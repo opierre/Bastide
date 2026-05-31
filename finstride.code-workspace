@@ -1,0 +1,13 @@
+{
+  "folders": [
+    { "path": "backend" },
+    { "path": "frontend" },
+    { "path": "docs" },
+    { "path": "." }          // root: CLAUDE.md, .claude/, skills
+  ],
+  "settings": {
+    "editor.formatOnSave": true,
+    "[python]": { "editor.defaultFormatter": "charliermarsh.ruff" },
+    "[dart]":   { "editor.defaultFormatter": "Dart-Code.dart-code" }
+  }
+}

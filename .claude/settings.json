@@ -1,0 +1,6 @@
+{
+  "skills": {
+    "enabled": true,
+    "directory": ".claude/skills"
+  }
+}
