@@ -1,0 +1,11 @@
+{
+  "@@locale": "en",
+  "appTitle": "FinStride",
+  "navDashboard": "Dashboard",
+  "navAccounts": "Accounts",
+  "navTransactions": "Transactions",
+  "navImports": "Imports",
+  "navCategories": "Categories",
+  "navSettings": "Settings",
+  "statusBarReady": "Ready"
+}

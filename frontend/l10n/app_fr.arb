@@ -1,0 +1,35 @@
+{
+  "@@locale": "fr",
+  "appTitle": "FinStride",
+  "@appTitle": {
+    "description": "The application title, shown in the OS window title and task switcher."
+  },
+  "navDashboard": "Tableau de bord",
+  "@navDashboard": {
+    "description": "Left nav label for the dashboard screen."
+  },
+  "navAccounts": "Comptes",
+  "@navAccounts": {
+    "description": "Left nav label for the accounts screen."
+  },
+  "navTransactions": "Transactions",
+  "@navTransactions": {
+    "description": "Left nav label for the transactions screen."
+  },
+  "navImports": "Imports",
+  "@navImports": {
+    "description": "Left nav label for the imports screen."
+  },
+  "navCategories": "Catégories",
+  "@navCategories": {
+    "description": "Left nav label for the categories screen."
+  },
+  "navSettings": "Paramètres",
+  "@navSettings": {
+    "description": "Left nav label for the settings screen."
+  },
+  "statusBarReady": "Prêt",
+  "@statusBarReady": {
+    "description": "Default status text shown in the bottom bar."
+  }
+}
