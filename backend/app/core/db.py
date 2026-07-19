@@ -4,9 +4,14 @@ from collections.abc import Generator
 from typing import Any
 
 from sqlalchemy import Engine, create_engine, event
-from sqlalchemy.orm import Session, sessionmaker
+from sqlalchemy.orm import DeclarativeBase, Session, sessionmaker
 
 from app.core.config import get_settings
+
+
+class Base(DeclarativeBase):
+    """Declarative base; its metadata is Alembic's autogenerate target."""
+
 
 settings = get_settings()
 
