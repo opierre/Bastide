@@ -19,6 +19,7 @@ from app.features.transactions.models import Transaction
 BACKEND_DIR = Path(__file__).resolve().parent.parent
 EXPECTED_TABLES = {
     "users",
+    "auth_tokens",
     "accounts",
     "categories",
     "csv_templates",

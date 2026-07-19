@@ -25,6 +25,7 @@ def client(tmp_path: Path) -> Generator[TestClient]:
         f"sqlite:///{tmp_path / 'test.db'}",
         connect_args={"check_same_thread": False},
     )
+    Base.metadata.create_all(engine)
     testing_session_local = sessionmaker(bind=engine, autoflush=False, autocommit=False)
 
     def override_get_db() -> Generator:
