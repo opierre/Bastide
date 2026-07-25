@@ -30,13 +30,54 @@ class AppLocalizationsEn extends AppLocalizations {
   String get navSettings => 'Settings';
 
   @override
+  String get navSectionOverview => 'Overview';
+
+  @override
+  String get navSectionManage => 'Manage';
+
+  @override
+  String get navDashboardSubtitle => 'Your financial picture at a glance';
+
+  @override
+  String get navAccountsSubtitle => 'Your accounts and their balances';
+
+  @override
+  String get navTransactionsSubtitle => 'Every movement, categorized';
+
+  @override
+  String get navImportsSubtitle => 'Bring in your OFX and CSV statements';
+
+  @override
+  String get navCategoriesSubtitle => 'Organize where your money goes';
+
+  @override
+  String get navSettingsSubtitle => 'Preferences and account';
+
+  @override
+  String get userMenuLogout => 'Log out';
+
+  @override
   String get statusBarReady => 'Ready';
+
+  @override
+  String get statusBarLocalData => 'Local data';
+
+  @override
+  String get comingSoonTitle => 'Coming soon';
+
+  @override
+  String get comingSoonBody =>
+      'This screen arrives in a later step. In the meantime, add your accounts to get set up.';
 
   @override
   String get authLoginTitle => 'Log in';
 
   @override
   String get authRegisterTitle => 'Create an account';
+
+  @override
+  String get authTagline =>
+      'Your finances, on your machine. Nothing leaves it.';
 
   @override
   String get authEmailLabel => 'Email';
@@ -95,6 +136,21 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get accountsAddButton => 'Add account';
+
+  @override
+  String get accountsTotalBalanceLabel => 'Total balance';
+
+  @override
+  String accountsActiveCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count active accounts',
+      one: '1 active account',
+      zero: 'No active accounts',
+    );
+    return '$_temp0';
+  }
 
   @override
   String get accountsEmptyTitle => 'Add your first account';

@@ -140,11 +140,83 @@ abstract class AppLocalizations {
   /// **'Paramètres'**
   String get navSettings;
 
+  /// Left nav section heading grouping the dashboard, accounts and transactions destinations. Rendered uppercase.
+  ///
+  /// In fr, this message translates to:
+  /// **'Vue d\'ensemble'**
+  String get navSectionOverview;
+
+  /// Left nav section heading grouping the imports and categories destinations. Rendered uppercase.
+  ///
+  /// In fr, this message translates to:
+  /// **'Gérer'**
+  String get navSectionManage;
+
+  /// One-line descriptor shown under the panel title in the top bar, on the dashboard.
+  ///
+  /// In fr, this message translates to:
+  /// **'Votre situation financière en un coup d\'œil'**
+  String get navDashboardSubtitle;
+
+  /// One-line descriptor shown under the panel title in the top bar, on the accounts screen.
+  ///
+  /// In fr, this message translates to:
+  /// **'Vos comptes et leurs soldes'**
+  String get navAccountsSubtitle;
+
+  /// One-line descriptor shown under the panel title in the top bar, on the transactions screen.
+  ///
+  /// In fr, this message translates to:
+  /// **'Tous vos mouvements, catégorisés'**
+  String get navTransactionsSubtitle;
+
+  /// One-line descriptor shown under the panel title in the top bar, on the imports screen.
+  ///
+  /// In fr, this message translates to:
+  /// **'Importez vos relevés OFX et CSV'**
+  String get navImportsSubtitle;
+
+  /// One-line descriptor shown under the panel title in the top bar, on the categories screen.
+  ///
+  /// In fr, this message translates to:
+  /// **'Organisez vos dépenses'**
+  String get navCategoriesSubtitle;
+
+  /// One-line descriptor shown under the panel title in the top bar, on the settings screen.
+  ///
+  /// In fr, this message translates to:
+  /// **'Préférences et compte'**
+  String get navSettingsSubtitle;
+
+  /// Item in the top-bar user menu that ends the session.
+  ///
+  /// In fr, this message translates to:
+  /// **'Se déconnecter'**
+  String get userMenuLogout;
+
   /// Default status text shown in the bottom bar.
   ///
   /// In fr, this message translates to:
   /// **'Prêt'**
   String get statusBarReady;
+
+  /// Right-aligned bottom bar note reminding the user that all data stays on their machine.
+  ///
+  /// In fr, this message translates to:
+  /// **'Données locales'**
+  String get statusBarLocalData;
+
+  /// Placeholder heading on panels whose feature isn't built yet.
+  ///
+  /// In fr, this message translates to:
+  /// **'Bientôt disponible'**
+  String get comingSoonTitle;
+
+  /// Encouraging placeholder body on panels whose feature isn't built yet.
+  ///
+  /// In fr, this message translates to:
+  /// **'Cet écran arrive dans une prochaine étape. En attendant, ajoutez vos comptes pour préparer le terrain.'**
+  String get comingSoonBody;
 
   /// Heading on the login screen.
   ///
@@ -157,6 +229,12 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Créer un compte'**
   String get authRegisterTitle;
+
+  /// Reassuring subheading under the brand lockup on the login and register screens.
+  ///
+  /// In fr, this message translates to:
+  /// **'Vos finances, sur votre machine. Rien ne sort d\'ici.'**
+  String get authTagline;
 
   /// Label for the email field on login/register forms.
   ///
@@ -271,6 +349,18 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Ajouter un compte'**
   String get accountsAddButton;
+
+  /// Label on the summary card above the accounts list, over the sum of all account balances.
+  ///
+  /// In fr, this message translates to:
+  /// **'Solde total'**
+  String get accountsTotalBalanceLabel;
+
+  /// Caption under the total balance, counting the accounts included in the sum.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, =0{Aucun compte actif} =1{1 compte actif} other{{count} comptes actifs}}'**
+  String accountsActiveCount(int count);
 
   /// Heading shown when the user has no accounts yet.
   ///

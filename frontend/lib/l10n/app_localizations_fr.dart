@@ -30,13 +30,55 @@ class AppLocalizationsFr extends AppLocalizations {
   String get navSettings => 'Paramètres';
 
   @override
+  String get navSectionOverview => 'Vue d\'ensemble';
+
+  @override
+  String get navSectionManage => 'Gérer';
+
+  @override
+  String get navDashboardSubtitle =>
+      'Votre situation financière en un coup d\'œil';
+
+  @override
+  String get navAccountsSubtitle => 'Vos comptes et leurs soldes';
+
+  @override
+  String get navTransactionsSubtitle => 'Tous vos mouvements, catégorisés';
+
+  @override
+  String get navImportsSubtitle => 'Importez vos relevés OFX et CSV';
+
+  @override
+  String get navCategoriesSubtitle => 'Organisez vos dépenses';
+
+  @override
+  String get navSettingsSubtitle => 'Préférences et compte';
+
+  @override
+  String get userMenuLogout => 'Se déconnecter';
+
+  @override
   String get statusBarReady => 'Prêt';
+
+  @override
+  String get statusBarLocalData => 'Données locales';
+
+  @override
+  String get comingSoonTitle => 'Bientôt disponible';
+
+  @override
+  String get comingSoonBody =>
+      'Cet écran arrive dans une prochaine étape. En attendant, ajoutez vos comptes pour préparer le terrain.';
 
   @override
   String get authLoginTitle => 'Se connecter';
 
   @override
   String get authRegisterTitle => 'Créer un compte';
+
+  @override
+  String get authTagline =>
+      'Vos finances, sur votre machine. Rien ne sort d\'ici.';
 
   @override
   String get authEmailLabel => 'E-mail';
@@ -94,6 +136,21 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get accountsAddButton => 'Ajouter un compte';
+
+  @override
+  String get accountsTotalBalanceLabel => 'Solde total';
+
+  @override
+  String accountsActiveCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count comptes actifs',
+      one: '1 compte actif',
+      zero: 'Aucun compte actif',
+    );
+    return '$_temp0';
+  }
 
   @override
   String get accountsEmptyTitle => 'Ajoutez votre premier compte';

@@ -28,9 +28,57 @@
   "@navSettings": {
     "description": "Left nav label for the settings screen."
   },
+  "navSectionOverview": "Vue d'ensemble",
+  "@navSectionOverview": {
+    "description": "Left nav section heading grouping the dashboard, accounts and transactions destinations. Rendered uppercase."
+  },
+  "navSectionManage": "Gérer",
+  "@navSectionManage": {
+    "description": "Left nav section heading grouping the imports and categories destinations. Rendered uppercase."
+  },
+  "navDashboardSubtitle": "Votre situation financière en un coup d'œil",
+  "@navDashboardSubtitle": {
+    "description": "One-line descriptor shown under the panel title in the top bar, on the dashboard."
+  },
+  "navAccountsSubtitle": "Vos comptes et leurs soldes",
+  "@navAccountsSubtitle": {
+    "description": "One-line descriptor shown under the panel title in the top bar, on the accounts screen."
+  },
+  "navTransactionsSubtitle": "Tous vos mouvements, catégorisés",
+  "@navTransactionsSubtitle": {
+    "description": "One-line descriptor shown under the panel title in the top bar, on the transactions screen."
+  },
+  "navImportsSubtitle": "Importez vos relevés OFX et CSV",
+  "@navImportsSubtitle": {
+    "description": "One-line descriptor shown under the panel title in the top bar, on the imports screen."
+  },
+  "navCategoriesSubtitle": "Organisez vos dépenses",
+  "@navCategoriesSubtitle": {
+    "description": "One-line descriptor shown under the panel title in the top bar, on the categories screen."
+  },
+  "navSettingsSubtitle": "Préférences et compte",
+  "@navSettingsSubtitle": {
+    "description": "One-line descriptor shown under the panel title in the top bar, on the settings screen."
+  },
+  "userMenuLogout": "Se déconnecter",
+  "@userMenuLogout": {
+    "description": "Item in the top-bar user menu that ends the session."
+  },
   "statusBarReady": "Prêt",
   "@statusBarReady": {
     "description": "Default status text shown in the bottom bar."
+  },
+  "statusBarLocalData": "Données locales",
+  "@statusBarLocalData": {
+    "description": "Right-aligned bottom bar note reminding the user that all data stays on their machine."
+  },
+  "comingSoonTitle": "Bientôt disponible",
+  "@comingSoonTitle": {
+    "description": "Placeholder heading on panels whose feature isn't built yet."
+  },
+  "comingSoonBody": "Cet écran arrive dans une prochaine étape. En attendant, ajoutez vos comptes pour préparer le terrain.",
+  "@comingSoonBody": {
+    "description": "Encouraging placeholder body on panels whose feature isn't built yet."
   },
   "authLoginTitle": "Se connecter",
   "@authLoginTitle": {
@@ -39,6 +87,10 @@
   "authRegisterTitle": "Créer un compte",
   "@authRegisterTitle": {
     "description": "Heading on the registration screen."
+  },
+  "authTagline": "Vos finances, sur votre machine. Rien ne sort d'ici.",
+  "@authTagline": {
+    "description": "Reassuring subheading under the brand lockup on the login and register screens."
   },
   "authEmailLabel": "E-mail",
   "@authEmailLabel": {
@@ -115,6 +167,19 @@
   "accountsAddButton": "Ajouter un compte",
   "@accountsAddButton": {
     "description": "Button label to open the create-account form."
+  },
+  "accountsTotalBalanceLabel": "Solde total",
+  "@accountsTotalBalanceLabel": {
+    "description": "Label on the summary card above the accounts list, over the sum of all account balances."
+  },
+  "accountsActiveCount": "{count, plural, =0{Aucun compte actif} =1{1 compte actif} other{{count} comptes actifs}}",
+  "@accountsActiveCount": {
+    "description": "Caption under the total balance, counting the accounts included in the sum.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   },
   "accountsEmptyTitle": "Ajoutez votre premier compte",
   "@accountsEmptyTitle": {
