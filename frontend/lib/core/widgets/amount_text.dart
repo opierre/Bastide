@@ -9,23 +9,47 @@ import '../theme/tokens.dart';
 /// Takes the canonical integer-minor-units + currency code and formats only
 /// here, at the presentation edge — see the flutter-frontend skill.
 class AmountText extends StatelessWidget {
-  const AmountText({super.key, required this.amountMinor, required this.currency, this.style});
+  const AmountText({
+    super.key,
+    required this.amountMinor,
+    required this.currency,
+    this.style,
+    this.showPositiveSign = false,
+    this.colorize = true,
+  });
 
   final int amountMinor;
   final String currency;
   final TextStyle? style;
 
+  /// Prefix positive amounts with `+`. Off for balances (a balance isn't a
+  /// movement); on for transaction amounts, where the explicit sign is what
+  /// keeps the income/expense distinction from resting on color alone.
+  final bool showPositiveSign;
+
+  /// Apply the semantic money colors. Turn off where the amount is a neutral
+  /// figure — a total, a form value — rather than an inflow or outflow.
+  final bool colorize;
+
   @override
   Widget build(BuildContext context) {
     final locale = Localizations.localeOf(context).toString();
-    final formatted = NumberFormat.currency(locale: locale, name: currency).format(amountMinor / 100);
+    final formatted = NumberFormat.currency(
+      locale: locale,
+      name: currency,
+    ).format(amountMinor / 100);
     final base = style ?? DefaultTextStyle.of(context).style;
-    final color = switch (amountMinor) {
-      > 0 => AppColors.positive,
-      < 0 => AppColors.negative,
-      _ => base.color,
-    };
+    final color = !colorize
+        ? base.color
+        : switch (amountMinor) {
+            > 0 => AppColors.positive,
+            < 0 => AppColors.negative,
+            _ => base.color,
+          };
 
-    return Text(formatted, style: tabularNumberStyle(base).copyWith(color: color));
+    return Text(
+      showPositiveSign && amountMinor > 0 ? '+$formatted' : formatted,
+      style: tabularNumberStyle(base).copyWith(color: color),
+    );
   }
 }
