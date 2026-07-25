@@ -1,14 +1,32 @@
 import 'package:finstride/app.dart';
 import 'package:finstride/core/l10n/locale_provider.dart';
+import 'package:finstride/features/auth/application/auth_controller.dart';
+import 'package:finstride/features/auth/domain/auth_user.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+
+import 'support/fake_auth_controller.dart';
+
+const _signedInUser = AuthUser(
+  id: 'u1',
+  email: 'ada@example.com',
+  displayName: 'Ada',
+  locale: 'fr',
+  currency: 'EUR',
+);
+
+final _authenticatedOverrides = [
+  authControllerProvider.overrideWith(() => FakeAuthController(initialUser: _signedInUser)),
+];
 
 void main() {
   testWidgets('shell renders the fixed nav, top and bottom bars', (
     tester,
   ) async {
-    await tester.pumpWidget(const ProviderScope(child: FinStrideApp()));
+    await tester.pumpWidget(
+      ProviderScope(overrides: _authenticatedOverrides, child: const FinStrideApp()),
+    );
     await tester.pumpAndSettle();
 
     expect(find.byKey(const Key('appNavRail')), findsOneWidget);
@@ -20,7 +38,9 @@ void main() {
   testWidgets('tapping a nav item swaps the content region, not the chrome', (
     tester,
   ) async {
-    await tester.pumpWidget(const ProviderScope(child: FinStrideApp()));
+    await tester.pumpWidget(
+      ProviderScope(overrides: _authenticatedOverrides, child: const FinStrideApp()),
+    );
     await tester.pumpAndSettle();
 
     await tester.tap(find.text('Comptes'));
@@ -36,7 +56,9 @@ void main() {
   testWidgets('renders under fr without missing localized keys', (
     tester,
   ) async {
-    await tester.pumpWidget(const ProviderScope(child: FinStrideApp()));
+    await tester.pumpWidget(
+      ProviderScope(overrides: _authenticatedOverrides, child: const FinStrideApp()),
+    );
     await tester.pumpAndSettle();
 
     expect(find.text('Tableau de bord'), findsWidgets);
@@ -49,7 +71,10 @@ void main() {
   ) async {
     await tester.pumpWidget(
       ProviderScope(
-        overrides: [localeProvider.overrideWith(() => _EnLocaleController())],
+        overrides: [
+          ..._authenticatedOverrides,
+          localeProvider.overrideWith(() => _EnLocaleController()),
+        ],
         child: const FinStrideApp(),
       ),
     );

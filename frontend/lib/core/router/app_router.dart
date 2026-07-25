@@ -1,7 +1,11 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../features/accounts/presentation/accounts_screen.dart';
+import '../../features/auth/application/auth_controller.dart';
+import '../../features/auth/presentation/login_screen.dart';
+import '../../features/auth/presentation/register_screen.dart';
 import '../../features/categories/presentation/categories_screen.dart';
 import '../../features/dashboard/presentation/dashboard_screen.dart';
 import '../../features/imports/presentation/imports_screen.dart';
@@ -9,17 +13,37 @@ import '../../features/settings/presentation/settings_screen.dart';
 import '../../features/transactions/presentation/transactions_screen.dart';
 import '../widgets/app_shell.dart';
 
-/// Redirect-guard stub: currently always allows navigation. Replaced by real
-/// session-state checks once the auth feature exists.
-final isAuthenticatedProvider = Provider<bool>((ref) => true);
+/// Notifies go_router's `redirect` to re-run whenever auth state changes
+/// (session restore resolving, login, logout) so a single router instance
+/// can be reused instead of rebuilt on every state change.
+class _AuthRefreshListenable extends ChangeNotifier {
+  _AuthRefreshListenable(Ref ref) {
+    ref.listen(authControllerProvider, (_, _) => notifyListeners());
+  }
+}
 
 final appRouterProvider = Provider<GoRouter>((ref) {
-  // Watched so the router rebuilds once real auth state lands.
-  ref.watch(isAuthenticatedProvider);
+  final authRefresh = _AuthRefreshListenable(ref);
 
   return GoRouter(
-    initialLocation: DashboardScreen.path,
+    initialLocation: LoginScreen.path,
+    refreshListenable: authRefresh,
+    redirect: (context, state) {
+      final authState = ref.read(authControllerProvider);
+      if (authState.isLoading) return null;
+
+      final isAuthenticated = authState.value != null;
+      final isAuthRoute =
+          state.matchedLocation == LoginScreen.path ||
+          state.matchedLocation == RegisterScreen.path;
+
+      if (!isAuthenticated && !isAuthRoute) return LoginScreen.path;
+      if (isAuthenticated && isAuthRoute) return DashboardScreen.path;
+      return null;
+    },
     routes: [
+      GoRoute(path: LoginScreen.path, builder: (context, state) => const LoginScreen()),
+      GoRoute(path: RegisterScreen.path, builder: (context, state) => const RegisterScreen()),
       ShellRoute(
         builder: (context, state, child) {
           return AppShell(
