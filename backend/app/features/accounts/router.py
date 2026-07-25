@@ -6,6 +6,7 @@ from fastapi import APIRouter, Depends, status
 from sqlalchemy.orm import Session
 
 from app.core.db import get_db
+from app.features.accounts import balance
 from app.features.accounts.models import Account
 from app.features.accounts.repository import AccountRepository
 from app.features.accounts.schemas import AccountCreate, AccountRead, AccountUpdate
@@ -28,7 +29,7 @@ def _to_read(account: Account) -> AccountRead:
         institution=account.institution,
         currency=account.currency,
         opening_balance_minor=account.opening_balance_minor,
-        balance_minor=account.cached_balance_minor,
+        balance_minor=balance.current_balance(account),
         archived=account.archived,
         created_at=account.created_at,
         updated_at=account.updated_at,
