@@ -1,0 +1,36 @@
+/// ISO-4217 codes offered on the registration currency picker. A curated
+/// subset of the backend's full validated set (`schemas.ISO_4217_CURRENCIES`)
+/// kept short enough to browse in a dropdown. EUR first: French users first
+/// per `PROJECT.md` §1.
+const List<String> supportedCurrencies = [
+  'EUR',
+  'USD',
+  'GBP',
+  'CHF',
+  'CAD',
+  'JPY',
+  'AUD',
+  'CNY',
+  'INR',
+  'BRL',
+  'MXN',
+  'SEK',
+  'NOK',
+  'DKK',
+  'PLN',
+  'CZK',
+  'HUF',
+  'RON',
+  'ZAR',
+  'AED',
+  'SGD',
+  'HKD',
+  'NZD',
+  'TRY',
+  'ILS',
+  'KRW',
+  'THB',
+  'MAD',
+  'XOF',
+  'XAF',
+];
