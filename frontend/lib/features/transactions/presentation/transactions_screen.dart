@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../../core/theme/tokens.dart';
+import '../../../core/widgets/state_views.dart';
 import '../../../l10n/app_localizations.dart';
 
 class TransactionsScreen extends StatelessWidget {
@@ -10,9 +12,12 @@ class TransactionsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    return Center(
+    return EmptyStateView(
       key: const Key('screen-transactions'),
-      child: Text(l10n.navTransactions, style: Theme.of(context).textTheme.headlineSmall),
+      icon: Icons.receipt_long_outlined,
+      accent: AppColors.info,
+      title: l10n.comingSoonTitle,
+      message: l10n.comingSoonBody,
     );
   }
 }

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../../core/theme/tokens.dart';
+import '../../../core/widgets/state_views.dart';
 import '../../../l10n/app_localizations.dart';
 
 class DashboardScreen extends StatelessWidget {
@@ -10,9 +12,12 @@ class DashboardScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    return Center(
+    return EmptyStateView(
       key: const Key('screen-dashboard'),
-      child: Text(l10n.navDashboard, style: Theme.of(context).textTheme.headlineSmall),
+      icon: Icons.insights_outlined,
+      accent: AppColors.brandAccent,
+      title: l10n.comingSoonTitle,
+      message: l10n.comingSoonBody,
     );
   }
 }
