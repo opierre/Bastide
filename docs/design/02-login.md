@@ -4,9 +4,11 @@ A focused, welcoming entry screen. The fixed app shell may be minimal or hidden 
 (the rail/bars appear after login) — show a clean centered auth layout on the dark base surface.
 
 ## Layout
-- Centered card (raised surface `#161B22`, soft border, generous padding) on the base background,
-  optionally with a subtle atmospheric gradient/texture behind (no purple-on-white clichés).
-- App name/logo lockup at the top of the card.
+- Centered card (raised surface `#111620`, 20px radius, hairline border, generous padding) on the
+  sunken background, lit by two very low-opacity radial glows — jade top-left, violet
+  bottom-right — for atmosphere without decoration competing with the form.
+- Brand lockup (logomark + wordmark) and the privacy tagline sit **above** the card, so the card
+  holds only the task at hand. The "switch to register" link sits below it.
 - Fields: Email, Password (with show/hide). Primary button "Log in" (accent). Secondary link
   "Create an account" → Register.
 - Inline error area for invalid credentials (use the expense-red semantic color, calm tone).
