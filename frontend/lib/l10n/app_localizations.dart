@@ -145,6 +145,126 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Prêt'**
   String get statusBarReady;
+
+  /// Heading on the login screen.
+  ///
+  /// In fr, this message translates to:
+  /// **'Se connecter'**
+  String get authLoginTitle;
+
+  /// Heading on the registration screen.
+  ///
+  /// In fr, this message translates to:
+  /// **'Créer un compte'**
+  String get authRegisterTitle;
+
+  /// Label for the email field on login/register forms.
+  ///
+  /// In fr, this message translates to:
+  /// **'E-mail'**
+  String get authEmailLabel;
+
+  /// Label for the password field on login/register forms.
+  ///
+  /// In fr, this message translates to:
+  /// **'Mot de passe'**
+  String get authPasswordLabel;
+
+  /// Label for the display name field on the register form.
+  ///
+  /// In fr, this message translates to:
+  /// **'Nom affiché'**
+  String get authDisplayNameLabel;
+
+  /// Label for the language selector on the register form.
+  ///
+  /// In fr, this message translates to:
+  /// **'Langue'**
+  String get authLocaleLabel;
+
+  /// Option label for French, shown in its own language regardless of app locale.
+  ///
+  /// In fr, this message translates to:
+  /// **'Français'**
+  String get authLocaleFrench;
+
+  /// Option label for English, shown in its own language regardless of app locale.
+  ///
+  /// In fr, this message translates to:
+  /// **'English'**
+  String get authLocaleEnglish;
+
+  /// Label for the base-currency selector on the register form.
+  ///
+  /// In fr, this message translates to:
+  /// **'Devise'**
+  String get authCurrencyLabel;
+
+  /// Submit button label on the login form.
+  ///
+  /// In fr, this message translates to:
+  /// **'Se connecter'**
+  String get authLoginSubmit;
+
+  /// Submit button label on the register form.
+  ///
+  /// In fr, this message translates to:
+  /// **'Créer mon compte'**
+  String get authRegisterSubmit;
+
+  /// Link on the login screen navigating to registration.
+  ///
+  /// In fr, this message translates to:
+  /// **'Pas encore de compte ? Créer un compte'**
+  String get authGoToRegister;
+
+  /// Link on the register screen navigating to login.
+  ///
+  /// In fr, this message translates to:
+  /// **'Déjà un compte ? Se connecter'**
+  String get authGoToLogin;
+
+  /// Validation message when the email field is left empty.
+  ///
+  /// In fr, this message translates to:
+  /// **'L\'e-mail est requis.'**
+  String get authEmailRequired;
+
+  /// Validation message when the password field is left empty.
+  ///
+  /// In fr, this message translates to:
+  /// **'Le mot de passe est requis.'**
+  String get authPasswordRequired;
+
+  /// Validation message when the display name field is left empty.
+  ///
+  /// In fr, this message translates to:
+  /// **'Le nom est requis.'**
+  String get authDisplayNameRequired;
+
+  /// Localized message for the backend's INVALID_CREDENTIALS error code.
+  ///
+  /// In fr, this message translates to:
+  /// **'E-mail ou mot de passe incorrect.'**
+  String get authErrorInvalidCredentials;
+
+  /// Localized message for the backend's EMAIL_TAKEN error code.
+  ///
+  /// In fr, this message translates to:
+  /// **'Un compte existe déjà avec cet e-mail.'**
+  String get authErrorEmailTaken;
+
+  /// Localized message for the backend's VALIDATION_ERROR error code.
+  ///
+  /// In fr, this message translates to:
+  /// **'Certaines informations sont invalides.'**
+  String get authErrorValidation;
+
+  /// Fallback localized message for unrecognized or network errors.
+  ///
+  /// In fr, this message translates to:
+  /// **'Une erreur est survenue. Veuillez réessayer.'**
+  String get authErrorGeneric;
 }
 
 class _AppLocalizationsDelegate

@@ -31,5 +31,85 @@
   "statusBarReady": "Prêt",
   "@statusBarReady": {
     "description": "Default status text shown in the bottom bar."
+  },
+  "authLoginTitle": "Se connecter",
+  "@authLoginTitle": {
+    "description": "Heading on the login screen."
+  },
+  "authRegisterTitle": "Créer un compte",
+  "@authRegisterTitle": {
+    "description": "Heading on the registration screen."
+  },
+  "authEmailLabel": "E-mail",
+  "@authEmailLabel": {
+    "description": "Label for the email field on login/register forms."
+  },
+  "authPasswordLabel": "Mot de passe",
+  "@authPasswordLabel": {
+    "description": "Label for the password field on login/register forms."
+  },
+  "authDisplayNameLabel": "Nom affiché",
+  "@authDisplayNameLabel": {
+    "description": "Label for the display name field on the register form."
+  },
+  "authLocaleLabel": "Langue",
+  "@authLocaleLabel": {
+    "description": "Label for the language selector on the register form."
+  },
+  "authLocaleFrench": "Français",
+  "@authLocaleFrench": {
+    "description": "Option label for French, shown in its own language regardless of app locale."
+  },
+  "authLocaleEnglish": "English",
+  "@authLocaleEnglish": {
+    "description": "Option label for English, shown in its own language regardless of app locale."
+  },
+  "authCurrencyLabel": "Devise",
+  "@authCurrencyLabel": {
+    "description": "Label for the base-currency selector on the register form."
+  },
+  "authLoginSubmit": "Se connecter",
+  "@authLoginSubmit": {
+    "description": "Submit button label on the login form."
+  },
+  "authRegisterSubmit": "Créer mon compte",
+  "@authRegisterSubmit": {
+    "description": "Submit button label on the register form."
+  },
+  "authGoToRegister": "Pas encore de compte ? Créer un compte",
+  "@authGoToRegister": {
+    "description": "Link on the login screen navigating to registration."
+  },
+  "authGoToLogin": "Déjà un compte ? Se connecter",
+  "@authGoToLogin": {
+    "description": "Link on the register screen navigating to login."
+  },
+  "authEmailRequired": "L'e-mail est requis.",
+  "@authEmailRequired": {
+    "description": "Validation message when the email field is left empty."
+  },
+  "authPasswordRequired": "Le mot de passe est requis.",
+  "@authPasswordRequired": {
+    "description": "Validation message when the password field is left empty."
+  },
+  "authDisplayNameRequired": "Le nom est requis.",
+  "@authDisplayNameRequired": {
+    "description": "Validation message when the display name field is left empty."
+  },
+  "authErrorInvalidCredentials": "E-mail ou mot de passe incorrect.",
+  "@authErrorInvalidCredentials": {
+    "description": "Localized message for the backend's INVALID_CREDENTIALS error code."
+  },
+  "authErrorEmailTaken": "Un compte existe déjà avec cet e-mail.",
+  "@authErrorEmailTaken": {
+    "description": "Localized message for the backend's EMAIL_TAKEN error code."
+  },
+  "authErrorValidation": "Certaines informations sont invalides.",
+  "@authErrorValidation": {
+    "description": "Localized message for the backend's VALIDATION_ERROR error code."
+  },
+  "authErrorGeneric": "Une erreur est survenue. Veuillez réessayer.",
+  "@authErrorGeneric": {
+    "description": "Fallback localized message for unrecognized or network errors."
   }
 }
