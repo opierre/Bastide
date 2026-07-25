@@ -91,4 +91,97 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get authErrorGeneric => 'Une erreur est survenue. Veuillez réessayer.';
+
+  @override
+  String get accountsAddButton => 'Ajouter un compte';
+
+  @override
+  String get accountsEmptyTitle => 'Ajoutez votre premier compte';
+
+  @override
+  String get accountsEmptyBody =>
+      'Suivez vos soldes et vos mouvements en un seul endroit.';
+
+  @override
+  String get accountsRetry => 'Réessayer';
+
+  @override
+  String get accountEdit => 'Modifier';
+
+  @override
+  String get accountArchive => 'Archiver';
+
+  @override
+  String get accountFormCancel => 'Annuler';
+
+  @override
+  String get accountArchiveConfirmTitle => 'Archiver ce compte ?';
+
+  @override
+  String get accountArchiveConfirmBody =>
+      'Vous pourrez toujours consulter son historique, mais il n\'apparaîtra plus dans votre liste de comptes.';
+
+  @override
+  String get accountFormCreateTitle => 'Nouveau compte';
+
+  @override
+  String get accountFormEditTitle => 'Modifier le compte';
+
+  @override
+  String get accountNameLabel => 'Nom';
+
+  @override
+  String get accountNameRequired => 'Le nom est requis.';
+
+  @override
+  String get accountTypeLabel => 'Type';
+
+  @override
+  String get accountTypeChecking => 'Compte courant';
+
+  @override
+  String get accountTypeSavings => 'Épargne';
+
+  @override
+  String get accountTypeCredit => 'Carte de crédit';
+
+  @override
+  String get accountTypeCash => 'Espèces';
+
+  @override
+  String get accountTypeOther => 'Autre';
+
+  @override
+  String get accountInstitutionLabel => 'Établissement';
+
+  @override
+  String get accountInstitutionRequired => 'L\'établissement est requis.';
+
+  @override
+  String get accountOpeningBalanceLabel => 'Solde initial';
+
+  @override
+  String get accountOpeningBalanceRequired => 'Le solde initial est requis.';
+
+  @override
+  String get accountOpeningBalanceInvalid => 'Entrez un montant valide.';
+
+  @override
+  String get accountCurrencyLabel => 'Devise';
+
+  @override
+  String get accountFormSubmitCreate => 'Créer le compte';
+
+  @override
+  String get accountFormSubmitEdit => 'Enregistrer';
+
+  @override
+  String get accountErrorNotFound => 'Compte introuvable.';
+
+  @override
+  String get accountErrorValidation => 'Certaines informations sont invalides.';
+
+  @override
+  String get accountErrorGeneric =>
+      'Une erreur est survenue. Veuillez réessayer.';
 }

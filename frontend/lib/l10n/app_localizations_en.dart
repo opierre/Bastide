@@ -92,4 +92,96 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get authErrorGeneric => 'Something went wrong. Please try again.';
+
+  @override
+  String get accountsAddButton => 'Add account';
+
+  @override
+  String get accountsEmptyTitle => 'Add your first account';
+
+  @override
+  String get accountsEmptyBody =>
+      'Track your balances and activity in one place.';
+
+  @override
+  String get accountsRetry => 'Retry';
+
+  @override
+  String get accountEdit => 'Edit';
+
+  @override
+  String get accountArchive => 'Archive';
+
+  @override
+  String get accountFormCancel => 'Cancel';
+
+  @override
+  String get accountArchiveConfirmTitle => 'Archive this account?';
+
+  @override
+  String get accountArchiveConfirmBody =>
+      'You\'ll still be able to view its history, but it will no longer appear in your accounts list.';
+
+  @override
+  String get accountFormCreateTitle => 'New account';
+
+  @override
+  String get accountFormEditTitle => 'Edit account';
+
+  @override
+  String get accountNameLabel => 'Name';
+
+  @override
+  String get accountNameRequired => 'Name is required.';
+
+  @override
+  String get accountTypeLabel => 'Type';
+
+  @override
+  String get accountTypeChecking => 'Checking';
+
+  @override
+  String get accountTypeSavings => 'Savings';
+
+  @override
+  String get accountTypeCredit => 'Credit card';
+
+  @override
+  String get accountTypeCash => 'Cash';
+
+  @override
+  String get accountTypeOther => 'Other';
+
+  @override
+  String get accountInstitutionLabel => 'Institution';
+
+  @override
+  String get accountInstitutionRequired => 'Institution is required.';
+
+  @override
+  String get accountOpeningBalanceLabel => 'Opening balance';
+
+  @override
+  String get accountOpeningBalanceRequired => 'Opening balance is required.';
+
+  @override
+  String get accountOpeningBalanceInvalid => 'Enter a valid amount.';
+
+  @override
+  String get accountCurrencyLabel => 'Currency';
+
+  @override
+  String get accountFormSubmitCreate => 'Create account';
+
+  @override
+  String get accountFormSubmitEdit => 'Save';
+
+  @override
+  String get accountErrorNotFound => 'Account not found.';
+
+  @override
+  String get accountErrorValidation => 'Some information is invalid.';
+
+  @override
+  String get accountErrorGeneric => 'Something went wrong. Please try again.';
 }

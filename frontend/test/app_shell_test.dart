@@ -1,11 +1,13 @@
 import 'package:finstride/app.dart';
 import 'package:finstride/core/l10n/locale_provider.dart';
+import 'package:finstride/features/accounts/application/accounts_controller.dart';
 import 'package:finstride/features/auth/application/auth_controller.dart';
 import 'package:finstride/features/auth/domain/auth_user.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'support/fake_accounts_controller.dart';
 import 'support/fake_auth_controller.dart';
 
 const _signedInUser = AuthUser(
@@ -18,6 +20,7 @@ const _signedInUser = AuthUser(
 
 final _authenticatedOverrides = [
   authControllerProvider.overrideWith(() => FakeAuthController(initialUser: _signedInUser)),
+  accountsControllerProvider.overrideWith(() => FakeAccountsController()),
 ];
 
 void main() {

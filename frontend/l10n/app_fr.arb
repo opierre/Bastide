@@ -111,5 +111,125 @@
   "authErrorGeneric": "Une erreur est survenue. Veuillez réessayer.",
   "@authErrorGeneric": {
     "description": "Fallback localized message for unrecognized or network errors."
+  },
+  "accountsAddButton": "Ajouter un compte",
+  "@accountsAddButton": {
+    "description": "Button label to open the create-account form."
+  },
+  "accountsEmptyTitle": "Ajoutez votre premier compte",
+  "@accountsEmptyTitle": {
+    "description": "Heading shown when the user has no accounts yet."
+  },
+  "accountsEmptyBody": "Suivez vos soldes et vos mouvements en un seul endroit.",
+  "@accountsEmptyBody": {
+    "description": "Encouraging subtext under the empty-state heading on the accounts screen."
+  },
+  "accountsRetry": "Réessayer",
+  "@accountsRetry": {
+    "description": "Retry button label shown when the accounts list fails to load."
+  },
+  "accountEdit": "Modifier",
+  "@accountEdit": {
+    "description": "Menu item to edit an account."
+  },
+  "accountArchive": "Archiver",
+  "@accountArchive": {
+    "description": "Menu item and confirm-dialog action to archive an account."
+  },
+  "accountFormCancel": "Annuler",
+  "@accountFormCancel": {
+    "description": "Cancel action on the account form and archive confirmation dialogs."
+  },
+  "accountArchiveConfirmTitle": "Archiver ce compte ?",
+  "@accountArchiveConfirmTitle": {
+    "description": "Title of the archive confirmation dialog."
+  },
+  "accountArchiveConfirmBody": "Vous pourrez toujours consulter son historique, mais il n'apparaîtra plus dans votre liste de comptes.",
+  "@accountArchiveConfirmBody": {
+    "description": "Body text of the archive confirmation dialog."
+  },
+  "accountFormCreateTitle": "Nouveau compte",
+  "@accountFormCreateTitle": {
+    "description": "Title of the account form dialog when creating an account."
+  },
+  "accountFormEditTitle": "Modifier le compte",
+  "@accountFormEditTitle": {
+    "description": "Title of the account form dialog when editing an account."
+  },
+  "accountNameLabel": "Nom",
+  "@accountNameLabel": {
+    "description": "Label for the account name field on the account form."
+  },
+  "accountNameRequired": "Le nom est requis.",
+  "@accountNameRequired": {
+    "description": "Validation message when the account name field is left empty."
+  },
+  "accountTypeLabel": "Type",
+  "@accountTypeLabel": {
+    "description": "Label for the account type selector on the account form."
+  },
+  "accountTypeChecking": "Compte courant",
+  "@accountTypeChecking": {
+    "description": "Account type option: checking."
+  },
+  "accountTypeSavings": "Épargne",
+  "@accountTypeSavings": {
+    "description": "Account type option: savings."
+  },
+  "accountTypeCredit": "Carte de crédit",
+  "@accountTypeCredit": {
+    "description": "Account type option: credit."
+  },
+  "accountTypeCash": "Espèces",
+  "@accountTypeCash": {
+    "description": "Account type option: cash."
+  },
+  "accountTypeOther": "Autre",
+  "@accountTypeOther": {
+    "description": "Account type option: other."
+  },
+  "accountInstitutionLabel": "Établissement",
+  "@accountInstitutionLabel": {
+    "description": "Label for the institution field on the account form."
+  },
+  "accountInstitutionRequired": "L'établissement est requis.",
+  "@accountInstitutionRequired": {
+    "description": "Validation message when the institution field is left empty."
+  },
+  "accountOpeningBalanceLabel": "Solde initial",
+  "@accountOpeningBalanceLabel": {
+    "description": "Label for the opening balance field on the account form."
+  },
+  "accountOpeningBalanceRequired": "Le solde initial est requis.",
+  "@accountOpeningBalanceRequired": {
+    "description": "Validation message when the opening balance field is left empty."
+  },
+  "accountOpeningBalanceInvalid": "Entrez un montant valide.",
+  "@accountOpeningBalanceInvalid": {
+    "description": "Validation message when the opening balance can't be parsed as a number."
+  },
+  "accountCurrencyLabel": "Devise",
+  "@accountCurrencyLabel": {
+    "description": "Label for the read-only currency field on the account form."
+  },
+  "accountFormSubmitCreate": "Créer le compte",
+  "@accountFormSubmitCreate": {
+    "description": "Submit button label on the account form when creating an account."
+  },
+  "accountFormSubmitEdit": "Enregistrer",
+  "@accountFormSubmitEdit": {
+    "description": "Submit button label on the account form when editing an account."
+  },
+  "accountErrorNotFound": "Compte introuvable.",
+  "@accountErrorNotFound": {
+    "description": "Localized message for the backend's ACCOUNT_NOT_FOUND error code."
+  },
+  "accountErrorValidation": "Certaines informations sont invalides.",
+  "@accountErrorValidation": {
+    "description": "Localized message for the backend's VALIDATION_ERROR error code."
+  },
+  "accountErrorGeneric": "Une erreur est survenue. Veuillez réessayer.",
+  "@accountErrorGeneric": {
+    "description": "Fallback localized message for unrecognized or network errors on the accounts screen."
   }
 }

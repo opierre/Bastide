@@ -265,6 +265,186 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Une erreur est survenue. Veuillez réessayer.'**
   String get authErrorGeneric;
+
+  /// Button label to open the create-account form.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ajouter un compte'**
+  String get accountsAddButton;
+
+  /// Heading shown when the user has no accounts yet.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ajoutez votre premier compte'**
+  String get accountsEmptyTitle;
+
+  /// Encouraging subtext under the empty-state heading on the accounts screen.
+  ///
+  /// In fr, this message translates to:
+  /// **'Suivez vos soldes et vos mouvements en un seul endroit.'**
+  String get accountsEmptyBody;
+
+  /// Retry button label shown when the accounts list fails to load.
+  ///
+  /// In fr, this message translates to:
+  /// **'Réessayer'**
+  String get accountsRetry;
+
+  /// Menu item to edit an account.
+  ///
+  /// In fr, this message translates to:
+  /// **'Modifier'**
+  String get accountEdit;
+
+  /// Menu item and confirm-dialog action to archive an account.
+  ///
+  /// In fr, this message translates to:
+  /// **'Archiver'**
+  String get accountArchive;
+
+  /// Cancel action on the account form and archive confirmation dialogs.
+  ///
+  /// In fr, this message translates to:
+  /// **'Annuler'**
+  String get accountFormCancel;
+
+  /// Title of the archive confirmation dialog.
+  ///
+  /// In fr, this message translates to:
+  /// **'Archiver ce compte ?'**
+  String get accountArchiveConfirmTitle;
+
+  /// Body text of the archive confirmation dialog.
+  ///
+  /// In fr, this message translates to:
+  /// **'Vous pourrez toujours consulter son historique, mais il n\'apparaîtra plus dans votre liste de comptes.'**
+  String get accountArchiveConfirmBody;
+
+  /// Title of the account form dialog when creating an account.
+  ///
+  /// In fr, this message translates to:
+  /// **'Nouveau compte'**
+  String get accountFormCreateTitle;
+
+  /// Title of the account form dialog when editing an account.
+  ///
+  /// In fr, this message translates to:
+  /// **'Modifier le compte'**
+  String get accountFormEditTitle;
+
+  /// Label for the account name field on the account form.
+  ///
+  /// In fr, this message translates to:
+  /// **'Nom'**
+  String get accountNameLabel;
+
+  /// Validation message when the account name field is left empty.
+  ///
+  /// In fr, this message translates to:
+  /// **'Le nom est requis.'**
+  String get accountNameRequired;
+
+  /// Label for the account type selector on the account form.
+  ///
+  /// In fr, this message translates to:
+  /// **'Type'**
+  String get accountTypeLabel;
+
+  /// Account type option: checking.
+  ///
+  /// In fr, this message translates to:
+  /// **'Compte courant'**
+  String get accountTypeChecking;
+
+  /// Account type option: savings.
+  ///
+  /// In fr, this message translates to:
+  /// **'Épargne'**
+  String get accountTypeSavings;
+
+  /// Account type option: credit.
+  ///
+  /// In fr, this message translates to:
+  /// **'Carte de crédit'**
+  String get accountTypeCredit;
+
+  /// Account type option: cash.
+  ///
+  /// In fr, this message translates to:
+  /// **'Espèces'**
+  String get accountTypeCash;
+
+  /// Account type option: other.
+  ///
+  /// In fr, this message translates to:
+  /// **'Autre'**
+  String get accountTypeOther;
+
+  /// Label for the institution field on the account form.
+  ///
+  /// In fr, this message translates to:
+  /// **'Établissement'**
+  String get accountInstitutionLabel;
+
+  /// Validation message when the institution field is left empty.
+  ///
+  /// In fr, this message translates to:
+  /// **'L\'établissement est requis.'**
+  String get accountInstitutionRequired;
+
+  /// Label for the opening balance field on the account form.
+  ///
+  /// In fr, this message translates to:
+  /// **'Solde initial'**
+  String get accountOpeningBalanceLabel;
+
+  /// Validation message when the opening balance field is left empty.
+  ///
+  /// In fr, this message translates to:
+  /// **'Le solde initial est requis.'**
+  String get accountOpeningBalanceRequired;
+
+  /// Validation message when the opening balance can't be parsed as a number.
+  ///
+  /// In fr, this message translates to:
+  /// **'Entrez un montant valide.'**
+  String get accountOpeningBalanceInvalid;
+
+  /// Label for the read-only currency field on the account form.
+  ///
+  /// In fr, this message translates to:
+  /// **'Devise'**
+  String get accountCurrencyLabel;
+
+  /// Submit button label on the account form when creating an account.
+  ///
+  /// In fr, this message translates to:
+  /// **'Créer le compte'**
+  String get accountFormSubmitCreate;
+
+  /// Submit button label on the account form when editing an account.
+  ///
+  /// In fr, this message translates to:
+  /// **'Enregistrer'**
+  String get accountFormSubmitEdit;
+
+  /// Localized message for the backend's ACCOUNT_NOT_FOUND error code.
+  ///
+  /// In fr, this message translates to:
+  /// **'Compte introuvable.'**
+  String get accountErrorNotFound;
+
+  /// Localized message for the backend's VALIDATION_ERROR error code.
+  ///
+  /// In fr, this message translates to:
+  /// **'Certaines informations sont invalides.'**
+  String get accountErrorValidation;
+
+  /// Fallback localized message for unrecognized or network errors on the accounts screen.
+  ///
+  /// In fr, this message translates to:
+  /// **'Une erreur est survenue. Veuillez réessayer.'**
+  String get accountErrorGeneric;
 }
 
 class _AppLocalizationsDelegate
