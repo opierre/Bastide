@@ -3,7 +3,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
 import '../../../core/session/current_user_provider.dart';
+import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/tokens.dart';
+import '../../../core/widgets/inline_banner.dart';
+import '../../../core/widgets/labeled_field.dart';
 import '../../../l10n/app_localizations.dart';
 import '../application/accounts_controller.dart';
 import '../domain/account.dart';
@@ -115,66 +118,105 @@ class _AccountFormState extends ConsumerState<AccountForm> {
 
     return AlertDialog(
       title: Text(_isEditing ? l10n.accountFormEditTitle : l10n.accountFormCreateTitle),
-      content: SingleChildScrollView(
-        child: Form(
-          key: _formKey,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              TextFormField(
-                key: const Key('accountNameField'),
-                controller: _nameController,
-                decoration: InputDecoration(labelText: l10n.accountNameLabel),
-                validator: (value) =>
-                    (value == null || value.trim().isEmpty) ? l10n.accountNameRequired : null,
-              ),
-              const SizedBox(height: AppSpacing.md),
-              DropdownButtonFormField<AccountType>(
-                key: const Key('accountTypeField'),
-                initialValue: _type,
-                decoration: InputDecoration(labelText: l10n.accountTypeLabel),
-                items: [
-                  for (final type in AccountType.values)
-                    DropdownMenuItem(value: type, child: Text(_typeLabel(l10n, type))),
-                ],
-                onChanged: (value) {
-                  if (value != null) setState(() => _type = value);
-                },
-              ),
-              const SizedBox(height: AppSpacing.md),
-              TextFormField(
-                key: const Key('accountInstitutionField'),
-                controller: _institutionController,
-                decoration: InputDecoration(labelText: l10n.accountInstitutionLabel),
-                validator: (value) =>
-                    (value == null || value.trim().isEmpty) ? l10n.accountInstitutionRequired : null,
-              ),
-              const SizedBox(height: AppSpacing.md),
-              TextFormField(
-                key: const Key('accountOpeningBalanceField'),
-                controller: _openingBalanceController,
-                enabled: !_isEditing,
-                keyboardType: const TextInputType.numberWithOptions(decimal: true, signed: true),
-                decoration: InputDecoration(labelText: l10n.accountOpeningBalanceLabel),
-                validator: _isEditing ? null : (value) => _validateOpeningBalance(value, l10n),
-              ),
-              const SizedBox(height: AppSpacing.md),
-              TextFormField(
-                key: const Key('accountCurrencyField'),
-                initialValue: currency,
-                enabled: false,
-                decoration: InputDecoration(labelText: l10n.accountCurrencyLabel),
-              ),
-              if (_errorText != null) ...[
-                const SizedBox(height: AppSpacing.md),
-                Text(
-                  _errorText!,
-                  key: const Key('accountFormErrorText'),
-                  style: const TextStyle(color: AppColors.negative),
+      contentPadding: const EdgeInsets.fromLTRB(
+        AppSpacing.lg,
+        AppSpacing.md,
+        AppSpacing.lg,
+        AppSpacing.md,
+      ),
+      content: SizedBox(
+        width: 400,
+        child: SingleChildScrollView(
+          child: Form(
+            key: _formKey,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                LabeledField(
+                  label: l10n.accountNameLabel,
+                  child: TextFormField(
+                    key: const Key('accountNameField'),
+                    controller: _nameController,
+                    validator: (value) =>
+                        (value == null || value.trim().isEmpty) ? l10n.accountNameRequired : null,
+                  ),
                 ),
+                const SizedBox(height: AppSpacing.md),
+                LabeledField(
+                  label: l10n.accountTypeLabel,
+                  child: DropdownButtonFormField<AccountType>(
+                    key: const Key('accountTypeField'),
+                    initialValue: _type,
+                    borderRadius: BorderRadius.circular(AppRadii.md),
+                    icon: const Icon(Icons.expand_more_rounded, size: 18),
+                    items: [
+                      for (final type in AccountType.values)
+                        DropdownMenuItem(value: type, child: Text(_typeLabel(l10n, type))),
+                    ],
+                    onChanged: (value) {
+                      if (value != null) setState(() => _type = value);
+                    },
+                  ),
+                ),
+                const SizedBox(height: AppSpacing.md),
+                LabeledField(
+                  label: l10n.accountInstitutionLabel,
+                  child: TextFormField(
+                    key: const Key('accountInstitutionField'),
+                    controller: _institutionController,
+                    validator: (value) => (value == null || value.trim().isEmpty)
+                        ? l10n.accountInstitutionRequired
+                        : null,
+                  ),
+                ),
+                const SizedBox(height: AppSpacing.md),
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(
+                      flex: 2,
+                      child: LabeledField(
+                        label: l10n.accountOpeningBalanceLabel,
+                        child: TextFormField(
+                          key: const Key('accountOpeningBalanceField'),
+                          controller: _openingBalanceController,
+                          enabled: !_isEditing,
+                          keyboardType: const TextInputType.numberWithOptions(
+                            decimal: true,
+                            signed: true,
+                          ),
+                          style: tabularNumberStyle(
+                            Theme.of(context).textTheme.bodyLarge!,
+                          ),
+                          validator: _isEditing
+                              ? null
+                              : (value) => _validateOpeningBalance(value, l10n),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: AppSpacing.md),
+                    Expanded(
+                      child: LabeledField(
+                        label: l10n.accountCurrencyLabel,
+                        child: TextFormField(
+                          key: const Key('accountCurrencyField'),
+                          initialValue: currency,
+                          enabled: false,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                if (_errorText != null) ...[
+                  const SizedBox(height: AppSpacing.md),
+                  InlineErrorBanner(
+                    key: const Key('accountFormErrorText'),
+                    message: _errorText!,
+                  ),
+                ],
               ],
-            ],
+            ),
           ),
         ),
       ),

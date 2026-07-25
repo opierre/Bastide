@@ -42,6 +42,13 @@ Widget _wrap({required FakeAccountsController controller, Locale locale = const 
   );
 }
 
+/// Scoped to the list: the screen's summary card shows the *total* balance,
+/// which for a single account renders the same string as its row.
+Finder _balanceInList(String formatted) => find.descendant(
+  of: find.byKey(const Key('accountsList')),
+  matching: find.text(formatted),
+);
+
 void main() {
   testWidgets('renders the balance formatted for the fr locale', (tester) async {
     await tester.pumpWidget(
@@ -50,7 +57,7 @@ void main() {
     await tester.pumpAndSettle();
 
     final expected = NumberFormat.currency(locale: 'fr', name: 'EUR').format(1234.56);
-    expect(find.text(expected), findsOneWidget);
+    expect(_balanceInList(expected), findsOneWidget);
   });
 
   testWidgets('renders the balance formatted for the en locale', (tester) async {
@@ -63,7 +70,30 @@ void main() {
     await tester.pumpAndSettle();
 
     final expected = NumberFormat.currency(locale: 'en', name: 'EUR').format(1234.56);
-    expect(find.text(expected), findsOneWidget);
+    expect(_balanceInList(expected), findsOneWidget);
+  });
+
+  testWidgets('sums the listed balances into the summary card', (tester) async {
+    await tester.pumpWidget(
+      _wrap(
+        controller: FakeAccountsController(
+          initialAccounts: [
+            _account(id: 'a1', balanceMinor: 123456),
+            _account(id: 'a2', name: 'Livret A', balanceMinor: 76544),
+          ],
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    final total = NumberFormat.currency(locale: 'fr', name: 'EUR').format(2000.00);
+    expect(
+      find.descendant(
+        of: find.byKey(const Key('accountsTotalBalance')),
+        matching: find.text(total),
+      ),
+      findsOneWidget,
+    );
   });
 
   testWidgets('renders the empty state with a CTA when there are no accounts', (tester) async {

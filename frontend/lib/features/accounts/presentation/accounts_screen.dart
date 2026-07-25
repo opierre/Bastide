@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/tokens.dart';
 import '../../../core/widgets/amount_text.dart';
+import '../../../core/widgets/app_card.dart';
+import '../../../core/widgets/app_chip.dart';
 import '../../../core/widgets/institution_avatar.dart';
+import '../../../core/widgets/state_views.dart';
 import '../../../l10n/app_localizations.dart';
 import '../application/accounts_controller.dart';
 import '../domain/account.dart';
@@ -22,38 +26,38 @@ class AccountsScreen extends ConsumerWidget {
 
     return Padding(
       key: const Key('screen-accounts'),
-      padding: const EdgeInsets.all(AppSpacing.lg),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Align(
-            alignment: Alignment.centerRight,
-            child: FilledButton.icon(
-              key: const Key('addAccountButton'),
-              onPressed: () => _openForm(context),
-              icon: const Icon(Icons.add),
-              label: Text(l10n.accountsAddButton),
-            ),
-          ),
-          const SizedBox(height: AppSpacing.lg),
-          Expanded(
-            child: switch (accountsState) {
-              AsyncData(:final value) => value.isEmpty
-                  ? _EmptyState(onAdd: () => _openForm(context))
-                  : _AccountsList(
-                      accounts: value,
-                      onEdit: (account) => _openForm(context, initial: account),
-                      onArchive: (account) => _confirmArchive(context, ref, l10n, account),
-                    ),
-              AsyncError(:final error) => _ErrorState(
-                message: localizeAccountError(l10n, error),
-                onRetry: () => ref.read(accountsControllerProvider.notifier).refresh(),
+      padding: const EdgeInsets.all(AppSpacing.lg + AppSpacing.xs),
+      child: switch (accountsState) {
+        AsyncData(:final value) when value.isEmpty => _EmptyState(
+          onAdd: () => _openForm(context),
+        ),
+        AsyncData(:final value) => Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            _SummaryHeader(accounts: value, onAdd: () => _openForm(context)),
+            const SizedBox(height: AppSpacing.lg),
+            Expanded(
+              child: _AccountsList(
+                accounts: value,
+                onEdit: (account) => _openForm(context, initial: account),
+                onArchive: (account) => _confirmArchive(context, ref, l10n, account),
               ),
-              _ => const Center(key: Key('accountsLoadingIndicator'), child: CircularProgressIndicator()),
-            },
-          ),
-        ],
-      ),
+            ),
+          ],
+        ),
+        AsyncError(:final error) => ErrorStateView(
+          message: localizeAccountError(l10n, error),
+          messageKey: const Key('accountsErrorText'),
+          retryLabel: l10n.accountsRetry,
+          retryKey: const Key('accountsRetryButton'),
+          onRetry: () => ref.read(accountsControllerProvider.notifier).refresh(),
+        ),
+        _ => const Padding(
+          key: Key('accountsLoadingIndicator'),
+          padding: EdgeInsets.only(top: 92),
+          child: SkeletonList(),
+        ),
+      },
     );
   }
 
@@ -98,8 +102,71 @@ class AccountsScreen extends ConsumerWidget {
   }
 }
 
+/// Total balance across the listed accounts, plus the add-account action.
+/// Summing is safe in Phase 1 because every account shares the user's single
+/// currency (see the multi-currency skill); this needs FX before Phase 4.
+class _SummaryHeader extends StatelessWidget {
+  const _SummaryHeader({required this.accounts, required this.onAdd});
+
+  final List<Account> accounts;
+  final VoidCallback onAdd;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final textTheme = Theme.of(context).textTheme;
+    final total = accounts.fold<int>(0, (sum, account) => sum + account.balanceMinor);
+
+    return AppCard(
+      padding: const EdgeInsets.all(AppSpacing.lg),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  l10n.accountsTotalBalanceLabel.toUpperCase(),
+                  style: textTheme.labelSmall?.copyWith(color: AppColors.textSecondary),
+                ),
+                const SizedBox(height: AppSpacing.sm),
+                AmountText(
+                  key: const Key('accountsTotalBalance'),
+                  amountMinor: total,
+                  currency: accounts.first.currency,
+                  // A total is a standing figure, not an inflow or an outflow,
+                  // so the income/expense colors would misread here.
+                  colorize: false,
+                  style: textTheme.headlineMedium!,
+                ),
+                const SizedBox(height: AppSpacing.xs),
+                Text(
+                  l10n.accountsActiveCount(accounts.length),
+                  style: textTheme.bodySmall?.copyWith(color: AppColors.textSecondary),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: AppSpacing.md),
+          FilledButton.icon(
+            key: const Key('addAccountButton'),
+            onPressed: onAdd,
+            icon: const Icon(Icons.add_rounded),
+            label: Text(l10n.accountsAddButton),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 class _AccountsList extends StatelessWidget {
-  const _AccountsList({required this.accounts, required this.onEdit, required this.onArchive});
+  const _AccountsList({
+    required this.accounts,
+    required this.onEdit,
+    required this.onArchive,
+  });
 
   final List<Account> accounts;
   final ValueChanged<Account> onEdit;
@@ -111,7 +178,7 @@ class _AccountsList extends StatelessWidget {
     return ListView.separated(
       key: const Key('accountsList'),
       itemCount: accounts.length,
-      separatorBuilder: (context, index) => const SizedBox(height: AppSpacing.sm),
+      separatorBuilder: (context, index) => const SizedBox(height: AppSpacing.sm + AppSpacing.xs),
       itemBuilder: (context, index) {
         final account = accounts[index];
         return _AccountCard(
@@ -128,7 +195,12 @@ class _AccountsList extends StatelessWidget {
 enum _AccountAction { edit, archive }
 
 class _AccountCard extends StatelessWidget {
-  const _AccountCard({required this.account, required this.l10n, required this.onEdit, required this.onArchive});
+  const _AccountCard({
+    required this.account,
+    required this.l10n,
+    required this.onEdit,
+    required this.onArchive,
+  });
 
   final Account account;
   final AppLocalizations l10n;
@@ -143,43 +215,104 @@ class _AccountCard extends StatelessWidget {
     AccountType.other => l10n.accountTypeOther,
   };
 
+  IconData _typeIcon(AccountType type) => switch (type) {
+    AccountType.checking => Icons.account_balance_wallet_outlined,
+    AccountType.savings => Icons.savings_outlined,
+    AccountType.credit => Icons.credit_card_rounded,
+    AccountType.cash => Icons.payments_outlined,
+    AccountType.other => Icons.more_horiz_rounded,
+  };
+
   @override
   Widget build(BuildContext context) {
-    return Card(
+    final textTheme = Theme.of(context).textTheme;
+
+    return AppCard(
       key: Key('accountCard-${account.id}'),
-      child: Padding(
-        padding: const EdgeInsets.all(AppSpacing.md),
-        child: Row(
-          children: [
-            InstitutionAvatar(name: account.institution),
-            const SizedBox(width: AppSpacing.md),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(account.name, style: Theme.of(context).textTheme.titleMedium),
-                  Text(
-                    '${account.institution} · ${_typeLabel(account.type)}',
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(color: AppColors.textSecondary),
-                  ),
-                ],
-              ),
-            ),
-            AmountText(amountMinor: account.balanceMinor, currency: account.currency),
-            PopupMenuButton<_AccountAction>(
-              key: Key('accountMenu-${account.id}'),
-              onSelected: (action) => switch (action) {
-                _AccountAction.edit => onEdit(),
-                _AccountAction.archive => onArchive(),
-              },
-              itemBuilder: (context) => [
-                PopupMenuItem(value: _AccountAction.edit, child: Text(l10n.accountEdit)),
-                PopupMenuItem(value: _AccountAction.archive, child: Text(l10n.accountArchive)),
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.md,
+        vertical: AppSpacing.md - 2,
+      ),
+      onTap: onEdit,
+      child: Row(
+        children: [
+          InstitutionAvatar(name: account.institution, size: 44),
+          const SizedBox(width: AppSpacing.md),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  account.name,
+                  style: textTheme.titleMedium,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                const SizedBox(height: AppSpacing.xs + 2),
+                Row(
+                  children: [
+                    AppChip(
+                      label: _typeLabel(account.type),
+                      icon: _typeIcon(account.type),
+                    ),
+                    const SizedBox(width: AppSpacing.sm),
+                    Flexible(
+                      child: Text(
+                        account.institution,
+                        style: textTheme.bodySmall?.copyWith(color: AppColors.textSecondary),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  ],
+                ),
               ],
             ),
-          ],
-        ),
+          ),
+          const SizedBox(width: AppSpacing.md),
+          AmountText(
+            amountMinor: account.balanceMinor,
+            currency: account.currency,
+            style: tabularNumberStyle(textTheme.titleMedium!),
+          ),
+          const SizedBox(width: AppSpacing.xs),
+          PopupMenuButton<_AccountAction>(
+            key: Key('accountMenu-${account.id}'),
+            icon: const Icon(Icons.more_horiz_rounded, size: 20),
+            position: PopupMenuPosition.under,
+            onSelected: (action) => switch (action) {
+              _AccountAction.edit => onEdit(),
+              _AccountAction.archive => onArchive(),
+            },
+            itemBuilder: (context) => [
+              PopupMenuItem(
+                value: _AccountAction.edit,
+                child: _MenuRow(icon: Icons.edit_outlined, label: l10n.accountEdit),
+              ),
+              PopupMenuItem(
+                value: _AccountAction.archive,
+                child: _MenuRow(icon: Icons.inventory_2_outlined, label: l10n.accountArchive),
+              ),
+            ],
+          ),
+        ],
       ),
+    );
+  }
+}
+
+class _MenuRow extends StatelessWidget {
+  const _MenuRow({required this.icon, required this.label});
+
+  final IconData icon;
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Icon(icon, size: 16, color: AppColors.textSecondary),
+        const SizedBox(width: AppSpacing.sm),
+        Text(label),
+      ],
     );
   }
 }
@@ -192,55 +325,15 @@ class _EmptyState extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    return Center(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          const Icon(Icons.account_balance_outlined, size: 48, color: AppColors.textSecondary),
-          const SizedBox(height: AppSpacing.md),
-          Text(l10n.accountsEmptyTitle, style: Theme.of(context).textTheme.titleLarge),
-          const SizedBox(height: AppSpacing.xs),
-          Text(
-            l10n.accountsEmptyBody,
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: AppColors.textSecondary),
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: AppSpacing.lg),
-          FilledButton.icon(
-            key: const Key('emptyStateAddAccountButton'),
-            onPressed: onAdd,
-            icon: const Icon(Icons.add),
-            label: Text(l10n.accountsAddButton),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _ErrorState extends StatelessWidget {
-  const _ErrorState({required this.message, required this.onRetry});
-
-  final String message;
-  final VoidCallback onRetry;
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
-    return Center(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          const Icon(Icons.error_outline, size: 48, color: AppColors.negative),
-          const SizedBox(height: AppSpacing.md),
-          Text(message, key: const Key('accountsErrorText'), textAlign: TextAlign.center),
-          const SizedBox(height: AppSpacing.md),
-          OutlinedButton(
-            key: const Key('accountsRetryButton'),
-            onPressed: onRetry,
-            child: Text(l10n.accountsRetry),
-          ),
-        ],
+    return EmptyStateView(
+      icon: Icons.account_balance_outlined,
+      title: l10n.accountsEmptyTitle,
+      message: l10n.accountsEmptyBody,
+      action: FilledButton.icon(
+        key: const Key('emptyStateAddAccountButton'),
+        onPressed: onAdd,
+        icon: const Icon(Icons.add_rounded),
+        label: Text(l10n.accountsAddButton),
       ),
     );
   }
