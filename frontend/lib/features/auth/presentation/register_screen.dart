@@ -3,10 +3,14 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/theme/tokens.dart';
+import '../../../core/widgets/app_segmented.dart';
+import '../../../core/widgets/inline_banner.dart';
+import '../../../core/widgets/labeled_field.dart';
 import '../../../l10n/app_localizations.dart';
 import '../application/auth_controller.dart';
 import '../domain/supported_currencies.dart';
 import 'auth_error_localizer.dart';
+import 'auth_scaffold.dart';
 import 'login_screen.dart';
 
 class RegisterScreen extends ConsumerStatefulWidget {
@@ -54,113 +58,116 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     final authState = ref.watch(authControllerProvider);
     final isSubmitting = authState.isLoading;
 
-    return Scaffold(
-      body: Center(
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 400),
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.all(AppSpacing.lg),
-            child: Form(
-              key: _formKey,
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Text(l10n.authRegisterTitle, style: Theme.of(context).textTheme.headlineSmall),
-                  const SizedBox(height: AppSpacing.lg),
-                  TextFormField(
-                    key: const Key('registerEmailField'),
-                    controller: _emailController,
-                    keyboardType: TextInputType.emailAddress,
-                    autofillHints: const [AutofillHints.email],
-                    decoration: InputDecoration(labelText: l10n.authEmailLabel),
-                    validator: (value) =>
-                        (value == null || value.trim().isEmpty) ? l10n.authEmailRequired : null,
+    return AuthScaffold(
+      title: l10n.authRegisterTitle,
+      form: Form(
+        key: _formKey,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            LabeledField(
+              label: l10n.authDisplayNameLabel,
+              child: TextFormField(
+                key: const Key('registerDisplayNameField'),
+                controller: _displayNameController,
+                autofillHints: const [AutofillHints.name],
+                decoration: const InputDecoration(
+                  prefixIcon: Icon(Icons.person_outline_rounded, size: 18),
+                ),
+                validator: (value) => (value == null || value.trim().isEmpty)
+                    ? l10n.authDisplayNameRequired
+                    : null,
+              ),
+            ),
+            const SizedBox(height: AppSpacing.md),
+            LabeledField(
+              label: l10n.authEmailLabel,
+              child: TextFormField(
+                key: const Key('registerEmailField'),
+                controller: _emailController,
+                keyboardType: TextInputType.emailAddress,
+                autofillHints: const [AutofillHints.email],
+                decoration: const InputDecoration(
+                  prefixIcon: Icon(Icons.alternate_email_rounded, size: 18),
+                ),
+                validator: (value) =>
+                    (value == null || value.trim().isEmpty) ? l10n.authEmailRequired : null,
+              ),
+            ),
+            const SizedBox(height: AppSpacing.md),
+            LabeledField(
+              label: l10n.authPasswordLabel,
+              child: TextFormField(
+                key: const Key('registerPasswordField'),
+                controller: _passwordController,
+                obscureText: true,
+                autofillHints: const [AutofillHints.newPassword],
+                decoration: const InputDecoration(
+                  prefixIcon: Icon(Icons.lock_outline_rounded, size: 18),
+                ),
+                validator: (value) =>
+                    (value == null || value.isEmpty) ? l10n.authPasswordRequired : null,
+              ),
+            ),
+            const SizedBox(height: AppSpacing.md),
+            LabeledField(
+              label: l10n.authLocaleLabel,
+              child: AppSegmented<String>(
+                value: _locale,
+                onChanged: (value) => setState(() => _locale = value),
+                segments: [
+                  AppSegment(
+                    key: const Key('registerLocaleFrenchOption'),
+                    value: 'fr',
+                    label: l10n.authLocaleFrench,
                   ),
-                  const SizedBox(height: AppSpacing.md),
-                  TextFormField(
-                    key: const Key('registerPasswordField'),
-                    controller: _passwordController,
-                    obscureText: true,
-                    autofillHints: const [AutofillHints.newPassword],
-                    decoration: InputDecoration(labelText: l10n.authPasswordLabel),
-                    validator: (value) =>
-                        (value == null || value.isEmpty) ? l10n.authPasswordRequired : null,
-                  ),
-                  const SizedBox(height: AppSpacing.md),
-                  TextFormField(
-                    key: const Key('registerDisplayNameField'),
-                    controller: _displayNameController,
-                    autofillHints: const [AutofillHints.name],
-                    decoration: InputDecoration(labelText: l10n.authDisplayNameLabel),
-                    validator: (value) => (value == null || value.trim().isEmpty)
-                        ? l10n.authDisplayNameRequired
-                        : null,
-                  ),
-                  const SizedBox(height: AppSpacing.md),
-                  Text(l10n.authLocaleLabel, style: Theme.of(context).textTheme.labelLarge),
-                  const SizedBox(height: AppSpacing.xs),
-                  Wrap(
-                    spacing: AppSpacing.sm,
-                    children: [
-                      ChoiceChip(
-                        key: const Key('registerLocaleFrenchOption'),
-                        label: Text(l10n.authLocaleFrench),
-                        selected: _locale == 'fr',
-                        onSelected: (_) => setState(() => _locale = 'fr'),
-                      ),
-                      ChoiceChip(
-                        key: const Key('registerLocaleEnglishOption'),
-                        label: Text(l10n.authLocaleEnglish),
-                        selected: _locale == 'en',
-                        onSelected: (_) => setState(() => _locale = 'en'),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: AppSpacing.md),
-                  DropdownButtonFormField<String>(
-                    key: const Key('registerCurrencyField'),
-                    initialValue: _currency,
-                    decoration: InputDecoration(labelText: l10n.authCurrencyLabel),
-                    items: [
-                      for (final code in supportedCurrencies)
-                        DropdownMenuItem(value: code, child: Text(code)),
-                    ],
-                    onChanged: (value) {
-                      if (value != null) setState(() => _currency = value);
-                    },
-                  ),
-                  if (authState.hasError) ...[
-                    const SizedBox(height: AppSpacing.md),
-                    Text(
-                      localizeAuthError(l10n, authState.error),
-                      key: const Key('registerErrorText'),
-                      style: const TextStyle(color: AppColors.negative),
-                    ),
-                  ],
-                  const SizedBox(height: AppSpacing.lg),
-                  FilledButton(
-                    key: const Key('registerSubmitButton'),
-                    onPressed: isSubmitting ? null : _submit,
-                    child: isSubmitting
-                        ? const SizedBox(
-                            height: 16,
-                            width: 16,
-                            child: CircularProgressIndicator(strokeWidth: 2),
-                          )
-                        : Text(l10n.authRegisterSubmit),
-                  ),
-                  const SizedBox(height: AppSpacing.sm),
-                  TextButton(
-                    key: const Key('goToLoginButton'),
-                    onPressed: () => context.go(LoginScreen.path),
-                    child: Text(l10n.authGoToLogin),
+                  AppSegment(
+                    key: const Key('registerLocaleEnglishOption'),
+                    value: 'en',
+                    label: l10n.authLocaleEnglish,
                   ),
                 ],
               ),
             ),
-          ),
+            const SizedBox(height: AppSpacing.md),
+            LabeledField(
+              label: l10n.authCurrencyLabel,
+              child: DropdownButtonFormField<String>(
+                key: const Key('registerCurrencyField'),
+                initialValue: _currency,
+                borderRadius: BorderRadius.circular(AppRadii.md),
+                icon: const Icon(Icons.expand_more_rounded, size: 18),
+                items: [
+                  for (final code in supportedCurrencies)
+                    DropdownMenuItem(value: code, child: Text(code)),
+                ],
+                onChanged: (value) {
+                  if (value != null) setState(() => _currency = value);
+                },
+              ),
+            ),
+            if (authState.hasError) ...[
+              const SizedBox(height: AppSpacing.md),
+              InlineErrorBanner(
+                key: const Key('registerErrorText'),
+                message: localizeAuthError(l10n, authState.error),
+              ),
+            ],
+            const SizedBox(height: AppSpacing.lg),
+            AuthSubmitButton(
+              key: const Key('registerSubmitButton'),
+              label: l10n.authRegisterSubmit,
+              isSubmitting: isSubmitting,
+              onPressed: _submit,
+            ),
+          ],
         ),
+      ),
+      footer: TextButton(
+        key: const Key('goToLoginButton'),
+        onPressed: () => context.go(LoginScreen.path),
+        child: Text(l10n.authGoToLogin),
       ),
     );
   }

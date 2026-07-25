@@ -45,6 +45,10 @@ void main() {
     await tester.tap(find.byKey(const Key('registerLocaleEnglishOption')));
     await tester.pumpAndSettle();
 
+    // The form is taller than the 800×600 test viewport (it's a desktop-first
+    // layout), so the currency field has to be scrolled into view first.
+    await tester.ensureVisible(find.byKey(const Key('registerCurrencyField')));
+    await tester.pumpAndSettle();
     await tester.tap(find.byKey(const Key('registerCurrencyField')));
     await tester.pumpAndSettle();
     await tester.tap(find.text('USD').last);
