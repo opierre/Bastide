@@ -73,6 +73,7 @@ code finstride.code-workspace
 
 # backend (terminal A)
 cd backend && uv sync
+uv run alembic upgrade head   # apply migrations before first run (and after pulling new ones)
 uv run uvicorn app.main:app --host 127.0.0.1 --port 8765 --reload
 
 # frontend (terminal B)
