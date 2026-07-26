@@ -107,6 +107,120 @@ class AppLocalizationsFr extends AppLocalizations {
   String get authDisplayNameLabel => 'Nom affiché';
 
   @override
+  String get authPasswordStrengthWeak => 'Trop faible';
+
+  @override
+  String get authPasswordStrengthFair => 'Moyen';
+
+  @override
+  String get authPasswordStrengthStrong => 'Robuste';
+
+  @override
+  String get authPasswordStrengthHint =>
+      'Ajoutez quelques caractères, un chiffre et une majuscule.';
+
+  @override
+  String get authPreferencesNote =>
+      'Vous pourrez changer la langue plus tard ; la devise s\'applique à tous vos comptes et ne pourra plus être modifiée dans cette version.';
+
+  @override
+  String get authEmailTaken =>
+      'Cet e-mail est déjà utilisé — connectez-vous plutôt.';
+
+  @override
+  String get authEmailInvalid => 'Saisissez une adresse e-mail valide.';
+
+  @override
+  String get currencyNameEUR => 'Euro';
+
+  @override
+  String get currencyNameUSD => 'Dollar américain';
+
+  @override
+  String get currencyNameGBP => 'Livre sterling';
+
+  @override
+  String get currencyNameCHF => 'Franc suisse';
+
+  @override
+  String get currencyNameCAD => 'Dollar canadien';
+
+  @override
+  String get currencyNameJPY => 'Yen japonais';
+
+  @override
+  String get currencyNameAUD => 'Dollar australien';
+
+  @override
+  String get currencyNameCNY => 'Yuan chinois';
+
+  @override
+  String get currencyNameINR => 'Roupie indienne';
+
+  @override
+  String get currencyNameBRL => 'Réal brésilien';
+
+  @override
+  String get currencyNameMXN => 'Peso mexicain';
+
+  @override
+  String get currencyNameSEK => 'Couronne suédoise';
+
+  @override
+  String get currencyNameNOK => 'Couronne norvégienne';
+
+  @override
+  String get currencyNameDKK => 'Couronne danoise';
+
+  @override
+  String get currencyNamePLN => 'Zloty polonais';
+
+  @override
+  String get currencyNameCZK => 'Couronne tchèque';
+
+  @override
+  String get currencyNameHUF => 'Forint hongrois';
+
+  @override
+  String get currencyNameRON => 'Leu roumain';
+
+  @override
+  String get currencyNameZAR => 'Rand sud-africain';
+
+  @override
+  String get currencyNameAED => 'Dirham des Émirats';
+
+  @override
+  String get currencyNameSGD => 'Dollar de Singapour';
+
+  @override
+  String get currencyNameHKD => 'Dollar de Hong Kong';
+
+  @override
+  String get currencyNameNZD => 'Dollar néo-zélandais';
+
+  @override
+  String get currencyNameTRY => 'Livre turque';
+
+  @override
+  String get currencyNameILS => 'Shekel israélien';
+
+  @override
+  String get currencyNameKRW => 'Won sud-coréen';
+
+  @override
+  String get currencyNameTHB => 'Baht thaïlandais';
+
+  @override
+  String get currencyNameMAD => 'Dirham marocain';
+
+  @override
+  String get currencyNameXOF => 'Franc CFA (BCEAO)';
+
+  @override
+  String get currencyNameXAF => 'Franc CFA (BEAC)';
+
+  @override
   String get authLocaleLabel => 'Langue';
 
   @override

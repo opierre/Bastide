@@ -52,6 +52,154 @@
   "authEmailLabel": "Email address",
   "authPasswordLabel": "Password",
   "authDisplayNameLabel": "Display name",
+  "authPasswordStrengthWeak": "Too weak",
+  "@authPasswordStrengthWeak": {
+    "description": "Verdict beside the password strength meter at its lowest levels."
+  },
+  "authPasswordStrengthFair": "Fair",
+  "@authPasswordStrengthFair": {
+    "description": "Verdict beside the password strength meter at its middle level."
+  },
+  "authPasswordStrengthStrong": "Strong",
+  "@authPasswordStrengthStrong": {
+    "description": "Verdict beside the password strength meter once it is acceptable."
+  },
+  "authPasswordStrengthHint": "Add a few more characters, a digit and a capital letter.",
+  "@authPasswordStrengthHint": {
+    "description": "Guidance shown under a password that is still too weak to submit."
+  },
+  "authPreferencesNote": "You can change the language later; the currency applies to all your accounts and cannot be changed in this version.",
+  "@authPreferencesNote": {
+    "description": "Microcopy under the language and currency row at registration, stating which choice is permanent."
+  },
+  "authEmailTaken": "That email is already in use — sign in instead.",
+  "@authEmailTaken": {
+    "description": "Validation helper shown when the chosen email already has an account."
+  },
+  "authEmailInvalid": "Enter a valid email address.",
+  "@authEmailInvalid": {
+    "description": "Validation helper shown when the typed email is not a valid address."
+  },
+  "currencyNameEUR": "Euro",
+  "@currencyNameEUR": {
+    "description": "Display name for the EUR currency, shown beside its code and symbol."
+  },
+  "currencyNameUSD": "US Dollar",
+  "@currencyNameUSD": {
+    "description": "Display name for the USD currency, shown beside its code and symbol."
+  },
+  "currencyNameGBP": "British Pound",
+  "@currencyNameGBP": {
+    "description": "Display name for the GBP currency, shown beside its code and symbol."
+  },
+  "currencyNameCHF": "Swiss Franc",
+  "@currencyNameCHF": {
+    "description": "Display name for the CHF currency, shown beside its code and symbol."
+  },
+  "currencyNameCAD": "Canadian Dollar",
+  "@currencyNameCAD": {
+    "description": "Display name for the CAD currency, shown beside its code and symbol."
+  },
+  "currencyNameJPY": "Japanese Yen",
+  "@currencyNameJPY": {
+    "description": "Display name for the JPY currency, shown beside its code and symbol."
+  },
+  "currencyNameAUD": "Australian Dollar",
+  "@currencyNameAUD": {
+    "description": "Display name for the AUD currency, shown beside its code and symbol."
+  },
+  "currencyNameCNY": "Chinese Yuan",
+  "@currencyNameCNY": {
+    "description": "Display name for the CNY currency, shown beside its code and symbol."
+  },
+  "currencyNameINR": "Indian Rupee",
+  "@currencyNameINR": {
+    "description": "Display name for the INR currency, shown beside its code and symbol."
+  },
+  "currencyNameBRL": "Brazilian Real",
+  "@currencyNameBRL": {
+    "description": "Display name for the BRL currency, shown beside its code and symbol."
+  },
+  "currencyNameMXN": "Mexican Peso",
+  "@currencyNameMXN": {
+    "description": "Display name for the MXN currency, shown beside its code and symbol."
+  },
+  "currencyNameSEK": "Swedish Krona",
+  "@currencyNameSEK": {
+    "description": "Display name for the SEK currency, shown beside its code and symbol."
+  },
+  "currencyNameNOK": "Norwegian Krone",
+  "@currencyNameNOK": {
+    "description": "Display name for the NOK currency, shown beside its code and symbol."
+  },
+  "currencyNameDKK": "Danish Krone",
+  "@currencyNameDKK": {
+    "description": "Display name for the DKK currency, shown beside its code and symbol."
+  },
+  "currencyNamePLN": "Polish Zloty",
+  "@currencyNamePLN": {
+    "description": "Display name for the PLN currency, shown beside its code and symbol."
+  },
+  "currencyNameCZK": "Czech Koruna",
+  "@currencyNameCZK": {
+    "description": "Display name for the CZK currency, shown beside its code and symbol."
+  },
+  "currencyNameHUF": "Hungarian Forint",
+  "@currencyNameHUF": {
+    "description": "Display name for the HUF currency, shown beside its code and symbol."
+  },
+  "currencyNameRON": "Romanian Leu",
+  "@currencyNameRON": {
+    "description": "Display name for the RON currency, shown beside its code and symbol."
+  },
+  "currencyNameZAR": "South African Rand",
+  "@currencyNameZAR": {
+    "description": "Display name for the ZAR currency, shown beside its code and symbol."
+  },
+  "currencyNameAED": "UAE Dirham",
+  "@currencyNameAED": {
+    "description": "Display name for the AED currency, shown beside its code and symbol."
+  },
+  "currencyNameSGD": "Singapore Dollar",
+  "@currencyNameSGD": {
+    "description": "Display name for the SGD currency, shown beside its code and symbol."
+  },
+  "currencyNameHKD": "Hong Kong Dollar",
+  "@currencyNameHKD": {
+    "description": "Display name for the HKD currency, shown beside its code and symbol."
+  },
+  "currencyNameNZD": "New Zealand Dollar",
+  "@currencyNameNZD": {
+    "description": "Display name for the NZD currency, shown beside its code and symbol."
+  },
+  "currencyNameTRY": "Turkish Lira",
+  "@currencyNameTRY": {
+    "description": "Display name for the TRY currency, shown beside its code and symbol."
+  },
+  "currencyNameILS": "Israeli Shekel",
+  "@currencyNameILS": {
+    "description": "Display name for the ILS currency, shown beside its code and symbol."
+  },
+  "currencyNameKRW": "South Korean Won",
+  "@currencyNameKRW": {
+    "description": "Display name for the KRW currency, shown beside its code and symbol."
+  },
+  "currencyNameTHB": "Thai Baht",
+  "@currencyNameTHB": {
+    "description": "Display name for the THB currency, shown beside its code and symbol."
+  },
+  "currencyNameMAD": "Moroccan Dirham",
+  "@currencyNameMAD": {
+    "description": "Display name for the MAD currency, shown beside its code and symbol."
+  },
+  "currencyNameXOF": "West African CFA Franc",
+  "@currencyNameXOF": {
+    "description": "Display name for the XOF currency, shown beside its code and symbol."
+  },
+  "currencyNameXAF": "Central African CFA Franc",
+  "@currencyNameXAF": {
+    "description": "Display name for the XAF currency, shown beside its code and symbol."
+  },
   "authLocaleLabel": "Language",
   "authLocaleFrench": "Français",
   "authLocaleEnglish": "English",
