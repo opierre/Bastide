@@ -1,26 +1,13 @@
-# Panel: Accounts
-
-Manage the user's accounts. Multi-account, all in the user's single currency (Phase 1). Show the
-full app shell with this in the content region.
+# 05 — Accounts
 
 ## Top bar (this panel)
-Title "Accounts" + a primary "Add account" button (accent) + search + profile.
+Title « Comptes » + descriptor « Tous vos comptes, une seule devise ». Right: primary « Ajouter un compte » (38 px, plus glyph), search pill (230 px), user pill.
 
 ## Content layout
-- **Account cards** (grid or list): each shows institution **logo or monogram**, account name,
-  type (checking/savings/credit/cash), and the current **balance** in tabular figures, locale-
-  formatted, with sign color. A small overflow menu per card: Edit, Archive.
-- Optional summary header: total balance across accounts (single currency).
-- **Add/Edit form** (panel or modal): Name, Type (select), Institution (with logo preview when
-  recognized), Opening balance. Currency is shown **read-only** (the user's currency) — no picker
-  in Phase 1.
+Summary Card: label « Solde total », 32 px neutral 14 013,72 €; right-aligned meta « 4 comptes actifs · EUR » + last-recalc timestamp. Below, 2-column card grid (gap 18): each account Card = 40 px BrandLogo monogram + name (14.5/700) + institution (12 secondary) + ⋯ overflow (Edit/Archive — archive only, no delete), footer row = type badge pill (Courant/Épargne/Crédit) + signed balance 21 px (green +3 486,12 € BNP, green +8 240,00 € Livret A, red −312,40 € Revolut credit, green +2 600,00 € Caisse Locale d'Épargne — the unknown-institution monogram case). Cards hover with iris border.
 
 ## States to show
-1. Populated with 3–4 varied accounts (a bank checking, a savings, a credit card) — show real
-   logos where plausible and a monogram fallback for an unknown institution.
-2. The Add/Edit form open.
-3. Empty state: "Add your first account" with a clear CTA.
+① populated (fr) — 4 varied accounts incl. monogram fallback. ② add/edit modal (fr) — 480 px Modal: Nom, Type select, Solde d'ouverture (neutral figure), Établissement with live logo preview (« Logo reconnu » in green beside the BP chip), Devise read-only (dashed field + lock + note « La devise est celle de votre profil et s'applique à tous les comptes. »), footer Annuler/Enregistrer. ③ empty (fr) — EmptyState « Ajoutez votre premier compte » + CTA.
 
 ## Notes
-Balances right-aligned, tabular. Monogram fallback must look intentional (colored chip with
-initials), never a broken image. French + English variants for labels.
+Account-card balances use sign colors (they are the card's one data point); the summary total stays neutral. No per-account currency appears anywhere.

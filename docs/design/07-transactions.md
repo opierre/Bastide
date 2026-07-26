@@ -1,34 +1,13 @@
-# Panel: Transactions
-
-The workhorse list. Filterable, searchable transactions with inline category editing, plus a
-review queue for uncategorized/uncertain items. Show the full app shell.
+# 07 — Transactions
 
 ## Top bar (this panel)
-Title "Transactions" + **global search** (over description/merchant) + profile. Filters live in
-the panel header.
+Title « Transactions » + descriptor « Toutes vos opérations, en un seul fil ». Right: wide search (300 px, « Rechercher une description ou un marchand… »), user pill.
 
 ## Content layout
-- **Filter bar**: account, date range, category, and a "Needs review" toggle.
-- **Transaction list**: each **row** shows merchant **logo/monogram**, description, a **category
-  chip** (with category color), date, and the **signed amount** (green income / red expense,
-  tabular, right-aligned). Rows are calm and scannable; zebra or subtle separators only.
-- **Inline category edit**: clicking the category chip opens a category picker; selecting one
-  updates the row and clears its review flag.
-- Pagination or infinite scroll.
-
-## Review queue (sub-view or filtered mode)
-- Surfaces only `needs_review` transactions (uncategorized in Phase 1).
-- For each: quick category assignment; an optional **"Always categorize like this"** affordance
-  (creates a rule — wired for the future AI learning loop).
-- Encouraging framing: "X transactions to review" with progress as the user clears them.
+Filter bar (36 px pills, raised surface): Tous les comptes · 01/05/2026 – 31/05/2026 · Toutes les catégories · right-aligned « À vérifier » label + Toggle (amber count badge 12 when on). List Card: 52 px TransactionRows (30 px monogram · 290 px two-line merchant + account block · CategoryChip with category icon · date · 120 px signed tabular amount), #1A212C separators only, hover #151B26; footer pager « 1–12 sur 128 » + round ‹ › buttons. Twelve May-2026 rows from Carrefour to Salaire — Novatech SARL (+2 850,00 € green). Category picker: clicking a chip opens a 250 px overlay popover anchored under it — search field « Changer de catégorie… » + category rows (swatch + name) with iris check on the current one. Review queue: iris-tinted progress Card « 12 transactions à vérifier » / « 4 catégorisées aujourd'hui — vous y êtes presque, continuez ! » + 4/16 and a 25 % iris progress bar; then 64 px rows: "?" monogram, raw bank label in monospace (PRLV SEPA CAISSE LOC EPARGNE…), dashed « Non catégorisé » chip, suggested CategoryChips (with their category icons), iris « Toujours catégoriser ainsi » rule affordance, signed amount.
 
 ## States to show
-1. Populated list with French data (real merchant names, French categories, `1 234,56 €`).
-   Also the English variant.
-2. Category picker open on a row.
-3. Review queue with several uncategorized items + the "always categorize" option.
-4. Empty state (no transactions yet → CTA to Imports).
+① populated (fr). ② populated (en) — same geometry, May 14 2026 / −€86.42 formatting. ③ category picker open (fr) — on the Carrefour row. ④ review queue (fr) — toggle on. ⑤ empty (fr) — EmptyState « Aucune transaction pour l'instant » + CTA « Aller aux imports », filter bar hidden.
 
 ## Notes
-Sign color + icon together (not color alone). Category chip colors consistent with Dashboard and
-Categories. Tabular amounts. French + English variants.
+Choosing a category in the picker or a suggestion chip clears the review flag; « Toujours catégoriser ainsi » creates a rule (see 08). Review copy is framed as progress, never as a backlog of failures.

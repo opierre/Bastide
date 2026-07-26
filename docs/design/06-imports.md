@@ -1,36 +1,13 @@
-# Panel: Imports (+ CSV mapping wizard)
-
-Where users bring in bank data (OFX/QFX/CSV) and review past imports. Two sub-views: the import
-action and the import history. Show the full app shell.
+# 06 — Imports
 
 ## Top bar (this panel)
-Title "Imports" + profile. (Account selection happens within the panel.)
+Title « Imports » + descriptor « Relevés OFX, QFX et CSV — traités sur cet ordinateur ». Right: user pill only — account selection lives in the panel.
 
 ## Content layout
-**A. Import action**
-- Account selector + a drop zone / file picker ("Drop an OFX, QFX, or CSV file").
-- OFX/QFX import directly. CSV launches the **mapping wizard** (or offers to reuse a saved
-  template if one exists for that bank).
-- After import: a result summary card — new vs duplicate counts, coverage period, success/
-  partial/failed status (failed shows a calm error message).
-
-**B. CSV mapping wizard** (show as a focused step/modal)
-- Controls: delimiter (default `;`), encoding (Latin-1/UTF-8), date format (e.g. `dd/MM/yyyy`),
-  decimal separator (`,`), amount strategy (signed vs separate débit/crédit columns), header
-  rows to skip.
-- Column mapping: map file columns → canonical fields (date, amount/debit/credit, description).
-- **Live preview table** of a few parsed rows so the user validates before saving the template +
-  importing. Save-template toggle ("Remember this layout for <bank>").
-
-**C. Import history**
-- Table/list of past batches: file name, format badge (OFX/QFX/CSV), import date, **coverage
-  window** (period start–end), counts (new / duplicates), status. Localized dates.
+Region A « Nouvel import » (Card, left, flex 1.35): Compte de destination select (340 px, with monogram) + DropZone « Déposez un fichier OFX, QFX ou CSV » / sub « ou cliquez pour parcourir — un CSV ouvre l'assistant de correspondance ». File-selected variant: iris-tinted dashed row with OFX format badge, filename + size, remove ×, and primary « Importer ». Region A' result Card (right, only after an import): « Dernier import » + Réussi status pill, two inset count plates (42 nouvelles / 3 doublons ignorés), coverage line 01/05/2026 – 31/05/2026 and file→account line. Region C « Historique des imports » (Card, fills remaining height): DataTable Fichier · Format badge (OFX blue / QFX violet / CSV amber) · Importé le · Période couverte · Nouvelles · Doublons · Statut pill (Réussi green / Partiel amber / Échec red); notes render as a second line under the filename (amber dup note, red failure message « Colonne montant introuvable — relancez l'assistant CSV, rien n'a été modifié »).
 
 ## States to show
-1. Import action with a file selected. 2. CSV wizard with the live preview populated.
-3. Import history with several past imports (incl. one with duplicates and one failed).
-4. Empty history state.
+① file selected + result (fr). ② CSV wizard (fr) — 780 px Modal over the panel: stepper (1 Format ✓ · 2 Colonnes & aperçu), 3×2 control grid (Délimiteur ; · Encodage Latin-1 · Format de date dd/MM/yyyy · Séparateur décimal , · Montants SegmentedControl Signé/Débit-Crédit · Lignes d'en-tête 1), three mapping plates (Col. A « Date opération » → Date, etc., iris arrows), 4-row live preview DataTable with signed colored amounts, save-template toggle « Mémoriser ce format pour Boursorama », footer Annuler / « Valider et importer (57 lignes) ». ③ history (fr) — 5 batches incl. Partiel-with-dups and Échec. ④ empty history (fr) — EmptyState inside Region C, DropZone above stays available.
 
 ## Notes
-The wizard is the most complex screen — keep it legible and stepwise. French + English variants.
-Dates/amounts locale-formatted.
+Failure copy is calm and states nothing was modified. Wizard defaults mirror French bank CSVs (;, Latin-1, dd/MM/yyyy, decimal comma).

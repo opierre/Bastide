@@ -1,68 +1,33 @@
-# Shared Design Block
-
-> Paste this block at the top of **every** panel prompt (for either tool). It is the single
-> source of visual truth and is kept in sync with the `design-system` skill so mockups match the
-> built app. Per-panel prompts add only screen-specific content below this block.
+# 00 — Shared design block
 
 ## Product
-A desktop-first personal finance app (French-first, English second). Calm, modern, sleek, and
-**encouraging** — it should make tracking money feel rewarding, not punitive. **Dark mode.**
+FinStride — desktop-first (1440×900), dark-mode personal finance app. French-first, English second. Local-first: file imports only (OFX/QFX/CSV), no bank connections; the UI reassures via a lock + « Données 100 % locales » badge pinned at the sidebar foot and privacy microcopy on auth screens. Emotional target: calm, rewarding, never punitive — savings rate is the hero metric. Month context of all mock data: May 2026, user Camille Dubois (camille.dubois@proton.me), currency EUR.
 
 ## Palette (dark)
-- Surfaces: sunken `#070910` (sidebar + bottom bar), base `#0A0D12` (content), raised `#111620`
-  (cards), overlay `#19202B` (dialogs/menus), hover `#1E2634`, field `#0D1219` (inputs)
-- Text: primary `#EDF1F7`, secondary `#97A3B6`, disabled `#5A6579`
-- Primary accent (growth/savings): jade `#2FE0A6`; deep end `#14B989`; soft = jade @ 12%
-- Secondary accent: violet `#8B7CF6` (charts, category hues — never used for money)
-- Semantic: income/positive `#4ADE80`, expense/negative `#FF5C6C`, warning `#FFB84D`, info `#5AA9FF`
-- Borders/lines: structural `#232B38`, subtle `#1A212C`; focus ring = primary accent
-- Money color rule everywhere: income positive = green, expense negative = red. Neutral figures
-  (totals, form values) stay in primary text color rather than being tinted.
-- Radii: 8 / 12 / 16 / 20, plus fully-rounded pills. Corners are generous — nothing square.
+Surfaces: sunken #070910 (sidebar, auth background) · base #0A0D12 (content) · raised #111620 (Card) · overlay #19202B (Modal, popover, Toast) · hover #1E2634 (also inset plates/toggle tracks) · field #0D1219. Row-hover inside raised cards: #151B26 (introduced — between raised and hover).
+Text: primary #EDF1F7 · secondary #97A3B6 · disabled/placeholder #5A6579.
+Accents: iris violet #8B8CF9, deep #6C6AF0; primary buttons and the logomark use linear-gradient(135deg, #8B8CF9, #6C6AF0) with ink #0E1030; soft fill = iris at 12–16 % alpha. Cyan #4FD1E8 = leading chart/category hue; violet is reserved for the iris accent and never used for categories or money.
+Semantic: income #4ADE80 · expense #FF5C6C · warning #FFB84D · info #5AA9FF. Tinted fills = color at 10–14 % alpha with a 30–55 % alpha border.
+Category hues (introduced): Logement #4FD1E8 (cyan) · Alimentation #5AA9FF · Transport #2DD4BF · Loisirs #F472B6 · Abonnements #FFB84D · Santé #A3E635 · Autres/Épargne #64748B · Revenus #4ADE80.
+Monogram chips: brand-ish hue at 16 % alpha bg + full-strength letter (BNP #2FB574, Crédit Agricole #0AA396, Revolut #5AA9FF, Caisse Locale #4FD1E8, Carrefour #3B82F6, Novatech #6C6AF0, unknown "?" on #1E2634/#97A3B6).
+Texture (Iris direction): every frame carries a film-grain overlay (SVG fractal noise, white at 5 %, 140 px tile) above the content and a 1 px luminous hairline across the top edge — linear-gradient(90deg, transparent, rgba(139,140,249,.55), transparent).
+Lines: structural #232B38 · subtle divider #1A212C · focus = 1px #8B8CF9 border + 0 0 0 3px rgba(139,140,249,.15).
+Money rule: income green with "+", expense red with "−" (U+2212), neutral figures (totals, balances in forms, form values) stay #EDF1F7. Sign/icon always accompanies color.
 
 ## Typography
-- **Open Sans** throughout. 400 body, 600 emphasis, 700 headings.
-- Amounts/balances use **tabular figures** and right-align in columns.
-- Assume French labels run ~15–20% longer than English — never size layouts to English only.
+Manrope for UI (400 body, 600 emphasis/labels, 700 headings) + Space Grotesk 700 for display: wordmark, panel titles, headline amounts and ring values. Amounts always font-variant-numeric: tabular-nums, right-aligned in columns, signed. Scale used: 10 px section labels (uppercase, +1.3px tracking) · 11–11.5 px captions/badges · 12–12.5 px secondary · 13–13.5 px body/rows · 14 px card titles · 16–19 px modal/empty-state titles · 18 px top-bar title · 29–32 px headline stat values.
 
-## Layout invariant (identical on every panel — do not move or restyle)
-- **Left sidebar**, 252px wide on the sunken surface, persistent on desktop. Brand lockup at the
-  top (jade gradient logomark + "FinStride" wordmark), then destinations grouped under small
-  uppercase section labels: *Overview* — Dashboard, Accounts, Transactions; *Manage* — Imports,
-  Categories. Settings sits pinned at the bottom behind a divider. Items are 40px rounded pills;
-  the active one has a jade-tinted fill, jade label and icon, a flush-left 3px jade accent rail,
-  and a filled (not outline) icon. Hover is a faint neutral wash.
-- **Top bar**, 72px on the base surface with a hairline underneath: current panel title with a
-  one-line descriptor beneath it (left); contextual controls like account/period selector and
-  global search (center/right); user menu at the far right — monogram avatar + name and email in
-  a bordered pill with a chevron.
-- **Bottom bar**, 30px on the sunken surface: green status dot + status label on the left, and a
-  right-aligned lock icon + "local data" reminder. Consistent even when minimal.
-- Only the **content region** between these bars changes per panel.
+## Layout invariant
+Frame 1440×900. Left sidebar 252 px sunken, 12 px inner gutter: brand lockup (30 px gradient logomark with three ascending dark bars + 17 px/700 wordmark), then "Vue d'ensemble" (Tableau de bord, Comptes, Transactions) and "Gestion" (Imports, Catégories); Paramètres pinned bottom behind a #1A212C divider. Items = 40 px pills (radius 20), 18 px icons, gap 11, padding 0 13; active = iris 12 % fill, iris text, filled icon, 3×22 px iris rail flush to the sidebar edge; hover = #12161F wash. Top bar 72 px base surface with #1A212C hairline: title 18/700 + 12 px secondary descriptor; right-aligned contextual controls (38 px pills) then user pill (44 px, bordered: 32 px iris-tint "CD" monogram + name/email + chevron). No bottom bar. Sidebar foot carries the privacy badge (10 px lock + « Données 100 % locales », disabled tone) under Paramètres. Sidebar is collapsible: a 26 px double-chevron control sits right of the lockup; collapsed = 76 px icon-only rail (40 px icon pills, same active treatment, lock kept at the foot) — shown on 04. Content region padding 24×28 (20 top on filter-bar panels). Auth screens: no rail; centered column on sunken bg with two radial glows (iris ~7 % top-left, violet ~7 % bottom-right), lockup + tagline + privacy line above the card, secondary link below.
 
-## Components (consistent across panels)
-Card (raised plate, 16px radius, hairline border, accent border on hover when clickable),
-metric/stat card (small uppercase label + large tabular value + caption, action button on the
-right), transaction row (merchant logo/monogram + description + category chip + signed amount),
-category chip (tinted pill with a small leading icon), amount text, segmented control (inset
-track, tinted active segment) for 2–3 fixed choices, form fields with the label **above** the
-control (not floating inside), chart container, encouraging empty state (tinted 64px glyph plate
-+ title + one-line reassurance + single CTA), loading skeleton matching the content shape,
-error+retry on the same silhouette as the empty state, inline error banner (tinted, with icon),
-primary/secondary/danger buttons, toast/snackbar.
+## Components
+As drawn (spacing tokens introduced): Card radius 16, border #242E3E, padding 20–24, top sheen linear-gradient(180deg, rgba(255,255,255,.025), transparent 46%); clickable hover = border rgba(139,140,249,.45). StatCard: uppercase 11 px label, 29 px tabular value, delta pill (22 px, semantic 12 % fill, triangle glyph rotated 0/180) + 11.5 px caption. SavingsRateCard: iris-tinted gradient Card with iris 35 % border; 96 px SVG ring (r 40, stroke 10, round cap) with centered % text. TransactionRow 52 px: 30 px monogram (radius 9) · 290 px two-line block (merchant 13 px + account 10.5 px disabled tone) · CategoryChip · date · 120 px signed amount right. Compact variant (dashboard Activité récente, 48 px): monogram · flexible merchant+account block · right column amount over date, no chip. CategoryChip: 22 px pill, hue 14 % fill + full-hue text + an 11 px leading category icon (single-path line glyph: house, bowl, car, star, refresh, cross, coin, up-arrow); uncategorized = dashed #3A4556 border, neutral. SegmentedControl: #0D1219 inset track radius 12, 3 px padding, active segment iris 14 % fill. FormField: label above (12.5/600 secondary), 42–44 px field on #0D1219 radius 12; helper/validation 11.5 px beneath; error border rgba(255,92,108,.55); read-only = dashed border on #0A0F15 with lock glyph. Select/Combobox: overlay popover radius 12–14, 32 px option rows, iris check on selected. DropZone: 1.5 px dashed radius 14, 38–46 px iris-tint glyph plate; drag-active = iris dashed border + iris 5–7 % fill. DataTable: 30 px uppercase 10.5 px sticky header, #1A212C row separators, 34–46 px rows, numeric columns right. ChartContainer: titled Card with legend column (34 px rows: 9 px swatch radius 3 · name · amount · %). Donut: SVG r 80 stroke 24 (212 px), 3 px gaps, center total. HorizontalBars 8 px radius 4. Sparkline 2 px iris polyline. AreaLine (savings evolution): iris 2.5 px stroke over 16 % iris fill, hairline #1A212C gridlines, 5 px current-point dot, month axis beneath. StackedBars (income vs expense): one 44 px column per month, income #4ADE80 above expense #FF5C6C with a 2 px gap, radius 6/2; month label + net beneath (net in semantic color); hover reveals an overlay-surface tooltip listing the month’s income and expense amounts. Toggle: 34×20 track (iris on / #1E2634 off) with explicit 16 px knob element. EmptyState: 64 px radius-20 iris-12 % glyph plate, 19/700 title, one reassuring line, single primary CTA. LoadingSkeleton: silhouette blocks #1E2634/#1A212C, whole-card opacity pulse 1.6 s. ErrorRetry: EmptyState silhouette, warning plate, bordered Réessayer. InlineBanner: tint 10 % + border 30–35 % + icon, radius 12. Button 38–46 px radius 12: primary iris gradient/#0E1030 with glow 0 8px 22px rgba(108,106,240,.3) (loading = 2 px spinner + label; disabled = #1E2634/#5A6579), secondary #232B38 border, danger red 14 % fill + red border, ghost text-only. Modal: overlay surface radius 20, scrim rgba(4,6,11,.62), shadow 0 24 60. Drawer unused in Phase 1. Toast: bottom-right overlay surface radius 14 + semantic leading disc. Toggle: 34×20 track, iris when on, #0E1030 knob. BrandLogo: monogram chip per palette above — never an image, never broken.
 
 ## Iconography & logos
-- One consistent modern outline icon family.
-- Show brand logos for known merchants/institutions; **fall back to a colored monogram chip**
-  (initials) when no logo exists. Never show a broken/empty image.
+Line icons, 18 px, 1.5 px stroke, round caps; active nav = filled variant of the same glyph. Set: dashboard 4-square, wallet card, twin arrows, download-to-tray, rotated-square tag, slider rows (settings), magnifier, chevrons, lock, plus, drag-handle dots, check, ⋯ overflow. No emoji anywhere. Institution/merchant logos are always monogram chips (see palette) — a deliberate Phase 1 decision instead of embedding third-party logos.
 
 ## Motion & accessibility
-- Restrained, purposeful motion: one orchestrated load reveal, smooth transitions, subtle
-  hover/press on desktop. No animation noise on data-dense views.
-- AA contrast; never encode meaning by color alone (pair income/expense color with sign/icon);
-  visible focus states; reduced-motion respected.
+Two keyframes only: spin (.8 s, button spinners) and shimmer (1.6 s opacity pulse, skeletons). Hovers are instant fills/border changes; no data-view animation. prefers-reduced-motion kills all animation. AA contrast on all text pairs; focus ring iris as specified; meaning always doubled (sign + color, icon + hue on chips, badge + lock glyph).
 
 ## Output expectation
-Desktop canvas (~1440×900). Show the full app shell (rail + top bar + bottom bar) with the
-panel rendered in the content region. Provide both **French and English** versions of the screen
-where text is prominent (at minimum the dashboard, auth, and transactions panels).
+Mockups live in one canvas document, frames named NN-Panel — variant (fr/en). French copy sizes every box; English renders in the same geometry. All values in this file are binding for the Flutter build.

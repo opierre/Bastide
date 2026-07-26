@@ -1,27 +1,13 @@
-# Panel: Login
+# 02 — Login
 
-A focused, welcoming entry screen. The fixed app shell may be minimal or hidden on auth screens
-(the rail/bars appear after login) — show a clean centered auth layout on the dark base surface.
+## Top bar (this panel)
+None. Auth exception: centered column on sunken #070910 with iris (top-left) and violet (bottom-right) radial glows at ~7 % opacity. Above the card: brand lockup (40 px logomark + 26 px wordmark), tagline « Votre argent, en clair. » / "Your money, clearly.", then lock glyph + privacy line « Local et privé — vos données ne quittent jamais cet ordinateur. »
 
-## Layout
-- Centered card (raised surface `#111620`, 20px radius, hairline border, generous padding) on the
-  sunken background, lit by two very low-opacity radial glows — jade top-left, violet
-  bottom-right — for atmosphere without decoration competing with the form.
-- Brand lockup (logomark + wordmark) and the privacy tagline sit **above** the card, so the card
-  holds only the task at hand. The "switch to register" link sits below it.
-- Fields: Email, Password (with show/hide). Primary button "Log in" (accent). Secondary link
-  "Create an account" → Register.
-- Inline error area for invalid credentials (use the expense-red semantic color, calm tone).
-- Loading state on the button while authenticating.
-
-## Content / copy
-- Encouraging one-line subtitle under the app name (e.g. "Your money, clearly.").
-- Localized: provide French and English versions (e.g. "Se connecter" / "Log in",
-  "Créer un compte" / "Create an account").
+## Content layout
+Card (416 px, radius 20, raised surface, padding 30) holds only the task: FormField Adresse e-mail; FormField Mot de passe with trailing show/hide eye; primary Button « Se connecter » (46 px, full width). Below the card: « Pas encore de compte ? Créer un compte » (iris link). Credential error renders as an InlineBanner (expense-red tint, calm copy « E-mail ou mot de passe incorrect. Vérifiez vos identifiants et réessayez. ») at the top of the card, plus red field borders on both fields.
 
 ## States to show
-1. Default empty. 2. Filled with a validation/credential error. 3. Loading.
+① empty (fr) — placeholder text in disabled tone. ② credential error (fr) — filled values, banner, red borders. ③ loading (fr) — filled, button shows spinner + « Connexion… ». ④ empty (en) — same geometry, English strings.
 
 ## Notes
-Open Sans; accent only on the primary action; clear focus rings; comfortable field sizing for
-desktop. This is the simplest screen — keep it elegant and uncluttered.
+Password dots at letter-spacing 2px. Button loading swaps label, never shrinks. French strings size the card; English reuses it unchanged.
