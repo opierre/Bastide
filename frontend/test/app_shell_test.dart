@@ -23,8 +23,19 @@ final _authenticatedOverrides = [
   accountsControllerProvider.overrideWith(() => FakeAccountsController()),
 ];
 
+/// The frame is specified at 1440×900 (docs/design/00 §Layout invariant), and
+/// the top bar's contextual controls are sized for it. Testing the chrome at
+/// flutter_test's default 800×600 would assert against a window size the design
+/// does not target.
+void _useDesignViewport(WidgetTester tester) {
+  tester.view.physicalSize = const Size(1440, 900);
+  tester.view.devicePixelRatio = 1.0;
+  addTearDown(tester.view.reset);
+}
+
 void main() {
   testWidgets('shell renders the fixed sidebar and top bar', (tester) async {
+    _useDesignViewport(tester);
     await tester.pumpWidget(
       ProviderScope(overrides: _authenticatedOverrides, child: const FinStrideApp()),
     );
@@ -38,6 +49,7 @@ void main() {
   testWidgets('the privacy badge sits at the sidebar foot, not in a bottom bar', (
     tester,
   ) async {
+    _useDesignViewport(tester);
     await tester.pumpWidget(
       ProviderScope(overrides: _authenticatedOverrides, child: const FinStrideApp()),
     );
@@ -50,6 +62,7 @@ void main() {
   testWidgets('collapsing the sidebar keeps the destinations and the lock', (
     tester,
   ) async {
+    _useDesignViewport(tester);
     await tester.pumpWidget(
       ProviderScope(overrides: _authenticatedOverrides, child: const FinStrideApp()),
     );
@@ -72,6 +85,7 @@ void main() {
   testWidgets('tapping a nav item swaps the content region, not the chrome', (
     tester,
   ) async {
+    _useDesignViewport(tester);
     await tester.pumpWidget(
       ProviderScope(overrides: _authenticatedOverrides, child: const FinStrideApp()),
     );
@@ -89,6 +103,7 @@ void main() {
   testWidgets('renders under fr without missing localized keys', (
     tester,
   ) async {
+    _useDesignViewport(tester);
     await tester.pumpWidget(
       ProviderScope(overrides: _authenticatedOverrides, child: const FinStrideApp()),
     );
@@ -102,6 +117,7 @@ void main() {
   testWidgets('renders under en without missing localized keys', (
     tester,
   ) async {
+    _useDesignViewport(tester);
     await tester.pumpWidget(
       ProviderScope(
         overrides: [

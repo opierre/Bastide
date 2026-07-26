@@ -7,9 +7,11 @@ import '../../../core/widgets/amount_text.dart';
 import '../../../core/widgets/app_card.dart';
 import '../../../core/widgets/app_chip.dart';
 import '../../../core/widgets/institution_avatar.dart';
+import '../../../core/widgets/primary_button.dart';
 import '../../../core/widgets/state_views.dart';
 import '../../../l10n/app_localizations.dart';
 import '../application/accounts_controller.dart';
+import '../application/accounts_search.dart';
 import '../domain/account.dart';
 import 'account_error_localizer.dart';
 import 'account_form.dart';
@@ -22,24 +24,49 @@ class AccountsScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context)!;
-    final accountsState = ref.watch(accountsControllerProvider);
+    final filtered = ref.watch(filteredAccountsProvider);
+    final isSearching = ref.watch(accountsQueryProvider).trim().isNotEmpty;
 
     return Padding(
       key: const Key('screen-accounts'),
-      padding: const EdgeInsets.all(AppSpacing.lg + AppSpacing.xs),
-      child: switch (accountsState) {
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.contentX,
+        vertical: AppSpacing.contentY,
+      ),
+      child: switch (filtered) {
+        // An empty result while searching is not an empty account list — the
+        // summary stays put so the user keeps their bearings, and only the grid
+        // reports the miss.
+        AsyncData(:final value) when value.isEmpty && isSearching => Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            const _SummaryCard(),
+            const SizedBox(height: AppSpacing.gridGap),
+            Expanded(
+              child: Center(
+                child: Text(
+                  l10n.accountsSearchEmpty,
+                  key: const Key('accountsSearchEmpty'),
+                  style: Theme.of(
+                    context,
+                  ).textTheme.bodyLarge?.copyWith(color: AppColors.textSecondary),
+                ),
+              ),
+            ),
+          ],
+        ),
         AsyncData(:final value) when value.isEmpty => _EmptyState(
-          onAdd: () => _openForm(context),
+          onAdd: () => showAccountForm(context),
         ),
         AsyncData(:final value) => Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            _SummaryHeader(accounts: value, onAdd: () => _openForm(context)),
-            const SizedBox(height: AppSpacing.lg),
+            const _SummaryCard(),
+            const SizedBox(height: AppSpacing.gridGap),
             Expanded(
-              child: _AccountsList(
+              child: _AccountsGrid(
                 accounts: value,
-                onEdit: (account) => _openForm(context, initial: account),
+                onEdit: (account) => showAccountForm(context, initial: account),
                 onArchive: (account) => _confirmArchive(context, ref, l10n, account),
               ),
             ),
@@ -59,10 +86,6 @@ class AccountsScreen extends ConsumerWidget {
         ),
       },
     );
-  }
-
-  void _openForm(BuildContext context, {Account? initial}) {
-    showDialog<void>(context: context, builder: (_) => AccountForm(initial: initial));
   }
 
   Future<void> _confirmArchive(
@@ -102,25 +125,35 @@ class AccountsScreen extends ConsumerWidget {
   }
 }
 
-/// Total balance across the listed accounts, plus the add-account action.
+/// Total balance across the accounts, with the account count, currency and the
+/// timestamp the balances were last derived at.
+///
+/// It reads the *unfiltered* list: a total that changed as you typed in the
+/// search box would be a different number than the one the label promises.
 /// Summing is safe in Phase 1 because every account shares the user's single
 /// currency (see the multi-currency skill); this needs FX before Phase 4.
-class _SummaryHeader extends StatelessWidget {
-  const _SummaryHeader({required this.accounts, required this.onAdd});
-
-  final List<Account> accounts;
-  final VoidCallback onAdd;
+class _SummaryCard extends ConsumerWidget {
+  const _SummaryCard();
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context)!;
     final textTheme = Theme.of(context).textTheme;
+    final accounts = ref.watch(accountsControllerProvider).value ?? const <Account>[];
+    if (accounts.isEmpty) return const SizedBox.shrink();
+
     final total = accounts.fold<int>(0, (sum, account) => sum + account.balanceMinor);
+    final currency = accounts.first.currency;
+    // The backend has no "balances recalculated at" field yet; the newest
+    // account mutation is the closest honest stand-in for it.
+    final asOf = accounts
+        .map((account) => account.updatedAt)
+        .reduce((a, b) => a.isAfter(b) ? a : b);
 
     return AppCard(
-      padding: const EdgeInsets.all(AppSpacing.lg),
+      padding: const EdgeInsets.all(AppSpacing.cardPaddingWide),
       child: Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Expanded(
             child: Column(
@@ -128,32 +161,35 @@ class _SummaryHeader extends StatelessWidget {
               children: [
                 Text(
                   l10n.accountsTotalBalanceLabel.toUpperCase(),
-                  style: textTheme.labelSmall?.copyWith(color: AppColors.textSecondary),
+                  style: AppTextStyles.sectionLabel,
                 ),
-                const SizedBox(height: AppSpacing.sm),
+                const SizedBox(height: AppSpacing.sm + 2),
                 AmountText(
                   key: const Key('accountsTotalBalance'),
                   amountMinor: total,
-                  currency: accounts.first.currency,
+                  currency: currency,
                   // A total is a standing figure, not an inflow or an outflow,
                   // so the income/expense colors would misread here.
                   colorize: false,
-                  style: textTheme.headlineMedium!,
-                ),
-                const SizedBox(height: AppSpacing.xs),
-                Text(
-                  l10n.accountsActiveCount(accounts.length),
-                  style: textTheme.bodySmall?.copyWith(color: AppColors.textSecondary),
+                  style: textTheme.displayLarge!,
                 ),
               ],
             ),
           ),
           const SizedBox(width: AppSpacing.md),
-          FilledButton.icon(
-            key: const Key('addAccountButton'),
-            onPressed: onAdd,
-            icon: const Icon(Icons.add_rounded),
-            label: Text(l10n.accountsAddButton),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Text(
+                '${l10n.accountsActiveCount(accounts.length)} · $currency',
+                style: textTheme.bodySmall?.copyWith(color: AppColors.textSecondary),
+              ),
+              const SizedBox(height: AppSpacing.xs),
+              Text(
+                l10n.accountsBalancesAsOf(asOf),
+                style: AppTextStyles.helper.copyWith(color: AppColors.textDisabled),
+              ),
+            ],
           ),
         ],
       ),
@@ -161,8 +197,8 @@ class _SummaryHeader extends StatelessWidget {
   }
 }
 
-class _AccountsList extends StatelessWidget {
-  const _AccountsList({
+class _AccountsGrid extends StatelessWidget {
+  const _AccountsGrid({
     required this.accounts,
     required this.onEdit,
     required this.onArchive,
@@ -175,10 +211,18 @@ class _AccountsList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    return ListView.separated(
+
+    return GridView.builder(
       key: const Key('accountsList'),
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 2,
+        mainAxisSpacing: AppSpacing.gridGap,
+        crossAxisSpacing: AppSpacing.gridGap,
+        // Two lines of identity above a footer row; fixed so every card in the
+        // grid is the same height regardless of how long its name runs.
+        mainAxisExtent: 132,
+      ),
       itemCount: accounts.length,
-      separatorBuilder: (context, index) => const SizedBox(height: AppSpacing.sm + AppSpacing.xs),
       itemBuilder: (context, index) {
         final account = accounts[index];
         return _AccountCard(
@@ -215,81 +259,88 @@ class _AccountCard extends StatelessWidget {
     AccountType.other => l10n.accountTypeOther,
   };
 
-  IconData _typeIcon(AccountType type) => switch (type) {
-    AccountType.checking => Icons.account_balance_wallet_outlined,
-    AccountType.savings => Icons.savings_outlined,
-    AccountType.credit => Icons.credit_card_rounded,
-    AccountType.cash => Icons.payments_outlined,
-    AccountType.other => Icons.more_horiz_rounded,
-  };
-
   @override
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
 
     return AppCard(
       key: Key('accountCard-${account.id}'),
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppSpacing.md,
-        vertical: AppSpacing.md - 2,
-      ),
+      padding: const EdgeInsets.all(AppSpacing.cardPadding),
       onTap: onEdit,
-      child: Row(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          InstitutionAvatar(name: account.institution, size: 44),
-          const SizedBox(width: AppSpacing.md),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  account.name,
-                  style: textTheme.titleMedium,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                const SizedBox(height: AppSpacing.xs + 2),
-                Row(
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              InstitutionAvatar(name: account.institution, size: 40),
+              const SizedBox(width: AppSpacing.sm + AppSpacing.xs),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    AppChip(
-                      label: _typeLabel(account.type),
-                      icon: _typeIcon(account.type),
+                    Text(
+                      account.name,
+                      style: textTheme.titleMedium,
+                      overflow: TextOverflow.ellipsis,
                     ),
-                    const SizedBox(width: AppSpacing.sm),
-                    Flexible(
-                      child: Text(
-                        account.institution,
-                        style: textTheme.bodySmall?.copyWith(color: AppColors.textSecondary),
-                        overflow: TextOverflow.ellipsis,
+                    const SizedBox(height: 2),
+                    Text(
+                      account.institution,
+                      style: textTheme.bodySmall?.copyWith(
+                        color: AppColors.textSecondary,
                       ),
+                      overflow: TextOverflow.ellipsis,
                     ),
                   ],
                 ),
-              ],
-            ),
-          ),
-          const SizedBox(width: AppSpacing.md),
-          AmountText(
-            amountMinor: account.balanceMinor,
-            currency: account.currency,
-            style: tabularNumberStyle(textTheme.titleMedium!),
-          ),
-          const SizedBox(width: AppSpacing.xs),
-          PopupMenuButton<_AccountAction>(
-            key: Key('accountMenu-${account.id}'),
-            icon: const Icon(Icons.more_horiz_rounded, size: 20),
-            position: PopupMenuPosition.under,
-            onSelected: (action) => switch (action) {
-              _AccountAction.edit => onEdit(),
-              _AccountAction.archive => onArchive(),
-            },
-            itemBuilder: (context) => [
-              PopupMenuItem(
-                value: _AccountAction.edit,
-                child: _MenuRow(icon: Icons.edit_outlined, label: l10n.accountEdit),
               ),
-              PopupMenuItem(
-                value: _AccountAction.archive,
-                child: _MenuRow(icon: Icons.inventory_2_outlined, label: l10n.accountArchive),
+              PopupMenuButton<_AccountAction>(
+                key: Key('accountMenu-${account.id}'),
+                icon: const Icon(Icons.more_horiz_rounded, size: 18),
+                position: PopupMenuPosition.under,
+                // Archive, never delete: an account's transactions are history,
+                // and deleting it would take them with it.
+                onSelected: (action) => switch (action) {
+                  _AccountAction.edit => onEdit(),
+                  _AccountAction.archive => onArchive(),
+                },
+                itemBuilder: (context) => [
+                  PopupMenuItem(
+                    value: _AccountAction.edit,
+                    child: _MenuRow(icon: Icons.edit_outlined, label: l10n.accountEdit),
+                  ),
+                  PopupMenuItem(
+                    value: _AccountAction.archive,
+                    child: _MenuRow(
+                      icon: Icons.inventory_2_outlined,
+                      label: l10n.accountArchive,
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+          const Spacer(),
+          Row(
+            children: [
+              AppChip(label: _typeLabel(account.type)),
+              const SizedBox(width: AppSpacing.sm),
+              // The balance is this card's one data point, so it carries the
+              // sign colors — unlike the summary total, which stays neutral.
+              // It scales down rather than wrapping or clipping: a balance that
+              // loses digits is worse than one rendered a point smaller.
+              Expanded(
+                child: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  alignment: Alignment.centerRight,
+                  child: AmountText(
+                    amountMinor: account.balanceMinor,
+                    currency: account.currency,
+                    showPositiveSign: true,
+                    style: tabularNumberStyle(textTheme.headlineLarge!),
+                  ),
+                ),
               ),
             ],
           ),
@@ -326,14 +377,15 @@ class _EmptyState extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     return EmptyStateView(
-      icon: Icons.account_balance_outlined,
+      icon: Icons.account_balance_wallet_outlined,
       title: l10n.accountsEmptyTitle,
       message: l10n.accountsEmptyBody,
-      action: FilledButton.icon(
+      action: PrimaryButton(
         key: const Key('emptyStateAddAccountButton'),
+        label: l10n.accountsAddButton,
+        icon: Icons.add_rounded,
+        height: 44,
         onPressed: onAdd,
-        icon: const Icon(Icons.add_rounded),
-        label: Text(l10n.accountsAddButton),
       ),
     );
   }

@@ -270,6 +270,27 @@ class AppLocalizationsEn extends AppLocalizations {
   String get accountsAddButton => 'Add account';
 
   @override
+  String get accountsSearchHint => 'Search…';
+
+  @override
+  String get accountsSearchEmpty => 'No account matches your search.';
+
+  @override
+  String accountsBalancesAsOf(DateTime date) {
+    final intl.DateFormat dateDateFormat = intl.DateFormat.yMd(localeName);
+    final String dateString = dateDateFormat.format(date);
+
+    return 'Balances as of $dateString';
+  }
+
+  @override
+  String get accountLogoRecognized => 'Logo recognized';
+
+  @override
+  String get accountCurrencyNote =>
+      'The currency comes from your profile and applies to all your accounts.';
+
+  @override
   String get accountsTotalBalanceLabel => 'Total balance';
 
   @override

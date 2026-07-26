@@ -602,6 +602,36 @@ abstract class AppLocalizations {
   /// **'Ajouter un compte'**
   String get accountsAddButton;
 
+  /// Placeholder in the accounts search pill in the top bar.
+  ///
+  /// In fr, this message translates to:
+  /// **'Rechercher…'**
+  String get accountsSearchHint;
+
+  /// Shown in place of the account grid when the search filters everything out.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucun compte ne correspond à votre recherche.'**
+  String get accountsSearchEmpty;
+
+  /// Timestamp under the summary meta saying when the balances were last recalculated.
+  ///
+  /// In fr, this message translates to:
+  /// **'Soldes au {date}'**
+  String accountsBalancesAsOf(DateTime date);
+
+  /// Confirmation shown beside the institution monogram once the typed name is one we have a pinned color for.
+  ///
+  /// In fr, this message translates to:
+  /// **'Logo reconnu'**
+  String get accountLogoRecognized;
+
+  /// Note under the read-only currency field in the account form.
+  ///
+  /// In fr, this message translates to:
+  /// **'La devise est celle de votre profil et s\'applique à tous les comptes.'**
+  String get accountCurrencyNote;
+
   /// Label on the summary card above the accounts list, over the sum of all account balances.
   ///
   /// In fr, this message translates to:
@@ -695,7 +725,7 @@ abstract class AppLocalizations {
   /// Account type option: checking.
   ///
   /// In fr, this message translates to:
-  /// **'Compte courant'**
+  /// **'Courant'**
   String get accountTypeChecking;
 
   /// Account type option: savings.
@@ -707,7 +737,7 @@ abstract class AppLocalizations {
   /// Account type option: credit.
   ///
   /// In fr, this message translates to:
-  /// **'Carte de crédit'**
+  /// **'Crédit'**
   String get accountTypeCredit;
 
   /// Account type option: cash.

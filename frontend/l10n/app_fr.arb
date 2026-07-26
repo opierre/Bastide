@@ -336,6 +336,32 @@
   "@accountsAddButton": {
     "description": "Button label to open the create-account form."
   },
+  "accountsSearchHint": "Rechercher…",
+  "@accountsSearchHint": {
+    "description": "Placeholder in the accounts search pill in the top bar."
+  },
+  "accountsSearchEmpty": "Aucun compte ne correspond à votre recherche.",
+  "@accountsSearchEmpty": {
+    "description": "Shown in place of the account grid when the search filters everything out."
+  },
+  "accountsBalancesAsOf": "Soldes au {date}",
+  "@accountsBalancesAsOf": {
+    "description": "Timestamp under the summary meta saying when the balances were last recalculated.",
+    "placeholders": {
+      "date": {
+        "type": "DateTime",
+        "format": "yMd"
+      }
+    }
+  },
+  "accountLogoRecognized": "Logo reconnu",
+  "@accountLogoRecognized": {
+    "description": "Confirmation shown beside the institution monogram once the typed name is one we have a pinned color for."
+  },
+  "accountCurrencyNote": "La devise est celle de votre profil et s'applique à tous les comptes.",
+  "@accountCurrencyNote": {
+    "description": "Note under the read-only currency field in the account form."
+  },
   "accountsTotalBalanceLabel": "Solde total",
   "@accountsTotalBalanceLabel": {
     "description": "Label on the summary card above the accounts list, over the sum of all account balances."
@@ -401,7 +427,7 @@
   "@accountTypeLabel": {
     "description": "Label for the account type selector on the account form."
   },
-  "accountTypeChecking": "Compte courant",
+  "accountTypeChecking": "Courant",
   "@accountTypeChecking": {
     "description": "Account type option: checking."
   },
@@ -409,7 +435,7 @@
   "@accountTypeSavings": {
     "description": "Account type option: savings."
   },
-  "accountTypeCredit": "Carte de crédit",
+  "accountTypeCredit": "Crédit",
   "@accountTypeCredit": {
     "description": "Account type option: credit."
   },

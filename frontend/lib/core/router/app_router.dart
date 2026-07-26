@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../features/accounts/presentation/accounts_screen.dart';
+import '../../features/accounts/presentation/accounts_top_bar_actions.dart';
 import '../../features/auth/application/auth_controller.dart';
 import '../../features/auth/presentation/login_screen.dart';
 import '../../features/auth/presentation/register_screen.dart';
@@ -21,6 +22,17 @@ class _AuthRefreshListenable extends ChangeNotifier {
     ref.listen(authControllerProvider, (_, _) => notifyListeners());
   }
 }
+
+/// The contextual controls each panel contributes to the top bar.
+///
+/// Resolved from the route here rather than pushed up by the screen: the top
+/// bar is built above the content region, so a child cannot fill a parent's
+/// slot in the same frame. Each panel's controls are their own widget and watch
+/// whatever providers they need, which keeps the shell ignorant of features.
+TopBarActionsBuilder? _topBarActions(String path) => switch (path) {
+  '/accounts' => (context) => const [AccountsTopBarActions()],
+  _ => null,
+};
 
 final appRouterProvider = Provider<GoRouter>((ref) {
   final authRefresh = _AuthRefreshListenable(ref);
@@ -49,6 +61,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           return AppShell(
             currentPath: state.matchedLocation,
             onNavigate: (path) => context.go(path),
+            actionsBuilder: _topBarActions(state.matchedLocation),
             child: child,
           );
         },

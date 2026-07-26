@@ -85,4 +85,50 @@ void main() {
 
     expect(controller.updateCalls, hasLength(1));
   });
+
+  testWidgets('the currency is shown as a settled value, not an editable field', (
+    tester,
+  ) async {
+    await tester.pumpWidget(_wrap(controller: FakeAccountsController()));
+    await tester.pumpAndSettle();
+
+    // A read-only plate, not a disabled input: there is no text field to type
+    // into at all, and the note beneath carries why.
+    expect(find.byKey(const Key('accountCurrencyField')), findsOneWidget);
+    expect(
+      find.descendant(
+        of: find.byKey(const Key('accountCurrencyField')),
+        matching: find.byType(EditableText),
+      ),
+      findsNothing,
+    );
+    expect(find.text('EUR'), findsOneWidget);
+    expect(
+      find.text("La devise est celle de votre profil et s'applique à tous les comptes."),
+      findsOneWidget,
+    );
+  });
+
+  testWidgets('the institution preview confirms a recognized name as it is typed', (
+    tester,
+  ) async {
+    await tester.pumpWidget(_wrap(controller: FakeAccountsController()));
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(const Key('accountLogoRecognized')), findsNothing);
+
+    await tester.enterText(find.byKey(const Key('accountInstitutionField')), 'Revolut');
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(const Key('accountLogoRecognized')), findsOneWidget);
+
+    // An unknown institution is not an error — it just doesn't claim a match.
+    await tester.enterText(
+      find.byKey(const Key('accountInstitutionField')),
+      'Banque de Quelque Part',
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(const Key('accountLogoRecognized')), findsNothing);
+  });
 }

@@ -512,6 +512,9 @@ class _TopBar extends StatelessWidget {
               ],
             ),
           ),
+          // Actions size naturally and the title takes what's left: making them
+          // flexible too would have the two split the bar evenly, squeezing
+          // fixed-width controls that have a designed size.
           for (final action in actions) ...[
             const SizedBox(width: AppSpacing.sm + AppSpacing.xs),
             action,

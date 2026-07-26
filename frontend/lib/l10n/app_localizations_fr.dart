@@ -270,6 +270,28 @@ class AppLocalizationsFr extends AppLocalizations {
   String get accountsAddButton => 'Ajouter un compte';
 
   @override
+  String get accountsSearchHint => 'Rechercher…';
+
+  @override
+  String get accountsSearchEmpty =>
+      'Aucun compte ne correspond à votre recherche.';
+
+  @override
+  String accountsBalancesAsOf(DateTime date) {
+    final intl.DateFormat dateDateFormat = intl.DateFormat.yMd(localeName);
+    final String dateString = dateDateFormat.format(date);
+
+    return 'Soldes au $dateString';
+  }
+
+  @override
+  String get accountLogoRecognized => 'Logo reconnu';
+
+  @override
+  String get accountCurrencyNote =>
+      'La devise est celle de votre profil et s\'applique à tous les comptes.';
+
+  @override
   String get accountsTotalBalanceLabel => 'Solde total';
 
   @override
@@ -326,13 +348,13 @@ class AppLocalizationsFr extends AppLocalizations {
   String get accountTypeLabel => 'Type';
 
   @override
-  String get accountTypeChecking => 'Compte courant';
+  String get accountTypeChecking => 'Courant';
 
   @override
   String get accountTypeSavings => 'Épargne';
 
   @override
-  String get accountTypeCredit => 'Carte de crédit';
+  String get accountTypeCredit => 'Crédit';
 
   @override
   String get accountTypeCash => 'Espèces';
