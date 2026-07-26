@@ -85,7 +85,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
             ),
             if (authState.hasError) ...[
               const SizedBox(height: AppSpacing.md),
-              InlineErrorBanner(
+              InlineBanner(
                 key: const Key('loginErrorText'),
                 message: localizeAuthError(l10n, authState.error),
               ),

@@ -24,9 +24,7 @@ final _authenticatedOverrides = [
 ];
 
 void main() {
-  testWidgets('shell renders the fixed nav, top and bottom bars', (
-    tester,
-  ) async {
+  testWidgets('shell renders the fixed sidebar and top bar', (tester) async {
     await tester.pumpWidget(
       ProviderScope(overrides: _authenticatedOverrides, child: const FinStrideApp()),
     );
@@ -34,8 +32,41 @@ void main() {
 
     expect(find.byKey(const Key('appNavRail')), findsOneWidget);
     expect(find.byKey(const Key('appTopBar')), findsOneWidget);
-    expect(find.byKey(const Key('appBottomBar')), findsOneWidget);
     expect(find.byKey(const Key('screen-dashboard')), findsOneWidget);
+  });
+
+  testWidgets('the privacy badge sits at the sidebar foot, not in a bottom bar', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      ProviderScope(overrides: _authenticatedOverrides, child: const FinStrideApp()),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(const Key('appBottomBar')), findsNothing);
+    expect(find.byKey(const Key('sidebarPrivacyBadge')), findsOneWidget);
+  });
+
+  testWidgets('collapsing the sidebar keeps the destinations and the lock', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      ProviderScope(overrides: _authenticatedOverrides, child: const FinStrideApp()),
+    );
+    await tester.pumpAndSettle();
+
+    double railWidth() => tester.getSize(find.byKey(const Key('appNavRail'))).width;
+    expect(railWidth(), 252);
+
+    await tester.tap(find.byKey(const Key('sidebarToggleButton')));
+    await tester.pumpAndSettle();
+
+    expect(railWidth(), 76);
+    // The label is gone but the destination itself is not — the collapsed rail
+    // is icon-only, never a shorter menu.
+    expect(find.text('Comptes'), findsNothing);
+    expect(find.byIcon(Icons.account_balance_wallet_outlined), findsOneWidget);
+    expect(find.byIcon(Icons.lock_outline_rounded), findsOneWidget);
   });
 
   testWidgets('tapping a nav item swaps the content region, not the chrome', (
@@ -53,7 +84,6 @@ void main() {
     expect(find.byKey(const Key('screen-dashboard')), findsNothing);
     expect(find.byKey(const Key('appNavRail')), findsOneWidget);
     expect(find.byKey(const Key('appTopBar')), findsOneWidget);
-    expect(find.byKey(const Key('appBottomBar')), findsOneWidget);
   });
 
   testWidgets('renders under fr without missing localized keys', (

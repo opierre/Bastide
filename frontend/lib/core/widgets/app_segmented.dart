@@ -72,23 +72,23 @@ class _Segment extends StatelessWidget {
       child: InkWell(
         onTap: onTap,
         borderRadius: BorderRadius.circular(AppRadii.sm + 1),
-        child: AnimatedContainer(
-          duration: AppMotion.fast,
-          curve: AppMotion.curve,
-          height: 36,
+        // Selection is an instant fill swap — the spec permits no transition
+        // here, and a 120ms slide would draw the eye to the control rather than
+        // to what it changed.
+        child: Container(
+          height: 34,
           alignment: Alignment.center,
           decoration: BoxDecoration(
-            color: selected ? AppColors.brandAccentSoft : Colors.transparent,
+            // Fill only: a border on the active segment reads as a second
+            // control nested inside the track.
+            color: selected ? const Color(0x248B8CF9) : Colors.transparent,
             borderRadius: BorderRadius.circular(AppRadii.sm + 1),
-            border: Border.all(
-              color: selected ? AppColors.brandAccent : Colors.transparent,
-            ),
           ),
           child: Text(
             label,
             overflow: TextOverflow.ellipsis,
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: selected ? AppColors.brandAccent : AppColors.textSecondary,
+              color: selected ? AppColors.iris : AppColors.textSecondary,
               fontWeight: selected ? FontWeight.w600 : FontWeight.w400,
             ),
           ),

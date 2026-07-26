@@ -1,14 +1,18 @@
 ---
 name: design-system
-description: Use for any visual/UI work in the finstride — building screens, styling, theming, layout, icons, brand logos, or writing design-tool prompts. Defines the dark-first palette, Open Sans typography, the fixed navbar/top bar/bottom bar invariant, brand-logo handling with monogram fallback, the component inventory, and the encouraging-UX direction. Builds on the general frontend-design skill for craft; this skill supplies the project-specific tokens and invariants.
+description: Use for any visual/UI work in the finstride — building screens, styling, theming, layout, icons, brand logos, or writing design-tool prompts. Summarises the binding spec in docs/design/00-shared-design-block.md — the dark-first iris palette, Manrope/Space Grotesk typography, the fixed sidebar/top bar invariant (no bottom bar), monogram-only brand logos, the component inventory, and the encouraging-UX direction. Builds on the general frontend-design skill for craft; this skill supplies the project-specific tokens and invariants.
 ---
 
 # Design System
 
 The single source of visual truth for every panel. For general design *craft* (avoiding generic
 AI aesthetics, typography pairing, motion restraint), also follow the **frontend-design** skill.
-This skill supplies the project-specific, non-negotiable tokens and invariants. See
-`PROJECT.md` §9.
+This skill supplies the project-specific, non-negotiable tokens and invariants.
+
+> **`docs/design/00-shared-design-block.md` is binding.** It transcribes the drawn mockup and
+> outranks this file and `PROJECT.md` §9 wherever they disagree. Panel specs live in
+> `docs/design/02-*.md` … `09-*.md`; each is self-contained when paired with `00`. This skill
+> summarises `00` — if you are about to write UI code, read `00` itself.
 
 ## Direction
 
@@ -22,69 +26,98 @@ tokens are theme-keyed from the start).
 Define once as theme constants (`core/theme/tokens.dart` + `core/theme/app_theme.dart`); never
 hardcode hex in widgets. The dark palette (AA-verified against its intended surface):
 
-- **Surfaces**, deepest to highest: sunken `#070910` (app chrome — sidebar, bottom bar), base
-  `#0A0D12` (content region), raised `#111620` (cards, panels), overlay `#19202B` (dialogs,
-  menus), hover `#1E2634` (pointer wash), field `#0D1219` (inset wells: inputs, read-only slots).
-- **Text**: primary `#EDF1F7`, secondary `#97A3B6`, disabled `#5A6579`.
-- **Brand/primary accent**: jade `#2FE0A6`, signalling growth/savings. Deep end `#14B989`
-  (gradients, pressed states); soft `#2FE0A6` @ 12% for selected nav pills and tinted chips.
-- **Secondary accent**: violet `#8B7CF6` — charts, category hues, decorative pairing. Never used
-  for money, so it can't be confused with the sign rule.
+- **Surfaces**, deepest to highest: sunken `#070910` (sidebar, auth page), base `#0A0D12` (content
+  region), raised `#111620` (cards, panels), overlay `#19202B` (modals, popovers, toasts), hover
+  `#1E2634` (pointer wash, inset plates, toggle tracks), field `#0D1219` (inset wells: inputs,
+  read-only slots). Row hover *inside* a raised card is `#151B26`; sidebar nav hover is `#12161F`.
+- **Text**: primary `#EDF1F7`, secondary `#97A3B6`, disabled/placeholder `#5A6579`.
+- **Brand/primary accent**: iris violet `#8B8CF9`, deep end `#6C6AF0`. Primary buttons and the
+  logomark use `linear-gradient(135deg, #8B8CF9, #6C6AF0)` with ink `#0E1030` and a glow
+  `0 8px 22px rgba(108,106,240,.3)`; soft fill = iris @ 12–16%.
+  **Iris is the accent role only** — never a category hue, never money. Cyan `#4FD1E8` is the
+  leading chart/category hue.
 - **Semantic**: income/positive `#4ADE80`, expense/negative `#FF5C6C`, warning `#FFB84D`, info
-  `#5AA9FF`. Positive green is deliberately yellower than the brand jade so a balance never reads
-  as a brand element.
-- **Lines/borders**: structural `#232B38`, subtle `#1A212C` (separators inside a card).
-  **Focus ring**: brand accent at full opacity.
-- Money color rule: income positive uses the positive green, expenses the negative red — applied
-  consistently on every panel (dashboard, transactions, categories). Neutral figures (a total, a
-  form value) opt out of colorization rather than being tinted green by default.
+  `#5AA9FF`. Tinted fills = the color at 10–14% with a 30–55% border.
+- **Category hues** (pinned, not derived — a hue means the same thing in the donut, the legend,
+  and the chip): Logement `#4FD1E8` · Alimentation `#5AA9FF` · Transport `#2DD4BF` · Loisirs
+  `#F472B6` · Abonnements `#FFB84D` · Santé `#A3E635` · Autres/Épargne `#64748B` · Revenus
+  `#4ADE80`.
+- **Lines/borders**: structural `#232B38`, subtle `#1A212C` (separators inside a card), card
+  outline `#242E3E`, dashed read-only/uncategorized `#3A4556`.
+  **Focus ring**: 1px `#8B8CF9` border + `0 0 0 3px rgba(139,140,249,.15)`.
+- Money color rule: income green with `+`, expense red with `−` (U+2212, *not* an ASCII hyphen).
+  Neutral figures (a total, a balance in a form, a form value) stay `#EDF1F7` and opt out of
+  colorization rather than being tinted by default. Sign or icon always accompanies color.
+- **Texture**: every frame carries a film-grain overlay (white @ 5%, 140px tile) above the
+  content and a 1px luminous hairline across the top edge,
+  `linear-gradient(90deg, transparent, rgba(139,140,249,.55), transparent)`.
 
 **One coherent palette across all panels.** Same semantic colors mean the same thing everywhere.
 
-Non-color tokens live alongside: spacing (4/8/16/24/32/48), radii (sm 8, md 12, lg 16, xl 20,
-pill), shadows (card, overlay), motion (fast 120ms, base 200ms, slow 320ms, `easeOutCubic`), and
-chrome dimensions (sidebar 252, top bar 72, bottom bar 30).
+Non-color tokens live alongside: spacing (the 4/8/16/24/32/48 ramp, plus the mockup's measured
+gaps — nav gap 11, nav inset 13, sidebar gutter 12, grid gap 18, card padding 20–24, content
+region 24×28), radii (sm 8, monogram 9, md 12, inset/toast 14, card 16, modal/plate 20, nav pill
+20, pill), shadows (card, modal `0 24 60`), motion (**two keyframes only** — spin 0.8s for button
+spinners, shimmer 1.6s for skeletons), and chrome dimensions (sidebar 252 / collapsed 76, top bar
+72).
 
 ## Typography
 
-- **Open Sans** (Google Fonts) as the UI family — clean, highly readable, multilingual (handles
-  French accents). Use weights deliberately: 400 body, 600 emphasis, 700 headings.
-- Numbers (amounts, balances) use **tabular figures** so columns align.
+- **Manrope** as the UI family — 400 body, 600 emphasis/labels, 700 headings.
+- **Space Grotesk 700** for the display role: wordmark, panel titles, headline amounts, ring
+  values. The split is by *role*, not size — a 14px card title stays Manrope, an 18px panel title
+  is Space Grotesk.
+- Scale: 10px section labels (uppercase, +1.3 tracking) · 11–11.5 captions/badges · 12–12.5
+  secondary · 13–13.5 body/rows · 14 card titles · 16–19 modal/empty-state titles · 18 top-bar
+  title · 29–32 headline stat values.
+- Numbers (amounts, balances) use **tabular figures** and are right-aligned in columns and signed.
 - Respect French text length: French labels run ~15–20% longer than English; never size layouts
   to English-only.
 
 ## Icons & brand logos
 
-- **Modern icon set**, single consistent family (outline style), used for nav, categories,
-  actions. Category icons map to the system categories.
-- **Brand logos**: where a transaction merchant or an account institution maps to a known brand,
-  show its logo (sourced via a permissive logo service or a bundled curated set). **Fallback**:
-  when no logo exists, render a generated **monogram chip** (first letters on a color derived
-  deterministically from the name). Never show a broken/empty image.
-- Logos are decorative enhancements — never required for function, and never block rendering on a
-  network fetch (cache locally; degrade to monogram offline).
+- **Line icons**, 18px, 1.5px stroke, round caps, single consistent family; active nav uses the
+  **filled** variant of the same glyph. Set: dashboard 4-square, wallet card, twin arrows,
+  download-to-tray, rotated-square tag, slider rows (settings), magnifier, chevrons, lock, plus,
+  drag-handle dots, check, ⋯ overflow. Category chips carry an 11px leading glyph (house, bowl,
+  car, star, refresh, cross, coin, up-arrow). **No emoji anywhere.**
+- **Brand logos are always monogram chips** — a deliberate Phase 1 decision instead of embedding
+  third-party logos. Never an image, never broken. Hues are **pinned per brand** (BNP `#2FB574`,
+  Crédit Agricole `#0AA396`, Revolut `#5AA9FF`, Caisse Locale `#4FD1E8`, Carrefour `#3B82F6`,
+  Novatech `#6C6AF0`) at 16% alpha background with a full-strength letter; an unrecognised name
+  renders `?` on `#1E2634`/`#97A3B6`. Pinned rather than hashed: an institution that changes color
+  between launches looks like a bug.
+- `InstitutionAvatar` stays the named seam a real logo image would drop into later.
 
 ## Fixed chrome — the layout invariant (non-negotiable)
 
-The **navbar, top bar, and bottom bar keep identical position and behaviour on every panel.**
-Implement once as a shared shell scaffold (`core/`); feature screens render into the content
-region only and never alter the chrome.
+The **sidebar and top bar keep identical position and behaviour on every panel.** Implement once
+as a shared shell scaffold (`core/`); feature screens render into the content region only and
+never alter the chrome. **There is no bottom bar** — the privacy reminder it used to carry now
+lives at the sidebar foot.
 
-- **Left sidebar (primary navigation)**, 252px on the sunken surface: brand lockup at the top,
-  then grouped destinations under small uppercase section labels — *Overview* (Dashboard,
-  Accounts, Transactions), *Manage* (Imports, Categories), and later Goals/Mortgages/Taxes.
-  Settings is pinned to the bottom behind a divider so the primary items keep their vertical
-  position as the app grows. Items are 40px rounded pills; the active one gets a brand-tinted
-  fill, brand-colored label, a flush-left 3px accent rail, and the filled variant of its icon
-  (so selection isn't carried by color alone). Hover is a neutral wash.
-- **Top bar**, 72px: current panel title with a one-line panel descriptor beneath it (left),
-  account/period selector and global search where relevant (center/right), user/profile menu at
-  the far right — monogram avatar + name/email, opening the session menu.
-- **Bottom bar**, 30px: a status dot and label on the left (sync/import status, app state), and a
-  right-aligned local-data reminder. Reserved and consistent even where minimal.
+- **Left sidebar (primary navigation)**, 252px on the sunken surface, 12px inner gutter: brand
+  lockup at the top (30px gradient logomark with three ascending dark bars + 17px/700 wordmark),
+  then grouped destinations under small uppercase section labels — *Vue d'ensemble* (Tableau de
+  bord, Comptes, Transactions), *Gestion* (Imports, Catégories), and later Goals/Mortgages/Taxes.
+  Settings is pinned to the bottom behind a `#1A212C` divider so the primary items keep their
+  vertical position as the app grows. Items are 40px pills (radius 20), 18px icons, gap 11,
+  padding 0 13; the active one gets an iris 12% fill, iris label, the filled variant of its icon,
+  and a flush-left 3×22px iris rail (so selection isn't carried by color alone). Hover is a
+  `#12161F` wash.
+  **Collapsible**: a 26px double-chevron control sits right of the lockup; collapsed is a 76px
+  icon-only rail (40px icon pills, same active treatment, privacy badge kept at the foot).
+- **Sidebar foot**: lock glyph + « Données 100 % locales » / "All data stays on this device" in
+  the disabled tone, under Paramètres.
+- **Top bar**, 72px on the base surface with a `#1A212C` hairline: panel title 18/700 + 12px
+  secondary descriptor beneath it (left), then right-aligned **contextual controls** (38px pills —
+  month selector, search, primary CTA; each panel spec names its own) and the user pill (44px,
+  bordered: 32px iris-tint monogram + name/email + chevron).
+- **Content region** padding 24×28 — 20 top on panels that open with a filter bar.
 
 Consistency of chrome is a hard acceptance criterion: a screen that moves or restyles the
-nav/top/bottom bar is wrong.
+sidebar/top bar is wrong. The contextual-controls slot is the one sanctioned way a panel reaches
+into the chrome.
 
 ## Component inventory (shared, themed)
 
@@ -92,7 +125,8 @@ Build these as reusable themed widgets so panels stay coherent. Prefer the share
 raw Material one — Material's defaults carry touch-sized padding and a light-mode look that
 drifts from the system. Already in `core/widgets/`:
 
-- `AppShell` — sidebar + top bar + bottom bar; feature screens render into the content region.
+- `AppShell` — sidebar + top bar; feature screens render into the content region and supply the
+  top bar's contextual controls.
 - `AppCard` — the raised, hairline-bordered plate every panel builds on; brand-tinted border on
   hover when tappable. Use instead of Material's `Card`.
 - `AmountText` — locale + sign + tabular figures, with `showPositiveSign` for movements and
@@ -108,20 +142,28 @@ drifts from the system. Already in `core/widgets/`:
   the same silhouette so a screen doesn't restructure between them.
 - `BrandMark` / `BrandLockup` — drawn (not asset) logomark and wordmark.
 
-Still to build: metric/stat card with trend delta arrow, transaction row, trend indicator, chart
-container (income/expense, by-category), toast/snackbar wrapper.
+- `PrimaryButton` — the iris-gradient primary. Material's `ButtonStyle` cannot paint a gradient,
+  so this widget owns it; `FilledButton` is a solid-iris fallback, not the spec'd primary.
+- `CategoryChip` — 22px pill, category hue @ 14% + full-hue text + 11px leading glyph; dashed
+  `#3A4556` neutral variant when uncategorized.
+- `FrameTexture` — the film-grain overlay and top hairline, applied once by the shell.
+
+Still to build (see the panel specs for exact geometry): `StatCard`, `SavingsRateCard` (96px ring),
+`TransactionRow` (52px + 48px compact), `DataTable`, `DropZone`, `ChartContainer`, `Donut`
+(r80 stroke24), `HorizontalBars`, `Sparkline`, `AreaLine`, `StackedBars`, `Toggle` (34×20 with an
+explicit knob), `Toast`, `Modal`, `Select`/`Combobox` popover.
 
 ## Motion & feel
 
-Purposeful, restrained motion (per frontend-design): one well-orchestrated screen-load reveal,
-smooth state transitions, subtle hover/press feedback on desktop. No gratuitous animation on
-data-dense views. Charts animate in once, not on every rebuild.
+**Two keyframes only**: `spin` (0.8s, button spinners) and `shimmer` (1.6s opacity pulse,
+skeletons). Hovers are instant fills or border changes. **No data-view animation** — charts do not
+animate in. `prefers-reduced-motion` kills all animation.
 
 ## Accessibility
 
-AA contrast on text and semantic colors; never encode meaning by **color alone** (pair
-income/expense color with sign and/or icon); visible focus states; sensible hit targets; respect
-reduced-motion.
+AA contrast on text and semantic colors; never encode meaning by **color alone** — meaning is
+always doubled (sign + color on money, icon + hue on chips, badge + lock glyph on system rows);
+visible focus states; sensible hit targets; respect reduced-motion.
 
 ## For design-tool prompts (Stitch / Claude Design)
 

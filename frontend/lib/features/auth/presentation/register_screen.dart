@@ -149,7 +149,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
             ),
             if (authState.hasError) ...[
               const SizedBox(height: AppSpacing.md),
-              InlineErrorBanner(
+              InlineBanner(
                 key: const Key('registerErrorText'),
                 message: localizeAuthError(l10n, authState.error),
               ),

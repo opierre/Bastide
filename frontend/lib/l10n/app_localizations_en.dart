@@ -36,31 +36,36 @@ class AppLocalizationsEn extends AppLocalizations {
   String get navSectionManage => 'Manage';
 
   @override
-  String get navDashboardSubtitle => 'Your financial picture at a glance';
+  String get navDashboardSubtitle => 'Your month at a glance';
 
   @override
-  String get navAccountsSubtitle => 'Your accounts and their balances';
+  String get navAccountsSubtitle => 'All your accounts, one currency';
 
   @override
-  String get navTransactionsSubtitle => 'Every movement, categorized';
+  String get navTransactionsSubtitle => 'Every transaction, in a single feed';
 
   @override
-  String get navImportsSubtitle => 'Bring in your OFX and CSV statements';
+  String get navImportsSubtitle =>
+      'OFX, QFX and CSV statements — processed on this computer';
 
   @override
-  String get navCategoriesSubtitle => 'Organize where your money goes';
+  String get navCategoriesSubtitle =>
+      'Organize your spending, automate it with rules';
 
   @override
-  String get navSettingsSubtitle => 'Preferences and account';
+  String get navSettingsSubtitle => 'Profile, preferences and your local data';
+
+  @override
+  String get sidebarPrivacyBadge => 'All data stays on this device';
+
+  @override
+  String get sidebarCollapse => 'Collapse menu';
+
+  @override
+  String get sidebarExpand => 'Expand menu';
 
   @override
   String get userMenuLogout => 'Log out';
-
-  @override
-  String get statusBarReady => 'Ready';
-
-  @override
-  String get statusBarLocalData => 'Local data';
 
   @override
   String get comingSoonTitle => 'Coming soon';

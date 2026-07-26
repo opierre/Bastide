@@ -31,8 +31,8 @@ class AuthScaffold extends StatelessWidget {
       backgroundColor: AppColors.surfaceSunken,
       body: Stack(
         children: [
-          const Positioned(top: -180, left: -140, child: _Glow(color: AppColors.brandAccent)),
-          const Positioned(bottom: -220, right: -160, child: _Glow(color: AppColors.accentViolet)),
+          const Positioned(top: -180, left: -140, child: _Glow(color: AppColors.iris)),
+          const Positioned(bottom: -220, right: -160, child: _Glow(color: AppColors.irisDeep)),
           Center(
             child: SingleChildScrollView(
               padding: const EdgeInsets.all(AppSpacing.xl),
@@ -56,7 +56,7 @@ class AuthScaffold extends StatelessWidget {
                         color: AppColors.surfaceRaised,
                         borderRadius: BorderRadius.circular(AppRadii.xl),
                         border: Border.all(color: AppColors.border),
-                        boxShadow: AppShadows.overlay,
+                        boxShadow: AppShadows.modal,
                       ),
                       child: Column(
                         mainAxisSize: MainAxisSize.min,

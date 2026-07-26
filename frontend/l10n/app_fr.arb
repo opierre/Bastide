@@ -32,45 +32,49 @@
   "@navSectionOverview": {
     "description": "Left nav section heading grouping the dashboard, accounts and transactions destinations. Rendered uppercase."
   },
-  "navSectionManage": "Gérer",
+  "navSectionManage": "Gestion",
   "@navSectionManage": {
     "description": "Left nav section heading grouping the imports and categories destinations. Rendered uppercase."
   },
-  "navDashboardSubtitle": "Votre situation financière en un coup d'œil",
+  "navDashboardSubtitle": "Votre mois en un coup d'œil",
   "@navDashboardSubtitle": {
     "description": "One-line descriptor shown under the panel title in the top bar, on the dashboard."
   },
-  "navAccountsSubtitle": "Vos comptes et leurs soldes",
+  "navAccountsSubtitle": "Tous vos comptes, une seule devise",
   "@navAccountsSubtitle": {
     "description": "One-line descriptor shown under the panel title in the top bar, on the accounts screen."
   },
-  "navTransactionsSubtitle": "Tous vos mouvements, catégorisés",
+  "navTransactionsSubtitle": "Toutes vos opérations, en un seul fil",
   "@navTransactionsSubtitle": {
     "description": "One-line descriptor shown under the panel title in the top bar, on the transactions screen."
   },
-  "navImportsSubtitle": "Importez vos relevés OFX et CSV",
+  "navImportsSubtitle": "Relevés OFX, QFX et CSV — traités sur cet ordinateur",
   "@navImportsSubtitle": {
     "description": "One-line descriptor shown under the panel title in the top bar, on the imports screen."
   },
-  "navCategoriesSubtitle": "Organisez vos dépenses",
+  "navCategoriesSubtitle": "Organisez vos dépenses, automatisez avec des règles",
   "@navCategoriesSubtitle": {
     "description": "One-line descriptor shown under the panel title in the top bar, on the categories screen."
   },
-  "navSettingsSubtitle": "Préférences et compte",
+  "navSettingsSubtitle": "Profil, préférences et vos données locales",
   "@navSettingsSubtitle": {
     "description": "One-line descriptor shown under the panel title in the top bar, on the settings screen."
+  },
+  "sidebarPrivacyBadge": "Données 100 % locales",
+  "@sidebarPrivacyBadge": {
+    "description": "Reassurance badge pinned at the foot of the sidebar, beside a lock glyph."
+  },
+  "sidebarCollapse": "Réduire le menu",
+  "@sidebarCollapse": {
+    "description": "Tooltip on the control that collapses the sidebar to an icon-only rail."
+  },
+  "sidebarExpand": "Déployer le menu",
+  "@sidebarExpand": {
+    "description": "Tooltip on the control that expands the collapsed sidebar back to full width."
   },
   "userMenuLogout": "Se déconnecter",
   "@userMenuLogout": {
     "description": "Item in the top-bar user menu that ends the session."
-  },
-  "statusBarReady": "Prêt",
-  "@statusBarReady": {
-    "description": "Default status text shown in the bottom bar."
-  },
-  "statusBarLocalData": "Données locales",
-  "@statusBarLocalData": {
-    "description": "Right-aligned bottom bar note reminding the user that all data stays on their machine."
   },
   "comingSoonTitle": "Bientôt disponible",
   "@comingSoonTitle": {

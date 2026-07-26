@@ -15,7 +15,7 @@ class DashboardScreen extends StatelessWidget {
     return EmptyStateView(
       key: const Key('screen-dashboard'),
       icon: Icons.insights_outlined,
-      accent: AppColors.brandAccent,
+      accent: AppColors.iris,
       title: l10n.comingSoonTitle,
       message: l10n.comingSoonBody,
     );

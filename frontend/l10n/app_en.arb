@@ -9,15 +9,25 @@
   "navSettings": "Settings",
   "navSectionOverview": "Overview",
   "navSectionManage": "Manage",
-  "navDashboardSubtitle": "Your financial picture at a glance",
-  "navAccountsSubtitle": "Your accounts and their balances",
-  "navTransactionsSubtitle": "Every movement, categorized",
-  "navImportsSubtitle": "Bring in your OFX and CSV statements",
-  "navCategoriesSubtitle": "Organize where your money goes",
-  "navSettingsSubtitle": "Preferences and account",
+  "navDashboardSubtitle": "Your month at a glance",
+  "navAccountsSubtitle": "All your accounts, one currency",
+  "navTransactionsSubtitle": "Every transaction, in a single feed",
+  "navImportsSubtitle": "OFX, QFX and CSV statements — processed on this computer",
+  "navCategoriesSubtitle": "Organize your spending, automate it with rules",
+  "navSettingsSubtitle": "Profile, preferences and your local data",
+  "sidebarPrivacyBadge": "All data stays on this device",
+  "@sidebarPrivacyBadge": {
+    "description": "Reassurance badge pinned at the foot of the sidebar, beside a lock glyph."
+  },
+  "sidebarCollapse": "Collapse menu",
+  "@sidebarCollapse": {
+    "description": "Tooltip on the control that collapses the sidebar to an icon-only rail."
+  },
+  "sidebarExpand": "Expand menu",
+  "@sidebarExpand": {
+    "description": "Tooltip on the control that expands the collapsed sidebar back to full width."
+  },
   "userMenuLogout": "Log out",
-  "statusBarReady": "Ready",
-  "statusBarLocalData": "Local data",
   "comingSoonTitle": "Coming soon",
   "comingSoonBody": "This screen arrives in a later step. In the meantime, add your accounts to get set up.",
   "authLoginTitle": "Log in",

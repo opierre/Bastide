@@ -33,7 +33,8 @@
 - **Immutable models.** Use `@immutable` or freezed.
 - **No hard-coded strings.** All user-facing text comes from ARB files and localizations.
 - **Format at the edge.** Money, dates, numbers are formatted using `intl` and the current locale at the point of display.
-- **Fixed chrome invariant.** The navbar, top bar, and bottom bar keep the same position and behaviour on every screen.
+- **Fixed chrome invariant.** The sidebar and top bar keep the same position and behaviour on every screen. There is no bottom bar. A panel reaches the chrome only through the top bar's contextual-controls slot (`AppShell.actionsBuilder`); the collapsible sidebar is chrome state, not panel state.
+- **`docs/design/00-shared-design-block.md` is binding** for every visual value, and `docs/design/NN-*.md` for each panel. Never invent a color, font, radius, or spacing value — add it to `core/theme/tokens.dart` from the spec.
 
 ## See also
 

@@ -34,10 +34,12 @@ class AmountText extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final locale = Localizations.localeOf(context).toString();
-    final formatted = NumberFormat.currency(
+    final formatted = formatAmount(
+      amountMinor: amountMinor,
+      currency: currency,
       locale: locale,
-      name: currency,
-    ).format(amountMinor / 100);
+      showPositiveSign: showPositiveSign,
+    );
     final base = style ?? DefaultTextStyle.of(context).style;
     final color = !colorize
         ? base.color
@@ -47,9 +49,29 @@ class AmountText extends StatelessWidget {
             _ => base.color,
           };
 
-    return Text(
-      showPositiveSign && amountMinor > 0 ? '+$formatted' : formatted,
-      style: tabularNumberStyle(base).copyWith(color: color),
-    );
+    return Text(formatted, style: tabularNumberStyle(base).copyWith(color: color));
   }
+}
+
+/// The U+2212 minus sign. `intl` emits an ASCII hyphen-minus, which is narrower
+/// than the digits around it and breaks the tabular alignment the spec relies on
+/// for stacked amount columns.
+const _minusSign = '−';
+
+/// Formats integer minor units for display. Exposed separately from
+/// [AmountText] for the places that need the string rather than the widget —
+/// chart tooltips, semantics labels, legend rows.
+String formatAmount({
+  required int amountMinor,
+  required String currency,
+  required String locale,
+  bool showPositiveSign = false,
+}) {
+  final formatted = NumberFormat.currency(
+    locale: locale,
+    name: currency,
+  ).format(amountMinor / 100).replaceAll('-', _minusSign);
+
+  if (showPositiveSign && amountMinor > 0) return '+$formatted';
+  return formatted;
 }

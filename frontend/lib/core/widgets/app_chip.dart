@@ -2,9 +2,13 @@ import 'package:flutter/material.dart';
 
 import '../theme/tokens.dart';
 
-/// A small tinted pill used for taxonomy labels: account type, category, import
-/// status. Material's [Chip] carries touch-sized padding and a delete affordance
-/// we never want here, so this is a plain themed container.
+/// A small tinted pill for taxonomy and status labels: account type, import
+/// status, system/custom badges. Material's [Chip] carries touch-sized padding
+/// and a delete affordance we never want here, so this is a plain themed
+/// container.
+///
+/// Category labels use [CategoryChip] instead — they carry a pinned hue and a
+/// category glyph, and the uncategorized case has its own dashed treatment.
 class AppChip extends StatelessWidget {
   const AppChip({super.key, required this.label, this.color, this.icon});
 
@@ -20,21 +24,22 @@ class AppChip extends StatelessWidget {
     final foreground = tint ?? AppColors.textSecondary;
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm, vertical: 3),
+      height: 22,
+      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm + 2),
       decoration: BoxDecoration(
         color: tint == null
             ? AppColors.surfaceOverlay
             : tint.withValues(alpha: 0.12),
         borderRadius: BorderRadius.circular(AppRadii.pill),
         border: Border.all(
-          color: tint == null ? AppColors.border : tint.withValues(alpha: 0.28),
+          color: tint == null ? AppColors.border : tint.withValues(alpha: 0.30),
         ),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
           if (icon != null) ...[
-            Icon(icon, size: 12, color: foreground),
+            Icon(icon, size: 11, color: foreground),
             const SizedBox(width: AppSpacing.xs + 1),
           ],
           Text(

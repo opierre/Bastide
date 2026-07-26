@@ -12,7 +12,7 @@ class EmptyStateView extends StatelessWidget {
     required this.title,
     required this.message,
     this.action,
-    this.accent = AppColors.brandAccent,
+    this.accent = AppColors.iris,
   });
 
   final IconData icon;
@@ -31,17 +31,17 @@ class EmptyStateView extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            _GlyphPlate(icon: icon, accent: accent),
+            GlyphPlate(icon: icon, accent: accent),
             const SizedBox(height: AppSpacing.lg),
-            Text(title, style: textTheme.titleLarge, textAlign: TextAlign.center),
-            const SizedBox(height: AppSpacing.sm),
+            Text(title, style: textTheme.headlineMedium, textAlign: TextAlign.center),
+            const SizedBox(height: AppSpacing.sm + 2),
             Text(
               message,
-              style: textTheme.bodyMedium?.copyWith(color: AppColors.textSecondary),
+              style: textTheme.bodyLarge?.copyWith(color: AppColors.textSecondary),
               textAlign: TextAlign.center,
             ),
             if (action != null) ...[
-              const SizedBox(height: AppSpacing.xl),
+              const SizedBox(height: AppSpacing.lg + AppSpacing.xs),
               action!,
             ],
           ],
@@ -52,7 +52,8 @@ class EmptyStateView extends StatelessWidget {
 }
 
 /// Failure state with a retry affordance. Same silhouette as [EmptyStateView]
-/// so a load failure doesn't restructure the page.
+/// so a load failure doesn't restructure the page — only the plate's hue and
+/// glyph change, which is what tells the two apart.
 class ErrorStateView extends StatelessWidget {
   const ErrorStateView({
     super.key,
@@ -79,23 +80,22 @@ class ErrorStateView extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const _GlyphPlate(
-              icon: Icons.cloud_off_rounded,
-              accent: AppColors.negative,
+            const GlyphPlate(
+              icon: Icons.warning_amber_rounded,
+              accent: AppColors.warning,
             ),
             const SizedBox(height: AppSpacing.lg),
             Text(
               message,
               key: messageKey,
-              style: textTheme.bodyMedium?.copyWith(color: AppColors.textSecondary),
+              style: textTheme.bodyLarge?.copyWith(color: AppColors.textSecondary),
               textAlign: TextAlign.center,
             ),
-            const SizedBox(height: AppSpacing.xl),
-            OutlinedButton.icon(
+            const SizedBox(height: AppSpacing.lg + AppSpacing.xs),
+            OutlinedButton(
               key: retryKey,
               onPressed: onRetry,
-              icon: const Icon(Icons.refresh_rounded),
-              label: Text(retryLabel),
+              child: Text(retryLabel),
             ),
           ],
         ),
@@ -104,8 +104,9 @@ class ErrorStateView extends StatelessWidget {
   }
 }
 
-class _GlyphPlate extends StatelessWidget {
-  const _GlyphPlate({required this.icon, required this.accent});
+/// The 64px tinted plate that heads an empty or error state.
+class GlyphPlate extends StatelessWidget {
+  const GlyphPlate({super.key, required this.icon, this.accent = AppColors.iris});
 
   final IconData icon;
   final Color accent;
@@ -119,9 +120,8 @@ class _GlyphPlate extends StatelessWidget {
       decoration: BoxDecoration(
         color: accent.withValues(alpha: 0.12),
         borderRadius: BorderRadius.circular(AppRadii.xl),
-        border: Border.all(color: accent.withValues(alpha: 0.24)),
       ),
-      child: Icon(icon, size: 28, color: accent),
+      child: Icon(icon, size: 27, color: accent),
     );
   }
 }
@@ -136,37 +136,36 @@ class SkeletonList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ListView.separated(
-      physics: const NeverScrollableScrollPhysics(),
-      itemCount: itemCount,
-      separatorBuilder: (_, _) => const SizedBox(height: AppSpacing.sm),
-      itemBuilder: (_, _) => SkeletonBlock(height: itemHeight),
+    return SkeletonPulse(
+      child: ListView.separated(
+        physics: const NeverScrollableScrollPhysics(),
+        itemCount: itemCount,
+        separatorBuilder: (_, _) => const SizedBox(height: AppSpacing.sm + AppSpacing.xs),
+        itemBuilder: (_, _) => SkeletonBlock(height: itemHeight),
+      ),
     );
   }
 }
 
-/// A single pulsing placeholder block.
-class SkeletonBlock extends StatefulWidget {
-  const SkeletonBlock({
-    super.key,
-    required this.height,
-    this.width,
-    this.radius = AppRadii.lg,
-  });
+/// Pulses everything beneath it as one unit.
+///
+/// The spec asks for a whole-card opacity pulse rather than a per-block one:
+/// blocks fading independently reads as several things loading at different
+/// speeds, when in fact one request is in flight.
+class SkeletonPulse extends StatefulWidget {
+  const SkeletonPulse({super.key, required this.child});
 
-  final double height;
-  final double? width;
-  final double radius;
+  final Widget child;
 
   @override
-  State<SkeletonBlock> createState() => _SkeletonBlockState();
+  State<SkeletonPulse> createState() => _SkeletonPulseState();
 }
 
-class _SkeletonBlockState extends State<SkeletonBlock>
+class _SkeletonPulseState extends State<SkeletonPulse>
     with SingleTickerProviderStateMixin {
   late final AnimationController _controller = AnimationController(
     vsync: this,
-    duration: const Duration(milliseconds: 1100),
+    duration: AppMotion.shimmer,
   );
 
   @override
@@ -183,24 +182,42 @@ class _SkeletonBlockState extends State<SkeletonBlock>
 
   @override
   Widget build(BuildContext context) {
-    final plate = Container(
-      height: widget.height,
-      width: widget.width,
-      decoration: BoxDecoration(
-        color: AppColors.surfaceRaised,
-        borderRadius: BorderRadius.circular(widget.radius),
-        border: Border.all(color: AppColors.borderSubtle),
-      ),
-    );
-
-    // Reduced-motion users get the plate without the pulse.
-    if (MediaQuery.disableAnimationsOf(context)) return plate;
+    // Reduced-motion users get the silhouettes without the pulse.
+    if (MediaQuery.disableAnimationsOf(context)) return widget.child;
 
     return FadeTransition(
       opacity: Tween<double>(begin: 0.45, end: 0.9).animate(
         CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
       ),
-      child: plate,
+      child: widget.child,
+    );
+  }
+}
+
+/// A single placeholder silhouette. Static on its own — wrap a group in
+/// [SkeletonPulse] to animate them together.
+class SkeletonBlock extends StatelessWidget {
+  const SkeletonBlock({
+    super.key,
+    required this.height,
+    this.width,
+    this.radius = AppRadii.lg,
+  });
+
+  final double height;
+  final double? width;
+  final double radius;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: height,
+      width: width,
+      decoration: BoxDecoration(
+        color: AppColors.surfaceHover,
+        borderRadius: BorderRadius.circular(radius),
+        border: Border.all(color: AppColors.borderSubtle),
+      ),
     );
   }
 }

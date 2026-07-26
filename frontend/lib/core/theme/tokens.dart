@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 
-/// Dark-first palette. See `PROJECT.md` §9 and the design-system skill.
+/// Dark-first palette. Binding values come from `docs/design/00-shared-design-block.md`;
+/// that file is the source of truth and this one transcribes it.
 ///
 /// The scale is built on an ink base with a slight blue cast rather than a
 /// neutral grey, so raised surfaces read as *lifted* without needing heavy
 /// borders. Never hardcode a hex in a widget — add a token here instead.
 abstract final class AppColors {
-  /// App chrome background (sidebar, bottom bar) — the deepest layer.
+  /// App chrome background (sidebar, auth page) — the deepest layer.
   static const surfaceSunken = Color(0xFF070910);
 
   /// Content region background.
@@ -15,35 +16,46 @@ abstract final class AppColors {
   /// Cards and panels lifted off [surfaceBase].
   static const surfaceRaised = Color(0xFF111620);
 
-  /// Dialogs, menus, and anything floating above the page.
+  /// Dialogs, popovers, toasts — anything floating above the page.
   static const surfaceOverlay = Color(0xFF19202B);
 
-  /// Pointer-hover wash for interactive rows and cards.
+  /// Pointer-hover wash; also inset plates and toggle tracks.
   static const surfaceHover = Color(0xFF1E2634);
+
+  /// Row hover *inside* a raised card — sits between raised and hover, so a
+  /// hovered row lifts without jumping to the full overlay tone.
+  static const surfaceRowHover = Color(0xFF151B26);
 
   /// Inset wells: text fields, search, read-only value slots.
   static const surfaceField = Color(0xFF0D1219);
+
+  /// Sidebar nav hover — quieter than [surfaceHover] because the sidebar sits
+  /// on the sunken surface, where a lighter wash would read as selection.
+  static const sidebarHover = Color(0xFF12161F);
 
   static const textPrimary = Color(0xFFEDF1F7);
   static const textSecondary = Color(0xFF97A3B6);
   static const textDisabled = Color(0xFF5A6579);
 
-  /// Brand accent — jade/mint, signalling growth and savings.
-  static const brandAccent = Color(0xFF2FE0A6);
+  /// Brand accent — iris violet. Reserved for the accent role: primary buttons,
+  /// active nav, focus, links, the logomark. Deliberately *never* used for a
+  /// category hue or for money, so an iris element is always chrome.
+  static const iris = Color(0xFF8B8CF9);
 
-  /// Deeper end of the brand ramp, for gradients and pressed states.
-  static const brandAccentDeep = Color(0xFF14B989);
+  /// Deep end of the iris ramp — gradient terminus and pressed states.
+  static const irisDeep = Color(0xFF6C6AF0);
 
-  /// Brand accent at low alpha, for selected nav pills and tinted chips.
-  static const brandAccentSoft = Color(0x1F2FE0A6);
+  /// Iris at 12% — active nav pills, tinted chips, glyph plates.
+  static const irisSoft = Color(0x1F8B8CF9);
 
-  /// Secondary accent — used for charts, categories, and decorative pairing
-  /// with [brandAccent]. Never used for money, so it can't be confused with
-  /// the income/expense rule below.
-  static const accentViolet = Color(0xFF8B7CF6);
+  /// Foreground on an iris-gradient fill.
+  static const irisInk = Color(0xFF0E1030);
 
-  /// Money sign colors. Income/positive is a leaf green, deliberately yellower
-  /// than [brandAccent] so a balance never reads as a brand element.
+  /// Leading chart/category hue.
+  static const cyan = Color(0xFF4FD1E8);
+
+  /// Money sign colors. Income green is deliberately yellower than [iris] so a
+  /// balance never reads as a brand element.
   static const positive = Color(0xFF4ADE80);
   static const negative = Color(0xFFFF5C6C);
   static const warning = Color(0xFFFFB84D);
@@ -55,10 +67,93 @@ abstract final class AppColors {
   /// Quieter hairline, for separators *inside* a card.
   static const borderSubtle = Color(0xFF1A212C);
 
-  static const focusRing = brandAccent;
+  /// Card outline — a touch lighter than [border] so a card edge reads against
+  /// the base surface without the weight of a structural divider.
+  static const borderCard = Color(0xFF242E3E);
+
+  /// Dashed outline on read-only / uncategorized slots.
+  static const borderDashed = Color(0xFF3A4556);
+
+  static const focusRing = iris;
 
   /// Neutral wash used for hover/press overlays on dark surfaces.
   static const overlayWash = Color(0x0FFFFFFF);
+
+  /// Modal scrim.
+  static const scrim = Color(0x9E04060B);
+
+  /// The iris gradient used by primary buttons and the logomark.
+  static const irisGradient = LinearGradient(
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+    colors: [iris, irisDeep],
+  );
+
+  /// Glow beneath a primary button.
+  static const irisGlow = [
+    BoxShadow(color: Color(0x4D6C6AF0), blurRadius: 22, offset: Offset(0, 8)),
+  ];
+}
+
+/// Category hues. Fixed per category so a hue means the same thing in the
+/// donut, the legend, and every chip — the spec pins these rather than deriving
+/// them, so charts and chips can never drift apart.
+///
+/// Iris is absent by design: it is the accent role, not a data hue.
+abstract final class CategoryHues {
+  static const logement = AppColors.cyan;
+  static const alimentation = Color(0xFF5AA9FF);
+  static const transport = Color(0xFF2DD4BF);
+  static const loisirs = Color(0xFFF472B6);
+  static const abonnements = AppColors.warning;
+  static const sante = Color(0xFFA3E635);
+
+  /// Shared by "Autres" and "Épargne" — both are catch-alls rather than
+  /// spending categories, so they take the neutral slate.
+  static const autres = Color(0xFF64748B);
+  static const revenus = AppColors.positive;
+
+  /// Fallback for a category with no pinned hue (user-created categories).
+  static const fallback = autres;
+
+  /// Keyed by the backend category slug.
+  static const bySlug = <String, Color>{
+    'logement': logement,
+    'alimentation': alimentation,
+    'transport': transport,
+    'loisirs': loisirs,
+    'abonnements': abonnements,
+    'sante': sante,
+    'autres': autres,
+    'epargne': autres,
+    'revenus': revenus,
+  };
+
+  static Color forSlug(String? slug) => bySlug[slug] ?? fallback;
+}
+
+/// Brand-ish hues for institution/merchant monogram chips.
+///
+/// Pinned per brand rather than hashed: an institution that changes color
+/// between launches looks like a bug, and these specific hues are drawn in the
+/// mockup. Unknown names fall back to a neutral plate with a `?` glyph.
+abstract final class MonogramHues {
+  static const unknownBackground = AppColors.surfaceHover;
+  static const unknownForeground = AppColors.textSecondary;
+
+  /// Lowercased, whitespace-collapsed brand name → hue.
+  static const byBrand = <String, Color>{
+    'bnp': Color(0xFF2FB574),
+    'bnp paribas': Color(0xFF2FB574),
+    'crédit agricole': Color(0xFF0AA396),
+    'credit agricole': Color(0xFF0AA396),
+    'revolut': Color(0xFF5AA9FF),
+    'caisse locale': AppColors.cyan,
+    "caisse locale d'épargne": AppColors.cyan,
+    'carrefour': Color(0xFF3B82F6),
+    'novatech': AppColors.irisDeep,
+    'novatech sarl': AppColors.irisDeep,
+  };
 }
 
 abstract final class AppSpacing {
@@ -68,15 +163,54 @@ abstract final class AppSpacing {
   static const lg = 24.0;
   static const xl = 32.0;
   static const xxl = 48.0;
+
+  // Values measured off the mockup (docs/design/00 §Layout invariant). They sit
+  // beside the ramp above rather than replacing it: the drawn design uses a few
+  // deliberate odd gaps that a 4pt ramp can't express without rounding the
+  // layout away from the spec.
+
+  /// Gap between a nav item's icon and its label.
+  static const navGap = 11.0;
+
+  /// Horizontal padding inside a nav pill.
+  static const navInset = 13.0;
+
+  /// Sidebar inner gutter.
+  static const sidebarGutter = 12.0;
+
+  /// Gap between cards in a grid (stat row, account grid).
+  static const gridGap = 18.0;
+
+  /// Card padding — the wide variant is for cards that carry a headline figure.
+  static const cardPadding = 20.0;
+  static const cardPaddingWide = 24.0;
+
+  /// Content region padding: 24 vertical × 28 horizontal.
+  static const contentX = 28.0;
+  static const contentY = 24.0;
+
+  /// Panels that open with a filter bar sit 20 from the top instead of 24.
+  static const contentTopFiltered = 20.0;
 }
 
 abstract final class AppRadii {
   static const sm = 8.0;
+  static const monogram = 9.0;
   static const md = 12.0;
+
+  /// Toasts and inset configuration plates.
+  static const inset = 14.0;
+
+  /// Card.
   static const lg = 16.0;
+
+  /// Modal, glyph plate.
   static const xl = 20.0;
 
-  /// Fully rounded — pills, avatars, status dots.
+  /// Nav pill.
+  static const navPill = 20.0;
+
+  /// Fully rounded — status dots, round pager buttons.
   static const pill = 999.0;
 }
 
@@ -88,29 +222,64 @@ abstract final class AppShadows {
     BoxShadow(color: Color(0x33000000), blurRadius: 16, offset: Offset(0, 4)),
   ];
 
-  static const overlay = [
-    BoxShadow(color: Color(0x66000000), blurRadius: 40, offset: Offset(0, 16)),
+  static const modal = [
+    BoxShadow(color: Color(0x66000000), blurRadius: 60, offset: Offset(0, 24)),
   ];
 }
 
-/// Restrained motion — one duration per intent, so transitions across the app
-/// stay in step. See the design-system skill's motion rules.
+/// The spec allows exactly two keyframes — a button spinner and a skeleton
+/// pulse. Everything else (hover fills, border changes, selection) is an
+/// instant swap, so there is no `base`/`slow` duration to reach for.
 abstract final class AppMotion {
-  static const fast = Duration(milliseconds: 120);
-  static const base = Duration(milliseconds: 200);
-  static const slow = Duration(milliseconds: 320);
+  /// Button spinner revolution.
+  static const spin = Duration(milliseconds: 800);
 
-  static const curve = Curves.easeOutCubic;
+  /// Skeleton opacity pulse.
+  static const shimmer = Duration(milliseconds: 1600);
 }
 
 abstract final class AppFonts {
-  static const openSans = 'Open Sans';
+  /// UI family: 400 body, 600 emphasis/labels, 700 headings.
+  static const manrope = 'Manrope';
+
+  /// Display family, 700 only: wordmark, panel titles, headline amounts.
+  static const spaceGrotesk = 'Space Grotesk';
+
+  /// Raw bank labels in the review queue, where character alignment matters.
+  static const mono = 'monospace';
 }
 
 /// Fixed-chrome dimensions. The shell is the only place these are consumed;
 /// they live here so the design docs and the app can't drift.
 abstract final class AppChrome {
   static const sidebarWidth = 252.0;
+
+  /// Icon-only rail when the sidebar is collapsed.
+  static const sidebarCollapsedWidth = 76.0;
+
   static const topBarHeight = 72.0;
-  static const bottomBarHeight = 30.0;
+
+  /// Nav pill, top-bar control pill.
+  static const navItemHeight = 40.0;
+  static const controlPillHeight = 38.0;
+  static const userPillHeight = 44.0;
+
+  /// Flush-left active rail on a nav item.
+  static const navRailWidth = 3.0;
+  static const navRailHeight = 22.0;
+
+  static const navIconSize = 18.0;
+}
+
+/// The luminous hairline across the top edge of every frame, and the film-grain
+/// overlay tile size. Both are frame-level texture rather than component style,
+/// so they live here and are applied once by the shell.
+abstract final class AppTexture {
+  /// Edge length of the repeating grain tile, in pixels.
+  static const grainTile = 140;
+  static const grainOpacity = 0.05;
+
+  static const topHairline = LinearGradient(
+    colors: [Color(0x008B8CF9), Color(0x8C8B8CF9), Color(0x008B8CF9)],
+  );
 }

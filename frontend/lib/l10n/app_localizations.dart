@@ -149,62 +149,68 @@ abstract class AppLocalizations {
   /// Left nav section heading grouping the imports and categories destinations. Rendered uppercase.
   ///
   /// In fr, this message translates to:
-  /// **'Gérer'**
+  /// **'Gestion'**
   String get navSectionManage;
 
   /// One-line descriptor shown under the panel title in the top bar, on the dashboard.
   ///
   /// In fr, this message translates to:
-  /// **'Votre situation financière en un coup d\'œil'**
+  /// **'Votre mois en un coup d\'œil'**
   String get navDashboardSubtitle;
 
   /// One-line descriptor shown under the panel title in the top bar, on the accounts screen.
   ///
   /// In fr, this message translates to:
-  /// **'Vos comptes et leurs soldes'**
+  /// **'Tous vos comptes, une seule devise'**
   String get navAccountsSubtitle;
 
   /// One-line descriptor shown under the panel title in the top bar, on the transactions screen.
   ///
   /// In fr, this message translates to:
-  /// **'Tous vos mouvements, catégorisés'**
+  /// **'Toutes vos opérations, en un seul fil'**
   String get navTransactionsSubtitle;
 
   /// One-line descriptor shown under the panel title in the top bar, on the imports screen.
   ///
   /// In fr, this message translates to:
-  /// **'Importez vos relevés OFX et CSV'**
+  /// **'Relevés OFX, QFX et CSV — traités sur cet ordinateur'**
   String get navImportsSubtitle;
 
   /// One-line descriptor shown under the panel title in the top bar, on the categories screen.
   ///
   /// In fr, this message translates to:
-  /// **'Organisez vos dépenses'**
+  /// **'Organisez vos dépenses, automatisez avec des règles'**
   String get navCategoriesSubtitle;
 
   /// One-line descriptor shown under the panel title in the top bar, on the settings screen.
   ///
   /// In fr, this message translates to:
-  /// **'Préférences et compte'**
+  /// **'Profil, préférences et vos données locales'**
   String get navSettingsSubtitle;
+
+  /// Reassurance badge pinned at the foot of the sidebar, beside a lock glyph.
+  ///
+  /// In fr, this message translates to:
+  /// **'Données 100 % locales'**
+  String get sidebarPrivacyBadge;
+
+  /// Tooltip on the control that collapses the sidebar to an icon-only rail.
+  ///
+  /// In fr, this message translates to:
+  /// **'Réduire le menu'**
+  String get sidebarCollapse;
+
+  /// Tooltip on the control that expands the collapsed sidebar back to full width.
+  ///
+  /// In fr, this message translates to:
+  /// **'Déployer le menu'**
+  String get sidebarExpand;
 
   /// Item in the top-bar user menu that ends the session.
   ///
   /// In fr, this message translates to:
   /// **'Se déconnecter'**
   String get userMenuLogout;
-
-  /// Default status text shown in the bottom bar.
-  ///
-  /// In fr, this message translates to:
-  /// **'Prêt'**
-  String get statusBarReady;
-
-  /// Right-aligned bottom bar note reminding the user that all data stays on their machine.
-  ///
-  /// In fr, this message translates to:
-  /// **'Données locales'**
-  String get statusBarLocalData;
 
   /// Placeholder heading on panels whose feature isn't built yet.
   ///

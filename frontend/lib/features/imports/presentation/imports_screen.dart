@@ -15,7 +15,7 @@ class ImportsScreen extends StatelessWidget {
     return EmptyStateView(
       key: const Key('screen-imports'),
       icon: Icons.upload_file_outlined,
-      accent: AppColors.accentViolet,
+      accent: AppColors.irisDeep,
       title: l10n.comingSoonTitle,
       message: l10n.comingSoonBody,
     );

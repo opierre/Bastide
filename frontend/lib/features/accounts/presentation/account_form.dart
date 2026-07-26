@@ -210,7 +210,7 @@ class _AccountFormState extends ConsumerState<AccountForm> {
                 ),
                 if (_errorText != null) ...[
                   const SizedBox(height: AppSpacing.md),
-                  InlineErrorBanner(
+                  InlineBanner(
                     key: const Key('accountFormErrorText'),
                     message: _errorText!,
                   ),

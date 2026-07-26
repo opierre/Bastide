@@ -33,35 +33,40 @@ class AppLocalizationsFr extends AppLocalizations {
   String get navSectionOverview => 'Vue d\'ensemble';
 
   @override
-  String get navSectionManage => 'Gérer';
+  String get navSectionManage => 'Gestion';
 
   @override
-  String get navDashboardSubtitle =>
-      'Votre situation financière en un coup d\'œil';
+  String get navDashboardSubtitle => 'Votre mois en un coup d\'œil';
 
   @override
-  String get navAccountsSubtitle => 'Vos comptes et leurs soldes';
+  String get navAccountsSubtitle => 'Tous vos comptes, une seule devise';
 
   @override
-  String get navTransactionsSubtitle => 'Tous vos mouvements, catégorisés';
+  String get navTransactionsSubtitle => 'Toutes vos opérations, en un seul fil';
 
   @override
-  String get navImportsSubtitle => 'Importez vos relevés OFX et CSV';
+  String get navImportsSubtitle =>
+      'Relevés OFX, QFX et CSV — traités sur cet ordinateur';
 
   @override
-  String get navCategoriesSubtitle => 'Organisez vos dépenses';
+  String get navCategoriesSubtitle =>
+      'Organisez vos dépenses, automatisez avec des règles';
 
   @override
-  String get navSettingsSubtitle => 'Préférences et compte';
+  String get navSettingsSubtitle =>
+      'Profil, préférences et vos données locales';
+
+  @override
+  String get sidebarPrivacyBadge => 'Données 100 % locales';
+
+  @override
+  String get sidebarCollapse => 'Réduire le menu';
+
+  @override
+  String get sidebarExpand => 'Déployer le menu';
 
   @override
   String get userMenuLogout => 'Se déconnecter';
-
-  @override
-  String get statusBarReady => 'Prêt';
-
-  @override
-  String get statusBarLocalData => 'Données locales';
 
   @override
   String get comingSoonTitle => 'Bientôt disponible';
