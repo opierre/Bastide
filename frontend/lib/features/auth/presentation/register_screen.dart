@@ -6,6 +6,7 @@ import '../../../core/theme/tokens.dart';
 import '../../../core/widgets/app_segmented.dart';
 import '../../../core/widgets/inline_banner.dart';
 import '../../../core/widgets/labeled_field.dart';
+import '../../../core/widgets/primary_button.dart';
 import '../../../l10n/app_localizations.dart';
 import '../application/auth_controller.dart';
 import '../domain/supported_currencies.dart';
@@ -58,8 +59,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     final authState = ref.watch(authControllerProvider);
     final isSubmitting = authState.isLoading;
 
-    return AuthScaffold(
-      title: l10n.authRegisterTitle,
+    return AuthScaffold.register(
       form: Form(
         key: _formKey,
         child: Column(
@@ -155,10 +155,10 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
               ),
             ],
             const SizedBox(height: AppSpacing.lg),
-            AuthSubmitButton(
+            PrimaryButton.submit(
               key: const Key('registerSubmitButton'),
               label: l10n.authRegisterSubmit,
-              isSubmitting: isSubmitting,
+              isLoading: isSubmitting,
               onPressed: _submit,
             ),
           ],

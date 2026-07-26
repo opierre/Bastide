@@ -5,10 +5,12 @@ import 'package:go_router/go_router.dart';
 import '../../../core/theme/tokens.dart';
 import '../../../core/widgets/inline_banner.dart';
 import '../../../core/widgets/labeled_field.dart';
+import '../../../core/widgets/primary_button.dart';
 import '../../../l10n/app_localizations.dart';
 import '../application/auth_controller.dart';
 import 'auth_error_localizer.dart';
 import 'auth_scaffold.dart';
+import 'password_field.dart';
 import 'register_screen.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
@@ -45,14 +47,26 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     final authState = ref.watch(authControllerProvider);
     final isSubmitting = authState.isLoading;
 
-    return AuthScaffold(
-      title: l10n.authLoginTitle,
+    // A rejected credential pair is a failure of the pair, not of one field —
+    // so both fields take the error border and the reason is stated once, in a
+    // banner, rather than being duplicated under each input.
+    final hasCredentialError = authState.hasError;
+
+    return AuthScaffold.login(
+      tagline: l10n.authTagline,
       form: Form(
         key: _formKey,
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
+            if (hasCredentialError) ...[
+              InlineBanner(
+                key: const Key('loginErrorText'),
+                message: localizeAuthError(l10n, authState.error),
+              ),
+              const SizedBox(height: AppSpacing.md + AppSpacing.xs),
+            ],
             LabeledField(
               label: l10n.authEmailLabel,
               child: TextFormField(
@@ -60,41 +74,29 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 controller: _emailController,
                 keyboardType: TextInputType.emailAddress,
                 autofillHints: const [AutofillHints.email],
-                decoration: const InputDecoration(
-                  prefixIcon: Icon(Icons.alternate_email_rounded, size: 18),
-                ),
+                decoration: hasCredentialError ? errorFieldDecoration() : null,
                 validator: (value) =>
                     (value == null || value.trim().isEmpty) ? l10n.authEmailRequired : null,
               ),
             ),
-            const SizedBox(height: AppSpacing.md),
+            const SizedBox(height: AppSpacing.md + AppSpacing.xs),
             LabeledField(
               label: l10n.authPasswordLabel,
-              child: TextFormField(
-                key: const Key('loginPasswordField'),
+              child: PasswordField(
+                fieldKey: const Key('loginPasswordField'),
                 controller: _passwordController,
-                obscureText: true,
-                autofillHints: const [AutofillHints.password],
-                decoration: const InputDecoration(
-                  prefixIcon: Icon(Icons.lock_outline_rounded, size: 18),
-                ),
-                onFieldSubmitted: (_) => isSubmitting ? null : _submit(),
+                hasError: hasCredentialError,
+                onSubmitted: (_) => isSubmitting ? null : _submit(),
                 validator: (value) =>
                     (value == null || value.isEmpty) ? l10n.authPasswordRequired : null,
               ),
             ),
-            if (authState.hasError) ...[
-              const SizedBox(height: AppSpacing.md),
-              InlineBanner(
-                key: const Key('loginErrorText'),
-                message: localizeAuthError(l10n, authState.error),
-              ),
-            ],
             const SizedBox(height: AppSpacing.lg),
-            AuthSubmitButton(
+            PrimaryButton.submit(
               key: const Key('loginSubmitButton'),
               label: l10n.authLoginSubmit,
-              isSubmitting: isSubmitting,
+              loadingLabel: l10n.authLoginSubmitting,
+              isLoading: isSubmitting,
               onPressed: _submit,
             ),
           ],

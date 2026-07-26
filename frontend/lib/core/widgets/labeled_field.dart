@@ -105,6 +105,19 @@ class FieldHelper extends StatelessWidget {
   }
 }
 
+/// The error border, with no inline message.
+///
+/// For failures that belong to the form as a whole rather than to one field —
+/// a rejected credential pair, say — where the reason is already stated once in
+/// a banner and repeating it under each input would bury the fix.
+InputDecoration errorFieldDecoration() {
+  final border = OutlineInputBorder(
+    borderRadius: BorderRadius.circular(AppRadii.md),
+    borderSide: const BorderSide(color: Color(0x8CFF5C6C)),
+  );
+  return InputDecoration(enabledBorder: border, focusedBorder: border);
+}
+
 /// A value the user is shown but cannot change — the profile currency, chiefly.
 ///
 /// Rendered as a dashed plate with a lock glyph rather than a disabled input:

@@ -82,11 +82,23 @@ class AppLocalizationsFr extends AppLocalizations {
   String get authRegisterTitle => 'Créer un compte';
 
   @override
-  String get authTagline =>
-      'Vos finances, sur votre machine. Rien ne sort d\'ici.';
+  String get authTagline => 'Votre argent, en clair.';
 
   @override
-  String get authEmailLabel => 'E-mail';
+  String get authPrivacyLine =>
+      'Local et privé — vos données ne quittent jamais cet ordinateur.';
+
+  @override
+  String get authLoginSubmitting => 'Connexion…';
+
+  @override
+  String get authPasswordShow => 'Afficher le mot de passe';
+
+  @override
+  String get authPasswordHide => 'Masquer le mot de passe';
+
+  @override
+  String get authEmailLabel => 'Adresse e-mail';
 
   @override
   String get authPasswordLabel => 'Mot de passe';
@@ -128,7 +140,8 @@ class AppLocalizationsFr extends AppLocalizations {
   String get authDisplayNameRequired => 'Le nom est requis.';
 
   @override
-  String get authErrorInvalidCredentials => 'E-mail ou mot de passe incorrect.';
+  String get authErrorInvalidCredentials =>
+      'E-mail ou mot de passe incorrect. Vérifiez vos identifiants et réessayez.';
 
   @override
   String get authErrorEmailTaken => 'Un compte existe déjà avec cet e-mail.';

@@ -81,11 +81,23 @@ class AppLocalizationsEn extends AppLocalizations {
   String get authRegisterTitle => 'Create an account';
 
   @override
-  String get authTagline =>
-      'Your finances, on your machine. Nothing leaves it.';
+  String get authTagline => 'Your money, clearly.';
 
   @override
-  String get authEmailLabel => 'Email';
+  String get authPrivacyLine =>
+      'Local and private — your data never leaves this computer.';
+
+  @override
+  String get authLoginSubmitting => 'Signing in…';
+
+  @override
+  String get authPasswordShow => 'Show password';
+
+  @override
+  String get authPasswordHide => 'Hide password';
+
+  @override
+  String get authEmailLabel => 'Email address';
 
   @override
   String get authPasswordLabel => 'Password';
@@ -127,7 +139,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get authDisplayNameRequired => 'Display name is required.';
 
   @override
-  String get authErrorInvalidCredentials => 'Incorrect email or password.';
+  String get authErrorInvalidCredentials =>
+      'Incorrect email or password. Check your details and try again.';
 
   @override
   String get authErrorEmailTaken =>

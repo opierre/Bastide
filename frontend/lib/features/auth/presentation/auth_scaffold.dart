@@ -1,26 +1,56 @@
 import 'package:flutter/material.dart';
 
+import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/tokens.dart';
 import '../../../core/widgets/brand_mark.dart';
+import '../../../core/widgets/frame_texture.dart';
 import '../../../l10n/app_localizations.dart';
 
-/// Shared chrome for the signed-out screens: an ink page lit by two soft brand
-/// glows, with the form on a single raised card. Login and register use it so
-/// the two screens are indistinguishable apart from their fields.
+/// Shared chrome for the signed-out screens: an ink page lit by two soft iris
+/// glows, with the form on a single raised card.
+///
+/// The card holds *only the task* — no heading. What the screen is for is said
+/// once, above the card, by the lockup and the tagline; repeating it as a card
+/// title would put two competing headings on a 416px column.
 class AuthScaffold extends StatelessWidget {
   const AuthScaffold({
     super.key,
-    required this.title,
     required this.form,
     required this.footer,
+    required this.lockup,
+    this.cardWidth = 416,
+    this.tagline,
   });
 
-  final String title;
+  /// Login's variant: the wider lockup and the tagline.
+  const AuthScaffold.login({
+    super.key,
+    required this.form,
+    required this.footer,
+    required String this.tagline,
+  }) : cardWidth = 416,
+       lockup = const BrandLockup.login();
+
+  /// Register's variant: a smaller lockup and a wider card, with no tagline —
+  /// the form is long enough that the extra line pushes the fields down for no
+  /// gain, and the user has already read it on the way here.
+  const AuthScaffold.register({
+    super.key,
+    required this.form,
+    required this.footer,
+  }) : cardWidth = 470,
+       tagline = null,
+       lockup = const BrandLockup.register();
+
   final Widget form;
 
   /// The "switch to the other screen" link, kept outside the card so the card
   /// contains only the task at hand.
   final Widget footer;
+
+  final Widget lockup;
+  final double cardWidth;
+  final String? tagline;
 
   @override
   Widget build(BuildContext context) {
@@ -29,54 +59,89 @@ class AuthScaffold extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: AppColors.surfaceSunken,
-      body: Stack(
-        children: [
-          const Positioned(top: -180, left: -140, child: _Glow(color: AppColors.iris)),
-          const Positioned(bottom: -220, right: -160, child: _Glow(color: AppColors.irisDeep)),
-          Center(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.all(AppSpacing.xl),
-              child: ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 420),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    const Center(child: BrandLockup(markSize: 44, wordmarkSize: 24)),
-                    const SizedBox(height: AppSpacing.sm + AppSpacing.xs),
-                    Text(
-                      l10n.authTagline,
-                      textAlign: TextAlign.center,
-                      style: textTheme.bodyMedium?.copyWith(color: AppColors.textSecondary),
-                    ),
-                    const SizedBox(height: AppSpacing.xl),
-                    Container(
-                      padding: const EdgeInsets.all(AppSpacing.lg + AppSpacing.xs),
-                      decoration: BoxDecoration(
-                        color: AppColors.surfaceRaised,
-                        borderRadius: BorderRadius.circular(AppRadii.xl),
-                        border: Border.all(color: AppColors.border),
-                        boxShadow: AppShadows.modal,
+      body: FrameTexture(
+        child: Stack(
+          children: [
+            const Positioned(
+              top: -180,
+              left: -140,
+              child: _Glow(color: AppColors.iris),
+            ),
+            const Positioned(
+              bottom: -220,
+              right: -160,
+              child: _Glow(color: AppColors.irisDeep),
+            ),
+            Center(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.all(AppSpacing.xl),
+                child: SizedBox(
+                  width: cardWidth,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Center(child: lockup),
+                      if (tagline != null) ...[
+                        const SizedBox(height: AppSpacing.sm + AppSpacing.xs),
+                        Text(
+                          tagline!,
+                          textAlign: TextAlign.center,
+                          style: textTheme.bodyLarge?.copyWith(
+                            color: AppColors.textSecondary,
+                          ),
+                        ),
+                      ],
+                      const SizedBox(height: AppSpacing.sm + AppSpacing.xs),
+                      _PrivacyLine(text: l10n.authPrivacyLine),
+                      const SizedBox(height: AppSpacing.lg + AppSpacing.xs),
+                      Container(
+                        padding: const EdgeInsets.all(30),
+                        decoration: BoxDecoration(
+                          color: AppColors.surfaceRaised,
+                          borderRadius: BorderRadius.circular(AppRadii.xl),
+                          border: Border.all(color: AppColors.borderCard),
+                          boxShadow: AppShadows.modal,
+                        ),
+                        child: form,
                       ),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          Text(title, style: textTheme.headlineSmall),
-                          const SizedBox(height: AppSpacing.lg),
-                          form,
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: AppSpacing.md),
-                    Center(child: footer),
-                  ],
+                      const SizedBox(height: AppSpacing.md + AppSpacing.xs),
+                      Center(child: footer),
+                    ],
+                  ),
                 ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
+    );
+  }
+}
+
+/// Lock glyph + the local-and-private promise. It sits above the card rather
+/// than inside it because it is about the product, not about the form.
+class _PrivacyLine extends StatelessWidget {
+  const _PrivacyLine({required this.text});
+
+  final String text;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        const Icon(Icons.lock_outline_rounded, size: 12, color: AppColors.textDisabled),
+        const SizedBox(width: AppSpacing.xs + 2),
+        Flexible(
+          child: Text(
+            text,
+            key: const Key('authPrivacyLine'),
+            textAlign: TextAlign.center,
+            style: AppTextStyles.helper.copyWith(color: AppColors.textDisabled),
+          ),
+        ),
+      ],
     );
   }
 }
@@ -97,42 +162,10 @@ class _Glow extends StatelessWidget {
         decoration: BoxDecoration(
           shape: BoxShape.circle,
           gradient: RadialGradient(
-            colors: [color.withValues(alpha: 0.10), color.withValues(alpha: 0.0)],
+            colors: [color.withValues(alpha: 0.07), color.withValues(alpha: 0.0)],
           ),
         ),
       ),
-    );
-  }
-}
-
-/// The submit button used on both auth screens: full width, with the spinner
-/// swapped in place so the button doesn't resize mid-submit.
-class AuthSubmitButton extends StatelessWidget {
-  const AuthSubmitButton({
-    super.key,
-    required this.label,
-    required this.isSubmitting,
-    required this.onPressed,
-  });
-
-  final String label;
-  final bool isSubmitting;
-  final VoidCallback onPressed;
-
-  @override
-  Widget build(BuildContext context) {
-    return FilledButton(
-      onPressed: isSubmitting ? null : onPressed,
-      child: isSubmitting
-          ? const SizedBox(
-              height: 18,
-              width: 18,
-              child: CircularProgressIndicator(
-                strokeWidth: 2,
-                color: AppColors.textDisabled,
-              ),
-            )
-          : Text(label),
     );
   }
 }

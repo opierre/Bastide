@@ -32,8 +32,24 @@
   "comingSoonBody": "This screen arrives in a later step. In the meantime, add your accounts to get set up.",
   "authLoginTitle": "Log in",
   "authRegisterTitle": "Create an account",
-  "authTagline": "Your finances, on your machine. Nothing leaves it.",
-  "authEmailLabel": "Email",
+  "authTagline": "Your money, clearly.",
+  "authPrivacyLine": "Local and private — your data never leaves this computer.",
+  "@authPrivacyLine": {
+    "description": "Reassurance line shown under the tagline on the signed-out screens, beside a lock glyph."
+  },
+  "authLoginSubmitting": "Signing in…",
+  "@authLoginSubmitting": {
+    "description": "Label replacing the sign-in button text while the request is in flight."
+  },
+  "authPasswordShow": "Show password",
+  "@authPasswordShow": {
+    "description": "Accessible label for the control that reveals the typed password."
+  },
+  "authPasswordHide": "Hide password",
+  "@authPasswordHide": {
+    "description": "Accessible label for the control that hides the typed password again."
+  },
+  "authEmailLabel": "Email address",
   "authPasswordLabel": "Password",
   "authDisplayNameLabel": "Display name",
   "authLocaleLabel": "Language",
@@ -47,7 +63,7 @@
   "authEmailRequired": "Email is required.",
   "authPasswordRequired": "Password is required.",
   "authDisplayNameRequired": "Display name is required.",
-  "authErrorInvalidCredentials": "Incorrect email or password.",
+  "authErrorInvalidCredentials": "Incorrect email or password. Check your details and try again.",
   "authErrorEmailTaken": "An account with this email already exists.",
   "authErrorValidation": "Some information is invalid.",
   "authErrorGeneric": "Something went wrong. Please try again.",

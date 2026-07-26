@@ -239,13 +239,37 @@ abstract class AppLocalizations {
   /// Reassuring subheading under the brand lockup on the login and register screens.
   ///
   /// In fr, this message translates to:
-  /// **'Vos finances, sur votre machine. Rien ne sort d\'ici.'**
+  /// **'Votre argent, en clair.'**
   String get authTagline;
+
+  /// Reassurance line shown under the tagline on the signed-out screens, beside a lock glyph.
+  ///
+  /// In fr, this message translates to:
+  /// **'Local et privé — vos données ne quittent jamais cet ordinateur.'**
+  String get authPrivacyLine;
+
+  /// Label replacing the sign-in button text while the request is in flight.
+  ///
+  /// In fr, this message translates to:
+  /// **'Connexion…'**
+  String get authLoginSubmitting;
+
+  /// Accessible label for the control that reveals the typed password.
+  ///
+  /// In fr, this message translates to:
+  /// **'Afficher le mot de passe'**
+  String get authPasswordShow;
+
+  /// Accessible label for the control that hides the typed password again.
+  ///
+  /// In fr, this message translates to:
+  /// **'Masquer le mot de passe'**
+  String get authPasswordHide;
 
   /// Label for the email field on login/register forms.
   ///
   /// In fr, this message translates to:
-  /// **'E-mail'**
+  /// **'Adresse e-mail'**
   String get authEmailLabel;
 
   /// Label for the password field on login/register forms.
@@ -329,7 +353,7 @@ abstract class AppLocalizations {
   /// Localized message for the backend's INVALID_CREDENTIALS error code.
   ///
   /// In fr, this message translates to:
-  /// **'E-mail ou mot de passe incorrect.'**
+  /// **'E-mail ou mot de passe incorrect. Vérifiez vos identifiants et réessayez.'**
   String get authErrorInvalidCredentials;
 
   /// Localized message for the backend's EMAIL_TAKEN error code.

@@ -6,9 +6,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 /// fixed session state and/or to record which methods were called — without
 /// touching the real API client or secure storage platform channels.
 class FakeAuthController extends AuthController {
-  FakeAuthController({this.initialUser});
+  FakeAuthController({this.initialUser, this.loginError});
 
   final AuthUser? initialUser;
+
+  /// When set, [login] fails with it instead of recording a success — the seam
+  /// screens' error states are asserted through.
+  final Object? loginError;
 
   final loginCalls = <({String email, String password})>[];
   final registerCalls =
@@ -21,6 +25,9 @@ class FakeAuthController extends AuthController {
   @override
   Future<void> login({required String email, required String password}) async {
     loginCalls.add((email: email, password: password));
+    if (loginError case final error?) {
+      state = AsyncValue.error(error, StackTrace.current);
+    }
   }
 
   @override

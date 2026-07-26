@@ -92,11 +92,27 @@
   "@authRegisterTitle": {
     "description": "Heading on the registration screen."
   },
-  "authTagline": "Vos finances, sur votre machine. Rien ne sort d'ici.",
+  "authTagline": "Votre argent, en clair.",
   "@authTagline": {
     "description": "Reassuring subheading under the brand lockup on the login and register screens."
   },
-  "authEmailLabel": "E-mail",
+  "authPrivacyLine": "Local et privé — vos données ne quittent jamais cet ordinateur.",
+  "@authPrivacyLine": {
+    "description": "Reassurance line shown under the tagline on the signed-out screens, beside a lock glyph."
+  },
+  "authLoginSubmitting": "Connexion…",
+  "@authLoginSubmitting": {
+    "description": "Label replacing the sign-in button text while the request is in flight."
+  },
+  "authPasswordShow": "Afficher le mot de passe",
+  "@authPasswordShow": {
+    "description": "Accessible label for the control that reveals the typed password."
+  },
+  "authPasswordHide": "Masquer le mot de passe",
+  "@authPasswordHide": {
+    "description": "Accessible label for the control that hides the typed password again."
+  },
+  "authEmailLabel": "Adresse e-mail",
   "@authEmailLabel": {
     "description": "Label for the email field on login/register forms."
   },
@@ -152,7 +168,7 @@
   "@authDisplayNameRequired": {
     "description": "Validation message when the display name field is left empty."
   },
-  "authErrorInvalidCredentials": "E-mail ou mot de passe incorrect.",
+  "authErrorInvalidCredentials": "E-mail ou mot de passe incorrect. Vérifiez vos identifiants et réessayez.",
   "@authErrorInvalidCredentials": {
     "description": "Localized message for the backend's INVALID_CREDENTIALS error code."
   },

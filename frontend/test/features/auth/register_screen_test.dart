@@ -70,8 +70,10 @@ void main() {
     await tester.pumpWidget(_wrap(controller: FakeAuthController()));
     await tester.pumpAndSettle();
 
-    expect(find.text('Créer un compte'), findsOneWidget);
+    // The card carries no heading — the lockup and the privacy line above it
+    // say what the screen is, so the submit label is the assertable title.
     expect(find.text('Créer mon compte'), findsOneWidget);
+    expect(find.text('Déjà un compte ? Se connecter'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
 
@@ -81,8 +83,8 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(find.text('Create an account'), findsOneWidget);
     expect(find.text('Create account'), findsOneWidget);
+    expect(find.text('Already have an account? Log in'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
 }
