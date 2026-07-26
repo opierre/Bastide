@@ -72,6 +72,48 @@ class AppLocalizationsFr extends AppLocalizations {
   String get comingSoonTitle => 'Bientôt disponible';
 
   @override
+  String get settingsSectionProfile => 'Profil';
+
+  @override
+  String get settingsSectionPreferences => 'Préférences';
+
+  @override
+  String get settingsSectionData => 'Données';
+
+  @override
+  String get settingsSectionAbout => 'À propos';
+
+  @override
+  String get settingsLanguageTitle => 'Langue';
+
+  @override
+  String get settingsLanguageNote =>
+      'S\'applique immédiatement à toute l\'interface.';
+
+  @override
+  String get settingsCurrencyTitle => 'Devise';
+
+  @override
+  String get settingsCurrencyNote =>
+      'Choisie à l\'inscription et appliquée à tous vos comptes. Elle ne peut pas être modifiée dans cette version.';
+
+  @override
+  String get settingsFormatsTitle => 'Aperçu des formats';
+
+  @override
+  String get settingsFormatsDates => 'Dates';
+
+  @override
+  String get settingsFormatsAmounts => 'Montants';
+
+  @override
+  String get settingsAboutVersion => 'Version';
+
+  @override
+  String get settingsAboutPrivacy =>
+      'Toutes vos données restent sur cet ordinateur. FinStride ne se connecte à aucune banque et n\'envoie rien sur Internet.';
+
+  @override
   String get comingSoonBody =>
       'Cet écran arrive dans une prochaine étape. En attendant, ajoutez vos comptes pour préparer le terrain.';
 

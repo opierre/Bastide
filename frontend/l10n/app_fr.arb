@@ -80,6 +80,58 @@
   "@comingSoonTitle": {
     "description": "Placeholder heading on panels whose feature isn't built yet."
   },
+  "settingsSectionProfile": "Profil",
+  "@settingsSectionProfile": {
+    "description": "Settings section nav item for the user's profile."
+  },
+  "settingsSectionPreferences": "Préférences",
+  "@settingsSectionPreferences": {
+    "description": "Settings section nav item for language, currency and formats."
+  },
+  "settingsSectionData": "Données",
+  "@settingsSectionData": {
+    "description": "Settings section nav item for the local database, export and danger zone."
+  },
+  "settingsSectionAbout": "À propos",
+  "@settingsSectionAbout": {
+    "description": "Settings section nav item for the version and privacy statement."
+  },
+  "settingsLanguageTitle": "Langue",
+  "@settingsLanguageTitle": {
+    "description": "Title of the language card in settings preferences."
+  },
+  "settingsLanguageNote": "S'applique immédiatement à toute l'interface.",
+  "@settingsLanguageNote": {
+    "description": "Note under the language segmented control."
+  },
+  "settingsCurrencyTitle": "Devise",
+  "@settingsCurrencyTitle": {
+    "description": "Title of the currency card in settings preferences."
+  },
+  "settingsCurrencyNote": "Choisie à l'inscription et appliquée à tous vos comptes. Elle ne peut pas être modifiée dans cette version.",
+  "@settingsCurrencyNote": {
+    "description": "Note under the read-only currency field in settings, stating that it is permanent."
+  },
+  "settingsFormatsTitle": "Aperçu des formats",
+  "@settingsFormatsTitle": {
+    "description": "Title of the card previewing how dates and amounts render in the active locale."
+  },
+  "settingsFormatsDates": "Dates",
+  "@settingsFormatsDates": {
+    "description": "Label on the date format preview plate."
+  },
+  "settingsFormatsAmounts": "Montants",
+  "@settingsFormatsAmounts": {
+    "description": "Label on the amount format preview plate."
+  },
+  "settingsAboutVersion": "Version",
+  "@settingsAboutVersion": {
+    "description": "Label beside the application version number in the About section."
+  },
+  "settingsAboutPrivacy": "Toutes vos données restent sur cet ordinateur. FinStride ne se connecte à aucune banque et n'envoie rien sur Internet.",
+  "@settingsAboutPrivacy": {
+    "description": "Local-privacy statement in the About section."
+  },
   "comingSoonBody": "Cet écran arrive dans une prochaine étape. En attendant, ajoutez vos comptes pour préparer le terrain.",
   "@comingSoonBody": {
     "description": "Encouraging placeholder body on panels whose feature isn't built yet."

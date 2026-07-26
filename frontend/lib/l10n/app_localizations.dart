@@ -218,6 +218,84 @@ abstract class AppLocalizations {
   /// **'Bientôt disponible'**
   String get comingSoonTitle;
 
+  /// Settings section nav item for the user's profile.
+  ///
+  /// In fr, this message translates to:
+  /// **'Profil'**
+  String get settingsSectionProfile;
+
+  /// Settings section nav item for language, currency and formats.
+  ///
+  /// In fr, this message translates to:
+  /// **'Préférences'**
+  String get settingsSectionPreferences;
+
+  /// Settings section nav item for the local database, export and danger zone.
+  ///
+  /// In fr, this message translates to:
+  /// **'Données'**
+  String get settingsSectionData;
+
+  /// Settings section nav item for the version and privacy statement.
+  ///
+  /// In fr, this message translates to:
+  /// **'À propos'**
+  String get settingsSectionAbout;
+
+  /// Title of the language card in settings preferences.
+  ///
+  /// In fr, this message translates to:
+  /// **'Langue'**
+  String get settingsLanguageTitle;
+
+  /// Note under the language segmented control.
+  ///
+  /// In fr, this message translates to:
+  /// **'S\'applique immédiatement à toute l\'interface.'**
+  String get settingsLanguageNote;
+
+  /// Title of the currency card in settings preferences.
+  ///
+  /// In fr, this message translates to:
+  /// **'Devise'**
+  String get settingsCurrencyTitle;
+
+  /// Note under the read-only currency field in settings, stating that it is permanent.
+  ///
+  /// In fr, this message translates to:
+  /// **'Choisie à l\'inscription et appliquée à tous vos comptes. Elle ne peut pas être modifiée dans cette version.'**
+  String get settingsCurrencyNote;
+
+  /// Title of the card previewing how dates and amounts render in the active locale.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aperçu des formats'**
+  String get settingsFormatsTitle;
+
+  /// Label on the date format preview plate.
+  ///
+  /// In fr, this message translates to:
+  /// **'Dates'**
+  String get settingsFormatsDates;
+
+  /// Label on the amount format preview plate.
+  ///
+  /// In fr, this message translates to:
+  /// **'Montants'**
+  String get settingsFormatsAmounts;
+
+  /// Label beside the application version number in the About section.
+  ///
+  /// In fr, this message translates to:
+  /// **'Version'**
+  String get settingsAboutVersion;
+
+  /// Local-privacy statement in the About section.
+  ///
+  /// In fr, this message translates to:
+  /// **'Toutes vos données restent sur cet ordinateur. FinStride ne se connecte à aucune banque et n\'envoie rien sur Internet.'**
+  String get settingsAboutPrivacy;
+
   /// Encouraging placeholder body on panels whose feature isn't built yet.
   ///
   /// In fr, this message translates to:
