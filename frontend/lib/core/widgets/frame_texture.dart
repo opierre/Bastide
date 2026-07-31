@@ -91,10 +91,15 @@ Future<ui.Image> _decodeGrainTile() {
 
   for (var i = 0; i < size * size; i++) {
     final offset = i * 4;
-    pixels[offset] = 255;
-    pixels[offset + 1] = 255;
-    pixels[offset + 2] = 255;
-    pixels[offset + 3] = (random.nextDouble() * maxAlpha).round();
+    final alpha = (random.nextDouble() * maxAlpha).round();
+    // `rgba8888` is *premultiplied*: the channels must already be scaled by
+    // alpha. The grain is white, so each channel equals alpha. Writing 255 here
+    // instead would be invalid premultiplied data and rasterize as opaque white,
+    // painting the whole frame out.
+    pixels[offset] = alpha;
+    pixels[offset + 1] = alpha;
+    pixels[offset + 2] = alpha;
+    pixels[offset + 3] = alpha;
   }
 
   final completer = Completer<ui.Image>();
