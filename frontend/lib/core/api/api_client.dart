@@ -23,12 +23,9 @@ class ApiFailure implements Exception {
 /// injection, JSON encode/decode, and error-envelope mapping so no other
 /// layer talks HTTP directly.
 class ApiClient {
-  ApiClient({
-    Uri? baseUrl,
-    http.Client? httpClient,
-    this.tokenProvider,
-  }) : baseUrl = baseUrl ?? Uri.parse('http://127.0.0.1:8000/api/v1'),
-       _httpClient = httpClient ?? http.Client();
+  ApiClient({Uri? baseUrl, http.Client? httpClient, this.tokenProvider})
+    : baseUrl = baseUrl ?? Uri.parse('http://127.0.0.1:8000/api/v1'),
+      _httpClient = httpClient ?? http.Client();
 
   final Uri baseUrl;
   final http.Client _httpClient;
@@ -52,6 +49,32 @@ class ApiClient {
     return _send('DELETE', path);
   }
 
+  /// Uploads a file alongside flat form fields (`POST /imports`,
+  /// `POST /csv-templates/preview`).
+  ///
+  /// Multipart rather than JSON because the backend takes the statement file as
+  /// an `UploadFile` — see `PROJECT.md` §5. The `Content-Type` header is left to
+  /// [http.MultipartRequest], which has to append the generated boundary to it.
+  Future<dynamic> postMultipart(
+    String path, {
+    required String fileField,
+    required String fileName,
+    required List<int> fileBytes,
+    Map<String, String> fields = const {},
+  }) async {
+    final uri = baseUrl.replace(path: '${baseUrl.path}$path');
+    final request = http.MultipartRequest('POST', uri)
+      ..headers.addAll(_headers(json: false))
+      ..fields.addAll(fields)
+      ..files.add(
+        http.MultipartFile.fromBytes(fileField, fileBytes, filename: fileName),
+      );
+
+    final streamed = await _httpClient.send(request);
+    final response = await http.Response.fromStream(streamed);
+    return _decode(response);
+  }
+
   Future<dynamic> _send(
     String method,
     String path, {
@@ -72,9 +95,9 @@ class ApiClient {
     return _decode(response);
   }
 
-  Map<String, String> _headers() {
+  Map<String, String> _headers({bool json = true}) {
     final headers = <String, String>{
-      'Content-Type': 'application/json',
+      if (json) 'Content-Type': 'application/json',
       'Accept': 'application/json',
     };
     final token = tokenProvider?.call();
