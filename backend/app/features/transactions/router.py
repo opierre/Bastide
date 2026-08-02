@@ -1,4 +1,4 @@
-"""Transaction endpoints: user-scoped list with filters, search, and pagination."""
+"""Transaction endpoints: user-scoped list with filters/search/pagination, detail, and patch."""
 
 from datetime import date
 from typing import Annotated
@@ -11,7 +11,12 @@ from app.features.auth.deps import get_current_user
 from app.features.auth.models import User
 from app.features.transactions.models import Transaction
 from app.features.transactions.repository import TransactionRepository
-from app.features.transactions.schemas import TransactionCategory, TransactionPage, TransactionRead
+from app.features.transactions.schemas import (
+    TransactionCategory,
+    TransactionPage,
+    TransactionRead,
+    TransactionUpdate,
+)
 from app.features.transactions.service import PAGE_SIZE, TransactionService
 
 router = APIRouter(prefix="/api/v1/transactions", tags=["transactions"])
@@ -76,3 +81,24 @@ async def list_transactions(
         page_size=PAGE_SIZE,
         total=total,
     )
+
+
+@router.get("/{transaction_id}", response_model=TransactionRead)
+async def get_transaction(
+    transaction_id: str,
+    service: Annotated[TransactionService, Depends(_service)],
+    user: Annotated[User, Depends(get_current_user)],
+) -> TransactionRead:
+    """Fetch a single transaction the caller owns."""
+    return _to_read(service.get(user.id, transaction_id))
+
+
+@router.patch("/{transaction_id}", response_model=TransactionRead)
+async def update_transaction(
+    transaction_id: str,
+    payload: TransactionUpdate,
+    service: Annotated[TransactionService, Depends(_service)],
+    user: Annotated[User, Depends(get_current_user)],
+) -> TransactionRead:
+    """Patch category/description/merchant. A category edit sets `source=user`."""
+    return _to_read(service.update(user.id, transaction_id, payload))

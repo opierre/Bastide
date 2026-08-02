@@ -2,7 +2,7 @@
 
 from datetime import date, datetime
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class TransactionCategory(BaseModel):
@@ -48,3 +48,11 @@ class TransactionPage(BaseModel):
     page: int
     page_size: int
     total: int
+
+
+class TransactionUpdate(BaseModel):
+    """Patch payload for a transaction. A `category_id` edit sets `source=user`."""
+
+    category_id: str | None = None
+    description_clean: str | None = Field(default=None, min_length=1)
+    merchant: str | None = None

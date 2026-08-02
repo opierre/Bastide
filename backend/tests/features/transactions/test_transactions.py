@@ -1,4 +1,4 @@
-"""Tests for the transaction list endpoint: filters, search, and pagination."""
+"""Tests for the transaction list/detail endpoints and the user category override."""
 
 from datetime import date
 from pathlib import Path
@@ -283,3 +283,126 @@ def test_list_is_user_scoped(client: TestClient, tmp_path: Path) -> None:
 
     response = client.get("/api/v1/transactions", headers=headers_a)
     assert response.json()["total"] == 1
+
+
+# --- detail ------------------------------------------------------------------------------
+
+
+def test_get_transaction(client: TestClient, tmp_path: Path) -> None:
+    headers, _ = _register(client)
+    account_id = _create_account(client, headers)
+    transaction_id = _insert_transaction(tmp_path, account_id)
+
+    response = client.get(f"/api/v1/transactions/{transaction_id}", headers=headers)
+
+    assert response.status_code == 200
+    assert response.json()["id"] == transaction_id
+
+
+def test_get_missing_transaction_returns_404(client: TestClient) -> None:
+    headers, _ = _register(client)
+    response = client.get("/api/v1/transactions/does-not-exist", headers=headers)
+    assert response.status_code == 404
+    assert response.json()["error"]["code"] == "TRANSACTION_NOT_FOUND"
+
+
+def test_get_cross_user_transaction_returns_404(client: TestClient, tmp_path: Path) -> None:
+    headers_a, _ = _register(client, "amelie@example.com")
+    account_id_a = _create_account(client, headers_a)
+    transaction_id = _insert_transaction(tmp_path, account_id_a)
+
+    headers_b, _ = _register(client, "bruno@example.com")
+    response = client.get(f"/api/v1/transactions/{transaction_id}", headers=headers_b)
+
+    assert response.status_code == 404
+    assert response.json()["error"]["code"] == "TRANSACTION_NOT_FOUND"
+
+
+# --- patch ---------------------------------------------------------------------------------
+
+
+def test_patch_category_sets_source_user_and_clears_review(
+    client: TestClient, tmp_path: Path
+) -> None:
+    headers, _ = _register(client)
+    account_id = _create_account(client, headers)
+    category_id = _create_category(client, headers)
+    transaction_id = _insert_transaction(tmp_path, account_id)
+
+    response = client.patch(
+        f"/api/v1/transactions/{transaction_id}",
+        json={"category_id": category_id},
+        headers=headers,
+    )
+
+    assert response.status_code == 200
+    body = response.json()
+    assert body["category"]["id"] == category_id
+    assert body["categorization_source"] == "user"
+    assert body["needs_review"] is False
+
+
+def test_patch_description_and_merchant(client: TestClient, tmp_path: Path) -> None:
+    headers, _ = _register(client)
+    account_id = _create_account(client, headers)
+    transaction_id = _insert_transaction(tmp_path, account_id)
+
+    response = client.patch(
+        f"/api/v1/transactions/{transaction_id}",
+        json={"description_clean": "Carrefour Market", "merchant": "Carrefour"},
+        headers=headers,
+    )
+
+    body = response.json()
+    assert body["description_clean"] == "Carrefour Market"
+    assert body["merchant"] == "Carrefour"
+
+
+def test_patch_category_protects_from_rule_apply(client: TestClient, tmp_path: Path) -> None:
+    headers, _ = _register(client)
+    account_id = _create_account(client, headers)
+    rule_category_id = _create_category(client, headers, name="Auto-cat")
+    user_category_id = _create_category(client, headers, name="User pick")
+    client.post(
+        "/api/v1/rules",
+        json={
+            "priority": 1,
+            "match_field": "description_clean",
+            "match_type": "contains",
+            "pattern": "CARREFOUR",
+            "category_id": rule_category_id,
+            "enabled": True,
+        },
+        headers=headers,
+    )
+    transaction_id = _insert_transaction(tmp_path, account_id, description_clean="CARREFOUR")
+
+    client.patch(
+        f"/api/v1/transactions/{transaction_id}",
+        json={"category_id": user_category_id},
+        headers=headers,
+    )
+
+    response = client.post("/api/v1/rules/apply", json={}, headers=headers)
+    assert response.json()["recategorized_count"] == 0
+
+    transaction = client.get(f"/api/v1/transactions/{transaction_id}", headers=headers).json()
+    assert transaction["category"]["id"] == user_category_id
+    assert transaction["categorization_source"] == "user"
+
+
+def test_patch_cross_user_transaction_returns_404(client: TestClient, tmp_path: Path) -> None:
+    headers_a, _ = _register(client, "amelie@example.com")
+    account_id_a = _create_account(client, headers_a)
+    transaction_id = _insert_transaction(tmp_path, account_id_a)
+
+    headers_b, _ = _register(client, "bruno@example.com")
+    category_id_b = _create_category(client, headers_b)
+    response = client.patch(
+        f"/api/v1/transactions/{transaction_id}",
+        json={"category_id": category_id_b},
+        headers=headers_b,
+    )
+
+    assert response.status_code == 404
+    assert response.json()["error"]["code"] == "TRANSACTION_NOT_FOUND"

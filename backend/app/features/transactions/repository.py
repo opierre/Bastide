@@ -68,3 +68,16 @@ class TransactionRepository:
             )
         )
         return rows, total
+
+    def get_by_id_for_user(self, transaction_id: str, user_id: str) -> Transaction | None:
+        return self._db.scalar(
+            select(Transaction)
+            .join(Account, Account.id == Transaction.account_id)
+            .where(Transaction.id == transaction_id, Account.user_id == user_id)
+            .options(selectinload(Transaction.category))
+        )
+
+    def update(self, transaction: Transaction) -> Transaction:
+        self._db.commit()
+        self._db.refresh(transaction)
+        return transaction
