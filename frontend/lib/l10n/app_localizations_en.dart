@@ -437,6 +437,152 @@ class AppLocalizationsEn extends AppLocalizations {
   String get accountErrorGeneric => 'Something went wrong. Please try again.';
 
   @override
+  String get importNewTitle => 'New import';
+
+  @override
+  String get importAccountLabel => 'Destination account';
+
+  @override
+  String get importNoAccounts =>
+      'Create an account first — it is what the imported transactions will land in.';
+
+  @override
+  String get importAccountsUnavailable =>
+      'Couldn\'t load your accounts. Try again in a moment.';
+
+  @override
+  String get importDropZoneTitle => 'Drop an OFX, QFX or CSV file';
+
+  @override
+  String get importDropZoneHint =>
+      'or click to browse — a CSV opens the mapping wizard';
+
+  @override
+  String importFileSize(String size) {
+    return '$size kB';
+  }
+
+  @override
+  String get importRemoveFile => 'Remove file';
+
+  @override
+  String get importSubmit => 'Import';
+
+  @override
+  String get importSubmitting => 'Importing…';
+
+  @override
+  String get importOpenWizard => 'Set up and import';
+
+  @override
+  String importTemplateReuse(String bank) {
+    return 'CSV format saved for $bank — it will be reused for this file.';
+  }
+
+  @override
+  String get importReconfigureTemplate => 'Reconfigure';
+
+  @override
+  String get importResultTitle => 'Last import';
+
+  @override
+  String importResultNewLabel(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'new transactions',
+      one: 'new transaction',
+      zero: 'no new transactions',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String importResultDuplicateLabel(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'duplicates skipped',
+      one: 'duplicate skipped',
+      zero: 'no duplicates',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String importResultTarget(String file, String account) {
+    return '$file → $account';
+  }
+
+  @override
+  String importPeriodRange(DateTime start, DateTime end) {
+    final intl.DateFormat startDateFormat = intl.DateFormat.yMd(localeName);
+    final String startString = startDateFormat.format(start);
+    final intl.DateFormat endDateFormat = intl.DateFormat.yMd(localeName);
+    final String endString = endDateFormat.format(end);
+
+    return '$startString – $endString';
+  }
+
+  @override
+  String get importFailedNote =>
+      'The file couldn\'t be read — nothing was changed.';
+
+  @override
+  String importDuplicatesNote(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count transactions already present, skipped',
+      one: '1 transaction already present, skipped',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get importStatusSuccess => 'Succeeded';
+
+  @override
+  String get importStatusPartial => 'Partial';
+
+  @override
+  String get importStatusFailed => 'Failed';
+
+  @override
+  String get importHistoryTitle => 'Import history';
+
+  @override
+  String get importHistoryEmptyTitle => 'No imports yet';
+
+  @override
+  String get importHistoryEmptyBody =>
+      'Drop a statement above and your transactions will appear here.';
+
+  @override
+  String get importHistoryFileHeader => 'File';
+
+  @override
+  String get importHistoryFormatHeader => 'Format';
+
+  @override
+  String get importHistoryImportedHeader => 'Imported on';
+
+  @override
+  String get importHistoryPeriodHeader => 'Period covered';
+
+  @override
+  String get importHistoryNewHeader => 'New';
+
+  @override
+  String get importHistoryDuplicatesHeader => 'Duplicates';
+
+  @override
+  String get importHistoryStatusHeader => 'Status';
+
+  @override
+  String get importRetry => 'Try again';
+
+  @override
   String get csvWizardTitle => 'CSV wizard';
 
   @override

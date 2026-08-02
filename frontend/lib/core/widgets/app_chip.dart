@@ -42,11 +42,17 @@ class AppChip extends StatelessWidget {
             Icon(icon, size: 11, color: foreground),
             const SizedBox(width: AppSpacing.xs + 1),
           ],
-          Text(
-            label,
-            style: Theme.of(
-              context,
-            ).textTheme.labelSmall?.copyWith(color: foreground),
+          // Flexible so a long localized label ellipsizes inside a narrow
+          // column instead of overflowing the pill — French status and type
+          // labels run well past their English counterparts.
+          Flexible(
+            child: Text(
+              label,
+              overflow: TextOverflow.ellipsis,
+              style: Theme.of(
+                context,
+              ).textTheme.labelSmall?.copyWith(color: foreground),
+            ),
           ),
         ],
       ),

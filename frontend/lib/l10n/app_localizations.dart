@@ -896,6 +896,210 @@ abstract class AppLocalizations {
   /// **'Une erreur est survenue. Veuillez réessayer.'**
   String get accountErrorGeneric;
 
+  /// Title of the card where a file is staged and imported, on the imports panel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Nouvel import'**
+  String get importNewTitle;
+
+  /// Label for the account selector on the imports panel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Compte de destination'**
+  String get importAccountLabel;
+
+  /// Shown in place of the account selector when the user has no accounts yet.
+  ///
+  /// In fr, this message translates to:
+  /// **'Créez d\'abord un compte : c\'est lui qui recevra les opérations importées.'**
+  String get importNoAccounts;
+
+  /// Shown in place of the account selector when the accounts list failed to load.
+  ///
+  /// In fr, this message translates to:
+  /// **'Impossible de charger vos comptes. Réessayez dans un instant.'**
+  String get importAccountsUnavailable;
+
+  /// Headline inside the imports drop zone.
+  ///
+  /// In fr, this message translates to:
+  /// **'Déposez un fichier OFX, QFX ou CSV'**
+  String get importDropZoneTitle;
+
+  /// Sub-line inside the imports drop zone, stating that a CSV opens the mapping wizard.
+  ///
+  /// In fr, this message translates to:
+  /// **'ou cliquez pour parcourir — un CSV ouvre l\'assistant de correspondance'**
+  String get importDropZoneHint;
+
+  /// Size of the staged file, shown under its name. The number is already formatted for the locale.
+  ///
+  /// In fr, this message translates to:
+  /// **'{size} ko'**
+  String importFileSize(String size);
+
+  /// Tooltip on the control that unstages the selected file.
+  ///
+  /// In fr, this message translates to:
+  /// **'Retirer le fichier'**
+  String get importRemoveFile;
+
+  /// Primary action that imports the staged file.
+  ///
+  /// In fr, this message translates to:
+  /// **'Importer'**
+  String get importSubmit;
+
+  /// Label replacing the import button text while the upload is in flight.
+  ///
+  /// In fr, this message translates to:
+  /// **'Import en cours…'**
+  String get importSubmitting;
+
+  /// Primary action shown for a CSV with no saved mapping — it opens the wizard rather than importing straight away.
+  ///
+  /// In fr, this message translates to:
+  /// **'Configurer et importer'**
+  String get importOpenWizard;
+
+  /// Banner telling the user a saved CSV template will be reused instead of the wizard.
+  ///
+  /// In fr, this message translates to:
+  /// **'Format CSV mémorisé pour {bank} — il sera réutilisé pour ce fichier.'**
+  String importTemplateReuse(String bank);
+
+  /// Action that re-opens the CSV wizard even though a saved template exists.
+  ///
+  /// In fr, this message translates to:
+  /// **'Reconfigurer'**
+  String get importReconfigureTemplate;
+
+  /// Title of the card summarising the import that just ran.
+  ///
+  /// In fr, this message translates to:
+  /// **'Dernier import'**
+  String get importResultTitle;
+
+  /// Caption under the count of newly inserted transactions on the import result card.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, =0{aucune nouvelle opération} =1{nouvelle opération} other{nouvelles opérations}}'**
+  String importResultNewLabel(int count);
+
+  /// Caption under the count of skipped duplicate transactions on the import result card.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, =0{aucun doublon} =1{doublon ignoré} other{doublons ignorés}}'**
+  String importResultDuplicateLabel(int count);
+
+  /// Line on the result card naming the imported file and the account it landed in.
+  ///
+  /// In fr, this message translates to:
+  /// **'{file} → {account}'**
+  String importResultTarget(String file, String account);
+
+  /// The coverage window of an import batch, derived from the file's contents.
+  ///
+  /// In fr, this message translates to:
+  /// **'{start} – {end}'**
+  String importPeriodRange(DateTime start, DateTime end);
+
+  /// Calm explanation shown on a failed import, stating that nothing was written.
+  ///
+  /// In fr, this message translates to:
+  /// **'Le fichier n\'a pas pu être lu — rien n\'a été modifié.'**
+  String get importFailedNote;
+
+  /// Note under a history row's filename when the run skipped duplicates.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, =1{1 opération déjà présente, ignorée} other{{count} opérations déjà présentes, ignorées}}'**
+  String importDuplicatesNote(int count);
+
+  /// Status pill for an import that completed.
+  ///
+  /// In fr, this message translates to:
+  /// **'Réussi'**
+  String get importStatusSuccess;
+
+  /// Status pill for an import where only some rows landed.
+  ///
+  /// In fr, this message translates to:
+  /// **'Partiel'**
+  String get importStatusPartial;
+
+  /// Status pill for an import that could not be parsed at all.
+  ///
+  /// In fr, this message translates to:
+  /// **'Échec'**
+  String get importStatusFailed;
+
+  /// Title of the card listing every past import.
+  ///
+  /// In fr, this message translates to:
+  /// **'Historique des imports'**
+  String get importHistoryTitle;
+
+  /// Heading shown when the import history is empty.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucun import pour l\'instant'**
+  String get importHistoryEmptyTitle;
+
+  /// Encouraging subtext under the empty import-history heading.
+  ///
+  /// In fr, this message translates to:
+  /// **'Déposez un relevé ci-dessus : vos opérations apparaîtront ici.'**
+  String get importHistoryEmptyBody;
+
+  /// Import history column header for the file name.
+  ///
+  /// In fr, this message translates to:
+  /// **'Fichier'**
+  String get importHistoryFileHeader;
+
+  /// Import history column header for the source format badge.
+  ///
+  /// In fr, this message translates to:
+  /// **'Format'**
+  String get importHistoryFormatHeader;
+
+  /// Import history column header for the date the file was imported.
+  ///
+  /// In fr, this message translates to:
+  /// **'Importé le'**
+  String get importHistoryImportedHeader;
+
+  /// Import history column header for the coverage window.
+  ///
+  /// In fr, this message translates to:
+  /// **'Période couverte'**
+  String get importHistoryPeriodHeader;
+
+  /// Import history column header for the count of newly inserted transactions.
+  ///
+  /// In fr, this message translates to:
+  /// **'Nouvelles'**
+  String get importHistoryNewHeader;
+
+  /// Import history column header for the count of skipped duplicates.
+  ///
+  /// In fr, this message translates to:
+  /// **'Doublons'**
+  String get importHistoryDuplicatesHeader;
+
+  /// Import history column header for the outcome pill.
+  ///
+  /// In fr, this message translates to:
+  /// **'Statut'**
+  String get importHistoryStatusHeader;
+
+  /// Retry button label shown when the import history fails to load.
+  ///
+  /// In fr, this message translates to:
+  /// **'Réessayer'**
+  String get importRetry;
+
   /// Title of the one-time CSV column-mapping wizard modal.
   ///
   /// In fr, this message translates to:

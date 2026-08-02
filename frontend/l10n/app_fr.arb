@@ -543,6 +543,185 @@
   "@accountErrorGeneric": {
     "description": "Fallback localized message for unrecognized or network errors on the accounts screen."
   },
+  "importNewTitle": "Nouvel import",
+  "@importNewTitle": {
+    "description": "Title of the card where a file is staged and imported, on the imports panel."
+  },
+  "importAccountLabel": "Compte de destination",
+  "@importAccountLabel": {
+    "description": "Label for the account selector on the imports panel."
+  },
+  "importNoAccounts": "Créez d'abord un compte : c'est lui qui recevra les opérations importées.",
+  "@importNoAccounts": {
+    "description": "Shown in place of the account selector when the user has no accounts yet."
+  },
+  "importAccountsUnavailable": "Impossible de charger vos comptes. Réessayez dans un instant.",
+  "@importAccountsUnavailable": {
+    "description": "Shown in place of the account selector when the accounts list failed to load."
+  },
+  "importDropZoneTitle": "Déposez un fichier OFX, QFX ou CSV",
+  "@importDropZoneTitle": {
+    "description": "Headline inside the imports drop zone."
+  },
+  "importDropZoneHint": "ou cliquez pour parcourir — un CSV ouvre l'assistant de correspondance",
+  "@importDropZoneHint": {
+    "description": "Sub-line inside the imports drop zone, stating that a CSV opens the mapping wizard."
+  },
+  "importFileSize": "{size} ko",
+  "@importFileSize": {
+    "description": "Size of the staged file, shown under its name. The number is already formatted for the locale.",
+    "placeholders": {
+      "size": {
+        "type": "String"
+      }
+    }
+  },
+  "importRemoveFile": "Retirer le fichier",
+  "@importRemoveFile": {
+    "description": "Tooltip on the control that unstages the selected file."
+  },
+  "importSubmit": "Importer",
+  "@importSubmit": {
+    "description": "Primary action that imports the staged file."
+  },
+  "importSubmitting": "Import en cours…",
+  "@importSubmitting": {
+    "description": "Label replacing the import button text while the upload is in flight."
+  },
+  "importOpenWizard": "Configurer et importer",
+  "@importOpenWizard": {
+    "description": "Primary action shown for a CSV with no saved mapping — it opens the wizard rather than importing straight away."
+  },
+  "importTemplateReuse": "Format CSV mémorisé pour {bank} — il sera réutilisé pour ce fichier.",
+  "@importTemplateReuse": {
+    "description": "Banner telling the user a saved CSV template will be reused instead of the wizard.",
+    "placeholders": {
+      "bank": {
+        "type": "String"
+      }
+    }
+  },
+  "importReconfigureTemplate": "Reconfigurer",
+  "@importReconfigureTemplate": {
+    "description": "Action that re-opens the CSV wizard even though a saved template exists."
+  },
+  "importResultTitle": "Dernier import",
+  "@importResultTitle": {
+    "description": "Title of the card summarising the import that just ran."
+  },
+  "importResultNewLabel": "{count, plural, =0{aucune nouvelle opération} =1{nouvelle opération} other{nouvelles opérations}}",
+  "@importResultNewLabel": {
+    "description": "Caption under the count of newly inserted transactions on the import result card.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "importResultDuplicateLabel": "{count, plural, =0{aucun doublon} =1{doublon ignoré} other{doublons ignorés}}",
+  "@importResultDuplicateLabel": {
+    "description": "Caption under the count of skipped duplicate transactions on the import result card.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "importResultTarget": "{file} → {account}",
+  "@importResultTarget": {
+    "description": "Line on the result card naming the imported file and the account it landed in.",
+    "placeholders": {
+      "file": {
+        "type": "String"
+      },
+      "account": {
+        "type": "String"
+      }
+    }
+  },
+  "importPeriodRange": "{start} – {end}",
+  "@importPeriodRange": {
+    "description": "The coverage window of an import batch, derived from the file's contents.",
+    "placeholders": {
+      "start": {
+        "type": "DateTime",
+        "format": "yMd"
+      },
+      "end": {
+        "type": "DateTime",
+        "format": "yMd"
+      }
+    }
+  },
+  "importFailedNote": "Le fichier n'a pas pu être lu — rien n'a été modifié.",
+  "@importFailedNote": {
+    "description": "Calm explanation shown on a failed import, stating that nothing was written."
+  },
+  "importDuplicatesNote": "{count, plural, =1{1 opération déjà présente, ignorée} other{{count} opérations déjà présentes, ignorées}}",
+  "@importDuplicatesNote": {
+    "description": "Note under a history row's filename when the run skipped duplicates.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "importStatusSuccess": "Réussi",
+  "@importStatusSuccess": {
+    "description": "Status pill for an import that completed."
+  },
+  "importStatusPartial": "Partiel",
+  "@importStatusPartial": {
+    "description": "Status pill for an import where only some rows landed."
+  },
+  "importStatusFailed": "Échec",
+  "@importStatusFailed": {
+    "description": "Status pill for an import that could not be parsed at all."
+  },
+  "importHistoryTitle": "Historique des imports",
+  "@importHistoryTitle": {
+    "description": "Title of the card listing every past import."
+  },
+  "importHistoryEmptyTitle": "Aucun import pour l'instant",
+  "@importHistoryEmptyTitle": {
+    "description": "Heading shown when the import history is empty."
+  },
+  "importHistoryEmptyBody": "Déposez un relevé ci-dessus : vos opérations apparaîtront ici.",
+  "@importHistoryEmptyBody": {
+    "description": "Encouraging subtext under the empty import-history heading."
+  },
+  "importHistoryFileHeader": "Fichier",
+  "@importHistoryFileHeader": {
+    "description": "Import history column header for the file name."
+  },
+  "importHistoryFormatHeader": "Format",
+  "@importHistoryFormatHeader": {
+    "description": "Import history column header for the source format badge."
+  },
+  "importHistoryImportedHeader": "Importé le",
+  "@importHistoryImportedHeader": {
+    "description": "Import history column header for the date the file was imported."
+  },
+  "importHistoryPeriodHeader": "Période couverte",
+  "@importHistoryPeriodHeader": {
+    "description": "Import history column header for the coverage window."
+  },
+  "importHistoryNewHeader": "Nouvelles",
+  "@importHistoryNewHeader": {
+    "description": "Import history column header for the count of newly inserted transactions."
+  },
+  "importHistoryDuplicatesHeader": "Doublons",
+  "@importHistoryDuplicatesHeader": {
+    "description": "Import history column header for the count of skipped duplicates."
+  },
+  "importHistoryStatusHeader": "Statut",
+  "@importHistoryStatusHeader": {
+    "description": "Import history column header for the outcome pill."
+  },
+  "importRetry": "Réessayer",
+  "@importRetry": {
+    "description": "Retry button label shown when the import history fails to load."
+  },
   "csvWizardTitle": "Assistant CSV",
   "@csvWizardTitle": {
     "description": "Title of the one-time CSV column-mapping wizard modal."
