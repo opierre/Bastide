@@ -4,9 +4,10 @@ from datetime import UTC, date, datetime
 from uuid import uuid4
 
 from sqlalchemy import Boolean, Date, DateTime, Float, ForeignKey, Index, Integer, String
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.core.db import Base
+from app.features.categories.models import Category
 
 
 class Transaction(Base):
@@ -40,6 +41,7 @@ class Transaction(Base):
     category_id: Mapped[str | None] = mapped_column(
         String(36), ForeignKey("categories.id"), nullable=True, index=True
     )
+    category: Mapped[Category | None] = relationship(Category, lazy="select", viewonly=True)
     categorization_source: Mapped[str] = mapped_column(String(20))
     categorization_confidence: Mapped[float | None] = mapped_column(Float, nullable=True)
     needs_review: Mapped[bool] = mapped_column(Boolean, default=True)
