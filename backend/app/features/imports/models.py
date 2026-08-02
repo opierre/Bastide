@@ -47,6 +47,7 @@ class CsvTemplate(Base):
     decimal_separator: Mapped[str] = mapped_column(String(1))
     amount_strategy: Mapped[str] = mapped_column(String(20))
     column_map: Mapped[dict] = mapped_column(JSON)
+    header_offset: Mapped[int] = mapped_column(Integer, default=0)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), default=lambda: datetime.now(UTC)
     )

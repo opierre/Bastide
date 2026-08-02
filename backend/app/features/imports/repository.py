@@ -3,7 +3,7 @@
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from app.features.imports.models import ImportBatch
+from app.features.imports.models import CsvTemplate, ImportBatch
 from app.features.transactions.models import Transaction
 
 
@@ -68,3 +68,30 @@ class ImportRepository:
         self._db.commit()
         self._db.refresh(batch)
         return batch
+
+
+class CsvTemplateRepository:
+    """Queries and writes for saved per-bank CSV templates, always scoped to a user."""
+
+    def __init__(self, db: Session) -> None:
+        self._db = db
+
+    def list_by_user(self, user_id: str) -> list[CsvTemplate]:
+        return list(
+            self._db.scalars(
+                select(CsvTemplate)
+                .where(CsvTemplate.user_id == user_id)
+                .order_by(CsvTemplate.created_at)
+            )
+        )
+
+    def get_by_id_for_user(self, template_id: str, user_id: str) -> CsvTemplate | None:
+        return self._db.scalar(
+            select(CsvTemplate).where(CsvTemplate.id == template_id, CsvTemplate.user_id == user_id)
+        )
+
+    def add(self, template: CsvTemplate) -> CsvTemplate:
+        self._db.add(template)
+        self._db.commit()
+        self._db.refresh(template)
+        return template
