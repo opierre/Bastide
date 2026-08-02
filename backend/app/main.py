@@ -7,6 +7,7 @@ from app.core.config import get_settings
 from app.core.errors import register_exception_handlers
 from app.features.accounts.router import router as accounts_router
 from app.features.auth.router import router as auth_router
+from app.features.categories.router import router as categories_router
 from app.features.health.router import router as health_router
 from app.features.imports.router import router as imports_router
 
@@ -30,6 +31,7 @@ def create_app() -> FastAPI:
     app.include_router(auth_router)
     app.include_router(accounts_router)
     app.include_router(imports_router)
+    app.include_router(categories_router)
 
     return app
 
