@@ -9,6 +9,7 @@ import '../../features/auth/presentation/login_screen.dart';
 import '../../features/auth/presentation/register_screen.dart';
 import '../../features/categories/presentation/categories_screen.dart';
 import '../../features/dashboard/presentation/dashboard_screen.dart';
+import '../../features/dashboard/presentation/month_selector.dart';
 import '../../features/imports/presentation/imports_screen.dart';
 import '../../features/settings/presentation/settings_screen.dart';
 import '../../features/transactions/presentation/transactions_screen.dart';
@@ -30,6 +31,7 @@ class _AuthRefreshListenable extends ChangeNotifier {
 /// slot in the same frame. Each panel's controls are their own widget and watch
 /// whatever providers they need, which keeps the shell ignorant of features.
 TopBarActionsBuilder? _topBarActions(String path) => switch (path) {
+  '/dashboard' => (context) => const [DashboardTopBarActions()],
   '/accounts' => (context) => const [AccountsTopBarActions()],
   '/transactions' => (context) => const [TransactionsTopBarActions()],
   _ => null,
