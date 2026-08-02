@@ -245,6 +245,14 @@ def test_mom_deltas_computed_against_previous_month(client: TestClient, tmp_path
     assert body["income_delta_pct"] == (150_000 - 100_000) / 100_000 * 100
     assert body["expense_delta_pct"] == (15_000 - 10_000) / 10_000 * 100
 
+    prev_net = 100_000 - 10_000
+    current_net = 150_000 - 15_000
+    assert body["net_delta_pct"] == (current_net - prev_net) / prev_net * 100
+
+    prev_rate = (100_000 - 10_000) / 100_000
+    current_rate = (150_000 - 15_000) / 150_000
+    assert body["savings_rate_delta_pct"] == (current_rate - prev_rate) * 100
+
 
 def test_mom_delta_is_safe_when_previous_month_is_absent(
     client: TestClient, tmp_path: Path
@@ -265,6 +273,8 @@ def test_mom_delta_is_safe_when_previous_month_is_absent(
 
     assert body["income_delta_pct"] == 0.0
     assert body["expense_delta_pct"] == 0.0
+    assert body["net_delta_pct"] == 0.0
+    assert body["savings_rate_delta_pct"] == 0.0
 
 
 # --- by-category breakdown ----------------------------------------------------------------------

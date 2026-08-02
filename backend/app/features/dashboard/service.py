@@ -31,6 +31,9 @@ class DashboardService:
         income, expense = self._repository.monthly_totals(user_id, month_start, month_end)
         prev_income, prev_expense = self._repository.monthly_totals(user_id, prev_start, prev_end)
 
+        savings_rate = _safe_ratio(income - expense, income)
+        prev_savings_rate = _safe_ratio(prev_income - prev_expense, prev_income)
+
         expense_rows = self._repository.expense_breakdown(user_id, month_start, month_end)
         by_category = [
             CategoryBreakdown(
@@ -46,9 +49,13 @@ class DashboardService:
             income_minor=income,
             expense_minor=expense,
             net_minor=income - expense,
-            savings_rate=_safe_ratio(income - expense, income),
+            savings_rate=savings_rate,
             income_delta_pct=_delta_pct(income, prev_income),
             expense_delta_pct=_delta_pct(expense, prev_expense),
+            net_delta_pct=_delta_pct(income - expense, prev_income - prev_expense),
+            savings_rate_delta_pct=_savings_rate_delta_pct(
+                savings_rate, prev_savings_rate, prev_income
+            ),
             by_category=by_category,
             currency=currency,
         )
@@ -83,6 +90,16 @@ def _delta_pct(current: int, previous: int) -> float:
     if previous == 0:
         return 0.0
     return (current - previous) / previous * 100
+
+
+def _savings_rate_delta_pct(rate: float, prev_rate: float, prev_income: int) -> float:
+    """MoM change in savings rate, in points.
+
+    `0.0` when the previous month has no income to rate against.
+    """
+    if prev_income == 0:
+        return 0.0
+    return (rate - prev_rate) * 100
 
 
 def _safe_ratio(numerator: int, denominator: int) -> float:

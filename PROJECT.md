@@ -303,7 +303,7 @@ POST   /rules/apply         {account_id?} → {recategorized_count}   (re-run ru
 
 GET    /dashboard/summary   ?month=YYYY-MM → {
           income_minor, expense_minor, net_minor, savings_rate,
-          income_delta_pct, expense_delta_pct,            // vs previous month
+          income_delta_pct, expense_delta_pct, net_delta_pct, savings_rate_delta_pct,  // vs prev.
           by_category: [{category_id, name, amount_minor, pct}],
           currency
         }

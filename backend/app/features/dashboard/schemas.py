@@ -25,5 +25,10 @@ class DashboardSummary(BaseModel):
     savings_rate: float
     income_delta_pct: float
     expense_delta_pct: float
+    net_delta_pct: float
+
+    #: MoM change in savings rate, in percentage *points* (e.g. `0.223` → `0.204` is `-1.9`, not
+    #: `-8.5`), so the frontend can show it directly beside the ratio without rescaling.
+    savings_rate_delta_pct: float
     by_category: list[CategoryBreakdown]
     currency: str
