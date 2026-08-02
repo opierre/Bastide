@@ -1610,12 +1610,6 @@ abstract class AppLocalizations {
   /// **'Loisirs'**
   String get categorySystemLeisure;
 
-  /// Display name for the system category with i18n key category.leisure.subscriptions.
-  ///
-  /// In fr, this message translates to:
-  /// **'Abonnements'**
-  String get categorySystemLeisureSubscriptions;
-
   /// Display name for the system category with i18n key category.leisure.outings.
   ///
   /// In fr, this message translates to:
@@ -1627,6 +1621,12 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Voyages'**
   String get categorySystemLeisureTravel;
+
+  /// Display name for the system category with i18n key category.subscriptions — a top-level category (not a child of Loisirs), pinned to its own design-system hue.
+  ///
+  /// In fr, this message translates to:
+  /// **'Abonnements'**
+  String get categorySystemSubscriptions;
 
   /// Display name for the system category with i18n key category.shopping.
   ///

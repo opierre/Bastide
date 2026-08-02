@@ -5,11 +5,13 @@ import '../../../l10n/app_localizations.dart';
 /// and `core/widgets/category_chip.dart`).
 ///
 /// The backend's system catalog (`backend/app/core/seed.py`) seeds ~30
-/// categories and subcategories, each carrying its own hex `color` — richer
-/// than, and different from, the eight hues `docs/design/00` pins. Per
-/// product decision, chips stay on the pinned palette rather than the
-/// backend's per-category color: every category (including subcategories) is
-/// bucketed under its top-level parent's pinned slug instead.
+/// categories and subcategories — more than the eight hues `docs/design/00`
+/// pins, since several categories (Achats, Finances, Divers) intentionally
+/// share the neutral "Autres/Épargne" catch-all. `seed.py`'s `color` is kept
+/// in lockstep with the pinned hues (the design spec is the single source of
+/// truth for color), so this bucketing and the backend's own `color` field
+/// agree — the bucket is still needed here because a slug, not a hex string,
+/// is what picks the matching glyph from `CategoryIcons`.
 ///
 /// System category names are i18n keys shaped `category.<bucket>` or
 /// `category.<bucket>.<child>` (see seed.py) — the bucket segment is what we
@@ -35,6 +37,8 @@ String categorySlugFor({required String name, required String kind}) {
         return 'sante';
       case 'leisure':
         return 'loisirs';
+      case 'subscriptions':
+        return 'abonnements';
       case 'income':
         return 'revenus';
       default:
@@ -71,9 +75,9 @@ String localizedCategoryName(AppLocalizations l10n, String name) => switch (name
   'category.health.pharmacy' => l10n.categorySystemHealthPharmacy,
   'category.health.insurance' => l10n.categorySystemHealthInsurance,
   'category.leisure' => l10n.categorySystemLeisure,
-  'category.leisure.subscriptions' => l10n.categorySystemLeisureSubscriptions,
   'category.leisure.outings' => l10n.categorySystemLeisureOutings,
   'category.leisure.travel' => l10n.categorySystemLeisureTravel,
+  'category.subscriptions' => l10n.categorySystemSubscriptions,
   'category.shopping' => l10n.categorySystemShopping,
   'category.shopping.clothing' => l10n.categorySystemShoppingClothing,
   'category.shopping.electronics' => l10n.categorySystemShoppingElectronics,

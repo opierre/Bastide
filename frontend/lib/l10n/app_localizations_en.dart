@@ -856,13 +856,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get categorySystemLeisure => 'Leisure';
 
   @override
-  String get categorySystemLeisureSubscriptions => 'Subscriptions';
-
-  @override
   String get categorySystemLeisureOutings => 'Outings';
 
   @override
   String get categorySystemLeisureTravel => 'Travel';
+
+  @override
+  String get categorySystemSubscriptions => 'Subscriptions';
 
   @override
   String get categorySystemShopping => 'Shopping';

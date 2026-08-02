@@ -1078,10 +1078,6 @@
   "@categorySystemLeisure": {
     "description": "Display name for the system category with i18n key category.leisure."
   },
-  "categorySystemLeisureSubscriptions": "Abonnements",
-  "@categorySystemLeisureSubscriptions": {
-    "description": "Display name for the system category with i18n key category.leisure.subscriptions."
-  },
   "categorySystemLeisureOutings": "Sorties",
   "@categorySystemLeisureOutings": {
     "description": "Display name for the system category with i18n key category.leisure.outings."
@@ -1089,6 +1085,10 @@
   "categorySystemLeisureTravel": "Voyages",
   "@categorySystemLeisureTravel": {
     "description": "Display name for the system category with i18n key category.leisure.travel."
+  },
+  "categorySystemSubscriptions": "Abonnements",
+  "@categorySystemSubscriptions": {
+    "description": "Display name for the system category with i18n key category.subscriptions — a top-level category (not a child of Loisirs), pinned to its own design-system hue."
   },
   "categorySystemShopping": "Achats",
   "@categorySystemShopping": {

@@ -863,13 +863,13 @@ class AppLocalizationsFr extends AppLocalizations {
   String get categorySystemLeisure => 'Loisirs';
 
   @override
-  String get categorySystemLeisureSubscriptions => 'Abonnements';
-
-  @override
   String get categorySystemLeisureOutings => 'Sorties';
 
   @override
   String get categorySystemLeisureTravel => 'Voyages';
+
+  @override
+  String get categorySystemSubscriptions => 'Abonnements';
 
   @override
   String get categorySystemShopping => 'Achats';
