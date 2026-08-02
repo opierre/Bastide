@@ -437,4 +437,143 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get accountErrorGeneric =>
       'Une erreur est survenue. Veuillez réessayer.';
+
+  @override
+  String get csvWizardTitle => 'Assistant CSV';
+
+  @override
+  String get csvWizardStepFormat => 'Format';
+
+  @override
+  String get csvWizardStepColumns => 'Colonnes & aperçu';
+
+  @override
+  String get csvWizardCancel => 'Annuler';
+
+  @override
+  String get csvWizardNext => 'Continuer';
+
+  @override
+  String get csvWizardConfirm => 'Valider et importer';
+
+  @override
+  String get csvWizardConfirming => 'Import en cours…';
+
+  @override
+  String get csvWizardBankLabel => 'Banque';
+
+  @override
+  String get csvWizardBankHelper =>
+      'Ce format sera mémorisé sous ce nom et réutilisé à chaque import de cette banque.';
+
+  @override
+  String get csvWizardDelimiterLabel => 'Délimiteur';
+
+  @override
+  String get csvDelimiterSemicolon => 'Point-virgule ( ; )';
+
+  @override
+  String get csvDelimiterComma => 'Virgule ( , )';
+
+  @override
+  String get csvDelimiterTab => 'Tabulation';
+
+  @override
+  String get csvDelimiterPipe => 'Barre verticale ( | )';
+
+  @override
+  String get csvWizardEncodingLabel => 'Encodage';
+
+  @override
+  String get csvWizardDateFormatLabel => 'Format de date';
+
+  @override
+  String get csvWizardDecimalLabel => 'Séparateur décimal';
+
+  @override
+  String get csvDecimalComma => 'Virgule ( , )';
+
+  @override
+  String get csvDecimalPeriod => 'Point ( . )';
+
+  @override
+  String get csvWizardAmountsLabel => 'Montants';
+
+  @override
+  String get csvAmountStrategySigned => 'Signé';
+
+  @override
+  String get csvAmountStrategyDebitCredit => 'Débit / Crédit';
+
+  @override
+  String get csvWizardHeaderOffsetLabel => 'Lignes à ignorer';
+
+  @override
+  String get csvWizardHeaderOffsetHelper => 'Avant la ligne d\'en-tête.';
+
+  @override
+  String get csvWizardColumnsHint =>
+      'Indiquez le nom de la colonne du fichier (ou son numéro, à partir de 0) pour chaque information.';
+
+  @override
+  String get csvWizardColumnHint => 'Nom ou numéro de colonne';
+
+  @override
+  String get csvWizardColumnOptional => 'facultatif';
+
+  @override
+  String get csvColumnBookedDate => 'Date d\'opération';
+
+  @override
+  String get csvColumnValueDate => 'Date de valeur';
+
+  @override
+  String get csvColumnDescription => 'Libellé';
+
+  @override
+  String get csvColumnAmount => 'Montant';
+
+  @override
+  String get csvColumnDebit => 'Débit';
+
+  @override
+  String get csvColumnCredit => 'Crédit';
+
+  @override
+  String get csvWizardPreviewTitle => 'Aperçu';
+
+  @override
+  String get csvWizardPreviewPending =>
+      'Renseignez les colonnes obligatoires pour voir un aperçu.';
+
+  @override
+  String get csvWizardPreviewEmpty =>
+      'Aucune ligne lisible avec ce paramétrage.';
+
+  @override
+  String get csvPreviewDateHeader => 'Date';
+
+  @override
+  String get csvPreviewDescriptionHeader => 'Libellé';
+
+  @override
+  String get csvPreviewAmountHeader => 'Montant';
+
+  @override
+  String get importErrorAccountNotFound => 'Compte introuvable.';
+
+  @override
+  String get importErrorBatchNotFound => 'Import introuvable.';
+
+  @override
+  String get importErrorTemplateNotFound =>
+      'Format CSV introuvable — relancez l\'assistant.';
+
+  @override
+  String get importErrorTemplateInvalid =>
+      'Ce paramétrage ne correspond pas au fichier — ajustez les colonnes ci-dessus.';
+
+  @override
+  String get importErrorGeneric =>
+      'Une erreur est survenue. Veuillez réessayer.';
 }

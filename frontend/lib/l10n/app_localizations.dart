@@ -895,6 +895,270 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Une erreur est survenue. Veuillez réessayer.'**
   String get accountErrorGeneric;
+
+  /// Title of the one-time CSV column-mapping wizard modal.
+  ///
+  /// In fr, this message translates to:
+  /// **'Assistant CSV'**
+  String get csvWizardTitle;
+
+  /// Label of the wizard's first step, where the file's format is described.
+  ///
+  /// In fr, this message translates to:
+  /// **'Format'**
+  String get csvWizardStepFormat;
+
+  /// Label of the wizard's second step, where columns are mapped and previewed.
+  ///
+  /// In fr, this message translates to:
+  /// **'Colonnes & aperçu'**
+  String get csvWizardStepColumns;
+
+  /// Cancel action in the CSV wizard footer.
+  ///
+  /// In fr, this message translates to:
+  /// **'Annuler'**
+  String get csvWizardCancel;
+
+  /// Action moving from the wizard's format step to its columns step.
+  ///
+  /// In fr, this message translates to:
+  /// **'Continuer'**
+  String get csvWizardNext;
+
+  /// Action that saves the mapping and imports the file.
+  ///
+  /// In fr, this message translates to:
+  /// **'Valider et importer'**
+  String get csvWizardConfirm;
+
+  /// Label replacing the wizard's confirm button text while saving and importing.
+  ///
+  /// In fr, this message translates to:
+  /// **'Import en cours…'**
+  String get csvWizardConfirming;
+
+  /// Label for the bank name the CSV mapping is remembered under.
+  ///
+  /// In fr, this message translates to:
+  /// **'Banque'**
+  String get csvWizardBankLabel;
+
+  /// Helper under the bank name field, stating that the mapping is saved for reuse.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ce format sera mémorisé sous ce nom et réutilisé à chaque import de cette banque.'**
+  String get csvWizardBankHelper;
+
+  /// Label for the CSV column separator selector.
+  ///
+  /// In fr, this message translates to:
+  /// **'Délimiteur'**
+  String get csvWizardDelimiterLabel;
+
+  /// Delimiter option: semicolon, the common French bank export separator.
+  ///
+  /// In fr, this message translates to:
+  /// **'Point-virgule ( ; )'**
+  String get csvDelimiterSemicolon;
+
+  /// Delimiter option: comma.
+  ///
+  /// In fr, this message translates to:
+  /// **'Virgule ( , )'**
+  String get csvDelimiterComma;
+
+  /// Delimiter option: tab character.
+  ///
+  /// In fr, this message translates to:
+  /// **'Tabulation'**
+  String get csvDelimiterTab;
+
+  /// Delimiter option: pipe character.
+  ///
+  /// In fr, this message translates to:
+  /// **'Barre verticale ( | )'**
+  String get csvDelimiterPipe;
+
+  /// Label for the CSV character encoding selector.
+  ///
+  /// In fr, this message translates to:
+  /// **'Encodage'**
+  String get csvWizardEncodingLabel;
+
+  /// Label for the CSV date format selector.
+  ///
+  /// In fr, this message translates to:
+  /// **'Format de date'**
+  String get csvWizardDateFormatLabel;
+
+  /// Label for the decimal separator control.
+  ///
+  /// In fr, this message translates to:
+  /// **'Séparateur décimal'**
+  String get csvWizardDecimalLabel;
+
+  /// Decimal separator option: comma.
+  ///
+  /// In fr, this message translates to:
+  /// **'Virgule ( , )'**
+  String get csvDecimalComma;
+
+  /// Decimal separator option: period.
+  ///
+  /// In fr, this message translates to:
+  /// **'Point ( . )'**
+  String get csvDecimalPeriod;
+
+  /// Label for the control choosing how the file encodes amount direction.
+  ///
+  /// In fr, this message translates to:
+  /// **'Montants'**
+  String get csvWizardAmountsLabel;
+
+  /// Amount strategy option: a single signed amount column.
+  ///
+  /// In fr, this message translates to:
+  /// **'Signé'**
+  String get csvAmountStrategySigned;
+
+  /// Amount strategy option: separate debit and credit columns.
+  ///
+  /// In fr, this message translates to:
+  /// **'Débit / Crédit'**
+  String get csvAmountStrategyDebitCredit;
+
+  /// Label for the count of lines to skip before the header row.
+  ///
+  /// In fr, this message translates to:
+  /// **'Lignes à ignorer'**
+  String get csvWizardHeaderOffsetLabel;
+
+  /// Helper clarifying that the skipped lines precede the header row.
+  ///
+  /// In fr, this message translates to:
+  /// **'Avant la ligne d\'en-tête.'**
+  String get csvWizardHeaderOffsetHelper;
+
+  /// Instruction above the column mapping rows in the CSV wizard.
+  ///
+  /// In fr, this message translates to:
+  /// **'Indiquez le nom de la colonne du fichier (ou son numéro, à partir de 0) pour chaque information.'**
+  String get csvWizardColumnsHint;
+
+  /// Placeholder inside a column mapping input.
+  ///
+  /// In fr, this message translates to:
+  /// **'Nom ou numéro de colonne'**
+  String get csvWizardColumnHint;
+
+  /// Marker beside a canonical field that does not have to be mapped.
+  ///
+  /// In fr, this message translates to:
+  /// **'facultatif'**
+  String get csvWizardColumnOptional;
+
+  /// Canonical field name: the date the transaction was booked.
+  ///
+  /// In fr, this message translates to:
+  /// **'Date d\'opération'**
+  String get csvColumnBookedDate;
+
+  /// Canonical field name: the value date.
+  ///
+  /// In fr, this message translates to:
+  /// **'Date de valeur'**
+  String get csvColumnValueDate;
+
+  /// Canonical field name: the raw description from the bank.
+  ///
+  /// In fr, this message translates to:
+  /// **'Libellé'**
+  String get csvColumnDescription;
+
+  /// Canonical field name: the signed amount.
+  ///
+  /// In fr, this message translates to:
+  /// **'Montant'**
+  String get csvColumnAmount;
+
+  /// Canonical field name: the debit column, used by the debit/credit layout.
+  ///
+  /// In fr, this message translates to:
+  /// **'Débit'**
+  String get csvColumnDebit;
+
+  /// Canonical field name: the credit column, used by the debit/credit layout.
+  ///
+  /// In fr, this message translates to:
+  /// **'Crédit'**
+  String get csvColumnCredit;
+
+  /// Section label above the live preview of parsed sample rows.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aperçu'**
+  String get csvWizardPreviewTitle;
+
+  /// Placeholder shown before the mapping is complete enough to preview.
+  ///
+  /// In fr, this message translates to:
+  /// **'Renseignez les colonnes obligatoires pour voir un aperçu.'**
+  String get csvWizardPreviewPending;
+
+  /// Shown when the preview parsed the file but found no rows.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucune ligne lisible avec ce paramétrage.'**
+  String get csvWizardPreviewEmpty;
+
+  /// Preview table column header for the booked date.
+  ///
+  /// In fr, this message translates to:
+  /// **'Date'**
+  String get csvPreviewDateHeader;
+
+  /// Preview table column header for the raw description.
+  ///
+  /// In fr, this message translates to:
+  /// **'Libellé'**
+  String get csvPreviewDescriptionHeader;
+
+  /// Preview table column header for the parsed amount.
+  ///
+  /// In fr, this message translates to:
+  /// **'Montant'**
+  String get csvPreviewAmountHeader;
+
+  /// Localized message for the backend's ACCOUNT_NOT_FOUND error code on the imports panel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Compte introuvable.'**
+  String get importErrorAccountNotFound;
+
+  /// Localized message for the backend's IMPORT_BATCH_NOT_FOUND error code.
+  ///
+  /// In fr, this message translates to:
+  /// **'Import introuvable.'**
+  String get importErrorBatchNotFound;
+
+  /// Localized message for the backend's CSV_TEMPLATE_NOT_FOUND error code.
+  ///
+  /// In fr, this message translates to:
+  /// **'Format CSV introuvable — relancez l\'assistant.'**
+  String get importErrorTemplateNotFound;
+
+  /// Localized message for the backend's CSV_TEMPLATE_INVALID and VALIDATION_ERROR codes.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ce paramétrage ne correspond pas au fichier — ajustez les colonnes ci-dessus.'**
+  String get importErrorTemplateInvalid;
+
+  /// Fallback localized message for unrecognized or network errors on the imports panel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Une erreur est survenue. Veuillez réessayer.'**
+  String get importErrorGeneric;
 }
 
 class _AppLocalizationsDelegate

@@ -435,4 +435,141 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get accountErrorGeneric => 'Something went wrong. Please try again.';
+
+  @override
+  String get csvWizardTitle => 'CSV wizard';
+
+  @override
+  String get csvWizardStepFormat => 'Format';
+
+  @override
+  String get csvWizardStepColumns => 'Columns & preview';
+
+  @override
+  String get csvWizardCancel => 'Cancel';
+
+  @override
+  String get csvWizardNext => 'Continue';
+
+  @override
+  String get csvWizardConfirm => 'Confirm and import';
+
+  @override
+  String get csvWizardConfirming => 'Importing…';
+
+  @override
+  String get csvWizardBankLabel => 'Bank';
+
+  @override
+  String get csvWizardBankHelper =>
+      'This format is saved under this name and reused for every import from this bank.';
+
+  @override
+  String get csvWizardDelimiterLabel => 'Delimiter';
+
+  @override
+  String get csvDelimiterSemicolon => 'Semicolon ( ; )';
+
+  @override
+  String get csvDelimiterComma => 'Comma ( , )';
+
+  @override
+  String get csvDelimiterTab => 'Tab';
+
+  @override
+  String get csvDelimiterPipe => 'Pipe ( | )';
+
+  @override
+  String get csvWizardEncodingLabel => 'Encoding';
+
+  @override
+  String get csvWizardDateFormatLabel => 'Date format';
+
+  @override
+  String get csvWizardDecimalLabel => 'Decimal separator';
+
+  @override
+  String get csvDecimalComma => 'Comma ( , )';
+
+  @override
+  String get csvDecimalPeriod => 'Period ( . )';
+
+  @override
+  String get csvWizardAmountsLabel => 'Amounts';
+
+  @override
+  String get csvAmountStrategySigned => 'Signed';
+
+  @override
+  String get csvAmountStrategyDebitCredit => 'Debit / Credit';
+
+  @override
+  String get csvWizardHeaderOffsetLabel => 'Lines to skip';
+
+  @override
+  String get csvWizardHeaderOffsetHelper => 'Before the header row.';
+
+  @override
+  String get csvWizardColumnsHint =>
+      'Give the file\'s column name (or its number, starting at 0) for each piece of information.';
+
+  @override
+  String get csvWizardColumnHint => 'Column name or number';
+
+  @override
+  String get csvWizardColumnOptional => 'optional';
+
+  @override
+  String get csvColumnBookedDate => 'Booked date';
+
+  @override
+  String get csvColumnValueDate => 'Value date';
+
+  @override
+  String get csvColumnDescription => 'Description';
+
+  @override
+  String get csvColumnAmount => 'Amount';
+
+  @override
+  String get csvColumnDebit => 'Debit';
+
+  @override
+  String get csvColumnCredit => 'Credit';
+
+  @override
+  String get csvWizardPreviewTitle => 'Preview';
+
+  @override
+  String get csvWizardPreviewPending =>
+      'Fill in the required columns to see a preview.';
+
+  @override
+  String get csvWizardPreviewEmpty => 'No readable rows with these settings.';
+
+  @override
+  String get csvPreviewDateHeader => 'Date';
+
+  @override
+  String get csvPreviewDescriptionHeader => 'Description';
+
+  @override
+  String get csvPreviewAmountHeader => 'Amount';
+
+  @override
+  String get importErrorAccountNotFound => 'Account not found.';
+
+  @override
+  String get importErrorBatchNotFound => 'Import not found.';
+
+  @override
+  String get importErrorTemplateNotFound =>
+      'CSV format not found — run the wizard again.';
+
+  @override
+  String get importErrorTemplateInvalid =>
+      'These settings don\'t match the file — adjust the columns above.';
+
+  @override
+  String get importErrorGeneric => 'Something went wrong. Please try again.';
 }
