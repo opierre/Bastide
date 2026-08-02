@@ -15,6 +15,7 @@ import '../application/transactions_controller.dart';
 import '../domain/category.dart';
 import '../domain/transaction.dart';
 import 'category_display.dart';
+import 'review_queue.dart';
 import 'transaction_error_localizer.dart';
 import 'transaction_row.dart';
 
@@ -64,6 +65,8 @@ class TransactionsScreen extends ConsumerWidget {
                         ).textTheme.bodyLarge?.copyWith(color: AppColors.textSecondary),
                       ),
                     )
+                  : filters.needsReview == true
+                  ? ReviewQueue(items: value.items, total: value.total)
                   : _TransactionsListCard(page: value, filters: filters),
             ),
           ],

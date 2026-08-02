@@ -97,6 +97,9 @@ Widget _wrap({
   );
 }
 
+ProviderContainer _container(WidgetTester tester) =>
+    ProviderScope.containerOf(tester.element(find.byType(TransactionsScreen)));
+
 /// The panel is drawn for the 1440×900 desktop frame the design targets —
 /// the default test surface is narrower than the filter bar + row layout.
 void _useDesktopSurface(WidgetTester tester) {
@@ -176,6 +179,59 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Non catégorisé'), findsOneWidget);
+  });
+
+  testWidgets('the review queue lets the user resolve an item via the category picker', (
+    tester,
+  ) async {
+    _useDesktopSurface(tester);
+    final controller = FakeTransactionsController(
+      initialPage: TransactionsPage(
+        items: [_transaction(id: 't1', category: null, needsReview: true)],
+        page: 1,
+        pageSize: 50,
+        total: 1,
+      ),
+    );
+
+    await tester.pumpWidget(_wrap(controller: controller));
+    await tester.pumpAndSettle();
+    _container(tester).read(transactionFiltersProvider.notifier).setNeedsReview(true);
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(const Key('reviewQueueList')), findsOneWidget);
+    expect(find.byKey(const Key('reviewRowCategoryChip')), findsOneWidget);
+
+    await tester.tap(find.byKey(const Key('reviewRowCategoryChip')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('categoryPickerItem-c1')));
+    await tester.pumpAndSettle();
+
+    expect(controller.updateCategoryCalls, [(transactionId: 't1', categoryId: 'c1')]);
+  });
+
+  testWidgets('the review queue "always categorize" affordance creates a rule', (tester) async {
+    _useDesktopSurface(tester);
+    final controller = FakeTransactionsController(
+      initialPage: TransactionsPage(
+        items: [_transaction(id: 't1', category: null, needsReview: true)],
+        page: 1,
+        pageSize: 50,
+        total: 1,
+      ),
+    );
+
+    await tester.pumpWidget(_wrap(controller: controller));
+    await tester.pumpAndSettle();
+    _container(tester).read(transactionFiltersProvider.notifier).setNeedsReview(true);
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byKey(const Key('reviewRowAlwaysButton')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('categoryPickerItem-c1')));
+    await tester.pumpAndSettle();
+
+    expect(controller.alwaysCategorizeCalls, [(transactionId: 't1', categoryId: 'c1')]);
   });
 
   testWidgets('renders the empty state with no transactions and no active filter', (
