@@ -7,12 +7,14 @@ import 'package:flutter/material.dart';
 
 import '../theme/tokens.dart';
 
-/// The frame-level texture every screen carries: a film-grain overlay above the
-/// content and a 1px luminous hairline across the top edge.
+/// The frame-level texture every screen carries: a film-grain background layer
+/// beneath the content and a 1px luminous hairline across the top edge.
 ///
 /// Wrapped around the shell and the auth page rather than applied per-panel, so
 /// the grain tiles continuously across the whole frame instead of restarting at
-/// each card. Both layers are non-interactive.
+/// each card. The grain paints first so every opaque surface (sidebar, top bar,
+/// cards, popovers) occludes it; only the bare frame background shows it. Both
+/// layers are non-interactive.
 class FrameTexture extends StatelessWidget {
   const FrameTexture({super.key, required this.child});
 
@@ -22,8 +24,8 @@ class FrameTexture extends StatelessWidget {
   Widget build(BuildContext context) {
     return Stack(
       children: [
-        child,
         const Positioned.fill(child: IgnorePointer(child: _Grain())),
+        child,
         const Positioned(
           top: 0,
           left: 0,
