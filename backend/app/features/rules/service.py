@@ -1,9 +1,15 @@
-"""Business logic for categorization rule CRUD."""
+"""Business logic for categorization rule CRUD and re-applying the rule engine."""
+
+from sqlalchemy import select
+from sqlalchemy.orm import Session
 
 from app.core.errors import NotFoundError
+from app.features.accounts.models import Account
+from app.features.rules.engine import match_category
 from app.features.rules.models import CategorizationRule
 from app.features.rules.repository import RuleRepository
 from app.features.rules.schemas import RuleCreate, RuleUpdate
+from app.features.transactions.models import Transaction
 
 
 class RuleNotFoundError(NotFoundError):
@@ -13,10 +19,11 @@ class RuleNotFoundError(NotFoundError):
 
 
 class RuleService:
-    """Rule CRUD, scoped to a user."""
+    """Rule CRUD, scoped to a user, plus re-running the rule engine over transactions."""
 
-    def __init__(self, repository: RuleRepository) -> None:
+    def __init__(self, repository: RuleRepository, db: Session) -> None:
         self._repository = repository
+        self._db = db
 
     def list_for_user(self, user_id: str) -> list[CategorizationRule]:
         """List a user's rules in priority order."""
@@ -75,3 +82,48 @@ class RuleService:
         """
         rule = self.get(user_id, rule_id)
         self._repository.delete(rule)
+
+    def apply(self, user_id: str, account_id: str | None = None) -> int:
+        """Re-run the enabled rules over the user's transactions (optionally one account).
+
+        Sets `category_id` + `source=rule` + `needs_review=False` on rows an enabled rule
+        matches. Never touches rows with `source=user`, and leaves non-matching rows as-is.
+        Returns the number of transactions actually changed.
+        """
+        rules = self._repository.list_enabled_by_user(user_id)
+        transactions = self._transactions_for_user(user_id, account_id)
+
+        recategorized_count = 0
+        for transaction in transactions:
+            if transaction.categorization_source == "user":
+                continue
+
+            category_id = match_category(transaction, rules)
+            if category_id is None:
+                continue
+
+            already_applied = (
+                transaction.category_id == category_id
+                and transaction.categorization_source == "rule"
+                and transaction.needs_review is False
+            )
+            if already_applied:
+                continue
+
+            transaction.category_id = category_id
+            transaction.categorization_source = "rule"
+            transaction.needs_review = False
+            recategorized_count += 1
+
+        self._db.commit()
+        return recategorized_count
+
+    def _transactions_for_user(self, user_id: str, account_id: str | None) -> list[Transaction]:
+        query = (
+            select(Transaction)
+            .join(Account, Account.id == Transaction.account_id)
+            .where(Account.user_id == user_id)
+        )
+        if account_id is not None:
+            query = query.where(Transaction.account_id == account_id)
+        return list(self._db.scalars(query))

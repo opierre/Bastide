@@ -42,3 +42,15 @@ class RuleRead(BaseModel):
     category_id: str
     enabled: bool
     created_at: datetime
+
+
+class RuleApplyRequest(BaseModel):
+    """Payload for re-running the rule engine; ``account_id`` narrows it to one account."""
+
+    account_id: str | None = None
+
+
+class RuleApplyResult(BaseModel):
+    """Result of a rule apply run."""
+
+    recategorized_count: int

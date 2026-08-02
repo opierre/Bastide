@@ -1,4 +1,4 @@
-"""Categorization rule endpoints: user-scoped CRUD."""
+"""Categorization rule endpoints: user-scoped CRUD plus the re-apply action."""
 
 from typing import Annotated
 
@@ -10,14 +10,20 @@ from app.features.auth.deps import get_current_user
 from app.features.auth.models import User
 from app.features.rules.models import CategorizationRule
 from app.features.rules.repository import RuleRepository
-from app.features.rules.schemas import RuleCreate, RuleRead, RuleUpdate
+from app.features.rules.schemas import (
+    RuleApplyRequest,
+    RuleApplyResult,
+    RuleCreate,
+    RuleRead,
+    RuleUpdate,
+)
 from app.features.rules.service import RuleService
 
 router = APIRouter(prefix="/api/v1/rules", tags=["rules"])
 
 
 def _service(db: Annotated[Session, Depends(get_db)]) -> RuleService:
-    return RuleService(RuleRepository(db))
+    return RuleService(RuleRepository(db), db)
 
 
 def _to_read(rule: CategorizationRule) -> RuleRead:
@@ -71,3 +77,14 @@ async def delete_rule(
 ) -> None:
     """Delete a rule."""
     service.delete(user.id, rule_id)
+
+
+@router.post("/apply", response_model=RuleApplyResult)
+async def apply_rules(
+    payload: RuleApplyRequest,
+    service: Annotated[RuleService, Depends(_service)],
+    user: Annotated[User, Depends(get_current_user)],
+) -> RuleApplyResult:
+    """Re-run the enabled rules over the caller's transactions, optionally one account."""
+    count = service.apply(user.id, payload.account_id)
+    return RuleApplyResult(recategorized_count=count)

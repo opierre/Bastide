@@ -26,6 +26,8 @@ from app.features.imports.parsers.ofx import OfxParseError
 from app.features.imports.parsers.ofx import parse as parse_ofx
 from app.features.imports.repository import CsvTemplateRepository, ImportRepository
 from app.features.imports.schemas import CsvTemplateCreate
+from app.features.rules.engine import match_category
+from app.features.rules.repository import RuleRepository
 from app.features.transactions.models import Transaction
 
 _QFX_EXTENSION = ".qfx"
@@ -209,6 +211,7 @@ class ImportService:
         period_end = max((t.booked_date for t in canonical_transactions), default=today)
 
         new_rows, duplicate_count = self._dedup(account.id, canonical_transactions)
+        rules = RuleRepository(self._db).list_enabled_by_user(user.id)
 
         batch = ImportBatch(
             id=str(uuid4()),
@@ -225,8 +228,9 @@ class ImportService:
             status="success",
         )
 
-        new_transactions = [
-            Transaction(
+        new_transactions = []
+        for row in new_rows:
+            transaction = Transaction(
                 account_id=account.id,
                 import_batch_id=batch.id,
                 booked_date=row.booked_date,
@@ -242,8 +246,12 @@ class ImportService:
                 fitid=row.fitid,
                 dedup_hash=row.dedup_hash,
             )
-            for row in new_rows
-        ]
+            matched_category_id = match_category(transaction, rules)
+            if matched_category_id is not None:
+                transaction.category_id = matched_category_id
+                transaction.categorization_source = "rule"
+                transaction.needs_review = False
+            new_transactions.append(transaction)
 
         self._db.add_all(new_transactions)
         self._db.flush()
