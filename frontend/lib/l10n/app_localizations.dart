@@ -1363,6 +1363,360 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Une erreur est survenue. Veuillez réessayer.'**
   String get importErrorGeneric;
+
+  /// Placeholder in the transactions search pill in the top bar.
+  ///
+  /// In fr, this message translates to:
+  /// **'Rechercher une description ou un marchand…'**
+  String get transactionsSearchHint;
+
+  /// Shown in place of the transaction list when the filters/search match nothing.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucune transaction ne correspond à votre recherche.'**
+  String get transactionsSearchEmpty;
+
+  /// Retry button label shown when the transaction list fails to load.
+  ///
+  /// In fr, this message translates to:
+  /// **'Réessayer'**
+  String get transactionsRetry;
+
+  /// Heading shown when the user has no transactions at all yet.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucune transaction pour l\'instant'**
+  String get transactionsEmptyTitle;
+
+  /// Encouraging subtext under the empty-state heading on the transactions screen.
+  ///
+  /// In fr, this message translates to:
+  /// **'Importez un relevé pour voir vos opérations apparaître ici.'**
+  String get transactionsEmptyBody;
+
+  /// CTA on the transactions empty state, navigating to the imports panel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aller aux imports'**
+  String get transactionsGoToImports;
+
+  /// Label beside the filter bar's needs-review toggle.
+  ///
+  /// In fr, this message translates to:
+  /// **'À vérifier'**
+  String get transactionsNeedsReviewLabel;
+
+  /// Default option in the account filter pill, meaning no account filter is applied.
+  ///
+  /// In fr, this message translates to:
+  /// **'Tous les comptes'**
+  String get transactionsFilterAllAccounts;
+
+  /// Default option in the category filter pill, meaning no category filter is applied.
+  ///
+  /// In fr, this message translates to:
+  /// **'Toutes les catégories'**
+  String get transactionsFilterAllCategories;
+
+  /// Default label on the date range filter pill when no range is chosen.
+  ///
+  /// In fr, this message translates to:
+  /// **'Toutes les dates'**
+  String get transactionsFilterAllDates;
+
+  /// Pager label under the transaction list, showing the current page's row range and the total count.
+  ///
+  /// In fr, this message translates to:
+  /// **'{from}–{to} sur {total}'**
+  String transactionsPager(int from, int to, int total);
+
+  /// Shown in place of the review queue list when it is empty.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucune transaction à vérifier.'**
+  String get reviewQueueEmpty;
+
+  /// Headline on the review queue's progress card, counting the transactions still needing review.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, =0{Aucune transaction à vérifier} =1{1 transaction à vérifier} other{{count} transactions à vérifier}}'**
+  String reviewQueueCount(int count);
+
+  /// Encouraging subtext under the review queue's progress headline — framed as progress, not a backlog.
+  ///
+  /// In fr, this message translates to:
+  /// **'Vous y êtes presque, continuez !'**
+  String get reviewQueueEncouragement;
+
+  /// Affordance on a review queue row that, alongside picking a category, creates a matching categorization rule.
+  ///
+  /// In fr, this message translates to:
+  /// **'Toujours catégoriser ainsi'**
+  String get reviewAlwaysCategorize;
+
+  /// Placeholder in the category picker popover's search field.
+  ///
+  /// In fr, this message translates to:
+  /// **'Changer de catégorie…'**
+  String get categoryPickerSearchHint;
+
+  /// Shown inside the category picker popover when the category list fails to load.
+  ///
+  /// In fr, this message translates to:
+  /// **'Impossible de charger les catégories.'**
+  String get categoryPickerLoadError;
+
+  /// Shown inside the category picker popover when the search filters out every category.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucune catégorie ne correspond.'**
+  String get categoryPickerEmpty;
+
+  /// Label on the dashed category chip for a transaction with no category yet.
+  ///
+  /// In fr, this message translates to:
+  /// **'Non catégorisé'**
+  String get categoryUncategorized;
+
+  /// Localized message for the backend's TRANSACTION_NOT_FOUND error code.
+  ///
+  /// In fr, this message translates to:
+  /// **'Transaction introuvable.'**
+  String get transactionErrorNotFound;
+
+  /// Localized message for the backend's VALIDATION_ERROR error code on the transactions panel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Certaines informations sont invalides.'**
+  String get transactionErrorValidation;
+
+  /// Fallback localized message for unrecognized or network errors on the transactions panel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Une erreur est survenue. Veuillez réessayer.'**
+  String get transactionErrorGeneric;
+
+  /// Display name for the system category with i18n key category.housing.
+  ///
+  /// In fr, this message translates to:
+  /// **'Logement'**
+  String get categorySystemHousing;
+
+  /// Display name for the system category with i18n key category.housing.rent.
+  ///
+  /// In fr, this message translates to:
+  /// **'Loyer'**
+  String get categorySystemHousingRent;
+
+  /// Display name for the system category with i18n key category.housing.mortgage.
+  ///
+  /// In fr, this message translates to:
+  /// **'Prêt immobilier'**
+  String get categorySystemHousingMortgage;
+
+  /// Display name for the system category with i18n key category.housing.utilities.
+  ///
+  /// In fr, this message translates to:
+  /// **'Charges'**
+  String get categorySystemHousingUtilities;
+
+  /// Display name for the system category with i18n key category.housing.home_insurance.
+  ///
+  /// In fr, this message translates to:
+  /// **'Assurance habitation'**
+  String get categorySystemHousingHomeInsurance;
+
+  /// Display name for the system category with i18n key category.food.
+  ///
+  /// In fr, this message translates to:
+  /// **'Alimentation'**
+  String get categorySystemFood;
+
+  /// Display name for the system category with i18n key category.food.groceries.
+  ///
+  /// In fr, this message translates to:
+  /// **'Courses'**
+  String get categorySystemFoodGroceries;
+
+  /// Display name for the system category with i18n key category.food.restaurants.
+  ///
+  /// In fr, this message translates to:
+  /// **'Restaurants'**
+  String get categorySystemFoodRestaurants;
+
+  /// Display name for the system category with i18n key category.food.coffee.
+  ///
+  /// In fr, this message translates to:
+  /// **'Café'**
+  String get categorySystemFoodCoffee;
+
+  /// Display name for the system category with i18n key category.transport.
+  ///
+  /// In fr, this message translates to:
+  /// **'Transport'**
+  String get categorySystemTransport;
+
+  /// Display name for the system category with i18n key category.transport.fuel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Carburant'**
+  String get categorySystemTransportFuel;
+
+  /// Display name for the system category with i18n key category.transport.public_transit.
+  ///
+  /// In fr, this message translates to:
+  /// **'Transports en commun'**
+  String get categorySystemTransportPublicTransit;
+
+  /// Display name for the system category with i18n key category.transport.parking.
+  ///
+  /// In fr, this message translates to:
+  /// **'Stationnement'**
+  String get categorySystemTransportParking;
+
+  /// Display name for the system category with i18n key category.transport.car_maintenance.
+  ///
+  /// In fr, this message translates to:
+  /// **'Entretien auto'**
+  String get categorySystemTransportCarMaintenance;
+
+  /// Display name for the system category with i18n key category.health.
+  ///
+  /// In fr, this message translates to:
+  /// **'Santé'**
+  String get categorySystemHealth;
+
+  /// Display name for the system category with i18n key category.health.doctor.
+  ///
+  /// In fr, this message translates to:
+  /// **'Médecin'**
+  String get categorySystemHealthDoctor;
+
+  /// Display name for the system category with i18n key category.health.pharmacy.
+  ///
+  /// In fr, this message translates to:
+  /// **'Pharmacie'**
+  String get categorySystemHealthPharmacy;
+
+  /// Display name for the system category with i18n key category.health.insurance.
+  ///
+  /// In fr, this message translates to:
+  /// **'Mutuelle'**
+  String get categorySystemHealthInsurance;
+
+  /// Display name for the system category with i18n key category.leisure.
+  ///
+  /// In fr, this message translates to:
+  /// **'Loisirs'**
+  String get categorySystemLeisure;
+
+  /// Display name for the system category with i18n key category.leisure.subscriptions.
+  ///
+  /// In fr, this message translates to:
+  /// **'Abonnements'**
+  String get categorySystemLeisureSubscriptions;
+
+  /// Display name for the system category with i18n key category.leisure.outings.
+  ///
+  /// In fr, this message translates to:
+  /// **'Sorties'**
+  String get categorySystemLeisureOutings;
+
+  /// Display name for the system category with i18n key category.leisure.travel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Voyages'**
+  String get categorySystemLeisureTravel;
+
+  /// Display name for the system category with i18n key category.shopping.
+  ///
+  /// In fr, this message translates to:
+  /// **'Achats'**
+  String get categorySystemShopping;
+
+  /// Display name for the system category with i18n key category.shopping.clothing.
+  ///
+  /// In fr, this message translates to:
+  /// **'Vêtements'**
+  String get categorySystemShoppingClothing;
+
+  /// Display name for the system category with i18n key category.shopping.electronics.
+  ///
+  /// In fr, this message translates to:
+  /// **'Électronique'**
+  String get categorySystemShoppingElectronics;
+
+  /// Display name for the system category with i18n key category.shopping.home.
+  ///
+  /// In fr, this message translates to:
+  /// **'Maison'**
+  String get categorySystemShoppingHome;
+
+  /// Display name for the system category with i18n key category.finance.
+  ///
+  /// In fr, this message translates to:
+  /// **'Finances'**
+  String get categorySystemFinance;
+
+  /// Display name for the system category with i18n key category.finance.bank_fees.
+  ///
+  /// In fr, this message translates to:
+  /// **'Frais bancaires'**
+  String get categorySystemFinanceBankFees;
+
+  /// Display name for the system category with i18n key category.finance.taxes.
+  ///
+  /// In fr, this message translates to:
+  /// **'Impôts'**
+  String get categorySystemFinanceTaxes;
+
+  /// Display name for the system category with i18n key category.finance.savings.
+  ///
+  /// In fr, this message translates to:
+  /// **'Épargne'**
+  String get categorySystemFinanceSavings;
+
+  /// Display name for the system category with i18n key category.finance.interest.
+  ///
+  /// In fr, this message translates to:
+  /// **'Intérêts'**
+  String get categorySystemFinanceInterest;
+
+  /// Display name for the system category with i18n key category.income.
+  ///
+  /// In fr, this message translates to:
+  /// **'Revenus'**
+  String get categorySystemIncome;
+
+  /// Display name for the system category with i18n key category.income.salary.
+  ///
+  /// In fr, this message translates to:
+  /// **'Salaire'**
+  String get categorySystemIncomeSalary;
+
+  /// Display name for the system category with i18n key category.income.refunds.
+  ///
+  /// In fr, this message translates to:
+  /// **'Remboursements'**
+  String get categorySystemIncomeRefunds;
+
+  /// Display name for the system category with i18n key category.income.other.
+  ///
+  /// In fr, this message translates to:
+  /// **'Autres revenus'**
+  String get categorySystemIncomeOther;
+
+  /// Display name for the system category with i18n key category.other.
+  ///
+  /// In fr, this message translates to:
+  /// **'Divers'**
+  String get categorySystemOther;
+
+  /// Display name for the system category with i18n key category.other.uncategorized.
+  ///
+  /// In fr, this message translates to:
+  /// **'Non catégorisé'**
+  String get categorySystemOtherUncategorized;
 }
 
 class _AppLocalizationsDelegate

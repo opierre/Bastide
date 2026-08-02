@@ -1,0 +1,211 @@
+import 'package:finstride/core/theme/app_theme.dart';
+import 'package:finstride/core/widgets/amount_text.dart';
+import 'package:finstride/features/accounts/application/accounts_controller.dart';
+import 'package:finstride/features/accounts/domain/account.dart';
+import 'package:finstride/features/transactions/application/transactions_controller.dart';
+import 'package:finstride/features/transactions/domain/category.dart';
+import 'package:finstride/features/transactions/domain/transaction.dart';
+import 'package:finstride/features/transactions/presentation/transactions_screen.dart';
+import 'package:finstride/l10n/app_localizations.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_test/flutter_test.dart';
+
+import '../../support/fake_accounts_controller.dart';
+import '../../support/fake_transactions_controller.dart';
+
+final _account = Account(
+  id: 'a1',
+  name: 'Compte courant',
+  type: AccountType.checking,
+  institution: 'BNP Paribas',
+  currency: 'EUR',
+  openingBalanceMinor: 0,
+  balanceMinor: 0,
+  archived: false,
+  createdAt: DateTime.utc(2026, 1, 1),
+  updatedAt: DateTime.utc(2026, 1, 1),
+);
+
+Transaction _transaction({
+  String id = 't1',
+  int amountMinor = -1250,
+  bool needsReview = false,
+  TransactionCategory? category,
+  String? merchant = 'Carrefour',
+}) => Transaction(
+  id: id,
+  accountId: 'a1',
+  bookedDate: DateTime(2026, 5, 14),
+  valueDate: null,
+  amountMinor: amountMinor,
+  currency: 'EUR',
+  descriptionRaw: 'CB CARREFOUR MARKET 14/05',
+  descriptionClean: 'Carrefour Market',
+  merchant: merchant,
+  category: category,
+  categorizationSource: category == null
+      ? CategorizationSource.uncategorized
+      : CategorizationSource.rule,
+  categorizationConfidence: null,
+  needsReview: needsReview,
+  fitid: null,
+  dedupHash: 'hash-1',
+  createdAt: DateTime.utc(2026, 5, 14),
+  updatedAt: DateTime.utc(2026, 5, 14),
+);
+
+const _groceriesCategory = TransactionCategory(
+  id: 'c1',
+  name: 'category.food.groceries',
+  kind: 'expense',
+  icon: 'shopping_cart',
+  color: '#10B981',
+);
+
+Widget _wrap({
+  required FakeTransactionsController controller,
+  List<PickerCategory> categories = const [
+    PickerCategory(
+      id: 'c1',
+      userId: null,
+      parentId: null,
+      name: 'category.food.groceries',
+      kind: 'expense',
+      icon: 'shopping_cart',
+      color: '#10B981',
+      isSystem: true,
+    ),
+  ],
+  Locale locale = const Locale('fr'),
+}) {
+  return ProviderScope(
+    overrides: [
+      transactionsControllerProvider.overrideWith(() => controller),
+      transactionCategoriesProvider.overrideWith((ref) async => categories),
+      accountsControllerProvider.overrideWith(
+        () => FakeAccountsController(initialAccounts: [_account]),
+      ),
+    ],
+    child: MaterialApp(
+      locale: locale,
+      theme: appDarkTheme,
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      supportedLocales: AppLocalizations.supportedLocales,
+      home: const Scaffold(body: TransactionsScreen()),
+    ),
+  );
+}
+
+/// The panel is drawn for the 1440×900 desktop frame the design targets —
+/// the default test surface is narrower than the filter bar + row layout.
+void _useDesktopSurface(WidgetTester tester) {
+  tester.view.physicalSize = const Size(1440, 900);
+  tester.view.devicePixelRatio = 1.0;
+  addTearDown(tester.view.reset);
+}
+
+void main() {
+  testWidgets('renders the row amount, sign and category for the fr locale', (tester) async {
+    _useDesktopSurface(tester);
+    await tester.pumpWidget(
+      _wrap(
+        controller: FakeTransactionsController(
+          initialPage: TransactionsPage(
+            items: [_transaction(amountMinor: -1250, category: _groceriesCategory)],
+            page: 1,
+            pageSize: 50,
+            total: 1,
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    final expectedAmount = formatAmount(
+      amountMinor: -1250,
+      currency: 'EUR',
+      locale: 'fr',
+      showPositiveSign: true,
+    );
+    expect(find.text(expectedAmount), findsOneWidget);
+    expect(find.text('Courses'), findsOneWidget);
+  });
+
+  testWidgets('renders the row amount, sign and category for the en locale', (tester) async {
+    _useDesktopSurface(tester);
+    await tester.pumpWidget(
+      _wrap(
+        controller: FakeTransactionsController(
+          initialPage: TransactionsPage(
+            items: [_transaction(amountMinor: 285000, category: _groceriesCategory)],
+            page: 1,
+            pageSize: 50,
+            total: 1,
+          ),
+        ),
+        locale: const Locale('en'),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    final expectedAmount = formatAmount(
+      amountMinor: 285000,
+      currency: 'EUR',
+      locale: 'en',
+      showPositiveSign: true,
+    );
+    expect(find.text(expectedAmount), findsOneWidget);
+    expect(find.text('Groceries'), findsOneWidget);
+  });
+
+  testWidgets('an uncategorized row shows the dashed uncategorized chip', (tester) async {
+    _useDesktopSurface(tester);
+    await tester.pumpWidget(
+      _wrap(
+        controller: FakeTransactionsController(
+          initialPage: TransactionsPage(
+            items: [_transaction(category: null)],
+            page: 1,
+            pageSize: 50,
+            total: 1,
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('Non catégorisé'), findsOneWidget);
+  });
+
+  testWidgets('renders the empty state with no transactions and no active filter', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      _wrap(
+        controller: FakeTransactionsController(
+          initialPage: const TransactionsPage(items: [], page: 1, pageSize: 50, total: 0),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('Aucune transaction pour l\'instant'), findsOneWidget);
+    expect(find.byKey(const Key('transactionsList')), findsNothing);
+  });
+
+  testWidgets('renders under en without missing localized keys', (tester) async {
+    await tester.pumpWidget(
+      _wrap(
+        controller: FakeTransactionsController(
+          initialPage: const TransactionsPage(items: [], page: 1, pageSize: 50, total: 0),
+        ),
+        locale: const Locale('en'),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('No transactions yet'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+}

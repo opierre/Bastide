@@ -718,4 +718,194 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get importErrorGeneric => 'Something went wrong. Please try again.';
+
+  @override
+  String get transactionsSearchHint => 'Search a description or a merchant…';
+
+  @override
+  String get transactionsSearchEmpty => 'No transaction matches your search.';
+
+  @override
+  String get transactionsRetry => 'Retry';
+
+  @override
+  String get transactionsEmptyTitle => 'No transactions yet';
+
+  @override
+  String get transactionsEmptyBody =>
+      'Import a statement to see your transactions appear here.';
+
+  @override
+  String get transactionsGoToImports => 'Go to imports';
+
+  @override
+  String get transactionsNeedsReviewLabel => 'Needs review';
+
+  @override
+  String get transactionsFilterAllAccounts => 'All accounts';
+
+  @override
+  String get transactionsFilterAllCategories => 'All categories';
+
+  @override
+  String get transactionsFilterAllDates => 'All dates';
+
+  @override
+  String transactionsPager(int from, int to, int total) {
+    return '$from–$to of $total';
+  }
+
+  @override
+  String get reviewQueueEmpty => 'No transactions to review.';
+
+  @override
+  String reviewQueueCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count transactions to review',
+      one: '1 transaction to review',
+      zero: 'No transactions to review',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get reviewQueueEncouragement => 'You\'re almost there — keep going!';
+
+  @override
+  String get reviewAlwaysCategorize => 'Always categorize like this';
+
+  @override
+  String get categoryPickerSearchHint => 'Change category…';
+
+  @override
+  String get categoryPickerLoadError => 'Couldn\'t load categories.';
+
+  @override
+  String get categoryPickerEmpty => 'No category matches.';
+
+  @override
+  String get categoryUncategorized => 'Uncategorized';
+
+  @override
+  String get transactionErrorNotFound => 'Transaction not found.';
+
+  @override
+  String get transactionErrorValidation => 'Some information is invalid.';
+
+  @override
+  String get transactionErrorGeneric =>
+      'Something went wrong. Please try again.';
+
+  @override
+  String get categorySystemHousing => 'Housing';
+
+  @override
+  String get categorySystemHousingRent => 'Rent';
+
+  @override
+  String get categorySystemHousingMortgage => 'Mortgage';
+
+  @override
+  String get categorySystemHousingUtilities => 'Utilities';
+
+  @override
+  String get categorySystemHousingHomeInsurance => 'Home insurance';
+
+  @override
+  String get categorySystemFood => 'Food';
+
+  @override
+  String get categorySystemFoodGroceries => 'Groceries';
+
+  @override
+  String get categorySystemFoodRestaurants => 'Restaurants';
+
+  @override
+  String get categorySystemFoodCoffee => 'Coffee';
+
+  @override
+  String get categorySystemTransport => 'Transport';
+
+  @override
+  String get categorySystemTransportFuel => 'Fuel';
+
+  @override
+  String get categorySystemTransportPublicTransit => 'Public transit';
+
+  @override
+  String get categorySystemTransportParking => 'Parking';
+
+  @override
+  String get categorySystemTransportCarMaintenance => 'Car maintenance';
+
+  @override
+  String get categorySystemHealth => 'Health';
+
+  @override
+  String get categorySystemHealthDoctor => 'Doctor';
+
+  @override
+  String get categorySystemHealthPharmacy => 'Pharmacy';
+
+  @override
+  String get categorySystemHealthInsurance => 'Health insurance';
+
+  @override
+  String get categorySystemLeisure => 'Leisure';
+
+  @override
+  String get categorySystemLeisureSubscriptions => 'Subscriptions';
+
+  @override
+  String get categorySystemLeisureOutings => 'Outings';
+
+  @override
+  String get categorySystemLeisureTravel => 'Travel';
+
+  @override
+  String get categorySystemShopping => 'Shopping';
+
+  @override
+  String get categorySystemShoppingClothing => 'Clothing';
+
+  @override
+  String get categorySystemShoppingElectronics => 'Electronics';
+
+  @override
+  String get categorySystemShoppingHome => 'Home';
+
+  @override
+  String get categorySystemFinance => 'Finances';
+
+  @override
+  String get categorySystemFinanceBankFees => 'Bank fees';
+
+  @override
+  String get categorySystemFinanceTaxes => 'Taxes';
+
+  @override
+  String get categorySystemFinanceSavings => 'Savings';
+
+  @override
+  String get categorySystemFinanceInterest => 'Interest';
+
+  @override
+  String get categorySystemIncome => 'Income';
+
+  @override
+  String get categorySystemIncomeSalary => 'Salary';
+
+  @override
+  String get categorySystemIncomeRefunds => 'Refunds';
+
+  @override
+  String get categorySystemIncomeOther => 'Other income';
+
+  @override
+  String get categorySystemOther => 'Other';
+
+  @override
+  String get categorySystemOtherUncategorized => 'Uncategorized';
 }

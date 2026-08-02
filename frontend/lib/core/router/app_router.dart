@@ -31,6 +31,7 @@ class _AuthRefreshListenable extends ChangeNotifier {
 /// whatever providers they need, which keeps the shell ignorant of features.
 TopBarActionsBuilder? _topBarActions(String path) => switch (path) {
   '/accounts' => (context) => const [AccountsTopBarActions()],
+  '/transactions' => (context) => const [TransactionsTopBarActions()],
   _ => null,
 };
 

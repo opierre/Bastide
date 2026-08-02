@@ -897,5 +897,257 @@
   "importErrorGeneric": "Une erreur est survenue. Veuillez réessayer.",
   "@importErrorGeneric": {
     "description": "Fallback localized message for unrecognized or network errors on the imports panel."
+  },
+  "transactionsSearchHint": "Rechercher une description ou un marchand…",
+  "@transactionsSearchHint": {
+    "description": "Placeholder in the transactions search pill in the top bar."
+  },
+  "transactionsSearchEmpty": "Aucune transaction ne correspond à votre recherche.",
+  "@transactionsSearchEmpty": {
+    "description": "Shown in place of the transaction list when the filters/search match nothing."
+  },
+  "transactionsRetry": "Réessayer",
+  "@transactionsRetry": {
+    "description": "Retry button label shown when the transaction list fails to load."
+  },
+  "transactionsEmptyTitle": "Aucune transaction pour l'instant",
+  "@transactionsEmptyTitle": {
+    "description": "Heading shown when the user has no transactions at all yet."
+  },
+  "transactionsEmptyBody": "Importez un relevé pour voir vos opérations apparaître ici.",
+  "@transactionsEmptyBody": {
+    "description": "Encouraging subtext under the empty-state heading on the transactions screen."
+  },
+  "transactionsGoToImports": "Aller aux imports",
+  "@transactionsGoToImports": {
+    "description": "CTA on the transactions empty state, navigating to the imports panel."
+  },
+  "transactionsNeedsReviewLabel": "À vérifier",
+  "@transactionsNeedsReviewLabel": {
+    "description": "Label beside the filter bar's needs-review toggle."
+  },
+  "transactionsFilterAllAccounts": "Tous les comptes",
+  "@transactionsFilterAllAccounts": {
+    "description": "Default option in the account filter pill, meaning no account filter is applied."
+  },
+  "transactionsFilterAllCategories": "Toutes les catégories",
+  "@transactionsFilterAllCategories": {
+    "description": "Default option in the category filter pill, meaning no category filter is applied."
+  },
+  "transactionsFilterAllDates": "Toutes les dates",
+  "@transactionsFilterAllDates": {
+    "description": "Default label on the date range filter pill when no range is chosen."
+  },
+  "transactionsPager": "{from}–{to} sur {total}",
+  "@transactionsPager": {
+    "description": "Pager label under the transaction list, showing the current page's row range and the total count.",
+    "placeholders": {
+      "from": {
+        "type": "int"
+      },
+      "to": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "reviewQueueEmpty": "Aucune transaction à vérifier.",
+  "@reviewQueueEmpty": {
+    "description": "Shown in place of the review queue list when it is empty."
+  },
+  "reviewQueueCount": "{count, plural, =0{Aucune transaction à vérifier} =1{1 transaction à vérifier} other{{count} transactions à vérifier}}",
+  "@reviewQueueCount": {
+    "description": "Headline on the review queue's progress card, counting the transactions still needing review.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "reviewQueueEncouragement": "Vous y êtes presque, continuez !",
+  "@reviewQueueEncouragement": {
+    "description": "Encouraging subtext under the review queue's progress headline — framed as progress, not a backlog."
+  },
+  "reviewAlwaysCategorize": "Toujours catégoriser ainsi",
+  "@reviewAlwaysCategorize": {
+    "description": "Affordance on a review queue row that, alongside picking a category, creates a matching categorization rule."
+  },
+  "categoryPickerSearchHint": "Changer de catégorie…",
+  "@categoryPickerSearchHint": {
+    "description": "Placeholder in the category picker popover's search field."
+  },
+  "categoryPickerLoadError": "Impossible de charger les catégories.",
+  "@categoryPickerLoadError": {
+    "description": "Shown inside the category picker popover when the category list fails to load."
+  },
+  "categoryPickerEmpty": "Aucune catégorie ne correspond.",
+  "@categoryPickerEmpty": {
+    "description": "Shown inside the category picker popover when the search filters out every category."
+  },
+  "categoryUncategorized": "Non catégorisé",
+  "@categoryUncategorized": {
+    "description": "Label on the dashed category chip for a transaction with no category yet."
+  },
+  "transactionErrorNotFound": "Transaction introuvable.",
+  "@transactionErrorNotFound": {
+    "description": "Localized message for the backend's TRANSACTION_NOT_FOUND error code."
+  },
+  "transactionErrorValidation": "Certaines informations sont invalides.",
+  "@transactionErrorValidation": {
+    "description": "Localized message for the backend's VALIDATION_ERROR error code on the transactions panel."
+  },
+  "transactionErrorGeneric": "Une erreur est survenue. Veuillez réessayer.",
+  "@transactionErrorGeneric": {
+    "description": "Fallback localized message for unrecognized or network errors on the transactions panel."
+  },
+  "categorySystemHousing": "Logement",
+  "@categorySystemHousing": {
+    "description": "Display name for the system category with i18n key category.housing."
+  },
+  "categorySystemHousingRent": "Loyer",
+  "@categorySystemHousingRent": {
+    "description": "Display name for the system category with i18n key category.housing.rent."
+  },
+  "categorySystemHousingMortgage": "Prêt immobilier",
+  "@categorySystemHousingMortgage": {
+    "description": "Display name for the system category with i18n key category.housing.mortgage."
+  },
+  "categorySystemHousingUtilities": "Charges",
+  "@categorySystemHousingUtilities": {
+    "description": "Display name for the system category with i18n key category.housing.utilities."
+  },
+  "categorySystemHousingHomeInsurance": "Assurance habitation",
+  "@categorySystemHousingHomeInsurance": {
+    "description": "Display name for the system category with i18n key category.housing.home_insurance."
+  },
+  "categorySystemFood": "Alimentation",
+  "@categorySystemFood": {
+    "description": "Display name for the system category with i18n key category.food."
+  },
+  "categorySystemFoodGroceries": "Courses",
+  "@categorySystemFoodGroceries": {
+    "description": "Display name for the system category with i18n key category.food.groceries."
+  },
+  "categorySystemFoodRestaurants": "Restaurants",
+  "@categorySystemFoodRestaurants": {
+    "description": "Display name for the system category with i18n key category.food.restaurants."
+  },
+  "categorySystemFoodCoffee": "Café",
+  "@categorySystemFoodCoffee": {
+    "description": "Display name for the system category with i18n key category.food.coffee."
+  },
+  "categorySystemTransport": "Transport",
+  "@categorySystemTransport": {
+    "description": "Display name for the system category with i18n key category.transport."
+  },
+  "categorySystemTransportFuel": "Carburant",
+  "@categorySystemTransportFuel": {
+    "description": "Display name for the system category with i18n key category.transport.fuel."
+  },
+  "categorySystemTransportPublicTransit": "Transports en commun",
+  "@categorySystemTransportPublicTransit": {
+    "description": "Display name for the system category with i18n key category.transport.public_transit."
+  },
+  "categorySystemTransportParking": "Stationnement",
+  "@categorySystemTransportParking": {
+    "description": "Display name for the system category with i18n key category.transport.parking."
+  },
+  "categorySystemTransportCarMaintenance": "Entretien auto",
+  "@categorySystemTransportCarMaintenance": {
+    "description": "Display name for the system category with i18n key category.transport.car_maintenance."
+  },
+  "categorySystemHealth": "Santé",
+  "@categorySystemHealth": {
+    "description": "Display name for the system category with i18n key category.health."
+  },
+  "categorySystemHealthDoctor": "Médecin",
+  "@categorySystemHealthDoctor": {
+    "description": "Display name for the system category with i18n key category.health.doctor."
+  },
+  "categorySystemHealthPharmacy": "Pharmacie",
+  "@categorySystemHealthPharmacy": {
+    "description": "Display name for the system category with i18n key category.health.pharmacy."
+  },
+  "categorySystemHealthInsurance": "Mutuelle",
+  "@categorySystemHealthInsurance": {
+    "description": "Display name for the system category with i18n key category.health.insurance."
+  },
+  "categorySystemLeisure": "Loisirs",
+  "@categorySystemLeisure": {
+    "description": "Display name for the system category with i18n key category.leisure."
+  },
+  "categorySystemLeisureSubscriptions": "Abonnements",
+  "@categorySystemLeisureSubscriptions": {
+    "description": "Display name for the system category with i18n key category.leisure.subscriptions."
+  },
+  "categorySystemLeisureOutings": "Sorties",
+  "@categorySystemLeisureOutings": {
+    "description": "Display name for the system category with i18n key category.leisure.outings."
+  },
+  "categorySystemLeisureTravel": "Voyages",
+  "@categorySystemLeisureTravel": {
+    "description": "Display name for the system category with i18n key category.leisure.travel."
+  },
+  "categorySystemShopping": "Achats",
+  "@categorySystemShopping": {
+    "description": "Display name for the system category with i18n key category.shopping."
+  },
+  "categorySystemShoppingClothing": "Vêtements",
+  "@categorySystemShoppingClothing": {
+    "description": "Display name for the system category with i18n key category.shopping.clothing."
+  },
+  "categorySystemShoppingElectronics": "Électronique",
+  "@categorySystemShoppingElectronics": {
+    "description": "Display name for the system category with i18n key category.shopping.electronics."
+  },
+  "categorySystemShoppingHome": "Maison",
+  "@categorySystemShoppingHome": {
+    "description": "Display name for the system category with i18n key category.shopping.home."
+  },
+  "categorySystemFinance": "Finances",
+  "@categorySystemFinance": {
+    "description": "Display name for the system category with i18n key category.finance."
+  },
+  "categorySystemFinanceBankFees": "Frais bancaires",
+  "@categorySystemFinanceBankFees": {
+    "description": "Display name for the system category with i18n key category.finance.bank_fees."
+  },
+  "categorySystemFinanceTaxes": "Impôts",
+  "@categorySystemFinanceTaxes": {
+    "description": "Display name for the system category with i18n key category.finance.taxes."
+  },
+  "categorySystemFinanceSavings": "Épargne",
+  "@categorySystemFinanceSavings": {
+    "description": "Display name for the system category with i18n key category.finance.savings."
+  },
+  "categorySystemFinanceInterest": "Intérêts",
+  "@categorySystemFinanceInterest": {
+    "description": "Display name for the system category with i18n key category.finance.interest."
+  },
+  "categorySystemIncome": "Revenus",
+  "@categorySystemIncome": {
+    "description": "Display name for the system category with i18n key category.income."
+  },
+  "categorySystemIncomeSalary": "Salaire",
+  "@categorySystemIncomeSalary": {
+    "description": "Display name for the system category with i18n key category.income.salary."
+  },
+  "categorySystemIncomeRefunds": "Remboursements",
+  "@categorySystemIncomeRefunds": {
+    "description": "Display name for the system category with i18n key category.income.refunds."
+  },
+  "categorySystemIncomeOther": "Autres revenus",
+  "@categorySystemIncomeOther": {
+    "description": "Display name for the system category with i18n key category.income.other."
+  },
+  "categorySystemOther": "Divers",
+  "@categorySystemOther": {
+    "description": "Display name for the system category with i18n key category.other."
+  },
+  "categorySystemOtherUncategorized": "Non catégorisé",
+  "@categorySystemOtherUncategorized": {
+    "description": "Display name for the system category with i18n key category.other.uncategorized."
   }
 }
