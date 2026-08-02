@@ -10,6 +10,7 @@ from app.features.auth.router import router as auth_router
 from app.features.categories.router import router as categories_router
 from app.features.health.router import router as health_router
 from app.features.imports.router import router as imports_router
+from app.features.rules.router import router as rules_router
 
 
 def create_app() -> FastAPI:
@@ -32,6 +33,7 @@ def create_app() -> FastAPI:
     app.include_router(accounts_router)
     app.include_router(imports_router)
     app.include_router(categories_router)
+    app.include_router(rules_router)
 
     return app
 
