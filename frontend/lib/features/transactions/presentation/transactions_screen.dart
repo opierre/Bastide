@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
+import '../../../core/l10n/category_display.dart';
 import '../../../core/theme/tokens.dart';
 import '../../../core/widgets/app_card.dart';
 import '../../../core/widgets/search_pill.dart';
@@ -14,7 +15,6 @@ import '../../imports/presentation/imports_screen.dart';
 import '../application/transactions_controller.dart';
 import '../domain/category.dart';
 import '../domain/transaction.dart';
-import 'category_display.dart';
 import 'review_queue.dart';
 import 'transaction_error_localizer.dart';
 import 'transaction_row.dart';

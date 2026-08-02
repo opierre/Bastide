@@ -915,4 +915,40 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get categorySystemOtherUncategorized => 'Non catégorisé';
+
+  @override
+  String get dashboardStatIncome => 'Revenus';
+
+  @override
+  String get dashboardStatExpense => 'Dépenses';
+
+  @override
+  String get dashboardStatNet => 'Net';
+
+  @override
+  String get dashboardStatSavingsRate => 'Taux d\'épargne';
+
+  @override
+  String get dashboardCategoryBreakdownTitle => 'Dépenses par catégorie';
+
+  @override
+  String get dashboardEmptyTitle =>
+      'Importez un relevé pour donner vie à votre argent';
+
+  @override
+  String get dashboardEmptyBody =>
+      'Vos revenus, vos dépenses et votre taux d\'épargne apparaîtront ici dès votre premier import.';
+
+  @override
+  String get dashboardGoToImports => 'Aller aux imports';
+
+  @override
+  String get dashboardRetry => 'Réessayer';
+
+  @override
+  String get dashboardErrorInvalidMonth => 'Le mois demandé n\'est pas valide.';
+
+  @override
+  String get dashboardErrorGeneric =>
+      'Une erreur est survenue. Veuillez réessayer.';
 }

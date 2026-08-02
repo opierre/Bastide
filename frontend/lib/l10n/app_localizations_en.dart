@@ -908,4 +908,39 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get categorySystemOtherUncategorized => 'Uncategorized';
+
+  @override
+  String get dashboardStatIncome => 'Income';
+
+  @override
+  String get dashboardStatExpense => 'Expense';
+
+  @override
+  String get dashboardStatNet => 'Net';
+
+  @override
+  String get dashboardStatSavingsRate => 'Savings rate';
+
+  @override
+  String get dashboardCategoryBreakdownTitle => 'Expenses by category';
+
+  @override
+  String get dashboardEmptyTitle =>
+      'Import a statement to see your money come to life';
+
+  @override
+  String get dashboardEmptyBody =>
+      'Your income, expenses, and savings rate will show up here as soon as you import your first statement.';
+
+  @override
+  String get dashboardGoToImports => 'Go to imports';
+
+  @override
+  String get dashboardRetry => 'Retry';
+
+  @override
+  String get dashboardErrorInvalidMonth => 'The requested month isn\'t valid.';
+
+  @override
+  String get dashboardErrorGeneric => 'Something went wrong. Please try again.';
 }

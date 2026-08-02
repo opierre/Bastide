@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/l10n/category_display.dart';
 import '../../../core/theme/tokens.dart';
 import '../../../core/widgets/category_chip.dart';
 import '../../../l10n/app_localizations.dart';
 import '../application/transactions_controller.dart';
 import '../domain/category.dart' show PickerCategory;
 import '../domain/transaction.dart';
-import 'category_display.dart';
 import 'transaction_error_localizer.dart';
 
 /// Opens the category picker popover anchored under [anchorContext]'s widget

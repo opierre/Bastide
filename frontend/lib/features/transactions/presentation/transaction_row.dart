@@ -2,13 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
+import '../../../core/l10n/category_display.dart';
 import '../../../core/theme/tokens.dart';
 import '../../../core/widgets/amount_text.dart';
 import '../../../core/widgets/category_chip.dart';
 import '../../../core/widgets/institution_avatar.dart';
 import '../../../l10n/app_localizations.dart';
 import '../domain/transaction.dart';
-import 'category_display.dart';
 import 'category_picker.dart';
 
 /// A single 52px transaction row: merchant monogram, a two-line merchant +

@@ -401,5 +401,16 @@
   "categorySystemIncomeRefunds": "Refunds",
   "categorySystemIncomeOther": "Other income",
   "categorySystemOther": "Other",
-  "categorySystemOtherUncategorized": "Uncategorized"
+  "categorySystemOtherUncategorized": "Uncategorized",
+  "dashboardStatIncome": "Income",
+  "dashboardStatExpense": "Expense",
+  "dashboardStatNet": "Net",
+  "dashboardStatSavingsRate": "Savings rate",
+  "dashboardCategoryBreakdownTitle": "Expenses by category",
+  "dashboardEmptyTitle": "Import a statement to see your money come to life",
+  "dashboardEmptyBody": "Your income, expenses, and savings rate will show up here as soon as you import your first statement.",
+  "dashboardGoToImports": "Go to imports",
+  "dashboardRetry": "Retry",
+  "dashboardErrorInvalidMonth": "The requested month isn't valid.",
+  "dashboardErrorGeneric": "Something went wrong. Please try again."
 }

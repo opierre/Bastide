@@ -1,4 +1,4 @@
-import '../../../l10n/app_localizations.dart';
+import '../../l10n/app_localizations.dart';
 
 /// Resolves an embedded/picker category to one of the eight pinned
 /// design-system hues (`CategoryHues`/`CategoryIcons` in `core/theme/tokens.dart`
@@ -18,6 +18,10 @@ import '../../../l10n/app_localizations.dart';
 /// key off, with no need for a `parent_id` the embedded transaction category
 /// doesn't carry. User-created categories have no such key, so they fall back
 /// to their `kind`.
+///
+/// Lives in `core/l10n/` rather than a feature folder because both the
+/// transactions and dashboard features resolve category display names — see
+/// the architecture skill's "logic needed by two features? extract it" rule.
 String categorySlugFor({required String name, required String kind}) {
   // A savings-flavoured category reads as "épargne" regardless of which
   // bucket it lives under (e.g. `category.finance.savings`).

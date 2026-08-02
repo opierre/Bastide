@@ -1149,5 +1149,49 @@
   "categorySystemOtherUncategorized": "Non catégorisé",
   "@categorySystemOtherUncategorized": {
     "description": "Display name for the system category with i18n key category.other.uncategorized."
+  },
+  "dashboardStatIncome": "Revenus",
+  "@dashboardStatIncome": {
+    "description": "Label on the income stat card."
+  },
+  "dashboardStatExpense": "Dépenses",
+  "@dashboardStatExpense": {
+    "description": "Label on the expense stat card."
+  },
+  "dashboardStatNet": "Net",
+  "@dashboardStatNet": {
+    "description": "Label on the net (income minus expense) stat card."
+  },
+  "dashboardStatSavingsRate": "Taux d'épargne",
+  "@dashboardStatSavingsRate": {
+    "description": "Label on the savings rate hero card."
+  },
+  "dashboardCategoryBreakdownTitle": "Dépenses par catégorie",
+  "@dashboardCategoryBreakdownTitle": {
+    "description": "Title of the by-category expense breakdown chart card."
+  },
+  "dashboardEmptyTitle": "Importez un relevé pour donner vie à votre argent",
+  "@dashboardEmptyTitle": {
+    "description": "Encouraging heading shown when the user has no transactions yet for any month."
+  },
+  "dashboardEmptyBody": "Vos revenus, vos dépenses et votre taux d'épargne apparaîtront ici dès votre premier import.",
+  "@dashboardEmptyBody": {
+    "description": "Encouraging subtext under the dashboard empty-state heading."
+  },
+  "dashboardGoToImports": "Aller aux imports",
+  "@dashboardGoToImports": {
+    "description": "CTA on the dashboard empty state, navigating to the imports panel."
+  },
+  "dashboardRetry": "Réessayer",
+  "@dashboardRetry": {
+    "description": "Retry button label shown when the dashboard summary fails to load."
+  },
+  "dashboardErrorInvalidMonth": "Le mois demandé n'est pas valide.",
+  "@dashboardErrorInvalidMonth": {
+    "description": "Localized message for the backend's DASHBOARD_MONTH_INVALID error code."
+  },
+  "dashboardErrorGeneric": "Une erreur est survenue. Veuillez réessayer.",
+  "@dashboardErrorGeneric": {
+    "description": "Fallback localized message for unrecognized or network errors on the dashboard."
   }
 }

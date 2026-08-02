@@ -1717,6 +1717,72 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Non catégorisé'**
   String get categorySystemOtherUncategorized;
+
+  /// Label on the income stat card.
+  ///
+  /// In fr, this message translates to:
+  /// **'Revenus'**
+  String get dashboardStatIncome;
+
+  /// Label on the expense stat card.
+  ///
+  /// In fr, this message translates to:
+  /// **'Dépenses'**
+  String get dashboardStatExpense;
+
+  /// Label on the net (income minus expense) stat card.
+  ///
+  /// In fr, this message translates to:
+  /// **'Net'**
+  String get dashboardStatNet;
+
+  /// Label on the savings rate hero card.
+  ///
+  /// In fr, this message translates to:
+  /// **'Taux d\'épargne'**
+  String get dashboardStatSavingsRate;
+
+  /// Title of the by-category expense breakdown chart card.
+  ///
+  /// In fr, this message translates to:
+  /// **'Dépenses par catégorie'**
+  String get dashboardCategoryBreakdownTitle;
+
+  /// Encouraging heading shown when the user has no transactions yet for any month.
+  ///
+  /// In fr, this message translates to:
+  /// **'Importez un relevé pour donner vie à votre argent'**
+  String get dashboardEmptyTitle;
+
+  /// Encouraging subtext under the dashboard empty-state heading.
+  ///
+  /// In fr, this message translates to:
+  /// **'Vos revenus, vos dépenses et votre taux d\'épargne apparaîtront ici dès votre premier import.'**
+  String get dashboardEmptyBody;
+
+  /// CTA on the dashboard empty state, navigating to the imports panel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aller aux imports'**
+  String get dashboardGoToImports;
+
+  /// Retry button label shown when the dashboard summary fails to load.
+  ///
+  /// In fr, this message translates to:
+  /// **'Réessayer'**
+  String get dashboardRetry;
+
+  /// Localized message for the backend's DASHBOARD_MONTH_INVALID error code.
+  ///
+  /// In fr, this message translates to:
+  /// **'Le mois demandé n\'est pas valide.'**
+  String get dashboardErrorInvalidMonth;
+
+  /// Fallback localized message for unrecognized or network errors on the dashboard.
+  ///
+  /// In fr, this message translates to:
+  /// **'Une erreur est survenue. Veuillez réessayer.'**
+  String get dashboardErrorGeneric;
 }
 
 class _AppLocalizationsDelegate
