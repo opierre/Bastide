@@ -15,6 +15,7 @@ import '../application/accounts_search.dart';
 import '../domain/account.dart';
 import 'account_error_localizer.dart';
 import 'account_form.dart';
+import 'account_type_label.dart';
 
 class AccountsScreen extends ConsumerWidget {
   const AccountsScreen({super.key});
@@ -251,14 +252,6 @@ class _AccountCard extends StatelessWidget {
   final VoidCallback onEdit;
   final VoidCallback onArchive;
 
-  String _typeLabel(AccountType type) => switch (type) {
-    AccountType.checking => l10n.accountTypeChecking,
-    AccountType.savings => l10n.accountTypeSavings,
-    AccountType.credit => l10n.accountTypeCredit,
-    AccountType.cash => l10n.accountTypeCash,
-    AccountType.other => l10n.accountTypeOther,
-  };
-
   @override
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
@@ -324,7 +317,7 @@ class _AccountCard extends StatelessWidget {
           const Spacer(),
           Row(
             children: [
-              AppChip(label: _typeLabel(account.type)),
+              AppChip(label: accountTypeLabel(l10n, account.type)),
               const SizedBox(width: AppSpacing.sm),
               // The balance is this card's one data point, so it carries the
               // sign colors — unlike the summary total, which stays neutral.

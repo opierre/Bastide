@@ -253,6 +253,7 @@
   "accountTypeChecking": "Checking",
   "accountTypeSavings": "Savings",
   "accountTypeCredit": "Credit card",
+  "accountTypeDeferredCard": "Deferred debit card",
   "accountTypeCash": "Cash",
   "accountTypeOther": "Other",
   "accountInstitutionLabel": "Institution",

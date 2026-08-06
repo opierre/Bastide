@@ -824,6 +824,12 @@ abstract class AppLocalizations {
   /// **'Crédit'**
   String get accountTypeCredit;
 
+  /// Account type option: the holding account a deferred-debit card posts to, settled against the current account once a month.
+  ///
+  /// In fr, this message translates to:
+  /// **'Carte à débit différé'**
+  String get accountTypeDeferredCard;
+
   /// Account type option: cash.
   ///
   /// In fr, this message translates to:

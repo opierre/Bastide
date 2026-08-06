@@ -8,6 +8,7 @@ String accountTypeLabel(AppLocalizations l10n, AccountType type) => switch (type
   AccountType.checking => l10n.accountTypeChecking,
   AccountType.savings => l10n.accountTypeSavings,
   AccountType.credit => l10n.accountTypeCredit,
+  AccountType.deferredCard => l10n.accountTypeDeferredCard,
   AccountType.cash => l10n.accountTypeCash,
   AccountType.other => l10n.accountTypeOther,
 };

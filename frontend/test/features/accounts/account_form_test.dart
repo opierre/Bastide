@@ -95,6 +95,26 @@ void main() {
     expect(call.type, AccountType.savings);
   });
 
+  testWidgets('a deferred-debit card is offered as its own account type', (tester) async {
+    final controller = FakeAccountsController();
+    await tester.pumpWidget(_wrap(controller: controller));
+    await tester.pumpAndSettle();
+
+    await tester.enterText(find.byKey(const Key('accountNameField')), 'Carte Gold');
+    await tester.enterText(find.byKey(const Key('accountInstitutionField')), 'BNP Paribas');
+    await tester.enterText(find.byKey(const Key('accountOpeningBalanceField')), '-320,40');
+
+    await tester.tap(find.byKey(const Key('accountTypeField')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Carte à débit différé').last);
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byKey(const Key('accountFormSubmitButton')));
+    await tester.pumpAndSettle();
+
+    expect(controller.createCalls.single.type, AccountType.deferredCard);
+  });
+
   testWidgets('the opening balance field is disabled when editing', (tester) async {
     final initial = Account(
       id: 'a1',

@@ -402,6 +402,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get accountTypeCredit => 'Credit card';
 
   @override
+  String get accountTypeDeferredCard => 'Deferred debit card';
+
+  @override
   String get accountTypeCash => 'Cash';
 
   @override

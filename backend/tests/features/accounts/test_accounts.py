@@ -138,3 +138,27 @@ def test_list_accounts_requires_auth(client: TestClient) -> None:
     response = client.get("/api/v1/accounts")
 
     assert response.status_code == 401
+
+
+def test_create_deferred_card_account(client: TestClient) -> None:
+    """The holding account a deferred-debit card posts to is an account type of its own."""
+    headers = _register(client, "amelie@example.com")
+
+    response = client.post(
+        "/api/v1/accounts",
+        json={**ACCOUNT_PAYLOAD, "name": "Carte à débit différé", "type": "deferred_card"},
+        headers=headers,
+    )
+
+    assert response.status_code == 201
+    assert response.json()["type"] == "deferred_card"
+
+
+def test_create_account_rejects_an_unknown_type(client: TestClient) -> None:
+    headers = _register(client, "amelie@example.com")
+
+    response = client.post(
+        "/api/v1/accounts", json={**ACCOUNT_PAYLOAD, "type": "crypto"}, headers=headers
+    )
+
+    assert response.status_code == 422

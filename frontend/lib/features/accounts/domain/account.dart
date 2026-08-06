@@ -1,18 +1,30 @@
 import 'package:flutter/foundation.dart';
 
-/// Mirrors the backend's `AccountType` literal (`schemas.py`). Enum member
-/// names match the wire values exactly, so `.name` round-trips both ways.
+/// Mirrors the backend's `AccountType` literal (`schemas.py`). Declaration
+/// order is the order the type selector offers them in.
 enum AccountType {
-  checking,
-  savings,
-  credit,
-  cash,
-  other;
+  checking('checking'),
+  savings('savings'),
+  credit('credit'),
 
-  static AccountType fromWire(String value) =>
-      AccountType.values.firstWhere((type) => type.name == value, orElse: () => AccountType.other);
+  /// The holding account a deferred-debit card gets: French banks post card
+  /// purchases to it through the month and settle the total against the current
+  /// account on one date. Its own balance is what the user watches, so it is a
+  /// type of its own rather than a flag on [credit].
+  deferredCard('deferred_card'),
+  cash('cash'),
+  other('other');
 
-  String get wireValue => name;
+  const AccountType(this.wireValue);
+
+  /// The literal the backend uses. Carried explicitly rather than derived from
+  /// `.name`, which can't spell a snake_case wire value.
+  final String wireValue;
+
+  static AccountType fromWire(String value) => AccountType.values.firstWhere(
+    (type) => type.wireValue == value,
+    orElse: () => AccountType.other,
+  );
 }
 
 /// Values proposed for an account the user hasn't created yet — read out of a

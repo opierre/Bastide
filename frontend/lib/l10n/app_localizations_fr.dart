@@ -403,6 +403,9 @@ class AppLocalizationsFr extends AppLocalizations {
   String get accountTypeCredit => 'Crédit';
 
   @override
+  String get accountTypeDeferredCard => 'Carte à débit différé';
+
+  @override
   String get accountTypeCash => 'Espèces';
 
   @override

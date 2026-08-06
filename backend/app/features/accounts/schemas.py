@@ -5,7 +5,11 @@ from typing import Literal
 
 from pydantic import BaseModel, Field
 
-AccountType = Literal["checking", "savings", "credit", "cash", "other"]
+# `deferred_card` is the holding account a deferred-debit card gets: French banks
+# post card purchases to it during the month and settle the total against the
+# current account on one date. It is a real balance the user watches, so it is an
+# account type rather than a flag on `credit`.
+AccountType = Literal["checking", "savings", "credit", "deferred_card", "cash", "other"]
 
 
 class AccountCreate(BaseModel):

@@ -128,7 +128,7 @@ for money.** Primary keys are UUIDs (string). Timestamps are UTC ISO-8601.
 | id | uuid PK | |
 | user_id | uuid FK → users | |
 | name | text | user-facing label |
-| type | text | `checking` \| `savings` \| `credit` \| `cash` \| `other` |
+| type | text | `checking` \| `savings` \| `credit` \| `deferred_card` \| `cash` \| `other` (`deferred_card` = the holding account a deferred-debit card posts to, settled monthly against the current account) |
 | institution | text | bank name (drives brand-logo lookup) |
 | currency | text | defaults to `users.currency`; reserved for future multi-currency |
 | ofx_account_id | text null | bank's account id (OFX `ACCTID`), used for import routing; unique per user where set |
