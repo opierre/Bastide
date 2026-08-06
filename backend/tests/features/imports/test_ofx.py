@@ -6,7 +6,7 @@ import pytest
 from fastapi.testclient import TestClient
 
 from app.features.imports.canonical import normalize
-from app.features.imports.parsers.ofx import OfxParseError, parse
+from app.features.imports.parsers.ofx import OfxParseError, parse, parse_ledger_balance
 
 FIXTURES = Path(__file__).resolve().parent.parent.parent / "fixtures" / "imports"
 
@@ -91,6 +91,33 @@ def test_parse_rejects_non_ofx_file() -> None:
         parse((FIXTURES / "not_ofx.txt").read_bytes())
 
 
+# --- parser: the declared closing balance ----------------------------------------------
+
+
+def test_parse_ledger_balance_reads_the_declared_closing_balance() -> None:
+    declared = parse_ledger_balance((FIXTURES / "sample_sgml.ofx").read_bytes())
+
+    assert declared is not None
+    assert declared.amount_minor == 145_750
+    assert declared.as_of is not None
+    assert declared.as_of.isoformat() == "2024-01-31"
+
+
+def test_parse_ledger_balance_tolerates_a_missing_dtasof() -> None:
+    declared = parse_ledger_balance((FIXTURES / "sample_sgml_no_dtasof.ofx").read_bytes())
+
+    assert declared is not None
+    assert declared.amount_minor == 38_000
+    assert declared.as_of is None
+
+
+def test_parse_ledger_balance_returns_none_when_nothing_is_declared() -> None:
+    # A statement need not carry one, and an unreadable file must not raise here:
+    # the balance is a bonus, the transactions are the job.
+    assert parse_ledger_balance((FIXTURES / "sample_xml.ofx").read_bytes()) is None
+    assert parse_ledger_balance((FIXTURES / "not_ofx.txt").read_bytes()) is None
+
+
 def test_normalize_builds_canonical_transaction() -> None:
     raw = parse((FIXTURES / "sample_sgml.ofx").read_bytes())[0]
 
@@ -122,8 +149,10 @@ def test_import_ofx_creates_batch_and_updates_balance(client: TestClient) -> Non
     assert body["period_start"] == "2024-01-05"
     assert body["period_end"] == "2024-01-15"
 
+    # The statement declares LEDGERBAL 1457.50, so the account lands on exactly
+    # that — the 100 000 typed at creation is corrected away, not added to.
     account_response = client.get(f"/api/v1/accounts/{account_id}", headers=headers)
-    assert account_response.json()["balance_minor"] == 100_000 - 4_250 + 150_000
+    assert account_response.json()["balance_minor"] == 145_750
 
 
 def test_reimporting_identical_file_inserts_nothing(client: TestClient) -> None:
@@ -160,8 +189,78 @@ def test_reimport_with_overlapping_fitid_marks_duplicate(client: TestClient) -> 
     assert body["new_count"] == 1
     assert body["duplicate_count"] == 1
 
+    # Reconciled once on the first import; the second only moves the balance by
+    # the row it actually adds.
     account_response = client.get(f"/api/v1/accounts/{account_id}", headers=headers)
-    assert account_response.json()["balance_minor"] == 100_000 - 4_250 + 150_000 - 1_200
+    assert account_response.json()["balance_minor"] == 145_750 - 1_200
+
+
+# --- opening-balance reconciliation from LEDGERBAL ---------------------------------------
+
+
+def test_first_import_derives_the_opening_balance_from_the_declared_balance(
+    client: TestClient,
+) -> None:
+    """The figure typed at creation is a guess; the statement knows the answer.
+
+    The account is opened with 1 000.00 — what a user reads off their banking app
+    today — while the statement says it closed January at 1 457.50 after +1 457.50
+    of movement. The opening balance is worked back to 0, which is what the account
+    really held before its first transaction.
+    """
+    headers = _register(client)
+    account_id = _create_account(client, headers)
+
+    _upload(client, headers, account_id, FIXTURES / "sample_sgml.ofx", "sample.ofx")
+
+    account = client.get(f"/api/v1/accounts/{account_id}", headers=headers).json()
+    assert account["opening_balance_minor"] == 0
+    assert account["balance_minor"] == 145_750
+
+
+def test_reconciliation_falls_back_to_the_last_booked_date_without_dtasof(
+    client: TestClient,
+) -> None:
+    headers = _register(client)
+    account_id = _create_account(client, headers)
+
+    _upload(client, headers, account_id, FIXTURES / "sample_sgml_no_dtasof.ofx", "feb.ofx")
+
+    # 380.00 declared, 80.00 of movement in the file → it opened at 300.00.
+    account = client.get(f"/api/v1/accounts/{account_id}", headers=headers).json()
+    assert account["opening_balance_minor"] == 30_000
+    assert account["balance_minor"] == 38_000
+
+
+def test_a_later_statement_does_not_re_derive_the_opening_balance(client: TestClient) -> None:
+    """Once there is history, the ledger is what we trust.
+
+    The February statement declares 2 000.00, which does not follow from the rows
+    we hold — the sign of a gap the user never imported. Re-deriving from it would
+    move that gap into the opening balance and silently rewrite January.
+    """
+    headers = _register(client)
+    account_id = _create_account(client, headers)
+    _upload(client, headers, account_id, FIXTURES / "sample_sgml.ofx", "jan.ofx")
+
+    _upload(client, headers, account_id, FIXTURES / "sample_sgml_later_month.ofx", "feb.ofx")
+
+    account = client.get(f"/api/v1/accounts/{account_id}", headers=headers).json()
+    assert account["opening_balance_minor"] == 0
+    assert account["balance_minor"] == 145_750 - 5_000
+
+
+def test_a_statement_declaring_no_balance_keeps_the_typed_opening_balance(
+    client: TestClient,
+) -> None:
+    headers = _register(client)
+    account_id = _create_account(client, headers)
+
+    _upload(client, headers, account_id, FIXTURES / "sample_xml.ofx", "sample.ofx")
+
+    account = client.get(f"/api/v1/accounts/{account_id}", headers=headers).json()
+    assert account["opening_balance_minor"] == 100_000
+    assert account["balance_minor"] == 100_000 - 1_990 + 7_500
 
 
 def test_import_invalid_file_records_failed_batch_with_no_rows(client: TestClient) -> None:

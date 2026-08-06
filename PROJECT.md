@@ -148,6 +148,15 @@ for money.** Primary keys are UUIDs (string). Timestamps are UTC ISO-8601.
 >   or a manual "recalculate" action). If a fresh recompute ever disagrees with the cache, that
 >   is a detectable bug — which is the safety the derived model buys us.
 >
+> **`opening_balance_minor` is the seed, and an OFX import corrects it.** It means "what the
+> account held before its first transaction" — a figure no user can look up, so asked directly
+> they type today's balance instead and every imported row is then counted twice. On an
+> account's **first** OFX import we therefore derive it from the statement's `LEDGERBAL`:
+> `opening = BALAMT − sum(rows booked on or before DTASOF)`. Only the first: a later
+> statement's balance is equally true, but re-deriving from it would absorb any un-imported
+> gap in the ledger into the opening balance rather than surfacing it. CSV carries no declared
+> balance, so a CSV-only account keeps the figure the user typed.
+>
 > (Scale note: a single user's ledger is realistically tens of thousands of rows, not millions;
 > even a naive indexed `SUM(account_id)` would be sub-millisecond. The cache + snapshots keep it
 > fast regardless.)

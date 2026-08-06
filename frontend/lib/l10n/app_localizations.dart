@@ -866,6 +866,12 @@ abstract class AppLocalizations {
   /// **'Solde actuel'**
   String get accountCurrentBalanceLabel;
 
+  /// Helper under the balance field when the account is being created from a statement: the import derives the real figure from the statement's declared balance, so an approximate entry here is harmless.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ajusté automatiquement d\'après le solde déclaré par votre relevé lors du premier import.'**
+  String get accountBalanceStatementNote;
+
   /// Validation message when the balance field is left empty. Only ever shown while creating an account — the field is read-only afterwards.
   ///
   /// In fr, this message translates to:

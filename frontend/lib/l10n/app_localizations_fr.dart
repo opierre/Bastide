@@ -424,6 +424,10 @@ class AppLocalizationsFr extends AppLocalizations {
   String get accountCurrentBalanceLabel => 'Solde actuel';
 
   @override
+  String get accountBalanceStatementNote =>
+      'Ajusté automatiquement d\'après le solde déclaré par votre relevé lors du premier import.';
+
+  @override
   String get accountOpeningBalanceRequired => 'Le solde actuel est requis.';
 
   @override

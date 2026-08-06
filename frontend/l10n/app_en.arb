@@ -260,6 +260,7 @@
   "accountInstitutionRequired": "Institution is required.",
   "accountOpeningBalanceLabel": "Opening balance",
   "accountCurrentBalanceLabel": "Current balance",
+  "accountBalanceStatementNote": "Adjusted automatically from the balance your statement declares, on the first import.",
   "accountOpeningBalanceRequired": "Current balance is required.",
   "accountOpeningBalanceInvalid": "Enter a valid amount.",
   "accountCurrencyLabel": "Currency",

@@ -8,6 +8,7 @@ or line end, which works whether or not that leaf tag is itself closed.
 """
 
 import re
+from dataclasses import dataclass
 from datetime import date
 from decimal import ROUND_HALF_UP, Decimal, InvalidOperation
 
@@ -18,8 +19,28 @@ class OfxParseError(Exception):
     """Raised when a file cannot be parsed as OFX/QFX at all, or a record is malformed."""
 
 
+@dataclass(frozen=True, slots=True)
+class LedgerBalance:
+    """The closing balance a statement declares for its account (`LEDGERBAL`).
+
+    This is the one figure in the file that states where the account actually
+    stood, as opposed to how it moved — which is what lets an import work out
+    the account's opening balance instead of asking the user to know it.
+    """
+
+    amount_minor: int
+
+    #: `DTASOF` — the date the balance holds at. Optional: it is mandatory in
+    #: the spec but not every exporter emits it, and the statement's last
+    #: booked date is a serviceable stand-in.
+    as_of: date | None
+
+
 _OFX_ROOT_RE = re.compile(r"<OFX[>\s]", re.IGNORECASE)
 _STMTTRN_RE = re.compile(r"<STMTTRN>(.*?)</STMTTRN>", re.IGNORECASE | re.DOTALL)
+# `AVAILBAL` carries a different figure (funds available, including holds), so
+# the tag is matched exactly rather than on a `BAL` suffix.
+_LEDGERBAL_RE = re.compile(r"<LEDGERBAL>(.*?)(?:</LEDGERBAL>|\Z)", re.IGNORECASE | re.DOTALL)
 
 
 def _tag(block: str, tag: str) -> str | None:
@@ -88,3 +109,34 @@ def parse(raw_bytes: bytes) -> list[RawTransaction]:
             )
         )
     return transactions
+
+
+def parse_ledger_balance(raw_bytes: bytes) -> LedgerBalance | None:
+    """The closing balance the statement declares, or `None` when it declares none.
+
+    Never raises: the balance is a bonus the file may or may not carry, and a
+    statement we can't read one out of must still import its transactions. A
+    file holding several statements is read for the first, matching how the
+    client picks the account block it routes on.
+    """
+    text = decode(raw_bytes)
+    match = _LEDGERBAL_RE.search(text)
+    if match is None:
+        return None
+
+    balamt = _tag(match.group(1), "BALAMT")
+    if balamt is None:
+        return None
+
+    try:
+        amount_minor = _parse_amount_minor(balamt)
+    except OfxParseError:
+        return None
+
+    dtasof = _tag(match.group(1), "DTASOF")
+    try:
+        as_of = _parse_date(dtasof) if dtasof else None
+    except OfxParseError:
+        as_of = None
+
+    return LedgerBalance(amount_minor=amount_minor, as_of=as_of)

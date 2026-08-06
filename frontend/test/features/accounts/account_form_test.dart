@@ -103,6 +103,32 @@ void main() {
     // balance the account holds today — which is what a statement reports.
     expect(find.text('Solde actuel'), findsOneWidget);
     expect(find.text('Solde initial'), findsNothing);
+    // Typed from scratch, nothing will correct it later, so no promise is made.
+    expect(
+      find.text(
+        "Ajusté automatiquement d'après le solde déclaré par votre relevé lors du premier import.",
+      ),
+      findsNothing,
+    );
+  });
+
+  testWidgets('an account proposed by a statement says its balance will be adjusted', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      _wrap(
+        controller: FakeAccountsController(),
+        prefill: const AccountPrefill(name: 'Courant ••4567', institution: 'Boursorama'),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(
+      find.text(
+        "Ajusté automatiquement d'après le solde déclaré par votre relevé lors du premier import.",
+      ),
+      findsOneWidget,
+    );
   });
 
   testWidgets('a deferred-debit card is offered as its own account type', (tester) async {

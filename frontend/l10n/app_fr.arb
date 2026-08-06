@@ -523,6 +523,10 @@
   "@accountCurrentBalanceLabel": {
     "description": "Label for the same balance field when creating an account: with no history behind it yet, what the user enters is the balance the account holds today."
   },
+  "accountBalanceStatementNote": "Ajusté automatiquement d'après le solde déclaré par votre relevé lors du premier import.",
+  "@accountBalanceStatementNote": {
+    "description": "Helper under the balance field when the account is being created from a statement: the import derives the real figure from the statement's declared balance, so an approximate entry here is harmless."
+  },
   "accountOpeningBalanceRequired": "Le solde actuel est requis.",
   "@accountOpeningBalanceRequired": {
     "description": "Validation message when the balance field is left empty. Only ever shown while creating an account — the field is read-only afterwards."

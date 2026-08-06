@@ -6,11 +6,11 @@ from collections.abc import Callable
 from datetime import date
 from uuid import uuid4
 
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 from app.core.errors import NotFoundError, ValidationError
-from app.features.accounts.balance import apply_delta, point_in_time_balance
+from app.features.accounts.balance import apply_delta, point_in_time_balance, recompute_balance
 from app.features.accounts.models import Account, AccountBalanceSnapshot
 from app.features.accounts.service import AccountService
 from app.features.auth.models import User
@@ -22,7 +22,7 @@ from app.features.imports.parsers.csv import (
     validate_template_config,
 )
 from app.features.imports.parsers.csv import parse as parse_csv
-from app.features.imports.parsers.ofx import OfxParseError
+from app.features.imports.parsers.ofx import LedgerBalance, OfxParseError, parse_ledger_balance
 from app.features.imports.parsers.ofx import parse as parse_ofx
 from app.features.imports.repository import CsvTemplateRepository, ImportRepository
 from app.features.imports.schemas import CsvTemplateCreate
@@ -179,6 +179,10 @@ class ImportService:
         if existing_batch is not None:
             return existing_batch
 
+        # Only a statement declares where the account stands; a CSV is movements alone.
+        declared_balance: LedgerBalance | None = None
+        had_transactions = self._has_transactions(account.id)
+
         if csv_template_id is not None:
             template = self._csv_template_repository.get_by_id_for_user(csv_template_id, user.id)
             if template is None:
@@ -195,6 +199,7 @@ class ImportService:
             source_format = "qfx" if file_name.lower().endswith(_QFX_EXTENSION) else "ofx"
             try:
                 raw_transactions = parse_ofx(content)
+                declared_balance = parse_ledger_balance(content)
             except OfxParseError as exc:
                 return self._repository.save(
                     self._failed_batch(user, account, source_format, file_name, file_hash, exc),
@@ -258,6 +263,11 @@ class ImportService:
 
         delta_minor = sum(row.amount_minor for row in new_rows)
         apply_delta(account, delta_minor)
+
+        # Before any snapshot is written, so they are taken from the corrected base.
+        if declared_balance is not None and not had_transactions:
+            self._reconcile_opening_balance(account, declared_balance, fallback_as_of=period_end)
+
         if new_rows:
             self._sync_month_boundary_snapshots(account, period_start, period_end)
 
@@ -319,6 +329,47 @@ class ImportService:
                 new_rows.append(row)
 
         return new_rows, duplicate_count
+
+    def _has_transactions(self, account_id: str) -> bool:
+        """Whether the account already has a ledger — i.e. this import isn't its first."""
+        return (
+            self._db.scalar(
+                select(Transaction.id).where(Transaction.account_id == account_id).limit(1)
+            )
+            is not None
+        )
+
+    def _reconcile_opening_balance(
+        self, account: Account, declared: LedgerBalance, fallback_as_of: date
+    ) -> None:
+        """Derive the account's opening balance from the balance the statement declares.
+
+        `opening_balance_minor` is the seed the ledger is added to, so it means "what
+        this account held before its first transaction" — a figure nobody can look up.
+        Asked for it directly, a user reasonably types today's balance instead, and every
+        transaction in the statement then gets counted twice. The statement already knows
+        the answer, so we work backwards from it::
+
+            opening = declared balance − (rows booked on or before its as-of date)
+
+        **Only on an account's first import**, deliberately. A later statement's balance
+        is equally true, but re-deriving from it would silently absorb any gap in the
+        ledger (months the user never imported) into the opening balance, moving the
+        error rather than fixing it. Once there is history, the ledger is what we trust.
+        """
+        as_of = declared.as_of or fallback_as_of
+        booked_through = (
+            self._db.scalar(
+                select(func.coalesce(func.sum(Transaction.amount_minor), 0)).where(
+                    Transaction.account_id == account.id,
+                    Transaction.booked_date <= as_of,
+                )
+            )
+            or 0
+        )
+
+        account.opening_balance_minor = declared.amount_minor - booked_through
+        account.cached_balance_minor = recompute_balance(self._db, account)
 
     def _sync_month_boundary_snapshots(
         self, account: Account, period_start: date, period_end: date

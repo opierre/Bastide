@@ -226,6 +226,14 @@ class _AccountFormState extends ConsumerState<AccountForm> {
               label: _isEditing
                   ? l10n.accountOpeningBalanceLabel
                   : l10n.accountCurrentBalanceLabel,
+              // Shown only for an account proposed by a statement, because that
+              // is the case where the import will go on to derive the real
+              // figure from the statement's declared balance — so a rough entry
+              // here costs nothing. An account typed from scratch gets no such
+              // correction, and promising one would be a lie.
+              helper: !_isEditing && widget.prefill != null
+                  ? l10n.accountBalanceStatementNote
+                  : null,
               child: TextFormField(
                 key: const Key('accountOpeningBalanceField'),
                 controller: _openingBalanceController,

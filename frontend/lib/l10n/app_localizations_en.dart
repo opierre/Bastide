@@ -423,6 +423,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get accountCurrentBalanceLabel => 'Current balance';
 
   @override
+  String get accountBalanceStatementNote =>
+      'Adjusted automatically from the balance your statement declares, on the first import.';
+
+  @override
   String get accountOpeningBalanceRequired => 'Current balance is required.';
 
   @override
