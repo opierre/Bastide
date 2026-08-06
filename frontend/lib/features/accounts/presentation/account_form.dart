@@ -33,11 +33,12 @@ Future<Account?> showAccountForm(
   );
 }
 
-/// Create/edit modal. Opening balance is only editable at creation — the
-/// backend treats it as the seed for the derived balance cache and doesn't
-/// accept it on `PATCH` (see `AccountUpdate`), so edit mode shows it
-/// read-only, alongside currency (never editable in Phase 1 — one currency
-/// per user, see the multi-currency skill).
+/// Create/edit modal. The balance field means something different at each end
+/// of the account's life (see [_AccountFormState]) but is editable at both —
+/// on `PATCH` it is a manual correction, shifting the cached balance and every
+/// saved snapshot by the delta rather than being treated as a fresh figure
+/// (see the backend's `shift_opening_balance`). Currency is never editable in
+/// Phase 1 — one currency per user, see the multi-currency skill.
 ///
 /// [prefill] seeds the create form from something the user didn't type — today,
 /// the account block of an OFX statement. The fields stay editable: a prefill
@@ -60,11 +61,15 @@ class _AccountFormState extends ConsumerState<AccountForm> {
   late final _institutionController = TextEditingController(
     text: widget.initial?.institution ?? widget.prefill?.institution,
   );
-  late final _openingBalanceController = TextEditingController(
-    text: widget.initial == null
-        ? null
-        : (widget.initial!.openingBalanceMinor / 100).toStringAsFixed(2),
-  );
+  final _openingBalanceController = TextEditingController();
+
+  /// Guards the one-time locale-aware fill of [_openingBalanceController] in
+  /// edit mode. Done in [didChangeDependencies] rather than at field-init
+  /// time because it must match the same [NumberFormat] `_parseMinorUnits`
+  /// re-parses on submit, which needs `context` for the active locale —
+  /// unavailable before the widget is mounted.
+  bool _openingBalanceFilled = false;
+
   late AccountType _type =
       widget.initial?.type ?? widget.prefill?.type ?? AccountType.checking;
 
@@ -76,6 +81,17 @@ class _AccountFormState extends ConsumerState<AccountForm> {
   String? _errorText;
 
   bool get _isEditing => widget.initial != null;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_openingBalanceFilled || widget.initial == null) return;
+    final locale = Localizations.localeOf(context).toString();
+    _openingBalanceController.text = NumberFormat.decimalPattern(
+      locale,
+    ).format(widget.initial!.openingBalanceMinor / 100);
+    _openingBalanceFilled = true;
+  }
 
   @override
   void dispose() {
@@ -95,6 +111,9 @@ class _AccountFormState extends ConsumerState<AccountForm> {
     });
 
     try {
+      final locale = Localizations.localeOf(context).toString();
+      final openingBalanceMinor = _parseMinorUnits(_openingBalanceController.text, locale);
+
       Account? created;
       if (_isEditing) {
         await ref
@@ -104,13 +123,9 @@ class _AccountFormState extends ConsumerState<AccountForm> {
               name: _nameController.text.trim(),
               type: _type,
               institution: _institutionController.text.trim(),
+              openingBalanceMinor: openingBalanceMinor,
             );
       } else {
-        final locale = Localizations.localeOf(context).toString();
-        final openingBalanceMinor = _parseMinorUnits(
-          _openingBalanceController.text,
-          locale,
-        );
         created = await ref
             .read(accountsControllerProvider.notifier)
             .create(
@@ -226,18 +241,20 @@ class _AccountFormState extends ConsumerState<AccountForm> {
               label: _isEditing
                   ? l10n.accountOpeningBalanceLabel
                   : l10n.accountCurrentBalanceLabel,
-              // Shown only for an account proposed by a statement, because that
-              // is the case where the import will go on to derive the real
-              // figure from the statement's declared balance — so a rough entry
-              // here costs nothing. An account typed from scratch gets no such
-              // correction, and promising one would be a lie.
+              // On create from a statement, a rough entry costs nothing — the
+              // first import derives the real figure from the statement's
+              // declared balance, so we say so rather than let it look like a
+              // typo tax. On edit, changing it is itself the correction, so the
+              // note explains its blast radius instead: cache and snapshots
+              // move with it, but no transaction is touched.
               helper: !_isEditing && widget.prefill != null
                   ? l10n.accountBalanceStatementNote
+                  : _isEditing
+                  ? l10n.accountOpeningBalanceEditNote
                   : null,
               child: TextFormField(
                 key: const Key('accountOpeningBalanceField'),
                 controller: _openingBalanceController,
-                enabled: !_isEditing,
                 keyboardType: const TextInputType.numberWithOptions(
                   decimal: true,
                   signed: true,
@@ -245,9 +262,7 @@ class _AccountFormState extends ConsumerState<AccountForm> {
                 // A form value is a neutral figure, not a movement, so it keeps
                 // the primary text color rather than taking a sign color.
                 style: tabularNumberStyle(Theme.of(context).textTheme.bodyLarge!),
-                validator: _isEditing
-                    ? null
-                    : (value) => _validateOpeningBalance(value, l10n),
+                validator: (value) => _validateOpeningBalance(value, l10n),
               ),
             ),
             const SizedBox(height: AppSpacing.md),

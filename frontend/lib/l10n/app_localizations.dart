@@ -872,10 +872,16 @@ abstract class AppLocalizations {
   /// **'Ajusté automatiquement d\'après le solde déclaré par votre relevé lors du premier import.'**
   String get accountBalanceStatementNote;
 
-  /// Validation message when the balance field is left empty. Only ever shown while creating an account — the field is read-only afterwards.
+  /// Helper under the balance field when editing an existing account: explains that a manual correction shifts the cached balance and every saved snapshot by the same delta rather than rewriting the ledger.
   ///
   /// In fr, this message translates to:
-  /// **'Le solde actuel est requis.'**
+  /// **'Corriger cette valeur décale le solde du compte et son historique enregistré du même montant — aucune transaction n\'est modifiée.'**
+  String get accountOpeningBalanceEditNote;
+
+  /// Validation message when the balance field is left empty, whether creating an account or correcting it while editing.
+  ///
+  /// In fr, this message translates to:
+  /// **'Le solde est requis.'**
   String get accountOpeningBalanceRequired;
 
   /// Validation message when the opening balance can't be parsed as a number.
@@ -1046,6 +1052,12 @@ abstract class AppLocalizations {
   /// **'{file} → {account}'**
   String importResultTarget(String file, String account);
 
+  /// Warning banner on the result card when the statement's declared balance disagrees with what the ledger implies. `amount` is pre-formatted with a sign (see formatAmount).
+  ///
+  /// In fr, this message translates to:
+  /// **'Le relevé indique un solde à {amount} de votre suivi au {date}. Vérifiez un import manquant, ou corrigez le solde d\'ouverture du compte si l\'écart persiste.'**
+  String importResultBalanceMismatchBody(String amount, DateTime date);
+
   /// The coverage window of an import batch, derived from the file's contents.
   ///
   /// In fr, this message translates to:
@@ -1063,6 +1075,12 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'{count, plural, =1{1 opération déjà présente, ignorée} other{{count} opérations déjà présentes, ignorées}}'**
   String importDuplicatesNote(int count);
+
+  /// Note under a history row's filename when the statement's declared balance disagrees with what the ledger implies — only ever set from an account's second import onward. `amount` is pre-formatted with a sign (see formatAmount).
+  ///
+  /// In fr, this message translates to:
+  /// **'Écart de {amount} avec le solde de la banque au {date}.'**
+  String importBalanceMismatchNote(String amount, DateTime date);
 
   /// Status pill for an import that completed.
   ///

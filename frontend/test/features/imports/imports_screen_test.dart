@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:finstride/core/session/current_user_provider.dart';
 import 'package:finstride/core/theme/app_theme.dart';
+import 'package:finstride/core/widgets/amount_text.dart';
 import 'package:finstride/features/auth/domain/auth_user.dart';
 import 'package:finstride/features/accounts/application/accounts_controller.dart';
 import 'package:finstride/features/accounts/domain/account.dart';
@@ -13,6 +14,7 @@ import 'package:finstride/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:intl/intl.dart';
 
 import '../../support/fake_accounts_controller.dart';
 import '../../support/fake_imports_controllers.dart';
@@ -53,6 +55,8 @@ ImportBatch _batch({
   String fileName = 'releve.ofx',
   int newCount = 42,
   int duplicateCount = 3,
+  int? balanceMismatchMinor,
+  DateTime? balanceMismatchAsOf,
 }) => ImportBatch(
   id: 'b1',
   accountId: 'a1',
@@ -66,6 +70,8 @@ ImportBatch _batch({
   duplicateCount: duplicateCount,
   status: ImportStatus.success,
   errorMessage: null,
+  balanceMismatchMinor: balanceMismatchMinor,
+  balanceMismatchAsOf: balanceMismatchAsOf,
   importedAt: DateTime(2026, 6, 1, 9, 30),
 );
 
@@ -165,6 +171,47 @@ void main() {
     );
     // The drop zone resets, ready for the next statement.
     expect(find.byKey(const Key('importStagedFileName')), findsNothing);
+  });
+
+  testWidgets('a result that disagrees with the bank shows a warning banner', (
+    tester,
+  ) async {
+    _useDesktopSurface(tester);
+    final imports = FakeImportsController(
+      importResult: _batch(
+        balanceMismatchMinor: 5925,
+        balanceMismatchAsOf: DateTime(2024, 2, 29),
+      ),
+    );
+    await tester.pumpWidget(
+      _wrap(
+        imports: imports,
+        templates: FakeCsvTemplatesController(),
+        file: const PickedImportFile(name: 'releve.ofx', bytes: [1, 2, 3]),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await _stageFile(tester);
+    await tester.tap(find.byKey(const Key('importSubmitButton')));
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(const Key('importResultBalanceMismatch')), findsOneWidget);
+    final amount = formatAmount(
+      amountMinor: 5925,
+      currency: 'EUR',
+      locale: 'fr',
+      showPositiveSign: true,
+    );
+    final date = DateFormat.yMd('fr').format(DateTime(2024, 2, 29));
+    expect(
+      find.text(
+        "Le relevé indique un solde à $amount de votre suivi au $date. "
+        "Vérifiez un import manquant, ou corrigez le solde d'ouverture du "
+        "compte si l'écart persiste.",
+      ),
+      findsOneWidget,
+    );
   });
 
   testWidgets('a CSV reuses the saved template for that bank without the wizard', (

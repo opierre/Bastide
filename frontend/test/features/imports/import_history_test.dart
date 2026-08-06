@@ -1,4 +1,7 @@
 import 'package:finstride/core/theme/app_theme.dart';
+import 'package:finstride/core/widgets/amount_text.dart';
+import 'package:finstride/features/accounts/application/accounts_controller.dart';
+import 'package:finstride/features/accounts/domain/account.dart';
 import 'package:finstride/features/imports/application/imports_controller.dart';
 import 'package:finstride/features/imports/domain/import_batch.dart';
 import 'package:finstride/features/imports/presentation/import_history.dart';
@@ -8,7 +11,21 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:intl/intl.dart';
 
+import '../../support/fake_accounts_controller.dart';
 import '../../support/fake_imports_controllers.dart';
+
+final _account = Account(
+  id: 'a1',
+  name: 'Compte courant',
+  type: AccountType.checking,
+  institution: 'BNP Paribas',
+  currency: 'EUR',
+  openingBalanceMinor: 0,
+  balanceMinor: 0,
+  archived: false,
+  createdAt: DateTime.utc(2026, 1, 1),
+  updatedAt: DateTime.utc(2026, 1, 1),
+);
 
 ImportBatch _batch({
   String id = 'b1',
@@ -18,6 +35,8 @@ ImportBatch _batch({
   int duplicateCount = 3,
   ImportStatus status = ImportStatus.success,
   String? errorMessage,
+  int? balanceMismatchMinor,
+  DateTime? balanceMismatchAsOf,
 }) => ImportBatch(
   id: id,
   accountId: 'a1',
@@ -31,6 +50,8 @@ ImportBatch _batch({
   duplicateCount: duplicateCount,
   status: status,
   errorMessage: errorMessage,
+  balanceMismatchMinor: balanceMismatchMinor,
+  balanceMismatchAsOf: balanceMismatchAsOf,
   importedAt: DateTime(2026, 6, 1, 9, 30),
 );
 
@@ -39,7 +60,12 @@ Widget _wrap({
   Locale locale = const Locale('fr'),
 }) {
   return ProviderScope(
-    overrides: [importsControllerProvider.overrideWith(() => controller)],
+    overrides: [
+      importsControllerProvider.overrideWith(() => controller),
+      accountsControllerProvider.overrideWith(
+        () => FakeAccountsController(initialAccounts: [_account]),
+      ),
+    ],
     child: MaterialApp(
       locale: locale,
       theme: appDarkTheme,
@@ -108,6 +134,34 @@ void main() {
 
     expect(find.byKey(const Key('importBatchDuplicateNote-b1')), findsOneWidget);
     expect(find.text('45 opérations déjà présentes, ignorées'), findsOneWidget);
+  });
+
+  testWidgets('a batch that disagrees with the bank shows the gap as a note', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      _wrap(
+        controller: FakeImportsController(
+          initialBatches: [
+            _batch(
+              balanceMismatchMinor: 5925,
+              balanceMismatchAsOf: DateTime(2024, 2, 29),
+            ),
+          ],
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(const Key('importBatchMismatchNote-b1')), findsOneWidget);
+    final amount = formatAmount(
+      amountMinor: 5925,
+      currency: 'EUR',
+      locale: 'fr',
+      showPositiveSign: true,
+    );
+    final date = DateFormat.yMd('fr').format(DateTime(2024, 2, 29));
+    expect(find.text('Écart de $amount avec le solde de la banque au $date.'), findsOneWidget);
   });
 
   testWidgets('a failed batch states nothing was changed and shows the reason', (

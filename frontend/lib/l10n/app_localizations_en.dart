@@ -427,7 +427,11 @@ class AppLocalizationsEn extends AppLocalizations {
       'Adjusted automatically from the balance your statement declares, on the first import.';
 
   @override
-  String get accountOpeningBalanceRequired => 'Current balance is required.';
+  String get accountOpeningBalanceEditNote =>
+      'Correcting this shifts the account\'s balance and any saved history by the same amount — it never touches a transaction.';
+
+  @override
+  String get accountOpeningBalanceRequired => 'Balance is required.';
 
   @override
   String get accountOpeningBalanceInvalid => 'Enter a valid amount.';
@@ -547,6 +551,14 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String importResultBalanceMismatchBody(String amount, DateTime date) {
+    final intl.DateFormat dateDateFormat = intl.DateFormat.yMd(localeName);
+    final String dateString = dateDateFormat.format(date);
+
+    return 'The statement declares a balance $amount from your ledger as of $dateString. Check for a missed import, or correct the account\'s opening balance if this keeps happening.';
+  }
+
+  @override
   String importPeriodRange(DateTime start, DateTime end) {
     final intl.DateFormat startDateFormat = intl.DateFormat.yMd(localeName);
     final String startString = startDateFormat.format(start);
@@ -569,6 +581,14 @@ class AppLocalizationsEn extends AppLocalizations {
       one: '1 transaction already present, skipped',
     );
     return '$_temp0';
+  }
+
+  @override
+  String importBalanceMismatchNote(String amount, DateTime date) {
+    final intl.DateFormat dateDateFormat = intl.DateFormat.yMd(localeName);
+    final String dateString = dateDateFormat.format(date);
+
+    return 'Off by $amount from the bank\'s balance as of $dateString.';
   }
 
   @override

@@ -27,6 +27,8 @@ final _batch = ImportBatch(
   duplicateCount: 0,
   status: ImportStatus.success,
   errorMessage: null,
+  balanceMismatchMinor: null,
+  balanceMismatchAsOf: null,
   importedAt: DateTime(2026, 6, 1, 9, 30),
 );
 

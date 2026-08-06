@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 
 import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/tokens.dart';
+import '../../../core/widgets/amount_text.dart';
 import '../../../core/widgets/app_card.dart';
 import '../../../core/widgets/dashed_border.dart';
 import '../../../core/widgets/inline_banner.dart';
@@ -641,10 +642,8 @@ class _ResultCard extends ConsumerWidget {
     final l10n = AppLocalizations.of(context)!;
     final textTheme = Theme.of(context).textTheme;
     final accounts = ref.watch(accountsControllerProvider).value ?? const <Account>[];
-    final accountName = accounts
-        .where((account) => account.id == batch.accountId)
-        .map((account) => account.name)
-        .firstOrNull;
+    final account = accounts.where((account) => account.id == batch.accountId).firstOrNull;
+    final accountName = account?.name;
 
     return AppCard(
       key: const Key('importResultCard'),
@@ -692,6 +691,22 @@ class _ResultCard extends ConsumerWidget {
                 ),
               ],
             ),
+          if (batch.balanceMismatchMinor case final mismatch?) ...[
+            const SizedBox(height: AppSpacing.md),
+            InlineBanner(
+              key: const Key('importResultBalanceMismatch'),
+              message: l10n.importResultBalanceMismatchBody(
+                formatAmount(
+                  amountMinor: mismatch,
+                  currency: account?.currency ?? '',
+                  locale: Localizations.localeOf(context).toString(),
+                  showPositiveSign: true,
+                ),
+                batch.balanceMismatchAsOf!,
+              ),
+              tone: BannerTone.warning,
+            ),
+          ],
           const SizedBox(height: AppSpacing.md),
           Text(
             l10n.importPeriodRange(batch.periodStart, batch.periodEnd),

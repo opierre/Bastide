@@ -46,10 +46,17 @@ class AccountsController extends AsyncNotifier<List<Account>> {
     required String name,
     required AccountType type,
     required String institution,
+    required int openingBalanceMinor,
   }) async {
     final updated = await ref
         .read(accountsRepositoryProvider)
-        .update(id, name: name, type: type, institution: institution);
+        .update(
+          id,
+          name: name,
+          type: type,
+          institution: institution,
+          openingBalanceMinor: openingBalanceMinor,
+        );
     state = AsyncValue.data([
       for (final account in state.value ?? const <Account>[])
         if (account.id == id) updated else account,

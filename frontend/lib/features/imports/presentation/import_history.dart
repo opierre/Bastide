@@ -4,10 +4,13 @@ import 'package:intl/intl.dart';
 
 import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/tokens.dart';
+import '../../../core/widgets/amount_text.dart';
 import '../../../core/widgets/app_card.dart';
 import '../../../core/widgets/app_chip.dart';
 import '../../../core/widgets/state_views.dart';
 import '../../../l10n/app_localizations.dart';
+import '../../accounts/application/accounts_controller.dart';
+import '../../accounts/domain/account.dart';
 import '../application/imports_controller.dart';
 import '../domain/import_batch.dart';
 import 'import_error_localizer.dart';
@@ -24,6 +27,10 @@ class ImportHistory extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context)!;
     final batches = ref.watch(importsControllerProvider);
+    // Needed only to format a mismatch amount in the account's own currency;
+    // the account list is already loaded for the panel's selector, so this is
+    // never a first fetch of its own.
+    final accounts = ref.watch(accountsControllerProvider).value ?? const <Account>[];
 
     return AppCard(
       padding: const EdgeInsets.all(AppSpacing.cardPaddingWide),
@@ -40,7 +47,7 @@ class ImportHistory extends ConsumerWidget {
                 title: l10n.importHistoryEmptyTitle,
                 message: l10n.importHistoryEmptyBody,
               ),
-              AsyncData(:final value) => _HistoryTable(batches: value),
+              AsyncData(:final value) => _HistoryTable(batches: value, accounts: accounts),
               AsyncError(:final error) => ErrorStateView(
                 message: localizeImportError(l10n, error),
                 messageKey: const Key('importHistoryErrorText'),
@@ -62,9 +69,10 @@ class ImportHistory extends ConsumerWidget {
 }
 
 class _HistoryTable extends StatelessWidget {
-  const _HistoryTable({required this.batches});
+  const _HistoryTable({required this.batches, required this.accounts});
 
   final List<ImportBatch> batches;
+  final List<Account> accounts;
 
   @override
   Widget build(BuildContext context) {
@@ -79,12 +87,25 @@ class _HistoryTable extends StatelessWidget {
             key: const Key('importHistoryList'),
             itemCount: batches.length,
             separatorBuilder: (_, _) => const Divider(color: AppColors.borderSubtle),
-            itemBuilder: (context, index) => _HistoryRow(batch: batches[index]),
+            itemBuilder: (context, index) => _HistoryRow(
+              batch: batches[index],
+              currency: _currencyFor(accounts, batches[index].accountId),
+            ),
           ),
         ),
       ],
     );
   }
+}
+
+/// The currency of the account a batch belongs to, when that account is
+/// still loaded — falling back to an empty string, which `NumberFormat`
+/// resolves from the ambient locale rather than throwing.
+String _currencyFor(List<Account> accounts, String accountId) {
+  for (final account in accounts) {
+    if (account.id == accountId) return account.currency;
+  }
+  return '';
 }
 
 /// Column widths shared by the header and every row, so the two can't drift.
@@ -132,9 +153,10 @@ class _HeaderRow extends StatelessWidget {
 }
 
 class _HistoryRow extends StatelessWidget {
-  const _HistoryRow({required this.batch});
+  const _HistoryRow({required this.batch, required this.currency});
 
   final ImportBatch batch;
+  final String currency;
 
   @override
   Widget build(BuildContext context) {
@@ -182,6 +204,24 @@ class _HistoryRow extends StatelessWidget {
                   Text(
                     l10n.importDuplicatesNote(batch.duplicateCount),
                     key: Key('importBatchDuplicateNote-${batch.id}'),
+                    style: AppTextStyles.helper.copyWith(color: AppColors.warning),
+                  ),
+                ],
+                // Independent of the notes above: a statement can both skip
+                // duplicates and disagree with the ledger's balance.
+                if (batch.balanceMismatchMinor case final mismatch?) ...[
+                  const SizedBox(height: 2),
+                  Text(
+                    l10n.importBalanceMismatchNote(
+                      formatAmount(
+                        amountMinor: mismatch,
+                        currency: currency,
+                        locale: locale,
+                        showPositiveSign: true,
+                      ),
+                      batch.balanceMismatchAsOf!,
+                    ),
+                    key: Key('importBatchMismatchNote-${batch.id}'),
                     style: AppTextStyles.helper.copyWith(color: AppColors.warning),
                   ),
                 ],

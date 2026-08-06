@@ -47,6 +47,8 @@ class ImportBatch {
     required this.duplicateCount,
     required this.status,
     required this.errorMessage,
+    required this.balanceMismatchMinor,
+    required this.balanceMismatchAsOf,
     required this.importedAt,
   });
 
@@ -66,6 +68,15 @@ class ImportBatch {
   /// only thing that says *why* the file was rejected.
   final String? errorMessage;
 
+  /// Set only from this account's second statement import onward, and only
+  /// when the statement's declared balance disagrees with what the ledger
+  /// implies at [balanceMismatchAsOf] — see the backend's
+  /// `ImportService._detect_balance_mismatch`. `null` means either nothing was
+  /// declared to compare (CSV, or an OFX file without `LEDGERBAL`) or the two
+  /// agreed.
+  final int? balanceMismatchMinor;
+  final DateTime? balanceMismatchAsOf;
+
   final DateTime importedAt;
 
   @override
@@ -84,6 +95,8 @@ class ImportBatch {
           other.duplicateCount == duplicateCount &&
           other.status == status &&
           other.errorMessage == errorMessage &&
+          other.balanceMismatchMinor == balanceMismatchMinor &&
+          other.balanceMismatchAsOf == balanceMismatchAsOf &&
           other.importedAt == importedAt);
 
   @override
@@ -100,6 +113,8 @@ class ImportBatch {
     duplicateCount,
     status,
     errorMessage,
+    balanceMismatchMinor,
+    balanceMismatchAsOf,
     importedAt,
   );
 }

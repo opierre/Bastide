@@ -46,10 +46,19 @@ class AccountsRepository {
     required String name,
     required AccountType type,
     required String institution,
+    required int openingBalanceMinor,
   }) async {
     final json = await _apiClient.patch(
       '/accounts/$id',
-      body: {'name': name, 'type': type.wireValue, 'institution': institution},
+      body: {
+        'name': name,
+        'type': type.wireValue,
+        'institution': institution,
+        // A manual correction: the backend shifts the cache and every existing
+        // snapshot by the delta rather than treating this as an independent
+        // figure — see `shift_opening_balance`.
+        'opening_balance_minor': openingBalanceMinor,
+      },
     );
     return _parse(json as Map<String, dynamic>);
   }

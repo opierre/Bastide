@@ -151,7 +151,7 @@ void main() {
     expect(controller.createCalls.single.type, AccountType.deferredCard);
   });
 
-  testWidgets('the opening balance field is disabled when editing', (tester) async {
+  testWidgets('the opening balance is editable, and prefilled, when editing', (tester) async {
     final initial = Account(
       id: 'a1',
       name: 'Compte courant',
@@ -168,17 +168,31 @@ void main() {
     await tester.pumpWidget(_wrap(controller: controller, initial: initial));
     await tester.pumpAndSettle();
 
-    final field = tester.widget<TextFormField>(find.byKey(const Key('accountOpeningBalanceField')));
-    expect(field.enabled, isFalse);
+    final field = tester.widget<TextFormField>(
+      find.byKey(const Key('accountOpeningBalanceField')),
+    );
+    expect(field.enabled, isTrue);
     // With transactions on top of it, the stored figure is only where the
     // account started — no longer what it holds.
     expect(find.text('Solde initial'), findsOneWidget);
+    // Prefilled from the account, locale-formatted (fr: comma decimal).
+    expect(find.text('100'), findsOneWidget);
+    // The correction's blast radius, spelled out.
+    expect(
+      find.text(
+        "Corriger cette valeur décale le solde du compte et son historique "
+        "enregistré du même montant — aucune transaction n'est modifiée.",
+      ),
+      findsOneWidget,
+    );
 
     await tester.enterText(find.byKey(const Key('accountNameField')), 'Compte courant modifié');
+    await tester.enterText(find.byKey(const Key('accountOpeningBalanceField')), '80');
     await tester.tap(find.byKey(const Key('accountFormSubmitButton')));
     await tester.pumpAndSettle();
 
     expect(controller.updateCalls, hasLength(1));
+    expect(controller.updateCalls.single.openingBalanceMinor, 8000);
   });
 
   testWidgets('the currency is shown as a settled value, not an editable field', (

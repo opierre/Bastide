@@ -112,6 +112,10 @@ class ImportsRepository {
     duplicateCount: json['duplicate_count'] as int,
     status: ImportStatus.fromWire(json['status'] as String),
     errorMessage: json['error_message'] as String?,
+    balanceMismatchMinor: json['balance_mismatch_minor'] as int?,
+    balanceMismatchAsOf: json['balance_mismatch_as_of'] == null
+        ? null
+        : DateTime.parse(json['balance_mismatch_as_of'] as String),
     importedAt: DateTime.parse(json['imported_at'] as String),
   );
 

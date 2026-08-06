@@ -527,9 +527,13 @@
   "@accountBalanceStatementNote": {
     "description": "Helper under the balance field when the account is being created from a statement: the import derives the real figure from the statement's declared balance, so an approximate entry here is harmless."
   },
-  "accountOpeningBalanceRequired": "Le solde actuel est requis.",
+  "accountOpeningBalanceEditNote": "Corriger cette valeur décale le solde du compte et son historique enregistré du même montant — aucune transaction n'est modifiée.",
+  "@accountOpeningBalanceEditNote": {
+    "description": "Helper under the balance field when editing an existing account: explains that a manual correction shifts the cached balance and every saved snapshot by the same delta rather than rewriting the ledger."
+  },
+  "accountOpeningBalanceRequired": "Le solde est requis.",
   "@accountOpeningBalanceRequired": {
-    "description": "Validation message when the balance field is left empty. Only ever shown while creating an account — the field is read-only afterwards."
+    "description": "Validation message when the balance field is left empty, whether creating an account or correcting it while editing."
   },
   "accountOpeningBalanceInvalid": "Entrez un montant valide.",
   "@accountOpeningBalanceInvalid": {
@@ -686,6 +690,19 @@
       }
     }
   },
+  "importResultBalanceMismatchBody": "Le relevé indique un solde à {amount} de votre suivi au {date}. Vérifiez un import manquant, ou corrigez le solde d'ouverture du compte si l'écart persiste.",
+  "@importResultBalanceMismatchBody": {
+    "description": "Warning banner on the result card when the statement's declared balance disagrees with what the ledger implies. `amount` is pre-formatted with a sign (see formatAmount).",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "date": {
+        "type": "DateTime",
+        "format": "yMd"
+      }
+    }
+  },
   "importPeriodRange": "{start} – {end}",
   "@importPeriodRange": {
     "description": "The coverage window of an import batch, derived from the file's contents.",
@@ -710,6 +727,19 @@
     "placeholders": {
       "count": {
         "type": "int"
+      }
+    }
+  },
+  "importBalanceMismatchNote": "Écart de {amount} avec le solde de la banque au {date}.",
+  "@importBalanceMismatchNote": {
+    "description": "Note under a history row's filename when the statement's declared balance disagrees with what the ledger implies — only ever set from an account's second import onward. `amount` is pre-formatted with a sign (see formatAmount).",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "date": {
+        "type": "DateTime",
+        "format": "yMd"
       }
     }
   },

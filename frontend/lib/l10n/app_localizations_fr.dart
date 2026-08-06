@@ -428,7 +428,11 @@ class AppLocalizationsFr extends AppLocalizations {
       'Ajusté automatiquement d\'après le solde déclaré par votre relevé lors du premier import.';
 
   @override
-  String get accountOpeningBalanceRequired => 'Le solde actuel est requis.';
+  String get accountOpeningBalanceEditNote =>
+      'Corriger cette valeur décale le solde du compte et son historique enregistré du même montant — aucune transaction n\'est modifiée.';
+
+  @override
+  String get accountOpeningBalanceRequired => 'Le solde est requis.';
 
   @override
   String get accountOpeningBalanceInvalid => 'Entrez un montant valide.';
@@ -549,6 +553,14 @@ class AppLocalizationsFr extends AppLocalizations {
   }
 
   @override
+  String importResultBalanceMismatchBody(String amount, DateTime date) {
+    final intl.DateFormat dateDateFormat = intl.DateFormat.yMd(localeName);
+    final String dateString = dateDateFormat.format(date);
+
+    return 'Le relevé indique un solde à $amount de votre suivi au $dateString. Vérifiez un import manquant, ou corrigez le solde d\'ouverture du compte si l\'écart persiste.';
+  }
+
+  @override
   String importPeriodRange(DateTime start, DateTime end) {
     final intl.DateFormat startDateFormat = intl.DateFormat.yMd(localeName);
     final String startString = startDateFormat.format(start);
@@ -571,6 +583,14 @@ class AppLocalizationsFr extends AppLocalizations {
       one: '1 opération déjà présente, ignorée',
     );
     return '$_temp0';
+  }
+
+  @override
+  String importBalanceMismatchNote(String amount, DateTime date) {
+    final intl.DateFormat dateDateFormat = intl.DateFormat.yMd(localeName);
+    final String dateString = dateDateFormat.format(date);
+
+    return 'Écart de $amount avec le solde de la banque au $dateString.';
   }
 
   @override
