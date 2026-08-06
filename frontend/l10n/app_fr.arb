@@ -463,6 +463,10 @@
   "@accountFormCreateTitle": {
     "description": "Title of the account form dialog when creating an account."
   },
+  "accountFormPrefilledNote": "Champs pré-remplis depuis votre relevé — modifiez-les si besoin.",
+  "@accountFormPrefilledNote": {
+    "description": "Note at the top of the account form when its fields were pre-filled from an imported statement rather than typed."
+  },
   "accountFormEditTitle": "Modifier le compte",
   "@accountFormEditTitle": {
     "description": "Title of the account form dialog when editing an account."
@@ -604,6 +608,37 @@
   "importReconfigureTemplate": "Reconfigurer",
   "@importReconfigureTemplate": {
     "description": "Action that re-opens the CSV wizard even though a saved template exists."
+  },
+  "importDetectedAccount": "Compte reconnu dans le fichier : {account}.",
+  "@importDetectedAccount": {
+    "description": "Banner confirming the statement's account block matched an existing account, which has been selected as the destination.",
+    "placeholders": {
+      "account": {
+        "type": "String"
+      }
+    }
+  },
+  "importDetectedAccountAmbiguous": "Ce relevé vient de {account}, mais plusieurs comptes y correspondent — choisissez la destination.",
+  "@importDetectedAccountAmbiguous": {
+    "description": "Banner shown when the statement's bank matches several accounts and nothing in the file separates them; the user picks the destination.",
+    "placeholders": {
+      "account": {
+        "type": "String"
+      }
+    }
+  },
+  "importDetectedAccountUnknown": "Aucun compte ne correspond au compte {account} de ce relevé.",
+  "@importDetectedAccountUnknown": {
+    "description": "Banner shown when the account declared by the statement matches none of the user's accounts.",
+    "placeholders": {
+      "account": {
+        "type": "String"
+      }
+    }
+  },
+  "importCreateDetectedAccount": "Créer ce compte",
+  "@importCreateDetectedAccount": {
+    "description": "Action opening the account form pre-filled with the account read from the statement."
   },
   "importResultTitle": "Dernier import",
   "@importResultTitle": {

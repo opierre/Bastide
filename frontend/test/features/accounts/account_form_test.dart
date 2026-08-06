@@ -18,7 +18,11 @@ const _user = AuthUser(
   currency: 'EUR',
 );
 
-Widget _wrap({required FakeAccountsController controller, Account? initial}) {
+Widget _wrap({
+  required FakeAccountsController controller,
+  Account? initial,
+  AccountPrefill? prefill,
+}) {
   return ProviderScope(
     overrides: [
       accountsControllerProvider.overrideWith(() => controller),
@@ -28,7 +32,9 @@ Widget _wrap({required FakeAccountsController controller, Account? initial}) {
       locale: const Locale('fr'),
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
-      home: Scaffold(body: Center(child: AccountForm(initial: initial))),
+      home: Scaffold(
+        body: Center(child: AccountForm(initial: initial, prefill: prefill)),
+      ),
     ),
   );
 }
@@ -57,6 +63,36 @@ void main() {
     expect(call.institution, 'BNP Paribas');
     expect(call.type, AccountType.savings);
     expect(call.openingBalanceMinor, 123456);
+  });
+
+  testWidgets('a prefill seeds the create form and stays editable', (tester) async {
+    final controller = FakeAccountsController();
+    await tester.pumpWidget(
+      _wrap(
+        controller: controller,
+        prefill: const AccountPrefill(
+          name: 'Compte courant ••4567',
+          institution: 'BOURSORAMA BANQUE',
+          type: AccountType.savings,
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(const Key('accountFormPrefillNote')), findsOneWidget);
+    expect(find.text('Compte courant ••4567'), findsOneWidget);
+    expect(find.text('BOURSORAMA BANQUE'), findsOneWidget);
+
+    // The proposal is editable: the user renames it and the typed value wins.
+    await tester.enterText(find.byKey(const Key('accountNameField')), 'Mon livret');
+    await tester.enterText(find.byKey(const Key('accountOpeningBalanceField')), '0');
+    await tester.tap(find.byKey(const Key('accountFormSubmitButton')));
+    await tester.pumpAndSettle();
+
+    final call = controller.createCalls.single;
+    expect(call.name, 'Mon livret');
+    expect(call.institution, 'BOURSORAMA BANQUE');
+    expect(call.type, AccountType.savings);
   });
 
   testWidgets('the opening balance field is disabled when editing', (tester) async {

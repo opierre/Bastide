@@ -15,9 +15,13 @@ import '../../../core/widgets/state_views.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../accounts/application/accounts_controller.dart';
 import '../../accounts/domain/account.dart';
+import '../../accounts/presentation/account_form.dart';
+import '../../accounts/presentation/account_type_label.dart';
 import '../application/imports_controller.dart';
+import '../application/ofx_account_detection.dart';
 import '../domain/csv_template.dart';
 import '../domain/import_batch.dart';
+import '../domain/ofx_account_info.dart';
 import 'csv_mapping_wizard.dart';
 import 'import_error_localizer.dart';
 import 'import_history.dart';
@@ -58,12 +62,13 @@ class _ImportsScreenState extends ConsumerState<ImportsScreen> {
     if (picked != null) _stage(picked);
   }
 
-  void _stage(PickedImportFile file) {
+  Future<void> _stage(PickedImportFile file) async {
     setState(() {
       _errorText = null;
       _forceWizard = false;
     });
     ref.read(selectedImportFileProvider.notifier).select(file);
+    await _detectAccount(file);
   }
 
   void _clearFile() {
@@ -72,6 +77,48 @@ class _ImportsScreenState extends ConsumerState<ImportsScreen> {
       _forceWizard = false;
     });
     ref.read(selectedImportFileProvider.notifier).clear();
+    ref.read(ofxAccountDetectionProvider.notifier).clear();
+  }
+
+  /// Points the import at the account the statement itself names.
+  ///
+  /// An OFX file carries its own account block, so the user shouldn't have to
+  /// re-state which account a statement is for — and shouldn't be able to file
+  /// it against the wrong one by leaving the selector where it was. When no
+  /// account matches, the statement is describing an account the user hasn't
+  /// created yet, so we offer to create it from what the file says.
+  Future<void> _detectAccount(PickedImportFile file) async {
+    final List<Account> accounts;
+    try {
+      accounts = await ref.read(accountsControllerProvider.future);
+    } catch (_) {
+      // The account selector already reports that the list failed to load;
+      // detection just stays silent rather than adding a second error.
+      ref.read(ofxAccountDetectionProvider.notifier).clear();
+      return;
+    }
+    // The staged file may have been replaced or cleared while we waited.
+    if (!mounted || ref.read(selectedImportFileProvider) != file) return;
+
+    switch (ref.read(ofxAccountDetectionProvider.notifier).detect(file, accounts)) {
+      case OfxAccountMatched(:final account):
+        ref.read(selectedImportAccountProvider.notifier).select(account.id);
+      case OfxAccountUnmatched(:final info):
+        await _createDetectedAccount(info);
+      case OfxAccountAmbiguous() || null:
+        break;
+    }
+  }
+
+  /// Opens the account form pre-filled from the statement, and imports into the
+  /// account it creates. Cancelling leaves the banner and its button in place,
+  /// so the offer can be taken up later.
+  Future<void> _createDetectedAccount(OfxAccountInfo info) async {
+    final l10n = AppLocalizations.of(context)!;
+    final created = await showAccountForm(context, prefill: _prefillFrom(info, l10n));
+    if (created == null || !mounted) return;
+    ref.read(selectedImportAccountProvider.notifier).select(created.id);
+    ref.read(ofxAccountDetectionProvider.notifier).resolveTo(info, created);
   }
 
   /// Routes the staged file: OFX/QFX import in one step, CSV either through the
@@ -127,6 +174,7 @@ class _ImportsScreenState extends ConsumerState<ImportsScreen> {
     if (!mounted) return;
     ref.read(lastImportResultProvider.notifier).set(batch);
     ref.read(selectedImportFileProvider.notifier).clear();
+    ref.read(ofxAccountDetectionProvider.notifier).clear();
     setState(() => _forceWizard = false);
   }
 
@@ -157,6 +205,7 @@ class _ImportsScreenState extends ConsumerState<ImportsScreen> {
                     onDropFile: _stage,
                     onClearFile: _clearFile,
                     onImport: _import,
+                    onCreateDetectedAccount: _createDetectedAccount,
                     onReconfigure: () => setState(() => _forceWizard = true),
                   ),
                 ),
@@ -174,6 +223,24 @@ class _ImportsScreenState extends ConsumerState<ImportsScreen> {
     );
   }
 }
+
+/// The statement's account phrased for the account form: a name built from the
+/// type and the last digits of the account number, plus the bank's own name for
+/// itself. Everything stays editable — the user renames it if they prefer.
+AccountPrefill _prefillFrom(OfxAccountInfo info, AppLocalizations l10n) {
+  final type = accountTypeFromOfx(info.accountType);
+  final label = type == null ? info.institutionLabel : accountTypeLabel(l10n, type);
+  return AccountPrefill(
+    name: [?label, info.maskedNumber].join(' '),
+    institution: info.institutionLabel,
+    type: type,
+  );
+}
+
+/// How a detected account is named in the banners: `Boursorama ••4567`, or just
+/// the masked number when the file names no bank.
+String _detectedAccountLabel(OfxAccountInfo info) =>
+    [?info.institutionLabel, info.maskedNumber].join(' ');
 
 /// Resolves the selected account id against the loaded list, falling back to
 /// the first account so the common single-account case needs no selection at
@@ -197,6 +264,7 @@ class _NewImportCard extends ConsumerWidget {
     required this.onDropFile,
     required this.onClearFile,
     required this.onImport,
+    required this.onCreateDetectedAccount,
     required this.onReconfigure,
   });
 
@@ -207,6 +275,7 @@ class _NewImportCard extends ConsumerWidget {
   final ValueChanged<PickedImportFile> onDropFile;
   final VoidCallback onClearFile;
   final VoidCallback onImport;
+  final ValueChanged<OfxAccountInfo> onCreateDetectedAccount;
   final VoidCallback onReconfigure;
 
   @override
@@ -235,6 +304,10 @@ class _NewImportCard extends ConsumerWidget {
             ),
             _ => const SkeletonBlock(height: 44, radius: AppRadii.md),
           },
+          _DetectedAccountNotice(
+            isImporting: isImporting,
+            onCreateAccount: onCreateDetectedAccount,
+          ),
           const SizedBox(height: AppSpacing.md),
           if (file == null)
             _DropZone(onPickFile: onPickFile, onDropFile: onDropFile)
@@ -253,6 +326,59 @@ class _NewImportCard extends ConsumerWidget {
           ],
         ],
       ),
+    );
+  }
+}
+
+/// What the staged statement says about its own account, sitting right under
+/// the destination selector it either settled or is questioning.
+///
+/// Renders nothing at all when there is nothing to say — no file staged, a CSV
+/// (which declares no account), or an OFX whose header we couldn't read.
+class _DetectedAccountNotice extends ConsumerWidget {
+  const _DetectedAccountNotice({
+    required this.isImporting,
+    required this.onCreateAccount,
+  });
+
+  final bool isImporting;
+  final ValueChanged<OfxAccountInfo> onCreateAccount;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
+    final match = ref.watch(ofxAccountDetectionProvider);
+    if (match == null) return const SizedBox.shrink();
+
+    return Padding(
+      padding: const EdgeInsets.only(top: AppSpacing.sm),
+      child: switch (match) {
+        OfxAccountMatched(:final account) => InlineBanner(
+          key: const Key('importDetectedAccountBanner'),
+          message: l10n.importDetectedAccount(account.name),
+          tone: BannerTone.success,
+        ),
+        OfxAccountAmbiguous(:final info) => InlineBanner(
+          key: const Key('importAmbiguousAccountBanner'),
+          message: l10n.importDetectedAccountAmbiguous(_detectedAccountLabel(info)),
+          tone: BannerTone.warning,
+        ),
+        OfxAccountUnmatched(:final info) => Column(
+          crossAxisAlignment: CrossAxisAlignment.end,
+          children: [
+            InlineBanner(
+              key: const Key('importUnknownAccountBanner'),
+              message: l10n.importDetectedAccountUnknown(_detectedAccountLabel(info)),
+              tone: BannerTone.warning,
+            ),
+            TextButton(
+              key: const Key('importCreateDetectedAccountButton'),
+              onPressed: isImporting ? null : () => onCreateAccount(info),
+              child: Text(l10n.importCreateDetectedAccount),
+            ),
+          ],
+        ),
+      },
     );
   }
 }

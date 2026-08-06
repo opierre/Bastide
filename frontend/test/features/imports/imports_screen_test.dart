@@ -1,4 +1,8 @@
+import 'dart:convert';
+
+import 'package:finstride/core/session/current_user_provider.dart';
 import 'package:finstride/core/theme/app_theme.dart';
+import 'package:finstride/features/auth/domain/auth_user.dart';
 import 'package:finstride/features/accounts/application/accounts_controller.dart';
 import 'package:finstride/features/accounts/domain/account.dart';
 import 'package:finstride/features/imports/application/imports_controller.dart';
@@ -22,6 +26,14 @@ class FakeImportFilePicker extends ImportFilePicker {
   @override
   Future<PickedImportFile?> pick() async => file;
 }
+
+const _user = AuthUser(
+  id: 'u1',
+  email: 'ada@example.com',
+  displayName: 'Ada',
+  locale: 'fr',
+  currency: 'EUR',
+);
 
 final _account = Account(
   id: 'a1',
@@ -63,17 +75,35 @@ final _savedTemplate = CsvTemplate(
   createdAt: DateTime.utc(2026, 5, 1),
 );
 
+/// An OFX statement declaring a Boursorama checking account ending 4567.
+final _ofxBytes = utf8.encode('''
+<OFX>
+<SIGNONMSGSRSV1><SONRS><FI><ORG>BOURSORAMA BANQUE
+</FI></SONRS></SIGNONMSGSRSV1>
+<BANKMSGSRSV1><STMTTRNRS><STMTRS>
+<CURDEF>EUR
+<BANKACCTFROM>
+<BANKID>40618
+<ACCTID>0001234567
+<ACCTTYPE>CHECKING
+</BANKACCTFROM>
+</STMTRS></STMTTRNRS></BANKMSGSRSV1>
+</OFX>
+''');
+
 Widget _wrap({
   required FakeImportsController imports,
   required FakeCsvTemplatesController templates,
   required PickedImportFile file,
+  FakeAccountsController? accounts,
   Locale locale = const Locale('fr'),
 }) {
   return ProviderScope(
     overrides: [
       accountsControllerProvider.overrideWith(
-        () => FakeAccountsController(initialAccounts: [_account]),
+        () => accounts ?? FakeAccountsController(initialAccounts: [_account]),
       ),
+      currentUserProvider.overrideWithValue(_user),
       importsControllerProvider.overrideWith(() => imports),
       csvTemplatesControllerProvider.overrideWith(() => templates),
       importFilePickerProvider.overrideWithValue(FakeImportFilePicker(file)),
@@ -186,6 +216,122 @@ void main() {
     expect(find.text('Assistant CSV'), findsOneWidget);
     // Nothing is imported until the wizard is confirmed.
     expect(imports.importCalls, isEmpty);
+  });
+
+  testWidgets('an OFX file selects the account it declares', (tester) async {
+    _useDesktopSurface(tester);
+    final imports = FakeImportsController(importResult: _batch());
+    final other = Account(
+      id: 'a2',
+      name: 'Compte BNP',
+      type: AccountType.checking,
+      institution: 'BNP Paribas',
+      currency: 'EUR',
+      openingBalanceMinor: 0,
+      balanceMinor: 0,
+      archived: false,
+      createdAt: DateTime.utc(2026, 1, 1),
+      updatedAt: DateTime.utc(2026, 1, 1),
+    );
+    await tester.pumpWidget(
+      _wrap(
+        imports: imports,
+        templates: FakeCsvTemplatesController(),
+        // The BNP account comes first, so the panel's default selection is the
+        // wrong one until the file says otherwise.
+        accounts: FakeAccountsController(initialAccounts: [other, _account]),
+        file: PickedImportFile(name: 'releve.ofx', bytes: _ofxBytes),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await _stageFile(tester);
+
+    expect(find.byKey(const Key('importDetectedAccountBanner')), findsOneWidget);
+
+    await tester.tap(find.byKey(const Key('importSubmitButton')));
+    await tester.pumpAndSettle();
+
+    expect(imports.importCalls.single.accountId, 'a1');
+  });
+
+  testWidgets('an OFX file for an unknown account opens the prefilled form', (
+    tester,
+  ) async {
+    _useDesktopSurface(tester);
+    final imports = FakeImportsController(importResult: _batch());
+    final accounts = FakeAccountsController(
+      initialAccounts: [
+        Account(
+          id: 'a2',
+          name: 'Compte BNP',
+          type: AccountType.checking,
+          institution: 'BNP Paribas',
+          currency: 'EUR',
+          openingBalanceMinor: 0,
+          balanceMinor: 0,
+          archived: false,
+          createdAt: DateTime.utc(2026, 1, 1),
+          updatedAt: DateTime.utc(2026, 1, 1),
+        ),
+      ],
+      createdAccount: _account,
+    );
+    await tester.pumpWidget(
+      _wrap(
+        imports: imports,
+        templates: FakeCsvTemplatesController(),
+        accounts: accounts,
+        file: PickedImportFile(name: 'releve.ofx', bytes: _ofxBytes),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await _stageFile(tester);
+
+    // The form opens on its own, carrying what the statement said.
+    expect(find.byKey(const Key('accountFormPrefillNote')), findsOneWidget);
+    expect(find.text('Courant ••4567'), findsOneWidget);
+    expect(find.text('BOURSORAMA BANQUE'), findsOneWidget);
+
+    await tester.enterText(find.byKey(const Key('accountOpeningBalanceField')), '0');
+    await tester.tap(find.byKey(const Key('accountFormSubmitButton')));
+    await tester.pumpAndSettle();
+
+    expect(accounts.createCalls.single.institution, 'BOURSORAMA BANQUE');
+    expect(accounts.createCalls.single.type, AccountType.checking);
+
+    // The new account becomes the destination, and the file imports into it.
+    expect(find.byKey(const Key('importDetectedAccountBanner')), findsOneWidget);
+    await tester.tap(find.byKey(const Key('importSubmitButton')));
+    await tester.pumpAndSettle();
+
+    expect(imports.importCalls.single.accountId, 'a1');
+  });
+
+  testWidgets('cancelling the offered account leaves it on the banner', (tester) async {
+    _useDesktopSurface(tester);
+    await tester.pumpWidget(
+      _wrap(
+        imports: FakeImportsController(importResult: _batch()),
+        templates: FakeCsvTemplatesController(),
+        accounts: FakeAccountsController(initialAccounts: const []),
+        file: PickedImportFile(name: 'releve.ofx', bytes: _ofxBytes),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await _stageFile(tester);
+    await tester.tap(find.byKey(const Key('accountFormCancelButton')));
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(const Key('importUnknownAccountBanner')), findsOneWidget);
+
+    // The offer stays available rather than being lost with the dialog.
+    await tester.tap(find.byKey(const Key('importCreateDetectedAccountButton')));
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(const Key('accountFormPrefillNote')), findsOneWidget);
   });
 
   testWidgets('renders under en without missing localized keys', (tester) async {

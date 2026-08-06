@@ -377,6 +377,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get accountFormCreateTitle => 'New account';
 
   @override
+  String get accountFormPrefilledNote =>
+      'Pre-filled from your statement — adjust anything that looks off.';
+
+  @override
   String get accountFormEditTitle => 'Edit account';
 
   @override
@@ -481,6 +485,24 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get importReconfigureTemplate => 'Reconfigure';
+
+  @override
+  String importDetectedAccount(String account) {
+    return 'Account recognized in the file: $account.';
+  }
+
+  @override
+  String importDetectedAccountAmbiguous(String account) {
+    return 'This statement is from $account, but several accounts match it — choose the destination.';
+  }
+
+  @override
+  String importDetectedAccountUnknown(String account) {
+    return 'No account matches this statement\'s account $account.';
+  }
+
+  @override
+  String get importCreateDetectedAccount => 'Create this account';
 
   @override
   String get importResultTitle => 'Last import';

@@ -15,6 +15,18 @@ enum AccountType {
   String get wireValue => name;
 }
 
+/// Values proposed for an account the user hasn't created yet — read out of a
+/// statement file rather than typed. Every field is optional: the form falls
+/// back to its own defaults for whatever the source couldn't tell us.
+@immutable
+class AccountPrefill {
+  const AccountPrefill({this.name, this.institution, this.type});
+
+  final String? name;
+  final String? institution;
+  final AccountType? type;
+}
+
 /// An account as returned by the API, including its derived current balance.
 /// Currency is set by the backend from the user's currency (Phase 1: one
 /// currency per user) and is never picked per account — see the

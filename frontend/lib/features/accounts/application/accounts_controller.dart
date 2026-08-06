@@ -18,7 +18,10 @@ class AccountsController extends AsyncNotifier<List<Account>> {
     state = await AsyncValue.guard(() => ref.read(accountsRepositoryProvider).list());
   }
 
-  Future<void> create({
+  /// Creates an account and returns it, so a caller that needs the new id —
+  /// the imports panel, staging a statement for an account it just created —
+  /// doesn't have to search the refreshed list for it.
+  Future<Account> create({
     required String name,
     required AccountType type,
     required String institution,
@@ -28,6 +31,7 @@ class AccountsController extends AsyncNotifier<List<Account>> {
         .read(accountsRepositoryProvider)
         .create(name: name, type: type, institution: institution, openingBalanceMinor: openingBalanceMinor);
     state = AsyncValue.data([...?state.value, account]);
+    return account;
   }
 
   Future<void> updateAccount(

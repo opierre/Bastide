@@ -6,9 +6,14 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 /// a fixed list state and/or to record which methods were called — without
 /// touching the real API client.
 class FakeAccountsController extends AccountsController {
-  FakeAccountsController({this.initialAccounts = const []});
+  FakeAccountsController({this.initialAccounts = const [], this.createdAccount});
 
   final List<Account> initialAccounts;
+
+  /// What [create] resolves to. Tests that only assert the call was made can
+  /// leave it null; those that follow what the caller does with the new
+  /// account (the imports panel selecting it) supply one.
+  final Account? createdAccount;
 
   final createCalls =
       <({String name, AccountType type, String institution, int openingBalanceMinor})>[];
@@ -23,7 +28,7 @@ class FakeAccountsController extends AccountsController {
   Future<List<Account>> build() async => initialAccounts;
 
   @override
-  Future<void> create({
+  Future<Account> create({
     required String name,
     required AccountType type,
     required String institution,
@@ -31,6 +36,22 @@ class FakeAccountsController extends AccountsController {
   }) async {
     createCalls.add((name: name, type: type, institution: institution, openingBalanceMinor: openingBalanceMinor));
     if (errorOnCreate != null) throw errorOnCreate!;
+    final account =
+        createdAccount ??
+        Account(
+          id: 'created-${createCalls.length}',
+          name: name,
+          type: type,
+          institution: institution,
+          currency: 'EUR',
+          openingBalanceMinor: openingBalanceMinor,
+          balanceMinor: openingBalanceMinor,
+          archived: false,
+          createdAt: DateTime.utc(2026, 1, 1),
+          updatedAt: DateTime.utc(2026, 1, 1),
+        );
+    state = AsyncValue.data([...?state.value, account]);
+    return account;
   }
 
   @override

@@ -15,10 +15,22 @@ import '../../../l10n/app_localizations.dart';
 import '../application/accounts_controller.dart';
 import '../domain/account.dart';
 import 'account_error_localizer.dart';
+import 'account_type_label.dart';
 
 /// Opens the create/edit account modal.
-void showAccountForm(BuildContext context, {Account? initial}) {
-  showDialog<void>(context: context, builder: (_) => AccountForm(initial: initial));
+///
+/// Resolves to the account that was created, or `null` when the user cancelled
+/// or was editing — so a caller that opened the form to fill a gap (the imports
+/// panel, needing an account for the statement it holds) can carry on with it.
+Future<Account?> showAccountForm(
+  BuildContext context, {
+  Account? initial,
+  AccountPrefill? prefill,
+}) {
+  return showDialog<Account>(
+    context: context,
+    builder: (_) => AccountForm(initial: initial, prefill: prefill),
+  );
 }
 
 /// Create/edit modal. Opening balance is only editable at creation — the
@@ -26,10 +38,15 @@ void showAccountForm(BuildContext context, {Account? initial}) {
 /// accept it on `PATCH` (see `AccountUpdate`), so edit mode shows it
 /// read-only, alongside currency (never editable in Phase 1 — one currency
 /// per user, see the multi-currency skill).
+///
+/// [prefill] seeds the create form from something the user didn't type — today,
+/// the account block of an OFX statement. The fields stay editable: a prefill
+/// is a proposal, not a fact.
 class AccountForm extends ConsumerStatefulWidget {
-  const AccountForm({super.key, this.initial});
+  const AccountForm({super.key, this.initial, this.prefill});
 
   final Account? initial;
+  final AccountPrefill? prefill;
 
   @override
   ConsumerState<AccountForm> createState() => _AccountFormState();
@@ -37,19 +54,23 @@ class AccountForm extends ConsumerStatefulWidget {
 
 class _AccountFormState extends ConsumerState<AccountForm> {
   final _formKey = GlobalKey<FormState>();
-  late final _nameController = TextEditingController(text: widget.initial?.name);
+  late final _nameController = TextEditingController(
+    text: widget.initial?.name ?? widget.prefill?.name,
+  );
   late final _institutionController = TextEditingController(
-    text: widget.initial?.institution,
+    text: widget.initial?.institution ?? widget.prefill?.institution,
   );
   late final _openingBalanceController = TextEditingController(
     text: widget.initial == null
         ? null
         : (widget.initial!.openingBalanceMinor / 100).toStringAsFixed(2),
   );
-  late AccountType _type = widget.initial?.type ?? AccountType.checking;
+  late AccountType _type =
+      widget.initial?.type ?? widget.prefill?.type ?? AccountType.checking;
 
   /// Mirrors the institution field so the logo preview updates as it is typed.
-  late String _institution = widget.initial?.institution ?? '';
+  late String _institution =
+      widget.initial?.institution ?? widget.prefill?.institution ?? '';
 
   bool _isSubmitting = false;
   String? _errorText;
@@ -74,6 +95,7 @@ class _AccountFormState extends ConsumerState<AccountForm> {
     });
 
     try {
+      Account? created;
       if (_isEditing) {
         await ref
             .read(accountsControllerProvider.notifier)
@@ -89,7 +111,7 @@ class _AccountFormState extends ConsumerState<AccountForm> {
           _openingBalanceController.text,
           locale,
         );
-        await ref
+        created = await ref
             .read(accountsControllerProvider.notifier)
             .create(
               name: _nameController.text.trim(),
@@ -98,7 +120,7 @@ class _AccountFormState extends ConsumerState<AccountForm> {
               openingBalanceMinor: openingBalanceMinor,
             );
       }
-      if (mounted) Navigator.of(context).pop();
+      if (mounted) Navigator.of(context).pop(created);
     } catch (error) {
       if (!mounted) return;
       setState(() => _errorText = localizeAccountError(l10n, error));
@@ -123,14 +145,6 @@ class _AccountFormState extends ConsumerState<AccountForm> {
       return l10n.accountOpeningBalanceInvalid;
     }
   }
-
-  String _typeLabel(AppLocalizations l10n, AccountType type) => switch (type) {
-    AccountType.checking => l10n.accountTypeChecking,
-    AccountType.savings => l10n.accountTypeSavings,
-    AccountType.credit => l10n.accountTypeCredit,
-    AccountType.cash => l10n.accountTypeCash,
-    AccountType.other => l10n.accountTypeOther,
-  };
 
   @override
   Widget build(BuildContext context) {
@@ -161,6 +175,14 @@ class _AccountFormState extends ConsumerState<AccountForm> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
+            if (!_isEditing && widget.prefill != null) ...[
+              InlineBanner(
+                key: const Key('accountFormPrefillNote'),
+                message: l10n.accountFormPrefilledNote,
+                tone: BannerTone.info,
+              ),
+              const SizedBox(height: AppSpacing.md),
+            ],
             LabeledField(
               label: l10n.accountNameLabel,
               child: TextFormField(
@@ -181,7 +203,10 @@ class _AccountFormState extends ConsumerState<AccountForm> {
                 icon: const Icon(Icons.expand_more_rounded, size: 18),
                 items: [
                   for (final type in AccountType.values)
-                    DropdownMenuItem(value: type, child: Text(_typeLabel(l10n, type))),
+                    DropdownMenuItem(
+                      value: type,
+                      child: Text(accountTypeLabel(l10n, type)),
+                    ),
                 ],
                 onChanged: (value) {
                   if (value != null) setState(() => _type = value);

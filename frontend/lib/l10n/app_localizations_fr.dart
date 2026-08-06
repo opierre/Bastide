@@ -378,6 +378,10 @@ class AppLocalizationsFr extends AppLocalizations {
   String get accountFormCreateTitle => 'Nouveau compte';
 
   @override
+  String get accountFormPrefilledNote =>
+      'Champs pré-remplis depuis votre relevé — modifiez-les si besoin.';
+
+  @override
   String get accountFormEditTitle => 'Modifier le compte';
 
   @override
@@ -483,6 +487,24 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get importReconfigureTemplate => 'Reconfigurer';
+
+  @override
+  String importDetectedAccount(String account) {
+    return 'Compte reconnu dans le fichier : $account.';
+  }
+
+  @override
+  String importDetectedAccountAmbiguous(String account) {
+    return 'Ce relevé vient de $account, mais plusieurs comptes y correspondent — choisissez la destination.';
+  }
+
+  @override
+  String importDetectedAccountUnknown(String account) {
+    return 'Aucun compte ne correspond au compte $account de ce relevé.';
+  }
+
+  @override
+  String get importCreateDetectedAccount => 'Créer ce compte';
 
   @override
   String get importResultTitle => 'Dernier import';

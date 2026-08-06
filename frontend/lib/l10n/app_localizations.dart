@@ -776,6 +776,12 @@ abstract class AppLocalizations {
   /// **'Nouveau compte'**
   String get accountFormCreateTitle;
 
+  /// Note at the top of the account form when its fields were pre-filled from an imported statement rather than typed.
+  ///
+  /// In fr, this message translates to:
+  /// **'Champs pré-remplis depuis votre relevé — modifiez-les si besoin.'**
+  String get accountFormPrefilledNote;
+
   /// Title of the account form dialog when editing an account.
   ///
   /// In fr, this message translates to:
@@ -973,6 +979,30 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Reconfigurer'**
   String get importReconfigureTemplate;
+
+  /// Banner confirming the statement's account block matched an existing account, which has been selected as the destination.
+  ///
+  /// In fr, this message translates to:
+  /// **'Compte reconnu dans le fichier : {account}.'**
+  String importDetectedAccount(String account);
+
+  /// Banner shown when the statement's bank matches several accounts and nothing in the file separates them; the user picks the destination.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ce relevé vient de {account}, mais plusieurs comptes y correspondent — choisissez la destination.'**
+  String importDetectedAccountAmbiguous(String account);
+
+  /// Banner shown when the account declared by the statement matches none of the user's accounts.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucun compte ne correspond au compte {account} de ce relevé.'**
+  String importDetectedAccountUnknown(String account);
+
+  /// Action opening the account form pre-filled with the account read from the statement.
+  ///
+  /// In fr, this message translates to:
+  /// **'Créer ce compte'**
+  String get importCreateDetectedAccount;
 
   /// Title of the card summarising the import that just ran.
   ///
