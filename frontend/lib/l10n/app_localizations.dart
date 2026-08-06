@@ -854,16 +854,22 @@ abstract class AppLocalizations {
   /// **'L\'établissement est requis.'**
   String get accountInstitutionRequired;
 
-  /// Label for the opening balance field on the account form.
+  /// Label for the opening balance field on the account form, when editing an account: the figure the account started from.
   ///
   /// In fr, this message translates to:
   /// **'Solde initial'**
   String get accountOpeningBalanceLabel;
 
-  /// Validation message when the opening balance field is left empty.
+  /// Label for the same balance field when creating an account: with no history behind it yet, what the user enters is the balance the account holds today.
   ///
   /// In fr, this message translates to:
-  /// **'Le solde initial est requis.'**
+  /// **'Solde actuel'**
+  String get accountCurrentBalanceLabel;
+
+  /// Validation message when the balance field is left empty. Only ever shown while creating an account — the field is read-only afterwards.
+  ///
+  /// In fr, this message translates to:
+  /// **'Le solde actuel est requis.'**
   String get accountOpeningBalanceRequired;
 
   /// Validation message when the opening balance can't be parsed as a number.

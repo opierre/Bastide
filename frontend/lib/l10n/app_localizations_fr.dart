@@ -421,7 +421,10 @@ class AppLocalizationsFr extends AppLocalizations {
   String get accountOpeningBalanceLabel => 'Solde initial';
 
   @override
-  String get accountOpeningBalanceRequired => 'Le solde initial est requis.';
+  String get accountCurrentBalanceLabel => 'Solde actuel';
+
+  @override
+  String get accountOpeningBalanceRequired => 'Le solde actuel est requis.';
 
   @override
   String get accountOpeningBalanceInvalid => 'Entrez un montant valide.';

@@ -218,7 +218,14 @@ class _AccountFormState extends ConsumerState<AccountForm> {
             ),
             const SizedBox(height: AppSpacing.md),
             LabeledField(
-              label: l10n.accountOpeningBalanceLabel,
+              // The same stored figure, named for what it means at each end of
+              // the account's life: on creation there is no history behind it,
+              // so what the user types is the balance the account holds today —
+              // which is also what a statement's account block reports. Once
+              // transactions land on top, it is only where the account started.
+              label: _isEditing
+                  ? l10n.accountOpeningBalanceLabel
+                  : l10n.accountCurrentBalanceLabel,
               child: TextFormField(
                 key: const Key('accountOpeningBalanceField'),
                 controller: _openingBalanceController,

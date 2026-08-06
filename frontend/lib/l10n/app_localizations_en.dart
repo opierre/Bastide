@@ -420,7 +420,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get accountOpeningBalanceLabel => 'Opening balance';
 
   @override
-  String get accountOpeningBalanceRequired => 'Opening balance is required.';
+  String get accountCurrentBalanceLabel => 'Current balance';
+
+  @override
+  String get accountOpeningBalanceRequired => 'Current balance is required.';
 
   @override
   String get accountOpeningBalanceInvalid => 'Enter a valid amount.';

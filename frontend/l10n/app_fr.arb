@@ -517,11 +517,15 @@
   },
   "accountOpeningBalanceLabel": "Solde initial",
   "@accountOpeningBalanceLabel": {
-    "description": "Label for the opening balance field on the account form."
+    "description": "Label for the opening balance field on the account form, when editing an account: the figure the account started from."
   },
-  "accountOpeningBalanceRequired": "Le solde initial est requis.",
+  "accountCurrentBalanceLabel": "Solde actuel",
+  "@accountCurrentBalanceLabel": {
+    "description": "Label for the same balance field when creating an account: with no history behind it yet, what the user enters is the balance the account holds today."
+  },
+  "accountOpeningBalanceRequired": "Le solde actuel est requis.",
   "@accountOpeningBalanceRequired": {
-    "description": "Validation message when the opening balance field is left empty."
+    "description": "Validation message when the balance field is left empty. Only ever shown while creating an account — the field is read-only afterwards."
   },
   "accountOpeningBalanceInvalid": "Entrez un montant valide.",
   "@accountOpeningBalanceInvalid": {

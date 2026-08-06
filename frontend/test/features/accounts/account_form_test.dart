@@ -95,6 +95,16 @@ void main() {
     expect(call.type, AccountType.savings);
   });
 
+  testWidgets('the balance field is named for what it means at creation', (tester) async {
+    await tester.pumpWidget(_wrap(controller: FakeAccountsController()));
+    await tester.pumpAndSettle();
+
+    // Nothing has been imported yet, so the figure the user types is the
+    // balance the account holds today — which is what a statement reports.
+    expect(find.text('Solde actuel'), findsOneWidget);
+    expect(find.text('Solde initial'), findsNothing);
+  });
+
   testWidgets('a deferred-debit card is offered as its own account type', (tester) async {
     final controller = FakeAccountsController();
     await tester.pumpWidget(_wrap(controller: controller));
@@ -134,6 +144,9 @@ void main() {
 
     final field = tester.widget<TextFormField>(find.byKey(const Key('accountOpeningBalanceField')));
     expect(field.enabled, isFalse);
+    // With transactions on top of it, the stored figure is only where the
+    // account started — no longer what it holds.
+    expect(find.text('Solde initial'), findsOneWidget);
 
     await tester.enterText(find.byKey(const Key('accountNameField')), 'Compte courant modifié');
     await tester.tap(find.byKey(const Key('accountFormSubmitButton')));
