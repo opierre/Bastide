@@ -890,6 +890,12 @@ abstract class AppLocalizations {
   /// **'Compte introuvable.'**
   String get accountErrorNotFound;
 
+  /// Localized message for the backend's ACCOUNT_OFX_ID_TAKEN error code, raised when the bank account id read from a statement is already bound to another account.
+  ///
+  /// In fr, this message translates to:
+  /// **'Un autre compte utilise déjà cet identifiant bancaire.'**
+  String get accountErrorOfxIdTaken;
+
   /// Localized message for the backend's VALIDATION_ERROR error code.
   ///
   /// In fr, this message translates to:

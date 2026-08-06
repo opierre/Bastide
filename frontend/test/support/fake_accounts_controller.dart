@@ -16,7 +16,15 @@ class FakeAccountsController extends AccountsController {
   final Account? createdAccount;
 
   final createCalls =
-      <({String name, AccountType type, String institution, int openingBalanceMinor})>[];
+      <
+        ({
+          String name,
+          AccountType type,
+          String institution,
+          int openingBalanceMinor,
+          String? ofxAccountId,
+        })
+      >[];
   final updateCalls = <({String id, String name, AccountType type, String institution})>[];
   final archiveCalls = <String>[];
 
@@ -33,8 +41,15 @@ class FakeAccountsController extends AccountsController {
     required AccountType type,
     required String institution,
     required int openingBalanceMinor,
+    String? ofxAccountId,
   }) async {
-    createCalls.add((name: name, type: type, institution: institution, openingBalanceMinor: openingBalanceMinor));
+    createCalls.add((
+      name: name,
+      type: type,
+      institution: institution,
+      openingBalanceMinor: openingBalanceMinor,
+      ofxAccountId: ofxAccountId,
+    ));
     if (errorOnCreate != null) throw errorOnCreate!;
     final account =
         createdAccount ??
@@ -44,6 +59,7 @@ class FakeAccountsController extends AccountsController {
           type: type,
           institution: institution,
           currency: 'EUR',
+          ofxAccountId: ofxAccountId,
           openingBalanceMinor: openingBalanceMinor,
           balanceMinor: openingBalanceMinor,
           archived: false,

@@ -65,11 +65,13 @@ Account _account({
   String name = 'Compte courant',
   String institution = 'Boursorama',
   AccountType type = AccountType.checking,
+  String? ofxAccountId,
 }) => Account(
   id: id,
   name: name,
   type: type,
   institution: institution,
+  ofxAccountId: ofxAccountId,
   currency: 'EUR',
   openingBalanceMinor: 0,
   balanceMinor: 0,
@@ -125,6 +127,20 @@ void main() {
   });
 
   group('matchOfxAccount', () {
+    test('the bound bank account id settles it, whatever else looks close', () {
+      final bound = _account(
+        id: 'a2',
+        name: 'Un tout autre nom',
+        institution: 'Autre banque',
+        type: AccountType.savings,
+        ofxAccountId: '0001234567',
+      );
+
+      final match = matchOfxAccount(_info, [_account(), bound]);
+
+      expect((match as OfxAccountMatched).account, bound);
+    });
+
     test('matches on the account number even when the bank name differs', () {
       final numbered = _account(name: 'Courant ••4567', institution: 'BoursoBank');
 

@@ -24,6 +24,7 @@ class AccountsRepository {
     required AccountType type,
     required String institution,
     required int openingBalanceMinor,
+    String? ofxAccountId,
   }) async {
     final json = await _apiClient.post(
       '/accounts',
@@ -32,6 +33,9 @@ class AccountsRepository {
         'type': type.wireValue,
         'institution': institution,
         'opening_balance_minor': openingBalanceMinor,
+        // Omitted rather than sent as null: the field is optional, and a blank
+        // one would claim nothing anyway.
+        'ofx_account_id': ?ofxAccountId,
       },
     );
     return _parse(json as Map<String, dynamic>);
@@ -60,6 +64,7 @@ class AccountsRepository {
     type: AccountType.fromWire(json['type'] as String),
     institution: json['institution'] as String,
     currency: json['currency'] as String,
+    ofxAccountId: json['ofx_account_id'] as String?,
     openingBalanceMinor: json['opening_balance_minor'] as int,
     balanceMinor: json['balance_minor'] as int,
     archived: json['archived'] as bool,

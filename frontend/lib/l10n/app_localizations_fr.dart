@@ -436,6 +436,10 @@ class AppLocalizationsFr extends AppLocalizations {
   String get accountErrorNotFound => 'Compte introuvable.';
 
   @override
+  String get accountErrorOfxIdTaken =>
+      'Un autre compte utilise déjà cet identifiant bancaire.';
+
+  @override
   String get accountErrorValidation => 'Certaines informations sont invalides.';
 
   @override

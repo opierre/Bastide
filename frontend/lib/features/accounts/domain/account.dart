@@ -20,11 +20,15 @@ enum AccountType {
 /// back to its own defaults for whatever the source couldn't tell us.
 @immutable
 class AccountPrefill {
-  const AccountPrefill({this.name, this.institution, this.type});
+  const AccountPrefill({this.name, this.institution, this.type, this.ofxAccountId});
 
   final String? name;
   final String? institution;
   final AccountType? type;
+
+  /// Carried through creation but never shown as a field: it is the bank's
+  /// identifier, not something the user has an opinion about.
+  final String? ofxAccountId;
 }
 
 /// An account as returned by the API, including its derived current balance.
@@ -39,6 +43,7 @@ class Account {
     required this.type,
     required this.institution,
     required this.currency,
+    this.ofxAccountId,
     required this.openingBalanceMinor,
     required this.balanceMinor,
     required this.archived,
@@ -51,6 +56,10 @@ class Account {
   final AccountType type;
   final String institution;
   final String currency;
+
+  /// The bank's own id for this account (OFX `ACCTID`), when we know it —
+  /// what makes a statement identify its account exactly rather than by name.
+  final String? ofxAccountId;
   final int openingBalanceMinor;
   final int balanceMinor;
   final bool archived;
@@ -66,6 +75,7 @@ class Account {
           other.type == type &&
           other.institution == institution &&
           other.currency == currency &&
+          other.ofxAccountId == ofxAccountId &&
           other.openingBalanceMinor == openingBalanceMinor &&
           other.balanceMinor == balanceMinor &&
           other.archived == archived &&
@@ -79,6 +89,7 @@ class Account {
     type,
     institution,
     currency,
+    ofxAccountId,
     openingBalanceMinor,
     balanceMinor,
     archived,

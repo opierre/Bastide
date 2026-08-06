@@ -82,12 +82,21 @@ bool _carriesNumber(Account account, String number) {
   return false;
 }
 
-/// Resolves [info] against [accounts], most specific evidence first: the
-/// account number, then bank plus type, then bank alone.
+/// Resolves [info] against [accounts], most specific evidence first: the bank
+/// account id the account was bound to, then the number read out of its name,
+/// then bank plus type, then bank alone.
 ///
 /// Kept as a pure function so the rule is testable on its own — the widget only
 /// reacts to the verdict.
 OfxAccountMatch matchOfxAccount(OfxAccountInfo info, List<Account> accounts) {
+  // An account created from a statement carries that statement's ACCTID, so
+  // this is an identity, not a heuristic: it settles the question outright.
+  for (final account in accounts) {
+    if (account.ofxAccountId == info.accountNumber.trim()) {
+      return OfxAccountMatched(info, account);
+    }
+  }
+
   final byNumber = accounts.where((a) => _carriesNumber(a, info.accountNumber)).toList();
   if (byNumber.length == 1) return OfxAccountMatched(info, byNumber.single);
 

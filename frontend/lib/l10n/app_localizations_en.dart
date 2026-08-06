@@ -435,6 +435,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get accountErrorNotFound => 'Account not found.';
 
   @override
+  String get accountErrorOfxIdTaken =>
+      'Another account already uses this bank account id.';
+
+  @override
   String get accountErrorValidation => 'Some information is invalid.';
 
   @override

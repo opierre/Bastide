@@ -264,6 +264,7 @@
   "accountFormSubmitCreate": "Create account",
   "accountFormSubmitEdit": "Save",
   "accountErrorNotFound": "Account not found.",
+  "accountErrorOfxIdTaken": "Another account already uses this bank account id.",
   "accountErrorValidation": "Some information is invalid.",
   "accountErrorGeneric": "Something went wrong. Please try again.",
   "importNewTitle": "New import",

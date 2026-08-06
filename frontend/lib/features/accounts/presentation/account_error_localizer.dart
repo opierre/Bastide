@@ -9,6 +9,8 @@ String localizeAccountError(AppLocalizations l10n, Object? error) {
     switch (error.code) {
       case 'ACCOUNT_NOT_FOUND':
         return l10n.accountErrorNotFound;
+      case 'ACCOUNT_OFX_ID_TAKEN':
+        return l10n.accountErrorOfxIdTaken;
       case 'VALIDATION_ERROR':
         return l10n.accountErrorValidation;
     }

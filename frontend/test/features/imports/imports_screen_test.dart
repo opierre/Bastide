@@ -300,6 +300,9 @@ void main() {
 
     expect(accounts.createCalls.single.institution, 'BOURSORAMA BANQUE');
     expect(accounts.createCalls.single.type, AccountType.checking);
+    // The statement's own id is bound to the account, so the next import from
+    // it matches on identity rather than on the bank's name.
+    expect(accounts.createCalls.single.ofxAccountId, '0001234567');
 
     // The new account becomes the destination, and the file imports into it.
     expect(find.byKey(const Key('importDetectedAccountBanner')), findsOneWidget);

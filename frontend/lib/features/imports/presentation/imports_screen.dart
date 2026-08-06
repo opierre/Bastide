@@ -234,6 +234,9 @@ AccountPrefill _prefillFrom(OfxAccountInfo info, AppLocalizations l10n) {
     name: [?label, info.maskedNumber].join(' '),
     institution: info.institutionLabel,
     type: type,
+    // Bound to the account so the next statement from it matches on identity
+    // rather than on how the bank happens to spell its own name.
+    ofxAccountId: info.accountNumber.trim(),
   );
 }
 

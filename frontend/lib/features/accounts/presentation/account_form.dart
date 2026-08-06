@@ -118,6 +118,9 @@ class _AccountFormState extends ConsumerState<AccountForm> {
               type: _type,
               institution: _institutionController.text.trim(),
               openingBalanceMinor: openingBalanceMinor,
+              // Not a form field: it comes from the statement that proposed the
+              // account, and binds it so later imports match exactly.
+              ofxAccountId: widget.prefill?.ofxAccountId,
             );
       }
       if (mounted) Navigator.of(context).pop(created);
