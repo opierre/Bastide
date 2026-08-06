@@ -11,6 +11,7 @@ class OfxAccountInfo {
   const OfxAccountInfo({
     required this.accountNumber,
     this.bankId,
+    this.bankName,
     this.accountType,
     this.organization,
     this.currency,
@@ -20,9 +21,14 @@ class OfxAccountInfo {
   /// what makes two statements from the same bank distinguishable.
   final String accountNumber;
 
-  /// `BANKID` — routing/branch code. Used as a fallback institution label when
-  /// the file carries no `ORG`.
+  /// `BANKID` — the bank code. In France its leading five digits are the
+  /// `code banque` from the RIB (13306 is a Crédit Agricole regional bank).
   final String? bankId;
+
+  /// The bank [bankId] was resolved to, when the backend's directory knows it.
+  /// Not read from the file: it is what turns `13306` into `Crédit Agricole`
+  /// for a statement whose signon block names no bank.
+  final String? bankName;
 
   /// `ACCTTYPE` as written in the file (`CHECKING`, `SAVINGS`, `CREDITLINE`…),
   /// or `CREDITCARD` when the statement is a `CCACCTFROM` block.
@@ -34,14 +40,27 @@ class OfxAccountInfo {
   /// `CURDEF` — the statement's currency.
   final String? currency;
 
-  /// The best available human label for the bank: its declared name, else its
-  /// routing code, else nothing.
+  /// The best available human label for the bank: the name it declares for
+  /// itself, else the one its bank code resolves to, else the bare code, else
+  /// nothing. A declared name wins because it is the bank's own answer, where
+  /// the directory is only our lookup of it.
   String? get institutionLabel {
-    final org = organization?.trim();
-    if (org != null && org.isNotEmpty) return org;
-    final id = bankId?.trim();
-    return (id != null && id.isNotEmpty) ? id : null;
+    for (final candidate in [organization, bankName, bankId]) {
+      final trimmed = candidate?.trim();
+      if (trimmed != null && trimmed.isNotEmpty) return trimmed;
+    }
+    return null;
   }
+
+  /// This account block with the bank its code was resolved to attached.
+  OfxAccountInfo withBankName(String? name) => OfxAccountInfo(
+    accountNumber: accountNumber,
+    bankId: bankId,
+    bankName: name,
+    accountType: accountType,
+    organization: organization,
+    currency: currency,
+  );
 
   /// The account number reduced to what is safe and useful to show: the last
   /// four characters behind a mask, e.g. `••4567`.
@@ -57,11 +76,12 @@ class OfxAccountInfo {
       (other is OfxAccountInfo &&
           other.accountNumber == accountNumber &&
           other.bankId == bankId &&
+          other.bankName == bankName &&
           other.accountType == accountType &&
           other.organization == organization &&
           other.currency == currency);
 
   @override
   int get hashCode =>
-      Object.hash(accountNumber, bankId, accountType, organization, currency);
+      Object.hash(accountNumber, bankId, bankName, accountType, organization, currency);
 }

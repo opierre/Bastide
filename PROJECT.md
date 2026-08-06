@@ -280,6 +280,8 @@ GET    /accounts/{id}       → account (with derived current balance)
 PATCH  /accounts/{id}
 DELETE /accounts/{id}        (archive, not hard delete)
 
+GET    /banks               ?bank_code=… → [bank]  (0–1: the French bank code resolved to its bank)
+
 POST   /imports             multipart: file + account_id [+ csv_template_id] → import_batch
 GET    /imports             → [import_batch]            (history)
 GET    /imports/{id}        → import_batch

@@ -100,7 +100,12 @@ class _ImportsScreenState extends ConsumerState<ImportsScreen> {
     // The staged file may have been replaced or cleared while we waited.
     if (!mounted || ref.read(selectedImportFileProvider) != file) return;
 
-    switch (ref.read(ofxAccountDetectionProvider.notifier).detect(file, accounts)) {
+    final match = await ref
+        .read(ofxAccountDetectionProvider.notifier)
+        .detect(file, accounts);
+    if (!mounted || ref.read(selectedImportFileProvider) != file) return;
+
+    switch (match) {
       case OfxAccountMatched(:final account):
         ref.read(selectedImportAccountProvider.notifier).select(account.id);
       case OfxAccountUnmatched(:final info):

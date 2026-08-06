@@ -1,9 +1,13 @@
 import 'dart:convert';
 
+import 'package:finstride/core/api/api_client.dart';
 import 'package:finstride/features/accounts/domain/account.dart';
+import 'package:finstride/features/banks/data/banks_repository.dart';
+import 'package:finstride/features/imports/application/imports_controller.dart';
 import 'package:finstride/features/imports/application/ofx_account_detection.dart';
 import 'package:finstride/features/imports/data/ofx_account_parser.dart';
 import 'package:finstride/features/imports/domain/ofx_account_info.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 /// OFX 1.x SGML with unclosed leaf tags — the shape French banks actually emit.
@@ -79,6 +83,51 @@ Account _account({
   createdAt: DateTime.utc(2026, 1, 1),
   updatedAt: DateTime.utc(2026, 1, 1),
 );
+
+/// A statement whose signon block names no bank — all it says about its
+/// institution is the 5-digit `code banque` of a Crédit Agricole regional bank.
+const _bankCodeOnlySgml = '''
+<OFX>
+<BANKMSGSRSV1><STMTTRNRS><STMTRS>
+<CURDEF>EUR
+<BANKACCTFROM>
+<BANKID>13306
+<ACCTID>0009876543
+<ACCTTYPE>CHECKING
+</BANKACCTFROM>
+</STMTRS></STMTTRNRS></BANKMSGSRSV1>
+</OFX>
+''';
+
+/// Stands in for the backend's bank directory.
+class _FakeBanksRepository extends BanksRepository {
+  _FakeBanksRepository(this.names) : super(ApiClient());
+
+  final Map<String, String> names;
+  final lookups = <String>[];
+
+  @override
+  Future<String?> nameForCode(String bankCode) async {
+    lookups.add(bankCode);
+    return names[bankCode.trim()];
+  }
+}
+
+/// Runs [detect] against a container wired to [banks].
+Future<OfxAccountMatch?> _detect(
+  String ofx,
+  List<Account> accounts,
+  _FakeBanksRepository banks,
+) async {
+  final container = ProviderContainer(
+    overrides: [banksRepositoryProvider.overrideWithValue(banks)],
+  );
+  addTearDown(container.dispose);
+
+  return container
+      .read(ofxAccountDetectionProvider.notifier)
+      .detect(PickedImportFile(name: 'releve.ofx', bytes: utf8.encode(ofx)), accounts);
+}
 
 const _info = OfxAccountInfo(
   accountNumber: '0001234567',
@@ -179,6 +228,52 @@ void main() {
         isA<OfxAccountUnmatched>(),
       );
       expect(matchOfxAccount(_info, const []), isA<OfxAccountUnmatched>());
+    });
+
+    test('names the bank from its code when the file names none itself', () {
+      const info = OfxAccountInfo(accountNumber: '0009876543', bankId: '13306');
+
+      expect(info.institutionLabel, '13306');
+      expect(info.withBankName('Crédit Agricole').institutionLabel, 'Crédit Agricole');
+      // The bank's own name for itself still wins over our lookup of it.
+      expect(_info.withBankName('Boursorama').institutionLabel, 'BOURSORAMA BANQUE');
+    });
+  });
+
+  group('OfxAccountDetection', () {
+    test('resolves the bank code so the proposed account is named, not numbered', () async {
+      final banks = _FakeBanksRepository({'13306': 'Crédit Agricole'});
+
+      final match = await _detect(_bankCodeOnlySgml, const [], banks);
+
+      expect(banks.lookups, ['13306']);
+      expect(match, isA<OfxAccountUnmatched>());
+      expect(match!.info.institutionLabel, 'Crédit Agricole');
+    });
+
+    test('the resolved bank matches an account the user typed by name', () async {
+      final banks = _FakeBanksRepository({'13306': 'Crédit Agricole'});
+      final account = _account(name: 'Compte courant', institution: 'Crédit Agricole');
+
+      final match = await _detect(_bankCodeOnlySgml, [account], banks);
+
+      expect((match as OfxAccountMatched).account, account);
+    });
+
+    test('an unknown code leaves the file speaking for itself', () async {
+      final banks = _FakeBanksRepository(const {});
+
+      final match = await _detect(_bankCodeOnlySgml, const [], banks);
+
+      expect(match!.info.institutionLabel, '13306');
+    });
+
+    test('a file that names its bank is not looked up at all', () async {
+      final banks = _FakeBanksRepository({'40618': 'Boursorama'});
+
+      await _detect(_sgml, const [], banks);
+
+      expect(banks.lookups, isEmpty);
     });
   });
 }

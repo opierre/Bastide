@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../accounts/domain/account.dart';
+import '../../banks/data/banks_repository.dart';
 import '../data/ofx_account_parser.dart';
 import '../domain/ofx_account_info.dart';
 import 'imports_controller.dart';
@@ -127,10 +128,22 @@ class OfxAccountDetection extends Notifier<OfxAccountMatch?> {
   /// Reads [file] and resolves it against [accounts]. Returns the verdict so
   /// the caller can act on it (select the account, or offer to create it)
   /// without re-reading state it just wrote.
-  OfxAccountMatch? detect(PickedImportFile file, List<Account> accounts) {
+  ///
+  /// Asynchronous because a statement that names no bank still carries its bank
+  /// code, and the backend's directory is what turns that code into a name —
+  /// which both the matcher and the account it proposes are better for.
+  Future<OfxAccountMatch?> detect(PickedImportFile file, List<Account> accounts) async {
     if (file.needsCsvTemplate) return state = null;
-    final info = parseOfxAccountInfo(file.bytes);
-    return state = info == null ? null : matchOfxAccount(info, accounts);
+    var info = parseOfxAccountInfo(file.bytes);
+    if (info == null) return state = null;
+
+    // Only worth asking when the file didn't already name its bank.
+    final bankId = info.bankId;
+    if (info.organization == null && bankId != null) {
+      info = info.withBankName(await ref.read(banksRepositoryProvider).nameForCode(bankId));
+    }
+
+    return state = matchOfxAccount(info, accounts);
   }
 
   /// Records that [account] — just created from [info] — is this statement's
