@@ -355,6 +355,32 @@ void main() {
     expect(find.byKey(const Key('importDropZone')), findsOneWidget);
   });
 
+  testWidgets('the detected-account notice fits a short window', (tester) async {
+    // The notice grows the import card, squeezing the history beneath it. On a
+    // window this short that used to overflow the empty state's column.
+    tester.view.physicalSize = const Size(1280, 640);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.reset);
+
+    await tester.pumpWidget(
+      _wrap(
+        imports: FakeImportsController(),
+        templates: FakeCsvTemplatesController(),
+        accounts: FakeAccountsController(
+          initialAccounts: const [],
+          createdAccount: _account,
+        ),
+        file: PickedImportFile(name: 'releve.ofx', bytes: _ofxBytes),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await _stageFile(tester);
+
+    expect(find.byKey(const Key('accountFormPrefillNote')), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('renders under en without missing localized keys', (tester) async {
     _useDesktopSurface(tester);
     await tester.pumpWidget(

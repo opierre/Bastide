@@ -25,28 +25,60 @@ class EmptyStateView extends StatelessWidget {
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
 
-    return Center(
-      child: ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: 420),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            GlyphPlate(icon: icon, accent: accent),
-            const SizedBox(height: AppSpacing.lg),
-            Text(title, style: textTheme.headlineMedium, textAlign: TextAlign.center),
-            const SizedBox(height: AppSpacing.sm + 2),
-            Text(
-              message,
-              style: textTheme.bodyLarge?.copyWith(color: AppColors.textSecondary),
-              textAlign: TextAlign.center,
-            ),
-            if (action != null) ...[
-              const SizedBox(height: AppSpacing.lg + AppSpacing.xs),
-              action!,
-            ],
+    return CenteredStatePane(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          GlyphPlate(icon: icon, accent: accent),
+          const SizedBox(height: AppSpacing.lg),
+          Text(title, style: textTheme.headlineMedium, textAlign: TextAlign.center),
+          const SizedBox(height: AppSpacing.sm + 2),
+          Text(
+            message,
+            style: textTheme.bodyLarge?.copyWith(color: AppColors.textSecondary),
+            textAlign: TextAlign.center,
+          ),
+          if (action != null) ...[
+            const SizedBox(height: AppSpacing.lg + AppSpacing.xs),
+            action!,
           ],
-        ),
+        ],
       ),
+    );
+  }
+}
+
+/// Centres an empty/error state in whatever room it is given, and lets it
+/// scroll rather than overflow when that room runs short.
+///
+/// These states sit in the flexible half of a panel, so their height is
+/// whatever the cards above them leave over — and a card grows (the imports
+/// panel gains a detected-account notice, say) without asking. Centring alone
+/// turns that into a RenderFlex overflow; scrolling keeps the state readable
+/// and the layout quiet.
+class CenteredStatePane extends StatelessWidget {
+  const CenteredStatePane({super.key, required this.child, this.maxWidth = 420});
+
+  final Widget child;
+  final double maxWidth;
+
+  @override
+  Widget build(BuildContext context) {
+    final content = ConstrainedBox(
+      constraints: BoxConstraints(maxWidth: maxWidth),
+      child: child,
+    );
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        if (!constraints.hasBoundedHeight) return Center(child: content);
+        return SingleChildScrollView(
+          child: ConstrainedBox(
+            constraints: BoxConstraints(minHeight: constraints.maxHeight),
+            child: Center(child: content),
+          ),
+        );
+      },
     );
   }
 }
@@ -74,31 +106,28 @@ class ErrorStateView extends StatelessWidget {
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
 
-    return Center(
-      child: ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: 420),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const GlyphPlate(
-              icon: Icons.warning_amber_rounded,
-              accent: AppColors.warning,
-            ),
-            const SizedBox(height: AppSpacing.lg),
-            Text(
-              message,
-              key: messageKey,
-              style: textTheme.bodyLarge?.copyWith(color: AppColors.textSecondary),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: AppSpacing.lg + AppSpacing.xs),
-            OutlinedButton(
-              key: retryKey,
-              onPressed: onRetry,
-              child: Text(retryLabel),
-            ),
-          ],
-        ),
+    return CenteredStatePane(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const GlyphPlate(
+            icon: Icons.warning_amber_rounded,
+            accent: AppColors.warning,
+          ),
+          const SizedBox(height: AppSpacing.lg),
+          Text(
+            message,
+            key: messageKey,
+            style: textTheme.bodyLarge?.copyWith(color: AppColors.textSecondary),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: AppSpacing.lg + AppSpacing.xs),
+          OutlinedButton(
+            key: retryKey,
+            onPressed: onRetry,
+            child: Text(retryLabel),
+          ),
+        ],
       ),
     );
   }
