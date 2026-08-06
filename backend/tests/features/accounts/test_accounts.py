@@ -80,6 +80,30 @@ def test_update_account_patches_mutable_fields(client: TestClient) -> None:
     assert body["institution"] == ACCOUNT_PAYLOAD["institution"]
 
 
+def test_update_account_patches_opening_balance_and_shifts_the_cache(
+    client: TestClient,
+) -> None:
+    """The manual correction escape hatch: patching the opening balance moves the
+    derived balance by the same delta, not to some independently-typed number.
+    """
+    headers = _register(client, "amelie@example.com")
+    create_response = client.post("/api/v1/accounts", json=ACCOUNT_PAYLOAD, headers=headers)
+    account_id = create_response.json()["id"]
+
+    response = client.patch(
+        f"/api/v1/accounts/{account_id}",
+        json={"opening_balance_minor": 100_000},
+        headers=headers,
+    )
+
+    assert response.status_code == 200
+    body = response.json()
+    assert body["opening_balance_minor"] == 100_000
+    # 150 000 typed at creation was corrected down to 100 000; the balance (with no
+    # transactions yet) moves by exactly that delta.
+    assert body["balance_minor"] == 100_000
+
+
 def test_delete_account_archives_not_hard_deletes(client: TestClient) -> None:
     headers = _register(client, "amelie@example.com")
     create_response = client.post("/api/v1/accounts", json=ACCOUNT_PAYLOAD, headers=headers)

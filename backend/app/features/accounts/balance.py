@@ -7,7 +7,7 @@ balance strategy this module implements.
 
 from datetime import date
 
-from sqlalchemy import func, select
+from sqlalchemy import func, select, update
 from sqlalchemy.orm import Session
 
 from app.features.accounts.models import Account, AccountBalanceSnapshot
@@ -72,3 +72,29 @@ def recompute_balance(db: Session, account: Account) -> int:
         )
     )
     return account.opening_balance_minor + (total or 0)
+
+
+def shift_opening_balance(db: Session, account: Account, new_opening_balance_minor: int) -> None:
+    """Change the account's opening balance, keeping the cache and every snapshot consistent.
+
+    The ledger itself is untouched by this, so every figure derived from the opening
+    balance — the cache and each monthly snapshot — must move by exactly the delta the
+    opening balance moves by, rather than being recomputed independently of it. A cache-only
+    fix (or none at all) would leave existing snapshots silently wrong: still offset by the
+    old opening balance, so `point_in_time_balance` would answer differently before and after
+    a snapshot boundary for a balance that never actually changed on the given date.
+
+    Used both when an import derives the opening balance from a statement's first `LEDGERBAL`
+    and when a user corrects it by hand — the two are the same operation with a different
+    source for the new value.
+    """
+    delta = new_opening_balance_minor - account.opening_balance_minor
+    if delta == 0:
+        return
+    account.opening_balance_minor = new_opening_balance_minor
+    account.cached_balance_minor += delta
+    db.execute(
+        update(AccountBalanceSnapshot)
+        .where(AccountBalanceSnapshot.account_id == account.id)
+        .values(balance_minor=AccountBalanceSnapshot.balance_minor + delta)
+    )

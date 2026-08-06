@@ -27,16 +27,21 @@ class AccountCreate(BaseModel):
 
 
 class AccountUpdate(BaseModel):
-    """Patch payload: name, type, institution, and the bank's account id are mutable.
+    """Patch payload: name, type, institution, the bank's account id, and the opening
+    balance are mutable.
 
-    `ofx_account_id` is patchable so an account created before its first import
-    can be bound to the id its statements carry.
+    `ofx_account_id` is patchable so an account created before its first import can be
+    bound to the id its statements carry. `opening_balance_minor` is a manual correction —
+    imports derive it automatically from a statement's first `LEDGERBAL` where possible,
+    but a CSV-only account never gets that, so this is the escape hatch for it (and for
+    fixing a bad derivation).
     """
 
     name: str | None = Field(default=None, min_length=1, max_length=255)
     type: AccountType | None = None
     institution: str | None = Field(default=None, min_length=1, max_length=255)
     ofx_account_id: str | None = Field(default=None, max_length=255)
+    opening_balance_minor: int | None = None
 
 
 class AccountRead(BaseModel):

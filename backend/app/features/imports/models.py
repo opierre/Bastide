@@ -28,6 +28,14 @@ class ImportBatch(Base):
     duplicate_count: Mapped[int] = mapped_column(Integer)
     status: Mapped[str] = mapped_column(String(10))
     error_message: Mapped[str | None] = mapped_column(String, nullable=True)
+    # Set only from an account's *second* statement import onward, and only when the
+    # statement's declared balance disagrees with what the ledger implies at its as-of
+    # date — see `ImportService._detect_balance_mismatch`. NULL means either there was
+    # no declared balance to compare (CSV, or an OFX file without LEDGERBAL) or the two
+    # agreed. Never derived from an account's first import: that import derives the
+    # opening balance from this same figure instead of comparing against it.
+    balance_mismatch_minor: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    balance_mismatch_as_of: Mapped[date | None] = mapped_column(Date, nullable=True)
     imported_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), default=lambda: datetime.now(UTC)
     )

@@ -18,7 +18,7 @@ router = APIRouter(prefix="/api/v1/accounts", tags=["accounts"])
 
 
 def _service(db: Annotated[Session, Depends(get_db)]) -> AccountService:
-    return AccountService(AccountRepository(db))
+    return AccountService(AccountRepository(db), db)
 
 
 def _to_read(account: Account) -> AccountRead:

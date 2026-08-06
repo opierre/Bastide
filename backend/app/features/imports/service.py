@@ -10,7 +10,7 @@ from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 from app.core.errors import NotFoundError, ValidationError
-from app.features.accounts.balance import apply_delta, point_in_time_balance, recompute_balance
+from app.features.accounts.balance import apply_delta, point_in_time_balance, shift_opening_balance
 from app.features.accounts.models import Account, AccountBalanceSnapshot
 from app.features.accounts.service import AccountService
 from app.features.auth.models import User
@@ -265,8 +265,15 @@ class ImportService:
         apply_delta(account, delta_minor)
 
         # Before any snapshot is written, so they are taken from the corrected base.
-        if declared_balance is not None and not had_transactions:
-            self._reconcile_opening_balance(account, declared_balance, fallback_as_of=period_end)
+        if declared_balance is not None:
+            if had_transactions:
+                self._detect_balance_mismatch(
+                    batch, account, declared_balance, fallback_as_of=period_end
+                )
+            else:
+                self._reconcile_opening_balance(
+                    account, declared_balance, fallback_as_of=period_end
+                )
 
         if new_rows:
             self._sync_month_boundary_snapshots(account, period_start, period_end)
@@ -355,7 +362,8 @@ class ImportService:
         **Only on an account's first import**, deliberately. A later statement's balance
         is equally true, but re-deriving from it would silently absorb any gap in the
         ledger (months the user never imported) into the opening balance, moving the
-        error rather than fixing it. Once there is history, the ledger is what we trust.
+        error rather than fixing it. Once there is history, `_detect_balance_mismatch`
+        compares against it instead of overwriting it.
         """
         as_of = declared.as_of or fallback_as_of
         booked_through = (
@@ -368,8 +376,31 @@ class ImportService:
             or 0
         )
 
-        account.opening_balance_minor = declared.amount_minor - booked_through
-        account.cached_balance_minor = recompute_balance(self._db, account)
+        shift_opening_balance(self._db, account, declared.amount_minor - booked_through)
+
+    def _detect_balance_mismatch(
+        self,
+        batch: ImportBatch,
+        account: Account,
+        declared: LedgerBalance,
+        fallback_as_of: date,
+    ) -> None:
+        """Compare a statement's declared balance against what the ledger implies.
+
+        Runs from an account's *second* import onward — the first derives the opening
+        balance from this same figure instead (`_reconcile_opening_balance`), so there is
+        nothing yet to compare it to. A non-zero gap means the bank and the ledger
+        disagree — a missed statement, an un-imported gap, or a bad prior correction — and
+        it is recorded on the batch rather than absorbed into the opening balance or the
+        cache, so the user sees it and can decide how to fix it (e.g. patch
+        `opening_balance_minor`, or track down the missing transactions).
+        """
+        as_of = declared.as_of or fallback_as_of
+        implied = point_in_time_balance(self._db, account, as_of)
+        mismatch = declared.amount_minor - implied
+        if mismatch != 0:
+            batch.balance_mismatch_minor = mismatch
+            batch.balance_mismatch_as_of = as_of
 
     def _sync_month_boundary_snapshots(
         self, account: Account, period_start: date, period_end: date

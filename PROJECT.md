@@ -157,6 +157,19 @@ for money.** Primary keys are UUIDs (string). Timestamps are UTC ISO-8601.
 > gap in the ledger into the opening balance rather than surfacing it. CSV carries no declared
 > balance, so a CSV-only account keeps the figure the user typed.
 >
+> **Every import after the first compares instead of correcting.** Its statement's `LEDGERBAL`
+> is checked against what the ledger implies at that date (`point_in_time_balance`); a
+> disagreement is recorded on the `import_batch` as `balance_mismatch_minor` /
+> `balance_mismatch_as_of` rather than silently absorbed — it means a missed statement, an
+> un-imported gap, or a bad earlier correction, and the user needs to see it to act on it.
+>
+> **`opening_balance_minor` is also user-patchable** (`PATCH /accounts/{id}`), the manual
+> counterpart to the two mechanisms above — for a CSV-only account (no `LEDGERBAL` ever), or to
+> fix a bad first derivation. The patch goes through `shift_opening_balance`, which moves
+> `cached_balance_minor` **and every existing snapshot** by the same delta rather than
+> recomputing them independently — the ledger didn't change, so nothing derived from it should
+> move by anything other than exactly that delta.
+>
 > (Scale note: a single user's ledger is realistically tens of thousands of rows, not millions;
 > even a naive indexed `SUM(account_id)` would be sub-millisecond. The cache + snapshots keep it
 > fast regardless.)
@@ -228,6 +241,8 @@ richer label space also benefits the Phase 2 SLM.
 | transaction_count / new_count / duplicate_count | int | |
 | status | text | `success` \| `partial` \| `failed` |
 | error_message | text null | |
+| balance_mismatch_minor | int null | declared `LEDGERBAL` − ledger-implied balance; set only from the account's 2nd+ import, and only when non-zero |
+| balance_mismatch_as_of | date null | the date the mismatch above holds at |
 | imported_at | datetime | |
 
 ### `csv_templates` (per-bank CSV mapping, saved once and reused)

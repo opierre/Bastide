@@ -29,7 +29,7 @@ router = APIRouter(prefix="/api/v1", tags=["imports"])
 def _import_service(db: Annotated[Session, Depends(get_db)]) -> ImportService:
     return ImportService(
         ImportRepository(db),
-        AccountService(AccountRepository(db)),
+        AccountService(AccountRepository(db), db),
         db,
         CsvTemplateRepository(db),
     )
@@ -53,6 +53,8 @@ def _to_read(batch: ImportBatch) -> ImportBatchRead:
         duplicate_count=batch.duplicate_count,
         status=batch.status,
         error_message=batch.error_message,
+        balance_mismatch_minor=batch.balance_mismatch_minor,
+        balance_mismatch_as_of=batch.balance_mismatch_as_of,
         imported_at=batch.imported_at,
     )
 

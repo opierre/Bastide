@@ -3,6 +3,7 @@
 from datetime import date
 from uuid import uuid4
 
+from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.features.accounts import balance
@@ -107,3 +108,46 @@ def test_recompute_balance_matches_cache_after_series_of_inserts(db_session: Ses
     result = balance.recompute_balance(db_session, account)
 
     assert result == account.cached_balance_minor == 9_000
+
+
+def test_shift_opening_balance_moves_the_cache_by_the_same_delta(db_session: Session) -> None:
+    account = _make_account(db_session, opening_balance_minor=1000, cached_balance_minor=1800)
+
+    balance.shift_opening_balance(db_session, account, 1500)
+
+    assert account.opening_balance_minor == 1500
+    assert account.cached_balance_minor == 2300
+
+
+def test_shift_opening_balance_is_a_no_op_when_unchanged(db_session: Session) -> None:
+    account = _make_account(db_session, opening_balance_minor=1000, cached_balance_minor=1800)
+
+    balance.shift_opening_balance(db_session, account, 1000)
+
+    assert account.opening_balance_minor == 1000
+    assert account.cached_balance_minor == 1800
+
+
+def test_shift_opening_balance_moves_existing_snapshots_by_the_same_delta(
+    db_session: Session,
+) -> None:
+    """A snapshot is a cached balance too — leaving it behind would make point-in-time
+    balances before the correction disagree with the ones after it, for no real change
+    on the ledger.
+    """
+    account = _make_account(db_session, opening_balance_minor=1000, cached_balance_minor=1800)
+    db_session.add(
+        AccountBalanceSnapshot(
+            account_id=account.id, period_end=date(2026, 1, 31), balance_minor=1500
+        )
+    )
+    db_session.commit()
+
+    balance.shift_opening_balance(db_session, account, 1500)
+    db_session.commit()
+
+    snapshot = db_session.scalar(
+        select(AccountBalanceSnapshot).where(AccountBalanceSnapshot.account_id == account.id)
+    )
+    assert snapshot is not None
+    assert snapshot.balance_minor == 2000

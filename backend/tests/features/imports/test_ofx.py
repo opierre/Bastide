@@ -243,11 +243,43 @@ def test_a_later_statement_does_not_re_derive_the_opening_balance(client: TestCl
     account_id = _create_account(client, headers)
     _upload(client, headers, account_id, FIXTURES / "sample_sgml.ofx", "jan.ofx")
 
-    _upload(client, headers, account_id, FIXTURES / "sample_sgml_later_month.ofx", "feb.ofx")
+    response = _upload(
+        client, headers, account_id, FIXTURES / "sample_sgml_later_month.ofx", "feb.ofx"
+    )
 
     account = client.get(f"/api/v1/accounts/{account_id}", headers=headers).json()
     assert account["opening_balance_minor"] == 0
     assert account["balance_minor"] == 145_750 - 5_000
+
+    # The gap isn't silently absorbed — it's surfaced on the batch instead: the
+    # bank says 2 000.00 as of Feb 29, the ledger implies 1 407.50.
+    body = response.json()
+    assert body["balance_mismatch_minor"] == 200_000 - (145_750 - 5_000)
+    assert body["balance_mismatch_as_of"] == "2024-02-29"
+
+
+def test_a_matching_later_statement_reports_no_mismatch(client: TestClient) -> None:
+    headers = _register(client)
+    account_id = _create_account(client, headers)
+    _upload(client, headers, account_id, FIXTURES / "sample_sgml.ofx", "jan.ofx")
+
+    response = _upload(
+        client, headers, account_id, FIXTURES / "sample_sgml_second_matching.ofx", "feb.ofx"
+    )
+
+    assert response.json()["balance_mismatch_minor"] is None
+    assert response.json()["balance_mismatch_as_of"] is None
+
+
+def test_first_import_never_reports_a_mismatch(client: TestClient) -> None:
+    """The first import derives the opening balance from LEDGERBAL; nothing to compare yet."""
+    headers = _register(client)
+    account_id = _create_account(client, headers)
+
+    response = _upload(client, headers, account_id, FIXTURES / "sample_sgml.ofx", "jan.ofx")
+
+    assert response.json()["balance_mismatch_minor"] is None
+    assert response.json()["balance_mismatch_as_of"] is None
 
 
 def test_a_statement_declaring_no_balance_keeps_the_typed_opening_balance(

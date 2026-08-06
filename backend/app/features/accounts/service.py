@@ -1,6 +1,9 @@
 """Business logic for account creation, updates, and archive-on-delete."""
 
+from sqlalchemy.orm import Session
+
 from app.core.errors import ConflictError, NotFoundError
+from app.features.accounts.balance import shift_opening_balance
 from app.features.accounts.models import Account
 from app.features.accounts.repository import AccountRepository
 from app.features.accounts.schemas import AccountCreate, AccountUpdate
@@ -30,8 +33,11 @@ def _normalize_ofx_account_id(value: str | None) -> str | None:
 class AccountService:
     """Account CRUD, scoped to a user, plus archive-on-delete."""
 
-    def __init__(self, repository: AccountRepository) -> None:
+    def __init__(self, repository: AccountRepository, db: Session) -> None:
         self._repository = repository
+        # Needed only for `update`'s opening-balance correction (cache + snapshot shift);
+        # every other method here goes through the repository alone.
+        self._db = db
 
     def list_for_user(self, user_id: str) -> list[Account]:
         """List a user's non-archived accounts."""
@@ -81,7 +87,12 @@ class AccountService:
         return self._repository.add(account)
 
     def update(self, user_id: str, account_id: str, data: AccountUpdate) -> Account:
-        """Patch mutable fields (name, type, institution, ofx_account_id).
+        """Patch mutable fields (name, type, institution, ofx_account_id, opening_balance_minor).
+
+        `opening_balance_minor` is the manual escape hatch: imports derive it from a
+        statement automatically (see the imports service), but a CSV-only account never
+        gets that, and a bad first derivation needs a way back. Shifting it keeps the
+        cache and every existing snapshot consistent rather than just patching the field.
 
         Raises:
             AccountNotFoundError: no such account, or it belongs to another user.
@@ -99,6 +110,8 @@ class AccountService:
             account.ofx_account_id = self._claim_ofx_account_id(
                 user_id, data.ofx_account_id, allow_account_id=account.id
             )
+        if data.opening_balance_minor is not None:
+            shift_opening_balance(self._db, account, data.opening_balance_minor)
         return self._repository.update(account)
 
     def _claim_ofx_account_id(
