@@ -337,6 +337,24 @@ void main() {
     expect(find.byKey(const Key('accountFormPrefillNote')), findsOneWidget);
   });
 
+  testWidgets('a user with no accounts is not told to create one first', (tester) async {
+    _useDesktopSurface(tester);
+    await tester.pumpWidget(
+      _wrap(
+        imports: FakeImportsController(),
+        templates: FakeCsvTemplatesController(),
+        accounts: FakeAccountsController(initialAccounts: const []),
+        file: const PickedImportFile(name: 'releve.ofx', bytes: [1, 2, 3]),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    // Dropping a statement is now how an account gets created, so having none
+    // yet is not a prerequisite the panel has to nag about.
+    expect(find.byKey(const Key('importNoAccountsBanner')), findsNothing);
+    expect(find.byKey(const Key('importDropZone')), findsOneWidget);
+  });
+
   testWidgets('renders under en without missing localized keys', (tester) async {
     _useDesktopSurface(tester);
     await tester.pumpWidget(

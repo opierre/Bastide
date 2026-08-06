@@ -271,7 +271,6 @@
   "accountErrorGeneric": "Something went wrong. Please try again.",
   "importNewTitle": "New import",
   "importAccountLabel": "Destination account",
-  "importNoAccounts": "Create an account first — it is what the imported transactions will land in.",
   "importAccountsUnavailable": "Couldn't load your accounts. Try again in a moment.",
   "importDropZoneTitle": "Drop an OFX, QFX or CSV file",
   "importDropZoneHint": "or click to browse — a CSV opens the mapping wizard",

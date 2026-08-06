@@ -932,12 +932,6 @@ abstract class AppLocalizations {
   /// **'Compte de destination'**
   String get importAccountLabel;
 
-  /// Shown in place of the account selector when the user has no accounts yet.
-  ///
-  /// In fr, this message translates to:
-  /// **'Créez d\'abord un compte : c\'est lui qui recevra les opérations importées.'**
-  String get importNoAccounts;
-
   /// Shown in place of the account selector when the accounts list failed to load.
   ///
   /// In fr, this message translates to:

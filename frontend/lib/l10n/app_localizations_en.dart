@@ -457,10 +457,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get importAccountLabel => 'Destination account';
 
   @override
-  String get importNoAccounts =>
-      'Create an account first — it is what the imported transactions will land in.';
-
-  @override
   String get importAccountsUnavailable =>
       'Couldn\'t load your accounts. Try again in a moment.';
 

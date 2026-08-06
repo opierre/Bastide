@@ -459,10 +459,6 @@ class AppLocalizationsFr extends AppLocalizations {
   String get importAccountLabel => 'Compte de destination';
 
   @override
-  String get importNoAccounts =>
-      'Créez d\'abord un compte : c\'est lui qui recevra les opérations importées.';
-
-  @override
   String get importAccountsUnavailable =>
       'Impossible de charger vos comptes. Réessayez dans un instant.';
 

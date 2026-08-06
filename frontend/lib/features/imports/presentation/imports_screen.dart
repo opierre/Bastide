@@ -300,11 +300,10 @@ class _NewImportCard extends ConsumerWidget {
           Text(l10n.importNewTitle, style: Theme.of(context).textTheme.titleMedium),
           const SizedBox(height: AppSpacing.md),
           switch (accounts) {
-            AsyncData(:final value) when value.isEmpty => InlineBanner(
-              key: const Key('importNoAccountsBanner'),
-              message: l10n.importNoAccounts,
-              tone: BannerTone.info,
-            ),
+            // Nothing to select from, and nothing to say: a statement now
+            // proposes the account it belongs to, so having no accounts yet is
+            // not something the user has to fix before dropping a file.
+            AsyncData(:final value) when value.isEmpty => const SizedBox.shrink(),
             AsyncData(:final value) => _AccountSelect(accounts: value),
             AsyncError() => InlineBanner(
               key: const Key('importAccountsErrorBanner'),

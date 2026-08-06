@@ -567,10 +567,6 @@
   "@importAccountLabel": {
     "description": "Label for the account selector on the imports panel."
   },
-  "importNoAccounts": "Créez d'abord un compte : c'est lui qui recevra les opérations importées.",
-  "@importNoAccounts": {
-    "description": "Shown in place of the account selector when the user has no accounts yet."
-  },
   "importAccountsUnavailable": "Impossible de charger vos comptes. Réessayez dans un instant.",
   "@importAccountsUnavailable": {
     "description": "Shown in place of the account selector when the accounts list failed to load."
