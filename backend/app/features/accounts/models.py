@@ -13,6 +13,13 @@ class Account(Base):
     """A user's bank/cash account. Balance is cached and derived from the ledger."""
 
     __tablename__ = "accounts"
+    # `ofx_account_id` is optional, but where it is set it identifies exactly one
+    # of the user's accounts — that is what lets an import route a statement to
+    # its account without guessing. NULLs stay distinct under both SQLite and
+    # Postgres, so accounts opened without one are unaffected.
+    __table_args__ = (
+        UniqueConstraint("user_id", "ofx_account_id", name="uq_accounts_user_ofx_account_id"),
+    )
 
     id: Mapped[str] = mapped_column(String(36), primary_key=True, default=lambda: str(uuid4()))
     user_id: Mapped[str] = mapped_column(String(36), ForeignKey("users.id"), index=True)
@@ -20,6 +27,7 @@ class Account(Base):
     type: Mapped[str] = mapped_column(String(20))
     institution: Mapped[str] = mapped_column(String(255))
     currency: Mapped[str] = mapped_column(String(3))
+    # Lookups are always user-scoped, so the unique constraint's index covers them.
     ofx_account_id: Mapped[str | None] = mapped_column(String(255), nullable=True)
     opening_balance_minor: Mapped[int] = mapped_column(Integer)
     archived: Mapped[bool] = mapped_column(Boolean, default=False)

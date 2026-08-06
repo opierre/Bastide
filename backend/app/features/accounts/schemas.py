@@ -15,14 +15,24 @@ class AccountCreate(BaseModel):
     type: AccountType
     institution: str = Field(min_length=1, max_length=255)
     opening_balance_minor: int
+    ofx_account_id: str | None = Field(
+        default=None,
+        max_length=255,
+        description="The bank's own account id (OFX `ACCTID`). Optional, unique per user.",
+    )
 
 
 class AccountUpdate(BaseModel):
-    """Patch payload: only name, type, and institution are mutable."""
+    """Patch payload: name, type, institution, and the bank's account id are mutable.
+
+    `ofx_account_id` is patchable so an account created before its first import
+    can be bound to the id its statements carry.
+    """
 
     name: str | None = Field(default=None, min_length=1, max_length=255)
     type: AccountType | None = None
     institution: str | None = Field(default=None, min_length=1, max_length=255)
+    ofx_account_id: str | None = Field(default=None, max_length=255)
 
 
 class AccountRead(BaseModel):
@@ -33,6 +43,7 @@ class AccountRead(BaseModel):
     type: str
     institution: str
     currency: str
+    ofx_account_id: str | None
     opening_balance_minor: int
     balance_minor: int
     archived: bool

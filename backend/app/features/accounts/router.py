@@ -2,7 +2,7 @@
 
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, Depends, Query, status
 from sqlalchemy.orm import Session
 
 from app.core.db import get_db
@@ -28,6 +28,7 @@ def _to_read(account: Account) -> AccountRead:
         type=account.type,
         institution=account.institution,
         currency=account.currency,
+        ofx_account_id=account.ofx_account_id,
         opening_balance_minor=account.opening_balance_minor,
         balance_minor=balance.current_balance(account),
         archived=account.archived,
@@ -40,8 +41,21 @@ def _to_read(account: Account) -> AccountRead:
 async def list_accounts(
     service: Annotated[AccountService, Depends(_service)],
     user: Annotated[User, Depends(get_current_user)],
+    ofx_account_id: Annotated[
+        str | None,
+        Query(description="Return only the account carrying this bank account id (OFX ACCTID)."),
+    ] = None,
 ) -> list[AccountRead]:
-    """List the caller's non-archived accounts."""
+    """List the caller's non-archived accounts.
+
+    Filtered by `ofx_account_id`, this answers "which account is this statement
+    for" exactly: zero or one result. An archived match is still returned — it
+    still owns that id, and reporting it as free would only lead to a conflict
+    on create.
+    """
+    if ofx_account_id is not None:
+        match = service.find_by_ofx_account_id(user.id, ofx_account_id)
+        return [_to_read(match)] if match is not None else []
     return [_to_read(account) for account in service.list_for_user(user.id)]
 
 

@@ -131,7 +131,7 @@ for money.** Primary keys are UUIDs (string). Timestamps are UTC ISO-8601.
 | type | text | `checking` \| `savings` \| `credit` \| `cash` \| `other` |
 | institution | text | bank name (drives brand-logo lookup) |
 | currency | text | defaults to `users.currency`; reserved for future multi-currency |
-| ofx_account_id | text null | bank's account id, used for import routing |
+| ofx_account_id | text null | bank's account id (OFX `ACCTID`), used for import routing; unique per user where set |
 | opening_balance_minor | int | |
 | archived | bool | default false |
 | cached_balance_minor | int | maintained incrementally; see note |
@@ -274,8 +274,8 @@ POST   /auth/login           {email,password} → {token,user}
 POST   /auth/logout
 GET    /auth/me              → {user}
 
-GET    /accounts            → [account]
-POST   /accounts            {name,type,institution,opening_balance_minor} → account
+GET    /accounts            → [account]   (?ofx_account_id=… → the 0–1 account holding it)
+POST   /accounts            {name,type,institution,opening_balance_minor[,ofx_account_id]} → account
 GET    /accounts/{id}       → account (with derived current balance)
 PATCH  /accounts/{id}
 DELETE /accounts/{id}        (archive, not hard delete)
