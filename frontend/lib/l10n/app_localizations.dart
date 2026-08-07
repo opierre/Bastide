@@ -1742,10 +1742,10 @@ abstract class AppLocalizations {
   /// **'Importez un relevé pour donner vie à votre argent'**
   String get dashboardEmptyTitle;
 
-  /// Encouraging subtext under the dashboard empty-state heading.
+  /// Reassurance under the dashboard empty-state heading. Leads with privacy rather than with what the panel will contain: the user has just been asked to hand over a bank statement, and that is the doubt worth answering first.
   ///
   /// In fr, this message translates to:
-  /// **'Vos revenus, vos dépenses et votre taux d\'épargne apparaîtront ici dès votre premier import.'**
+  /// **'Tout reste sur cet ordinateur — rien n\'est envoyé en ligne.'**
   String get dashboardEmptyBody;
 
   /// CTA on the dashboard empty state, navigating to the imports panel.

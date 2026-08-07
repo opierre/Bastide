@@ -982,7 +982,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get dashboardEmptyBody =>
-      'Vos revenus, vos dépenses et votre taux d\'épargne apparaîtront ici dès votre premier import.';
+      'Tout reste sur cet ordinateur — rien n\'est envoyé en ligne.';
 
   @override
   String get dashboardGoToImports => 'Aller aux imports';

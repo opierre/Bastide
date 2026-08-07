@@ -1,8 +1,12 @@
+import 'package:finstride/core/navigation/sidebar_controller.dart';
 import 'package:finstride/core/theme/app_theme.dart';
 import 'package:finstride/core/theme/tokens.dart';
 import 'package:finstride/core/widgets/amount_text.dart';
 import 'package:finstride/core/widgets/area_line.dart';
+import 'package:finstride/core/widgets/app_shell.dart';
 import 'package:finstride/core/widgets/category_chip.dart';
+import 'package:finstride/core/widgets/primary_button.dart';
+import 'package:finstride/core/widgets/state_views.dart';
 import 'package:finstride/features/dashboard/application/dashboard_controller.dart';
 import 'package:finstride/features/dashboard/domain/dashboard_summary.dart';
 import 'package:finstride/features/dashboard/presentation/category_breakdown.dart';
@@ -439,6 +443,88 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Importez un relevé pour donner vie à votre argent'), findsOneWidget);
+    // The reassurance answers the doubt the CTA creates — the user has just been asked to
+    // hand over a bank statement.
+    expect(
+      find.text('Tout reste sur cet ordinateur — rien n\'est envoyé en ligne.'),
+      findsOneWidget,
+    );
+    // One *primary* CTA, per the EmptyState spec.
     expect(find.byKey(const Key('dashboardGoToImportsButton')), findsOneWidget);
+    expect(find.byType(PrimaryButton), findsOneWidget);
+
+    // Nothing else is on screen: the empty state replaces the whole panel.
+    expect(find.byType(StatCard), findsNothing);
+    expect(find.byType(CategoryDonut), findsNothing);
+    expect(find.byType(IncomeVsExpenseChart), findsNothing);
+  });
+
+  testWidgets('the loading skeleton silhouettes all three rows at their real ratios', (
+    tester,
+  ) async {
+    _useDesktopSurface(tester);
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          dashboardControllerProvider.overrideWith(FakeLoadingDashboardController.new),
+        ],
+        child: const MaterialApp(
+          locale: Locale('fr'),
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: Scaffold(body: DashboardScreen()),
+        ),
+      ),
+    );
+    await tester.pump();
+
+    expect(find.byKey(const Key('dashboardLoadingIndicator')), findsOneWidget);
+    // 4 stat silhouettes + 2 for row 2 + 2 for row 3.
+    expect(find.byType(SkeletonBlock), findsNWidgets(8));
+
+    // The silhouette must not move the cards when the data lands, so it carries the same
+    // ratios: 1:1:1:1.35 across row 1, and 1.35:1 across row 2 at its pinned height.
+    final blocks = [
+      for (var i = 0; i < 8; i++) tester.getSize(find.byType(SkeletonBlock).at(i)),
+    ];
+    expect(blocks[0].height, 132);
+    expect(blocks[3].width / blocks[0].width, closeTo(1.35, 0.01));
+    expect(blocks[4].height, 322);
+    expect(blocks[4].width / blocks[5].width, closeTo(1.35, 0.01));
+    expect(blocks[6].width, closeTo(blocks[7].width, 0.5));
+  });
+
+  testWidgets('the panel renders unchanged under the collapsed 76px nav rail', (tester) async {
+    _useDesktopSurface(tester);
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          dashboardControllerProvider.overrideWith(
+            () => FakeDashboardController(initialState: _state()),
+          ),
+          sidebarCollapsedProvider.overrideWith(FakeCollapsedSidebar.new),
+        ],
+        child: MaterialApp(
+          locale: const Locale('fr'),
+          theme: appDarkTheme,
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: AppShell(
+            currentPath: DashboardScreen.path,
+            onNavigate: (_) {},
+            child: const DashboardScreen(),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    // Collapsing the nav is chrome state, not panel state — the same data is drawn, just in
+    // the wider content region the 76px rail leaves behind.
+    expect(find.byType(StatCard), findsNWidgets(3));
+    expect(find.byType(CategoryDonut), findsOneWidget);
+    expect(find.byType(IncomeVsExpenseChart), findsOneWidget);
+    expect(find.byType(CompactTransactionRow), findsNWidgets(4));
+    expect(tester.takeException(), isNull);
   });
 }

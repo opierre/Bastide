@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
@@ -41,12 +43,32 @@ class RecentActivityCard extends StatelessWidget {
                       style: textTheme.bodySmall?.copyWith(color: AppColors.textSecondary),
                     ),
                   )
-                : Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      for (final transaction in transactions)
-                        CompactTransactionRow(transaction: transaction),
-                    ],
+                : LayoutBuilder(
+                    // 48px is the spec's row height and what the four drawn rows need. It is
+                    // applied as a maximum rather than a fixed height: rows 1 and 2 are pinned
+                    // (136 and 322), so on the 900px frame this card gets whatever is left,
+                    // and four rows at a hard 48 overflow it by a few pixels once the title
+                    // and the link are counted.
+                    builder: (context, constraints) {
+                      final height = constraints.hasBoundedHeight
+                          ? math.min(
+                              CompactTransactionRow.rowHeight,
+                              constraints.maxHeight / transactions.length,
+                            )
+                          : CompactTransactionRow.rowHeight;
+
+                      return Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          for (final transaction in transactions)
+                            CompactTransactionRow(
+                              transaction: transaction,
+                              height: height,
+                            ),
+                        ],
+                      );
+                    },
                   ),
           ),
           const SizedBox(height: AppSpacing.sm),
@@ -73,11 +95,20 @@ class RecentActivityCard extends StatelessWidget {
 /// The 48px compact row. Sibling of the transactions panel's 52px [TransactionRow], which
 /// carries a category chip and a wider monogram — see `docs/design/00` §Components.
 class CompactTransactionRow extends StatelessWidget {
-  const CompactTransactionRow({super.key, required this.transaction});
+  const CompactTransactionRow({
+    super.key,
+    required this.transaction,
+    this.height = rowHeight,
+  });
 
   final RecentTransaction transaction;
 
-  static const height = 48.0;
+  /// The row's height. Defaults to the spec's 48; the list tightens it when the card it sits
+  /// in is shorter than four full rows.
+  final double height;
+
+  /// The spec's row height.
+  static const rowHeight = 48.0;
   static const monogramSize = 28.0;
 
   @override

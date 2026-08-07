@@ -1252,9 +1252,9 @@
   "@dashboardEmptyTitle": {
     "description": "Encouraging heading shown when the user has no transactions yet for any month."
   },
-  "dashboardEmptyBody": "Vos revenus, vos dépenses et votre taux d'épargne apparaîtront ici dès votre premier import.",
+  "dashboardEmptyBody": "Tout reste sur cet ordinateur — rien n'est envoyé en ligne.",
   "@dashboardEmptyBody": {
-    "description": "Encouraging subtext under the dashboard empty-state heading."
+    "description": "Reassurance under the dashboard empty-state heading. Leads with privacy rather than with what the panel will contain: the user has just been asked to hand over a bank statement, and that is the doubt worth answering first."
   },
   "dashboardGoToImports": "Aller aux imports",
   "@dashboardGoToImports": {

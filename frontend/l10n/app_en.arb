@@ -316,7 +316,7 @@
   "dashboardViewAllTransactions": "View all transactions",
   "dashboardRecentActivityEmpty": "Your transactions will show up here.",
   "dashboardEmptyTitle": "Import a statement to see your money come to life",
-  "dashboardEmptyBody": "Your income, expenses, and savings rate will show up here as soon as you import your first statement.",
+  "dashboardEmptyBody": "Everything stays on this computer — nothing is sent online.",
   "dashboardGoToImports": "Go to imports",
   "dashboardRetry": "Retry",
   "dashboardErrorInvalidMonth": "The requested month isn't valid.",

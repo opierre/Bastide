@@ -974,7 +974,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get dashboardEmptyBody =>
-      'Your income, expenses, and savings rate will show up here as soon as you import your first statement.';
+      'Everything stays on this computer — nothing is sent online.';
 
   @override
   String get dashboardGoToImports => 'Go to imports';

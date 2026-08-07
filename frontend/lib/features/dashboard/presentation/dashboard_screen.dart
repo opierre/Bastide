@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/api/api_client.dart';
 import '../../../core/theme/tokens.dart';
+import '../../../core/widgets/primary_button.dart';
 import '../../../core/widgets/state_views.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../imports/presentation/imports_screen.dart';
@@ -195,10 +196,12 @@ class _EmptyState extends StatelessWidget {
       icon: Icons.bar_chart_rounded,
       title: l10n.dashboardEmptyTitle,
       message: l10n.dashboardEmptyBody,
-      action: OutlinedButton(
+      // A *primary* CTA, per the EmptyState in `docs/design/00` §Components — this is the one
+      // action the panel wants, not an alternative to something else on screen.
+      action: PrimaryButton(
         key: const Key('dashboardGoToImportsButton'),
         onPressed: onGoToImports,
-        child: Text(l10n.dashboardGoToImports),
+        label: l10n.dashboardGoToImports,
       ),
     );
   }
@@ -209,25 +212,45 @@ class _DashboardSkeleton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SkeletonPulse(
+    // The silhouette mirrors the populated panel's three rows and their exact ratios, so the
+    // cards don't jump sideways or resize when the data lands — which is the whole reason a
+    // skeleton beats a centred spinner.
+    return const SkeletonPulse(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Row(
             children: [
-              // Same `1fr 1fr 1fr 1.35fr` ratio as the populated row, so the skeleton
-              // doesn't shift the cards sideways when the data lands.
-              const Expanded(flex: 100, child: SkeletonBlock(height: 132)),
-              const SizedBox(width: AppSpacing.gridGap),
-              const Expanded(flex: 100, child: SkeletonBlock(height: 132)),
-              const SizedBox(width: AppSpacing.gridGap),
-              const Expanded(flex: 100, child: SkeletonBlock(height: 132)),
-              const SizedBox(width: AppSpacing.gridGap),
-              const Expanded(flex: 135, child: SkeletonBlock(height: 132)),
+              Expanded(flex: 100, child: SkeletonBlock(height: 132)),
+              SizedBox(width: AppSpacing.gridGap),
+              Expanded(flex: 100, child: SkeletonBlock(height: 132)),
+              SizedBox(width: AppSpacing.gridGap),
+              Expanded(flex: 100, child: SkeletonBlock(height: 132)),
+              SizedBox(width: AppSpacing.gridGap),
+              Expanded(flex: 135, child: SkeletonBlock(height: 132)),
             ],
           ),
-          const SizedBox(height: AppSpacing.gridGap),
-          const Expanded(child: SkeletonBlock(height: double.infinity)),
+          SizedBox(height: AppSpacing.gridGap),
+          SizedBox(
+            height: _row2Height,
+            child: Row(
+              children: [
+                Expanded(flex: 135, child: SkeletonBlock(height: double.infinity)),
+                SizedBox(width: AppSpacing.gridGap),
+                Expanded(flex: 100, child: SkeletonBlock(height: double.infinity)),
+              ],
+            ),
+          ),
+          SizedBox(height: AppSpacing.gridGap),
+          Expanded(
+            child: Row(
+              children: [
+                Expanded(child: SkeletonBlock(height: double.infinity)),
+                SizedBox(width: AppSpacing.gridGap),
+                Expanded(child: SkeletonBlock(height: double.infinity)),
+              ],
+            ),
+          ),
         ],
       ),
     );
