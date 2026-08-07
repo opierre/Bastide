@@ -406,10 +406,6 @@
       }
     }
   },
-  "accountLogoRecognized": "Logo reconnu",
-  "@accountLogoRecognized": {
-    "description": "Confirmation shown beside the institution monogram once the typed name is one we have a pinned color for."
-  },
   "accountCurrencyNote": "La devise est celle de votre profil et s'applique à tous les comptes.",
   "@accountCurrencyNote": {
     "description": "Note under the read-only currency field in the account form."
@@ -463,9 +459,9 @@
   "@accountFormCreateTitle": {
     "description": "Title of the account form dialog when creating an account."
   },
-  "accountFormPrefilledNote": "Champs pré-remplis depuis votre relevé — modifiez-les si besoin.",
+  "accountFormPrefilledNote": "Champs pré-remplis depuis votre relevé.",
   "@accountFormPrefilledNote": {
-    "description": "Note at the top of the account form when its fields were pre-filled from an imported statement rather than typed."
+    "description": "Note at the top of the account form when its fields were pre-filled from an imported statement rather than typed. Says nothing about editability: which fields can be changed varies with what the statement declares, and each field's own helper carries that."
   },
   "accountFormEditTitle": "Modifier le compte",
   "@accountFormEditTitle": {
@@ -515,6 +511,10 @@
   "@accountInstitutionRequired": {
     "description": "Validation message when the institution field is left empty."
   },
+  "accountInstitutionFromStatementNote": "Repris de l'établissement déclaré par votre relevé.",
+  "@accountInstitutionFromStatementNote": {
+    "description": "Helper under the read-only institution field when the account is being created from a statement that names its bank."
+  },
   "accountOpeningBalanceLabel": "Solde initial",
   "@accountOpeningBalanceLabel": {
     "description": "Label for the opening balance field on the account form, when editing an account: the figure the account started from."
@@ -527,9 +527,9 @@
   "@accountBalanceStatementNote": {
     "description": "Helper under the balance field when the account is being created from a statement: the import derives the real figure from the statement's declared balance, so an approximate entry here is harmless."
   },
-  "accountBalanceFromStatementNote": "Repris du solde déclaré par votre relevé. Modifiable si besoin.",
+  "accountBalanceFromStatementNote": "Repris du solde déclaré par votre relevé.",
   "@accountBalanceFromStatementNote": {
-    "description": "Helper under the balance field when the account is being created from a statement that declares its closing balance: the field is pre-filled from it, and the user can still change it."
+    "description": "Helper under the read-only balance field when the account is being created from a statement that declares its closing balance: the figure is the statement's, not something to type."
   },
   "accountOpeningBalanceEditNote": "Corriger cette valeur décale le solde du compte et son historique enregistré du même montant — aucune transaction n'est modifiée.",
   "@accountOpeningBalanceEditNote": {

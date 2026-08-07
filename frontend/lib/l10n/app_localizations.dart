@@ -698,12 +698,6 @@ abstract class AppLocalizations {
   /// **'Soldes au {date}'**
   String accountsBalancesAsOf(DateTime date);
 
-  /// Confirmation shown beside the institution monogram once the typed name is one we have a pinned color for.
-  ///
-  /// In fr, this message translates to:
-  /// **'Logo reconnu'**
-  String get accountLogoRecognized;
-
   /// Note under the read-only currency field in the account form.
   ///
   /// In fr, this message translates to:
@@ -776,10 +770,10 @@ abstract class AppLocalizations {
   /// **'Nouveau compte'**
   String get accountFormCreateTitle;
 
-  /// Note at the top of the account form when its fields were pre-filled from an imported statement rather than typed.
+  /// Note at the top of the account form when its fields were pre-filled from an imported statement rather than typed. Says nothing about editability: which fields can be changed varies with what the statement declares, and each field's own helper carries that.
   ///
   /// In fr, this message translates to:
-  /// **'Champs pré-remplis depuis votre relevé — modifiez-les si besoin.'**
+  /// **'Champs pré-remplis depuis votre relevé.'**
   String get accountFormPrefilledNote;
 
   /// Title of the account form dialog when editing an account.
@@ -854,6 +848,12 @@ abstract class AppLocalizations {
   /// **'L\'établissement est requis.'**
   String get accountInstitutionRequired;
 
+  /// Helper under the read-only institution field when the account is being created from a statement that names its bank.
+  ///
+  /// In fr, this message translates to:
+  /// **'Repris de l\'établissement déclaré par votre relevé.'**
+  String get accountInstitutionFromStatementNote;
+
   /// Label for the opening balance field on the account form, when editing an account: the figure the account started from.
   ///
   /// In fr, this message translates to:
@@ -872,10 +872,10 @@ abstract class AppLocalizations {
   /// **'Ajusté automatiquement d\'après le solde déclaré par votre relevé lors du premier import.'**
   String get accountBalanceStatementNote;
 
-  /// Helper under the balance field when the account is being created from a statement that declares its closing balance: the field is pre-filled from it, and the user can still change it.
+  /// Helper under the read-only balance field when the account is being created from a statement that declares its closing balance: the figure is the statement's, not something to type.
   ///
   /// In fr, this message translates to:
-  /// **'Repris du solde déclaré par votre relevé. Modifiable si besoin.'**
+  /// **'Repris du solde déclaré par votre relevé.'**
   String get accountBalanceFromStatementNote;
 
   /// Helper under the balance field when editing an existing account: explains that a manual correction shifts the cached balance and every saved snapshot by the same delta rather than rewriting the ledger.

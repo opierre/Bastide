@@ -1,4 +1,5 @@
 import 'package:finstride/core/session/current_user_provider.dart';
+import 'package:finstride/core/widgets/institution_avatar.dart';
 import 'package:finstride/features/accounts/application/accounts_controller.dart';
 import 'package:finstride/features/accounts/domain/account.dart';
 import 'package:finstride/features/accounts/presentation/account_form.dart';
@@ -66,7 +67,9 @@ void main() {
     expect(call.openingBalanceMinor, 123456);
   });
 
-  testWidgets('a prefill seeds the create form and stays editable', (tester) async {
+  testWidgets('a prefill seeds the create form, and what it proposes stays editable', (
+    tester,
+  ) async {
     final controller = FakeAccountsController();
     await tester.pumpWidget(
       _wrap(
@@ -84,7 +87,8 @@ void main() {
     expect(find.text('Compte courant ••4567'), findsOneWidget);
     expect(find.text('BOURSORAMA BANQUE'), findsOneWidget);
 
-    // The proposal is editable: the user renames it and the typed value wins.
+    // The name is our own construction from the account block, not something
+    // the statement states — so the user renames it and the typed value wins.
     await tester.enterText(find.byKey(const Key('accountNameField')), 'Mon livret');
     await tester.enterText(find.byKey(const Key('accountOpeningBalanceField')), '0');
     await tester.tap(find.byKey(const Key('accountFormSubmitButton')));
@@ -132,7 +136,7 @@ void main() {
     );
   });
 
-  testWidgets('the balance a statement declares is filled in, formatted for the locale', (
+  testWidgets('the balance a statement declares is stated, not asked for', (
     tester,
   ) async {
     final controller = FakeAccountsController();
@@ -152,18 +156,75 @@ void main() {
     // written the way a French user reads it (grouping and decimal comma —
     // spelled with the separators intl itself uses, not with ASCII ones).
     expect(find.text(NumberFormat.decimalPattern('fr').format(1234.56)), findsOneWidget);
+    expect(find.text('Repris du solde déclaré par votre relevé.'), findsOneWidget);
+
+    // Read from the file, so there is nothing to type into: a read-only plate,
+    // not an input holding the same value.
     expect(
-      find.text('Repris du solde déclaré par votre relevé. Modifiable si besoin.'),
-      findsOneWidget,
+      find.descendant(
+        of: find.byKey(const Key('accountOpeningBalanceField')),
+        matching: find.byType(EditableText),
+      ),
+      findsNothing,
     );
 
-    await tester.enterText(find.byKey(const Key('accountInstitutionField')), 'Boursorama');
     await tester.tap(find.byKey(const Key('accountFormSubmitButton')));
     await tester.pumpAndSettle();
 
-    // Submitted as read: the round-trip through the locale format must not
-    // shift the figure the statement declared.
+    // Submitted exactly as the statement declared it.
     expect(controller.createCalls.single.openingBalanceMinor, 123456);
+  });
+
+  testWidgets('the institution a statement names is stated, not asked for', (
+    tester,
+  ) async {
+    final controller = FakeAccountsController();
+    await tester.pumpWidget(
+      _wrap(
+        controller: controller,
+        prefill: const AccountPrefill(
+          name: 'Courant ••4567',
+          institution: 'Boursorama',
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(
+      find.descendant(
+        of: find.byKey(const Key('accountInstitutionField')),
+        matching: find.byType(EditableText),
+      ),
+      findsNothing,
+    );
+    expect(find.text("Repris de l'établissement déclaré par votre relevé."), findsOneWidget);
+
+    await tester.enterText(find.byKey(const Key('accountOpeningBalanceField')), '0');
+    await tester.tap(find.byKey(const Key('accountFormSubmitButton')));
+    await tester.pumpAndSettle();
+
+    // Still submitted, even though the user never touched the field.
+    expect(controller.createCalls.single.institution, 'Boursorama');
+  });
+
+  testWidgets('a statement that names no bank leaves the institution to be typed', (
+    tester,
+  ) async {
+    final controller = FakeAccountsController();
+    await tester.pumpWidget(
+      _wrap(
+        controller: controller,
+        prefill: const AccountPrefill(name: 'Courant ••4567'),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.enterText(find.byKey(const Key('accountInstitutionField')), 'Ma banque');
+    await tester.enterText(find.byKey(const Key('accountOpeningBalanceField')), '0');
+    await tester.tap(find.byKey(const Key('accountFormSubmitButton')));
+    await tester.pumpAndSettle();
+
+    expect(controller.createCalls.single.institution, 'Ma banque');
   });
 
   testWidgets('a deferred-debit card is offered as its own account type', (tester) async {
@@ -253,26 +314,42 @@ void main() {
     );
   });
 
-  testWidgets('the institution preview confirms a recognized name as it is typed', (
+  testWidgets('the institution preview follows the typed name without claiming a match', (
     tester,
   ) async {
     await tester.pumpWidget(_wrap(controller: FakeAccountsController()));
     await tester.pumpAndSettle();
 
-    expect(find.byKey(const Key('accountLogoRecognized')), findsNothing);
-
     await tester.enterText(find.byKey(const Key('accountInstitutionField')), 'Revolut');
     await tester.pumpAndSettle();
 
-    expect(find.byKey(const Key('accountLogoRecognized')), findsOneWidget);
-
-    // An unknown institution is not an error — it just doesn't claim a match.
-    await tester.enterText(
-      find.byKey(const Key('accountInstitutionField')),
-      'Banque de Quelque Part',
+    // The chip the account will carry, shown live. A pinned brand hue is not
+    // announced: the preview itself is the confirmation, and a name with no
+    // pinned hue is not a failure to report.
+    expect(
+      tester.widget<InstitutionAvatar>(find.byType(InstitutionAvatar)).name,
+      'Revolut',
     );
+    expect(find.text('Logo reconnu'), findsNothing);
+  });
+
+  testWidgets('the type select keeps the field visible and drops its options below', (
+    tester,
+  ) async {
+    await tester.pumpWidget(_wrap(controller: FakeAccountsController()));
     await tester.pumpAndSettle();
 
-    expect(find.byKey(const Key('accountLogoRecognized')), findsNothing);
+    final anchor = tester.getRect(find.byKey(const Key('accountTypeField')));
+
+    await tester.tap(find.byKey(const Key('accountTypeField')));
+    await tester.pumpAndSettle();
+
+    // The current choice is still on screen — the menu didn't land on top of
+    // the field the user is changing.
+    expect(find.text('Courant'), findsNWidgets(2));
+    expect(
+      tester.getRect(find.text('Épargne').last).top,
+      greaterThanOrEqualTo(anchor.bottom),
+    );
   });
 }

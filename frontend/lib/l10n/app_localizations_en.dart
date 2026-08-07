@@ -326,9 +326,6 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get accountLogoRecognized => 'Logo recognized';
-
-  @override
   String get accountCurrencyNote =>
       'The currency comes from your profile and applies to all your accounts.';
 
@@ -377,8 +374,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get accountFormCreateTitle => 'New account';
 
   @override
-  String get accountFormPrefilledNote =>
-      'Pre-filled from your statement — adjust anything that looks off.';
+  String get accountFormPrefilledNote => 'Pre-filled from your statement.';
 
   @override
   String get accountFormEditTitle => 'Edit account';
@@ -417,6 +413,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get accountInstitutionRequired => 'Institution is required.';
 
   @override
+  String get accountInstitutionFromStatementNote =>
+      'Taken from the institution your statement declares.';
+
+  @override
   String get accountOpeningBalanceLabel => 'Opening balance';
 
   @override
@@ -428,7 +428,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get accountBalanceFromStatementNote =>
-      'Taken from the balance your statement declares. Change it if you need to.';
+      'Taken from the balance your statement declares.';
 
   @override
   String get accountOpeningBalanceEditNote =>

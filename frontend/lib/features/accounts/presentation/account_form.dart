@@ -6,10 +6,10 @@ import '../../../core/session/current_user_provider.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/tokens.dart';
 import '../../../core/widgets/app_modal.dart';
+import '../../../core/widgets/app_select.dart';
 import '../../../core/widgets/inline_banner.dart';
 import '../../../core/widgets/institution_avatar.dart';
 import '../../../core/widgets/labeled_field.dart';
-import '../../../core/widgets/monogram_avatar.dart';
 import '../../../core/widgets/primary_button.dart';
 import '../../../l10n/app_localizations.dart';
 import '../application/accounts_controller.dart';
@@ -41,8 +41,10 @@ Future<Account?> showAccountForm(
 /// Phase 1 — one currency per user, see the multi-currency skill.
 ///
 /// [prefill] seeds the create form from something the user didn't type — today,
-/// the account block of an OFX statement. The fields stay editable: a prefill
-/// is a proposal, not a fact.
+/// the account block of an OFX statement. Fields the statement *proposes* stay
+/// editable (the name it suggests is our own construction); fields it *declares*
+/// — its closing balance, the bank it names — are shown read-only, because they
+/// are the file's answer and retyping them can only introduce a discrepancy.
 class AccountForm extends ConsumerStatefulWidget {
   const AccountForm({super.key, this.initial, this.prefill});
 
@@ -83,6 +85,15 @@ class _AccountFormState extends ConsumerState<AccountForm> {
 
   bool get _isEditing => widget.initial != null;
 
+  /// The statement declared a closing balance, so the balance field states it
+  /// rather than asking for it.
+  bool get _balanceFromStatement =>
+      !_isEditing && widget.prefill?.balanceMinor != null;
+
+  /// The statement named its bank, so the institution field states it too.
+  bool get _institutionFromStatement =>
+      !_isEditing && (widget.prefill?.institution?.trim().isNotEmpty ?? false);
+
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
@@ -115,7 +126,11 @@ class _AccountFormState extends ConsumerState<AccountForm> {
 
     try {
       final locale = Localizations.localeOf(context).toString();
-      final openingBalanceMinor = _parseMinorUnits(_openingBalanceController.text, locale);
+      // A statement-declared balance goes back out exactly as it came in: it was
+      // never typed, so there is nothing to re-parse and no rounding to risk.
+      final openingBalanceMinor = _balanceFromStatement
+          ? widget.prefill!.balanceMinor!
+          : _parseMinorUnits(_openingBalanceController.text, locale);
 
       Account? created;
       if (_isEditing) {
@@ -217,21 +232,14 @@ class _AccountFormState extends ConsumerState<AccountForm> {
             const SizedBox(height: AppSpacing.md),
             LabeledField(
               label: l10n.accountTypeLabel,
-              child: DropdownButtonFormField<AccountType>(
+              child: AppSelect<AccountType>(
                 key: const Key('accountTypeField'),
-                initialValue: _type,
-                borderRadius: BorderRadius.circular(AppRadii.md),
-                icon: const Icon(Icons.expand_more_rounded, size: 18),
+                value: _type,
                 items: [
                   for (final type in AccountType.values)
-                    DropdownMenuItem(
-                      value: type,
-                      child: Text(accountTypeLabel(l10n, type)),
-                    ),
+                    AppSelectItem(value: type, label: accountTypeLabel(l10n, type)),
                 ],
-                onChanged: (value) {
-                  if (value != null) setState(() => _type = value);
-                },
+                onChanged: (value) => setState(() => _type = value),
               ),
             ),
             const SizedBox(height: AppSpacing.md),
@@ -244,51 +252,66 @@ class _AccountFormState extends ConsumerState<AccountForm> {
               label: _isEditing
                   ? l10n.accountOpeningBalanceLabel
                   : l10n.accountCurrentBalanceLabel,
-              // On create from a statement that declares its balance, the field
-              // is already filled from it and the note says where the figure
-              // came from. A statement without one leaves the field empty, so
-              // the note reassures instead: a rough entry costs nothing, since
-              // the first import derives the real figure anyway. On edit,
-              // changing it is itself the correction, so the note explains its
-              // blast radius: cache and snapshots move with it, but no
-              // transaction is touched.
+              // On create from a statement that declares its balance, the figure
+              // is the statement's and is shown as settled — the note says where
+              // it came from. A statement without one leaves the field empty and
+              // editable, so the note reassures instead: a rough entry costs
+              // nothing, since the first import derives the real figure anyway.
+              // On edit, changing it is itself the correction, so the note
+              // explains its blast radius: cache and snapshots move with it, but
+              // no transaction is touched.
               helper: _isEditing
                   ? l10n.accountOpeningBalanceEditNote
-                  : widget.prefill?.balanceMinor != null
+                  : _balanceFromStatement
                   ? l10n.accountBalanceFromStatementNote
                   : widget.prefill != null
                   ? l10n.accountBalanceStatementNote
                   : null,
-              child: TextFormField(
-                key: const Key('accountOpeningBalanceField'),
-                controller: _openingBalanceController,
-                keyboardType: const TextInputType.numberWithOptions(
-                  decimal: true,
-                  signed: true,
-                ),
-                // A form value is a neutral figure, not a movement, so it keeps
-                // the primary text color rather than taking a sign color.
-                style: tabularNumberStyle(Theme.of(context).textTheme.bodyLarge!),
-                validator: (value) => _validateOpeningBalance(value, l10n),
-              ),
+              child: _balanceFromStatement
+                  ? ReadOnlyField(
+                      key: const Key('accountOpeningBalanceField'),
+                      value: _openingBalanceController.text,
+                    )
+                  : TextFormField(
+                      key: const Key('accountOpeningBalanceField'),
+                      controller: _openingBalanceController,
+                      keyboardType: const TextInputType.numberWithOptions(
+                        decimal: true,
+                        signed: true,
+                      ),
+                      // A form value is a neutral figure, not a movement, so it
+                      // keeps the primary text color rather than a sign color.
+                      style: tabularNumberStyle(Theme.of(context).textTheme.bodyLarge!),
+                      validator: (value) => _validateOpeningBalance(value, l10n),
+                    ),
             ),
             const SizedBox(height: AppSpacing.md),
             LabeledField(
               label: l10n.accountInstitutionLabel,
+              helper: _institutionFromStatement
+                  ? l10n.accountInstitutionFromStatementNote
+                  : null,
               child: Row(
                 children: [
                   Expanded(
-                    child: TextFormField(
-                      key: const Key('accountInstitutionField'),
-                      controller: _institutionController,
-                      onChanged: (value) => setState(() => _institution = value),
-                      validator: (value) => (value == null || value.trim().isEmpty)
-                          ? l10n.accountInstitutionRequired
-                          : null,
-                    ),
+                    child: _institutionFromStatement
+                        ? ReadOnlyField(
+                            key: const Key('accountInstitutionField'),
+                            value: _institution,
+                          )
+                        : TextFormField(
+                            key: const Key('accountInstitutionField'),
+                            controller: _institutionController,
+                            onChanged: (value) => setState(() => _institution = value),
+                            validator: (value) => (value == null || value.trim().isEmpty)
+                                ? l10n.accountInstitutionRequired
+                                : null,
+                          ),
                   ),
                   const SizedBox(width: AppSpacing.sm + AppSpacing.xs),
-                  _LogoPreview(institution: _institution),
+                  // Live for a typed name, confirmation for a declared one:
+                  // either way the user sees the chip the account will carry.
+                  InstitutionAvatar(name: _institution, size: 40),
                 ],
               ),
             ),
@@ -311,41 +334,6 @@ class _AccountFormState extends ConsumerState<AccountForm> {
           ],
         ),
       ),
-    );
-  }
-}
-
-/// Live monogram for whatever institution name is typed, plus a confirmation
-/// once the name is one we have a pinned color for.
-///
-/// The preview is what makes the monogram read as deliberate rather than as a
-/// missing logo: the user sees the chip they will get before saving.
-class _LogoPreview extends StatelessWidget {
-  const _LogoPreview({required this.institution});
-
-  final String institution;
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
-    final recognized =
-        institution.trim().isNotEmpty && MonogramAvatar.hueFor(institution) != null;
-
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        InstitutionAvatar(name: institution, size: 40),
-        if (recognized) ...[
-          const SizedBox(width: AppSpacing.sm - 2),
-          const Icon(Icons.check_rounded, size: 13, color: AppColors.positive),
-          const SizedBox(width: 2),
-          Text(
-            l10n.accountLogoRecognized,
-            key: const Key('accountLogoRecognized'),
-            style: AppTextStyles.helper.copyWith(color: AppColors.positive),
-          ),
-        ],
-      ],
     );
   }
 }

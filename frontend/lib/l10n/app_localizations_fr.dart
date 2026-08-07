@@ -327,9 +327,6 @@ class AppLocalizationsFr extends AppLocalizations {
   }
 
   @override
-  String get accountLogoRecognized => 'Logo reconnu';
-
-  @override
   String get accountCurrencyNote =>
       'La devise est celle de votre profil et s\'applique à tous les comptes.';
 
@@ -379,7 +376,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get accountFormPrefilledNote =>
-      'Champs pré-remplis depuis votre relevé — modifiez-les si besoin.';
+      'Champs pré-remplis depuis votre relevé.';
 
   @override
   String get accountFormEditTitle => 'Modifier le compte';
@@ -418,6 +415,10 @@ class AppLocalizationsFr extends AppLocalizations {
   String get accountInstitutionRequired => 'L\'établissement est requis.';
 
   @override
+  String get accountInstitutionFromStatementNote =>
+      'Repris de l\'établissement déclaré par votre relevé.';
+
+  @override
   String get accountOpeningBalanceLabel => 'Solde initial';
 
   @override
@@ -429,7 +430,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get accountBalanceFromStatementNote =>
-      'Repris du solde déclaré par votre relevé. Modifiable si besoin.';
+      'Repris du solde déclaré par votre relevé.';
 
   @override
   String get accountOpeningBalanceEditNote =>
