@@ -22,6 +22,13 @@ abstract final class AppColors {
   /// Pointer-hover wash; also inset plates and toggle tracks.
   static const surfaceHover = Color(0xFF1E2634);
 
+  /// Menu/select popovers. One step above [surfaceOverlay] rather than equal to
+  /// it, because a popover routinely opens *on top of* an overlay-surface modal:
+  /// at the same fill the menu and the dialog behind it read as one plane, and
+  /// only the hairline separates them. No new hex — this is [surfaceHover],
+  /// named for the role so the intent survives the next edit.
+  static const surfacePopover = surfaceHover;
+
   /// Row hover *inside* a raised card — sits between raised and hover, so a
   /// hovered row lifts without jumping to the full overlay tone.
   static const surfaceRowHover = Color(0xFF151B26);
@@ -225,6 +232,14 @@ abstract final class AppShadows {
   static const modal = [
     BoxShadow(color: Color(0x66000000), blurRadius: 60, offset: Offset(0, 24)),
   ];
+
+  /// The popover shadow, expressed as an elevation rather than a [BoxShadow]
+  /// because [MenuStyle] accepts only that. It costs nothing to speak of:
+  /// Material renders it through `Canvas.drawShadow`, a single draw op on the
+  /// menu's own layer, with no offscreen buffer and no blur pass of our own —
+  /// and only while a menu is open.
+  static const popoverElevation = 12.0;
+  static const popoverShadow = Color(0x8C000000);
 }
 
 /// The spec allows exactly two keyframes — a button spinner and a skeleton

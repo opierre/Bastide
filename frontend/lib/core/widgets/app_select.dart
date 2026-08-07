@@ -75,10 +75,13 @@ class _AppSelectState<T> extends State<AppSelect<T>> {
       onClose: () => setState(() => _isOpen = false),
       alignmentOffset: const Offset(0, AppSpacing.xs),
       style: MenuStyle(
-        backgroundColor: const WidgetStatePropertyAll(AppColors.surfaceOverlay),
+        // Lifted off the overlay surface and given a shadow, so the menu reads
+        // as floating *above* the dialog it opened from rather than as a panel
+        // spliced into it — see [AppColors.surfacePopover].
+        backgroundColor: const WidgetStatePropertyAll(AppColors.surfacePopover),
         surfaceTintColor: const WidgetStatePropertyAll(Colors.transparent),
-        shadowColor: const WidgetStatePropertyAll(Color(0x66000000)),
-        elevation: const WidgetStatePropertyAll(8),
+        shadowColor: const WidgetStatePropertyAll(AppShadows.popoverShadow),
+        elevation: const WidgetStatePropertyAll(AppShadows.popoverElevation),
         padding: const WidgetStatePropertyAll(
           EdgeInsets.symmetric(vertical: AppSpacing.xs + 2),
         ),
@@ -208,7 +211,9 @@ class _Option<T> extends StatelessWidget {
         padding: const WidgetStatePropertyAll(
           EdgeInsets.symmetric(horizontal: AppSpacing.sm + AppSpacing.xs),
         ),
-        overlayColor: const WidgetStatePropertyAll(AppColors.surfaceHover),
+        // A neutral wash rather than a fixed fill: the popover now sits *on*
+        // #1E2634, so hovering to that same color would highlight nothing.
+        overlayColor: const WidgetStatePropertyAll(AppColors.overlayWash),
         foregroundColor: const WidgetStatePropertyAll(AppColors.textPrimary),
       ),
       child: Row(
