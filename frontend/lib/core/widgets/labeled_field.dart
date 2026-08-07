@@ -137,7 +137,7 @@ class ReadOnlyField extends StatelessWidget {
         height: height,
         padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm + AppSpacing.xs),
         decoration: BoxDecoration(
-          color: const Color(0xFF0A0F15),
+          color: AppColors.surfaceField,
           borderRadius: BorderRadius.circular(AppRadii.md),
         ),
         child: Row(

@@ -28,8 +28,9 @@ hardcode hex in widgets. The dark palette (AA-verified against its intended surf
 
 - **Surfaces**, deepest to highest: sunken `#070910` (sidebar, auth page), base `#0A0D12` (content
   region), raised `#111620` (cards, panels), overlay `#19202B` (modals, popovers, toasts), hover
-  `#1E2634` (pointer wash, inset plates, toggle tracks), field `#0D1219` (inset wells: inputs,
-  read-only slots). Row hover *inside* a raised card is `#151B26`; sidebar nav hover is `#12161F`.
+  `#1E2634` (pointer wash, inset plates, toggle tracks), field `#0A0F15` (every inset well — inputs,
+  selects, read-only plates — and select popovers; one tone, since two near-identical darks in
+  a form read as a rendering error rather than a distinction). Row hover *inside* a raised card is `#151B26`; sidebar nav hover is `#12161F`.
 - **Text**: primary `#EDF1F7`, secondary `#97A3B6`, disabled/placeholder `#5A6579`.
 - **Brand/primary accent**: iris violet `#8B8CF9`, deep end `#6C6AF0`. Primary buttons and the
   logomark use `linear-gradient(135deg, #8B8CF9, #6C6AF0)` with ink `#0E1030` and a glow

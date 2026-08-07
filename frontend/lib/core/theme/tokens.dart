@@ -22,19 +22,27 @@ abstract final class AppColors {
   /// Pointer-hover wash; also inset plates and toggle tracks.
   static const surfaceHover = Color(0xFF1E2634);
 
-  /// Menu/select popovers. One step above [surfaceOverlay] rather than equal to
-  /// it, because a popover routinely opens *on top of* an overlay-surface modal:
-  /// at the same fill the menu and the dialog behind it read as one plane, and
-  /// only the hairline separates them. No new hex — this is [surfaceHover],
-  /// named for the role so the intent survives the next edit.
-  static const surfacePopover = surfaceHover;
+  /// Menu/select popovers. The *same* fill as [surfaceField], because a select
+  /// is a field the user opened: a popover in a lighter tone than the anchor it
+  /// dropped from reads as a second material spliced into the form, where one
+  /// tone reads as the field having grown. Separation from the modal behind it
+  /// is carried by the hairline and the near-black [AppShadows.popoverShadow],
+  /// not by the fill — a well sunk *below* the dialog surface is as legible a
+  /// plane as one raised above it.
+  static const surfacePopover = surfaceField;
 
   /// Row hover *inside* a raised card — sits between raised and hover, so a
   /// hovered row lifts without jumping to the full overlay tone.
   static const surfaceRowHover = Color(0xFF151B26);
 
-  /// Inset wells: text fields, search, read-only value slots.
-  static const surfaceField = Color(0xFF0D1219);
+  /// Inset wells: text fields, selects, search, read-only value slots.
+  ///
+  /// One tone for every well, editable or not (amended — the spec drew inputs
+  /// on `#0D1219` and read-only plates on `#0A0F15`). Two nearly-identical
+  /// darks side by side in the same form don't read as a distinction, they read
+  /// as a rendering error; what actually says "you cannot change this" is the
+  /// dashed border and the lock glyph, which no fill needed to reinforce.
+  static const surfaceField = Color(0xFF0A0F15);
 
   /// Sidebar nav hover — quieter than [surfaceHover] because the sidebar sits
   /// on the sunken surface, where a lighter wash would read as selection.
