@@ -37,8 +37,10 @@ Future<Account?> showAccountForm(
 /// of the account's life (see [_AccountFormState]) but is editable at both —
 /// on `PATCH` it is a manual correction, shifting the cached balance and every
 /// saved snapshot by the delta rather than being treated as a fresh figure
-/// (see the backend's `shift_opening_balance`). Currency is never editable in
-/// Phase 1 — one currency per user, see the multi-currency skill.
+/// (see the backend's `shift_opening_balance`). Currency is never editable and
+/// is not a field of its own — it rides as the balance's suffix, taken from the
+/// account, else from the statement's `CURDEF`, else from the profile (one
+/// currency per user in Phase 1 — see the multi-currency skill).
 ///
 /// [prefill] seeds the create form from something the user didn't type — today,
 /// the account block of an OFX statement. Fields the statement *proposes* stay
@@ -154,6 +156,10 @@ class _AccountFormState extends ConsumerState<AccountForm> {
               // Not a form field: it comes from the statement that proposed the
               // account, and binds it so later imports match exactly.
               ofxAccountId: widget.prefill?.ofxAccountId,
+              // Likewise the statement's `CURDEF`. Sent only when the file
+              // declares one — otherwise the backend keeps defaulting to the
+              // user's currency, which is what every hand-made account gets.
+              currency: widget.prefill?.currency,
             );
       }
       if (mounted) Navigator.of(context).pop(created);
@@ -185,8 +191,15 @@ class _AccountFormState extends ConsumerState<AccountForm> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    // The account's own currency when it has one, else the one its source
+    // declares (an OFX `CURDEF`), else the profile's. The statement outranks the
+    // profile because it is stating a fact about the account it describes, where
+    // the profile is only the default we fall back to when nothing declares one.
     final currency =
-        widget.initial?.currency ?? ref.watch(currentUserProvider)?.currency ?? '';
+        widget.initial?.currency ??
+        widget.prefill?.currency ??
+        ref.watch(currentUserProvider)?.currency ??
+        '';
     // Only meaningful for the figure the statement itself declares: a date
     // without a balance to date says nothing about what the user is typing.
     final balanceAsOf = _balanceFromStatement ? widget.prefill?.balanceAsOf : null;
@@ -278,10 +291,17 @@ class _AccountFormState extends ConsumerState<AccountForm> {
                   : widget.prefill != null
                   ? l10n.accountBalanceStatementNote
                   : null,
+              // The currency rides at the end of the amount rather than in a
+              // field of its own: it is a unit, not a value the form is asking
+              // for, and a whole labelled row — dashed plate, lock glyph and all
+              // — spent on three unchangeable letters read as a question the
+              // user had to answer. Here it simply says what the figure beside
+              // it is denominated in, which is the only thing it ever meant.
               child: _balanceFromStatement
                   ? ReadOnlyField(
                       key: const Key('accountOpeningBalanceField'),
                       value: _openingBalanceController.text,
+                      suffix: currency,
                     )
                   : TextFormField(
                       key: const Key('accountOpeningBalanceField'),
@@ -293,6 +313,10 @@ class _AccountFormState extends ConsumerState<AccountForm> {
                       // A form value is a neutral figure, not a movement, so it
                       // keeps the primary text color rather than a sign color.
                       style: tabularNumberStyle(Theme.of(context).textTheme.bodyLarge!),
+                      decoration: InputDecoration(
+                        suffixText: currency,
+                        suffixStyle: fieldSuffixStyle(context),
+                      ),
                       validator: (value) => _validateOpeningBalance(value, l10n),
                     ),
             ),
@@ -324,15 +348,6 @@ class _AccountFormState extends ConsumerState<AccountForm> {
                   // either way the user sees the chip the account will carry.
                   InstitutionAvatar(name: _institution, size: 40),
                 ],
-              ),
-            ),
-            const SizedBox(height: AppSpacing.md),
-            LabeledField(
-              label: l10n.accountCurrencyLabel,
-              helper: l10n.accountCurrencyNote,
-              child: ReadOnlyField(
-                key: const Key('accountCurrencyField'),
-                value: currency,
               ),
             ),
             if (_errorText != null) ...[

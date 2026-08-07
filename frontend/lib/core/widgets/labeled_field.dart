@@ -118,16 +118,36 @@ InputDecoration errorFieldDecoration() {
   return InputDecoration(enabledBorder: border, focusedBorder: border);
 }
 
-/// A value the user is shown but cannot change — the profile currency, chiefly.
+/// The tone a unit takes at the end of a field — a currency code beside an
+/// amount, chiefly. Secondary rather than primary so the figure keeps the
+/// weight: the code labels the number, it isn't part of it.
+///
+/// Shared by [ReadOnlyField.suffix] and the `suffixText` of an editable field,
+/// so an amount reads the same whether or not the user can change it.
+TextStyle fieldSuffixStyle(BuildContext context) =>
+    Theme.of(context).textTheme.bodyLarge!.copyWith(color: AppColors.textSecondary);
+
+/// A value the user is shown but cannot change.
 ///
 /// Rendered as a dashed plate with a lock glyph rather than a disabled input:
 /// a greyed-out field reads as "not available yet", whereas this reads as
 /// "settled, and deliberately so". The permanence itself is carried by the
 /// caller's [LabeledField.helper] copy.
 class ReadOnlyField extends StatelessWidget {
-  const ReadOnlyField({super.key, required this.value, this.height = 44});
+  const ReadOnlyField({
+    super.key,
+    required this.value,
+    this.suffix,
+    this.height = 44,
+  });
 
   final String value;
+
+  /// Unit the value is expressed in — a currency code, chiefly. Set in the
+  /// secondary tone at the field's end so it reads as a label on the figure
+  /// rather than as part of it.
+  final String? suffix;
+
   final double height;
 
   @override
@@ -149,6 +169,10 @@ class ReadOnlyField extends StatelessWidget {
                 style: Theme.of(context).textTheme.bodyLarge,
               ),
             ),
+            if (suffix != null) ...[
+              const SizedBox(width: AppSpacing.sm),
+              Text(suffix!, style: fieldSuffixStyle(context)),
+            ],
             const SizedBox(width: AppSpacing.sm),
             const Icon(
               Icons.lock_outline_rounded,

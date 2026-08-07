@@ -41,6 +41,38 @@ def test_create_account_defaults_currency_to_users_currency(client: TestClient) 
     assert body["archived"] is False
 
 
+def test_create_account_takes_a_declared_currency_over_the_users(client: TestClient) -> None:
+    """A statement's `CURDEF` describes the account; the profile is only the fallback.
+
+    Storing the profile currency for an account an OFX file declares in dollars would
+    relabel every figure the import goes on to write, not convert it.
+    """
+    headers = _register(client, "amelie@example.com", currency="eur")
+
+    response = client.post(
+        "/api/v1/accounts",
+        json={**ACCOUNT_PAYLOAD, "currency": "usd"},
+        headers=headers,
+    )
+
+    assert response.status_code == 201
+    assert response.json()["currency"] == "USD"
+
+
+def test_create_account_rejects_a_currency_that_is_not_a_three_letter_code(
+    client: TestClient,
+) -> None:
+    headers = _register(client, "amelie@example.com")
+
+    response = client.post(
+        "/api/v1/accounts",
+        json={**ACCOUNT_PAYLOAD, "currency": "€"},
+        headers=headers,
+    )
+
+    assert response.status_code == 422
+
+
 def test_list_accounts_returns_created_account(client: TestClient) -> None:
     headers = _register(client, "amelie@example.com")
     client.post("/api/v1/accounts", json=ACCOUNT_PAYLOAD, headers=headers)

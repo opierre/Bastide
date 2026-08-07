@@ -39,11 +39,19 @@ class AccountPrefill {
     this.ofxAccountId,
     this.balanceMinor,
     this.balanceAsOf,
+    this.currency,
   });
 
   final String? name;
   final String? institution;
   final AccountType? type;
+
+  /// The currency the source declares its figures are in — an OFX statement's
+  /// `CURDEF`. Preferred over the profile currency and sent on to the backend,
+  /// because the file is stating a fact about the account, where the profile is
+  /// only our default guess at it. `null` when the source declares none, and
+  /// the account takes the user's currency as every hand-made account does.
+  final String? currency;
 
   /// The balance the source declares the account holds — an OFX statement's
   /// `LEDGERBAL`. Fills the create form's balance field, which means exactly

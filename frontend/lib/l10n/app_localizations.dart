@@ -698,12 +698,6 @@ abstract class AppLocalizations {
   /// **'Soldes au {date}'**
   String accountsBalancesAsOf(DateTime date);
 
-  /// Note under the read-only currency field in the account form.
-  ///
-  /// In fr, this message translates to:
-  /// **'La devise est celle de votre profil et s\'applique à tous les comptes.'**
-  String get accountCurrencyNote;
-
   /// Label on the summary card above the accounts list, over the sum of all account balances.
   ///
   /// In fr, this message translates to:
@@ -901,12 +895,6 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Entrez un montant valide.'**
   String get accountOpeningBalanceInvalid;
-
-  /// Label for the read-only currency field on the account form.
-  ///
-  /// In fr, this message translates to:
-  /// **'Devise'**
-  String get accountCurrencyLabel;
 
   /// Submit button label on the account form when creating an account.
   ///

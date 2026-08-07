@@ -27,6 +27,7 @@ class AccountsController extends AsyncNotifier<List<Account>> {
     required String institution,
     required int openingBalanceMinor,
     String? ofxAccountId,
+    String? currency,
   }) async {
     final account = await ref
         .read(accountsRepositoryProvider)
@@ -36,6 +37,7 @@ class AccountsController extends AsyncNotifier<List<Account>> {
           institution: institution,
           openingBalanceMinor: openingBalanceMinor,
           ofxAccountId: ofxAccountId,
+          currency: currency,
         );
     state = AsyncValue.data([...?state.value, account]);
     return account;

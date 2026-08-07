@@ -249,6 +249,10 @@ AccountPrefill _prefillFrom(OfxAccountInfo info, AppLocalizations l10n) {
     // day it belongs to instead of implying it is today's.
     balanceMinor: info.ledgerBalanceMinor,
     balanceAsOf: info.ledgerBalanceAsOf,
+    // `CURDEF` — the currency the statement's own figures are in. Read from the
+    // file rather than inherited from the profile: the balance just above comes
+    // from this statement, and naming it in another currency would misstate it.
+    currency: info.currency,
   );
 }
 

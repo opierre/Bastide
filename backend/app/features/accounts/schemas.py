@@ -13,7 +13,7 @@ AccountType = Literal["checking", "savings", "credit", "deferred_card", "cash", 
 
 
 class AccountCreate(BaseModel):
-    """Payload to open a new account. Currency is not accepted here — it defaults to the user's."""
+    """Payload to open a new account."""
 
     name: str = Field(min_length=1, max_length=255)
     type: AccountType
@@ -23,6 +23,18 @@ class AccountCreate(BaseModel):
         default=None,
         max_length=255,
         description="The bank's own account id (OFX `ACCTID`). Optional, unique per user.",
+    )
+    currency: str | None = Field(
+        default=None,
+        min_length=3,
+        max_length=3,
+        pattern=r"^[A-Za-z]{3}$",
+        description=(
+            "ISO 4217 code the account is denominated in. Omit — the normal case — and it "
+            "defaults to the user's. Sent only when the source *declares* one, i.e. an OFX "
+            "statement's `CURDEF`: the file states which currency its figures are in, and "
+            "the account holding them has to agree or every balance it shows is mislabelled."
+        ),
     )
 
 

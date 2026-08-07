@@ -25,6 +25,7 @@ class AccountsRepository {
     required String institution,
     required int openingBalanceMinor,
     String? ofxAccountId,
+    String? currency,
   }) async {
     final json = await _apiClient.post(
       '/accounts',
@@ -36,6 +37,9 @@ class AccountsRepository {
         // Omitted rather than sent as null: the field is optional, and a blank
         // one would claim nothing anyway.
         'ofx_account_id': ?ofxAccountId,
+        // Likewise: sent only when a source declared it (an OFX `CURDEF`), so
+        // omitting it leaves the backend on its default — the user's currency.
+        'currency': ?currency,
       },
     );
     return _parse(json as Map<String, dynamic>);

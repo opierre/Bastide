@@ -67,7 +67,14 @@ class AccountService:
         return self._repository.get_by_ofx_account_id(normalized, user_id)
 
     def create(self, user: User, data: AccountCreate) -> Account:
-        """Create an account, currency defaulted to the user's and the cache seeded.
+        """Create an account with the cache seeded from its opening balance.
+
+        Currency falls back to the user's, which is the Phase 1 answer for every
+        account the user types by hand (one currency per user — see the
+        multi-currency skill). A declared one wins over it: an account proposed by
+        an OFX statement is denominated by that file's `CURDEF`, and storing the
+        profile currency instead would relabel — not convert — every figure the
+        import goes on to write.
 
         Raises:
             OfxAccountIdTakenError: another account of this user already carries
@@ -79,7 +86,7 @@ class AccountService:
             name=data.name,
             type=data.type,
             institution=data.institution,
-            currency=user.currency,
+            currency=(data.currency or user.currency).upper(),
             ofx_account_id=ofx_account_id,
             opening_balance_minor=data.opening_balance_minor,
             cached_balance_minor=data.opening_balance_minor,

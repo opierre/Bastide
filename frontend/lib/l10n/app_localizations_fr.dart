@@ -327,10 +327,6 @@ class AppLocalizationsFr extends AppLocalizations {
   }
 
   @override
-  String get accountCurrencyNote =>
-      'La devise est celle de votre profil et s\'applique à tous les comptes.';
-
-  @override
   String get accountsTotalBalanceLabel => 'Solde total';
 
   @override
@@ -449,9 +445,6 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get accountOpeningBalanceInvalid => 'Entrez un montant valide.';
-
-  @override
-  String get accountCurrencyLabel => 'Devise';
 
   @override
   String get accountFormSubmitCreate => 'Créer le compte';

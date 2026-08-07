@@ -65,7 +65,7 @@ async def create_account(
     service: Annotated[AccountService, Depends(_service)],
     user: Annotated[User, Depends(get_current_user)],
 ) -> AccountRead:
-    """Open a new account; currency defaults to the caller's."""
+    """Open a new account; currency defaults to the caller's unless the payload declares one."""
     return _to_read(service.create(user, payload))
 
 

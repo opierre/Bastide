@@ -326,10 +326,6 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get accountCurrencyNote =>
-      'The currency comes from your profile and applies to all your accounts.';
-
-  @override
   String get accountsTotalBalanceLabel => 'Total balance';
 
   @override
@@ -447,9 +443,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get accountOpeningBalanceInvalid => 'Enter a valid amount.';
-
-  @override
-  String get accountCurrencyLabel => 'Currency';
 
   @override
   String get accountFormSubmitCreate => 'Create account';

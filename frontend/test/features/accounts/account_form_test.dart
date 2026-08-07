@@ -324,27 +324,72 @@ void main() {
     expect(controller.updateCalls.single.openingBalanceMinor, 8000);
   });
 
-  testWidgets('the currency is shown as a settled value, not an editable field', (
+  testWidgets('the currency labels the balance rather than occupying a field', (
     tester,
   ) async {
     await tester.pumpWidget(_wrap(controller: FakeAccountsController()));
     await tester.pumpAndSettle();
 
-    // A read-only plate, not a disabled input: there is no text field to type
-    // into at all, and the note beneath carries why.
-    expect(find.byKey(const Key('accountCurrencyField')), findsOneWidget);
+    // It is a unit, not a value the form asks for: no field of its own, and
+    // nothing to type into — it sits at the end of the amount it denominates.
+    expect(find.byKey(const Key('accountCurrencyField')), findsNothing);
+    expect(find.text('Devise'), findsNothing);
     expect(
       find.descendant(
-        of: find.byKey(const Key('accountCurrencyField')),
-        matching: find.byType(EditableText),
+        of: find.byKey(const Key('accountOpeningBalanceField')),
+        matching: find.text('EUR'),
       ),
-      findsNothing,
-    );
-    expect(find.text('EUR'), findsOneWidget);
-    expect(
-      find.text("La devise est celle de votre profil et s'applique à tous les comptes."),
       findsOneWidget,
     );
+  });
+
+  testWidgets('a statement-declared currency outranks the profile, and is sent on', (
+    tester,
+  ) async {
+    // The file says its figures are in dollars; the profile still says EUR.
+    // The statement wins — it is describing this account, where the profile is
+    // only the default for an account nothing declares a currency for.
+    final controller = FakeAccountsController();
+    await tester.pumpWidget(
+      _wrap(
+        controller: controller,
+        prefill: const AccountPrefill(
+          name: 'Courant ••4567',
+          institution: 'Chase',
+          balanceMinor: 123456,
+          currency: 'USD',
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    // The balance is the statement's too, so it states rather than asks — the
+    // currency rides on the read-only plate the same way.
+    expect(find.text('USD'), findsOneWidget);
+    expect(find.text('EUR'), findsNothing);
+
+    await tester.tap(find.byKey(const Key('accountFormSubmitButton')));
+    await tester.pumpAndSettle();
+
+    expect(controller.createCalls.single.currency, 'USD');
+  });
+
+  testWidgets('an account created by hand declares no currency of its own', (
+    tester,
+  ) async {
+    final controller = FakeAccountsController();
+    await tester.pumpWidget(_wrap(controller: controller));
+    await tester.pumpAndSettle();
+
+    await tester.enterText(find.byKey(const Key('accountNameField')), 'Livret A');
+    await tester.enterText(find.byKey(const Key('accountInstitutionField')), 'BNP Paribas');
+    await tester.enterText(find.byKey(const Key('accountOpeningBalanceField')), '100');
+    await tester.tap(find.byKey(const Key('accountFormSubmitButton')));
+    await tester.pumpAndSettle();
+
+    // Omitted rather than echoed back from the profile: the backend's default
+    // is the user's currency, and claiming it here would fake a declaration.
+    expect(controller.createCalls.single.currency, isNull);
   });
 
   testWidgets('the institution preview follows the typed name without claiming a match', (

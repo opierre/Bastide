@@ -23,6 +23,7 @@ class FakeAccountsController extends AccountsController {
           String institution,
           int openingBalanceMinor,
           String? ofxAccountId,
+          String? currency,
         })
       >[];
   final updateCalls =
@@ -51,6 +52,7 @@ class FakeAccountsController extends AccountsController {
     required String institution,
     required int openingBalanceMinor,
     String? ofxAccountId,
+    String? currency,
   }) async {
     createCalls.add((
       name: name,
@@ -58,6 +60,7 @@ class FakeAccountsController extends AccountsController {
       institution: institution,
       openingBalanceMinor: openingBalanceMinor,
       ofxAccountId: ofxAccountId,
+      currency: currency,
     ));
     if (errorOnCreate != null) throw errorOnCreate!;
     final account =
@@ -67,7 +70,7 @@ class FakeAccountsController extends AccountsController {
           name: name,
           type: type,
           institution: institution,
-          currency: 'EUR',
+          currency: currency ?? 'EUR',
           ofxAccountId: ofxAccountId,
           openingBalanceMinor: openingBalanceMinor,
           balanceMinor: openingBalanceMinor,

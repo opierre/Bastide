@@ -406,10 +406,6 @@
       }
     }
   },
-  "accountCurrencyNote": "La devise est celle de votre profil et s'applique à tous les comptes.",
-  "@accountCurrencyNote": {
-    "description": "Note under the read-only currency field in the account form."
-  },
   "accountsTotalBalanceLabel": "Solde total",
   "@accountsTotalBalanceLabel": {
     "description": "Label on the summary card above the accounts list, over the sum of all account balances."
@@ -552,10 +548,6 @@
   "accountOpeningBalanceInvalid": "Entrez un montant valide.",
   "@accountOpeningBalanceInvalid": {
     "description": "Validation message when the opening balance can't be parsed as a number."
-  },
-  "accountCurrencyLabel": "Devise",
-  "@accountCurrencyLabel": {
-    "description": "Label for the read-only currency field on the account form."
   },
   "accountFormSubmitCreate": "Créer le compte",
   "@accountFormSubmitCreate": {
