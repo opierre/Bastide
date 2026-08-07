@@ -16,17 +16,16 @@ class DashboardState {
     required this.month,
     required this.summary,
     required this.trends,
+    required this.recent,
   });
 
   final DateTime month;
   final DashboardSummary summary;
   final DashboardTrends trends;
 
-  DashboardState copyWith({DateTime? month, DashboardSummary? summary}) => DashboardState(
-    month: month ?? this.month,
-    summary: summary ?? this.summary,
-    trends: trends,
-  );
+  /// The newest transactions, for « Activité récente ». Like [trends], not keyed to [month] —
+  /// "recent" means recent, not "recent within the month you happen to be looking at".
+  final List<RecentTransaction> recent;
 }
 
 /// Loads the dashboard summary for a selected month, defaulting to the latest month with data.
@@ -39,8 +38,12 @@ class DashboardController extends AsyncNotifier<DashboardState> {
     final repository = ref.read(dashboardRepositoryProvider);
     final month = await repository.latestMonthWithData() ?? _currentMonth();
     // Independent of each other, so they go out together rather than in series.
-    final (summary, trends) = await (repository.summary(month), repository.trends()).wait;
-    return DashboardState(month: month, summary: summary, trends: trends);
+    final (summary, trends, recent) = await (
+      repository.summary(month),
+      repository.trends(),
+      repository.recentTransactions(),
+    ).wait;
+    return DashboardState(month: month, summary: summary, trends: trends, recent: recent);
   }
 
   Future<void> changeMonth(DateTime month) => _load(month);
@@ -50,19 +53,33 @@ class DashboardController extends AsyncNotifier<DashboardState> {
     return _load(current?.month ?? _currentMonth(), reloadTrends: true);
   }
 
-  /// Reloads the summary for [month]. The trends are re-fetched only on an explicit refresh:
-  /// they don't depend on the month, so paging the picker would otherwise re-request a series
-  /// that cannot have changed.
+  /// Reloads the summary for [month]. The trends and the activity list are re-fetched only on
+  /// an explicit refresh: neither depends on the month, so paging the picker would otherwise
+  /// re-request data that cannot have changed.
   Future<void> _load(DateTime month, {bool reloadTrends = false}) async {
     final previous = state.value;
     state = const AsyncValue.loading();
     state = await AsyncValue.guard(() async {
       final repository = ref.read(dashboardRepositoryProvider);
       final summary = await repository.summary(month);
-      final trends = reloadTrends || previous == null
-          ? await repository.trends()
-          : previous.trends;
-      return DashboardState(month: month, summary: summary, trends: trends);
+      if (reloadTrends || previous == null) {
+        final (trends, recent) = await (
+          repository.trends(),
+          repository.recentTransactions(),
+        ).wait;
+        return DashboardState(
+          month: month,
+          summary: summary,
+          trends: trends,
+          recent: recent,
+        );
+      }
+      return DashboardState(
+        month: month,
+        summary: summary,
+        trends: previous.trends,
+        recent: previous.recent,
+      );
     });
   }
 }

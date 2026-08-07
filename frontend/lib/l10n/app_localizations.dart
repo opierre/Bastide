@@ -1694,6 +1694,48 @@ abstract class AppLocalizations {
   /// **'{amount} en {month}'**
   String dashboardSavingsTrendDelta(String amount, String month);
 
+  /// Title of the stacked income-vs-expense bar chart.
+  ///
+  /// In fr, this message translates to:
+  /// **'Revenus vs dépenses'**
+  String get dashboardIncomeVsExpenseTitle;
+
+  /// Subtitle of the income-vs-expense chart, naming the window it covers.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count} derniers mois'**
+  String dashboardIncomeVsExpenseSubtitle(int count);
+
+  /// Green dot legend in the income-vs-expense chart header.
+  ///
+  /// In fr, this message translates to:
+  /// **'Revenus'**
+  String get dashboardLegendIncome;
+
+  /// Red dot legend in the income-vs-expense chart header.
+  ///
+  /// In fr, this message translates to:
+  /// **'Dépenses'**
+  String get dashboardLegendExpense;
+
+  /// Title of the recent-transactions card.
+  ///
+  /// In fr, this message translates to:
+  /// **'Activité récente'**
+  String get dashboardRecentActivityTitle;
+
+  /// Iris link under the recent-activity list, navigating to the transactions panel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Voir toutes les transactions'**
+  String get dashboardViewAllTransactions;
+
+  /// Shown in the recent-activity card when the user has no transactions yet.
+  ///
+  /// In fr, this message translates to:
+  /// **'Vos transactions apparaîtront ici.'**
+  String get dashboardRecentActivityEmpty;
+
   /// Encouraging heading shown when the user has no transactions yet for any month.
   ///
   /// In fr, this message translates to:

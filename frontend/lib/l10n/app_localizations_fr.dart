@@ -953,6 +953,30 @@ class AppLocalizationsFr extends AppLocalizations {
   }
 
   @override
+  String get dashboardIncomeVsExpenseTitle => 'Revenus vs dépenses';
+
+  @override
+  String dashboardIncomeVsExpenseSubtitle(int count) {
+    return '$count derniers mois';
+  }
+
+  @override
+  String get dashboardLegendIncome => 'Revenus';
+
+  @override
+  String get dashboardLegendExpense => 'Dépenses';
+
+  @override
+  String get dashboardRecentActivityTitle => 'Activité récente';
+
+  @override
+  String get dashboardViewAllTransactions => 'Voir toutes les transactions';
+
+  @override
+  String get dashboardRecentActivityEmpty =>
+      'Vos transactions apparaîtront ici.';
+
+  @override
   String get dashboardEmptyTitle =>
       'Importez un relevé pour donner vie à votre argent';
 

@@ -945,6 +945,30 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get dashboardIncomeVsExpenseTitle => 'Income vs expenses';
+
+  @override
+  String dashboardIncomeVsExpenseSubtitle(int count) {
+    return 'Last $count months';
+  }
+
+  @override
+  String get dashboardLegendIncome => 'Income';
+
+  @override
+  String get dashboardLegendExpense => 'Expenses';
+
+  @override
+  String get dashboardRecentActivityTitle => 'Recent activity';
+
+  @override
+  String get dashboardViewAllTransactions => 'View all transactions';
+
+  @override
+  String get dashboardRecentActivityEmpty =>
+      'Your transactions will show up here.';
+
+  @override
   String get dashboardEmptyTitle =>
       'Import a statement to see your money come to life';
 

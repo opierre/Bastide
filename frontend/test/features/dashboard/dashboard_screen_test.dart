@@ -2,10 +2,13 @@ import 'package:finstride/core/theme/app_theme.dart';
 import 'package:finstride/core/theme/tokens.dart';
 import 'package:finstride/core/widgets/amount_text.dart';
 import 'package:finstride/core/widgets/area_line.dart';
+import 'package:finstride/core/widgets/category_chip.dart';
 import 'package:finstride/features/dashboard/application/dashboard_controller.dart';
 import 'package:finstride/features/dashboard/domain/dashboard_summary.dart';
 import 'package:finstride/features/dashboard/presentation/category_breakdown.dart';
 import 'package:finstride/features/dashboard/presentation/dashboard_screen.dart';
+import 'package:finstride/features/dashboard/presentation/income_vs_expense.dart';
+import 'package:finstride/features/dashboard/presentation/recent_activity.dart';
 import 'package:finstride/features/dashboard/presentation/savings_trend.dart';
 import 'package:finstride/features/dashboard/presentation/stat_card.dart';
 import 'package:finstride/l10n/app_localizations.dart';
@@ -20,6 +23,7 @@ DashboardState _state({DashboardSummary? summary}) => DashboardState(
   month: DateTime(2026, 5),
   summary: summary ?? specSummary(),
   trends: specTrends(),
+  recent: specRecent(),
 );
 
 Widget _wrap({required DashboardState state, Locale locale = const Locale('fr')}) {
@@ -57,12 +61,15 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(
-      find.text(
-        formatAmount(
-          amountMinor: 285000,
-          currency: 'EUR',
-          locale: 'fr',
-          showPositiveSign: true,
+      find.descendant(
+        of: find.byType(StatCard),
+        matching: find.text(
+          formatAmount(
+            amountMinor: 285000,
+            currency: 'EUR',
+            locale: 'fr',
+            showPositiveSign: true,
+          ),
         ),
       ),
       findsOneWidget,
@@ -86,8 +93,12 @@ void main() {
       locale: 'fr',
       showPositiveSign: true,
     );
-    expect(find.text(netText), findsOneWidget);
-    expect(tester.widget<Text>(find.text(netText)).style?.color, AppColors.textPrimary);
+    final netInCard = find.descendant(
+      of: find.byType(StatCard),
+      matching: find.text(netText),
+    );
+    expect(netInCard, findsOneWidget);
+    expect(tester.widget<Text>(netInCard).style?.color, AppColors.textPrimary);
 
     // Income up is good, expense up is bad, net down is bad.
     expect(find.text(formatDeltaPct(2.1, 'fr')), findsOneWidget);
@@ -140,12 +151,15 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(
-      find.text(
-        formatAmount(
-          amountMinor: 285000,
-          currency: 'EUR',
-          locale: 'en',
-          showPositiveSign: true,
+      find.descendant(
+        of: find.byType(StatCard),
+        matching: find.text(
+          formatAmount(
+            amountMinor: 285000,
+            currency: 'EUR',
+            locale: 'en',
+            showPositiveSign: true,
+          ),
         ),
       ),
       findsOneWidget,
@@ -260,6 +274,147 @@ void main() {
     expect(donutCard.width / savingsCard.width, closeTo(1.35, 0.01));
   });
 
+  // --- row 3: bars + recent activity -----------------------------------------------------
+
+  testWidgets('the bars carry the spec\'s four months with nets colored by sign', (
+    tester,
+  ) async {
+    _useDesktopSurface(tester);
+    await tester.pumpWidget(_wrap(state: _state()));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Revenus vs dépenses'), findsOneWidget);
+    expect(find.text('4 derniers mois'), findsOneWidget);
+
+    // One 44px column per month, in order. Scoped to the chart: the savings line's axis
+    // beside it labels the same months.
+    final bars = find.byType(IncomeVsExpenseChart);
+    expect(bars, findsOneWidget);
+    for (final month in ['Févr.', 'Mars', 'Avr.', 'Mai']) {
+      expect(
+        find.descendant(of: bars, matching: find.text(month)),
+        findsOneWidget,
+        reason: '$month missing from the bars',
+      );
+    }
+    expect(tester.getSize(find.byType(MonthBar).first).width, 44);
+
+    // Février's net is negative and red; the other three are positive and green.
+    Finder net(int minor) => find.descendant(
+      of: bars,
+      matching: find.text(
+        formatAmount(
+          amountMinor: minor,
+          currency: 'EUR',
+          locale: 'fr',
+          showPositiveSign: true,
+        ),
+      ),
+    );
+    expect(tester.widget<Text>(net(-11840)).style?.color, AppColors.negative);
+    for (final minor in [54020, 73710, 63565]) {
+      expect(tester.widget<Text>(net(minor)).style?.color, AppColors.positive);
+    }
+  });
+
+  testWidgets('the current month\'s bar label is primary, earlier months recede', (
+    tester,
+  ) async {
+    _useDesktopSurface(tester);
+    await tester.pumpWidget(_wrap(state: _state()));
+    await tester.pumpAndSettle();
+
+    final bars = find.byType(IncomeVsExpenseChart);
+    Text label(String month) =>
+        tester.widget<Text>(find.descendant(of: bars, matching: find.text(month)));
+
+    expect(label('Mai').style?.color, AppColors.textPrimary);
+    for (final month in ['Févr.', 'Mars', 'Avr.']) {
+      expect(label(month).style?.color, AppColors.textSecondary);
+    }
+  });
+
+  testWidgets('hovering a bar names that month\'s income and expense', (tester) async {
+    _useDesktopSurface(tester);
+    await tester.pumpWidget(_wrap(state: _state()));
+    await tester.pumpAndSettle();
+
+    final tooltip = tester.widget<Tooltip>(
+      find.byKey(const Key('dashboardBarTooltip-2026-5')),
+    );
+    final spans = (tooltip.richMessage! as TextSpan).children!.cast<TextSpan>();
+    final text = spans.map((span) => span.text).join();
+
+    expect(text, contains('Revenus'));
+    expect(text, contains('Dépenses'));
+    expect(
+      text,
+      contains(
+        formatAmount(
+          amountMinor: 285000,
+          currency: 'EUR',
+          locale: 'fr',
+          showPositiveSign: true,
+        ),
+      ),
+    );
+    expect(
+      text,
+      contains(formatAmount(amountMinor: -221435, currency: 'EUR', locale: 'fr')),
+    );
+  });
+
+  testWidgets('the activity list is the compact variant: no chip, amount over date', (
+    tester,
+  ) async {
+    _useDesktopSurface(tester);
+    await tester.pumpWidget(_wrap(state: _state()));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Activité récente'), findsOneWidget);
+    expect(find.byType(CompactTransactionRow), findsNWidgets(4));
+    // The compact variant deliberately drops the category chip the 52px row carries.
+    expect(find.byType(CategoryChip), findsNothing);
+
+    for (final row in ['Carrefour', 'Novatech SARL', 'SNCF Connect', 'Free Mobile']) {
+      expect(find.text(row), findsOneWidget);
+    }
+    expect(find.text('BNP — Compte courant'), findsNWidgets(3));
+    expect(find.text('Revolut'), findsOneWidget);
+
+    // Amount sits above its date in the right column.
+    final amount = tester.getTopLeft(
+      find.text(
+        formatAmount(
+          amountMinor: -8642,
+          currency: 'EUR',
+          locale: 'fr',
+          showPositiveSign: true,
+        ),
+      ),
+    );
+    final date = tester.getTopLeft(find.text('14/05/2026'));
+    expect(amount.dy, lessThan(date.dy));
+    expect(amount.dx, closeTo(date.dx, 24));
+
+    expect(find.byKey(const Key('dashboardViewAllTransactions')), findsOneWidget);
+  });
+
+  testWidgets('a monogram with no pinned hue falls back to the neutral plate', (tester) async {
+    _useDesktopSurface(tester);
+    await tester.pumpWidget(_wrap(state: _state()));
+    await tester.pumpAndSettle();
+
+    // Carrefour and Novatech carry pinned hues (#3B82F6 and #6C6AF0, both as the spec's
+    // table has them). Their *initials* come from `MonogramAvatar.initialsFor`, which takes
+    // one letter per word — so « Novatech SARL » reads NS where the table draws NV.
+    expect(find.text('CA'), findsOneWidget);
+    expect(find.text('NS'), findsOneWidget);
+    // SNCF Connect and Free Mobile have no pinned hue, so they keep the neutral "?" plate
+    // rather than the table's SC / FM.
+    expect(find.text('?'), findsNWidgets(2));
+  });
+
   // --- states ------------------------------------------------------------------------------
 
   testWidgets('renders the encouraging empty state with a CTA when there is no data', (
@@ -277,6 +432,7 @@ void main() {
             byCategory: const [],
           ),
           trends: emptyTrends(),
+          recent: const [],
         ),
       ),
     );

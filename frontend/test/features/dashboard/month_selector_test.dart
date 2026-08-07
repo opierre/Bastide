@@ -38,7 +38,7 @@ Widget _wrap(FakeDashboardController controller) {
 }
 
 FakeDashboardController _controllerAt(DateTime month) =>
-    FakeDashboardController(initialState: DashboardState(month: month, summary: _summary, trends: specTrends()));
+    FakeDashboardController(initialState: DashboardState(month: month, summary: _summary, trends: specTrends(), recent: specRecent()));
 
 void main() {
   testWidgets('the chevrons still step one month at a time', (tester) async {

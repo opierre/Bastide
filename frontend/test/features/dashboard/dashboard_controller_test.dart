@@ -74,6 +74,22 @@ Map<String, dynamic> _trendsJson() => {
   'currency': 'EUR',
 };
 
+List<Map<String, dynamic>> _accountsJson() => [
+  {
+    'id': 'a1',
+    'name': 'Compte courant',
+    'type': 'checking',
+    'institution': 'BNP',
+    'currency': 'EUR',
+    'opening_balance_minor': 0,
+    'current_balance_minor': 0,
+    'archived': false,
+    'ofx_account_id': null,
+    'created_at': '2026-01-01T00:00:00Z',
+    'updated_at': '2026-01-01T00:00:00Z',
+  },
+];
+
 void main() {
   late MockApiClient apiClient;
   late ProviderContainer container;
@@ -96,6 +112,7 @@ void main() {
       () => apiClient.get('/dashboard/summary', query: any(named: 'query')),
     ).thenAnswer((_) async => _summaryJson());
     when(() => apiClient.get('/dashboard/trends')).thenAnswer((_) async => _trendsJson());
+    when(() => apiClient.get('/accounts')).thenAnswer((_) async => _accountsJson());
 
     final state = await container.read(dashboardControllerProvider.future);
 
@@ -114,6 +131,7 @@ void main() {
       () => apiClient.get('/dashboard/summary', query: any(named: 'query')),
     ).thenAnswer((_) async => _summaryJson());
     when(() => apiClient.get('/dashboard/trends')).thenAnswer((_) async => _trendsJson());
+    when(() => apiClient.get('/accounts')).thenAnswer((_) async => _accountsJson());
 
     final state = await container.read(dashboardControllerProvider.future);
     final now = DateTime.now();
@@ -129,6 +147,7 @@ void main() {
       () => apiClient.get('/dashboard/summary', query: any(named: 'query')),
     ).thenAnswer((_) async => _summaryJson());
     when(() => apiClient.get('/dashboard/trends')).thenAnswer((_) async => _trendsJson());
+    when(() => apiClient.get('/accounts')).thenAnswer((_) async => _accountsJson());
 
     await container.read(dashboardControllerProvider.future);
     await container.read(dashboardControllerProvider.notifier).changeMonth(DateTime(2026, 4));
@@ -148,6 +167,7 @@ void main() {
       () => apiClient.get('/dashboard/summary', query: any(named: 'query')),
     ).thenAnswer((_) async => _summaryJson());
     when(() => apiClient.get('/dashboard/trends')).thenAnswer((_) async => _trendsJson());
+    when(() => apiClient.get('/accounts')).thenAnswer((_) async => _accountsJson());
 
     await container.read(dashboardControllerProvider.future);
     await container.read(dashboardControllerProvider.notifier).changeMonth(DateTime(2026, 1));
@@ -168,6 +188,7 @@ void main() {
       () => apiClient.get('/dashboard/summary', query: any(named: 'query')),
     ).thenAnswer((_) async => _summaryJson());
     when(() => apiClient.get('/dashboard/trends')).thenAnswer((_) async => _trendsJson());
+    when(() => apiClient.get('/accounts')).thenAnswer((_) async => _accountsJson());
 
     await container.read(dashboardControllerProvider.future);
     await container.read(dashboardControllerProvider.notifier).refresh();
@@ -183,6 +204,7 @@ void main() {
       () => apiClient.get('/dashboard/summary', query: any(named: 'query')),
     ).thenAnswer((_) async => _summaryJson());
     when(() => apiClient.get('/dashboard/trends')).thenAnswer((_) async => _trendsJson());
+    when(() => apiClient.get('/accounts')).thenAnswer((_) async => _accountsJson());
 
     await container.read(dashboardControllerProvider.future);
 
@@ -204,6 +226,7 @@ void main() {
       () => apiClient.get('/dashboard/summary', query: any(named: 'query')),
     ).thenAnswer((_) async => _summaryJson());
     when(() => apiClient.get('/dashboard/trends')).thenAnswer((_) async => _trendsJson());
+    when(() => apiClient.get('/accounts')).thenAnswer((_) async => _accountsJson());
 
     await container.read(dashboardControllerProvider.future);
     await container.read(dashboardControllerProvider.notifier).refresh();

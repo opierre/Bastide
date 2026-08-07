@@ -1215,6 +1215,39 @@
       }
     }
   },
+  "dashboardIncomeVsExpenseTitle": "Revenus vs dépenses",
+  "@dashboardIncomeVsExpenseTitle": {
+    "description": "Title of the stacked income-vs-expense bar chart."
+  },
+  "dashboardIncomeVsExpenseSubtitle": "{count} derniers mois",
+  "@dashboardIncomeVsExpenseSubtitle": {
+    "description": "Subtitle of the income-vs-expense chart, naming the window it covers.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "dashboardLegendIncome": "Revenus",
+  "@dashboardLegendIncome": {
+    "description": "Green dot legend in the income-vs-expense chart header."
+  },
+  "dashboardLegendExpense": "Dépenses",
+  "@dashboardLegendExpense": {
+    "description": "Red dot legend in the income-vs-expense chart header."
+  },
+  "dashboardRecentActivityTitle": "Activité récente",
+  "@dashboardRecentActivityTitle": {
+    "description": "Title of the recent-transactions card."
+  },
+  "dashboardViewAllTransactions": "Voir toutes les transactions",
+  "@dashboardViewAllTransactions": {
+    "description": "Iris link under the recent-activity list, navigating to the transactions panel."
+  },
+  "dashboardRecentActivityEmpty": "Vos transactions apparaîtront ici.",
+  "@dashboardRecentActivityEmpty": {
+    "description": "Shown in the recent-activity card when the user has no transactions yet."
+  },
   "dashboardEmptyTitle": "Importez un relevé pour donner vie à votre argent",
   "@dashboardEmptyTitle": {
     "description": "Encouraging heading shown when the user has no transactions yet for any month."

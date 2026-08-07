@@ -7,9 +7,12 @@ import '../../../core/theme/tokens.dart';
 import '../../../core/widgets/state_views.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../imports/presentation/imports_screen.dart';
+import '../../transactions/presentation/transactions_screen.dart';
 import '../application/dashboard_controller.dart';
 import '../domain/dashboard_summary.dart';
 import 'category_breakdown.dart';
+import 'income_vs_expense.dart';
+import 'recent_activity.dart';
 import 'savings_trend.dart';
 import 'stat_card.dart';
 
@@ -152,6 +155,22 @@ class _DashboardContent extends StatelessWidget {
               Expanded(
                 flex: 100,
                 child: SavingsTrendChart(trends: state.trends),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: AppSpacing.gridGap),
+        Expanded(
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Expanded(child: IncomeVsExpenseChart(trends: state.trends)),
+              const SizedBox(width: AppSpacing.gridGap),
+              Expanded(
+                child: RecentActivityCard(
+                  transactions: state.recent,
+                  onViewAll: () => context.go(TransactionsScreen.path),
+                ),
               ),
             ],
           ),

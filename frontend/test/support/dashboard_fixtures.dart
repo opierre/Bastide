@@ -87,6 +87,42 @@ DashboardTrends specTrends() => DashboardTrends(
   currency: 'EUR',
 );
 
+/// The four activity rows exactly as `docs/design/04-dashboard.md` tabulates them.
+List<RecentTransaction> specRecent() => [
+  RecentTransaction(
+    id: 't1',
+    label: 'Carrefour',
+    accountLabel: 'BNP — Compte courant',
+    bookedDate: DateTime(2026, 5, 14),
+    amountMinor: -8642,
+    currency: 'EUR',
+  ),
+  RecentTransaction(
+    id: 't2',
+    label: 'Novatech SARL',
+    accountLabel: 'BNP — Compte courant',
+    bookedDate: DateTime(2026, 5, 2),
+    amountMinor: 285000,
+    currency: 'EUR',
+  ),
+  RecentTransaction(
+    id: 't3',
+    label: 'SNCF Connect',
+    accountLabel: 'Revolut',
+    bookedDate: DateTime(2026, 5, 11),
+    amountMinor: -4700,
+    currency: 'EUR',
+  ),
+  RecentTransaction(
+    id: 't4',
+    label: 'Free Mobile',
+    accountLabel: 'BNP — Compte courant',
+    bookedDate: DateTime(2026, 5, 9),
+    amountMinor: -1599,
+    currency: 'EUR',
+  ),
+];
+
 /// A user with no history at all — every series empty.
 DashboardTrends emptyTrends() =>
     const DashboardTrends(monthlySeries: [], savingsSeries: [], currency: 'EUR');

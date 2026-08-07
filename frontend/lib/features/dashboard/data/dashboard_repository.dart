@@ -42,6 +42,52 @@ class DashboardRepository {
     );
   }
 
+  /// The newest [limit] transactions, with their account names already resolved.
+  ///
+  /// Reads `/transactions` and `/accounts` directly rather than through those features' Dart
+  /// internals — a feature owns everything it needs (see the architecture skill), the same way
+  /// the transactions repository calls `/categories` itself.
+  Future<List<RecentTransaction>> recentTransactions({int limit = 4}) async {
+    final (page, accounts) = await (
+      _apiClient.get('/transactions', query: {'page': '1'}),
+      _apiClient.get('/accounts'),
+    ).wait;
+
+    final names = {
+      for (final entry in (accounts as List<dynamic>).cast<Map<String, dynamic>>())
+        entry['id'] as String: _accountLabel(entry),
+    };
+
+    return [
+      for (final entry
+          in ((page as Map<String, dynamic>)['items'] as List<dynamic>)
+              .cast<Map<String, dynamic>>()
+              .take(limit))
+        RecentTransaction(
+          id: entry['id'] as String,
+          label: _transactionLabel(entry),
+          accountLabel: names[entry['account_id'] as String] ?? '',
+          bookedDate: DateTime.parse(entry['booked_date'] as String),
+          amountMinor: entry['amount_minor'] as int,
+          currency: entry['currency'] as String,
+        ),
+    ];
+  }
+
+  /// « BNP — Compte courant ». The em dash matches the spec's activity rows; an account with
+  /// no institution recorded falls back to its name alone rather than a dangling dash.
+  String _accountLabel(Map<String, dynamic> json) {
+    final institution = (json['institution'] as String?)?.trim() ?? '';
+    final name = json['name'] as String;
+    return institution.isEmpty ? name : '$institution — $name';
+  }
+
+  /// The merchant when the import recognised one, else the cleaned description.
+  String _transactionLabel(Map<String, dynamic> json) {
+    final merchant = (json['merchant'] as String?)?.trim() ?? '';
+    return merchant.isEmpty ? json['description_clean'] as String : merchant;
+  }
+
   /// The first-of-month for the most recent transaction, or `null` if the user has none yet —
   /// used to default the month selector to where the user's data actually is, rather than the
   /// calendar's current month (which may have no imports).
