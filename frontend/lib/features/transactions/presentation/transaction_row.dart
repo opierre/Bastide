@@ -51,6 +51,10 @@ class TransactionRow extends ConsumerWidget {
               ],
             ),
           ),
+          // A merchant name ellipsizes at the edge of its 290px block, so
+          // without a gutter here a long label runs straight into the category
+          // pill and the two read as one run of text.
+          const SizedBox(width: AppSpacing.lg),
           Expanded(
             child: Align(
               alignment: Alignment.centerLeft,
