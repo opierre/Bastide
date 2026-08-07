@@ -1,64 +1,19 @@
 import 'package:intl/intl.dart';
 
-import '../../../l10n/app_localizations.dart';
-
-/// Builds the `EUR (€) — Euro` label the currency select-look shows.
+/// Builds the `€ — EUR` label every currency display shows.
 ///
-/// The symbol comes from `intl` (locale-aware), the name from the ARB. `intl`
-/// ships symbols but not currency display names, so the names are localized
-/// keys like any other user-facing string.
-///
-/// The symbol is bracketed onto the code rather than set between two dashes:
-/// code and symbol name the same thing twice, so they belong together, and one
-/// separator left in the line makes the display name read as the gloss it is.
-String currencyLabel(AppLocalizations l10n, String code, String locale) {
+/// The symbol leads because it is what the user recognises at a glance; the
+/// ISO code follows as the unambiguous gloss behind it — several currencies
+/// share the `$` and `£` glyphs, so the symbol alone would not identify one.
+/// The symbol comes from `intl`, which resolves it per locale.
+String currencyLabel(String code, String locale) {
   final symbol = NumberFormat.simpleCurrency(
     locale: locale,
     name: code,
   ).currencySymbol;
-  final name = currencyName(l10n, code);
 
   // A few codes have no distinct symbol — intl echoes the code back. Showing
-  // "XOF (XOF) — Franc CFA" reads as a bug, so the symbol is dropped there.
-  if (symbol == code) return '$code — $name';
-  return '$code ($symbol) — $name';
+  // "XOF — XOF" reads as a bug, so the code stands on its own there.
+  if (symbol == code) return code;
+  return '$symbol — $code';
 }
-
-/// Localized display name for an ISO-4217 code in [supportedCurrencies].
-///
-/// A switch rather than a map because the generated localizations expose one
-/// getter per key; an unknown code falls back to the code itself, which is
-/// still meaningful.
-String currencyName(AppLocalizations l10n, String code) => switch (code) {
-  'EUR' => l10n.currencyNameEUR,
-  'USD' => l10n.currencyNameUSD,
-  'GBP' => l10n.currencyNameGBP,
-  'CHF' => l10n.currencyNameCHF,
-  'CAD' => l10n.currencyNameCAD,
-  'JPY' => l10n.currencyNameJPY,
-  'AUD' => l10n.currencyNameAUD,
-  'CNY' => l10n.currencyNameCNY,
-  'INR' => l10n.currencyNameINR,
-  'BRL' => l10n.currencyNameBRL,
-  'MXN' => l10n.currencyNameMXN,
-  'SEK' => l10n.currencyNameSEK,
-  'NOK' => l10n.currencyNameNOK,
-  'DKK' => l10n.currencyNameDKK,
-  'PLN' => l10n.currencyNamePLN,
-  'CZK' => l10n.currencyNameCZK,
-  'HUF' => l10n.currencyNameHUF,
-  'RON' => l10n.currencyNameRON,
-  'ZAR' => l10n.currencyNameZAR,
-  'AED' => l10n.currencyNameAED,
-  'SGD' => l10n.currencyNameSGD,
-  'HKD' => l10n.currencyNameHKD,
-  'NZD' => l10n.currencyNameNZD,
-  'TRY' => l10n.currencyNameTRY,
-  'ILS' => l10n.currencyNameILS,
-  'KRW' => l10n.currencyNameKRW,
-  'THB' => l10n.currencyNameTHB,
-  'MAD' => l10n.currencyNameMAD,
-  'XOF' => l10n.currencyNameXOF,
-  'XAF' => l10n.currencyNameXAF,
-  _ => code,
-};

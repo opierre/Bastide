@@ -66,13 +66,13 @@ void main() {
     expect(find.text('5/14/2026'), findsOneWidget);
   });
 
-  testWidgets('the currency is a settled value, shown with its symbol and name', (
+  testWidgets('the currency is a settled value, shown as symbol then code', (
     tester,
   ) async {
     await tester.pumpWidget(_wrap());
     await tester.pumpAndSettle();
 
-    expect(find.text('EUR (€) — Euro'), findsOneWidget);
+    expect(find.text('€ — EUR'), findsOneWidget);
     expect(
       find.descendant(
         of: find.byKey(const Key('settingsCurrencyField')),

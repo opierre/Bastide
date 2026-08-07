@@ -205,7 +205,7 @@ class _PreferencesPanel extends ConsumerWidget {
             key: const Key('settingsCurrencyField'),
             value: currency.isEmpty
                 ? ''
-                : currencyLabel(l10n, currency, activeLocale.toString()),
+                : currencyLabel(currency, activeLocale.toString()),
           ),
         ),
         const SizedBox(height: AppSpacing.gridGap),

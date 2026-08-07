@@ -237,7 +237,7 @@ class _PreferencesRow extends StatelessWidget {
                 for (final code in supportedCurrencies)
                   AppSelectItem(
                     value: code,
-                    label: currencyLabel(l10n, code, activeLocale),
+                    label: currencyLabel(code, activeLocale),
                   ),
               ],
               onChanged: onCurrencyChanged,
