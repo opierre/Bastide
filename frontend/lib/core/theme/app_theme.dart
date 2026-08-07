@@ -331,6 +331,19 @@ abstract final class AppTextStyles {
     color: AppColors.textDisabled,
   );
 
+  /// 11px uppercase label heading a stat card's value (`docs/design/00` §Components).
+  /// A notch larger than [sectionLabel] and in the secondary tone rather than the disabled
+  /// one — it titles the card's headline figure, where a section label only groups a list.
+  /// Uppercase is applied at the usage site so the localized string stays intact for
+  /// screen readers.
+  static const statLabel = TextStyle(
+    fontFamily: AppFonts.geist,
+    fontSize: 11,
+    fontWeight: FontWeight.w600,
+    letterSpacing: 1.3,
+    color: AppColors.textSecondary,
+  );
+
   /// Field helper / validation line.
   static const helper = TextStyle(
     fontFamily: AppFonts.geist,

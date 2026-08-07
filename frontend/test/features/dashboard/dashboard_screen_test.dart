@@ -1,4 +1,5 @@
 import 'package:finstride/core/theme/app_theme.dart';
+import 'package:finstride/core/theme/tokens.dart';
 import 'package:finstride/core/widgets/amount_text.dart';
 import 'package:finstride/features/dashboard/application/dashboard_controller.dart';
 import 'package:finstride/features/dashboard/domain/dashboard_summary.dart';
@@ -79,18 +80,76 @@ void main() {
       find.text(formatAmount(amountMinor: -221435, currency: 'EUR', locale: 'fr', showPositiveSign: true)),
       findsOneWidget,
     );
-    // Net is a neutral figure: no explicit sign, no color.
+    // Net is neutral in *color* but still signed — the spec draws `+635,65 €` in primary
+    // text, so the sign carries the direction the color no longer does.
     expect(
-      find.text(formatAmount(amountMinor: 63565, currency: 'EUR', locale: 'fr')),
+      find.text(
+        formatAmount(amountMinor: 63565, currency: 'EUR', locale: 'fr', showPositiveSign: true),
+      ),
       findsOneWidget,
     );
+    final net = tester.widget<Text>(
+      find.descendant(
+        of: find.byType(StatCard),
+        matching: find.textContaining('63', findRichText: false),
+      ),
+    );
+    expect(net.style?.color, AppColors.textPrimary);
 
-    // Income up is good, expense up is bad, net down is bad, savings rate up is good.
+    // Income up is good, expense up is bad, net down is bad.
     expect(find.text(formatDeltaPct(2.1, 'fr')), findsOneWidget);
     expect(find.text(formatDeltaPct(4.8, 'fr')), findsOneWidget);
     expect(find.text(formatDeltaPct(-6.1, 'fr')), findsOneWidget);
-    expect(find.text(formatDeltaPct(1.9, 'fr')), findsOneWidget);
-    expect(find.text(formatPct(22.3, 'fr')), findsOneWidget);
+
+    // The savings rate's change is in percentage *points*, not percent, and its value sits
+    // inside the ring rather than beside it.
+    expect(find.text('+1,9 pt'), findsOneWidget);
+    expect(find.text(formatDeltaPct(1.9, 'fr')), findsNothing);
+    expect(
+      tester.widget<Text>(find.byKey(const Key('dashboardSavingsRateValue'))).data,
+      formatPct(22.3, 'fr'),
+    );
+
+    // Captions naming what each trend is measured against.
+    expect(find.text('vs avril'), findsNWidgets(2));
+    expect(find.text('revenus − dépenses'), findsOneWidget);
+    expect(find.text('Objectif : 20 % · atteint'), findsOneWidget);
+  });
+
+  testWidgets('the savings caption frames a missed goal as progress, not shortfall', (
+    tester,
+  ) async {
+    _useDesktopSurface(tester);
+    await tester.pumpWidget(
+      _wrap(
+        state: DashboardState(
+          month: DateTime(2026, 5),
+          summary: _summary(savingsRate: 0.118),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('Objectif : 20 % · en cours'), findsOneWidget);
+  });
+
+  testWidgets('row 1 lays the four cards out on the spec 1:1:1:1.35 grid', (tester) async {
+    _useDesktopSurface(tester);
+    await tester.pumpWidget(
+      _wrap(state: DashboardState(month: DateTime(2026, 5), summary: _summary())),
+    );
+    await tester.pumpAndSettle();
+
+    final stats = tester.widgetList<StatCard>(find.byType(StatCard)).toList();
+    expect(stats, hasLength(3));
+    final statWidth = tester.getSize(find.byType(StatCard).first).width;
+    final savingsWidth = tester.getSize(find.byType(SavingsRateCard)).width;
+
+    // Every StatCard is the same width, and the savings hero is 1.35× one of them.
+    for (var i = 1; i < 3; i++) {
+      expect(tester.getSize(find.byType(StatCard).at(i)).width, closeTo(statWidth, 0.5));
+    }
+    expect(savingsWidth / statWidth, closeTo(1.35, 0.01));
   });
 
   testWidgets('renders stat cards with formatted values for en', (tester) async {

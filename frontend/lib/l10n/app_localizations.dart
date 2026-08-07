@@ -1607,13 +1607,13 @@ abstract class AppLocalizations {
   /// Label on the income stat card.
   ///
   /// In fr, this message translates to:
-  /// **'Revenus'**
+  /// **'Revenus (mois)'**
   String get dashboardStatIncome;
 
   /// Label on the expense stat card.
   ///
   /// In fr, this message translates to:
-  /// **'Dépenses'**
+  /// **'Dépenses (mois)'**
   String get dashboardStatExpense;
 
   /// Label on the net (income minus expense) stat card.
@@ -1627,6 +1627,36 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Taux d\'épargne'**
   String get dashboardStatSavingsRate;
+
+  /// Caption beside the income and expense trend pills, naming the month compared against. French renders the month lowercase (« vs avril »), English capitalized ("vs April").
+  ///
+  /// In fr, this message translates to:
+  /// **'vs {month}'**
+  String dashboardStatVsPreviousMonth(DateTime month);
+
+  /// Caption beside the net card's trend pill, restating how net is derived. The minus is U+2212, matching the money rule.
+  ///
+  /// In fr, this message translates to:
+  /// **'revenus − dépenses'**
+  String get dashboardStatNetCaption;
+
+  /// The savings-rate trend pill. A change in a rate is measured in percentage *points*, not percent, so the unit differs from the other three cards.
+  ///
+  /// In fr, this message translates to:
+  /// **'{delta} pt'**
+  String dashboardSavingsDeltaPoints(String delta);
+
+  /// Caption on the savings rate card when the rate meets or beats the goal.
+  ///
+  /// In fr, this message translates to:
+  /// **'Objectif : {goal} · atteint'**
+  String dashboardSavingsGoalReached(String goal);
+
+  /// Caption on the savings rate card when the rate is still below the goal. Phrased as progress rather than shortfall — the panel leads with encouragement.
+  ///
+  /// In fr, this message translates to:
+  /// **'Objectif : {goal} · en cours'**
+  String dashboardSavingsGoalPending(String goal);
 
   /// Title of the by-category expense breakdown chart card.
   ///

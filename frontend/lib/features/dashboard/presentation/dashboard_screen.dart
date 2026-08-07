@@ -8,6 +8,7 @@ import '../../../core/widgets/state_views.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../imports/presentation/imports_screen.dart';
 import '../application/dashboard_controller.dart';
+import '../domain/dashboard_summary.dart';
 import 'category_breakdown.dart';
 import 'stat_card.dart';
 
@@ -60,7 +61,11 @@ class _DashboardContent extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    final locale = Localizations.localeOf(context).toString();
     final summary = state.summary;
+    // The month the deltas compare against — « vs avril » when May is selected.
+    final previousMonth = DateTime(state.month.year, state.month.month - 1);
+    final goal = formatWholePct(savingsRateGoal * 100, locale);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -69,43 +74,58 @@ class _DashboardContent extends StatelessWidget {
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
+              // `1fr 1fr 1fr 1.35fr` from the spec's grid, expressed as integer flex —
+              // Flutter's `flex` is a whole number, so the ratio is scaled by 100 rather
+              // than rounded to 1:1:1:1 (too narrow) or 1:1:1:2 (too wide).
               Expanded(
+                flex: 100,
                 child: StatCard(
                   label: l10n.dashboardStatIncome,
                   amountMinor: summary.incomeMinor,
                   currency: summary.currency,
                   deltaPct: summary.incomeDeltaPct,
                   direction: TrendDirection.upIsGood,
+                  caption: l10n.dashboardStatVsPreviousMonth(previousMonth),
                 ),
               ),
               const SizedBox(width: AppSpacing.gridGap),
               Expanded(
+                flex: 100,
                 child: StatCard(
                   label: l10n.dashboardStatExpense,
                   amountMinor: -summary.expenseMinor,
                   currency: summary.currency,
                   deltaPct: summary.expenseDeltaPct,
                   direction: TrendDirection.upIsBad,
+                  caption: l10n.dashboardStatVsPreviousMonth(previousMonth),
                 ),
               ),
               const SizedBox(width: AppSpacing.gridGap),
               Expanded(
+                flex: 100,
                 child: StatCard(
                   label: l10n.dashboardStatNet,
                   amountMinor: summary.netMinor,
                   currency: summary.currency,
                   deltaPct: summary.netDeltaPct,
                   direction: TrendDirection.upIsGood,
+                  caption: l10n.dashboardStatNetCaption,
                   colorizeAmount: false,
                 ),
               ),
               const SizedBox(width: AppSpacing.gridGap),
               Expanded(
-                flex: 2,
+                flex: 135,
                 child: SavingsRateCard(
                   label: l10n.dashboardStatSavingsRate,
                   rate: summary.savingsRate,
                   deltaPct: summary.savingsRateDeltaPct,
+                  deltaLabel: l10n.dashboardSavingsDeltaPoints(
+                    formatSignedMagnitude(summary.savingsRateDeltaPct, locale),
+                  ),
+                  caption: summary.savingsGoalReached
+                      ? l10n.dashboardSavingsGoalReached(goal)
+                      : l10n.dashboardSavingsGoalPending(goal),
                 ),
               ),
             ],
@@ -155,13 +175,15 @@ class _DashboardSkeleton extends StatelessWidget {
         children: [
           Row(
             children: [
-              const Expanded(child: SkeletonBlock(height: 132)),
+              // Same `1fr 1fr 1fr 1.35fr` ratio as the populated row, so the skeleton
+              // doesn't shift the cards sideways when the data lands.
+              const Expanded(flex: 100, child: SkeletonBlock(height: 132)),
               const SizedBox(width: AppSpacing.gridGap),
-              const Expanded(child: SkeletonBlock(height: 132)),
+              const Expanded(flex: 100, child: SkeletonBlock(height: 132)),
               const SizedBox(width: AppSpacing.gridGap),
-              const Expanded(child: SkeletonBlock(height: 132)),
+              const Expanded(flex: 100, child: SkeletonBlock(height: 132)),
               const SizedBox(width: AppSpacing.gridGap),
-              const Expanded(flex: 2, child: SkeletonBlock(height: 132)),
+              const Expanded(flex: 135, child: SkeletonBlock(height: 132)),
             ],
           ),
           const SizedBox(height: AppSpacing.gridGap),

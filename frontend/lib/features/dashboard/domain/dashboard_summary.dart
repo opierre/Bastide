@@ -53,4 +53,15 @@ class DashboardSummary {
   final String currency;
 
   bool get isEmpty => incomeMinor == 0 && expenseMinor == 0 && byCategory.isEmpty;
+
+  /// Whether the month met the savings goal — decides which of the two goal captions the
+  /// savings card shows. Lives here rather than in the widget so the threshold comparison
+  /// isn't business logic sitting in presentation.
+  bool get savingsGoalReached => savingsRate >= savingsRateGoal;
 }
+
+/// The savings-rate goal the dashboard measures against, as a `0..1` ratio.
+///
+/// A fixed 20 % in Phase 1 (see `docs/design/04-dashboard.md` — « Objectif : 20 % »); it becomes
+/// a per-user setting when Goals ship in a later phase.
+const savingsRateGoal = 0.20;

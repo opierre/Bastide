@@ -885,16 +885,42 @@ class AppLocalizationsFr extends AppLocalizations {
   String get categorySystemOtherUncategorized => 'Non catégorisé';
 
   @override
-  String get dashboardStatIncome => 'Revenus';
+  String get dashboardStatIncome => 'Revenus (mois)';
 
   @override
-  String get dashboardStatExpense => 'Dépenses';
+  String get dashboardStatExpense => 'Dépenses (mois)';
 
   @override
   String get dashboardStatNet => 'Net';
 
   @override
   String get dashboardStatSavingsRate => 'Taux d\'épargne';
+
+  @override
+  String dashboardStatVsPreviousMonth(DateTime month) {
+    final intl.DateFormat monthDateFormat = intl.DateFormat.MMMM(localeName);
+    final String monthString = monthDateFormat.format(month);
+
+    return 'vs $monthString';
+  }
+
+  @override
+  String get dashboardStatNetCaption => 'revenus − dépenses';
+
+  @override
+  String dashboardSavingsDeltaPoints(String delta) {
+    return '$delta pt';
+  }
+
+  @override
+  String dashboardSavingsGoalReached(String goal) {
+    return 'Objectif : $goal · atteint';
+  }
+
+  @override
+  String dashboardSavingsGoalPending(String goal) {
+    return 'Objectif : $goal · en cours';
+  }
 
   @override
   String get dashboardCategoryBreakdownTitle => 'Dépenses par catégorie';
