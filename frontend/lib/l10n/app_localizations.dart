@@ -1664,6 +1664,36 @@ abstract class AppLocalizations {
   /// **'Dépenses par catégorie'**
   String get dashboardCategoryBreakdownTitle;
 
+  /// Subtitle under the breakdown chart's title: the month it covers and how many categories it splits into.
+  ///
+  /// In fr, this message translates to:
+  /// **'{month} · {count, plural, =1{1 catégorie} other{{count} catégories}}'**
+  String dashboardCategoryBreakdownSubtitle(String month, int count);
+
+  /// Caption under the total in the middle of the category donut.
+  ///
+  /// In fr, this message translates to:
+  /// **'dépensés'**
+  String get dashboardDonutCenterCaption;
+
+  /// Title of the cumulative savings area chart.
+  ///
+  /// In fr, this message translates to:
+  /// **'Évolution de l\'épargne'**
+  String get dashboardSavingsTrendTitle;
+
+  /// Subtitle of the cumulative savings chart, naming the window it covers.
+  ///
+  /// In fr, this message translates to:
+  /// **'Épargne cumulée · {count} mois'**
+  String dashboardSavingsTrendSubtitle(int count);
+
+  /// The savings chart's header delta — how much the latest month added, e.g. « +635,65 € en mai ».
+  ///
+  /// In fr, this message translates to:
+  /// **'{amount} en {month}'**
+  String dashboardSavingsTrendDelta(String amount, String month);
+
   /// Encouraging heading shown when the user has no transactions yet for any month.
   ///
   /// In fr, this message translates to:

@@ -1174,6 +1174,47 @@
   "@dashboardCategoryBreakdownTitle": {
     "description": "Title of the by-category expense breakdown chart card."
   },
+  "dashboardCategoryBreakdownSubtitle": "{month} · {count, plural, =1{1 catégorie} other{{count} catégories}}",
+  "@dashboardCategoryBreakdownSubtitle": {
+    "description": "Subtitle under the breakdown chart's title: the month it covers and how many categories it splits into.",
+    "placeholders": {
+      "month": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "dashboardDonutCenterCaption": "dépensés",
+  "@dashboardDonutCenterCaption": {
+    "description": "Caption under the total in the middle of the category donut."
+  },
+  "dashboardSavingsTrendTitle": "Évolution de l'épargne",
+  "@dashboardSavingsTrendTitle": {
+    "description": "Title of the cumulative savings area chart."
+  },
+  "dashboardSavingsTrendSubtitle": "Épargne cumulée · {count} mois",
+  "@dashboardSavingsTrendSubtitle": {
+    "description": "Subtitle of the cumulative savings chart, naming the window it covers.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "dashboardSavingsTrendDelta": "{amount} en {month}",
+  "@dashboardSavingsTrendDelta": {
+    "description": "The savings chart's header delta — how much the latest month added, e.g. « +635,65 € en mai ».",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "month": {
+        "type": "String"
+      }
+    }
+  },
   "dashboardEmptyTitle": "Importez un relevé pour donner vie à votre argent",
   "@dashboardEmptyTitle": {
     "description": "Encouraging heading shown when the user has no transactions yet for any month."

@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 import '../../../core/api/api_client.dart';
 import '../../../core/api/api_client_provider.dart';
 import '../domain/dashboard_summary.dart';
+import '../domain/dashboard_trends.dart';
 
 final _monthParam = DateFormat('yyyy-MM');
 
@@ -22,6 +23,23 @@ class DashboardRepository {
         await _apiClient.get('/dashboard/summary', query: {'month': _monthParam.format(month)})
             as Map<String, dynamic>;
     return _parse(json);
+  }
+
+  /// The two trend series behind row 2's savings line and row 3's bars.
+  ///
+  /// Takes no month: both windows end at the current one, so this is fetched once and survives
+  /// the month picker (see `PROJECT.md` §5).
+  Future<DashboardTrends> trends() async {
+    final json = await _apiClient.get('/dashboard/trends') as Map<String, dynamic>;
+    return DashboardTrends(
+      monthlySeries: (json['monthly_series'] as List<dynamic>)
+          .map((entry) => _parseMonthlyTotals(entry as Map<String, dynamic>))
+          .toList(),
+      savingsSeries: (json['savings_series'] as List<dynamic>)
+          .map((entry) => _parseSavingsPoint(entry as Map<String, dynamic>))
+          .toList(),
+      currency: json['currency'] as String,
+    );
   }
 
   /// The first-of-month for the most recent transaction, or `null` if the user has none yet —
@@ -49,6 +67,22 @@ class DashboardRepository {
         .toList(),
     currency: json['currency'] as String,
   );
+
+  MonthlyTotals _parseMonthlyTotals(Map<String, dynamic> json) => MonthlyTotals(
+    month: _parseMonth(json['month'] as String),
+    incomeMinor: json['income_minor'] as int,
+    expenseMinor: json['expense_minor'] as int,
+    netMinor: json['net_minor'] as int,
+  );
+
+  SavingsPoint _parseSavingsPoint(Map<String, dynamic> json) => SavingsPoint(
+    month: _parseMonth(json['month'] as String),
+    cumulativeMinor: json['cumulative_minor'] as int,
+  );
+
+  /// `YYYY-MM` → the first of that month. `DateTime.parse` needs a day component, and the wire
+  /// deliberately carries none — these are months, not dates.
+  DateTime _parseMonth(String value) => _monthParam.parse(value);
 
   CategoryBreakdown _parseCategory(Map<String, dynamic> json) => CategoryBreakdown(
     categoryId: json['category_id'] as String?,

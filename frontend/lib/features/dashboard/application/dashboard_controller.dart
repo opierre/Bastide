@@ -3,14 +3,30 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../data/dashboard_repository.dart';
 import '../domain/dashboard_summary.dart';
+import '../domain/dashboard_trends.dart';
 
-/// The selected month (always the first of that month) alongside the summary loaded for it.
+/// The selected month alongside the summary loaded for it, plus the trend series.
+///
+/// The month is always the first of that month. [trends] is *not* keyed to it: both its windows
+/// end at the current calendar month, so paging the picker back leaves the bars and the savings
+/// line where they are (see `PROJECT.md` §5).
 @immutable
 class DashboardState {
-  const DashboardState({required this.month, required this.summary});
+  const DashboardState({
+    required this.month,
+    required this.summary,
+    required this.trends,
+  });
 
   final DateTime month;
   final DashboardSummary summary;
+  final DashboardTrends trends;
+
+  DashboardState copyWith({DateTime? month, DashboardSummary? summary}) => DashboardState(
+    month: month ?? this.month,
+    summary: summary ?? this.summary,
+    trends: trends,
+  );
 }
 
 /// Loads the dashboard summary for a selected month, defaulting to the latest month with data.
@@ -22,22 +38,31 @@ class DashboardController extends AsyncNotifier<DashboardState> {
   Future<DashboardState> build() async {
     final repository = ref.read(dashboardRepositoryProvider);
     final month = await repository.latestMonthWithData() ?? _currentMonth();
-    final summary = await repository.summary(month);
-    return DashboardState(month: month, summary: summary);
+    // Independent of each other, so they go out together rather than in series.
+    final (summary, trends) = await (repository.summary(month), repository.trends()).wait;
+    return DashboardState(month: month, summary: summary, trends: trends);
   }
 
   Future<void> changeMonth(DateTime month) => _load(month);
 
   Future<void> refresh() {
     final current = state.value;
-    return _load(current?.month ?? _currentMonth());
+    return _load(current?.month ?? _currentMonth(), reloadTrends: true);
   }
 
-  Future<void> _load(DateTime month) async {
+  /// Reloads the summary for [month]. The trends are re-fetched only on an explicit refresh:
+  /// they don't depend on the month, so paging the picker would otherwise re-request a series
+  /// that cannot have changed.
+  Future<void> _load(DateTime month, {bool reloadTrends = false}) async {
+    final previous = state.value;
     state = const AsyncValue.loading();
     state = await AsyncValue.guard(() async {
-      final summary = await ref.read(dashboardRepositoryProvider).summary(month);
-      return DashboardState(month: month, summary: summary);
+      final repository = ref.read(dashboardRepositoryProvider);
+      final summary = await repository.summary(month);
+      final trends = reloadTrends || previous == null
+          ? await repository.trends()
+          : previous.trends;
+      return DashboardState(month: month, summary: summary, trends: trends);
     });
   }
 }

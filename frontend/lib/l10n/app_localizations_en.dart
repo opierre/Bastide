@@ -915,7 +915,34 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get dashboardCategoryBreakdownTitle => 'Expenses by category';
+  String get dashboardCategoryBreakdownTitle => 'Spending by category';
+
+  @override
+  String dashboardCategoryBreakdownSubtitle(String month, int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count categories',
+      one: '1 category',
+    );
+    return '$month · $_temp0';
+  }
+
+  @override
+  String get dashboardDonutCenterCaption => 'spent';
+
+  @override
+  String get dashboardSavingsTrendTitle => 'Savings over time';
+
+  @override
+  String dashboardSavingsTrendSubtitle(int count) {
+    return 'Total saved · $count months';
+  }
+
+  @override
+  String dashboardSavingsTrendDelta(String amount, String month) {
+    return '$amount in $month';
+  }
 
   @override
   String get dashboardEmptyTitle =>

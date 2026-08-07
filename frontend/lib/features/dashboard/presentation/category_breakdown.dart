@@ -1,8 +1,11 @@
 import 'dart:math' as math;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
 import '../../../core/l10n/category_display.dart';
+import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/tokens.dart';
 import '../../../core/widgets/amount_text.dart';
 import '../../../core/widgets/chart_container.dart';
@@ -10,16 +13,27 @@ import '../../../l10n/app_localizations.dart';
 import '../domain/dashboard_summary.dart';
 
 /// « Dépenses par catégorie » — a donut of the month's expense breakdown plus a legend with
-/// amounts, colored to match [CategoryHues] exactly (see `docs/design/04-dashboard.md`).
+/// amounts, colored to match [CategoryHues] exactly (see `docs/design/04-dashboard.md` §Row 2).
 class CategoryBreakdownChart extends StatelessWidget {
-  const CategoryBreakdownChart({super.key, required this.categories, required this.currency});
+  const CategoryBreakdownChart({
+    super.key,
+    required this.categories,
+    required this.currency,
+    required this.month,
+  });
 
   final List<CategoryBreakdown> categories;
   final String currency;
+  final DateTime month;
+
+  /// Width of the donut column beside the legend, per the spec. The donut itself is 212
+  /// (`r 80 × 2 + stroke 24`), leaving room either side for the column's own gutter.
+  static const _donutColumnWidth = 250.0;
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    final locale = Localizations.localeOf(context).toString();
     final total = categories.fold<int>(0, (sum, category) => sum + category.amountMinor);
     // Highest amount first, so the donut and legend read the same order.
     final sorted = [...categories]..sort((a, b) => b.amountMinor.compareTo(a.amountMinor));
@@ -27,46 +41,38 @@ class CategoryBreakdownChart extends StatelessWidget {
     final slugs = [
       for (final category in sorted) categorySlugFor(name: category.name, kind: 'expense'),
     ];
+    final colors = [for (final slug in slugs) CategoryHues.forSlug(slug)];
 
     return ChartContainer(
       title: l10n.dashboardCategoryBreakdownTitle,
+      subtitle: l10n.dashboardCategoryBreakdownSubtitle(
+        _capitalize(DateFormat.yMMMM(locale).format(month)),
+        sorted.length,
+      ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           SizedBox(
-            width: 160,
-            height: 160,
-            child: CustomPaint(
-              painter: _DonutPainter(
-                amounts: [for (final category in sorted) category.amountMinor],
-                colors: [for (final slug in slugs) CategoryHues.forSlug(slug)],
-              ),
-              child: Center(
-                child: AmountText(
-                  amountMinor: total,
-                  currency: currency,
-                  colorize: false,
-                  style: Theme.of(context).textTheme.headlineSmall,
+            width: _donutColumnWidth,
+            child: Center(
+              child: SizedBox(
+                width: CategoryDonut.size,
+                height: CategoryDonut.size,
+                child: CategoryDonut(
+                  amounts: [for (final category in sorted) category.amountMinor],
+                  colors: colors,
+                  center: _DonutCenter(total: total, currency: currency),
                 ),
               ),
             ),
           ),
           const SizedBox(width: AppSpacing.lg),
           Expanded(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                for (var i = 0; i < sorted.length; i++) ...[
-                  if (i > 0) const SizedBox(height: AppSpacing.sm),
-                  _LegendRow(
-                    color: CategoryHues.forSlug(slugs[i]),
-                    label: localizedCategoryName(l10n, sorted[i].name),
-                    amountMinor: sorted[i].amountMinor,
-                    currency: currency,
-                    pct: sorted[i].pct,
-                  ),
-                ],
-              ],
+            child: _Legend(
+              categories: sorted,
+              colors: colors,
+              currency: currency,
+              labels: [for (final row in sorted) localizedCategoryName(l10n, row.name)],
             ),
           ),
         ],
@@ -75,14 +81,103 @@ class CategoryBreakdownChart extends StatelessWidget {
   }
 }
 
+/// The total spent, and what it is — « 2 214,35 € » over « dépensés ».
+class _DonutCenter extends StatelessWidget {
+  const _DonutCenter({required this.total, required this.currency});
+
+  final int total;
+  final String currency;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final textTheme = Theme.of(context).textTheme;
+
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        AmountText(
+          amountMinor: total,
+          currency: currency,
+          // A total is a neutral figure, not an outflow — it stays primary rather than red.
+          colorize: false,
+          style: textTheme.headlineSmall,
+        ),
+        Text(
+          l10n.dashboardDonutCenterCaption,
+          style: textTheme.labelSmall?.copyWith(
+            fontWeight: FontWeight.w400,
+            color: AppColors.textSecondary,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+/// The legend column beside the donut.
+///
+/// Rows sit on the spec's 34px rhythm, which is exactly what the drawn seven categories need.
+/// A user with more categories than that would overflow a fixed 34, so the rhythm is a
+/// *maximum*: past the point where they'd no longer fit, the rows tighten evenly rather than
+/// the card overflowing or the tail of the list being cut off.
+class _Legend extends StatelessWidget {
+  const _Legend({
+    required this.categories,
+    required this.colors,
+    required this.labels,
+    required this.currency,
+  });
+
+  final List<CategoryBreakdown> categories;
+  final List<Color> colors;
+  final List<String> labels;
+  final String currency;
+
+  static const rowHeight = 34.0;
+
+  @override
+  Widget build(BuildContext context) {
+    if (categories.isEmpty) return const SizedBox.shrink();
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final height = constraints.hasBoundedHeight
+            ? math.min(rowHeight, constraints.maxHeight / categories.length)
+            : rowHeight;
+
+        return Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            for (var i = 0; i < categories.length; i++)
+              _LegendRow(
+                height: height,
+                color: colors[i],
+                label: labels[i],
+                amountMinor: categories[i].amountMinor,
+                currency: currency,
+                pct: categories[i].pct,
+              ),
+          ],
+        );
+      },
+    );
+  }
+}
+
+/// One legend row: swatch · name · amount · share.
 class _LegendRow extends StatelessWidget {
   const _LegendRow({
+    required this.height,
     required this.color,
     required this.label,
     required this.amountMinor,
     required this.currency,
     required this.pct,
   });
+
+  final double height;
 
   final Color color;
   final String label;
@@ -92,42 +187,88 @@ class _LegendRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final locale = Localizations.localeOf(context).toString();
     final textTheme = Theme.of(context).textTheme;
 
-    return Row(
-      children: [
-        Container(
-          width: 8,
-          height: 8,
-          decoration: BoxDecoration(color: color, shape: BoxShape.circle),
-        ),
-        const SizedBox(width: AppSpacing.sm),
-        Expanded(
-          child: Text(label, style: textTheme.bodyMedium, overflow: TextOverflow.ellipsis),
-        ),
-        const SizedBox(width: AppSpacing.sm),
-        AmountText(
-          amountMinor: amountMinor,
-          currency: currency,
-          colorize: false,
-          style: textTheme.bodyMedium,
-        ),
-        const SizedBox(width: AppSpacing.sm),
-        SizedBox(
-          width: 44,
-          child: Text(
-            '${pct.round()} %',
-            textAlign: TextAlign.end,
-            style: textTheme.bodySmall?.copyWith(color: AppColors.textSecondary),
+    return SizedBox(
+      height: height,
+      child: Row(
+        children: [
+          Container(
+            width: 9,
+            height: 9,
+            decoration: BoxDecoration(
+              color: color,
+              borderRadius: BorderRadius.circular(3),
+            ),
           ),
-        ),
-      ],
+          const SizedBox(width: AppSpacing.sm + AppSpacing.xs),
+          Expanded(
+            child: Text(label, style: textTheme.bodyMedium, overflow: TextOverflow.ellipsis),
+          ),
+          const SizedBox(width: AppSpacing.sm),
+          AmountText(
+            amountMinor: amountMinor,
+            currency: currency,
+            colorize: false,
+            style: textTheme.bodyMedium,
+          ),
+          const SizedBox(width: AppSpacing.md),
+          SizedBox(
+            width: 46,
+            child: Text(
+              formatSharePct(pct, locale),
+              textAlign: TextAlign.end,
+              style: tabularNumberStyle(
+                textTheme.bodySmall!,
+              ).copyWith(color: AppColors.textSecondary),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
 
-/// Draws the r80/stroke24 donut named in `docs/design/04-dashboard.md`, scaled to the 160px box
-/// above. Each slice's sweep is proportional to its share of [amounts]' sum.
+/// A category's share of the total, to one decimal — « 42,9 % ». Rounding to whole percent
+/// collapses the tail of the list, where three categories can all land on the same figure.
+String formatSharePct(double pct, String locale) =>
+    '${NumberFormat('0.0', locale).format(pct)} %';
+
+/// The donut itself: `r 80`, stroke 24, with a 3px gap between segments.
+///
+/// Split out from the chart card so the geometry lives in one place — the spec pins these
+/// numbers, and a donut drawn at any other radius stops matching the legend beside it.
+class CategoryDonut extends StatelessWidget {
+  const CategoryDonut({
+    super.key,
+    required this.amounts,
+    required this.colors,
+    this.center,
+  });
+
+  final List<int> amounts;
+  final List<Color> colors;
+  final Widget? center;
+
+  static const radius = 80.0;
+  static const stroke = 24.0;
+  static const gap = 3.0;
+
+  /// The box the donut occupies. Larger than the ring it contains (`r 80` + `stroke 24` spans
+  /// 184): the spec draws the ring on a 212 canvas, and the slack is what keeps the centred
+  /// total clear of the ring's inner edge.
+  static const size = 212.0;
+
+  @override
+  Widget build(BuildContext context) {
+    return CustomPaint(
+      painter: _DonutPainter(amounts: amounts, colors: colors),
+      child: Center(child: center),
+    );
+  }
+}
+
 class _DonutPainter extends CustomPainter {
   _DonutPainter({required this.amounts, required this.colors});
 
@@ -139,28 +280,40 @@ class _DonutPainter extends CustomPainter {
     final total = amounts.fold<int>(0, (sum, amount) => sum + amount);
     if (total <= 0) return;
 
-    final strokeWidth = size.shortestSide * 0.15;
-    final rect = Rect.fromLTWH(
-      strokeWidth / 2,
-      strokeWidth / 2,
-      size.width - strokeWidth,
-      size.height - strokeWidth,
+    final rect = Rect.fromCenter(
+      center: size.center(Offset.zero),
+      width: CategoryDonut.radius * 2,
+      height: CategoryDonut.radius * 2,
     );
+    // The spec's 3px gap is a distance along the ring, so it converts to an angle through the
+    // radius rather than being a fixed number of degrees.
+    final gapAngle = CategoryDonut.gap / CategoryDonut.radius;
 
     var startAngle = -math.pi / 2;
     for (var i = 0; i < amounts.length; i++) {
       final sweep = (amounts[i] / total) * 2 * math.pi;
-      final paint = Paint()
-        ..color = colors[i]
-        ..style = PaintingStyle.stroke
-        ..strokeWidth = strokeWidth
-        ..strokeCap = StrokeCap.butt;
-      canvas.drawArc(rect, startAngle, sweep, false, paint);
+      // A segment thinner than the gap it would carve out would invert into a backwards arc,
+      // so tiny slices keep a hairline of their own rather than disappearing.
+      final drawn = math.max(sweep - gapAngle, gapAngle / 2);
+      canvas.drawArc(
+        rect,
+        startAngle + gapAngle / 2,
+        drawn,
+        false,
+        Paint()
+          ..color = colors[i]
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = CategoryDonut.stroke
+          ..strokeCap = StrokeCap.butt,
+      );
       startAngle += sweep;
     }
   }
 
   @override
   bool shouldRepaint(_DonutPainter oldDelegate) =>
-      oldDelegate.amounts != amounts || oldDelegate.colors != colors;
+      !listEquals(oldDelegate.amounts, amounts) || !listEquals(oldDelegate.colors, colors);
 }
+
+String _capitalize(String value) =>
+    value.isEmpty ? value : value[0].toUpperCase() + value.substring(1);

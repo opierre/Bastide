@@ -58,6 +58,22 @@ Map<String, dynamic> _transactionsPageJson(List<String> bookedDates) => {
   'total': bookedDates.length,
 };
 
+Map<String, dynamic> _trendsJson() => {
+  'monthly_series': [
+    {
+      'month': '2026-05',
+      'income_minor': 285000,
+      'expense_minor': 221435,
+      'net_minor': 63565,
+    },
+  ],
+  'savings_series': [
+    {'month': '2026-04', 'cumulative_minor': 1020435},
+    {'month': '2026-05', 'cumulative_minor': 1084000},
+  ],
+  'currency': 'EUR',
+};
+
 void main() {
   late MockApiClient apiClient;
   late ProviderContainer container;
@@ -79,6 +95,7 @@ void main() {
     when(
       () => apiClient.get('/dashboard/summary', query: any(named: 'query')),
     ).thenAnswer((_) async => _summaryJson());
+    when(() => apiClient.get('/dashboard/trends')).thenAnswer((_) async => _trendsJson());
 
     final state = await container.read(dashboardControllerProvider.future);
 
@@ -96,6 +113,7 @@ void main() {
     when(
       () => apiClient.get('/dashboard/summary', query: any(named: 'query')),
     ).thenAnswer((_) async => _summaryJson());
+    when(() => apiClient.get('/dashboard/trends')).thenAnswer((_) async => _trendsJson());
 
     final state = await container.read(dashboardControllerProvider.future);
     final now = DateTime.now();
@@ -110,6 +128,7 @@ void main() {
     when(
       () => apiClient.get('/dashboard/summary', query: any(named: 'query')),
     ).thenAnswer((_) async => _summaryJson());
+    when(() => apiClient.get('/dashboard/trends')).thenAnswer((_) async => _trendsJson());
 
     await container.read(dashboardControllerProvider.future);
     await container.read(dashboardControllerProvider.notifier).changeMonth(DateTime(2026, 4));
@@ -121,6 +140,41 @@ void main() {
     ).called(1);
   });
 
+  test('the trend series survive a month change and are not re-fetched', () async {
+    when(
+      () => apiClient.get('/transactions', query: any(named: 'query')),
+    ).thenAnswer((_) async => _transactionsPageJson(['2026-05-14']));
+    when(
+      () => apiClient.get('/dashboard/summary', query: any(named: 'query')),
+    ).thenAnswer((_) async => _summaryJson());
+    when(() => apiClient.get('/dashboard/trends')).thenAnswer((_) async => _trendsJson());
+
+    await container.read(dashboardControllerProvider.future);
+    await container.read(dashboardControllerProvider.notifier).changeMonth(DateTime(2026, 1));
+
+    final state = container.read(dashboardControllerProvider).value!;
+    expect(state.month, DateTime(2026, 1));
+    // Both windows end at the *current* month, so paging back to January leaves them alone —
+    // and re-requesting a series that cannot have changed would be wasted work.
+    expect(state.trends.totalSavedMinor, 1084000);
+    verify(() => apiClient.get('/dashboard/trends')).called(1);
+  });
+
+  test('refresh does re-fetch the trends', () async {
+    when(
+      () => apiClient.get('/transactions', query: any(named: 'query')),
+    ).thenAnswer((_) async => _transactionsPageJson(['2026-05-14']));
+    when(
+      () => apiClient.get('/dashboard/summary', query: any(named: 'query')),
+    ).thenAnswer((_) async => _summaryJson());
+    when(() => apiClient.get('/dashboard/trends')).thenAnswer((_) async => _trendsJson());
+
+    await container.read(dashboardControllerProvider.future);
+    await container.read(dashboardControllerProvider.notifier).refresh();
+
+    verify(() => apiClient.get('/dashboard/trends')).called(2);
+  });
+
   test('a failed month change surfaces as an AsyncError', () async {
     when(
       () => apiClient.get('/transactions', query: any(named: 'query')),
@@ -128,6 +182,7 @@ void main() {
     when(
       () => apiClient.get('/dashboard/summary', query: any(named: 'query')),
     ).thenAnswer((_) async => _summaryJson());
+    when(() => apiClient.get('/dashboard/trends')).thenAnswer((_) async => _trendsJson());
 
     await container.read(dashboardControllerProvider.future);
 
@@ -148,6 +203,7 @@ void main() {
     when(
       () => apiClient.get('/dashboard/summary', query: any(named: 'query')),
     ).thenAnswer((_) async => _summaryJson());
+    when(() => apiClient.get('/dashboard/trends')).thenAnswer((_) async => _trendsJson());
 
     await container.read(dashboardControllerProvider.future);
     await container.read(dashboardControllerProvider.notifier).refresh();

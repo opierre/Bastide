@@ -10,6 +10,7 @@ import '../../imports/presentation/imports_screen.dart';
 import '../application/dashboard_controller.dart';
 import '../domain/dashboard_summary.dart';
 import 'category_breakdown.dart';
+import 'savings_trend.dart';
 import 'stat_card.dart';
 
 class DashboardScreen extends ConsumerWidget {
@@ -132,16 +133,36 @@ class _DashboardContent extends StatelessWidget {
           ),
         ),
         const SizedBox(height: AppSpacing.gridGap),
-        Expanded(
-          child: CategoryBreakdownChart(
-            categories: summary.byCategory,
-            currency: summary.currency,
+        SizedBox(
+          // Fixed 322px, per the spec's row 2 — the donut's geometry is pinned, so the row
+          // can't be left to take whatever height happens to be over.
+          height: _row2Height,
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Expanded(
+                flex: 135,
+                child: CategoryBreakdownChart(
+                  categories: summary.byCategory,
+                  currency: summary.currency,
+                  month: state.month,
+                ),
+              ),
+              const SizedBox(width: AppSpacing.gridGap),
+              Expanded(
+                flex: 100,
+                child: SavingsTrendChart(trends: state.trends),
+              ),
+            ],
           ),
         ),
       ],
     );
   }
 }
+
+/// Row 2's pinned height from `docs/design/04-dashboard.md`.
+const _row2Height = 322.0;
 
 class _EmptyState extends StatelessWidget {
   const _EmptyState({required this.onGoToImports});

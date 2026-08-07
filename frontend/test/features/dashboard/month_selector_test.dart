@@ -8,6 +8,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../../support/dashboard_fixtures.dart';
 import '../../support/fake_dashboard_controller.dart';
 
 const _summary = DashboardSummary(
@@ -37,7 +38,7 @@ Widget _wrap(FakeDashboardController controller) {
 }
 
 FakeDashboardController _controllerAt(DateTime month) =>
-    FakeDashboardController(initialState: DashboardState(month: month, summary: _summary));
+    FakeDashboardController(initialState: DashboardState(month: month, summary: _summary, trends: specTrends()));
 
 void main() {
   testWidgets('the chevrons still step one month at a time', (tester) async {
