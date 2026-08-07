@@ -866,6 +866,12 @@ abstract class AppLocalizations {
   /// **'Solde actuel'**
   String get accountCurrentBalanceLabel;
 
+  /// Label for the balance field when creating an account from a statement that dates its declared balance (OFX DTASOF): names the day the figure belongs to rather than calling it the current balance.
+  ///
+  /// In fr, this message translates to:
+  /// **'Solde au {date}'**
+  String accountBalanceAsOfLabel(DateTime date);
+
   /// Helper under the balance field when the account is being created from a statement: the import derives the real figure from the statement's declared balance, so an approximate entry here is harmless.
   ///
   /// In fr, this message translates to:

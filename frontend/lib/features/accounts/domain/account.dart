@@ -38,17 +38,23 @@ class AccountPrefill {
     this.type,
     this.ofxAccountId,
     this.balanceMinor,
+    this.balanceAsOf,
   });
 
   final String? name;
   final String? institution;
   final AccountType? type;
 
-  /// The balance the source declares the account holds today — an OFX
-  /// statement's `LEDGERBAL`. Fills the create form's balance field, which
-  /// means exactly that before any transaction lands. `null` when the source
-  /// declares none, and the user types it as before.
+  /// The balance the source declares the account holds — an OFX statement's
+  /// `LEDGERBAL`. Fills the create form's balance field, which means exactly
+  /// that before any transaction lands. `null` when the source declares none,
+  /// and the user types it as before.
   final int? balanceMinor;
+
+  /// The date [balanceMinor] holds at (`DTASOF`), when the source dates it.
+  /// The form names the field by it, because a statement's closing balance is
+  /// only "current" on the day the statement was cut.
+  final DateTime? balanceAsOf;
 
   /// Carried through creation but never shown as a field: it is the bank's
   /// identifier, not something the user has an opinion about.

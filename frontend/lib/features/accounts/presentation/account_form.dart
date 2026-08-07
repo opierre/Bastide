@@ -187,6 +187,9 @@ class _AccountFormState extends ConsumerState<AccountForm> {
     final l10n = AppLocalizations.of(context)!;
     final currency =
         widget.initial?.currency ?? ref.watch(currentUserProvider)?.currency ?? '';
+    // Only meaningful for the figure the statement itself declares: a date
+    // without a balance to date says nothing about what the user is typing.
+    final balanceAsOf = _balanceFromStatement ? widget.prefill?.balanceAsOf : null;
 
     return AppModal(
       width: 480,
@@ -249,8 +252,16 @@ class _AccountFormState extends ConsumerState<AccountForm> {
               // so what the user types is the balance the account holds today —
               // which is also what a statement's account block reports. Once
               // transactions land on top, it is only where the account started.
+              //
+              // A statement that dates its balance gets that date in the label:
+              // the file's closing balance was current on the day it was cut,
+              // and calling a three-week-old figure "solde actuel" invites the
+              // user to correct it to today's — which is exactly the number the
+              // first import must not be given.
               label: _isEditing
                   ? l10n.accountOpeningBalanceLabel
+                  : balanceAsOf != null
+                  ? l10n.accountBalanceAsOfLabel(balanceAsOf)
                   : l10n.accountCurrentBalanceLabel,
               // On create from a statement that declares its balance, the figure
               // is the statement's and is shown as settled — the note says where

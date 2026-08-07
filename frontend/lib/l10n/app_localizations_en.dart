@@ -423,6 +423,14 @@ class AppLocalizationsEn extends AppLocalizations {
   String get accountCurrentBalanceLabel => 'Current balance';
 
   @override
+  String accountBalanceAsOfLabel(DateTime date) {
+    final intl.DateFormat dateDateFormat = intl.DateFormat.yMd(localeName);
+    final String dateString = dateDateFormat.format(date);
+
+    return 'Balance as of $dateString';
+  }
+
+  @override
   String get accountBalanceStatementNote =>
       'Adjusted automatically from the balance your statement declares, on the first import.';
 

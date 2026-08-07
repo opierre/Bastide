@@ -245,8 +245,10 @@ AccountPrefill _prefillFrom(OfxAccountInfo info, AppLocalizations l10n) {
     // rather than on how the bank happens to spell its own name.
     ofxAccountId: info.accountNumber.trim(),
     // The statement's own closing balance, so the form asks the user to confirm
-    // a figure rather than to remember one.
+    // a figure rather than to remember one — dated, so the form can say which
+    // day it belongs to instead of implying it is today's.
     balanceMinor: info.ledgerBalanceMinor,
+    balanceAsOf: info.ledgerBalanceAsOf,
   );
 }
 

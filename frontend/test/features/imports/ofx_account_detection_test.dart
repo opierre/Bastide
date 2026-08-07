@@ -158,6 +158,22 @@ void main() {
       expect(info.maskedNumber, '••4567');
       // The declared closing balance, not the available one just after it.
       expect(info.ledgerBalanceMinor, 123456);
+      // The day the balance holds at, so the account form can name it.
+      expect(info.ledgerBalanceAsOf, DateTime(2026, 1, 31));
+    });
+
+    test('reads a balance whose DTASOF carries a time and a zone', () {
+      final dated = _sgml.replaceFirst('<DTASOF>20260131', '<DTASOF>20260131120000[+1:CET]');
+
+      expect(parseOfxAccountInfo(utf8.encode(dated))!.ledgerBalanceAsOf, DateTime(2026, 1, 31));
+    });
+
+    test('keeps a balance whose DTASOF is missing or unreadable', () {
+      final undated = _sgml.replaceFirst('<DTASOF>20260131', '<DTASOF>20260231');
+
+      final info = parseOfxAccountInfo(utf8.encode(undated))!;
+      expect(info.ledgerBalanceMinor, 123456);
+      expect(info.ledgerBalanceAsOf, isNull);
     });
 
     test('reads no balance out of a statement that declares none', () {

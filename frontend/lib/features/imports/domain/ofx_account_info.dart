@@ -16,6 +16,7 @@ class OfxAccountInfo {
     this.organization,
     this.currency,
     this.ledgerBalanceMinor,
+    this.ledgerBalanceAsOf,
   });
 
   /// `ACCTID` — the bank's account number. The one field worth having: it is
@@ -48,6 +49,13 @@ class OfxAccountInfo {
   /// balance would otherwise have to be typed from memory.
   final int? ledgerBalanceMinor;
 
+  /// `LEDGERBAL/DTASOF` — the date [ledgerBalanceMinor] holds at, or `null`
+  /// when the statement declares none (the tag is mandatory in the spec, but
+  /// exporters skip it). It is what lets the account form say *which* balance
+  /// it is stating instead of calling it the current one, which it stops being
+  /// the moment the statement is a few days old.
+  final DateTime? ledgerBalanceAsOf;
+
   /// The best available human label for the bank: the name it declares for
   /// itself, else the one its bank code resolves to, else the bare code, else
   /// nothing. A declared name wins because it is the bank's own answer, where
@@ -69,6 +77,7 @@ class OfxAccountInfo {
     organization: organization,
     currency: currency,
     ledgerBalanceMinor: ledgerBalanceMinor,
+    ledgerBalanceAsOf: ledgerBalanceAsOf,
   );
 
   /// The account number reduced to what is safe and useful to show: the last
@@ -89,7 +98,8 @@ class OfxAccountInfo {
           other.accountType == accountType &&
           other.organization == organization &&
           other.currency == currency &&
-          other.ledgerBalanceMinor == ledgerBalanceMinor);
+          other.ledgerBalanceMinor == ledgerBalanceMinor &&
+          other.ledgerBalanceAsOf == ledgerBalanceAsOf);
 
   @override
   int get hashCode => Object.hash(
@@ -100,5 +110,6 @@ class OfxAccountInfo {
     organization,
     currency,
     ledgerBalanceMinor,
+    ledgerBalanceAsOf,
   );
 }

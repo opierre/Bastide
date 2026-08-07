@@ -57,16 +57,41 @@ int? _parseAmountMinor(String? value) {
   return parsed == null ? null : (parsed * 100).round();
 }
 
-/// The closing balance the statement declares (`LEDGERBAL`), in minor units.
+/// An OFX timestamp (`YYYYMMDD` plus an optional time and zone we ignore), or
+/// `null` when it isn't one. Only the date half is read, and only as a label:
+/// the balance itself is what the import reconciles against.
+DateTime? _parseDate(String? value) {
+  final digits = value?.trim() ?? '';
+  if (digits.length < 8) return null;
+  final year = int.tryParse(digits.substring(0, 4));
+  final month = int.tryParse(digits.substring(4, 6));
+  final day = int.tryParse(digits.substring(6, 8));
+  if (year == null || month == null || day == null) return null;
+  if (month < 1 || month > 12 || day < 1 || day > 31) return null;
+  final parsed = DateTime(year, month, day);
+  // DateTime rolls an out-of-range day into the next month rather than
+  // rejecting it, so 20260231 would silently become 3 March.
+  return parsed.month == month && parsed.day == day ? parsed : null;
+}
+
+/// The closing balance the statement declares (`LEDGERBAL`), with the date it
+/// holds at (`DTASOF`).
 ///
 /// The one figure in the file saying where the account actually stands, as
 /// opposed to how it moved — which is what lets the account form propose a real
 /// balance instead of asking for one nobody can look up. A file holding several
 /// statements is read for the first, matching the account block we route on.
-int? _parseLedgerBalanceMinor(String text) {
+///
+/// `DTASOF` is mandatory in the spec but not every exporter emits it, so the
+/// date is optional and the balance stands on its own without it — the same
+/// tolerance the backend's `parse_ledger_balance` applies.
+({int amountMinor, DateTime? asOf})? _parseLedgerBalance(String text) {
   final match = _ledgerBalRe.firstMatch(text);
   if (match == null) return null;
-  return _parseAmountMinor(_tag(match.group(1)!, 'BALAMT'));
+  final block = match.group(1)!;
+  final amountMinor = _parseAmountMinor(_tag(block, 'BALAMT'));
+  if (amountMinor == null) return null;
+  return (amountMinor: amountMinor, asOf: _parseDate(_tag(block, 'DTASOF')));
 }
 
 /// The account block of [bytes], or `null` when the file isn't OFX or declares
@@ -84,12 +109,15 @@ OfxAccountInfo? parseOfxAccountInfo(List<int> bytes) {
   // A credit-card statement has no ACCTTYPE — the block it lives in is the type.
   final isCreditCard = acctFrom.group(1)!.toUpperCase() == 'CC';
 
+  final ledgerBalance = _parseLedgerBalance(text);
+
   return OfxAccountInfo(
     accountNumber: accountNumber,
     bankId: _tag(block, 'BANKID'),
     accountType: isCreditCard ? 'CREDITCARD' : _tag(block, 'ACCTTYPE'),
     organization: _tag(text, 'ORG'),
     currency: _tag(text, 'CURDEF'),
-    ledgerBalanceMinor: _parseLedgerBalanceMinor(text),
+    ledgerBalanceMinor: ledgerBalance?.amountMinor,
+    ledgerBalanceAsOf: ledgerBalance?.asOf,
   );
 }

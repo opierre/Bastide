@@ -523,6 +523,16 @@
   "@accountCurrentBalanceLabel": {
     "description": "Label for the same balance field when creating an account: with no history behind it yet, what the user enters is the balance the account holds today."
   },
+  "accountBalanceAsOfLabel": "Solde au {date}",
+  "@accountBalanceAsOfLabel": {
+    "description": "Label for the balance field when creating an account from a statement that dates its declared balance (OFX DTASOF): names the day the figure belongs to rather than calling it the current balance.",
+    "placeholders": {
+      "date": {
+        "type": "DateTime",
+        "format": "yMd"
+      }
+    }
+  },
   "accountBalanceStatementNote": "Ajusté automatiquement d'après le solde déclaré par votre relevé lors du premier import.",
   "@accountBalanceStatementNote": {
     "description": "Helper under the balance field when the account is being created from a statement: the import derives the real figure from the statement's declared balance, so an approximate entry here is harmless."

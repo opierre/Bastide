@@ -117,6 +117,39 @@ void main() {
     );
   });
 
+  testWidgets('a dated statement balance is labelled with the day it holds at', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      _wrap(
+        controller: FakeAccountsController(),
+        prefill: AccountPrefill(
+          name: 'Courant ••4567',
+          balanceMinor: 123456,
+          balanceAsOf: DateTime(2026, 1, 31),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    // The statement's closing balance was current the day it was cut, not
+    // today — naming the day stops the user "fixing" it to today's figure.
+    expect(find.text('Solde au 31/01/2026'), findsOneWidget);
+    expect(find.text('Solde actuel'), findsNothing);
+  });
+
+  testWidgets('an undated statement balance keeps the plain label', (tester) async {
+    await tester.pumpWidget(
+      _wrap(
+        controller: FakeAccountsController(),
+        prefill: const AccountPrefill(name: 'Courant ••4567', balanceMinor: 123456),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('Solde actuel'), findsOneWidget);
+  });
+
   testWidgets('a statement declaring no balance says the balance will be adjusted', (
     tester,
   ) async {

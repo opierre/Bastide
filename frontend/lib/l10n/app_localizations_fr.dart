@@ -425,6 +425,14 @@ class AppLocalizationsFr extends AppLocalizations {
   String get accountCurrentBalanceLabel => 'Solde actuel';
 
   @override
+  String accountBalanceAsOfLabel(DateTime date) {
+    final intl.DateFormat dateDateFormat = intl.DateFormat.yMd(localeName);
+    final String dateString = dateDateFormat.format(date);
+
+    return 'Solde au $dateString';
+  }
+
+  @override
   String get accountBalanceStatementNote =>
       'Ajusté automatiquement d\'après le solde déclaré par votre relevé lors du premier import.';
 
