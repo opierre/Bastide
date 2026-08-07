@@ -32,3 +32,44 @@ class DashboardSummary(BaseModel):
     savings_rate_delta_pct: float
     by_category: list[CategoryBreakdown]
     currency: str
+
+
+class MonthlyTotals(BaseModel):
+    """One month's income and expense, for the income-vs-expense bars."""
+
+    #: `YYYY-MM`.
+    month: str
+    income_minor: int
+
+    #: Positive magnitude, matching `DashboardSummary.expense_minor`.
+    expense_minor: int
+    net_minor: int
+
+
+class SavingsPoint(BaseModel):
+    """One point on the cumulative-savings line."""
+
+    #: `YYYY-MM`.
+    month: str
+
+    #: Running total of net across every month up to and including this one — including months
+    #: before the returned window, so the line starts where the user's savings actually stand
+    #: rather than at zero.
+    cumulative_minor: int
+
+
+class DashboardTrends(BaseModel):
+    """The dashboard's two trend series.
+
+    Both windows are anchored on *today*, not on the month the user has selected in the picker:
+    they answer "how am I trending lately", which doesn't change when the user pages back to
+    look at an older month. That is why this is a separate endpoint from the summary rather
+    than more fields on it — there is no `month` parameter for it to honour.
+    """
+
+    #: The last 4 months ending with the current one, oldest first.
+    monthly_series: list[MonthlyTotals]
+
+    #: The last 6 months ending with the current one, oldest first.
+    savings_series: list[SavingsPoint]
+    currency: str

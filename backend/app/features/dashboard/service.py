@@ -4,7 +4,17 @@ from datetime import date
 
 from app.core.errors import ValidationError
 from app.features.dashboard.repository import DashboardRepository
-from app.features.dashboard.schemas import CategoryBreakdown, DashboardSummary
+from app.features.dashboard.schemas import (
+    CategoryBreakdown,
+    DashboardSummary,
+    DashboardTrends,
+    MonthlyTotals,
+    SavingsPoint,
+)
+
+#: How many months each trend series covers, ending with the current month.
+BARS_MONTHS = 4
+SAVINGS_MONTHS = 6
 
 
 class DashboardMonthInvalidError(ValidationError):
@@ -59,6 +69,68 @@ class DashboardService:
             by_category=by_category,
             currency=currency,
         )
+
+    def trends(self, user_id: str, currency: str, today: date) -> DashboardTrends:
+        """Both trend series, over the months ending with `today`'s.
+
+        Anchored on `today` rather than on a requested month: these answer "how am I trending
+        lately", a question the month picker doesn't change. `today` is a parameter rather than
+        a `date.today()` call so the series are testable without freezing the clock.
+        """
+        current = date(today.year, today.month, 1)
+        months = _months_ending_at(current, SAVINGS_MONTHS)
+        window_end = _next_month(current)
+
+        buckets = self._repository.monthly_totals_by_month(user_id, months[0], window_end)
+
+        # Everything saved before the window opens, so the line starts at the user's real
+        # standing rather than at zero six months ago.
+        running = self._repository.net_before(user_id, months[0])
+        savings_series: list[SavingsPoint] = []
+        monthly_series: list[MonthlyTotals] = []
+        bars_from = months[SAVINGS_MONTHS - BARS_MONTHS]
+
+        for month_start in months:
+            income, expense = buckets.get((month_start.year, month_start.month), (0, 0))
+            running += income - expense
+            savings_series.append(
+                SavingsPoint(month=_month_key(month_start), cumulative_minor=running)
+            )
+            if month_start >= bars_from:
+                monthly_series.append(
+                    MonthlyTotals(
+                        month=_month_key(month_start),
+                        income_minor=income,
+                        expense_minor=expense,
+                        net_minor=income - expense,
+                    )
+                )
+
+        return DashboardTrends(
+            monthly_series=monthly_series,
+            savings_series=savings_series,
+            currency=currency,
+        )
+
+
+def _month_key(month_start: date) -> str:
+    """`YYYY-MM` for a first-of-month date."""
+    return f"{month_start.year:04d}-{month_start.month:02d}"
+
+
+def _next_month(month_start: date) -> date:
+    if month_start.month == 12:
+        return date(month_start.year + 1, 1, 1)
+    return date(month_start.year, month_start.month + 1, 1)
+
+
+def _months_ending_at(current: date, count: int) -> list[date]:
+    """The `count` first-of-month dates ending with `current`, oldest first."""
+    months: list[date] = []
+    for offset in range(count - 1, -1, -1):
+        total = current.year * 12 + (current.month - 1) - offset
+        months.append(date(total // 12, total % 12 + 1, 1))
+    return months
 
 
 def _month_bounds(month: str) -> tuple[date, date]:

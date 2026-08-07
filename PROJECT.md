@@ -333,7 +333,20 @@ GET    /dashboard/summary   ?month=YYYY-MM → {
           by_category: [{category_id, name, amount_minor, pct}],
           currency
         }
+GET    /dashboard/trends    → {                          // no month param — see below
+          monthly_series: [{month, income_minor, expense_minor, net_minor}],   // last 4 months
+          savings_series: [{month, cumulative_minor}],                         // last 6 months
+          currency
+        }
 ```
+
+> **Why `/dashboard/trends` is separate from `/dashboard/summary`.** The summary answers "how
+> did *this month* go" and is driven by the panel's month picker. The two trend series answer
+> "how am I trending lately", whose window ends at the *current* month and does not move when
+> the user pages back to inspect an older one. Folding them into `/summary` would mean an
+> endpoint whose response is only partly about the `month` it was asked for, and re-computing
+> identical series on every month change. Kept separate, the trends are fetched once and
+> survive month changes.
 
 Errors: consistent JSON envelope `{error: {code, message, details?}}` with proper HTTP status.
 

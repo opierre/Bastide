@@ -8,6 +8,9 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
 from app.features.accounts.models import Account
+from app.features.dashboard.repository import DashboardRepository
+from app.features.dashboard.schemas import DashboardTrends
+from app.features.dashboard.service import DashboardService
 from app.features.imports.models import ImportBatch
 from app.features.transactions.models import Transaction
 
@@ -385,3 +388,218 @@ def test_summary_rejects_invalid_month(client: TestClient) -> None:
     response = client.get("/api/v1/dashboard/summary", params={"month": "2026-13"}, headers=headers)
     assert response.status_code == 422
     assert response.json()["error"]["code"] == "DASHBOARD_MONTH_INVALID"
+
+
+# --- trend series ---------------------------------------------------------------------------
+
+
+def _trends_service(
+    client: TestClient, headers: dict[str, str], tmp_path: Path, today: date
+) -> DashboardTrends:
+    """Call the service directly so the series can be anchored on a fixed `today`.
+
+    The endpoint reads the real clock, which would make every assertion below expire the
+    moment the calendar moved on. The session is opened on the client's own SQLite file, the
+    same way `_insert_transaction` does.
+    """
+    user = client.get("/api/v1/auth/me", headers=headers).json()["user"]
+    engine = create_engine(
+        f"sqlite:///{tmp_path / 'test.db'}", connect_args={"check_same_thread": False}
+    )
+    session = sessionmaker(bind=engine)()
+    try:
+        service = DashboardService(DashboardRepository(session))
+        return service.trends(user["id"], user["currency"], today)
+    finally:
+        session.close()
+
+
+def test_trends_returns_four_bar_months_and_six_savings_months(
+    client: TestClient, tmp_path: Path
+) -> None:
+    headers = _register(client)
+    account_id = _create_account(client, headers)
+    income_category = _create_category(client, headers, kind="income")
+
+    _insert_transaction(
+        tmp_path,
+        account_id,
+        amount_minor=100_000,
+        booked_date=date(2026, 5, 5),
+        category_id=income_category,
+    )
+
+    trends = _trends_service(client, headers, tmp_path, date(2026, 5, 20))
+
+    assert [row.month for row in trends.monthly_series] == [
+        "2026-02",
+        "2026-03",
+        "2026-04",
+        "2026-05",
+    ]
+    assert [row.month for row in trends.savings_series] == [
+        "2025-12",
+        "2026-01",
+        "2026-02",
+        "2026-03",
+        "2026-04",
+        "2026-05",
+    ]
+    assert trends.currency == "EUR"
+
+
+def test_trends_windows_ignore_the_selected_month_and_end_at_today(
+    client: TestClient, tmp_path: Path
+) -> None:
+    """The series are anchored on the calendar, so they cross a year boundary correctly."""
+    headers = _register(client)
+    _create_account(client, headers)
+
+    trends = _trends_service(client, headers, tmp_path, date(2026, 2, 3))
+
+    assert [row.month for row in trends.monthly_series] == [
+        "2025-11",
+        "2025-12",
+        "2026-01",
+        "2026-02",
+    ]
+    assert trends.savings_series[0].month == "2025-09"
+
+
+def test_trends_bars_carry_income_expense_and_net_per_month(
+    client: TestClient, tmp_path: Path
+) -> None:
+    headers = _register(client)
+    account_id = _create_account(client, headers)
+    income_category = _create_category(client, headers, kind="income")
+    expense_category = _create_category(client, headers, kind="expense")
+
+    _insert_transaction(
+        tmp_path,
+        account_id,
+        amount_minor=285_000,
+        booked_date=date(2026, 5, 2),
+        category_id=income_category,
+    )
+    _insert_transaction(
+        tmp_path,
+        account_id,
+        amount_minor=-221_435,
+        booked_date=date(2026, 5, 14),
+        category_id=expense_category,
+    )
+
+    trends = _trends_service(client, headers, tmp_path, date(2026, 5, 20))
+    may = trends.monthly_series[-1]
+
+    assert may.income_minor == 285_000
+    # Expense is the positive magnitude, matching the summary's convention.
+    assert may.expense_minor == 221_435
+    assert may.net_minor == 63_565
+
+    # A month with no transactions is a zero bar, not a missing one.
+    assert trends.monthly_series[0].income_minor == 0
+    assert trends.monthly_series[0].net_minor == 0
+
+
+def test_savings_series_accumulates_and_opens_from_prior_months(
+    client: TestClient, tmp_path: Path
+) -> None:
+    headers = _register(client)
+    account_id = _create_account(client, headers)
+    income_category = _create_category(client, headers, kind="income")
+
+    # Before the 6-month window — must still be counted, or the line understates the total.
+    _insert_transaction(
+        tmp_path,
+        account_id,
+        amount_minor=500_000,
+        booked_date=date(2025, 6, 1),
+        category_id=income_category,
+    )
+    _insert_transaction(
+        tmp_path,
+        account_id,
+        amount_minor=100_000,
+        booked_date=date(2026, 4, 1),
+        category_id=income_category,
+    )
+    _insert_transaction(
+        tmp_path,
+        account_id,
+        amount_minor=63_565,
+        booked_date=date(2026, 5, 1),
+        category_id=income_category,
+    )
+
+    trends = _trends_service(client, headers, tmp_path, date(2026, 5, 20))
+    cumulative = [row.cumulative_minor for row in trends.savings_series]
+
+    # Opens at the pre-window total, then only ever moves by that month's net.
+    assert cumulative == [500_000, 500_000, 500_000, 500_000, 600_000, 663_565]
+
+
+def test_trends_excludes_transfers(client: TestClient, tmp_path: Path) -> None:
+    headers = _register(client)
+    account_id = _create_account(client, headers)
+    transfer_category = _create_category(client, headers, kind="transfer", name="Virement")
+
+    _insert_transaction(
+        tmp_path,
+        account_id,
+        amount_minor=-50_000,
+        booked_date=date(2026, 5, 5),
+        category_id=transfer_category,
+    )
+
+    trends = _trends_service(client, headers, tmp_path, date(2026, 5, 20))
+
+    assert trends.monthly_series[-1].expense_minor == 0
+    assert trends.savings_series[-1].cumulative_minor == 0
+
+
+def test_trends_is_user_scoped(client: TestClient, tmp_path: Path) -> None:
+    headers_a = _register(client, "amelie@example.com")
+    account_id_a = _create_account(client, headers_a)
+    income_a = _create_category(client, headers_a, kind="income")
+    _insert_transaction(
+        tmp_path,
+        account_id_a,
+        amount_minor=100_000,
+        booked_date=date(2026, 5, 5),
+        category_id=income_a,
+    )
+
+    headers_b = _register(client, "bruno@example.com")
+    account_id_b = _create_account(client, headers_b)
+    income_b = _create_category(client, headers_b, kind="income")
+    _insert_transaction(
+        tmp_path,
+        account_id_b,
+        amount_minor=500_000,
+        booked_date=date(2026, 5, 5),
+        category_id=income_b,
+    )
+
+    trends = _trends_service(client, headers_a, tmp_path, date(2026, 5, 20))
+
+    assert trends.monthly_series[-1].income_minor == 100_000
+
+
+def test_trends_requires_auth(client: TestClient) -> None:
+    response = client.get("/api/v1/dashboard/trends")
+    assert response.status_code == 401
+
+
+def test_trends_endpoint_takes_no_month_parameter(client: TestClient) -> None:
+    """A stray `?month=` is ignored rather than honoured — the window is the calendar's."""
+    headers = _register(client)
+
+    plain = client.get("/api/v1/dashboard/trends", headers=headers)
+    with_month = client.get(
+        "/api/v1/dashboard/trends", params={"month": "2020-01"}, headers=headers
+    )
+
+    assert plain.status_code == 200
+    assert with_month.status_code == 200
+    assert plain.json() == with_month.json()

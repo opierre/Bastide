@@ -2,7 +2,7 @@
 
 from datetime import date
 
-from sqlalchemy import case, func, or_, select
+from sqlalchemy import case, extract, func, or_, select
 from sqlalchemy.orm import Session
 
 from app.features.accounts.models import Account
@@ -49,6 +49,65 @@ class DashboardRepository:
             )
         ).one()
         return income or 0, expense or 0
+
+    def monthly_totals_by_month(
+        self, user_id: str, start: date, end: date
+    ) -> dict[tuple[int, int], tuple[int, int]]:
+        """`(year, month)` → `(income, expense)` for every month in `[start, end)` that has rows.
+
+        The same aggregation as `monthly_totals`, grouped rather than bounded to one month, so
+        the trend series costs one query instead of one per month. Months with no transactions
+        are simply absent from the mapping; the caller decides what a gap means (for the trend
+        series, zero).
+
+        Grouped with `extract()` rather than `strftime()` so the query keeps working on
+        PostgreSQL in Phase 4 — SQLAlchemy compiles it to each backend's own dialect.
+        """
+        year = extract("year", Transaction.booked_date)
+        month = extract("month", Transaction.booked_date)
+        income_expr = func.sum(
+            case((Transaction.amount_minor > 0, Transaction.amount_minor), else_=0)
+        )
+        expense_expr = func.sum(
+            case((Transaction.amount_minor < 0, -Transaction.amount_minor), else_=0)
+        )
+        rows = self._db.execute(
+            select(year, month, income_expr, expense_expr)
+            .select_from(Transaction)
+            .join(Account, Account.id == Transaction.account_id)
+            .outerjoin(Category, Category.id == Transaction.category_id)
+            .where(
+                Account.user_id == user_id,
+                Transaction.booked_date >= start,
+                Transaction.booked_date < end,
+                or_(Category.kind.is_(None), Category.kind != "transfer"),
+            )
+            .group_by(year, month)
+        ).all()
+        return {
+            (int(row_year), int(row_month)): (income or 0, expense or 0)
+            for row_year, row_month, income, expense in rows
+        }
+
+    def net_before(self, user_id: str, before: date) -> int:
+        """Net (income − expense) over every non-transfer transaction booked before `before`.
+
+        The opening balance the cumulative-savings series starts from: without it the chart
+        would restart at zero six months ago and understate what the user has actually put
+        aside.
+        """
+        total = self._db.execute(
+            select(func.sum(Transaction.amount_minor))
+            .select_from(Transaction)
+            .join(Account, Account.id == Transaction.account_id)
+            .outerjoin(Category, Category.id == Transaction.category_id)
+            .where(
+                Account.user_id == user_id,
+                Transaction.booked_date < before,
+                or_(Category.kind.is_(None), Category.kind != "transfer"),
+            )
+        ).scalar()
+        return total or 0
 
     def expense_breakdown(
         self, user_id: str, month_start: date, month_end: date
