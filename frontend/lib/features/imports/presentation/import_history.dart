@@ -108,12 +108,53 @@ String _currencyFor(List<Account> accounts, String accountId) {
   return '';
 }
 
-/// Column widths shared by the header and every row, so the two can't drift.
-const _formatWidth = 84.0;
-const _importedWidth = 118.0;
-const _periodWidth = 168.0;
-const _countWidth = 82.0;
-const _statusWidth = 116.0;
+/// Column proportions shared by the header and every row, so the two can't
+/// drift, plus the gutter between two columns.
+///
+/// Shares rather than pixel widths: the panel is as wide as the window, and
+/// pinning six columns to fixed widths spent every extra pixel on the file
+/// name while a date range or a status pill stayed clipped at the width it was
+/// born with. Proportions let each column grow with the table.
+const _fileFlex = 30;
+const _formatFlex = 10;
+const _importedFlex = 14;
+const _periodFlex = 20;
+const _countFlex = 10;
+const _statusFlex = 14;
+const _columnGap = AppSpacing.sm + AppSpacing.xs;
+
+/// Lays seven cells out on the shared column grid. Both the header and every
+/// row build through this, so a column can't be widened in one and not the
+/// other.
+Widget _columnRow({
+  required Widget file,
+  required Widget format,
+  required Widget imported,
+  required Widget period,
+  required Widget newCount,
+  required Widget duplicates,
+  required Widget status,
+  CrossAxisAlignment crossAxisAlignment = CrossAxisAlignment.center,
+}) {
+  return Row(
+    crossAxisAlignment: crossAxisAlignment,
+    children: [
+      Expanded(flex: _fileFlex, child: file),
+      const SizedBox(width: _columnGap),
+      Expanded(flex: _formatFlex, child: format),
+      const SizedBox(width: _columnGap),
+      Expanded(flex: _importedFlex, child: imported),
+      const SizedBox(width: _columnGap),
+      Expanded(flex: _periodFlex, child: period),
+      const SizedBox(width: _columnGap),
+      Expanded(flex: _countFlex, child: newCount),
+      const SizedBox(width: _columnGap),
+      Expanded(flex: _countFlex, child: duplicates),
+      const SizedBox(width: _columnGap),
+      Expanded(flex: _statusFlex, child: status),
+    ],
+  );
+}
 
 class _HeaderRow extends StatelessWidget {
   const _HeaderRow({required this.l10n});
@@ -122,31 +163,23 @@ class _HeaderRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    Widget cell(String label, {double? width, TextAlign align = TextAlign.left}) {
-      final text = Text(
-        label.toUpperCase(),
-        textAlign: align,
-        style: AppTextStyles.sectionLabel,
-      );
-      return width == null ? Expanded(child: text) : SizedBox(width: width, child: text);
-    }
+    Widget cell(String label, {TextAlign align = TextAlign.left}) => Text(
+      label.toUpperCase(),
+      textAlign: align,
+      style: AppTextStyles.sectionLabel,
+    );
 
     return Padding(
       padding: const EdgeInsets.only(bottom: AppSpacing.sm),
-      child: Row(
-        children: [
-          cell(l10n.importHistoryFileHeader),
-          cell(l10n.importHistoryFormatHeader, width: _formatWidth),
-          cell(l10n.importHistoryImportedHeader, width: _importedWidth),
-          cell(l10n.importHistoryPeriodHeader, width: _periodWidth),
-          cell(l10n.importHistoryNewHeader, width: _countWidth, align: TextAlign.right),
-          cell(
-            l10n.importHistoryDuplicatesHeader,
-            width: _countWidth,
-            align: TextAlign.right,
-          ),
-          cell(l10n.importHistoryStatusHeader, width: _statusWidth),
-        ],
+      child: _columnRow(
+        crossAxisAlignment: CrossAxisAlignment.end,
+        file: cell(l10n.importHistoryFileHeader),
+        format: cell(l10n.importHistoryFormatHeader),
+        imported: cell(l10n.importHistoryImportedHeader),
+        period: cell(l10n.importHistoryPeriodHeader),
+        newCount: cell(l10n.importHistoryNewHeader, align: TextAlign.right),
+        duplicates: cell(l10n.importHistoryDuplicatesHeader, align: TextAlign.right),
+        status: cell(l10n.importHistoryStatusHeader),
       ),
     );
   }
@@ -169,104 +202,88 @@ class _HistoryRow extends StatelessWidget {
     return Padding(
       key: Key('importBatchRow-${batch.id}'),
       padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm + 2),
-      child: Row(
+      child: _columnRow(
         crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
+        file: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              batch.fileName,
+              overflow: TextOverflow.ellipsis,
+              style: textTheme.titleSmall,
+            ),
+            // The note under the filename is where a run explains itself:
+            // why a re-import added nothing, or what a failure left alone.
+            if (batch.status == ImportStatus.failed) ...[
+              const SizedBox(height: 2),
+              Text(
+                l10n.importFailedNote,
+                key: Key('importBatchFailureNote-${batch.id}'),
+                style: AppTextStyles.helper.copyWith(color: AppColors.negative),
+              ),
+              if (batch.errorMessage case final message?
+                  when message.trim().isNotEmpty) ...[
+                const SizedBox(height: 1),
                 Text(
-                  batch.fileName,
+                  message,
                   overflow: TextOverflow.ellipsis,
-                  style: textTheme.titleSmall,
+                  style: AppTextStyles.mono.copyWith(color: AppColors.textDisabled),
                 ),
-                // The note under the filename is where a run explains itself:
-                // why a re-import added nothing, or what a failure left alone.
-                if (batch.status == ImportStatus.failed) ...[
-                  const SizedBox(height: 2),
-                  Text(
-                    l10n.importFailedNote,
-                    key: Key('importBatchFailureNote-${batch.id}'),
-                    style: AppTextStyles.helper.copyWith(color: AppColors.negative),
-                  ),
-                  if (batch.errorMessage case final message?
-                      when message.trim().isNotEmpty) ...[
-                    const SizedBox(height: 1),
-                    Text(
-                      message,
-                      overflow: TextOverflow.ellipsis,
-                      style: AppTextStyles.mono.copyWith(color: AppColors.textDisabled),
-                    ),
-                  ],
-                ] else if (batch.duplicateCount > 0) ...[
-                  const SizedBox(height: 2),
-                  Text(
-                    l10n.importDuplicatesNote(batch.duplicateCount),
-                    key: Key('importBatchDuplicateNote-${batch.id}'),
-                    style: AppTextStyles.helper.copyWith(color: AppColors.warning),
-                  ),
-                ],
-                // Independent of the notes above: a statement can both skip
-                // duplicates and disagree with the ledger's balance.
-                if (batch.balanceMismatchMinor case final mismatch?) ...[
-                  const SizedBox(height: 2),
-                  Text(
-                    l10n.importBalanceMismatchNote(
-                      formatAmount(
-                        amountMinor: mismatch,
-                        currency: currency,
-                        locale: locale,
-                        showPositiveSign: true,
-                      ),
-                      batch.balanceMismatchAsOf!,
-                    ),
-                    key: Key('importBatchMismatchNote-${batch.id}'),
-                    style: AppTextStyles.helper.copyWith(color: AppColors.warning),
-                  ),
-                ],
               ],
-            ),
-          ),
-          SizedBox(width: _formatWidth, child: ImportFormatBadge(format: batch.sourceFormat)),
-          SizedBox(
-            width: _importedWidth,
-            child: Text(
-              dateFormat.format(batch.importedAt.toLocal()),
-              style: tabularNumberStyle(
-                textTheme.bodyMedium!,
-              ).copyWith(color: AppColors.textSecondary),
-            ),
-          ),
-          SizedBox(
-            width: _periodWidth,
-            child: Text(
-              l10n.importPeriodRange(batch.periodStart, batch.periodEnd),
-              style: tabularNumberStyle(
-                textTheme.bodyMedium!,
-              ).copyWith(color: AppColors.textSecondary),
-            ),
-          ),
-          SizedBox(
-            width: _countWidth,
-            child: Text(
-              numberFormat.format(batch.newCount),
-              textAlign: TextAlign.right,
-              style: tabularNumberStyle(textTheme.bodyMedium!),
-            ),
-          ),
-          SizedBox(
-            width: _countWidth,
-            child: Text(
-              numberFormat.format(batch.duplicateCount),
-              textAlign: TextAlign.right,
-              style: tabularNumberStyle(
-                textTheme.bodyMedium!,
-              ).copyWith(color: AppColors.textSecondary),
-            ),
-          ),
-          SizedBox(width: _statusWidth, child: ImportStatusPill(status: batch.status)),
-        ],
+            ] else if (batch.duplicateCount > 0) ...[
+              const SizedBox(height: 2),
+              Text(
+                l10n.importDuplicatesNote(batch.duplicateCount),
+                key: Key('importBatchDuplicateNote-${batch.id}'),
+                style: AppTextStyles.helper.copyWith(color: AppColors.warning),
+              ),
+            ],
+            // Independent of the notes above: a statement can both skip
+            // duplicates and disagree with the ledger's balance.
+            if (batch.balanceMismatchMinor case final mismatch?) ...[
+              const SizedBox(height: 2),
+              Text(
+                l10n.importBalanceMismatchNote(
+                  formatAmount(
+                    amountMinor: mismatch,
+                    currency: currency,
+                    locale: locale,
+                    showPositiveSign: true,
+                  ),
+                  batch.balanceMismatchAsOf!,
+                ),
+                key: Key('importBatchMismatchNote-${batch.id}'),
+                style: AppTextStyles.helper.copyWith(color: AppColors.warning),
+              ),
+            ],
+          ],
+        ),
+        format: ImportFormatBadge(format: batch.sourceFormat),
+        imported: Text(
+          dateFormat.format(batch.importedAt.toLocal()),
+          style: tabularNumberStyle(
+            textTheme.bodyMedium!,
+          ).copyWith(color: AppColors.textSecondary),
+        ),
+        period: Text(
+          l10n.importPeriodRange(batch.periodStart, batch.periodEnd),
+          style: tabularNumberStyle(
+            textTheme.bodyMedium!,
+          ).copyWith(color: AppColors.textSecondary),
+        ),
+        newCount: Text(
+          numberFormat.format(batch.newCount),
+          textAlign: TextAlign.right,
+          style: tabularNumberStyle(textTheme.bodyMedium!),
+        ),
+        duplicates: Text(
+          numberFormat.format(batch.duplicateCount),
+          textAlign: TextAlign.right,
+          style: tabularNumberStyle(
+            textTheme.bodyMedium!,
+          ).copyWith(color: AppColors.textSecondary),
+        ),
+        status: ImportStatusPill(status: batch.status),
       ),
     );
   }
