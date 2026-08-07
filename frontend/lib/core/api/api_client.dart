@@ -24,7 +24,7 @@ class ApiFailure implements Exception {
 /// layer talks HTTP directly.
 class ApiClient {
   ApiClient({Uri? baseUrl, http.Client? httpClient, this.tokenProvider})
-    : baseUrl = baseUrl ?? Uri.parse('http://127.0.0.1:8000/api/v1'),
+    : baseUrl = baseUrl ?? Uri.parse('http://127.0.0.1:8765/api/v1'),
       _httpClient = httpClient ?? http.Client();
 
   final Uri baseUrl;
