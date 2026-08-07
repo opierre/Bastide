@@ -48,6 +48,9 @@ htmlcov/
 *.db
 *.sqlite
 *.sqlite3
+# WAL sidecars — SQLite runs in WAL mode, so these sit beside every local db.
+*.db-shm
+*.db-wal
 
 # Environment
 .env
