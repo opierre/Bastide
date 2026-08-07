@@ -85,10 +85,11 @@ class _AppSelectState<T> extends State<AppSelect<T>> {
         padding: const WidgetStatePropertyAll(
           EdgeInsets.symmetric(vertical: AppSpacing.xs + 2),
         ),
-        minimumSize: WidgetStatePropertyAll(Size(_menuWidth ?? 0, 0)),
-        maximumSize: WidgetStatePropertyAll(
-          Size(_menuWidth ?? double.infinity, 320),
-        ),
+        // Height only. The width is carried by the options themselves (see
+        // [_Option]): a vertical menu panel wraps itself in an
+        // [UnconstrainedBox], which drops the minimum width a [MenuStyle]
+        // asks for, so a style-level width would silently do nothing.
+        maximumSize: const WidgetStatePropertyAll(Size(double.infinity, 320)),
         shape: const WidgetStatePropertyAll(
           RoundedRectangleBorder(
             borderRadius: BorderRadius.all(Radius.circular(AppRadii.inset)),
@@ -100,6 +101,7 @@ class _AppSelectState<T> extends State<AppSelect<T>> {
         for (final item in widget.items)
           _Option<T>(
             item: item,
+            width: _menuWidth,
             isSelected: item.value == widget.value,
             onSelected: () => widget.onChanged(item.value),
           ),
@@ -191,19 +193,36 @@ class _Anchor extends StatelessWidget {
 /// A 32px option row. The selected one is marked by an iris check rather than
 /// by a filled row: the popover sits on the overlay surface, where a full-width
 /// fill would compete with hover.
+///
+/// [width] is the anchor's measured width, and it is the row — not the panel —
+/// that carries it: the panel sizes itself to its widest child, so widening
+/// every row is what makes the popover line up edge-to-edge with the field it
+/// dropped from. Null before the first open, where the rows fall back to their
+/// intrinsic width.
 class _Option<T> extends StatelessWidget {
   const _Option({
     required this.item,
+    required this.width,
     required this.isSelected,
     required this.onSelected,
   });
 
   final AppSelectItem<T> item;
+  final double? width;
   final bool isSelected;
   final VoidCallback onSelected;
 
   @override
   Widget build(BuildContext context) {
+    // Sized from the outside rather than through the button's own minimum
+    // width, which desktop's compact [VisualDensity] would shave 8px off.
+    return SizedBox(
+      width: width,
+      child: _button(context),
+    );
+  }
+
+  Widget _button(BuildContext context) {
     return MenuItemButton(
       onPressed: onSelected,
       style: ButtonStyle(
@@ -226,7 +245,10 @@ class _Option<T> extends StatelessWidget {
             child: Text(
               item.label,
               overflow: TextOverflow.ellipsis,
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              // The same style the anchor states the current choice in, so a
+              // row and the closed field read as the same text, not as a
+              // summary and a smaller list beneath it.
+              style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                 color: isSelected ? AppColors.iris : AppColors.textPrimary,
               ),
             ),

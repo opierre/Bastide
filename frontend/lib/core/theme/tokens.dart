@@ -238,8 +238,13 @@ abstract final class AppShadows {
   /// Material renders it through `Canvas.drawShadow`, a single draw op on the
   /// menu's own layer, with no offscreen buffer and no blur pass of our own —
   /// and only while a menu is open.
-  static const popoverElevation = 12.0;
-  static const popoverShadow = Color(0x8C000000);
+  ///
+  /// Raised from the spec's elevation 12 to 24 with a near-black shadow: a
+  /// popover most often opens over a modal, whose own surface is already dark
+  /// and already shadowed, and at 12 the menu's edge dissolved into it. The
+  /// darker, longer cast is what separates the two planes.
+  static const popoverElevation = 24.0;
+  static const popoverShadow = Color(0xCC000000);
 }
 
 /// The spec allows exactly two keyframes — a button spinner and a skeleton
