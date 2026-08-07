@@ -41,6 +41,14 @@ VERSION:102
 <NAME>CARTE ACHAT
 </STMTTRN>
 </BANKTRANLIST>
+<LEDGERBAL>
+<BALAMT>1234.56
+<DTASOF>20260131
+</LEDGERBAL>
+<AVAILBAL>
+<BALAMT>999.00
+<DTASOF>20260131
+</AVAILBAL>
 </STMTRS>
 </STMTTRNRS>
 </BANKMSGSRSV1>
@@ -148,6 +156,18 @@ void main() {
       expect(info.organization, 'BOURSORAMA BANQUE');
       expect(info.currency, 'EUR');
       expect(info.maskedNumber, '••4567');
+      // The declared closing balance, not the available one just after it.
+      expect(info.ledgerBalanceMinor, 123456);
+    });
+
+    test('reads no balance out of a statement that declares none', () {
+      expect(parseOfxAccountInfo(utf8.encode(_creditCardXml))!.ledgerBalanceMinor, isNull);
+    });
+
+    test('reads a negative closing balance as an overdraft, not its absolute value', () {
+      final overdrawn = _sgml.replaceFirst('<BALAMT>1234.56', '<BALAMT>-42.05');
+
+      expect(parseOfxAccountInfo(utf8.encode(overdrawn))!.ledgerBalanceMinor, -4205);
     });
 
     test('reads closed XML tags and types a CCACCTFROM block as a card', () {

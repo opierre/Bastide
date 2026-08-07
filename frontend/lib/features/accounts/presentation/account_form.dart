@@ -63,11 +63,12 @@ class _AccountFormState extends ConsumerState<AccountForm> {
   );
   final _openingBalanceController = TextEditingController();
 
-  /// Guards the one-time locale-aware fill of [_openingBalanceController] in
-  /// edit mode. Done in [didChangeDependencies] rather than at field-init
-  /// time because it must match the same [NumberFormat] `_parseMinorUnits`
-  /// re-parses on submit, which needs `context` for the active locale —
-  /// unavailable before the widget is mounted.
+  /// Guards the one-time locale-aware fill of [_openingBalanceController] —
+  /// with the account's own figure when editing, with the balance the statement
+  /// declares when creating from one. Done in [didChangeDependencies] rather
+  /// than at field-init time because it must match the same [NumberFormat]
+  /// `_parseMinorUnits` re-parses on submit, which needs `context` for the
+  /// active locale — unavailable before the widget is mounted.
   bool _openingBalanceFilled = false;
 
   late AccountType _type =
@@ -85,11 +86,13 @@ class _AccountFormState extends ConsumerState<AccountForm> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    if (_openingBalanceFilled || widget.initial == null) return;
+    if (_openingBalanceFilled) return;
+    final balanceMinor = widget.initial?.openingBalanceMinor ?? widget.prefill?.balanceMinor;
+    if (balanceMinor == null) return;
     final locale = Localizations.localeOf(context).toString();
     _openingBalanceController.text = NumberFormat.decimalPattern(
       locale,
-    ).format(widget.initial!.openingBalanceMinor / 100);
+    ).format(balanceMinor / 100);
     _openingBalanceFilled = true;
   }
 
@@ -241,16 +244,20 @@ class _AccountFormState extends ConsumerState<AccountForm> {
               label: _isEditing
                   ? l10n.accountOpeningBalanceLabel
                   : l10n.accountCurrentBalanceLabel,
-              // On create from a statement, a rough entry costs nothing — the
-              // first import derives the real figure from the statement's
-              // declared balance, so we say so rather than let it look like a
-              // typo tax. On edit, changing it is itself the correction, so the
-              // note explains its blast radius instead: cache and snapshots
-              // move with it, but no transaction is touched.
-              helper: !_isEditing && widget.prefill != null
-                  ? l10n.accountBalanceStatementNote
-                  : _isEditing
+              // On create from a statement that declares its balance, the field
+              // is already filled from it and the note says where the figure
+              // came from. A statement without one leaves the field empty, so
+              // the note reassures instead: a rough entry costs nothing, since
+              // the first import derives the real figure anyway. On edit,
+              // changing it is itself the correction, so the note explains its
+              // blast radius: cache and snapshots move with it, but no
+              // transaction is touched.
+              helper: _isEditing
                   ? l10n.accountOpeningBalanceEditNote
+                  : widget.prefill?.balanceMinor != null
+                  ? l10n.accountBalanceFromStatementNote
+                  : widget.prefill != null
+                  ? l10n.accountBalanceStatementNote
                   : null,
               child: TextFormField(
                 key: const Key('accountOpeningBalanceField'),

@@ -81,7 +81,8 @@ final _savedTemplate = CsvTemplate(
   createdAt: DateTime.utc(2026, 5, 1),
 );
 
-/// An OFX statement declaring a Boursorama checking account ending 4567.
+/// An OFX statement declaring a Boursorama checking account ending 4567, and
+/// the balance that account closed the period at.
 final _ofxBytes = utf8.encode('''
 <OFX>
 <SIGNONMSGSRSV1><SONRS><FI><ORG>BOURSORAMA BANQUE
@@ -93,6 +94,10 @@ final _ofxBytes = utf8.encode('''
 <ACCTID>0001234567
 <ACCTTYPE>CHECKING
 </BANKACCTFROM>
+<LEDGERBAL>
+<BALAMT>1234.56
+<DTASOF>20260131
+</LEDGERBAL>
 </STMTRS></STMTTRNRS></BANKMSGSRSV1>
 </OFX>
 ''');
@@ -341,12 +346,14 @@ void main() {
     expect(find.text('Courant ••4567'), findsOneWidget);
     expect(find.text('BOURSORAMA BANQUE'), findsOneWidget);
 
-    await tester.enterText(find.byKey(const Key('accountOpeningBalanceField')), '0');
+    // Nothing left to fill in: the statement declared its balance, so the form
+    // submits as it opened.
     await tester.tap(find.byKey(const Key('accountFormSubmitButton')));
     await tester.pumpAndSettle();
 
     expect(accounts.createCalls.single.institution, 'BOURSORAMA BANQUE');
     expect(accounts.createCalls.single.type, AccountType.checking);
+    expect(accounts.createCalls.single.openingBalanceMinor, 123456);
     // The statement's own id is bound to the account, so the next import from
     // it matches on identity rather than on the bank's name.
     expect(accounts.createCalls.single.ofxAccountId, '0001234567');

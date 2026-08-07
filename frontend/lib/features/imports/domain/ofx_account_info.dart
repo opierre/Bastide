@@ -15,6 +15,7 @@ class OfxAccountInfo {
     this.accountType,
     this.organization,
     this.currency,
+    this.ledgerBalanceMinor,
   });
 
   /// `ACCTID` — the bank's account number. The one field worth having: it is
@@ -40,6 +41,13 @@ class OfxAccountInfo {
   /// `CURDEF` — the statement's currency.
   final String? currency;
 
+  /// `LEDGERBAL/BALAMT` in minor units — the closing balance the statement
+  /// declares for its account, or `null` when it declares none (not every
+  /// exporter emits one). Not part of matching: it says nothing about *which*
+  /// account this is. It is here for the account the statement proposes, whose
+  /// balance would otherwise have to be typed from memory.
+  final int? ledgerBalanceMinor;
+
   /// The best available human label for the bank: the name it declares for
   /// itself, else the one its bank code resolves to, else the bare code, else
   /// nothing. A declared name wins because it is the bank's own answer, where
@@ -60,6 +68,7 @@ class OfxAccountInfo {
     accountType: accountType,
     organization: organization,
     currency: currency,
+    ledgerBalanceMinor: ledgerBalanceMinor,
   );
 
   /// The account number reduced to what is safe and useful to show: the last
@@ -79,9 +88,17 @@ class OfxAccountInfo {
           other.bankName == bankName &&
           other.accountType == accountType &&
           other.organization == organization &&
-          other.currency == currency);
+          other.currency == currency &&
+          other.ledgerBalanceMinor == ledgerBalanceMinor);
 
   @override
-  int get hashCode =>
-      Object.hash(accountNumber, bankId, bankName, accountType, organization, currency);
+  int get hashCode => Object.hash(
+    accountNumber,
+    bankId,
+    bankName,
+    accountType,
+    organization,
+    currency,
+    ledgerBalanceMinor,
+  );
 }

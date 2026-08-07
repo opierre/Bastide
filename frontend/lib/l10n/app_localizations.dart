@@ -872,6 +872,12 @@ abstract class AppLocalizations {
   /// **'Ajusté automatiquement d\'après le solde déclaré par votre relevé lors du premier import.'**
   String get accountBalanceStatementNote;
 
+  /// Helper under the balance field when the account is being created from a statement that declares its closing balance: the field is pre-filled from it, and the user can still change it.
+  ///
+  /// In fr, this message translates to:
+  /// **'Repris du solde déclaré par votre relevé. Modifiable si besoin.'**
+  String get accountBalanceFromStatementNote;
+
   /// Helper under the balance field when editing an existing account: explains that a manual correction shifts the cached balance and every saved snapshot by the same delta rather than rewriting the ledger.
   ///
   /// In fr, this message translates to:

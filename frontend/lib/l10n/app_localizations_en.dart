@@ -427,6 +427,10 @@ class AppLocalizationsEn extends AppLocalizations {
       'Adjusted automatically from the balance your statement declares, on the first import.';
 
   @override
+  String get accountBalanceFromStatementNote =>
+      'Taken from the balance your statement declares. Change it if you need to.';
+
+  @override
   String get accountOpeningBalanceEditNote =>
       'Correcting this shifts the account\'s balance and any saved history by the same amount — it never touches a transaction.';
 

@@ -243,6 +243,9 @@ AccountPrefill _prefillFrom(OfxAccountInfo info, AppLocalizations l10n) {
     // Bound to the account so the next statement from it matches on identity
     // rather than on how the bank happens to spell its own name.
     ofxAccountId: info.accountNumber.trim(),
+    // The statement's own closing balance, so the form asks the user to confirm
+    // a figure rather than to remember one.
+    balanceMinor: info.ledgerBalanceMinor,
   );
 }
 

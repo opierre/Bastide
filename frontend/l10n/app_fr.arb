@@ -527,6 +527,10 @@
   "@accountBalanceStatementNote": {
     "description": "Helper under the balance field when the account is being created from a statement: the import derives the real figure from the statement's declared balance, so an approximate entry here is harmless."
   },
+  "accountBalanceFromStatementNote": "Repris du solde déclaré par votre relevé. Modifiable si besoin.",
+  "@accountBalanceFromStatementNote": {
+    "description": "Helper under the balance field when the account is being created from a statement that declares its closing balance: the field is pre-filled from it, and the user can still change it."
+  },
   "accountOpeningBalanceEditNote": "Corriger cette valeur décale le solde du compte et son historique enregistré du même montant — aucune transaction n'est modifiée.",
   "@accountOpeningBalanceEditNote": {
     "description": "Helper under the balance field when editing an existing account: explains that a manual correction shifts the cached balance and every saved snapshot by the same delta rather than rewriting the ledger."

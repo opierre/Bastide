@@ -32,11 +32,23 @@ enum AccountType {
 /// back to its own defaults for whatever the source couldn't tell us.
 @immutable
 class AccountPrefill {
-  const AccountPrefill({this.name, this.institution, this.type, this.ofxAccountId});
+  const AccountPrefill({
+    this.name,
+    this.institution,
+    this.type,
+    this.ofxAccountId,
+    this.balanceMinor,
+  });
 
   final String? name;
   final String? institution;
   final AccountType? type;
+
+  /// The balance the source declares the account holds today — an OFX
+  /// statement's `LEDGERBAL`. Fills the create form's balance field, which
+  /// means exactly that before any transaction lands. `null` when the source
+  /// declares none, and the user types it as before.
+  final int? balanceMinor;
 
   /// Carried through creation but never shown as a field: it is the bank's
   /// identifier, not something the user has an opinion about.

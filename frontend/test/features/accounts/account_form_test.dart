@@ -7,6 +7,7 @@ import 'package:finstride/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:intl/intl.dart';
 
 import '../../support/fake_accounts_controller.dart';
 
@@ -112,7 +113,7 @@ void main() {
     );
   });
 
-  testWidgets('an account proposed by a statement says its balance will be adjusted', (
+  testWidgets('a statement declaring no balance says the balance will be adjusted', (
     tester,
   ) async {
     await tester.pumpWidget(
@@ -129,6 +130,40 @@ void main() {
       ),
       findsOneWidget,
     );
+  });
+
+  testWidgets('the balance a statement declares is filled in, formatted for the locale', (
+    tester,
+  ) async {
+    final controller = FakeAccountsController();
+    await tester.pumpWidget(
+      _wrap(
+        controller: controller,
+        prefill: const AccountPrefill(
+          name: 'Courant ••4567',
+          institution: 'Boursorama',
+          balanceMinor: 123456,
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    // Nothing to remember and nothing to type: the figure is the statement's,
+    // written the way a French user reads it (grouping and decimal comma —
+    // spelled with the separators intl itself uses, not with ASCII ones).
+    expect(find.text(NumberFormat.decimalPattern('fr').format(1234.56)), findsOneWidget);
+    expect(
+      find.text('Repris du solde déclaré par votre relevé. Modifiable si besoin.'),
+      findsOneWidget,
+    );
+
+    await tester.enterText(find.byKey(const Key('accountInstitutionField')), 'Boursorama');
+    await tester.tap(find.byKey(const Key('accountFormSubmitButton')));
+    await tester.pumpAndSettle();
+
+    // Submitted as read: the round-trip through the locale format must not
+    // shift the figure the statement declared.
+    expect(controller.createCalls.single.openingBalanceMinor, 123456);
   });
 
   testWidgets('a deferred-debit card is offered as its own account type', (tester) async {

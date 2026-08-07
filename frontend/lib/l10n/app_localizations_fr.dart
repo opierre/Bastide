@@ -428,6 +428,10 @@ class AppLocalizationsFr extends AppLocalizations {
       'Ajusté automatiquement d\'après le solde déclaré par votre relevé lors du premier import.';
 
   @override
+  String get accountBalanceFromStatementNote =>
+      'Repris du solde déclaré par votre relevé. Modifiable si besoin.';
+
+  @override
   String get accountOpeningBalanceEditNote =>
       'Corriger cette valeur décale le solde du compte et son historique enregistré du même montant — aucune transaction n\'est modifiée.';
 
