@@ -180,11 +180,14 @@ InputDecorationTheme _inputDecorationTheme(TextTheme textTheme) {
     filled: true,
     fillColor: AppColors.surfaceField,
     isDense: true,
-    // 13.5px at height 1.5 plus 12 top/bottom lands the field at the spec's
-    // 42–44px without pinning an explicit height (which would clip helper text).
+    // A dense decorator lays the text out on its font metrics rather than on the
+    // 1.5 line height, so 12px of padding left the field at 36 — three-quarters
+    // of an inch shorter than the 44px [AppSelect] and [ReadOnlyField] standing
+    // beside it in the same form. Padded to land on 44 instead, measured rather
+    // than derived, so a field and a select read as one row of controls.
     contentPadding: const EdgeInsets.symmetric(
       horizontal: AppSpacing.sm + AppSpacing.xs,
-      vertical: AppSpacing.sm + AppSpacing.xs,
+      vertical: AppSpacing.md,
     ),
     // Labels sit above the field rather than floating inside it: French labels
     // run 15–20% longer than English and clip badly when squeezed into a notch.
