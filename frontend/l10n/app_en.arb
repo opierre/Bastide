@@ -303,5 +303,8 @@
   "dashboardGoToImports": "Go to imports",
   "dashboardRetry": "Retry",
   "dashboardErrorInvalidMonth": "The requested month isn't valid.",
-  "dashboardErrorGeneric": "Something went wrong. Please try again."
+  "dashboardErrorGeneric": "Something went wrong. Please try again.",
+  "dashboardChooseMonth": "Choose a month",
+  "dashboardPreviousYear": "Previous year",
+  "dashboardNextYear": "Next year"
 }

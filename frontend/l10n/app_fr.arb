@@ -1156,5 +1156,17 @@
   "dashboardErrorGeneric": "Une erreur est survenue. Veuillez réessayer.",
   "@dashboardErrorGeneric": {
     "description": "Fallback localized message for unrecognized or network errors on the dashboard."
+  },
+  "dashboardChooseMonth": "Choisir un mois",
+  "@dashboardChooseMonth": {
+    "description": "Tooltip on the top bar's month label, which opens a month-and-year picker."
+  },
+  "dashboardPreviousYear": "Année précédente",
+  "@dashboardPreviousYear": {
+    "description": "Tooltip on the picker's back-a-year step button."
+  },
+  "dashboardNextYear": "Année suivante",
+  "@dashboardNextYear": {
+    "description": "Tooltip on the picker's forward-a-year step button."
   }
 }

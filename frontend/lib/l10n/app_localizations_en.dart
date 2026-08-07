@@ -910,4 +910,13 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get dashboardErrorGeneric => 'Something went wrong. Please try again.';
+
+  @override
+  String get dashboardChooseMonth => 'Choose a month';
+
+  @override
+  String get dashboardPreviousYear => 'Previous year';
+
+  @override
+  String get dashboardNextYear => 'Next year';
 }

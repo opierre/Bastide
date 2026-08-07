@@ -919,4 +919,13 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get dashboardErrorGeneric =>
       'Une erreur est survenue. Veuillez réessayer.';
+
+  @override
+  String get dashboardChooseMonth => 'Choisir un mois';
+
+  @override
+  String get dashboardPreviousYear => 'Année précédente';
+
+  @override
+  String get dashboardNextYear => 'Année suivante';
 }

@@ -1669,6 +1669,24 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Une erreur est survenue. Veuillez réessayer.'**
   String get dashboardErrorGeneric;
+
+  /// Tooltip on the top bar's month label, which opens a month-and-year picker.
+  ///
+  /// In fr, this message translates to:
+  /// **'Choisir un mois'**
+  String get dashboardChooseMonth;
+
+  /// Tooltip on the picker's back-a-year step button.
+  ///
+  /// In fr, this message translates to:
+  /// **'Année précédente'**
+  String get dashboardPreviousYear;
+
+  /// Tooltip on the picker's forward-a-year step button.
+  ///
+  /// In fr, this message translates to:
+  /// **'Année suivante'**
+  String get dashboardNextYear;
 }
 
 class _AppLocalizationsDelegate
