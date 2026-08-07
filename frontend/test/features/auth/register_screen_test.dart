@@ -121,7 +121,17 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(find.byKey(const Key('registerCurrencyField')));
     await tester.pumpAndSettle();
-    await tester.tap(find.textContaining('USD —').last);
+
+    // The field keeps stating the currency in force while the options are up,
+    // so the choice being changed never leaves the screen.
+    expect(find.textContaining('EUR —'), findsNWidgets(2));
+
+    await tester.tap(
+      find.ancestor(
+        of: find.textContaining('USD —'),
+        matching: find.byType(MenuItemButton),
+      ),
+    );
     await tester.pumpAndSettle();
 
     await tester.tap(find.byKey(const Key('registerSubmitButton')));

@@ -107,6 +107,35 @@ void main() {
     expect(find.byKey(const Key('csvWizardConfirmButton')), findsNothing);
   });
 
+  testWidgets('a delimiter picked from the select reaches the parse', (tester) async {
+    final imports = FakeImportsController(previewRows: _previewRows);
+    await tester.pumpWidget(
+      _wrap(imports: imports, templates: FakeCsvTemplatesController()),
+    );
+    await tester.pumpAndSettle();
+
+    final anchor = tester.getRect(find.byKey(const Key('csvWizardDelimiterField')));
+    await tester.tap(find.byKey(const Key('csvWizardDelimiterField')));
+    await tester.pumpAndSettle();
+
+    // The field still states the current delimiter — twice on screen now, once
+    // in the field and once as the option it came from — with the options
+    // beneath it rather than over it. (The comma is taken from the open menu:
+    // the decimal-separator segmented control spells one too.)
+    expect(find.text('Point-virgule ( ; )'), findsNWidgets(2));
+    final comma = find.widgetWithText(MenuItemButton, 'Virgule ( , )');
+    expect(tester.getRect(comma).top, greaterThanOrEqualTo(anchor.bottom));
+
+    await tester.tap(comma);
+    await tester.pumpAndSettle();
+
+    // The menu is gone and the field states the new choice.
+    expect(find.text('Point-virgule ( ; )'), findsNothing);
+
+    await _mapSignedColumns(tester);
+    expect(imports.previewCalls.last.delimiter, ',');
+  });
+
   testWidgets('holds the preview back until the required columns are mapped', (
     tester,
   ) async {

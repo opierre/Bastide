@@ -7,6 +7,7 @@ import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/tokens.dart';
 import '../../../core/widgets/amount_text.dart';
 import '../../../core/widgets/app_card.dart';
+import '../../../core/widgets/app_select.dart';
 import '../../../core/widgets/dashed_border.dart';
 import '../../../core/widgets/inline_banner.dart';
 import '../../../core/widgets/institution_avatar.dart';
@@ -403,29 +404,21 @@ class _AccountSelect extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context)!;
     final selectedId = ref.watch(selectedImportAccountProvider);
-    final value = resolveImportAccount(accounts, selectedId)?.id;
+    // Never null here: the panel only builds the selector once there is at
+    // least one account, and the resolver falls back to the first of them.
+    final value = resolveImportAccount(accounts, selectedId)!.id;
 
     return LabeledField(
       label: l10n.importAccountLabel,
-      child: DropdownButtonFormField<String>(
+      child: AppSelect<String>(
         key: const Key('importAccountField'),
-        initialValue: value,
-        borderRadius: BorderRadius.circular(AppRadii.md),
-        icon: const Icon(Icons.expand_more_rounded, size: 18),
-        isExpanded: true,
+        value: value,
         items: [
           for (final account in accounts)
-            DropdownMenuItem(
+            AppSelectItem(
               value: account.id,
-              child: Row(
-                children: [
-                  InstitutionAvatar(name: account.institution, size: 24),
-                  const SizedBox(width: AppSpacing.sm),
-                  Flexible(
-                    child: Text(account.name, overflow: TextOverflow.ellipsis),
-                  ),
-                ],
-              ),
+              label: account.name,
+              leading: InstitutionAvatar(name: account.institution, size: 24),
             ),
         ],
         onChanged: (selected) =>

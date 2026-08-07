@@ -307,6 +307,53 @@ void main() {
     expect(imports.importCalls.single.accountId, 'a1');
   });
 
+  testWidgets('the account selector imports into the account picked from it', (
+    tester,
+  ) async {
+    _useDesktopSurface(tester);
+    final imports = FakeImportsController(importResult: _batch());
+    final other = Account(
+      id: 'a2',
+      name: 'Compte joint',
+      type: AccountType.checking,
+      institution: 'Boursorama',
+      currency: 'EUR',
+      openingBalanceMinor: 0,
+      balanceMinor: 0,
+      archived: false,
+      createdAt: DateTime.utc(2026, 1, 1),
+      updatedAt: DateTime.utc(2026, 1, 1),
+    );
+    await tester.pumpWidget(
+      _wrap(
+        imports: imports,
+        templates: FakeCsvTemplatesController(initialTemplates: [_savedTemplate]),
+        accounts: FakeAccountsController(initialAccounts: [_account, other]),
+        // A CSV: nothing in it declares an account, so the selector is what
+        // decides where the file lands.
+        file: const PickedImportFile(name: 'export.csv', bytes: [1, 2, 3]),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byKey(const Key('importAccountField')));
+    await tester.pumpAndSettle();
+
+    // The field keeps showing its current choice while the options sit below.
+    expect(find.text('Compte courant'), findsNWidgets(2));
+
+    await tester.tap(find.text('Compte joint').last);
+    await tester.pumpAndSettle();
+
+    expect(find.text('Compte joint'), findsOneWidget);
+
+    await _stageFile(tester);
+    await tester.tap(find.byKey(const Key('importSubmitButton')));
+    await tester.pumpAndSettle();
+
+    expect(imports.importCalls.single.accountId, 'a2');
+  });
+
   testWidgets('an OFX file for an unknown account opens the prefilled form', (
     tester,
   ) async {

@@ -9,6 +9,7 @@ import '../../../core/theme/tokens.dart';
 import '../../../core/widgets/amount_text.dart';
 import '../../../core/widgets/app_modal.dart';
 import '../../../core/widgets/app_segmented.dart';
+import '../../../core/widgets/app_select.dart';
 import '../../../core/widgets/inline_banner.dart';
 import '../../../core/widgets/labeled_field.dart';
 import '../../../core/widgets/primary_button.dart';
@@ -700,8 +701,12 @@ class _PreviewTable extends StatelessWidget {
   }
 }
 
-/// A themed dropdown over a fixed option set, keyed by the value that goes on
-/// the wire and labelled with what the user recognizes.
+/// A select over a fixed option set, keyed by the value that goes on the wire
+/// and labelled with what the user recognizes.
+///
+/// The map form is what the call sites want — a wire value paired with its
+/// label — so this adapts it to [AppSelect] rather than spelling out an item
+/// list at each of the three settings fields.
 class _Dropdown<T> extends StatelessWidget {
   const _Dropdown({
     required this.fieldKey,
@@ -717,22 +722,14 @@ class _Dropdown<T> extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return DropdownButtonFormField<T>(
+    return AppSelect<T>(
       key: fieldKey,
-      initialValue: value,
-      borderRadius: BorderRadius.circular(AppRadii.md),
-      icon: const Icon(Icons.expand_more_rounded, size: 18),
-      isExpanded: true,
+      value: value,
       items: [
         for (final entry in options.entries)
-          DropdownMenuItem(
-            value: entry.key,
-            child: Text(entry.value, overflow: TextOverflow.ellipsis),
-          ),
+          AppSelectItem(value: entry.key, label: entry.value),
       ],
-      onChanged: (selected) {
-        if (selected != null) onChanged(selected);
-      },
+      onChanged: onChanged,
     );
   }
 }

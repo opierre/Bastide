@@ -6,6 +6,7 @@ import '../../../core/api/api_client.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/tokens.dart';
 import '../../../core/widgets/app_segmented.dart';
+import '../../../core/widgets/app_select.dart';
 import '../../../core/widgets/labeled_field.dart';
 import '../../../core/widgets/primary_button.dart';
 import '../../../l10n/app_localizations.dart';
@@ -229,25 +230,17 @@ class _PreferencesRow extends StatelessWidget {
           const SizedBox(height: AppSpacing.sm + AppSpacing.xs),
           LabeledField(
             label: l10n.authCurrencyLabel,
-            child: DropdownButtonFormField<String>(
+            child: AppSelect<String>(
               key: const Key('registerCurrencyField'),
-              initialValue: currency,
-              borderRadius: BorderRadius.circular(AppRadii.md),
-              icon: const Icon(Icons.expand_more_rounded, size: 18),
-              isExpanded: true,
+              value: currency,
               items: [
                 for (final code in supportedCurrencies)
-                  DropdownMenuItem(
+                  AppSelectItem(
                     value: code,
-                    child: Text(
-                      currencyLabel(l10n, code, activeLocale),
-                      overflow: TextOverflow.ellipsis,
-                    ),
+                    label: currencyLabel(l10n, code, activeLocale),
                   ),
               ],
-              onChanged: (value) {
-                if (value != null) onCurrencyChanged(value);
-              },
+              onChanged: onCurrencyChanged,
             ),
           ),
           const SizedBox(height: AppSpacing.sm + AppSpacing.xs),
