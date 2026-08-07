@@ -1,6 +1,6 @@
 ---
 name: design-system
-description: Use for any visual/UI work in the finstride — building screens, styling, theming, layout, icons, brand logos, or writing design-tool prompts. Summarises the binding spec in docs/design/00-shared-design-block.md — the dark-first iris palette, Manrope/Space Grotesk typography, the fixed sidebar/top bar invariant (no bottom bar), monogram-only brand logos, the component inventory, and the encouraging-UX direction. Builds on the general frontend-design skill for craft; this skill supplies the project-specific tokens and invariants.
+description: Use for any visual/UI work in the finstride — building screens, styling, theming, layout, icons, brand logos, or writing design-tool prompts. Summarises the binding spec in docs/design/00-shared-design-block.md — the dark-first iris palette, Geist/Space Grotesk typography, the fixed sidebar/top bar invariant (no bottom bar), monogram-only brand logos, the component inventory, and the encouraging-UX direction. Builds on the general frontend-design skill for craft; this skill supplies the project-specific tokens and invariants.
 ---
 
 # Design System
@@ -63,9 +63,11 @@ spinners, shimmer 1.6s for skeletons), and chrome dimensions (sidebar 252 / coll
 
 ## Typography
 
-- **Manrope** as the UI family — 400 body, 600 emphasis/labels, 700 headings.
+- **Geist** as the UI family — 400 body, 600 emphasis/labels, 700 headings. (Amended from
+  Manrope: narrower and lower-contrast at the 11.5–14px the UI lives at, which French labels
+  need, with flat-sided figures that hold an amount column under `tnum`.)
 - **Space Grotesk 700** for the display role: wordmark, panel titles, headline amounts, ring
-  values. The split is by *role*, not size — a 14px card title stays Manrope, an 18px panel title
+  values. The split is by *role*, not size — a 14px card title stays Geist, an 18px panel title
   is Space Grotesk.
 - Scale: 10px section labels (uppercase, +1.3 tracking) · 11–11.5 captions/badges · 12–12.5
   secondary · 13–13.5 body/rows · 14 card titles · 16–19 modal/empty-state titles · 18 top-bar

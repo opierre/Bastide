@@ -72,18 +72,23 @@ flutter:
 
   generate: true
 
-  # Manrope carries the UI (400 body, 600 emphasis/labels, 700 headings) and
+  # Geist carries the UI (400 body, 600 emphasis/labels, 700 headings) and
   # Space Grotesk 700 the display role — wordmark, panel titles, headline
   # amounts. Only the weights the type scale actually uses are bundled.
   # See docs/design/00-shared-design-block.md §Typography.
+  #
+  # Geist ships from Google Fonts as a `wght` variable font only; the three
+  # statics beside it were instanced from it at 400/600/700 so the weights the
+  # scale asks for resolve through `fontWeight` alone, without every call site
+  # having to carry a matching `fontVariations`.
   fonts:
-    - family: Manrope
+    - family: Geist
       fonts:
-        - asset: assets/fonts/Manrope/static/Manrope-Regular.ttf
+        - asset: assets/fonts/Geist/static/Geist-Regular.ttf
           weight: 400
-        - asset: assets/fonts/Manrope/static/Manrope-SemiBold.ttf
+        - asset: assets/fonts/Geist/static/Geist-SemiBold.ttf
           weight: 600
-        - asset: assets/fonts/Manrope/static/Manrope-Bold.ttf
+        - asset: assets/fonts/Geist/static/Geist-Bold.ttf
           weight: 700
     - family: Space Grotesk
       fonts:

@@ -260,7 +260,13 @@ abstract final class AppMotion {
 
 abstract final class AppFonts {
   /// UI family: 400 body, 600 emphasis/labels, 700 headings.
-  static const manrope = 'Manrope';
+  ///
+  /// Geist rather than the spec's original Manrope (amended): at the 11.5–14px
+  /// the interface actually lives at, Manrope's wide, open counters cost width
+  /// that French labels — 15–20% longer than their English counterparts —
+  /// don't have to spare. Geist is narrower and lower-contrast, and its
+  /// flat-sided figures hold a column of amounts better under `tnum`.
+  static const geist = 'Geist';
 
   /// Display family, 700 only: wordmark, panel titles, headline amounts.
   static const spaceGrotesk = 'Space Grotesk';

@@ -63,7 +63,7 @@ class MonogramAvatar extends StatelessWidget {
           fontWeight: FontWeight.w700,
           fontSize: size * 0.36,
           letterSpacing: 0.2,
-          fontFamily: AppFonts.manrope,
+          fontFamily: AppFonts.geist,
         ),
       ),
     );
@@ -96,7 +96,7 @@ class UserMonogram extends StatelessWidget {
           fontWeight: FontWeight.w700,
           fontSize: size * 0.36,
           letterSpacing: 0.2,
-          fontFamily: AppFonts.manrope,
+          fontFamily: AppFonts.geist,
         ),
       ),
     );

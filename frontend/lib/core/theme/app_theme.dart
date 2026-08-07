@@ -36,7 +36,7 @@ ThemeData _buildDarkTheme() {
     colorScheme: colorScheme,
     scaffoldBackgroundColor: AppColors.surfaceBase,
     canvasColor: AppColors.surfaceOverlay,
-    fontFamily: AppFonts.manrope,
+    fontFamily: AppFonts.geist,
     textTheme: textTheme,
     // Desktop-first: tighter than Material's touch defaults. The spec allows no
     // data-view animation, so the ripple is suppressed in favour of the instant
@@ -283,8 +283,8 @@ ButtonStyle _textButtonStyle(TextTheme textTheme) => ButtonStyle(
 /// The type scale from `docs/design/00` §Typography.
 ///
 /// Space Grotesk 700 carries the display role — wordmark, panel titles, headline
-/// amounts, ring values — and Manrope everything else. The split is by *role*,
-/// not by size, so a 14px card title stays Manrope while an 18px panel title is
+/// amounts, ring values — and Geist everything else. The split is by *role*,
+/// not by size, so a 14px card title stays Geist while an 18px panel title is
 /// Space Grotesk.
 TextTheme _appTextTheme() {
   const base = TextTheme();
@@ -324,7 +324,7 @@ abstract final class AppTextStyles {
   /// 10px uppercase section label. Uppercase at the usage site, not here, so
   /// the localized string stays intact for screen readers.
   static const sectionLabel = TextStyle(
-    fontFamily: AppFonts.manrope,
+    fontFamily: AppFonts.geist,
     fontSize: 10,
     fontWeight: FontWeight.w600,
     letterSpacing: 1.3,
@@ -333,7 +333,7 @@ abstract final class AppTextStyles {
 
   /// Field helper / validation line.
   static const helper = TextStyle(
-    fontFamily: AppFonts.manrope,
+    fontFamily: AppFonts.geist,
     fontSize: 11.5,
     fontWeight: FontWeight.w400,
     height: 1.4,
@@ -364,7 +364,7 @@ TextStyle _ui(
   double tracking = 0,
   double? height,
 }) => TextStyle(
-  fontFamily: AppFonts.manrope,
+  fontFamily: AppFonts.geist,
   fontSize: size,
   fontWeight: weight,
   letterSpacing: tracking,
