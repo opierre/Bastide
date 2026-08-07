@@ -72,7 +72,7 @@ void main() {
     await tester.pumpWidget(_wrap());
     await tester.pumpAndSettle();
 
-    expect(find.text('EUR — € — Euro'), findsOneWidget);
+    expect(find.text('EUR (€) — Euro'), findsOneWidget);
     expect(
       find.descendant(
         of: find.byKey(const Key('settingsCurrencyField')),

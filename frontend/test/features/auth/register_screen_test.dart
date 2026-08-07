@@ -54,7 +54,7 @@ void main() {
     await tester.pumpWidget(_wrap(controller: FakeAuthController()));
     await tester.pumpAndSettle();
 
-    expect(find.textContaining('EUR — € — Euro'), findsWidgets);
+    expect(find.textContaining('EUR (€) — Euro'), findsWidgets);
   });
 
   testWidgets('submit stays disabled until the password clears the meter', (
@@ -124,11 +124,11 @@ void main() {
 
     // The field keeps stating the currency in force while the options are up,
     // so the choice being changed never leaves the screen.
-    expect(find.textContaining('EUR —'), findsNWidgets(2));
+    expect(find.textContaining('EUR ('), findsNWidgets(2));
 
     await tester.tap(
       find.ancestor(
-        of: find.textContaining('USD —'),
+        of: find.textContaining('USD ('),
         matching: find.byType(MenuItemButton),
       ),
     );

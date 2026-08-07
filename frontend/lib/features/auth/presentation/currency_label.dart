@@ -2,11 +2,15 @@ import 'package:intl/intl.dart';
 
 import '../../../l10n/app_localizations.dart';
 
-/// Builds the `EUR — € — Euro` label the currency select-look shows.
+/// Builds the `EUR (€) — Euro` label the currency select-look shows.
 ///
 /// The symbol comes from `intl` (locale-aware), the name from the ARB. `intl`
 /// ships symbols but not currency display names, so the names are localized
 /// keys like any other user-facing string.
+///
+/// The symbol is bracketed onto the code rather than set between two dashes:
+/// code and symbol name the same thing twice, so they belong together, and one
+/// separator left in the line makes the display name read as the gloss it is.
 String currencyLabel(AppLocalizations l10n, String code, String locale) {
   final symbol = NumberFormat.simpleCurrency(
     locale: locale,
@@ -15,9 +19,9 @@ String currencyLabel(AppLocalizations l10n, String code, String locale) {
   final name = currencyName(l10n, code);
 
   // A few codes have no distinct symbol — intl echoes the code back. Showing
-  // "XOF — XOF — Franc CFA" reads as a bug, so the symbol is dropped there.
+  // "XOF (XOF) — Franc CFA" reads as a bug, so the symbol is dropped there.
   if (symbol == code) return '$code — $name';
-  return '$code — $symbol — $name';
+  return '$code ($symbol) — $name';
 }
 
 /// Localized display name for an ISO-4217 code in [supportedCurrencies].
