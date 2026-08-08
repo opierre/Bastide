@@ -89,7 +89,6 @@ class _DashboardContent extends StatelessWidget {
                   amountMinor: summary.incomeMinor,
                   currency: summary.currency,
                   deltaPct: summary.incomeDeltaPct,
-                  direction: TrendDirection.upIsGood,
                   caption: l10n.dashboardStatVsPreviousMonth(previousMonth),
                 ),
               ),
@@ -101,8 +100,10 @@ class _DashboardContent extends StatelessWidget {
                   amountMinor: -summary.expenseMinor,
                   currency: summary.currency,
                   deltaPct: summary.expenseDeltaPct,
-                  direction: TrendDirection.upIsBad,
                   caption: l10n.dashboardStatVsPreviousMonth(previousMonth),
+                  // The one card where a rise is bad news: spending more than last month is
+                  // red, spending less is green.
+                  invertTrendColor: true,
                 ),
               ),
               const SizedBox(width: AppSpacing.gridGap),
@@ -113,7 +114,6 @@ class _DashboardContent extends StatelessWidget {
                   amountMinor: summary.netMinor,
                   currency: summary.currency,
                   deltaPct: summary.netDeltaPct,
-                  direction: TrendDirection.upIsGood,
                   caption: l10n.dashboardStatNetCaption,
                   colorizeAmount: false,
                 ),

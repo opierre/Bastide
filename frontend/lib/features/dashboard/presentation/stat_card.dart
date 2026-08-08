@@ -8,11 +8,6 @@ import '../../../core/theme/tokens.dart';
 import '../../../core/widgets/amount_text.dart';
 import '../../../core/widgets/app_card.dart';
 
-/// One stat card's MoM trend: a plain percentage-point delta plus whether an *increase* is the
-/// good direction for this metric — income and net are better when they rise, expense is better
-/// when it falls (see `docs/design/04-dashboard.md` §Row 1 and the card's acceptance criteria).
-enum TrendDirection { upIsGood, upIsBad }
-
 /// A headline figure with a label, a MoM trend pill, and a caption naming what the trend is
 /// measured against. Reused for income, expense, and net — [SavingsRateCard] below shares the
 /// same trend semantics but a different, gradient-hero shape.
@@ -23,16 +18,18 @@ class StatCard extends StatelessWidget {
     required this.amountMinor,
     required this.currency,
     required this.deltaPct,
-    required this.direction,
     required this.caption,
     this.colorizeAmount = true,
+    this.invertTrendColor = false,
   });
 
   final String label;
   final int amountMinor;
   final String currency;
   final double deltaPct;
-  final TrendDirection direction;
+
+  /// On for a metric where *rising* is the bad outcome — the expense card. See [TrendRow].
+  final bool invertTrendColor;
 
   /// The 11.5px line beside the trend pill — « vs avril », « revenus − dépenses ».
   final String caption;
@@ -64,7 +61,11 @@ class StatCard extends StatelessWidget {
             style: textTheme.displayMedium,
           ),
           const SizedBox(height: AppSpacing.sm),
-          TrendRow(deltaPct: deltaPct, direction: direction, caption: caption),
+          TrendRow(
+            deltaPct: deltaPct,
+            caption: caption,
+            invertColor: invertTrendColor,
+          ),
         ],
       ),
     );
@@ -73,22 +74,28 @@ class StatCard extends StatelessWidget {
 
 /// The trend pill and its caption, shared by every stat card.
 ///
-/// The pill is 22px with the semantic hue at 12% and a triangle rotated 0/180 — direction is
-/// carried by the glyph's rotation and the explicit sign as well as by the fill, so it never
-/// rests on color alone.
+/// The pill is 22px with the semantic hue at 12% and a triangle rotated 0/180. Color follows
+/// whether the movement is *good news*, not the raw sign: rising income is green, and rising
+/// expenses are red (see [invertColor]). Direction is carried by the glyph's rotation and the
+/// explicit sign as well as by the fill, so it never rests on color alone — which is what lets
+/// the hue mean "good/bad" rather than "up/down".
 class TrendRow extends StatelessWidget {
   const TrendRow({
     super.key,
     required this.deltaPct,
-    required this.direction,
     required this.caption,
     this.label,
     this.onGradient = false,
+    this.invertColor = false,
   });
 
   final double deltaPct;
-  final TrendDirection direction;
   final String caption;
+
+  /// Swaps the pill's two hues, for a metric where a rise is the bad outcome. Only the expense
+  /// card sets it: spending less month over month is a win, so its « −4,6 % » reads green while
+  /// the triangle still points down.
+  final bool invertColor;
 
   /// Overrides the pill's text — the savings card measures its change in percentage *points*
   /// rather than percent, so it supplies its own already-formatted string.
@@ -104,15 +111,16 @@ class TrendRow extends StatelessWidget {
     final locale = Localizations.localeOf(context).toString();
     final textTheme = Theme.of(context).textTheme;
     final up = deltaPct > 0;
-    final good = deltaPct == 0
-        ? null
-        : (direction == TrendDirection.upIsGood ? up : !up);
+    final riseColor = invertColor ? AppColors.negative : AppColors.positive;
+    final fallColor = invertColor ? AppColors.positive : AppColors.negative;
     final color = onGradient
         ? AppColors.irisInk
-        : switch (good) {
-            null => AppColors.textSecondary,
-            true => AppColors.positive,
-            false => AppColors.negative,
+        : switch (deltaPct) {
+            > 0 => riseColor,
+            < 0 => fallColor,
+            // A flat month is neither: it takes the secondary tone and a dash rather than
+            // borrowing one of the two money colors.
+            _ => AppColors.textSecondary,
           };
 
     return Row(
@@ -245,7 +253,6 @@ class SavingsRateCard extends StatelessWidget {
                 const SizedBox(height: AppSpacing.md),
                 TrendRow(
                   deltaPct: deltaPct,
-                  direction: TrendDirection.upIsGood,
                   caption: caption,
                   label: deltaLabel,
                   onGradient: true,

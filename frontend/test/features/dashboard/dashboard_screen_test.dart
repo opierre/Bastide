@@ -104,17 +104,29 @@ void main() {
     expect(netInCard, findsOneWidget);
     expect(tester.widget<Text>(netInCard).style?.color, AppColors.textPrimary);
 
-    // Income up is good, expense up is bad, net down is bad.
+    // A trend pill is colored by whether the movement is good news, not by its sign: income
+    // up is green, net down is red — and the expense card inverts, because spending 4,8 %
+    // more than last month is the one rise the panel should not congratulate.
+    Color? pillColor(double delta) => tester
+        .widget<Text>(find.text(formatDeltaPct(delta, 'fr')))
+        .style
+        ?.color;
+
     expect(find.text(formatDeltaPct(2.1, 'fr')), findsOneWidget);
     expect(find.text(formatDeltaPct(4.8, 'fr')), findsOneWidget);
     expect(find.text(formatDeltaPct(-6.1, 'fr')), findsOneWidget);
+    expect(pillColor(2.1), AppColors.positive);
+    expect(pillColor(4.8), AppColors.negative);
+    expect(pillColor(-6.1), AppColors.negative);
 
     // The savings rate's change is in percentage *points*, not percent, and its value sits
     // inside the ring rather than beside it.
     expect(find.text('+1,9 pt'), findsOneWidget);
     expect(find.text(formatDeltaPct(1.9, 'fr')), findsNothing);
     expect(
-      tester.widget<Text>(find.byKey(const Key('dashboardSavingsRateValue'))).data,
+      tester
+          .widget<Text>(find.byKey(const Key('dashboardSavingsRateValue')))
+          .data,
       formatPct(22.3, 'fr'),
     );
 
