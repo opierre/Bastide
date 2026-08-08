@@ -123,8 +123,7 @@ void main() {
     expect(pillColor(4.8), AppColors.negative);
     expect(pillColor(-6.1), AppColors.negative);
 
-    // The savings rate's change is in percentage *points*, not percent, and its value sits
-    // inside the ring rather than beside it.
+    // The savings rate's change is in percentage *points*, not percent.
     expect(find.text('+1,9 pt'), findsOneWidget);
     expect(find.text(formatDeltaPct(1.9, 'fr')), findsNothing);
     expect(
@@ -173,10 +172,11 @@ void main() {
             .first,
       );
       final decoration = decorated.decoration! as BoxDecoration;
-      expect(decoration.gradient, AppColors.irisGradient);
+      expect(decoration.gradient, AppColors.irisTintGradient);
       expect(
         (decoration.border! as Border).top.color,
         AppColors.irisBorderStrong,
+      );
 
       // The tint is a wash over the same base the neutral cards use, so the ring reads against
       // the app's inset-plate track and the pill keeps its ordinary semantic green — neither
@@ -196,7 +196,6 @@ void main() {
       expect(
         tester.widget<Text>(find.text('Taux d\'épargne'.toUpperCase())).style?.color,
         AppColors.iris,
-      );
       );
     },
   );
@@ -340,6 +339,32 @@ void main() {
     final area = tester.widget<AreaLine>(find.byType(AreaLine));
     expect(area.values, hasLength(6));
     expect(area.labels, ['Déc.', 'Janv.', 'Févr.', 'Mars', 'Avr.', 'Mai']);
+  });
+
+  testWidgets('the donut shrinks with the window instead of crowding its card', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(1280, 800);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.reset);
+    await tester.pumpWidget(_wrap(state: _state()));
+    await tester.pumpAndSettle();
+
+    // A fixed 212 ring in a card this short would either overflow it or squeeze the legend
+    // out; the donut is the part that gives way.
+    final donut = tester.getSize(find.byType(CategoryDonut));
+    expect(donut.width, lessThan(CategoryDonut.size));
+    expect(donut.width, donut.height);
+    expect(donut.width, greaterThanOrEqualTo(96.0));
+    expect(
+      donut.height,
+      lessThanOrEqualTo(tester.getSize(find.byType(CategoryBreakdownChart)).height),
+    );
+
+    // The legend keeps its figures — shrinking the donut is what buys them the room.
+    expect(find.text('Logement'), findsOneWidget);
+    expect(find.text('42,9 %'), findsOneWidget);
+    expect(tester.takeException(), isNull);
   });
 
   testWidgets('row 2 splits 1.35 / 1, at the same height as row 3', (

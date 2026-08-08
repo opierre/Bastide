@@ -120,6 +120,24 @@ abstract final class AppColors {
     transform: GradientRotation(math.pi / 4),
   );
 
+  /// The savings-rate hero's fill — the spec's
+  /// `linear-gradient(160deg, rgba(139,140,249,.14), rgba(108,106,240,.05) 55%)` layered over
+  /// the [surfaceRaised] card base.
+  ///
+  /// The two translucent stops are composited against that base here rather than stacked as a
+  /// separate translucent layer, so the card paints one gradient and the hero stays a *tint* of
+  /// the neutral cards beside it instead of a second, fully saturated material.
+  ///
+  /// CSS 160° points down and slightly right; Flutter measures a rotation from the left→right
+  /// axis, which is CSS 90°, so the axis is turned the remaining 70°.
+  static const irisTintGradient = LinearGradient(
+    begin: Alignment.centerLeft,
+    end: Alignment.centerRight,
+    colors: [Color(0xFF22273E), Color(0xFF161A2A)],
+    stops: [0.0, 0.55],
+    transform: GradientRotation(70 * math.pi / 180),
+  );
+
   /// Glow beneath a primary button.
   static const irisGlow = [
     BoxShadow(color: Color(0x4D6C6AF0), blurRadius: 22, offset: Offset(0, 8)),
