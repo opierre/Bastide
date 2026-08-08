@@ -163,7 +163,7 @@ class _HeaderRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    Widget cell(String label, {TextAlign align = TextAlign.left}) => Text(
+    Widget cell(String label, {TextAlign align = TextAlign.center}) => Text(
       label.toUpperCase(),
       textAlign: align,
       style: AppTextStyles.sectionLabel,
@@ -173,12 +173,15 @@ class _HeaderRow extends StatelessWidget {
       padding: const EdgeInsets.only(bottom: AppSpacing.sm),
       child: _columnRow(
         crossAxisAlignment: CrossAxisAlignment.end,
-        file: cell(l10n.importHistoryFileHeader),
+        // The file column is the only one that stays left: it carries a wrapped name and
+        // up to three explanatory notes under it, and a centred block of ragged text reads
+        // as misaligned rather than as a value under its header.
+        file: cell(l10n.importHistoryFileHeader, align: TextAlign.left),
         format: cell(l10n.importHistoryFormatHeader),
         imported: cell(l10n.importHistoryImportedHeader),
         period: cell(l10n.importHistoryPeriodHeader),
-        newCount: cell(l10n.importHistoryNewHeader, align: TextAlign.right),
-        duplicates: cell(l10n.importHistoryDuplicatesHeader, align: TextAlign.right),
+        newCount: cell(l10n.importHistoryNewHeader),
+        duplicates: cell(l10n.importHistoryDuplicatesHeader),
         status: cell(l10n.importHistoryStatusHeader),
       ),
     );
@@ -258,32 +261,42 @@ class _HistoryRow extends StatelessWidget {
             ],
           ],
         ),
-        format: ImportFormatBadge(format: batch.sourceFormat),
+        // Every value column is centred so it sits under its own header rather than beside
+        // it — the chips included, which is why both pills take an alignment.
+        format: ImportFormatBadge(
+          format: batch.sourceFormat,
+          alignment: Alignment.topCenter,
+        ),
         imported: Text(
           dateFormat.format(batch.importedAt.toLocal()),
+          textAlign: TextAlign.center,
           style: tabularNumberStyle(
             textTheme.bodyMedium!,
           ).copyWith(color: AppColors.textSecondary),
         ),
         period: Text(
           l10n.importPeriodRange(batch.periodStart, batch.periodEnd),
+          textAlign: TextAlign.center,
           style: tabularNumberStyle(
             textTheme.bodyMedium!,
           ).copyWith(color: AppColors.textSecondary),
         ),
         newCount: Text(
           numberFormat.format(batch.newCount),
-          textAlign: TextAlign.right,
+          textAlign: TextAlign.center,
           style: tabularNumberStyle(textTheme.bodyMedium!),
         ),
         duplicates: Text(
           numberFormat.format(batch.duplicateCount),
-          textAlign: TextAlign.right,
+          textAlign: TextAlign.center,
           style: tabularNumberStyle(
             textTheme.bodyMedium!,
           ).copyWith(color: AppColors.textSecondary),
         ),
-        status: ImportStatusPill(status: batch.status),
+        status: ImportStatusPill(
+          status: batch.status,
+          alignment: Alignment.topCenter,
+        ),
       ),
     );
   }
@@ -292,9 +305,17 @@ class _HistoryRow extends StatelessWidget {
 /// Source-format badge. The hue per format is pinned by
 /// `docs/design/06-imports.md`: OFX blue, QFX violet, CSV amber.
 class ImportFormatBadge extends StatelessWidget {
-  const ImportFormatBadge({super.key, required this.format});
+  const ImportFormatBadge({
+    super.key,
+    required this.format,
+    this.alignment = Alignment.centerLeft,
+  });
 
   final ImportFormat format;
+
+  /// Where the pill sits in the space it is given — the history table centres it under its
+  /// column header; elsewhere it hugs the leading edge.
+  final AlignmentGeometry alignment;
 
   @override
   Widget build(BuildContext context) {
@@ -305,7 +326,7 @@ class ImportFormatBadge extends StatelessWidget {
     };
 
     return Align(
-      alignment: Alignment.centerLeft,
+      alignment: alignment,
       child: AppChip(label: format.name.toUpperCase(), color: color),
     );
   }
@@ -314,9 +335,16 @@ class ImportFormatBadge extends StatelessWidget {
 /// Outcome pill. The glyph doubles the hue so the status never rests on color
 /// alone (see the shared design block's accessibility rule).
 class ImportStatusPill extends StatelessWidget {
-  const ImportStatusPill({super.key, required this.status});
+  const ImportStatusPill({
+    super.key,
+    required this.status,
+    this.alignment = Alignment.centerLeft,
+  });
 
   final ImportStatus status;
+
+  /// See [ImportFormatBadge.alignment].
+  final AlignmentGeometry alignment;
 
   @override
   Widget build(BuildContext context) {
@@ -341,7 +369,7 @@ class ImportStatusPill extends StatelessWidget {
     };
 
     return Align(
-      alignment: Alignment.centerLeft,
+      alignment: alignment,
       child: AppChip(label: label, color: color, icon: icon),
     );
   }

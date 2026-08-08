@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:finstride/core/session/current_user_provider.dart';
 import 'package:finstride/core/theme/app_theme.dart';
 import 'package:finstride/core/widgets/amount_text.dart';
+import 'package:finstride/core/widgets/app_chip.dart';
 import 'package:finstride/features/auth/domain/auth_user.dart';
 import 'package:finstride/features/accounts/application/accounts_controller.dart';
 import 'package:finstride/features/accounts/domain/account.dart';
@@ -482,7 +483,56 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('renders under en without missing localized keys', (tester) async {
+  testWidgets('every history value column is centred under its own header', (
+    tester,
+  ) async {
+    _useDesktopSurface(tester);
+    await tester.pumpWidget(
+      _wrap(
+        imports: FakeImportsController(initialBatches: [_batch()]),
+        templates: FakeCsvTemplatesController(),
+        file: const PickedImportFile(name: 'releve.ofx', bytes: [1, 2, 3]),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    void centredUnder(String header, Finder value) {
+      expect(
+        tester.getRect(value).center.dx,
+        closeTo(tester.getRect(find.text(header.toUpperCase())).center.dx, 1),
+        reason: '$header column',
+      );
+    }
+
+    final row = find.byKey(const Key('importBatchRow-b1'));
+    Finder inRow(Finder matching) =>
+        find.descendant(of: row, matching: matching);
+
+    centredUnder('Format', inRow(find.text('OFX')));
+    centredUnder('Importé le', inRow(find.text('01/06/2026')));
+    centredUnder('Nouvelles', inRow(find.text('42')));
+    centredUnder('Doublons', inRow(find.text('3')));
+    // The pill, not its label — the status chip carries a leading glyph, so its text sits
+    // right of its own centre by design.
+    centredUnder(
+      'Statut',
+      find.ancestor(
+        of: inRow(find.text('Réussi')),
+        matching: find.byType(AppChip),
+      ),
+    );
+
+    // The file column keeps its leading edge: it carries a wrapped name and its notes, which
+    // centred would read as misaligned rather than as a value under a header.
+    expect(
+      tester.getRect(inRow(find.text('releve.ofx'))).left,
+      closeTo(tester.getRect(find.text('FICHIER')).left, 1),
+    );
+  });
+
+  testWidgets('renders under en without missing localized keys', (
+    tester,
+  ) async {
     _useDesktopSurface(tester);
     await tester.pumpWidget(
       _wrap(
