@@ -177,6 +177,26 @@ void main() {
       expect(
         (decoration.border! as Border).top.color,
         AppColors.irisBorderStrong,
+
+      // The tint is a wash over the same base the neutral cards use, so the ring reads against
+      // the app's inset-plate track and the pill keeps its ordinary semantic green — neither
+      // of which a saturated iris ground could carry.
+      final ring = tester.widget<CircularProgressIndicator>(
+        find.descendant(
+          of: find.byType(SavingsRateRing),
+          matching: find.byType(CircularProgressIndicator),
+        ),
+      );
+      expect(ring.value, closeTo(0.223, 0.0001));
+      expect(ring.backgroundColor, AppColors.surfaceHover);
+      expect(ring.valueColor?.value, AppColors.iris);
+      expect(tester.widget<Text>(find.text('+1,9 pt')).style?.color, AppColors.positive);
+
+      // The label is iris rather than the gray every other stat label takes.
+      expect(
+        tester.widget<Text>(find.text('Taux d\'épargne'.toUpperCase())).style?.color,
+        AppColors.iris,
+      );
       );
     },
   );

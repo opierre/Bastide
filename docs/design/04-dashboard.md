@@ -15,7 +15,7 @@ Four cards, left → right:
 4. **SavingsRateCard** (widest, 1.35fr) — the only gradient card on screen: iris gradient `linear-gradient(135deg,#8B8CF9,#6C6AF0)`; label « Taux d'épargne » / "Savings rate"; 96 px ring (r 40) at **22,3 %**; delta `+1,9 pt`; caption « Objectif : 20 % · atteint » / "Goal: 20% · reached".
 
 ### Row 2 — split `1.35fr / 1fr`, height 322 px
-**Left — « Dépenses par catégorie » / "Spending by category"**, sub « Mai 2026 · 7 catégories ». 250 px donut column: Donut r 80, stroke 24, 3 px segment gaps, center total `2 214,35 €` + « dépensés » / "spent". Legend right of donut, one row per category `name · amount · %`, in this exact descending order with these exact colors:
+**Left — « Dépenses par catégorie » / "Spending by category"**, sub « Mai 2026 · 7 catégories ». 250 px donut column: Donut r 80, stroke 24, 3 px segment gaps, center total `2 214,35 €` + « dépensés » / "spent". Those are the numbers at the drawn frame; below it the donut is what gives way — radius, stroke, gap, and the centred total all scale together (down to 96 px, keeping the column's gutter), because the legend is the part that carries the figures. Legend right of donut, one row per category `name · amount · %`, in this exact descending order with these exact colors:
 
 | Catégorie (fr / en) | Color | Amount | % |
 |---|---|---|---|

@@ -26,9 +26,17 @@ class CategoryBreakdownChart extends StatelessWidget {
   final String currency;
   final DateTime month;
 
-  /// Width of the donut column beside the legend, per the spec. The donut itself is 212
-  /// (`r 80 × 2 + stroke 24`), leaving room either side for the column's own gutter.
+  /// Width of the donut column beside the legend at full size, per the spec. The donut itself
+  /// is 212 (`r 80 × 2 + stroke 24`), leaving room either side for the column's own gutter.
   static const _donutColumnWidth = 250.0;
+
+  /// The donut's share of the card's width once the card is too narrow for the drawn 250 — the
+  /// legend keeps the majority, since it is the part that carries the actual figures.
+  static const _donutWidthShare = 0.42;
+
+  /// Below this the ring is no longer a chart, it's a dot: the card stops shrinking the donut
+  /// and lets it be the thing that a very small window crops.
+  static const _minDonutSize = 96.0;
 
   @override
   Widget build(BuildContext context) {
@@ -49,35 +57,58 @@ class CategoryBreakdownChart extends StatelessWidget {
         _capitalize(DateFormat.yMMMM(locale).format(month)),
         sorted.length,
       ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          SizedBox(
-            width: _donutColumnWidth,
-            child: Center(
-              child: SizedBox(
-                width: CategoryDonut.size,
-                height: CategoryDonut.size,
-                child: CategoryDonut(
-                  amounts: [for (final category in sorted) category.amountMinor],
-                  colors: colors,
-                  center: _DonutCenter(total: total, currency: currency),
+      // The donut is drawn at the spec's 212 whenever the card has room for it, and scales down
+      // with the card when it doesn't — a fixed ring in a shrinking card either overflows or
+      // eats the legend, and the legend is where the amounts actually are.
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final donutSize = _donutSizeFor(constraints);
+          // The column keeps the spec's gutter either side of the ring, so a scaled donut stays
+          // centred in a column that narrows with it rather than drifting inside a fixed 250.
+          final columnWidth =
+              donutSize + (_donutColumnWidth - CategoryDonut.size);
+
+          return Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              SizedBox(
+                width: columnWidth,
+                child: Center(
+                  child: SizedBox(
+                    width: donutSize,
+                    height: donutSize,
+                    child: CategoryDonut(
+                      amounts: [for (final category in sorted) category.amountMinor],
+                      colors: colors,
+                      center: _DonutCenter(total: total, currency: currency),
+                    ),
+                  ),
                 ),
               ),
-            ),
-          ),
-          const SizedBox(width: AppSpacing.lg),
-          Expanded(
-            child: _Legend(
-              categories: sorted,
-              colors: colors,
-              currency: currency,
-              labels: [for (final row in sorted) localizedCategoryName(l10n, row.name)],
-            ),
-          ),
-        ],
+              const SizedBox(width: AppSpacing.lg),
+              Expanded(
+                child: _Legend(
+                  categories: sorted,
+                  colors: colors,
+                  currency: currency,
+                  labels: [for (final row in sorted) localizedCategoryName(l10n, row.name)],
+                ),
+              ),
+            ],
+          );
+        },
       ),
     );
+  }
+
+  /// The largest donut the card can hold: never above the drawn 212, never below
+  /// [_minDonutSize], and bounded by both the height left under the card's title and the share
+  /// of the width the legend can spare.
+  static double _donutSizeFor(BoxConstraints constraints) {
+    final byWidth = constraints.maxWidth * _donutWidthShare;
+    final byHeight = constraints.hasBoundedHeight ? constraints.maxHeight : CategoryDonut.size;
+    final fits = math.min(byWidth, byHeight);
+    return fits.clamp(_minDonutSize, CategoryDonut.size);
   }
 }
 
@@ -239,6 +270,10 @@ String formatSharePct(double pct, String locale) =>
 ///
 /// Split out from the chart card so the geometry lives in one place — the spec pins these
 /// numbers, and a donut drawn at any other radius stops matching the legend beside it.
+///
+/// Those numbers are the geometry at the drawn [size]; the ring fills whatever box it is given
+/// and scales all three in proportion, so a smaller donut is the same drawing at a smaller
+/// scale rather than a thick ring squeezed into a narrow one.
 class CategoryDonut extends StatelessWidget {
   const CategoryDonut({
     super.key,
@@ -262,9 +297,24 @@ class CategoryDonut extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return CustomPaint(
-      painter: _DonutPainter(amounts: amounts, colors: colors),
-      child: Center(child: center),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final side = math.min(constraints.maxWidth, constraints.maxHeight);
+        // The largest square that fits inside the ring's *inner* circle — what the centred
+        // total has to live in. Sizing it from the ring rather than from the box is what stops
+        // the figure colliding with the stroke once the donut scales down.
+        final innerBox = (radius - stroke / 2) * 2 * (side / size) / math.sqrt2;
+
+        return CustomPaint(
+          painter: _DonutPainter(amounts: amounts, colors: colors),
+          child: Center(
+            child: SizedBox(
+              width: innerBox,
+              child: FittedBox(fit: BoxFit.scaleDown, child: center),
+            ),
+          ),
+        );
+      },
     );
   }
 }
@@ -280,13 +330,18 @@ class _DonutPainter extends CustomPainter {
     final total = amounts.fold<int>(0, (sum, amount) => sum + amount);
     if (total <= 0) return;
 
+    // Radius, stroke, and gap are all read off the box, so the ring is the drawn geometry at
+    // whatever scale the card could give it.
+    final scale = math.min(size.width, size.height) / CategoryDonut.size;
+    final radius = CategoryDonut.radius * scale;
     final rect = Rect.fromCenter(
       center: size.center(Offset.zero),
-      width: CategoryDonut.radius * 2,
-      height: CategoryDonut.radius * 2,
+      width: radius * 2,
+      height: radius * 2,
     );
     // The spec's 3px gap is a distance along the ring, so it converts to an angle through the
-    // radius rather than being a fixed number of degrees.
+    // radius rather than being a fixed number of degrees. Scale cancels out — the gap stays the
+    // same slice of the circle at every size, which is what keeps the segments proportional.
     final gapAngle = CategoryDonut.gap / CategoryDonut.radius;
 
     var startAngle = -math.pi / 2;
@@ -303,7 +358,7 @@ class _DonutPainter extends CustomPainter {
         Paint()
           ..color = colors[i]
           ..style = PaintingStyle.stroke
-          ..strokeWidth = CategoryDonut.stroke
+          ..strokeWidth = CategoryDonut.stroke * scale
           ..strokeCap = StrokeCap.butt,
       );
       startAngle += sweep;
