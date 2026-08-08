@@ -47,7 +47,10 @@ class DashboardRepository {
   /// Reads `/transactions` and `/accounts` directly rather than through those features' Dart
   /// internals — a feature owns everything it needs (see the architecture skill), the same way
   /// the transactions repository calls `/categories` itself.
-  Future<List<RecentTransaction>> recentTransactions({int limit = 4}) async {
+  /// The default is a ceiling, not a target: « Activité récente » draws as many of these as fit
+  /// in the height row 3 gives it, so the list is fetched deep enough to fill a tall window
+  /// rather than to the four rows the spec's own frame happens to show.
+  Future<List<RecentTransaction>> recentTransactions({int limit = 8}) async {
     final (page, accounts) = await (
       _apiClient.get('/transactions', query: {'page': '1'}),
       _apiClient.get('/accounts'),

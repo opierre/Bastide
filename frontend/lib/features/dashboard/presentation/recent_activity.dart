@@ -33,7 +33,31 @@ class RecentActivityCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Text(l10n.dashboardRecentActivityTitle, style: textTheme.titleMedium),
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  l10n.dashboardRecentActivityTitle,
+                  style: textTheme.titleMedium,
+                ),
+              ),
+              const SizedBox(width: AppSpacing.sm),
+              // The link rides the title rather than the card's bottom edge: the list below
+              // it is sized to fill, so a trailing link would be pinned under a variable
+              // number of rows instead of sitting on a fixed line the eye can find.
+              TextButton(
+                key: const Key('dashboardViewAllTransactions'),
+                onPressed: onViewAll,
+                style: TextButton.styleFrom(
+                  padding: EdgeInsets.zero,
+                  foregroundColor: AppColors.iris,
+                  minimumSize: Size.zero,
+                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                ),
+                child: Text(l10n.dashboardViewAllTransactions),
+              ),
+            ],
+          ),
           const SizedBox(height: AppSpacing.sm),
           Expanded(
             child: transactions.isEmpty
@@ -44,50 +68,55 @@ class RecentActivityCard extends StatelessWidget {
                     ),
                   )
                 : LayoutBuilder(
-                    // 48px is the spec's row height and what the four drawn rows need. It is
-                    // applied as a maximum rather than a fixed height: rows 1 and 2 are pinned
-                    // (136 and 322), so on the 900px frame this card gets whatever is left,
-                    // and four rows at a hard 48 overflow it by a few pixels once the title
-                    // and the link are counted.
+                    // The card is as tall as row 2 beside it, so the list is drawn to fill
+                    // rather than to a fixed count: as many of the loaded transactions as
+                    // fit at the spec's 48px row, sharing the leftover so the last row lands
+                    // on the card's bottom edge. The rows are allowed to grow a quarter over
+                    // spec — past that a short list would read as a spaced-out menu, so the
+                    // remainder is left as air instead.
                     builder: (context, constraints) {
-                      final height = constraints.hasBoundedHeight
-                          ? math.min(
-                              CompactTransactionRow.rowHeight,
-                              constraints.maxHeight / transactions.length,
-                            )
-                          : CompactTransactionRow.rowHeight;
+                      const rowHeight = CompactTransactionRow.rowHeight;
+                      if (!constraints.hasBoundedHeight) {
+                        return _RowList(
+                          transactions: transactions,
+                          height: rowHeight,
+                        );
+                      }
 
-                      return Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          for (final transaction in transactions)
-                            CompactTransactionRow(
-                              transaction: transaction,
-                              height: height,
-                            ),
-                        ],
+                      final fits = (constraints.maxHeight ~/ rowHeight).clamp(
+                        1,
+                        transactions.length,
+                      );
+                      return _RowList(
+                        transactions: transactions.take(fits).toList(),
+                        height: math.min(
+                          rowHeight * 1.25,
+                          constraints.maxHeight / fits,
+                        ),
                       );
                     },
                   ),
           ),
-          const SizedBox(height: AppSpacing.sm),
-          Align(
-            alignment: Alignment.centerLeft,
-            child: TextButton(
-              key: const Key('dashboardViewAllTransactions'),
-              onPressed: onViewAll,
-              style: TextButton.styleFrom(
-                padding: EdgeInsets.zero,
-                foregroundColor: AppColors.iris,
-                minimumSize: Size.zero,
-                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-              ),
-              child: Text(l10n.dashboardViewAllTransactions),
-            ),
-          ),
         ],
       ),
+    );
+  }
+}
+
+class _RowList extends StatelessWidget {
+  const _RowList({required this.transactions, required this.height});
+
+  final List<RecentTransaction> transactions;
+  final double height;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        for (final transaction in transactions)
+          CompactTransactionRow(transaction: transaction, height: height),
+      ],
     );
   }
 }
@@ -123,7 +152,11 @@ class CompactTransactionRow extends StatelessWidget {
         children: [
           InstitutionAvatar(name: transaction.label, size: monogramSize),
           const SizedBox(width: AppSpacing.sm + AppSpacing.xs),
+          // The label block takes ~7/10 of what's left rather than everything but the amount:
+          // merchant names run long, and a label that ellipsizes hard against the figure
+          // reads as one run of text. The gutter is the flex share, not a fixed gap.
           Expanded(
+            flex: 7,
             child: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -146,25 +179,28 @@ class CompactTransactionRow extends StatelessWidget {
             ),
           ),
           const SizedBox(width: AppSpacing.sm),
-          Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              AmountText(
-                amountMinor: transaction.amountMinor,
-                currency: transaction.currency,
-                showPositiveSign: true,
-                style: textTheme.bodyMedium,
-              ),
-              const SizedBox(height: 1),
-              Text(
-                DateFormat.yMd(locale).format(transaction.bookedDate),
-                style: textTheme.labelSmall?.copyWith(
-                  fontWeight: FontWeight.w400,
-                  color: AppColors.textDisabled,
+          Expanded(
+            flex: 3,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                AmountText(
+                  amountMinor: transaction.amountMinor,
+                  currency: transaction.currency,
+                  showPositiveSign: true,
+                  style: textTheme.bodyMedium,
                 ),
-              ),
-            ],
+                const SizedBox(height: 1),
+                Text(
+                  DateFormat.yMd(locale).format(transaction.bookedDate),
+                  style: textTheme.labelSmall?.copyWith(
+                    fontWeight: FontWeight.w400,
+                    color: AppColors.textDisabled,
+                  ),
+                ),
+              ],
+            ),
           ),
         ],
       ),

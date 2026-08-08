@@ -137,10 +137,11 @@ class _DashboardContent extends StatelessWidget {
           ),
         ),
         const SizedBox(height: AppSpacing.gridGap),
-        SizedBox(
-          // Fixed 322px, per the spec's row 2 — the donut's geometry is pinned, so the row
-          // can't be left to take whatever height happens to be over.
-          height: _row2Height,
+        // Rows 2 and 3 split whatever is left below the stat grid, equally. The spec pins
+        // row 2 at 322 px against its 1440×900 frame, but two 322 px rows overrun the content
+        // region there — so the *relationship* is what's held: the two chart rows are always
+        // the same height as each other, and together they fill the panel without scrolling.
+        Expanded(
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
@@ -181,9 +182,6 @@ class _DashboardContent extends StatelessWidget {
   }
 }
 
-/// Row 2's pinned height from `docs/design/04-dashboard.md`.
-const _row2Height = 322.0;
-
 class _EmptyState extends StatelessWidget {
   const _EmptyState({required this.onGoToImports});
 
@@ -207,6 +205,9 @@ class _EmptyState extends StatelessWidget {
   }
 }
 
+/// The stat grid's measured height, so the skeleton's row 1 doesn't resize when data lands.
+const _statRowHeight = 175.0;
+
 class _DashboardSkeleton extends StatelessWidget {
   const _DashboardSkeleton({super.key});
 
@@ -221,18 +222,17 @@ class _DashboardSkeleton extends StatelessWidget {
         children: [
           Row(
             children: [
-              Expanded(flex: 100, child: SkeletonBlock(height: 132)),
+              Expanded(flex: 100, child: SkeletonBlock(height: _statRowHeight)),
               SizedBox(width: AppSpacing.gridGap),
-              Expanded(flex: 100, child: SkeletonBlock(height: 132)),
+              Expanded(flex: 100, child: SkeletonBlock(height: _statRowHeight)),
               SizedBox(width: AppSpacing.gridGap),
-              Expanded(flex: 100, child: SkeletonBlock(height: 132)),
+              Expanded(flex: 100, child: SkeletonBlock(height: _statRowHeight)),
               SizedBox(width: AppSpacing.gridGap),
-              Expanded(flex: 135, child: SkeletonBlock(height: 132)),
+              Expanded(flex: 135, child: SkeletonBlock(height: _statRowHeight)),
             ],
           ),
           SizedBox(height: AppSpacing.gridGap),
-          SizedBox(
-            height: _row2Height,
+          Expanded(
             child: Row(
               children: [
                 Expanded(flex: 135, child: SkeletonBlock(height: double.infinity)),

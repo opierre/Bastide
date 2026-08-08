@@ -9,6 +9,7 @@ import 'package:finstride/core/widgets/primary_button.dart';
 import 'package:finstride/core/widgets/state_views.dart';
 import 'package:finstride/features/dashboard/application/dashboard_controller.dart';
 import 'package:finstride/features/dashboard/domain/dashboard_summary.dart';
+import 'package:finstride/features/dashboard/domain/dashboard_trends.dart';
 import 'package:finstride/features/dashboard/presentation/category_breakdown.dart';
 import 'package:finstride/features/dashboard/presentation/dashboard_screen.dart';
 import 'package:finstride/features/dashboard/presentation/income_vs_expense.dart';
@@ -23,11 +24,14 @@ import 'package:flutter_test/flutter_test.dart';
 import '../../support/dashboard_fixtures.dart';
 import '../../support/fake_dashboard_controller.dart';
 
-DashboardState _state({DashboardSummary? summary}) => DashboardState(
+DashboardState _state({
+  DashboardSummary? summary,
+  List<RecentTransaction>? recent,
+}) => DashboardState(
   month: DateTime(2026, 5),
   summary: summary ?? specSummary(),
   trends: specTrends(),
-  recent: specRecent(),
+  recent: recent ?? specRecent(),
 );
 
 Widget _wrap({required DashboardState state, Locale locale = const Locale('fr')}) {
@@ -318,7 +322,9 @@ void main() {
     expect(area.labels, ['Déc.', 'Janv.', 'Févr.', 'Mars', 'Avr.', 'Mai']);
   });
 
-  testWidgets('row 2 splits 1.35 / 1 at the spec\'s 322px height', (tester) async {
+  testWidgets('row 2 splits 1.35 / 1, at the same height as row 3', (
+    tester,
+  ) async {
     _useDesktopSurface(tester);
     await tester.pumpWidget(_wrap(state: _state()));
     await tester.pumpAndSettle();
@@ -326,9 +332,20 @@ void main() {
     final donutCard = tester.getSize(find.byType(CategoryBreakdownChart));
     final savingsCard = tester.getSize(find.byType(SavingsTrendChart));
 
-    expect(donutCard.height, 322);
-    expect(savingsCard.height, 322);
+    expect(donutCard.height, savingsCard.height);
     expect(donutCard.width / savingsCard.width, closeTo(1.35, 0.01));
+
+    // The two chart rows share the height left under the stat grid, so they read as one
+    // block. The spec's 322px is measured against its own frame; what has to hold at any
+    // viewport is that row 3 matches row 2.
+    expect(
+      tester.getSize(find.byType(IncomeVsExpenseChart)).height,
+      donutCard.height,
+    );
+    expect(
+      tester.getSize(find.byType(RecentActivityCard)).height,
+      donutCard.height,
+    );
   });
 
   // --- row 3: bars + recent activity -----------------------------------------------------
@@ -457,7 +474,69 @@ void main() {
     expect(find.byKey(const Key('dashboardViewAllTransactions')), findsOneWidget);
   });
 
-  testWidgets('a monogram with no pinned hue falls back to the neutral plate', (tester) async {
+  testWidgets('the view-all link rides the card title, at its trailing edge', (
+    tester,
+  ) async {
+    _useDesktopSurface(tester);
+    await tester.pumpWidget(_wrap(state: _state()));
+    await tester.pumpAndSettle();
+
+    final link = tester.getRect(
+      find.byKey(const Key('dashboardViewAllTransactions')),
+    );
+    final title = tester.getRect(find.text('Activité récente'));
+    final card = tester.getRect(find.byType(RecentActivityCard));
+    final firstRow = tester.getRect(find.byType(CompactTransactionRow).first);
+
+    // Level with the title, on the far side of the card, and above the list rather than
+    // under it — a link pinned below a variable number of rows has no fixed line to sit on.
+    expect(link.center.dy, closeTo(title.center.dy, 4));
+    expect(link.right, closeTo(card.right - AppSpacing.cardPadding, 1));
+    expect(link.left, greaterThan(title.right));
+    expect(link.bottom, lessThanOrEqualTo(firstRow.top));
+  });
+
+  testWidgets('the activity list fills the height row 3 gives it', (
+    tester,
+  ) async {
+    _useDesktopSurface(tester);
+    // Twice as many transactions as the frame can show, so the count is decided by the card
+    // rather than by the fixture's length.
+    final doubled = [
+      ...specRecent(),
+      for (final transaction in specRecent())
+        RecentTransaction(
+          id: '${transaction.id}-bis',
+          label: transaction.label,
+          accountLabel: transaction.accountLabel,
+          bookedDate: transaction.bookedDate,
+          amountMinor: transaction.amountMinor,
+          currency: transaction.currency,
+        ),
+    ];
+    await tester.pumpWidget(_wrap(state: _state(recent: doubled)));
+    await tester.pumpAndSettle();
+
+    final rows = find.byType(CompactTransactionRow);
+    expect(rows, findsWidgets);
+
+    final card = tester.getRect(find.byType(RecentActivityCard));
+    final first = tester.getRect(rows.first);
+    final last = tester.getRect(rows.last);
+
+    // Rows are contiguous and reach the card's padded bottom edge, and none is drawn shorter
+    // than the spec's 48 or more than a quarter over it.
+    expect(first.height, greaterThanOrEqualTo(CompactTransactionRow.rowHeight));
+    expect(
+      first.height,
+      lessThanOrEqualTo(CompactTransactionRow.rowHeight * 1.25),
+    );
+    expect(last.bottom, closeTo(card.bottom - AppSpacing.cardPadding, 1));
+  });
+
+  testWidgets('a monogram with no pinned hue falls back to the neutral plate', (
+    tester,
+  ) async {
     _useDesktopSurface(tester);
     await tester.pumpWidget(_wrap(state: _state()));
     await tester.pumpAndSettle();
@@ -531,21 +610,27 @@ void main() {
     );
     await tester.pump();
 
-    expect(find.byKey(const Key('dashboardLoadingIndicator')), findsOneWidget);
-    // 4 stat silhouettes + 2 for row 2 + 2 for row 3.
-    expect(find.byType(SkeletonBlock), findsNWidgets(8));
+      expect(
+        find.byKey(const Key('dashboardLoadingIndicator')),
+        findsOneWidget,
+      );
+      // 4 stat silhouettes + 2 for row 2 + 2 for row 3.
+      expect(find.byType(SkeletonBlock), findsNWidgets(8));
 
-    // The silhouette must not move the cards when the data lands, so it carries the same
-    // ratios: 1:1:1:1.35 across row 1, and 1.35:1 across row 2 at its pinned height.
-    final blocks = [
-      for (var i = 0; i < 8; i++) tester.getSize(find.byType(SkeletonBlock).at(i)),
-    ];
-    expect(blocks[0].height, 132);
-    expect(blocks[3].width / blocks[0].width, closeTo(1.35, 0.01));
-    expect(blocks[4].height, 322);
-    expect(blocks[4].width / blocks[5].width, closeTo(1.35, 0.01));
-    expect(blocks[6].width, closeTo(blocks[7].width, 0.5));
-  });
+      // The silhouette must not move the cards when the data lands, so it carries the same
+      // ratios: 1:1:1:1.35 across row 1, and 1.35:1 across row 2.
+      final blocks = [
+        for (var i = 0; i < 8; i++)
+          tester.getSize(find.byType(SkeletonBlock).at(i)),
+      ];
+      expect(blocks[0].height, 175);
+      expect(blocks[3].width / blocks[0].width, closeTo(1.35, 0.01));
+      expect(blocks[4].width / blocks[5].width, closeTo(1.35, 0.01));
+      // Rows 2 and 3 are equal-height in the silhouette too, as they are once data lands.
+      expect(blocks[4].height, blocks[6].height);
+      expect(blocks[6].width, closeTo(blocks[7].width, 0.5));
+    },
+  );
 
   testWidgets('the panel renders unchanged under the collapsed 76px nav rail', (tester) async {
     _useDesktopSurface(tester);
