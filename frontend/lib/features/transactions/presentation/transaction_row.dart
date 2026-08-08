@@ -11,6 +11,11 @@ import '../../../l10n/app_localizations.dart';
 import '../domain/transaction.dart';
 import 'category_picker.dart';
 
+/// How wide the merchant + account block is allowed to grow before it ellipsizes. Generous
+/// enough for the long descriptions French banks emit, while still leaving the category pill,
+/// the date, and the amount on screen at the panel's narrowest.
+const _labelMaxWidth = 420.0;
+
 /// A single 52px transaction row: merchant monogram, a two-line merchant +
 /// account block, the category chip, the booked date, and the signed amount
 /// — see `docs/design/07-transactions.md`.
@@ -35,48 +40,73 @@ class TransactionRow extends ConsumerWidget {
         children: [
           InstitutionAvatar(name: label, size: 30),
           const SizedBox(width: AppSpacing.sm + AppSpacing.xs),
-          SizedBox(
-            width: 290,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
+          // The label block sizes to its own text up to [_labelMaxWidth] and the pill follows
+          // immediately after it, so the category reads as belonging to *that* merchant rather
+          // than as a third column that happens to sit nearby. Slack is left trailing the pill;
+          // the date and amount keep their fixed columns at the row's end.
+          Expanded(
+            child: Row(
               children: [
-                Text(label, style: textTheme.bodyMedium, overflow: TextOverflow.ellipsis),
-                const SizedBox(height: 2),
-                Text(
-                  accountName,
-                  style: textTheme.bodySmall?.copyWith(color: AppColors.textSecondary),
-                  overflow: TextOverflow.ellipsis,
+                Flexible(
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: _labelMaxWidth),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          label,
+                          style: textTheme.bodyMedium,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          accountName,
+                          style: textTheme.bodySmall?.copyWith(
+                            color: AppColors.textSecondary,
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                // A merchant name ellipsizes at the edge of its block, so without a gutter
+                // here a long label runs straight into the category pill and the two read as
+                // one run of text.
+                const SizedBox(width: AppSpacing.md),
+                Builder(
+                  builder: (chipContext) => transaction.category == null
+                      ? CategoryChip.uncategorized(
+                          key: const Key('transactionRowCategoryChip'),
+                          label: l10n.categoryUncategorized,
+                          onTap: () => showCategoryPicker(
+                            chipContext,
+                            ref,
+                            transaction: transaction,
+                          ),
+                        )
+                      : CategoryChip(
+                          key: const Key('transactionRowCategoryChip'),
+                          label: localizedCategoryName(
+                            l10n,
+                            transaction.category!.name,
+                          ),
+                          slug: categorySlugFor(
+                            name: transaction.category!.name,
+                            kind: transaction.category!.kind,
+                          ),
+                          onTap: () => showCategoryPicker(
+                            chipContext,
+                            ref,
+                            transaction: transaction,
+                          ),
+                        ),
                 ),
               ],
             ),
           ),
-          // A merchant name ellipsizes at the edge of its 290px block, so
-          // without a gutter here a long label runs straight into the category
-          // pill and the two read as one run of text.
-          const SizedBox(width: AppSpacing.lg),
-          Expanded(
-            child: Align(
-              alignment: Alignment.centerLeft,
-              child: Builder(
-                builder: (chipContext) => transaction.category == null
-                    ? CategoryChip.uncategorized(
-                        key: const Key('transactionRowCategoryChip'),
-                        label: l10n.categoryUncategorized,
-                        onTap: () => showCategoryPicker(chipContext, ref, transaction: transaction),
-                      )
-                    : CategoryChip(
-                        key: const Key('transactionRowCategoryChip'),
-                        label: localizedCategoryName(l10n, transaction.category!.name),
-                        slug: categorySlugFor(
-                          name: transaction.category!.name,
-                          kind: transaction.category!.kind,
-                        ),
-                        onTap: () => showCategoryPicker(chipContext, ref, transaction: transaction),
-                      ),
-              ),
-            ),
-          ),
+          const SizedBox(width: AppSpacing.md),
           SizedBox(
             width: 90,
             child: Text(

@@ -12,6 +12,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../../support/fake_accounts_controller.dart';
+import 'package:finstride/features/transactions/presentation/transaction_row.dart';
+
 import '../../support/fake_transactions_controller.dart';
 
 final _account = Account(
@@ -135,7 +137,68 @@ void main() {
     expect(find.text('Courses'), findsOneWidget);
   });
 
-  testWidgets('renders the row amount, sign and category for the en locale', (tester) async {
+  testWidgets(
+    'the category pill follows the merchant name rather than its own column',
+    (tester) async {
+      _useDesktopSurface(tester);
+      await tester.pumpWidget(
+        _wrap(
+          controller: FakeTransactionsController(
+            initialPage: TransactionsPage(
+              items: [
+                _transaction(
+                  id: 't1',
+                  merchant: 'Carrefour',
+                  category: _groceriesCategory,
+                ),
+                _transaction(
+                  id: 't2',
+                  merchant: 'Prélèvement mensuel Assurance Habitation Matmut',
+                  category: _groceriesCategory,
+                ),
+              ],
+              page: 1,
+              pageSize: 50,
+              total: 2,
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      double pillLeft(String merchant) => tester
+          .getRect(
+            find.descendant(
+              of: find.ancestor(
+                of: find.text(merchant),
+                matching: find.byType(TransactionRow),
+              ),
+              matching: find.byKey(const Key('transactionRowCategoryChip')),
+            ),
+          )
+          .left;
+
+      // The pill starts where the name ends, so a short merchant pulls it left — under the old
+      // fixed 290px block both rows put it on the same rail.
+      expect(
+        pillLeft('Carrefour'),
+        lessThan(pillLeft('Prélèvement mensuel Assurance Habitation Matmut')),
+      );
+      // …and the long name is given room to run well past the old 290px cap.
+      expect(
+        tester
+            .getSize(
+              find.text('Prélèvement mensuel Assurance Habitation Matmut'),
+            )
+            .width,
+        greaterThan(290),
+      );
+    },
+  );
+
+  testWidgets('renders the row amount, sign and category for the en locale', (
+    tester,
+  ) async {
     _useDesktopSurface(tester);
     await tester.pumpWidget(
       _wrap(
