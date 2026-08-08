@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
@@ -34,36 +36,56 @@ class AreaLine extends StatelessWidget {
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
 
-    return Column(
-      children: [
-        Expanded(
-          child: RepaintBoundary(
-            child: CustomPaint(
-              size: Size.infinite,
-              painter: _AreaLinePainter(values: values, gridlines: gridlines),
-            ),
-          ),
-        ),
-        SizedBox(
-          height: axisHeight,
-          child: Row(
-            children: [
-              for (final label in labels)
-                Expanded(
-                  child: Text(
-                    label,
-                    textAlign: TextAlign.center,
-                    overflow: TextOverflow.ellipsis,
-                    style: textTheme.labelSmall?.copyWith(
-                      fontWeight: FontWeight.w400,
-                      color: AppColors.textSecondary,
-                    ),
+    // The axis is a fixed band under a flexible plot, so a card shorter than the band has
+    // nothing left to give it and the column overflows its own box. On a short window the
+    // band gives way instead — a clipped axis is a worse chart, an overflow is a broken one.
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final axis = constraints.hasBoundedHeight
+            ? math.min(axisHeight, constraints.maxHeight)
+            : axisHeight;
+
+        return Column(
+          children: [
+            Expanded(
+              child: RepaintBoundary(
+                child: CustomPaint(
+                  size: Size.infinite,
+                  painter: _AreaLinePainter(
+                    values: values,
+                    gridlines: gridlines,
                   ),
                 ),
-            ],
-          ),
-        ),
-      ],
+              ),
+            ),
+            SizedBox(
+              height: axis,
+              child: ClipRect(
+                child: OverflowBox(
+                  alignment: Alignment.topCenter,
+                  maxHeight: axisHeight,
+                  child: Row(
+                    children: [
+                      for (final label in labels)
+                        Expanded(
+                          child: Text(
+                            label,
+                            textAlign: TextAlign.center,
+                            overflow: TextOverflow.ellipsis,
+                            style: textTheme.labelSmall?.copyWith(
+                              fontWeight: FontWeight.w400,
+                              color: AppColors.textSecondary,
+                            ),
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ],
+        );
+      },
     );
   }
 }
