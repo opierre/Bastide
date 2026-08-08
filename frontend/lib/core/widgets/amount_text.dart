@@ -67,7 +67,11 @@ String formatAmount({
   required String locale,
   bool showPositiveSign = false,
 }) {
-  final formatted = NumberFormat.currency(
+  // `simpleCurrency` rather than `currency`: the latter prints the ISO code
+  // where the glyph belongs ("EUR 2 850,00"), and every amount in the spec reads
+  // with the symbol — `2 850,00 €`, `€2,850.00`. A code with no distinct glyph
+  // still falls back to the code itself, which is what we want.
+  final formatted = NumberFormat.simpleCurrency(
     locale: locale,
     name: currency,
   ).format(amountMinor / 100).replaceAll('-', _minusSign);

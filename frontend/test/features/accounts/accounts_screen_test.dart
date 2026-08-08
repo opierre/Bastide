@@ -64,7 +64,8 @@ void main() {
     await tester.pumpAndSettle();
 
     // An account card's balance is its one data point, so it is signed.
-    final expected = '+${NumberFormat.currency(locale: 'fr', name: 'EUR').format(1234.56)}';
+    final expected =
+        '+${NumberFormat.simpleCurrency(locale: 'fr', name: 'EUR').format(1234.56)}';
     expect(_balanceInGrid(expected), findsOneWidget);
   });
 
@@ -77,7 +78,8 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    final expected = '+${NumberFormat.currency(locale: 'en', name: 'EUR').format(1234.56)}';
+    final expected =
+        '+${NumberFormat.simpleCurrency(locale: 'en', name: 'EUR').format(1234.56)}';
     expect(_balanceInGrid(expected), findsOneWidget);
   });
 
@@ -94,7 +96,7 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    final total = NumberFormat.currency(locale: 'fr', name: 'EUR').format(2000.00);
+    final total = NumberFormat.simpleCurrency(locale: 'fr', name: 'EUR').format(2000.00);
     expect(
       find.descendant(
         of: find.byKey(const Key('accountsTotalBalance')),
@@ -128,7 +130,7 @@ void main() {
 
     // The total answers "how much do I have", not "how much matches" — it must
     // not move as the user types.
-    final total = NumberFormat.currency(locale: 'fr', name: 'EUR').format(2000.00);
+    final total = NumberFormat.simpleCurrency(locale: 'fr', name: 'EUR').format(2000.00);
     expect(
       find.descendant(
         of: find.byKey(const Key('accountsTotalBalance')),

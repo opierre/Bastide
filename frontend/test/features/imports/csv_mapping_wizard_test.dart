@@ -168,7 +168,7 @@ void main() {
 
     // Amounts stay integer minor units end to end and render signed, in the
     // active locale.
-    final money = NumberFormat.currency(locale: 'fr', name: 'EUR');
+    final money = NumberFormat.simpleCurrency(locale: 'fr', name: 'EUR');
     expect(find.text(money.format(42.50).replaceAll('-', '−')), findsNothing);
     expect(find.text('−${money.format(42.50)}'), findsOneWidget);
     expect(find.text('+${money.format(2500.00)}'), findsOneWidget);
@@ -265,7 +265,7 @@ void main() {
     await _mapSignedColumns(tester);
 
     expect(find.byKey(const Key('csvWizardPreviewTable')), findsOneWidget);
-    final money = NumberFormat.currency(locale: 'en', name: 'EUR');
+    final money = NumberFormat.simpleCurrency(locale: 'en', name: 'EUR');
     expect(find.text('−${money.format(42.50)}'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
