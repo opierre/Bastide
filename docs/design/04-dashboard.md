@@ -29,7 +29,7 @@ Four cards, left → right:
 
 Donut segments use the same colors in the same order (starting at 12 o'clock, clockwise). These colors also match CategoryChips everywhere.
 
-**Right — « Évolution de l'épargne » / "Savings over time"**, sub « Épargne cumulée · 6 mois » / "Total saved · 6 months". Header: `10 840,00 €` + green delta `+635,65 € en mai` / "+€635.65 in May". AreaLine chart: cumulative savings, iris `#8B8CF9` 2.5 px stroke over 16 % iris fill, dot on the current (last) point; x-axis Déc. · Janv. · Févr. · Mars · Avr. · Mai (Dec–May), rising trend.
+**Right — « Évolution de l'épargne » / "Savings over time"**, sub « Épargne cumulée · 6 mois » / "Total saved · 6 months". Header, at the card's **top right**, level with the title and right-aligned: `10 840,00 €` over the green delta `+635,65 € en mai` / "+€635.65 in May" — the chart then owns the card's whole body. AreaLine chart: cumulative savings, iris `#8B8CF9` 2.5 px stroke over 16 % iris fill, dot on the current (last) point; x-axis Déc. · Janv. · Févr. · Mars · Avr. · Mai (Dec–May), rising trend.
 
 ### Row 3 — split `1fr / 1fr`
 **Left — « Revenus vs dépenses » / "Income vs expenses"**, sub « 4 derniers mois » / "Last 4 months"; green/red dot legend « Revenus / Dépenses » in the header. One 44 px-wide stacked bar per month, income segment `#4ADE80` on top, expense `#FF5C6C` below, 2 px gap. Beneath each bar: month label + net (green if positive, red if negative). Exact data:

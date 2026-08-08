@@ -28,19 +28,14 @@ class SavingsTrendChart extends StatelessWidget {
     return ChartContainer(
       title: l10n.dashboardSavingsTrendTitle,
       subtitle: l10n.dashboardSavingsTrendSubtitle(series.length),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          _Header(trends: trends),
-          const SizedBox(height: AppSpacing.md),
-          Expanded(
-            child: AreaLine(
-              values: [for (final point in series) point.cumulativeMinor],
-              labels: [
-                for (final point in series) _capitalize(monthFormat.format(point.month)),
-              ],
-            ),
-          ),
+      // The running total and the latest month's step head the card from its trailing edge,
+      // level with the title, rather than sitting above the plot — the chart then owns the
+      // card's whole body, which is what keeps the line readable as the panel narrows.
+      trailing: _Header(trends: trends),
+      child: AreaLine(
+        values: [for (final point in series) point.cumulativeMinor],
+        labels: [
+          for (final point in series) _capitalize(monthFormat.format(point.month)),
         ],
       ),
     );
@@ -61,7 +56,7 @@ class _Header extends StatelessWidget {
     final latestMonth = trends.latestMonth;
 
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.end,
       mainAxisSize: MainAxisSize.min,
       children: [
         AmountText(
