@@ -136,6 +136,47 @@ void main() {
     expect(find.text('Objectif : 20 % · atteint'), findsOneWidget);
   });
 
+  testWidgets(
+    'an expense card that fell reads green — spending less is the good news',
+    (tester) async {
+      _useDesktopSurface(tester);
+      await tester.pumpWidget(
+        _wrap(state: _state(summary: specSummary(expenseDeltaPct: -4.6))),
+      );
+      await tester.pumpAndSettle();
+
+      final pill = find.text(formatDeltaPct(-4.6, 'fr'));
+      expect(pill, findsOneWidget);
+      expect(tester.widget<Text>(pill).style?.color, AppColors.positive);
+    },
+  );
+
+  testWidgets(
+    'the savings hero card is outlined in iris, not the neutral card border',
+    (tester) async {
+      _useDesktopSurface(tester);
+      await tester.pumpWidget(_wrap(state: _state()));
+      await tester.pumpAndSettle();
+
+      // The card's own ramp is a few percent of lightness wide, so the border is what carries
+      // the hero apart from the three neutral cards beside it.
+      final decorated = tester.widget<Container>(
+        find
+            .descendant(
+              of: find.byType(SavingsRateCard),
+              matching: find.byType(Container),
+            )
+            .first,
+      );
+      final decoration = decorated.decoration! as BoxDecoration;
+      expect(decoration.gradient, AppColors.irisGradient);
+      expect(
+        (decoration.border! as Border).top.color,
+        AppColors.irisBorderStrong,
+      );
+    },
+  );
+
   testWidgets('the savings caption frames a missed goal as progress, not shortfall', (
     tester,
   ) async {

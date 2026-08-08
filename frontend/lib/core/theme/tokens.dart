@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 
 /// Dark-first palette. Binding values come from `docs/design/00-shared-design-block.md`;
@@ -63,6 +65,11 @@ abstract final class AppColors {
   /// Iris at 12% — active nav pills, tinted chips, glyph plates.
   static const irisSoft = Color(0x1F8B8CF9);
 
+  /// Iris at 35% — the savings-rate hero card's outline (`docs/design/00` §Components). The
+  /// card's own ramp (#8B8CF9 → #6C6AF0) is only a few percent of lightness wide, so it is
+  /// this border, not the fill, that separates the hero from the neutral cards beside it.
+  static const irisBorderStrong = Color(0x598B8CF9);
+
   /// Foreground on an iris-gradient fill.
   static const irisInk = Color(0xFF0E1030);
 
@@ -97,11 +104,20 @@ abstract final class AppColors {
   /// Modal scrim.
   static const scrim = Color(0x9E04060B);
 
-  /// The iris gradient used by primary buttons and the logomark.
+  /// The iris gradient used by primary buttons, the logomark, and the
+  /// savings-rate hero card — the spec's
+  /// `linear-gradient(135deg, #8B8CF9, #6C6AF0)`.
+  ///
+  /// A true 45° axis, not `topLeft → bottomRight`. Flutter's corner alignments
+  /// follow the box's aspect ratio, so on a wide, short card (the savings hero)
+  /// that vector flattens to roughly 20° and the ramp reads as a horizontal
+  /// wash instead of the drawn diagonal. Rotating a horizontal gradient by π/4
+  /// pins the angle whatever box it paints.
   static const irisGradient = LinearGradient(
-    begin: Alignment.topLeft,
-    end: Alignment.bottomRight,
+    begin: Alignment.centerLeft,
+    end: Alignment.centerRight,
     colors: [iris, irisDeep],
+    transform: GradientRotation(math.pi / 4),
   );
 
   /// Glow beneath a primary button.

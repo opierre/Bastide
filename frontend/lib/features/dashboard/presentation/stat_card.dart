@@ -237,6 +237,7 @@ class SavingsRateCard extends StatelessWidget {
     return AppCard(
       padding: const EdgeInsets.all(AppSpacing.cardPaddingWide),
       gradient: AppColors.irisGradient,
+      border: Border.all(color: AppColors.irisBorderStrong),
       child: Row(
         children: [
           Expanded(
