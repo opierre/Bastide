@@ -298,14 +298,11 @@ class SavingsRateCard extends StatelessWidget {
                   style: tabularNumberStyle(textTheme.displayMedium!).copyWith(fontSize: 25),
                 ),
                 const SizedBox(height: AppSpacing.sm - 2),
-                TrendPill(deltaPct: deltaPct, label: deltaLabel),
-                const SizedBox(height: AppSpacing.sm - 2),
-                Text(
-                  caption,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: textTheme.bodySmall?.copyWith(color: AppColors.textSecondary),
-                ),
+                // Pill and « Objectif … » caption share a row, exactly like the neutral cards'
+                // [TrendRow] — so a narrow card truncates the goal text with the same ellipsis
+                // behavior the net card's caption already gets, rather than inventing a second
+                // wrapping rule for this one card.
+                TrendRow(deltaPct: deltaPct, label: deltaLabel, caption: caption),
               ],
             ),
           ),
