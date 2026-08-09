@@ -22,13 +22,14 @@ built so an optional cloud-sync / multi-user tier can be added later without rew
 
 ## 2. Phased roadmap
 
-Build in phases. Each phase ships something usable. **Phase 1 is the current build target**
-and is specified in detail below; later phases are outlined and will be detailed when reached.
+Build in phases. Each phase ships something usable. **Phase 2 is the current build target**;
+Phases 1 and 2 are specified in detail below; later phases are outlined and will be detailed
+when reached.
 
 | Phase | Scope | Status |
 |-------|-------|--------|
-| **1** | Auth (register/login, locale + currency at registration); multi-account; OFX/QFX/CSV import normalised to a canonical schema + import history; transaction list; **rules-based** categorisation; dashboard (monthly income/expense, MoM trend, savings rate, by-category breakdown). | **TARGET** |
-| 2 | SLM categorisation (Ollama) + confidence threshold + review/confirm queue; category management; subscription/recurring detection; savings goals (virtual envelopes). | Planned |
+| 1 | Auth (register/login, locale + currency at registration); multi-account; OFX/QFX/CSV import normalised to a canonical schema + import history; transaction list; **rules-based** categorisation; dashboard (monthly income/expense, MoM trend, savings rate, by-category breakdown). | **Done** |
+| **2** | SLM categorisation (local inference runtime) + confidence threshold + review/confirm queue; category & rule management UI; subscription/recurring detection with lifecycle; savings goals (virtual envelopes). | **TARGET** |
 | 3 | Mortgages (amortisation table, debt ratio); French tax estimation (IR + IFI + capital gains/dividends/property — estimation-first); new-mortgage projection simulator. | Planned |
 | 4 | Multi-user; optional cloud sync (move datastore to PostgreSQL); per-account multi-currency monitoring with FX. | Planned |
 
@@ -53,7 +54,7 @@ and is specified in detail below; later phases are outlined and will be detailed
                                                                      │   (Phase 4 cloud tier)        │
                                                                      │            │                  │
                                                                      │            ▼                  │
-                                                                     │   Ollama (Phase 2, optional)  │
+                                                                     │   Local LLM runtime (Phase 2) │
                                                                      └──────────────────────────────┘
 ```
 
@@ -61,8 +62,21 @@ and is specified in detail below; later phases are outlined and will be detailed
   and supervises, exposing FastAPI on `127.0.0.1` (loopback only — never bind `0.0.0.0`).
 - **Datastore:** SQLite in WAL mode for the local app. Access strictly through SQLAlchemy ORM +
   Alembic migrations so the Phase 4 switch to PostgreSQL is a dialect/connection change.
-- **AI (Phase 2):** Ollama, model configurable in settings, default Gemma 4 E4B. Categorisation
-  degrades gracefully if Ollama is absent (rules only).
+- **AI (Phase 2):** a **local inference runtime**, reached over an OpenAI-compatible HTTP API on
+  loopback. The backend is deliberately **runtime-agnostic**: `llama.cpp`'s `llama-server` and
+  Ollama both speak that surface, so which one runs is configuration (`inference_base_url`,
+  `model_tag`), not code. Default model class: Gemma 4 E4B or equivalent small multilingual
+  model. Categorisation degrades gracefully when no runtime answers (rules only).
+
+> **Why runtime-agnostic, and why the bundling call is deferred.** The two candidates differ in
+> what they cost to *ship*: `llama-server` is a small per-platform binary but makes us own
+> binaries, GPU-backend variants, model download, and child-process supervision; Ollama hands all
+> of that over for free at the price of a separate user install. Neither difference is large next
+> to the model weights (~3–4 GB for an E4B-class Q4 GGUF), which dominate any bundled delivery
+> regardless of runtime — so the real packaging lever is whether weights ship at all, not which
+> engine loads them. That is a Phase 3 packaging decision, made against measured installer sizes;
+> Phase 2 must not prejudge it. Hence one narrow client interface and no runtime-specific calls
+> anywhere above it.
 - **Modularity:** feature-first on both sides. A feature owns its routes/models/services
   (backend) and its screens/state/widgets (frontend). No cross-feature reach-through.
 
@@ -274,8 +288,116 @@ richer label space also benefits the Phase 2 SLM.
 > count. Snapshots are written/updated on import when a period boundary is crossed and can be
 > rebuilt by the reconciliation routine. Unique on `(account_id, period_end)`.
 
-**Phase 2+ entities (stubs, do not build now):** `goals`, `goal_allocations`, `mortgages`,
-`amortization_entries`, `tax_profiles`, `projections`.
+**Phase 3+ entities (stubs, do not build now):** `mortgages`, `amortization_entries`,
+`tax_profiles`, `projections`.
+
+---
+
+## 4b. Data model (Phase 2)
+
+Same rules as §4: UUID string PKs, UTC timestamps, money as signed integer minor units.
+
+### `user_settings`
+| column | type | notes |
+|--------|------|-------|
+| id | uuid PK | |
+| user_id | uuid FK → users, unique | one row per user, created lazily on first read |
+| ai_enabled | bool | default false — the user opts in |
+| inference_base_url | text | OpenAI-compatible base, e.g. `http://127.0.0.1:11434/v1` (Ollama) or `http://127.0.0.1:8080/v1` (`llama-server`) |
+| model_tag | text null | runtime's own model identifier; null = use whatever the runtime lists first |
+| confidence_threshold | real | default `0.80`, range `[0,1]` |
+| created_at / updated_at | datetime | |
+
+> Server-side, not in the Flutter local store: the **backend** is what talks to the runtime, so
+> the backend must own the connection settings. The frontend reads/writes them over `/settings`.
+
+### `categorization_runs`
+| column | type | notes |
+|--------|------|-------|
+| id | uuid PK | |
+| user_id | uuid FK → users | |
+| account_id | uuid FK → accounts null | null = all accounts |
+| import_batch_id | uuid FK → import_batches null | set when the run was triggered by an import |
+| trigger | text | `import` \| `manual` |
+| status | text | `pending` \| `running` \| `success` \| `partial` \| `failed` \| `cancelled` |
+| model_tag | text null | the model actually used, recorded for auditability |
+| total_count | int | rows the run intends to process |
+| processed_count | int | rows attempted so far (drives the progress UI) |
+| assigned_count | int | confidence ≥ threshold → categorised |
+| deferred_count | int | below threshold or unparseable reply → left for review |
+| failed_count | int | rows the runtime errored on |
+| error_message | text null | set on `failed` |
+| started_at / finished_at | datetime null | |
+| created_at | datetime | |
+
+> Persisted rather than in-memory so a run's outcome survives a sidecar restart and the history
+> is inspectable — the same reasoning as `import_batches`. A run left `running` at startup is
+> reconciled to `failed` (see §7).
+
+### `recurring_series`
+| column | type | notes |
+|--------|------|-------|
+| id | uuid PK | |
+| user_id | uuid FK → users | |
+| account_id | uuid FK → accounts | |
+| merchant_key | text | normalised grouping key derived from `merchant`/`description_clean` |
+| label | text | user-facing name; defaults to the prettiest observed merchant, user-editable |
+| category_id | uuid FK → categories null | |
+| cadence | text | `weekly` \| `monthly` \| `quarterly` \| `yearly` \| `irregular` |
+| median_interval_days | int | observed, backs the cadence classification |
+| expected_amount_minor | int | signed; median of recent occurrences |
+| currency | text | = account currency |
+| first_seen_date / last_seen_date | date | |
+| next_expected_date | date | `last_seen_date + median_interval_days` |
+| occurrence_count | int | |
+| status | text | `detected` \| `confirmed` \| `dismissed` \| `cancelled` |
+| is_manual | bool | true = user-declared, never overwritten by the detector |
+| price_change_minor | int null | last observed step in `expected_amount_minor`, signed |
+| price_changed_at | date null | booked date of the occurrence that changed the price |
+| created_at / updated_at | datetime | |
+
+Unique on `(account_id, merchant_key)` for detected series, so re-running the detector updates
+rather than duplicates.
+
+### `recurring_occurrences`
+| column | type | notes |
+|--------|------|-------|
+| id | uuid PK | |
+| series_id | uuid FK → recurring_series | |
+| transaction_id | uuid FK → transactions, unique | a transaction belongs to at most one series |
+| created_at | datetime | |
+
+> A link table rather than a `recurring_series_id` column on `transactions`: occurrences are
+> detector output that the user can attach and detach, and keeping that churn out of the ledger
+> table means re-detection never writes to the single source of truth.
+
+### `goals`
+| column | type | notes |
+|--------|------|-------|
+| id | uuid PK | |
+| user_id | uuid FK → users | |
+| name | text | |
+| target_minor | int | positive |
+| currency | text | = user currency (Phase 1 rule still holds) |
+| target_date | date null | |
+| icon / color | text | |
+| status | text | `active` \| `reached` \| `archived` |
+| created_at / updated_at | datetime | |
+
+### `goal_allocations`
+| column | type | notes |
+|--------|------|-------|
+| id | uuid PK | |
+| goal_id | uuid FK → goals | |
+| amount_minor | int | signed — negative = taking money back out of the envelope |
+| allocated_on | date | |
+| note | text null | |
+| created_at | datetime | |
+
+> **Envelopes are virtual and never touch the ledger.** `progress_minor = sum(allocations)`; a
+> goal writes no transactions and moves no balance. Allocating is bookkeeping *about* money the
+> user already has, so an allocation that would make the ledger and the envelopes disagree is not
+> an error — over-allocation is surfaced as a warning in the UI, never blocked. See §13.
 
 ---
 
@@ -353,6 +475,57 @@ Errors: consistent JSON envelope `{error: {code, message, details?}}` with prope
 
 ---
 
+## 5b. API contract (Phase 2)
+
+Same conventions: `/api/v1`, bearer auth, user-scoped, same error envelope.
+
+```
+GET    /settings                    → user_settings          (created lazily if absent)
+PATCH  /settings                    {ai_enabled?, inference_base_url?, model_tag?,
+                                     confidence_threshold?} → user_settings
+GET    /settings/inference/health   → {reachable, models: [tag], detail?}   (never 5xx — an
+                                       unreachable runtime is a normal, reportable state)
+
+POST   /categorization/runs         {account_id?, scope: pending|all} → 202 run
+GET    /categorization/runs         ?limit → [run]                     (history, newest first)
+GET    /categorization/runs/{id}    → run                              (polled for progress)
+POST   /categorization/runs/{id}/cancel → run
+
+POST   /rules/preview               {match_field, match_type, pattern, account_id?}
+                                    → {match_count, samples: [transaction]}   (max 3 samples)
+POST   /rules/from-transaction      {transaction_id, match_field, match_type, pattern,
+                                     category_id, apply_now} → {rule, recategorized_count}
+
+GET    /recurring                   ?status&account_id → [series]
+GET    /recurring/{id}              → series + [occurrence with transaction]
+POST   /recurring/detect            {account_id?} → {created_count, updated_count}
+POST   /recurring                   {label, account_id, expected_amount_minor, cadence,
+                                     category_id?} → series            (is_manual = true)
+PATCH  /recurring/{id}              {label?|category_id?|cadence?|expected_amount_minor?|status?}
+DELETE /recurring/{id}              (manual → hard delete; detected → status = dismissed)
+GET    /recurring/summary           → {monthly_total_minor, active_count, cancelled_count,
+                                       cadence_counts: {monthly, quarterly, yearly, …},
+                                       next_charge: {series_id, label, amount_minor, due_on}?,
+                                       price_increases: [{series_id, delta_minor, changed_at}],
+                                       missed: [{series_id, expected_on, days_late}], currency}
+
+GET    /goals                       ?status → [goal + {progress_minor, progress_pct}]
+POST   /goals                       {name, target_minor, target_date?, icon, color}
+PATCH  /goals/{id}                  (incl. {status} — archive and restore)
+DELETE /goals/{id}                  (archive, not hard delete — allocations are history)
+GET    /goals/{id}/allocations      → [allocation]
+POST   /goals/{id}/allocations      {amount_minor, allocated_on, note?} → allocation
+DELETE /goals/{id}/allocations/{allocation_id}
+```
+
+> **Why `/rules/from-transaction` instead of a flag on `PATCH /transactions/{id}`.** The
+> "always categorise X as Y" affordance does two things — correct one row *and* create a rule
+> that may recategorise many others. Folding that into the transaction patch would give one
+> endpoint two blast radii and a response shape that sometimes reports a bulk count. Separate,
+> the patch stays a single-row edit and the learning step reports what it changed.
+
+---
+
 ## 6. Import pipeline
 
 One **canonical transaction model** is the target of every parser. The rest of the app never
@@ -384,9 +557,9 @@ knows the source format.
 - `POST /rules/apply` re-runs rules over existing transactions (e.g. after adding a rule),
   but **never overrides** a transaction whose `source = user`.
 
-**Phase 2 (adds the model, designed now so Phase 1 doesn't block it):**
-- Unmatched transactions go to the SLM (Ollama) with a prompt containing the category list +
-  cleaned description/merchant + a few-shot set.
+**Phase 2 (adds the model):**
+- Unmatched transactions go to the SLM with a prompt containing the category list + cleaned
+  description/merchant + amount sign + a small few-shot set.
 - If returned `confidence ≥ threshold` (default 0.80, configurable): assign,
   `source = model`, `needs_review = false`. Else `needs_review = true`.
 - User confirms/corrects in the review queue. A user correction may offer "always categorise
@@ -394,6 +567,27 @@ knows the source format.
 
 This is the small-model-with-deferral pattern: the cheap path handles the easy majority and
 only genuinely uncertain items reach the human.
+
+**Stage 2 runs asynchronously, never inside the import request.** An import finishes on rules
+alone and returns immediately; it then enqueues a `categorization_run` over the rows it left
+`needs_review`. The frontend polls the run for progress and the transaction list refreshes as
+rows resolve. Rationale: a few hundred rows through a local SLM is minutes of work, and binding
+that to the upload request would make imports appear to hang and let a stalled runtime become a
+stalled import — the one thing §"graceful degradation" forbids.
+
+Run mechanics:
+- **One run at a time per user.** Requesting a run while one is `pending`/`running` returns the
+  in-flight run rather than starting a second — two passes over the same rows would race on
+  `category_id`.
+- **Progress is committed incrementally** (per batch, not at the end), so a crash keeps the work
+  already done and `processed_count` is always truthful.
+- **Startup reconciliation:** any run still `running` when the sidecar boots is marked `failed`
+  — its executor died with the process.
+- **Cancellation** is cooperative: the executor checks the run's status between batches.
+- A row already carrying `source = user` or `source = rule` is never re-examined by a run.
+- **Malformed replies and per-row runtime errors never abort the run.** A row that can't be
+  parsed into `{category_id, confidence}` counts as deferred; the run ends `partial` if any row
+  failed, `success` if none did.
 
 ---
 
@@ -457,8 +651,9 @@ Pinned intent (verify exact patch at install time and record in lockfiles):
   the normal loop. No `black`.
 - SQLite (WAL) now · PostgreSQL 18.x (Phase 4)
 - Flutter (latest stable) · Dart · Riverpod · intl · flutter_localizations
-- Ollama (latest) · default model **Gemma 4 E4B** (configurable), optional finance-tuned 8B
-  model for the Phase 2+ insights feature
+- Local inference runtime: **`llama.cpp` (`llama-server`) or Ollama**, whichever the user runs —
+  reached over the OpenAI-compatible `/v1` surface both expose. Default model **Gemma 4 E4B**
+  (configurable); optional finance-tuned 8B model for the Phase 3+ insights feature
 - Docker (dev) · native installers (release)
 
 ---
@@ -468,3 +663,63 @@ Pinned intent (verify exact patch at install time and record in lockfiles):
 A slice is done when: it matches this spec; has passing unit tests with external deps mocked;
 passes lints; ships UI strings in both `fr` and `en`; money is integer minor units; and the
 work lands as one or more Conventional Commits.
+
+---
+
+> §12 and §13 are appended rather than inserted so the existing §1–§11 numbering — referenced by
+> every skill and task card — stays stable.
+
+## 12. Recurring / subscription detection (Phase 2)
+
+Deterministic, no model involved. The detector is a pure function over a user's transactions
+producing candidate series; persistence and lifecycle sit above it.
+
+**Grouping.** Rows are grouped per account by `merchant_key`: `merchant` when extracted, else
+`description_clean` stripped of the parts banks vary between occurrences — dates, card-sequence
+digits, trailing reference numbers — then case-folded and whitespace-collapsed. Only outflows
+(`amount_minor < 0`) are considered.
+
+**Qualification.** A group becomes a series when it has **≥ 3 occurrences** whose gaps are
+regular: the median gap classifies the cadence (weekly 5–9 d, monthly 26–35 d, quarterly
+85–95 d, yearly 350–380 d) and **each** gap must sit within tolerance of that median (±25 %,
+floor ±3 days). Amounts must agree too: every occurrence within **±10 % or ±200 minor units**
+(whichever is larger) of the median — the floor keeps small subscriptions from failing on
+rounding, the percentage keeps large ones from absorbing a real price change.
+
+**Signals.**
+- *Price change*: the most recent occurrence sits outside the amount tolerance of the median of
+  the previous ones, but the cadence still holds. Record the delta and its date, and re-baseline
+  `expected_amount_minor` on the newer amount.
+- *Missed charge*: `next_expected_date` has passed by more than the cadence tolerance with no
+  new occurrence. Derived at read time — never persisted, since it stops being true the moment
+  the charge lands.
+
+**Idempotence.** Re-running the detector matches existing series on `(account_id, merchant_key)`
+and updates them in place. It **never** touches a series with `is_manual = true`, never
+resurrects one the user set to `dismissed` or `cancelled`, and never overwrites a user-edited
+`label` or `category_id`. As with §7's rule engine: user intent is sacred.
+
+**`monthly_total_minor`** normalises every non-dismissed series to a monthly figure
+(weekly ×52/12, quarterly ÷3, yearly ÷12) so the burden of a mixed set is one comparable number.
+
+## 13. Savings goals / virtual envelopes (Phase 2)
+
+A goal is a target the user allocates money toward on paper. It is **purely virtual**: creating,
+funding, or completing a goal writes no transaction and changes no account balance.
+
+- `progress_minor = sum(goal_allocations.amount_minor)`; allocations are signed, so taking money
+  back out is a negative allocation and the history stays append-only rather than mutable.
+- `progress_pct = progress_minor / target_minor`, clamped to `[0, 1]` for display; the raw value
+  is reported unclamped so an over-funded goal can say so.
+- A goal flips to `status = reached` when progress ≥ target. It does not auto-archive — reaching
+  it is the rewarding moment the UI is built around (§9: encouraging UX). Archiving is an
+  explicit user action, and reversible: an archived goal keeps its allocation history and can be
+  restored (`PATCH /goals/{id} {status}`).
+- **A goal is not linked to an account.** Earlier drafts carried a display-only `account_id`; the
+  drawn design (`docs/design/11-goals.md`) shows no account anywhere — not on the card, the
+  detail header, or the allocation modal — so the column has no remaining purpose and is not
+  built. The only account-derived figure in the feature is the aggregate savings total behind the
+  over-allocation banner, which is read from accounts, not stored on the goal.
+- **Over-allocation is a warning, not an error.** Total allocations across active goals may
+  exceed the user's actual savings balance; the UI says so plainly and the API still accepts it.
+  Blocking it would require the app to be right about which money is "savings", which it isn't.

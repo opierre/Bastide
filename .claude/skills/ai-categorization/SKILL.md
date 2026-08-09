@@ -1,6 +1,6 @@
 ---
 name: ai-categorization
-description: Use for transaction categorization and the AI insights feature in the finstride. Covers the deterministic rule engine (Phase 1) and the Phase 2 Ollama SLM layer — the rules→model→confidence-deferral pattern, the human review/confirm queue, learning corrections back into rules, model selection (Gemma 4 default, finance-tuned 8B for insights), graceful degradation when Ollama is absent, and full mocking of the model in tests.
+description: Use for transaction categorization and the AI insights feature in the finstride. Covers the deterministic rule engine (Phase 1) and the Phase 2 SLM layer running on a local inference runtime (llama.cpp or Ollama) — the rules→model→confidence-deferral pattern, the async run model, the human review/confirm queue, learning corrections back into rules, model selection (Gemma 4 default, finance-tuned 8B for insights), graceful degradation when no runtime answers, and full mocking of the model in tests.
 ---
 
 # AI Categorization
@@ -28,8 +28,12 @@ transaction → [1] rule engine → matched? → done (source=rule, needs_review
 This stage handles the easy majority (recurring merchants, salary, known patterns) with zero
 tokens and full reproducibility.
 
-### Stage 2 — SLM via Ollama (Phase 2, optional)
+### Stage 2 — SLM on a local runtime (Phase 2, optional)
 
+- The runtime is reached over an **OpenAI-compatible `/v1` HTTP API on loopback**, which both
+  `llama-server` (llama.cpp) and Ollama expose. Never call runtime-specific endpoints: the base
+  URL and model tag are user settings, so which engine is running must not be visible above the
+  client. See `PROJECT.md` §3 for why that choice is deferred to packaging.
 - Only **unmatched** transactions reach the model. The prompt contains: the localized category
   list (id + name + kind), the transaction's `description_clean`/`merchant`/amount sign, and a
   small few-shot set. The model returns a `category_id` + a `confidence` in [0,1].
@@ -37,8 +41,11 @@ tokens and full reproducibility.
   `source = model`, `confidence` stored, `needs_review = false`.
 - Else: leave for the user, `needs_review = true`.
 - Batch requests where possible; keep the prompt compact (token discipline). Constrain output to
-  a strict JSON shape and parse defensively — a malformed model reply ⇒ treat as uncertain, never
-  crash the import.
+  a strict JSON shape — request structured output (`response_format`) where the runtime supports
+  it — and parse defensively regardless: a malformed reply ⇒ treat as uncertain, never crash.
+- **Stage 2 runs asynchronously**, in a tracked `categorization_run`, never inside the import
+  request. One run at a time per user; progress committed per batch; cancellation cooperative.
+  `PROJECT.md` §7 holds the full run mechanics.
 
 This is the small-model-with-deferral pattern: cheap model on the easy part, human on the rest.
 
@@ -54,21 +61,24 @@ This is the small-model-with-deferral pattern: cheap model on the easy part, hum
 ## Model selection
 
 - **Default categorization model: Gemma 4 E4B** — small, ~4 GB RAM class, multilingual (incl.
-  French), tool-capable, runs from GGUF in Ollama. Pick the size by detected hardware:
+  French), tool-capable, runs from GGUF on either runtime. Pick the size by detected hardware:
   E2B (low-end) / E4B (default sweet spot) / 26B MoE (capable machines). User-overridable.
 - **Insights / advisory feature: a finance-tuned ~8B model** (e.g. the AGEFI/Dragon LLM Open
   Finance Initiative models, Llama-3.1/Qwen-3 based, strong fr+en financial vocabulary). The
   domain tuning helps with French financial terminology where a general small model is weaker.
-  Also runs in Ollama, selectable in settings.
+  Runs on the same runtime, selectable in settings. **Deferred to Phase 3** — Phase 2 builds the
+  categorization path only.
 - Model names/tags are **config**, never hardcoded in logic. Settings exposes model choice and
   the confidence threshold.
 
 ## Graceful degradation (hard requirement)
 
-The app must fully work with **no Ollama installed**. If the model endpoint is unreachable:
+The app must fully work with **no inference runtime installed**. If the endpoint is unreachable:
 - Categorization runs **Stage 1 only**; unmatched rows stay `uncategorized / needs_review`.
 - The UI shows a calm, optional "enable local AI for smarter categorization" affordance — never
   an error wall, never a blocked import.
+- `GET /settings/inference/health` reports `reachable: false` as a **200**, not an error: an
+  absent runtime is the expected default state, not a failure of the app.
 - The insights feature is hidden/disabled, not broken.
 
 ## Insights feature
@@ -80,9 +90,9 @@ The app must fully work with **no Ollama installed**. If the model endpoint is u
 
 ## Testing (model fully mocked)
 
-- **Unit tests never call a live model.** Mock the Ollama client. Test: confident reply →
+- **Unit tests never call a live model.** Mock the inference client. Test: confident reply →
   assigned; low-confidence → review queue; malformed/garbage reply → treated as uncertain, no
-  crash; Ollama unreachable → Stage-1-only path, import still succeeds.
+  crash; runtime unreachable → Stage-1-only path, import still succeeds.
 - Test the learning loop: a user correction with "always" creates a rule that then matches in
   Stage 1 on the next run.
 - Rule engine tests (Phase 1): priority ordering, first-match-wins, `source=user` never
