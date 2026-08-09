@@ -265,6 +265,10 @@ class SavingsRateCard extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 18),
       gradient: AppColors.irisTintGradient,
       border: Border.all(color: AppColors.irisBorderStrong),
+      // This card is shorter than its stretched neutral siblings (the dashboard row matches
+      // every card to the tallest one), so without this it would hug the top instead of sitting
+      // centered in the extra height.
+      alignment: Alignment.center,
       child: Row(
         children: [
           SavingsRateRing(rate: rate),

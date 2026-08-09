@@ -18,6 +18,7 @@ class AppCard extends StatefulWidget {
     this.color,
     this.border,
     this.gradient,
+    this.alignment = AlignmentDirectional.topStart,
   });
 
   final Widget child;
@@ -29,6 +30,13 @@ class AppCard extends StatefulWidget {
   final Color? color;
   final BoxBorder? border;
   final Gradient? gradient;
+
+  /// How [child] sits inside the card once it's shorter than the space a
+  /// stretched sibling row gives it (see the dashboard's `IntrinsicHeight` +
+  /// `CrossAxisAlignment.stretch` grid). Defaults to the top-start the
+  /// internal [Stack] would use anyway, so every existing card keeps its
+  /// current look; [SavingsRateCard] is the one caller that overrides it.
+  final AlignmentGeometry alignment;
 
   @override
   State<AppCard> createState() => _AppCardState();
@@ -63,6 +71,7 @@ class _AppCardState extends State<AppCard> {
       child: ClipRRect(
         borderRadius: BorderRadius.circular(AppRadii.lg),
         child: Stack(
+          alignment: widget.alignment,
           children: [
             // Sized by the padded child, so the sheen's 46% stop is relative to
             // the card's own height rather than a fixed pixel run.
