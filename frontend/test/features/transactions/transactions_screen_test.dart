@@ -178,7 +178,7 @@ void main() {
   });
 
   testWidgets(
-    'the category pill follows the merchant name rather than its own column',
+    'the category pill holds one column however long the merchant name is',
     (tester) async {
       _useDesktopSurface(tester);
       await tester.pumpWidget(
@@ -218,13 +218,14 @@ void main() {
           )
           .left;
 
-      // The pill starts where the name ends, so a short merchant pulls it left — under the old
-      // fixed 290px block both rows put it on the same rail.
+      // The label block is tight, so a short merchant no longer pulls its pill left:
+      // every row starts its pill at the same x and they read as one column.
       expect(
         pillLeft('Carrefour'),
-        lessThan(pillLeft('Prélèvement mensuel Assurance Habitation Matmut')),
+        pillLeft('Prélèvement mensuel Assurance Habitation Matmut'),
       );
-      // …and the long name is given room to run well past the old 290px cap.
+      // …and the long name still gets room to run well past the old 290px cap
+      // before it ellipsizes.
       expect(
         tester
             .getSize(
