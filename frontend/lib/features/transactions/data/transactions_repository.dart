@@ -111,6 +111,7 @@ class TransactionsRepository {
       currency: json['currency'] as String,
       descriptionRaw: json['description_raw'] as String,
       descriptionClean: json['description_clean'] as String,
+      memo: json['memo'] as String?,
       merchant: json['merchant'] as String?,
       category: categoryJson == null
           ? null

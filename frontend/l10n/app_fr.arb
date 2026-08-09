@@ -916,6 +916,18 @@
       }
     }
   },
+  "transactionRowMemoAndAccount": "{memo} · {account}",
+  "@transactionRowMemoAndAccount": {
+    "description": "Secondary line of a transaction row when the bank shipped a memo: the memo first, then the account it belongs to.",
+    "placeholders": {
+      "memo": {
+        "type": "String"
+      },
+      "account": {
+        "type": "String"
+      }
+    }
+  },
   "reviewQueueEmpty": "Aucune transaction à vérifier.",
   "@reviewQueueEmpty": {
     "description": "Shown in place of the review queue list when it is empty."

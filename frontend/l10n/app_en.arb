@@ -245,6 +245,7 @@
   "transactionsFilterAllCategories": "All categories",
   "transactionsFilterAllDates": "All dates",
   "transactionsPager": "{from}–{to} of {total}",
+  "transactionRowMemoAndAccount": "{memo} · {account}",
   "reviewQueueEmpty": "No transactions to review.",
   "reviewQueueCount": "{count, plural, =0{No transactions to review} =1{1 transaction to review} other{{count} transactions to review}}",
   "reviewQueueEncouragement": "You're almost there — keep going!",

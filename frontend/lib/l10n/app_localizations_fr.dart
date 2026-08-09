@@ -730,6 +730,11 @@ class AppLocalizationsFr extends AppLocalizations {
   }
 
   @override
+  String transactionRowMemoAndAccount(String memo, String account) {
+    return '$memo · $account';
+  }
+
+  @override
   String get reviewQueueEmpty => 'Aucune transaction à vérifier.';
 
   @override

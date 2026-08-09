@@ -62,6 +62,7 @@ class Transaction {
     required this.currency,
     required this.descriptionRaw,
     required this.descriptionClean,
+    required this.memo,
     required this.merchant,
     required this.category,
     required this.categorizationSource,
@@ -81,6 +82,10 @@ class Transaction {
   final String currency;
   final String descriptionRaw;
   final String descriptionClean;
+
+  /// The bank's free-text detail for the row (OFX `MEMO`), when it carried one.
+  /// Display-only, shown under the label; `null` for CSV imports.
+  final String? memo;
   final String? merchant;
   final TransactionCategory? category;
   final CategorizationSource categorizationSource;
@@ -106,6 +111,7 @@ class Transaction {
       currency: currency,
       descriptionRaw: descriptionRaw,
       descriptionClean: descriptionClean,
+      memo: memo,
       merchant: merchant,
       category: clearCategory ? null : (category ?? this.category),
       categorizationSource: categorizationSource ?? this.categorizationSource,
@@ -130,6 +136,7 @@ class Transaction {
           other.currency == currency &&
           other.descriptionRaw == descriptionRaw &&
           other.descriptionClean == descriptionClean &&
+          other.memo == memo &&
           other.merchant == merchant &&
           other.category == category &&
           other.categorizationSource == categorizationSource &&
@@ -150,6 +157,7 @@ class Transaction {
     currency,
     descriptionRaw,
     descriptionClean,
+    memo,
     merchant,
     category,
     categorizationSource,

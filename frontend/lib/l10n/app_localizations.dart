@@ -1316,6 +1316,12 @@ abstract class AppLocalizations {
   /// **'{from}–{to} sur {total}'**
   String transactionsPager(int from, int to, int total);
 
+  /// Secondary line of a transaction row when the bank shipped a memo: the memo first, then the account it belongs to.
+  ///
+  /// In fr, this message translates to:
+  /// **'{memo} · {account}'**
+  String transactionRowMemoAndAccount(String memo, String account);
+
   /// Shown in place of the review queue list when it is empty.
   ///
   /// In fr, this message translates to:

@@ -35,6 +35,7 @@ Transaction _transaction({
   bool needsReview = false,
   TransactionCategory? category,
   String? merchant = 'Carrefour',
+  String? memo,
 }) => Transaction(
   id: id,
   accountId: 'a1',
@@ -44,6 +45,7 @@ Transaction _transaction({
   currency: 'EUR',
   descriptionRaw: 'CB CARREFOUR MARKET 14/05',
   descriptionClean: 'Carrefour Market',
+  memo: memo,
   merchant: merchant,
   category: category,
   categorizationSource: category == null
@@ -135,6 +137,44 @@ void main() {
     );
     expect(find.text(expectedAmount), findsOneWidget);
     expect(find.text('Courses'), findsOneWidget);
+  });
+
+  testWidgets('a row with a memo shows it before the account name', (tester) async {
+    _useDesktopSurface(tester);
+    await tester.pumpWidget(
+      _wrap(
+        controller: FakeTransactionsController(
+          initialPage: TransactionsPage(
+            items: [_transaction(memo: 'Abonnement mensuel')],
+            page: 1,
+            pageSize: 50,
+            total: 1,
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('Abonnement mensuel · Compte courant'), findsOneWidget);
+  });
+
+  testWidgets('a row without a memo keeps the account name alone', (tester) async {
+    _useDesktopSurface(tester);
+    await tester.pumpWidget(
+      _wrap(
+        controller: FakeTransactionsController(
+          initialPage: TransactionsPage(
+            items: [_transaction()],
+            page: 1,
+            pageSize: 50,
+            total: 1,
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('Compte courant'), findsOneWidget);
   });
 
   testWidgets(
