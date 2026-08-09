@@ -136,7 +136,10 @@ class TransactionRow extends ConsumerWidget {
                 amountMinor: transaction.amountMinor,
                 currency: transaction.currency,
                 showPositiveSign: true,
-                style: textTheme.bodyMedium!,
+                // Bolder and a step larger than the merchant line (titleSmall)
+                // so the signed amount reads as the row's headline figure,
+                // not body text — see the design-system skill's type scale.
+                style: textTheme.titleMedium!,
               ),
             ),
           ),
