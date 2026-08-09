@@ -11,6 +11,8 @@ from dataclasses import dataclass
 from datetime import date
 
 _WHITESPACE_RE = re.compile(r"\s+")
+# Any letter or digit, in any script — a memo made of nothing but punctuation says nothing.
+_ALPHANUMERIC_RE = re.compile(r"[^\W_]")
 _NOISE_PREFIX_RE = re.compile(
     r"^(CB|CARTE|PAIEMENT CB|ACHAT CB|VIR(?:EMENT)?|PRLV(?:EMENT)?)\s+",
     re.IGNORECASE,
@@ -53,6 +55,20 @@ def clean_description(raw: str) -> str:
     return _WHITESPACE_RE.sub(" ", raw).strip()
 
 
+def clean_memo(raw: str | None) -> str | None:
+    """The memo as it should be displayed, or `None` when it carries nothing to display.
+
+    Banks emit a placeholder instead of omitting the tag — Crédit Agricole ships
+    ``<MEMO>.`` on every row that has no real detail — so a memo without a single letter
+    or digit is treated as absent. Kept here rather than in the OFX parser because it is
+    a property of the value, not of the format that carried it.
+    """
+    if raw is None:
+        return None
+    cleaned = clean_description(raw)
+    return cleaned if _ALPHANUMERIC_RE.search(cleaned) else None
+
+
 def extract_merchant(description_clean: str) -> str | None:
     """Best-effort merchant guess: the cleaned description with bank-noise prefixes stripped."""
     if not description_clean:
@@ -84,7 +100,7 @@ def normalize(raw: RawTransaction, account_id: str, currency: str) -> CanonicalT
         currency=currency,
         description_raw=raw.description_raw,
         description_clean=description_clean,
-        memo=clean_description(raw.memo) or None if raw.memo else None,
+        memo=clean_memo(raw.memo),
         merchant=extract_merchant(description_clean),
         fitid=raw.fitid,
         dedup_hash=dedup_hash,

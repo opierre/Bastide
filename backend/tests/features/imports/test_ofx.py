@@ -158,6 +158,28 @@ def test_normalize_builds_canonical_transaction() -> None:
     assert canonical.dedup_hash
 
 
+def test_normalize_drops_a_placeholder_memo() -> None:
+    # Crédit Agricole ships `<MEMO>.` on every row with no real detail, which would
+    # otherwise render as a stray dot in front of the account name.
+    raw = b"<OFX><STMTTRN><DTPOSTED>20240410<TRNAMT>-8.20<NAME>CARREFOUR<MEMO>.</STMTTRN></OFX>"
+
+    canonical = normalize(parse(raw)[0], account_id="acct-1", currency="EUR")
+
+    assert canonical.description_clean == "CARREFOUR"
+    assert canonical.memo is None
+
+
+def test_normalize_keeps_a_memo_that_says_something() -> None:
+    raw = (
+        b"<OFX><STMTTRN><DTPOSTED>20240410<TRNAMT>-8.20"
+        b"<NAME>CARREFOUR<MEMO>Retrait  DAB 12</STMTTRN></OFX>"
+    )
+
+    canonical = normalize(parse(raw)[0], account_id="acct-1", currency="EUR")
+
+    assert canonical.memo == "Retrait DAB 12"
+
+
 # --- import endpoint: persistence, dedup, idempotency, failure --------------------------
 
 
