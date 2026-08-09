@@ -38,11 +38,14 @@ class TransactionRow extends ConsumerWidget {
         ? transaction.merchant!
         : transaction.descriptionClean;
     // The bank's memo is the more informative half of the secondary line, so it leads
-    // and the account follows it; rows without a memo keep the account line as-is.
-    final memo = transaction.memo?.trim();
-    final subtitle = memo == null || memo.isEmpty
-        ? accountName
-        : l10n.transactionRowMemoAndAccount(memo, accountName);
+    // and the account follows it. The separator only appears between two present
+    // halves — a row with no memo reads as the account alone, never as a stray dot.
+    final memo = transaction.memo?.trim() ?? '';
+    final subtitle = switch ((memo.isEmpty, accountName.isEmpty)) {
+      (true, _) => accountName,
+      (false, true) => memo,
+      _ => l10n.transactionRowMemoAndAccount(memo, accountName),
+    };
 
     return _HoverableRow(
       key: Key('transactionRow-${transaction.id}'),
