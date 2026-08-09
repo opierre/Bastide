@@ -186,6 +186,7 @@ for money.** Primary keys are UUIDs (string). Timestamps are UTC ISO-8601.
 | currency | text | = account currency (Phase 1) |
 | description_raw | text | as received from file |
 | description_clean | text | normalised for matching/display |
+| memo | text null | bank free-text detail (OFX `MEMO`), display only |
 | merchant | text null | extracted if possible |
 | category_id | uuid FK → categories null | |
 | categorization_source | text | `rule` \| `model` \| `user` \| `uncategorized` |

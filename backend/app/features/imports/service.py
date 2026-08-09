@@ -244,6 +244,7 @@ class ImportService:
                 currency=row.currency,
                 description_raw=row.description_raw,
                 description_clean=row.description_clean,
+                memo=row.memo,
                 merchant=row.merchant,
                 category_id=None,
                 categorization_source="uncategorized",

@@ -24,6 +24,10 @@ class RawTransaction:
     booked_date: date
     amount_minor: int
     description_raw: str
+
+    #: Bank free-text detail alongside the label (OFX `MEMO`), when the format carries one and
+    #: it says something the description doesn't. Display-only: nothing derives from it.
+    memo: str | None = None
     fitid: str | None = None
     value_date: date | None = None
 
@@ -38,6 +42,7 @@ class CanonicalTransaction:
     currency: str
     description_raw: str
     description_clean: str
+    memo: str | None
     merchant: str | None
     fitid: str | None
     dedup_hash: str
@@ -79,6 +84,7 @@ def normalize(raw: RawTransaction, account_id: str, currency: str) -> CanonicalT
         currency=currency,
         description_raw=raw.description_raw,
         description_clean=description_clean,
+        memo=clean_description(raw.memo) or None if raw.memo else None,
         merchant=extract_merchant(description_clean),
         fitid=raw.fitid,
         dedup_hash=dedup_hash,

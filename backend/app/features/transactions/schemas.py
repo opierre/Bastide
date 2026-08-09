@@ -30,6 +30,7 @@ class TransactionRead(BaseModel):
     currency: str
     description_raw: str
     description_clean: str
+    memo: str | None
     merchant: str | None
     category: TransactionCategory | None
     categorization_source: str

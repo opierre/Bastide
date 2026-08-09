@@ -36,6 +36,7 @@ def _to_read(transaction: Transaction) -> TransactionRead:
         currency=transaction.currency,
         description_raw=transaction.description_raw,
         description_clean=transaction.description_clean,
+        memo=transaction.memo,
         merchant=transaction.merchant,
         category=(
             TransactionCategory.model_validate(transaction.category)

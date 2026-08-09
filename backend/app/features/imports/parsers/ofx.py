@@ -93,9 +93,15 @@ def parse(raw_bytes: bytes) -> list[RawTransaction]:
         if dtposted is None or trnamt is None:
             raise OfxParseError("STMTTRN missing DTPOSTED or TRNAMT.")
 
+        # `NAME` is the payee/label and `MEMO` the bank's free-text detail. They are kept
+        # apart so the description (and everything derived from it — merchant, rules,
+        # dedup hash) stays the label alone, with the memo carried as its own field.
         name = _tag(block, "NAME")
         memo = _tag(block, "MEMO")
-        description_raw = f"{name} {memo}" if name and memo and name != memo else name or memo or ""
+        description_raw = name or memo or ""
+        # A memo echoing the name adds nothing to display, and a memo-only record has
+        # already been promoted to the description above.
+        memo = memo if memo and memo != name and memo != description_raw else None
 
         dtuser = _tag(block, "DTUSER") or _tag(block, "DTAVAIL")
 
@@ -105,6 +111,7 @@ def parse(raw_bytes: bytes) -> list[RawTransaction]:
                 value_date=_parse_date(dtuser) if dtuser else None,
                 amount_minor=_parse_amount_minor(trnamt),
                 description_raw=description_raw,
+                memo=memo,
                 fitid=_tag(block, "FITID"),
             )
         )

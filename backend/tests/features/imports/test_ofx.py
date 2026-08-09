@@ -76,7 +76,35 @@ def test_parse_qfx_tolerates_quicken_extras() -> None:
 
     assert len(transactions) == 1
     assert transactions[0].amount_minor == -820
-    assert transactions[0].description_raw == "PRLV ABONNEMENT Abonnement mensuel"
+    assert transactions[0].description_raw == "PRLV ABONNEMENT"
+
+
+def test_parse_keeps_memo_out_of_the_description() -> None:
+    transactions = parse((FIXTURES / "sample.qfx").read_bytes())
+
+    assert transactions[0].description_raw == "PRLV ABONNEMENT"
+    assert transactions[0].memo == "Abonnement mensuel"
+
+
+def test_parse_promotes_a_memo_only_record_to_the_description() -> None:
+    raw = b"<OFX><STMTTRN><DTPOSTED>20240410<TRNAMT>-8.20<MEMO>Frais de tenue</STMTTRN></OFX>"
+
+    transactions = parse(raw)
+
+    assert transactions[0].description_raw == "Frais de tenue"
+    assert transactions[0].memo is None
+
+
+def test_parse_drops_a_memo_echoing_the_name() -> None:
+    raw = (
+        b"<OFX><STMTTRN><DTPOSTED>20240410<TRNAMT>-8.20"
+        b"<NAME>CARREFOUR<MEMO>CARREFOUR</STMTTRN></OFX>"
+    )
+
+    transactions = parse(raw)
+
+    assert transactions[0].description_raw == "CARREFOUR"
+    assert transactions[0].memo is None
 
 
 def test_parse_handles_latin1_encoding() -> None:

@@ -37,6 +37,10 @@ class Transaction(Base):
     currency: Mapped[str] = mapped_column(String(3))
     description_raw: Mapped[str] = mapped_column(String)
     description_clean: Mapped[str] = mapped_column(String)
+    #: Free-text detail the bank shipped next to the label (OFX `MEMO`). Display-only, and
+    #: deliberately outside ``description_*``: merchant extraction, rule matching, and the
+    #: dedup hash all read the label alone.
+    memo: Mapped[str | None] = mapped_column(String, nullable=True)
     merchant: Mapped[str | None] = mapped_column(String(255), nullable=True)
     category_id: Mapped[str | None] = mapped_column(
         String(36), ForeignKey("categories.id"), nullable=True, index=True

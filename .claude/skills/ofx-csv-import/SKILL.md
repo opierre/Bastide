@@ -17,7 +17,7 @@ parser/adapter for that format.
 
 Canonical fields produced per transaction (see `PROJECT.md` §4 `transactions`):
 `booked_date, value_date?, amount_minor (signed), currency, description_raw,
-description_clean, merchant?, fitid?, dedup_hash`.
+description_clean, memo?, merchant?, fitid?, dedup_hash`.
 
 ## Pipeline (idempotent)
 
@@ -39,8 +39,10 @@ with `error_message`.
 ## OFX / QFX
 
 - Parse SGML/XML `STMTTRN` records. Map: `DTPOSTED→booked_date`, `TRNAMT→amount_minor` (sign as
-  given), `FITID→fitid`, `NAME`/`MEMO→description_raw`, `CURDEF`/account currency, account id
-  from `BANKACCTFROM`/`ACCTID` for routing.
+  given), `FITID→fitid`, `NAME→description_raw`, `MEMO→memo` (its own field — display only, so
+  merchant extraction, rules, and the dedup hash read the label alone; a memo-only record puts
+  the memo in `description_raw` instead), `CURDEF`/account currency, account id from
+  `BANKACCTFROM`/`ACCTID` for routing.
 - QFX is OFX with Quicken extras — same parser, tolerate extra tags.
 - Be tolerant: some French banks emit OFX 1.x SGML (not strict XML), inconsistent casing, and
   Latin-1. Detect/handle encoding; don't assume UTF-8.
