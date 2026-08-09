@@ -117,12 +117,6 @@ class AppLocalizationsEn extends AppLocalizations {
       'This screen arrives in a later step. In the meantime, add your accounts to get set up.';
 
   @override
-  String get authLoginTitle => 'Log in';
-
-  @override
-  String get authRegisterTitle => 'Create an account';
-
-  @override
   String get authTagline => 'Your money, clearly.';
 
   @override

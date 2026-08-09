@@ -302,18 +302,6 @@ abstract class AppLocalizations {
   /// **'Cet écran arrive dans une prochaine étape. En attendant, ajoutez vos comptes pour préparer le terrain.'**
   String get comingSoonBody;
 
-  /// Heading on the login screen.
-  ///
-  /// In fr, this message translates to:
-  /// **'Se connecter'**
-  String get authLoginTitle;
-
-  /// Heading on the registration screen.
-  ///
-  /// In fr, this message translates to:
-  /// **'Créer un compte'**
-  String get authRegisterTitle;
-
   /// Reassuring subheading under the brand lockup on the login and register screens.
   ///
   /// In fr, this message translates to:

@@ -43,8 +43,6 @@
   "settingsFormatsAmounts": "Amounts",
   "settingsAboutVersion": "Version",
   "settingsAboutPrivacy": "All your data stays on this computer. FinStride connects to no bank and sends nothing over the internet.",
-  "authLoginTitle": "Log in",
-  "authRegisterTitle": "Create an account",
   "authTagline": "Your money, clearly.",
   "authPrivacyLine": "Local and private — your data never leaves this computer.",
   "@authPrivacyLine": {

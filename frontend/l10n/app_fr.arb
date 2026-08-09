@@ -136,14 +136,6 @@
   "@comingSoonBody": {
     "description": "Encouraging placeholder body on panels whose feature isn't built yet."
   },
-  "authLoginTitle": "Se connecter",
-  "@authLoginTitle": {
-    "description": "Heading on the login screen."
-  },
-  "authRegisterTitle": "Créer un compte",
-  "@authRegisterTitle": {
-    "description": "Heading on the registration screen."
-  },
   "authTagline": "Votre argent, en clair.",
   "@authTagline": {
     "description": "Reassuring subheading under the brand lockup on the login and register screens."

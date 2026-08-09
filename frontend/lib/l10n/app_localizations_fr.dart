@@ -118,12 +118,6 @@ class AppLocalizationsFr extends AppLocalizations {
       'Cet écran arrive dans une prochaine étape. En attendant, ajoutez vos comptes pour préparer le terrain.';
 
   @override
-  String get authLoginTitle => 'Se connecter';
-
-  @override
-  String get authRegisterTitle => 'Créer un compte';
-
-  @override
   String get authTagline => 'Votre argent, en clair.';
 
   @override
