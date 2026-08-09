@@ -2,6 +2,9 @@ import 'package:file_selector/file_selector.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../accounts/application/accounts_controller.dart';
+import '../../dashboard/application/dashboard_controller.dart';
+import '../../transactions/application/transactions_controller.dart';
 import '../data/imports_repository.dart';
 import '../domain/csv_template.dart';
 import '../domain/import_batch.dart';
@@ -96,6 +99,17 @@ class ImportsController extends AsyncNotifier<List<ImportBatch>> {
       batch,
       ...history.where((existing) => existing.id != batch.id),
     ]);
+
+    // An import writes rows and moves the account's balance, so every panel reading
+    // either is stale the moment it lands — without this, the transactions list only
+    // caught up on a restart. Invalidated rather than refetched here: the panels that
+    // are actually being watched reload themselves, the ones that aren't stay idle.
+    // A `failed` batch wrote nothing, so it leaves them alone.
+    if (batch.status != ImportStatus.failed) {
+      ref.invalidate(transactionsControllerProvider);
+      ref.invalidate(accountsControllerProvider);
+      ref.invalidate(dashboardControllerProvider);
+    }
     return batch;
   }
 

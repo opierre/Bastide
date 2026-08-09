@@ -3,6 +3,7 @@ import 'package:finstride/core/api/api_client_provider.dart';
 import 'package:finstride/features/imports/application/imports_controller.dart';
 import 'package:finstride/features/imports/domain/csv_template.dart';
 import 'package:finstride/features/imports/domain/import_batch.dart';
+import 'package:finstride/features/transactions/application/transactions_controller.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
@@ -54,6 +55,15 @@ Map<String, dynamic> _templateJson({
   },
   'header_offset': 0,
   'created_at': '2026-05-01T10:00:00Z',
+};
+
+/// An empty transactions page — enough for the list to load, since the tests that
+/// use it only care about *whether* it was fetched again.
+const _transactionsPageJson = {
+  'items': <Map<String, dynamic>>[],
+  'page': 1,
+  'page_size': 50,
+  'total': 0,
 };
 
 const _file = PickedImportFile(name: 'releve.ofx', bytes: [1, 2, 3]);
@@ -193,6 +203,47 @@ void main() {
       expect(batch.newCount, 0);
       expect(batch.errorMessage, "Column 'Montant' not found in header");
       expect(container.read(importsControllerProvider).value, hasLength(1));
+    });
+
+    test('a successful import invalidates the transactions list', () async {
+      // Without this the panel only caught up on a restart: the list had already
+      // been fetched, and nothing told it the import had written to it.
+      when(() => apiClient.get('/imports')).thenAnswer((_) async => <dynamic>[]);
+      when(
+        () => apiClient.get('/transactions', query: any(named: 'query')),
+      ).thenAnswer((_) async => _transactionsPageJson);
+      _stubMultipart(apiClient, '/imports', _batchJson());
+
+      await container.read(importsControllerProvider.future);
+      await container.read(transactionsControllerProvider.future);
+      await container
+          .read(importsControllerProvider.notifier)
+          .importFile(accountId: 'a1', file: _file);
+      await container.read(transactionsControllerProvider.future);
+
+      verify(
+        () => apiClient.get('/transactions', query: any(named: 'query')),
+      ).called(2);
+    });
+
+    test('a failed import leaves the transactions list alone', () async {
+      // Nothing was written, so re-reading the list would only cost a round trip.
+      when(() => apiClient.get('/imports')).thenAnswer((_) async => <dynamic>[]);
+      when(
+        () => apiClient.get('/transactions', query: any(named: 'query')),
+      ).thenAnswer((_) async => _transactionsPageJson);
+      _stubMultipart(apiClient, '/imports', _batchJson(status: 'failed'));
+
+      await container.read(importsControllerProvider.future);
+      await container.read(transactionsControllerProvider.future);
+      await container
+          .read(importsControllerProvider.notifier)
+          .importFile(accountId: 'a1', file: _file);
+      await container.read(transactionsControllerProvider.future);
+
+      verify(
+        () => apiClient.get('/transactions', query: any(named: 'query')),
+      ).called(1);
     });
 
     test('an import failure rethrows and leaves the history untouched', () async {
