@@ -39,11 +39,9 @@ abstract final class AppColors {
 
   /// Inset wells: text fields, selects, search, read-only value slots.
   ///
-  /// One tone for every well, editable or not (amended — the spec drew inputs
-  /// on `#0D1219` and read-only plates on `#0A0F15`). Two nearly-identical
-  /// darks side by side in the same form don't read as a distinction, they read
-  /// as a rendering error; what actually says "you cannot change this" is the
-  /// dashed border and the lock glyph, which no fill needed to reinforce.
+  /// One tone for every well, editable or not — read-only is carried by the
+  /// dashed border and lock glyph, not by the fill (amended twice; see
+  /// `docs/design/00` §Palette).
   static const surfaceField = Color(0xFF0A0F15);
 
   /// Sidebar nav hover — quieter than [surfaceHover] because the sidebar sits
@@ -276,26 +274,22 @@ abstract final class AppShadows {
   ];
 
   /// The popover shadow, expressed as an elevation rather than a [BoxShadow]
-  /// because [MenuStyle] accepts only that. It costs nothing to speak of:
-  /// Material renders it through `Canvas.drawShadow`, a single draw op on the
-  /// menu's own layer, with no offscreen buffer and no blur pass of our own —
-  /// and only while a menu is open.
+  /// because [MenuStyle] accepts only that.
   ///
-  /// Raised from the spec's elevation 12 to 24 with a near-black shadow: a
-  /// popover most often opens over a modal, whose own surface is already dark
-  /// and already shadowed, and at 12 the menu's edge dissolved into it. The
-  /// darker, longer cast is what separates the two planes.
+  /// Heavy enough to separate a popover from the modal it usually opens over
+  /// (amended from elevation 12; see `docs/design/00` §Components).
   static const popoverElevation = 24.0;
   static const popoverShadow = Color(0xCC000000);
 }
 
-/// The spec allows exactly two keyframes — a button spinner and a skeleton
-/// pulse. Everything else (hover fills, border changes, selection) is an
-/// instant swap, so there is no `base`/`slow` duration to reach for.
+/// Animation timings. Everything not listed here (hover fills, border changes,
+/// selection) is an instant swap, so there is no `base`/`slow` duration to
+/// reach for.
+///
+/// The spec's other keyframe, the button spinner, takes no duration here: it is
+/// Flutter's own indeterminate progress arc, which runs on its built-in period
+/// (amended; see `docs/design/00` §Motion).
 abstract final class AppMotion {
-  /// Button spinner revolution.
-  static const spin = Duration(milliseconds: 800);
-
   /// Skeleton opacity pulse.
   static const shimmer = Duration(milliseconds: 1600);
 }
@@ -303,11 +297,9 @@ abstract final class AppMotion {
 abstract final class AppFonts {
   /// UI family: 400 body, 600 emphasis/labels, 700 headings.
   ///
-  /// Geist rather than the spec's original Manrope (amended): at the 11.5–14px
-  /// the interface actually lives at, Manrope's wide, open counters cost width
-  /// that French labels — 15–20% longer than their English counterparts —
-  /// don't have to spare. Geist is narrower and lower-contrast, and its
-  /// flat-sided figures hold a column of amounts better under `tnum`.
+  /// Narrow enough for French labels at 11.5–14px, and its flat-sided figures
+  /// hold an amount column under `tnum` (amended from Manrope; see
+  /// `docs/design/00` §Typography).
   static const geist = 'Geist';
 
   /// Display family, 700 only: wordmark, panel titles, headline amounts.
