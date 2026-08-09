@@ -20,7 +20,11 @@ const _labelMaxWidth = 420.0;
 /// account block, the category chip, the booked date, and the signed amount
 /// — see `docs/design/07-transactions.md`.
 class TransactionRow extends ConsumerWidget {
-  const TransactionRow({super.key, required this.transaction, required this.accountName});
+  const TransactionRow({
+    super.key,
+    required this.transaction,
+    required this.accountName,
+  });
 
   final Transaction transaction;
   final String accountName;
@@ -40,14 +44,15 @@ class TransactionRow extends ConsumerWidget {
         children: [
           InstitutionAvatar(name: label, size: 30),
           const SizedBox(width: AppSpacing.sm + AppSpacing.xs),
-          // The label block sizes to its own text up to [_labelMaxWidth] and the pill follows
-          // immediately after it, so the category reads as belonging to *that* merchant rather
-          // than as a third column that happens to sit nearby. Slack is left trailing the pill;
-          // the date and amount keep their fixed columns at the row's end.
+          // The label block is *tight* (Expanded, not Flexible) up to [_labelMaxWidth],
+          // so it always occupies the same width regardless of how short the merchant
+          // name is — the category pill starts at the same x on every row and the
+          // pills read as one aligned column down the panel. It still shrinks below
+          // the cap on narrow layouts, same as before.
           Expanded(
             child: Row(
               children: [
-                Flexible(
+                Expanded(
                   child: ConstrainedBox(
                     constraints: const BoxConstraints(maxWidth: _labelMaxWidth),
                     child: Column(
@@ -57,6 +62,7 @@ class TransactionRow extends ConsumerWidget {
                         Text(
                           label,
                           style: textTheme.bodyMedium,
+                          maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
                         const SizedBox(height: 2),
@@ -65,16 +71,16 @@ class TransactionRow extends ConsumerWidget {
                           style: textTheme.bodySmall?.copyWith(
                             color: AppColors.textSecondary,
                           ),
+                          maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
                       ],
                     ),
                   ),
                 ),
-                // A merchant name ellipsizes at the edge of its block, so without a gutter
-                // here a long label runs straight into the category pill and the two read as
-                // one run of text.
-                const SizedBox(width: AppSpacing.md),
+                // Deliberately wider than the row's other gutters — the pill needs to
+                // read as its own column, not as a continuation of the merchant text.
+                const SizedBox(width: AppSpacing.xl),
                 Builder(
                   builder: (chipContext) => transaction.category == null
                       ? CategoryChip.uncategorized(
@@ -106,12 +112,19 @@ class TransactionRow extends ConsumerWidget {
               ],
             ),
           ),
-          const SizedBox(width: AppSpacing.md),
+          // Wider than the row's other gutters: the amount column right-aligns its
+          // tabular figures, so for most everyday amounts (one or two digits before
+          // the decimal) the date→amount gap reads bigger than a plain AppSpacing.md
+          // gutter would. This closes that visual mismatch without needing the exact
+          // amount's width, which varies row to row.
+          const SizedBox(width: AppSpacing.xl),
           SizedBox(
             width: 90,
             child: Text(
               DateFormat.yMd(locale).format(transaction.bookedDate),
-              style: textTheme.bodySmall?.copyWith(color: AppColors.textSecondary),
+              style: textTheme.bodySmall?.copyWith(
+                color: AppColors.textSecondary,
+              ),
               overflow: TextOverflow.ellipsis,
             ),
           ),
