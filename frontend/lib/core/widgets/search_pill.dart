@@ -27,11 +27,30 @@ class SearchPill extends StatefulWidget {
 
 class _SearchPillState extends State<SearchPill> {
   late final _controller = TextEditingController(text: widget.initialValue);
+  bool _hasText = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _hasText = _controller.text.isNotEmpty;
+    _controller.addListener(_handleTextChanged);
+  }
 
   @override
   void dispose() {
+    _controller.removeListener(_handleTextChanged);
     _controller.dispose();
     super.dispose();
+  }
+
+  void _handleTextChanged() {
+    final hasText = _controller.text.isNotEmpty;
+    if (hasText != _hasText) setState(() => _hasText = hasText);
+  }
+
+  void _clear() {
+    _controller.clear();
+    widget.onChanged('');
   }
 
   @override
@@ -56,6 +75,17 @@ class _SearchPillState extends State<SearchPill> {
           contentPadding: const EdgeInsets.symmetric(vertical: AppSpacing.sm + 2),
           prefixIcon: const Icon(Icons.search_rounded, size: 16),
           prefixIconConstraints: const BoxConstraints(minWidth: 34, minHeight: 34),
+          // Only takes up space once there's something to clear, so the pill
+          // keeps its resting look when empty.
+          suffixIcon: _hasText
+              ? IconButton(
+                  icon: const Icon(Icons.close_rounded, size: 16),
+                  splashRadius: 14,
+                  tooltip: MaterialLocalizations.of(context).deleteButtonTooltip,
+                  onPressed: _clear,
+                )
+              : null,
+          suffixIconConstraints: const BoxConstraints(minWidth: 34, minHeight: 34),
           border: _border(AppColors.border),
           enabledBorder: _border(AppColors.border),
           focusedBorder: _border(AppColors.focusRing),
