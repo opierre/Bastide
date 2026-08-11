@@ -13,6 +13,7 @@ from app.features.accounts.router import router as accounts_router
 from app.features.auth.router import router as auth_router
 from app.features.banks.router import router as banks_router
 from app.features.categories.router import router as categories_router
+from app.features.categorization.router import router as categorization_router
 from app.features.categorization.runner import reconcile_orphaned_runs
 from app.features.dashboard.router import router as dashboard_router
 from app.features.health.router import router as health_router
@@ -66,6 +67,7 @@ def create_app() -> FastAPI:
     app.include_router(dashboard_router)
     app.include_router(settings_router)
     app.include_router(inference_router)
+    app.include_router(categorization_router)
 
     return app
 
