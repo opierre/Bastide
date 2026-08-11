@@ -1,0 +1,101 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://finstride.app/schemas/rule-pack.v1.schema.json",
+  "title": "FinStride rule pack, version 1",
+  "description": "A portable, shareable set of deterministic categorization rules. Carries no ids, no priorities, and no user data, so the same file imports cleanly on any install. Categories are referenced by their system i18n key rather than by id, which is what makes a pack portable across installs and across locales. See docs/tasks/Phase2/P2-06b-rule-packs.md.",
+  "type": "object",
+  "required": ["format_version", "name", "rules"],
+  "additionalProperties": false,
+  "properties": {
+    "format_version": {
+      "description": "Pack format version. An importer that does not support this exact version must refuse the file rather than parse it best-effort.",
+      "type": "integer",
+      "const": 1
+    },
+    "name": {
+      "description": "Human-readable pack name, shown in the import confirmation.",
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 100
+    },
+    "description": {
+      "description": "Optional one-paragraph explanation of what the pack covers.",
+      "type": "string",
+      "maxLength": 500
+    },
+    "locale": {
+      "description": "The locale the pack's patterns were authored against (bank label conventions are locale-specific). Advisory only: patterns match against raw bank text, and category_key resolution is locale-independent, so a pack is never rejected for locale mismatch.",
+      "type": "string",
+      "enum": ["fr", "en"]
+    },
+    "source_url": {
+      "description": "Optional provenance for a shared pack. Never fetched by the importer; displayed only.",
+      "type": "string",
+      "format": "uri",
+      "maxLength": 500
+    },
+    "rules": {
+      "description": "The pack's rules, in the order they should be appended. Order is relative: an importer appends the whole pack after the user's existing rules and never interleaves.",
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 1000,
+      "items": { "$ref": "#/$defs/rule" }
+    }
+  },
+  "$defs": {
+    "rule": {
+      "type": "object",
+      "required": ["field", "type", "pattern", "category_key"],
+      "additionalProperties": false,
+      "properties": {
+        "field": {
+          "description": "The transaction field to match. 'amount' is only meaningful with type 'range'.",
+          "type": "string",
+          "enum": ["description_clean", "merchant", "amount"]
+        },
+        "type": {
+          "description": "Match type. 'contains' and 'equals' are case-insensitive. 'regex' is deliberately NOT permitted in a pack: the engine runs patterns unbounded against every transaction, so an untrusted regex arriving in a shared file is a denial-of-service risk that a hand-typed one is not.",
+          "type": "string",
+          "enum": ["contains", "equals", "range"]
+        },
+        "pattern": {
+          "description": "The value to match. For type 'range', a 'min:max' string in signed integer minor units, either side blank for an open bound (e.g. '-5000:-100', ':0'). Capped at 255 to match the storage column.",
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 255
+        },
+        "category_key": {
+          "description": "The i18n key of the system category to assign, as seeded in backend/app/core/seed.py (e.g. 'category.food.groceries'). A key that does not resolve on the importing install is reported and its rule skipped; a category is never created implicitly. User-defined categories cannot be referenced in version 1.",
+          "type": "string",
+          "pattern": "^category\\.[a-z0-9_]+(\\.[a-z0-9_]+)*$",
+          "maxLength": 100
+        },
+        "enabled": {
+          "description": "Whether the rule is active on import. Defaults to true.",
+          "type": "boolean",
+          "default": true
+        },
+        "comment": {
+          "description": "Optional note for pack authors and reviewers. Not persisted as part of the rule.",
+          "type": "string",
+          "maxLength": 200
+        }
+      }
+    }
+  },
+  "examples": [
+    {
+      "format_version": 1,
+      "name": "France — commerces courants",
+      "description": "Enseignes, opérateurs et services récurrents les plus fréquents sur un relevé bancaire français.",
+      "locale": "fr",
+      "rules": [
+        { "field": "merchant", "type": "contains", "pattern": "CARREFOUR", "category_key": "category.food.groceries" },
+        { "field": "merchant", "type": "contains", "pattern": "SNCF", "category_key": "category.transport.public_transit" },
+        { "field": "merchant", "type": "contains", "pattern": "NETFLIX", "category_key": "category.subscriptions" },
+        { "field": "description_clean", "type": "contains", "pattern": "COTISATION", "category_key": "category.finance.bank_fees" },
+        { "field": "description_clean", "type": "contains", "pattern": "VIREMENT SALAIRE", "category_key": "category.income.salary" }
+      ]
+    }
+  ]
+}
