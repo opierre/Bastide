@@ -14,11 +14,15 @@ Abonnements is a top-level bucket, not a child of Loisirs, because the design sp
 its own hue distinct from Loisirs.
 """
 
+import logging
 from dataclasses import dataclass, field
 
 from sqlalchemy.orm import Session
 
+from app.core.db import SessionFactory
 from app.features.categories.models import Category
+
+logger = logging.getLogger(__name__)
 
 # The eight pinned design-system category hues (docs/design/00-shared-design-block.md).
 _LOGEMENT = "#4FD1E8"
@@ -374,3 +378,27 @@ def seed_categories(db: Session) -> None:
         for child in group.children:
             _get_or_create(db, child, parent_id=parent.id)
     db.commit()
+
+
+def seed_system_categories(session_factory: SessionFactory) -> int:
+    """Ensure the system catalog exists at startup; return how many rows this call created.
+
+    The catalog is global (`user_id = None`), not per-user, so there is no registration hook it
+    naturally belongs to and no migration that could carry it without duplicating the catalog in
+    SQL. Startup is the one place guaranteed to run before anything can reference a category —
+    and every reference matters: the rule engine assigns these ids, `from-transaction` targets
+    them, and rule packs resolve their `category_key` against them.
+
+    Safe to run on every boot: `_get_or_create` skips keys that already exist, which is also how
+    a catalog entry added in a later release reaches installs seeded before it.
+    """
+    db = session_factory()
+    try:
+        before = db.query(Category).filter_by(is_system=True).count()
+        seed_categories(db)
+        created = db.query(Category).filter_by(is_system=True).count() - before
+    finally:
+        db.close()
+    if created:
+        logger.info("Seeded %d system categor%s.", created, "y" if created == 1 else "ies")
+    return created

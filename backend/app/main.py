@@ -9,6 +9,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.core.config import get_settings
 from app.core.db import get_session_factory
 from app.core.errors import register_exception_handlers
+from app.core.seed import seed_system_categories
 from app.features.accounts.router import router as accounts_router
 from app.features.auth.router import router as auth_router
 from app.features.banks.router import router as banks_router
@@ -26,7 +27,12 @@ from app.features.transactions.router import router as transactions_router
 
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncIterator[None]:
-    """Reconcile runs orphaned by the previous process before serving anything.
+    """Seed the system categories, then reconcile runs orphaned by the previous process.
+
+    The catalog is seeded first because everything that categorises assigns one of its ids, so
+    an unseeded install has a rule engine with nothing to assign. It is global rather than
+    per-user, which is why it hangs off startup and not registration, and it is idempotent, so
+    this both seeds a fresh install and carries later catalog additions to an existing one.
 
     A categorisation run executes as an in-process task, so one still `pending`/`running` in
     the database lost its executor when that process stopped (`PROJECT.md` §7). Left alone it
@@ -37,6 +43,7 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     exactly as they do for the routes.
     """
     provider = app.dependency_overrides.get(get_session_factory, get_session_factory)
+    seed_system_categories(provider())
     reconcile_orphaned_runs(provider())
     yield
 
