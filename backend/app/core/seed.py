@@ -328,6 +328,20 @@ SYSTEM_CATEGORIES: tuple[CategorySeed, ...] = (
                 "help",
                 _AUTRES_EPARGNE,
             ),
+            # Cash leaves the account for an unknowable purpose, so a withdrawal is a category
+            # in its own right rather than a guess at what the cash was later spent on. This is
+            # the one operation type a rule can name outright ("RETRAIT DAB" is unambiguous on a
+            # French statement); transfers deliberately get no equivalent, because a `VIR EMIS`
+            # is as likely to be a reimbursement for theatre tickets as a movement between the
+            # user's own accounts, and only the user knows which.
+            CategorySeed(
+                "category.other.cash",
+                "Retraits espèces",
+                "Cash withdrawals",
+                "expense",
+                "atm",
+                _AUTRES_EPARGNE,
+            ),
         ),
     ),
 )
