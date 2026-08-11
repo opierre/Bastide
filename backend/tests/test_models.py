@@ -27,6 +27,7 @@ EXPECTED_TABLES = {
     "categorization_rules",
     "import_batches",
     "transactions",
+    "user_settings",
     "alembic_version",
 }
 

@@ -14,6 +14,7 @@ from app.features.auth import models as _auth_models  # noqa: F401
 from app.features.categories import models as _categories_models  # noqa: F401
 from app.features.imports import models as _imports_models  # noqa: F401
 from app.features.rules import models as _rules_models  # noqa: F401
+from app.features.settings import models as _settings_models  # noqa: F401
 from app.features.transactions import models as _transactions_models  # noqa: F401
 from app.main import create_app
 
