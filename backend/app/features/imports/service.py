@@ -4,6 +4,7 @@ import hashlib
 from calendar import monthrange
 from collections.abc import Callable
 from datetime import date
+from typing import Protocol
 from uuid import uuid4
 
 from sqlalchemy import func, select
@@ -32,6 +33,20 @@ from app.features.transactions.models import Transaction
 
 _QFX_EXTENSION = ".qfx"
 _CSV_SAMPLE_ROW_COUNT = 5
+
+
+class RunEnqueuer(Protocol):
+    """Starts stage-2 categorisation over what an import left for review.
+
+    A protocol rather than a direct call into the categorisation feature: the import pipeline
+    has no business knowing a model exists, and stating the dependency this narrowly is what
+    lets an import with no enqueuer wired behave exactly as it did in Phase 1.
+
+    Implementations must be silent — an import that has already committed cannot be failed by
+    anything that happens after it (`PROJECT.md` §7).
+    """
+
+    def __call__(self, user: User, account_id: str, import_batch_id: str) -> None: ...
 
 
 class ImportBatchNotFoundError(NotFoundError):
@@ -133,12 +148,17 @@ class ImportService:
         db: Session,
         csv_template_repository: CsvTemplateRepository,
         clock: Callable[[], date] = date.today,
+        run_enqueuer: RunEnqueuer | None = None,
     ) -> None:
         self._repository = repository
         self._account_service = account_service
         self._db = db
         self._csv_template_repository = csv_template_repository
         self._clock = clock
+        # Absent means stage 2 is simply not wired here: the import behaves as it did before
+        # the model existed, which is also what every Phase 1 test constructing this service
+        # continues to get.
+        self._run_enqueuer = run_enqueuer
 
     def list_for_user(self, user_id: str) -> list[ImportBatch]:
         """List a user's import batches, most recent first (the import history)."""
@@ -279,7 +299,15 @@ class ImportService:
         if new_rows:
             self._sync_month_boundary_snapshots(account, period_start, period_end)
 
-        return self._repository.save(batch, new_transactions)
+        saved = self._repository.save(batch, new_transactions)
+
+        # Only once the batch has committed, and only from the success path: a run over rows
+        # that were never persisted would have nothing to categorise. The import does not wait
+        # on the model — the enqueuer starts the run and returns (`PROJECT.md` §7).
+        if self._run_enqueuer is not None:
+            self._run_enqueuer(user, account.id, saved.id)
+
+        return saved
 
     def _failed_batch(
         self,

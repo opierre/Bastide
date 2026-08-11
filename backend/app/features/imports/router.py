@@ -7,12 +7,21 @@ import pydantic
 from fastapi import APIRouter, Depends, File, Form, UploadFile, status
 from sqlalchemy.orm import Session
 
-from app.core.db import get_db
+from app.core.db import SessionFactory, get_db, get_session_factory
 from app.core.errors import ValidationError
 from app.features.accounts.repository import AccountRepository
 from app.features.accounts.service import AccountService
 from app.features.auth.deps import get_current_user
 from app.features.auth.models import User
+from app.features.categorization.repository import CategorizationRunRepository
+from app.features.categorization.runner import (
+    CategorizationRunService,
+    ClientFactory,
+    ImportRunEnqueuer,
+    RunLauncher,
+    get_client_factory,
+    get_run_launcher,
+)
 from app.features.imports.models import CsvTemplate, ImportBatch
 from app.features.imports.repository import CsvTemplateRepository, ImportRepository
 from app.features.imports.schemas import (
@@ -22,16 +31,36 @@ from app.features.imports.schemas import (
     ImportBatchRead,
 )
 from app.features.imports.service import CsvTemplateService, ImportService
+from app.features.settings.repository import SettingsRepository
+from app.features.settings.service import SettingsService
 
 router = APIRouter(prefix="/api/v1", tags=["imports"])
 
 
-def _import_service(db: Annotated[Session, Depends(get_db)]) -> ImportService:
+def _import_service(
+    db: Annotated[Session, Depends(get_db)],
+    session_factory: Annotated[SessionFactory, Depends(get_session_factory)],
+    launcher: Annotated[RunLauncher, Depends(get_run_launcher)],
+    client_factory: Annotated[ClientFactory, Depends(get_client_factory)],
+) -> ImportService:
+    account_service = AccountService(AccountRepository(db), db)
+    settings_service = SettingsService(SettingsRepository(db))
     return ImportService(
         ImportRepository(db),
-        AccountService(AccountRepository(db), db),
+        account_service,
         db,
         CsvTemplateRepository(db),
+        run_enqueuer=ImportRunEnqueuer(
+            settings_service,
+            CategorizationRunService(
+                CategorizationRunRepository(db),
+                account_service,
+                settings_service,
+                session_factory,
+                launcher,
+                client_factory,
+            ),
+        ),
     )
 
 
