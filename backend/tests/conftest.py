@@ -8,7 +8,7 @@ from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session, sessionmaker
 
-from app.core.db import Base, get_db
+from app.core.db import Base, get_db, get_session_factory
 from app.features.accounts import models as _accounts_models  # noqa: F401
 from app.features.auth import models as _auth_models  # noqa: F401
 from app.features.categories import models as _categories_models  # noqa: F401
@@ -41,6 +41,9 @@ def client(tmp_path: Path) -> Generator[TestClient]:
 
     app = create_app()
     app.dependency_overrides[get_db] = override_get_db
+    # Background work and the startup reconciliation open their own sessions; without this
+    # they would open them on the real database instead of this test's temp file.
+    app.dependency_overrides[get_session_factory] = lambda: testing_session_local
 
     with TestClient(app) as test_client:
         yield test_client

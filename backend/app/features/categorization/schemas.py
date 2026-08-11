@@ -1,8 +1,9 @@
 """Schemas for stage-2 categorisation: what the model suggested, and what we do about it."""
 
+from datetime import datetime
 from typing import Literal
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 
 #: What the decision layer concluded for one row. ``assigned`` carries a category and a
 #: confidence at or above the user's threshold; ``deferred`` carries neither and sends the row
@@ -37,3 +38,47 @@ class SuggestionOutcome(BaseModel):
     confidence: float | None = None
     #: Mirrors what the transaction row will carry; always the inverse of an assignment.
     needs_review: bool
+
+
+#: Which rows a run reconsiders. ``pending`` takes only what nothing has categorised yet;
+#: ``all`` additionally takes rows a previous run assigned, so a changed model or threshold
+#: can be applied to them. Neither ever includes a `user` or `rule` row (`PROJECT.md` §7).
+RunScope = Literal["pending", "all"]
+
+#: What started the run: the user asking for one, or an import finishing.
+RunTrigger = Literal["import", "manual"]
+
+#: ``pending``/``running`` are the in-flight pair the one-run-at-a-time check looks for; the
+#: other four are terminal. ``partial`` means some rows failed, ``failed`` that the run got
+#: nowhere at all.
+RunStatus = Literal["pending", "running", "success", "partial", "failed", "cancelled"]
+
+
+class RunCreate(BaseModel):
+    """Request to start a categorisation run."""
+
+    account_id: str | None = None
+    scope: RunScope
+
+
+class CategorizationRunRead(BaseModel):
+    """A run as the API returns it — polled for progress while it is in flight."""
+
+    # `model_tag` is the runtime's model identifier, not a Pydantic model attribute.
+    model_config = ConfigDict(from_attributes=True, protected_namespaces=())
+
+    id: str
+    account_id: str | None
+    import_batch_id: str | None
+    trigger: RunTrigger
+    status: RunStatus
+    model_tag: str | None
+    total_count: int
+    processed_count: int
+    assigned_count: int
+    deferred_count: int
+    failed_count: int
+    error_message: str | None
+    started_at: datetime | None
+    finished_at: datetime | None
+    created_at: datetime
