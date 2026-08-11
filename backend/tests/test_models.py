@@ -28,6 +28,11 @@ EXPECTED_TABLES = {
     "import_batches",
     "transactions",
     "user_settings",
+    "categorization_runs",
+    "recurring_series",
+    "recurring_occurrences",
+    "goals",
+    "goal_allocations",
     "alembic_version",
 }
 
