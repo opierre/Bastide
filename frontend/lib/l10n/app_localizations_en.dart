@@ -1316,4 +1316,167 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get ruleErrorGeneric => 'Something went wrong. Please try again.';
+
+  @override
+  String get rulePackMenuTooltip => 'Import / export rules';
+
+  @override
+  String get rulePackImportFile => 'Import a file…';
+
+  @override
+  String rulePackImportBuiltin(String name) {
+    return 'Import “$name”';
+  }
+
+  @override
+  String get rulePackExportAction => 'Export my rules…';
+
+  @override
+  String get rulePackCancel => 'Cancel';
+
+  @override
+  String get rulePackClose => 'Close';
+
+  @override
+  String get rulePackRefusedTitle => 'This file wasn\'t accepted';
+
+  @override
+  String get rulePackRefusedMalformed =>
+      'This file isn\'t a FinStride rule pack. Expected a JSON file with a name, a format version and a list of rules.';
+
+  @override
+  String rulePackRefusedVersion(int version) {
+    return 'This pack uses a format version this build of FinStride doesn\'t read. It reads version $version. A pack we only half understood would silently drop rules, so it is refused whole.';
+  }
+
+  @override
+  String get rulePackRefusedRegex =>
+      'This pack contains a “regex” rule. Regular expressions aren\'t accepted in a shared pack: an expression from someone else\'s file can lock up your machine. Use “contains”, “equals” or “range”.';
+
+  @override
+  String rulePackWouldMatch(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          'This pack would categorize $count of your uncategorized transactions.',
+      one:
+          'This pack would categorize $count of your uncategorized transactions.',
+      zero:
+          'This pack would categorize none of your uncategorized transactions.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get rulePackRuleCount => 'Rules in the pack';
+
+  @override
+  String get rulePackNewCount => 'New rules';
+
+  @override
+  String get rulePackDuplicateCount => 'Duplicates skipped';
+
+  @override
+  String get rulePackUnresolvedCount => 'Categories not found';
+
+  @override
+  String rulePackUnresolvedDetail(String keys) {
+    return 'These rules will be skipped: $keys';
+  }
+
+  @override
+  String get rulePackSamplesLabel => 'Example transactions affected';
+
+  @override
+  String get rulePackApplyNowLabel =>
+      'Apply the rules to my existing transactions after importing';
+
+  @override
+  String get rulePackImportConfirm => 'Import';
+
+  @override
+  String rulePackImportedTitle(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count rules imported',
+      one: '$count rule imported',
+      zero: 'No rules imported',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String rulePackImportedBody(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count transactions recategorized.',
+      one: '$count transaction recategorized.',
+      zero: 'No transaction changed category.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get rulePackImportFailed => 'The import failed';
+
+  @override
+  String get rulePackExportTitle => 'Export my rules';
+
+  @override
+  String get rulePackExportPrivacyNotice =>
+      'Read it before saving: a pattern can hold personal details — your landlord\'s name, “VIR SALAIRE DUPONT”.';
+
+  @override
+  String rulePackExportContents(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'File contents — $count rules',
+      one: 'File contents — $count rule',
+      zero: 'File contents — no rules',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String rulePackOmittedLabel(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count rules can\'t be exported',
+      one: '$count rule can\'t be exported',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String rulePackOmittedRegex(String pattern) {
+    return '“$pattern” — regex rules cannot appear in a pack.';
+  }
+
+  @override
+  String rulePackOmittedUserCategory(String pattern) {
+    return '“$pattern” — targets a custom category, which has no shareable identifier.';
+  }
+
+  @override
+  String get rulePackExportSave => 'Save';
+
+  @override
+  String get rulePackExportedTitle => 'Pack saved';
+
+  @override
+  String get rulePackExportFailed => 'The export failed';
+
+  @override
+  String rulePackStartWith(String name, int count) {
+    return 'Start with “$name” ($count rules)';
+  }
+
+  @override
+  String get rulePackStartWithHelper =>
+      'You\'ll see what the pack would do before importing it.';
 }

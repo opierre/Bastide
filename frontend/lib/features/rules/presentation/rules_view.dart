@@ -14,6 +14,7 @@ import '../application/rules_controller.dart';
 import '../domain/rule.dart';
 import 'rule_editor_modal.dart';
 import 'rule_error_localizer.dart';
+import 'rule_pack_menu.dart';
 import 'rule_row.dart';
 
 /// The rules half of the categories panel: the priority note and the « Exécuter
@@ -32,7 +33,9 @@ class RulesView extends ConsumerWidget {
     final rules = ref.watch(rulesControllerProvider);
 
     return switch (rules) {
-      AsyncData(:final value) when value.isEmpty => const RulesEmptyState(),
+      AsyncData(:final value) when value.isEmpty => const RulesEmptyState(
+        extraAction: BuiltinPackOffer(),
+      ),
       AsyncData(:final value) => _RulesCard(rules: value),
       AsyncError(:final error) => ErrorStateView(
         message: localizeRuleError(l10n, error),
@@ -195,6 +198,8 @@ class _RulesViewHeaderActionsState extends ConsumerState<RulesViewHeaderActions>
           onPressed: _isApplying ? null : _apply,
           child: Text(_isApplying ? l10n.rulesApplyRunning : l10n.rulesApplyButton),
         ),
+        const SizedBox(width: AppSpacing.xs),
+        const RulePackMenu(),
       ],
     );
   }

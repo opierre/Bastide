@@ -1684,5 +1684,200 @@
   "ruleErrorGeneric": "Une erreur est survenue. Veuillez réessayer.",
   "@ruleErrorGeneric": {
     "description": "Fallback message for unrecognized or network errors on the rules view."
+  },
+  "rulePackMenuTooltip": "Importer / Exporter des règles",
+  "@rulePackMenuTooltip": {
+    "description": "Tooltip on the rules view's pack menu."
+  },
+  "rulePackImportFile": "Importer un fichier…",
+  "@rulePackImportFile": {
+    "description": "Pack menu entry opening the file picker."
+  },
+  "rulePackImportBuiltin": "Importer « {name} »",
+  "@rulePackImportBuiltin": {
+    "description": "Pack menu entry importing one of the packs bundled with the app.",
+    "placeholders": {
+      "name": {
+        "type": "String",
+        "example": "Commerçants français"
+      }
+    }
+  },
+  "rulePackExportAction": "Exporter mes règles…",
+  "@rulePackExportAction": {
+    "description": "Pack menu entry opening the export review sheet."
+  },
+  "rulePackCancel": "Annuler",
+  "@rulePackCancel": {
+    "description": "Cancel button on the pack import and export sheets."
+  },
+  "rulePackClose": "Fermer",
+  "@rulePackClose": {
+    "description": "Button closing the refused-pack explanation."
+  },
+  "rulePackRefusedTitle": "Ce fichier n'a pas été accepté",
+  "@rulePackRefusedTitle": {
+    "description": "Title of the dialog explaining why a pack was refused."
+  },
+  "rulePackRefusedMalformed": "Ce fichier n'est pas un pack de règles FinStride. Attendu : un fichier JSON avec un nom, une version de format et une liste de règles.",
+  "@rulePackRefusedMalformed": {
+    "description": "Refusal reason: the file isn't a pack-shaped JSON document."
+  },
+  "rulePackRefusedVersion": "Ce pack utilise une version de format que cette version de FinStride ne lit pas. Elle lit la version {version}. Un pack partiellement compris perdrait silencieusement des règles, il est donc refusé en entier.",
+  "@rulePackRefusedVersion": {
+    "description": "Refusal reason: unsupported format_version. Says why the pack is refused outright rather than read best-effort.",
+    "placeholders": {
+      "version": {
+        "type": "int"
+      }
+    }
+  },
+  "rulePackRefusedRegex": "Ce pack contient une règle « regex ». Les expressions régulières ne sont pas acceptées dans un pack partagé : une expression venue d'un fichier tiers peut bloquer votre machine. Utilisez « contient », « égal à » ou « plage ».",
+  "@rulePackRefusedRegex": {
+    "description": "Refusal reason: the pack contains a regex rule. Names the risk, and the three types that are accepted."
+  },
+  "rulePackWouldMatch": "{count, plural, =0{Ce pack ne catégoriserait aucune de vos transactions non catégorisées.} one{Ce pack catégoriserait {count} de vos transactions non catégorisées.} other{Ce pack catégoriserait {count} de vos transactions non catégorisées.}}",
+  "@rulePackWouldMatch": {
+    "description": "Headline of the import confirmation. The figure the backend reports covers the user's currently-uncategorized transactions.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "rulePackRuleCount": "Règles dans le pack",
+  "@rulePackRuleCount": {
+    "description": "Report line: how many rules the pack holds."
+  },
+  "rulePackNewCount": "Nouvelles règles",
+  "@rulePackNewCount": {
+    "description": "Report line: how many would actually be created."
+  },
+  "rulePackDuplicateCount": "Doublons ignorés",
+  "@rulePackDuplicateCount": {
+    "description": "Report line: how many are already among the user's rules."
+  },
+  "rulePackUnresolvedCount": "Catégories introuvables",
+  "@rulePackUnresolvedCount": {
+    "description": "Report line: how many rules point at a category this install doesn't have."
+  },
+  "rulePackUnresolvedDetail": "Ces règles seront ignorées : {keys}",
+  "@rulePackUnresolvedDetail": {
+    "description": "Detail under the unresolved count, naming the category keys that could not be resolved.",
+    "placeholders": {
+      "keys": {
+        "type": "String",
+        "example": "category.pets, category.hobbies"
+      }
+    }
+  },
+  "rulePackSamplesLabel": "Exemples de transactions concernées",
+  "@rulePackSamplesLabel": {
+    "description": "Section label above the sample transactions in the import report."
+  },
+  "rulePackApplyNowLabel": "Appliquer les règles à mes transactions existantes après l'import",
+  "@rulePackApplyNowLabel": {
+    "description": "Label beside the apply-now switch on the import sheet."
+  },
+  "rulePackImportConfirm": "Importer",
+  "@rulePackImportConfirm": {
+    "description": "Confirm button on the import sheet."
+  },
+  "rulePackImportedTitle": "{count, plural, =0{Aucune règle importée} one{{count} règle importée} other{{count} règles importées}}",
+  "@rulePackImportedTitle": {
+    "description": "First line of the toast after a pack import.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "rulePackImportedBody": "{count, plural, =0{Aucune transaction n'a changé de catégorie.} one{{count} transaction recatégorisée.} other{{count} transactions recatégorisées.}}",
+  "@rulePackImportedBody": {
+    "description": "Second line of the import toast when the rules were applied straight away.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "rulePackImportFailed": "L'import a échoué",
+  "@rulePackImportFailed": {
+    "description": "Toast headline when a pack import failed."
+  },
+  "rulePackExportTitle": "Exporter mes règles",
+  "@rulePackExportTitle": {
+    "description": "Title of the export review sheet."
+  },
+  "rulePackExportPrivacyNotice": "Relisez avant d'enregistrer : un motif peut contenir des informations personnelles — le nom de votre propriétaire, « VIR SALAIRE DUPONT ».",
+  "@rulePackExportPrivacyNotice": {
+    "description": "Warning at the top of the export sheet. Names a concrete example, because the abstract warning is the one nobody reads."
+  },
+  "rulePackExportContents": "{count, plural, =0{Contenu du fichier — aucune règle} one{Contenu du fichier — {count} règle} other{Contenu du fichier — {count} règles}}",
+  "@rulePackExportContents": {
+    "description": "Section label above the verbatim pack contents in the export sheet.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "rulePackOmittedLabel": "{count, plural, one{{count} règle non exportable} other{{count} règles non exportables}}",
+  "@rulePackOmittedLabel": {
+    "description": "Section label above the rules an export could not carry.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "rulePackOmittedRegex": "« {pattern} » — les règles regex ne peuvent pas figurer dans un pack.",
+  "@rulePackOmittedRegex": {
+    "description": "Explains one omitted rule: it uses a regex, which no importer accepts.",
+    "placeholders": {
+      "pattern": {
+        "type": "String",
+        "example": "^CB .*CARREFOUR"
+      }
+    }
+  },
+  "rulePackOmittedUserCategory": "« {pattern} » — vise une catégorie personnalisée, qui n'a pas d'identifiant partageable.",
+  "@rulePackOmittedUserCategory": {
+    "description": "Explains one omitted rule: it targets a user-defined category, which has no portable key.",
+    "placeholders": {
+      "pattern": {
+        "type": "String",
+        "example": "VIR EPARGNE"
+      }
+    }
+  },
+  "rulePackExportSave": "Enregistrer",
+  "@rulePackExportSave": {
+    "description": "Save button on the export sheet."
+  },
+  "rulePackExportedTitle": "Pack enregistré",
+  "@rulePackExportedTitle": {
+    "description": "First line of the toast after an export is written to disk."
+  },
+  "rulePackExportFailed": "L'export a échoué",
+  "@rulePackExportFailed": {
+    "description": "Toast headline when preparing or writing an export failed."
+  },
+  "rulePackStartWith": "Commencer avec « {name} » ({count} règles)",
+  "@rulePackStartWith": {
+    "description": "CTA on the rules empty state offering the bundled pack, named and sized.",
+    "placeholders": {
+      "name": {
+        "type": "String",
+        "example": "Commerçants français"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "rulePackStartWithHelper": "Vous verrez ce que le pack ferait avant de l'importer.",
+  "@rulePackStartWithHelper": {
+    "description": "Reassurance under the bundled-pack CTA: the preview step always comes first."
   }
 }

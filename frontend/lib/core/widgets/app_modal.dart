@@ -66,14 +66,16 @@ class AppModal extends StatelessWidget {
                 AppSpacing.lg,
                 AppSpacing.lg,
               ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  for (final (index, action) in actions.indexed) ...[
-                    if (index > 0) const SizedBox(width: AppSpacing.sm + AppSpacing.xs),
-                    action,
-                  ],
-                ],
+              // A [Wrap], not a [Row]: French button labels run 15–20 % past
+              // their English counterparts, and a three-action footer in a
+              // 480 px modal has no room to spare. Identical to a row while the
+              // actions fit, and it drops to a second line instead of
+              // overflowing when they don't.
+              child: Wrap(
+                alignment: WrapAlignment.end,
+                spacing: AppSpacing.sm + AppSpacing.xs,
+                runSpacing: AppSpacing.sm,
+                children: actions,
               ),
             ),
           ],

@@ -2335,6 +2335,204 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Une erreur est survenue. Veuillez réessayer.'**
   String get ruleErrorGeneric;
+
+  /// Tooltip on the rules view's pack menu.
+  ///
+  /// In fr, this message translates to:
+  /// **'Importer / Exporter des règles'**
+  String get rulePackMenuTooltip;
+
+  /// Pack menu entry opening the file picker.
+  ///
+  /// In fr, this message translates to:
+  /// **'Importer un fichier…'**
+  String get rulePackImportFile;
+
+  /// Pack menu entry importing one of the packs bundled with the app.
+  ///
+  /// In fr, this message translates to:
+  /// **'Importer « {name} »'**
+  String rulePackImportBuiltin(String name);
+
+  /// Pack menu entry opening the export review sheet.
+  ///
+  /// In fr, this message translates to:
+  /// **'Exporter mes règles…'**
+  String get rulePackExportAction;
+
+  /// Cancel button on the pack import and export sheets.
+  ///
+  /// In fr, this message translates to:
+  /// **'Annuler'**
+  String get rulePackCancel;
+
+  /// Button closing the refused-pack explanation.
+  ///
+  /// In fr, this message translates to:
+  /// **'Fermer'**
+  String get rulePackClose;
+
+  /// Title of the dialog explaining why a pack was refused.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ce fichier n\'a pas été accepté'**
+  String get rulePackRefusedTitle;
+
+  /// Refusal reason: the file isn't a pack-shaped JSON document.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ce fichier n\'est pas un pack de règles FinStride. Attendu : un fichier JSON avec un nom, une version de format et une liste de règles.'**
+  String get rulePackRefusedMalformed;
+
+  /// Refusal reason: unsupported format_version. Says why the pack is refused outright rather than read best-effort.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ce pack utilise une version de format que cette version de FinStride ne lit pas. Elle lit la version {version}. Un pack partiellement compris perdrait silencieusement des règles, il est donc refusé en entier.'**
+  String rulePackRefusedVersion(int version);
+
+  /// Refusal reason: the pack contains a regex rule. Names the risk, and the three types that are accepted.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ce pack contient une règle « regex ». Les expressions régulières ne sont pas acceptées dans un pack partagé : une expression venue d\'un fichier tiers peut bloquer votre machine. Utilisez « contient », « égal à » ou « plage ».'**
+  String get rulePackRefusedRegex;
+
+  /// Headline of the import confirmation. The figure the backend reports covers the user's currently-uncategorized transactions.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, =0{Ce pack ne catégoriserait aucune de vos transactions non catégorisées.} one{Ce pack catégoriserait {count} de vos transactions non catégorisées.} other{Ce pack catégoriserait {count} de vos transactions non catégorisées.}}'**
+  String rulePackWouldMatch(int count);
+
+  /// Report line: how many rules the pack holds.
+  ///
+  /// In fr, this message translates to:
+  /// **'Règles dans le pack'**
+  String get rulePackRuleCount;
+
+  /// Report line: how many would actually be created.
+  ///
+  /// In fr, this message translates to:
+  /// **'Nouvelles règles'**
+  String get rulePackNewCount;
+
+  /// Report line: how many are already among the user's rules.
+  ///
+  /// In fr, this message translates to:
+  /// **'Doublons ignorés'**
+  String get rulePackDuplicateCount;
+
+  /// Report line: how many rules point at a category this install doesn't have.
+  ///
+  /// In fr, this message translates to:
+  /// **'Catégories introuvables'**
+  String get rulePackUnresolvedCount;
+
+  /// Detail under the unresolved count, naming the category keys that could not be resolved.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ces règles seront ignorées : {keys}'**
+  String rulePackUnresolvedDetail(String keys);
+
+  /// Section label above the sample transactions in the import report.
+  ///
+  /// In fr, this message translates to:
+  /// **'Exemples de transactions concernées'**
+  String get rulePackSamplesLabel;
+
+  /// Label beside the apply-now switch on the import sheet.
+  ///
+  /// In fr, this message translates to:
+  /// **'Appliquer les règles à mes transactions existantes après l\'import'**
+  String get rulePackApplyNowLabel;
+
+  /// Confirm button on the import sheet.
+  ///
+  /// In fr, this message translates to:
+  /// **'Importer'**
+  String get rulePackImportConfirm;
+
+  /// First line of the toast after a pack import.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, =0{Aucune règle importée} one{{count} règle importée} other{{count} règles importées}}'**
+  String rulePackImportedTitle(int count);
+
+  /// Second line of the import toast when the rules were applied straight away.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, =0{Aucune transaction n\'a changé de catégorie.} one{{count} transaction recatégorisée.} other{{count} transactions recatégorisées.}}'**
+  String rulePackImportedBody(int count);
+
+  /// Toast headline when a pack import failed.
+  ///
+  /// In fr, this message translates to:
+  /// **'L\'import a échoué'**
+  String get rulePackImportFailed;
+
+  /// Title of the export review sheet.
+  ///
+  /// In fr, this message translates to:
+  /// **'Exporter mes règles'**
+  String get rulePackExportTitle;
+
+  /// Warning at the top of the export sheet. Names a concrete example, because the abstract warning is the one nobody reads.
+  ///
+  /// In fr, this message translates to:
+  /// **'Relisez avant d\'enregistrer : un motif peut contenir des informations personnelles — le nom de votre propriétaire, « VIR SALAIRE DUPONT ».'**
+  String get rulePackExportPrivacyNotice;
+
+  /// Section label above the verbatim pack contents in the export sheet.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, =0{Contenu du fichier — aucune règle} one{Contenu du fichier — {count} règle} other{Contenu du fichier — {count} règles}}'**
+  String rulePackExportContents(int count);
+
+  /// Section label above the rules an export could not carry.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, one{{count} règle non exportable} other{{count} règles non exportables}}'**
+  String rulePackOmittedLabel(int count);
+
+  /// Explains one omitted rule: it uses a regex, which no importer accepts.
+  ///
+  /// In fr, this message translates to:
+  /// **'« {pattern} » — les règles regex ne peuvent pas figurer dans un pack.'**
+  String rulePackOmittedRegex(String pattern);
+
+  /// Explains one omitted rule: it targets a user-defined category, which has no portable key.
+  ///
+  /// In fr, this message translates to:
+  /// **'« {pattern} » — vise une catégorie personnalisée, qui n\'a pas d\'identifiant partageable.'**
+  String rulePackOmittedUserCategory(String pattern);
+
+  /// Save button on the export sheet.
+  ///
+  /// In fr, this message translates to:
+  /// **'Enregistrer'**
+  String get rulePackExportSave;
+
+  /// First line of the toast after an export is written to disk.
+  ///
+  /// In fr, this message translates to:
+  /// **'Pack enregistré'**
+  String get rulePackExportedTitle;
+
+  /// Toast headline when preparing or writing an export failed.
+  ///
+  /// In fr, this message translates to:
+  /// **'L\'export a échoué'**
+  String get rulePackExportFailed;
+
+  /// CTA on the rules empty state offering the bundled pack, named and sized.
+  ///
+  /// In fr, this message translates to:
+  /// **'Commencer avec « {name} » ({count} règles)'**
+  String rulePackStartWith(String name, int count);
+
+  /// Reassurance under the bundled-pack CTA: the preview step always comes first.
+  ///
+  /// In fr, this message translates to:
+  /// **'Vous verrez ce que le pack ferait avant de l\'importer.'**
+  String get rulePackStartWithHelper;
 }
 
 class _AppLocalizationsDelegate
