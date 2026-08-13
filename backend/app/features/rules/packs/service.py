@@ -1,4 +1,4 @@
-"""Business logic for previewing and importing rule packs.
+"""Business logic for previewing, importing, and exporting rule packs.
 
 Everything here funnels into ordinary `categorization_rules` rows and the P1 engine. There is
 deliberately no parallel matching or apply path: an imported rule has to be indistinguishable
@@ -14,11 +14,21 @@ from pathlib import Path
 from sqlalchemy.orm import Session
 
 from app.core.errors import NotFoundError, ValidationError
+from app.features.categories.models import Category
 from app.features.categories.repository import CategoryRepository
 from app.features.rules.engine import match_category
 from app.features.rules.models import CategorizationRule
 from app.features.rules.packs.resolve import ResolvedEntry, resolve_pack
-from app.features.rules.packs.schema import BuiltinPackRead, RulePack, RulePackSource
+from app.features.rules.packs.schema import (
+    DEFAULT_EXPORT_PACK_NAME,
+    SUPPORTED_FORMAT_VERSION,
+    BuiltinPackRead,
+    OmissionReason,
+    OmittedRuleRead,
+    RulePack,
+    RulePackEntry,
+    RulePackSource,
+)
 from app.features.rules.repository import RuleRepository
 from app.features.rules.service import PREVIEW_SAMPLE_LIMIT, RuleService
 from app.features.transactions.models import Transaction
@@ -27,6 +37,10 @@ from app.features.transactions.repository import TransactionRepository
 #: Where the bundled packs live. Shipped as data files rather than Python literals so a pack is
 #: the same artifact whether it came with the app or arrived from a friend.
 BUILTIN_DIR = Path(__file__).parent / "builtin"
+
+#: The locales the pack format admits; a user whose locale is anything else exports without one,
+#: since `locale` is advisory provenance and a wrong value is worse than none.
+_PACK_LOCALES = frozenset({"fr", "en"})
 
 #: The natural key an imported rule is deduplicated on: field, type, casefolded pattern, and
 #: destination category. Casefolded because `contains`/`equals` match case-insensitively
@@ -69,8 +83,16 @@ class PackImport:
     recategorized_count: int
 
 
+@dataclass(frozen=True)
+class PackExport:
+    """A pack built from a user's rules, plus the rules the format could not carry."""
+
+    pack: RulePack
+    omitted: list[OmittedRuleRead]
+
+
 class RulePackService:
-    """Rule pack preview and import, always scoped to one user."""
+    """Rule pack preview/import/export, always scoped to one user."""
 
     def __init__(
         self,
@@ -179,6 +201,53 @@ class RulePackService:
             recategorized_count=recategorized_count,
         )
 
+    # --- export -----------------------------------------------------------------------------
+
+    def export(self, user_id: str, locale: str, enabled_only: bool, name: str | None) -> PackExport:
+        """Emit the caller's rules in pack format, resolving `category_id` back to its key.
+
+        A rule pointing at a user-defined category has no key to emit, and a `regex` rule would
+        be refused by the very importer this file targets. Both are omitted and reported rather
+        than written out — a pack that fails its own import is worse than one that says what it
+        left behind.
+        """
+        rules = self._rules.list_by_user(user_id)
+        if enabled_only:
+            rules = [rule for rule in rules if rule.enabled]
+
+        by_id: dict[str, Category] = {
+            category.id: category for category in self._categories.list_for_user(user_id)
+        }
+
+        entries: list[RulePackEntry] = []
+        omitted: list[OmittedRuleRead] = []
+        for rule in rules:
+            reason = _export_blocker(rule, by_id.get(rule.category_id))
+            if reason is not None:
+                omitted.append(
+                    OmittedRuleRead(rule_id=rule.id, pattern=rule.pattern, reason=reason)
+                )
+                continue
+            category = by_id[rule.category_id]
+            entries.append(
+                RulePackEntry(
+                    field=rule.match_field,  # ty: ignore[invalid-argument-type] — column is a
+                    # plain str; the literal is enforced on the way in by `RuleCreate`.
+                    type=rule.match_type,  # ty: ignore[invalid-argument-type] — same.
+                    pattern=rule.pattern,
+                    category_key=category.name,
+                    enabled=rule.enabled,
+                )
+            )
+
+        pack = RulePack(
+            format_version=SUPPORTED_FORMAT_VERSION,
+            name=name or DEFAULT_EXPORT_PACK_NAME,
+            locale=locale if locale in _PACK_LOCALES else None,  # ty: ignore[invalid-argument-type]
+            rules=entries,
+        )
+        return PackExport(pack=pack, omitted=omitted)
+
     # --- shared planning --------------------------------------------------------------------
 
     def _plan(self, user_id: str, pack: RulePack) -> _ImportPlan:
@@ -250,6 +319,15 @@ def _candidate_rules(
         )
         for offset, resolved in enumerate(entries)
     ]
+
+
+def _export_blocker(rule: CategorizationRule, category: Category | None) -> OmissionReason | None:
+    """Why ``rule`` cannot round-trip through the pack format, or None if it can."""
+    if rule.match_type == "regex":
+        return "regex"
+    if category is None or not category.is_system:
+        return "user_category"
+    return None
 
 
 @lru_cache(maxsize=1)

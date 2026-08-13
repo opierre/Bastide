@@ -2,7 +2,7 @@
 
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, Depends, Query, status
 from sqlalchemy.orm import Session
 
 from app.core.db import get_db
@@ -12,6 +12,7 @@ from app.features.categories.repository import CategoryRepository
 from app.features.rules.models import CategorizationRule
 from app.features.rules.packs.schema import (
     BuiltinPackRead,
+    RulePackExportResult,
     RulePackImportRequest,
     RulePackImportResult,
     RulePackPreviewResult,
@@ -174,6 +175,29 @@ async def import_pack(
         unresolved=result.unresolved,
         recategorized_count=result.recategorized_count,
     )
+
+
+@router.get("/packs/export", response_model=RulePackExportResult)
+async def export_pack(
+    service: Annotated[RulePackService, Depends(_pack_service)],
+    user: Annotated[User, Depends(get_current_user)],
+    enabled_only: bool = False,
+    name: Annotated[
+        str | None,
+        Query(
+            min_length=1,
+            max_length=100,
+            description="Title for the exported pack; the UI's review step supplies it.",
+        ),
+    ] = None,
+) -> RulePackExportResult:
+    """Return the caller's rules as a pack for review, plus the ones it could not carry.
+
+    A body, not a download: a pattern can hold personal detail, so the user sees the file's
+    contents before it becomes a file.
+    """
+    result = service.export(user.id, user.locale, enabled_only, name)
+    return RulePackExportResult(pack=result.pack, omitted=result.omitted)
 
 
 @router.patch("/{rule_id}", response_model=RuleRead)
