@@ -1,9 +1,17 @@
-"""Tests for the rule pattern suggested from a transaction. Pure function — no DB, no app."""
+"""Tests for the rule pattern suggested from a transaction: the pure function and its endpoint."""
 
 from datetime import date
+from pathlib import Path
+
+from fastapi.testclient import TestClient
 
 from app.features.rules.suggest import MAX_PATTERN_LENGTH, suggest_rule
 from app.features.transactions.models import Transaction
+from tests.features.rules.test_rules import (
+    _create_account,
+    _insert_transaction,
+    _register,
+)
 
 
 def _transaction(description_clean: str, merchant: str | None = None) -> Transaction:
@@ -119,3 +127,87 @@ def test_a_long_run_is_capped_without_cutting_a_word() -> None:
     assert len(pattern) <= MAX_PATTERN_LENGTH
     assert pattern.split() == words[: len(pattern.split())]
     assert not pattern.endswith("MERCHAN")
+
+
+# --- GET /rules/suggestion ------------------------------------------------------------------
+
+
+def test_the_endpoint_returns_the_suggestion(client: TestClient, tmp_path: Path) -> None:
+    headers, user_id = _register(client)
+    account_id = _create_account(client, headers)
+    transaction_id = _insert_transaction(tmp_path, user_id, account_id, "PRLV SEPA ASSUR MAIF")
+
+    response = client.get(
+        "/api/v1/rules/suggestion", params={"transaction_id": transaction_id}, headers=headers
+    )
+
+    assert response.status_code == 200
+    assert response.json() == {
+        "match_field": "description_clean",
+        "match_type": "contains",
+        "pattern": "ASSUR MAIF",
+    }
+
+
+def test_the_endpoint_prefers_the_merchant_when_there_is_one(
+    client: TestClient, tmp_path: Path
+) -> None:
+    headers, user_id = _register(client)
+    account_id = _create_account(client, headers)
+    transaction_id = _insert_transaction(tmp_path, user_id, account_id, "CB CARREFOUR CITY")
+    client.patch(
+        f"/api/v1/transactions/{transaction_id}",
+        json={"merchant": "CARREFOUR CITY"},
+        headers=headers,
+    )
+
+    response = client.get(
+        "/api/v1/rules/suggestion", params={"transaction_id": transaction_id}, headers=headers
+    )
+
+    assert response.json() == {
+        "match_field": "merchant",
+        "match_type": "equals",
+        "pattern": "CARREFOUR CITY",
+    }
+
+
+def test_the_suggestion_feeds_a_rule_that_matches_its_own_transaction(
+    client: TestClient, tmp_path: Path
+) -> None:
+    """The whole point of the pre-fill: posting it back must catch the row it came from."""
+    headers, user_id = _register(client)
+    account_id = _create_account(client, headers)
+    transaction_id = _insert_transaction(
+        tmp_path, user_id, account_id, "PAIEMENT CB 12/05 MONOPRIX PARIS 11 REF 998877"
+    )
+
+    suggestion = client.get(
+        "/api/v1/rules/suggestion", params={"transaction_id": transaction_id}, headers=headers
+    ).json()
+    preview = client.post("/api/v1/rules/preview", json=suggestion, headers=headers).json()
+
+    assert preview["match_count"] == 1
+    assert preview["samples"][0]["id"] == transaction_id
+
+
+def test_another_users_transaction_is_a_404(client: TestClient, tmp_path: Path) -> None:
+    headers_a, _ = _register(client, "amelie@example.com")
+    headers_b, user_id_b = _register(client, "bruno@example.com")
+    account_id_b = _create_account(client, headers_b)
+    transaction_id_b = _insert_transaction(
+        tmp_path, user_id_b, account_id_b, "PRLV SEPA ASSUR MAIF"
+    )
+
+    response = client.get(
+        "/api/v1/rules/suggestion", params={"transaction_id": transaction_id_b}, headers=headers_a
+    )
+
+    assert response.status_code == 404
+    assert response.json()["error"]["code"] == "TRANSACTION_NOT_FOUND"
+
+
+def test_the_endpoint_requires_auth(client: TestClient) -> None:
+    response = client.get("/api/v1/rules/suggestion", params={"transaction_id": "t-1"})
+
+    assert response.status_code == 401

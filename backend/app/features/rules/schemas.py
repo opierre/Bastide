@@ -58,6 +58,14 @@ class RuleApplyResult(BaseModel):
     recategorized_count: int
 
 
+class RuleSuggestionRead(BaseModel):
+    """The pre-fill for a rule form, derived from the transaction being corrected."""
+
+    match_field: MatchField
+    match_type: MatchType
+    pattern: str
+
+
 class RulePreviewRequest(BaseModel):
     """An unsaved rule condition to count against the caller's existing transactions."""
 

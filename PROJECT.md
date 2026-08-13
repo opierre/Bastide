@@ -491,6 +491,9 @@ GET    /categorization/runs         ?limit → [run]                     (histor
 GET    /categorization/runs/{id}    → run                              (polled for progress)
 POST   /categorization/runs/{id}/cancel → run
 
+GET    /rules/suggestion            ?transaction_id → {match_field, match_type, pattern}
+                                     (the rule form's pre-fill; a default, not a constraint —
+                                      the client may override every field)
 POST   /rules/preview               {match_field, match_type, pattern, account_id?}
                                     → {match_count, samples: [transaction]}   (max 3 samples)
 POST   /rules/from-transaction      {transaction_id, match_field, match_type, pattern,
@@ -523,6 +526,12 @@ DELETE /goals/{id}/allocations/{allocation_id}
 > that may recategorise many others. Folding that into the transaction patch would give one
 > endpoint two blast radii and a response shape that sometimes reports a bulk count. Separate,
 > the patch stays a single-row edit and the learning step reports what it changed.
+
+> **Why the suggestion is a server call and not client-side string work.** Deriving the pattern
+> means knowing which parts of a French bank label are noise — the same knowledge the import
+> pipeline already applies when it cleans a description and extracts a merchant. A second copy
+> of those heuristics in Dart would drift from the first, and the drift would show up as rules
+> that don't match the transaction they were suggested from.
 
 ---
 

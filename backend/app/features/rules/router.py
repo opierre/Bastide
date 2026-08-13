@@ -20,6 +20,7 @@ from app.features.rules.schemas import (
     RulePreviewRequest,
     RulePreviewResult,
     RuleRead,
+    RuleSuggestionRead,
     RuleUpdate,
 )
 from app.features.rules.service import RuleService
@@ -63,6 +64,21 @@ async def create_rule(
 ) -> RuleRead:
     """Create a new categorization rule."""
     return _to_read(service.create(user.id, payload))
+
+
+@router.get("/suggestion", response_model=RuleSuggestionRead)
+async def suggest_rule_for_transaction(
+    transaction_id: str,
+    service: Annotated[RuleService, Depends(_service)],
+    user: Annotated[User, Depends(get_current_user)],
+) -> RuleSuggestionRead:
+    """Pre-fill for the rule form, derived from the transaction the user is correcting."""
+    suggestion = service.suggest_for_transaction(user.id, transaction_id)
+    return RuleSuggestionRead(
+        match_field=suggestion.match_field,
+        match_type=suggestion.match_type,
+        pattern=suggestion.pattern,
+    )
 
 
 @router.post("/preview", response_model=RulePreviewResult)

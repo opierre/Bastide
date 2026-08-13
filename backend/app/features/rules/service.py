@@ -20,6 +20,7 @@ from app.features.rules.schemas import (
     RulePreviewRequest,
     RuleUpdate,
 )
+from app.features.rules.suggest import RuleSuggestion, suggest_rule
 from app.features.transactions.models import Transaction
 from app.features.transactions.repository import TransactionRepository
 from app.features.transactions.service import TransactionNotFoundError
@@ -176,6 +177,17 @@ class RuleService:
             if len(samples) < PREVIEW_SAMPLE_LIMIT:
                 samples.append(transaction)
         return match_count, samples
+
+    def suggest_for_transaction(self, user_id: str, transaction_id: str) -> RuleSuggestion:
+        """Propose the rule that would have categorized one of the caller's transactions.
+
+        Raises:
+            TransactionNotFoundError: no such transaction, or it belongs to another user.
+        """
+        transaction = self._transactions.get_by_id_for_user(transaction_id, user_id)
+        if transaction is None:
+            raise TransactionNotFoundError("Transaction not found.")
+        return suggest_rule(transaction)
 
     def create_from_transaction(
         self, user_id: str, data: RuleFromTransactionRequest
