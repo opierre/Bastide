@@ -69,6 +69,22 @@ class TransactionRepository:
         )
         return rows, total
 
+    def list_uncategorized_for_user(self, user_id: str) -> list[Transaction]:
+        """The user's transactions carrying no category, newest first.
+
+        The population a rule pack preview measures itself against: rows nothing has managed to
+        categorise yet are exactly the ones a new pack could help with.
+        """
+        return list(
+            self._db.scalars(
+                select(Transaction)
+                .join(Account, Account.id == Transaction.account_id)
+                .where(Account.user_id == user_id, Transaction.category_id.is_(None))
+                .options(selectinload(Transaction.category))
+                .order_by(Transaction.booked_date.desc(), Transaction.id.desc())
+            )
+        )
+
     def get_by_id_for_user(self, transaction_id: str, user_id: str) -> Transaction | None:
         return self._db.scalar(
             select(Transaction)

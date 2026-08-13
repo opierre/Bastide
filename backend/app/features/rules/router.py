@@ -1,4 +1,4 @@
-"""Categorization rule endpoints: user-scoped CRUD plus the re-apply action."""
+"""Categorization rule endpoints: user-scoped CRUD, the re-apply action, and rule packs."""
 
 from typing import Annotated
 
@@ -10,6 +10,14 @@ from app.features.auth.deps import get_current_user
 from app.features.auth.models import User
 from app.features.categories.repository import CategoryRepository
 from app.features.rules.models import CategorizationRule
+from app.features.rules.packs.schema import (
+    BuiltinPackRead,
+    RulePackImportRequest,
+    RulePackImportResult,
+    RulePackPreviewResult,
+    RulePackSource,
+)
+from app.features.rules.packs.service import RulePackService
 from app.features.rules.repository import RuleRepository
 from app.features.rules.schemas import (
     RuleApplyRequest,
@@ -32,6 +40,16 @@ router = APIRouter(prefix="/api/v1/rules", tags=["rules"])
 
 def _service(db: Annotated[Session, Depends(get_db)]) -> RuleService:
     return RuleService(RuleRepository(db), TransactionRepository(db), CategoryRepository(db), db)
+
+
+def _pack_service(db: Annotated[Session, Depends(get_db)]) -> RulePackService:
+    return RulePackService(
+        RuleRepository(db),
+        CategoryRepository(db),
+        TransactionRepository(db),
+        _service(db),
+        db,
+    )
 
 
 def _to_read(rule: CategorizationRule) -> RuleRead:
@@ -108,6 +126,54 @@ async def create_rule_from_transaction(
     """Turn a correction into a rule, optionally re-applying it to existing transactions."""
     rule, recategorized_count = service.create_from_transaction(user.id, payload)
     return RuleFromTransactionResult(rule=_to_read(rule), recategorized_count=recategorized_count)
+
+
+# --- rule packs ---------------------------------------------------------------------------
+# Declared before `/{rule_id}` so the literal `packs` segment can never be read as a rule id.
+
+
+@router.get("/packs/builtin", response_model=list[BuiltinPackRead])
+async def list_builtin_packs(
+    service: Annotated[RulePackService, Depends(_pack_service)],
+    _user: Annotated[User, Depends(get_current_user)],
+) -> list[BuiltinPackRead]:
+    """List the packs bundled with the app, so the frontend can offer one without a file."""
+    return service.list_builtin()
+
+
+@router.post("/packs/preview", response_model=RulePackPreviewResult)
+async def preview_pack(
+    payload: RulePackSource,
+    service: Annotated[RulePackService, Depends(_pack_service)],
+    user: Annotated[User, Depends(get_current_user)],
+) -> RulePackPreviewResult:
+    """Report what importing a pack would do, and how much of the backlog it would categorise."""
+    preview = service.preview(user.id, service.load_source(payload))
+    return RulePackPreviewResult(
+        name=preview.name,
+        total=preview.total,
+        new_count=preview.new_count,
+        duplicate_count=preview.duplicate_count,
+        unresolved=preview.unresolved,
+        would_match_count=preview.would_match_count,
+        samples=[TransactionRead.model_validate(sample) for sample in preview.samples],
+    )
+
+
+@router.post("/packs/import", response_model=RulePackImportResult)
+async def import_pack(
+    payload: RulePackImportRequest,
+    service: Annotated[RulePackService, Depends(_pack_service)],
+    user: Annotated[User, Depends(get_current_user)],
+) -> RulePackImportResult:
+    """Import a pack's resolvable, non-duplicate rules, optionally re-applying them after."""
+    result = service.import_pack(user.id, service.load_source(payload), payload.apply_now)
+    return RulePackImportResult(
+        created_count=result.created_count,
+        skipped_count=result.skipped_count,
+        unresolved=result.unresolved,
+        recategorized_count=result.recategorized_count,
+    )
 
 
 @router.patch("/{rule_id}", response_model=RuleRead)
