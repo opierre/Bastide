@@ -7,7 +7,9 @@ from fastapi.testclient import TestClient
 from sqlalchemy import create_engine, select
 from sqlalchemy.orm import sessionmaker
 
+from app.core.seed import SYSTEM_CATEGORIES
 from app.features.rules.models import CategorizationRule
+from app.features.rules.packs.service import _load_builtin_packs
 from app.features.rules.repository import RuleRepository
 from tests.features.rules.packs.helpers import (
     GROCERIES,
@@ -151,6 +153,17 @@ def test_importing_the_same_pack_twice_creates_nothing_the_second_time(client: T
         "recategorized_count": 0,
     }
     assert len(_rules(client, headers)) == 2
+
+
+def test_reimporting_the_bundled_pack_is_a_no_op(client: TestClient) -> None:
+    headers, _ = _register(client)
+
+    _, first = import_pack(client, headers, builtin_id=BUILTIN_ID)
+    _, second = import_pack(client, headers, builtin_id=BUILTIN_ID)
+
+    assert first["created_count"] > 0
+    assert second["created_count"] == 0
+    assert second["skipped_count"] == first["created_count"]
 
 
 # --- atomicity -----------------------------------------------------------------------------
@@ -357,7 +370,56 @@ def test_preview_never_sees_another_users_transactions(client: TestClient, tmp_p
     assert body_b["would_match_count"] == 1
 
 
-# --- scoping and auth ----------------------------------------------------------------------
+# --- the bundled pack ----------------------------------------------------------------------
+
+
+def test_the_bundled_pack_is_listed(client: TestClient) -> None:
+    headers, _ = _register(client)
+
+    body = client.get("/api/v1/rules/packs/builtin", headers=headers).json()
+
+    assert [entry_["id"] for entry_ in body] == [BUILTIN_ID]
+    assert body[0]["locale"] == "fr"
+    assert body[0]["rule_count"] > 0
+
+
+def test_every_bundled_pack_key_resolves_on_a_freshly_seeded_user(client: TestClient) -> None:
+    headers, _ = _register(client)
+
+    _, body = import_pack(client, headers, builtin_id=BUILTIN_ID)
+
+    bundled = _load_builtin_packs()[BUILTIN_ID]
+    assert body["unresolved"] == []
+    assert body["created_count"] == len(bundled.rules)
+
+
+def test_every_bundled_pack_key_is_in_the_seed_catalog() -> None:
+    """A unit-level guard, so a catalog rename fails here and not only through the API."""
+    seeded = {seed.key for group in SYSTEM_CATEGORIES for seed in (group, *group.children)}
+
+    keys = {rule.category_key for rule in _load_builtin_packs()[BUILTIN_ID].rules}
+
+    assert keys <= seeded
+
+
+def test_the_bundled_pack_imports_and_applies(client: TestClient, tmp_path: Path) -> None:
+    headers, user_id = _register(client)
+    account_id = _create_account(client, headers)
+    _insert_transaction(tmp_path, user_id, account_id, "RETRAIT DAB 12/01 PARIS")
+    _insert_transaction(tmp_path, user_id, account_id, "VIREMENT SALAIRE", amount_minor=285_000)
+    _insert_transaction(tmp_path, user_id, account_id, "VIR EMIS M DUPONT", amount_minor=-3000)
+
+    _, body = import_pack(client, headers, builtin_id=BUILTIN_ID, apply_now=True)
+
+    assert body["recategorized_count"] == 2
+    items = client.get("/api/v1/transactions", headers=headers).json()["items"]
+    by_label = {item["description_clean"]: item for item in items}
+    assert by_label["RETRAIT DAB 12/01 PARIS"]["category"]["name"] == "category.other.cash"
+    assert by_label["VIREMENT SALAIRE"]["category"]["name"] == "category.income.salary"
+    # A `VIR EMIS` is as likely a friend's reimbursement as a move between the user's own
+    # accounts, so the pack deliberately carries no rule for it: the row reaches the review queue.
+    assert by_label["VIR EMIS M DUPONT"]["category"] is None
+    assert by_label["VIR EMIS M DUPONT"]["needs_review"] is True
 
 
 def test_pack_import_requires_auth(client: TestClient) -> None:
