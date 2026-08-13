@@ -3,7 +3,7 @@ import 'package:finstride/core/widgets/amount_text.dart';
 import 'package:finstride/features/accounts/application/accounts_controller.dart';
 import 'package:finstride/features/accounts/domain/account.dart';
 import 'package:finstride/features/transactions/application/transactions_controller.dart';
-import 'package:finstride/features/transactions/domain/category.dart';
+import 'package:finstride/features/categories/domain/category.dart';
 import 'package:finstride/features/transactions/domain/transaction.dart';
 import 'package:finstride/features/transactions/presentation/transactions_screen.dart';
 import 'package:finstride/l10n/app_localizations.dart';
@@ -69,8 +69,8 @@ const _groceriesCategory = TransactionCategory(
 
 Widget _wrap({
   required FakeTransactionsController controller,
-  List<PickerCategory> categories = const [
-    PickerCategory(
+  List<AppCategory> categories = const [
+    AppCategory(
       id: 'c1',
       userId: null,
       parentId: null,

@@ -2,7 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../data/transactions_repository.dart';
-import '../domain/category.dart' show PickerCategory;
+import '../../categories/domain/category.dart' show AppCategory;
 import '../domain/transaction.dart';
 
 /// The active list filters, held separately from the loaded page so a filter
@@ -183,6 +183,6 @@ final transactionsControllerProvider =
 /// The category catalog for the picker (system + the caller's own). Loaded
 /// once per session — categories change rarely enough that a `FutureProvider`
 /// without manual refresh is the right amount of machinery here.
-final transactionCategoriesProvider = FutureProvider<List<PickerCategory>>((ref) {
+final transactionCategoriesProvider = FutureProvider<List<AppCategory>>((ref) {
   return ref.read(transactionsRepositoryProvider).listCategories();
 });

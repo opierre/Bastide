@@ -3,17 +3,20 @@ import 'package:intl/intl.dart';
 
 import '../../../core/api/api_client.dart';
 import '../../../core/api/api_client_provider.dart';
-import '../domain/category.dart';
+import '../../categories/domain/category.dart';
 import '../domain/transaction.dart';
 
 final _isoDate = DateFormat('yyyy-MM-dd');
 
 /// Calls the `/transactions`, `/categories` and `/rules` endpoints and maps
-/// the wire JSON to domain models. The transactions feature owns these calls
-/// itself — there is no dedicated categories/rules frontend feature yet (see
-/// the architecture skill's "a feature owns everything it needs" rule) — so
-/// this stays the one place that knows their response shapes for the
-/// category picker and the "always categorize like this" affordance.
+/// the wire JSON to domain models.
+///
+/// The two foreign calls serve affordances that belong to *this* panel — the
+/// category picker, and "always categorize like this" — so they stay here
+/// rather than reaching into the categories/rules controllers, which hold the
+/// state of a panel this one never shows. Only the [AppCategory] shape is
+/// shared, because a second shape for the same resource is the one thing worse
+/// than a shared one.
 class TransactionsRepository {
   TransactionsRepository(this._apiClient);
 
@@ -66,9 +69,11 @@ class TransactionsRepository {
     return _parse(json as Map<String, dynamic>);
   }
 
-  Future<List<PickerCategory>> listCategories() async {
+  Future<List<AppCategory>> listCategories() async {
     final json = await _apiClient.get('/categories') as List<dynamic>;
-    return json.map((entry) => _parseCategory(entry as Map<String, dynamic>)).toList();
+    return json
+        .map((entry) => AppCategory.fromJson(entry as Map<String, dynamic>))
+        .toList();
   }
 
   /// Creates a rule matching [pattern] on [matchField] to [categoryId], so the
@@ -134,16 +139,6 @@ class TransactionsRepository {
     );
   }
 
-  PickerCategory _parseCategory(Map<String, dynamic> json) => PickerCategory(
-    id: json['id'] as String,
-    userId: json['user_id'] as String?,
-    parentId: json['parent_id'] as String?,
-    name: json['name'] as String,
-    kind: json['kind'] as String,
-    icon: json['icon'] as String,
-    color: json['color'] as String,
-    isSystem: json['is_system'] as bool,
-  );
 }
 
 final transactionsRepositoryProvider = Provider<TransactionsRepository>((ref) {

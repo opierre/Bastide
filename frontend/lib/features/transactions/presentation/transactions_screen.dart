@@ -13,7 +13,7 @@ import '../../accounts/application/accounts_controller.dart';
 import '../../accounts/domain/account.dart';
 import '../../imports/presentation/imports_screen.dart';
 import '../application/transactions_controller.dart';
-import '../domain/category.dart';
+import '../../categories/domain/category.dart';
 import '../domain/transaction.dart';
 import 'review_queue.dart';
 import 'transaction_error_localizer.dart';
@@ -136,7 +136,7 @@ class _FilterBar extends ConsumerWidget {
     final l10n = AppLocalizations.of(context)!;
     final filters = ref.watch(transactionFiltersProvider);
     final accounts = ref.watch(accountsControllerProvider).value ?? const <Account>[];
-    final categories = ref.watch(transactionCategoriesProvider).value ?? const <PickerCategory>[];
+    final categories = ref.watch(transactionCategoriesProvider).value ?? const <AppCategory>[];
     final notifier = ref.read(transactionFiltersProvider.notifier);
 
     return Row(
@@ -246,7 +246,7 @@ class _CategoryFilterPill extends StatelessWidget {
     required this.onChanged,
   });
 
-  final List<PickerCategory> categories;
+  final List<AppCategory> categories;
   final String? selectedId;
   final ValueChanged<String?> onChanged;
 

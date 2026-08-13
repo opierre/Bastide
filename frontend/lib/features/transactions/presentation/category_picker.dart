@@ -6,7 +6,7 @@ import '../../../core/theme/tokens.dart';
 import '../../../core/widgets/category_chip.dart';
 import '../../../l10n/app_localizations.dart';
 import '../application/transactions_controller.dart';
-import '../domain/category.dart' show PickerCategory;
+import '../../categories/domain/category.dart' show AppCategory;
 import '../domain/transaction.dart';
 import 'transaction_error_localizer.dart';
 
@@ -164,7 +164,7 @@ class _CategoryPickerBodyState extends ConsumerState<_CategoryPickerBody> {
     );
   }
 
-  List<PickerCategory> _filter(List<PickerCategory> categories, String query) {
+  List<AppCategory> _filter(List<AppCategory> categories, String query) {
     final needle = query.trim().toLowerCase();
     if (needle.isEmpty) return categories;
     final l10n = AppLocalizations.of(context)!;
@@ -185,7 +185,7 @@ class _CategoryList extends StatelessWidget {
     required this.onSelect,
   });
 
-  final List<PickerCategory> categories;
+  final List<AppCategory> categories;
   final String? currentCategoryId;
   final bool isSaving;
   final ValueChanged<String> onSelect;
