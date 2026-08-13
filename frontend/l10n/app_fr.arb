@@ -1453,5 +1453,236 @@
   "categoryErrorGeneric": "Une erreur est survenue. Veuillez réessayer.",
   "@categoryErrorGeneric": {
     "description": "Fallback message for unrecognized or network errors on the categories panel."
+  },
+  "categoriesTabCategories": "Catégories",
+  "@categoriesTabCategories": {
+    "description": "Left segment of the panel's view switch."
+  },
+  "categoriesTabRules": "Règles",
+  "@categoriesTabRules": {
+    "description": "Right segment of the panel's view switch."
+  },
+  "rulesAddButton": "Nouvelle règle",
+  "@rulesAddButton": {
+    "description": "Top-bar primary button while the rules view is showing."
+  },
+  "rulesPriorityNote": "Évaluées dans l'ordre de priorité — une règle ne remplace jamais une catégorie choisie manuellement.",
+  "@rulesPriorityNote": {
+    "description": "Note beside the view switch on the rules view, stating both how rules are ordered and what they will never overwrite."
+  },
+  "rulesApplyButton": "Exécuter les règles",
+  "@rulesApplyButton": {
+    "description": "Secondary action re-running the rules over existing transactions."
+  },
+  "rulesApplyRunning": "Exécution…",
+  "@rulesApplyRunning": {
+    "description": "Label of the run action while the run is in flight."
+  },
+  "rulesApplyToastTitle": "{count, plural, =0{Aucune transaction recatégorisée} one{{count} transaction recatégorisée} other{{count} transactions recatégorisées}}",
+  "@rulesApplyToastTitle": {
+    "description": "First line of the toast after a rule run: how many transactions changed category.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "rulesApplyToastBody": "Vos catégories choisies manuellement n'ont pas été modifiées.",
+  "@rulesApplyToastBody": {
+    "description": "Second line of the rule-run toast. Answers the question the count alone raises."
+  },
+  "rulesApplyFailed": "L'exécution des règles a échoué",
+  "@rulesApplyFailed": {
+    "description": "Toast headline when the rule run itself failed."
+  },
+  "rulesReorderFailed": "L'ordre n'a pas pu être enregistré",
+  "@rulesReorderFailed": {
+    "description": "Toast headline when persisting a drag-reorder failed and the previous order was restored."
+  },
+  "rulesToggleFailed": "La règle n'a pas pu être modifiée",
+  "@rulesToggleFailed": {
+    "description": "Toast headline when enabling or disabling a rule failed and the switch was put back."
+  },
+  "rulesRetry": "Réessayer",
+  "@rulesRetry": {
+    "description": "Retry button shown when the rules list fails to load."
+  },
+  "rulesEmptyTitle": "Automatisez votre classement",
+  "@rulesEmptyTitle": {
+    "description": "Heading of the rules empty state."
+  },
+  "rulesEmptyBody": "Une règle reconnaît un libellé — « CARREFOUR » — et attribue sa catégorie à chaque transaction correspondante, aujourd'hui et aux prochains imports.",
+  "@rulesEmptyBody": {
+    "description": "Body of the rules empty state, explaining what a rule does before asking the user to write one."
+  },
+  "ruleToggleSemantics": "Activer la règle",
+  "@ruleToggleSemantics": {
+    "description": "Accessible label of the enable switch on a rule row."
+  },
+  "ruleTargetMissing": "Catégorie introuvable",
+  "@ruleTargetMissing": {
+    "description": "Chip shown when a rule points at a category that no longer exists."
+  },
+  "ruleFieldDescription": "Libellé",
+  "@ruleFieldDescription": {
+    "description": "Rule match field: the cleaned transaction description."
+  },
+  "ruleFieldMerchant": "Commerçant",
+  "@ruleFieldMerchant": {
+    "description": "Rule match field: the extracted merchant name."
+  },
+  "ruleFieldAmount": "Montant",
+  "@ruleFieldAmount": {
+    "description": "Rule match field: the transaction amount."
+  },
+  "ruleConditionContains": "contient",
+  "@ruleConditionContains": {
+    "description": "Rule condition badge: substring match."
+  },
+  "ruleConditionEquals": "égal à",
+  "@ruleConditionEquals": {
+    "description": "Rule condition badge: exact match."
+  },
+  "ruleConditionRegex": "regex",
+  "@ruleConditionRegex": {
+    "description": "Rule condition badge: regular expression match."
+  },
+  "ruleConditionRange": "plage",
+  "@ruleConditionRange": {
+    "description": "Rule condition badge: amount range match."
+  },
+  "ruleFormCreateTitle": "Nouvelle règle",
+  "@ruleFormCreateTitle": {
+    "description": "Title of the rule editor when creating."
+  },
+  "ruleFormEditTitle": "Modifier la règle",
+  "@ruleFormEditTitle": {
+    "description": "Title of the rule editor when editing."
+  },
+  "ruleFormFieldLabel": "Champ",
+  "@ruleFormFieldLabel": {
+    "description": "Label of the rule editor's match-field select."
+  },
+  "ruleFormConditionLabel": "Condition",
+  "@ruleFormConditionLabel": {
+    "description": "Label of the rule editor's condition select."
+  },
+  "ruleFormPriorityLabel": "Priorité",
+  "@ruleFormPriorityLabel": {
+    "description": "Label of the rule editor's priority field. Lower runs first."
+  },
+  "ruleFormPriorityInvalid": "Indiquez une priorité d'au moins 1.",
+  "@ruleFormPriorityInvalid": {
+    "description": "Validation message for a missing or non-positive priority."
+  },
+  "ruleFormPatternLabel": "Motif",
+  "@ruleFormPatternLabel": {
+    "description": "Label of the rule editor's pattern field."
+  },
+  "ruleFormPatternRequired": "Indiquez ce que la règle doit reconnaître.",
+  "@ruleFormPatternRequired": {
+    "description": "Validation message when the pattern is left empty."
+  },
+  "rulePatternHelperText": "Recherche insensible à la casse dans le champ choisi.",
+  "@rulePatternHelperText": {
+    "description": "Helper under the pattern field for the contains and equals conditions."
+  },
+  "rulePatternHelperRegex": "Expression régulière, sensible à la casse. Testée en direct ci-dessous.",
+  "@rulePatternHelperRegex": {
+    "description": "Helper under the pattern field for the regex condition."
+  },
+  "rulePatternHelperRange": "Plage de montants en centimes, « min:max ». Laissez un côté vide pour une borne ouverte ; les dépenses sont négatives.",
+  "@rulePatternHelperRange": {
+    "description": "Helper under the pattern field for the range condition. Names the unit and the sign, both of which the user cannot guess."
+  },
+  "rulePatternHintText": "CARREFOUR",
+  "@rulePatternHintText": {
+    "description": "Placeholder example in the pattern field for a text condition."
+  },
+  "rulePatternHintRegex": "^CB .*CARREFOUR",
+  "@rulePatternHintRegex": {
+    "description": "Placeholder example in the pattern field for a regex condition."
+  },
+  "rulePatternHintRange": "-10000:-5000",
+  "@rulePatternHintRange": {
+    "description": "Placeholder example in the pattern field for a range condition."
+  },
+  "ruleFormCategoryLabel": "Catégorie attribuée",
+  "@ruleFormCategoryLabel": {
+    "description": "Label of the rule editor's target-category select."
+  },
+  "ruleFormCategoryNone": "Choisir une catégorie",
+  "@ruleFormCategoryNone": {
+    "description": "Empty option of the target-category select."
+  },
+  "ruleFormCategoryRequired": "Choisissez la catégorie que cette règle attribue.",
+  "@ruleFormCategoryRequired": {
+    "description": "Error shown when saving a rule with no target category."
+  },
+  "ruleFormEnabledLabel": "Règle active",
+  "@ruleFormEnabledLabel": {
+    "description": "Label beside the rule editor's enable switch."
+  },
+  "ruleFormCancel": "Annuler",
+  "@ruleFormCancel": {
+    "description": "Cancel button of the rule editor."
+  },
+  "ruleFormSave": "Enregistrer",
+  "@ruleFormSave": {
+    "description": "Submit button of the rule editor."
+  },
+  "ruleFormDelete": "Supprimer",
+  "@ruleFormDelete": {
+    "description": "Delete action in the rule editor's footer, shown only when editing."
+  },
+  "rulePreviewLoading": "Recherche des transactions correspondantes…",
+  "@rulePreviewLoading": {
+    "description": "Info banner shown while the match preview is in flight."
+  },
+  "rulePreviewCount": "{count, plural, =0{Ne correspond à aucune transaction existante.} one{Correspond à {count} transaction existante.} other{Correspond à {count} transactions existantes.}}",
+  "@rulePreviewCount": {
+    "description": "Match-preview banner when the backend returned no example to quote.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "rulePreviewCountWithSample": "{count, plural, one{Correspond à {count} transaction existante — « {sample} » du {date}.} other{Correspond à {count} transactions existantes — dont « {sample} » du {date}.}}",
+  "@rulePreviewCountWithSample": {
+    "description": "Match-preview banner naming one of the matched transactions, so the user can tell whether the rule caught what they meant.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "sample": {
+        "type": "String",
+        "example": "CB CARREFOUR PARIS 15"
+      },
+      "date": {
+        "type": "String",
+        "example": "14/05/2026"
+      }
+    }
+  },
+  "ruleErrorPatternInvalid": "Ce motif n'est pas une expression régulière valide.",
+  "@ruleErrorPatternInvalid": {
+    "description": "Localized message for RULE_PATTERN_INVALID. Rendered on the pattern field, never as a match count of zero."
+  },
+  "ruleErrorNotFound": "Cette règle n'existe plus.",
+  "@ruleErrorNotFound": {
+    "description": "Localized message for the backend's RULE_NOT_FOUND code."
+  },
+  "ruleErrorCategoryNotFound": "La catégorie visée n'existe plus.",
+  "@ruleErrorCategoryNotFound": {
+    "description": "Localized message when a rule targets a category the backend can no longer resolve."
+  },
+  "ruleErrorValidation": "Ces informations ne sont pas valides. Vérifiez le motif et la priorité.",
+  "@ruleErrorValidation": {
+    "description": "Localized message for a VALIDATION_ERROR on a rule write."
+  },
+  "ruleErrorGeneric": "Une erreur est survenue. Veuillez réessayer.",
+  "@ruleErrorGeneric": {
+    "description": "Fallback message for unrecognized or network errors on the rules view."
   }
 }

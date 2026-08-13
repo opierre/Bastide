@@ -1133,4 +1133,198 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get categoryErrorGeneric =>
       'Une erreur est survenue. Veuillez réessayer.';
+
+  @override
+  String get categoriesTabCategories => 'Catégories';
+
+  @override
+  String get categoriesTabRules => 'Règles';
+
+  @override
+  String get rulesAddButton => 'Nouvelle règle';
+
+  @override
+  String get rulesPriorityNote =>
+      'Évaluées dans l\'ordre de priorité — une règle ne remplace jamais une catégorie choisie manuellement.';
+
+  @override
+  String get rulesApplyButton => 'Exécuter les règles';
+
+  @override
+  String get rulesApplyRunning => 'Exécution…';
+
+  @override
+  String rulesApplyToastTitle(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count transactions recatégorisées',
+      one: '$count transaction recatégorisée',
+      zero: 'Aucune transaction recatégorisée',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get rulesApplyToastBody =>
+      'Vos catégories choisies manuellement n\'ont pas été modifiées.';
+
+  @override
+  String get rulesApplyFailed => 'L\'exécution des règles a échoué';
+
+  @override
+  String get rulesReorderFailed => 'L\'ordre n\'a pas pu être enregistré';
+
+  @override
+  String get rulesToggleFailed => 'La règle n\'a pas pu être modifiée';
+
+  @override
+  String get rulesRetry => 'Réessayer';
+
+  @override
+  String get rulesEmptyTitle => 'Automatisez votre classement';
+
+  @override
+  String get rulesEmptyBody =>
+      'Une règle reconnaît un libellé — « CARREFOUR » — et attribue sa catégorie à chaque transaction correspondante, aujourd\'hui et aux prochains imports.';
+
+  @override
+  String get ruleToggleSemantics => 'Activer la règle';
+
+  @override
+  String get ruleTargetMissing => 'Catégorie introuvable';
+
+  @override
+  String get ruleFieldDescription => 'Libellé';
+
+  @override
+  String get ruleFieldMerchant => 'Commerçant';
+
+  @override
+  String get ruleFieldAmount => 'Montant';
+
+  @override
+  String get ruleConditionContains => 'contient';
+
+  @override
+  String get ruleConditionEquals => 'égal à';
+
+  @override
+  String get ruleConditionRegex => 'regex';
+
+  @override
+  String get ruleConditionRange => 'plage';
+
+  @override
+  String get ruleFormCreateTitle => 'Nouvelle règle';
+
+  @override
+  String get ruleFormEditTitle => 'Modifier la règle';
+
+  @override
+  String get ruleFormFieldLabel => 'Champ';
+
+  @override
+  String get ruleFormConditionLabel => 'Condition';
+
+  @override
+  String get ruleFormPriorityLabel => 'Priorité';
+
+  @override
+  String get ruleFormPriorityInvalid => 'Indiquez une priorité d\'au moins 1.';
+
+  @override
+  String get ruleFormPatternLabel => 'Motif';
+
+  @override
+  String get ruleFormPatternRequired =>
+      'Indiquez ce que la règle doit reconnaître.';
+
+  @override
+  String get rulePatternHelperText =>
+      'Recherche insensible à la casse dans le champ choisi.';
+
+  @override
+  String get rulePatternHelperRegex =>
+      'Expression régulière, sensible à la casse. Testée en direct ci-dessous.';
+
+  @override
+  String get rulePatternHelperRange =>
+      'Plage de montants en centimes, « min:max ». Laissez un côté vide pour une borne ouverte ; les dépenses sont négatives.';
+
+  @override
+  String get rulePatternHintText => 'CARREFOUR';
+
+  @override
+  String get rulePatternHintRegex => '^CB .*CARREFOUR';
+
+  @override
+  String get rulePatternHintRange => '-10000:-5000';
+
+  @override
+  String get ruleFormCategoryLabel => 'Catégorie attribuée';
+
+  @override
+  String get ruleFormCategoryNone => 'Choisir une catégorie';
+
+  @override
+  String get ruleFormCategoryRequired =>
+      'Choisissez la catégorie que cette règle attribue.';
+
+  @override
+  String get ruleFormEnabledLabel => 'Règle active';
+
+  @override
+  String get ruleFormCancel => 'Annuler';
+
+  @override
+  String get ruleFormSave => 'Enregistrer';
+
+  @override
+  String get ruleFormDelete => 'Supprimer';
+
+  @override
+  String get rulePreviewLoading =>
+      'Recherche des transactions correspondantes…';
+
+  @override
+  String rulePreviewCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Correspond à $count transactions existantes.',
+      one: 'Correspond à $count transaction existante.',
+      zero: 'Ne correspond à aucune transaction existante.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String rulePreviewCountWithSample(int count, String sample, String date) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          'Correspond à $count transactions existantes — dont « $sample » du $date.',
+      one: 'Correspond à $count transaction existante — « $sample » du $date.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get ruleErrorPatternInvalid =>
+      'Ce motif n\'est pas une expression régulière valide.';
+
+  @override
+  String get ruleErrorNotFound => 'Cette règle n\'existe plus.';
+
+  @override
+  String get ruleErrorCategoryNotFound => 'La catégorie visée n\'existe plus.';
+
+  @override
+  String get ruleErrorValidation =>
+      'Ces informations ne sont pas valides. Vérifiez le motif et la priorité.';
+
+  @override
+  String get ruleErrorGeneric => 'Une erreur est survenue. Veuillez réessayer.';
 }

@@ -4,15 +4,19 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/l10n/category_display.dart';
 import '../../../core/theme/tokens.dart';
 import '../../../core/widgets/app_card.dart';
+import '../../../core/widgets/app_segmented.dart';
 import '../../../core/widgets/primary_button.dart';
 import '../../../core/widgets/state_views.dart';
 import '../../../l10n/app_localizations.dart';
+import '../../rules/presentation/rules_view.dart';
 import '../application/categories_controller.dart';
 import '../domain/category.dart';
 import 'category_error_localizer.dart';
 import 'category_form_modal.dart';
 import 'category_row.dart';
 
+/// The two-view management panel: the category tree, and the priority-ordered
+/// rules that fill it in automatically (`docs/design/08-categories-rules.md`).
 class CategoriesScreen extends ConsumerWidget {
   const CategoriesScreen({super.key});
 
@@ -21,7 +25,7 @@ class CategoriesScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context)!;
-    final tree = ref.watch(categoryTreeProvider);
+    final view = ref.watch(categoriesViewProvider);
 
     return Padding(
       key: const Key('screen-categories'),
@@ -29,7 +33,60 @@ class CategoriesScreen extends ConsumerWidget {
         horizontal: AppSpacing.contentX,
         vertical: AppSpacing.contentY,
       ),
-      child: switch (tree) {
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Row(
+            children: [
+              SizedBox(
+                width: 300,
+                child: AppSegmented<CategoriesView>(
+                  key: const Key('categoriesViewSwitch'),
+                  value: view,
+                  onChanged: (value) =>
+                      ref.read(categoriesViewProvider.notifier).set(value),
+                  segments: [
+                    AppSegment(
+                      key: const Key('categoriesViewSegment'),
+                      value: CategoriesView.categories,
+                      label: l10n.categoriesTabCategories,
+                    ),
+                    AppSegment(
+                      key: const Key('rulesViewSegment'),
+                      value: CategoriesView.rules,
+                      label: l10n.categoriesTabRules,
+                    ),
+                  ],
+                ),
+              ),
+              if (view == CategoriesView.rules) ...[
+                const SizedBox(width: AppSpacing.lg),
+                const Expanded(child: RulesViewHeaderActions()),
+              ],
+            ],
+          ),
+          const SizedBox(height: AppSpacing.md),
+          Expanded(
+            child: switch (view) {
+              CategoriesView.categories => const _CategoriesView(),
+              CategoriesView.rules => const RulesView(),
+            },
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _CategoriesView extends ConsumerWidget {
+  const _CategoriesView();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
+    final tree = ref.watch(categoryTreeProvider);
+
+    return switch (tree) {
         AsyncData(:final value) when value.isEmpty => EmptyStateView(
           key: const Key('categoriesEmptyState'),
           icon: Icons.donut_small_outlined,
@@ -56,8 +113,7 @@ class CategoriesScreen extends ConsumerWidget {
           padding: EdgeInsets.only(top: 24),
           child: SkeletonList(itemHeight: 41),
         ),
-      },
-    );
+    };
   }
 }
 

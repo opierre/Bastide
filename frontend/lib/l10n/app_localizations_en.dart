@@ -1123,4 +1123,197 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get categoryErrorGeneric => 'Something went wrong. Please try again.';
+
+  @override
+  String get categoriesTabCategories => 'Categories';
+
+  @override
+  String get categoriesTabRules => 'Rules';
+
+  @override
+  String get rulesAddButton => 'New rule';
+
+  @override
+  String get rulesPriorityNote =>
+      'Evaluated in priority order — a rule never replaces a category you chose yourself.';
+
+  @override
+  String get rulesApplyButton => 'Run the rules';
+
+  @override
+  String get rulesApplyRunning => 'Running…';
+
+  @override
+  String rulesApplyToastTitle(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count transactions recategorized',
+      one: '$count transaction recategorized',
+      zero: 'No transactions recategorized',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get rulesApplyToastBody =>
+      'The categories you chose yourself were left untouched.';
+
+  @override
+  String get rulesApplyFailed => 'The rule run failed';
+
+  @override
+  String get rulesReorderFailed => 'The new order could not be saved';
+
+  @override
+  String get rulesToggleFailed => 'The rule could not be changed';
+
+  @override
+  String get rulesRetry => 'Try again';
+
+  @override
+  String get rulesEmptyTitle => 'Automate your sorting';
+
+  @override
+  String get rulesEmptyBody =>
+      'A rule recognizes a label — “CARREFOUR” — and applies its category to every matching transaction, today and on every import after.';
+
+  @override
+  String get ruleToggleSemantics => 'Enable rule';
+
+  @override
+  String get ruleTargetMissing => 'Category missing';
+
+  @override
+  String get ruleFieldDescription => 'Label';
+
+  @override
+  String get ruleFieldMerchant => 'Merchant';
+
+  @override
+  String get ruleFieldAmount => 'Amount';
+
+  @override
+  String get ruleConditionContains => 'contains';
+
+  @override
+  String get ruleConditionEquals => 'equals';
+
+  @override
+  String get ruleConditionRegex => 'regex';
+
+  @override
+  String get ruleConditionRange => 'range';
+
+  @override
+  String get ruleFormCreateTitle => 'New rule';
+
+  @override
+  String get ruleFormEditTitle => 'Edit rule';
+
+  @override
+  String get ruleFormFieldLabel => 'Field';
+
+  @override
+  String get ruleFormConditionLabel => 'Condition';
+
+  @override
+  String get ruleFormPriorityLabel => 'Priority';
+
+  @override
+  String get ruleFormPriorityInvalid => 'Enter a priority of at least 1.';
+
+  @override
+  String get ruleFormPatternLabel => 'Pattern';
+
+  @override
+  String get ruleFormPatternRequired => 'Enter what the rule should recognize.';
+
+  @override
+  String get rulePatternHelperText =>
+      'Case-insensitive search in the chosen field.';
+
+  @override
+  String get rulePatternHelperRegex =>
+      'Regular expression, case-sensitive. Tested live below.';
+
+  @override
+  String get rulePatternHelperRange =>
+      'Amount range in cents, “min:max”. Leave one side empty for an open bound; expenses are negative.';
+
+  @override
+  String get rulePatternHintText => 'CARREFOUR';
+
+  @override
+  String get rulePatternHintRegex => '^CB .*CARREFOUR';
+
+  @override
+  String get rulePatternHintRange => '-10000:-5000';
+
+  @override
+  String get ruleFormCategoryLabel => 'Category assigned';
+
+  @override
+  String get ruleFormCategoryNone => 'Choose a category';
+
+  @override
+  String get ruleFormCategoryRequired =>
+      'Choose the category this rule assigns.';
+
+  @override
+  String get ruleFormEnabledLabel => 'Rule active';
+
+  @override
+  String get ruleFormCancel => 'Cancel';
+
+  @override
+  String get ruleFormSave => 'Save';
+
+  @override
+  String get ruleFormDelete => 'Delete';
+
+  @override
+  String get rulePreviewLoading => 'Looking for matching transactions…';
+
+  @override
+  String rulePreviewCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Matches $count existing transactions.',
+      one: 'Matches $count existing transaction.',
+      zero: 'Matches no existing transaction.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String rulePreviewCountWithSample(int count, String sample, String date) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          'Matches $count existing transactions — including “$sample” of $date.',
+      one: 'Matches $count existing transaction — “$sample” of $date.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get ruleErrorPatternInvalid =>
+      'That pattern isn\'t a valid regular expression.';
+
+  @override
+  String get ruleErrorNotFound => 'That rule no longer exists.';
+
+  @override
+  String get ruleErrorCategoryNotFound =>
+      'The target category no longer exists.';
+
+  @override
+  String get ruleErrorValidation =>
+      'That information isn\'t valid. Check the pattern and the priority.';
+
+  @override
+  String get ruleErrorGeneric => 'Something went wrong. Please try again.';
 }

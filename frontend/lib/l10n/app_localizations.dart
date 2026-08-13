@@ -2023,6 +2023,318 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Une erreur est survenue. Veuillez réessayer.'**
   String get categoryErrorGeneric;
+
+  /// Left segment of the panel's view switch.
+  ///
+  /// In fr, this message translates to:
+  /// **'Catégories'**
+  String get categoriesTabCategories;
+
+  /// Right segment of the panel's view switch.
+  ///
+  /// In fr, this message translates to:
+  /// **'Règles'**
+  String get categoriesTabRules;
+
+  /// Top-bar primary button while the rules view is showing.
+  ///
+  /// In fr, this message translates to:
+  /// **'Nouvelle règle'**
+  String get rulesAddButton;
+
+  /// Note beside the view switch on the rules view, stating both how rules are ordered and what they will never overwrite.
+  ///
+  /// In fr, this message translates to:
+  /// **'Évaluées dans l\'ordre de priorité — une règle ne remplace jamais une catégorie choisie manuellement.'**
+  String get rulesPriorityNote;
+
+  /// Secondary action re-running the rules over existing transactions.
+  ///
+  /// In fr, this message translates to:
+  /// **'Exécuter les règles'**
+  String get rulesApplyButton;
+
+  /// Label of the run action while the run is in flight.
+  ///
+  /// In fr, this message translates to:
+  /// **'Exécution…'**
+  String get rulesApplyRunning;
+
+  /// First line of the toast after a rule run: how many transactions changed category.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, =0{Aucune transaction recatégorisée} one{{count} transaction recatégorisée} other{{count} transactions recatégorisées}}'**
+  String rulesApplyToastTitle(int count);
+
+  /// Second line of the rule-run toast. Answers the question the count alone raises.
+  ///
+  /// In fr, this message translates to:
+  /// **'Vos catégories choisies manuellement n\'ont pas été modifiées.'**
+  String get rulesApplyToastBody;
+
+  /// Toast headline when the rule run itself failed.
+  ///
+  /// In fr, this message translates to:
+  /// **'L\'exécution des règles a échoué'**
+  String get rulesApplyFailed;
+
+  /// Toast headline when persisting a drag-reorder failed and the previous order was restored.
+  ///
+  /// In fr, this message translates to:
+  /// **'L\'ordre n\'a pas pu être enregistré'**
+  String get rulesReorderFailed;
+
+  /// Toast headline when enabling or disabling a rule failed and the switch was put back.
+  ///
+  /// In fr, this message translates to:
+  /// **'La règle n\'a pas pu être modifiée'**
+  String get rulesToggleFailed;
+
+  /// Retry button shown when the rules list fails to load.
+  ///
+  /// In fr, this message translates to:
+  /// **'Réessayer'**
+  String get rulesRetry;
+
+  /// Heading of the rules empty state.
+  ///
+  /// In fr, this message translates to:
+  /// **'Automatisez votre classement'**
+  String get rulesEmptyTitle;
+
+  /// Body of the rules empty state, explaining what a rule does before asking the user to write one.
+  ///
+  /// In fr, this message translates to:
+  /// **'Une règle reconnaît un libellé — « CARREFOUR » — et attribue sa catégorie à chaque transaction correspondante, aujourd\'hui et aux prochains imports.'**
+  String get rulesEmptyBody;
+
+  /// Accessible label of the enable switch on a rule row.
+  ///
+  /// In fr, this message translates to:
+  /// **'Activer la règle'**
+  String get ruleToggleSemantics;
+
+  /// Chip shown when a rule points at a category that no longer exists.
+  ///
+  /// In fr, this message translates to:
+  /// **'Catégorie introuvable'**
+  String get ruleTargetMissing;
+
+  /// Rule match field: the cleaned transaction description.
+  ///
+  /// In fr, this message translates to:
+  /// **'Libellé'**
+  String get ruleFieldDescription;
+
+  /// Rule match field: the extracted merchant name.
+  ///
+  /// In fr, this message translates to:
+  /// **'Commerçant'**
+  String get ruleFieldMerchant;
+
+  /// Rule match field: the transaction amount.
+  ///
+  /// In fr, this message translates to:
+  /// **'Montant'**
+  String get ruleFieldAmount;
+
+  /// Rule condition badge: substring match.
+  ///
+  /// In fr, this message translates to:
+  /// **'contient'**
+  String get ruleConditionContains;
+
+  /// Rule condition badge: exact match.
+  ///
+  /// In fr, this message translates to:
+  /// **'égal à'**
+  String get ruleConditionEquals;
+
+  /// Rule condition badge: regular expression match.
+  ///
+  /// In fr, this message translates to:
+  /// **'regex'**
+  String get ruleConditionRegex;
+
+  /// Rule condition badge: amount range match.
+  ///
+  /// In fr, this message translates to:
+  /// **'plage'**
+  String get ruleConditionRange;
+
+  /// Title of the rule editor when creating.
+  ///
+  /// In fr, this message translates to:
+  /// **'Nouvelle règle'**
+  String get ruleFormCreateTitle;
+
+  /// Title of the rule editor when editing.
+  ///
+  /// In fr, this message translates to:
+  /// **'Modifier la règle'**
+  String get ruleFormEditTitle;
+
+  /// Label of the rule editor's match-field select.
+  ///
+  /// In fr, this message translates to:
+  /// **'Champ'**
+  String get ruleFormFieldLabel;
+
+  /// Label of the rule editor's condition select.
+  ///
+  /// In fr, this message translates to:
+  /// **'Condition'**
+  String get ruleFormConditionLabel;
+
+  /// Label of the rule editor's priority field. Lower runs first.
+  ///
+  /// In fr, this message translates to:
+  /// **'Priorité'**
+  String get ruleFormPriorityLabel;
+
+  /// Validation message for a missing or non-positive priority.
+  ///
+  /// In fr, this message translates to:
+  /// **'Indiquez une priorité d\'au moins 1.'**
+  String get ruleFormPriorityInvalid;
+
+  /// Label of the rule editor's pattern field.
+  ///
+  /// In fr, this message translates to:
+  /// **'Motif'**
+  String get ruleFormPatternLabel;
+
+  /// Validation message when the pattern is left empty.
+  ///
+  /// In fr, this message translates to:
+  /// **'Indiquez ce que la règle doit reconnaître.'**
+  String get ruleFormPatternRequired;
+
+  /// Helper under the pattern field for the contains and equals conditions.
+  ///
+  /// In fr, this message translates to:
+  /// **'Recherche insensible à la casse dans le champ choisi.'**
+  String get rulePatternHelperText;
+
+  /// Helper under the pattern field for the regex condition.
+  ///
+  /// In fr, this message translates to:
+  /// **'Expression régulière, sensible à la casse. Testée en direct ci-dessous.'**
+  String get rulePatternHelperRegex;
+
+  /// Helper under the pattern field for the range condition. Names the unit and the sign, both of which the user cannot guess.
+  ///
+  /// In fr, this message translates to:
+  /// **'Plage de montants en centimes, « min:max ». Laissez un côté vide pour une borne ouverte ; les dépenses sont négatives.'**
+  String get rulePatternHelperRange;
+
+  /// Placeholder example in the pattern field for a text condition.
+  ///
+  /// In fr, this message translates to:
+  /// **'CARREFOUR'**
+  String get rulePatternHintText;
+
+  /// Placeholder example in the pattern field for a regex condition.
+  ///
+  /// In fr, this message translates to:
+  /// **'^CB .*CARREFOUR'**
+  String get rulePatternHintRegex;
+
+  /// Placeholder example in the pattern field for a range condition.
+  ///
+  /// In fr, this message translates to:
+  /// **'-10000:-5000'**
+  String get rulePatternHintRange;
+
+  /// Label of the rule editor's target-category select.
+  ///
+  /// In fr, this message translates to:
+  /// **'Catégorie attribuée'**
+  String get ruleFormCategoryLabel;
+
+  /// Empty option of the target-category select.
+  ///
+  /// In fr, this message translates to:
+  /// **'Choisir une catégorie'**
+  String get ruleFormCategoryNone;
+
+  /// Error shown when saving a rule with no target category.
+  ///
+  /// In fr, this message translates to:
+  /// **'Choisissez la catégorie que cette règle attribue.'**
+  String get ruleFormCategoryRequired;
+
+  /// Label beside the rule editor's enable switch.
+  ///
+  /// In fr, this message translates to:
+  /// **'Règle active'**
+  String get ruleFormEnabledLabel;
+
+  /// Cancel button of the rule editor.
+  ///
+  /// In fr, this message translates to:
+  /// **'Annuler'**
+  String get ruleFormCancel;
+
+  /// Submit button of the rule editor.
+  ///
+  /// In fr, this message translates to:
+  /// **'Enregistrer'**
+  String get ruleFormSave;
+
+  /// Delete action in the rule editor's footer, shown only when editing.
+  ///
+  /// In fr, this message translates to:
+  /// **'Supprimer'**
+  String get ruleFormDelete;
+
+  /// Info banner shown while the match preview is in flight.
+  ///
+  /// In fr, this message translates to:
+  /// **'Recherche des transactions correspondantes…'**
+  String get rulePreviewLoading;
+
+  /// Match-preview banner when the backend returned no example to quote.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, =0{Ne correspond à aucune transaction existante.} one{Correspond à {count} transaction existante.} other{Correspond à {count} transactions existantes.}}'**
+  String rulePreviewCount(int count);
+
+  /// Match-preview banner naming one of the matched transactions, so the user can tell whether the rule caught what they meant.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, one{Correspond à {count} transaction existante — « {sample} » du {date}.} other{Correspond à {count} transactions existantes — dont « {sample} » du {date}.}}'**
+  String rulePreviewCountWithSample(int count, String sample, String date);
+
+  /// Localized message for RULE_PATTERN_INVALID. Rendered on the pattern field, never as a match count of zero.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ce motif n\'est pas une expression régulière valide.'**
+  String get ruleErrorPatternInvalid;
+
+  /// Localized message for the backend's RULE_NOT_FOUND code.
+  ///
+  /// In fr, this message translates to:
+  /// **'Cette règle n\'existe plus.'**
+  String get ruleErrorNotFound;
+
+  /// Localized message when a rule targets a category the backend can no longer resolve.
+  ///
+  /// In fr, this message translates to:
+  /// **'La catégorie visée n\'existe plus.'**
+  String get ruleErrorCategoryNotFound;
+
+  /// Localized message for a VALIDATION_ERROR on a rule write.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ces informations ne sont pas valides. Vérifiez le motif et la priorité.'**
+  String get ruleErrorValidation;
+
+  /// Fallback message for unrecognized or network errors on the rules view.
+  ///
+  /// In fr, this message translates to:
+  /// **'Une erreur est survenue. Veuillez réessayer.'**
+  String get ruleErrorGeneric;
 }
 
 class _AppLocalizationsDelegate
