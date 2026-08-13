@@ -1010,6 +1010,17 @@ class AppLocalizationsEn extends AppLocalizations {
   String get categoriesRetry => 'Try again';
 
   @override
+  String categoriesSpendCaption(DateTime month) {
+    final intl.DateFormat monthDateFormat = intl.DateFormat.yMMMM(localeName);
+    final String monthString = monthDateFormat.format(month);
+
+    return 'Spending in $monthString';
+  }
+
+  @override
+  String get categorySpendNone => '—';
+
+  @override
   String get categoryBadgeSystem => 'System';
 
   @override

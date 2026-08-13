@@ -1304,6 +1304,20 @@
   "@categoriesRetry": {
     "description": "Retry button shown when the category catalog fails to load."
   },
+  "categoriesSpendCaption": "Dépenses de {month}",
+  "@categoriesSpendCaption": {
+    "description": "Caption above the category list, naming the month the spend-share bars and amounts cover. The panel has no month picker, and the month is the latest one with data rather than necessarily the current one. French keeps the month name lowercase after « de ».",
+    "placeholders": {
+      "month": {
+        "type": "DateTime",
+        "format": "yMMMM"
+      }
+    }
+  },
+  "categorySpendNone": "—",
+  "@categorySpendNone": {
+    "description": "Em dash shown in a category row's amount column when nothing was spent in that category this month. A dash rather than « 0,00 € », which would read as a measurement of zero instead of an absence of rows."
+  },
   "categoryBadgeSystem": "Système",
   "@categoryBadgeSystem": {
     "description": "Neutral badge on a seeded, read-only category row."

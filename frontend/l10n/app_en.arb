@@ -327,6 +327,8 @@
   "categoriesEmptyTitle": "No categories yet",
   "categoriesEmptyBody": "Categories sort your spending. Create one to get started.",
   "categoriesRetry": "Try again",
+  "categoriesSpendCaption": "Spending in {month}",
+  "categorySpendNone": "—",
   "categoryBadgeSystem": "System",
   "categoryBadgeCustom": "Custom",
   "categorySystemLockedTooltip": "System category: it cannot be edited or deleted.",

@@ -1808,6 +1808,18 @@ abstract class AppLocalizations {
   /// **'Réessayer'**
   String get categoriesRetry;
 
+  /// Caption above the category list, naming the month the spend-share bars and amounts cover. The panel has no month picker, and the month is the latest one with data rather than necessarily the current one. French keeps the month name lowercase after « de ».
+  ///
+  /// In fr, this message translates to:
+  /// **'Dépenses de {month}'**
+  String categoriesSpendCaption(DateTime month);
+
+  /// Em dash shown in a category row's amount column when nothing was spent in that category this month. A dash rather than « 0,00 € », which would read as a measurement of zero instead of an absence of rows.
+  ///
+  /// In fr, this message translates to:
+  /// **'—'**
+  String get categorySpendNone;
+
   /// Neutral badge on a seeded, read-only category row.
   ///
   /// In fr, this message translates to:

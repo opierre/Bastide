@@ -10,7 +10,9 @@ import '../../../core/widgets/state_views.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../rules/presentation/rules_view.dart';
 import '../application/categories_controller.dart';
+import '../application/category_spend_controller.dart';
 import '../domain/category.dart';
+import '../domain/category_spend.dart';
 import 'category_error_localizer.dart';
 import 'category_form_modal.dart';
 import 'category_row.dart';
@@ -126,30 +128,59 @@ class _CategoryTreeCard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
+    final spend = ref.watch(categorySpendProvider).value;
+
     return AppCard(
       padding: const EdgeInsets.symmetric(
         horizontal: AppSpacing.cardPadding,
         vertical: AppSpacing.sm,
       ),
-      child: ListView.separated(
-        key: const Key('categoriesList'),
-        shrinkWrap: true,
-        itemCount: nodes.length,
-        separatorBuilder: (_, _) => const Divider(
-          height: 1,
-          thickness: 1,
-          color: AppColors.borderSubtle,
-        ),
-        itemBuilder: (context, index) => _CategoryGroup(node: nodes[index]),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          // Which month the amounts and shares are for. Frame 08 draws the
+          // columns without a caption, but the panel has no month picker of its
+          // own, so without this line the figures are an amount of nothing in
+          // particular — and the month is not always the calendar's current one.
+          if (spend != null)
+            Padding(
+              padding: const EdgeInsets.only(bottom: AppSpacing.xs),
+              child: Text(
+                l10n.categoriesSpendCaption(spend.month),
+                key: const Key('categoriesSpendCaption'),
+                style: Theme.of(
+                  context,
+                ).textTheme.bodySmall?.copyWith(color: AppColors.textSecondary),
+              ),
+            ),
+          ListView.separated(
+            key: const Key('categoriesList'),
+            shrinkWrap: true,
+            itemCount: nodes.length,
+            separatorBuilder: (_, _) => const Divider(
+              height: 1,
+              thickness: 1,
+              color: AppColors.borderSubtle,
+            ),
+            itemBuilder: (context, index) => _CategoryGroup(node: nodes[index], spend: spend),
+          ),
+        ],
       ),
     );
   }
 }
 
 class _CategoryGroup extends ConsumerWidget {
-  const _CategoryGroup({required this.node});
+  const _CategoryGroup({required this.node, required this.spend});
 
   final CategoryNode node;
+
+  /// The month's spend, or `null` while it is loading — or after it failed. A
+  /// summary the sidecar can't answer costs the panel its bars and nothing
+  /// else: managing categories is what this screen is for, and it stays fully
+  /// usable without the figures.
+  final CategorySpendView? spend;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -159,6 +190,8 @@ class _CategoryGroup extends ConsumerWidget {
         CategoryRow(
           key: Key('categoryRow-${node.category.id}'),
           category: node.category,
+          spend: spend?.forCategory(node.category.id),
+          currency: spend?.currency,
           onEdit: node.category.isSystem
               ? null
               : () => showCategoryForm(context, initial: node.category),
@@ -170,6 +203,8 @@ class _CategoryGroup extends ConsumerWidget {
           CategorySubRow(
             key: Key('categoryRow-${child.id}'),
             category: child,
+            spend: spend?.forCategory(child.id),
+            currency: spend?.currency,
             onEdit: child.isSystem ? null : () => showCategoryForm(context, initial: child),
             onDelete: child.isSystem ? null : () => _confirmDelete(context, ref, child),
           ),

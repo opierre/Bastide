@@ -1019,6 +1019,17 @@ class AppLocalizationsFr extends AppLocalizations {
   String get categoriesRetry => 'Réessayer';
 
   @override
+  String categoriesSpendCaption(DateTime month) {
+    final intl.DateFormat monthDateFormat = intl.DateFormat.yMMMM(localeName);
+    final String monthString = monthDateFormat.format(month);
+
+    return 'Dépenses de $monthString';
+  }
+
+  @override
+  String get categorySpendNone => '—';
+
+  @override
   String get categoryBadgeSystem => 'Système';
 
   @override
