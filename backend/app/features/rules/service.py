@@ -1,21 +1,39 @@
 """Business logic for categorization rule CRUD and re-applying the rule engine."""
 
-from sqlalchemy import select
-from sqlalchemy.orm import Session
+import re
 
-from app.core.errors import NotFoundError
+from sqlalchemy import Select, select
+from sqlalchemy.orm import Session, selectinload
+
+from app.core.errors import NotFoundError, ValidationError
 from app.features.accounts.models import Account
-from app.features.rules.engine import match_category
+from app.features.rules.engine import match_category, matches
 from app.features.rules.models import CategorizationRule
 from app.features.rules.repository import RuleRepository
-from app.features.rules.schemas import RuleCreate, RuleUpdate
+from app.features.rules.schemas import (
+    MatchField,
+    MatchType,
+    RuleCreate,
+    RulePreviewRequest,
+    RuleUpdate,
+)
 from app.features.transactions.models import Transaction
+
+#: Examples shown next to a preview's count. Enough to recognise what the rule caught, few
+#: enough that the modal stays a modal.
+PREVIEW_SAMPLE_LIMIT = 3
 
 
 class RuleNotFoundError(NotFoundError):
     """Raised when a rule doesn't exist or doesn't belong to the caller."""
 
     code = "RULE_NOT_FOUND"
+
+
+class RulePatternInvalidError(ValidationError):
+    """Raised when a `regex` pattern doesn't compile; carries the compile error in `details`."""
+
+    code = "RULE_PATTERN_INVALID"
 
 
 class RuleService:
@@ -91,7 +109,7 @@ class RuleService:
         Returns the number of transactions actually changed.
         """
         rules = self._repository.list_enabled_by_user(user_id)
-        transactions = self._transactions_for_user(user_id, account_id)
+        transactions = list(self._db.scalars(self._transactions_query(user_id, account_id)))
 
         recategorized_count = 0
         for transaction in transactions:
@@ -118,7 +136,56 @@ class RuleService:
         self._db.commit()
         return recategorized_count
 
-    def _transactions_for_user(self, user_id: str, account_id: str | None) -> list[Transaction]:
+    def preview(self, user_id: str, data: RulePreviewRequest) -> tuple[int, list[Transaction]]:
+        """Count the caller's transactions an unsaved rule would match, with a few examples.
+
+        Evaluated by the rule engine itself, so the count is exactly the set of rows the saved
+        rule would match. Note that a subsequent apply may change fewer rows than this: it
+        leaves rows already carrying `source=user` alone, and rows this rule's category is
+        already on need no change. Writes nothing.
+
+        Raises:
+            RulePatternInvalidError: `match_type` is `regex` and the pattern doesn't compile.
+        """
+        candidate = self._candidate_rule(user_id, data.match_field, data.match_type, data.pattern)
+        query = (
+            self._transactions_query(user_id, data.account_id)
+            .options(selectinload(Transaction.category))
+            .order_by(Transaction.booked_date.desc(), Transaction.id.desc())
+        )
+
+        match_count = 0
+        samples: list[Transaction] = []
+        for transaction in self._db.scalars(query):
+            if not matches(transaction, candidate):
+                continue
+            match_count += 1
+            if len(samples) < PREVIEW_SAMPLE_LIMIT:
+                samples.append(transaction)
+        return match_count, samples
+
+    def _candidate_rule(
+        self, user_id: str, match_field: MatchField, match_type: MatchType, pattern: str
+    ) -> CategorizationRule:
+        """An in-memory rule for the engine to evaluate. Never added to the session.
+
+        `category_id` is left blank: the engine's match predicate doesn't read it, and a preview
+        has no category to speak of.
+        """
+        _validate_pattern(match_type, pattern)
+        return CategorizationRule(
+            user_id=user_id,
+            priority=0,
+            match_field=match_field,
+            match_type=match_type,
+            pattern=pattern,
+            category_id="",
+            enabled=True,
+        )
+
+    def _transactions_query(
+        self, user_id: str, account_id: str | None
+    ) -> Select[tuple[Transaction]]:
         query = (
             select(Transaction)
             .join(Account, Account.id == Transaction.account_id)
@@ -126,4 +193,22 @@ class RuleService:
         )
         if account_id is not None:
             query = query.where(Transaction.account_id == account_id)
-        return list(self._db.scalars(query))
+        return query
+
+
+def _validate_pattern(match_type: MatchType, pattern: str) -> None:
+    """Reject a `regex` pattern that doesn't compile.
+
+    Raises:
+        RulePatternInvalidError: the pattern is an invalid regular expression. The user is
+            writing it in a modal, so the compile error travels in `details`.
+    """
+    if match_type != "regex":
+        return
+    try:
+        re.compile(pattern)
+    except re.error as exc:
+        raise RulePatternInvalidError(
+            "The pattern is not a valid regular expression.",
+            {"pattern": pattern, "error": str(exc)},
+        ) from exc

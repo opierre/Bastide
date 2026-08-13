@@ -5,6 +5,8 @@ from typing import Literal
 
 from pydantic import BaseModel, Field
 
+from app.features.transactions.schemas import TransactionRead
+
 MatchField = Literal["description_clean", "merchant", "amount"]
 MatchType = Literal["contains", "equals", "regex", "range"]
 
@@ -54,3 +56,19 @@ class RuleApplyResult(BaseModel):
     """Result of a rule apply run."""
 
     recategorized_count: int
+
+
+class RulePreviewRequest(BaseModel):
+    """An unsaved rule condition to count against the caller's existing transactions."""
+
+    match_field: MatchField
+    match_type: MatchType
+    pattern: str = Field(min_length=1, max_length=255)
+    account_id: str | None = None
+
+
+class RulePreviewResult(BaseModel):
+    """How many transactions a condition matches, with a few of them to show as examples."""
+
+    match_count: int
+    samples: list[TransactionRead]

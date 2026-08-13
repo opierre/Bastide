@@ -13,12 +13,18 @@ def match_category(transaction: Transaction, rules: Sequence[CategorizationRule]
     Returns None if no enabled rule matches (the caller leaves the transaction uncategorized).
     """
     for rule in sorted((r for r in rules if r.enabled), key=lambda r: r.priority):
-        if _matches(transaction, rule):
+        if matches(transaction, rule):
             return rule.category_id
     return None
 
 
-def _matches(transaction: Transaction, rule: CategorizationRule) -> bool:
+def matches(transaction: Transaction, rule: CategorizationRule) -> bool:
+    """True if ``rule``'s condition holds for ``transaction``, ignoring priority and `enabled`.
+
+    Public so the match preview can evaluate an unsaved rule through the very code that will
+    later apply it: a `regex` or `range` condition has no `LIKE` equivalent, and a preview that
+    disagreed with the rule it previews would be worse than none.
+    """
     if rule.match_type == "range":
         return _matches_range(transaction.amount_minor, rule.pattern)
 

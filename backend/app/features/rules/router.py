@@ -14,10 +14,13 @@ from app.features.rules.schemas import (
     RuleApplyRequest,
     RuleApplyResult,
     RuleCreate,
+    RulePreviewRequest,
+    RulePreviewResult,
     RuleRead,
     RuleUpdate,
 )
 from app.features.rules.service import RuleService
+from app.features.transactions.schemas import TransactionRead
 
 router = APIRouter(prefix="/api/v1/rules", tags=["rules"])
 
@@ -56,6 +59,20 @@ async def create_rule(
 ) -> RuleRead:
     """Create a new categorization rule."""
     return _to_read(service.create(user.id, payload))
+
+
+@router.post("/preview", response_model=RulePreviewResult)
+async def preview_rule(
+    payload: RulePreviewRequest,
+    service: Annotated[RuleService, Depends(_service)],
+    user: Annotated[User, Depends(get_current_user)],
+) -> RulePreviewResult:
+    """Count the transactions an unsaved rule would match, with up to three examples."""
+    match_count, samples = service.preview(user.id, payload)
+    return RulePreviewResult(
+        match_count=match_count,
+        samples=[TransactionRead.model_validate(sample) for sample in samples],
+    )
 
 
 @router.patch("/{rule_id}", response_model=RuleRead)
