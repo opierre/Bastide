@@ -995,4 +995,132 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get dashboardNextYear => 'Next year';
+
+  @override
+  String get categoriesAddButton => 'New category';
+
+  @override
+  String get categoriesEmptyTitle => 'No categories yet';
+
+  @override
+  String get categoriesEmptyBody =>
+      'Categories sort your spending. Create one to get started.';
+
+  @override
+  String get categoriesRetry => 'Try again';
+
+  @override
+  String get categoryBadgeSystem => 'System';
+
+  @override
+  String get categoryBadgeCustom => 'Custom';
+
+  @override
+  String get categorySystemLockedTooltip =>
+      'System category: it cannot be edited or deleted.';
+
+  @override
+  String get categoryEdit => 'Edit';
+
+  @override
+  String get categoryDelete => 'Delete';
+
+  @override
+  String get categoryDeleteConfirmTitle => 'Delete this category?';
+
+  @override
+  String categoryDeleteConfirmBody(String name) {
+    return '“$name” and its subcategories will be deleted. The transactions in them become uncategorized again.';
+  }
+
+  @override
+  String get categoryFormCreateTitle => 'New category';
+
+  @override
+  String get categoryFormEditTitle => 'Edit category';
+
+  @override
+  String get categoryFormNameLabel => 'Name';
+
+  @override
+  String get categoryFormNameHint => 'Project savings';
+
+  @override
+  String get categoryFormNameRequired => 'Give this category a name.';
+
+  @override
+  String get categoryFormKindLabel => 'Kind';
+
+  @override
+  String get categoryFormKindHelper =>
+      'An expense leaves your accounts, income arrives in them, a transfer moves between them.';
+
+  @override
+  String get categoryFormParentLabel => 'Parent category';
+
+  @override
+  String get categoryFormParentNone => 'None (top-level category)';
+
+  @override
+  String get categoryFormIconLabel => 'Icon';
+
+  @override
+  String get categoryFormColorLabel => 'Color';
+
+  @override
+  String get categoryFormColorHelper =>
+      'The color follows the category everywhere: charts, legends and labels.';
+
+  @override
+  String get categoryFormCancel => 'Cancel';
+
+  @override
+  String get categoryFormSave => 'Save';
+
+  @override
+  String get categoryKindExpense => 'Expense';
+
+  @override
+  String get categoryKindIncome => 'Income';
+
+  @override
+  String get categoryKindTransfer => 'Transfer';
+
+  @override
+  String get categoryIconHousing => 'Housing';
+
+  @override
+  String get categoryIconFood => 'Food';
+
+  @override
+  String get categoryIconTransport => 'Transport';
+
+  @override
+  String get categoryIconLeisure => 'Leisure';
+
+  @override
+  String get categoryIconSubscriptions => 'Subscriptions';
+
+  @override
+  String get categoryIconHealth => 'Health';
+
+  @override
+  String get categoryIconIncome => 'Income';
+
+  @override
+  String get categoryIconSavings => 'Savings';
+
+  @override
+  String get categoryIconOther => 'Other';
+
+  @override
+  String get categoryErrorNotEditable =>
+      'This category belongs to the system: it cannot be edited or deleted.';
+
+  @override
+  String get categoryErrorValidation =>
+      'That information isn\'t valid. Check the name and the kind.';
+
+  @override
+  String get categoryErrorGeneric => 'Something went wrong. Please try again.';
 }

@@ -1004,4 +1004,133 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get dashboardNextYear => 'Année suivante';
+
+  @override
+  String get categoriesAddButton => 'Nouvelle catégorie';
+
+  @override
+  String get categoriesEmptyTitle => 'Aucune catégorie pour l\'instant';
+
+  @override
+  String get categoriesEmptyBody =>
+      'Les catégories classent vos dépenses. Créez-en une pour commencer.';
+
+  @override
+  String get categoriesRetry => 'Réessayer';
+
+  @override
+  String get categoryBadgeSystem => 'Système';
+
+  @override
+  String get categoryBadgeCustom => 'Personnalisée';
+
+  @override
+  String get categorySystemLockedTooltip =>
+      'Catégorie du système : elle ne peut pas être modifiée ni supprimée.';
+
+  @override
+  String get categoryEdit => 'Modifier';
+
+  @override
+  String get categoryDelete => 'Supprimer';
+
+  @override
+  String get categoryDeleteConfirmTitle => 'Supprimer cette catégorie ?';
+
+  @override
+  String categoryDeleteConfirmBody(String name) {
+    return '« $name » et ses sous-catégories seront supprimées. Les transactions concernées redeviendront non catégorisées.';
+  }
+
+  @override
+  String get categoryFormCreateTitle => 'Nouvelle catégorie';
+
+  @override
+  String get categoryFormEditTitle => 'Modifier la catégorie';
+
+  @override
+  String get categoryFormNameLabel => 'Nom';
+
+  @override
+  String get categoryFormNameHint => 'Épargne projet';
+
+  @override
+  String get categoryFormNameRequired => 'Donnez un nom à cette catégorie.';
+
+  @override
+  String get categoryFormKindLabel => 'Type';
+
+  @override
+  String get categoryFormKindHelper =>
+      'Une dépense sort de vos comptes, un revenu y entre, un transfert circule entre eux.';
+
+  @override
+  String get categoryFormParentLabel => 'Catégorie parente';
+
+  @override
+  String get categoryFormParentNone => 'Aucune (catégorie principale)';
+
+  @override
+  String get categoryFormIconLabel => 'Icône';
+
+  @override
+  String get categoryFormColorLabel => 'Couleur';
+
+  @override
+  String get categoryFormColorHelper =>
+      'La couleur suit la catégorie partout : graphiques, légendes et étiquettes.';
+
+  @override
+  String get categoryFormCancel => 'Annuler';
+
+  @override
+  String get categoryFormSave => 'Enregistrer';
+
+  @override
+  String get categoryKindExpense => 'Dépense';
+
+  @override
+  String get categoryKindIncome => 'Revenu';
+
+  @override
+  String get categoryKindTransfer => 'Transfert';
+
+  @override
+  String get categoryIconHousing => 'Logement';
+
+  @override
+  String get categoryIconFood => 'Alimentation';
+
+  @override
+  String get categoryIconTransport => 'Transport';
+
+  @override
+  String get categoryIconLeisure => 'Loisirs';
+
+  @override
+  String get categoryIconSubscriptions => 'Abonnements';
+
+  @override
+  String get categoryIconHealth => 'Santé';
+
+  @override
+  String get categoryIconIncome => 'Revenus';
+
+  @override
+  String get categoryIconSavings => 'Épargne';
+
+  @override
+  String get categoryIconOther => 'Autre';
+
+  @override
+  String get categoryErrorNotEditable =>
+      'Cette catégorie appartient au système : elle ne peut pas être modifiée ni supprimée.';
+
+  @override
+  String get categoryErrorValidation =>
+      'Ces informations ne sont pas valides. Vérifiez le nom et le type.';
+
+  @override
+  String get categoryErrorGeneric =>
+      'Une erreur est survenue. Veuillez réessayer.';
 }

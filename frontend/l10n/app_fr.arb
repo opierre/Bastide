@@ -1287,5 +1287,171 @@
   "dashboardNextYear": "Année suivante",
   "@dashboardNextYear": {
     "description": "Tooltip on the picker's forward-a-year step button."
+  },
+  "categoriesAddButton": "Nouvelle catégorie",
+  "@categoriesAddButton": {
+    "description": "Top-bar primary button on the categories panel, opening the create-category modal."
+  },
+  "categoriesEmptyTitle": "Aucune catégorie pour l'instant",
+  "@categoriesEmptyTitle": {
+    "description": "Heading of the categories empty state."
+  },
+  "categoriesEmptyBody": "Les catégories classent vos dépenses. Créez-en une pour commencer.",
+  "@categoriesEmptyBody": {
+    "description": "Reassuring line under the categories empty-state heading."
+  },
+  "categoriesRetry": "Réessayer",
+  "@categoriesRetry": {
+    "description": "Retry button shown when the category catalog fails to load."
+  },
+  "categoryBadgeSystem": "Système",
+  "@categoryBadgeSystem": {
+    "description": "Neutral badge on a seeded, read-only category row."
+  },
+  "categoryBadgeCustom": "Personnalisée",
+  "@categoryBadgeCustom": {
+    "description": "Iris-tinted badge on a category the user created."
+  },
+  "categorySystemLockedTooltip": "Catégorie du système : elle ne peut pas être modifiée ni supprimée.",
+  "@categorySystemLockedTooltip": {
+    "description": "Tooltip on the lock glyph of a system category row. States the refusal the API also enforces."
+  },
+  "categoryEdit": "Modifier",
+  "@categoryEdit": {
+    "description": "Tooltip on the ⋯ affordance of a user category row."
+  },
+  "categoryDelete": "Supprimer",
+  "@categoryDelete": {
+    "description": "Tooltip on the trash affordance of a user category row, and label of the delete confirmation button."
+  },
+  "categoryDeleteConfirmTitle": "Supprimer cette catégorie ?",
+  "@categoryDeleteConfirmTitle": {
+    "description": "Title of the delete-category confirmation dialog."
+  },
+  "categoryDeleteConfirmBody": "« {name} » et ses sous-catégories seront supprimées. Les transactions concernées redeviendront non catégorisées.",
+  "@categoryDeleteConfirmBody": {
+    "description": "Body of the delete-category confirmation. Names what else goes with it, since the deletion cascades.",
+    "placeholders": {
+      "name": {
+        "type": "String",
+        "example": "Épargne projet"
+      }
+    }
+  },
+  "categoryFormCreateTitle": "Nouvelle catégorie",
+  "@categoryFormCreateTitle": {
+    "description": "Title of the create-category modal."
+  },
+  "categoryFormEditTitle": "Modifier la catégorie",
+  "@categoryFormEditTitle": {
+    "description": "Title of the edit-category modal."
+  },
+  "categoryFormNameLabel": "Nom",
+  "@categoryFormNameLabel": {
+    "description": "Label of the category name field."
+  },
+  "categoryFormNameHint": "Épargne projet",
+  "@categoryFormNameHint": {
+    "description": "Placeholder example in the category name field."
+  },
+  "categoryFormNameRequired": "Donnez un nom à cette catégorie.",
+  "@categoryFormNameRequired": {
+    "description": "Validation message when the category name is left empty."
+  },
+  "categoryFormKindLabel": "Type",
+  "@categoryFormKindLabel": {
+    "description": "Label of the category kind select."
+  },
+  "categoryFormKindHelper": "Une dépense sort de vos comptes, un revenu y entre, un transfert circule entre eux.",
+  "@categoryFormKindHelper": {
+    "description": "Helper under the category kind select, explaining the three kinds in the user's own terms."
+  },
+  "categoryFormParentLabel": "Catégorie parente",
+  "@categoryFormParentLabel": {
+    "description": "Label of the parent-category select."
+  },
+  "categoryFormParentNone": "Aucune (catégorie principale)",
+  "@categoryFormParentNone": {
+    "description": "Option in the parent select for a top-level category."
+  },
+  "categoryFormIconLabel": "Icône",
+  "@categoryFormIconLabel": {
+    "description": "Label of the category icon select."
+  },
+  "categoryFormColorLabel": "Couleur",
+  "@categoryFormColorLabel": {
+    "description": "Label of the category colour picker."
+  },
+  "categoryFormColorHelper": "La couleur suit la catégorie partout : graphiques, légendes et étiquettes.",
+  "@categoryFormColorHelper": {
+    "description": "Helper under the colour picker, explaining that the hue is reused across the app."
+  },
+  "categoryFormCancel": "Annuler",
+  "@categoryFormCancel": {
+    "description": "Cancel button in the category modal and the delete confirmation."
+  },
+  "categoryFormSave": "Enregistrer",
+  "@categoryFormSave": {
+    "description": "Submit button of the category modal."
+  },
+  "categoryKindExpense": "Dépense",
+  "@categoryKindExpense": {
+    "description": "Category kind: money leaving the user's accounts."
+  },
+  "categoryKindIncome": "Revenu",
+  "@categoryKindIncome": {
+    "description": "Category kind: money arriving in the user's accounts."
+  },
+  "categoryKindTransfer": "Transfert",
+  "@categoryKindTransfer": {
+    "description": "Category kind: money moving between the user's own accounts."
+  },
+  "categoryIconHousing": "Logement",
+  "@categoryIconHousing": {
+    "description": "Icon choice in the category form: house glyph."
+  },
+  "categoryIconFood": "Alimentation",
+  "@categoryIconFood": {
+    "description": "Icon choice in the category form: bowl glyph."
+  },
+  "categoryIconTransport": "Transport",
+  "@categoryIconTransport": {
+    "description": "Icon choice in the category form: car glyph."
+  },
+  "categoryIconLeisure": "Loisirs",
+  "@categoryIconLeisure": {
+    "description": "Icon choice in the category form: star glyph."
+  },
+  "categoryIconSubscriptions": "Abonnements",
+  "@categoryIconSubscriptions": {
+    "description": "Icon choice in the category form: refresh glyph."
+  },
+  "categoryIconHealth": "Santé",
+  "@categoryIconHealth": {
+    "description": "Icon choice in the category form: cross glyph."
+  },
+  "categoryIconIncome": "Revenus",
+  "@categoryIconIncome": {
+    "description": "Icon choice in the category form: up-arrow glyph."
+  },
+  "categoryIconSavings": "Épargne",
+  "@categoryIconSavings": {
+    "description": "Icon choice in the category form: coin glyph."
+  },
+  "categoryIconOther": "Autre",
+  "@categoryIconOther": {
+    "description": "Icon choice in the category form: the neutral fallback glyph."
+  },
+  "categoryErrorNotEditable": "Cette catégorie appartient au système : elle ne peut pas être modifiée ni supprimée.",
+  "@categoryErrorNotEditable": {
+    "description": "Localized message for the backend's CATEGORY_NOT_FOUND code, which is also what a forced edit of a system category returns."
+  },
+  "categoryErrorValidation": "Ces informations ne sont pas valides. Vérifiez le nom et le type.",
+  "@categoryErrorValidation": {
+    "description": "Localized message for a VALIDATION_ERROR on a category write."
+  },
+  "categoryErrorGeneric": "Une erreur est survenue. Veuillez réessayer.",
+  "@categoryErrorGeneric": {
+    "description": "Fallback message for unrecognized or network errors on the categories panel."
   }
 }

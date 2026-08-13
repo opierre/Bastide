@@ -241,6 +241,9 @@ abstract final class AppSpacing {
 }
 
 abstract final class AppRadii {
+  /// Category swatch, stacked-bar cap (`docs/design/00` §Components).
+  static const xs = 4.0;
+
   static const sm = 8.0;
   static const monogram = 9.0;
   static const md = 12.0;

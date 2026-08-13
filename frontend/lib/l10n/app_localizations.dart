@@ -1783,6 +1783,246 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Année suivante'**
   String get dashboardNextYear;
+
+  /// Top-bar primary button on the categories panel, opening the create-category modal.
+  ///
+  /// In fr, this message translates to:
+  /// **'Nouvelle catégorie'**
+  String get categoriesAddButton;
+
+  /// Heading of the categories empty state.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucune catégorie pour l\'instant'**
+  String get categoriesEmptyTitle;
+
+  /// Reassuring line under the categories empty-state heading.
+  ///
+  /// In fr, this message translates to:
+  /// **'Les catégories classent vos dépenses. Créez-en une pour commencer.'**
+  String get categoriesEmptyBody;
+
+  /// Retry button shown when the category catalog fails to load.
+  ///
+  /// In fr, this message translates to:
+  /// **'Réessayer'**
+  String get categoriesRetry;
+
+  /// Neutral badge on a seeded, read-only category row.
+  ///
+  /// In fr, this message translates to:
+  /// **'Système'**
+  String get categoryBadgeSystem;
+
+  /// Iris-tinted badge on a category the user created.
+  ///
+  /// In fr, this message translates to:
+  /// **'Personnalisée'**
+  String get categoryBadgeCustom;
+
+  /// Tooltip on the lock glyph of a system category row. States the refusal the API also enforces.
+  ///
+  /// In fr, this message translates to:
+  /// **'Catégorie du système : elle ne peut pas être modifiée ni supprimée.'**
+  String get categorySystemLockedTooltip;
+
+  /// Tooltip on the ⋯ affordance of a user category row.
+  ///
+  /// In fr, this message translates to:
+  /// **'Modifier'**
+  String get categoryEdit;
+
+  /// Tooltip on the trash affordance of a user category row, and label of the delete confirmation button.
+  ///
+  /// In fr, this message translates to:
+  /// **'Supprimer'**
+  String get categoryDelete;
+
+  /// Title of the delete-category confirmation dialog.
+  ///
+  /// In fr, this message translates to:
+  /// **'Supprimer cette catégorie ?'**
+  String get categoryDeleteConfirmTitle;
+
+  /// Body of the delete-category confirmation. Names what else goes with it, since the deletion cascades.
+  ///
+  /// In fr, this message translates to:
+  /// **'« {name} » et ses sous-catégories seront supprimées. Les transactions concernées redeviendront non catégorisées.'**
+  String categoryDeleteConfirmBody(String name);
+
+  /// Title of the create-category modal.
+  ///
+  /// In fr, this message translates to:
+  /// **'Nouvelle catégorie'**
+  String get categoryFormCreateTitle;
+
+  /// Title of the edit-category modal.
+  ///
+  /// In fr, this message translates to:
+  /// **'Modifier la catégorie'**
+  String get categoryFormEditTitle;
+
+  /// Label of the category name field.
+  ///
+  /// In fr, this message translates to:
+  /// **'Nom'**
+  String get categoryFormNameLabel;
+
+  /// Placeholder example in the category name field.
+  ///
+  /// In fr, this message translates to:
+  /// **'Épargne projet'**
+  String get categoryFormNameHint;
+
+  /// Validation message when the category name is left empty.
+  ///
+  /// In fr, this message translates to:
+  /// **'Donnez un nom à cette catégorie.'**
+  String get categoryFormNameRequired;
+
+  /// Label of the category kind select.
+  ///
+  /// In fr, this message translates to:
+  /// **'Type'**
+  String get categoryFormKindLabel;
+
+  /// Helper under the category kind select, explaining the three kinds in the user's own terms.
+  ///
+  /// In fr, this message translates to:
+  /// **'Une dépense sort de vos comptes, un revenu y entre, un transfert circule entre eux.'**
+  String get categoryFormKindHelper;
+
+  /// Label of the parent-category select.
+  ///
+  /// In fr, this message translates to:
+  /// **'Catégorie parente'**
+  String get categoryFormParentLabel;
+
+  /// Option in the parent select for a top-level category.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucune (catégorie principale)'**
+  String get categoryFormParentNone;
+
+  /// Label of the category icon select.
+  ///
+  /// In fr, this message translates to:
+  /// **'Icône'**
+  String get categoryFormIconLabel;
+
+  /// Label of the category colour picker.
+  ///
+  /// In fr, this message translates to:
+  /// **'Couleur'**
+  String get categoryFormColorLabel;
+
+  /// Helper under the colour picker, explaining that the hue is reused across the app.
+  ///
+  /// In fr, this message translates to:
+  /// **'La couleur suit la catégorie partout : graphiques, légendes et étiquettes.'**
+  String get categoryFormColorHelper;
+
+  /// Cancel button in the category modal and the delete confirmation.
+  ///
+  /// In fr, this message translates to:
+  /// **'Annuler'**
+  String get categoryFormCancel;
+
+  /// Submit button of the category modal.
+  ///
+  /// In fr, this message translates to:
+  /// **'Enregistrer'**
+  String get categoryFormSave;
+
+  /// Category kind: money leaving the user's accounts.
+  ///
+  /// In fr, this message translates to:
+  /// **'Dépense'**
+  String get categoryKindExpense;
+
+  /// Category kind: money arriving in the user's accounts.
+  ///
+  /// In fr, this message translates to:
+  /// **'Revenu'**
+  String get categoryKindIncome;
+
+  /// Category kind: money moving between the user's own accounts.
+  ///
+  /// In fr, this message translates to:
+  /// **'Transfert'**
+  String get categoryKindTransfer;
+
+  /// Icon choice in the category form: house glyph.
+  ///
+  /// In fr, this message translates to:
+  /// **'Logement'**
+  String get categoryIconHousing;
+
+  /// Icon choice in the category form: bowl glyph.
+  ///
+  /// In fr, this message translates to:
+  /// **'Alimentation'**
+  String get categoryIconFood;
+
+  /// Icon choice in the category form: car glyph.
+  ///
+  /// In fr, this message translates to:
+  /// **'Transport'**
+  String get categoryIconTransport;
+
+  /// Icon choice in the category form: star glyph.
+  ///
+  /// In fr, this message translates to:
+  /// **'Loisirs'**
+  String get categoryIconLeisure;
+
+  /// Icon choice in the category form: refresh glyph.
+  ///
+  /// In fr, this message translates to:
+  /// **'Abonnements'**
+  String get categoryIconSubscriptions;
+
+  /// Icon choice in the category form: cross glyph.
+  ///
+  /// In fr, this message translates to:
+  /// **'Santé'**
+  String get categoryIconHealth;
+
+  /// Icon choice in the category form: up-arrow glyph.
+  ///
+  /// In fr, this message translates to:
+  /// **'Revenus'**
+  String get categoryIconIncome;
+
+  /// Icon choice in the category form: coin glyph.
+  ///
+  /// In fr, this message translates to:
+  /// **'Épargne'**
+  String get categoryIconSavings;
+
+  /// Icon choice in the category form: the neutral fallback glyph.
+  ///
+  /// In fr, this message translates to:
+  /// **'Autre'**
+  String get categoryIconOther;
+
+  /// Localized message for the backend's CATEGORY_NOT_FOUND code, which is also what a forced edit of a system category returns.
+  ///
+  /// In fr, this message translates to:
+  /// **'Cette catégorie appartient au système : elle ne peut pas être modifiée ni supprimée.'**
+  String get categoryErrorNotEditable;
+
+  /// Localized message for a VALIDATION_ERROR on a category write.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ces informations ne sont pas valides. Vérifiez le nom et le type.'**
+  String get categoryErrorValidation;
+
+  /// Fallback message for unrecognized or network errors on the categories panel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Une erreur est survenue. Veuillez réessayer.'**
+  String get categoryErrorGeneric;
 }
 
 class _AppLocalizationsDelegate

@@ -8,6 +8,7 @@ import '../../features/auth/application/auth_controller.dart';
 import '../../features/auth/presentation/login_screen.dart';
 import '../../features/auth/presentation/register_screen.dart';
 import '../../features/categories/presentation/categories_screen.dart';
+import '../../features/categories/presentation/categories_top_bar_actions.dart';
 import '../../features/dashboard/presentation/dashboard_screen.dart';
 import '../../features/dashboard/presentation/month_selector.dart';
 import '../../features/imports/presentation/imports_screen.dart';
@@ -34,6 +35,7 @@ TopBarActionsBuilder? _topBarActions(String path) => switch (path) {
   '/dashboard' => (context) => const [DashboardTopBarActions()],
   '/accounts' => (context) => const [AccountsTopBarActions()],
   '/transactions' => (context) => const [TransactionsTopBarActions()],
+  '/categories' => (context) => const [CategoriesTopBarActions()],
   _ => null,
 };
 
