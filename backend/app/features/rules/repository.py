@@ -1,6 +1,6 @@
 """Data access for `CategorizationRule` rows. The only place that queries this table."""
 
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 from app.features.rules.models import CategorizationRule
@@ -40,6 +40,23 @@ class RuleRepository:
                 CategorizationRule.id == rule_id, CategorizationRule.user_id == user_id
             )
         )
+
+    def next_priority(self, user_id: str) -> int:
+        """One past the user's highest priority, so a new rule appends instead of preempting."""
+        highest = self._db.scalar(
+            select(func.max(CategorizationRule.priority)).where(
+                CategorizationRule.user_id == user_id
+            )
+        )
+        return 1 if highest is None else highest + 1
+
+    def stage(self, rule: CategorizationRule) -> None:
+        """Add a rule to the session *without* committing.
+
+        For callers that own the transaction boundary because the rule has to land together
+        with something else — see `RuleService.create_from_transaction`.
+        """
+        self._db.add(rule)
 
     def add(self, rule: CategorizationRule) -> CategorizationRule:
         self._db.add(rule)

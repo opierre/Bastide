@@ -8,25 +8,29 @@ from sqlalchemy.orm import Session
 from app.core.db import get_db
 from app.features.auth.deps import get_current_user
 from app.features.auth.models import User
+from app.features.categories.repository import CategoryRepository
 from app.features.rules.models import CategorizationRule
 from app.features.rules.repository import RuleRepository
 from app.features.rules.schemas import (
     RuleApplyRequest,
     RuleApplyResult,
     RuleCreate,
+    RuleFromTransactionRequest,
+    RuleFromTransactionResult,
     RulePreviewRequest,
     RulePreviewResult,
     RuleRead,
     RuleUpdate,
 )
 from app.features.rules.service import RuleService
+from app.features.transactions.repository import TransactionRepository
 from app.features.transactions.schemas import TransactionRead
 
 router = APIRouter(prefix="/api/v1/rules", tags=["rules"])
 
 
 def _service(db: Annotated[Session, Depends(get_db)]) -> RuleService:
-    return RuleService(RuleRepository(db), db)
+    return RuleService(RuleRepository(db), TransactionRepository(db), CategoryRepository(db), db)
 
 
 def _to_read(rule: CategorizationRule) -> RuleRead:
@@ -73,6 +77,21 @@ async def preview_rule(
         match_count=match_count,
         samples=[TransactionRead.model_validate(sample) for sample in samples],
     )
+
+
+@router.post(
+    "/from-transaction",
+    response_model=RuleFromTransactionResult,
+    status_code=status.HTTP_201_CREATED,
+)
+async def create_rule_from_transaction(
+    payload: RuleFromTransactionRequest,
+    service: Annotated[RuleService, Depends(_service)],
+    user: Annotated[User, Depends(get_current_user)],
+) -> RuleFromTransactionResult:
+    """Turn a correction into a rule, optionally re-applying it to existing transactions."""
+    rule, recategorized_count = service.create_from_transaction(user.id, payload)
+    return RuleFromTransactionResult(rule=_to_read(rule), recategorized_count=recategorized_count)
 
 
 @router.patch("/{rule_id}", response_model=RuleRead)

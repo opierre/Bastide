@@ -72,3 +72,21 @@ class RulePreviewResult(BaseModel):
 
     match_count: int
     samples: list[TransactionRead]
+
+
+class RuleFromTransactionRequest(BaseModel):
+    """A user correction to turn into a rule: « toujours catégoriser ainsi »."""
+
+    transaction_id: str
+    match_field: MatchField
+    match_type: MatchType
+    pattern: str = Field(min_length=1, max_length=255)
+    category_id: str
+    apply_now: bool
+
+
+class RuleFromTransactionResult(BaseModel):
+    """The learned rule, plus how many other transactions re-applying it changed."""
+
+    rule: RuleRead
+    recategorized_count: int

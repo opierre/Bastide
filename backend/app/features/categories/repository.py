@@ -28,6 +28,19 @@ class CategoryRepository:
             select(Category).where(Category.id == category_id, Category.user_id == user_id)
         )
 
+    def get_visible_by_id_for_user(self, category_id: str, user_id: str) -> Category | None:
+        """Fetch a category the user may *target*: their own, or a shared system row.
+
+        Wider than `get_owned_by_id_for_user` on purpose: a system category is a perfectly
+        good destination for a rule or a correction, it just can't be edited or deleted.
+        """
+        return self._db.scalar(
+            select(Category).where(
+                Category.id == category_id,
+                (Category.user_id == user_id) | (Category.user_id.is_(None)),
+            )
+        )
+
     def add(self, category: Category) -> Category:
         self._db.add(category)
         self._db.commit()

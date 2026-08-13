@@ -7,6 +7,8 @@ from sqlalchemy.orm import Session, selectinload
 
 from app.core.errors import NotFoundError, ValidationError
 from app.features.accounts.models import Account
+from app.features.categories.repository import CategoryRepository
+from app.features.categories.service import CategoryNotFoundError
 from app.features.rules.engine import match_category, matches
 from app.features.rules.models import CategorizationRule
 from app.features.rules.repository import RuleRepository
@@ -14,10 +16,13 @@ from app.features.rules.schemas import (
     MatchField,
     MatchType,
     RuleCreate,
+    RuleFromTransactionRequest,
     RulePreviewRequest,
     RuleUpdate,
 )
 from app.features.transactions.models import Transaction
+from app.features.transactions.repository import TransactionRepository
+from app.features.transactions.service import TransactionNotFoundError
 
 #: Examples shown next to a preview's count. Enough to recognise what the rule caught, few
 #: enough that the modal stays a modal.
@@ -39,8 +44,16 @@ class RulePatternInvalidError(ValidationError):
 class RuleService:
     """Rule CRUD, scoped to a user, plus re-running the rule engine over transactions."""
 
-    def __init__(self, repository: RuleRepository, db: Session) -> None:
+    def __init__(
+        self,
+        repository: RuleRepository,
+        transactions: TransactionRepository,
+        categories: CategoryRepository,
+        db: Session,
+    ) -> None:
         self._repository = repository
+        self._transactions = transactions
+        self._categories = categories
         self._db = db
 
     def list_for_user(self, user_id: str) -> list[CategorizationRule]:
@@ -163,6 +176,61 @@ class RuleService:
             if len(samples) < PREVIEW_SAMPLE_LIMIT:
                 samples.append(transaction)
         return match_count, samples
+
+    def create_from_transaction(
+        self, user_id: str, data: RuleFromTransactionRequest
+    ) -> tuple[CategorizationRule, int]:
+        """Turn a user correction into a rule, so stage 1 handles the next occurrence.
+
+        The rule and the correction that justifies it are written in one DB transaction: a rule
+        without the correction would leave the row the user just fixed unfixed, and a correction
+        without the rule would silently drop what the user asked to remember.
+
+        The rule appends at the end of the priority order, so learning something never reorders
+        what the user arranged deliberately. With `apply_now`, the P1 apply path then re-runs
+        over the caller's transactions — honouring its own invariant that a row carrying
+        `source=user` is never overridden, this one included.
+
+        Returns:
+            The created rule and the number of *other* transactions the apply step changed
+            (0 when `apply_now` is false).
+
+        Raises:
+            RulePatternInvalidError: `match_type` is `regex` and the pattern doesn't compile.
+            TransactionNotFoundError: no such transaction, or it belongs to another user.
+            CategoryNotFoundError: no such category, or it is another user's.
+        """
+        _validate_pattern(data.match_type, data.pattern)
+
+        transaction = self._transactions.get_by_id_for_user(data.transaction_id, user_id)
+        if transaction is None:
+            raise TransactionNotFoundError("Transaction not found.")
+        if self._categories.get_visible_by_id_for_user(data.category_id, user_id) is None:
+            raise CategoryNotFoundError("Category not found.")
+
+        rule = CategorizationRule(
+            user_id=user_id,
+            priority=self._repository.next_priority(user_id),
+            match_field=data.match_field,
+            match_type=data.match_type,
+            pattern=data.pattern,
+            category_id=data.category_id,
+            enabled=True,
+        )
+        self._repository.stage(rule)
+        transaction.category_id = data.category_id
+        transaction.categorization_source = "user"
+        transaction.needs_review = False
+
+        try:
+            self._db.commit()
+        except Exception:
+            self._db.rollback()
+            raise
+        self._db.refresh(rule)
+
+        recategorized_count = self.apply(user_id) if data.apply_now else 0
+        return rule, recategorized_count
 
     def _candidate_rule(
         self, user_id: str, match_field: MatchField, match_type: MatchType, pattern: str
