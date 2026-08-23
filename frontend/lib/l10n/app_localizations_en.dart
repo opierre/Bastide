@@ -1490,4 +1490,56 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get rulePackStartWithHelper =>
       'You\'ll see what the pack would do before importing it.';
+
+  @override
+  String reviewQueueAiSubtitle(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          'Local AI proposes a category for $count of them — confirm or correct, nothing is filed without you.',
+      one:
+          'Local AI proposes a category for one of them — confirm or correct, nothing is filed without you.',
+      zero:
+          'Local AI hasn\'t proposed a category for any of these — confirm or correct, nothing is filed without you.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String reviewQueueProgress(int resolved, int total, double percent) {
+    final intl.NumberFormat percentNumberFormat =
+        intl.NumberFormat.percentPattern(localeName);
+    final String percentString = percentNumberFormat.format(percent);
+
+    return '$resolved/$total · $percentString';
+  }
+
+  @override
+  String get reviewAiInvitation =>
+      'Turn on local AI to automatically categorize the transactions your rules didn\'t recognize.';
+
+  @override
+  String get reviewAiInvitationLink => 'Settings';
+
+  @override
+  String reviewConfidence(double confidence) {
+    final intl.NumberFormat confidenceNumberFormat =
+        intl.NumberFormat.percentPattern(localeName);
+    final String confidenceString = confidenceNumberFormat.format(confidence);
+
+    return 'Confidence $confidenceString';
+  }
+
+  @override
+  String get reviewConfirm => 'Confirm';
+
+  @override
+  String get reviewCorrect => 'Correct';
+
+  @override
+  String get reviewNoProposal => '— no proposal';
+
+  @override
+  String get reviewChooseCategory => 'Choose a category';
 }

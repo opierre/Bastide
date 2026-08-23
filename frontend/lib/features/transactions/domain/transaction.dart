@@ -96,6 +96,18 @@ class Transaction {
   final DateTime createdAt;
   final DateTime updatedAt;
 
+  /// True when this row carries a stage-2 proposal the user has yet to judge.
+  ///
+  /// All four conditions matter: a `rule` or `user` row is settled and must not
+  /// grow AI chrome, a row the model *assigned* has already left the queue, and
+  /// a proposal without a confidence has nothing to show in the gauge beside it
+  /// — so it is rendered as no proposal rather than as a silent one.
+  bool get hasModelProposal =>
+      needsReview &&
+      categorizationSource == CategorizationSource.model &&
+      category != null &&
+      categorizationConfidence != null;
+
   Transaction copyWith({
     TransactionCategory? category,
     bool clearCategory = false,

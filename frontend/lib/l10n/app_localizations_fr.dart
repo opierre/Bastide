@@ -1501,4 +1501,56 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get rulePackStartWithHelper =>
       'Vous verrez ce que le pack ferait avant de l\'importer.';
+
+  @override
+  String reviewQueueAiSubtitle(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          'L\'IA locale propose une catégorie pour $count d\'entre elles — confirmez ou corrigez, rien n\'est classé sans vous.',
+      one:
+          'L\'IA locale propose une catégorie pour l\'une d\'entre elles — confirmez ou corrigez, rien n\'est classé sans vous.',
+      zero:
+          'Aucune de ces transactions n\'a reçu de proposition de l\'IA locale — confirmez ou corrigez, rien n\'est classé sans vous.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String reviewQueueProgress(int resolved, int total, double percent) {
+    final intl.NumberFormat percentNumberFormat =
+        intl.NumberFormat.percentPattern(localeName);
+    final String percentString = percentNumberFormat.format(percent);
+
+    return '$resolved/$total · $percentString';
+  }
+
+  @override
+  String get reviewAiInvitation =>
+      'Activez l\'IA locale pour classer automatiquement les transactions que vos règles n\'ont pas reconnues.';
+
+  @override
+  String get reviewAiInvitationLink => 'Paramètres';
+
+  @override
+  String reviewConfidence(double confidence) {
+    final intl.NumberFormat confidenceNumberFormat =
+        intl.NumberFormat.percentPattern(localeName);
+    final String confidenceString = confidenceNumberFormat.format(confidence);
+
+    return 'Confiance $confidenceString';
+  }
+
+  @override
+  String get reviewConfirm => 'Confirmer';
+
+  @override
+  String get reviewCorrect => 'Corriger';
+
+  @override
+  String get reviewNoProposal => '— aucune proposition';
+
+  @override
+  String get reviewChooseCategory => 'Choisir une catégorie';
 }

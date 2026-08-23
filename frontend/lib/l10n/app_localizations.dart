@@ -2545,6 +2545,60 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Vous verrez ce que le pack ferait avant de l\'importer.'**
   String get rulePackStartWithHelper;
+
+  /// Subtext on the review queue's header card when local AI is active, counting the rows it proposed a category for.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, =0{Aucune de ces transactions n\'a reçu de proposition de l\'IA locale — confirmez ou corrigez, rien n\'est classé sans vous.} one{L\'IA locale propose une catégorie pour l\'une d\'entre elles — confirmez ou corrigez, rien n\'est classé sans vous.} other{L\'IA locale propose une catégorie pour {count} d\'entre elles — confirmez ou corrigez, rien n\'est classé sans vous.}}'**
+  String reviewQueueAiSubtitle(int count);
+
+  /// Resolved-progress label on the review queue's header card: rows already dealt with, out of the queue's size this session.
+  ///
+  /// In fr, this message translates to:
+  /// **'{resolved}/{total} · {percent}'**
+  String reviewQueueProgress(int resolved, int total, double percent);
+
+  /// Calm invitation at the foot of the review queue's header card when AI is off or the runtime is unreachable. The only place in the app that mentions it.
+  ///
+  /// In fr, this message translates to:
+  /// **'Activez l\'IA locale pour classer automatiquement les transactions que vos règles n\'ont pas reconnues.'**
+  String get reviewAiInvitation;
+
+  /// Link at the end of the AI invitation, opening the settings panel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Paramètres'**
+  String get reviewAiInvitationLink;
+
+  /// Caption beside a proposal's confidence gauge. Always a percentage, never the raw [0,1] value the API returns.
+  ///
+  /// In fr, this message translates to:
+  /// **'Confiance {confidence}'**
+  String reviewConfidence(double confidence);
+
+  /// Row action accepting the model's proposed category as-is.
+  ///
+  /// In fr, this message translates to:
+  /// **'Confirmer'**
+  String get reviewConfirm;
+
+  /// Row action opening the category picker to replace the model's proposal.
+  ///
+  /// In fr, this message translates to:
+  /// **'Corriger'**
+  String get reviewCorrect;
+
+  /// Italic note on a review row the model made no proposal for.
+  ///
+  /// In fr, this message translates to:
+  /// **'— aucune proposition'**
+  String get reviewNoProposal;
+
+  /// Link on a review row with no proposal, opening the category picker.
+  ///
+  /// In fr, this message translates to:
+  /// **'Choisir une catégorie'**
+  String get reviewChooseCategory;
 }
 
 class _AppLocalizationsDelegate

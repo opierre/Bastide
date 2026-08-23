@@ -449,5 +449,14 @@
   "rulePackExportedTitle": "Pack saved",
   "rulePackExportFailed": "The export failed",
   "rulePackStartWith": "Start with “{name}” ({count} rules)",
-  "rulePackStartWithHelper": "You'll see what the pack would do before importing it."
+  "rulePackStartWithHelper": "You'll see what the pack would do before importing it.",
+  "reviewQueueAiSubtitle": "{count, plural, =0{Local AI hasn't proposed a category for any of these — confirm or correct, nothing is filed without you.} one{Local AI proposes a category for one of them — confirm or correct, nothing is filed without you.} other{Local AI proposes a category for {count} of them — confirm or correct, nothing is filed without you.}}",
+  "reviewQueueProgress": "{resolved}/{total} · {percent}",
+  "reviewAiInvitation": "Turn on local AI to automatically categorize the transactions your rules didn't recognize.",
+  "reviewAiInvitationLink": "Settings",
+  "reviewConfidence": "Confidence {confidence}",
+  "reviewConfirm": "Confirm",
+  "reviewCorrect": "Correct",
+  "reviewNoProposal": "— no proposal",
+  "reviewChooseCategory": "Choose a category"
 }

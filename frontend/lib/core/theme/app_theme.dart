@@ -360,6 +360,17 @@ abstract final class AppTextStyles {
     fontWeight: FontWeight.w400,
     color: AppColors.textSecondary,
   );
+
+  /// « — aucune proposition » on a review row the model had nothing for.
+  /// Italic and in the disabled tone so it reads as an absence rather than as
+  /// a category the row was given (`docs/design/07` §Phase 2 amendment).
+  static const reviewNoProposal = TextStyle(
+    fontFamily: AppFonts.geist,
+    fontSize: 11.5,
+    fontWeight: FontWeight.w400,
+    fontStyle: FontStyle.italic,
+    color: AppColors.textDisabled,
+  );
 }
 
 TextStyle _display(double size, {double tracking = 0}) => TextStyle(

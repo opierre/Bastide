@@ -2,6 +2,8 @@ import 'package:finstride/core/theme/app_theme.dart';
 import 'package:finstride/core/widgets/amount_text.dart';
 import 'package:finstride/features/accounts/application/accounts_controller.dart';
 import 'package:finstride/features/accounts/domain/account.dart';
+import 'package:finstride/features/categorization/application/run_controller.dart';
+import 'package:finstride/features/categorization/domain/categorization_run.dart';
 import 'package:finstride/features/transactions/application/transactions_controller.dart';
 import 'package:finstride/features/categories/domain/category.dart';
 import 'package:finstride/features/transactions/domain/transaction.dart';
@@ -90,6 +92,9 @@ Widget _wrap({
       accountsControllerProvider.overrideWith(
         () => FakeAccountsController(initialAccounts: [_account]),
       ),
+      // Phase 1 expectations: no opted-in AI, so no stage-2 chrome anywhere —
+      // and no health probe leaving the test either.
+      aiAvailabilityProvider.overrideWith((ref) async => AiAvailability.unavailable),
     ],
     child: MaterialApp(
       locale: locale,
