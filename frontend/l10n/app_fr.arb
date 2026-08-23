@@ -1997,5 +1997,62 @@
   "alwaysRuleSuggestionFailed": "Impossible de pré-remplir la règle. Renseignez le motif vous-même.",
   "@alwaysRuleSuggestionFailed": {
     "description": "Shown in the always-categorize modal when the server-side pre-fill could not be fetched — the form stays usable."
+  },
+  "reviewQueueRunAction": "Catégoriser avec l'IA",
+  "@reviewQueueRunAction": {
+    "description": "Action on the review queue's header card that starts a local-AI categorization run over the pending rows."
+  },
+  "runBannerRunning": "{total, plural, one{Catégorisation en cours — {processed} sur {total} transaction} other{Catégorisation en cours — {processed} sur {total} transactions}}",
+  "@runBannerRunning": {
+    "description": "Headline of the banner that replaces the review queue's header card while a run is classifying.",
+    "placeholders": {
+      "processed": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "runBannerRunningDetail": "{assigned, plural, one{{assigned} classée · {deferred} à vérifier · le panneau reste utilisable} other{{assigned} classées · {deferred} à vérifier · le panneau reste utilisable}}",
+  "@runBannerRunningDetail": {
+    "description": "Sub-line under the running banner: what the run has settled, what it has left for the user, and the reassurance that nothing is blocked.",
+    "placeholders": {
+      "assigned": {
+        "type": "int"
+      },
+      "deferred": {
+        "type": "int"
+      }
+    }
+  },
+  "runBannerCancel": "Annuler",
+  "@runBannerCancel": {
+    "description": "Cancels the categorization run in flight. The executor stops after the batch it is on."
+  },
+  "runBannerPartial": "{count, plural, one{Catégorisation terminée — {count} transaction n'a pas pu être analysée.} other{Catégorisation terminée — {count} transactions n'ont pas pu être analysées.}}",
+  "@runBannerPartial": {
+    "description": "Dismissible amber banner after a run that ended `partial`. A report, not an error wall.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "runBannerPartialAction": "Voir",
+  "@runBannerPartialAction": {
+    "description": "Link on the partial-run banner, showing the transactions the run could not analyse."
+  },
+  "runBannerFailed": "La catégorisation n'a pas pu s'exécuter.",
+  "@runBannerFailed": {
+    "description": "Banner after a run that ended `failed` — reported plainly; the queue stays fully usable."
+  },
+  "runBannerDismiss": "Fermer",
+  "@runBannerDismiss": {
+    "description": "Accessible label of the × that dismisses a finished-run banner."
+  },
+  "runStartFailed": "Impossible de lancer la catégorisation pour le moment.",
+  "@runStartFailed": {
+    "description": "Shown when starting or cancelling a run failed. The queue is unaffected."
   }
 }

@@ -1575,4 +1575,57 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get alwaysRuleSuggestionFailed =>
       'Couldn\'t pre-fill the rule. Enter the pattern yourself.';
+
+  @override
+  String get reviewQueueRunAction => 'Categorize with AI';
+
+  @override
+  String runBannerRunning(int processed, int total) {
+    String _temp0 = intl.Intl.pluralLogic(
+      total,
+      locale: localeName,
+      other: 'Categorizing — $processed of $total transactions',
+      one: 'Categorizing — $processed of $total transaction',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String runBannerRunningDetail(int assigned, int deferred) {
+    String _temp0 = intl.Intl.pluralLogic(
+      assigned,
+      locale: localeName,
+      other: '$assigned filed · $deferred to review · the panel stays usable',
+      one: '$assigned filed · $deferred to review · the panel stays usable',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get runBannerCancel => 'Cancel';
+
+  @override
+  String runBannerPartial(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          'Categorization finished — $count transactions couldn\'t be analysed.',
+      one:
+          'Categorization finished — $count transaction couldn\'t be analysed.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get runBannerPartialAction => 'View';
+
+  @override
+  String get runBannerFailed => 'Categorization couldn\'t run.';
+
+  @override
+  String get runBannerDismiss => 'Dismiss';
+
+  @override
+  String get runStartFailed => 'Categorization can\'t be started right now.';
 }

@@ -11,6 +11,7 @@ import '../../../core/theme/tokens.dart';
 import '../../../core/widgets/amount_text.dart';
 import '../../../core/widgets/app_card.dart';
 import '../../../core/widgets/app_toast.dart';
+import '../../../core/widgets/inline_banner.dart';
 import '../../../core/widgets/category_chip.dart';
 import '../../../core/widgets/confidence_gauge.dart';
 import '../../../core/widgets/institution_avatar.dart';
@@ -21,6 +22,7 @@ import '../../categorization/application/run_controller.dart';
 import '../../settings/presentation/settings_screen.dart';
 import '../application/transactions_controller.dart';
 import '../domain/transaction.dart';
+import 'ai_run_banner.dart';
 import 'always_categorize_modal.dart';
 import 'category_picker.dart';
 import 'transaction_error_localizer.dart';
@@ -73,15 +75,38 @@ class _ReviewQueueState extends ConsumerState<ReviewQueue> {
       );
     }
 
+    final runState = ref.watch(runControllerProvider);
+    final finishedRun = runState.run;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        ReviewQueueHeaderCard(
-          total: widget.total,
-          baseline: _baseline,
-          proposedCount: widget.items.where((item) => item.hasModelProposal).length,
-          aiIsActive: aiIsActive,
-        ),
+        if (runState.error != null) ...[
+          InlineBanner(
+            key: const Key('reviewRunError'),
+            tone: BannerTone.warning,
+            message: l10n.runStartFailed,
+          ),
+          const SizedBox(height: AppSpacing.sm + AppSpacing.xs),
+        ],
+        if (finishedRun != null &&
+            finishedRun.status.isTerminal &&
+            !runState.isBannerDismissed) ...[
+          RunOutcomeBanner(run: finishedRun),
+          const SizedBox(height: AppSpacing.sm + AppSpacing.xs),
+        ],
+        // Replaced, not stacked: while a run is classifying, the count on the
+        // header card is a moving target and the banner is the truthful one.
+        if (runState.isRunning)
+          AiRunBanner(run: finishedRun!)
+        else
+          ReviewQueueHeaderCard(
+            total: widget.total,
+            baseline: _baseline,
+            proposedCount: widget.items.where((item) => item.hasModelProposal).length,
+            aiIsActive: aiIsActive,
+            isStarting: runState.isStarting,
+          ),
         const SizedBox(height: AppSpacing.gridGap),
         Expanded(
           child: AppCard(
@@ -107,13 +132,14 @@ class _ReviewQueueState extends ConsumerState<ReviewQueue> {
 /// Public so the run banner can replace it — `docs/design/07` frame ⑦ swaps
 /// this whole card out while a run is classifying rather than stacking a
 /// second header above it.
-class ReviewQueueHeaderCard extends StatelessWidget {
+class ReviewQueueHeaderCard extends ConsumerWidget {
   const ReviewQueueHeaderCard({
     super.key,
     required this.total,
     required this.baseline,
     required this.proposedCount,
     required this.aiIsActive,
+    this.isStarting = false,
   });
 
   final int total;
@@ -121,8 +147,12 @@ class ReviewQueueHeaderCard extends StatelessWidget {
   final int proposedCount;
   final bool aiIsActive;
 
+  /// A start request is in flight but the run hasn't come back yet — the
+  /// button holds its label and spins rather than the card swapping twice.
+  final bool isStarting;
+
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context)!;
     final resolved = math.max(0, baseline - total);
     final fraction = baseline == 0 ? 1.0 : resolved / baseline;
@@ -175,10 +205,27 @@ class ReviewQueueHeaderCard extends StatelessWidget {
                   ],
                 ),
               ),
+              if (aiIsActive) ...[
+                const SizedBox(width: AppSpacing.sm),
+                PrimaryButton(
+                  key: const Key('reviewQueueRunButton'),
+                  label: l10n.reviewQueueRunAction,
+                  icon: Icons.auto_awesome_outlined,
+                  height: 30,
+                  isLoading: isStarting,
+                  onPressed: isStarting
+                      ? null
+                      // `scope: pending` — a run never revisits a row a rule or
+                      // the user has settled, so the queue is exactly its input.
+                      : () => ref.read(runControllerProvider.notifier).start(
+                          accountId: ref.read(transactionFiltersProvider).accountId,
+                        ),
+                ),
+              ],
             ],
           ),
           const SizedBox(height: AppSpacing.sm + AppSpacing.xs),
-          _ProgressBar(fraction: fraction),
+          RunProgressBar(fraction: fraction),
           const SizedBox(height: AppSpacing.sm - 2),
           Text(
             l10n.reviewQueueProgress(resolved, baseline, fraction),
@@ -192,36 +239,6 @@ class ReviewQueueHeaderCard extends StatelessWidget {
             const _AiInvitation(),
           ],
         ],
-      ),
-    );
-  }
-}
-
-/// The 6px iris-gradient progress bar the design draws under the headline.
-class _ProgressBar extends StatelessWidget {
-  const _ProgressBar({required this.fraction});
-
-  final double fraction;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      height: 6,
-      decoration: BoxDecoration(
-        color: AppColors.surfaceHover,
-        borderRadius: BorderRadius.circular(AppRadii.xs),
-      ),
-      child: FractionallySizedBox(
-        alignment: Alignment.centerLeft,
-        widthFactor: fraction.clamp(0.0, 1.0),
-        child: Container(
-          decoration: BoxDecoration(
-            gradient: const LinearGradient(
-              colors: [AppColors.irisDeep, AppColors.iris],
-            ),
-            borderRadius: BorderRadius.circular(AppRadii.xs),
-          ),
-        ),
       ),
     );
   }

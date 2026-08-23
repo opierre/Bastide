@@ -465,5 +465,14 @@
   "alwaysRuleSubmit": "Create the rule",
   "alwaysRuleCreatedTitle": "Rule created",
   "alwaysRuleCreatedBody": "{count, plural, =0{No other transaction changed category.} one{{count} transaction recategorized.} other{{count} transactions recategorized.}}",
-  "alwaysRuleSuggestionFailed": "Couldn't pre-fill the rule. Enter the pattern yourself."
+  "alwaysRuleSuggestionFailed": "Couldn't pre-fill the rule. Enter the pattern yourself.",
+  "reviewQueueRunAction": "Categorize with AI",
+  "runBannerRunning": "{total, plural, one{Categorizing — {processed} of {total} transaction} other{Categorizing — {processed} of {total} transactions}}",
+  "runBannerRunningDetail": "{assigned, plural, one{{assigned} filed · {deferred} to review · the panel stays usable} other{{assigned} filed · {deferred} to review · the panel stays usable}}",
+  "runBannerCancel": "Cancel",
+  "runBannerPartial": "{count, plural, one{Categorization finished — {count} transaction couldn't be analysed.} other{Categorization finished — {count} transactions couldn't be analysed.}}",
+  "runBannerPartialAction": "View",
+  "runBannerFailed": "Categorization couldn't run.",
+  "runBannerDismiss": "Dismiss",
+  "runStartFailed": "Categorization can't be started right now."
 }

@@ -2641,6 +2641,60 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Impossible de pré-remplir la règle. Renseignez le motif vous-même.'**
   String get alwaysRuleSuggestionFailed;
+
+  /// Action on the review queue's header card that starts a local-AI categorization run over the pending rows.
+  ///
+  /// In fr, this message translates to:
+  /// **'Catégoriser avec l\'IA'**
+  String get reviewQueueRunAction;
+
+  /// Headline of the banner that replaces the review queue's header card while a run is classifying.
+  ///
+  /// In fr, this message translates to:
+  /// **'{total, plural, one{Catégorisation en cours — {processed} sur {total} transaction} other{Catégorisation en cours — {processed} sur {total} transactions}}'**
+  String runBannerRunning(int processed, int total);
+
+  /// Sub-line under the running banner: what the run has settled, what it has left for the user, and the reassurance that nothing is blocked.
+  ///
+  /// In fr, this message translates to:
+  /// **'{assigned, plural, one{{assigned} classée · {deferred} à vérifier · le panneau reste utilisable} other{{assigned} classées · {deferred} à vérifier · le panneau reste utilisable}}'**
+  String runBannerRunningDetail(int assigned, int deferred);
+
+  /// Cancels the categorization run in flight. The executor stops after the batch it is on.
+  ///
+  /// In fr, this message translates to:
+  /// **'Annuler'**
+  String get runBannerCancel;
+
+  /// Dismissible amber banner after a run that ended `partial`. A report, not an error wall.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, one{Catégorisation terminée — {count} transaction n\'a pas pu être analysée.} other{Catégorisation terminée — {count} transactions n\'ont pas pu être analysées.}}'**
+  String runBannerPartial(int count);
+
+  /// Link on the partial-run banner, showing the transactions the run could not analyse.
+  ///
+  /// In fr, this message translates to:
+  /// **'Voir'**
+  String get runBannerPartialAction;
+
+  /// Banner after a run that ended `failed` — reported plainly; the queue stays fully usable.
+  ///
+  /// In fr, this message translates to:
+  /// **'La catégorisation n\'a pas pu s\'exécuter.'**
+  String get runBannerFailed;
+
+  /// Accessible label of the × that dismisses a finished-run banner.
+  ///
+  /// In fr, this message translates to:
+  /// **'Fermer'**
+  String get runBannerDismiss;
+
+  /// Shown when starting or cancelling a run failed. The queue is unaffected.
+  ///
+  /// In fr, this message translates to:
+  /// **'Impossible de lancer la catégorisation pour le moment.'**
+  String get runStartFailed;
 }
 
 class _AppLocalizationsDelegate

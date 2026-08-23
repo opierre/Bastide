@@ -1586,4 +1586,60 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get alwaysRuleSuggestionFailed =>
       'Impossible de pré-remplir la règle. Renseignez le motif vous-même.';
+
+  @override
+  String get reviewQueueRunAction => 'Catégoriser avec l\'IA';
+
+  @override
+  String runBannerRunning(int processed, int total) {
+    String _temp0 = intl.Intl.pluralLogic(
+      total,
+      locale: localeName,
+      other: 'Catégorisation en cours — $processed sur $total transactions',
+      one: 'Catégorisation en cours — $processed sur $total transaction',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String runBannerRunningDetail(int assigned, int deferred) {
+    String _temp0 = intl.Intl.pluralLogic(
+      assigned,
+      locale: localeName,
+      other:
+          '$assigned classées · $deferred à vérifier · le panneau reste utilisable',
+      one:
+          '$assigned classée · $deferred à vérifier · le panneau reste utilisable',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get runBannerCancel => 'Annuler';
+
+  @override
+  String runBannerPartial(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          'Catégorisation terminée — $count transactions n\'ont pas pu être analysées.',
+      one:
+          'Catégorisation terminée — $count transaction n\'a pas pu être analysée.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get runBannerPartialAction => 'Voir';
+
+  @override
+  String get runBannerFailed => 'La catégorisation n\'a pas pu s\'exécuter.';
+
+  @override
+  String get runBannerDismiss => 'Fermer';
+
+  @override
+  String get runStartFailed =>
+      'Impossible de lancer la catégorisation pour le moment.';
 }
