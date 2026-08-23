@@ -154,16 +154,20 @@ class _CategoryTreeCard extends ConsumerWidget {
                 ).textTheme.bodySmall?.copyWith(color: AppColors.textSecondary),
               ),
             ),
-          ListView.separated(
-            key: const Key('categoriesList'),
-            shrinkWrap: true,
-            itemCount: nodes.length,
-            separatorBuilder: (_, _) => const Divider(
-              height: 1,
-              thickness: 1,
-              color: AppColors.borderSubtle,
+          // The card is given the panel's remaining height, so the tree scrolls
+          // inside it rather than growing past the bottom edge.
+          Expanded(
+            child: ListView.separated(
+              key: const Key('categoriesList'),
+              itemCount: nodes.length,
+              separatorBuilder: (_, _) => const Divider(
+                height: 1,
+                thickness: 1,
+                color: AppColors.borderSubtle,
+              ),
+              itemBuilder: (context, index) =>
+                  _CategoryGroup(node: nodes[index], spend: spend),
             ),
-            itemBuilder: (context, index) => _CategoryGroup(node: nodes[index], spend: spend),
           ),
         ],
       ),
