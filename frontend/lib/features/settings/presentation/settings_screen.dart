@@ -14,6 +14,7 @@ import '../../../core/widgets/labeled_field.dart';
 import '../../../core/widgets/state_views.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../auth/presentation/currency_label.dart';
+import 'ai_settings_card.dart';
 
 /// Which group of settings the right-hand column is showing.
 enum SettingsSection { profile, preferences, data, about }
@@ -54,11 +55,11 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 constraints: const BoxConstraints(maxWidth: 640),
                 child: switch (_section) {
                   SettingsSection.preferences => const _PreferencesPanel(),
+                  SettingsSection.data => const _DataPanel(),
                   SettingsSection.about => const _AboutPanel(),
                   // Profile edits need a PATCH /me the backend doesn't expose,
-                  // and Données needs export/recalculate endpoints that don't
-                  // exist either — so these announce themselves rather than
-                  // offering controls that would fail.
+                  // so this section announces itself rather than offering
+                  // controls that would fail.
                   _ => const _UnavailablePanel(),
                 },
               ),
@@ -245,6 +246,16 @@ class _PreferencesPanel extends ConsumerWidget {
       ],
     );
   }
+}
+
+/// Données. The local-AI card is the only part of this tab Phase 2 builds —
+/// database location, recalculation and export need endpoints the backend does
+/// not expose yet (`docs/design/09-settings.md` §Phase 2 amendment).
+class _DataPanel extends StatelessWidget {
+  const _DataPanel();
+
+  @override
+  Widget build(BuildContext context) => const AiSettingsCard();
 }
 
 class _AboutPanel extends StatelessWidget {

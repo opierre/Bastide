@@ -1628,4 +1628,89 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get runStartFailed => 'Categorization can\'t be started right now.';
+
+  @override
+  String get settingsAiTitle => 'Local AI';
+
+  @override
+  String get settingsAiSubtitle => 'Enable AI categorization';
+
+  @override
+  String get settingsAiToggleLabel => 'AI categorization';
+
+  @override
+  String get settingsAiPrivacy =>
+      'Your transaction descriptions are sent to a model running on this computer. Nothing leaves your machine.';
+
+  @override
+  String get settingsAiBaseUrlLabel => 'Engine address';
+
+  @override
+  String get settingsAiBaseUrlHelp =>
+      'Local addresses only — 127.0.0.1 or localhost.';
+
+  @override
+  String get settingsAiBaseUrlRejected =>
+      'Address refused: the engine must run on this computer (127.0.0.1 or localhost). A remote address would send your transaction descriptions off your machine.';
+
+  @override
+  String get settingsAiModelLabel => 'Model';
+
+  @override
+  String get settingsAiModelHelp =>
+      'List provided by the engine — manual entry allowed.';
+
+  @override
+  String get settingsAiModelUnavailable => 'No model — engine unreachable.';
+
+  @override
+  String get settingsAiModelChoose => 'Choose a model';
+
+  @override
+  String settingsAiThresholdLabel(double threshold) {
+    final intl.NumberFormat thresholdNumberFormat =
+        intl.NumberFormat.percentPattern(localeName);
+    final String thresholdString = thresholdNumberFormat.format(threshold);
+
+    return 'Confidence threshold — $thresholdString';
+  }
+
+  @override
+  String get settingsAiThresholdHelp =>
+      'Below this threshold, a transaction is offered to you for review rather than categorized automatically.';
+
+  @override
+  String settingsAiStatusConnected(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Connected — $count models available',
+      one: 'Connected — 1 model available',
+      zero: 'Connected — no model available',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get settingsAiStatusUnreachable =>
+      'No engine detected at this address.';
+
+  @override
+  String get settingsAiStatusDisabled => 'AI categorization is off.';
+
+  @override
+  String get settingsAiLearnMore => 'Learn more';
+
+  @override
+  String get settingsAiTest => 'Test connection';
+
+  @override
+  String get settingsAiTesting => 'Testing…';
+
+  @override
+  String get settingsAiLoadFailed =>
+      'Your settings couldn\'t be loaded right now.';
+
+  @override
+  String get settingsAiRetry => 'Try again';
 }

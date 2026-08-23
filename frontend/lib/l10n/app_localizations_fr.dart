@@ -1642,4 +1642,89 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get runStartFailed =>
       'Impossible de lancer la catégorisation pour le moment.';
+
+  @override
+  String get settingsAiTitle => 'IA locale';
+
+  @override
+  String get settingsAiSubtitle => 'Activer la catégorisation par IA';
+
+  @override
+  String get settingsAiToggleLabel => 'Catégorisation par IA';
+
+  @override
+  String get settingsAiPrivacy =>
+      'Les descriptions de vos transactions sont envoyées à un modèle qui s\'exécute sur cet ordinateur. Rien ne quitte votre machine.';
+
+  @override
+  String get settingsAiBaseUrlLabel => 'Adresse du moteur';
+
+  @override
+  String get settingsAiBaseUrlHelp =>
+      'Adresse locale uniquement — 127.0.0.1 ou localhost.';
+
+  @override
+  String get settingsAiBaseUrlRejected =>
+      'Adresse refusée : le moteur doit s\'exécuter sur cet ordinateur (127.0.0.1 ou localhost). Une adresse distante enverrait les descriptions de vos transactions hors de votre machine.';
+
+  @override
+  String get settingsAiModelLabel => 'Modèle';
+
+  @override
+  String get settingsAiModelHelp =>
+      'Liste fournie par le moteur — saisie manuelle possible.';
+
+  @override
+  String get settingsAiModelUnavailable => 'Aucun modèle — moteur injoignable.';
+
+  @override
+  String get settingsAiModelChoose => 'Choisir un modèle';
+
+  @override
+  String settingsAiThresholdLabel(double threshold) {
+    final intl.NumberFormat thresholdNumberFormat =
+        intl.NumberFormat.percentPattern(localeName);
+    final String thresholdString = thresholdNumberFormat.format(threshold);
+
+    return 'Seuil de confiance — $thresholdString';
+  }
+
+  @override
+  String get settingsAiThresholdHelp =>
+      'En dessous de ce seuil, la transaction vous est proposée pour vérification plutôt que classée automatiquement.';
+
+  @override
+  String settingsAiStatusConnected(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Connecté — $count modèles disponibles',
+      one: 'Connecté — 1 modèle disponible',
+      zero: 'Connecté — aucun modèle disponible',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get settingsAiStatusUnreachable =>
+      'Aucun moteur détecté à cette adresse.';
+
+  @override
+  String get settingsAiStatusDisabled => 'Catégorisation par IA désactivée.';
+
+  @override
+  String get settingsAiLearnMore => 'En savoir plus';
+
+  @override
+  String get settingsAiTest => 'Tester la connexion';
+
+  @override
+  String get settingsAiTesting => 'Test en cours…';
+
+  @override
+  String get settingsAiLoadFailed =>
+      'Impossible de charger vos paramètres pour le moment.';
+
+  @override
+  String get settingsAiRetry => 'Réessayer';
 }

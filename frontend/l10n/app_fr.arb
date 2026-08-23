@@ -2054,5 +2054,103 @@
   "runStartFailed": "Impossible de lancer la catégorisation pour le moment.",
   "@runStartFailed": {
     "description": "Shown when starting or cancelling a run failed. The queue is unaffected."
+  },
+  "settingsAiTitle": "IA locale",
+  "@settingsAiTitle": {
+    "description": "Title of the local-AI card in the settings Données tab."
+  },
+  "settingsAiSubtitle": "Activer la catégorisation par IA",
+  "@settingsAiSubtitle": {
+    "description": "Sub-line under the card title, naming what the toggle beside it does."
+  },
+  "settingsAiToggleLabel": "Catégorisation par IA",
+  "@settingsAiToggleLabel": {
+    "description": "Accessible label of the card's opt-in toggle."
+  },
+  "settingsAiPrivacy": "Les descriptions de vos transactions sont envoyées à un modèle qui s'exécute sur cet ordinateur. Rien ne quitte votre machine.",
+  "@settingsAiPrivacy": {
+    "description": "The card's privacy callout — its centerpiece. Visible whenever the card is, whether or not AI is enabled."
+  },
+  "settingsAiBaseUrlLabel": "Adresse du moteur",
+  "@settingsAiBaseUrlLabel": {
+    "description": "Label of the inference base URL field."
+  },
+  "settingsAiBaseUrlHelp": "Adresse locale uniquement — 127.0.0.1 ou localhost.",
+  "@settingsAiBaseUrlHelp": {
+    "description": "Helper under the engine address field, stating the loopback-only rule."
+  },
+  "settingsAiBaseUrlRejected": "Adresse refusée : le moteur doit s'exécuter sur cet ordinateur (127.0.0.1 ou localhost). Une adresse distante enverrait les descriptions de vos transactions hors de votre machine.",
+  "@settingsAiBaseUrlRejected": {
+    "description": "Inline validation shown on the address field when the backend refuses a non-loopback URL (422). States why it was refused, not only that it was."
+  },
+  "settingsAiModelLabel": "Modèle",
+  "@settingsAiModelLabel": {
+    "description": "Label of the model tag field."
+  },
+  "settingsAiModelHelp": "Liste fournie par le moteur — saisie manuelle possible.",
+  "@settingsAiModelHelp": {
+    "description": "Helper under the model field: the list comes from the engine, but any tag can be typed."
+  },
+  "settingsAiModelUnavailable": "Aucun modèle — moteur injoignable.",
+  "@settingsAiModelUnavailable": {
+    "description": "Helper under the model field when no engine answered, where the field degrades to a dashed read-only dash."
+  },
+  "settingsAiModelChoose": "Choisir un modèle",
+  "@settingsAiModelChoose": {
+    "description": "Accessible label of the control opening the list of models the engine reported."
+  },
+  "settingsAiThresholdLabel": "Seuil de confiance — {threshold}",
+  "@settingsAiThresholdLabel": {
+    "description": "Label above the threshold slider, carrying its live percentage. Only this label is a percentage — the stored value is the [0,1] real the API defines.",
+    "placeholders": {
+      "threshold": {
+        "type": "double",
+        "format": "percentPattern",
+        "optionalParameters": {
+          "decimalDigits": 0
+        }
+      }
+    }
+  },
+  "settingsAiThresholdHelp": "En dessous de ce seuil, la transaction vous est proposée pour vérification plutôt que classée automatiquement.",
+  "@settingsAiThresholdHelp": {
+    "description": "Helper under the threshold slider, stating what the threshold decides."
+  },
+  "settingsAiStatusConnected": "{count, plural, =0{Connecté — aucun modèle disponible} =1{Connecté — 1 modèle disponible} other{Connecté — {count} modèles disponibles}}",
+  "@settingsAiStatusConnected": {
+    "description": "Status row when the runtime answered, with the number of models it reported.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "settingsAiStatusUnreachable": "Aucun moteur détecté à cette adresse.",
+  "@settingsAiStatusUnreachable": {
+    "description": "Status row when nothing answered at the configured address."
+  },
+  "settingsAiStatusDisabled": "Catégorisation par IA désactivée.",
+  "@settingsAiStatusDisabled": {
+    "description": "Status row while the user has not opted in. The connection test stays available so an engine can be checked before opting in."
+  },
+  "settingsAiLearnMore": "En savoir plus",
+  "@settingsAiLearnMore": {
+    "description": "Link beside the no-engine status, opening the local runtime's download page in the browser."
+  },
+  "settingsAiTest": "Tester la connexion",
+  "@settingsAiTest": {
+    "description": "Button that probes the configured runtime."
+  },
+  "settingsAiTesting": "Test en cours…",
+  "@settingsAiTesting": {
+    "description": "Label the connection-test button takes while its probe is in flight."
+  },
+  "settingsAiLoadFailed": "Impossible de charger vos paramètres pour le moment.",
+  "@settingsAiLoadFailed": {
+    "description": "Shown in place of the local-AI card when reading the settings failed."
+  },
+  "settingsAiRetry": "Réessayer",
+  "@settingsAiRetry": {
+    "description": "Retry action on the local-AI card's error state."
   }
 }

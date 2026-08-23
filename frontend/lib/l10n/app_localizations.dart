@@ -2695,6 +2695,132 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Impossible de lancer la catégorisation pour le moment.'**
   String get runStartFailed;
+
+  /// Title of the local-AI card in the settings Données tab.
+  ///
+  /// In fr, this message translates to:
+  /// **'IA locale'**
+  String get settingsAiTitle;
+
+  /// Sub-line under the card title, naming what the toggle beside it does.
+  ///
+  /// In fr, this message translates to:
+  /// **'Activer la catégorisation par IA'**
+  String get settingsAiSubtitle;
+
+  /// Accessible label of the card's opt-in toggle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Catégorisation par IA'**
+  String get settingsAiToggleLabel;
+
+  /// The card's privacy callout — its centerpiece. Visible whenever the card is, whether or not AI is enabled.
+  ///
+  /// In fr, this message translates to:
+  /// **'Les descriptions de vos transactions sont envoyées à un modèle qui s\'exécute sur cet ordinateur. Rien ne quitte votre machine.'**
+  String get settingsAiPrivacy;
+
+  /// Label of the inference base URL field.
+  ///
+  /// In fr, this message translates to:
+  /// **'Adresse du moteur'**
+  String get settingsAiBaseUrlLabel;
+
+  /// Helper under the engine address field, stating the loopback-only rule.
+  ///
+  /// In fr, this message translates to:
+  /// **'Adresse locale uniquement — 127.0.0.1 ou localhost.'**
+  String get settingsAiBaseUrlHelp;
+
+  /// Inline validation shown on the address field when the backend refuses a non-loopback URL (422). States why it was refused, not only that it was.
+  ///
+  /// In fr, this message translates to:
+  /// **'Adresse refusée : le moteur doit s\'exécuter sur cet ordinateur (127.0.0.1 ou localhost). Une adresse distante enverrait les descriptions de vos transactions hors de votre machine.'**
+  String get settingsAiBaseUrlRejected;
+
+  /// Label of the model tag field.
+  ///
+  /// In fr, this message translates to:
+  /// **'Modèle'**
+  String get settingsAiModelLabel;
+
+  /// Helper under the model field: the list comes from the engine, but any tag can be typed.
+  ///
+  /// In fr, this message translates to:
+  /// **'Liste fournie par le moteur — saisie manuelle possible.'**
+  String get settingsAiModelHelp;
+
+  /// Helper under the model field when no engine answered, where the field degrades to a dashed read-only dash.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucun modèle — moteur injoignable.'**
+  String get settingsAiModelUnavailable;
+
+  /// Accessible label of the control opening the list of models the engine reported.
+  ///
+  /// In fr, this message translates to:
+  /// **'Choisir un modèle'**
+  String get settingsAiModelChoose;
+
+  /// Label above the threshold slider, carrying its live percentage. Only this label is a percentage — the stored value is the [0,1] real the API defines.
+  ///
+  /// In fr, this message translates to:
+  /// **'Seuil de confiance — {threshold}'**
+  String settingsAiThresholdLabel(double threshold);
+
+  /// Helper under the threshold slider, stating what the threshold decides.
+  ///
+  /// In fr, this message translates to:
+  /// **'En dessous de ce seuil, la transaction vous est proposée pour vérification plutôt que classée automatiquement.'**
+  String get settingsAiThresholdHelp;
+
+  /// Status row when the runtime answered, with the number of models it reported.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, =0{Connecté — aucun modèle disponible} =1{Connecté — 1 modèle disponible} other{Connecté — {count} modèles disponibles}}'**
+  String settingsAiStatusConnected(int count);
+
+  /// Status row when nothing answered at the configured address.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucun moteur détecté à cette adresse.'**
+  String get settingsAiStatusUnreachable;
+
+  /// Status row while the user has not opted in. The connection test stays available so an engine can be checked before opting in.
+  ///
+  /// In fr, this message translates to:
+  /// **'Catégorisation par IA désactivée.'**
+  String get settingsAiStatusDisabled;
+
+  /// Link beside the no-engine status, opening the local runtime's download page in the browser.
+  ///
+  /// In fr, this message translates to:
+  /// **'En savoir plus'**
+  String get settingsAiLearnMore;
+
+  /// Button that probes the configured runtime.
+  ///
+  /// In fr, this message translates to:
+  /// **'Tester la connexion'**
+  String get settingsAiTest;
+
+  /// Label the connection-test button takes while its probe is in flight.
+  ///
+  /// In fr, this message translates to:
+  /// **'Test en cours…'**
+  String get settingsAiTesting;
+
+  /// Shown in place of the local-AI card when reading the settings failed.
+  ///
+  /// In fr, this message translates to:
+  /// **'Impossible de charger vos paramètres pour le moment.'**
+  String get settingsAiLoadFailed;
+
+  /// Retry action on the local-AI card's error state.
+  ///
+  /// In fr, this message translates to:
+  /// **'Réessayer'**
+  String get settingsAiRetry;
 }
 
 class _AppLocalizationsDelegate
