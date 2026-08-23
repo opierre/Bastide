@@ -142,3 +142,40 @@ class RulePreview {
   final int matchCount;
   final List<RuleSample> samples;
 }
+
+/// The backend's pre-fill for a rule derived from one transaction
+/// (`GET /rules/suggestion`).
+///
+/// A default, not a constraint — the form may override every field. Derived
+/// server-side because knowing which parts of a French bank label are noise is
+/// the same knowledge the import pipeline applies when it cleans a description
+/// (PROJECT.md §5b); a second copy of those heuristics in Dart would drift and
+/// suggest rules that don't match the row they came from.
+@immutable
+class RuleSuggestion {
+  const RuleSuggestion({
+    required this.matchField,
+    required this.matchType,
+    required this.pattern,
+  });
+
+  factory RuleSuggestion.fromJson(Map<String, dynamic> json) => RuleSuggestion(
+    matchField: RuleMatchField.fromWire(json['match_field'] as String),
+    matchType: RuleMatchType.fromWire(json['match_type'] as String),
+    pattern: json['pattern'] as String,
+  );
+
+  final RuleMatchField matchField;
+  final RuleMatchType matchType;
+  final String pattern;
+}
+
+/// What `POST /rules/from-transaction` reports back: the rule, and how many
+/// *other* rows it moved.
+@immutable
+class RuleFromTransactionResult {
+  const RuleFromTransactionResult({required this.rule, required this.recategorizedCount});
+
+  final Rule rule;
+  final int recategorizedCount;
+}

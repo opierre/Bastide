@@ -8,15 +8,14 @@ import '../domain/transaction.dart';
 
 final _isoDate = DateFormat('yyyy-MM-dd');
 
-/// Calls the `/transactions`, `/categories` and `/rules` endpoints and maps
-/// the wire JSON to domain models.
+/// Calls the `/transactions` and `/categories` endpoints and maps the wire
+/// JSON to domain models.
 ///
-/// The two foreign calls serve affordances that belong to *this* panel — the
-/// category picker, and "always categorize like this" — so they stay here
-/// rather than reaching into the categories/rules controllers, which hold the
-/// state of a panel this one never shows. Only the [AppCategory] shape is
-/// shared, because a second shape for the same resource is the one thing worse
-/// than a shared one.
+/// The foreign call serves an affordance that belongs to *this* panel — the
+/// category picker — so it stays here rather than reaching into the categories
+/// controller, which holds the state of a panel this one never shows. Only the
+/// [AppCategory] shape is shared, because a second shape for the same resource
+/// is the one thing worse than a shared one.
 class TransactionsRepository {
   TransactionsRepository(this._apiClient);
 
@@ -74,33 +73,6 @@ class TransactionsRepository {
     return json
         .map((entry) => AppCategory.fromJson(entry as Map<String, dynamic>))
         .toList();
-  }
-
-  /// Creates a rule matching [pattern] on [matchField] to [categoryId], so the
-  /// rule engine picks up transactions like this one automatically from now
-  /// on (see the ai-categorization skill's learning-loop pattern).
-  ///
-  /// Priority is placed after every existing rule: this transaction already
-  /// fell through every enabled rule to reach the review queue, so nothing
-  /// currently matches it and ordering relative to the existing set can't
-  /// change today's outcome — only future imports.
-  Future<void> alwaysCategorizeAs({
-    required String matchField,
-    required String pattern,
-    required String categoryId,
-  }) async {
-    final existing = await _apiClient.get('/rules') as List<dynamic>;
-    await _apiClient.post(
-      '/rules',
-      body: {
-        'priority': existing.length + 1,
-        'match_field': matchField,
-        'match_type': 'contains',
-        'pattern': pattern,
-        'category_id': categoryId,
-        'enabled': true,
-      },
-    );
   }
 
   Transaction _parse(Map<String, dynamic> json) {

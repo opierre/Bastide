@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:intl/intl.dart';
 
-import '../../../core/l10n/category_display.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/tokens.dart';
 import '../../../core/widgets/app_modal.dart';
@@ -19,6 +17,7 @@ import '../application/rules_controller.dart';
 import '../domain/rule.dart';
 import 'rule_error_localizer.dart';
 import 'rule_labels.dart';
+import 'rule_match_preview_banner.dart';
 
 /// Opens the rule editor. Resolves to the saved rule, or `null` on cancel or
 /// delete.
@@ -274,7 +273,7 @@ class _RuleEditorModalState extends ConsumerState<RuleEditorModal> {
               ),
             ),
             const SizedBox(height: AppSpacing.sm + AppSpacing.xs),
-            _MatchPreviewBanner(state: previewState),
+            RuleMatchPreviewBanner(state: previewState),
             const SizedBox(height: AppSpacing.md),
             LabeledField(
               label: l10n.ruleFormCategoryLabel,
@@ -287,7 +286,7 @@ class _RuleEditorModalState extends ConsumerState<RuleEditorModal> {
                   for (final category in categories)
                     AppSelectItem(
                       value: category.id,
-                      label: _categoryPath(l10n, category, categories),
+                      label: categoryPath(l10n, category, categories),
                     ),
                 ],
               ),
@@ -312,77 +311,6 @@ class _RuleEditorModalState extends ConsumerState<RuleEditorModal> {
           ],
         ),
       ),
-    );
-  }
-}
-
-/// « Alimentation › Courses » — the parent is what disambiguates a subcategory
-/// whose own name (« Autres », « Assurance ») repeats across several groups.
-String _categoryPath(
-  AppLocalizations l10n,
-  AppCategory category,
-  List<AppCategory> catalog,
-) {
-  final name = localizedCategoryName(l10n, category.name);
-  final parentId = category.parentId;
-  if (parentId == null) return name;
-  for (final candidate in catalog) {
-    if (candidate.id == parentId) {
-      return '${localizedCategoryName(l10n, candidate.name)} › $name';
-    }
-  }
-  return name;
-}
-
-/// The info banner frame 08 draws under the pattern field: the count, and one
-/// example named so the user can tell at a glance whether the rule caught what
-/// they meant.
-///
-/// Silent while the pattern is empty, and silent on a rejected pattern too —
-/// that message belongs on the field, and repeating it here would state the
-/// same failure twice.
-class _MatchPreviewBanner extends StatelessWidget {
-  const _MatchPreviewBanner({required this.state});
-
-  final RulePreviewState state;
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
-
-    if (state.isLoading && state.preview == null) {
-      return InlineBanner(
-        key: const Key('rulePreviewLoading'),
-        tone: BannerTone.info,
-        message: l10n.rulePreviewLoading,
-      );
-    }
-    if (state.error != null) {
-      if (isRulePatternInvalid(state.error)) return const SizedBox.shrink();
-      return InlineBanner(
-        key: const Key('rulePreviewError'),
-        tone: BannerTone.warning,
-        message: localizeRuleError(l10n, state.error),
-      );
-    }
-
-    final preview = state.preview;
-    if (preview == null) return const SizedBox.shrink();
-
-    final sample = preview.samples.isEmpty ? null : preview.samples.first;
-    final locale = Localizations.localeOf(context).toString();
-    final message = sample == null
-        ? l10n.rulePreviewCount(preview.matchCount)
-        : l10n.rulePreviewCountWithSample(
-            preview.matchCount,
-            sample.descriptionClean,
-            DateFormat.yMd(locale).format(sample.bookedDate),
-          );
-
-    return InlineBanner(
-      key: const Key('rulePreviewBanner'),
-      tone: BannerTone.info,
-      message: message,
     );
   }
 }

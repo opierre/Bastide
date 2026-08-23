@@ -458,5 +458,12 @@
   "reviewConfirm": "Confirm",
   "reviewCorrect": "Correct",
   "reviewNoProposal": "— no proposal",
-  "reviewChooseCategory": "Choose a category"
+  "reviewChooseCategory": "Choose a category",
+  "alwaysRuleSubtitle": "A rule files these transactions without AI, on every import — pre-filled from “{label}”.",
+  "alwaysRuleCategoryLabel": "Target category",
+  "alwaysRuleApplyExisting": "Apply to existing transactions",
+  "alwaysRuleSubmit": "Create the rule",
+  "alwaysRuleCreatedTitle": "Rule created",
+  "alwaysRuleCreatedBody": "{count, plural, =0{No other transaction changed category.} one{{count} transaction recategorized.} other{{count} transactions recategorized.}}",
+  "alwaysRuleSuggestionFailed": "Couldn't pre-fill the rule. Enter the pattern yourself."
 }

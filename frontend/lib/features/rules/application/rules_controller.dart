@@ -44,6 +44,36 @@ class RulesController extends AsyncNotifier<List<Rule>> {
     return created;
   }
 
+  /// Creates a rule out of a correction and folds it into the list.
+  ///
+  /// Goes through the controller rather than straight to the repository so the
+  /// rules panel is already correct the next time it opens — a rule the user
+  /// created from the review queue that only appears after a reload reads as a
+  /// rule that wasn't saved.
+  Future<RuleFromTransactionResult> createFromTransaction({
+    required String transactionId,
+    required RuleMatchField matchField,
+    required RuleMatchType matchType,
+    required String pattern,
+    required String categoryId,
+    required bool applyNow,
+  }) async {
+    final result = await ref
+        .read(rulesRepositoryProvider)
+        .createFromTransaction(
+          transactionId: transactionId,
+          matchField: matchField,
+          matchType: matchType,
+          pattern: pattern,
+          categoryId: categoryId,
+          applyNow: applyNow,
+        );
+    state = AsyncValue.data(
+      _sorted([...state.value ?? const <Rule>[], result.rule]),
+    );
+    return result;
+  }
+
   Future<Rule> updateRule(
     String id, {
     RuleMatchField? matchField,

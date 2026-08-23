@@ -4,9 +4,12 @@ import 'package:finstride/features/accounts/application/accounts_controller.dart
 import 'package:finstride/features/accounts/domain/account.dart';
 import 'package:finstride/features/categorization/application/run_controller.dart';
 import 'package:finstride/features/categorization/domain/categorization_run.dart';
+import 'package:finstride/features/rules/application/rule_preview_controller.dart';
+import 'package:finstride/features/rules/domain/rule.dart';
 import 'package:finstride/features/transactions/application/transactions_controller.dart';
 import 'package:finstride/features/categories/domain/category.dart';
 import 'package:finstride/features/transactions/domain/transaction.dart';
+import 'package:finstride/features/transactions/presentation/always_categorize_modal.dart';
 import 'package:finstride/features/transactions/presentation/transactions_screen.dart';
 import 'package:finstride/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
@@ -95,6 +98,14 @@ Widget _wrap({
       // Phase 1 expectations: no opted-in AI, so no stage-2 chrome anywhere —
       // and no health probe leaving the test either.
       aiAvailabilityProvider.overrideWith((ref) async => AiAvailability.unavailable),
+      // The rule modal pre-fills from the sidecar; no widget test reaches one.
+      ruleSuggestionProvider.overrideWith(
+        (ref, transactionId) async => const RuleSuggestion(
+          matchField: RuleMatchField.merchant,
+          matchType: RuleMatchType.contains,
+          pattern: 'CARREFOUR',
+        ),
+      ),
     ],
     child: MaterialApp(
       locale: locale,
@@ -319,7 +330,9 @@ void main() {
     expect(controller.updateCategoryCalls, [(transactionId: 't1', categoryId: 'c1')]);
   });
 
-  testWidgets('the review queue "always categorize" affordance creates a rule', (tester) async {
+  testWidgets('the review queue "always categorize" affordance opens the rule modal', (
+    tester,
+  ) async {
     _useDesktopSurface(tester);
     final controller = FakeTransactionsController(
       initialPage: TransactionsPage(
@@ -336,11 +349,9 @@ void main() {
     await tester.pumpAndSettle();
 
     await tester.tap(find.byKey(const Key('reviewRowAlwaysButton')));
-    await tester.pumpAndSettle();
-    await tester.tap(find.byKey(const Key('categoryPickerItem-c1')));
-    await tester.pumpAndSettle();
+    await tester.pump();
 
-    expect(controller.alwaysCategorizeCalls, [(transactionId: 't1', categoryId: 'c1')]);
+    expect(find.byType(AlwaysCategorizeModal), findsOneWidget);
   });
 
   testWidgets('renders the empty state with no transactions and no active filter', (

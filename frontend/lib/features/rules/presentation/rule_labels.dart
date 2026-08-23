@@ -1,4 +1,6 @@
+import '../../../core/l10n/category_display.dart';
 import '../../../l10n/app_localizations.dart';
+import '../../categories/domain/category.dart';
 import '../domain/rule.dart';
 
 /// The localized name of the transaction field a rule reads.
@@ -31,3 +33,21 @@ String rulePatternHint(AppLocalizations l10n, RuleMatchType type) => switch (typ
   RuleMatchType.range => l10n.rulePatternHintRange,
   _ => l10n.rulePatternHintText,
 };
+
+/// « Alimentation › Courses » — the parent is what disambiguates a subcategory
+/// whose own name (« Autres », « Assurance ») repeats across several groups.
+String categoryPath(
+  AppLocalizations l10n,
+  AppCategory category,
+  List<AppCategory> catalog,
+) {
+  final name = localizedCategoryName(l10n, category.name);
+  final parentId = category.parentId;
+  if (parentId == null) return name;
+  for (final candidate in catalog) {
+    if (candidate.id == parentId) {
+      return '${localizedCategoryName(l10n, candidate.name)} › $name';
+    }
+  }
+  return name;
+}

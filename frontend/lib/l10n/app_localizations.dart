@@ -2599,6 +2599,48 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Choisir une catégorie'**
   String get reviewChooseCategory;
+
+  /// Subtext under the always-categorize modal's title, naming the transaction the rule was derived from.
+  ///
+  /// In fr, this message translates to:
+  /// **'Une règle classe ces transactions sans IA, à chaque import — pré-remplie depuis « {label} ».'**
+  String alwaysRuleSubtitle(String label);
+
+  /// Label of the always-categorize modal's target-category select.
+  ///
+  /// In fr, this message translates to:
+  /// **'Catégorie cible'**
+  String get alwaysRuleCategoryLabel;
+
+  /// Checkbox in the always-categorize modal: re-run the new rule over transactions already imported.
+  ///
+  /// In fr, this message translates to:
+  /// **'Appliquer aux transactions existantes'**
+  String get alwaysRuleApplyExisting;
+
+  /// Confirm button of the always-categorize modal.
+  ///
+  /// In fr, this message translates to:
+  /// **'Créer la règle'**
+  String get alwaysRuleSubmit;
+
+  /// Success toast headline after a rule was created from a correction.
+  ///
+  /// In fr, this message translates to:
+  /// **'Règle créée'**
+  String get alwaysRuleCreatedTitle;
+
+  /// Success toast subtext after a rule was created from a correction, counting the other rows it moved.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, =0{Aucune autre transaction n\'a changé de catégorie.} one{{count} transaction recatégorisée.} other{{count} transactions recatégorisées.}}'**
+  String alwaysRuleCreatedBody(int count);
+
+  /// Shown in the always-categorize modal when the server-side pre-fill could not be fetched — the form stays usable.
+  ///
+  /// In fr, this message translates to:
+  /// **'Impossible de pré-remplir la règle. Renseignez le motif vous-même.'**
+  String get alwaysRuleSuggestionFailed;
 }
 
 class _AppLocalizationsDelegate

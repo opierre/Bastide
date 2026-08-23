@@ -1958,5 +1958,44 @@
   "reviewChooseCategory": "Choisir une catégorie",
   "@reviewChooseCategory": {
     "description": "Link on a review row with no proposal, opening the category picker."
+  },
+  "alwaysRuleSubtitle": "Une règle classe ces transactions sans IA, à chaque import — pré-remplie depuis « {label} ».",
+  "@alwaysRuleSubtitle": {
+    "description": "Subtext under the always-categorize modal's title, naming the transaction the rule was derived from.",
+    "placeholders": {
+      "label": {
+        "type": "String",
+        "example": "PRLV SEPA ASSUR MAIF"
+      }
+    }
+  },
+  "alwaysRuleCategoryLabel": "Catégorie cible",
+  "@alwaysRuleCategoryLabel": {
+    "description": "Label of the always-categorize modal's target-category select."
+  },
+  "alwaysRuleApplyExisting": "Appliquer aux transactions existantes",
+  "@alwaysRuleApplyExisting": {
+    "description": "Checkbox in the always-categorize modal: re-run the new rule over transactions already imported."
+  },
+  "alwaysRuleSubmit": "Créer la règle",
+  "@alwaysRuleSubmit": {
+    "description": "Confirm button of the always-categorize modal."
+  },
+  "alwaysRuleCreatedTitle": "Règle créée",
+  "@alwaysRuleCreatedTitle": {
+    "description": "Success toast headline after a rule was created from a correction."
+  },
+  "alwaysRuleCreatedBody": "{count, plural, =0{Aucune autre transaction n'a changé de catégorie.} one{{count} transaction recatégorisée.} other{{count} transactions recatégorisées.}}",
+  "@alwaysRuleCreatedBody": {
+    "description": "Success toast subtext after a rule was created from a correction, counting the other rows it moved.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "alwaysRuleSuggestionFailed": "Impossible de pré-remplir la règle. Renseignez le motif vous-même.",
+  "@alwaysRuleSuggestionFailed": {
+    "description": "Shown in the always-categorize modal when the server-side pre-fill could not be fetched — the form stays usable."
   }
 }

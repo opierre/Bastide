@@ -95,3 +95,13 @@ final rulePreviewControllerProvider =
     NotifierProvider<RulePreviewController, RulePreviewState>(
       RulePreviewController.new,
     );
+
+/// The backend's pre-fill for a rule derived from one transaction.
+///
+/// `autoDispose.family` so each modal fetches for its own row and nothing is
+/// kept once it closes: a suggestion is only ever read while the form that
+/// pre-fills from it is open.
+final ruleSuggestionProvider =
+    FutureProvider.autoDispose.family<RuleSuggestion, String>((ref, transactionId) {
+      return ref.read(rulesRepositoryProvider).suggestion(transactionId);
+    });

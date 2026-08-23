@@ -160,21 +160,6 @@ class TransactionsController extends AsyncNotifier<TransactionsPage> {
     _replace(updated);
   }
 
-  /// Applies [categoryId] to [transaction] and creates a matching rule so the
-  /// rule engine picks up transactions like it automatically from now on.
-  Future<void> alwaysCategorizeLike(Transaction transaction, String categoryId) async {
-    final merchant = transaction.merchant?.trim();
-    final hasMerchant = merchant != null && merchant.isNotEmpty;
-    await ref
-        .read(transactionsRepositoryProvider)
-        .alwaysCategorizeAs(
-          matchField: hasMerchant ? 'merchant' : 'description_clean',
-          pattern: hasMerchant ? merchant : transaction.descriptionClean,
-          categoryId: categoryId,
-        );
-    await updateCategory(transaction, categoryId);
-  }
-
   /// Accepts the model's proposal for [transaction] as-is.
   ///
   /// The same patch a correction makes, and deliberately so: a confirmed guess

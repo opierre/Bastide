@@ -1553,4 +1553,37 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get reviewChooseCategory => 'Choisir une catégorie';
+
+  @override
+  String alwaysRuleSubtitle(String label) {
+    return 'Une règle classe ces transactions sans IA, à chaque import — pré-remplie depuis « $label ».';
+  }
+
+  @override
+  String get alwaysRuleCategoryLabel => 'Catégorie cible';
+
+  @override
+  String get alwaysRuleApplyExisting => 'Appliquer aux transactions existantes';
+
+  @override
+  String get alwaysRuleSubmit => 'Créer la règle';
+
+  @override
+  String get alwaysRuleCreatedTitle => 'Règle créée';
+
+  @override
+  String alwaysRuleCreatedBody(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count transactions recatégorisées.',
+      one: '$count transaction recatégorisée.',
+      zero: 'Aucune autre transaction n\'a changé de catégorie.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get alwaysRuleSuggestionFailed =>
+      'Impossible de pré-remplir la règle. Renseignez le motif vous-même.';
 }

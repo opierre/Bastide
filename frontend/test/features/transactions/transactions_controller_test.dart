@@ -138,43 +138,6 @@ void main() {
     expect(updated.categorizationSource, CategorizationSource.user);
   });
 
-  test('alwaysCategorizeLike creates a rule matching the merchant, then patches the category', () async {
-    when(
-      () => apiClient.get('/transactions', query: any(named: 'query')),
-    ).thenAnswer(
-      (_) async => _pageJson([_transactionJson(id: 't1', needsReview: true, merchant: 'Carrefour')]),
-    );
-    when(() => apiClient.get('/rules')).thenAnswer((_) async => <dynamic>[]);
-    when(
-      () => apiClient.post('/rules', body: any(named: 'body')),
-    ).thenAnswer((_) async => <String, dynamic>{});
-    when(
-      () => apiClient.patch('/transactions/t1', body: any(named: 'body')),
-    ).thenAnswer(
-      (_) async => _transactionJson(
-        id: 't1',
-        needsReview: false,
-        category: _categoryJson(),
-        categorizationSource: 'user',
-      ),
-    );
-
-    final page = await container.read(transactionsControllerProvider.future);
-    await container
-        .read(transactionsControllerProvider.notifier)
-        .alwaysCategorizeLike(page.items.single, 'c1');
-
-    final rulePayload =
-        verify(() => apiClient.post('/rules', body: captureAny(named: 'body'))).captured.single
-            as Map<String, dynamic>;
-    expect(rulePayload['match_field'], 'merchant');
-    expect(rulePayload['pattern'], 'Carrefour');
-    expect(rulePayload['category_id'], 'c1');
-
-    final updated = container.read(transactionsControllerProvider).value!.items.single;
-    expect(updated.needsReview, isFalse);
-  });
-
   test('transactionCategoriesProvider maps the category catalog', () async {
     when(() => apiClient.get('/categories')).thenAnswer((_) async => [_categoryJson()]);
 

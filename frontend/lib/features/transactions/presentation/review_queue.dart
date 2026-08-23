@@ -10,6 +10,7 @@ import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/tokens.dart';
 import '../../../core/widgets/amount_text.dart';
 import '../../../core/widgets/app_card.dart';
+import '../../../core/widgets/app_toast.dart';
 import '../../../core/widgets/category_chip.dart';
 import '../../../core/widgets/confidence_gauge.dart';
 import '../../../core/widgets/institution_avatar.dart';
@@ -20,6 +21,7 @@ import '../../categorization/application/run_controller.dart';
 import '../../settings/presentation/settings_screen.dart';
 import '../application/transactions_controller.dart';
 import '../domain/transaction.dart';
+import 'always_categorize_modal.dart';
 import 'category_picker.dart';
 import 'transaction_error_localizer.dart';
 
@@ -332,17 +334,10 @@ class _ReviewRow extends ConsumerWidget {
           else
             _NoProposalBlock(transaction: transaction, aiIsActive: aiIsActive),
           const SizedBox(width: AppSpacing.sm),
-          Builder(
-            builder: (buttonContext) => _InlineLink(
-              key: const Key('reviewRowAlwaysButton'),
-              label: l10n.reviewAlwaysCategorize,
-              onTap: () => showCategoryPicker(
-                buttonContext,
-                ref,
-                transaction: transaction,
-                alwaysRule: true,
-              ),
-            ),
+          _InlineLink(
+            key: const Key('reviewRowAlwaysButton'),
+            label: l10n.reviewAlwaysCategorize,
+            onTap: () => _createAlwaysRule(context, ref, transaction),
           ),
           const SizedBox(width: AppSpacing.sm),
           SizedBox(
@@ -361,6 +356,29 @@ class _ReviewRow extends ConsumerWidget {
       ),
     );
   }
+}
+
+/// Opens the rule form, then reports what the rule changed and re-reads the
+/// list.
+///
+/// The toast goes up before the refresh on purpose: the refresh is very likely
+/// to remove the row this was invoked from, and a toast asked for from a
+/// context that has just left the tree never appears.
+Future<void> _createAlwaysRule(
+  BuildContext context,
+  WidgetRef ref,
+  Transaction transaction,
+) async {
+  final l10n = AppLocalizations.of(context)!;
+  final result = await showAlwaysCategorizeModal(context, transaction: transaction);
+  if (result == null || !context.mounted) return;
+
+  showAppToast(
+    context,
+    title: l10n.alwaysRuleCreatedTitle,
+    message: l10n.alwaysRuleCreatedBody(result.recategorizedCount),
+  );
+  await ref.read(transactionsControllerProvider.notifier).refresh();
 }
 
 class _Label extends StatelessWidget {

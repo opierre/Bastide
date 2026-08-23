@@ -73,6 +73,47 @@ class RulesRepository {
     return json['recategorized_count'] as int;
   }
 
+  /// The form's pre-fill for a rule derived from [transactionId].
+  Future<RuleSuggestion> suggestion(String transactionId) async {
+    final json = await _apiClient.get(
+      '/rules/suggestion',
+      query: {'transaction_id': transactionId},
+    );
+    return RuleSuggestion.fromJson(json as Map<String, dynamic>);
+  }
+
+  /// Turns a correction into a rule in one call.
+  ///
+  /// One endpoint rather than a flag on the transaction patch: this both fixes
+  /// the row *and* may recategorize many others, and the response has to report
+  /// that second count (PROJECT.md §5b).
+  Future<RuleFromTransactionResult> createFromTransaction({
+    required String transactionId,
+    required RuleMatchField matchField,
+    required RuleMatchType matchType,
+    required String pattern,
+    required String categoryId,
+    required bool applyNow,
+  }) async {
+    final json =
+        await _apiClient.post(
+              '/rules/from-transaction',
+              body: {
+                'transaction_id': transactionId,
+                'match_field': matchField.wire,
+                'match_type': matchType.wire,
+                'pattern': pattern,
+                'category_id': categoryId,
+                'apply_now': applyNow,
+              },
+            )
+            as Map<String, dynamic>;
+    return RuleFromTransactionResult(
+      rule: Rule.fromJson(json['rule'] as Map<String, dynamic>),
+      recategorizedCount: json['recategorized_count'] as int,
+    );
+  }
+
   /// Counts what an *unsaved* condition would match, with up to three examples.
   ///
   /// Throws [ApiFailure] with code `RULE_PATTERN_INVALID` when a `regex`
