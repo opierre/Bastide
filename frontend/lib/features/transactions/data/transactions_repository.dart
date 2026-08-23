@@ -138,7 +138,6 @@ class TransactionsRepository {
       updatedAt: DateTime.parse(json['updated_at'] as String),
     );
   }
-
 }
 
 final transactionsRepositoryProvider = Provider<TransactionsRepository>((ref) {

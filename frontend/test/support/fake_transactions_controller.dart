@@ -12,6 +12,7 @@ class FakeTransactionsController extends TransactionsController {
 
   final updateCategoryCalls = <({String transactionId, String categoryId})>[];
   final alwaysCategorizeCalls = <({String transactionId, String categoryId})>[];
+  int refreshQuietlyCalls = 0;
 
   Object? errorOnUpdate;
 
@@ -31,6 +32,9 @@ class FakeTransactionsController extends TransactionsController {
     if (errorOnUpdate != null) throw errorOnUpdate!;
     _applyCategory(transaction.id, categoryId);
   }
+
+  @override
+  Future<void> refreshQuietly() async => refreshQuietlyCalls++;
 
   void _applyCategory(String transactionId, String categoryId) {
     final current = state.value;
