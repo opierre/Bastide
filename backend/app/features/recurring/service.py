@@ -1,21 +1,32 @@
-"""Business logic for a detection pass: run the detector, then persist what it found.
+"""Business logic for recurring series: the detection pass, and the lifecycle above it.
 
-The whole pass is one database transaction. Its two rules — idempotence and the primacy of
-user intent (`PROJECT.md` §12) — are what most of this module is about: running detection twice
-over unchanged history must leave the same rows behind as running it once, and must never talk
-back to a user who has already had their say about a series.
+Two services, because they answer to different rules. `RecurringDetectionService` runs the
+detector and persists what it found, under idempotence and the primacy of user intent
+(`PROJECT.md` §12): running detection twice over unchanged history must leave the same rows
+behind as running it once, and must never talk back to a user who has already had their say.
+`RecurringService` *is* the user: what they see of a series, and the ones they declare
+themselves.
 """
 
 from dataclasses import dataclass
+from datetime import date, timedelta
 
 from sqlalchemy.orm import Session
 
+from app.core.errors import ConflictError, NotFoundError
 from app.features.accounts.service import AccountService
-from app.features.recurring.detector import SeriesCandidate
+from app.features.recurring.detector import (
+    SeriesCandidate,
+)
 from app.features.recurring.detector import detect as detect_candidates
 from app.features.recurring.models import RecurringOccurrence, RecurringSeries
+from app.features.recurring.normalize import normalize_label
 from app.features.recurring.repository import RecurringRepository
-from app.features.recurring.schemas import SeriesStatus
+from app.features.recurring.schemas import (
+    SeriesCreate,
+    SeriesStatus,
+)
+from app.features.transactions.models import Transaction
 from app.features.transactions.repository import TransactionRepository
 
 #: The status a newly detected series starts in — the detector has found it, the user has not
@@ -169,3 +180,120 @@ def _refresh(series: RecurringSeries, candidate: SeriesCandidate) -> None:
     series.occurrence_count = candidate.occurrence_count
     series.price_change_minor = candidate.price_change_minor
     series.price_changed_at = candidate.price_changed_at
+
+
+class SeriesNotFoundError(NotFoundError):
+    """Raised when a series doesn't exist or doesn't belong to the caller."""
+
+    code = "RECURRING_SERIES_NOT_FOUND"
+
+
+class SeriesAlreadyTrackedError(ConflictError):
+    """Raised when a declared series would collide with one already tracked in that account."""
+
+    code = "RECURRING_SERIES_EXISTS"
+
+
+#: The interval a *declared* series is seeded with, having no occurrences to measure one from.
+#: `irregular` gets none — that is what irregular means — so its `next_expected_date` is a
+#: placeholder the date-derived signals skip rather than a claim about when it will be charged.
+NOMINAL_INTERVAL_DAYS: dict[str, int] = {
+    "weekly": 7,
+    "monthly": 30,
+    "quarterly": 91,
+    "yearly": 365,
+    "irregular": 0,
+}
+
+
+class RecurringService:
+    """The user-facing surface over series: listing, detail, and manual declaration.
+
+    Separate from `RecurringDetectionService` because the two answer to different rules. That
+    one is a batch pass that must never contradict the user; this one *is* the user.
+    """
+
+    def __init__(
+        self,
+        repository: RecurringRepository,
+        transactions: TransactionRepository,
+        accounts: AccountService,
+    ) -> None:
+        self._repository = repository
+        self._transactions = transactions
+        self._accounts = accounts
+
+    def list_for_user(
+        self, user_id: str, *, status: str | None = None, account_id: str | None = None
+    ) -> list[RecurringSeries]:
+        """The user's series, soonest charge first.
+
+        Raises:
+            AccountNotFoundError: `account_id` is set and is not one of the user's accounts.
+        """
+        if account_id is not None:
+            self._accounts.get(user_id, account_id)
+        return self._repository.list_for_user(user_id, account_id=account_id, status=status)
+
+    def get(self, user_id: str, series_id: str) -> RecurringSeries:
+        """One series the user owns.
+
+        Raises:
+            SeriesNotFoundError: no such series, or it belongs to another user.
+        """
+        series = self._repository.get_for_user(series_id, user_id)
+        if series is None:
+            raise SeriesNotFoundError("Recurring series not found.")
+        return series
+
+    def occurrences(
+        self, user_id: str, series_id: str
+    ) -> tuple[RecurringSeries, list[tuple[RecurringOccurrence, Transaction]]]:
+        """A series and the transactions it was deduced from, newest first.
+
+        Raises:
+            SeriesNotFoundError: no such series, or it belongs to another user.
+        """
+        series = self.get(user_id, series_id)
+        return series, self._repository.list_occurrences(series.id)
+
+    def create(self, user_id: str, data: SeriesCreate, today: date) -> RecurringSeries:
+        """Declare a subscription detection has not found.
+
+        The observed columns have nothing to observe yet, so they are seeded from the creation
+        date and the nominal length of the chosen cadence: `occurrence_count` is `0`, and
+        `first_seen_date` records when the user started tracking the series rather than claiming
+        when it started. `is_manual` keeps detection off it for good (`PROJECT.md` §12).
+
+        Raises:
+            AccountNotFoundError: the account is not one of the user's.
+            SeriesAlreadyTrackedError: that account already tracks a series under this name.
+        """
+        account = self._accounts.get(user_id, data.account_id)
+        key = normalize_label(data.label)
+        existing = self._repository.get_by_merchant_key(user_id, account.id, key)
+        if existing is not None:
+            raise SeriesAlreadyTrackedError(
+                "This account already tracks a subscription under that name.",
+                details={"series_id": existing.id},
+            )
+
+        interval = NOMINAL_INTERVAL_DAYS[data.cadence]
+        series = RecurringSeries(
+            user_id=user_id,
+            account_id=account.id,
+            merchant_key=key,
+            label=data.label,
+            category_id=data.category_id,
+            cadence=data.cadence,
+            median_interval_days=interval,
+            expected_amount_minor=data.expected_amount_minor,
+            currency=account.currency,
+            first_seen_date=today,
+            last_seen_date=today,
+            next_expected_date=today + timedelta(days=interval),
+            occurrence_count=0,
+            status=INITIAL_STATUS,
+            is_manual=True,
+        )
+        return self._repository.add(series)
