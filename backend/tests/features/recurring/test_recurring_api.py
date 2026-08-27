@@ -428,6 +428,7 @@ def test_a_dismissed_series_stays_dismissed_across_a_detection_re_run(
 
 def test_every_route_requires_authentication(client: TestClient) -> None:
     assert client.get("/api/v1/recurring").status_code == 401
+    assert client.get("/api/v1/recurring/summary").status_code == 401
     assert client.get("/api/v1/recurring/some-id").status_code == 401
     assert client.post("/api/v1/recurring", json={}).status_code == 401
     assert client.patch("/api/v1/recurring/some-id", json={}).status_code == 401

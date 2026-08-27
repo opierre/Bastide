@@ -119,3 +119,58 @@ class SeriesUpdate(BaseModel):
     cadence: Cadence | None = None
     expected_amount_minor: int | None = None
     status: SeriesStatus | None = None
+
+
+class NextCharge(BaseModel):
+    """The soonest charge ahead, ready to print — « Netflix — demain · 15,49 € · 15/05/2026 »."""
+
+    series_id: str
+    label: str
+    #: Signed, like every other amount here.
+    amount_minor: int
+    due_on: date
+
+
+class PriceIncrease(BaseModel):
+    """A recent price rise on a series."""
+
+    series_id: str
+    #: Signed step, so negative on an outflow that grew.
+    delta_minor: int
+    changed_at: date
+
+
+class MissedCharge(BaseModel):
+    """A charge that has not landed long enough after its due date to be worth reporting.
+
+    `days_late` travels with `expected_on` because the panel prints « 9 jours de retard »: a
+    date alone would make the client measure lateness against its own clock.
+    """
+
+    series_id: str
+    expected_on: date
+    days_late: int
+
+
+class RecurringSummary(BaseModel):
+    """The three summary cards of the subscriptions panel, plus the signals the rows carry.
+
+    Every field is computed server-side rather than re-derived by the client from the list, so
+    the burden, the counts, and the exclusions can never disagree with each other.
+    """
+
+    #: Every non-dismissed, non-cancelled series normalised to a monthly figure and summed.
+    #: Signed, so negative (`PROJECT.md` §8); `irregular` series are excluded, having no period
+    #: to normalise from.
+    monthly_total_minor: int
+    #: Non-dismissed, non-cancelled series — what the panel calls « Abonnements actifs ».
+    active_count: int
+    #: Counted separately because the panel names the exclusion (« Canal+ (résilié) exclu »)
+    #: rather than leaving the burden and the count to disagree silently.
+    cancelled_count: int
+    #: One entry per cadence, zeros included, over the same set as `active_count`.
+    cadence_counts: dict[str, int]
+    next_charge: NextCharge | None
+    price_increases: list[PriceIncrease]
+    missed: list[MissedCharge]
+    currency: str

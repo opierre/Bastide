@@ -4,8 +4,8 @@ Two services, because they answer to different rules. `RecurringDetectionService
 detector and persists what it found, under idempotence and the primacy of user intent
 (`PROJECT.md` §12): running detection twice over unchanged history must leave the same rows
 behind as running it once, and must never talk back to a user who has already had their say.
-`RecurringService` *is* the user — listing, editing, and the status lifecycle — and its only
-constraint is that the states it writes are states the lifecycle allows.
+`RecurringService` *is* the user — listing, editing, the status lifecycle, and the read-time
+summary — and its only constraint is that the states it writes are states the lifecycle allows.
 """
 
 from dataclasses import dataclass
@@ -16,13 +16,19 @@ from sqlalchemy.orm import Session
 from app.core.errors import ConflictError, NotFoundError
 from app.features.accounts.service import AccountService
 from app.features.recurring.detector import (
+    INTERVAL_TOLERANCE_FLOOR_DAYS,
+    INTERVAL_TOLERANCE_PERCENT,
     SeriesCandidate,
 )
 from app.features.recurring.detector import detect as detect_candidates
 from app.features.recurring.models import RecurringOccurrence, RecurringSeries
-from app.features.recurring.normalize import normalize_label
+from app.features.recurring.normalize import merchant_key, normalize_label
 from app.features.recurring.repository import RecurringRepository
 from app.features.recurring.schemas import (
+    MissedCharge,
+    NextCharge,
+    PriceIncrease,
+    RecurringSummary,
     SeriesCreate,
     SeriesStatus,
     SeriesUpdate,
@@ -214,6 +220,10 @@ LEGAL_TRANSITIONS: dict[str, frozenset[str]] = {
     "dismissed": frozenset(),
 }
 
+#: Statuses a series still counts as running under: everything the user has not ruled out.
+#: `cancelled` is a subscription that existed and ended, so it stays listed and counted on its
+#: own line, but never enters the burden.
+ACTIVE_STATUSES: frozenset[str] = frozenset({"detected", "confirmed"})
 
 #: The interval a *declared* series is seeded with, having no occurrences to measure one from.
 #: `irregular` gets none — that is what irregular means — so its `next_expected_date` is a
@@ -226,9 +236,59 @@ NOMINAL_INTERVAL_DAYS: dict[str, int] = {
     "irregular": 0,
 }
 
+#: Numerator and denominator converting one cadence's charge to a monthly figure
+#: (`PROJECT.md` §12). `irregular` is absent: a series with no period has no monthly equivalent,
+#: and inventing one would put a number the user never agreed to into the burden.
+MONTHLY_FACTORS: dict[str, tuple[int, int]] = {
+    "weekly": (52, 12),
+    "monthly": (1, 1),
+    "quarterly": (1, 3),
+    "yearly": (1, 12),
+}
+
+#: How long a price rise stays news. Past a quarter it is simply what the subscription costs.
+PRICE_INCREASE_WINDOW_DAYS = 90
+
+
+def monthly_equivalent_minor(amount_minor: int, cadence: str) -> int | None:
+    """``amount_minor`` charged at ``cadence`` as a monthly figure, or `None` if it has none.
+
+    Integer minor units throughout (`PROJECT.md` §8): the conversion is one exact rational
+    multiplication rounded once, never a float that would carry its own error into a sum.
+    """
+    factors = MONTHLY_FACTORS.get(cadence)
+    if factors is None:
+        return None
+    numerator, denominator = factors
+    return _divide_rounding_half_away(amount_minor * numerator, denominator)
+
+
+def _divide_rounding_half_away(numerator: int, denominator: int) -> int:
+    """``numerator / denominator`` rounded to the nearest minor unit, halves away from zero.
+
+    Away from zero rather than Python's banker's rounding so the rule is symmetric in the sign:
+    an outflow and an inflow of the same size normalise to the same magnitude, which they would
+    not if ties broke toward even.
+    """
+    magnitude = (abs(numerator) * 2 + denominator) // (denominator * 2)
+    return -magnitude if numerator < 0 else magnitude
+
+
+def missed_tolerance_days(median_interval_days: int) -> int:
+    """How late a charge may be before it counts as missed, for a series of this interval.
+
+    The detector's own gap tolerance (`PROJECT.md` §12), reused deliberately: a charge still
+    within the spread detection accepts between two occurrences has not gone missing, it has
+    landed on a working day.
+    """
+    return max(
+        INTERVAL_TOLERANCE_FLOOR_DAYS,
+        median_interval_days * INTERVAL_TOLERANCE_PERCENT // 100,
+    )
+
 
 class RecurringService:
-    """The user-facing surface over series: listing, detail, and the status lifecycle.
+    """The user-facing surface over series: listing, detail, lifecycle, and the summary.
 
     Separate from `RecurringDetectionService` because the two answer to different rules. That
     one is a batch pass that must never contradict the user; this one *is* the user, and its
@@ -362,6 +422,85 @@ class RecurringService:
         series.status = "dismissed"
         self._repository.save(series)
 
+    def summary(self, user_id: str, currency: str, today: date) -> RecurringSummary:
+        """The monthly burden, the counts, and the price-increase and missed-charge signals.
+
+        Everything here is derived at read time and nothing is written: a missed charge stops
+        being true the moment the charge lands, so persisting it would mean carrying a flag that
+        is wrong between an import and the next detection pass (`PROJECT.md` §12).
+        """
+        series = self._repository.list_for_user(user_id)
+        active = [row for row in series if row.status in ACTIVE_STATUSES]
+
+        monthly_total = 0
+        cadence_counts = dict.fromkeys(NOMINAL_INTERVAL_DAYS, 0)
+        for row in active:
+            cadence_counts[row.cadence] += 1
+            monthly = monthly_equivalent_minor(row.expected_amount_minor, row.cadence)
+            if monthly is not None:
+                monthly_total += monthly
+
+        return RecurringSummary(
+            monthly_total_minor=monthly_total,
+            active_count=len(active),
+            cancelled_count=sum(1 for row in series if row.status == "cancelled"),
+            cadence_counts=cadence_counts,
+            next_charge=_next_charge(active, today),
+            price_increases=_price_increases(active, today),
+            missed=self._missed(user_id, active, today),
+            currency=currency,
+        )
+
+    def _missed(
+        self, user_id: str, active: list[RecurringSeries], today: date
+    ) -> list[MissedCharge]:
+        """Which active series are overdue past their tolerance with no charge to show for it.
+
+        The second half is why this reads the ledger rather than the occurrence links: those are
+        refreshed only by a detection pass, so a charge imported this morning would still look
+        missing until the user ran one. Matching on the same merchant key the detector groups by
+        lets an imported charge clear the signal on its own, with no write to the series.
+
+        The scan is skipped entirely when nothing is overdue, which is the ordinary case.
+        """
+        overdue = [
+            row
+            for row in active
+            if row.cadence != "irregular"
+            and (today - row.next_expected_date).days
+            > missed_tolerance_days(row.median_interval_days)
+        ]
+        if not overdue:
+            return []
+
+        newest_charge = self._newest_charge_dates(user_id)
+        return [
+            MissedCharge(
+                series_id=row.id,
+                expected_on=row.next_expected_date,
+                days_late=(today - row.next_expected_date).days,
+            )
+            for row in overdue
+            if newest_charge.get((row.account_id, row.merchant_key), row.last_seen_date)
+            <= row.last_seen_date
+        ]
+
+    def _newest_charge_dates(self, user_id: str) -> dict[tuple[str, str], date]:
+        """The most recent outflow per `(account_id, merchant_key)` across the user's ledger.
+
+        Outflows only, and keyed exactly as the detector groups, so "has this subscription been
+        charged since we last looked" is answered by the same notion of "this subscription".
+        """
+        newest: dict[tuple[str, str], date] = {}
+        for transaction in self._transactions.list_all_for_user(user_id):
+            if transaction.amount_minor >= 0:
+                continue
+            key = (transaction.account_id, merchant_key(transaction))
+            previous = newest.get(key)
+            if previous is None or transaction.booked_date > previous:
+                newest[key] = transaction.booked_date
+        return newest
+
 
 def _check_transition(current: str, requested: str) -> None:
     """Guard a status change against `LEGAL_TRANSITIONS`.
@@ -374,3 +513,47 @@ def _check_transition(current: str, requested: str) -> None:
             "That status change is not allowed for this series.",
             details={"from": current, "to": requested},
         )
+
+
+def _next_charge(active: list[RecurringSeries], today: date) -> NextCharge | None:
+    """The soonest charge still ahead, or `None` when no active series expects one.
+
+    ``active`` arrives ordered by `next_expected_date`, so the first series that expects a
+    charge at all is the answer — but only among the dates that have not passed. A series whose
+    charge was due last week is late, not next: the panel prints it as a missed charge on its
+    own row, and calling it « Prochain prélèvement » would put a date in the past on a card
+    whose whole job is to say what is coming.
+    """
+    for row in active:
+        if row.cadence == "irregular" or row.next_expected_date < today:
+            continue
+        return NextCharge(
+            series_id=row.id,
+            label=row.label,
+            amount_minor=row.expected_amount_minor,
+            due_on=row.next_expected_date,
+        )
+    return None
+
+
+def _price_increases(active: list[RecurringSeries], today: date) -> list[PriceIncrease]:
+    """Recent price *rises*, newest first.
+
+    Filtered to rises because a subscription that got cheaper is not something to flag, and on
+    an outflow a rise is the step growing more negative. The detector wrote both the delta and
+    its date; this only decides what is still recent enough to be worth showing.
+    """
+    window_start = today - timedelta(days=PRICE_INCREASE_WINDOW_DAYS)
+    increases = [
+        PriceIncrease(
+            series_id=row.id,
+            delta_minor=row.price_change_minor,
+            changed_at=row.price_changed_at,
+        )
+        for row in active
+        if row.price_change_minor is not None
+        and row.price_change_minor < 0
+        and row.price_changed_at is not None
+        and row.price_changed_at >= window_start
+    ]
+    return sorted(increases, key=lambda increase: increase.changed_at, reverse=True)

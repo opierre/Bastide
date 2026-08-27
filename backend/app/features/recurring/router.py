@@ -1,4 +1,4 @@
-"""Recurring-series endpoints: detection and the subscription lifecycle."""
+"""Recurring-series endpoints: detection, the subscription lifecycle, and the panel summary."""
 
 from datetime import date
 from typing import Annotated
@@ -16,6 +16,7 @@ from app.features.recurring.schemas import (
     DetectionResultRead,
     DetectRequest,
     OccurrenceRead,
+    RecurringSummary,
     SeriesCreate,
     SeriesDetailRead,
     SeriesRead,
@@ -94,6 +95,20 @@ async def detect_recurring(
     return DetectionResultRead(
         created_count=result.created_count, updated_count=result.updated_count
     )
+
+
+@router.get("/summary", response_model=RecurringSummary)
+async def get_summary(
+    service: Annotated[RecurringService, Depends(_service)],
+    user: Annotated[User, Depends(get_current_user)],
+) -> RecurringSummary:
+    """The monthly burden, the counts, and the price-increase and missed-charge signals.
+
+    Declared above `/{series_id}` so the literal path wins the match, and takes `date.today()`
+    here rather than in the service so the read-time signals stay testable without freezing the
+    clock — the same arrangement as the dashboard's trends.
+    """
+    return service.summary(user.id, user.currency, date.today())
 
 
 @router.get("/{series_id}", response_model=SeriesDetailRead)
