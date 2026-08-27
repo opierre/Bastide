@@ -7,6 +7,7 @@ with OFX in `canonical.py`.
 """
 
 import csv
+from _strptime import TimeRE
 from datetime import datetime
 from decimal import Decimal, InvalidOperation
 
@@ -67,9 +68,14 @@ def validate_template_config(config: CsvTemplateConfig) -> None:
     if config.decimal_separator not in (",", "."):
         raise CsvParseError(f"decimal_separator must be ',' or '.': {config.decimal_separator!r}")
 
+    # `strftime` isn't used here: unknown directives are silently passed through as
+    # literal text on glibc (Linux), while Windows' CRT raises - the same date_format
+    # would validate on a dev machine and pass through as broken in CI. `TimeRE` is the
+    # pure-Python directive table `strptime` itself builds a matching regex from, so it
+    # rejects an unsupported directive like `%Q` the same way on every platform.
     try:
-        datetime(2000, 1, 1).strftime(config.date_format)
-    except ValueError as exc:
+        TimeRE().pattern(config.date_format)
+    except (KeyError, ValueError) as exc:
         raise CsvParseError(f"Invalid date_format: {config.date_format!r}") from exc
 
 
