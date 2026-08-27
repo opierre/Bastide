@@ -85,6 +85,25 @@ class TransactionRepository:
             )
         )
 
+    def list_all_for_user(
+        self, user_id: str, *, account_id: str | None = None
+    ) -> list[Transaction]:
+        """The user's whole history, oldest first, optionally narrowed to one account.
+
+        Deliberately unpaginated and unfiltered: the recurring detector re-reads every row
+        rather than only the new ones, because a third occurrence promotes a group that has
+        been sitting below the threshold since long before this import (`PROJECT.md` §12).
+        The scan is one pass over an account's rows at a scale §4 sizes in the thousands.
+        """
+        query = (
+            select(Transaction)
+            .join(Account, Account.id == Transaction.account_id)
+            .where(Account.user_id == user_id)
+        )
+        if account_id is not None:
+            query = query.where(Transaction.account_id == account_id)
+        return list(self._db.scalars(query.order_by(Transaction.booked_date, Transaction.id)))
+
     def get_by_id_for_user(self, transaction_id: str, user_id: str) -> Transaction | None:
         return self._db.scalar(
             select(Transaction)
