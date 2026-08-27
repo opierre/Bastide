@@ -4,8 +4,8 @@ Two services, because they answer to different rules. `RecurringDetectionService
 detector and persists what it found, under idempotence and the primacy of user intent
 (`PROJECT.md` §12): running detection twice over unchanged history must leave the same rows
 behind as running it once, and must never talk back to a user who has already had their say.
-`RecurringService` *is* the user: what they see of a series, and the ones they declare
-themselves.
+`RecurringService` *is* the user — listing, editing, and the status lifecycle — and its only
+constraint is that the states it writes are states the lifecycle allows.
 """
 
 from dataclasses import dataclass
@@ -25,6 +25,7 @@ from app.features.recurring.repository import RecurringRepository
 from app.features.recurring.schemas import (
     SeriesCreate,
     SeriesStatus,
+    SeriesUpdate,
 )
 from app.features.transactions.models import Transaction
 from app.features.transactions.repository import TransactionRepository
@@ -194,6 +195,26 @@ class SeriesAlreadyTrackedError(ConflictError):
     code = "RECURRING_SERIES_EXISTS"
 
 
+class InvalidSeriesTransitionError(ConflictError):
+    """Raised when a status change is not one the lifecycle allows."""
+
+    code = "RECURRING_INVALID_TRANSITION"
+
+
+#: The lifecycle, exhaustively. `detected` is where both detection and a user declaration start;
+#: `dismissed` is the end of the line — the detector never revives it (`FROZEN_STATUSES`) and
+#: nothing else may either, because a "no" undoable by a stray patch is not an answer.
+#: `cancelled → confirmed` exists for the user who resubscribes. Anything absent here is a 409
+#: rather than a silent no-op: a client asking for a transition the panel never offers is
+#: mistaken about the series' state, and writing the state it imagined would hide that.
+LEGAL_TRANSITIONS: dict[str, frozenset[str]] = {
+    "detected": frozenset({"confirmed", "dismissed"}),
+    "confirmed": frozenset({"cancelled", "dismissed"}),
+    "cancelled": frozenset({"confirmed"}),
+    "dismissed": frozenset(),
+}
+
+
 #: The interval a *declared* series is seeded with, having no occurrences to measure one from.
 #: `irregular` gets none — that is what irregular means — so its `next_expected_date` is a
 #: placeholder the date-derived signals skip rather than a claim about when it will be charged.
@@ -207,10 +228,11 @@ NOMINAL_INTERVAL_DAYS: dict[str, int] = {
 
 
 class RecurringService:
-    """The user-facing surface over series: listing, detail, and manual declaration.
+    """The user-facing surface over series: listing, detail, and the status lifecycle.
 
     Separate from `RecurringDetectionService` because the two answer to different rules. That
-    one is a batch pass that must never contradict the user; this one *is* the user.
+    one is a batch pass that must never contradict the user; this one *is* the user, and its
+    only constraint is that the states it writes are states the lifecycle allows.
     """
 
     def __init__(
@@ -297,3 +319,58 @@ class RecurringService:
             is_manual=True,
         )
         return self._repository.add(series)
+
+    def update(self, user_id: str, series_id: str, data: SeriesUpdate) -> RecurringSeries:
+        """Patch a series' user-owned fields, validating a status change against the lifecycle.
+
+        Raises:
+            SeriesNotFoundError: no such series, or it belongs to another user.
+            InvalidSeriesTransitionError: the requested status is not reachable from the
+                current one.
+        """
+        series = self.get(user_id, series_id)
+        # Checked before anything is assigned, so a rejected transition leaves the whole patch
+        # unapplied rather than half of it.
+        if data.status is not None:
+            _check_transition(series.status, data.status)
+            series.status = data.status
+        if data.label is not None:
+            series.label = data.label
+        if data.category_id is not None:
+            series.category_id = data.category_id
+        if data.cadence is not None:
+            series.cadence = data.cadence
+        if data.expected_amount_minor is not None:
+            series.expected_amount_minor = data.expected_amount_minor
+        return self._repository.save(series)
+
+    def delete(self, user_id: str, series_id: str) -> None:
+        """Remove a declared series; dismiss a detected one.
+
+        A manual series is pure user data, so deleting it deletes it. A detected one is a
+        conclusion the ledger still supports: hard-deleting it would only invite the next
+        detection pass to recreate it, so the delete is recorded as `dismissed` — the one place
+        the user's "no" can live where detection will respect it.
+
+        Raises:
+            SeriesNotFoundError: no such series, or it belongs to another user.
+        """
+        series = self.get(user_id, series_id)
+        if series.is_manual:
+            self._repository.delete(series)
+            return
+        series.status = "dismissed"
+        self._repository.save(series)
+
+
+def _check_transition(current: str, requested: str) -> None:
+    """Guard a status change against `LEGAL_TRANSITIONS`.
+
+    Raises:
+        InvalidSeriesTransitionError: the transition is not one the lifecycle allows.
+    """
+    if requested not in LEGAL_TRANSITIONS[current]:
+        raise InvalidSeriesTransitionError(
+            "That status change is not allowed for this series.",
+            details={"from": current, "to": requested},
+        )

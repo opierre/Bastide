@@ -101,3 +101,21 @@ class SeriesCreate(BaseModel):
     )
     cadence: Cadence
     category_id: str | None = None
+
+
+class SeriesUpdate(BaseModel):
+    """Patch payload for a series.
+
+    Omitted fields are left alone; `None` is indistinguishable from absent, as everywhere else
+    in this API, so clearing a category is not expressible here.
+
+    `median_interval_days` and `next_expected_date` are deliberately *not* recomputed when
+    `cadence` changes: on a detected series they are observations, and replacing a measured
+    median with the nominal length of a cadence would overwrite what the ledger actually shows.
+    """
+
+    label: str | None = Field(default=None, min_length=1, max_length=255)
+    category_id: str | None = None
+    cadence: Cadence | None = None
+    expected_amount_minor: int | None = None
+    status: SeriesStatus | None = None

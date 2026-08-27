@@ -1,4 +1,4 @@
-"""Recurring-series endpoints: detection, and the subscriptions the user reads and declares."""
+"""Recurring-series endpoints: detection and the subscription lifecycle."""
 
 from datetime import date
 from typing import Annotated
@@ -20,6 +20,7 @@ from app.features.recurring.schemas import (
     SeriesDetailRead,
     SeriesRead,
     SeriesStatus,
+    SeriesUpdate,
 )
 from app.features.recurring.service import RecurringDetectionService, RecurringService
 from app.features.transactions.repository import TransactionRepository
@@ -114,3 +115,24 @@ async def get_series(
             for occurrence, transaction in occurrences
         ],
     )
+
+
+@router.patch("/{series_id}", response_model=SeriesRead)
+async def update_series(
+    series_id: str,
+    payload: SeriesUpdate,
+    service: Annotated[RecurringService, Depends(_service)],
+    user: Annotated[User, Depends(get_current_user)],
+) -> SeriesRead:
+    """Patch a series; a `status` outside the lifecycle is a 409, not a write."""
+    return SeriesRead.model_validate(service.update(user.id, series_id, payload))
+
+
+@router.delete("/{series_id}", status_code=status.HTTP_204_NO_CONTENT)
+async def delete_series(
+    series_id: str,
+    service: Annotated[RecurringService, Depends(_service)],
+    user: Annotated[User, Depends(get_current_user)],
+) -> None:
+    """Delete a declared series; dismiss a detected one."""
+    service.delete(user.id, series_id)

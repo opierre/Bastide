@@ -79,6 +79,18 @@ class RecurringRepository:
         self._db.refresh(series)
         return series
 
+    def save(self, series: RecurringSeries) -> RecurringSeries:
+        """Commit pending changes to a series already in the session."""
+        self._db.commit()
+        self._db.refresh(series)
+        return series
+
+    def delete(self, series: RecurringSeries) -> None:
+        """Remove a series and its occurrence links, and commit."""
+        self.delete_occurrences_for_series([series.id])
+        self._db.delete(series)
+        self._db.commit()
+
     def get_by_merchant_key(
         self, user_id: str, account_id: str, merchant_key: str
     ) -> RecurringSeries | None:
