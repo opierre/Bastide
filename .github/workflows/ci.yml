@@ -67,8 +67,15 @@ jobs:
           cache-dependency-glob: uv.lock
       - name: Install dependencies
         run: uv sync --frozen
+      # Each tool runs twice: once to a machine-readable report for the job
+      # summary and the artifact, once in `github` format for the inline PR
+      # annotations. The second run is cache-warm and costs milliseconds.
+      # `set -u` without `-e` keeps the annotating run as the step's exit code.
       - name: ruff check
-        run: uv run ruff check --output-format=github .
+        run: |
+          set -uo pipefail
+          uv run ruff check --output-format=json --output-file "${RUNNER_TEMP}/ruff.json" .
+          uv run ruff check --output-format=github .
       - name: ruff format
         run: uv run ruff format --check .
       # NOT blocking yet: `ty check` currently reports 13 pre-existing
@@ -76,7 +83,28 @@ jobs:
       # Flip to blocking once those are fixed - see CI-PLAN.md.
       - name: ty check (non-blocking)
         continue-on-error: true
-        run: uv run ty check
+        run: |
+          set -uo pipefail
+          uv run ty check --output-format=junit > "${RUNNER_TEMP}/ty-junit.xml"
+          uv run ty check --output-format=github
+      # always(): the reports matter most when a step above just failed.
+      - name: Job summary
+        if: always()
+        run: |
+          python3 "${GITHUB_WORKSPACE}/.github/scripts/ci_summary.py" \
+            --title "backend / lint" \
+            --ruff "${RUNNER_TEMP}/ruff.json" \
+            --ty-junit "${RUNNER_TEMP}/ty-junit.xml"
+      - name: Upload lint reports
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: backend-lint-reports
+          path: |
+            ${{ runner.temp }}/ruff.json
+            ${{ runner.temp }}/ty-junit.xml
+          retention-days: 14
+          if-no-files-found: warn
 
   backend-test:
     name: backend / test
@@ -99,7 +127,21 @@ jobs:
       - name: Install dependencies
         run: uv sync --frozen
       - name: pytest
-        run: uv run pytest -q
+        run: uv run pytest -q --junitxml="${RUNNER_TEMP}/pytest-junit.xml"
+      - name: Job summary
+        if: always()
+        run: |
+          python3 "${GITHUB_WORKSPACE}/.github/scripts/ci_summary.py" \
+            --title "backend / test" \
+            --pytest-junit "${RUNNER_TEMP}/pytest-junit.xml"
+      - name: Upload test report
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: backend-test-report
+          path: ${{ runner.temp }}/pytest-junit.xml
+          retention-days: 14
+          if-no-files-found: warn
 
   frontend-lint:
     name: frontend / lint
@@ -159,8 +201,24 @@ jobs:
           pub-cache-key: pub-${{ runner.os }}-${{ hashFiles('frontend/pubspec.lock') }}
       - name: flutter pub get
         run: flutter pub get
+      # --file-reporter adds a machine-readable copy without displacing the
+      # stdout reporter, which is already `github` when running on Actions.
       - name: flutter test
-        run: flutter test
+        run: flutter test --file-reporter="json:${RUNNER_TEMP}/dart-tests.json"
+      - name: Job summary
+        if: always()
+        run: |
+          python3 "${GITHUB_WORKSPACE}/.github/scripts/ci_summary.py" \
+            --title "frontend / test" \
+            --dart-json "${RUNNER_TEMP}/dart-tests.json"
+      - name: Upload test report
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: frontend-test-report
+          path: ${{ runner.temp }}/dart-tests.json
+          retention-days: 14
+          if-no-files-found: warn
 
   deps-vulns:
     name: security / dependency vulnerabilities
