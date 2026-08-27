@@ -90,8 +90,9 @@ class SeriesTableHeader extends StatelessWidget {
   }
 }
 
-/// What the kebab can do to a row: move it along the lifecycle.
-enum SeriesAction { confirm, dismiss, cancel }
+/// What the kebab can do to a row: move it along the lifecycle, or open it in
+/// the form.
+enum SeriesAction { confirm, dismiss, cancel, edit }
 
 /// A 56 px subscription row: monogram · label · category · cadence · amount ·
 /// next charge · status pill · kebab (`docs/design/10` frame ①).
@@ -105,6 +106,7 @@ class SeriesRow extends StatefulWidget {
     super.key,
     required this.row,
     required this.category,
+    required this.onOpen,
     required this.onAction,
   });
 
@@ -114,6 +116,7 @@ class SeriesRow extends StatefulWidget {
   /// still loading, which renders the same dashed "uncategorized" chip.
   final AppCategory? category;
 
+  final VoidCallback onOpen;
   final ValueChanged<SeriesAction> onAction;
 
   @override
@@ -144,10 +147,18 @@ class _SeriesRowState extends State<SeriesRow> {
             monogram: Center(
               child: MonogramAvatar(name: series.label, size: SeriesColumns.monogram),
             ),
-            name: Text(
-              series.label,
-              overflow: TextOverflow.ellipsis,
-              style: textTheme.titleSmall,
+            name: GestureDetector(
+              key: Key('seriesOpen-${series.id}'),
+              behavior: HitTestBehavior.opaque,
+              onTap: widget.onOpen,
+              child: MouseRegion(
+                cursor: SystemMouseCursors.click,
+                child: Text(
+                  series.label,
+                  overflow: TextOverflow.ellipsis,
+                  style: textTheme.titleSmall,
+                ),
+              ),
             ),
             category: Align(
               alignment: Alignment.centerLeft,
@@ -362,6 +373,14 @@ class _SeriesKebab extends StatelessWidget {
               label: l10n.subscriptionActionCancel,
             ),
           ),
+        PopupMenuItem(
+          key: Key('seriesActionEdit-${series.id}'),
+          value: SeriesAction.edit,
+          child: _MenuRow(
+            icon: Icons.edit_outlined,
+            label: l10n.subscriptionActionEdit,
+          ),
+        ),
       ],
     );
   }

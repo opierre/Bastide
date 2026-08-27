@@ -17,6 +17,8 @@ import '../domain/recurring_series.dart';
 import '../domain/recurring_summary.dart';
 import 'recurring_error_localizer.dart';
 import 'recurring_labels.dart';
+import 'series_detail.dart';
+import 'series_form_modal.dart';
 import 'series_row.dart';
 
 /// The Abonnements panel: the monthly burden, the detected series with their
@@ -28,19 +30,27 @@ class SubscriptionsScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return const Padding(
-      key: Key('screen-subscriptions'),
-      padding: EdgeInsets.symmetric(
+    final selected = ref.watch(selectedSeriesProvider);
+
+    return Padding(
+      key: const Key('screen-subscriptions'),
+      padding: const EdgeInsets.symmetric(
         horizontal: AppSpacing.contentX,
         vertical: AppSpacing.contentY,
       ),
-      child: _SubscriptionsList(),
+      child: selected == null
+          ? const _SubscriptionsList()
+          : SeriesDetailView(seriesId: selected),
     );
   }
 }
 
-/// The subscriptions panel's contribution to the top bar: « Détecter », which
-/// re-runs detection over the imported ledger.
+/// The subscriptions panel's contribution to the top bar: « Détecter » beside
+/// the primary « Nouvel abonnement ».
+///
+/// Both stay available on the detail view. The detail is a state of this panel,
+/// not a different one, and chrome that rearranged itself under the user would
+/// break the invariant the shell exists to hold (`docs/design/00` §Layout).
 class SubscriptionsTopBarActions extends ConsumerStatefulWidget {
   const SubscriptionsTopBarActions({super.key});
 
@@ -81,15 +91,27 @@ class _SubscriptionsTopBarActionsState
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
 
-    return SizedBox(
-      height: AppChrome.controlPillHeight,
-      child: OutlinedButton(
-        key: const Key('subscriptionsDetectButton'),
-        onPressed: _detecting ? null : _detect,
-        child: Text(
-          _detecting ? l10n.subscriptionsDetectRunning : l10n.subscriptionsDetect,
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        SizedBox(
+          height: AppChrome.controlPillHeight,
+          child: OutlinedButton(
+            key: const Key('subscriptionsDetectButton'),
+            onPressed: _detecting ? null : _detect,
+            child: Text(
+              _detecting ? l10n.subscriptionsDetectRunning : l10n.subscriptionsDetect,
+            ),
+          ),
         ),
-      ),
+        const SizedBox(width: AppSpacing.sm + AppSpacing.xs),
+        PrimaryButton(
+          key: const Key('addSubscriptionButton'),
+          label: l10n.subscriptionsAdd,
+          icon: Icons.add_rounded,
+          onPressed: () => showSeriesForm(context),
+        ),
+      ],
     );
   }
 }
@@ -363,13 +385,25 @@ class _TableCard extends ConsumerWidget {
 
   final List<SubscriptionRow> rows;
 
-  Future<void> _handle(WidgetRef ref, RecurringSeries series, SeriesAction action) {
+  Future<void> _handle(
+    BuildContext context,
+    WidgetRef ref,
+    RecurringSeries series,
+    SeriesAction action,
+  ) async {
+    if (action == SeriesAction.edit) {
+      await showSeriesForm(context, initial: series);
+      return;
+    }
+
     final status = switch (action) {
       SeriesAction.confirm => SeriesStatus.confirmed,
       SeriesAction.dismiss => SeriesStatus.dismissed,
       SeriesAction.cancel => SeriesStatus.cancelled,
+      SeriesAction.edit => null,
     };
-    return ref
+    if (status == null) return;
+    await ref
         .read(subscriptionsControllerProvider.notifier)
         .changeStatus(series.id, status);
   }
@@ -401,7 +435,10 @@ class _TableCard extends ConsumerWidget {
                 return SeriesRow(
                   row: row,
                   category: categories[row.series.categoryId],
-                  onAction: (action) => _handle(ref, row.series, action),
+                  onOpen: () => ref
+                      .read(selectedSeriesProvider.notifier)
+                      .open(row.series.id),
+                  onAction: (action) => _handle(context, ref, row.series, action),
                 );
               },
             ),

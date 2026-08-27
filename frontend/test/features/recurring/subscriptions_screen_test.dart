@@ -179,6 +179,7 @@ void main() {
     expect(find.byKey(const Key('seriesActionCancel-s1')), findsOneWidget);
     expect(find.byKey(const Key('seriesActionDismiss-s1')), findsOneWidget);
     expect(find.byKey(const Key('seriesActionConfirm-s1')), findsNothing);
+    expect(find.byKey(const Key('seriesActionEdit-s1')), findsOneWidget);
   });
 
   testWidgets('a lifecycle action patches the series and refreshes the row', (
