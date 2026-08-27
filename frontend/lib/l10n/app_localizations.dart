@@ -2821,6 +2821,539 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Réessayer'**
   String get settingsAiRetry;
+
+  /// Sidebar entry for the subscriptions panel, third in the Gestion group.
+  ///
+  /// In fr, this message translates to:
+  /// **'Abonnements'**
+  String get navSubscriptions;
+
+  /// Top-bar descriptor under the subscriptions panel title.
+  ///
+  /// In fr, this message translates to:
+  /// **'Vos prélèvements récurrents, détectés automatiquement'**
+  String get navSubscriptionsSubtitle;
+
+  /// Secondary top-bar button re-running detection over the imported ledger.
+  ///
+  /// In fr, this message translates to:
+  /// **'Détecter'**
+  String get subscriptionsDetect;
+
+  /// Label the detect button takes while a pass is in flight.
+  ///
+  /// In fr, this message translates to:
+  /// **'Détection…'**
+  String get subscriptionsDetectRunning;
+
+  /// Primary top-bar button opening the manual-creation modal.
+  ///
+  /// In fr, this message translates to:
+  /// **'Nouvel abonnement'**
+  String get subscriptionsAdd;
+
+  /// Toast headline after a detection pass, counting what it created.
+  ///
+  /// In fr, this message translates to:
+  /// **'{created, plural, =0{Aucun nouvel abonnement détecté} =1{1 nouvel abonnement détecté} other{{created} nouveaux abonnements détectés}}'**
+  String subscriptionsDetectResult(int created);
+
+  /// Second toast line after a detection pass, counting what it refreshed.
+  ///
+  /// In fr, this message translates to:
+  /// **'{updated, plural, =0{Aucune série existante mise à jour} =1{1 série existante mise à jour} other{{updated} séries existantes mises à jour}}'**
+  String subscriptionsDetectResultDetail(int updated);
+
+  /// Toast headline when the detection call itself failed.
+  ///
+  /// In fr, this message translates to:
+  /// **'La détection n\'a pas pu s\'exécuter.'**
+  String get subscriptionsDetectFailed;
+
+  /// Label of the iris-tinted hero card carrying the monthly burden.
+  ///
+  /// In fr, this message translates to:
+  /// **'Charge mensuelle'**
+  String get subscriptionsBurdenLabel;
+
+  /// Caption under the monthly burden, naming the normalisation it applies.
+  ///
+  /// In fr, this message translates to:
+  /// **'Charges trimestrielles et annuelles ramenées au mois.'**
+  String get subscriptionsBurdenCaption;
+
+  /// Appended to the burden caption so the figure names its own exclusion rather than disagreeing silently with the count beside it.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, =1{1 abonnement résilié exclu.} other{{count} abonnements résiliés exclus.}}'**
+  String subscriptionsBurdenExcluded(int count);
+
+  /// Label of the card counting the subscriptions still running.
+  ///
+  /// In fr, this message translates to:
+  /// **'Abonnements actifs'**
+  String get subscriptionsActiveLabel;
+
+  /// Weekly share of the active count, in the cadence breakdown caption.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, =1{1 hebdomadaire} other{{count} hebdomadaires}}'**
+  String subscriptionsCadenceWeeklyCount(int count);
+
+  /// Monthly share of the active count, in the cadence breakdown caption.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, =1{1 mensuel} other{{count} mensuels}}'**
+  String subscriptionsCadenceMonthlyCount(int count);
+
+  /// Quarterly share of the active count, in the cadence breakdown caption.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, =1{1 trimestriel} other{{count} trimestriels}}'**
+  String subscriptionsCadenceQuarterlyCount(int count);
+
+  /// Yearly share of the active count, in the cadence breakdown caption.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, =1{1 annuel} other{{count} annuels}}'**
+  String subscriptionsCadenceYearlyCount(int count);
+
+  /// Irregular share of the active count — user-declared series only.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, =1{1 irrégulier} other{{count} irréguliers}}'**
+  String subscriptionsCadenceIrregularCount(int count);
+
+  /// Tail of the cadence breakdown caption, naming the cancelled rows the active count leaves out.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, =1{1 résilié} other{{count} résiliés}}'**
+  String subscriptionsCancelledCount(int count);
+
+  /// Label of the card naming the soonest charge ahead.
+  ///
+  /// In fr, this message translates to:
+  /// **'Prochain prélèvement'**
+  String get subscriptionsNextLabel;
+
+  /// Value line of the next-charge card: the subscription and how far off it is.
+  ///
+  /// In fr, this message translates to:
+  /// **'{label} — {when}'**
+  String subscriptionsNextValue(String label, String when);
+
+  /// Caption of the next-charge card: the amount and the exact date.
+  ///
+  /// In fr, this message translates to:
+  /// **'{amount} · {date}'**
+  String subscriptionsNextCaption(String amount, String date);
+
+  /// Relative phrasing for a charge due today.
+  ///
+  /// In fr, this message translates to:
+  /// **'aujourd\'hui'**
+  String get subscriptionsNextToday;
+
+  /// Relative phrasing for a charge due tomorrow.
+  ///
+  /// In fr, this message translates to:
+  /// **'demain'**
+  String get subscriptionsNextTomorrow;
+
+  /// Relative phrasing for a charge further ahead.
+  ///
+  /// In fr, this message translates to:
+  /// **'{days, plural, =1{dans 1 jour} other{dans {days} jours}}'**
+  String subscriptionsNextInDays(int days);
+
+  /// Value of the next-charge card when no running series expects one.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucun prélèvement à venir'**
+  String get subscriptionsNextNone;
+
+  /// Table header over the subscription name column.
+  ///
+  /// In fr, this message translates to:
+  /// **'Abonnement'**
+  String get subscriptionsColumnName;
+
+  /// Table header over the category chip column.
+  ///
+  /// In fr, this message translates to:
+  /// **'Catégorie'**
+  String get subscriptionsColumnCategory;
+
+  /// Table header over the cadence column.
+  ///
+  /// In fr, this message translates to:
+  /// **'Cadence'**
+  String get subscriptionsColumnCadence;
+
+  /// Table header over the expected-amount column.
+  ///
+  /// In fr, this message translates to:
+  /// **'Montant'**
+  String get subscriptionsColumnAmount;
+
+  /// Table header over the next-charge date column.
+  ///
+  /// In fr, this message translates to:
+  /// **'Prochain'**
+  String get subscriptionsColumnNext;
+
+  /// Table header over the status-pill column, which is empty for a healthy row.
+  ///
+  /// In fr, this message translates to:
+  /// **'Statut'**
+  String get subscriptionsColumnStatus;
+
+  /// Placeholder in a cell with nothing to state — a cancelled row's next charge.
+  ///
+  /// In fr, this message translates to:
+  /// **'—'**
+  String get subscriptionsValueNone;
+
+  /// Cadence name: every week.
+  ///
+  /// In fr, this message translates to:
+  /// **'Hebdomadaire'**
+  String get cadenceWeekly;
+
+  /// Cadence name: every month.
+  ///
+  /// In fr, this message translates to:
+  /// **'Mensuel'**
+  String get cadenceMonthly;
+
+  /// Cadence name: every quarter.
+  ///
+  /// In fr, this message translates to:
+  /// **'Trimestriel'**
+  String get cadenceQuarterly;
+
+  /// Cadence name: every year.
+  ///
+  /// In fr, this message translates to:
+  /// **'Annuel'**
+  String get cadenceYearly;
+
+  /// Cadence name for a user-declared series with no rhythm. Detection never produces it.
+  ///
+  /// In fr, this message translates to:
+  /// **'Irrégulier'**
+  String get cadenceIrregular;
+
+  /// Amber status pill on a row whose charge recently grew.
+  ///
+  /// In fr, this message translates to:
+  /// **'Augmentation · {from} → {to}'**
+  String subscriptionSignalIncrease(String from, String to);
+
+  /// Amber status pill on a row whose charge has not landed past its tolerance.
+  ///
+  /// In fr, this message translates to:
+  /// **'{days, plural, =1{Prélèvement manquant · 1 jour de retard} other{Prélèvement manquant · {days} jours de retard}}'**
+  String subscriptionSignalMissed(int days);
+
+  /// Gray status pill on a subscription the user ended. It stays listed, dimmed.
+  ///
+  /// In fr, this message translates to:
+  /// **'Résilié · dernier prélèvement {date}'**
+  String subscriptionSignalCancelled(String date);
+
+  /// Replaces the next-charge date on a row with a missed charge, in amber: the date is what was expected, not what is coming.
+  ///
+  /// In fr, this message translates to:
+  /// **'attendu le {date}'**
+  String subscriptionNextExpected(String date);
+
+  /// Tooltip of the row's kebab button.
+  ///
+  /// In fr, this message translates to:
+  /// **'Actions de l\'abonnement'**
+  String get subscriptionActionsTooltip;
+
+  /// Kebab action accepting a detected series — status becomes confirmed.
+  ///
+  /// In fr, this message translates to:
+  /// **'Confirmer'**
+  String get subscriptionActionConfirm;
+
+  /// Kebab action dismissing a series. Final: detection never revives a dismissed one.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ignorer'**
+  String get subscriptionActionDismiss;
+
+  /// Kebab action recording that the subscription has ended.
+  ///
+  /// In fr, this message translates to:
+  /// **'Marquer comme résilié'**
+  String get subscriptionActionCancel;
+
+  /// Kebab action opening the series in the edit form.
+  ///
+  /// In fr, this message translates to:
+  /// **'Modifier'**
+  String get subscriptionActionEdit;
+
+  /// Localized RECURRING_INVALID_TRANSITION.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ce changement de statut n\'est pas possible pour cet abonnement.'**
+  String get subscriptionErrorInvalidTransition;
+
+  /// Localized RECURRING_SERIES_EXISTS.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ce compte suit déjà un abonnement sous ce nom.'**
+  String get subscriptionErrorExists;
+
+  /// Localized RECURRING_SERIES_NOT_FOUND.
+  ///
+  /// In fr, this message translates to:
+  /// **'Cet abonnement n\'existe plus.'**
+  String get subscriptionErrorNotFound;
+
+  /// Localized ACCOUNT_NOT_FOUND, reachable from the creation form's account select.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ce compte n\'existe plus.'**
+  String get subscriptionErrorAccountNotFound;
+
+  /// Localized VALIDATION_ERROR on the subscription form.
+  ///
+  /// In fr, this message translates to:
+  /// **'Vérifiez les informations saisies.'**
+  String get subscriptionErrorValidation;
+
+  /// Fallback for an error code this panel has no specific message for.
+  ///
+  /// In fr, this message translates to:
+  /// **'Une erreur est survenue. Réessayez.'**
+  String get subscriptionErrorGeneric;
+
+  /// Error state replacing the panel when the list or summary failed to load.
+  ///
+  /// In fr, this message translates to:
+  /// **'Impossible de charger vos abonnements pour le moment.'**
+  String get subscriptionsLoadFailed;
+
+  /// Retry action on the subscriptions error state.
+  ///
+  /// In fr, this message translates to:
+  /// **'Réessayer'**
+  String get subscriptionsRetry;
+
+  /// Empty-state title on the subscriptions panel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucun abonnement détecté pour l\'instant'**
+  String get subscriptionsEmptyTitle;
+
+  /// Empty-state body, stating the three-repeat rule so the absence reads as a threshold rather than a failure.
+  ///
+  /// In fr, this message translates to:
+  /// **'FinStride repère un abonnement lorsqu\'un prélèvement s\'est répété trois fois. Importer davantage d\'historique accélère la détection.'**
+  String get subscriptionsEmptyBody;
+
+  /// Empty-state CTA. It goes to imports rather than to manual creation because more history is the actual remedy.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aller aux imports'**
+  String get subscriptionsEmptyCta;
+
+  /// Iris back link at the top of the series detail.
+  ///
+  /// In fr, this message translates to:
+  /// **'Retour aux abonnements'**
+  String get subscriptionDetailBack;
+
+  /// Sub-line of the detail header for a detected series.
+  ///
+  /// In fr, this message translates to:
+  /// **'{account} · détecté depuis {month}'**
+  String subscriptionDetailDetectedSince(String account, String month);
+
+  /// Sub-line of the detail header for a user-declared series, which was never detected.
+  ///
+  /// In fr, this message translates to:
+  /// **'{account} · suivi depuis {month}'**
+  String subscriptionDetailTrackedSince(String account, String month);
+
+  /// Label of the cadence stat in the detail header.
+  ///
+  /// In fr, this message translates to:
+  /// **'Cadence'**
+  String get subscriptionDetailCadence;
+
+  /// Label of the expected-amount stat in the detail header.
+  ///
+  /// In fr, this message translates to:
+  /// **'Montant attendu'**
+  String get subscriptionDetailExpectedAmount;
+
+  /// Label of the next-charge stat in the detail header.
+  ///
+  /// In fr, this message translates to:
+  /// **'Prochain prélèvement'**
+  String get subscriptionDetailNextCharge;
+
+  /// Amber banner on the detail. The annualised figure is stated rather than left as a multiplication for the reader.
+  ///
+  /// In fr, this message translates to:
+  /// **'Augmentation : {from} → {to} le {date} — soit {annual} par an.'**
+  String subscriptionDetailIncrease(
+    String from,
+    String to,
+    String date,
+    String annual,
+  );
+
+  /// Title of the occurrence-history card on the detail.
+  ///
+  /// In fr, this message translates to:
+  /// **'Historique des prélèvements'**
+  String get subscriptionDetailHistoryTitle;
+
+  /// Sub-line of the history card, naming the evidence and the account it comes from.
+  ///
+  /// In fr, this message translates to:
+  /// **'Les transactions dont cette série est déduite · {account}'**
+  String subscriptionDetailHistorySubtitle(String account);
+
+  /// History table header over the charge date.
+  ///
+  /// In fr, this message translates to:
+  /// **'Date'**
+  String get subscriptionDetailHistoryDate;
+
+  /// History table header over the charge amount.
+  ///
+  /// In fr, this message translates to:
+  /// **'Montant'**
+  String get subscriptionDetailHistoryAmount;
+
+  /// History card with no rows — the ordinary state of a series the user has just declared.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucun prélèvement rattaché pour l\'instant.'**
+  String get subscriptionDetailHistoryEmpty;
+
+  /// Amber pill marking the occurrence where the price stepped up.
+  ///
+  /// In fr, this message translates to:
+  /// **'{from} → {to}'**
+  String subscriptionDetailChange(String from, String to);
+
+  /// Foot note under the history: the user is being asked to trust a deduction, so the evidence is part of the screen.
+  ///
+  /// In fr, this message translates to:
+  /// **'FinStride déduit la série de ces occurrences — vérifiez-les avant de confirmer un changement.'**
+  String get subscriptionDetailFootnote;
+
+  /// Error state replacing the detail when it failed to load.
+  ///
+  /// In fr, this message translates to:
+  /// **'Impossible de charger cet abonnement pour le moment.'**
+  String get subscriptionDetailLoadFailed;
+
+  /// Title of the manual-creation modal.
+  ///
+  /// In fr, this message translates to:
+  /// **'Nouvel abonnement'**
+  String get subscriptionFormCreateTitle;
+
+  /// Title of the modal when editing an existing series.
+  ///
+  /// In fr, this message translates to:
+  /// **'Modifier l\'abonnement'**
+  String get subscriptionFormEditTitle;
+
+  /// Sub-line under the creation modal's title.
+  ///
+  /// In fr, this message translates to:
+  /// **'Suivez un prélèvement que la détection n\'a pas encore repéré.'**
+  String get subscriptionFormIntro;
+
+  /// Label of the subscription name field.
+  ///
+  /// In fr, this message translates to:
+  /// **'Nom'**
+  String get subscriptionFormNameLabel;
+
+  /// Validation message when the name field is empty.
+  ///
+  /// In fr, this message translates to:
+  /// **'Donnez un nom à cet abonnement.'**
+  String get subscriptionFormNameRequired;
+
+  /// Label of the account select in the subscription form.
+  ///
+  /// In fr, this message translates to:
+  /// **'Compte'**
+  String get subscriptionFormAccountLabel;
+
+  /// Label of the amount field. The user types the charge as a positive figure; it is stored signed.
+  ///
+  /// In fr, this message translates to:
+  /// **'Montant'**
+  String get subscriptionFormAmountLabel;
+
+  /// Validation message when the amount is missing, unparseable, or not positive.
+  ///
+  /// In fr, this message translates to:
+  /// **'Saisissez un montant supérieur à zéro.'**
+  String get subscriptionFormAmountInvalid;
+
+  /// Label of the cadence select in the subscription form.
+  ///
+  /// In fr, this message translates to:
+  /// **'Cadence'**
+  String get subscriptionFormCadenceLabel;
+
+  /// Helper under the cadence select, listing what it offers. Irregular is offered here and nowhere else — detection never concludes it.
+  ///
+  /// In fr, this message translates to:
+  /// **'Hebdomadaire · Mensuel · Trimestriel · Annuel · Irrégulier'**
+  String get subscriptionFormCadenceHelp;
+
+  /// Label of the category select in the subscription form.
+  ///
+  /// In fr, this message translates to:
+  /// **'Catégorie'**
+  String get subscriptionFormCategoryLabel;
+
+  /// The no-category option in the subscription form's category select.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucune'**
+  String get subscriptionFormCategoryNone;
+
+  /// Shown in place of the account select when the user has no accounts yet.
+  ///
+  /// In fr, this message translates to:
+  /// **'Créez d\'abord un compte pour y suivre un abonnement.'**
+  String get subscriptionFormNoAccounts;
+
+  /// Cancel action in the subscription modal footer.
+  ///
+  /// In fr, this message translates to:
+  /// **'Annuler'**
+  String get subscriptionFormCancel;
+
+  /// Confirm action when creating a subscription.
+  ///
+  /// In fr, this message translates to:
+  /// **'Créer l\'abonnement'**
+  String get subscriptionFormSubmit;
+
+  /// Confirm action when editing a subscription.
+  ///
+  /// In fr, this message translates to:
+  /// **'Enregistrer'**
+  String get subscriptionFormSave;
 }
 
 class _AppLocalizationsDelegate

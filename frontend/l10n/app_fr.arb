@@ -2152,5 +2152,489 @@
   "settingsAiRetry": "Réessayer",
   "@settingsAiRetry": {
     "description": "Retry action on the local-AI card's error state."
+  },
+  "navSubscriptions": "Abonnements",
+  "@navSubscriptions": {
+    "description": "Sidebar entry for the subscriptions panel, third in the Gestion group."
+  },
+  "navSubscriptionsSubtitle": "Vos prélèvements récurrents, détectés automatiquement",
+  "@navSubscriptionsSubtitle": {
+    "description": "Top-bar descriptor under the subscriptions panel title."
+  },
+  "subscriptionsDetect": "Détecter",
+  "@subscriptionsDetect": {
+    "description": "Secondary top-bar button re-running detection over the imported ledger."
+  },
+  "subscriptionsDetectRunning": "Détection…",
+  "@subscriptionsDetectRunning": {
+    "description": "Label the detect button takes while a pass is in flight."
+  },
+  "subscriptionsAdd": "Nouvel abonnement",
+  "@subscriptionsAdd": {
+    "description": "Primary top-bar button opening the manual-creation modal."
+  },
+  "subscriptionsDetectResult": "{created, plural, =0{Aucun nouvel abonnement détecté} =1{1 nouvel abonnement détecté} other{{created} nouveaux abonnements détectés}}",
+  "@subscriptionsDetectResult": {
+    "description": "Toast headline after a detection pass, counting what it created.",
+    "placeholders": {
+      "created": {
+        "type": "int"
+      }
+    }
+  },
+  "subscriptionsDetectResultDetail": "{updated, plural, =0{Aucune série existante mise à jour} =1{1 série existante mise à jour} other{{updated} séries existantes mises à jour}}",
+  "@subscriptionsDetectResultDetail": {
+    "description": "Second toast line after a detection pass, counting what it refreshed.",
+    "placeholders": {
+      "updated": {
+        "type": "int"
+      }
+    }
+  },
+  "subscriptionsDetectFailed": "La détection n'a pas pu s'exécuter.",
+  "@subscriptionsDetectFailed": {
+    "description": "Toast headline when the detection call itself failed."
+  },
+  "subscriptionsBurdenLabel": "Charge mensuelle",
+  "@subscriptionsBurdenLabel": {
+    "description": "Label of the iris-tinted hero card carrying the monthly burden."
+  },
+  "subscriptionsBurdenCaption": "Charges trimestrielles et annuelles ramenées au mois.",
+  "@subscriptionsBurdenCaption": {
+    "description": "Caption under the monthly burden, naming the normalisation it applies."
+  },
+  "subscriptionsBurdenExcluded": "{count, plural, =1{1 abonnement résilié exclu.} other{{count} abonnements résiliés exclus.}}",
+  "@subscriptionsBurdenExcluded": {
+    "description": "Appended to the burden caption so the figure names its own exclusion rather than disagreeing silently with the count beside it.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "subscriptionsActiveLabel": "Abonnements actifs",
+  "@subscriptionsActiveLabel": {
+    "description": "Label of the card counting the subscriptions still running."
+  },
+  "subscriptionsCadenceWeeklyCount": "{count, plural, =1{1 hebdomadaire} other{{count} hebdomadaires}}",
+  "@subscriptionsCadenceWeeklyCount": {
+    "description": "Weekly share of the active count, in the cadence breakdown caption.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "subscriptionsCadenceMonthlyCount": "{count, plural, =1{1 mensuel} other{{count} mensuels}}",
+  "@subscriptionsCadenceMonthlyCount": {
+    "description": "Monthly share of the active count, in the cadence breakdown caption.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "subscriptionsCadenceQuarterlyCount": "{count, plural, =1{1 trimestriel} other{{count} trimestriels}}",
+  "@subscriptionsCadenceQuarterlyCount": {
+    "description": "Quarterly share of the active count, in the cadence breakdown caption.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "subscriptionsCadenceYearlyCount": "{count, plural, =1{1 annuel} other{{count} annuels}}",
+  "@subscriptionsCadenceYearlyCount": {
+    "description": "Yearly share of the active count, in the cadence breakdown caption.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "subscriptionsCadenceIrregularCount": "{count, plural, =1{1 irrégulier} other{{count} irréguliers}}",
+  "@subscriptionsCadenceIrregularCount": {
+    "description": "Irregular share of the active count — user-declared series only.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "subscriptionsCancelledCount": "{count, plural, =1{1 résilié} other{{count} résiliés}}",
+  "@subscriptionsCancelledCount": {
+    "description": "Tail of the cadence breakdown caption, naming the cancelled rows the active count leaves out.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "subscriptionsNextLabel": "Prochain prélèvement",
+  "@subscriptionsNextLabel": {
+    "description": "Label of the card naming the soonest charge ahead."
+  },
+  "subscriptionsNextValue": "{label} — {when}",
+  "@subscriptionsNextValue": {
+    "description": "Value line of the next-charge card: the subscription and how far off it is.",
+    "placeholders": {
+      "label": {
+        "type": "String"
+      },
+      "when": {
+        "type": "String"
+      }
+    }
+  },
+  "subscriptionsNextCaption": "{amount} · {date}",
+  "@subscriptionsNextCaption": {
+    "description": "Caption of the next-charge card: the amount and the exact date.",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "subscriptionsNextToday": "aujourd'hui",
+  "@subscriptionsNextToday": {
+    "description": "Relative phrasing for a charge due today."
+  },
+  "subscriptionsNextTomorrow": "demain",
+  "@subscriptionsNextTomorrow": {
+    "description": "Relative phrasing for a charge due tomorrow."
+  },
+  "subscriptionsNextInDays": "{days, plural, =1{dans 1 jour} other{dans {days} jours}}",
+  "@subscriptionsNextInDays": {
+    "description": "Relative phrasing for a charge further ahead.",
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "subscriptionsNextNone": "Aucun prélèvement à venir",
+  "@subscriptionsNextNone": {
+    "description": "Value of the next-charge card when no running series expects one."
+  },
+  "subscriptionsColumnName": "Abonnement",
+  "@subscriptionsColumnName": {
+    "description": "Table header over the subscription name column."
+  },
+  "subscriptionsColumnCategory": "Catégorie",
+  "@subscriptionsColumnCategory": {
+    "description": "Table header over the category chip column."
+  },
+  "subscriptionsColumnCadence": "Cadence",
+  "@subscriptionsColumnCadence": {
+    "description": "Table header over the cadence column."
+  },
+  "subscriptionsColumnAmount": "Montant",
+  "@subscriptionsColumnAmount": {
+    "description": "Table header over the expected-amount column."
+  },
+  "subscriptionsColumnNext": "Prochain",
+  "@subscriptionsColumnNext": {
+    "description": "Table header over the next-charge date column."
+  },
+  "subscriptionsColumnStatus": "Statut",
+  "@subscriptionsColumnStatus": {
+    "description": "Table header over the status-pill column, which is empty for a healthy row."
+  },
+  "subscriptionsValueNone": "—",
+  "@subscriptionsValueNone": {
+    "description": "Placeholder in a cell with nothing to state — a cancelled row's next charge."
+  },
+  "cadenceWeekly": "Hebdomadaire",
+  "@cadenceWeekly": {
+    "description": "Cadence name: every week."
+  },
+  "cadenceMonthly": "Mensuel",
+  "@cadenceMonthly": {
+    "description": "Cadence name: every month."
+  },
+  "cadenceQuarterly": "Trimestriel",
+  "@cadenceQuarterly": {
+    "description": "Cadence name: every quarter."
+  },
+  "cadenceYearly": "Annuel",
+  "@cadenceYearly": {
+    "description": "Cadence name: every year."
+  },
+  "cadenceIrregular": "Irrégulier",
+  "@cadenceIrregular": {
+    "description": "Cadence name for a user-declared series with no rhythm. Detection never produces it."
+  },
+  "subscriptionSignalIncrease": "Augmentation · {from} → {to}",
+  "@subscriptionSignalIncrease": {
+    "description": "Amber status pill on a row whose charge recently grew.",
+    "placeholders": {
+      "from": {
+        "type": "String"
+      },
+      "to": {
+        "type": "String"
+      }
+    }
+  },
+  "subscriptionSignalMissed": "{days, plural, =1{Prélèvement manquant · 1 jour de retard} other{Prélèvement manquant · {days} jours de retard}}",
+  "@subscriptionSignalMissed": {
+    "description": "Amber status pill on a row whose charge has not landed past its tolerance.",
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "subscriptionSignalCancelled": "Résilié · dernier prélèvement {date}",
+  "@subscriptionSignalCancelled": {
+    "description": "Gray status pill on a subscription the user ended. It stays listed, dimmed.",
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "subscriptionNextExpected": "attendu le {date}",
+  "@subscriptionNextExpected": {
+    "description": "Replaces the next-charge date on a row with a missed charge, in amber: the date is what was expected, not what is coming.",
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "subscriptionActionsTooltip": "Actions de l'abonnement",
+  "@subscriptionActionsTooltip": {
+    "description": "Tooltip of the row's kebab button."
+  },
+  "subscriptionActionConfirm": "Confirmer",
+  "@subscriptionActionConfirm": {
+    "description": "Kebab action accepting a detected series — status becomes confirmed."
+  },
+  "subscriptionActionDismiss": "Ignorer",
+  "@subscriptionActionDismiss": {
+    "description": "Kebab action dismissing a series. Final: detection never revives a dismissed one."
+  },
+  "subscriptionActionCancel": "Marquer comme résilié",
+  "@subscriptionActionCancel": {
+    "description": "Kebab action recording that the subscription has ended."
+  },
+  "subscriptionActionEdit": "Modifier",
+  "@subscriptionActionEdit": {
+    "description": "Kebab action opening the series in the edit form."
+  },
+  "subscriptionErrorInvalidTransition": "Ce changement de statut n'est pas possible pour cet abonnement.",
+  "@subscriptionErrorInvalidTransition": {
+    "description": "Localized RECURRING_INVALID_TRANSITION."
+  },
+  "subscriptionErrorExists": "Ce compte suit déjà un abonnement sous ce nom.",
+  "@subscriptionErrorExists": {
+    "description": "Localized RECURRING_SERIES_EXISTS."
+  },
+  "subscriptionErrorNotFound": "Cet abonnement n'existe plus.",
+  "@subscriptionErrorNotFound": {
+    "description": "Localized RECURRING_SERIES_NOT_FOUND."
+  },
+  "subscriptionErrorAccountNotFound": "Ce compte n'existe plus.",
+  "@subscriptionErrorAccountNotFound": {
+    "description": "Localized ACCOUNT_NOT_FOUND, reachable from the creation form's account select."
+  },
+  "subscriptionErrorValidation": "Vérifiez les informations saisies.",
+  "@subscriptionErrorValidation": {
+    "description": "Localized VALIDATION_ERROR on the subscription form."
+  },
+  "subscriptionErrorGeneric": "Une erreur est survenue. Réessayez.",
+  "@subscriptionErrorGeneric": {
+    "description": "Fallback for an error code this panel has no specific message for."
+  },
+  "subscriptionsLoadFailed": "Impossible de charger vos abonnements pour le moment.",
+  "@subscriptionsLoadFailed": {
+    "description": "Error state replacing the panel when the list or summary failed to load."
+  },
+  "subscriptionsRetry": "Réessayer",
+  "@subscriptionsRetry": {
+    "description": "Retry action on the subscriptions error state."
+  },
+  "subscriptionsEmptyTitle": "Aucun abonnement détecté pour l'instant",
+  "@subscriptionsEmptyTitle": {
+    "description": "Empty-state title on the subscriptions panel."
+  },
+  "subscriptionsEmptyBody": "FinStride repère un abonnement lorsqu'un prélèvement s'est répété trois fois. Importer davantage d'historique accélère la détection.",
+  "@subscriptionsEmptyBody": {
+    "description": "Empty-state body, stating the three-repeat rule so the absence reads as a threshold rather than a failure."
+  },
+  "subscriptionsEmptyCta": "Aller aux imports",
+  "@subscriptionsEmptyCta": {
+    "description": "Empty-state CTA. It goes to imports rather than to manual creation because more history is the actual remedy."
+  },
+  "subscriptionDetailBack": "Retour aux abonnements",
+  "@subscriptionDetailBack": {
+    "description": "Iris back link at the top of the series detail."
+  },
+  "subscriptionDetailDetectedSince": "{account} · détecté depuis {month}",
+  "@subscriptionDetailDetectedSince": {
+    "description": "Sub-line of the detail header for a detected series.",
+    "placeholders": {
+      "account": {
+        "type": "String"
+      },
+      "month": {
+        "type": "String"
+      }
+    }
+  },
+  "subscriptionDetailTrackedSince": "{account} · suivi depuis {month}",
+  "@subscriptionDetailTrackedSince": {
+    "description": "Sub-line of the detail header for a user-declared series, which was never detected.",
+    "placeholders": {
+      "account": {
+        "type": "String"
+      },
+      "month": {
+        "type": "String"
+      }
+    }
+  },
+  "subscriptionDetailCadence": "Cadence",
+  "@subscriptionDetailCadence": {
+    "description": "Label of the cadence stat in the detail header."
+  },
+  "subscriptionDetailExpectedAmount": "Montant attendu",
+  "@subscriptionDetailExpectedAmount": {
+    "description": "Label of the expected-amount stat in the detail header."
+  },
+  "subscriptionDetailNextCharge": "Prochain prélèvement",
+  "@subscriptionDetailNextCharge": {
+    "description": "Label of the next-charge stat in the detail header."
+  },
+  "subscriptionDetailIncrease": "Augmentation : {from} → {to} le {date} — soit {annual} par an.",
+  "@subscriptionDetailIncrease": {
+    "description": "Amber banner on the detail. The annualised figure is stated rather than left as a multiplication for the reader.",
+    "placeholders": {
+      "from": {
+        "type": "String"
+      },
+      "to": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      },
+      "annual": {
+        "type": "String"
+      }
+    }
+  },
+  "subscriptionDetailHistoryTitle": "Historique des prélèvements",
+  "@subscriptionDetailHistoryTitle": {
+    "description": "Title of the occurrence-history card on the detail."
+  },
+  "subscriptionDetailHistorySubtitle": "Les transactions dont cette série est déduite · {account}",
+  "@subscriptionDetailHistorySubtitle": {
+    "description": "Sub-line of the history card, naming the evidence and the account it comes from.",
+    "placeholders": {
+      "account": {
+        "type": "String"
+      }
+    }
+  },
+  "subscriptionDetailHistoryDate": "Date",
+  "@subscriptionDetailHistoryDate": {
+    "description": "History table header over the charge date."
+  },
+  "subscriptionDetailHistoryAmount": "Montant",
+  "@subscriptionDetailHistoryAmount": {
+    "description": "History table header over the charge amount."
+  },
+  "subscriptionDetailHistoryEmpty": "Aucun prélèvement rattaché pour l'instant.",
+  "@subscriptionDetailHistoryEmpty": {
+    "description": "History card with no rows — the ordinary state of a series the user has just declared."
+  },
+  "subscriptionDetailChange": "{from} → {to}",
+  "@subscriptionDetailChange": {
+    "description": "Amber pill marking the occurrence where the price stepped up.",
+    "placeholders": {
+      "from": {
+        "type": "String"
+      },
+      "to": {
+        "type": "String"
+      }
+    }
+  },
+  "subscriptionDetailFootnote": "FinStride déduit la série de ces occurrences — vérifiez-les avant de confirmer un changement.",
+  "@subscriptionDetailFootnote": {
+    "description": "Foot note under the history: the user is being asked to trust a deduction, so the evidence is part of the screen."
+  },
+  "subscriptionDetailLoadFailed": "Impossible de charger cet abonnement pour le moment.",
+  "@subscriptionDetailLoadFailed": {
+    "description": "Error state replacing the detail when it failed to load."
+  },
+  "subscriptionFormCreateTitle": "Nouvel abonnement",
+  "@subscriptionFormCreateTitle": {
+    "description": "Title of the manual-creation modal."
+  },
+  "subscriptionFormEditTitle": "Modifier l'abonnement",
+  "@subscriptionFormEditTitle": {
+    "description": "Title of the modal when editing an existing series."
+  },
+  "subscriptionFormIntro": "Suivez un prélèvement que la détection n'a pas encore repéré.",
+  "@subscriptionFormIntro": {
+    "description": "Sub-line under the creation modal's title."
+  },
+  "subscriptionFormNameLabel": "Nom",
+  "@subscriptionFormNameLabel": {
+    "description": "Label of the subscription name field."
+  },
+  "subscriptionFormNameRequired": "Donnez un nom à cet abonnement.",
+  "@subscriptionFormNameRequired": {
+    "description": "Validation message when the name field is empty."
+  },
+  "subscriptionFormAccountLabel": "Compte",
+  "@subscriptionFormAccountLabel": {
+    "description": "Label of the account select in the subscription form."
+  },
+  "subscriptionFormAmountLabel": "Montant",
+  "@subscriptionFormAmountLabel": {
+    "description": "Label of the amount field. The user types the charge as a positive figure; it is stored signed."
+  },
+  "subscriptionFormAmountInvalid": "Saisissez un montant supérieur à zéro.",
+  "@subscriptionFormAmountInvalid": {
+    "description": "Validation message when the amount is missing, unparseable, or not positive."
+  },
+  "subscriptionFormCadenceLabel": "Cadence",
+  "@subscriptionFormCadenceLabel": {
+    "description": "Label of the cadence select in the subscription form."
+  },
+  "subscriptionFormCadenceHelp": "Hebdomadaire · Mensuel · Trimestriel · Annuel · Irrégulier",
+  "@subscriptionFormCadenceHelp": {
+    "description": "Helper under the cadence select, listing what it offers. Irregular is offered here and nowhere else — detection never concludes it."
+  },
+  "subscriptionFormCategoryLabel": "Catégorie",
+  "@subscriptionFormCategoryLabel": {
+    "description": "Label of the category select in the subscription form."
+  },
+  "subscriptionFormCategoryNone": "Aucune",
+  "@subscriptionFormCategoryNone": {
+    "description": "The no-category option in the subscription form's category select."
+  },
+  "subscriptionFormNoAccounts": "Créez d'abord un compte pour y suivre un abonnement.",
+  "@subscriptionFormNoAccounts": {
+    "description": "Shown in place of the account select when the user has no accounts yet."
+  },
+  "subscriptionFormCancel": "Annuler",
+  "@subscriptionFormCancel": {
+    "description": "Cancel action in the subscription modal footer."
+  },
+  "subscriptionFormSubmit": "Créer l'abonnement",
+  "@subscriptionFormSubmit": {
+    "description": "Confirm action when creating a subscription."
+  },
+  "subscriptionFormSave": "Enregistrer",
+  "@subscriptionFormSave": {
+    "description": "Confirm action when editing a subscription."
   }
 }

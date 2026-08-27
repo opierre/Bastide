@@ -12,6 +12,7 @@ import '../../features/categories/presentation/categories_top_bar_actions.dart';
 import '../../features/dashboard/presentation/dashboard_screen.dart';
 import '../../features/dashboard/presentation/month_selector.dart';
 import '../../features/imports/presentation/imports_screen.dart';
+import '../../features/recurring/presentation/subscriptions_screen.dart';
 import '../../features/settings/presentation/settings_screen.dart';
 import '../../features/transactions/presentation/transactions_screen.dart';
 import '../widgets/app_shell.dart';
@@ -36,6 +37,7 @@ TopBarActionsBuilder? _topBarActions(String path) => switch (path) {
   '/accounts' => (context) => const [AccountsTopBarActions()],
   '/transactions' => (context) => const [TransactionsTopBarActions()],
   '/categories' => (context) => const [CategoriesTopBarActions()],
+  '/subscriptions' => (context) => const [SubscriptionsTopBarActions()],
   _ => null,
 };
 
@@ -90,6 +92,10 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           GoRoute(
             path: CategoriesScreen.path,
             builder: (context, state) => const CategoriesScreen(),
+          ),
+          GoRoute(
+            path: SubscriptionsScreen.path,
+            builder: (context, state) => const SubscriptionsScreen(),
           ),
           GoRoute(
             path: SettingsScreen.path,

@@ -1727,4 +1727,399 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get settingsAiRetry => 'Réessayer';
+
+  @override
+  String get navSubscriptions => 'Abonnements';
+
+  @override
+  String get navSubscriptionsSubtitle =>
+      'Vos prélèvements récurrents, détectés automatiquement';
+
+  @override
+  String get subscriptionsDetect => 'Détecter';
+
+  @override
+  String get subscriptionsDetectRunning => 'Détection…';
+
+  @override
+  String get subscriptionsAdd => 'Nouvel abonnement';
+
+  @override
+  String subscriptionsDetectResult(int created) {
+    String _temp0 = intl.Intl.pluralLogic(
+      created,
+      locale: localeName,
+      other: '$created nouveaux abonnements détectés',
+      one: '1 nouvel abonnement détecté',
+      zero: 'Aucun nouvel abonnement détecté',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String subscriptionsDetectResultDetail(int updated) {
+    String _temp0 = intl.Intl.pluralLogic(
+      updated,
+      locale: localeName,
+      other: '$updated séries existantes mises à jour',
+      one: '1 série existante mise à jour',
+      zero: 'Aucune série existante mise à jour',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get subscriptionsDetectFailed =>
+      'La détection n\'a pas pu s\'exécuter.';
+
+  @override
+  String get subscriptionsBurdenLabel => 'Charge mensuelle';
+
+  @override
+  String get subscriptionsBurdenCaption =>
+      'Charges trimestrielles et annuelles ramenées au mois.';
+
+  @override
+  String subscriptionsBurdenExcluded(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count abonnements résiliés exclus.',
+      one: '1 abonnement résilié exclu.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get subscriptionsActiveLabel => 'Abonnements actifs';
+
+  @override
+  String subscriptionsCadenceWeeklyCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count hebdomadaires',
+      one: '1 hebdomadaire',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String subscriptionsCadenceMonthlyCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count mensuels',
+      one: '1 mensuel',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String subscriptionsCadenceQuarterlyCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count trimestriels',
+      one: '1 trimestriel',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String subscriptionsCadenceYearlyCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count annuels',
+      one: '1 annuel',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String subscriptionsCadenceIrregularCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count irréguliers',
+      one: '1 irrégulier',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String subscriptionsCancelledCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count résiliés',
+      one: '1 résilié',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get subscriptionsNextLabel => 'Prochain prélèvement';
+
+  @override
+  String subscriptionsNextValue(String label, String when) {
+    return '$label — $when';
+  }
+
+  @override
+  String subscriptionsNextCaption(String amount, String date) {
+    return '$amount · $date';
+  }
+
+  @override
+  String get subscriptionsNextToday => 'aujourd\'hui';
+
+  @override
+  String get subscriptionsNextTomorrow => 'demain';
+
+  @override
+  String subscriptionsNextInDays(int days) {
+    String _temp0 = intl.Intl.pluralLogic(
+      days,
+      locale: localeName,
+      other: 'dans $days jours',
+      one: 'dans 1 jour',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get subscriptionsNextNone => 'Aucun prélèvement à venir';
+
+  @override
+  String get subscriptionsColumnName => 'Abonnement';
+
+  @override
+  String get subscriptionsColumnCategory => 'Catégorie';
+
+  @override
+  String get subscriptionsColumnCadence => 'Cadence';
+
+  @override
+  String get subscriptionsColumnAmount => 'Montant';
+
+  @override
+  String get subscriptionsColumnNext => 'Prochain';
+
+  @override
+  String get subscriptionsColumnStatus => 'Statut';
+
+  @override
+  String get subscriptionsValueNone => '—';
+
+  @override
+  String get cadenceWeekly => 'Hebdomadaire';
+
+  @override
+  String get cadenceMonthly => 'Mensuel';
+
+  @override
+  String get cadenceQuarterly => 'Trimestriel';
+
+  @override
+  String get cadenceYearly => 'Annuel';
+
+  @override
+  String get cadenceIrregular => 'Irrégulier';
+
+  @override
+  String subscriptionSignalIncrease(String from, String to) {
+    return 'Augmentation · $from → $to';
+  }
+
+  @override
+  String subscriptionSignalMissed(int days) {
+    String _temp0 = intl.Intl.pluralLogic(
+      days,
+      locale: localeName,
+      other: 'Prélèvement manquant · $days jours de retard',
+      one: 'Prélèvement manquant · 1 jour de retard',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String subscriptionSignalCancelled(String date) {
+    return 'Résilié · dernier prélèvement $date';
+  }
+
+  @override
+  String subscriptionNextExpected(String date) {
+    return 'attendu le $date';
+  }
+
+  @override
+  String get subscriptionActionsTooltip => 'Actions de l\'abonnement';
+
+  @override
+  String get subscriptionActionConfirm => 'Confirmer';
+
+  @override
+  String get subscriptionActionDismiss => 'Ignorer';
+
+  @override
+  String get subscriptionActionCancel => 'Marquer comme résilié';
+
+  @override
+  String get subscriptionActionEdit => 'Modifier';
+
+  @override
+  String get subscriptionErrorInvalidTransition =>
+      'Ce changement de statut n\'est pas possible pour cet abonnement.';
+
+  @override
+  String get subscriptionErrorExists =>
+      'Ce compte suit déjà un abonnement sous ce nom.';
+
+  @override
+  String get subscriptionErrorNotFound => 'Cet abonnement n\'existe plus.';
+
+  @override
+  String get subscriptionErrorAccountNotFound => 'Ce compte n\'existe plus.';
+
+  @override
+  String get subscriptionErrorValidation =>
+      'Vérifiez les informations saisies.';
+
+  @override
+  String get subscriptionErrorGeneric => 'Une erreur est survenue. Réessayez.';
+
+  @override
+  String get subscriptionsLoadFailed =>
+      'Impossible de charger vos abonnements pour le moment.';
+
+  @override
+  String get subscriptionsRetry => 'Réessayer';
+
+  @override
+  String get subscriptionsEmptyTitle =>
+      'Aucun abonnement détecté pour l\'instant';
+
+  @override
+  String get subscriptionsEmptyBody =>
+      'FinStride repère un abonnement lorsqu\'un prélèvement s\'est répété trois fois. Importer davantage d\'historique accélère la détection.';
+
+  @override
+  String get subscriptionsEmptyCta => 'Aller aux imports';
+
+  @override
+  String get subscriptionDetailBack => 'Retour aux abonnements';
+
+  @override
+  String subscriptionDetailDetectedSince(String account, String month) {
+    return '$account · détecté depuis $month';
+  }
+
+  @override
+  String subscriptionDetailTrackedSince(String account, String month) {
+    return '$account · suivi depuis $month';
+  }
+
+  @override
+  String get subscriptionDetailCadence => 'Cadence';
+
+  @override
+  String get subscriptionDetailExpectedAmount => 'Montant attendu';
+
+  @override
+  String get subscriptionDetailNextCharge => 'Prochain prélèvement';
+
+  @override
+  String subscriptionDetailIncrease(
+    String from,
+    String to,
+    String date,
+    String annual,
+  ) {
+    return 'Augmentation : $from → $to le $date — soit $annual par an.';
+  }
+
+  @override
+  String get subscriptionDetailHistoryTitle => 'Historique des prélèvements';
+
+  @override
+  String subscriptionDetailHistorySubtitle(String account) {
+    return 'Les transactions dont cette série est déduite · $account';
+  }
+
+  @override
+  String get subscriptionDetailHistoryDate => 'Date';
+
+  @override
+  String get subscriptionDetailHistoryAmount => 'Montant';
+
+  @override
+  String get subscriptionDetailHistoryEmpty =>
+      'Aucun prélèvement rattaché pour l\'instant.';
+
+  @override
+  String subscriptionDetailChange(String from, String to) {
+    return '$from → $to';
+  }
+
+  @override
+  String get subscriptionDetailFootnote =>
+      'FinStride déduit la série de ces occurrences — vérifiez-les avant de confirmer un changement.';
+
+  @override
+  String get subscriptionDetailLoadFailed =>
+      'Impossible de charger cet abonnement pour le moment.';
+
+  @override
+  String get subscriptionFormCreateTitle => 'Nouvel abonnement';
+
+  @override
+  String get subscriptionFormEditTitle => 'Modifier l\'abonnement';
+
+  @override
+  String get subscriptionFormIntro =>
+      'Suivez un prélèvement que la détection n\'a pas encore repéré.';
+
+  @override
+  String get subscriptionFormNameLabel => 'Nom';
+
+  @override
+  String get subscriptionFormNameRequired => 'Donnez un nom à cet abonnement.';
+
+  @override
+  String get subscriptionFormAccountLabel => 'Compte';
+
+  @override
+  String get subscriptionFormAmountLabel => 'Montant';
+
+  @override
+  String get subscriptionFormAmountInvalid =>
+      'Saisissez un montant supérieur à zéro.';
+
+  @override
+  String get subscriptionFormCadenceLabel => 'Cadence';
+
+  @override
+  String get subscriptionFormCadenceHelp =>
+      'Hebdomadaire · Mensuel · Trimestriel · Annuel · Irrégulier';
+
+  @override
+  String get subscriptionFormCategoryLabel => 'Catégorie';
+
+  @override
+  String get subscriptionFormCategoryNone => 'Aucune';
+
+  @override
+  String get subscriptionFormNoAccounts =>
+      'Créez d\'abord un compte pour y suivre un abonnement.';
+
+  @override
+  String get subscriptionFormCancel => 'Annuler';
+
+  @override
+  String get subscriptionFormSubmit => 'Créer l\'abonnement';
+
+  @override
+  String get subscriptionFormSave => 'Enregistrer';
 }

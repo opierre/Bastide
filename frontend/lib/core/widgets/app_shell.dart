@@ -113,6 +113,17 @@ class AppShell extends ConsumerWidget {
           label: l10n.navCategories,
           subtitle: l10n.navCategoriesSubtitle,
         ),
+        // The circular-arrow cycle glyph the Phase 2 nav amendment names
+        // (`docs/design/00`). The spec thickens its stroke when active, which
+        // Flutter's icon font cannot do — the iris fill, the filled-icon swap
+        // and the rail carry the selection, exactly as on every other item.
+        NavDestinationSpec(
+          path: '/subscriptions',
+          icon: Icons.autorenew_outlined,
+          selectedIcon: Icons.autorenew_rounded,
+          label: l10n.navSubscriptions,
+          subtitle: l10n.navSubscriptionsSubtitle,
+        ),
       ],
     ),
     NavSectionSpec(

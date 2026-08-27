@@ -1713,4 +1713,397 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get settingsAiRetry => 'Try again';
+
+  @override
+  String get navSubscriptions => 'Subscriptions';
+
+  @override
+  String get navSubscriptionsSubtitle =>
+      'Your recurring charges, detected automatically';
+
+  @override
+  String get subscriptionsDetect => 'Detect';
+
+  @override
+  String get subscriptionsDetectRunning => 'Detecting…';
+
+  @override
+  String get subscriptionsAdd => 'New subscription';
+
+  @override
+  String subscriptionsDetectResult(int created) {
+    String _temp0 = intl.Intl.pluralLogic(
+      created,
+      locale: localeName,
+      other: '$created new subscriptions detected',
+      one: '1 new subscription detected',
+      zero: 'No new subscriptions detected',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String subscriptionsDetectResultDetail(int updated) {
+    String _temp0 = intl.Intl.pluralLogic(
+      updated,
+      locale: localeName,
+      other: '$updated existing series refreshed',
+      one: '1 existing series refreshed',
+      zero: 'No existing series refreshed',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get subscriptionsDetectFailed => 'Detection could not run.';
+
+  @override
+  String get subscriptionsBurdenLabel => 'Monthly burden';
+
+  @override
+  String get subscriptionsBurdenCaption =>
+      'Quarterly and yearly charges brought back to a monthly figure.';
+
+  @override
+  String subscriptionsBurdenExcluded(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count cancelled subscriptions excluded.',
+      one: '1 cancelled subscription excluded.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get subscriptionsActiveLabel => 'Active subscriptions';
+
+  @override
+  String subscriptionsCadenceWeeklyCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count weekly',
+      one: '1 weekly',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String subscriptionsCadenceMonthlyCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count monthly',
+      one: '1 monthly',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String subscriptionsCadenceQuarterlyCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count quarterly',
+      one: '1 quarterly',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String subscriptionsCadenceYearlyCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count yearly',
+      one: '1 yearly',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String subscriptionsCadenceIrregularCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count irregular',
+      one: '1 irregular',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String subscriptionsCancelledCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count cancelled',
+      one: '1 cancelled',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get subscriptionsNextLabel => 'Next charge';
+
+  @override
+  String subscriptionsNextValue(String label, String when) {
+    return '$label — $when';
+  }
+
+  @override
+  String subscriptionsNextCaption(String amount, String date) {
+    return '$amount · $date';
+  }
+
+  @override
+  String get subscriptionsNextToday => 'today';
+
+  @override
+  String get subscriptionsNextTomorrow => 'tomorrow';
+
+  @override
+  String subscriptionsNextInDays(int days) {
+    String _temp0 = intl.Intl.pluralLogic(
+      days,
+      locale: localeName,
+      other: 'in $days days',
+      one: 'in 1 day',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get subscriptionsNextNone => 'No upcoming charge';
+
+  @override
+  String get subscriptionsColumnName => 'Subscription';
+
+  @override
+  String get subscriptionsColumnCategory => 'Category';
+
+  @override
+  String get subscriptionsColumnCadence => 'Frequency';
+
+  @override
+  String get subscriptionsColumnAmount => 'Amount';
+
+  @override
+  String get subscriptionsColumnNext => 'Next';
+
+  @override
+  String get subscriptionsColumnStatus => 'Status';
+
+  @override
+  String get subscriptionsValueNone => '—';
+
+  @override
+  String get cadenceWeekly => 'Weekly';
+
+  @override
+  String get cadenceMonthly => 'Monthly';
+
+  @override
+  String get cadenceQuarterly => 'Quarterly';
+
+  @override
+  String get cadenceYearly => 'Yearly';
+
+  @override
+  String get cadenceIrregular => 'Irregular';
+
+  @override
+  String subscriptionSignalIncrease(String from, String to) {
+    return 'Price increase · $from → $to';
+  }
+
+  @override
+  String subscriptionSignalMissed(int days) {
+    String _temp0 = intl.Intl.pluralLogic(
+      days,
+      locale: localeName,
+      other: 'Missed charge · $days days late',
+      one: 'Missed charge · 1 day late',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String subscriptionSignalCancelled(String date) {
+    return 'Cancelled · last charge $date';
+  }
+
+  @override
+  String subscriptionNextExpected(String date) {
+    return 'expected $date';
+  }
+
+  @override
+  String get subscriptionActionsTooltip => 'Subscription actions';
+
+  @override
+  String get subscriptionActionConfirm => 'Confirm';
+
+  @override
+  String get subscriptionActionDismiss => 'Ignore';
+
+  @override
+  String get subscriptionActionCancel => 'Mark as cancelled';
+
+  @override
+  String get subscriptionActionEdit => 'Edit';
+
+  @override
+  String get subscriptionErrorInvalidTransition =>
+      'That status change isn\'t available for this subscription.';
+
+  @override
+  String get subscriptionErrorExists =>
+      'This account already tracks a subscription under that name.';
+
+  @override
+  String get subscriptionErrorNotFound => 'This subscription no longer exists.';
+
+  @override
+  String get subscriptionErrorAccountNotFound =>
+      'That account no longer exists.';
+
+  @override
+  String get subscriptionErrorValidation => 'Check the details you entered.';
+
+  @override
+  String get subscriptionErrorGeneric => 'Something went wrong. Try again.';
+
+  @override
+  String get subscriptionsLoadFailed =>
+      'We couldn\'t load your subscriptions right now.';
+
+  @override
+  String get subscriptionsRetry => 'Try again';
+
+  @override
+  String get subscriptionsEmptyTitle => 'No subscriptions detected yet';
+
+  @override
+  String get subscriptionsEmptyBody =>
+      'FinStride spots a subscription once a charge has repeated three times. Importing more history speeds detection up.';
+
+  @override
+  String get subscriptionsEmptyCta => 'Go to imports';
+
+  @override
+  String get subscriptionDetailBack => 'Back to subscriptions';
+
+  @override
+  String subscriptionDetailDetectedSince(String account, String month) {
+    return '$account · detected since $month';
+  }
+
+  @override
+  String subscriptionDetailTrackedSince(String account, String month) {
+    return '$account · tracked since $month';
+  }
+
+  @override
+  String get subscriptionDetailCadence => 'Frequency';
+
+  @override
+  String get subscriptionDetailExpectedAmount => 'Expected amount';
+
+  @override
+  String get subscriptionDetailNextCharge => 'Next charge';
+
+  @override
+  String subscriptionDetailIncrease(
+    String from,
+    String to,
+    String date,
+    String annual,
+  ) {
+    return 'Price increase: $from → $to on $date — that\'s $annual a year.';
+  }
+
+  @override
+  String get subscriptionDetailHistoryTitle => 'Charge history';
+
+  @override
+  String subscriptionDetailHistorySubtitle(String account) {
+    return 'The transactions this series is deduced from · $account';
+  }
+
+  @override
+  String get subscriptionDetailHistoryDate => 'Date';
+
+  @override
+  String get subscriptionDetailHistoryAmount => 'Amount';
+
+  @override
+  String get subscriptionDetailHistoryEmpty =>
+      'No charges linked to this subscription yet.';
+
+  @override
+  String subscriptionDetailChange(String from, String to) {
+    return '$from → $to';
+  }
+
+  @override
+  String get subscriptionDetailFootnote =>
+      'FinStride deduces the series from these charges — check them before confirming a change.';
+
+  @override
+  String get subscriptionDetailLoadFailed =>
+      'We couldn\'t load this subscription right now.';
+
+  @override
+  String get subscriptionFormCreateTitle => 'New subscription';
+
+  @override
+  String get subscriptionFormEditTitle => 'Edit subscription';
+
+  @override
+  String get subscriptionFormIntro =>
+      'Track a charge detection hasn\'t spotted yet.';
+
+  @override
+  String get subscriptionFormNameLabel => 'Name';
+
+  @override
+  String get subscriptionFormNameRequired => 'Give this subscription a name.';
+
+  @override
+  String get subscriptionFormAccountLabel => 'Account';
+
+  @override
+  String get subscriptionFormAmountLabel => 'Amount';
+
+  @override
+  String get subscriptionFormAmountInvalid =>
+      'Enter an amount greater than zero.';
+
+  @override
+  String get subscriptionFormCadenceLabel => 'Frequency';
+
+  @override
+  String get subscriptionFormCadenceHelp =>
+      'Weekly · Monthly · Quarterly · Yearly · Irregular';
+
+  @override
+  String get subscriptionFormCategoryLabel => 'Category';
+
+  @override
+  String get subscriptionFormCategoryNone => 'None';
+
+  @override
+  String get subscriptionFormNoAccounts =>
+      'Create an account first to track a subscription in it.';
+
+  @override
+  String get subscriptionFormCancel => 'Cancel';
+
+  @override
+  String get subscriptionFormSubmit => 'Create subscription';
+
+  @override
+  String get subscriptionFormSave => 'Save';
 }
