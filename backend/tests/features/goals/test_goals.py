@@ -46,6 +46,33 @@ def list_goals(client: TestClient, headers: dict[str, str], **params: str) -> li
     return list(response.json())
 
 
+def allocate(
+    client: TestClient,
+    headers: dict[str, str],
+    goal_id: str,
+    amount_minor: int,
+    allocated_on: str = "2026-05-01",
+    note: str | None = None,
+) -> dict:
+    """Append one signed line to a goal's ledger and return it."""
+    response = client.post(
+        f"/api/v1/goals/{goal_id}/allocations",
+        json={"amount_minor": amount_minor, "allocated_on": allocated_on, "note": note},
+        headers=headers,
+    )
+    assert response.status_code == 201, response.json()
+    return dict(response.json())
+
+
+def read_goal(client: TestClient, headers: dict[str, str], goal_id: str) -> dict:
+    """Re-read one goal whatever its status — there is no single-goal endpoint."""
+    for status in ("active", "reached", "archived"):
+        for goal in list_goals(client, headers, status=status):
+            if goal["id"] == goal_id:
+                return goal
+    raise AssertionError(f"goal {goal_id} not found in any status")
+
+
 # --- creation -------------------------------------------------------------------------------
 
 
@@ -211,3 +238,83 @@ def test_no_transaction_or_balance_is_written_by_a_goal(client: TestClient) -> N
     assert transactions["items"] == []
     unchanged = client.get(f"/api/v1/accounts/{account['id']}", headers=headers).json()
     assert unchanged["balance_minor"] == 2_210_000
+
+
+# --- reached ---------------------------------------------------------------------------------
+
+
+def test_a_goal_reaches_at_exactly_its_target(client: TestClient) -> None:
+    headers = register(client)
+    goal_id = create_goal(client, headers, target_minor=400_000)["id"]
+
+    allocate(client, headers, goal_id, 399_999)
+    assert read_goal(client, headers, goal_id)["status"] == "active"
+
+    allocate(client, headers, goal_id, 1)
+    reached = read_goal(client, headers, goal_id)
+    assert reached["status"] == "reached"
+    assert reached["progress_pct"] == 1.0
+
+
+def test_a_reached_goal_is_not_auto_archived(client: TestClient) -> None:
+    """Reaching a goal is the moment the panel is built around, so it stays on the grid."""
+    headers = register(client)
+    goal_id = create_goal(client, headers, target_minor=400_000)["id"]
+    allocate(client, headers, goal_id, 400_000)
+
+    assert [goal["id"] for goal in list_goals(client, headers)] == [goal_id]
+    assert list_goals(client, headers, status="archived") == []
+
+
+def test_an_archived_goal_keeps_its_status_while_its_ledger_moves(client: TestClient) -> None:
+    headers = register(client)
+    goal_id = create_goal(client, headers, target_minor=400_000)["id"]
+    client.delete(f"/api/v1/goals/{goal_id}", headers=headers)
+
+    allocate(client, headers, goal_id, 400_000)
+
+    assert read_goal(client, headers, goal_id)["status"] == "archived"
+
+
+def test_restoring_recomputes_reached_from_the_allocations(client: TestClient) -> None:
+    """The status a goal carried when archived is not trusted: the target may have moved
+    since, and reaching one target says nothing about reaching another."""
+    headers = register(client)
+    goal_id = create_goal(client, headers, target_minor=400_000)["id"]
+    allocate(client, headers, goal_id, 400_000)
+    client.delete(f"/api/v1/goals/{goal_id}", headers=headers)
+
+    client.patch(f"/api/v1/goals/{goal_id}", json={"target_minor": 800_000}, headers=headers)
+    restored = client.patch(
+        f"/api/v1/goals/{goal_id}", json={"status": "active"}, headers=headers
+    ).json()
+
+    assert restored["status"] == "active"
+    assert restored["progress_minor"] == 400_000
+
+
+def test_restoring_a_goal_whose_target_was_lowered_reports_reached(client: TestClient) -> None:
+    headers = register(client)
+    goal_id = create_goal(client, headers, target_minor=800_000)["id"]
+    allocate(client, headers, goal_id, 400_000)
+    client.delete(f"/api/v1/goals/{goal_id}", headers=headers)
+
+    client.patch(f"/api/v1/goals/{goal_id}", json={"target_minor": 400_000}, headers=headers)
+    restored = client.patch(
+        f"/api/v1/goals/{goal_id}", json={"status": "active"}, headers=headers
+    ).json()
+
+    assert restored["status"] == "reached"
+    assert [goal["id"] for goal in list_goals(client, headers, status="reached")] == [goal_id]
+
+
+def test_archiving_preserves_the_allocation_history(client: TestClient) -> None:
+    headers = register(client)
+    goal_id = create_goal(client, headers)["id"]
+    allocate(client, headers, goal_id, 30_000, note="Virement mensuel")
+
+    client.delete(f"/api/v1/goals/{goal_id}", headers=headers)
+
+    response = client.get(f"/api/v1/goals/{goal_id}/allocations", headers=headers)
+    assert response.status_code == 200
+    assert [line["note"] for line in response.json()] == ["Virement mensuel"]

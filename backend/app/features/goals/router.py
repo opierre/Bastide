@@ -1,4 +1,4 @@
-"""Goal endpoints: user-scoped virtual-envelope CRUD with archive-on-delete."""
+"""Goal endpoints: virtual-envelope CRUD and the signed allocation ledger."""
 
 from typing import Annotated
 
@@ -10,7 +10,14 @@ from app.features.auth.deps import get_current_user
 from app.features.auth.models import User
 from app.features.goals.models import Goal
 from app.features.goals.repository import GoalRepository
-from app.features.goals.schemas import GoalCreate, GoalRead, GoalStatus, GoalUpdate
+from app.features.goals.schemas import (
+    AllocationCreate,
+    AllocationRead,
+    GoalCreate,
+    GoalRead,
+    GoalStatus,
+    GoalUpdate,
+)
 from app.features.goals.service import GoalService
 
 router = APIRouter(prefix="/api/v1/goals", tags=["goals"])
@@ -85,3 +92,40 @@ async def delete_goal(
 ) -> None:
     """Archive a goal (never hard-deletes â€” the allocations are history)."""
     service.archive(user.id, goal_id)
+
+
+@router.get("/{goal_id}/allocations", response_model=list[AllocationRead])
+async def list_allocations(
+    goal_id: str,
+    service: Annotated[GoalService, Depends(_service)],
+    user: Annotated[User, Depends(get_current_user)],
+) -> list[AllocationRead]:
+    """One goal's allocation history, newest first."""
+    return [
+        AllocationRead.model_validate(allocation)
+        for allocation in service.list_allocations(user.id, goal_id)
+    ]
+
+
+@router.post(
+    "/{goal_id}/allocations", response_model=AllocationRead, status_code=status.HTTP_201_CREATED
+)
+async def create_allocation(
+    goal_id: str,
+    payload: AllocationCreate,
+    service: Annotated[GoalService, Depends(_service)],
+    user: Annotated[User, Depends(get_current_user)],
+) -> AllocationRead:
+    """Append a signed allocation. A negative amount takes money back out of the envelope."""
+    return AllocationRead.model_validate(service.add_allocation(user.id, goal_id, payload))
+
+
+@router.delete("/{goal_id}/allocations/{allocation_id}", status_code=status.HTTP_204_NO_CONTENT)
+async def delete_allocation(
+    goal_id: str,
+    allocation_id: str,
+    service: Annotated[GoalService, Depends(_service)],
+    user: Annotated[User, Depends(get_current_user)],
+) -> None:
+    """Undo a mistyped ledger line. There is no PATCH: a real correction is an offsetting line."""
+    service.delete_allocation(user.id, goal_id, allocation_id)

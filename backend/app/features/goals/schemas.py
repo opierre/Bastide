@@ -70,3 +70,31 @@ class GoalRead(BaseModel):
     progress_pct: float
     created_at: datetime
     updated_at: datetime
+
+
+class AllocationCreate(BaseModel):
+    """Payload adding one line to a goal's ledger.
+
+    `amount_minor` is signed: negative takes money back out of the envelope. There is no
+    separate withdrawal endpoint, and no PATCH — a mistake is corrected with an offsetting
+    line, which is what an honest ledger looks like.
+    """
+
+    model_config = ConfigDict(extra="forbid")
+
+    amount_minor: int
+    allocated_on: date
+    note: str | None = None
+
+
+class AllocationRead(BaseModel):
+    """One allocation as returned by the API."""
+
+    model_config = ConfigDict(from_attributes=True)
+
+    id: str
+    goal_id: str
+    amount_minor: int
+    allocated_on: date
+    note: str | None
+    created_at: datetime

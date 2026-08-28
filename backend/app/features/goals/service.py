@@ -1,14 +1,16 @@
-"""Business logic for savings goals: CRUD over the virtual envelopes and their progress.
+"""Business logic for savings goals: CRUD, the signed allocation ledger, and derived status.
 
 Nothing in here writes a transaction or moves an account balance. A goal is a virtual
-envelope (`PROJECT.md` §13): it is bookkeeping *about* money the user already has.
+envelope (`PROJECT.md` §13): allocating is bookkeeping *about* money the user already has, so
+this feature never touches the ledger, and never compares an allocation against a balance —
+the backend has no basis for deciding which money is "savings".
 """
 
 from app.core.errors import NotFoundError
 from app.features.auth.models import User
-from app.features.goals.models import Goal
+from app.features.goals.models import Goal, GoalAllocation
 from app.features.goals.repository import GoalRepository
-from app.features.goals.schemas import GoalCreate, GoalStatus, GoalUpdate
+from app.features.goals.schemas import AllocationCreate, GoalCreate, GoalStatus, GoalUpdate
 
 #: The status a goal starts in, and the one it falls back to when progress drops below target.
 ACTIVE: GoalStatus = "active"
@@ -30,8 +32,25 @@ class GoalNotFoundError(NotFoundError):
     code = "GOAL_NOT_FOUND"
 
 
+class AllocationNotFoundError(NotFoundError):
+    """Raised when an allocation doesn't exist or belongs to another goal."""
+
+    code = "GOAL_ALLOCATION_NOT_FOUND"
+
+
+def _settled_status(goal: Goal, progress_minor: int) -> GoalStatus:
+    """The status this goal's progress implies.
+
+    Archived is the user's own decision and outranks the arithmetic — an archived goal stays
+    archived however its ledger moves, and its status is recomputed only when it is restored.
+    """
+    if goal.status == ARCHIVED:
+        return ARCHIVED
+    return REACHED if progress_minor >= goal.target_minor else ACTIVE
+
+
 class GoalService:
-    """Goal CRUD, scoped to a user."""
+    """Goal CRUD and the allocation ledger, scoped to a user."""
 
     def __init__(self, repository: GoalRepository) -> None:
         self._repository = repository
@@ -75,6 +94,11 @@ class GoalService:
     def update(self, user_id: str, goal_id: str, data: GoalUpdate) -> tuple[Goal, int]:
         """Patch a goal, including archiving and restoring it.
 
+        A restore (`status: active`) recomputes `reached` from the allocations rather than
+        trusting the status the goal carried when it was archived — the target may have been
+        edited since, and the stored value would then be a claim about arithmetic that no
+        longer holds.
+
         Raises:
             GoalNotFoundError: no such goal, or it belongs to another user.
         """
@@ -91,6 +115,8 @@ class GoalService:
             goal.color = data.color
         if data.status is not None:
             goal.status = data.status
+            if data.status == ACTIVE:
+                goal.status = _settled_status(goal, progress_minor)
         return self._repository.save(goal), progress_minor
 
     def archive(self, user_id: str, goal_id: str) -> None:
@@ -102,3 +128,57 @@ class GoalService:
         goal, _ = self.get(user_id, goal_id)
         goal.status = ARCHIVED
         self._repository.save(goal)
+
+    def list_allocations(self, user_id: str, goal_id: str) -> list[GoalAllocation]:
+        """A goal's allocation history, newest first.
+
+        Raises:
+            GoalNotFoundError: no such goal, or it belongs to another user.
+        """
+        goal, _ = self.get(user_id, goal_id)
+        return self._repository.list_allocations(goal.id)
+
+    def add_allocation(self, user_id: str, goal_id: str, data: AllocationCreate) -> GoalAllocation:
+        """Append one signed line to a goal's ledger and settle the goal's status.
+
+        Over-allocation is accepted silently, here and across goals: total allocations may
+        exceed whatever the user actually holds, and the UI is what says so (`PROJECT.md` §13).
+
+        Raises:
+            GoalNotFoundError: no such goal, or it belongs to another user.
+        """
+        goal, _ = self.get(user_id, goal_id)
+        allocation = self._repository.add_allocation(
+            GoalAllocation(
+                goal_id=goal.id,
+                amount_minor=data.amount_minor,
+                allocated_on=data.allocated_on,
+                note=data.note,
+            )
+        )
+        self._settle(goal)
+        return allocation
+
+    def delete_allocation(self, user_id: str, goal_id: str, allocation_id: str) -> None:
+        """Remove one line of the ledger and settle the goal's status.
+
+        The one mutation the history allows, and only because a mistyped line is not history.
+        Undoing an allocation the user meant is done with an offsetting negative line instead.
+
+        Raises:
+            GoalNotFoundError: no such goal, or it belongs to another user.
+            AllocationNotFoundError: no such allocation on this goal.
+        """
+        goal, _ = self.get(user_id, goal_id)
+        allocation = self._repository.get_allocation(allocation_id, goal.id)
+        if allocation is None:
+            raise AllocationNotFoundError("Allocation not found.")
+        self._repository.delete_allocation(allocation)
+        self._settle(goal)
+
+    def _settle(self, goal: Goal) -> None:
+        """Re-derive `reached` / `active` from the ledger after it changed."""
+        status = _settled_status(goal, self._repository.progress_for(goal.id))
+        if status != goal.status:
+            goal.status = status
+            self._repository.save(goal)
