@@ -28,7 +28,9 @@ Widget _wrap({
 }
 
 void main() {
-  testWidgets('the calendar writes the picked day into the field', (tester) async {
+  testWidgets('the calendar writes the picked day into the field', (
+    tester,
+  ) async {
     final controller = TextEditingController(text: '14/05/2026');
     await tester.pumpWidget(_wrap(controller: controller));
     await tester.pumpAndSettle();
@@ -86,6 +88,39 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(controller.text, '5/22/2026');
+  });
+
+  testWidgets('takes only a date, and types the separators itself', (
+    tester,
+  ) async {
+    final controller = TextEditingController();
+    await tester.pumpWidget(_wrap(controller: controller));
+    await tester.pumpAndSettle();
+
+    // Eight digits are a date: the field puts the slashes in as each section
+    // fills, so the user never types one.
+    await tester.enterText(find.byKey(const Key('field')), '12032026');
+    expect(controller.text, '12/03/2026');
+
+    // Anything that is not that shape never reaches the field.
+    for (final rejected in ['12 mars', '2026-03-12', 'today', '12/03/20267']) {
+      await tester.enterText(find.byKey(const Key('field')), rejected);
+      expect(controller.text, '12/03/2026', reason: rejected);
+    }
+  });
+
+  testWidgets('takes the en shape under en', (tester) async {
+    final controller = TextEditingController();
+    await tester.pumpWidget(
+      _wrap(controller: controller, locale: const Locale('en')),
+    );
+    await tester.pumpAndSettle();
+
+    // A single-digit month closes on the typed separator rather than waiting
+    // for a second digit.
+    await tester.enterText(find.byKey(const Key('field')), '5/14/2026');
+    expect(controller.text, '5/14/2026');
+    expect(parseDateInput(controller.text, 'en'), DateTime(2026, 5, 14));
   });
 
   group('parseDateInput', () {
