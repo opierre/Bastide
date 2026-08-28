@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:intl/intl.dart';
 
+import '../../../core/session/current_user_provider.dart';
 import '../../../core/theme/tokens.dart';
 import '../../../core/widgets/app_modal.dart';
+import '../../../core/widgets/date_field.dart';
 import '../../../core/widgets/inline_banner.dart';
 import '../../../core/widgets/labeled_field.dart';
+import '../../../core/widgets/money_field.dart';
 import '../../../core/widgets/primary_button.dart';
 import '../../../l10n/app_localizations.dart';
 import '../application/goals_controller.dart';
@@ -63,11 +65,9 @@ class _GoalFormModalState extends ConsumerState<GoalFormModal> {
     final goal = widget.initial;
     if (goal == null) return;
     final locale = Localizations.localeOf(context).toString();
-    _targetController.text = NumberFormat.decimalPattern(
-      locale,
-    ).format(goal.targetMinor / 100);
+    _targetController.text = formatMoneyInput(goal.targetMinor, locale);
     if (goal.targetDate case final date?) {
-      _dateController.text = goalDateFormat(locale).format(date);
+      _dateController.text = appDateFormat(locale).format(date);
     }
   }
 
@@ -80,36 +80,24 @@ class _GoalFormModalState extends ConsumerState<GoalFormModal> {
   }
 
   /// The target in minor units, or `null` when the field doesn't hold a
-  /// positive amount. A target is what the user is aiming at, so zero and
-  /// negatives are not targets — the backend refuses them too.
+  /// positive amount. A target is what the user is aiming at, so zero is not
+  /// one — and the field itself refuses a minus sign.
   int? _parseTarget(String text, String locale) {
-    try {
-      final value = NumberFormat.decimalPattern(locale).parse(text.trim());
-      final minor = (value.toDouble() * 100).round();
-      return minor > 0 ? minor : null;
-    } on FormatException {
-      return null;
-    }
+    final minor = parseMoneyMinor(text, locale);
+    return (minor != null && minor > 0) ? minor : null;
   }
 
-  /// `(parsed, ok)` for the optional date field: an empty field is a valid
-  /// no-deadline goal, a filled one has to be a date the locale can read.
-  (DateTime?, bool) _parseDate(String text, String locale) {
-    final trimmed = text.trim();
-    if (trimmed.isEmpty) return (null, true);
-    try {
-      return (goalDateFormat(locale).parseStrict(trimmed), true);
-    } on FormatException {
-      return (null, false);
-    }
-  }
+  /// Whether the optional date field holds something usable: an empty one is a
+  /// valid no-deadline goal, a filled one has to be a date the locale can read.
+  bool _dateIsValid(String text, String locale) =>
+      text.trim().isEmpty || parseDateInput(text, locale) != null;
 
   Future<void> _submit() async {
     if (!(_formKey.currentState?.validate() ?? false)) return;
 
     final locale = Localizations.localeOf(context).toString();
     final target = _parseTarget(_targetController.text, locale);
-    final (date, _) = _parseDate(_dateController.text, locale);
+    final date = parseDateInput(_dateController.text, locale);
     if (target == null) return;
 
     setState(() {
@@ -150,6 +138,11 @@ class _GoalFormModalState extends ConsumerState<GoalFormModal> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final locale = Localizations.localeOf(context).toString();
+    // The goal's own currency when it has one, else the profile's. Phase 1 is
+    // one currency per user, so the two only ever differ while the profile is
+    // still loading.
+    final currency =
+        widget.initial?.currency ?? ref.watch(currentUserProvider)?.currency ?? '';
 
     return AppModal(
       title: _isEditing ? l10n.goalFormEditTitle : l10n.goalFormCreateTitle,
@@ -201,12 +194,10 @@ class _GoalFormModalState extends ConsumerState<GoalFormModal> {
                 Expanded(
                   child: LabeledField(
                     label: l10n.goalFormTargetLabel,
-                    child: TextFormField(
+                    child: MoneyField(
                       key: const Key('goalFormTarget'),
                       controller: _targetController,
-                      keyboardType: const TextInputType.numberWithOptions(
-                        decimal: true,
-                      ),
+                      currency: currency,
                       validator: (value) => _parseTarget(value ?? '', locale) == null
                           ? l10n.goalFormTargetInvalid
                           : null,
@@ -215,14 +206,20 @@ class _GoalFormModalState extends ConsumerState<GoalFormModal> {
                 ),
                 const SizedBox(width: AppSpacing.sm + AppSpacing.xs),
                 SizedBox(
-                  width: 150,
+                  width: 170,
                   child: LabeledField(
                     label: l10n.goalFormDateLabel,
                     helper: l10n.goalFormDateHelp,
-                    child: TextFormField(
+                    child: DateField(
                       key: const Key('goalFormDate'),
                       controller: _dateController,
-                      validator: (value) => _parseDate(value ?? '', locale).$2
+                      // A goal is aimed forward, but an existing one may carry a
+                      // date that has since passed, and editing its name must
+                      // not force the user to move it.
+                      firstDate: DateTime(2000),
+                      lastDate: DateTime(2100),
+                      calendarTooltip: l10n.goalFormDatePick,
+                      validator: (value) => _dateIsValid(value ?? '', locale)
                           ? null
                           : l10n.goalFormDateInvalid,
                     ),

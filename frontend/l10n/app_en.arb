@@ -646,5 +646,7 @@
   "dashboardGoalsTitle": "Goals",
   "dashboardGoalsViewAll": "View all",
   "dashboardGoalsProgress": "{saved} / {target}",
-  "dashboardGoalsReached": "Reached"
+  "dashboardGoalsReached": "Reached",
+  "goalFormDatePick": "Pick a target date",
+  "allocationDatePick": "Pick a date"
 }

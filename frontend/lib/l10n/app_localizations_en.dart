@@ -2315,4 +2315,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get dashboardGoalsReached => 'Reached';
+
+  @override
+  String get goalFormDatePick => 'Pick a target date';
+
+  @override
+  String get allocationDatePick => 'Pick a date';
 }

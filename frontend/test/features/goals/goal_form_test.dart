@@ -1,4 +1,6 @@
+import 'package:finstride/core/session/current_user_provider.dart';
 import 'package:finstride/core/theme/app_theme.dart';
+import 'package:finstride/features/auth/domain/auth_user.dart';
 import 'package:finstride/features/goals/application/goals_controller.dart';
 import 'package:finstride/features/goals/domain/goal.dart';
 import 'package:finstride/features/goals/presentation/goal_form_modal.dart';
@@ -33,7 +35,18 @@ Widget _wrap({
   Locale locale = const Locale('fr'),
 }) {
   return ProviderScope(
-    overrides: [goalsControllerProvider.overrideWith(() => controller)],
+    overrides: [
+      goalsControllerProvider.overrideWith(() => controller),
+      currentUserProvider.overrideWithValue(
+        const AuthUser(
+          id: 'u1',
+          email: 'chloe@example.com',
+          displayName: 'Chloé Dubois',
+          locale: 'fr',
+          currency: 'EUR',
+        ),
+      ),
+    ],
     child: MaterialApp(
       locale: locale,
       theme: appDarkTheme,
@@ -45,6 +58,67 @@ Widget _wrap({
 }
 
 void main() {
+  testWidgets('the target field carries the currency and takes digits only', (
+    tester,
+  ) async {
+    final controller = _RecordingGoalsController();
+    await tester.pumpWidget(_wrap(controller: controller));
+    await tester.pumpAndSettle();
+
+    final target = tester.widget<TextField>(
+      find.descendant(
+        of: find.byKey(const Key('goalFormTarget')),
+        matching: find.byType(TextField),
+      ),
+    );
+    expect(target.decoration?.suffixText, 'EUR');
+
+    // The field can only ever hold an amount, so it never has to say it wanted
+    // one — and a target has no sign to give it.
+    await tester.enterText(find.byKey(const Key('goalFormTarget')), '10000');
+    await tester.enterText(find.byKey(const Key('goalFormTarget')), '10000abc');
+    expect(
+      tester.widget<TextField>(
+        find.descendant(
+          of: find.byKey(const Key('goalFormTarget')),
+          matching: find.byType(TextField),
+        ),
+      ).controller?.text,
+      '10000',
+    );
+    await tester.enterText(find.byKey(const Key('goalFormTarget')), '-5000');
+    expect(
+      tester.widget<TextField>(
+        find.descendant(
+          of: find.byKey(const Key('goalFormTarget')),
+          matching: find.byType(TextField),
+        ),
+      ).controller?.text,
+      '10000',
+    );
+  });
+
+  testWidgets('the target date is picked from a calendar', (tester) async {
+    final controller = _RecordingGoalsController();
+    await tester.pumpWidget(_wrap(controller: controller));
+    await tester.pumpAndSettle();
+
+    await tester.enterText(find.byKey(const Key('goalFormName')), 'Voyage Japon');
+    await tester.enterText(find.byKey(const Key('goalFormTarget')), '4000');
+
+    await tester.tap(find.byIcon(Icons.calendar_today_outlined));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('22'));
+    await tester.tap(find.text('OK'));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byKey(const Key('goalFormSubmit')));
+    await tester.pumpAndSettle();
+
+    // Whatever month the calendar opened on, it is the 22nd that was submitted.
+    expect(controller.createCalls.single.$3?.day, 22);
+  });
+
   testWidgets('creating sends the name, the target, the date and the picks', (
     tester,
   ) async {

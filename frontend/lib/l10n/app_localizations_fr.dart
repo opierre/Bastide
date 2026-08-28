@@ -2334,4 +2334,10 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get dashboardGoalsReached => 'Atteint';
+
+  @override
+  String get goalFormDatePick => 'Choisir une date cible';
+
+  @override
+  String get allocationDatePick => 'Choisir une date';
 }

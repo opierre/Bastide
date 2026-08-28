@@ -2924,5 +2924,13 @@
   "dashboardGoalsReached": "Atteint",
   "@dashboardGoalsReached": {
     "description": "Badge replacing the amounts on a reached goal's dashboard row."
+  },
+  "goalFormDatePick": "Choisir une date cible",
+  "@goalFormDatePick": {
+    "description": "Tooltip on the calendar button of the goal form's target date field."
+  },
+  "allocationDatePick": "Choisir une date",
+  "@allocationDatePick": {
+    "description": "Tooltip on the calendar button of the allocation modal's date field."
   }
 }

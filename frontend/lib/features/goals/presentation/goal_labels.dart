@@ -27,11 +27,6 @@ String localizeGoalError(AppLocalizations l10n, Object? error) {
   return l10n.goalErrorGeneric;
 }
 
-/// Allocation dates as the panel prints them, in the locale's short numeric
-/// form — the same formatter the transactions feed and the subscriptions panel
-/// use, so a date means the same shape wherever the user meets it.
-DateFormat goalDateFormat(String locale) => DateFormat.yMd(locale);
-
 /// « Juin 2028 » — the month a goal is aimed at, as its pill states it.
 String goalMonthLabel(String locale, DateTime date) =>
     _capitalize(DateFormat.yMMMM(locale).format(date));

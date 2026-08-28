@@ -93,6 +93,43 @@ ThemeData _buildDarkTheme() {
       barrierColor: AppColors.scrim,
     ),
 
+    // The calendar behind every [DateField]. Material's own surfaces are a
+    // shade of the seed color rather than this palette, so the picker's slots
+    // are mapped onto the app's tokens here — one place, so a date picker in a
+    // later panel cannot drift from this one.
+    datePickerTheme: DatePickerThemeData(
+      backgroundColor: AppColors.surfaceOverlay,
+      surfaceTintColor: Colors.transparent,
+      elevation: 0,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.all(Radius.circular(AppRadii.xl)),
+        side: BorderSide(color: AppColors.border),
+      ),
+      headerBackgroundColor: AppColors.surfaceOverlay,
+      headerForegroundColor: AppColors.textSecondary,
+      weekdayStyle: AppTextStyles.sectionLabel,
+      dayForegroundColor: WidgetStateProperty.resolveWith((states) {
+        return states.contains(WidgetState.selected)
+            ? AppColors.irisInk
+            : AppColors.textPrimary;
+      }),
+      dayBackgroundColor: WidgetStateProperty.resolveWith((states) {
+        if (states.contains(WidgetState.selected)) return AppColors.iris;
+        if (states.contains(WidgetState.hovered)) return AppColors.surfaceHover;
+        return Colors.transparent;
+      }),
+      // The selected day sits on an iris fill, so its label takes the ink that
+      // reads on one — the same pair a primary button uses.
+      todayForegroundColor: WidgetStateProperty.resolveWith((states) {
+        return states.contains(WidgetState.selected)
+            ? AppColors.irisInk
+            : AppColors.iris;
+      }),
+      todayBorder: const BorderSide(color: AppColors.iris),
+      yearForegroundColor: const WidgetStatePropertyAll(AppColors.textPrimary),
+      dividerColor: AppColors.borderSubtle,
+    ),
+
     popupMenuTheme: PopupMenuThemeData(
       color: AppColors.surfaceOverlay,
       surfaceTintColor: Colors.transparent,

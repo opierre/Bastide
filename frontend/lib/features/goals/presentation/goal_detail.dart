@@ -5,6 +5,7 @@ import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/tokens.dart';
 import '../../../core/widgets/amount_text.dart';
 import '../../../core/widgets/app_card.dart';
+import '../../../core/widgets/date_field.dart';
 import '../../../core/widgets/primary_button.dart';
 import '../../../core/widgets/state_views.dart';
 import '../../../l10n/app_localizations.dart';
@@ -414,7 +415,7 @@ class _HistoryRow extends StatelessWidget {
           SizedBox(
             width: 140,
             child: Text(
-              goalDateFormat(locale).format(allocation.allocatedOn),
+              appDateFormat(locale).format(allocation.allocatedOn),
               style: tabularNumberStyle(
                 textTheme.bodyMedium!,
               ).copyWith(color: AppColors.textSecondary),

@@ -3732,6 +3732,18 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Atteint'**
   String get dashboardGoalsReached;
+
+  /// Tooltip on the calendar button of the goal form's target date field.
+  ///
+  /// In fr, this message translates to:
+  /// **'Choisir une date cible'**
+  String get goalFormDatePick;
+
+  /// Tooltip on the calendar button of the allocation modal's date field.
+  ///
+  /// In fr, this message translates to:
+  /// **'Choisir une date'**
+  String get allocationDatePick;
 }
 
 class _AppLocalizationsDelegate

@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:intl/intl.dart';
 
 import '../../../core/theme/tokens.dart';
 import '../../../core/widgets/app_modal.dart';
+import '../../../core/widgets/date_field.dart';
 import '../../../core/widgets/inline_banner.dart';
 import '../../../core/widgets/labeled_field.dart';
+import '../../../core/widgets/money_field.dart';
 import '../../../core/widgets/primary_button.dart';
 import '../../../l10n/app_localizations.dart';
 import '../application/goals_controller.dart';
@@ -63,7 +64,7 @@ class _AllocationModalState extends ConsumerState<AllocationModal> {
     // pre-filled date the user can overwrite beats an empty field they must
     // fill to move on.
     final locale = Localizations.localeOf(context).toString();
-    _dateController.text = goalDateFormat(locale).format(DateTime.now());
+    _dateController.text = appDateFormat(locale).format(DateTime.now());
   }
 
   @override
@@ -78,21 +79,8 @@ class _AllocationModalState extends ConsumerState<AllocationModal> {
   /// usable one. Zero is refused: an allocation of nothing is a line that says
   /// nothing, and the ledger is read as a record of decisions.
   int? _parseAmount(String text, String locale) {
-    try {
-      final value = NumberFormat.decimalPattern(locale).parse(text.trim());
-      final minor = (value.toDouble() * 100).round();
-      return minor == 0 ? null : minor;
-    } on FormatException {
-      return null;
-    }
-  }
-
-  DateTime? _parseDate(String text, String locale) {
-    try {
-      return goalDateFormat(locale).parseStrict(text.trim());
-    } on FormatException {
-      return null;
-    }
+    final minor = parseMoneyMinor(text, locale, allowNegative: true);
+    return (minor == null || minor == 0) ? null : minor;
   }
 
   Future<void> _submit() async {
@@ -100,7 +88,7 @@ class _AllocationModalState extends ConsumerState<AllocationModal> {
 
     final locale = Localizations.localeOf(context).toString();
     final amount = _parseAmount(_amountController.text, locale);
-    final date = _parseDate(_dateController.text, locale);
+    final date = parseDateInput(_dateController.text, locale);
     if (amount == null || date == null) return;
 
     final note = _noteController.text.trim();
@@ -134,6 +122,7 @@ class _AllocationModalState extends ConsumerState<AllocationModal> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final locale = Localizations.localeOf(context).toString();
+    final currency = widget.goal.currency;
 
     return AppModal(
       title: l10n.allocationModalTitle,
@@ -175,16 +164,15 @@ class _AllocationModalState extends ConsumerState<AllocationModal> {
                   child: LabeledField(
                     label: l10n.allocationAmountLabel,
                     helper: l10n.allocationAmountHelp,
-                    child: TextFormField(
+                    // Signed: the minus sign is the whole withdrawal
+                    // mechanism, so this is the one amount field in the app
+                    // that has to let one through.
+                    child: MoneyField(
                       key: const Key('allocationAmount'),
                       controller: _amountController,
+                      currency: currency,
+                      allowNegative: true,
                       autofocus: true,
-                      // A signed field: the minus sign is the whole withdrawal
-                      // mechanism, so the keyboard has to offer it.
-                      keyboardType: const TextInputType.numberWithOptions(
-                        decimal: true,
-                        signed: true,
-                      ),
                       validator: (value) => _parseAmount(value ?? '', locale) == null
                           ? l10n.allocationAmountInvalid
                           : null,
@@ -193,13 +181,17 @@ class _AllocationModalState extends ConsumerState<AllocationModal> {
                 ),
                 const SizedBox(width: AppSpacing.sm + AppSpacing.xs),
                 SizedBox(
-                  width: 140,
+                  width: 170,
                   child: LabeledField(
                     label: l10n.allocationDateLabel,
-                    child: TextFormField(
+                    child: DateField(
                       key: const Key('allocationDate'),
                       controller: _dateController,
-                      validator: (value) => _parseDate(value ?? '', locale) == null
+                      firstDate: DateTime(2000),
+                      lastDate: DateTime(2100),
+                      calendarTooltip: l10n.allocationDatePick,
+                      validator: (value) =>
+                          parseDateInput(value ?? '', locale) == null
                           ? l10n.allocationDateInvalid
                           : null,
                     ),
