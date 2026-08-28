@@ -7,11 +7,14 @@ import '../../../core/theme/tokens.dart';
 import '../../../core/widgets/primary_button.dart';
 import '../../../core/widgets/state_views.dart';
 import '../../../l10n/app_localizations.dart';
+import '../../goals/application/goals_controller.dart';
+import '../../goals/presentation/goals_screen.dart';
 import '../../imports/presentation/imports_screen.dart';
 import '../../transactions/presentation/transactions_screen.dart';
 import '../application/dashboard_controller.dart';
 import '../domain/dashboard_summary.dart';
 import 'category_breakdown.dart';
+import 'goals_progress_card.dart';
 import 'income_vs_expense.dart';
 import 'recent_activity.dart';
 import 'savings_trend.dart';
@@ -58,14 +61,18 @@ String _localizeError(AppLocalizations l10n, Object? error) {
   return l10n.dashboardErrorGeneric;
 }
 
-class _DashboardContent extends StatelessWidget {
+class _DashboardContent extends ConsumerWidget {
   const _DashboardContent({required this.state});
 
   final DashboardState state;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context)!;
+    // The top three active goals, or nothing at all — a goals load that hasn't
+    // landed or has failed simply leaves row 3 as it was in Phase 1, rather
+    // than putting an error about a side card on the dashboard.
+    final goals = ref.watch(goalsControllerProvider).value?.topGoals ?? const [];
     final locale = Localizations.localeOf(context).toString();
     final summary = state.summary;
     // The month the deltas compare against — « vs avril » when May is selected.
@@ -162,6 +169,11 @@ class _DashboardContent extends StatelessWidget {
           ),
         ),
         const SizedBox(height: AppSpacing.gridGap),
+        // Row 3's Phase 2 split, `1fr .95fr .85fr`, expressed as integer flex the
+        // same way row 1's is. The Objectifs card is *dropped* rather than
+        // collapsed when there are no goals, and the other two cards go back to
+        // sharing the row equally — a third column held open for something the
+        // user hasn't created reads as a rendering fault.
         Expanded(
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -169,11 +181,24 @@ class _DashboardContent extends StatelessWidget {
               Expanded(child: IncomeVsExpenseChart(trends: state.trends)),
               const SizedBox(width: AppSpacing.gridGap),
               Expanded(
+                // `.95fr` beside the left card's `1fr`, and back to an even
+                // share when the Objectifs card is absent.
+                flex: goals.isEmpty ? 100 : 95,
                 child: RecentActivityCard(
                   transactions: state.recent,
                   onViewAll: () => context.go(TransactionsScreen.path),
                 ),
               ),
+              if (goals.isNotEmpty) ...[
+                const SizedBox(width: AppSpacing.gridGap),
+                Expanded(
+                  flex: 85,
+                  child: GoalsProgressCard(
+                    goals: goals,
+                    onViewAll: () => context.go(GoalsScreen.path),
+                  ),
+                ),
+              ],
             ],
           ),
         ),
