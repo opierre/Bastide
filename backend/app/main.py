@@ -17,6 +17,7 @@ from app.features.categories.router import router as categories_router
 from app.features.categorization.router import router as categorization_router
 from app.features.categorization.runner import reconcile_orphaned_runs
 from app.features.dashboard.router import router as dashboard_router
+from app.features.goals.router import router as goals_router
 from app.features.health.router import router as health_router
 from app.features.imports.router import router as imports_router
 from app.features.inference.router import router as inference_router
@@ -77,6 +78,7 @@ def create_app() -> FastAPI:
     app.include_router(inference_router)
     app.include_router(categorization_router)
     app.include_router(recurring_router)
+    app.include_router(goals_router)
 
     return app
 
