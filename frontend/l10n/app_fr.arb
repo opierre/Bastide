@@ -2636,5 +2636,293 @@
   "subscriptionFormSave": "Enregistrer",
   "@subscriptionFormSave": {
     "description": "Confirm action when editing a recurring payment."
+  },
+  "navGoals": "Objectifs",
+  "@navGoals": {
+    "description": "Sidebar label of the goals panel, last of the Gestion group."
+  },
+  "navGoalsSubtitle": "Mettez de côté, virtuellement, pour ce qui compte",
+  "@navGoalsSubtitle": {
+    "description": "Top-bar descriptor of the goals panel."
+  },
+  "goalsAdd": "Nouvel objectif",
+  "@goalsAdd": {
+    "description": "Primary top-bar action opening the goal form."
+  },
+  "goalsReassurance": "Répartition sur le papier : vos comptes ne sont pas modifiés.",
+  "@goalsReassurance": {
+    "description": "Lock line stating that allocating changes no account. Shown on the grid and on the detail."
+  },
+  "goalsOverAllocated": "Vous avez réparti {allocated} alors que vos comptes d'épargne totalisent {savings}.",
+  "@goalsOverAllocated": {
+    "description": "The over-allocation banner. Informative and dismissible, never blocking (`PROJECT.md` §13).",
+    "placeholders": {
+      "allocated": {
+        "type": "String"
+      },
+      "savings": {
+        "type": "String"
+      }
+    }
+  },
+  "goalsDismissBanner": "Masquer cet avertissement",
+  "@goalsDismissBanner": {
+    "description": "Tooltip on the over-allocation banner's dismiss control."
+  },
+  "goalsShowArchived": "Afficher les objectifs archivés ({count})",
+  "@goalsShowArchived": {
+    "description": "Link below the grid that reveals archived goals in place; the count is the real number.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "goalsHideArchived": "Masquer les objectifs archivés ({count})",
+  "@goalsHideArchived": {
+    "description": "The same link once the archived goals are showing.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "goalsEmptyTitle": "Donnez un nom à ce qui compte",
+  "@goalsEmptyTitle": {
+    "description": "Empty-state title of the goals panel."
+  },
+  "goalsEmptyBody": "Un objectif est une enveloppe virtuelle : vous y mettez de côté à votre rythme, sans toucher à vos comptes.",
+  "@goalsEmptyBody": {
+    "description": "Empty-state body explaining what a virtual envelope is."
+  },
+  "goalsLoadFailed": "Impossible de charger vos objectifs pour le moment.",
+  "@goalsLoadFailed": {
+    "description": "Error state when the goals list fails to load."
+  },
+  "goalsRetry": "Réessayer",
+  "@goalsRetry": {
+    "description": "Retry action on the goals error states."
+  },
+  "goalPillNoDeadline": "Sans échéance",
+  "@goalPillNoDeadline": {
+    "description": "Card pill for a goal with no target date."
+  },
+  "goalPillReached": "Objectif atteint",
+  "@goalPillReached": {
+    "description": "Card pill for a reached goal with no target date."
+  },
+  "goalPillReachedOn": "Objectif atteint · {month}",
+  "@goalPillReachedOn": {
+    "description": "The reached pill when the goal carried a target date.",
+    "placeholders": {
+      "month": {
+        "type": "String"
+      }
+    }
+  },
+  "goalDetailBack": "Retour aux objectifs",
+  "@goalDetailBack": {
+    "description": "Iris back link from the goal detail to the grid."
+  },
+  "goalDetailTargetDate": "Échéance {month}",
+  "@goalDetailTargetDate": {
+    "description": "Sub-line of the detail header when the goal has a target date. No account is named here.",
+    "placeholders": {
+      "month": {
+        "type": "String"
+      }
+    }
+  },
+  "goalDetailArchive": "Archiver",
+  "@goalDetailArchive": {
+    "description": "Secondary action archiving a goal from its detail header."
+  },
+  "goalDetailRestore": "Restaurer",
+  "@goalDetailRestore": {
+    "description": "The same button on an archived goal, which restores it."
+  },
+  "goalDetailNewAllocation": "Nouvelle allocation",
+  "@goalDetailNewAllocation": {
+    "description": "Primary action opening the allocation modal."
+  },
+  "goalDetailMissing": "Cet objectif n'est plus disponible.",
+  "@goalDetailMissing": {
+    "description": "Shown when the open goal no longer exists."
+  },
+  "goalDetailFootnote": "Aucune transaction n'est créée : ces lignes n'existent que sur le papier de l'objectif.",
+  "@goalDetailFootnote": {
+    "description": "Foot note under the allocation history: no transaction is created."
+  },
+  "goalDetailHistoryFailed": "Impossible de charger l'historique des allocations.",
+  "@goalDetailHistoryFailed": {
+    "description": "Error state when the allocation history fails to load."
+  },
+  "goalHistoryTitle": "Historique des allocations",
+  "@goalHistoryTitle": {
+    "description": "Title of the allocation history card."
+  },
+  "goalHistorySubtitle": "Une seule liste, montants signés — un retrait est une ligne négative.",
+  "@goalHistorySubtitle": {
+    "description": "Sub-line stating that the ledger is one signed list."
+  },
+  "goalHistoryDate": "Date",
+  "@goalHistoryDate": {
+    "description": "Date column of the allocation history."
+  },
+  "goalHistoryAmount": "Montant",
+  "@goalHistoryAmount": {
+    "description": "Amount column of the allocation history."
+  },
+  "goalHistoryNote": "Note",
+  "@goalHistoryNote": {
+    "description": "Note column of the allocation history."
+  },
+  "goalHistoryDelete": "Supprimer cette allocation",
+  "@goalHistoryDelete": {
+    "description": "Tooltip on the control removing one allocation line."
+  },
+  "goalHistoryEmpty": "Aucune allocation pour l'instant.",
+  "@goalHistoryEmpty": {
+    "description": "Shown when a goal has no allocations yet."
+  },
+  "goalFormCreateTitle": "Nouvel objectif",
+  "@goalFormCreateTitle": {
+    "description": "Title of the goal modal when creating."
+  },
+  "goalFormEditTitle": "Modifier l'objectif",
+  "@goalFormEditTitle": {
+    "description": "Title of the goal modal when editing."
+  },
+  "goalFormIntro": "Une enveloppe virtuelle : vous y mettez de côté sur le papier, sans toucher à vos comptes.",
+  "@goalFormIntro": {
+    "description": "Sub-line under the goal modal's title."
+  },
+  "goalFormNameLabel": "Nom",
+  "@goalFormNameLabel": {
+    "description": "Label of the goal name field."
+  },
+  "goalFormNameRequired": "Donnez un nom à cet objectif.",
+  "@goalFormNameRequired": {
+    "description": "Validation message when the goal name is empty."
+  },
+  "goalFormTargetLabel": "Montant cible",
+  "@goalFormTargetLabel": {
+    "description": "Label of the target amount field."
+  },
+  "goalFormTargetInvalid": "Saisissez un montant supérieur à zéro.",
+  "@goalFormTargetInvalid": {
+    "description": "Validation message when the target is missing, unparseable, or not positive."
+  },
+  "goalFormDateLabel": "Date cible",
+  "@goalFormDateLabel": {
+    "description": "Label of the optional target date field."
+  },
+  "goalFormDateHelp": "Facultative",
+  "@goalFormDateHelp": {
+    "description": "Helper marking the target date as optional."
+  },
+  "goalFormDateInvalid": "Date invalide.",
+  "@goalFormDateInvalid": {
+    "description": "Validation message when the target date cannot be read in the current locale."
+  },
+  "goalFormIconLabel": "Icône",
+  "@goalFormIconLabel": {
+    "description": "Label of the goal icon picker."
+  },
+  "goalFormColorLabel": "Couleur",
+  "@goalFormColorLabel": {
+    "description": "Label of the goal color picker."
+  },
+  "goalFormCancel": "Annuler",
+  "@goalFormCancel": {
+    "description": "Cancel action in the goal modal footer."
+  },
+  "goalFormSubmit": "Créer l'objectif",
+  "@goalFormSubmit": {
+    "description": "Confirm action when creating a goal."
+  },
+  "goalFormSave": "Enregistrer",
+  "@goalFormSave": {
+    "description": "Confirm action when editing a goal."
+  },
+  "allocationModalTitle": "Nouvelle allocation",
+  "@allocationModalTitle": {
+    "description": "Title of the allocation modal."
+  },
+  "allocationAmountLabel": "Montant",
+  "@allocationAmountLabel": {
+    "description": "Label of the signed amount field — the only amount control in the modal."
+  },
+  "allocationAmountHelp": "Un montant négatif retire de l'objectif.",
+  "@allocationAmountHelp": {
+    "description": "Helper stating that a negative amount is a withdrawal. There are no deposit/withdraw modes."
+  },
+  "allocationAmountInvalid": "Saisissez un montant différent de zéro.",
+  "@allocationAmountInvalid": {
+    "description": "Validation message when the allocation amount is missing, unparseable, or zero."
+  },
+  "allocationDateLabel": "Date",
+  "@allocationDateLabel": {
+    "description": "Label of the allocation date field."
+  },
+  "allocationDateInvalid": "Date invalide.",
+  "@allocationDateInvalid": {
+    "description": "Validation message when the allocation date cannot be read in the current locale."
+  },
+  "allocationNoteLabel": "Note (optionnelle)",
+  "@allocationNoteLabel": {
+    "description": "Label of the optional allocation note field."
+  },
+  "allocationNoteHint": "Ex. Virement mensuel",
+  "@allocationNoteHint": {
+    "description": "Placeholder example in the allocation note field."
+  },
+  "allocationCancel": "Annuler",
+  "@allocationCancel": {
+    "description": "Cancel action in the allocation modal footer."
+  },
+  "allocationSubmit": "Ajouter",
+  "@allocationSubmit": {
+    "description": "Confirm action appending the allocation."
+  },
+  "goalErrorNotFound": "Cet objectif n'existe plus.",
+  "@goalErrorNotFound": {
+    "description": "Message for the backend's GOAL_NOT_FOUND code."
+  },
+  "goalErrorAllocationNotFound": "Cette allocation n'existe plus.",
+  "@goalErrorAllocationNotFound": {
+    "description": "Message for the backend's GOAL_ALLOCATION_NOT_FOUND code."
+  },
+  "goalErrorValidation": "Vérifiez les informations saisies.",
+  "@goalErrorValidation": {
+    "description": "Message for a rejected goal or allocation payload."
+  },
+  "goalErrorGeneric": "Une erreur est survenue. Réessayez.",
+  "@goalErrorGeneric": {
+    "description": "Fallback message for any other goals failure."
+  },
+  "dashboardGoalsTitle": "Objectifs",
+  "@dashboardGoalsTitle": {
+    "description": "Title of the dashboard's Objectifs card."
+  },
+  "dashboardGoalsViewAll": "Voir tout",
+  "@dashboardGoalsViewAll": {
+    "description": "Iris link from the dashboard goals card to the goals panel."
+  },
+  "dashboardGoalsProgress": "{saved} / {target}",
+  "@dashboardGoalsProgress": {
+    "description": "Compact saved/target pair on a dashboard goal row.",
+    "placeholders": {
+      "saved": {
+        "type": "String"
+      },
+      "target": {
+        "type": "String"
+      }
+    }
+  },
+  "dashboardGoalsReached": "Atteint",
+  "@dashboardGoalsReached": {
+    "description": "Badge replacing the amounts on a reached goal's dashboard row."
   }
 }

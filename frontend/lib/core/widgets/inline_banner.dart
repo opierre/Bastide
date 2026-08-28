@@ -23,10 +23,22 @@ class InlineBanner extends StatelessWidget {
     super.key,
     required this.message,
     this.tone = BannerTone.error,
+    this.onDismiss,
+    this.dismissTooltip,
   });
 
   final String message;
   final BannerTone tone;
+
+  /// Adds the spec's dismiss ×. Set only where the banner reports something the
+  /// user may reasonably decide to live with — an over-allocation, say. A
+  /// failure the user still has to fix keeps no × , because dismissing it would
+  /// hide the reason the form won't go through.
+  final VoidCallback? onDismiss;
+
+  /// Names the dismiss control for assistive tech. Required by callers that set
+  /// [onDismiss]; localized text can't be defaulted here.
+  final String? dismissTooltip;
 
   @override
   Widget build(BuildContext context) {
@@ -53,6 +65,16 @@ class InlineBanner extends StatelessWidget {
               ).textTheme.bodySmall?.copyWith(color: tone.color),
             ),
           ),
+          if (onDismiss != null)
+            IconButton(
+              onPressed: onDismiss,
+              iconSize: 15,
+              visualDensity: VisualDensity.compact,
+              constraints: const BoxConstraints(),
+              padding: EdgeInsets.zero,
+              tooltip: dismissTooltip,
+              icon: Icon(Icons.close_rounded, color: tone.color),
+            ),
         ],
       ),
     );

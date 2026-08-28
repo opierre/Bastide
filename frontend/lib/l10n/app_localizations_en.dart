@@ -2107,4 +2107,212 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get subscriptionFormSave => 'Save';
+
+  @override
+  String get navGoals => 'Goals';
+
+  @override
+  String get navGoalsSubtitle => 'Set money aside, virtually, for what matters';
+
+  @override
+  String get goalsAdd => 'New goal';
+
+  @override
+  String get goalsReassurance =>
+      'On-paper allocation: your accounts are not modified.';
+
+  @override
+  String goalsOverAllocated(String allocated, String savings) {
+    return 'You\'ve allocated $allocated while your savings accounts total $savings.';
+  }
+
+  @override
+  String get goalsDismissBanner => 'Hide this warning';
+
+  @override
+  String goalsShowArchived(int count) {
+    return 'Show archived goals ($count)';
+  }
+
+  @override
+  String goalsHideArchived(int count) {
+    return 'Hide archived goals ($count)';
+  }
+
+  @override
+  String get goalsEmptyTitle => 'Give a name to what matters';
+
+  @override
+  String get goalsEmptyBody =>
+      'A goal is a virtual envelope: you set money aside at your own pace, without touching your accounts.';
+
+  @override
+  String get goalsLoadFailed => 'We couldn\'t load your goals right now.';
+
+  @override
+  String get goalsRetry => 'Try again';
+
+  @override
+  String get goalPillNoDeadline => 'No deadline';
+
+  @override
+  String get goalPillReached => 'Goal reached';
+
+  @override
+  String goalPillReachedOn(String month) {
+    return 'Goal reached · $month';
+  }
+
+  @override
+  String get goalDetailBack => 'Back to goals';
+
+  @override
+  String goalDetailTargetDate(String month) {
+    return 'Target $month';
+  }
+
+  @override
+  String get goalDetailArchive => 'Archive';
+
+  @override
+  String get goalDetailRestore => 'Restore';
+
+  @override
+  String get goalDetailNewAllocation => 'New allocation';
+
+  @override
+  String get goalDetailMissing => 'This goal is no longer available.';
+
+  @override
+  String get goalDetailFootnote =>
+      'No transaction is created: these lines exist only on the goal\'s paper.';
+
+  @override
+  String get goalDetailHistoryFailed =>
+      'We couldn\'t load the allocation history.';
+
+  @override
+  String get goalHistoryTitle => 'Allocation history';
+
+  @override
+  String get goalHistorySubtitle =>
+      'One list, signed amounts — a withdrawal is a negative line.';
+
+  @override
+  String get goalHistoryDate => 'Date';
+
+  @override
+  String get goalHistoryAmount => 'Amount';
+
+  @override
+  String get goalHistoryNote => 'Note';
+
+  @override
+  String get goalHistoryDelete => 'Delete this allocation';
+
+  @override
+  String get goalHistoryEmpty => 'No allocations yet.';
+
+  @override
+  String get goalFormCreateTitle => 'New goal';
+
+  @override
+  String get goalFormEditTitle => 'Edit goal';
+
+  @override
+  String get goalFormIntro =>
+      'A virtual envelope: you set money aside on paper, without touching your accounts.';
+
+  @override
+  String get goalFormNameLabel => 'Name';
+
+  @override
+  String get goalFormNameRequired => 'Give this goal a name.';
+
+  @override
+  String get goalFormTargetLabel => 'Target amount';
+
+  @override
+  String get goalFormTargetInvalid => 'Enter an amount greater than zero.';
+
+  @override
+  String get goalFormDateLabel => 'Target date';
+
+  @override
+  String get goalFormDateHelp => 'Optional';
+
+  @override
+  String get goalFormDateInvalid => 'Invalid date.';
+
+  @override
+  String get goalFormIconLabel => 'Icon';
+
+  @override
+  String get goalFormColorLabel => 'Color';
+
+  @override
+  String get goalFormCancel => 'Cancel';
+
+  @override
+  String get goalFormSubmit => 'Create goal';
+
+  @override
+  String get goalFormSave => 'Save';
+
+  @override
+  String get allocationModalTitle => 'New allocation';
+
+  @override
+  String get allocationAmountLabel => 'Amount';
+
+  @override
+  String get allocationAmountHelp =>
+      'A negative amount takes money back out of the goal.';
+
+  @override
+  String get allocationAmountInvalid => 'Enter an amount other than zero.';
+
+  @override
+  String get allocationDateLabel => 'Date';
+
+  @override
+  String get allocationDateInvalid => 'Invalid date.';
+
+  @override
+  String get allocationNoteLabel => 'Note (optional)';
+
+  @override
+  String get allocationNoteHint => 'e.g. Monthly transfer';
+
+  @override
+  String get allocationCancel => 'Cancel';
+
+  @override
+  String get allocationSubmit => 'Add';
+
+  @override
+  String get goalErrorNotFound => 'This goal no longer exists.';
+
+  @override
+  String get goalErrorAllocationNotFound => 'This allocation no longer exists.';
+
+  @override
+  String get goalErrorValidation => 'Check the details you entered.';
+
+  @override
+  String get goalErrorGeneric => 'Something went wrong. Try again.';
+
+  @override
+  String get dashboardGoalsTitle => 'Goals';
+
+  @override
+  String get dashboardGoalsViewAll => 'View all';
+
+  @override
+  String dashboardGoalsProgress(String saved, String target) {
+    return '$saved / $target';
+  }
+
+  @override
+  String get dashboardGoalsReached => 'Reached';
 }

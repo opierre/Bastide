@@ -124,6 +124,16 @@ class AppShell extends ConsumerWidget {
           label: l10n.navSubscriptions,
           subtitle: l10n.navSubscriptionsSubtitle,
         ),
+        // Last of the Gestion group, per the Phase 2 nav amendment
+        // (`docs/design/00`). The flag glyph the spec names, with the same
+        // outline/filled swap every other item uses to carry selection.
+        NavDestinationSpec(
+          path: '/goals',
+          icon: Icons.flag_outlined,
+          selectedIcon: Icons.flag_rounded,
+          label: l10n.navGoals,
+          subtitle: l10n.navGoalsSubtitle,
+        ),
       ],
     ),
     NavSectionSpec(
