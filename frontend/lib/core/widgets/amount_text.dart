@@ -16,6 +16,7 @@ class AmountText extends StatelessWidget {
     this.style,
     this.showPositiveSign = false,
     this.colorize = true,
+    this.maxLines,
   });
 
   final int amountMinor;
@@ -30,6 +31,12 @@ class AmountText extends StatelessWidget {
   /// Apply the semantic money colors. Turn off where the amount is a neutral
   /// figure — a total, a form value — rather than an inflow or outflow.
   final bool colorize;
+
+  /// Caps the amount at this many lines, ellipsizing past it. Set to 1 in a
+  /// column narrow enough to wrap: an amount broken across two lines stops
+  /// reading as one figure, and « 2 850,00 » over « € » is worse than a clipped
+  /// number the user can widen the window to see.
+  final int? maxLines;
 
   @override
   Widget build(BuildContext context) {
@@ -49,7 +56,12 @@ class AmountText extends StatelessWidget {
             _ => base.color,
           };
 
-    return Text(formatted, style: tabularNumberStyle(base).copyWith(color: color));
+    return Text(
+      formatted,
+      maxLines: maxLines,
+      overflow: maxLines == null ? null : TextOverflow.ellipsis,
+      style: tabularNumberStyle(base).copyWith(color: color),
+    );
   }
 }
 

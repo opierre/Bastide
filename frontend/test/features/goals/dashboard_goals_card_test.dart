@@ -82,6 +82,35 @@ void main() {
     expect(find.byType(RecentActivityCard), findsOneWidget);
   });
 
+  testWidgets('row 3 keeps the drawn 1fr .95fr .85fr split', (tester) async {
+    _useDesktopSurface(tester);
+    await tester.pumpWidget(_wrap(goals: specGoals()));
+    await tester.pumpAndSettle();
+
+    final income = tester.getSize(find.byType(IncomeVsExpenseChart)).width;
+    final recent = tester.getSize(find.byType(RecentActivityCard)).width;
+    final goals = tester.getSize(find.byKey(const Key('dashboardGoalsCard'))).width;
+
+    // Widths, not presence: an `Expanded` that fell back to its default flex
+    // leaves the card in the tree at a couple of pixels wide, which is what a
+    // findsOneWidget assertion cannot tell apart from the drawn column.
+    expect(income / recent, closeTo(100 / 95, 0.02));
+    expect(income / goals, closeTo(100 / 85, 0.02));
+  });
+
+  testWidgets('the two Phase 1 cards share the row evenly without goals', (
+    tester,
+  ) async {
+    _useDesktopSurface(tester);
+    await tester.pumpWidget(_wrap(goals: const []));
+    await tester.pumpAndSettle();
+
+    final income = tester.getSize(find.byType(IncomeVsExpenseChart)).width;
+    final recent = tester.getSize(find.byType(RecentActivityCard)).width;
+
+    expect(income / recent, closeTo(1.0, 0.02));
+  });
+
   testWidgets('the card is absent entirely when there are no goals', (tester) async {
     _useDesktopSurface(tester);
     await tester.pumpWidget(_wrap(goals: const []));

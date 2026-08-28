@@ -178,7 +178,14 @@ class _DashboardContent extends ConsumerWidget {
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Expanded(child: IncomeVsExpenseChart(trends: state.trends)),
+              Expanded(
+                // The `1fr` the other two are measured against. Stated even
+                // though it is the widest share: `Expanded` defaults to flex 1,
+                // which against a sibling's 95 is not a wide column but an
+                // invisible one.
+                flex: 100,
+                child: IncomeVsExpenseChart(trends: state.trends),
+              ),
               const SizedBox(width: AppSpacing.gridGap),
               Expanded(
                 // `.95fr` beside the left card's `1fr`, and back to an even
