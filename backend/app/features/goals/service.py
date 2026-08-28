@@ -94,10 +94,11 @@ class GoalService:
     def update(self, user_id: str, goal_id: str, data: GoalUpdate) -> tuple[Goal, int]:
         """Patch a goal, including archiving and restoring it.
 
-        A restore (`status: active`) recomputes `reached` from the allocations rather than
-        trusting the status the goal carried when it was archived — the target may have been
-        edited since, and the stored value would then be a claim about arithmetic that no
-        longer holds.
+        Whatever the patch touched, the status is re-derived from the ledger afterwards, so
+        `reached` is never a claim about arithmetic that no longer holds: raising a target
+        above the money already set aside drops the goal back to `active`, lowering one under
+        it reports `reached`, and a restore recomputes rather than trusting the status the
+        goal carried when it was archived. Archiving still outranks the arithmetic.
 
         Raises:
             GoalNotFoundError: no such goal, or it belongs to another user.
@@ -115,8 +116,7 @@ class GoalService:
             goal.color = data.color
         if data.status is not None:
             goal.status = data.status
-            if data.status == ACTIVE:
-                goal.status = _settled_status(goal, progress_minor)
+        goal.status = _settled_status(goal, progress_minor)
         return self._repository.save(goal), progress_minor
 
     def archive(self, user_id: str, goal_id: str) -> None:

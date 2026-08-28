@@ -266,6 +266,49 @@ def test_a_reached_goal_is_not_auto_archived(client: TestClient) -> None:
     assert list_goals(client, headers, status="archived") == []
 
 
+def test_raising_the_target_takes_a_goal_back_out_of_reached(client: TestClient) -> None:
+    """`reached` is arithmetic over the current target, so moving the target re-runs it."""
+    headers = register(client)
+    goal_id = create_goal(client, headers, target_minor=400_000)["id"]
+    allocate(client, headers, goal_id, 400_000)
+    assert read_goal(client, headers, goal_id)["status"] == "reached"
+
+    response = client.patch(
+        f"/api/v1/goals/{goal_id}", json={"target_minor": 800_000}, headers=headers
+    )
+
+    assert response.status_code == 200, response.json()
+    assert response.json()["status"] == "active"
+    assert response.json()["progress_minor"] == 400_000
+
+
+def test_lowering_the_target_under_the_progress_reports_reached(client: TestClient) -> None:
+    headers = register(client)
+    goal_id = create_goal(client, headers, target_minor=800_000)["id"]
+    allocate(client, headers, goal_id, 400_000)
+
+    response = client.patch(
+        f"/api/v1/goals/{goal_id}", json={"target_minor": 400_000}, headers=headers
+    )
+
+    assert response.status_code == 200, response.json()
+    assert response.json()["status"] == "reached"
+
+
+def test_editing_an_archived_goal_leaves_it_archived(client: TestClient) -> None:
+    headers = register(client)
+    goal_id = create_goal(client, headers, target_minor=400_000)["id"]
+    allocate(client, headers, goal_id, 400_000)
+    client.delete(f"/api/v1/goals/{goal_id}", headers=headers)
+
+    response = client.patch(
+        f"/api/v1/goals/{goal_id}", json={"target_minor": 200_000}, headers=headers
+    )
+
+    assert response.status_code == 200, response.json()
+    assert response.json()["status"] == "archived"
+
+
 def test_an_archived_goal_keeps_its_status_while_its_ledger_moves(client: TestClient) -> None:
     headers = register(client)
     goal_id = create_goal(client, headers, target_minor=400_000)["id"]
