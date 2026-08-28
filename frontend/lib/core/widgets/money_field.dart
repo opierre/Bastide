@@ -71,7 +71,12 @@ class MoneyField extends StatelessWidget {
   }
 }
 
-/// Keeps the field to something that could still become an amount.
+/// Keeps the field to something that could still become an amount, and groups
+/// its thousands as it is typed.
+///
+/// The grouping is the locale's own — the narrow no-break space French prints,
+/// the comma English does — so a figure being typed reads the way the same
+/// figure reads everywhere else in the app rather than as a bare run of digits.
 ///
 /// Deliberately permissive about *incomplete* input — a lone « − », a trailing
 /// separator — because a formatter that rejects those makes the field
@@ -93,24 +98,89 @@ class _MoneyInputFormatter extends TextInputFormatter {
     TextEditingValue oldValue,
     TextEditingValue newValue,
   ) {
-    final text = newValue.text;
-    if (text.isEmpty) return newValue;
+    if (newValue.text.isEmpty) return newValue;
 
+    var text = newValue.text;
+    var caret = newValue.selection.end.clamp(0, text.length);
+
+    // Backspacing a group separator takes the digit in front of it. The
+    // separator is not something the user typed, so removing it on its own
+    // would leave the field unchanged once it is regrouped, and the key would
+    // read as dead.
+    if (oldValue.text.length == text.length + 1 &&
+        caret > 0 &&
+        caret < oldValue.text.length &&
+        oldValue.text[caret] == groupSeparator) {
+      text = text.substring(0, caret - 1) + text.substring(caret);
+      caret -= 1;
+    }
+
+    // What the user typed, with the grouping taken back out: it is rewritten
+    // from scratch below, so the separators already in the field would only
+    // get in the way of counting.
+    final typed = StringBuffer();
+    var kept = 0;
+    var keptBeforeCaret = 0;
     var decimalSeparators = 0;
+
     for (var index = 0; index < text.length; index++) {
+      if (index == caret) keptBeforeCaret = kept;
       final character = text[index];
-      if (_isDigit(character)) continue;
-      if (character == '-' && allowNegative && index == 0) continue;
       if (_isGroupSeparator(character)) continue;
-      if (_isDecimalSeparator(character)) {
+      if (_isDigit(character)) {
+        // Always welcome.
+      } else if (character == '-' && allowNegative && kept == 0) {
+        // A sign, and only in front: « 1-5 » is not an amount.
+      } else if (_isDecimalSeparator(character)) {
         // One decimal point: « 1,50,2 » is not a number in any locale this app
         // runs in.
         if (++decimalSeparators > 1) return oldValue;
-        continue;
+      } else {
+        return oldValue;
       }
-      return oldValue;
+      typed.write(character);
+      kept++;
     }
-    return newValue;
+    if (caret >= text.length) keptBeforeCaret = kept;
+
+    final formatted = _group(typed.toString());
+    return TextEditingValue(
+      text: formatted,
+      selection: TextSelection.collapsed(
+        offset: _caretAfter(formatted, keptBeforeCaret),
+      ),
+    );
+  }
+
+  /// Rewrites the integer part in threes, leaving the sign and everything from
+  /// the decimal separator on exactly as typed.
+  String _group(String typed) {
+    final sign = typed.startsWith('-') ? '-' : '';
+    final body = typed.substring(sign.length);
+    final decimalIndex = body.indexOf(decimalSeparator);
+    final integer = decimalIndex == -1 ? body : body.substring(0, decimalIndex);
+    final fraction = decimalIndex == -1 ? '' : body.substring(decimalIndex);
+
+    final grouped = StringBuffer();
+    for (var index = 0; index < integer.length; index++) {
+      if (index > 0 && (integer.length - index) % 3 == 0) {
+        grouped.write(groupSeparator);
+      }
+      grouped.write(integer[index]);
+    }
+    return '$sign$grouped$fraction';
+  }
+
+  /// Where the caret sits in the grouped text, counted in the characters the
+  /// user actually typed — the separators this formatter inserted are not
+  /// positions they can be measured from.
+  int _caretAfter(String formatted, int typedBeforeCaret) {
+    var typed = 0;
+    for (var index = 0; index < formatted.length; index++) {
+      if (typed == typedBeforeCaret) return index;
+      if (formatted[index] != groupSeparator) typed++;
+    }
+    return formatted.length;
   }
 
   bool _isDigit(String character) {

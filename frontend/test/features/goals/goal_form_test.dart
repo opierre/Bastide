@@ -74,7 +74,8 @@ void main() {
     expect(target.decoration?.suffixText, 'EUR');
 
     // The field can only ever hold an amount, so it never has to say it wanted
-    // one — and a target has no sign to give it.
+    // one — and a target has no sign to give it. What it does hold is grouped
+    // as it is typed, the way every other amount in the app is printed.
     await tester.enterText(find.byKey(const Key('goalFormTarget')), '10000');
     await tester.enterText(find.byKey(const Key('goalFormTarget')), '10000abc');
     expect(
@@ -84,7 +85,7 @@ void main() {
           matching: find.byType(TextField),
         ),
       ).controller?.text,
-      '10000',
+      '10\u202F000',
     );
     await tester.enterText(find.byKey(const Key('goalFormTarget')), '-5000');
     expect(
@@ -94,7 +95,7 @@ void main() {
           matching: find.byType(TextField),
         ),
       ).controller?.text,
-      '10000',
+      '10\u202F000',
     );
   });
 

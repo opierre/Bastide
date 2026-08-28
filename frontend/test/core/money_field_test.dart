@@ -61,19 +61,43 @@ void main() {
       await tester.pumpWidget(_wrap(controller: controller));
       await tester.pumpAndSettle();
 
+      // However the thousands were spaced on the way in, they come back in the
+      // locale's own grouping — the narrow no-break space French prints.
       await tester.enterText(find.byKey(const Key('field')), '10 000,50');
-      expect(controller.text, '10 000,50');
+      expect(controller.text, '10\u202F000,50');
 
       // Letters, currency glyphs and arithmetic never reach the field.
       await tester.enterText(find.byKey(const Key('field')), 'abc');
-      expect(controller.text, '10 000,50');
+      expect(controller.text, '10\u202F000,50');
       await tester.enterText(find.byKey(const Key('field')), '10€');
-      expect(controller.text, '10 000,50');
+      expect(controller.text, '10\u202F000,50');
       await tester.enterText(find.byKey(const Key('field')), '1+2');
-      expect(controller.text, '10 000,50');
+      expect(controller.text, '10\u202F000,50');
       // And not a second decimal separator.
       await tester.enterText(find.byKey(const Key('field')), '1,50,2');
-      expect(controller.text, '10 000,50');
+      expect(controller.text, '10\u202F000,50');
+    });
+
+    testWidgets('groups the thousands as the amount is typed', (tester) async {
+      final french = TextEditingController();
+      await tester.pumpWidget(_wrap(controller: french));
+      await tester.pumpAndSettle();
+
+      // Typed bare, printed the way the same figure prints on a card or in the
+      // transactions feed.
+      await tester.enterText(find.byKey(const Key('field')), '1500000');
+      expect(french.text, '1\u202F500\u202F000');
+      // The decimals stay as typed — only the integer part is grouped.
+      await tester.enterText(find.byKey(const Key('field')), '4000,5');
+      expect(french.text, '4\u202F000,5');
+
+      final english = TextEditingController();
+      await tester.pumpWidget(
+        _wrap(controller: english, locale: const Locale('en')),
+      );
+      await tester.pumpAndSettle();
+      await tester.enterText(find.byKey(const Key('field')), '1500000.50');
+      expect(english.text, '1,500,000.50');
     });
 
     testWidgets('refuses a minus unless the amount is a signed one', (tester) async {
