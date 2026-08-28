@@ -46,7 +46,7 @@ class SubscriptionsScreen extends ConsumerWidget {
 }
 
 /// The subscriptions panel's contribution to the top bar: « Détecter » beside
-/// the primary « Nouvel abonnement ».
+/// the primary « Nouveau paiement récurrent ».
 ///
 /// Both stay available on the detail view. The detail is a state of this panel,
 /// not a different one, and chrome that rearranged itself under the user would

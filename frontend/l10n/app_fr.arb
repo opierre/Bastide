@@ -2153,13 +2153,13 @@
   "@settingsAiRetry": {
     "description": "Retry action on the local-AI card's error state."
   },
-  "navSubscriptions": "Abonnements",
+  "navSubscriptions": "Récurrents",
   "@navSubscriptions": {
-    "description": "Sidebar entry for the subscriptions panel, third in the Gestion group."
+    "description": "Sidebar entry for the recurring payments panel, third in the Gestion group."
   },
-  "navSubscriptionsSubtitle": "Vos prélèvements récurrents, détectés automatiquement",
+  "navSubscriptionsSubtitle": "Vos paiements récurrents, détectés automatiquement",
   "@navSubscriptionsSubtitle": {
-    "description": "Top-bar descriptor under the subscriptions panel title."
+    "description": "Top-bar descriptor under the recurring payments panel title."
   },
   "subscriptionsDetect": "Détecter",
   "@subscriptionsDetect": {
@@ -2169,11 +2169,11 @@
   "@subscriptionsDetectRunning": {
     "description": "Label the detect button takes while a pass is in flight."
   },
-  "subscriptionsAdd": "Nouvel abonnement",
+  "subscriptionsAdd": "Nouveau paiement récurrent",
   "@subscriptionsAdd": {
     "description": "Primary top-bar button opening the manual-creation modal."
   },
-  "subscriptionsDetectResult": "{created, plural, =0{Aucun nouvel abonnement détecté} =1{1 nouvel abonnement détecté} other{{created} nouveaux abonnements détectés}}",
+  "subscriptionsDetectResult": "{created, plural, =0{Aucun nouveau paiement récurrent détecté} =1{1 nouveau paiement récurrent détecté} other{{created} nouveaux paiements récurrents détectés}}",
   "@subscriptionsDetectResult": {
     "description": "Toast headline after a detection pass, counting what it created.",
     "placeholders": {
@@ -2203,7 +2203,7 @@
   "@subscriptionsBurdenCaption": {
     "description": "Caption under the monthly burden, naming the normalisation it applies."
   },
-  "subscriptionsBurdenExcluded": "{count, plural, =1{1 abonnement résilié exclu.} other{{count} abonnements résiliés exclus.}}",
+  "subscriptionsBurdenExcluded": "{count, plural, =1{1 paiement terminé exclu.} other{{count} paiements terminés exclus.}}",
   "@subscriptionsBurdenExcluded": {
     "description": "Appended to the burden caption so the figure names its own exclusion rather than disagreeing silently with the count beside it.",
     "placeholders": {
@@ -2212,9 +2212,9 @@
       }
     }
   },
-  "subscriptionsActiveLabel": "Abonnements actifs",
+  "subscriptionsActiveLabel": "Paiements actifs",
   "@subscriptionsActiveLabel": {
-    "description": "Label of the card counting the subscriptions still running."
+    "description": "Label of the card counting the recurring payments still running."
   },
   "subscriptionsCadenceWeeklyCount": "{count, plural, =1{1 hebdomadaire} other{{count} hebdomadaires}}",
   "@subscriptionsCadenceWeeklyCount": {
@@ -2261,7 +2261,7 @@
       }
     }
   },
-  "subscriptionsCancelledCount": "{count, plural, =1{1 résilié} other{{count} résiliés}}",
+  "subscriptionsCancelledCount": "{count, plural, =1{1 terminé} other{{count} terminés}}",
   "@subscriptionsCancelledCount": {
     "description": "Tail of the cadence breakdown caption, naming the cancelled rows the active count leaves out.",
     "placeholders": {
@@ -2276,7 +2276,7 @@
   },
   "subscriptionsNextValue": "{label} — {when}",
   "@subscriptionsNextValue": {
-    "description": "Value line of the next-charge card: the subscription and how far off it is.",
+    "description": "Value line of the next-charge card: the payment and how far off it is.",
     "placeholders": {
       "label": {
         "type": "String"
@@ -2319,9 +2319,9 @@
   "@subscriptionsNextNone": {
     "description": "Value of the next-charge card when no running series expects one."
   },
-  "subscriptionsColumnName": "Abonnement",
+  "subscriptionsColumnName": "Libellé",
   "@subscriptionsColumnName": {
-    "description": "Table header over the subscription name column."
+    "description": "Table header over the payment name column."
   },
   "subscriptionsColumnCategory": "Catégorie",
   "@subscriptionsColumnCategory": {
@@ -2388,9 +2388,9 @@
       }
     }
   },
-  "subscriptionSignalCancelled": "Résilié · dernier prélèvement {date}",
+  "subscriptionSignalCancelled": "Terminé · dernier prélèvement {date}",
   "@subscriptionSignalCancelled": {
-    "description": "Gray status pill on a subscription the user ended. It stays listed, dimmed.",
+    "description": "Gray status pill on a recurring payment the user ended. It stays listed, dimmed.",
     "placeholders": {
       "date": {
         "type": "String"
@@ -2406,7 +2406,7 @@
       }
     }
   },
-  "subscriptionActionsTooltip": "Actions de l'abonnement",
+  "subscriptionActionsTooltip": "Actions du paiement",
   "@subscriptionActionsTooltip": {
     "description": "Tooltip of the row's kebab button."
   },
@@ -2418,23 +2418,23 @@
   "@subscriptionActionDismiss": {
     "description": "Kebab action dismissing a series. Final: detection never revives a dismissed one."
   },
-  "subscriptionActionCancel": "Marquer comme résilié",
+  "subscriptionActionCancel": "Marquer comme terminé",
   "@subscriptionActionCancel": {
-    "description": "Kebab action recording that the subscription has ended."
+    "description": "Kebab action recording that the recurring payment has ended."
   },
   "subscriptionActionEdit": "Modifier",
   "@subscriptionActionEdit": {
     "description": "Kebab action opening the series in the edit form."
   },
-  "subscriptionErrorInvalidTransition": "Ce changement de statut n'est pas possible pour cet abonnement.",
+  "subscriptionErrorInvalidTransition": "Ce changement de statut n'est pas possible pour ce paiement.",
   "@subscriptionErrorInvalidTransition": {
     "description": "Localized RECURRING_INVALID_TRANSITION."
   },
-  "subscriptionErrorExists": "Ce compte suit déjà un abonnement sous ce nom.",
+  "subscriptionErrorExists": "Ce compte suit déjà un paiement récurrent sous ce nom.",
   "@subscriptionErrorExists": {
     "description": "Localized RECURRING_SERIES_EXISTS."
   },
-  "subscriptionErrorNotFound": "Cet abonnement n'existe plus.",
+  "subscriptionErrorNotFound": "Ce paiement récurrent n'existe plus.",
   "@subscriptionErrorNotFound": {
     "description": "Localized RECURRING_SERIES_NOT_FOUND."
   },
@@ -2444,25 +2444,25 @@
   },
   "subscriptionErrorValidation": "Vérifiez les informations saisies.",
   "@subscriptionErrorValidation": {
-    "description": "Localized VALIDATION_ERROR on the subscription form."
+    "description": "Localized VALIDATION_ERROR on the recurring payment form."
   },
   "subscriptionErrorGeneric": "Une erreur est survenue. Réessayez.",
   "@subscriptionErrorGeneric": {
     "description": "Fallback for an error code this panel has no specific message for."
   },
-  "subscriptionsLoadFailed": "Impossible de charger vos abonnements pour le moment.",
+  "subscriptionsLoadFailed": "Impossible de charger vos paiements récurrents pour le moment.",
   "@subscriptionsLoadFailed": {
     "description": "Error state replacing the panel when the list or summary failed to load."
   },
   "subscriptionsRetry": "Réessayer",
   "@subscriptionsRetry": {
-    "description": "Retry action on the subscriptions error state."
+    "description": "Retry action on the recurring payments error state."
   },
-  "subscriptionsEmptyTitle": "Aucun abonnement détecté pour l'instant",
+  "subscriptionsEmptyTitle": "Aucun paiement récurrent détecté pour l'instant",
   "@subscriptionsEmptyTitle": {
-    "description": "Empty-state title on the subscriptions panel."
+    "description": "Empty-state title on the recurring payments panel."
   },
-  "subscriptionsEmptyBody": "FinStride repère un abonnement lorsqu'un prélèvement s'est répété trois fois. Importer davantage d'historique accélère la détection.",
+  "subscriptionsEmptyBody": "FinStride repère un paiement récurrent lorsqu'un prélèvement s'est répété trois fois. Importer davantage d'historique accélère la détection.",
   "@subscriptionsEmptyBody": {
     "description": "Empty-state body, stating the three-repeat rule so the absence reads as a threshold rather than a failure."
   },
@@ -2470,7 +2470,7 @@
   "@subscriptionsEmptyCta": {
     "description": "Empty-state CTA. It goes to imports rather than to manual creation because more history is the actual remedy."
   },
-  "subscriptionDetailBack": "Retour aux abonnements",
+  "subscriptionDetailBack": "Retour aux récurrents",
   "@subscriptionDetailBack": {
     "description": "Iris back link at the top of the series detail."
   },
@@ -2549,7 +2549,7 @@
   "@subscriptionDetailHistoryAmount": {
     "description": "History table header over the charge amount."
   },
-  "subscriptionDetailHistoryEmpty": "Aucun prélèvement rattaché pour l'instant.",
+  "subscriptionDetailHistoryEmpty": "Aucun prélèvement rattaché à ce paiement pour l'instant.",
   "@subscriptionDetailHistoryEmpty": {
     "description": "History card with no rows — the ordinary state of a series the user has just declared."
   },
@@ -2569,33 +2569,33 @@
   "@subscriptionDetailFootnote": {
     "description": "Foot note under the history: the user is being asked to trust a deduction, so the evidence is part of the screen."
   },
-  "subscriptionDetailLoadFailed": "Impossible de charger cet abonnement pour le moment.",
+  "subscriptionDetailLoadFailed": "Impossible de charger ce paiement récurrent pour le moment.",
   "@subscriptionDetailLoadFailed": {
     "description": "Error state replacing the detail when it failed to load."
   },
-  "subscriptionFormCreateTitle": "Nouvel abonnement",
+  "subscriptionFormCreateTitle": "Nouveau paiement récurrent",
   "@subscriptionFormCreateTitle": {
     "description": "Title of the manual-creation modal."
   },
-  "subscriptionFormEditTitle": "Modifier l'abonnement",
+  "subscriptionFormEditTitle": "Modifier le paiement récurrent",
   "@subscriptionFormEditTitle": {
     "description": "Title of the modal when editing an existing series."
   },
-  "subscriptionFormIntro": "Suivez un prélèvement que la détection n'a pas encore repéré.",
+  "subscriptionFormIntro": "Suivez un paiement récurrent que la détection n'a pas encore repéré.",
   "@subscriptionFormIntro": {
     "description": "Sub-line under the creation modal's title."
   },
   "subscriptionFormNameLabel": "Nom",
   "@subscriptionFormNameLabel": {
-    "description": "Label of the subscription name field."
+    "description": "Label of the payment name field."
   },
-  "subscriptionFormNameRequired": "Donnez un nom à cet abonnement.",
+  "subscriptionFormNameRequired": "Donnez un nom à ce paiement.",
   "@subscriptionFormNameRequired": {
     "description": "Validation message when the name field is empty."
   },
   "subscriptionFormAccountLabel": "Compte",
   "@subscriptionFormAccountLabel": {
-    "description": "Label of the account select in the subscription form."
+    "description": "Label of the account select in the recurring payment form."
   },
   "subscriptionFormAmountLabel": "Montant",
   "@subscriptionFormAmountLabel": {
@@ -2607,7 +2607,7 @@
   },
   "subscriptionFormCadenceLabel": "Cadence",
   "@subscriptionFormCadenceLabel": {
-    "description": "Label of the cadence select in the subscription form."
+    "description": "Label of the cadence select in the recurring payment form."
   },
   "subscriptionFormCadenceHelp": "Hebdomadaire · Mensuel · Trimestriel · Annuel · Irrégulier",
   "@subscriptionFormCadenceHelp": {
@@ -2615,26 +2615,26 @@
   },
   "subscriptionFormCategoryLabel": "Catégorie",
   "@subscriptionFormCategoryLabel": {
-    "description": "Label of the category select in the subscription form."
+    "description": "Label of the category select in the recurring payment form."
   },
   "subscriptionFormCategoryNone": "Aucune",
   "@subscriptionFormCategoryNone": {
-    "description": "The no-category option in the subscription form's category select."
+    "description": "The no-category option in the recurring payment form's category select."
   },
-  "subscriptionFormNoAccounts": "Créez d'abord un compte pour y suivre un abonnement.",
+  "subscriptionFormNoAccounts": "Créez d'abord un compte pour y suivre un paiement récurrent.",
   "@subscriptionFormNoAccounts": {
     "description": "Shown in place of the account select when the user has no accounts yet."
   },
   "subscriptionFormCancel": "Annuler",
   "@subscriptionFormCancel": {
-    "description": "Cancel action in the subscription modal footer."
+    "description": "Cancel action in the recurring payment modal footer."
   },
-  "subscriptionFormSubmit": "Créer l'abonnement",
+  "subscriptionFormSubmit": "Créer le paiement récurrent",
   "@subscriptionFormSubmit": {
-    "description": "Confirm action when creating a subscription."
+    "description": "Confirm action when creating a recurring payment."
   },
   "subscriptionFormSave": "Enregistrer",
   "@subscriptionFormSave": {
-    "description": "Confirm action when editing a subscription."
+    "description": "Confirm action when editing a recurring payment."
   }
 }

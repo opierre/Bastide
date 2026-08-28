@@ -1729,11 +1729,11 @@ class AppLocalizationsFr extends AppLocalizations {
   String get settingsAiRetry => 'Réessayer';
 
   @override
-  String get navSubscriptions => 'Abonnements';
+  String get navSubscriptions => 'Récurrents';
 
   @override
   String get navSubscriptionsSubtitle =>
-      'Vos prélèvements récurrents, détectés automatiquement';
+      'Vos paiements récurrents, détectés automatiquement';
 
   @override
   String get subscriptionsDetect => 'Détecter';
@@ -1742,16 +1742,16 @@ class AppLocalizationsFr extends AppLocalizations {
   String get subscriptionsDetectRunning => 'Détection…';
 
   @override
-  String get subscriptionsAdd => 'Nouvel abonnement';
+  String get subscriptionsAdd => 'Nouveau paiement récurrent';
 
   @override
   String subscriptionsDetectResult(int created) {
     String _temp0 = intl.Intl.pluralLogic(
       created,
       locale: localeName,
-      other: '$created nouveaux abonnements détectés',
-      one: '1 nouvel abonnement détecté',
-      zero: 'Aucun nouvel abonnement détecté',
+      other: '$created nouveaux paiements récurrents détectés',
+      one: '1 nouveau paiement récurrent détecté',
+      zero: 'Aucun nouveau paiement récurrent détecté',
     );
     return '$_temp0';
   }
@@ -1784,14 +1784,14 @@ class AppLocalizationsFr extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '$count abonnements résiliés exclus.',
-      one: '1 abonnement résilié exclu.',
+      other: '$count paiements terminés exclus.',
+      one: '1 paiement terminé exclu.',
     );
     return '$_temp0';
   }
 
   @override
-  String get subscriptionsActiveLabel => 'Abonnements actifs';
+  String get subscriptionsActiveLabel => 'Paiements actifs';
 
   @override
   String subscriptionsCadenceWeeklyCount(int count) {
@@ -1853,8 +1853,8 @@ class AppLocalizationsFr extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '$count résiliés',
-      one: '1 résilié',
+      other: '$count terminés',
+      one: '1 terminé',
     );
     return '$_temp0';
   }
@@ -1893,7 +1893,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get subscriptionsNextNone => 'Aucun prélèvement à venir';
 
   @override
-  String get subscriptionsColumnName => 'Abonnement';
+  String get subscriptionsColumnName => 'Libellé';
 
   @override
   String get subscriptionsColumnCategory => 'Catégorie';
@@ -1946,7 +1946,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String subscriptionSignalCancelled(String date) {
-    return 'Résilié · dernier prélèvement $date';
+    return 'Terminé · dernier prélèvement $date';
   }
 
   @override
@@ -1955,7 +1955,7 @@ class AppLocalizationsFr extends AppLocalizations {
   }
 
   @override
-  String get subscriptionActionsTooltip => 'Actions de l\'abonnement';
+  String get subscriptionActionsTooltip => 'Actions du paiement';
 
   @override
   String get subscriptionActionConfirm => 'Confirmer';
@@ -1964,21 +1964,22 @@ class AppLocalizationsFr extends AppLocalizations {
   String get subscriptionActionDismiss => 'Ignorer';
 
   @override
-  String get subscriptionActionCancel => 'Marquer comme résilié';
+  String get subscriptionActionCancel => 'Marquer comme terminé';
 
   @override
   String get subscriptionActionEdit => 'Modifier';
 
   @override
   String get subscriptionErrorInvalidTransition =>
-      'Ce changement de statut n\'est pas possible pour cet abonnement.';
+      'Ce changement de statut n\'est pas possible pour ce paiement.';
 
   @override
   String get subscriptionErrorExists =>
-      'Ce compte suit déjà un abonnement sous ce nom.';
+      'Ce compte suit déjà un paiement récurrent sous ce nom.';
 
   @override
-  String get subscriptionErrorNotFound => 'Cet abonnement n\'existe plus.';
+  String get subscriptionErrorNotFound =>
+      'Ce paiement récurrent n\'existe plus.';
 
   @override
   String get subscriptionErrorAccountNotFound => 'Ce compte n\'existe plus.';
@@ -1992,24 +1993,24 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get subscriptionsLoadFailed =>
-      'Impossible de charger vos abonnements pour le moment.';
+      'Impossible de charger vos paiements récurrents pour le moment.';
 
   @override
   String get subscriptionsRetry => 'Réessayer';
 
   @override
   String get subscriptionsEmptyTitle =>
-      'Aucun abonnement détecté pour l\'instant';
+      'Aucun paiement récurrent détecté pour l\'instant';
 
   @override
   String get subscriptionsEmptyBody =>
-      'FinStride repère un abonnement lorsqu\'un prélèvement s\'est répété trois fois. Importer davantage d\'historique accélère la détection.';
+      'FinStride repère un paiement récurrent lorsqu\'un prélèvement s\'est répété trois fois. Importer davantage d\'historique accélère la détection.';
 
   @override
   String get subscriptionsEmptyCta => 'Aller aux imports';
 
   @override
-  String get subscriptionDetailBack => 'Retour aux abonnements';
+  String get subscriptionDetailBack => 'Retour aux récurrents';
 
   @override
   String subscriptionDetailDetectedSince(String account, String month) {
@@ -2056,7 +2057,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get subscriptionDetailHistoryEmpty =>
-      'Aucun prélèvement rattaché pour l\'instant.';
+      'Aucun prélèvement rattaché à ce paiement pour l\'instant.';
 
   @override
   String subscriptionDetailChange(String from, String to) {
@@ -2069,23 +2070,23 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get subscriptionDetailLoadFailed =>
-      'Impossible de charger cet abonnement pour le moment.';
+      'Impossible de charger ce paiement récurrent pour le moment.';
 
   @override
-  String get subscriptionFormCreateTitle => 'Nouvel abonnement';
+  String get subscriptionFormCreateTitle => 'Nouveau paiement récurrent';
 
   @override
-  String get subscriptionFormEditTitle => 'Modifier l\'abonnement';
+  String get subscriptionFormEditTitle => 'Modifier le paiement récurrent';
 
   @override
   String get subscriptionFormIntro =>
-      'Suivez un prélèvement que la détection n\'a pas encore repéré.';
+      'Suivez un paiement récurrent que la détection n\'a pas encore repéré.';
 
   @override
   String get subscriptionFormNameLabel => 'Nom';
 
   @override
-  String get subscriptionFormNameRequired => 'Donnez un nom à cet abonnement.';
+  String get subscriptionFormNameRequired => 'Donnez un nom à ce paiement.';
 
   @override
   String get subscriptionFormAccountLabel => 'Compte';
@@ -2112,13 +2113,13 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get subscriptionFormNoAccounts =>
-      'Créez d\'abord un compte pour y suivre un abonnement.';
+      'Créez d\'abord un compte pour y suivre un paiement récurrent.';
 
   @override
   String get subscriptionFormCancel => 'Annuler';
 
   @override
-  String get subscriptionFormSubmit => 'Créer l\'abonnement';
+  String get subscriptionFormSubmit => 'Créer le paiement récurrent';
 
   @override
   String get subscriptionFormSave => 'Enregistrer';

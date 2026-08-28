@@ -81,7 +81,7 @@ void main() {
     await tester.tap(find.byKey(const Key('seriesFormSubmit')));
     await tester.pumpAndSettle();
 
-    expect(find.text('Donnez un nom à cet abonnement.'), findsOneWidget);
+    expect(find.text('Donnez un nom à ce paiement.'), findsOneWidget);
     expect(find.text('Saisissez un montant supérieur à zéro.'), findsOneWidget);
     expect(controller.createCalls, isEmpty);
   });
@@ -104,7 +104,7 @@ void main() {
 
     expect(find.byKey(const Key('seriesFormError')), findsOneWidget);
     expect(
-      find.text('Ce compte suit déjà un abonnement sous ce nom.'),
+      find.text('Ce compte suit déjà un paiement récurrent sous ce nom.'),
       findsOneWidget,
     );
     expect(find.byKey(const Key('seriesFormName')), findsOneWidget);
@@ -121,7 +121,7 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(find.text("Modifier l'abonnement"), findsOneWidget);
+    expect(find.text('Modifier le paiement récurrent'), findsOneWidget);
     expect(find.byKey(const Key('seriesFormAccount')), findsNothing);
     expect(find.text('BNP — Compte courant'), findsOneWidget);
     // The amount round-trips unsigned, in the locale's own decimal form.

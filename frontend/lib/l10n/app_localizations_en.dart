@@ -1715,7 +1715,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingsAiRetry => 'Try again';
 
   @override
-  String get navSubscriptions => 'Subscriptions';
+  String get navSubscriptions => 'Recurring';
 
   @override
   String get navSubscriptionsSubtitle =>
@@ -1728,16 +1728,16 @@ class AppLocalizationsEn extends AppLocalizations {
   String get subscriptionsDetectRunning => 'Detecting…';
 
   @override
-  String get subscriptionsAdd => 'New subscription';
+  String get subscriptionsAdd => 'New recurring payment';
 
   @override
   String subscriptionsDetectResult(int created) {
     String _temp0 = intl.Intl.pluralLogic(
       created,
       locale: localeName,
-      other: '$created new subscriptions detected',
-      one: '1 new subscription detected',
-      zero: 'No new subscriptions detected',
+      other: '$created new recurring payments detected',
+      one: '1 new recurring payment detected',
+      zero: 'No new recurring payments detected',
     );
     return '$_temp0';
   }
@@ -1769,14 +1769,14 @@ class AppLocalizationsEn extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '$count cancelled subscriptions excluded.',
-      one: '1 cancelled subscription excluded.',
+      other: '$count ended payments excluded.',
+      one: '1 ended payment excluded.',
     );
     return '$_temp0';
   }
 
   @override
-  String get subscriptionsActiveLabel => 'Active subscriptions';
+  String get subscriptionsActiveLabel => 'Active payments';
 
   @override
   String subscriptionsCadenceWeeklyCount(int count) {
@@ -1838,8 +1838,8 @@ class AppLocalizationsEn extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '$count cancelled',
-      one: '1 cancelled',
+      other: '$count ended',
+      one: '1 ended',
     );
     return '$_temp0';
   }
@@ -1878,7 +1878,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get subscriptionsNextNone => 'No upcoming charge';
 
   @override
-  String get subscriptionsColumnName => 'Subscription';
+  String get subscriptionsColumnName => 'Name';
 
   @override
   String get subscriptionsColumnCategory => 'Category';
@@ -1931,7 +1931,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String subscriptionSignalCancelled(String date) {
-    return 'Cancelled · last charge $date';
+    return 'Ended · last charge $date';
   }
 
   @override
@@ -1940,7 +1940,7 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get subscriptionActionsTooltip => 'Subscription actions';
+  String get subscriptionActionsTooltip => 'Payment actions';
 
   @override
   String get subscriptionActionConfirm => 'Confirm';
@@ -1949,21 +1949,22 @@ class AppLocalizationsEn extends AppLocalizations {
   String get subscriptionActionDismiss => 'Ignore';
 
   @override
-  String get subscriptionActionCancel => 'Mark as cancelled';
+  String get subscriptionActionCancel => 'Mark as ended';
 
   @override
   String get subscriptionActionEdit => 'Edit';
 
   @override
   String get subscriptionErrorInvalidTransition =>
-      'That status change isn\'t available for this subscription.';
+      'That status change isn\'t available for this payment.';
 
   @override
   String get subscriptionErrorExists =>
-      'This account already tracks a subscription under that name.';
+      'This account already tracks a recurring payment under that name.';
 
   @override
-  String get subscriptionErrorNotFound => 'This subscription no longer exists.';
+  String get subscriptionErrorNotFound =>
+      'This recurring payment no longer exists.';
 
   @override
   String get subscriptionErrorAccountNotFound =>
@@ -1977,23 +1978,23 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get subscriptionsLoadFailed =>
-      'We couldn\'t load your subscriptions right now.';
+      'We couldn\'t load your recurring payments right now.';
 
   @override
   String get subscriptionsRetry => 'Try again';
 
   @override
-  String get subscriptionsEmptyTitle => 'No subscriptions detected yet';
+  String get subscriptionsEmptyTitle => 'No recurring payments detected yet';
 
   @override
   String get subscriptionsEmptyBody =>
-      'FinStride spots a subscription once a charge has repeated three times. Importing more history speeds detection up.';
+      'FinStride spots a recurring payment once a charge has repeated three times. Importing more history speeds detection up.';
 
   @override
   String get subscriptionsEmptyCta => 'Go to imports';
 
   @override
-  String get subscriptionDetailBack => 'Back to subscriptions';
+  String get subscriptionDetailBack => 'Back to recurring payments';
 
   @override
   String subscriptionDetailDetectedSince(String account, String month) {
@@ -2040,7 +2041,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get subscriptionDetailHistoryEmpty =>
-      'No charges linked to this subscription yet.';
+      'No charges linked to this payment yet.';
 
   @override
   String subscriptionDetailChange(String from, String to) {
@@ -2053,23 +2054,23 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get subscriptionDetailLoadFailed =>
-      'We couldn\'t load this subscription right now.';
+      'We couldn\'t load this recurring payment right now.';
 
   @override
-  String get subscriptionFormCreateTitle => 'New subscription';
+  String get subscriptionFormCreateTitle => 'New recurring payment';
 
   @override
-  String get subscriptionFormEditTitle => 'Edit subscription';
+  String get subscriptionFormEditTitle => 'Edit recurring payment';
 
   @override
   String get subscriptionFormIntro =>
-      'Track a charge detection hasn\'t spotted yet.';
+      'Track a recurring charge detection hasn\'t spotted yet.';
 
   @override
   String get subscriptionFormNameLabel => 'Name';
 
   @override
-  String get subscriptionFormNameRequired => 'Give this subscription a name.';
+  String get subscriptionFormNameRequired => 'Give this payment a name.';
 
   @override
   String get subscriptionFormAccountLabel => 'Account';
@@ -2096,13 +2097,13 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get subscriptionFormNoAccounts =>
-      'Create an account first to track a subscription in it.';
+      'Create an account first to track a recurring payment in it.';
 
   @override
   String get subscriptionFormCancel => 'Cancel';
 
   @override
-  String get subscriptionFormSubmit => 'Create subscription';
+  String get subscriptionFormSubmit => 'Create payment';
 
   @override
   String get subscriptionFormSave => 'Save';

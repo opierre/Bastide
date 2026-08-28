@@ -28,7 +28,7 @@ Future<RecurringSeries?> showSeriesForm(
   );
 }
 
-/// The 480 px « Nouvel abonnement » modal (`docs/design/10` frame ④), reused
+/// The 480 px « Nouveau paiement récurrent » modal (`docs/design/10` frame ④), reused
 /// for the kebab's « Modifier ».
 ///
 /// This is the only place `Irrégulier` can be chosen. Detection concludes a

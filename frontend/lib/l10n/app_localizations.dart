@@ -2822,16 +2822,16 @@ abstract class AppLocalizations {
   /// **'Réessayer'**
   String get settingsAiRetry;
 
-  /// Sidebar entry for the subscriptions panel, third in the Gestion group.
+  /// Sidebar entry for the recurring payments panel, third in the Gestion group.
   ///
   /// In fr, this message translates to:
-  /// **'Abonnements'**
+  /// **'Récurrents'**
   String get navSubscriptions;
 
-  /// Top-bar descriptor under the subscriptions panel title.
+  /// Top-bar descriptor under the recurring payments panel title.
   ///
   /// In fr, this message translates to:
-  /// **'Vos prélèvements récurrents, détectés automatiquement'**
+  /// **'Vos paiements récurrents, détectés automatiquement'**
   String get navSubscriptionsSubtitle;
 
   /// Secondary top-bar button re-running detection over the imported ledger.
@@ -2849,13 +2849,13 @@ abstract class AppLocalizations {
   /// Primary top-bar button opening the manual-creation modal.
   ///
   /// In fr, this message translates to:
-  /// **'Nouvel abonnement'**
+  /// **'Nouveau paiement récurrent'**
   String get subscriptionsAdd;
 
   /// Toast headline after a detection pass, counting what it created.
   ///
   /// In fr, this message translates to:
-  /// **'{created, plural, =0{Aucun nouvel abonnement détecté} =1{1 nouvel abonnement détecté} other{{created} nouveaux abonnements détectés}}'**
+  /// **'{created, plural, =0{Aucun nouveau paiement récurrent détecté} =1{1 nouveau paiement récurrent détecté} other{{created} nouveaux paiements récurrents détectés}}'**
   String subscriptionsDetectResult(int created);
 
   /// Second toast line after a detection pass, counting what it refreshed.
@@ -2885,13 +2885,13 @@ abstract class AppLocalizations {
   /// Appended to the burden caption so the figure names its own exclusion rather than disagreeing silently with the count beside it.
   ///
   /// In fr, this message translates to:
-  /// **'{count, plural, =1{1 abonnement résilié exclu.} other{{count} abonnements résiliés exclus.}}'**
+  /// **'{count, plural, =1{1 paiement terminé exclu.} other{{count} paiements terminés exclus.}}'**
   String subscriptionsBurdenExcluded(int count);
 
-  /// Label of the card counting the subscriptions still running.
+  /// Label of the card counting the recurring payments still running.
   ///
   /// In fr, this message translates to:
-  /// **'Abonnements actifs'**
+  /// **'Paiements actifs'**
   String get subscriptionsActiveLabel;
 
   /// Weekly share of the active count, in the cadence breakdown caption.
@@ -2927,7 +2927,7 @@ abstract class AppLocalizations {
   /// Tail of the cadence breakdown caption, naming the cancelled rows the active count leaves out.
   ///
   /// In fr, this message translates to:
-  /// **'{count, plural, =1{1 résilié} other{{count} résiliés}}'**
+  /// **'{count, plural, =1{1 terminé} other{{count} terminés}}'**
   String subscriptionsCancelledCount(int count);
 
   /// Label of the card naming the soonest charge ahead.
@@ -2936,7 +2936,7 @@ abstract class AppLocalizations {
   /// **'Prochain prélèvement'**
   String get subscriptionsNextLabel;
 
-  /// Value line of the next-charge card: the subscription and how far off it is.
+  /// Value line of the next-charge card: the payment and how far off it is.
   ///
   /// In fr, this message translates to:
   /// **'{label} — {when}'**
@@ -2972,10 +2972,10 @@ abstract class AppLocalizations {
   /// **'Aucun prélèvement à venir'**
   String get subscriptionsNextNone;
 
-  /// Table header over the subscription name column.
+  /// Table header over the payment name column.
   ///
   /// In fr, this message translates to:
-  /// **'Abonnement'**
+  /// **'Libellé'**
   String get subscriptionsColumnName;
 
   /// Table header over the category chip column.
@@ -3056,10 +3056,10 @@ abstract class AppLocalizations {
   /// **'{days, plural, =1{Prélèvement manquant · 1 jour de retard} other{Prélèvement manquant · {days} jours de retard}}'**
   String subscriptionSignalMissed(int days);
 
-  /// Gray status pill on a subscription the user ended. It stays listed, dimmed.
+  /// Gray status pill on a recurring payment the user ended. It stays listed, dimmed.
   ///
   /// In fr, this message translates to:
-  /// **'Résilié · dernier prélèvement {date}'**
+  /// **'Terminé · dernier prélèvement {date}'**
   String subscriptionSignalCancelled(String date);
 
   /// Replaces the next-charge date on a row with a missed charge, in amber: the date is what was expected, not what is coming.
@@ -3071,7 +3071,7 @@ abstract class AppLocalizations {
   /// Tooltip of the row's kebab button.
   ///
   /// In fr, this message translates to:
-  /// **'Actions de l\'abonnement'**
+  /// **'Actions du paiement'**
   String get subscriptionActionsTooltip;
 
   /// Kebab action accepting a detected series — status becomes confirmed.
@@ -3086,10 +3086,10 @@ abstract class AppLocalizations {
   /// **'Ignorer'**
   String get subscriptionActionDismiss;
 
-  /// Kebab action recording that the subscription has ended.
+  /// Kebab action recording that the recurring payment has ended.
   ///
   /// In fr, this message translates to:
-  /// **'Marquer comme résilié'**
+  /// **'Marquer comme terminé'**
   String get subscriptionActionCancel;
 
   /// Kebab action opening the series in the edit form.
@@ -3101,19 +3101,19 @@ abstract class AppLocalizations {
   /// Localized RECURRING_INVALID_TRANSITION.
   ///
   /// In fr, this message translates to:
-  /// **'Ce changement de statut n\'est pas possible pour cet abonnement.'**
+  /// **'Ce changement de statut n\'est pas possible pour ce paiement.'**
   String get subscriptionErrorInvalidTransition;
 
   /// Localized RECURRING_SERIES_EXISTS.
   ///
   /// In fr, this message translates to:
-  /// **'Ce compte suit déjà un abonnement sous ce nom.'**
+  /// **'Ce compte suit déjà un paiement récurrent sous ce nom.'**
   String get subscriptionErrorExists;
 
   /// Localized RECURRING_SERIES_NOT_FOUND.
   ///
   /// In fr, this message translates to:
-  /// **'Cet abonnement n\'existe plus.'**
+  /// **'Ce paiement récurrent n\'existe plus.'**
   String get subscriptionErrorNotFound;
 
   /// Localized ACCOUNT_NOT_FOUND, reachable from the creation form's account select.
@@ -3122,7 +3122,7 @@ abstract class AppLocalizations {
   /// **'Ce compte n\'existe plus.'**
   String get subscriptionErrorAccountNotFound;
 
-  /// Localized VALIDATION_ERROR on the subscription form.
+  /// Localized VALIDATION_ERROR on the recurring payment form.
   ///
   /// In fr, this message translates to:
   /// **'Vérifiez les informations saisies.'**
@@ -3137,25 +3137,25 @@ abstract class AppLocalizations {
   /// Error state replacing the panel when the list or summary failed to load.
   ///
   /// In fr, this message translates to:
-  /// **'Impossible de charger vos abonnements pour le moment.'**
+  /// **'Impossible de charger vos paiements récurrents pour le moment.'**
   String get subscriptionsLoadFailed;
 
-  /// Retry action on the subscriptions error state.
+  /// Retry action on the recurring payments error state.
   ///
   /// In fr, this message translates to:
   /// **'Réessayer'**
   String get subscriptionsRetry;
 
-  /// Empty-state title on the subscriptions panel.
+  /// Empty-state title on the recurring payments panel.
   ///
   /// In fr, this message translates to:
-  /// **'Aucun abonnement détecté pour l\'instant'**
+  /// **'Aucun paiement récurrent détecté pour l\'instant'**
   String get subscriptionsEmptyTitle;
 
   /// Empty-state body, stating the three-repeat rule so the absence reads as a threshold rather than a failure.
   ///
   /// In fr, this message translates to:
-  /// **'FinStride repère un abonnement lorsqu\'un prélèvement s\'est répété trois fois. Importer davantage d\'historique accélère la détection.'**
+  /// **'FinStride repère un paiement récurrent lorsqu\'un prélèvement s\'est répété trois fois. Importer davantage d\'historique accélère la détection.'**
   String get subscriptionsEmptyBody;
 
   /// Empty-state CTA. It goes to imports rather than to manual creation because more history is the actual remedy.
@@ -3167,7 +3167,7 @@ abstract class AppLocalizations {
   /// Iris back link at the top of the series detail.
   ///
   /// In fr, this message translates to:
-  /// **'Retour aux abonnements'**
+  /// **'Retour aux récurrents'**
   String get subscriptionDetailBack;
 
   /// Sub-line of the detail header for a detected series.
@@ -3238,7 +3238,7 @@ abstract class AppLocalizations {
   /// History card with no rows — the ordinary state of a series the user has just declared.
   ///
   /// In fr, this message translates to:
-  /// **'Aucun prélèvement rattaché pour l\'instant.'**
+  /// **'Aucun prélèvement rattaché à ce paiement pour l\'instant.'**
   String get subscriptionDetailHistoryEmpty;
 
   /// Amber pill marking the occurrence where the price stepped up.
@@ -3256,28 +3256,28 @@ abstract class AppLocalizations {
   /// Error state replacing the detail when it failed to load.
   ///
   /// In fr, this message translates to:
-  /// **'Impossible de charger cet abonnement pour le moment.'**
+  /// **'Impossible de charger ce paiement récurrent pour le moment.'**
   String get subscriptionDetailLoadFailed;
 
   /// Title of the manual-creation modal.
   ///
   /// In fr, this message translates to:
-  /// **'Nouvel abonnement'**
+  /// **'Nouveau paiement récurrent'**
   String get subscriptionFormCreateTitle;
 
   /// Title of the modal when editing an existing series.
   ///
   /// In fr, this message translates to:
-  /// **'Modifier l\'abonnement'**
+  /// **'Modifier le paiement récurrent'**
   String get subscriptionFormEditTitle;
 
   /// Sub-line under the creation modal's title.
   ///
   /// In fr, this message translates to:
-  /// **'Suivez un prélèvement que la détection n\'a pas encore repéré.'**
+  /// **'Suivez un paiement récurrent que la détection n\'a pas encore repéré.'**
   String get subscriptionFormIntro;
 
-  /// Label of the subscription name field.
+  /// Label of the payment name field.
   ///
   /// In fr, this message translates to:
   /// **'Nom'**
@@ -3286,10 +3286,10 @@ abstract class AppLocalizations {
   /// Validation message when the name field is empty.
   ///
   /// In fr, this message translates to:
-  /// **'Donnez un nom à cet abonnement.'**
+  /// **'Donnez un nom à ce paiement.'**
   String get subscriptionFormNameRequired;
 
-  /// Label of the account select in the subscription form.
+  /// Label of the account select in the recurring payment form.
   ///
   /// In fr, this message translates to:
   /// **'Compte'**
@@ -3307,7 +3307,7 @@ abstract class AppLocalizations {
   /// **'Saisissez un montant supérieur à zéro.'**
   String get subscriptionFormAmountInvalid;
 
-  /// Label of the cadence select in the subscription form.
+  /// Label of the cadence select in the recurring payment form.
   ///
   /// In fr, this message translates to:
   /// **'Cadence'**
@@ -3319,13 +3319,13 @@ abstract class AppLocalizations {
   /// **'Hebdomadaire · Mensuel · Trimestriel · Annuel · Irrégulier'**
   String get subscriptionFormCadenceHelp;
 
-  /// Label of the category select in the subscription form.
+  /// Label of the category select in the recurring payment form.
   ///
   /// In fr, this message translates to:
   /// **'Catégorie'**
   String get subscriptionFormCategoryLabel;
 
-  /// The no-category option in the subscription form's category select.
+  /// The no-category option in the recurring payment form's category select.
   ///
   /// In fr, this message translates to:
   /// **'Aucune'**
@@ -3334,22 +3334,22 @@ abstract class AppLocalizations {
   /// Shown in place of the account select when the user has no accounts yet.
   ///
   /// In fr, this message translates to:
-  /// **'Créez d\'abord un compte pour y suivre un abonnement.'**
+  /// **'Créez d\'abord un compte pour y suivre un paiement récurrent.'**
   String get subscriptionFormNoAccounts;
 
-  /// Cancel action in the subscription modal footer.
+  /// Cancel action in the recurring payment modal footer.
   ///
   /// In fr, this message translates to:
   /// **'Annuler'**
   String get subscriptionFormCancel;
 
-  /// Confirm action when creating a subscription.
+  /// Confirm action when creating a recurring payment.
   ///
   /// In fr, this message translates to:
-  /// **'Créer l\'abonnement'**
+  /// **'Créer le paiement récurrent'**
   String get subscriptionFormSubmit;
 
-  /// Confirm action when editing a subscription.
+  /// Confirm action when editing a recurring payment.
   ///
   /// In fr, this message translates to:
   /// **'Enregistrer'**

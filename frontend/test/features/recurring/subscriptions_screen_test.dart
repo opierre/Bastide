@@ -153,7 +153,7 @@ void main() {
       tester.widget<StatusPill>(find.byType(StatusPill)).tone,
       StatusPillTone.neutral,
     );
-    expect(find.text('Résilié · dernier prélèvement 15/04/2026'), findsOneWidget);
+    expect(find.text('Terminé · dernier prélèvement 15/04/2026'), findsOneWidget);
     expect(find.text('15/05/2026'), findsNothing);
   });
 
@@ -222,7 +222,7 @@ void main() {
 
     expect(find.byKey(const Key('subscriptionsActionError')), findsOneWidget);
     expect(
-      find.text("Ce changement de statut n'est pas possible pour cet abonnement."),
+      find.text("Ce changement de statut n'est pas possible pour ce paiement."),
       findsOneWidget,
     );
     expect(find.byKey(const Key('seriesRow-s1')), findsOneWidget);
@@ -261,13 +261,13 @@ void main() {
 
     expect(find.text(_money(21208)), findsOneWidget);
     expect(find.text('8'), findsOneWidget);
-    expect(find.text('6 mensuels · 1 trimestriel · 1 annuel — 1 résilié'), findsOneWidget);
+    expect(find.text('6 mensuels · 1 trimestriel · 1 annuel — 1 terminé'), findsOneWidget);
     expect(find.text('Netflix — demain'), findsOneWidget);
     expect(
       find.textContaining('Charges trimestrielles et annuelles ramenées au mois.'),
       findsOneWidget,
     );
-    expect(find.textContaining('1 abonnement résilié exclu.'), findsOneWidget);
+    expect(find.textContaining('1 paiement terminé exclu.'), findsOneWidget);
   });
 
   testWidgets('the empty state explains the three-repeat rule and offers imports', (
@@ -278,7 +278,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.byKey(const Key('subscriptionsEmptyState')), findsOneWidget);
-    expect(find.text('Aucun abonnement détecté pour l\'instant'), findsOneWidget);
+    expect(find.text('Aucun paiement récurrent détecté pour l\'instant'), findsOneWidget);
     expect(
       find.textContaining("un prélèvement s'est répété trois fois"),
       findsOneWidget,
@@ -333,7 +333,7 @@ void main() {
 
     expect(find.text('Monthly'), findsNWidgets(3));
     expect(find.text('Missed charge · 9 days late'), findsOneWidget);
-    expect(find.textContaining('Cancelled · last charge'), findsOneWidget);
+    expect(find.textContaining('Ended · last charge'), findsOneWidget);
     // Netflix and the cancelled Canal+ share a price in this fixture.
     expect(find.text(_money(1549, locale: 'en')), findsNWidgets(2));
     expect(find.text('Monthly burden'.toUpperCase()), findsOneWidget);
