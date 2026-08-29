@@ -73,7 +73,13 @@ class RuleService:
         return rule
 
     def create(self, user_id: str, data: RuleCreate) -> CategorizationRule:
-        """Create a new categorization rule."""
+        """Create a new categorization rule.
+
+        Raises:
+            RulePatternInvalidError: `match_type` is `regex` and the pattern doesn't compile.
+        """
+        _validate_pattern(data.match_type, data.pattern)
+
         rule = CategorizationRule(
             user_id=user_id,
             priority=data.priority,
@@ -90,8 +96,16 @@ class RuleService:
 
         Raises:
             RuleNotFoundError: no such rule, or it belongs to another user.
+            RulePatternInvalidError: the rule would end up a `regex` whose pattern doesn't
+                compile. Checked against the *resulting* rule, not the patch: switching
+                `match_type` to `regex` without resending `pattern` is what turns an
+                already-stored `contains` string into an uncompilable expression.
         """
         rule = self.get(user_id, rule_id)
+        _validate_pattern(
+            data.match_type if data.match_type is not None else rule.match_type,
+            data.pattern if data.pattern is not None else rule.pattern,
+        )
         if data.priority is not None:
             rule.priority = data.priority
         if data.match_field is not None:
@@ -276,8 +290,12 @@ class RuleService:
         return query
 
 
-def _validate_pattern(match_type: MatchType, pattern: str) -> None:
+def _validate_pattern(match_type: str, pattern: str) -> None:
     """Reject a `regex` pattern that doesn't compile.
+
+    Takes a plain `str` rather than `MatchType` because the update path checks the *resulting*
+    rule, whose `match_type` comes off the ORM column as `str`. Nothing here narrows on the
+    literal beyond the one `== "regex"` test, so widening costs no safety.
 
     Raises:
         RulePatternInvalidError: the pattern is an invalid regular expression. The user is

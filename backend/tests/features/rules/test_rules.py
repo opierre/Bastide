@@ -306,3 +306,48 @@ def test_apply_is_user_scoped(client: TestClient, tmp_path: Path) -> None:
 
     response_b = client.post("/api/v1/rules/apply", json={}, headers=headers_b)
     assert response_b.json()["recategorized_count"] == 0
+
+
+def test_create_rejects_a_regex_that_does_not_compile(client: TestClient) -> None:
+    """The preview already refused it; saving must refuse it too.
+
+    Without this the modal shows the pattern error and the save still succeeds, and the
+    uncompilable rule only surfaces later as a 500 out of `/rules/apply` — from a screen that
+    never mentioned a pattern.
+    """
+    headers, _ = _register(client)
+    category_id = _create_category(client, headers)
+
+    response = client.post(
+        "/api/v1/rules",
+        json={
+            **RULE_PAYLOAD,
+            "category_id": category_id,
+            "match_type": "regex",
+            "pattern": "CARREFOUR(",
+        },
+        headers=headers,
+    )
+
+    assert response.status_code == 422
+    assert response.json()["error"]["code"] == "RULE_PATTERN_INVALID"
+    assert client.get("/api/v1/rules", headers=headers).json() == []
+
+
+def test_update_rejects_a_regex_the_patch_would_produce(client: TestClient) -> None:
+    """Checked against the resulting rule, not the patch body.
+
+    Switching `match_type` to `regex` without resending `pattern` is what turns a stored
+    `contains` string into an uncompilable expression, and the patch alone looks harmless.
+    """
+    headers, _ = _register(client)
+    category_id = _create_category(client, headers)
+    rule = _create_rule(client, headers, category_id, pattern="CARREFOUR(")
+
+    response = client.patch(
+        f"/api/v1/rules/{rule['id']}", json={"match_type": "regex"}, headers=headers
+    )
+
+    assert response.status_code == 422
+    assert response.json()["error"]["code"] == "RULE_PATTERN_INVALID"
+    assert client.get("/api/v1/rules", headers=headers).json()[0]["match_type"] == "contains"
