@@ -19,7 +19,11 @@ String localizeRuleError(AppLocalizations l10n, Object? error) {
         return l10n.ruleErrorPatternInvalid;
       case 'RULE_NOT_FOUND':
         return l10n.ruleErrorNotFound;
-      case 'CATEGORY_NOT_FOUND':
+      // A rule's category is a *field* of the rule, so the backend answers
+      // `CATEGORY_INVALID` (422) rather than the `CATEGORY_NOT_FOUND` (404) it
+      // uses when a category is the addressed resource. The message is the
+      // same either way; only the code the rules endpoints emit changed.
+      case 'CATEGORY_INVALID':
         return l10n.ruleErrorCategoryNotFound;
       case 'VALIDATION_ERROR':
         return l10n.ruleErrorValidation;

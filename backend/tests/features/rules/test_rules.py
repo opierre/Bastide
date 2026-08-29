@@ -351,3 +351,54 @@ def test_update_rejects_a_regex_the_patch_would_produce(client: TestClient) -> N
     assert response.status_code == 422
     assert response.json()["error"]["code"] == "RULE_PATTERN_INVALID"
     assert client.get("/api/v1/rules", headers=headers).json()[0]["match_type"] == "contains"
+
+
+def test_create_rejects_another_users_category(client: TestClient) -> None:
+    """The foreign key proves the row exists; only this check proves the caller may see it."""
+    headers_a, _ = _register(client, "amelie@example.com")
+    headers_b, _ = _register(client, "bruno@example.com")
+    category_id_b = _create_category(client, headers_b)
+
+    response = client.post(
+        "/api/v1/rules",
+        json={**RULE_PAYLOAD, "category_id": category_id_b},
+        headers=headers_a,
+    )
+
+    assert response.status_code == 422
+    assert response.json()["error"]["code"] == "CATEGORY_INVALID"
+    assert client.get("/api/v1/rules", headers=headers_a).json() == []
+
+
+def test_update_rejects_another_users_category(client: TestClient) -> None:
+    headers_a, _ = _register(client, "amelie@example.com")
+    category_id_a = _create_category(client, headers_a)
+    rule = _create_rule(client, headers_a, category_id_a)
+    headers_b, _ = _register(client, "bruno@example.com")
+    category_id_b = _create_category(client, headers_b)
+
+    response = client.patch(
+        f"/api/v1/rules/{rule['id']}", json={"category_id": category_id_b}, headers=headers_a
+    )
+
+    assert response.status_code == 422
+    assert response.json()["error"]["code"] == "CATEGORY_INVALID"
+    assert client.get("/api/v1/rules", headers=headers_a).json()[0]["category_id"] == category_id_a
+
+
+def test_a_system_category_is_assignable(client: TestClient) -> None:
+    """System rows have `user_id=None`, so the visibility check must not read them as foreign."""
+    headers, _ = _register(client)
+    system_category = next(
+        category
+        for category in client.get("/api/v1/categories", headers=headers).json()
+        if category["is_system"]
+    )
+
+    response = client.post(
+        "/api/v1/rules",
+        json={**RULE_PAYLOAD, "category_id": system_category["id"]},
+        headers=headers,
+    )
+
+    assert response.status_code == 201

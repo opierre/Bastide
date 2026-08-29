@@ -758,6 +758,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get transactionErrorNotFound => 'Transaction not found.';
 
   @override
+  String get transactionErrorCategoryInvalid =>
+      'That category is no longer available.';
+
+  @override
   String get transactionErrorValidation => 'Some information is invalid.';
 
   @override
@@ -1969,6 +1973,10 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get subscriptionErrorAccountNotFound =>
       'That account no longer exists.';
+
+  @override
+  String get subscriptionErrorCategoryInvalid =>
+      'That category is no longer available.';
 
   @override
   String get subscriptionErrorValidation => 'Check the details you entered.';

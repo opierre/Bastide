@@ -15,6 +15,7 @@ from fastapi.testclient import TestClient
 
 from app.features.accounts.repository import AccountRepository
 from app.features.accounts.service import AccountService
+from app.features.categories.repository import CategoryRepository
 from app.features.recurring.repository import RecurringRepository
 from app.features.recurring.schemas import RecurringSummary
 from app.features.recurring.service import RecurringService, monthly_equivalent_minor
@@ -41,6 +42,7 @@ def _summary(owner: Owner, tmp_path: Path, today: date = TODAY) -> RecurringSumm
             RecurringRepository(session),
             TransactionRepository(session),
             AccountService(AccountRepository(session), session),
+            CategoryRepository(session),
         )
         return service.summary(owner.user_id, "EUR", today)
     finally:

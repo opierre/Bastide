@@ -1,6 +1,6 @@
 """Business logic for category CRUD: system rows are read-only, users manage their own."""
 
-from app.core.errors import NotFoundError
+from app.core.errors import NotFoundError, ValidationError
 from app.features.categories.models import Category
 from app.features.categories.repository import CategoryRepository
 from app.features.categories.schemas import CategoryCreate, CategoryUpdate
@@ -10,6 +10,19 @@ class CategoryNotFoundError(NotFoundError):
     """Raised when a category doesn't exist, isn't the caller's, or is a system category."""
 
     code = "CATEGORY_NOT_FOUND"
+
+
+class CategoryInvalidError(ValidationError):
+    """Raised when a payload's ``category_id`` is not one the caller may assign.
+
+    Distinct from `CategoryNotFoundError`: that one answers a request *for* a category
+    (`GET/PATCH/DELETE /categories/{id}`), where a bad id means the addressed resource does not
+    exist. Here the category is a *field* of some other resource — a rule, a transaction
+    override, a subscription — so an id the caller cannot see is a bad field value rather than a
+    missing endpoint, which is why it is a 422 carrying the offending field in `details`.
+    """
+
+    code = "CATEGORY_INVALID"
 
 
 class CategoryService:

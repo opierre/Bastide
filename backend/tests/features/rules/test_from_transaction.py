@@ -13,7 +13,7 @@ from app.features.accounts.models import Account
 from app.features.auth.models import User
 from app.features.categories.models import Category
 from app.features.categories.repository import CategoryRepository
-from app.features.categories.service import CategoryNotFoundError
+from app.features.categories.service import CategoryInvalidError
 from app.features.imports.models import ImportBatch
 from app.features.rules.models import CategorizationRule
 from app.features.rules.repository import RuleRepository
@@ -248,7 +248,7 @@ def test_another_users_transaction_is_a_404(client: TestClient, tmp_path: Path) 
     assert client.get("/api/v1/rules", headers=headers_a).json() == []
 
 
-def test_another_users_category_is_a_404(client: TestClient, tmp_path: Path) -> None:
+def test_another_users_category_is_rejected(client: TestClient, tmp_path: Path) -> None:
     headers_a, user_id_a = _register(client, "amelie@example.com")
     account_id_a = _create_account(client, headers_a)
     transaction_id_a = _insert_transaction(
@@ -259,8 +259,8 @@ def test_another_users_category_is_a_404(client: TestClient, tmp_path: Path) -> 
 
     status_code, body = _from_transaction(client, headers_a, transaction_id_a, category_id_b)
 
-    assert status_code == 404
-    assert body["error"]["code"] == "CATEGORY_NOT_FOUND"
+    assert status_code == 422
+    assert body["error"]["code"] == "CATEGORY_INVALID"
     assert client.get("/api/v1/rules", headers=headers_a).json() == []
     assert _fetch_transaction(tmp_path, transaction_id_a).category_id is None
 
@@ -386,7 +386,7 @@ def test_a_missing_category_raises_before_anything_is_staged(db_session: Session
         db_session,
     )
 
-    with pytest.raises(CategoryNotFoundError):
+    with pytest.raises(CategoryInvalidError):
         service.create_from_transaction(
             user_id,
             RuleFromTransactionRequest(

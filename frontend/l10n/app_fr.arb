@@ -961,6 +961,10 @@
   "@transactionErrorNotFound": {
     "description": "Localized message for the backend's TRANSACTION_NOT_FOUND error code."
   },
+  "transactionErrorCategoryInvalid": "Cette catégorie n'est plus disponible.",
+  "@transactionErrorCategoryInvalid": {
+    "description": "Localized message for the backend's CATEGORY_INVALID error code, returned when a transaction is patched with a category the user cannot assign — usually one deleted in another window."
+  },
   "transactionErrorValidation": "Certaines informations sont invalides.",
   "@transactionErrorValidation": {
     "description": "Localized message for the backend's VALIDATION_ERROR error code on the transactions panel."
@@ -2441,6 +2445,10 @@
   "subscriptionErrorAccountNotFound": "Ce compte n'existe plus.",
   "@subscriptionErrorAccountNotFound": {
     "description": "Localized ACCOUNT_NOT_FOUND, reachable from the creation form's account select."
+  },
+  "subscriptionErrorCategoryInvalid": "Cette catégorie n'est plus disponible.",
+  "@subscriptionErrorCategoryInvalid": {
+    "description": "Localized CATEGORY_INVALID on the recurring payment form, returned when the chosen category is not one the user may assign."
   },
   "subscriptionErrorValidation": "Vérifiez les informations saisies.",
   "@subscriptionErrorValidation": {

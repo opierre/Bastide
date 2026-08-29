@@ -11,6 +11,7 @@ from app.features.accounts.repository import AccountRepository
 from app.features.accounts.service import AccountService
 from app.features.auth.deps import get_current_user
 from app.features.auth.models import User
+from app.features.categories.repository import CategoryRepository
 from app.features.recurring.repository import RecurringRepository
 from app.features.recurring.schemas import (
     DetectionResultRead,
@@ -44,6 +45,7 @@ def _service(db: Annotated[Session, Depends(get_db)]) -> RecurringService:
         RecurringRepository(db),
         TransactionRepository(db),
         AccountService(AccountRepository(db), db),
+        CategoryRepository(db),
     )
 
 

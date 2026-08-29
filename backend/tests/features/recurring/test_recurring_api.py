@@ -335,6 +335,66 @@ def test_manual_creation_rejects_an_account_of_another_user(client: TestClient) 
     assert response.json()["error"]["code"] == "ACCOUNT_NOT_FOUND"
 
 
+
+def test_manual_creation_rejects_a_category_of_another_user(client: TestClient) -> None:
+    """A series' category is a field, so an id the caller cannot see is a bad value (422).
+
+    The foreign key alone would accept it and the panel would then render another user's
+    private label and colour on this user's subscriptions.
+    """
+    owner = register(client)
+    other = register(client, email="bruno@example.com")
+    category_id = client.post(
+        "/api/v1/categories",
+        json={"name": "Sport", "kind": "expense", "icon": "fitness", "color": "#10B981"},
+        headers=other.headers,
+    ).json()["id"]
+
+    response = client.post(
+        "/api/v1/recurring",
+        json={
+            "label": "Basic-Fit",
+            "account_id": create_account(client, owner),
+            "expected_amount_minor": -2999,
+            "cadence": "monthly",
+            "category_id": category_id,
+        },
+        headers=owner.headers,
+    )
+
+    assert response.status_code == 422
+    assert response.json()["error"]["code"] == "CATEGORY_INVALID"
+    assert _list(client, owner) == []
+
+
+def test_patching_a_category_of_another_user_is_rejected(
+    client: TestClient, tmp_path: Path
+) -> None:
+    owner = register(client)
+    account_id = create_account(client, owner)
+    series_id = insert_series(
+        tmp_path, owner, account_id, label="Netflix", next_expected_date=TODAY
+    )
+    other = register(client, email="bruno@example.com")
+    category_id = client.post(
+        "/api/v1/categories",
+        json={"name": "Sport", "kind": "expense", "icon": "fitness", "color": "#10B981"},
+        headers=other.headers,
+    ).json()["id"]
+
+    response = client.patch(
+        f"/api/v1/recurring/{series_id}",
+        json={"category_id": category_id, "label": "Netflix Premium"},
+        headers=owner.headers,
+    )
+
+    assert response.status_code == 422
+    assert response.json()["error"]["code"] == "CATEGORY_INVALID"
+    # Checked before anything is assigned, so the label edit does not land either.
+    series = read_series(tmp_path, series_id)
+    assert series is not None
+    assert series.label == "Netflix"
+
 # --- delete ---------------------------------------------------------------------------------
 
 

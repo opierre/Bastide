@@ -15,6 +15,8 @@ from sqlalchemy.orm import Session
 
 from app.core.errors import ConflictError, NotFoundError
 from app.features.accounts.service import AccountService
+from app.features.categories.repository import CategoryRepository
+from app.features.categories.service import CategoryInvalidError
 from app.features.recurring.detector import (
     INTERVAL_TOLERANCE_FLOOR_DAYS,
     INTERVAL_TOLERANCE_PERCENT,
@@ -300,10 +302,12 @@ class RecurringService:
         repository: RecurringRepository,
         transactions: TransactionRepository,
         accounts: AccountService,
+        categories: CategoryRepository,
     ) -> None:
         self._repository = repository
         self._transactions = transactions
         self._accounts = accounts
+        self._categories = categories
 
     def list_for_user(
         self, user_id: str, *, status: str | None = None, account_id: str | None = None
@@ -349,9 +353,11 @@ class RecurringService:
 
         Raises:
             AccountNotFoundError: the account is not one of the user's.
+            CategoryInvalidError: `category_id` is set and is not one the caller may assign.
             SeriesAlreadyTrackedError: that account already tracks a series under this name.
         """
         account = self._accounts.get(user_id, data.account_id)
+        self._require_assignable_category(user_id, data.category_id)
         key = normalize_label(data.label)
         existing = self._repository.get_by_merchant_key(user_id, account.id, key)
         if existing is not None:
@@ -385,10 +391,12 @@ class RecurringService:
 
         Raises:
             SeriesNotFoundError: no such series, or it belongs to another user.
+            CategoryInvalidError: `category_id` is set and is not one the caller may assign.
             InvalidSeriesTransitionError: the requested status is not reachable from the
                 current one.
         """
         series = self.get(user_id, series_id)
+        self._require_assignable_category(user_id, data.category_id)
         # Checked before anything is assigned, so a rejected transition leaves the whole patch
         # unapplied rather than half of it.
         if data.status is not None:
@@ -403,6 +411,23 @@ class RecurringService:
         if data.expected_amount_minor is not None:
             series.expected_amount_minor = data.expected_amount_minor
         return self._repository.save(series)
+
+    def _require_assignable_category(self, user_id: str, category_id: str | None) -> None:
+        """Reject a `category_id` the caller cannot see. `None` means "leave it alone".
+
+        The foreign key only proves the row exists — it knows nothing about users — so without
+        this a series could carry another user's private category and render its label and
+        colour on this user's subscriptions.
+
+        Raises:
+            CategoryInvalidError: no such category, or it is another user's.
+        """
+        if category_id is None:
+            return
+        if self._categories.get_visible_by_id_for_user(category_id, user_id) is None:
+            raise CategoryInvalidError(
+                "Category not found.", {"field": "category_id", "category_id": category_id}
+            )
 
     def delete(self, user_id: str, series_id: str) -> None:
         """Remove a declared series; dismiss a detected one.

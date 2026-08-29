@@ -8,7 +8,7 @@ from sqlalchemy.orm import Session, selectinload
 from app.core.errors import NotFoundError, ValidationError
 from app.features.accounts.models import Account
 from app.features.categories.repository import CategoryRepository
-from app.features.categories.service import CategoryNotFoundError
+from app.features.categories.service import CategoryInvalidError
 from app.features.rules.engine import match_category, matches
 from app.features.rules.models import CategorizationRule
 from app.features.rules.repository import RuleRepository
@@ -77,8 +77,10 @@ class RuleService:
 
         Raises:
             RulePatternInvalidError: `match_type` is `regex` and the pattern doesn't compile.
+            CategoryInvalidError: no such category, or it is another user's.
         """
         _validate_pattern(data.match_type, data.pattern)
+        self._require_assignable_category(user_id, data.category_id)
 
         rule = CategorizationRule(
             user_id=user_id,
@@ -100,12 +102,15 @@ class RuleService:
                 compile. Checked against the *resulting* rule, not the patch: switching
                 `match_type` to `regex` without resending `pattern` is what turns an
                 already-stored `contains` string into an uncompilable expression.
+            CategoryInvalidError: no such category, or it is another user's.
         """
         rule = self.get(user_id, rule_id)
         _validate_pattern(
             data.match_type if data.match_type is not None else rule.match_type,
             data.pattern if data.pattern is not None else rule.pattern,
         )
+        if data.category_id is not None:
+            self._require_assignable_category(user_id, data.category_id)
         if data.priority is not None:
             rule.priority = data.priority
         if data.match_field is not None:
@@ -224,15 +229,14 @@ class RuleService:
         Raises:
             RulePatternInvalidError: `match_type` is `regex` and the pattern doesn't compile.
             TransactionNotFoundError: no such transaction, or it belongs to another user.
-            CategoryNotFoundError: no such category, or it is another user's.
+            CategoryInvalidError: no such category, or it is another user's.
         """
         _validate_pattern(data.match_type, data.pattern)
 
         transaction = self._transactions.get_by_id_for_user(data.transaction_id, user_id)
         if transaction is None:
             raise TransactionNotFoundError("Transaction not found.")
-        if self._categories.get_visible_by_id_for_user(data.category_id, user_id) is None:
-            raise CategoryNotFoundError("Category not found.")
+        self._require_assignable_category(user_id, data.category_id)
 
         rule = CategorizationRule(
             user_id=user_id,
@@ -257,6 +261,21 @@ class RuleService:
 
         recategorized_count = self.apply(user_id) if data.apply_now else 0
         return rule, recategorized_count
+
+    def _require_assignable_category(self, user_id: str, category_id: str) -> None:
+        """Reject a `category_id` the caller cannot see.
+
+        The DB's foreign key only proves the row exists — it does not know about users, so
+        without this a rule (or a correction) could carry another user's private category and
+        render that user's label and colour on this user's ledger.
+
+        Raises:
+            CategoryInvalidError: no such category, or it is another user's.
+        """
+        if self._categories.get_visible_by_id_for_user(category_id, user_id) is None:
+            raise CategoryInvalidError(
+                "Category not found.", {"field": "category_id", "category_id": category_id}
+            )
 
     def _candidate_rule(
         self, user_id: str, match_field: MatchField, match_type: MatchType, pattern: str

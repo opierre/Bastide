@@ -1364,6 +1364,12 @@ abstract class AppLocalizations {
   /// **'Transaction introuvable.'**
   String get transactionErrorNotFound;
 
+  /// Localized message for the backend's CATEGORY_INVALID error code, returned when a transaction is patched with a category the user cannot assign — usually one deleted in another window.
+  ///
+  /// In fr, this message translates to:
+  /// **'Cette catégorie n\'est plus disponible.'**
+  String get transactionErrorCategoryInvalid;
+
   /// Localized message for the backend's VALIDATION_ERROR error code on the transactions panel.
   ///
   /// In fr, this message translates to:
@@ -3121,6 +3127,12 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Ce compte n\'existe plus.'**
   String get subscriptionErrorAccountNotFound;
+
+  /// Localized CATEGORY_INVALID on the recurring payment form, returned when the chosen category is not one the user may assign.
+  ///
+  /// In fr, this message translates to:
+  /// **'Cette catégorie n\'est plus disponible.'**
+  String get subscriptionErrorCategoryInvalid;
 
   /// Localized VALIDATION_ERROR on the recurring payment form.
   ///

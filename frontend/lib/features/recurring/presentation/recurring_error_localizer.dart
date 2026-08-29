@@ -19,6 +19,8 @@ String localizeRecurringError(AppLocalizations l10n, Object? error) {
         return l10n.subscriptionErrorNotFound;
       case 'ACCOUNT_NOT_FOUND':
         return l10n.subscriptionErrorAccountNotFound;
+      case 'CATEGORY_INVALID':
+        return l10n.subscriptionErrorCategoryInvalid;
       case 'VALIDATION_ERROR':
         return l10n.subscriptionErrorValidation;
     }

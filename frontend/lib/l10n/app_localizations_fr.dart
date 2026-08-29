@@ -765,6 +765,10 @@ class AppLocalizationsFr extends AppLocalizations {
   String get transactionErrorNotFound => 'Transaction introuvable.';
 
   @override
+  String get transactionErrorCategoryInvalid =>
+      'Cette catégorie n\'est plus disponible.';
+
+  @override
   String get transactionErrorValidation =>
       'Certaines informations sont invalides.';
 
@@ -1983,6 +1987,10 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get subscriptionErrorAccountNotFound => 'Ce compte n\'existe plus.';
+
+  @override
+  String get subscriptionErrorCategoryInvalid =>
+      'Cette catégorie n\'est plus disponible.';
 
   @override
   String get subscriptionErrorValidation =>
