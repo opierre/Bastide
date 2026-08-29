@@ -25,8 +25,6 @@ class RulePreviewState {
   /// — telling those apart is what stops "not a valid pattern" from rendering
   /// as "matches 0 transactions".
   final Object? error;
-
-  bool get isIdle => !isLoading && preview == null && error == null;
 }
 
 /// Runs `POST /rules/preview` for the condition being typed, debounced.
