@@ -31,8 +31,6 @@ enum InferenceConnection {
   /// A probe was made and nothing answered at that address.
   unreachable;
 
-  bool get isReachable => this == InferenceConnection.reachable;
-
   bool get isUnreachable => this == InferenceConnection.unreachable;
 }
 
