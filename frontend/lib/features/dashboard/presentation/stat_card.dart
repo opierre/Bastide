@@ -19,7 +19,7 @@ class StatCard extends StatelessWidget {
     required this.currency,
     required this.deltaPct,
     required this.caption,
-    this.colorizeAmount = true,
+    this.colorizeAmount = false,
     this.invertTrendColor = false,
   });
 
@@ -34,9 +34,10 @@ class StatCard extends StatelessWidget {
   /// The 11.5px line beside the trend pill — « vs avril », « revenus − dépenses ».
   final String caption;
 
-  /// Off for [amountMinor] values that are neutral figures rather than a movement (e.g. net) —
-  /// see the money color rule in the design-system skill. The *sign* is not affected: every
-  /// figure on this row is signed, colorized or not.
+  /// On only for the net card, where the figure's sign *is* the result — a surplus reads green,
+  /// a shortfall red. Income and expense are neutral totals whose direction is already fixed by
+  /// the label, so they stay in primary ink. The *sign* is not affected: every figure on this
+  /// row is signed, colorized or not.
   final bool colorizeAmount;
 
   @override

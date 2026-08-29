@@ -122,7 +122,9 @@ class _DashboardContent extends ConsumerWidget {
                   currency: summary.currency,
                   deltaPct: summary.netDeltaPct,
                   caption: l10n.dashboardStatNetCaption,
-                  colorizeAmount: false,
+                  // The only colorized headline of the row: a positive net is green, a
+                  // negative one red.
+                  colorizeAmount: true,
                 ),
               ),
               const SizedBox(width: AppSpacing.gridGap),

@@ -93,8 +93,8 @@ void main() {
       ),
       findsOneWidget,
     );
-    // Net is neutral in *color* but still signed — the spec draws `+635,65 €` in primary
-    // text, so the sign carries the direction the color no longer does.
+    // Net is the row's one colorized headline: a surplus reads green, a shortfall red — and
+    // it stays signed either way, so direction never rests on the color alone.
     final netText = formatAmount(
       amountMinor: 63565,
       currency: 'EUR',
@@ -106,7 +106,7 @@ void main() {
       matching: find.text(netText),
     );
     expect(netInCard, findsOneWidget);
-    expect(tester.widget<Text>(netInCard).style?.color, AppColors.textPrimary);
+    expect(tester.widget<Text>(netInCard).style?.color, AppColors.positive);
 
     // A trend pill is colored by whether the movement is good news, not by its sign: income
     // up is green, net down is red — and the expense card inverts, because spending 4,8 %
