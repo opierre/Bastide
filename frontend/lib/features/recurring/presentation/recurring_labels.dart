@@ -27,6 +27,13 @@ String cadenceCountLabel(AppLocalizations l10n, Cadence cadence, int count) =>
 /// date means the same shape wherever the user meets it.
 DateFormat seriesDateFormat(String locale) => DateFormat.yMd(locale);
 
+/// Axis ticks under the price curve. Day-and-month while the whole history
+/// fits inside a year, month-and-year beyond it: a weekly series would
+/// otherwise print « mai 2026 » under every tick, and a series running over
+/// several years would print a month with no year to place it in.
+DateFormat seriesAxisDateFormat(String locale, {required Duration span}) =>
+    span.inDays > 365 ? DateFormat.yMMM(locale) : DateFormat.MMMd(locale);
+
 /// « décembre 2025 » — the month a series has been tracked since.
 String seriesMonthLabel(String locale, DateTime date) =>
     DateFormat.yMMMM(locale).format(date);

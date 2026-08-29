@@ -2050,12 +2050,6 @@ class AppLocalizationsFr extends AppLocalizations {
   }
 
   @override
-  String get subscriptionDetailHistoryDate => 'Date';
-
-  @override
-  String get subscriptionDetailHistoryAmount => 'Montant';
-
-  @override
   String get subscriptionDetailHistoryEmpty =>
       'Aucun prélèvement rattaché à ce paiement pour l\'instant.';
 

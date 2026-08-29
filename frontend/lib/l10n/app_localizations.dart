@@ -3223,18 +3223,6 @@ abstract class AppLocalizations {
   /// **'Les transactions dont cette série est déduite · {account}'**
   String subscriptionDetailHistorySubtitle(String account);
 
-  /// History table header over the charge date.
-  ///
-  /// In fr, this message translates to:
-  /// **'Date'**
-  String get subscriptionDetailHistoryDate;
-
-  /// History table header over the charge amount.
-  ///
-  /// In fr, this message translates to:
-  /// **'Montant'**
-  String get subscriptionDetailHistoryAmount;
-
   /// History card with no rows — the ordinary state of a series the user has just declared.
   ///
   /// In fr, this message translates to:

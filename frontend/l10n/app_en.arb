@@ -562,8 +562,6 @@
   "subscriptionDetailIncrease": "Price increase: {from} → {to} on {date} — that's {annual} a year.",
   "subscriptionDetailHistoryTitle": "Charge history",
   "subscriptionDetailHistorySubtitle": "The transactions this series is deduced from · {account}",
-  "subscriptionDetailHistoryDate": "Date",
-  "subscriptionDetailHistoryAmount": "Amount",
   "subscriptionDetailHistoryEmpty": "No charges linked to this payment yet.",
   "subscriptionDetailChange": "{from} → {to}",
   "subscriptionDetailFootnote": "FinStride deduces the series from these charges — check them before confirming a change.",

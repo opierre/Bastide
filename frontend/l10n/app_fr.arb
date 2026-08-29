@@ -2541,14 +2541,6 @@
       }
     }
   },
-  "subscriptionDetailHistoryDate": "Date",
-  "@subscriptionDetailHistoryDate": {
-    "description": "History table header over the charge date."
-  },
-  "subscriptionDetailHistoryAmount": "Montant",
-  "@subscriptionDetailHistoryAmount": {
-    "description": "History table header over the charge amount."
-  },
   "subscriptionDetailHistoryEmpty": "Aucun prélèvement rattaché à ce paiement pour l'instant.",
   "@subscriptionDetailHistoryEmpty": {
     "description": "History card with no rows — the ordinary state of a series the user has just declared."

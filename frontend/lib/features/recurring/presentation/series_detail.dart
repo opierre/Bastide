@@ -14,12 +14,8 @@ import '../../../core/widgets/status_pill.dart';
 import '../../../l10n/app_localizations.dart';
 import '../application/subscriptions_controller.dart';
 import '../domain/recurring_series.dart';
+import 'price_history_chart.dart';
 import 'recurring_labels.dart';
-
-/// The occurrence-history row tint on the charge that stepped up — the spec's
-/// `rgba(255,184,77,.05)`, faint enough to mark the row without competing with
-/// the amber pill sitting on it.
-const _steppedUpRowTint = Color(0x0DFFB84D);
 
 /// One series in full (`docs/design/10` frame ②): the stats, the price-increase
 /// banner with its annualised impact, and the occurrence history the series was
@@ -252,19 +248,31 @@ class _Stat extends StatelessWidget {
   }
 }
 
-/// The occurrences the series was deduced from, newest first, with the charge
-/// that stepped up marked.
+/// The price the series has been charged at over time, drawn as a step curve,
+/// with the charge it stepped at marked.
+///
+/// A curve rather than the column of amounts this card used to hold: five
+/// near-identical prices make the reader do the comparison, where a line has
+/// already done it. The amounts themselves stay one hover away, so the
+/// evidence the footnote asks the user to check is still on the screen that
+/// asks.
 class _HistoryCard extends StatelessWidget {
   const _HistoryCard({required this.detail, required this.accountName});
 
   final SeriesDetail detail;
   final String accountName;
 
+  /// Plot height. Tall enough that a single-cent step is still a visible tread,
+  /// short enough that the card doesn't push the footnote off a laptop screen.
+  static const _chartHeight = 184.0;
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    final locale = Localizations.localeOf(context).toString();
     final textTheme = Theme.of(context).textTheme;
     final series = detail.series;
+    final stepped = _steppedUpOccurrence();
 
     return AppCard(
       padding: const EdgeInsets.all(AppSpacing.cardPadding),
@@ -285,115 +293,47 @@ class _HistoryCard extends StatelessWidget {
               style: AppTextStyles.helper,
             )
           else ...[
-            _HistoryHeader(),
-            for (final occurrence in detail.occurrences)
-              _HistoryRow(
-                occurrence: occurrence,
+            SizedBox(
+              height: _chartHeight,
+              child: PriceHistoryChart(
                 series: series,
-                isSteppedUp: series.priceChangedAt != null &&
-                    _sameDay(occurrence.bookedDate, series.priceChangedAt!),
+                occurrences: detail.occurrences,
               ),
+            ),
+            if (stepped != null) ...[
+              const SizedBox(height: AppSpacing.sm + AppSpacing.xs),
+              // The legend for the amber point on the curve, in the same pill
+              // the list row uses for the same fact.
+              Align(
+                alignment: Alignment.centerLeft,
+                child: StatusPill(
+                  key: Key('seriesOccurrenceChange-${stepped.id}'),
+                  tone: StatusPillTone.warning,
+                  label: l10n.subscriptionDetailChange(
+                    _money(series.previousAmountMinor!, series.currency, locale),
+                    _money(series.expectedAmountMinor, series.currency, locale),
+                  ),
+                ),
+              ),
+            ],
           ],
         ],
       ),
     );
   }
 
+  /// The charge the recorded price change landed on, or `null` when the series
+  /// never stepped — or when the change predates the occurrences on hand.
+  SeriesOccurrence? _steppedUpOccurrence() {
+    final changedAt = detail.series.priceChangedAt;
+    if (changedAt == null || detail.series.previousAmountMinor == null) return null;
+    return detail.occurrences
+        .where((occurrence) => _sameDay(occurrence.bookedDate, changedAt))
+        .firstOrNull;
+  }
+
   static bool _sameDay(DateTime a, DateTime b) =>
       a.year == b.year && a.month == b.month && a.day == b.day;
-}
-
-class _HistoryHeader extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
-
-    return SizedBox(
-      height: 28,
-      child: Row(
-        children: [
-          SizedBox(
-            width: 140,
-            child: Text(
-              l10n.subscriptionDetailHistoryDate.toUpperCase(),
-              style: AppTextStyles.sectionLabel,
-            ),
-          ),
-          SizedBox(
-            width: 120,
-            child: Text(
-              l10n.subscriptionDetailHistoryAmount.toUpperCase(),
-              textAlign: TextAlign.end,
-              style: AppTextStyles.sectionLabel,
-            ),
-          ),
-          const Spacer(),
-        ],
-      ),
-    );
-  }
-}
-
-class _HistoryRow extends StatelessWidget {
-  const _HistoryRow({
-    required this.occurrence,
-    required this.series,
-    required this.isSteppedUp,
-  });
-
-  final SeriesOccurrence occurrence;
-  final RecurringSeries series;
-  final bool isSteppedUp;
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
-    final locale = Localizations.localeOf(context).toString();
-    final textTheme = Theme.of(context).textTheme;
-
-    return Container(
-      key: Key('seriesOccurrence-${occurrence.id}'),
-      height: 44,
-      color: isSteppedUp ? _steppedUpRowTint : Colors.transparent,
-      child: Row(
-        children: [
-          SizedBox(
-            width: 140,
-            child: Text(
-              seriesDateFormat(locale).format(occurrence.bookedDate),
-              style: tabularNumberStyle(
-                textTheme.bodyMedium!,
-              ).copyWith(color: AppColors.textSecondary),
-            ),
-          ),
-          SizedBox(
-            width: 120,
-            child: Align(
-              alignment: Alignment.centerRight,
-              // Signed and colorized, unlike the list's expected amounts:
-              // these rows *are* transactions, money that actually left the
-              // account, so the ledger's own rule applies.
-              child: AmountText(
-                amountMinor: occurrence.amountMinor,
-                currency: occurrence.currency,
-                style: textTheme.bodyMedium,
-              ),
-            ),
-          ),
-          const Spacer(),
-          if (isSteppedUp && series.previousAmountMinor != null)
-            StatusPill(
-              key: Key('seriesOccurrenceChange-${occurrence.id}'),
-              tone: StatusPillTone.warning,
-              label: l10n.subscriptionDetailChange(
-                _money(series.previousAmountMinor!, series.currency, locale),
-                _money(series.expectedAmountMinor, series.currency, locale),
-              ),
-            ),
-        ],
-      ),
-    );
-  }
 }
 
 /// A price as the panel states one: unsigned, because it is what the

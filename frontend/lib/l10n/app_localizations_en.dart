@@ -2034,12 +2034,6 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get subscriptionDetailHistoryDate => 'Date';
-
-  @override
-  String get subscriptionDetailHistoryAmount => 'Amount';
-
-  @override
   String get subscriptionDetailHistoryEmpty =>
       'No charges linked to this payment yet.';
 
