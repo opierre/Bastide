@@ -173,7 +173,7 @@ abstract class AppLocalizations {
   /// One-line descriptor shown under the panel title in the top bar, on the imports screen.
   ///
   /// In fr, this message translates to:
-  /// **'Relevés OFX, QFX et CSV — traités sur cet ordinateur'**
+  /// **'Relevés OFX et QFX — traités sur cet ordinateur'**
   String get navImportsSubtitle;
 
   /// One-line descriptor shown under the panel title in the top bar, on the categories screen.
@@ -734,13 +734,13 @@ abstract class AppLocalizations {
   /// **'Nouvel import'**
   String get importNewTitle;
 
-  /// Label for the account selector on the imports panel.
+  /// Label for the account picker shown only when a statement could not name its own destination.
   ///
   /// In fr, this message translates to:
   /// **'Compte de destination'**
   String get importAccountLabel;
 
-  /// Shown in place of the account selector when the accounts list failed to load.
+  /// Shown when the accounts list failed to load, so the statement cannot be matched against anything.
   ///
   /// In fr, this message translates to:
   /// **'Impossible de charger vos comptes. Réessayez dans un instant.'**
@@ -749,13 +749,13 @@ abstract class AppLocalizations {
   /// Headline inside the imports drop zone.
   ///
   /// In fr, this message translates to:
-  /// **'Déposez un fichier OFX, QFX ou CSV'**
+  /// **'Déposez un fichier OFX ou QFX'**
   String get importDropZoneTitle;
 
-  /// Sub-line inside the imports drop zone, stating that a CSV opens the mapping wizard.
+  /// Sub-line inside the imports drop zone, stating that the file itself names the destination account.
   ///
   /// In fr, this message translates to:
-  /// **'ou cliquez pour parcourir — un CSV ouvre l\'assistant de correspondance'**
+  /// **'ou cliquez pour parcourir — le relevé indique lui-même son compte'**
   String get importDropZoneHint;
 
   /// Size of the staged file, shown under its name. The number is already formatted for the locale.
@@ -782,24 +782,6 @@ abstract class AppLocalizations {
   /// **'Import en cours…'**
   String get importSubmitting;
 
-  /// Primary action shown for a CSV with no saved mapping — it opens the wizard rather than importing straight away.
-  ///
-  /// In fr, this message translates to:
-  /// **'Configurer et importer'**
-  String get importOpenWizard;
-
-  /// Banner telling the user a saved CSV template will be reused instead of the wizard.
-  ///
-  /// In fr, this message translates to:
-  /// **'Format CSV mémorisé pour {bank} — il sera réutilisé pour ce fichier.'**
-  String importTemplateReuse(String bank);
-
-  /// Action that re-opens the CSV wizard even though a saved template exists.
-  ///
-  /// In fr, this message translates to:
-  /// **'Reconfigurer'**
-  String get importReconfigureTemplate;
-
   /// Banner confirming the statement's account block matched an existing account, which has been selected as the destination.
   ///
   /// In fr, this message translates to:
@@ -823,6 +805,18 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Créer ce compte'**
   String get importCreateDetectedAccount;
+
+  /// Placeholder option in the account picker shown when a statement could not name its own destination — the unanswered state.
+  ///
+  /// In fr, this message translates to:
+  /// **'Choisissez un compte'**
+  String get importChooseAccount;
+
+  /// Warning shown when the staged file declares no account block at all, so the user has to pick the destination from every account.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ce fichier n\'indique aucun compte — choisissez la destination.'**
+  String get importUnreadableAccount;
 
   /// Title of the card summarising the import that just ran.
   ///
@@ -962,240 +956,6 @@ abstract class AppLocalizations {
   /// **'Réessayer'**
   String get importRetry;
 
-  /// Title of the one-time CSV column-mapping wizard modal.
-  ///
-  /// In fr, this message translates to:
-  /// **'Assistant CSV'**
-  String get csvWizardTitle;
-
-  /// Label of the wizard's first step, where the file's format is described.
-  ///
-  /// In fr, this message translates to:
-  /// **'Format'**
-  String get csvWizardStepFormat;
-
-  /// Label of the wizard's second step, where columns are mapped and previewed.
-  ///
-  /// In fr, this message translates to:
-  /// **'Colonnes & aperçu'**
-  String get csvWizardStepColumns;
-
-  /// Cancel action in the CSV wizard footer.
-  ///
-  /// In fr, this message translates to:
-  /// **'Annuler'**
-  String get csvWizardCancel;
-
-  /// Action moving from the wizard's format step to its columns step.
-  ///
-  /// In fr, this message translates to:
-  /// **'Continuer'**
-  String get csvWizardNext;
-
-  /// Action that saves the mapping and imports the file.
-  ///
-  /// In fr, this message translates to:
-  /// **'Valider et importer'**
-  String get csvWizardConfirm;
-
-  /// Label replacing the wizard's confirm button text while saving and importing.
-  ///
-  /// In fr, this message translates to:
-  /// **'Import en cours…'**
-  String get csvWizardConfirming;
-
-  /// Label for the bank name the CSV mapping is remembered under.
-  ///
-  /// In fr, this message translates to:
-  /// **'Banque'**
-  String get csvWizardBankLabel;
-
-  /// Helper under the bank name field, stating that the mapping is saved for reuse.
-  ///
-  /// In fr, this message translates to:
-  /// **'Ce format sera mémorisé sous ce nom et réutilisé à chaque import de cette banque.'**
-  String get csvWizardBankHelper;
-
-  /// Label for the CSV column separator selector.
-  ///
-  /// In fr, this message translates to:
-  /// **'Délimiteur'**
-  String get csvWizardDelimiterLabel;
-
-  /// Delimiter option: semicolon, the common French bank export separator.
-  ///
-  /// In fr, this message translates to:
-  /// **'Point-virgule ( ; )'**
-  String get csvDelimiterSemicolon;
-
-  /// Delimiter option: comma.
-  ///
-  /// In fr, this message translates to:
-  /// **'Virgule ( , )'**
-  String get csvDelimiterComma;
-
-  /// Delimiter option: tab character.
-  ///
-  /// In fr, this message translates to:
-  /// **'Tabulation'**
-  String get csvDelimiterTab;
-
-  /// Delimiter option: pipe character.
-  ///
-  /// In fr, this message translates to:
-  /// **'Barre verticale ( | )'**
-  String get csvDelimiterPipe;
-
-  /// Label for the CSV character encoding selector.
-  ///
-  /// In fr, this message translates to:
-  /// **'Encodage'**
-  String get csvWizardEncodingLabel;
-
-  /// Label for the CSV date format selector.
-  ///
-  /// In fr, this message translates to:
-  /// **'Format de date'**
-  String get csvWizardDateFormatLabel;
-
-  /// Label for the decimal separator control.
-  ///
-  /// In fr, this message translates to:
-  /// **'Séparateur décimal'**
-  String get csvWizardDecimalLabel;
-
-  /// Decimal separator option: comma.
-  ///
-  /// In fr, this message translates to:
-  /// **'Virgule ( , )'**
-  String get csvDecimalComma;
-
-  /// Decimal separator option: period.
-  ///
-  /// In fr, this message translates to:
-  /// **'Point ( . )'**
-  String get csvDecimalPeriod;
-
-  /// Label for the control choosing how the file encodes amount direction.
-  ///
-  /// In fr, this message translates to:
-  /// **'Montants'**
-  String get csvWizardAmountsLabel;
-
-  /// Amount strategy option: a single signed amount column.
-  ///
-  /// In fr, this message translates to:
-  /// **'Signé'**
-  String get csvAmountStrategySigned;
-
-  /// Amount strategy option: separate debit and credit columns.
-  ///
-  /// In fr, this message translates to:
-  /// **'Débit / Crédit'**
-  String get csvAmountStrategyDebitCredit;
-
-  /// Label for the count of lines to skip before the header row.
-  ///
-  /// In fr, this message translates to:
-  /// **'Lignes à ignorer'**
-  String get csvWizardHeaderOffsetLabel;
-
-  /// Helper clarifying that the skipped lines precede the header row.
-  ///
-  /// In fr, this message translates to:
-  /// **'Avant la ligne d\'en-tête.'**
-  String get csvWizardHeaderOffsetHelper;
-
-  /// Instruction above the column mapping rows in the CSV wizard.
-  ///
-  /// In fr, this message translates to:
-  /// **'Indiquez le nom de la colonne du fichier (ou son numéro, à partir de 0) pour chaque information.'**
-  String get csvWizardColumnsHint;
-
-  /// Placeholder inside a column mapping input.
-  ///
-  /// In fr, this message translates to:
-  /// **'Nom ou numéro de colonne'**
-  String get csvWizardColumnHint;
-
-  /// Marker beside a canonical field that does not have to be mapped.
-  ///
-  /// In fr, this message translates to:
-  /// **'facultatif'**
-  String get csvWizardColumnOptional;
-
-  /// Canonical field name: the date the transaction was booked.
-  ///
-  /// In fr, this message translates to:
-  /// **'Date d\'opération'**
-  String get csvColumnBookedDate;
-
-  /// Canonical field name: the value date.
-  ///
-  /// In fr, this message translates to:
-  /// **'Date de valeur'**
-  String get csvColumnValueDate;
-
-  /// Canonical field name: the raw description from the bank.
-  ///
-  /// In fr, this message translates to:
-  /// **'Libellé'**
-  String get csvColumnDescription;
-
-  /// Canonical field name: the signed amount.
-  ///
-  /// In fr, this message translates to:
-  /// **'Montant'**
-  String get csvColumnAmount;
-
-  /// Canonical field name: the debit column, used by the debit/credit layout.
-  ///
-  /// In fr, this message translates to:
-  /// **'Débit'**
-  String get csvColumnDebit;
-
-  /// Canonical field name: the credit column, used by the debit/credit layout.
-  ///
-  /// In fr, this message translates to:
-  /// **'Crédit'**
-  String get csvColumnCredit;
-
-  /// Section label above the live preview of parsed sample rows.
-  ///
-  /// In fr, this message translates to:
-  /// **'Aperçu'**
-  String get csvWizardPreviewTitle;
-
-  /// Placeholder shown before the mapping is complete enough to preview.
-  ///
-  /// In fr, this message translates to:
-  /// **'Renseignez les colonnes obligatoires pour voir un aperçu.'**
-  String get csvWizardPreviewPending;
-
-  /// Shown when the preview parsed the file but found no rows.
-  ///
-  /// In fr, this message translates to:
-  /// **'Aucune ligne lisible avec ce paramétrage.'**
-  String get csvWizardPreviewEmpty;
-
-  /// Preview table column header for the booked date.
-  ///
-  /// In fr, this message translates to:
-  /// **'Date'**
-  String get csvPreviewDateHeader;
-
-  /// Preview table column header for the raw description.
-  ///
-  /// In fr, this message translates to:
-  /// **'Libellé'**
-  String get csvPreviewDescriptionHeader;
-
-  /// Preview table column header for the parsed amount.
-  ///
-  /// In fr, this message translates to:
-  /// **'Montant'**
-  String get csvPreviewAmountHeader;
-
   /// Localized message for the backend's ACCOUNT_NOT_FOUND error code on the imports panel.
   ///
   /// In fr, this message translates to:
@@ -1207,18 +967,6 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Import introuvable.'**
   String get importErrorBatchNotFound;
-
-  /// Localized message for the backend's CSV_TEMPLATE_NOT_FOUND error code.
-  ///
-  /// In fr, this message translates to:
-  /// **'Format CSV introuvable — relancez l\'assistant.'**
-  String get importErrorTemplateNotFound;
-
-  /// Localized message for the backend's CSV_TEMPLATE_INVALID and VALIDATION_ERROR codes.
-  ///
-  /// In fr, this message translates to:
-  /// **'Ce paramétrage ne correspond pas au fichier — ajustez les colonnes ci-dessus.'**
-  String get importErrorTemplateInvalid;
 
   /// Fallback localized message for unrecognized or network errors on the imports panel.
   ///

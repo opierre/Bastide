@@ -84,8 +84,8 @@ def _insert_transaction(
     batch = ImportBatch(
         user_id=user_id,
         account_id=account_id,
-        source_format="csv",
-        file_name="test.csv",
+        source_format="ofx",
+        file_name="test.ofx",
         file_hash=f"hash-{description_clean}-{amount_minor}",
         period_start=date(2026, 1, 1),
         period_end=date(2026, 1, 1),

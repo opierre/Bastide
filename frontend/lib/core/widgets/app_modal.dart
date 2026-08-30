@@ -7,7 +7,7 @@ import '../theme/tokens.dart';
 ///
 /// Replaces [AlertDialog], whose padding, title style and action layout all
 /// drift from the spec. Each panel spec names its own width (480 for the account
-/// form, 520 for the rule editor, 780 for the CSV wizard), so that is the one
+/// form, 520 for the rule editor), so that is the one
 /// required dimension.
 class AppModal extends StatelessWidget {
   const AppModal({

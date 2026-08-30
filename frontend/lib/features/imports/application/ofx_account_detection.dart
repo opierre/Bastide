@@ -9,16 +9,21 @@ import 'imports_controller.dart';
 
 /// What the staged statement says about its account, resolved against the
 /// accounts the user already has.
+///
+/// This is the panel's only source of a destination: there is no account
+/// selector to fall back on, so every case here either names the account
+/// outright or says exactly what the user still has to settle.
 sealed class OfxAccountMatch {
-  const OfxAccountMatch(this.info);
+  const OfxAccountMatch();
+}
+
+/// One account is clearly the destination — the panel imports into it, with
+/// nothing left for the user to settle.
+class OfxAccountMatched extends OfxAccountMatch {
+  const OfxAccountMatched(this.info, this.account);
 
   /// The account block read from the file.
   final OfxAccountInfo info;
-}
-
-/// One account is clearly the destination — the panel selects it.
-class OfxAccountMatched extends OfxAccountMatch {
-  const OfxAccountMatched(super.info, this.account);
 
   final Account account;
 }
@@ -26,16 +31,33 @@ class OfxAccountMatched extends OfxAccountMatch {
 /// The file points at a bank the user has several accounts with, and nothing
 /// in the file separates them. We refuse to guess: creating an account here
 /// would duplicate one, and picking one could file transactions in the wrong
-/// place, so the user chooses.
+/// place, so the panel asks — over these candidates only.
 class OfxAccountAmbiguous extends OfxAccountMatch {
-  const OfxAccountAmbiguous(super.info, this.candidates);
+  const OfxAccountAmbiguous(this.info, this.candidates);
+
+  /// The account block read from the file.
+  final OfxAccountInfo info;
 
   final List<Account> candidates;
 }
 
 /// No account looks like this statement's — offer to create it.
 class OfxAccountUnmatched extends OfxAccountMatch {
-  const OfxAccountUnmatched(super.info);
+  const OfxAccountUnmatched(this.info);
+
+  /// The account block read from the file.
+  final OfxAccountInfo info;
+}
+
+/// The file declares no account we can read — not OFX at all, or an exporter
+/// that omits `ACCTID`.
+///
+/// Nothing can be matched or proposed from a file that names no account, so
+/// this is the one case where the user still picks from the full list. It is a
+/// fallback for a malformed file, not the normal path: a well-formed statement
+/// always lands in one of the cases above.
+class OfxAccountUnreadable extends OfxAccountMatch {
+  const OfxAccountUnreadable();
 }
 
 /// Casefolded, punctuation-free form used to compare bank names typed by hand
@@ -118,24 +140,26 @@ OfxAccountMatch matchOfxAccount(OfxAccountInfo info, List<Account> accounts) {
       : OfxAccountAmbiguous(info, candidates);
 }
 
-/// The verdict for the staged file, or `null` when there is none to show — no
-/// file staged, a CSV (which carries no account block), or an OFX we couldn't
-/// read an account out of.
+/// The verdict for the staged file, or `null` when there is no file staged to
+/// have a verdict about.
+///
+/// Since the panel dropped its destination selector, this is what decides where
+/// an import goes: [OfxAccountMatched] carries the account, and every other
+/// case is a question the panel has to put to the user before it can import.
 class OfxAccountDetection extends Notifier<OfxAccountMatch?> {
   @override
   OfxAccountMatch? build() => null;
 
   /// Reads [file] and resolves it against [accounts]. Returns the verdict so
-  /// the caller can act on it (select the account, or offer to create it)
+  /// the caller can act on it (import into the account, or offer to create it)
   /// without re-reading state it just wrote.
   ///
   /// Asynchronous because a statement that names no bank still carries its bank
   /// code, and the backend's directory is what turns that code into a name —
   /// which both the matcher and the account it proposes are better for.
-  Future<OfxAccountMatch?> detect(PickedImportFile file, List<Account> accounts) async {
-    if (file.needsCsvTemplate) return state = null;
+  Future<OfxAccountMatch> detect(PickedImportFile file, List<Account> accounts) async {
     var info = parseOfxAccountInfo(file.bytes);
-    if (info == null) return state = null;
+    if (info == null) return state = const OfxAccountUnreadable();
 
     // Only worth asking when the file didn't already name its bank.
     final bankId = info.bankId;

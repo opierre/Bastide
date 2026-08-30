@@ -21,15 +21,17 @@ import '../../accounts/presentation/account_form.dart';
 import '../../accounts/presentation/account_type_label.dart';
 import '../application/imports_controller.dart';
 import '../application/ofx_account_detection.dart';
-import '../domain/csv_template.dart';
 import '../domain/import_batch.dart';
 import '../domain/ofx_account_info.dart';
-import 'csv_mapping_wizard.dart';
 import 'import_error_localizer.dart';
 import 'import_history.dart';
 
-/// The imports panel: stage a file against an account, import it, and read back
-/// what every past import did.
+/// The imports panel: stage a statement, import it, and read back what every
+/// past import did.
+///
+/// There is no destination field. An OFX file carries its own account block, so
+/// the panel reads the destination out of the file and only asks when the file
+/// leaves the question genuinely open — see [OfxAccountMatch].
 ///
 /// The account list comes from the accounts feature's controller provider — its
 /// published surface, not its internals — because "which account does this
@@ -47,16 +49,17 @@ class _ImportsScreenState extends ConsumerState<ImportsScreen> {
   bool _isImporting = false;
   String? _errorText;
 
-  /// Set when the user explicitly chooses to re-run the wizard for a bank that
-  /// already has a saved template. Cleared with the staged file.
-  bool _forceWizard = false;
-
-  /// The destination account, resolving the same way the selector renders it:
-  /// the explicit choice when there is one, otherwise the first account — which
-  /// is what the dropdown shows before the user touches it.
-  Account? get _selectedAccount => resolveImportAccount(
+  /// The account this import will land in.
+  ///
+  /// Read from the statement itself, falling back to the account the user
+  /// picked only when the file couldn't name one (see
+  /// [resolveImportDestination]). There is deliberately no default: with the
+  /// destination selector gone, an unresolved destination leaves the import
+  /// button disabled rather than filing the statement somewhere nobody chose.
+  Account? get _destination => resolveImportDestination(
+    ref.read(ofxAccountDetectionProvider),
+    ref.read(chosenImportAccountProvider),
     ref.read(accountsControllerProvider).value ?? const <Account>[],
-    ref.read(selectedImportAccountProvider),
   );
 
   Future<void> _pickFile() async {
@@ -65,30 +68,27 @@ class _ImportsScreenState extends ConsumerState<ImportsScreen> {
   }
 
   Future<void> _stage(PickedImportFile file) async {
-    setState(() {
-      _errorText = null;
-      _forceWizard = false;
-    });
+    setState(() => _errorText = null);
+    // A choice made for the previous statement says nothing about this one.
+    ref.read(chosenImportAccountProvider.notifier).clear();
     ref.read(selectedImportFileProvider.notifier).select(file);
     await _detectAccount(file);
   }
 
   void _clearFile() {
-    setState(() {
-      _errorText = null;
-      _forceWizard = false;
-    });
+    setState(() => _errorText = null);
     ref.read(selectedImportFileProvider.notifier).clear();
     ref.read(ofxAccountDetectionProvider.notifier).clear();
+    ref.read(chosenImportAccountProvider.notifier).clear();
   }
 
   /// Points the import at the account the statement itself names.
   ///
-  /// An OFX file carries its own account block, so the user shouldn't have to
-  /// re-state which account a statement is for — and shouldn't be able to file
-  /// it against the wrong one by leaving the selector where it was. When no
-  /// account matches, the statement is describing an account the user hasn't
-  /// created yet, so we offer to create it from what the file says.
+  /// An OFX file carries its own account block, so the panel reads the
+  /// destination out of the file rather than asking for it. When no account
+  /// matches, the statement is describing an account the user hasn't created
+  /// yet, so we offer to create it from what the file says; when the file
+  /// can't settle it alone, `_DetectedAccountNotice` asks.
   Future<void> _detectAccount(PickedImportFile file) async {
     final List<Account> accounts;
     try {
@@ -108,11 +108,12 @@ class _ImportsScreenState extends ConsumerState<ImportsScreen> {
     if (!mounted || ref.read(selectedImportFileProvider) != file) return;
 
     switch (match) {
-      case OfxAccountMatched(:final account):
-        ref.read(selectedImportAccountProvider.notifier).select(account.id);
       case OfxAccountUnmatched(:final info):
         await _createDetectedAccount(info);
-      case OfxAccountAmbiguous() || null:
+      // Matched needs nothing — the verdict *is* the destination. The two
+      // unresolved cases are put to the user by `_DetectedAccountNotice`
+      // rather than answered here.
+      case OfxAccountMatched() || OfxAccountAmbiguous() || OfxAccountUnreadable():
         break;
     }
   }
@@ -124,33 +125,15 @@ class _ImportsScreenState extends ConsumerState<ImportsScreen> {
     final l10n = AppLocalizations.of(context)!;
     final created = await showAccountForm(context, prefill: _prefillFrom(info, l10n));
     if (created == null || !mounted) return;
-    ref.read(selectedImportAccountProvider.notifier).select(created.id);
     ref.read(ofxAccountDetectionProvider.notifier).resolveTo(info, created);
   }
 
-  /// Routes the staged file: OFX/QFX import in one step, CSV either through the
-  /// saved template for that bank or through the mapping wizard.
+  /// Uploads the staged statement into the destination the file resolved to.
   Future<void> _import() async {
     final l10n = AppLocalizations.of(context)!;
-    final account = _selectedAccount;
+    final account = _destination;
     final file = ref.read(selectedImportFileProvider);
     if (account == null || file == null) return;
-
-    final template = file.needsCsvTemplate && !_forceWizard
-        ? ref.read(csvTemplatesControllerProvider.notifier).templateFor(account.institution)
-        : null;
-
-    if (file.needsCsvTemplate && template == null) {
-      final batch = await showCsvMappingWizard(
-        context,
-        accountId: account.id,
-        institution: account.institution,
-        file: file,
-        currency: account.currency,
-      );
-      if (batch != null) _finish(batch);
-      return;
-    }
 
     setState(() {
       _isImporting = true;
@@ -160,11 +143,7 @@ class _ImportsScreenState extends ConsumerState<ImportsScreen> {
     try {
       final batch = await ref
           .read(importsControllerProvider.notifier)
-          .importFile(
-            accountId: account.id,
-            file: file,
-            csvTemplateId: template?.id,
-          );
+          .importFile(accountId: account.id, file: file);
       _finish(batch);
     } catch (error) {
       if (!mounted) return;
@@ -182,7 +161,7 @@ class _ImportsScreenState extends ConsumerState<ImportsScreen> {
     ref.read(lastImportResultProvider.notifier).set(batch);
     ref.read(selectedImportFileProvider.notifier).clear();
     ref.read(ofxAccountDetectionProvider.notifier).clear();
-    setState(() => _forceWizard = false);
+    ref.read(chosenImportAccountProvider.notifier).clear();
   }
 
   @override
@@ -207,13 +186,11 @@ class _ImportsScreenState extends ConsumerState<ImportsScreen> {
                   child: _NewImportCard(
                     isImporting: _isImporting,
                     errorText: _errorText,
-                    forceWizard: _forceWizard,
                     onPickFile: _pickFile,
                     onDropFile: _stage,
                     onClearFile: _clearFile,
                     onImport: _import,
                     onCreateDetectedAccount: _createDetectedAccount,
-                    onReconfigure: () => setState(() => _forceWizard = true),
                   ),
                 ),
                 if (lastResult != null) ...[
@@ -261,41 +238,49 @@ AccountPrefill _prefillFrom(OfxAccountInfo info, AppLocalizations l10n) {
 String _detectedAccountLabel(OfxAccountInfo info) =>
     [?info.institutionLabel, info.maskedNumber].join(' ');
 
-/// Resolves the selected account id against the loaded list, falling back to
-/// the first account so the common single-account case needs no selection at
-/// all. Shared by the selector, the staged-file row and the import action, so
-/// what is shown and what is imported into can't diverge.
-Account? resolveImportAccount(List<Account> accounts, String? selectedId) {
-  if (accounts.isEmpty) return null;
+/// The account an import will land in: the one the statement resolved to, else
+/// the one the user picked to settle a statement that couldn't resolve itself.
+///
+/// `null` means nothing has settled it yet, and the panel must not import.
+/// Deliberately without a "first account" fallback: the panel no longer carries
+/// a destination selector, so a default here would file a statement against an
+/// account nobody chose and nothing on screen would say so.
+///
+/// Pure so the rule is testable on its own, and shared by the staged-file row
+/// and the import action so what is shown and what is imported into can't
+/// diverge.
+Account? resolveImportDestination(
+  OfxAccountMatch? match,
+  String? chosenId,
+  List<Account> accounts,
+) {
+  if (match is OfxAccountMatched) return match.account;
+  if (chosenId == null) return null;
   for (final account in accounts) {
-    if (account.id == selectedId) return account;
+    if (account.id == chosenId) return account;
   }
-  return accounts.first;
+  return null;
 }
 
-/// Region A — destination account plus the drop zone.
+/// Region A — the drop zone and what the staged statement says about itself.
 class _NewImportCard extends ConsumerWidget {
   const _NewImportCard({
     required this.isImporting,
     required this.errorText,
-    required this.forceWizard,
     required this.onPickFile,
     required this.onDropFile,
     required this.onClearFile,
     required this.onImport,
     required this.onCreateDetectedAccount,
-    required this.onReconfigure,
   });
 
   final bool isImporting;
   final String? errorText;
-  final bool forceWizard;
   final VoidCallback onPickFile;
   final ValueChanged<PickedImportFile> onDropFile;
   final VoidCallback onClearFile;
   final VoidCallback onImport;
   final ValueChanged<OfxAccountInfo> onCreateDetectedAccount;
-  final VoidCallback onReconfigure;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -309,19 +294,16 @@ class _NewImportCard extends ConsumerWidget {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Text(l10n.importNewTitle, style: Theme.of(context).textTheme.titleMedium),
-          const SizedBox(height: AppSpacing.md),
-          switch (accounts) {
-            // Nothing to select from, and nothing to say: a statement now
-            // proposes the account it belongs to, so having no accounts yet is
-            // not something the user has to fix before dropping a file.
-            AsyncData(:final value) when value.isEmpty => const SizedBox.shrink(),
-            AsyncData(:final value) => _AccountSelect(accounts: value),
-            AsyncError() => InlineBanner(
+          // No destination field: the statement names its own account. All that
+          // is left to say up here is when we couldn't even load the accounts to
+          // match it against — without which detection stays silent.
+          if (accounts is AsyncError) ...[
+            const SizedBox(height: AppSpacing.md),
+            InlineBanner(
               key: const Key('importAccountsErrorBanner'),
               message: l10n.importAccountsUnavailable,
             ),
-            _ => const SkeletonBlock(height: 44, radius: AppRadii.md),
-          },
+          ],
           _DetectedAccountNotice(
             isImporting: isImporting,
             onCreateAccount: onCreateDetectedAccount,
@@ -333,10 +315,8 @@ class _NewImportCard extends ConsumerWidget {
             _StagedFile(
               file: file,
               isImporting: isImporting,
-              forceWizard: forceWizard,
               onClear: onClearFile,
               onImport: onImport,
-              onReconfigure: onReconfigure,
             ),
           if (errorText != null) ...[
             const SizedBox(height: AppSpacing.md),
@@ -348,11 +328,10 @@ class _NewImportCard extends ConsumerWidget {
   }
 }
 
-/// What the staged statement says about its own account, sitting right under
-/// the destination selector it either settled or is questioning.
+/// What the staged statement says about its own account — and, when the file
+/// can't answer that on its own, the one control that asks the user.
 ///
-/// Renders nothing at all when there is nothing to say — no file staged, a CSV
-/// (which declares no account), or an OFX whose header we couldn't read.
+/// Renders nothing at all when there is nothing to say (no file staged).
 class _DetectedAccountNotice extends ConsumerWidget {
   const _DetectedAccountNotice({
     required this.isImporting,
@@ -376,10 +355,15 @@ class _DetectedAccountNotice extends ConsumerWidget {
           message: l10n.importDetectedAccount(account.name),
           tone: BannerTone.success,
         ),
-        OfxAccountAmbiguous(:final info) => InlineBanner(
-          key: const Key('importAmbiguousAccountBanner'),
+        // The file names a bank the user has several accounts with. Only those
+        // candidates are offered: the rest of the list is already ruled out by
+        // the file, and showing it would invite filing the statement wrongly.
+        OfxAccountAmbiguous(:final info, :final candidates) => _AccountChoice(
+          bannerKey: const Key('importAmbiguousAccountBanner'),
+          selectKey: const Key('importAmbiguousAccountField'),
           message: l10n.importDetectedAccountAmbiguous(_detectedAccountLabel(info)),
-          tone: BannerTone.warning,
+          candidates: candidates,
+          isImporting: isImporting,
         ),
         OfxAccountUnmatched(:final info) => Column(
           crossAxisAlignment: CrossAxisAlignment.end,
@@ -396,40 +380,90 @@ class _DetectedAccountNotice extends ConsumerWidget {
             ),
           ],
         ),
+        OfxAccountUnreadable() => _UnreadableAccountChoice(isImporting: isImporting),
       },
     );
   }
 }
 
-class _AccountSelect extends ConsumerWidget {
-  const _AccountSelect({required this.accounts});
+/// The fallback for a file that declares no account at all: nothing can be
+/// matched or proposed from it, so the user picks from every account they have.
+///
+/// Its own widget because it is the only case that needs the full account list,
+/// which nothing in the verdict carries.
+class _UnreadableAccountChoice extends ConsumerWidget {
+  const _UnreadableAccountChoice({required this.isImporting});
 
-  final List<Account> accounts;
+  final bool isImporting;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context)!;
-    final selectedId = ref.watch(selectedImportAccountProvider);
-    // Never null here: the panel only builds the selector once there is at
-    // least one account, and the resolver falls back to the first of them.
-    final value = resolveImportAccount(accounts, selectedId)!.id;
+    final accounts = ref.watch(accountsControllerProvider).value ?? const <Account>[];
 
-    return LabeledField(
-      label: l10n.importAccountLabel,
-      child: AppSelect<String>(
-        key: const Key('importAccountField'),
-        value: value,
-        items: [
-          for (final account in accounts)
-            AppSelectItem(
-              value: account.id,
-              label: account.name,
-              leading: InstitutionAvatar(name: account.institution, size: 24),
+    return _AccountChoice(
+      bannerKey: const Key('importUnreadableAccountBanner'),
+      selectKey: const Key('importUnreadableAccountField'),
+      message: l10n.importUnreadableAccount,
+      candidates: accounts,
+      isImporting: isImporting,
+    );
+  }
+}
+
+/// A warning plus a picker over [candidates] — the panel's only manual account
+/// choice, shown only when the statement could not name its own destination.
+class _AccountChoice extends ConsumerWidget {
+  const _AccountChoice({
+    required this.bannerKey,
+    required this.selectKey,
+    required this.message,
+    required this.candidates,
+    required this.isImporting,
+  });
+
+  final Key bannerKey;
+  final Key selectKey;
+  final String message;
+  final List<Account> candidates;
+  final bool isImporting;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
+    final chosenId = ref.watch(chosenImportAccountProvider);
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        InlineBanner(key: bannerKey, message: message, tone: BannerTone.warning),
+        if (candidates.isNotEmpty) ...[
+          const SizedBox(height: AppSpacing.sm),
+          LabeledField(
+            label: l10n.importAccountLabel,
+            child: AppSelect<String?>(
+              key: selectKey,
+              value: chosenId,
+              items: [
+                // Carried as a real option so the field reads as an unanswered
+                // question rather than as a blank well. Re-picking it simply
+                // un-answers it, which disables the import again.
+                AppSelectItem(value: null, label: l10n.importChooseAccount),
+                for (final account in candidates)
+                  AppSelectItem(
+                    value: account.id,
+                    label: account.name,
+                    leading: InstitutionAvatar(name: account.institution, size: 24),
+                  ),
+              ],
+              onChanged: isImporting
+                  ? (_) {}
+                  : (selected) =>
+                        ref.read(chosenImportAccountProvider.notifier).select(selected),
             ),
+          ),
         ],
-        onChanged: (selected) =>
-            ref.read(selectedImportAccountProvider.notifier).select(selected),
-      ),
+      ],
     );
   }
 }
@@ -513,41 +547,27 @@ class _StagedFile extends ConsumerWidget {
   const _StagedFile({
     required this.file,
     required this.isImporting,
-    required this.forceWizard,
     required this.onClear,
     required this.onImport,
-    required this.onReconfigure,
   });
 
   final PickedImportFile file;
   final bool isImporting;
-  final bool forceWizard;
   final VoidCallback onClear;
   final VoidCallback onImport;
-  final VoidCallback onReconfigure;
-
-  /// The saved mapping that would be reused for this file, if any.
-  CsvTemplate? _reusableTemplate(WidgetRef ref) {
-    if (!file.needsCsvTemplate || forceWizard) return null;
-    final accounts = ref.watch(accountsControllerProvider).value ?? const <Account>[];
-    final account = resolveImportAccount(
-      accounts,
-      ref.watch(selectedImportAccountProvider),
-    );
-    if (account == null) return null;
-    // Watched so a template saved by the wizard is picked up immediately.
-    ref.watch(csvTemplatesControllerProvider);
-    return ref
-        .read(csvTemplatesControllerProvider.notifier)
-        .templateFor(account.institution);
-  }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context)!;
     final locale = Localizations.localeOf(context).toString();
-    final template = _reusableTemplate(ref);
     final format = ImportFormat.fromWire(file.extension);
+    // Watched, not read: the button turns live the moment detection lands or
+    // the user answers the picker above.
+    final destination = resolveImportDestination(
+      ref.watch(ofxAccountDetectionProvider),
+      ref.watch(chosenImportAccountProvider),
+      ref.watch(accountsControllerProvider).value ?? const <Account>[],
+    );
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -594,33 +614,19 @@ class _StagedFile extends ConsumerWidget {
             ),
           ),
         ),
-        if (template != null) ...[
-          const SizedBox(height: AppSpacing.sm + AppSpacing.xs),
-          InlineBanner(
-            key: const Key('importTemplateReuseBanner'),
-            message: l10n.importTemplateReuse(template.bankName),
-            tone: BannerTone.info,
-          ),
-        ],
         const SizedBox(height: AppSpacing.md),
         Row(
           mainAxisAlignment: MainAxisAlignment.end,
           children: [
-            if (template != null)
-              TextButton(
-                key: const Key('importReconfigureButton'),
-                onPressed: isImporting ? null : onReconfigure,
-                child: Text(l10n.importReconfigureTemplate),
-              ),
-            const SizedBox(width: AppSpacing.sm),
             PrimaryButton(
               key: const Key('importSubmitButton'),
-              label: file.needsCsvTemplate && template == null
-                  ? l10n.importOpenWizard
-                  : l10n.importSubmit,
+              label: l10n.importSubmit,
               loadingLabel: l10n.importSubmitting,
               isLoading: isImporting,
-              onPressed: onImport,
+              // Disabled until something has named the destination. The notice
+              // above always says what is missing, so this never reads as an
+              // unexplained dead button.
+              onPressed: destination == null ? null : onImport,
             ),
           ],
         ),

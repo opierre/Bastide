@@ -97,9 +97,10 @@ class AccountService:
         """Patch mutable fields (name, type, institution, ofx_account_id, opening_balance_minor).
 
         `opening_balance_minor` is the manual escape hatch: imports derive it from a
-        statement automatically (see the imports service), but a CSV-only account never
-        gets that, and a bad first derivation needs a way back. Shifting it keeps the
-        cache and every existing snapshot consistent rather than just patching the field.
+        statement automatically (see the imports service), but a statement without a
+        `LEDGERBAL` never yields one, and a bad first derivation needs a way back. Shifting
+        it keeps the cache and every existing snapshot consistent rather than just patching
+        the field.
 
         Raises:
             AccountNotFoundError: no such account, or it belongs to another user.

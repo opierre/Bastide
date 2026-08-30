@@ -312,8 +312,8 @@ def _seed(db_session: Session) -> tuple[str, str, str]:
     batch = ImportBatch(
         user_id=user.id,
         account_id=account.id,
-        source_format="csv",
-        file_name="test.csv",
+        source_format="ofx",
+        file_name="test.ofx",
         file_hash="hash",
         period_start=date(2026, 1, 1),
         period_end=date(2026, 1, 31),

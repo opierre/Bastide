@@ -122,7 +122,7 @@ class _FakeBanksRepository extends BanksRepository {
 }
 
 /// Runs [detect] against a container wired to [banks].
-Future<OfxAccountMatch?> _detect(
+Future<OfxAccountMatch> _detect(
   String ofx,
   List<Account> accounts,
   _FakeBanksRepository banks,
@@ -284,7 +284,7 @@ void main() {
 
       expect(banks.lookups, ['13306']);
       expect(match, isA<OfxAccountUnmatched>());
-      expect(match!.info.institutionLabel, 'Crédit Agricole');
+      expect((match as OfxAccountUnmatched).info.institutionLabel, 'Crédit Agricole');
     });
 
     test('the resolved bank matches an account the user typed by name', () async {
@@ -301,7 +301,27 @@ void main() {
 
       final match = await _detect(_bankCodeOnlySgml, const [], banks);
 
-      expect(match!.info.institutionLabel, '13306');
+      expect((match as OfxAccountUnmatched).info.institutionLabel, '13306');
+    });
+
+    test('a file with no readable account block is a question, not a silence', () async {
+      // With no destination selector left, "we could not read this" has to be a
+      // verdict the panel can act on rather than an absent one it ignores.
+      final banks = _FakeBanksRepository(const {});
+      final container = ProviderContainer(
+        overrides: [banksRepositoryProvider.overrideWithValue(banks)],
+      );
+      addTearDown(container.dispose);
+
+      final match = await container
+          .read(ofxAccountDetectionProvider.notifier)
+          .detect(
+            const PickedImportFile(name: 'releve.ofx', bytes: [1, 2, 3]),
+            [_account()],
+          );
+
+      expect(match, isA<OfxAccountUnreadable>());
+      expect(container.read(ofxAccountDetectionProvider), isA<OfxAccountUnreadable>());
     });
 
     test('a file that names its bank is not looked up at all', () async {

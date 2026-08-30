@@ -15,7 +15,7 @@ class Transaction(Base):
 
     Dedup: unique on ``(account_id, fitid)`` when ``fitid`` is present (NULLs are distinct
     under SQL unique semantics, so multiple fitid-less rows are still allowed). Rows without a
-    ``fitid`` (CSV imports) are deduped by ``dedup_hash`` in the import service instead of a DB
+    ``fitid`` are deduped by ``dedup_hash`` in the import service instead of a DB
     constraint, since the hash alone can legitimately collide between two real transactions with
     a fitid — see the database skill.
     """

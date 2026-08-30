@@ -68,8 +68,8 @@ def _insert_subscription(
     batch = ImportBatch(
         user_id="unused",
         account_id=account_id,
-        source_format="csv",
-        file_name="test.csv",
+        source_format="ofx",
+        file_name="test.ofx",
         file_hash=f"hash-{account_id}-{label}",
         period_start=START,
         period_end=START + timedelta(days=max(offsets)),

@@ -49,8 +49,7 @@ class ApiClient {
     return _send('DELETE', path);
   }
 
-  /// Uploads a file alongside flat form fields (`POST /imports`,
-  /// `POST /csv-templates/preview`).
+  /// Uploads a file alongside flat form fields (`POST /imports`).
   ///
   /// Multipart rather than JSON because the backend takes the statement file as
   /// an `UploadFile` — see `PROJECT.md` §5. The `Content-Type` header is left to

@@ -45,8 +45,8 @@ class AccountUpdate(BaseModel):
     `ofx_account_id` is patchable so an account created before its first import can be
     bound to the id its statements carry. `opening_balance_minor` is a manual correction —
     imports derive it automatically from a statement's first `LEDGERBAL` where possible,
-    but a CSV-only account never gets that, so this is the escape hatch for it (and for
-    fixing a bad derivation).
+    but a statement without a `LEDGERBAL` never gives one, so this is the escape hatch
+    for that account (and for fixing a bad derivation).
     """
 
     name: str | None = Field(default=None, min_length=1, max_length=255)

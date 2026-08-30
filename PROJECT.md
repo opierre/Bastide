@@ -9,7 +9,7 @@
 ## 1. Vision
 
 A desktop-first (Flutter) personal finance application for French users first, English second.
-The user imports bank data via OFX/QFX/CSV files (no direct bank connections), and the app
+The user imports bank data via OFX/QFX files (no direct bank connections), and the app
 gives them a clear, encouraging view of their money: transactions, monthly income/expense
 with month-over-month trend, categories, subscriptions, savings rate, goals, mortgages, and
 French tax estimation. Transactions are auto-categorised by a local model (Ollama), with a
@@ -28,7 +28,7 @@ when reached.
 
 | Phase | Scope | Status |
 |-------|-------|--------|
-| 1 | Auth (register/login, locale + currency at registration); multi-account; OFX/QFX/CSV import normalised to a canonical schema + import history; transaction list; **rules-based** categorisation; dashboard (monthly income/expense, MoM trend, savings rate, by-category breakdown). | **Done** |
+| 1 | Auth (register/login, locale + currency at registration); multi-account; OFX/QFX import normalised to a canonical schema + import history; transaction list; **rules-based** categorisation; dashboard (monthly income/expense, MoM trend, savings rate, by-category breakdown). | **Done** |
 | **2** | SLM categorisation (local inference runtime) + confidence threshold + review/confirm queue; category & rule management UI; subscription/recurring detection with lifecycle; savings goals (virtual envelopes). | **TARGET** |
 | 3 | Mortgages (amortisation table, debt ratio); French tax estimation (IR + IFI + capital gains/dividends/property — estimation-first); new-mortgage projection simulator. | Planned |
 | 4 | Multi-user; optional cloud sync (move datastore to PostgreSQL); per-account multi-currency monitoring with FX. | Planned |
@@ -168,8 +168,8 @@ for money.** Primary keys are UUIDs (string). Timestamps are UTC ISO-8601.
 > account's **first** OFX import we therefore derive it from the statement's `LEDGERBAL`:
 > `opening = BALAMT − sum(rows booked on or before DTASOF)`. Only the first: a later
 > statement's balance is equally true, but re-deriving from it would absorb any un-imported
-> gap in the ledger into the opening balance rather than surfacing it. CSV carries no declared
-> balance, so a CSV-only account keeps the figure the user typed.
+> gap in the ledger into the opening balance rather than surfacing it. An exporter that omits
+> `LEDGERBAL` declares no balance, so that account keeps the figure the user typed.
 >
 > **Every import after the first compares instead of correcting.** Its statement's `LEDGERBAL`
 > is checked against what the ledger implies at that date (`point_in_time_balance`); a
@@ -178,8 +178,8 @@ for money.** Primary keys are UUIDs (string). Timestamps are UTC ISO-8601.
 > un-imported gap, or a bad earlier correction, and the user needs to see it to act on it.
 >
 > **`opening_balance_minor` is also user-patchable** (`PATCH /accounts/{id}`), the manual
-> counterpart to the two mechanisms above — for a CSV-only account (no `LEDGERBAL` ever), or to
-> fix a bad first derivation. The patch goes through `shift_opening_balance`, which moves
+> counterpart to the two mechanisms above — for an account whose statements never carry a
+> `LEDGERBAL`, or to fix a bad first derivation. The patch goes through `shift_opening_balance`, which moves
 > `cached_balance_minor` **and every existing snapshot** by the same delta rather than
 > recomputing them independently — the ledger didn't change, so nothing derived from it should
 > move by anything other than exactly that delta.
@@ -207,7 +207,7 @@ for money.** Primary keys are UUIDs (string). Timestamps are UTC ISO-8601.
 | categorization_confidence | real null | model only (Phase 2) |
 | needs_review | bool | true until confirmed/assigned with confidence |
 | fitid | text null | OFX unique id, used for dedup |
-| dedup_hash | text | stable hash for CSV dedup (see §6) |
+| dedup_hash | text | stable hash for fitid-less dedup (see §6) |
 | created_at / updated_at | datetime | |
 
 Unique constraint to prevent duplicate imports: `(account_id, fitid)` when `fitid` present,
@@ -249,7 +249,7 @@ richer label space also benefits the Phase 2 SLM.
 | id | uuid PK | |
 | user_id | uuid FK | |
 | account_id | uuid FK | |
-| source_format | text | `ofx` \| `qfx` \| `csv` |
+| source_format | text | `ofx` \| `qfx` |
 | file_name | text | |
 | file_hash | text | reject re-import of identical file |
 | period_start / period_end | date | coverage window, derived from contents |
@@ -259,20 +259,6 @@ richer label space also benefits the Phase 2 SLM.
 | balance_mismatch_minor | int null | declared `LEDGERBAL` − ledger-implied balance; set only from the account's 2nd+ import, and only when non-zero |
 | balance_mismatch_as_of | date null | the date the mismatch above holds at |
 | imported_at | datetime | |
-
-### `csv_templates` (per-bank CSV mapping, saved once and reused)
-| column | type | notes |
-|--------|------|-------|
-| id | uuid PK | |
-| user_id | uuid FK | |
-| bank_name | text | |
-| delimiter | text | e.g. `;` |
-| encoding | text | e.g. `latin-1`, `utf-8` |
-| date_format | text | e.g. `%d/%m/%Y` |
-| decimal_separator | text | `,` or `.` |
-| amount_strategy | text | `signed` \| `debit_credit` |
-| column_map | json | maps canonical fields → CSV column names/indices |
-| created_at | datetime | |
 
 ### `account_balance_snapshots`
 | column | type | notes |
@@ -410,7 +396,7 @@ are user-scoped — a user only ever sees their own rows.
 > into one round trip) require many heterogeneous remote clients and network latency to pay off.
 > This app has one client (the Flutter app we control) talking to a **loopback sidecar** where
 > round-trip cost is ~0, so those wins are moot — while GraphQL would add N+1/dataloader
-> complexity, weaker caching, and awkward multipart uploads (our OFX/CSV import). FastAPI + REST
+> complexity, weaker caching, and awkward multipart uploads (our OFX import). FastAPI + REST
 > gives typed Pydantic I/O, auto OpenAPI docs, and trivial uploads. The one composite view
 > (dashboard) is served by a single purpose-built endpoint. Revisit only if a Phase 4 cloud tier
 > grows multiple external client types.
@@ -429,11 +415,9 @@ DELETE /accounts/{id}        (archive, not hard delete)
 
 GET    /banks               ?bank_code=… → [bank]  (0–1: the French bank code resolved to its bank)
 
-POST   /imports             multipart: file + account_id [+ csv_template_id] → import_batch
+POST   /imports             multipart: file + account_id → import_batch
 GET    /imports             → [import_batch]            (history)
 GET    /imports/{id}        → import_batch
-POST   /csv-templates       {…mapping…} → csv_template
-GET    /csv-templates       → [csv_template]
 
 GET    /transactions        ?account_id&from&to&category_id&needs_review&q&page → page<transaction>
 GET    /transactions/{id}   → transaction
@@ -544,9 +528,6 @@ knows the source format.
 2. **Parse to canonical** —
    - **OFX/QFX:** parse `STMTTRN` records; use `FITID` as the dedup key; read currency and
      account id; derive `period_start/end` from transaction date range.
-   - **CSV:** require a `csv_template` (created via a one-time per-bank column-mapping UI).
-     Handle French realities: `;` delimiters, `,` decimals, `%d/%m/%Y` dates, Latin-1/UTF-8,
-     and either signed amounts or separate debit/credit columns.
 3. **Normalise** — clean description (`description_clean`), attempt `merchant` extraction,
    compute `amount_minor` (signed), set `currency` = account currency.
 4. **Dedup** — `fitid` if present, else `dedup_hash = hash(account_id, booked_date,

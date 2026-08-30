@@ -1,14 +1,17 @@
 import 'package:flutter/foundation.dart';
 
-/// The file format a batch was parsed from. Mirrors `import_batches.source_format`.
+/// The file format a batch was parsed from. Mirrors `import_batches.source_format`,
+/// which the backend only ever writes as `ofx` or `qfx`.
 enum ImportFormat {
   ofx,
-  qfx,
-  csv;
+  qfx;
 
+  /// Falls back to [ofx] for a value we don't recognise. Unreachable against the
+  /// current backend, and it only picks the history badge's label and hue — so a
+  /// wrong guess mislabels a row rather than misreading a batch.
   static ImportFormat fromWire(String value) => ImportFormat.values.firstWhere(
     (format) => format.name == value,
-    orElse: () => ImportFormat.csv,
+    orElse: () => ImportFormat.ofx,
   );
 }
 
@@ -72,8 +75,7 @@ class ImportBatch {
   /// when the statement's declared balance disagrees with what the ledger
   /// implies at [balanceMismatchAsOf] — see the backend's
   /// `ImportService._detect_balance_mismatch`. `null` means either nothing was
-  /// declared to compare (CSV, or an OFX file without `LEDGERBAL`) or the two
-  /// agreed.
+  /// declared to compare (an OFX file without `LEDGERBAL`) or the two agreed.
   final int? balanceMismatchMinor;
   final DateTime? balanceMismatchAsOf;
 

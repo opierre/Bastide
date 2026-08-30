@@ -22,7 +22,6 @@ EXPECTED_TABLES = {
     "auth_tokens",
     "accounts",
     "categories",
-    "csv_templates",
     "account_balance_snapshots",
     "categorization_rules",
     "import_batches",

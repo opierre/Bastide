@@ -48,7 +48,7 @@
   "@navTransactionsSubtitle": {
     "description": "One-line descriptor shown under the panel title in the top bar, on the transactions screen."
   },
-  "navImportsSubtitle": "Relevés OFX, QFX et CSV — traités sur cet ordinateur",
+  "navImportsSubtitle": "Relevés OFX et QFX — traités sur cet ordinateur",
   "@navImportsSubtitle": {
     "description": "One-line descriptor shown under the panel title in the top bar, on the imports screen."
   },
@@ -443,19 +443,19 @@
   },
   "importAccountLabel": "Compte de destination",
   "@importAccountLabel": {
-    "description": "Label for the account selector on the imports panel."
+    "description": "Label for the account picker shown only when a statement could not name its own destination."
   },
   "importAccountsUnavailable": "Impossible de charger vos comptes. Réessayez dans un instant.",
   "@importAccountsUnavailable": {
-    "description": "Shown in place of the account selector when the accounts list failed to load."
+    "description": "Shown when the accounts list failed to load, so the statement cannot be matched against anything."
   },
-  "importDropZoneTitle": "Déposez un fichier OFX, QFX ou CSV",
+  "importDropZoneTitle": "Déposez un fichier OFX ou QFX",
   "@importDropZoneTitle": {
     "description": "Headline inside the imports drop zone."
   },
-  "importDropZoneHint": "ou cliquez pour parcourir — un CSV ouvre l'assistant de correspondance",
+  "importDropZoneHint": "ou cliquez pour parcourir — le relevé indique lui-même son compte",
   "@importDropZoneHint": {
-    "description": "Sub-line inside the imports drop zone, stating that a CSV opens the mapping wizard."
+    "description": "Sub-line inside the imports drop zone, stating that the file itself names the destination account."
   },
   "importFileSize": "{size} ko",
   "@importFileSize": {
@@ -477,23 +477,6 @@
   "importSubmitting": "Import en cours…",
   "@importSubmitting": {
     "description": "Label replacing the import button text while the upload is in flight."
-  },
-  "importOpenWizard": "Configurer et importer",
-  "@importOpenWizard": {
-    "description": "Primary action shown for a CSV with no saved mapping — it opens the wizard rather than importing straight away."
-  },
-  "importTemplateReuse": "Format CSV mémorisé pour {bank} — il sera réutilisé pour ce fichier.",
-  "@importTemplateReuse": {
-    "description": "Banner telling the user a saved CSV template will be reused instead of the wizard.",
-    "placeholders": {
-      "bank": {
-        "type": "String"
-      }
-    }
-  },
-  "importReconfigureTemplate": "Reconfigurer",
-  "@importReconfigureTemplate": {
-    "description": "Action that re-opens the CSV wizard even though a saved template exists."
   },
   "importDetectedAccount": "Compte reconnu dans le fichier : {account}.",
   "@importDetectedAccount": {
@@ -525,6 +508,14 @@
   "importCreateDetectedAccount": "Créer ce compte",
   "@importCreateDetectedAccount": {
     "description": "Action opening the account form pre-filled with the account read from the statement."
+  },
+  "importChooseAccount": "Choisissez un compte",
+  "@importChooseAccount": {
+    "description": "Placeholder option in the account picker shown when a statement could not name its own destination — the unanswered state."
+  },
+  "importUnreadableAccount": "Ce fichier n'indique aucun compte — choisissez la destination.",
+  "@importUnreadableAccount": {
+    "description": "Warning shown when the staged file declares no account block at all, so the user has to pick the destination from every account."
   },
   "importResultTitle": "Dernier import",
   "@importResultTitle": {
@@ -669,162 +660,6 @@
   "@importRetry": {
     "description": "Retry button label shown when the import history fails to load."
   },
-  "csvWizardTitle": "Assistant CSV",
-  "@csvWizardTitle": {
-    "description": "Title of the one-time CSV column-mapping wizard modal."
-  },
-  "csvWizardStepFormat": "Format",
-  "@csvWizardStepFormat": {
-    "description": "Label of the wizard's first step, where the file's format is described."
-  },
-  "csvWizardStepColumns": "Colonnes & aperçu",
-  "@csvWizardStepColumns": {
-    "description": "Label of the wizard's second step, where columns are mapped and previewed."
-  },
-  "csvWizardCancel": "Annuler",
-  "@csvWizardCancel": {
-    "description": "Cancel action in the CSV wizard footer."
-  },
-  "csvWizardNext": "Continuer",
-  "@csvWizardNext": {
-    "description": "Action moving from the wizard's format step to its columns step."
-  },
-  "csvWizardConfirm": "Valider et importer",
-  "@csvWizardConfirm": {
-    "description": "Action that saves the mapping and imports the file."
-  },
-  "csvWizardConfirming": "Import en cours…",
-  "@csvWizardConfirming": {
-    "description": "Label replacing the wizard's confirm button text while saving and importing."
-  },
-  "csvWizardBankLabel": "Banque",
-  "@csvWizardBankLabel": {
-    "description": "Label for the bank name the CSV mapping is remembered under."
-  },
-  "csvWizardBankHelper": "Ce format sera mémorisé sous ce nom et réutilisé à chaque import de cette banque.",
-  "@csvWizardBankHelper": {
-    "description": "Helper under the bank name field, stating that the mapping is saved for reuse."
-  },
-  "csvWizardDelimiterLabel": "Délimiteur",
-  "@csvWizardDelimiterLabel": {
-    "description": "Label for the CSV column separator selector."
-  },
-  "csvDelimiterSemicolon": "Point-virgule ( ; )",
-  "@csvDelimiterSemicolon": {
-    "description": "Delimiter option: semicolon, the common French bank export separator."
-  },
-  "csvDelimiterComma": "Virgule ( , )",
-  "@csvDelimiterComma": {
-    "description": "Delimiter option: comma."
-  },
-  "csvDelimiterTab": "Tabulation",
-  "@csvDelimiterTab": {
-    "description": "Delimiter option: tab character."
-  },
-  "csvDelimiterPipe": "Barre verticale ( | )",
-  "@csvDelimiterPipe": {
-    "description": "Delimiter option: pipe character."
-  },
-  "csvWizardEncodingLabel": "Encodage",
-  "@csvWizardEncodingLabel": {
-    "description": "Label for the CSV character encoding selector."
-  },
-  "csvWizardDateFormatLabel": "Format de date",
-  "@csvWizardDateFormatLabel": {
-    "description": "Label for the CSV date format selector."
-  },
-  "csvWizardDecimalLabel": "Séparateur décimal",
-  "@csvWizardDecimalLabel": {
-    "description": "Label for the decimal separator control."
-  },
-  "csvDecimalComma": "Virgule ( , )",
-  "@csvDecimalComma": {
-    "description": "Decimal separator option: comma."
-  },
-  "csvDecimalPeriod": "Point ( . )",
-  "@csvDecimalPeriod": {
-    "description": "Decimal separator option: period."
-  },
-  "csvWizardAmountsLabel": "Montants",
-  "@csvWizardAmountsLabel": {
-    "description": "Label for the control choosing how the file encodes amount direction."
-  },
-  "csvAmountStrategySigned": "Signé",
-  "@csvAmountStrategySigned": {
-    "description": "Amount strategy option: a single signed amount column."
-  },
-  "csvAmountStrategyDebitCredit": "Débit / Crédit",
-  "@csvAmountStrategyDebitCredit": {
-    "description": "Amount strategy option: separate debit and credit columns."
-  },
-  "csvWizardHeaderOffsetLabel": "Lignes à ignorer",
-  "@csvWizardHeaderOffsetLabel": {
-    "description": "Label for the count of lines to skip before the header row."
-  },
-  "csvWizardHeaderOffsetHelper": "Avant la ligne d'en-tête.",
-  "@csvWizardHeaderOffsetHelper": {
-    "description": "Helper clarifying that the skipped lines precede the header row."
-  },
-  "csvWizardColumnsHint": "Indiquez le nom de la colonne du fichier (ou son numéro, à partir de 0) pour chaque information.",
-  "@csvWizardColumnsHint": {
-    "description": "Instruction above the column mapping rows in the CSV wizard."
-  },
-  "csvWizardColumnHint": "Nom ou numéro de colonne",
-  "@csvWizardColumnHint": {
-    "description": "Placeholder inside a column mapping input."
-  },
-  "csvWizardColumnOptional": "facultatif",
-  "@csvWizardColumnOptional": {
-    "description": "Marker beside a canonical field that does not have to be mapped."
-  },
-  "csvColumnBookedDate": "Date d'opération",
-  "@csvColumnBookedDate": {
-    "description": "Canonical field name: the date the transaction was booked."
-  },
-  "csvColumnValueDate": "Date de valeur",
-  "@csvColumnValueDate": {
-    "description": "Canonical field name: the value date."
-  },
-  "csvColumnDescription": "Libellé",
-  "@csvColumnDescription": {
-    "description": "Canonical field name: the raw description from the bank."
-  },
-  "csvColumnAmount": "Montant",
-  "@csvColumnAmount": {
-    "description": "Canonical field name: the signed amount."
-  },
-  "csvColumnDebit": "Débit",
-  "@csvColumnDebit": {
-    "description": "Canonical field name: the debit column, used by the debit/credit layout."
-  },
-  "csvColumnCredit": "Crédit",
-  "@csvColumnCredit": {
-    "description": "Canonical field name: the credit column, used by the debit/credit layout."
-  },
-  "csvWizardPreviewTitle": "Aperçu",
-  "@csvWizardPreviewTitle": {
-    "description": "Section label above the live preview of parsed sample rows."
-  },
-  "csvWizardPreviewPending": "Renseignez les colonnes obligatoires pour voir un aperçu.",
-  "@csvWizardPreviewPending": {
-    "description": "Placeholder shown before the mapping is complete enough to preview."
-  },
-  "csvWizardPreviewEmpty": "Aucune ligne lisible avec ce paramétrage.",
-  "@csvWizardPreviewEmpty": {
-    "description": "Shown when the preview parsed the file but found no rows."
-  },
-  "csvPreviewDateHeader": "Date",
-  "@csvPreviewDateHeader": {
-    "description": "Preview table column header for the booked date."
-  },
-  "csvPreviewDescriptionHeader": "Libellé",
-  "@csvPreviewDescriptionHeader": {
-    "description": "Preview table column header for the raw description."
-  },
-  "csvPreviewAmountHeader": "Montant",
-  "@csvPreviewAmountHeader": {
-    "description": "Preview table column header for the parsed amount."
-  },
   "importErrorAccountNotFound": "Compte introuvable.",
   "@importErrorAccountNotFound": {
     "description": "Localized message for the backend's ACCOUNT_NOT_FOUND error code on the imports panel."
@@ -832,14 +667,6 @@
   "importErrorBatchNotFound": "Import introuvable.",
   "@importErrorBatchNotFound": {
     "description": "Localized message for the backend's IMPORT_BATCH_NOT_FOUND error code."
-  },
-  "importErrorTemplateNotFound": "Format CSV introuvable — relancez l'assistant.",
-  "@importErrorTemplateNotFound": {
-    "description": "Localized message for the backend's CSV_TEMPLATE_NOT_FOUND error code."
-  },
-  "importErrorTemplateInvalid": "Ce paramétrage ne correspond pas au fichier — ajustez les colonnes ci-dessus.",
-  "@importErrorTemplateInvalid": {
-    "description": "Localized message for the backend's CSV_TEMPLATE_INVALID and VALIDATION_ERROR codes."
   },
   "importErrorGeneric": "Une erreur est survenue. Veuillez réessayer.",
   "@importErrorGeneric": {

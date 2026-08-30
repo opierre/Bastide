@@ -1,18 +1,23 @@
 ---
 name: ofx-csv-import
-description: Use when building or changing the file import pipeline — parsing OFX/QFX, mapping French bank CSVs, normalizing to the canonical transaction model, deduplication, or the import-batch lifecycle and history. Encodes the one-canonical-model rule, French CSV realities (separators, decimals, encodings, debit/credit columns), FITID/dedup-hash dedup, and idempotent re-import handling.
+description: Use when building or changing the file import pipeline — parsing OFX/QFX (French SGML dialects, Latin-1), routing a statement to the account its own header names, normalizing to the canonical transaction model, deduplication, or the import-batch lifecycle and history. Encodes the one-canonical-model rule, FITID/dedup-hash dedup, idempotent re-import handling, and the fact that CSV import has been removed.
 ---
 
-# OFX / CSV Import
+# OFX Import
 
-Turns bank files into canonical transactions. Source of truth: `PROJECT.md` §6. Obey **database**
-(money, dedup constraints) and **architecture** (this is a feature: parsing in services, DB in
-repositories).
+Turns bank statements into canonical transactions. Source of truth: `PROJECT.md` §6. Obey
+**database** (money, dedup constraints) and **architecture** (this is a feature: parsing in
+services, DB in repositories).
+
+> **CSV import was removed**, root and branch: no `csv_templates` table, no CSV parser, no
+> mapping wizard, and no `csv` value anywhere in `source_format`. A CSV names no account, and the
+> panel now reads the destination out of the file rather than asking for it. Do not reintroduce a
+> CSV path without the user asking for it.
 
 ## The one rule
 
 Every parser targets the **same canonical transaction model**. After parsing, no downstream code
-knows or cares whether the source was OFX, QFX, or CSV. Format-specific logic lives only in the
+knows or cares whether the source was OFX or QFX. Format-specific logic lives only in the
 parser/adapter for that format.
 
 Canonical fields produced per transaction (see `PROJECT.md` §4 `transactions`):
@@ -21,7 +26,7 @@ description_clean, memo?, merchant?, fitid?, dedup_hash`.
 
 ## Pipeline (idempotent)
 
-1. **Accept file** + `account_id` (+ `csv_template_id` for CSV). Compute `file_hash`.
+1. **Accept file** + `account_id`. Compute `file_hash`.
 2. **Reject duplicate file**: if `file_hash` already imported for this account → return the
    existing batch info, import nothing.
 3. **Parse → canonical** (per format below).
@@ -47,28 +52,14 @@ with `error_message`.
 - Be tolerant: some French banks emit OFX 1.x SGML (not strict XML), inconsistent casing, and
   Latin-1. Detect/handle encoding; don't assume UTF-8.
 - `FITID` is the dedup key and is trusted unique per account.
-
-## CSV — French realities (the messy one)
-
-CSV has **no standard**, so it requires a saved **`csv_template`** per bank (created via a
-one-time column-mapping UI; reused thereafter). Handle:
-
-- **Delimiters**: often `;` (because `,` is the decimal sep). Never assume `,`.
-- **Decimals**: comma decimal (`1 234,56`), thin-space/space thousands separators.
-- **Dates**: `%d/%m/%Y` typically; never assume ISO.
-- **Encoding**: Latin-1 / Windows-1252 common; detect and decode, store as UTF-8.
-- **Amount layout**: either one **signed** column, or separate **débit/crédit** columns
-  (`amount_strategy = signed | debit_credit`). Debit column → negative, credit → positive.
-- **Header noise**: leading metadata rows, BOM, trailing blank lines, summary footers — skip via
-  the template's header offset.
-
-`csv_template.column_map` maps canonical fields → column name/index. Persist the template so the
-next import from that bank is one click. Validate a template against a sample on creation
-(parse a few rows, show the user the preview) before saving.
+- `BANKACCTFROM`/`CCACCTFROM` is read **client-side too** (`data/ofx_account_parser.dart`) to
+  route the import: the panel resolves the file's account block against the user's accounts,
+  imports into the match, offers to create the account when there is none, and asks only when
+  the file leaves the question genuinely open (several candidates, or no readable block).
 
 ## Dedup hash
 
-When `fitid` is absent (typical for CSV):
+When `fitid` is absent:
 `dedup_hash = stable_hash(account_id, booked_date, amount_minor, description_clean)`.
 Same triple within an account = duplicate. Document that two genuinely identical transactions on
 the same day (rare) may collide; acceptable trade-off, surfaced in import results so the user can
@@ -76,14 +67,14 @@ spot it.
 
 ## Import history
 
-`import_batches` is the user-facing history: file name, source format, import date, coverage
-window (`period_start/end`), and counts. Every import — success, partial, or failed — writes a
+`import_batches` is the user-facing history: file name, source format (`ofx`/`qfx`), import
+date, coverage window (`period_start/end`), and counts. Every import — success, partial, or failed — writes a
 batch row. Never delete batch history on re-import; it's an audit trail.
 
 ## Testing
 
-- Unit-test parsers against **fixture files** for each real bank dialect (OFX SGML, OFX XML, and
-  several CSV shapes: `;`+comma-decimal, debit/credit columns, Latin-1). Mock file I/O.
+- Unit-test parsers against **fixture files** for each real bank dialect (OFX SGML, OFX XML,
+  Latin-1 payloads). Mock file I/O.
 - Assert: correct sign, correct minor-unit conversion, dedup catches re-imports, idempotent
   re-import of the same file inserts zero rows, encoding handled.
 - Keep a small library of anonymized fixture files under `backend/tests/fixtures/imports/`.
