@@ -1286,6 +1286,72 @@ abstract class AppLocalizations {
   /// **'Toutes les dates'**
   String get transactionsFilterAllDates;
 
+  /// Title of the transactions date range filter modal.
+  ///
+  /// In fr, this message translates to:
+  /// **'Période'**
+  String get transactionsDateRangeTitle;
+
+  /// Label of the range's start date field.
+  ///
+  /// In fr, this message translates to:
+  /// **'Du'**
+  String get transactionsDateRangeFromLabel;
+
+  /// Label of the range's end date field.
+  ///
+  /// In fr, this message translates to:
+  /// **'Au'**
+  String get transactionsDateRangeToLabel;
+
+  /// Helper under the range fields explaining how to lift the date filter.
+  ///
+  /// In fr, this message translates to:
+  /// **'Laissez les deux dates vides pour voir toutes les dates.'**
+  String get transactionsDateRangeHelp;
+
+  /// Tooltip on the calendar button of the range's start date field.
+  ///
+  /// In fr, this message translates to:
+  /// **'Choisir la date de début'**
+  String get transactionsDateRangePickFrom;
+
+  /// Tooltip on the calendar button of the range's end date field.
+  ///
+  /// In fr, this message translates to:
+  /// **'Choisir la date de fin'**
+  String get transactionsDateRangePickTo;
+
+  /// Validation message when a range date cannot be read in the current locale.
+  ///
+  /// In fr, this message translates to:
+  /// **'Date invalide.'**
+  String get transactionsDateRangeInvalid;
+
+  /// Validation message when only one of the two range dates is filled in.
+  ///
+  /// In fr, this message translates to:
+  /// **'Renseignez les deux dates, ou aucune.'**
+  String get transactionsDateRangeIncomplete;
+
+  /// Validation message when the range's end date is before its start date.
+  ///
+  /// In fr, this message translates to:
+  /// **'La date de fin précède la date de début.'**
+  String get transactionsDateRangeOrder;
+
+  /// Cancel button of the date range modal.
+  ///
+  /// In fr, this message translates to:
+  /// **'Annuler'**
+  String get transactionsDateRangeCancel;
+
+  /// Confirm button of the date range modal, applying the chosen range.
+  ///
+  /// In fr, this message translates to:
+  /// **'Appliquer'**
+  String get transactionsDateRangeApply;
+
   /// Pager label under the transaction list, showing the current page's row range and the total count.
   ///
   /// In fr, this message translates to:

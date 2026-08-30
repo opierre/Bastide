@@ -885,6 +885,50 @@
   "@transactionsFilterAllDates": {
     "description": "Default label on the date range filter pill when no range is chosen."
   },
+  "transactionsDateRangeTitle": "Période",
+  "@transactionsDateRangeTitle": {
+    "description": "Title of the transactions date range filter modal."
+  },
+  "transactionsDateRangeFromLabel": "Du",
+  "@transactionsDateRangeFromLabel": {
+    "description": "Label of the range's start date field."
+  },
+  "transactionsDateRangeToLabel": "Au",
+  "@transactionsDateRangeToLabel": {
+    "description": "Label of the range's end date field."
+  },
+  "transactionsDateRangeHelp": "Laissez les deux dates vides pour voir toutes les dates.",
+  "@transactionsDateRangeHelp": {
+    "description": "Helper under the range fields explaining how to lift the date filter."
+  },
+  "transactionsDateRangePickFrom": "Choisir la date de début",
+  "@transactionsDateRangePickFrom": {
+    "description": "Tooltip on the calendar button of the range's start date field."
+  },
+  "transactionsDateRangePickTo": "Choisir la date de fin",
+  "@transactionsDateRangePickTo": {
+    "description": "Tooltip on the calendar button of the range's end date field."
+  },
+  "transactionsDateRangeInvalid": "Date invalide.",
+  "@transactionsDateRangeInvalid": {
+    "description": "Validation message when a range date cannot be read in the current locale."
+  },
+  "transactionsDateRangeIncomplete": "Renseignez les deux dates, ou aucune.",
+  "@transactionsDateRangeIncomplete": {
+    "description": "Validation message when only one of the two range dates is filled in."
+  },
+  "transactionsDateRangeOrder": "La date de fin précède la date de début.",
+  "@transactionsDateRangeOrder": {
+    "description": "Validation message when the range's end date is before its start date."
+  },
+  "transactionsDateRangeCancel": "Annuler",
+  "@transactionsDateRangeCancel": {
+    "description": "Cancel button of the date range modal."
+  },
+  "transactionsDateRangeApply": "Appliquer",
+  "@transactionsDateRangeApply": {
+    "description": "Confirm button of the date range modal, applying the chosen range."
+  },
   "transactionsPager": "{from}–{to} sur {total}",
   "@transactionsPager": {
     "description": "Pager label under the transaction list, showing the current page's row range and the total count.",

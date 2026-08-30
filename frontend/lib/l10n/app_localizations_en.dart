@@ -706,6 +706,42 @@ class AppLocalizationsEn extends AppLocalizations {
   String get transactionsFilterAllDates => 'All dates';
 
   @override
+  String get transactionsDateRangeTitle => 'Date range';
+
+  @override
+  String get transactionsDateRangeFromLabel => 'From';
+
+  @override
+  String get transactionsDateRangeToLabel => 'To';
+
+  @override
+  String get transactionsDateRangeHelp =>
+      'Leave both dates empty to see every date.';
+
+  @override
+  String get transactionsDateRangePickFrom => 'Pick the start date';
+
+  @override
+  String get transactionsDateRangePickTo => 'Pick the end date';
+
+  @override
+  String get transactionsDateRangeInvalid => 'Invalid date.';
+
+  @override
+  String get transactionsDateRangeIncomplete =>
+      'Fill in both dates, or neither.';
+
+  @override
+  String get transactionsDateRangeOrder =>
+      'The end date comes before the start date.';
+
+  @override
+  String get transactionsDateRangeCancel => 'Cancel';
+
+  @override
+  String get transactionsDateRangeApply => 'Apply';
+
+  @override
   String transactionsPager(int from, int to, int total) {
     return '$from–$to of $total';
   }

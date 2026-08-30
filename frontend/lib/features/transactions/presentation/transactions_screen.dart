@@ -15,6 +15,7 @@ import '../../imports/presentation/imports_screen.dart';
 import '../application/transactions_controller.dart';
 import '../../categories/domain/category.dart';
 import '../domain/transaction.dart';
+import 'date_range_modal.dart';
 import 'review_queue.dart';
 import 'transaction_error_localizer.dart';
 import 'transaction_row.dart';
@@ -296,14 +297,8 @@ class _DateRangeFilterPill extends StatelessWidget {
       icon: Icons.calendar_today_outlined,
       label: label,
       onTap: () async {
-        final now = DateTime.now();
-        final range = await showDateRangePicker(
-          context: context,
-          firstDate: DateTime(now.year - 10),
-          lastDate: DateTime(now.year + 1),
-          initialDateRange: (from != null && to != null) ? DateTimeRange(start: from!, end: to!) : null,
-        );
-        if (range != null) onChanged(range.start, range.end);
+        final range = await showTransactionDateRange(context, from: from, to: to);
+        if (range != null) onChanged(range.$1, range.$2);
       },
     );
   }
