@@ -23,6 +23,12 @@ from app.features.recurring.models import RecurringOccurrence, RecurringSeries
 from app.features.transactions.models import Transaction
 
 BACKEND_DIR = Path(__file__).resolve().parent.parent
+
+# The revision *below* the Phase 2 migration. Named rather than reached with
+# `downgrade -1`, which only meant "undo Phase 2" while Phase 2 happened to be
+# head — every migration added since silently retargeted the test.
+PRE_PHASE2_REVISION = "e4a1c6f20b73"
+
 PHASE2_TABLES = {
     "categorization_runs",
     "recurring_series",
@@ -90,7 +96,7 @@ def test_downgrade_then_upgrade_is_clean(tmp_path: Path) -> None:
     db_path = tmp_path / "roundtrip.db"
     _alembic(["upgrade", "head"], db_path)
 
-    _alembic(["downgrade", "-1"], db_path)
+    _alembic(["downgrade", PRE_PHASE2_REVISION], db_path)
     engine = create_engine(f"sqlite:///{db_path}")
     assert not (PHASE2_TABLES & set(inspect(engine).get_table_names()))
     engine.dispose()
