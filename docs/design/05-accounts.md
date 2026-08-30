@@ -1,7 +1,7 @@
 # 05 — Accounts
 
 ## Top bar (this panel)
-Title « Comptes » + descriptor « Tous vos comptes, une seule devise ». Right: primary « Ajouter un compte » (38 px, plus glyph), search pill (230 px), user pill.
+Title « Comptes » + descriptor « Tous vos comptes, une seule devise ». Right: primary « Ajouter un compte » (38 px, plus glyph), user pill. No search pill — an account list is short enough to read at a glance.
 
 ## Content layout
 Summary Card: label « Solde total », 32 px neutral 14 013,72 €; right-aligned meta « 4 comptes actifs · EUR » + last-recalc timestamp. Below, 2-column card grid (gap 18): each account Card = 40 px BrandLogo monogram + name (14.5/700) + institution (12 secondary) + ⋯ overflow (Edit/Archive — archive only, no delete), footer row = type badge pill (Courant/Épargne/Crédit) + signed balance 21 px (green +3 486,12 € BNP, green +8 240,00 € Livret A, red −312,40 € Revolut credit, green +2 600,00 € Caisse Locale d'Épargne — the unknown-institution monogram case). Cards hover with iris border.

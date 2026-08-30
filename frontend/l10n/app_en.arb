@@ -107,8 +107,6 @@
   "authErrorValidation": "Some information is invalid.",
   "authErrorGeneric": "Something went wrong. Please try again.",
   "accountsAddButton": "Add account",
-  "accountsSearchHint": "Search…",
-  "accountsSearchEmpty": "No account matches your search.",
   "accountsBalancesAsOf": "Balances as of {date}",
   "accountsTotalBalanceLabel": "Total balance",
   "accountsActiveCount": "{count, plural, =0{No active accounts} =1{1 active account} other{{count} active accounts}}",

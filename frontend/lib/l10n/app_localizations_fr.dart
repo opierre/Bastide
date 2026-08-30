@@ -216,13 +216,6 @@ class AppLocalizationsFr extends AppLocalizations {
   String get accountsAddButton => 'Ajouter un compte';
 
   @override
-  String get accountsSearchHint => 'Rechercher…';
-
-  @override
-  String get accountsSearchEmpty =>
-      'Aucun compte ne correspond à votre recherche.';
-
-  @override
   String accountsBalancesAsOf(DateTime date) {
     final intl.DateFormat dateDateFormat = intl.DateFormat.yMd(localeName);
     final String dateString = dateDateFormat.format(date);

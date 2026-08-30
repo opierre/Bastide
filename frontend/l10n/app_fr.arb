@@ -260,14 +260,6 @@
   "@accountsAddButton": {
     "description": "Button label to open the create-account form."
   },
-  "accountsSearchHint": "Rechercher…",
-  "@accountsSearchHint": {
-    "description": "Placeholder in the accounts search pill in the top bar."
-  },
-  "accountsSearchEmpty": "Aucun compte ne correspond à votre recherche.",
-  "@accountsSearchEmpty": {
-    "description": "Shown in place of the account grid when the search filters everything out."
-  },
   "accountsBalancesAsOf": "Soldes au {date}",
   "@accountsBalancesAsOf": {
     "description": "Timestamp under the summary meta saying when the balances were last recalculated.",

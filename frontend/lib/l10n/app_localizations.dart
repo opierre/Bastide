@@ -488,18 +488,6 @@ abstract class AppLocalizations {
   /// **'Ajouter un compte'**
   String get accountsAddButton;
 
-  /// Placeholder in the accounts search pill in the top bar.
-  ///
-  /// In fr, this message translates to:
-  /// **'Rechercher…'**
-  String get accountsSearchHint;
-
-  /// Shown in place of the account grid when the search filters everything out.
-  ///
-  /// In fr, this message translates to:
-  /// **'Aucun compte ne correspond à votre recherche.'**
-  String get accountsSearchEmpty;
-
   /// Timestamp under the summary meta saying when the balances were last recalculated.
   ///
   /// In fr, this message translates to:
