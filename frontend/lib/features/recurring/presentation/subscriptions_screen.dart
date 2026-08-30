@@ -94,14 +94,11 @@ class _SubscriptionsTopBarActionsState
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        SizedBox(
-          height: AppChrome.controlPillHeight,
-          child: OutlinedButton(
-            key: const Key('subscriptionsDetectButton'),
-            onPressed: _detecting ? null : _detect,
-            child: Text(
-              _detecting ? l10n.subscriptionsDetectRunning : l10n.subscriptionsDetect,
-            ),
+        OutlinedButton(
+          key: const Key('subscriptionsDetectButton'),
+          onPressed: _detecting ? null : _detect,
+          child: Text(
+            _detecting ? l10n.subscriptionsDetectRunning : l10n.subscriptionsDetect,
           ),
         ),
         const SizedBox(width: AppSpacing.sm + AppSpacing.xs),

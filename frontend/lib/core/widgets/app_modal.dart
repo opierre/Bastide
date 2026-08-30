@@ -73,6 +73,7 @@ class AppModal extends StatelessWidget {
               // overflowing when they don't.
               child: Wrap(
                 alignment: WrapAlignment.end,
+                crossAxisAlignment: WrapCrossAlignment.center,
                 spacing: AppSpacing.sm + AppSpacing.xs,
                 runSpacing: AppSpacing.sm,
                 children: actions,

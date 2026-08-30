@@ -620,7 +620,6 @@ class _StagedFile extends ConsumerWidget {
                   : l10n.importSubmit,
               loadingLabel: l10n.importSubmitting,
               isLoading: isImporting,
-              height: 42,
               onPressed: onImport,
             ),
           ],

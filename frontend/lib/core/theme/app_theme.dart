@@ -64,9 +64,9 @@ ThemeData _buildDarkTheme() {
     ),
 
     inputDecorationTheme: _inputDecorationTheme(textTheme),
-    filledButtonTheme: FilledButtonThemeData(style: _filledButtonStyle(textTheme)),
-    outlinedButtonTheme: OutlinedButtonThemeData(style: _outlinedButtonStyle(textTheme)),
-    textButtonTheme: TextButtonThemeData(style: _textButtonStyle(textTheme)),
+    filledButtonTheme: FilledButtonThemeData(style: _rowAligned(_filledButtonStyle(textTheme))),
+    outlinedButtonTheme: OutlinedButtonThemeData(style: _rowAligned(_outlinedButtonStyle(textTheme))),
+    textButtonTheme: TextButtonThemeData(style: _rowAligned(_textButtonStyle(textTheme))),
 
     iconButtonTheme: IconButtonThemeData(
       style: ButtonStyle(
@@ -245,6 +245,22 @@ InputDecorationTheme _inputDecorationTheme(TextTheme textTheme) {
   );
 }
 
+/// Pins a button to [AppChrome.buttonHeight] whatever its label.
+///
+/// Sizing a button from its label's line height let a « Annuler » and the
+/// « Appliquer » beside it land a pixel or two apart, and Material's padded tap
+/// target then wrapped each of them in a box of yet another height — which is
+/// what threw the footer rows out of alignment. So the styles carry no vertical
+/// padding: the height is pinned here, and the global [VisualDensity.compact]
+/// (which would shave that minimum back down) opted out of, so every button in
+/// a row measures the same. A button under a tight parent constraint — the 30px
+/// inline pills — still takes its parent's height.
+ButtonStyle _rowAligned(ButtonStyle style) => style.copyWith(
+  minimumSize: const WidgetStatePropertyAll(Size(0, AppChrome.buttonHeight)),
+  visualDensity: VisualDensity.standard,
+  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+);
+
 /// Fallback solid-iris style. The spec's primary button is an iris *gradient*
 /// with a glow, which [ButtonStyle] cannot express — [PrimaryButton] paints it.
 /// This keeps any stray [FilledButton] on-palette rather than on Material's.
@@ -262,7 +278,7 @@ ButtonStyle _filledButtonStyle(TextTheme textTheme) => ButtonStyle(
   textStyle: WidgetStatePropertyAll(textTheme.labelLarge),
   elevation: const WidgetStatePropertyAll(0),
   padding: const WidgetStatePropertyAll(
-    EdgeInsets.symmetric(horizontal: AppSpacing.md + AppSpacing.xs, vertical: 12),
+    EdgeInsets.symmetric(horizontal: AppSpacing.md + AppSpacing.xs),
   ),
   shape: const WidgetStatePropertyAll(
     RoundedRectangleBorder(
@@ -289,7 +305,7 @@ ButtonStyle _outlinedButtonStyle(TextTheme textTheme) => ButtonStyle(
   }),
   textStyle: WidgetStatePropertyAll(textTheme.labelLarge),
   padding: const WidgetStatePropertyAll(
-    EdgeInsets.symmetric(horizontal: AppSpacing.md + AppSpacing.xs, vertical: 12),
+    EdgeInsets.symmetric(horizontal: AppSpacing.md + AppSpacing.xs),
   ),
   shape: const WidgetStatePropertyAll(
     RoundedRectangleBorder(
@@ -308,7 +324,7 @@ ButtonStyle _textButtonStyle(TextTheme textTheme) => ButtonStyle(
   overlayColor: const WidgetStatePropertyAll(AppColors.overlayWash),
   textStyle: WidgetStatePropertyAll(textTheme.labelLarge),
   padding: const WidgetStatePropertyAll(
-    EdgeInsets.symmetric(horizontal: AppSpacing.sm + AppSpacing.xs, vertical: AppSpacing.sm),
+    EdgeInsets.symmetric(horizontal: AppSpacing.sm + AppSpacing.xs),
   ),
   shape: const WidgetStatePropertyAll(
     RoundedRectangleBorder(

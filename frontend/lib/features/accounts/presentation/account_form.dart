@@ -217,7 +217,6 @@ class _AccountFormState extends ConsumerState<AccountForm> {
           key: const Key('accountFormSubmitButton'),
           label: _isEditing ? l10n.accountFormSubmitEdit : l10n.accountFormSubmitCreate,
           isLoading: _isSubmitting,
-          height: 42,
           onPressed: _submit,
         ),
       ],

@@ -361,6 +361,12 @@ abstract final class AppChrome {
   static const controlPillHeight = 38.0;
   static const userPillHeight = 44.0;
 
+  /// Every button in a footer or action row — primary, secondary, ghost — is
+  /// this tall, so a « Annuler » sits exactly level with the « Appliquer »
+  /// beside it. The spec's 38–46 range is a range for standalone CTAs; paired
+  /// buttons have to agree on one number, and 38 is the low end the footers use.
+  static const buttonHeight = 38.0;
+
   /// Flush-left active rail on a nav item.
   static const navRailWidth = 3.0;
   static const navRailHeight = 22.0;

@@ -186,7 +186,6 @@ class _CsvMappingWizardState extends ConsumerState<CsvMappingWizard> {
           PrimaryButton(
             key: const Key('csvWizardNextButton'),
             label: l10n.csvWizardNext,
-            height: 42,
             onPressed: _draft.bankName.trim().isEmpty ? null : _goToColumns,
           )
         else
@@ -195,7 +194,6 @@ class _CsvMappingWizardState extends ConsumerState<CsvMappingWizard> {
             label: l10n.csvWizardConfirm,
             loadingLabel: l10n.csvWizardConfirming,
             isLoading: _isSubmitting,
-            height: 42,
             onPressed: _canConfirm ? _confirm : null,
           ),
       ],
