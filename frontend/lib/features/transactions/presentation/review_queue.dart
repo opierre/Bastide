@@ -375,12 +375,11 @@ class _ReviewRow extends ConsumerWidget {
   }
 }
 
-/// Opens the rule form, then reports what the rule changed and re-reads the
-/// list.
+/// Opens the rule form, then reports what the rule changed.
 ///
-/// The toast goes up before the refresh on purpose: the refresh is very likely
-/// to remove the row this was invoked from, and a toast asked for from a
-/// context that has just left the tree never appears.
+/// Only the toast: reloading the views a rule rewrote is the controller's job
+/// (`reloadRecategorizedViews`), because « Exécuter les règles » and a pack
+/// import move the same rows from panels that have no review queue to refresh.
 Future<void> _createAlwaysRule(
   BuildContext context,
   WidgetRef ref,
@@ -395,7 +394,6 @@ Future<void> _createAlwaysRule(
     title: l10n.alwaysRuleCreatedTitle,
     message: l10n.alwaysRuleCreatedBody(result.recategorizedCount),
   );
-  await ref.read(transactionsControllerProvider.notifier).refresh();
 }
 
 class _Label extends StatelessWidget {

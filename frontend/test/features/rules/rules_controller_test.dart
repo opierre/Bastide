@@ -1,7 +1,9 @@
 import 'package:finstride/core/api/api_client.dart';
 import 'package:finstride/core/api/api_client_provider.dart';
+import 'package:finstride/features/dashboard/application/dashboard_controller.dart';
 import 'package:finstride/features/rules/application/rules_controller.dart';
 import 'package:finstride/features/rules/domain/rule.dart';
+import 'package:finstride/features/transactions/application/transactions_controller.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
@@ -225,4 +227,88 @@ void main() {
 
     expect(await container.read(rulesControllerProvider.notifier).apply(), 48);
   });
+
+  group('apply reloads what it recategorized', () {
+    setUp(() {
+      when(() => apiClient.get('/rules')).thenAnswer((_) async => <dynamic>[]);
+      when(
+        () => apiClient.post('/rules/apply', body: any(named: 'body')),
+      ).thenAnswer((_) async => {'recategorized_count': 48});
+      when(
+        () => apiClient.get('/transactions', query: any(named: 'query')),
+      ).thenAnswer((_) async => _emptyPage());
+      when(() => apiClient.get('/accounts')).thenAnswer((_) async => <dynamic>[]);
+      when(
+        () => apiClient.get('/dashboard/summary', query: any(named: 'query')),
+      ).thenAnswer((_) async => _summaryJson());
+      when(
+        () => apiClient.get('/dashboard/trends'),
+      ).thenAnswer((_) async => _trendsJson());
+    });
+
+    test('the transaction list is re-read, so the new categories show', () async {
+      await container.read(transactionsControllerProvider.future);
+      await container.read(rulesControllerProvider.future);
+      // The load above is the only read so far; what follows is the refresh.
+      verify(() => apiClient.get('/transactions', query: any(named: 'query'))).called(1);
+
+      await container.read(rulesControllerProvider.notifier).apply();
+
+      verify(() => apiClient.get('/transactions', query: any(named: 'query'))).called(1);
+    });
+
+    test('the dashboard is invalidated, so the répartition follows', () async {
+      await container.read(dashboardControllerProvider.future);
+      await container.read(rulesControllerProvider.future);
+
+      await container.read(rulesControllerProvider.notifier).apply();
+      await container.read(dashboardControllerProvider.future);
+
+      // Twice: the first load, then the rebuild the invalidation forced. A
+      // dashboard still showing the pre-run split is the bug this guards.
+      verify(
+        () => apiClient.get('/dashboard/summary', query: any(named: 'query')),
+      ).called(2);
+    });
+
+    test('a run that moved nothing refreshes nothing', () async {
+      when(
+        () => apiClient.post('/rules/apply', body: any(named: 'body')),
+      ).thenAnswer((_) async => {'recategorized_count': 0});
+
+      await container.read(transactionsControllerProvider.future);
+      await container.read(rulesControllerProvider.future);
+      verify(() => apiClient.get('/transactions', query: any(named: 'query'))).called(1);
+
+      await container.read(rulesControllerProvider.notifier).apply();
+
+      verifyNever(() => apiClient.get('/transactions', query: any(named: 'query')));
+    });
+  });
 }
+
+Map<String, dynamic> _emptyPage() => {
+  'items': <dynamic>[],
+  'page': 1,
+  'page_size': 50,
+  'total': 0,
+};
+
+Map<String, dynamic> _summaryJson() => {
+  'income_minor': 250000,
+  'expense_minor': -180000,
+  'net_minor': 70000,
+  'savings_rate': 0.28,
+  'income_delta_pct': 0.0,
+  'expense_delta_pct': 0.0,
+  'net_delta_pct': 0.0,
+  'savings_rate_delta_pct': 0.0,
+  'by_category': <dynamic>[],
+  'currency': 'EUR',
+};
+
+Map<String, dynamic> _trendsJson() => {
+  'monthly_series': <dynamic>[],
+  'savings_series': <dynamic>[],
+  'currency': 'EUR',
+};

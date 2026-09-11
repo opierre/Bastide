@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../data/rules_repository.dart';
 import '../domain/rule.dart';
+import 'recategorized_reload.dart';
 
 /// The priority-ordered rule list.
 ///
@@ -71,6 +72,10 @@ class RulesController extends AsyncNotifier<List<Rule>> {
     state = AsyncValue.data(
       _sorted([...state.value ?? const <Rule>[], result.rule]),
     );
+    // Only when the rule actually moved rows: `applyNow` off writes a rule and
+    // nothing else, and the corrected row itself already came back from the
+    // category patch that opened this.
+    if (result.recategorizedCount > 0) await reloadRecategorizedViews(ref);
     return result;
   }
 
@@ -162,7 +167,15 @@ class RulesController extends AsyncNotifier<List<Rule>> {
 
   /// Re-runs the rules over existing transactions and returns the count the
   /// toast reports.
-  Future<int> apply() => ref.read(rulesRepositoryProvider).apply();
+  ///
+  /// The count is the toast's; [reloadRecategorizedViews] is what makes the
+  /// rest of the app agree with it. A bulk recategorization the user is told
+  /// about but cannot see anywhere reads as one that silently failed.
+  Future<int> apply() async {
+    final count = await ref.read(rulesRepositoryProvider).apply();
+    if (count > 0) await reloadRecategorizedViews(ref);
+    return count;
+  }
 
   /// Priority order, as the backend lists them — kept locally so an optimistic
   /// insert lands where the next reload would put it.

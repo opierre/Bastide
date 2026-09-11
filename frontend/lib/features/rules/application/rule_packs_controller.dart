@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../data/rule_packs_repository.dart';
 import '../domain/rule_pack.dart';
+import 'recategorized_reload.dart';
 import 'rules_controller.dart';
 
 /// The extension a pack is written and read as.
@@ -100,7 +101,8 @@ class RulePacksController extends Notifier<void> {
   ///
   /// The rules list is reloaded rather than patched: an import creates several
   /// rules at once and renumbers nothing, so the server's ordering is the only
-  /// truthful one to show next.
+  /// truthful one to show next. An import that also applied the pack has
+  /// rewritten categories across the app, so those views are reloaded too.
   Future<RulePackImportResult> import(
     PendingRulePack pending, {
     bool applyNow = false,
@@ -109,6 +111,7 @@ class RulePacksController extends Notifier<void> {
         .read(rulePacksRepositoryProvider)
         .import(pack: pending.pack, builtinId: pending.builtinId, applyNow: applyNow);
     ref.invalidate(rulesControllerProvider);
+    if (result.recategorizedCount > 0) await reloadRecategorizedViews(ref);
     return result;
   }
 
