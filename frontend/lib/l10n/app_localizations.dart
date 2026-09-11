@@ -1910,6 +1910,18 @@ abstract class AppLocalizations {
   /// **'La règle n\'a pas pu être modifiée'**
   String get rulesToggleFailed;
 
+  /// Tooltip on the ✕ beside the category filter chip in the rules view, opened from a category card's footer.
+  ///
+  /// In fr, this message translates to:
+  /// **'Afficher toutes les règles'**
+  String get rulesFilterClear;
+
+  /// Shown inside the rules card when the category filter leaves no rule.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucune règle ne cible cette catégorie.'**
+  String get rulesFilterEmpty;
+
   /// Retry button shown when the rules list fails to load.
   ///
   /// In fr, this message translates to:

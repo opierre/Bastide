@@ -1384,6 +1384,14 @@
   "@rulesToggleFailed": {
     "description": "Toast headline when enabling or disabling a rule failed and the switch was put back."
   },
+  "rulesFilterClear": "Afficher toutes les règles",
+  "@rulesFilterClear": {
+    "description": "Tooltip on the ✕ beside the category filter chip in the rules view, opened from a category card's footer."
+  },
+  "rulesFilterEmpty": "Aucune règle ne cible cette catégorie.",
+  "@rulesFilterEmpty": {
+    "description": "Shown inside the rules card when the category filter leaves no rule."
+  },
   "rulesRetry": "Réessayer",
   "@rulesRetry": {
     "description": "Retry button shown when the rules list fails to load."

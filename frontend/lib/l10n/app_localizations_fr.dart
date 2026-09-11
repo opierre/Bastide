@@ -1090,6 +1090,12 @@ class AppLocalizationsFr extends AppLocalizations {
   String get rulesToggleFailed => 'La règle n\'a pas pu être modifiée';
 
   @override
+  String get rulesFilterClear => 'Afficher toutes les règles';
+
+  @override
+  String get rulesFilterEmpty => 'Aucune règle ne cible cette catégorie.';
+
+  @override
   String get rulesRetry => 'Réessayer';
 
   @override

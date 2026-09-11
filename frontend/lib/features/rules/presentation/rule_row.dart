@@ -26,9 +26,15 @@ class RuleRow extends StatelessWidget {
     required this.index,
     required this.onEdit,
     required this.onToggle,
+    this.canReorder = true,
   });
 
   final Rule rule;
+
+  /// `false` while the list is filtered to one category: the handle dims and
+  /// stops dragging, because moving a rule within a subset says nothing about
+  /// where it lands among the rules the filter hides.
+  final bool canReorder;
 
   /// The rule's target. `null` when the catalog hasn't loaded yet, or when the
   /// category was deleted out from under the rule — rendered as the dashed
@@ -52,17 +58,25 @@ class RuleRow extends StatelessWidget {
         opacity: rule.enabled ? 1 : 0.5,
         child: Row(
           children: [
-            ReorderableDragStartListener(
-              index: index,
-              child: const MouseRegion(
-                cursor: SystemMouseCursors.grab,
-                child: Icon(
-                  Icons.drag_indicator_rounded,
-                  size: 18,
-                  color: AppColors.textDisabled,
+            if (canReorder)
+              ReorderableDragStartListener(
+                index: index,
+                child: const MouseRegion(
+                  cursor: SystemMouseCursors.grab,
+                  child: Icon(
+                    Icons.drag_indicator_rounded,
+                    size: 18,
+                    color: AppColors.textDisabled,
+                  ),
                 ),
+              )
+            else
+              Icon(
+                Icons.drag_indicator_rounded,
+                key: Key('ruleHandleDisabled-${rule.id}'),
+                size: 18,
+                color: AppColors.textDisabled.withValues(alpha: 0.4),
               ),
-            ),
             const SizedBox(width: AppSpacing.sm),
             _PriorityPlate(priority: rule.priority),
             const SizedBox(width: AppSpacing.sm + AppSpacing.xs),

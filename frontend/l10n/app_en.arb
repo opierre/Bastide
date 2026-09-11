@@ -353,6 +353,8 @@
   "rulesApplyFailed": "The rule run failed",
   "rulesReorderFailed": "The new order could not be saved",
   "rulesToggleFailed": "The rule could not be changed",
+  "rulesFilterClear": "Show all rules",
+  "rulesFilterEmpty": "No rule targets this category.",
   "rulesRetry": "Try again",
   "rulesEmptyTitle": "Automate your sorting",
   "rulesEmptyBody": "A rule recognizes a label — “CARREFOUR” — and applies its category to every matching transaction, today and on every import after.",

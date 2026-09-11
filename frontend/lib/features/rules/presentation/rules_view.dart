@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/l10n/category_display.dart';
 import '../../../core/theme/tokens.dart';
 import '../../../core/widgets/app_card.dart';
+import '../../../core/widgets/category_chip.dart';
 import '../../../core/widgets/app_toast.dart';
 import '../../../core/widgets/inline_banner.dart';
 import '../../../core/widgets/primary_button.dart';
@@ -11,6 +13,7 @@ import '../../../l10n/app_localizations.dart';
 import '../../categories/application/categories_controller.dart';
 import '../../categories/domain/category.dart';
 import '../application/rules_controller.dart';
+import '../application/rules_filter.dart';
 import '../domain/rule.dart';
 import 'rule_editor_modal.dart';
 import 'rule_error_localizer.dart';
@@ -30,13 +33,25 @@ class RulesView extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context)!;
-    final rules = ref.watch(rulesControllerProvider);
+    final rules = ref.watch(visibleRulesProvider);
+    final filtered = ref.watch(rulesCategoryFilterProvider) != null;
 
     return switch (rules) {
+      // Filtered to nothing is not "you have no rules": the cold-start
+      // explanation would be wrong, so the card says what the filter found.
+      AsyncData(:final value) when value.isEmpty && filtered => AppCard(
+        child: Text(
+          l10n.rulesFilterEmpty,
+          key: const Key('rulesFilterEmpty'),
+          style: Theme.of(
+            context,
+          ).textTheme.bodySmall?.copyWith(color: AppColors.textSecondary),
+        ),
+      ),
       AsyncData(:final value) when value.isEmpty => const RulesEmptyState(
         extraAction: BuiltinPackOffer(),
       ),
-      AsyncData(:final value) => _RulesCard(rules: value),
+      AsyncData(:final value) => _RulesCard(rules: value, canReorder: !filtered),
       AsyncError(:final error) => ErrorStateView(
         message: localizeRuleError(l10n, error),
         messageKey: const Key('rulesErrorText'),
@@ -54,9 +69,10 @@ class RulesView extends ConsumerWidget {
 }
 
 class _RulesCard extends ConsumerWidget {
-  const _RulesCard({required this.rules});
+  const _RulesCard({required this.rules, required this.canReorder});
 
   final List<Rule> rules;
+  final bool canReorder;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -74,7 +90,9 @@ class _RulesCard extends ConsumerWidget {
         shrinkWrap: true,
         buildDefaultDragHandles: false,
         itemCount: rules.length,
-        onReorderItem: (oldIndex, newIndex) => _reorder(context, ref, oldIndex, newIndex),
+        onReorderItem: (oldIndex, newIndex) {
+          if (canReorder) _reorder(context, ref, oldIndex, newIndex);
+        },
         itemBuilder: (context, index) {
           final rule = rules[index];
           return Padding(
@@ -84,6 +102,7 @@ class _RulesCard extends ConsumerWidget {
               rule: rule,
               category: byId[rule.categoryId],
               index: index,
+              canReorder: canReorder,
               onEdit: () => showRuleEditor(context, initial: rule),
               onToggle: (enabled) => _toggle(context, ref, l10n, rule, enabled),
             ),
@@ -184,6 +203,7 @@ class _RulesViewHeaderActionsState extends ConsumerState<RulesViewHeaderActions>
 
     return Row(
       children: [
+        const _CategoryFilterChip(),
         Expanded(
           child: Text(
             l10n.rulesPriorityNote,
@@ -201,6 +221,48 @@ class _RulesViewHeaderActionsState extends ConsumerState<RulesViewHeaderActions>
         const SizedBox(width: AppSpacing.xs),
         const RulePackMenu(),
       ],
+    );
+  }
+}
+
+/// The category the list is narrowed to, as its own chip with a ✕ that lifts
+/// the filter. Nothing at all when the list is unfiltered.
+class _CategoryFilterChip extends ConsumerWidget {
+  const _CategoryFilterChip();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final filter = ref.watch(rulesCategoryFilterProvider);
+    if (filter == null) return const SizedBox.shrink();
+
+    final l10n = AppLocalizations.of(context)!;
+    final categories = ref.watch(categoriesControllerProvider).value ?? const <AppCategory>[];
+    final category = categories.where((entry) => entry.id == filter).firstOrNull;
+
+    return Padding(
+      key: const Key('rulesFilterChip'),
+      padding: const EdgeInsets.only(right: AppSpacing.md),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (category == null)
+            CategoryChip.uncategorized(label: l10n.ruleTargetMissing)
+          else
+            CategoryChip(
+              label: localizedCategoryName(l10n, category.name),
+              slug: categorySlugFor(name: category.name, kind: category.kind),
+            ),
+          IconButton(
+            key: const Key('rulesFilterClear'),
+            onPressed: () => ref.read(rulesCategoryFilterProvider.notifier).set(null),
+            tooltip: l10n.rulesFilterClear,
+            iconSize: 14,
+            visualDensity: VisualDensity.compact,
+            color: AppColors.textSecondary,
+            icon: const Icon(Icons.close_rounded),
+          ),
+        ],
+      ),
     );
   }
 }
