@@ -11,6 +11,7 @@ import '../../../core/widgets/labeled_field.dart';
 import '../../../core/widgets/state_views.dart';
 import '../../../l10n/app_localizations.dart';
 import '../application/settings_controller.dart';
+import 'lock_callout.dart';
 
 /// Where « En savoir plus » sends a user with no engine: the download page of
 /// the runtime `PROJECT.md` §2 names as the Phase 2 default.
@@ -114,7 +115,7 @@ class _CardState extends ConsumerState<_Card> {
           // The card's centerpiece, and unconditional: what the user is being
           // asked to opt into is exactly the promise this makes, so it is
           // present whether the toggle is on or off.
-          const _PrivacyCallout(),
+          LockCallout(key: const Key('settingsAiPrivacy'), message: l10n.settingsAiPrivacy),
           const SizedBox(height: AppSpacing.md),
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -220,42 +221,6 @@ class _Header extends StatelessWidget {
           semanticLabel: l10n.settingsAiToggleLabel,
         ),
       ],
-    );
-  }
-}
-
-/// The iris-tinted lock plate. Not an [InlineBanner]: the banner tones are
-/// semantic — this is neither a warning nor a success, it is the card's
-/// standing promise.
-class _PrivacyCallout extends StatelessWidget {
-  const _PrivacyCallout();
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      key: const Key('settingsAiPrivacy'),
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppSpacing.sm + AppSpacing.xs,
-        vertical: AppSpacing.sm + AppSpacing.xs,
-      ),
-      decoration: BoxDecoration(
-        color: AppColors.iris.withValues(alpha: 0.08),
-        borderRadius: BorderRadius.circular(AppRadii.md),
-        border: Border.all(color: AppColors.iris.withValues(alpha: 0.25)),
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Icon(Icons.lock_outline_rounded, size: 15, color: AppColors.iris),
-          const SizedBox(width: AppSpacing.sm),
-          Expanded(
-            child: Text(
-              AppLocalizations.of(context)!.settingsAiPrivacy,
-              style: AppTextStyles.helper.copyWith(color: AppColors.textPrimary),
-            ),
-          ),
-        ],
-      ),
     );
   }
 }
