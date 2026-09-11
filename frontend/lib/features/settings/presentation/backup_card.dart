@@ -11,9 +11,9 @@ import '../../../core/widgets/primary_button.dart';
 import '../../../l10n/app_localizations.dart';
 import '../application/backup_controller.dart';
 import '../application/settings_controller.dart';
-import '../domain/backup.dart';
 import 'backup_format.dart';
 import 'lock_callout.dart';
+import 'refusal_banner.dart';
 import 'restore_confirm_modal.dart';
 
 /// The « Sauvegarde et restauration » card in Settings › Données
@@ -104,14 +104,20 @@ class BackupCard extends ConsumerWidget {
             ),
           ],
           const SizedBox(height: AppSpacing.md),
-          LockCallout(
-            key: const Key('settingsBackupPrivacy'),
-            message: l10n.settingsBackupPrivacy,
-          ),
-          if (state.restoreFailure != null) ...[
-            const SizedBox(height: AppSpacing.sm + AppSpacing.xs),
-            _RestoreRefusedBanner(failure: state.restoreFailure!),
-          ],
+          // ⑨: the refusal takes the callout's place rather than stacking under
+          // it. One plate holds this slot, and while a file has just been
+          // refused, why it was refused outranks a standing notice.
+          if (state.restoreFailure != null)
+            RefusalBanner(
+              key: const Key('settingsBackupRestoreError'),
+              lead: l10n.settingsBackupRestoreFailedLead,
+              message: backupFailureMessage(l10n, state.restoreFailure!),
+            )
+          else
+            LockCallout(
+              key: const Key('settingsBackupPrivacy'),
+              message: l10n.settingsBackupPrivacy,
+            ),
           const SizedBox(height: AppSpacing.md),
           const Divider(height: 1, color: AppColors.borderSubtle),
           const SizedBox(height: AppSpacing.sm + AppSpacing.xs),
@@ -257,54 +263,3 @@ class _RestoreRow extends StatelessWidget {
   }
 }
 
-/// ⑨: the red banner with a bold lead. Its own widget rather than an
-/// [InlineBanner] because the spec draws a two-weight message.
-class _RestoreRefusedBanner extends StatelessWidget {
-  const _RestoreRefusedBanner({required this.failure});
-
-  final BackupFailure failure;
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
-    final style = Theme.of(context).textTheme.bodySmall?.copyWith(color: AppColors.textPrimary);
-
-    return Container(
-      key: const Key('settingsBackupRestoreError'),
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppSpacing.sm + AppSpacing.xs,
-        vertical: AppSpacing.sm + 2,
-      ),
-      decoration: BoxDecoration(
-        color: AppColors.negative.withValues(alpha: 0.08),
-        borderRadius: BorderRadius.circular(AppRadii.md),
-        border: Border.all(color: AppColors.negative.withValues(alpha: 0.32)),
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Icon(Icons.info_outline_rounded, size: 15, color: AppColors.negative),
-          const SizedBox(width: AppSpacing.sm),
-          Expanded(
-            child: Text.rich(
-              TextSpan(
-                children: [
-                  TextSpan(
-                    text: l10n.settingsBackupRestoreFailedLead,
-                    style: const TextStyle(
-                      fontWeight: FontWeight.w700,
-                      color: AppColors.negative,
-                    ),
-                  ),
-                  const TextSpan(text: ' '),
-                  TextSpan(text: backupFailureMessage(l10n, failure)),
-                ],
-              ),
-              style: style,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
