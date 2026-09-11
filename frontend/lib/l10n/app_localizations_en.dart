@@ -912,17 +912,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get categoriesRetry => 'Try again';
 
   @override
-  String categoriesSpendCaption(DateTime month) {
-    final intl.DateFormat monthDateFormat = intl.DateFormat.yMMMM(localeName);
-    final String monthString = monthDateFormat.format(month);
-
-    return 'Spending in $monthString';
-  }
-
-  @override
-  String get categorySpendNone => '—';
-
-  @override
   String get categoryBadgeSystem => 'System';
 
   @override
@@ -933,10 +922,28 @@ class AppLocalizationsEn extends AppLocalizations {
       'System category: it cannot be edited or deleted.';
 
   @override
+  String get categoryActionsTooltip => 'Actions';
+
+  @override
   String get categoryEdit => 'Edit';
 
   @override
   String get categoryDelete => 'Delete';
+
+  @override
+  String get categoryAddSubcategory => 'Subcategory';
+
+  @override
+  String categoryRuleCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count automatic rules',
+      one: '1 automatic rule',
+      zero: 'No rules',
+    );
+    return '$_temp0';
+  }
 
   @override
   String get categoryDeleteConfirmTitle => 'Delete this category?';

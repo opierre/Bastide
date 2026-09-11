@@ -919,17 +919,6 @@ class AppLocalizationsFr extends AppLocalizations {
   String get categoriesRetry => 'Réessayer';
 
   @override
-  String categoriesSpendCaption(DateTime month) {
-    final intl.DateFormat monthDateFormat = intl.DateFormat.yMMMM(localeName);
-    final String monthString = monthDateFormat.format(month);
-
-    return 'Dépenses de $monthString';
-  }
-
-  @override
-  String get categorySpendNone => '—';
-
-  @override
   String get categoryBadgeSystem => 'Système';
 
   @override
@@ -940,10 +929,28 @@ class AppLocalizationsFr extends AppLocalizations {
       'Catégorie du système : elle ne peut pas être modifiée ni supprimée.';
 
   @override
+  String get categoryActionsTooltip => 'Actions';
+
+  @override
   String get categoryEdit => 'Modifier';
 
   @override
   String get categoryDelete => 'Supprimer';
+
+  @override
+  String get categoryAddSubcategory => 'Sous-catégorie';
+
+  @override
+  String categoryRuleCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count règles automatiques',
+      one: '1 règle automatique',
+      zero: 'Aucune règle',
+    );
+    return '$_temp0';
+  }
 
   @override
   String get categoryDeleteConfirmTitle => 'Supprimer cette catégorie ?';

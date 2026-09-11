@@ -1616,19 +1616,7 @@ abstract class AppLocalizations {
   /// **'Réessayer'**
   String get categoriesRetry;
 
-  /// Caption above the category list, naming the month the spend-share bars and amounts cover. The panel has no month picker, and the month is the latest one with data rather than necessarily the current one. French keeps the month name lowercase after « de ».
-  ///
-  /// In fr, this message translates to:
-  /// **'Dépenses de {month}'**
-  String categoriesSpendCaption(DateTime month);
-
-  /// Em dash shown in a category row's amount column when nothing was spent in that category this month. A dash rather than « 0,00 € », which would read as a measurement of zero instead of an absence of rows.
-  ///
-  /// In fr, this message translates to:
-  /// **'—'**
-  String get categorySpendNone;
-
-  /// Neutral badge on a seeded, read-only category row.
+  /// Neutral badge on a seeded, read-only category card.
   ///
   /// In fr, this message translates to:
   /// **'Système'**
@@ -1640,23 +1628,41 @@ abstract class AppLocalizations {
   /// **'Personnalisée'**
   String get categoryBadgeCustom;
 
-  /// Tooltip on the lock glyph of a system category row. States the refusal the API also enforces.
+  /// Tooltip on the lock glyph of a system category card. States the refusal the API also enforces.
   ///
   /// In fr, this message translates to:
   /// **'Catégorie du système : elle ne peut pas être modifiée ni supprimée.'**
   String get categorySystemLockedTooltip;
 
-  /// Tooltip on the ⋯ affordance of a user category row.
+  /// Tooltip on the ⋯ menu of a user category card.
+  ///
+  /// In fr, this message translates to:
+  /// **'Actions'**
+  String get categoryActionsTooltip;
+
+  /// ⋯ menu entry opening the edit modal (name, icon, color) of a user category.
   ///
   /// In fr, this message translates to:
   /// **'Modifier'**
   String get categoryEdit;
 
-  /// Tooltip on the trash affordance of a user category row, and label of the delete confirmation button.
+  /// ⋯ menu entry and edit-modal action deleting a user category, and label of the delete confirmation button.
   ///
   /// In fr, this message translates to:
   /// **'Supprimer'**
   String get categoryDelete;
+
+  /// Dashed ghost chip at the end of a category card's subcategories, drawn after a plus glyph. Opens the create modal with this category preset as the parent.
+  ///
+  /// In fr, this message translates to:
+  /// **'Sous-catégorie'**
+  String get categoryAddSubcategory;
+
+  /// Footer of a category card: how many rules target this category or its subcategories, disabled ones included. The zero case is drawn in amber.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, =0{Aucune règle} one{1 règle automatique} other{{count} règles automatiques}}'**
+  String categoryRuleCount(int count);
 
   /// Title of the delete-category confirmation dialog.
   ///

@@ -13,15 +13,24 @@ import '../../../l10n/app_localizations.dart';
 import '../application/categories_controller.dart';
 import '../domain/category.dart';
 import 'category_color.dart';
+import 'category_delete.dart';
 import 'category_error_localizer.dart';
 import 'category_labels.dart';
 
 /// Opens the create/edit category modal. Resolves to the saved category, or
-/// `null` when the user cancelled.
-Future<AppCategory?> showCategoryForm(BuildContext context, {AppCategory? initial}) {
+/// `null` when the user cancelled or deleted it.
+///
+/// [parent] presets a new category's parent — the « + Sous-catégorie » chip on
+/// a card — and with it the kind and colour, since a subcategory is drawn in
+/// its parent's hue and almost always shares its kind.
+Future<AppCategory?> showCategoryForm(
+  BuildContext context, {
+  AppCategory? initial,
+  AppCategory? parent,
+}) {
   return showDialog<AppCategory>(
     context: context,
-    builder: (_) => CategoryFormModal(initial: initial),
+    builder: (_) => CategoryFormModal(initial: initial, parent: parent),
   );
 }
 
@@ -31,9 +40,10 @@ Future<AppCategory?> showCategoryForm(BuildContext context, {AppCategory? initia
 /// System categories never reach it: they have no edit affordance, and the API
 /// would 404 the patch anyway. The form only ever writes the user's own rows.
 class CategoryFormModal extends ConsumerStatefulWidget {
-  const CategoryFormModal({super.key, this.initial});
+  const CategoryFormModal({super.key, this.initial, this.parent});
 
   final AppCategory? initial;
+  final AppCategory? parent;
 
   @override
   ConsumerState<CategoryFormModal> createState() => _CategoryFormModalState();
@@ -43,12 +53,14 @@ class _CategoryFormModalState extends ConsumerState<CategoryFormModal> {
   final _formKey = GlobalKey<FormState>();
   late final _nameController = TextEditingController(text: widget.initial?.name);
 
-  late String _kind = widget.initial?.kind ?? 'expense';
-  late String? _parentId = widget.initial?.parentId;
+  late String _kind = widget.initial?.kind ?? widget.parent?.kind ?? 'expense';
+  late String? _parentId = widget.initial?.parentId ?? widget.parent?.id;
   late String _icon = widget.initial?.icon ?? 'autres';
-  late Color _color = widget.initial == null
-      ? categoryPalette.last
-      : categoryColor(widget.initial!);
+  late Color _color = switch ((widget.initial, widget.parent)) {
+    (final AppCategory initial, _) => categoryColor(initial),
+    (null, final AppCategory parent) => categoryColor(parent),
+    _ => categoryPalette.last,
+  };
 
   bool _isSubmitting = false;
   String? _errorText;
@@ -106,6 +118,30 @@ class _CategoryFormModalState extends ConsumerState<CategoryFormModal> {
     }
   }
 
+  /// Deletes the category being edited, after the same confirmation the card's
+  /// ⋯ menu asks. The subcategory chips have no menu of their own, so this is
+  /// where a user's subcategory is removed.
+  Future<void> _delete() async {
+    final category = widget.initial!;
+    if (!await confirmCategoryDelete(context, category)) return;
+    if (!mounted) return;
+    setState(() {
+      _isSubmitting = true;
+      _errorText = null;
+    });
+    try {
+      await ref.read(categoriesControllerProvider.notifier).delete(category.id);
+      if (!mounted) return;
+      Navigator.of(context).pop();
+    } catch (error) {
+      if (!mounted) return;
+      setState(() {
+        _isSubmitting = false;
+        _errorText = localizeCategoryError(AppLocalizations.of(context)!, error);
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
@@ -115,6 +151,13 @@ class _CategoryFormModalState extends ConsumerState<CategoryFormModal> {
       title: _isEditing ? l10n.categoryFormEditTitle : l10n.categoryFormCreateTitle,
       width: 480,
       actions: [
+        // First in the footer, as in the rule editor: furthest from « Enregistrer ».
+        if (_isEditing)
+          TextButton(
+            key: const Key('categoryFormDelete'),
+            onPressed: _isSubmitting ? null : _delete,
+            child: Text(l10n.categoryDelete),
+          ),
         OutlinedButton(
           onPressed: _isSubmitting ? null : () => Navigator.of(context).pop(),
           child: Text(l10n.categoryFormCancel),

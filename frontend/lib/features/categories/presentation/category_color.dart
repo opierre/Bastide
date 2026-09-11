@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../core/l10n/category_display.dart';
 import '../../../core/theme/tokens.dart';
+import '../../../core/widgets/category_chip.dart';
 import '../domain/category.dart';
 
 /// The hue a category is drawn in — its swatch here, its chip everywhere else.
@@ -18,6 +19,19 @@ Color categoryColor(AppCategory category) {
   return CategoryHues.forSlug(
     categorySlugFor(name: category.name, kind: category.kind),
   );
+}
+
+/// The glyph a category is drawn with on its card.
+///
+/// A system category takes its chip's glyph, so a category looks the same on
+/// the panel as on every transaction row (`docs/design/08`). A user category
+/// takes the icon chosen in its modal — the form stores one of the
+/// [CategoryIcons] slugs — falling back to the chip's glyph for a slug the app
+/// doesn't know.
+IconData categoryIcon(AppCategory category) {
+  final chipSlug = categorySlugFor(name: category.name, kind: category.kind);
+  if (category.isSystem) return CategoryIcons.forSlug(chipSlug);
+  return CategoryIcons.bySlug[category.icon] ?? CategoryIcons.forSlug(chipSlug);
 }
 
 /// The palette the create/edit form offers. The design system pins these hues
