@@ -4,18 +4,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
 import '../../../core/api/api_client.dart';
-import '../../accounts/application/accounts_controller.dart';
-import '../../categories/application/categories_controller.dart';
-import '../../categorization/application/run_controller.dart';
-import '../../dashboard/application/dashboard_controller.dart';
-import '../../goals/application/goals_controller.dart';
-import '../../imports/application/imports_controller.dart';
-import '../../recurring/application/subscriptions_controller.dart';
-import '../../rules/application/rules_controller.dart';
-import '../../transactions/application/transactions_controller.dart';
 import '../data/backup_repository.dart';
 import '../domain/backup.dart';
 import 'settings_controller.dart';
+import 'user_data_reload.dart';
 
 /// The extension a backup is written and read as.
 const backupExtension = 'finstride';
@@ -154,21 +146,12 @@ class BackupController extends Notifier<BackupState> {
 
   /// Every cached view of the user's data now describes data that no longer
   /// exists, so each one is dropped and reloads on next read.
+  ///
+  /// The settings go too, unlike after a reset: an archive carries the user's
+  /// settings row and has just replaced it.
   void _reloadEverything() {
-    ref
-      ..invalidate(accountsControllerProvider)
-      ..invalidate(transactionsControllerProvider)
-      ..invalidate(dashboardControllerProvider)
-      ..invalidate(categoriesControllerProvider)
-      ..invalidate(rulesControllerProvider)
-      ..invalidate(subscriptionsControllerProvider)
-      ..invalidate(seriesDetailProvider)
-      ..invalidate(goalsControllerProvider)
-      ..invalidate(goalAllocationsProvider)
-      ..invalidate(importsControllerProvider)
-      ..invalidate(runControllerProvider)
-      ..invalidate(aiAvailabilityProvider)
-      ..invalidate(settingsControllerProvider);
+    reloadUserData(ref);
+    ref.invalidate(settingsControllerProvider);
   }
 
   static String _withExtension(String path) =>
