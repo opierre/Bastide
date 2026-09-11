@@ -371,12 +371,21 @@ def _get_or_create(db: Session, seed: CategorySeed, parent_id: str | None) -> Ca
     return category
 
 
-def seed_categories(db: Session) -> None:
-    """Insert the system category catalog, skipping any i18n key that already exists."""
+def ensure_system_categories(db: Session) -> None:
+    """Insert the missing system categories, skipping any i18n key that already exists.
+
+    Leaves the transaction open, so a caller that is already in one — the database reset, which
+    empties a profile and restores the catalog atomically — commits the whole thing once.
+    """
     for group in SYSTEM_CATEGORIES:
         parent = _get_or_create(db, group, parent_id=None)
         for child in group.children:
             _get_or_create(db, child, parent_id=parent.id)
+
+
+def seed_categories(db: Session) -> None:
+    """Insert the system category catalog, skipping any i18n key that already exists."""
+    ensure_system_categories(db)
     db.commit()
 
 
