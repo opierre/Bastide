@@ -663,5 +663,20 @@
   "dashboardGoalsProgress": "{saved} / {target}",
   "dashboardGoalsReached": "Reached",
   "goalFormDatePick": "Pick a target date",
-  "allocationDatePick": "Pick a date"
+  "allocationDatePick": "Pick a date",
+  "settingsResetTitle": "Danger zone",
+  "settingsResetBadge": "IRREVERSIBLE",
+  "settingsResetSubtitle": "Resetting the database deletes this profile's transactions, accounts, rules, custom categories, goals and subscriptions. Exported backups aren't touched.",
+  "settingsResetButton": "Reset…",
+  "settingsResetConfirmTitle": "Reset the database?",
+  "settingsResetConfirmLead": "Everything in {name}'s profile will be permanently deleted:",
+  "settingsResetConfirmCategories": "Custom categories",
+  "settingsResetConfirmNote": "System categories, your preferences and the AI settings are kept. Backup files you've already exported stay intact.",
+  "settingsResetConfirmWarning": "This can't be undone. Export a backup before you continue.",
+  "settingsResetConfirmWord": "DELETE",
+  "settingsResetConfirmLabel": "Type {word} to confirm",
+  "settingsResetConfirmSubmit": "Delete everything",
+  "settingsResetDone": "Database reset. The system categories have been restored.",
+  "settingsResetFailedLead": "Reset not possible.",
+  "settingsResetErrorUnknown": "The reset failed. Your data hasn't been changed."
 }

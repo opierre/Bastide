@@ -2393,4 +2393,58 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get allocationDatePick => 'Choisir une date';
+
+  @override
+  String get settingsResetTitle => 'Zone de danger';
+
+  @override
+  String get settingsResetBadge => 'IRRÉVERSIBLE';
+
+  @override
+  String get settingsResetSubtitle =>
+      'Réinitialiser la base de données supprime transactions, comptes, règles, catégories personnalisées, objectifs et abonnements de ce profil. Les sauvegardes exportées ne sont pas touchées.';
+
+  @override
+  String get settingsResetButton => 'Réinitialiser…';
+
+  @override
+  String get settingsResetConfirmTitle => 'Réinitialiser la base de données ?';
+
+  @override
+  String settingsResetConfirmLead(String name) {
+    return 'Tout le contenu du profil $name sera supprimé définitivement :';
+  }
+
+  @override
+  String get settingsResetConfirmCategories => 'Catégories personnalisées';
+
+  @override
+  String get settingsResetConfirmNote =>
+      'Les catégories système, vos préférences et le réglage IA sont conservés. Les fichiers de sauvegarde déjà exportés restent intacts.';
+
+  @override
+  String get settingsResetConfirmWarning =>
+      'Cette action est irréversible. Exportez une sauvegarde avant de continuer.';
+
+  @override
+  String get settingsResetConfirmWord => 'SUPPRIMER';
+
+  @override
+  String settingsResetConfirmLabel(String word) {
+    return 'Saisissez $word pour confirmer';
+  }
+
+  @override
+  String get settingsResetConfirmSubmit => 'Tout supprimer';
+
+  @override
+  String get settingsResetDone =>
+      'Base de données réinitialisée. Les catégories système ont été restaurées.';
+
+  @override
+  String get settingsResetFailedLead => 'Réinitialisation impossible.';
+
+  @override
+  String get settingsResetErrorUnknown =>
+      'La réinitialisation a échoué. Vos données n\'ont pas été modifiées.';
 }

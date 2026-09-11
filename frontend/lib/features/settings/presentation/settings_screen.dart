@@ -16,6 +16,7 @@ import '../../../l10n/app_localizations.dart';
 import '../../auth/presentation/currency_label.dart';
 import 'ai_settings_card.dart';
 import 'backup_card.dart';
+import 'danger_zone_card.dart';
 
 /// Which group of settings the right-hand column is showing.
 enum SettingsSection { profile, preferences, data, about }
@@ -249,9 +250,13 @@ class _PreferencesPanel extends ConsumerWidget {
   }
 }
 
-/// Données: the local-AI card, then backup and restore directly under it
-/// (`docs/design/09-settings.md` §Phase 2 amendments). Database location and
-/// recalculation still need endpoints the backend does not expose.
+/// Données: the local-AI card, backup and restore under it, and the danger zone
+/// last (`docs/design/09-settings.md` §Phase 2 amendments). Database location
+/// and recalculation still need endpoints the backend does not expose.
+///
+/// The order is the spec's and it is not arbitrary: the card that offers to
+/// export the data sits above the one that deletes it, so the way out is read
+/// before the way through.
 class _DataPanel extends StatelessWidget {
   const _DataPanel();
 
@@ -262,6 +267,8 @@ class _DataPanel extends StatelessWidget {
       AiSettingsCard(),
       SizedBox(height: AppSpacing.gridGap),
       BackupCard(),
+      SizedBox(height: AppSpacing.gridGap),
+      DangerZoneCard(),
     ],
   );
 }

@@ -2982,5 +2982,75 @@
   "allocationDatePick": "Choisir une date",
   "@allocationDatePick": {
     "description": "Tooltip on the calendar button of the allocation modal's date field."
+  },
+  "settingsResetTitle": "Zone de danger",
+  "@settingsResetTitle": {
+    "description": "Title of the danger zone card in Settings › Données."
+  },
+  "settingsResetBadge": "IRRÉVERSIBLE",
+  "@settingsResetBadge": {
+    "description": "Pill beside the danger zone title, stating the stake in a word."
+  },
+  "settingsResetSubtitle": "Réinitialiser la base de données supprime transactions, comptes, règles, catégories personnalisées, objectifs et abonnements de ce profil. Les sauvegardes exportées ne sont pas touchées.",
+  "@settingsResetSubtitle": {
+    "description": "What a database reset deletes, and what it leaves alone."
+  },
+  "settingsResetButton": "Réinitialiser…",
+  "@settingsResetButton": {
+    "description": "Outline danger button opening the reset confirmation."
+  },
+  "settingsResetConfirmTitle": "Réinitialiser la base de données ?",
+  "@settingsResetConfirmTitle": {
+    "description": "Title of the reset confirmation modal."
+  },
+  "settingsResetConfirmLead": "Tout le contenu du profil {name} sera supprimé définitivement :",
+  "@settingsResetConfirmLead": {
+    "description": "Lead sentence of the reset confirmation; the name is set in bold.",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "settingsResetConfirmCategories": "Catégories personnalisées",
+  "@settingsResetConfirmCategories": {
+    "description": "Counts row for the user's own categories — the system catalog is kept."
+  },
+  "settingsResetConfirmNote": "Les catégories système, vos préférences et le réglage IA sont conservés. Les fichiers de sauvegarde déjà exportés restent intacts.",
+  "@settingsResetConfirmNote": {
+    "description": "Note under the reset counts listing what survives the reset."
+  },
+  "settingsResetConfirmWarning": "Cette action est irréversible. Exportez une sauvegarde avant de continuer.",
+  "@settingsResetConfirmWarning": {
+    "description": "Red callout in the reset confirmation modal."
+  },
+  "settingsResetConfirmWord": "SUPPRIMER",
+  "@settingsResetConfirmWord": {
+    "description": "The word that must be typed exactly to enable the reset. Uppercase."
+  },
+  "settingsResetConfirmLabel": "Saisissez {word} pour confirmer",
+  "@settingsResetConfirmLabel": {
+    "description": "Label of the typed-confirmation field.",
+    "placeholders": {
+      "word": {
+        "type": "String"
+      }
+    }
+  },
+  "settingsResetConfirmSubmit": "Tout supprimer",
+  "@settingsResetConfirmSubmit": {
+    "description": "Destructive confirm action of the reset modal."
+  },
+  "settingsResetDone": "Base de données réinitialisée. Les catégories système ont été restaurées.",
+  "@settingsResetDone": {
+    "description": "Toast shown once the reset has completed."
+  },
+  "settingsResetFailedLead": "Réinitialisation impossible.",
+  "@settingsResetFailedLead": {
+    "description": "Bold red lead of the refusal banner in the danger zone card."
+  },
+  "settingsResetErrorUnknown": "La réinitialisation a échoué. Vos données n'ont pas été modifiées.",
+  "@settingsResetErrorUnknown": {
+    "description": "Fallback message for any other reset failure."
   }
 }

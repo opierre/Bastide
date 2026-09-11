@@ -3785,6 +3785,96 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Choisir une date'**
   String get allocationDatePick;
+
+  /// Title of the danger zone card in Settings › Données.
+  ///
+  /// In fr, this message translates to:
+  /// **'Zone de danger'**
+  String get settingsResetTitle;
+
+  /// Pill beside the danger zone title, stating the stake in a word.
+  ///
+  /// In fr, this message translates to:
+  /// **'IRRÉVERSIBLE'**
+  String get settingsResetBadge;
+
+  /// What a database reset deletes, and what it leaves alone.
+  ///
+  /// In fr, this message translates to:
+  /// **'Réinitialiser la base de données supprime transactions, comptes, règles, catégories personnalisées, objectifs et abonnements de ce profil. Les sauvegardes exportées ne sont pas touchées.'**
+  String get settingsResetSubtitle;
+
+  /// Outline danger button opening the reset confirmation.
+  ///
+  /// In fr, this message translates to:
+  /// **'Réinitialiser…'**
+  String get settingsResetButton;
+
+  /// Title of the reset confirmation modal.
+  ///
+  /// In fr, this message translates to:
+  /// **'Réinitialiser la base de données ?'**
+  String get settingsResetConfirmTitle;
+
+  /// Lead sentence of the reset confirmation; the name is set in bold.
+  ///
+  /// In fr, this message translates to:
+  /// **'Tout le contenu du profil {name} sera supprimé définitivement :'**
+  String settingsResetConfirmLead(String name);
+
+  /// Counts row for the user's own categories — the system catalog is kept.
+  ///
+  /// In fr, this message translates to:
+  /// **'Catégories personnalisées'**
+  String get settingsResetConfirmCategories;
+
+  /// Note under the reset counts listing what survives the reset.
+  ///
+  /// In fr, this message translates to:
+  /// **'Les catégories système, vos préférences et le réglage IA sont conservés. Les fichiers de sauvegarde déjà exportés restent intacts.'**
+  String get settingsResetConfirmNote;
+
+  /// Red callout in the reset confirmation modal.
+  ///
+  /// In fr, this message translates to:
+  /// **'Cette action est irréversible. Exportez une sauvegarde avant de continuer.'**
+  String get settingsResetConfirmWarning;
+
+  /// The word that must be typed exactly to enable the reset. Uppercase.
+  ///
+  /// In fr, this message translates to:
+  /// **'SUPPRIMER'**
+  String get settingsResetConfirmWord;
+
+  /// Label of the typed-confirmation field.
+  ///
+  /// In fr, this message translates to:
+  /// **'Saisissez {word} pour confirmer'**
+  String settingsResetConfirmLabel(String word);
+
+  /// Destructive confirm action of the reset modal.
+  ///
+  /// In fr, this message translates to:
+  /// **'Tout supprimer'**
+  String get settingsResetConfirmSubmit;
+
+  /// Toast shown once the reset has completed.
+  ///
+  /// In fr, this message translates to:
+  /// **'Base de données réinitialisée. Les catégories système ont été restaurées.'**
+  String get settingsResetDone;
+
+  /// Bold red lead of the refusal banner in the danger zone card.
+  ///
+  /// In fr, this message translates to:
+  /// **'Réinitialisation impossible.'**
+  String get settingsResetFailedLead;
+
+  /// Fallback message for any other reset failure.
+  ///
+  /// In fr, this message translates to:
+  /// **'La réinitialisation a échoué. Vos données n\'ont pas été modifiées.'**
+  String get settingsResetErrorUnknown;
 }
 
 class _AppLocalizationsDelegate

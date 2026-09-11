@@ -2375,4 +2375,58 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get allocationDatePick => 'Pick a date';
+
+  @override
+  String get settingsResetTitle => 'Danger zone';
+
+  @override
+  String get settingsResetBadge => 'IRREVERSIBLE';
+
+  @override
+  String get settingsResetSubtitle =>
+      'Resetting the database deletes this profile\'s transactions, accounts, rules, custom categories, goals and subscriptions. Exported backups aren\'t touched.';
+
+  @override
+  String get settingsResetButton => 'Reset…';
+
+  @override
+  String get settingsResetConfirmTitle => 'Reset the database?';
+
+  @override
+  String settingsResetConfirmLead(String name) {
+    return 'Everything in $name\'s profile will be permanently deleted:';
+  }
+
+  @override
+  String get settingsResetConfirmCategories => 'Custom categories';
+
+  @override
+  String get settingsResetConfirmNote =>
+      'System categories, your preferences and the AI settings are kept. Backup files you\'ve already exported stay intact.';
+
+  @override
+  String get settingsResetConfirmWarning =>
+      'This can\'t be undone. Export a backup before you continue.';
+
+  @override
+  String get settingsResetConfirmWord => 'DELETE';
+
+  @override
+  String settingsResetConfirmLabel(String word) {
+    return 'Type $word to confirm';
+  }
+
+  @override
+  String get settingsResetConfirmSubmit => 'Delete everything';
+
+  @override
+  String get settingsResetDone =>
+      'Database reset. The system categories have been restored.';
+
+  @override
+  String get settingsResetFailedLead => 'Reset not possible.';
+
+  @override
+  String get settingsResetErrorUnknown =>
+      'The reset failed. Your data hasn\'t been changed.';
 }
