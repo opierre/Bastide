@@ -514,6 +514,12 @@ POST   /backup/restore              multipart file → summary   (replaces all t
                                      errors: BACKUP_INVALID | BACKUP_TOO_NEW |
                                        BACKUP_CURRENCY_MISMATCH (422) · BACKUP_RUN_ACTIVE |
                                        BACKUP_CONFLICT (409)
+
+GET    /database/summary            → {counts: {accounts, transactions, categories, rules,
+                                       recurring, goals}} — the caller's rows; `categories`
+                                       counts their own, never the system catalog
+POST   /database/reset              → the same counts, for what was deleted
+                                     errors: RESET_RUN_ACTIVE (409)
 ```
 
 > **Why `/rules/from-transaction` instead of a flag on `PATCH /transactions/{id}`.** The
@@ -750,3 +756,9 @@ machine or another (`docs/design/09-settings.md` §Sauvegarde et restauration).
   still exists in the same database collides (`BACKUP_CONFLICT`) and changes nothing.
 - The archive is **not encrypted** — the UI says so. Runs that were in flight in the archive
   are restored as `failed`; `last_backup_at` is a fact about this install and survives a restore.
+- **Resetting the database** (`docs/design/09-settings.md` §Zone de danger) deletes the same
+  scope minus `user_settings`: the profile's contents go, its locale, AI configuration and
+  `last_backup_at` stay. It is one transaction — a refusal deletes nothing — is refused while a
+  categorisation run is in flight (`RESET_RUN_ACTIVE`), re-seeds the system catalog on its way
+  out, and never touches another profile's rows or any `.finstride` file already exported. The
+  confirmation reports the counts read *before* the delete, so the user is told what went.
