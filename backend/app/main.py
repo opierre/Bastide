@@ -12,6 +12,7 @@ from app.core.errors import register_exception_handlers
 from app.core.seed import seed_system_categories
 from app.features.accounts.router import router as accounts_router
 from app.features.auth.router import router as auth_router
+from app.features.backup.router import router as backup_router
 from app.features.banks.router import router as banks_router
 from app.features.categories.router import router as categories_router
 from app.features.categorization.router import router as categorization_router
@@ -75,6 +76,7 @@ def create_app() -> FastAPI:
     app.include_router(transactions_router)
     app.include_router(dashboard_router)
     app.include_router(settings_router)
+    app.include_router(backup_router)
     app.include_router(inference_router)
     app.include_router(categorization_router)
     app.include_router(recurring_router)

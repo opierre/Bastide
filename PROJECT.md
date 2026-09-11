@@ -292,6 +292,7 @@ Same rules as §4: UUID string PKs, UTC timestamps, money as signed integer mino
 | inference_base_url | text | OpenAI-compatible base, e.g. `http://127.0.0.1:11434/v1` (Ollama) or `http://127.0.0.1:8080/v1` (`llama-server`) |
 | model_tag | text null | runtime's own model identifier; null = use whatever the runtime lists first |
 | confidence_threshold | real | default `0.80`, range `[0,1]` |
+| last_backup_at | datetime null | set by each full export (§14); kept across a restore |
 | created_at / updated_at | datetime | |
 
 > Server-side, not in the Flutter local store: the **backend** is what talks to the runtime, so
@@ -503,6 +504,16 @@ DELETE /goals/{id}                  (archive, not hard delete — allocations ar
 GET    /goals/{id}/allocations      → [allocation]
 POST   /goals/{id}/allocations      {amount_minor, allocated_on, note?} → allocation
 DELETE /goals/{id}/allocations/{allocation_id}
+
+POST   /backup/export               → application/zip (.finstride) + header X-Backup-Summary:
+                                       summary JSON; stamps user_settings.last_backup_at
+POST   /backup/inspect              multipart file → summary {format_version, app_version,
+                                       exported_at, currency, counts: {accounts, transactions,
+                                       categories, rules, recurring, goals}}
+POST   /backup/restore              multipart file → summary   (replaces all the caller's data)
+                                     errors: BACKUP_INVALID | BACKUP_TOO_NEW |
+                                       BACKUP_CURRENCY_MISMATCH (422) · BACKUP_RUN_ACTIVE |
+                                       BACKUP_CONFLICT (409)
 ```
 
 > **Why `/rules/from-transaction` instead of a flag on `PATCH /transactions/{id}`.** The
@@ -713,3 +724,29 @@ funding, or completing a goal writes no transaction and changes no account balan
 - **Over-allocation is a warning, not an error.** Total allocations across active goals may
   exceed the user's actual savings balance; the UI says so plainly and the API still accepts it.
   Blocking it would require the app to be right about which money is "savings", which it isn't.
+
+## 14. Backup and restore (Phase 2)
+
+A user can export everything they own to one `.finstride` file and restore it later, on this
+machine or another (`docs/design/09-settings.md` §Sauvegarde et restauration).
+
+- **Container**: a ZIP holding `manifest.json` and one `<table>.jsonl` per table, one row per
+  line — original UUIDs, integer minor units, ISO-8601 dates/timestamps. The manifest carries
+  `format: "finstride-backup"`, an integer `format_version`, the backend `app_version` (display
+  only), `exported_at`, `currency` and per-table row counts, so a file can be summarised without
+  reading its rows.
+- **Scope**: the caller's rows only — categories (user-owned), accounts, balance snapshots,
+  import batches, transactions, rules, recurring series/occurrences, goals/allocations,
+  categorisation runs, settings. Never `users` or `auth_tokens`: credentials do not travel in a
+  file, and a restore lands in the signed-in account (`user_id` is rewritten to the caller).
+- **Refusals before any write**: not an archive (`BACKUP_INVALID`), a `format_version` newer
+  than the build reads (`BACKUP_TOO_NEW`), a currency other than the user's
+  (`BACKUP_CURRENCY_MISMATCH`, Phase 1 is single-currency), a categorisation run in flight
+  (`BACKUP_RUN_ACTIVE`).
+- **Restore is one transaction**: delete the caller's rows, then insert table by table in FK
+  order. Every foreign key must point at a row restored from the same archive (or a system
+  category); any malformed row, dangling reference or float in an integer column rolls the whole
+  restore back. Row ids are kept, so restoring into a *different* user while the original owner
+  still exists in the same database collides (`BACKUP_CONFLICT`) and changes nothing.
+- The archive is **not encrypted** — the UI says so. Runs that were in flight in the archive
+  are restored as `failed`; `last_backup_at` is a fact about this install and survives a restore.
