@@ -1630,6 +1630,147 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingsAiRetry => 'Try again';
 
   @override
+  String get settingsBackupTitle => 'Backup & restore';
+
+  @override
+  String get settingsBackupSubtitle =>
+      'Export all your data to a file you can import again.';
+
+  @override
+  String get settingsBackupExportLabel => 'Export all data';
+
+  @override
+  String get settingsBackupExportCaption =>
+      '.finstride file — accounts, transactions, categories, rules, goals, settings.';
+
+  @override
+  String get settingsBackupExportPreparing => 'Preparing the archive…';
+
+  @override
+  String get settingsBackupExport => 'Export';
+
+  @override
+  String settingsBackupLast(String when) {
+    return 'Last backup: $when';
+  }
+
+  @override
+  String get settingsBackupNone => 'No backup yet.';
+
+  @override
+  String settingsBackupDateTime(String date, String time) {
+    return '$date at $time';
+  }
+
+  @override
+  String get settingsBackupPrivacy =>
+      'The file isn\'t encrypted. Keep it somewhere safe — it holds your entire financial history.';
+
+  @override
+  String get settingsBackupRestoreTitle => 'Restore a backup';
+
+  @override
+  String get settingsBackupRestoreSubtitle => 'Replaces all current data.';
+
+  @override
+  String get settingsBackupRestoreButton => 'Import a file…';
+
+  @override
+  String get settingsBackupRestoreFailedLead => 'Restore not possible.';
+
+  @override
+  String get settingsBackupErrorTooNew =>
+      'This file comes from a newer version of FinStride. Update the app to restore it.';
+
+  @override
+  String get settingsBackupErrorInvalid =>
+      'This file isn\'t a valid FinStride backup, or it\'s damaged.';
+
+  @override
+  String get settingsBackupErrorCurrency =>
+      'This backup uses a different currency from your account.';
+
+  @override
+  String get settingsBackupErrorRunActive =>
+      'A categorization run is in progress. Wait for it to finish, then try again.';
+
+  @override
+  String get settingsBackupErrorConflict =>
+      'This backup belongs to another account on this computer.';
+
+  @override
+  String get settingsBackupErrorUnknown =>
+      'The restore failed. Your data hasn\'t been changed.';
+
+  @override
+  String settingsBackupExported(
+    int transactionCount,
+    String transactions,
+    int accountCount,
+    String accounts,
+  ) {
+    String _temp0 = intl.Intl.pluralLogic(
+      transactionCount,
+      locale: localeName,
+      other: '$transactions transactions',
+      one: '$transactions transaction',
+    );
+    String _temp1 = intl.Intl.pluralLogic(
+      accountCount,
+      locale: localeName,
+      other: '$accounts accounts',
+      one: '$accounts account',
+    );
+    return 'Backup saved — $_temp0, $_temp1.';
+  }
+
+  @override
+  String get settingsBackupExportFailed => 'The export failed. Try again.';
+
+  @override
+  String get settingsBackupConfirmTitle => 'Restore this backup?';
+
+  @override
+  String get settingsBackupConfirmFile => 'Selected file:';
+
+  @override
+  String get settingsBackupConfirmExportedAt => 'Exported on';
+
+  @override
+  String get settingsBackupConfirmVersion => 'App version';
+
+  @override
+  String get settingsBackupConfirmAccounts => 'Accounts';
+
+  @override
+  String get settingsBackupConfirmTransactions => 'Transactions';
+
+  @override
+  String get settingsBackupConfirmCategories => 'Categories';
+
+  @override
+  String get settingsBackupConfirmRules => 'Rules';
+
+  @override
+  String get settingsBackupConfirmSubscriptions => 'Subscriptions';
+
+  @override
+  String get settingsBackupConfirmGoals => 'Goals';
+
+  @override
+  String get settingsBackupConfirmWarning =>
+      'All your current data will be replaced. Export it first if needed.';
+
+  @override
+  String get settingsBackupCancel => 'Cancel';
+
+  @override
+  String get settingsBackupReplace => 'Replace my data';
+
+  @override
+  String get settingsBackupRestored => 'Backup restored';
+
+  @override
   String get navSubscriptions => 'Recurring';
 
   @override

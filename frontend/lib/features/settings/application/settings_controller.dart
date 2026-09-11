@@ -171,6 +171,16 @@ class SettingsController extends AsyncNotifier<SettingsState> {
     _edit((settings) => settings.copyWith(confidenceThreshold: threshold));
   }
 
+  /// Shows a backup the user just exported. Applied locally rather than by a
+  /// reload, which would reseed the AI card's text fields mid-edit.
+  void recordBackup(DateTime at) {
+    final current = state.value;
+    if (current == null) return;
+    state = AsyncData(
+      current.copyWith(settings: current.settings.copyWith(lastBackupAt: at)),
+    );
+  }
+
   /// Probes the runtime the backend currently has stored.
   ///
   /// Flushes any pending edit first: testing the address the user just typed

@@ -78,6 +78,10 @@ abstract final class AppColors {
   /// balance never reads as a brand element.
   static const positive = Color(0xFF4ADE80);
   static const negative = Color(0xFFFF5C6C);
+
+  /// Label ink on a solid [negative] fill — the destructive confirm button
+  /// (`docs/design/09-settings.md` §Sauvegarde, state ⑧).
+  static const negativeInk = Color(0xFF2A0A0F);
   static const warning = Color(0xFFFFB84D);
   static const info = Color(0xFF5AA9FF);
 

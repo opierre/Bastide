@@ -1642,6 +1642,148 @@ class AppLocalizationsFr extends AppLocalizations {
   String get settingsAiRetry => 'Réessayer';
 
   @override
+  String get settingsBackupTitle => 'Sauvegarde et restauration';
+
+  @override
+  String get settingsBackupSubtitle =>
+      'Exportez toutes vos données dans un fichier que vous pourrez réimporter.';
+
+  @override
+  String get settingsBackupExportLabel => 'Exporter toutes les données';
+
+  @override
+  String get settingsBackupExportCaption =>
+      'Fichier .finstride — comptes, transactions, catégories, règles, objectifs, paramètres.';
+
+  @override
+  String get settingsBackupExportPreparing => 'Préparation de l\'archive…';
+
+  @override
+  String get settingsBackupExport => 'Exporter';
+
+  @override
+  String settingsBackupLast(String when) {
+    return 'Dernière sauvegarde : $when';
+  }
+
+  @override
+  String get settingsBackupNone => 'Aucune sauvegarde pour l\'instant.';
+
+  @override
+  String settingsBackupDateTime(String date, String time) {
+    return '$date à $time';
+  }
+
+  @override
+  String get settingsBackupPrivacy =>
+      'Le fichier n\'est pas chiffré. Conservez-le en lieu sûr — il contient tout votre historique financier.';
+
+  @override
+  String get settingsBackupRestoreTitle => 'Restaurer une sauvegarde';
+
+  @override
+  String get settingsBackupRestoreSubtitle =>
+      'Remplace toutes les données actuelles.';
+
+  @override
+  String get settingsBackupRestoreButton => 'Importer un fichier…';
+
+  @override
+  String get settingsBackupRestoreFailedLead => 'Restauration impossible.';
+
+  @override
+  String get settingsBackupErrorTooNew =>
+      'Ce fichier provient d\'une version plus récente de FinStride. Mettez l\'application à jour pour le restaurer.';
+
+  @override
+  String get settingsBackupErrorInvalid =>
+      'Ce fichier n\'est pas une sauvegarde FinStride valide, ou il est endommagé.';
+
+  @override
+  String get settingsBackupErrorCurrency =>
+      'Cette sauvegarde utilise une autre devise que votre compte.';
+
+  @override
+  String get settingsBackupErrorRunActive =>
+      'Une catégorisation est en cours. Attendez qu\'elle se termine, puis réessayez.';
+
+  @override
+  String get settingsBackupErrorConflict =>
+      'Cette sauvegarde appartient à un autre compte présent sur cet ordinateur.';
+
+  @override
+  String get settingsBackupErrorUnknown =>
+      'La restauration a échoué. Vos données n\'ont pas été modifiées.';
+
+  @override
+  String settingsBackupExported(
+    int transactionCount,
+    String transactions,
+    int accountCount,
+    String accounts,
+  ) {
+    String _temp0 = intl.Intl.pluralLogic(
+      transactionCount,
+      locale: localeName,
+      other: '$transactions transactions',
+      one: '$transactions transaction',
+    );
+    String _temp1 = intl.Intl.pluralLogic(
+      accountCount,
+      locale: localeName,
+      other: '$accounts comptes',
+      one: '$accounts compte',
+    );
+    return 'Sauvegarde enregistrée — $_temp0, $_temp1.';
+  }
+
+  @override
+  String get settingsBackupExportFailed => 'L\'export a échoué. Réessayez.';
+
+  @override
+  String get settingsBackupConfirmTitle => 'Restaurer cette sauvegarde ?';
+
+  @override
+  String get settingsBackupConfirmFile => 'Fichier sélectionné :';
+
+  @override
+  String get settingsBackupConfirmExportedAt => 'Exporté le';
+
+  @override
+  String get settingsBackupConfirmVersion => 'Version de l\'application';
+
+  @override
+  String get settingsBackupConfirmAccounts => 'Comptes';
+
+  @override
+  String get settingsBackupConfirmTransactions => 'Transactions';
+
+  @override
+  String get settingsBackupConfirmCategories => 'Catégories';
+
+  @override
+  String get settingsBackupConfirmRules => 'Règles';
+
+  @override
+  String get settingsBackupConfirmSubscriptions => 'Abonnements';
+
+  @override
+  String get settingsBackupConfirmGoals => 'Objectifs';
+
+  @override
+  String get settingsBackupConfirmWarning =>
+      'Toutes vos données actuelles seront remplacées. Exportez-les d\'abord si besoin.';
+
+  @override
+  String get settingsBackupCancel => 'Annuler';
+
+  @override
+  String get settingsBackupReplace => 'Remplacer mes données';
+
+  @override
+  String get settingsBackupRestored => 'Sauvegarde restaurée';
+
+  @override
   String get navSubscriptions => 'Récurrents';
 
   @override

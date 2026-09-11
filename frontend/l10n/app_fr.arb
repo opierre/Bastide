@@ -2031,6 +2031,182 @@
   "@settingsAiRetry": {
     "description": "Retry action on the local-AI card's error state."
   },
+  "settingsBackupTitle": "Sauvegarde et restauration",
+  "@settingsBackupTitle": {
+    "description": "Title of the backup card in Settings › Données."
+  },
+  "settingsBackupSubtitle": "Exportez toutes vos données dans un fichier que vous pourrez réimporter.",
+  "@settingsBackupSubtitle": {
+    "description": "Line under the backup card's title."
+  },
+  "settingsBackupExportLabel": "Exporter toutes les données",
+  "@settingsBackupExportLabel": {
+    "description": "Label of the export row on the backup card."
+  },
+  "settingsBackupExportCaption": "Fichier .finstride — comptes, transactions, catégories, règles, objectifs, paramètres.",
+  "@settingsBackupExportCaption": {
+    "description": "Caption under the export row's label: what the file contains."
+  },
+  "settingsBackupExportPreparing": "Préparation de l'archive…",
+  "@settingsBackupExportPreparing": {
+    "description": "Replaces the export caption while the archive is being built."
+  },
+  "settingsBackupExport": "Exporter",
+  "@settingsBackupExport": {
+    "description": "Primary button that exports a full backup."
+  },
+  "settingsBackupLast": "Dernière sauvegarde : {when}",
+  "@settingsBackupLast": {
+    "description": "Line under the export row with the time of the latest backup.",
+    "placeholders": {
+      "when": {
+        "type": "String",
+        "example": "11/09/2026 à 14:32"
+      }
+    }
+  },
+  "settingsBackupNone": "Aucune sauvegarde pour l'instant.",
+  "@settingsBackupNone": {
+    "description": "Shown under the export row when the user has never exported a backup."
+  },
+  "settingsBackupDateTime": "{date} à {time}",
+  "@settingsBackupDateTime": {
+    "description": "A backup timestamp: a locale-formatted date then time.",
+    "placeholders": {
+      "date": {
+        "type": "String",
+        "example": "11/09/2026"
+      },
+      "time": {
+        "type": "String",
+        "example": "14:32"
+      }
+    }
+  },
+  "settingsBackupPrivacy": "Le fichier n'est pas chiffré. Conservez-le en lieu sûr — il contient tout votre historique financier.",
+  "@settingsBackupPrivacy": {
+    "description": "Lock callout on the backup card warning that the archive is unencrypted."
+  },
+  "settingsBackupRestoreTitle": "Restaurer une sauvegarde",
+  "@settingsBackupRestoreTitle": {
+    "description": "Label of the restore row on the backup card."
+  },
+  "settingsBackupRestoreSubtitle": "Remplace toutes les données actuelles.",
+  "@settingsBackupRestoreSubtitle": {
+    "description": "Line under the restore row's label."
+  },
+  "settingsBackupRestoreButton": "Importer un fichier…",
+  "@settingsBackupRestoreButton": {
+    "description": "Secondary button that opens the file picker to restore a backup."
+  },
+  "settingsBackupRestoreFailedLead": "Restauration impossible.",
+  "@settingsBackupRestoreFailedLead": {
+    "description": "Bold lead of the error banner shown when a chosen backup cannot be restored."
+  },
+  "settingsBackupErrorTooNew": "Ce fichier provient d'une version plus récente de FinStride. Mettez l'application à jour pour le restaurer.",
+  "@settingsBackupErrorTooNew": {
+    "description": "Restore refused: the archive was written by a newer app version (BACKUP_TOO_NEW)."
+  },
+  "settingsBackupErrorInvalid": "Ce fichier n'est pas une sauvegarde FinStride valide, ou il est endommagé.",
+  "@settingsBackupErrorInvalid": {
+    "description": "Restore refused: not a FinStride archive or corrupted (BACKUP_INVALID)."
+  },
+  "settingsBackupErrorCurrency": "Cette sauvegarde utilise une autre devise que votre compte.",
+  "@settingsBackupErrorCurrency": {
+    "description": "Restore refused: the archive's currency differs from the user's (BACKUP_CURRENCY_MISMATCH)."
+  },
+  "settingsBackupErrorRunActive": "Une catégorisation est en cours. Attendez qu'elle se termine, puis réessayez.",
+  "@settingsBackupErrorRunActive": {
+    "description": "Restore refused while a categorization run is in flight (BACKUP_RUN_ACTIVE)."
+  },
+  "settingsBackupErrorConflict": "Cette sauvegarde appartient à un autre compte présent sur cet ordinateur.",
+  "@settingsBackupErrorConflict": {
+    "description": "Restore refused: its rows belong to another account still in this database (BACKUP_CONFLICT)."
+  },
+  "settingsBackupErrorUnknown": "La restauration a échoué. Vos données n'ont pas été modifiées.",
+  "@settingsBackupErrorUnknown": {
+    "description": "Restore failed for any other reason; nothing was changed."
+  },
+  "settingsBackupExported": "Sauvegarde enregistrée — {transactionCount, plural, one{{transactions} transaction} other{{transactions} transactions}}, {accountCount, plural, one{{accounts} compte} other{{accounts} comptes}}.",
+  "@settingsBackupExported": {
+    "description": "Toast after a backup was written. The String placeholders are the locale-formatted counts.",
+    "placeholders": {
+      "transactionCount": {
+        "type": "int"
+      },
+      "transactions": {
+        "type": "String",
+        "example": "1 284"
+      },
+      "accountCount": {
+        "type": "int"
+      },
+      "accounts": {
+        "type": "String",
+        "example": "4"
+      }
+    }
+  },
+  "settingsBackupExportFailed": "L'export a échoué. Réessayez.",
+  "@settingsBackupExportFailed": {
+    "description": "Error toast when building or writing the backup failed."
+  },
+  "settingsBackupConfirmTitle": "Restaurer cette sauvegarde ?",
+  "@settingsBackupConfirmTitle": {
+    "description": "Title of the restore confirmation modal."
+  },
+  "settingsBackupConfirmFile": "Fichier sélectionné :",
+  "@settingsBackupConfirmFile": {
+    "description": "Subtitle lead of the restore modal, followed by the file name."
+  },
+  "settingsBackupConfirmExportedAt": "Exporté le",
+  "@settingsBackupConfirmExportedAt": {
+    "description": "Summary row: when the backup was exported."
+  },
+  "settingsBackupConfirmVersion": "Version de l'application",
+  "@settingsBackupConfirmVersion": {
+    "description": "Summary row: the app version that wrote the backup."
+  },
+  "settingsBackupConfirmAccounts": "Comptes",
+  "@settingsBackupConfirmAccounts": {
+    "description": "Summary row: number of accounts in the backup."
+  },
+  "settingsBackupConfirmTransactions": "Transactions",
+  "@settingsBackupConfirmTransactions": {
+    "description": "Summary row: number of transactions in the backup."
+  },
+  "settingsBackupConfirmCategories": "Catégories",
+  "@settingsBackupConfirmCategories": {
+    "description": "Summary row: number of user categories in the backup."
+  },
+  "settingsBackupConfirmRules": "Règles",
+  "@settingsBackupConfirmRules": {
+    "description": "Summary row: number of categorization rules in the backup."
+  },
+  "settingsBackupConfirmSubscriptions": "Abonnements",
+  "@settingsBackupConfirmSubscriptions": {
+    "description": "Summary row: number of recurring series in the backup."
+  },
+  "settingsBackupConfirmGoals": "Objectifs",
+  "@settingsBackupConfirmGoals": {
+    "description": "Summary row: number of savings goals in the backup."
+  },
+  "settingsBackupConfirmWarning": "Toutes vos données actuelles seront remplacées. Exportez-les d'abord si besoin.",
+  "@settingsBackupConfirmWarning": {
+    "description": "Warning callout in the restore modal."
+  },
+  "settingsBackupCancel": "Annuler",
+  "@settingsBackupCancel": {
+    "description": "Dismisses the restore modal without changing anything."
+  },
+  "settingsBackupReplace": "Remplacer mes données",
+  "@settingsBackupReplace": {
+    "description": "Destructive confirm button of the restore modal."
+  },
+  "settingsBackupRestored": "Sauvegarde restaurée",
+  "@settingsBackupRestored": {
+    "description": "Toast after a restore completed."
+  },
   "navSubscriptions": "Récurrents",
   "@navSubscriptions": {
     "description": "Sidebar entry for the recurring payments panel, third in the Gestion group."

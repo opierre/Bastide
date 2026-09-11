@@ -15,6 +15,7 @@ import '../../../core/widgets/state_views.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../auth/presentation/currency_label.dart';
 import 'ai_settings_card.dart';
+import 'backup_card.dart';
 
 /// Which group of settings the right-hand column is showing.
 enum SettingsSection { profile, preferences, data, about }
@@ -248,14 +249,21 @@ class _PreferencesPanel extends ConsumerWidget {
   }
 }
 
-/// Données. The local-AI card is the only part of this tab Phase 2 builds —
-/// database location, recalculation and export need endpoints the backend does
-/// not expose yet (`docs/design/09-settings.md` §Phase 2 amendment).
+/// Données: the local-AI card, then backup and restore directly under it
+/// (`docs/design/09-settings.md` §Phase 2 amendments). Database location and
+/// recalculation still need endpoints the backend does not expose.
 class _DataPanel extends StatelessWidget {
   const _DataPanel();
 
   @override
-  Widget build(BuildContext context) => const AiSettingsCard();
+  Widget build(BuildContext context) => const Column(
+    crossAxisAlignment: CrossAxisAlignment.stretch,
+    children: [
+      AiSettingsCard(),
+      SizedBox(height: AppSpacing.gridGap),
+      BackupCard(),
+    ],
+  );
 }
 
 class _AboutPanel extends StatelessWidget {

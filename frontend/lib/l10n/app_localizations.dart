@@ -2648,6 +2648,227 @@ abstract class AppLocalizations {
   /// **'Réessayer'**
   String get settingsAiRetry;
 
+  /// Title of the backup card in Settings › Données.
+  ///
+  /// In fr, this message translates to:
+  /// **'Sauvegarde et restauration'**
+  String get settingsBackupTitle;
+
+  /// Line under the backup card's title.
+  ///
+  /// In fr, this message translates to:
+  /// **'Exportez toutes vos données dans un fichier que vous pourrez réimporter.'**
+  String get settingsBackupSubtitle;
+
+  /// Label of the export row on the backup card.
+  ///
+  /// In fr, this message translates to:
+  /// **'Exporter toutes les données'**
+  String get settingsBackupExportLabel;
+
+  /// Caption under the export row's label: what the file contains.
+  ///
+  /// In fr, this message translates to:
+  /// **'Fichier .finstride — comptes, transactions, catégories, règles, objectifs, paramètres.'**
+  String get settingsBackupExportCaption;
+
+  /// Replaces the export caption while the archive is being built.
+  ///
+  /// In fr, this message translates to:
+  /// **'Préparation de l\'archive…'**
+  String get settingsBackupExportPreparing;
+
+  /// Primary button that exports a full backup.
+  ///
+  /// In fr, this message translates to:
+  /// **'Exporter'**
+  String get settingsBackupExport;
+
+  /// Line under the export row with the time of the latest backup.
+  ///
+  /// In fr, this message translates to:
+  /// **'Dernière sauvegarde : {when}'**
+  String settingsBackupLast(String when);
+
+  /// Shown under the export row when the user has never exported a backup.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucune sauvegarde pour l\'instant.'**
+  String get settingsBackupNone;
+
+  /// A backup timestamp: a locale-formatted date then time.
+  ///
+  /// In fr, this message translates to:
+  /// **'{date} à {time}'**
+  String settingsBackupDateTime(String date, String time);
+
+  /// Lock callout on the backup card warning that the archive is unencrypted.
+  ///
+  /// In fr, this message translates to:
+  /// **'Le fichier n\'est pas chiffré. Conservez-le en lieu sûr — il contient tout votre historique financier.'**
+  String get settingsBackupPrivacy;
+
+  /// Label of the restore row on the backup card.
+  ///
+  /// In fr, this message translates to:
+  /// **'Restaurer une sauvegarde'**
+  String get settingsBackupRestoreTitle;
+
+  /// Line under the restore row's label.
+  ///
+  /// In fr, this message translates to:
+  /// **'Remplace toutes les données actuelles.'**
+  String get settingsBackupRestoreSubtitle;
+
+  /// Secondary button that opens the file picker to restore a backup.
+  ///
+  /// In fr, this message translates to:
+  /// **'Importer un fichier…'**
+  String get settingsBackupRestoreButton;
+
+  /// Bold lead of the error banner shown when a chosen backup cannot be restored.
+  ///
+  /// In fr, this message translates to:
+  /// **'Restauration impossible.'**
+  String get settingsBackupRestoreFailedLead;
+
+  /// Restore refused: the archive was written by a newer app version (BACKUP_TOO_NEW).
+  ///
+  /// In fr, this message translates to:
+  /// **'Ce fichier provient d\'une version plus récente de FinStride. Mettez l\'application à jour pour le restaurer.'**
+  String get settingsBackupErrorTooNew;
+
+  /// Restore refused: not a FinStride archive or corrupted (BACKUP_INVALID).
+  ///
+  /// In fr, this message translates to:
+  /// **'Ce fichier n\'est pas une sauvegarde FinStride valide, ou il est endommagé.'**
+  String get settingsBackupErrorInvalid;
+
+  /// Restore refused: the archive's currency differs from the user's (BACKUP_CURRENCY_MISMATCH).
+  ///
+  /// In fr, this message translates to:
+  /// **'Cette sauvegarde utilise une autre devise que votre compte.'**
+  String get settingsBackupErrorCurrency;
+
+  /// Restore refused while a categorization run is in flight (BACKUP_RUN_ACTIVE).
+  ///
+  /// In fr, this message translates to:
+  /// **'Une catégorisation est en cours. Attendez qu\'elle se termine, puis réessayez.'**
+  String get settingsBackupErrorRunActive;
+
+  /// Restore refused: its rows belong to another account still in this database (BACKUP_CONFLICT).
+  ///
+  /// In fr, this message translates to:
+  /// **'Cette sauvegarde appartient à un autre compte présent sur cet ordinateur.'**
+  String get settingsBackupErrorConflict;
+
+  /// Restore failed for any other reason; nothing was changed.
+  ///
+  /// In fr, this message translates to:
+  /// **'La restauration a échoué. Vos données n\'ont pas été modifiées.'**
+  String get settingsBackupErrorUnknown;
+
+  /// Toast after a backup was written. The String placeholders are the locale-formatted counts.
+  ///
+  /// In fr, this message translates to:
+  /// **'Sauvegarde enregistrée — {transactionCount, plural, one{{transactions} transaction} other{{transactions} transactions}}, {accountCount, plural, one{{accounts} compte} other{{accounts} comptes}}.'**
+  String settingsBackupExported(
+    int transactionCount,
+    String transactions,
+    int accountCount,
+    String accounts,
+  );
+
+  /// Error toast when building or writing the backup failed.
+  ///
+  /// In fr, this message translates to:
+  /// **'L\'export a échoué. Réessayez.'**
+  String get settingsBackupExportFailed;
+
+  /// Title of the restore confirmation modal.
+  ///
+  /// In fr, this message translates to:
+  /// **'Restaurer cette sauvegarde ?'**
+  String get settingsBackupConfirmTitle;
+
+  /// Subtitle lead of the restore modal, followed by the file name.
+  ///
+  /// In fr, this message translates to:
+  /// **'Fichier sélectionné :'**
+  String get settingsBackupConfirmFile;
+
+  /// Summary row: when the backup was exported.
+  ///
+  /// In fr, this message translates to:
+  /// **'Exporté le'**
+  String get settingsBackupConfirmExportedAt;
+
+  /// Summary row: the app version that wrote the backup.
+  ///
+  /// In fr, this message translates to:
+  /// **'Version de l\'application'**
+  String get settingsBackupConfirmVersion;
+
+  /// Summary row: number of accounts in the backup.
+  ///
+  /// In fr, this message translates to:
+  /// **'Comptes'**
+  String get settingsBackupConfirmAccounts;
+
+  /// Summary row: number of transactions in the backup.
+  ///
+  /// In fr, this message translates to:
+  /// **'Transactions'**
+  String get settingsBackupConfirmTransactions;
+
+  /// Summary row: number of user categories in the backup.
+  ///
+  /// In fr, this message translates to:
+  /// **'Catégories'**
+  String get settingsBackupConfirmCategories;
+
+  /// Summary row: number of categorization rules in the backup.
+  ///
+  /// In fr, this message translates to:
+  /// **'Règles'**
+  String get settingsBackupConfirmRules;
+
+  /// Summary row: number of recurring series in the backup.
+  ///
+  /// In fr, this message translates to:
+  /// **'Abonnements'**
+  String get settingsBackupConfirmSubscriptions;
+
+  /// Summary row: number of savings goals in the backup.
+  ///
+  /// In fr, this message translates to:
+  /// **'Objectifs'**
+  String get settingsBackupConfirmGoals;
+
+  /// Warning callout in the restore modal.
+  ///
+  /// In fr, this message translates to:
+  /// **'Toutes vos données actuelles seront remplacées. Exportez-les d\'abord si besoin.'**
+  String get settingsBackupConfirmWarning;
+
+  /// Dismisses the restore modal without changing anything.
+  ///
+  /// In fr, this message translates to:
+  /// **'Annuler'**
+  String get settingsBackupCancel;
+
+  /// Destructive confirm button of the restore modal.
+  ///
+  /// In fr, this message translates to:
+  /// **'Remplacer mes données'**
+  String get settingsBackupReplace;
+
+  /// Toast after a restore completed.
+  ///
+  /// In fr, this message translates to:
+  /// **'Sauvegarde restaurée'**
+  String get settingsBackupRestored;
+
   /// Sidebar entry for the recurring payments panel, third in the Gestion group.
   ///
   /// In fr, this message translates to:

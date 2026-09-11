@@ -12,6 +12,7 @@ class UserSettings {
     required this.inferenceBaseUrl,
     required this.modelTag,
     required this.confidenceThreshold,
+    this.lastBackupAt,
   });
 
   factory UserSettings.fromJson(Map<String, dynamic> json) => UserSettings(
@@ -19,7 +20,14 @@ class UserSettings {
     inferenceBaseUrl: json['inference_base_url'] as String,
     modelTag: json['model_tag'] as String?,
     confidenceThreshold: (json['confidence_threshold'] as num).toDouble(),
+    lastBackupAt: switch (json['last_backup_at']) {
+      final String value => DateTime.parse(value),
+      _ => null,
+    },
   );
+
+  /// When the user last exported a full backup; `null` until the first one.
+  final DateTime? lastBackupAt;
 
   /// The user opts in — an install that has never been to this screen runs on
   /// rules alone.
@@ -50,11 +58,13 @@ class UserSettings {
     String? inferenceBaseUrl,
     String? modelTag,
     double? confidenceThreshold,
+    DateTime? lastBackupAt,
   }) => UserSettings(
     aiEnabled: aiEnabled ?? this.aiEnabled,
     inferenceBaseUrl: inferenceBaseUrl ?? this.inferenceBaseUrl,
     modelTag: modelTag ?? this.modelTag,
     confidenceThreshold: confidenceThreshold ?? this.confidenceThreshold,
+    lastBackupAt: lastBackupAt ?? this.lastBackupAt,
   );
 
   @override
@@ -64,11 +74,17 @@ class UserSettings {
           other.aiEnabled == aiEnabled &&
           other.inferenceBaseUrl == inferenceBaseUrl &&
           other.modelTag == modelTag &&
-          other.confidenceThreshold == confidenceThreshold);
+          other.confidenceThreshold == confidenceThreshold &&
+          other.lastBackupAt == lastBackupAt);
 
   @override
-  int get hashCode =>
-      Object.hash(aiEnabled, inferenceBaseUrl, modelTag, confidenceThreshold);
+  int get hashCode => Object.hash(
+    aiEnabled,
+    inferenceBaseUrl,
+    modelTag,
+    confidenceThreshold,
+    lastBackupAt,
+  );
 }
 
 /// What `GET /settings/inference/health` reports about the configured runtime.

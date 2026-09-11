@@ -111,6 +111,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.byKey(const Key('settingsAiCard')), findsOneWidget);
+    expect(find.byKey(const Key('settingsBackupCard')), findsOneWidget);
     // Préférences is unchanged by the Phase 2 amendment: language, currency and
     // formats stay there, and none of them followed the card into Données.
     expect(find.byKey(const Key('settingsCurrencyField')), findsNothing);
