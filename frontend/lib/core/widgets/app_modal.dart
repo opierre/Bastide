@@ -16,9 +16,14 @@ class AppModal extends StatelessWidget {
     required this.width,
     required this.child,
     required this.actions,
+    this.subtitle,
   });
 
   final String title;
+
+  /// Optional context line under the title — the parent a new subcategory will
+  /// sit under, say.
+  final Widget? subtitle;
   final double width;
   final Widget child;
 
@@ -51,7 +56,16 @@ class AppModal extends StatelessWidget {
                 AppSpacing.lg,
                 AppSpacing.md,
               ),
-              child: Text(title, style: Theme.of(context).textTheme.headlineMedium),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(title, style: Theme.of(context).textTheme.headlineMedium),
+                  if (subtitle != null) ...[
+                    const SizedBox(height: AppSpacing.xs),
+                    subtitle!,
+                  ],
+                ],
+              ),
             ),
             Flexible(
               child: SingleChildScrollView(
