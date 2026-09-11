@@ -228,6 +228,36 @@ void main() {
     expect(find.byKey(const Key('categoryFormDelete')), findsNothing);
   });
 
+  testWidgets('a subcategory hides kind, icon and colour, and names its parent in the header', (
+    tester,
+  ) async {
+    _useDesktopSurface(tester);
+    await tester.pumpWidget(_wrap(controller: FakeCategoriesController(initialCategories: [_food])));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byKey(const Key('addSubcategory-food')));
+    await tester.pumpAndSettle();
+
+    final header = find.byKey(const Key('categoryFormParentLine'));
+    expect(find.descendant(of: header, matching: find.text('Alimentation')), findsOneWidget);
+    final glyph = tester.widget<Icon>(find.descendant(of: header, matching: find.byType(Icon)));
+    expect(glyph.icon, Icons.rice_bowl_outlined);
+    expect(glyph.color, CategoryHues.alimentation);
+    expect(find.byKey(const Key('categoryFormKind')), findsNothing);
+    expect(find.byKey(const Key('categoryFormIcon')), findsNothing);
+    expect(find.byKey(const Key('categoryFormColor-#64748B')), findsNothing);
+
+    tester
+        .widget<AppSelect<String?>>(find.byKey(const Key('categoryFormParent')))
+        .onChanged(null);
+    await tester.pumpAndSettle();
+
+    expect(header, findsNothing);
+    expect(find.byKey(const Key('categoryFormKind')), findsOneWidget);
+    expect(find.byKey(const Key('categoryFormIcon')), findsOneWidget);
+    expect(find.byKey(const Key('categoryFormColor-#64748B')), findsOneWidget);
+  });
+
   // --- the rule-count footer ----------------------------------------------------------
 
   testWidgets('the footer counts rules on the category and its subcategories', (

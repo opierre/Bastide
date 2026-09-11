@@ -21,8 +21,8 @@ import 'category_labels.dart';
 /// `null` when the user cancelled or deleted it.
 ///
 /// [parent] presets a new category's parent — the « + Sous-catégorie » chip on
-/// a card — and with it the kind and colour, since a subcategory is drawn in
-/// its parent's hue and almost always shares its kind.
+/// a card. A subcategory always takes its parent's kind, icon and colour, so
+/// while a parent is set none of them is shown: the header names the parent.
 Future<AppCategory?> showCategoryForm(
   BuildContext context, {
   AppCategory? initial,
@@ -81,6 +81,17 @@ class _CategoryFormModalState extends ConsumerState<CategoryFormModal> {
       if (category.parentId == null && category.id != widget.initial?.id) category,
   ];
 
+  /// The chosen parent, looked up in the loaded list — falling back to the
+  /// preset one, so the lock holds even before the list has arrived.
+  AppCategory? _selectedParent(List<AppCategory> categories) {
+    final id = _parentId;
+    if (id == null) return null;
+    for (final category in categories) {
+      if (category.id == id) return category;
+    }
+    return widget.parent?.id == id ? widget.parent : null;
+  }
+
   Future<void> _submit() async {
     if (!(_formKey.currentState?.validate() ?? false)) return;
     setState(() {
@@ -88,23 +99,28 @@ class _CategoryFormModalState extends ConsumerState<CategoryFormModal> {
       _errorText = null;
     });
 
+    final categories = ref.read(categoriesControllerProvider).value ?? const <AppCategory>[];
+    final parent = _selectedParent(categories);
+    final kind = parent?.kind ?? _kind;
+    final icon = parent == null ? _icon : categoryIconSlug(parent);
+    final color = hexOf(parent == null ? _color : categoryColor(parent));
     final controller = ref.read(categoriesControllerProvider.notifier);
     try {
       final saved = _isEditing
           ? await controller.updateCategory(
               widget.initial!.id,
               name: _nameController.text.trim(),
-              kind: _kind,
-              icon: _icon,
-              color: hexOf(_color),
+              kind: kind,
+              icon: icon,
+              color: color,
               parentId: _parentId,
               clearParent: _parentId == null,
             )
           : await controller.create(
               name: _nameController.text.trim(),
-              kind: _kind,
-              icon: _icon,
-              color: hexOf(_color),
+              kind: kind,
+              icon: icon,
+              color: color,
               parentId: _parentId,
             );
       if (!mounted) return;
@@ -146,9 +162,13 @@ class _CategoryFormModalState extends ConsumerState<CategoryFormModal> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final categories = ref.watch(categoriesControllerProvider).value ?? const <AppCategory>[];
+    // A subcategory's kind, icon and colour are its parent's, so the form drops
+    // those fields and names the parent under the title instead.
+    final parent = _selectedParent(categories);
 
     return AppModal(
       title: _isEditing ? l10n.categoryFormEditTitle : l10n.categoryFormCreateTitle,
+      subtitle: parent == null ? null : _ParentLine(parent: parent),
       width: 480,
       actions: [
         // First in the footer, as in the rule editor: furthest from « Enregistrer ».
@@ -190,20 +210,22 @@ class _CategoryFormModalState extends ConsumerState<CategoryFormModal> {
                     : null,
               ),
             ),
-            const SizedBox(height: AppSpacing.md),
-            LabeledField(
-              label: l10n.categoryFormKindLabel,
-              helper: l10n.categoryFormKindHelper,
-              child: AppSelect<String>(
-                key: const Key('categoryFormKind'),
-                value: _kind,
-                onChanged: (value) => setState(() => _kind = value),
-                items: [
-                  for (final kind in const ['expense', 'income', 'transfer'])
-                    AppSelectItem(value: kind, label: categoryKindLabel(l10n, kind)),
-                ],
+            if (parent == null) ...[
+              const SizedBox(height: AppSpacing.md),
+              LabeledField(
+                label: l10n.categoryFormKindLabel,
+                helper: l10n.categoryFormKindHelper,
+                child: AppSelect<String>(
+                  key: const Key('categoryFormKind'),
+                  value: _kind,
+                  onChanged: (value) => setState(() => _kind = value),
+                  items: [
+                    for (final kind in const ['expense', 'income', 'transfer'])
+                      AppSelectItem(value: kind, label: categoryKindLabel(l10n, kind)),
+                  ],
+                ),
               ),
-            ),
+            ],
             const SizedBox(height: AppSpacing.md),
             LabeledField(
               label: l10n.categoryFormParentLabel,
@@ -221,40 +243,71 @@ class _CategoryFormModalState extends ConsumerState<CategoryFormModal> {
                 ],
               ),
             ),
-            const SizedBox(height: AppSpacing.md),
-            LabeledField(
-              label: l10n.categoryFormIconLabel,
-              child: AppSelect<String>(
-                key: const Key('categoryFormIcon'),
-                value: _icon,
-                onChanged: (value) => setState(() => _icon = value),
-                items: [
-                  for (final slug in CategoryIcons.bySlug.keys)
-                    AppSelectItem(
-                      value: slug,
-                      label: categoryIconLabel(l10n, slug),
-                      leading: Icon(
-                        CategoryIcons.forSlug(slug),
-                        size: 15,
-                        color: AppColors.textSecondary,
+            if (parent == null) ...[
+              const SizedBox(height: AppSpacing.md),
+              LabeledField(
+                label: l10n.categoryFormIconLabel,
+                child: AppSelect<String>(
+                  key: const Key('categoryFormIcon'),
+                  value: _icon,
+                  onChanged: (value) => setState(() => _icon = value),
+                  items: [
+                    for (final slug in CategoryIcons.bySlug.keys)
+                      AppSelectItem(
+                        value: slug,
+                        label: categoryIconLabel(l10n, slug),
+                        leading: Icon(
+                          CategoryIcons.forSlug(slug),
+                          size: 15,
+                          color: AppColors.textSecondary,
+                        ),
                       ),
-                    ),
-                ],
+                  ],
+                ),
               ),
-            ),
-            const SizedBox(height: AppSpacing.md),
-            LabeledField(
-              label: l10n.categoryFormColorLabel,
-              helper: l10n.categoryFormColorHelper,
-              child: _ColorPicker(
-                selected: _color,
-                onSelected: (color) => setState(() => _color = color),
+              const SizedBox(height: AppSpacing.md),
+              LabeledField(
+                label: l10n.categoryFormColorLabel,
+                helper: l10n.categoryFormColorHelper,
+                child: _ColorPicker(
+                  selected: _color,
+                  onSelected: (color) => setState(() => _color = color),
+                ),
               ),
-            ),
+            ],
             const SizedBox(height: AppSpacing.sm),
           ],
         ),
       ),
+    );
+  }
+}
+
+/// The subtitle of a subcategory's modal: its parent's glyph, in the parent's
+/// hue, and name — standing in for the kind, icon and colour it inherits.
+class _ParentLine extends StatelessWidget {
+  const _ParentLine({required this.parent});
+
+  final AppCategory parent;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    return Row(
+      key: const Key('categoryFormParentLine'),
+      children: [
+        Icon(categoryIcon(parent), size: 15, color: categoryColor(parent)),
+        const SizedBox(width: AppSpacing.sm),
+        Flexible(
+          child: Text(
+            localizedCategoryName(l10n, parent.name),
+            overflow: TextOverflow.ellipsis,
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              color: AppColors.textSecondary,
+            ),
+          ),
+        ),
+      ],
     );
   }
 }
@@ -280,33 +333,48 @@ class _ColorPicker extends StatelessWidget {
             onTap: () => onSelected(color),
             child: MouseRegion(
               cursor: SystemMouseCursors.click,
-              child: Container(
-                width: 28,
-                height: 28,
-                decoration: BoxDecoration(
-                  color: color.withValues(alpha: 0.2),
-                  borderRadius: BorderRadius.circular(AppRadii.sm),
-                  border: Border.all(
-                    color: color.toARGB32() == selected.toARGB32()
-                        ? color
-                        : AppColors.border,
-                    width: color.toARGB32() == selected.toARGB32() ? 2 : 1,
-                  ),
-                ),
-                child: Center(
-                  child: Container(
-                    width: 12,
-                    height: 12,
-                    decoration: BoxDecoration(
-                      color: color,
-                      borderRadius: BorderRadius.circular(AppRadii.xs),
-                    ),
-                  ),
-                ),
+              child: _Swatch(
+                color: color,
+                isSelected: color.toARGB32() == selected.toARGB32(),
               ),
             ),
           ),
       ],
+    );
+  }
+}
+
+/// One 28 px swatch: the hue as a 12 px chip on a tinted plate, ringed in the
+/// hue itself when selected.
+class _Swatch extends StatelessWidget {
+  const _Swatch({required this.color, required this.isSelected});
+
+  final Color color;
+  final bool isSelected;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 28,
+      height: 28,
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.2),
+        borderRadius: BorderRadius.circular(AppRadii.sm),
+        border: Border.all(
+          color: isSelected ? color : AppColors.border,
+          width: isSelected ? 2 : 1,
+        ),
+      ),
+      child: Center(
+        child: Container(
+          width: 12,
+          height: 12,
+          decoration: BoxDecoration(
+            color: color,
+            borderRadius: BorderRadius.circular(AppRadii.xs),
+          ),
+        ),
+      ),
     );
   }
 }

@@ -28,10 +28,17 @@ Color categoryColor(AppCategory category) {
 /// takes the icon chosen in its modal — the form stores one of the
 /// [CategoryIcons] slugs — falling back to the chip's glyph for a slug the app
 /// doesn't know.
-IconData categoryIcon(AppCategory category) {
+IconData categoryIcon(AppCategory category) =>
+    CategoryIcons.forSlug(categoryIconSlug(category));
+
+/// The [CategoryIcons] slug behind [categoryIcon] — what a subcategory stores
+/// to wear its parent's glyph.
+String categoryIconSlug(AppCategory category) {
   final chipSlug = categorySlugFor(name: category.name, kind: category.kind);
-  if (category.isSystem) return CategoryIcons.forSlug(chipSlug);
-  return CategoryIcons.bySlug[category.icon] ?? CategoryIcons.forSlug(chipSlug);
+  if (category.isSystem || !CategoryIcons.bySlug.containsKey(category.icon)) {
+    return chipSlug;
+  }
+  return category.icon;
 }
 
 /// The palette the create/edit form offers. The design system pins these hues
