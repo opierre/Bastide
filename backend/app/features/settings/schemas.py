@@ -1,6 +1,7 @@
 """Request/response schemas for the settings feature."""
 
 import ipaddress
+from datetime import datetime
 from typing import Annotated
 from urllib.parse import urlparse
 
@@ -66,3 +67,4 @@ class SettingsRead(BaseModel):
     inference_base_url: str
     model_tag: str | None
     confidence_threshold: float
+    last_backup_at: datetime | None

@@ -1,5 +1,6 @@
 """User settings endpoints: read (lazily created) and partial patch."""
 
+from datetime import UTC
 from typing import Annotated
 
 from fastapi import APIRouter, Depends
@@ -26,6 +27,12 @@ def _to_read(settings: UserSettings) -> SettingsRead:
         inference_base_url=settings.inference_base_url,
         model_tag=settings.model_tag,
         confidence_threshold=settings.confidence_threshold,
+        # SQLite hands timestamps back naive; they were written in UTC, so say so on the wire.
+        last_backup_at=(
+            settings.last_backup_at.replace(tzinfo=settings.last_backup_at.tzinfo or UTC)
+            if settings.last_backup_at is not None
+            else None
+        ),
     )
 
 

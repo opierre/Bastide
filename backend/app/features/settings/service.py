@@ -1,5 +1,7 @@
 """Business logic for reading and patching a user's settings."""
 
+from datetime import datetime
+
 from app.features.settings.models import UserSettings
 from app.features.settings.repository import SettingsRepository
 from app.features.settings.schemas import SettingsUpdate
@@ -26,6 +28,12 @@ class SettingsService:
         if existing is not None:
             return existing
         return self._repository.add_or_get_existing(UserSettings(user_id=user_id))
+
+    def record_backup(self, user_id: str, at: datetime) -> UserSettings:
+        """Stamp the time of the user's latest full backup export."""
+        settings = self.get_or_create(user_id)
+        settings.last_backup_at = at
+        return self._repository.update(settings)
 
     def update(self, user_id: str, data: SettingsUpdate) -> UserSettings:
         """Patch the supplied fields; omitted ones keep their stored value."""

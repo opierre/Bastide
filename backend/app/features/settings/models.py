@@ -28,6 +28,8 @@ class UserSettings(Base):
     inference_base_url: Mapped[str] = mapped_column(String(255), default=DEFAULT_INFERENCE_BASE_URL)
     model_tag: Mapped[str | None] = mapped_column(String(255), nullable=True)
     confidence_threshold: Mapped[float] = mapped_column(Float, default=DEFAULT_CONFIDENCE_THRESHOLD)
+    # When the user last exported a full backup; null until the first one.
+    last_backup_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), default=lambda: datetime.now(UTC)
     )

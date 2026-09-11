@@ -14,6 +14,7 @@ DEFAULTS = {
     "inference_base_url": "http://127.0.0.1:11434/v1",
     "model_tag": None,
     "confidence_threshold": 0.80,
+    "last_backup_at": None,
 }
 
 
@@ -76,6 +77,7 @@ def test_patch_updates_only_supplied_fields(client: TestClient) -> None:
         "inference_base_url": "http://127.0.0.1:11434/v1",
         "model_tag": "gemma4:e4b",
         "confidence_threshold": 0.9,
+        "last_backup_at": None,
     }
 
 
