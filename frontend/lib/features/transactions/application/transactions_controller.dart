@@ -2,7 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../data/transactions_repository.dart';
-import '../domain/category.dart' show PickerCategory;
+import '../../categories/domain/category.dart' show AppCategory;
 import '../domain/transaction.dart';
 
 /// The active list filters, held separately from the loaded page so a filter
@@ -134,6 +134,23 @@ class TransactionsController extends AsyncNotifier<TransactionsPage> {
     state = await AsyncValue.guard(() => _fetch(filters));
   }
 
+  /// Re-reads the current page without dropping to a loading state.
+  ///
+  /// What a categorization run needs: it commits a batch every couple of
+  /// seconds, and rows leave the review queue as it does. Going through
+  /// [refresh] would blank the list into a skeleton on every poll, which is
+  /// the opposite of the calm, non-blocking progress the panel promises — and
+  /// a failed background refresh leaves the rows already on screen rather than
+  /// replacing them with an error.
+  Future<void> refreshQuietly() async {
+    final filters = ref.read(transactionFiltersProvider);
+    try {
+      state = AsyncValue.data(await _fetch(filters));
+    } catch (_) {
+      // Deliberately swallowed: nobody asked for this refresh.
+    }
+  }
+
   /// Patches [transaction]'s category. Sets `source=user` server-side and
   /// clears `needs_review` — see the ai-categorization skill.
   Future<void> updateCategory(Transaction transaction, String categoryId) async {
@@ -143,19 +160,16 @@ class TransactionsController extends AsyncNotifier<TransactionsPage> {
     _replace(updated);
   }
 
-  /// Applies [categoryId] to [transaction] and creates a matching rule so the
-  /// rule engine picks up transactions like it automatically from now on.
-  Future<void> alwaysCategorizeLike(Transaction transaction, String categoryId) async {
-    final merchant = transaction.merchant?.trim();
-    final hasMerchant = merchant != null && merchant.isNotEmpty;
-    await ref
-        .read(transactionsRepositoryProvider)
-        .alwaysCategorizeAs(
-          matchField: hasMerchant ? 'merchant' : 'description_clean',
-          pattern: hasMerchant ? merchant : transaction.descriptionClean,
-          categoryId: categoryId,
-        );
-    await updateCategory(transaction, categoryId);
+  /// Accepts the model's proposal for [transaction] as-is.
+  ///
+  /// The same patch a correction makes, and deliberately so: a confirmed guess
+  /// becomes `source = user`, because the user has now said it — the run that
+  /// guessed it is no longer what the row rests on, and a later run must never
+  /// reconsider it (PROJECT.md §7).
+  Future<void> confirmProposal(Transaction transaction) async {
+    final proposed = transaction.category;
+    if (proposed == null) return;
+    await updateCategory(transaction, proposed.id);
   }
 
   void _replace(Transaction updated) {
@@ -183,6 +197,6 @@ final transactionsControllerProvider =
 /// The category catalog for the picker (system + the caller's own). Loaded
 /// once per session — categories change rarely enough that a `FutureProvider`
 /// without manual refresh is the right amount of machinery here.
-final transactionCategoriesProvider = FutureProvider<List<PickerCategory>>((ref) {
+final transactionCategoriesProvider = FutureProvider<List<AppCategory>>((ref) {
   return ref.read(transactionsRepositoryProvider).listCategories();
 });

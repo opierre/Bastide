@@ -158,10 +158,17 @@ def _previous_month_bounds(month_start: date) -> tuple[date, date]:
 
 
 def _delta_pct(current: int, previous: int) -> float:
-    """MoM percentage change; `0.0` when there's no previous baseline to compare against."""
+    """MoM percentage change; `0.0` when there's no previous baseline to compare against.
+
+    Divided by the *magnitude* of the baseline, so the sign of the result is always the
+    direction of the move. Net can be negative, and a signed divisor inverts it: a month going
+    from −200,00 € to +100,00 € is a recovery, but `(100_00 − −200_00) / −200_00` reports
+    −150 %, which the dashboard's trend pill paints red and points downwards. Income and expense
+    are non-negative totals, so `abs` leaves their deltas unchanged.
+    """
     if previous == 0:
         return 0.0
-    return (current - previous) / previous * 100
+    return (current - previous) / abs(previous) * 100
 
 
 def _savings_rate_delta_pct(rate: float, prev_rate: float, prev_income: int) -> float:

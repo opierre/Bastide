@@ -1,0 +1,380 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+import '../../../core/l10n/category_display.dart';
+import '../../../core/theme/tokens.dart';
+import '../../../core/widgets/app_modal.dart';
+import '../../../core/widgets/app_select.dart';
+import '../../../core/widgets/category_chip.dart';
+import '../../../core/widgets/inline_banner.dart';
+import '../../../core/widgets/labeled_field.dart';
+import '../../../core/widgets/primary_button.dart';
+import '../../../l10n/app_localizations.dart';
+import '../application/categories_controller.dart';
+import '../domain/category.dart';
+import 'category_color.dart';
+import 'category_delete.dart';
+import 'category_error_localizer.dart';
+import 'category_labels.dart';
+
+/// Opens the create/edit category modal. Resolves to the saved category, or
+/// `null` when the user cancelled or deleted it.
+///
+/// [parent] presets a new category's parent — the « + Sous-catégorie » chip on
+/// a card. A subcategory always takes its parent's kind, icon and colour, so
+/// while a parent is set none of them is shown: the header names the parent.
+Future<AppCategory?> showCategoryForm(
+  BuildContext context, {
+  AppCategory? initial,
+  AppCategory? parent,
+}) {
+  return showDialog<AppCategory>(
+    context: context,
+    builder: (_) => CategoryFormModal(initial: initial, parent: parent),
+  );
+}
+
+/// Create/edit modal for a user category — Nom, Kind, Parent, icône, couleur,
+/// following the 05 modal pattern at 480 px (`docs/design/08`).
+///
+/// System categories never reach it: they have no edit affordance, and the API
+/// would 404 the patch anyway. The form only ever writes the user's own rows.
+class CategoryFormModal extends ConsumerStatefulWidget {
+  const CategoryFormModal({super.key, this.initial, this.parent});
+
+  final AppCategory? initial;
+  final AppCategory? parent;
+
+  @override
+  ConsumerState<CategoryFormModal> createState() => _CategoryFormModalState();
+}
+
+class _CategoryFormModalState extends ConsumerState<CategoryFormModal> {
+  final _formKey = GlobalKey<FormState>();
+  late final _nameController = TextEditingController(text: widget.initial?.name);
+
+  late String _kind = widget.initial?.kind ?? widget.parent?.kind ?? 'expense';
+  late String? _parentId = widget.initial?.parentId ?? widget.parent?.id;
+  late String _icon = widget.initial?.icon ?? 'autres';
+  late Color _color = switch ((widget.initial, widget.parent)) {
+    (final AppCategory initial, _) => categoryColor(initial),
+    (null, final AppCategory parent) => categoryColor(parent),
+    _ => categoryPalette.last,
+  };
+
+  bool _isSubmitting = false;
+  String? _errorText;
+
+  bool get _isEditing => widget.initial != null;
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    super.dispose();
+  }
+
+  /// Every category that could hold this one: top-level rows only (the data
+  /// model is two levels deep), and never the category being edited — a
+  /// category parented to itself would vanish from the tree.
+  List<AppCategory> _parentOptions(List<AppCategory> categories) => [
+    for (final category in categories)
+      if (category.parentId == null && category.id != widget.initial?.id) category,
+  ];
+
+  /// The chosen parent, looked up in the loaded list — falling back to the
+  /// preset one, so the lock holds even before the list has arrived.
+  AppCategory? _selectedParent(List<AppCategory> categories) {
+    final id = _parentId;
+    if (id == null) return null;
+    for (final category in categories) {
+      if (category.id == id) return category;
+    }
+    return widget.parent?.id == id ? widget.parent : null;
+  }
+
+  Future<void> _submit() async {
+    if (!(_formKey.currentState?.validate() ?? false)) return;
+    setState(() {
+      _isSubmitting = true;
+      _errorText = null;
+    });
+
+    final categories = ref.read(categoriesControllerProvider).value ?? const <AppCategory>[];
+    final parent = _selectedParent(categories);
+    final kind = parent?.kind ?? _kind;
+    final icon = parent == null ? _icon : categoryIconSlug(parent);
+    final color = hexOf(parent == null ? _color : categoryColor(parent));
+    final controller = ref.read(categoriesControllerProvider.notifier);
+    try {
+      final saved = _isEditing
+          ? await controller.updateCategory(
+              widget.initial!.id,
+              name: _nameController.text.trim(),
+              kind: kind,
+              icon: icon,
+              color: color,
+              parentId: _parentId,
+              clearParent: _parentId == null,
+            )
+          : await controller.create(
+              name: _nameController.text.trim(),
+              kind: kind,
+              icon: icon,
+              color: color,
+              parentId: _parentId,
+            );
+      if (!mounted) return;
+      Navigator.of(context).pop(saved);
+    } catch (error) {
+      if (!mounted) return;
+      setState(() {
+        _isSubmitting = false;
+        _errorText = localizeCategoryError(AppLocalizations.of(context)!, error);
+      });
+    }
+  }
+
+  /// Deletes the category being edited, after the same confirmation the card's
+  /// ⋯ menu asks. The subcategory chips have no menu of their own, so this is
+  /// where a user's subcategory is removed.
+  Future<void> _delete() async {
+    final category = widget.initial!;
+    if (!await confirmCategoryDelete(context, category)) return;
+    if (!mounted) return;
+    setState(() {
+      _isSubmitting = true;
+      _errorText = null;
+    });
+    try {
+      await ref.read(categoriesControllerProvider.notifier).delete(category.id);
+      if (!mounted) return;
+      Navigator.of(context).pop();
+    } catch (error) {
+      if (!mounted) return;
+      setState(() {
+        _isSubmitting = false;
+        _errorText = localizeCategoryError(AppLocalizations.of(context)!, error);
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final categories = ref.watch(categoriesControllerProvider).value ?? const <AppCategory>[];
+    // A subcategory's kind, icon and colour are its parent's, so the form drops
+    // those fields and names the parent under the title instead.
+    final parent = _selectedParent(categories);
+
+    return AppModal(
+      title: _isEditing ? l10n.categoryFormEditTitle : l10n.categoryFormCreateTitle,
+      subtitle: parent == null ? null : _ParentLine(parent: parent),
+      width: 480,
+      actions: [
+        // First in the footer, as in the rule editor: furthest from « Enregistrer ».
+        if (_isEditing)
+          TextButton(
+            key: const Key('categoryFormDelete'),
+            onPressed: _isSubmitting ? null : _delete,
+            child: Text(l10n.categoryDelete),
+          ),
+        OutlinedButton(
+          onPressed: _isSubmitting ? null : () => Navigator.of(context).pop(),
+          child: Text(l10n.categoryFormCancel),
+        ),
+        PrimaryButton(
+          key: const Key('categoryFormSubmit'),
+          label: l10n.categoryFormSave,
+          isLoading: _isSubmitting,
+          onPressed: _isSubmitting ? null : _submit,
+        ),
+      ],
+      child: Form(
+        key: _formKey,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            if (_errorText != null) ...[
+              InlineBanner(key: const Key('categoryFormError'), message: _errorText!),
+              const SizedBox(height: AppSpacing.md),
+            ],
+            LabeledField(
+              label: l10n.categoryFormNameLabel,
+              child: TextFormField(
+                key: const Key('categoryFormName'),
+                controller: _nameController,
+                autofocus: true,
+                decoration: InputDecoration(hintText: l10n.categoryFormNameHint),
+                validator: (value) => (value == null || value.trim().isEmpty)
+                    ? l10n.categoryFormNameRequired
+                    : null,
+              ),
+            ),
+            if (parent == null) ...[
+              const SizedBox(height: AppSpacing.md),
+              LabeledField(
+                label: l10n.categoryFormKindLabel,
+                helper: l10n.categoryFormKindHelper,
+                child: AppSelect<String>(
+                  key: const Key('categoryFormKind'),
+                  value: _kind,
+                  onChanged: (value) => setState(() => _kind = value),
+                  items: [
+                    for (final kind in const ['expense', 'income', 'transfer'])
+                      AppSelectItem(value: kind, label: categoryKindLabel(l10n, kind)),
+                  ],
+                ),
+              ),
+            ],
+            const SizedBox(height: AppSpacing.md),
+            LabeledField(
+              label: l10n.categoryFormParentLabel,
+              child: AppSelect<String?>(
+                key: const Key('categoryFormParent'),
+                value: _parentId,
+                onChanged: (value) => setState(() => _parentId = value),
+                items: [
+                  AppSelectItem(value: null, label: l10n.categoryFormParentNone),
+                  for (final parent in _parentOptions(categories))
+                    AppSelectItem(
+                      value: parent.id,
+                      label: localizedCategoryName(l10n, parent.name),
+                    ),
+                ],
+              ),
+            ),
+            if (parent == null) ...[
+              const SizedBox(height: AppSpacing.md),
+              LabeledField(
+                label: l10n.categoryFormIconLabel,
+                child: AppSelect<String>(
+                  key: const Key('categoryFormIcon'),
+                  value: _icon,
+                  onChanged: (value) => setState(() => _icon = value),
+                  items: [
+                    for (final slug in CategoryIcons.bySlug.keys)
+                      AppSelectItem(
+                        value: slug,
+                        label: categoryIconLabel(l10n, slug),
+                        leading: Icon(
+                          CategoryIcons.forSlug(slug),
+                          size: 15,
+                          color: AppColors.textSecondary,
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: AppSpacing.md),
+              LabeledField(
+                label: l10n.categoryFormColorLabel,
+                helper: l10n.categoryFormColorHelper,
+                child: _ColorPicker(
+                  selected: _color,
+                  onSelected: (color) => setState(() => _color = color),
+                ),
+              ),
+            ],
+            const SizedBox(height: AppSpacing.sm),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// The subtitle of a subcategory's modal: its parent's glyph, in the parent's
+/// hue, and name — standing in for the kind, icon and colour it inherits.
+class _ParentLine extends StatelessWidget {
+  const _ParentLine({required this.parent});
+
+  final AppCategory parent;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    return Row(
+      key: const Key('categoryFormParentLine'),
+      children: [
+        Icon(categoryIcon(parent), size: 15, color: categoryColor(parent)),
+        const SizedBox(width: AppSpacing.sm),
+        Flexible(
+          child: Text(
+            localizedCategoryName(l10n, parent.name),
+            overflow: TextOverflow.ellipsis,
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              color: AppColors.textSecondary,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+/// The pinned palette as a row of 28 px swatches. A picker rather than a colour
+/// wheel: the hues are fixed by the design system so a category means the same
+/// colour in the donut, the legend and its chip.
+class _ColorPicker extends StatelessWidget {
+  const _ColorPicker({required this.selected, required this.onSelected});
+
+  final Color selected;
+  final ValueChanged<Color> onSelected;
+
+  @override
+  Widget build(BuildContext context) {
+    return Wrap(
+      spacing: AppSpacing.sm,
+      runSpacing: AppSpacing.sm,
+      children: [
+        for (final color in categoryPalette)
+          GestureDetector(
+            key: Key('categoryFormColor-${hexOf(color)}'),
+            onTap: () => onSelected(color),
+            child: MouseRegion(
+              cursor: SystemMouseCursors.click,
+              child: _Swatch(
+                color: color,
+                isSelected: color.toARGB32() == selected.toARGB32(),
+              ),
+            ),
+          ),
+      ],
+    );
+  }
+}
+
+/// One 28 px swatch: the hue as a 12 px chip on a tinted plate, ringed in the
+/// hue itself when selected.
+class _Swatch extends StatelessWidget {
+  const _Swatch({required this.color, required this.isSelected});
+
+  final Color color;
+  final bool isSelected;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 28,
+      height: 28,
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.2),
+        borderRadius: BorderRadius.circular(AppRadii.sm),
+        border: Border.all(
+          color: isSelected ? color : AppColors.border,
+          width: isSelected ? 2 : 1,
+        ),
+      ),
+      child: Center(
+        child: Container(
+          width: 12,
+          height: 12,
+          decoration: BoxDecoration(
+            color: color,
+            borderRadius: BorderRadius.circular(AppRadii.xs),
+          ),
+        ),
+      ),
+    );
+  }
+}

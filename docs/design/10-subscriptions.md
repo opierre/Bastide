@@ -34,7 +34,20 @@ Header row 32 px uppercase `#5A6579`: (36 monogram) · Abonnement (flex) · Cat�
 **Kebab menu** (open on Netflix in frame ①): 230 px popover, overlay surface `#19202B`, border `#232B38`, radius 14, shadow `0 18px 44px rgba(0,0,0,.55)`; items 34 px: Confirmer (green check) · Ignorer · Marquer comme résilié · Modifier.
 
 ## Detail state (frame ②, Netflix)
-Iris back link « Retour aux abonnements ». Header Card: 48 px NF monogram · name (Space Grotesk 20) + Loisirs chip · sub « BNP — Compte courant · détecté depuis décembre 2025 » · right stat trio (Cadence Mensuel / Montant attendu 15,49 € / Prochain prélèvement 15/05/2026). Below: amber banner « Augmentation : 13,49 € → 15,49 € le 15/04/2026 — soit +24,00 € par an. » Then history Card « Historique des prélèvements », sub « Les transactions dont cette série est déduite · BNP — Compte courant »; table Date 140 / Montant 120 right / right-aligned change pill; rows (amounts red `#FF5C6C`): 15/04/2026 −15,49 € with amber pill « 13,49 € → 15,49 € » and row tint `rgba(255,184,77,.05)`; then 15/03, 15/02, 15/01/2026, 15/12/2025 at −13,49 €. Foot note: « FinStride déduit la série de ces occurrences — vérifiez-les avant de confirmer un changement. »
+Iris back link « Retour aux abonnements ». Header Card: 48 px NF monogram · name (Space Grotesk 20) + Loisirs chip · sub « BNP — Compte courant · détecté depuis décembre 2025 » · right stat trio (Cadence Mensuel / Montant attendu 15,49 € / Prochain prélèvement 15/05/2026). Below: amber banner « Augmentation : 13,49 € → 15,49 € le 15/04/2026 — soit +24,00 € par an. » Then history Card « Historique des prélèvements », sub « Les transactions dont cette série est déduite · BNP — Compte courant », holding the **price curve** (see below) over an amber change pill « 13,49 € → 15,49 € » aligned left as its legend. Foot note: « FinStride déduit la série de ces occurrences — vérifiez-les avant de confirmer un changement. »
+
+### Price curve (history Card body)
+Replaces the occurrence table the frame was first drawn with: five near-identical amounts asked the reader to do the comparison, where a line has already done it. The amounts are not lost — see the axis and the hover below.
+
+**Shape.** A **step**, never a slope: a subscription costs the same until the day it doesn't, so an interpolated segment would draw a price that was never billed. Step-after — hold at the level, then jump at the charge that changed. Same family as the dashboard's AreaLine (`00` §Components): iris `#8B8CF9` 2.5 px stroke over a 16% iris fill, 4 hairline gridlines `#1A212C` across the plot, drawn not animated.
+
+**Box.** 184 px card body. Value axis 62 px + 8 px gap on the left, date axis 20 px beneath, 6 px vertical inset to clear the dot. Scale runs on the series' own min/max with 35% headroom, so an increase reads as a tread rather than as the line leaving the card; a price that never moved has no span and sits centred as one flat level.
+
+**Points.** 3 px iris dot per charge, suppressed above 24 charges; 5 px dot on the latest, ringed in `#111620` so it sits *on* the line. The charge the price stepped at takes the 5 px dot in amber `#FFB84D` plus a 1 px `rgba(255,184,77,.35)` guide from plot top to bottom.
+
+**Axes.** Value: two ticks only — the cheapest and the dearest charge, unsigned, at their own height, 11.5 px `#97A3B6` tabular, right-aligned; one tick when the price never moved (no invented spread). Dates: 10 px `#97A3B6`, thinned to 5 ticks max, edge ticks clamped inward; `15 mars` while the history fits inside a year, `mars 2026` beyond it.
+
+**Hover.** A full-height column per charge (the moment, not the 3 px dot) carrying the dashboard's tooltip: date (tabular) over the signed, colorized amount — `−15,49 €` in `#FF5C6C` — plus « 13,49 € → 15,49 € » in amber on the charge that stepped.
 
 ## Empty state (frame ③)
 Centered: 64 px iris plate with cycle glyph; « Aucun abonnement détecté pour l'instant »; « FinStride repère un abonnement lorsqu'un prélèvement s'est répété trois fois. Importer davantage d'historique accélère la détection. »; gradient CTA « Aller aux imports ».

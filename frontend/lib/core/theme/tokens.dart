@@ -78,6 +78,10 @@ abstract final class AppColors {
   /// balance never reads as a brand element.
   static const positive = Color(0xFF4ADE80);
   static const negative = Color(0xFFFF5C6C);
+
+  /// Label ink on a solid [negative] fill — the destructive confirm button
+  /// (`docs/design/09-settings.md` §Sauvegarde, state ⑧).
+  static const negativeInk = Color(0xFF2A0A0F);
   static const warning = Color(0xFFFFB84D);
   static const info = Color(0xFF5AA9FF);
 
@@ -135,6 +139,40 @@ abstract final class AppColors {
     stops: [0.0, 0.55],
     transform: GradientRotation(70 * math.pi / 180),
   );
+
+  /// Iris at 30% — the dashboard's Objectifs card outline (`docs/design/04` §Row 3). A notch
+  /// lighter than [irisBorderStrong] because that card's own tint is lighter too: the pair are
+  /// drawn to keep the same border-to-fill relationship as the savings hero.
+  static const irisBorder = Color(0x4D8B8CF9);
+
+  /// The goal progress bar's fill — the spec's `linear-gradient(90deg,#6C6AF0,#8B8CF9)`
+  /// (`docs/design/00` §Phase 2 additions).
+  ///
+  /// Deep end *first*, unlike [irisGradient]: a progress bar fills from the left, and starting
+  /// on the darker stop is what makes a part-filled bar read as one that has been travelling
+  /// rather than one that has been cropped.
+  static const goalProgressGradient = LinearGradient(
+    begin: Alignment.centerLeft,
+    end: Alignment.centerRight,
+    colors: [irisDeep, iris],
+  );
+
+  /// The dashboard Objectifs card's fill — the spec's
+  /// `linear-gradient(160deg,rgba(139,140,249,.10),rgba(108,106,240,.03) 55%)` over
+  /// [surfaceRaised], composited here for the same reason [irisTintGradient] is: one gradient,
+  /// so the card stays a tint of the neutral cards beside it rather than a second material.
+  static const irisTintGradientSoft = LinearGradient(
+    begin: Alignment.centerLeft,
+    end: Alignment.centerRight,
+    colors: [Color(0xFF1D2236), Color(0xFF141926)],
+    stops: [0.0, 0.55],
+    transform: GradientRotation(70 * math.pi / 180),
+  );
+
+  /// The reached goal card's outline — the spec's `rgba(74,222,128,.35)`. Green rather than
+  /// iris because reaching a target is the one state on this panel the design lets a card
+  /// announce by its edge (`docs/design/11-goals.md` §Grid state).
+  static const positiveBorder = Color(0x594ADE80);
 
   /// Glow beneath a primary button.
   static const irisGlow = [
@@ -241,6 +279,9 @@ abstract final class AppSpacing {
 }
 
 abstract final class AppRadii {
+  /// Category swatch, stacked-bar cap (`docs/design/00` §Components).
+  static const xs = 4.0;
+
   static const sm = 8.0;
   static const monogram = 9.0;
   static const md = 12.0;
@@ -323,6 +364,12 @@ abstract final class AppChrome {
   static const navItemHeight = 40.0;
   static const controlPillHeight = 38.0;
   static const userPillHeight = 44.0;
+
+  /// Every button in a footer or action row — primary, secondary, ghost — is
+  /// this tall, so a « Annuler » sits exactly level with the « Appliquer »
+  /// beside it. The spec's 38–46 range is a range for standalone CTAs; paired
+  /// buttons have to agree on one number, and 38 is the low end the footers use.
+  static const buttonHeight = 38.0;
 
   /// Flush-left active rail on a nav item.
   static const navRailWidth = 3.0;

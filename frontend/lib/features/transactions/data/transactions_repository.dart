@@ -3,17 +3,19 @@ import 'package:intl/intl.dart';
 
 import '../../../core/api/api_client.dart';
 import '../../../core/api/api_client_provider.dart';
-import '../domain/category.dart';
+import '../../categories/domain/category.dart';
 import '../domain/transaction.dart';
 
 final _isoDate = DateFormat('yyyy-MM-dd');
 
-/// Calls the `/transactions`, `/categories` and `/rules` endpoints and maps
-/// the wire JSON to domain models. The transactions feature owns these calls
-/// itself — there is no dedicated categories/rules frontend feature yet (see
-/// the architecture skill's "a feature owns everything it needs" rule) — so
-/// this stays the one place that knows their response shapes for the
-/// category picker and the "always categorize like this" affordance.
+/// Calls the `/transactions` and `/categories` endpoints and maps the wire
+/// JSON to domain models.
+///
+/// The foreign call serves an affordance that belongs to *this* panel — the
+/// category picker — so it stays here rather than reaching into the categories
+/// controller, which holds the state of a panel this one never shows. Only the
+/// [AppCategory] shape is shared, because a second shape for the same resource
+/// is the one thing worse than a shared one.
 class TransactionsRepository {
   TransactionsRepository(this._apiClient);
 
@@ -66,36 +68,11 @@ class TransactionsRepository {
     return _parse(json as Map<String, dynamic>);
   }
 
-  Future<List<PickerCategory>> listCategories() async {
+  Future<List<AppCategory>> listCategories() async {
     final json = await _apiClient.get('/categories') as List<dynamic>;
-    return json.map((entry) => _parseCategory(entry as Map<String, dynamic>)).toList();
-  }
-
-  /// Creates a rule matching [pattern] on [matchField] to [categoryId], so the
-  /// rule engine picks up transactions like this one automatically from now
-  /// on (see the ai-categorization skill's learning-loop pattern).
-  ///
-  /// Priority is placed after every existing rule: this transaction already
-  /// fell through every enabled rule to reach the review queue, so nothing
-  /// currently matches it and ordering relative to the existing set can't
-  /// change today's outcome — only future imports.
-  Future<void> alwaysCategorizeAs({
-    required String matchField,
-    required String pattern,
-    required String categoryId,
-  }) async {
-    final existing = await _apiClient.get('/rules') as List<dynamic>;
-    await _apiClient.post(
-      '/rules',
-      body: {
-        'priority': existing.length + 1,
-        'match_field': matchField,
-        'match_type': 'contains',
-        'pattern': pattern,
-        'category_id': categoryId,
-        'enabled': true,
-      },
-    );
+    return json
+        .map((entry) => AppCategory.fromJson(entry as Map<String, dynamic>))
+        .toList();
   }
 
   Transaction _parse(Map<String, dynamic> json) {
@@ -133,17 +110,6 @@ class TransactionsRepository {
       updatedAt: DateTime.parse(json['updated_at'] as String),
     );
   }
-
-  PickerCategory _parseCategory(Map<String, dynamic> json) => PickerCategory(
-    id: json['id'] as String,
-    userId: json['user_id'] as String?,
-    parentId: json['parent_id'] as String?,
-    name: json['name'] as String,
-    kind: json['kind'] as String,
-    icon: json['icon'] as String,
-    color: json['color'] as String,
-    isSystem: json['is_system'] as bool,
-  );
 }
 
 final transactionsRepositoryProvider = Provider<TransactionsRepository>((ref) {

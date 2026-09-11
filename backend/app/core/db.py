@@ -1,6 +1,6 @@
 """SQLAlchemy engine, session factory, and the per-request session dependency."""
 
-from collections.abc import Generator
+from collections.abc import Callable, Generator
 from typing import Any
 
 from sqlalchemy import Engine, create_engine, event
@@ -32,6 +32,10 @@ def _enable_wal(dbapi_connection: Any, connection_record: Any) -> None:
 SessionLocal = sessionmaker(bind=engine, autoflush=False, autocommit=False)
 
 
+#: Opens a session with no request bound to its lifetime.
+type SessionFactory = Callable[[], Session]
+
+
 def get_db() -> Generator[Session]:
     """Yield a database session scoped to a single request."""
     db = SessionLocal()
@@ -39,3 +43,15 @@ def get_db() -> Generator[Session]:
         yield db
     finally:
         db.close()
+
+
+def get_session_factory() -> SessionFactory:
+    """Return the factory background work opens its own sessions with.
+
+    Work that outlives the request that started it — a categorisation run, which returns 202
+    and then keeps writing — cannot borrow the request's session: `get_db` closes it as soon
+    as the response is sent. It takes the factory instead and owns the session it opens.
+    Exposed as a dependency so tests can point background work at their temp database, the
+    same way they override `get_db`.
+    """
+    return SessionLocal

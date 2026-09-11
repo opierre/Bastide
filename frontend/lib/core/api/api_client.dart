@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:typed_data';
 
 import 'package:http/http.dart' as http;
 
@@ -17,6 +18,14 @@ class ApiFailure implements Exception {
 
   @override
   String toString() => 'ApiFailure($code: $message)';
+}
+
+/// A binary response body with its headers (lower-cased names).
+class ApiBytesResponse {
+  const ApiBytesResponse({required this.bytes, required this.headers});
+
+  final Uint8List bytes;
+  final Map<String, String> headers;
 }
 
 /// Single typed HTTP client for the local sidecar. Owns bearer-header
@@ -49,8 +58,7 @@ class ApiClient {
     return _send('DELETE', path);
   }
 
-  /// Uploads a file alongside flat form fields (`POST /imports`,
-  /// `POST /csv-templates/preview`).
+  /// Uploads a file alongside flat form fields (`POST /imports`).
   ///
   /// Multipart rather than JSON because the backend takes the statement file as
   /// an `UploadFile` — see `PROJECT.md` §5. The `Content-Type` header is left to
@@ -73,6 +81,21 @@ class ApiClient {
     final streamed = await _httpClient.send(request);
     final response = await http.Response.fromStream(streamed);
     return _decode(response);
+  }
+
+  /// POSTs with no body and returns the raw bytes and headers — for endpoints
+  /// that answer with a file (`POST /backup/export`). A failure still arrives
+  /// as the JSON error envelope and is thrown as [ApiFailure].
+  Future<ApiBytesResponse> postForBytes(String path) async {
+    final uri = baseUrl.replace(path: '${baseUrl.path}$path');
+    final request = http.Request('POST', uri)
+      ..headers.addAll(_headers(json: false))
+      ..headers['Accept'] = '*/*';
+
+    final streamed = await _httpClient.send(request);
+    final response = await http.Response.fromStream(streamed);
+    if (response.statusCode >= 400) _decode(response);
+    return ApiBytesResponse(bytes: response.bodyBytes, headers: response.headers);
   }
 
   Future<dynamic> _send(

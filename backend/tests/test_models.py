@@ -22,11 +22,16 @@ EXPECTED_TABLES = {
     "auth_tokens",
     "accounts",
     "categories",
-    "csv_templates",
     "account_balance_snapshots",
     "categorization_rules",
     "import_batches",
     "transactions",
+    "user_settings",
+    "categorization_runs",
+    "recurring_series",
+    "recurring_occurrences",
+    "goals",
+    "goal_allocations",
     "alembic_version",
 }
 

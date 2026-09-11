@@ -6,7 +6,7 @@ import '../../../core/theme/tokens.dart';
 import '../../../core/widgets/category_chip.dart';
 import '../../../l10n/app_localizations.dart';
 import '../application/transactions_controller.dart';
-import '../domain/category.dart' show PickerCategory;
+import '../../categories/domain/category.dart' show AppCategory;
 import '../domain/transaction.dart';
 import 'transaction_error_localizer.dart';
 
@@ -14,15 +14,14 @@ import 'transaction_error_localizer.dart';
 /// — a 250px overlay with a search field and the category catalog, the
 /// current category checked (see `docs/design/07-transactions.md`).
 ///
-/// When [alwaysRule] is set (the review queue's "Toujours catégoriser ainsi"
-/// affordance), picking a category also creates a matching rule so future
-/// imports categorize transactions like it automatically — see the
-/// ai-categorization skill's learning loop.
+/// Assigning only. "Toujours catégoriser ainsi" is a rule form of its own
+/// (`always_categorize_modal.dart`), because a rule needs a field, a condition
+/// and a pattern the user can see and change — a category tap alone can't say
+/// what the rule would match.
 Future<void> showCategoryPicker(
   BuildContext anchorContext,
   WidgetRef ref, {
   required Transaction transaction,
-  bool alwaysRule = false,
 }) async {
   final button = anchorContext.findRenderObject()! as RenderBox;
   final overlay =
@@ -51,17 +50,16 @@ Future<void> showCategoryPicker(
       PopupMenuItem<void>(
         enabled: false,
         padding: EdgeInsets.zero,
-        child: _CategoryPickerBody(transaction: transaction, alwaysRule: alwaysRule),
+        child: _CategoryPickerBody(transaction: transaction),
       ),
     ],
   );
 }
 
 class _CategoryPickerBody extends ConsumerStatefulWidget {
-  const _CategoryPickerBody({required this.transaction, required this.alwaysRule});
+  const _CategoryPickerBody({required this.transaction});
 
   final Transaction transaction;
-  final bool alwaysRule;
 
   @override
   ConsumerState<_CategoryPickerBody> createState() => _CategoryPickerBodyState();
@@ -77,11 +75,7 @@ class _CategoryPickerBodyState extends ConsumerState<_CategoryPickerBody> {
     final l10n = AppLocalizations.of(context)!;
     final notifier = ref.read(transactionsControllerProvider.notifier);
     try {
-      if (widget.alwaysRule) {
-        await notifier.alwaysCategorizeLike(widget.transaction, categoryId);
-      } else {
-        await notifier.updateCategory(widget.transaction, categoryId);
-      }
+      await notifier.updateCategory(widget.transaction, categoryId);
       if (mounted) Navigator.of(context).pop();
     } catch (error) {
       if (!mounted) return;
@@ -164,7 +158,7 @@ class _CategoryPickerBodyState extends ConsumerState<_CategoryPickerBody> {
     );
   }
 
-  List<PickerCategory> _filter(List<PickerCategory> categories, String query) {
+  List<AppCategory> _filter(List<AppCategory> categories, String query) {
     final needle = query.trim().toLowerCase();
     if (needle.isEmpty) return categories;
     final l10n = AppLocalizations.of(context)!;
@@ -185,7 +179,7 @@ class _CategoryList extends StatelessWidget {
     required this.onSelect,
   });
 
-  final List<PickerCategory> categories;
+  final List<AppCategory> categories;
   final String? currentCategoryId;
   final bool isSaving;
   final ValueChanged<String> onSelect;

@@ -46,7 +46,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get navImportsSubtitle =>
-      'OFX, QFX and CSV statements — processed on this computer';
+      'OFX and QFX statements — processed on this computer';
 
   @override
   String get navCategoriesSubtitle =>
@@ -216,12 +216,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get accountsAddButton => 'Add account';
 
   @override
-  String get accountsSearchHint => 'Search…';
-
-  @override
-  String get accountsSearchEmpty => 'No account matches your search.';
-
-  @override
   String accountsBalancesAsOf(DateTime date) {
     final intl.DateFormat dateDateFormat = intl.DateFormat.yMd(localeName);
     final String dateString = dateDateFormat.format(date);
@@ -378,11 +372,11 @@ class AppLocalizationsEn extends AppLocalizations {
       'Couldn\'t load your accounts. Try again in a moment.';
 
   @override
-  String get importDropZoneTitle => 'Drop an OFX, QFX or CSV file';
+  String get importDropZoneTitle => 'Drop an OFX or QFX file';
 
   @override
   String get importDropZoneHint =>
-      'or click to browse — a CSV opens the mapping wizard';
+      'or click to browse — the statement names its own account';
 
   @override
   String importFileSize(String size) {
@@ -397,17 +391,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get importSubmitting => 'Importing…';
-
-  @override
-  String get importOpenWizard => 'Set up and import';
-
-  @override
-  String importTemplateReuse(String bank) {
-    return 'CSV format saved for $bank — it will be reused for this file.';
-  }
-
-  @override
-  String get importReconfigureTemplate => 'Reconfigure';
 
   @override
   String importDetectedAccount(String account) {
@@ -426,6 +409,13 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get importCreateDetectedAccount => 'Create this account';
+
+  @override
+  String get importChooseAccount => 'Choose an account';
+
+  @override
+  String get importUnreadableAccount =>
+      'This file names no account — choose the destination.';
 
   @override
   String get importResultTitle => 'Last import';
@@ -544,138 +534,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get importRetry => 'Try again';
 
   @override
-  String get csvWizardTitle => 'CSV wizard';
-
-  @override
-  String get csvWizardStepFormat => 'Format';
-
-  @override
-  String get csvWizardStepColumns => 'Columns & preview';
-
-  @override
-  String get csvWizardCancel => 'Cancel';
-
-  @override
-  String get csvWizardNext => 'Continue';
-
-  @override
-  String get csvWizardConfirm => 'Confirm and import';
-
-  @override
-  String get csvWizardConfirming => 'Importing…';
-
-  @override
-  String get csvWizardBankLabel => 'Bank';
-
-  @override
-  String get csvWizardBankHelper =>
-      'This format is saved under this name and reused for every import from this bank.';
-
-  @override
-  String get csvWizardDelimiterLabel => 'Delimiter';
-
-  @override
-  String get csvDelimiterSemicolon => 'Semicolon ( ; )';
-
-  @override
-  String get csvDelimiterComma => 'Comma ( , )';
-
-  @override
-  String get csvDelimiterTab => 'Tab';
-
-  @override
-  String get csvDelimiterPipe => 'Pipe ( | )';
-
-  @override
-  String get csvWizardEncodingLabel => 'Encoding';
-
-  @override
-  String get csvWizardDateFormatLabel => 'Date format';
-
-  @override
-  String get csvWizardDecimalLabel => 'Decimal separator';
-
-  @override
-  String get csvDecimalComma => 'Comma ( , )';
-
-  @override
-  String get csvDecimalPeriod => 'Period ( . )';
-
-  @override
-  String get csvWizardAmountsLabel => 'Amounts';
-
-  @override
-  String get csvAmountStrategySigned => 'Signed';
-
-  @override
-  String get csvAmountStrategyDebitCredit => 'Debit / Credit';
-
-  @override
-  String get csvWizardHeaderOffsetLabel => 'Lines to skip';
-
-  @override
-  String get csvWizardHeaderOffsetHelper => 'Before the header row.';
-
-  @override
-  String get csvWizardColumnsHint =>
-      'Give the file\'s column name (or its number, starting at 0) for each piece of information.';
-
-  @override
-  String get csvWizardColumnHint => 'Column name or number';
-
-  @override
-  String get csvWizardColumnOptional => 'optional';
-
-  @override
-  String get csvColumnBookedDate => 'Booked date';
-
-  @override
-  String get csvColumnValueDate => 'Value date';
-
-  @override
-  String get csvColumnDescription => 'Description';
-
-  @override
-  String get csvColumnAmount => 'Amount';
-
-  @override
-  String get csvColumnDebit => 'Debit';
-
-  @override
-  String get csvColumnCredit => 'Credit';
-
-  @override
-  String get csvWizardPreviewTitle => 'Preview';
-
-  @override
-  String get csvWizardPreviewPending =>
-      'Fill in the required columns to see a preview.';
-
-  @override
-  String get csvWizardPreviewEmpty => 'No readable rows with these settings.';
-
-  @override
-  String get csvPreviewDateHeader => 'Date';
-
-  @override
-  String get csvPreviewDescriptionHeader => 'Description';
-
-  @override
-  String get csvPreviewAmountHeader => 'Amount';
-
-  @override
   String get importErrorAccountNotFound => 'Account not found.';
 
   @override
   String get importErrorBatchNotFound => 'Import not found.';
-
-  @override
-  String get importErrorTemplateNotFound =>
-      'CSV format not found — run the wizard again.';
-
-  @override
-  String get importErrorTemplateInvalid =>
-      'These settings don\'t match the file — adjust the columns above.';
 
   @override
   String get importErrorGeneric => 'Something went wrong. Please try again.';
@@ -710,6 +572,42 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get transactionsFilterAllDates => 'All dates';
+
+  @override
+  String get transactionsDateRangeTitle => 'Date range';
+
+  @override
+  String get transactionsDateRangeFromLabel => 'From';
+
+  @override
+  String get transactionsDateRangeToLabel => 'To';
+
+  @override
+  String get transactionsDateRangeHelp =>
+      'Leave both dates empty to see every date.';
+
+  @override
+  String get transactionsDateRangePickFrom => 'Pick the start date';
+
+  @override
+  String get transactionsDateRangePickTo => 'Pick the end date';
+
+  @override
+  String get transactionsDateRangeInvalid => 'Invalid date.';
+
+  @override
+  String get transactionsDateRangeIncomplete =>
+      'Fill in both dates, or neither.';
+
+  @override
+  String get transactionsDateRangeOrder =>
+      'The end date comes before the start date.';
+
+  @override
+  String get transactionsDateRangeCancel => 'Cancel';
+
+  @override
+  String get transactionsDateRangeApply => 'Apply';
 
   @override
   String transactionsPager(int from, int to, int total) {
@@ -756,6 +654,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get transactionErrorNotFound => 'Transaction not found.';
+
+  @override
+  String get transactionErrorCategoryInvalid =>
+      'That category is no longer available.';
 
   @override
   String get transactionErrorValidation => 'Some information is invalid.';
@@ -995,4 +897,1536 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get dashboardNextYear => 'Next year';
+
+  @override
+  String get categoriesAddButton => 'New category';
+
+  @override
+  String get categoriesEmptyTitle => 'No categories yet';
+
+  @override
+  String get categoriesEmptyBody =>
+      'Categories sort your spending. Create one to get started.';
+
+  @override
+  String get categoriesRetry => 'Try again';
+
+  @override
+  String get categoryBadgeSystem => 'System';
+
+  @override
+  String get categoryBadgeCustom => 'Custom';
+
+  @override
+  String get categorySystemLockedTooltip =>
+      'System category: it cannot be edited or deleted.';
+
+  @override
+  String get categoryActionsTooltip => 'Actions';
+
+  @override
+  String get categoryEdit => 'Edit';
+
+  @override
+  String get categoryDelete => 'Delete';
+
+  @override
+  String get categoryAddSubcategory => 'Subcategory';
+
+  @override
+  String categoryRuleCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count automatic rules',
+      one: '1 automatic rule',
+      zero: 'No rules',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get categoryDeleteConfirmTitle => 'Delete this category?';
+
+  @override
+  String categoryDeleteConfirmBody(String name) {
+    return '“$name” and its subcategories will be deleted. The transactions in them become uncategorized again.';
+  }
+
+  @override
+  String get categoryFormCreateTitle => 'New category';
+
+  @override
+  String get categoryFormEditTitle => 'Edit category';
+
+  @override
+  String get categoryFormNameLabel => 'Name';
+
+  @override
+  String get categoryFormNameHint => 'Project savings';
+
+  @override
+  String get categoryFormNameRequired => 'Give this category a name.';
+
+  @override
+  String get categoryFormKindLabel => 'Kind';
+
+  @override
+  String get categoryFormKindHelper =>
+      'An expense leaves your accounts, income arrives in them, a transfer moves between them.';
+
+  @override
+  String get categoryFormParentLabel => 'Parent category';
+
+  @override
+  String get categoryFormParentNone => 'None (top-level category)';
+
+  @override
+  String get categoryFormIconLabel => 'Icon';
+
+  @override
+  String get categoryFormColorLabel => 'Color';
+
+  @override
+  String get categoryFormColorHelper =>
+      'The color follows the category everywhere: charts, legends and labels.';
+
+  @override
+  String get categoryFormCancel => 'Cancel';
+
+  @override
+  String get categoryFormSave => 'Save';
+
+  @override
+  String get categoryKindExpense => 'Expense';
+
+  @override
+  String get categoryKindIncome => 'Income';
+
+  @override
+  String get categoryKindTransfer => 'Transfer';
+
+  @override
+  String get categoryIconHousing => 'Housing';
+
+  @override
+  String get categoryIconFood => 'Food';
+
+  @override
+  String get categoryIconTransport => 'Transport';
+
+  @override
+  String get categoryIconLeisure => 'Leisure';
+
+  @override
+  String get categoryIconSubscriptions => 'Subscriptions';
+
+  @override
+  String get categoryIconHealth => 'Health';
+
+  @override
+  String get categoryIconIncome => 'Income';
+
+  @override
+  String get categoryIconSavings => 'Savings';
+
+  @override
+  String get categoryIconOther => 'Other';
+
+  @override
+  String get categoryErrorNotEditable =>
+      'This category belongs to the system: it cannot be edited or deleted.';
+
+  @override
+  String get categoryErrorValidation =>
+      'That information isn\'t valid. Check the name and the kind.';
+
+  @override
+  String get categoryErrorGeneric => 'Something went wrong. Please try again.';
+
+  @override
+  String get categoriesTabCategories => 'Categories';
+
+  @override
+  String get categoriesTabRules => 'Rules';
+
+  @override
+  String get rulesAddButton => 'New rule';
+
+  @override
+  String get rulesPriorityNote =>
+      'Evaluated in priority order — a rule never replaces a category you chose yourself.';
+
+  @override
+  String get rulesApplyButton => 'Run the rules';
+
+  @override
+  String get rulesApplyRunning => 'Running…';
+
+  @override
+  String rulesApplyToastTitle(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count transactions recategorized',
+      one: '$count transaction recategorized',
+      zero: 'No transactions recategorized',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get rulesApplyToastBody =>
+      'The categories you chose yourself were left untouched.';
+
+  @override
+  String get rulesApplyFailed => 'The rule run failed';
+
+  @override
+  String get rulesReorderFailed => 'The new order could not be saved';
+
+  @override
+  String get rulesToggleFailed => 'The rule could not be changed';
+
+  @override
+  String get rulesFilterClear => 'Show all rules';
+
+  @override
+  String get rulesFilterEmpty => 'No rule targets this category.';
+
+  @override
+  String get rulesRetry => 'Try again';
+
+  @override
+  String get rulesEmptyTitle => 'Automate your sorting';
+
+  @override
+  String get rulesEmptyBody =>
+      'A rule recognizes a label — “CARREFOUR” — and applies its category to every matching transaction, today and on every import after.';
+
+  @override
+  String get ruleToggleSemantics => 'Enable rule';
+
+  @override
+  String get ruleTargetMissing => 'Category missing';
+
+  @override
+  String get ruleFieldDescription => 'Label';
+
+  @override
+  String get ruleFieldMerchant => 'Merchant';
+
+  @override
+  String get ruleFieldAmount => 'Amount';
+
+  @override
+  String get ruleConditionContains => 'contains';
+
+  @override
+  String get ruleConditionEquals => 'equals';
+
+  @override
+  String get ruleConditionRegex => 'regex';
+
+  @override
+  String get ruleConditionRange => 'range';
+
+  @override
+  String get ruleFormCreateTitle => 'New rule';
+
+  @override
+  String get ruleFormEditTitle => 'Edit rule';
+
+  @override
+  String get ruleFormFieldLabel => 'Field';
+
+  @override
+  String get ruleFormConditionLabel => 'Condition';
+
+  @override
+  String get ruleFormPriorityLabel => 'Priority';
+
+  @override
+  String get ruleFormPriorityInvalid => 'Enter a priority of at least 1.';
+
+  @override
+  String get ruleFormPatternLabel => 'Pattern';
+
+  @override
+  String get ruleFormPatternRequired => 'Enter what the rule should recognize.';
+
+  @override
+  String get rulePatternHelperText =>
+      'Case-insensitive search in the chosen field.';
+
+  @override
+  String get rulePatternHelperRegex =>
+      'Regular expression, case-sensitive. Tested live below.';
+
+  @override
+  String get rulePatternHelperRange =>
+      'Amount range in cents, “min:max”. Leave one side empty for an open bound; expenses are negative.';
+
+  @override
+  String get rulePatternHintText => 'CARREFOUR';
+
+  @override
+  String get rulePatternHintRegex => '^CB .*CARREFOUR';
+
+  @override
+  String get rulePatternHintRange => '-10000:-5000';
+
+  @override
+  String get ruleFormCategoryLabel => 'Category assigned';
+
+  @override
+  String get ruleFormCategoryNone => 'Choose a category';
+
+  @override
+  String get ruleFormCategoryRequired =>
+      'Choose the category this rule assigns.';
+
+  @override
+  String get ruleFormEnabledLabel => 'Rule active';
+
+  @override
+  String get ruleFormCancel => 'Cancel';
+
+  @override
+  String get ruleFormSave => 'Save';
+
+  @override
+  String get ruleFormDelete => 'Delete';
+
+  @override
+  String get rulePreviewLoading => 'Looking for matching transactions…';
+
+  @override
+  String rulePreviewCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Matches $count existing transactions.',
+      one: 'Matches $count existing transaction.',
+      zero: 'Matches no existing transaction.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String rulePreviewCountWithSample(int count, String sample, String date) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          'Matches $count existing transactions — including “$sample” of $date.',
+      one: 'Matches $count existing transaction — “$sample” of $date.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get ruleErrorPatternInvalid =>
+      'That pattern isn\'t a valid regular expression.';
+
+  @override
+  String get ruleErrorNotFound => 'That rule no longer exists.';
+
+  @override
+  String get ruleErrorCategoryNotFound =>
+      'The target category no longer exists.';
+
+  @override
+  String get ruleErrorValidation =>
+      'That information isn\'t valid. Check the pattern and the priority.';
+
+  @override
+  String get ruleErrorGeneric => 'Something went wrong. Please try again.';
+
+  @override
+  String get rulePackMenuTooltip => 'Import / export rules';
+
+  @override
+  String get rulePackImportFile => 'Import a file…';
+
+  @override
+  String rulePackImportBuiltin(String name) {
+    return 'Import “$name”';
+  }
+
+  @override
+  String get rulePackExportAction => 'Export my rules…';
+
+  @override
+  String get rulePackCancel => 'Cancel';
+
+  @override
+  String get rulePackClose => 'Close';
+
+  @override
+  String get rulePackRefusedTitle => 'This file wasn\'t accepted';
+
+  @override
+  String get rulePackRefusedMalformed =>
+      'This file isn\'t a FinStride rule pack. Expected a JSON file with a name, a format version and a list of rules.';
+
+  @override
+  String rulePackRefusedVersion(int version) {
+    return 'This pack uses a format version this build of FinStride doesn\'t read. It reads version $version. A pack we only half understood would silently drop rules, so it is refused whole.';
+  }
+
+  @override
+  String get rulePackRefusedRegex =>
+      'This pack contains a “regex” rule. Regular expressions aren\'t accepted in a shared pack: an expression from someone else\'s file can lock up your machine. Use “contains”, “equals” or “range”.';
+
+  @override
+  String rulePackWouldMatch(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          'This pack would categorize $count of your uncategorized transactions.',
+      one:
+          'This pack would categorize $count of your uncategorized transactions.',
+      zero:
+          'This pack would categorize none of your uncategorized transactions.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get rulePackRuleCount => 'Rules in the pack';
+
+  @override
+  String get rulePackNewCount => 'New rules';
+
+  @override
+  String get rulePackDuplicateCount => 'Duplicates skipped';
+
+  @override
+  String get rulePackUnresolvedCount => 'Categories not found';
+
+  @override
+  String rulePackUnresolvedDetail(String keys) {
+    return 'These rules will be skipped: $keys';
+  }
+
+  @override
+  String get rulePackSamplesLabel => 'Example transactions affected';
+
+  @override
+  String get rulePackApplyNowLabel =>
+      'Apply the rules to my existing transactions after importing';
+
+  @override
+  String get rulePackImportConfirm => 'Import';
+
+  @override
+  String rulePackImportedTitle(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count rules imported',
+      one: '$count rule imported',
+      zero: 'No rules imported',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String rulePackImportedBody(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count transactions recategorized.',
+      one: '$count transaction recategorized.',
+      zero: 'No transaction changed category.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get rulePackImportFailed => 'The import failed';
+
+  @override
+  String get rulePackExportTitle => 'Export my rules';
+
+  @override
+  String get rulePackExportPrivacyNotice =>
+      'Read it before saving: a pattern can hold personal details — your landlord\'s name, “VIR SALAIRE DUPONT”.';
+
+  @override
+  String rulePackExportContents(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'File contents — $count rules',
+      one: 'File contents — $count rule',
+      zero: 'File contents — no rules',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String rulePackOmittedLabel(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count rules can\'t be exported',
+      one: '$count rule can\'t be exported',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String rulePackOmittedRegex(String pattern) {
+    return '“$pattern” — regex rules cannot appear in a pack.';
+  }
+
+  @override
+  String rulePackOmittedUserCategory(String pattern) {
+    return '“$pattern” — targets a custom category, which has no shareable identifier.';
+  }
+
+  @override
+  String get rulePackExportSave => 'Save';
+
+  @override
+  String get rulePackExportedTitle => 'Pack saved';
+
+  @override
+  String get rulePackExportFailed => 'The export failed';
+
+  @override
+  String rulePackStartWith(String name, int count) {
+    return 'Start with “$name” ($count rules)';
+  }
+
+  @override
+  String get rulePackStartWithHelper =>
+      'You\'ll see what the pack would do before importing it.';
+
+  @override
+  String reviewQueueAiSubtitle(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          'Local AI proposes a category for $count of them — confirm or correct, nothing is filed without you.',
+      one:
+          'Local AI proposes a category for one of them — confirm or correct, nothing is filed without you.',
+      zero:
+          'Local AI hasn\'t proposed a category for any of these — confirm or correct, nothing is filed without you.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String reviewQueueProgress(int resolved, int total, double percent) {
+    final intl.NumberFormat percentNumberFormat =
+        intl.NumberFormat.percentPattern(localeName);
+    final String percentString = percentNumberFormat.format(percent);
+
+    return '$resolved/$total · $percentString';
+  }
+
+  @override
+  String get reviewAiInvitation =>
+      'Turn on local AI to automatically categorize the transactions your rules didn\'t recognize.';
+
+  @override
+  String get reviewAiInvitationLink => 'Settings';
+
+  @override
+  String reviewConfidence(double confidence) {
+    final intl.NumberFormat confidenceNumberFormat =
+        intl.NumberFormat.percentPattern(localeName);
+    final String confidenceString = confidenceNumberFormat.format(confidence);
+
+    return 'Confidence $confidenceString';
+  }
+
+  @override
+  String get reviewConfirm => 'Confirm';
+
+  @override
+  String get reviewCorrect => 'Correct';
+
+  @override
+  String get reviewNoProposal => '— no proposal';
+
+  @override
+  String get reviewChooseCategory => 'Choose a category';
+
+  @override
+  String alwaysRuleSubtitle(String label) {
+    return 'A rule files these transactions without AI, on every import — pre-filled from “$label”.';
+  }
+
+  @override
+  String get alwaysRuleCategoryLabel => 'Target category';
+
+  @override
+  String get alwaysRuleApplyExisting => 'Apply to existing transactions';
+
+  @override
+  String get alwaysRuleSubmit => 'Create the rule';
+
+  @override
+  String get alwaysRuleCreatedTitle => 'Rule created';
+
+  @override
+  String alwaysRuleCreatedBody(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count transactions recategorized.',
+      one: '$count transaction recategorized.',
+      zero: 'No other transaction changed category.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get alwaysRuleSuggestionFailed =>
+      'Couldn\'t pre-fill the rule. Enter the pattern yourself.';
+
+  @override
+  String get reviewQueueRunAction => 'Categorize with AI';
+
+  @override
+  String runBannerRunning(int processed, int total) {
+    String _temp0 = intl.Intl.pluralLogic(
+      total,
+      locale: localeName,
+      other: 'Categorizing — $processed of $total transactions',
+      one: 'Categorizing — $processed of $total transaction',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String runBannerRunningDetail(int assigned, int deferred) {
+    String _temp0 = intl.Intl.pluralLogic(
+      assigned,
+      locale: localeName,
+      other: '$assigned filed · $deferred to review · the panel stays usable',
+      one: '$assigned filed · $deferred to review · the panel stays usable',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get runBannerCancel => 'Cancel';
+
+  @override
+  String runBannerPartial(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          'Categorization finished — $count transactions couldn\'t be analysed.',
+      one:
+          'Categorization finished — $count transaction couldn\'t be analysed.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get runBannerPartialAction => 'View';
+
+  @override
+  String get runBannerFailed => 'Categorization couldn\'t run.';
+
+  @override
+  String get runBannerDismiss => 'Dismiss';
+
+  @override
+  String get runStartFailed => 'Categorization can\'t be started right now.';
+
+  @override
+  String get settingsAiTitle => 'Local AI';
+
+  @override
+  String get settingsAiSubtitle => 'Enable AI categorization';
+
+  @override
+  String get settingsAiToggleLabel => 'AI categorization';
+
+  @override
+  String get settingsAiPrivacy =>
+      'Your transaction descriptions are sent to a model running on this computer. Nothing leaves your machine.';
+
+  @override
+  String get settingsAiBaseUrlLabel => 'Engine address';
+
+  @override
+  String get settingsAiBaseUrlHelp =>
+      'Local addresses only — 127.0.0.1 or localhost.';
+
+  @override
+  String get settingsAiBaseUrlRejected =>
+      'Address refused: the engine must run on this computer (127.0.0.1 or localhost). A remote address would send your transaction descriptions off your machine.';
+
+  @override
+  String get settingsAiModelLabel => 'Model';
+
+  @override
+  String get settingsAiModelHelp =>
+      'List provided by the engine — manual entry allowed.';
+
+  @override
+  String get settingsAiModelUnavailable => 'No model — engine unreachable.';
+
+  @override
+  String get settingsAiModelChoose => 'Choose a model';
+
+  @override
+  String settingsAiThresholdLabel(double threshold) {
+    final intl.NumberFormat thresholdNumberFormat =
+        intl.NumberFormat.percentPattern(localeName);
+    final String thresholdString = thresholdNumberFormat.format(threshold);
+
+    return 'Confidence threshold — $thresholdString';
+  }
+
+  @override
+  String get settingsAiThresholdHelp =>
+      'Below this threshold, a transaction is offered to you for review rather than categorized automatically.';
+
+  @override
+  String settingsAiStatusConnected(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Connected — $count models available',
+      one: 'Connected — 1 model available',
+      zero: 'Connected — no model available',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get settingsAiStatusUnreachable =>
+      'No engine detected at this address.';
+
+  @override
+  String get settingsAiStatusDisabled => 'AI categorization is off.';
+
+  @override
+  String get settingsAiLearnMore => 'Learn more';
+
+  @override
+  String get settingsAiTest => 'Test connection';
+
+  @override
+  String get settingsAiTesting => 'Testing…';
+
+  @override
+  String get settingsAiLoadFailed =>
+      'Your settings couldn\'t be loaded right now.';
+
+  @override
+  String get settingsAiRetry => 'Try again';
+
+  @override
+  String get settingsBackupTitle => 'Backup & restore';
+
+  @override
+  String get settingsBackupSubtitle =>
+      'Export all your data to a file you can import again.';
+
+  @override
+  String get settingsBackupExportLabel => 'Export all data';
+
+  @override
+  String get settingsBackupExportCaption =>
+      '.finstride file — accounts, transactions, categories, rules, goals, settings.';
+
+  @override
+  String get settingsBackupExportPreparing => 'Preparing the archive…';
+
+  @override
+  String get settingsBackupExport => 'Export';
+
+  @override
+  String settingsBackupLast(String when) {
+    return 'Last backup: $when';
+  }
+
+  @override
+  String get settingsBackupNone => 'No backup yet.';
+
+  @override
+  String settingsBackupDateTime(String date, String time) {
+    return '$date at $time';
+  }
+
+  @override
+  String get settingsBackupPrivacy =>
+      'The file isn\'t encrypted. Keep it somewhere safe — it holds your entire financial history.';
+
+  @override
+  String get settingsBackupRestoreTitle => 'Restore a backup';
+
+  @override
+  String get settingsBackupRestoreSubtitle => 'Replaces all current data.';
+
+  @override
+  String get settingsBackupRestoreButton => 'Import a file…';
+
+  @override
+  String get settingsBackupRestoreFailedLead => 'Restore not possible.';
+
+  @override
+  String get settingsBackupErrorTooNew =>
+      'This file comes from a newer version of FinStride. Update the app to restore it.';
+
+  @override
+  String get settingsBackupErrorInvalid =>
+      'This file isn\'t a valid FinStride backup, or it\'s damaged.';
+
+  @override
+  String get settingsBackupErrorCurrency =>
+      'This backup uses a different currency from your account.';
+
+  @override
+  String get settingsBackupErrorRunActive =>
+      'A categorization run is in progress. Wait for it to finish, then try again.';
+
+  @override
+  String get settingsBackupErrorConflict =>
+      'This backup belongs to another account on this computer.';
+
+  @override
+  String get settingsBackupErrorUnknown =>
+      'The restore failed. Your data hasn\'t been changed.';
+
+  @override
+  String settingsBackupExported(
+    int transactionCount,
+    String transactions,
+    int accountCount,
+    String accounts,
+  ) {
+    String _temp0 = intl.Intl.pluralLogic(
+      transactionCount,
+      locale: localeName,
+      other: '$transactions transactions',
+      one: '$transactions transaction',
+    );
+    String _temp1 = intl.Intl.pluralLogic(
+      accountCount,
+      locale: localeName,
+      other: '$accounts accounts',
+      one: '$accounts account',
+    );
+    return 'Backup saved — $_temp0, $_temp1.';
+  }
+
+  @override
+  String get settingsBackupExportFailed => 'The export failed. Try again.';
+
+  @override
+  String get settingsBackupConfirmTitle => 'Restore this backup?';
+
+  @override
+  String get settingsBackupConfirmFile => 'Selected file:';
+
+  @override
+  String get settingsBackupConfirmExportedAt => 'Exported on';
+
+  @override
+  String get settingsBackupConfirmVersion => 'App version';
+
+  @override
+  String get settingsBackupConfirmAccounts => 'Accounts';
+
+  @override
+  String get settingsBackupConfirmTransactions => 'Transactions';
+
+  @override
+  String get settingsBackupConfirmCategories => 'Categories';
+
+  @override
+  String get settingsBackupConfirmRules => 'Rules';
+
+  @override
+  String get settingsBackupConfirmSubscriptions => 'Subscriptions';
+
+  @override
+  String get settingsBackupConfirmGoals => 'Goals';
+
+  @override
+  String get settingsBackupConfirmWarning =>
+      'All your current data will be replaced. Export it first if needed.';
+
+  @override
+  String get settingsBackupCancel => 'Cancel';
+
+  @override
+  String get settingsBackupReplace => 'Replace my data';
+
+  @override
+  String get settingsBackupRestored => 'Backup restored';
+
+  @override
+  String get navSubscriptions => 'Recurring';
+
+  @override
+  String get navSubscriptionsSubtitle =>
+      'Your recurring charges, detected automatically';
+
+  @override
+  String get subscriptionsDetect => 'Detect';
+
+  @override
+  String get subscriptionsDetectRunning => 'Detecting…';
+
+  @override
+  String get subscriptionsAdd => 'New recurring payment';
+
+  @override
+  String subscriptionsDetectResult(int created) {
+    String _temp0 = intl.Intl.pluralLogic(
+      created,
+      locale: localeName,
+      other: '$created new recurring payments detected',
+      one: '1 new recurring payment detected',
+      zero: 'No new recurring payments detected',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String subscriptionsDetectResultDetail(int updated) {
+    String _temp0 = intl.Intl.pluralLogic(
+      updated,
+      locale: localeName,
+      other: '$updated existing series refreshed',
+      one: '1 existing series refreshed',
+      zero: 'No existing series refreshed',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get subscriptionsDetectFailed => 'Detection could not run.';
+
+  @override
+  String get subscriptionsBurdenLabel => 'Monthly burden';
+
+  @override
+  String get subscriptionsBurdenCaption =>
+      'Quarterly and yearly charges brought back to a monthly figure.';
+
+  @override
+  String subscriptionsBurdenExcluded(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count ended payments excluded.',
+      one: '1 ended payment excluded.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get subscriptionsActiveLabel => 'Active payments';
+
+  @override
+  String subscriptionsCadenceWeeklyCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count weekly',
+      one: '1 weekly',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String subscriptionsCadenceMonthlyCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count monthly',
+      one: '1 monthly',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String subscriptionsCadenceQuarterlyCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count quarterly',
+      one: '1 quarterly',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String subscriptionsCadenceYearlyCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count yearly',
+      one: '1 yearly',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String subscriptionsCadenceIrregularCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count irregular',
+      one: '1 irregular',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String subscriptionsCancelledCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count ended',
+      one: '1 ended',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get subscriptionsNextLabel => 'Next charge';
+
+  @override
+  String subscriptionsNextValue(String label, String when) {
+    return '$label — $when';
+  }
+
+  @override
+  String subscriptionsNextCaption(String amount, String date) {
+    return '$amount · $date';
+  }
+
+  @override
+  String get subscriptionsNextToday => 'today';
+
+  @override
+  String get subscriptionsNextTomorrow => 'tomorrow';
+
+  @override
+  String subscriptionsNextInDays(int days) {
+    String _temp0 = intl.Intl.pluralLogic(
+      days,
+      locale: localeName,
+      other: 'in $days days',
+      one: 'in 1 day',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get subscriptionsNextNone => 'No upcoming charge';
+
+  @override
+  String get subscriptionsColumnName => 'Name';
+
+  @override
+  String get subscriptionsColumnCategory => 'Category';
+
+  @override
+  String get subscriptionsColumnCadence => 'Frequency';
+
+  @override
+  String get subscriptionsColumnAmount => 'Amount';
+
+  @override
+  String get subscriptionsColumnNext => 'Next';
+
+  @override
+  String get subscriptionsColumnStatus => 'Status';
+
+  @override
+  String get subscriptionsValueNone => '—';
+
+  @override
+  String get cadenceWeekly => 'Weekly';
+
+  @override
+  String get cadenceMonthly => 'Monthly';
+
+  @override
+  String get cadenceQuarterly => 'Quarterly';
+
+  @override
+  String get cadenceYearly => 'Yearly';
+
+  @override
+  String get cadenceIrregular => 'Irregular';
+
+  @override
+  String subscriptionSignalIncrease(String from, String to) {
+    return 'Price increase · $from → $to';
+  }
+
+  @override
+  String subscriptionSignalMissed(int days) {
+    String _temp0 = intl.Intl.pluralLogic(
+      days,
+      locale: localeName,
+      other: 'Missed charge · $days days late',
+      one: 'Missed charge · 1 day late',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String subscriptionSignalCancelled(String date) {
+    return 'Ended · last charge $date';
+  }
+
+  @override
+  String subscriptionNextExpected(String date) {
+    return 'expected $date';
+  }
+
+  @override
+  String get subscriptionActionsTooltip => 'Payment actions';
+
+  @override
+  String get subscriptionActionConfirm => 'Confirm';
+
+  @override
+  String get subscriptionActionDismiss => 'Ignore';
+
+  @override
+  String get subscriptionActionCancel => 'Mark as ended';
+
+  @override
+  String get subscriptionActionEdit => 'Edit';
+
+  @override
+  String get subscriptionErrorInvalidTransition =>
+      'That status change isn\'t available for this payment.';
+
+  @override
+  String get subscriptionErrorExists =>
+      'This account already tracks a recurring payment under that name.';
+
+  @override
+  String get subscriptionErrorNotFound =>
+      'This recurring payment no longer exists.';
+
+  @override
+  String get subscriptionErrorAccountNotFound =>
+      'That account no longer exists.';
+
+  @override
+  String get subscriptionErrorCategoryInvalid =>
+      'That category is no longer available.';
+
+  @override
+  String get subscriptionErrorValidation => 'Check the details you entered.';
+
+  @override
+  String get subscriptionErrorGeneric => 'Something went wrong. Try again.';
+
+  @override
+  String get subscriptionsLoadFailed =>
+      'We couldn\'t load your recurring payments right now.';
+
+  @override
+  String get subscriptionsRetry => 'Try again';
+
+  @override
+  String get subscriptionsEmptyTitle => 'No recurring payments detected yet';
+
+  @override
+  String get subscriptionsEmptyBody =>
+      'FinStride spots a recurring payment once a charge has repeated three times. Importing more history speeds detection up.';
+
+  @override
+  String get subscriptionsEmptyCta => 'Go to imports';
+
+  @override
+  String get subscriptionDetailBack => 'Back to recurring payments';
+
+  @override
+  String subscriptionDetailDetectedSince(String account, String month) {
+    return '$account · detected since $month';
+  }
+
+  @override
+  String subscriptionDetailTrackedSince(String account, String month) {
+    return '$account · tracked since $month';
+  }
+
+  @override
+  String get subscriptionDetailCadence => 'Frequency';
+
+  @override
+  String get subscriptionDetailExpectedAmount => 'Expected amount';
+
+  @override
+  String get subscriptionDetailNextCharge => 'Next charge';
+
+  @override
+  String subscriptionDetailIncrease(
+    String from,
+    String to,
+    String date,
+    String annual,
+  ) {
+    return 'Price increase: $from → $to on $date — that\'s $annual a year.';
+  }
+
+  @override
+  String get subscriptionDetailHistoryTitle => 'Charge history';
+
+  @override
+  String subscriptionDetailHistorySubtitle(String account) {
+    return 'The transactions this series is deduced from · $account';
+  }
+
+  @override
+  String get subscriptionDetailHistoryEmpty =>
+      'No charges linked to this payment yet.';
+
+  @override
+  String subscriptionDetailChange(String from, String to) {
+    return '$from → $to';
+  }
+
+  @override
+  String get subscriptionDetailFootnote =>
+      'FinStride deduces the series from these charges — check them before confirming a change.';
+
+  @override
+  String get subscriptionDetailLoadFailed =>
+      'We couldn\'t load this recurring payment right now.';
+
+  @override
+  String get subscriptionFormCreateTitle => 'New recurring payment';
+
+  @override
+  String get subscriptionFormEditTitle => 'Edit recurring payment';
+
+  @override
+  String get subscriptionFormIntro =>
+      'Track a recurring charge detection hasn\'t spotted yet.';
+
+  @override
+  String get subscriptionFormNameLabel => 'Name';
+
+  @override
+  String get subscriptionFormNameRequired => 'Give this payment a name.';
+
+  @override
+  String get subscriptionFormAccountLabel => 'Account';
+
+  @override
+  String get subscriptionFormAmountLabel => 'Amount';
+
+  @override
+  String get subscriptionFormAmountInvalid =>
+      'Enter an amount greater than zero.';
+
+  @override
+  String get subscriptionFormCadenceLabel => 'Frequency';
+
+  @override
+  String get subscriptionFormCadenceHelp =>
+      'Weekly · Monthly · Quarterly · Yearly · Irregular';
+
+  @override
+  String get subscriptionFormCategoryLabel => 'Category';
+
+  @override
+  String get subscriptionFormCategoryNone => 'None';
+
+  @override
+  String get subscriptionFormNoAccounts =>
+      'Create an account first to track a recurring payment in it.';
+
+  @override
+  String get subscriptionFormCancel => 'Cancel';
+
+  @override
+  String get subscriptionFormSubmit => 'Create payment';
+
+  @override
+  String get subscriptionFormSave => 'Save';
+
+  @override
+  String get navGoals => 'Goals';
+
+  @override
+  String get navGoalsSubtitle => 'Set money aside, virtually, for what matters';
+
+  @override
+  String get goalsAdd => 'New goal';
+
+  @override
+  String get goalsReassurance =>
+      'On-paper allocation: your accounts are not modified.';
+
+  @override
+  String goalsOverAllocated(String allocated, String savings) {
+    return 'You\'ve allocated $allocated while your savings accounts total $savings.';
+  }
+
+  @override
+  String get goalsDismissBanner => 'Hide this warning';
+
+  @override
+  String goalsShowArchived(int count) {
+    return 'Show archived goals ($count)';
+  }
+
+  @override
+  String goalsHideArchived(int count) {
+    return 'Hide archived goals ($count)';
+  }
+
+  @override
+  String get goalsEmptyTitle => 'Give a name to what matters';
+
+  @override
+  String get goalsEmptyBody =>
+      'A goal is a virtual envelope: you set money aside at your own pace, without touching your accounts.';
+
+  @override
+  String get goalsLoadFailed => 'We couldn\'t load your goals right now.';
+
+  @override
+  String get goalsRetry => 'Try again';
+
+  @override
+  String get goalPillNoDeadline => 'No deadline';
+
+  @override
+  String get goalPillReached => 'Goal reached';
+
+  @override
+  String goalPillReachedOn(String month) {
+    return 'Goal reached · $month';
+  }
+
+  @override
+  String get goalDetailBack => 'Back to goals';
+
+  @override
+  String goalDetailTargetDate(String month) {
+    return 'Target $month';
+  }
+
+  @override
+  String get goalDetailArchive => 'Archive';
+
+  @override
+  String get goalDetailRestore => 'Restore';
+
+  @override
+  String get goalDetailNewAllocation => 'New allocation';
+
+  @override
+  String get goalDetailMissing => 'This goal is no longer available.';
+
+  @override
+  String get goalDetailFootnote =>
+      'No transaction is created: these lines exist only on the goal\'s paper.';
+
+  @override
+  String get goalDetailHistoryFailed =>
+      'We couldn\'t load the allocation history.';
+
+  @override
+  String get goalHistoryTitle => 'Allocation history';
+
+  @override
+  String get goalHistorySubtitle =>
+      'One list, signed amounts — a withdrawal is a negative line.';
+
+  @override
+  String get goalHistoryDate => 'Date';
+
+  @override
+  String get goalHistoryAmount => 'Amount';
+
+  @override
+  String get goalHistoryNote => 'Note';
+
+  @override
+  String get goalHistoryDelete => 'Delete this allocation';
+
+  @override
+  String get goalHistoryEmpty => 'No allocations yet.';
+
+  @override
+  String get goalFormCreateTitle => 'New goal';
+
+  @override
+  String get goalFormEditTitle => 'Edit goal';
+
+  @override
+  String get goalFormIntro =>
+      'A virtual envelope: you set money aside on paper, without touching your accounts.';
+
+  @override
+  String get goalFormNameLabel => 'Name';
+
+  @override
+  String get goalFormNameRequired => 'Give this goal a name.';
+
+  @override
+  String get goalFormTargetLabel => 'Target amount';
+
+  @override
+  String get goalFormTargetInvalid => 'Enter an amount greater than zero.';
+
+  @override
+  String get goalFormDateLabel => 'Target date';
+
+  @override
+  String get goalFormDateHelp => 'Optional';
+
+  @override
+  String get goalFormDateInvalid => 'Invalid date.';
+
+  @override
+  String get goalFormIconLabel => 'Icon';
+
+  @override
+  String get goalFormColorLabel => 'Color';
+
+  @override
+  String get goalFormCancel => 'Cancel';
+
+  @override
+  String get goalFormSubmit => 'Create goal';
+
+  @override
+  String get goalFormSave => 'Save';
+
+  @override
+  String get allocationModalTitle => 'New allocation';
+
+  @override
+  String get allocationAmountLabel => 'Amount';
+
+  @override
+  String get allocationAmountHelp =>
+      'A negative amount takes money back out of the goal.';
+
+  @override
+  String get allocationAmountInvalid => 'Enter an amount other than zero.';
+
+  @override
+  String get allocationDateLabel => 'Date';
+
+  @override
+  String get allocationDateInvalid => 'Invalid date.';
+
+  @override
+  String get allocationNoteLabel => 'Note (optional)';
+
+  @override
+  String get allocationNoteHint => 'e.g. Monthly transfer';
+
+  @override
+  String get allocationCancel => 'Cancel';
+
+  @override
+  String get allocationSubmit => 'Add';
+
+  @override
+  String get goalErrorNotFound => 'This goal no longer exists.';
+
+  @override
+  String get goalErrorAllocationNotFound => 'This allocation no longer exists.';
+
+  @override
+  String get goalErrorValidation => 'Check the details you entered.';
+
+  @override
+  String get goalErrorGeneric => 'Something went wrong. Try again.';
+
+  @override
+  String get dashboardGoalsTitle => 'Goals';
+
+  @override
+  String get dashboardGoalsViewAll => 'View all';
+
+  @override
+  String dashboardGoalsProgress(String saved, String target) {
+    return '$saved / $target';
+  }
+
+  @override
+  String get dashboardGoalsReached => 'Reached';
+
+  @override
+  String get goalFormDatePick => 'Pick a target date';
+
+  @override
+  String get allocationDatePick => 'Pick a date';
+
+  @override
+  String get settingsResetTitle => 'Danger zone';
+
+  @override
+  String get settingsResetBadge => 'IRREVERSIBLE';
+
+  @override
+  String get settingsResetSubtitle =>
+      'Resetting the database deletes this profile\'s transactions, accounts, rules, custom categories, goals and subscriptions. Exported backups aren\'t touched.';
+
+  @override
+  String get settingsResetButton => 'Reset…';
+
+  @override
+  String get settingsResetConfirmTitle => 'Reset the database?';
+
+  @override
+  String settingsResetConfirmLead(String name) {
+    return 'Everything in $name\'s profile will be permanently deleted:';
+  }
+
+  @override
+  String get settingsResetConfirmCategories => 'Custom categories';
+
+  @override
+  String get settingsResetConfirmNote =>
+      'System categories, your preferences and the AI settings are kept. Backup files you\'ve already exported stay intact.';
+
+  @override
+  String get settingsResetConfirmWarning =>
+      'This can\'t be undone. Export a backup before you continue.';
+
+  @override
+  String get settingsResetConfirmWord => 'DELETE';
+
+  @override
+  String settingsResetConfirmLabel(String word) {
+    return 'Type $word to confirm';
+  }
+
+  @override
+  String get settingsResetConfirmSubmit => 'Delete everything';
+
+  @override
+  String get settingsResetDone =>
+      'Database reset. The system categories have been restored.';
+
+  @override
+  String get settingsResetFailedLead => 'Reset not possible.';
+
+  @override
+  String get settingsResetErrorUnknown =>
+      'The reset failed. Your data hasn\'t been changed.';
 }

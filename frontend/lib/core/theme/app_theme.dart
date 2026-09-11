@@ -64,9 +64,9 @@ ThemeData _buildDarkTheme() {
     ),
 
     inputDecorationTheme: _inputDecorationTheme(textTheme),
-    filledButtonTheme: FilledButtonThemeData(style: _filledButtonStyle(textTheme)),
-    outlinedButtonTheme: OutlinedButtonThemeData(style: _outlinedButtonStyle(textTheme)),
-    textButtonTheme: TextButtonThemeData(style: _textButtonStyle(textTheme)),
+    filledButtonTheme: FilledButtonThemeData(style: _rowAligned(_filledButtonStyle(textTheme))),
+    outlinedButtonTheme: OutlinedButtonThemeData(style: _rowAligned(_outlinedButtonStyle(textTheme))),
+    textButtonTheme: TextButtonThemeData(style: _rowAligned(_textButtonStyle(textTheme))),
 
     iconButtonTheme: IconButtonThemeData(
       style: ButtonStyle(
@@ -91,6 +91,43 @@ ThemeData _buildDarkTheme() {
         side: BorderSide(color: AppColors.border),
       ),
       barrierColor: AppColors.scrim,
+    ),
+
+    // The calendar behind every [DateField]. Material's own surfaces are a
+    // shade of the seed color rather than this palette, so the picker's slots
+    // are mapped onto the app's tokens here — one place, so a date picker in a
+    // later panel cannot drift from this one.
+    datePickerTheme: DatePickerThemeData(
+      backgroundColor: AppColors.surfaceOverlay,
+      surfaceTintColor: Colors.transparent,
+      elevation: 0,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.all(Radius.circular(AppRadii.xl)),
+        side: BorderSide(color: AppColors.border),
+      ),
+      headerBackgroundColor: AppColors.surfaceOverlay,
+      headerForegroundColor: AppColors.textSecondary,
+      weekdayStyle: AppTextStyles.sectionLabel,
+      dayForegroundColor: WidgetStateProperty.resolveWith((states) {
+        return states.contains(WidgetState.selected)
+            ? AppColors.irisInk
+            : AppColors.textPrimary;
+      }),
+      dayBackgroundColor: WidgetStateProperty.resolveWith((states) {
+        if (states.contains(WidgetState.selected)) return AppColors.iris;
+        if (states.contains(WidgetState.hovered)) return AppColors.surfaceHover;
+        return Colors.transparent;
+      }),
+      // The selected day sits on an iris fill, so its label takes the ink that
+      // reads on one — the same pair a primary button uses.
+      todayForegroundColor: WidgetStateProperty.resolveWith((states) {
+        return states.contains(WidgetState.selected)
+            ? AppColors.irisInk
+            : AppColors.iris;
+      }),
+      todayBorder: const BorderSide(color: AppColors.iris),
+      yearForegroundColor: const WidgetStatePropertyAll(AppColors.textPrimary),
+      dividerColor: AppColors.borderSubtle,
     ),
 
     popupMenuTheme: PopupMenuThemeData(
@@ -208,6 +245,22 @@ InputDecorationTheme _inputDecorationTheme(TextTheme textTheme) {
   );
 }
 
+/// Pins a button to [AppChrome.buttonHeight] whatever its label.
+///
+/// Sizing a button from its label's line height let a « Annuler » and the
+/// « Appliquer » beside it land a pixel or two apart, and Material's padded tap
+/// target then wrapped each of them in a box of yet another height — which is
+/// what threw the footer rows out of alignment. So the styles carry no vertical
+/// padding: the height is pinned here, and the global [VisualDensity.compact]
+/// (which would shave that minimum back down) opted out of, so every button in
+/// a row measures the same. A button under a tight parent constraint — the 30px
+/// inline pills — still takes its parent's height.
+ButtonStyle _rowAligned(ButtonStyle style) => style.copyWith(
+  minimumSize: const WidgetStatePropertyAll(Size(0, AppChrome.buttonHeight)),
+  visualDensity: VisualDensity.standard,
+  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+);
+
 /// Fallback solid-iris style. The spec's primary button is an iris *gradient*
 /// with a glow, which [ButtonStyle] cannot express — [PrimaryButton] paints it.
 /// This keeps any stray [FilledButton] on-palette rather than on Material's.
@@ -225,7 +278,7 @@ ButtonStyle _filledButtonStyle(TextTheme textTheme) => ButtonStyle(
   textStyle: WidgetStatePropertyAll(textTheme.labelLarge),
   elevation: const WidgetStatePropertyAll(0),
   padding: const WidgetStatePropertyAll(
-    EdgeInsets.symmetric(horizontal: AppSpacing.md + AppSpacing.xs, vertical: 12),
+    EdgeInsets.symmetric(horizontal: AppSpacing.md + AppSpacing.xs),
   ),
   shape: const WidgetStatePropertyAll(
     RoundedRectangleBorder(
@@ -252,7 +305,7 @@ ButtonStyle _outlinedButtonStyle(TextTheme textTheme) => ButtonStyle(
   }),
   textStyle: WidgetStatePropertyAll(textTheme.labelLarge),
   padding: const WidgetStatePropertyAll(
-    EdgeInsets.symmetric(horizontal: AppSpacing.md + AppSpacing.xs, vertical: 12),
+    EdgeInsets.symmetric(horizontal: AppSpacing.md + AppSpacing.xs),
   ),
   shape: const WidgetStatePropertyAll(
     RoundedRectangleBorder(
@@ -271,7 +324,7 @@ ButtonStyle _textButtonStyle(TextTheme textTheme) => ButtonStyle(
   overlayColor: const WidgetStatePropertyAll(AppColors.overlayWash),
   textStyle: WidgetStatePropertyAll(textTheme.labelLarge),
   padding: const WidgetStatePropertyAll(
-    EdgeInsets.symmetric(horizontal: AppSpacing.sm + AppSpacing.xs, vertical: AppSpacing.sm),
+    EdgeInsets.symmetric(horizontal: AppSpacing.sm + AppSpacing.xs),
   ),
   shape: const WidgetStatePropertyAll(
     RoundedRectangleBorder(
@@ -359,6 +412,17 @@ abstract final class AppTextStyles {
     fontSize: 12.5,
     fontWeight: FontWeight.w400,
     color: AppColors.textSecondary,
+  );
+
+  /// « — aucune proposition » on a review row the model had nothing for.
+  /// Italic and in the disabled tone so it reads as an absence rather than as
+  /// a category the row was given (`docs/design/07` §Phase 2 amendment).
+  static const reviewNoProposal = TextStyle(
+    fontFamily: AppFonts.geist,
+    fontSize: 11.5,
+    fontWeight: FontWeight.w400,
+    fontStyle: FontStyle.italic,
+    color: AppColors.textDisabled,
   );
 }
 

@@ -11,7 +11,6 @@ import '../../../core/widgets/primary_button.dart';
 import '../../../core/widgets/state_views.dart';
 import '../../../l10n/app_localizations.dart';
 import '../application/accounts_controller.dart';
-import '../application/accounts_search.dart';
 import '../domain/account.dart';
 import 'account_error_localizer.dart';
 import 'account_form.dart';
@@ -25,8 +24,7 @@ class AccountsScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context)!;
-    final filtered = ref.watch(filteredAccountsProvider);
-    final isSearching = ref.watch(accountsQueryProvider).trim().isNotEmpty;
+    final accounts = ref.watch(accountsControllerProvider);
 
     return Padding(
       key: const Key('screen-accounts'),
@@ -34,28 +32,7 @@ class AccountsScreen extends ConsumerWidget {
         horizontal: AppSpacing.contentX,
         vertical: AppSpacing.contentY,
       ),
-      child: switch (filtered) {
-        // An empty result while searching is not an empty account list — the
-        // summary stays put so the user keeps their bearings, and only the grid
-        // reports the miss.
-        AsyncData(:final value) when value.isEmpty && isSearching => Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            const _SummaryCard(),
-            const SizedBox(height: AppSpacing.gridGap),
-            Expanded(
-              child: Center(
-                child: Text(
-                  l10n.accountsSearchEmpty,
-                  key: const Key('accountsSearchEmpty'),
-                  style: Theme.of(
-                    context,
-                  ).textTheme.bodyLarge?.copyWith(color: AppColors.textSecondary),
-                ),
-              ),
-            ),
-          ],
-        ),
+      child: switch (accounts) {
         AsyncData(:final value) when value.isEmpty => _EmptyState(
           onAdd: () => showAccountForm(context),
         ),
@@ -129,8 +106,6 @@ class AccountsScreen extends ConsumerWidget {
 /// Total balance across the accounts, with the account count, currency and the
 /// timestamp the balances were last derived at.
 ///
-/// It reads the *unfiltered* list: a total that changed as you typed in the
-/// search box would be a different number than the one the label promises.
 /// Summing is safe in Phase 1 because every account shares the user's single
 /// currency (see the multi-currency skill); this needs FX before Phase 4.
 class _SummaryCard extends ConsumerWidget {

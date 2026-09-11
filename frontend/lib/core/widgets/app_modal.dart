@@ -7,7 +7,7 @@ import '../theme/tokens.dart';
 ///
 /// Replaces [AlertDialog], whose padding, title style and action layout all
 /// drift from the spec. Each panel spec names its own width (480 for the account
-/// form, 520 for the rule editor, 780 for the CSV wizard), so that is the one
+/// form, 520 for the rule editor), so that is the one
 /// required dimension.
 class AppModal extends StatelessWidget {
   const AppModal({
@@ -16,9 +16,20 @@ class AppModal extends StatelessWidget {
     required this.width,
     required this.child,
     required this.actions,
+    this.subtitle,
+    this.leading,
   });
 
   final String title;
+
+  /// Optional glyph plate set before the title — the destructive confirmations
+  /// draw one (`docs/design/09-settings.md` state ⑩) so the modal announces its
+  /// weight before the copy is read.
+  final Widget? leading;
+
+  /// Optional context line under the title — the parent a new subcategory will
+  /// sit under, say.
+  final Widget? subtitle;
   final double width;
   final Widget child;
 
@@ -51,7 +62,27 @@ class AppModal extends StatelessWidget {
                 AppSpacing.lg,
                 AppSpacing.md,
               ),
-              child: Text(title, style: Theme.of(context).textTheme.headlineMedium),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  if (leading != null) ...[
+                    leading!,
+                    const SizedBox(width: AppSpacing.sm + AppSpacing.xs),
+                  ],
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(title, style: Theme.of(context).textTheme.headlineMedium),
+                        if (subtitle != null) ...[
+                          const SizedBox(height: AppSpacing.xs),
+                          subtitle!,
+                        ],
+                      ],
+                    ),
+                  ),
+                ],
+              ),
             ),
             Flexible(
               child: SingleChildScrollView(
@@ -66,14 +97,17 @@ class AppModal extends StatelessWidget {
                 AppSpacing.lg,
                 AppSpacing.lg,
               ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  for (final (index, action) in actions.indexed) ...[
-                    if (index > 0) const SizedBox(width: AppSpacing.sm + AppSpacing.xs),
-                    action,
-                  ],
-                ],
+              // A [Wrap], not a [Row]: French button labels run 15–20 % past
+              // their English counterparts, and a three-action footer in a
+              // 480 px modal has no room to spare. Identical to a row while the
+              // actions fit, and it drops to a second line instead of
+              // overflowing when they don't.
+              child: Wrap(
+                alignment: WrapAlignment.end,
+                crossAxisAlignment: WrapCrossAlignment.center,
+                spacing: AppSpacing.sm + AppSpacing.xs,
+                runSpacing: AppSpacing.sm,
+                children: actions,
               ),
             ),
           ],

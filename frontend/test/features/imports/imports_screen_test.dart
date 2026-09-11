@@ -4,11 +4,11 @@ import 'package:finstride/core/session/current_user_provider.dart';
 import 'package:finstride/core/theme/app_theme.dart';
 import 'package:finstride/core/widgets/amount_text.dart';
 import 'package:finstride/core/widgets/app_chip.dart';
+import 'package:finstride/core/widgets/primary_button.dart';
 import 'package:finstride/features/auth/domain/auth_user.dart';
 import 'package:finstride/features/accounts/application/accounts_controller.dart';
 import 'package:finstride/features/accounts/domain/account.dart';
 import 'package:finstride/features/imports/application/imports_controller.dart';
-import 'package:finstride/features/imports/domain/csv_template.dart';
 import 'package:finstride/features/imports/domain/import_batch.dart';
 import 'package:finstride/features/imports/presentation/imports_screen.dart';
 import 'package:finstride/l10n/app_localizations.dart';
@@ -76,12 +76,6 @@ ImportBatch _batch({
   importedAt: DateTime(2026, 6, 1, 9, 30),
 );
 
-final _savedTemplate = CsvTemplate(
-  id: 't1',
-  draft: const CsvTemplateDraft(bankName: 'Boursorama'),
-  createdAt: DateTime.utc(2026, 5, 1),
-);
-
 /// An OFX statement declaring a Boursorama checking account ending 4567, and
 /// the balance that account closed the period at.
 final _ofxBytes = utf8.encode('''
@@ -105,7 +99,6 @@ final _ofxBytes = utf8.encode('''
 
 Widget _wrap({
   required FakeImportsController imports,
-  required FakeCsvTemplatesController templates,
   required PickedImportFile file,
   FakeAccountsController? accounts,
   Locale locale = const Locale('fr'),
@@ -117,7 +110,6 @@ Widget _wrap({
       ),
       currentUserProvider.overrideWithValue(_user),
       importsControllerProvider.overrideWith(() => imports),
-      csvTemplatesControllerProvider.overrideWith(() => templates),
       importFilePickerProvider.overrideWithValue(FakeImportFilePicker(file)),
     ],
     child: MaterialApp(
@@ -149,22 +141,19 @@ void main() {
     await tester.pumpWidget(
       _wrap(
         imports: imports,
-        templates: FakeCsvTemplatesController(),
-        file: const PickedImportFile(name: 'releve.ofx', bytes: [1, 2, 3]),
+        file: PickedImportFile(name: 'releve.ofx', bytes: _ofxBytes),
       ),
     );
     await tester.pumpAndSettle();
 
     await _stageFile(tester);
     expect(find.byKey(const Key('importStagedFileName')), findsOneWidget);
-    // No wizard is offered for a self-describing format.
     expect(find.text('Importer'), findsOneWidget);
 
     await tester.tap(find.byKey(const Key('importSubmitButton')));
     await tester.pumpAndSettle();
 
     expect(imports.importCalls, hasLength(1));
-    expect(imports.importCalls.single.csvTemplateId, isNull);
 
     expect(find.byKey(const Key('importResultCard')), findsOneWidget);
     expect(
@@ -192,8 +181,7 @@ void main() {
     await tester.pumpWidget(
       _wrap(
         imports: imports,
-        templates: FakeCsvTemplatesController(),
-        file: const PickedImportFile(name: 'releve.ofx', bytes: [1, 2, 3]),
+        file: PickedImportFile(name: 'releve.ofx', bytes: _ofxBytes),
       ),
     );
     await tester.pumpAndSettle();
@@ -220,57 +208,6 @@ void main() {
     );
   });
 
-  testWidgets('a CSV reuses the saved template for that bank without the wizard', (
-    tester,
-  ) async {
-    _useDesktopSurface(tester);
-    final imports = FakeImportsController(
-      importResult: _batch(format: ImportFormat.csv, fileName: 'export.csv'),
-    );
-    await tester.pumpWidget(
-      _wrap(
-        imports: imports,
-        templates: FakeCsvTemplatesController(initialTemplates: [_savedTemplate]),
-        file: const PickedImportFile(name: 'export.csv', bytes: [1, 2, 3]),
-      ),
-    );
-    await tester.pumpAndSettle();
-
-    await _stageFile(tester);
-
-    expect(find.byKey(const Key('importTemplateReuseBanner')), findsOneWidget);
-    expect(find.byKey(const Key('importReconfigureButton')), findsOneWidget);
-
-    await tester.tap(find.byKey(const Key('importSubmitButton')));
-    await tester.pumpAndSettle();
-
-    expect(imports.importCalls.single.csvTemplateId, 't1');
-    expect(find.byKey(const Key('importResultCard')), findsOneWidget);
-  });
-
-  testWidgets('a CSV with no saved template opens the mapping wizard', (tester) async {
-    _useDesktopSurface(tester);
-    final imports = FakeImportsController(importResult: _batch());
-    await tester.pumpWidget(
-      _wrap(
-        imports: imports,
-        templates: FakeCsvTemplatesController(),
-        file: const PickedImportFile(name: 'export.csv', bytes: [1, 2, 3]),
-      ),
-    );
-    await tester.pumpAndSettle();
-
-    await _stageFile(tester);
-    expect(find.byKey(const Key('importTemplateReuseBanner')), findsNothing);
-
-    await tester.tap(find.byKey(const Key('importSubmitButton')));
-    await tester.pumpAndSettle();
-
-    expect(find.text('Assistant CSV'), findsOneWidget);
-    // Nothing is imported until the wizard is confirmed.
-    expect(imports.importCalls, isEmpty);
-  });
-
   testWidgets('an OFX file selects the account it declares', (tester) async {
     _useDesktopSurface(tester);
     final imports = FakeImportsController(importResult: _batch());
@@ -289,7 +226,6 @@ void main() {
     await tester.pumpWidget(
       _wrap(
         imports: imports,
-        templates: FakeCsvTemplatesController(),
         // The BNP account comes first, so the panel's default selection is the
         // wrong one until the file says otherwise.
         accounts: FakeAccountsController(initialAccounts: [other, _account]),
@@ -308,7 +244,7 @@ void main() {
     expect(imports.importCalls.single.accountId, 'a1');
   });
 
-  testWidgets('the account selector imports into the account picked from it', (
+  testWidgets('an ambiguous statement asks, and imports into what was picked', (
     tester,
   ) async {
     _useDesktopSurface(tester);
@@ -328,31 +264,148 @@ void main() {
     await tester.pumpWidget(
       _wrap(
         imports: imports,
-        templates: FakeCsvTemplatesController(initialTemplates: [_savedTemplate]),
+        // Two checking accounts at the bank the statement names, and nothing in
+        // the file to separate them — the one case the file can't settle alone.
         accounts: FakeAccountsController(initialAccounts: [_account, other]),
-        // A CSV: nothing in it declares an account, so the selector is what
-        // decides where the file lands.
-        file: const PickedImportFile(name: 'export.csv', bytes: [1, 2, 3]),
+        file: PickedImportFile(name: 'releve.ofx', bytes: _ofxBytes),
       ),
     );
     await tester.pumpAndSettle();
 
-    await tester.tap(find.byKey(const Key('importAccountField')));
+    await _stageFile(tester);
+
+    expect(find.byKey(const Key('importAmbiguousAccountBanner')), findsOneWidget);
+    // Nothing has named a destination, so there is nothing to import yet.
+    expect(
+      tester.widget<PrimaryButton>(find.byKey(const Key('importSubmitButton'))).onPressed,
+      isNull,
+    );
+
+    await tester.tap(find.byKey(const Key('importAmbiguousAccountField')));
     await tester.pumpAndSettle();
-
-    // The field keeps showing its current choice while the options sit below.
-    expect(find.text('Compte courant'), findsNWidgets(2));
-
     await tester.tap(find.text('Compte joint').last);
     await tester.pumpAndSettle();
 
-    expect(find.text('Compte joint'), findsOneWidget);
-
-    await _stageFile(tester);
     await tester.tap(find.byKey(const Key('importSubmitButton')));
     await tester.pumpAndSettle();
 
     expect(imports.importCalls.single.accountId, 'a2');
+  });
+
+  testWidgets('the ambiguity picker offers only the accounts the file allows', (
+    tester,
+  ) async {
+    _useDesktopSurface(tester);
+    final joint = Account(
+      id: 'a2',
+      name: 'Compte joint',
+      type: AccountType.checking,
+      institution: 'Boursorama',
+      currency: 'EUR',
+      openingBalanceMinor: 0,
+      balanceMinor: 0,
+      archived: false,
+      createdAt: DateTime.utc(2026, 1, 1),
+      updatedAt: DateTime.utc(2026, 1, 1),
+    );
+    final elsewhere = Account(
+      id: 'a3',
+      name: 'Compte BNP',
+      type: AccountType.checking,
+      institution: 'BNP Paribas',
+      currency: 'EUR',
+      openingBalanceMinor: 0,
+      balanceMinor: 0,
+      archived: false,
+      createdAt: DateTime.utc(2026, 1, 1),
+      updatedAt: DateTime.utc(2026, 1, 1),
+    );
+    await tester.pumpWidget(
+      _wrap(
+        imports: FakeImportsController(importResult: _batch()),
+        accounts: FakeAccountsController(
+          initialAccounts: [_account, joint, elsewhere],
+        ),
+        file: PickedImportFile(name: 'releve.ofx', bytes: _ofxBytes),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await _stageFile(tester);
+    await tester.tap(find.byKey(const Key('importAmbiguousAccountField')));
+    await tester.pumpAndSettle();
+
+    // The statement is Boursorama's, so the BNP account is not a destination
+    // the user should be able to pick by accident.
+    expect(find.text('Compte joint'), findsOneWidget);
+    expect(find.text('Compte BNP'), findsNothing);
+  });
+
+  testWidgets('a file declaring no account falls back to the full list', (
+    tester,
+  ) async {
+    _useDesktopSurface(tester);
+    final imports = FakeImportsController(importResult: _batch());
+    await tester.pumpWidget(
+      _wrap(
+        imports: imports,
+        accounts: FakeAccountsController(initialAccounts: [_account]),
+        // Not a statement at all: nothing can be read out of it, so the panel
+        // has to ask rather than leave the user stuck.
+        file: const PickedImportFile(name: 'releve.ofx', bytes: [1, 2, 3]),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await _stageFile(tester);
+
+    expect(find.byKey(const Key('importUnreadableAccountBanner')), findsOneWidget);
+    expect(
+      tester.widget<PrimaryButton>(find.byKey(const Key('importSubmitButton'))).onPressed,
+      isNull,
+    );
+
+    await tester.tap(find.byKey(const Key('importUnreadableAccountField')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Compte courant').last);
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byKey(const Key('importSubmitButton')));
+    await tester.pumpAndSettle();
+
+    expect(imports.importCalls.single.accountId, 'a1');
+  });
+
+  testWidgets('a choice made for one statement does not carry to the next', (
+    tester,
+  ) async {
+    _useDesktopSurface(tester);
+    final imports = FakeImportsController(importResult: _batch());
+    await tester.pumpWidget(
+      _wrap(
+        imports: imports,
+        accounts: FakeAccountsController(initialAccounts: [_account]),
+        file: const PickedImportFile(name: 'releve.ofx', bytes: [1, 2, 3]),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await _stageFile(tester);
+    await tester.tap(find.byKey(const Key('importUnreadableAccountField')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Compte courant').last);
+    await tester.pumpAndSettle();
+
+    // Drop a second unreadable file without importing the first.
+    await tester.tap(find.byKey(const Key('importRemoveFileButton')));
+    await tester.pumpAndSettle();
+    await _stageFile(tester);
+
+    // The answer to the previous statement says nothing about this one.
+    expect(
+      tester.widget<PrimaryButton>(find.byKey(const Key('importSubmitButton'))).onPressed,
+      isNull,
+    );
   });
 
   testWidgets('an OFX file for an unknown account opens the prefilled form', (
@@ -380,7 +433,6 @@ void main() {
     await tester.pumpWidget(
       _wrap(
         imports: imports,
-        templates: FakeCsvTemplatesController(),
         accounts: accounts,
         file: PickedImportFile(name: 'releve.ofx', bytes: _ofxBytes),
       ),
@@ -419,7 +471,6 @@ void main() {
     await tester.pumpWidget(
       _wrap(
         imports: FakeImportsController(importResult: _batch()),
-        templates: FakeCsvTemplatesController(),
         accounts: FakeAccountsController(initialAccounts: const []),
         file: PickedImportFile(name: 'releve.ofx', bytes: _ofxBytes),
       ),
@@ -444,9 +495,8 @@ void main() {
     await tester.pumpWidget(
       _wrap(
         imports: FakeImportsController(),
-        templates: FakeCsvTemplatesController(),
         accounts: FakeAccountsController(initialAccounts: const []),
-        file: const PickedImportFile(name: 'releve.ofx', bytes: [1, 2, 3]),
+        file: PickedImportFile(name: 'releve.ofx', bytes: _ofxBytes),
       ),
     );
     await tester.pumpAndSettle();
@@ -467,7 +517,6 @@ void main() {
     await tester.pumpWidget(
       _wrap(
         imports: FakeImportsController(),
-        templates: FakeCsvTemplatesController(),
         accounts: FakeAccountsController(
           initialAccounts: const [],
           createdAccount: _account,
@@ -490,8 +539,7 @@ void main() {
     await tester.pumpWidget(
       _wrap(
         imports: FakeImportsController(initialBatches: [_batch()]),
-        templates: FakeCsvTemplatesController(),
-        file: const PickedImportFile(name: 'releve.ofx', bytes: [1, 2, 3]),
+        file: PickedImportFile(name: 'releve.ofx', bytes: _ofxBytes),
       ),
     );
     await tester.pumpAndSettle();
@@ -537,15 +585,14 @@ void main() {
     await tester.pumpWidget(
       _wrap(
         imports: FakeImportsController(),
-        templates: FakeCsvTemplatesController(),
-        file: const PickedImportFile(name: 'releve.ofx', bytes: [1, 2, 3]),
+        file: PickedImportFile(name: 'releve.ofx', bytes: _ofxBytes),
         locale: const Locale('en'),
       ),
     );
     await tester.pumpAndSettle();
 
     expect(find.text('New import'), findsOneWidget);
-    expect(find.text('Drop an OFX, QFX or CSV file'), findsOneWidget);
+    expect(find.text('Drop an OFX or QFX file'), findsOneWidget);
     expect(find.text('No imports yet'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });

@@ -13,8 +13,9 @@ import '../../accounts/application/accounts_controller.dart';
 import '../../accounts/domain/account.dart';
 import '../../imports/presentation/imports_screen.dart';
 import '../application/transactions_controller.dart';
-import '../domain/category.dart';
+import '../../categories/domain/category.dart';
 import '../domain/transaction.dart';
+import 'date_range_modal.dart';
 import 'review_queue.dart';
 import 'transaction_error_localizer.dart';
 import 'transaction_row.dart';
@@ -136,7 +137,7 @@ class _FilterBar extends ConsumerWidget {
     final l10n = AppLocalizations.of(context)!;
     final filters = ref.watch(transactionFiltersProvider);
     final accounts = ref.watch(accountsControllerProvider).value ?? const <Account>[];
-    final categories = ref.watch(transactionCategoriesProvider).value ?? const <PickerCategory>[];
+    final categories = ref.watch(transactionCategoriesProvider).value ?? const <AppCategory>[];
     final notifier = ref.read(transactionFiltersProvider.notifier);
 
     return Row(
@@ -246,7 +247,7 @@ class _CategoryFilterPill extends StatelessWidget {
     required this.onChanged,
   });
 
-  final List<PickerCategory> categories;
+  final List<AppCategory> categories;
   final String? selectedId;
   final ValueChanged<String?> onChanged;
 
@@ -296,14 +297,8 @@ class _DateRangeFilterPill extends StatelessWidget {
       icon: Icons.calendar_today_outlined,
       label: label,
       onTap: () async {
-        final now = DateTime.now();
-        final range = await showDateRangePicker(
-          context: context,
-          firstDate: DateTime(now.year - 10),
-          lastDate: DateTime(now.year + 1),
-          initialDateRange: (from != null && to != null) ? DateTimeRange(start: from!, end: to!) : null,
-        );
-        if (range != null) onChanged(range.start, range.end);
+        final range = await showTransactionDateRange(context, from: from, to: to);
+        if (range != null) onChanged(range.$1, range.$2);
       },
     );
   }

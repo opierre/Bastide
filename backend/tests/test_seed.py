@@ -2,6 +2,7 @@
 
 from collections.abc import Iterator
 
+from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session
 
 from app.core.seed import SYSTEM_CATEGORIES, CategorySeed, seed_categories
@@ -48,6 +49,35 @@ def test_seed_is_idempotent(db_session: Session) -> None:
 
     assert second_ids == first_ids
     assert len(first_ids) == len(list(_flatten(SYSTEM_CATEGORIES)))
+
+
+def test_startup_seeds_the_catalog(client: TestClient) -> None:
+    """A booted app has the catalog, without anyone having seeded it by hand.
+
+    This is the regression guard for the gap this seeding closed: `seed_categories` existed and
+    was tested, but nothing in the running app ever called it, so a real install had zero
+    categories and the rule engine had nothing to assign.
+    """
+    client.post(
+        "/api/v1/auth/register",
+        json={
+            "email": "seed@example.com",
+            "password": "correct-horse-battery-staple",
+            "display_name": "Seed",
+            "locale": "fr",
+            "currency": "eur",
+        },
+    )
+    token = client.post(
+        "/api/v1/auth/login",
+        json={"email": "seed@example.com", "password": "correct-horse-battery-staple"},
+    ).json()["token"]
+
+    body = client.get("/api/v1/categories", headers={"Authorization": f"Bearer {token}"}).json()
+
+    names = {c["name"] for c in body if c["is_system"]}
+    assert names == {node.key for node in _flatten(SYSTEM_CATEGORIES)}
+    assert "category.other.cash" in names
 
 
 def test_seed_does_not_touch_user_created_categories(db_session: Session) -> None:

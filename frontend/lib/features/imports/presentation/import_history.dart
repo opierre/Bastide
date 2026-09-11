@@ -303,7 +303,7 @@ class _HistoryRow extends StatelessWidget {
 }
 
 /// Source-format badge. The hue per format is pinned by
-/// `docs/design/06-imports.md`: OFX blue, QFX violet, CSV amber.
+/// `docs/design/06-imports.md`: OFX blue, QFX violet.
 class ImportFormatBadge extends StatelessWidget {
   const ImportFormatBadge({
     super.key,
@@ -322,7 +322,6 @@ class ImportFormatBadge extends StatelessWidget {
     final color = switch (format) {
       ImportFormat.ofx => AppColors.info,
       ImportFormat.qfx => AppColors.iris,
-      ImportFormat.csv => AppColors.warning,
     };
 
     return Align(

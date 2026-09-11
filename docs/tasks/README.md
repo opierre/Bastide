@@ -81,7 +81,8 @@ P2-01 user settings backend
        └─ P2-04 stage-2 categorization service
             ├─ P2-05 run orchestration + import enqueue ─ (P2-02, P2-04)
             └─ P2-06 learning loop + rule preview
-P2-07 categories & rules frontend ─ (P2-06)
+                 └─ P2-06b rule pack import/export + French starter pack
+P2-07 categories & rules frontend ─ (P2-06, P2-06b)
 P2-08 review queue: AI proposals + progress ─ (P2-05, P2-06, P2-07)
 P2-09 settings frontend: local AI ─ (P2-01, P2-03)
 P2-10 recurring detector ─ (P2-02)
@@ -119,5 +120,8 @@ the background, confirm or correct suggestions in the review queue, and turn a c
 rule that handles the next occurrence deterministically. They can manage categories and reorder
 rules, see detected subscriptions with their monthly burden, price increases and missed charges,
 and confirm/dismiss/cancel or declare one by hand. They can create savings goals and fund them
-with signed allocations, with progress on the dashboard. **With no runtime installed the whole
-app still works**, minus the AI affordances — in French and English.
+with signed allocations, with progress on the dashboard. They can import a shared rule pack —
+and are offered the bundled French one after their first import — export their own rules, and
+see how many transactions a pack would match before committing to it. **With no runtime
+installed the whole app still works** and imports still arrive substantially categorized,
+minus the AI affordances — in French and English.

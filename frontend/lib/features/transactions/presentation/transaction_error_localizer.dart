@@ -9,6 +9,8 @@ String localizeTransactionError(AppLocalizations l10n, Object? error) {
     switch (error.code) {
       case 'TRANSACTION_NOT_FOUND':
         return l10n.transactionErrorNotFound;
+      case 'CATEGORY_INVALID':
+        return l10n.transactionErrorCategoryInvalid;
       case 'VALIDATION_ERROR':
         return l10n.transactionErrorValidation;
     }

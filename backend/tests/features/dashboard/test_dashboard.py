@@ -79,8 +79,8 @@ def _insert_transaction(
     batch = ImportBatch(
         user_id=account.user_id,
         account_id=account_id,
-        source_format="csv",
-        file_name="test.csv",
+        source_format="ofx",
+        file_name="test.ofx",
         file_hash=f"hash-{unique}",
         period_start=booked_date,
         period_end=booked_date,
@@ -255,6 +255,100 @@ def test_mom_deltas_computed_against_previous_month(client: TestClient, tmp_path
     prev_rate = (100_000 - 10_000) / 100_000
     current_rate = (150_000 - 15_000) / 150_000
     assert body["savings_rate_delta_pct"] == (current_rate - prev_rate) * 100
+
+
+def test_net_delta_keeps_its_sign_when_the_previous_month_was_negative(
+    client: TestClient, tmp_path: Path
+) -> None:
+    """A month recovering from a loss reads as a rise, not a fall.
+
+    Dividing by a signed negative baseline would invert the sign and make the dashboard's trend
+    pill report an improvement as a red, downward move.
+    """
+    headers = _register(client)
+    account_id = _create_account(client, headers)
+    income_category = _create_category(client, headers, kind="income")
+    expense_category = _create_category(client, headers, kind="expense")
+
+    # February ends at −20 000 minor units: income 10 000, expense 30 000.
+    _insert_transaction(
+        tmp_path,
+        account_id,
+        amount_minor=10_000,
+        booked_date=date(2026, 2, 5),
+        category_id=income_category,
+    )
+    _insert_transaction(
+        tmp_path,
+        account_id,
+        amount_minor=-30_000,
+        booked_date=date(2026, 2, 5),
+        category_id=expense_category,
+    )
+    # March recovers to +40 000.
+    _insert_transaction(
+        tmp_path,
+        account_id,
+        amount_minor=50_000,
+        booked_date=date(2026, 3, 5),
+        category_id=income_category,
+    )
+    _insert_transaction(
+        tmp_path,
+        account_id,
+        amount_minor=-10_000,
+        booked_date=date(2026, 3, 5),
+        category_id=expense_category,
+    )
+
+    body = _summary(client, headers, "2026-03")
+
+    assert body["net_minor"] == 40_000
+    # (40 000 − −20 000) / |−20 000| × 100 — a rise, positive.
+    assert body["net_delta_pct"] == 300.0
+
+
+def test_net_delta_is_negative_when_a_loss_deepens(client: TestClient, tmp_path: Path) -> None:
+    """The mirror of the recovery case: a worsening loss must still read as a fall."""
+    headers = _register(client)
+    account_id = _create_account(client, headers)
+    income_category = _create_category(client, headers, kind="income")
+    expense_category = _create_category(client, headers, kind="expense")
+
+    _insert_transaction(
+        tmp_path,
+        account_id,
+        amount_minor=10_000,
+        booked_date=date(2026, 2, 5),
+        category_id=income_category,
+    )
+    _insert_transaction(
+        tmp_path,
+        account_id,
+        amount_minor=-30_000,
+        booked_date=date(2026, 2, 5),
+        category_id=expense_category,
+    )
+    _insert_transaction(
+        tmp_path,
+        account_id,
+        amount_minor=10_000,
+        booked_date=date(2026, 3, 5),
+        category_id=income_category,
+    )
+    _insert_transaction(
+        tmp_path,
+        account_id,
+        amount_minor=-50_000,
+        booked_date=date(2026, 3, 5),
+        category_id=expense_category,
+    )
+
+    body = _summary(client, headers, "2026-03")
+
+    assert body["net_minor"] == -40_000
+    # (−40 000 − −20 000) / |−20 000| × 100.
+    assert body["net_delta_pct"] == -100.0
 
 
 def test_mom_delta_is_safe_when_previous_month_is_absent(

@@ -84,8 +84,8 @@ def _insert_transaction(
     batch = ImportBatch(
         user_id=user_id,
         account_id=account_id,
-        source_format="csv",
-        file_name="test.csv",
+        source_format="ofx",
+        file_name="test.ofx",
         file_hash=f"hash-{description_clean}-{amount_minor}",
         period_start=date(2026, 1, 1),
         period_end=date(2026, 1, 1),
@@ -306,3 +306,99 @@ def test_apply_is_user_scoped(client: TestClient, tmp_path: Path) -> None:
 
     response_b = client.post("/api/v1/rules/apply", json={}, headers=headers_b)
     assert response_b.json()["recategorized_count"] == 0
+
+
+def test_create_rejects_a_regex_that_does_not_compile(client: TestClient) -> None:
+    """The preview already refused it; saving must refuse it too.
+
+    Without this the modal shows the pattern error and the save still succeeds, and the
+    uncompilable rule only surfaces later as a 500 out of `/rules/apply` — from a screen that
+    never mentioned a pattern.
+    """
+    headers, _ = _register(client)
+    category_id = _create_category(client, headers)
+
+    response = client.post(
+        "/api/v1/rules",
+        json={
+            **RULE_PAYLOAD,
+            "category_id": category_id,
+            "match_type": "regex",
+            "pattern": "CARREFOUR(",
+        },
+        headers=headers,
+    )
+
+    assert response.status_code == 422
+    assert response.json()["error"]["code"] == "RULE_PATTERN_INVALID"
+    assert client.get("/api/v1/rules", headers=headers).json() == []
+
+
+def test_update_rejects_a_regex_the_patch_would_produce(client: TestClient) -> None:
+    """Checked against the resulting rule, not the patch body.
+
+    Switching `match_type` to `regex` without resending `pattern` is what turns a stored
+    `contains` string into an uncompilable expression, and the patch alone looks harmless.
+    """
+    headers, _ = _register(client)
+    category_id = _create_category(client, headers)
+    rule = _create_rule(client, headers, category_id, pattern="CARREFOUR(")
+
+    response = client.patch(
+        f"/api/v1/rules/{rule['id']}", json={"match_type": "regex"}, headers=headers
+    )
+
+    assert response.status_code == 422
+    assert response.json()["error"]["code"] == "RULE_PATTERN_INVALID"
+    assert client.get("/api/v1/rules", headers=headers).json()[0]["match_type"] == "contains"
+
+
+def test_create_rejects_another_users_category(client: TestClient) -> None:
+    """The foreign key proves the row exists; only this check proves the caller may see it."""
+    headers_a, _ = _register(client, "amelie@example.com")
+    headers_b, _ = _register(client, "bruno@example.com")
+    category_id_b = _create_category(client, headers_b)
+
+    response = client.post(
+        "/api/v1/rules",
+        json={**RULE_PAYLOAD, "category_id": category_id_b},
+        headers=headers_a,
+    )
+
+    assert response.status_code == 422
+    assert response.json()["error"]["code"] == "CATEGORY_INVALID"
+    assert client.get("/api/v1/rules", headers=headers_a).json() == []
+
+
+def test_update_rejects_another_users_category(client: TestClient) -> None:
+    headers_a, _ = _register(client, "amelie@example.com")
+    category_id_a = _create_category(client, headers_a)
+    rule = _create_rule(client, headers_a, category_id_a)
+    headers_b, _ = _register(client, "bruno@example.com")
+    category_id_b = _create_category(client, headers_b)
+
+    response = client.patch(
+        f"/api/v1/rules/{rule['id']}", json={"category_id": category_id_b}, headers=headers_a
+    )
+
+    assert response.status_code == 422
+    assert response.json()["error"]["code"] == "CATEGORY_INVALID"
+    assert client.get("/api/v1/rules", headers=headers_a).json()[0]["category_id"] == category_id_a
+
+
+def test_a_system_category_is_assignable(client: TestClient) -> None:
+    """System rows have `user_id=None`, so the visibility check must not read them as foreign."""
+    headers, _ = _register(client)
+    system_category = next(
+        category
+        for category in client.get("/api/v1/categories", headers=headers).json()
+        if category["is_system"]
+    )
+
+    response = client.post(
+        "/api/v1/rules",
+        json={**RULE_PAYLOAD, "category_id": system_category["id"]},
+        headers=headers,
+    )
+
+    assert response.status_code == 201

@@ -6,17 +6,16 @@ import '../../accounts/application/accounts_controller.dart';
 import '../../dashboard/application/dashboard_controller.dart';
 import '../../transactions/application/transactions_controller.dart';
 import '../data/imports_repository.dart';
-import '../domain/csv_template.dart';
 import '../domain/import_batch.dart';
 
 /// Extensions the file picker and the drop target both accept.
-const importFileExtensions = ['ofx', 'qfx', 'csv'];
+const importFileExtensions = ['ofx', 'qfx'];
 
 /// A file the user has chosen but not yet imported, held in memory.
 ///
 /// Bytes rather than a path: the sidecar takes the file as a multipart upload,
 /// and a statement is small enough that reading it once up front is simpler
-/// than keeping a handle open across the wizard's lifetime.
+/// than keeping a handle open until the user commits it.
 @immutable
 class PickedImportFile {
   const PickedImportFile({required this.name, required this.bytes});
@@ -29,10 +28,6 @@ class PickedImportFile {
     final dot = name.lastIndexOf('.');
     return dot == -1 ? '' : name.substring(dot + 1).toLowerCase();
   }
-
-  /// CSV needs a column mapping before it can be parsed; OFX/QFX are
-  /// self-describing and import in one step.
-  bool get needsCsvTemplate => extension == 'csv';
 }
 
 /// Opens the native file dialog. Behind an interface so widget tests can drive
@@ -43,7 +38,7 @@ class ImportFilePicker {
   Future<PickedImportFile?> pick() async {
     final file = await openFile(
       acceptedTypeGroups: const [
-        XTypeGroup(label: 'OFX / QFX / CSV', extensions: importFileExtensions),
+        XTypeGroup(label: 'OFX / QFX', extensions: importFileExtensions),
       ],
     );
     if (file == null) return null;
@@ -72,8 +67,7 @@ class ImportsController extends AsyncNotifier<List<ImportBatch>> {
     );
   }
 
-  /// Imports [file] into [accountId], as CSV when [csvTemplateId] is given and
-  /// as OFX/QFX otherwise.
+  /// Imports [file] into [accountId].
   ///
   /// Returns the batch so the panel can show its result. A `failed` batch is a
   /// normal return, not a throw: the backend records the rejected file in the
@@ -81,16 +75,10 @@ class ImportsController extends AsyncNotifier<List<ImportBatch>> {
   Future<ImportBatch> importFile({
     required String accountId,
     required PickedImportFile file,
-    String? csvTemplateId,
   }) async {
     final batch = await ref
         .read(importsRepositoryProvider)
-        .importFile(
-          accountId: accountId,
-          fileName: file.name,
-          bytes: file.bytes,
-          csvTemplateId: csvTemplateId,
-        );
+        .importFile(accountId: accountId, fileName: file.name, bytes: file.bytes);
 
     // Re-importing an identical file returns the original batch rather than a
     // new one, so replace a matching entry instead of listing it twice.
@@ -112,63 +100,29 @@ class ImportsController extends AsyncNotifier<List<ImportBatch>> {
     }
     return batch;
   }
-
-  /// Parses a sample of [file] against a candidate mapping without saving
-  /// anything — the wizard's live preview.
-  Future<List<CsvPreviewRow>> previewCsv({
-    required CsvTemplateDraft draft,
-    required PickedImportFile file,
-  }) {
-    return ref
-        .read(importsRepositoryProvider)
-        .previewTemplate(draft: draft, fileName: file.name, bytes: file.bytes);
-  }
 }
 
 final importsControllerProvider =
     AsyncNotifierProvider<ImportsController, List<ImportBatch>>(ImportsController.new);
 
-/// The user's saved per-bank CSV mappings.
-class CsvTemplatesController extends AsyncNotifier<List<CsvTemplate>> {
-  @override
-  Future<List<CsvTemplate>> build() => ref.read(importsRepositoryProvider).listTemplates();
-
-  Future<CsvTemplate> create(CsvTemplateDraft draft) async {
-    final template = await ref.read(importsRepositoryProvider).createTemplate(draft);
-    state = AsyncValue.data([...?state.value, template]);
-    return template;
-  }
-
-  /// The saved mapping for [institution], if one exists.
-  ///
-  /// Matched on the bank name the template was saved under, case- and
-  /// whitespace-insensitively, since it is typed by hand in both places. This
-  /// is what lets a second import from the same bank skip the wizard.
-  CsvTemplate? templateFor(String institution) {
-    final needle = institution.trim().toLowerCase();
-    if (needle.isEmpty) return null;
-    for (final template in state.value ?? const <CsvTemplate>[]) {
-      if (template.bankName.trim().toLowerCase() == needle) return template;
-    }
-    return null;
-  }
-}
-
-final csvTemplatesControllerProvider =
-    AsyncNotifierProvider<CsvTemplatesController, List<CsvTemplate>>(
-      CsvTemplatesController.new,
-    );
-
-/// The destination account chosen in the panel.
-class SelectedImportAccount extends Notifier<String?> {
+/// The account the user picked to settle a statement that couldn't name its own
+/// destination — an ambiguous match, or a file with no readable account block.
+///
+/// Not a destination selector: it is empty on every well-formed statement, and
+/// is only ever consulted when [ofxAccountDetectionProvider] came back without
+/// an answer. Cleared whenever the staged file changes, so a choice made for
+/// one statement can never carry over to the next.
+class ChosenImportAccount extends Notifier<String?> {
   @override
   String? build() => null;
 
   void select(String? accountId) => state = accountId;
+
+  void clear() => state = null;
 }
 
-final selectedImportAccountProvider = NotifierProvider<SelectedImportAccount, String?>(
-  SelectedImportAccount.new,
+final chosenImportAccountProvider = NotifierProvider<ChosenImportAccount, String?>(
+  ChosenImportAccount.new,
 );
 
 /// The file staged in the drop zone, before it is imported.

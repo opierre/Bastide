@@ -27,6 +27,11 @@ GET/POST/PATCH/DELETE /api/v1/categories
 GET/POST/PATCH/DELETE /api/v1/rules
 POST /api/v1/rules/apply   {account_id?} → {recategorized_count}
 POST /api/v1/rules/preview {match_field, match_type, pattern} → {match_count, samples}
+GET  /api/v1/rules/packs/builtin → [{id, name, locale, rule_count}]
+POST /api/v1/rules/packs/preview {pack} | {builtin_id} → {name, total, new_count,
+                                   duplicate_count, unresolved, would_match_count, samples}
+POST /api/v1/rules/packs/import  {pack} | {builtin_id}, apply_now → {created_count, …}
+GET  /api/v1/rules/packs/export  ?enabled_only → pack
 ```
 
 ## Steps
@@ -49,7 +54,20 @@ POST /api/v1/rules/preview {match_field, match_type, pattern} → {match_count, 
 5. Reordering and toggling are **optimistic with rollback**: apply locally, patch, and restore
    the previous order on failure with an error toast. A drag that visibly snaps back after a
    round trip reads as a broken list.
-6. Empty states for both views; ARB keys for every string in fr **and** en; `flutter analyze`
+6. **Rule packs (P2-06b)** — an « Importer / Exporter » affordance on the rules view:
+   - Import takes a file *or* a bundled pack from `GET /rules/packs/builtin`. Always call
+     `POST /rules/packs/preview` first and show its report as a confirmation sheet — new count,
+     duplicates skipped, unresolved categories, and the headline « Ce pack catégoriserait 342 de
+     vos 500 transactions. » Never import straight from the file picker; the count is the whole
+     reason the user can judge a stranger's pack.
+   - A 422 (bad `format_version`, or a pack containing `regex`) renders as a plain explanation of
+     why the file was refused, not a generic failure.
+   - Export shows the pack contents **before** the user saves it, with the omitted-rules report
+     and a note that patterns can contain personal detail. A silent download of a file carrying
+     « VIR SALAIRE DUPONT » is the failure mode this review step exists to prevent.
+   - The rules **empty state** offers the bundled French pack directly — that is where a new user
+     with no rules actually is, and it is the cold-start path.
+7. Empty states for both views; ARB keys for every string in fr **and** en; `flutter analyze`
    clean.
 
 ## Acceptance
@@ -59,6 +77,8 @@ POST /api/v1/rules/preview {match_field, match_type, pattern} → {match_count, 
 - The rule editor previews the match count for the typed pattern (including `regex` and `range`,
   which no text search could approximate) and creates a working rule.
 - « Exécuter les règles » shows the recategorized count.
+- A pack import always shows the preview report before committing, and a refused pack explains
+  why; export shows its contents before saving; the rules empty state offers the bundled pack.
 - fr + en parity; no hard-coded user-facing strings.
 
 ## Tests
@@ -72,3 +92,4 @@ POST /api/v1/rules/preview {match_field, match_type, pattern} → {match_count, 
 - `feat(categories): add categories repository and controller`
 - `feat(categories): add category management view with spend share`
 - `feat(rules): add reorderable rules view with editor and match preview`
+- `feat(rules): add rule pack import and export with preview confirmation`

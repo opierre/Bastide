@@ -5,6 +5,8 @@ from typing import Literal
 
 from pydantic import BaseModel, Field
 
+from app.features.transactions.schemas import TransactionRead
+
 MatchField = Literal["description_clean", "merchant", "amount"]
 MatchType = Literal["contains", "equals", "regex", "range"]
 
@@ -53,4 +55,46 @@ class RuleApplyRequest(BaseModel):
 class RuleApplyResult(BaseModel):
     """Result of a rule apply run."""
 
+    recategorized_count: int
+
+
+class RuleSuggestionRead(BaseModel):
+    """The pre-fill for a rule form, derived from the transaction being corrected."""
+
+    match_field: MatchField
+    match_type: MatchType
+    pattern: str
+
+
+class RulePreviewRequest(BaseModel):
+    """An unsaved rule condition to count against the caller's existing transactions."""
+
+    match_field: MatchField
+    match_type: MatchType
+    pattern: str = Field(min_length=1, max_length=255)
+    account_id: str | None = None
+
+
+class RulePreviewResult(BaseModel):
+    """How many transactions a condition matches, with a few of them to show as examples."""
+
+    match_count: int
+    samples: list[TransactionRead]
+
+
+class RuleFromTransactionRequest(BaseModel):
+    """A user correction to turn into a rule: « toujours catégoriser ainsi »."""
+
+    transaction_id: str
+    match_field: MatchField
+    match_type: MatchType
+    pattern: str = Field(min_length=1, max_length=255)
+    category_id: str
+    apply_now: bool
+
+
+class RuleFromTransactionResult(BaseModel):
+    """The learned rule, plus how many other transactions re-applying it changed."""
+
+    rule: RuleRead
     recategorized_count: int

@@ -172,12 +172,12 @@ void main() {
         controller: FakeImportsController(
           initialBatches: [
             _batch(
-              format: ImportFormat.csv,
-              fileName: 'export.csv',
+              format: ImportFormat.qfx,
+              fileName: 'releve.qfx',
               newCount: 0,
               duplicateCount: 0,
               status: ImportStatus.failed,
-              errorMessage: "Column 'Montant' not found in header",
+              errorMessage: 'No <STMTTRN> records found',
             ),
           ],
         ),
@@ -187,9 +187,9 @@ void main() {
 
     expect(find.byKey(const Key('importBatchFailureNote-b1')), findsOneWidget);
     expect(find.text("Le fichier n'a pas pu être lu — rien n'a été modifié."), findsOneWidget);
-    expect(find.text("Column 'Montant' not found in header"), findsOneWidget);
+    expect(find.text('No <STMTTRN> records found'), findsOneWidget);
     expect(find.text('Échec'), findsOneWidget);
-    expect(find.text('CSV'), findsOneWidget);
+    expect(find.text('QFX'), findsOneWidget);
   });
 
   testWidgets('renders the empty state when nothing has been imported', (tester) async {

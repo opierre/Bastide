@@ -79,14 +79,19 @@ def test_list_categories_includes_system_and_user_rows(client: TestClient, tmp_p
     assert "Vacances" in names
 
 
-def test_system_category_name_is_an_i18n_key(client: TestClient, tmp_path: Path) -> None:
+def test_system_category_name_is_an_i18n_key(client: TestClient) -> None:
+    """The seeded catalog stores keys, not display names — the frontend localizes them.
+
+    Reads the row startup seeded rather than inserting one, and selects it **by name**: the
+    catalog holds dozens of system rows, so "the first system category in the list" would
+    assert against whichever one the query happened to order first.
+    """
     headers = _register(client)
-    _insert_system_category(tmp_path, name="category.food")
 
     response = client.get("/api/v1/categories", headers=headers)
 
-    system_category = next(c for c in response.json() if c["is_system"])
-    assert system_category["name"] == "category.food"
+    system_category = next(c for c in response.json() if c["name"] == "category.food")
+    assert system_category["is_system"] is True
     assert system_category["user_id"] is None
 
 
@@ -111,8 +116,11 @@ def test_delete_user_category(client: TestClient) -> None:
     response = client.delete(f"/api/v1/categories/{category_id}", headers=headers)
     assert response.status_code == 204
 
-    list_response = client.get("/api/v1/categories", headers=headers)
-    assert list_response.json() == []
+    # The list is never empty — the seeded system catalog is always there — so assert the
+    # user's own rows are gone rather than that nothing at all remains.
+    remaining = client.get("/api/v1/categories", headers=headers).json()
+    assert [c for c in remaining if not c["is_system"]] == []
+    assert category_id not in {c["id"] for c in remaining}
 
 
 def test_cannot_update_system_category(client: TestClient, tmp_path: Path) -> None:

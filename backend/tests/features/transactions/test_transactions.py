@@ -84,8 +84,8 @@ def _insert_transaction(
     batch = ImportBatch(
         user_id=_account_user_id(session, account_id),
         account_id=account_id,
-        source_format="csv",
-        file_name="test.csv",
+        source_format="ofx",
+        file_name="test.ofx",
         file_hash=f"hash-{unique}",
         period_start=booked_date,
         period_end=booked_date,
@@ -406,3 +406,51 @@ def test_patch_cross_user_transaction_returns_404(client: TestClient, tmp_path: 
 
     assert response.status_code == 404
     assert response.json()["error"]["code"] == "TRANSACTION_NOT_FOUND"
+
+
+def test_patch_with_another_users_category_is_rejected(client: TestClient, tmp_path: Path) -> None:
+    """The transaction is the caller's; the category is not.
+
+    The foreign key proves the category row exists but knows nothing about users, so without
+    the visibility check the ledger would render another user's private label and colour.
+    """
+    headers_a, _ = _register(client, "amelie@example.com")
+    account_id_a = _create_account(client, headers_a)
+    transaction_id = _insert_transaction(tmp_path, account_id_a)
+
+    headers_b, _ = _register(client, "bruno@example.com")
+    category_id_b = _create_category(client, headers_b)
+
+    response = client.patch(
+        f"/api/v1/transactions/{transaction_id}",
+        json={"category_id": category_id_b},
+        headers=headers_a,
+    )
+
+    assert response.status_code == 422
+    assert response.json()["error"]["code"] == "CATEGORY_INVALID"
+
+    transaction = client.get(f"/api/v1/transactions/{transaction_id}", headers=headers_a).json()
+    assert transaction["category"] is None
+    assert transaction["categorization_source"] == "uncategorized"
+
+
+def test_patch_accepts_a_system_category(client: TestClient, tmp_path: Path) -> None:
+    """System rows have `user_id=None`; the check must not read that as another user's."""
+    headers, _ = _register(client)
+    account_id = _create_account(client, headers)
+    transaction_id = _insert_transaction(tmp_path, account_id)
+    system_category = next(
+        category
+        for category in client.get("/api/v1/categories", headers=headers).json()
+        if category["is_system"]
+    )
+
+    response = client.patch(
+        f"/api/v1/transactions/{transaction_id}",
+        json={"category_id": system_category["id"]},
+        headers=headers,
+    )
+
+    assert response.status_code == 200
+    assert response.json()["category"]["id"] == system_category["id"]

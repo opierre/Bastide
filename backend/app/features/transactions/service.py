@@ -3,6 +3,8 @@
 from datetime import date
 
 from app.core.errors import NotFoundError
+from app.features.categories.repository import CategoryRepository
+from app.features.categories.service import CategoryInvalidError
 from app.features.transactions.models import Transaction
 from app.features.transactions.repository import TransactionRepository
 from app.features.transactions.schemas import TransactionUpdate
@@ -19,8 +21,9 @@ class TransactionNotFoundError(NotFoundError):
 class TransactionService:
     """Transaction listing/detail (user-scoped) and the user category/description override."""
 
-    def __init__(self, repository: TransactionRepository) -> None:
+    def __init__(self, repository: TransactionRepository, categories: CategoryRepository) -> None:
         self._repository = repository
+        self._categories = categories
 
     def list_for_user(
         self,
@@ -66,9 +69,18 @@ class TransactionService:
 
         Raises:
             TransactionNotFoundError: no such transaction, or it belongs to another user.
+            CategoryInvalidError: no such category, or it is another user's.
         """
         transaction = self.get(user_id, transaction_id)
         if data.category_id is not None:
+            # The foreign key proves the category row exists, not that this user may see it —
+            # without the visibility check a caller could stamp another user's private category
+            # onto their own ledger, and its label and colour would render there.
+            if self._categories.get_visible_by_id_for_user(data.category_id, user_id) is None:
+                raise CategoryInvalidError(
+                    "Category not found.",
+                    {"field": "category_id", "category_id": data.category_id},
+                )
             transaction.category_id = data.category_id
             transaction.categorization_source = "user"
             transaction.needs_review = False

@@ -1,7 +1,6 @@
 import 'package:finstride/core/api/api_client.dart';
 import 'package:finstride/core/api/api_client_provider.dart';
 import 'package:finstride/features/imports/application/imports_controller.dart';
-import 'package:finstride/features/imports/domain/csv_template.dart';
 import 'package:finstride/features/imports/domain/import_batch.dart';
 import 'package:finstride/features/transactions/application/transactions_controller.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -34,27 +33,6 @@ Map<String, dynamic> _batchJson({
   'status': status,
   'error_message': errorMessage,
   'imported_at': '2026-06-01T09:30:00Z',
-};
-
-Map<String, dynamic> _templateJson({
-  String id = 't1',
-  String bankName = 'Boursorama',
-  String amountStrategy = 'signed',
-}) => {
-  'id': id,
-  'bank_name': bankName,
-  'delimiter': ';',
-  'encoding': 'latin-1',
-  'date_format': '%d/%m/%Y',
-  'decimal_separator': ',',
-  'amount_strategy': amountStrategy,
-  'column_map': {
-    'booked_date': 'Date operation',
-    'description': 'Libelle',
-    'amount': 'Montant',
-  },
-  'header_offset': 0,
-  'created_at': '2026-05-01T10:00:00Z',
 };
 
 /// An empty transactions page — enough for the list to load, since the tests that
@@ -129,14 +107,14 @@ void main() {
       expect(history.map((entry) => entry.id), ['b1', 'b0']);
     });
 
-    test('sends the template id only for a CSV import', () async {
+    test('the upload carries the destination account and nothing else', () async {
       when(() => apiClient.get('/imports')).thenAnswer((_) async => <dynamic>[]);
-      _stubMultipart(apiClient, '/imports', _batchJson(sourceFormat: 'csv'));
+      _stubMultipart(apiClient, '/imports', _batchJson());
 
       await container.read(importsControllerProvider.future);
       await container
           .read(importsControllerProvider.notifier)
-          .importFile(accountId: 'a1', file: _file, csvTemplateId: 't1');
+          .importFile(accountId: 'a1', file: _file);
 
       final captured =
           verify(
@@ -150,8 +128,7 @@ void main() {
               ).captured.single
               as Map<String, String>;
 
-      expect(captured['account_id'], 'a1');
-      expect(captured['csv_template_id'], 't1');
+      expect(captured, {'account_id': 'a1'});
     });
 
     test('re-importing the same file replaces its entry instead of listing it twice', () async {
@@ -185,23 +162,22 @@ void main() {
         '/imports',
         _batchJson(
           id: 'b2',
-          sourceFormat: 'csv',
           transactionCount: 0,
           newCount: 0,
           duplicateCount: 0,
           status: 'failed',
-          errorMessage: "Column 'Montant' not found in header",
+          errorMessage: 'No <STMTTRN> records found',
         ),
       );
 
       await container.read(importsControllerProvider.future);
       final batch = await container
           .read(importsControllerProvider.notifier)
-          .importFile(accountId: 'a1', file: _file, csvTemplateId: 't1');
+          .importFile(accountId: 'a1', file: _file);
 
       expect(batch.status, ImportStatus.failed);
       expect(batch.newCount, 0);
-      expect(batch.errorMessage, "Column 'Montant' not found in header");
+      expect(batch.errorMessage, 'No <STMTTRN> records found');
       expect(container.read(importsControllerProvider).value, hasLength(1));
     });
 
@@ -267,73 +243,6 @@ void main() {
         throwsA(isA<ApiFailure>()),
       );
       expect(container.read(importsControllerProvider).value, hasLength(1));
-    });
-
-    test('previewCsv parses the sample rows into signed minor units', () async {
-      when(() => apiClient.get('/imports')).thenAnswer((_) async => <dynamic>[]);
-      _stubMultipart(apiClient, '/csv-templates/preview', [
-        {
-          'booked_date': '2026-05-04',
-          'value_date': null,
-          'amount_minor': -4250,
-          'description_raw': 'CARREFOUR MARKET',
-        },
-      ]);
-
-      await container.read(importsControllerProvider.future);
-      final rows = await container
-          .read(importsControllerProvider.notifier)
-          .previewCsv(draft: const CsvTemplateDraft(), file: _file);
-
-      expect(rows, hasLength(1));
-      expect(rows.single.amountMinor, -4250);
-      expect(rows.single.valueDate, isNull);
-      expect(rows.single.descriptionRaw, 'CARREFOUR MARKET');
-    });
-  });
-
-  group('CsvTemplatesController', () {
-    test('build loads the saved templates', () async {
-      when(
-        () => apiClient.get('/csv-templates'),
-      ).thenAnswer((_) async => [_templateJson()]);
-
-      final templates = await container.read(csvTemplatesControllerProvider.future);
-
-      expect(templates.single.bankName, 'Boursorama');
-      expect(templates.single.draft.delimiter, ';');
-      expect(templates.single.draft.amountStrategy, AmountStrategy.signed);
-      expect(templates.single.draft.columnMap['amount'], 'Montant');
-    });
-
-    test('create appends the saved template', () async {
-      when(() => apiClient.get('/csv-templates')).thenAnswer((_) async => <dynamic>[]);
-      when(
-        () => apiClient.post('/csv-templates', body: any(named: 'body')),
-      ).thenAnswer((_) async => _templateJson(id: 't2', amountStrategy: 'debit_credit'));
-
-      await container.read(csvTemplatesControllerProvider.future);
-      final template = await container
-          .read(csvTemplatesControllerProvider.notifier)
-          .create(const CsvTemplateDraft(bankName: 'Boursorama'));
-
-      expect(template.id, 't2');
-      expect(template.draft.amountStrategy, AmountStrategy.debitCredit);
-      expect(container.read(csvTemplatesControllerProvider).value, hasLength(1));
-    });
-
-    test('a saved template is reused for the same bank, whatever the casing', () async {
-      when(
-        () => apiClient.get('/csv-templates'),
-      ).thenAnswer((_) async => [_templateJson(bankName: 'Boursorama')]);
-
-      await container.read(csvTemplatesControllerProvider.future);
-      final controller = container.read(csvTemplatesControllerProvider.notifier);
-
-      expect(controller.templateFor('  boursorama ')?.id, 't1');
-      expect(controller.templateFor('Boursorama')?.id, 't1');
-      expect(controller.templateFor('Revolut'), isNull);
-      expect(controller.templateFor(''), isNull);
     });
   });
 }

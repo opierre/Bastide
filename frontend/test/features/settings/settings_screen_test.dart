@@ -1,3 +1,5 @@
+import 'package:finstride/core/api/api_client.dart';
+import 'package:finstride/core/api/api_client_provider.dart';
 import 'package:finstride/core/l10n/locale_provider.dart';
 import 'package:finstride/core/session/current_user_provider.dart';
 import 'package:finstride/core/theme/app_theme.dart';
@@ -7,6 +9,9 @@ import 'package:finstride/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mocktail/mocktail.dart';
+
+class _MockApiClient extends Mock implements ApiClient {}
 
 const _user = AuthUser(
   id: 'u1',
@@ -33,10 +38,26 @@ class _Harness extends ConsumerWidget {
   }
 }
 
-Widget _wrap() => ProviderScope(
-  overrides: [currentUserProvider.overrideWithValue(_user)],
-  child: const _Harness(),
-);
+/// Données now renders the local-AI card, which reads `/settings` — so the
+/// screen needs a stubbed client even in the tests that never open that tab.
+Widget _wrap() {
+  final apiClient = _MockApiClient();
+  when(() => apiClient.get('/settings')).thenAnswer(
+    (_) async => {
+      'ai_enabled': false,
+      'inference_base_url': 'http://127.0.0.1:11434/v1',
+      'model_tag': null,
+      'confidence_threshold': 0.8,
+    },
+  );
+  return ProviderScope(
+    overrides: [
+      currentUserProvider.overrideWithValue(_user),
+      apiClientProvider.overrideWithValue(apiClient),
+    ],
+    child: const _Harness(),
+  );
+}
 
 void main() {
   testWidgets('opens on preferences with the four sections listed', (tester) async {
@@ -82,11 +103,27 @@ void main() {
     );
   });
 
-  testWidgets('sections without a backend announce themselves', (tester) async {
+  testWidgets('Données carries the local-AI card', (tester) async {
     await tester.pumpWidget(_wrap());
     await tester.pumpAndSettle();
 
     await tester.tap(find.byKey(const Key('settingsSection-data')));
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(const Key('settingsAiCard')), findsOneWidget);
+    expect(find.byKey(const Key('settingsBackupCard')), findsOneWidget);
+    // The way out is offered above the way through: export, then danger zone.
+    expect(find.byKey(const Key('settingsDangerZoneCard')), findsOneWidget);
+    // Préférences is unchanged by the Phase 2 amendment: language, currency and
+    // formats stay there, and none of them followed the card into Données.
+    expect(find.byKey(const Key('settingsCurrencyField')), findsNothing);
+  });
+
+  testWidgets('Profil still announces itself as unbuilt', (tester) async {
+    await tester.pumpWidget(_wrap());
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byKey(const Key('settingsSection-profile')));
     await tester.pumpAndSettle();
 
     expect(find.text('Bientôt disponible'), findsOneWidget);

@@ -1,4 +1,4 @@
-"""Balance helpers: cache delta application, point-in-time lookup, and full recompute.
+"""Balance helpers: cache delta application, point-in-time lookup, and opening-balance shifts.
 
 The ledger (`transactions`) is the source of truth; `Account.cached_balance_minor` is a
 maintained-by-delta cache so normal reads are O(1). See the database skill for the full
@@ -58,20 +58,6 @@ def point_in_time_balance(db: Session, account: Account, as_of: date) -> int:
 
     rows_since_sum = db.scalar(rows_since_query) or 0
     return base + rows_since_sum
-
-
-def recompute_balance(db: Session, account: Account) -> int:
-    """Full reconciliation: opening balance plus every transaction on the ledger.
-
-    A repair/verification routine only (post-import integrity check, or a manual "recalculate"
-    action) — never on the normal read path, which uses `current_balance` instead.
-    """
-    total = db.scalar(
-        select(func.coalesce(func.sum(Transaction.amount_minor), 0)).where(
-            Transaction.account_id == account.id
-        )
-    )
-    return account.opening_balance_minor + (total or 0)
 
 
 def shift_opening_balance(db: Session, account: Account, new_opening_balance_minor: int) -> None:

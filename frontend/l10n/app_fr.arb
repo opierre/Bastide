@@ -48,7 +48,7 @@
   "@navTransactionsSubtitle": {
     "description": "One-line descriptor shown under the panel title in the top bar, on the transactions screen."
   },
-  "navImportsSubtitle": "Relevés OFX, QFX et CSV — traités sur cet ordinateur",
+  "navImportsSubtitle": "Relevés OFX et QFX — traités sur cet ordinateur",
   "@navImportsSubtitle": {
     "description": "One-line descriptor shown under the panel title in the top bar, on the imports screen."
   },
@@ -260,14 +260,6 @@
   "@accountsAddButton": {
     "description": "Button label to open the create-account form."
   },
-  "accountsSearchHint": "Rechercher…",
-  "@accountsSearchHint": {
-    "description": "Placeholder in the accounts search pill in the top bar."
-  },
-  "accountsSearchEmpty": "Aucun compte ne correspond à votre recherche.",
-  "@accountsSearchEmpty": {
-    "description": "Shown in place of the account grid when the search filters everything out."
-  },
   "accountsBalancesAsOf": "Soldes au {date}",
   "@accountsBalancesAsOf": {
     "description": "Timestamp under the summary meta saying when the balances were last recalculated.",
@@ -451,19 +443,19 @@
   },
   "importAccountLabel": "Compte de destination",
   "@importAccountLabel": {
-    "description": "Label for the account selector on the imports panel."
+    "description": "Label for the account picker shown only when a statement could not name its own destination."
   },
   "importAccountsUnavailable": "Impossible de charger vos comptes. Réessayez dans un instant.",
   "@importAccountsUnavailable": {
-    "description": "Shown in place of the account selector when the accounts list failed to load."
+    "description": "Shown when the accounts list failed to load, so the statement cannot be matched against anything."
   },
-  "importDropZoneTitle": "Déposez un fichier OFX, QFX ou CSV",
+  "importDropZoneTitle": "Déposez un fichier OFX ou QFX",
   "@importDropZoneTitle": {
     "description": "Headline inside the imports drop zone."
   },
-  "importDropZoneHint": "ou cliquez pour parcourir — un CSV ouvre l'assistant de correspondance",
+  "importDropZoneHint": "ou cliquez pour parcourir — le relevé indique lui-même son compte",
   "@importDropZoneHint": {
-    "description": "Sub-line inside the imports drop zone, stating that a CSV opens the mapping wizard."
+    "description": "Sub-line inside the imports drop zone, stating that the file itself names the destination account."
   },
   "importFileSize": "{size} ko",
   "@importFileSize": {
@@ -485,23 +477,6 @@
   "importSubmitting": "Import en cours…",
   "@importSubmitting": {
     "description": "Label replacing the import button text while the upload is in flight."
-  },
-  "importOpenWizard": "Configurer et importer",
-  "@importOpenWizard": {
-    "description": "Primary action shown for a CSV with no saved mapping — it opens the wizard rather than importing straight away."
-  },
-  "importTemplateReuse": "Format CSV mémorisé pour {bank} — il sera réutilisé pour ce fichier.",
-  "@importTemplateReuse": {
-    "description": "Banner telling the user a saved CSV template will be reused instead of the wizard.",
-    "placeholders": {
-      "bank": {
-        "type": "String"
-      }
-    }
-  },
-  "importReconfigureTemplate": "Reconfigurer",
-  "@importReconfigureTemplate": {
-    "description": "Action that re-opens the CSV wizard even though a saved template exists."
   },
   "importDetectedAccount": "Compte reconnu dans le fichier : {account}.",
   "@importDetectedAccount": {
@@ -533,6 +508,14 @@
   "importCreateDetectedAccount": "Créer ce compte",
   "@importCreateDetectedAccount": {
     "description": "Action opening the account form pre-filled with the account read from the statement."
+  },
+  "importChooseAccount": "Choisissez un compte",
+  "@importChooseAccount": {
+    "description": "Placeholder option in the account picker shown when a statement could not name its own destination — the unanswered state."
+  },
+  "importUnreadableAccount": "Ce fichier n'indique aucun compte — choisissez la destination.",
+  "@importUnreadableAccount": {
+    "description": "Warning shown when the staged file declares no account block at all, so the user has to pick the destination from every account."
   },
   "importResultTitle": "Dernier import",
   "@importResultTitle": {
@@ -677,162 +660,6 @@
   "@importRetry": {
     "description": "Retry button label shown when the import history fails to load."
   },
-  "csvWizardTitle": "Assistant CSV",
-  "@csvWizardTitle": {
-    "description": "Title of the one-time CSV column-mapping wizard modal."
-  },
-  "csvWizardStepFormat": "Format",
-  "@csvWizardStepFormat": {
-    "description": "Label of the wizard's first step, where the file's format is described."
-  },
-  "csvWizardStepColumns": "Colonnes & aperçu",
-  "@csvWizardStepColumns": {
-    "description": "Label of the wizard's second step, where columns are mapped and previewed."
-  },
-  "csvWizardCancel": "Annuler",
-  "@csvWizardCancel": {
-    "description": "Cancel action in the CSV wizard footer."
-  },
-  "csvWizardNext": "Continuer",
-  "@csvWizardNext": {
-    "description": "Action moving from the wizard's format step to its columns step."
-  },
-  "csvWizardConfirm": "Valider et importer",
-  "@csvWizardConfirm": {
-    "description": "Action that saves the mapping and imports the file."
-  },
-  "csvWizardConfirming": "Import en cours…",
-  "@csvWizardConfirming": {
-    "description": "Label replacing the wizard's confirm button text while saving and importing."
-  },
-  "csvWizardBankLabel": "Banque",
-  "@csvWizardBankLabel": {
-    "description": "Label for the bank name the CSV mapping is remembered under."
-  },
-  "csvWizardBankHelper": "Ce format sera mémorisé sous ce nom et réutilisé à chaque import de cette banque.",
-  "@csvWizardBankHelper": {
-    "description": "Helper under the bank name field, stating that the mapping is saved for reuse."
-  },
-  "csvWizardDelimiterLabel": "Délimiteur",
-  "@csvWizardDelimiterLabel": {
-    "description": "Label for the CSV column separator selector."
-  },
-  "csvDelimiterSemicolon": "Point-virgule ( ; )",
-  "@csvDelimiterSemicolon": {
-    "description": "Delimiter option: semicolon, the common French bank export separator."
-  },
-  "csvDelimiterComma": "Virgule ( , )",
-  "@csvDelimiterComma": {
-    "description": "Delimiter option: comma."
-  },
-  "csvDelimiterTab": "Tabulation",
-  "@csvDelimiterTab": {
-    "description": "Delimiter option: tab character."
-  },
-  "csvDelimiterPipe": "Barre verticale ( | )",
-  "@csvDelimiterPipe": {
-    "description": "Delimiter option: pipe character."
-  },
-  "csvWizardEncodingLabel": "Encodage",
-  "@csvWizardEncodingLabel": {
-    "description": "Label for the CSV character encoding selector."
-  },
-  "csvWizardDateFormatLabel": "Format de date",
-  "@csvWizardDateFormatLabel": {
-    "description": "Label for the CSV date format selector."
-  },
-  "csvWizardDecimalLabel": "Séparateur décimal",
-  "@csvWizardDecimalLabel": {
-    "description": "Label for the decimal separator control."
-  },
-  "csvDecimalComma": "Virgule ( , )",
-  "@csvDecimalComma": {
-    "description": "Decimal separator option: comma."
-  },
-  "csvDecimalPeriod": "Point ( . )",
-  "@csvDecimalPeriod": {
-    "description": "Decimal separator option: period."
-  },
-  "csvWizardAmountsLabel": "Montants",
-  "@csvWizardAmountsLabel": {
-    "description": "Label for the control choosing how the file encodes amount direction."
-  },
-  "csvAmountStrategySigned": "Signé",
-  "@csvAmountStrategySigned": {
-    "description": "Amount strategy option: a single signed amount column."
-  },
-  "csvAmountStrategyDebitCredit": "Débit / Crédit",
-  "@csvAmountStrategyDebitCredit": {
-    "description": "Amount strategy option: separate debit and credit columns."
-  },
-  "csvWizardHeaderOffsetLabel": "Lignes à ignorer",
-  "@csvWizardHeaderOffsetLabel": {
-    "description": "Label for the count of lines to skip before the header row."
-  },
-  "csvWizardHeaderOffsetHelper": "Avant la ligne d'en-tête.",
-  "@csvWizardHeaderOffsetHelper": {
-    "description": "Helper clarifying that the skipped lines precede the header row."
-  },
-  "csvWizardColumnsHint": "Indiquez le nom de la colonne du fichier (ou son numéro, à partir de 0) pour chaque information.",
-  "@csvWizardColumnsHint": {
-    "description": "Instruction above the column mapping rows in the CSV wizard."
-  },
-  "csvWizardColumnHint": "Nom ou numéro de colonne",
-  "@csvWizardColumnHint": {
-    "description": "Placeholder inside a column mapping input."
-  },
-  "csvWizardColumnOptional": "facultatif",
-  "@csvWizardColumnOptional": {
-    "description": "Marker beside a canonical field that does not have to be mapped."
-  },
-  "csvColumnBookedDate": "Date d'opération",
-  "@csvColumnBookedDate": {
-    "description": "Canonical field name: the date the transaction was booked."
-  },
-  "csvColumnValueDate": "Date de valeur",
-  "@csvColumnValueDate": {
-    "description": "Canonical field name: the value date."
-  },
-  "csvColumnDescription": "Libellé",
-  "@csvColumnDescription": {
-    "description": "Canonical field name: the raw description from the bank."
-  },
-  "csvColumnAmount": "Montant",
-  "@csvColumnAmount": {
-    "description": "Canonical field name: the signed amount."
-  },
-  "csvColumnDebit": "Débit",
-  "@csvColumnDebit": {
-    "description": "Canonical field name: the debit column, used by the debit/credit layout."
-  },
-  "csvColumnCredit": "Crédit",
-  "@csvColumnCredit": {
-    "description": "Canonical field name: the credit column, used by the debit/credit layout."
-  },
-  "csvWizardPreviewTitle": "Aperçu",
-  "@csvWizardPreviewTitle": {
-    "description": "Section label above the live preview of parsed sample rows."
-  },
-  "csvWizardPreviewPending": "Renseignez les colonnes obligatoires pour voir un aperçu.",
-  "@csvWizardPreviewPending": {
-    "description": "Placeholder shown before the mapping is complete enough to preview."
-  },
-  "csvWizardPreviewEmpty": "Aucune ligne lisible avec ce paramétrage.",
-  "@csvWizardPreviewEmpty": {
-    "description": "Shown when the preview parsed the file but found no rows."
-  },
-  "csvPreviewDateHeader": "Date",
-  "@csvPreviewDateHeader": {
-    "description": "Preview table column header for the booked date."
-  },
-  "csvPreviewDescriptionHeader": "Libellé",
-  "@csvPreviewDescriptionHeader": {
-    "description": "Preview table column header for the raw description."
-  },
-  "csvPreviewAmountHeader": "Montant",
-  "@csvPreviewAmountHeader": {
-    "description": "Preview table column header for the parsed amount."
-  },
   "importErrorAccountNotFound": "Compte introuvable.",
   "@importErrorAccountNotFound": {
     "description": "Localized message for the backend's ACCOUNT_NOT_FOUND error code on the imports panel."
@@ -840,14 +667,6 @@
   "importErrorBatchNotFound": "Import introuvable.",
   "@importErrorBatchNotFound": {
     "description": "Localized message for the backend's IMPORT_BATCH_NOT_FOUND error code."
-  },
-  "importErrorTemplateNotFound": "Format CSV introuvable — relancez l'assistant.",
-  "@importErrorTemplateNotFound": {
-    "description": "Localized message for the backend's CSV_TEMPLATE_NOT_FOUND error code."
-  },
-  "importErrorTemplateInvalid": "Ce paramétrage ne correspond pas au fichier — ajustez les colonnes ci-dessus.",
-  "@importErrorTemplateInvalid": {
-    "description": "Localized message for the backend's CSV_TEMPLATE_INVALID and VALIDATION_ERROR codes."
   },
   "importErrorGeneric": "Une erreur est survenue. Veuillez réessayer.",
   "@importErrorGeneric": {
@@ -892,6 +711,50 @@
   "transactionsFilterAllDates": "Toutes les dates",
   "@transactionsFilterAllDates": {
     "description": "Default label on the date range filter pill when no range is chosen."
+  },
+  "transactionsDateRangeTitle": "Période",
+  "@transactionsDateRangeTitle": {
+    "description": "Title of the transactions date range filter modal."
+  },
+  "transactionsDateRangeFromLabel": "Du",
+  "@transactionsDateRangeFromLabel": {
+    "description": "Label of the range's start date field."
+  },
+  "transactionsDateRangeToLabel": "Au",
+  "@transactionsDateRangeToLabel": {
+    "description": "Label of the range's end date field."
+  },
+  "transactionsDateRangeHelp": "Laissez les deux dates vides pour voir toutes les dates.",
+  "@transactionsDateRangeHelp": {
+    "description": "Helper under the range fields explaining how to lift the date filter."
+  },
+  "transactionsDateRangePickFrom": "Choisir la date de début",
+  "@transactionsDateRangePickFrom": {
+    "description": "Tooltip on the calendar button of the range's start date field."
+  },
+  "transactionsDateRangePickTo": "Choisir la date de fin",
+  "@transactionsDateRangePickTo": {
+    "description": "Tooltip on the calendar button of the range's end date field."
+  },
+  "transactionsDateRangeInvalid": "Date invalide.",
+  "@transactionsDateRangeInvalid": {
+    "description": "Validation message when a range date cannot be read in the current locale."
+  },
+  "transactionsDateRangeIncomplete": "Renseignez les deux dates, ou aucune.",
+  "@transactionsDateRangeIncomplete": {
+    "description": "Validation message when only one of the two range dates is filled in."
+  },
+  "transactionsDateRangeOrder": "La date de fin précède la date de début.",
+  "@transactionsDateRangeOrder": {
+    "description": "Validation message when the range's end date is before its start date."
+  },
+  "transactionsDateRangeCancel": "Annuler",
+  "@transactionsDateRangeCancel": {
+    "description": "Cancel button of the date range modal."
+  },
+  "transactionsDateRangeApply": "Appliquer",
+  "@transactionsDateRangeApply": {
+    "description": "Confirm button of the date range modal, applying the chosen range."
   },
   "transactionsPager": "{from}–{to} sur {total}",
   "@transactionsPager": {
@@ -960,6 +823,10 @@
   "transactionErrorNotFound": "Transaction introuvable.",
   "@transactionErrorNotFound": {
     "description": "Localized message for the backend's TRANSACTION_NOT_FOUND error code."
+  },
+  "transactionErrorCategoryInvalid": "Cette catégorie n'est plus disponible.",
+  "@transactionErrorCategoryInvalid": {
+    "description": "Localized message for the backend's CATEGORY_INVALID error code, returned when a transaction is patched with a category the user cannot assign — usually one deleted in another window."
   },
   "transactionErrorValidation": "Certaines informations sont invalides.",
   "@transactionErrorValidation": {
@@ -1287,5 +1154,1903 @@
   "dashboardNextYear": "Année suivante",
   "@dashboardNextYear": {
     "description": "Tooltip on the picker's forward-a-year step button."
+  },
+  "categoriesAddButton": "Nouvelle catégorie",
+  "@categoriesAddButton": {
+    "description": "Top-bar primary button on the categories panel, opening the create-category modal."
+  },
+  "categoriesEmptyTitle": "Aucune catégorie pour l'instant",
+  "@categoriesEmptyTitle": {
+    "description": "Heading of the categories empty state."
+  },
+  "categoriesEmptyBody": "Les catégories classent vos dépenses. Créez-en une pour commencer.",
+  "@categoriesEmptyBody": {
+    "description": "Reassuring line under the categories empty-state heading."
+  },
+  "categoriesRetry": "Réessayer",
+  "@categoriesRetry": {
+    "description": "Retry button shown when the category catalog fails to load."
+  },
+  "categoryBadgeSystem": "Système",
+  "@categoryBadgeSystem": {
+    "description": "Neutral badge on a seeded, read-only category card."
+  },
+  "categoryBadgeCustom": "Personnalisée",
+  "@categoryBadgeCustom": {
+    "description": "Iris-tinted badge on a category the user created."
+  },
+  "categorySystemLockedTooltip": "Catégorie du système : elle ne peut pas être modifiée ni supprimée.",
+  "@categorySystemLockedTooltip": {
+    "description": "Tooltip on the lock glyph of a system category card. States the refusal the API also enforces."
+  },
+  "categoryActionsTooltip": "Actions",
+  "@categoryActionsTooltip": {
+    "description": "Tooltip on the ⋯ menu of a user category card."
+  },
+  "categoryEdit": "Modifier",
+  "@categoryEdit": {
+    "description": "⋯ menu entry opening the edit modal (name, icon, color) of a user category."
+  },
+  "categoryDelete": "Supprimer",
+  "@categoryDelete": {
+    "description": "⋯ menu entry and edit-modal action deleting a user category, and label of the delete confirmation button."
+  },
+  "categoryAddSubcategory": "Sous-catégorie",
+  "@categoryAddSubcategory": {
+    "description": "Dashed ghost chip at the end of a category card's subcategories, drawn after a plus glyph. Opens the create modal with this category preset as the parent."
+  },
+  "categoryRuleCount": "{count, plural, =0{Aucune règle} one{1 règle automatique} other{{count} règles automatiques}}",
+  "@categoryRuleCount": {
+    "description": "Footer of a category card: how many rules target this category or its subcategories, disabled ones included. The zero case is drawn in amber.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "categoryDeleteConfirmTitle": "Supprimer cette catégorie ?",
+  "@categoryDeleteConfirmTitle": {
+    "description": "Title of the delete-category confirmation dialog."
+  },
+  "categoryDeleteConfirmBody": "« {name} » et ses sous-catégories seront supprimées. Les transactions concernées redeviendront non catégorisées.",
+  "@categoryDeleteConfirmBody": {
+    "description": "Body of the delete-category confirmation. Names what else goes with it, since the deletion cascades.",
+    "placeholders": {
+      "name": {
+        "type": "String",
+        "example": "Épargne projet"
+      }
+    }
+  },
+  "categoryFormCreateTitle": "Nouvelle catégorie",
+  "@categoryFormCreateTitle": {
+    "description": "Title of the create-category modal."
+  },
+  "categoryFormEditTitle": "Modifier la catégorie",
+  "@categoryFormEditTitle": {
+    "description": "Title of the edit-category modal."
+  },
+  "categoryFormNameLabel": "Nom",
+  "@categoryFormNameLabel": {
+    "description": "Label of the category name field."
+  },
+  "categoryFormNameHint": "Épargne projet",
+  "@categoryFormNameHint": {
+    "description": "Placeholder example in the category name field."
+  },
+  "categoryFormNameRequired": "Donnez un nom à cette catégorie.",
+  "@categoryFormNameRequired": {
+    "description": "Validation message when the category name is left empty."
+  },
+  "categoryFormKindLabel": "Type",
+  "@categoryFormKindLabel": {
+    "description": "Label of the category kind select."
+  },
+  "categoryFormKindHelper": "Une dépense sort de vos comptes, un revenu y entre, un transfert circule entre eux.",
+  "@categoryFormKindHelper": {
+    "description": "Helper under the category kind select, explaining the three kinds in the user's own terms."
+  },
+  "categoryFormParentLabel": "Catégorie parente",
+  "@categoryFormParentLabel": {
+    "description": "Label of the parent-category select."
+  },
+  "categoryFormParentNone": "Aucune (catégorie principale)",
+  "@categoryFormParentNone": {
+    "description": "Option in the parent select for a top-level category."
+  },
+  "categoryFormIconLabel": "Icône",
+  "@categoryFormIconLabel": {
+    "description": "Label of the category icon select."
+  },
+  "categoryFormColorLabel": "Couleur",
+  "@categoryFormColorLabel": {
+    "description": "Label of the category colour picker."
+  },
+  "categoryFormColorHelper": "La couleur suit la catégorie partout : graphiques, légendes et étiquettes.",
+  "@categoryFormColorHelper": {
+    "description": "Helper under the colour picker, explaining that the hue is reused across the app."
+  },
+  "categoryFormCancel": "Annuler",
+  "@categoryFormCancel": {
+    "description": "Cancel button in the category modal and the delete confirmation."
+  },
+  "categoryFormSave": "Enregistrer",
+  "@categoryFormSave": {
+    "description": "Submit button of the category modal."
+  },
+  "categoryKindExpense": "Dépense",
+  "@categoryKindExpense": {
+    "description": "Category kind: money leaving the user's accounts."
+  },
+  "categoryKindIncome": "Revenu",
+  "@categoryKindIncome": {
+    "description": "Category kind: money arriving in the user's accounts."
+  },
+  "categoryKindTransfer": "Transfert",
+  "@categoryKindTransfer": {
+    "description": "Category kind: money moving between the user's own accounts."
+  },
+  "categoryIconHousing": "Logement",
+  "@categoryIconHousing": {
+    "description": "Icon choice in the category form: house glyph."
+  },
+  "categoryIconFood": "Alimentation",
+  "@categoryIconFood": {
+    "description": "Icon choice in the category form: bowl glyph."
+  },
+  "categoryIconTransport": "Transport",
+  "@categoryIconTransport": {
+    "description": "Icon choice in the category form: car glyph."
+  },
+  "categoryIconLeisure": "Loisirs",
+  "@categoryIconLeisure": {
+    "description": "Icon choice in the category form: star glyph."
+  },
+  "categoryIconSubscriptions": "Abonnements",
+  "@categoryIconSubscriptions": {
+    "description": "Icon choice in the category form: refresh glyph."
+  },
+  "categoryIconHealth": "Santé",
+  "@categoryIconHealth": {
+    "description": "Icon choice in the category form: cross glyph."
+  },
+  "categoryIconIncome": "Revenus",
+  "@categoryIconIncome": {
+    "description": "Icon choice in the category form: up-arrow glyph."
+  },
+  "categoryIconSavings": "Épargne",
+  "@categoryIconSavings": {
+    "description": "Icon choice in the category form: coin glyph."
+  },
+  "categoryIconOther": "Autre",
+  "@categoryIconOther": {
+    "description": "Icon choice in the category form: the neutral fallback glyph."
+  },
+  "categoryErrorNotEditable": "Cette catégorie appartient au système : elle ne peut pas être modifiée ni supprimée.",
+  "@categoryErrorNotEditable": {
+    "description": "Localized message for the backend's CATEGORY_NOT_FOUND code, which is also what a forced edit of a system category returns."
+  },
+  "categoryErrorValidation": "Ces informations ne sont pas valides. Vérifiez le nom et le type.",
+  "@categoryErrorValidation": {
+    "description": "Localized message for a VALIDATION_ERROR on a category write."
+  },
+  "categoryErrorGeneric": "Une erreur est survenue. Veuillez réessayer.",
+  "@categoryErrorGeneric": {
+    "description": "Fallback message for unrecognized or network errors on the categories panel."
+  },
+  "categoriesTabCategories": "Catégories",
+  "@categoriesTabCategories": {
+    "description": "Left segment of the panel's view switch."
+  },
+  "categoriesTabRules": "Règles",
+  "@categoriesTabRules": {
+    "description": "Right segment of the panel's view switch."
+  },
+  "rulesAddButton": "Nouvelle règle",
+  "@rulesAddButton": {
+    "description": "Top-bar primary button while the rules view is showing."
+  },
+  "rulesPriorityNote": "Évaluées dans l'ordre de priorité — une règle ne remplace jamais une catégorie choisie manuellement.",
+  "@rulesPriorityNote": {
+    "description": "Note beside the view switch on the rules view, stating both how rules are ordered and what they will never overwrite."
+  },
+  "rulesApplyButton": "Exécuter les règles",
+  "@rulesApplyButton": {
+    "description": "Secondary action re-running the rules over existing transactions."
+  },
+  "rulesApplyRunning": "Exécution…",
+  "@rulesApplyRunning": {
+    "description": "Label of the run action while the run is in flight."
+  },
+  "rulesApplyToastTitle": "{count, plural, =0{Aucune transaction recatégorisée} one{{count} transaction recatégorisée} other{{count} transactions recatégorisées}}",
+  "@rulesApplyToastTitle": {
+    "description": "First line of the toast after a rule run: how many transactions changed category.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "rulesApplyToastBody": "Vos catégories choisies manuellement n'ont pas été modifiées.",
+  "@rulesApplyToastBody": {
+    "description": "Second line of the rule-run toast. Answers the question the count alone raises."
+  },
+  "rulesApplyFailed": "L'exécution des règles a échoué",
+  "@rulesApplyFailed": {
+    "description": "Toast headline when the rule run itself failed."
+  },
+  "rulesReorderFailed": "L'ordre n'a pas pu être enregistré",
+  "@rulesReorderFailed": {
+    "description": "Toast headline when persisting a drag-reorder failed and the previous order was restored."
+  },
+  "rulesToggleFailed": "La règle n'a pas pu être modifiée",
+  "@rulesToggleFailed": {
+    "description": "Toast headline when enabling or disabling a rule failed and the switch was put back."
+  },
+  "rulesFilterClear": "Afficher toutes les règles",
+  "@rulesFilterClear": {
+    "description": "Tooltip on the ✕ beside the category filter chip in the rules view, opened from a category card's footer."
+  },
+  "rulesFilterEmpty": "Aucune règle ne cible cette catégorie.",
+  "@rulesFilterEmpty": {
+    "description": "Shown inside the rules card when the category filter leaves no rule."
+  },
+  "rulesRetry": "Réessayer",
+  "@rulesRetry": {
+    "description": "Retry button shown when the rules list fails to load."
+  },
+  "rulesEmptyTitle": "Automatisez votre classement",
+  "@rulesEmptyTitle": {
+    "description": "Heading of the rules empty state."
+  },
+  "rulesEmptyBody": "Une règle reconnaît un libellé — « CARREFOUR » — et attribue sa catégorie à chaque transaction correspondante, aujourd'hui et aux prochains imports.",
+  "@rulesEmptyBody": {
+    "description": "Body of the rules empty state, explaining what a rule does before asking the user to write one."
+  },
+  "ruleToggleSemantics": "Activer la règle",
+  "@ruleToggleSemantics": {
+    "description": "Accessible label of the enable switch on a rule row."
+  },
+  "ruleTargetMissing": "Catégorie introuvable",
+  "@ruleTargetMissing": {
+    "description": "Chip shown when a rule points at a category that no longer exists."
+  },
+  "ruleFieldDescription": "Libellé",
+  "@ruleFieldDescription": {
+    "description": "Rule match field: the cleaned transaction description."
+  },
+  "ruleFieldMerchant": "Commerçant",
+  "@ruleFieldMerchant": {
+    "description": "Rule match field: the extracted merchant name."
+  },
+  "ruleFieldAmount": "Montant",
+  "@ruleFieldAmount": {
+    "description": "Rule match field: the transaction amount."
+  },
+  "ruleConditionContains": "contient",
+  "@ruleConditionContains": {
+    "description": "Rule condition badge: substring match."
+  },
+  "ruleConditionEquals": "égal à",
+  "@ruleConditionEquals": {
+    "description": "Rule condition badge: exact match."
+  },
+  "ruleConditionRegex": "regex",
+  "@ruleConditionRegex": {
+    "description": "Rule condition badge: regular expression match."
+  },
+  "ruleConditionRange": "plage",
+  "@ruleConditionRange": {
+    "description": "Rule condition badge: amount range match."
+  },
+  "ruleFormCreateTitle": "Nouvelle règle",
+  "@ruleFormCreateTitle": {
+    "description": "Title of the rule editor when creating."
+  },
+  "ruleFormEditTitle": "Modifier la règle",
+  "@ruleFormEditTitle": {
+    "description": "Title of the rule editor when editing."
+  },
+  "ruleFormFieldLabel": "Champ",
+  "@ruleFormFieldLabel": {
+    "description": "Label of the rule editor's match-field select."
+  },
+  "ruleFormConditionLabel": "Condition",
+  "@ruleFormConditionLabel": {
+    "description": "Label of the rule editor's condition select."
+  },
+  "ruleFormPriorityLabel": "Priorité",
+  "@ruleFormPriorityLabel": {
+    "description": "Label of the rule editor's priority field. Lower runs first."
+  },
+  "ruleFormPriorityInvalid": "Indiquez une priorité d'au moins 1.",
+  "@ruleFormPriorityInvalid": {
+    "description": "Validation message for a missing or non-positive priority."
+  },
+  "ruleFormPatternLabel": "Motif",
+  "@ruleFormPatternLabel": {
+    "description": "Label of the rule editor's pattern field."
+  },
+  "ruleFormPatternRequired": "Indiquez ce que la règle doit reconnaître.",
+  "@ruleFormPatternRequired": {
+    "description": "Validation message when the pattern is left empty."
+  },
+  "rulePatternHelperText": "Recherche insensible à la casse dans le champ choisi.",
+  "@rulePatternHelperText": {
+    "description": "Helper under the pattern field for the contains and equals conditions."
+  },
+  "rulePatternHelperRegex": "Expression régulière, sensible à la casse. Testée en direct ci-dessous.",
+  "@rulePatternHelperRegex": {
+    "description": "Helper under the pattern field for the regex condition."
+  },
+  "rulePatternHelperRange": "Plage de montants en centimes, « min:max ». Laissez un côté vide pour une borne ouverte ; les dépenses sont négatives.",
+  "@rulePatternHelperRange": {
+    "description": "Helper under the pattern field for the range condition. Names the unit and the sign, both of which the user cannot guess."
+  },
+  "rulePatternHintText": "CARREFOUR",
+  "@rulePatternHintText": {
+    "description": "Placeholder example in the pattern field for a text condition."
+  },
+  "rulePatternHintRegex": "^CB .*CARREFOUR",
+  "@rulePatternHintRegex": {
+    "description": "Placeholder example in the pattern field for a regex condition."
+  },
+  "rulePatternHintRange": "-10000:-5000",
+  "@rulePatternHintRange": {
+    "description": "Placeholder example in the pattern field for a range condition."
+  },
+  "ruleFormCategoryLabel": "Catégorie attribuée",
+  "@ruleFormCategoryLabel": {
+    "description": "Label of the rule editor's target-category select."
+  },
+  "ruleFormCategoryNone": "Choisir une catégorie",
+  "@ruleFormCategoryNone": {
+    "description": "Empty option of the target-category select."
+  },
+  "ruleFormCategoryRequired": "Choisissez la catégorie que cette règle attribue.",
+  "@ruleFormCategoryRequired": {
+    "description": "Error shown when saving a rule with no target category."
+  },
+  "ruleFormEnabledLabel": "Règle active",
+  "@ruleFormEnabledLabel": {
+    "description": "Label beside the rule editor's enable switch."
+  },
+  "ruleFormCancel": "Annuler",
+  "@ruleFormCancel": {
+    "description": "Cancel button of the rule editor."
+  },
+  "ruleFormSave": "Enregistrer",
+  "@ruleFormSave": {
+    "description": "Submit button of the rule editor."
+  },
+  "ruleFormDelete": "Supprimer",
+  "@ruleFormDelete": {
+    "description": "Delete action in the rule editor's footer, shown only when editing."
+  },
+  "rulePreviewLoading": "Recherche des transactions correspondantes…",
+  "@rulePreviewLoading": {
+    "description": "Info banner shown while the match preview is in flight."
+  },
+  "rulePreviewCount": "{count, plural, =0{Ne correspond à aucune transaction existante.} one{Correspond à {count} transaction existante.} other{Correspond à {count} transactions existantes.}}",
+  "@rulePreviewCount": {
+    "description": "Match-preview banner when the backend returned no example to quote.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "rulePreviewCountWithSample": "{count, plural, one{Correspond à {count} transaction existante — « {sample} » du {date}.} other{Correspond à {count} transactions existantes — dont « {sample} » du {date}.}}",
+  "@rulePreviewCountWithSample": {
+    "description": "Match-preview banner naming one of the matched transactions, so the user can tell whether the rule caught what they meant.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "sample": {
+        "type": "String",
+        "example": "CB CARREFOUR PARIS 15"
+      },
+      "date": {
+        "type": "String",
+        "example": "14/05/2026"
+      }
+    }
+  },
+  "ruleErrorPatternInvalid": "Ce motif n'est pas une expression régulière valide.",
+  "@ruleErrorPatternInvalid": {
+    "description": "Localized message for RULE_PATTERN_INVALID. Rendered on the pattern field, never as a match count of zero."
+  },
+  "ruleErrorNotFound": "Cette règle n'existe plus.",
+  "@ruleErrorNotFound": {
+    "description": "Localized message for the backend's RULE_NOT_FOUND code."
+  },
+  "ruleErrorCategoryNotFound": "La catégorie visée n'existe plus.",
+  "@ruleErrorCategoryNotFound": {
+    "description": "Localized message when a rule targets a category the backend can no longer resolve."
+  },
+  "ruleErrorValidation": "Ces informations ne sont pas valides. Vérifiez le motif et la priorité.",
+  "@ruleErrorValidation": {
+    "description": "Localized message for a VALIDATION_ERROR on a rule write."
+  },
+  "ruleErrorGeneric": "Une erreur est survenue. Veuillez réessayer.",
+  "@ruleErrorGeneric": {
+    "description": "Fallback message for unrecognized or network errors on the rules view."
+  },
+  "rulePackMenuTooltip": "Importer / Exporter des règles",
+  "@rulePackMenuTooltip": {
+    "description": "Tooltip on the rules view's pack menu."
+  },
+  "rulePackImportFile": "Importer un fichier…",
+  "@rulePackImportFile": {
+    "description": "Pack menu entry opening the file picker."
+  },
+  "rulePackImportBuiltin": "Importer « {name} »",
+  "@rulePackImportBuiltin": {
+    "description": "Pack menu entry importing one of the packs bundled with the app.",
+    "placeholders": {
+      "name": {
+        "type": "String",
+        "example": "Commerçants français"
+      }
+    }
+  },
+  "rulePackExportAction": "Exporter mes règles…",
+  "@rulePackExportAction": {
+    "description": "Pack menu entry opening the export review sheet."
+  },
+  "rulePackCancel": "Annuler",
+  "@rulePackCancel": {
+    "description": "Cancel button on the pack import and export sheets."
+  },
+  "rulePackClose": "Fermer",
+  "@rulePackClose": {
+    "description": "Button closing the refused-pack explanation."
+  },
+  "rulePackRefusedTitle": "Ce fichier n'a pas été accepté",
+  "@rulePackRefusedTitle": {
+    "description": "Title of the dialog explaining why a pack was refused."
+  },
+  "rulePackRefusedMalformed": "Ce fichier n'est pas un pack de règles FinStride. Attendu : un fichier JSON avec un nom, une version de format et une liste de règles.",
+  "@rulePackRefusedMalformed": {
+    "description": "Refusal reason: the file isn't a pack-shaped JSON document."
+  },
+  "rulePackRefusedVersion": "Ce pack utilise une version de format que cette version de FinStride ne lit pas. Elle lit la version {version}. Un pack partiellement compris perdrait silencieusement des règles, il est donc refusé en entier.",
+  "@rulePackRefusedVersion": {
+    "description": "Refusal reason: unsupported format_version. Says why the pack is refused outright rather than read best-effort.",
+    "placeholders": {
+      "version": {
+        "type": "int"
+      }
+    }
+  },
+  "rulePackRefusedRegex": "Ce pack contient une règle « regex ». Les expressions régulières ne sont pas acceptées dans un pack partagé : une expression venue d'un fichier tiers peut bloquer votre machine. Utilisez « contient », « égal à » ou « plage ».",
+  "@rulePackRefusedRegex": {
+    "description": "Refusal reason: the pack contains a regex rule. Names the risk, and the three types that are accepted."
+  },
+  "rulePackWouldMatch": "{count, plural, =0{Ce pack ne catégoriserait aucune de vos transactions non catégorisées.} one{Ce pack catégoriserait {count} de vos transactions non catégorisées.} other{Ce pack catégoriserait {count} de vos transactions non catégorisées.}}",
+  "@rulePackWouldMatch": {
+    "description": "Headline of the import confirmation. The figure the backend reports covers the user's currently-uncategorized transactions.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "rulePackRuleCount": "Règles dans le pack",
+  "@rulePackRuleCount": {
+    "description": "Report line: how many rules the pack holds."
+  },
+  "rulePackNewCount": "Nouvelles règles",
+  "@rulePackNewCount": {
+    "description": "Report line: how many would actually be created."
+  },
+  "rulePackDuplicateCount": "Doublons ignorés",
+  "@rulePackDuplicateCount": {
+    "description": "Report line: how many are already among the user's rules."
+  },
+  "rulePackUnresolvedCount": "Catégories introuvables",
+  "@rulePackUnresolvedCount": {
+    "description": "Report line: how many rules point at a category this install doesn't have."
+  },
+  "rulePackUnresolvedDetail": "Ces règles seront ignorées : {keys}",
+  "@rulePackUnresolvedDetail": {
+    "description": "Detail under the unresolved count, naming the category keys that could not be resolved.",
+    "placeholders": {
+      "keys": {
+        "type": "String",
+        "example": "category.pets, category.hobbies"
+      }
+    }
+  },
+  "rulePackSamplesLabel": "Exemples de transactions concernées",
+  "@rulePackSamplesLabel": {
+    "description": "Section label above the sample transactions in the import report."
+  },
+  "rulePackApplyNowLabel": "Appliquer les règles à mes transactions existantes après l'import",
+  "@rulePackApplyNowLabel": {
+    "description": "Label beside the apply-now switch on the import sheet."
+  },
+  "rulePackImportConfirm": "Importer",
+  "@rulePackImportConfirm": {
+    "description": "Confirm button on the import sheet."
+  },
+  "rulePackImportedTitle": "{count, plural, =0{Aucune règle importée} one{{count} règle importée} other{{count} règles importées}}",
+  "@rulePackImportedTitle": {
+    "description": "First line of the toast after a pack import.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "rulePackImportedBody": "{count, plural, =0{Aucune transaction n'a changé de catégorie.} one{{count} transaction recatégorisée.} other{{count} transactions recatégorisées.}}",
+  "@rulePackImportedBody": {
+    "description": "Second line of the import toast when the rules were applied straight away.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "rulePackImportFailed": "L'import a échoué",
+  "@rulePackImportFailed": {
+    "description": "Toast headline when a pack import failed."
+  },
+  "rulePackExportTitle": "Exporter mes règles",
+  "@rulePackExportTitle": {
+    "description": "Title of the export review sheet."
+  },
+  "rulePackExportPrivacyNotice": "Relisez avant d'enregistrer : un motif peut contenir des informations personnelles — le nom de votre propriétaire, « VIR SALAIRE DUPONT ».",
+  "@rulePackExportPrivacyNotice": {
+    "description": "Warning at the top of the export sheet. Names a concrete example, because the abstract warning is the one nobody reads."
+  },
+  "rulePackExportContents": "{count, plural, =0{Contenu du fichier — aucune règle} one{Contenu du fichier — {count} règle} other{Contenu du fichier — {count} règles}}",
+  "@rulePackExportContents": {
+    "description": "Section label above the verbatim pack contents in the export sheet.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "rulePackOmittedLabel": "{count, plural, one{{count} règle non exportable} other{{count} règles non exportables}}",
+  "@rulePackOmittedLabel": {
+    "description": "Section label above the rules an export could not carry.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "rulePackOmittedRegex": "« {pattern} » — les règles regex ne peuvent pas figurer dans un pack.",
+  "@rulePackOmittedRegex": {
+    "description": "Explains one omitted rule: it uses a regex, which no importer accepts.",
+    "placeholders": {
+      "pattern": {
+        "type": "String",
+        "example": "^CB .*CARREFOUR"
+      }
+    }
+  },
+  "rulePackOmittedUserCategory": "« {pattern} » — vise une catégorie personnalisée, qui n'a pas d'identifiant partageable.",
+  "@rulePackOmittedUserCategory": {
+    "description": "Explains one omitted rule: it targets a user-defined category, which has no portable key.",
+    "placeholders": {
+      "pattern": {
+        "type": "String",
+        "example": "VIR EPARGNE"
+      }
+    }
+  },
+  "rulePackExportSave": "Enregistrer",
+  "@rulePackExportSave": {
+    "description": "Save button on the export sheet."
+  },
+  "rulePackExportedTitle": "Pack enregistré",
+  "@rulePackExportedTitle": {
+    "description": "First line of the toast after an export is written to disk."
+  },
+  "rulePackExportFailed": "L'export a échoué",
+  "@rulePackExportFailed": {
+    "description": "Toast headline when preparing or writing an export failed."
+  },
+  "rulePackStartWith": "Commencer avec « {name} » ({count} règles)",
+  "@rulePackStartWith": {
+    "description": "CTA on the rules empty state offering the bundled pack, named and sized.",
+    "placeholders": {
+      "name": {
+        "type": "String",
+        "example": "Commerçants français"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "rulePackStartWithHelper": "Vous verrez ce que le pack ferait avant de l'importer.",
+  "@rulePackStartWithHelper": {
+    "description": "Reassurance under the bundled-pack CTA: the preview step always comes first."
+  },
+  "reviewQueueAiSubtitle": "{count, plural, =0{Aucune de ces transactions n'a reçu de proposition de l'IA locale — confirmez ou corrigez, rien n'est classé sans vous.} one{L'IA locale propose une catégorie pour l'une d'entre elles — confirmez ou corrigez, rien n'est classé sans vous.} other{L'IA locale propose une catégorie pour {count} d'entre elles — confirmez ou corrigez, rien n'est classé sans vous.}}",
+  "@reviewQueueAiSubtitle": {
+    "description": "Subtext on the review queue's header card when local AI is active, counting the rows it proposed a category for.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "reviewQueueProgress": "{resolved}/{total} · {percent}",
+  "@reviewQueueProgress": {
+    "description": "Resolved-progress label on the review queue's header card: rows already dealt with, out of the queue's size this session.",
+    "placeholders": {
+      "resolved": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      },
+      "percent": {
+        "type": "double",
+        "format": "percentPattern",
+        "optionalParameters": {
+          "decimalDigits": 0
+        }
+      }
+    }
+  },
+  "reviewAiInvitation": "Activez l'IA locale pour classer automatiquement les transactions que vos règles n'ont pas reconnues.",
+  "@reviewAiInvitation": {
+    "description": "Calm invitation at the foot of the review queue's header card when AI is off or the runtime is unreachable. The only place in the app that mentions it."
+  },
+  "reviewAiInvitationLink": "Paramètres",
+  "@reviewAiInvitationLink": {
+    "description": "Link at the end of the AI invitation, opening the settings panel."
+  },
+  "reviewConfidence": "Confiance {confidence}",
+  "@reviewConfidence": {
+    "description": "Caption beside a proposal's confidence gauge. Always a percentage, never the raw [0,1] value the API returns.",
+    "placeholders": {
+      "confidence": {
+        "type": "double",
+        "format": "percentPattern",
+        "optionalParameters": {
+          "decimalDigits": 0
+        }
+      }
+    }
+  },
+  "reviewConfirm": "Confirmer",
+  "@reviewConfirm": {
+    "description": "Row action accepting the model's proposed category as-is."
+  },
+  "reviewCorrect": "Corriger",
+  "@reviewCorrect": {
+    "description": "Row action opening the category picker to replace the model's proposal."
+  },
+  "reviewNoProposal": "— aucune proposition",
+  "@reviewNoProposal": {
+    "description": "Italic note on a review row the model made no proposal for."
+  },
+  "reviewChooseCategory": "Choisir une catégorie",
+  "@reviewChooseCategory": {
+    "description": "Link on a review row with no proposal, opening the category picker."
+  },
+  "alwaysRuleSubtitle": "Une règle classe ces transactions sans IA, à chaque import — pré-remplie depuis « {label} ».",
+  "@alwaysRuleSubtitle": {
+    "description": "Subtext under the always-categorize modal's title, naming the transaction the rule was derived from.",
+    "placeholders": {
+      "label": {
+        "type": "String",
+        "example": "PRLV SEPA ASSUR MAIF"
+      }
+    }
+  },
+  "alwaysRuleCategoryLabel": "Catégorie cible",
+  "@alwaysRuleCategoryLabel": {
+    "description": "Label of the always-categorize modal's target-category select."
+  },
+  "alwaysRuleApplyExisting": "Appliquer aux transactions existantes",
+  "@alwaysRuleApplyExisting": {
+    "description": "Checkbox in the always-categorize modal: re-run the new rule over transactions already imported."
+  },
+  "alwaysRuleSubmit": "Créer la règle",
+  "@alwaysRuleSubmit": {
+    "description": "Confirm button of the always-categorize modal."
+  },
+  "alwaysRuleCreatedTitle": "Règle créée",
+  "@alwaysRuleCreatedTitle": {
+    "description": "Success toast headline after a rule was created from a correction."
+  },
+  "alwaysRuleCreatedBody": "{count, plural, =0{Aucune autre transaction n'a changé de catégorie.} one{{count} transaction recatégorisée.} other{{count} transactions recatégorisées.}}",
+  "@alwaysRuleCreatedBody": {
+    "description": "Success toast subtext after a rule was created from a correction, counting the other rows it moved.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "alwaysRuleSuggestionFailed": "Impossible de pré-remplir la règle. Renseignez le motif vous-même.",
+  "@alwaysRuleSuggestionFailed": {
+    "description": "Shown in the always-categorize modal when the server-side pre-fill could not be fetched — the form stays usable."
+  },
+  "reviewQueueRunAction": "Catégoriser avec l'IA",
+  "@reviewQueueRunAction": {
+    "description": "Action on the review queue's header card that starts a local-AI categorization run over the pending rows."
+  },
+  "runBannerRunning": "{total, plural, one{Catégorisation en cours — {processed} sur {total} transaction} other{Catégorisation en cours — {processed} sur {total} transactions}}",
+  "@runBannerRunning": {
+    "description": "Headline of the banner that replaces the review queue's header card while a run is classifying.",
+    "placeholders": {
+      "processed": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "runBannerRunningDetail": "{assigned, plural, one{{assigned} classée · {deferred} à vérifier · le panneau reste utilisable} other{{assigned} classées · {deferred} à vérifier · le panneau reste utilisable}}",
+  "@runBannerRunningDetail": {
+    "description": "Sub-line under the running banner: what the run has settled, what it has left for the user, and the reassurance that nothing is blocked.",
+    "placeholders": {
+      "assigned": {
+        "type": "int"
+      },
+      "deferred": {
+        "type": "int"
+      }
+    }
+  },
+  "runBannerCancel": "Annuler",
+  "@runBannerCancel": {
+    "description": "Cancels the categorization run in flight. The executor stops after the batch it is on."
+  },
+  "runBannerPartial": "{count, plural, one{Catégorisation terminée — {count} transaction n'a pas pu être analysée.} other{Catégorisation terminée — {count} transactions n'ont pas pu être analysées.}}",
+  "@runBannerPartial": {
+    "description": "Dismissible amber banner after a run that ended `partial`. A report, not an error wall.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "runBannerPartialAction": "Voir",
+  "@runBannerPartialAction": {
+    "description": "Link on the partial-run banner, showing the transactions the run could not analyse."
+  },
+  "runBannerFailed": "La catégorisation n'a pas pu s'exécuter.",
+  "@runBannerFailed": {
+    "description": "Banner after a run that ended `failed` — reported plainly; the queue stays fully usable."
+  },
+  "runBannerDismiss": "Fermer",
+  "@runBannerDismiss": {
+    "description": "Accessible label of the × that dismisses a finished-run banner."
+  },
+  "runStartFailed": "Impossible de lancer la catégorisation pour le moment.",
+  "@runStartFailed": {
+    "description": "Shown when starting or cancelling a run failed. The queue is unaffected."
+  },
+  "settingsAiTitle": "IA locale",
+  "@settingsAiTitle": {
+    "description": "Title of the local-AI card in the settings Données tab."
+  },
+  "settingsAiSubtitle": "Activer la catégorisation par IA",
+  "@settingsAiSubtitle": {
+    "description": "Sub-line under the card title, naming what the toggle beside it does."
+  },
+  "settingsAiToggleLabel": "Catégorisation par IA",
+  "@settingsAiToggleLabel": {
+    "description": "Accessible label of the card's opt-in toggle."
+  },
+  "settingsAiPrivacy": "Les descriptions de vos transactions sont envoyées à un modèle qui s'exécute sur cet ordinateur. Rien ne quitte votre machine.",
+  "@settingsAiPrivacy": {
+    "description": "The card's privacy callout — its centerpiece. Visible whenever the card is, whether or not AI is enabled."
+  },
+  "settingsAiBaseUrlLabel": "Adresse du moteur",
+  "@settingsAiBaseUrlLabel": {
+    "description": "Label of the inference base URL field."
+  },
+  "settingsAiBaseUrlHelp": "Adresse locale uniquement — 127.0.0.1 ou localhost.",
+  "@settingsAiBaseUrlHelp": {
+    "description": "Helper under the engine address field, stating the loopback-only rule."
+  },
+  "settingsAiBaseUrlRejected": "Adresse refusée : le moteur doit s'exécuter sur cet ordinateur (127.0.0.1 ou localhost). Une adresse distante enverrait les descriptions de vos transactions hors de votre machine.",
+  "@settingsAiBaseUrlRejected": {
+    "description": "Inline validation shown on the address field when the backend refuses a non-loopback URL (422). States why it was refused, not only that it was."
+  },
+  "settingsAiModelLabel": "Modèle",
+  "@settingsAiModelLabel": {
+    "description": "Label of the model tag field."
+  },
+  "settingsAiModelHelp": "Liste fournie par le moteur — saisie manuelle possible.",
+  "@settingsAiModelHelp": {
+    "description": "Helper under the model field: the list comes from the engine, but any tag can be typed."
+  },
+  "settingsAiModelUnavailable": "Aucun modèle — moteur injoignable.",
+  "@settingsAiModelUnavailable": {
+    "description": "Helper under the model field when no engine answered, where the field degrades to a dashed read-only dash."
+  },
+  "settingsAiModelChoose": "Choisir un modèle",
+  "@settingsAiModelChoose": {
+    "description": "Accessible label of the control opening the list of models the engine reported."
+  },
+  "settingsAiThresholdLabel": "Seuil de confiance — {threshold}",
+  "@settingsAiThresholdLabel": {
+    "description": "Label above the threshold slider, carrying its live percentage. Only this label is a percentage — the stored value is the [0,1] real the API defines.",
+    "placeholders": {
+      "threshold": {
+        "type": "double",
+        "format": "percentPattern",
+        "optionalParameters": {
+          "decimalDigits": 0
+        }
+      }
+    }
+  },
+  "settingsAiThresholdHelp": "En dessous de ce seuil, la transaction vous est proposée pour vérification plutôt que classée automatiquement.",
+  "@settingsAiThresholdHelp": {
+    "description": "Helper under the threshold slider, stating what the threshold decides."
+  },
+  "settingsAiStatusConnected": "{count, plural, =0{Connecté — aucun modèle disponible} =1{Connecté — 1 modèle disponible} other{Connecté — {count} modèles disponibles}}",
+  "@settingsAiStatusConnected": {
+    "description": "Status row when the runtime answered, with the number of models it reported.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "settingsAiStatusUnreachable": "Aucun moteur détecté à cette adresse.",
+  "@settingsAiStatusUnreachable": {
+    "description": "Status row when nothing answered at the configured address."
+  },
+  "settingsAiStatusDisabled": "Catégorisation par IA désactivée.",
+  "@settingsAiStatusDisabled": {
+    "description": "Status row while the user has not opted in. The connection test stays available so an engine can be checked before opting in."
+  },
+  "settingsAiLearnMore": "En savoir plus",
+  "@settingsAiLearnMore": {
+    "description": "Link beside the no-engine status, opening the local runtime's download page in the browser."
+  },
+  "settingsAiTest": "Tester la connexion",
+  "@settingsAiTest": {
+    "description": "Button that probes the configured runtime."
+  },
+  "settingsAiTesting": "Test en cours…",
+  "@settingsAiTesting": {
+    "description": "Label the connection-test button takes while its probe is in flight."
+  },
+  "settingsAiLoadFailed": "Impossible de charger vos paramètres pour le moment.",
+  "@settingsAiLoadFailed": {
+    "description": "Shown in place of the local-AI card when reading the settings failed."
+  },
+  "settingsAiRetry": "Réessayer",
+  "@settingsAiRetry": {
+    "description": "Retry action on the local-AI card's error state."
+  },
+  "settingsBackupTitle": "Sauvegarde et restauration",
+  "@settingsBackupTitle": {
+    "description": "Title of the backup card in Settings › Données."
+  },
+  "settingsBackupSubtitle": "Exportez toutes vos données dans un fichier que vous pourrez réimporter.",
+  "@settingsBackupSubtitle": {
+    "description": "Line under the backup card's title."
+  },
+  "settingsBackupExportLabel": "Exporter toutes les données",
+  "@settingsBackupExportLabel": {
+    "description": "Label of the export row on the backup card."
+  },
+  "settingsBackupExportCaption": "Fichier .finstride — comptes, transactions, catégories, règles, objectifs, paramètres.",
+  "@settingsBackupExportCaption": {
+    "description": "Caption under the export row's label: what the file contains."
+  },
+  "settingsBackupExportPreparing": "Préparation de l'archive…",
+  "@settingsBackupExportPreparing": {
+    "description": "Replaces the export caption while the archive is being built."
+  },
+  "settingsBackupExport": "Exporter",
+  "@settingsBackupExport": {
+    "description": "Primary button that exports a full backup."
+  },
+  "settingsBackupLast": "Dernière sauvegarde : {when}",
+  "@settingsBackupLast": {
+    "description": "Line under the export row with the time of the latest backup.",
+    "placeholders": {
+      "when": {
+        "type": "String",
+        "example": "11/09/2026 à 14:32"
+      }
+    }
+  },
+  "settingsBackupNone": "Aucune sauvegarde pour l'instant.",
+  "@settingsBackupNone": {
+    "description": "Shown under the export row when the user has never exported a backup."
+  },
+  "settingsBackupDateTime": "{date} à {time}",
+  "@settingsBackupDateTime": {
+    "description": "A backup timestamp: a locale-formatted date then time.",
+    "placeholders": {
+      "date": {
+        "type": "String",
+        "example": "11/09/2026"
+      },
+      "time": {
+        "type": "String",
+        "example": "14:32"
+      }
+    }
+  },
+  "settingsBackupPrivacy": "Le fichier n'est pas chiffré. Conservez-le en lieu sûr — il contient tout votre historique financier.",
+  "@settingsBackupPrivacy": {
+    "description": "Lock callout on the backup card warning that the archive is unencrypted."
+  },
+  "settingsBackupRestoreTitle": "Restaurer une sauvegarde",
+  "@settingsBackupRestoreTitle": {
+    "description": "Label of the restore row on the backup card."
+  },
+  "settingsBackupRestoreSubtitle": "Remplace toutes les données actuelles.",
+  "@settingsBackupRestoreSubtitle": {
+    "description": "Line under the restore row's label."
+  },
+  "settingsBackupRestoreButton": "Importer un fichier…",
+  "@settingsBackupRestoreButton": {
+    "description": "Secondary button that opens the file picker to restore a backup."
+  },
+  "settingsBackupRestoreFailedLead": "Restauration impossible.",
+  "@settingsBackupRestoreFailedLead": {
+    "description": "Bold lead of the error banner shown when a chosen backup cannot be restored."
+  },
+  "settingsBackupErrorTooNew": "Ce fichier provient d'une version plus récente de FinStride. Mettez l'application à jour pour le restaurer.",
+  "@settingsBackupErrorTooNew": {
+    "description": "Restore refused: the archive was written by a newer app version (BACKUP_TOO_NEW)."
+  },
+  "settingsBackupErrorInvalid": "Ce fichier n'est pas une sauvegarde FinStride valide, ou il est endommagé.",
+  "@settingsBackupErrorInvalid": {
+    "description": "Restore refused: not a FinStride archive or corrupted (BACKUP_INVALID)."
+  },
+  "settingsBackupErrorCurrency": "Cette sauvegarde utilise une autre devise que votre compte.",
+  "@settingsBackupErrorCurrency": {
+    "description": "Restore refused: the archive's currency differs from the user's (BACKUP_CURRENCY_MISMATCH)."
+  },
+  "settingsBackupErrorRunActive": "Une catégorisation est en cours. Attendez qu'elle se termine, puis réessayez.",
+  "@settingsBackupErrorRunActive": {
+    "description": "Restore refused while a categorization run is in flight (BACKUP_RUN_ACTIVE)."
+  },
+  "settingsBackupErrorConflict": "Cette sauvegarde appartient à un autre compte présent sur cet ordinateur.",
+  "@settingsBackupErrorConflict": {
+    "description": "Restore refused: its rows belong to another account still in this database (BACKUP_CONFLICT)."
+  },
+  "settingsBackupErrorUnknown": "La restauration a échoué. Vos données n'ont pas été modifiées.",
+  "@settingsBackupErrorUnknown": {
+    "description": "Restore failed for any other reason; nothing was changed."
+  },
+  "settingsBackupExported": "Sauvegarde enregistrée — {transactionCount, plural, one{{transactions} transaction} other{{transactions} transactions}}, {accountCount, plural, one{{accounts} compte} other{{accounts} comptes}}.",
+  "@settingsBackupExported": {
+    "description": "Toast after a backup was written. The String placeholders are the locale-formatted counts.",
+    "placeholders": {
+      "transactionCount": {
+        "type": "int"
+      },
+      "transactions": {
+        "type": "String",
+        "example": "1 284"
+      },
+      "accountCount": {
+        "type": "int"
+      },
+      "accounts": {
+        "type": "String",
+        "example": "4"
+      }
+    }
+  },
+  "settingsBackupExportFailed": "L'export a échoué. Réessayez.",
+  "@settingsBackupExportFailed": {
+    "description": "Error toast when building or writing the backup failed."
+  },
+  "settingsBackupConfirmTitle": "Restaurer cette sauvegarde ?",
+  "@settingsBackupConfirmTitle": {
+    "description": "Title of the restore confirmation modal."
+  },
+  "settingsBackupConfirmFile": "Fichier sélectionné :",
+  "@settingsBackupConfirmFile": {
+    "description": "Subtitle lead of the restore modal, followed by the file name."
+  },
+  "settingsBackupConfirmExportedAt": "Exporté le",
+  "@settingsBackupConfirmExportedAt": {
+    "description": "Summary row: when the backup was exported."
+  },
+  "settingsBackupConfirmVersion": "Version de l'application",
+  "@settingsBackupConfirmVersion": {
+    "description": "Summary row: the app version that wrote the backup."
+  },
+  "settingsBackupConfirmAccounts": "Comptes",
+  "@settingsBackupConfirmAccounts": {
+    "description": "Summary row: number of accounts in the backup."
+  },
+  "settingsBackupConfirmTransactions": "Transactions",
+  "@settingsBackupConfirmTransactions": {
+    "description": "Summary row: number of transactions in the backup."
+  },
+  "settingsBackupConfirmCategories": "Catégories",
+  "@settingsBackupConfirmCategories": {
+    "description": "Summary row: number of user categories in the backup."
+  },
+  "settingsBackupConfirmRules": "Règles",
+  "@settingsBackupConfirmRules": {
+    "description": "Summary row: number of categorization rules in the backup."
+  },
+  "settingsBackupConfirmSubscriptions": "Abonnements",
+  "@settingsBackupConfirmSubscriptions": {
+    "description": "Summary row: number of recurring series in the backup."
+  },
+  "settingsBackupConfirmGoals": "Objectifs",
+  "@settingsBackupConfirmGoals": {
+    "description": "Summary row: number of savings goals in the backup."
+  },
+  "settingsBackupConfirmWarning": "Toutes vos données actuelles seront remplacées. Exportez-les d'abord si besoin.",
+  "@settingsBackupConfirmWarning": {
+    "description": "Warning callout in the restore modal."
+  },
+  "settingsBackupCancel": "Annuler",
+  "@settingsBackupCancel": {
+    "description": "Dismisses the restore modal without changing anything."
+  },
+  "settingsBackupReplace": "Remplacer mes données",
+  "@settingsBackupReplace": {
+    "description": "Destructive confirm button of the restore modal."
+  },
+  "settingsBackupRestored": "Sauvegarde restaurée",
+  "@settingsBackupRestored": {
+    "description": "Toast after a restore completed."
+  },
+  "navSubscriptions": "Récurrents",
+  "@navSubscriptions": {
+    "description": "Sidebar entry for the recurring payments panel, third in the Gestion group."
+  },
+  "navSubscriptionsSubtitle": "Vos paiements récurrents, détectés automatiquement",
+  "@navSubscriptionsSubtitle": {
+    "description": "Top-bar descriptor under the recurring payments panel title."
+  },
+  "subscriptionsDetect": "Détecter",
+  "@subscriptionsDetect": {
+    "description": "Secondary top-bar button re-running detection over the imported ledger."
+  },
+  "subscriptionsDetectRunning": "Détection…",
+  "@subscriptionsDetectRunning": {
+    "description": "Label the detect button takes while a pass is in flight."
+  },
+  "subscriptionsAdd": "Nouveau paiement récurrent",
+  "@subscriptionsAdd": {
+    "description": "Primary top-bar button opening the manual-creation modal."
+  },
+  "subscriptionsDetectResult": "{created, plural, =0{Aucun nouveau paiement récurrent détecté} =1{1 nouveau paiement récurrent détecté} other{{created} nouveaux paiements récurrents détectés}}",
+  "@subscriptionsDetectResult": {
+    "description": "Toast headline after a detection pass, counting what it created.",
+    "placeholders": {
+      "created": {
+        "type": "int"
+      }
+    }
+  },
+  "subscriptionsDetectResultDetail": "{updated, plural, =0{Aucune série existante mise à jour} =1{1 série existante mise à jour} other{{updated} séries existantes mises à jour}}",
+  "@subscriptionsDetectResultDetail": {
+    "description": "Second toast line after a detection pass, counting what it refreshed.",
+    "placeholders": {
+      "updated": {
+        "type": "int"
+      }
+    }
+  },
+  "subscriptionsDetectFailed": "La détection n'a pas pu s'exécuter.",
+  "@subscriptionsDetectFailed": {
+    "description": "Toast headline when the detection call itself failed."
+  },
+  "subscriptionsBurdenLabel": "Charge mensuelle",
+  "@subscriptionsBurdenLabel": {
+    "description": "Label of the iris-tinted hero card carrying the monthly burden."
+  },
+  "subscriptionsBurdenCaption": "Charges trimestrielles et annuelles ramenées au mois.",
+  "@subscriptionsBurdenCaption": {
+    "description": "Caption under the monthly burden, naming the normalisation it applies."
+  },
+  "subscriptionsBurdenExcluded": "{count, plural, =1{1 paiement terminé exclu.} other{{count} paiements terminés exclus.}}",
+  "@subscriptionsBurdenExcluded": {
+    "description": "Appended to the burden caption so the figure names its own exclusion rather than disagreeing silently with the count beside it.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "subscriptionsActiveLabel": "Paiements actifs",
+  "@subscriptionsActiveLabel": {
+    "description": "Label of the card counting the recurring payments still running."
+  },
+  "subscriptionsCadenceWeeklyCount": "{count, plural, =1{1 hebdomadaire} other{{count} hebdomadaires}}",
+  "@subscriptionsCadenceWeeklyCount": {
+    "description": "Weekly share of the active count, in the cadence breakdown caption.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "subscriptionsCadenceMonthlyCount": "{count, plural, =1{1 mensuel} other{{count} mensuels}}",
+  "@subscriptionsCadenceMonthlyCount": {
+    "description": "Monthly share of the active count, in the cadence breakdown caption.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "subscriptionsCadenceQuarterlyCount": "{count, plural, =1{1 trimestriel} other{{count} trimestriels}}",
+  "@subscriptionsCadenceQuarterlyCount": {
+    "description": "Quarterly share of the active count, in the cadence breakdown caption.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "subscriptionsCadenceYearlyCount": "{count, plural, =1{1 annuel} other{{count} annuels}}",
+  "@subscriptionsCadenceYearlyCount": {
+    "description": "Yearly share of the active count, in the cadence breakdown caption.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "subscriptionsCadenceIrregularCount": "{count, plural, =1{1 irrégulier} other{{count} irréguliers}}",
+  "@subscriptionsCadenceIrregularCount": {
+    "description": "Irregular share of the active count — user-declared series only.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "subscriptionsCancelledCount": "{count, plural, =1{1 terminé} other{{count} terminés}}",
+  "@subscriptionsCancelledCount": {
+    "description": "Tail of the cadence breakdown caption, naming the cancelled rows the active count leaves out.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "subscriptionsNextLabel": "Prochain prélèvement",
+  "@subscriptionsNextLabel": {
+    "description": "Label of the card naming the soonest charge ahead."
+  },
+  "subscriptionsNextValue": "{label} — {when}",
+  "@subscriptionsNextValue": {
+    "description": "Value line of the next-charge card: the payment and how far off it is.",
+    "placeholders": {
+      "label": {
+        "type": "String"
+      },
+      "when": {
+        "type": "String"
+      }
+    }
+  },
+  "subscriptionsNextCaption": "{amount} · {date}",
+  "@subscriptionsNextCaption": {
+    "description": "Caption of the next-charge card: the amount and the exact date.",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "subscriptionsNextToday": "aujourd'hui",
+  "@subscriptionsNextToday": {
+    "description": "Relative phrasing for a charge due today."
+  },
+  "subscriptionsNextTomorrow": "demain",
+  "@subscriptionsNextTomorrow": {
+    "description": "Relative phrasing for a charge due tomorrow."
+  },
+  "subscriptionsNextInDays": "{days, plural, =1{dans 1 jour} other{dans {days} jours}}",
+  "@subscriptionsNextInDays": {
+    "description": "Relative phrasing for a charge further ahead.",
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "subscriptionsNextNone": "Aucun prélèvement à venir",
+  "@subscriptionsNextNone": {
+    "description": "Value of the next-charge card when no running series expects one."
+  },
+  "subscriptionsColumnName": "Libellé",
+  "@subscriptionsColumnName": {
+    "description": "Table header over the payment name column."
+  },
+  "subscriptionsColumnCategory": "Catégorie",
+  "@subscriptionsColumnCategory": {
+    "description": "Table header over the category chip column."
+  },
+  "subscriptionsColumnCadence": "Cadence",
+  "@subscriptionsColumnCadence": {
+    "description": "Table header over the cadence column."
+  },
+  "subscriptionsColumnAmount": "Montant",
+  "@subscriptionsColumnAmount": {
+    "description": "Table header over the expected-amount column."
+  },
+  "subscriptionsColumnNext": "Prochain",
+  "@subscriptionsColumnNext": {
+    "description": "Table header over the next-charge date column."
+  },
+  "subscriptionsColumnStatus": "Statut",
+  "@subscriptionsColumnStatus": {
+    "description": "Table header over the status-pill column, which is empty for a healthy row."
+  },
+  "subscriptionsValueNone": "—",
+  "@subscriptionsValueNone": {
+    "description": "Placeholder in a cell with nothing to state — a cancelled row's next charge."
+  },
+  "cadenceWeekly": "Hebdomadaire",
+  "@cadenceWeekly": {
+    "description": "Cadence name: every week."
+  },
+  "cadenceMonthly": "Mensuel",
+  "@cadenceMonthly": {
+    "description": "Cadence name: every month."
+  },
+  "cadenceQuarterly": "Trimestriel",
+  "@cadenceQuarterly": {
+    "description": "Cadence name: every quarter."
+  },
+  "cadenceYearly": "Annuel",
+  "@cadenceYearly": {
+    "description": "Cadence name: every year."
+  },
+  "cadenceIrregular": "Irrégulier",
+  "@cadenceIrregular": {
+    "description": "Cadence name for a user-declared series with no rhythm. Detection never produces it."
+  },
+  "subscriptionSignalIncrease": "Augmentation · {from} → {to}",
+  "@subscriptionSignalIncrease": {
+    "description": "Amber status pill on a row whose charge recently grew.",
+    "placeholders": {
+      "from": {
+        "type": "String"
+      },
+      "to": {
+        "type": "String"
+      }
+    }
+  },
+  "subscriptionSignalMissed": "{days, plural, =1{Prélèvement manquant · 1 jour de retard} other{Prélèvement manquant · {days} jours de retard}}",
+  "@subscriptionSignalMissed": {
+    "description": "Amber status pill on a row whose charge has not landed past its tolerance.",
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "subscriptionSignalCancelled": "Terminé · dernier prélèvement {date}",
+  "@subscriptionSignalCancelled": {
+    "description": "Gray status pill on a recurring payment the user ended. It stays listed, dimmed.",
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "subscriptionNextExpected": "attendu le {date}",
+  "@subscriptionNextExpected": {
+    "description": "Replaces the next-charge date on a row with a missed charge, in amber: the date is what was expected, not what is coming.",
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "subscriptionActionsTooltip": "Actions du paiement",
+  "@subscriptionActionsTooltip": {
+    "description": "Tooltip of the row's kebab button."
+  },
+  "subscriptionActionConfirm": "Confirmer",
+  "@subscriptionActionConfirm": {
+    "description": "Kebab action accepting a detected series — status becomes confirmed."
+  },
+  "subscriptionActionDismiss": "Ignorer",
+  "@subscriptionActionDismiss": {
+    "description": "Kebab action dismissing a series. Final: detection never revives a dismissed one."
+  },
+  "subscriptionActionCancel": "Marquer comme terminé",
+  "@subscriptionActionCancel": {
+    "description": "Kebab action recording that the recurring payment has ended."
+  },
+  "subscriptionActionEdit": "Modifier",
+  "@subscriptionActionEdit": {
+    "description": "Kebab action opening the series in the edit form."
+  },
+  "subscriptionErrorInvalidTransition": "Ce changement de statut n'est pas possible pour ce paiement.",
+  "@subscriptionErrorInvalidTransition": {
+    "description": "Localized RECURRING_INVALID_TRANSITION."
+  },
+  "subscriptionErrorExists": "Ce compte suit déjà un paiement récurrent sous ce nom.",
+  "@subscriptionErrorExists": {
+    "description": "Localized RECURRING_SERIES_EXISTS."
+  },
+  "subscriptionErrorNotFound": "Ce paiement récurrent n'existe plus.",
+  "@subscriptionErrorNotFound": {
+    "description": "Localized RECURRING_SERIES_NOT_FOUND."
+  },
+  "subscriptionErrorAccountNotFound": "Ce compte n'existe plus.",
+  "@subscriptionErrorAccountNotFound": {
+    "description": "Localized ACCOUNT_NOT_FOUND, reachable from the creation form's account select."
+  },
+  "subscriptionErrorCategoryInvalid": "Cette catégorie n'est plus disponible.",
+  "@subscriptionErrorCategoryInvalid": {
+    "description": "Localized CATEGORY_INVALID on the recurring payment form, returned when the chosen category is not one the user may assign."
+  },
+  "subscriptionErrorValidation": "Vérifiez les informations saisies.",
+  "@subscriptionErrorValidation": {
+    "description": "Localized VALIDATION_ERROR on the recurring payment form."
+  },
+  "subscriptionErrorGeneric": "Une erreur est survenue. Réessayez.",
+  "@subscriptionErrorGeneric": {
+    "description": "Fallback for an error code this panel has no specific message for."
+  },
+  "subscriptionsLoadFailed": "Impossible de charger vos paiements récurrents pour le moment.",
+  "@subscriptionsLoadFailed": {
+    "description": "Error state replacing the panel when the list or summary failed to load."
+  },
+  "subscriptionsRetry": "Réessayer",
+  "@subscriptionsRetry": {
+    "description": "Retry action on the recurring payments error state."
+  },
+  "subscriptionsEmptyTitle": "Aucun paiement récurrent détecté pour l'instant",
+  "@subscriptionsEmptyTitle": {
+    "description": "Empty-state title on the recurring payments panel."
+  },
+  "subscriptionsEmptyBody": "FinStride repère un paiement récurrent lorsqu'un prélèvement s'est répété trois fois. Importer davantage d'historique accélère la détection.",
+  "@subscriptionsEmptyBody": {
+    "description": "Empty-state body, stating the three-repeat rule so the absence reads as a threshold rather than a failure."
+  },
+  "subscriptionsEmptyCta": "Aller aux imports",
+  "@subscriptionsEmptyCta": {
+    "description": "Empty-state CTA. It goes to imports rather than to manual creation because more history is the actual remedy."
+  },
+  "subscriptionDetailBack": "Retour aux récurrents",
+  "@subscriptionDetailBack": {
+    "description": "Iris back link at the top of the series detail."
+  },
+  "subscriptionDetailDetectedSince": "{account} · détecté depuis {month}",
+  "@subscriptionDetailDetectedSince": {
+    "description": "Sub-line of the detail header for a detected series.",
+    "placeholders": {
+      "account": {
+        "type": "String"
+      },
+      "month": {
+        "type": "String"
+      }
+    }
+  },
+  "subscriptionDetailTrackedSince": "{account} · suivi depuis {month}",
+  "@subscriptionDetailTrackedSince": {
+    "description": "Sub-line of the detail header for a user-declared series, which was never detected.",
+    "placeholders": {
+      "account": {
+        "type": "String"
+      },
+      "month": {
+        "type": "String"
+      }
+    }
+  },
+  "subscriptionDetailCadence": "Cadence",
+  "@subscriptionDetailCadence": {
+    "description": "Label of the cadence stat in the detail header."
+  },
+  "subscriptionDetailExpectedAmount": "Montant attendu",
+  "@subscriptionDetailExpectedAmount": {
+    "description": "Label of the expected-amount stat in the detail header."
+  },
+  "subscriptionDetailNextCharge": "Prochain prélèvement",
+  "@subscriptionDetailNextCharge": {
+    "description": "Label of the next-charge stat in the detail header."
+  },
+  "subscriptionDetailIncrease": "Augmentation : {from} → {to} le {date} — soit {annual} par an.",
+  "@subscriptionDetailIncrease": {
+    "description": "Amber banner on the detail. The annualised figure is stated rather than left as a multiplication for the reader.",
+    "placeholders": {
+      "from": {
+        "type": "String"
+      },
+      "to": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      },
+      "annual": {
+        "type": "String"
+      }
+    }
+  },
+  "subscriptionDetailHistoryTitle": "Historique des prélèvements",
+  "@subscriptionDetailHistoryTitle": {
+    "description": "Title of the occurrence-history card on the detail."
+  },
+  "subscriptionDetailHistorySubtitle": "Les transactions dont cette série est déduite · {account}",
+  "@subscriptionDetailHistorySubtitle": {
+    "description": "Sub-line of the history card, naming the evidence and the account it comes from.",
+    "placeholders": {
+      "account": {
+        "type": "String"
+      }
+    }
+  },
+  "subscriptionDetailHistoryEmpty": "Aucun prélèvement rattaché à ce paiement pour l'instant.",
+  "@subscriptionDetailHistoryEmpty": {
+    "description": "History card with no rows — the ordinary state of a series the user has just declared."
+  },
+  "subscriptionDetailChange": "{from} → {to}",
+  "@subscriptionDetailChange": {
+    "description": "Amber pill marking the occurrence where the price stepped up.",
+    "placeholders": {
+      "from": {
+        "type": "String"
+      },
+      "to": {
+        "type": "String"
+      }
+    }
+  },
+  "subscriptionDetailFootnote": "FinStride déduit la série de ces occurrences — vérifiez-les avant de confirmer un changement.",
+  "@subscriptionDetailFootnote": {
+    "description": "Foot note under the history: the user is being asked to trust a deduction, so the evidence is part of the screen."
+  },
+  "subscriptionDetailLoadFailed": "Impossible de charger ce paiement récurrent pour le moment.",
+  "@subscriptionDetailLoadFailed": {
+    "description": "Error state replacing the detail when it failed to load."
+  },
+  "subscriptionFormCreateTitle": "Nouveau paiement récurrent",
+  "@subscriptionFormCreateTitle": {
+    "description": "Title of the manual-creation modal."
+  },
+  "subscriptionFormEditTitle": "Modifier le paiement récurrent",
+  "@subscriptionFormEditTitle": {
+    "description": "Title of the modal when editing an existing series."
+  },
+  "subscriptionFormIntro": "Suivez un paiement récurrent que la détection n'a pas encore repéré.",
+  "@subscriptionFormIntro": {
+    "description": "Sub-line under the creation modal's title."
+  },
+  "subscriptionFormNameLabel": "Nom",
+  "@subscriptionFormNameLabel": {
+    "description": "Label of the payment name field."
+  },
+  "subscriptionFormNameRequired": "Donnez un nom à ce paiement.",
+  "@subscriptionFormNameRequired": {
+    "description": "Validation message when the name field is empty."
+  },
+  "subscriptionFormAccountLabel": "Compte",
+  "@subscriptionFormAccountLabel": {
+    "description": "Label of the account select in the recurring payment form."
+  },
+  "subscriptionFormAmountLabel": "Montant",
+  "@subscriptionFormAmountLabel": {
+    "description": "Label of the amount field. The user types the charge as a positive figure; it is stored signed."
+  },
+  "subscriptionFormAmountInvalid": "Saisissez un montant supérieur à zéro.",
+  "@subscriptionFormAmountInvalid": {
+    "description": "Validation message when the amount is missing, unparseable, or not positive."
+  },
+  "subscriptionFormCadenceLabel": "Cadence",
+  "@subscriptionFormCadenceLabel": {
+    "description": "Label of the cadence select in the recurring payment form."
+  },
+  "subscriptionFormCadenceHelp": "Hebdomadaire · Mensuel · Trimestriel · Annuel · Irrégulier",
+  "@subscriptionFormCadenceHelp": {
+    "description": "Helper under the cadence select, listing what it offers. Irregular is offered here and nowhere else — detection never concludes it."
+  },
+  "subscriptionFormCategoryLabel": "Catégorie",
+  "@subscriptionFormCategoryLabel": {
+    "description": "Label of the category select in the recurring payment form."
+  },
+  "subscriptionFormCategoryNone": "Aucune",
+  "@subscriptionFormCategoryNone": {
+    "description": "The no-category option in the recurring payment form's category select."
+  },
+  "subscriptionFormNoAccounts": "Créez d'abord un compte pour y suivre un paiement récurrent.",
+  "@subscriptionFormNoAccounts": {
+    "description": "Shown in place of the account select when the user has no accounts yet."
+  },
+  "subscriptionFormCancel": "Annuler",
+  "@subscriptionFormCancel": {
+    "description": "Cancel action in the recurring payment modal footer."
+  },
+  "subscriptionFormSubmit": "Créer le paiement récurrent",
+  "@subscriptionFormSubmit": {
+    "description": "Confirm action when creating a recurring payment."
+  },
+  "subscriptionFormSave": "Enregistrer",
+  "@subscriptionFormSave": {
+    "description": "Confirm action when editing a recurring payment."
+  },
+  "navGoals": "Objectifs",
+  "@navGoals": {
+    "description": "Sidebar label of the goals panel, last of the Gestion group."
+  },
+  "navGoalsSubtitle": "Mettez de côté, virtuellement, pour ce qui compte",
+  "@navGoalsSubtitle": {
+    "description": "Top-bar descriptor of the goals panel."
+  },
+  "goalsAdd": "Nouvel objectif",
+  "@goalsAdd": {
+    "description": "Primary top-bar action opening the goal form."
+  },
+  "goalsReassurance": "Répartition sur le papier : vos comptes ne sont pas modifiés.",
+  "@goalsReassurance": {
+    "description": "Lock line stating that allocating changes no account. Shown on the grid and on the detail."
+  },
+  "goalsOverAllocated": "Vous avez réparti {allocated} alors que vos comptes d'épargne totalisent {savings}.",
+  "@goalsOverAllocated": {
+    "description": "The over-allocation banner. Informative and dismissible, never blocking (`PROJECT.md` §13).",
+    "placeholders": {
+      "allocated": {
+        "type": "String"
+      },
+      "savings": {
+        "type": "String"
+      }
+    }
+  },
+  "goalsDismissBanner": "Masquer cet avertissement",
+  "@goalsDismissBanner": {
+    "description": "Tooltip on the over-allocation banner's dismiss control."
+  },
+  "goalsShowArchived": "Afficher les objectifs archivés ({count})",
+  "@goalsShowArchived": {
+    "description": "Link below the grid that reveals archived goals in place; the count is the real number.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "goalsHideArchived": "Masquer les objectifs archivés ({count})",
+  "@goalsHideArchived": {
+    "description": "The same link once the archived goals are showing.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "goalsEmptyTitle": "Donnez un nom à ce qui compte",
+  "@goalsEmptyTitle": {
+    "description": "Empty-state title of the goals panel."
+  },
+  "goalsEmptyBody": "Un objectif est une enveloppe virtuelle : vous y mettez de côté à votre rythme, sans toucher à vos comptes.",
+  "@goalsEmptyBody": {
+    "description": "Empty-state body explaining what a virtual envelope is."
+  },
+  "goalsLoadFailed": "Impossible de charger vos objectifs pour le moment.",
+  "@goalsLoadFailed": {
+    "description": "Error state when the goals list fails to load."
+  },
+  "goalsRetry": "Réessayer",
+  "@goalsRetry": {
+    "description": "Retry action on the goals error states."
+  },
+  "goalPillNoDeadline": "Sans échéance",
+  "@goalPillNoDeadline": {
+    "description": "Card pill for a goal with no target date."
+  },
+  "goalPillReached": "Objectif atteint",
+  "@goalPillReached": {
+    "description": "Card pill for a reached goal with no target date."
+  },
+  "goalPillReachedOn": "Objectif atteint · {month}",
+  "@goalPillReachedOn": {
+    "description": "The reached pill when the goal carried a target date.",
+    "placeholders": {
+      "month": {
+        "type": "String"
+      }
+    }
+  },
+  "goalDetailBack": "Retour aux objectifs",
+  "@goalDetailBack": {
+    "description": "Iris back link from the goal detail to the grid."
+  },
+  "goalDetailTargetDate": "Échéance {month}",
+  "@goalDetailTargetDate": {
+    "description": "Sub-line of the detail header when the goal has a target date. No account is named here.",
+    "placeholders": {
+      "month": {
+        "type": "String"
+      }
+    }
+  },
+  "goalDetailArchive": "Archiver",
+  "@goalDetailArchive": {
+    "description": "Secondary action archiving a goal from its detail header."
+  },
+  "goalDetailRestore": "Restaurer",
+  "@goalDetailRestore": {
+    "description": "The same button on an archived goal, which restores it."
+  },
+  "goalDetailNewAllocation": "Nouvelle allocation",
+  "@goalDetailNewAllocation": {
+    "description": "Primary action opening the allocation modal."
+  },
+  "goalDetailMissing": "Cet objectif n'est plus disponible.",
+  "@goalDetailMissing": {
+    "description": "Shown when the open goal no longer exists."
+  },
+  "goalDetailFootnote": "Aucune transaction n'est créée : ces lignes n'existent que sur le papier de l'objectif.",
+  "@goalDetailFootnote": {
+    "description": "Foot note under the allocation history: no transaction is created."
+  },
+  "goalDetailHistoryFailed": "Impossible de charger l'historique des allocations.",
+  "@goalDetailHistoryFailed": {
+    "description": "Error state when the allocation history fails to load."
+  },
+  "goalHistoryTitle": "Historique des allocations",
+  "@goalHistoryTitle": {
+    "description": "Title of the allocation history card."
+  },
+  "goalHistorySubtitle": "Une seule liste, montants signés — un retrait est une ligne négative.",
+  "@goalHistorySubtitle": {
+    "description": "Sub-line stating that the ledger is one signed list."
+  },
+  "goalHistoryDate": "Date",
+  "@goalHistoryDate": {
+    "description": "Date column of the allocation history."
+  },
+  "goalHistoryAmount": "Montant",
+  "@goalHistoryAmount": {
+    "description": "Amount column of the allocation history."
+  },
+  "goalHistoryNote": "Note",
+  "@goalHistoryNote": {
+    "description": "Note column of the allocation history."
+  },
+  "goalHistoryDelete": "Supprimer cette allocation",
+  "@goalHistoryDelete": {
+    "description": "Tooltip on the control removing one allocation line."
+  },
+  "goalHistoryEmpty": "Aucune allocation pour l'instant.",
+  "@goalHistoryEmpty": {
+    "description": "Shown when a goal has no allocations yet."
+  },
+  "goalFormCreateTitle": "Nouvel objectif",
+  "@goalFormCreateTitle": {
+    "description": "Title of the goal modal when creating."
+  },
+  "goalFormEditTitle": "Modifier l'objectif",
+  "@goalFormEditTitle": {
+    "description": "Title of the goal modal when editing."
+  },
+  "goalFormIntro": "Une enveloppe virtuelle : vous y mettez de côté sur le papier, sans toucher à vos comptes.",
+  "@goalFormIntro": {
+    "description": "Sub-line under the goal modal's title."
+  },
+  "goalFormNameLabel": "Nom",
+  "@goalFormNameLabel": {
+    "description": "Label of the goal name field."
+  },
+  "goalFormNameRequired": "Donnez un nom à cet objectif.",
+  "@goalFormNameRequired": {
+    "description": "Validation message when the goal name is empty."
+  },
+  "goalFormTargetLabel": "Montant cible",
+  "@goalFormTargetLabel": {
+    "description": "Label of the target amount field."
+  },
+  "goalFormTargetInvalid": "Saisissez un montant supérieur à zéro.",
+  "@goalFormTargetInvalid": {
+    "description": "Validation message when the target is missing, unparseable, or not positive."
+  },
+  "goalFormDateLabel": "Date cible",
+  "@goalFormDateLabel": {
+    "description": "Label of the optional target date field."
+  },
+  "goalFormDateHelp": "Facultative",
+  "@goalFormDateHelp": {
+    "description": "Helper marking the target date as optional."
+  },
+  "goalFormDateInvalid": "Date invalide.",
+  "@goalFormDateInvalid": {
+    "description": "Validation message when the target date cannot be read in the current locale."
+  },
+  "goalFormIconLabel": "Icône",
+  "@goalFormIconLabel": {
+    "description": "Label of the goal icon picker."
+  },
+  "goalFormColorLabel": "Couleur",
+  "@goalFormColorLabel": {
+    "description": "Label of the goal color picker."
+  },
+  "goalFormCancel": "Annuler",
+  "@goalFormCancel": {
+    "description": "Cancel action in the goal modal footer."
+  },
+  "goalFormSubmit": "Créer l'objectif",
+  "@goalFormSubmit": {
+    "description": "Confirm action when creating a goal."
+  },
+  "goalFormSave": "Enregistrer",
+  "@goalFormSave": {
+    "description": "Confirm action when editing a goal."
+  },
+  "allocationModalTitle": "Nouvelle allocation",
+  "@allocationModalTitle": {
+    "description": "Title of the allocation modal."
+  },
+  "allocationAmountLabel": "Montant",
+  "@allocationAmountLabel": {
+    "description": "Label of the signed amount field — the only amount control in the modal."
+  },
+  "allocationAmountHelp": "Un montant négatif retire de l'objectif.",
+  "@allocationAmountHelp": {
+    "description": "Helper stating that a negative amount is a withdrawal. There are no deposit/withdraw modes."
+  },
+  "allocationAmountInvalid": "Saisissez un montant différent de zéro.",
+  "@allocationAmountInvalid": {
+    "description": "Validation message when the allocation amount is missing, unparseable, or zero."
+  },
+  "allocationDateLabel": "Date",
+  "@allocationDateLabel": {
+    "description": "Label of the allocation date field."
+  },
+  "allocationDateInvalid": "Date invalide.",
+  "@allocationDateInvalid": {
+    "description": "Validation message when the allocation date cannot be read in the current locale."
+  },
+  "allocationNoteLabel": "Note (optionnelle)",
+  "@allocationNoteLabel": {
+    "description": "Label of the optional allocation note field."
+  },
+  "allocationNoteHint": "Ex. Virement mensuel",
+  "@allocationNoteHint": {
+    "description": "Placeholder example in the allocation note field."
+  },
+  "allocationCancel": "Annuler",
+  "@allocationCancel": {
+    "description": "Cancel action in the allocation modal footer."
+  },
+  "allocationSubmit": "Ajouter",
+  "@allocationSubmit": {
+    "description": "Confirm action appending the allocation."
+  },
+  "goalErrorNotFound": "Cet objectif n'existe plus.",
+  "@goalErrorNotFound": {
+    "description": "Message for the backend's GOAL_NOT_FOUND code."
+  },
+  "goalErrorAllocationNotFound": "Cette allocation n'existe plus.",
+  "@goalErrorAllocationNotFound": {
+    "description": "Message for the backend's GOAL_ALLOCATION_NOT_FOUND code."
+  },
+  "goalErrorValidation": "Vérifiez les informations saisies.",
+  "@goalErrorValidation": {
+    "description": "Message for a rejected goal or allocation payload."
+  },
+  "goalErrorGeneric": "Une erreur est survenue. Réessayez.",
+  "@goalErrorGeneric": {
+    "description": "Fallback message for any other goals failure."
+  },
+  "dashboardGoalsTitle": "Objectifs",
+  "@dashboardGoalsTitle": {
+    "description": "Title of the dashboard's Objectifs card."
+  },
+  "dashboardGoalsViewAll": "Voir tout",
+  "@dashboardGoalsViewAll": {
+    "description": "Iris link from the dashboard goals card to the goals panel."
+  },
+  "dashboardGoalsProgress": "{saved} / {target}",
+  "@dashboardGoalsProgress": {
+    "description": "Compact saved/target pair on a dashboard goal row.",
+    "placeholders": {
+      "saved": {
+        "type": "String"
+      },
+      "target": {
+        "type": "String"
+      }
+    }
+  },
+  "dashboardGoalsReached": "Atteint",
+  "@dashboardGoalsReached": {
+    "description": "Badge replacing the amounts on a reached goal's dashboard row."
+  },
+  "goalFormDatePick": "Choisir une date cible",
+  "@goalFormDatePick": {
+    "description": "Tooltip on the calendar button of the goal form's target date field."
+  },
+  "allocationDatePick": "Choisir une date",
+  "@allocationDatePick": {
+    "description": "Tooltip on the calendar button of the allocation modal's date field."
+  },
+  "settingsResetTitle": "Zone de danger",
+  "@settingsResetTitle": {
+    "description": "Title of the danger zone card in Settings › Données."
+  },
+  "settingsResetBadge": "IRRÉVERSIBLE",
+  "@settingsResetBadge": {
+    "description": "Pill beside the danger zone title, stating the stake in a word."
+  },
+  "settingsResetSubtitle": "Réinitialiser la base de données supprime transactions, comptes, règles, catégories personnalisées, objectifs et abonnements de ce profil. Les sauvegardes exportées ne sont pas touchées.",
+  "@settingsResetSubtitle": {
+    "description": "What a database reset deletes, and what it leaves alone."
+  },
+  "settingsResetButton": "Réinitialiser…",
+  "@settingsResetButton": {
+    "description": "Outline danger button opening the reset confirmation."
+  },
+  "settingsResetConfirmTitle": "Réinitialiser la base de données ?",
+  "@settingsResetConfirmTitle": {
+    "description": "Title of the reset confirmation modal."
+  },
+  "settingsResetConfirmLead": "Tout le contenu du profil {name} sera supprimé définitivement :",
+  "@settingsResetConfirmLead": {
+    "description": "Lead sentence of the reset confirmation; the name is set in bold.",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "settingsResetConfirmCategories": "Catégories personnalisées",
+  "@settingsResetConfirmCategories": {
+    "description": "Counts row for the user's own categories — the system catalog is kept."
+  },
+  "settingsResetConfirmNote": "Les catégories système, vos préférences et le réglage IA sont conservés. Les fichiers de sauvegarde déjà exportés restent intacts.",
+  "@settingsResetConfirmNote": {
+    "description": "Note under the reset counts listing what survives the reset."
+  },
+  "settingsResetConfirmWarning": "Cette action est irréversible. Exportez une sauvegarde avant de continuer.",
+  "@settingsResetConfirmWarning": {
+    "description": "Red callout in the reset confirmation modal."
+  },
+  "settingsResetConfirmWord": "SUPPRIMER",
+  "@settingsResetConfirmWord": {
+    "description": "The word that must be typed exactly to enable the reset. Uppercase."
+  },
+  "settingsResetConfirmLabel": "Saisissez {word} pour confirmer",
+  "@settingsResetConfirmLabel": {
+    "description": "Label of the typed-confirmation field.",
+    "placeholders": {
+      "word": {
+        "type": "String"
+      }
+    }
+  },
+  "settingsResetConfirmSubmit": "Tout supprimer",
+  "@settingsResetConfirmSubmit": {
+    "description": "Destructive confirm action of the reset modal."
+  },
+  "settingsResetDone": "Base de données réinitialisée. Les catégories système ont été restaurées.",
+  "@settingsResetDone": {
+    "description": "Toast shown once the reset has completed."
+  },
+  "settingsResetFailedLead": "Réinitialisation impossible.",
+  "@settingsResetFailedLead": {
+    "description": "Bold red lead of the refusal banner in the danger zone card."
+  },
+  "settingsResetErrorUnknown": "La réinitialisation a échoué. Vos données n'ont pas été modifiées.",
+  "@settingsResetErrorUnknown": {
+    "description": "Fallback message for any other reset failure."
   }
 }

@@ -9,7 +9,7 @@
 ## 1. Vision
 
 A desktop-first (Flutter) personal finance application for French users first, English second.
-The user imports bank data via OFX/QFX/CSV files (no direct bank connections), and the app
+The user imports bank data via OFX/QFX files (no direct bank connections), and the app
 gives them a clear, encouraging view of their money: transactions, monthly income/expense
 with month-over-month trend, categories, subscriptions, savings rate, goals, mortgages, and
 French tax estimation. Transactions are auto-categorised by a local model (Ollama), with a
@@ -28,7 +28,7 @@ when reached.
 
 | Phase | Scope | Status |
 |-------|-------|--------|
-| 1 | Auth (register/login, locale + currency at registration); multi-account; OFX/QFX/CSV import normalised to a canonical schema + import history; transaction list; **rules-based** categorisation; dashboard (monthly income/expense, MoM trend, savings rate, by-category breakdown). | **Done** |
+| 1 | Auth (register/login, locale + currency at registration); multi-account; OFX/QFX import normalised to a canonical schema + import history; transaction list; **rules-based** categorisation; dashboard (monthly income/expense, MoM trend, savings rate, by-category breakdown). | **Done** |
 | **2** | SLM categorisation (local inference runtime) + confidence threshold + review/confirm queue; category & rule management UI; subscription/recurring detection with lifecycle; savings goals (virtual envelopes). | **TARGET** |
 | 3 | Mortgages (amortisation table, debt ratio); French tax estimation (IR + IFI + capital gains/dividends/property — estimation-first); new-mortgage projection simulator. | Planned |
 | 4 | Multi-user; optional cloud sync (move datastore to PostgreSQL); per-account multi-currency monitoring with FX. | Planned |
@@ -168,8 +168,8 @@ for money.** Primary keys are UUIDs (string). Timestamps are UTC ISO-8601.
 > account's **first** OFX import we therefore derive it from the statement's `LEDGERBAL`:
 > `opening = BALAMT − sum(rows booked on or before DTASOF)`. Only the first: a later
 > statement's balance is equally true, but re-deriving from it would absorb any un-imported
-> gap in the ledger into the opening balance rather than surfacing it. CSV carries no declared
-> balance, so a CSV-only account keeps the figure the user typed.
+> gap in the ledger into the opening balance rather than surfacing it. An exporter that omits
+> `LEDGERBAL` declares no balance, so that account keeps the figure the user typed.
 >
 > **Every import after the first compares instead of correcting.** Its statement's `LEDGERBAL`
 > is checked against what the ledger implies at that date (`point_in_time_balance`); a
@@ -178,8 +178,8 @@ for money.** Primary keys are UUIDs (string). Timestamps are UTC ISO-8601.
 > un-imported gap, or a bad earlier correction, and the user needs to see it to act on it.
 >
 > **`opening_balance_minor` is also user-patchable** (`PATCH /accounts/{id}`), the manual
-> counterpart to the two mechanisms above — for a CSV-only account (no `LEDGERBAL` ever), or to
-> fix a bad first derivation. The patch goes through `shift_opening_balance`, which moves
+> counterpart to the two mechanisms above — for an account whose statements never carry a
+> `LEDGERBAL`, or to fix a bad first derivation. The patch goes through `shift_opening_balance`, which moves
 > `cached_balance_minor` **and every existing snapshot** by the same delta rather than
 > recomputing them independently — the ledger didn't change, so nothing derived from it should
 > move by anything other than exactly that delta.
@@ -207,7 +207,7 @@ for money.** Primary keys are UUIDs (string). Timestamps are UTC ISO-8601.
 | categorization_confidence | real null | model only (Phase 2) |
 | needs_review | bool | true until confirmed/assigned with confidence |
 | fitid | text null | OFX unique id, used for dedup |
-| dedup_hash | text | stable hash for CSV dedup (see §6) |
+| dedup_hash | text | stable hash for fitid-less dedup (see §6) |
 | created_at / updated_at | datetime | |
 
 Unique constraint to prevent duplicate imports: `(account_id, fitid)` when `fitid` present,
@@ -249,7 +249,7 @@ richer label space also benefits the Phase 2 SLM.
 | id | uuid PK | |
 | user_id | uuid FK | |
 | account_id | uuid FK | |
-| source_format | text | `ofx` \| `qfx` \| `csv` |
+| source_format | text | `ofx` \| `qfx` |
 | file_name | text | |
 | file_hash | text | reject re-import of identical file |
 | period_start / period_end | date | coverage window, derived from contents |
@@ -259,20 +259,6 @@ richer label space also benefits the Phase 2 SLM.
 | balance_mismatch_minor | int null | declared `LEDGERBAL` − ledger-implied balance; set only from the account's 2nd+ import, and only when non-zero |
 | balance_mismatch_as_of | date null | the date the mismatch above holds at |
 | imported_at | datetime | |
-
-### `csv_templates` (per-bank CSV mapping, saved once and reused)
-| column | type | notes |
-|--------|------|-------|
-| id | uuid PK | |
-| user_id | uuid FK | |
-| bank_name | text | |
-| delimiter | text | e.g. `;` |
-| encoding | text | e.g. `latin-1`, `utf-8` |
-| date_format | text | e.g. `%d/%m/%Y` |
-| decimal_separator | text | `,` or `.` |
-| amount_strategy | text | `signed` \| `debit_credit` |
-| column_map | json | maps canonical fields → CSV column names/indices |
-| created_at | datetime | |
 
 ### `account_balance_snapshots`
 | column | type | notes |
@@ -306,6 +292,7 @@ Same rules as §4: UUID string PKs, UTC timestamps, money as signed integer mino
 | inference_base_url | text | OpenAI-compatible base, e.g. `http://127.0.0.1:11434/v1` (Ollama) or `http://127.0.0.1:8080/v1` (`llama-server`) |
 | model_tag | text null | runtime's own model identifier; null = use whatever the runtime lists first |
 | confidence_threshold | real | default `0.80`, range `[0,1]` |
+| last_backup_at | datetime null | set by each full export (§14); kept across a restore |
 | created_at / updated_at | datetime | |
 
 > Server-side, not in the Flutter local store: the **backend** is what talks to the runtime, so
@@ -410,7 +397,7 @@ are user-scoped — a user only ever sees their own rows.
 > into one round trip) require many heterogeneous remote clients and network latency to pay off.
 > This app has one client (the Flutter app we control) talking to a **loopback sidecar** where
 > round-trip cost is ~0, so those wins are moot — while GraphQL would add N+1/dataloader
-> complexity, weaker caching, and awkward multipart uploads (our OFX/CSV import). FastAPI + REST
+> complexity, weaker caching, and awkward multipart uploads (our OFX import). FastAPI + REST
 > gives typed Pydantic I/O, auto OpenAPI docs, and trivial uploads. The one composite view
 > (dashboard) is served by a single purpose-built endpoint. Revisit only if a Phase 4 cloud tier
 > grows multiple external client types.
@@ -429,11 +416,9 @@ DELETE /accounts/{id}        (archive, not hard delete)
 
 GET    /banks               ?bank_code=… → [bank]  (0–1: the French bank code resolved to its bank)
 
-POST   /imports             multipart: file + account_id [+ csv_template_id] → import_batch
+POST   /imports             multipart: file + account_id → import_batch
 GET    /imports             → [import_batch]            (history)
 GET    /imports/{id}        → import_batch
-POST   /csv-templates       {…mapping…} → csv_template
-GET    /csv-templates       → [csv_template]
 
 GET    /transactions        ?account_id&from&to&category_id&needs_review&q&page → page<transaction>
 GET    /transactions/{id}   → transaction
@@ -491,6 +476,9 @@ GET    /categorization/runs         ?limit → [run]                     (histor
 GET    /categorization/runs/{id}    → run                              (polled for progress)
 POST   /categorization/runs/{id}/cancel → run
 
+GET    /rules/suggestion            ?transaction_id → {match_field, match_type, pattern}
+                                     (the rule form's pre-fill; a default, not a constraint —
+                                      the client may override every field)
 POST   /rules/preview               {match_field, match_type, pattern, account_id?}
                                     → {match_count, samples: [transaction]}   (max 3 samples)
 POST   /rules/from-transaction      {transaction_id, match_field, match_type, pattern,
@@ -516,6 +504,22 @@ DELETE /goals/{id}                  (archive, not hard delete — allocations ar
 GET    /goals/{id}/allocations      → [allocation]
 POST   /goals/{id}/allocations      {amount_minor, allocated_on, note?} → allocation
 DELETE /goals/{id}/allocations/{allocation_id}
+
+POST   /backup/export               → application/zip (.finstride) + header X-Backup-Summary:
+                                       summary JSON; stamps user_settings.last_backup_at
+POST   /backup/inspect              multipart file → summary {format_version, app_version,
+                                       exported_at, currency, counts: {accounts, transactions,
+                                       categories, rules, recurring, goals}}
+POST   /backup/restore              multipart file → summary   (replaces all the caller's data)
+                                     errors: BACKUP_INVALID | BACKUP_TOO_NEW |
+                                       BACKUP_CURRENCY_MISMATCH (422) · BACKUP_RUN_ACTIVE |
+                                       BACKUP_CONFLICT (409)
+
+GET    /database/summary            → {counts: {accounts, transactions, categories, rules,
+                                       recurring, goals}} — the caller's rows; `categories`
+                                       counts their own, never the system catalog
+POST   /database/reset              → the same counts, for what was deleted
+                                     errors: RESET_RUN_ACTIVE (409)
 ```
 
 > **Why `/rules/from-transaction` instead of a flag on `PATCH /transactions/{id}`.** The
@@ -523,6 +527,12 @@ DELETE /goals/{id}/allocations/{allocation_id}
 > that may recategorise many others. Folding that into the transaction patch would give one
 > endpoint two blast radii and a response shape that sometimes reports a bulk count. Separate,
 > the patch stays a single-row edit and the learning step reports what it changed.
+
+> **Why the suggestion is a server call and not client-side string work.** Deriving the pattern
+> means knowing which parts of a French bank label are noise — the same knowledge the import
+> pipeline already applies when it cleans a description and extracts a merchant. A second copy
+> of those heuristics in Dart would drift from the first, and the drift would show up as rules
+> that don't match the transaction they were suggested from.
 
 ---
 
@@ -535,9 +545,6 @@ knows the source format.
 2. **Parse to canonical** —
    - **OFX/QFX:** parse `STMTTRN` records; use `FITID` as the dedup key; read currency and
      account id; derive `period_start/end` from transaction date range.
-   - **CSV:** require a `csv_template` (created via a one-time per-bank column-mapping UI).
-     Handle French realities: `;` delimiters, `,` decimals, `%d/%m/%Y` dates, Latin-1/UTF-8,
-     and either signed amounts or separate debit/credit columns.
 3. **Normalise** — clean description (`description_clean`), attempt `merchant` extraction,
    compute `amount_minor` (signed), set `currency` = account currency.
 4. **Dedup** — `fitid` if present, else `dedup_hash = hash(account_id, booked_date,
@@ -723,3 +730,35 @@ funding, or completing a goal writes no transaction and changes no account balan
 - **Over-allocation is a warning, not an error.** Total allocations across active goals may
   exceed the user's actual savings balance; the UI says so plainly and the API still accepts it.
   Blocking it would require the app to be right about which money is "savings", which it isn't.
+
+## 14. Backup and restore (Phase 2)
+
+A user can export everything they own to one `.finstride` file and restore it later, on this
+machine or another (`docs/design/09-settings.md` §Sauvegarde et restauration).
+
+- **Container**: a ZIP holding `manifest.json` and one `<table>.jsonl` per table, one row per
+  line — original UUIDs, integer minor units, ISO-8601 dates/timestamps. The manifest carries
+  `format: "finstride-backup"`, an integer `format_version`, the backend `app_version` (display
+  only), `exported_at`, `currency` and per-table row counts, so a file can be summarised without
+  reading its rows.
+- **Scope**: the caller's rows only — categories (user-owned), accounts, balance snapshots,
+  import batches, transactions, rules, recurring series/occurrences, goals/allocations,
+  categorisation runs, settings. Never `users` or `auth_tokens`: credentials do not travel in a
+  file, and a restore lands in the signed-in account (`user_id` is rewritten to the caller).
+- **Refusals before any write**: not an archive (`BACKUP_INVALID`), a `format_version` newer
+  than the build reads (`BACKUP_TOO_NEW`), a currency other than the user's
+  (`BACKUP_CURRENCY_MISMATCH`, Phase 1 is single-currency), a categorisation run in flight
+  (`BACKUP_RUN_ACTIVE`).
+- **Restore is one transaction**: delete the caller's rows, then insert table by table in FK
+  order. Every foreign key must point at a row restored from the same archive (or a system
+  category); any malformed row, dangling reference or float in an integer column rolls the whole
+  restore back. Row ids are kept, so restoring into a *different* user while the original owner
+  still exists in the same database collides (`BACKUP_CONFLICT`) and changes nothing.
+- The archive is **not encrypted** — the UI says so. Runs that were in flight in the archive
+  are restored as `failed`; `last_backup_at` is a fact about this install and survives a restore.
+- **Resetting the database** (`docs/design/09-settings.md` §Zone de danger) deletes the same
+  scope minus `user_settings`: the profile's contents go, its locale, AI configuration and
+  `last_backup_at` stay. It is one transaction — a refusal deletes nothing — is refused while a
+  categorisation run is in flight (`RESET_RUN_ACTIVE`), re-seeds the system catalog on its way
+  out, and never touches another profile's rows or any `.finstride` file already exported. The
+  confirmation reports the counts read *before* the delete, so the user is told what went.

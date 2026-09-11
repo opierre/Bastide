@@ -85,31 +85,6 @@ def test_point_in_time_balance_without_snapshot_falls_back_to_opening_balance(
     assert result == 800
 
 
-def test_recompute_balance_matches_cache_on_fresh_account(db_session: Session) -> None:
-    account = _make_account(db_session, opening_balance_minor=1000, cached_balance_minor=1000)
-
-    result = balance.recompute_balance(db_session, account)
-
-    assert result == account.cached_balance_minor == 1000
-
-
-def test_recompute_balance_matches_cache_after_series_of_inserts(db_session: Session) -> None:
-    account = _make_account(db_session, opening_balance_minor=0, cached_balance_minor=0)
-
-    for booked_date, amount_minor in (
-        (date(2026, 1, 5), 10_000),
-        (date(2026, 1, 20), -3_000),
-        (date(2026, 2, 3), 2_000),
-    ):
-        db_session.add(_make_transaction(account.id, booked_date, amount_minor))
-        balance.apply_delta(account, amount_minor)
-    db_session.commit()
-
-    result = balance.recompute_balance(db_session, account)
-
-    assert result == account.cached_balance_minor == 9_000
-
-
 def test_shift_opening_balance_moves_the_cache_by_the_same_delta(db_session: Session) -> None:
     account = _make_account(db_session, opening_balance_minor=1000, cached_balance_minor=1800)
 

@@ -1,15 +1,33 @@
 """Business logic for categorization rule CRUD and re-applying the rule engine."""
 
-from sqlalchemy import select
-from sqlalchemy.orm import Session
+import re
 
-from app.core.errors import NotFoundError
+from sqlalchemy import Select, select
+from sqlalchemy.orm import Session, selectinload
+
+from app.core.errors import NotFoundError, ValidationError
 from app.features.accounts.models import Account
-from app.features.rules.engine import match_category
+from app.features.categories.repository import CategoryRepository
+from app.features.categories.service import CategoryInvalidError
+from app.features.rules.engine import match_category, matches
 from app.features.rules.models import CategorizationRule
 from app.features.rules.repository import RuleRepository
-from app.features.rules.schemas import RuleCreate, RuleUpdate
+from app.features.rules.schemas import (
+    MatchField,
+    MatchType,
+    RuleCreate,
+    RuleFromTransactionRequest,
+    RulePreviewRequest,
+    RuleUpdate,
+)
+from app.features.rules.suggest import RuleSuggestion, suggest_rule
 from app.features.transactions.models import Transaction
+from app.features.transactions.repository import TransactionRepository
+from app.features.transactions.service import TransactionNotFoundError
+
+#: Examples shown next to a preview's count. Enough to recognise what the rule caught, few
+#: enough that the modal stays a modal.
+PREVIEW_SAMPLE_LIMIT = 3
 
 
 class RuleNotFoundError(NotFoundError):
@@ -18,11 +36,25 @@ class RuleNotFoundError(NotFoundError):
     code = "RULE_NOT_FOUND"
 
 
+class RulePatternInvalidError(ValidationError):
+    """Raised when a `regex` pattern doesn't compile; carries the compile error in `details`."""
+
+    code = "RULE_PATTERN_INVALID"
+
+
 class RuleService:
     """Rule CRUD, scoped to a user, plus re-running the rule engine over transactions."""
 
-    def __init__(self, repository: RuleRepository, db: Session) -> None:
+    def __init__(
+        self,
+        repository: RuleRepository,
+        transactions: TransactionRepository,
+        categories: CategoryRepository,
+        db: Session,
+    ) -> None:
         self._repository = repository
+        self._transactions = transactions
+        self._categories = categories
         self._db = db
 
     def list_for_user(self, user_id: str) -> list[CategorizationRule]:
@@ -41,7 +73,15 @@ class RuleService:
         return rule
 
     def create(self, user_id: str, data: RuleCreate) -> CategorizationRule:
-        """Create a new categorization rule."""
+        """Create a new categorization rule.
+
+        Raises:
+            RulePatternInvalidError: `match_type` is `regex` and the pattern doesn't compile.
+            CategoryInvalidError: no such category, or it is another user's.
+        """
+        _validate_pattern(data.match_type, data.pattern)
+        self._require_assignable_category(user_id, data.category_id)
+
         rule = CategorizationRule(
             user_id=user_id,
             priority=data.priority,
@@ -58,8 +98,19 @@ class RuleService:
 
         Raises:
             RuleNotFoundError: no such rule, or it belongs to another user.
+            RulePatternInvalidError: the rule would end up a `regex` whose pattern doesn't
+                compile. Checked against the *resulting* rule, not the patch: switching
+                `match_type` to `regex` without resending `pattern` is what turns an
+                already-stored `contains` string into an uncompilable expression.
+            CategoryInvalidError: no such category, or it is another user's.
         """
         rule = self.get(user_id, rule_id)
+        _validate_pattern(
+            data.match_type if data.match_type is not None else rule.match_type,
+            data.pattern if data.pattern is not None else rule.pattern,
+        )
+        if data.category_id is not None:
+            self._require_assignable_category(user_id, data.category_id)
         if data.priority is not None:
             rule.priority = data.priority
         if data.match_field is not None:
@@ -91,7 +142,7 @@ class RuleService:
         Returns the number of transactions actually changed.
         """
         rules = self._repository.list_enabled_by_user(user_id)
-        transactions = self._transactions_for_user(user_id, account_id)
+        transactions = list(self._db.scalars(self._transactions_query(user_id, account_id)))
 
         recategorized_count = 0
         for transaction in transactions:
@@ -118,7 +169,136 @@ class RuleService:
         self._db.commit()
         return recategorized_count
 
-    def _transactions_for_user(self, user_id: str, account_id: str | None) -> list[Transaction]:
+    def preview(self, user_id: str, data: RulePreviewRequest) -> tuple[int, list[Transaction]]:
+        """Count the caller's transactions an unsaved rule would match, with a few examples.
+
+        Evaluated by the rule engine itself, so the count is exactly the set of rows the saved
+        rule would match. Note that a subsequent apply may change fewer rows than this: it
+        leaves rows already carrying `source=user` alone, and rows this rule's category is
+        already on need no change. Writes nothing.
+
+        Raises:
+            RulePatternInvalidError: `match_type` is `regex` and the pattern doesn't compile.
+        """
+        candidate = self._candidate_rule(user_id, data.match_field, data.match_type, data.pattern)
+        query = (
+            self._transactions_query(user_id, data.account_id)
+            .options(selectinload(Transaction.category))
+            .order_by(Transaction.booked_date.desc(), Transaction.id.desc())
+        )
+
+        match_count = 0
+        samples: list[Transaction] = []
+        for transaction in self._db.scalars(query):
+            if not matches(transaction, candidate):
+                continue
+            match_count += 1
+            if len(samples) < PREVIEW_SAMPLE_LIMIT:
+                samples.append(transaction)
+        return match_count, samples
+
+    def suggest_for_transaction(self, user_id: str, transaction_id: str) -> RuleSuggestion:
+        """Propose the rule that would have categorized one of the caller's transactions.
+
+        Raises:
+            TransactionNotFoundError: no such transaction, or it belongs to another user.
+        """
+        transaction = self._transactions.get_by_id_for_user(transaction_id, user_id)
+        if transaction is None:
+            raise TransactionNotFoundError("Transaction not found.")
+        return suggest_rule(transaction)
+
+    def create_from_transaction(
+        self, user_id: str, data: RuleFromTransactionRequest
+    ) -> tuple[CategorizationRule, int]:
+        """Turn a user correction into a rule, so stage 1 handles the next occurrence.
+
+        The rule and the correction that justifies it are written in one DB transaction: a rule
+        without the correction would leave the row the user just fixed unfixed, and a correction
+        without the rule would silently drop what the user asked to remember.
+
+        The rule appends at the end of the priority order, so learning something never reorders
+        what the user arranged deliberately. With `apply_now`, the P1 apply path then re-runs
+        over the caller's transactions — honouring its own invariant that a row carrying
+        `source=user` is never overridden, this one included.
+
+        Returns:
+            The created rule and the number of *other* transactions the apply step changed
+            (0 when `apply_now` is false).
+
+        Raises:
+            RulePatternInvalidError: `match_type` is `regex` and the pattern doesn't compile.
+            TransactionNotFoundError: no such transaction, or it belongs to another user.
+            CategoryInvalidError: no such category, or it is another user's.
+        """
+        _validate_pattern(data.match_type, data.pattern)
+
+        transaction = self._transactions.get_by_id_for_user(data.transaction_id, user_id)
+        if transaction is None:
+            raise TransactionNotFoundError("Transaction not found.")
+        self._require_assignable_category(user_id, data.category_id)
+
+        rule = CategorizationRule(
+            user_id=user_id,
+            priority=self._repository.next_priority(user_id),
+            match_field=data.match_field,
+            match_type=data.match_type,
+            pattern=data.pattern,
+            category_id=data.category_id,
+            enabled=True,
+        )
+        self._repository.stage(rule)
+        transaction.category_id = data.category_id
+        transaction.categorization_source = "user"
+        transaction.needs_review = False
+
+        try:
+            self._db.commit()
+        except Exception:
+            self._db.rollback()
+            raise
+        self._db.refresh(rule)
+
+        recategorized_count = self.apply(user_id) if data.apply_now else 0
+        return rule, recategorized_count
+
+    def _require_assignable_category(self, user_id: str, category_id: str) -> None:
+        """Reject a `category_id` the caller cannot see.
+
+        The DB's foreign key only proves the row exists — it does not know about users, so
+        without this a rule (or a correction) could carry another user's private category and
+        render that user's label and colour on this user's ledger.
+
+        Raises:
+            CategoryInvalidError: no such category, or it is another user's.
+        """
+        if self._categories.get_visible_by_id_for_user(category_id, user_id) is None:
+            raise CategoryInvalidError(
+                "Category not found.", {"field": "category_id", "category_id": category_id}
+            )
+
+    def _candidate_rule(
+        self, user_id: str, match_field: MatchField, match_type: MatchType, pattern: str
+    ) -> CategorizationRule:
+        """An in-memory rule for the engine to evaluate. Never added to the session.
+
+        `category_id` is left blank: the engine's match predicate doesn't read it, and a preview
+        has no category to speak of.
+        """
+        _validate_pattern(match_type, pattern)
+        return CategorizationRule(
+            user_id=user_id,
+            priority=0,
+            match_field=match_field,
+            match_type=match_type,
+            pattern=pattern,
+            category_id="",
+            enabled=True,
+        )
+
+    def _transactions_query(
+        self, user_id: str, account_id: str | None
+    ) -> Select[tuple[Transaction]]:
         query = (
             select(Transaction)
             .join(Account, Account.id == Transaction.account_id)
@@ -126,4 +306,26 @@ class RuleService:
         )
         if account_id is not None:
             query = query.where(Transaction.account_id == account_id)
-        return list(self._db.scalars(query))
+        return query
+
+
+def _validate_pattern(match_type: str, pattern: str) -> None:
+    """Reject a `regex` pattern that doesn't compile.
+
+    Takes a plain `str` rather than `MatchType` because the update path checks the *resulting*
+    rule, whose `match_type` comes off the ORM column as `str`. Nothing here narrows on the
+    literal beyond the one `== "regex"` test, so widening costs no safety.
+
+    Raises:
+        RulePatternInvalidError: the pattern is an invalid regular expression. The user is
+            writing it in a modal, so the compile error travels in `details`.
+    """
+    if match_type != "regex":
+        return
+    try:
+        re.compile(pattern)
+    except re.error as exc:
+        raise RulePatternInvalidError(
+            "The pattern is not a valid regular expression.",
+            {"pattern": pattern, "error": str(exc)},
+        ) from exc

@@ -1,6 +1,5 @@
 import 'package:finstride/core/theme/app_theme.dart';
 import 'package:finstride/features/accounts/application/accounts_controller.dart';
-import 'package:finstride/features/accounts/application/accounts_search.dart';
 import 'package:finstride/features/accounts/domain/account.dart';
 import 'package:finstride/features/accounts/presentation/accounts_screen.dart';
 import 'package:finstride/l10n/app_localizations.dart';
@@ -46,15 +45,8 @@ Widget _wrap({required FakeAccountsController controller, Locale locale = const 
 /// Scoped to the grid: the screen's summary card shows the *total* balance,
 /// which for a single account is the same figure — but unsigned, since a total
 /// is a standing figure rather than a movement.
-Finder _balanceInGrid(String formatted) => find.descendant(
-  of: find.byKey(const Key('accountsList')),
-  matching: find.text(formatted),
-);
-
-/// The search pill lives in the shell's top bar, which this screen-only test
-/// doesn't mount — so the query is driven through its provider directly.
-ProviderContainer _container(WidgetTester tester) =>
-    ProviderScope.containerOf(tester.element(find.byType(AccountsScreen)));
+Finder _balanceInGrid(String formatted) =>
+    find.descendant(of: find.byKey(const Key('accountsList')), matching: find.text(formatted));
 
 void main() {
   testWidgets('renders the balance formatted for the fr locale', (tester) async {
@@ -64,8 +56,7 @@ void main() {
     await tester.pumpAndSettle();
 
     // An account card's balance is its one data point, so it is signed.
-    final expected =
-        '+${NumberFormat.simpleCurrency(locale: 'fr', name: 'EUR').format(1234.56)}';
+    final expected = '+${NumberFormat.simpleCurrency(locale: 'fr', name: 'EUR').format(1234.56)}';
     expect(_balanceInGrid(expected), findsOneWidget);
   });
 
@@ -78,8 +69,7 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    final expected =
-        '+${NumberFormat.simpleCurrency(locale: 'en', name: 'EUR').format(1234.56)}';
+    final expected = '+${NumberFormat.simpleCurrency(locale: 'en', name: 'EUR').format(1234.56)}';
     expect(_balanceInGrid(expected), findsOneWidget);
   });
 
@@ -106,55 +96,6 @@ void main() {
     );
   });
 
-  testWidgets('the search narrows the grid but leaves the total alone', (tester) async {
-    await tester.pumpWidget(
-      _wrap(
-        controller: FakeAccountsController(
-          initialAccounts: [
-            _account(id: 'a1', name: 'Compte courant', balanceMinor: 123456),
-            _account(id: 'a2', name: 'Livret A', institution: 'Revolut', balanceMinor: 76544),
-          ],
-        ),
-      ),
-    );
-    await tester.pumpAndSettle();
-
-    expect(find.byKey(const Key('accountCard-a1')), findsOneWidget);
-    expect(find.byKey(const Key('accountCard-a2')), findsOneWidget);
-
-    _container(tester).read(accountsQueryProvider.notifier).set('livret');
-    await tester.pumpAndSettle();
-
-    expect(find.byKey(const Key('accountCard-a1')), findsNothing);
-    expect(find.byKey(const Key('accountCard-a2')), findsOneWidget);
-
-    // The total answers "how much do I have", not "how much matches" — it must
-    // not move as the user types.
-    final total = NumberFormat.simpleCurrency(locale: 'fr', name: 'EUR').format(2000.00);
-    expect(
-      find.descendant(
-        of: find.byKey(const Key('accountsTotalBalance')),
-        matching: find.text(total),
-      ),
-      findsOneWidget,
-    );
-  });
-
-  testWidgets('a search that matches nothing reports the miss, not an empty app', (
-    tester,
-  ) async {
-    await tester.pumpWidget(
-      _wrap(controller: FakeAccountsController(initialAccounts: [_account()])),
-    );
-    await tester.pumpAndSettle();
-
-    _container(tester).read(accountsQueryProvider.notifier).set('zzzz');
-    await tester.pumpAndSettle();
-
-    expect(find.byKey(const Key('accountsSearchEmpty')), findsOneWidget);
-    expect(find.byKey(const Key('emptyStateAddAccountButton')), findsNothing);
-  });
-
   testWidgets('renders the empty state with a CTA when there are no accounts', (tester) async {
     await tester.pumpWidget(_wrap(controller: FakeAccountsController()));
     await tester.pumpAndSettle();
@@ -172,7 +113,9 @@ void main() {
   });
 
   testWidgets('renders under en without missing localized keys', (tester) async {
-    await tester.pumpWidget(_wrap(controller: FakeAccountsController(), locale: const Locale('en')));
+    await tester.pumpWidget(
+      _wrap(controller: FakeAccountsController(), locale: const Locale('en')),
+    );
     await tester.pumpAndSettle();
 
     expect(find.text('Add your first account'), findsOneWidget);

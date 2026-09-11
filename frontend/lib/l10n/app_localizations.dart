@@ -173,7 +173,7 @@ abstract class AppLocalizations {
   /// One-line descriptor shown under the panel title in the top bar, on the imports screen.
   ///
   /// In fr, this message translates to:
-  /// **'Relevés OFX, QFX et CSV — traités sur cet ordinateur'**
+  /// **'Relevés OFX et QFX — traités sur cet ordinateur'**
   String get navImportsSubtitle;
 
   /// One-line descriptor shown under the panel title in the top bar, on the categories screen.
@@ -488,18 +488,6 @@ abstract class AppLocalizations {
   /// **'Ajouter un compte'**
   String get accountsAddButton;
 
-  /// Placeholder in the accounts search pill in the top bar.
-  ///
-  /// In fr, this message translates to:
-  /// **'Rechercher…'**
-  String get accountsSearchHint;
-
-  /// Shown in place of the account grid when the search filters everything out.
-  ///
-  /// In fr, this message translates to:
-  /// **'Aucun compte ne correspond à votre recherche.'**
-  String get accountsSearchEmpty;
-
   /// Timestamp under the summary meta saying when the balances were last recalculated.
   ///
   /// In fr, this message translates to:
@@ -746,13 +734,13 @@ abstract class AppLocalizations {
   /// **'Nouvel import'**
   String get importNewTitle;
 
-  /// Label for the account selector on the imports panel.
+  /// Label for the account picker shown only when a statement could not name its own destination.
   ///
   /// In fr, this message translates to:
   /// **'Compte de destination'**
   String get importAccountLabel;
 
-  /// Shown in place of the account selector when the accounts list failed to load.
+  /// Shown when the accounts list failed to load, so the statement cannot be matched against anything.
   ///
   /// In fr, this message translates to:
   /// **'Impossible de charger vos comptes. Réessayez dans un instant.'**
@@ -761,13 +749,13 @@ abstract class AppLocalizations {
   /// Headline inside the imports drop zone.
   ///
   /// In fr, this message translates to:
-  /// **'Déposez un fichier OFX, QFX ou CSV'**
+  /// **'Déposez un fichier OFX ou QFX'**
   String get importDropZoneTitle;
 
-  /// Sub-line inside the imports drop zone, stating that a CSV opens the mapping wizard.
+  /// Sub-line inside the imports drop zone, stating that the file itself names the destination account.
   ///
   /// In fr, this message translates to:
-  /// **'ou cliquez pour parcourir — un CSV ouvre l\'assistant de correspondance'**
+  /// **'ou cliquez pour parcourir — le relevé indique lui-même son compte'**
   String get importDropZoneHint;
 
   /// Size of the staged file, shown under its name. The number is already formatted for the locale.
@@ -794,24 +782,6 @@ abstract class AppLocalizations {
   /// **'Import en cours…'**
   String get importSubmitting;
 
-  /// Primary action shown for a CSV with no saved mapping — it opens the wizard rather than importing straight away.
-  ///
-  /// In fr, this message translates to:
-  /// **'Configurer et importer'**
-  String get importOpenWizard;
-
-  /// Banner telling the user a saved CSV template will be reused instead of the wizard.
-  ///
-  /// In fr, this message translates to:
-  /// **'Format CSV mémorisé pour {bank} — il sera réutilisé pour ce fichier.'**
-  String importTemplateReuse(String bank);
-
-  /// Action that re-opens the CSV wizard even though a saved template exists.
-  ///
-  /// In fr, this message translates to:
-  /// **'Reconfigurer'**
-  String get importReconfigureTemplate;
-
   /// Banner confirming the statement's account block matched an existing account, which has been selected as the destination.
   ///
   /// In fr, this message translates to:
@@ -835,6 +805,18 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Créer ce compte'**
   String get importCreateDetectedAccount;
+
+  /// Placeholder option in the account picker shown when a statement could not name its own destination — the unanswered state.
+  ///
+  /// In fr, this message translates to:
+  /// **'Choisissez un compte'**
+  String get importChooseAccount;
+
+  /// Warning shown when the staged file declares no account block at all, so the user has to pick the destination from every account.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ce fichier n\'indique aucun compte — choisissez la destination.'**
+  String get importUnreadableAccount;
 
   /// Title of the card summarising the import that just ran.
   ///
@@ -974,240 +956,6 @@ abstract class AppLocalizations {
   /// **'Réessayer'**
   String get importRetry;
 
-  /// Title of the one-time CSV column-mapping wizard modal.
-  ///
-  /// In fr, this message translates to:
-  /// **'Assistant CSV'**
-  String get csvWizardTitle;
-
-  /// Label of the wizard's first step, where the file's format is described.
-  ///
-  /// In fr, this message translates to:
-  /// **'Format'**
-  String get csvWizardStepFormat;
-
-  /// Label of the wizard's second step, where columns are mapped and previewed.
-  ///
-  /// In fr, this message translates to:
-  /// **'Colonnes & aperçu'**
-  String get csvWizardStepColumns;
-
-  /// Cancel action in the CSV wizard footer.
-  ///
-  /// In fr, this message translates to:
-  /// **'Annuler'**
-  String get csvWizardCancel;
-
-  /// Action moving from the wizard's format step to its columns step.
-  ///
-  /// In fr, this message translates to:
-  /// **'Continuer'**
-  String get csvWizardNext;
-
-  /// Action that saves the mapping and imports the file.
-  ///
-  /// In fr, this message translates to:
-  /// **'Valider et importer'**
-  String get csvWizardConfirm;
-
-  /// Label replacing the wizard's confirm button text while saving and importing.
-  ///
-  /// In fr, this message translates to:
-  /// **'Import en cours…'**
-  String get csvWizardConfirming;
-
-  /// Label for the bank name the CSV mapping is remembered under.
-  ///
-  /// In fr, this message translates to:
-  /// **'Banque'**
-  String get csvWizardBankLabel;
-
-  /// Helper under the bank name field, stating that the mapping is saved for reuse.
-  ///
-  /// In fr, this message translates to:
-  /// **'Ce format sera mémorisé sous ce nom et réutilisé à chaque import de cette banque.'**
-  String get csvWizardBankHelper;
-
-  /// Label for the CSV column separator selector.
-  ///
-  /// In fr, this message translates to:
-  /// **'Délimiteur'**
-  String get csvWizardDelimiterLabel;
-
-  /// Delimiter option: semicolon, the common French bank export separator.
-  ///
-  /// In fr, this message translates to:
-  /// **'Point-virgule ( ; )'**
-  String get csvDelimiterSemicolon;
-
-  /// Delimiter option: comma.
-  ///
-  /// In fr, this message translates to:
-  /// **'Virgule ( , )'**
-  String get csvDelimiterComma;
-
-  /// Delimiter option: tab character.
-  ///
-  /// In fr, this message translates to:
-  /// **'Tabulation'**
-  String get csvDelimiterTab;
-
-  /// Delimiter option: pipe character.
-  ///
-  /// In fr, this message translates to:
-  /// **'Barre verticale ( | )'**
-  String get csvDelimiterPipe;
-
-  /// Label for the CSV character encoding selector.
-  ///
-  /// In fr, this message translates to:
-  /// **'Encodage'**
-  String get csvWizardEncodingLabel;
-
-  /// Label for the CSV date format selector.
-  ///
-  /// In fr, this message translates to:
-  /// **'Format de date'**
-  String get csvWizardDateFormatLabel;
-
-  /// Label for the decimal separator control.
-  ///
-  /// In fr, this message translates to:
-  /// **'Séparateur décimal'**
-  String get csvWizardDecimalLabel;
-
-  /// Decimal separator option: comma.
-  ///
-  /// In fr, this message translates to:
-  /// **'Virgule ( , )'**
-  String get csvDecimalComma;
-
-  /// Decimal separator option: period.
-  ///
-  /// In fr, this message translates to:
-  /// **'Point ( . )'**
-  String get csvDecimalPeriod;
-
-  /// Label for the control choosing how the file encodes amount direction.
-  ///
-  /// In fr, this message translates to:
-  /// **'Montants'**
-  String get csvWizardAmountsLabel;
-
-  /// Amount strategy option: a single signed amount column.
-  ///
-  /// In fr, this message translates to:
-  /// **'Signé'**
-  String get csvAmountStrategySigned;
-
-  /// Amount strategy option: separate debit and credit columns.
-  ///
-  /// In fr, this message translates to:
-  /// **'Débit / Crédit'**
-  String get csvAmountStrategyDebitCredit;
-
-  /// Label for the count of lines to skip before the header row.
-  ///
-  /// In fr, this message translates to:
-  /// **'Lignes à ignorer'**
-  String get csvWizardHeaderOffsetLabel;
-
-  /// Helper clarifying that the skipped lines precede the header row.
-  ///
-  /// In fr, this message translates to:
-  /// **'Avant la ligne d\'en-tête.'**
-  String get csvWizardHeaderOffsetHelper;
-
-  /// Instruction above the column mapping rows in the CSV wizard.
-  ///
-  /// In fr, this message translates to:
-  /// **'Indiquez le nom de la colonne du fichier (ou son numéro, à partir de 0) pour chaque information.'**
-  String get csvWizardColumnsHint;
-
-  /// Placeholder inside a column mapping input.
-  ///
-  /// In fr, this message translates to:
-  /// **'Nom ou numéro de colonne'**
-  String get csvWizardColumnHint;
-
-  /// Marker beside a canonical field that does not have to be mapped.
-  ///
-  /// In fr, this message translates to:
-  /// **'facultatif'**
-  String get csvWizardColumnOptional;
-
-  /// Canonical field name: the date the transaction was booked.
-  ///
-  /// In fr, this message translates to:
-  /// **'Date d\'opération'**
-  String get csvColumnBookedDate;
-
-  /// Canonical field name: the value date.
-  ///
-  /// In fr, this message translates to:
-  /// **'Date de valeur'**
-  String get csvColumnValueDate;
-
-  /// Canonical field name: the raw description from the bank.
-  ///
-  /// In fr, this message translates to:
-  /// **'Libellé'**
-  String get csvColumnDescription;
-
-  /// Canonical field name: the signed amount.
-  ///
-  /// In fr, this message translates to:
-  /// **'Montant'**
-  String get csvColumnAmount;
-
-  /// Canonical field name: the debit column, used by the debit/credit layout.
-  ///
-  /// In fr, this message translates to:
-  /// **'Débit'**
-  String get csvColumnDebit;
-
-  /// Canonical field name: the credit column, used by the debit/credit layout.
-  ///
-  /// In fr, this message translates to:
-  /// **'Crédit'**
-  String get csvColumnCredit;
-
-  /// Section label above the live preview of parsed sample rows.
-  ///
-  /// In fr, this message translates to:
-  /// **'Aperçu'**
-  String get csvWizardPreviewTitle;
-
-  /// Placeholder shown before the mapping is complete enough to preview.
-  ///
-  /// In fr, this message translates to:
-  /// **'Renseignez les colonnes obligatoires pour voir un aperçu.'**
-  String get csvWizardPreviewPending;
-
-  /// Shown when the preview parsed the file but found no rows.
-  ///
-  /// In fr, this message translates to:
-  /// **'Aucune ligne lisible avec ce paramétrage.'**
-  String get csvWizardPreviewEmpty;
-
-  /// Preview table column header for the booked date.
-  ///
-  /// In fr, this message translates to:
-  /// **'Date'**
-  String get csvPreviewDateHeader;
-
-  /// Preview table column header for the raw description.
-  ///
-  /// In fr, this message translates to:
-  /// **'Libellé'**
-  String get csvPreviewDescriptionHeader;
-
-  /// Preview table column header for the parsed amount.
-  ///
-  /// In fr, this message translates to:
-  /// **'Montant'**
-  String get csvPreviewAmountHeader;
-
   /// Localized message for the backend's ACCOUNT_NOT_FOUND error code on the imports panel.
   ///
   /// In fr, this message translates to:
@@ -1219,18 +967,6 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Import introuvable.'**
   String get importErrorBatchNotFound;
-
-  /// Localized message for the backend's CSV_TEMPLATE_NOT_FOUND error code.
-  ///
-  /// In fr, this message translates to:
-  /// **'Format CSV introuvable — relancez l\'assistant.'**
-  String get importErrorTemplateNotFound;
-
-  /// Localized message for the backend's CSV_TEMPLATE_INVALID and VALIDATION_ERROR codes.
-  ///
-  /// In fr, this message translates to:
-  /// **'Ce paramétrage ne correspond pas au fichier — ajustez les colonnes ci-dessus.'**
-  String get importErrorTemplateInvalid;
 
   /// Fallback localized message for unrecognized or network errors on the imports panel.
   ///
@@ -1298,6 +1034,72 @@ abstract class AppLocalizations {
   /// **'Toutes les dates'**
   String get transactionsFilterAllDates;
 
+  /// Title of the transactions date range filter modal.
+  ///
+  /// In fr, this message translates to:
+  /// **'Période'**
+  String get transactionsDateRangeTitle;
+
+  /// Label of the range's start date field.
+  ///
+  /// In fr, this message translates to:
+  /// **'Du'**
+  String get transactionsDateRangeFromLabel;
+
+  /// Label of the range's end date field.
+  ///
+  /// In fr, this message translates to:
+  /// **'Au'**
+  String get transactionsDateRangeToLabel;
+
+  /// Helper under the range fields explaining how to lift the date filter.
+  ///
+  /// In fr, this message translates to:
+  /// **'Laissez les deux dates vides pour voir toutes les dates.'**
+  String get transactionsDateRangeHelp;
+
+  /// Tooltip on the calendar button of the range's start date field.
+  ///
+  /// In fr, this message translates to:
+  /// **'Choisir la date de début'**
+  String get transactionsDateRangePickFrom;
+
+  /// Tooltip on the calendar button of the range's end date field.
+  ///
+  /// In fr, this message translates to:
+  /// **'Choisir la date de fin'**
+  String get transactionsDateRangePickTo;
+
+  /// Validation message when a range date cannot be read in the current locale.
+  ///
+  /// In fr, this message translates to:
+  /// **'Date invalide.'**
+  String get transactionsDateRangeInvalid;
+
+  /// Validation message when only one of the two range dates is filled in.
+  ///
+  /// In fr, this message translates to:
+  /// **'Renseignez les deux dates, ou aucune.'**
+  String get transactionsDateRangeIncomplete;
+
+  /// Validation message when the range's end date is before its start date.
+  ///
+  /// In fr, this message translates to:
+  /// **'La date de fin précède la date de début.'**
+  String get transactionsDateRangeOrder;
+
+  /// Cancel button of the date range modal.
+  ///
+  /// In fr, this message translates to:
+  /// **'Annuler'**
+  String get transactionsDateRangeCancel;
+
+  /// Confirm button of the date range modal, applying the chosen range.
+  ///
+  /// In fr, this message translates to:
+  /// **'Appliquer'**
+  String get transactionsDateRangeApply;
+
   /// Pager label under the transaction list, showing the current page's row range and the total count.
   ///
   /// In fr, this message translates to:
@@ -1363,6 +1165,12 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Transaction introuvable.'**
   String get transactionErrorNotFound;
+
+  /// Localized message for the backend's CATEGORY_INVALID error code, returned when a transaction is patched with a category the user cannot assign — usually one deleted in another window.
+  ///
+  /// In fr, this message translates to:
+  /// **'Cette catégorie n\'est plus disponible.'**
+  String get transactionErrorCategoryInvalid;
 
   /// Localized message for the backend's VALIDATION_ERROR error code on the transactions panel.
   ///
@@ -1783,6 +1591,2290 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Année suivante'**
   String get dashboardNextYear;
+
+  /// Top-bar primary button on the categories panel, opening the create-category modal.
+  ///
+  /// In fr, this message translates to:
+  /// **'Nouvelle catégorie'**
+  String get categoriesAddButton;
+
+  /// Heading of the categories empty state.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucune catégorie pour l\'instant'**
+  String get categoriesEmptyTitle;
+
+  /// Reassuring line under the categories empty-state heading.
+  ///
+  /// In fr, this message translates to:
+  /// **'Les catégories classent vos dépenses. Créez-en une pour commencer.'**
+  String get categoriesEmptyBody;
+
+  /// Retry button shown when the category catalog fails to load.
+  ///
+  /// In fr, this message translates to:
+  /// **'Réessayer'**
+  String get categoriesRetry;
+
+  /// Neutral badge on a seeded, read-only category card.
+  ///
+  /// In fr, this message translates to:
+  /// **'Système'**
+  String get categoryBadgeSystem;
+
+  /// Iris-tinted badge on a category the user created.
+  ///
+  /// In fr, this message translates to:
+  /// **'Personnalisée'**
+  String get categoryBadgeCustom;
+
+  /// Tooltip on the lock glyph of a system category card. States the refusal the API also enforces.
+  ///
+  /// In fr, this message translates to:
+  /// **'Catégorie du système : elle ne peut pas être modifiée ni supprimée.'**
+  String get categorySystemLockedTooltip;
+
+  /// Tooltip on the ⋯ menu of a user category card.
+  ///
+  /// In fr, this message translates to:
+  /// **'Actions'**
+  String get categoryActionsTooltip;
+
+  /// ⋯ menu entry opening the edit modal (name, icon, color) of a user category.
+  ///
+  /// In fr, this message translates to:
+  /// **'Modifier'**
+  String get categoryEdit;
+
+  /// ⋯ menu entry and edit-modal action deleting a user category, and label of the delete confirmation button.
+  ///
+  /// In fr, this message translates to:
+  /// **'Supprimer'**
+  String get categoryDelete;
+
+  /// Dashed ghost chip at the end of a category card's subcategories, drawn after a plus glyph. Opens the create modal with this category preset as the parent.
+  ///
+  /// In fr, this message translates to:
+  /// **'Sous-catégorie'**
+  String get categoryAddSubcategory;
+
+  /// Footer of a category card: how many rules target this category or its subcategories, disabled ones included. The zero case is drawn in amber.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, =0{Aucune règle} one{1 règle automatique} other{{count} règles automatiques}}'**
+  String categoryRuleCount(int count);
+
+  /// Title of the delete-category confirmation dialog.
+  ///
+  /// In fr, this message translates to:
+  /// **'Supprimer cette catégorie ?'**
+  String get categoryDeleteConfirmTitle;
+
+  /// Body of the delete-category confirmation. Names what else goes with it, since the deletion cascades.
+  ///
+  /// In fr, this message translates to:
+  /// **'« {name} » et ses sous-catégories seront supprimées. Les transactions concernées redeviendront non catégorisées.'**
+  String categoryDeleteConfirmBody(String name);
+
+  /// Title of the create-category modal.
+  ///
+  /// In fr, this message translates to:
+  /// **'Nouvelle catégorie'**
+  String get categoryFormCreateTitle;
+
+  /// Title of the edit-category modal.
+  ///
+  /// In fr, this message translates to:
+  /// **'Modifier la catégorie'**
+  String get categoryFormEditTitle;
+
+  /// Label of the category name field.
+  ///
+  /// In fr, this message translates to:
+  /// **'Nom'**
+  String get categoryFormNameLabel;
+
+  /// Placeholder example in the category name field.
+  ///
+  /// In fr, this message translates to:
+  /// **'Épargne projet'**
+  String get categoryFormNameHint;
+
+  /// Validation message when the category name is left empty.
+  ///
+  /// In fr, this message translates to:
+  /// **'Donnez un nom à cette catégorie.'**
+  String get categoryFormNameRequired;
+
+  /// Label of the category kind select.
+  ///
+  /// In fr, this message translates to:
+  /// **'Type'**
+  String get categoryFormKindLabel;
+
+  /// Helper under the category kind select, explaining the three kinds in the user's own terms.
+  ///
+  /// In fr, this message translates to:
+  /// **'Une dépense sort de vos comptes, un revenu y entre, un transfert circule entre eux.'**
+  String get categoryFormKindHelper;
+
+  /// Label of the parent-category select.
+  ///
+  /// In fr, this message translates to:
+  /// **'Catégorie parente'**
+  String get categoryFormParentLabel;
+
+  /// Option in the parent select for a top-level category.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucune (catégorie principale)'**
+  String get categoryFormParentNone;
+
+  /// Label of the category icon select.
+  ///
+  /// In fr, this message translates to:
+  /// **'Icône'**
+  String get categoryFormIconLabel;
+
+  /// Label of the category colour picker.
+  ///
+  /// In fr, this message translates to:
+  /// **'Couleur'**
+  String get categoryFormColorLabel;
+
+  /// Helper under the colour picker, explaining that the hue is reused across the app.
+  ///
+  /// In fr, this message translates to:
+  /// **'La couleur suit la catégorie partout : graphiques, légendes et étiquettes.'**
+  String get categoryFormColorHelper;
+
+  /// Cancel button in the category modal and the delete confirmation.
+  ///
+  /// In fr, this message translates to:
+  /// **'Annuler'**
+  String get categoryFormCancel;
+
+  /// Submit button of the category modal.
+  ///
+  /// In fr, this message translates to:
+  /// **'Enregistrer'**
+  String get categoryFormSave;
+
+  /// Category kind: money leaving the user's accounts.
+  ///
+  /// In fr, this message translates to:
+  /// **'Dépense'**
+  String get categoryKindExpense;
+
+  /// Category kind: money arriving in the user's accounts.
+  ///
+  /// In fr, this message translates to:
+  /// **'Revenu'**
+  String get categoryKindIncome;
+
+  /// Category kind: money moving between the user's own accounts.
+  ///
+  /// In fr, this message translates to:
+  /// **'Transfert'**
+  String get categoryKindTransfer;
+
+  /// Icon choice in the category form: house glyph.
+  ///
+  /// In fr, this message translates to:
+  /// **'Logement'**
+  String get categoryIconHousing;
+
+  /// Icon choice in the category form: bowl glyph.
+  ///
+  /// In fr, this message translates to:
+  /// **'Alimentation'**
+  String get categoryIconFood;
+
+  /// Icon choice in the category form: car glyph.
+  ///
+  /// In fr, this message translates to:
+  /// **'Transport'**
+  String get categoryIconTransport;
+
+  /// Icon choice in the category form: star glyph.
+  ///
+  /// In fr, this message translates to:
+  /// **'Loisirs'**
+  String get categoryIconLeisure;
+
+  /// Icon choice in the category form: refresh glyph.
+  ///
+  /// In fr, this message translates to:
+  /// **'Abonnements'**
+  String get categoryIconSubscriptions;
+
+  /// Icon choice in the category form: cross glyph.
+  ///
+  /// In fr, this message translates to:
+  /// **'Santé'**
+  String get categoryIconHealth;
+
+  /// Icon choice in the category form: up-arrow glyph.
+  ///
+  /// In fr, this message translates to:
+  /// **'Revenus'**
+  String get categoryIconIncome;
+
+  /// Icon choice in the category form: coin glyph.
+  ///
+  /// In fr, this message translates to:
+  /// **'Épargne'**
+  String get categoryIconSavings;
+
+  /// Icon choice in the category form: the neutral fallback glyph.
+  ///
+  /// In fr, this message translates to:
+  /// **'Autre'**
+  String get categoryIconOther;
+
+  /// Localized message for the backend's CATEGORY_NOT_FOUND code, which is also what a forced edit of a system category returns.
+  ///
+  /// In fr, this message translates to:
+  /// **'Cette catégorie appartient au système : elle ne peut pas être modifiée ni supprimée.'**
+  String get categoryErrorNotEditable;
+
+  /// Localized message for a VALIDATION_ERROR on a category write.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ces informations ne sont pas valides. Vérifiez le nom et le type.'**
+  String get categoryErrorValidation;
+
+  /// Fallback message for unrecognized or network errors on the categories panel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Une erreur est survenue. Veuillez réessayer.'**
+  String get categoryErrorGeneric;
+
+  /// Left segment of the panel's view switch.
+  ///
+  /// In fr, this message translates to:
+  /// **'Catégories'**
+  String get categoriesTabCategories;
+
+  /// Right segment of the panel's view switch.
+  ///
+  /// In fr, this message translates to:
+  /// **'Règles'**
+  String get categoriesTabRules;
+
+  /// Top-bar primary button while the rules view is showing.
+  ///
+  /// In fr, this message translates to:
+  /// **'Nouvelle règle'**
+  String get rulesAddButton;
+
+  /// Note beside the view switch on the rules view, stating both how rules are ordered and what they will never overwrite.
+  ///
+  /// In fr, this message translates to:
+  /// **'Évaluées dans l\'ordre de priorité — une règle ne remplace jamais une catégorie choisie manuellement.'**
+  String get rulesPriorityNote;
+
+  /// Secondary action re-running the rules over existing transactions.
+  ///
+  /// In fr, this message translates to:
+  /// **'Exécuter les règles'**
+  String get rulesApplyButton;
+
+  /// Label of the run action while the run is in flight.
+  ///
+  /// In fr, this message translates to:
+  /// **'Exécution…'**
+  String get rulesApplyRunning;
+
+  /// First line of the toast after a rule run: how many transactions changed category.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, =0{Aucune transaction recatégorisée} one{{count} transaction recatégorisée} other{{count} transactions recatégorisées}}'**
+  String rulesApplyToastTitle(int count);
+
+  /// Second line of the rule-run toast. Answers the question the count alone raises.
+  ///
+  /// In fr, this message translates to:
+  /// **'Vos catégories choisies manuellement n\'ont pas été modifiées.'**
+  String get rulesApplyToastBody;
+
+  /// Toast headline when the rule run itself failed.
+  ///
+  /// In fr, this message translates to:
+  /// **'L\'exécution des règles a échoué'**
+  String get rulesApplyFailed;
+
+  /// Toast headline when persisting a drag-reorder failed and the previous order was restored.
+  ///
+  /// In fr, this message translates to:
+  /// **'L\'ordre n\'a pas pu être enregistré'**
+  String get rulesReorderFailed;
+
+  /// Toast headline when enabling or disabling a rule failed and the switch was put back.
+  ///
+  /// In fr, this message translates to:
+  /// **'La règle n\'a pas pu être modifiée'**
+  String get rulesToggleFailed;
+
+  /// Tooltip on the ✕ beside the category filter chip in the rules view, opened from a category card's footer.
+  ///
+  /// In fr, this message translates to:
+  /// **'Afficher toutes les règles'**
+  String get rulesFilterClear;
+
+  /// Shown inside the rules card when the category filter leaves no rule.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucune règle ne cible cette catégorie.'**
+  String get rulesFilterEmpty;
+
+  /// Retry button shown when the rules list fails to load.
+  ///
+  /// In fr, this message translates to:
+  /// **'Réessayer'**
+  String get rulesRetry;
+
+  /// Heading of the rules empty state.
+  ///
+  /// In fr, this message translates to:
+  /// **'Automatisez votre classement'**
+  String get rulesEmptyTitle;
+
+  /// Body of the rules empty state, explaining what a rule does before asking the user to write one.
+  ///
+  /// In fr, this message translates to:
+  /// **'Une règle reconnaît un libellé — « CARREFOUR » — et attribue sa catégorie à chaque transaction correspondante, aujourd\'hui et aux prochains imports.'**
+  String get rulesEmptyBody;
+
+  /// Accessible label of the enable switch on a rule row.
+  ///
+  /// In fr, this message translates to:
+  /// **'Activer la règle'**
+  String get ruleToggleSemantics;
+
+  /// Chip shown when a rule points at a category that no longer exists.
+  ///
+  /// In fr, this message translates to:
+  /// **'Catégorie introuvable'**
+  String get ruleTargetMissing;
+
+  /// Rule match field: the cleaned transaction description.
+  ///
+  /// In fr, this message translates to:
+  /// **'Libellé'**
+  String get ruleFieldDescription;
+
+  /// Rule match field: the extracted merchant name.
+  ///
+  /// In fr, this message translates to:
+  /// **'Commerçant'**
+  String get ruleFieldMerchant;
+
+  /// Rule match field: the transaction amount.
+  ///
+  /// In fr, this message translates to:
+  /// **'Montant'**
+  String get ruleFieldAmount;
+
+  /// Rule condition badge: substring match.
+  ///
+  /// In fr, this message translates to:
+  /// **'contient'**
+  String get ruleConditionContains;
+
+  /// Rule condition badge: exact match.
+  ///
+  /// In fr, this message translates to:
+  /// **'égal à'**
+  String get ruleConditionEquals;
+
+  /// Rule condition badge: regular expression match.
+  ///
+  /// In fr, this message translates to:
+  /// **'regex'**
+  String get ruleConditionRegex;
+
+  /// Rule condition badge: amount range match.
+  ///
+  /// In fr, this message translates to:
+  /// **'plage'**
+  String get ruleConditionRange;
+
+  /// Title of the rule editor when creating.
+  ///
+  /// In fr, this message translates to:
+  /// **'Nouvelle règle'**
+  String get ruleFormCreateTitle;
+
+  /// Title of the rule editor when editing.
+  ///
+  /// In fr, this message translates to:
+  /// **'Modifier la règle'**
+  String get ruleFormEditTitle;
+
+  /// Label of the rule editor's match-field select.
+  ///
+  /// In fr, this message translates to:
+  /// **'Champ'**
+  String get ruleFormFieldLabel;
+
+  /// Label of the rule editor's condition select.
+  ///
+  /// In fr, this message translates to:
+  /// **'Condition'**
+  String get ruleFormConditionLabel;
+
+  /// Label of the rule editor's priority field. Lower runs first.
+  ///
+  /// In fr, this message translates to:
+  /// **'Priorité'**
+  String get ruleFormPriorityLabel;
+
+  /// Validation message for a missing or non-positive priority.
+  ///
+  /// In fr, this message translates to:
+  /// **'Indiquez une priorité d\'au moins 1.'**
+  String get ruleFormPriorityInvalid;
+
+  /// Label of the rule editor's pattern field.
+  ///
+  /// In fr, this message translates to:
+  /// **'Motif'**
+  String get ruleFormPatternLabel;
+
+  /// Validation message when the pattern is left empty.
+  ///
+  /// In fr, this message translates to:
+  /// **'Indiquez ce que la règle doit reconnaître.'**
+  String get ruleFormPatternRequired;
+
+  /// Helper under the pattern field for the contains and equals conditions.
+  ///
+  /// In fr, this message translates to:
+  /// **'Recherche insensible à la casse dans le champ choisi.'**
+  String get rulePatternHelperText;
+
+  /// Helper under the pattern field for the regex condition.
+  ///
+  /// In fr, this message translates to:
+  /// **'Expression régulière, sensible à la casse. Testée en direct ci-dessous.'**
+  String get rulePatternHelperRegex;
+
+  /// Helper under the pattern field for the range condition. Names the unit and the sign, both of which the user cannot guess.
+  ///
+  /// In fr, this message translates to:
+  /// **'Plage de montants en centimes, « min:max ». Laissez un côté vide pour une borne ouverte ; les dépenses sont négatives.'**
+  String get rulePatternHelperRange;
+
+  /// Placeholder example in the pattern field for a text condition.
+  ///
+  /// In fr, this message translates to:
+  /// **'CARREFOUR'**
+  String get rulePatternHintText;
+
+  /// Placeholder example in the pattern field for a regex condition.
+  ///
+  /// In fr, this message translates to:
+  /// **'^CB .*CARREFOUR'**
+  String get rulePatternHintRegex;
+
+  /// Placeholder example in the pattern field for a range condition.
+  ///
+  /// In fr, this message translates to:
+  /// **'-10000:-5000'**
+  String get rulePatternHintRange;
+
+  /// Label of the rule editor's target-category select.
+  ///
+  /// In fr, this message translates to:
+  /// **'Catégorie attribuée'**
+  String get ruleFormCategoryLabel;
+
+  /// Empty option of the target-category select.
+  ///
+  /// In fr, this message translates to:
+  /// **'Choisir une catégorie'**
+  String get ruleFormCategoryNone;
+
+  /// Error shown when saving a rule with no target category.
+  ///
+  /// In fr, this message translates to:
+  /// **'Choisissez la catégorie que cette règle attribue.'**
+  String get ruleFormCategoryRequired;
+
+  /// Label beside the rule editor's enable switch.
+  ///
+  /// In fr, this message translates to:
+  /// **'Règle active'**
+  String get ruleFormEnabledLabel;
+
+  /// Cancel button of the rule editor.
+  ///
+  /// In fr, this message translates to:
+  /// **'Annuler'**
+  String get ruleFormCancel;
+
+  /// Submit button of the rule editor.
+  ///
+  /// In fr, this message translates to:
+  /// **'Enregistrer'**
+  String get ruleFormSave;
+
+  /// Delete action in the rule editor's footer, shown only when editing.
+  ///
+  /// In fr, this message translates to:
+  /// **'Supprimer'**
+  String get ruleFormDelete;
+
+  /// Info banner shown while the match preview is in flight.
+  ///
+  /// In fr, this message translates to:
+  /// **'Recherche des transactions correspondantes…'**
+  String get rulePreviewLoading;
+
+  /// Match-preview banner when the backend returned no example to quote.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, =0{Ne correspond à aucune transaction existante.} one{Correspond à {count} transaction existante.} other{Correspond à {count} transactions existantes.}}'**
+  String rulePreviewCount(int count);
+
+  /// Match-preview banner naming one of the matched transactions, so the user can tell whether the rule caught what they meant.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, one{Correspond à {count} transaction existante — « {sample} » du {date}.} other{Correspond à {count} transactions existantes — dont « {sample} » du {date}.}}'**
+  String rulePreviewCountWithSample(int count, String sample, String date);
+
+  /// Localized message for RULE_PATTERN_INVALID. Rendered on the pattern field, never as a match count of zero.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ce motif n\'est pas une expression régulière valide.'**
+  String get ruleErrorPatternInvalid;
+
+  /// Localized message for the backend's RULE_NOT_FOUND code.
+  ///
+  /// In fr, this message translates to:
+  /// **'Cette règle n\'existe plus.'**
+  String get ruleErrorNotFound;
+
+  /// Localized message when a rule targets a category the backend can no longer resolve.
+  ///
+  /// In fr, this message translates to:
+  /// **'La catégorie visée n\'existe plus.'**
+  String get ruleErrorCategoryNotFound;
+
+  /// Localized message for a VALIDATION_ERROR on a rule write.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ces informations ne sont pas valides. Vérifiez le motif et la priorité.'**
+  String get ruleErrorValidation;
+
+  /// Fallback message for unrecognized or network errors on the rules view.
+  ///
+  /// In fr, this message translates to:
+  /// **'Une erreur est survenue. Veuillez réessayer.'**
+  String get ruleErrorGeneric;
+
+  /// Tooltip on the rules view's pack menu.
+  ///
+  /// In fr, this message translates to:
+  /// **'Importer / Exporter des règles'**
+  String get rulePackMenuTooltip;
+
+  /// Pack menu entry opening the file picker.
+  ///
+  /// In fr, this message translates to:
+  /// **'Importer un fichier…'**
+  String get rulePackImportFile;
+
+  /// Pack menu entry importing one of the packs bundled with the app.
+  ///
+  /// In fr, this message translates to:
+  /// **'Importer « {name} »'**
+  String rulePackImportBuiltin(String name);
+
+  /// Pack menu entry opening the export review sheet.
+  ///
+  /// In fr, this message translates to:
+  /// **'Exporter mes règles…'**
+  String get rulePackExportAction;
+
+  /// Cancel button on the pack import and export sheets.
+  ///
+  /// In fr, this message translates to:
+  /// **'Annuler'**
+  String get rulePackCancel;
+
+  /// Button closing the refused-pack explanation.
+  ///
+  /// In fr, this message translates to:
+  /// **'Fermer'**
+  String get rulePackClose;
+
+  /// Title of the dialog explaining why a pack was refused.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ce fichier n\'a pas été accepté'**
+  String get rulePackRefusedTitle;
+
+  /// Refusal reason: the file isn't a pack-shaped JSON document.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ce fichier n\'est pas un pack de règles FinStride. Attendu : un fichier JSON avec un nom, une version de format et une liste de règles.'**
+  String get rulePackRefusedMalformed;
+
+  /// Refusal reason: unsupported format_version. Says why the pack is refused outright rather than read best-effort.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ce pack utilise une version de format que cette version de FinStride ne lit pas. Elle lit la version {version}. Un pack partiellement compris perdrait silencieusement des règles, il est donc refusé en entier.'**
+  String rulePackRefusedVersion(int version);
+
+  /// Refusal reason: the pack contains a regex rule. Names the risk, and the three types that are accepted.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ce pack contient une règle « regex ». Les expressions régulières ne sont pas acceptées dans un pack partagé : une expression venue d\'un fichier tiers peut bloquer votre machine. Utilisez « contient », « égal à » ou « plage ».'**
+  String get rulePackRefusedRegex;
+
+  /// Headline of the import confirmation. The figure the backend reports covers the user's currently-uncategorized transactions.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, =0{Ce pack ne catégoriserait aucune de vos transactions non catégorisées.} one{Ce pack catégoriserait {count} de vos transactions non catégorisées.} other{Ce pack catégoriserait {count} de vos transactions non catégorisées.}}'**
+  String rulePackWouldMatch(int count);
+
+  /// Report line: how many rules the pack holds.
+  ///
+  /// In fr, this message translates to:
+  /// **'Règles dans le pack'**
+  String get rulePackRuleCount;
+
+  /// Report line: how many would actually be created.
+  ///
+  /// In fr, this message translates to:
+  /// **'Nouvelles règles'**
+  String get rulePackNewCount;
+
+  /// Report line: how many are already among the user's rules.
+  ///
+  /// In fr, this message translates to:
+  /// **'Doublons ignorés'**
+  String get rulePackDuplicateCount;
+
+  /// Report line: how many rules point at a category this install doesn't have.
+  ///
+  /// In fr, this message translates to:
+  /// **'Catégories introuvables'**
+  String get rulePackUnresolvedCount;
+
+  /// Detail under the unresolved count, naming the category keys that could not be resolved.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ces règles seront ignorées : {keys}'**
+  String rulePackUnresolvedDetail(String keys);
+
+  /// Section label above the sample transactions in the import report.
+  ///
+  /// In fr, this message translates to:
+  /// **'Exemples de transactions concernées'**
+  String get rulePackSamplesLabel;
+
+  /// Label beside the apply-now switch on the import sheet.
+  ///
+  /// In fr, this message translates to:
+  /// **'Appliquer les règles à mes transactions existantes après l\'import'**
+  String get rulePackApplyNowLabel;
+
+  /// Confirm button on the import sheet.
+  ///
+  /// In fr, this message translates to:
+  /// **'Importer'**
+  String get rulePackImportConfirm;
+
+  /// First line of the toast after a pack import.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, =0{Aucune règle importée} one{{count} règle importée} other{{count} règles importées}}'**
+  String rulePackImportedTitle(int count);
+
+  /// Second line of the import toast when the rules were applied straight away.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, =0{Aucune transaction n\'a changé de catégorie.} one{{count} transaction recatégorisée.} other{{count} transactions recatégorisées.}}'**
+  String rulePackImportedBody(int count);
+
+  /// Toast headline when a pack import failed.
+  ///
+  /// In fr, this message translates to:
+  /// **'L\'import a échoué'**
+  String get rulePackImportFailed;
+
+  /// Title of the export review sheet.
+  ///
+  /// In fr, this message translates to:
+  /// **'Exporter mes règles'**
+  String get rulePackExportTitle;
+
+  /// Warning at the top of the export sheet. Names a concrete example, because the abstract warning is the one nobody reads.
+  ///
+  /// In fr, this message translates to:
+  /// **'Relisez avant d\'enregistrer : un motif peut contenir des informations personnelles — le nom de votre propriétaire, « VIR SALAIRE DUPONT ».'**
+  String get rulePackExportPrivacyNotice;
+
+  /// Section label above the verbatim pack contents in the export sheet.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, =0{Contenu du fichier — aucune règle} one{Contenu du fichier — {count} règle} other{Contenu du fichier — {count} règles}}'**
+  String rulePackExportContents(int count);
+
+  /// Section label above the rules an export could not carry.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, one{{count} règle non exportable} other{{count} règles non exportables}}'**
+  String rulePackOmittedLabel(int count);
+
+  /// Explains one omitted rule: it uses a regex, which no importer accepts.
+  ///
+  /// In fr, this message translates to:
+  /// **'« {pattern} » — les règles regex ne peuvent pas figurer dans un pack.'**
+  String rulePackOmittedRegex(String pattern);
+
+  /// Explains one omitted rule: it targets a user-defined category, which has no portable key.
+  ///
+  /// In fr, this message translates to:
+  /// **'« {pattern} » — vise une catégorie personnalisée, qui n\'a pas d\'identifiant partageable.'**
+  String rulePackOmittedUserCategory(String pattern);
+
+  /// Save button on the export sheet.
+  ///
+  /// In fr, this message translates to:
+  /// **'Enregistrer'**
+  String get rulePackExportSave;
+
+  /// First line of the toast after an export is written to disk.
+  ///
+  /// In fr, this message translates to:
+  /// **'Pack enregistré'**
+  String get rulePackExportedTitle;
+
+  /// Toast headline when preparing or writing an export failed.
+  ///
+  /// In fr, this message translates to:
+  /// **'L\'export a échoué'**
+  String get rulePackExportFailed;
+
+  /// CTA on the rules empty state offering the bundled pack, named and sized.
+  ///
+  /// In fr, this message translates to:
+  /// **'Commencer avec « {name} » ({count} règles)'**
+  String rulePackStartWith(String name, int count);
+
+  /// Reassurance under the bundled-pack CTA: the preview step always comes first.
+  ///
+  /// In fr, this message translates to:
+  /// **'Vous verrez ce que le pack ferait avant de l\'importer.'**
+  String get rulePackStartWithHelper;
+
+  /// Subtext on the review queue's header card when local AI is active, counting the rows it proposed a category for.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, =0{Aucune de ces transactions n\'a reçu de proposition de l\'IA locale — confirmez ou corrigez, rien n\'est classé sans vous.} one{L\'IA locale propose une catégorie pour l\'une d\'entre elles — confirmez ou corrigez, rien n\'est classé sans vous.} other{L\'IA locale propose une catégorie pour {count} d\'entre elles — confirmez ou corrigez, rien n\'est classé sans vous.}}'**
+  String reviewQueueAiSubtitle(int count);
+
+  /// Resolved-progress label on the review queue's header card: rows already dealt with, out of the queue's size this session.
+  ///
+  /// In fr, this message translates to:
+  /// **'{resolved}/{total} · {percent}'**
+  String reviewQueueProgress(int resolved, int total, double percent);
+
+  /// Calm invitation at the foot of the review queue's header card when AI is off or the runtime is unreachable. The only place in the app that mentions it.
+  ///
+  /// In fr, this message translates to:
+  /// **'Activez l\'IA locale pour classer automatiquement les transactions que vos règles n\'ont pas reconnues.'**
+  String get reviewAiInvitation;
+
+  /// Link at the end of the AI invitation, opening the settings panel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Paramètres'**
+  String get reviewAiInvitationLink;
+
+  /// Caption beside a proposal's confidence gauge. Always a percentage, never the raw [0,1] value the API returns.
+  ///
+  /// In fr, this message translates to:
+  /// **'Confiance {confidence}'**
+  String reviewConfidence(double confidence);
+
+  /// Row action accepting the model's proposed category as-is.
+  ///
+  /// In fr, this message translates to:
+  /// **'Confirmer'**
+  String get reviewConfirm;
+
+  /// Row action opening the category picker to replace the model's proposal.
+  ///
+  /// In fr, this message translates to:
+  /// **'Corriger'**
+  String get reviewCorrect;
+
+  /// Italic note on a review row the model made no proposal for.
+  ///
+  /// In fr, this message translates to:
+  /// **'— aucune proposition'**
+  String get reviewNoProposal;
+
+  /// Link on a review row with no proposal, opening the category picker.
+  ///
+  /// In fr, this message translates to:
+  /// **'Choisir une catégorie'**
+  String get reviewChooseCategory;
+
+  /// Subtext under the always-categorize modal's title, naming the transaction the rule was derived from.
+  ///
+  /// In fr, this message translates to:
+  /// **'Une règle classe ces transactions sans IA, à chaque import — pré-remplie depuis « {label} ».'**
+  String alwaysRuleSubtitle(String label);
+
+  /// Label of the always-categorize modal's target-category select.
+  ///
+  /// In fr, this message translates to:
+  /// **'Catégorie cible'**
+  String get alwaysRuleCategoryLabel;
+
+  /// Checkbox in the always-categorize modal: re-run the new rule over transactions already imported.
+  ///
+  /// In fr, this message translates to:
+  /// **'Appliquer aux transactions existantes'**
+  String get alwaysRuleApplyExisting;
+
+  /// Confirm button of the always-categorize modal.
+  ///
+  /// In fr, this message translates to:
+  /// **'Créer la règle'**
+  String get alwaysRuleSubmit;
+
+  /// Success toast headline after a rule was created from a correction.
+  ///
+  /// In fr, this message translates to:
+  /// **'Règle créée'**
+  String get alwaysRuleCreatedTitle;
+
+  /// Success toast subtext after a rule was created from a correction, counting the other rows it moved.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, =0{Aucune autre transaction n\'a changé de catégorie.} one{{count} transaction recatégorisée.} other{{count} transactions recatégorisées.}}'**
+  String alwaysRuleCreatedBody(int count);
+
+  /// Shown in the always-categorize modal when the server-side pre-fill could not be fetched — the form stays usable.
+  ///
+  /// In fr, this message translates to:
+  /// **'Impossible de pré-remplir la règle. Renseignez le motif vous-même.'**
+  String get alwaysRuleSuggestionFailed;
+
+  /// Action on the review queue's header card that starts a local-AI categorization run over the pending rows.
+  ///
+  /// In fr, this message translates to:
+  /// **'Catégoriser avec l\'IA'**
+  String get reviewQueueRunAction;
+
+  /// Headline of the banner that replaces the review queue's header card while a run is classifying.
+  ///
+  /// In fr, this message translates to:
+  /// **'{total, plural, one{Catégorisation en cours — {processed} sur {total} transaction} other{Catégorisation en cours — {processed} sur {total} transactions}}'**
+  String runBannerRunning(int processed, int total);
+
+  /// Sub-line under the running banner: what the run has settled, what it has left for the user, and the reassurance that nothing is blocked.
+  ///
+  /// In fr, this message translates to:
+  /// **'{assigned, plural, one{{assigned} classée · {deferred} à vérifier · le panneau reste utilisable} other{{assigned} classées · {deferred} à vérifier · le panneau reste utilisable}}'**
+  String runBannerRunningDetail(int assigned, int deferred);
+
+  /// Cancels the categorization run in flight. The executor stops after the batch it is on.
+  ///
+  /// In fr, this message translates to:
+  /// **'Annuler'**
+  String get runBannerCancel;
+
+  /// Dismissible amber banner after a run that ended `partial`. A report, not an error wall.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, one{Catégorisation terminée — {count} transaction n\'a pas pu être analysée.} other{Catégorisation terminée — {count} transactions n\'ont pas pu être analysées.}}'**
+  String runBannerPartial(int count);
+
+  /// Link on the partial-run banner, showing the transactions the run could not analyse.
+  ///
+  /// In fr, this message translates to:
+  /// **'Voir'**
+  String get runBannerPartialAction;
+
+  /// Banner after a run that ended `failed` — reported plainly; the queue stays fully usable.
+  ///
+  /// In fr, this message translates to:
+  /// **'La catégorisation n\'a pas pu s\'exécuter.'**
+  String get runBannerFailed;
+
+  /// Accessible label of the × that dismisses a finished-run banner.
+  ///
+  /// In fr, this message translates to:
+  /// **'Fermer'**
+  String get runBannerDismiss;
+
+  /// Shown when starting or cancelling a run failed. The queue is unaffected.
+  ///
+  /// In fr, this message translates to:
+  /// **'Impossible de lancer la catégorisation pour le moment.'**
+  String get runStartFailed;
+
+  /// Title of the local-AI card in the settings Données tab.
+  ///
+  /// In fr, this message translates to:
+  /// **'IA locale'**
+  String get settingsAiTitle;
+
+  /// Sub-line under the card title, naming what the toggle beside it does.
+  ///
+  /// In fr, this message translates to:
+  /// **'Activer la catégorisation par IA'**
+  String get settingsAiSubtitle;
+
+  /// Accessible label of the card's opt-in toggle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Catégorisation par IA'**
+  String get settingsAiToggleLabel;
+
+  /// The card's privacy callout — its centerpiece. Visible whenever the card is, whether or not AI is enabled.
+  ///
+  /// In fr, this message translates to:
+  /// **'Les descriptions de vos transactions sont envoyées à un modèle qui s\'exécute sur cet ordinateur. Rien ne quitte votre machine.'**
+  String get settingsAiPrivacy;
+
+  /// Label of the inference base URL field.
+  ///
+  /// In fr, this message translates to:
+  /// **'Adresse du moteur'**
+  String get settingsAiBaseUrlLabel;
+
+  /// Helper under the engine address field, stating the loopback-only rule.
+  ///
+  /// In fr, this message translates to:
+  /// **'Adresse locale uniquement — 127.0.0.1 ou localhost.'**
+  String get settingsAiBaseUrlHelp;
+
+  /// Inline validation shown on the address field when the backend refuses a non-loopback URL (422). States why it was refused, not only that it was.
+  ///
+  /// In fr, this message translates to:
+  /// **'Adresse refusée : le moteur doit s\'exécuter sur cet ordinateur (127.0.0.1 ou localhost). Une adresse distante enverrait les descriptions de vos transactions hors de votre machine.'**
+  String get settingsAiBaseUrlRejected;
+
+  /// Label of the model tag field.
+  ///
+  /// In fr, this message translates to:
+  /// **'Modèle'**
+  String get settingsAiModelLabel;
+
+  /// Helper under the model field: the list comes from the engine, but any tag can be typed.
+  ///
+  /// In fr, this message translates to:
+  /// **'Liste fournie par le moteur — saisie manuelle possible.'**
+  String get settingsAiModelHelp;
+
+  /// Helper under the model field when no engine answered, where the field degrades to a dashed read-only dash.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucun modèle — moteur injoignable.'**
+  String get settingsAiModelUnavailable;
+
+  /// Accessible label of the control opening the list of models the engine reported.
+  ///
+  /// In fr, this message translates to:
+  /// **'Choisir un modèle'**
+  String get settingsAiModelChoose;
+
+  /// Label above the threshold slider, carrying its live percentage. Only this label is a percentage — the stored value is the [0,1] real the API defines.
+  ///
+  /// In fr, this message translates to:
+  /// **'Seuil de confiance — {threshold}'**
+  String settingsAiThresholdLabel(double threshold);
+
+  /// Helper under the threshold slider, stating what the threshold decides.
+  ///
+  /// In fr, this message translates to:
+  /// **'En dessous de ce seuil, la transaction vous est proposée pour vérification plutôt que classée automatiquement.'**
+  String get settingsAiThresholdHelp;
+
+  /// Status row when the runtime answered, with the number of models it reported.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, =0{Connecté — aucun modèle disponible} =1{Connecté — 1 modèle disponible} other{Connecté — {count} modèles disponibles}}'**
+  String settingsAiStatusConnected(int count);
+
+  /// Status row when nothing answered at the configured address.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucun moteur détecté à cette adresse.'**
+  String get settingsAiStatusUnreachable;
+
+  /// Status row while the user has not opted in. The connection test stays available so an engine can be checked before opting in.
+  ///
+  /// In fr, this message translates to:
+  /// **'Catégorisation par IA désactivée.'**
+  String get settingsAiStatusDisabled;
+
+  /// Link beside the no-engine status, opening the local runtime's download page in the browser.
+  ///
+  /// In fr, this message translates to:
+  /// **'En savoir plus'**
+  String get settingsAiLearnMore;
+
+  /// Button that probes the configured runtime.
+  ///
+  /// In fr, this message translates to:
+  /// **'Tester la connexion'**
+  String get settingsAiTest;
+
+  /// Label the connection-test button takes while its probe is in flight.
+  ///
+  /// In fr, this message translates to:
+  /// **'Test en cours…'**
+  String get settingsAiTesting;
+
+  /// Shown in place of the local-AI card when reading the settings failed.
+  ///
+  /// In fr, this message translates to:
+  /// **'Impossible de charger vos paramètres pour le moment.'**
+  String get settingsAiLoadFailed;
+
+  /// Retry action on the local-AI card's error state.
+  ///
+  /// In fr, this message translates to:
+  /// **'Réessayer'**
+  String get settingsAiRetry;
+
+  /// Title of the backup card in Settings › Données.
+  ///
+  /// In fr, this message translates to:
+  /// **'Sauvegarde et restauration'**
+  String get settingsBackupTitle;
+
+  /// Line under the backup card's title.
+  ///
+  /// In fr, this message translates to:
+  /// **'Exportez toutes vos données dans un fichier que vous pourrez réimporter.'**
+  String get settingsBackupSubtitle;
+
+  /// Label of the export row on the backup card.
+  ///
+  /// In fr, this message translates to:
+  /// **'Exporter toutes les données'**
+  String get settingsBackupExportLabel;
+
+  /// Caption under the export row's label: what the file contains.
+  ///
+  /// In fr, this message translates to:
+  /// **'Fichier .finstride — comptes, transactions, catégories, règles, objectifs, paramètres.'**
+  String get settingsBackupExportCaption;
+
+  /// Replaces the export caption while the archive is being built.
+  ///
+  /// In fr, this message translates to:
+  /// **'Préparation de l\'archive…'**
+  String get settingsBackupExportPreparing;
+
+  /// Primary button that exports a full backup.
+  ///
+  /// In fr, this message translates to:
+  /// **'Exporter'**
+  String get settingsBackupExport;
+
+  /// Line under the export row with the time of the latest backup.
+  ///
+  /// In fr, this message translates to:
+  /// **'Dernière sauvegarde : {when}'**
+  String settingsBackupLast(String when);
+
+  /// Shown under the export row when the user has never exported a backup.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucune sauvegarde pour l\'instant.'**
+  String get settingsBackupNone;
+
+  /// A backup timestamp: a locale-formatted date then time.
+  ///
+  /// In fr, this message translates to:
+  /// **'{date} à {time}'**
+  String settingsBackupDateTime(String date, String time);
+
+  /// Lock callout on the backup card warning that the archive is unencrypted.
+  ///
+  /// In fr, this message translates to:
+  /// **'Le fichier n\'est pas chiffré. Conservez-le en lieu sûr — il contient tout votre historique financier.'**
+  String get settingsBackupPrivacy;
+
+  /// Label of the restore row on the backup card.
+  ///
+  /// In fr, this message translates to:
+  /// **'Restaurer une sauvegarde'**
+  String get settingsBackupRestoreTitle;
+
+  /// Line under the restore row's label.
+  ///
+  /// In fr, this message translates to:
+  /// **'Remplace toutes les données actuelles.'**
+  String get settingsBackupRestoreSubtitle;
+
+  /// Secondary button that opens the file picker to restore a backup.
+  ///
+  /// In fr, this message translates to:
+  /// **'Importer un fichier…'**
+  String get settingsBackupRestoreButton;
+
+  /// Bold lead of the error banner shown when a chosen backup cannot be restored.
+  ///
+  /// In fr, this message translates to:
+  /// **'Restauration impossible.'**
+  String get settingsBackupRestoreFailedLead;
+
+  /// Restore refused: the archive was written by a newer app version (BACKUP_TOO_NEW).
+  ///
+  /// In fr, this message translates to:
+  /// **'Ce fichier provient d\'une version plus récente de FinStride. Mettez l\'application à jour pour le restaurer.'**
+  String get settingsBackupErrorTooNew;
+
+  /// Restore refused: not a FinStride archive or corrupted (BACKUP_INVALID).
+  ///
+  /// In fr, this message translates to:
+  /// **'Ce fichier n\'est pas une sauvegarde FinStride valide, ou il est endommagé.'**
+  String get settingsBackupErrorInvalid;
+
+  /// Restore refused: the archive's currency differs from the user's (BACKUP_CURRENCY_MISMATCH).
+  ///
+  /// In fr, this message translates to:
+  /// **'Cette sauvegarde utilise une autre devise que votre compte.'**
+  String get settingsBackupErrorCurrency;
+
+  /// Restore refused while a categorization run is in flight (BACKUP_RUN_ACTIVE).
+  ///
+  /// In fr, this message translates to:
+  /// **'Une catégorisation est en cours. Attendez qu\'elle se termine, puis réessayez.'**
+  String get settingsBackupErrorRunActive;
+
+  /// Restore refused: its rows belong to another account still in this database (BACKUP_CONFLICT).
+  ///
+  /// In fr, this message translates to:
+  /// **'Cette sauvegarde appartient à un autre compte présent sur cet ordinateur.'**
+  String get settingsBackupErrorConflict;
+
+  /// Restore failed for any other reason; nothing was changed.
+  ///
+  /// In fr, this message translates to:
+  /// **'La restauration a échoué. Vos données n\'ont pas été modifiées.'**
+  String get settingsBackupErrorUnknown;
+
+  /// Toast after a backup was written. The String placeholders are the locale-formatted counts.
+  ///
+  /// In fr, this message translates to:
+  /// **'Sauvegarde enregistrée — {transactionCount, plural, one{{transactions} transaction} other{{transactions} transactions}}, {accountCount, plural, one{{accounts} compte} other{{accounts} comptes}}.'**
+  String settingsBackupExported(
+    int transactionCount,
+    String transactions,
+    int accountCount,
+    String accounts,
+  );
+
+  /// Error toast when building or writing the backup failed.
+  ///
+  /// In fr, this message translates to:
+  /// **'L\'export a échoué. Réessayez.'**
+  String get settingsBackupExportFailed;
+
+  /// Title of the restore confirmation modal.
+  ///
+  /// In fr, this message translates to:
+  /// **'Restaurer cette sauvegarde ?'**
+  String get settingsBackupConfirmTitle;
+
+  /// Subtitle lead of the restore modal, followed by the file name.
+  ///
+  /// In fr, this message translates to:
+  /// **'Fichier sélectionné :'**
+  String get settingsBackupConfirmFile;
+
+  /// Summary row: when the backup was exported.
+  ///
+  /// In fr, this message translates to:
+  /// **'Exporté le'**
+  String get settingsBackupConfirmExportedAt;
+
+  /// Summary row: the app version that wrote the backup.
+  ///
+  /// In fr, this message translates to:
+  /// **'Version de l\'application'**
+  String get settingsBackupConfirmVersion;
+
+  /// Summary row: number of accounts in the backup.
+  ///
+  /// In fr, this message translates to:
+  /// **'Comptes'**
+  String get settingsBackupConfirmAccounts;
+
+  /// Summary row: number of transactions in the backup.
+  ///
+  /// In fr, this message translates to:
+  /// **'Transactions'**
+  String get settingsBackupConfirmTransactions;
+
+  /// Summary row: number of user categories in the backup.
+  ///
+  /// In fr, this message translates to:
+  /// **'Catégories'**
+  String get settingsBackupConfirmCategories;
+
+  /// Summary row: number of categorization rules in the backup.
+  ///
+  /// In fr, this message translates to:
+  /// **'Règles'**
+  String get settingsBackupConfirmRules;
+
+  /// Summary row: number of recurring series in the backup.
+  ///
+  /// In fr, this message translates to:
+  /// **'Abonnements'**
+  String get settingsBackupConfirmSubscriptions;
+
+  /// Summary row: number of savings goals in the backup.
+  ///
+  /// In fr, this message translates to:
+  /// **'Objectifs'**
+  String get settingsBackupConfirmGoals;
+
+  /// Warning callout in the restore modal.
+  ///
+  /// In fr, this message translates to:
+  /// **'Toutes vos données actuelles seront remplacées. Exportez-les d\'abord si besoin.'**
+  String get settingsBackupConfirmWarning;
+
+  /// Dismisses the restore modal without changing anything.
+  ///
+  /// In fr, this message translates to:
+  /// **'Annuler'**
+  String get settingsBackupCancel;
+
+  /// Destructive confirm button of the restore modal.
+  ///
+  /// In fr, this message translates to:
+  /// **'Remplacer mes données'**
+  String get settingsBackupReplace;
+
+  /// Toast after a restore completed.
+  ///
+  /// In fr, this message translates to:
+  /// **'Sauvegarde restaurée'**
+  String get settingsBackupRestored;
+
+  /// Sidebar entry for the recurring payments panel, third in the Gestion group.
+  ///
+  /// In fr, this message translates to:
+  /// **'Récurrents'**
+  String get navSubscriptions;
+
+  /// Top-bar descriptor under the recurring payments panel title.
+  ///
+  /// In fr, this message translates to:
+  /// **'Vos paiements récurrents, détectés automatiquement'**
+  String get navSubscriptionsSubtitle;
+
+  /// Secondary top-bar button re-running detection over the imported ledger.
+  ///
+  /// In fr, this message translates to:
+  /// **'Détecter'**
+  String get subscriptionsDetect;
+
+  /// Label the detect button takes while a pass is in flight.
+  ///
+  /// In fr, this message translates to:
+  /// **'Détection…'**
+  String get subscriptionsDetectRunning;
+
+  /// Primary top-bar button opening the manual-creation modal.
+  ///
+  /// In fr, this message translates to:
+  /// **'Nouveau paiement récurrent'**
+  String get subscriptionsAdd;
+
+  /// Toast headline after a detection pass, counting what it created.
+  ///
+  /// In fr, this message translates to:
+  /// **'{created, plural, =0{Aucun nouveau paiement récurrent détecté} =1{1 nouveau paiement récurrent détecté} other{{created} nouveaux paiements récurrents détectés}}'**
+  String subscriptionsDetectResult(int created);
+
+  /// Second toast line after a detection pass, counting what it refreshed.
+  ///
+  /// In fr, this message translates to:
+  /// **'{updated, plural, =0{Aucune série existante mise à jour} =1{1 série existante mise à jour} other{{updated} séries existantes mises à jour}}'**
+  String subscriptionsDetectResultDetail(int updated);
+
+  /// Toast headline when the detection call itself failed.
+  ///
+  /// In fr, this message translates to:
+  /// **'La détection n\'a pas pu s\'exécuter.'**
+  String get subscriptionsDetectFailed;
+
+  /// Label of the iris-tinted hero card carrying the monthly burden.
+  ///
+  /// In fr, this message translates to:
+  /// **'Charge mensuelle'**
+  String get subscriptionsBurdenLabel;
+
+  /// Caption under the monthly burden, naming the normalisation it applies.
+  ///
+  /// In fr, this message translates to:
+  /// **'Charges trimestrielles et annuelles ramenées au mois.'**
+  String get subscriptionsBurdenCaption;
+
+  /// Appended to the burden caption so the figure names its own exclusion rather than disagreeing silently with the count beside it.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, =1{1 paiement terminé exclu.} other{{count} paiements terminés exclus.}}'**
+  String subscriptionsBurdenExcluded(int count);
+
+  /// Label of the card counting the recurring payments still running.
+  ///
+  /// In fr, this message translates to:
+  /// **'Paiements actifs'**
+  String get subscriptionsActiveLabel;
+
+  /// Weekly share of the active count, in the cadence breakdown caption.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, =1{1 hebdomadaire} other{{count} hebdomadaires}}'**
+  String subscriptionsCadenceWeeklyCount(int count);
+
+  /// Monthly share of the active count, in the cadence breakdown caption.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, =1{1 mensuel} other{{count} mensuels}}'**
+  String subscriptionsCadenceMonthlyCount(int count);
+
+  /// Quarterly share of the active count, in the cadence breakdown caption.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, =1{1 trimestriel} other{{count} trimestriels}}'**
+  String subscriptionsCadenceQuarterlyCount(int count);
+
+  /// Yearly share of the active count, in the cadence breakdown caption.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, =1{1 annuel} other{{count} annuels}}'**
+  String subscriptionsCadenceYearlyCount(int count);
+
+  /// Irregular share of the active count — user-declared series only.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, =1{1 irrégulier} other{{count} irréguliers}}'**
+  String subscriptionsCadenceIrregularCount(int count);
+
+  /// Tail of the cadence breakdown caption, naming the cancelled rows the active count leaves out.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, =1{1 terminé} other{{count} terminés}}'**
+  String subscriptionsCancelledCount(int count);
+
+  /// Label of the card naming the soonest charge ahead.
+  ///
+  /// In fr, this message translates to:
+  /// **'Prochain prélèvement'**
+  String get subscriptionsNextLabel;
+
+  /// Value line of the next-charge card: the payment and how far off it is.
+  ///
+  /// In fr, this message translates to:
+  /// **'{label} — {when}'**
+  String subscriptionsNextValue(String label, String when);
+
+  /// Caption of the next-charge card: the amount and the exact date.
+  ///
+  /// In fr, this message translates to:
+  /// **'{amount} · {date}'**
+  String subscriptionsNextCaption(String amount, String date);
+
+  /// Relative phrasing for a charge due today.
+  ///
+  /// In fr, this message translates to:
+  /// **'aujourd\'hui'**
+  String get subscriptionsNextToday;
+
+  /// Relative phrasing for a charge due tomorrow.
+  ///
+  /// In fr, this message translates to:
+  /// **'demain'**
+  String get subscriptionsNextTomorrow;
+
+  /// Relative phrasing for a charge further ahead.
+  ///
+  /// In fr, this message translates to:
+  /// **'{days, plural, =1{dans 1 jour} other{dans {days} jours}}'**
+  String subscriptionsNextInDays(int days);
+
+  /// Value of the next-charge card when no running series expects one.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucun prélèvement à venir'**
+  String get subscriptionsNextNone;
+
+  /// Table header over the payment name column.
+  ///
+  /// In fr, this message translates to:
+  /// **'Libellé'**
+  String get subscriptionsColumnName;
+
+  /// Table header over the category chip column.
+  ///
+  /// In fr, this message translates to:
+  /// **'Catégorie'**
+  String get subscriptionsColumnCategory;
+
+  /// Table header over the cadence column.
+  ///
+  /// In fr, this message translates to:
+  /// **'Cadence'**
+  String get subscriptionsColumnCadence;
+
+  /// Table header over the expected-amount column.
+  ///
+  /// In fr, this message translates to:
+  /// **'Montant'**
+  String get subscriptionsColumnAmount;
+
+  /// Table header over the next-charge date column.
+  ///
+  /// In fr, this message translates to:
+  /// **'Prochain'**
+  String get subscriptionsColumnNext;
+
+  /// Table header over the status-pill column, which is empty for a healthy row.
+  ///
+  /// In fr, this message translates to:
+  /// **'Statut'**
+  String get subscriptionsColumnStatus;
+
+  /// Placeholder in a cell with nothing to state — a cancelled row's next charge.
+  ///
+  /// In fr, this message translates to:
+  /// **'—'**
+  String get subscriptionsValueNone;
+
+  /// Cadence name: every week.
+  ///
+  /// In fr, this message translates to:
+  /// **'Hebdomadaire'**
+  String get cadenceWeekly;
+
+  /// Cadence name: every month.
+  ///
+  /// In fr, this message translates to:
+  /// **'Mensuel'**
+  String get cadenceMonthly;
+
+  /// Cadence name: every quarter.
+  ///
+  /// In fr, this message translates to:
+  /// **'Trimestriel'**
+  String get cadenceQuarterly;
+
+  /// Cadence name: every year.
+  ///
+  /// In fr, this message translates to:
+  /// **'Annuel'**
+  String get cadenceYearly;
+
+  /// Cadence name for a user-declared series with no rhythm. Detection never produces it.
+  ///
+  /// In fr, this message translates to:
+  /// **'Irrégulier'**
+  String get cadenceIrregular;
+
+  /// Amber status pill on a row whose charge recently grew.
+  ///
+  /// In fr, this message translates to:
+  /// **'Augmentation · {from} → {to}'**
+  String subscriptionSignalIncrease(String from, String to);
+
+  /// Amber status pill on a row whose charge has not landed past its tolerance.
+  ///
+  /// In fr, this message translates to:
+  /// **'{days, plural, =1{Prélèvement manquant · 1 jour de retard} other{Prélèvement manquant · {days} jours de retard}}'**
+  String subscriptionSignalMissed(int days);
+
+  /// Gray status pill on a recurring payment the user ended. It stays listed, dimmed.
+  ///
+  /// In fr, this message translates to:
+  /// **'Terminé · dernier prélèvement {date}'**
+  String subscriptionSignalCancelled(String date);
+
+  /// Replaces the next-charge date on a row with a missed charge, in amber: the date is what was expected, not what is coming.
+  ///
+  /// In fr, this message translates to:
+  /// **'attendu le {date}'**
+  String subscriptionNextExpected(String date);
+
+  /// Tooltip of the row's kebab button.
+  ///
+  /// In fr, this message translates to:
+  /// **'Actions du paiement'**
+  String get subscriptionActionsTooltip;
+
+  /// Kebab action accepting a detected series — status becomes confirmed.
+  ///
+  /// In fr, this message translates to:
+  /// **'Confirmer'**
+  String get subscriptionActionConfirm;
+
+  /// Kebab action dismissing a series. Final: detection never revives a dismissed one.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ignorer'**
+  String get subscriptionActionDismiss;
+
+  /// Kebab action recording that the recurring payment has ended.
+  ///
+  /// In fr, this message translates to:
+  /// **'Marquer comme terminé'**
+  String get subscriptionActionCancel;
+
+  /// Kebab action opening the series in the edit form.
+  ///
+  /// In fr, this message translates to:
+  /// **'Modifier'**
+  String get subscriptionActionEdit;
+
+  /// Localized RECURRING_INVALID_TRANSITION.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ce changement de statut n\'est pas possible pour ce paiement.'**
+  String get subscriptionErrorInvalidTransition;
+
+  /// Localized RECURRING_SERIES_EXISTS.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ce compte suit déjà un paiement récurrent sous ce nom.'**
+  String get subscriptionErrorExists;
+
+  /// Localized RECURRING_SERIES_NOT_FOUND.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ce paiement récurrent n\'existe plus.'**
+  String get subscriptionErrorNotFound;
+
+  /// Localized ACCOUNT_NOT_FOUND, reachable from the creation form's account select.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ce compte n\'existe plus.'**
+  String get subscriptionErrorAccountNotFound;
+
+  /// Localized CATEGORY_INVALID on the recurring payment form, returned when the chosen category is not one the user may assign.
+  ///
+  /// In fr, this message translates to:
+  /// **'Cette catégorie n\'est plus disponible.'**
+  String get subscriptionErrorCategoryInvalid;
+
+  /// Localized VALIDATION_ERROR on the recurring payment form.
+  ///
+  /// In fr, this message translates to:
+  /// **'Vérifiez les informations saisies.'**
+  String get subscriptionErrorValidation;
+
+  /// Fallback for an error code this panel has no specific message for.
+  ///
+  /// In fr, this message translates to:
+  /// **'Une erreur est survenue. Réessayez.'**
+  String get subscriptionErrorGeneric;
+
+  /// Error state replacing the panel when the list or summary failed to load.
+  ///
+  /// In fr, this message translates to:
+  /// **'Impossible de charger vos paiements récurrents pour le moment.'**
+  String get subscriptionsLoadFailed;
+
+  /// Retry action on the recurring payments error state.
+  ///
+  /// In fr, this message translates to:
+  /// **'Réessayer'**
+  String get subscriptionsRetry;
+
+  /// Empty-state title on the recurring payments panel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucun paiement récurrent détecté pour l\'instant'**
+  String get subscriptionsEmptyTitle;
+
+  /// Empty-state body, stating the three-repeat rule so the absence reads as a threshold rather than a failure.
+  ///
+  /// In fr, this message translates to:
+  /// **'FinStride repère un paiement récurrent lorsqu\'un prélèvement s\'est répété trois fois. Importer davantage d\'historique accélère la détection.'**
+  String get subscriptionsEmptyBody;
+
+  /// Empty-state CTA. It goes to imports rather than to manual creation because more history is the actual remedy.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aller aux imports'**
+  String get subscriptionsEmptyCta;
+
+  /// Iris back link at the top of the series detail.
+  ///
+  /// In fr, this message translates to:
+  /// **'Retour aux récurrents'**
+  String get subscriptionDetailBack;
+
+  /// Sub-line of the detail header for a detected series.
+  ///
+  /// In fr, this message translates to:
+  /// **'{account} · détecté depuis {month}'**
+  String subscriptionDetailDetectedSince(String account, String month);
+
+  /// Sub-line of the detail header for a user-declared series, which was never detected.
+  ///
+  /// In fr, this message translates to:
+  /// **'{account} · suivi depuis {month}'**
+  String subscriptionDetailTrackedSince(String account, String month);
+
+  /// Label of the cadence stat in the detail header.
+  ///
+  /// In fr, this message translates to:
+  /// **'Cadence'**
+  String get subscriptionDetailCadence;
+
+  /// Label of the expected-amount stat in the detail header.
+  ///
+  /// In fr, this message translates to:
+  /// **'Montant attendu'**
+  String get subscriptionDetailExpectedAmount;
+
+  /// Label of the next-charge stat in the detail header.
+  ///
+  /// In fr, this message translates to:
+  /// **'Prochain prélèvement'**
+  String get subscriptionDetailNextCharge;
+
+  /// Amber banner on the detail. The annualised figure is stated rather than left as a multiplication for the reader.
+  ///
+  /// In fr, this message translates to:
+  /// **'Augmentation : {from} → {to} le {date} — soit {annual} par an.'**
+  String subscriptionDetailIncrease(
+    String from,
+    String to,
+    String date,
+    String annual,
+  );
+
+  /// Title of the occurrence-history card on the detail.
+  ///
+  /// In fr, this message translates to:
+  /// **'Historique des prélèvements'**
+  String get subscriptionDetailHistoryTitle;
+
+  /// Sub-line of the history card, naming the evidence and the account it comes from.
+  ///
+  /// In fr, this message translates to:
+  /// **'Les transactions dont cette série est déduite · {account}'**
+  String subscriptionDetailHistorySubtitle(String account);
+
+  /// History card with no rows — the ordinary state of a series the user has just declared.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucun prélèvement rattaché à ce paiement pour l\'instant.'**
+  String get subscriptionDetailHistoryEmpty;
+
+  /// Amber pill marking the occurrence where the price stepped up.
+  ///
+  /// In fr, this message translates to:
+  /// **'{from} → {to}'**
+  String subscriptionDetailChange(String from, String to);
+
+  /// Foot note under the history: the user is being asked to trust a deduction, so the evidence is part of the screen.
+  ///
+  /// In fr, this message translates to:
+  /// **'FinStride déduit la série de ces occurrences — vérifiez-les avant de confirmer un changement.'**
+  String get subscriptionDetailFootnote;
+
+  /// Error state replacing the detail when it failed to load.
+  ///
+  /// In fr, this message translates to:
+  /// **'Impossible de charger ce paiement récurrent pour le moment.'**
+  String get subscriptionDetailLoadFailed;
+
+  /// Title of the manual-creation modal.
+  ///
+  /// In fr, this message translates to:
+  /// **'Nouveau paiement récurrent'**
+  String get subscriptionFormCreateTitle;
+
+  /// Title of the modal when editing an existing series.
+  ///
+  /// In fr, this message translates to:
+  /// **'Modifier le paiement récurrent'**
+  String get subscriptionFormEditTitle;
+
+  /// Sub-line under the creation modal's title.
+  ///
+  /// In fr, this message translates to:
+  /// **'Suivez un paiement récurrent que la détection n\'a pas encore repéré.'**
+  String get subscriptionFormIntro;
+
+  /// Label of the payment name field.
+  ///
+  /// In fr, this message translates to:
+  /// **'Nom'**
+  String get subscriptionFormNameLabel;
+
+  /// Validation message when the name field is empty.
+  ///
+  /// In fr, this message translates to:
+  /// **'Donnez un nom à ce paiement.'**
+  String get subscriptionFormNameRequired;
+
+  /// Label of the account select in the recurring payment form.
+  ///
+  /// In fr, this message translates to:
+  /// **'Compte'**
+  String get subscriptionFormAccountLabel;
+
+  /// Label of the amount field. The user types the charge as a positive figure; it is stored signed.
+  ///
+  /// In fr, this message translates to:
+  /// **'Montant'**
+  String get subscriptionFormAmountLabel;
+
+  /// Validation message when the amount is missing, unparseable, or not positive.
+  ///
+  /// In fr, this message translates to:
+  /// **'Saisissez un montant supérieur à zéro.'**
+  String get subscriptionFormAmountInvalid;
+
+  /// Label of the cadence select in the recurring payment form.
+  ///
+  /// In fr, this message translates to:
+  /// **'Cadence'**
+  String get subscriptionFormCadenceLabel;
+
+  /// Helper under the cadence select, listing what it offers. Irregular is offered here and nowhere else — detection never concludes it.
+  ///
+  /// In fr, this message translates to:
+  /// **'Hebdomadaire · Mensuel · Trimestriel · Annuel · Irrégulier'**
+  String get subscriptionFormCadenceHelp;
+
+  /// Label of the category select in the recurring payment form.
+  ///
+  /// In fr, this message translates to:
+  /// **'Catégorie'**
+  String get subscriptionFormCategoryLabel;
+
+  /// The no-category option in the recurring payment form's category select.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucune'**
+  String get subscriptionFormCategoryNone;
+
+  /// Shown in place of the account select when the user has no accounts yet.
+  ///
+  /// In fr, this message translates to:
+  /// **'Créez d\'abord un compte pour y suivre un paiement récurrent.'**
+  String get subscriptionFormNoAccounts;
+
+  /// Cancel action in the recurring payment modal footer.
+  ///
+  /// In fr, this message translates to:
+  /// **'Annuler'**
+  String get subscriptionFormCancel;
+
+  /// Confirm action when creating a recurring payment.
+  ///
+  /// In fr, this message translates to:
+  /// **'Créer le paiement récurrent'**
+  String get subscriptionFormSubmit;
+
+  /// Confirm action when editing a recurring payment.
+  ///
+  /// In fr, this message translates to:
+  /// **'Enregistrer'**
+  String get subscriptionFormSave;
+
+  /// Sidebar label of the goals panel, last of the Gestion group.
+  ///
+  /// In fr, this message translates to:
+  /// **'Objectifs'**
+  String get navGoals;
+
+  /// Top-bar descriptor of the goals panel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Mettez de côté, virtuellement, pour ce qui compte'**
+  String get navGoalsSubtitle;
+
+  /// Primary top-bar action opening the goal form.
+  ///
+  /// In fr, this message translates to:
+  /// **'Nouvel objectif'**
+  String get goalsAdd;
+
+  /// Lock line stating that allocating changes no account. Shown on the grid and on the detail.
+  ///
+  /// In fr, this message translates to:
+  /// **'Répartition sur le papier : vos comptes ne sont pas modifiés.'**
+  String get goalsReassurance;
+
+  /// The over-allocation banner. Informative and dismissible, never blocking (`PROJECT.md` §13).
+  ///
+  /// In fr, this message translates to:
+  /// **'Vous avez réparti {allocated} alors que vos comptes d\'épargne totalisent {savings}.'**
+  String goalsOverAllocated(String allocated, String savings);
+
+  /// Tooltip on the over-allocation banner's dismiss control.
+  ///
+  /// In fr, this message translates to:
+  /// **'Masquer cet avertissement'**
+  String get goalsDismissBanner;
+
+  /// Link below the grid that reveals archived goals in place; the count is the real number.
+  ///
+  /// In fr, this message translates to:
+  /// **'Afficher les objectifs archivés ({count})'**
+  String goalsShowArchived(int count);
+
+  /// The same link once the archived goals are showing.
+  ///
+  /// In fr, this message translates to:
+  /// **'Masquer les objectifs archivés ({count})'**
+  String goalsHideArchived(int count);
+
+  /// Empty-state title of the goals panel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Donnez un nom à ce qui compte'**
+  String get goalsEmptyTitle;
+
+  /// Empty-state body explaining what a virtual envelope is.
+  ///
+  /// In fr, this message translates to:
+  /// **'Un objectif est une enveloppe virtuelle : vous y mettez de côté à votre rythme, sans toucher à vos comptes.'**
+  String get goalsEmptyBody;
+
+  /// Error state when the goals list fails to load.
+  ///
+  /// In fr, this message translates to:
+  /// **'Impossible de charger vos objectifs pour le moment.'**
+  String get goalsLoadFailed;
+
+  /// Retry action on the goals error states.
+  ///
+  /// In fr, this message translates to:
+  /// **'Réessayer'**
+  String get goalsRetry;
+
+  /// Card pill for a goal with no target date.
+  ///
+  /// In fr, this message translates to:
+  /// **'Sans échéance'**
+  String get goalPillNoDeadline;
+
+  /// Card pill for a reached goal with no target date.
+  ///
+  /// In fr, this message translates to:
+  /// **'Objectif atteint'**
+  String get goalPillReached;
+
+  /// The reached pill when the goal carried a target date.
+  ///
+  /// In fr, this message translates to:
+  /// **'Objectif atteint · {month}'**
+  String goalPillReachedOn(String month);
+
+  /// Iris back link from the goal detail to the grid.
+  ///
+  /// In fr, this message translates to:
+  /// **'Retour aux objectifs'**
+  String get goalDetailBack;
+
+  /// Sub-line of the detail header when the goal has a target date. No account is named here.
+  ///
+  /// In fr, this message translates to:
+  /// **'Échéance {month}'**
+  String goalDetailTargetDate(String month);
+
+  /// Secondary action archiving a goal from its detail header.
+  ///
+  /// In fr, this message translates to:
+  /// **'Archiver'**
+  String get goalDetailArchive;
+
+  /// The same button on an archived goal, which restores it.
+  ///
+  /// In fr, this message translates to:
+  /// **'Restaurer'**
+  String get goalDetailRestore;
+
+  /// Primary action opening the allocation modal.
+  ///
+  /// In fr, this message translates to:
+  /// **'Nouvelle allocation'**
+  String get goalDetailNewAllocation;
+
+  /// Shown when the open goal no longer exists.
+  ///
+  /// In fr, this message translates to:
+  /// **'Cet objectif n\'est plus disponible.'**
+  String get goalDetailMissing;
+
+  /// Foot note under the allocation history: no transaction is created.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucune transaction n\'est créée : ces lignes n\'existent que sur le papier de l\'objectif.'**
+  String get goalDetailFootnote;
+
+  /// Error state when the allocation history fails to load.
+  ///
+  /// In fr, this message translates to:
+  /// **'Impossible de charger l\'historique des allocations.'**
+  String get goalDetailHistoryFailed;
+
+  /// Title of the allocation history card.
+  ///
+  /// In fr, this message translates to:
+  /// **'Historique des allocations'**
+  String get goalHistoryTitle;
+
+  /// Sub-line stating that the ledger is one signed list.
+  ///
+  /// In fr, this message translates to:
+  /// **'Une seule liste, montants signés — un retrait est une ligne négative.'**
+  String get goalHistorySubtitle;
+
+  /// Date column of the allocation history.
+  ///
+  /// In fr, this message translates to:
+  /// **'Date'**
+  String get goalHistoryDate;
+
+  /// Amount column of the allocation history.
+  ///
+  /// In fr, this message translates to:
+  /// **'Montant'**
+  String get goalHistoryAmount;
+
+  /// Note column of the allocation history.
+  ///
+  /// In fr, this message translates to:
+  /// **'Note'**
+  String get goalHistoryNote;
+
+  /// Tooltip on the control removing one allocation line.
+  ///
+  /// In fr, this message translates to:
+  /// **'Supprimer cette allocation'**
+  String get goalHistoryDelete;
+
+  /// Shown when a goal has no allocations yet.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucune allocation pour l\'instant.'**
+  String get goalHistoryEmpty;
+
+  /// Title of the goal modal when creating.
+  ///
+  /// In fr, this message translates to:
+  /// **'Nouvel objectif'**
+  String get goalFormCreateTitle;
+
+  /// Title of the goal modal when editing.
+  ///
+  /// In fr, this message translates to:
+  /// **'Modifier l\'objectif'**
+  String get goalFormEditTitle;
+
+  /// Sub-line under the goal modal's title.
+  ///
+  /// In fr, this message translates to:
+  /// **'Une enveloppe virtuelle : vous y mettez de côté sur le papier, sans toucher à vos comptes.'**
+  String get goalFormIntro;
+
+  /// Label of the goal name field.
+  ///
+  /// In fr, this message translates to:
+  /// **'Nom'**
+  String get goalFormNameLabel;
+
+  /// Validation message when the goal name is empty.
+  ///
+  /// In fr, this message translates to:
+  /// **'Donnez un nom à cet objectif.'**
+  String get goalFormNameRequired;
+
+  /// Label of the target amount field.
+  ///
+  /// In fr, this message translates to:
+  /// **'Montant cible'**
+  String get goalFormTargetLabel;
+
+  /// Validation message when the target is missing, unparseable, or not positive.
+  ///
+  /// In fr, this message translates to:
+  /// **'Saisissez un montant supérieur à zéro.'**
+  String get goalFormTargetInvalid;
+
+  /// Label of the optional target date field.
+  ///
+  /// In fr, this message translates to:
+  /// **'Date cible'**
+  String get goalFormDateLabel;
+
+  /// Helper marking the target date as optional.
+  ///
+  /// In fr, this message translates to:
+  /// **'Facultative'**
+  String get goalFormDateHelp;
+
+  /// Validation message when the target date cannot be read in the current locale.
+  ///
+  /// In fr, this message translates to:
+  /// **'Date invalide.'**
+  String get goalFormDateInvalid;
+
+  /// Label of the goal icon picker.
+  ///
+  /// In fr, this message translates to:
+  /// **'Icône'**
+  String get goalFormIconLabel;
+
+  /// Label of the goal color picker.
+  ///
+  /// In fr, this message translates to:
+  /// **'Couleur'**
+  String get goalFormColorLabel;
+
+  /// Cancel action in the goal modal footer.
+  ///
+  /// In fr, this message translates to:
+  /// **'Annuler'**
+  String get goalFormCancel;
+
+  /// Confirm action when creating a goal.
+  ///
+  /// In fr, this message translates to:
+  /// **'Créer l\'objectif'**
+  String get goalFormSubmit;
+
+  /// Confirm action when editing a goal.
+  ///
+  /// In fr, this message translates to:
+  /// **'Enregistrer'**
+  String get goalFormSave;
+
+  /// Title of the allocation modal.
+  ///
+  /// In fr, this message translates to:
+  /// **'Nouvelle allocation'**
+  String get allocationModalTitle;
+
+  /// Label of the signed amount field — the only amount control in the modal.
+  ///
+  /// In fr, this message translates to:
+  /// **'Montant'**
+  String get allocationAmountLabel;
+
+  /// Helper stating that a negative amount is a withdrawal. There are no deposit/withdraw modes.
+  ///
+  /// In fr, this message translates to:
+  /// **'Un montant négatif retire de l\'objectif.'**
+  String get allocationAmountHelp;
+
+  /// Validation message when the allocation amount is missing, unparseable, or zero.
+  ///
+  /// In fr, this message translates to:
+  /// **'Saisissez un montant différent de zéro.'**
+  String get allocationAmountInvalid;
+
+  /// Label of the allocation date field.
+  ///
+  /// In fr, this message translates to:
+  /// **'Date'**
+  String get allocationDateLabel;
+
+  /// Validation message when the allocation date cannot be read in the current locale.
+  ///
+  /// In fr, this message translates to:
+  /// **'Date invalide.'**
+  String get allocationDateInvalid;
+
+  /// Label of the optional allocation note field.
+  ///
+  /// In fr, this message translates to:
+  /// **'Note (optionnelle)'**
+  String get allocationNoteLabel;
+
+  /// Placeholder example in the allocation note field.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ex. Virement mensuel'**
+  String get allocationNoteHint;
+
+  /// Cancel action in the allocation modal footer.
+  ///
+  /// In fr, this message translates to:
+  /// **'Annuler'**
+  String get allocationCancel;
+
+  /// Confirm action appending the allocation.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ajouter'**
+  String get allocationSubmit;
+
+  /// Message for the backend's GOAL_NOT_FOUND code.
+  ///
+  /// In fr, this message translates to:
+  /// **'Cet objectif n\'existe plus.'**
+  String get goalErrorNotFound;
+
+  /// Message for the backend's GOAL_ALLOCATION_NOT_FOUND code.
+  ///
+  /// In fr, this message translates to:
+  /// **'Cette allocation n\'existe plus.'**
+  String get goalErrorAllocationNotFound;
+
+  /// Message for a rejected goal or allocation payload.
+  ///
+  /// In fr, this message translates to:
+  /// **'Vérifiez les informations saisies.'**
+  String get goalErrorValidation;
+
+  /// Fallback message for any other goals failure.
+  ///
+  /// In fr, this message translates to:
+  /// **'Une erreur est survenue. Réessayez.'**
+  String get goalErrorGeneric;
+
+  /// Title of the dashboard's Objectifs card.
+  ///
+  /// In fr, this message translates to:
+  /// **'Objectifs'**
+  String get dashboardGoalsTitle;
+
+  /// Iris link from the dashboard goals card to the goals panel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Voir tout'**
+  String get dashboardGoalsViewAll;
+
+  /// Compact saved/target pair on a dashboard goal row.
+  ///
+  /// In fr, this message translates to:
+  /// **'{saved} / {target}'**
+  String dashboardGoalsProgress(String saved, String target);
+
+  /// Badge replacing the amounts on a reached goal's dashboard row.
+  ///
+  /// In fr, this message translates to:
+  /// **'Atteint'**
+  String get dashboardGoalsReached;
+
+  /// Tooltip on the calendar button of the goal form's target date field.
+  ///
+  /// In fr, this message translates to:
+  /// **'Choisir une date cible'**
+  String get goalFormDatePick;
+
+  /// Tooltip on the calendar button of the allocation modal's date field.
+  ///
+  /// In fr, this message translates to:
+  /// **'Choisir une date'**
+  String get allocationDatePick;
+
+  /// Title of the danger zone card in Settings › Données.
+  ///
+  /// In fr, this message translates to:
+  /// **'Zone de danger'**
+  String get settingsResetTitle;
+
+  /// Pill beside the danger zone title, stating the stake in a word.
+  ///
+  /// In fr, this message translates to:
+  /// **'IRRÉVERSIBLE'**
+  String get settingsResetBadge;
+
+  /// What a database reset deletes, and what it leaves alone.
+  ///
+  /// In fr, this message translates to:
+  /// **'Réinitialiser la base de données supprime transactions, comptes, règles, catégories personnalisées, objectifs et abonnements de ce profil. Les sauvegardes exportées ne sont pas touchées.'**
+  String get settingsResetSubtitle;
+
+  /// Outline danger button opening the reset confirmation.
+  ///
+  /// In fr, this message translates to:
+  /// **'Réinitialiser…'**
+  String get settingsResetButton;
+
+  /// Title of the reset confirmation modal.
+  ///
+  /// In fr, this message translates to:
+  /// **'Réinitialiser la base de données ?'**
+  String get settingsResetConfirmTitle;
+
+  /// Lead sentence of the reset confirmation; the name is set in bold.
+  ///
+  /// In fr, this message translates to:
+  /// **'Tout le contenu du profil {name} sera supprimé définitivement :'**
+  String settingsResetConfirmLead(String name);
+
+  /// Counts row for the user's own categories — the system catalog is kept.
+  ///
+  /// In fr, this message translates to:
+  /// **'Catégories personnalisées'**
+  String get settingsResetConfirmCategories;
+
+  /// Note under the reset counts listing what survives the reset.
+  ///
+  /// In fr, this message translates to:
+  /// **'Les catégories système, vos préférences et le réglage IA sont conservés. Les fichiers de sauvegarde déjà exportés restent intacts.'**
+  String get settingsResetConfirmNote;
+
+  /// Red callout in the reset confirmation modal.
+  ///
+  /// In fr, this message translates to:
+  /// **'Cette action est irréversible. Exportez une sauvegarde avant de continuer.'**
+  String get settingsResetConfirmWarning;
+
+  /// The word that must be typed exactly to enable the reset. Uppercase.
+  ///
+  /// In fr, this message translates to:
+  /// **'SUPPRIMER'**
+  String get settingsResetConfirmWord;
+
+  /// Label of the typed-confirmation field.
+  ///
+  /// In fr, this message translates to:
+  /// **'Saisissez {word} pour confirmer'**
+  String settingsResetConfirmLabel(String word);
+
+  /// Destructive confirm action of the reset modal.
+  ///
+  /// In fr, this message translates to:
+  /// **'Tout supprimer'**
+  String get settingsResetConfirmSubmit;
+
+  /// Toast shown once the reset has completed.
+  ///
+  /// In fr, this message translates to:
+  /// **'Base de données réinitialisée. Les catégories système ont été restaurées.'**
+  String get settingsResetDone;
+
+  /// Bold red lead of the refusal banner in the danger zone card.
+  ///
+  /// In fr, this message translates to:
+  /// **'Réinitialisation impossible.'**
+  String get settingsResetFailedLead;
+
+  /// Fallback message for any other reset failure.
+  ///
+  /// In fr, this message translates to:
+  /// **'La réinitialisation a échoué. Vos données n\'ont pas été modifiées.'**
+  String get settingsResetErrorUnknown;
 }
 
 class _AppLocalizationsDelegate

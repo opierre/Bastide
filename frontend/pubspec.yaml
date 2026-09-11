@@ -46,6 +46,10 @@ dependencies:
   # provides the drag-and-drop target. See docs/design/06-imports.md.
   file_selector: ^1.0.3
   desktop_drop: ^0.6.0
+  # « En savoir plus » on the settings AI card hands the user off to the
+  # runtime's own download page — the one link in the app that leaves it.
+  # Nothing about the user is carried across; it opens the default browser.
+  url_launcher: ^6.3.2
 
 dev_dependencies:
   flutter_test:

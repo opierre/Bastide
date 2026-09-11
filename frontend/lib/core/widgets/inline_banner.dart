@@ -23,10 +23,28 @@ class InlineBanner extends StatelessWidget {
     super.key,
     required this.message,
     this.tone = BannerTone.error,
+    this.onDismiss,
+    this.dismissTooltip,
+    this.icon,
   });
 
   final String message;
   final BannerTone tone;
+
+  /// Overrides the tone's glyph while keeping its hue. Set where a spec draws a
+  /// different pairing — the reset confirmation's red triangle
+  /// (`docs/design/09-settings.md` state ⑩), which warns rather than reports.
+  final IconData? icon;
+
+  /// Adds the spec's dismiss ×. Set only where the banner reports something the
+  /// user may reasonably decide to live with — an over-allocation, say. A
+  /// failure the user still has to fix keeps no × , because dismissing it would
+  /// hide the reason the form won't go through.
+  final VoidCallback? onDismiss;
+
+  /// Names the dismiss control for assistive tech. Required by callers that set
+  /// [onDismiss]; localized text can't be defaulted here.
+  final String? dismissTooltip;
 
   @override
   Widget build(BuildContext context) {
@@ -43,7 +61,7 @@ class InlineBanner extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(tone.icon, size: 15, color: tone.color),
+          Icon(icon ?? tone.icon, size: 15, color: tone.color),
           const SizedBox(width: AppSpacing.sm),
           Expanded(
             child: Text(
@@ -53,6 +71,16 @@ class InlineBanner extends StatelessWidget {
               ).textTheme.bodySmall?.copyWith(color: tone.color),
             ),
           ),
+          if (onDismiss != null)
+            IconButton(
+              onPressed: onDismiss,
+              iconSize: 15,
+              visualDensity: VisualDensity.compact,
+              constraints: const BoxConstraints(),
+              padding: EdgeInsets.zero,
+              tooltip: dismissTooltip,
+              icon: Icon(Icons.close_rounded, color: tone.color),
+            ),
         ],
       ),
     );
