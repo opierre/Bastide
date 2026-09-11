@@ -335,7 +335,6 @@ def test_manual_creation_rejects_an_account_of_another_user(client: TestClient) 
     assert response.json()["error"]["code"] == "ACCOUNT_NOT_FOUND"
 
 
-
 def test_manual_creation_rejects_a_category_of_another_user(client: TestClient) -> None:
     """A series' category is a field, so an id the caller cannot see is a bad value (422).
 
@@ -394,6 +393,7 @@ def test_patching_a_category_of_another_user_is_rejected(
     series = read_series(tmp_path, series_id)
     assert series is not None
     assert series.label == "Netflix"
+
 
 # --- delete ---------------------------------------------------------------------------------
 

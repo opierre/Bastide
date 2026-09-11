@@ -21,9 +21,7 @@ class TransactionNotFoundError(NotFoundError):
 class TransactionService:
     """Transaction listing/detail (user-scoped) and the user category/description override."""
 
-    def __init__(
-        self, repository: TransactionRepository, categories: CategoryRepository
-    ) -> None:
+    def __init__(self, repository: TransactionRepository, categories: CategoryRepository) -> None:
         self._repository = repository
         self._categories = categories
 
