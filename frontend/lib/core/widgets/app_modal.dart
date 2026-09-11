@@ -17,9 +17,15 @@ class AppModal extends StatelessWidget {
     required this.child,
     required this.actions,
     this.subtitle,
+    this.leading,
   });
 
   final String title;
+
+  /// Optional glyph plate set before the title — the destructive confirmations
+  /// draw one (`docs/design/09-settings.md` state ⑩) so the modal announces its
+  /// weight before the copy is read.
+  final Widget? leading;
 
   /// Optional context line under the title — the parent a new subcategory will
   /// sit under, say.
@@ -56,14 +62,25 @@ class AppModal extends StatelessWidget {
                 AppSpacing.lg,
                 AppSpacing.md,
               ),
-              child: Column(
+              child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(title, style: Theme.of(context).textTheme.headlineMedium),
-                  if (subtitle != null) ...[
-                    const SizedBox(height: AppSpacing.xs),
-                    subtitle!,
+                  if (leading != null) ...[
+                    leading!,
+                    const SizedBox(width: AppSpacing.sm + AppSpacing.xs),
                   ],
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(title, style: Theme.of(context).textTheme.headlineMedium),
+                        if (subtitle != null) ...[
+                          const SizedBox(height: AppSpacing.xs),
+                          subtitle!,
+                        ],
+                      ],
+                    ),
+                  ),
                 ],
               ),
             ),

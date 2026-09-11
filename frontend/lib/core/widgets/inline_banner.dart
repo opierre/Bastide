@@ -25,10 +25,16 @@ class InlineBanner extends StatelessWidget {
     this.tone = BannerTone.error,
     this.onDismiss,
     this.dismissTooltip,
+    this.icon,
   });
 
   final String message;
   final BannerTone tone;
+
+  /// Overrides the tone's glyph while keeping its hue. Set where a spec draws a
+  /// different pairing — the reset confirmation's red triangle
+  /// (`docs/design/09-settings.md` state ⑩), which warns rather than reports.
+  final IconData? icon;
 
   /// Adds the spec's dismiss ×. Set only where the banner reports something the
   /// user may reasonably decide to live with — an over-allocation, say. A
@@ -55,7 +61,7 @@ class InlineBanner extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(tone.icon, size: 15, color: tone.color),
+          Icon(icon ?? tone.icon, size: 15, color: tone.color),
           const SizedBox(width: AppSpacing.sm),
           Expanded(
             child: Text(
