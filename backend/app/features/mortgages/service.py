@@ -5,10 +5,11 @@ declared and standalone (§15); its schedule is a pure function of the row, buil
 once per loan per request and reused for every figure that request needs.
 """
 
+from collections.abc import Sequence
 from datetime import date
 from typing import Any
 
-from app.core.errors import NotFoundError, ValidationError
+from app.core.errors import DomainError, NotFoundError, ValidationError
 from app.features.auth.models import User
 from app.features.mortgages.engine import (
     NonAmortizingLoanError,
@@ -20,11 +21,16 @@ from app.features.mortgages.engine import (
 from app.features.mortgages.models import Mortgage
 from app.features.mortgages.repository import MortgageRepository
 from app.features.mortgages.schemas import (
+    IncomeSource,
+    LenderCharge,
+    LoanEndMarker,
     MortgageCreate,
     MortgageDetail,
     MortgageRead,
     MortgageStatus,
+    MortgageSummary,
     MortgageUpdate,
+    OutstandingPoint,
     ScheduleGranularity,
     ScheduleMonthRow,
     ScheduleRead,
@@ -39,6 +45,17 @@ ARCHIVED: MortgageStatus = "archived"
 DEFAULT_STATUSES: tuple[MortgageStatus, ...] = ("active", "repaid")
 
 _BPS_PER_UNIT = 10_000
+_MONTHS_PER_YEAR = 12
+
+#: The seeded §15 reference the ratio is read against.
+HCSF_LIMIT_KEY = "hcsf_limit_bps"
+
+#: How many complete months back the ledger income median looks.
+LEDGER_INCOME_MONTHS = 12
+
+#: Below this many months of ledger income the ratio is unknown: a ratio invented from one
+#: month of data is worse than no ratio (§15).
+MIN_LEDGER_INCOME_MONTHS = 3
 
 #: The columns the schedule is a function of — a patch touching none of them cannot break it.
 _SCHEDULE_INPUTS = (
@@ -85,6 +102,12 @@ class MortgageScheduleWindowInvalidError(ValidationError):
     code = "MORTGAGE_SCHEDULE_WINDOW_INVALID"
 
 
+class MortgageParameterMissingError(DomainError):
+    """Raised when a seeded reference parameter is absent: a broken install, not a user error."""
+
+    code = "MORTGAGE_PARAMETER_MISSING"
+
+
 def schedule_for(mortgage: Mortgage) -> Schedule:
     """The loan's full schedule from the engine."""
     return build_schedule(
@@ -107,6 +130,67 @@ def monthly_payment_minor(schedule: Schedule) -> int:
     """The échéance, insurance excluded: the first row, before any final-row residue."""
     first = schedule.rows[0]
     return first.interest_minor + first.principal_minor
+
+
+def median_minor(values: Sequence[int]) -> int:
+    """The median; with an even count, the two middle values' mean rounded half-up."""
+    ordered = sorted(values)
+    middle = len(ordered) // 2
+    if len(ordered) % 2:
+        return ordered[middle]
+    return (ordered[middle - 1] + ordered[middle] + 1) // 2
+
+
+def outstanding_series(
+    loans: Sequence[tuple[Mortgage, Schedule]],
+) -> tuple[list[OutstandingPoint], list[LoanEndMarker]]:
+    """The combined outstanding principal per month, and the month each loan ends.
+
+    Joined here because the frontend may not sum schedules itself (§15: one engine). A loan
+    contributes nothing before its first instalment's month — which is what draws the step a
+    later loan adds — then its engine row's `outstanding_after_minor` for each month, then 0.
+    """
+    if not loans:
+        return [], []
+    after_by_month: list[dict[int, int]] = []
+    for _, schedule in loans:
+        after: dict[int, int] = {}
+        for row in schedule.rows:
+            after[_month_index(row.due_on)] = row.outstanding_after_minor
+        after_by_month.append(after)
+
+    first = min(_month_index(schedule.rows[0].due_on) for _, schedule in loans)
+    last = max(_month_index(schedule.rows[-1].due_on) for _, schedule in loans)
+    carried = [0] * len(loans)
+    points: list[OutstandingPoint] = []
+    for index in range(first, last + 1):
+        for position, after in enumerate(after_by_month):
+            if index in after:
+                carried[position] = after[index]
+        points.append(OutstandingPoint(month=_month_key(index), outstanding_minor=sum(carried)))
+
+    ends = [
+        LoanEndMarker(
+            mortgage_id=mortgage.id,
+            label=mortgage.label,
+            month=_month_key(_month_index(schedule.rows[-1].due_on)),
+        )
+        for mortgage, schedule in loans
+    ]
+    return points, ends
+
+
+def _month_index(day: date) -> int:
+    return day.year * _MONTHS_PER_YEAR + day.month - 1
+
+
+def _month_key(index: int) -> str:
+    """`YYYY-MM` for a month index."""
+    return f"{index // _MONTHS_PER_YEAR:04d}-{index % _MONTHS_PER_YEAR + 1:02d}"
+
+
+def _first_of_month(index: int) -> date:
+    return date(index // _MONTHS_PER_YEAR, index % _MONTHS_PER_YEAR + 1, 1)
 
 
 def to_read(mortgage: Mortgage, schedule: Schedule, currency: str, today: date) -> MortgageRead:
@@ -286,6 +370,85 @@ class MortgageService:
             ),
             currency=user.currency,
         )
+
+    def summary(self, user: User, today: date) -> MortgageSummary:
+        """Totals over active loans, the debt ratio with its income source, and the trajectory.
+
+        Archived and repaid loans take no part in any figure. Each loan's schedule is built once
+        and shared by its figures and the series.
+
+        Raises:
+            MortgageParameterMissingError: `hcsf_limit_bps` is neither seeded nor overridden.
+        """
+        hcsf_limit_bps = self._repository.parameter_int(user.id, HCSF_LIMIT_KEY)
+        if hcsf_limit_bps is None:
+            raise MortgageParameterMissingError(f"Parameter '{HCSF_LIMIT_KEY}' is not seeded.")
+
+        loans = [
+            (mortgage, schedule_for(mortgage))
+            for mortgage in self._repository.list_for_user(user.id, (ACTIVE,))
+        ]
+        reads = [to_read(mortgage, schedule, user.currency, today) for mortgage, schedule in loans]
+
+        monthly_charge = sum(read.total_instalment_minor for read in reads)
+        total_outstanding = sum(read.outstanding_principal_minor for read in reads)
+        total_principal = sum(read.principal_minor for read in reads)
+        repaid = total_principal - total_outstanding
+
+        upcoming = [read.next_payment_on for read in reads if read.next_payment_on is not None]
+        next_payment_on = min(upcoming) if upcoming else None
+
+        by_lender: dict[str, int] = {}
+        for read in reads:
+            by_lender[read.lender] = by_lender.get(read.lender, 0) + read.total_instalment_minor
+
+        income, income_source = self._monthly_income(user.id, today)
+        debt_ratio = (
+            ratio_bps(monthly_charge, income) if income is not None and income > 0 else None
+        )
+        points, ends = outstanding_series(loans)
+
+        return MortgageSummary(
+            monthly_charge_minor=monthly_charge,
+            total_outstanding_minor=total_outstanding,
+            total_principal_minor=total_principal,
+            repaid_principal_minor=repaid,
+            repaid_pct_bps=ratio_bps(repaid, total_principal) if total_principal else 0,
+            next_payment_on=next_payment_on,
+            next_payment_count=upcoming.count(next_payment_on) if next_payment_on else 0,
+            debt_ratio_bps=debt_ratio,
+            monthly_income_minor=income,
+            income_source=income_source,
+            hcsf_limit_bps=hcsf_limit_bps,
+            over_limit=debt_ratio is not None and debt_ratio > hcsf_limit_bps,
+            active_count=len(loans),
+            by_lender=[
+                LenderCharge(lender=lender, monthly_charge_minor=charge)
+                for lender, charge in by_lender.items()
+            ],
+            outstanding_series=points,
+            loan_ends=ends,
+            currency=user.currency,
+        )
+
+    def _monthly_income(self, user_id: str, today: date) -> tuple[int | None, IncomeSource]:
+        """The ratio's denominator and where it came from: declared › ledger median › unknown.
+
+        The median, not the mean, of the complete months holding income: a 13th-month bonus
+        must not lift a ratio the user will plan around (§15).
+        """
+        declared = self._repository.declared_monthly_income_minor(user_id)
+        if declared is not None:
+            return declared, "declared"
+        current = _month_index(today)
+        totals = self._repository.monthly_income_totals(
+            user_id,
+            start=_first_of_month(current - LEDGER_INCOME_MONTHS),
+            end=_first_of_month(current),
+        )
+        if len(totals) < MIN_LEDGER_INCOME_MONTHS:
+            return None, "unknown"
+        return median_minor(totals), "ledger"
 
     def archive(self, user_id: str, mortgage_id: str) -> None:
         """Archive a loan, as accounts and goals are archived, never hard-deleted.

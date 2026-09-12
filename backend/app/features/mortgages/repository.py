@@ -1,12 +1,23 @@
-"""Data access for `Mortgage` rows. The only place the table is queried."""
+"""Data access for `Mortgage` rows and the few figures the debt ratio reads around them.
+
+The only place the mortgages table is queried. The ratio's inputs — the declared income, the
+ledger's income totals and the HCSF reference parameter — are read-only aggregates over other
+features' tables, the way the dashboard reads the ledger.
+"""
 
 from collections.abc import Sequence
+from datetime import date
 
-from sqlalchemy import select
+from sqlalchemy import extract, func, or_, select
 from sqlalchemy.orm import Session
 
+from app.features.accounts.models import Account
+from app.features.categories.models import Category
 from app.features.mortgages.models import Mortgage
 from app.features.properties.models import Property
+from app.features.settings.models import UserSettings
+from app.features.tax.models import TaxParameter
+from app.features.transactions.models import Transaction
 
 
 class MortgageRepository:
@@ -48,3 +59,51 @@ class MortgageRepository:
         self._db.commit()
         self._db.refresh(mortgage)
         return mortgage
+
+    def declared_monthly_income_minor(self, user_id: str) -> int | None:
+        """The user's declared monthly income; `None` when undeclared or no settings row yet."""
+        return self._db.scalar(
+            select(UserSettings.declared_monthly_income_minor).where(
+                UserSettings.user_id == user_id
+            )
+        )
+
+    def monthly_income_totals(self, user_id: str, start: date, end: date) -> list[int]:
+        """Income-kind category totals per month over `[start, end)`, non-archived accounts.
+
+        Only months holding at least one income-kind transaction appear. Grouped with
+        `extract()` so the query stays portable to PostgreSQL (see the dashboard repository).
+        """
+        year = extract("year", Transaction.booked_date)
+        month = extract("month", Transaction.booked_date)
+        rows = self._db.execute(
+            select(year, month, func.sum(Transaction.amount_minor))
+            .select_from(Transaction)
+            .join(Account, Account.id == Transaction.account_id)
+            .join(Category, Category.id == Transaction.category_id)
+            .where(
+                Account.user_id == user_id,
+                Account.archived.is_(False),
+                Category.kind == "income",
+                Transaction.booked_date >= start,
+                Transaction.booked_date < end,
+            )
+            .group_by(year, month)
+        ).all()
+        return [int(total) for _, _, total in rows]
+
+    def parameter_int(self, user_id: str, key: str) -> int | None:
+        """The resolved value of a parameter: the latest year, a user row shadowing the system's.
+
+        `None` when neither the user nor the seed holds the key.
+        """
+        return self._db.scalar(
+            select(TaxParameter.int_value)
+            .where(
+                TaxParameter.key == key,
+                or_(TaxParameter.user_id == user_id, TaxParameter.user_id.is_(None)),
+            )
+            # Within a year, `user_id IS NULL` sorts false (the user's row) before true.
+            .order_by(TaxParameter.tax_year.desc(), TaxParameter.user_id.is_(None))
+            .limit(1)
+        )

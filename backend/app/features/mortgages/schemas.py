@@ -148,3 +148,60 @@ class ScheduleRead(BaseModel):
     rows: list[ScheduleMonthRow] | list[ScheduleYearRow]
     totals: ScheduleTotals
     currency: str
+
+
+#: Where the ratio's denominator came from, so the user can check it (§15).
+IncomeSource = Literal["declared", "ledger", "unknown"]
+
+
+class LenderCharge(BaseModel):
+    """The monthly charge of the active loans held with one lender."""
+
+    lender: str
+    monthly_charge_minor: int
+
+
+class OutstandingPoint(BaseModel):
+    """Combined capital still owed across active loans after one month's instalments."""
+
+    #: `YYYY-MM`.
+    month: str
+    outstanding_minor: int
+
+
+class LoanEndMarker(BaseModel):
+    """The month an active loan's last instalment falls in."""
+
+    mortgage_id: str
+    label: str
+    #: `YYYY-MM`.
+    month: str
+
+
+class MortgageSummary(BaseModel):
+    """Totals over **active** loans, the debt ratio and the combined trajectory.
+
+    `over_limit` is information only: the app makes no lending decisions (§15).
+    """
+
+    #: Sum of every active loan's `total_instalment_minor`, insurance included.
+    monthly_charge_minor: int
+    total_outstanding_minor: int
+    total_principal_minor: int
+    repaid_principal_minor: int
+    repaid_pct_bps: int
+    #: The soonest upcoming instalment across active loans; null when none remains.
+    next_payment_on: date | None
+    #: How many active loans have an instalment on `next_payment_on`.
+    next_payment_count: int
+    debt_ratio_bps: int | None
+    monthly_income_minor: int | None
+    income_source: IncomeSource
+    hcsf_limit_bps: int
+    over_limit: bool
+    active_count: int
+    by_lender: list[LenderCharge]
+    #: One point per month, earliest first payment to the last instalment of the longest loan.
+    outstanding_series: list[OutstandingPoint]
+    loan_ends: list[LoanEndMarker]
+    currency: str

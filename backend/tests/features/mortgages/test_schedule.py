@@ -4,16 +4,22 @@ The endpoint is a view over the P3-03 engine's rows, so every assertion reconcil
 engine itself — the endpoint must never become a second formula.
 """
 
+import calendar
 from collections import defaultdict
 from datetime import date
+from pathlib import Path
 from typing import cast
 
 import pytest
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker
 
 from app.features.mortgages.engine import RepaymentType, Schedule, build_schedule
 from app.features.mortgages.router import get_today
+from app.features.tax.models import TaxParameter
+from app.features.tax.seed import SYSTEM_LENDING_PARAMETERS, SYSTEM_TAX_SEED
 
 TODAY = date(2026, 5, 15)
 
@@ -270,3 +276,111 @@ def test_the_schedule_is_user_scoped(client: TestClient) -> None:
 
     assert response.status_code == 404
     assert response.json()["error"]["code"] == "MORTGAGE_NOT_FOUND"
+
+
+# --- the summary's combined trajectory -------------------------------------------------------
+
+WORKS_OVERRIDES = {
+    "label": "Travaux cuisine",
+    "lender": "Crédit Agricole",
+    "kind": "works",
+    "principal_minor": 1_500_000,
+    "annual_rate_bps": 490,
+    "insurance_monthly_minor": 0,
+    "term_months": 60,
+    "first_payment_date": "2025-03-01",
+    "upfront_fees_minor": 0,
+}
+
+
+def seed_hcsf(tmp_path: Path) -> None:
+    """The summary reads the seeded reference; the client database is built from metadata."""
+    engine = create_engine(f"sqlite:///{tmp_path / 'test.db'}")
+    with sessionmaker(bind=engine)() as session:
+        for key, parameter in SYSTEM_LENDING_PARAMETERS.items():
+            session.add(
+                TaxParameter(
+                    user_id=None,
+                    tax_year=SYSTEM_TAX_SEED.tax_year,
+                    key=key,
+                    int_value=parameter.int_value,
+                    unit=parameter.unit,
+                )
+            )
+        session.commit()
+    engine.dispose()
+
+
+def month_end(key: str) -> date:
+    year, month = int(key[:4]), int(key[5:])
+    return date(year, month, calendar.monthrange(year, month)[1])
+
+
+def outstanding_in(schedule: Schedule, key: str) -> int:
+    """One loan's outstanding after the month `key`, 0 before its first instalment's month."""
+    end = month_end(key)
+    if schedule.rows[0].due_on > end:
+        return 0
+    return schedule.outstanding_at(end)
+
+
+def test_the_series_reconciles_with_each_loans_own_schedule(
+    client: TestClient, tmp_path: Path
+) -> None:
+    seed_hcsf(tmp_path)
+    headers = register(client)
+    home = create_loan(client, headers)
+    works = create_loan(client, headers, **WORKS_OVERRIDES)
+
+    response = client.get("/api/v1/mortgages/summary", headers=headers)
+    assert response.status_code == 200, response.json()
+    body = response.json()
+
+    home_schedule = engine_schedule()
+    works_schedule = engine_schedule(**WORKS_OVERRIDES)
+    series = {point["month"]: point["outstanding_minor"] for point in body["outstanding_series"]}
+    months = list(series)
+    assert months[0] == "2023-09"
+    assert months[-1] == "2048-08"
+    assert len(months) == 300
+    assert series["2048-08"] == 0
+    for key, value in series.items():
+        assert value == outstanding_in(home_schedule, key) + outstanding_in(works_schedule, key), (
+            key
+        )
+
+    # The travaux loan starts in 03/2025: February carries only the home loan, March adds the
+    # step of the works loan's outstanding after its first instalment.
+    assert series["2025-02"] == home_schedule.outstanding_at(date(2025, 2, 28))
+    assert series["2025-03"] == (
+        home_schedule.outstanding_at(date(2025, 3, 31))
+        + works_schedule.rows[0].outstanding_after_minor
+    )
+    assert series["2025-03"] > series["2025-02"]
+    # After the works loan ends, only the home loan remains.
+    assert series["2030-03"] == home_schedule.outstanding_at(date(2030, 3, 31))
+
+    assert body["loan_ends"] == [
+        {"mortgage_id": home["id"], "label": "Appartement Lyon 3e", "month": "2048-08"},
+        {"mortgage_id": works["id"], "label": "Travaux cuisine", "month": "2030-02"},
+    ]
+    today_key = f"{TODAY.year:04d}-{TODAY.month:02d}"
+    assert series[today_key] == body["total_outstanding_minor"]
+
+
+def test_the_series_of_a_single_future_loan_starts_at_its_first_payment(
+    client: TestClient, tmp_path: Path
+) -> None:
+    seed_hcsf(tmp_path)
+    headers = register(client)
+    create_loan(client, headers, first_payment_date="2027-01-10", term_months=24)
+
+    body = client.get("/api/v1/mortgages/summary", headers=headers).json()
+
+    schedule = engine_schedule(first_payment_date="2027-01-10", term_months=24)
+    points = body["outstanding_series"]
+    assert [point["month"] for point in points][:2] == ["2027-01", "2027-02"]
+    assert [point["outstanding_minor"] for point in points] == [
+        row.outstanding_after_minor for row in schedule.rows
+    ]
+    assert points[-1] == {"month": "2028-12", "outstanding_minor": 0}

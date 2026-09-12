@@ -15,6 +15,7 @@ from app.features.mortgages.schemas import (
     MortgageDetail,
     MortgageRead,
     MortgageStatus,
+    MortgageSummary,
     MortgageUpdate,
     ScheduleGranularity,
     ScheduleRead,
@@ -56,6 +57,20 @@ async def create_mortgage(
 ) -> MortgageDetail:
     """Declare a loan. Writes no transaction, moves no balance, stores no schedule."""
     return service.create(user, payload, today)
+
+
+# Declared before `/{mortgage_id}` so "summary" is never read as a loan id.
+@router.get("/summary", response_model=MortgageSummary)
+async def get_summary(
+    service: Annotated[MortgageService, Depends(_service)],
+    user: Annotated[User, Depends(get_current_user)],
+    today: Annotated[date, Depends(get_today)],
+) -> MortgageSummary:
+    """Totals over active loans, the debt ratio with its income source, and the trajectory.
+
+    `over_limit` is a reading, never a refusal: the app makes no lending decisions (§15).
+    """
+    return service.summary(user, today)
 
 
 @router.get("/{mortgage_id}", response_model=MortgageDetail)
