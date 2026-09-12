@@ -22,6 +22,7 @@ PATCH  /api/v1/mortgages/{id}
 DELETE /api/v1/mortgages/{id}             (archive)
 GET    /api/v1/mortgages/{id}/schedule   ?from&to&granularity=month|year
 GET    /api/v1/mortgages/summary         -> totals + debt_ratio_bps + income_source
+                                           + by_lender[] + outstanding_series[]
 ```
 
 ## Steps
@@ -42,7 +43,10 @@ GET    /api/v1/mortgages/summary         -> totals + debt_ratio_bps + income_sou
 5. `DELETE` archives (status `archived`), as accounts and goals do. A loan reaching its last
    instalment does **not** auto-flip to `repaid`: status is user intent, and a schedule that has
    run out already shows `remaining_months = 0`. A PATCH on status does the flip.
-6. `/summary`: `monthly_charge_minor` and `total_outstanding_minor` sum over **active** loans only.
+6. `/summary`: `monthly_charge_minor` and `total_outstanding_minor` sum over **active** loans only,
+   with `total_principal_minor`, `repaid_principal_minor` and `repaid_pct_bps` beside them, plus
+   `next_payment_on` and how many instalments fall on it. `by_lender[]` gives the monthly charge
+   per lender so the panel can legend it without re-listing loans.
 7. Debt ratio per §15: `declared_monthly_income_minor` when set (income source `declared`), else
    the **median** of the last 12 complete months of income-kind category totals across
    non-archived accounts (`ledger`), else `null` with `unknown` when fewer than 3 complete months
@@ -51,6 +55,12 @@ GET    /api/v1/mortgages/summary         -> totals + debt_ratio_bps + income_sou
    the app makes no lending decisions (§15).
 8. Archived loans are excluded from every aggregate and from the default list; `?status=archived`
    returns them.
+9. `outstanding_series[]`: the **combined** outstanding principal of all active loans, one point per
+   month from the earliest first payment to the last instalment of the longest loan, plus a marker
+   per loan for the month it ends. `12-credits.md` §3 draws this as the panel's trajectory chart,
+   and the frontend is forbidden from summing schedules in Dart (§15: one engine), so the join has
+   to happen here. It is aggregated from the same P3-03 rows as `/schedule` — never a second
+   formula — and like everything else in this card it is computed per request and stored nowhere.
 
 ## Acceptance
 - Derived fields match the engine for identical inputs, and no derived figure or schedule row is
@@ -58,6 +68,9 @@ GET    /api/v1/mortgages/summary         -> totals + debt_ratio_bps + income_sou
 - A future-dated loan reports full principal, 0 % paid, and `next_payment_on` equal to
   `first_payment_date`.
 - Yearly granularity totals equal the month rows they aggregate.
+- `outstanding_series` at any month equals the sum of each active loan's outstanding at that month,
+  starts at the earliest first payment and reaches 0 at the last instalment; `by_lender` sums to
+  `monthly_charge_minor`.
 - The ratio uses the declared override when present, the ledger median otherwise, and says which;
   with fewer than 3 complete months it is null and unknown.
 - `over_limit` is informative: a 60 % ratio still accepts POST and PATCH with 2xx.
@@ -69,7 +82,8 @@ GET    /api/v1/mortgages/summary         -> totals + debt_ratio_bps + income_sou
 - `test_mortgages.py`: CRUD; the validation matrix; archive and restore; `repaid` only via PATCH;
   user scoping; currency copied from the user.
 - `test_schedule.py`: window filtering; yearly totals equal their months; cap at term;
-  future-dated loan.
+  future-dated loan; the summary's `outstanding_series` reconciled against two loans' own schedules
+  month by month, including the step a later-starting loan adds and its end marker.
 - `test_debt_ratio.py`: declared override wins; ledger median across 12 months with an outlier
   month proving median-not-mean; under 3 months gives null and unknown; archived loans excluded;
   `over_limit` never blocks a write.

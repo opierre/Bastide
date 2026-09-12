@@ -27,7 +27,10 @@ DELETE /api/v1/properties/{id}   (archive)
    10000; `kind` one of the four values; `valued_on` required and **not in the future** — a
    valuation dated tomorrow is a typo, and §18 leans on this date to caveat the net-worth series.
 2. `user_share_value_minor = round_half_up(market_value_minor * ownership_bps / 10000)` — derived,
-   never stored, and the only place that arithmetic lives.
+   never stored, and the only place that arithmetic lives. Return
+   `acquisition_delta_minor` beside it — the held share less the held share of the acquisition
+   price, null when no acquisition price was declared — because `15-synthese.md` §Biens view prints
+   it on every card and the frontend derives no money.
 3. Rent fields are coupled and validated as a set: `property_regime` requires `annual_rent_minor`,
    and `annual_charges_minor` is accepted **only** under `reel`. A `micro_foncier` property
    carrying charges is a contradiction the estimate would silently resolve one way or the other
@@ -41,9 +44,14 @@ DELETE /api/v1/properties/{id}   (archive)
 7. Archiving keeps the loan link intact — the loan still exists. P3-01's `ON DELETE SET NULL`
    covers the hard-delete path that archiving deliberately avoids.
 8. `currency` is the user's; no per-property currency, no selector.
+9. « Nouvelle estimation » in the panel (`15-synthese.md`) is a **PATCH of `market_value_minor` and
+   `valued_on` together** — there is no valuation history table in §4c, and a property has exactly
+   one declared value (the assumption §18's series leans on). If a per-property history is ever
+   wanted, that is a data-model decision, not something this endpoint grows quietly: stop and ask.
 
 ## Acceptance
-- `user_share_value_minor` is exact at 100 % ownership and correctly rounded below it.
+- `user_share_value_minor` is exact at 100 % ownership and correctly rounded below it;
+  `acquisition_delta_minor` is on the same held-share basis and null without an acquisition price.
 - The rent/regime/charges matrix behaves as specified, with 422 in the error envelope.
 - A future `valued_on` is refused.
 - Archived properties are absent from the default list and present under `?archived=true`.

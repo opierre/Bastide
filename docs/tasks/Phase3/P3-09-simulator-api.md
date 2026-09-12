@@ -34,17 +34,25 @@ POST   /api/v1/simulations/compute  -> payment, cost totals, taeg_bps, yearly, d
    body, not because it writes.
 2. Reuse P3-03's engine for the payment, cost totals and `taeg_bps`. The response carries a
    **year-by-year** summary rather than 300 rows: month-level detail is what
-   `/mortgages/{id}/schedule` is for, once the loan is real.
+   `/mortgages/{id}/schedule` is for, once the loan is real. Each yearly row splits **capital and
+   interest** (and insurance separately), because the panel stacks exactly those two
+   (`14-simulateur.md` §Projection) and must not derive the split itself.
 3. `cost_over_price_bps` = total cost over `property_price_minor` when a price is given, else null.
    It answers the question the user actually has — what the credit adds to the purchase — and is
    meaningless without a price, so it is null rather than 0.
 4. `include_existing_loans` adds the caller's **active** mortgages to the charge side of the
    ratio. That is the real question: not "can I afford this loan" but "can I afford this loan
    *too*". Income resolution is P3-04's, shared and unchanged.
-5. `max_borrowable_minor` solves the same formula backwards for the principal that lands the ratio
-   exactly on `hcsf_limit_bps` at the given rate, term and insurance — null when income is unknown.
-   Solve it with the engine, by bisection on the principal, so it can never drift from the forward
-   computation.
+5. `max_borrowable_minor` is the principal that lands the ratio exactly on `hcsf_limit_bps` at the
+   **simulation's own** rate, term and insurance ratio — null when income is unknown. Per
+   `14-simulateur.md` §HCSF (decided in design review): take the instalment still available under
+   the limit (`limit x income − existing charge` when `include_existing_loans`, else
+   `limit x income`) and scale the simulation's borrowed amount by it — insurance scales with the
+   instalment rather than staying pinned at its flat amount, which is what makes the figure answer
+   "how much house", not "how much principal at exactly this insurance premium". Solve it through
+   the engine (bisection on the principal with the insurance ratio held) so it can never drift from
+   the forward computation, and feed the caption the available instalment it came from — a small
+   capacity has to be explainable by its cause.
 6. `hcsf` reports `within_ratio`, `within_term`, `limit_bps` and `max_term_months` as data. A
    breach is displayed, never enforced: no 4xx, no refusal to save (§15, §17).
 7. Saved scenarios: CRUD, user-scoped, inputs only, with the same validation as a mortgage
@@ -59,15 +67,18 @@ POST   /api/v1/simulations/compute  -> payment, cost totals, taeg_bps, yearly, d
 - Yearly rows sum to the engine's month rows, to the cent.
 - `cost_over_price_bps` is null without a price and correct with one.
 - `include_existing_loans` changes only the ratio, never the payment or the cost.
-- `max_borrowable_minor` fed back into `/compute` produces a ratio equal to `hcsf_limit_bps` within
-  1 bps, and is null when income is unknown.
+- `max_borrowable_minor` fed back into `/compute` (with the insurance scaled the same way) produces
+  a ratio equal to `hcsf_limit_bps` within 1 bps, and is null when income is unknown.
+- With `include_existing_loans`, the capacity reflects only the instalment left under the limit
+  once the existing charge is counted, and the response carries that available instalment.
 - An HCSF breach still returns 2xx from both `/compute` and the scenario writes.
 - Scenario CRUD is user-scoped; delete is hard; the cap returns 422.
 - No computed result is stored on a scenario row.
 - `ruff` + `ty` clean.
 
 ## Tests
-- `test_compute.py`: parity with a declared loan; yearly aggregation; null and non-null
+- `test_compute.py`: parity with a declared loan; yearly aggregation and its capital/interest
+  split; null and non-null
   `cost_over_price_bps`; existing loans in the ratio; the `max_borrowable` round trip; unknown
   income; a breach returning 2xx; statelessness.
 - `test_simulations.py`: CRUD; validation; hard delete; the per-user cap; user scoping.
