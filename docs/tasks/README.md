@@ -37,7 +37,7 @@ PROJECT.md: <sections this implements>
 ## Commits          the conventional commit(s) to make
 ```
 
-Cards live in a per-phase folder: `Phase1/`, `Phase2/`.
+Cards live in a per-phase folder: `Phase1/`, `Phase2/`, `Phase3/`.
 
 ## Phase 1 — sequence & dependency graph
 
@@ -112,7 +112,7 @@ independent tracks after P2-02 — **AI** (03→06, 08, 09), **subscriptions** (
   summarising `docs/design/`; if the two disagree, follow the design file and say so in the PR.
   Cards were written before the frames came back and may lag them.
 
-## Phase 2 definition of done
+## Phase 2 definition of done — **met**
 
 All P2 cards merged; `PROJECT.md` §11 satisfied per slice; CI green. With a local runtime
 configured, a user can enable AI in settings, watch an import's unmatched rows get categorized in
@@ -125,3 +125,73 @@ and are offered the bundled French one after their first import — export their
 see how many transactions a pack would match before committing to it. **With no runtime
 installed the whole app still works** and imports still arrive substantially categorized,
 minus the AI affordances — in French and English.
+
+---
+
+## Phase 3 — sequence & dependency graph
+
+```
+P3-01 phase 3 models + migrations
+  ├─ P3-02 tax parameter + barème seeding
+  ├─ P3-03 amortisation + TAEG engine
+  │    └─ P3-04 mortgages API + debt ratio
+  │         └─ P3-09 simulator API ─ (P3-03, P3-04)
+  ├─ P3-05 properties API
+  └─ P3-06 tax profiles API + ledger prefill
+P3-07 tax estimation engine + endpoint ─ (P3-02, P3-05, P3-06)
+P3-08 tax parameters API + override resolution ─ (P3-02)
+P3-10 net-worth API ─ (P3-04, P3-05)
+P3-11 Patrimoine nav group + routes ─ (P2-14)
+P3-12 crédits panel ─ (P3-04, P3-11)
+P3-13 impôts panel: declaration + estimate ─ (P3-07, P3-11)
+  └─ P3-14 impôts panel: paramètres fiscaux view ─ (P3-08, P3-13)
+P3-15 simulateur panel ─ (P3-09, P3-11)
+P3-16 synthèse panel + properties management ─ (P3-05, P3-10, P3-11)
+```
+
+**P3-11 first among the frontend cards, and alone.** It is the only card that edits the shell
+(`app_shell.dart`, `app_router.dart`); with it merged, the four panel cards touch disjoint feature
+folders and can run in parallel. Two agents editing the sidebar is the one collision this phase
+can easily avoid.
+
+After P3-01 there are three independent backend tracks — **mortgages** (03 → 04 → 09), **tax**
+(02 → 06/07/08) and **assets** (05 → 10) — with P3-10 the only join.
+
+### Phase 3 notes for agents
+
+- The spec lives in `PROJECT.md` §4c (data model), §5c (API), §15 (mortgages + debt ratio), §16
+  (tax), §17 (simulator), §18 (net worth). §15–§19 are appended after §14 so the section numbers
+  every skill and earlier card cites stay stable.
+- **Nothing is derived twice.** Schedules, estimates, simulation results and net worth are computed
+  on read from declared inputs — §4c retires `amortization_entries` and `projections` for exactly
+  this reason. No card may add a column that caches one of them, and **no frontend card may
+  reimplement one in Dart**: the Python engines are the ones with hand-computed tests.
+- **Every rate is an integer in bps.** The percent the user types is converted at the form edge and
+  nowhere else. No floats in the engines — `Decimal` for intermediates, integer minor units out.
+- **The app makes no lending decisions and files no tax return.** An HCSF breach is displayed, never
+  enforced; the tax estimate ships with the limits it did not model (§16 `ignored_keys`) beside the
+  figure, not behind a tooltip. Cards carrying those statements are not carrying polish.
+- **Tax parameters live in the Impôts panel**, not in Paramètres (§16): a number and its workings
+  belong in the same panel.
+- P3-02's job includes **verifying the seeded barème against the official source and recording the
+  check in the migration**. A figure nobody sourced is every user's tax estimate a year later.
+- **The drawn frames win over any card's prose.** Cards were written before the Phase 3 frames
+  exist; where they disagree, follow `docs/design/` and say so in the PR.
+- §19 lists three Phase 3 questions that are **not decided** — runtime packaging, the insights
+  feature, and whether an estimate can be exported. No card may claim them.
+
+## Phase 3 definition of done
+
+All P3 cards merged; `PROJECT.md` §11 satisfied per slice; CI green. A user can declare a mortgage
+and read its full amortisation schedule with interest, principal and insurance separated, see the
+total cost and an indicative TAEG, and see their debt ratio against the HCSF reference with the
+income it was computed from named. They can declare the properties they own, with ownership shares
+and valuation dates. They can fill a tax profile for a year — accepting ledger-derived suggestions
+field by field, never silently — and read an estimate of IR, PFU or barème capital tax, social
+charges, property income and IFI, broken down component by component, next to a plain statement of
+what it did not model; and they can adjust any barème band or parameter for that year inside the
+panel and reset to the official values. They can simulate a new loan, watch the figures follow
+their inputs, read the HCSF verdict including their existing loans, and compare up to three saved
+scenarios. They can see assets, liabilities and net worth in one panel, with the series honest
+about held-flat property values and the exclusions stated. **In French and English**, with no
+arithmetic duplicated in Dart and no derived figure stored in the database.
