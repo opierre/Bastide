@@ -65,12 +65,11 @@ amortisation table with its year navigation, and the loan form.
    written in Dart. `« Modifier »` opens the same modal prefilled, and deletion lives inside it as
    a secondary text button whose confirmation names both consequences: the loan leaves Synthèse's
    passif and leaves the IFI base when it was linked to a property.
-5b. **Open question — the frame's « Type » select.** `12-credits.md` §Modal draws a Type field with
-   *product* values (Crédit immobilier / Prêt travaux / Crédit à la consommation / Crédit auto) and
-   the loan cards print it in their sub-line, but §4c has no such column — `repayment_type`
-   (`constant_payment` | `interest_only`) is a different axis and cannot carry it. **Stop and ask**
-   before building: this needs either a new `mortgages.kind` column (a P3-01 change) or the frame's
-   sub-line reduced to lender + term. Do not silently map one onto the other.
+5b. The frame's « Type » select is `mortgages.kind` (§4c): `mortgage` / `works` / `consumer` /
+   `auto`, labelled from ARB in fr and en — the backend stores the machine value only. It is a
+   **separate axis from `repayment_type`**, which stays its own control; a works loan can be
+   constant-payment or in fine, so neither field may be derived from the other. The loan card's
+   sub-line prints the kind's label, then the lender, then the term, as drawn.
 6. The 422 from a degenerate loan (instalment below its first interest) renders as an inline field
    error explaining the cause, not a toast — the user has to change a number, and the number is on
    screen.
@@ -93,6 +92,7 @@ amortisation table with its year navigation, and the loan form.
   absent (not empty) when the income source is unknown.
 - A degenerate loan shows an inline error; archive removes the loan from the list and the summary.
 - Empty, loading and error states render per the frames.
+- The Type select writes `kind` and never touches `repayment_type`; both labels resolve from ARB.
 - fr + en parity; `flutter analyze` clean.
 
 ## Tests

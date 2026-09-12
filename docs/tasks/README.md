@@ -180,9 +180,8 @@ After P3-01 there are three independent backend tracks — **mortgages** (03 →
   additions paragraph in `00-shared-design-block.md` are normative for every card here. The cards
   were written first and have since been reconciled against them; where any residue disagrees,
   follow `docs/design/` and say so in the PR.
-- **Three Phase 3 questions are open and no card may answer them alone** (they surface as *stop and
-  ask* steps in P3-12, P3-05 and P3-16): whether `mortgages` gains a product-`kind` column for the
-  « Type » select the Crédits modal draws; whether a property keeps a valuation *history* rather
+- **Two Phase 3 questions are open and no card may answer them alone** (they surface as *stop and
+  ask* steps in P3-05 and P3-16): whether a property keeps a valuation *history* rather
   than one declared value; and the parameter values and comparison figures the frames mark
   *« à fournir »* (`13-impots.md`, `14-simulateur.md`, `15-synthese.md` §Notes), which are mock
   data until the owner supplies them — P3-02 seeds from `PROJECT.md` §16 and the official source,

@@ -19,7 +19,9 @@ All Phase 3 SQLAlchemy models and one Alembic migration creating them, plus the 
 ## Schema slice
 Use `PROJECT.md` §4c **exactly** — UUID string PKs, UTC timestamps, money as signed integer
 `*_minor`, **every rate an integer `*_bps`**. Constraints that must exist:
-- `mortgages`: index on `(user_id, status)`; FK `property_id` → properties **nullable**, `ON DELETE
+- `mortgages`: `kind` text NOT NULL, one of `mortgage|works|consumer|auto` (the credit product the
+  user recognises — a different axis from `repayment_type`, which is the maths; see §4c). Index on
+  `(user_id, status)`; FK `property_id` → properties **nullable**, `ON DELETE
   SET NULL` (archiving a property must not delete the loan that financed it).
 - `properties`: index on `(user_id, archived)`.
 - `tax_profiles`: unique `(user_id, tax_year)`.
@@ -53,6 +55,7 @@ Use `PROJECT.md` §4c **exactly** — UUID string PKs, UTC timestamps, money as 
 - A NULL `user_id` row is accepted in `tax_brackets` and `tax_parameters` (system rows).
 - Archiving or deleting a property leaves its mortgage row intact with `property_id` NULL.
 - All money columns integer, all rate columns integer, all PKs UUID strings, timestamps UTC-aware.
+- `mortgages.kind` exists, is NOT NULL and rejects a value outside the four.
 - `ruff` + `ty` clean.
 
 ## Tests

@@ -27,7 +27,8 @@ GET    /api/v1/mortgages/summary         -> totals + debt_ratio_bps + income_sou
 
 ## Steps
 1. CRUD, user-scoped. Validation: `principal_minor > 0`, `term_months > 0`, `annual_rate_bps >= 0`,
-   `insurance_monthly_minor >= 0`, `repayment_type` one of the two values, and a `property_id` that
+   `insurance_monthly_minor >= 0`, `repayment_type` one of the two values, `kind` one of the four
+   credit products (§4c — the label the panel prints, never an input to the engine), and a `property_id` that
    must belong to the caller. `currency` comes from the user (Phase 1 one-currency rule, no
    selector; see the multi-currency skill).
 2. Every derived figure comes from the P3-03 engine at read time: `monthly_payment_minor`,
@@ -79,7 +80,8 @@ GET    /api/v1/mortgages/summary         -> totals + debt_ratio_bps + income_sou
 - `ruff` + `ty` clean.
 
 ## Tests
-- `test_mortgages.py`: CRUD; the validation matrix; archive and restore; `repaid` only via PATCH;
+- `test_mortgages.py`: CRUD; the validation matrix including an unknown `kind`; archive and restore;
+  `repaid` only via PATCH;
   user scoping; currency copied from the user.
 - `test_schedule.py`: window filtering; yearly totals equal their months; cap at term;
   future-dated loan; the summary's `outstanding_series` reconciled against two loans' own schedules
