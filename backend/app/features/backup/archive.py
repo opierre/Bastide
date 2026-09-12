@@ -15,8 +15,20 @@ from app.features.backup.errors import BackupInvalidError
 
 FORMAT_MARKER = "finstride-backup"
 # Bump when the archive layout or a table's columns change in a way an older build cannot read.
-FORMAT_VERSION = 1
+# 2: the Phase 3 tables — an older build would restore such an archive and silently drop them.
+FORMAT_VERSION = 2
 MANIFEST_NAME = "manifest.json"
+
+#: The format version that first archived each table; tables absent here date from version 1.
+#: An older archive has no member for a newer table, and restores it as empty.
+TABLE_SINCE_VERSION: dict[str, int] = {
+    "properties": 2,
+    "mortgages": 2,
+    "mortgage_simulations": 2,
+    "tax_profiles": 2,
+    "tax_brackets": 2,
+    "tax_parameters": 2,
+}
 
 
 def table_member(table: str) -> str:

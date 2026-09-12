@@ -988,8 +988,12 @@ machine or another (`docs/design/09-settings.md` §Sauvegarde et restauration).
   reading its rows.
 - **Scope**: the caller's rows only — categories (user-owned), accounts, balance snapshots,
   import batches, transactions, rules, recurring series/occurrences, goals/allocations,
-  categorisation runs, settings. Never `users` or `auth_tokens`: credentials do not travel in a
-  file, and a restore lands in the signed-in account (`user_id` is rewritten to the caller).
+  categorisation runs, properties, mortgages, mortgage simulations, tax profiles, tax
+  brackets/parameters (user-owned — system rows stay with the install), settings. Never `users`
+  or `auth_tokens`: credentials do not travel in a file, and a restore lands in the signed-in
+  account (`user_id` is rewritten to the caller).
+- **Format versions**: `2` added the Phase 3 tables. An older archive restores them as empty; an
+  older build refuses a newer archive rather than silently dropping tables it does not know.
 - **Refusals before any write**: not an archive (`BACKUP_INVALID`), a `format_version` newer
   than the build reads (`BACKUP_TOO_NEW`), a currency other than the user's
   (`BACKUP_CURRENCY_MISMATCH`, Phase 1 is single-currency), a categorisation run in flight

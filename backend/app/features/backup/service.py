@@ -8,7 +8,13 @@ from typing import Any
 from sqlalchemy.exc import IntegrityError
 
 from app.features.auth.models import User
-from app.features.backup.archive import FORMAT_MARKER, FORMAT_VERSION, ArchiveReader, write_archive
+from app.features.backup.archive import (
+    FORMAT_MARKER,
+    FORMAT_VERSION,
+    TABLE_SINCE_VERSION,
+    ArchiveReader,
+    write_archive,
+)
 from app.features.backup.errors import (
     BackupConflictError,
     BackupCurrencyMismatchError,
@@ -103,6 +109,8 @@ class BackupService:
             self._repository.delete_user_data(user.id)
             known: dict[str, set[str]] = {"categories": self._repository.system_category_ids()}
             for name in BACKUP_TABLES:
+                if manifest["format_version"] < TABLE_SINCE_VERSION.get(name, 1):
+                    continue  # the archive predates this table: it has nothing to restore
                 specs = describe(name)
                 batch: list[dict[str, Any]] = []
                 for raw in reader.rows(name):
