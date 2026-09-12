@@ -78,3 +78,10 @@ SYSTEM_TAX_SEED = TaxSeed(
         "ifi_decote_rate_bps": Parameter(int_value=125, unit="bps"),
     },
 )
+
+#: The HCSF debt-ratio reference of §15, seeded for the same year. Lending guidance rather than
+#: tax law, but held in the same parameter table so it is data a user can override, never
+#: law-in-code — and a reading, never a refusal.
+SYSTEM_LENDING_PARAMETERS: dict[str, Parameter] = {
+    "hcsf_limit_bps": Parameter(int_value=3500, unit="bps"),
+}

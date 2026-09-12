@@ -13,7 +13,7 @@ from sqlalchemy.orm import Session
 
 from app.features.auth.models import User
 from app.features.tax.models import TaxBracket, TaxParameter
-from app.features.tax.seed import SYSTEM_TAX_SEED
+from app.features.tax.seed import SYSTEM_LENDING_PARAMETERS, SYSTEM_TAX_SEED
 
 BACKEND_DIR = Path(__file__).resolve().parents[3]
 
@@ -43,6 +43,9 @@ SECTION_16_KEYS = {
     "ifi_decote_base_minor": "minor",
     "ifi_decote_rate_bps": "bps",
 }
+
+# The §15 lending reference seeded into the same table by its own migration.
+SECTION_15_KEYS = {"hcsf_limit_bps": "bps"}
 
 UNIT_BY_SUFFIX = {"_bps": "bps", "_minor": "minor", "_count": "count"}
 
@@ -123,7 +126,7 @@ def test_seeded_rows_match_the_seed_module_exactly(tmp_path: Path) -> None:
         }
         assert seeded_parameters == {
             key: (parameter.int_value, parameter.unit)
-            for key, parameter in SYSTEM_TAX_SEED.parameters.items()
+            for key, parameter in (SYSTEM_TAX_SEED.parameters | SYSTEM_LENDING_PARAMETERS).items()
         }
 
 
@@ -141,9 +144,16 @@ def test_bands_are_contiguous_and_ascending_with_no_gap_or_overlap(tmp_path: Pat
             assert rates == sorted(rates), kind
 
 
-def test_every_section_16_scalar_key_is_seeded_with_its_unit(tmp_path: Path) -> None:
+def test_every_section_15_and_16_scalar_key_is_seeded_with_its_unit(tmp_path: Path) -> None:
     with _session(_migrated(tmp_path)) as db:
-        assert {key: row.unit for key, row in _system_parameters(db).items()} == SECTION_16_KEYS
+        assert {key: row.unit for key, row in _system_parameters(db).items()} == (
+            SECTION_16_KEYS | SECTION_15_KEYS
+        )
+
+
+def test_the_hcsf_limit_is_seeded_at_35_percent(tmp_path: Path) -> None:
+    with _session(_migrated(tmp_path)) as db:
+        assert _system_parameters(db)["hcsf_limit_bps"].int_value == 3500
 
 
 def test_every_unit_is_known_and_agrees_with_its_key_suffix(tmp_path: Path) -> None:
