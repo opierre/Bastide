@@ -23,6 +23,11 @@ Map<String, dynamic> _summaryJson({int transactions = 1284}) => {
     'rules': 30,
     'recurring': 5,
     'goals': 2,
+    'mortgages': 1,
+    'properties': 1,
+    'simulations': 3,
+    'tax_profiles': 2,
+    'tax_overrides': 4,
   },
 };
 

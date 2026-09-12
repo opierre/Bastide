@@ -8,7 +8,13 @@ from typing import Any
 from sqlalchemy.exc import IntegrityError
 
 from app.features.auth.models import User
-from app.features.backup.archive import FORMAT_MARKER, FORMAT_VERSION, ArchiveReader, write_archive
+from app.features.backup.archive import (
+    FORMAT_MARKER,
+    FORMAT_VERSION,
+    TABLE_SINCE_VERSION,
+    ArchiveReader,
+    write_archive,
+)
 from app.features.backup.errors import (
     BackupConflictError,
     BackupCurrencyMismatchError,
@@ -103,6 +109,8 @@ class BackupService:
             self._repository.delete_user_data(user.id)
             known: dict[str, set[str]] = {"categories": self._repository.system_category_ids()}
             for name in BACKUP_TABLES:
+                if manifest["format_version"] < TABLE_SINCE_VERSION.get(name, 1):
+                    continue  # the archive predates this table: it has nothing to restore
                 specs = describe(name)
                 batch: list[dict[str, Any]] = []
                 for raw in reader.rows(name):
@@ -164,9 +172,15 @@ class BackupService:
                     rules=tables.get("categorization_rules", 0),
                     recurring=tables.get("recurring_series", 0),
                     goals=tables.get("goals", 0),
+                    # Absent from a format-1 manifest, which predates these tables.
+                    mortgages=tables.get("mortgages", 0),
+                    properties=tables.get("properties", 0),
+                    simulations=tables.get("mortgage_simulations", 0),
+                    tax_profiles=tables.get("tax_profiles", 0),
+                    tax_overrides=tables.get("tax_brackets", 0) + tables.get("tax_parameters", 0),
                 ),
             )
-        except (KeyError, ValueError) as exc:
+        except (KeyError, TypeError, ValueError) as exc:
             raise BackupInvalidError("The backup's manifest is malformed.") from exc
 
     @staticmethod

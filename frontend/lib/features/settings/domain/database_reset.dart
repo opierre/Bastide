@@ -14,6 +14,11 @@ class DatabaseCounts {
     required this.rules,
     required this.recurring,
     required this.goals,
+    required this.mortgages,
+    required this.properties,
+    required this.simulations,
+    required this.taxProfiles,
+    required this.taxOverrides,
   });
 
   factory DatabaseCounts.fromJson(Map<String, dynamic> json) => DatabaseCounts(
@@ -23,6 +28,11 @@ class DatabaseCounts {
     rules: json['rules'] as int,
     recurring: json['recurring'] as int,
     goals: json['goals'] as int,
+    mortgages: json['mortgages'] as int,
+    properties: json['properties'] as int,
+    simulations: json['simulations'] as int,
+    taxProfiles: json['tax_profiles'] as int,
+    taxOverrides: json['tax_overrides'] as int,
   );
 
   final int accounts;
@@ -31,6 +41,14 @@ class DatabaseCounts {
   final int rules;
   final int recurring;
   final int goals;
+  final int mortgages;
+  final int properties;
+  final int simulations;
+  final int taxProfiles;
+
+  /// The user's own tax brackets and parameters; the official values are the
+  /// install's and a reset keeps them.
+  final int taxOverrides;
 }
 
 /// Why a reset could not be carried out — one per backend error code.

@@ -507,6 +507,8 @@ One row per user per tax year: the household facts and declared income an estima
 | unit | text | `bps` \| `minor` \| `count` — what the integer means |
 
 Unique on `(user_id, tax_year, key)` and on `(user_id, tax_year, kind, ordinal)` respectively.
+Because a unique constraint treats NULLs as distinct, system rows are held to one per slot by a
+partial unique index on `(tax_year, key)` / `(tax_year, kind, ordinal)` `WHERE user_id IS NULL`.
 **Resolution:** a user row shadows the system row for the same key; brackets are overridden as a
 *whole set* per `(tax_year, kind)` — a half-replaced barème is not a barème. See §16.
 
@@ -660,15 +662,19 @@ POST   /backup/export               → application/zip (.finstride) + header X-
                                        summary JSON; stamps user_settings.last_backup_at
 POST   /backup/inspect              multipart file → summary {format_version, app_version,
                                        exported_at, currency, counts: {accounts, transactions,
-                                       categories, rules, recurring, goals}}
+                                       categories, rules, recurring, goals, mortgages,
+                                       properties, simulations, tax_profiles, tax_overrides}}
+                                       — tax_overrides = the user's own brackets + parameters
 POST   /backup/restore              multipart file → summary   (replaces all the caller's data)
                                      errors: BACKUP_INVALID | BACKUP_TOO_NEW |
                                        BACKUP_CURRENCY_MISMATCH (422) · BACKUP_RUN_ACTIVE |
                                        BACKUP_CONFLICT (409)
 
 GET    /database/summary            → {counts: {accounts, transactions, categories, rules,
-                                       recurring, goals}} — the caller's rows; `categories`
-                                       counts their own, never the system catalog
+                                       recurring, goals, mortgages, properties, simulations,
+                                       tax_profiles, tax_overrides}} — the caller's rows;
+                                       `categories` and `tax_overrides` count their own, never
+                                       the system catalog or the official tax values
 POST   /database/reset              → the same counts, for what was deleted
                                      errors: RESET_RUN_ACTIVE (409)
 ```
@@ -986,8 +992,12 @@ machine or another (`docs/design/09-settings.md` §Sauvegarde et restauration).
   reading its rows.
 - **Scope**: the caller's rows only — categories (user-owned), accounts, balance snapshots,
   import batches, transactions, rules, recurring series/occurrences, goals/allocations,
-  categorisation runs, settings. Never `users` or `auth_tokens`: credentials do not travel in a
-  file, and a restore lands in the signed-in account (`user_id` is rewritten to the caller).
+  categorisation runs, properties, mortgages, mortgage simulations, tax profiles, tax
+  brackets/parameters (user-owned — system rows stay with the install), settings. Never `users`
+  or `auth_tokens`: credentials do not travel in a file, and a restore lands in the signed-in
+  account (`user_id` is rewritten to the caller).
+- **Format versions**: `2` added the Phase 3 tables. An older archive restores them as empty; an
+  older build refuses a newer archive rather than silently dropping tables it does not know.
 - **Refusals before any write**: not an archive (`BACKUP_INVALID`), a `format_version` newer
   than the build reads (`BACKUP_TOO_NEW`), a currency other than the user's
   (`BACKUP_CURRENCY_MISMATCH`, Phase 1 is single-currency), a categorisation run in flight
