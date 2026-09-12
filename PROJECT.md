@@ -1088,11 +1088,12 @@ Seeded set (tax year 2025 income, stored as minor units / bps):
 
 | key | value |
 |---|---|
-| `ir` brackets | 0 % ≤ 11 497 € · 11 % → 29 315 € · 30 % → 83 823 € · 41 % → 180 294 € · 45 % above |
-| `salary_allowance_bps` / floor / ceiling | 1000 · 504 € · 14 426 € |
-| `quotient_half_part_cap_minor` | 1 791 € |
-| `decote_threshold_single_minor` / `_couple_minor` / `decote_rate_bps` | 889 € · 1 470 € · 4525 |
-| `pfu_income_tax_bps` / `social_charges_bps` | 1280 · 1720 |
+| `ir` brackets | 0 % ≤ 11 600 € · 11 % → 29 579 € · 30 % → 84 577 € · 41 % → 181 917 € · 45 % above |
+| `salary_allowance_bps` / `salary_allowance_floor_minor` / `salary_allowance_ceiling_minor` | 1000 · 509 € · 14 555 € |
+| `quotient_half_part_cap_minor` | 1 807 € |
+| `decote_threshold_single_minor` / `_couple_minor` / `decote_rate_bps` | 897 € · 1 483 € · 4525 |
+| `pfu_income_tax_bps` | 1280 |
+| `capital_social_charges_bps` / `property_social_charges_bps` | 1860 · 1720 (LFSS 2026 raised capital income only) |
 | `dividend_allowance_bps` | 4000 (barème option only) |
 | `micro_foncier_allowance_bps` / `micro_foncier_ceiling_minor` | 3000 · 15 000 € |
 | `ifi` brackets | 0 % < 800 000 € · 0,5 % → 1 300 000 € · 0,7 % → 2 570 000 € · 1 % → 5 000 000 € · 1,25 % → 10 000 000 € · 1,5 % above |
@@ -1104,10 +1105,10 @@ Seeded set (tax year 2025 income, stored as minor units / bps):
 1. **Salaries and pensions** → 10 % abattement per person, floored and capped by the parameters.
 2. **Property income**, derived from `properties` — never declared twice (§4c). `micro_foncier`
    when gross rent ≤ ceiling: 30 % abattement. `reel`: gross − `annual_charges_minor`, floored at
-   0. Social charges at 17,2 % apply to the net figure.
+   0. Social charges at `property_social_charges_bps` (17,2 %) apply to the net figure.
 3. **Capital income** goes down one of two roads, chosen by `pfu_opt_out`: the **PFU** (12,8 % IR +
-   17,2 % PS, flat, outside the barème), or the **barème**, where dividends take the 40 % abattement
-   and capital gains and interest enter in full — still with 17,2 % PS.
+   18,6 % PS, flat, outside the barème), or the **barème**, where dividends take the 40 % abattement
+   and capital gains and interest enter in full — still with `capital_social_charges_bps` (18,6 %).
 4. **Revenu net imposable** = the barème-taxed categories − `deductions_minor`, floored at 0.
 5. **Parts**: 1 (single) or 2 (couple), + 0,5 for each of the first two dependents, + 1 per
    dependent from the third, + 0,5 when `single_parent`.
