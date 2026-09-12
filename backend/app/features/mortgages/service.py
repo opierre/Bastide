@@ -25,6 +25,11 @@ from app.features.mortgages.schemas import (
     MortgageRead,
     MortgageStatus,
     MortgageUpdate,
+    ScheduleGranularity,
+    ScheduleMonthRow,
+    ScheduleRead,
+    ScheduleTotals,
+    ScheduleYearRow,
 )
 
 ACTIVE: MortgageStatus = "active"
@@ -72,6 +77,12 @@ class MortgageFeesExceedPrincipalError(ValidationError):
     """Raised when upfront fees swallow the principal, leaving no advance to rate a TAEG on."""
 
     code = "MORTGAGE_FEES_EXCEED_PRINCIPAL"
+
+
+class MortgageScheduleWindowInvalidError(ValidationError):
+    """Raised when a schedule window's `from` falls after its `to`."""
+
+    code = "MORTGAGE_SCHEDULE_WINDOW_INVALID"
 
 
 def schedule_for(mortgage: Mortgage) -> Schedule:
@@ -207,6 +218,74 @@ class MortgageService:
         for field, value in changes.items():
             setattr(mortgage, field, value)
         return self._detail(self._repository.save(mortgage), user.currency, today)
+
+    def schedule(
+        self,
+        user: User,
+        mortgage_id: str,
+        *,
+        start: date | None,
+        end: date | None,
+        granularity: ScheduleGranularity,
+    ) -> ScheduleRead:
+        """The instalments due in `[start, end]`, per month or summed per calendar year.
+
+        Paged by date window rather than offset, because the panel reads a schedule a year at a
+        time. Either bound may be open; the schedule itself ends at the loan's term, so an
+        unbounded window is capped there with nothing to add beyond it.
+
+        Raises:
+            MortgageNotFoundError: no such loan, or it belongs to another user.
+            MortgageScheduleWindowInvalidError: `start` is after `end`.
+        """
+        if start is not None and end is not None and start > end:
+            raise MortgageScheduleWindowInvalidError("`from` must not be after `to`.")
+        full = schedule_for(self._owned(user.id, mortgage_id))
+        window = Schedule(
+            principal_minor=full.principal_minor,
+            upfront_fees_minor=full.upfront_fees_minor,
+            rows=tuple(
+                row
+                for row in full.rows
+                if (start is None or row.due_on >= start) and (end is None or row.due_on <= end)
+            ),
+        )
+        rows: list[ScheduleMonthRow] | list[ScheduleYearRow]
+        if granularity == "year":
+            rows = [
+                ScheduleYearRow(
+                    year=year.year,
+                    instalment_minor=year.instalment_minor,
+                    interest_minor=year.interest_minor,
+                    principal_minor=year.principal_minor,
+                    insurance_minor=year.insurance_minor,
+                    outstanding_after_minor=year.outstanding_end_minor,
+                )
+                for year in window.by_year()
+            ]
+        else:
+            rows = [
+                ScheduleMonthRow(
+                    ordinal=row.ordinal,
+                    due_on=row.due_on,
+                    instalment_minor=row.instalment_minor,
+                    interest_minor=row.interest_minor,
+                    principal_minor=row.principal_minor,
+                    insurance_minor=row.insurance_minor,
+                    outstanding_after_minor=row.outstanding_after_minor,
+                )
+                for row in window.rows
+            ]
+        return ScheduleRead(
+            granularity=granularity,
+            rows=rows,
+            totals=ScheduleTotals(
+                interest_minor=window.total_interest_minor,
+                principal_minor=sum(row.principal_minor for row in window.rows),
+                insurance_minor=window.total_insurance_minor,
+            ),
+            currency=user.currency,
+        )
 
     def archive(self, user_id: str, mortgage_id: str) -> None:
         """Archive a loan, as accounts and goals are archived, never hard-deleted.

@@ -103,3 +103,48 @@ class MortgageDetail(MortgageRead):
     #: Indicative (§15): a real TAEG includes fees the app never sees.
     taeg_bps: int
     last_payment_on: date
+
+
+#: `year` aggregates the engine's month rows; it is never a second formula.
+ScheduleGranularity = Literal["month", "year"]
+
+
+class ScheduleMonthRow(BaseModel):
+    """One instalment, exactly as the engine produced it. `instalment_minor` includes insurance."""
+
+    ordinal: int
+    due_on: date
+    instalment_minor: int
+    interest_minor: int
+    principal_minor: int
+    insurance_minor: int
+    outstanding_after_minor: int
+
+
+class ScheduleYearRow(BaseModel):
+    """The instalments of one calendar year inside the requested window, summed."""
+
+    year: int
+    instalment_minor: int
+    interest_minor: int
+    principal_minor: int
+    insurance_minor: int
+    #: Capital still owed after the year's last instalment in the window.
+    outstanding_after_minor: int
+
+
+class ScheduleTotals(BaseModel):
+    """Sums over the rows returned, whatever the granularity."""
+
+    interest_minor: int
+    principal_minor: int
+    insurance_minor: int
+
+
+class ScheduleRead(BaseModel):
+    """A window of a loan's schedule, derived per request and stored nowhere (§15)."""
+
+    granularity: ScheduleGranularity
+    rows: list[ScheduleMonthRow] | list[ScheduleYearRow]
+    totals: ScheduleTotals
+    currency: str

@@ -16,6 +16,8 @@ from app.features.mortgages.schemas import (
     MortgageRead,
     MortgageStatus,
     MortgageUpdate,
+    ScheduleGranularity,
+    ScheduleRead,
 )
 from app.features.mortgages.service import MortgageService
 
@@ -77,6 +79,23 @@ async def update_mortgage(
 ) -> MortgageDetail:
     """Patch a loan, including archiving, restoring and marking it repaid via `status`."""
     return service.update(user, mortgage_id, payload, today)
+
+
+@router.get("/{mortgage_id}/schedule", response_model=ScheduleRead)
+async def get_schedule(
+    mortgage_id: str,
+    service: Annotated[MortgageService, Depends(_service)],
+    user: Annotated[User, Depends(get_current_user)],
+    start: Annotated[
+        date | None, Query(alias="from", description="First due date included.")
+    ] = None,
+    end: Annotated[date | None, Query(alias="to", description="Last due date included.")] = None,
+    granularity: Annotated[
+        ScheduleGranularity, Query(description="`month` rows, or the same rows summed per year.")
+    ] = "month",
+) -> ScheduleRead:
+    """A date window of the loan's amortisation schedule, derived per request."""
+    return service.schedule(user, mortgage_id, start=start, end=end, granularity=granularity)
 
 
 @router.delete("/{mortgage_id}", status_code=status.HTTP_204_NO_CONTENT)
