@@ -406,6 +406,7 @@ every parameter, bracket and result comparable as an exact integer.
 | label | text | user-facing, e.g. « Résidence principale » |
 | lender | text | bank name (drives the monogram chip, as `accounts.institution` does) |
 | property_id | uuid FK → properties null | the asset this loan financed; null = unlinked |
+| kind | text | the credit product: `mortgage` (crédit immobilier) \| `works` (prêt travaux) \| `consumer` (crédit à la consommation) \| `auto` (crédit auto) |
 | repayment_type | text | `constant_payment` (échéance constante) \| `interest_only` (in fine) |
 | principal_minor | int | capital borrowed, positive |
 | annual_rate_bps | int | nominal annual rate, basis points |
@@ -416,6 +417,12 @@ every parameter, bracket and result comparable as an exact integer.
 | status | text | `active` \| `repaid` \| `archived` |
 | created_at / updated_at | datetime | |
 
+> `kind` and `repayment_type` are **two axes, not one**: the product a user recognises (« prêt
+> travaux ») and the maths the schedule runs on (constant payment vs in fine). A works loan can be
+> either, so collapsing them would either lose the label the panel prints on every card or force a
+> repayment type the loan does not have. `kind` is labelled from ARB, fr and en, and is used
+> nowhere in the engine.
+>
 > **The amortisation schedule is derived, never stored.** Five declared inputs determine every row
 > of it, so persisting 300 rows per loan would create a second source of truth that an edit to the
 > rate silently invalidates — the trap `cached_balance_minor` avoids by being a delta off an
@@ -689,7 +696,7 @@ payload or a response is an integer in basis points (§4c); every amount is inte
 GET    /mortgages               ?status → [mortgage + {monthly_payment_minor,
                                   total_instalment_minor, outstanding_principal_minor,
                                   paid_principal_pct, remaining_months, next_payment_on}]
-POST   /mortgages               {label, lender, repayment_type, principal_minor,
+POST   /mortgages               {label, lender, kind, repayment_type, principal_minor,
                                  annual_rate_bps, insurance_monthly_minor, term_months,
                                  first_payment_date, upfront_fees_minor?, property_id?} → mortgage
 GET    /mortgages/{id}          → mortgage + the derived figures above + {total_interest_minor,

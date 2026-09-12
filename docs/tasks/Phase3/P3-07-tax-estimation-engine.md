@@ -45,7 +45,12 @@ GET /api/v1/tax/profiles/{year}/estimate -> parts, taxable_income_minor, ir_mino
    the micro ceiling is estimated under `reel`, and the response names the regime it used.
 7. IFI only when the base reaches the threshold: the sum of `user_share_value_minor`, primary
    residence less its abattement, **minus the outstanding principal of the mortgages linked to
-   those properties** (via P3-03's engine), then the barème and the décote band.
+   those properties** (via P3-03's engine), then the barème and the décote band. Return the base's
+   **components** — one line per counted property at its held share, the residence abattement, each
+   netted mortgage — alongside the base and the threshold. `15-synthese.md` §Biens view draws that
+   build-up inside Synthèse, and the alternative is the frontend re-deriving an IFI base from
+   `/properties`, which is the duplication §16 exists to prevent. `Non redevable` is a state with a
+   base and a threshold, not an absent component: emit the row with a zero amount.
 8. `breakdown` carries one entry per component, so the total is never a number without a
    derivation. `ignored_keys` lists §16's not-modelled regimes as **machine keys** — the frontend
    owns the wording, in fr and en.
@@ -61,7 +66,10 @@ GET /api/v1/tax/profiles/{year}/estimate -> parts, taxable_income_minor, ir_mino
   band; a zero-income profile.
 - The two capital roads are mutually exclusive in every response.
 - Property income comes from `properties` and follows a change to one.
-- The IFI base nets off only mortgages linked to the counted properties.
+- The IFI base nets off only mortgages linked to the counted properties, and its components sum to
+  the reported base.
+- A user under the threshold still gets an IFI component with its base and threshold and a zero
+  amount, never a missing entry.
 - `average_rate_bps` and `marginal_rate_bps` agree with the bracket that applied.
 - `ignored_keys` is non-empty and machine-readable; no user-facing prose in the response.
 - No `float` in `engine.py`; no estimate is persisted anywhere.

@@ -25,20 +25,51 @@ amortisation table with its year navigation, and the loan form.
    and in this feature that specifically means **no arithmetic**: every figure on screen comes from
    the backend, because a second amortisation implementation in Dart would drift from the one the
    tests pin (§15).
-2. Summary row carries the debt ratio, its income source and the HCSF reference. When
-   `income_source` is `unknown`, say why and offer the way out (declare an income) rather than
-   drawing an empty gauge. When `over_limit` is true it is information in the warning tone, never
-   an error and never a block — the panel states that no lender is bound by it.
-3. Loan cards: label, lender monogram chip (00 §Components — monogram, never an image), monthly
-   instalment, outstanding, progress bar with the paid share, and the next payment date. Money
-   follows the money rule; an instalment is a neutral figure, not a red expense — it is a scheduled
-   charge, not a booked transaction (the same call `10-subscriptions.md` made).
-4. Detail: the cost totals, `taeg_bps` **labelled indicative**, and the schedule table paged by
-   year with a year switcher. Show the insurance column separately from interest and principal —
-   folding it in is exactly the misstatement §15 forbids.
+2. Summary row (three cards: charge mensuelle · capital restant dû · taux d'endettement) carries
+   the debt ratio, its income source and the HCSF reference. The **RatioGauge** has a fixed 0–60 %
+   scale so the 35 % reference tick sits at the same x in every state, iris fill under the
+   reference and amber `#FFB84D` above, and a ratio past 60 % clamps the fill while still printing
+   the exact percent (`12-credits.md` §1, §Notes). When `income_source` is `unknown`, **no gauge is
+   drawn**: say why and offer the way out (declare an income) rather than drawing an empty one.
+   When `over_limit` is true it is information in the warning tone — an amber StatusPill and an
+   amber fill, the card border unchanged — never an error, never a block, and the line « Lecture
+   informative : ce repère ne lie aucun prêteur. » is body content on the card, never a tooltip.
+   The caption always names the income *and* its source, so wording must follow §15: the ledger
+   figure is the **median** of the last 12 complete months.
+3. Loan cards — **cards in a 2-column grid, not a DataTable** (`12-credits.md` §2: at n <= 5 a
+   table header organises less than it costs, and two loans of very different size each keep a
+   progress bar and their dates at equal rank): label, lender monogram chip (00 §Components —
+   monogram, never an image), monthly instalment, outstanding, progress bar with the paid share,
+   and a footer of taux nominal · assurance · prochaine échéance. Money follows the money rule; an
+   instalment is a neutral figure, not a red expense — it is a scheduled charge, not a booked
+   transaction (the same call `10-subscriptions.md` made).
+3b. **The trajectory chart is part of this panel, not an extra.** Under the loan cards, an AreaLine
+   of the *combined* outstanding principal of all active loans, month by month to the last
+   instalment, with dashed annotations for today and for each loan's end date (`12-credits.md` §3).
+   It is what the cards cannot show: when each debt ends and the step a second loan adds. The
+   series comes from `/mortgages/summary` (P3-04 step 9) — **not** from summing schedules in Dart.
+4. Detail: the cost totals, `taeg_bps` **labelled indicative** (an iris « INDICATIF » pill on the
+   label), and the schedule table paged by year with a **YearSwitcher** — a ‹ year › pill plus a
+   segmented strip of the loan's years, opening on the year of the current instalment, the strip
+   jumping when the chevrons step. Rows use the dense 28 px table variant so twelve rows and the
+   year's foot total fit at 900 px, the current instalment's row carries an iris 6 % wash, and the
+   insurance column is separate from interest and principal — folding it in is exactly the
+   misstatement §15 forbids. **No amortisation curve in the detail**: the frames reject it, since
+   the table carries the numbers and the list's trajectory chart already carries the shape.
 5. Form modal: label, lender, repayment type, principal, rate (as a percent input that converts to
    bps at the edge — the user types 3,45, the API gets 345), insurance, term, first payment date,
    optional fees, optional property link. Rate and money parsing is locale-aware (fr uses a comma).
+   The frame's read-only « Mensualité calculée » plate under the fields (`#0A0F15`, dashed border,
+   lock glyph) updates **live** as the fields change — feed it from a debounced
+   `POST /simulations/compute` (P3-09, stateless and free to call), never from a payment formula
+   written in Dart. `« Modifier »` opens the same modal prefilled, and deletion lives inside it as
+   a secondary text button whose confirmation names both consequences: the loan leaves Synthèse's
+   passif and leaves the IFI base when it was linked to a property.
+5b. The frame's « Type » select is `mortgages.kind` (§4c): `mortgage` / `works` / `consumer` /
+   `auto`, labelled from ARB in fr and en — the backend stores the machine value only. It is a
+   **separate axis from `repayment_type`**, which stays its own control; a works loan can be
+   constant-payment or in fine, so neither field may be derived from the other. The loan card's
+   sub-line prints the kind's label, then the lender, then the term, as drawn.
 6. The 422 from a degenerate loan (instalment below its first interest) renders as an inline field
    error explaining the cause, not a toast — the user has to change a number, and the number is on
    screen.
@@ -53,17 +84,25 @@ amortisation table with its year navigation, and the loan form.
 - Amounts, dates, percentages and rates are locale-formatted in fr and en, tabular and aligned.
 - The ratio card renders all three income sources correctly, including `unknown`.
 - An over-limit ratio warns and still allows every action.
-- The schedule table's yearly totals match its rows; the insurance column is separate.
+- The schedule table's yearly totals match its rows; the insurance column is separate; rows are the
+  dense 28 px variant and a full year plus its foot fits at 900 px without scrolling the panel.
+- The trajectory chart renders the combined outstanding of all active loans from the API's series,
+  with today and each loan's end annotated; no schedule is summed in Dart.
+- The ratio gauge uses the fixed 0–60 % scale with the reference tick, clamps above it, and is
+  absent (not empty) when the income source is unknown.
 - A degenerate loan shows an inline error; archive removes the loan from the list and the summary.
 - Empty, loading and error states render per the frames.
+- The Type select writes `kind` and never touches `repayment_type`; both labels resolve from ARB.
 - fr + en parity; `flutter analyze` clean.
 
 ## Tests
 - Controller (mocked repo): load and filter; create; patch; archive and restore; summary mapping
   including all three income sources; schedule window paging.
-- Widget: card figures in fr and en; ratio card for declared, ledger and unknown; over-limit
-  warning present and non-blocking; schedule table renders a year and its totals; form submits a
-  comma-typed rate as bps; the 422 surfaces inline; empty state.
+- Widget: card figures in fr and en; ratio card for declared, ledger and unknown; the gauge absent
+  under unknown and clamped past 60 %; over-limit warning present and non-blocking; schedule table
+  renders a year and its totals; the YearSwitcher opens on the current instalment's year; the
+  trajectory chart renders from a fixture series; form submits a comma-typed rate as bps and its
+  live mensualité plate follows a mocked compute; the 422 surfaces inline; empty state.
 
 ## Commits
 - `feat(mortgages): add the mortgages repository and controller`

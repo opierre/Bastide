@@ -175,8 +175,17 @@ After P3-01 there are three independent backend tracks — **mortgages** (03 →
   belong in the same panel.
 - P3-02's job includes **verifying the seeded barème against the official source and recording the
   check in the migration**. A figure nobody sourced is every user's tax estimate a year later.
-- **The drawn frames win over any card's prose.** Cards were written before the Phase 3 frames
-  exist; where they disagree, follow `docs/design/` and say so in the PR.
+- **The drawn frames win over any card's prose.** The Phase 3 frames now exist —
+  `docs/design/12-credits.md`, `13-impots.md`, `14-simulateur.md`, `15-synthese.md` and the Phase 3
+  additions paragraph in `00-shared-design-block.md` are normative for every card here. The cards
+  were written first and have since been reconciled against them; where any residue disagrees,
+  follow `docs/design/` and say so in the PR.
+- **Two Phase 3 questions are open and no card may answer them alone** (they surface as *stop and
+  ask* steps in P3-05 and P3-16): whether a property keeps a valuation *history* rather
+  than one declared value; and the parameter values and comparison figures the frames mark
+  *« à fournir »* (`13-impots.md`, `14-simulateur.md`, `15-synthese.md` §Notes), which are mock
+  data until the owner supplies them — P3-02 seeds from `PROJECT.md` §16 and the official source,
+  never from a frame.
 - §19 lists three Phase 3 questions that are **not decided** — runtime packaging, the insights
   feature, and whether an estimate can be exported. No card may claim them.
 
