@@ -26,6 +26,9 @@ BACKEND_DIR = Path(__file__).resolve().parent.parent
 # retarget the round-trip (see test_phase2_models.py).
 PRE_PHASE3_REVISION = "a8d3f2c61e05"
 
+# A year the seed migration leaves empty, so system rows inserted here meet no seeded row.
+UNSEEDED_TAX_YEAR = 2099
+
 PHASE3_TABLES = {
     "mortgages",
     "properties",
@@ -208,7 +211,7 @@ def test_tax_bracket_unique_per_user_year_kind_ordinal(migrated_session: Session
 
 def test_tax_parameter_unique_per_user_year_key(migrated_session: Session) -> None:
     user = _seed_user(migrated_session)
-    parameter = {"tax_year": 2025, "key": "pfu_income_tax_bps", "unit": "bps"}
+    parameter = {"tax_year": UNSEEDED_TAX_YEAR, "key": "pfu_income_tax_bps", "unit": "bps"}
     migrated_session.add(TaxParameter(user_id=user.id, int_value=1280, **parameter))
     migrated_session.commit()
 
@@ -222,7 +225,7 @@ def test_system_rows_with_null_user_id_insert(migrated_session: Session) -> None
         [
             TaxBracket(
                 user_id=None,
-                tax_year=2025,
+                tax_year=UNSEEDED_TAX_YEAR,
                 kind="ir",
                 ordinal=0,
                 lower_bound_minor=0,
@@ -230,7 +233,7 @@ def test_system_rows_with_null_user_id_insert(migrated_session: Session) -> None
             ),
             TaxParameter(
                 user_id=None,
-                tax_year=2025,
+                tax_year=UNSEEDED_TAX_YEAR,
                 key="micro_foncier_ceiling_minor",
                 int_value=1_500_000,
                 unit="minor",
@@ -239,12 +242,13 @@ def test_system_rows_with_null_user_id_insert(migrated_session: Session) -> None
     )
     migrated_session.commit()
 
-    assert migrated_session.query(TaxBracket).one().user_id is None
-    assert migrated_session.query(TaxParameter).one().user_id is None
+    year = {"tax_year": UNSEEDED_TAX_YEAR}
+    assert migrated_session.query(TaxBracket).filter_by(**year).one().user_id is None
+    assert migrated_session.query(TaxParameter).filter_by(**year).one().user_id is None
 
 
 def test_duplicate_system_tax_parameter_is_rejected(migrated_session: Session) -> None:
-    parameter = {"tax_year": 2025, "key": "pfu_income_tax_bps", "unit": "bps"}
+    parameter = {"tax_year": UNSEEDED_TAX_YEAR, "key": "pfu_income_tax_bps", "unit": "bps"}
     migrated_session.add(TaxParameter(user_id=None, int_value=1280, **parameter))
     migrated_session.commit()
 
@@ -254,7 +258,7 @@ def test_duplicate_system_tax_parameter_is_rejected(migrated_session: Session) -
 
 
 def test_duplicate_system_tax_bracket_is_rejected(migrated_session: Session) -> None:
-    bracket = {"tax_year": 2025, "kind": "ir", "ordinal": 0, "lower_bound_minor": 0}
+    bracket = {"tax_year": UNSEEDED_TAX_YEAR, "kind": "ir", "ordinal": 0, "lower_bound_minor": 0}
     migrated_session.add(TaxBracket(user_id=None, rate_bps=0, **bracket))
     migrated_session.commit()
 
@@ -265,7 +269,7 @@ def test_duplicate_system_tax_bracket_is_rejected(migrated_session: Session) -> 
 
 def test_user_row_can_shadow_the_system_row_for_the_same_key(migrated_session: Session) -> None:
     user = _seed_user(migrated_session)
-    parameter = {"tax_year": 2025, "key": "pfu_income_tax_bps", "unit": "bps"}
+    parameter = {"tax_year": UNSEEDED_TAX_YEAR, "key": "pfu_income_tax_bps", "unit": "bps"}
     migrated_session.add_all(
         [
             TaxParameter(user_id=None, int_value=1280, **parameter),
@@ -274,7 +278,7 @@ def test_user_row_can_shadow_the_system_row_for_the_same_key(migrated_session: S
     )
     migrated_session.commit()
 
-    assert migrated_session.query(TaxParameter).count() == 2
+    assert migrated_session.query(TaxParameter).filter_by(tax_year=UNSEEDED_TAX_YEAR).count() == 2
 
 
 def test_archiving_a_property_leaves_its_mortgage_linked(migrated_session: Session) -> None:
