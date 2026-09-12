@@ -243,6 +243,26 @@ def test_system_rows_with_null_user_id_insert(migrated_session: Session) -> None
     assert migrated_session.query(TaxParameter).one().user_id is None
 
 
+def test_duplicate_system_tax_parameter_is_rejected(migrated_session: Session) -> None:
+    parameter = {"tax_year": 2025, "key": "pfu_income_tax_bps", "unit": "bps"}
+    migrated_session.add(TaxParameter(user_id=None, int_value=1280, **parameter))
+    migrated_session.commit()
+
+    migrated_session.add(TaxParameter(user_id=None, int_value=1300, **parameter))
+    with pytest.raises(IntegrityError):
+        migrated_session.commit()
+
+
+def test_duplicate_system_tax_bracket_is_rejected(migrated_session: Session) -> None:
+    bracket = {"tax_year": 2025, "kind": "ir", "ordinal": 0, "lower_bound_minor": 0}
+    migrated_session.add(TaxBracket(user_id=None, rate_bps=0, **bracket))
+    migrated_session.commit()
+
+    migrated_session.add(TaxBracket(user_id=None, rate_bps=1100, **bracket))
+    with pytest.raises(IntegrityError):
+        migrated_session.commit()
+
+
 def test_user_row_can_shadow_the_system_row_for_the_same_key(migrated_session: Session) -> None:
     user = _seed_user(migrated_session)
     parameter = {"tax_year": 2025, "key": "pfu_income_tax_bps", "unit": "bps"}

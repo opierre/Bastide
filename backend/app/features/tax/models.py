@@ -6,10 +6,24 @@ No estimate is stored: it is a pure function of a profile plus the resolved para
 from datetime import UTC, datetime
 from uuid import uuid4
 
-from sqlalchemy import Boolean, DateTime, ForeignKey, Index, Integer, String, UniqueConstraint
+from sqlalchemy import (
+    Boolean,
+    DateTime,
+    ForeignKey,
+    Index,
+    Integer,
+    String,
+    UniqueConstraint,
+    text,
+)
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.core.db import Base
+
+# A unique constraint treats NULLs as distinct on both SQLite and Postgres, so it cannot stop two
+# system rows (`user_id` NULL) for the same slot. A partial unique index over the system rows
+# does, and both dialects support it.
+_SYSTEM_ROW = text("user_id IS NULL")
 
 
 class TaxProfile(Base):
@@ -56,6 +70,15 @@ class TaxBracket(Base):
         ),
         # The system-row read resolves a barème by year and kind, ordered by band.
         Index("ix_tax_brackets_year_kind_ordinal", "tax_year", "kind", "ordinal"),
+        Index(
+            "uq_tax_brackets_system_year_kind_ordinal",
+            "tax_year",
+            "kind",
+            "ordinal",
+            unique=True,
+            sqlite_where=_SYSTEM_ROW,
+            postgresql_where=_SYSTEM_ROW,
+        ),
     )
 
     id: Mapped[str] = mapped_column(String(36), primary_key=True, default=lambda: str(uuid4()))
@@ -77,6 +100,14 @@ class TaxParameter(Base):
     __table_args__ = (
         UniqueConstraint("user_id", "tax_year", "key", name="uq_tax_parameters_user_year_key"),
         Index("ix_tax_parameters_year_key", "tax_year", "key"),
+        Index(
+            "uq_tax_parameters_system_year_key",
+            "tax_year",
+            "key",
+            unique=True,
+            sqlite_where=_SYSTEM_ROW,
+            postgresql_where=_SYSTEM_ROW,
+        ),
     )
 
     id: Mapped[str] = mapped_column(String(36), primary_key=True, default=lambda: str(uuid4()))

@@ -99,6 +99,14 @@ def upgrade() -> None:
         batch_op.create_index(
             "ix_tax_brackets_year_kind_ordinal", ["tax_year", "kind", "ordinal"], unique=False
         )
+        # NULLs are distinct in the unique constraint above; this holds system rows to one per slot.
+        batch_op.create_index(
+            "uq_tax_brackets_system_year_kind_ordinal",
+            ["tax_year", "kind", "ordinal"],
+            unique=True,
+            sqlite_where=sa.text("user_id IS NULL"),
+            postgresql_where=sa.text("user_id IS NULL"),
+        )
 
     op.create_table(
         "tax_parameters",
@@ -117,6 +125,13 @@ def upgrade() -> None:
     )
     with op.batch_alter_table("tax_parameters", schema=None) as batch_op:
         batch_op.create_index("ix_tax_parameters_year_key", ["tax_year", "key"], unique=False)
+        batch_op.create_index(
+            "uq_tax_parameters_system_year_key",
+            ["tax_year", "key"],
+            unique=True,
+            sqlite_where=sa.text("user_id IS NULL"),
+            postgresql_where=sa.text("user_id IS NULL"),
+        )
 
     op.create_table(
         "tax_profiles",
@@ -189,10 +204,12 @@ def downgrade() -> None:
     op.drop_table("mortgages")
     op.drop_table("tax_profiles")
     with op.batch_alter_table("tax_parameters", schema=None) as batch_op:
+        batch_op.drop_index("uq_tax_parameters_system_year_key")
         batch_op.drop_index("ix_tax_parameters_year_key")
 
     op.drop_table("tax_parameters")
     with op.batch_alter_table("tax_brackets", schema=None) as batch_op:
+        batch_op.drop_index("uq_tax_brackets_system_year_kind_ordinal")
         batch_op.drop_index("ix_tax_brackets_year_kind_ordinal")
 
     op.drop_table("tax_brackets")

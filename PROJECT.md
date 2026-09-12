@@ -507,6 +507,8 @@ One row per user per tax year: the household facts and declared income an estima
 | unit | text | `bps` \| `minor` \| `count` — what the integer means |
 
 Unique on `(user_id, tax_year, key)` and on `(user_id, tax_year, kind, ordinal)` respectively.
+Because a unique constraint treats NULLs as distinct, system rows are held to one per slot by a
+partial unique index on `(tax_year, key)` / `(tax_year, kind, ordinal)` `WHERE user_id IS NULL`.
 **Resolution:** a user row shadows the system row for the same key; brackets are overridden as a
 *whole set* per `(tax_year, kind)` — a half-replaced barème is not a barème. See §16.
 
