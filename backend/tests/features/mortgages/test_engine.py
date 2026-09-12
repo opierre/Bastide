@@ -2,7 +2,7 @@
 
 import inspect
 from datetime import date
-from decimal import ROUND_DOWN, localcontext
+from decimal import ROUND_DOWN, Decimal, localcontext
 
 import pytest
 
@@ -12,6 +12,7 @@ from app.features.mortgages.engine import (
     RepaymentType,
     Schedule,
     build_schedule,
+    taeg_bps,
 )
 
 
@@ -205,6 +206,35 @@ def test_non_positive_principal_or_term_is_rejected() -> None:
         _loan(principal_minor=0)
     with pytest.raises(ValueError):
         _loan(term_months=0)
+
+
+@pytest.mark.parametrize(
+    ("annual_rate_bps", "term_months"), [(345, 240), (120, 12), (777, 360), (1999, 60)]
+)
+def test_taeg_of_a_bare_loan_is_the_nominal_rate_annual_equivalent(
+    annual_rate_bps: int, term_months: int
+) -> None:
+    schedule = _loan(annual_rate_bps=annual_rate_bps, term_months=term_months)
+    monthly = Decimal(annual_rate_bps) / 120_000
+    expected = ((1 + monthly) ** 12 - 1) * 10_000
+
+    assert abs(taeg_bps(schedule) - expected) <= 1
+
+
+def test_taeg_rises_with_fees_and_with_insurance() -> None:
+    bare = taeg_bps(_loan())
+
+    assert taeg_bps(_loan(upfront_fees_minor=150_000)) > bare
+    assert taeg_bps(_loan(insurance_monthly_minor=4_200)) > bare
+
+
+def test_taeg_of_a_free_loan_is_zero() -> None:
+    assert taeg_bps(_loan(annual_rate_bps=0)) == 0
+
+
+def test_taeg_rejects_fees_that_swallow_the_principal() -> None:
+    with pytest.raises(ValueError):
+        taeg_bps(_loan(principal_minor=100_000, upfront_fees_minor=100_000))
 
 
 def test_engine_source_never_mentions_float() -> None:

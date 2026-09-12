@@ -19,6 +19,7 @@ from enum import StrEnum
 _CONTEXT = Context(prec=50, rounding=ROUND_HALF_EVEN)
 _BPS_PER_UNIT = 10_000
 _MONTHS_PER_YEAR = 12
+_TAEG_MONTHLY_TOLERANCE = Decimal("1e-15")
 
 
 class RepaymentType(StrEnum):
@@ -165,6 +166,50 @@ def build_schedule(
             for ordinal, (interest, principal, outstanding) in enumerate(rows, start=1)
         ),
     )
+
+
+def taeg_bps(schedule: Schedule) -> int:
+    """The loan's indicative TAEG, in basis points.
+
+    The internal rate of return of the actual flows — the advance ``principal − upfront_fees``
+    against every instalment including insurance — solved by bisection on the monthly rate and
+    annualised as ``(1 + m)^12 − 1``. Indicative only (§15): a real TAEG includes fees we never
+    see.
+
+    Raises:
+        ValueError: If the upfront fees swallow the whole principal, leaving no advance.
+    """
+    advance = schedule.principal_minor - schedule.upfront_fees_minor
+    if advance <= 0:
+        raise ValueError("upfront_fees_minor must be smaller than principal_minor")
+    instalments = [row.instalment_minor for row in schedule.rows]
+
+    with localcontext(_CONTEXT):
+
+        def net_present_value(monthly_rate: Decimal) -> Decimal:
+            discount = 1 / (1 + monthly_rate)
+            factor = Decimal(1)
+            present_value = Decimal(0)
+            for instalment in instalments:
+                factor *= discount
+                present_value += instalment * factor
+            return advance - present_value
+
+        # Repaying no more than the advance is a zero cost of credit.
+        if net_present_value(Decimal(0)) >= 0:
+            return 0
+        low, high = Decimal(0), Decimal(1)
+        while net_present_value(high) < 0:
+            high *= 2
+        # A monthly-rate bracket this narrow moves the annual rate by far less than 1 bps.
+        while high - low > _TAEG_MONTHLY_TOLERANCE:
+            middle = (low + high) / 2
+            if net_present_value(middle) < 0:
+                low = middle
+            else:
+                high = middle
+        monthly = (low + high) / 2
+        return _round_half_up(((1 + monthly) ** _MONTHS_PER_YEAR - 1) * _BPS_PER_UNIT)
 
 
 def _constant_payment_rows(
