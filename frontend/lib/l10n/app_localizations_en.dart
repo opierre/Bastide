@@ -1641,7 +1641,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get settingsBackupExportCaption =>
-      '.finstride file — accounts, transactions, categories, rules, goals, settings.';
+      '.finstride file — accounts, transactions, categories, rules, goals, loans, properties, taxes, settings.';
 
   @override
   String get settingsBackupExportPreparing => 'Preparing the archive…';
@@ -1756,6 +1756,21 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get settingsBackupConfirmGoals => 'Goals';
+
+  @override
+  String get settingsBackupConfirmMortgages => 'Loans';
+
+  @override
+  String get settingsBackupConfirmProperties => 'Properties';
+
+  @override
+  String get settingsBackupConfirmSimulations => 'Simulations';
+
+  @override
+  String get settingsBackupConfirmTaxProfiles => 'Tax profiles';
+
+  @override
+  String get settingsBackupConfirmTaxOverrides => 'Custom tax parameters';
 
   @override
   String get settingsBackupConfirmWarning =>
@@ -2384,7 +2399,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get settingsResetSubtitle =>
-      'Resetting the database deletes this profile\'s transactions, accounts, rules, custom categories, goals and subscriptions. Exported backups aren\'t touched.';
+      'Resetting the database deletes this profile\'s transactions, accounts, rules, custom categories, goals, subscriptions, loans, properties, simulations and tax data. Exported backups aren\'t touched.';
 
   @override
   String get settingsResetButton => 'Reset…';

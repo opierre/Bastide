@@ -14,14 +14,19 @@ from app.core.user_data import USER_DATA_TABLES, owned_by, table
 #: (`docs/design/09-settings.md` §Zone de danger).
 RESET_TABLES: tuple[str, ...] = tuple(name for name in USER_DATA_TABLES if name != "user_settings")
 
-#: The counts the confirmation modal lists, and the table each one comes from.
-COUNTED_TABLES: dict[str, str] = {
-    "accounts": "accounts",
-    "transactions": "transactions",
-    "categories": "categories",
-    "rules": "categorization_rules",
-    "recurring": "recurring_series",
-    "goals": "goals",
+#: The counts the confirmation modal lists, and the tables each one sums.
+COUNTED_TABLES: dict[str, tuple[str, ...]] = {
+    "accounts": ("accounts",),
+    "transactions": ("transactions",),
+    "categories": ("categories",),
+    "rules": ("categorization_rules",),
+    "recurring": ("recurring_series",),
+    "goals": ("goals",),
+    "mortgages": ("mortgages",),
+    "properties": ("properties",),
+    "simulations": ("mortgage_simulations",),
+    "tax_profiles": ("tax_profiles",),
+    "tax_overrides": ("tax_brackets", "tax_parameters"),
 }
 
 
@@ -34,11 +39,14 @@ class DatabaseRepository:
     def count_rows(self, user_id: str) -> dict[str, int]:
         """How many rows of each counted table the user owns, keyed as the schema names them."""
         return {
-            key: self._db.scalar(
-                select(func.count()).select_from(table(name)).where(owned_by(name, user_id))
+            key: sum(
+                self._db.scalar(
+                    select(func.count()).select_from(table(name)).where(owned_by(name, user_id))
+                )
+                or 0
+                for name in names
             )
-            or 0
-            for key, name in COUNTED_TABLES.items()
+            for key, names in COUNTED_TABLES.items()
         }
 
     def has_active_run(self, user_id: str) -> bool:

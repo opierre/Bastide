@@ -212,6 +212,12 @@ def test_summary_counts_the_callers_own_rows(client: TestClient, tmp_path: Path)
         "rules": 1,
         "recurring": 1,
         "goals": 1,
+        "mortgages": 1,
+        "properties": 1,
+        "simulations": 1,
+        "tax_profiles": 1,
+        # The user's bracket and parameter together.
+        "tax_overrides": 2,
     }
 
 

@@ -662,15 +662,19 @@ POST   /backup/export               → application/zip (.finstride) + header X-
                                        summary JSON; stamps user_settings.last_backup_at
 POST   /backup/inspect              multipart file → summary {format_version, app_version,
                                        exported_at, currency, counts: {accounts, transactions,
-                                       categories, rules, recurring, goals}}
+                                       categories, rules, recurring, goals, mortgages,
+                                       properties, simulations, tax_profiles, tax_overrides}}
+                                       — tax_overrides = the user's own brackets + parameters
 POST   /backup/restore              multipart file → summary   (replaces all the caller's data)
                                      errors: BACKUP_INVALID | BACKUP_TOO_NEW |
                                        BACKUP_CURRENCY_MISMATCH (422) · BACKUP_RUN_ACTIVE |
                                        BACKUP_CONFLICT (409)
 
 GET    /database/summary            → {counts: {accounts, transactions, categories, rules,
-                                       recurring, goals}} — the caller's rows; `categories`
-                                       counts their own, never the system catalog
+                                       recurring, goals, mortgages, properties, simulations,
+                                       tax_profiles, tax_overrides}} — the caller's rows;
+                                       `categories` and `tax_overrides` count their own, never
+                                       the system catalog or the official tax values
 POST   /database/reset              → the same counts, for what was deleted
                                      errors: RESET_RUN_ACTIVE (409)
 ```

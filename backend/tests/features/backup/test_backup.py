@@ -270,6 +270,11 @@ def test_export_writes_a_manifest_and_one_jsonl_per_table(
         "rules": 1,
         "recurring": 0,
         "goals": 1,
+        "mortgages": 0,
+        "properties": 0,
+        "simulations": 0,
+        "tax_profiles": 0,
+        "tax_overrides": 0,
     }
     archive = zipfile.ZipFile(io.BytesIO(response.content))
     manifest = json.loads(archive.read("manifest.json"))
@@ -373,7 +378,17 @@ def test_backup_round_trips_the_phase3_tables(client: TestClient, tmp_path: Path
     parameters = [json.loads(line) for line in archive.read("tax_parameters.jsonl").splitlines()]
     assert [row["int_value"] for row in parameters] == [1300]
 
-    assert _upload(client, "restore", headers, content).status_code == 200
+    response = _upload(client, "restore", headers, content)
+    assert response.status_code == 200
+    counts = response.json()["counts"]
+    assert {key: counts[key] for key in ("mortgages", "properties", "simulations")} == {
+        "mortgages": 1,
+        "properties": 1,
+        "simulations": 1,
+    }
+    assert counts["tax_profiles"] == 1
+    # The user's bracket and parameter together; the system parameter is not theirs.
+    assert counts["tax_overrides"] == 2
 
     with _session(tmp_path) as db:
         loan = db.get(Mortgage, ids["mortgage"])
@@ -402,6 +417,7 @@ def test_restore_of_a_version_1_archive_empties_the_phase3_tables(
     response = _upload(client, "restore", headers, older)
 
     assert response.status_code == 200
+    assert response.json()["counts"]["mortgages"] == 0
     with _session(tmp_path) as db:
         assert db.get(Transaction, ids["transaction"]) is not None
         assert db.scalars(select(Mortgage)).all() == []

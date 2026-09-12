@@ -199,6 +199,11 @@ class _CountsPlate extends StatelessWidget {
       (l10n.settingsBackupConfirmRules, counts?.rules),
       (l10n.settingsBackupConfirmSubscriptions, counts?.recurring),
       (l10n.settingsBackupConfirmGoals, counts?.goals),
+      (l10n.settingsBackupConfirmMortgages, counts?.mortgages),
+      (l10n.settingsBackupConfirmProperties, counts?.properties),
+      (l10n.settingsBackupConfirmSimulations, counts?.simulations),
+      (l10n.settingsBackupConfirmTaxProfiles, counts?.taxProfiles),
+      (l10n.settingsBackupConfirmTaxOverrides, counts?.taxOverrides),
     ];
 
     return Container(
@@ -216,11 +221,16 @@ class _CountsPlate extends StatelessWidget {
               height: 34,
               child: Row(
                 children: [
-                  Text(
-                    label,
-                    style: textTheme.bodyMedium?.copyWith(color: AppColors.textSecondary),
+                  // Expanded, not a Spacer: the longest label (« Paramètres fiscaux
+                  // personnalisés ») must shrink on a narrow modal, never overflow.
+                  Expanded(
+                    child: Text(
+                      label,
+                      overflow: TextOverflow.ellipsis,
+                      style: textTheme.bodyMedium?.copyWith(color: AppColors.textSecondary),
+                    ),
                   ),
-                  const Spacer(),
+                  const SizedBox(width: AppSpacing.sm),
                   Text(
                     count == null ? '—' : number.format(count),
                     style: valueStyle,

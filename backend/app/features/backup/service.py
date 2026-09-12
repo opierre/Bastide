@@ -172,9 +172,15 @@ class BackupService:
                     rules=tables.get("categorization_rules", 0),
                     recurring=tables.get("recurring_series", 0),
                     goals=tables.get("goals", 0),
+                    # Absent from a format-1 manifest, which predates these tables.
+                    mortgages=tables.get("mortgages", 0),
+                    properties=tables.get("properties", 0),
+                    simulations=tables.get("mortgage_simulations", 0),
+                    tax_profiles=tables.get("tax_profiles", 0),
+                    tax_overrides=tables.get("tax_brackets", 0) + tables.get("tax_parameters", 0),
                 ),
             )
-        except (KeyError, ValueError) as exc:
+        except (KeyError, TypeError, ValueError) as exc:
             raise BackupInvalidError("The backup's manifest is malformed.") from exc
 
     @staticmethod
