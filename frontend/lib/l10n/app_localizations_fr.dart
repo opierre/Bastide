@@ -2469,4 +2469,32 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get settingsResetErrorUnknown =>
       'La réinitialisation a échoué. Vos données n\'ont pas été modifiées.';
+
+  @override
+  String get navSectionWealth => 'Patrimoine';
+
+  @override
+  String get navMortgages => 'Crédits';
+
+  @override
+  String get navMortgagesSubtitle =>
+      'Vos emprunts, leur coût et votre capacité';
+
+  @override
+  String get navTax => 'Impôts';
+
+  @override
+  String get navTaxSubtitle => 'Une estimation, pas une déclaration';
+
+  @override
+  String get navSimulator => 'Simulateur';
+
+  @override
+  String get navSimulatorSubtitle => 'Ce qu\'un nouveau crédit changerait';
+
+  @override
+  String get navNetworth => 'Synthèse';
+
+  @override
+  String get navNetworthSubtitle => 'Ce que vous possédez, ce que vous devez';
 }

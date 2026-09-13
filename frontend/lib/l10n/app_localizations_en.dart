@@ -2450,4 +2450,31 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get settingsResetErrorUnknown =>
       'The reset failed. Your data hasn\'t been changed.';
+
+  @override
+  String get navSectionWealth => 'Wealth';
+
+  @override
+  String get navMortgages => 'Loans';
+
+  @override
+  String get navMortgagesSubtitle => 'Your loans, their cost and your capacity';
+
+  @override
+  String get navTax => 'Taxes';
+
+  @override
+  String get navTaxSubtitle => 'An estimate, not a return';
+
+  @override
+  String get navSimulator => 'Simulator';
+
+  @override
+  String get navSimulatorSubtitle => 'What a new loan would change';
+
+  @override
+  String get navNetworth => 'Net worth';
+
+  @override
+  String get navNetworthSubtitle => 'What you own, what you owe';
 }

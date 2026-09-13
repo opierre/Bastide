@@ -3917,6 +3917,60 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'La réinitialisation a échoué. Vos données n\'ont pas été modifiées.'**
   String get settingsResetErrorUnknown;
+
+  /// Left nav section heading grouping the loans, taxes, simulator and net-worth destinations (Phase 3). Rendered uppercase.
+  ///
+  /// In fr, this message translates to:
+  /// **'Patrimoine'**
+  String get navSectionWealth;
+
+  /// Left nav label for the loans screen.
+  ///
+  /// In fr, this message translates to:
+  /// **'Crédits'**
+  String get navMortgages;
+
+  /// Top-bar descriptor under the loans panel title.
+  ///
+  /// In fr, this message translates to:
+  /// **'Vos emprunts, leur coût et votre capacité'**
+  String get navMortgagesSubtitle;
+
+  /// Left nav label for the tax estimation screen.
+  ///
+  /// In fr, this message translates to:
+  /// **'Impôts'**
+  String get navTax;
+
+  /// Top-bar descriptor under the tax panel title.
+  ///
+  /// In fr, this message translates to:
+  /// **'Une estimation, pas une déclaration'**
+  String get navTaxSubtitle;
+
+  /// Left nav label for the new-loan simulator screen.
+  ///
+  /// In fr, this message translates to:
+  /// **'Simulateur'**
+  String get navSimulator;
+
+  /// Top-bar descriptor under the simulator panel title.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ce qu\'un nouveau crédit changerait'**
+  String get navSimulatorSubtitle;
+
+  /// Left nav label for the net-worth screen. The EN label is 'Net worth', not 'Overview': the Overview group already owns that word.
+  ///
+  /// In fr, this message translates to:
+  /// **'Synthèse'**
+  String get navNetworth;
+
+  /// Top-bar descriptor under the net-worth panel title.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ce que vous possédez, ce que vous devez'**
+  String get navNetworthSubtitle;
 }
 
 class _AppLocalizationsDelegate
