@@ -1,8 +1,8 @@
 """Tests for the net-worth summary: reconciliation, exclusions, the series, scoping.
 
 What is at stake is that net worth is a measurement: every figure reconciles with its parts to
-the minor unit, nothing already counted elsewhere (goals) or not yet owed (subscriptions, tax)
-creeps in, and the series never reports a month it has no data for.
+the minor unit, nothing already counted elsewhere (goals) or not yet owed (subscriptions) creeps
+in, and the series never reports a month it has no data for.
 """
 
 from collections.abc import Iterator
@@ -310,7 +310,7 @@ def test_an_active_subscription_is_not_counted(client: TestClient) -> None:
     assert summary(client, headers) == before
 
 
-def test_tax_never_appears_in_any_figure(client: TestClient) -> None:
+def test_the_summary_carries_only_assets_and_loan_liabilities(client: TestClient) -> None:
     headers = register(client)
 
     body = summary(client, headers)

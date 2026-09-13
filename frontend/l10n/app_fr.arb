@@ -2051,7 +2051,7 @@
   "@settingsBackupExportLabel": {
     "description": "Label of the export row on the backup card."
   },
-  "settingsBackupExportCaption": "Fichier .finstride — comptes, transactions, catégories, règles, objectifs, crédits, biens, impôts, paramètres.",
+  "settingsBackupExportCaption": "Fichier .finstride — comptes, transactions, catégories, règles, objectifs, crédits, biens, paramètres.",
   "@settingsBackupExportCaption": {
     "description": "Caption under the export row's label: what the file contains."
   },
@@ -2210,14 +2210,6 @@
   "settingsBackupConfirmSimulations": "Simulations",
   "@settingsBackupConfirmSimulations": {
     "description": "Summary row: number of saved loan simulator scenarios."
-  },
-  "settingsBackupConfirmTaxProfiles": "Profils fiscaux",
-  "@settingsBackupConfirmTaxProfiles": {
-    "description": "Summary row: number of tax profiles (one per tax year)."
-  },
-  "settingsBackupConfirmTaxOverrides": "Paramètres fiscaux personnalisés",
-  "@settingsBackupConfirmTaxOverrides": {
-    "description": "Summary row: the user's own tax brackets and parameters together — the official values are not counted."
   },
   "settingsBackupConfirmWarning": "Toutes vos données actuelles seront remplacées. Exportez-les d'abord si besoin.",
   "@settingsBackupConfirmWarning": {
@@ -3019,7 +3011,7 @@
   "@settingsResetBadge": {
     "description": "Pill beside the danger zone title, stating the stake in a word."
   },
-  "settingsResetSubtitle": "Réinitialiser la base de données supprime transactions, comptes, règles, catégories personnalisées, objectifs, abonnements, crédits, biens, simulations et données fiscales de ce profil. Les sauvegardes exportées ne sont pas touchées.",
+  "settingsResetSubtitle": "Réinitialiser la base de données supprime transactions, comptes, règles, catégories personnalisées, objectifs, abonnements, crédits, biens et simulations de ce profil. Les sauvegardes exportées ne sont pas touchées.",
   "@settingsResetSubtitle": {
     "description": "What a database reset deletes, and what it leaves alone."
   },

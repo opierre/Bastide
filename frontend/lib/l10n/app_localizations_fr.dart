@@ -1659,7 +1659,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get settingsBackupExportCaption =>
-      'Fichier .finstride — comptes, transactions, catégories, règles, objectifs, crédits, biens, impôts, paramètres.';
+      'Fichier .finstride — comptes, transactions, catégories, règles, objectifs, crédits, biens, paramètres.';
 
   @override
   String get settingsBackupExportPreparing => 'Préparation de l\'archive…';
@@ -1784,13 +1784,6 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get settingsBackupConfirmSimulations => 'Simulations';
-
-  @override
-  String get settingsBackupConfirmTaxProfiles => 'Profils fiscaux';
-
-  @override
-  String get settingsBackupConfirmTaxOverrides =>
-      'Paramètres fiscaux personnalisés';
 
   @override
   String get settingsBackupConfirmWarning =>
@@ -2424,7 +2417,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get settingsResetSubtitle =>
-      'Réinitialiser la base de données supprime transactions, comptes, règles, catégories personnalisées, objectifs, abonnements, crédits, biens, simulations et données fiscales de ce profil. Les sauvegardes exportées ne sont pas touchées.';
+      'Réinitialiser la base de données supprime transactions, comptes, règles, catégories personnalisées, objectifs, abonnements, crédits, biens et simulations de ce profil. Les sauvegardes exportées ne sont pas touchées.';
 
   @override
   String get settingsResetButton => 'Réinitialiser…';

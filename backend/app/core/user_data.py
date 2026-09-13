@@ -26,13 +26,11 @@ from app.features.properties import models as _properties_models  # noqa: F401
 from app.features.recurring import models as _recurring_models  # noqa: F401
 from app.features.rules import models as _rules_models  # noqa: F401
 from app.features.settings import models as _settings_models  # noqa: F401
-from app.features.tax import models as _tax_models  # noqa: F401
 from app.features.transactions import models as _transactions_models  # noqa: F401
 
 # Insert order: each table after every table its foreign keys point at. Deletion runs it
 # backwards. `users` and `auth_tokens` are deliberately absent — they are the account itself,
-# not its contents. The tax tables' system rows (`user_id` NULL) are the install's, not the
-# user's: the ownership predicate never selects them.
+# not its contents.
 USER_DATA_TABLES: tuple[str, ...] = (
     "categories",
     "accounts",
@@ -48,9 +46,6 @@ USER_DATA_TABLES: tuple[str, ...] = (
     "properties",
     "mortgages",
     "mortgage_simulations",
-    "tax_profiles",
-    "tax_brackets",
-    "tax_parameters",
     "user_settings",
 )
 

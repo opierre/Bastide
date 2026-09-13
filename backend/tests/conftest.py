@@ -20,7 +20,6 @@ from app.features.properties import models as _properties_models  # noqa: F401
 from app.features.recurring import models as _recurring_models  # noqa: F401
 from app.features.rules import models as _rules_models  # noqa: F401
 from app.features.settings import models as _settings_models  # noqa: F401
-from app.features.tax import models as _tax_models  # noqa: F401
 from app.features.transactions import models as _transactions_models  # noqa: F401
 from app.main import create_app
 

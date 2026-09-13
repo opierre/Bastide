@@ -13,8 +13,6 @@ class BackupCounts {
     required this.mortgages,
     required this.properties,
     required this.simulations,
-    required this.taxProfiles,
-    required this.taxOverrides,
   });
 
   factory BackupCounts.fromJson(Map<String, dynamic> json) => BackupCounts(
@@ -27,8 +25,6 @@ class BackupCounts {
     mortgages: json['mortgages'] as int,
     properties: json['properties'] as int,
     simulations: json['simulations'] as int,
-    taxProfiles: json['tax_profiles'] as int,
-    taxOverrides: json['tax_overrides'] as int,
   );
 
   final int accounts;
@@ -40,10 +36,6 @@ class BackupCounts {
   final int mortgages;
   final int properties;
   final int simulations;
-  final int taxProfiles;
-
-  /// The user's own tax brackets and parameters together.
-  final int taxOverrides;
 }
 
 /// An archive's manifest (`PROJECT.md` §14), as inspect and restore return it

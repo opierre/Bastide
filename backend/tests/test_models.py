@@ -34,9 +34,6 @@ EXPECTED_TABLES = {
     "goal_allocations",
     "mortgages",
     "properties",
-    "tax_profiles",
-    "tax_brackets",
-    "tax_parameters",
     "mortgage_simulations",
     "alembic_version",
 }

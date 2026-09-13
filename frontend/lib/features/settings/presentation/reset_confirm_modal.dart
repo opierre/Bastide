@@ -202,8 +202,6 @@ class _CountsPlate extends StatelessWidget {
       (l10n.settingsBackupConfirmMortgages, counts?.mortgages),
       (l10n.settingsBackupConfirmProperties, counts?.properties),
       (l10n.settingsBackupConfirmSimulations, counts?.simulations),
-      (l10n.settingsBackupConfirmTaxProfiles, counts?.taxProfiles),
-      (l10n.settingsBackupConfirmTaxOverrides, counts?.taxOverrides),
     ];
 
     return Container(

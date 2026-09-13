@@ -21,16 +21,12 @@ from app.features.imports.models import ImportBatch
 from app.features.mortgages.models import Mortgage, MortgageSimulation
 from app.features.properties.models import Property
 from app.features.rules.models import CategorizationRule
-from app.features.tax.models import TaxBracket, TaxParameter, TaxProfile
 from app.features.transactions.models import Transaction
 
 PHASE3_MEMBERS = (
     "properties.jsonl",
     "mortgages.jsonl",
     "mortgage_simulations.jsonl",
-    "tax_profiles.jsonl",
-    "tax_brackets.jsonl",
-    "tax_parameters.jsonl",
 )
 
 
@@ -132,7 +128,7 @@ def _seed(db: Session, email: str) -> dict[str, str]:
 
 
 def _seed_phase3(db: Session, user_id: str) -> dict[str, str]:
-    """A property with the loan that financed it, a simulation, and the user's tax rows."""
+    """A property with the loan that financed it, and a simulation."""
     home = Property(
         user_id=user_id,
         label="Résidence principale",
@@ -168,32 +164,6 @@ def _seed_phase3(db: Session, user_id: str) -> dict[str, str]:
                 insurance_monthly_minor=3_800,
                 term_months=240,
                 upfront_fees_minor=150_000,
-            ),
-            TaxProfile(
-                user_id=user_id, tax_year=2025, household="single", salaries_minor=4_200_000
-            ),
-            TaxBracket(
-                user_id=user_id,
-                tax_year=2025,
-                kind="ir",
-                ordinal=0,
-                lower_bound_minor=0,
-                rate_bps=0,
-            ),
-            TaxParameter(
-                user_id=user_id,
-                tax_year=2025,
-                key="pfu_income_tax_bps",
-                int_value=1300,
-                unit="bps",
-            ),
-            # The install's own parameter: never the user's to archive.
-            TaxParameter(
-                user_id=None,
-                tax_year=2025,
-                key="pfu_income_tax_bps",
-                int_value=1280,
-                unit="bps",
             ),
         ]
     )
@@ -273,8 +243,6 @@ def test_export_writes_a_manifest_and_one_jsonl_per_table(
         "mortgages": 0,
         "properties": 0,
         "simulations": 0,
-        "tax_profiles": 0,
-        "tax_overrides": 0,
     }
     archive = zipfile.ZipFile(io.BytesIO(response.content))
     manifest = json.loads(archive.read("manifest.json"))
@@ -375,8 +343,6 @@ def test_backup_round_trips_the_phase3_tables(client: TestClient, tmp_path: Path
     manifest = json.loads(archive.read("manifest.json"))
     for member in PHASE3_MEMBERS:
         assert manifest["tables"][member.removesuffix(".jsonl")] == 1
-    parameters = [json.loads(line) for line in archive.read("tax_parameters.jsonl").splitlines()]
-    assert [row["int_value"] for row in parameters] == [1300]
 
     response = _upload(client, "restore", headers, content)
     assert response.status_code == 200
@@ -386,9 +352,6 @@ def test_backup_round_trips_the_phase3_tables(client: TestClient, tmp_path: Path
         "properties": 1,
         "simulations": 1,
     }
-    assert counts["tax_profiles"] == 1
-    # The user's bracket and parameter together; the system parameter is not theirs.
-    assert counts["tax_overrides"] == 2
 
     with _session(tmp_path) as db:
         loan = db.get(Mortgage, ids["mortgage"])
@@ -397,11 +360,37 @@ def test_backup_round_trips_the_phase3_tables(client: TestClient, tmp_path: Path
         assert loan.annual_rate_bps == 345
         assert db.get(Property, ids["property"]) is not None
         assert len(db.scalars(select(MortgageSimulation)).all()) == 1
-        assert len(db.scalars(select(TaxProfile)).all()) == 1
-        assert len(db.scalars(select(TaxBracket)).all()) == 1
-        # The user's parameter came back; the system one was never deleted.
-        stored = db.scalars(select(TaxParameter).order_by(TaxParameter.int_value)).all()
-        assert [(row.user_id, row.int_value) for row in stored] == [(None, 1280), (user_id, 1300)]
+
+
+def test_restore_ignores_the_members_of_the_removed_tax_tables(
+    client: TestClient, tmp_path: Path
+) -> None:
+    """A format-2 archive exported while the tax feature existed still restores."""
+    headers = _register(client, "amelie@example.com")
+    with _session(tmp_path) as db:
+        ids = _seed(db, "amelie@example.com")
+    source = zipfile.ZipFile(io.BytesIO(_export(client, headers)))
+    buffer = io.BytesIO()
+    with zipfile.ZipFile(buffer, "w") as older:
+        for member in source.namelist():
+            data = source.read(member)
+            if member == "manifest.json":
+                manifest = json.loads(data)
+                manifest["tables"] |= {"tax_profiles": 1, "tax_brackets": 0, "tax_parameters": 0}
+                data = json.dumps(manifest).encode()
+            older.writestr(member, data)
+        older.writestr(
+            "tax_profiles.jsonl",
+            json.dumps({"id": "p1", "user_id": ids["user"], "tax_year": 2025}) + "\n",
+        )
+        older.writestr("tax_brackets.jsonl", "")
+        older.writestr("tax_parameters.jsonl", "")
+
+    response = _upload(client, "restore", headers, buffer.getvalue())
+
+    assert response.status_code == 200
+    with _session(tmp_path) as db:
+        assert db.get(Transaction, ids["transaction"]) is not None
 
 
 def test_restore_of_a_version_1_archive_empties_the_phase3_tables(
@@ -422,7 +411,6 @@ def test_restore_of_a_version_1_archive_empties_the_phase3_tables(
         assert db.get(Transaction, ids["transaction"]) is not None
         assert db.scalars(select(Mortgage)).all() == []
         assert db.scalars(select(Property)).all() == []
-        assert db.scalars(select(TaxParameter).where(TaxParameter.user_id.is_not(None))).all() == []
 
 
 def test_restore_rejects_a_version_2_archive_missing_a_phase3_table(client: TestClient) -> None:

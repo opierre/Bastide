@@ -26,8 +26,6 @@ Map<String, dynamic> _summaryJson({int transactions = 1284}) => {
     'mortgages': 1,
     'properties': 1,
     'simulations': 3,
-    'tax_profiles': 2,
-    'tax_overrides': 4,
   },
 };
 
