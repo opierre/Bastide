@@ -7,12 +7,14 @@ copy per test rather than a `create_all`, and a migrated one a copy rather than 
 import shutil
 from collections.abc import Generator
 from pathlib import Path
+from typing import Any
 from unittest.mock import patch
 
 import pytest
 from argon2 import PasswordHasher
+from fastapi import FastAPI
 from fastapi.testclient import TestClient
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, event
 from sqlalchemy.orm import Session, sessionmaker
 
 from app.core import security
@@ -76,12 +78,32 @@ def migrated_template(tmp_path_factory: pytest.TempPathFactory) -> Path:
     return path
 
 
+@pytest.fixture(scope="session")
+def app() -> FastAPI:
+    """One app for the whole session.
+
+    FastAPI sets up parts of a route on its first call, which costs tens of milliseconds on some
+    routes; a fresh app per test would pay that again in every test. Isolation comes from the
+    dependency overrides instead, which `client` installs and clears around each test.
+    """
+    return create_app()
+
+
 @pytest.fixture
-def client(tmp_path: Path, seeded_template: Path) -> Generator[TestClient]:
+def client(app: FastAPI, tmp_path: Path, seeded_template: Path) -> Generator[TestClient]:
     """A TestClient whose DB session dependency points at a temp SQLite file."""
     db_path = tmp_path / "test.db"
     shutil.copyfile(seeded_template, db_path)
     engine = create_engine(f"sqlite:///{db_path}", connect_args={"check_same_thread": False})
+
+    @event.listens_for(engine, "connect")
+    def _skip_fsync(dbapi_connection: Any, connection_record: Any) -> None:
+        # A throwaway file: durability across a power cut buys nothing, and a sync per commit
+        # is most of what a write request costs here.
+        cursor = dbapi_connection.cursor()
+        cursor.execute("PRAGMA synchronous=OFF")
+        cursor.close()
+
     testing_session_local = sessionmaker(bind=engine, autoflush=False, autocommit=False)
 
     def override_get_db() -> Generator:
@@ -91,14 +113,17 @@ def client(tmp_path: Path, seeded_template: Path) -> Generator[TestClient]:
         finally:
             db.close()
 
-    app = create_app()
     app.dependency_overrides[get_db] = override_get_db
     # Background work and the startup reconciliation open their own sessions; without this
     # they would open them on the real database instead of this test's temp file.
     app.dependency_overrides[get_session_factory] = lambda: testing_session_local
 
-    with TestClient(app) as test_client:
-        yield test_client
+    try:
+        with TestClient(app) as test_client:
+            yield test_client
+    finally:
+        app.dependency_overrides.clear()
+        engine.dispose()
 
 
 @pytest.fixture
