@@ -1,19 +1,23 @@
-"""Data access for tax profiles, plus the two reads the prefill and the year validator need.
+"""Data access for tax profiles, the parameter set, and the rows an estimate is assembled from.
 
-The only place `tax_profiles` is queried. `monthly_totals_by_category_key` reads the ledger the
-way the dashboard and the debt ratio read it — a grouped, read-only lookup over another
-feature's rows — because the prefill is a read and writes nothing (§5c).
+The only place `tax_profiles` is queried. Everything else here is a read over another feature's
+rows — the ledger for the prefill, `properties` and `mortgages` for the estimate — because both
+of those are reads and write nothing (§5c). The estimate takes its property income and its IFI
+base from `properties` rather than from a column of its own, so the Impôts and Synthèse panels
+cannot disagree about the same rent or the same valuation (§4c).
 """
 
 from datetime import date
 
-from sqlalchemy import extract, func, select
+from sqlalchemy import extract, func, or_, select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from app.features.accounts.models import Account
 from app.features.categories.models import Category
-from app.features.tax.models import TaxParameter, TaxProfile
+from app.features.mortgages.models import Mortgage
+from app.features.properties.models import Property
+from app.features.tax.models import TaxBracket, TaxParameter, TaxProfile
 from app.features.transactions.models import Transaction
 
 
@@ -72,6 +76,64 @@ class TaxRepository:
         """
         return self._db.scalar(
             select(func.min(TaxParameter.tax_year)).where(TaxParameter.user_id.is_(None))
+        )
+
+    def list_parameters(self, user_id: str, tax_year: int) -> list[TaxParameter]:
+        """The year's scalar parameters: the seeded rows and this user's, for `resolve` to sort.
+
+        Both are returned rather than resolved in SQL, because resolution is one function shared
+        with the parameters panel (§5c) — the numbers a user reads must be the numbers the
+        estimate ran on, and two implementations cannot promise that.
+        """
+        return list(
+            self._db.scalars(
+                select(TaxParameter).where(
+                    TaxParameter.tax_year == tax_year,
+                    or_(TaxParameter.user_id == user_id, TaxParameter.user_id.is_(None)),
+                )
+            )
+        )
+
+    def list_brackets(self, user_id: str, tax_year: int) -> list[TaxBracket]:
+        """The year's barème bands, seeded and user-owned. Resolved per kind by `resolve`."""
+        return list(
+            self._db.scalars(
+                select(TaxBracket).where(
+                    TaxBracket.tax_year == tax_year,
+                    or_(TaxBracket.user_id == user_id, TaxBracket.user_id.is_(None)),
+                )
+            )
+        )
+
+    def list_active_properties(self, user_id: str) -> list[Property]:
+        """The user's non-archived properties, oldest first — §16's property income and IFI base.
+
+        Archived ones leave every aggregate, exactly as they leave `/properties` and §18's assets.
+        """
+        return list(
+            self._db.scalars(
+                select(Property)
+                .where(Property.user_id == user_id, Property.archived.is_(False))
+                .order_by(Property.created_at)
+            )
+        )
+
+    def list_active_property_loans(self, user_id: str) -> list[Mortgage]:
+        """The user's active loans that are secured on a property, oldest first.
+
+        Only these net off the IFI base (§16). An unlinked loan finances nothing the base counts,
+        and an archived or repaid one is not a debt the base should shrink for.
+        """
+        return list(
+            self._db.scalars(
+                select(Mortgage)
+                .where(
+                    Mortgage.user_id == user_id,
+                    Mortgage.status == "active",
+                    Mortgage.property_id.is_not(None),
+                )
+                .order_by(Mortgage.created_at)
+            )
         )
 
     def monthly_totals_by_category_key(
