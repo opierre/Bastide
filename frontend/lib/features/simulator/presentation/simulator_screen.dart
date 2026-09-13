@@ -6,6 +6,8 @@ import '../../../core/widgets/inline_banner.dart';
 import '../../../core/widgets/state_views.dart';
 import '../../../l10n/app_localizations.dart';
 import '../application/simulator_controller.dart';
+import 'scenario_compare.dart';
+import 'scenario_list.dart';
 import 'simulation_result.dart';
 import 'simulator_form.dart';
 import 'simulator_labels.dart';
@@ -49,12 +51,29 @@ class SimulatorScreen extends ConsumerWidget {
   }
 }
 
-/// The panel's contribution to the top bar.
-class SimulatorTopBarActions extends StatelessWidget {
+/// The panel's contribution to the top bar: the secondary « Enregistrer le
+/// scénario ». Off until the inputs make a loan with a price — never because
+/// of what the HCSF reading says.
+class SimulatorTopBarActions extends ConsumerWidget {
   const SimulatorTopBarActions({super.key});
 
   @override
-  Widget build(BuildContext context) => const SizedBox.shrink();
+  Widget build(BuildContext context, WidgetRef ref) {
+    final canSave = ref.watch(
+      simulatorControllerProvider.select(
+        (state) => state.value?.canSave ?? false,
+      ),
+    );
+
+    return SizedBox(
+      height: AppChrome.controlPillHeight,
+      child: OutlinedButton(
+        key: const Key('simulatorSaveButton'),
+        onPressed: canSave ? () => showSaveScenarioModal(context) : null,
+        child: Text(AppLocalizations.of(context)!.simulatorSaveScenario),
+      ),
+    );
+  }
 }
 
 /// Grid `400px minmax(0,1fr)`, gap 18 (`14-simulateur.md` §Layout).
@@ -80,28 +99,36 @@ class _SimulatorPanel extends StatelessWidget {
           width: 400,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [SimulatorForm(state: state)],
+            children: [
+              SimulatorForm(state: state),
+              const SizedBox(height: AppSpacing.gridGap),
+              Expanded(child: ScenarioListCard(state: state)),
+            ],
           ),
         ),
         const SizedBox(width: AppSpacing.gridGap),
         Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              if (bannerError) ...[
-                InlineBanner(
-                  key: const Key('simulatorComputeError'),
-                  message: l10n.simulatorComputeFailed,
+          // The comparison takes the right column while it is open; the form
+          // and the list stay where they are beside it.
+          child: state.comparison != null
+              ? ScenarioCompareCard(state: state)
+              : Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    if (bannerError) ...[
+                      InlineBanner(
+                        key: const Key('simulatorComputeError'),
+                        message: l10n.simulatorComputeFailed,
+                      ),
+                      const SizedBox(height: AppSpacing.gridGap),
+                    ],
+                    SimulationResultRow(state: state),
+                    const SizedBox(height: AppSpacing.gridGap),
+                    HcsfReadingCard(state: state),
+                    const SizedBox(height: AppSpacing.gridGap),
+                    Expanded(child: YearlyProjectionCard(result: state.result)),
+                  ],
                 ),
-                const SizedBox(height: AppSpacing.gridGap),
-              ],
-              SimulationResultRow(state: state),
-              const SizedBox(height: AppSpacing.gridGap),
-              HcsfReadingCard(state: state),
-              const SizedBox(height: AppSpacing.gridGap),
-              Expanded(child: YearlyProjectionCard(result: state.result)),
-            ],
-          ),
         ),
       ],
     );

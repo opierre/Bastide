@@ -4138,5 +4138,209 @@
   "simulatorCancel": "Annuler",
   "@simulatorCancel": {
     "description": "Cancel button of the simulator modals."
+  },
+  "simulatorSaveScenario": "Enregistrer le scénario",
+  "@simulatorSaveScenario": {
+    "description": "Secondary top-bar button saving the current inputs as a scenario, and the save modal title."
+  },
+  "simulatorSaveBody": "Seules les valeurs saisies sont enregistrées : le résultat est recalculé à chaque fois.",
+  "@simulatorSaveBody": {
+    "description": "Save-scenario modal body: a scenario stores inputs only."
+  },
+  "simulatorSaveName": "Nom",
+  "@simulatorSaveName": {
+    "description": "Save-scenario modal name field label."
+  },
+  "simulatorSaveNamePrefill": " — {price}",
+  "@simulatorSaveNamePrefill": {
+    "description": "Prefill of the scenario name on the « lieu — prix k€ » pattern, with an empty place slot before the dash for the user to type into. Keep the leading space.",
+    "placeholders": {
+      "price": {
+        "type": "String"
+      }
+    }
+  },
+  "simulatorSaveNameRequired": "Donnez un nom au scénario.",
+  "@simulatorSaveNameRequired": {
+    "description": "Save-scenario modal validation error."
+  },
+  "simulatorSaveSubmit": "Enregistrer",
+  "@simulatorSaveSubmit": {
+    "description": "Save-scenario modal submit button."
+  },
+  "simulatorPriceThousands": "{amount} k€",
+  "@simulatorPriceThousands": {
+    "description": "A property price in thousands of euros, as scenario names read it.",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "simulatorErrorLimitReached": "Vous avez atteint le nombre maximal de scénarios enregistrés. Supprimez-en un pour en ajouter un autre.",
+  "@simulatorErrorLimitReached": {
+    "description": "Save refused because the per-user scenario cap is reached."
+  },
+  "simulatorErrorNotFound": "Ce scénario n'existe plus.",
+  "@simulatorErrorNotFound": {
+    "description": "A scenario was deleted elsewhere."
+  },
+  "simulatorScenariosTitle": "Scénarios enregistrés",
+  "@simulatorScenariosTitle": {
+    "description": "Title of the saved scenarios card."
+  },
+  "simulatorCompareButton": "Comparer ({count}/{max})",
+  "@simulatorCompareButton": {
+    "description": "Outline button opening the side-by-side comparison, with the checked count and the cap.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "max": {
+        "type": "int"
+      }
+    }
+  },
+  "simulatorCompareNeedsTwo": "Cochez au moins deux scénarios pour les comparer.",
+  "@simulatorCompareNeedsTwo": {
+    "description": "Why the compare button is disabled with fewer than two rows checked."
+  },
+  "simulatorCompareCapNamed": "Trois scénarios au plus, pour rester lisibles côte à côte. Décochez-en un pour ajouter {name}.",
+  "@simulatorCompareCapNamed": {
+    "description": "Note under the list at the cap, naming the one row left out.",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "simulatorCompareCap": "Trois scénarios au plus, pour rester lisibles côte à côte. Décochez-en un pour en ajouter un autre.",
+  "@simulatorCompareCap": {
+    "description": "Note under the list at the cap when several rows are left out."
+  },
+  "simulatorLivePill": "En cours",
+  "@simulatorLivePill": {
+    "description": "Iris marker pill on the live, unsaved simulation row. Rendered uppercase."
+  },
+  "simulatorLiveName": "Simulation en cours",
+  "@simulatorLiveName": {
+    "description": "Name of the live row before a price gives it one."
+  },
+  "simulatorScenarioSub": "{rate} · {term} · {instalment}",
+  "@simulatorScenarioSub": {
+    "description": "Scenario row sub-line: rate, term and instalment.",
+    "placeholders": {
+      "rate": {
+        "type": "String"
+      },
+      "term": {
+        "type": "String"
+      },
+      "instalment": {
+        "type": "String"
+      }
+    }
+  },
+  "simulatorScenarioSubNoInstalment": "{rate} · {term}",
+  "@simulatorScenarioSubNoInstalment": {
+    "description": "Scenario row sub-line before its instalment is known.",
+    "placeholders": {
+      "rate": {
+        "type": "String"
+      },
+      "term": {
+        "type": "String"
+      }
+    }
+  },
+  "simulatorScenarioActions": "Actions du scénario",
+  "@simulatorScenarioActions": {
+    "description": "Tooltip of a scenario row's overflow menu."
+  },
+  "simulatorScenarioDelete": "Supprimer",
+  "@simulatorScenarioDelete": {
+    "description": "Scenario overflow action: hard delete, no confirmation."
+  },
+  "simulatorScenarioSelect": "Sélectionner {name} pour la comparaison",
+  "@simulatorScenarioSelect": {
+    "description": "Semantic label of a scenario row checkbox.",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "simulatorScenariosEmptyTitle": "Aucun scénario enregistré",
+  "@simulatorScenariosEmptyTitle": {
+    "description": "Mini empty state of the scenarios card."
+  },
+  "simulatorScenariosEmptyBody": "Enregistrez une simulation pour la retrouver ici et la comparer à deux autres.",
+  "@simulatorScenariosEmptyBody": {
+    "description": "Mini empty state body of the scenarios card."
+  },
+  "simulatorCompareTitle": "{count, plural, =1{Comparaison d'un scénario} other{Comparaison de {count} scénarios}}",
+  "@simulatorCompareTitle": {
+    "description": "Title of the comparison card.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "simulatorCompareSubtitle": "Mêmes lignes pour chaque colonne · un tiret quand la donnée ne s'applique pas",
+  "@simulatorCompareSubtitle": {
+    "description": "Subtitle of the comparison card."
+  },
+  "simulatorCompareClose": "Fermer la comparaison",
+  "@simulatorCompareClose": {
+    "description": "Secondary button closing the comparison."
+  },
+  "simulatorCompareFailed": "Impossible de calculer la comparaison.",
+  "@simulatorCompareFailed": {
+    "description": "Comparison card when a column cannot be computed."
+  },
+  "simulatorCompareTotalInterest": "Intérêts totaux",
+  "@simulatorCompareTotalInterest": {
+    "description": "Comparison row: total interest."
+  },
+  "simulatorCompareTotalInsurance": "Assurance totale",
+  "@simulatorCompareTotalInsurance": {
+    "description": "Comparison row: total insurance."
+  },
+  "simulatorCompareCostShare": "Coût / prix",
+  "@simulatorCompareCostShare": {
+    "description": "Comparison row: total cost over the property price."
+  },
+  "simulatorCompareTaeg": "TAEG indicatif",
+  "@simulatorCompareTaeg": {
+    "description": "Comparison row: indicative TAEG. Always labelled indicative."
+  },
+  "simulatorCompareWithExisting": "Avec crédits actuels",
+  "@simulatorCompareWithExisting": {
+    "description": "Comparison row: debt ratio with the current loans counted."
+  },
+  "simulatorCompareFoot": "Taux d'endettement sur un revenu {source, select, declared{déclaré} other{médian constaté}} de {income} · repère HCSF {limit} · lecture informative, ne lie aucun prêteur.",
+  "@simulatorCompareFoot": {
+    "description": "Comparison foot: the income the ratios are read against, the reference, and the no-lender-is-bound statement.",
+    "placeholders": {
+      "source": {
+        "type": "String"
+      },
+      "income": {
+        "type": "String"
+      },
+      "limit": {
+        "type": "String"
+      }
+    }
+  },
+  "simulatorCompareFootUnknown": "Aucun revenu connu, donc aucun taux d'endettement · repère HCSF {limit} · lecture informative, ne lie aucun prêteur.",
+  "@simulatorCompareFootUnknown": {
+    "description": "Comparison foot when no income is known.",
+    "placeholders": {
+      "limit": {
+        "type": "String"
+      }
+    }
   }
 }

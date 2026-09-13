@@ -3248,4 +3248,142 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get simulatorCancel => 'Annuler';
+
+  @override
+  String get simulatorSaveScenario => 'Enregistrer le scénario';
+
+  @override
+  String get simulatorSaveBody =>
+      'Seules les valeurs saisies sont enregistrées : le résultat est recalculé à chaque fois.';
+
+  @override
+  String get simulatorSaveName => 'Nom';
+
+  @override
+  String simulatorSaveNamePrefill(String price) {
+    return ' — $price';
+  }
+
+  @override
+  String get simulatorSaveNameRequired => 'Donnez un nom au scénario.';
+
+  @override
+  String get simulatorSaveSubmit => 'Enregistrer';
+
+  @override
+  String simulatorPriceThousands(String amount) {
+    return '$amount k€';
+  }
+
+  @override
+  String get simulatorErrorLimitReached =>
+      'Vous avez atteint le nombre maximal de scénarios enregistrés. Supprimez-en un pour en ajouter un autre.';
+
+  @override
+  String get simulatorErrorNotFound => 'Ce scénario n\'existe plus.';
+
+  @override
+  String get simulatorScenariosTitle => 'Scénarios enregistrés';
+
+  @override
+  String simulatorCompareButton(int count, int max) {
+    return 'Comparer ($count/$max)';
+  }
+
+  @override
+  String get simulatorCompareNeedsTwo =>
+      'Cochez au moins deux scénarios pour les comparer.';
+
+  @override
+  String simulatorCompareCapNamed(String name) {
+    return 'Trois scénarios au plus, pour rester lisibles côte à côte. Décochez-en un pour ajouter $name.';
+  }
+
+  @override
+  String get simulatorCompareCap =>
+      'Trois scénarios au plus, pour rester lisibles côte à côte. Décochez-en un pour en ajouter un autre.';
+
+  @override
+  String get simulatorLivePill => 'En cours';
+
+  @override
+  String get simulatorLiveName => 'Simulation en cours';
+
+  @override
+  String simulatorScenarioSub(String rate, String term, String instalment) {
+    return '$rate · $term · $instalment';
+  }
+
+  @override
+  String simulatorScenarioSubNoInstalment(String rate, String term) {
+    return '$rate · $term';
+  }
+
+  @override
+  String get simulatorScenarioActions => 'Actions du scénario';
+
+  @override
+  String get simulatorScenarioDelete => 'Supprimer';
+
+  @override
+  String simulatorScenarioSelect(String name) {
+    return 'Sélectionner $name pour la comparaison';
+  }
+
+  @override
+  String get simulatorScenariosEmptyTitle => 'Aucun scénario enregistré';
+
+  @override
+  String get simulatorScenariosEmptyBody =>
+      'Enregistrez une simulation pour la retrouver ici et la comparer à deux autres.';
+
+  @override
+  String simulatorCompareTitle(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Comparaison de $count scénarios',
+      one: 'Comparaison d\'un scénario',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get simulatorCompareSubtitle =>
+      'Mêmes lignes pour chaque colonne · un tiret quand la donnée ne s\'applique pas';
+
+  @override
+  String get simulatorCompareClose => 'Fermer la comparaison';
+
+  @override
+  String get simulatorCompareFailed => 'Impossible de calculer la comparaison.';
+
+  @override
+  String get simulatorCompareTotalInterest => 'Intérêts totaux';
+
+  @override
+  String get simulatorCompareTotalInsurance => 'Assurance totale';
+
+  @override
+  String get simulatorCompareCostShare => 'Coût / prix';
+
+  @override
+  String get simulatorCompareTaeg => 'TAEG indicatif';
+
+  @override
+  String get simulatorCompareWithExisting => 'Avec crédits actuels';
+
+  @override
+  String simulatorCompareFoot(String source, String income, String limit) {
+    String _temp0 = intl.Intl.selectLogic(source, {
+      'declared': 'déclaré',
+      'other': 'médian constaté',
+    });
+    return 'Taux d\'endettement sur un revenu $_temp0 de $income · repère HCSF $limit · lecture informative, ne lie aucun prêteur.';
+  }
+
+  @override
+  String simulatorCompareFootUnknown(String limit) {
+    return 'Aucun revenu connu, donc aucun taux d\'endettement · repère HCSF $limit · lecture informative, ne lie aucun prêteur.';
+  }
 }

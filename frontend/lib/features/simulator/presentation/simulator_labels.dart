@@ -60,6 +60,10 @@ String localizeSimulatorError(AppLocalizations l10n, Object? error) {
         return l10n.simulatorErrorNonAmortizing;
       case 'MORTGAGE_FEES_EXCEED_PRINCIPAL':
         return l10n.simulatorErrorFeesExceed;
+      case 'SIMULATION_LIMIT_REACHED':
+        return l10n.simulatorErrorLimitReached;
+      case 'SIMULATION_NOT_FOUND':
+        return l10n.simulatorErrorNotFound;
       case 'VALIDATION_ERROR':
         return l10n.simulatorErrorValidation;
     }

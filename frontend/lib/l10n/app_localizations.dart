@@ -5082,6 +5082,210 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Annuler'**
   String get simulatorCancel;
+
+  /// Secondary top-bar button saving the current inputs as a scenario, and the save modal title.
+  ///
+  /// In fr, this message translates to:
+  /// **'Enregistrer le scénario'**
+  String get simulatorSaveScenario;
+
+  /// Save-scenario modal body: a scenario stores inputs only.
+  ///
+  /// In fr, this message translates to:
+  /// **'Seules les valeurs saisies sont enregistrées : le résultat est recalculé à chaque fois.'**
+  String get simulatorSaveBody;
+
+  /// Save-scenario modal name field label.
+  ///
+  /// In fr, this message translates to:
+  /// **'Nom'**
+  String get simulatorSaveName;
+
+  /// Prefill of the scenario name on the « lieu — prix k€ » pattern, with an empty place slot before the dash for the user to type into. Keep the leading space.
+  ///
+  /// In fr, this message translates to:
+  /// **' — {price}'**
+  String simulatorSaveNamePrefill(String price);
+
+  /// Save-scenario modal validation error.
+  ///
+  /// In fr, this message translates to:
+  /// **'Donnez un nom au scénario.'**
+  String get simulatorSaveNameRequired;
+
+  /// Save-scenario modal submit button.
+  ///
+  /// In fr, this message translates to:
+  /// **'Enregistrer'**
+  String get simulatorSaveSubmit;
+
+  /// A property price in thousands of euros, as scenario names read it.
+  ///
+  /// In fr, this message translates to:
+  /// **'{amount} k€'**
+  String simulatorPriceThousands(String amount);
+
+  /// Save refused because the per-user scenario cap is reached.
+  ///
+  /// In fr, this message translates to:
+  /// **'Vous avez atteint le nombre maximal de scénarios enregistrés. Supprimez-en un pour en ajouter un autre.'**
+  String get simulatorErrorLimitReached;
+
+  /// A scenario was deleted elsewhere.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ce scénario n\'existe plus.'**
+  String get simulatorErrorNotFound;
+
+  /// Title of the saved scenarios card.
+  ///
+  /// In fr, this message translates to:
+  /// **'Scénarios enregistrés'**
+  String get simulatorScenariosTitle;
+
+  /// Outline button opening the side-by-side comparison, with the checked count and the cap.
+  ///
+  /// In fr, this message translates to:
+  /// **'Comparer ({count}/{max})'**
+  String simulatorCompareButton(int count, int max);
+
+  /// Why the compare button is disabled with fewer than two rows checked.
+  ///
+  /// In fr, this message translates to:
+  /// **'Cochez au moins deux scénarios pour les comparer.'**
+  String get simulatorCompareNeedsTwo;
+
+  /// Note under the list at the cap, naming the one row left out.
+  ///
+  /// In fr, this message translates to:
+  /// **'Trois scénarios au plus, pour rester lisibles côte à côte. Décochez-en un pour ajouter {name}.'**
+  String simulatorCompareCapNamed(String name);
+
+  /// Note under the list at the cap when several rows are left out.
+  ///
+  /// In fr, this message translates to:
+  /// **'Trois scénarios au plus, pour rester lisibles côte à côte. Décochez-en un pour en ajouter un autre.'**
+  String get simulatorCompareCap;
+
+  /// Iris marker pill on the live, unsaved simulation row. Rendered uppercase.
+  ///
+  /// In fr, this message translates to:
+  /// **'En cours'**
+  String get simulatorLivePill;
+
+  /// Name of the live row before a price gives it one.
+  ///
+  /// In fr, this message translates to:
+  /// **'Simulation en cours'**
+  String get simulatorLiveName;
+
+  /// Scenario row sub-line: rate, term and instalment.
+  ///
+  /// In fr, this message translates to:
+  /// **'{rate} · {term} · {instalment}'**
+  String simulatorScenarioSub(String rate, String term, String instalment);
+
+  /// Scenario row sub-line before its instalment is known.
+  ///
+  /// In fr, this message translates to:
+  /// **'{rate} · {term}'**
+  String simulatorScenarioSubNoInstalment(String rate, String term);
+
+  /// Tooltip of a scenario row's overflow menu.
+  ///
+  /// In fr, this message translates to:
+  /// **'Actions du scénario'**
+  String get simulatorScenarioActions;
+
+  /// Scenario overflow action: hard delete, no confirmation.
+  ///
+  /// In fr, this message translates to:
+  /// **'Supprimer'**
+  String get simulatorScenarioDelete;
+
+  /// Semantic label of a scenario row checkbox.
+  ///
+  /// In fr, this message translates to:
+  /// **'Sélectionner {name} pour la comparaison'**
+  String simulatorScenarioSelect(String name);
+
+  /// Mini empty state of the scenarios card.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucun scénario enregistré'**
+  String get simulatorScenariosEmptyTitle;
+
+  /// Mini empty state body of the scenarios card.
+  ///
+  /// In fr, this message translates to:
+  /// **'Enregistrez une simulation pour la retrouver ici et la comparer à deux autres.'**
+  String get simulatorScenariosEmptyBody;
+
+  /// Title of the comparison card.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, =1{Comparaison d\'un scénario} other{Comparaison de {count} scénarios}}'**
+  String simulatorCompareTitle(int count);
+
+  /// Subtitle of the comparison card.
+  ///
+  /// In fr, this message translates to:
+  /// **'Mêmes lignes pour chaque colonne · un tiret quand la donnée ne s\'applique pas'**
+  String get simulatorCompareSubtitle;
+
+  /// Secondary button closing the comparison.
+  ///
+  /// In fr, this message translates to:
+  /// **'Fermer la comparaison'**
+  String get simulatorCompareClose;
+
+  /// Comparison card when a column cannot be computed.
+  ///
+  /// In fr, this message translates to:
+  /// **'Impossible de calculer la comparaison.'**
+  String get simulatorCompareFailed;
+
+  /// Comparison row: total interest.
+  ///
+  /// In fr, this message translates to:
+  /// **'Intérêts totaux'**
+  String get simulatorCompareTotalInterest;
+
+  /// Comparison row: total insurance.
+  ///
+  /// In fr, this message translates to:
+  /// **'Assurance totale'**
+  String get simulatorCompareTotalInsurance;
+
+  /// Comparison row: total cost over the property price.
+  ///
+  /// In fr, this message translates to:
+  /// **'Coût / prix'**
+  String get simulatorCompareCostShare;
+
+  /// Comparison row: indicative TAEG. Always labelled indicative.
+  ///
+  /// In fr, this message translates to:
+  /// **'TAEG indicatif'**
+  String get simulatorCompareTaeg;
+
+  /// Comparison row: debt ratio with the current loans counted.
+  ///
+  /// In fr, this message translates to:
+  /// **'Avec crédits actuels'**
+  String get simulatorCompareWithExisting;
+
+  /// Comparison foot: the income the ratios are read against, the reference, and the no-lender-is-bound statement.
+  ///
+  /// In fr, this message translates to:
+  /// **'Taux d\'endettement sur un revenu {source, select, declared{déclaré} other{médian constaté}} de {income} · repère HCSF {limit} · lecture informative, ne lie aucun prêteur.'**
+  String simulatorCompareFoot(String source, String income, String limit);
+
+  /// Comparison foot when no income is known.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucun revenu connu, donc aucun taux d\'endettement · repère HCSF {limit} · lecture informative, ne lie aucun prêteur.'**
+  String simulatorCompareFootUnknown(String limit);
 }
 
 class _AppLocalizationsDelegate

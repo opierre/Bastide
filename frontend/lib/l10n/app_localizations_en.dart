@@ -3223,4 +3223,142 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get simulatorCancel => 'Cancel';
+
+  @override
+  String get simulatorSaveScenario => 'Save scenario';
+
+  @override
+  String get simulatorSaveBody =>
+      'Only the inputs are saved: the result is recomputed every time.';
+
+  @override
+  String get simulatorSaveName => 'Name';
+
+  @override
+  String simulatorSaveNamePrefill(String price) {
+    return ' — $price';
+  }
+
+  @override
+  String get simulatorSaveNameRequired => 'Give the scenario a name.';
+
+  @override
+  String get simulatorSaveSubmit => 'Save';
+
+  @override
+  String simulatorPriceThousands(String amount) {
+    return '€${amount}k';
+  }
+
+  @override
+  String get simulatorErrorLimitReached =>
+      'You\'ve reached the maximum number of saved scenarios. Delete one to add another.';
+
+  @override
+  String get simulatorErrorNotFound => 'This scenario no longer exists.';
+
+  @override
+  String get simulatorScenariosTitle => 'Saved scenarios';
+
+  @override
+  String simulatorCompareButton(int count, int max) {
+    return 'Compare ($count/$max)';
+  }
+
+  @override
+  String get simulatorCompareNeedsTwo =>
+      'Check at least two scenarios to compare them.';
+
+  @override
+  String simulatorCompareCapNamed(String name) {
+    return 'Three scenarios at most, so they stay readable side by side. Uncheck one to add $name.';
+  }
+
+  @override
+  String get simulatorCompareCap =>
+      'Three scenarios at most, so they stay readable side by side. Uncheck one to add another.';
+
+  @override
+  String get simulatorLivePill => 'Current';
+
+  @override
+  String get simulatorLiveName => 'Current simulation';
+
+  @override
+  String simulatorScenarioSub(String rate, String term, String instalment) {
+    return '$rate · $term · $instalment';
+  }
+
+  @override
+  String simulatorScenarioSubNoInstalment(String rate, String term) {
+    return '$rate · $term';
+  }
+
+  @override
+  String get simulatorScenarioActions => 'Scenario actions';
+
+  @override
+  String get simulatorScenarioDelete => 'Delete';
+
+  @override
+  String simulatorScenarioSelect(String name) {
+    return 'Select $name for comparison';
+  }
+
+  @override
+  String get simulatorScenariosEmptyTitle => 'No saved scenario';
+
+  @override
+  String get simulatorScenariosEmptyBody =>
+      'Save a simulation to find it here and compare it with two others.';
+
+  @override
+  String simulatorCompareTitle(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Comparing $count scenarios',
+      one: 'Comparing 1 scenario',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get simulatorCompareSubtitle =>
+      'Same rows for every column · a dash where a figure doesn\'t apply';
+
+  @override
+  String get simulatorCompareClose => 'Close comparison';
+
+  @override
+  String get simulatorCompareFailed => 'Couldn\'t compute the comparison.';
+
+  @override
+  String get simulatorCompareTotalInterest => 'Total interest';
+
+  @override
+  String get simulatorCompareTotalInsurance => 'Total insurance';
+
+  @override
+  String get simulatorCompareCostShare => 'Cost / price';
+
+  @override
+  String get simulatorCompareTaeg => 'Indicative APR';
+
+  @override
+  String get simulatorCompareWithExisting => 'With current loans';
+
+  @override
+  String simulatorCompareFoot(String source, String income, String limit) {
+    String _temp0 = intl.Intl.selectLogic(source, {
+      'declared': 'declared',
+      'other': 'median observed',
+    });
+    return 'Debt ratio against a $_temp0 income of $income · HCSF reference $limit · an informative reading that binds no lender.';
+  }
+
+  @override
+  String simulatorCompareFootUnknown(String limit) {
+    return 'No known income, so no debt ratio · HCSF reference $limit · an informative reading that binds no lender.';
+  }
 }
