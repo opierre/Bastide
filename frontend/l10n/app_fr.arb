@@ -3782,5 +3782,565 @@
   "mortgageScheduleLoadFailed": "Impossible de charger le tableau d'amortissement.",
   "@mortgageScheduleLoadFailed": {
     "description": "Error state when a schedule year cannot be loaded."
+  },
+  "simulatorLoadFailed": "Impossible de charger le simulateur.",
+  "@simulatorLoadFailed": {
+    "description": "Simulator panel error state when the household or scenarios cannot be loaded."
+  },
+  "simulatorRetry": "Réessayer",
+  "@simulatorRetry": {
+    "description": "Retry button of the simulator error state."
+  },
+  "simulatorFormTitle": "Nouveau crédit",
+  "@simulatorFormTitle": {
+    "description": "Title of the simulator input card."
+  },
+  "simulatorFormSubtitle": "Le résultat se recalcule à chaque saisie",
+  "@simulatorFormSubtitle": {
+    "description": "Subtitle of the simulator input card: results are live, nothing is saved."
+  },
+  "simulatorPrice": "Prix du bien",
+  "@simulatorPrice": {
+    "description": "Simulator field: property price."
+  },
+  "simulatorDownPayment": "Apport",
+  "@simulatorDownPayment": {
+    "description": "Simulator field: down payment."
+  },
+  "simulatorFees": "Frais",
+  "@simulatorFees": {
+    "description": "Simulator field: upfront fees."
+  },
+  "simulatorPrincipal": "Montant emprunté",
+  "@simulatorPrincipal": {
+    "description": "Simulator field: borrowed amount, derived from price + fees − down payment until edited."
+  },
+  "simulatorDerivedPill": "Dérivé",
+  "@simulatorDerivedPill": {
+    "description": "Gray marker pill beside the borrowed amount while it is still derived. Rendered uppercase."
+  },
+  "simulatorRate": "Taux nominal",
+  "@simulatorRate": {
+    "description": "Simulator field: nominal annual rate, typed as a percent."
+  },
+  "simulatorRateInvalid": "Saisissez un taux, par exemple 3,25.",
+  "@simulatorRateInvalid": {
+    "description": "Inline error when the typed rate cannot be read."
+  },
+  "simulatorInsurance": "Assurance / mois",
+  "@simulatorInsurance": {
+    "description": "Simulator field: monthly insurance premium."
+  },
+  "simulatorTerm": "Durée",
+  "@simulatorTerm": {
+    "description": "Simulator term slider label, and the HCSF term column label."
+  },
+  "simulatorTermValue": "{months} mois · {years, plural, =1{1 an} other{{years} ans}}",
+  "@simulatorTermValue": {
+    "description": "Term slider value in both units.",
+    "placeholders": {
+      "months": {
+        "type": "int"
+      },
+      "years": {
+        "type": "num",
+        "format": "compact"
+      }
+    }
+  },
+  "simulatorYears": "{years, plural, =1{1 an} other{{years} ans}}",
+  "@simulatorYears": {
+    "description": "A duration in whole years.",
+    "placeholders": {
+      "years": {
+        "type": "num",
+        "format": "compact"
+      }
+    }
+  },
+  "simulatorMonths": "{months} mois",
+  "@simulatorMonths": {
+    "description": "A duration in months.",
+    "placeholders": {
+      "months": {
+        "type": "int"
+      }
+    }
+  },
+  "simulatorIncludeExisting": "Inclure mes crédits actuels",
+  "@simulatorIncludeExisting": {
+    "description": "Switch adding the user's active loans to the HCSF reading."
+  },
+  "simulatorIncludeExistingAdds": "Ajoute {amount} / mois à la lecture",
+  "@simulatorIncludeExistingAdds": {
+    "description": "Sub-line of the existing-loans switch naming what it adds.",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "simulatorIncludeExistingNone": "Aucun crédit en cours à ajouter",
+  "@simulatorIncludeExistingNone": {
+    "description": "Sub-line of the existing-loans switch when the user has no active loan."
+  },
+  "simulatorInstalmentLabel": "Échéance mensuelle",
+  "@simulatorInstalmentLabel": {
+    "description": "Hero result card label. Rendered uppercase."
+  },
+  "simulatorInstalmentCaption": "{payment} de mensualité + {insurance} d'assurance · {count, plural, =1{1 échéance} other{{count} échéances}}",
+  "@simulatorInstalmentCaption": {
+    "description": "Hero caption: the instalment is the payment plus the insurance, named separately.",
+    "placeholders": {
+      "payment": {
+        "type": "String"
+      },
+      "insurance": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "simulatorInstalmentEmpty": "Renseignez un prix et un taux pour voir l'échéance et sa part d'assurance.",
+  "@simulatorInstalmentEmpty": {
+    "description": "Hero caption before anything can be computed."
+  },
+  "simulatorCostLabel": "Coût total",
+  "@simulatorCostLabel": {
+    "description": "Total cost result card label. Rendered uppercase."
+  },
+  "simulatorCostCaption": "intérêts {interest} + assurance {insurance} + frais {fees} · {share} du prix",
+  "@simulatorCostCaption": {
+    "description": "Total cost caption with its parts and its share of the property price.",
+    "placeholders": {
+      "interest": {
+        "type": "String"
+      },
+      "insurance": {
+        "type": "String"
+      },
+      "fees": {
+        "type": "String"
+      },
+      "share": {
+        "type": "String"
+      }
+    }
+  },
+  "simulatorCostCaptionNoPrice": "intérêts {interest} + assurance {insurance} + frais {fees}",
+  "@simulatorCostCaptionNoPrice": {
+    "description": "Total cost caption when no price was entered, so there is no share of the price.",
+    "placeholders": {
+      "interest": {
+        "type": "String"
+      },
+      "insurance": {
+        "type": "String"
+      },
+      "fees": {
+        "type": "String"
+      }
+    }
+  },
+  "simulatorCostEmpty": "Renseignez un prix et un taux pour voir le coût total et sa part du prix.",
+  "@simulatorCostEmpty": {
+    "description": "Total cost caption before anything can be computed."
+  },
+  "simulatorTaegLabel": "TAEG",
+  "@simulatorTaegLabel": {
+    "description": "Annual percentage rate result card label."
+  },
+  "simulatorIndicativePill": "Indicatif",
+  "@simulatorIndicativePill": {
+    "description": "Iris marker pill always attached to the TAEG. Rendered uppercase."
+  },
+  "simulatorTaegCaption": "taux, assurance et frais inclus",
+  "@simulatorTaegCaption": {
+    "description": "TAEG caption."
+  },
+  "simulatorHcsfTitle": "Lecture HCSF",
+  "@simulatorHcsfTitle": {
+    "description": "Title of the HCSF reading card."
+  },
+  "simulatorHcsfOver": "Au-dessus du repère",
+  "@simulatorHcsfOver": {
+    "description": "Amber status pill when the reading is above an HCSF reference. Information, never a refusal."
+  },
+  "simulatorHcsfCaveat": "Informative — ne lie aucun prêteur",
+  "@simulatorHcsfCaveat": {
+    "description": "HCSF caveat, always shown as body content on the card: no lender is bound by this reading."
+  },
+  "simulatorReference": "repère {value}",
+  "@simulatorReference": {
+    "description": "The HCSF reference beside a reading.",
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "simulatorRatioLabel": "Taux d'endettement",
+  "@simulatorRatioLabel": {
+    "description": "HCSF card: debt ratio column label."
+  },
+  "simulatorRatioCaption": "{instalment} sur un revenu {source, select, declared{déclaré} other{médian constaté}} de {income}",
+  "@simulatorRatioCaption": {
+    "description": "Debt ratio caption: the instalment against the income and where the income came from.",
+    "placeholders": {
+      "instalment": {
+        "type": "String"
+      },
+      "source": {
+        "type": "String"
+      },
+      "income": {
+        "type": "String"
+      }
+    }
+  },
+  "simulatorRatioCaptionWithExisting": "{instalment} + crédits actuels {existing} sur un revenu {source, select, declared{déclaré} other{médian constaté}} de {income}",
+  "@simulatorRatioCaptionWithExisting": {
+    "description": "Debt ratio caption with the current loans counted.",
+    "placeholders": {
+      "instalment": {
+        "type": "String"
+      },
+      "existing": {
+        "type": "String"
+      },
+      "source": {
+        "type": "String"
+      },
+      "income": {
+        "type": "String"
+      }
+    }
+  },
+  "simulatorRatioEmpty": "Renseignez un prix et un taux pour lire le taux d'endettement.",
+  "@simulatorRatioEmpty": {
+    "description": "Debt ratio caption before anything can be computed."
+  },
+  "simulatorRatioUnknown": "Aucun revenu connu : le grand livre n'a pas de revenus réguliers et aucun revenu n'est déclaré. Sans revenu, ni taux ni capacité ne peuvent être lus.",
+  "@simulatorRatioUnknown": {
+    "description": "HCSF card when no income is known: no ratio and no capacity."
+  },
+  "simulatorDeclareIncome": "Déclarer un revenu",
+  "@simulatorDeclareIncome": {
+    "description": "Outline button offering to declare an income when none is known."
+  },
+  "simulatorTermAtReference": "au repère, pas au-delà",
+  "@simulatorTermAtReference": {
+    "description": "HCSF term caption when the term equals the maximum."
+  },
+  "simulatorTermUnderReference": "sous le repère",
+  "@simulatorTermUnderReference": {
+    "description": "HCSF term caption when the term is shorter than the maximum."
+  },
+  "simulatorTermOverReference": "au-delà du repère",
+  "@simulatorTermOverReference": {
+    "description": "HCSF term caption when the term is longer than the maximum. Information only."
+  },
+  "simulatorCapacityLabel": "Capacité d'emprunt au repère",
+  "@simulatorCapacityLabel": {
+    "description": "HCSF card: borrowing capacity column label."
+  },
+  "simulatorCapacityCaption": "{available} d'échéance disponibles sous {limit}, à ces conditions",
+  "@simulatorCapacityCaption": {
+    "description": "Capacity caption: the instalment still available under the reference.",
+    "placeholders": {
+      "available": {
+        "type": "String"
+      },
+      "limit": {
+        "type": "String"
+      }
+    }
+  },
+  "simulatorCapacityCaptionExisting": "il ne reste que {available} d'échéance sous le repère une fois vos crédits actuels comptés — c'est ce qui rend la capacité si faible, pas le bien visé",
+  "@simulatorCapacityCaptionExisting": {
+    "description": "Capacity caption when the current loans use up the room under the reference: explains the cause calmly.",
+    "placeholders": {
+      "available": {
+        "type": "String"
+      }
+    }
+  },
+  "simulatorCapacityEmpty": "Renseignez un prix et un taux pour lire la capacité d'emprunt.",
+  "@simulatorCapacityEmpty": {
+    "description": "Capacity caption before anything can be computed."
+  },
+  "simulatorChartTitle": "Projection annuelle",
+  "@simulatorChartTitle": {
+    "description": "Title of the yearly projection chart."
+  },
+  "simulatorChartSubtitle": "Capital remboursé et intérêts versés, année par année",
+  "@simulatorChartSubtitle": {
+    "description": "Subtitle of the yearly projection chart."
+  },
+  "simulatorChartCapital": "Capital",
+  "@simulatorChartCapital": {
+    "description": "Projection legend: principal repaid."
+  },
+  "simulatorChartInterest": "Intérêts",
+  "@simulatorChartInterest": {
+    "description": "Projection legend: interest paid."
+  },
+  "simulatorChartEmpty": "Renseignez un prix et un taux : la répartition capital / intérêts par année s'affiche ici.",
+  "@simulatorChartEmpty": {
+    "description": "Projection chart invitation before anything can be computed."
+  },
+  "simulatorComputeFailed": "Le calcul n'a pas abouti. Réessayez dans un instant.",
+  "@simulatorComputeFailed": {
+    "description": "Banner when a live compute fails for a reason no field explains."
+  },
+  "simulatorErrorNonAmortizing": "À ce taux, l'échéance ne rembourse pas le capital : baissez le taux ou allongez la durée.",
+  "@simulatorErrorNonAmortizing": {
+    "description": "Inline error under the rate when the engine refuses a loan that never amortises."
+  },
+  "simulatorErrorFeesExceed": "Les frais doivent rester inférieurs au montant emprunté.",
+  "@simulatorErrorFeesExceed": {
+    "description": "Inline error under the fees when they are not smaller than the borrowed amount."
+  },
+  "simulatorErrorValidation": "Certaines valeurs ne sont pas acceptées.",
+  "@simulatorErrorValidation": {
+    "description": "Generic validation refusal."
+  },
+  "simulatorErrorGeneric": "Une erreur est survenue. Réessayez.",
+  "@simulatorErrorGeneric": {
+    "description": "Fallback simulator error."
+  },
+  "simulatorIncomeTitle": "Déclarer un revenu",
+  "@simulatorIncomeTitle": {
+    "description": "Title of the declare-income modal opened from the simulator."
+  },
+  "simulatorIncomeBody": "Le revenu mensuel déclaré sert de base au taux d'endettement et à la capacité d'emprunt.",
+  "@simulatorIncomeBody": {
+    "description": "Body of the declare-income modal."
+  },
+  "simulatorIncomeLabel": "Revenu mensuel net",
+  "@simulatorIncomeLabel": {
+    "description": "Declare-income modal field label."
+  },
+  "simulatorIncomeInvalid": "Saisissez un montant supérieur à zéro.",
+  "@simulatorIncomeInvalid": {
+    "description": "Declare-income modal validation error."
+  },
+  "simulatorIncomeSubmit": "Déclarer",
+  "@simulatorIncomeSubmit": {
+    "description": "Declare-income modal submit button."
+  },
+  "simulatorIncomeFailed": "Impossible d'enregistrer ce revenu. Réessayez.",
+  "@simulatorIncomeFailed": {
+    "description": "Declare-income modal banner when the save fails."
+  },
+  "simulatorCancel": "Annuler",
+  "@simulatorCancel": {
+    "description": "Cancel button of the simulator modals."
+  },
+  "simulatorSaveScenario": "Enregistrer le scénario",
+  "@simulatorSaveScenario": {
+    "description": "Secondary top-bar button saving the current inputs as a scenario, and the save modal title."
+  },
+  "simulatorSaveBody": "Seules les valeurs saisies sont enregistrées : le résultat est recalculé à chaque fois.",
+  "@simulatorSaveBody": {
+    "description": "Save-scenario modal body: a scenario stores inputs only."
+  },
+  "simulatorSaveName": "Nom",
+  "@simulatorSaveName": {
+    "description": "Save-scenario modal name field label."
+  },
+  "simulatorSaveNamePrefill": " — {price}",
+  "@simulatorSaveNamePrefill": {
+    "description": "Prefill of the scenario name on the « lieu — prix k€ » pattern, with an empty place slot before the dash for the user to type into. Keep the leading space.",
+    "placeholders": {
+      "price": {
+        "type": "String"
+      }
+    }
+  },
+  "simulatorSaveNameRequired": "Donnez un nom au scénario.",
+  "@simulatorSaveNameRequired": {
+    "description": "Save-scenario modal validation error."
+  },
+  "simulatorSaveSubmit": "Enregistrer",
+  "@simulatorSaveSubmit": {
+    "description": "Save-scenario modal submit button."
+  },
+  "simulatorPriceThousands": "{amount} k€",
+  "@simulatorPriceThousands": {
+    "description": "A property price in thousands of euros, as scenario names read it.",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "simulatorErrorLimitReached": "Vous avez atteint le nombre maximal de scénarios enregistrés. Supprimez-en un pour en ajouter un autre.",
+  "@simulatorErrorLimitReached": {
+    "description": "Save refused because the per-user scenario cap is reached."
+  },
+  "simulatorErrorNotFound": "Ce scénario n'existe plus.",
+  "@simulatorErrorNotFound": {
+    "description": "A scenario was deleted elsewhere."
+  },
+  "simulatorScenariosTitle": "Scénarios enregistrés",
+  "@simulatorScenariosTitle": {
+    "description": "Title of the saved scenarios card."
+  },
+  "simulatorCompareButton": "Comparer ({count}/{max})",
+  "@simulatorCompareButton": {
+    "description": "Outline button opening the side-by-side comparison, with the checked count and the cap.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "max": {
+        "type": "int"
+      }
+    }
+  },
+  "simulatorCompareNeedsTwo": "Cochez au moins deux scénarios pour les comparer.",
+  "@simulatorCompareNeedsTwo": {
+    "description": "Why the compare button is disabled with fewer than two rows checked."
+  },
+  "simulatorCompareCapNamed": "Trois scénarios au plus, pour rester lisibles côte à côte. Décochez-en un pour ajouter {name}.",
+  "@simulatorCompareCapNamed": {
+    "description": "Note under the list at the cap, naming the one row left out.",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "simulatorCompareCap": "Trois scénarios au plus, pour rester lisibles côte à côte. Décochez-en un pour en ajouter un autre.",
+  "@simulatorCompareCap": {
+    "description": "Note under the list at the cap when several rows are left out."
+  },
+  "simulatorLivePill": "En cours",
+  "@simulatorLivePill": {
+    "description": "Iris marker pill on the live, unsaved simulation row. Rendered uppercase."
+  },
+  "simulatorLiveName": "Simulation en cours",
+  "@simulatorLiveName": {
+    "description": "Name of the live row before a price gives it one."
+  },
+  "simulatorScenarioSub": "{rate} · {term} · {instalment}",
+  "@simulatorScenarioSub": {
+    "description": "Scenario row sub-line: rate, term and instalment.",
+    "placeholders": {
+      "rate": {
+        "type": "String"
+      },
+      "term": {
+        "type": "String"
+      },
+      "instalment": {
+        "type": "String"
+      }
+    }
+  },
+  "simulatorScenarioSubNoInstalment": "{rate} · {term}",
+  "@simulatorScenarioSubNoInstalment": {
+    "description": "Scenario row sub-line before its instalment is known.",
+    "placeholders": {
+      "rate": {
+        "type": "String"
+      },
+      "term": {
+        "type": "String"
+      }
+    }
+  },
+  "simulatorScenarioActions": "Actions du scénario",
+  "@simulatorScenarioActions": {
+    "description": "Tooltip of a scenario row's overflow menu."
+  },
+  "simulatorScenarioDelete": "Supprimer",
+  "@simulatorScenarioDelete": {
+    "description": "Scenario overflow action: hard delete, no confirmation."
+  },
+  "simulatorScenarioSelect": "Sélectionner {name} pour la comparaison",
+  "@simulatorScenarioSelect": {
+    "description": "Semantic label of a scenario row checkbox.",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "simulatorScenariosEmptyTitle": "Aucun scénario enregistré",
+  "@simulatorScenariosEmptyTitle": {
+    "description": "Mini empty state of the scenarios card."
+  },
+  "simulatorScenariosEmptyBody": "Enregistrez une simulation pour la retrouver ici et la comparer à deux autres.",
+  "@simulatorScenariosEmptyBody": {
+    "description": "Mini empty state body of the scenarios card."
+  },
+  "simulatorCompareTitle": "{count, plural, =1{Comparaison d'un scénario} other{Comparaison de {count} scénarios}}",
+  "@simulatorCompareTitle": {
+    "description": "Title of the comparison card.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "simulatorCompareSubtitle": "Mêmes lignes pour chaque colonne · un tiret quand la donnée ne s'applique pas",
+  "@simulatorCompareSubtitle": {
+    "description": "Subtitle of the comparison card."
+  },
+  "simulatorCompareClose": "Fermer la comparaison",
+  "@simulatorCompareClose": {
+    "description": "Secondary button closing the comparison."
+  },
+  "simulatorCompareFailed": "Impossible de calculer la comparaison.",
+  "@simulatorCompareFailed": {
+    "description": "Comparison card when a column cannot be computed."
+  },
+  "simulatorCompareTotalInterest": "Intérêts totaux",
+  "@simulatorCompareTotalInterest": {
+    "description": "Comparison row: total interest."
+  },
+  "simulatorCompareTotalInsurance": "Assurance totale",
+  "@simulatorCompareTotalInsurance": {
+    "description": "Comparison row: total insurance."
+  },
+  "simulatorCompareCostShare": "Coût / prix",
+  "@simulatorCompareCostShare": {
+    "description": "Comparison row: total cost over the property price."
+  },
+  "simulatorCompareTaeg": "TAEG indicatif",
+  "@simulatorCompareTaeg": {
+    "description": "Comparison row: indicative TAEG. Always labelled indicative."
+  },
+  "simulatorCompareWithExisting": "Avec crédits actuels",
+  "@simulatorCompareWithExisting": {
+    "description": "Comparison row: debt ratio with the current loans counted."
+  },
+  "simulatorCompareFoot": "Taux d'endettement sur un revenu {source, select, declared{déclaré} other{médian constaté}} de {income} · repère HCSF {limit} · lecture informative, ne lie aucun prêteur.",
+  "@simulatorCompareFoot": {
+    "description": "Comparison foot: the income the ratios are read against, the reference, and the no-lender-is-bound statement.",
+    "placeholders": {
+      "source": {
+        "type": "String"
+      },
+      "income": {
+        "type": "String"
+      },
+      "limit": {
+        "type": "String"
+      }
+    }
+  },
+  "simulatorCompareFootUnknown": "Aucun revenu connu, donc aucun taux d'endettement · repère HCSF {limit} · lecture informative, ne lie aucun prêteur.",
+  "@simulatorCompareFootUnknown": {
+    "description": "Comparison foot when no income is known.",
+    "placeholders": {
+      "limit": {
+        "type": "String"
+      }
+    }
   }
 }

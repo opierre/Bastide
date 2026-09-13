@@ -2941,4 +2941,424 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get mortgageScheduleLoadFailed =>
       'Couldn\'t load the amortisation schedule.';
+
+  @override
+  String get simulatorLoadFailed => 'Couldn\'t load the simulator.';
+
+  @override
+  String get simulatorRetry => 'Try again';
+
+  @override
+  String get simulatorFormTitle => 'New loan';
+
+  @override
+  String get simulatorFormSubtitle => 'The result updates as you type';
+
+  @override
+  String get simulatorPrice => 'Property price';
+
+  @override
+  String get simulatorDownPayment => 'Down payment';
+
+  @override
+  String get simulatorFees => 'Fees';
+
+  @override
+  String get simulatorPrincipal => 'Amount borrowed';
+
+  @override
+  String get simulatorDerivedPill => 'Derived';
+
+  @override
+  String get simulatorRate => 'Nominal rate';
+
+  @override
+  String get simulatorRateInvalid => 'Enter a rate, for example 3.25.';
+
+  @override
+  String get simulatorInsurance => 'Insurance / month';
+
+  @override
+  String get simulatorTerm => 'Term';
+
+  @override
+  String simulatorTermValue(int months, num years) {
+    final intl.NumberFormat yearsNumberFormat = intl.NumberFormat.compact(
+      locale: localeName,
+    );
+    final String yearsString = yearsNumberFormat.format(years);
+
+    String _temp0 = intl.Intl.pluralLogic(
+      years,
+      locale: localeName,
+      other: '$yearsString years',
+      one: '1 year',
+    );
+    return '$months months · $_temp0';
+  }
+
+  @override
+  String simulatorYears(num years) {
+    final intl.NumberFormat yearsNumberFormat = intl.NumberFormat.compact(
+      locale: localeName,
+    );
+    final String yearsString = yearsNumberFormat.format(years);
+
+    String _temp0 = intl.Intl.pluralLogic(
+      years,
+      locale: localeName,
+      other: '$yearsString years',
+      one: '1 year',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String simulatorMonths(int months) {
+    return '$months months';
+  }
+
+  @override
+  String get simulatorIncludeExisting => 'Include my current loans';
+
+  @override
+  String simulatorIncludeExistingAdds(String amount) {
+    return 'Adds $amount / month to the reading';
+  }
+
+  @override
+  String get simulatorIncludeExistingNone => 'No current loan to add';
+
+  @override
+  String get simulatorInstalmentLabel => 'Monthly instalment';
+
+  @override
+  String simulatorInstalmentCaption(
+    String payment,
+    String insurance,
+    int count,
+  ) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count instalments',
+      one: '1 instalment',
+    );
+    return '$payment payment + $insurance insurance · $_temp0';
+  }
+
+  @override
+  String get simulatorInstalmentEmpty =>
+      'Enter a price and a rate to see the instalment and its insurance share.';
+
+  @override
+  String get simulatorCostLabel => 'Total cost';
+
+  @override
+  String simulatorCostCaption(
+    String interest,
+    String insurance,
+    String fees,
+    String share,
+  ) {
+    return 'interest $interest + insurance $insurance + fees $fees · $share of the price';
+  }
+
+  @override
+  String simulatorCostCaptionNoPrice(
+    String interest,
+    String insurance,
+    String fees,
+  ) {
+    return 'interest $interest + insurance $insurance + fees $fees';
+  }
+
+  @override
+  String get simulatorCostEmpty =>
+      'Enter a price and a rate to see the total cost and its share of the price.';
+
+  @override
+  String get simulatorTaegLabel => 'APR';
+
+  @override
+  String get simulatorIndicativePill => 'Indicative';
+
+  @override
+  String get simulatorTaegCaption => 'rate, insurance and fees included';
+
+  @override
+  String get simulatorHcsfTitle => 'HCSF reading';
+
+  @override
+  String get simulatorHcsfOver => 'Above the reference';
+
+  @override
+  String get simulatorHcsfCaveat => 'Informative — binds no lender';
+
+  @override
+  String simulatorReference(String value) {
+    return 'reference $value';
+  }
+
+  @override
+  String get simulatorRatioLabel => 'Debt ratio';
+
+  @override
+  String simulatorRatioCaption(
+    String instalment,
+    String source,
+    String income,
+  ) {
+    String _temp0 = intl.Intl.selectLogic(source, {
+      'declared': 'declared',
+      'other': 'median observed',
+    });
+    return '$instalment against a $_temp0 income of $income';
+  }
+
+  @override
+  String simulatorRatioCaptionWithExisting(
+    String instalment,
+    String existing,
+    String source,
+    String income,
+  ) {
+    String _temp0 = intl.Intl.selectLogic(source, {
+      'declared': 'declared',
+      'other': 'median observed',
+    });
+    return '$instalment + current loans $existing against a $_temp0 income of $income';
+  }
+
+  @override
+  String get simulatorRatioEmpty =>
+      'Enter a price and a rate to read the debt ratio.';
+
+  @override
+  String get simulatorRatioUnknown =>
+      'No known income: the ledger has no regular income and none is declared. Without an income, neither a ratio nor a capacity can be read.';
+
+  @override
+  String get simulatorDeclareIncome => 'Declare an income';
+
+  @override
+  String get simulatorTermAtReference => 'at the reference, not beyond';
+
+  @override
+  String get simulatorTermUnderReference => 'under the reference';
+
+  @override
+  String get simulatorTermOverReference => 'beyond the reference';
+
+  @override
+  String get simulatorCapacityLabel => 'Borrowing capacity at the reference';
+
+  @override
+  String simulatorCapacityCaption(String available, String limit) {
+    return '$available of instalment available under $limit, on these terms';
+  }
+
+  @override
+  String simulatorCapacityCaptionExisting(String available) {
+    return 'only $available of instalment is left under the reference once your current loans are counted — that is what keeps the capacity so low, not the property';
+  }
+
+  @override
+  String get simulatorCapacityEmpty =>
+      'Enter a price and a rate to read the borrowing capacity.';
+
+  @override
+  String get simulatorChartTitle => 'Yearly projection';
+
+  @override
+  String get simulatorChartSubtitle =>
+      'Principal repaid and interest paid, year by year';
+
+  @override
+  String get simulatorChartCapital => 'Principal';
+
+  @override
+  String get simulatorChartInterest => 'Interest';
+
+  @override
+  String get simulatorChartEmpty =>
+      'Enter a price and a rate: the yearly split between principal and interest shows here.';
+
+  @override
+  String get simulatorComputeFailed =>
+      'The calculation didn\'t go through. Try again in a moment.';
+
+  @override
+  String get simulatorErrorNonAmortizing =>
+      'At this rate the instalment doesn\'t repay the principal: lower the rate or lengthen the term.';
+
+  @override
+  String get simulatorErrorFeesExceed =>
+      'Fees must stay below the amount borrowed.';
+
+  @override
+  String get simulatorErrorValidation => 'Some values aren\'t accepted.';
+
+  @override
+  String get simulatorErrorGeneric => 'Something went wrong. Try again.';
+
+  @override
+  String get simulatorIncomeTitle => 'Declare an income';
+
+  @override
+  String get simulatorIncomeBody =>
+      'The declared monthly income is the basis of the debt ratio and the borrowing capacity.';
+
+  @override
+  String get simulatorIncomeLabel => 'Net monthly income';
+
+  @override
+  String get simulatorIncomeInvalid => 'Enter an amount above zero.';
+
+  @override
+  String get simulatorIncomeSubmit => 'Declare';
+
+  @override
+  String get simulatorIncomeFailed => 'Couldn\'t save this income. Try again.';
+
+  @override
+  String get simulatorCancel => 'Cancel';
+
+  @override
+  String get simulatorSaveScenario => 'Save scenario';
+
+  @override
+  String get simulatorSaveBody =>
+      'Only the inputs are saved: the result is recomputed every time.';
+
+  @override
+  String get simulatorSaveName => 'Name';
+
+  @override
+  String simulatorSaveNamePrefill(String price) {
+    return ' — $price';
+  }
+
+  @override
+  String get simulatorSaveNameRequired => 'Give the scenario a name.';
+
+  @override
+  String get simulatorSaveSubmit => 'Save';
+
+  @override
+  String simulatorPriceThousands(String amount) {
+    return '€${amount}k';
+  }
+
+  @override
+  String get simulatorErrorLimitReached =>
+      'You\'ve reached the maximum number of saved scenarios. Delete one to add another.';
+
+  @override
+  String get simulatorErrorNotFound => 'This scenario no longer exists.';
+
+  @override
+  String get simulatorScenariosTitle => 'Saved scenarios';
+
+  @override
+  String simulatorCompareButton(int count, int max) {
+    return 'Compare ($count/$max)';
+  }
+
+  @override
+  String get simulatorCompareNeedsTwo =>
+      'Check at least two scenarios to compare them.';
+
+  @override
+  String simulatorCompareCapNamed(String name) {
+    return 'Three scenarios at most, so they stay readable side by side. Uncheck one to add $name.';
+  }
+
+  @override
+  String get simulatorCompareCap =>
+      'Three scenarios at most, so they stay readable side by side. Uncheck one to add another.';
+
+  @override
+  String get simulatorLivePill => 'Current';
+
+  @override
+  String get simulatorLiveName => 'Current simulation';
+
+  @override
+  String simulatorScenarioSub(String rate, String term, String instalment) {
+    return '$rate · $term · $instalment';
+  }
+
+  @override
+  String simulatorScenarioSubNoInstalment(String rate, String term) {
+    return '$rate · $term';
+  }
+
+  @override
+  String get simulatorScenarioActions => 'Scenario actions';
+
+  @override
+  String get simulatorScenarioDelete => 'Delete';
+
+  @override
+  String simulatorScenarioSelect(String name) {
+    return 'Select $name for comparison';
+  }
+
+  @override
+  String get simulatorScenariosEmptyTitle => 'No saved scenario';
+
+  @override
+  String get simulatorScenariosEmptyBody =>
+      'Save a simulation to find it here and compare it with two others.';
+
+  @override
+  String simulatorCompareTitle(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Comparing $count scenarios',
+      one: 'Comparing 1 scenario',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get simulatorCompareSubtitle =>
+      'Same rows for every column · a dash where a figure doesn\'t apply';
+
+  @override
+  String get simulatorCompareClose => 'Close comparison';
+
+  @override
+  String get simulatorCompareFailed => 'Couldn\'t compute the comparison.';
+
+  @override
+  String get simulatorCompareTotalInterest => 'Total interest';
+
+  @override
+  String get simulatorCompareTotalInsurance => 'Total insurance';
+
+  @override
+  String get simulatorCompareCostShare => 'Cost / price';
+
+  @override
+  String get simulatorCompareTaeg => 'Indicative APR';
+
+  @override
+  String get simulatorCompareWithExisting => 'With current loans';
+
+  @override
+  String simulatorCompareFoot(String source, String income, String limit) {
+    String _temp0 = intl.Intl.selectLogic(source, {
+      'declared': 'declared',
+      'other': 'median observed',
+    });
+    return 'Debt ratio against a $_temp0 income of $income · HCSF reference $limit · an informative reading that binds no lender.';
+  }
+
+  @override
+  String simulatorCompareFootUnknown(String limit) {
+    return 'No known income, so no debt ratio · HCSF reference $limit · an informative reading that binds no lender.';
+  }
 }
