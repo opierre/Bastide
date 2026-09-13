@@ -94,3 +94,108 @@ class PrefillRead(BaseModel):
     months_covered: int
     per_field_confidence: PrefillConfidence
     currency: str
+
+
+#: The regime the estimate taxed property income under (§16). `mixed` when the user's rented
+#: properties did not all land on the same one; `None` when none of them produced rent.
+PropertyRegimeUsed = Literal["micro_foncier", "reel", "mixed"]
+
+#: What an IFI base line is: a property at its held share, a primary-residence abattement, or a
+#: loan secured on a counted property. Negative amounts net off the base.
+IfiComponentKey = Literal["property", "primary_residence_allowance", "mortgage"]
+
+#: Whether any figure behind the estimate came from a user-owned parameter row (§16).
+ParameterSourceRead = Literal["seeded", "overridden"]
+
+
+class BreakdownEntryRead(BaseModel):
+    """One component of the total. `key` is a machine key; the frontend owns the wording."""
+
+    key: str
+    amount_minor: int
+
+
+class PfuRead(BaseModel):
+    """The flat road for capital income. Null whenever the barème road was taken instead."""
+
+    base_minor: int
+    income_tax_minor: int
+    social_charges_minor: int
+
+
+class PropertyIncomeRead(BaseModel):
+    """Property income, derived from `properties` and never declared in the profile (§4c)."""
+
+    regime: PropertyRegimeUsed | None
+    gross_minor: int
+    allowance_minor: int
+    net_minor: int
+    social_charges_minor: int
+
+
+class IfiComponentRead(BaseModel):
+    """One line of the IFI base build-up, at the amount it contributes.
+
+    `reference_id` is the property or mortgage it came from, so Synthèse can draw the build-up
+    without re-deriving a base from `/properties` — the duplication §16 exists to prevent.
+    """
+
+    key: IfiComponentKey
+    reference_id: str
+    label: str
+    amount_minor: int
+
+
+class IfiRead(BaseModel):
+    """The IFI block, always present.
+
+    « Non redevable » is a state with a base and a threshold behind it, not an absent component,
+    so a user under the threshold gets `liable: false` and a zero amount rather than a null.
+    """
+
+    base_minor: int
+    threshold_minor: int
+    liable: bool
+    gross_minor: int
+    decote_minor: int
+    due_minor: int
+    components: list[IfiComponentRead]
+
+
+class TaxEstimateRead(BaseModel):
+    """One year's estimate: every component, and an explicit list of what it did not model.
+
+    Nothing here is stored (§4c) — it is a pure function of the profile, the resolved parameter
+    set and the user's properties, recomputed on every read.
+    """
+
+    model_config = ConfigDict(populate_by_name=True)
+
+    tax_year: int
+    #: Always an exact multiple of 0,5, so no binary approximation is possible. Not money: the
+    #: integer-minor-units rule governs amounts, and a part is a count of half-shares.
+    parts: float
+    salary_pension_gross_minor: int
+    salary_pension_allowance_minor: int
+    taxable_income_minor: int
+    ir_before_decote_minor: int
+    decote_minor: int
+    credits_applied_minor: int
+    #: The IR after décote and credits, rounded to the whole currency unit (French practice).
+    ir_minor: int
+    quotient_capped: bool
+    average_rate_bps: int
+    marginal_rate_bps: int
+    #: Exactly one of these two is non-null: §16's roads are exclusive, never blended.
+    pfu: PfuRead | None
+    bareme_capital_minor: int | None = Field(
+        default=None, serialization_alias="barème_capital_minor"
+    )
+    property_income: PropertyIncomeRead = Field(serialization_alias="property")
+    ifi: IfiRead
+    total_due_minor: int
+    breakdown: list[BreakdownEntryRead]
+    parameter_source: ParameterSourceRead
+    #: §16's knowingly-not-modelled regimes, as machine keys — the frontend owns the wording.
+    ignored_keys: list[str]
+    currency: str
