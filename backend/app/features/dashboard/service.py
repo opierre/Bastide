@@ -40,10 +40,10 @@ class DashboardService:
         month_start, month_end = first_of_month(current), first_of_month(current + 1)
         prev_start = first_of_month(current - 1)
 
-        income, expense = self._repository.monthly_totals(user_id, month_start, month_end)
-        prev_income, prev_expense = self._repository.monthly_totals(
-            user_id, prev_start, month_start
-        )
+        # Both months in one grouped query; a month without rows is absent, which means zero.
+        buckets = self._repository.monthly_totals_by_month(user_id, prev_start, month_end)
+        income, expense = buckets.get((month_start.year, month_start.month), (0, 0))
+        prev_income, prev_expense = buckets.get((prev_start.year, prev_start.month), (0, 0))
 
         savings_rate = _safe_ratio(income - expense, income)
         prev_savings_rate = _safe_ratio(prev_income - prev_expense, prev_income)
