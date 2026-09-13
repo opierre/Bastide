@@ -33,6 +33,7 @@ def _to_read(settings: UserSettings) -> SettingsRead:
             if settings.last_backup_at is not None
             else None
         ),
+        declared_monthly_income_minor=settings.declared_monthly_income_minor,
     )
 
 

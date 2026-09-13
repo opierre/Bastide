@@ -620,7 +620,9 @@ Same conventions: `/api/v1`, bearer auth, user-scoped, same error envelope.
 ```
 GET    /settings                    → user_settings          (created lazily if absent)
 PATCH  /settings                    {ai_enabled?, inference_base_url?, model_tag?,
-                                     confidence_threshold?} → user_settings
+                                     confidence_threshold?,
+                                     declared_monthly_income_minor?} → user_settings
+                                     (Phase 3 field, §4c; explicit null clears it)
 GET    /settings/inference/health   → {reachable, models: [tag], detail?}   (never 5xx — an
                                        unreachable runtime is a normal, reportable state)
 
