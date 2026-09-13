@@ -3710,5 +3710,93 @@
   "mortgageErrorGeneric": "Une erreur est survenue. Réessayez.",
   "@mortgageErrorGeneric": {
     "description": "Fallback error for loan actions."
+  },
+  "mortgageScheduleTitle": "Tableau d'amortissement",
+  "@mortgageScheduleTitle": {
+    "description": "Title of the amortisation table card."
+  },
+  "mortgageScheduleSubtitle": "Année {position} sur {total} · {count, plural, =1{1 échéance} other{{count} échéances}} · l'assurance est comptée à part",
+  "@mortgageScheduleSubtitle": {
+    "description": "Subtitle of the amortisation table: the year's position in the loan's calendar years, its instalment count, and that insurance is counted separately.",
+    "placeholders": {
+      "position": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "mortgageScheduleSubtitleLoading": "Année {position} sur {total}",
+  "@mortgageScheduleSubtitleLoading": {
+    "description": "Subtitle of the amortisation table while the year loads.",
+    "placeholders": {
+      "position": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "mortgageScheduleDue": "Échéance",
+  "@mortgageScheduleDue": {
+    "description": "Amortisation table column: due date. Rendered uppercase."
+  },
+  "mortgageScheduleInterest": "Intérêts",
+  "@mortgageScheduleInterest": {
+    "description": "Amortisation table column: interest. Rendered uppercase."
+  },
+  "mortgageSchedulePrincipal": "Capital",
+  "@mortgageSchedulePrincipal": {
+    "description": "Amortisation table column: principal repaid. Rendered uppercase."
+  },
+  "mortgageScheduleInsurance": "Assurance",
+  "@mortgageScheduleInsurance": {
+    "description": "Amortisation table column: insurance, kept apart from interest and principal. Rendered uppercase."
+  },
+  "mortgageScheduleTotalPaid": "Total versé",
+  "@mortgageScheduleTotalPaid": {
+    "description": "Amortisation table column: total paid for the instalment. Rendered uppercase."
+  },
+  "mortgageScheduleOutstanding": "Capital restant dû",
+  "@mortgageScheduleOutstanding": {
+    "description": "Amortisation table column: principal still owed after the instalment. Rendered uppercase."
+  },
+  "mortgageScheduleFootTotal": "Total {year}",
+  "@mortgageScheduleFootTotal": {
+    "description": "Amortisation table foot row label for the year's totals.",
+    "placeholders": {
+      "year": {
+        "type": "String"
+      }
+    }
+  },
+  "mortgageScheduleFootOutstanding": "au {date} : {amount}",
+  "@mortgageScheduleFootOutstanding": {
+    "description": "Amortisation table foot: principal still owed at year end.",
+    "placeholders": {
+      "date": {
+        "type": "String"
+      },
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "mortgageScheduleYearPrevious": "Année précédente",
+  "@mortgageScheduleYearPrevious": {
+    "description": "Year switcher: previous year button."
+  },
+  "mortgageScheduleYearNext": "Année suivante",
+  "@mortgageScheduleYearNext": {
+    "description": "Year switcher: next year button."
+  },
+  "mortgageScheduleLoadFailed": "Impossible de charger le tableau d'amortissement.",
+  "@mortgageScheduleLoadFailed": {
+    "description": "Error state when a schedule year cannot be loaded."
   }
 }

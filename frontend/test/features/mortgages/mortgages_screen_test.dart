@@ -35,6 +35,9 @@ Widget _wrap({
           interestStillDueMinor: 9240674,
         ),
       ),
+      scheduleWindowProvider.overrideWith(
+        (ref, window) async => testScheduleYear(year: window.year),
+      ),
     ],
     child: MaterialApp(
       locale: locale,
@@ -54,10 +57,9 @@ Widget _wrap({
   );
 }
 
-/// The 1440×900 desktop frame the design targets, less the shell's 72 px top
-/// bar the panel sits under.
+/// The 1440×900 desktop frame the design targets.
 void _useDesktopSurface(WidgetTester tester) {
-  tester.view.physicalSize = const Size(1440 - 252, 900 - 72);
+  tester.view.physicalSize = const Size(1440, 900);
   tester.view.devicePixelRatio = 1.0;
   addTearDown(tester.view.reset);
 }

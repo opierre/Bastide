@@ -4626,6 +4626,90 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Une erreur est survenue. Réessayez.'**
   String get mortgageErrorGeneric;
+
+  /// Title of the amortisation table card.
+  ///
+  /// In fr, this message translates to:
+  /// **'Tableau d\'amortissement'**
+  String get mortgageScheduleTitle;
+
+  /// Subtitle of the amortisation table: the year's position in the loan's calendar years, its instalment count, and that insurance is counted separately.
+  ///
+  /// In fr, this message translates to:
+  /// **'Année {position} sur {total} · {count, plural, =1{1 échéance} other{{count} échéances}} · l\'assurance est comptée à part'**
+  String mortgageScheduleSubtitle(int position, int total, int count);
+
+  /// Subtitle of the amortisation table while the year loads.
+  ///
+  /// In fr, this message translates to:
+  /// **'Année {position} sur {total}'**
+  String mortgageScheduleSubtitleLoading(int position, int total);
+
+  /// Amortisation table column: due date. Rendered uppercase.
+  ///
+  /// In fr, this message translates to:
+  /// **'Échéance'**
+  String get mortgageScheduleDue;
+
+  /// Amortisation table column: interest. Rendered uppercase.
+  ///
+  /// In fr, this message translates to:
+  /// **'Intérêts'**
+  String get mortgageScheduleInterest;
+
+  /// Amortisation table column: principal repaid. Rendered uppercase.
+  ///
+  /// In fr, this message translates to:
+  /// **'Capital'**
+  String get mortgageSchedulePrincipal;
+
+  /// Amortisation table column: insurance, kept apart from interest and principal. Rendered uppercase.
+  ///
+  /// In fr, this message translates to:
+  /// **'Assurance'**
+  String get mortgageScheduleInsurance;
+
+  /// Amortisation table column: total paid for the instalment. Rendered uppercase.
+  ///
+  /// In fr, this message translates to:
+  /// **'Total versé'**
+  String get mortgageScheduleTotalPaid;
+
+  /// Amortisation table column: principal still owed after the instalment. Rendered uppercase.
+  ///
+  /// In fr, this message translates to:
+  /// **'Capital restant dû'**
+  String get mortgageScheduleOutstanding;
+
+  /// Amortisation table foot row label for the year's totals.
+  ///
+  /// In fr, this message translates to:
+  /// **'Total {year}'**
+  String mortgageScheduleFootTotal(String year);
+
+  /// Amortisation table foot: principal still owed at year end.
+  ///
+  /// In fr, this message translates to:
+  /// **'au {date} : {amount}'**
+  String mortgageScheduleFootOutstanding(String date, String amount);
+
+  /// Year switcher: previous year button.
+  ///
+  /// In fr, this message translates to:
+  /// **'Année précédente'**
+  String get mortgageScheduleYearPrevious;
+
+  /// Year switcher: next year button.
+  ///
+  /// In fr, this message translates to:
+  /// **'Année suivante'**
+  String get mortgageScheduleYearNext;
+
+  /// Error state when a schedule year cannot be loaded.
+  ///
+  /// In fr, this message translates to:
+  /// **'Impossible de charger le tableau d\'amortissement.'**
+  String get mortgageScheduleLoadFailed;
 }
 
 class _AppLocalizationsDelegate

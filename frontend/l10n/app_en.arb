@@ -801,5 +801,19 @@
   "mortgageErrorPropertyInvalid": "This property no longer exists.",
   "mortgageErrorNotFound": "This loan no longer exists.",
   "mortgageErrorValidation": "Some values are invalid.",
-  "mortgageErrorGeneric": "Something went wrong. Try again."
+  "mortgageErrorGeneric": "Something went wrong. Try again.",
+  "mortgageScheduleTitle": "Amortisation schedule",
+  "mortgageScheduleSubtitle": "Year {position} of {total} · {count, plural, =1{1 instalment} other{{count} instalments}} · insurance is counted separately",
+  "mortgageScheduleSubtitleLoading": "Year {position} of {total}",
+  "mortgageScheduleDue": "Due date",
+  "mortgageScheduleInterest": "Interest",
+  "mortgageSchedulePrincipal": "Principal",
+  "mortgageScheduleInsurance": "Insurance",
+  "mortgageScheduleTotalPaid": "Total paid",
+  "mortgageScheduleOutstanding": "Outstanding",
+  "mortgageScheduleFootTotal": "{year} total",
+  "mortgageScheduleFootOutstanding": "at {date}: {amount}",
+  "mortgageScheduleYearPrevious": "Previous year",
+  "mortgageScheduleYearNext": "Next year",
+  "mortgageScheduleLoadFailed": "Couldn't load the amortisation schedule."
 }

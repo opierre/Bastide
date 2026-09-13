@@ -10,8 +10,10 @@ import '../../../core/widgets/state_views.dart';
 import '../../../l10n/app_localizations.dart';
 import '../application/mortgages_controller.dart';
 import '../domain/mortgage.dart';
+import '../domain/schedule_row.dart';
 import 'mortgage_form_modal.dart';
 import 'mortgage_labels.dart';
+import 'schedule_table.dart';
 
 /// One loan in full (`12-credits.md` frame ②): the header, the cost row with the
 /// indicative TAEG, and the amortisation table.
@@ -32,22 +34,33 @@ class MortgageDetailPanel extends ConsumerWidget {
       key: const Key('mortgageDetail'),
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
+        // A link, not a 38 px button: the frame budgets the whole detail —
+        // header, cost row, twelve dense rows and the foot — into 900 px.
         Align(
           alignment: Alignment.centerLeft,
-          child: TextButton.icon(
+          child: InkWell(
             key: const Key('mortgageDetailBack'),
-            onPressed: () =>
-                ref.read(selectedMortgageProvider.notifier).close(),
-            icon: const Icon(
-              Icons.arrow_back_rounded,
-              size: 16,
-              color: AppColors.iris,
-            ),
-            label: Text(
-              l10n.mortgageDetailBack,
-              style: Theme.of(
-                context,
-              ).textTheme.labelMedium?.copyWith(color: AppColors.iris),
+            borderRadius: BorderRadius.circular(AppRadii.sm),
+            onTap: () => ref.read(selectedMortgageProvider.notifier).close(),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 2),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Icon(
+                    Icons.arrow_back_rounded,
+                    size: 16,
+                    color: AppColors.iris,
+                  ),
+                  const SizedBox(width: AppSpacing.xs + 2),
+                  Text(
+                    l10n.mortgageDetailBack,
+                    style: Theme.of(
+                      context,
+                    ).textTheme.labelMedium?.copyWith(color: AppColors.iris),
+                  ),
+                ],
+              ),
             ),
           ),
         ),
@@ -74,13 +87,15 @@ class MortgageDetailPanel extends ConsumerWidget {
   }
 }
 
-class MortgageDetailBody extends StatelessWidget {
+class MortgageDetailBody extends ConsumerWidget {
   const MortgageDetailBody({super.key, required this.view});
 
   final MortgageDetailView view;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final today = ref.watch(mortgagesTodayProvider)();
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -88,7 +103,9 @@ class MortgageDetailBody extends StatelessWidget {
         const SizedBox(height: AppSpacing.gridGap),
         _CostRow(view: view),
         const SizedBox(height: AppSpacing.gridGap),
-        const Expanded(child: SizedBox.shrink()),
+        Expanded(
+          child: ScheduleTableCard(years: ScheduleYears.of(view.detail, today)),
+        ),
       ],
     );
   }
@@ -419,7 +436,14 @@ class _CostCard extends StatelessWidget {
             ).copyWith(fontSize: 24),
           ),
           const SizedBox(height: AppSpacing.xs),
-          Text(caption, style: AppTextStyles.helper),
+          // Two lines at most: the detail budgets its cost row so the year's
+          // table and foot still fit a 900 px frame below it.
+          Text(
+            caption,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            style: AppTextStyles.helper,
+          ),
         ],
       ),
     );

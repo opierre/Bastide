@@ -2896,4 +2896,61 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get mortgageErrorGeneric => 'Something went wrong. Try again.';
+
+  @override
+  String get mortgageScheduleTitle => 'Amortisation schedule';
+
+  @override
+  String mortgageScheduleSubtitle(int position, int total, int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count instalments',
+      one: '1 instalment',
+    );
+    return 'Year $position of $total · $_temp0 · insurance is counted separately';
+  }
+
+  @override
+  String mortgageScheduleSubtitleLoading(int position, int total) {
+    return 'Year $position of $total';
+  }
+
+  @override
+  String get mortgageScheduleDue => 'Due date';
+
+  @override
+  String get mortgageScheduleInterest => 'Interest';
+
+  @override
+  String get mortgageSchedulePrincipal => 'Principal';
+
+  @override
+  String get mortgageScheduleInsurance => 'Insurance';
+
+  @override
+  String get mortgageScheduleTotalPaid => 'Total paid';
+
+  @override
+  String get mortgageScheduleOutstanding => 'Outstanding';
+
+  @override
+  String mortgageScheduleFootTotal(String year) {
+    return '$year total';
+  }
+
+  @override
+  String mortgageScheduleFootOutstanding(String date, String amount) {
+    return 'at $date: $amount';
+  }
+
+  @override
+  String get mortgageScheduleYearPrevious => 'Previous year';
+
+  @override
+  String get mortgageScheduleYearNext => 'Next year';
+
+  @override
+  String get mortgageScheduleLoadFailed =>
+      'Couldn\'t load the amortisation schedule.';
 }

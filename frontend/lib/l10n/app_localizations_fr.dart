@@ -2919,4 +2919,61 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get mortgageErrorGeneric => 'Une erreur est survenue. Réessayez.';
+
+  @override
+  String get mortgageScheduleTitle => 'Tableau d\'amortissement';
+
+  @override
+  String mortgageScheduleSubtitle(int position, int total, int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count échéances',
+      one: '1 échéance',
+    );
+    return 'Année $position sur $total · $_temp0 · l\'assurance est comptée à part';
+  }
+
+  @override
+  String mortgageScheduleSubtitleLoading(int position, int total) {
+    return 'Année $position sur $total';
+  }
+
+  @override
+  String get mortgageScheduleDue => 'Échéance';
+
+  @override
+  String get mortgageScheduleInterest => 'Intérêts';
+
+  @override
+  String get mortgageSchedulePrincipal => 'Capital';
+
+  @override
+  String get mortgageScheduleInsurance => 'Assurance';
+
+  @override
+  String get mortgageScheduleTotalPaid => 'Total versé';
+
+  @override
+  String get mortgageScheduleOutstanding => 'Capital restant dû';
+
+  @override
+  String mortgageScheduleFootTotal(String year) {
+    return 'Total $year';
+  }
+
+  @override
+  String mortgageScheduleFootOutstanding(String date, String amount) {
+    return 'au $date : $amount';
+  }
+
+  @override
+  String get mortgageScheduleYearPrevious => 'Année précédente';
+
+  @override
+  String get mortgageScheduleYearNext => 'Année suivante';
+
+  @override
+  String get mortgageScheduleLoadFailed =>
+      'Impossible de charger le tableau d\'amortissement.';
 }
