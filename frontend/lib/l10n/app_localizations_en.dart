@@ -2455,12 +2455,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get navMortgagesSubtitle => 'Your loans, their cost and your capacity';
 
   @override
-  String get navTax => 'Taxes';
-
-  @override
-  String get navTaxSubtitle => 'An estimate, not a return';
-
-  @override
   String get navSimulator => 'Simulator';
 
   @override

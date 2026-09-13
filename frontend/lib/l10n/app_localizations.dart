@@ -3906,7 +3906,7 @@ abstract class AppLocalizations {
   /// **'La réinitialisation a échoué. Vos données n\'ont pas été modifiées.'**
   String get settingsResetErrorUnknown;
 
-  /// Left nav section heading grouping the loans, taxes, simulator and net-worth destinations (Phase 3). Rendered uppercase.
+  /// Left nav section heading grouping the loans, simulator and net-worth destinations (Phase 3). Rendered uppercase.
   ///
   /// In fr, this message translates to:
   /// **'Patrimoine'**
@@ -3923,18 +3923,6 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Vos emprunts, leur coût et votre capacité'**
   String get navMortgagesSubtitle;
-
-  /// Left nav label for the tax estimation screen.
-  ///
-  /// In fr, this message translates to:
-  /// **'Impôts'**
-  String get navTax;
-
-  /// Top-bar descriptor under the tax panel title.
-  ///
-  /// In fr, this message translates to:
-  /// **'Une estimation, pas une déclaration'**
-  String get navTaxSubtitle;
 
   /// Left nav label for the new-loan simulator screen.
   ///

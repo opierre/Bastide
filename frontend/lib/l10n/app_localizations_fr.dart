@@ -2474,12 +2474,6 @@ class AppLocalizationsFr extends AppLocalizations {
       'Vos emprunts, leur coût et votre capacité';
 
   @override
-  String get navTax => 'Impôts';
-
-  @override
-  String get navTaxSubtitle => 'Une estimation, pas une déclaration';
-
-  @override
   String get navSimulator => 'Simulateur';
 
   @override

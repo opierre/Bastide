@@ -3075,7 +3075,7 @@
   },
   "navSectionWealth": "Patrimoine",
   "@navSectionWealth": {
-    "description": "Left nav section heading grouping the loans, taxes, simulator and net-worth destinations (Phase 3). Rendered uppercase."
+    "description": "Left nav section heading grouping the loans, simulator and net-worth destinations (Phase 3). Rendered uppercase."
   },
   "navMortgages": "Crédits",
   "@navMortgages": {
@@ -3084,14 +3084,6 @@
   "navMortgagesSubtitle": "Vos emprunts, leur coût et votre capacité",
   "@navMortgagesSubtitle": {
     "description": "Top-bar descriptor under the loans panel title."
-  },
-  "navTax": "Impôts",
-  "@navTax": {
-    "description": "Left nav label for the tax estimation screen."
-  },
-  "navTaxSubtitle": "Une estimation, pas une déclaration",
-  "@navTaxSubtitle": {
-    "description": "Top-bar descriptor under the tax panel title."
   },
   "navSimulator": "Simulateur",
   "@navSimulator": {
