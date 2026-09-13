@@ -24,6 +24,7 @@ from app.features.health.router import router as health_router
 from app.features.imports.router import router as imports_router
 from app.features.inference.router import router as inference_router
 from app.features.mortgages.router import router as mortgages_router
+from app.features.mortgages.simulations_router import router as simulations_router
 from app.features.properties.router import router as properties_router
 from app.features.recurring.router import router as recurring_router
 from app.features.rules.router import router as rules_router
@@ -87,6 +88,7 @@ def create_app() -> FastAPI:
     app.include_router(recurring_router)
     app.include_router(goals_router)
     app.include_router(mortgages_router)
+    app.include_router(simulations_router)
     app.include_router(properties_router)
     app.include_router(tax_router)
 

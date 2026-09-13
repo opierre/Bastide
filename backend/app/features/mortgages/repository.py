@@ -13,7 +13,7 @@ from sqlalchemy.orm import Session
 
 from app.features.accounts.models import Account
 from app.features.categories.models import Category
-from app.features.mortgages.models import Mortgage
+from app.features.mortgages.models import Mortgage, MortgageSimulation
 from app.features.properties.models import Property
 from app.features.settings.models import UserSettings
 from app.features.tax.models import TaxParameter
@@ -107,3 +107,54 @@ class MortgageRepository:
             .order_by(TaxParameter.tax_year.desc(), TaxParameter.user_id.is_(None))
             .limit(1)
         )
+
+
+class SimulationRepository:
+    """Queries and writes for saved simulator scenarios, always scoped to a user."""
+
+    def __init__(self, db: Session) -> None:
+        self._db = db
+
+    def list_for_user(self, user_id: str) -> list[MortgageSimulation]:
+        """The user's scenarios, oldest first. Bounded by the per-user cap, so unpaginated."""
+        return list(
+            self._db.scalars(
+                select(MortgageSimulation)
+                .where(MortgageSimulation.user_id == user_id)
+                .order_by(MortgageSimulation.created_at)
+            )
+        )
+
+    def count_for_user(self, user_id: str) -> int:
+        return (
+            self._db.scalar(
+                select(func.count())
+                .select_from(MortgageSimulation)
+                .where(MortgageSimulation.user_id == user_id)
+            )
+            or 0
+        )
+
+    def get_for_user(self, simulation_id: str, user_id: str) -> MortgageSimulation | None:
+        """One scenario the user owns, or `None` — including another user's."""
+        return self._db.scalar(
+            select(MortgageSimulation).where(
+                MortgageSimulation.id == simulation_id, MortgageSimulation.user_id == user_id
+            )
+        )
+
+    def add(self, simulation: MortgageSimulation) -> MortgageSimulation:
+        self._db.add(simulation)
+        self._db.commit()
+        self._db.refresh(simulation)
+        return simulation
+
+    def save(self, simulation: MortgageSimulation) -> MortgageSimulation:
+        self._db.commit()
+        self._db.refresh(simulation)
+        return simulation
+
+    def delete(self, simulation: MortgageSimulation) -> None:
+        """Remove the row for good: a scenario is a scratchpad, not history."""
+        self._db.delete(simulation)
+        self._db.commit()
