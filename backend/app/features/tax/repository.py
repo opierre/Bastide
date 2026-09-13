@@ -7,9 +7,10 @@ base from `properties` rather than from a column of its own, so the Impôts and 
 cannot disagree about the same rent or the same valuation (§4c).
 """
 
+from collections.abc import Sequence
 from datetime import date
 
-from sqlalchemy import extract, func, or_, select
+from sqlalchemy import delete, extract, func, or_, select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
@@ -104,6 +105,95 @@ class TaxRepository:
                 )
             )
         )
+
+    def system_parameter_units(self, tax_year: int) -> dict[str, str]:
+        """The year's seeded keys and their units — the set of keys an override may name."""
+        rows = self._db.execute(
+            select(TaxParameter.key, TaxParameter.unit).where(
+                TaxParameter.tax_year == tax_year, TaxParameter.user_id.is_(None)
+            )
+        ).all()
+        return {key: unit for key, unit in rows}
+
+    def set_user_parameter(
+        self, user_id: str, tax_year: int, key: str, int_value: int, unit: str
+    ) -> None:
+        """Write the user's own row for one key, updating it if they already hold one.
+
+        Only ever selects or creates a row carrying `user_id`, so a system row cannot be reached
+        from here. Not committed.
+        """
+        row = self._db.scalar(
+            select(TaxParameter).where(
+                TaxParameter.user_id == user_id,
+                TaxParameter.tax_year == tax_year,
+                TaxParameter.key == key,
+            )
+        )
+        if row is None:
+            self._db.add(
+                TaxParameter(
+                    user_id=user_id, tax_year=tax_year, key=key, int_value=int_value, unit=unit
+                )
+            )
+        else:
+            row.int_value = int_value
+            row.unit = unit
+
+    def replace_user_brackets(
+        self, user_id: str, tax_year: int, kind: str, bands: Sequence[tuple[int, int]]
+    ) -> None:
+        """Replace the user's whole set for one kind with `(lower_bound_minor, rate_bps)` bands.
+
+        Deleted and flushed before the insert, so the new ordinals never meet the old ones on
+        the unique constraint. Not committed.
+        """
+        self._db.execute(
+            delete(TaxBracket).where(
+                TaxBracket.user_id == user_id,
+                TaxBracket.tax_year == tax_year,
+                TaxBracket.kind == kind,
+            )
+        )
+        self._db.flush()
+        self._db.add_all(
+            TaxBracket(
+                user_id=user_id,
+                tax_year=tax_year,
+                kind=kind,
+                ordinal=ordinal,
+                lower_bound_minor=lower_bound_minor,
+                rate_bps=rate_bps,
+            )
+            for ordinal, (lower_bound_minor, rate_bps) in enumerate(bands)
+        )
+
+    def delete_user_overrides(
+        self, user_id: str, tax_year: int, key: str | None, kind: str | None
+    ) -> None:
+        """Drop the user's overrides for a year: all of them, or only the named key and/or kind.
+
+        Every statement is filtered on `user_id`, so the seeded rows are never touched.
+        Not committed.
+        """
+        everything = key is None and kind is None
+        if everything or key is not None:
+            parameters = delete(TaxParameter).where(
+                TaxParameter.user_id == user_id, TaxParameter.tax_year == tax_year
+            )
+            if key is not None:
+                parameters = parameters.where(TaxParameter.key == key)
+            self._db.execute(parameters)
+        if everything or kind is not None:
+            brackets = delete(TaxBracket).where(
+                TaxBracket.user_id == user_id, TaxBracket.tax_year == tax_year
+            )
+            if kind is not None:
+                brackets = brackets.where(TaxBracket.kind == kind)
+            self._db.execute(brackets)
+
+    def commit(self) -> None:
+        self._db.commit()
 
     def list_active_properties(self, user_id: str) -> list[Property]:
         """The user's non-archived properties, oldest first — §16's property income and IFI base.

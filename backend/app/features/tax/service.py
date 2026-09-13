@@ -18,9 +18,17 @@ from app.features.mortgages.service import median_minor, schedule_for
 from app.features.properties.models import Property
 from app.features.tax import engine
 from app.features.tax.models import TaxProfile
-from app.features.tax.parameters import resolve
+from app.features.tax.parameters import (
+    ResolvedBracket,
+    ResolvedParameters,
+    TaxParameterUnknownError,
+    check_brackets,
+    check_parameter,
+    resolve,
+)
 from app.features.tax.repository import TaxRepository
 from app.features.tax.schemas import (
+    BracketKind,
     BreakdownEntryRead,
     Confidence,
     IfiComponentRead,
@@ -29,7 +37,12 @@ from app.features.tax.schemas import (
     PrefillConfidence,
     PrefillRead,
     PropertyIncomeRead,
+    TaxBracketRead,
     TaxEstimateRead,
+    TaxOverriddenRead,
+    TaxParameterRead,
+    TaxParametersRead,
+    TaxParametersUpdate,
     TaxProfileRead,
     TaxProfileUpdate,
 )
@@ -206,11 +219,7 @@ class TaxService:
             TaxBracketsMissingError: the year holds no `ir` or `ifi` barème.
         """
         profile = self._owned(user.id, tax_year, today)
-        parameters = resolve(
-            tax_year,
-            self._repository.list_parameters(user.id, tax_year),
-            self._repository.list_brackets(user.id, tax_year),
-        )
+        parameters = self._resolved(user.id, tax_year)
         properties = self._repository.list_active_properties(user.id)
         loans = self._repository.list_active_property_loans(user.id)
         on = ifi_valuation_date(tax_year)
@@ -234,6 +243,88 @@ class TaxService:
             mortgages=tuple(_mortgage_input(loan, on) for loan in loans),
         )
         return _to_estimate_read(result, parameters.source, user.currency)
+
+    def parameters(self, user: User, tax_year: int, today: date) -> TaxParametersRead:
+        """The year's resolved set and what in it came from the user's rows.
+
+        The same resolution the estimate runs, so the figures shown are the figures used.
+
+        Raises:
+            TaxYearOutOfRangeError: the year is in the future or predates the seeded set.
+        """
+        self._check_year(tax_year, today)
+        return _to_parameters_read(self._resolved(user.id, tax_year))
+
+    def update_parameters(
+        self, user: User, tax_year: int, data: TaxParametersUpdate, today: date
+    ) -> TaxParametersRead:
+        """Write the user's overrides and return the newly resolved set.
+
+        Everything submitted is checked before anything is written, and the writes land in one
+        commit: a refused key or a broken barème leaves the stored overrides exactly as they were.
+
+        Raises:
+            TaxYearOutOfRangeError: the year is in the future or predates the seeded set.
+            TaxParameterUnknownError: a key the year's seeded set does not hold.
+            TaxParameterOutOfRangeError: a value outside its unit's range.
+            TaxBracketsInvalidError: an empty, gapped, descending or overlapping set.
+        """
+        self._check_year(tax_year, today)
+        system_units = self._repository.system_parameter_units(tax_year)
+        scalars = {
+            key: (value, check_parameter(key, value, system_units))
+            for key, value in (data.parameters or {}).items()
+        }
+        sets: dict[str, list[ResolvedBracket]] = {}
+        if data.brackets is not None:
+            for kind, bands in data.brackets.model_dump(exclude_none=True).items():
+                sets[kind] = [ResolvedBracket(**band) for band in bands]
+                check_brackets(kind, sets[kind])
+
+        for key, (value, unit) in scalars.items():
+            self._repository.set_user_parameter(user.id, tax_year, key, value, unit)
+        for kind, bands in sets.items():
+            self._repository.replace_user_brackets(
+                user.id,
+                tax_year,
+                kind,
+                [(band.lower_bound_minor, band.rate_bps) for band in bands],
+            )
+        self._repository.commit()
+        return _to_parameters_read(self._resolved(user.id, tax_year))
+
+    def reset_parameters(
+        self,
+        user: User,
+        tax_year: int,
+        today: date,
+        key: str | None = None,
+        kind: BracketKind | None = None,
+    ) -> TaxParametersRead:
+        """Drop the user's overrides — all of the year's, or the named key and/or kind.
+
+        Only the user's rows go; the seeded set is what remains, and what is returned.
+
+        Raises:
+            TaxYearOutOfRangeError: the year is in the future or predates the seeded set.
+            TaxParameterUnknownError: `key` is not in the year's seeded set.
+        """
+        self._check_year(tax_year, today)
+        if key is not None and key not in self._repository.system_parameter_units(tax_year):
+            raise TaxParameterUnknownError(
+                "This tax parameter does not exist for the year.", details={"key": key}
+            )
+        self._repository.delete_user_overrides(user.id, tax_year, key, kind)
+        self._repository.commit()
+        return _to_parameters_read(self._resolved(user.id, tax_year))
+
+    def _resolved(self, user_id: str, tax_year: int) -> ResolvedParameters:
+        """The one resolution both the estimate and the parameters panel read."""
+        return resolve(
+            tax_year,
+            self._repository.list_parameters(user_id, tax_year),
+            self._repository.list_brackets(user_id, tax_year),
+        )
 
     def _owned(self, user_id: str, tax_year: int, today: date) -> TaxProfile:
         """The user's profile for the year, created with defaults on first read.
@@ -308,6 +399,29 @@ def _mortgage_input(loan: Mortgage, on: date) -> engine.MortgageInput:
         # Narrowed by the query: only loans carrying a `property_id` net off the base.
         property_id=str(loan.property_id),
         outstanding_principal_minor=schedule_for(loan).outstanding_at(on),
+    )
+
+
+def _to_parameters_read(resolved: ResolvedParameters) -> TaxParametersRead:
+    """The resolved set on the wire, keys sorted so the response is stable."""
+    return TaxParametersRead(
+        brackets={
+            kind: [
+                TaxBracketRead(lower_bound_minor=band.lower_bound_minor, rate_bps=band.rate_bps)
+                for band in resolved.brackets[kind]
+            ]
+            for kind in sorted(resolved.brackets)
+        },
+        parameters={
+            key: TaxParameterRead(
+                int_value=resolved.parameters[key].int_value, unit=resolved.parameters[key].unit
+            )
+            for key in sorted(resolved.parameters)
+        },
+        overridden=TaxOverriddenRead(
+            keys=list(resolved.overridden_keys),
+            bracket_kinds=list(resolved.overridden_bracket_kinds),
+        ),
     )
 
 
