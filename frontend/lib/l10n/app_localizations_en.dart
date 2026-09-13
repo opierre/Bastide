@@ -3675,4 +3675,24 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get networthRetry => 'Retry';
+
+  @override
+  String get networthSeriesTitle => 'Net worth · 12 months';
+
+  @override
+  String get networthSeriesSubtitle => 'Accounts and loans, month by month';
+
+  @override
+  String networthSeriesRange(String from, String to) {
+    return '$from → $to';
+  }
+
+  @override
+  String get networthSeriesEmpty =>
+      'No history yet: the series starts with the first closed month of an imported account.';
+
+  @override
+  String networthSeriesCaveat(String date) {
+    return 'Properties are held at their declared value (oldest estimate: $date): only accounts and loans move from month to month. Months without data are simply absent.';
+  }
 }

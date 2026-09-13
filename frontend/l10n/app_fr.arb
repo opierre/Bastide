@@ -4795,5 +4795,38 @@
   "networthRetry": "Réessayer",
   "@networthRetry": {
     "description": "Retry action on the net-worth error state."
+  },
+  "networthSeriesTitle": "Patrimoine net · 12 mois",
+  "@networthSeriesTitle": {
+    "description": "Title of the net-worth series card."
+  },
+  "networthSeriesSubtitle": "Comptes et crédits, mois après mois",
+  "@networthSeriesSubtitle": {
+    "description": "Subtitle of the net-worth series card."
+  },
+  "networthSeriesRange": "{from} → {to}",
+  "@networthSeriesRange": {
+    "description": "First and last month the series covers.",
+    "placeholders": {
+      "from": {
+        "type": "String"
+      },
+      "to": {
+        "type": "String"
+      }
+    }
+  },
+  "networthSeriesEmpty": "Pas encore d'historique : la série commence au premier mois clos d'un compte importé.",
+  "@networthSeriesEmpty": {
+    "description": "Shown in place of the chart when the series has no closed month yet."
+  },
+  "networthSeriesCaveat": "Les biens sont maintenus à leur valeur déclarée (estimation la plus ancienne : {date}) : seuls les comptes et les crédits bougent d'un mois à l'autre. Les mois sans donnée sont simplement absents.",
+  "@networthSeriesCaveat": {
+    "description": "Info banner under the series when property values are held flat, naming the oldest current valuation date.",
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
   }
 }

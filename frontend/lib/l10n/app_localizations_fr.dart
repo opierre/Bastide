@@ -3702,4 +3702,24 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get networthRetry => 'Réessayer';
+
+  @override
+  String get networthSeriesTitle => 'Patrimoine net · 12 mois';
+
+  @override
+  String get networthSeriesSubtitle => 'Comptes et crédits, mois après mois';
+
+  @override
+  String networthSeriesRange(String from, String to) {
+    return '$from → $to';
+  }
+
+  @override
+  String get networthSeriesEmpty =>
+      'Pas encore d\'historique : la série commence au premier mois clos d\'un compte importé.';
+
+  @override
+  String networthSeriesCaveat(String date) {
+    return 'Les biens sont maintenus à leur valeur déclarée (estimation la plus ancienne : $date) : seuls les comptes et les crédits bougent d\'un mois à l\'autre. Les mois sans donnée sont simplement absents.';
+  }
 }

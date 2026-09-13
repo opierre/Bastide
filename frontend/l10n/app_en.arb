@@ -992,5 +992,10 @@
   "networthEmptyBody": "Import an account or declare a property: net worth adds up what you own and subtracts your loans, inventing nothing in between.",
   "networthEmptyImport": "Import a file",
   "networthLoadFailed": "Couldn't load your net worth.",
-  "networthRetry": "Retry"
+  "networthRetry": "Retry",
+  "networthSeriesTitle": "Net worth · 12 months",
+  "networthSeriesSubtitle": "Accounts and loans, month by month",
+  "networthSeriesRange": "{from} → {to}",
+  "networthSeriesEmpty": "No history yet: the series starts with the first closed month of an imported account.",
+  "networthSeriesCaveat": "Properties are held at their declared value (oldest estimate: {date}): only accounts and loans move from month to month. Months without data are simply absent."
 }

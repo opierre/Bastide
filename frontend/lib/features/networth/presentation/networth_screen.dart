@@ -15,6 +15,7 @@ import '../../properties/presentation/property_list.dart';
 import '../application/networth_controller.dart';
 import '../domain/networth_summary.dart';
 import 'composition_breakdown.dart';
+import 'networth_series_chart.dart';
 import 'networth_summary_card.dart';
 
 /// The Synthèse panel (`docs/design/15-synthese.md`): what the user owns
@@ -179,7 +180,9 @@ class _SummaryView extends StatelessWidget {
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
+                      // `minmax(0,1fr) minmax(0,1.5fr)`, gap 18.
                       Expanded(
+                        flex: 100,
                         child: CompositionBreakdownCard(
                           summary: summary,
                           properties: properties.properties,
@@ -188,6 +191,11 @@ class _SummaryView extends StatelessWidget {
                             currency: summary.currency,
                           ),
                         ),
+                      ),
+                      const SizedBox(width: AppSpacing.gridGap),
+                      Expanded(
+                        flex: 150,
+                        child: NetworthSeriesCard(summary: summary),
                       ),
                     ],
                   ),

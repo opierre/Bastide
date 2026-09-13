@@ -5790,6 +5790,36 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Réessayer'**
   String get networthRetry;
+
+  /// Title of the net-worth series card.
+  ///
+  /// In fr, this message translates to:
+  /// **'Patrimoine net · 12 mois'**
+  String get networthSeriesTitle;
+
+  /// Subtitle of the net-worth series card.
+  ///
+  /// In fr, this message translates to:
+  /// **'Comptes et crédits, mois après mois'**
+  String get networthSeriesSubtitle;
+
+  /// First and last month the series covers.
+  ///
+  /// In fr, this message translates to:
+  /// **'{from} → {to}'**
+  String networthSeriesRange(String from, String to);
+
+  /// Shown in place of the chart when the series has no closed month yet.
+  ///
+  /// In fr, this message translates to:
+  /// **'Pas encore d\'historique : la série commence au premier mois clos d\'un compte importé.'**
+  String get networthSeriesEmpty;
+
+  /// Info banner under the series when property values are held flat, naming the oldest current valuation date.
+  ///
+  /// In fr, this message translates to:
+  /// **'Les biens sont maintenus à leur valeur déclarée (estimation la plus ancienne : {date}) : seuls les comptes et les crédits bougent d\'un mois à l\'autre. Les mois sans donnée sont simplement absents.'**
+  String networthSeriesCaveat(String date);
 }
 
 class _AppLocalizationsDelegate
