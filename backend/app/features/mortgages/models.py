@@ -12,8 +12,6 @@ from sqlalchemy.orm import Mapped, mapped_column
 
 from app.core.db import Base
 
-MORTGAGE_KINDS: tuple[str, ...] = ("mortgage", "works", "consumer", "auto")
-
 
 class Mortgage(Base):
     """A loan the user declares.

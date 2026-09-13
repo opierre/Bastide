@@ -80,11 +80,6 @@ class Schedule:
         return sum(row.insurance_minor for row in self.rows)
 
     @property
-    def total_paid_minor(self) -> int:
-        """Every instalment, insurance included."""
-        return sum(row.instalment_minor for row in self.rows)
-
-    @property
     def total_cost_minor(self) -> int:
         """What the loan costs beyond the capital: interest, insurance and upfront fees."""
         return self.total_interest_minor + self.total_insurance_minor + self.upfront_fees_minor
