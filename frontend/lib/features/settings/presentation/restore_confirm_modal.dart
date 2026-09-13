@@ -181,8 +181,8 @@ class _SummaryPlate extends StatelessWidget {
               height: 36,
               child: Row(
                 children: [
-                  // Expanded, not a Spacer: the longest label (« Paramètres fiscaux
-                  // personnalisés ») must shrink on a narrow modal, never overflow.
+                  // Expanded, not a Spacer: a long label must shrink on a
+                  // narrow modal, never overflow.
                   Expanded(
                     child: Text(
                       label,
