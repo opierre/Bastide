@@ -20,14 +20,14 @@ from app.features.recurring.repository import RecurringRepository
 from app.features.recurring.schemas import RecurringSummary
 from app.features.recurring.service import RecurringService, monthly_equivalent_minor
 from app.features.transactions.repository import TransactionRepository
+from tests.api import RegisteredUser as Owner
+from tests.api import register_user as register
 from tests.features.recurring.factories import (
-    Owner,
     create_account,
     insert_series,
     insert_transaction,
     open_session,
     read_series,
-    register,
 )
 
 #: The day frame ① is drawn on: Netflix is due « demain », Basic-Fit is « 9 jours de retard ».

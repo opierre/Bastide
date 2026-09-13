@@ -21,6 +21,7 @@ from app.features.imports.models import ImportBatch
 from app.features.mortgages.router import get_today
 from app.features.settings.models import UserSettings
 from app.features.transactions.models import Transaction
+from tests.api import register
 
 TODAY = date(2026, 5, 15)
 
@@ -64,21 +65,6 @@ def pinned_today(client: TestClient) -> None:
 def db(tmp_path: Path) -> Session:
     engine = create_engine(f"sqlite:///{tmp_path / 'test.db'}")
     return sessionmaker(bind=engine)()
-
-
-def register(client: TestClient, email: str = "amelie@example.com") -> dict[str, str]:
-    response = client.post(
-        "/api/v1/auth/register",
-        json={
-            "email": email,
-            "password": "correct-horse-battery-staple",
-            "display_name": "Amelie",
-            "locale": "fr",
-            "currency": "eur",
-        },
-    )
-    assert response.status_code == 201, response.json()
-    return {"Authorization": f"Bearer {response.json()['token']}"}
 
 
 def user_id_of(client: TestClient, headers: dict[str, str]) -> str:

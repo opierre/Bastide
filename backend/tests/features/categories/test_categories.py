@@ -7,6 +7,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
 from app.features.categories.models import Category
+from tests.api import register as _register
 
 USER_CATEGORY_PAYLOAD = {
     "name": "Vacances",
@@ -14,21 +15,6 @@ USER_CATEGORY_PAYLOAD = {
     "icon": "flight",
     "color": "#8B5CF6",
 }
-
-
-def _register(client: TestClient, email: str = "amelie@example.com") -> dict[str, str]:
-    response = client.post(
-        "/api/v1/auth/register",
-        json={
-            "email": email,
-            "password": "correct-horse-battery-staple",
-            "display_name": "Amelie",
-            "locale": "fr",
-            "currency": "eur",
-        },
-    )
-    token = response.json()["token"]
-    return {"Authorization": f"Bearer {token}"}
 
 
 def _insert_system_category(tmp_path: Path, name: str = "category.housing") -> str:

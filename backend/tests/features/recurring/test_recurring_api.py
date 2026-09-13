@@ -11,14 +11,14 @@ import pytest
 from fastapi.testclient import TestClient
 
 from app.features.recurring.service import LEGAL_TRANSITIONS, NOMINAL_INTERVAL_DAYS
+from tests.api import RegisteredUser as Owner
+from tests.api import register_user as register
 from tests.features.recurring.factories import (
-    Owner,
     create_account,
     insert_series,
     insert_transaction,
     link_occurrence,
     read_series,
-    register,
 )
 
 TODAY = date.today()

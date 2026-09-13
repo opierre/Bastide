@@ -17,6 +17,7 @@ from sqlalchemy.orm import sessionmaker
 from app.features.mortgages.engine import RepaymentType, build_schedule, taeg_bps
 from app.features.mortgages.router import get_today
 from app.features.properties.models import Property
+from tests.api import register
 
 TODAY = date(2026, 5, 15)
 
@@ -37,22 +38,6 @@ LOAN_PAYLOAD = {
 @pytest.fixture(autouse=True)
 def pinned_today(client: TestClient) -> None:
     cast(FastAPI, client.app).dependency_overrides[get_today] = lambda: TODAY
-
-
-def register(client: TestClient, email: str = "amelie@example.com") -> dict[str, str]:
-    """Register a user and return the auth header their requests carry."""
-    response = client.post(
-        "/api/v1/auth/register",
-        json={
-            "email": email,
-            "password": "correct-horse-battery-staple",
-            "display_name": "Amelie",
-            "locale": "fr",
-            "currency": "eur",
-        },
-    )
-    assert response.status_code == 201, response.json()
-    return {"Authorization": f"Bearer {response.json()['token']}"}
 
 
 def create_loan(client: TestClient, headers: dict[str, str], **overrides: object) -> dict:

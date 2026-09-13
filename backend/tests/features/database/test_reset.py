@@ -19,20 +19,7 @@ from app.features.recurring.models import RecurringSeries
 from app.features.rules.models import CategorizationRule
 from app.features.settings.models import UserSettings
 from app.features.transactions.models import Transaction
-
-
-def _register(client: TestClient, email: str) -> dict[str, str]:
-    response = client.post(
-        "/api/v1/auth/register",
-        json={
-            "email": email,
-            "password": "correct-horse-battery-staple",
-            "display_name": "Amelie",
-            "locale": "fr",
-            "currency": "eur",
-        },
-    )
-    return {"Authorization": f"Bearer {response.json()['token']}"}
+from tests.api import register as _register
 
 
 def _session(tmp_path: Path) -> Session:

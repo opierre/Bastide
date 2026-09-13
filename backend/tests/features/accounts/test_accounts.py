@@ -2,27 +2,14 @@
 
 from fastapi.testclient import TestClient
 
+from tests.api import register as _register
+
 ACCOUNT_PAYLOAD = {
     "name": "Compte courant",
     "type": "checking",
     "institution": "BNP Paribas",
     "opening_balance_minor": 150_000,
 }
-
-
-def _register(client: TestClient, email: str, currency: str = "eur") -> dict[str, str]:
-    response = client.post(
-        "/api/v1/auth/register",
-        json={
-            "email": email,
-            "password": "correct-horse-battery-staple",
-            "display_name": "Amelie",
-            "locale": "fr",
-            "currency": currency,
-        },
-    )
-    token = response.json()["token"]
-    return {"Authorization": f"Bearer {token}"}
 
 
 def test_create_account_defaults_currency_to_users_currency(client: TestClient) -> None:

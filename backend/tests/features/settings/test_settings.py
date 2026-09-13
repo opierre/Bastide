@@ -8,6 +8,7 @@ from sqlalchemy import create_engine, func, select
 from sqlalchemy.orm import sessionmaker
 
 from app.features.settings.models import UserSettings
+from tests.api import register as _register
 
 DEFAULTS = {
     "ai_enabled": False,
@@ -17,20 +18,6 @@ DEFAULTS = {
     "last_backup_at": None,
     "declared_monthly_income_minor": None,
 }
-
-
-def _register(client: TestClient, email: str = "amelie@example.com") -> dict[str, str]:
-    response = client.post(
-        "/api/v1/auth/register",
-        json={
-            "email": email,
-            "password": "correct-horse-battery-staple",
-            "display_name": "Amelie",
-            "locale": "fr",
-            "currency": "eur",
-        },
-    )
-    return {"Authorization": f"Bearer {response.json()['token']}"}
 
 
 def _settings_row_count(tmp_path: Path) -> int:
