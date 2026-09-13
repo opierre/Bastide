@@ -221,6 +221,35 @@ abstract final class CategoryHues {
   static Color forSlug(String? slug) => bySlug[slug] ?? fallback;
 }
 
+/// Hues of the Synthèse asset composition and the property nature pills
+/// (`docs/design/15-synthese.md` §Row 2, §Biens view).
+///
+/// The frame pins four; every other account type and property kind takes the
+/// neutral slate, the same catch-all hue as « Autres » (decided in review).
+abstract final class AssetHues {
+  static const checking = Color(0xFF5AA9FF);
+  static const savings = Color(0xFF2DD4BF);
+  static const primaryResidence = AppColors.cyan;
+  static const rental = Color(0xFFA3E635);
+  static const unpinned = CategoryHues.autres;
+
+  /// Keyed by the backend account `type`.
+  static const byAccountType = <String, Color>{
+    'checking': checking,
+    'savings': savings,
+  };
+
+  /// Keyed by the backend property `kind`.
+  static const byPropertyKind = <String, Color>{
+    'primary_residence': primaryResidence,
+    'rental': rental,
+  };
+
+  static Color forAccountType(String type) => byAccountType[type] ?? unpinned;
+
+  static Color forPropertyKind(String kind) => byPropertyKind[kind] ?? unpinned;
+}
+
 /// Brand-ish hues for institution/merchant monogram chips.
 ///
 /// Pinned per brand rather than hashed: an institution that changes color

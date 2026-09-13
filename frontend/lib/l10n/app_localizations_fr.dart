@@ -3490,4 +3490,216 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get propertyErrorGeneric =>
       'Impossible d\'enregistrer le bien. Réessayez.';
+
+  @override
+  String propertyCardCaptionWhole(String date) {
+    return 'valeur déclarée · estimée le $date';
+  }
+
+  @override
+  String propertyCardCaptionPart(String value, String date) {
+    return 'part détenue · sur $value estimés le $date';
+  }
+
+  @override
+  String get propertyCardOwnership => 'Quote-part';
+
+  @override
+  String get propertyCardAcquisition => 'Prix d\'acquisition';
+
+  @override
+  String propertyCardAcquisitionValue(String price, String date) {
+    return '$price · $date';
+  }
+
+  @override
+  String get propertyCardSinceAcquisition => 'Depuis l\'acquisition';
+
+  @override
+  String propertyCardAbove(String amount, String partial) {
+    String _temp0 = intl.Intl.selectLogic(partial, {
+      'true': ' (part)',
+      'other': '',
+    });
+    return '$amount au-dessus$_temp0';
+  }
+
+  @override
+  String propertyCardBelow(String amount, String partial) {
+    String _temp0 = intl.Intl.selectLogic(partial, {
+      'true': ' (part)',
+      'other': '',
+    });
+    return '$amount en dessous$_temp0';
+  }
+
+  @override
+  String get propertyMenuTooltip => 'Actions';
+
+  @override
+  String get propertyMenuEdit => 'Modifier';
+
+  @override
+  String get propertyMenuRevalue => 'Nouvelle estimation';
+
+  @override
+  String get propertyMenuArchive => 'Archiver';
+
+  @override
+  String get propertyMenuUnarchive => 'Désarchiver';
+
+  @override
+  String get propertiesNewTileTitle => '+ Nouveau bien';
+
+  @override
+  String get propertiesNewTileBody => 'Résidence, locatif, terrain ou autre';
+
+  @override
+  String propertiesShowArchived(int count) {
+    return 'Afficher les biens archivés ($count)';
+  }
+
+  @override
+  String propertiesHideArchived(int count) {
+    return 'Masquer les biens archivés ($count)';
+  }
+
+  @override
+  String get propertiesDismiss => 'Fermer';
+
+  @override
+  String get networthViewSummary => 'Synthèse';
+
+  @override
+  String networthViewProperties(int count) {
+    return 'Biens ($count)';
+  }
+
+  @override
+  String get networthAddProperty => 'Nouveau bien';
+
+  @override
+  String get networthHeroLabel => 'Patrimoine net';
+
+  @override
+  String networthDeltaCaption(String month) {
+    return 'vs $month';
+  }
+
+  @override
+  String networthDeltaCaptionFlat(String month) {
+    return 'vs $month — valeur des biens inchangée';
+  }
+
+  @override
+  String get networthAssetsLabel => 'Actif';
+
+  @override
+  String networthAssetsCaption(String accounts, String properties) {
+    return 'Comptes $accounts · Biens $properties';
+  }
+
+  @override
+  String networthAssetsCaptionNoProperty(String accounts) {
+    return 'Comptes $accounts · aucun bien déclaré';
+  }
+
+  @override
+  String get networthLiabilitiesLabel => 'Passif';
+
+  @override
+  String networthLiabilitiesCaption(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count crédits',
+      one: '1 crédit',
+      zero: 'Aucun crédit',
+    );
+    return '$_temp0 · capital restant dû';
+  }
+
+  @override
+  String get networthCompositionTitle => 'Composition de l\'actif';
+
+  @override
+  String get networthCompositionSubtitle =>
+      'Comptes par type, biens par nature';
+
+  @override
+  String get networthCompositionChecking => 'Comptes courants';
+
+  @override
+  String get networthCompositionSavings => 'Épargne';
+
+  @override
+  String get networthCompositionCredit => 'Comptes de crédit';
+
+  @override
+  String get networthCompositionDeferredCard => 'Cartes à débit différé';
+
+  @override
+  String get networthCompositionCash => 'Espèces';
+
+  @override
+  String get networthCompositionOtherAccounts => 'Autres comptes';
+
+  @override
+  String networthCompositionHeldShare(String label) {
+    return '$label (part détenue)';
+  }
+
+  @override
+  String get networthCompositionFootWhole =>
+      'Les biens comptent pour la part détenue seulement.';
+
+  @override
+  String networthCompositionFoot(String items) {
+    return 'Les biens comptent pour la part détenue seulement ($items).';
+  }
+
+  @override
+  String networthCompositionFootItem(String label, String share, String value) {
+    return '$label : $share sur $value';
+  }
+
+  @override
+  String get networthCompositionInvite =>
+      'Aucun bien déclaré : l\'actif ne compte que vos comptes.';
+
+  @override
+  String get networthCompositionInviteAction => 'Nouveau bien →';
+
+  @override
+  String get networthExclusionsLabel => 'Volontairement non compté';
+
+  @override
+  String get networthExclusionGoalsTitle => 'Objectifs';
+
+  @override
+  String get networthExclusionGoalsBody =>
+      'Une allocation étiquette de l\'argent déjà présent sur un compte — le compter reviendrait à le compter deux fois.';
+
+  @override
+  String get networthExclusionSubscriptionsTitle => 'Abonnements';
+
+  @override
+  String get networthExclusionSubscriptionsBody =>
+      'Un prélèvement récurrent est une dépense à venir, pas une dette due aujourd\'hui.';
+
+  @override
+  String get networthEmptyTitle => 'Rien à additionner pour l\'instant';
+
+  @override
+  String get networthEmptyBody =>
+      'Importez un compte ou déclarez un bien : la synthèse additionne ce que vous possédez et soustrait vos crédits, sans rien inventer entre les deux.';
+
+  @override
+  String get networthEmptyImport => 'Importer un fichier';
+
+  @override
+  String get networthLoadFailed => 'Impossible de charger la synthèse.';
+
+  @override
+  String get networthRetry => 'Réessayer';
 }

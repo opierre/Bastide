@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/api/api_client.dart';
+import '../../networth/application/networth_controller.dart';
 import '../data/properties_repository.dart';
 import '../domain/property.dart';
 
@@ -142,8 +143,11 @@ class PropertiesController extends AsyncNotifier<PropertiesState> {
   }
 
   /// Re-reads both lists without passing through a loading state, so a save
-  /// doesn't blank the grid behind the closing modal.
+  /// doesn't blank the grid behind the closing modal — and invalidates the
+  /// net-worth summary, whose assets the write just changed, so the figure
+  /// follows in the same interaction.
   Future<void> _afterWrite() async {
+    ref.invalidate(networthControllerProvider);
     final showArchived = state.value?.showArchived ?? false;
     state = await AsyncValue.guard(() => _load(showArchived: showArchived));
   }

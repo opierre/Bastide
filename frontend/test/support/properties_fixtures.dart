@@ -107,7 +107,26 @@ class FakePropertiesController extends PropertiesController {
     archiveCalls.add(propertyId);
     final current = state.value;
     if (current == null) return;
-    final moved = current.properties.where((p) => p.id == propertyId);
+    // Flagged the way the server returns an archived property, so its card
+    // offers « Désarchiver » rather than the live menu.
+    final moved = [
+      for (final p in current.properties)
+        if (p.id == propertyId)
+          Property(
+            id: p.id,
+            label: p.label,
+            kind: p.kind,
+            marketValueMinor: p.marketValueMinor,
+            valuedOn: p.valuedOn,
+            ownershipBps: p.ownershipBps,
+            acquisitionPriceMinor: p.acquisitionPriceMinor,
+            acquiredOn: p.acquiredOn,
+            archived: true,
+            currency: p.currency,
+            userShareValueMinor: p.userShareValueMinor,
+            acquisitionDeltaMinor: p.acquisitionDeltaMinor,
+          ),
+    ];
     state = AsyncValue.data(
       current.copyWith(
         properties: [

@@ -5472,6 +5472,324 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Impossible d\'enregistrer le bien. Réessayez.'**
   String get propertyErrorGeneric;
+
+  /// Caption under a wholly owned property's value: the date of the declared estimate.
+  ///
+  /// In fr, this message translates to:
+  /// **'valeur déclarée · estimée le {date}'**
+  String propertyCardCaptionWhole(String date);
+
+  /// Caption under a partly owned property's held value: the full declared value and its date.
+  ///
+  /// In fr, this message translates to:
+  /// **'part détenue · sur {value} estimés le {date}'**
+  String propertyCardCaptionPart(String value, String date);
+
+  /// Property card row: the user's ownership share.
+  ///
+  /// In fr, this message translates to:
+  /// **'Quote-part'**
+  String get propertyCardOwnership;
+
+  /// Property card row: purchase price and date.
+  ///
+  /// In fr, this message translates to:
+  /// **'Prix d\'acquisition'**
+  String get propertyCardAcquisition;
+
+  /// Property card value: purchase price followed by its date.
+  ///
+  /// In fr, this message translates to:
+  /// **'{price} · {date}'**
+  String propertyCardAcquisitionValue(String price, String date);
+
+  /// Property card row: how the held value compares with the held purchase price.
+  ///
+  /// In fr, this message translates to:
+  /// **'Depuis l\'acquisition'**
+  String get propertyCardSinceAcquisition;
+
+  /// Property card value: the held value is this much above the purchase price; '(part)' when only a share is held.
+  ///
+  /// In fr, this message translates to:
+  /// **'{amount} au-dessus{partial, select, true{ (part)} other{}}'**
+  String propertyCardAbove(String amount, String partial);
+
+  /// Property card value: the held value is this much below the purchase price; '(part)' when only a share is held.
+  ///
+  /// In fr, this message translates to:
+  /// **'{amount} en dessous{partial, select, true{ (part)} other{}}'**
+  String propertyCardBelow(String amount, String partial);
+
+  /// Tooltip of a property card's overflow menu.
+  ///
+  /// In fr, this message translates to:
+  /// **'Actions'**
+  String get propertyMenuTooltip;
+
+  /// Property menu: edit the property.
+  ///
+  /// In fr, this message translates to:
+  /// **'Modifier'**
+  String get propertyMenuEdit;
+
+  /// Property menu: record a new declared value.
+  ///
+  /// In fr, this message translates to:
+  /// **'Nouvelle estimation'**
+  String get propertyMenuRevalue;
+
+  /// Property menu: archive the property.
+  ///
+  /// In fr, this message translates to:
+  /// **'Archiver'**
+  String get propertyMenuArchive;
+
+  /// Property menu on an archived property: bring it back.
+  ///
+  /// In fr, this message translates to:
+  /// **'Désarchiver'**
+  String get propertyMenuUnarchive;
+
+  /// Dashed tile at the end of the property grid.
+  ///
+  /// In fr, this message translates to:
+  /// **'+ Nouveau bien'**
+  String get propertiesNewTileTitle;
+
+  /// Line under the new-property tile.
+  ///
+  /// In fr, this message translates to:
+  /// **'Résidence, locatif, terrain ou autre'**
+  String get propertiesNewTileBody;
+
+  /// Foot link that reveals archived properties; the count is the real number.
+  ///
+  /// In fr, this message translates to:
+  /// **'Afficher les biens archivés ({count})'**
+  String propertiesShowArchived(int count);
+
+  /// The same link once archived properties are showing.
+  ///
+  /// In fr, this message translates to:
+  /// **'Masquer les biens archivés ({count})'**
+  String propertiesHideArchived(int count);
+
+  /// Tooltip of the dismiss control on a property action error.
+  ///
+  /// In fr, this message translates to:
+  /// **'Fermer'**
+  String get propertiesDismiss;
+
+  /// Segmented control on the net-worth panel: the summary view.
+  ///
+  /// In fr, this message translates to:
+  /// **'Synthèse'**
+  String get networthViewSummary;
+
+  /// Segmented control on the net-worth panel: the property list, with the live property count.
+  ///
+  /// In fr, this message translates to:
+  /// **'Biens ({count})'**
+  String networthViewProperties(int count);
+
+  /// Top-bar and empty-state action that opens the new-property form.
+  ///
+  /// In fr, this message translates to:
+  /// **'Nouveau bien'**
+  String get networthAddProperty;
+
+  /// Label of the net-worth hero card.
+  ///
+  /// In fr, this message translates to:
+  /// **'Patrimoine net'**
+  String get networthHeroLabel;
+
+  /// Caption beside the month delta pill: the month it is measured against.
+  ///
+  /// In fr, this message translates to:
+  /// **'vs {month}'**
+  String networthDeltaCaption(String month);
+
+  /// Caption beside the month delta pill when property values are held flat.
+  ///
+  /// In fr, this message translates to:
+  /// **'vs {month} — valeur des biens inchangée'**
+  String networthDeltaCaptionFlat(String month);
+
+  /// Label of the assets card.
+  ///
+  /// In fr, this message translates to:
+  /// **'Actif'**
+  String get networthAssetsLabel;
+
+  /// Caption of the assets card: accounts and held property shares.
+  ///
+  /// In fr, this message translates to:
+  /// **'Comptes {accounts} · Biens {properties}'**
+  String networthAssetsCaption(String accounts, String properties);
+
+  /// Caption of the assets card when no property is declared.
+  ///
+  /// In fr, this message translates to:
+  /// **'Comptes {accounts} · aucun bien déclaré'**
+  String networthAssetsCaptionNoProperty(String accounts);
+
+  /// Label of the liabilities card.
+  ///
+  /// In fr, this message translates to:
+  /// **'Passif'**
+  String get networthLiabilitiesLabel;
+
+  /// Caption of the liabilities card: how many active loans the outstanding principal comes from.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, =0{Aucun crédit} =1{1 crédit} other{{count} crédits}} · capital restant dû'**
+  String networthLiabilitiesCaption(int count);
+
+  /// Title of the asset composition card.
+  ///
+  /// In fr, this message translates to:
+  /// **'Composition de l\'actif'**
+  String get networthCompositionTitle;
+
+  /// Subtitle of the asset composition card.
+  ///
+  /// In fr, this message translates to:
+  /// **'Comptes par type, biens par nature'**
+  String get networthCompositionSubtitle;
+
+  /// Composition row: checking accounts.
+  ///
+  /// In fr, this message translates to:
+  /// **'Comptes courants'**
+  String get networthCompositionChecking;
+
+  /// Composition row: savings accounts.
+  ///
+  /// In fr, this message translates to:
+  /// **'Épargne'**
+  String get networthCompositionSavings;
+
+  /// Composition row: credit accounts.
+  ///
+  /// In fr, this message translates to:
+  /// **'Comptes de crédit'**
+  String get networthCompositionCredit;
+
+  /// Composition row: deferred-debit card accounts.
+  ///
+  /// In fr, this message translates to:
+  /// **'Cartes à débit différé'**
+  String get networthCompositionDeferredCard;
+
+  /// Composition row: cash accounts.
+  ///
+  /// In fr, this message translates to:
+  /// **'Espèces'**
+  String get networthCompositionCash;
+
+  /// Composition row: accounts of any other type.
+  ///
+  /// In fr, this message translates to:
+  /// **'Autres comptes'**
+  String get networthCompositionOtherAccounts;
+
+  /// Composition row label for a property kind counted at a held share only.
+  ///
+  /// In fr, this message translates to:
+  /// **'{label} (part détenue)'**
+  String networthCompositionHeldShare(String label);
+
+  /// Composition foot when every property is wholly owned.
+  ///
+  /// In fr, this message translates to:
+  /// **'Les biens comptent pour la part détenue seulement.'**
+  String get networthCompositionFootWhole;
+
+  /// Composition foot naming each partly owned property with its held share and declared value.
+  ///
+  /// In fr, this message translates to:
+  /// **'Les biens comptent pour la part détenue seulement ({items}).'**
+  String networthCompositionFoot(String items);
+
+  /// One partly owned property in the composition foot.
+  ///
+  /// In fr, this message translates to:
+  /// **'{label} : {share} sur {value}'**
+  String networthCompositionFootItem(String label, String share, String value);
+
+  /// Dashed plate under the composition when no property is declared.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucun bien déclaré : l\'actif ne compte que vos comptes.'**
+  String get networthCompositionInvite;
+
+  /// Link in the no-property plate that opens the new-property form.
+  ///
+  /// In fr, this message translates to:
+  /// **'Nouveau bien →'**
+  String get networthCompositionInviteAction;
+
+  /// Section label of the card listing what net worth deliberately leaves out.
+  ///
+  /// In fr, this message translates to:
+  /// **'Volontairement non compté'**
+  String get networthExclusionsLabel;
+
+  /// Exclusion: savings goals.
+  ///
+  /// In fr, this message translates to:
+  /// **'Objectifs'**
+  String get networthExclusionGoalsTitle;
+
+  /// Why goals are not counted in net worth.
+  ///
+  /// In fr, this message translates to:
+  /// **'Une allocation étiquette de l\'argent déjà présent sur un compte — le compter reviendrait à le compter deux fois.'**
+  String get networthExclusionGoalsBody;
+
+  /// Exclusion: subscriptions.
+  ///
+  /// In fr, this message translates to:
+  /// **'Abonnements'**
+  String get networthExclusionSubscriptionsTitle;
+
+  /// Why subscriptions are not counted as liabilities.
+  ///
+  /// In fr, this message translates to:
+  /// **'Un prélèvement récurrent est une dépense à venir, pas une dette due aujourd\'hui.'**
+  String get networthExclusionSubscriptionsBody;
+
+  /// Empty-state title when there are no accounts, properties or loans.
+  ///
+  /// In fr, this message translates to:
+  /// **'Rien à additionner pour l\'instant'**
+  String get networthEmptyTitle;
+
+  /// Empty-state body of the net-worth panel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Importez un compte ou déclarez un bien : la synthèse additionne ce que vous possédez et soustrait vos crédits, sans rien inventer entre les deux.'**
+  String get networthEmptyBody;
+
+  /// Empty-state secondary action that goes to imports.
+  ///
+  /// In fr, this message translates to:
+  /// **'Importer un fichier'**
+  String get networthEmptyImport;
+
+  /// Error state when the net-worth summary or the properties cannot be loaded.
+  ///
+  /// In fr, this message translates to:
+  /// **'Impossible de charger la synthèse.'**
+  String get networthLoadFailed;
+
+  /// Retry action on the net-worth error state.
+  ///
+  /// In fr, this message translates to:
+  /// **'Réessayer'**
+  String get networthRetry;
 }
 
 class _AppLocalizationsDelegate

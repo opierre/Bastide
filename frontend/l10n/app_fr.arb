@@ -4482,5 +4482,318 @@
   "propertyErrorGeneric": "Impossible d'enregistrer le bien. Réessayez.",
   "@propertyErrorGeneric": {
     "description": "Fallback error for a failed property write."
+  },
+  "propertyCardCaptionWhole": "valeur déclarée · estimée le {date}",
+  "@propertyCardCaptionWhole": {
+    "description": "Caption under a wholly owned property's value: the date of the declared estimate.",
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "propertyCardCaptionPart": "part détenue · sur {value} estimés le {date}",
+  "@propertyCardCaptionPart": {
+    "description": "Caption under a partly owned property's held value: the full declared value and its date.",
+    "placeholders": {
+      "value": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "propertyCardOwnership": "Quote-part",
+  "@propertyCardOwnership": {
+    "description": "Property card row: the user's ownership share."
+  },
+  "propertyCardAcquisition": "Prix d'acquisition",
+  "@propertyCardAcquisition": {
+    "description": "Property card row: purchase price and date."
+  },
+  "propertyCardAcquisitionValue": "{price} · {date}",
+  "@propertyCardAcquisitionValue": {
+    "description": "Property card value: purchase price followed by its date.",
+    "placeholders": {
+      "price": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "propertyCardSinceAcquisition": "Depuis l'acquisition",
+  "@propertyCardSinceAcquisition": {
+    "description": "Property card row: how the held value compares with the held purchase price."
+  },
+  "propertyCardAbove": "{amount} au-dessus{partial, select, true{ (part)} other{}}",
+  "@propertyCardAbove": {
+    "description": "Property card value: the held value is this much above the purchase price; '(part)' when only a share is held.",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "partial": {
+        "type": "String"
+      }
+    }
+  },
+  "propertyCardBelow": "{amount} en dessous{partial, select, true{ (part)} other{}}",
+  "@propertyCardBelow": {
+    "description": "Property card value: the held value is this much below the purchase price; '(part)' when only a share is held.",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "partial": {
+        "type": "String"
+      }
+    }
+  },
+  "propertyMenuTooltip": "Actions",
+  "@propertyMenuTooltip": {
+    "description": "Tooltip of a property card's overflow menu."
+  },
+  "propertyMenuEdit": "Modifier",
+  "@propertyMenuEdit": {
+    "description": "Property menu: edit the property."
+  },
+  "propertyMenuRevalue": "Nouvelle estimation",
+  "@propertyMenuRevalue": {
+    "description": "Property menu: record a new declared value."
+  },
+  "propertyMenuArchive": "Archiver",
+  "@propertyMenuArchive": {
+    "description": "Property menu: archive the property."
+  },
+  "propertyMenuUnarchive": "Désarchiver",
+  "@propertyMenuUnarchive": {
+    "description": "Property menu on an archived property: bring it back."
+  },
+  "propertiesNewTileTitle": "+ Nouveau bien",
+  "@propertiesNewTileTitle": {
+    "description": "Dashed tile at the end of the property grid."
+  },
+  "propertiesNewTileBody": "Résidence, locatif, terrain ou autre",
+  "@propertiesNewTileBody": {
+    "description": "Line under the new-property tile."
+  },
+  "propertiesShowArchived": "Afficher les biens archivés ({count})",
+  "@propertiesShowArchived": {
+    "description": "Foot link that reveals archived properties; the count is the real number.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "propertiesHideArchived": "Masquer les biens archivés ({count})",
+  "@propertiesHideArchived": {
+    "description": "The same link once archived properties are showing.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "propertiesDismiss": "Fermer",
+  "@propertiesDismiss": {
+    "description": "Tooltip of the dismiss control on a property action error."
+  },
+  "networthViewSummary": "Synthèse",
+  "@networthViewSummary": {
+    "description": "Segmented control on the net-worth panel: the summary view."
+  },
+  "networthViewProperties": "Biens ({count})",
+  "@networthViewProperties": {
+    "description": "Segmented control on the net-worth panel: the property list, with the live property count.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "networthAddProperty": "Nouveau bien",
+  "@networthAddProperty": {
+    "description": "Top-bar and empty-state action that opens the new-property form."
+  },
+  "networthHeroLabel": "Patrimoine net",
+  "@networthHeroLabel": {
+    "description": "Label of the net-worth hero card."
+  },
+  "networthDeltaCaption": "vs {month}",
+  "@networthDeltaCaption": {
+    "description": "Caption beside the month delta pill: the month it is measured against.",
+    "placeholders": {
+      "month": {
+        "type": "String"
+      }
+    }
+  },
+  "networthDeltaCaptionFlat": "vs {month} — valeur des biens inchangée",
+  "@networthDeltaCaptionFlat": {
+    "description": "Caption beside the month delta pill when property values are held flat.",
+    "placeholders": {
+      "month": {
+        "type": "String"
+      }
+    }
+  },
+  "networthAssetsLabel": "Actif",
+  "@networthAssetsLabel": {
+    "description": "Label of the assets card."
+  },
+  "networthAssetsCaption": "Comptes {accounts} · Biens {properties}",
+  "@networthAssetsCaption": {
+    "description": "Caption of the assets card: accounts and held property shares.",
+    "placeholders": {
+      "accounts": {
+        "type": "String"
+      },
+      "properties": {
+        "type": "String"
+      }
+    }
+  },
+  "networthAssetsCaptionNoProperty": "Comptes {accounts} · aucun bien déclaré",
+  "@networthAssetsCaptionNoProperty": {
+    "description": "Caption of the assets card when no property is declared.",
+    "placeholders": {
+      "accounts": {
+        "type": "String"
+      }
+    }
+  },
+  "networthLiabilitiesLabel": "Passif",
+  "@networthLiabilitiesLabel": {
+    "description": "Label of the liabilities card."
+  },
+  "networthLiabilitiesCaption": "{count, plural, =0{Aucun crédit} =1{1 crédit} other{{count} crédits}} · capital restant dû",
+  "@networthLiabilitiesCaption": {
+    "description": "Caption of the liabilities card: how many active loans the outstanding principal comes from.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "networthCompositionTitle": "Composition de l'actif",
+  "@networthCompositionTitle": {
+    "description": "Title of the asset composition card."
+  },
+  "networthCompositionSubtitle": "Comptes par type, biens par nature",
+  "@networthCompositionSubtitle": {
+    "description": "Subtitle of the asset composition card."
+  },
+  "networthCompositionChecking": "Comptes courants",
+  "@networthCompositionChecking": {
+    "description": "Composition row: checking accounts."
+  },
+  "networthCompositionSavings": "Épargne",
+  "@networthCompositionSavings": {
+    "description": "Composition row: savings accounts."
+  },
+  "networthCompositionCredit": "Comptes de crédit",
+  "@networthCompositionCredit": {
+    "description": "Composition row: credit accounts."
+  },
+  "networthCompositionDeferredCard": "Cartes à débit différé",
+  "@networthCompositionDeferredCard": {
+    "description": "Composition row: deferred-debit card accounts."
+  },
+  "networthCompositionCash": "Espèces",
+  "@networthCompositionCash": {
+    "description": "Composition row: cash accounts."
+  },
+  "networthCompositionOtherAccounts": "Autres comptes",
+  "@networthCompositionOtherAccounts": {
+    "description": "Composition row: accounts of any other type."
+  },
+  "networthCompositionHeldShare": "{label} (part détenue)",
+  "@networthCompositionHeldShare": {
+    "description": "Composition row label for a property kind counted at a held share only.",
+    "placeholders": {
+      "label": {
+        "type": "String"
+      }
+    }
+  },
+  "networthCompositionFootWhole": "Les biens comptent pour la part détenue seulement.",
+  "@networthCompositionFootWhole": {
+    "description": "Composition foot when every property is wholly owned."
+  },
+  "networthCompositionFoot": "Les biens comptent pour la part détenue seulement ({items}).",
+  "@networthCompositionFoot": {
+    "description": "Composition foot naming each partly owned property with its held share and declared value.",
+    "placeholders": {
+      "items": {
+        "type": "String"
+      }
+    }
+  },
+  "networthCompositionFootItem": "{label} : {share} sur {value}",
+  "@networthCompositionFootItem": {
+    "description": "One partly owned property in the composition foot.",
+    "placeholders": {
+      "label": {
+        "type": "String"
+      },
+      "share": {
+        "type": "String"
+      },
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "networthCompositionInvite": "Aucun bien déclaré : l'actif ne compte que vos comptes.",
+  "@networthCompositionInvite": {
+    "description": "Dashed plate under the composition when no property is declared."
+  },
+  "networthCompositionInviteAction": "Nouveau bien →",
+  "@networthCompositionInviteAction": {
+    "description": "Link in the no-property plate that opens the new-property form."
+  },
+  "networthExclusionsLabel": "Volontairement non compté",
+  "@networthExclusionsLabel": {
+    "description": "Section label of the card listing what net worth deliberately leaves out."
+  },
+  "networthExclusionGoalsTitle": "Objectifs",
+  "@networthExclusionGoalsTitle": {
+    "description": "Exclusion: savings goals."
+  },
+  "networthExclusionGoalsBody": "Une allocation étiquette de l'argent déjà présent sur un compte — le compter reviendrait à le compter deux fois.",
+  "@networthExclusionGoalsBody": {
+    "description": "Why goals are not counted in net worth."
+  },
+  "networthExclusionSubscriptionsTitle": "Abonnements",
+  "@networthExclusionSubscriptionsTitle": {
+    "description": "Exclusion: subscriptions."
+  },
+  "networthExclusionSubscriptionsBody": "Un prélèvement récurrent est une dépense à venir, pas une dette due aujourd'hui.",
+  "@networthExclusionSubscriptionsBody": {
+    "description": "Why subscriptions are not counted as liabilities."
+  },
+  "networthEmptyTitle": "Rien à additionner pour l'instant",
+  "@networthEmptyTitle": {
+    "description": "Empty-state title when there are no accounts, properties or loans."
+  },
+  "networthEmptyBody": "Importez un compte ou déclarez un bien : la synthèse additionne ce que vous possédez et soustrait vos crédits, sans rien inventer entre les deux.",
+  "@networthEmptyBody": {
+    "description": "Empty-state body of the net-worth panel."
+  },
+  "networthEmptyImport": "Importer un fichier",
+  "@networthEmptyImport": {
+    "description": "Empty-state secondary action that goes to imports."
+  },
+  "networthLoadFailed": "Impossible de charger la synthèse.",
+  "@networthLoadFailed": {
+    "description": "Error state when the net-worth summary or the properties cannot be loaded."
+  },
+  "networthRetry": "Réessayer",
+  "@networthRetry": {
+    "description": "Retry action on the net-worth error state."
   }
 }

@@ -3463,4 +3463,216 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get propertyErrorGeneric => 'Couldn\'t save the property. Try again.';
+
+  @override
+  String propertyCardCaptionWhole(String date) {
+    return 'declared value · valued on $date';
+  }
+
+  @override
+  String propertyCardCaptionPart(String value, String date) {
+    return 'held share · of $value valued on $date';
+  }
+
+  @override
+  String get propertyCardOwnership => 'Share';
+
+  @override
+  String get propertyCardAcquisition => 'Purchase price';
+
+  @override
+  String propertyCardAcquisitionValue(String price, String date) {
+    return '$price · $date';
+  }
+
+  @override
+  String get propertyCardSinceAcquisition => 'Since purchase';
+
+  @override
+  String propertyCardAbove(String amount, String partial) {
+    String _temp0 = intl.Intl.selectLogic(partial, {
+      'true': ' (share)',
+      'other': '',
+    });
+    return '$amount above$_temp0';
+  }
+
+  @override
+  String propertyCardBelow(String amount, String partial) {
+    String _temp0 = intl.Intl.selectLogic(partial, {
+      'true': ' (share)',
+      'other': '',
+    });
+    return '$amount below$_temp0';
+  }
+
+  @override
+  String get propertyMenuTooltip => 'Actions';
+
+  @override
+  String get propertyMenuEdit => 'Edit';
+
+  @override
+  String get propertyMenuRevalue => 'New valuation';
+
+  @override
+  String get propertyMenuArchive => 'Archive';
+
+  @override
+  String get propertyMenuUnarchive => 'Unarchive';
+
+  @override
+  String get propertiesNewTileTitle => '+ New property';
+
+  @override
+  String get propertiesNewTileBody => 'Residence, rental, land or other';
+
+  @override
+  String propertiesShowArchived(int count) {
+    return 'Show archived properties ($count)';
+  }
+
+  @override
+  String propertiesHideArchived(int count) {
+    return 'Hide archived properties ($count)';
+  }
+
+  @override
+  String get propertiesDismiss => 'Dismiss';
+
+  @override
+  String get networthViewSummary => 'Net worth';
+
+  @override
+  String networthViewProperties(int count) {
+    return 'Properties ($count)';
+  }
+
+  @override
+  String get networthAddProperty => 'New property';
+
+  @override
+  String get networthHeroLabel => 'Net worth';
+
+  @override
+  String networthDeltaCaption(String month) {
+    return 'vs $month';
+  }
+
+  @override
+  String networthDeltaCaptionFlat(String month) {
+    return 'vs $month — property values unchanged';
+  }
+
+  @override
+  String get networthAssetsLabel => 'Assets';
+
+  @override
+  String networthAssetsCaption(String accounts, String properties) {
+    return 'Accounts $accounts · Properties $properties';
+  }
+
+  @override
+  String networthAssetsCaptionNoProperty(String accounts) {
+    return 'Accounts $accounts · no property declared';
+  }
+
+  @override
+  String get networthLiabilitiesLabel => 'Liabilities';
+
+  @override
+  String networthLiabilitiesCaption(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count loans',
+      one: '1 loan',
+      zero: 'No loan',
+    );
+    return '$_temp0 · outstanding principal';
+  }
+
+  @override
+  String get networthCompositionTitle => 'Asset composition';
+
+  @override
+  String get networthCompositionSubtitle =>
+      'Accounts by type, properties by kind';
+
+  @override
+  String get networthCompositionChecking => 'Current accounts';
+
+  @override
+  String get networthCompositionSavings => 'Savings';
+
+  @override
+  String get networthCompositionCredit => 'Credit accounts';
+
+  @override
+  String get networthCompositionDeferredCard => 'Deferred-debit cards';
+
+  @override
+  String get networthCompositionCash => 'Cash';
+
+  @override
+  String get networthCompositionOtherAccounts => 'Other accounts';
+
+  @override
+  String networthCompositionHeldShare(String label) {
+    return '$label (held share)';
+  }
+
+  @override
+  String get networthCompositionFootWhole =>
+      'Properties count for the held share only.';
+
+  @override
+  String networthCompositionFoot(String items) {
+    return 'Properties count for the held share only ($items).';
+  }
+
+  @override
+  String networthCompositionFootItem(String label, String share, String value) {
+    return '$label: $share of $value';
+  }
+
+  @override
+  String get networthCompositionInvite =>
+      'No property declared: assets count your accounts only.';
+
+  @override
+  String get networthCompositionInviteAction => 'New property →';
+
+  @override
+  String get networthExclusionsLabel => 'Deliberately not counted';
+
+  @override
+  String get networthExclusionGoalsTitle => 'Goals';
+
+  @override
+  String get networthExclusionGoalsBody =>
+      'An allocation labels money already in an account — counting it would count it twice.';
+
+  @override
+  String get networthExclusionSubscriptionsTitle => 'Subscriptions';
+
+  @override
+  String get networthExclusionSubscriptionsBody =>
+      'A recurring charge is a future expense, not a debt owed today.';
+
+  @override
+  String get networthEmptyTitle => 'Nothing to add up yet';
+
+  @override
+  String get networthEmptyBody =>
+      'Import an account or declare a property: net worth adds up what you own and subtracts your loans, inventing nothing in between.';
+
+  @override
+  String get networthEmptyImport => 'Import a file';
+
+  @override
+  String get networthLoadFailed => 'Couldn\'t load your net worth.';
+
+  @override
+  String get networthRetry => 'Retry';
 }
