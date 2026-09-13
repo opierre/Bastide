@@ -447,18 +447,14 @@ every parameter, bracket and result comparable as an exact integer.
 | ownership_bps | int | the user's share, default `10000` (100 %); indivision/SCI quote-part |
 | acquisition_price_minor | int null | |
 | acquired_on | date null | |
-| annual_rent_minor | int null | gross rent received; `rental` only |
-| annual_charges_minor | int null | deductible charges; `reel` regime only |
-| property_regime | text null | `micro_foncier` \| `reel`; null when not rented |
 | archived | bool | default false |
 | created_at / updated_at | datetime | |
 
 > Declared, not derived: the app never sees a property in a bank statement. Net worth is
 > meaningless without it (§18), so it is one entity rather than a figure duplicated per panel.
 >
-> The rent block (`annual_rent_minor`, `annual_charges_minor`, `property_regime`) was specified
-> for the tax estimate, which has been dropped (§16); it is still stored and validated, with no
-> figure reading it.
+> The rent block (`annual_rent_minor`, `annual_charges_minor`, `property_regime`) served only the
+> tax estimate and was dropped with it (§16, migration `c7e2a9d4b150`).
 
 > **`tax_profiles`, `tax_brackets` and `tax_parameters` were dropped** with the tax feature
 > (migration `b6d4f0e81a53`).
@@ -672,8 +668,7 @@ GET    /mortgages/summary       → {total_outstanding_minor, monthly_charge_min
 
 GET    /properties              ?archived → [property + {user_share_value_minor}]
 POST   /properties              {label, kind, market_value_minor, valued_on, ownership_bps?,
-                                 acquisition_price_minor?, acquired_on?, annual_rent_minor?,
-                                 annual_charges_minor?, property_regime?} → property
+                                 acquisition_price_minor?, acquired_on?} → property
 GET    /properties/{id}         → property + {user_share_value_minor, linked_mortgages: [id]}
 PATCH  /properties/{id}
 DELETE /properties/{id}          (archive)

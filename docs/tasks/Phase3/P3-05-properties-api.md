@@ -31,11 +31,10 @@ DELETE /api/v1/properties/{id}   (archive)
    `acquisition_delta_minor` beside it — the held share less the held share of the acquisition
    price, null when no acquisition price was declared — because `15-synthese.md` §Biens view prints
    it on every card and the frontend derives no money.
-3. Rent fields are coupled and validated as a set: `property_regime` requires `annual_rent_minor`,
-   and `annual_charges_minor` is accepted **only** under `reel`. A `micro_foncier` property
-   carrying charges is a contradiction, so refuse it with a 422 instead of choosing for the user.
-4. `kind='rental'` with no rent fields is allowed — a vacant rental is a real state — but rent
-   fields on a non-rental kind are refused.
+3. ~~Rent fields~~ — **removed with the tax feature.** `annual_rent_minor`, `annual_charges_minor`
+   and `property_regime` and their validation matrix are gone (migration `c7e2a9d4b150`); a
+   payload carrying them is refused as unknown.
+4. `kind` is a label only; `rental` carries no extra fields.
 5. `DELETE` archives. Archived properties leave every aggregate (§18 assets) and are returned by
    `?archived=true`.
 6. `linked_mortgages` is read from `mortgages.property_id`, so the user can see the link they made.
@@ -50,7 +49,6 @@ DELETE /api/v1/properties/{id}   (archive)
 ## Acceptance
 - `user_share_value_minor` is exact at 100 % ownership and correctly rounded below it;
   `acquisition_delta_minor` is on the same held-share basis and null without an acquisition price.
-- The rent/regime/charges matrix behaves as specified, with 422 in the error envelope.
 - A future `valued_on` is refused.
 - Archived properties are absent from the default list and present under `?archived=true`.
 - `linked_mortgages` lists exactly the caller's loans pointing at that property.
@@ -58,8 +56,8 @@ DELETE /api/v1/properties/{id}   (archive)
 - `ruff` + `ty` clean.
 
 ## Tests
-- `test_properties.py`: CRUD; ownership rounding at 10000, 5000 and an odd share; the full
-  rent/regime/charges matrix; future `valued_on` refused; archive filtering; `linked_mortgages`
+- `test_properties.py`: CRUD; ownership rounding at 10000, 5000 and an odd share; rent fields refused as
+  unknown; future `valued_on` refused; archive filtering; `linked_mortgages`
   content; user scoping; currency copied from the user.
 
 ## Commits

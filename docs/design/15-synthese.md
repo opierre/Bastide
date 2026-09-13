@@ -32,7 +32,7 @@ Segmented « Biens (0) ». Hero **−209 829,21 €** (neutral, U+2212), same de
 
 ## Biens view (frame ②)
 Grid 3 columns, gap 18: two **PropertyCards** + a dashed « + Nouveau bien » tile (« Résidence, locatif, terrain ou autre »).
-PropertyCard (padding 18/22, hover iris border): name Space Grotesk 16 · nature CategoryChip-style pill (Résidence principale cyan `#4FD1E8` with house glyph · Locatif `#A3E635` with two-building glyph) · ⋯ overflow; **held value** Space Grotesk 24 + caption; then a 12 px key/value list: Quote-part · Prix d'acquisition · Depuis l'acquisition · (locatif) Loyer annuel (part) · Régime.
+PropertyCard (padding 18/22, hover iris border): name Space Grotesk 16 · nature CategoryChip-style pill (Résidence principale cyan `#4FD1E8` with house glyph · Locatif `#A3E635` with two-building glyph) · ⋯ overflow; **held value** Space Grotesk 24 + caption; then a 12 px key/value list: Quote-part · Prix d'acquisition · Depuis l'acquisition. (The frame's locatif « Loyer annuel · Régime » rows were dropped with the tax feature.)
 
 | | Appartement Lyon 3e | Studio Villeurbanne |
 |---|---|---|
@@ -40,19 +40,18 @@ PropertyCard (padding 18/22, hover iris border): name Space Grotesk 16 · nature
 | Quote-part | 100 % | 50 % (indivision) |
 | Prix d'acquisition | 385 000,00 € · 01/09/2023 | 132 000,00 € · 14/06/2021 |
 | Depuis l'acquisition | 35 000,00 € au-dessus | 6 500,00 € au-dessus (part) |
-| Loyer · Régime | — | 3 900,00 € · Micro-foncier |
 
 Overflow menu (drawn open on the studio): Modifier · Nouvelle estimation · **Archiver**. (The frame's amber sub-line about the IFI base and the « Ces biens dans votre estimation d'impôt » card below the grid were dropped with the tax feature.)
 Below the grid: foot link (archive-box icon) « Afficher les biens archivés (0) ».
 
-## Modal nouveau bien, régime réel (frame ③, over the list)
-620 px Modal: « Nouveau bien », sub « La valeur déclarée entre dans la synthèse. » Grid 2 columns: Libellé « Studio Villeurbanne » · Nature (Select « Locatif ») · Valeur déclarée 145 000,00 € · Date d'estimation 05/03/2026 · Quote-part détenue 50 % (label carries « part : 72 500,00 € » live) · Prix d'acquisition · date (132 000,00 € | 14/06/2021, paired fields). **Location block** (border-top, shown only for Locatif): « Location » 13/700 + « affiché pour un bien locatif »; 3 columns: Loyer annuel (part) 3 900,00 € · Régime SegmentedControl Micro-foncier | **Réel** · Charges déductibles **1 240,00 €** (focused; label pill « RÉEL ») — this field exists **only** under Réel. Help 11.5 `#5A6579` « Au réel, le revenu foncier net = loyer − charges déductibles ; en micro-foncier, l'abattement de 30 % s'applique et les charges n'entrent pas. » Footer « Annuler » · gradient « Ajouter le bien ». The 1 240,00 € charges value is *mock, à fournir*.
+## Modal nouveau bien (frame ③, over the list)
+620 px Modal: « Nouveau bien », sub « La valeur déclarée entre dans la synthèse. » Grid 2 columns: Libellé « Studio Villeurbanne » · Nature (Select « Locatif ») · Valeur déclarée 145 000,00 € · Date d'estimation 05/03/2026 · Quote-part détenue 50 % (label carries « part : 72 500,00 € » live) · Prix d'acquisition · date (132 000,00 € | 14/06/2021, paired fields). Footer « Annuler » · gradient « Ajouter le bien ». (The frame's « Location » block — rent, régime, deductible charges — was dropped with the tax feature.)
 
 ## Empty state (frame ⑤)
 No segmented control. Centered EmptyState: 64 px iris plate with pie glyph; « Rien à additionner pour l'instant »; « Importez un compte ou déclarez un bien : la synthèse additionne ce que vous possédez et soustrait vos crédits, sans rien inventer entre les deux. »; secondary « Importer un fichier » + gradient « Nouveau bien ».
 
 ## States to show
-① synthèse (fr) ② liste des biens (fr) ③ modal nouveau bien, régime réel (fr) ④ aucun bien — synthèse sur les seuls comptes (fr) ⑤ vide (fr) ⑥ synthèse (en).
+① synthèse (fr) ② liste des biens (fr) ③ modal nouveau bien (fr) ④ aucun bien — synthèse sur les seuls comptes (fr) ⑤ vide (fr) ⑥ synthèse (en).
 
 ## Notes
 - Delta = this month's net minus last month's; pill is iris in both directions (triangle rotated 180° when negative), never green/red.

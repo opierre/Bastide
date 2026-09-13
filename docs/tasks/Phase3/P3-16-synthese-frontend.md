@@ -44,8 +44,8 @@ because this is where a user thinks about what they own.
    in an account) and subscriptions (a future charge is not a debt). §18 makes these
    exclusions correct; an unexplained absence just reads as a missing feature.
 6. Property list and form: label, kind, market value, valuation date, ownership share (percent to
-   bps at the edge), optional acquisition price and date, and the rent block — rent, regime, and
-   charges only under `reel`, matching P3-05's validation so the user is never refused by surprise.
+   bps at the edge), optional acquisition price and date. No rent block: it was dropped with the
+   tax feature.
 7. Show each property's user share when ownership is below 100 %, and its valuation date with an
    « estimée le … » line: a declared value ages, and the panel should say how old it is.
 8. A property archived from the list leaves the summary. Archived properties stay reachable
@@ -65,8 +65,7 @@ because this is where a user thinks about what they own.
 - The flat-property caveat appears whenever the API flags it, naming the oldest valuation date.
 - Omitted months are absent from the chart, not plotted as zero.
 - The exclusions (goals, subscriptions) are stated in the panel.
-- Property CRUD works; the rent/regime/charges rules are enforced in the form before the API;
-  percent ownership converts to bps; the user share shows below 100 %.
+- Property CRUD works; percent ownership converts to bps; the user share shows below 100 %.
 - Archiving a property updates the summary in the same interaction.
 - A user with accounts but no properties gets a working summary; a user with nothing gets the empty
   state, not an error.
@@ -77,8 +76,7 @@ because this is where a user thinks about what they own.
   CRUD; archive.
 - Widget: summary figures and neutral net worth in fr and en, including a negative net worth with
   U+2212; the delta pill iris in both directions; caveat shown and hidden per the flag; a gap month
-  absent from the series; exclusions rendered; form validation matrix mirroring P3-05, including
-  the charges field appearing only under `reel`; ownership share display and the live held-share
+  absent from the series; exclusions rendered; form validation; ownership share display and the live held-share
   label in the form; both empty states.
 
 ## Commits
