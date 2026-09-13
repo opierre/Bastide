@@ -1,8 +1,7 @@
-"""Tests for the properties surface: CRUD, the held share, the rent matrix, archiving, scoping.
+"""Tests for the properties surface: CRUD, the held share, archiving, scoping.
 
 What is at stake is that a valuation is declared exactly once and read from here by everyone:
-the held share is derived on the way out (§16's IFI base, §18's assets), and the rent/regime
-matrix refuses every combination the estimate would otherwise resolve for the user.
+the held share is derived on the way out (§18's assets), never recomputed elsewhere.
 """
 
 from datetime import date
@@ -320,160 +319,30 @@ def test_a_patch_cannot_move_the_valuation_into_the_future(client: TestClient) -
     )
 
 
-# --- the rent / regime / charges matrix ------------------------------------------------------
+# --- rent fields are gone --------------------------------------------------------------------
 
 
-def test_a_rental_with_rent_and_micro_foncier_is_accepted(client: TestClient) -> None:
+@pytest.mark.parametrize("field", ["annual_rent_minor", "annual_charges_minor", "property_regime"])
+def test_a_rent_field_is_refused_as_unknown(client: TestClient, field: str) -> None:
+    """The rent block went with the tax estimate; `extra="forbid"` keeps it from coming back."""
     headers = register(client)
+    value: object = "reel" if field == "property_regime" else 390_000
 
-    created = create_property(
-        client,
-        headers,
-        kind="rental",
-        annual_rent_minor=390_000,
-        property_regime="micro_foncier",
+    response = client.post(
+        "/api/v1/properties",
+        json={**PROPERTY_PAYLOAD, "kind": "rental", field: value},
+        headers=headers,
     )
 
-    assert created["annual_rent_minor"] == 390_000
-    assert created["property_regime"] == "micro_foncier"
-    assert created["annual_charges_minor"] is None
+    assert response.status_code == 422, response.json()
 
 
-def test_a_rental_under_reel_may_carry_charges(client: TestClient) -> None:
-    headers = register(client)
-
-    created = create_property(
-        client,
-        headers,
-        kind="rental",
-        annual_rent_minor=390_000,
-        annual_charges_minor=124_000,
-        property_regime="reel",
-    )
-
-    assert created["annual_charges_minor"] == 124_000
-    assert created["property_regime"] == "reel"
-
-
-def test_a_vacant_rental_carries_no_rent_fields(client: TestClient) -> None:
-    """A rental between tenants is a real state, not an incomplete declaration."""
+def test_a_read_carries_no_rent_fields(client: TestClient) -> None:
     headers = register(client)
 
     created = create_property(client, headers, kind="rental")
 
-    assert created["annual_rent_minor"] is None
-    assert created["property_regime"] is None
-    assert created["annual_charges_minor"] is None
-
-
-@pytest.mark.parametrize(
-    "rent_fields",
-    [
-        {"annual_rent_minor": 390_000, "property_regime": "micro_foncier"},
-        {"property_regime": "reel"},
-        {"annual_charges_minor": 124_000},
-    ],
-)
-def test_rent_fields_on_a_non_rental_kind_are_refused(
-    client: TestClient, rent_fields: dict[str, object]
-) -> None:
-    headers = register(client)
-
-    response = client.post(
-        "/api/v1/properties",
-        json={**PROPERTY_PAYLOAD, "kind": "secondary", **rent_fields},
-        headers=headers,
-    )
-
-    assert response.status_code == 422, response.json()
-    assert error_of(response)["code"] == "PROPERTY_RENT_ON_NON_RENTAL"
-
-
-def test_a_regime_without_rent_is_refused(client: TestClient) -> None:
-    headers = register(client)
-
-    response = client.post(
-        "/api/v1/properties",
-        json={**PROPERTY_PAYLOAD, "kind": "rental", "property_regime": "micro_foncier"},
-        headers=headers,
-    )
-
-    assert response.status_code == 422, response.json()
-    assert error_of(response)["code"] == "PROPERTY_REGIME_REQUIRES_RENT"
-
-
-def test_rent_without_a_regime_is_refused(client: TestClient) -> None:
-    """§16 has two roads for property income; with no regime it would have to pick one."""
-    headers = register(client)
-
-    response = client.post(
-        "/api/v1/properties",
-        json={**PROPERTY_PAYLOAD, "kind": "rental", "annual_rent_minor": 390_000},
-        headers=headers,
-    )
-
-    assert response.status_code == 422, response.json()
-    assert error_of(response)["code"] == "PROPERTY_RENT_REQUIRES_REGIME"
-
-
-def test_charges_under_micro_foncier_are_refused(client: TestClient) -> None:
-    """The 30 % abattement replaces real charges (§16); carrying both is a contradiction."""
-    headers = register(client)
-
-    response = client.post(
-        "/api/v1/properties",
-        json={
-            **PROPERTY_PAYLOAD,
-            "kind": "rental",
-            "annual_rent_minor": 390_000,
-            "annual_charges_minor": 124_000,
-            "property_regime": "micro_foncier",
-        },
-        headers=headers,
-    )
-
-    assert response.status_code == 422, response.json()
-    assert error_of(response)["code"] == "PROPERTY_CHARGES_REQUIRE_REEL"
-
-
-def test_a_patch_is_validated_against_the_merged_row(client: TestClient) -> None:
-    """Switching a `reel` rental to `micro_foncier` while it still carries charges is refused."""
-    headers = register(client)
-    created = create_property(
-        client,
-        headers,
-        kind="rental",
-        annual_rent_minor=390_000,
-        annual_charges_minor=124_000,
-        property_regime="reel",
-    )
-
-    response = client.patch(
-        f"/api/v1/properties/{created['id']}",
-        json={"property_regime": "micro_foncier"},
-        headers=headers,
-    )
-
-    assert response.status_code == 422, response.json()
-    assert error_of(response)["code"] == "PROPERTY_CHARGES_REQUIRE_REEL"
-    assert (
-        client.get(f"/api/v1/properties/{created['id']}", headers=headers).json()["property_regime"]
-        == "reel"
-    )
-
-
-def test_a_patch_may_add_rent_to_a_vacant_rental(client: TestClient) -> None:
-    headers = register(client)
-    created = create_property(client, headers, kind="rental")
-
-    response = client.patch(
-        f"/api/v1/properties/{created['id']}",
-        json={"annual_rent_minor": 390_000, "property_regime": "micro_foncier"},
-        headers=headers,
-    )
-
-    assert response.status_code == 200, response.json()
-    assert response.json()["annual_rent_minor"] == 390_000
+    assert not {"annual_rent_minor", "annual_charges_minor", "property_regime"} & set(created)
 
 
 # --- archiving -------------------------------------------------------------------------------

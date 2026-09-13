@@ -5,12 +5,8 @@ from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field
 
-#: The four natures a declared property can take (§4c). A label everywhere but in §16, where
-#: `primary_residence` alone carries the IFI abattement.
+#: The four natures a declared property can take (§4c); a label, used by no computation.
 PropertyKind = Literal["primary_residence", "rental", "secondary", "other"]
-
-#: How rent is taxed (§16); null when the property is not rented.
-PropertyRegime = Literal["micro_foncier", "reel"]
 
 
 class PropertyCreate(BaseModel):
@@ -29,16 +25,13 @@ class PropertyCreate(BaseModel):
     ownership_bps: int = Field(default=10_000, ge=1, le=10_000)
     acquisition_price_minor: int | None = Field(default=None, ge=0)
     acquired_on: date | None = None
-    annual_rent_minor: int | None = Field(default=None, ge=0)
-    annual_charges_minor: int | None = Field(default=None, ge=0)
-    property_regime: PropertyRegime | None = None
 
 
 class PropertyUpdate(BaseModel):
     """Patch payload for a property.
 
     Omitted fields are left alone; `None` is indistinguishable from absent, as everywhere else
-    in this API, so clearing a rent field or an acquisition price is not expressible here.
+    in this API, so clearing an acquisition price is not expressible here.
 
     « Nouvelle estimation » is this payload carrying `market_value_minor` and `valued_on`
     together: a property has exactly one declared value (§4c), so a re-valuation replaces it
@@ -54,9 +47,6 @@ class PropertyUpdate(BaseModel):
     ownership_bps: int | None = Field(default=None, ge=1, le=10_000)
     acquisition_price_minor: int | None = Field(default=None, ge=0)
     acquired_on: date | None = None
-    annual_rent_minor: int | None = Field(default=None, ge=0)
-    annual_charges_minor: int | None = Field(default=None, ge=0)
-    property_regime: PropertyRegime | None = None
     #: Archiving is also reachable through `DELETE`; `false` here is how a bien is unarchived.
     archived: bool | None = None
 
@@ -72,9 +62,6 @@ class PropertyRead(BaseModel):
     ownership_bps: int
     acquisition_price_minor: int | None
     acquired_on: date | None
-    annual_rent_minor: int | None
-    annual_charges_minor: int | None
-    property_regime: PropertyRegime | None
     archived: bool
     currency: str
     #: The held share of the declared value; derived here and nowhere else.
@@ -86,7 +73,7 @@ class PropertyRead(BaseModel):
 
 
 class PropertyDetail(PropertyRead):
-    """A property with the loans pointing at it, so the user sees the link they made (§16)."""
+    """A property with the loans pointing at it, so the user sees the link they made."""
 
     #: Ids of the caller's mortgages whose `property_id` is this property, oldest first.
     linked_mortgages: list[str]
