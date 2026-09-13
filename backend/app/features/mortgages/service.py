@@ -10,6 +10,7 @@ from datetime import date
 from typing import Any
 
 from app.core.errors import NotFoundError, ValidationError
+from app.core.months import first_of_month, month_index, month_key
 from app.features.auth.models import User
 from app.features.mortgages.engine import (
     NonAmortizingLoanError,
@@ -45,7 +46,6 @@ ARCHIVED: MortgageStatus = "archived"
 DEFAULT_STATUSES: tuple[MortgageStatus, ...] = ("active", "repaid")
 
 _BPS_PER_UNIT = 10_000
-_MONTHS_PER_YEAR = 12
 
 #: The §15 debt-ratio reference the ratio is read against: 35 %, insurance included — HCSF
 #: décision n° D-HCSF-2021-7 du 29 septembre 2021, binding on lenders since 1 January 2022.
@@ -151,41 +151,28 @@ def outstanding_series(
     for _, schedule in loans:
         after: dict[int, int] = {}
         for row in schedule.rows:
-            after[_month_index(row.due_on)] = row.outstanding_after_minor
+            after[month_index(row.due_on)] = row.outstanding_after_minor
         after_by_month.append(after)
 
-    first = min(_month_index(schedule.rows[0].due_on) for _, schedule in loans)
-    last = max(_month_index(schedule.rows[-1].due_on) for _, schedule in loans)
+    first = min(month_index(schedule.rows[0].due_on) for _, schedule in loans)
+    last = max(month_index(schedule.rows[-1].due_on) for _, schedule in loans)
     carried = [0] * len(loans)
     points: list[OutstandingPoint] = []
     for index in range(first, last + 1):
         for position, after in enumerate(after_by_month):
             if index in after:
                 carried[position] = after[index]
-        points.append(OutstandingPoint(month=_month_key(index), outstanding_minor=sum(carried)))
+        points.append(OutstandingPoint(month=month_key(index), outstanding_minor=sum(carried)))
 
     ends = [
         LoanEndMarker(
             mortgage_id=mortgage.id,
             label=mortgage.label,
-            month=_month_key(_month_index(schedule.rows[-1].due_on)),
+            month=month_key(month_index(schedule.rows[-1].due_on)),
         )
         for mortgage, schedule in loans
     ]
     return points, ends
-
-
-def _month_index(day: date) -> int:
-    return day.year * _MONTHS_PER_YEAR + day.month - 1
-
-
-def _month_key(index: int) -> str:
-    """`YYYY-MM` for a month index."""
-    return f"{index // _MONTHS_PER_YEAR:04d}-{index % _MONTHS_PER_YEAR + 1:02d}"
-
-
-def _first_of_month(index: int) -> date:
-    return date(index // _MONTHS_PER_YEAR, index % _MONTHS_PER_YEAR + 1, 1)
 
 
 def to_read(mortgage: Mortgage, schedule: Schedule, currency: str, today: date) -> MortgageRead:
@@ -431,11 +418,11 @@ class MortgageService:
         declared = self._repository.declared_monthly_income_minor(user_id)
         if declared is not None:
             return declared, "declared"
-        current = _month_index(today)
+        current = month_index(today)
         totals = self._repository.monthly_income_totals(
             user_id,
-            start=_first_of_month(current - LEDGER_INCOME_MONTHS),
-            end=_first_of_month(current),
+            start=first_of_month(current - LEDGER_INCOME_MONTHS),
+            end=first_of_month(current),
         )
         if len(totals) < MIN_LEDGER_INCOME_MONTHS:
             return None, "unknown"

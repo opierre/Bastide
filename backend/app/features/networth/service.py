@@ -6,10 +6,10 @@ a goal labels money already inside an account (§13), and a future charge is not
 share and the schedule come from their own features — reused, not recomputed.
 """
 
-from calendar import monthrange
 from collections.abc import Sequence
 from datetime import date
 
+from app.core.months import first_of_month, last_of_month, month_index, month_key
 from app.features.accounts.models import Account
 from app.features.auth.models import User
 from app.features.mortgages.engine import Schedule
@@ -29,7 +29,6 @@ from app.features.properties.service import held_share_minor
 SERIES_MONTHS = 12
 
 _BPS_PER_UNIT = 10_000
-_MONTHS_PER_YEAR = 12
 
 
 def shares_bps(amounts: Sequence[int]) -> list[int]:
@@ -126,14 +125,14 @@ class NetWorthService:
         plus the rows since, or the opening balance plus the rows when it has no snapshot yet.
         Property values are held flat at their one declared value; loans follow their schedule.
         """
-        current = _month_index(today)
-        window_end = _first_of_month(current)
+        current = month_index(today)
+        window_end = first_of_month(current)
         account_ids = [account.id for account in accounts]
         snapshots: dict[str, dict[int, int]] = {}
         for account_id, period_end, balance in self._repository.snapshots(
             user_id, account_ids, window_end
         ):
-            snapshots.setdefault(account_id, {})[_month_index(period_end)] = balance
+            snapshots.setdefault(account_id, {})[month_index(period_end)] = balance
         row_sums = self._repository.monthly_row_sums(user_id, account_ids, window_end)
         snapshot_months = {month for months in snapshots.values() for month in months}
 
@@ -141,7 +140,7 @@ class NetWorthService:
         for month in range(current - SERIES_MONTHS, current):
             if month not in snapshot_months:
                 continue
-            month_end = _last_of_month(month)
+            month_end = last_of_month(month)
             accounts_minor = sum(
                 _balance_at(account, snapshots.get(account.id, {}), row_sums, month)
                 for account in accounts
@@ -149,7 +148,7 @@ class NetWorthService:
             mortgages_minor = sum(schedule.outstanding_at(month_end) for schedule in schedules)
             points.append(
                 NetWorthPoint(
-                    month=_month_key(month),
+                    month=month_key(month),
                     net_worth_minor=accounts_minor + properties_minor - mortgages_minor,
                 )
             )
@@ -178,21 +177,3 @@ def _balance_at(
         for (account_id, index), total in row_sums.items()
         if account_id == account.id and index <= month and (since is None or index > since)
     )
-
-
-def _month_index(day: date) -> int:
-    return day.year * _MONTHS_PER_YEAR + day.month - 1
-
-
-def _month_key(index: int) -> str:
-    """`YYYY-MM` for a month index."""
-    return f"{index // _MONTHS_PER_YEAR:04d}-{index % _MONTHS_PER_YEAR + 1:02d}"
-
-
-def _first_of_month(index: int) -> date:
-    return date(index // _MONTHS_PER_YEAR, index % _MONTHS_PER_YEAR + 1, 1)
-
-
-def _last_of_month(index: int) -> date:
-    year, month = index // _MONTHS_PER_YEAR, index % _MONTHS_PER_YEAR + 1
-    return date(year, month, monthrange(year, month)[1])
