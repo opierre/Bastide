@@ -6,7 +6,10 @@ PROJECT.md: §4c, §15, §16, §17
 
 ## Objective
 All Phase 3 SQLAlchemy models and one Alembic migration creating them, plus the single column
-`user_settings` gains. No endpoints, no engines, no seed data (that is P3-02).
+`user_settings` gains. No endpoints, no engines, no seed data.
+
+> **Amended after the tax feature was removed.** The `tax_*` models this card created were dropped
+> again by migration `b6d4f0e81a53`; the migration itself stays in history unchanged in schema.
 
 ## Files
 - `backend/app/features/mortgages/models.py` — `mortgages`, `mortgage_simulations`

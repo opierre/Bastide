@@ -10,7 +10,7 @@ Each panel file (02–15; 10–11 Phase 2, 12–15 Phase 3) is self-contained: p
 Prompt shape used for this set: paste 00-shared-design-block.md verbatim as binding tokens, then one panel file, then the instruction "render every state listed under States to show as a separate 1440×900 frame named NN-Panel — variant; French first, English only where listed". Components must be referenced by their §Components names.
 
 ## Phase 3 wrapper
-The Phase 3 « Patrimoine » panels (12 Crédits · 13 Impôts · 14 Simulateur · 15 Synthèse) have their
+The Phase 3 « Patrimoine » panels (12 Crédits · 14 Simulateur · 15 Synthèse; 13 Impôts was dropped with the tax feature) have their
 own ready-to-paste prompt: `PROMPT-phase3.md`. It carries the invariants, the shared mock data, a
 brief and a state list per panel, and the contract for the description files the run must produce
 (`12-credits.md` … `15-synthese.md` plus a Phase 3 additions paragraph for `00`). Regenerating one

@@ -11,8 +11,8 @@
 A desktop-first (Flutter) personal finance application for French users first, English second.
 The user imports bank data via OFX/QFX files (no direct bank connections), and the app
 gives them a clear, encouraging view of their money: transactions, monthly income/expense
-with month-over-month trend, categories, subscriptions, savings rate, goals, mortgages, and
-French tax estimation. Transactions are auto-categorised by a local model (Ollama), with a
+with month-over-month trend, categories, subscriptions, savings rate, goals, mortgages and net
+worth. Transactions are auto-categorised by a local model (Ollama), with a
 human-in-the-loop confirmation queue for uncertain guesses.
 
 **Local-first, privacy-first.** All data and AI run on the user's machine. The architecture is
@@ -30,7 +30,7 @@ when reached.
 |-------|-------|--------|
 | 1 | Auth (register/login, locale + currency at registration); multi-account; OFX/QFX import normalised to a canonical schema + import history; transaction list; **rules-based** categorisation; dashboard (monthly income/expense, MoM trend, savings rate, by-category breakdown). | **Done** |
 | 2 | SLM categorisation (local inference runtime) + confidence threshold + review/confirm queue; category & rule management UI; subscription/recurring detection with lifecycle; savings goals (virtual envelopes); rule packs; backup/restore. | **Done** |
-| **3** | Mortgages (derived amortisation schedule, debt ratio); declared properties; French tax estimation (IR + IFI + PFU on dividends/interest/capital gains + property income — estimation-first, seeded parameters with user override); new-mortgage projection simulator; net-worth synthesis. New « Patrimoine » nav group: Crédits · Impôts · Simulateur · Synthèse. | **TARGET** |
+| **3** | Mortgages (derived amortisation schedule, debt ratio); declared properties; new-mortgage projection simulator; net-worth synthesis. New « Patrimoine » nav group: Crédits · Simulateur · Synthèse. (French tax estimation was dropped — §16.) | **TARGET** |
 | 4 | Multi-user; optional cloud sync (move datastore to PostgreSQL); per-account multi-currency monitoring with FX. | Planned |
 
 **Deferred by explicit decision (do not build in Phase 1):**
@@ -276,8 +276,9 @@ richer label space also benefits the Phase 2 SLM.
 
 **Phase 3 entities:** specified in §4c. The stubs this section once listed are partly retired
 there — `amortization_entries` and `projections` are **not** built, because both are derivable
-from a handful of declared inputs (§15, §17); `mortgages` and `tax_profiles` are built as
-described, joined by `properties`, `tax_brackets`, `tax_parameters` and `mortgage_simulations`.
+from a handful of declared inputs (§15, §17); `mortgages` is built as described, joined by
+`properties` and `mortgage_simulations`. `tax_profiles` was built and later dropped with the tax
+feature (§16).
 
 ---
 
@@ -452,65 +453,15 @@ every parameter, bracket and result comparable as an exact integer.
 | archived | bool | default false |
 | created_at / updated_at | datetime | |
 
-> Declared, not derived: the app never sees a property in a bank statement. It exists because
-> **two** Phase 3 features need it — IFI is a tax on real estate (§16) and net worth is meaningless
-> without it (§18) — so it is one entity rather than a figure duplicated in each.
-
-### `tax_profiles`
-One row per user per tax year: the household facts and declared income an estimate runs on.
-
-| column | type | notes |
-|--------|------|-------|
-| id | uuid PK | |
-| user_id | uuid FK → users | |
-| tax_year | int | the year the income was earned; unique with `user_id` |
-| household | text | `single` \| `couple` (marié/pacsé — one joint estimate) |
-| dependents_count | int | children and dependents, default 0 |
-| single_parent | bool | parent isolé (case T), default false |
-| salaries_minor | int | traitements et salaires, gross annual |
-| pensions_minor | int | default 0 |
-| dividends_minor | int | default 0 |
-| interest_minor | int | default 0 |
-| capital_gains_minor | int | plus-values mobilières, default 0 |
-| pfu_opt_out | bool | option for the progressive barème instead of the 30 % PFU, default false |
-| deductions_minor | int | charges déductibles (pension alimentaire, PER…), default 0 |
-| credits_minor | int | réductions et crédits d'impôt, applied last, default 0 |
-| created_at / updated_at | datetime | |
-
-> **No estimate is stored.** The result is a pure function of this row plus the resolved parameters
-> (§16), so it is computed on read like `/dashboard/summary` — and a stored estimate would go stale
-> the moment an override or a declared figure changed. History comes from the profiles themselves:
-> one row per year, kept.
+> Declared, not derived: the app never sees a property in a bank statement. Net worth is
+> meaningless without it (§18), so it is one entity rather than a figure duplicated per panel.
 >
-> **Property income is not a column here.** It is derived from `properties` (§16), so the Impôts
-> and Synthèse panels cannot disagree about the same rent.
+> The rent block (`annual_rent_minor`, `annual_charges_minor`, `property_regime`) was specified
+> for the tax estimate, which has been dropped (§16); it is still stored and validated, with no
+> figure reading it.
 
-### `tax_brackets`
-| column | type | notes |
-|--------|------|-------|
-| id | uuid PK | |
-| user_id | uuid FK → users null | **null = system, seeded** (same convention as `categories`) |
-| tax_year | int | |
-| kind | text | `ir` \| `ifi` |
-| ordinal | int | 0-based, ascending |
-| lower_bound_minor | int | inclusive floor of the band; the top band has no ceiling |
-| rate_bps | int | |
-
-### `tax_parameters`
-| column | type | notes |
-|--------|------|-------|
-| id | uuid PK | |
-| user_id | uuid FK → users null | null = system, seeded |
-| tax_year | int | |
-| key | text | e.g. `pfu_income_tax_bps`, `micro_foncier_ceiling_minor` |
-| int_value | int | |
-| unit | text | `bps` \| `minor` \| `count` — what the integer means |
-
-Unique on `(user_id, tax_year, key)` and on `(user_id, tax_year, kind, ordinal)` respectively.
-Because a unique constraint treats NULLs as distinct, system rows are held to one per slot by a
-partial unique index on `(tax_year, key)` / `(tax_year, kind, ordinal)` `WHERE user_id IS NULL`.
-**Resolution:** a user row shadows the system row for the same key; brackets are overridden as a
-*whole set* per `(tax_year, kind)` — a half-replaced barème is not a barème. See §16.
+> **`tax_profiles`, `tax_brackets` and `tax_parameters` were dropped** with the tax feature
+> (migration `b6d4f0e81a53`).
 
 ### `mortgage_simulations`
 Saved simulator scenarios — **inputs only**.
@@ -665,18 +616,16 @@ POST   /backup/export               → application/zip (.finstride) + header X-
 POST   /backup/inspect              multipart file → summary {format_version, app_version,
                                        exported_at, currency, counts: {accounts, transactions,
                                        categories, rules, recurring, goals, mortgages,
-                                       properties, simulations, tax_profiles, tax_overrides}}
-                                       — tax_overrides = the user's own brackets + parameters
+                                       properties, simulations}}
 POST   /backup/restore              multipart file → summary   (replaces all the caller's data)
                                      errors: BACKUP_INVALID | BACKUP_TOO_NEW |
                                        BACKUP_CURRENCY_MISMATCH (422) · BACKUP_RUN_ACTIVE |
                                        BACKUP_CONFLICT (409)
 
 GET    /database/summary            → {counts: {accounts, transactions, categories, rules,
-                                       recurring, goals, mortgages, properties, simulations,
-                                       tax_profiles, tax_overrides}} — the caller's rows;
-                                       `categories` and `tax_overrides` count their own, never
-                                       the system catalog or the official tax values
+                                       recurring, goals, mortgages, properties, simulations}}
+                                       — the caller's rows; `categories` counts their own, never
+                                       the system catalog
 POST   /database/reset              → the same counts, for what was deleted
                                      errors: RESET_RUN_ACTIVE (409)
 ```
@@ -729,30 +678,6 @@ GET    /properties/{id}         → property + {user_share_value_minor, linked_m
 PATCH  /properties/{id}
 DELETE /properties/{id}          (archive)
 
-GET    /tax/profiles            → [profile]                     (one per declared year, desc)
-GET    /tax/profiles/{year}     → profile                       (created lazily with defaults)
-PATCH  /tax/profiles/{year}     {household?, dependents_count?, …} → profile
-GET    /tax/profiles/{year}/estimate → {
-          parts, taxable_income_minor, ir_minor, ir_before_decote_minor, decote_minor,
-          quotient_capped: bool, average_rate_bps, marginal_rate_bps,
-          pfu: {base_minor, income_tax_minor, social_charges_minor} | null,
-          barème_capital_minor | null,           // when pfu_opt_out
-          property: {regime, gross_minor, allowance_minor, net_minor, social_charges_minor},
-          ifi: {base_minor, gross_minor, decote_minor, due_minor} | null,
-          total_due_minor, breakdown: [{key, amount_minor}],
-          tax_year, parameter_source: seeded|overridden, ignored_keys: [key], currency}
-GET    /tax/prefill             ?year → {salaries_minor, pensions_minor, dividends_minor,
-                                  interest_minor, source: ledger, months_covered,
-                                  per_field_confidence: {field: low|medium|high}}
-                                  (a suggestion the user accepts field by field — never written
-                                   automatically, same reasoning as `/rules/suggestion`)
-GET    /tax/parameters/{year}   → {brackets: {ir: [...], ifi: [...]}, parameters: {key: {int_value,
-                                   unit}}, overridden: {keys: [key], bracket_kinds: [kind]}}
-PATCH  /tax/parameters/{year}   {parameters?: {key: int_value},
-                                 brackets?: {ir?: [...], ifi?: [...]}} → the resolved set
-                                 (writes user-owned rows; a bracket kind is replaced wholesale)
-DELETE /tax/parameters/{year}   ?key&kind → the resolved set   (drops overrides, back to seeded)
-
 GET    /simulations             → [simulation]
 POST   /simulations             {label, property_price_minor, down_payment_minor, principal_minor,
                                  annual_rate_bps, insurance_monthly_minor, term_months,
@@ -775,15 +700,6 @@ GET    /networth/summary        → {assets: {accounts_minor, properties_minor},
                                    property_values_held_flat: bool, valued_on_oldest: date|null,
                                    currency}
 ```
-
-> **Why `/tax/prefill` is a separate read and not a prefilled profile.** A tax figure the app
-> guessed and wrote into the profile would be indistinguishable, later, from one the user
-> declared — and an estimate is only as defensible as the user's own numbers. Kept separate, the
-> ledger offers and the user decides, field by field.
-
-> **Why the estimate reports `ignored_keys`.** An estimator that silently omits a regime invites
-> the user to trust a total that was never trying to be complete. The endpoint names what it did
-> not model (§16), so the UI can show it next to the figure rather than in a footnote nobody reads.
 
 ---
 
@@ -994,8 +910,7 @@ machine or another (`docs/design/09-settings.md` §Sauvegarde et restauration).
   reading its rows.
 - **Scope**: the caller's rows only — categories (user-owned), accounts, balance snapshots,
   import batches, transactions, rules, recurring series/occurrences, goals/allocations,
-  categorisation runs, properties, mortgages, mortgage simulations, tax profiles, tax
-  brackets/parameters (user-owned — system rows stay with the install), settings. Never `users`
+  categorisation runs, properties, mortgages, mortgage simulations, settings. Never `users`
   or `auth_tokens`: credentials do not travel in a file, and a restore lands in the signed-in
   account (`user_id` is rewritten to the caller).
 - **Format versions**: `2` added the Phase 3 tables. An older archive restores them as empty; an
@@ -1063,8 +978,8 @@ monthly_income_minor`, in bps.
   denominator the user can't see is a number they can't check.
 - With neither a declaration nor enough ledger history (< 3 complete months), the ratio is `null`
   and the panel says why. A ratio invented from one month of data is worse than no ratio.
-- The HCSF reference points are parameters, not law-in-code: `hcsf_limit_bps` (3500) and
-  `max_term_months` (300). Exceeding them is shown as information, never as a refusal — **the app
+- The HCSF reference points are constants in the mortgages feature: `HCSF_LIMIT_BPS` (3500) and
+  `HCSF_MAX_TERM_MONTHS` (300) — HCSF décision n° D-HCSF-2021-7, stable since 2022. Exceeding them is shown as information, never as a refusal — **the app
   does not make lending decisions and says so in the panel.**
 
 **Deferred by explicit decision (do not build in Phase 3):** early/partial repayment, variable and
@@ -1072,77 +987,15 @@ stepped rates (taux variable, prêt à palier), deferred amortisation (différé
 PTZ, and insurance quoted as a rate on outstanding capital. Each one breaks the closed form and
 needs persisted loan *events* replayed over the schedule — a larger feature than this one.
 
-## 16. French tax estimation (Phase 3)
+## 16. French tax estimation — removed
 
-Panel « Impôts » (`/tax`). **Estimation-first, and loudly so**: this is an order-of-magnitude
-figure to plan with, not a return, not advice, and never a filing. The panel carries that
-statement beside the total, not in a footnote, and every response reports the regimes it skipped
-(`ignored_keys`, §5c).
-
-**Parameters are data, seeded per year and user-overridable** (§4c). Resolution: a user row shadows
-the system row for its key; a bracket *kind* is overridden as a whole set. Every estimate reports
-`parameter_source` and its `tax_year`, so a figure can be traced to the numbers that produced it.
-The seed card must **verify each figure against the official source and record the date of that
-check in the migration** — the values below are what was known at authoring, and a barème is the
-one input in this app that changes annually without anyone touching the code.
-
-Seeded set (tax year 2025 income, stored as minor units / bps):
-
-| key | value |
-|---|---|
-| `ir` brackets | 0 % ≤ 11 600 € · 11 % → 29 579 € · 30 % → 84 577 € · 41 % → 181 917 € · 45 % above |
-| `salary_allowance_bps` / `salary_allowance_floor_minor` / `salary_allowance_ceiling_minor` | 1000 · 509 € · 14 555 € |
-| `quotient_half_part_cap_minor` | 1 807 € |
-| `decote_threshold_single_minor` / `_couple_minor` / `decote_rate_bps` | 897 € · 1 483 € · 4525 |
-| `pfu_income_tax_bps` | 1280 |
-| `capital_social_charges_bps` / `property_social_charges_bps` | 1860 · 1720 (LFSS 2026 raised capital income only) |
-| `dividend_allowance_bps` | 4000 (barème option only) |
-| `micro_foncier_allowance_bps` / `micro_foncier_ceiling_minor` | 3000 · 15 000 € |
-| `ifi` brackets | 0 % < 800 000 € · 0,5 % → 1 300 000 € · 0,7 % → 2 570 000 € · 1 % → 5 000 000 € · 1,25 % → 10 000 000 € · 1,5 % above |
-| `ifi_threshold_minor` · `ifi_primary_residence_allowance_bps` | 1 300 000 € · 3000 |
-| `ifi_decote_base_minor` / `ifi_decote_rate_bps` | 17 500 € · 125 (applies 1,3–1,4 M€) |
-
-**Pipeline, in this order:**
-
-1. **Salaries and pensions** → 10 % abattement per person, floored and capped by the parameters.
-2. **Property income**, derived from `properties` — never declared twice (§4c). `micro_foncier`
-   when gross rent ≤ ceiling: 30 % abattement. `reel`: gross − `annual_charges_minor`, floored at
-   0. Social charges at `property_social_charges_bps` (17,2 %) apply to the net figure.
-3. **Capital income** goes down one of two roads, chosen by `pfu_opt_out`: the **PFU** (12,8 % IR +
-   18,6 % PS, flat, outside the barème), or the **barème**, where dividends take the 40 % abattement
-   and capital gains and interest enter in full — still with `capital_social_charges_bps` (18,6 %).
-4. **Revenu net imposable** = the barème-taxed categories − `deductions_minor`, floored at 0.
-5. **Parts**: 1 (single) or 2 (couple), + 0,5 for each of the first two dependents, + 1 per
-   dependent from the third, + 0,5 when `single_parent`.
-6. **IR brut** = `barème(RNI / parts) × parts`, then the **plafonnement du quotient familial**: the
-   advantage the half-parts above the base (1 or 2) confer is capped at `quotient_half_part_cap`
-   per half-part, and the capped figure wins when it is higher. `quotient_capped` reports whether
-   it bit.
-7. **Décote**, then `− credits_minor`, floored at 0. The IR is **rounded to the whole currency
-   unit** (French practice); every intermediate stays in minor units.
-8. **IFI**, only when the base reaches the threshold: `Σ (market_value × ownership_bps)` over
-   non-archived properties, primary residence less 30 %, **minus the outstanding principal of the
-   mortgages linked to those properties** (`property_id`, outstanding from §15). Then the barème
-   from 800 000 € and the 1,3–1,4 M€ décote.
-9. **Total** = IR net + PFU IR + social charges + IFI, with a per-component `breakdown` so the
-   total is never a number without a derivation.
-
-**Knowingly not modelled** — the estimate names these rather than absorbing them: prélèvement à la
-source reconciliation, PER/Madelin beyond a lump `deductions_minor`, déficits fonciers and their
-carry-forward cap, CSG déductible on barème-taxed capital income, holding-duration abattements
-(PEA, dirigeant, plus-values immobilières), IR and PS on property *sales*, micro-BIC/BNC and LMNP,
-taxe foncière and taxe d'habitation, IFI liabilities other than linked mortgages, foreign income
-and treaties, and parts for invalidity or veteran status. **A tax estimate that hides its own gaps
-is worse than no estimate**, so this list is part of the feature, not a disclaimer bolted on.
-
-**The parameters live inside the Impôts panel**, not in Paramètres. They are not a preference like
-a locale or an engine address — they are *the working of the estimate*, and the only moment a user
-wants to see or change one is while reading a total that looks wrong. Sending them to a settings
-tab would put the explanation of a number in a different panel from the number, and the round trip
-would cost the user the context they came with. So the panel carries its own « Paramètres fiscaux »
-view (barème rows and the parameter set for the displayed year, editable in place, « Rétablir les
-valeurs officielles » to drop the overrides), reachable from the estimate itself; an overridden
-figure is marked « ajusté » wherever it appears, and that marker is the way in.
+**Dropped by decision.** A French tax estimate (IR, PFU, IFI, property income) was specified and
+its backend built, then removed before the panel shipped: a barème that must be re-sourced every
+year, a large engine and a parameter-override layer cost far more than an order-of-magnitude
+figure was worth. The « Impôts » panel, the `/tax` endpoints and the `tax_profiles`,
+`tax_brackets` and `tax_parameters` tables are gone (migration `b6d4f0e81a53`). The section number
+is kept so the numbering every card cites stays stable. Do not reintroduce tax estimation without
+a new decision recorded here.
 
 ## 17. New-mortgage projection simulator (Phase 3)
 
@@ -1172,7 +1025,7 @@ Panel « Synthèse » (`/networth`). One derived view, no new stored money.
 - **Goals are excluded.** An envelope is a label on money already counted inside an account (§13);
   adding allocations to assets would count the same euros twice. The panel says so where a user
   would expect to see them.
-- **Subscriptions and estimated tax are not liabilities.** A future charge is not a debt, and
+- **Subscriptions are not liabilities.** A future charge is not a debt, and
   treating next month's Netflix as one would make net worth a mood rather than a measurement.
 - **The 12-month series is honest about what it can't know.** Account history comes from the
   monthly balance snapshots (§4) and mortgage history from the derived schedules, but a property
@@ -1182,13 +1035,11 @@ Panel « Synthèse » (`/networth`). One derived view, no new stored money.
 
 ## 19. Phase 3 open decisions (not decided — do not guess)
 
-Three questions sit inside Phase 3's boundary that this spec deliberately does **not** answer. A
-task card must not claim any of them until the user has ruled:
+Two questions sit inside Phase 3's boundary that this spec deliberately does **not** answer. A
+task card must not claim either of them until the user has ruled:
 
 1. **Packaging of the inference runtime** — §3 defers the bundle-or-not call to Phase 3, to be made
    against *measured* installer sizes. Nothing in §15–§18 depends on it, so it is sequenced
    separately from the Patrimoine work.
 2. **The finance-tuned 8B "insights" feature** — §10 calls it Phase 3+; §2's Phase 3 row does not
    include it. Unscheduled until scoped.
-3. **Whether a tax estimate can be exported** (a PDF or printable summary). Plausible, unspecified,
-   and out of scope here — an exportable estimate raises the bar on the disclaimer in §16.

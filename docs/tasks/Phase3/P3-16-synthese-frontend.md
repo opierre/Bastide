@@ -7,7 +7,7 @@ Design: `docs/design/15-synthese.md` + `00-shared-design-block.md` — both norm
 
 ## Objective
 The Synthèse panel: assets against liabilities, net worth, the 12-month series with its caveat, and
-the property list that feeds both this panel and the IFI base — properties are declared here,
+the property list — properties are declared here,
 because this is where a user thinks about what they own.
 
 ## Files
@@ -41,24 +41,16 @@ because this is where a user thinks about what they own.
    foot states that properties count for the **held share only**, naming the property and both
    figures.
 5. **State what is deliberately not counted**, in the panel: goals (allocations label money already
-   in an account), subscriptions and estimated tax (a future charge is not a debt). §18 makes these
+   in an account) and subscriptions (a future charge is not a debt). §18 makes these
    exclusions correct; an unexplained absence just reads as a missing feature.
 6. Property list and form: label, kind, market value, valuation date, ownership share (percent to
    bps at the edge), optional acquisition price and date, and the rent block — rent, regime, and
    charges only under `reel`, matching P3-05's validation so the user is never refused by surprise.
 7. Show each property's user share when ownership is below 100 %, and its valuation date with an
    « estimée le … » line: a declared value ages, and the panel should say how old it is.
-8. A property archived from the list leaves the summary, the IFI base and the property income; say
-   so **on the menu item itself**, in the amber tone, before the click — and repeat it in the
-   confirmation, since the user is changing a tax figure from a net-worth screen. Archived
-   properties stay reachable through a foot link and can be unarchived. « Nouvelle estimation »
-   appends a dated value and the card always shows the latest with its « estimée le … » line.
-8b. **The Biens view carries the « Ces biens dans votre estimation d'impôt » card** (`15-synthese.md`
-   §Biens view): the IFI base built line by line — primary residence after its abattement, each
-   held share, the linked mortgage's outstanding netted off — the base against the threshold with
-   its bar, the liability StatusPill, and a link into Impôts. Every figure comes from the tax
-   estimate's IFI component (P3-07 step 7), **not recomputed here**; if the estimate does not
-   expose the base's components, stop and ask rather than deriving them in Dart.
+8. A property archived from the list leaves the summary. Archived properties stay reachable
+   through a foot link and can be unarchived. « Nouvelle estimation » appends a dated value and the
+   card always shows the latest with its « estimée le … » line.
 9. Empty states: no properties — the summary still computes on accounts and loans alone, the
    composition strip shows only the account rows with a dashed invite plate, and the segmented
    control reads « Biens (0) » — and no data at all, which is the one case that drops the
@@ -70,13 +62,12 @@ because this is where a user thinks about what they own.
 - Assets, liabilities and net worth render exactly as returned, locale-formatted and tabular; net
   worth is neutral-toned in both directions, and the month delta pill is iris, never green or red.
 - The composition is a stacked HorizontalBars strip with its held-share foot note; no Donut.
-- The IFI base card in the Biens view renders from the estimate's components, not from local sums.
 - The flat-property caveat appears whenever the API flags it, naming the oldest valuation date.
 - Omitted months are absent from the chart, not plotted as zero.
-- The exclusions (goals, subscriptions, tax) are stated in the panel.
+- The exclusions (goals, subscriptions) are stated in the panel.
 - Property CRUD works; the rent/regime/charges rules are enforced in the form before the API;
   percent ownership converts to bps; the user share shows below 100 %.
-- Archiving a property updates the summary in the same interaction and warns about the IFI base.
+- Archiving a property updates the summary in the same interaction.
 - A user with accounts but no properties gets a working summary; a user with nothing gets the empty
   state, not an error.
 - fr + en parity; `flutter analyze` clean.
@@ -88,8 +79,7 @@ because this is where a user thinks about what they own.
   U+2212; the delta pill iris in both directions; caveat shown and hidden per the flag; a gap month
   absent from the series; exclusions rendered; form validation matrix mirroring P3-05, including
   the charges field appearing only under `reel`; ownership share display and the live held-share
-  label in the form; the archive menu item carrying its warning before the click and the
-  confirmation repeating it; the IFI base card from a fixture; both empty states.
+  label in the form; both empty states.
 
 ## Commits
 - `feat(properties): add the properties repository, controller and form`

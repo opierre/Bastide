@@ -25,7 +25,7 @@ GET /api/v1/networth/summary -> assets, liabilities, net_worth_minor, compositio
 2. **Goals are excluded.** An allocation labels money already counted inside an account (§13), so
    adding envelopes would count the same euros twice. Assert it in a test rather than trusting
    nobody adds it later.
-3. **Subscriptions and estimated tax are excluded.** A future charge is not a debt; treating next
+3. **Subscriptions are excluded.** A future charge is not a debt; treating next
    month's Netflix as one would make net worth a mood rather than a measurement.
 4. The 12-month series: account history from the monthly balance snapshots (§4), mortgage history
    from the derived schedules at each month end. A property has exactly one declared value, so past
@@ -50,7 +50,7 @@ GET /api/v1/networth/summary -> assets, liabilities, net_worth_minor, compositio
 - `month_delta_minor` equals the last two series points' difference and is null with fewer than two.
 - A user whose loans exceed their assets gets a negative `net_worth_minor`, not a floor at zero.
 - Archived accounts, archived properties and non-active loans are excluded.
-- Goals, subscriptions and tax never appear in any figure.
+- Goals and subscriptions never appear in any figure.
 - `property_values_held_flat` is true when properties are counted and false when none are.
 - The series omits months with no snapshot rather than reporting zero.
 - A user with no accounts, properties or loans gets zeros and an empty series, not an error.

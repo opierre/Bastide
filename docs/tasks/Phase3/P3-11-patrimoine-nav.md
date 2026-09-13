@@ -4,8 +4,13 @@ Depends on: P2-14
 Skills: flutter-frontend, design-system, i18n-l10n, testing
 PROJECT.md: §9, §2
 Design: `docs/design/00-shared-design-block.md` Phase 3 amendment (nav) + the §Nav section of
-`12-credits.md`, `13-impots.md`, `14-simulateur.md`, `15-synthese.md` — all normative, and they win
-over this card's prose
+`12-credits.md`, `14-simulateur.md`, `15-synthese.md` — all normative, and they win over this
+card's prose
+
+> **Amended after the tax feature was removed.** Impôts (`/tax`), its placeholder screen, its
+> percent glyph and its strings are gone: the group is Crédits · Simulateur · Synthèse, the stack is
+> 3 + 4 + 3 + 1, and the collapsed rail carries three glyphs. Where the steps below still name four
+> items, read three.
 
 ## Objective
 The third sidebar group and its four routes, with placeholder screens the panel cards fill in.
@@ -27,8 +32,7 @@ each editing the shell.
    (`/simulations`) · Synthèse (`/networth`).
 2. Icons are **drawn, not chosen** — take them from the frames, not from this card's intuition:
    Crédits = **house** (pentagon roof/walls with a door notch, `M3 8.2L9 3l6 5.2V15H3zM7.2 15v-4.2h3.6V15`,
-   `12-credits.md` §Nav) · Impôts = **percent sign** (diagonal + two 1.8 px-radius rings,
-   `M4.5 13.5l9-9` + rings at 5.8,5.6 and 12.2,12.4, `13-impots.md` §Nav) · Simulateur =
+   `12-credits.md` §Nav) · Simulateur =
    **calculator** (rounded rect, display bar, 3 x 2 key dots, `14-simulateur.md` §Nav) · Synthèse =
    **pie** (full disc with one separated 90° sector, `15-synthese.md` §Nav). 1.5 px stroke, round
    caps, 2 px when active. Each must stay distinct at 18 px from the existing eight (dashboard

@@ -74,5 +74,5 @@ Centered EmptyState: 64 px iris plate with the house glyph; « Aucun crédit enr
 - Income source precedence for the ratio: `declared` › `ledger` (the **median** of the last 12 complete months of income-category totals — §15: a 13th-month bonus must not lift a ratio the user will plan around, so the caption says « médian », never « moyen ») › `unknown`. The card always names the source in its caption.
 - Gauge scale is fixed 0–60 % so the 35 % tick sits at the same x in every state; a ratio above 60 % clamps the fill and still prints the real percent.
 - LoanCard click → detail; YearSwitcher ‹ › steps one year, the strip jumps; the year of the current instalment is selected on open.
-- « Modifier » opens the same modal as « Nouveau crédit » prefilled. Deleting a loan is done from that modal (secondary text button) and removes it from Synthèse passif and from the IFI base (mortgage on the main residence) — the confirmation says both.
+- « Modifier » opens the same modal as « Nouveau crédit » prefilled. Deleting a loan is done from that modal (secondary text button) and removes it from Synthèse passif — the confirmation says so.
 - Money rule: all figures neutral; the only colored figures are the ratio value/fill (iris under, amber over) and lender monograms. EN frame: « Net worth » is the EN label of Synthèse (the group « Aperçu » already owns "Overview").
