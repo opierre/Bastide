@@ -19,6 +19,7 @@ dependencies = [
 dev = [
     "httpx>=0.28.1",
     "pytest>=9.1.1",
+    "pytest-xdist>=3.8.0",
     "ruff>=0.15.22",
     "ty>=0.0.61",
 ]
@@ -35,3 +36,5 @@ python-version = "3.14"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+# Every test owns its temp database, so the suite runs across all cores; `-n 0` runs it serially.
+addopts = ["-n", "auto"]
