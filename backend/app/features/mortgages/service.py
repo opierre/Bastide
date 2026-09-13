@@ -253,8 +253,8 @@ class MortgageService:
         """
         mortgage = Mortgage(user_id=user.id, status=ACTIVE, **data.model_dump())
         self._check_property(user.id, data.property_id)
-        self._validated_schedule(mortgage)
-        return self._detail(self._repository.add(mortgage), user.currency, today)
+        schedule = self._validated_schedule(mortgage)
+        return self._detail(self._repository.add(mortgage), user.currency, today, schedule)
 
     def update(
         self, user: User, mortgage_id: str, data: MortgageUpdate, today: date
@@ -273,6 +273,7 @@ class MortgageService:
         mortgage = self._owned(user.id, mortgage_id)
         changes: dict[str, Any] = data.model_dump(exclude_none=True)
         self._check_property(user.id, changes.get("property_id"))
+        schedule: Schedule | None = None
         if any(field in changes for field in _SCHEDULE_INPUTS):
             merged = Mortgage(
                 **{
@@ -280,10 +281,11 @@ class MortgageService:
                     for field in _SCHEDULE_INPUTS
                 }
             )
-            self._validated_schedule(merged)
+            # Built from exactly the inputs the saved row will hold, so it is the row's schedule.
+            schedule = self._validated_schedule(merged)
         for field, value in changes.items():
             setattr(mortgage, field, value)
-        return self._detail(self._repository.save(mortgage), user.currency, today)
+        return self._detail(self._repository.save(mortgage), user.currency, today, schedule)
 
     def schedule(
         self,
@@ -359,8 +361,6 @@ class MortgageService:
         Archived and repaid loans take no part in any figure. Each loan's schedule is built once
         and shared by its figures and the series.
         """
-        hcsf_limit_bps = HCSF_LIMIT_BPS
-
         loans = [
             (mortgage, schedule_for(mortgage))
             for mortgage in self._repository.list_for_user(user.id, (ACTIVE,))
@@ -396,8 +396,8 @@ class MortgageService:
             debt_ratio_bps=debt_ratio,
             monthly_income_minor=income,
             income_source=income_source,
-            hcsf_limit_bps=hcsf_limit_bps,
-            over_limit=debt_ratio is not None and debt_ratio > hcsf_limit_bps,
+            hcsf_limit_bps=HCSF_LIMIT_BPS,
+            over_limit=debt_ratio is not None and debt_ratio > HCSF_LIMIT_BPS,
             active_count=len(loans),
             by_lender=[
                 LenderCharge(lender=lender, monthly_charge_minor=charge)
@@ -466,8 +466,12 @@ class MortgageService:
             ) from exc
 
     @staticmethod
-    def _detail(mortgage: Mortgage, currency: str, today: date) -> MortgageDetail:
-        schedule = schedule_for(mortgage)
+    def _detail(
+        mortgage: Mortgage, currency: str, today: date, schedule: Schedule | None = None
+    ) -> MortgageDetail:
+        """The loan's detail; `schedule` is reused when the caller already built it."""
+        if schedule is None:
+            schedule = schedule_for(mortgage)
         return MortgageDetail(
             **to_read(mortgage, schedule, currency, today).model_dump(),
             total_interest_minor=schedule.total_interest_minor,

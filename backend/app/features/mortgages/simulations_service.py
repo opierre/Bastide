@@ -233,8 +233,6 @@ class SimulationService:
             MortgageFeesExceedPrincipalError: the fees are not smaller than the principal.
             MortgageNonAmortizingError: the instalment does not repay the principal.
         """
-        limit_bps = HCSF_LIMIT_BPS
-        max_term_months = HCSF_MAX_TERM_MONTHS
         first_on = first_payment_date(today)
 
         schedule = simulated_schedule(
@@ -256,7 +254,7 @@ class SimulationService:
         max_borrowable: int | None = None
         if income is not None and income > 0:
             debt_ratio = ratio_bps(instalment + existing_charge, income)
-            available = max(limit_bps * income // _BPS_PER_UNIT - existing_charge, 0)
+            available = max(HCSF_LIMIT_BPS * income // _BPS_PER_UNIT - existing_charge, 0)
             max_borrowable = self._max_borrowable(data, available, first_on)
 
         return SimulationResult(
@@ -284,10 +282,10 @@ class SimulationService:
             ],
             debt_ratio_bps=debt_ratio,
             hcsf=HcsfReading(
-                within_ratio=None if debt_ratio is None else debt_ratio <= limit_bps,
-                within_term=data.term_months <= max_term_months,
-                limit_bps=limit_bps,
-                max_term_months=max_term_months,
+                within_ratio=None if debt_ratio is None else debt_ratio <= HCSF_LIMIT_BPS,
+                within_term=data.term_months <= HCSF_MAX_TERM_MONTHS,
+                limit_bps=HCSF_LIMIT_BPS,
+                max_term_months=HCSF_MAX_TERM_MONTHS,
             ),
             max_borrowable_minor=max_borrowable,
             available_instalment_minor=available,
