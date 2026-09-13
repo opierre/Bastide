@@ -3386,4 +3386,340 @@ class AppLocalizationsFr extends AppLocalizations {
   String simulatorCompareFootUnknown(String limit) {
     return 'Aucun revenu connu, donc aucun taux d\'endettement · repère HCSF $limit · lecture informative, ne lie aucun prêteur.';
   }
+
+  @override
+  String get propertyKindPrimaryResidence => 'Résidence principale';
+
+  @override
+  String get propertyKindRental => 'Locatif';
+
+  @override
+  String get propertyKindSecondary => 'Résidence secondaire';
+
+  @override
+  String get propertyKindOther => 'Autre bien';
+
+  @override
+  String get propertyFormCreateTitle => 'Nouveau bien';
+
+  @override
+  String get propertyFormEditTitle => 'Modifier le bien';
+
+  @override
+  String get propertyFormSubtitle =>
+      'La valeur déclarée entre dans la synthèse.';
+
+  @override
+  String get propertyFormLabel => 'Libellé';
+
+  @override
+  String get propertyFormLabelRequired => 'Donnez un nom à ce bien.';
+
+  @override
+  String get propertyFormKind => 'Nature';
+
+  @override
+  String get propertyFormValue => 'Valeur déclarée';
+
+  @override
+  String get propertyFormValuedOn => 'Date d\'estimation';
+
+  @override
+  String get propertyFormOwnership => 'Quote-part détenue';
+
+  @override
+  String propertyFormOwnershipShare(String amount) {
+    return 'part : $amount';
+  }
+
+  @override
+  String get propertyFormOwnershipInvalid =>
+      'Indiquez une quote-part entre 0,01 et 100 %.';
+
+  @override
+  String get propertyFormAcquisitionPrice => 'Prix d\'acquisition';
+
+  @override
+  String get propertyFormAcquiredOn => 'Date d\'acquisition';
+
+  @override
+  String get propertyFormAmountInvalid =>
+      'Saisissez un montant supérieur à zéro.';
+
+  @override
+  String get propertyFormAmountOptionalInvalid =>
+      'Montant illisible — laissez vide s\'il est inconnu.';
+
+  @override
+  String get propertyFormDateInvalid => 'Date invalide (JJ/MM/AAAA).';
+
+  @override
+  String get propertyFormCalendar => 'Choisir une date';
+
+  @override
+  String get propertyFormCancel => 'Annuler';
+
+  @override
+  String get propertyFormSubmit => 'Ajouter le bien';
+
+  @override
+  String get propertyFormSave => 'Enregistrer';
+
+  @override
+  String get propertyRevalueTitle => 'Nouvelle estimation';
+
+  @override
+  String propertyRevalueSubtitle(String label, String value, String date) {
+    return '$label : $value estimés le $date. La nouvelle estimation remplace celle-ci.';
+  }
+
+  @override
+  String get propertyRevalueSubmit => 'Enregistrer l\'estimation';
+
+  @override
+  String get propertyErrorValuationInFuture =>
+      'Une date d\'estimation ne peut pas être dans le futur.';
+
+  @override
+  String get propertyErrorNotFound => 'Ce bien n\'existe plus.';
+
+  @override
+  String get propertyErrorValidation =>
+      'Certaines valeurs ont été refusées. Vérifiez le formulaire.';
+
+  @override
+  String get propertyErrorGeneric =>
+      'Impossible d\'enregistrer le bien. Réessayez.';
+
+  @override
+  String propertyCardCaptionWhole(String date) {
+    return 'valeur déclarée · estimée le $date';
+  }
+
+  @override
+  String propertyCardCaptionPart(String value, String date) {
+    return 'part détenue · sur $value estimés le $date';
+  }
+
+  @override
+  String get propertyCardOwnership => 'Quote-part';
+
+  @override
+  String get propertyCardAcquisition => 'Prix d\'acquisition';
+
+  @override
+  String propertyCardAcquisitionValue(String price, String date) {
+    return '$price · $date';
+  }
+
+  @override
+  String get propertyCardSinceAcquisition => 'Depuis l\'acquisition';
+
+  @override
+  String propertyCardAbove(String amount, String partial) {
+    String _temp0 = intl.Intl.selectLogic(partial, {
+      'true': ' (part)',
+      'other': '',
+    });
+    return '$amount au-dessus$_temp0';
+  }
+
+  @override
+  String propertyCardBelow(String amount, String partial) {
+    String _temp0 = intl.Intl.selectLogic(partial, {
+      'true': ' (part)',
+      'other': '',
+    });
+    return '$amount en dessous$_temp0';
+  }
+
+  @override
+  String get propertyMenuTooltip => 'Actions';
+
+  @override
+  String get propertyMenuEdit => 'Modifier';
+
+  @override
+  String get propertyMenuRevalue => 'Nouvelle estimation';
+
+  @override
+  String get propertyMenuArchive => 'Archiver';
+
+  @override
+  String get propertyMenuUnarchive => 'Désarchiver';
+
+  @override
+  String get propertiesNewTileTitle => '+ Nouveau bien';
+
+  @override
+  String get propertiesNewTileBody => 'Résidence, locatif, terrain ou autre';
+
+  @override
+  String propertiesShowArchived(int count) {
+    return 'Afficher les biens archivés ($count)';
+  }
+
+  @override
+  String propertiesHideArchived(int count) {
+    return 'Masquer les biens archivés ($count)';
+  }
+
+  @override
+  String get propertiesDismiss => 'Fermer';
+
+  @override
+  String get networthViewSummary => 'Synthèse';
+
+  @override
+  String networthViewProperties(int count) {
+    return 'Biens ($count)';
+  }
+
+  @override
+  String get networthAddProperty => 'Nouveau bien';
+
+  @override
+  String get networthHeroLabel => 'Patrimoine net';
+
+  @override
+  String networthDeltaCaption(String month) {
+    return 'vs $month';
+  }
+
+  @override
+  String networthDeltaCaptionFlat(String month) {
+    return 'vs $month — valeur des biens inchangée';
+  }
+
+  @override
+  String get networthAssetsLabel => 'Actif';
+
+  @override
+  String networthAssetsCaption(String accounts, String properties) {
+    return 'Comptes $accounts · Biens $properties';
+  }
+
+  @override
+  String networthAssetsCaptionNoProperty(String accounts) {
+    return 'Comptes $accounts · aucun bien déclaré';
+  }
+
+  @override
+  String get networthLiabilitiesLabel => 'Passif';
+
+  @override
+  String networthLiabilitiesCaption(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count crédits',
+      one: '1 crédit',
+      zero: 'Aucun crédit',
+    );
+    return '$_temp0 · capital restant dû';
+  }
+
+  @override
+  String get networthCompositionTitle => 'Composition de l\'actif';
+
+  @override
+  String get networthCompositionSubtitle =>
+      'Comptes par type, biens par nature';
+
+  @override
+  String get networthCompositionChecking => 'Comptes courants';
+
+  @override
+  String get networthCompositionSavings => 'Épargne';
+
+  @override
+  String get networthCompositionCredit => 'Comptes de crédit';
+
+  @override
+  String get networthCompositionDeferredCard => 'Cartes à débit différé';
+
+  @override
+  String get networthCompositionCash => 'Espèces';
+
+  @override
+  String get networthCompositionOtherAccounts => 'Autres comptes';
+
+  @override
+  String networthCompositionHeldShare(String label) {
+    return '$label (part détenue)';
+  }
+
+  @override
+  String get networthCompositionFootWhole =>
+      'Les biens comptent pour la part détenue seulement.';
+
+  @override
+  String networthCompositionFoot(String items) {
+    return 'Les biens comptent pour la part détenue seulement ($items).';
+  }
+
+  @override
+  String networthCompositionFootItem(String label, String share, String value) {
+    return '$label : $share sur $value';
+  }
+
+  @override
+  String get networthCompositionInvite =>
+      'Aucun bien déclaré : l\'actif ne compte que vos comptes.';
+
+  @override
+  String get networthCompositionInviteAction => 'Nouveau bien →';
+
+  @override
+  String get networthExclusionsLabel => 'Volontairement non compté';
+
+  @override
+  String get networthExclusionGoalsTitle => 'Objectifs';
+
+  @override
+  String get networthExclusionGoalsBody =>
+      'Une allocation étiquette de l\'argent déjà présent sur un compte — le compter reviendrait à le compter deux fois.';
+
+  @override
+  String get networthExclusionSubscriptionsTitle => 'Abonnements';
+
+  @override
+  String get networthExclusionSubscriptionsBody =>
+      'Un prélèvement récurrent est une dépense à venir, pas une dette due aujourd\'hui.';
+
+  @override
+  String get networthEmptyTitle => 'Rien à additionner pour l\'instant';
+
+  @override
+  String get networthEmptyBody =>
+      'Importez un compte ou déclarez un bien : la synthèse additionne ce que vous possédez et soustrait vos crédits, sans rien inventer entre les deux.';
+
+  @override
+  String get networthEmptyImport => 'Importer un fichier';
+
+  @override
+  String get networthLoadFailed => 'Impossible de charger la synthèse.';
+
+  @override
+  String get networthRetry => 'Réessayer';
+
+  @override
+  String get networthSeriesTitle => 'Patrimoine net · 12 mois';
+
+  @override
+  String get networthSeriesSubtitle => 'Comptes et crédits, mois après mois';
+
+  @override
+  String networthSeriesRange(String from, String to) {
+    return '$from → $to';
+  }
+
+  @override
+  String get networthSeriesEmpty =>
+      'Pas encore d\'historique : la série commence au premier mois clos d\'un compte importé.';
+
+  @override
+  String networthSeriesCaveat(String date) {
+    return 'Les biens sont maintenus à leur valeur déclarée (estimation la plus ancienne : $date) : seuls les comptes et les crédits bougent d\'un mois à l\'autre. Les mois sans donnée sont simplement absents.';
+  }
 }

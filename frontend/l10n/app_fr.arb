@@ -4342,5 +4342,491 @@
         "type": "String"
       }
     }
+  },
+  "propertyKindPrimaryResidence": "Résidence principale",
+  "@propertyKindPrimaryResidence": {
+    "description": "Property nature: the household's main home (wire value primary_residence)."
+  },
+  "propertyKindRental": "Locatif",
+  "@propertyKindRental": {
+    "description": "Property nature: a property let to tenants (wire value rental)."
+  },
+  "propertyKindSecondary": "Résidence secondaire",
+  "@propertyKindSecondary": {
+    "description": "Property nature: a second home (wire value secondary)."
+  },
+  "propertyKindOther": "Autre bien",
+  "@propertyKindOther": {
+    "description": "Property nature: land or anything else (wire value other)."
+  },
+  "propertyFormCreateTitle": "Nouveau bien",
+  "@propertyFormCreateTitle": {
+    "description": "Title of the property form when declaring a new property."
+  },
+  "propertyFormEditTitle": "Modifier le bien",
+  "@propertyFormEditTitle": {
+    "description": "Title of the property form when editing an existing property."
+  },
+  "propertyFormSubtitle": "La valeur déclarée entre dans la synthèse.",
+  "@propertyFormSubtitle": {
+    "description": "Subtitle under the property form title."
+  },
+  "propertyFormLabel": "Libellé",
+  "@propertyFormLabel": {
+    "description": "Property form field: the property's name."
+  },
+  "propertyFormLabelRequired": "Donnez un nom à ce bien.",
+  "@propertyFormLabelRequired": {
+    "description": "Validation message when the property name is empty."
+  },
+  "propertyFormKind": "Nature",
+  "@propertyFormKind": {
+    "description": "Property form field: the property's nature (select)."
+  },
+  "propertyFormValue": "Valeur déclarée",
+  "@propertyFormValue": {
+    "description": "Property form field: the declared market value."
+  },
+  "propertyFormValuedOn": "Date d'estimation",
+  "@propertyFormValuedOn": {
+    "description": "Property form field: the date the value was estimated."
+  },
+  "propertyFormOwnership": "Quote-part détenue",
+  "@propertyFormOwnership": {
+    "description": "Property form field: the user's ownership share, typed as a percent."
+  },
+  "propertyFormOwnershipShare": "part : {amount}",
+  "@propertyFormOwnershipShare": {
+    "description": "Live label beside the ownership field: the held share of the declared value.",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "propertyFormOwnershipInvalid": "Indiquez une quote-part entre 0,01 et 100 %.",
+  "@propertyFormOwnershipInvalid": {
+    "description": "Validation message when the ownership share is not between 0.01 and 100 percent."
+  },
+  "propertyFormAcquisitionPrice": "Prix d'acquisition",
+  "@propertyFormAcquisitionPrice": {
+    "description": "Property form field: the optional purchase price."
+  },
+  "propertyFormAcquiredOn": "Date d'acquisition",
+  "@propertyFormAcquiredOn": {
+    "description": "Property form field: the optional purchase date."
+  },
+  "propertyFormAmountInvalid": "Saisissez un montant supérieur à zéro.",
+  "@propertyFormAmountInvalid": {
+    "description": "Validation message when a required amount is missing or not positive."
+  },
+  "propertyFormAmountOptionalInvalid": "Montant illisible — laissez vide s'il est inconnu.",
+  "@propertyFormAmountOptionalInvalid": {
+    "description": "Validation message when an optional amount cannot be read."
+  },
+  "propertyFormDateInvalid": "Date invalide (JJ/MM/AAAA).",
+  "@propertyFormDateInvalid": {
+    "description": "Validation message when a date cannot be read."
+  },
+  "propertyFormCalendar": "Choisir une date",
+  "@propertyFormCalendar": {
+    "description": "Tooltip of the calendar button beside a date field."
+  },
+  "propertyFormCancel": "Annuler",
+  "@propertyFormCancel": {
+    "description": "Cancel action on the property modals."
+  },
+  "propertyFormSubmit": "Ajouter le bien",
+  "@propertyFormSubmit": {
+    "description": "Primary action of the new-property form."
+  },
+  "propertyFormSave": "Enregistrer",
+  "@propertyFormSave": {
+    "description": "Primary action of the edit-property form."
+  },
+  "propertyRevalueTitle": "Nouvelle estimation",
+  "@propertyRevalueTitle": {
+    "description": "Title of the modal that records a new declared value for a property."
+  },
+  "propertyRevalueSubtitle": "{label} : {value} estimés le {date}. La nouvelle estimation remplace celle-ci.",
+  "@propertyRevalueSubtitle": {
+    "description": "Subtitle of the new-valuation modal: the current declared value, and that the new one replaces it.",
+    "placeholders": {
+      "label": {
+        "type": "String"
+      },
+      "value": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "propertyRevalueSubmit": "Enregistrer l'estimation",
+  "@propertyRevalueSubmit": {
+    "description": "Primary action of the new-valuation modal."
+  },
+  "propertyErrorValuationInFuture": "Une date d'estimation ne peut pas être dans le futur.",
+  "@propertyErrorValuationInFuture": {
+    "description": "Error when the valuation date is after today (PROPERTY_VALUATION_IN_FUTURE)."
+  },
+  "propertyErrorNotFound": "Ce bien n'existe plus.",
+  "@propertyErrorNotFound": {
+    "description": "Error when the property was not found (PROPERTY_NOT_FOUND)."
+  },
+  "propertyErrorValidation": "Certaines valeurs ont été refusées. Vérifiez le formulaire.",
+  "@propertyErrorValidation": {
+    "description": "Error when the server rejected the payload (VALIDATION_ERROR)."
+  },
+  "propertyErrorGeneric": "Impossible d'enregistrer le bien. Réessayez.",
+  "@propertyErrorGeneric": {
+    "description": "Fallback error for a failed property write."
+  },
+  "propertyCardCaptionWhole": "valeur déclarée · estimée le {date}",
+  "@propertyCardCaptionWhole": {
+    "description": "Caption under a wholly owned property's value: the date of the declared estimate.",
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "propertyCardCaptionPart": "part détenue · sur {value} estimés le {date}",
+  "@propertyCardCaptionPart": {
+    "description": "Caption under a partly owned property's held value: the full declared value and its date.",
+    "placeholders": {
+      "value": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "propertyCardOwnership": "Quote-part",
+  "@propertyCardOwnership": {
+    "description": "Property card row: the user's ownership share."
+  },
+  "propertyCardAcquisition": "Prix d'acquisition",
+  "@propertyCardAcquisition": {
+    "description": "Property card row: purchase price and date."
+  },
+  "propertyCardAcquisitionValue": "{price} · {date}",
+  "@propertyCardAcquisitionValue": {
+    "description": "Property card value: purchase price followed by its date.",
+    "placeholders": {
+      "price": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "propertyCardSinceAcquisition": "Depuis l'acquisition",
+  "@propertyCardSinceAcquisition": {
+    "description": "Property card row: how the held value compares with the held purchase price."
+  },
+  "propertyCardAbove": "{amount} au-dessus{partial, select, true{ (part)} other{}}",
+  "@propertyCardAbove": {
+    "description": "Property card value: the held value is this much above the purchase price; '(part)' when only a share is held.",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "partial": {
+        "type": "String"
+      }
+    }
+  },
+  "propertyCardBelow": "{amount} en dessous{partial, select, true{ (part)} other{}}",
+  "@propertyCardBelow": {
+    "description": "Property card value: the held value is this much below the purchase price; '(part)' when only a share is held.",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "partial": {
+        "type": "String"
+      }
+    }
+  },
+  "propertyMenuTooltip": "Actions",
+  "@propertyMenuTooltip": {
+    "description": "Tooltip of a property card's overflow menu."
+  },
+  "propertyMenuEdit": "Modifier",
+  "@propertyMenuEdit": {
+    "description": "Property menu: edit the property."
+  },
+  "propertyMenuRevalue": "Nouvelle estimation",
+  "@propertyMenuRevalue": {
+    "description": "Property menu: record a new declared value."
+  },
+  "propertyMenuArchive": "Archiver",
+  "@propertyMenuArchive": {
+    "description": "Property menu: archive the property."
+  },
+  "propertyMenuUnarchive": "Désarchiver",
+  "@propertyMenuUnarchive": {
+    "description": "Property menu on an archived property: bring it back."
+  },
+  "propertiesNewTileTitle": "+ Nouveau bien",
+  "@propertiesNewTileTitle": {
+    "description": "Dashed tile at the end of the property grid."
+  },
+  "propertiesNewTileBody": "Résidence, locatif, terrain ou autre",
+  "@propertiesNewTileBody": {
+    "description": "Line under the new-property tile."
+  },
+  "propertiesShowArchived": "Afficher les biens archivés ({count})",
+  "@propertiesShowArchived": {
+    "description": "Foot link that reveals archived properties; the count is the real number.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "propertiesHideArchived": "Masquer les biens archivés ({count})",
+  "@propertiesHideArchived": {
+    "description": "The same link once archived properties are showing.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "propertiesDismiss": "Fermer",
+  "@propertiesDismiss": {
+    "description": "Tooltip of the dismiss control on a property action error."
+  },
+  "networthViewSummary": "Synthèse",
+  "@networthViewSummary": {
+    "description": "Segmented control on the net-worth panel: the summary view."
+  },
+  "networthViewProperties": "Biens ({count})",
+  "@networthViewProperties": {
+    "description": "Segmented control on the net-worth panel: the property list, with the live property count.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "networthAddProperty": "Nouveau bien",
+  "@networthAddProperty": {
+    "description": "Top-bar and empty-state action that opens the new-property form."
+  },
+  "networthHeroLabel": "Patrimoine net",
+  "@networthHeroLabel": {
+    "description": "Label of the net-worth hero card."
+  },
+  "networthDeltaCaption": "vs {month}",
+  "@networthDeltaCaption": {
+    "description": "Caption beside the month delta pill: the month it is measured against.",
+    "placeholders": {
+      "month": {
+        "type": "String"
+      }
+    }
+  },
+  "networthDeltaCaptionFlat": "vs {month} — valeur des biens inchangée",
+  "@networthDeltaCaptionFlat": {
+    "description": "Caption beside the month delta pill when property values are held flat.",
+    "placeholders": {
+      "month": {
+        "type": "String"
+      }
+    }
+  },
+  "networthAssetsLabel": "Actif",
+  "@networthAssetsLabel": {
+    "description": "Label of the assets card."
+  },
+  "networthAssetsCaption": "Comptes {accounts} · Biens {properties}",
+  "@networthAssetsCaption": {
+    "description": "Caption of the assets card: accounts and held property shares.",
+    "placeholders": {
+      "accounts": {
+        "type": "String"
+      },
+      "properties": {
+        "type": "String"
+      }
+    }
+  },
+  "networthAssetsCaptionNoProperty": "Comptes {accounts} · aucun bien déclaré",
+  "@networthAssetsCaptionNoProperty": {
+    "description": "Caption of the assets card when no property is declared.",
+    "placeholders": {
+      "accounts": {
+        "type": "String"
+      }
+    }
+  },
+  "networthLiabilitiesLabel": "Passif",
+  "@networthLiabilitiesLabel": {
+    "description": "Label of the liabilities card."
+  },
+  "networthLiabilitiesCaption": "{count, plural, =0{Aucun crédit} =1{1 crédit} other{{count} crédits}} · capital restant dû",
+  "@networthLiabilitiesCaption": {
+    "description": "Caption of the liabilities card: how many active loans the outstanding principal comes from.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "networthCompositionTitle": "Composition de l'actif",
+  "@networthCompositionTitle": {
+    "description": "Title of the asset composition card."
+  },
+  "networthCompositionSubtitle": "Comptes par type, biens par nature",
+  "@networthCompositionSubtitle": {
+    "description": "Subtitle of the asset composition card."
+  },
+  "networthCompositionChecking": "Comptes courants",
+  "@networthCompositionChecking": {
+    "description": "Composition row: checking accounts."
+  },
+  "networthCompositionSavings": "Épargne",
+  "@networthCompositionSavings": {
+    "description": "Composition row: savings accounts."
+  },
+  "networthCompositionCredit": "Comptes de crédit",
+  "@networthCompositionCredit": {
+    "description": "Composition row: credit accounts."
+  },
+  "networthCompositionDeferredCard": "Cartes à débit différé",
+  "@networthCompositionDeferredCard": {
+    "description": "Composition row: deferred-debit card accounts."
+  },
+  "networthCompositionCash": "Espèces",
+  "@networthCompositionCash": {
+    "description": "Composition row: cash accounts."
+  },
+  "networthCompositionOtherAccounts": "Autres comptes",
+  "@networthCompositionOtherAccounts": {
+    "description": "Composition row: accounts of any other type."
+  },
+  "networthCompositionHeldShare": "{label} (part détenue)",
+  "@networthCompositionHeldShare": {
+    "description": "Composition row label for a property kind counted at a held share only.",
+    "placeholders": {
+      "label": {
+        "type": "String"
+      }
+    }
+  },
+  "networthCompositionFootWhole": "Les biens comptent pour la part détenue seulement.",
+  "@networthCompositionFootWhole": {
+    "description": "Composition foot when every property is wholly owned."
+  },
+  "networthCompositionFoot": "Les biens comptent pour la part détenue seulement ({items}).",
+  "@networthCompositionFoot": {
+    "description": "Composition foot naming each partly owned property with its held share and declared value.",
+    "placeholders": {
+      "items": {
+        "type": "String"
+      }
+    }
+  },
+  "networthCompositionFootItem": "{label} : {share} sur {value}",
+  "@networthCompositionFootItem": {
+    "description": "One partly owned property in the composition foot.",
+    "placeholders": {
+      "label": {
+        "type": "String"
+      },
+      "share": {
+        "type": "String"
+      },
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "networthCompositionInvite": "Aucun bien déclaré : l'actif ne compte que vos comptes.",
+  "@networthCompositionInvite": {
+    "description": "Dashed plate under the composition when no property is declared."
+  },
+  "networthCompositionInviteAction": "Nouveau bien →",
+  "@networthCompositionInviteAction": {
+    "description": "Link in the no-property plate that opens the new-property form."
+  },
+  "networthExclusionsLabel": "Volontairement non compté",
+  "@networthExclusionsLabel": {
+    "description": "Section label of the card listing what net worth deliberately leaves out."
+  },
+  "networthExclusionGoalsTitle": "Objectifs",
+  "@networthExclusionGoalsTitle": {
+    "description": "Exclusion: savings goals."
+  },
+  "networthExclusionGoalsBody": "Une allocation étiquette de l'argent déjà présent sur un compte — le compter reviendrait à le compter deux fois.",
+  "@networthExclusionGoalsBody": {
+    "description": "Why goals are not counted in net worth."
+  },
+  "networthExclusionSubscriptionsTitle": "Abonnements",
+  "@networthExclusionSubscriptionsTitle": {
+    "description": "Exclusion: subscriptions."
+  },
+  "networthExclusionSubscriptionsBody": "Un prélèvement récurrent est une dépense à venir, pas une dette due aujourd'hui.",
+  "@networthExclusionSubscriptionsBody": {
+    "description": "Why subscriptions are not counted as liabilities."
+  },
+  "networthEmptyTitle": "Rien à additionner pour l'instant",
+  "@networthEmptyTitle": {
+    "description": "Empty-state title when there are no accounts, properties or loans."
+  },
+  "networthEmptyBody": "Importez un compte ou déclarez un bien : la synthèse additionne ce que vous possédez et soustrait vos crédits, sans rien inventer entre les deux.",
+  "@networthEmptyBody": {
+    "description": "Empty-state body of the net-worth panel."
+  },
+  "networthEmptyImport": "Importer un fichier",
+  "@networthEmptyImport": {
+    "description": "Empty-state secondary action that goes to imports."
+  },
+  "networthLoadFailed": "Impossible de charger la synthèse.",
+  "@networthLoadFailed": {
+    "description": "Error state when the net-worth summary or the properties cannot be loaded."
+  },
+  "networthRetry": "Réessayer",
+  "@networthRetry": {
+    "description": "Retry action on the net-worth error state."
+  },
+  "networthSeriesTitle": "Patrimoine net · 12 mois",
+  "@networthSeriesTitle": {
+    "description": "Title of the net-worth series card."
+  },
+  "networthSeriesSubtitle": "Comptes et crédits, mois après mois",
+  "@networthSeriesSubtitle": {
+    "description": "Subtitle of the net-worth series card."
+  },
+  "networthSeriesRange": "{from} → {to}",
+  "@networthSeriesRange": {
+    "description": "First and last month the series covers.",
+    "placeholders": {
+      "from": {
+        "type": "String"
+      },
+      "to": {
+        "type": "String"
+      }
+    }
+  },
+  "networthSeriesEmpty": "Pas encore d'historique : la série commence au premier mois clos d'un compte importé.",
+  "@networthSeriesEmpty": {
+    "description": "Shown in place of the chart when the series has no closed month yet."
+  },
+  "networthSeriesCaveat": "Les biens sont maintenus à leur valeur déclarée (estimation la plus ancienne : {date}) : seuls les comptes et les crédits bougent d'un mois à l'autre. Les mois sans donnée sont simplement absents.",
+  "@networthSeriesCaveat": {
+    "description": "Info banner under the series when property values are held flat, naming the oldest current valuation date.",
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
   }
 }
