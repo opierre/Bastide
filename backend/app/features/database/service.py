@@ -22,7 +22,7 @@ class DatabaseService:
     def __init__(
         self,
         repository: DatabaseRepository,
-        reseed: Callable[[Session], None] = ensure_system_categories,
+        reseed: Callable[[Session], object] = ensure_system_categories,
     ) -> None:
         self._repository = repository
         self._reseed = reseed

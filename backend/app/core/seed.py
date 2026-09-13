@@ -16,7 +16,9 @@ its own hue distinct from Loisirs.
 
 import logging
 from dataclasses import dataclass, field
+from uuid import uuid4
 
+from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.core.db import SessionFactory
@@ -368,42 +370,59 @@ SYSTEM_CATEGORIES: tuple[CategorySeed, ...] = (
 )
 
 
-def _get_or_create(db: Session, seed: CategorySeed, parent_id: str | None) -> Category:
-    """Return the existing system category for ``seed.key``, or insert and return a new one."""
-    existing = db.query(Category).filter_by(name=seed.key, is_system=True).one_or_none()
-    if existing is not None:
-        return existing
-
-    category = Category(
-        user_id=None,
-        parent_id=parent_id,
-        name=seed.key,
-        kind=seed.kind,
-        icon=seed.icon,
-        color=seed.color,
-        is_system=True,
-    )
-    db.add(category)
-    db.flush()
-    return category
-
-
-def ensure_system_categories(db: Session) -> None:
+def ensure_system_categories(db: Session) -> int:
     """Insert the missing system categories, skipping any i18n key that already exists.
+
+    The existing catalog is read in one query and new rows get their ids up front, so a boot
+    against an already-seeded database costs a single SELECT rather than one per entry.
 
     Leaves the transaction open, so a caller that is already in one — the database reset, which
     empties a profile and restores the catalog atomically — commits the whole thing once.
+
+    Returns:
+        How many rows were added.
     """
+    ids_by_key = {
+        name: category_id
+        for name, category_id in db.execute(
+            select(Category.name, Category.id).where(Category.is_system.is_(True))
+        )
+    }
+    created = 0
+
+    def ensure(seed: CategorySeed, parent_id: str | None) -> str:
+        nonlocal created
+        category_id = ids_by_key.get(seed.key)
+        if category_id is None:
+            category_id = str(uuid4())
+            db.add(
+                Category(
+                    id=category_id,
+                    user_id=None,
+                    parent_id=parent_id,
+                    name=seed.key,
+                    kind=seed.kind,
+                    icon=seed.icon,
+                    color=seed.color,
+                    is_system=True,
+                )
+            )
+            created += 1
+        return category_id
+
     for group in SYSTEM_CATEGORIES:
-        parent = _get_or_create(db, group, parent_id=None)
+        parent_id = ensure(group, parent_id=None)
         for child in group.children:
-            _get_or_create(db, child, parent_id=parent.id)
+            ensure(child, parent_id=parent_id)
+    db.flush()
+    return created
 
 
-def seed_categories(db: Session) -> None:
-    """Insert the system category catalog, skipping any i18n key that already exists."""
-    ensure_system_categories(db)
+def seed_categories(db: Session) -> int:
+    """Insert the system category catalog and commit; return how many rows were added."""
+    created = ensure_system_categories(db)
     db.commit()
+    return created
 
 
 def seed_system_categories(session_factory: SessionFactory) -> int:
@@ -420,9 +439,7 @@ def seed_system_categories(session_factory: SessionFactory) -> int:
     """
     db = session_factory()
     try:
-        before = db.query(Category).filter_by(is_system=True).count()
-        seed_categories(db)
-        created = db.query(Category).filter_by(is_system=True).count() - before
+        created = seed_categories(db)
     finally:
         db.close()
     if created:
