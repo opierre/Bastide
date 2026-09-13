@@ -44,8 +44,8 @@ SECTION_16_KEYS = {
     "ifi_decote_rate_bps": "bps",
 }
 
-# The §15 lending reference seeded into the same table by its own migration.
-SECTION_15_KEYS = {"hcsf_limit_bps": "bps"}
+# The §15 lending references seeded into the same table by their own migrations.
+SECTION_15_KEYS = {"hcsf_limit_bps": "bps", "hcsf_max_term_months_count": "count"}
 
 UNIT_BY_SUFFIX = {"_bps": "bps", "_minor": "minor", "_count": "count"}
 
@@ -154,6 +154,11 @@ def test_every_section_15_and_16_scalar_key_is_seeded_with_its_unit(tmp_path: Pa
 def test_the_hcsf_limit_is_seeded_at_35_percent(tmp_path: Path) -> None:
     with _session(_migrated(tmp_path)) as db:
         assert _system_parameters(db)["hcsf_limit_bps"].int_value == 3500
+
+
+def test_the_hcsf_max_term_is_seeded_at_25_years(tmp_path: Path) -> None:
+    with _session(_migrated(tmp_path)) as db:
+        assert _system_parameters(db)["hcsf_max_term_months_count"].int_value == 300
 
 
 def test_every_unit_is_known_and_agrees_with_its_key_suffix(tmp_path: Path) -> None:

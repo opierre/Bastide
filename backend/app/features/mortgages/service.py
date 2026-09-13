@@ -402,7 +402,7 @@ class MortgageService:
         for read in reads:
             by_lender[read.lender] = by_lender.get(read.lender, 0) + read.total_instalment_minor
 
-        income, income_source = self._monthly_income(user.id, today)
+        income, income_source = self.monthly_income(user.id, today)
         debt_ratio = (
             ratio_bps(monthly_charge, income) if income is not None and income > 0 else None
         )
@@ -431,11 +431,12 @@ class MortgageService:
             currency=user.currency,
         )
 
-    def _monthly_income(self, user_id: str, today: date) -> tuple[int | None, IncomeSource]:
+    def monthly_income(self, user_id: str, today: date) -> tuple[int | None, IncomeSource]:
         """The ratio's denominator and where it came from: declared › ledger median › unknown.
 
         The median, not the mean, of the complete months holding income: a 13th-month bonus
-        must not lift a ratio the user will plan around (§15).
+        must not lift a ratio the user will plan around (§15). Shared with the simulator, so a
+        simulated ratio and the summary's divide by the same income.
         """
         declared = self._repository.declared_monthly_income_minor(user_id)
         if declared is not None:

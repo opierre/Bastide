@@ -205,3 +205,71 @@ class MortgageSummary(BaseModel):
     outstanding_series: list[OutstandingPoint]
     loan_ends: list[LoanEndMarker]
     currency: str
+
+
+class SimulationCompute(BaseModel):
+    """Inputs of a stateless simulation (§17); POST only because they travel as a body."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    principal_minor: int = Field(gt=0)
+    annual_rate_bps: int = Field(ge=0)
+    insurance_monthly_minor: int = Field(ge=0)
+    term_months: int = Field(gt=0)
+    upfront_fees_minor: int = Field(default=0, ge=0)
+    #: Without a price, `cost_over_price_bps` is null rather than 0.
+    property_price_minor: int | None = Field(default=None, gt=0)
+    down_payment_minor: int | None = Field(default=None, ge=0)
+    #: Adds the caller's active loans to the charge side of the ratio, and nothing else.
+    include_existing_loans: bool = False
+
+
+class SimulationYearRow(BaseModel):
+    """The simulated instalments of one calendar year, summed from the engine's month rows.
+
+    Capital and interest are split — and insurance kept apart — because the panel stacks exactly
+    those and must not derive the split itself.
+    """
+
+    year: int
+    instalment_minor: int
+    interest_minor: int
+    principal_minor: int
+    insurance_minor: int
+    outstanding_after_minor: int
+
+
+class HcsfReading(BaseModel):
+    """The HCSF reference points and where the simulation sits against them — data, never a
+    refusal (§15)."""
+
+    #: Null when income is unknown: there is no ratio to hold against the limit.
+    within_ratio: bool | None
+    within_term: bool
+    limit_bps: int
+    max_term_months: int
+
+
+class SimulationResult(BaseModel):
+    """What a simulated loan costs and how it reads against the HCSF references. Stored nowhere."""
+
+    #: The échéance, insurance excluded.
+    monthly_payment_minor: int
+    #: The échéance plus insurance.
+    total_instalment_minor: int
+    total_interest_minor: int
+    total_insurance_minor: int
+    #: Interest, insurance and upfront fees.
+    total_cost_minor: int
+    cost_over_price_bps: int | None
+    #: Indicative (§15).
+    taeg_bps: int
+    yearly: list[SimulationYearRow]
+    debt_ratio_bps: int | None
+    hcsf: HcsfReading
+    #: The principal landing the ratio on the limit at this rate, term and insurance ratio.
+    max_borrowable_minor: int | None
+    #: The instalment still available under the limit, which `max_borrowable_minor` is scaled
+    #: from — so a small capacity can be explained by its cause.
+    available_instalment_minor: int | None
+    currency: str
