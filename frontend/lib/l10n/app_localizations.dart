@@ -3971,6 +3971,661 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Ce que vous possédez, ce que vous devez'**
   String get navNetworthSubtitle;
+
+  /// Top-bar primary CTA of the loans panel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Nouveau crédit'**
+  String get mortgagesAdd;
+
+  /// Error state when the loans list cannot be loaded.
+  ///
+  /// In fr, this message translates to:
+  /// **'Impossible de charger vos crédits.'**
+  String get mortgagesLoadFailed;
+
+  /// Retry button on the loans error states.
+  ///
+  /// In fr, this message translates to:
+  /// **'Réessayer'**
+  String get mortgagesRetry;
+
+  /// Empty state title of the loans panel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucun crédit enregistré'**
+  String get mortgagesEmptyTitle;
+
+  /// Empty state reassurance line of the loans panel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ajoutez vos emprunts pour suivre leur coût réel, leur trajectoire et votre capacité — sans jamais relier FinStride à une banque.'**
+  String get mortgagesEmptyBody;
+
+  /// Label of the monthly charge summary card. Rendered uppercase.
+  ///
+  /// In fr, this message translates to:
+  /// **'Charge mensuelle'**
+  String get mortgagesChargeLabel;
+
+  /// Caption of the monthly charge card: how many instalments fall on the next due date.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, =1{1 échéance le {date}} other{{count} échéances le {date}}} · assurance comprise'**
+  String mortgagesChargeCaption(int count, String date);
+
+  /// Caption of the monthly charge card when no instalment remains.
+  ///
+  /// In fr, this message translates to:
+  /// **'assurance comprise'**
+  String get mortgagesChargeCaptionNoNext;
+
+  /// Label of the outstanding principal summary card. Rendered uppercase.
+  ///
+  /// In fr, this message translates to:
+  /// **'Capital restant dû'**
+  String get mortgagesOutstandingLabel;
+
+  /// Caption of the outstanding principal card: the amount borrowed and the loan count.
+  ///
+  /// In fr, this message translates to:
+  /// **'sur {principal} empruntés · {count, plural, =1{1 crédit} other{{count} crédits}}'**
+  String mortgagesOutstandingCaption(String principal, int count);
+
+  /// Foot line of the outstanding principal card.
+  ///
+  /// In fr, this message translates to:
+  /// **'{amount} remboursés · {percent}'**
+  String mortgagesRepaidLine(String amount, String percent);
+
+  /// Label of the debt ratio card. Rendered uppercase.
+  ///
+  /// In fr, this message translates to:
+  /// **'Taux d\'endettement'**
+  String get mortgagesRatioLabel;
+
+  /// The HCSF reference beside the ratio value.
+  ///
+  /// In fr, this message translates to:
+  /// **'repère HCSF {percent}'**
+  String mortgagesRatioReference(String percent);
+
+  /// Amber status pill when the ratio is above the HCSF reference. Information, never a refusal.
+  ///
+  /// In fr, this message translates to:
+  /// **'Au-dessus du repère'**
+  String get mortgagesRatioOverLimit;
+
+  /// Ratio caption when the income was declared by the user.
+  ///
+  /// In fr, this message translates to:
+  /// **'Charge {charge} sur un revenu déclaré de {income}'**
+  String mortgagesRatioCaptionDeclared(String charge, String income);
+
+  /// Ratio caption when the income is the ledger's median of the last 12 complete months. Must say median, never average.
+  ///
+  /// In fr, this message translates to:
+  /// **'Charge {charge} sur un revenu médian constaté de {income} (12 mois du grand livre). Le ménage perçoit peut-être des revenus hors application : un revenu déclaré remplace cette lecture.'**
+  String mortgagesRatioCaptionLedger(String charge, String income);
+
+  /// Ratio card body when no income is known and no ratio can be computed.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucun revenu connu : le grand livre ne contient pas de revenus réguliers et aucun revenu n\'est déclaré. Sans revenu, il n\'y a pas de taux à calculer.'**
+  String get mortgagesRatioUnknown;
+
+  /// Iris link on the ledger-income ratio card.
+  ///
+  /// In fr, this message translates to:
+  /// **'Déclarer un revenu →'**
+  String get mortgagesRatioDeclareLink;
+
+  /// Outline button on the unknown-income ratio card.
+  ///
+  /// In fr, this message translates to:
+  /// **'Déclarer un revenu'**
+  String get mortgagesRatioDeclareButton;
+
+  /// HCSF caveat, always shown as body content on the ratio card, never as a tooltip.
+  ///
+  /// In fr, this message translates to:
+  /// **'Lecture informative : ce repère ne lie aucun prêteur.'**
+  String get mortgagesRatioCaveat;
+
+  /// Title of the declare-income modal.
+  ///
+  /// In fr, this message translates to:
+  /// **'Déclarer un revenu'**
+  String get mortgagesIncomeTitle;
+
+  /// Intro line of the declare-income modal.
+  ///
+  /// In fr, this message translates to:
+  /// **'Le revenu mensuel net du ménage sur lequel lire le taux d\'endettement. Il remplace le revenu médian du grand livre.'**
+  String get mortgagesIncomeBody;
+
+  /// Field label in the declare-income modal.
+  ///
+  /// In fr, this message translates to:
+  /// **'Revenu mensuel'**
+  String get mortgagesIncomeLabel;
+
+  /// Validation message for a missing or non-positive declared income.
+  ///
+  /// In fr, this message translates to:
+  /// **'Saisissez un montant supérieur à zéro.'**
+  String get mortgagesIncomeInvalid;
+
+  /// Submit button of the declare-income modal.
+  ///
+  /// In fr, this message translates to:
+  /// **'Enregistrer'**
+  String get mortgagesIncomeSubmit;
+
+  /// Inline error when the declared income cannot be saved.
+  ///
+  /// In fr, this message translates to:
+  /// **'Le revenu n\'a pas pu être enregistré.'**
+  String get mortgagesIncomeFailed;
+
+  /// Credit product label for kind=mortgage.
+  ///
+  /// In fr, this message translates to:
+  /// **'Crédit immobilier'**
+  String get mortgageKindMortgage;
+
+  /// Credit product label for kind=works.
+  ///
+  /// In fr, this message translates to:
+  /// **'Prêt travaux'**
+  String get mortgageKindWorks;
+
+  /// Credit product label for kind=consumer.
+  ///
+  /// In fr, this message translates to:
+  /// **'Crédit à la consommation'**
+  String get mortgageKindConsumer;
+
+  /// Credit product label for kind=auto.
+  ///
+  /// In fr, this message translates to:
+  /// **'Crédit auto'**
+  String get mortgageKindAuto;
+
+  /// Repayment type label for constant_payment.
+  ///
+  /// In fr, this message translates to:
+  /// **'Échéance constante'**
+  String get mortgageRepaymentConstant;
+
+  /// Repayment type label for interest_only.
+  ///
+  /// In fr, this message translates to:
+  /// **'In fine'**
+  String get mortgageRepaymentInterestOnly;
+
+  /// Loan card sub-line: kind label, lender, term.
+  ///
+  /// In fr, this message translates to:
+  /// **'{kind} · {lender} · {months} mois'**
+  String mortgageCardSubline(String kind, String lender, int months);
+
+  /// Unit under the loan card's instalment.
+  ///
+  /// In fr, this message translates to:
+  /// **'/ mois'**
+  String get mortgageCardPerMonth;
+
+  /// Loan card label before the outstanding principal.
+  ///
+  /// In fr, this message translates to:
+  /// **'Capital restant dû'**
+  String get mortgageCardOutstandingLabel;
+
+  /// Loan card: the principal the outstanding is measured against.
+  ///
+  /// In fr, this message translates to:
+  /// **'sur {principal}'**
+  String mortgageCardOutstandingOf(String principal);
+
+  /// Loan card: word after the iris repaid percentage.
+  ///
+  /// In fr, this message translates to:
+  /// **'remboursé'**
+  String get mortgageCardRepaid;
+
+  /// Loan card: instalments left.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, =0{aucune échéance restante} =1{1 échéance restante} other{{count} échéances restantes}}'**
+  String mortgageCardRemaining(int count);
+
+  /// Nominal rate label (loan card footer and cost row). Rendered uppercase on the card.
+  ///
+  /// In fr, this message translates to:
+  /// **'Taux nominal'**
+  String get mortgageRateLabel;
+
+  /// Insurance label in the loan card footer. Rendered uppercase.
+  ///
+  /// In fr, this message translates to:
+  /// **'Assurance'**
+  String get mortgageInsuranceLabel;
+
+  /// Next instalment label (loan card footer and detail header). Rendered uppercase.
+  ///
+  /// In fr, this message translates to:
+  /// **'Prochaine échéance'**
+  String get mortgageNextLabel;
+
+  /// Insurance premium per month.
+  ///
+  /// In fr, this message translates to:
+  /// **'{amount} / mois'**
+  String mortgageInsurancePerMonth(String amount);
+
+  /// Title of the trajectory chart.
+  ///
+  /// In fr, this message translates to:
+  /// **'Trajectoire du capital restant dû'**
+  String get mortgagesChartTitle;
+
+  /// Subtitle of the trajectory chart, by active loan count.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, =1{Le crédit, échéance après échéance, jusqu\'au dernier remboursement} =2{Les deux crédits, échéance après échéance, jusqu\'au dernier remboursement} other{Les {count} crédits, échéance après échéance, jusqu\'au dernier remboursement}}'**
+  String mortgagesChartSubtitle(int count);
+
+  /// Chart legend for the combined outstanding line.
+  ///
+  /// In fr, this message translates to:
+  /// **'Capital restant dû total'**
+  String get mortgagesChartLegendTotal;
+
+  /// Chart legend for the dashed today marker.
+  ///
+  /// In fr, this message translates to:
+  /// **'aujourd\'hui'**
+  String get mortgagesChartLegendToday;
+
+  /// Chart annotation on today's month: the month and the combined outstanding.
+  ///
+  /// In fr, this message translates to:
+  /// **'{month} · {amount}'**
+  String mortgagesChartToday(String month, String amount);
+
+  /// Chart annotation at a loan's last instalment: the kind label (lower-cased) and the month.
+  ///
+  /// In fr, this message translates to:
+  /// **'fin {kind} · {month}'**
+  String mortgagesChartLoanEnd(String kind, String month);
+
+  /// Iris back link from the loan detail to the list.
+  ///
+  /// In fr, this message translates to:
+  /// **'Retour aux crédits'**
+  String get mortgageDetailBack;
+
+  /// Error state when a loan's detail cannot be loaded.
+  ///
+  /// In fr, this message translates to:
+  /// **'Impossible de charger ce crédit.'**
+  String get mortgageDetailLoadFailed;
+
+  /// Detail header sub-line without upfront fees.
+  ///
+  /// In fr, this message translates to:
+  /// **'{kind} · {lender} · {principal} sur {months} mois · 1re échéance le {date}'**
+  String mortgageDetailSubline(
+    String kind,
+    String lender,
+    String principal,
+    int months,
+    String date,
+  );
+
+  /// Detail header sub-line with upfront fees.
+  ///
+  /// In fr, this message translates to:
+  /// **'{kind} · {lender} · {principal} sur {months} mois · 1re échéance le {date} · frais de dossier {fees}'**
+  String mortgageDetailSublineFees(
+    String kind,
+    String lender,
+    String principal,
+    int months,
+    String date,
+    String fees,
+  );
+
+  /// Detail header stat label. Rendered uppercase.
+  ///
+  /// In fr, this message translates to:
+  /// **'Échéance totale'**
+  String get mortgageDetailInstalmentLabel;
+
+  /// Detail header: the instalment split into payment and insurance.
+  ///
+  /// In fr, this message translates to:
+  /// **'{payment} + {insurance} assurance'**
+  String mortgageDetailInstalmentCaption(String payment, String insurance);
+
+  /// Detail header caption for a loan without insurance.
+  ///
+  /// In fr, this message translates to:
+  /// **'sans assurance'**
+  String get mortgageDetailInstalmentNoInsurance;
+
+  /// Detail header: repaid share and instalments left.
+  ///
+  /// In fr, this message translates to:
+  /// **'{percent} remboursé · {count, plural, =1{1 échéance} other{{count} échéances}}'**
+  String mortgageDetailOutstandingCaption(String percent, int count);
+
+  /// Secondary button opening the loan form prefilled.
+  ///
+  /// In fr, this message translates to:
+  /// **'Modifier'**
+  String get mortgageDetailEdit;
+
+  /// Cost row: caption under the nominal rate.
+  ///
+  /// In fr, this message translates to:
+  /// **'fixe sur toute la durée'**
+  String get mortgageCostRateCaption;
+
+  /// Cost row: TAEG label.
+  ///
+  /// In fr, this message translates to:
+  /// **'TAEG'**
+  String get mortgageCostTaegLabel;
+
+  /// Iris marker pill beside the TAEG label. Rendered uppercase.
+  ///
+  /// In fr, this message translates to:
+  /// **'Indicatif'**
+  String get mortgageCostIndicative;
+
+  /// TAEG disclaimer read by assistive tech on the INDICATIF pill.
+  ///
+  /// In fr, this message translates to:
+  /// **'Indicatif : un TAEG réel inclut des frais que FinStride ne voit pas.'**
+  String get mortgageCostTaegDisclaimer;
+
+  /// Cost row: caption under the TAEG.
+  ///
+  /// In fr, this message translates to:
+  /// **'taux, assurance et frais inclus'**
+  String get mortgageCostTaegCaption;
+
+  /// Cost row: total interest label.
+  ///
+  /// In fr, this message translates to:
+  /// **'Intérêts totaux'**
+  String get mortgageCostInterestLabel;
+
+  /// Cost row: interest still to pay after today.
+  ///
+  /// In fr, this message translates to:
+  /// **'dont {amount} encore à verser'**
+  String mortgageCostInterestCaption(String amount);
+
+  /// Cost row: total cost label.
+  ///
+  /// In fr, this message translates to:
+  /// **'Coût total du crédit'**
+  String get mortgageCostTotalLabel;
+
+  /// Cost row: what the total cost is made of.
+  ///
+  /// In fr, this message translates to:
+  /// **'intérêts + assurance {insurance} + frais {fees}'**
+  String mortgageCostTotalCaption(String insurance, String fees);
+
+  /// Title of the loan form when creating.
+  ///
+  /// In fr, this message translates to:
+  /// **'Nouveau crédit'**
+  String get mortgageFormCreateTitle;
+
+  /// Title of the loan form when editing.
+  ///
+  /// In fr, this message translates to:
+  /// **'Modifier le crédit'**
+  String get mortgageFormEditTitle;
+
+  /// Subtitle of the loan form.
+  ///
+  /// In fr, this message translates to:
+  /// **'La mensualité est calculée à partir du capital, du taux et de la durée.'**
+  String get mortgageFormSubtitle;
+
+  /// Loan form: label field.
+  ///
+  /// In fr, this message translates to:
+  /// **'Libellé'**
+  String get mortgageFormLabel;
+
+  /// Loan form: missing label.
+  ///
+  /// In fr, this message translates to:
+  /// **'Donnez un nom à ce crédit.'**
+  String get mortgageFormLabelRequired;
+
+  /// Loan form: lender field.
+  ///
+  /// In fr, this message translates to:
+  /// **'Prêteur'**
+  String get mortgageFormLender;
+
+  /// Loan form: missing lender.
+  ///
+  /// In fr, this message translates to:
+  /// **'Indiquez le prêteur.'**
+  String get mortgageFormLenderRequired;
+
+  /// Loan form: credit product select.
+  ///
+  /// In fr, this message translates to:
+  /// **'Type'**
+  String get mortgageFormKind;
+
+  /// Loan form: repayment type control, a separate axis from Type.
+  ///
+  /// In fr, this message translates to:
+  /// **'Remboursement'**
+  String get mortgageFormRepayment;
+
+  /// Loan form: principal field.
+  ///
+  /// In fr, this message translates to:
+  /// **'Capital emprunté'**
+  String get mortgageFormPrincipal;
+
+  /// Loan form: an amount that is missing or not above zero.
+  ///
+  /// In fr, this message translates to:
+  /// **'Saisissez un montant supérieur à zéro.'**
+  String get mortgageFormAmountInvalid;
+
+  /// Loan form: nominal rate field, typed as a percent.
+  ///
+  /// In fr, this message translates to:
+  /// **'Taux nominal'**
+  String get mortgageFormRate;
+
+  /// Loan form: unreadable rate.
+  ///
+  /// In fr, this message translates to:
+  /// **'Saisissez un taux, par exemple 3,45.'**
+  String get mortgageFormRateInvalid;
+
+  /// Loan form: term field.
+  ///
+  /// In fr, this message translates to:
+  /// **'Durée'**
+  String get mortgageFormTerm;
+
+  /// Unit suffix inside the term field.
+  ///
+  /// In fr, this message translates to:
+  /// **'mois'**
+  String get mortgageFormTermUnit;
+
+  /// Loan form: missing or zero term.
+  ///
+  /// In fr, this message translates to:
+  /// **'Saisissez une durée en mois.'**
+  String get mortgageFormTermInvalid;
+
+  /// Loan form: first instalment date field.
+  ///
+  /// In fr, this message translates to:
+  /// **'1re échéance'**
+  String get mortgageFormFirstPayment;
+
+  /// Loan form: unreadable date.
+  ///
+  /// In fr, this message translates to:
+  /// **'Saisissez une date valide.'**
+  String get mortgageFormDateInvalid;
+
+  /// Tooltip of the date field's calendar button.
+  ///
+  /// In fr, this message translates to:
+  /// **'Choisir une date'**
+  String get mortgageFormCalendar;
+
+  /// Loan form: monthly insurance field.
+  ///
+  /// In fr, this message translates to:
+  /// **'Assurance / mois'**
+  String get mortgageFormInsurance;
+
+  /// Loan form: an optional amount that cannot be read.
+  ///
+  /// In fr, this message translates to:
+  /// **'Saisissez un montant valide ou laissez vide.'**
+  String get mortgageFormAmountOptionalInvalid;
+
+  /// Loan form: upfront fees field.
+  ///
+  /// In fr, this message translates to:
+  /// **'Frais de dossier'**
+  String get mortgageFormFees;
+
+  /// Loan form: optional property link.
+  ///
+  /// In fr, this message translates to:
+  /// **'Bien financé'**
+  String get mortgageFormProperty;
+
+  /// Loan form: no property linked.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucun'**
+  String get mortgageFormPropertyNone;
+
+  /// Read-only computed instalment plate label.
+  ///
+  /// In fr, this message translates to:
+  /// **'Mensualité calculée'**
+  String get mortgageFormPlateLabel;
+
+  /// Computed instalment plate: total instalment and total interest.
+  ///
+  /// In fr, this message translates to:
+  /// **'échéance totale {instalment} — intérêts totaux {interest}'**
+  String mortgageFormPlateDetail(String instalment, String interest);
+
+  /// Computed instalment plate before the inputs are complete.
+  ///
+  /// In fr, this message translates to:
+  /// **'Renseignez le capital, le taux et la durée.'**
+  String get mortgageFormPlatePending;
+
+  /// Computed instalment plate for an interest-only loan, which the simulator does not compute.
+  ///
+  /// In fr, this message translates to:
+  /// **'La mensualité d\'un prêt in fine s\'affiche une fois le crédit enregistré.'**
+  String get mortgageFormPlateInterestOnly;
+
+  /// Loan form: cancel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Annuler'**
+  String get mortgageFormCancel;
+
+  /// Loan form: create.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ajouter le crédit'**
+  String get mortgageFormSubmit;
+
+  /// Loan form: save edits.
+  ///
+  /// In fr, this message translates to:
+  /// **'Enregistrer'**
+  String get mortgageFormSave;
+
+  /// Loan form: secondary text button deleting the loan.
+  ///
+  /// In fr, this message translates to:
+  /// **'Supprimer le crédit'**
+  String get mortgageFormDelete;
+
+  /// Delete confirmation title.
+  ///
+  /// In fr, this message translates to:
+  /// **'Supprimer ce crédit ?'**
+  String get mortgageDeleteTitle;
+
+  /// Delete confirmation: both consequences.
+  ///
+  /// In fr, this message translates to:
+  /// **'Il quittera le passif de la Synthèse et, s\'il est rattaché à un bien, la base de l\'IFI.'**
+  String get mortgageDeleteBody;
+
+  /// Delete confirmation: confirm.
+  ///
+  /// In fr, this message translates to:
+  /// **'Supprimer'**
+  String get mortgageDeleteConfirm;
+
+  /// Inline error for a loan whose instalment does not cover its first interest (422).
+  ///
+  /// In fr, this message translates to:
+  /// **'Ce crédit ne se rembourse pas : l\'échéance ne couvre pas les intérêts du premier mois. Modifiez le taux, le capital ou la durée.'**
+  String get mortgageErrorNonAmortizing;
+
+  /// Inline error when upfront fees reach the principal.
+  ///
+  /// In fr, this message translates to:
+  /// **'Les frais de dossier doivent rester inférieurs au capital emprunté.'**
+  String get mortgageErrorFeesExceed;
+
+  /// Inline error when the linked property no longer exists.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ce bien n\'existe plus.'**
+  String get mortgageErrorPropertyInvalid;
+
+  /// Error when the loan no longer exists.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ce crédit n\'existe plus.'**
+  String get mortgageErrorNotFound;
+
+  /// Error for any other rejected loan value.
+  ///
+  /// In fr, this message translates to:
+  /// **'Certaines valeurs sont invalides.'**
+  String get mortgageErrorValidation;
+
+  /// Fallback error for loan actions.
+  ///
+  /// In fr, this message translates to:
+  /// **'Une erreur est survenue. Réessayez.'**
+  String get mortgageErrorGeneric;
 }
 
 class _AppLocalizationsDelegate

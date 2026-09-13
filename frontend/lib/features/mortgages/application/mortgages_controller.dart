@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -229,6 +231,63 @@ final scheduleWindowProvider =
           .watch(mortgagesRepositoryProvider)
           .scheduleYear(window.mortgageId, window.year);
     });
+
+/// The loan form's live « Mensualité calculée » plate.
+///
+/// Fed by a debounced `POST /simulations/compute` — stateless and free to call —
+/// never by a payment formula written in Dart (§17: one engine). `null` means
+/// there is nothing to compute yet; a later request supersedes any answer still
+/// in flight, so a slow response can't overwrite a newer one.
+class LoanInstalmentPreview extends Notifier<AsyncValue<ComputedInstalment>?> {
+  static const debounce = Duration(milliseconds: 350);
+
+  Timer? _timer;
+  int _generation = 0;
+
+  @override
+  AsyncValue<ComputedInstalment>? build() {
+    ref.onDispose(() => _timer?.cancel());
+    return null;
+  }
+
+  void clear() {
+    _timer?.cancel();
+    _generation++;
+    state = null;
+  }
+
+  void request({
+    required int principalMinor,
+    required int annualRateBps,
+    required int insuranceMonthlyMinor,
+    required int termMonths,
+    required int upfrontFeesMinor,
+  }) {
+    _timer?.cancel();
+    final generation = ++_generation;
+    _timer = Timer(debounce, () async {
+      final result = await AsyncValue.guard(
+        () => ref
+            .read(mortgagesRepositoryProvider)
+            .compute(
+              principalMinor: principalMinor,
+              annualRateBps: annualRateBps,
+              insuranceMonthlyMinor: insuranceMonthlyMinor,
+              termMonths: termMonths,
+              upfrontFeesMinor: upfrontFeesMinor,
+            ),
+      );
+      if (!ref.mounted || generation != _generation) return;
+      state = result;
+    });
+  }
+}
+
+final loanInstalmentPreviewProvider =
+    NotifierProvider.autoDispose<
+      LoanInstalmentPreview,
+      AsyncValue<ComputedInstalment>?
+    >(LoanInstalmentPreview.new);
 
 /// The properties a loan can be linked to, for the form's property select.
 final loanPropertiesProvider = FutureProvider<List<LoanProperty>>((ref) {

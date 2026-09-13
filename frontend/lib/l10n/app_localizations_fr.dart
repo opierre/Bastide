@@ -2497,4 +2497,426 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get navNetworthSubtitle => 'Ce que vous possédez, ce que vous devez';
+
+  @override
+  String get mortgagesAdd => 'Nouveau crédit';
+
+  @override
+  String get mortgagesLoadFailed => 'Impossible de charger vos crédits.';
+
+  @override
+  String get mortgagesRetry => 'Réessayer';
+
+  @override
+  String get mortgagesEmptyTitle => 'Aucun crédit enregistré';
+
+  @override
+  String get mortgagesEmptyBody =>
+      'Ajoutez vos emprunts pour suivre leur coût réel, leur trajectoire et votre capacité — sans jamais relier FinStride à une banque.';
+
+  @override
+  String get mortgagesChargeLabel => 'Charge mensuelle';
+
+  @override
+  String mortgagesChargeCaption(int count, String date) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count échéances le $date',
+      one: '1 échéance le $date',
+    );
+    return '$_temp0 · assurance comprise';
+  }
+
+  @override
+  String get mortgagesChargeCaptionNoNext => 'assurance comprise';
+
+  @override
+  String get mortgagesOutstandingLabel => 'Capital restant dû';
+
+  @override
+  String mortgagesOutstandingCaption(String principal, int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count crédits',
+      one: '1 crédit',
+    );
+    return 'sur $principal empruntés · $_temp0';
+  }
+
+  @override
+  String mortgagesRepaidLine(String amount, String percent) {
+    return '$amount remboursés · $percent';
+  }
+
+  @override
+  String get mortgagesRatioLabel => 'Taux d\'endettement';
+
+  @override
+  String mortgagesRatioReference(String percent) {
+    return 'repère HCSF $percent';
+  }
+
+  @override
+  String get mortgagesRatioOverLimit => 'Au-dessus du repère';
+
+  @override
+  String mortgagesRatioCaptionDeclared(String charge, String income) {
+    return 'Charge $charge sur un revenu déclaré de $income';
+  }
+
+  @override
+  String mortgagesRatioCaptionLedger(String charge, String income) {
+    return 'Charge $charge sur un revenu médian constaté de $income (12 mois du grand livre). Le ménage perçoit peut-être des revenus hors application : un revenu déclaré remplace cette lecture.';
+  }
+
+  @override
+  String get mortgagesRatioUnknown =>
+      'Aucun revenu connu : le grand livre ne contient pas de revenus réguliers et aucun revenu n\'est déclaré. Sans revenu, il n\'y a pas de taux à calculer.';
+
+  @override
+  String get mortgagesRatioDeclareLink => 'Déclarer un revenu →';
+
+  @override
+  String get mortgagesRatioDeclareButton => 'Déclarer un revenu';
+
+  @override
+  String get mortgagesRatioCaveat =>
+      'Lecture informative : ce repère ne lie aucun prêteur.';
+
+  @override
+  String get mortgagesIncomeTitle => 'Déclarer un revenu';
+
+  @override
+  String get mortgagesIncomeBody =>
+      'Le revenu mensuel net du ménage sur lequel lire le taux d\'endettement. Il remplace le revenu médian du grand livre.';
+
+  @override
+  String get mortgagesIncomeLabel => 'Revenu mensuel';
+
+  @override
+  String get mortgagesIncomeInvalid => 'Saisissez un montant supérieur à zéro.';
+
+  @override
+  String get mortgagesIncomeSubmit => 'Enregistrer';
+
+  @override
+  String get mortgagesIncomeFailed => 'Le revenu n\'a pas pu être enregistré.';
+
+  @override
+  String get mortgageKindMortgage => 'Crédit immobilier';
+
+  @override
+  String get mortgageKindWorks => 'Prêt travaux';
+
+  @override
+  String get mortgageKindConsumer => 'Crédit à la consommation';
+
+  @override
+  String get mortgageKindAuto => 'Crédit auto';
+
+  @override
+  String get mortgageRepaymentConstant => 'Échéance constante';
+
+  @override
+  String get mortgageRepaymentInterestOnly => 'In fine';
+
+  @override
+  String mortgageCardSubline(String kind, String lender, int months) {
+    return '$kind · $lender · $months mois';
+  }
+
+  @override
+  String get mortgageCardPerMonth => '/ mois';
+
+  @override
+  String get mortgageCardOutstandingLabel => 'Capital restant dû';
+
+  @override
+  String mortgageCardOutstandingOf(String principal) {
+    return 'sur $principal';
+  }
+
+  @override
+  String get mortgageCardRepaid => 'remboursé';
+
+  @override
+  String mortgageCardRemaining(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count échéances restantes',
+      one: '1 échéance restante',
+      zero: 'aucune échéance restante',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get mortgageRateLabel => 'Taux nominal';
+
+  @override
+  String get mortgageInsuranceLabel => 'Assurance';
+
+  @override
+  String get mortgageNextLabel => 'Prochaine échéance';
+
+  @override
+  String mortgageInsurancePerMonth(String amount) {
+    return '$amount / mois';
+  }
+
+  @override
+  String get mortgagesChartTitle => 'Trajectoire du capital restant dû';
+
+  @override
+  String mortgagesChartSubtitle(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          'Les $count crédits, échéance après échéance, jusqu\'au dernier remboursement',
+      two:
+          'Les deux crédits, échéance après échéance, jusqu\'au dernier remboursement',
+      one:
+          'Le crédit, échéance après échéance, jusqu\'au dernier remboursement',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get mortgagesChartLegendTotal => 'Capital restant dû total';
+
+  @override
+  String get mortgagesChartLegendToday => 'aujourd\'hui';
+
+  @override
+  String mortgagesChartToday(String month, String amount) {
+    return '$month · $amount';
+  }
+
+  @override
+  String mortgagesChartLoanEnd(String kind, String month) {
+    return 'fin $kind · $month';
+  }
+
+  @override
+  String get mortgageDetailBack => 'Retour aux crédits';
+
+  @override
+  String get mortgageDetailLoadFailed => 'Impossible de charger ce crédit.';
+
+  @override
+  String mortgageDetailSubline(
+    String kind,
+    String lender,
+    String principal,
+    int months,
+    String date,
+  ) {
+    return '$kind · $lender · $principal sur $months mois · 1re échéance le $date';
+  }
+
+  @override
+  String mortgageDetailSublineFees(
+    String kind,
+    String lender,
+    String principal,
+    int months,
+    String date,
+    String fees,
+  ) {
+    return '$kind · $lender · $principal sur $months mois · 1re échéance le $date · frais de dossier $fees';
+  }
+
+  @override
+  String get mortgageDetailInstalmentLabel => 'Échéance totale';
+
+  @override
+  String mortgageDetailInstalmentCaption(String payment, String insurance) {
+    return '$payment + $insurance assurance';
+  }
+
+  @override
+  String get mortgageDetailInstalmentNoInsurance => 'sans assurance';
+
+  @override
+  String mortgageDetailOutstandingCaption(String percent, int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count échéances',
+      one: '1 échéance',
+    );
+    return '$percent remboursé · $_temp0';
+  }
+
+  @override
+  String get mortgageDetailEdit => 'Modifier';
+
+  @override
+  String get mortgageCostRateCaption => 'fixe sur toute la durée';
+
+  @override
+  String get mortgageCostTaegLabel => 'TAEG';
+
+  @override
+  String get mortgageCostIndicative => 'Indicatif';
+
+  @override
+  String get mortgageCostTaegDisclaimer =>
+      'Indicatif : un TAEG réel inclut des frais que FinStride ne voit pas.';
+
+  @override
+  String get mortgageCostTaegCaption => 'taux, assurance et frais inclus';
+
+  @override
+  String get mortgageCostInterestLabel => 'Intérêts totaux';
+
+  @override
+  String mortgageCostInterestCaption(String amount) {
+    return 'dont $amount encore à verser';
+  }
+
+  @override
+  String get mortgageCostTotalLabel => 'Coût total du crédit';
+
+  @override
+  String mortgageCostTotalCaption(String insurance, String fees) {
+    return 'intérêts + assurance $insurance + frais $fees';
+  }
+
+  @override
+  String get mortgageFormCreateTitle => 'Nouveau crédit';
+
+  @override
+  String get mortgageFormEditTitle => 'Modifier le crédit';
+
+  @override
+  String get mortgageFormSubtitle =>
+      'La mensualité est calculée à partir du capital, du taux et de la durée.';
+
+  @override
+  String get mortgageFormLabel => 'Libellé';
+
+  @override
+  String get mortgageFormLabelRequired => 'Donnez un nom à ce crédit.';
+
+  @override
+  String get mortgageFormLender => 'Prêteur';
+
+  @override
+  String get mortgageFormLenderRequired => 'Indiquez le prêteur.';
+
+  @override
+  String get mortgageFormKind => 'Type';
+
+  @override
+  String get mortgageFormRepayment => 'Remboursement';
+
+  @override
+  String get mortgageFormPrincipal => 'Capital emprunté';
+
+  @override
+  String get mortgageFormAmountInvalid =>
+      'Saisissez un montant supérieur à zéro.';
+
+  @override
+  String get mortgageFormRate => 'Taux nominal';
+
+  @override
+  String get mortgageFormRateInvalid => 'Saisissez un taux, par exemple 3,45.';
+
+  @override
+  String get mortgageFormTerm => 'Durée';
+
+  @override
+  String get mortgageFormTermUnit => 'mois';
+
+  @override
+  String get mortgageFormTermInvalid => 'Saisissez une durée en mois.';
+
+  @override
+  String get mortgageFormFirstPayment => '1re échéance';
+
+  @override
+  String get mortgageFormDateInvalid => 'Saisissez une date valide.';
+
+  @override
+  String get mortgageFormCalendar => 'Choisir une date';
+
+  @override
+  String get mortgageFormInsurance => 'Assurance / mois';
+
+  @override
+  String get mortgageFormAmountOptionalInvalid =>
+      'Saisissez un montant valide ou laissez vide.';
+
+  @override
+  String get mortgageFormFees => 'Frais de dossier';
+
+  @override
+  String get mortgageFormProperty => 'Bien financé';
+
+  @override
+  String get mortgageFormPropertyNone => 'Aucun';
+
+  @override
+  String get mortgageFormPlateLabel => 'Mensualité calculée';
+
+  @override
+  String mortgageFormPlateDetail(String instalment, String interest) {
+    return 'échéance totale $instalment — intérêts totaux $interest';
+  }
+
+  @override
+  String get mortgageFormPlatePending =>
+      'Renseignez le capital, le taux et la durée.';
+
+  @override
+  String get mortgageFormPlateInterestOnly =>
+      'La mensualité d\'un prêt in fine s\'affiche une fois le crédit enregistré.';
+
+  @override
+  String get mortgageFormCancel => 'Annuler';
+
+  @override
+  String get mortgageFormSubmit => 'Ajouter le crédit';
+
+  @override
+  String get mortgageFormSave => 'Enregistrer';
+
+  @override
+  String get mortgageFormDelete => 'Supprimer le crédit';
+
+  @override
+  String get mortgageDeleteTitle => 'Supprimer ce crédit ?';
+
+  @override
+  String get mortgageDeleteBody =>
+      'Il quittera le passif de la Synthèse et, s\'il est rattaché à un bien, la base de l\'IFI.';
+
+  @override
+  String get mortgageDeleteConfirm => 'Supprimer';
+
+  @override
+  String get mortgageErrorNonAmortizing =>
+      'Ce crédit ne se rembourse pas : l\'échéance ne couvre pas les intérêts du premier mois. Modifiez le taux, le capital ou la durée.';
+
+  @override
+  String get mortgageErrorFeesExceed =>
+      'Les frais de dossier doivent rester inférieurs au capital emprunté.';
+
+  @override
+  String get mortgageErrorPropertyInvalid => 'Ce bien n\'existe plus.';
+
+  @override
+  String get mortgageErrorNotFound => 'Ce crédit n\'existe plus.';
+
+  @override
+  String get mortgageErrorValidation => 'Certaines valeurs sont invalides.';
+
+  @override
+  String get mortgageErrorGeneric => 'Une erreur est survenue. Réessayez.';
 }

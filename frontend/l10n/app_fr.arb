@@ -3116,5 +3116,599 @@
   "navNetworthSubtitle": "Ce que vous possédez, ce que vous devez",
   "@navNetworthSubtitle": {
     "description": "Top-bar descriptor under the net-worth panel title."
+  },
+  "mortgagesAdd": "Nouveau crédit",
+  "@mortgagesAdd": {
+    "description": "Top-bar primary CTA of the loans panel."
+  },
+  "mortgagesLoadFailed": "Impossible de charger vos crédits.",
+  "@mortgagesLoadFailed": {
+    "description": "Error state when the loans list cannot be loaded."
+  },
+  "mortgagesRetry": "Réessayer",
+  "@mortgagesRetry": {
+    "description": "Retry button on the loans error states."
+  },
+  "mortgagesEmptyTitle": "Aucun crédit enregistré",
+  "@mortgagesEmptyTitle": {
+    "description": "Empty state title of the loans panel."
+  },
+  "mortgagesEmptyBody": "Ajoutez vos emprunts pour suivre leur coût réel, leur trajectoire et votre capacité — sans jamais relier FinStride à une banque.",
+  "@mortgagesEmptyBody": {
+    "description": "Empty state reassurance line of the loans panel."
+  },
+  "mortgagesChargeLabel": "Charge mensuelle",
+  "@mortgagesChargeLabel": {
+    "description": "Label of the monthly charge summary card. Rendered uppercase."
+  },
+  "mortgagesChargeCaption": "{count, plural, =1{1 échéance le {date}} other{{count} échéances le {date}}} · assurance comprise",
+  "@mortgagesChargeCaption": {
+    "description": "Caption of the monthly charge card: how many instalments fall on the next due date.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "mortgagesChargeCaptionNoNext": "assurance comprise",
+  "@mortgagesChargeCaptionNoNext": {
+    "description": "Caption of the monthly charge card when no instalment remains."
+  },
+  "mortgagesOutstandingLabel": "Capital restant dû",
+  "@mortgagesOutstandingLabel": {
+    "description": "Label of the outstanding principal summary card. Rendered uppercase."
+  },
+  "mortgagesOutstandingCaption": "sur {principal} empruntés · {count, plural, =1{1 crédit} other{{count} crédits}}",
+  "@mortgagesOutstandingCaption": {
+    "description": "Caption of the outstanding principal card: the amount borrowed and the loan count.",
+    "placeholders": {
+      "principal": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "mortgagesRepaidLine": "{amount} remboursés · {percent}",
+  "@mortgagesRepaidLine": {
+    "description": "Foot line of the outstanding principal card.",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "percent": {
+        "type": "String"
+      }
+    }
+  },
+  "mortgagesRatioLabel": "Taux d'endettement",
+  "@mortgagesRatioLabel": {
+    "description": "Label of the debt ratio card. Rendered uppercase."
+  },
+  "mortgagesRatioReference": "repère HCSF {percent}",
+  "@mortgagesRatioReference": {
+    "description": "The HCSF reference beside the ratio value.",
+    "placeholders": {
+      "percent": {
+        "type": "String"
+      }
+    }
+  },
+  "mortgagesRatioOverLimit": "Au-dessus du repère",
+  "@mortgagesRatioOverLimit": {
+    "description": "Amber status pill when the ratio is above the HCSF reference. Information, never a refusal."
+  },
+  "mortgagesRatioCaptionDeclared": "Charge {charge} sur un revenu déclaré de {income}",
+  "@mortgagesRatioCaptionDeclared": {
+    "description": "Ratio caption when the income was declared by the user.",
+    "placeholders": {
+      "charge": {
+        "type": "String"
+      },
+      "income": {
+        "type": "String"
+      }
+    }
+  },
+  "mortgagesRatioCaptionLedger": "Charge {charge} sur un revenu médian constaté de {income} (12 mois du grand livre). Le ménage perçoit peut-être des revenus hors application : un revenu déclaré remplace cette lecture.",
+  "@mortgagesRatioCaptionLedger": {
+    "description": "Ratio caption when the income is the ledger's median of the last 12 complete months. Must say median, never average.",
+    "placeholders": {
+      "charge": {
+        "type": "String"
+      },
+      "income": {
+        "type": "String"
+      }
+    }
+  },
+  "mortgagesRatioUnknown": "Aucun revenu connu : le grand livre ne contient pas de revenus réguliers et aucun revenu n'est déclaré. Sans revenu, il n'y a pas de taux à calculer.",
+  "@mortgagesRatioUnknown": {
+    "description": "Ratio card body when no income is known and no ratio can be computed."
+  },
+  "mortgagesRatioDeclareLink": "Déclarer un revenu →",
+  "@mortgagesRatioDeclareLink": {
+    "description": "Iris link on the ledger-income ratio card."
+  },
+  "mortgagesRatioDeclareButton": "Déclarer un revenu",
+  "@mortgagesRatioDeclareButton": {
+    "description": "Outline button on the unknown-income ratio card."
+  },
+  "mortgagesRatioCaveat": "Lecture informative : ce repère ne lie aucun prêteur.",
+  "@mortgagesRatioCaveat": {
+    "description": "HCSF caveat, always shown as body content on the ratio card, never as a tooltip."
+  },
+  "mortgagesIncomeTitle": "Déclarer un revenu",
+  "@mortgagesIncomeTitle": {
+    "description": "Title of the declare-income modal."
+  },
+  "mortgagesIncomeBody": "Le revenu mensuel net du ménage sur lequel lire le taux d'endettement. Il remplace le revenu médian du grand livre.",
+  "@mortgagesIncomeBody": {
+    "description": "Intro line of the declare-income modal."
+  },
+  "mortgagesIncomeLabel": "Revenu mensuel",
+  "@mortgagesIncomeLabel": {
+    "description": "Field label in the declare-income modal."
+  },
+  "mortgagesIncomeInvalid": "Saisissez un montant supérieur à zéro.",
+  "@mortgagesIncomeInvalid": {
+    "description": "Validation message for a missing or non-positive declared income."
+  },
+  "mortgagesIncomeSubmit": "Enregistrer",
+  "@mortgagesIncomeSubmit": {
+    "description": "Submit button of the declare-income modal."
+  },
+  "mortgagesIncomeFailed": "Le revenu n'a pas pu être enregistré.",
+  "@mortgagesIncomeFailed": {
+    "description": "Inline error when the declared income cannot be saved."
+  },
+  "mortgageKindMortgage": "Crédit immobilier",
+  "@mortgageKindMortgage": {
+    "description": "Credit product label for kind=mortgage."
+  },
+  "mortgageKindWorks": "Prêt travaux",
+  "@mortgageKindWorks": {
+    "description": "Credit product label for kind=works."
+  },
+  "mortgageKindConsumer": "Crédit à la consommation",
+  "@mortgageKindConsumer": {
+    "description": "Credit product label for kind=consumer."
+  },
+  "mortgageKindAuto": "Crédit auto",
+  "@mortgageKindAuto": {
+    "description": "Credit product label for kind=auto."
+  },
+  "mortgageRepaymentConstant": "Échéance constante",
+  "@mortgageRepaymentConstant": {
+    "description": "Repayment type label for constant_payment."
+  },
+  "mortgageRepaymentInterestOnly": "In fine",
+  "@mortgageRepaymentInterestOnly": {
+    "description": "Repayment type label for interest_only."
+  },
+  "mortgageCardSubline": "{kind} · {lender} · {months} mois",
+  "@mortgageCardSubline": {
+    "description": "Loan card sub-line: kind label, lender, term.",
+    "placeholders": {
+      "kind": {
+        "type": "String"
+      },
+      "lender": {
+        "type": "String"
+      },
+      "months": {
+        "type": "int"
+      }
+    }
+  },
+  "mortgageCardPerMonth": "/ mois",
+  "@mortgageCardPerMonth": {
+    "description": "Unit under the loan card's instalment."
+  },
+  "mortgageCardOutstandingLabel": "Capital restant dû",
+  "@mortgageCardOutstandingLabel": {
+    "description": "Loan card label before the outstanding principal."
+  },
+  "mortgageCardOutstandingOf": "sur {principal}",
+  "@mortgageCardOutstandingOf": {
+    "description": "Loan card: the principal the outstanding is measured against.",
+    "placeholders": {
+      "principal": {
+        "type": "String"
+      }
+    }
+  },
+  "mortgageCardRepaid": "remboursé",
+  "@mortgageCardRepaid": {
+    "description": "Loan card: word after the iris repaid percentage."
+  },
+  "mortgageCardRemaining": "{count, plural, =0{aucune échéance restante} =1{1 échéance restante} other{{count} échéances restantes}}",
+  "@mortgageCardRemaining": {
+    "description": "Loan card: instalments left.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "mortgageRateLabel": "Taux nominal",
+  "@mortgageRateLabel": {
+    "description": "Nominal rate label (loan card footer and cost row). Rendered uppercase on the card."
+  },
+  "mortgageInsuranceLabel": "Assurance",
+  "@mortgageInsuranceLabel": {
+    "description": "Insurance label in the loan card footer. Rendered uppercase."
+  },
+  "mortgageNextLabel": "Prochaine échéance",
+  "@mortgageNextLabel": {
+    "description": "Next instalment label (loan card footer and detail header). Rendered uppercase."
+  },
+  "mortgageInsurancePerMonth": "{amount} / mois",
+  "@mortgageInsurancePerMonth": {
+    "description": "Insurance premium per month.",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "mortgagesChartTitle": "Trajectoire du capital restant dû",
+  "@mortgagesChartTitle": {
+    "description": "Title of the trajectory chart."
+  },
+  "mortgagesChartSubtitle": "{count, plural, =1{Le crédit, échéance après échéance, jusqu'au dernier remboursement} =2{Les deux crédits, échéance après échéance, jusqu'au dernier remboursement} other{Les {count} crédits, échéance après échéance, jusqu'au dernier remboursement}}",
+  "@mortgagesChartSubtitle": {
+    "description": "Subtitle of the trajectory chart, by active loan count.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "mortgagesChartLegendTotal": "Capital restant dû total",
+  "@mortgagesChartLegendTotal": {
+    "description": "Chart legend for the combined outstanding line."
+  },
+  "mortgagesChartLegendToday": "aujourd'hui",
+  "@mortgagesChartLegendToday": {
+    "description": "Chart legend for the dashed today marker."
+  },
+  "mortgagesChartToday": "{month} · {amount}",
+  "@mortgagesChartToday": {
+    "description": "Chart annotation on today's month: the month and the combined outstanding.",
+    "placeholders": {
+      "month": {
+        "type": "String"
+      },
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "mortgagesChartLoanEnd": "fin {kind} · {month}",
+  "@mortgagesChartLoanEnd": {
+    "description": "Chart annotation at a loan's last instalment: the kind label (lower-cased) and the month.",
+    "placeholders": {
+      "kind": {
+        "type": "String"
+      },
+      "month": {
+        "type": "String"
+      }
+    }
+  },
+  "mortgageDetailBack": "Retour aux crédits",
+  "@mortgageDetailBack": {
+    "description": "Iris back link from the loan detail to the list."
+  },
+  "mortgageDetailLoadFailed": "Impossible de charger ce crédit.",
+  "@mortgageDetailLoadFailed": {
+    "description": "Error state when a loan's detail cannot be loaded."
+  },
+  "mortgageDetailSubline": "{kind} · {lender} · {principal} sur {months} mois · 1re échéance le {date}",
+  "@mortgageDetailSubline": {
+    "description": "Detail header sub-line without upfront fees.",
+    "placeholders": {
+      "kind": {
+        "type": "String"
+      },
+      "lender": {
+        "type": "String"
+      },
+      "principal": {
+        "type": "String"
+      },
+      "months": {
+        "type": "int"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "mortgageDetailSublineFees": "{kind} · {lender} · {principal} sur {months} mois · 1re échéance le {date} · frais de dossier {fees}",
+  "@mortgageDetailSublineFees": {
+    "description": "Detail header sub-line with upfront fees.",
+    "placeholders": {
+      "kind": {
+        "type": "String"
+      },
+      "lender": {
+        "type": "String"
+      },
+      "principal": {
+        "type": "String"
+      },
+      "months": {
+        "type": "int"
+      },
+      "date": {
+        "type": "String"
+      },
+      "fees": {
+        "type": "String"
+      }
+    }
+  },
+  "mortgageDetailInstalmentLabel": "Échéance totale",
+  "@mortgageDetailInstalmentLabel": {
+    "description": "Detail header stat label. Rendered uppercase."
+  },
+  "mortgageDetailInstalmentCaption": "{payment} + {insurance} assurance",
+  "@mortgageDetailInstalmentCaption": {
+    "description": "Detail header: the instalment split into payment and insurance.",
+    "placeholders": {
+      "payment": {
+        "type": "String"
+      },
+      "insurance": {
+        "type": "String"
+      }
+    }
+  },
+  "mortgageDetailInstalmentNoInsurance": "sans assurance",
+  "@mortgageDetailInstalmentNoInsurance": {
+    "description": "Detail header caption for a loan without insurance."
+  },
+  "mortgageDetailOutstandingCaption": "{percent} remboursé · {count, plural, =1{1 échéance} other{{count} échéances}}",
+  "@mortgageDetailOutstandingCaption": {
+    "description": "Detail header: repaid share and instalments left.",
+    "placeholders": {
+      "percent": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "mortgageDetailEdit": "Modifier",
+  "@mortgageDetailEdit": {
+    "description": "Secondary button opening the loan form prefilled."
+  },
+  "mortgageCostRateCaption": "fixe sur toute la durée",
+  "@mortgageCostRateCaption": {
+    "description": "Cost row: caption under the nominal rate."
+  },
+  "mortgageCostTaegLabel": "TAEG",
+  "@mortgageCostTaegLabel": {
+    "description": "Cost row: TAEG label."
+  },
+  "mortgageCostIndicative": "Indicatif",
+  "@mortgageCostIndicative": {
+    "description": "Iris marker pill beside the TAEG label. Rendered uppercase."
+  },
+  "mortgageCostTaegDisclaimer": "Indicatif : un TAEG réel inclut des frais que FinStride ne voit pas.",
+  "@mortgageCostTaegDisclaimer": {
+    "description": "TAEG disclaimer read by assistive tech on the INDICATIF pill."
+  },
+  "mortgageCostTaegCaption": "taux, assurance et frais inclus",
+  "@mortgageCostTaegCaption": {
+    "description": "Cost row: caption under the TAEG."
+  },
+  "mortgageCostInterestLabel": "Intérêts totaux",
+  "@mortgageCostInterestLabel": {
+    "description": "Cost row: total interest label."
+  },
+  "mortgageCostInterestCaption": "dont {amount} encore à verser",
+  "@mortgageCostInterestCaption": {
+    "description": "Cost row: interest still to pay after today.",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "mortgageCostTotalLabel": "Coût total du crédit",
+  "@mortgageCostTotalLabel": {
+    "description": "Cost row: total cost label."
+  },
+  "mortgageCostTotalCaption": "intérêts + assurance {insurance} + frais {fees}",
+  "@mortgageCostTotalCaption": {
+    "description": "Cost row: what the total cost is made of.",
+    "placeholders": {
+      "insurance": {
+        "type": "String"
+      },
+      "fees": {
+        "type": "String"
+      }
+    }
+  },
+  "mortgageFormCreateTitle": "Nouveau crédit",
+  "@mortgageFormCreateTitle": {
+    "description": "Title of the loan form when creating."
+  },
+  "mortgageFormEditTitle": "Modifier le crédit",
+  "@mortgageFormEditTitle": {
+    "description": "Title of the loan form when editing."
+  },
+  "mortgageFormSubtitle": "La mensualité est calculée à partir du capital, du taux et de la durée.",
+  "@mortgageFormSubtitle": {
+    "description": "Subtitle of the loan form."
+  },
+  "mortgageFormLabel": "Libellé",
+  "@mortgageFormLabel": {
+    "description": "Loan form: label field."
+  },
+  "mortgageFormLabelRequired": "Donnez un nom à ce crédit.",
+  "@mortgageFormLabelRequired": {
+    "description": "Loan form: missing label."
+  },
+  "mortgageFormLender": "Prêteur",
+  "@mortgageFormLender": {
+    "description": "Loan form: lender field."
+  },
+  "mortgageFormLenderRequired": "Indiquez le prêteur.",
+  "@mortgageFormLenderRequired": {
+    "description": "Loan form: missing lender."
+  },
+  "mortgageFormKind": "Type",
+  "@mortgageFormKind": {
+    "description": "Loan form: credit product select."
+  },
+  "mortgageFormRepayment": "Remboursement",
+  "@mortgageFormRepayment": {
+    "description": "Loan form: repayment type control, a separate axis from Type."
+  },
+  "mortgageFormPrincipal": "Capital emprunté",
+  "@mortgageFormPrincipal": {
+    "description": "Loan form: principal field."
+  },
+  "mortgageFormAmountInvalid": "Saisissez un montant supérieur à zéro.",
+  "@mortgageFormAmountInvalid": {
+    "description": "Loan form: an amount that is missing or not above zero."
+  },
+  "mortgageFormRate": "Taux nominal",
+  "@mortgageFormRate": {
+    "description": "Loan form: nominal rate field, typed as a percent."
+  },
+  "mortgageFormRateInvalid": "Saisissez un taux, par exemple 3,45.",
+  "@mortgageFormRateInvalid": {
+    "description": "Loan form: unreadable rate."
+  },
+  "mortgageFormTerm": "Durée",
+  "@mortgageFormTerm": {
+    "description": "Loan form: term field."
+  },
+  "mortgageFormTermUnit": "mois",
+  "@mortgageFormTermUnit": {
+    "description": "Unit suffix inside the term field."
+  },
+  "mortgageFormTermInvalid": "Saisissez une durée en mois.",
+  "@mortgageFormTermInvalid": {
+    "description": "Loan form: missing or zero term."
+  },
+  "mortgageFormFirstPayment": "1re échéance",
+  "@mortgageFormFirstPayment": {
+    "description": "Loan form: first instalment date field."
+  },
+  "mortgageFormDateInvalid": "Saisissez une date valide.",
+  "@mortgageFormDateInvalid": {
+    "description": "Loan form: unreadable date."
+  },
+  "mortgageFormCalendar": "Choisir une date",
+  "@mortgageFormCalendar": {
+    "description": "Tooltip of the date field's calendar button."
+  },
+  "mortgageFormInsurance": "Assurance / mois",
+  "@mortgageFormInsurance": {
+    "description": "Loan form: monthly insurance field."
+  },
+  "mortgageFormAmountOptionalInvalid": "Saisissez un montant valide ou laissez vide.",
+  "@mortgageFormAmountOptionalInvalid": {
+    "description": "Loan form: an optional amount that cannot be read."
+  },
+  "mortgageFormFees": "Frais de dossier",
+  "@mortgageFormFees": {
+    "description": "Loan form: upfront fees field."
+  },
+  "mortgageFormProperty": "Bien financé",
+  "@mortgageFormProperty": {
+    "description": "Loan form: optional property link."
+  },
+  "mortgageFormPropertyNone": "Aucun",
+  "@mortgageFormPropertyNone": {
+    "description": "Loan form: no property linked."
+  },
+  "mortgageFormPlateLabel": "Mensualité calculée",
+  "@mortgageFormPlateLabel": {
+    "description": "Read-only computed instalment plate label."
+  },
+  "mortgageFormPlateDetail": "échéance totale {instalment} — intérêts totaux {interest}",
+  "@mortgageFormPlateDetail": {
+    "description": "Computed instalment plate: total instalment and total interest.",
+    "placeholders": {
+      "instalment": {
+        "type": "String"
+      },
+      "interest": {
+        "type": "String"
+      }
+    }
+  },
+  "mortgageFormPlatePending": "Renseignez le capital, le taux et la durée.",
+  "@mortgageFormPlatePending": {
+    "description": "Computed instalment plate before the inputs are complete."
+  },
+  "mortgageFormPlateInterestOnly": "La mensualité d'un prêt in fine s'affiche une fois le crédit enregistré.",
+  "@mortgageFormPlateInterestOnly": {
+    "description": "Computed instalment plate for an interest-only loan, which the simulator does not compute."
+  },
+  "mortgageFormCancel": "Annuler",
+  "@mortgageFormCancel": {
+    "description": "Loan form: cancel."
+  },
+  "mortgageFormSubmit": "Ajouter le crédit",
+  "@mortgageFormSubmit": {
+    "description": "Loan form: create."
+  },
+  "mortgageFormSave": "Enregistrer",
+  "@mortgageFormSave": {
+    "description": "Loan form: save edits."
+  },
+  "mortgageFormDelete": "Supprimer le crédit",
+  "@mortgageFormDelete": {
+    "description": "Loan form: secondary text button deleting the loan."
+  },
+  "mortgageDeleteTitle": "Supprimer ce crédit ?",
+  "@mortgageDeleteTitle": {
+    "description": "Delete confirmation title."
+  },
+  "mortgageDeleteBody": "Il quittera le passif de la Synthèse et, s'il est rattaché à un bien, la base de l'IFI.",
+  "@mortgageDeleteBody": {
+    "description": "Delete confirmation: both consequences."
+  },
+  "mortgageDeleteConfirm": "Supprimer",
+  "@mortgageDeleteConfirm": {
+    "description": "Delete confirmation: confirm."
+  },
+  "mortgageErrorNonAmortizing": "Ce crédit ne se rembourse pas : l'échéance ne couvre pas les intérêts du premier mois. Modifiez le taux, le capital ou la durée.",
+  "@mortgageErrorNonAmortizing": {
+    "description": "Inline error for a loan whose instalment does not cover its first interest (422)."
+  },
+  "mortgageErrorFeesExceed": "Les frais de dossier doivent rester inférieurs au capital emprunté.",
+  "@mortgageErrorFeesExceed": {
+    "description": "Inline error when upfront fees reach the principal."
+  },
+  "mortgageErrorPropertyInvalid": "Ce bien n'existe plus.",
+  "@mortgageErrorPropertyInvalid": {
+    "description": "Inline error when the linked property no longer exists."
+  },
+  "mortgageErrorNotFound": "Ce crédit n'existe plus.",
+  "@mortgageErrorNotFound": {
+    "description": "Error when the loan no longer exists."
+  },
+  "mortgageErrorValidation": "Certaines valeurs sont invalides.",
+  "@mortgageErrorValidation": {
+    "description": "Error for any other rejected loan value."
+  },
+  "mortgageErrorGeneric": "Une erreur est survenue. Réessayez.",
+  "@mortgageErrorGeneric": {
+    "description": "Fallback error for loan actions."
   }
 }
