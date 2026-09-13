@@ -10,7 +10,7 @@ units: a negative salary is not an outflow, it is a typo.
 from datetime import datetime
 from typing import Literal
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, StrictInt
 
 #: The two household shapes an estimate runs on (§4c). `couple` is marié/pacsé — one joint
 #: estimate; anything finer is a filing status the estimate does not model (§16).
@@ -199,3 +199,67 @@ class TaxEstimateRead(BaseModel):
     #: §16's knowingly-not-modelled regimes, as machine keys — the frontend owns the wording.
     ignored_keys: list[str]
     currency: str
+
+
+#: The two barèmes a year holds (§4c).
+BracketKind = Literal["ir", "ifi"]
+
+
+class TaxBracketWrite(BaseModel):
+    """One submitted band. Strict integers: `1280.0` or `"1280"` is not a rate in bps."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    lower_bound_minor: StrictInt
+    rate_bps: StrictInt
+
+
+class TaxBracketsWrite(BaseModel):
+    """Replacement sets per kind. An omitted or null kind is left as it is."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    ir: list[TaxBracketWrite] | None = None
+    ifi: list[TaxBracketWrite] | None = None
+
+
+class TaxParametersUpdate(BaseModel):
+    """Overrides for one year: scalar keys individually, bracket kinds wholesale (§5c).
+
+    Ranges, known keys and bracket-set shape are checked by the service against the year's
+    seeded set, because that set — not this schema — defines what exists.
+    """
+
+    model_config = ConfigDict(extra="forbid")
+
+    parameters: dict[str, StrictInt] | None = None
+    brackets: TaxBracketsWrite | None = None
+
+
+class TaxBracketRead(BaseModel):
+    """One resolved band; its position in the list is its ordinal."""
+
+    lower_bound_minor: int
+    rate_bps: int
+
+
+class TaxParameterRead(BaseModel):
+    """One resolved scalar and the unit that says what its integer means."""
+
+    int_value: int
+    unit: str
+
+
+class TaxOverriddenRead(BaseModel):
+    """What in the resolved set came from the user's rows — the panel's « ajusté » markers."""
+
+    keys: list[str]
+    bracket_kinds: list[str]
+
+
+class TaxParametersRead(BaseModel):
+    """A year's resolved set: the numbers the estimate runs on, and which of them are the user's."""
+
+    brackets: dict[str, list[TaxBracketRead]]
+    parameters: dict[str, TaxParameterRead]
+    overridden: TaxOverriddenRead

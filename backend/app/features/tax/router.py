@@ -14,8 +14,11 @@ from app.features.auth.deps import get_current_user
 from app.features.auth.models import User
 from app.features.tax.repository import TaxRepository
 from app.features.tax.schemas import (
+    BracketKind,
     PrefillRead,
     TaxEstimateRead,
+    TaxParametersRead,
+    TaxParametersUpdate,
     TaxProfileRead,
     TaxProfileUpdate,
 )
@@ -93,3 +96,39 @@ async def read_estimate(
     estimate itself is recomputed on every read.
     """
     return service.estimate(user, tax_year, today)
+
+
+@router.get("/parameters/{tax_year}", response_model=TaxParametersRead)
+async def read_parameters(
+    tax_year: int,
+    service: Annotated[TaxService, Depends(_service)],
+    user: Annotated[User, Depends(get_current_user)],
+    today: Annotated[date, Depends(get_today)],
+) -> TaxParametersRead:
+    """The year's resolved parameter set, naming what came from the caller's overrides."""
+    return service.parameters(user, tax_year, today)
+
+
+@router.patch("/parameters/{tax_year}", response_model=TaxParametersRead)
+async def update_parameters(
+    tax_year: int,
+    payload: TaxParametersUpdate,
+    service: Annotated[TaxService, Depends(_service)],
+    user: Annotated[User, Depends(get_current_user)],
+    today: Annotated[date, Depends(get_today)],
+) -> TaxParametersRead:
+    """Override keys and/or whole bracket kinds; returns the newly resolved set."""
+    return service.update_parameters(user, tax_year, payload, today)
+
+
+@router.delete("/parameters/{tax_year}", response_model=TaxParametersRead)
+async def reset_parameters(
+    tax_year: int,
+    service: Annotated[TaxService, Depends(_service)],
+    user: Annotated[User, Depends(get_current_user)],
+    today: Annotated[date, Depends(get_today)],
+    key: Annotated[str | None, Query(description="Drop only this key's override.")] = None,
+    kind: Annotated[BracketKind | None, Query(description="Drop only this barème.")] = None,
+) -> TaxParametersRead:
+    """Drop overrides back to the seeded set: all of the year's, or the named key and/or kind."""
+    return service.reset_parameters(user, tax_year, today, key=key, kind=kind)
