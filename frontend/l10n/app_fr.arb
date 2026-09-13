@@ -968,6 +968,14 @@
   "@categorySystemIncomeSalary": {
     "description": "Display name for the system category with i18n key category.income.salary."
   },
+  "categorySystemIncomePension": "Retraite",
+  "@categorySystemIncomePension": {
+    "description": "Display name for the system category with i18n key category.income.pension."
+  },
+  "categorySystemIncomeDividends": "Dividendes",
+  "@categorySystemIncomeDividends": {
+    "description": "Display name for the system category with i18n key category.income.dividends."
+  },
   "categorySystemIncomeRefunds": "Remboursements",
   "@categorySystemIncomeRefunds": {
     "description": "Display name for the system category with i18n key category.income.refunds."

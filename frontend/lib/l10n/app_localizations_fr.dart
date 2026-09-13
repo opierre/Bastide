@@ -772,6 +772,12 @@ class AppLocalizationsFr extends AppLocalizations {
   String get categorySystemIncomeSalary => 'Salaire';
 
   @override
+  String get categorySystemIncomePension => 'Retraite';
+
+  @override
+  String get categorySystemIncomeDividends => 'Dividendes';
+
+  @override
   String get categorySystemIncomeRefunds => 'Remboursements';
 
   @override

@@ -1382,6 +1382,18 @@ abstract class AppLocalizations {
   /// **'Salaire'**
   String get categorySystemIncomeSalary;
 
+  /// Display name for the system category with i18n key category.income.pension.
+  ///
+  /// In fr, this message translates to:
+  /// **'Retraite'**
+  String get categorySystemIncomePension;
+
+  /// Display name for the system category with i18n key category.income.dividends.
+  ///
+  /// In fr, this message translates to:
+  /// **'Dividendes'**
+  String get categorySystemIncomeDividends;
+
   /// Display name for the system category with i18n key category.income.refunds.
   ///
   /// In fr, this message translates to:

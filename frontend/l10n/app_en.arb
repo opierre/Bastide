@@ -265,6 +265,8 @@
   "categorySystemFinanceInterest": "Interest",
   "categorySystemIncome": "Income",
   "categorySystemIncomeSalary": "Salary",
+  "categorySystemIncomePension": "Pension",
+  "categorySystemIncomeDividends": "Dividends",
   "categorySystemIncomeRefunds": "Refunds",
   "categorySystemIncomeOther": "Other income",
   "categorySystemOther": "Other",
