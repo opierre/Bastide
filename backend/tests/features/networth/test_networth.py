@@ -450,8 +450,8 @@ def test_rows_after_the_nearest_snapshot_are_added_to_it() -> None:
     ]
     months = {(2026, 2): 999_999, (2026, 3): 1_500, (2026, 4): -700}
     repository.monthly_row_sums.return_value = {
-        **{("a1", year * 12 + month - 1): total for (year, month), total in months.items()},
-        ("a2", 2026 * 12 + 1): 250,
+        "a1": {year * 12 + month - 1: total for (year, month), total in months.items()},
+        "a2": {2026 * 12 + 1: 250},
     }
     user = cast(User, SimpleNamespace(id="u1", currency="EUR"))
 

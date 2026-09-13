@@ -142,7 +142,12 @@ class NetWorthService:
                 continue
             month_end = last_of_month(month)
             accounts_minor = sum(
-                _balance_at(account, snapshots.get(account.id, {}), row_sums, month)
+                _balance_at(
+                    account,
+                    snapshots.get(account.id, {}),
+                    row_sums.get(account.id, {}),
+                    month,
+                )
                 for account in accounts
             )
             mortgages_minor = sum(schedule.outstanding_at(month_end) for schedule in schedules)
@@ -158,12 +163,13 @@ class NetWorthService:
 def _balance_at(
     account: Account,
     snapshots: dict[int, int],
-    row_sums: dict[tuple[str, int], int],
+    row_sums: dict[int, int],
     month: int,
 ) -> int:
     """The account's balance at the end of `month`, from its nearest snapshot plus rows since.
 
-    Snapshots are month-end figures, so "rows since" are the rows of the following months.
+    `snapshots` and `row_sums` are this account's own, keyed by month index. Snapshots are
+    month-end figures, so "rows since" are the rows of the following months.
     """
     earlier = [index for index in snapshots if index <= month]
     if earlier:
@@ -174,6 +180,6 @@ def _balance_at(
         base = account.opening_balance_minor
     return base + sum(
         total
-        for (account_id, index), total in row_sums.items()
-        if account_id == account.id and index <= month and (since is None or index > since)
+        for index, total in row_sums.items()
+        if index <= month and (since is None or index > since)
     )

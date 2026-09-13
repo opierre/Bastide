@@ -77,8 +77,8 @@ class NetWorthRepository:
 
     def monthly_row_sums(
         self, user_id: str, account_ids: Sequence[str], before: date
-    ) -> dict[tuple[str, int], int]:
-        """Ledger totals per `(account_id, month index)` for rows booked before `before`.
+    ) -> dict[str, dict[int, int]]:
+        """Ledger totals per account, then per month index, for rows booked before `before`.
 
         A month index is `year * 12 + month - 1`. Grouped with `extract()` so the query stays
         portable to PostgreSQL (see the dashboard repository).
@@ -97,7 +97,7 @@ class NetWorthRepository:
             )
             .group_by(Transaction.account_id, year, month)
         ).all()
-        return {
-            (account_id, int(y) * MONTHS_PER_YEAR + int(m) - 1): int(total)
-            for account_id, y, m, total in rows
-        }
+        sums: dict[str, dict[int, int]] = {}
+        for account_id, y, m, total in rows:
+            sums.setdefault(account_id, {})[int(y) * MONTHS_PER_YEAR + int(m) - 1] = int(total)
+        return sums
