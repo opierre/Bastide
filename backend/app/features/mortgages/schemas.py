@@ -207,6 +207,57 @@ class MortgageSummary(BaseModel):
     currency: str
 
 
+class SimulationCreate(BaseModel):
+    """Payload saving a scenario: inputs only, never a result (§4c).
+
+    The mortgage validation minus the loan-only fields (lender, kind, repayment type, dates,
+    property link).
+    """
+
+    model_config = ConfigDict(extra="forbid")
+
+    label: str = Field(min_length=1, max_length=255)
+    property_price_minor: int = Field(gt=0)
+    down_payment_minor: int = Field(ge=0)
+    principal_minor: int = Field(gt=0)
+    annual_rate_bps: int = Field(ge=0)
+    insurance_monthly_minor: int = Field(ge=0)
+    term_months: int = Field(gt=0)
+    upfront_fees_minor: int = Field(default=0, ge=0)
+
+
+class SimulationUpdate(BaseModel):
+    """Patch payload for a scenario; omitted fields are left alone."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    label: str | None = Field(default=None, min_length=1, max_length=255)
+    property_price_minor: int | None = Field(default=None, gt=0)
+    down_payment_minor: int | None = Field(default=None, ge=0)
+    principal_minor: int | None = Field(default=None, gt=0)
+    annual_rate_bps: int | None = Field(default=None, ge=0)
+    insurance_monthly_minor: int | None = Field(default=None, ge=0)
+    term_months: int | None = Field(default=None, gt=0)
+    upfront_fees_minor: int | None = Field(default=None, ge=0)
+
+
+class SimulationRead(BaseModel):
+    """A saved scenario's inputs. Its figures come from `/simulations/compute`, never the row."""
+
+    id: str
+    label: str
+    property_price_minor: int
+    down_payment_minor: int
+    principal_minor: int
+    annual_rate_bps: int
+    insurance_monthly_minor: int
+    term_months: int
+    upfront_fees_minor: int
+    currency: str
+    created_at: datetime
+    updated_at: datetime
+
+
 class SimulationCompute(BaseModel):
     """Inputs of a stateless simulation (§17); POST only because they travel as a body."""
 

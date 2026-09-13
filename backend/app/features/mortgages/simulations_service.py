@@ -1,12 +1,14 @@
-"""The simulator (§17): a stateless compute over the mortgages engine.
+"""The simulator (§17): a stateless compute over the mortgages engine, and saved scenarios.
 
 It lives inside the mortgages feature because it computes through that feature's engine — one
 implementation, so a simulated loan and a declared one can never disagree about the same inputs.
-Nothing computed here is ever persisted.
+Nothing computed here is ever persisted: a saved scenario holds inputs only.
 """
 
 from datetime import date
+from typing import Any
 
+from app.core.errors import NotFoundError, ValidationError
 from app.features.auth.models import User
 from app.features.mortgages.engine import (
     NonAmortizingLoanError,
@@ -15,11 +17,15 @@ from app.features.mortgages.engine import (
     build_schedule,
     taeg_bps,
 )
-from app.features.mortgages.repository import MortgageRepository
+from app.features.mortgages.models import MortgageSimulation
+from app.features.mortgages.repository import MortgageRepository, SimulationRepository
 from app.features.mortgages.schemas import (
     HcsfReading,
     SimulationCompute,
+    SimulationCreate,
+    SimulationRead,
     SimulationResult,
+    SimulationUpdate,
     SimulationYearRow,
 )
 from app.features.mortgages.service import (
@@ -39,6 +45,33 @@ _MONTHS_PER_YEAR = 12
 
 #: The seeded §15 maximum term the simulation's duration is read against.
 HCSF_MAX_TERM_KEY = "hcsf_max_term_months_count"
+
+#: The panel compares at most 3 (§17); an unbounded list is a list nobody curates.
+MAX_SIMULATIONS_PER_USER = 20
+
+#: Validating a saved scenario needs a dated schedule, but no amount depends on the date.
+_VALIDATION_FIRST_PAYMENT = date(2000, 1, 1)
+
+#: The columns a scenario's schedule is a function of.
+_SCHEDULE_INPUTS = (
+    "principal_minor",
+    "annual_rate_bps",
+    "insurance_monthly_minor",
+    "term_months",
+    "upfront_fees_minor",
+)
+
+
+class SimulationNotFoundError(NotFoundError):
+    """Raised when a scenario doesn't exist or doesn't belong to the caller."""
+
+    code = "SIMULATION_NOT_FOUND"
+
+
+class SimulationLimitReachedError(ValidationError):
+    """Raised when saving one more scenario would exceed the per-user cap."""
+
+    code = "SIMULATION_LIMIT_REACHED"
 
 
 def first_payment_date(today: date) -> date:
@@ -95,13 +128,102 @@ def simulated_schedule(
         ) from exc
 
 
-class SimulationService:
-    """The stateless simulation, scoped to a user only for income, loans and parameters."""
+def to_read(simulation: MortgageSimulation, currency: str) -> SimulationRead:
+    return SimulationRead(
+        id=simulation.id,
+        label=simulation.label,
+        property_price_minor=simulation.property_price_minor,
+        down_payment_minor=simulation.down_payment_minor,
+        principal_minor=simulation.principal_minor,
+        annual_rate_bps=simulation.annual_rate_bps,
+        insurance_monthly_minor=simulation.insurance_monthly_minor,
+        term_months=simulation.term_months,
+        upfront_fees_minor=simulation.upfront_fees_minor,
+        currency=currency,
+        created_at=simulation.created_at,
+        updated_at=simulation.updated_at,
+    )
 
-    def __init__(self, mortgages: MortgageRepository) -> None:
+
+class SimulationService:
+    """The stateless simulation and the user's saved scenarios."""
+
+    def __init__(self, mortgages: MortgageRepository, simulations: SimulationRepository) -> None:
         self._mortgages = mortgages
+        self._simulations = simulations
         # Income resolution is P3-04's, shared unchanged.
         self._mortgage_service = MortgageService(mortgages)
+
+    def list_for_user(self, user: User) -> list[SimulationRead]:
+        """The user's saved scenarios, oldest first."""
+        return [
+            to_read(simulation, user.currency)
+            for simulation in self._simulations.list_for_user(user.id)
+        ]
+
+    def create(self, user: User, data: SimulationCreate) -> SimulationRead:
+        """Save a scenario's inputs. No HCSF reading ever refuses it (§15, §17).
+
+        Raises:
+            SimulationLimitReachedError: the user already holds the maximum number of scenarios.
+            MortgageFeesExceedPrincipalError: the fees are not smaller than the principal.
+            MortgageNonAmortizingError: the instalment does not repay the principal.
+        """
+        if self._simulations.count_for_user(user.id) >= MAX_SIMULATIONS_PER_USER:
+            raise SimulationLimitReachedError(
+                "Too many saved scenarios.", details={"limit": MAX_SIMULATIONS_PER_USER}
+            )
+        simulation = MortgageSimulation(user_id=user.id, **data.model_dump())
+        self._validate(simulation)
+        return to_read(self._simulations.add(simulation), user.currency)
+
+    def update(self, user: User, simulation_id: str, data: SimulationUpdate) -> SimulationRead:
+        """Patch a scenario, validated against the merged inputs before anything is assigned.
+
+        Raises:
+            SimulationNotFoundError: no such scenario, or it belongs to another user.
+            MortgageFeesExceedPrincipalError: the fees are not smaller than the principal.
+            MortgageNonAmortizingError: the instalment does not repay the principal.
+        """
+        simulation = self._owned(user.id, simulation_id)
+        changes: dict[str, Any] = data.model_dump(exclude_none=True)
+        if any(field in changes for field in _SCHEDULE_INPUTS):
+            self._validate(
+                MortgageSimulation(
+                    **{
+                        field: changes.get(field, getattr(simulation, field))
+                        for field in _SCHEDULE_INPUTS
+                    }
+                )
+            )
+        for field, value in changes.items():
+            setattr(simulation, field, value)
+        return to_read(self._simulations.save(simulation), user.currency)
+
+    def delete(self, user_id: str, simulation_id: str) -> None:
+        """Hard-delete a scenario: archiving a scratchpad would leave debris nobody can clear.
+
+        Raises:
+            SimulationNotFoundError: no such scenario, or it belongs to another user.
+        """
+        self._simulations.delete(self._owned(user_id, simulation_id))
+
+    def _owned(self, user_id: str, simulation_id: str) -> MortgageSimulation:
+        simulation = self._simulations.get_for_user(simulation_id, user_id)
+        if simulation is None:
+            raise SimulationNotFoundError("Simulation not found.")
+        return simulation
+
+    @staticmethod
+    def _validate(simulation: MortgageSimulation) -> None:
+        simulated_schedule(
+            principal_minor=simulation.principal_minor,
+            annual_rate_bps=simulation.annual_rate_bps,
+            insurance_monthly_minor=simulation.insurance_monthly_minor,
+            term_months=simulation.term_months,
+            upfront_fees_minor=simulation.upfront_fees_minor,
+            first_payment_on=_VALIDATION_FIRST_PAYMENT,
+        )
 
     def compute(self, user: User, data: SimulationCompute, today: date) -> SimulationResult:
         """Cost, yearly projection and HCSF reading of a loan nobody has declared.
