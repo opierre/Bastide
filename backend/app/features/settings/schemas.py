@@ -56,6 +56,9 @@ class SettingsUpdate(BaseModel):
     inference_base_url: InferenceBaseUrl | None = None
     model_tag: str | None = Field(default=None, max_length=255)
     confidence_threshold: ConfidenceThreshold | None = None
+    #: Monthly income the debt ratio runs on (§15). An explicit `null` clears the declaration so
+    #: the ratio falls back to the ledger median.
+    declared_monthly_income_minor: int | None = Field(default=None, gt=0)
 
 
 class SettingsRead(BaseModel):
@@ -68,3 +71,4 @@ class SettingsRead(BaseModel):
     model_tag: str | None
     confidence_threshold: float
     last_backup_at: datetime | None
+    declared_monthly_income_minor: int | None

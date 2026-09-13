@@ -15,6 +15,7 @@ DEFAULTS = {
     "model_tag": None,
     "confidence_threshold": 0.80,
     "last_backup_at": None,
+    "declared_monthly_income_minor": None,
 }
 
 
@@ -78,6 +79,7 @@ def test_patch_updates_only_supplied_fields(client: TestClient) -> None:
         "model_tag": "gemma4:e4b",
         "confidence_threshold": 0.9,
         "last_backup_at": None,
+        "declared_monthly_income_minor": None,
     }
 
 
@@ -143,6 +145,35 @@ def test_patch_rejects_non_loopback_or_non_http_base_urls(
 
     response = client.patch(
         "/api/v1/settings", json={"inference_base_url": base_url}, headers=headers
+    )
+
+    assert response.status_code == 422
+
+
+def test_patch_declares_and_clears_the_monthly_income(client: TestClient) -> None:
+    headers = _register(client)
+
+    declared = client.patch(
+        "/api/v1/settings", json={"declared_monthly_income_minor": 460_000}, headers=headers
+    )
+    untouched = client.patch("/api/v1/settings", json={"ai_enabled": True}, headers=headers)
+    # An explicit null is the way back to the ledger median (PROJECT.md §15).
+    cleared = client.patch(
+        "/api/v1/settings", json={"declared_monthly_income_minor": None}, headers=headers
+    )
+
+    assert declared.status_code == 200
+    assert declared.json()["declared_monthly_income_minor"] == 460_000
+    assert untouched.json()["declared_monthly_income_minor"] == 460_000
+    assert cleared.json()["declared_monthly_income_minor"] is None
+
+
+@pytest.mark.parametrize("income", [0, -100])
+def test_patch_rejects_a_non_positive_declared_income(client: TestClient, income: int) -> None:
+    headers = _register(client)
+
+    response = client.patch(
+        "/api/v1/settings", json={"declared_monthly_income_minor": income}, headers=headers
     )
 
     assert response.status_code == 422
