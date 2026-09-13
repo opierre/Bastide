@@ -10,11 +10,11 @@ One resolution, shared by the estimate (§16) and the parameters panel (§5c), s
 reads are literally the numbers the estimate ran on.
 """
 
-from collections.abc import Iterable
+from collections.abc import Iterable, Sequence
 from dataclasses import dataclass
 from typing import Literal
 
-from app.core.errors import DomainError
+from app.core.errors import DomainError, ValidationError
 from app.features.tax.models import TaxBracket, TaxParameter
 
 #: Whether any figure behind an estimate came from a user row (§5c).
@@ -23,6 +23,17 @@ ParameterSource = Literal["seeded", "overridden"]
 #: The two barèmes a year holds (§4c).
 IR = "ir"
 IFI = "ifi"
+
+#: 100 %, the ceiling of every rate an override or a submitted band may carry.
+BPS_MAX = 10_000
+
+#: The inclusive range an override may take, by the unit of the key it shadows. `None` is no
+#: ceiling: an amount or a count has no natural upper bound, but a rate above 100 % is a typo.
+UNIT_RANGES: dict[str, tuple[int, int | None]] = {
+    "bps": (0, BPS_MAX),
+    "minor": (0, None),
+    "count": (0, None),
+}
 
 
 class TaxParameterMissingError(DomainError):
@@ -39,6 +50,28 @@ class TaxBracketsMissingError(DomainError):
     """Raised when a year holds no barème of the requested kind. Same cause as above."""
 
     code = "TAX_BRACKETS_MISSING"
+
+
+class TaxParameterUnknownError(ValidationError):
+    """Raised when an override names a key the year's seeded set does not hold.
+
+    The seeded set defines what exists: an unknown key is refused rather than created, since a
+    row nothing reads would look like a setting the estimate honours.
+    """
+
+    code = "TAX_PARAMETER_UNKNOWN"
+
+
+class TaxParameterOutOfRangeError(ValidationError):
+    """Raised when an override's value is outside the range its unit allows."""
+
+    code = "TAX_PARAMETER_OUT_OF_RANGE"
+
+
+class TaxBracketsInvalidError(ValidationError):
+    """Raised when a submitted barème is not a usable set; the whole set is refused."""
+
+    code = "TAX_BRACKETS_INVALID"
 
 
 @dataclass(frozen=True)
@@ -138,6 +171,55 @@ def resolve(
         overridden_keys=tuple(sorted(user_values)),
         overridden_bracket_kinds=tuple(sorted(user_bands)),
     )
+
+
+def check_parameter(key: str, int_value: int, system_units: dict[str, str]) -> str:
+    """Check one scalar override against the year's seeded set; return the unit it inherits.
+
+    Raises:
+        TaxParameterUnknownError: the year's seeded set holds no such key.
+        TaxParameterOutOfRangeError: the value is outside its unit's range.
+    """
+    unit = system_units.get(key)
+    if unit is None:
+        raise TaxParameterUnknownError(
+            "This tax parameter does not exist for the year.", details={"key": key}
+        )
+    low, high = UNIT_RANGES[unit]
+    if int_value < low or (high is not None and int_value > high):
+        raise TaxParameterOutOfRangeError(
+            "The tax parameter is outside the range its unit allows.",
+            details={"key": key, "unit": unit, "min": low, "max": high, "int_value": int_value},
+        )
+    return unit
+
+
+def check_brackets(kind: str, bands: Sequence[ResolvedBracket]) -> None:
+    """Check a submitted barème as a whole, before any of it is written.
+
+    A band is a floor and a rate, and its ceiling is the next band's floor, so a set is usable
+    exactly when it is non-empty, starts at 0 (no gap below the first band) and has strictly
+    ascending floors (neither descending nor two bands on one floor).
+
+    Raises:
+        TaxBracketsInvalidError: with `details.reason` naming the first rule the set breaks.
+    """
+
+    def refuse(reason: str, **details: int) -> TaxBracketsInvalidError:
+        return TaxBracketsInvalidError(
+            "The tax barème is not a valid set.",
+            details={"kind": kind, "reason": reason, **details},
+        )
+
+    if not bands:
+        raise refuse("empty")
+    if bands[0].lower_bound_minor != 0:
+        raise refuse("not_from_zero")
+    for ordinal, band in enumerate(bands):
+        if ordinal and band.lower_bound_minor <= bands[ordinal - 1].lower_bound_minor:
+            raise refuse("not_ascending", ordinal=ordinal)
+        if not 0 <= band.rate_bps <= BPS_MAX:
+            raise refuse("rate_out_of_range", ordinal=ordinal)
 
 
 def _ascending(bands: list[TaxBracket]) -> tuple[ResolvedBracket, ...]:
