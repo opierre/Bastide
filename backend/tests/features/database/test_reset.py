@@ -4,7 +4,7 @@ from datetime import date
 from pathlib import Path
 
 from fastapi.testclient import TestClient
-from sqlalchemy import create_engine, select
+from sqlalchemy import create_engine, delete, select
 from sqlalchemy.orm import Session, sessionmaker
 
 from app.features.accounts.models import Account
@@ -258,7 +258,7 @@ def test_reset_restores_a_system_catalog_that_had_gone_missing(
 ) -> None:
     headers = _register(client, "amelie@example.com")
     with _session(tmp_path) as db:
-        db.execute(Category.__table__.delete().where(Category.user_id.is_(None)))
+        db.execute(delete(Category).where(Category.user_id.is_(None)))
         db.commit()
 
     assert client.post("/api/v1/database/reset", headers=headers).status_code == 200
