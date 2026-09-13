@@ -13,8 +13,12 @@ import '../../features/dashboard/presentation/dashboard_screen.dart';
 import '../../features/dashboard/presentation/month_selector.dart';
 import '../../features/goals/presentation/goals_screen.dart';
 import '../../features/imports/presentation/imports_screen.dart';
+import '../../features/mortgages/presentation/mortgages_screen.dart';
+import '../../features/networth/presentation/networth_screen.dart';
 import '../../features/recurring/presentation/subscriptions_screen.dart';
 import '../../features/settings/presentation/settings_screen.dart';
+import '../../features/simulator/presentation/simulator_screen.dart';
+import '../../features/tax/presentation/tax_screen.dart';
 import '../../features/transactions/presentation/transactions_screen.dart';
 import '../widgets/app_shell.dart';
 
@@ -40,6 +44,10 @@ TopBarActionsBuilder? _topBarActions(String path) => switch (path) {
   '/categories' => (context) => const [CategoriesTopBarActions()],
   '/subscriptions' => (context) => const [SubscriptionsTopBarActions()],
   '/goals' => (context) => const [GoalsTopBarActions()],
+  '/mortgages' => (context) => const [MortgagesTopBarActions()],
+  '/tax' => (context) => const [TaxTopBarActions()],
+  '/simulations' => (context) => const [SimulatorTopBarActions()],
+  '/networth' => (context) => const [NetworthTopBarActions()],
   _ => null,
 };
 
@@ -102,6 +110,22 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           GoRoute(
             path: GoalsScreen.path,
             builder: (context, state) => const GoalsScreen(),
+          ),
+          GoRoute(
+            path: MortgagesScreen.path,
+            builder: (context, state) => const MortgagesScreen(),
+          ),
+          GoRoute(
+            path: TaxScreen.path,
+            builder: (context, state) => const TaxScreen(),
+          ),
+          GoRoute(
+            path: SimulatorScreen.path,
+            builder: (context, state) => const SimulatorScreen(),
+          ),
+          GoRoute(
+            path: NetworthScreen.path,
+            builder: (context, state) => const NetworthScreen(),
           ),
           GoRoute(
             path: SettingsScreen.path,

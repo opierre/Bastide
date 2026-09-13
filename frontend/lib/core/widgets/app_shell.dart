@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -14,19 +16,34 @@ import 'monogram_avatar.dart';
 class NavDestinationSpec {
   const NavDestinationSpec({
     required this.path,
-    required this.icon,
-    required this.selectedIcon,
+    required IconData this.icon,
+    required IconData this.selectedIcon,
     required this.label,
     required this.subtitle,
-  });
+  }) : glyph = null;
+
+  /// A destination whose icon is drawn from the frames' paths rather than
+  /// taken from the icon font — the Phase 3 glyphs have no Material equivalent
+  /// that stays distinct from the existing eight at 18 px.
+  const NavDestinationSpec.drawn({
+    required this.path,
+    required NavGlyph this.glyph,
+    required this.label,
+    required this.subtitle,
+  }) : icon = null,
+       selectedIcon = null;
 
   final String path;
-  final IconData icon;
+  final IconData? icon;
 
   /// Filled counterpart of [icon], shown when the destination is active — the
   /// outline/filled swap carries the selection alongside color, so the active
   /// item isn't signalled by color alone.
-  final IconData selectedIcon;
+  final IconData? selectedIcon;
+
+  /// Set instead of [icon]/[selectedIcon] on drawn destinations; it gets the
+  /// same outline/filled swap.
+  final NavGlyph? glyph;
   final String label;
 
   /// One-line descriptor of the panel, shown under the title in the top bar.
@@ -136,6 +153,38 @@ class AppShell extends ConsumerWidget {
         ),
       ],
     ),
+    // Phase 3 « Patrimoine », after Gestion and before the pinned Paramètres
+    // (`docs/design/00` §Phase 3 additions). The 3 + 4 + 4 + 1 stack still
+    // fits 900 px at the 40 px pill rhythm, so no token changes with it.
+    NavSectionSpec(
+      label: l10n.navSectionWealth,
+      destinations: [
+        NavDestinationSpec.drawn(
+          path: '/mortgages',
+          glyph: NavGlyph.house,
+          label: l10n.navMortgages,
+          subtitle: l10n.navMortgagesSubtitle,
+        ),
+        NavDestinationSpec.drawn(
+          path: '/tax',
+          glyph: NavGlyph.percent,
+          label: l10n.navTax,
+          subtitle: l10n.navTaxSubtitle,
+        ),
+        NavDestinationSpec.drawn(
+          path: '/simulations',
+          glyph: NavGlyph.calculator,
+          label: l10n.navSimulator,
+          subtitle: l10n.navSimulatorSubtitle,
+        ),
+        NavDestinationSpec.drawn(
+          path: '/networth',
+          glyph: NavGlyph.pie,
+          label: l10n.navNetworth,
+          subtitle: l10n.navNetworthSubtitle,
+        ),
+      ],
+    ),
     NavSectionSpec(
       label: null,
       destinations: [
@@ -180,7 +229,10 @@ class AppShell extends ConsumerWidget {
                     actions: actionsBuilder?.call(context) ?? const [],
                   ),
                   Expanded(
-                    child: ColoredBox(color: AppColors.surfaceBase, child: child),
+                    child: ColoredBox(
+                      color: AppColors.surfaceBase,
+                      child: child,
+                    ),
                   ),
                 ],
               ),
@@ -215,7 +267,9 @@ class _Sidebar extends ConsumerWidget {
     final pinnedSection = sections.last;
 
     return Container(
-      width: collapsed ? AppChrome.sidebarCollapsedWidth : AppChrome.sidebarWidth,
+      width: collapsed
+          ? AppChrome.sidebarCollapsedWidth
+          : AppChrome.sidebarWidth,
       color: AppColors.surfaceSunken,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -228,17 +282,25 @@ class _Sidebar extends ConsumerWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  for (final section in primarySections)
-                    ..._sectionChildren(context, section, collapsed),
+                  for (final (index, section) in primarySections.indexed)
+                    ..._sectionChildren(
+                      context,
+                      section,
+                      collapsed,
+                      leadingSeparator: index > 0,
+                    ),
                 ],
               ),
             ),
           ),
-          const Divider(
-            color: AppColors.borderSubtle,
-            indent: AppSpacing.sidebarGutter,
-            endIndent: AppSpacing.sidebarGutter,
-          ),
+          if (collapsed)
+            const NavRailSeparator()
+          else
+            const Divider(
+              color: AppColors.borderSubtle,
+              indent: AppSpacing.sidebarGutter,
+              endIndent: AppSpacing.sidebarGutter,
+            ),
           const SizedBox(height: AppSpacing.sm),
           ..._sectionChildren(context, pinnedSection, collapsed),
           _PrivacyBadge(collapsed: collapsed, label: l10n.sidebarPrivacyBadge),
@@ -251,8 +313,12 @@ class _Sidebar extends ConsumerWidget {
   List<Widget> _sectionChildren(
     BuildContext context,
     NavSectionSpec section,
-    bool collapsed,
-  ) => [
+    bool collapsed, {
+    bool leadingSeparator = false,
+  }) => [
+    // With the labels gone, a short hairline is what tells three icon groups
+    // apart on the collapsed rail (`docs/design/00` §Layout invariant).
+    if (collapsed && leadingSeparator) const NavRailSeparator(),
     // The collapsed rail drops section labels rather than truncating them —
     // there is no width at which "Vue d'ensemble" reads as anything useful.
     if (section.label != null && !collapsed)
@@ -263,7 +329,10 @@ class _Sidebar extends ConsumerWidget {
           AppSpacing.sidebarGutter,
           AppSpacing.sm,
         ),
-        child: Text(section.label!.toUpperCase(), style: AppTextStyles.sectionLabel),
+        child: Text(
+          section.label!.toUpperCase(),
+          style: AppTextStyles.sectionLabel,
+        ),
       ),
     for (final destination in section.destinations)
       _NavItem(
@@ -321,7 +390,10 @@ class _SidebarHeader extends ConsumerWidget {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sidebarGutter),
       child: Row(
-        children: [const Expanded(child: BrandLockup.sidebar()), toggle],
+        children: [
+          const Expanded(child: BrandLockup.sidebar()),
+          toggle,
+        ],
       ),
     );
   }
@@ -354,11 +426,19 @@ class _NavItemState extends State<_NavItem> {
         ? AppColors.iris
         : (_hovered ? AppColors.textPrimary : AppColors.textSecondary);
 
-    final icon = Icon(
-      selected ? widget.destination.selectedIcon : widget.destination.icon,
-      size: AppChrome.navIconSize,
-      color: foreground,
-    );
+    final destination = widget.destination;
+    final Widget icon = switch (destination.glyph) {
+      final glyph? => NavGlyphIcon(
+        glyph: glyph,
+        filled: selected,
+        color: foreground,
+      ),
+      null => Icon(
+        selected ? destination.selectedIcon : destination.icon,
+        size: AppChrome.navIconSize,
+        color: foreground,
+      ),
+    };
 
     // Hover and selection are instant fills — the spec allows no transition on
     // chrome, and an animated pill pulls the eye to the nav rather than to the
@@ -440,6 +520,195 @@ class _NavItemState extends State<_NavItem> {
   }
 }
 
+/// The 28 px `#1A212C` hairline that separates icon groups on the collapsed
+/// rail, and sits before the pinned Paramètres there. It takes the expanded
+/// divider's height so collapsing never shifts an item vertically.
+class NavRailSeparator extends StatelessWidget {
+  const NavRailSeparator({super.key});
+
+  static const width = 28.0;
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      height: DividerTheme.of(context).space ?? 16,
+      child: const Center(
+        child: SizedBox(
+          width: width,
+          height: 1,
+          child: ColoredBox(color: AppColors.borderSubtle),
+        ),
+      ),
+    );
+  }
+}
+
+/// The drawn nav glyphs of the Phase 3 « Patrimoine » group.
+enum NavGlyph { house, percent, calculator, pie }
+
+/// An 18 px line glyph on the frames' 18-unit grid: 1.5 px stroke with round
+/// caps, and a filled silhouette of the same glyph when [filled] — the same
+/// outline/filled swap the icon-font items make when active.
+class NavGlyphIcon extends StatelessWidget {
+  const NavGlyphIcon({
+    super.key,
+    required this.glyph,
+    required this.filled,
+    required this.color,
+  });
+
+  final NavGlyph glyph;
+  final bool filled;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox.square(
+      dimension: AppChrome.navIconSize,
+      child: CustomPaint(
+        painter: _NavGlyphPainter(glyph: glyph, filled: filled, color: color),
+      ),
+    );
+  }
+}
+
+class _NavGlyphPainter extends CustomPainter {
+  const _NavGlyphPainter({
+    required this.glyph,
+    required this.filled,
+    required this.color,
+  });
+
+  final NavGlyph glyph;
+  final bool filled;
+  final Color color;
+
+  static const _viewBox = 18.0;
+  static const _strokeWidth = 1.5;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    canvas.scale(size.width / _viewBox);
+
+    final stroke = Paint()
+      ..color = color
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = _strokeWidth
+      ..strokeCap = StrokeCap.round
+      ..strokeJoin = StrokeJoin.round;
+    final fill = Paint()
+      ..color = color
+      ..style = PaintingStyle.fill;
+
+    // A filled glyph is its outline stroked *and* filled, so the silhouette
+    // keeps the outline's extent; details (door, display, keys) are then
+    // punched back out so the shape still reads as the same object.
+    void shape(Path path) {
+      if (filled) canvas.drawPath(path, fill);
+      canvas.drawPath(path, stroke);
+    }
+
+    final clear = Paint()..blendMode = BlendMode.clear;
+    canvas.saveLayer(Offset.zero & const Size.square(_viewBox), Paint());
+
+    switch (glyph) {
+      case NavGlyph.house:
+        // `M3 8.2L9 3l6 5.2V15H3zM7.2 15v-4.2h3.6V15` (`12-credits.md` §Nav).
+        shape(
+          Path()
+            ..moveTo(3, 8.2)
+            ..lineTo(9, 3)
+            ..lineTo(15, 8.2)
+            ..lineTo(15, 15)
+            ..lineTo(3, 15)
+            ..close(),
+        );
+        final door = Path()
+          ..moveTo(7.2, 15)
+          ..lineTo(7.2, 10.8)
+          ..lineTo(10.8, 10.8)
+          ..lineTo(10.8, 15);
+        if (filled) {
+          canvas.drawRect(const Rect.fromLTRB(7.2, 10.8, 10.8, 16), clear);
+        } else {
+          canvas.drawPath(door, stroke);
+        }
+      case NavGlyph.percent:
+        // `M4.5 13.5l9-9` + 1.8-radius rings at 5.8,5.6 and 12.2,12.4
+        // (`13-impots.md` §Nav).
+        canvas.drawLine(
+          const Offset(4.5, 13.5),
+          const Offset(13.5, 4.5),
+          stroke,
+        );
+        for (final center in const [Offset(5.8, 5.6), Offset(12.2, 12.4)]) {
+          shape(Path()..addOval(Rect.fromCircle(center: center, radius: 1.8)));
+        }
+      case NavGlyph.calculator:
+        // Rounded rect, display bar, 3 × 2 key dots (`14-simulateur.md` §Nav).
+        shape(
+          Path()..addRRect(
+            RRect.fromLTRBR(3.5, 2.25, 14.5, 15.75, const Radius.circular(2)),
+          ),
+        );
+        final keyPaint = filled ? clear : fill;
+        final displayPaint = filled
+            ? (Paint()
+                ..blendMode = BlendMode.clear
+                ..style = PaintingStyle.stroke
+                ..strokeWidth = _strokeWidth
+                ..strokeCap = StrokeCap.round)
+            : stroke;
+        canvas.drawLine(
+          const Offset(6.25, 5.5),
+          const Offset(11.75, 5.5),
+          displayPaint,
+        );
+        for (final y in const [9.25, 12.75]) {
+          for (final x in const [6.25, 9.0, 11.75]) {
+            canvas.drawCircle(Offset(x, y), 0.9, keyPaint);
+          }
+        }
+      case NavGlyph.pie:
+        // A full disc with one 90° sector pulled out along its bisector
+        // (`15-synthese.md` §Nav).
+        const radius = 5.8;
+        const body = Offset(8.2, 9.8);
+        const sector = Offset(9.8, 8.2);
+        shape(
+          Path()
+            ..moveTo(body.dx, body.dy)
+            ..arcTo(
+              Rect.fromCircle(center: body, radius: radius),
+              0,
+              1.5 * math.pi,
+              false,
+            )
+            ..close(),
+        );
+        shape(
+          Path()
+            ..moveTo(sector.dx, sector.dy)
+            ..arcTo(
+              Rect.fromCircle(center: sector, radius: radius),
+              -math.pi / 2,
+              math.pi / 2,
+              false,
+            )
+            ..close(),
+        );
+    }
+
+    canvas.restore();
+  }
+
+  @override
+  bool shouldRepaint(_NavGlyphPainter oldDelegate) =>
+      oldDelegate.glyph != glyph ||
+      oldDelegate.filled != filled ||
+      oldDelegate.color != color;
+}
+
 /// The always-visible reassurance at the sidebar foot. It replaces the old
 /// bottom bar: the promise is about where the data lives, so it belongs beside
 /// the app's identity rather than in a status strip.
@@ -460,7 +729,10 @@ class _PrivacyBadge extends StatelessWidget {
     if (collapsed) {
       return Padding(
         padding: const EdgeInsets.only(top: AppSpacing.sm),
-        child: Tooltip(message: label, child: const Center(child: lock)),
+        child: Tooltip(
+          message: label,
+          child: const Center(child: lock),
+        ),
       );
     }
 
@@ -521,12 +793,18 @@ class _TopBar extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(title, style: textTheme.titleLarge, overflow: TextOverflow.ellipsis),
+                Text(
+                  title,
+                  style: textTheme.titleLarge,
+                  overflow: TextOverflow.ellipsis,
+                ),
                 if (subtitle.isNotEmpty) ...[
                   const SizedBox(height: 3),
                   Text(
                     subtitle,
-                    style: textTheme.bodySmall?.copyWith(color: AppColors.textSecondary),
+                    style: textTheme.bodySmall?.copyWith(
+                      color: AppColors.textSecondary,
+                    ),
                     overflow: TextOverflow.ellipsis,
                   ),
                 ],
@@ -571,7 +849,11 @@ class _UserPill extends ConsumerWidget {
           value: null,
           child: Row(
             children: [
-              const Icon(Icons.logout_rounded, size: 16, color: AppColors.textSecondary),
+              const Icon(
+                Icons.logout_rounded,
+                size: 16,
+                color: AppColors.textSecondary,
+              ),
               const SizedBox(width: AppSpacing.sm),
               Text(l10n.userMenuLogout),
             ],
@@ -604,7 +886,9 @@ class _UserPill extends ConsumerWidget {
                   ),
                   Text(
                     user.email,
-                    style: AppTextStyles.helper.copyWith(color: AppColors.textSecondary),
+                    style: AppTextStyles.helper.copyWith(
+                      color: AppColors.textSecondary,
+                    ),
                     overflow: TextOverflow.ellipsis,
                   ),
                 ],

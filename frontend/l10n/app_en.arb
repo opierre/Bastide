@@ -685,5 +685,14 @@
   "settingsResetConfirmSubmit": "Delete everything",
   "settingsResetDone": "Database reset. The system categories have been restored.",
   "settingsResetFailedLead": "Reset not possible.",
-  "settingsResetErrorUnknown": "The reset failed. Your data hasn't been changed."
+  "settingsResetErrorUnknown": "The reset failed. Your data hasn't been changed.",
+  "navSectionWealth": "Wealth",
+  "navMortgages": "Loans",
+  "navMortgagesSubtitle": "Your loans, their cost and your capacity",
+  "navTax": "Taxes",
+  "navTaxSubtitle": "An estimate, not a return",
+  "navSimulator": "Simulator",
+  "navSimulatorSubtitle": "What a new loan would change",
+  "navNetworth": "Net worth",
+  "navNetworthSubtitle": "What you own, what you owe"
 }

@@ -3080,5 +3080,41 @@
   "settingsResetErrorUnknown": "La réinitialisation a échoué. Vos données n'ont pas été modifiées.",
   "@settingsResetErrorUnknown": {
     "description": "Fallback message for any other reset failure."
+  },
+  "navSectionWealth": "Patrimoine",
+  "@navSectionWealth": {
+    "description": "Left nav section heading grouping the loans, taxes, simulator and net-worth destinations (Phase 3). Rendered uppercase."
+  },
+  "navMortgages": "Crédits",
+  "@navMortgages": {
+    "description": "Left nav label for the loans screen."
+  },
+  "navMortgagesSubtitle": "Vos emprunts, leur coût et votre capacité",
+  "@navMortgagesSubtitle": {
+    "description": "Top-bar descriptor under the loans panel title."
+  },
+  "navTax": "Impôts",
+  "@navTax": {
+    "description": "Left nav label for the tax estimation screen."
+  },
+  "navTaxSubtitle": "Une estimation, pas une déclaration",
+  "@navTaxSubtitle": {
+    "description": "Top-bar descriptor under the tax panel title."
+  },
+  "navSimulator": "Simulateur",
+  "@navSimulator": {
+    "description": "Left nav label for the new-loan simulator screen."
+  },
+  "navSimulatorSubtitle": "Ce qu'un nouveau crédit changerait",
+  "@navSimulatorSubtitle": {
+    "description": "Top-bar descriptor under the simulator panel title."
+  },
+  "navNetworth": "Synthèse",
+  "@navNetworth": {
+    "description": "Left nav label for the net-worth screen. The EN label is 'Net worth', not 'Overview': the Overview group already owns that word."
+  },
+  "navNetworthSubtitle": "Ce que vous possédez, ce que vous devez",
+  "@navNetworthSubtitle": {
+    "description": "Top-bar descriptor under the net-worth panel title."
   }
 }
