@@ -16,6 +16,9 @@ from pydantic import BaseModel, ConfigDict, Field
 #: estimate; anything finer is a filing status the estimate does not model (§16).
 Household = Literal["single", "couple"]
 
+#: How far a prefilled figure can be trusted, always shown next to its coverage (§5c).
+Confidence = Literal["low", "medium", "high"]
+
 
 class TaxProfileUpdate(BaseModel):
     """Patch payload for a tax profile.
@@ -63,3 +66,31 @@ class TaxProfileRead(BaseModel):
     currency: str
     created_at: datetime
     updated_at: datetime
+
+
+class PrefillConfidence(BaseModel):
+    """Per-field confidence, keyed the way the profile fields are so the UI can pair them."""
+
+    salaries_minor: Confidence
+    pensions_minor: Confidence
+    dividends_minor: Confidence
+    interest_minor: Confidence
+
+
+class PrefillRead(BaseModel):
+    """A suggestion the ledger offers for one year — never a write (§5c).
+
+    `source` is `ledger` and nothing else, because the point of the field is that every
+    prefilled figure can be labelled as derived before the user accepts it.
+    """
+
+    tax_year: int
+    salaries_minor: int
+    pensions_minor: int
+    dividends_minor: int
+    interest_minor: int
+    source: Literal["ledger"] = "ledger"
+    #: Distinct months of the year holding at least one matching transaction, 0 to 12.
+    months_covered: int
+    per_field_confidence: PrefillConfidence
+    currency: str

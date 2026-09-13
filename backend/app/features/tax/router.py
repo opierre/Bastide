@@ -1,16 +1,17 @@
-"""Tax endpoints: the per-year profile, created lazily and patched field by field."""
+"""Tax endpoints: the per-year profile, created lazily and patched field by field, and the
+ledger prefill that suggests figures for it without ever writing one."""
 
 from datetime import date
 from typing import Annotated
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
 
 from app.core.db import get_db
 from app.features.auth.deps import get_current_user
 from app.features.auth.models import User
 from app.features.tax.repository import TaxRepository
-from app.features.tax.schemas import TaxProfileRead, TaxProfileUpdate
+from app.features.tax.schemas import PrefillRead, TaxProfileRead, TaxProfileUpdate
 from app.features.tax.service import TaxService
 
 router = APIRouter(prefix="/api/v1/tax", tags=["tax"])
@@ -32,6 +33,20 @@ async def list_profiles(
 ) -> list[TaxProfileRead]:
     """The caller's declared years, newest first. Listing creates nothing."""
     return service.list_profiles(user)
+
+
+@router.get("/prefill", response_model=PrefillRead)
+async def read_prefill(
+    service: Annotated[TaxService, Depends(_service)],
+    user: Annotated[User, Depends(get_current_user)],
+    today: Annotated[date, Depends(get_today)],
+    year: Annotated[int, Query(description="The tax year to read the ledger for.")],
+) -> PrefillRead:
+    """What the ledger suggests for a year, with the coverage and confidence behind it.
+
+    Declared before `/profiles/{year}` so the literal path is not swallowed by it.
+    """
+    return service.prefill(user, year, today)
 
 
 @router.get("/profiles/{tax_year}", response_model=TaxProfileRead)
