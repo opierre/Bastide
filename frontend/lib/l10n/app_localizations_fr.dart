@@ -3386,4 +3386,108 @@ class AppLocalizationsFr extends AppLocalizations {
   String simulatorCompareFootUnknown(String limit) {
     return 'Aucun revenu connu, donc aucun taux d\'endettement · repère HCSF $limit · lecture informative, ne lie aucun prêteur.';
   }
+
+  @override
+  String get propertyKindPrimaryResidence => 'Résidence principale';
+
+  @override
+  String get propertyKindRental => 'Locatif';
+
+  @override
+  String get propertyKindSecondary => 'Résidence secondaire';
+
+  @override
+  String get propertyKindOther => 'Autre bien';
+
+  @override
+  String get propertyFormCreateTitle => 'Nouveau bien';
+
+  @override
+  String get propertyFormEditTitle => 'Modifier le bien';
+
+  @override
+  String get propertyFormSubtitle =>
+      'La valeur déclarée entre dans la synthèse.';
+
+  @override
+  String get propertyFormLabel => 'Libellé';
+
+  @override
+  String get propertyFormLabelRequired => 'Donnez un nom à ce bien.';
+
+  @override
+  String get propertyFormKind => 'Nature';
+
+  @override
+  String get propertyFormValue => 'Valeur déclarée';
+
+  @override
+  String get propertyFormValuedOn => 'Date d\'estimation';
+
+  @override
+  String get propertyFormOwnership => 'Quote-part détenue';
+
+  @override
+  String propertyFormOwnershipShare(String amount) {
+    return 'part : $amount';
+  }
+
+  @override
+  String get propertyFormOwnershipInvalid =>
+      'Indiquez une quote-part entre 0,01 et 100 %.';
+
+  @override
+  String get propertyFormAcquisitionPrice => 'Prix d\'acquisition';
+
+  @override
+  String get propertyFormAcquiredOn => 'Date d\'acquisition';
+
+  @override
+  String get propertyFormAmountInvalid =>
+      'Saisissez un montant supérieur à zéro.';
+
+  @override
+  String get propertyFormAmountOptionalInvalid =>
+      'Montant illisible — laissez vide s\'il est inconnu.';
+
+  @override
+  String get propertyFormDateInvalid => 'Date invalide (JJ/MM/AAAA).';
+
+  @override
+  String get propertyFormCalendar => 'Choisir une date';
+
+  @override
+  String get propertyFormCancel => 'Annuler';
+
+  @override
+  String get propertyFormSubmit => 'Ajouter le bien';
+
+  @override
+  String get propertyFormSave => 'Enregistrer';
+
+  @override
+  String get propertyRevalueTitle => 'Nouvelle estimation';
+
+  @override
+  String propertyRevalueSubtitle(String label, String value, String date) {
+    return '$label : $value estimés le $date. La nouvelle estimation remplace celle-ci.';
+  }
+
+  @override
+  String get propertyRevalueSubmit => 'Enregistrer l\'estimation';
+
+  @override
+  String get propertyErrorValuationInFuture =>
+      'Une date d\'estimation ne peut pas être dans le futur.';
+
+  @override
+  String get propertyErrorNotFound => 'Ce bien n\'existe plus.';
+
+  @override
+  String get propertyErrorValidation =>
+      'Certaines valeurs ont été refusées. Vérifiez le formulaire.';
+
+  @override
+  String get propertyErrorGeneric =>
+      'Impossible d\'enregistrer le bien. Réessayez.';
 }

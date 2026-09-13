@@ -3361,4 +3361,106 @@ class AppLocalizationsEn extends AppLocalizations {
   String simulatorCompareFootUnknown(String limit) {
     return 'No known income, so no debt ratio · HCSF reference $limit · an informative reading that binds no lender.';
   }
+
+  @override
+  String get propertyKindPrimaryResidence => 'Primary residence';
+
+  @override
+  String get propertyKindRental => 'Rental';
+
+  @override
+  String get propertyKindSecondary => 'Second home';
+
+  @override
+  String get propertyKindOther => 'Other property';
+
+  @override
+  String get propertyFormCreateTitle => 'New property';
+
+  @override
+  String get propertyFormEditTitle => 'Edit property';
+
+  @override
+  String get propertyFormSubtitle =>
+      'The declared value counts in your net worth.';
+
+  @override
+  String get propertyFormLabel => 'Label';
+
+  @override
+  String get propertyFormLabelRequired => 'Give this property a name.';
+
+  @override
+  String get propertyFormKind => 'Type';
+
+  @override
+  String get propertyFormValue => 'Declared value';
+
+  @override
+  String get propertyFormValuedOn => 'Valuation date';
+
+  @override
+  String get propertyFormOwnership => 'Share owned';
+
+  @override
+  String propertyFormOwnershipShare(String amount) {
+    return 'share: $amount';
+  }
+
+  @override
+  String get propertyFormOwnershipInvalid =>
+      'Enter a share between 0.01 and 100%.';
+
+  @override
+  String get propertyFormAcquisitionPrice => 'Purchase price';
+
+  @override
+  String get propertyFormAcquiredOn => 'Purchase date';
+
+  @override
+  String get propertyFormAmountInvalid => 'Enter an amount above zero.';
+
+  @override
+  String get propertyFormAmountOptionalInvalid =>
+      'Unreadable amount — leave it empty if unknown.';
+
+  @override
+  String get propertyFormDateInvalid => 'Invalid date (M/D/YYYY).';
+
+  @override
+  String get propertyFormCalendar => 'Pick a date';
+
+  @override
+  String get propertyFormCancel => 'Cancel';
+
+  @override
+  String get propertyFormSubmit => 'Add property';
+
+  @override
+  String get propertyFormSave => 'Save';
+
+  @override
+  String get propertyRevalueTitle => 'New valuation';
+
+  @override
+  String propertyRevalueSubtitle(String label, String value, String date) {
+    return '$label: $value as valued on $date. The new valuation replaces it.';
+  }
+
+  @override
+  String get propertyRevalueSubmit => 'Save valuation';
+
+  @override
+  String get propertyErrorValuationInFuture =>
+      'A valuation date can\'t be in the future.';
+
+  @override
+  String get propertyErrorNotFound => 'This property no longer exists.';
+
+  @override
+  String get propertyErrorValidation =>
+      'Some values were refused. Check the form.';
+
+  @override
+  String get propertyErrorGeneric => 'Couldn\'t save the property. Try again.';
 }

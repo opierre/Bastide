@@ -5286,6 +5286,192 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Aucun revenu connu, donc aucun taux d\'endettement · repère HCSF {limit} · lecture informative, ne lie aucun prêteur.'**
   String simulatorCompareFootUnknown(String limit);
+
+  /// Property nature: the household's main home (wire value primary_residence).
+  ///
+  /// In fr, this message translates to:
+  /// **'Résidence principale'**
+  String get propertyKindPrimaryResidence;
+
+  /// Property nature: a property let to tenants (wire value rental).
+  ///
+  /// In fr, this message translates to:
+  /// **'Locatif'**
+  String get propertyKindRental;
+
+  /// Property nature: a second home (wire value secondary).
+  ///
+  /// In fr, this message translates to:
+  /// **'Résidence secondaire'**
+  String get propertyKindSecondary;
+
+  /// Property nature: land or anything else (wire value other).
+  ///
+  /// In fr, this message translates to:
+  /// **'Autre bien'**
+  String get propertyKindOther;
+
+  /// Title of the property form when declaring a new property.
+  ///
+  /// In fr, this message translates to:
+  /// **'Nouveau bien'**
+  String get propertyFormCreateTitle;
+
+  /// Title of the property form when editing an existing property.
+  ///
+  /// In fr, this message translates to:
+  /// **'Modifier le bien'**
+  String get propertyFormEditTitle;
+
+  /// Subtitle under the property form title.
+  ///
+  /// In fr, this message translates to:
+  /// **'La valeur déclarée entre dans la synthèse.'**
+  String get propertyFormSubtitle;
+
+  /// Property form field: the property's name.
+  ///
+  /// In fr, this message translates to:
+  /// **'Libellé'**
+  String get propertyFormLabel;
+
+  /// Validation message when the property name is empty.
+  ///
+  /// In fr, this message translates to:
+  /// **'Donnez un nom à ce bien.'**
+  String get propertyFormLabelRequired;
+
+  /// Property form field: the property's nature (select).
+  ///
+  /// In fr, this message translates to:
+  /// **'Nature'**
+  String get propertyFormKind;
+
+  /// Property form field: the declared market value.
+  ///
+  /// In fr, this message translates to:
+  /// **'Valeur déclarée'**
+  String get propertyFormValue;
+
+  /// Property form field: the date the value was estimated.
+  ///
+  /// In fr, this message translates to:
+  /// **'Date d\'estimation'**
+  String get propertyFormValuedOn;
+
+  /// Property form field: the user's ownership share, typed as a percent.
+  ///
+  /// In fr, this message translates to:
+  /// **'Quote-part détenue'**
+  String get propertyFormOwnership;
+
+  /// Live label beside the ownership field: the held share of the declared value.
+  ///
+  /// In fr, this message translates to:
+  /// **'part : {amount}'**
+  String propertyFormOwnershipShare(String amount);
+
+  /// Validation message when the ownership share is not between 0.01 and 100 percent.
+  ///
+  /// In fr, this message translates to:
+  /// **'Indiquez une quote-part entre 0,01 et 100 %.'**
+  String get propertyFormOwnershipInvalid;
+
+  /// Property form field: the optional purchase price.
+  ///
+  /// In fr, this message translates to:
+  /// **'Prix d\'acquisition'**
+  String get propertyFormAcquisitionPrice;
+
+  /// Property form field: the optional purchase date.
+  ///
+  /// In fr, this message translates to:
+  /// **'Date d\'acquisition'**
+  String get propertyFormAcquiredOn;
+
+  /// Validation message when a required amount is missing or not positive.
+  ///
+  /// In fr, this message translates to:
+  /// **'Saisissez un montant supérieur à zéro.'**
+  String get propertyFormAmountInvalid;
+
+  /// Validation message when an optional amount cannot be read.
+  ///
+  /// In fr, this message translates to:
+  /// **'Montant illisible — laissez vide s\'il est inconnu.'**
+  String get propertyFormAmountOptionalInvalid;
+
+  /// Validation message when a date cannot be read.
+  ///
+  /// In fr, this message translates to:
+  /// **'Date invalide (JJ/MM/AAAA).'**
+  String get propertyFormDateInvalid;
+
+  /// Tooltip of the calendar button beside a date field.
+  ///
+  /// In fr, this message translates to:
+  /// **'Choisir une date'**
+  String get propertyFormCalendar;
+
+  /// Cancel action on the property modals.
+  ///
+  /// In fr, this message translates to:
+  /// **'Annuler'**
+  String get propertyFormCancel;
+
+  /// Primary action of the new-property form.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ajouter le bien'**
+  String get propertyFormSubmit;
+
+  /// Primary action of the edit-property form.
+  ///
+  /// In fr, this message translates to:
+  /// **'Enregistrer'**
+  String get propertyFormSave;
+
+  /// Title of the modal that records a new declared value for a property.
+  ///
+  /// In fr, this message translates to:
+  /// **'Nouvelle estimation'**
+  String get propertyRevalueTitle;
+
+  /// Subtitle of the new-valuation modal: the current declared value, and that the new one replaces it.
+  ///
+  /// In fr, this message translates to:
+  /// **'{label} : {value} estimés le {date}. La nouvelle estimation remplace celle-ci.'**
+  String propertyRevalueSubtitle(String label, String value, String date);
+
+  /// Primary action of the new-valuation modal.
+  ///
+  /// In fr, this message translates to:
+  /// **'Enregistrer l\'estimation'**
+  String get propertyRevalueSubmit;
+
+  /// Error when the valuation date is after today (PROPERTY_VALUATION_IN_FUTURE).
+  ///
+  /// In fr, this message translates to:
+  /// **'Une date d\'estimation ne peut pas être dans le futur.'**
+  String get propertyErrorValuationInFuture;
+
+  /// Error when the property was not found (PROPERTY_NOT_FOUND).
+  ///
+  /// In fr, this message translates to:
+  /// **'Ce bien n\'existe plus.'**
+  String get propertyErrorNotFound;
+
+  /// Error when the server rejected the payload (VALIDATION_ERROR).
+  ///
+  /// In fr, this message translates to:
+  /// **'Certaines valeurs ont été refusées. Vérifiez le formulaire.'**
+  String get propertyErrorValidation;
+
+  /// Fallback error for a failed property write.
+  ///
+  /// In fr, this message translates to:
+  /// **'Impossible d\'enregistrer le bien. Réessayez.'**
+  String get propertyErrorGeneric;
 }
 
 class _AppLocalizationsDelegate
