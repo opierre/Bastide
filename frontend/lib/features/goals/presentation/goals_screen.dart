@@ -125,7 +125,10 @@ class _LoadedPanel extends ConsumerWidget {
           const SizedBox(height: AppSpacing.md),
         ],
         if (state.isOverAllocated && !state.bannerDismissed) ...[
-          _OverAllocationBanner(state: state, onDismiss: controller.dismissOverAllocationBanner),
+          _OverAllocationBanner(
+            state: state,
+            onDismiss: controller.dismissOverAllocationBanner,
+          ),
           const SizedBox(height: AppSpacing.md),
         ],
         Expanded(
@@ -171,7 +174,11 @@ class _LoadedPanel extends ConsumerWidget {
 /// is its content's: a grid would need a fixed aspect ratio, and the one that
 /// fits « Fonds d'urgence » clips a longer name at another window width.
 class _CardGrid extends StatelessWidget {
-  const _CardGrid({required this.goals, required this.onOpen, this.dimmed = false});
+  const _CardGrid({
+    required this.goals,
+    required this.onOpen,
+    this.dimmed = false,
+  });
 
   final List<Goal> goals;
   final ValueChanged<String> onOpen;
@@ -214,7 +221,10 @@ class _CardGrid extends StatelessWidget {
         ),
       );
     }
-    return Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: rows);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: rows,
+    );
   }
 }
 

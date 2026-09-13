@@ -131,7 +131,11 @@ class _PrivacyLine extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        const Icon(Icons.lock_outline_rounded, size: 12, color: AppColors.textDisabled),
+        const Icon(
+          Icons.lock_outline_rounded,
+          size: 12,
+          color: AppColors.textDisabled,
+        ),
         const SizedBox(width: AppSpacing.xs + 2),
         Flexible(
           child: Text(
@@ -162,7 +166,10 @@ class _Glow extends StatelessWidget {
         decoration: BoxDecoration(
           shape: BoxShape.circle,
           gradient: RadialGradient(
-            colors: [color.withValues(alpha: 0.07), color.withValues(alpha: 0.0)],
+            colors: [
+              color.withValues(alpha: 0.07),
+              color.withValues(alpha: 0.0),
+            ],
           ),
         ),
       ),

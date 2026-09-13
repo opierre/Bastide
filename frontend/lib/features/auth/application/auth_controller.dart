@@ -32,10 +32,9 @@ class AuthController extends AsyncNotifier<AuthUser?> {
   Future<void> login({required String email, required String password}) async {
     state = const AsyncValue.loading();
     state = await AsyncValue.guard(() async {
-      final session = await ref.read(authRepositoryProvider).login(
-        email: email,
-        password: password,
-      );
+      final session = await ref
+          .read(authRepositoryProvider)
+          .login(email: email, password: password);
       await _persistSession(session);
       return session.user;
     });
@@ -50,13 +49,15 @@ class AuthController extends AsyncNotifier<AuthUser?> {
   }) async {
     state = const AsyncValue.loading();
     state = await AsyncValue.guard(() async {
-      final session = await ref.read(authRepositoryProvider).register(
-        email: email,
-        password: password,
-        displayName: displayName,
-        locale: locale,
-        currency: currency,
-      );
+      final session = await ref
+          .read(authRepositoryProvider)
+          .register(
+            email: email,
+            password: password,
+            displayName: displayName,
+            locale: locale,
+            currency: currency,
+          );
       await _persistSession(session);
       return session.user;
     });

@@ -61,7 +61,9 @@ class PriceHistoryChart extends StatelessWidget {
     final points = occurrences.reversed.toList();
     // Unsigned: the chart plots what the subscription costs, not a movement on
     // the ledger, so the line climbs when the price climbs.
-    final values = [for (final point in points) point.amountMinor.abs().toDouble()];
+    final values = [
+      for (final point in points) point.amountMinor.abs().toDouble(),
+    ];
     final stepIndex = _stepIndex(points);
 
     return LayoutBuilder(
@@ -201,7 +203,9 @@ class PriceHistoryChart extends StatelessWidget {
   static List<int> _tickIndices(int count) {
     if (count <= _maxDateLabels) return [for (var i = 0; i < count; i++) i];
     final step = (count - 1) / (_maxDateLabels - 1);
-    return {for (var i = 0; i < _maxDateLabels; i++) (i * step).round()}.toList();
+    return {
+      for (var i = 0; i < _maxDateLabels; i++) (i * step).round(),
+    }.toList();
   }
 
   /// A full-height column over each charge: the point is a few pixels wide, but
@@ -232,7 +236,8 @@ class PriceHistoryChart extends StatelessWidget {
         richMessage: TextSpan(
           children: [
             TextSpan(
-              text: '${seriesDateFormat(locale).format(occurrence.bookedDate)}\n',
+              text:
+                  '${seriesDateFormat(locale).format(occurrence.bookedDate)}\n',
               style: tabularNumberStyle(textTheme.labelSmall!),
             ),
             TextSpan(
@@ -295,7 +300,12 @@ class _PlotGeometry {
     // is then symmetric around it and the flat line lands mid-plot, which is
     // the honest drawing of "this never changed".
     final pad = span == 0 ? math.max(max.abs() * 0.2, 1) : span * 0.35;
-    return _PlotGeometry(rect: rect, values: values, low: min - pad, high: max + pad);
+    return _PlotGeometry(
+      rect: rect,
+      values: values,
+      low: min - pad,
+      high: max + pad,
+    );
   }
 
   final Rect rect;

@@ -134,7 +134,10 @@ Future<OfxAccountMatch> _detect(
 
   return container
       .read(ofxAccountDetectionProvider.notifier)
-      .detect(PickedImportFile(name: 'releve.ofx', bytes: utf8.encode(ofx)), accounts);
+      .detect(
+        PickedImportFile(name: 'releve.ofx', bytes: utf8.encode(ofx)),
+        accounts,
+      );
 }
 
 const _info = OfxAccountInfo(
@@ -163,13 +166,22 @@ void main() {
     });
 
     test('reads a balance whose DTASOF carries a time and a zone', () {
-      final dated = _sgml.replaceFirst('<DTASOF>20260131', '<DTASOF>20260131120000[+1:CET]');
+      final dated = _sgml.replaceFirst(
+        '<DTASOF>20260131',
+        '<DTASOF>20260131120000[+1:CET]',
+      );
 
-      expect(parseOfxAccountInfo(utf8.encode(dated))!.ledgerBalanceAsOf, DateTime(2026, 1, 31));
+      expect(
+        parseOfxAccountInfo(utf8.encode(dated))!.ledgerBalanceAsOf,
+        DateTime(2026, 1, 31),
+      );
     });
 
     test('keeps a balance whose DTASOF is missing or unreadable', () {
-      final undated = _sgml.replaceFirst('<DTASOF>20260131', '<DTASOF>20260231');
+      final undated = _sgml.replaceFirst(
+        '<DTASOF>20260131',
+        '<DTASOF>20260231',
+      );
 
       final info = parseOfxAccountInfo(utf8.encode(undated))!;
       expect(info.ledgerBalanceMinor, 123456);
@@ -177,14 +189,26 @@ void main() {
     });
 
     test('reads no balance out of a statement that declares none', () {
-      expect(parseOfxAccountInfo(utf8.encode(_creditCardXml))!.ledgerBalanceMinor, isNull);
+      expect(
+        parseOfxAccountInfo(utf8.encode(_creditCardXml))!.ledgerBalanceMinor,
+        isNull,
+      );
     });
 
-    test('reads a negative closing balance as an overdraft, not its absolute value', () {
-      final overdrawn = _sgml.replaceFirst('<BALAMT>1234.56', '<BALAMT>-42.05');
+    test(
+      'reads a negative closing balance as an overdraft, not its absolute value',
+      () {
+        final overdrawn = _sgml.replaceFirst(
+          '<BALAMT>1234.56',
+          '<BALAMT>-42.05',
+        );
 
-      expect(parseOfxAccountInfo(utf8.encode(overdrawn))!.ledgerBalanceMinor, -4205);
-    });
+        expect(
+          parseOfxAccountInfo(utf8.encode(overdrawn))!.ledgerBalanceMinor,
+          -4205,
+        );
+      },
+    );
 
     test('reads closed XML tags and types a CCACCTFROM block as a card', () {
       final info = parseOfxAccountInfo(utf8.encode(_creditCardXml))!;
@@ -205,8 +229,14 @@ void main() {
     });
 
     test('returns null for files that are not OFX or declare no account', () {
-      expect(parseOfxAccountInfo(utf8.encode('date;montant\n01/01/2026;-12,00')), isNull);
-      expect(parseOfxAccountInfo(utf8.encode('<OFX>\n<SONRS>\n</SONRS>\n</OFX>')), isNull);
+      expect(
+        parseOfxAccountInfo(utf8.encode('date;montant\n01/01/2026;-12,00')),
+        isNull,
+      );
+      expect(
+        parseOfxAccountInfo(utf8.encode('<OFX>\n<SONRS>\n</SONRS>\n</OFX>')),
+        isNull,
+      );
       expect(parseOfxAccountInfo(const [1, 2, 3]), isNull);
     });
   });
@@ -227,7 +257,10 @@ void main() {
     });
 
     test('matches on the account number even when the bank name differs', () {
-      final numbered = _account(name: 'Courant ••4567', institution: 'BoursoBank');
+      final numbered = _account(
+        name: 'Courant ••4567',
+        institution: 'BoursoBank',
+      );
 
       final match = matchOfxAccount(_info, [_account(), numbered]);
 
@@ -235,14 +268,21 @@ void main() {
       expect((match as OfxAccountMatched).account, numbered);
     });
 
-    test('matches a bank name the user typed shorter than the file spells it', () {
-      final match = matchOfxAccount(_info, [_account()]);
+    test(
+      'matches a bank name the user typed shorter than the file spells it',
+      () {
+        final match = matchOfxAccount(_info, [_account()]);
 
-      expect((match as OfxAccountMatched).account.id, 'a1');
-    });
+        expect((match as OfxAccountMatched).account.id, 'a1');
+      },
+    );
 
     test('uses the OFX account type to separate two accounts at one bank', () {
-      final savings = _account(id: 'a2', name: 'Livret A', type: AccountType.savings);
+      final savings = _account(
+        id: 'a2',
+        name: 'Livret A',
+        type: AccountType.savings,
+      );
 
       final match = matchOfxAccount(_info, [_account(), savings]);
 
@@ -270,31 +310,49 @@ void main() {
       const info = OfxAccountInfo(accountNumber: '0009876543', bankId: '13306');
 
       expect(info.institutionLabel, '13306');
-      expect(info.withBankName('Crédit Agricole').institutionLabel, 'Crédit Agricole');
+      expect(
+        info.withBankName('Crédit Agricole').institutionLabel,
+        'Crédit Agricole',
+      );
       // The bank's own name for itself still wins over our lookup of it.
-      expect(_info.withBankName('Boursorama').institutionLabel, 'BOURSORAMA BANQUE');
+      expect(
+        _info.withBankName('Boursorama').institutionLabel,
+        'BOURSORAMA BANQUE',
+      );
     });
   });
 
   group('OfxAccountDetection', () {
-    test('resolves the bank code so the proposed account is named, not numbered', () async {
-      final banks = _FakeBanksRepository({'13306': 'Crédit Agricole'});
+    test(
+      'resolves the bank code so the proposed account is named, not numbered',
+      () async {
+        final banks = _FakeBanksRepository({'13306': 'Crédit Agricole'});
 
-      final match = await _detect(_bankCodeOnlySgml, const [], banks);
+        final match = await _detect(_bankCodeOnlySgml, const [], banks);
 
-      expect(banks.lookups, ['13306']);
-      expect(match, isA<OfxAccountUnmatched>());
-      expect((match as OfxAccountUnmatched).info.institutionLabel, 'Crédit Agricole');
-    });
+        expect(banks.lookups, ['13306']);
+        expect(match, isA<OfxAccountUnmatched>());
+        expect(
+          (match as OfxAccountUnmatched).info.institutionLabel,
+          'Crédit Agricole',
+        );
+      },
+    );
 
-    test('the resolved bank matches an account the user typed by name', () async {
-      final banks = _FakeBanksRepository({'13306': 'Crédit Agricole'});
-      final account = _account(name: 'Compte courant', institution: 'Crédit Agricole');
+    test(
+      'the resolved bank matches an account the user typed by name',
+      () async {
+        final banks = _FakeBanksRepository({'13306': 'Crédit Agricole'});
+        final account = _account(
+          name: 'Compte courant',
+          institution: 'Crédit Agricole',
+        );
 
-      final match = await _detect(_bankCodeOnlySgml, [account], banks);
+        final match = await _detect(_bankCodeOnlySgml, [account], banks);
 
-      expect((match as OfxAccountMatched).account, account);
-    });
+        expect((match as OfxAccountMatched).account, account);
+      },
+    );
 
     test('an unknown code leaves the file speaking for itself', () async {
       final banks = _FakeBanksRepository(const {});
@@ -304,25 +362,31 @@ void main() {
       expect((match as OfxAccountUnmatched).info.institutionLabel, '13306');
     });
 
-    test('a file with no readable account block is a question, not a silence', () async {
-      // With no destination selector left, "we could not read this" has to be a
-      // verdict the panel can act on rather than an absent one it ignores.
-      final banks = _FakeBanksRepository(const {});
-      final container = ProviderContainer(
-        overrides: [banksRepositoryProvider.overrideWithValue(banks)],
-      );
-      addTearDown(container.dispose);
+    test(
+      'a file with no readable account block is a question, not a silence',
+      () async {
+        // With no destination selector left, "we could not read this" has to be a
+        // verdict the panel can act on rather than an absent one it ignores.
+        final banks = _FakeBanksRepository(const {});
+        final container = ProviderContainer(
+          overrides: [banksRepositoryProvider.overrideWithValue(banks)],
+        );
+        addTearDown(container.dispose);
 
-      final match = await container
-          .read(ofxAccountDetectionProvider.notifier)
-          .detect(
-            const PickedImportFile(name: 'releve.ofx', bytes: [1, 2, 3]),
-            [_account()],
-          );
+        final match = await container
+            .read(ofxAccountDetectionProvider.notifier)
+            .detect(
+              const PickedImportFile(name: 'releve.ofx', bytes: [1, 2, 3]),
+              [_account()],
+            );
 
-      expect(match, isA<OfxAccountUnreadable>());
-      expect(container.read(ofxAccountDetectionProvider), isA<OfxAccountUnreadable>());
-    });
+        expect(match, isA<OfxAccountUnreadable>());
+        expect(
+          container.read(ofxAccountDetectionProvider),
+          isA<OfxAccountUnreadable>(),
+        );
+      },
+    );
 
     test('a file that names its bank is not looked up at all', () async {
       final banks = _FakeBanksRepository({'40618': 'Boursorama'});

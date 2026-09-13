@@ -28,7 +28,9 @@ class BanksRepository {
 
     String? name;
     try {
-      final json = await _apiClient.get('/banks', query: {'bank_code': code}) as List<dynamic>;
+      final json =
+          await _apiClient.get('/banks', query: {'bank_code': code})
+              as List<dynamic>;
       if (json.isNotEmpty) {
         name = (json.first as Map<String, dynamic>)['name'] as String?;
       }

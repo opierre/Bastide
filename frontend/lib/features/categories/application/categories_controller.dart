@@ -19,9 +19,10 @@ class CategoriesViewNotifier extends Notifier<CategoriesView> {
   void set(CategoriesView view) => state = view;
 }
 
-final categoriesViewProvider = NotifierProvider<CategoriesViewNotifier, CategoriesView>(
-  CategoriesViewNotifier.new,
-);
+final categoriesViewProvider =
+    NotifierProvider<CategoriesViewNotifier, CategoriesView>(
+      CategoriesViewNotifier.new,
+    );
 
 /// The category catalog: system rows plus the caller's own.
 ///
@@ -31,11 +32,14 @@ final categoriesViewProvider = NotifierProvider<CategoriesViewNotifier, Categori
 /// exactly as it was.
 class CategoriesController extends AsyncNotifier<List<AppCategory>> {
   @override
-  Future<List<AppCategory>> build() => ref.read(categoriesRepositoryProvider).list();
+  Future<List<AppCategory>> build() =>
+      ref.read(categoriesRepositoryProvider).list();
 
   Future<void> refresh() async {
     state = const AsyncValue.loading();
-    state = await AsyncValue.guard(() => ref.read(categoriesRepositoryProvider).list());
+    state = await AsyncValue.guard(
+      () => ref.read(categoriesRepositoryProvider).list(),
+    );
   }
 
   Future<AppCategory> create({
@@ -47,7 +51,13 @@ class CategoriesController extends AsyncNotifier<List<AppCategory>> {
   }) async {
     final created = await ref
         .read(categoriesRepositoryProvider)
-        .create(name: name, kind: kind, icon: icon, color: color, parentId: parentId);
+        .create(
+          name: name,
+          kind: kind,
+          icon: icon,
+          color: color,
+          parentId: parentId,
+        );
     state = AsyncValue.data([...?state.value, created]);
     return created;
   }

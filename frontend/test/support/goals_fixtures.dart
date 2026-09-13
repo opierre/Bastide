@@ -137,7 +137,9 @@ class FakeGoalsController extends GoalsController {
     archiveCalls.add(goalId);
     final current = state.value;
     if (current == null) return;
-    final goal = current.goals.where((candidate) => candidate.id == goalId).firstOrNull;
+    final goal = current.goals
+        .where((candidate) => candidate.id == goalId)
+        .firstOrNull;
     if (goal == null) return;
     state = AsyncValue.data(
       current.copyWith(

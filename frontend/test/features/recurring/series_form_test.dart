@@ -39,12 +39,17 @@ Widget _wrap({
 }
 
 void main() {
-  testWidgets('a declared subscription is stored as a signed outflow', (tester) async {
+  testWidgets('a declared subscription is stored as a signed outflow', (
+    tester,
+  ) async {
     final controller = FakeSubscriptionsController();
     await tester.pumpWidget(_wrap(controller: controller));
     await tester.pumpAndSettle();
 
-    await tester.enterText(find.byKey(const Key('seriesFormName')), 'Basic-Fit');
+    await tester.enterText(
+      find.byKey(const Key('seriesFormName')),
+      'Basic-Fit',
+    );
     // Typed the way the user reads a price — the sign is this form's own
     // statement that a subscription leaves the account.
     await tester.enterText(find.byKey(const Key('seriesFormAmount')), '29,99');
@@ -58,19 +63,30 @@ void main() {
     expect(controller.createCalls.single.cadence, Cadence.monthly);
   });
 
-  testWidgets('the cadence select offers Irrégulier — the only place it can be chosen', (
-    tester,
-  ) async {
-    await tester.pumpWidget(_wrap(controller: FakeSubscriptionsController()));
-    await tester.pumpAndSettle();
+  testWidgets(
+    'the cadence select offers Irrégulier — the only place it can be chosen',
+    (tester) async {
+      await tester.pumpWidget(_wrap(controller: FakeSubscriptionsController()));
+      await tester.pumpAndSettle();
 
-    await tester.tap(find.byKey(const Key('seriesFormCadence')));
-    await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const Key('seriesFormCadence')));
+      await tester.pumpAndSettle();
 
-    for (final label in ['Hebdomadaire', 'Mensuel', 'Trimestriel', 'Annuel', 'Irrégulier']) {
-      expect(find.text(label), findsWidgets, reason: '$label should be offered');
-    }
-  });
+      for (final label in [
+        'Hebdomadaire',
+        'Mensuel',
+        'Trimestriel',
+        'Annuel',
+        'Irrégulier',
+      ]) {
+        expect(
+          find.text(label),
+          findsWidgets,
+          reason: '$label should be offered',
+        );
+      }
+    },
+  );
 
   testWidgets('a name and a positive amount are both required', (tester) async {
     final controller = FakeSubscriptionsController();

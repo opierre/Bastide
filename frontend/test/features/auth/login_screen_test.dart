@@ -71,14 +71,22 @@ void main() {
     await tester.pumpWidget(_wrap(controller: controller));
     await tester.pumpAndSettle();
 
-    await tester.enterText(find.byKey(const Key('loginEmailField')), 'ada@example.com');
-    await tester.enterText(find.byKey(const Key('loginPasswordField')), 'wrong');
+    await tester.enterText(
+      find.byKey(const Key('loginEmailField')),
+      'ada@example.com',
+    );
+    await tester.enterText(
+      find.byKey(const Key('loginPasswordField')),
+      'wrong',
+    );
     await tester.tap(find.byKey(const Key('loginSubmitButton')));
     await tester.pumpAndSettle();
 
     expect(find.byKey(const Key('loginErrorText')), findsOneWidget);
     expect(
-      find.text('E-mail ou mot de passe incorrect. Vérifiez vos identifiants et réessayez.'),
+      find.text(
+        'E-mail ou mot de passe incorrect. Vérifiez vos identifiants et réessayez.',
+      ),
       findsOneWidget,
     );
   });
@@ -90,8 +98,14 @@ void main() {
     await tester.pumpWidget(_wrap(controller: controller));
     await tester.pumpAndSettle();
 
-    await tester.enterText(find.byKey(const Key('loginEmailField')), 'ada@example.com');
-    await tester.enterText(find.byKey(const Key('loginPasswordField')), 'secret123');
+    await tester.enterText(
+      find.byKey(const Key('loginEmailField')),
+      'ada@example.com',
+    );
+    await tester.enterText(
+      find.byKey(const Key('loginPasswordField')),
+      'secret123',
+    );
 
     await tester.tap(find.byKey(const Key('loginSubmitButton')));
     await tester.pumpAndSettle();
@@ -101,7 +115,9 @@ void main() {
     expect(controller.loginCalls.single.password, 'secret123');
   });
 
-  testWidgets('renders under en without missing localized keys', (tester) async {
+  testWidgets('renders under en without missing localized keys', (
+    tester,
+  ) async {
     await tester.pumpWidget(
       _wrap(controller: FakeAuthController(), locale: const Locale('en')),
     );

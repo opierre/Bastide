@@ -7,10 +7,11 @@ enum CategorizationSource {
   user,
   uncategorized;
 
-  static CategorizationSource fromWire(String value) => CategorizationSource.values.firstWhere(
-    (source) => source.name == value,
-    orElse: () => CategorizationSource.uncategorized,
-  );
+  static CategorizationSource fromWire(String value) =>
+      CategorizationSource.values.firstWhere(
+        (source) => source.name == value,
+        orElse: () => CategorizationSource.uncategorized,
+      );
 
   String get wireValue => name;
 }

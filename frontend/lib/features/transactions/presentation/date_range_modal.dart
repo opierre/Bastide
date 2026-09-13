@@ -64,8 +64,12 @@ class _DateRangeModalState extends State<DateRangeModal> {
     _filled = true;
     final locale = Localizations.localeOf(context).toString();
     final format = appDateFormat(locale);
-    if (widget.from case final date?) _fromController.text = format.format(date);
-    if (widget.to case final date?) _toController.text = format.format(date);
+    if (widget.from case final date?) {
+      _fromController.text = format.format(date);
+    }
+    if (widget.to case final date?) {
+      _toController.text = format.format(date);
+    }
   }
 
   @override
@@ -82,7 +86,8 @@ class _DateRangeModalState extends State<DateRangeModal> {
     final l10n = AppLocalizations.of(context)!;
     final locale = Localizations.localeOf(context).toString();
     final text = (raw ?? '').trim();
-    final otherText = (isFrom ? _toController.text : _fromController.text).trim();
+    final otherText = (isFrom ? _toController.text : _fromController.text)
+        .trim();
 
     if (text.isEmpty) {
       return otherText.isEmpty ? null : l10n.transactionsDateRangeIncomplete;
@@ -95,7 +100,9 @@ class _DateRangeModalState extends State<DateRangeModal> {
     // one date rather than both.
     if (isFrom) return null;
     final start = parseDateInput(otherText, locale);
-    if (start != null && date.isBefore(start)) return l10n.transactionsDateRangeOrder;
+    if (start != null && date.isBefore(start)) {
+      return l10n.transactionsDateRangeOrder;
+    }
     return null;
   }
 

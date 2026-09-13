@@ -19,7 +19,9 @@ const _signedInUser = AuthUser(
 );
 
 final _authenticatedOverrides = [
-  authControllerProvider.overrideWith(() => FakeAuthController(initialUser: _signedInUser)),
+  authControllerProvider.overrideWith(
+    () => FakeAuthController(initialUser: _signedInUser),
+  ),
   accountsControllerProvider.overrideWith(() => FakeAccountsController()),
 ];
 
@@ -37,7 +39,10 @@ void main() {
   testWidgets('shell renders the fixed sidebar and top bar', (tester) async {
     _useDesignViewport(tester);
     await tester.pumpWidget(
-      ProviderScope(overrides: _authenticatedOverrides, child: const FinStrideApp()),
+      ProviderScope(
+        overrides: _authenticatedOverrides,
+        child: const FinStrideApp(),
+      ),
     );
     await tester.pumpAndSettle();
 
@@ -46,29 +51,37 @@ void main() {
     expect(find.byKey(const Key('screen-dashboard')), findsOneWidget);
   });
 
-  testWidgets('the privacy badge sits at the sidebar foot, not in a bottom bar', (
-    tester,
-  ) async {
-    _useDesignViewport(tester);
-    await tester.pumpWidget(
-      ProviderScope(overrides: _authenticatedOverrides, child: const FinStrideApp()),
-    );
-    await tester.pumpAndSettle();
+  testWidgets(
+    'the privacy badge sits at the sidebar foot, not in a bottom bar',
+    (tester) async {
+      _useDesignViewport(tester);
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: _authenticatedOverrides,
+          child: const FinStrideApp(),
+        ),
+      );
+      await tester.pumpAndSettle();
 
-    expect(find.byKey(const Key('appBottomBar')), findsNothing);
-    expect(find.byKey(const Key('sidebarPrivacyBadge')), findsOneWidget);
-  });
+      expect(find.byKey(const Key('appBottomBar')), findsNothing);
+      expect(find.byKey(const Key('sidebarPrivacyBadge')), findsOneWidget);
+    },
+  );
 
   testWidgets('collapsing the sidebar keeps the destinations and the lock', (
     tester,
   ) async {
     _useDesignViewport(tester);
     await tester.pumpWidget(
-      ProviderScope(overrides: _authenticatedOverrides, child: const FinStrideApp()),
+      ProviderScope(
+        overrides: _authenticatedOverrides,
+        child: const FinStrideApp(),
+      ),
     );
     await tester.pumpAndSettle();
 
-    double railWidth() => tester.getSize(find.byKey(const Key('appNavRail'))).width;
+    double railWidth() =>
+        tester.getSize(find.byKey(const Key('appNavRail'))).width;
     expect(railWidth(), 252);
 
     await tester.tap(find.byKey(const Key('sidebarToggleButton')));
@@ -87,7 +100,10 @@ void main() {
   ) async {
     _useDesignViewport(tester);
     await tester.pumpWidget(
-      ProviderScope(overrides: _authenticatedOverrides, child: const FinStrideApp()),
+      ProviderScope(
+        overrides: _authenticatedOverrides,
+        child: const FinStrideApp(),
+      ),
     );
     await tester.pumpAndSettle();
 
@@ -105,7 +121,10 @@ void main() {
   ) async {
     _useDesignViewport(tester);
     await tester.pumpWidget(
-      ProviderScope(overrides: _authenticatedOverrides, child: const FinStrideApp()),
+      ProviderScope(
+        overrides: _authenticatedOverrides,
+        child: const FinStrideApp(),
+      ),
     );
     await tester.pumpAndSettle();
 

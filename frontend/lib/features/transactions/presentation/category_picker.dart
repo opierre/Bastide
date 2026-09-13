@@ -25,10 +25,14 @@ Future<void> showCategoryPicker(
 }) async {
   final button = anchorContext.findRenderObject()! as RenderBox;
   final overlay =
-      Navigator.of(anchorContext).overlay!.context.findRenderObject()! as RenderBox;
+      Navigator.of(anchorContext).overlay!.context.findRenderObject()!
+          as RenderBox;
   final position = RelativeRect.fromRect(
     Rect.fromPoints(
-      button.localToGlobal(Offset(0, button.size.height + 4), ancestor: overlay),
+      button.localToGlobal(
+        Offset(0, button.size.height + 4),
+        ancestor: overlay,
+      ),
       button.localToGlobal(
         button.size.bottomRight(const Offset(0, 4)),
         ancestor: overlay,
@@ -62,7 +66,8 @@ class _CategoryPickerBody extends ConsumerStatefulWidget {
   final Transaction transaction;
 
   @override
-  ConsumerState<_CategoryPickerBody> createState() => _CategoryPickerBodyState();
+  ConsumerState<_CategoryPickerBody> createState() =>
+      _CategoryPickerBodyState();
 }
 
 class _CategoryPickerBodyState extends ConsumerState<_CategoryPickerBody> {
@@ -80,9 +85,9 @@ class _CategoryPickerBodyState extends ConsumerState<_CategoryPickerBody> {
     } catch (error) {
       if (!mounted) return;
       setState(() => _isSaving = false);
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(localizeTransactionError(l10n, error))));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(localizeTransactionError(l10n, error))),
+      );
     }
   }
 
@@ -112,7 +117,10 @@ class _CategoryPickerBodyState extends ConsumerState<_CategoryPickerBody> {
                 isDense: true,
                 hintText: l10n.categoryPickerSearchHint,
                 prefixIcon: const Icon(Icons.search_rounded, size: 16),
-                prefixIconConstraints: const BoxConstraints(minWidth: 30, minHeight: 30),
+                prefixIconConstraints: const BoxConstraints(
+                  minWidth: 30,
+                  minHeight: 30,
+                ),
                 filled: true,
                 fillColor: AppColors.surfaceField,
                 border: OutlineInputBorder(
@@ -135,9 +143,9 @@ class _CategoryPickerBodyState extends ConsumerState<_CategoryPickerBody> {
                 padding: const EdgeInsets.all(AppSpacing.md),
                 child: Text(
                   l10n.categoryPickerLoadError,
-                  style: Theme.of(
-                    context,
-                  ).textTheme.bodySmall?.copyWith(color: AppColors.textSecondary),
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: AppColors.textSecondary,
+                  ),
                 ),
               ),
               _ => const Padding(
@@ -164,8 +172,10 @@ class _CategoryPickerBodyState extends ConsumerState<_CategoryPickerBody> {
     final l10n = AppLocalizations.of(context)!;
     return categories
         .where(
-          (category) =>
-              localizedCategoryName(l10n, category.name).toLowerCase().contains(needle),
+          (category) => localizedCategoryName(
+            l10n,
+            category.name,
+          ).toLowerCase().contains(needle),
         )
         .toList();
   }
@@ -219,7 +229,11 @@ class _CategoryList extends StatelessWidget {
             ),
             child: Row(
               children: [
-                Icon(CategoryIcons.forSlug(slug), size: 14, color: CategoryHues.forSlug(slug)),
+                Icon(
+                  CategoryIcons.forSlug(slug),
+                  size: 14,
+                  color: CategoryHues.forSlug(slug),
+                ),
                 const SizedBox(width: AppSpacing.sm),
                 Expanded(
                   child: Text(
@@ -229,7 +243,11 @@ class _CategoryList extends StatelessWidget {
                   ),
                 ),
                 if (selected)
-                  const Icon(Icons.check_rounded, size: 16, color: AppColors.iris),
+                  const Icon(
+                    Icons.check_rounded,
+                    size: 16,
+                    color: AppColors.iris,
+                  ),
               ],
             ),
           ),

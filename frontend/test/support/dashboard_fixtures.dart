@@ -5,18 +5,48 @@ import 'package:finstride/features/dashboard/domain/dashboard_trends.dart';
 /// descending order. The i18n keys are the ones `categorySlugFor` buckets into the pinned hues,
 /// so a test asserting a legend color is asserting the real mapping.
 const specCategories = [
-  CategoryBreakdown(categoryId: 'c1', name: 'category.housing', amountMinor: 95000, pct: 42.9),
-  CategoryBreakdown(categoryId: 'c2', name: 'category.food', amountMinor: 48620, pct: 22.0),
-  CategoryBreakdown(categoryId: 'c3', name: 'category.other', amountMinor: 23655, pct: 10.7),
-  CategoryBreakdown(categoryId: 'c4', name: 'category.transport', amountMinor: 21490, pct: 9.7),
-  CategoryBreakdown(categoryId: 'c5', name: 'category.leisure', amountMinor: 18945, pct: 8.6),
+  CategoryBreakdown(
+    categoryId: 'c1',
+    name: 'category.housing',
+    amountMinor: 95000,
+    pct: 42.9,
+  ),
+  CategoryBreakdown(
+    categoryId: 'c2',
+    name: 'category.food',
+    amountMinor: 48620,
+    pct: 22.0,
+  ),
+  CategoryBreakdown(
+    categoryId: 'c3',
+    name: 'category.other',
+    amountMinor: 23655,
+    pct: 10.7,
+  ),
+  CategoryBreakdown(
+    categoryId: 'c4',
+    name: 'category.transport',
+    amountMinor: 21490,
+    pct: 9.7,
+  ),
+  CategoryBreakdown(
+    categoryId: 'c5',
+    name: 'category.leisure',
+    amountMinor: 18945,
+    pct: 8.6,
+  ),
   CategoryBreakdown(
     categoryId: 'c6',
     name: 'category.subscriptions',
     amountMinor: 7495,
     pct: 3.4,
   ),
-  CategoryBreakdown(categoryId: 'c7', name: 'category.health', amountMinor: 6230, pct: 2.8),
+  CategoryBreakdown(
+    categoryId: 'c7',
+    name: 'category.health',
+    amountMinor: 6230,
+    pct: 2.8,
+  ),
 ];
 
 /// May 2026's summary exactly as the spec's row 1 and row 2 draw it.
@@ -124,5 +154,8 @@ List<RecentTransaction> specRecent() => [
 ];
 
 /// A user with no history at all — every series empty.
-DashboardTrends emptyTrends() =>
-    const DashboardTrends(monthlySeries: [], savingsSeries: [], currency: 'EUR');
+DashboardTrends emptyTrends() => const DashboardTrends(
+  monthlySeries: [],
+  savingsSeries: [],
+  currency: 'EUR',
+);

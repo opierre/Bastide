@@ -64,9 +64,15 @@ ThemeData _buildDarkTheme() {
     ),
 
     inputDecorationTheme: _inputDecorationTheme(textTheme),
-    filledButtonTheme: FilledButtonThemeData(style: _rowAligned(_filledButtonStyle(textTheme))),
-    outlinedButtonTheme: OutlinedButtonThemeData(style: _rowAligned(_outlinedButtonStyle(textTheme))),
-    textButtonTheme: TextButtonThemeData(style: _rowAligned(_textButtonStyle(textTheme))),
+    filledButtonTheme: FilledButtonThemeData(
+      style: _rowAligned(_filledButtonStyle(textTheme)),
+    ),
+    outlinedButtonTheme: OutlinedButtonThemeData(
+      style: _rowAligned(_outlinedButtonStyle(textTheme)),
+    ),
+    textButtonTheme: TextButtonThemeData(
+      style: _rowAligned(_textButtonStyle(textTheme)),
+    ),
 
     iconButtonTheme: IconButtonThemeData(
       style: ButtonStyle(
@@ -85,7 +91,9 @@ ThemeData _buildDarkTheme() {
       surfaceTintColor: Colors.transparent,
       elevation: 0,
       titleTextStyle: textTheme.headlineMedium,
-      contentTextStyle: textTheme.bodyMedium?.copyWith(color: AppColors.textSecondary),
+      contentTextStyle: textTheme.bodyMedium?.copyWith(
+        color: AppColors.textSecondary,
+      ),
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.all(Radius.circular(AppRadii.xl)),
         side: BorderSide(color: AppColors.border),
@@ -368,7 +376,10 @@ TextTheme _appTextTheme() {
         // Captions and badges.
         labelSmall: _ui(11.5, FontWeight.w600, tracking: 0.1),
       )
-      .apply(bodyColor: AppColors.textPrimary, displayColor: AppColors.textPrimary);
+      .apply(
+        bodyColor: AppColors.textPrimary,
+        displayColor: AppColors.textPrimary,
+      );
 }
 
 /// Styles the [TextTheme] slots can't carry — an uppercase section label sits

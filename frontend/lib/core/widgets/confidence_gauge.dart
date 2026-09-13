@@ -10,7 +10,11 @@ import '../theme/tokens.dart';
 /// figure and the part a screen reader can read. Meaning is never on the bar
 /// alone.
 class ConfidenceGauge extends StatelessWidget {
-  const ConfidenceGauge({super.key, required this.confidence, required this.label});
+  const ConfidenceGauge({
+    super.key,
+    required this.confidence,
+    required this.label,
+  });
 
   /// The model's confidence in `[0,1]` — the raw API value. Formatting it as a
   /// percentage happens where every other number is formatted, in the caller's

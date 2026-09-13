@@ -47,7 +47,11 @@ class GoalDetailView extends ConsumerWidget {
           child: TextButton.icon(
             key: const Key('goalDetailBack'),
             onPressed: () => ref.read(selectedGoalProvider.notifier).close(),
-            icon: const Icon(Icons.arrow_back_rounded, size: 16, color: AppColors.iris),
+            icon: const Icon(
+              Icons.arrow_back_rounded,
+              size: 16,
+              color: AppColors.iris,
+            ),
             label: Text(
               l10n.goalDetailBack,
               style: Theme.of(
@@ -66,7 +70,8 @@ class GoalDetailView extends ConsumerWidget {
                   messageKey: const Key('goalDetailMissing'),
                   retryLabel: l10n.goalDetailBack,
                   retryKey: const Key('goalDetailMissingBack'),
-                  onRetry: () => ref.read(selectedGoalProvider.notifier).close(),
+                  onRetry: () =>
+                      ref.read(selectedGoalProvider.notifier).close(),
                 )
               : _DetailBody(goal: goal),
         ),
@@ -93,7 +98,10 @@ class _DetailBody extends ConsumerWidget {
         const GoalReassuranceLine(),
         const SizedBox(height: AppSpacing.gridGap),
         switch (allocations) {
-          AsyncData(:final value) => _HistoryCard(goal: goal, allocations: value),
+          AsyncData(:final value) => _HistoryCard(
+            goal: goal,
+            allocations: value,
+          ),
           AsyncError() => ErrorStateView(
             message: l10n.goalDetailHistoryFailed,
             messageKey: const Key('goalHistoryErrorText'),
@@ -167,7 +175,9 @@ class _HeaderCard extends ConsumerWidget {
                           goalMonthLabel(locale, goal.targetDate!),
                         ),
                   key: const Key('goalDetailSubline'),
-                  style: textTheme.bodySmall?.copyWith(color: AppColors.textSecondary),
+                  style: textTheme.bodySmall?.copyWith(
+                    color: AppColors.textSecondary,
+                  ),
                 ),
                 const SizedBox(height: AppSpacing.sm + AppSpacing.xs),
                 Row(
@@ -206,7 +216,9 @@ class _HeaderCard extends ConsumerWidget {
                   : controller.archive(goal.id),
               icon: const Icon(Icons.archive_outlined, size: 16),
               label: Text(
-                goal.isArchived ? l10n.goalDetailRestore : l10n.goalDetailArchive,
+                goal.isArchived
+                    ? l10n.goalDetailRestore
+                    : l10n.goalDetailArchive,
               ),
             ),
           ),
@@ -291,7 +303,11 @@ class GoalReassuranceLine extends StatelessWidget {
       key: const Key('goalReassuranceLine'),
       mainAxisSize: MainAxisSize.min,
       children: [
-        const Icon(Icons.lock_outline_rounded, size: 13, color: AppColors.textDisabled),
+        const Icon(
+          Icons.lock_outline_rounded,
+          size: 13,
+          color: AppColors.textDisabled,
+        ),
         const SizedBox(width: AppSpacing.sm - 2),
         Flexible(
           child: Text(
@@ -325,7 +341,9 @@ class _HistoryCard extends ConsumerWidget {
           const SizedBox(height: 3),
           Text(
             l10n.goalHistorySubtitle,
-            style: textTheme.bodySmall?.copyWith(color: AppColors.textSecondary),
+            style: textTheme.bodySmall?.copyWith(
+              color: AppColors.textSecondary,
+            ),
           ),
           const SizedBox(height: AppSpacing.md),
           if (allocations.isEmpty)
@@ -443,7 +461,9 @@ class _HistoryRow extends StatelessWidget {
               allocation.note ?? '',
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
-              style: textTheme.bodyMedium?.copyWith(color: AppColors.textSecondary),
+              style: textTheme.bodyMedium?.copyWith(
+                color: AppColors.textSecondary,
+              ),
             ),
           ),
           IconButton(
@@ -452,7 +472,10 @@ class _HistoryRow extends StatelessWidget {
             iconSize: 16,
             visualDensity: VisualDensity.compact,
             tooltip: l10n.goalHistoryDelete,
-            icon: const Icon(Icons.close_rounded, color: AppColors.textDisabled),
+            icon: const Icon(
+              Icons.close_rounded,
+              color: AppColors.textDisabled,
+            ),
           ),
         ],
       ),

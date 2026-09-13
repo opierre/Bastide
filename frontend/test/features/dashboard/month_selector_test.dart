@@ -38,7 +38,14 @@ Widget _wrap(FakeDashboardController controller) {
 }
 
 FakeDashboardController _controllerAt(DateTime month) =>
-    FakeDashboardController(initialState: DashboardState(month: month, summary: _summary, trends: specTrends(), recent: specRecent()));
+    FakeDashboardController(
+      initialState: DashboardState(
+        month: month,
+        summary: _summary,
+        trends: specTrends(),
+        recent: specRecent(),
+      ),
+    );
 
 void main() {
   testWidgets('the chevrons still step one month at a time', (tester) async {
@@ -52,7 +59,9 @@ void main() {
     expect(controller.changeMonthCalls, [DateTime(2026, 4)]);
   });
 
-  testWidgets('tapping the label opens the picker on the selected month', (tester) async {
+  testWidgets('tapping the label opens the picker on the selected month', (
+    tester,
+  ) async {
     final controller = _controllerAt(DateTime(2026, 5));
     await tester.pumpWidget(_wrap(controller));
     await tester.pumpAndSettle();
@@ -67,7 +76,9 @@ void main() {
     }
   });
 
-  testWidgets('paging the year and picking a month selects that month', (tester) async {
+  testWidgets('paging the year and picking a month selects that month', (
+    tester,
+  ) async {
     final controller = _controllerAt(DateTime(2026, 5));
     await tester.pumpWidget(_wrap(controller));
     await tester.pumpAndSettle();
@@ -87,7 +98,9 @@ void main() {
     expect(find.byKey(const Key('dashboardPickerYearLabel')), findsNothing);
   });
 
-  testWidgets('paging the year without choosing leaves the month alone', (tester) async {
+  testWidgets('paging the year without choosing leaves the month alone', (
+    tester,
+  ) async {
     final controller = _controllerAt(DateTime(2026, 5));
     await tester.pumpWidget(_wrap(controller));
     await tester.pumpAndSettle();

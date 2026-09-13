@@ -78,7 +78,9 @@ class SettingsState {
     connection: connection ?? this.connection,
     models: models ?? this.models,
     isProbing: isProbing ?? this.isProbing,
-    baseUrlError: clearBaseUrlError ? null : (baseUrlError ?? this.baseUrlError),
+    baseUrlError: clearBaseUrlError
+        ? null
+        : (baseUrlError ?? this.baseUrlError),
   );
 }
 
@@ -119,7 +121,10 @@ class SettingsController extends AsyncNotifier<SettingsState> {
     // the default state, and dialing one nobody asked for costs a round trip to
     // learn nothing.
     if (!settings.aiEnabled) {
-      return SettingsState(settings: settings, connection: InferenceConnection.disabled);
+      return SettingsState(
+        settings: settings,
+        connection: InferenceConnection.disabled,
+      );
     }
     return _withHealth(settings, await _safeProbe());
   }
@@ -221,13 +226,18 @@ class SettingsController extends AsyncNotifier<SettingsState> {
     );
 
     _debounce?.cancel();
-    _debounce = Timer(settingsPatchDebounce, () => unawaited(_flushThenProbe()));
+    _debounce = Timer(
+      settingsPatchDebounce,
+      () => unawaited(_flushThenProbe()),
+    );
   }
 
   Future<void> _flushThenProbe() async {
     final probesAddress = _pendingBaseUrl != null;
     final accepted = await _flush();
-    if (accepted && probesAddress && (state.value?.settings.aiEnabled ?? false)) {
+    if (accepted &&
+        probesAddress &&
+        (state.value?.settings.aiEnabled ?? false)) {
       await probe();
     }
   }
@@ -260,7 +270,9 @@ class SettingsController extends AsyncNotifier<SettingsState> {
           );
       final latest = state.value;
       if (latest == null) return false;
-      state = AsyncData(latest.copyWith(settings: saved, clearBaseUrlError: true));
+      state = AsyncData(
+        latest.copyWith(settings: saved, clearBaseUrlError: true),
+      );
       if (aiEnabled != null) _syncReviewQueue();
       return true;
     } catch (error) {
@@ -308,4 +320,6 @@ class SettingsController extends AsyncNotifier<SettingsState> {
 }
 
 final settingsControllerProvider =
-    AsyncNotifierProvider<SettingsController, SettingsState>(SettingsController.new);
+    AsyncNotifierProvider<SettingsController, SettingsState>(
+      SettingsController.new,
+    );

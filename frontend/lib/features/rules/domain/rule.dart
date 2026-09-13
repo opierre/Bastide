@@ -174,7 +174,10 @@ class RuleSuggestion {
 /// *other* rows it moved.
 @immutable
 class RuleFromTransactionResult {
-  const RuleFromTransactionResult({required this.rule, required this.recategorizedCount});
+  const RuleFromTransactionResult({
+    required this.rule,
+    required this.recategorizedCount,
+  });
 
   final Rule rule;
   final int recategorizedCount;

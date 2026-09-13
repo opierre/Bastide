@@ -135,7 +135,9 @@ Future<void> _stageFile(WidgetTester tester) async {
 }
 
 void main() {
-  testWidgets('an OFX file imports in one step and reports its counts', (tester) async {
+  testWidgets('an OFX file imports in one step and reports its counts', (
+    tester,
+  ) async {
     _useDesktopSurface(tester);
     final imports = FakeImportsController(importResult: _batch());
     await tester.pumpWidget(
@@ -161,7 +163,9 @@ void main() {
       '42',
     );
     expect(
-      tester.widget<Text>(find.byKey(const Key('importResultDuplicateCount'))).data,
+      tester
+          .widget<Text>(find.byKey(const Key('importResultDuplicateCount')))
+          .data,
       '3',
     );
     // The drop zone resets, ready for the next statement.
@@ -190,7 +194,10 @@ void main() {
     await tester.tap(find.byKey(const Key('importSubmitButton')));
     await tester.pumpAndSettle();
 
-    expect(find.byKey(const Key('importResultBalanceMismatch')), findsOneWidget);
+    expect(
+      find.byKey(const Key('importResultBalanceMismatch')),
+      findsOneWidget,
+    );
     final amount = formatAmount(
       amountMinor: 5925,
       currency: 'EUR',
@@ -236,7 +243,10 @@ void main() {
 
     await _stageFile(tester);
 
-    expect(find.byKey(const Key('importDetectedAccountBanner')), findsOneWidget);
+    expect(
+      find.byKey(const Key('importDetectedAccountBanner')),
+      findsOneWidget,
+    );
 
     await tester.tap(find.byKey(const Key('importSubmitButton')));
     await tester.pumpAndSettle();
@@ -274,10 +284,15 @@ void main() {
 
     await _stageFile(tester);
 
-    expect(find.byKey(const Key('importAmbiguousAccountBanner')), findsOneWidget);
+    expect(
+      find.byKey(const Key('importAmbiguousAccountBanner')),
+      findsOneWidget,
+    );
     // Nothing has named a destination, so there is nothing to import yet.
     expect(
-      tester.widget<PrimaryButton>(find.byKey(const Key('importSubmitButton'))).onPressed,
+      tester
+          .widget<PrimaryButton>(find.byKey(const Key('importSubmitButton')))
+          .onPressed,
       isNull,
     );
 
@@ -359,9 +374,14 @@ void main() {
 
     await _stageFile(tester);
 
-    expect(find.byKey(const Key('importUnreadableAccountBanner')), findsOneWidget);
     expect(
-      tester.widget<PrimaryButton>(find.byKey(const Key('importSubmitButton'))).onPressed,
+      find.byKey(const Key('importUnreadableAccountBanner')),
+      findsOneWidget,
+    );
+    expect(
+      tester
+          .widget<PrimaryButton>(find.byKey(const Key('importSubmitButton')))
+          .onPressed,
       isNull,
     );
 
@@ -403,7 +423,9 @@ void main() {
 
     // The answer to the previous statement says nothing about this one.
     expect(
-      tester.widget<PrimaryButton>(find.byKey(const Key('importSubmitButton'))).onPressed,
+      tester
+          .widget<PrimaryButton>(find.byKey(const Key('importSubmitButton')))
+          .onPressed,
       isNull,
     );
   });
@@ -459,14 +481,19 @@ void main() {
     expect(accounts.createCalls.single.ofxAccountId, '0001234567');
 
     // The new account becomes the destination, and the file imports into it.
-    expect(find.byKey(const Key('importDetectedAccountBanner')), findsOneWidget);
+    expect(
+      find.byKey(const Key('importDetectedAccountBanner')),
+      findsOneWidget,
+    );
     await tester.tap(find.byKey(const Key('importSubmitButton')));
     await tester.pumpAndSettle();
 
     expect(imports.importCalls.single.accountId, 'a1');
   });
 
-  testWidgets('cancelling the offered account leaves it on the banner', (tester) async {
+  testWidgets('cancelling the offered account leaves it on the banner', (
+    tester,
+  ) async {
     _useDesktopSurface(tester);
     await tester.pumpWidget(
       _wrap(
@@ -484,13 +511,17 @@ void main() {
     expect(find.byKey(const Key('importUnknownAccountBanner')), findsOneWidget);
 
     // The offer stays available rather than being lost with the dialog.
-    await tester.tap(find.byKey(const Key('importCreateDetectedAccountButton')));
+    await tester.tap(
+      find.byKey(const Key('importCreateDetectedAccountButton')),
+    );
     await tester.pumpAndSettle();
 
     expect(find.byKey(const Key('accountFormPrefillNote')), findsOneWidget);
   });
 
-  testWidgets('a user with no accounts is not told to create one first', (tester) async {
+  testWidgets('a user with no accounts is not told to create one first', (
+    tester,
+  ) async {
     _useDesktopSurface(tester);
     await tester.pumpWidget(
       _wrap(
@@ -507,7 +538,9 @@ void main() {
     expect(find.byKey(const Key('importDropZone')), findsOneWidget);
   });
 
-  testWidgets('the detected-account notice fits a short window', (tester) async {
+  testWidgets('the detected-account notice fits a short window', (
+    tester,
+  ) async {
     // The notice grows the import card, squeezing the history beneath it. On a
     // window this short that used to overflow the empty state's column.
     tester.view.physicalSize = const Size(1280, 640);

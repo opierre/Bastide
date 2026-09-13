@@ -81,12 +81,13 @@ bool _sameInstitution(String a, String b) {
 }
 
 /// Maps the OFX account-type literal onto ours.
-AccountType? accountTypeFromOfx(String? ofxType) => switch (ofxType?.toUpperCase()) {
-  'CHECKING' || 'MONEYMRKT' => AccountType.checking,
-  'SAVINGS' => AccountType.savings,
-  'CREDITCARD' || 'CREDITLINE' => AccountType.credit,
-  _ => null,
-};
+AccountType? accountTypeFromOfx(String? ofxType) =>
+    switch (ofxType?.toUpperCase()) {
+      'CHECKING' || 'MONEYMRKT' => AccountType.checking,
+      'SAVINGS' => AccountType.savings,
+      'CREDITCARD' || 'CREDITLINE' => AccountType.credit,
+      _ => null,
+    };
 
 /// Every digit run in [value], so an account number can be recognized inside a
 /// free-text account name ("Courant ••4567", "Livret A 12345678").
@@ -120,7 +121,9 @@ OfxAccountMatch matchOfxAccount(OfxAccountInfo info, List<Account> accounts) {
     }
   }
 
-  final byNumber = accounts.where((a) => _carriesNumber(a, info.accountNumber)).toList();
+  final byNumber = accounts
+      .where((a) => _carriesNumber(a, info.accountNumber))
+      .toList();
   if (byNumber.length == 1) return OfxAccountMatched(info, byNumber.single);
 
   final institution = info.institutionLabel;
@@ -157,14 +160,19 @@ class OfxAccountDetection extends Notifier<OfxAccountMatch?> {
   /// Asynchronous because a statement that names no bank still carries its bank
   /// code, and the backend's directory is what turns that code into a name —
   /// which both the matcher and the account it proposes are better for.
-  Future<OfxAccountMatch> detect(PickedImportFile file, List<Account> accounts) async {
+  Future<OfxAccountMatch> detect(
+    PickedImportFile file,
+    List<Account> accounts,
+  ) async {
     var info = parseOfxAccountInfo(file.bytes);
     if (info == null) return state = const OfxAccountUnreadable();
 
     // Only worth asking when the file didn't already name its bank.
     final bankId = info.bankId;
     if (info.organization == null && bankId != null) {
-      info = info.withBankName(await ref.read(banksRepositoryProvider).nameForCode(bankId));
+      info = info.withBankName(
+        await ref.read(banksRepositoryProvider).nameForCode(bankId),
+      );
     }
 
     return state = matchOfxAccount(info, accounts);
@@ -179,4 +187,6 @@ class OfxAccountDetection extends Notifier<OfxAccountMatch?> {
 }
 
 final ofxAccountDetectionProvider =
-    NotifierProvider<OfxAccountDetection, OfxAccountMatch?>(OfxAccountDetection.new);
+    NotifierProvider<OfxAccountDetection, OfxAccountMatch?>(
+      OfxAccountDetection.new,
+    );

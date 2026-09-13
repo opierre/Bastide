@@ -19,7 +19,9 @@ class BrandMark extends StatelessWidget {
         gradient: AppColors.irisGradient,
         borderRadius: BorderRadius.circular(size * 0.3),
       ),
-      child: CustomPaint(painter: const _AscendingBarsPainter(color: AppColors.irisInk)),
+      child: CustomPaint(
+        painter: const _AscendingBarsPainter(color: AppColors.irisInk),
+      ),
     );
   }
 }
@@ -58,7 +60,8 @@ class _AscendingBarsPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(_AscendingBarsPainter oldDelegate) => oldDelegate.color != color;
+  bool shouldRepaint(_AscendingBarsPainter oldDelegate) =>
+      oldDelegate.color != color;
 }
 
 /// Logomark plus the wordmark, as used in the sidebar header and on the auth

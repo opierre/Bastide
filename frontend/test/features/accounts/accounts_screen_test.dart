@@ -29,7 +29,10 @@ Account _account({
   updatedAt: DateTime.utc(2026, 1, 1),
 );
 
-Widget _wrap({required FakeAccountsController controller, Locale locale = const Locale('fr')}) {
+Widget _wrap({
+  required FakeAccountsController controller,
+  Locale locale = const Locale('fr'),
+}) {
   return ProviderScope(
     overrides: [accountsControllerProvider.overrideWith(() => controller)],
     child: MaterialApp(
@@ -45,31 +48,45 @@ Widget _wrap({required FakeAccountsController controller, Locale locale = const 
 /// Scoped to the grid: the screen's summary card shows the *total* balance,
 /// which for a single account is the same figure — but unsigned, since a total
 /// is a standing figure rather than a movement.
-Finder _balanceInGrid(String formatted) =>
-    find.descendant(of: find.byKey(const Key('accountsList')), matching: find.text(formatted));
+Finder _balanceInGrid(String formatted) => find.descendant(
+  of: find.byKey(const Key('accountsList')),
+  matching: find.text(formatted),
+);
 
 void main() {
-  testWidgets('renders the balance formatted for the fr locale', (tester) async {
+  testWidgets('renders the balance formatted for the fr locale', (
+    tester,
+  ) async {
     await tester.pumpWidget(
-      _wrap(controller: FakeAccountsController(initialAccounts: [_account(balanceMinor: 123456)])),
+      _wrap(
+        controller: FakeAccountsController(
+          initialAccounts: [_account(balanceMinor: 123456)],
+        ),
+      ),
     );
     await tester.pumpAndSettle();
 
     // An account card's balance is its one data point, so it is signed.
-    final expected = '+${NumberFormat.simpleCurrency(locale: 'fr', name: 'EUR').format(1234.56)}';
+    final expected =
+        '+${NumberFormat.simpleCurrency(locale: 'fr', name: 'EUR').format(1234.56)}';
     expect(_balanceInGrid(expected), findsOneWidget);
   });
 
-  testWidgets('renders the balance formatted for the en locale', (tester) async {
+  testWidgets('renders the balance formatted for the en locale', (
+    tester,
+  ) async {
     await tester.pumpWidget(
       _wrap(
-        controller: FakeAccountsController(initialAccounts: [_account(balanceMinor: 123456)]),
+        controller: FakeAccountsController(
+          initialAccounts: [_account(balanceMinor: 123456)],
+        ),
         locale: const Locale('en'),
       ),
     );
     await tester.pumpAndSettle();
 
-    final expected = '+${NumberFormat.simpleCurrency(locale: 'en', name: 'EUR').format(1234.56)}';
+    final expected =
+        '+${NumberFormat.simpleCurrency(locale: 'en', name: 'EUR').format(1234.56)}';
     expect(_balanceInGrid(expected), findsOneWidget);
   });
 
@@ -86,7 +103,10 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    final total = NumberFormat.simpleCurrency(locale: 'fr', name: 'EUR').format(2000.00);
+    final total = NumberFormat.simpleCurrency(
+      locale: 'fr',
+      name: 'EUR',
+    ).format(2000.00);
     expect(
       find.descendant(
         of: find.byKey(const Key('accountsTotalBalance')),
@@ -96,7 +116,9 @@ void main() {
     );
   });
 
-  testWidgets('renders the empty state with a CTA when there are no accounts', (tester) async {
+  testWidgets('renders the empty state with a CTA when there are no accounts', (
+    tester,
+  ) async {
     await tester.pumpWidget(_wrap(controller: FakeAccountsController()));
     await tester.pumpAndSettle();
 
@@ -104,7 +126,9 @@ void main() {
     expect(find.byKey(const Key('accountsList')), findsNothing);
   });
 
-  testWidgets('renders under fr without missing localized keys', (tester) async {
+  testWidgets('renders under fr without missing localized keys', (
+    tester,
+  ) async {
     await tester.pumpWidget(_wrap(controller: FakeAccountsController()));
     await tester.pumpAndSettle();
 
@@ -112,7 +136,9 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('renders under en without missing localized keys', (tester) async {
+  testWidgets('renders under en without missing localized keys', (
+    tester,
+  ) async {
     await tester.pumpWidget(
       _wrap(controller: FakeAccountsController(), locale: const Locale('en')),
     );

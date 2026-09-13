@@ -100,7 +100,8 @@ class _AccountFormState extends ConsumerState<AccountForm> {
   void didChangeDependencies() {
     super.didChangeDependencies();
     if (_openingBalanceFilled) return;
-    final balanceMinor = widget.initial?.openingBalanceMinor ?? widget.prefill?.balanceMinor;
+    final balanceMinor =
+        widget.initial?.openingBalanceMinor ?? widget.prefill?.balanceMinor;
     if (balanceMinor == null) return;
     final locale = Localizations.localeOf(context).toString();
     _openingBalanceController.text = NumberFormat.decimalPattern(
@@ -177,7 +178,9 @@ class _AccountFormState extends ConsumerState<AccountForm> {
   }
 
   String? _validateOpeningBalance(String? value, AppLocalizations l10n) {
-    if (value == null || value.trim().isEmpty) return l10n.accountOpeningBalanceRequired;
+    if (value == null || value.trim().isEmpty) {
+      return l10n.accountOpeningBalanceRequired;
+    }
     try {
       NumberFormat.decimalPattern(
         Localizations.localeOf(context).toString(),
@@ -202,11 +205,15 @@ class _AccountFormState extends ConsumerState<AccountForm> {
         '';
     // Only meaningful for the figure the statement itself declares: a date
     // without a balance to date says nothing about what the user is typing.
-    final balanceAsOf = _balanceFromStatement ? widget.prefill?.balanceAsOf : null;
+    final balanceAsOf = _balanceFromStatement
+        ? widget.prefill?.balanceAsOf
+        : null;
 
     return AppModal(
       width: 480,
-      title: _isEditing ? l10n.accountFormEditTitle : l10n.accountFormCreateTitle,
+      title: _isEditing
+          ? l10n.accountFormEditTitle
+          : l10n.accountFormCreateTitle,
       actions: [
         TextButton(
           key: const Key('accountFormCancelButton'),
@@ -215,7 +222,9 @@ class _AccountFormState extends ConsumerState<AccountForm> {
         ),
         PrimaryButton(
           key: const Key('accountFormSubmitButton'),
-          label: _isEditing ? l10n.accountFormSubmitEdit : l10n.accountFormSubmitCreate,
+          label: _isEditing
+              ? l10n.accountFormSubmitEdit
+              : l10n.accountFormSubmitCreate,
           isLoading: _isSubmitting,
           onPressed: _submit,
         ),
@@ -252,7 +261,10 @@ class _AccountFormState extends ConsumerState<AccountForm> {
                 value: _type,
                 items: [
                   for (final type in AccountType.values)
-                    AppSelectItem(value: type, label: accountTypeLabel(l10n, type)),
+                    AppSelectItem(
+                      value: type,
+                      label: accountTypeLabel(l10n, type),
+                    ),
                 ],
                 onChanged: (value) => setState(() => _type = value),
               ),
@@ -311,12 +323,15 @@ class _AccountFormState extends ConsumerState<AccountForm> {
                       ),
                       // A form value is a neutral figure, not a movement, so it
                       // keeps the primary text color rather than a sign color.
-                      style: tabularNumberStyle(Theme.of(context).textTheme.bodyLarge!),
+                      style: tabularNumberStyle(
+                        Theme.of(context).textTheme.bodyLarge!,
+                      ),
                       decoration: InputDecoration(
                         suffixText: currency,
                         suffixStyle: fieldSuffixStyle(context),
                       ),
-                      validator: (value) => _validateOpeningBalance(value, l10n),
+                      validator: (value) =>
+                          _validateOpeningBalance(value, l10n),
                     ),
             ),
             const SizedBox(height: AppSpacing.md),
@@ -336,8 +351,10 @@ class _AccountFormState extends ConsumerState<AccountForm> {
                         : TextFormField(
                             key: const Key('accountInstitutionField'),
                             controller: _institutionController,
-                            onChanged: (value) => setState(() => _institution = value),
-                            validator: (value) => (value == null || value.trim().isEmpty)
+                            onChanged: (value) =>
+                                setState(() => _institution = value),
+                            validator: (value) =>
+                                (value == null || value.trim().isEmpty)
                                 ? l10n.accountInstitutionRequired
                                 : null,
                           ),

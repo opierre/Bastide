@@ -59,7 +59,9 @@ class _AppSelectState<T> extends State<AppSelect<T>> {
     }
     final box = _anchorKey.currentContext?.findRenderObject() as RenderBox?;
     final width = box?.size.width;
-    if (width != null && width != _menuWidth) setState(() => _menuWidth = width);
+    if (width != null && width != _menuWidth) {
+      setState(() => _menuWidth = width);
+    }
     controller.open();
   }
 
@@ -160,7 +162,10 @@ class _Anchor extends StatelessWidget {
           ),
           child: Row(
             children: [
-              if (leading != null) ...[leading!, const SizedBox(width: AppSpacing.sm)],
+              if (leading != null) ...[
+                leading!,
+                const SizedBox(width: AppSpacing.sm),
+              ],
               Expanded(
                 child: Text(
                   label,
@@ -177,7 +182,9 @@ class _Anchor extends StatelessWidget {
                   borderRadius: BorderRadius.circular(AppRadii.sm),
                 ),
                 child: Icon(
-                  isOpen ? Icons.expand_less_rounded : Icons.expand_more_rounded,
+                  isOpen
+                      ? Icons.expand_less_rounded
+                      : Icons.expand_more_rounded,
                   size: 17,
                   color: AppColors.iris,
                 ),
@@ -216,10 +223,7 @@ class _Option<T> extends StatelessWidget {
   Widget build(BuildContext context) {
     // Sized from the outside rather than through the button's own minimum
     // width, which desktop's compact [VisualDensity] would shave 8px off.
-    return SizedBox(
-      width: width,
-      child: _button(context),
-    );
+    return SizedBox(width: width, child: _button(context));
   }
 
   Widget _button(BuildContext context) {

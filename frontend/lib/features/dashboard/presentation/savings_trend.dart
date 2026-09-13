@@ -35,7 +35,8 @@ class SavingsTrendChart extends StatelessWidget {
       child: AreaLine(
         values: [for (final point in series) point.cumulativeMinor],
         labels: [
-          for (final point in series) _capitalize(monthFormat.format(point.month)),
+          for (final point in series)
+            _capitalize(monthFormat.format(point.month)),
         ],
       ),
     );

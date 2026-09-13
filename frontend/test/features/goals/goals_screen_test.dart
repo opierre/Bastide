@@ -44,7 +44,9 @@ void _useDesktopSurface(WidgetTester tester) {
 }
 
 void main() {
-  testWidgets('a card renders its name, amounts, percent and bar in fr', (tester) async {
+  testWidgets('a card renders its name, amounts, percent and bar in fr', (
+    tester,
+  ) async {
     _useDesktopSurface(tester);
     await tester.pumpWidget(
       _wrap(controller: FakeGoalsController(initialGoals: specGoals())),
@@ -66,7 +68,9 @@ void main() {
 
     // What is set aside is a standing quantity, not a movement, so the money
     // rule's colors would state something false about it.
-    final saved = tester.widget<AmountText>(find.byKey(const Key('goalSaved-g1')));
+    final saved = tester.widget<AmountText>(
+      find.byKey(const Key('goalSaved-g1')),
+    );
     expect(saved.colorize, isFalse);
 
     // No account appears anywhere in this feature (`11-goals.md` §Concept).
@@ -89,27 +93,28 @@ void main() {
     expect(find.text('Show archived goals (0)'), findsNothing);
   });
 
-  testWidgets('an over-funded goal clamps the bar and reports the true percent', (
-    tester,
-  ) async {
-    _useDesktopSurface(tester);
-    await tester.pumpWidget(
-      _wrap(
-        controller: FakeGoalsController(
-          initialGoals: [
-            testGoal(targetMinor: 1000000, progressMinor: 1180000),
-          ],
+  testWidgets(
+    'an over-funded goal clamps the bar and reports the true percent',
+    (tester) async {
+      _useDesktopSurface(tester);
+      await tester.pumpWidget(
+        _wrap(
+          controller: FakeGoalsController(
+            initialGoals: [
+              testGoal(targetMinor: 1000000, progressMinor: 1180000),
+            ],
+          ),
         ),
-      ),
-    );
-    await tester.pumpAndSettle();
+      );
+      await tester.pumpAndSettle();
 
-    // A bar past its own track reads as a rendering bug; a percentage rounded
-    // down to 100 would be a lie about the user's money.
-    final bar = tester.widget<GoalProgressBar>(find.byType(GoalProgressBar));
-    expect(bar.fraction, 1.0);
-    expect(find.text('118 %'), findsOneWidget);
-  });
+      // A bar past its own track reads as a rendering bug; a percentage rounded
+      // down to 100 would be a lie about the user's money.
+      final bar = tester.widget<GoalProgressBar>(find.byType(GoalProgressBar));
+      expect(bar.fraction, 1.0);
+      expect(find.text('118 %'), findsOneWidget);
+    },
+  );
 
   testWidgets('a reached goal renders its green treatment and check pill', (
     tester,
@@ -122,7 +127,9 @@ void main() {
 
     expect(find.text('Objectif atteint · Juin 2026'), findsOneWidget);
 
-    final percent = tester.widget<Text>(find.byKey(const Key('goalPercent-g3')));
+    final percent = tester.widget<Text>(
+      find.byKey(const Key('goalPercent-g3')),
+    );
     expect(percent.style?.color, AppColors.positive);
 
     // The reached card is outlined in green rather than the card hairline.
@@ -139,8 +146,16 @@ void main() {
         controller: FakeGoalsController(
           initialGoals: [testGoal()],
           archivedGoals: [
-            testGoal(id: 'g8', name: 'Vieux projet', status: GoalStatus.archived),
-            testGoal(id: 'g9', name: 'Ancien voyage', status: GoalStatus.archived),
+            testGoal(
+              id: 'g8',
+              name: 'Vieux projet',
+              status: GoalStatus.archived,
+            ),
+            testGoal(
+              id: 'g9',
+              name: 'Ancien voyage',
+              status: GoalStatus.archived,
+            ),
           ],
         ),
       ),
@@ -170,7 +185,9 @@ void main() {
     await tester.pumpWidget(
       _wrap(
         controller: FakeGoalsController(
-          initialGoals: [testGoal(progressMinor: 2445000, targetMinor: 3000000)],
+          initialGoals: [
+            testGoal(progressMinor: 2445000, targetMinor: 3000000),
+          ],
           savingsAccounts: [testSavingsAccount(balanceMinor: 2210000)],
         ),
       ),
@@ -182,19 +199,23 @@ void main() {
     expect(
       tester.widget<InlineBanner>(banner).message,
       'Vous avez réparti ${_money(2445000)} alors que vos comptes '
-          "d'épargne totalisent ${_money(2210000)}.",
+      "d'épargne totalisent ${_money(2210000)}.",
     );
     // The grid is still there: the warning informs, it never blocks (§13).
     expect(find.byKey(const Key('goalCard-g1')), findsOneWidget);
 
-    await tester.tap(find.descendant(of: banner, matching: find.byType(IconButton)));
+    await tester.tap(
+      find.descendant(of: banner, matching: find.byType(IconButton)),
+    );
     await tester.pumpAndSettle();
 
     expect(find.byKey(const Key('goalsOverAllocationBanner')), findsNothing);
     expect(find.byKey(const Key('goalCard-g1')), findsOneWidget);
   });
 
-  testWidgets('a goal within its savings balance raises no banner', (tester) async {
+  testWidgets('a goal within its savings balance raises no banner', (
+    tester,
+  ) async {
     _useDesktopSurface(tester);
     await tester.pumpWidget(
       _wrap(
@@ -209,7 +230,9 @@ void main() {
     expect(find.byKey(const Key('goalsOverAllocationBanner')), findsNothing);
   });
 
-  testWidgets('the empty state offers the one action the panel wants', (tester) async {
+  testWidgets('the empty state offers the one action the panel wants', (
+    tester,
+  ) async {
     _useDesktopSurface(tester);
     await tester.pumpWidget(_wrap(controller: FakeGoalsController()));
     await tester.pumpAndSettle();
@@ -229,7 +252,9 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(
-      find.text('Répartition sur le papier : vos comptes ne sont pas modifiés.'),
+      find.text(
+        'Répartition sur le papier : vos comptes ne sont pas modifiés.',
+      ),
       findsOneWidget,
     );
   });

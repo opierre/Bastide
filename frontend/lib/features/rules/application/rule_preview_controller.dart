@@ -79,7 +79,11 @@ class RulePreviewController extends Notifier<RulePreviewState> {
     try {
       final preview = await ref
           .read(rulesRepositoryProvider)
-          .preview(matchField: matchField, matchType: matchType, pattern: pattern);
+          .preview(
+            matchField: matchField,
+            matchType: matchType,
+            pattern: pattern,
+          );
       if (requestId != _requestId) return;
       state = RulePreviewState(preview: preview);
     } catch (error) {
@@ -99,7 +103,7 @@ final rulePreviewControllerProvider =
 /// `autoDispose.family` so each modal fetches for its own row and nothing is
 /// kept once it closes: a suggestion is only ever read while the form that
 /// pre-fills from it is open.
-final ruleSuggestionProvider =
-    FutureProvider.autoDispose.family<RuleSuggestion, String>((ref, transactionId) {
+final ruleSuggestionProvider = FutureProvider.autoDispose
+    .family<RuleSuggestion, String>((ref, transactionId) {
       return ref.read(rulesRepositoryProvider).suggestion(transactionId);
     });

@@ -69,7 +69,9 @@ void main() {
   ProviderSubscription<RunState> keepAlive() =>
       container.listen(runControllerProvider, (_, _) {}, fireImmediately: true);
 
-  testWidgets('start posts the requested scope and holds the returned run', (tester) async {
+  testWidgets('start posts the requested scope and holds the returned run', (
+    tester,
+  ) async {
     when(
       () => apiClient.post('/categorization/runs', body: any(named: 'body')),
     ).thenAnswer((_) async => _runJson(status: 'pending'));
@@ -78,7 +80,10 @@ void main() {
     await container.read(runControllerProvider.notifier).start(accountId: 'a1');
 
     final captured = verify(
-      () => apiClient.post('/categorization/runs', body: captureAny(named: 'body')),
+      () => apiClient.post(
+        '/categorization/runs',
+        body: captureAny(named: 'body'),
+      ),
     ).captured.single;
     expect(captured, {'account_id': 'a1', 'scope': 'pending'});
     expect(container.read(runControllerProvider).run?.id, 'run-1');
@@ -98,7 +103,13 @@ void main() {
 
     final replies = [
       _runJson(status: 'running', processed: 80, assigned: 60, deferred: 20),
-      _runJson(status: 'success', total: 200, processed: 200, assigned: 150, deferred: 50),
+      _runJson(
+        status: 'success',
+        total: 200,
+        processed: 200,
+        assigned: 150,
+        deferred: 50,
+      ),
     ];
     var call = 0;
     when(
@@ -114,7 +125,10 @@ void main() {
 
     await tester.pump(runPollInterval);
     await tester.pump();
-    expect(container.read(runControllerProvider).run?.status, RunStatus.success);
+    expect(
+      container.read(runControllerProvider).run?.status,
+      RunStatus.success,
+    );
     expect(container.read(runControllerProvider).isRunning, isFalse);
 
     // The poll must be gone, not merely idle: a terminal run is never going to
@@ -129,9 +143,9 @@ void main() {
     when(
       () => apiClient.post('/categorization/runs', body: any(named: 'body')),
     ).thenAnswer((_) async => _runJson(status: 'running', processed: 0));
-    when(
-      () => apiClient.get('/categorization/runs/run-1'),
-    ).thenAnswer((_) async => _runJson(status: 'success', processed: 200, assigned: 200));
+    when(() => apiClient.get('/categorization/runs/run-1')).thenAnswer(
+      (_) async => _runJson(status: 'success', processed: 200, assigned: 200),
+    );
 
     keepAlive();
     await container.read(runControllerProvider.notifier).start();
@@ -143,19 +157,29 @@ void main() {
     expect(transactions.refreshQuietlyCalls, 2);
   });
 
-  testWidgets('cancel moves the run to cancelled and stops polling', (tester) async {
+  testWidgets('cancel moves the run to cancelled and stops polling', (
+    tester,
+  ) async {
     when(
       () => apiClient.post('/categorization/runs', body: any(named: 'body')),
     ).thenAnswer((_) async => _runJson(status: 'running'));
     when(() => apiClient.post('/categorization/runs/run-1/cancel')).thenAnswer(
-      (_) async => _runJson(status: 'cancelled', processed: 80, assigned: 60, deferred: 20),
+      (_) async => _runJson(
+        status: 'cancelled',
+        processed: 80,
+        assigned: 60,
+        deferred: 20,
+      ),
     );
 
     keepAlive();
     await container.read(runControllerProvider.notifier).start();
     await container.read(runControllerProvider.notifier).cancel();
 
-    expect(container.read(runControllerProvider).run?.status, RunStatus.cancelled);
+    expect(
+      container.read(runControllerProvider).run?.status,
+      RunStatus.cancelled,
+    );
     expect(container.read(runControllerProvider).isRunning, isFalse);
 
     await tester.pump(runPollInterval * 3);
@@ -187,8 +211,12 @@ void main() {
     verifyNever(() => apiClient.get('/categorization/runs/run-1'));
   });
 
-  testWidgets('a failed start is reported without losing the queue', (tester) async {
-    when(() => apiClient.post('/categorization/runs', body: any(named: 'body'))).thenThrow(
+  testWidgets('a failed start is reported without losing the queue', (
+    tester,
+  ) async {
+    when(
+      () => apiClient.post('/categorization/runs', body: any(named: 'body')),
+    ).thenThrow(
       const ApiFailure(code: 'INFERENCE_UNAVAILABLE', message: 'no runtime'),
     );
     final subscription = keepAlive();
@@ -205,21 +233,24 @@ void main() {
     await tester.pump(runPollInterval);
   });
 
-  test('availability skips the health probe when the user has not opted in', () async {
-    when(() => apiClient.get('/settings')).thenAnswer(
-      (_) async => {
-        'ai_enabled': false,
-        'inference_base_url': 'http://127.0.0.1:11434/v1',
-        'model_tag': null,
-        'confidence_threshold': 0.8,
-      },
-    );
+  test(
+    'availability skips the health probe when the user has not opted in',
+    () async {
+      when(() => apiClient.get('/settings')).thenAnswer(
+        (_) async => {
+          'ai_enabled': false,
+          'inference_base_url': 'http://127.0.0.1:11434/v1',
+          'model_tag': null,
+          'confidence_threshold': 0.8,
+        },
+      );
 
-    final availability = await container.read(aiAvailabilityProvider.future);
+      final availability = await container.read(aiAvailabilityProvider.future);
 
-    expect(availability.isActive, isFalse);
-    verifyNever(() => apiClient.get('/settings/inference/health'));
-  });
+      expect(availability.isActive, isFalse);
+      verifyNever(() => apiClient.get('/settings/inference/health'));
+    },
+  );
 
   test('availability is inactive when the runtime does not answer', () async {
     when(() => apiClient.get('/settings')).thenAnswer(
@@ -231,7 +262,11 @@ void main() {
       },
     );
     when(() => apiClient.get('/settings/inference/health')).thenAnswer(
-      (_) async => {'reachable': false, 'models': <String>[], 'detail': 'connection refused'},
+      (_) async => {
+        'reachable': false,
+        'models': <String>[],
+        'detail': 'connection refused',
+      },
     );
 
     final availability = await container.read(aiAvailabilityProvider.future);
@@ -244,6 +279,9 @@ void main() {
   test('a broken availability lookup degrades instead of raising', () async {
     when(() => apiClient.get('/settings')).thenThrow(Exception('sidecar down'));
 
-    expect(await container.read(aiAvailabilityProvider.future), AiAvailability.unavailable);
+    expect(
+      await container.read(aiAvailabilityProvider.future),
+      AiAvailability.unavailable,
+    );
   });
 }

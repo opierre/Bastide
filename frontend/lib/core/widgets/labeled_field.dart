@@ -43,9 +43,9 @@ class LabeledField extends StatelessWidget {
             Expanded(
               child: Text(
                 label,
-                style: Theme.of(
-                  context,
-                ).textTheme.labelMedium?.copyWith(color: AppColors.textSecondary),
+                style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                  color: AppColors.textSecondary,
+                ),
               ),
             ),
             ?trailing,
@@ -124,8 +124,9 @@ InputDecoration errorFieldDecoration() {
 ///
 /// Shared by [ReadOnlyField.suffix] and the `suffixText` of an editable field,
 /// so an amount reads the same whether or not the user can change it.
-TextStyle fieldSuffixStyle(BuildContext context) =>
-    Theme.of(context).textTheme.bodyLarge!.copyWith(color: AppColors.textSecondary);
+TextStyle fieldSuffixStyle(BuildContext context) => Theme.of(
+  context,
+).textTheme.bodyLarge!.copyWith(color: AppColors.textSecondary);
 
 /// A value the user is shown but cannot change.
 ///
@@ -155,7 +156,9 @@ class ReadOnlyField extends StatelessWidget {
     return DashedBorder(
       child: Container(
         height: height,
-        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm + AppSpacing.xs),
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.sm + AppSpacing.xs,
+        ),
         decoration: BoxDecoration(
           color: AppColors.surfaceField,
           borderRadius: BorderRadius.circular(AppRadii.md),

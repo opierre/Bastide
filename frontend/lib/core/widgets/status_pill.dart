@@ -39,7 +39,8 @@ class StatusPill extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final background = tone.background ?? tone.foreground.withValues(alpha: 0.14);
+    final background =
+        tone.background ?? tone.foreground.withValues(alpha: 0.14);
 
     return Container(
       height: 22,
@@ -54,7 +55,10 @@ class StatusPill extends StatelessWidget {
           Container(
             width: 6,
             height: 6,
-            decoration: BoxDecoration(color: tone.foreground, shape: BoxShape.circle),
+            decoration: BoxDecoration(
+              color: tone.foreground,
+              shape: BoxShape.circle,
+            ),
           ),
           const SizedBox(width: AppSpacing.sm - 2),
           Flexible(

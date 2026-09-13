@@ -47,14 +47,19 @@ class DangerZoneCard extends ConsumerWidget {
                       spacing: AppSpacing.sm,
                       runSpacing: AppSpacing.xs,
                       children: [
-                        Text(l10n.settingsResetTitle, style: textTheme.titleMedium),
+                        Text(
+                          l10n.settingsResetTitle,
+                          style: textTheme.titleMedium,
+                        ),
                         const _IrreversibleBadge(),
                       ],
                     ),
                     const SizedBox(height: 2),
                     Text(
                       l10n.settingsResetSubtitle,
-                      style: AppTextStyles.helper.copyWith(color: AppColors.textSecondary),
+                      style: AppTextStyles.helper.copyWith(
+                        color: AppColors.textSecondary,
+                      ),
                     ),
                   ],
                 ),
@@ -92,7 +97,10 @@ class _IrreversibleBadge extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm - 2, vertical: 3),
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.sm - 2,
+        vertical: 3,
+      ),
       decoration: BoxDecoration(
         color: AppColors.negative.withValues(alpha: 0.12),
         borderRadius: BorderRadius.circular(5),
@@ -137,16 +145,24 @@ class _ResetButtonState extends State<_ResetButton> {
         child: Container(
           key: const Key('settingsResetButton'),
           height: 34,
-          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm + AppSpacing.xs),
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppSpacing.sm + AppSpacing.xs,
+          ),
           decoration: BoxDecoration(
             color: _hovered ? AppColors.negative.withValues(alpha: 0.10) : null,
             borderRadius: BorderRadius.circular(11),
-            border: Border.all(color: AppColors.negative.withValues(alpha: 0.45)),
+            border: Border.all(
+              color: AppColors.negative.withValues(alpha: 0.45),
+            ),
           ),
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Icon(Icons.delete_outline_rounded, size: 16, color: AppColors.negative),
+              const Icon(
+                Icons.delete_outline_rounded,
+                size: 16,
+                color: AppColors.negative,
+              ),
               const SizedBox(width: AppSpacing.sm - 1),
               Text(
                 AppLocalizations.of(context)!.settingsResetButton,

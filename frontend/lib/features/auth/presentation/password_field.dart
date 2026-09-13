@@ -56,9 +56,7 @@ class _PasswordFieldState extends State<PasswordField> {
       validator: widget.validator,
       // Obscured text packs the dots too tightly to be countable at a glance;
       // the extra tracking only applies while they're dots.
-      style: _obscured
-          ? const TextStyle(letterSpacing: 2)
-          : null,
+      style: _obscured ? const TextStyle(letterSpacing: 2) : null,
       decoration: InputDecoration(
         enabledBorder: widget.hasError ? errorDecoration.enabledBorder : null,
         focusedBorder: widget.hasError ? errorDecoration.focusedBorder : null,
@@ -66,7 +64,9 @@ class _PasswordFieldState extends State<PasswordField> {
           key: const Key('passwordVisibilityToggle'),
           onPressed: () => setState(() => _obscured = !_obscured),
           icon: Icon(
-            _obscured ? Icons.visibility_outlined : Icons.visibility_off_outlined,
+            _obscured
+                ? Icons.visibility_outlined
+                : Icons.visibility_off_outlined,
             size: 17,
           ),
           tooltip: _obscured ? l10n.authPasswordShow : l10n.authPasswordHide,

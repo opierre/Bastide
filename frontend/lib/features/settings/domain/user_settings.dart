@@ -51,7 +51,8 @@ class UserSettings {
   int get confidenceThresholdPercent => (confidenceThreshold * 100).round();
 
   /// Builds the `[0,1]` value for a percentage taken off the slider.
-  static double thresholdFromPercent(int percent) => percent.clamp(0, 100) / 100;
+  static double thresholdFromPercent(int percent) =>
+      percent.clamp(0, 100) / 100;
 
   UserSettings copyWith({
     bool? aiEnabled,
@@ -99,13 +100,14 @@ class InferenceHealth {
     this.detail,
   });
 
-  factory InferenceHealth.fromJson(Map<String, dynamic> json) => InferenceHealth(
-    reachable: json['reachable'] as bool,
-    models: (json['models'] as List<dynamic>? ?? const [])
-        .map((tag) => tag as String)
-        .toList(growable: false),
-    detail: json['detail'] as String?,
-  );
+  factory InferenceHealth.fromJson(Map<String, dynamic> json) =>
+      InferenceHealth(
+        reachable: json['reachable'] as bool,
+        models: (json['models'] as List<dynamic>? ?? const [])
+            .map((tag) => tag as String)
+            .toList(growable: false),
+        detail: json['detail'] as String?,
+      );
 
   /// What a probe that could not even be sent resolves to.
   static const unreachable = InferenceHealth(reachable: false);

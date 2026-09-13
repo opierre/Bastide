@@ -39,7 +39,9 @@ class GoalFormModal extends ConsumerStatefulWidget {
 
 class _GoalFormModalState extends ConsumerState<GoalFormModal> {
   final _formKey = GlobalKey<FormState>();
-  late final _nameController = TextEditingController(text: widget.initial?.name);
+  late final _nameController = TextEditingController(
+    text: widget.initial?.name,
+  );
   final _targetController = TextEditingController();
   final _dateController = TextEditingController();
 
@@ -142,7 +144,9 @@ class _GoalFormModalState extends ConsumerState<GoalFormModal> {
     // one currency per user, so the two only ever differ while the profile is
     // still loading.
     final currency =
-        widget.initial?.currency ?? ref.watch(currentUserProvider)?.currency ?? '';
+        widget.initial?.currency ??
+        ref.watch(currentUserProvider)?.currency ??
+        '';
 
     return AppModal(
       title: _isEditing ? l10n.goalFormEditTitle : l10n.goalFormCreateTitle,
@@ -173,7 +177,10 @@ class _GoalFormModalState extends ConsumerState<GoalFormModal> {
             ),
             const SizedBox(height: AppSpacing.md),
             if (_errorText != null) ...[
-              InlineBanner(key: const Key('goalFormError'), message: _errorText!),
+              InlineBanner(
+                key: const Key('goalFormError'),
+                message: _errorText!,
+              ),
               const SizedBox(height: AppSpacing.md),
             ],
             LabeledField(
@@ -198,7 +205,8 @@ class _GoalFormModalState extends ConsumerState<GoalFormModal> {
                       key: const Key('goalFormTarget'),
                       controller: _targetController,
                       currency: currency,
-                      validator: (value) => _parseTarget(value ?? '', locale) == null
+                      validator: (value) =>
+                          _parseTarget(value ?? '', locale) == null
                           ? l10n.goalFormTargetInvalid
                           : null,
                     ),

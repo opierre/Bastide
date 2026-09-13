@@ -21,7 +21,9 @@ class BackupRepository {
     if (header == null) throw ApiFailure.unknown();
     return BackupExport(
       bytes: response.bytes,
-      summary: BackupSummary.fromJson(jsonDecode(header) as Map<String, dynamic>),
+      summary: BackupSummary.fromJson(
+        jsonDecode(header) as Map<String, dynamic>,
+      ),
     );
   }
 
@@ -34,7 +36,11 @@ class BackupRepository {
   Future<BackupSummary> restore(String fileName, List<int> bytes) =>
       _upload('/backup/restore', fileName, bytes);
 
-  Future<BackupSummary> _upload(String path, String fileName, List<int> bytes) async {
+  Future<BackupSummary> _upload(
+    String path,
+    String fileName,
+    List<int> bytes,
+  ) async {
     final json = await _apiClient.postMultipart(
       path,
       fileField: 'file',

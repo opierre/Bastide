@@ -4,7 +4,11 @@ import 'package:finstride/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-Widget _wrap({DateTime? from, DateTime? to, Locale locale = const Locale('fr')}) {
+Widget _wrap({
+  DateTime? from,
+  DateTime? to,
+  Locale locale = const Locale('fr'),
+}) {
   return MaterialApp(
     locale: locale,
     theme: appDarkTheme,
@@ -40,7 +44,11 @@ Future<(DateTime?, DateTime?)?> _openAndSubmit(
         body: Builder(
           builder: (context) => TextButton(
             onPressed: () async {
-              result = await showTransactionDateRange(context, from: from, to: to);
+              result = await showTransactionDateRange(
+                context,
+                from: from,
+                to: to,
+              );
             },
             child: const Text('open'),
           ),
@@ -58,8 +66,12 @@ Future<(DateTime?, DateTime?)?> _openAndSubmit(
 }
 
 void main() {
-  testWidgets('fills both fields from the range already applied', (tester) async {
-    await tester.pumpWidget(_wrap(from: DateTime(2026, 3, 1), to: DateTime(2026, 3, 31)));
+  testWidgets('fills both fields from the range already applied', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      _wrap(from: DateTime(2026, 3, 1), to: DateTime(2026, 3, 31)),
+    );
     await tester.pumpAndSettle();
 
     expect(find.text('01/03/2026'), findsOneWidget);
@@ -98,7 +110,10 @@ void main() {
     await tester.tap(find.byKey(const Key('transactionsDateRangeApply')));
     await tester.pumpAndSettle();
 
-    expect(find.text('La date de fin précède la date de début.'), findsOneWidget);
+    expect(
+      find.text('La date de fin précède la date de début.'),
+      findsOneWidget,
+    );
     expect(find.byType(DateRangeModal), findsOneWidget);
   });
 
@@ -114,7 +129,9 @@ void main() {
     expect(find.byType(DateRangeModal), findsOneWidget);
   });
 
-  testWidgets('renders under en without missing localized keys', (tester) async {
+  testWidgets('renders under en without missing localized keys', (
+    tester,
+  ) async {
     await tester.pumpWidget(_wrap(locale: const Locale('en')));
     await tester.pumpAndSettle();
 

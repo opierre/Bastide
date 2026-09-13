@@ -46,7 +46,8 @@ class DashboardScreen extends ConsumerWidget {
           messageKey: const Key('dashboardErrorText'),
           retryLabel: l10n.dashboardRetry,
           retryKey: const Key('dashboardRetryButton'),
-          onRetry: () => ref.read(dashboardControllerProvider.notifier).refresh(),
+          onRetry: () =>
+              ref.read(dashboardControllerProvider.notifier).refresh(),
         ),
         _ => const _DashboardSkeleton(key: Key('dashboardLoadingIndicator')),
       },
@@ -72,7 +73,8 @@ class _DashboardContent extends ConsumerWidget {
     // The top three active goals, or nothing at all — a goals load that hasn't
     // landed or has failed simply leaves row 3 as it was in Phase 1, rather
     // than putting an error about a side card on the dashboard.
-    final goals = ref.watch(goalsControllerProvider).value?.topGoals ?? const [];
+    final goals =
+        ref.watch(goalsControllerProvider).value?.topGoals ?? const [];
     final locale = Localizations.localeOf(context).toString();
     final summary = state.summary;
     // The month the deltas compare against — « vs avril » when May is selected.
@@ -269,9 +271,15 @@ class _DashboardSkeleton extends StatelessWidget {
           Expanded(
             child: Row(
               children: [
-                Expanded(flex: 135, child: SkeletonBlock(height: double.infinity)),
+                Expanded(
+                  flex: 135,
+                  child: SkeletonBlock(height: double.infinity),
+                ),
                 SizedBox(width: AppSpacing.gridGap),
-                Expanded(flex: 100, child: SkeletonBlock(height: double.infinity)),
+                Expanded(
+                  flex: 100,
+                  child: SkeletonBlock(height: double.infinity),
+                ),
               ],
             ),
           ),

@@ -40,7 +40,8 @@ class TransactionsRepository {
       if (q != null && q.trim().isNotEmpty) 'q': q.trim(),
     };
     final json =
-        await _apiClient.get('/transactions', query: query) as Map<String, dynamic>;
+        await _apiClient.get('/transactions', query: query)
+            as Map<String, dynamic>;
     return TransactionsPage(
       items: (json['items'] as List<dynamic>)
           .map((entry) => _parse(entry as Map<String, dynamic>))
@@ -102,7 +103,8 @@ class TransactionsRepository {
       categorizationSource: CategorizationSource.fromWire(
         json['categorization_source'] as String,
       ),
-      categorizationConfidence: (json['categorization_confidence'] as num?)?.toDouble(),
+      categorizationConfidence: (json['categorization_confidence'] as num?)
+          ?.toDouble(),
       needsReview: json['needs_review'] as bool,
       fitid: json['fitid'] as String?,
       dedupHash: json['dedup_hash'] as String,

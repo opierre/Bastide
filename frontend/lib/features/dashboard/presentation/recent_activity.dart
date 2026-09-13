@@ -64,7 +64,9 @@ class RecentActivityCard extends StatelessWidget {
                 ? Center(
                     child: Text(
                       l10n.dashboardRecentActivityEmpty,
-                      style: textTheme.bodySmall?.copyWith(color: AppColors.textSecondary),
+                      style: textTheme.bodySmall?.copyWith(
+                        color: AppColors.textSecondary,
+                      ),
                     ),
                   )
                 : LayoutBuilder(

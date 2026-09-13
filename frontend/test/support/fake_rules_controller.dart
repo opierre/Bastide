@@ -4,7 +4,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 /// A no-network `RulesController` double for widget tests.
 class FakeRulesController extends RulesController {
-  FakeRulesController({this.initialRules = const [], this.loadError, this.applyCount = 0});
+  FakeRulesController({
+    this.initialRules = const [],
+    this.loadError,
+    this.applyCount = 0,
+  });
 
   final List<Rule> initialRules;
   final Object? loadError;

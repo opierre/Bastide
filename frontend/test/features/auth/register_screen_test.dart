@@ -10,7 +10,10 @@ import 'package:flutter_test/flutter_test.dart';
 
 import '../../support/fake_auth_controller.dart';
 
-Widget _wrap({required FakeAuthController controller, Locale locale = const Locale('fr')}) {
+Widget _wrap({
+  required FakeAuthController controller,
+  Locale locale = const Locale('fr'),
+}) {
   return ProviderScope(
     overrides: [authControllerProvider.overrideWith(() => controller)],
     child: MaterialApp(
@@ -25,9 +28,18 @@ Widget _wrap({required FakeAuthController controller, Locale locale = const Loca
 
 /// Clears the strength meter's bar and the other required fields.
 Future<void> _fillValidForm(WidgetTester tester) async {
-  await tester.enterText(find.byKey(const Key('registerDisplayNameField')), 'Ada Lovelace');
-  await tester.enterText(find.byKey(const Key('registerEmailField')), 'ada@example.com');
-  await tester.enterText(find.byKey(const Key('registerPasswordField')), 'Secret123!');
+  await tester.enterText(
+    find.byKey(const Key('registerDisplayNameField')),
+    'Ada Lovelace',
+  );
+  await tester.enterText(
+    find.byKey(const Key('registerEmailField')),
+    'ada@example.com',
+  );
+  await tester.enterText(
+    find.byKey(const Key('registerPasswordField')),
+    'Secret123!',
+  );
   await tester.pumpAndSettle();
 }
 
@@ -38,19 +50,28 @@ bool _submitEnabled(WidgetTester tester) =>
     null;
 
 void main() {
-  testWidgets('renders the locale and currency selectors on the preferences plate', (
+  testWidgets(
+    'renders the locale and currency selectors on the preferences plate',
+    (tester) async {
+      await tester.pumpWidget(_wrap(controller: FakeAuthController()));
+      await tester.pumpAndSettle();
+
+      expect(
+        find.byKey(const Key('registerLocaleFrenchOption')),
+        findsOneWidget,
+      );
+      expect(
+        find.byKey(const Key('registerLocaleEnglishOption')),
+        findsOneWidget,
+      );
+      expect(find.byKey(const Key('registerCurrencyField')), findsOneWidget);
+      expect(find.byKey(const Key('registerPreferencesNote')), findsOneWidget);
+    },
+  );
+
+  testWidgets('the currency reads as a value: symbol then code', (
     tester,
   ) async {
-    await tester.pumpWidget(_wrap(controller: FakeAuthController()));
-    await tester.pumpAndSettle();
-
-    expect(find.byKey(const Key('registerLocaleFrenchOption')), findsOneWidget);
-    expect(find.byKey(const Key('registerLocaleEnglishOption')), findsOneWidget);
-    expect(find.byKey(const Key('registerCurrencyField')), findsOneWidget);
-    expect(find.byKey(const Key('registerPreferencesNote')), findsOneWidget);
-  });
-
-  testWidgets('the currency reads as a value: symbol then code', (tester) async {
     await tester.pumpWidget(_wrap(controller: FakeAuthController()));
     await tester.pumpAndSettle();
 
@@ -65,15 +86,27 @@ void main() {
 
     expect(_submitEnabled(tester), isFalse);
 
-    await tester.enterText(find.byKey(const Key('registerDisplayNameField')), 'Ada Lovelace');
-    await tester.enterText(find.byKey(const Key('registerEmailField')), 'ada@example.com');
-    await tester.enterText(find.byKey(const Key('registerPasswordField')), 'secret');
+    await tester.enterText(
+      find.byKey(const Key('registerDisplayNameField')),
+      'Ada Lovelace',
+    );
+    await tester.enterText(
+      find.byKey(const Key('registerEmailField')),
+      'ada@example.com',
+    );
+    await tester.enterText(
+      find.byKey(const Key('registerPasswordField')),
+      'secret',
+    );
     await tester.pumpAndSettle();
 
     expect(find.text('Trop faible'), findsOneWidget);
     expect(_submitEnabled(tester), isFalse);
 
-    await tester.enterText(find.byKey(const Key('registerPasswordField')), 'Secret123!');
+    await tester.enterText(
+      find.byKey(const Key('registerPasswordField')),
+      'Secret123!',
+    );
     await tester.pumpAndSettle();
 
     expect(find.text('Robuste'), findsOneWidget);
@@ -103,50 +136,55 @@ void main() {
     );
   });
 
-  testWidgets('submitting calls the controller with the chosen locale and currency', (
+  testWidgets(
+    'submitting calls the controller with the chosen locale and currency',
+    (tester) async {
+      final controller = FakeAuthController();
+      await tester.pumpWidget(_wrap(controller: controller));
+      await tester.pumpAndSettle();
+
+      await _fillValidForm(tester);
+
+      await tester.tap(find.byKey(const Key('registerLocaleEnglishOption')));
+      await tester.pumpAndSettle();
+
+      // The form is taller than the 800×600 test viewport (it's a desktop-first
+      // layout), so the currency field has to be scrolled into view first.
+      await tester.ensureVisible(
+        find.byKey(const Key('registerCurrencyField')),
+      );
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const Key('registerCurrencyField')));
+      await tester.pumpAndSettle();
+
+      // The field keeps stating the currency in force while the options are up,
+      // so the choice being changed never leaves the screen.
+      expect(find.textContaining('— EUR'), findsNWidgets(2));
+
+      await tester.tap(
+        find.ancestor(
+          of: find.textContaining('— USD'),
+          matching: find.byType(MenuItemButton),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byKey(const Key('registerSubmitButton')));
+      await tester.pumpAndSettle();
+
+      expect(controller.registerCalls, hasLength(1));
+      final call = controller.registerCalls.single;
+      expect(call.email, 'ada@example.com');
+      expect(call.password, 'Secret123!');
+      expect(call.displayName, 'Ada Lovelace');
+      expect(call.locale, 'en');
+      expect(call.currency, 'USD');
+    },
+  );
+
+  testWidgets('renders under fr without missing localized keys', (
     tester,
   ) async {
-    final controller = FakeAuthController();
-    await tester.pumpWidget(_wrap(controller: controller));
-    await tester.pumpAndSettle();
-
-    await _fillValidForm(tester);
-
-    await tester.tap(find.byKey(const Key('registerLocaleEnglishOption')));
-    await tester.pumpAndSettle();
-
-    // The form is taller than the 800×600 test viewport (it's a desktop-first
-    // layout), so the currency field has to be scrolled into view first.
-    await tester.ensureVisible(find.byKey(const Key('registerCurrencyField')));
-    await tester.pumpAndSettle();
-    await tester.tap(find.byKey(const Key('registerCurrencyField')));
-    await tester.pumpAndSettle();
-
-    // The field keeps stating the currency in force while the options are up,
-    // so the choice being changed never leaves the screen.
-    expect(find.textContaining('— EUR'), findsNWidgets(2));
-
-    await tester.tap(
-      find.ancestor(
-        of: find.textContaining('— USD'),
-        matching: find.byType(MenuItemButton),
-      ),
-    );
-    await tester.pumpAndSettle();
-
-    await tester.tap(find.byKey(const Key('registerSubmitButton')));
-    await tester.pumpAndSettle();
-
-    expect(controller.registerCalls, hasLength(1));
-    final call = controller.registerCalls.single;
-    expect(call.email, 'ada@example.com');
-    expect(call.password, 'Secret123!');
-    expect(call.displayName, 'Ada Lovelace');
-    expect(call.locale, 'en');
-    expect(call.currency, 'USD');
-  });
-
-  testWidgets('renders under fr without missing localized keys', (tester) async {
     await tester.pumpWidget(_wrap(controller: FakeAuthController()));
     await tester.pumpAndSettle();
 
@@ -157,7 +195,9 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('renders under en without missing localized keys', (tester) async {
+  testWidgets('renders under en without missing localized keys', (
+    tester,
+  ) async {
     await tester.pumpWidget(
       _wrap(controller: FakeAuthController(), locale: const Locale('en')),
     );

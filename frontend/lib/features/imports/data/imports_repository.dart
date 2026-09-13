@@ -15,7 +15,9 @@ class ImportsRepository {
 
   Future<List<ImportBatch>> listBatches() async {
     final json = await _apiClient.get('/imports') as List<dynamic>;
-    return json.map((entry) => _parseBatch(entry as Map<String, dynamic>)).toList();
+    return json
+        .map((entry) => _parseBatch(entry as Map<String, dynamic>))
+        .toList();
   }
 
   /// Uploads an OFX/QFX statement.

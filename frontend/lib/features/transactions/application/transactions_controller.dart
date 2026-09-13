@@ -67,16 +67,26 @@ class TransactionFilters {
           other.page == page);
 
   @override
-  int get hashCode =>
-      Object.hash(accountId, dateFrom, dateTo, categoryId, needsReview, q, page);
+  int get hashCode => Object.hash(
+    accountId,
+    dateFrom,
+    dateTo,
+    categoryId,
+    needsReview,
+    q,
+    page,
+  );
 }
 
 class TransactionFiltersNotifier extends Notifier<TransactionFilters> {
   @override
   TransactionFilters build() => const TransactionFilters();
 
-  void setAccount(String? accountId) =>
-      state = state.copyWith(accountId: accountId, clearAccountId: accountId == null, page: 1);
+  void setAccount(String? accountId) => state = state.copyWith(
+    accountId: accountId,
+    clearAccountId: accountId == null,
+    page: 1,
+  );
 
   void setDateRange(DateTime? from, DateTime? to) => state = state.copyWith(
     dateFrom: from,
@@ -91,8 +101,11 @@ class TransactionFiltersNotifier extends Notifier<TransactionFilters> {
     page: 1,
   );
 
-  void setNeedsReview(bool? value) =>
-      state = state.copyWith(needsReview: value, clearNeedsReview: value == null, page: 1);
+  void setNeedsReview(bool? value) => state = state.copyWith(
+    needsReview: value,
+    clearNeedsReview: value == null,
+    page: 1,
+  );
 
   void setQuery(String q) => state = state.copyWith(q: q, page: 1);
 
@@ -153,7 +166,10 @@ class TransactionsController extends AsyncNotifier<TransactionsPage> {
 
   /// Patches [transaction]'s category. Sets `source=user` server-side and
   /// clears `needs_review` — see the ai-categorization skill.
-  Future<void> updateCategory(Transaction transaction, String categoryId) async {
+  Future<void> updateCategory(
+    Transaction transaction,
+    String categoryId,
+  ) async {
     final updated = await ref
         .read(transactionsRepositoryProvider)
         .update(transaction.id, categoryId: categoryId);

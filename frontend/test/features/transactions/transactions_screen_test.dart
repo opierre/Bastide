@@ -97,7 +97,9 @@ Widget _wrap({
       ),
       // Phase 1 expectations: no opted-in AI, so no stage-2 chrome anywhere —
       // and no health probe leaving the test either.
-      aiAvailabilityProvider.overrideWith((ref) async => AiAvailability.unavailable),
+      aiAvailabilityProvider.overrideWith(
+        (ref) async => AiAvailability.unavailable,
+      ),
       // The rule modal pre-fills from the sidecar; no widget test reaches one.
       ruleSuggestionProvider.overrideWith(
         (ref, transactionId) async => const RuleSuggestion(
@@ -129,13 +131,17 @@ void _useDesktopSurface(WidgetTester tester) {
 }
 
 void main() {
-  testWidgets('renders the row amount, sign and category for the fr locale', (tester) async {
+  testWidgets('renders the row amount, sign and category for the fr locale', (
+    tester,
+  ) async {
     _useDesktopSurface(tester);
     await tester.pumpWidget(
       _wrap(
         controller: FakeTransactionsController(
           initialPage: TransactionsPage(
-            items: [_transaction(amountMinor: -1250, category: _groceriesCategory)],
+            items: [
+              _transaction(amountMinor: -1250, category: _groceriesCategory),
+            ],
             page: 1,
             pageSize: 50,
             total: 1,
@@ -155,7 +161,9 @@ void main() {
     expect(find.text('Courses'), findsOneWidget);
   });
 
-  testWidgets('a row with a memo shows it before the account name', (tester) async {
+  testWidgets('a row with a memo shows it before the account name', (
+    tester,
+  ) async {
     _useDesktopSurface(tester);
     await tester.pumpWidget(
       _wrap(
@@ -174,7 +182,9 @@ void main() {
     expect(find.text('Abonnement mensuel · Compte courant'), findsOneWidget);
   });
 
-  testWidgets('a row without a memo keeps the account name alone', (tester) async {
+  testWidgets('a row without a memo keeps the account name alone', (
+    tester,
+  ) async {
     _useDesktopSurface(tester);
     await tester.pumpWidget(
       _wrap(
@@ -261,7 +271,9 @@ void main() {
       _wrap(
         controller: FakeTransactionsController(
           initialPage: TransactionsPage(
-            items: [_transaction(amountMinor: 285000, category: _groceriesCategory)],
+            items: [
+              _transaction(amountMinor: 285000, category: _groceriesCategory),
+            ],
             page: 1,
             pageSize: 50,
             total: 1,
@@ -282,7 +294,9 @@ void main() {
     expect(find.text('Groceries'), findsOneWidget);
   });
 
-  testWidgets('an uncategorized row shows the dashed uncategorized chip', (tester) async {
+  testWidgets('an uncategorized row shows the dashed uncategorized chip', (
+    tester,
+  ) async {
     _useDesktopSurface(tester);
     await tester.pumpWidget(
       _wrap(
@@ -301,80 +315,101 @@ void main() {
     expect(find.text('Non catégorisé'), findsOneWidget);
   });
 
-  testWidgets('the review queue lets the user resolve an item via the category picker', (
-    tester,
-  ) async {
-    _useDesktopSurface(tester);
-    final controller = FakeTransactionsController(
-      initialPage: TransactionsPage(
-        items: [_transaction(id: 't1', category: null, needsReview: true)],
-        page: 1,
-        pageSize: 50,
-        total: 1,
-      ),
-    );
-
-    await tester.pumpWidget(_wrap(controller: controller));
-    await tester.pumpAndSettle();
-    _container(tester).read(transactionFiltersProvider.notifier).setNeedsReview(true);
-    await tester.pumpAndSettle();
-
-    expect(find.byKey(const Key('reviewQueueList')), findsOneWidget);
-    expect(find.byKey(const Key('reviewRowCategoryChip')), findsOneWidget);
-
-    await tester.tap(find.byKey(const Key('reviewRowCategoryChip')));
-    await tester.pumpAndSettle();
-    await tester.tap(find.byKey(const Key('categoryPickerItem-c1')));
-    await tester.pumpAndSettle();
-
-    expect(controller.updateCategoryCalls, [(transactionId: 't1', categoryId: 'c1')]);
-  });
-
-  testWidgets('the review queue "always categorize" affordance opens the rule modal', (
-    tester,
-  ) async {
-    _useDesktopSurface(tester);
-    final controller = FakeTransactionsController(
-      initialPage: TransactionsPage(
-        items: [_transaction(id: 't1', category: null, needsReview: true)],
-        page: 1,
-        pageSize: 50,
-        total: 1,
-      ),
-    );
-
-    await tester.pumpWidget(_wrap(controller: controller));
-    await tester.pumpAndSettle();
-    _container(tester).read(transactionFiltersProvider.notifier).setNeedsReview(true);
-    await tester.pumpAndSettle();
-
-    await tester.tap(find.byKey(const Key('reviewRowAlwaysButton')));
-    await tester.pump();
-
-    expect(find.byType(AlwaysCategorizeModal), findsOneWidget);
-  });
-
-  testWidgets('renders the empty state with no transactions and no active filter', (
-    tester,
-  ) async {
-    await tester.pumpWidget(
-      _wrap(
-        controller: FakeTransactionsController(
-          initialPage: const TransactionsPage(items: [], page: 1, pageSize: 50, total: 0),
+  testWidgets(
+    'the review queue lets the user resolve an item via the category picker',
+    (tester) async {
+      _useDesktopSurface(tester);
+      final controller = FakeTransactionsController(
+        initialPage: TransactionsPage(
+          items: [_transaction(id: 't1', category: null, needsReview: true)],
+          page: 1,
+          pageSize: 50,
+          total: 1,
         ),
-      ),
-    );
-    await tester.pumpAndSettle();
+      );
 
-    expect(find.text('Aucune transaction pour l\'instant'), findsOneWidget);
-    expect(find.byKey(const Key('transactionsList')), findsNothing);
-  });
+      await tester.pumpWidget(_wrap(controller: controller));
+      await tester.pumpAndSettle();
+      _container(
+        tester,
+      ).read(transactionFiltersProvider.notifier).setNeedsReview(true);
+      await tester.pumpAndSettle();
 
-  testWidgets('renders under en without missing localized keys', (tester) async {
+      expect(find.byKey(const Key('reviewQueueList')), findsOneWidget);
+      expect(find.byKey(const Key('reviewRowCategoryChip')), findsOneWidget);
+
+      await tester.tap(find.byKey(const Key('reviewRowCategoryChip')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const Key('categoryPickerItem-c1')));
+      await tester.pumpAndSettle();
+
+      expect(controller.updateCategoryCalls, [
+        (transactionId: 't1', categoryId: 'c1'),
+      ]);
+    },
+  );
+
+  testWidgets(
+    'the review queue "always categorize" affordance opens the rule modal',
+    (tester) async {
+      _useDesktopSurface(tester);
+      final controller = FakeTransactionsController(
+        initialPage: TransactionsPage(
+          items: [_transaction(id: 't1', category: null, needsReview: true)],
+          page: 1,
+          pageSize: 50,
+          total: 1,
+        ),
+      );
+
+      await tester.pumpWidget(_wrap(controller: controller));
+      await tester.pumpAndSettle();
+      _container(
+        tester,
+      ).read(transactionFiltersProvider.notifier).setNeedsReview(true);
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byKey(const Key('reviewRowAlwaysButton')));
+      await tester.pump();
+
+      expect(find.byType(AlwaysCategorizeModal), findsOneWidget);
+    },
+  );
+
+  testWidgets(
+    'renders the empty state with no transactions and no active filter',
+    (tester) async {
+      await tester.pumpWidget(
+        _wrap(
+          controller: FakeTransactionsController(
+            initialPage: const TransactionsPage(
+              items: [],
+              page: 1,
+              pageSize: 50,
+              total: 0,
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('Aucune transaction pour l\'instant'), findsOneWidget);
+      expect(find.byKey(const Key('transactionsList')), findsNothing);
+    },
+  );
+
+  testWidgets('renders under en without missing localized keys', (
+    tester,
+  ) async {
     await tester.pumpWidget(
       _wrap(
         controller: FakeTransactionsController(
-          initialPage: const TransactionsPage(items: [], page: 1, pageSize: 50, total: 0),
+          initialPage: const TransactionsPage(
+            items: [],
+            page: 1,
+            pageSize: 50,
+            total: 0,
+          ),
         ),
         locale: const Locale('en'),
       ),

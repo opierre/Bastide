@@ -58,7 +58,8 @@ final importFilePickerProvider = Provider<ImportFilePicker>(
 /// `state` — a rejected file shouldn't blank out the history behind it.
 class ImportsController extends AsyncNotifier<List<ImportBatch>> {
   @override
-  Future<List<ImportBatch>> build() => ref.read(importsRepositoryProvider).listBatches();
+  Future<List<ImportBatch>> build() =>
+      ref.read(importsRepositoryProvider).listBatches();
 
   Future<void> refresh() async {
     state = const AsyncValue.loading();
@@ -78,7 +79,11 @@ class ImportsController extends AsyncNotifier<List<ImportBatch>> {
   }) async {
     final batch = await ref
         .read(importsRepositoryProvider)
-        .importFile(accountId: accountId, fileName: file.name, bytes: file.bytes);
+        .importFile(
+          accountId: accountId,
+          fileName: file.name,
+          bytes: file.bytes,
+        );
 
     // Re-importing an identical file returns the original batch rather than a
     // new one, so replace a matching entry instead of listing it twice.
@@ -103,7 +108,9 @@ class ImportsController extends AsyncNotifier<List<ImportBatch>> {
 }
 
 final importsControllerProvider =
-    AsyncNotifierProvider<ImportsController, List<ImportBatch>>(ImportsController.new);
+    AsyncNotifierProvider<ImportsController, List<ImportBatch>>(
+      ImportsController.new,
+    );
 
 /// The account the user picked to settle a statement that couldn't name its own
 /// destination — an ambiguous match, or a file with no readable account block.
@@ -121,9 +128,8 @@ class ChosenImportAccount extends Notifier<String?> {
   void clear() => state = null;
 }
 
-final chosenImportAccountProvider = NotifierProvider<ChosenImportAccount, String?>(
-  ChosenImportAccount.new,
-);
+final chosenImportAccountProvider =
+    NotifierProvider<ChosenImportAccount, String?>(ChosenImportAccount.new);
 
 /// The file staged in the drop zone, before it is imported.
 class SelectedImportFile extends Notifier<PickedImportFile?> {
@@ -136,7 +142,9 @@ class SelectedImportFile extends Notifier<PickedImportFile?> {
 }
 
 final selectedImportFileProvider =
-    NotifierProvider<SelectedImportFile, PickedImportFile?>(SelectedImportFile.new);
+    NotifierProvider<SelectedImportFile, PickedImportFile?>(
+      SelectedImportFile.new,
+    );
 
 /// The batch from the import run in this session, shown in the result card.
 ///
@@ -150,6 +158,5 @@ class LastImportResult extends Notifier<ImportBatch?> {
   void set(ImportBatch? batch) => state = batch;
 }
 
-final lastImportResultProvider = NotifierProvider<LastImportResult, ImportBatch?>(
-  LastImportResult.new,
-);
+final lastImportResultProvider =
+    NotifierProvider<LastImportResult, ImportBatch?>(LastImportResult.new);

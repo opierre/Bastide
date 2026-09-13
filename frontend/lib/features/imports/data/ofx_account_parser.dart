@@ -31,7 +31,10 @@ final _ledgerBalRe = RegExp(
 /// Pulls a leaf value, stopping at the next tag or end of line so it works
 /// whether or not the leaf tag is closed.
 String? _tag(String block, String tag) {
-  final match = RegExp('<$tag>\\s*([^<\r\n]*)', caseSensitive: false).firstMatch(block);
+  final match = RegExp(
+    '<$tag>\\s*([^<\r\n]*)',
+    caseSensitive: false,
+  ).firstMatch(block);
   if (match == null) return null;
   final value = match.group(1)!.trim();
   return value.isEmpty ? null : value;

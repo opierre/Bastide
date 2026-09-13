@@ -59,7 +59,9 @@ class _PrimaryButtonState extends State<PrimaryButton> {
     // keeps the gradient so the submit still reads as in-flight.
     final enabled = widget.onPressed != null && !widget.isLoading;
     final muted = widget.onPressed == null;
-    final label = widget.isLoading ? (widget.loadingLabel ?? widget.label) : widget.label;
+    final label = widget.isLoading
+        ? (widget.loadingLabel ?? widget.label)
+        : widget.label;
     final foreground = muted ? AppColors.textDisabled : AppColors.irisInk;
 
     final button = Container(
@@ -79,7 +81,10 @@ class _PrimaryButtonState extends State<PrimaryButton> {
             SizedBox(
               height: 15,
               width: 15,
-              child: CircularProgressIndicator(strokeWidth: 2, color: foreground),
+              child: CircularProgressIndicator(
+                strokeWidth: 2,
+                color: foreground,
+              ),
             ),
             const SizedBox(width: AppSpacing.sm + 2),
           ] else if (widget.icon != null) ...[

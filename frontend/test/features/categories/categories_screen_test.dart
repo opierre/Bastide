@@ -21,7 +21,9 @@ Widget _wrap({
   return ProviderScope(
     overrides: [
       categoriesControllerProvider.overrideWith(() => controller),
-      rulesControllerProvider.overrideWith(() => FakeRulesController(initialRules: rules)),
+      rulesControllerProvider.overrideWith(
+        () => FakeRulesController(initialRules: rules),
+      ),
     ],
     child: MaterialApp(
       locale: locale,
@@ -41,8 +43,10 @@ void _useDesktopSurface(WidgetTester tester) {
   addTearDown(tester.view.reset);
 }
 
-Finder _inCard(String id, Finder matching) =>
-    find.descendant(of: find.byKey(Key('categoryCard-$id')), matching: matching);
+Finder _inCard(String id, Finder matching) => find.descendant(
+  of: find.byKey(Key('categoryCard-$id')),
+  matching: matching,
+);
 
 final _food = testCategory(id: 'food', name: 'category.food');
 final _groceries = testCategory(
@@ -60,9 +64,13 @@ final _own = testCategory(
 );
 
 void main() {
-  testWidgets('a system card renders the lock and offers no menu', (tester) async {
+  testWidgets('a system card renders the lock and offers no menu', (
+    tester,
+  ) async {
     _useDesktopSurface(tester);
-    await tester.pumpWidget(_wrap(controller: FakeCategoriesController(initialCategories: [_food])));
+    await tester.pumpWidget(
+      _wrap(controller: FakeCategoriesController(initialCategories: [_food])),
+    );
     await tester.pumpAndSettle();
 
     expect(find.byKey(const Key('categoryLock-food')), findsOneWidget);
@@ -73,7 +81,9 @@ void main() {
 
   testWidgets('a custom card renders the ⋯ menu, and no lock', (tester) async {
     _useDesktopSurface(tester);
-    await tester.pumpWidget(_wrap(controller: FakeCategoriesController(initialCategories: [_own])));
+    await tester.pumpWidget(
+      _wrap(controller: FakeCategoriesController(initialCategories: [_own])),
+    );
     await tester.pumpAndSettle();
 
     expect(find.byKey(const Key('categoryLock-own')), findsNothing);
@@ -85,39 +95,64 @@ void main() {
     expect(find.byKey(const Key('categoryDelete-own')), findsOneWidget);
   });
 
-  testWidgets('a card draws its chip glyph, or the icon a custom category chose', (
+  testWidgets(
+    'a card draws its chip glyph, or the icon a custom category chose',
+    (tester) async {
+      _useDesktopSurface(tester);
+      await tester.pumpWidget(
+        _wrap(
+          controller: FakeCategoriesController(
+            initialCategories: [_food, _own],
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      final food = tester.widget<Icon>(
+        find.byKey(const Key('categoryIcon-food')),
+      );
+      expect(food.icon, Icons.rice_bowl_outlined);
+      expect(food.color, CategoryHues.alimentation);
+      final own = tester.widget<Icon>(
+        find.byKey(const Key('categoryIcon-own')),
+      );
+      expect(own.icon, Icons.star_outline_rounded);
+    },
+  );
+
+  testWidgets('subcategories render as chips inside their parent card', (
     tester,
   ) async {
     _useDesktopSurface(tester);
     await tester.pumpWidget(
-      _wrap(controller: FakeCategoriesController(initialCategories: [_food, _own])),
-    );
-    await tester.pumpAndSettle();
-
-    final food = tester.widget<Icon>(find.byKey(const Key('categoryIcon-food')));
-    expect(food.icon, Icons.rice_bowl_outlined);
-    expect(food.color, CategoryHues.alimentation);
-    final own = tester.widget<Icon>(find.byKey(const Key('categoryIcon-own')));
-    expect(own.icon, Icons.star_outline_rounded);
-  });
-
-  testWidgets('subcategories render as chips inside their parent card', (tester) async {
-    _useDesktopSurface(tester);
-    await tester.pumpWidget(
-      _wrap(controller: FakeCategoriesController(initialCategories: [_food, _groceries])),
+      _wrap(
+        controller: FakeCategoriesController(
+          initialCategories: [_food, _groceries],
+        ),
+      ),
     );
     await tester.pumpAndSettle();
 
     expect(find.byKey(const Key('categoryCard-groceries')), findsNothing);
-    expect(_inCard('food', find.byKey(const Key('subcategoryChip-groceries'))), findsOneWidget);
+    expect(
+      _inCard('food', find.byKey(const Key('subcategoryChip-groceries'))),
+      findsOneWidget,
+    );
     expect(_inCard('food', find.text('Courses')), findsOneWidget);
-    expect(_inCard('food', find.byKey(const Key('addSubcategory-food'))), findsOneWidget);
+    expect(
+      _inCard('food', find.byKey(const Key('addSubcategory-food'))),
+      findsOneWidget,
+    );
   });
 
   testWidgets('the view carries no amounts or shares', (tester) async {
     _useDesktopSurface(tester);
     await tester.pumpWidget(
-      _wrap(controller: FakeCategoriesController(initialCategories: [_food, _groceries, _own])),
+      _wrap(
+        controller: FakeCategoriesController(
+          initialCategories: [_food, _groceries, _own],
+        ),
+      ),
     );
     await tester.pumpAndSettle();
 
@@ -125,7 +160,9 @@ void main() {
     expect(find.textContaining('%'), findsNothing);
   });
 
-  testWidgets('cards run four to a row, the fifth below the first', (tester) async {
+  testWidgets('cards run four to a row, the fifth below the first', (
+    tester,
+  ) async {
     _useDesktopSurface(tester);
     await tester.pumpWidget(
       _wrap(
@@ -148,29 +185,34 @@ void main() {
     expect(first.height, greaterThanOrEqualTo(196));
   });
 
-  testWidgets('deleting a custom category asks first, then calls the controller', (
-    tester,
-  ) async {
-    _useDesktopSurface(tester);
-    final controller = FakeCategoriesController(initialCategories: [_own]);
-    await tester.pumpWidget(_wrap(controller: controller));
-    await tester.pumpAndSettle();
+  testWidgets(
+    'deleting a custom category asks first, then calls the controller',
+    (tester) async {
+      _useDesktopSurface(tester);
+      final controller = FakeCategoriesController(initialCategories: [_own]);
+      await tester.pumpWidget(_wrap(controller: controller));
+      await tester.pumpAndSettle();
 
-    await tester.tap(find.byKey(const Key('categoryMenu-own')));
-    await tester.pumpAndSettle();
-    await tester.tap(find.byKey(const Key('categoryDelete-own')));
-    await tester.pumpAndSettle();
-    expect(controller.deleteCalls, isEmpty);
+      await tester.tap(find.byKey(const Key('categoryMenu-own')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const Key('categoryDelete-own')));
+      await tester.pumpAndSettle();
+      expect(controller.deleteCalls, isEmpty);
 
-    await tester.tap(find.byKey(const Key('categoryDeleteConfirmButton')));
-    await tester.pumpAndSettle();
-    expect(controller.deleteCalls, ['own']);
-  });
+      await tester.tap(find.byKey(const Key('categoryDeleteConfirmButton')));
+      await tester.pumpAndSettle();
+      expect(controller.deleteCalls, ['own']);
+    },
+  );
 
   testWidgets('a system subcategory chip is inert', (tester) async {
     _useDesktopSurface(tester);
     await tester.pumpWidget(
-      _wrap(controller: FakeCategoriesController(initialCategories: [_food, _groceries])),
+      _wrap(
+        controller: FakeCategoriesController(
+          initialCategories: [_food, _groceries],
+        ),
+      ),
     );
     await tester.pumpAndSettle();
 
@@ -179,84 +221,101 @@ void main() {
     expect(find.byKey(const Key('categoryFormSubmit')), findsNothing);
   });
 
-  testWidgets('a custom subcategory chip opens its edit modal, which can delete it', (
-    tester,
-  ) async {
-    _useDesktopSurface(tester);
-    final controller = FakeCategoriesController(
-      initialCategories: [
-        _food,
-        testCategory(
-          id: 'mine',
-          userId: 'u1',
-          parentId: 'food',
-          name: 'Marché',
-          isSystem: false,
-        ),
-      ],
-    );
-    await tester.pumpWidget(_wrap(controller: controller));
-    await tester.pumpAndSettle();
+  testWidgets(
+    'a custom subcategory chip opens its edit modal, which can delete it',
+    (tester) async {
+      _useDesktopSurface(tester);
+      final controller = FakeCategoriesController(
+        initialCategories: [
+          _food,
+          testCategory(
+            id: 'mine',
+            userId: 'u1',
+            parentId: 'food',
+            name: 'Marché',
+            isSystem: false,
+          ),
+        ],
+      );
+      await tester.pumpWidget(_wrap(controller: controller));
+      await tester.pumpAndSettle();
 
-    await tester.tap(find.byKey(const Key('subcategoryChip-mine')));
-    await tester.pumpAndSettle();
-    expect(find.byKey(const Key('categoryFormSubmit')), findsOneWidget);
+      await tester.tap(find.byKey(const Key('subcategoryChip-mine')));
+      await tester.pumpAndSettle();
+      expect(find.byKey(const Key('categoryFormSubmit')), findsOneWidget);
 
-    await tester.tap(find.byKey(const Key('categoryFormDelete')));
-    await tester.pumpAndSettle();
-    await tester.tap(find.byKey(const Key('categoryDeleteConfirmButton')));
-    await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const Key('categoryFormDelete')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const Key('categoryDeleteConfirmButton')));
+      await tester.pumpAndSettle();
 
-    expect(controller.deleteCalls, ['mine']);
-    expect(find.byKey(const Key('categoryFormSubmit')), findsNothing);
-  });
+      expect(controller.deleteCalls, ['mine']);
+      expect(find.byKey(const Key('categoryFormSubmit')), findsNothing);
+    },
+  );
 
-  testWidgets('« + Sous-catégorie » opens the create modal with the parent preset', (
-    tester,
-  ) async {
-    _useDesktopSurface(tester);
-    await tester.pumpWidget(_wrap(controller: FakeCategoriesController(initialCategories: [_food])));
-    await tester.pumpAndSettle();
+  testWidgets(
+    '« + Sous-catégorie » opens the create modal with the parent preset',
+    (tester) async {
+      _useDesktopSurface(tester);
+      await tester.pumpWidget(
+        _wrap(controller: FakeCategoriesController(initialCategories: [_food])),
+      );
+      await tester.pumpAndSettle();
 
-    await tester.tap(find.byKey(const Key('addSubcategory-food')));
-    await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const Key('addSubcategory-food')));
+      await tester.pumpAndSettle();
 
-    final parent = tester.widget<AppSelect<String?>>(
-      find.byKey(const Key('categoryFormParent')),
-    );
-    expect(parent.value, 'food');
-    expect(find.byKey(const Key('categoryFormDelete')), findsNothing);
-  });
+      final parent = tester.widget<AppSelect<String?>>(
+        find.byKey(const Key('categoryFormParent')),
+      );
+      expect(parent.value, 'food');
+      expect(find.byKey(const Key('categoryFormDelete')), findsNothing);
+    },
+  );
 
-  testWidgets('a subcategory hides kind, icon and colour, and names its parent in the header', (
-    tester,
-  ) async {
-    _useDesktopSurface(tester);
-    await tester.pumpWidget(_wrap(controller: FakeCategoriesController(initialCategories: [_food])));
-    await tester.pumpAndSettle();
+  testWidgets(
+    'a subcategory hides kind, icon and colour, and names its parent in the header',
+    (tester) async {
+      _useDesktopSurface(tester);
+      await tester.pumpWidget(
+        _wrap(controller: FakeCategoriesController(initialCategories: [_food])),
+      );
+      await tester.pumpAndSettle();
 
-    await tester.tap(find.byKey(const Key('addSubcategory-food')));
-    await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const Key('addSubcategory-food')));
+      await tester.pumpAndSettle();
 
-    final header = find.byKey(const Key('categoryFormParentLine'));
-    expect(find.descendant(of: header, matching: find.text('Alimentation')), findsOneWidget);
-    final glyph = tester.widget<Icon>(find.descendant(of: header, matching: find.byType(Icon)));
-    expect(glyph.icon, Icons.rice_bowl_outlined);
-    expect(glyph.color, CategoryHues.alimentation);
-    expect(find.byKey(const Key('categoryFormKind')), findsNothing);
-    expect(find.byKey(const Key('categoryFormIcon')), findsNothing);
-    expect(find.byKey(const Key('categoryFormColor-#64748B')), findsNothing);
+      final header = find.byKey(const Key('categoryFormParentLine'));
+      expect(
+        find.descendant(of: header, matching: find.text('Alimentation')),
+        findsOneWidget,
+      );
+      final glyph = tester.widget<Icon>(
+        find.descendant(of: header, matching: find.byType(Icon)),
+      );
+      expect(glyph.icon, Icons.rice_bowl_outlined);
+      expect(glyph.color, CategoryHues.alimentation);
+      expect(find.byKey(const Key('categoryFormKind')), findsNothing);
+      expect(find.byKey(const Key('categoryFormIcon')), findsNothing);
+      expect(find.byKey(const Key('categoryFormColor-#64748B')), findsNothing);
 
-    tester
-        .widget<AppSelect<String?>>(find.byKey(const Key('categoryFormParent')))
-        .onChanged(null);
-    await tester.pumpAndSettle();
+      tester
+          .widget<AppSelect<String?>>(
+            find.byKey(const Key('categoryFormParent')),
+          )
+          .onChanged(null);
+      await tester.pumpAndSettle();
 
-    expect(header, findsNothing);
-    expect(find.byKey(const Key('categoryFormKind')), findsOneWidget);
-    expect(find.byKey(const Key('categoryFormIcon')), findsOneWidget);
-    expect(find.byKey(const Key('categoryFormColor-#64748B')), findsOneWidget);
-  });
+      expect(header, findsNothing);
+      expect(find.byKey(const Key('categoryFormKind')), findsOneWidget);
+      expect(find.byKey(const Key('categoryFormIcon')), findsOneWidget);
+      expect(
+        find.byKey(const Key('categoryFormColor-#64748B')),
+        findsOneWidget,
+      );
+    },
+  );
 
   // --- the rule-count footer ----------------------------------------------------------
 
@@ -266,7 +325,9 @@ void main() {
     _useDesktopSurface(tester);
     await tester.pumpWidget(
       _wrap(
-        controller: FakeCategoriesController(initialCategories: [_food, _groceries, _own]),
+        controller: FakeCategoriesController(
+          initialCategories: [_food, _groceries, _own],
+        ),
         rules: [
           testRule(id: 'r1', categoryId: 'groceries'),
           testRule(id: 'r2', priority: 2, categoryId: 'food', enabled: false),
@@ -281,7 +342,9 @@ void main() {
     expect(none.style?.color, AppColors.warning);
   });
 
-  testWidgets('the footer opens the rules view filtered on the category', (tester) async {
+  testWidgets('the footer opens the rules view filtered on the category', (
+    tester,
+  ) async {
     _useDesktopSurface(tester);
     await tester.pumpWidget(
       _wrap(
@@ -294,7 +357,12 @@ void main() {
         ),
         rules: [
           testRule(id: 'r1', categoryId: 'groceries'),
-          testRule(id: 'r2', priority: 2, pattern: 'SNCF', categoryId: 'transport'),
+          testRule(
+            id: 'r2',
+            priority: 2,
+            pattern: 'SNCF',
+            categoryId: 'transport',
+          ),
         ],
       ),
     );
@@ -319,7 +387,9 @@ void main() {
 
   testWidgets('a category with no rule links nowhere', (tester) async {
     _useDesktopSurface(tester);
-    await tester.pumpWidget(_wrap(controller: FakeCategoriesController(initialCategories: [_own])));
+    await tester.pumpWidget(
+      _wrap(controller: FakeCategoriesController(initialCategories: [_own])),
+    );
     await tester.pumpAndSettle();
 
     await tester.tap(find.byKey(const Key('categoryRules-own')));
@@ -330,16 +400,23 @@ void main() {
 
   // --- non-happy paths and locales ----------------------------------------------------
 
-  testWidgets('renders the empty state with no categories at all', (tester) async {
+  testWidgets('renders the empty state with no categories at all', (
+    tester,
+  ) async {
     _useDesktopSurface(tester);
     await tester.pumpWidget(_wrap(controller: FakeCategoriesController()));
     await tester.pumpAndSettle();
 
     expect(find.byKey(const Key('categoriesEmptyState')), findsOneWidget);
-    expect(find.byKey(const Key('emptyStateAddCategoryButton')), findsOneWidget);
+    expect(
+      find.byKey(const Key('emptyStateAddCategoryButton')),
+      findsOneWidget,
+    );
   });
 
-  testWidgets('a load failure renders the error state with a retry', (tester) async {
+  testWidgets('a load failure renders the error state with a retry', (
+    tester,
+  ) async {
     _useDesktopSurface(tester);
     await tester.pumpWidget(
       _wrap(controller: FakeCategoriesController(loadError: Exception('boom'))),
@@ -355,7 +432,9 @@ void main() {
     final categories = [_food, _groceries, _own];
 
     await tester.pumpWidget(
-      _wrap(controller: FakeCategoriesController(initialCategories: categories)),
+      _wrap(
+        controller: FakeCategoriesController(initialCategories: categories),
+      ),
     );
     await tester.pumpAndSettle();
     final frCard = tester.getRect(find.byKey(const Key('categoryCard-food')));

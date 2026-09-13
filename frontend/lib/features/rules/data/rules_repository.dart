@@ -13,7 +13,9 @@ class RulesRepository {
   /// The caller's rules, already in priority order server-side.
   Future<List<Rule>> list() async {
     final json = await _apiClient.get('/rules') as List<dynamic>;
-    return json.map((entry) => Rule.fromJson(entry as Map<String, dynamic>)).toList();
+    return json
+        .map((entry) => Rule.fromJson(entry as Map<String, dynamic>))
+        .toList();
   }
 
   Future<Rule> create({

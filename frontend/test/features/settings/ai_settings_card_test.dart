@@ -69,14 +69,14 @@ void main() {
       theme: appDarkTheme,
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
-      home: const Scaffold(
-        body: SizedBox(width: 640, child: AiSettingsCard()),
-      ),
+      home: const Scaffold(body: SizedBox(width: 640, child: AiSettingsCard())),
     ),
   );
 
   Color dotColor(WidgetTester tester) {
-    final box = tester.widget<Container>(find.byKey(const Key('settingsAiStatusDot')));
+    final box = tester.widget<Container>(
+      find.byKey(const Key('settingsAiStatusDot')),
+    );
     return (box.decoration! as BoxDecoration).color!;
   }
 
@@ -93,26 +93,29 @@ void main() {
       expect(find.text('Connecté — 3 modèles disponibles'), findsOneWidget);
     });
 
-    testWidgets('the model field stays editable and lists what the engine offers', (
+    testWidgets(
+      'the model field stays editable and lists what the engine offers',
+      (tester) async {
+        stub();
+
+        await tester.pumpWidget(wrap());
+        await tester.pumpAndSettle();
+
+        expect(find.byKey(const Key('settingsAiModelField')), findsOneWidget);
+        expect(find.byKey(const Key('settingsAiModelReadOnly')), findsNothing);
+
+        await tester.tap(find.byKey(const Key('settingsAiModelMenu')));
+        await tester.pumpAndSettle();
+
+        for (final tag in ['gemma3n:e4b', 'qwen3:4b', 'llama3.2:3b']) {
+          expect(find.byKey(Key('settingsAiModelOption-$tag')), findsOneWidget);
+        }
+      },
+    );
+
+    testWidgets('picking a model from the list puts it in the field', (
       tester,
     ) async {
-      stub();
-
-      await tester.pumpWidget(wrap());
-      await tester.pumpAndSettle();
-
-      expect(find.byKey(const Key('settingsAiModelField')), findsOneWidget);
-      expect(find.byKey(const Key('settingsAiModelReadOnly')), findsNothing);
-
-      await tester.tap(find.byKey(const Key('settingsAiModelMenu')));
-      await tester.pumpAndSettle();
-
-      for (final tag in ['gemma3n:e4b', 'qwen3:4b', 'llama3.2:3b']) {
-        expect(find.byKey(Key('settingsAiModelOption-$tag')), findsOneWidget);
-      }
-    });
-
-    testWidgets('picking a model from the list puts it in the field', (tester) async {
       stub();
 
       await tester.pumpWidget(wrap());
@@ -150,25 +153,34 @@ void main() {
   });
 
   group('no engine', () {
-    testWidgets('shows an amber dot, the learn-more link, and a dashed model field', (
+    testWidgets(
+      'shows an amber dot, the learn-more link, and a dashed model field',
+      (tester) async {
+        stub(health: _healthJson(reachable: false, models: []));
+
+        await tester.pumpWidget(wrap());
+        await tester.pumpAndSettle();
+
+        expect(dotColor(tester), AppColors.warning);
+        expect(
+          find.text('Aucun moteur détecté à cette adresse.'),
+          findsOneWidget,
+        );
+        expect(find.byKey(const Key('settingsAiLearnMore')), findsOneWidget);
+
+        // Never an empty dropdown the user is trapped behind.
+        expect(
+          find.byKey(const Key('settingsAiModelReadOnly')),
+          findsOneWidget,
+        );
+        expect(find.byKey(const Key('settingsAiModelField')), findsNothing);
+        expect(find.text('Aucun modèle — moteur injoignable.'), findsOneWidget);
+      },
+    );
+
+    testWidgets('the connected state offers no learn-more link', (
       tester,
     ) async {
-      stub(health: _healthJson(reachable: false, models: []));
-
-      await tester.pumpWidget(wrap());
-      await tester.pumpAndSettle();
-
-      expect(dotColor(tester), AppColors.warning);
-      expect(find.text('Aucun moteur détecté à cette adresse.'), findsOneWidget);
-      expect(find.byKey(const Key('settingsAiLearnMore')), findsOneWidget);
-
-      // Never an empty dropdown the user is trapped behind.
-      expect(find.byKey(const Key('settingsAiModelReadOnly')), findsOneWidget);
-      expect(find.byKey(const Key('settingsAiModelField')), findsNothing);
-      expect(find.text('Aucun modèle — moteur injoignable.'), findsOneWidget);
-    });
-
-    testWidgets('the connected state offers no learn-more link', (tester) async {
       stub();
 
       await tester.pumpWidget(wrap());
@@ -186,7 +198,10 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.byKey(const Key('settingsAiPrivacy')), findsOneWidget);
-      expect(find.textContaining('Rien ne quitte votre machine.'), findsOneWidget);
+      expect(
+        find.textContaining('Rien ne quitte votre machine.'),
+        findsOneWidget,
+      );
     });
 
     testWidgets('is still present with AI off', (tester) async {
@@ -197,7 +212,9 @@ void main() {
 
       expect(find.byKey(const Key('settingsAiPrivacy')), findsOneWidget);
       expect(
-        tester.widget<AppToggle>(find.byKey(const Key('settingsAiToggle'))).value,
+        tester
+            .widget<AppToggle>(find.byKey(const Key('settingsAiToggle')))
+            .value,
         isFalse,
       );
       expect(find.text('Catégorisation par IA désactivée.'), findsOneWidget);
@@ -215,9 +232,9 @@ void main() {
       expect(dotColor(tester), AppColors.warning);
 
       // The engine came up between the mount probe and the explicit test.
-      when(
-        () => apiClient.get('/settings/inference/health'),
-      ).thenAnswer((_) async {
+      when(() => apiClient.get('/settings/inference/health')).thenAnswer((
+        _,
+      ) async {
         await Future<void>.delayed(const Duration(milliseconds: 40));
         return _healthJson();
       });
@@ -282,7 +299,11 @@ void main() {
 
       expect(find.text('Seuil de confiance — 65 %'), findsOneWidget);
       expect(
-        tester.widget<AppSlider>(find.byKey(const Key('settingsAiThresholdSlider'))).value,
+        tester
+            .widget<AppSlider>(
+              find.byKey(const Key('settingsAiThresholdSlider')),
+            )
+            .value,
         65,
       );
     });
@@ -306,7 +327,10 @@ void main() {
 
       final body =
           verify(
-                () => apiClient.patch('/settings', body: captureAny(named: 'body')),
+                () => apiClient.patch(
+                  '/settings',
+                  body: captureAny(named: 'body'),
+                ),
               ).captured.last
               as Map<String, dynamic>;
       final stored = body['confidence_threshold'] as double;
@@ -316,7 +340,9 @@ void main() {
   });
 
   group('locales', () {
-    testWidgets('renders in English with no French left behind', (tester) async {
+    testWidgets('renders in English with no French left behind', (
+      tester,
+    ) async {
       stub();
 
       await tester.pumpWidget(wrap(locale: const Locale('en')));
@@ -327,7 +353,10 @@ void main() {
       expect(find.text('Connected — 3 models available'), findsOneWidget);
       expect(find.text('Test connection'), findsOneWidget);
       expect(find.text('Confidence threshold — 80%'), findsOneWidget);
-      expect(find.textContaining('Nothing leaves your machine.'), findsOneWidget);
+      expect(
+        find.textContaining('Nothing leaves your machine.'),
+        findsOneWidget,
+      );
     });
 
     testWidgets('renders in French', (tester) async {

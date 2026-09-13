@@ -78,7 +78,9 @@ void main() {
 
   group('ImportsController', () {
     test('build loads the import history', () async {
-      when(() => apiClient.get('/imports')).thenAnswer((_) async => [_batchJson()]);
+      when(
+        () => apiClient.get('/imports'),
+      ).thenAnswer((_) async => [_batchJson()]);
 
       final batches = await container.read(importsControllerProvider.future);
 
@@ -93,7 +95,9 @@ void main() {
     });
 
     test('a successful import prepends its batch to the history', () async {
-      when(() => apiClient.get('/imports')).thenAnswer((_) async => [_batchJson(id: 'b0')]);
+      when(
+        () => apiClient.get('/imports'),
+      ).thenAnswer((_) async => [_batchJson(id: 'b0')]);
       _stubMultipart(apiClient, '/imports', _batchJson(id: 'b1'));
 
       await container.read(importsControllerProvider.future);
@@ -107,56 +111,68 @@ void main() {
       expect(history.map((entry) => entry.id), ['b1', 'b0']);
     });
 
-    test('the upload carries the destination account and nothing else', () async {
-      when(() => apiClient.get('/imports')).thenAnswer((_) async => <dynamic>[]);
-      _stubMultipart(apiClient, '/imports', _batchJson());
+    test(
+      'the upload carries the destination account and nothing else',
+      () async {
+        when(
+          () => apiClient.get('/imports'),
+        ).thenAnswer((_) async => <dynamic>[]);
+        _stubMultipart(apiClient, '/imports', _batchJson());
 
-      await container.read(importsControllerProvider.future);
-      await container
-          .read(importsControllerProvider.notifier)
-          .importFile(accountId: 'a1', file: _file);
+        await container.read(importsControllerProvider.future);
+        await container
+            .read(importsControllerProvider.notifier)
+            .importFile(accountId: 'a1', file: _file);
 
-      final captured =
-          verify(
-                () => apiClient.postMultipart(
-                  '/imports',
-                  fileField: any(named: 'fileField'),
-                  fileName: any(named: 'fileName'),
-                  fileBytes: any(named: 'fileBytes'),
-                  fields: captureAny(named: 'fields'),
-                ),
-              ).captured.single
-              as Map<String, String>;
+        final captured =
+            verify(
+                  () => apiClient.postMultipart(
+                    '/imports',
+                    fileField: any(named: 'fileField'),
+                    fileName: any(named: 'fileName'),
+                    fileBytes: any(named: 'fileBytes'),
+                    fields: captureAny(named: 'fields'),
+                  ),
+                ).captured.single
+                as Map<String, String>;
 
-      expect(captured, {'account_id': 'a1'});
-    });
+        expect(captured, {'account_id': 'a1'});
+      },
+    );
 
-    test('re-importing the same file replaces its entry instead of listing it twice', () async {
-      // The backend returns the *original* batch for an already-imported file,
-      // so the history must not grow a second identical row.
-      when(() => apiClient.get('/imports')).thenAnswer((_) async => [_batchJson(id: 'b1')]);
-      _stubMultipart(
-        apiClient,
-        '/imports',
-        _batchJson(id: 'b1', newCount: 0, duplicateCount: 45),
-      );
+    test(
+      're-importing the same file replaces its entry instead of listing it twice',
+      () async {
+        // The backend returns the *original* batch for an already-imported file,
+        // so the history must not grow a second identical row.
+        when(
+          () => apiClient.get('/imports'),
+        ).thenAnswer((_) async => [_batchJson(id: 'b1')]);
+        _stubMultipart(
+          apiClient,
+          '/imports',
+          _batchJson(id: 'b1', newCount: 0, duplicateCount: 45),
+        );
 
-      await container.read(importsControllerProvider.future);
-      final batch = await container
-          .read(importsControllerProvider.notifier)
-          .importFile(accountId: 'a1', file: _file);
+        await container.read(importsControllerProvider.future);
+        final batch = await container
+            .read(importsControllerProvider.notifier)
+            .importFile(accountId: 'a1', file: _file);
 
-      expect(batch.newCount, 0);
-      expect(batch.duplicateCount, 45);
-      final history = container.read(importsControllerProvider).value!;
-      expect(history, hasLength(1));
-      expect(history.single.duplicateCount, 45);
-    });
+        expect(batch.newCount, 0);
+        expect(batch.duplicateCount, 45);
+        final history = container.read(importsControllerProvider).value!;
+        expect(history, hasLength(1));
+        expect(history.single.duplicateCount, 45);
+      },
+    );
 
     test('a failed batch returns normally and lands in the history', () async {
       // An unparseable file is recorded, not thrown: the panel reports it
       // calmly and the history keeps the evidence.
-      when(() => apiClient.get('/imports')).thenAnswer((_) async => <dynamic>[]);
+      when(
+        () => apiClient.get('/imports'),
+      ).thenAnswer((_) async => <dynamic>[]);
       _stubMultipart(
         apiClient,
         '/imports',
@@ -184,7 +200,9 @@ void main() {
     test('a successful import invalidates the transactions list', () async {
       // Without this the panel only caught up on a restart: the list had already
       // been fetched, and nothing told it the import had written to it.
-      when(() => apiClient.get('/imports')).thenAnswer((_) async => <dynamic>[]);
+      when(
+        () => apiClient.get('/imports'),
+      ).thenAnswer((_) async => <dynamic>[]);
       when(
         () => apiClient.get('/transactions', query: any(named: 'query')),
       ).thenAnswer((_) async => _transactionsPageJson);
@@ -204,7 +222,9 @@ void main() {
 
     test('a failed import leaves the transactions list alone', () async {
       // Nothing was written, so re-reading the list would only cost a round trip.
-      when(() => apiClient.get('/imports')).thenAnswer((_) async => <dynamic>[]);
+      when(
+        () => apiClient.get('/imports'),
+      ).thenAnswer((_) async => <dynamic>[]);
       when(
         () => apiClient.get('/transactions', query: any(named: 'query')),
       ).thenAnswer((_) async => _transactionsPageJson);
@@ -222,27 +242,34 @@ void main() {
       ).called(1);
     });
 
-    test('an import failure rethrows and leaves the history untouched', () async {
-      when(() => apiClient.get('/imports')).thenAnswer((_) async => [_batchJson()]);
-      when(
-        () => apiClient.postMultipart(
-          '/imports',
-          fileField: any(named: 'fileField'),
-          fileName: any(named: 'fileName'),
-          fileBytes: any(named: 'fileBytes'),
-          fields: any(named: 'fields'),
-        ),
-      ).thenThrow(const ApiFailure(code: 'ACCOUNT_NOT_FOUND', message: 'nope'));
+    test(
+      'an import failure rethrows and leaves the history untouched',
+      () async {
+        when(
+          () => apiClient.get('/imports'),
+        ).thenAnswer((_) async => [_batchJson()]);
+        when(
+          () => apiClient.postMultipart(
+            '/imports',
+            fileField: any(named: 'fileField'),
+            fileName: any(named: 'fileName'),
+            fileBytes: any(named: 'fileBytes'),
+            fields: any(named: 'fields'),
+          ),
+        ).thenThrow(
+          const ApiFailure(code: 'ACCOUNT_NOT_FOUND', message: 'nope'),
+        );
 
-      await container.read(importsControllerProvider.future);
+        await container.read(importsControllerProvider.future);
 
-      await expectLater(
-        () => container
-            .read(importsControllerProvider.notifier)
-            .importFile(accountId: 'missing', file: _file),
-        throwsA(isA<ApiFailure>()),
-      );
-      expect(container.read(importsControllerProvider).value, hasLength(1));
-    });
+        await expectLater(
+          () => container
+              .read(importsControllerProvider.notifier)
+              .importFile(accountId: 'missing', file: _file),
+          throwsA(isA<ApiFailure>()),
+        );
+        expect(container.read(importsControllerProvider).value, hasLength(1));
+      },
+    );
   });
 }

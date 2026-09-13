@@ -33,12 +33,18 @@ Widget _wrap(MockApiClient apiClient, {FakeRulesController? rules}) {
   return ProviderScope(
     overrides: [
       apiClientProvider.overrideWithValue(apiClient),
-      rulesControllerProvider.overrideWith(() => rules ?? FakeRulesController()),
+      rulesControllerProvider.overrideWith(
+        () => rules ?? FakeRulesController(),
+      ),
       categoriesControllerProvider.overrideWith(
         () => FakeCategoriesController(
           initialCategories: [
             testCategory(id: 'food', name: 'category.food'),
-            testCategory(id: 'groceries', parentId: 'food', name: 'category.food.groceries'),
+            testCategory(
+              id: 'groceries',
+              parentId: 'food',
+              name: 'category.food.groceries',
+            ),
           ],
         ),
       ),
@@ -83,39 +89,50 @@ void main() {
 
   setUp(() => apiClient = MockApiClient());
 
-  testWidgets('the preview is debounced: one request for a burst of keystrokes', (
+  testWidgets(
+    'the preview is debounced: one request for a burst of keystrokes',
+    (tester) async {
+      when(
+        () => apiClient.post('/rules/preview', body: any(named: 'body')),
+      ).thenAnswer((_) async => _previewJson());
+
+      await tester.pumpWidget(_wrap(apiClient));
+      await _openEditor(tester);
+
+      for (final text in ['C', 'CA', 'CAR', 'CARR', 'CARREFOUR']) {
+        await tester.enterText(find.byKey(const Key('ruleFormPattern')), text);
+        await tester.pump(const Duration(milliseconds: 60));
+      }
+      verifyNever(
+        () => apiClient.post('/rules/preview', body: any(named: 'body')),
+      );
+
+      await _settlePreview(tester);
+      final body =
+          verify(
+                () => apiClient.post(
+                  '/rules/preview',
+                  body: captureAny(named: 'body'),
+                ),
+              ).captured.single
+              as Map<String, dynamic>;
+      expect(body['pattern'], 'CARREFOUR');
+    },
+  );
+
+  testWidgets('the banner reports the count and quotes one example', (
     tester,
   ) async {
-    when(
-      () => apiClient.post('/rules/preview', body: any(named: 'body')),
-    ).thenAnswer((_) async => _previewJson());
-
-    await tester.pumpWidget(_wrap(apiClient));
-    await _openEditor(tester);
-
-    for (final text in ['C', 'CA', 'CAR', 'CARR', 'CARREFOUR']) {
-      await tester.enterText(find.byKey(const Key('ruleFormPattern')), text);
-      await tester.pump(const Duration(milliseconds: 60));
-    }
-    verifyNever(() => apiClient.post('/rules/preview', body: any(named: 'body')));
-
-    await _settlePreview(tester);
-    final body =
-        verify(
-              () => apiClient.post('/rules/preview', body: captureAny(named: 'body')),
-            ).captured.single
-            as Map<String, dynamic>;
-    expect(body['pattern'], 'CARREFOUR');
-  });
-
-  testWidgets('the banner reports the count and quotes one example', (tester) async {
     when(
       () => apiClient.post('/rules/preview', body: any(named: 'body')),
     ).thenAnswer((_) async => _previewJson(count: 7));
 
     await tester.pumpWidget(_wrap(apiClient));
     await _openEditor(tester);
-    await tester.enterText(find.byKey(const Key('ruleFormPattern')), 'CARREFOUR');
+    await tester.enterText(
+      find.byKey(const Key('ruleFormPattern')),
+      'CARREFOUR',
+    );
     await _settlePreview(tester);
 
     expect(find.byKey(const Key('rulePreviewBanner')), findsOneWidget);
@@ -126,7 +143,9 @@ void main() {
     expect(find.textContaining('CB CARREFOUR PARIS 15'), findsOneWidget);
   });
 
-  testWidgets('zero matches is reported as zero, not as an error', (tester) async {
+  testWidgets('zero matches is reported as zero, not as an error', (
+    tester,
+  ) async {
     when(
       () => apiClient.post('/rules/preview', body: any(named: 'body')),
     ).thenAnswer((_) async => _previewJson(count: 0, withSample: false));
@@ -142,30 +161,38 @@ void main() {
     );
   });
 
-  testWidgets('an uncompilable regex renders on the pattern field, not as zero matches', (
+  testWidgets(
+    'an uncompilable regex renders on the pattern field, not as zero matches',
+    (tester) async {
+      when(
+        () => apiClient.post('/rules/preview', body: any(named: 'body')),
+      ).thenThrow(
+        const ApiFailure(
+          code: 'RULE_PATTERN_INVALID',
+          message: 'unbalanced parenthesis',
+        ),
+      );
+
+      await tester.pumpWidget(_wrap(apiClient));
+      await _openEditor(tester);
+      await tester.enterText(
+        find.byKey(const Key('ruleFormPattern')),
+        '(CARREFOUR',
+      );
+      await _settlePreview(tester);
+
+      expect(
+        find.text("Ce motif n'est pas une expression régulière valide."),
+        findsOneWidget,
+      );
+      expect(find.byKey(const Key('rulePreviewBanner')), findsNothing);
+      expect(find.textContaining('aucune transaction'), findsNothing);
+    },
+  );
+
+  testWidgets('saving creates the rule with the typed condition', (
     tester,
   ) async {
-    when(() => apiClient.post('/rules/preview', body: any(named: 'body'))).thenThrow(
-      const ApiFailure(
-        code: 'RULE_PATTERN_INVALID',
-        message: 'unbalanced parenthesis',
-      ),
-    );
-
-    await tester.pumpWidget(_wrap(apiClient));
-    await _openEditor(tester);
-    await tester.enterText(find.byKey(const Key('ruleFormPattern')), '(CARREFOUR');
-    await _settlePreview(tester);
-
-    expect(
-      find.text("Ce motif n'est pas une expression régulière valide."),
-      findsOneWidget,
-    );
-    expect(find.byKey(const Key('rulePreviewBanner')), findsNothing);
-    expect(find.textContaining('aucune transaction'), findsNothing);
-  });
-
-  testWidgets('saving creates the rule with the typed condition', (tester) async {
     when(
       () => apiClient.post('/rules/preview', body: any(named: 'body')),
     ).thenAnswer((_) async => _previewJson());
@@ -185,7 +212,10 @@ void main() {
     await tester.pumpWidget(_wrap(apiClient));
     await _openEditor(tester);
 
-    await tester.enterText(find.byKey(const Key('ruleFormPattern')), 'CARREFOUR');
+    await tester.enterText(
+      find.byKey(const Key('ruleFormPattern')),
+      'CARREFOUR',
+    );
     await _settlePreview(tester);
 
     await tester.tap(find.byKey(const Key('ruleFormCategory')));
@@ -207,27 +237,31 @@ void main() {
     expect(find.byKey(const Key('ruleFormSubmit')), findsNothing);
   });
 
-  testWidgets('an empty pattern clears the banner instead of counting everything', (
-    tester,
-  ) async {
-    when(
-      () => apiClient.post('/rules/preview', body: any(named: 'body')),
-    ).thenAnswer((_) async => _previewJson());
+  testWidgets(
+    'an empty pattern clears the banner instead of counting everything',
+    (tester) async {
+      when(
+        () => apiClient.post('/rules/preview', body: any(named: 'body')),
+      ).thenAnswer((_) async => _previewJson());
 
-    await tester.pumpWidget(_wrap(apiClient));
-    await _openEditor(tester);
-    await tester.enterText(find.byKey(const Key('ruleFormPattern')), 'CARREFOUR');
-    await _settlePreview(tester);
-    expect(find.byKey(const Key('rulePreviewBanner')), findsOneWidget);
+      await tester.pumpWidget(_wrap(apiClient));
+      await _openEditor(tester);
+      await tester.enterText(
+        find.byKey(const Key('ruleFormPattern')),
+        'CARREFOUR',
+      );
+      await _settlePreview(tester);
+      expect(find.byKey(const Key('rulePreviewBanner')), findsOneWidget);
 
-    await tester.enterText(find.byKey(const Key('ruleFormPattern')), '');
-    await _settlePreview(tester);
+      await tester.enterText(find.byKey(const Key('ruleFormPattern')), '');
+      await _settlePreview(tester);
 
-    expect(find.byKey(const Key('rulePreviewBanner')), findsNothing);
-    verify(
-      () => apiClient.post('/rules/preview', body: any(named: 'body')),
-    ).called(1);
-  });
+      expect(find.byKey(const Key('rulePreviewBanner')), findsNothing);
+      verify(
+        () => apiClient.post('/rules/preview', body: any(named: 'body')),
+      ).called(1);
+    },
+  );
 
   testWidgets('the debounce is the documented one', (tester) async {
     expect(rulePreviewDebounce, const Duration(milliseconds: 350));

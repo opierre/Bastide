@@ -16,7 +16,9 @@ class RulesController extends AsyncNotifier<List<Rule>> {
 
   Future<void> refresh() async {
     state = const AsyncValue.loading();
-    state = await AsyncValue.guard(() => ref.read(rulesRepositoryProvider).list());
+    state = await AsyncValue.guard(
+      () => ref.read(rulesRepositoryProvider).list(),
+    );
   }
 
   /// Creates a rule. A new rule is filed last by default — it has to fall
@@ -131,7 +133,8 @@ class RulesController extends AsyncNotifier<List<Rule>> {
     moved.insert(newIndex, rule);
 
     final renumbered = [
-      for (final (index, entry) in moved.indexed) entry.copyWith(priority: index + 1),
+      for (final (index, entry) in moved.indexed)
+        entry.copyWith(priority: index + 1),
     ];
     state = AsyncValue.data(renumbered);
 
@@ -139,7 +142,9 @@ class RulesController extends AsyncNotifier<List<Rule>> {
     try {
       for (final entry in renumbered) {
         if (byId[entry.id]?.priority == entry.priority) continue;
-        await ref.read(rulesRepositoryProvider).update(entry.id, priority: entry.priority);
+        await ref
+            .read(rulesRepositoryProvider)
+            .update(entry.id, priority: entry.priority);
       }
     } catch (_) {
       state = AsyncValue.data(previous);
@@ -183,6 +188,5 @@ class RulesController extends AsyncNotifier<List<Rule>> {
       [...rules]..sort((a, b) => a.priority.compareTo(b.priority));
 }
 
-final rulesControllerProvider = AsyncNotifierProvider<RulesController, List<Rule>>(
-  RulesController.new,
-);
+final rulesControllerProvider =
+    AsyncNotifierProvider<RulesController, List<Rule>>(RulesController.new);

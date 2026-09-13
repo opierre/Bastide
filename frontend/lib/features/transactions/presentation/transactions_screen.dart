@@ -47,9 +47,8 @@ class TransactionsScreen extends ConsumerWidget {
         AppSpacing.contentY,
       ),
       child: switch (pageAsync) {
-        AsyncData(:final value) when value.total == 0 && !hasActiveFilter => _EmptyState(
-          onGoToImports: () => context.go(ImportsScreen.path),
-        ),
+        AsyncData(:final value) when value.total == 0 && !hasActiveFilter =>
+          _EmptyState(onGoToImports: () => context.go(ImportsScreen.path)),
         AsyncData(:final value) => Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
@@ -61,9 +60,9 @@ class TransactionsScreen extends ConsumerWidget {
                       child: Text(
                         l10n.transactionsSearchEmpty,
                         key: const Key('transactionsSearchEmpty'),
-                        style: Theme.of(
-                          context,
-                        ).textTheme.bodyLarge?.copyWith(color: AppColors.textSecondary),
+                        style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                          color: AppColors.textSecondary,
+                        ),
                       ),
                     )
                   : filters.needsReview == true
@@ -77,7 +76,8 @@ class TransactionsScreen extends ConsumerWidget {
           messageKey: const Key('transactionsErrorText'),
           retryLabel: l10n.transactionsRetry,
           retryKey: const Key('transactionsRetryButton'),
-          onRetry: () => ref.read(transactionsControllerProvider.notifier).refresh(),
+          onRetry: () =>
+              ref.read(transactionsControllerProvider.notifier).refresh(),
         ),
         _ => const Padding(
           key: Key('transactionsLoadingIndicator'),
@@ -103,7 +103,8 @@ class TransactionsTopBarActions extends ConsumerWidget {
       hint: l10n.transactionsSearchHint,
       width: 300,
       initialValue: ref.read(transactionFiltersProvider).q,
-      onChanged: (value) => ref.read(transactionFiltersProvider.notifier).setQuery(value),
+      onChanged: (value) =>
+          ref.read(transactionFiltersProvider.notifier).setQuery(value),
     );
   }
 }
@@ -136,15 +137,25 @@ class _FilterBar extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context)!;
     final filters = ref.watch(transactionFiltersProvider);
-    final accounts = ref.watch(accountsControllerProvider).value ?? const <Account>[];
-    final categories = ref.watch(transactionCategoriesProvider).value ?? const <AppCategory>[];
+    final accounts =
+        ref.watch(accountsControllerProvider).value ?? const <Account>[];
+    final categories =
+        ref.watch(transactionCategoriesProvider).value ?? const <AppCategory>[];
     final notifier = ref.read(transactionFiltersProvider.notifier);
 
     return Row(
       children: [
-        _AccountFilterPill(accounts: accounts, selectedId: filters.accountId, onChanged: notifier.setAccount),
+        _AccountFilterPill(
+          accounts: accounts,
+          selectedId: filters.accountId,
+          onChanged: notifier.setAccount,
+        ),
         const SizedBox(width: AppSpacing.sm),
-        _DateRangeFilterPill(from: filters.dateFrom, to: filters.dateTo, onChanged: notifier.setDateRange),
+        _DateRangeFilterPill(
+          from: filters.dateFrom,
+          to: filters.dateTo,
+          onChanged: notifier.setDateRange,
+        ),
         const SizedBox(width: AppSpacing.sm),
         _CategoryFilterPill(
           categories: categories,
@@ -152,7 +163,10 @@ class _FilterBar extends ConsumerWidget {
           onChanged: notifier.setCategory,
         ),
         const Spacer(),
-        Text(l10n.transactionsNeedsReviewLabel, style: Theme.of(context).textTheme.labelMedium),
+        Text(
+          l10n.transactionsNeedsReviewLabel,
+          style: Theme.of(context).textTheme.labelMedium,
+        ),
         const SizedBox(width: AppSpacing.sm),
         _NeedsReviewToggle(
           value: filters.needsReview == true,
@@ -164,7 +178,11 @@ class _FilterBar extends ConsumerWidget {
 }
 
 class _FilterPillButton extends StatelessWidget {
-  const _FilterPillButton({required this.label, required this.onTap, this.icon});
+  const _FilterPillButton({
+    required this.label,
+    required this.onTap,
+    this.icon,
+  });
 
   final String label;
   final VoidCallback onTap;
@@ -178,7 +196,9 @@ class _FilterPillButton extends StatelessWidget {
       child: Container(
         height: AppChrome.controlPillHeight,
         constraints: const BoxConstraints(maxWidth: 220),
-        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm + AppSpacing.xs),
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.sm + AppSpacing.xs,
+        ),
         decoration: BoxDecoration(
           color: AppColors.surfaceRaised,
           borderRadius: BorderRadius.circular(AppRadii.md),
@@ -199,7 +219,11 @@ class _FilterPillButton extends StatelessWidget {
               ),
             ),
             const SizedBox(width: AppSpacing.xs),
-            const Icon(Icons.expand_more_rounded, size: 14, color: AppColors.textSecondary),
+            const Icon(
+              Icons.expand_more_rounded,
+              size: 14,
+              color: AppColors.textSecondary,
+            ),
           ],
         ),
       ),
@@ -221,14 +245,19 @@ class _AccountFilterPill extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final selected = accounts.where((account) => account.id == selectedId).firstOrNull;
+    final selected = accounts
+        .where((account) => account.id == selectedId)
+        .firstOrNull;
 
     return PopupMenuButton<String?>(
       key: const Key('transactionsAccountFilter'),
       position: PopupMenuPosition.under,
       onSelected: onChanged,
       itemBuilder: (context) => [
-        PopupMenuItem<String?>(value: null, child: Text(l10n.transactionsFilterAllAccounts)),
+        PopupMenuItem<String?>(
+          value: null,
+          child: Text(l10n.transactionsFilterAllAccounts),
+        ),
         for (final account in accounts)
           PopupMenuItem<String?>(value: account.id, child: Text(account.name)),
       ],
@@ -254,14 +283,19 @@ class _CategoryFilterPill extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final selected = categories.where((category) => category.id == selectedId).firstOrNull;
+    final selected = categories
+        .where((category) => category.id == selectedId)
+        .firstOrNull;
 
     return PopupMenuButton<String?>(
       key: const Key('transactionsCategoryFilter'),
       position: PopupMenuPosition.under,
       onSelected: onChanged,
       itemBuilder: (context) => [
-        PopupMenuItem<String?>(value: null, child: Text(l10n.transactionsFilterAllCategories)),
+        PopupMenuItem<String?>(
+          value: null,
+          child: Text(l10n.transactionsFilterAllCategories),
+        ),
         for (final category in categories)
           PopupMenuItem<String?>(
             value: category.id,
@@ -279,7 +313,11 @@ class _CategoryFilterPill extends StatelessWidget {
 }
 
 class _DateRangeFilterPill extends StatelessWidget {
-  const _DateRangeFilterPill({required this.from, required this.to, required this.onChanged});
+  const _DateRangeFilterPill({
+    required this.from,
+    required this.to,
+    required this.onChanged,
+  });
 
   final DateTime? from;
   final DateTime? to;
@@ -297,7 +335,11 @@ class _DateRangeFilterPill extends StatelessWidget {
       icon: Icons.calendar_today_outlined,
       label: label,
       onTap: () async {
-        final range = await showTransactionDateRange(context, from: from, to: to);
+        final range = await showTransactionDateRange(
+          context,
+          from: from,
+          to: to,
+        );
         if (range != null) onChanged(range.$1, range.$2);
       },
     );
@@ -332,7 +374,10 @@ class _NeedsReviewToggle extends StatelessWidget {
         child: Container(
           width: 16,
           height: 16,
-          decoration: const BoxDecoration(color: Colors.white, shape: BoxShape.circle),
+          decoration: const BoxDecoration(
+            color: Colors.white,
+            shape: BoxShape.circle,
+          ),
         ),
       ),
     );
@@ -348,8 +393,11 @@ class _TransactionsListCard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context)!;
-    final accounts = ref.watch(accountsControllerProvider).value ?? const <Account>[];
-    final accountNames = {for (final account in accounts) account.id: account.name};
+    final accounts =
+        ref.watch(accountsControllerProvider).value ?? const <Account>[];
+    final accountNames = {
+      for (final account in accounts) account.id: account.name,
+    };
     final from = page.total == 0 ? 0 : ((page.page - 1) * page.pageSize) + 1;
     final to = ((page.page - 1) * page.pageSize) + page.items.length;
 
@@ -383,23 +431,27 @@ class _TransactionsListCard extends ConsumerWidget {
                 Text(
                   l10n.transactionsPager(from, to, page.total),
                   key: const Key('transactionsPagerLabel'),
-                  style: Theme.of(
-                    context,
-                  ).textTheme.bodySmall?.copyWith(color: AppColors.textSecondary),
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: AppColors.textSecondary,
+                  ),
                 ),
                 const Spacer(),
                 IconButton(
                   key: const Key('transactionsPagerPrev'),
                   icon: const Icon(Icons.chevron_left_rounded, size: 18),
                   onPressed: page.page > 1
-                      ? () => ref.read(transactionFiltersProvider.notifier).setPage(page.page - 1)
+                      ? () => ref
+                            .read(transactionFiltersProvider.notifier)
+                            .setPage(page.page - 1)
                       : null,
                 ),
                 IconButton(
                   key: const Key('transactionsPagerNext'),
                   icon: const Icon(Icons.chevron_right_rounded, size: 18),
                   onPressed: page.page < page.totalPages
-                      ? () => ref.read(transactionFiltersProvider.notifier).setPage(page.page + 1)
+                      ? () => ref
+                            .read(transactionFiltersProvider.notifier)
+                            .setPage(page.page + 1)
                       : null,
                 ),
               ],

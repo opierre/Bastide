@@ -42,12 +42,17 @@ class CategoryBreakdownChart extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final locale = Localizations.localeOf(context).toString();
-    final total = categories.fold<int>(0, (sum, category) => sum + category.amountMinor);
+    final total = categories.fold<int>(
+      0,
+      (sum, category) => sum + category.amountMinor,
+    );
     // Highest amount first, so the donut and legend read the same order.
-    final sorted = [...categories]..sort((a, b) => b.amountMinor.compareTo(a.amountMinor));
+    final sorted = [...categories]
+      ..sort((a, b) => b.amountMinor.compareTo(a.amountMinor));
     // The breakdown only ever carries expense rows (see `PROJECT.md` §5), so `kind` is fixed.
     final slugs = [
-      for (final category in sorted) categorySlugFor(name: category.name, kind: 'expense'),
+      for (final category in sorted)
+        categorySlugFor(name: category.name, kind: 'expense'),
     ];
     final colors = [for (final slug in slugs) CategoryHues.forSlug(slug)];
 
@@ -78,7 +83,9 @@ class CategoryBreakdownChart extends StatelessWidget {
                     width: donutSize,
                     height: donutSize,
                     child: CategoryDonut(
-                      amounts: [for (final category in sorted) category.amountMinor],
+                      amounts: [
+                        for (final category in sorted) category.amountMinor,
+                      ],
                       colors: colors,
                       center: _DonutCenter(total: total, currency: currency),
                     ),
@@ -91,7 +98,10 @@ class CategoryBreakdownChart extends StatelessWidget {
                   categories: sorted,
                   colors: colors,
                   currency: currency,
-                  labels: [for (final row in sorted) localizedCategoryName(l10n, row.name)],
+                  labels: [
+                    for (final row in sorted)
+                      localizedCategoryName(l10n, row.name),
+                  ],
                 ),
               ),
             ],
@@ -106,7 +116,9 @@ class CategoryBreakdownChart extends StatelessWidget {
   /// of the width the legend can spare.
   static double _donutSizeFor(BoxConstraints constraints) {
     final byWidth = constraints.maxWidth * _donutWidthShare;
-    final byHeight = constraints.hasBoundedHeight ? constraints.maxHeight : CategoryDonut.size;
+    final byHeight = constraints.hasBoundedHeight
+        ? constraints.maxHeight
+        : CategoryDonut.size;
     final fits = math.min(byWidth, byHeight);
     return fits.clamp(_minDonutSize, CategoryDonut.size);
   }
@@ -235,7 +247,11 @@ class _LegendRow extends StatelessWidget {
           ),
           const SizedBox(width: AppSpacing.sm + AppSpacing.xs),
           Expanded(
-            child: Text(label, style: textTheme.bodyMedium, overflow: TextOverflow.ellipsis),
+            child: Text(
+              label,
+              style: textTheme.bodyMedium,
+              overflow: TextOverflow.ellipsis,
+            ),
           ),
           const SizedBox(width: AppSpacing.sm),
           AmountText(
@@ -367,7 +383,8 @@ class _DonutPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(_DonutPainter oldDelegate) =>
-      !listEquals(oldDelegate.amounts, amounts) || !listEquals(oldDelegate.colors, colors);
+      !listEquals(oldDelegate.amounts, amounts) ||
+      !listEquals(oldDelegate.colors, colors);
 }
 
 String _capitalize(String value) =>

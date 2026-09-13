@@ -19,9 +19,8 @@ class RulesCategoryFilter extends Notifier<String?> {
   void set(String? categoryId) => state = categoryId;
 }
 
-final rulesCategoryFilterProvider = NotifierProvider<RulesCategoryFilter, String?>(
-  RulesCategoryFilter.new,
-);
+final rulesCategoryFilterProvider =
+    NotifierProvider<RulesCategoryFilter, String?>(RulesCategoryFilter.new);
 
 /// The id a rule counts toward on the categories panel: its target's parent
 /// when the target is a subcategory, otherwise the target itself.
@@ -63,7 +62,8 @@ final visibleRulesProvider = Provider<AsyncValue<List<Rule>>>((ref) {
   final rules = ref.watch(rulesControllerProvider);
   if (filter == null) return rules;
 
-  final categories = ref.watch(categoriesControllerProvider).value ?? const <AppCategory>[];
+  final categories =
+      ref.watch(categoriesControllerProvider).value ?? const <AppCategory>[];
   final byId = {for (final category in categories) category.id: category};
   return rules.whenData(
     (list) => [

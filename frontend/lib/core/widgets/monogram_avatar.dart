@@ -27,7 +27,11 @@ class MonogramAvatar extends StatelessWidget {
   }
 
   static String initialsFor(String name) {
-    final words = name.trim().split(RegExp(r'\s+')).where((w) => w.isNotEmpty).toList();
+    final words = name
+        .trim()
+        .split(RegExp(r'\s+'))
+        .where((w) => w.isNotEmpty)
+        .toList();
     if (words.isEmpty) return '?';
     if (words.length == 1) {
       final word = words.first;

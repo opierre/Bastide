@@ -74,11 +74,16 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
 
   /// The taken-email failure belongs to the email field, so it renders as that
   /// field's helper rather than as a banner over the whole form.
-  String? _emailHelperError(AppLocalizations l10n, AsyncValue<Object?> authState) {
+  String? _emailHelperError(
+    AppLocalizations l10n,
+    AsyncValue<Object?> authState,
+  ) {
     if (authState.error case ApiFailure(code: 'EMAIL_TAKEN')) {
       return l10n.authEmailTaken;
     }
-    if (_email.isNotEmpty && !_isEmail(_email.trim())) return l10n.authEmailInvalid;
+    if (_email.isNotEmpty && !_isEmail(_email.trim())) {
+      return l10n.authEmailInvalid;
+    }
     return null;
   }
 
@@ -119,8 +124,9 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                 autofillHints: const [AutofillHints.email],
                 decoration: emailError != null ? errorFieldDecoration() : null,
                 onChanged: (value) => setState(() => _email = value),
-                validator: (value) =>
-                    (value == null || value.trim().isEmpty) ? l10n.authEmailRequired : null,
+                validator: (value) => (value == null || value.trim().isEmpty)
+                    ? l10n.authEmailRequired
+                    : null,
               ),
             ),
             const SizedBox(height: AppSpacing.md + AppSpacing.xs),
@@ -128,7 +134,8 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
               label: l10n.authPasswordLabel,
               // The hint only appears once there is something to fix — an
               // empty field is not yet a mistake.
-              helper: _strength == PasswordStrength.empty || _strength.isAcceptable
+              helper:
+                  _strength == PasswordStrength.empty || _strength.isAcceptable
                   ? null
                   : l10n.authPasswordStrengthHint,
               child: Column(

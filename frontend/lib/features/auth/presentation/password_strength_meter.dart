@@ -19,10 +19,18 @@ class PasswordStrengthMeter extends StatelessWidget {
     final l10n = AppLocalizations.of(context)!;
     final (label, color) = switch (strength) {
       PasswordStrength.empty => (null, AppColors.surfaceHover),
-      PasswordStrength.weak => (l10n.authPasswordStrengthWeak, AppColors.negative),
-      PasswordStrength.fair => (l10n.authPasswordStrengthFair, AppColors.warning),
-      PasswordStrength.strong ||
-      PasswordStrength.excellent => (l10n.authPasswordStrengthStrong, AppColors.iris),
+      PasswordStrength.weak => (
+        l10n.authPasswordStrengthWeak,
+        AppColors.negative,
+      ),
+      PasswordStrength.fair => (
+        l10n.authPasswordStrengthFair,
+        AppColors.warning,
+      ),
+      PasswordStrength.strong || PasswordStrength.excellent => (
+        l10n.authPasswordStrengthStrong,
+        AppColors.iris,
+      ),
     };
 
     return Padding(

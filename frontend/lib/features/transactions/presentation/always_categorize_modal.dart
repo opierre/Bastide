@@ -52,7 +52,8 @@ class AlwaysCategorizeModal extends ConsumerStatefulWidget {
   final Transaction transaction;
 
   @override
-  ConsumerState<AlwaysCategorizeModal> createState() => _AlwaysCategorizeModalState();
+  ConsumerState<AlwaysCategorizeModal> createState() =>
+      _AlwaysCategorizeModalState();
 }
 
 class _AlwaysCategorizeModalState extends ConsumerState<AlwaysCategorizeModal> {
@@ -177,7 +178,10 @@ class _AlwaysCategorizeModalState extends ConsumerState<AlwaysCategorizeModal> {
             ),
             const SizedBox(height: AppSpacing.md),
             if (_errorText != null) ...[
-              InlineBanner(key: const Key('alwaysRuleError'), message: _errorText!),
+              InlineBanner(
+                key: const Key('alwaysRuleError'),
+                message: _errorText!,
+              ),
               const SizedBox(height: AppSpacing.md),
             ],
             // A pre-fill that didn't arrive is not a broken form: every field
@@ -206,7 +210,10 @@ class _AlwaysCategorizeModalState extends ConsumerState<AlwaysCategorizeModal> {
                       },
                       items: [
                         for (final field in RuleMatchField.values)
-                          AppSelectItem(value: field, label: ruleFieldLabel(l10n, field)),
+                          AppSelectItem(
+                            value: field,
+                            label: ruleFieldLabel(l10n, field),
+                          ),
                       ],
                     ),
                   ),
@@ -243,8 +250,12 @@ class _AlwaysCategorizeModalState extends ConsumerState<AlwaysCategorizeModal> {
                 key: const Key('alwaysRulePattern'),
                 controller: _patternController,
                 autofocus: true,
-                style: AppTextStyles.mono.copyWith(color: AppColors.textPrimary),
-                decoration: InputDecoration(hintText: rulePatternHint(l10n, _matchType)),
+                style: AppTextStyles.mono.copyWith(
+                  color: AppColors.textPrimary,
+                ),
+                decoration: InputDecoration(
+                  hintText: rulePatternHint(l10n, _matchType),
+                ),
                 onChanged: (_) => _requestPreview(),
                 validator: (value) => (value == null || value.trim().isEmpty)
                     ? l10n.ruleFormPatternRequired
@@ -323,7 +334,11 @@ class _ApplyNowCheckbox extends StatelessWidget {
                   ),
                 ),
                 child: value
-                    ? const Icon(Icons.check_rounded, size: 13, color: AppColors.irisInk)
+                    ? const Icon(
+                        Icons.check_rounded,
+                        size: 13,
+                        color: AppColors.irisInk,
+                      )
                     : null,
               ),
             ),

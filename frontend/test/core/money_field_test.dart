@@ -100,7 +100,9 @@ void main() {
       expect(english.text, '1,500,000.50');
     });
 
-    testWidgets('refuses a minus unless the amount is a signed one', (tester) async {
+    testWidgets('refuses a minus unless the amount is a signed one', (
+      tester,
+    ) async {
       final positive = TextEditingController();
       await tester.pumpWidget(_wrap(controller: positive));
       await tester.pumpAndSettle();
@@ -108,9 +110,7 @@ void main() {
       expect(positive.text, isEmpty);
 
       final signed = TextEditingController();
-      await tester.pumpWidget(
-        _wrap(controller: signed, allowNegative: true),
-      );
+      await tester.pumpWidget(_wrap(controller: signed, allowNegative: true));
       await tester.pumpAndSettle();
       // The minus is the whole withdrawal mechanism on a goal allocation.
       await tester.enterText(find.byKey(const Key('field')), '-150');
@@ -124,7 +124,9 @@ void main() {
       tester,
     ) async {
       final controller = TextEditingController();
-      await tester.pumpWidget(_wrap(controller: controller, allowNegative: true));
+      await tester.pumpWidget(
+        _wrap(controller: controller, allowNegative: true),
+      );
       await tester.pumpAndSettle();
 
       // A formatter that rejected these would make the field impossible to type

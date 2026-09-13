@@ -74,7 +74,11 @@ class _ResetConfirmModalState extends ConsumerState<ResetConfirmModal> {
           color: AppColors.negative.withValues(alpha: 0.12),
           borderRadius: BorderRadius.circular(AppRadii.md),
         ),
-        child: const Icon(Icons.delete_outline_rounded, size: 19, color: AppColors.negative),
+        child: const Icon(
+          Icons.delete_outline_rounded,
+          size: 19,
+          color: AppColors.negative,
+        ),
       ),
       actions: [
         OutlinedButton(
@@ -89,7 +93,9 @@ class _ResetConfirmModalState extends ConsumerState<ResetConfirmModal> {
             backgroundColor: AppColors.negative,
             foregroundColor: AppColors.negativeInk,
             disabledBackgroundColor: AppColors.negative.withValues(alpha: 0.45),
-            disabledForegroundColor: AppColors.negativeInk.withValues(alpha: 0.45),
+            disabledForegroundColor: AppColors.negativeInk.withValues(
+              alpha: 0.45,
+            ),
           ),
           child: Row(
             mainAxisSize: MainAxisSize.min,
@@ -98,7 +104,10 @@ class _ResetConfirmModalState extends ConsumerState<ResetConfirmModal> {
                 const SizedBox(
                   width: 13,
                   height: 13,
-                  child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.negativeInk),
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    color: AppColors.negativeInk,
+                  ),
                 ),
                 const SizedBox(width: AppSpacing.sm),
               ],
@@ -118,7 +127,9 @@ class _ResetConfirmModalState extends ConsumerState<ResetConfirmModal> {
               ),
             ),
             key: const Key('resetConfirmLead'),
-            style: textTheme.bodyMedium?.copyWith(color: AppColors.textSecondary),
+            style: textTheme.bodyMedium?.copyWith(
+              color: AppColors.textSecondary,
+            ),
           ),
           const SizedBox(height: AppSpacing.md),
           _CountsPlate(counts: counts.value),
@@ -146,7 +157,9 @@ class _ResetConfirmModalState extends ConsumerState<ResetConfirmModal> {
                 controller: _typed,
                 enabled: !isResetting,
                 autofocus: true,
-                style: AppTextStyles.mono.copyWith(color: AppColors.textPrimary),
+                style: AppTextStyles.mono.copyWith(
+                  color: AppColors.textPrimary,
+                ),
               ),
             ),
           ),
@@ -170,7 +183,10 @@ List<TextSpan> _leadSpans(String Function(String) lead, String name) {
     TextSpan(text: sentence.substring(0, at)),
     TextSpan(
       text: name,
-      style: const TextStyle(fontWeight: FontWeight.w700, color: AppColors.textPrimary),
+      style: const TextStyle(
+        fontWeight: FontWeight.w700,
+        color: AppColors.textPrimary,
+      ),
     ),
     TextSpan(text: sentence.substring(at + name.length)),
   ];
@@ -186,7 +202,9 @@ class _CountsPlate extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final number = NumberFormat.decimalPattern(Localizations.localeOf(context).toString());
+    final number = NumberFormat.decimalPattern(
+      Localizations.localeOf(context).toString(),
+    );
     final textTheme = Theme.of(context).textTheme;
     final valueStyle = tabularNumberStyle(
       textTheme.bodyMedium!.copyWith(color: AppColors.textPrimary),
@@ -206,7 +224,10 @@ class _CountsPlate extends StatelessWidget {
 
     return Container(
       key: const Key('resetConfirmCounts'),
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: AppSpacing.xs),
+      padding: const EdgeInsets.symmetric(
+        horizontal: 14,
+        vertical: AppSpacing.xs,
+      ),
       decoration: BoxDecoration(
         color: AppColors.surfaceField,
         borderRadius: BorderRadius.circular(AppRadii.inset),
@@ -225,7 +246,9 @@ class _CountsPlate extends StatelessWidget {
                     child: Text(
                       label,
                       overflow: TextOverflow.ellipsis,
-                      style: textTheme.bodyMedium?.copyWith(color: AppColors.textSecondary),
+                      style: textTheme.bodyMedium?.copyWith(
+                        color: AppColors.textSecondary,
+                      ),
                     ),
                   ),
                   const SizedBox(width: AppSpacing.sm),

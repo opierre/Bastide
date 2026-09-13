@@ -45,7 +45,8 @@ class AccountsScreen extends ConsumerWidget {
               child: _AccountsGrid(
                 accounts: value,
                 onEdit: (account) => showAccountForm(context, initial: account),
-                onArchive: (account) => _confirmArchive(context, ref, l10n, account),
+                onArchive: (account) =>
+                    _confirmArchive(context, ref, l10n, account),
               ),
             ),
           ],
@@ -55,7 +56,8 @@ class AccountsScreen extends ConsumerWidget {
           messageKey: const Key('accountsErrorText'),
           retryLabel: l10n.accountsRetry,
           retryKey: const Key('accountsRetryButton'),
-          onRetry: () => ref.read(accountsControllerProvider.notifier).refresh(),
+          onRetry: () =>
+              ref.read(accountsControllerProvider.notifier).refresh(),
         ),
         _ => const Padding(
           key: Key('accountsLoadingIndicator'),
@@ -96,9 +98,9 @@ class AccountsScreen extends ConsumerWidget {
       await ref.read(accountsControllerProvider.notifier).archive(account.id);
     } catch (error) {
       if (!context.mounted) return;
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(localizeAccountError(l10n, error))));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(localizeAccountError(l10n, error))),
+      );
     }
   }
 }
@@ -115,10 +117,14 @@ class _SummaryCard extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context)!;
     final textTheme = Theme.of(context).textTheme;
-    final accounts = ref.watch(accountsControllerProvider).value ?? const <Account>[];
+    final accounts =
+        ref.watch(accountsControllerProvider).value ?? const <Account>[];
     if (accounts.isEmpty) return const SizedBox.shrink();
 
-    final total = accounts.fold<int>(0, (sum, account) => sum + account.balanceMinor);
+    final total = accounts.fold<int>(
+      0,
+      (sum, account) => sum + account.balanceMinor,
+    );
     final currency = accounts.first.currency;
     // The backend has no "balances recalculated at" field yet; the newest
     // account mutation is the closest honest stand-in for it.
@@ -158,12 +164,16 @@ class _SummaryCard extends ConsumerWidget {
             children: [
               Text(
                 '${l10n.accountsActiveCount(accounts.length)} · $currency',
-                style: textTheme.bodySmall?.copyWith(color: AppColors.textSecondary),
+                style: textTheme.bodySmall?.copyWith(
+                  color: AppColors.textSecondary,
+                ),
               ),
               const SizedBox(height: AppSpacing.xs),
               Text(
                 l10n.accountsBalancesAsOf(asOf),
-                style: AppTextStyles.helper.copyWith(color: AppColors.textDisabled),
+                style: AppTextStyles.helper.copyWith(
+                  color: AppColors.textDisabled,
+                ),
               ),
             ],
           ),
@@ -276,7 +286,10 @@ class _AccountCard extends StatelessWidget {
                 itemBuilder: (context) => [
                   PopupMenuItem(
                     value: _AccountAction.edit,
-                    child: _MenuRow(icon: Icons.edit_outlined, label: l10n.accountEdit),
+                    child: _MenuRow(
+                      icon: Icons.edit_outlined,
+                      label: l10n.accountEdit,
+                    ),
                   ),
                   PopupMenuItem(
                     value: _AccountAction.archive,

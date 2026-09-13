@@ -56,7 +56,8 @@ void main() {
     ).thenAnswer((_) async => json);
   }
 
-  Future<SettingsState> load() => container.read(settingsControllerProvider.future);
+  Future<SettingsState> load() =>
+      container.read(settingsControllerProvider.future);
 
   SettingsController controller() =>
       container.read(settingsControllerProvider.notifier);
@@ -88,15 +89,24 @@ void main() {
       expect(state.models, ['gemma3n:e4b', 'qwen3:4b', 'llama3.2:3b']);
     });
 
-    test('a runtime that does not answer is unreachable, not an error', () async {
-      stubSettings(_settingsJson(aiEnabled: true));
-      stubHealth(_healthJson(reachable: false, models: [], detail: 'connection refused'));
+    test(
+      'a runtime that does not answer is unreachable, not an error',
+      () async {
+        stubSettings(_settingsJson(aiEnabled: true));
+        stubHealth(
+          _healthJson(
+            reachable: false,
+            models: [],
+            detail: 'connection refused',
+          ),
+        );
 
-      final state = await load();
+        final state = await load();
 
-      expect(state.connection, InferenceConnection.unreachable);
-      expect(state.models, isEmpty);
-    });
+        expect(state.connection, InferenceConnection.unreachable);
+        expect(state.models, isEmpty);
+      },
+    );
 
     test('a probe that cannot even be sent reads as unreachable', () async {
       stubSettings(_settingsJson(aiEnabled: true));
@@ -138,7 +148,11 @@ void main() {
       controller().setBaseUrl('http://localhost:8080/v1');
 
       expect(
-        container.read(settingsControllerProvider).value!.settings.inferenceBaseUrl,
+        container
+            .read(settingsControllerProvider)
+            .value!
+            .settings
+            .inferenceBaseUrl,
         'http://localhost:8080/v1',
       );
     });
@@ -147,7 +161,9 @@ void main() {
       stubSettings(_settingsJson());
       when(
         () => apiClient.patch('/settings', body: any(named: 'body')),
-      ).thenThrow(const ApiFailure(code: 'VALIDATION_ERROR', message: 'not loopback'));
+      ).thenThrow(
+        const ApiFailure(code: 'VALIDATION_ERROR', message: 'not loopback'),
+      );
       await load();
 
       controller().setBaseUrl('http://example.com/v1');
@@ -163,29 +179,42 @@ void main() {
       stubSettings(_settingsJson());
       when(
         () => apiClient.patch('/settings', body: any(named: 'body')),
-      ).thenThrow(const ApiFailure(code: 'VALIDATION_ERROR', message: 'not loopback'));
+      ).thenThrow(
+        const ApiFailure(code: 'VALIDATION_ERROR', message: 'not loopback'),
+      );
       await load();
 
       controller().setBaseUrl('http://example.com/v1');
       await Future<void>.delayed(settingsPatchDebounce * 2);
-      expect(container.read(settingsControllerProvider).value!.baseUrlError, isNotNull);
+      expect(
+        container.read(settingsControllerProvider).value!.baseUrlError,
+        isNotNull,
+      );
 
       controller().setBaseUrl('http://127.0.0.1:11434/v1');
 
-      expect(container.read(settingsControllerProvider).value!.baseUrlError, isNull);
+      expect(
+        container.read(settingsControllerProvider).value!.baseUrlError,
+        isNull,
+      );
     });
 
     test('a threshold rejection does not land on the address field', () async {
       stubSettings(_settingsJson());
       when(
         () => apiClient.patch('/settings', body: any(named: 'body')),
-      ).thenThrow(const ApiFailure(code: 'VALIDATION_ERROR', message: 'out of range'));
+      ).thenThrow(
+        const ApiFailure(code: 'VALIDATION_ERROR', message: 'out of range'),
+      );
       await load();
 
       controller().setThresholdPercent(50);
       await Future<void>.delayed(settingsPatchDebounce * 2);
 
-      expect(container.read(settingsControllerProvider).value!.baseUrlError, isNull);
+      expect(
+        container.read(settingsControllerProvider).value!.baseUrlError,
+        isNull,
+      );
     });
   });
 
@@ -206,27 +235,33 @@ void main() {
 
       final body =
           verify(
-                () => apiClient.patch('/settings', body: captureAny(named: 'body')),
+                () => apiClient.patch(
+                  '/settings',
+                  body: captureAny(named: 'body'),
+                ),
               ).captured.single
               as Map<String, dynamic>;
       expect(body['confidence_threshold'], 0.45);
     });
 
-    test('a threshold round-trips through both conversions unchanged', () async {
-      stubSettings(_settingsJson(threshold: 0.8));
-      await load();
+    test(
+      'a threshold round-trips through both conversions unchanged',
+      () async {
+        stubSettings(_settingsJson(threshold: 0.8));
+        await load();
 
-      for (final percent in [0, 33, 50, 80, 100]) {
-        final settings = UserSettings(
-          aiEnabled: true,
-          inferenceBaseUrl: 'http://127.0.0.1:11434/v1',
-          modelTag: null,
-          confidenceThreshold: UserSettings.thresholdFromPercent(percent),
-        );
-        expect(settings.confidenceThresholdPercent, percent);
-        expect(settings.confidenceThreshold, inInclusiveRange(0, 1));
-      }
-    });
+        for (final percent in [0, 33, 50, 80, 100]) {
+          final settings = UserSettings(
+            aiEnabled: true,
+            inferenceBaseUrl: 'http://127.0.0.1:11434/v1',
+            modelTag: null,
+            confidenceThreshold: UserSettings.thresholdFromPercent(percent),
+          );
+          expect(settings.confidenceThresholdPercent, percent);
+          expect(settings.confidenceThreshold, inInclusiveRange(0, 1));
+        }
+      },
+    );
   });
 
   group('opting in and out', () {
@@ -244,34 +279,41 @@ void main() {
       expect(state.models, isNotEmpty);
     });
 
-    test('turning it off drops the connection rather than keeping it green', () async {
-      stubSettings(_settingsJson(aiEnabled: true));
-      stubHealth(_healthJson());
-      stubPatch(_settingsJson());
-      final loaded = await load();
-      expect(loaded.connection, InferenceConnection.reachable);
+    test(
+      'turning it off drops the connection rather than keeping it green',
+      () async {
+        stubSettings(_settingsJson(aiEnabled: true));
+        stubHealth(_healthJson());
+        stubPatch(_settingsJson());
+        final loaded = await load();
+        expect(loaded.connection, InferenceConnection.reachable);
 
-      await controller().setAiEnabled(false);
+        await controller().setAiEnabled(false);
 
-      final state = container.read(settingsControllerProvider).value!;
-      expect(state.settings.aiEnabled, isFalse);
-      expect(state.connection, InferenceConnection.disabled);
-      expect(state.models, isEmpty);
-    });
+        final state = container.read(settingsControllerProvider).value!;
+        expect(state.settings.aiEnabled, isFalse);
+        expect(state.connection, InferenceConnection.disabled);
+        expect(state.models, isEmpty);
+      },
+    );
   });
 
   group('explicit test button', () {
     test('flushes a pending edit first, so it probes what was typed', () async {
       stubSettings(_settingsJson(aiEnabled: true));
       stubHealth(_healthJson(reachable: false, models: []));
-      stubPatch(_settingsJson(aiEnabled: true, baseUrl: 'http://127.0.0.1:8080/v1'));
+      stubPatch(
+        _settingsJson(aiEnabled: true, baseUrl: 'http://127.0.0.1:8080/v1'),
+      );
       await load();
 
       controller().setBaseUrl('http://127.0.0.1:8080/v1');
       stubHealth(_healthJson());
       await controller().probe();
 
-      verify(() => apiClient.patch('/settings', body: any(named: 'body'))).called(1);
+      verify(
+        () => apiClient.patch('/settings', body: any(named: 'body')),
+      ).called(1);
       expect(
         container.read(settingsControllerProvider).value!.connection,
         InferenceConnection.reachable,

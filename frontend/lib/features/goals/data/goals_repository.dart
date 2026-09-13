@@ -35,7 +35,9 @@ class GoalsRepository {
               query: {if (status != null) 'status': status.wireValue},
             )
             as List<dynamic>;
-    return json.map((entry) => _parseGoal(entry as Map<String, dynamic>)).toList();
+    return json
+        .map((entry) => _parseGoal(entry as Map<String, dynamic>))
+        .toList();
   }
 
   Future<Goal> create({
@@ -92,7 +94,8 @@ class GoalsRepository {
 
   /// One goal's allocation history, newest first.
   Future<List<GoalAllocation>> listAllocations(String goalId) async {
-    final json = await _apiClient.get('/goals/$goalId/allocations') as List<dynamic>;
+    final json =
+        await _apiClient.get('/goals/$goalId/allocations') as List<dynamic>;
     return json
         .map((entry) => _parseAllocation(entry as Map<String, dynamic>))
         .toList();
@@ -140,7 +143,8 @@ class GoalsRepository {
     ];
   }
 
-  String? _isoOrNull(DateTime? date) => date == null ? null : _isoDate.format(date);
+  String? _isoOrNull(DateTime? date) =>
+      date == null ? null : _isoDate.format(date);
 
   Goal _parseGoal(Map<String, dynamic> json) => Goal(
     id: json['id'] as String,

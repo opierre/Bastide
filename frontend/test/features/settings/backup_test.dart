@@ -28,7 +28,8 @@ class FakeBackupFiles implements BackupFiles {
   Future<String?> chooseSaveLocation(String suggestedName) async => savePath;
 
   @override
-  Future<void> write(String path, Uint8List bytes) async => written[path] = bytes;
+  Future<void> write(String path, Uint8List bytes) async =>
+      written[path] = bytes;
 
   @override
   Future<({String name, Uint8List bytes})?> pick() async => picked;
@@ -36,7 +37,10 @@ class FakeBackupFiles implements BackupFiles {
 
 final _exportedAt = DateTime.utc(2026, 9, 11, 12, 32);
 
-Map<String, dynamic> _summaryJson({int transactions = 1284, int accounts = 4}) => {
+Map<String, dynamic> _summaryJson({
+  int transactions = 1284,
+  int accounts = 4,
+}) => {
   'format_version': 1,
   'app_version': '0.1.0',
   'exported_at': _exportedAt.toIso8601String(),
@@ -76,7 +80,9 @@ void main() {
   setUp(() {
     apiClient = MockApiClient();
     files = FakeBackupFiles();
-    when(() => apiClient.get('/settings')).thenAnswer((_) async => _settingsJson());
+    when(
+      () => apiClient.get('/settings'),
+    ).thenAnswer((_) async => _settingsJson());
   });
 
   void stubExport() {
@@ -120,22 +126,30 @@ void main() {
       addTearDown(container.dispose);
     });
 
-    BackupController controller() => container.read(backupControllerProvider.notifier);
+    BackupController controller() =>
+        container.read(backupControllerProvider.notifier);
 
-    test('export writes the archive where the user chose and records the time', () async {
-      stubExport();
-      await container.read(settingsControllerProvider.future);
+    test(
+      'export writes the archive where the user chose and records the time',
+      () async {
+        stubExport();
+        await container.read(settingsControllerProvider.future);
 
-      final summary = await controller().export();
+        final summary = await controller().export();
 
-      expect(summary?.counts.transactions, 1284);
-      expect(files.written, {'C:/sauvegardes/finstride.finstride': _archive});
-      expect(
-        container.read(settingsControllerProvider).value?.settings.lastBackupAt,
-        _exportedAt,
-      );
-      expect(container.read(backupControllerProvider).isExporting, isFalse);
-    });
+        expect(summary?.counts.transactions, 1284);
+        expect(files.written, {'C:/sauvegardes/finstride.finstride': _archive});
+        expect(
+          container
+              .read(settingsControllerProvider)
+              .value
+              ?.settings
+              .lastBackupAt,
+          _exportedAt,
+        );
+        expect(container.read(backupControllerProvider).isExporting, isFalse);
+      },
+    );
 
     test('cancelling the save dialog builds nothing', () async {
       files.savePath = null;
@@ -149,21 +163,27 @@ void main() {
       stubUpload('/backup/inspect', throws: failure('BACKUP_TOO_NEW'));
 
       expect(await controller().pickForRestore(), isNull);
-      expect(container.read(backupControllerProvider).restoreFailure, BackupFailure.tooNew);
+      expect(
+        container.read(backupControllerProvider).restoreFailure,
+        BackupFailure.tooNew,
+      );
     });
 
-    test('a readable file comes back with its summary, and clears a past refusal', () async {
-      files.picked = (name: 'future.finstride', bytes: _archive);
-      stubUpload('/backup/inspect', throws: failure('BACKUP_INVALID'));
-      await controller().pickForRestore();
-      stubUpload('/backup/inspect');
+    test(
+      'a readable file comes back with its summary, and clears a past refusal',
+      () async {
+        files.picked = (name: 'future.finstride', bytes: _archive);
+        stubUpload('/backup/inspect', throws: failure('BACKUP_INVALID'));
+        await controller().pickForRestore();
+        stubUpload('/backup/inspect');
 
-      final pending = await controller().pickForRestore();
+        final pending = await controller().pickForRestore();
 
-      expect(pending?.fileName, 'future.finstride');
-      expect(pending?.summary.counts.accounts, 4);
-      expect(container.read(backupControllerProvider).restoreFailure, isNull);
-    });
+        expect(pending?.fileName, 'future.finstride');
+        expect(pending?.summary.counts.accounts, 4);
+        expect(container.read(backupControllerProvider).restoreFailure, isNull);
+      },
+    );
 
     test('a refused restore surfaces as a typed failure', () async {
       stubUpload('/backup/restore', throws: failure('BACKUP_CONFLICT'));
@@ -176,7 +196,11 @@ void main() {
       expect(
         () => controller().restore(pending),
         throwsA(
-          isA<BackupException>().having((e) => e.failure, 'failure', BackupFailure.conflict),
+          isA<BackupException>().having(
+            (e) => e.failure,
+            'failure',
+            BackupFailure.conflict,
+          ),
         ),
       );
     });
@@ -194,15 +218,17 @@ void main() {
         localizationsDelegates: AppLocalizations.localizationsDelegates,
         supportedLocales: AppLocalizations.supportedLocales,
         home: const Scaffold(
-          body: SingleChildScrollView(child: SizedBox(width: 640, child: BackupCard())),
+          body: SingleChildScrollView(
+            child: SizedBox(width: 640, child: BackupCard()),
+          ),
         ),
       ),
     );
 
     testWidgets('⑤ idle shows the last backup in local time', (tester) async {
-      when(
-        () => apiClient.get('/settings'),
-      ).thenAnswer((_) async => _settingsJson(lastBackupAt: '2026-09-11T12:32:00Z'));
+      when(() => apiClient.get('/settings')).thenAnswer(
+        (_) async => _settingsJson(lastBackupAt: '2026-09-11T12:32:00Z'),
+      );
 
       await tester.pumpWidget(wrap());
       await tester.pumpAndSettle();
@@ -223,9 +249,13 @@ void main() {
       expect(find.text("Aucune sauvegarde pour l'instant."), findsOneWidget);
     });
 
-    testWidgets('⑥ then ⑦: preparing caption, then the toast with counts', (tester) async {
+    testWidgets('⑥ then ⑦: preparing caption, then the toast with counts', (
+      tester,
+    ) async {
       final pending = Completer<ApiBytesResponse>();
-      when(() => apiClient.postForBytes('/backup/export')).thenAnswer((_) => pending.future);
+      when(
+        () => apiClient.postForBytes('/backup/export'),
+      ).thenAnswer((_) => pending.future);
 
       await tester.pumpWidget(wrap());
       await tester.pumpAndSettle();
@@ -249,7 +279,9 @@ void main() {
       await tester.pump(const Duration(seconds: 7));
     });
 
-    testWidgets('⑨ a newer-version file shows the refusal in the card', (tester) async {
+    testWidgets('⑨ a newer-version file shows the refusal in the card', (
+      tester,
+    ) async {
       files.picked = (name: 'future.finstride', bytes: _archive);
       stubUpload('/backup/inspect', throws: failure('BACKUP_TOO_NEW'));
 
@@ -258,13 +290,18 @@ void main() {
       await tester.tap(find.byKey(const Key('settingsBackupRestoreButton')));
       await tester.pumpAndSettle();
 
-      expect(find.byKey(const Key('settingsBackupRestoreError')), findsOneWidget);
+      expect(
+        find.byKey(const Key('settingsBackupRestoreError')),
+        findsOneWidget,
+      );
       expect(find.textContaining('Restauration impossible.'), findsOneWidget);
       expect(find.textContaining('version plus récente'), findsOneWidget);
       expect(find.byKey(const Key('backupConfirmSummary')), findsNothing);
     });
 
-    testWidgets('⑧ confirms with the file summary, then restores', (tester) async {
+    testWidgets('⑧ confirms with the file summary, then restores', (
+      tester,
+    ) async {
       files.picked = (name: 'finstride-2026-09-11.finstride', bytes: _archive);
       stubUpload('/backup/inspect');
       stubUpload('/backup/restore');
@@ -275,7 +312,10 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('Restaurer cette sauvegarde ?'), findsOneWidget);
-      expect(find.textContaining('finstride-2026-09-11.finstride'), findsOneWidget);
+      expect(
+        find.textContaining('finstride-2026-09-11.finstride'),
+        findsOneWidget,
+      );
       expect(find.text('0.1.0'), findsOneWidget);
       expect(find.text('30'), findsOneWidget);
       expect(find.byKey(const Key('backupConfirmWarning')), findsOneWidget);
@@ -297,7 +337,9 @@ void main() {
       await tester.pump(const Duration(seconds: 7));
     });
 
-    testWidgets('a refused restore keeps the modal open with the reason', (tester) async {
+    testWidgets('a refused restore keeps the modal open with the reason', (
+      tester,
+    ) async {
       files.picked = (name: 'x.finstride', bytes: _archive);
       stubUpload('/backup/inspect');
       stubUpload('/backup/restore', throws: failure('BACKUP_RUN_ACTIVE'));
@@ -310,7 +352,10 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.byKey(const Key('backupConfirmError')), findsOneWidget);
-      expect(find.textContaining('catégorisation est en cours'), findsOneWidget);
+      expect(
+        find.textContaining('catégorisation est en cours'),
+        findsOneWidget,
+      );
     });
 
     testWidgets('renders in English', (tester) async {

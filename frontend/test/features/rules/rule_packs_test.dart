@@ -33,7 +33,10 @@ class FakeRulePackFiles implements RulePackFiles {
   Future<String?> pick() async => pickedSource;
 
   @override
-  Future<String?> save({required String suggestedName, required String contents}) async {
+  Future<String?> save({
+    required String suggestedName,
+    required String contents,
+  }) async {
     saved.add((name: suggestedName, contents: contents));
     return savePath;
   }
@@ -79,7 +82,9 @@ Map<String, dynamic> _previewJson({
   ],
 };
 
-Map<String, dynamic> _exportJson({List<Map<String, dynamic>> omitted = const []}) => {
+Map<String, dynamic> _exportJson({
+  List<Map<String, dynamic>> omitted = const [],
+}) => {
   'pack': {
     'format_version': 1,
     'name': 'FinStride rules',
@@ -106,8 +111,12 @@ Widget _wrap(
     overrides: [
       apiClientProvider.overrideWithValue(apiClient),
       rulePackFilesProvider.overrideWithValue(files),
-      rulesControllerProvider.overrideWith(() => rules ?? FakeRulesController()),
-      categoriesControllerProvider.overrideWith(() => FakeCategoriesController()),
+      rulesControllerProvider.overrideWith(
+        () => rules ?? FakeRulesController(),
+      ),
+      categoriesControllerProvider.overrideWith(
+        () => FakeCategoriesController(),
+      ),
     ],
     child: MaterialApp(
       locale: const Locale('fr'),
@@ -131,11 +140,16 @@ void main() {
 
   setUp(() {
     apiClient = MockApiClient();
-    when(
-      () => apiClient.get('/rules/packs/builtin'),
-    ).thenAnswer((_) async => [
-      {'id': 'fr-starter', 'name': 'Commerçants français', 'locale': 'fr', 'rule_count': 12},
-    ]);
+    when(() => apiClient.get('/rules/packs/builtin')).thenAnswer(
+      (_) async => [
+        {
+          'id': 'fr-starter',
+          'name': 'Commerçants français',
+          'locale': 'fr',
+          'rule_count': 12,
+        },
+      ],
+    );
   });
 
   group('parseRulePack', () {
@@ -185,50 +199,55 @@ void main() {
     });
   });
 
-  testWidgets('importing a file always shows the report before writing anything', (
-    tester,
-  ) async {
-    when(
-      () => apiClient.post('/rules/packs/preview', body: any(named: 'body')),
-    ).thenAnswer((_) async => _previewJson());
-    when(
-      () => apiClient.post('/rules/packs/import', body: any(named: 'body')),
-    ).thenAnswer(
-      (_) async => {
-        'created_count': 10,
-        'skipped_count': 2,
-        'unresolved': <String>[],
-        'recategorized_count': 342,
-      },
-    );
+  testWidgets(
+    'importing a file always shows the report before writing anything',
+    (tester) async {
+      when(
+        () => apiClient.post('/rules/packs/preview', body: any(named: 'body')),
+      ).thenAnswer((_) async => _previewJson());
+      when(
+        () => apiClient.post('/rules/packs/import', body: any(named: 'body')),
+      ).thenAnswer(
+        (_) async => {
+          'created_count': 10,
+          'skipped_count': 2,
+          'unresolved': <String>[],
+          'recategorized_count': 342,
+        },
+      );
 
-    final files = FakeRulePackFiles(pickedSource: _packSource());
-    await tester.pumpWidget(_wrap(apiClient, files: files));
-    await tester.pumpAndSettle();
-    await _openRules(tester);
+      final files = FakeRulePackFiles(pickedSource: _packSource());
+      await tester.pumpWidget(_wrap(apiClient, files: files));
+      await tester.pumpAndSettle();
+      await _openRules(tester);
 
-    await tester.tap(find.byKey(const Key('rulePackMenu')));
-    await tester.pumpAndSettle();
-    await tester.tap(find.text('Importer un fichier…'));
-    await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const Key('rulePackMenu')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Importer un fichier…'));
+      await tester.pumpAndSettle();
 
-    // Nothing written yet — the report comes first, always.
-    verifyNever(() => apiClient.post('/rules/packs/import', body: any(named: 'body')));
-    expect(
-      find.text('Ce pack catégoriserait 342 de vos transactions non catégorisées.'),
-      findsOneWidget,
-    );
-    expect(find.text('10'), findsOneWidget);
-    expect(find.text('2'), findsOneWidget);
+      // Nothing written yet — the report comes first, always.
+      verifyNever(
+        () => apiClient.post('/rules/packs/import', body: any(named: 'body')),
+      );
+      expect(
+        find.text(
+          'Ce pack catégoriserait 342 de vos transactions non catégorisées.',
+        ),
+        findsOneWidget,
+      );
+      expect(find.text('10'), findsOneWidget);
+      expect(find.text('2'), findsOneWidget);
 
-    await tester.tap(find.byKey(const Key('rulePackImportConfirm')));
-    await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const Key('rulePackImportConfirm')));
+      await tester.pumpAndSettle();
 
-    verify(
-      () => apiClient.post('/rules/packs/import', body: any(named: 'body')),
-    ).called(1);
-    expect(find.text('10 règles importées'), findsOneWidget);
-  });
+      verify(
+        () => apiClient.post('/rules/packs/import', body: any(named: 'body')),
+      ).called(1);
+      expect(find.text('10 règles importées'), findsOneWidget);
+    },
+  );
 
   testWidgets('a refused pack explains why, and never reaches the backend', (
     tester,
@@ -245,13 +264,17 @@ void main() {
 
     expect(find.byKey(const Key('rulePackRefusal')), findsOneWidget);
     expect(find.textContaining('regex'), findsWidgets);
-    verifyNever(() => apiClient.post('/rules/packs/preview', body: any(named: 'body')));
+    verifyNever(
+      () => apiClient.post('/rules/packs/preview', body: any(named: 'body')),
+    );
   });
 
   testWidgets('an unsupported version explains the version this build reads', (
     tester,
   ) async {
-    final files = FakeRulePackFiles(pickedSource: _packSource(formatVersion: 7));
+    final files = FakeRulePackFiles(
+      pickedSource: _packSource(formatVersion: 7),
+    );
     await tester.pumpWidget(_wrap(apiClient, files: files));
     await tester.pumpAndSettle();
     await _openRules(tester);
@@ -264,53 +287,56 @@ void main() {
     expect(find.textContaining('la version 1'), findsOneWidget);
   });
 
-  testWidgets('export shows the pack contents and the omission report before saving', (
+  testWidgets(
+    'export shows the pack contents and the omission report before saving',
+    (tester) async {
+      when(
+        () => apiClient.get('/rules/packs/export', query: any(named: 'query')),
+      ).thenAnswer(
+        (_) async => _exportJson(
+          omitted: [
+            {'rule_id': 'r9', 'pattern': '^CB .*AMAZON', 'reason': 'regex'},
+          ],
+        ),
+      );
+
+      final files = FakeRulePackFiles();
+      await tester.pumpWidget(_wrap(apiClient, files: files));
+      await tester.pumpAndSettle();
+      await _openRules(tester);
+
+      await tester.tap(find.byKey(const Key('rulePackMenu')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Exporter mes règles…'));
+      await tester.pumpAndSettle();
+
+      // The contents, verbatim — including the pattern that carries a name.
+      expect(find.byKey(const Key('rulePackExportPreview')), findsOneWidget);
+      // Scoped to the preview: the privacy notice quotes the same label as its
+      // example, which is the point of the example but not what this asserts.
+      expect(
+        find.descendant(
+          of: find.byKey(const Key('rulePackExportPreview')),
+          matching: find.textContaining('VIR SALAIRE DUPONT'),
+        ),
+        findsOneWidget,
+      );
+      expect(find.byKey(const Key('rulePackPrivacyNotice')), findsOneWidget);
+      expect(find.byKey(const Key('rulePackOmitted-r9')), findsOneWidget);
+      expect(files.saved, isEmpty);
+
+      await tester.tap(find.byKey(const Key('rulePackExportSave')));
+      await tester.pumpAndSettle();
+
+      expect(files.saved, hasLength(1));
+      expect(files.saved.single.name, 'FinStride-rules.json');
+      expect(files.saved.single.contents, contains('VIR SALAIRE DUPONT'));
+    },
+  );
+
+  testWidgets('the rules empty state offers the bundled French pack', (
     tester,
   ) async {
-    when(
-      () => apiClient.get('/rules/packs/export', query: any(named: 'query')),
-    ).thenAnswer(
-      (_) async => _exportJson(
-        omitted: [
-          {'rule_id': 'r9', 'pattern': '^CB .*AMAZON', 'reason': 'regex'},
-        ],
-      ),
-    );
-
-    final files = FakeRulePackFiles();
-    await tester.pumpWidget(_wrap(apiClient, files: files));
-    await tester.pumpAndSettle();
-    await _openRules(tester);
-
-    await tester.tap(find.byKey(const Key('rulePackMenu')));
-    await tester.pumpAndSettle();
-    await tester.tap(find.text('Exporter mes règles…'));
-    await tester.pumpAndSettle();
-
-    // The contents, verbatim — including the pattern that carries a name.
-    expect(find.byKey(const Key('rulePackExportPreview')), findsOneWidget);
-    // Scoped to the preview: the privacy notice quotes the same label as its
-    // example, which is the point of the example but not what this asserts.
-    expect(
-      find.descendant(
-        of: find.byKey(const Key('rulePackExportPreview')),
-        matching: find.textContaining('VIR SALAIRE DUPONT'),
-      ),
-      findsOneWidget,
-    );
-    expect(find.byKey(const Key('rulePackPrivacyNotice')), findsOneWidget);
-    expect(find.byKey(const Key('rulePackOmitted-r9')), findsOneWidget);
-    expect(files.saved, isEmpty);
-
-    await tester.tap(find.byKey(const Key('rulePackExportSave')));
-    await tester.pumpAndSettle();
-
-    expect(files.saved, hasLength(1));
-    expect(files.saved.single.name, 'FinStride-rules.json');
-    expect(files.saved.single.contents, contains('VIR SALAIRE DUPONT'));
-  });
-
-  testWidgets('the rules empty state offers the bundled French pack', (tester) async {
     when(
       () => apiClient.post('/rules/packs/preview', body: any(named: 'body')),
     ).thenAnswer((_) async => _previewJson());

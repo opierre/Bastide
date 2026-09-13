@@ -95,7 +95,10 @@ class ApiClient {
     final streamed = await _httpClient.send(request);
     final response = await http.Response.fromStream(streamed);
     if (response.statusCode >= 400) _decode(response);
-    return ApiBytesResponse(bytes: response.bodyBytes, headers: response.headers);
+    return ApiBytesResponse(
+      bytes: response.bodyBytes,
+      headers: response.headers,
+    );
   }
 
   Future<dynamic> _send(

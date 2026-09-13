@@ -46,7 +46,11 @@ class SeriesDetailView extends ConsumerWidget {
           child: TextButton.icon(
             key: const Key('seriesDetailBack'),
             onPressed: () => ref.read(selectedSeriesProvider.notifier).close(),
-            icon: const Icon(Icons.arrow_back_rounded, size: 16, color: AppColors.iris),
+            icon: const Icon(
+              Icons.arrow_back_rounded,
+              size: 16,
+              color: AppColors.iris,
+            ),
             label: Text(
               l10n.subscriptionDetailBack,
               style: Theme.of(
@@ -99,7 +103,8 @@ class _DetailBody extends ConsumerWidget {
       key: const Key('seriesDetailContent'),
       children: [
         _HeaderCard(series: series, accountName: accountName),
-        if (series.priceChangedAt case final changedAt? when annual != null) ...[
+        if (series.priceChangedAt case final changedAt?
+            when annual != null) ...[
           const SizedBox(height: AppSpacing.gridGap),
           InlineBanner(
             key: const Key('seriesIncreaseBanner'),
@@ -188,10 +193,15 @@ class _HeaderCard extends ConsumerWidget {
                   // one who typed it in.
                   series.isManual
                       ? l10n.subscriptionDetailTrackedSince(accountName, since)
-                      : l10n.subscriptionDetailDetectedSince(accountName, since),
+                      : l10n.subscriptionDetailDetectedSince(
+                          accountName,
+                          since,
+                        ),
                   key: const Key('seriesDetailSubline'),
                   overflow: TextOverflow.ellipsis,
-                  style: textTheme.bodySmall?.copyWith(color: AppColors.textSecondary),
+                  style: textTheme.bodySmall?.copyWith(
+                    color: AppColors.textSecondary,
+                  ),
                 ),
               ],
             ),
@@ -199,7 +209,10 @@ class _HeaderCard extends ConsumerWidget {
           const SizedBox(width: AppSpacing.md),
           _Stat(
             label: l10n.subscriptionDetailCadence,
-            child: Text(cadenceLabel(l10n, series.cadence), style: textTheme.titleSmall),
+            child: Text(
+              cadenceLabel(l10n, series.cadence),
+              style: textTheme.titleSmall,
+            ),
           ),
           const SizedBox(width: AppSpacing.lg),
           _Stat(
@@ -279,11 +292,16 @@ class _HistoryCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Text(l10n.subscriptionDetailHistoryTitle, style: textTheme.titleMedium),
+          Text(
+            l10n.subscriptionDetailHistoryTitle,
+            style: textTheme.titleMedium,
+          ),
           const SizedBox(height: 3),
           Text(
             l10n.subscriptionDetailHistorySubtitle(accountName),
-            style: textTheme.bodySmall?.copyWith(color: AppColors.textSecondary),
+            style: textTheme.bodySmall?.copyWith(
+              color: AppColors.textSecondary,
+            ),
           ),
           const SizedBox(height: AppSpacing.md),
           if (detail.occurrences.isEmpty)
@@ -310,7 +328,11 @@ class _HistoryCard extends StatelessWidget {
                   key: Key('seriesOccurrenceChange-${stepped.id}'),
                   tone: StatusPillTone.warning,
                   label: l10n.subscriptionDetailChange(
-                    _money(series.previousAmountMinor!, series.currency, locale),
+                    _money(
+                      series.previousAmountMinor!,
+                      series.currency,
+                      locale,
+                    ),
                     _money(series.expectedAmountMinor, series.currency, locale),
                   ),
                 ),
@@ -326,7 +348,9 @@ class _HistoryCard extends StatelessWidget {
   /// never stepped — or when the change predates the occurrences on hand.
   SeriesOccurrence? _steppedUpOccurrence() {
     final changedAt = detail.series.priceChangedAt;
-    if (changedAt == null || detail.series.previousAmountMinor == null) return null;
+    if (changedAt == null || detail.series.previousAmountMinor == null) {
+      return null;
+    }
     return detail.occurrences
         .where((occurrence) => _sameDay(occurrence.bookedDate, changedAt))
         .firstOrNull;
@@ -338,5 +362,8 @@ class _HistoryCard extends StatelessWidget {
 
 /// A price as the panel states one: unsigned, because it is what the
 /// subscription costs rather than a movement on the ledger.
-String _money(int amountMinor, String currency, String locale) =>
-    formatAmount(amountMinor: amountMinor.abs(), currency: currency, locale: locale);
+String _money(int amountMinor, String currency, String locale) => formatAmount(
+  amountMinor: amountMinor.abs(),
+  currency: currency,
+  locale: locale,
+);

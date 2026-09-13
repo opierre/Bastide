@@ -26,9 +26,13 @@ class BackupCard extends ConsumerWidget {
 
   Future<void> _export(BuildContext context, WidgetRef ref) async {
     final l10n = AppLocalizations.of(context)!;
-    final number = NumberFormat.decimalPattern(Localizations.localeOf(context).toString());
+    final number = NumberFormat.decimalPattern(
+      Localizations.localeOf(context).toString(),
+    );
     try {
-      final summary = await ref.read(backupControllerProvider.notifier).export();
+      final summary = await ref
+          .read(backupControllerProvider.notifier)
+          .export();
       if (summary == null || !context.mounted) return;
       final counts = summary.counts;
       showAppToast(
@@ -42,12 +46,18 @@ class BackupCard extends ConsumerWidget {
       );
     } catch (_) {
       if (!context.mounted) return;
-      showAppToast(context, title: l10n.settingsBackupExportFailed, tone: BannerTone.error);
+      showAppToast(
+        context,
+        title: l10n.settingsBackupExportFailed,
+        tone: BannerTone.error,
+      );
     }
   }
 
   Future<void> _restore(BuildContext context, WidgetRef ref) async {
-    final pending = await ref.read(backupControllerProvider.notifier).pickForRestore();
+    final pending = await ref
+        .read(backupControllerProvider.notifier)
+        .pickForRestore();
     if (pending == null || !context.mounted) return;
     await showDialog<void>(
       context: context,
@@ -76,7 +86,9 @@ class BackupCard extends ConsumerWidget {
           const SizedBox(height: 2),
           Text(
             l10n.settingsBackupSubtitle,
-            style: textTheme.bodyMedium?.copyWith(color: AppColors.textSecondary),
+            style: textTheme.bodyMedium?.copyWith(
+              color: AppColors.textSecondary,
+            ),
           ),
           const SizedBox(height: AppSpacing.md),
           _ExportPlate(
@@ -99,7 +111,10 @@ class BackupCard extends ConsumerWidget {
                     ),
               key: const Key('settingsBackupLast'),
               style: tabularNumberStyle(
-                AppTextStyles.helper.copyWith(fontSize: 11.5, color: AppColors.textDisabled),
+                AppTextStyles.helper.copyWith(
+                  fontSize: 11.5,
+                  color: AppColors.textDisabled,
+                ),
               ),
             ),
           ],
@@ -170,7 +185,11 @@ class _ExportPlate extends StatelessWidget {
               color: AppColors.irisSoft,
               borderRadius: BorderRadius.circular(AppRadii.md),
             ),
-            child: const Icon(Icons.file_download_outlined, size: 18, color: AppColors.iris),
+            child: const Icon(
+              Icons.file_download_outlined,
+              size: 18,
+              color: AppColors.iris,
+            ),
           ),
           const SizedBox(width: AppSpacing.sm + AppSpacing.xs),
           Expanded(
@@ -190,7 +209,9 @@ class _ExportPlate extends StatelessWidget {
                       ? l10n.settingsBackupExportPreparing
                       : l10n.settingsBackupExportCaption,
                   key: const Key('settingsBackupExportCaption'),
-                  style: AppTextStyles.helper.copyWith(color: AppColors.textSecondary),
+                  style: AppTextStyles.helper.copyWith(
+                    color: AppColors.textSecondary,
+                  ),
                 ),
               ],
             ),
@@ -201,7 +222,9 @@ class _ExportPlate extends StatelessWidget {
           if (isExporting)
             MouseRegion(
               cursor: SystemMouseCursors.forbidden,
-              child: IgnorePointer(child: Opacity(opacity: 0.55, child: button)),
+              child: IgnorePointer(
+                child: Opacity(opacity: 0.55, child: button),
+              ),
             )
           else
             button,
@@ -238,7 +261,9 @@ class _RestoreRow extends StatelessWidget {
               const SizedBox(height: 2),
               Text(
                 l10n.settingsBackupRestoreSubtitle,
-                style: AppTextStyles.helper.copyWith(color: AppColors.textSecondary),
+                style: AppTextStyles.helper.copyWith(
+                  color: AppColors.textSecondary,
+                ),
               ),
             ],
           ),
@@ -262,4 +287,3 @@ class _RestoreRow extends StatelessWidget {
     );
   }
 }
-

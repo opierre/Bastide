@@ -12,7 +12,10 @@ import 'user_data_reload.dart';
 /// The extension a backup is written and read as.
 const backupExtension = 'finstride';
 
-const _typeGroup = XTypeGroup(label: 'FinStride backup', extensions: [backupExtension]);
+const _typeGroup = XTypeGroup(
+  label: 'FinStride backup',
+  extensions: [backupExtension],
+);
 
 /// Reads and writes backup files. Behind a provider so tests drive export and
 /// restore without a platform channel — the same seam as `RulePackFiles`.
@@ -68,7 +71,9 @@ class BackupState {
   }) => BackupState(
     isExporting: isExporting ?? this.isExporting,
     isPicking: isPicking ?? this.isPicking,
-    restoreFailure: clearFailure ? null : (restoreFailure ?? this.restoreFailure),
+    restoreFailure: clearFailure
+        ? null
+        : (restoreFailure ?? this.restoreFailure),
   );
 }
 
@@ -98,8 +103,12 @@ class BackupController extends Notifier<BackupState> {
     state = state.copyWith(isExporting: true);
     try {
       final export = await ref.read(backupRepositoryProvider).export();
-      await ref.read(backupFilesProvider).write(_withExtension(path), export.bytes);
-      ref.read(settingsControllerProvider.notifier).recordBackup(export.summary.exportedAt);
+      await ref
+          .read(backupFilesProvider)
+          .write(_withExtension(path), export.bytes);
+      ref
+          .read(settingsControllerProvider.notifier)
+          .recordBackup(export.summary.exportedAt);
       return export.summary;
     } finally {
       state = state.copyWith(isExporting: false);
@@ -117,9 +126,15 @@ class BackupController extends Notifier<BackupState> {
       final summary = await ref
           .read(backupRepositoryProvider)
           .inspect(picked.name, picked.bytes);
-      return PendingRestore(fileName: picked.name, bytes: picked.bytes, summary: summary);
+      return PendingRestore(
+        fileName: picked.name,
+        bytes: picked.bytes,
+        summary: summary,
+      );
     } on ApiFailure catch (failure) {
-      state = state.copyWith(restoreFailure: BackupFailure.fromCode(failure.code));
+      state = state.copyWith(
+        restoreFailure: BackupFailure.fromCode(failure.code),
+      );
       return null;
     } catch (_) {
       state = state.copyWith(restoreFailure: BackupFailure.unknown);
@@ -155,9 +170,10 @@ class BackupController extends Notifier<BackupState> {
   }
 
   static String _withExtension(String path) =>
-      path.toLowerCase().endsWith('.$backupExtension') ? path : '$path.$backupExtension';
+      path.toLowerCase().endsWith('.$backupExtension')
+      ? path
+      : '$path.$backupExtension';
 }
 
-final backupControllerProvider = NotifierProvider<BackupController, BackupState>(
-  BackupController.new,
-);
+final backupControllerProvider =
+    NotifierProvider<BackupController, BackupState>(BackupController.new);

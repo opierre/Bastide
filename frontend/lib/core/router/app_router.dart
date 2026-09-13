@@ -69,8 +69,14 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       return null;
     },
     routes: [
-      GoRoute(path: LoginScreen.path, builder: (context, state) => const LoginScreen()),
-      GoRoute(path: RegisterScreen.path, builder: (context, state) => const RegisterScreen()),
+      GoRoute(
+        path: LoginScreen.path,
+        builder: (context, state) => const LoginScreen(),
+      ),
+      GoRoute(
+        path: RegisterScreen.path,
+        builder: (context, state) => const RegisterScreen(),
+      ),
       ShellRoute(
         builder: (context, state, child) {
           return AppShell(

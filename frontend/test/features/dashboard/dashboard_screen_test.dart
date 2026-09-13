@@ -34,7 +34,10 @@ DashboardState _state({
   recent: recent ?? specRecent(),
 );
 
-Widget _wrap({required DashboardState state, Locale locale = const Locale('fr')}) {
+Widget _wrap({
+  required DashboardState state,
+  Locale locale = const Locale('fr'),
+}) {
   return ProviderScope(
     overrides: [
       dashboardControllerProvider.overrideWith(
@@ -190,27 +193,38 @@ void main() {
       expect(ring.value, closeTo(0.223, 0.0001));
       expect(ring.backgroundColor, AppColors.surfaceHover);
       expect(ring.valueColor?.value, AppColors.iris);
-      expect(tester.widget<Text>(find.text('+1,9 pt')).style?.color, AppColors.positive);
+      expect(
+        tester.widget<Text>(find.text('+1,9 pt')).style?.color,
+        AppColors.positive,
+      );
 
       // The label is iris rather than the gray every other stat label takes.
       expect(
-        tester.widget<Text>(find.text('Taux d\'épargne'.toUpperCase())).style?.color,
+        tester
+            .widget<Text>(find.text('Taux d\'épargne'.toUpperCase()))
+            .style
+            ?.color,
         AppColors.iris,
       );
     },
   );
 
-  testWidgets('the savings caption frames a missed goal as progress, not shortfall', (
+  testWidgets(
+    'the savings caption frames a missed goal as progress, not shortfall',
+    (tester) async {
+      _useDesktopSurface(tester);
+      await tester.pumpWidget(
+        _wrap(state: _state(summary: specSummary(savingsRate: 0.118))),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('Objectif : 20 % · en cours'), findsOneWidget);
+    },
+  );
+
+  testWidgets('row 1 lays the four cards out on the spec 1:1:1:1.35 grid', (
     tester,
   ) async {
-    _useDesktopSurface(tester);
-    await tester.pumpWidget(_wrap(state: _state(summary: specSummary(savingsRate: 0.118))));
-    await tester.pumpAndSettle();
-
-    expect(find.text('Objectif : 20 % · en cours'), findsOneWidget);
-  });
-
-  testWidgets('row 1 lays the four cards out on the spec 1:1:1:1.35 grid', (tester) async {
     _useDesktopSurface(tester);
     await tester.pumpWidget(_wrap(state: _state()));
     await tester.pumpAndSettle();
@@ -220,12 +234,17 @@ void main() {
     final savingsWidth = tester.getSize(find.byType(SavingsRateCard)).width;
 
     for (var i = 1; i < 3; i++) {
-      expect(tester.getSize(find.byType(StatCard).at(i)).width, closeTo(statWidth, 0.5));
+      expect(
+        tester.getSize(find.byType(StatCard).at(i)).width,
+        closeTo(statWidth, 0.5),
+      );
     }
     expect(savingsWidth / statWidth, closeTo(1.35, 0.01));
   });
 
-  testWidgets('renders stat cards with formatted values for en', (tester) async {
+  testWidgets('renders stat cards with formatted values for en', (
+    tester,
+  ) async {
     _useDesktopSurface(tester);
     await tester.pumpWidget(_wrap(state: _state(), locale: const Locale('en')));
     await tester.pumpAndSettle();
@@ -272,13 +291,23 @@ void main() {
       'Santé',
     ];
     for (final name in expected) {
-      expect(find.text(name), findsOneWidget, reason: '$name missing from the legend');
+      expect(
+        find.text(name),
+        findsOneWidget,
+        reason: '$name missing from the legend',
+      );
     }
 
     // Descending by amount, top to bottom — the donut is drawn in the same order.
-    final tops = [for (final name in expected) tester.getTopLeft(find.text(name)).dy];
+    final tops = [
+      for (final name in expected) tester.getTopLeft(find.text(name)).dy,
+    ];
     for (var i = 1; i < tops.length; i++) {
-      expect(tops[i], greaterThan(tops[i - 1]), reason: '${expected[i]} is out of order');
+      expect(
+        tops[i],
+        greaterThan(tops[i - 1]),
+        reason: '${expected[i]} is out of order',
+      );
     }
 
     // Shares carry one decimal — rounding to whole percent would collapse the tail.
@@ -286,60 +315,68 @@ void main() {
     expect(find.text('2,8 %'), findsOneWidget);
   });
 
-  testWidgets('the donut is drawn at the spec\'s r80 / stroke 24 and centres the total', (
-    tester,
-  ) async {
-    _useDesktopSurface(tester);
-    await tester.pumpWidget(_wrap(state: _state()));
-    await tester.pumpAndSettle();
+  testWidgets(
+    'the donut is drawn at the spec\'s r80 / stroke 24 and centres the total',
+    (tester) async {
+      _useDesktopSurface(tester);
+      await tester.pumpWidget(_wrap(state: _state()));
+      await tester.pumpAndSettle();
 
-    expect(CategoryDonut.radius, 80);
-    expect(CategoryDonut.stroke, 24);
-    expect(CategoryDonut.gap, 3);
-    expect(tester.getSize(find.byType(CategoryDonut)), const Size(212, 212));
+      expect(CategoryDonut.radius, 80);
+      expect(CategoryDonut.stroke, 24);
+      expect(CategoryDonut.gap, 3);
+      expect(tester.getSize(find.byType(CategoryDonut)), const Size(212, 212));
 
-    // The centre is the month's expense total as a neutral figure, over its caption.
-    expect(
-      find.text(formatAmount(amountMinor: 221435, currency: 'EUR', locale: 'fr')),
-      findsOneWidget,
-    );
-    expect(find.text('dépensés'), findsOneWidget);
-    expect(find.text('Mai 2026 · 7 catégories'), findsOneWidget);
-  });
+      // The centre is the month's expense total as a neutral figure, over its caption.
+      expect(
+        find.text(
+          formatAmount(amountMinor: 221435, currency: 'EUR', locale: 'fr'),
+        ),
+        findsOneWidget,
+      );
+      expect(find.text('dépensés'), findsOneWidget);
+      expect(find.text('Mai 2026 · 7 catégories'), findsOneWidget);
+    },
+  );
 
-  testWidgets('the savings line heads with the running total and the latest month\'s step', (
-    tester,
-  ) async {
-    _useDesktopSurface(tester);
-    await tester.pumpWidget(_wrap(state: _state()));
-    await tester.pumpAndSettle();
+  testWidgets(
+    'the savings line heads with the running total and the latest month\'s step',
+    (tester) async {
+      _useDesktopSurface(tester);
+      await tester.pumpWidget(_wrap(state: _state()));
+      await tester.pumpAndSettle();
 
-    expect(find.text('Évolution de l\'épargne'), findsOneWidget);
-    expect(find.text('Épargne cumulée · 6 mois'), findsOneWidget);
-    expect(
-      find.descendant(
-        of: find.byKey(const Key('dashboardTotalSaved')),
-        matching: find.text(formatAmount(amountMinor: 1084000, currency: 'EUR', locale: 'fr')),
-      ),
-      findsOneWidget,
-    );
+      expect(find.text('Évolution de l\'épargne'), findsOneWidget);
+      expect(find.text('Épargne cumulée · 6 mois'), findsOneWidget);
+      expect(
+        find.descendant(
+          of: find.byKey(const Key('dashboardTotalSaved')),
+          matching: find.text(
+            formatAmount(amountMinor: 1084000, currency: 'EUR', locale: 'fr'),
+          ),
+        ),
+        findsOneWidget,
+      );
 
-    // The step into May is May's net, and it is green because it is positive.
-    final delta = tester.widget<Text>(find.byKey(const Key('dashboardSavingsDelta')));
-    final may = formatAmount(
-      amountMinor: 63565,
-      currency: 'EUR',
-      locale: 'fr',
-      showPositiveSign: true,
-    );
-    expect(delta.data, '$may en mai');
-    expect(delta.style?.color, AppColors.positive);
+      // The step into May is May's net, and it is green because it is positive.
+      final delta = tester.widget<Text>(
+        find.byKey(const Key('dashboardSavingsDelta')),
+      );
+      final may = formatAmount(
+        amountMinor: 63565,
+        currency: 'EUR',
+        locale: 'fr',
+        showPositiveSign: true,
+      );
+      expect(delta.data, '$may en mai');
+      expect(delta.style?.color, AppColors.positive);
 
-    // Six points, labelled Déc. → Mai.
-    final area = tester.widget<AreaLine>(find.byType(AreaLine));
-    expect(area.values, hasLength(6));
-    expect(area.labels, ['Déc.', 'Janv.', 'Févr.', 'Mars', 'Avr.', 'Mai']);
-  });
+      // Six points, labelled Déc. → Mai.
+      final area = tester.widget<AreaLine>(find.byType(AreaLine));
+      expect(area.values, hasLength(6));
+      expect(area.labels, ['Déc.', 'Janv.', 'Févr.', 'Mars', 'Avr.', 'Mai']);
+    },
+  );
 
   testWidgets('the donut shrinks with the window instead of crowding its card', (
     tester,
@@ -358,7 +395,9 @@ void main() {
     expect(donut.width, greaterThanOrEqualTo(96.0));
     expect(
       donut.height,
-      lessThanOrEqualTo(tester.getSize(find.byType(CategoryBreakdownChart)).height),
+      lessThanOrEqualTo(
+        tester.getSize(find.byType(CategoryBreakdownChart)).height,
+      ),
     );
 
     // The legend keeps its figures — shrinking the donut is what buys them the room.
@@ -436,24 +475,28 @@ void main() {
     }
   });
 
-  testWidgets('the current month\'s bar label is primary, earlier months recede', (
+  testWidgets(
+    'the current month\'s bar label is primary, earlier months recede',
+    (tester) async {
+      _useDesktopSurface(tester);
+      await tester.pumpWidget(_wrap(state: _state()));
+      await tester.pumpAndSettle();
+
+      final bars = find.byType(IncomeVsExpenseChart);
+      Text label(String month) => tester.widget<Text>(
+        find.descendant(of: bars, matching: find.text(month)),
+      );
+
+      expect(label('Mai').style?.color, AppColors.textPrimary);
+      for (final month in ['Févr.', 'Mars', 'Avr.']) {
+        expect(label(month).style?.color, AppColors.textSecondary);
+      }
+    },
+  );
+
+  testWidgets('hovering a bar names that month\'s income and expense', (
     tester,
   ) async {
-    _useDesktopSurface(tester);
-    await tester.pumpWidget(_wrap(state: _state()));
-    await tester.pumpAndSettle();
-
-    final bars = find.byType(IncomeVsExpenseChart);
-    Text label(String month) =>
-        tester.widget<Text>(find.descendant(of: bars, matching: find.text(month)));
-
-    expect(label('Mai').style?.color, AppColors.textPrimary);
-    for (final month in ['Févr.', 'Mars', 'Avr.']) {
-      expect(label(month).style?.color, AppColors.textSecondary);
-    }
-  });
-
-  testWidgets('hovering a bar names that month\'s income and expense', (tester) async {
     _useDesktopSurface(tester);
     await tester.pumpWidget(_wrap(state: _state()));
     await tester.pumpAndSettle();
@@ -479,45 +522,56 @@ void main() {
     );
     expect(
       text,
-      contains(formatAmount(amountMinor: -221435, currency: 'EUR', locale: 'fr')),
-    );
-  });
-
-  testWidgets('the activity list is the compact variant: no chip, amount over date', (
-    tester,
-  ) async {
-    _useDesktopSurface(tester);
-    await tester.pumpWidget(_wrap(state: _state()));
-    await tester.pumpAndSettle();
-
-    expect(find.text('Activité récente'), findsOneWidget);
-    expect(find.byType(CompactTransactionRow), findsNWidgets(4));
-    // The compact variant deliberately drops the category chip the 52px row carries.
-    expect(find.byType(CategoryChip), findsNothing);
-
-    for (final row in ['Carrefour', 'Novatech SARL', 'SNCF Connect', 'Free Mobile']) {
-      expect(find.text(row), findsOneWidget);
-    }
-    expect(find.text('BNP — Compte courant'), findsNWidgets(3));
-    expect(find.text('Revolut'), findsOneWidget);
-
-    // Amount sits above its date in the right column.
-    final amount = tester.getTopLeft(
-      find.text(
-        formatAmount(
-          amountMinor: -8642,
-          currency: 'EUR',
-          locale: 'fr',
-          showPositiveSign: true,
-        ),
+      contains(
+        formatAmount(amountMinor: -221435, currency: 'EUR', locale: 'fr'),
       ),
     );
-    final date = tester.getTopLeft(find.text('14/05/2026'));
-    expect(amount.dy, lessThan(date.dy));
-    expect(amount.dx, closeTo(date.dx, 24));
-
-    expect(find.byKey(const Key('dashboardViewAllTransactions')), findsOneWidget);
   });
+
+  testWidgets(
+    'the activity list is the compact variant: no chip, amount over date',
+    (tester) async {
+      _useDesktopSurface(tester);
+      await tester.pumpWidget(_wrap(state: _state()));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Activité récente'), findsOneWidget);
+      expect(find.byType(CompactTransactionRow), findsNWidgets(4));
+      // The compact variant deliberately drops the category chip the 52px row carries.
+      expect(find.byType(CategoryChip), findsNothing);
+
+      for (final row in [
+        'Carrefour',
+        'Novatech SARL',
+        'SNCF Connect',
+        'Free Mobile',
+      ]) {
+        expect(find.text(row), findsOneWidget);
+      }
+      expect(find.text('BNP — Compte courant'), findsNWidgets(3));
+      expect(find.text('Revolut'), findsOneWidget);
+
+      // Amount sits above its date in the right column.
+      final amount = tester.getTopLeft(
+        find.text(
+          formatAmount(
+            amountMinor: -8642,
+            currency: 'EUR',
+            locale: 'fr',
+            showPositiveSign: true,
+          ),
+        ),
+      );
+      final date = tester.getTopLeft(find.text('14/05/2026'));
+      expect(amount.dy, lessThan(date.dy));
+      expect(amount.dx, closeTo(date.dx, 24));
+
+      expect(
+        find.byKey(const Key('dashboardViewAllTransactions')),
+        findsOneWidget,
+      );
+    },
+  );
 
   testWidgets('the view-all link rides the card title, at its trailing edge', (
     tester,
@@ -598,62 +652,73 @@ void main() {
 
   // --- states ------------------------------------------------------------------------------
 
-  testWidgets('renders the encouraging empty state with a CTA when there is no data', (
-    tester,
-  ) async {
-    _useDesktopSurface(tester);
-    await tester.pumpWidget(
-      _wrap(
-        state: DashboardState(
-          month: DateTime(2026, 5),
-          summary: specSummary(
-            incomeMinor: 0,
-            expenseMinor: 0,
-            netMinor: 0,
-            byCategory: const [],
+  testWidgets(
+    'renders the encouraging empty state with a CTA when there is no data',
+    (tester) async {
+      _useDesktopSurface(tester);
+      await tester.pumpWidget(
+        _wrap(
+          state: DashboardState(
+            month: DateTime(2026, 5),
+            summary: specSummary(
+              incomeMinor: 0,
+              expenseMinor: 0,
+              netMinor: 0,
+              byCategory: const [],
+            ),
+            trends: emptyTrends(),
+            recent: const [],
           ),
-          trends: emptyTrends(),
-          recent: const [],
         ),
-      ),
-    );
-    await tester.pumpAndSettle();
+      );
+      await tester.pumpAndSettle();
 
-    expect(find.text('Importez un relevé pour donner vie à votre argent'), findsOneWidget);
-    // The reassurance answers the doubt the CTA creates — the user has just been asked to
-    // hand over a bank statement.
-    expect(
-      find.text('Tout reste sur cet ordinateur — rien n\'est envoyé en ligne.'),
-      findsOneWidget,
-    );
-    // One *primary* CTA, per the EmptyState spec.
-    expect(find.byKey(const Key('dashboardGoToImportsButton')), findsOneWidget);
-    expect(find.byType(PrimaryButton), findsOneWidget);
-
-    // Nothing else is on screen: the empty state replaces the whole panel.
-    expect(find.byType(StatCard), findsNothing);
-    expect(find.byType(CategoryDonut), findsNothing);
-    expect(find.byType(IncomeVsExpenseChart), findsNothing);
-  });
-
-  testWidgets('the loading skeleton silhouettes all three rows at their real ratios', (
-    tester,
-  ) async {
-    _useDesktopSurface(tester);
-    await tester.pumpWidget(
-      ProviderScope(
-        overrides: [
-          dashboardControllerProvider.overrideWith(FakeLoadingDashboardController.new),
-        ],
-        child: const MaterialApp(
-          locale: Locale('fr'),
-          localizationsDelegates: AppLocalizations.localizationsDelegates,
-          supportedLocales: AppLocalizations.supportedLocales,
-          home: Scaffold(body: DashboardScreen()),
+      expect(
+        find.text('Importez un relevé pour donner vie à votre argent'),
+        findsOneWidget,
+      );
+      // The reassurance answers the doubt the CTA creates — the user has just been asked to
+      // hand over a bank statement.
+      expect(
+        find.text(
+          'Tout reste sur cet ordinateur — rien n\'est envoyé en ligne.',
         ),
-      ),
-    );
-    await tester.pump();
+        findsOneWidget,
+      );
+      // One *primary* CTA, per the EmptyState spec.
+      expect(
+        find.byKey(const Key('dashboardGoToImportsButton')),
+        findsOneWidget,
+      );
+      expect(find.byType(PrimaryButton), findsOneWidget);
+
+      // Nothing else is on screen: the empty state replaces the whole panel.
+      expect(find.byType(StatCard), findsNothing);
+      expect(find.byType(CategoryDonut), findsNothing);
+      expect(find.byType(IncomeVsExpenseChart), findsNothing);
+    },
+  );
+
+  testWidgets(
+    'the loading skeleton silhouettes all three rows at their real ratios',
+    (tester) async {
+      _useDesktopSurface(tester);
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            dashboardControllerProvider.overrideWith(
+              FakeLoadingDashboardController.new,
+            ),
+          ],
+          child: const MaterialApp(
+            locale: Locale('fr'),
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+            home: Scaffold(body: DashboardScreen()),
+          ),
+        ),
+      );
+      await tester.pump();
 
       expect(
         find.byKey(const Key('dashboardLoadingIndicator')),
@@ -677,7 +742,9 @@ void main() {
     },
   );
 
-  testWidgets('the panel renders unchanged under the collapsed 76px nav rail', (tester) async {
+  testWidgets('the panel renders unchanged under the collapsed 76px nav rail', (
+    tester,
+  ) async {
     _useDesktopSurface(tester);
     await tester.pumpWidget(
       ProviderScope(

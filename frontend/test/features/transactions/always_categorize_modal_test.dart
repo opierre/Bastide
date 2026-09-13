@@ -90,7 +90,9 @@ void main() {
     );
 
     when(() => apiClient.get('/rules')).thenAnswer((_) async => <dynamic>[]);
-    when(() => apiClient.get('/categories')).thenAnswer((_) async => _categoryCatalog());
+    when(
+      () => apiClient.get('/categories'),
+    ).thenAnswer((_) async => _categoryCatalog());
     when(
       () => apiClient.get('/rules/suggestion', query: any(named: 'query')),
     ).thenAnswer(
@@ -100,9 +102,9 @@ void main() {
         'pattern': 'ASSUR MAIF',
       },
     );
-    when(() => apiClient.post('/rules/preview', body: any(named: 'body'))).thenAnswer(
-      (_) async => {'match_count': 7, 'samples': <dynamic>[]},
-    );
+    when(
+      () => apiClient.post('/rules/preview', body: any(named: 'body')),
+    ).thenAnswer((_) async => {'match_count': 7, 'samples': <dynamic>[]});
     when(
       () => apiClient.post('/rules/from-transaction', body: any(named: 'body')),
     ).thenAnswer((_) async => {'rule': _ruleJson(), 'recategorized_count': 7});
@@ -145,16 +147,22 @@ void main() {
     await settlePreview(tester);
 
     expect(
-      find.text('Une règle classe ces transactions sans IA, à chaque import — '
-          'pré-remplie depuis « PRLV SEPA ASSUR MAIF ».'),
+      find.text(
+        'Une règle classe ces transactions sans IA, à chaque import — '
+        'pré-remplie depuis « PRLV SEPA ASSUR MAIF ».',
+      ),
       findsOneWidget,
     );
     expect(
-      tester.widget<TextFormField>(find.byKey(const Key('alwaysRulePattern'))).controller?.text,
+      tester
+          .widget<TextFormField>(find.byKey(const Key('alwaysRulePattern')))
+          .controller
+          ?.text,
       'ASSUR MAIF',
     );
     final captured = verify(
-      () => apiClient.get('/rules/suggestion', query: captureAny(named: 'query')),
+      () =>
+          apiClient.get('/rules/suggestion', query: captureAny(named: 'query')),
     ).captured.single;
     expect(captured, {'transaction_id': 't1'});
   });
@@ -168,7 +176,9 @@ void main() {
     expect(find.textContaining('7 transactions existantes'), findsOneWidget);
   });
 
-  testWidgets('creating posts the expected payload and reports the count', (tester) async {
+  testWidgets('creating posts the expected payload and reports the count', (
+    tester,
+  ) async {
     useDesktopSurface(tester);
     await tester.pumpWidget(wrap());
     await settlePreview(tester);
@@ -200,7 +210,9 @@ void main() {
     });
   });
 
-  testWidgets('unchecking the box keeps the rule off existing rows', (tester) async {
+  testWidgets('unchecking the box keeps the rule off existing rows', (
+    tester,
+  ) async {
     useDesktopSurface(tester);
     await tester.pumpWidget(wrap());
     await settlePreview(tester);
@@ -226,7 +238,9 @@ void main() {
     expect(payload['apply_now'], isFalse);
   });
 
-  testWidgets('a category is required before the rule can be created', (tester) async {
+  testWidgets('a category is required before the rule can be created', (
+    tester,
+  ) async {
     useDesktopSurface(tester);
     await tester.pumpWidget(wrap());
     await settlePreview(tester);
@@ -243,7 +257,9 @@ void main() {
   testWidgets('a pre-fill that fails leaves the form usable', (tester) async {
     when(
       () => apiClient.get('/rules/suggestion', query: any(named: 'query')),
-    ).thenThrow(const ApiFailure(code: 'TRANSACTION_NOT_FOUND', message: 'gone'));
+    ).thenThrow(
+      const ApiFailure(code: 'TRANSACTION_NOT_FOUND', message: 'gone'),
+    );
 
     useDesktopSurface(tester);
     await tester.pumpWidget(wrap());

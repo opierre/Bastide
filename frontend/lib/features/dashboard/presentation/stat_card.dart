@@ -185,7 +185,9 @@ class TrendPill extends StatelessWidget {
           const SizedBox(width: 1),
           Text(
             label ?? formatDeltaPct(deltaPct, locale),
-            style: tabularNumberStyle(textTheme.labelSmall!).copyWith(color: color),
+            style: tabularNumberStyle(
+              textTheme.labelSmall!,
+            ).copyWith(color: color),
           ),
         ],
       ),
@@ -215,7 +217,8 @@ String formatSignedMagnitude(double value, String locale) {
 
 /// Formats a plain percentage (not a delta) — used for the savings rate's ring value and for
 /// the goal in its caption.
-String formatPct(double pct, String locale) => '${NumberFormat('0.0', locale).format(pct)} %';
+String formatPct(double pct, String locale) =>
+    '${NumberFormat('0.0', locale).format(pct)} %';
 
 /// Formats a whole percentage, for the goal figure — « Objectif : 20 % », not « 20,0 % ».
 String formatWholePct(double pct, String locale) =>
@@ -300,14 +303,20 @@ class SavingsRateCard extends StatelessWidget {
                   maxLines: 1,
                   // A notch under the neutral cards' 29: the figure is one of four things
                   // stacked beside the ring, where those carry their card almost alone.
-                  style: tabularNumberStyle(textTheme.displayMedium!).copyWith(fontSize: 25),
+                  style: tabularNumberStyle(
+                    textTheme.displayMedium!,
+                  ).copyWith(fontSize: 25),
                 ),
                 const SizedBox(height: AppSpacing.sm - 2),
                 // Pill and « Objectif … » caption share a row, exactly like the neutral cards'
                 // [TrendRow] — so a narrow card truncates the goal text with the same ellipsis
                 // behavior the net card's caption already gets, rather than inventing a second
                 // wrapping rule for this one card.
-                TrendRow(deltaPct: deltaPct, label: deltaLabel, caption: caption),
+                TrendRow(
+                  deltaPct: deltaPct,
+                  label: deltaLabel,
+                  caption: caption,
+                ),
               ],
             ),
           ),

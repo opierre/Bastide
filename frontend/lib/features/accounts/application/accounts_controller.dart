@@ -15,7 +15,9 @@ class AccountsController extends AsyncNotifier<List<Account>> {
 
   Future<void> refresh() async {
     state = const AsyncValue.loading();
-    state = await AsyncValue.guard(() => ref.read(accountsRepositoryProvider).list());
+    state = await AsyncValue.guard(
+      () => ref.read(accountsRepositoryProvider).list(),
+    );
   }
 
   /// Creates an account and returns it, so a caller that needs the new id —
@@ -68,11 +70,14 @@ class AccountsController extends AsyncNotifier<List<Account>> {
   Future<void> archive(String id) async {
     await ref.read(accountsRepositoryProvider).archive(id);
     state = AsyncValue.data(
-      (state.value ?? const <Account>[]).where((account) => account.id != id).toList(),
+      (state.value ?? const <Account>[])
+          .where((account) => account.id != id)
+          .toList(),
     );
   }
 }
 
-final accountsControllerProvider = AsyncNotifierProvider<AccountsController, List<Account>>(
-  AccountsController.new,
-);
+final accountsControllerProvider =
+    AsyncNotifierProvider<AccountsController, List<Account>>(
+      AccountsController.new,
+    );

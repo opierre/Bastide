@@ -114,7 +114,8 @@ class _CategoriesView extends ConsumerWidget {
         messageKey: const Key('categoriesErrorText'),
         retryLabel: l10n.categoriesRetry,
         retryKey: const Key('categoriesRetryButton'),
-        onRetry: () => ref.read(categoriesControllerProvider.notifier).refresh(),
+        onRetry: () =>
+            ref.read(categoriesControllerProvider.notifier).refresh(),
       ),
       _ => const Padding(
         key: Key('categoriesLoadingIndicator'),
@@ -148,7 +149,9 @@ class _CategoryGrid extends ConsumerWidget {
         onEdit: category.isSystem
             ? null
             : () => showCategoryForm(context, initial: category),
-        onDelete: category.isSystem ? null : () => _delete(context, ref, category),
+        onDelete: category.isSystem
+            ? null
+            : () => _delete(context, ref, category),
         onEditSubcategory: (child) => showCategoryForm(context, initial: child),
         onAddSubcategory: () => showCategoryForm(context, parent: category),
         onOpenRules: () {
@@ -185,7 +188,10 @@ class _CategoryGrid extends ConsumerWidget {
 
     return SingleChildScrollView(
       key: const Key('categoriesGrid'),
-      child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: rows),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: rows,
+      ),
     );
   }
 }
@@ -208,13 +214,21 @@ class _GridSkeleton extends StatelessWidget {
 
     return SkeletonPulse(
       child: Column(
-        children: [row(), const SizedBox(height: AppSpacing.gridGap), row()],
+        children: [
+          row(),
+          const SizedBox(height: AppSpacing.gridGap),
+          row(),
+        ],
       ),
     );
   }
 }
 
-Future<void> _delete(BuildContext context, WidgetRef ref, AppCategory category) async {
+Future<void> _delete(
+  BuildContext context,
+  WidgetRef ref,
+  AppCategory category,
+) async {
   if (!await confirmCategoryDelete(context, category)) return;
   try {
     await ref.read(categoriesControllerProvider.notifier).delete(category.id);

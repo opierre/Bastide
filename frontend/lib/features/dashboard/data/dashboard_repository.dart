@@ -20,7 +20,10 @@ class DashboardRepository {
 
   Future<DashboardSummary> summary(DateTime month) async {
     final json =
-        await _apiClient.get('/dashboard/summary', query: {'month': _monthParam.format(month)})
+        await _apiClient.get(
+              '/dashboard/summary',
+              query: {'month': _monthParam.format(month)},
+            )
             as Map<String, dynamic>;
     return _parse(json);
   }
@@ -30,7 +33,8 @@ class DashboardRepository {
   /// Takes no month: both windows end at the current one, so this is fetched once and survives
   /// the month picker (see `PROJECT.md` §5).
   Future<DashboardTrends> trends() async {
-    final json = await _apiClient.get('/dashboard/trends') as Map<String, dynamic>;
+    final json =
+        await _apiClient.get('/dashboard/trends') as Map<String, dynamic>;
     return DashboardTrends(
       monthlySeries: (json['monthly_series'] as List<dynamic>)
           .map((entry) => _parseMonthlyTotals(entry as Map<String, dynamic>))
@@ -57,7 +61,8 @@ class DashboardRepository {
     ).wait;
 
     final names = {
-      for (final entry in (accounts as List<dynamic>).cast<Map<String, dynamic>>())
+      for (final entry
+          in (accounts as List<dynamic>).cast<Map<String, dynamic>>())
         entry['id'] as String: _accountLabel(entry),
     };
 
@@ -95,10 +100,14 @@ class DashboardRepository {
   /// used to default the month selector to where the user's data actually is, rather than the
   /// calendar's current month (which may have no imports).
   Future<DateTime?> latestMonthWithData() async {
-    final json = await _apiClient.get('/transactions', query: {'page': '1'}) as Map<String, dynamic>;
+    final json =
+        await _apiClient.get('/transactions', query: {'page': '1'})
+            as Map<String, dynamic>;
     final items = json['items'] as List<dynamic>;
     if (items.isEmpty) return null;
-    final latest = DateTime.parse((items.first as Map<String, dynamic>)['booked_date'] as String);
+    final latest = DateTime.parse(
+      (items.first as Map<String, dynamic>)['booked_date'] as String,
+    );
     return DateTime(latest.year, latest.month);
   }
 
@@ -133,12 +142,13 @@ class DashboardRepository {
   /// deliberately carries none — these are months, not dates.
   DateTime _parseMonth(String value) => _monthParam.parse(value);
 
-  CategoryBreakdown _parseCategory(Map<String, dynamic> json) => CategoryBreakdown(
-    categoryId: json['category_id'] as String?,
-    name: json['name'] as String,
-    amountMinor: json['amount_minor'] as int,
-    pct: (json['pct'] as num).toDouble(),
-  );
+  CategoryBreakdown _parseCategory(Map<String, dynamic> json) =>
+      CategoryBreakdown(
+        categoryId: json['category_id'] as String?,
+        name: json['name'] as String,
+        amountMinor: json['amount_minor'] as int,
+        pct: (json['pct'] as num).toDouble(),
+      );
 }
 
 final dashboardRepositoryProvider = Provider<DashboardRepository>((ref) {

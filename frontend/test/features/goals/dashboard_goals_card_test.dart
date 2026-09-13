@@ -18,10 +18,7 @@ import '../../support/goals_fixtures.dart';
 String _money(int amountMinor, {String locale = 'fr'}) =>
     formatAmount(amountMinor: amountMinor, currency: 'EUR', locale: locale);
 
-Widget _wrap({
-  required List<Goal> goals,
-  Locale locale = const Locale('fr'),
-}) {
+Widget _wrap({required List<Goal> goals, Locale locale = const Locale('fr')}) {
   return ProviderScope(
     overrides: [
       dashboardControllerProvider.overrideWith(
@@ -69,10 +66,7 @@ void main() {
     // Only three — the fourth goal of the grid stays on the panel.
     expect(find.byKey(const Key('dashboardGoalRow-g4')), findsNothing);
 
-    expect(
-      find.text('${_money(640000)} / ${_money(1000000)}'),
-      findsOneWidget,
-    );
+    expect(find.text('${_money(640000)} / ${_money(1000000)}'), findsOneWidget);
     // A reached goal shows the badge in place of the amounts.
     expect(find.byKey(const Key('dashboardGoalReached-g3')), findsOneWidget);
     expect(find.byKey(const Key('dashboardGoalAmounts-g3')), findsNothing);
@@ -89,7 +83,9 @@ void main() {
 
     final income = tester.getSize(find.byType(IncomeVsExpenseChart)).width;
     final recent = tester.getSize(find.byType(RecentActivityCard)).width;
-    final goals = tester.getSize(find.byKey(const Key('dashboardGoalsCard'))).width;
+    final goals = tester
+        .getSize(find.byKey(const Key('dashboardGoalsCard')))
+        .width;
 
     // Widths, not presence: an `Expanded` that fell back to its default flex
     // leaves the card in the tree at a couple of pixels wide, which is what a
@@ -111,7 +107,9 @@ void main() {
     expect(income / recent, closeTo(1.0, 0.02));
   });
 
-  testWidgets('the card is absent entirely when there are no goals', (tester) async {
+  testWidgets('the card is absent entirely when there are no goals', (
+    tester,
+  ) async {
     _useDesktopSurface(tester);
     await tester.pumpWidget(_wrap(goals: const []));
     await tester.pumpAndSettle();
@@ -126,7 +124,12 @@ void main() {
   testWidgets('an archived goal leaves the dashboard card', (tester) async {
     _useDesktopSurface(tester);
     await tester.pumpWidget(
-      _wrap(goals: [testGoal(id: 'g1'), testGoal(id: 'g2', name: 'Voyage Japon')]),
+      _wrap(
+        goals: [
+          testGoal(id: 'g1'),
+          testGoal(id: 'g2', name: 'Voyage Japon'),
+        ],
+      ),
     );
     await tester.pumpAndSettle();
     expect(find.byKey(const Key('dashboardGoalRow-g1')), findsOneWidget);

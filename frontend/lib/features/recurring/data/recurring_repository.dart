@@ -21,7 +21,10 @@ class RecurringRepository {
 
   final ApiClient _apiClient;
 
-  Future<List<RecurringSeries>> list({SeriesStatus? status, String? accountId}) async {
+  Future<List<RecurringSeries>> list({
+    SeriesStatus? status,
+    String? accountId,
+  }) async {
     final json =
         await _apiClient.get(
               '/recurring',
@@ -31,16 +34,20 @@ class RecurringRepository {
               },
             )
             as List<dynamic>;
-    return json.map((entry) => _parseSeries(entry as Map<String, dynamic>)).toList();
+    return json
+        .map((entry) => _parseSeries(entry as Map<String, dynamic>))
+        .toList();
   }
 
   Future<RecurringSummary> summary() async {
-    final json = await _apiClient.get('/recurring/summary') as Map<String, dynamic>;
+    final json =
+        await _apiClient.get('/recurring/summary') as Map<String, dynamic>;
     return _parseSummary(json);
   }
 
   Future<SeriesDetail> detail(String seriesId) async {
-    final json = await _apiClient.get('/recurring/$seriesId') as Map<String, dynamic>;
+    final json =
+        await _apiClient.get('/recurring/$seriesId') as Map<String, dynamic>;
     return SeriesDetail(
       series: _parseSeries(json),
       occurrences: (json['occurrences'] as List<dynamic>)
@@ -52,7 +59,10 @@ class RecurringRepository {
   /// Runs a detection pass and reports what it created and refreshed.
   Future<DetectionResult> detect({String? accountId}) async {
     final json =
-        await _apiClient.post('/recurring/detect', body: {'account_id': accountId})
+        await _apiClient.post(
+              '/recurring/detect',
+              body: {'account_id': accountId},
+            )
             as Map<String, dynamic>;
     return DetectionResult(
       createdCount: json['created_count'] as int,
@@ -111,7 +121,8 @@ class RecurringRepository {
   /// Deletes a declared series; a detected one comes back `dismissed` instead —
   /// the server decides which, since only it knows whether the ledger still
   /// supports the deduction.
-  Future<void> delete(String seriesId) => _apiClient.delete('/recurring/$seriesId');
+  Future<void> delete(String seriesId) =>
+      _apiClient.delete('/recurring/$seriesId');
 
   Future<List<SeriesAccount>> listAccounts() async {
     final json = await _apiClient.get('/accounts') as List<dynamic>;
@@ -187,7 +198,8 @@ class RecurringRepository {
             ),
       priceIncreases: [
         for (final entry
-            in (json['price_increases'] as List<dynamic>).cast<Map<String, dynamic>>())
+            in (json['price_increases'] as List<dynamic>)
+                .cast<Map<String, dynamic>>())
           PriceIncrease(
             seriesId: entry['series_id'] as String,
             deltaMinor: entry['delta_minor'] as int,
@@ -195,7 +207,8 @@ class RecurringRepository {
           ),
       ],
       missed: [
-        for (final entry in (json['missed'] as List<dynamic>).cast<Map<String, dynamic>>())
+        for (final entry
+            in (json['missed'] as List<dynamic>).cast<Map<String, dynamic>>())
           MissedCharge(
             seriesId: entry['series_id'] as String,
             expectedOn: DateTime.parse(entry['expected_on'] as String),
@@ -211,7 +224,10 @@ class RecurringRepository {
 /// dismissed, cancelled — count in neither number.
 @immutable
 class DetectionResult {
-  const DetectionResult({required this.createdCount, required this.updatedCount});
+  const DetectionResult({
+    required this.createdCount,
+    required this.updatedCount,
+  });
 
   final int createdCount;
   final int updatedCount;
