@@ -83,6 +83,10 @@ abstract final class AppColors {
   /// (`docs/design/09-settings.md` §Sauvegarde, state ⑧).
   static const negativeInk = Color(0xFF2A0A0F);
   static const warning = Color(0xFFFFB84D);
+
+  /// Warning at 35% — the over-reference card border (`docs/design/00`
+  /// §Phase 3 additions): the one edge a reading may tint, never red.
+  static const warningBorder = Color(0x59FFB84D);
   static const info = Color(0xFF5AA9FF);
 
   /// Hairline between structural regions.

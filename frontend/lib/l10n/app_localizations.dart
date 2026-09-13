@@ -4686,6 +4686,402 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Impossible de charger le tableau d\'amortissement.'**
   String get mortgageScheduleLoadFailed;
+
+  /// Simulator panel error state when the household or scenarios cannot be loaded.
+  ///
+  /// In fr, this message translates to:
+  /// **'Impossible de charger le simulateur.'**
+  String get simulatorLoadFailed;
+
+  /// Retry button of the simulator error state.
+  ///
+  /// In fr, this message translates to:
+  /// **'Réessayer'**
+  String get simulatorRetry;
+
+  /// Title of the simulator input card.
+  ///
+  /// In fr, this message translates to:
+  /// **'Nouveau crédit'**
+  String get simulatorFormTitle;
+
+  /// Subtitle of the simulator input card: results are live, nothing is saved.
+  ///
+  /// In fr, this message translates to:
+  /// **'Le résultat se recalcule à chaque saisie'**
+  String get simulatorFormSubtitle;
+
+  /// Simulator field: property price.
+  ///
+  /// In fr, this message translates to:
+  /// **'Prix du bien'**
+  String get simulatorPrice;
+
+  /// Simulator field: down payment.
+  ///
+  /// In fr, this message translates to:
+  /// **'Apport'**
+  String get simulatorDownPayment;
+
+  /// Simulator field: upfront fees.
+  ///
+  /// In fr, this message translates to:
+  /// **'Frais'**
+  String get simulatorFees;
+
+  /// Simulator field: borrowed amount, derived from price + fees − down payment until edited.
+  ///
+  /// In fr, this message translates to:
+  /// **'Montant emprunté'**
+  String get simulatorPrincipal;
+
+  /// Gray marker pill beside the borrowed amount while it is still derived. Rendered uppercase.
+  ///
+  /// In fr, this message translates to:
+  /// **'Dérivé'**
+  String get simulatorDerivedPill;
+
+  /// Simulator field: nominal annual rate, typed as a percent.
+  ///
+  /// In fr, this message translates to:
+  /// **'Taux nominal'**
+  String get simulatorRate;
+
+  /// Inline error when the typed rate cannot be read.
+  ///
+  /// In fr, this message translates to:
+  /// **'Saisissez un taux, par exemple 3,25.'**
+  String get simulatorRateInvalid;
+
+  /// Simulator field: monthly insurance premium.
+  ///
+  /// In fr, this message translates to:
+  /// **'Assurance / mois'**
+  String get simulatorInsurance;
+
+  /// Simulator term slider label, and the HCSF term column label.
+  ///
+  /// In fr, this message translates to:
+  /// **'Durée'**
+  String get simulatorTerm;
+
+  /// Term slider value in both units.
+  ///
+  /// In fr, this message translates to:
+  /// **'{months} mois · {years, plural, =1{1 an} other{{years} ans}}'**
+  String simulatorTermValue(int months, num years);
+
+  /// A duration in whole years.
+  ///
+  /// In fr, this message translates to:
+  /// **'{years, plural, =1{1 an} other{{years} ans}}'**
+  String simulatorYears(num years);
+
+  /// A duration in months.
+  ///
+  /// In fr, this message translates to:
+  /// **'{months} mois'**
+  String simulatorMonths(int months);
+
+  /// Switch adding the user's active loans to the HCSF reading.
+  ///
+  /// In fr, this message translates to:
+  /// **'Inclure mes crédits actuels'**
+  String get simulatorIncludeExisting;
+
+  /// Sub-line of the existing-loans switch naming what it adds.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ajoute {amount} / mois à la lecture'**
+  String simulatorIncludeExistingAdds(String amount);
+
+  /// Sub-line of the existing-loans switch when the user has no active loan.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucun crédit en cours à ajouter'**
+  String get simulatorIncludeExistingNone;
+
+  /// Hero result card label. Rendered uppercase.
+  ///
+  /// In fr, this message translates to:
+  /// **'Échéance mensuelle'**
+  String get simulatorInstalmentLabel;
+
+  /// Hero caption: the instalment is the payment plus the insurance, named separately.
+  ///
+  /// In fr, this message translates to:
+  /// **'{payment} de mensualité + {insurance} d\'assurance · {count, plural, =1{1 échéance} other{{count} échéances}}'**
+  String simulatorInstalmentCaption(
+    String payment,
+    String insurance,
+    int count,
+  );
+
+  /// Hero caption before anything can be computed.
+  ///
+  /// In fr, this message translates to:
+  /// **'Renseignez un prix et un taux pour voir l\'échéance et sa part d\'assurance.'**
+  String get simulatorInstalmentEmpty;
+
+  /// Total cost result card label. Rendered uppercase.
+  ///
+  /// In fr, this message translates to:
+  /// **'Coût total'**
+  String get simulatorCostLabel;
+
+  /// Total cost caption with its parts and its share of the property price.
+  ///
+  /// In fr, this message translates to:
+  /// **'intérêts {interest} + assurance {insurance} + frais {fees} · {share} du prix'**
+  String simulatorCostCaption(
+    String interest,
+    String insurance,
+    String fees,
+    String share,
+  );
+
+  /// Total cost caption when no price was entered, so there is no share of the price.
+  ///
+  /// In fr, this message translates to:
+  /// **'intérêts {interest} + assurance {insurance} + frais {fees}'**
+  String simulatorCostCaptionNoPrice(
+    String interest,
+    String insurance,
+    String fees,
+  );
+
+  /// Total cost caption before anything can be computed.
+  ///
+  /// In fr, this message translates to:
+  /// **'Renseignez un prix et un taux pour voir le coût total et sa part du prix.'**
+  String get simulatorCostEmpty;
+
+  /// Annual percentage rate result card label.
+  ///
+  /// In fr, this message translates to:
+  /// **'TAEG'**
+  String get simulatorTaegLabel;
+
+  /// Iris marker pill always attached to the TAEG. Rendered uppercase.
+  ///
+  /// In fr, this message translates to:
+  /// **'Indicatif'**
+  String get simulatorIndicativePill;
+
+  /// TAEG caption.
+  ///
+  /// In fr, this message translates to:
+  /// **'taux, assurance et frais inclus'**
+  String get simulatorTaegCaption;
+
+  /// Title of the HCSF reading card.
+  ///
+  /// In fr, this message translates to:
+  /// **'Lecture HCSF'**
+  String get simulatorHcsfTitle;
+
+  /// Amber status pill when the reading is above an HCSF reference. Information, never a refusal.
+  ///
+  /// In fr, this message translates to:
+  /// **'Au-dessus du repère'**
+  String get simulatorHcsfOver;
+
+  /// HCSF caveat, always shown as body content on the card: no lender is bound by this reading.
+  ///
+  /// In fr, this message translates to:
+  /// **'Informative — ne lie aucun prêteur'**
+  String get simulatorHcsfCaveat;
+
+  /// The HCSF reference beside a reading.
+  ///
+  /// In fr, this message translates to:
+  /// **'repère {value}'**
+  String simulatorReference(String value);
+
+  /// HCSF card: debt ratio column label.
+  ///
+  /// In fr, this message translates to:
+  /// **'Taux d\'endettement'**
+  String get simulatorRatioLabel;
+
+  /// Debt ratio caption: the instalment against the income and where the income came from.
+  ///
+  /// In fr, this message translates to:
+  /// **'{instalment} sur un revenu {source, select, declared{déclaré} other{médian constaté}} de {income}'**
+  String simulatorRatioCaption(String instalment, String source, String income);
+
+  /// Debt ratio caption with the current loans counted.
+  ///
+  /// In fr, this message translates to:
+  /// **'{instalment} + crédits actuels {existing} sur un revenu {source, select, declared{déclaré} other{médian constaté}} de {income}'**
+  String simulatorRatioCaptionWithExisting(
+    String instalment,
+    String existing,
+    String source,
+    String income,
+  );
+
+  /// Debt ratio caption before anything can be computed.
+  ///
+  /// In fr, this message translates to:
+  /// **'Renseignez un prix et un taux pour lire le taux d\'endettement.'**
+  String get simulatorRatioEmpty;
+
+  /// HCSF card when no income is known: no ratio and no capacity.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucun revenu connu : le grand livre n\'a pas de revenus réguliers et aucun revenu n\'est déclaré. Sans revenu, ni taux ni capacité ne peuvent être lus.'**
+  String get simulatorRatioUnknown;
+
+  /// Outline button offering to declare an income when none is known.
+  ///
+  /// In fr, this message translates to:
+  /// **'Déclarer un revenu'**
+  String get simulatorDeclareIncome;
+
+  /// HCSF term caption when the term equals the maximum.
+  ///
+  /// In fr, this message translates to:
+  /// **'au repère, pas au-delà'**
+  String get simulatorTermAtReference;
+
+  /// HCSF term caption when the term is shorter than the maximum.
+  ///
+  /// In fr, this message translates to:
+  /// **'sous le repère'**
+  String get simulatorTermUnderReference;
+
+  /// HCSF term caption when the term is longer than the maximum. Information only.
+  ///
+  /// In fr, this message translates to:
+  /// **'au-delà du repère'**
+  String get simulatorTermOverReference;
+
+  /// HCSF card: borrowing capacity column label.
+  ///
+  /// In fr, this message translates to:
+  /// **'Capacité d\'emprunt au repère'**
+  String get simulatorCapacityLabel;
+
+  /// Capacity caption: the instalment still available under the reference.
+  ///
+  /// In fr, this message translates to:
+  /// **'{available} d\'échéance disponibles sous {limit}, à ces conditions'**
+  String simulatorCapacityCaption(String available, String limit);
+
+  /// Capacity caption when the current loans use up the room under the reference: explains the cause calmly.
+  ///
+  /// In fr, this message translates to:
+  /// **'il ne reste que {available} d\'échéance sous le repère une fois vos crédits actuels comptés — c\'est ce qui rend la capacité si faible, pas le bien visé'**
+  String simulatorCapacityCaptionExisting(String available);
+
+  /// Capacity caption before anything can be computed.
+  ///
+  /// In fr, this message translates to:
+  /// **'Renseignez un prix et un taux pour lire la capacité d\'emprunt.'**
+  String get simulatorCapacityEmpty;
+
+  /// Title of the yearly projection chart.
+  ///
+  /// In fr, this message translates to:
+  /// **'Projection annuelle'**
+  String get simulatorChartTitle;
+
+  /// Subtitle of the yearly projection chart.
+  ///
+  /// In fr, this message translates to:
+  /// **'Capital remboursé et intérêts versés, année par année'**
+  String get simulatorChartSubtitle;
+
+  /// Projection legend: principal repaid.
+  ///
+  /// In fr, this message translates to:
+  /// **'Capital'**
+  String get simulatorChartCapital;
+
+  /// Projection legend: interest paid.
+  ///
+  /// In fr, this message translates to:
+  /// **'Intérêts'**
+  String get simulatorChartInterest;
+
+  /// Projection chart invitation before anything can be computed.
+  ///
+  /// In fr, this message translates to:
+  /// **'Renseignez un prix et un taux : la répartition capital / intérêts par année s\'affiche ici.'**
+  String get simulatorChartEmpty;
+
+  /// Banner when a live compute fails for a reason no field explains.
+  ///
+  /// In fr, this message translates to:
+  /// **'Le calcul n\'a pas abouti. Réessayez dans un instant.'**
+  String get simulatorComputeFailed;
+
+  /// Inline error under the rate when the engine refuses a loan that never amortises.
+  ///
+  /// In fr, this message translates to:
+  /// **'À ce taux, l\'échéance ne rembourse pas le capital : baissez le taux ou allongez la durée.'**
+  String get simulatorErrorNonAmortizing;
+
+  /// Inline error under the fees when they are not smaller than the borrowed amount.
+  ///
+  /// In fr, this message translates to:
+  /// **'Les frais doivent rester inférieurs au montant emprunté.'**
+  String get simulatorErrorFeesExceed;
+
+  /// Generic validation refusal.
+  ///
+  /// In fr, this message translates to:
+  /// **'Certaines valeurs ne sont pas acceptées.'**
+  String get simulatorErrorValidation;
+
+  /// Fallback simulator error.
+  ///
+  /// In fr, this message translates to:
+  /// **'Une erreur est survenue. Réessayez.'**
+  String get simulatorErrorGeneric;
+
+  /// Title of the declare-income modal opened from the simulator.
+  ///
+  /// In fr, this message translates to:
+  /// **'Déclarer un revenu'**
+  String get simulatorIncomeTitle;
+
+  /// Body of the declare-income modal.
+  ///
+  /// In fr, this message translates to:
+  /// **'Le revenu mensuel déclaré sert de base au taux d\'endettement et à la capacité d\'emprunt.'**
+  String get simulatorIncomeBody;
+
+  /// Declare-income modal field label.
+  ///
+  /// In fr, this message translates to:
+  /// **'Revenu mensuel net'**
+  String get simulatorIncomeLabel;
+
+  /// Declare-income modal validation error.
+  ///
+  /// In fr, this message translates to:
+  /// **'Saisissez un montant supérieur à zéro.'**
+  String get simulatorIncomeInvalid;
+
+  /// Declare-income modal submit button.
+  ///
+  /// In fr, this message translates to:
+  /// **'Déclarer'**
+  String get simulatorIncomeSubmit;
+
+  /// Declare-income modal banner when the save fails.
+  ///
+  /// In fr, this message translates to:
+  /// **'Impossible d\'enregistrer ce revenu. Réessayez.'**
+  String get simulatorIncomeFailed;
+
+  /// Cancel button of the simulator modals.
+  ///
+  /// In fr, this message translates to:
+  /// **'Annuler'**
+  String get simulatorCancel;
 }
 
 class _AppLocalizationsDelegate

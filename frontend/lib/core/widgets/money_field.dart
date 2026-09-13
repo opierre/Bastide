@@ -22,6 +22,8 @@ class MoneyField extends StatelessWidget {
     this.autofocus = false,
     this.validator,
     this.onFieldSubmitted,
+    this.onChanged,
+    this.hintText,
   });
 
   final TextEditingController controller;
@@ -38,6 +40,13 @@ class MoneyField extends StatelessWidget {
   final bool autofocus;
   final String? Function(String?)? validator;
   final ValueChanged<String>? onFieldSubmitted;
+
+  /// Fires on user edits only, never when [controller] is written by code.
+  final ValueChanged<String>? onChanged;
+
+  /// Placeholder shown while the field is empty — « 0,00 » on a form that
+  /// opens blank rather than on a value.
+  final String? hintText;
 
   @override
   Widget build(BuildContext context) {
@@ -62,11 +71,13 @@ class MoneyField extends StatelessWidget {
       // primary ink rather than a sign color.
       style: tabularNumberStyle(Theme.of(context).textTheme.bodyLarge!),
       decoration: InputDecoration(
+        hintText: hintText,
         suffixText: currency.isEmpty ? null : currency,
         suffixStyle: fieldSuffixStyle(context),
       ),
       validator: validator,
       onFieldSubmitted: onFieldSubmitted,
+      onChanged: onChanged,
     );
   }
 }
