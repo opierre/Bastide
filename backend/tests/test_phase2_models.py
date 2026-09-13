@@ -1,18 +1,14 @@
 """Tests for the Phase 2 schema: the migration, its unique constraints, and its cascades."""
 
-import os
-import subprocess
-import sys
-from collections.abc import Generator
+import shutil
 from datetime import date
 from pathlib import Path
-from typing import Any
 from uuid import uuid4
 
 import pytest
-from sqlalchemy import Engine, create_engine, event, inspect
+from sqlalchemy import create_engine, inspect
 from sqlalchemy.exc import IntegrityError
-from sqlalchemy.orm import Session, sessionmaker
+from sqlalchemy.orm import Session
 
 from app.features.accounts.models import Account
 from app.features.auth.models import User
@@ -21,8 +17,7 @@ from app.features.goals.models import Goal, GoalAllocation
 from app.features.imports.models import ImportBatch
 from app.features.recurring.models import RecurringOccurrence, RecurringSeries
 from app.features.transactions.models import Transaction
-
-BACKEND_DIR = Path(__file__).resolve().parent.parent
+from tests.migrations import downgrade, upgrade
 
 # The revision *below* the Phase 2 migration. Named rather than reached with
 # `downgrade -1`, which only meant "undo Phase 2" while Phase 2 happened to be
@@ -38,70 +33,22 @@ PHASE2_TABLES = {
 }
 
 
-def _alembic(command: list[str], db_path: Path) -> None:
-    env = os.environ.copy()
-    env["FINSTRIDE_DB_PATH"] = str(db_path)
-    subprocess.run(
-        [sys.executable, "-m", "alembic", *command],
-        cwd=BACKEND_DIR,
-        env=env,
-        check=True,
-        capture_output=True,
-        text=True,
-    )
-
-
-def _engine_with_foreign_keys(db_path: Path) -> Engine:
-    """An engine that enforces foreign keys — SQLite needs the pragma per connection.
-
-    Without it the cascades below would silently pass by doing nothing.
-    """
-    engine = create_engine(f"sqlite:///{db_path}", connect_args={"check_same_thread": False})
-
-    @event.listens_for(engine, "connect")
-    def _enable_foreign_keys(dbapi_connection: Any, connection_record: Any) -> None:
-        cursor = dbapi_connection.cursor()
-        cursor.execute("PRAGMA foreign_keys=ON")
-        cursor.close()
-
-    return engine
-
-
-@pytest.fixture
-def migrated_session(tmp_path: Path) -> Generator[Session]:
-    """A Session on a temp SQLite database built by Alembic, with FK enforcement on."""
-    db_path = tmp_path / "phase2.db"
-    _alembic(["upgrade", "head"], db_path)
-
-    engine = _engine_with_foreign_keys(db_path)
-    session_local = sessionmaker(bind=engine, autoflush=False, autocommit=False)
-    db = session_local()
-    try:
-        yield db
-    finally:
-        db.close()
-        engine.dispose()
-
-
-def test_alembic_upgrade_builds_phase2_tables_on_empty_db(tmp_path: Path) -> None:
-    db_path = tmp_path / "migrated.db"
-    _alembic(["upgrade", "head"], db_path)
-
-    engine = create_engine(f"sqlite:///{db_path}")
+def test_alembic_upgrade_builds_phase2_tables_on_empty_db(migrated_template: Path) -> None:
+    engine = create_engine(f"sqlite:///{migrated_template}")
     assert PHASE2_TABLES.issubset(inspect(engine).get_table_names())
     engine.dispose()
 
 
-def test_downgrade_then_upgrade_is_clean(tmp_path: Path) -> None:
+def test_downgrade_then_upgrade_is_clean(tmp_path: Path, migrated_template: Path) -> None:
     db_path = tmp_path / "roundtrip.db"
-    _alembic(["upgrade", "head"], db_path)
+    shutil.copyfile(migrated_template, db_path)
 
-    _alembic(["downgrade", PRE_PHASE2_REVISION], db_path)
+    downgrade(db_path, PRE_PHASE2_REVISION)
     engine = create_engine(f"sqlite:///{db_path}")
     assert not (PHASE2_TABLES & set(inspect(engine).get_table_names()))
     engine.dispose()
 
-    _alembic(["upgrade", "head"], db_path)
+    upgrade(db_path)
     engine = create_engine(f"sqlite:///{db_path}")
     assert PHASE2_TABLES.issubset(inspect(engine).get_table_names())
     engine.dispose()

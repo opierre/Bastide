@@ -1,25 +1,20 @@
 """Tests for the Phase 3 schema: the migration, its constraints, and the property FK."""
 
-import os
-import subprocess
-import sys
-from collections.abc import Generator
+import shutil
 from datetime import date
 from pathlib import Path
-from typing import Any
 from uuid import uuid4
 
 import pytest
-from sqlalchemy import DateTime, Engine, Integer, String, create_engine, event, inspect
+from sqlalchemy import DateTime, Integer, String, create_engine, inspect
 from sqlalchemy.exc import IntegrityError
-from sqlalchemy.orm import Session, sessionmaker
+from sqlalchemy.orm import Session
 
 from app.features.auth.models import User
 from app.features.mortgages.models import Mortgage, MortgageSimulation
 from app.features.properties.models import Property
 from app.features.settings.models import UserSettings
-
-BACKEND_DIR = Path(__file__).resolve().parent.parent
+from tests.migrations import downgrade, upgrade
 
 # The revision *below* the Phase 3 migration, named so a later migration cannot silently
 # retarget the round-trip (see test_phase2_models.py).
@@ -37,48 +32,6 @@ TAX_TABLES = {"tax_profiles", "tax_brackets", "tax_parameters"}
 PHASE3_MODELS = (Mortgage, MortgageSimulation, Property)
 
 
-def _alembic(command: list[str], db_path: Path) -> None:
-    env = os.environ.copy()
-    env["FINSTRIDE_DB_PATH"] = str(db_path)
-    subprocess.run(
-        [sys.executable, "-m", "alembic", *command],
-        cwd=BACKEND_DIR,
-        env=env,
-        check=True,
-        capture_output=True,
-        text=True,
-    )
-
-
-def _engine_with_foreign_keys(db_path: Path) -> Engine:
-    """An engine that enforces foreign keys — without the pragma SET NULL does nothing."""
-    engine = create_engine(f"sqlite:///{db_path}", connect_args={"check_same_thread": False})
-
-    @event.listens_for(engine, "connect")
-    def _enable_foreign_keys(dbapi_connection: Any, connection_record: Any) -> None:
-        cursor = dbapi_connection.cursor()
-        cursor.execute("PRAGMA foreign_keys=ON")
-        cursor.close()
-
-    return engine
-
-
-@pytest.fixture
-def migrated_session(tmp_path: Path) -> Generator[Session]:
-    """A Session on a temp SQLite database built by Alembic, with FK enforcement on."""
-    db_path = tmp_path / "phase3.db"
-    _alembic(["upgrade", "head"], db_path)
-
-    engine = _engine_with_foreign_keys(db_path)
-    session_local = sessionmaker(bind=engine, autoflush=False, autocommit=False)
-    db = session_local()
-    try:
-        yield db
-    finally:
-        db.close()
-        engine.dispose()
-
-
 def _schema(db_path: Path) -> tuple[set[str], set[str]]:
     """The table names and the `user_settings` column names of a migrated database."""
     engine = create_engine(f"sqlite:///{db_path}")
@@ -89,26 +42,23 @@ def _schema(db_path: Path) -> tuple[set[str], set[str]]:
     return tables, columns
 
 
-def test_alembic_upgrade_builds_phase3_schema_on_empty_db(tmp_path: Path) -> None:
-    db_path = tmp_path / "migrated.db"
-    _alembic(["upgrade", "head"], db_path)
-
-    tables, settings_columns = _schema(db_path)
+def test_alembic_upgrade_builds_phase3_schema_on_empty_db(migrated_template: Path) -> None:
+    tables, settings_columns = _schema(migrated_template)
     assert PHASE3_TABLES.issubset(tables)
     assert not (TAX_TABLES & tables)
     assert "declared_monthly_income_minor" in settings_columns
 
 
-def test_downgrade_then_upgrade_is_clean(tmp_path: Path) -> None:
+def test_downgrade_then_upgrade_is_clean(tmp_path: Path, migrated_template: Path) -> None:
     db_path = tmp_path / "roundtrip.db"
-    _alembic(["upgrade", "head"], db_path)
+    shutil.copyfile(migrated_template, db_path)
 
-    _alembic(["downgrade", PRE_PHASE3_REVISION], db_path)
+    downgrade(db_path, PRE_PHASE3_REVISION)
     tables, settings_columns = _schema(db_path)
     assert not (PHASE3_TABLES & tables)
     assert "declared_monthly_income_minor" not in settings_columns
 
-    _alembic(["upgrade", "head"], db_path)
+    upgrade(db_path)
     tables, settings_columns = _schema(db_path)
     assert PHASE3_TABLES.issubset(tables)
     assert "declared_monthly_income_minor" in settings_columns
