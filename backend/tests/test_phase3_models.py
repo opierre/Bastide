@@ -18,7 +18,6 @@ from app.features.auth.models import User
 from app.features.mortgages.models import Mortgage, MortgageSimulation
 from app.features.properties.models import Property
 from app.features.settings.models import UserSettings
-from app.features.tax.models import TaxBracket, TaxParameter, TaxProfile
 
 BACKEND_DIR = Path(__file__).resolve().parent.parent
 
@@ -26,19 +25,16 @@ BACKEND_DIR = Path(__file__).resolve().parent.parent
 # retarget the round-trip (see test_phase2_models.py).
 PRE_PHASE3_REVISION = "a8d3f2c61e05"
 
-# A year the seed migration leaves empty, so system rows inserted here meet no seeded row.
-UNSEEDED_TAX_YEAR = 2099
-
 PHASE3_TABLES = {
     "mortgages",
     "properties",
-    "tax_profiles",
-    "tax_brackets",
-    "tax_parameters",
     "mortgage_simulations",
 }
 
-PHASE3_MODELS = (Mortgage, MortgageSimulation, Property, TaxProfile, TaxBracket, TaxParameter)
+# Created by the Phase 3 migration and dropped again when the tax feature was removed.
+TAX_TABLES = {"tax_profiles", "tax_brackets", "tax_parameters"}
+
+PHASE3_MODELS = (Mortgage, MortgageSimulation, Property)
 
 
 def _alembic(command: list[str], db_path: Path) -> None:
@@ -99,6 +95,7 @@ def test_alembic_upgrade_builds_phase3_schema_on_empty_db(tmp_path: Path) -> Non
 
     tables, settings_columns = _schema(db_path)
     assert PHASE3_TABLES.issubset(tables)
+    assert not (TAX_TABLES & tables)
     assert "declared_monthly_income_minor" in settings_columns
 
 
@@ -175,110 +172,6 @@ def _mortgage(user: User, **overrides: object) -> Mortgage:
     }
     kwargs.update(overrides)
     return Mortgage(**kwargs)
-
-
-def _tax_profile(user: User, **overrides: object) -> TaxProfile:
-    kwargs: dict[str, object] = {
-        "user_id": user.id,
-        "tax_year": 2025,
-        "household": "single",
-        "salaries_minor": 4_200_000,
-    }
-    kwargs.update(overrides)
-    return TaxProfile(**kwargs)
-
-
-def test_tax_profile_unique_per_user_and_year(migrated_session: Session) -> None:
-    user = _seed_user(migrated_session)
-    migrated_session.add(_tax_profile(user))
-    migrated_session.commit()
-
-    migrated_session.add(_tax_profile(user, salaries_minor=5_000_000))
-    with pytest.raises(IntegrityError):
-        migrated_session.commit()
-
-
-def test_tax_bracket_unique_per_user_year_kind_ordinal(migrated_session: Session) -> None:
-    user = _seed_user(migrated_session)
-    bracket = {"tax_year": 2025, "kind": "ir", "ordinal": 1, "lower_bound_minor": 1_149_700}
-    migrated_session.add(TaxBracket(user_id=user.id, rate_bps=1100, **bracket))
-    migrated_session.commit()
-
-    migrated_session.add(TaxBracket(user_id=user.id, rate_bps=1200, **bracket))
-    with pytest.raises(IntegrityError):
-        migrated_session.commit()
-
-
-def test_tax_parameter_unique_per_user_year_key(migrated_session: Session) -> None:
-    user = _seed_user(migrated_session)
-    parameter = {"tax_year": UNSEEDED_TAX_YEAR, "key": "pfu_income_tax_bps", "unit": "bps"}
-    migrated_session.add(TaxParameter(user_id=user.id, int_value=1280, **parameter))
-    migrated_session.commit()
-
-    migrated_session.add(TaxParameter(user_id=user.id, int_value=1300, **parameter))
-    with pytest.raises(IntegrityError):
-        migrated_session.commit()
-
-
-def test_system_rows_with_null_user_id_insert(migrated_session: Session) -> None:
-    migrated_session.add_all(
-        [
-            TaxBracket(
-                user_id=None,
-                tax_year=UNSEEDED_TAX_YEAR,
-                kind="ir",
-                ordinal=0,
-                lower_bound_minor=0,
-                rate_bps=0,
-            ),
-            TaxParameter(
-                user_id=None,
-                tax_year=UNSEEDED_TAX_YEAR,
-                key="micro_foncier_ceiling_minor",
-                int_value=1_500_000,
-                unit="minor",
-            ),
-        ]
-    )
-    migrated_session.commit()
-
-    year = {"tax_year": UNSEEDED_TAX_YEAR}
-    assert migrated_session.query(TaxBracket).filter_by(**year).one().user_id is None
-    assert migrated_session.query(TaxParameter).filter_by(**year).one().user_id is None
-
-
-def test_duplicate_system_tax_parameter_is_rejected(migrated_session: Session) -> None:
-    parameter = {"tax_year": UNSEEDED_TAX_YEAR, "key": "pfu_income_tax_bps", "unit": "bps"}
-    migrated_session.add(TaxParameter(user_id=None, int_value=1280, **parameter))
-    migrated_session.commit()
-
-    migrated_session.add(TaxParameter(user_id=None, int_value=1300, **parameter))
-    with pytest.raises(IntegrityError):
-        migrated_session.commit()
-
-
-def test_duplicate_system_tax_bracket_is_rejected(migrated_session: Session) -> None:
-    bracket = {"tax_year": UNSEEDED_TAX_YEAR, "kind": "ir", "ordinal": 0, "lower_bound_minor": 0}
-    migrated_session.add(TaxBracket(user_id=None, rate_bps=0, **bracket))
-    migrated_session.commit()
-
-    migrated_session.add(TaxBracket(user_id=None, rate_bps=1100, **bracket))
-    with pytest.raises(IntegrityError):
-        migrated_session.commit()
-
-
-def test_user_row_can_shadow_the_system_row_for_the_same_key(migrated_session: Session) -> None:
-    user = _seed_user(migrated_session)
-    parameter = {"tax_year": UNSEEDED_TAX_YEAR, "key": "pfu_income_tax_bps", "unit": "bps"}
-    migrated_session.add_all(
-        [
-            TaxParameter(user_id=None, int_value=1280, **parameter),
-            TaxParameter(user_id=user.id, int_value=1300, **parameter),
-        ]
-    )
-    migrated_session.commit()
-
-    assert migrated_session.query(TaxParameter).filter_by(tax_year=UNSEEDED_TAX_YEAR).count() == 2
 
 
 def test_archiving_a_property_leaves_its_mortgage_linked(migrated_session: Session) -> None:

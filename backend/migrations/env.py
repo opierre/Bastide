@@ -16,7 +16,6 @@ from app.features.properties import models as properties_models  # noqa: F401
 from app.features.recurring import models as recurring_models  # noqa: F401
 from app.features.rules import models as rules_models  # noqa: F401
 from app.features.settings import models as settings_models  # noqa: F401
-from app.features.tax import models as tax_models  # noqa: F401
 from app.features.transactions import models as transactions_models  # noqa: F401
 
 # this is the Alembic Config object, which provides

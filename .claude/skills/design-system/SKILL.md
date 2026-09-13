@@ -102,7 +102,7 @@ lives at the sidebar foot.
 - **Left sidebar (primary navigation)**, 252px on the sunken surface, 12px inner gutter: brand
   lockup at the top (30px gradient logomark with three ascending dark bars + 17px/700 wordmark),
   then grouped destinations under small uppercase section labels — *Vue d'ensemble* (Tableau de
-  bord, Comptes, Transactions), *Gestion* (Imports, Catégories), and later Goals/Mortgages/Taxes.
+  bord, Comptes, Transactions), *Gestion* (Imports, Catégories), and later Goals/Mortgages.
   Settings is pinned to the bottom behind a `#1A212C` divider so the primary items keep their
   vertical position as the app grows. Items are 40px pills (radius 20), 18px icons, gap 11,
   padding 0 13; the active one gets an iris 12% fill, iris label, the filled variant of its icon,

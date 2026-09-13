@@ -162,8 +162,6 @@ class _SummaryPlate extends StatelessWidget {
         (l10n.settingsBackupConfirmMortgages, counts.mortgages),
         (l10n.settingsBackupConfirmProperties, counts.properties),
         (l10n.settingsBackupConfirmSimulations, counts.simulations),
-        (l10n.settingsBackupConfirmTaxProfiles, counts.taxProfiles),
-        (l10n.settingsBackupConfirmTaxOverrides, counts.taxOverrides),
       ])
         (label, Text(number.format(count), style: valueStyle)),
     ];
@@ -183,8 +181,8 @@ class _SummaryPlate extends StatelessWidget {
               height: 36,
               child: Row(
                 children: [
-                  // Expanded, not a Spacer: the longest label (« Paramètres fiscaux
-                  // personnalisés ») must shrink on a narrow modal, never overflow.
+                  // Expanded, not a Spacer: a long label must shrink on a
+                  // narrow modal, never overflow.
                   Expanded(
                     child: Text(
                       label,

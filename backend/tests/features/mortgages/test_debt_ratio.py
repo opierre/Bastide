@@ -20,8 +20,6 @@ from app.features.categories.models import Category
 from app.features.imports.models import ImportBatch
 from app.features.mortgages.router import get_today
 from app.features.settings.models import UserSettings
-from app.features.tax.models import TaxParameter
-from app.features.tax.seed import SYSTEM_LENDING_PARAMETERS, SYSTEM_TAX_SEED
 from app.features.transactions.models import Transaction
 
 TODAY = date(2026, 5, 15)
@@ -61,23 +59,6 @@ COMPLETE_MONTHS = [date(2025, month, 5) for month in range(5, 13)] + [
 @pytest.fixture(autouse=True)
 def pinned_today(client: TestClient) -> None:
     cast(FastAPI, client.app).dependency_overrides[get_today] = lambda: TODAY
-
-
-@pytest.fixture(autouse=True)
-def seeded_hcsf(client: TestClient, tmp_path: Path) -> None:
-    """The client database is built from metadata, so the seed migration's row is added here."""
-    with db(tmp_path) as session:
-        for key, parameter in SYSTEM_LENDING_PARAMETERS.items():
-            session.add(
-                TaxParameter(
-                    user_id=None,
-                    tax_year=SYSTEM_TAX_SEED.tax_year,
-                    key=key,
-                    int_value=parameter.int_value,
-                    unit=parameter.unit,
-                )
-            )
-        session.commit()
 
 
 def db(tmp_path: Path) -> Session:
@@ -428,19 +409,6 @@ def test_a_ratio_at_the_limit_is_not_over_it(client: TestClient, tmp_path: Path)
 
     assert body["debt_ratio_bps"] == 5_000
     assert body["over_limit"] is True
-    with db(tmp_path) as session:
-        session.add(
-            TaxParameter(
-                user_id=user_id_of(client, headers),
-                tax_year=SYSTEM_TAX_SEED.tax_year,
-                key="hcsf_limit_bps",
-                int_value=5_000,
-                unit="bps",
-            )
-        )
-        session.commit()
-    overridden = summary(client, headers)
-    assert (overridden["hcsf_limit_bps"], overridden["over_limit"]) == (5_000, False)
 
 
 def test_the_summary_is_user_scoped(client: TestClient) -> None:

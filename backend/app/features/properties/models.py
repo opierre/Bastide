@@ -12,13 +12,12 @@ from app.core.db import Base
 class Property(Base):
     """A property the user declares: the app never sees one in a bank statement.
 
-    One entity rather than a figure duplicated per feature, because both IFI (§16) and net worth
-    (§18) need it.
+    One entity rather than a figure duplicated per panel: net worth (§18) reads it.
     """
 
     __tablename__ = "properties"
     __table_args__ = (
-        # The Synthèse and Impôts panels list a user's properties, archived ones hidden.
+        # The Synthèse panel lists a user's properties, archived ones hidden.
         Index("ix_properties_user_archived", "user_id", "archived"),
     )
 
@@ -34,12 +33,6 @@ class Property(Base):
     ownership_bps: Mapped[int] = mapped_column(Integer, default=10000)
     acquisition_price_minor: Mapped[int | None] = mapped_column(Integer, nullable=True)
     acquired_on: Mapped[date | None] = mapped_column(Date, nullable=True)
-    #: Gross rent received; `rental` only.
-    annual_rent_minor: Mapped[int | None] = mapped_column(Integer, nullable=True)
-    #: Deductible charges; `reel` regime only.
-    annual_charges_minor: Mapped[int | None] = mapped_column(Integer, nullable=True)
-    #: `micro_foncier` | `reel`; null when not rented.
-    property_regime: Mapped[str | None] = mapped_column(String(20), nullable=True)
     archived: Mapped[bool] = mapped_column(Boolean, default=False)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), default=lambda: datetime.now(UTC)

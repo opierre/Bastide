@@ -1,9 +1,9 @@
 """Business logic for the net-worth synthesis (PROJECT.md §18).
 
 One derived view and no stored money. Assets are account balances plus held property shares;
-liabilities are the outstanding principal of active loans. Goals, subscriptions and estimated tax
-take no part: a goal labels money already inside an account (§13), and a future charge is not a
-debt. The held share and the schedule come from their own features — reused, not recomputed.
+liabilities are the outstanding principal of active loans. Goals and subscriptions take no part:
+a goal labels money already inside an account (§13), and a future charge is not a debt. The held
+share and the schedule come from their own features — reused, not recomputed.
 """
 
 from calendar import monthrange

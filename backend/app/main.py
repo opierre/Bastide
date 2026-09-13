@@ -30,7 +30,6 @@ from app.features.properties.router import router as properties_router
 from app.features.recurring.router import router as recurring_router
 from app.features.rules.router import router as rules_router
 from app.features.settings.router import router as settings_router
-from app.features.tax.router import router as tax_router
 from app.features.transactions.router import router as transactions_router
 
 
@@ -91,7 +90,6 @@ def create_app() -> FastAPI:
     app.include_router(mortgages_router)
     app.include_router(simulations_router)
     app.include_router(properties_router)
-    app.include_router(tax_router)
     app.include_router(networth_router)
 
     return app

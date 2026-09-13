@@ -47,7 +47,6 @@ Finder _inTopBar(Finder finder) =>
 
 const _patrimoine = [
   ('/mortgages', NavGlyph.house),
-  ('/tax', NavGlyph.percent),
   ('/simulations', NavGlyph.calculator),
   ('/networth', NavGlyph.pie),
 ];
@@ -67,7 +66,6 @@ void main() {
         'Objectifs',
         'PATRIMOINE',
         'Crédits',
-        'Impôts',
         'Simulateur',
         'Synthèse',
         'Paramètres',
@@ -76,7 +74,8 @@ void main() {
       for (var i = 1; i < order.length; i++) {
         expect(top(order[i]), greaterThan(top(order[i - 1])), reason: order[i]);
       }
-      expect(find.byType(NavGlyphIcon), findsNWidgets(4));
+      expect(find.byType(NavGlyphIcon), findsNWidgets(3));
+      expect(_inSidebar(find.text('Impôts')), findsNothing);
     },
   );
 
@@ -103,7 +102,6 @@ void main() {
       _useFrame(tester);
       const expected = {
         '/mortgages': ('Crédits', 'Vos emprunts, leur coût et votre capacité'),
-        '/tax': ('Impôts', 'Une estimation, pas une déclaration'),
         '/simulations': ('Simulateur', "Ce qu'un nouveau crédit changerait"),
         '/networth': ('Synthèse', 'Ce que vous possédez, ce que vous devez'),
       };
@@ -127,13 +125,7 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      for (final label in [
-        'WEALTH',
-        'Loans',
-        'Taxes',
-        'Simulator',
-        'Net worth',
-      ]) {
+      for (final label in ['WEALTH', 'Loans', 'Simulator', 'Net worth']) {
         expect(_inSidebar(find.text(label)), findsOneWidget, reason: label);
       }
       expect(_inTopBar(find.text('Net worth')), findsOneWidget);
@@ -147,13 +139,13 @@ void main() {
   );
 
   testWidgets(
-    'the collapsed rail carries the four glyphs and a hairline at each group boundary',
+    'the collapsed rail carries the three glyphs and a hairline at each group boundary',
     (tester) async {
       _useFrame(tester);
-      await tester.pumpWidget(_shell(path: '/tax', collapsed: true));
+      await tester.pumpWidget(_shell(path: '/simulations', collapsed: true));
       await tester.pumpAndSettle();
 
-      expect(find.byType(NavGlyphIcon), findsNWidgets(4));
+      expect(find.byType(NavGlyphIcon), findsNWidgets(3));
       expect(find.text('PATRIMOINE'), findsNothing);
       // Aperçu/Gestion, Gestion/Patrimoine, and one before Paramètres.
       expect(find.byType(NavRailSeparator), findsNWidgets(3));

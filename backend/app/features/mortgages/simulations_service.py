@@ -30,10 +30,9 @@ from app.features.mortgages.schemas import (
 )
 from app.features.mortgages.service import (
     ACTIVE,
-    HCSF_LIMIT_KEY,
+    HCSF_LIMIT_BPS,
     MortgageFeesExceedPrincipalError,
     MortgageNonAmortizingError,
-    MortgageParameterMissingError,
     MortgageService,
     monthly_payment_minor,
     ratio_bps,
@@ -43,8 +42,9 @@ from app.features.mortgages.service import (
 _BPS_PER_UNIT = 10_000
 _MONTHS_PER_YEAR = 12
 
-#: The seeded §15 maximum term the simulation's duration is read against.
-HCSF_MAX_TERM_KEY = "hcsf_max_term_months_count"
+#: The §15 maximum term the simulation's duration is read against: 25 years — the same HCSF
+#: decision (the 27-year VEFA allowance for deferred amortisation is not modelled).
+HCSF_MAX_TERM_MONTHS = 300
 
 #: The panel compares at most 3 (§17); an unbounded list is a list nobody curates.
 MAX_SIMULATIONS_PER_USER = 20
@@ -233,10 +233,9 @@ class SimulationService:
         Raises:
             MortgageFeesExceedPrincipalError: the fees are not smaller than the principal.
             MortgageNonAmortizingError: the instalment does not repay the principal.
-            MortgageParameterMissingError: an HCSF reference is neither seeded nor overridden.
         """
-        limit_bps = self._parameter(user.id, HCSF_LIMIT_KEY)
-        max_term_months = self._parameter(user.id, HCSF_MAX_TERM_KEY)
+        limit_bps = HCSF_LIMIT_BPS
+        max_term_months = HCSF_MAX_TERM_MONTHS
         first_on = first_payment_date(today)
 
         schedule = simulated_schedule(
@@ -343,9 +342,3 @@ class SimulationService:
             else:
                 high = middle
         return low
-
-    def _parameter(self, user_id: str, key: str) -> int:
-        value = self._mortgages.parameter_int(user_id, key)
-        if value is None:
-            raise MortgageParameterMissingError(f"Parameter '{key}' is not seeded.")
-        return value

@@ -154,8 +154,8 @@ class AppShell extends ConsumerWidget {
       ],
     ),
     // Phase 3 « Patrimoine », after Gestion and before the pinned Paramètres
-    // (`docs/design/00` §Phase 3 additions). The 3 + 4 + 4 + 1 stack still
-    // fits 900 px at the 40 px pill rhythm, so no token changes with it.
+    // (`docs/design/00` §Phase 3 additions). The 3 + 4 + 3 + 1 stack fits
+    // 900 px at the 40 px pill rhythm, so no token changes with it.
     NavSectionSpec(
       label: l10n.navSectionWealth,
       destinations: [
@@ -164,12 +164,6 @@ class AppShell extends ConsumerWidget {
           glyph: NavGlyph.house,
           label: l10n.navMortgages,
           subtitle: l10n.navMortgagesSubtitle,
-        ),
-        NavDestinationSpec.drawn(
-          path: '/tax',
-          glyph: NavGlyph.percent,
-          label: l10n.navTax,
-          subtitle: l10n.navTaxSubtitle,
         ),
         NavDestinationSpec.drawn(
           path: '/simulations',
@@ -544,7 +538,7 @@ class NavRailSeparator extends StatelessWidget {
 }
 
 /// The drawn nav glyphs of the Phase 3 « Patrimoine » group.
-enum NavGlyph { house, percent, calculator, pie }
+enum NavGlyph { house, calculator, pie }
 
 /// An 18 px line glyph on the frames' 18-unit grid: 1.5 px stroke with round
 /// caps, and a filled silhouette of the same glyph when [filled] — the same
@@ -632,17 +626,6 @@ class _NavGlyphPainter extends CustomPainter {
           canvas.drawRect(const Rect.fromLTRB(7.2, 10.8, 10.8, 16), clear);
         } else {
           canvas.drawPath(door, stroke);
-        }
-      case NavGlyph.percent:
-        // `M4.5 13.5l9-9` + 1.8-radius rings at 5.8,5.6 and 12.2,12.4
-        // (`13-impots.md` §Nav).
-        canvas.drawLine(
-          const Offset(4.5, 13.5),
-          const Offset(13.5, 4.5),
-          stroke,
-        );
-        for (final center in const [Offset(5.8, 5.6), Offset(12.2, 12.4)]) {
-          shape(Path()..addOval(Rect.fromCircle(center: center, radius: 1.8)));
         }
       case NavGlyph.calculator:
         // Rounded rect, display bar, 3 × 2 key dots (`14-simulateur.md` §Nav).

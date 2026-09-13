@@ -298,10 +298,7 @@ SYSTEM_CATEGORIES: tuple[CategorySeed, ...] = (
         _REVENUS,
         children=(
             CategorySeed("category.income.salary", "Salaire", "Salary", "income", "work", _REVENUS),
-            # Retraite, dividendes and the existing Salaire are the three ledger categories
-            # `/tax/prefill` reads a declared income from (PROJECT.md §5c). They are catalog
-            # entries rather than a tax-only lookup because a pension and a dividend are
-            # ordinary income a user categorises whether or not they ever open the Impôts panel.
+            # A pension and a dividend are ordinary income a user categorises beside a salary.
             CategorySeed(
                 "category.income.pension",
                 "Retraite",

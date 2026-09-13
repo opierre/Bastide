@@ -17,9 +17,6 @@ class BackupCounts(BaseModel):
     mortgages: int
     properties: int
     simulations: int
-    tax_profiles: int
-    #: The user's own tax brackets and parameters together — overrides of the official values.
-    tax_overrides: int
 
 
 class BackupSummary(BaseModel):

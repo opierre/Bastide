@@ -2681,7 +2681,7 @@ abstract class AppLocalizations {
   /// Caption under the export row's label: what the file contains.
   ///
   /// In fr, this message translates to:
-  /// **'Fichier .finstride — comptes, transactions, catégories, règles, objectifs, crédits, biens, impôts, paramètres.'**
+  /// **'Fichier .finstride — comptes, transactions, catégories, règles, objectifs, crédits, biens, paramètres.'**
   String get settingsBackupExportCaption;
 
   /// Replaces the export caption while the archive is being built.
@@ -2874,18 +2874,6 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Simulations'**
   String get settingsBackupConfirmSimulations;
-
-  /// Summary row: number of tax profiles (one per tax year).
-  ///
-  /// In fr, this message translates to:
-  /// **'Profils fiscaux'**
-  String get settingsBackupConfirmTaxProfiles;
-
-  /// Summary row: the user's own tax brackets and parameters together — the official values are not counted.
-  ///
-  /// In fr, this message translates to:
-  /// **'Paramètres fiscaux personnalisés'**
-  String get settingsBackupConfirmTaxOverrides;
 
   /// Warning callout in the restore modal.
   ///
@@ -3843,7 +3831,7 @@ abstract class AppLocalizations {
   /// What a database reset deletes, and what it leaves alone.
   ///
   /// In fr, this message translates to:
-  /// **'Réinitialiser la base de données supprime transactions, comptes, règles, catégories personnalisées, objectifs, abonnements, crédits, biens, simulations et données fiscales de ce profil. Les sauvegardes exportées ne sont pas touchées.'**
+  /// **'Réinitialiser la base de données supprime transactions, comptes, règles, catégories personnalisées, objectifs, abonnements, crédits, biens et simulations de ce profil. Les sauvegardes exportées ne sont pas touchées.'**
   String get settingsResetSubtitle;
 
   /// Outline danger button opening the reset confirmation.
@@ -3918,7 +3906,7 @@ abstract class AppLocalizations {
   /// **'La réinitialisation a échoué. Vos données n\'ont pas été modifiées.'**
   String get settingsResetErrorUnknown;
 
-  /// Left nav section heading grouping the loans, taxes, simulator and net-worth destinations (Phase 3). Rendered uppercase.
+  /// Left nav section heading grouping the loans, simulator and net-worth destinations (Phase 3). Rendered uppercase.
   ///
   /// In fr, this message translates to:
   /// **'Patrimoine'**
@@ -3935,18 +3923,6 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Vos emprunts, leur coût et votre capacité'**
   String get navMortgagesSubtitle;
-
-  /// Left nav label for the tax estimation screen.
-  ///
-  /// In fr, this message translates to:
-  /// **'Impôts'**
-  String get navTax;
-
-  /// Top-bar descriptor under the tax panel title.
-  ///
-  /// In fr, this message translates to:
-  /// **'Une estimation, pas une déclaration'**
-  String get navTaxSubtitle;
 
   /// Left nav label for the new-loan simulator screen.
   ///

@@ -20,14 +20,13 @@ FORMAT_VERSION = 2
 MANIFEST_NAME = "manifest.json"
 
 #: The format version that first archived each table; tables absent here date from version 1.
-#: An older archive has no member for a newer table, and restores it as empty.
+#: An older archive has no member for a newer table, and restores it as empty. A member for a
+#: table that no longer exists (the format-2 `tax_*` tables) is ignored: restore reads only the
+#: tables this build knows.
 TABLE_SINCE_VERSION: dict[str, int] = {
     "properties": 2,
     "mortgages": 2,
     "mortgage_simulations": 2,
-    "tax_profiles": 2,
-    "tax_brackets": 2,
-    "tax_parameters": 2,
 }
 
 

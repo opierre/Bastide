@@ -157,8 +157,8 @@ might reshape. To advance:
      `ai-categorization` skill already defines the rules→model→confidence→review flow and the
      graceful-degradation-without-Ollama requirement, so the cards mostly wire it up + build the
      review UI (the queue already exists from P1-13).
-   - **Phase 3 (mortgages + tax):** tax logic changes yearly and is estimation-first — keep each
-     fiscal year's rules versioned/dated so they can be updated without touching engine code.
+   - **Phase 3 (mortgages + net worth):** French tax estimation was scoped out — its rules change
+     yearly and cost more upkeep than the estimate was worth.
    - **Phase 4 (multi-user + cloud sync):** this is where SQLite → PostgreSQL happens. Because the
      code went through SQLAlchemy + Alembic with integer-minor-units and per-account `currency`
      columns from day one (see `database` + `multi-currency` skills), it's a dialect/connection

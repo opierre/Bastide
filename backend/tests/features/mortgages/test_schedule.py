@@ -7,19 +7,14 @@ engine itself — the endpoint must never become a second formula.
 import calendar
 from collections import defaultdict
 from datetime import date
-from pathlib import Path
 from typing import cast
 
 import pytest
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
 
 from app.features.mortgages.engine import RepaymentType, Schedule, build_schedule
 from app.features.mortgages.router import get_today
-from app.features.tax.models import TaxParameter
-from app.features.tax.seed import SYSTEM_LENDING_PARAMETERS, SYSTEM_TAX_SEED
 
 TODAY = date(2026, 5, 15)
 
@@ -293,24 +288,6 @@ WORKS_OVERRIDES = {
 }
 
 
-def seed_hcsf(tmp_path: Path) -> None:
-    """The summary reads the seeded reference; the client database is built from metadata."""
-    engine = create_engine(f"sqlite:///{tmp_path / 'test.db'}")
-    with sessionmaker(bind=engine)() as session:
-        for key, parameter in SYSTEM_LENDING_PARAMETERS.items():
-            session.add(
-                TaxParameter(
-                    user_id=None,
-                    tax_year=SYSTEM_TAX_SEED.tax_year,
-                    key=key,
-                    int_value=parameter.int_value,
-                    unit=parameter.unit,
-                )
-            )
-        session.commit()
-    engine.dispose()
-
-
 def month_end(key: str) -> date:
     year, month = int(key[:4]), int(key[5:])
     return date(year, month, calendar.monthrange(year, month)[1])
@@ -324,10 +301,7 @@ def outstanding_in(schedule: Schedule, key: str) -> int:
     return schedule.outstanding_at(end)
 
 
-def test_the_series_reconciles_with_each_loans_own_schedule(
-    client: TestClient, tmp_path: Path
-) -> None:
-    seed_hcsf(tmp_path)
+def test_the_series_reconciles_with_each_loans_own_schedule(client: TestClient) -> None:
     headers = register(client)
     home = create_loan(client, headers)
     works = create_loan(client, headers, **WORKS_OVERRIDES)
@@ -369,9 +343,8 @@ def test_the_series_reconciles_with_each_loans_own_schedule(
 
 
 def test_the_series_of_a_single_future_loan_starts_at_its_first_payment(
-    client: TestClient, tmp_path: Path
+    client: TestClient,
 ) -> None:
-    seed_hcsf(tmp_path)
     headers = register(client)
     create_loan(client, headers, first_payment_date="2027-01-10", term_months=24)
 

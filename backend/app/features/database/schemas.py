@@ -19,10 +19,6 @@ class DatabaseCounts(BaseModel):
     mortgages: int
     properties: int
     simulations: int
-    tax_profiles: int
-    #: The user's own tax brackets and parameters together; the official system rows are the
-    #: install's and survive a reset.
-    tax_overrides: int
 
 
 class DatabaseSummary(BaseModel):

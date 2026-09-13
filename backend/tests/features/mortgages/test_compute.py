@@ -19,8 +19,6 @@ from sqlalchemy.orm import Session, sessionmaker
 from app.features.mortgages.models import Mortgage, MortgageSimulation
 from app.features.mortgages.router import get_today
 from app.features.settings.models import UserSettings
-from app.features.tax.models import TaxParameter
-from app.features.tax.seed import SYSTEM_LENDING_PARAMETERS, SYSTEM_TAX_SEED
 
 TODAY = date(2026, 5, 15)
 #: The first instalment of a loan simulated on TODAY.
@@ -55,23 +53,6 @@ INCOME = 460_000
 @pytest.fixture(autouse=True)
 def pinned_today(client: TestClient) -> None:
     cast(FastAPI, client.app).dependency_overrides[get_today] = lambda: TODAY
-
-
-@pytest.fixture(autouse=True)
-def seeded_lending_parameters(client: TestClient, tmp_path: Path) -> None:
-    """The client database is built from metadata, so the seed migrations' rows are added here."""
-    with db(tmp_path) as session:
-        for key, parameter in SYSTEM_LENDING_PARAMETERS.items():
-            session.add(
-                TaxParameter(
-                    user_id=None,
-                    tax_year=SYSTEM_TAX_SEED.tax_year,
-                    key=key,
-                    int_value=parameter.int_value,
-                    unit=parameter.unit,
-                )
-            )
-        session.commit()
 
 
 def db(tmp_path: Path) -> Session:
@@ -381,19 +362,6 @@ def test_a_ratio_on_the_limit_is_within_it(client: TestClient, tmp_path: Path) -
 
     assert body["debt_ratio_bps"] == 5_000
     assert body["hcsf"]["within_ratio"] is False
-    with db(tmp_path) as session:
-        user_id = str(client.get("/api/v1/auth/me", headers=headers).json()["user"]["id"])
-        session.add(
-            TaxParameter(
-                user_id=user_id,
-                tax_year=SYSTEM_TAX_SEED.tax_year,
-                key="hcsf_limit_bps",
-                int_value=5_000,
-                unit="bps",
-            )
-        )
-        session.commit()
-    assert compute(client, headers)["hcsf"]["within_ratio"] is True
 
 
 # --- validation ------------------------------------------------------------------------------

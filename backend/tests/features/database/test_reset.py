@@ -18,7 +18,6 @@ from app.features.properties.models import Property
 from app.features.recurring.models import RecurringSeries
 from app.features.rules.models import CategorizationRule
 from app.features.settings.models import UserSettings
-from app.features.tax.models import TaxBracket, TaxParameter, TaxProfile
 from app.features.transactions.models import Transaction
 
 
@@ -166,24 +165,6 @@ def _seed(db: Session, email: str) -> dict[str, str]:
                 term_months=240,
                 upfront_fees_minor=150_000,
             ),
-            TaxProfile(
-                user_id=user.id, tax_year=2025, household="single", salaries_minor=4_200_000
-            ),
-            TaxBracket(
-                user_id=user.id,
-                tax_year=2025,
-                kind="ir",
-                ordinal=0,
-                lower_bound_minor=0,
-                rate_bps=0,
-            ),
-            TaxParameter(
-                user_id=user.id,
-                tax_year=2025,
-                key="pfu_income_tax_bps",
-                int_value=1300,
-                unit="bps",
-            ),
         ]
     )
     db.commit()
@@ -215,9 +196,6 @@ def test_summary_counts_the_callers_own_rows(client: TestClient, tmp_path: Path)
         "mortgages": 1,
         "properties": 1,
         "simulations": 1,
-        "tax_profiles": 1,
-        # The user's bracket and parameter together.
-        "tax_overrides": 2,
     }
 
 
@@ -235,16 +213,6 @@ def test_reset_deletes_everything_the_user_owns_and_reports_it(
     headers = _register(client, "amelie@example.com")
     with _session(tmp_path) as db:
         ids = _seed(db, "amelie@example.com")
-        db.add(
-            TaxParameter(
-                user_id=None,
-                tax_year=2025,
-                key="pfu_income_tax_bps",
-                int_value=1280,
-                unit="bps",
-            )
-        )
-        db.commit()
 
     response = client.post("/api/v1/database/reset", headers=headers)
 
@@ -252,11 +220,8 @@ def test_reset_deletes_everything_the_user_owns_and_reports_it(
     # What the confirmation listed, not the empty profile's zeroes.
     assert response.json()["counts"]["transactions"] == 1
     with _session(tmp_path) as db:
-        for model in (Property, Mortgage, MortgageSimulation, TaxProfile, TaxBracket):
+        for model in (Property, Mortgage, MortgageSimulation):
             assert db.scalars(select(model)).all() == []
-        # The user's override went; the install's system parameter stayed.
-        remaining = db.scalars(select(TaxParameter)).all()
-        assert [(row.user_id, row.int_value) for row in remaining] == [(None, 1280)]
         assert db.get(Account, ids["account"]) is None
         assert db.get(Transaction, ids["transaction"]) is None
         assert db.get(Goal, ids["goal"]) is None

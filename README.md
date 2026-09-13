@@ -3,7 +3,7 @@
 A desktop-first personal finance manager (French-first, English second). Import your bank data
 via OFX/QFX/CSV — no direct bank connections — and get a clear, encouraging view of your money:
 accounts, transactions, monthly income/expense with trend, categories, savings rate, and (in
-later phases) goals, mortgages, French tax estimation, and projections. Local-first and
+later phases) goals, mortgages, projections and net worth. Local-first and
 privacy-first: all data and AI run on your machine.
 
 > **New here? Read [`PROJECT.md`](PROJECT.md) first.** It is the single source of truth for scope,
@@ -58,8 +58,8 @@ execute against them. This keeps token usage low without losing precision.
   OFX/QFX/CSV import + history · transactions · rules-based categorization · dashboard
   (income/expense, MoM trend, savings rate, by-category). Fully specced as `P1-*` cards.
 - **Phase 2:** local SLM categorization + review queue · subscriptions · savings goals.
-- **Phase 3:** mortgages/amortization · French tax estimation (IR + IFI + capital gains/dividends/
-  property) · new-mortgage projection simulator.
+- **Phase 3:** mortgages/amortization · declared properties · new-mortgage projection simulator ·
+  net-worth synthesis.
 - **Phase 4:** multi-user · optional cloud sync (→ PostgreSQL) · per-account multi-currency + FX.
 
 Detail one phase at a time. The procedure to advance is in

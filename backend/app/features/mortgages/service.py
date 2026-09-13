@@ -9,7 +9,7 @@ from collections.abc import Sequence
 from datetime import date
 from typing import Any
 
-from app.core.errors import DomainError, NotFoundError, ValidationError
+from app.core.errors import NotFoundError, ValidationError
 from app.features.auth.models import User
 from app.features.mortgages.engine import (
     NonAmortizingLoanError,
@@ -47,8 +47,9 @@ DEFAULT_STATUSES: tuple[MortgageStatus, ...] = ("active", "repaid")
 _BPS_PER_UNIT = 10_000
 _MONTHS_PER_YEAR = 12
 
-#: The seeded §15 reference the ratio is read against.
-HCSF_LIMIT_KEY = "hcsf_limit_bps"
+#: The §15 debt-ratio reference the ratio is read against: 35 %, insurance included — HCSF
+#: décision n° D-HCSF-2021-7 du 29 septembre 2021, binding on lenders since 1 January 2022.
+HCSF_LIMIT_BPS = 3500
 
 #: How many complete months back the ledger income median looks.
 LEDGER_INCOME_MONTHS = 12
@@ -100,12 +101,6 @@ class MortgageScheduleWindowInvalidError(ValidationError):
     """Raised when a schedule window's `from` falls after its `to`."""
 
     code = "MORTGAGE_SCHEDULE_WINDOW_INVALID"
-
-
-class MortgageParameterMissingError(DomainError):
-    """Raised when a seeded reference parameter is absent: a broken install, not a user error."""
-
-    code = "MORTGAGE_PARAMETER_MISSING"
 
 
 def schedule_for(mortgage: Mortgage) -> Schedule:
@@ -376,13 +371,8 @@ class MortgageService:
 
         Archived and repaid loans take no part in any figure. Each loan's schedule is built once
         and shared by its figures and the series.
-
-        Raises:
-            MortgageParameterMissingError: `hcsf_limit_bps` is neither seeded nor overridden.
         """
-        hcsf_limit_bps = self._repository.parameter_int(user.id, HCSF_LIMIT_KEY)
-        if hcsf_limit_bps is None:
-            raise MortgageParameterMissingError(f"Parameter '{HCSF_LIMIT_KEY}' is not seeded.")
+        hcsf_limit_bps = HCSF_LIMIT_BPS
 
         loans = [
             (mortgage, schedule_for(mortgage))

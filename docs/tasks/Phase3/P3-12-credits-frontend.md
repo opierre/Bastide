@@ -63,8 +63,8 @@ amortisation table with its year navigation, and the loan form.
    lock glyph) updates **live** as the fields change — feed it from a debounced
    `POST /simulations/compute` (P3-09, stateless and free to call), never from a payment formula
    written in Dart. `« Modifier »` opens the same modal prefilled, and deletion lives inside it as
-   a secondary text button whose confirmation names both consequences: the loan leaves Synthèse's
-   passif and leaves the IFI base when it was linked to a property.
+   a secondary text button whose confirmation names the consequence: the loan leaves Synthèse's
+   passif.
 5b. The frame's « Type » select is `mortgages.kind` (§4c): `mortgage` / `works` / `consumer` /
    `auto`, labelled from ARB in fr and en — the backend stores the machine value only. It is a
    **separate axis from `repayment_type`**, which stays its own control; a works loan can be
