@@ -4,7 +4,7 @@ import 'dart:typed_data';
 import 'package:http/http.dart' as http;
 
 /// Typed failure mapped from the backend's `{error:{code,message,details}}`
-/// envelope (see `PROJECT.md` §5). `code` is a stable, translatable key the
+/// envelope. `code` is a stable, translatable key the
 /// frontend maps to a localized message.
 class ApiFailure implements Exception {
   const ApiFailure({required this.code, required this.message, this.details});
@@ -61,7 +61,7 @@ class ApiClient {
   /// Uploads a file alongside flat form fields (`POST /imports`).
   ///
   /// Multipart rather than JSON because the backend takes the statement file as
-  /// an `UploadFile` — see `PROJECT.md` §5. The `Content-Type` header is left to
+  /// an `UploadFile`. The `Content-Type` header is left to
   /// [http.MultipartRequest], which has to append the generated boundary to it.
   Future<dynamic> postMultipart(
     String path, {

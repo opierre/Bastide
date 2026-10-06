@@ -16,7 +16,7 @@ class BackupTooNewError(ValidationError):
 
 
 class BackupCurrencyMismatchError(ValidationError):
-    """The archive's currency differs from the user's, which Phase 1 cannot represent."""
+    """The archive's currency differs from the user's; the app is single-currency."""
 
     code = "BACKUP_CURRENCY_MISMATCH"
 

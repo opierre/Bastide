@@ -1,6 +1,6 @@
-# 14 — Simulateur (Phase 3)
+# 14 — Simulateur
 
-Everything below is exactly what the mockup frames `14-Simulateur — *` in `FinStride Phase 3 Mockups.dc.html` show. Colors, amounts, order and positions are normative — do not invent. Tokens per `00-shared-design-block.md`.
+Everything below is exactly what the mockup frames `14-Simulateur — *` in the Patrimoine mockup canvas show. Colors, amounts, order and positions are normative — do not invent. Tokens per `00-shared-design-block.md`.
 
 ## Concept (binding)
 Inputs and result stay **on screen together** and the result recomputes on every keystroke. The HCSF block is a **reading**: ratio against 35 %, duration against 25 ans, and the borrowing capacity at the reference — stated with their reference points, in the warning tone when above, **never a refusal and never a lecture**. A small capacity is explained by its cause (the existing loans), calmly. All money and rates are neutral figures.
@@ -16,7 +16,7 @@ Grid `400px minmax(0,1fr)`, gap 18, row capped to content height. Left column: f
 
 ### Form Card (padding 18/20)
 Title « Nouveau crédit », sub « Le résultat se recalcule à chaque saisie ». FormField grid 2 columns (gap 12/14), amounts right-aligned tabular: Prix du bien **320 000,00 €** (focused) · Apport 40 000,00 € · Frais 4 500,00 € · Montant emprunté 284 500,00 € with a 16 px gray pill « DÉRIVÉ » (= prix − apport + frais, still editable; editing it stops the derivation until prix/apport change again) · Taux nominal 3,25 % · Assurance / mois 32,00 €.
-**Durée Slider**: label « Durée » ⟷ value « 300 mois · 25 ans » 13/700; 5 px track `#1E2634`, iris gradient fill, 16 px `#EDF1F7` thumb (Phase 2 Slider); range 60–360 mois (labels « 5 ans » / « 30 ans »), step 12.
+**Durée Slider**: label « Durée » ⟷ value « 300 mois · 25 ans » 13/700; 5 px track `#1E2634`, iris gradient fill, 16 px `#EDF1F7` thumb (shared Slider); range 60–360 mois (labels « 5 ans » / « 30 ans »), step 12.
 **Toggle** « Inclure mes crédits actuels » + sub « Ajoute 1 506,25 € / mois à la lecture » — off in ①, on in ② (iris gradient track, knob `#EDF1F7` right).
 
 ### Scenarios Card

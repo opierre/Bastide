@@ -1,4 +1,4 @@
-"""add phase2 tables
+"""add goals, recurring and categorization run tables
 
 Revision ID: 69c99438379e
 Revises: e4a1c6f20b73
@@ -19,7 +19,7 @@ depends_on: str | Sequence[str] | None = None
 
 
 def upgrade() -> None:
-    """Create the Phase 2 tables: goals, recurring series, and categorization runs.
+    """Create the goals, recurring series, and categorization runs tables.
 
     Tables are created parent-first so every foreign key has its target. The two cascading
     FKs (`goal_allocations.goal_id`, `recurring_occurrences.transaction_id`) and the two
@@ -162,7 +162,7 @@ def upgrade() -> None:
 
 
 def downgrade() -> None:
-    """Drop the Phase 2 tables, children before parents so no FK is left dangling."""
+    """Drop these tables, children before parents so no FK is left dangling."""
     with op.batch_alter_table("categorization_runs", schema=None) as batch_op:
         batch_op.drop_index("ix_categorization_runs_user_created_at")
 

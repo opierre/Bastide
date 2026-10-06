@@ -19,7 +19,7 @@ class CategorizationRepository {
 
   /// Starts a run and returns it immediately (202). Asking while one is in
   /// flight returns that run instead of starting a second — one run at a time
-  /// per user (PROJECT.md §7), so the caller polls whatever comes back.
+  /// per user, so the caller polls whatever comes back.
   Future<CategorizationRun> startRun({
     String? accountId,
     required RunScope scope,

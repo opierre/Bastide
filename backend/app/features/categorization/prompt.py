@@ -4,7 +4,7 @@ Token discipline and privacy pull the same way here, so the prompt carries the *
 model needs to pick a category: the cleaned label, the merchant, the amount's sign and its
 absolute value. `description_raw`, `memo`, account ids and user ids are deliberately never
 rendered — they cost tokens, they help the model none, and they are the fields we least want
-leaving the row's own process boundary (`PROJECT.md` §3, local-first).
+leaving the row's own process boundary (local-first).
 
 Rows are correlated with the reply by their **index in the batch**, never by transaction id:
 sending UUIDs buys nothing the model can use and invites it to invent one.
@@ -29,8 +29,8 @@ REPLY_SCHEMA_NAME = "categorization_suggestions"
 class PromptCategory:
     """One selectable category, as the prompt offers it: id, localized name, kind.
 
-    ``name`` is already localized — system categories store an i18n key in the database
-    (`PROJECT.md` §4), so resolving it needs a locale the pure decision layer does not
+    ``name`` is already localized — system categories store an i18n key in the database,
+    so resolving it needs a locale the pure decision layer does not
     carry. `leaf_categories` does that resolution for the caller.
     """
 
@@ -123,7 +123,7 @@ def build_response_format() -> dict[str, Any]:
     """Return the `response_format` asking the runtime to constrain output to the reply shape.
 
     Requested, never relied on: support varies by runtime and build, so the parser treats
-    anything unusable as a deferral regardless (`PROJECT.md` §7).
+    anything unusable as a deferral regardless.
     """
     return {
         "type": "json_schema",
@@ -202,7 +202,7 @@ def _render_fields(description_clean: str, merchant: str | None, amount_minor: i
     """Render a row's visible fields: label, merchant, direction, magnitude.
 
     The signed minor-unit amount is split into a direction word and its absolute value: the
-    sign is the part that carries categorisation signal (`PROJECT.md` §8), and a bare "-4235"
+    sign is the part that carries categorisation signal, and a bare "-4235"
     invites a small model to reason about the minus rather than about the merchant.
     """
     direction = "in" if amount_minor >= 0 else "out"

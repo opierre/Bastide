@@ -81,8 +81,8 @@ Map<String, dynamic> _settingsJson({required bool aiEnabled}) => {
   'confidence_threshold': 0.8,
 };
 
-/// Step 8 of the card: turning the toggle off has to return the `07` review
-/// queue to its Phase 1 rendering with the calm invitation — not merely persist
+/// Turning the toggle off has to return the `07` review
+/// queue to its rules-only rendering with the calm invitation — not merely persist
 /// a boolean. Both live in one tree here, sharing the real availability
 /// provider, because that is the only way the wiring between them is actually
 /// exercised.
@@ -90,7 +90,7 @@ void main() {
   setUpAll(() => registerFallbackValue(<String, dynamic>{}));
 
   testWidgets(
-    'turning AI off returns the review queue to its Phase 1 rendering',
+    'turning AI off returns the review queue to its rules-only rendering',
     (tester) async {
       tester.view.physicalSize = const Size(1440, 1400);
       tester.view.devicePixelRatio = 1.0;

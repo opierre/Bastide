@@ -20,7 +20,7 @@
 ## Structure
 
 - `lib/core/` — theme, router, API client, l10n, utilities.
-- `lib/features/` — auth, accounts, imports, transactions, categories, dashboard. Each feature owns its screens, controllers, providers, and widgets.
+- `lib/features/` — one folder per feature (accounts, imports, transactions, rules, recurring, goals, mortgages, simulator, networth, …). Each feature owns its screens, controllers, providers, and widgets.
 - `l10n/` — ARB files for translations (French and English).
 - `test/` — flutter_test, mocktail.
 - `main.dart` — entry point.
@@ -39,4 +39,4 @@
 ## See also
 
 - Root `CLAUDE.md` for global conventions.
-- `PROJECT.md` for the design system, API contract, and architectural overview.
+- `docs/api.md` for the generated endpoint reference; `docs/design/` for the binding design specs.

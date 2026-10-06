@@ -5,7 +5,7 @@ import '../theme/app_theme.dart';
 import '../theme/tokens.dart';
 
 /// Locale-formatted, tabular-figure money text with the sign color rule
-/// (income positive = green, expense negative = red — see `PROJECT.md` §9).
+/// (income positive = green, expense negative = red).
 /// Takes the canonical integer-minor-units + currency code and formats only
 /// here, at the presentation edge — see the flutter-frontend skill.
 class AmountText extends StatelessWidget {

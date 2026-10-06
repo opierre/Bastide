@@ -47,7 +47,7 @@ French first, English second, both from day one. No string ships hardcoded.
 A feature is not done until: every new user-facing string has fr + en ARB entries; every new
 error `code` has a localized frontend message; all dates/numbers/money use locale-aware
 formatters; and switching the app locale changes everything with no leftover English (or French)
-literals. This is part of the project-wide Definition of Done (`PROJECT.md` §11).
+literals. This is part of the project-wide Definition of Done.
 
 ## Testing
 

@@ -16,7 +16,7 @@ import 'networth_summary_card.dart';
 ///
 /// The chart must not look like it knows something it doesn't: a property has
 /// one declared value, so the banner says values are held flat and names the
-/// oldest estimate (§18), and a month the API omitted is simply not drawn.
+/// oldest estimate, and a month the API omitted is simply not drawn.
 class NetworthSeriesCard extends StatelessWidget {
   const NetworthSeriesCard({super.key, required this.summary});
 

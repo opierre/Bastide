@@ -1,6 +1,6 @@
 """The recurring-charge detection algorithm. Pure — no DB access.
 
-`PROJECT.md` §12, implemented literally: group a user's outflows per account by merchant key,
+Group a user's outflows per account by merchant key,
 qualify a group as a series only when both its cadence and its amounts are regular, and report
 a price change when the newest charge steps outside the tolerance the earlier ones agree on.
 
@@ -20,7 +20,7 @@ from app.features.recurring.normalize import merchant_key
 from app.features.recurring.schemas import DetectedCadence
 from app.features.transactions.models import Transaction
 
-#: Two charges are a coincidence; three are a rhythm (`PROJECT.md` §12).
+#: Two charges are a coincidence; three are a rhythm.
 MIN_OCCURRENCES = 3
 
 #: Inclusive day bands classifying the median gap. A median outside every band is not a cadence
@@ -196,7 +196,7 @@ def _label(occurrences: Sequence[Transaction]) -> str:
     """The prettiest observed merchant: the most frequent label, the shortest one when tied.
 
     Only the default a new series is created with — the user renames it and detection never
-    writes over that (`PROJECT.md` §12).
+    writes over that.
     """
     counts = Counter(
         label

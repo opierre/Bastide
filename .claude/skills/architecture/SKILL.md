@@ -6,20 +6,20 @@ description: Use whenever creating or moving files, adding a feature, wiring the
 # Architecture
 
 Authoritative source for *where code goes* and *what may depend on what* in this monorepo.
-Read `PROJECT.md` §3 for the canonical layout; this skill is the enforceable rule set.
+This skill is the enforceable rule set.
 
 ## Non-negotiables
 
 - **Monorepo, two packages.** `backend/` (Python/FastAPI) and `frontend/` (Flutter). Shared
-  docs/skills live at the root. Never create a third top-level code package without updating
-  `PROJECT.md` first.
+  docs/skills live at the root. Never create a third top-level code package without asking
+  the user first.
 - **Local sidecar coupling.** The Flutter app launches and supervises the FastAPI process,
   which listens on `127.0.0.1` only. **Never bind `0.0.0.0`.** No code assumes a remote server.
 - **Feature-first, vertical slices.** A feature owns everything it needs. Cross-feature reach-in
   is forbidden — features talk through well-defined service interfaces or the API, never by
   importing each other's internals.
-- **Local-first.** No network calls except (Phase 2) the local Ollama endpoint and (opt-in)
-  ECB FX later. No telemetry, no cloud calls in Phase 1–3.
+- **Local-first.** No network calls except the opt-in local inference runtime on loopback.
+  No telemetry, no cloud calls.
 
 ## Backend layering (strict, one direction)
 
@@ -88,8 +88,8 @@ invariants, not feature-owned.
 
 ## API contract is the boundary
 
-The REST contract in `PROJECT.md` §5 is the single source of truth shared by both packages.
-When it changes: update `PROJECT.md` first, then backend schema, then frontend DTO — ideally in
+The backend's Pydantic schemas are the single source of truth for the REST contract shared by
+both packages (listed in the generated `docs/api.md`). When it changes: backend schema first, then frontend DTO — ideally in
 one commit (`feat(api): ...`) so the two sides never drift. Generate the frontend client from
 the backend's OpenAPI where practical rather than hand-maintaining two copies.
 
@@ -99,4 +99,4 @@ the backend's OpenAPI where practical rather than hand-maintaining two copies.
 - Logic needed by two features? Extract a service; do not import one feature from another.
 - Tempted to call the DB from a route or an HTTP client from a widget? Stop — that violates
   layering. Route the call through the proper layer.
-- A decision not covered here or in `PROJECT.md`? Surface it to the user instead of guessing.
+- A decision not covered by the skills? Surface it to the user instead of guessing.

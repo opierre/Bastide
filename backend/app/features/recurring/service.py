@@ -1,8 +1,8 @@
 """Business logic for recurring series: the detection pass, and the lifecycle above it.
 
 Two services, because they answer to different rules. `RecurringDetectionService` runs the
-detector and persists what it found, under idempotence and the primacy of user intent
-(`PROJECT.md` §12): running detection twice over unchanged history must leave the same rows
+detector and persists what it found, under idempotence and the primacy of user intent:
+running detection twice over unchanged history must leave the same rows
 behind as running it once, and must never talk back to a user who has already had their say.
 `RecurringService` *is* the user — listing, editing, the status lifecycle, and the read-time
 summary — and its only constraint is that the states it writes are states the lifecycle allows.
@@ -238,8 +238,8 @@ NOMINAL_INTERVAL_DAYS: dict[str, int] = {
     "irregular": 0,
 }
 
-#: Numerator and denominator converting one cadence's charge to a monthly figure
-#: (`PROJECT.md` §12). `irregular` is absent: a series with no period has no monthly equivalent,
+#: Numerator and denominator converting one cadence's charge to a monthly figure.
+#: `irregular` is absent: a series with no period has no monthly equivalent,
 #: and inventing one would put a number the user never agreed to into the burden.
 MONTHLY_FACTORS: dict[str, tuple[int, int]] = {
     "weekly": (52, 12),
@@ -255,7 +255,7 @@ PRICE_INCREASE_WINDOW_DAYS = 90
 def monthly_equivalent_minor(amount_minor: int, cadence: str) -> int | None:
     """``amount_minor`` charged at ``cadence`` as a monthly figure, or `None` if it has none.
 
-    Integer minor units throughout (`PROJECT.md` §8): the conversion is one exact rational
+    Integer minor units throughout: the conversion is one exact rational
     multiplication rounded once, never a float that would carry its own error into a sum.
     """
     factors = MONTHLY_FACTORS.get(cadence)
@@ -279,7 +279,7 @@ def _divide_rounding_half_away(numerator: int, denominator: int) -> int:
 def missed_tolerance_days(median_interval_days: int) -> int:
     """How late a charge may be before it counts as missed, for a series of this interval.
 
-    The detector's own gap tolerance (`PROJECT.md` §12), reused deliberately: a charge still
+    The detector's own gap tolerance, reused deliberately: a charge still
     within the spread detection accepts between two occurrences has not gone missing, it has
     landed on a working day.
     """
@@ -349,7 +349,7 @@ class RecurringService:
         The observed columns have nothing to observe yet, so they are seeded from the creation
         date and the nominal length of the chosen cadence: `occurrence_count` is `0`, and
         `first_seen_date` records when the user started tracking the series rather than claiming
-        when it started. `is_manual` keeps detection off it for good (`PROJECT.md` §12).
+        when it started. `is_manual` keeps detection off it for good.
 
         Raises:
             AccountNotFoundError: the account is not one of the user's.
@@ -452,7 +452,7 @@ class RecurringService:
 
         Everything here is derived at read time and nothing is written: a missed charge stops
         being true the moment the charge lands, so persisting it would mean carrying a flag that
-        is wrong between an import and the next detection pass (`PROJECT.md` §12).
+        is wrong between an import and the next detection pass.
         """
         series = self._repository.list_for_user(user_id)
         active = [row for row in series if row.status in ACTIVE_STATUSES]

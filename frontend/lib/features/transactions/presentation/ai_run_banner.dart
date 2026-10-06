@@ -14,7 +14,7 @@ import '../application/transactions_controller.dart';
 /// Non-blocking by construction: it is a card in the column above the list, not
 /// a modal or an overlay. The list beneath stays interactive, and rows leave it
 /// as the run commits batches — which is the whole point of running stage 2
-/// outside the request that triggered it (PROJECT.md §7).
+/// outside the request that triggered it.
 class AiRunBanner extends ConsumerWidget {
   const AiRunBanner({super.key, required this.run});
 

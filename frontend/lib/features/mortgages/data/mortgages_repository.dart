@@ -143,7 +143,7 @@ class MortgagesRepository {
     return (json['totals'] as Map<String, dynamic>)['interest_minor'] as int;
   }
 
-  /// The stateless simulator run behind the form's live plate (§17: one engine
+  /// The stateless simulator run behind the form's live plate (one engine
   /// for a simulated loan and a declared one).
   Future<ComputedInstalment> compute({
     required int principalMinor,

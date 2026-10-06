@@ -24,7 +24,7 @@ from app.features.rules.models import CategorizationRule
 from app.features.transactions.models import Transaction
 from tests.api import register as _register
 
-PHASE3_MEMBERS = (
+PATRIMOINE_MEMBERS = (
     "properties.jsonl",
     "mortgages.jsonl",
     "mortgage_simulations.jsonl",
@@ -114,7 +114,7 @@ def _seed(db: Session, email: str) -> dict[str, str]:
     return {"user": user.id, "account": account.id, "transaction": transaction.id}
 
 
-def _seed_phase3(db: Session, user_id: str) -> dict[str, str]:
+def _seed_patrimoine(db: Session, user_id: str) -> dict[str, str]:
     """A property with the loan that financed it, and a simulation."""
     home = Property(
         user_id=user_id,
@@ -319,16 +319,16 @@ def test_restore_replaces_the_users_data_with_the_archive(
         assert len(db.scalars(select(GoalAllocation)).all()) == 1
 
 
-def test_backup_round_trips_the_phase3_tables(client: TestClient, tmp_path: Path) -> None:
+def test_backup_round_trips_the_patrimoine_tables(client: TestClient, tmp_path: Path) -> None:
     headers = _register(client, "amelie@example.com")
     with _session(tmp_path) as db:
         user_id = db.scalars(select(User.id).where(User.email == "amelie@example.com")).one()
-        ids = _seed_phase3(db, user_id)
+        ids = _seed_patrimoine(db, user_id)
     content = _export(client, headers)
 
     archive = zipfile.ZipFile(io.BytesIO(content))
     manifest = json.loads(archive.read("manifest.json"))
-    for member in PHASE3_MEMBERS:
+    for member in PATRIMOINE_MEMBERS:
         assert manifest["tables"][member.removesuffix(".jsonl")] == 1
 
     response = _upload(client, "restore", headers, content)
@@ -380,15 +380,15 @@ def test_restore_ignores_the_members_of_the_removed_tax_tables(
         assert db.get(Transaction, ids["transaction"]) is not None
 
 
-def test_restore_of_a_version_1_archive_empties_the_phase3_tables(
+def test_restore_of_a_version_1_archive_empties_the_patrimoine_tables(
     client: TestClient, tmp_path: Path
 ) -> None:
     headers = _register(client, "amelie@example.com")
     with _session(tmp_path) as db:
         ids = _seed(db, "amelie@example.com")
-    older = _drop_members(_export(client, headers), *PHASE3_MEMBERS, format_version=1)
+    older = _drop_members(_export(client, headers), *PATRIMOINE_MEMBERS, format_version=1)
     with _session(tmp_path) as db:
-        _seed_phase3(db, ids["user"])
+        _seed_patrimoine(db, ids["user"])
 
     response = _upload(client, "restore", headers, older)
 
@@ -400,7 +400,7 @@ def test_restore_of_a_version_1_archive_empties_the_phase3_tables(
         assert db.scalars(select(Property)).all() == []
 
 
-def test_restore_rejects_a_version_2_archive_missing_a_phase3_table(client: TestClient) -> None:
+def test_restore_rejects_a_version_2_archive_missing_a_patrimoine_table(client: TestClient) -> None:
     headers = _register(client, "amelie@example.com")
     crafted = _drop_members(_export(client, headers), "mortgages.jsonl", format_version=2)
 

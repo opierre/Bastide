@@ -36,7 +36,7 @@ class SavingsPoint {
 /// Both windows end at the *current* month rather than the selected one — they answer "how am
 /// I trending lately", which doesn't change when the user pages the month picker back. That is
 /// why they arrive from their own endpoint and are fetched once per session rather than per
-/// month (see `PROJECT.md` §5).
+/// month.
 @immutable
 class DashboardTrends {
   const DashboardTrends({

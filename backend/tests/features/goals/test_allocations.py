@@ -141,7 +141,7 @@ def test_deleting_an_allocation_can_bring_a_goal_back_to_reached(client: TestCli
 
 def test_over_allocating_is_accepted_and_reported_unclamped(client: TestClient) -> None:
     """Over-allocation is a warning the UI draws, never an error the API raises: the backend
-    has no basis for deciding which money is savings (`PROJECT.md` §13)."""
+    has no basis for deciding which money is savings."""
     headers = register(client)
     client.post("/api/v1/accounts", json=ACCOUNT_PAYLOAD, headers=headers)
     goal_id = create_goal(client, headers, target_minor=400_000)["id"]

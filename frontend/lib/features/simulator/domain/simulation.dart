@@ -132,7 +132,7 @@ class SimulatorInputs {
 }
 
 /// A saved scenario: a label over inputs only. No result is ever stored on it
-/// (§17) — its figures are recomputed whenever they are shown.
+/// — its figures are recomputed whenever they are shown.
 @immutable
 class SavedSimulation {
   const SavedSimulation({
@@ -151,7 +151,7 @@ class SavedSimulation {
   final String currency;
 }
 
-/// Where the debt ratio's denominator came from (`PROJECT.md` §15).
+/// Where the debt ratio's denominator came from.
 enum IncomeSource {
   declared('declared'),
   ledger('ledger'),

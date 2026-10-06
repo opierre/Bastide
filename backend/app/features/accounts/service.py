@@ -69,7 +69,7 @@ class AccountService:
     def create(self, user: User, data: AccountCreate) -> Account:
         """Create an account with the cache seeded from its opening balance.
 
-        Currency falls back to the user's, which is the Phase 1 answer for every
+        Currency falls back to the user's, which is the answer for every
         account the user types by hand (one currency per user — see the
         multi-currency skill). A declared one wins over it: an account proposed by
         an OFX statement is denominated by that file's `CURDEF`, and storing the

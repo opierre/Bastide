@@ -1,7 +1,7 @@
 """Tests for the run an import enqueues — and, more importantly, for when it enqueues none.
 
 The load-bearing assertion in this file is the negative one: with AI switched off, an import
-must be indistinguishable from the Phase 1 import that predates the model entirely.
+must be indistinguishable from a rules-only import, as if the model did not exist.
 """
 
 from pathlib import Path

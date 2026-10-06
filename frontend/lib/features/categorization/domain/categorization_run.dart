@@ -7,7 +7,7 @@ enum RunScope {
   pending,
 
   /// Also rows a previous run assigned, so a changed model or threshold can be
-  /// applied to them. Never a `user` or `rule` row either way (PROJECT.md §7).
+  /// applied to them. Never a `user` or `rule` row either way.
   all;
 
   String get wire => name;
@@ -50,8 +50,7 @@ enum RunStatus {
   bool get isTerminal => !isInFlight;
 }
 
-/// One stage-2 categorization run, polled for progress while it is in flight
-/// (PROJECT.md §4b/§7).
+/// One stage-2 categorization run, polled for progress while it is in flight.
 @immutable
 class CategorizationRun {
   const CategorizationRun({

@@ -44,7 +44,7 @@ class NetWorthPoint {
 
 /// `GET /networth/summary`, plus the active loan count the Passif card names.
 ///
-/// Every figure is derived server-side (`PROJECT.md` §18). The panel formats
+/// Every figure is derived server-side. The panel formats
 /// them and adds nothing: not a percentage, not a delta, not a zero-filled month.
 @immutable
 class NetWorthSummary {

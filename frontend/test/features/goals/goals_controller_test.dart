@@ -366,7 +366,7 @@ void main() {
     final state = await container.read(goalsControllerProvider.future);
 
     // The app has no basis for deciding which of the user's other accounts is
-    // "savings", which is the same reason §13 refuses to let this block.
+    // "savings", which is the same reason the API refuses to let this block.
     expect(state.isOverAllocated, isFalse);
   });
 

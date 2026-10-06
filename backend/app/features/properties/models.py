@@ -1,4 +1,4 @@
-"""SQLAlchemy model for declared real-estate properties (Phase 3)."""
+"""SQLAlchemy model for declared real-estate properties."""
 
 from datetime import UTC, date, datetime
 from uuid import uuid4
@@ -12,7 +12,7 @@ from app.core.db import Base
 class Property(Base):
     """A property the user declares: the app never sees one in a bank statement.
 
-    One entity rather than a figure duplicated per panel: net worth (§18) reads it.
+    One entity rather than a figure duplicated per panel: net worth reads it.
     """
 
     __tablename__ = "properties"

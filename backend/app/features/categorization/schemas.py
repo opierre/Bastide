@@ -28,7 +28,7 @@ class SuggestionOutcome(BaseModel):
     """The decision for one row of a batch, correlated with the input by ``index``.
 
     ``category_id`` is set only when ``status == "assigned"``: a below-threshold guess is not a
-    weak assignment, it is no assignment at all (`PROJECT.md` §7). ``confidence`` is kept even
+    weak assignment, it is no assignment at all. ``confidence`` is kept even
     when deferring, because it is useful to order the review queue by how close the model got.
     """
 
@@ -42,7 +42,7 @@ class SuggestionOutcome(BaseModel):
 
 #: Which rows a run reconsiders. ``pending`` takes only what nothing has categorised yet;
 #: ``all`` additionally takes rows a previous run assigned, so a changed model or threshold
-#: can be applied to them. Neither ever includes a `user` or `rule` row (`PROJECT.md` §7).
+#: can be applied to them. Neither ever includes a `user` or `rule` row.
 RunScope = Literal["pending", "all"]
 
 #: What started the run: the user asking for one, or an import finishing.

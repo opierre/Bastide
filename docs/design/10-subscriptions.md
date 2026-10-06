@@ -1,6 +1,6 @@
-# 10 — Abonnements (Phase 2)
+# 10 — Abonnements
 
-Everything below is exactly what the mockup frames `10-Abonnements — *` in `FinStride Phase 2 Mockups.dc.html` show. Colors, amounts, order, and positions are normative — do not invent. Tokens per `00-shared-design-block.md`.
+Everything below is exactly what the mockup frames `10-Abonnements — *` in the Gestion & AI mockup canvas show. Colors, amounts, order, and positions are normative — do not invent. Tokens per `00-shared-design-block.md`.
 
 ## Nav
 Sidebar entry « Abonnements » / "Subscriptions" in the Gestion group, order: Imports · Catégories · **Abonnements** · Objectifs (see 00 amendment). Icon: circular-arrow cycle, 1.5 px stroke, round caps (2 px stroke when active).

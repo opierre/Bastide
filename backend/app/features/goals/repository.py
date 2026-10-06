@@ -20,8 +20,8 @@ class GoalRepository:
     def list_for_user(self, user_id: str, statuses: Sequence[str]) -> list[tuple[Goal, int]]:
         """The user's goals in the given statuses, each with its progress, oldest first.
 
-        Progress arrives as one grouped aggregate rather than a ledger load per goal
-        (`PROJECT.md` §13): the panel shows every goal at once, so summing in Python would
+        Progress arrives as one grouped aggregate rather than a ledger load per goal:
+        the panel shows every goal at once, so summing in Python would
         mean reading the whole allocation history to render four progress bars.
         """
         rows = self._db.execute(

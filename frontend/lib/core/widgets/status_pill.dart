@@ -8,7 +8,7 @@ import '../theme/tokens.dart';
 enum StatusPillTone {
   /// Something worth a look: a price rise, a charge that hasn't landed. Amber
   /// rather than red on purpose — the panel reports, it does not scold
-  /// (`PROJECT.md` §9: never punitive).
+  /// (never punitive).
   warning(AppColors.warning, null),
 
   /// A settled, no-longer-running state — a cancelled subscription. Opaque
@@ -24,7 +24,7 @@ enum StatusPillTone {
 }
 
 /// The 22 px status pill of the subscriptions panel (`docs/design/00`
-/// §Phase 2 additions): a 6 px dot in the pill's own hue and an 11 px/700
+/// §Gestion & AI additions): a 6 px dot in the pill's own hue and an 11 px/700
 /// label.
 ///
 /// There is deliberately no "healthy" tone. A subscription that is simply

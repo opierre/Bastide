@@ -1,4 +1,4 @@
-"""add phase3 tables
+"""add mortgages, properties and tax tables
 
 Revision ID: 9aac42160214
 Revises: a8d3f2c61e05
@@ -19,12 +19,12 @@ depends_on: str | Sequence[str] | None = None
 
 
 def upgrade() -> None:
-    """Create the Phase 3 tables and add `user_settings.declared_monthly_income_minor`.
+    """Create the mortgage, property and tax tables; add `declared_monthly_income_minor`.
 
     `properties` precedes `mortgages` so the nullable `property_id` FK has its target; it sets
     null on delete, so a loan outlives the property it financed. The per-user uniqueness of tax
     profiles, brackets and parameters and the `mortgages.kind` check are enforced here, in the
-    database. No derived figure (schedule, estimate, simulation result) gets a column (§4c).
+    database. No derived figure (schedule, estimate, simulation result) gets a column.
     """
     op.create_table(
         "mortgage_simulations",
@@ -194,7 +194,7 @@ def upgrade() -> None:
 
 
 def downgrade() -> None:
-    """Drop the settings column and the Phase 3 tables, `mortgages` before `properties`."""
+    """Drop the settings column and these tables, `mortgages` before `properties`."""
     with op.batch_alter_table("user_settings", schema=None) as batch_op:
         batch_op.drop_column("declared_monthly_income_minor")
 

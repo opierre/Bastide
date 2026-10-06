@@ -15,7 +15,8 @@ from app.features.backup.errors import BackupInvalidError
 
 FORMAT_MARKER = "finstride-backup"
 # Bump when the archive layout or a table's columns change in a way an older build cannot read.
-# 2: the Phase 3 tables — an older build would restore such an archive and silently drop them.
+# 2: properties, mortgages and simulations — an older build would restore such an archive
+# and silently drop them.
 FORMAT_VERSION = 2
 MANIFEST_NAME = "manifest.json"
 

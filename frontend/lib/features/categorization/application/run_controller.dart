@@ -71,7 +71,7 @@ class RunController extends Notifier<RunState> {
   }
 
   /// Asks for a run over [scope]. Requesting one while another is in flight
-  /// returns the in-flight run (PROJECT.md §7), so this is also how the panel
+  /// returns the in-flight run, so this is also how the panel
   /// re-attaches to a run it already started.
   Future<void> start({
     String? accountId,

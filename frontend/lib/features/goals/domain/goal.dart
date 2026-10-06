@@ -5,8 +5,7 @@ import 'package:flutter/foundation.dart';
 ///
 /// [reached] is *derived* server-side from the allocation ledger and is never
 /// asserted by this client — the patch payload accepts only [active] and
-/// [archived], which are the user's two decisions about a goal
-/// (`PROJECT.md` §13).
+/// [archived], which are the user's two decisions about a goal.
 enum GoalStatus {
   active,
   reached,
@@ -22,7 +21,7 @@ enum GoalStatus {
 ///
 /// There is deliberately no `accountId`: a goal is not linked to an account,
 /// and the column the earlier drafts carried was dropped rather than kept as a
-/// display-only field (`PROJECT.md` §13, `docs/design/11-goals.md` §Concept).
+/// display-only field (`docs/design/11-goals.md` §Concept).
 /// The only account-derived figure in this feature is the aggregate savings
 /// total behind the over-allocation banner, which the controller reads from
 /// accounts and never stores on a goal.
@@ -47,7 +46,7 @@ class Goal {
   final String name;
 
   /// Positive minor units. A target is an amount to reach, not a movement, so
-  /// the ledger's sign convention doesn't apply to it (`PROJECT.md` §8).
+  /// the ledger's sign convention doesn't apply to it.
   final int targetMinor;
 
   final String currency;
@@ -66,7 +65,7 @@ class Goal {
   final int progressMinor;
 
   /// `progressMinor / targetMinor`, unclamped: an over-funded goal reports past
-  /// 1.0 and the UI decides what to draw with it (`PROJECT.md` §13).
+  /// 1.0 and the UI decides what to draw with it.
   final double progressPct;
 
   final DateTime createdAt;

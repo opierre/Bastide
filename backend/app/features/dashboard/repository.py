@@ -35,7 +35,7 @@ class DashboardRepository:
         are simply absent from the mapping; the caller decides what a gap means (zero, so far).
 
         Grouped with `extract()` rather than `strftime()` so the query keeps working on
-        PostgreSQL in Phase 4 — SQLAlchemy compiles it to each backend's own dialect.
+        PostgreSQL — SQLAlchemy compiles it to each backend's own dialect.
         """
         year = extract("year", Transaction.booked_date)
         month = extract("month", Transaction.booked_date)

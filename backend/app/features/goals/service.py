@@ -1,7 +1,7 @@
 """Business logic for savings goals: CRUD, the signed allocation ledger, and derived status.
 
 Nothing in here writes a transaction or moves an account balance. A goal is a virtual
-envelope (`PROJECT.md` §13): allocating is bookkeeping *about* money the user already has, so
+envelope: allocating is bookkeeping *about* money the user already has, so
 this feature never touches the ledger, and never compares an allocation against a balance —
 the backend has no basis for deciding which money is "savings".
 """
@@ -16,7 +16,7 @@ from app.features.goals.schemas import AllocationCreate, GoalCreate, GoalStatus,
 ACTIVE: GoalStatus = "active"
 
 #: Progress has reached the target. Never auto-archived: reaching a goal is the moment the UI
-#: is built around (`PROJECT.md` §13).
+#: is built around.
 REACHED: GoalStatus = "reached"
 
 #: Out of the way, but not gone — the allocation history survives and the goal can be restored.
@@ -78,7 +78,7 @@ class GoalService:
         return found
 
     def create(self, user: User, data: GoalCreate) -> tuple[Goal, int]:
-        """Create a goal. Currency is copied from the user, per the Phase 1 one-currency rule."""
+        """Create a goal. Currency is copied from the user, per the one-currency rule."""
         goal = Goal(
             user_id=user.id,
             name=data.name,
@@ -142,7 +142,7 @@ class GoalService:
         """Append one signed line to a goal's ledger and settle the goal's status.
 
         Over-allocation is accepted silently, here and across goals: total allocations may
-        exceed whatever the user actually holds, and the UI is what says so (`PROJECT.md` §13).
+        exceed whatever the user actually holds, and the UI is what says so.
 
         Raises:
             GoalNotFoundError: no such goal, or it belongs to another user.

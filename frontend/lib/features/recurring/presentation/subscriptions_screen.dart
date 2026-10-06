@@ -191,7 +191,7 @@ class _LoadedPanel extends ConsumerWidget {
 ///
 /// Nothing here is recomputed from the rows below. The burden normalises
 /// cadences, excludes cancelled series, and skips the ones with no period —
-/// three rules the server owns (`PROJECT.md` §12), and a second implementation
+/// three rules the server owns, and a second implementation
 /// in Dart would be a second answer.
 class _SummaryRow extends StatelessWidget {
   const _SummaryRow({required this.summary});

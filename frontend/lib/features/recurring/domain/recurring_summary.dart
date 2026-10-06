@@ -59,7 +59,7 @@ class MissedCharge {
 ///
 /// Every figure here is computed server-side and is *never* re-derived from the
 /// list: the burden, the counts, and the exclusions can then never disagree
-/// with each other (`PROJECT.md` §12).
+/// with each other.
 @immutable
 class RecurringSummary {
   const RecurringSummary({

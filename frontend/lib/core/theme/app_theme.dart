@@ -427,7 +427,7 @@ abstract final class AppTextStyles {
 
   /// « — aucune proposition » on a review row the model had nothing for.
   /// Italic and in the disabled tone so it reads as an absence rather than as
-  /// a category the row was given (`docs/design/07` §Phase 2 amendment).
+  /// a category the row was given (`docs/design/07` §Amendment — AI proposals).
   static const reviewNoProposal = TextStyle(
     fontFamily: AppFonts.geist,
     fontSize: 11.5,

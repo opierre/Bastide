@@ -10,7 +10,7 @@ AI aesthetics, typography pairing, motion restraint), also follow the **frontend
 This skill supplies the project-specific, non-negotiable tokens and invariants.
 
 > **`docs/design/00-shared-design-block.md` is binding.** It transcribes the drawn mockup and
-> outranks this file and `PROJECT.md` §9 wherever they disagree. Panel specs live in
+> outranks this file wherever they disagree. Panel specs live in
 > `docs/design/02-*.md` … `09-*.md`; each is self-contained when paired with `00`. This skill
 > summarises `00` — if you are about to write UI code, read `00` itself.
 
@@ -84,7 +84,7 @@ spinners, shimmer 1.6s for skeletons), and chrome dimensions (sidebar 252 / coll
   download-to-tray, rotated-square tag, slider rows (settings), magnifier, chevrons, lock, plus,
   drag-handle dots, check, ⋯ overflow. Category chips carry an 11px leading glyph (house, bowl,
   car, star, refresh, cross, coin, up-arrow). **No emoji anywhere.**
-- **Brand logos are always monogram chips** — a deliberate Phase 1 decision instead of embedding
+- **Brand logos are always monogram chips** — a deliberate decision instead of embedding
   third-party logos. Never an image, never broken. Hues are **pinned per brand** (BNP `#2FB574`,
   Crédit Agricole `#0AA396`, Revolut `#5AA9FF`, Caisse Locale `#4FD1E8`, Carrefour `#3B82F6`,
   Novatech `#6C6AF0`) at 16% alpha background with a full-strength letter; an unrecognised name

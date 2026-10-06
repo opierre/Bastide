@@ -138,7 +138,7 @@ def test_each_batch_is_committed_before_the_next_one_is_asked_for(
 ) -> None:
     """Observe the database from inside the second batch: the first must already be durable.
 
-    This is the property `PROJECT.md` §7 asks for stated directly — not "the counts look right
+    This is the durability property stated directly — not "the counts look right
     at the end", but "the work was on disk before the next batch was attempted", which is the
     only version of it a crash can benefit from.
     """

@@ -49,7 +49,7 @@ class CategoryBreakdownChart extends StatelessWidget {
     // Highest amount first, so the donut and legend read the same order.
     final sorted = [...categories]
       ..sort((a, b) => b.amountMinor.compareTo(a.amountMinor));
-    // The breakdown only ever carries expense rows (see `PROJECT.md` §5), so `kind` is fixed.
+    // The breakdown only ever carries expense rows, so `kind` is fixed.
     final slugs = [
       for (final category in sorted)
         categorySlugFor(name: category.name, kind: 'expense'),

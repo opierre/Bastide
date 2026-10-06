@@ -5,8 +5,9 @@ description: Use for any database work in the finstride — defining or changing
 
 # Database
 
-Persistence rules for the local SQLite datastore, written so the Phase 4 switch to PostgreSQL
-is a dialect/connection change, not a rewrite. See `PROJECT.md` §4 for the canonical schema.
+Persistence rules for the local SQLite datastore, written so a future switch to PostgreSQL
+is a dialect/connection change, not a rewrite. The schema is in `docs/database.md`, generated
+from the migrations.
 
 ## The stack
 
@@ -22,9 +23,9 @@ is a dialect/connection change, not a rewrite. See `PROJECT.md` §4 for the cano
 - Store money as **signed integer minor units** (`*_minor`, e.g. cents). Negative = outflow,
   positive = inflow. **Floats for money are forbidden anywhere** — models, schemas, services,
   tests, fixtures.
-- Every monetary column travels with an **ISO-4217 `currency`** code (string). Phase 1: all of a
+- Every monetary column travels with an **ISO-4217 `currency`** code (string). All of a
   user's accounts share `users.currency`; the per-row/per-account `currency` column still exists
-  and is populated, reserved for Phase 4 multi-currency. Never drop it.
+  and is populated, reserved for multi-currency. Never drop it.
 - Convert to display units only at the very edge (formatting layer / frontend), never in storage
   or business logic.
 
@@ -49,7 +50,7 @@ is a dialect/connection change, not a rewrite. See `PROJECT.md` §4 for the cano
 ## Balances — authoritative ledger, fast reads
 
 The ledger is the source of truth; the balance is derived but **not** summed over all rows on
-every read (`PROJECT.md` §4):
+every read:
 
 1. `accounts.cached_balance_minor` is updated by **delta** on every transaction insert / edit /
    delete (`new = old ± Δamount`), inside the same DB transaction as the change. O(1) reads.
@@ -69,6 +70,8 @@ Never write code paths that compute a live balance with an unbounded `SUM` over 
 - Seed data (system categories, localised fr/en — the rich ~25+ set) goes in a dedicated seed
   migration or an idempotent seed routine, never ad hoc.
 - Test migrations apply cleanly on an empty DB in CI.
+- After any migration, regenerate the schema reference: `uv run python -m scripts.schema_doc`
+  from `backend/`. A test fails while `docs/database.md` is stale.
 
 ## Querying
 

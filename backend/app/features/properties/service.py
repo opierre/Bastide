@@ -1,7 +1,7 @@
 """Business logic for declared properties: CRUD and the held share.
 
-A property is declared, never observed: the app has no statement to read one from (§4c). Net
-worth (§18) reads it, so the share arithmetic lives here once and no panel keeps its own copy of
+A property is declared, never observed: the app has no statement to read one from. Net
+worth reads it, so the share arithmetic lives here once and no panel keeps its own copy of
 a valuation.
 """
 
@@ -31,7 +31,7 @@ class PropertyNotFoundError(NotFoundError):
 class PropertyValuationInFutureError(ValidationError):
     """Raised when `valued_on` is ahead of today.
 
-    A valuation dated tomorrow is a typo, and §18's series leans on this date to caveat the
+    A valuation dated tomorrow is a typo, and the net-worth series leans on this date to caveat the
     net-worth history — so it is refused rather than carried into a chart as fact.
     """
 
@@ -41,7 +41,7 @@ class PropertyValuationInFutureError(ValidationError):
 def held_share_minor(amount_minor: int, ownership_bps: int) -> int:
     """`amount_minor * ownership_bps / 10000`, rounded half-up.
 
-    The only place this arithmetic lives: §18's assets read the figure, they do not recompute
+    The only place this arithmetic lives: net-worth assets read the figure, they do not recompute
     it. Integer throughout, as money always is (root `CLAUDE.md`).
     """
     return (2 * amount_minor * ownership_bps + _BPS_PER_UNIT) // (2 * _BPS_PER_UNIT)
@@ -85,7 +85,7 @@ class PropertyService:
         """The user's properties with their share figures, oldest first.
 
         Archived ones are absent unless asked for by name with `?archived=true`: they leave
-        every aggregate (§18's assets) but are never destroyed.
+        every aggregate (net-worth assets) but are never destroyed.
         """
         return [
             to_read(prop, user.currency)
@@ -101,7 +101,7 @@ class PropertyService:
         return self._detail(self._owned(user.id, property_id), user.currency)
 
     def create(self, user: User, data: PropertyCreate, today: date) -> PropertyDetail:
-        """Declare a property. Currency is the user's; no per-property currency exists (§4c).
+        """Declare a property. Currency is the user's; no per-property currency exists.
 
         Raises:
             PropertyValuationInFutureError: `valued_on` is ahead of `today`.
@@ -117,7 +117,7 @@ class PropertyService:
 
         The patch is validated before anything is assigned, so a rejected edit leaves the
         property exactly as it was. A "nouvelle estimation" is this call carrying
-        `market_value_minor` and `valued_on` together (§4c: one declared value).
+        `market_value_minor` and `valued_on` together (one declared value).
 
         Raises:
             PropertyNotFoundError: no such property, or it belongs to another user.

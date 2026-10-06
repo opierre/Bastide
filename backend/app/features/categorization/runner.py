@@ -7,7 +7,7 @@ why every decision rule is testable without a database and every orchestration r
 testable with a stub client.
 
 The executor deliberately runs as a plain asyncio task rather than through a queue or broker:
-the sidecar is one process serving one user (`PROJECT.md` §3), so a broker would add an
+the sidecar is one process serving one user, so a broker would add an
 operational dependency to buy concurrency nobody has.
 """
 
@@ -88,7 +88,7 @@ def reconcile_orphaned_runs(session_factory: SessionFactory) -> int:
     """Fail every run still in flight at startup; return how many there were.
 
     A run's executor is an in-process task, so a run that was `pending` or `running` when the
-    process stopped has nobody left to finish it (`PROJECT.md` §7). The rows its completed
+    process stopped has nobody left to finish it. The rows its completed
     batches already committed stay categorised — that is the point of committing per batch.
     """
     db = session_factory()
@@ -211,8 +211,8 @@ class ImportRunEnqueuer:
 
     Lives here rather than in the imports feature so the import service depends on a callable
     it is handed, not on categorisation. Silent by design in every branch: an import must
-    finish the same way whether or not a model is configured, reachable, or wanted
-    (`PROJECT.md` §7), so nothing this class does can turn into an import error.
+    finish the same way whether or not a model is configured, reachable, or wanted,
+    so nothing this class does can turn into an import error.
     """
 
     def __init__(
@@ -320,7 +320,7 @@ async def _execute(
                 run.failed_count += 1
 
         # Per batch, not at the end: a process killed here keeps every row applied so far and
-        # a `processed_count` that still tells the truth about them (`PROJECT.md` §7).
+        # a `processed_count` that still tells the truth about them.
         repository.commit()
 
     run.status = _terminal_status(run)

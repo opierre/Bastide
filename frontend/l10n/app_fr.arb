@@ -2725,7 +2725,7 @@
   },
   "goalsOverAllocated": "Vous avez réparti {allocated} alors que vos comptes d'épargne totalisent {savings}.",
   "@goalsOverAllocated": {
-    "description": "The over-allocation banner. Informative and dismissible, never blocking (`PROJECT.md` §13).",
+    "description": "The over-allocation banner. Informative and dismissible, never blocking.",
     "placeholders": {
       "allocated": {
         "type": "String"
@@ -3075,7 +3075,7 @@
   },
   "navSectionWealth": "Patrimoine",
   "@navSectionWealth": {
-    "description": "Left nav section heading grouping the loans, simulator and net-worth destinations (Phase 3). Rendered uppercase."
+    "description": "Left nav section heading grouping the loans, simulator and net-worth destinations. Rendered uppercase."
   },
   "navMortgages": "Crédits",
   "@navMortgages": {

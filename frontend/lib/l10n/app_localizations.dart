@@ -3450,7 +3450,7 @@ abstract class AppLocalizations {
   /// **'Répartition sur le papier : vos comptes ne sont pas modifiés.'**
   String get goalsReassurance;
 
-  /// The over-allocation banner. Informative and dismissible, never blocking (`PROJECT.md` §13).
+  /// The over-allocation banner. Informative and dismissible, never blocking.
   ///
   /// In fr, this message translates to:
   /// **'Vous avez réparti {allocated} alors que vos comptes d\'épargne totalisent {savings}.'**
@@ -3906,7 +3906,7 @@ abstract class AppLocalizations {
   /// **'La réinitialisation a échoué. Vos données n\'ont pas été modifiées.'**
   String get settingsResetErrorUnknown;
 
-  /// Left nav section heading grouping the loans, simulator and net-worth destinations (Phase 3). Rendered uppercase.
+  /// Left nav section heading grouping the loans, simulator and net-worth destinations. Rendered uppercase.
   ///
   /// In fr, this message translates to:
   /// **'Patrimoine'**

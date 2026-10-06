@@ -236,11 +236,13 @@ jobs:
       - name: Scan lockfiles
         run: |
           set -uo pipefail
+          # `|| code=$?`: the runner's shell is `bash -e`, so a bare findings exit (1)
+          # would end the step here and the policy step below would never decide.
+          code=0
           "${RUNNER_TEMP}/osv-scanner" scan source \
             --lockfile backend/uv.lock \
             --lockfile frontend/pubspec.lock \
-            --format json --output-file "${RUNNER_TEMP}/osv.json"
-          code=$?
+            --format json --output-file "${RUNNER_TEMP}/osv.json" || code=$?
           # 0 = clean, 1 = findings (osv_policy.py decides), >=127 = real error.
           if [ "${code}" -ge 127 ]; then
             echo "::error::osv-scanner failed with exit code ${code} (127=error, 128=no packages found)"
@@ -267,9 +269,9 @@ jobs:
             exit 0
           fi
           # shellcheck disable=SC2086
+          code=0
           "${RUNNER_TEMP}/osv-scanner" scan source ${args} \
-            --format json --output-file "${RUNNER_TEMP}/osv-baseline.json"
-          code=$?
+            --format json --output-file "${RUNNER_TEMP}/osv-baseline.json" || code=$?
           if [ "${code}" -ge 127 ]; then
             echo "::warning::baseline scan failed (exit ${code}); every finding counts as new."
             rm -f "${RUNNER_TEMP}/osv-baseline.json"
@@ -312,21 +314,28 @@ jobs:
           echo "${expected}  ${RUNNER_TEMP}/gitleaks.tar.gz" | sha256sum -c -
           tar -xzf "${RUNNER_TEMP}/gitleaks.tar.gz" -C "${RUNNER_TEMP}" gitleaks
           chmod +x "${RUNNER_TEMP}/gitleaks"
-      # --redact keeps any matched secret out of the job log. On push, scan only
-      # history reachable from HEAD: gitleaks defaults to `--all`, which would
-      # let an unmerged branch fail main.
+      # --redact keeps any matched secret out of the job log. Both events scan only
+      # the commits they introduce: history cannot change without a force-push, so
+      # every new secret arrives inside some PR or push range, and re-scanning old
+      # history would only re-report what was already judged.
       - name: Scan for secrets
         env:
           EVENT_NAME: ${{ github.event_name }}
           BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          BEFORE_SHA: ${{ github.event.before }}
         run: |
           set -euo pipefail
           if [ "${EVENT_NAME}" = "pull_request" ]; then
-            "${RUNNER_TEMP}/gitleaks" git . --redact --no-banner \
-              --log-opts="--no-merges ${BASE_SHA}..HEAD"
+            range="--no-merges ${BASE_SHA}..HEAD"
+          elif git cat-file -e "${BEFORE_SHA}^{commit}" 2>/dev/null; then
+            range="${BEFORE_SHA}..HEAD"
           else
-            "${RUNNER_TEMP}/gitleaks" git . --redact --no-banner --log-opts="HEAD"
+            # First push to the branch (all-zero before) or a force-push whose old
+            # tip was not fetched: there is no range, so scan the tip commit alone.
+            echo "::warning::no previous commit to diff against; scanning HEAD only"
+            range="-1 HEAD"
           fi
+          "${RUNNER_TEMP}/gitleaks" git . --redact --no-banner --log-opts="${range}"
 
   # The single required status check. Path-filtered jobs that get skipped would
   # otherwise sit pending forever under branch protection and deadlock merges.

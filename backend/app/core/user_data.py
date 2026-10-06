@@ -1,7 +1,7 @@
 """What "everything one user owns" means, as table metadata rather than as ORM behaviour.
 
-Two features need the same answer — a backup copies those rows out and replaces them
-(`PROJECT.md` §14), a database reset deletes them (`docs/design/09-settings.md` §Zone de danger)
+Two features need the same answer — a backup copies those rows out and replaces them,
+a database reset deletes them (`docs/design/09-settings.md` §Zone de danger)
 — so the table order, the ownership predicate and the column specs live here instead of in
 either one. Working on the Core metadata rather than on each feature's ORM classes also means a
 column added later is carried without this file changing.

@@ -1,8 +1,7 @@
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-/// Active app locale. French first per `PROJECT.md` §1; switchable once the
-/// settings feature lands.
+/// Active app locale. French first; switchable in settings.
 class LocaleController extends Notifier<Locale> {
   @override
   Locale build() => const Locale('fr');

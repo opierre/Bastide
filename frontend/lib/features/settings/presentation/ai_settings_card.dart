@@ -14,14 +14,14 @@ import '../application/settings_controller.dart';
 import 'lock_callout.dart';
 
 /// Where « En savoir plus » sends a user with no engine: the download page of
-/// the runtime `PROJECT.md` §2 names as the Phase 2 default.
+/// Ollama, the default runtime.
 ///
 /// The one link in the app that leaves it, and it carries nothing about the
 /// user — the privacy callout two rows above stays true.
 final _runtimeHelpUrl = Uri.parse('https://ollama.com/download');
 
 /// The « IA locale » card in Settings → Données
-/// (`docs/design/09-settings.md` §Phase 2 amendment, frames ③–④).
+/// (`docs/design/09-settings.md` §Amendment — IA locale, frames ③–④).
 ///
 /// Everything it renders comes from [settingsControllerProvider]; the card
 /// itself decides nothing. In particular the connection state is one value

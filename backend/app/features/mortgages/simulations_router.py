@@ -1,4 +1,4 @@
-"""Simulator endpoints: the stateless compute and saved scenarios (§17)."""
+"""Simulator endpoints: the stateless compute and saved scenarios."""
 
 from datetime import date
 from typing import Annotated

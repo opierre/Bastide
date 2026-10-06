@@ -1,6 +1,6 @@
 """Bind a pack's `category_key`s to the importing user's category rows.
 
-System categories store their i18n key in `categories.name` (`PROJECT.md` §4), which is exactly
+System categories store their i18n key in `categories.name`, which is exactly
 what makes a pack portable: `category.food.groceries` resolves to the same row for a French user
 and an English one, because the key is the identity and the display name is the frontend's job.
 """

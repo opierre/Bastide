@@ -291,7 +291,7 @@ class GoalProgressRing extends StatelessWidget {
 ///
 /// On the grid *and* on the detail, because both are places a user could
 /// reasonably start to believe that allocating moved real money — and the whole
-/// feature rests on them not believing that (`PROJECT.md` §13).
+/// feature rests on them not believing that.
 class GoalReassuranceLine extends StatelessWidget {
   const GoalReassuranceLine({super.key});
 

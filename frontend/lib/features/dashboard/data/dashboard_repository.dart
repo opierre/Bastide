@@ -31,7 +31,7 @@ class DashboardRepository {
   /// The two trend series behind row 2's savings line and row 3's bars.
   ///
   /// Takes no month: both windows end at the current one, so this is fetched once and survives
-  /// the month picker (see `PROJECT.md` §5).
+  /// the month picker.
   Future<DashboardTrends> trends() async {
     final json =
         await _apiClient.get('/dashboard/trends') as Map<String, dynamic>;

@@ -1,103 +1,117 @@
+<div align="center">
+
 # FinStride
 
-A desktop-first personal finance manager (French-first, English second). Import your bank data
-via OFX/QFX/CSV — no direct bank connections — and get a clear, encouraging view of your money:
-accounts, transactions, monthly income/expense with trend, categories, savings rate, and (in
-later phases) goals, mortgages, projections and net worth. Local-first and
-privacy-first: all data and AI run on your machine.
+**A local-first personal finance manager for the desktop.**
+Import your bank statements, see where your money goes, and keep your data on your machine.
 
-> **New here? Read [`PROJECT.md`](PROJECT.md) first.** It is the single source of truth for scope,
-> architecture, schema, API contract, and conventions. Everything else points back to it.
+[![CI](https://github.com/opierre/FinStride/actions/workflows/ci.yml/badge.svg)](https://github.com/opierre/FinStride/actions/workflows/ci.yml)
+![Flutter](https://img.shields.io/badge/Flutter-desktop-02569B?logo=flutter&logoColor=white)
+![Python](https://img.shields.io/badge/Python-3.14-3776AB?logo=python&logoColor=white)
+![FastAPI](https://img.shields.io/badge/FastAPI-sidecar-009688?logo=fastapi&logoColor=white)
+![SQLite](https://img.shields.io/badge/SQLite-WAL-003B57?logo=sqlite&logoColor=white)
 
-## Stack
+🇫🇷 French first · 🇬🇧 English
 
-- **Frontend:** Flutter (desktop), Riverpod, intl + ARB localization (fr/en)
-- **Backend:** Python 3.14 + FastAPI, run as a localhost **sidecar**; uv · ruff (lint+format) · ty (types)
-- **Data:** SQLite (WAL) via SQLAlchemy + Alembic — built Postgres-ready for the future cloud tier
-- **AI (Phase 2):** Ollama, local SLM (default Gemma 4 E4B), optional — degrades gracefully if absent
-- **Deploy:** Docker for dev, native installers for end users
+</div>
 
-## Repo map
+> [!IMPORTANT]
+> **Your data never leaves your computer.** There are no bank connections, no cloud account and
+> no telemetry. The backend listens on `127.0.0.1` only, and the optional AI runs on a local
+> model.
 
-```
-finstride/
-├── PROJECT.md              ← START HERE: scope, architecture, schema, API, standards
-├── README.md               ← you are here
-├── CLAUDE.md               global agent conventions (+ backend/ and frontend/ have their own)
-├── .claude/
-│   └── skills/             the rule set every agent loads (see below)
-├── docs/
-│   ├── tasks/              Phase 1 task cards + README (execution protocol)
-│   ├── design/             design-tool prompts + mockups/
-│   └── vscode-workflow.md  day-to-day build workflow & phase transitions
-├── backend/                FastAPI sidecar (feature-first; see architecture skill)
-└── frontend/               Flutter desktop app (feature-first)
-```
+## ✨ Features
 
-## How this project is built
+| | |
+|---|---|
+| 📥 **Imports** | OFX/QFX statements, routed to the right account by its bank id, with deduplication and an import history that flags balance mismatches. |
+| 📊 **Dashboard** | Monthly income and expenses, month-over-month trend, savings rate, and a breakdown by category. |
+| 🏷️ **Categorisation** | Deterministic rules first, then an optional local model for the rest. Uncertain guesses go to a review queue, and a correction can become a rule. |
+| 🔁 **Subscriptions** | Recurring charges detected automatically, including price changes and missed payments. |
+| 🎯 **Goals** | Virtual savings envelopes that track progress without moving any money. |
+| 🏠 **Patrimoine** | Mortgages with derived amortisation schedules and the debt ratio, a new-loan simulator against the HCSF limits, and a net-worth view across accounts, properties and loans. |
+| 💾 **Backup** | Export everything to one `.finstride` file and restore it anywhere. |
 
-The expensive thinking is written **once** into durable artifacts; cheap/local models then
-execute against them. This keeps token usage low without losing precision.
+## 🚀 Quick start
 
-1. **[`PROJECT.md`](PROJECT.md)** — the spec.
-2. **Skills** in [`.claude/skills/`](.claude/skills/) — enforceable rules, each stated once and
-   cross-referenced:
-   `architecture`, `database`, `git-conventional-commits`, `fastapi-backend`, `flutter-frontend`,
-   `ofx-csv-import`, `ai-categorization` (Phase 2-ready), `i18n-l10n`, `multi-currency`,
-   `testing`, `design-system`.
-3. **Task cards** in [`docs/tasks/`](docs/tasks/) — atomic, self-contained units. Each names the
-   files, the slice of the spec it implements, the skills to load, acceptance criteria, and the
-   test that must pass. See [`docs/tasks/README.md`](docs/tasks/README.md) for the sequence and
-   the run-a-card protocol.
-4. **Design prompts** in [`docs/design/`](docs/design/) — a shared design block + per-tool
-   wrappers (Claude Design / Google Stitch) + one prompt per panel.
-
-## Phased roadmap (see `PROJECT.md` §2)
-
-- **Phase 1 (current target):** auth (locale + currency at registration) · multi-account ·
-  OFX/QFX/CSV import + history · transactions · rules-based categorization · dashboard
-  (income/expense, MoM trend, savings rate, by-category). Fully specced as `P1-*` cards.
-- **Phase 2:** local SLM categorization + review queue · subscriptions · savings goals.
-- **Phase 3:** mortgages/amortization · declared properties · new-mortgage projection simulator ·
-  net-worth synthesis.
-- **Phase 4:** multi-user · optional cloud sync (→ PostgreSQL) · per-account multi-currency + FX.
-
-Detail one phase at a time. The procedure to advance is in
-[`docs/vscode-workflow.md`](docs/vscode-workflow.md) §6.
-
-## Quick start (dev)
+> [!NOTE]
+> You need [uv](https://docs.astral.sh/uv/) and the [Flutter SDK](https://docs.flutter.dev/get-started/install)
+> with desktop support enabled for your OS.
 
 ```bash
-# clone, then open the multi-root workspace
-code finstride.code-workspace
-
-# backend (terminal A)
-cd backend && uv sync
-uv run alembic upgrade head   # apply migrations before first run (and after pulling new ones)
+# 1 · backend — the local API sidecar
+cd backend
+uv sync
+uv run alembic upgrade head
 uv run uvicorn app.main:app --host 127.0.0.1 --port 8765 --reload
 
-# frontend (terminal B)
-cd frontend && flutter pub get
-flutter run -d macos        # or windows / linux
+# 2 · frontend — in a second terminal
+cd frontend
+flutter pub get
+flutter run -d windows   # or macos / linux
 ```
 
-The backend binds **loopback only**. Point the frontend's dev API base URL at
-`http://127.0.0.1:8765`.
+> [!TIP]
+> **AI categorisation is optional.** Run [Ollama](https://ollama.com) or `llama-server` with a
+> small model (Gemma 4 E4B by default), then switch it on under **Paramètres → Données → IA
+> locale**. Without a model, the rules still categorise everything they match, and the rest goes
+> to the review queue.
 
-### Building it with agents
-Work one task card per scoped Claude Code session, in dependency order, loading the skills the
-card lists. Full loop, model-per-card guidance, commit/rollback, and phase transitions are in
-[`docs/vscode-workflow.md`](docs/vscode-workflow.md). First card: `docs/tasks/P1-00-scaffold.md`.
+With the backend running, interactive API docs are served at <http://127.0.0.1:8765/docs>.
 
-## Conventions (enforced by skills)
+## 🧱 How it works
 
-- **Money:** signed integer minor units + ISO-4217 currency code — never floats.
-- **Commits:** Conventional Commits (`type(scope): subject`), one logical change each.
-- **i18n:** no hardcoded user-facing strings; fr + en parity from day one.
-- **Tests:** every feature slice ships with tests; external deps (model, network, clock, FS) are
-  mocked. CI: backend `ruff`+`ty`+`pytest`, frontend `analyze`+`test`, ARB parity, migrations apply.
-- **Layout invariant:** the navbar / top bar / bottom bar are identical on every panel.
+```mermaid
+flowchart LR
+    UI["Flutter desktop app<br/>Riverpod · fr/en"] -- "REST · loopback only" --> API["FastAPI sidecar<br/>Python 3.14"]
+    API --> DB[("SQLite · WAL<br/>SQLAlchemy + Alembic")]
+    API -. optional .-> LLM["Local LLM runtime<br/>Ollama / llama-server"]
+```
 
-## License
+- **Money is integer minor units**, and rates are integer basis points. Floats are never used.
+- **Derived figures are not stored.** Amortisation schedules, simulations and net worth are
+  computed from what you declared, so they can't go out of sync with it.
+- **Feature-first** on both sides: each feature owns its routes, models and services in the
+  backend, and its screens and state in the frontend.
 
-TBD.
+## 📚 Documentation
+
+| Document | What's inside |
+|----------|---------------|
+| [`docs/database.md`](docs/database.md) | ER diagram and constraints, **generated** from the migrated database |
+| [`docs/api.md`](docs/api.md) | Every endpoint, **generated** from the OpenAPI schema |
+| [`docs/development.md`](docs/development.md) | Setup, running, CI checks, and working with coding agents |
+| [`docs/design/`](docs/design/) | The binding design system and one spec per panel |
+| [`.claude/skills/`](.claude/skills/) | Area-by-area rules for coding agents (database, testing, i18n, …) |
+
+> [!NOTE]
+> The schema and API references are checked by the test suite and fail CI when they go stale.
+> After changing a migration or a route, regenerate them from `backend/` with
+> `uv run python -m scripts.schema_doc` and `uv run python -m scripts.api_doc`.
+
+## 🗂️ Repository layout
+
+```
+FinStride/
+├── backend/            FastAPI sidecar · app/features/<feature>/ · Alembic migrations · pytest
+├── frontend/           Flutter desktop app · lib/features/<feature>/ · ARB l10n (fr, en)
+├── docs/               generated references, design specs, JSON schemas, dev guide
+├── .claude/skills/     conventions for coding agents
+└── CLAUDE.md           global agent conventions (backend/ and frontend/ extend it)
+```
+
+## 🤝 Conventions
+
+- **Commits** follow [Conventional Commits](https://www.conventionalcommits.org/):
+  `type(scope): subject`, one logical change each.
+- **i18n from day one.** User-facing text is never hard-coded, and French and English stay in
+  parity.
+- **Tests ship with every change**, with external dependencies (model, network, clock,
+  filesystem) mocked. CI runs `ruff`, `ty` and `pytest` on the backend, and `analyze`, `format`,
+  `gen-l10n` and `test` on the frontend, plus dependency-vulnerability and secret scanners.
+- **Fixed chrome.** The sidebar and top bar are identical on every panel.
+
+## 📄 License
+
+> [!WARNING]
+> No license has been chosen yet. Until one is added, all rights are reserved.

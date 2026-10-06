@@ -113,7 +113,7 @@ class SubscriptionsState {
 ///
 /// The summary is re-read after each mutation rather than adjusted locally.
 /// Every card on it — the burden, the counts, the exclusions — is defined
-/// server-side over the whole set (`PROJECT.md` §12), and a client that
+/// server-side over the whole set, and a client that
 /// recomputed them from the rows it happens to be showing would drift the
 /// moment a filter was applied.
 class SubscriptionsController extends AsyncNotifier<SubscriptionsState> {

@@ -1,4 +1,4 @@
-"""SQLAlchemy model for per-user settings (Phase 2: the AI configuration)."""
+"""SQLAlchemy model for per-user settings (the AI configuration)."""
 
 from datetime import UTC, datetime
 from uuid import uuid4
@@ -30,7 +30,7 @@ class UserSettings(Base):
     confidence_threshold: Mapped[float] = mapped_column(Float, default=DEFAULT_CONFIDENCE_THRESHOLD)
     # When the user last exported a full backup; null until the first one.
     last_backup_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
-    # Monthly income the debt ratio runs on. Null = derive it from the ledger (PROJECT.md §15).
+    # Monthly income the debt ratio runs on. Null = derive it from the ledger.
     declared_monthly_income_minor: Mapped[int | None] = mapped_column(Integer, nullable=True)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), default=lambda: datetime.now(UTC)

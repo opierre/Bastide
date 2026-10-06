@@ -277,7 +277,7 @@ class _FigureCard extends StatelessWidget {
 }
 
 /// Row 3, « Volontairement non compté »: what the synthèse leaves out on
-/// purpose, one quiet line each. §18 makes these exclusions correct; left
+/// purpose, one quiet line each. These exclusions are correct; left
 /// unexplained, they would read as missing features.
 class NetworthExclusionsCard extends StatelessWidget {
   const NetworthExclusionsCard({super.key});

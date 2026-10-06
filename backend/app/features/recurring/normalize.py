@@ -66,7 +66,7 @@ _LETTER_RE = re.compile(r"[^\W\d_]")
 def merchant_key(transaction: Transaction) -> str:
     """The key ``transaction`` is grouped under: its merchant, stripped of per-occurrence noise.
 
-    Prefers `merchant` over `description_clean` (`PROJECT.md` §12) — the import pipeline already
+    Prefers `merchant` over `description_clean` — the import pipeline already
     took the bank's wrapper prefix off it. The same stripping runs over either source anyway:
     `imports.canonical.extract_merchant` removes a *prefix*, so an extracted merchant still
     carries the embedded date and card sequence the bank rewrites every month, and grouping on

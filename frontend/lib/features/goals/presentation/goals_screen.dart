@@ -231,7 +231,7 @@ class _CardGrid extends StatelessWidget {
 /// « Vous avez réparti 24 450,00 € alors que vos comptes d'épargne totalisent
 /// 22 100,00 €. »
 ///
-/// Informative and dismissible, never blocking (§13). The app cannot be right
+/// Informative and dismissible, never blocking. The app cannot be right
 /// about which of a user's money is "savings", so it states the arithmetic and
 /// leaves the judgment where it belongs.
 class _OverAllocationBanner extends StatelessWidget {

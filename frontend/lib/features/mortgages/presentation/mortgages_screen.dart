@@ -24,7 +24,7 @@ import 'trajectory_chart.dart';
 /// debt ratio, the loan cards, the trajectory chart, and the loan detail.
 ///
 /// No figure on it is computed in Dart — every amount, share and ratio is the
-/// backend engine's (`PROJECT.md` §15).
+/// backend engine's.
 class MortgagesScreen extends ConsumerWidget {
   const MortgagesScreen({super.key});
 

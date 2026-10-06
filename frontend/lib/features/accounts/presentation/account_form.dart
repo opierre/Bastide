@@ -40,7 +40,7 @@ Future<Account?> showAccountForm(
 /// (see the backend's `shift_opening_balance`). Currency is never editable and
 /// is not a field of its own — it rides as the balance's suffix, taken from the
 /// account, else from the statement's `CURDEF`, else from the profile (one
-/// currency per user in Phase 1 — see the multi-currency skill).
+/// currency per user — see the multi-currency skill).
 ///
 /// [prefill] seeds the create form from something the user didn't type — today,
 /// the account block of an OFX statement. Fields the statement *proposes* stay

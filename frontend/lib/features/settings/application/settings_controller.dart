@@ -59,7 +59,7 @@ class SettingsState {
 
   /// The failure of the last patch that carried the engine address, left raw
   /// for the card to localize onto that field. The loopback-only rule is a 422
-  /// (`P2-01`), and it is the one validation the user has to be able to read
+  /// from `PATCH /settings`, and it is the one validation the user has to be able to read
   /// and act on.
   final Object? baseUrlError;
 
@@ -130,7 +130,7 @@ class SettingsController extends AsyncNotifier<SettingsState> {
   }
 
   /// Opts in or out. Not debounced: a toggle is a decision, not typing, and it
-  /// changes what the review queue renders (`P2-08`), which should follow the
+  /// changes what the review queue renders, which should follow the
   /// switch immediately.
   Future<void> setAiEnabled(bool enabled) async {
     final current = state.value;
@@ -312,8 +312,8 @@ class SettingsController extends AsyncNotifier<SettingsState> {
 
   /// Makes the review queue re-ask whether there is an AI to show.
   ///
-  /// Step 8 of the card: turning the toggle off has to return `07` to its
-  /// Phase 1 rendering with the calm invitation, not merely persist a boolean —
+  /// Turning the toggle off has to return `07` to its
+  /// rules-only rendering with the calm invitation, not merely persist a boolean —
   /// and that queue reads its answer from [aiAvailabilityProvider], which
   /// caches until something invalidates it.
   void _syncReviewQueue() => ref.invalidate(aiAvailabilityProvider);

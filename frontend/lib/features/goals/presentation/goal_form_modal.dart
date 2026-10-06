@@ -27,7 +27,7 @@ Future<Goal?> showGoalForm(BuildContext context, {Goal? initial}) {
 ///
 /// Deliberately short: a goal is a name, an amount, and — optionally — a date
 /// it is wanted by. Nothing here asks about an account, because a goal has
-/// none (`PROJECT.md` §13).
+/// none.
 class GoalFormModal extends ConsumerStatefulWidget {
   const GoalFormModal({super.key, this.initial});
 
@@ -140,7 +140,7 @@ class _GoalFormModalState extends ConsumerState<GoalFormModal> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final locale = Localizations.localeOf(context).toString();
-    // The goal's own currency when it has one, else the profile's. Phase 1 is
+    // The goal's own currency when it has one, else the profile's. The app is
     // one currency per user, so the two only ever differ while the profile is
     // still loading.
     final currency =

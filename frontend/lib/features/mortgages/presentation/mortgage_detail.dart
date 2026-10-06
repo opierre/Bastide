@@ -223,7 +223,7 @@ class _HeaderCard extends StatelessWidget {
               },
               valueKey: const Key('mortgageDetailNext'),
               // The lender, not an account: a declared loan is never linked to
-              // the ledger (§15), so there is no account to name.
+              // the ledger, so there is no account to name.
               caption: mortgage.lender,
             ),
           ),
@@ -290,7 +290,7 @@ class _HeaderStat extends StatelessWidget {
 }
 
 /// Frame ②'s four cost cards. The TAEG carries its « INDICATIF » marker on the
-/// label itself: a real TAEG includes fees the app never sees (§15).
+/// label itself: a real TAEG includes fees the app never sees.
 class _CostRow extends StatelessWidget {
   const _CostRow({required this.view});
 

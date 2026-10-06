@@ -16,7 +16,7 @@ import '../application/mortgages_controller.dart';
 import '../domain/mortgage.dart';
 import 'mortgage_labels.dart';
 
-/// The ratio gauge's fixed scale, in bps: 0–60 % on Crédits (`00` §Phase 3),
+/// The ratio gauge's fixed scale, in bps: 0–60 % on Crédits (`00` §Patrimoine additions),
 /// so the 35 % reference tick sits at the same x in every state.
 const ratioGaugeScaleBps = 6000;
 
@@ -173,7 +173,7 @@ class DebtRatioCard extends StatelessWidget {
           ],
           const SizedBox(height: AppSpacing.sm + AppSpacing.xs),
           // Body content, never a tooltip: the app makes no lending decisions
-          // and says so where the ratio is read (`PROJECT.md` §15).
+          // and says so where the ratio is read.
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [

@@ -13,7 +13,7 @@ class Goal(Base):
     """A savings target the user allocates money toward on paper.
 
     Purely virtual: a goal is not linked to an account, writes no transactions, and moves no
-    balance (PROJECT.md §13).
+    balance.
     """
 
     __tablename__ = "goals"

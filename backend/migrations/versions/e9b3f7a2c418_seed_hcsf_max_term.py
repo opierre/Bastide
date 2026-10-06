@@ -8,9 +8,9 @@ Seeds the system (`user_id` NULL) HCSF maximum loan term, `hcsf_max_term_months_
 seeded tax year. Frozen here: the mortgages feature now holds it as a constant, and
 `b6d4f0e81a53` drops the table.
 
-Verification (§15, checked 2026-09-13): 25 years (300 months) maximum term — HCSF décision
+Verification (checked 2026-09-13): 25 years (300 months) maximum term — HCSF décision
 n° D-HCSF-2021-7 du 29 septembre 2021, legally binding on lenders from 1 January 2022 (the
-27-year allowance for deferred amortisation in VEFA is not modelled: différé is deferred, §15).
+27-year allowance for deferred amortisation in VEFA is not modelled: différé is out of scope).
 """
 
 from collections.abc import Sequence

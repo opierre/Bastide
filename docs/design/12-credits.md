@@ -1,6 +1,6 @@
-# 12 — Crédits (Phase 3)
+# 12 — Crédits
 
-Everything below is exactly what the mockup frames `12-Crédits — *` in `FinStride Phase 3 Mockups.dc.html` show. Colors, amounts, order and positions are normative — do not invent. Tokens per `00-shared-design-block.md` (Geist UI, Space Grotesk display, `#0A0F15` fields).
+Everything below is exactly what the mockup frames `12-Crédits — *` in the Patrimoine mockup canvas show. Colors, amounts, order and positions are normative — do not invent. Tokens per `00-shared-design-block.md` (Geist UI, Space Grotesk display, `#0A0F15` fields).
 
 ## Concept (binding)
 A loan is a **scheduled amount, not a booked transaction**: every figure on this panel (échéance, capital restant dû, intérêts, TAEG, ratio) is a neutral `#EDF1F7` figure — never green, never red, never signed. The debt ratio is a **reading**, stated with its income, its income source and the 35 % HCSF reference; the line « Lecture informative : ce repère ne lie aucun prêteur. » is first-class card content, never a tooltip. Being above the reference is a warning-tone reading (amber `#FFB84D`), never a red refusal and never moralised. When no income is known, no ratio is drawn — the card says why and offers the way out.

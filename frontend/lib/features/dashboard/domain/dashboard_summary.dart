@@ -22,7 +22,7 @@ class CategoryBreakdown {
 /// The monthly dashboard summary: totals, MoM deltas, and the expense breakdown.
 ///
 /// `savingsRate` and the two `*DeltaPct` fields are fractions/percentages as returned by the
-/// backend (see `PROJECT.md` §5) — `savingsRate` is a `0..1` ratio, the deltas are already
+/// backend — `savingsRate` is a `0..1` ratio, the deltas are already
 /// percentages. Formatting happens only in the presentation layer.
 @immutable
 class DashboardSummary {
@@ -63,6 +63,6 @@ class DashboardSummary {
 
 /// The savings-rate goal the dashboard measures against, as a `0..1` ratio.
 ///
-/// A fixed 20 % in Phase 1 (see `docs/design/04-dashboard.md` — « Objectif : 20 % »); it becomes
-/// a per-user setting when Goals ship in a later phase.
+/// A fixed 20 % (see `docs/design/04-dashboard.md` — « Objectif : 20 % »), not a
+/// per-user setting.
 const savingsRateGoal = 0.20;

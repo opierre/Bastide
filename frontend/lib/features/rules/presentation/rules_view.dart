@@ -186,8 +186,8 @@ class _RulesViewHeaderActionsState
       final count = await ref.read(rulesControllerProvider.notifier).apply();
       if (!mounted) return;
       // Two lines, because the count alone leaves the question the second one
-      // answers: the run never overwrites a category the user chose by hand
-      // (PROJECT.md §7), and a bulk action that doesn't say so invites an undo
+      // answers: the run never overwrites a category the user chose by hand,
+      // and a bulk action that doesn't say so invites an undo
       // the app can't offer.
       showAppToast(
         context,

@@ -1,7 +1,6 @@
 /// ISO-4217 codes offered on the registration currency picker. A curated
 /// subset of the backend's full validated set (`schemas.ISO_4217_CURRENCIES`)
-/// kept short enough to browse in a dropdown. EUR first: French users first
-/// per `PROJECT.md` §1.
+/// kept short enough to browse in a dropdown. EUR first: French users first.
 const List<String> supportedCurrencies = [
   'EUR',
   'USD',

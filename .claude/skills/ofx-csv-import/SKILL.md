@@ -5,7 +5,7 @@ description: Use when building or changing the file import pipeline — parsing 
 
 # OFX Import
 
-Turns bank statements into canonical transactions. Source of truth: `PROJECT.md` §6. Obey
+Turns bank statements into canonical transactions. Obey
 **database** (money, dedup constraints) and **architecture** (this is a feature: parsing in
 services, DB in repositories).
 
@@ -20,7 +20,7 @@ Every parser targets the **same canonical transaction model**. After parsing, no
 knows or cares whether the source was OFX or QFX. Format-specific logic lives only in the
 parser/adapter for that format.
 
-Canonical fields produced per transaction (see `PROJECT.md` §4 `transactions`):
+Canonical fields produced per transaction (see `transactions` in `docs/database.md`):
 `booked_date, value_date?, amount_minor (signed), currency, description_raw,
 description_clean, memo?, merchant?, fitid?, dedup_hash`.
 
@@ -34,7 +34,7 @@ description_clean, memo?, merchant?, fitid?, dedup_hash`.
    uppercase-fold for matching), attempt `merchant` extraction, compute signed `amount_minor`,
    set `currency` = account currency.
 5. **Dedup**: `fitid` if present else `dedup_hash`; mark duplicates, insert only new rows.
-6. **Categorize**: run the rule engine (Phase 1) / + model (Phase 2). See **ai-categorization**.
+6. **Categorize**: run the rule engine, then enqueue an async model run for the rest. See **ai-categorization**.
 7. **Persist**: insert new rows in one DB transaction; write the `import_batch` with
    `transaction_count / new_count / duplicate_count`, derived `period_start/end`, and `status`.
 

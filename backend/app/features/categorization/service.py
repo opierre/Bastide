@@ -2,7 +2,7 @@
 
 Deliberately pure — no session, no `categorization_run` row, no background task. It takes rows
 and returns decisions; persisting them, committing progress per batch, and honouring
-cancellation belong to the run executor above it (`PROJECT.md` §7). Keeping the judgement
+cancellation belong to the run executor above it. Keeping the judgement
 separable from the orchestration is what lets every case below be tested without a database.
 """
 

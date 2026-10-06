@@ -16,7 +16,7 @@ import 'mortgage_labels.dart';
 ///
 /// 300 rows never appear at once. Every figure — each row, and the foot's
 /// totals — is the API's; insurance keeps its own column, because folding it
-/// into interest or principal would misstate both (§15).
+/// into interest or principal would misstate both.
 class ScheduleTableCard extends ConsumerWidget {
   const ScheduleTableCard({super.key, required this.years});
 

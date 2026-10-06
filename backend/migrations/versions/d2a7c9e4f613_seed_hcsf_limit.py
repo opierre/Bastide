@@ -7,7 +7,7 @@ Create Date: 2026-09-13 15:02:18.114530
 Seeds the system (`user_id` NULL) HCSF debt-ratio reference for the seeded tax year. Frozen here:
 the mortgages feature now holds it as a constant, and `b6d4f0e81a53` drops the table.
 
-Verification (§15): 35 % maximum debt ratio, insurance included — HCSF décision n° D-HCSF-2021-7
+Verification: 35 % maximum debt ratio, insurance included — HCSF décision n° D-HCSF-2021-7
 du 29 septembre 2021, made legally binding on lenders from 1 January 2022.
 """
 

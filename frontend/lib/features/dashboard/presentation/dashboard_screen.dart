@@ -71,7 +71,7 @@ class _DashboardContent extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context)!;
     // The top three active goals, or nothing at all — a goals load that hasn't
-    // landed or has failed simply leaves row 3 as it was in Phase 1, rather
+    // landed or has failed simply leaves row 3 with its two cards, rather
     // than putting an error about a side card on the dashboard.
     final goals =
         ref.watch(goalsControllerProvider).value?.topGoals ?? const [];
@@ -173,7 +173,7 @@ class _DashboardContent extends ConsumerWidget {
           ),
         ),
         const SizedBox(height: AppSpacing.gridGap),
-        // Row 3's Phase 2 split, `1fr .95fr .85fr`, expressed as integer flex the
+        // Row 3's three-card split, `1fr .95fr .85fr`, expressed as integer flex the
         // same way row 1's is. The Objectifs card is *dropped* rather than
         // collapsed when there are no goals, and the other two cards go back to
         // sharing the row equally — a third column held open for something the

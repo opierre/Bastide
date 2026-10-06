@@ -1,7 +1,7 @@
 """Tests for the properties surface: CRUD, the held share, archiving, scoping.
 
 What is at stake is that a valuation is declared exactly once and read from here by everyone:
-the held share is derived on the way out (§18's assets), never recomputed elsewhere.
+the held share is derived on the way out (net-worth assets), never recomputed elsewhere.
 """
 
 from datetime import date
@@ -124,7 +124,7 @@ def test_patch_updates_only_the_fields_it_carries(client: TestClient) -> None:
 
 
 def test_a_new_valuation_is_a_patch_of_the_value_and_its_date(client: TestClient) -> None:
-    """No valuation history exists (§4c): a re-estimation replaces the single declared value."""
+    """No valuation history exists: a re-estimation replaces the single declared value."""
     headers = register(client)
     created = create_property(client, headers)
 
@@ -379,7 +379,7 @@ def test_a_property_can_be_unarchived(client: TestClient) -> None:
 
 
 def test_archiving_keeps_the_loan_link_intact(client: TestClient) -> None:
-    """The loan still exists; only the hard delete P3-01 guards against would cut the link."""
+    """The loan still exists; only the hard delete the FK guards against would cut the link."""
     headers = register(client)
     created = create_property(client, headers)
     loan = create_loan(client, headers, property_id=created["id"])
@@ -462,7 +462,7 @@ def test_anonymous_requests_are_refused(client: TestClient) -> None:
 
 
 def test_currency_is_copied_from_the_user(client: TestClient) -> None:
-    """One currency per user (Phase 1); no per-property currency and no selector (§4c)."""
+    """One currency per user; no per-property currency and no selector."""
     headers = register(client)
 
     assert create_property(client, headers)["currency"] == "EUR"

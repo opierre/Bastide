@@ -1,4 +1,4 @@
-"""Tests for the Phase 1 schema: the migration, and the dedup unique constraints."""
+"""Tests for the core schema: the migration, and the dedup unique constraints."""
 
 from datetime import date
 from pathlib import Path

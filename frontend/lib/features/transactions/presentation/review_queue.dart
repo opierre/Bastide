@@ -333,7 +333,7 @@ class _InlineLink extends StatelessWidget {
 /// * a proposal → the dashed proposed chip, its confidence, Confirmer/Corriger;
 /// * no proposal, AI on → the neutral chip, « — aucune proposition », and the
 ///   picker link, so the row says the model was asked and had nothing;
-/// * AI off → exactly the Phase 1 row, with no trace of stage 2 anywhere.
+/// * AI off → exactly the rules-only row, with no trace of stage 2 anywhere.
 class _ReviewRow extends ConsumerWidget {
   const _ReviewRow({required this.transaction, required this.aiIsActive});
 
@@ -539,7 +539,7 @@ class _ProposalBlockState extends ConsumerState<_ProposalBlock> {
   }
 }
 
-/// The row the model had nothing to say about. Identical to Phase 1 when
+/// The row the model had nothing to say about. Identical to the rules-only row when
 /// stage 2 is unavailable — the queue must not grow AI furniture for a user
 /// who has no AI.
 class _NoProposalBlock extends ConsumerWidget {

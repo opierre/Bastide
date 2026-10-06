@@ -2,7 +2,7 @@
 
 The single property under test everywhere below: **nothing raises**. Every malformed reply a
 small model can produce must come back as a deferral, because a run that crashes on a bad reply
-is worse than a run that hands the row to the user (`PROJECT.md` §7).
+is worse than a run that hands the row to the user.
 """
 
 import json

@@ -253,7 +253,7 @@ class _PreferencesPanel extends ConsumerWidget {
 }
 
 /// Données: the local-AI card, backup and restore under it, and the danger zone
-/// last (`docs/design/09-settings.md` §Phase 2 amendments). Database location
+/// last (`docs/design/09-settings.md` amendments). Database location
 /// and recalculation still need endpoints the backend does not expose.
 ///
 /// The order is the spec's and it is not arbitrary: the card that offers to

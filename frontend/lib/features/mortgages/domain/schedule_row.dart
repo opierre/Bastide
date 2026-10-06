@@ -24,7 +24,7 @@ class ScheduleRow {
   final int principalMinor;
 
   /// Kept apart from interest and principal: folding it into either misstates
-  /// both the cost and the payoff (§15).
+  /// both the cost and the payoff.
   final int insuranceMinor;
   final int outstandingAfterMinor;
 }

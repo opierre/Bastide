@@ -6,7 +6,7 @@ description: Use whenever writing or changing tests, or deciding what to mock, i
 # Testing
 
 Every feature slice ships with tests; external dependencies are mocked. Tests are part of the
-Definition of Done (`PROJECT.md` §11), not an afterthought.
+Definition of Done, not an afterthought.
 
 ## Principles
 
@@ -45,7 +45,7 @@ Definition of Done (`PROJECT.md` §11), not an afterthought.
   display formatting matches locale.
 - **Imports**: dedup catches re-imports; re-importing an identical file inserts zero rows;
   encodings/decimal/date variants parse (use real fixture files).
-- **Categorization**: rule priority + first-match-wins; `source=user` never overridden; (Phase 2)
+- **Categorization**: rule priority + first-match-wins; `source=user` never overridden;
   confidence threshold routes to assign vs review; Ollama-absent path still succeeds.
 - **Security**: every list/detail query is user-scoped; unauthenticated requests are rejected.
 - **i18n**: ARB key parity (fr ↔ en) enforced by a test/CI check.

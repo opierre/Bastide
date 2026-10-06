@@ -6,7 +6,7 @@ import '../../../core/api/api_client.dart';
 import '../../../core/api/api_client_provider.dart';
 import '../domain/backup.dart';
 
-/// Calls `/backup` (`PROJECT.md` §5b, §14). The only place that knows its wire
+/// Calls `/backup`. The only place that knows its wire
 /// shapes — including that an export's summary rides in a response header.
 class BackupRepository {
   BackupRepository(this._apiClient);

@@ -35,7 +35,7 @@ Future<MortgageDetail?> showMortgageForm(
 
 /// Reads a typed percent as basis points — « 3,45 » → 345.
 ///
-/// The one place a rate changes unit (`docs/tasks/README.md` Phase 3 notes).
+/// The one place a rate changes unit (rates are bps).
 /// Done on the digits rather than through a double, so 3,45 can never come out
 /// as 344. Accepts a comma or a point, at most two decimals.
 int? parseRateBps(String raw) {
@@ -229,7 +229,7 @@ class _MortgageFormModalState extends ConsumerState<MortgageFormModal> {
     } catch (error) {
       if (!mounted) return;
       // A refused number is explained under that number: the user has to change
-      // it, and it is on screen (card P3-12 step 6).
+      // it, and it is on screen.
       final message = localizeMortgageError(l10n, error);
       setState(() {
         _isSubmitting = false;
