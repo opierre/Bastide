@@ -108,8 +108,8 @@ class AccountsScreen extends ConsumerWidget {
 /// Total balance across the accounts, with the account count, currency and the
 /// timestamp the balances were last derived at.
 ///
-/// Summing is safe in Phase 1 because every account shares the user's single
-/// currency (see the multi-currency skill); this needs FX before Phase 4.
+/// Summing is safe because every account shares the user's single currency
+/// (see the multi-currency skill); multi-currency would need FX here.
 class _SummaryCard extends ConsumerWidget {
   const _SummaryCard();
 

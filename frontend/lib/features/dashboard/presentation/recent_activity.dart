@@ -189,7 +189,7 @@ class CompactTransactionRow extends StatelessWidget {
               children: [
                 // Both capped at one line. This column is a flex share of a
                 // card that is now the middle of three (`docs/design/04`
-                // §Row 3 — Phase 2), and an amount or a date allowed to wrap
+                // §Row 3), and an amount or a date allowed to wrap
                 // grows the row past the height the list measured for it.
                 AmountText(
                   amountMinor: transaction.amountMinor,

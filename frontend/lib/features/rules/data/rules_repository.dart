@@ -88,7 +88,7 @@ class RulesRepository {
   ///
   /// One endpoint rather than a flag on the transaction patch: this both fixes
   /// the row *and* may recategorize many others, and the response has to report
-  /// that second count (PROJECT.md §5b).
+  /// that second count (PROJECT.md §5).
   Future<RuleFromTransactionResult> createFromTransaction({
     required String transactionId,
     required RuleMatchField matchField,

@@ -16,7 +16,7 @@ import '../application/mortgages_controller.dart';
 import '../domain/mortgage.dart';
 import 'mortgage_labels.dart';
 
-/// The ratio gauge's fixed scale, in bps: 0–60 % on Crédits (`00` §Phase 3),
+/// The ratio gauge's fixed scale, in bps: 0–60 % on Crédits (`00` §Patrimoine additions),
 /// so the 35 % reference tick sits at the same x in every state.
 const ratioGaugeScaleBps = 6000;
 

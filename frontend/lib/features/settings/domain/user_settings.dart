@@ -1,6 +1,6 @@
 import 'package:flutter/foundation.dart';
 
-/// The user's server-side settings (`PROJECT.md` §4b `user_settings`).
+/// The user's server-side settings (`PROJECT.md` §4 `user_settings`).
 ///
 /// These live on the backend, not in the Flutter store, because the *backend*
 /// is what talks to the inference runtime — the address and model it dials are

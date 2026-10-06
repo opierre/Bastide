@@ -71,7 +71,7 @@ void main() {
     expect(find.byKey(const Key('dashboardGoalReached-g3')), findsOneWidget);
     expect(find.byKey(const Key('dashboardGoalAmounts-g3')), findsNothing);
 
-    // The two Phase 1 cards keep their content beside it.
+    // The two original cards keep their content beside it.
     expect(find.byType(IncomeVsExpenseChart), findsOneWidget);
     expect(find.byType(RecentActivityCard), findsOneWidget);
   });
@@ -94,7 +94,7 @@ void main() {
     expect(income / goals, closeTo(100 / 85, 0.02));
   });
 
-  testWidgets('the two Phase 1 cards share the row evenly without goals', (
+  testWidgets('the two other cards share the row evenly without goals', (
     tester,
   ) async {
     _useDesktopSurface(tester);
@@ -115,7 +115,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.byKey(const Key('dashboardGoalsCard')), findsNothing);
-    // Row 3 falls back to its two Phase 1 cards rather than holding a column
+    // Row 3 falls back to its two other cards rather than holding a column
     // open for something the user hasn't created.
     expect(find.byType(IncomeVsExpenseChart), findsOneWidget);
     expect(find.byType(RecentActivityCard), findsOneWidget);

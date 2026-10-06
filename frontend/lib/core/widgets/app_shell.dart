@@ -23,7 +23,7 @@ class NavDestinationSpec {
   }) : glyph = null;
 
   /// A destination whose icon is drawn from the frames' paths rather than
-  /// taken from the icon font — the Phase 3 glyphs have no Material equivalent
+  /// taken from the icon font — the Patrimoine glyphs have no Material equivalent
   /// that stays distinct from the existing eight at 18 px.
   const NavDestinationSpec.drawn({
     required this.path,
@@ -130,7 +130,7 @@ class AppShell extends ConsumerWidget {
           label: l10n.navCategories,
           subtitle: l10n.navCategoriesSubtitle,
         ),
-        // The circular-arrow cycle glyph the Phase 2 nav amendment names
+        // The circular-arrow cycle glyph the nav spec names
         // (`docs/design/00`). The spec thickens its stroke when active, which
         // Flutter's icon font cannot do — the iris fill, the filled-icon swap
         // and the rail carry the selection, exactly as on every other item.
@@ -141,7 +141,7 @@ class AppShell extends ConsumerWidget {
           label: l10n.navSubscriptions,
           subtitle: l10n.navSubscriptionsSubtitle,
         ),
-        // Last of the Gestion group, per the Phase 2 nav amendment
+        // Last of the Gestion group, per the nav spec
         // (`docs/design/00`). The flag glyph the spec names, with the same
         // outline/filled swap every other item uses to carry selection.
         NavDestinationSpec(
@@ -153,8 +153,8 @@ class AppShell extends ConsumerWidget {
         ),
       ],
     ),
-    // Phase 3 « Patrimoine », after Gestion and before the pinned Paramètres
-    // (`docs/design/00` §Phase 3 additions). The 3 + 4 + 3 + 1 stack fits
+    // « Patrimoine », after Gestion and before the pinned Paramètres
+    // (`docs/design/00` §Patrimoine additions). The 3 + 4 + 3 + 1 stack fits
     // 900 px at the 40 px pill rhythm, so no token changes with it.
     NavSectionSpec(
       label: l10n.navSectionWealth,
@@ -537,7 +537,7 @@ class NavRailSeparator extends StatelessWidget {
   }
 }
 
-/// The drawn nav glyphs of the Phase 3 « Patrimoine » group.
+/// The drawn nav glyphs of the « Patrimoine » group.
 enum NavGlyph { house, calculator, pie }
 
 /// An 18 px line glyph on the frames' 18-unit grid: 1.5 px stroke with round

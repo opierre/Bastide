@@ -119,7 +119,7 @@ void main() {
     expect(find.byKey(const Key('settingsBackupCard')), findsOneWidget);
     // The way out is offered above the way through: export, then danger zone.
     expect(find.byKey(const Key('settingsDangerZoneCard')), findsOneWidget);
-    // Préférences is unchanged by the Phase 2 amendment: language, currency and
+    // Préférences is unchanged by the Données amendments: language, currency and
     // formats stay there, and none of them followed the card into Données.
     expect(find.byKey(const Key('settingsCurrencyField')), findsNothing);
   });

@@ -149,7 +149,7 @@ class RulePreview {
 /// A default, not a constraint — the form may override every field. Derived
 /// server-side because knowing which parts of a French bank label are noise is
 /// the same knowledge the import pipeline applies when it cleans a description
-/// (PROJECT.md §5b); a second copy of those heuristics in Dart would drift and
+/// (PROJECT.md §5); a second copy of those heuristics in Dart would drift and
 /// suggest rules that don't match the row they came from.
 @immutable
 class RuleSuggestion {

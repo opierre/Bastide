@@ -2,7 +2,7 @@ import 'package:flutter/foundation.dart';
 
 /// One calendar year of the simulated schedule, as the engine aggregates it.
 /// Capital and interest arrive split, so the projection stacks them without
-/// deriving either (P3-09 step 2).
+/// deriving either.
 @immutable
 class SimulationYear {
   const SimulationYear({

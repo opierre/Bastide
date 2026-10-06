@@ -85,7 +85,7 @@ abstract final class AppColors {
   static const warning = Color(0xFFFFB84D);
 
   /// Warning at 35% — the over-reference card border (`docs/design/00`
-  /// §Phase 3 additions): the one edge a reading may tint, never red.
+  /// §Patrimoine additions): the one edge a reading may tint, never red.
   static const warningBorder = Color(0x59FFB84D);
   static const info = Color(0xFF5AA9FF);
 
@@ -150,7 +150,7 @@ abstract final class AppColors {
   static const irisBorder = Color(0x4D8B8CF9);
 
   /// The goal progress bar's fill — the spec's `linear-gradient(90deg,#6C6AF0,#8B8CF9)`
-  /// (`docs/design/00` §Phase 2 additions).
+  /// (`docs/design/00` §Gestion & AI additions).
   ///
   /// Deep end *first*, unlike [irisGradient]: a progress bar fills from the left, and starting
   /// on the darker stop is what makes a part-filled bar read as one that has been travelling

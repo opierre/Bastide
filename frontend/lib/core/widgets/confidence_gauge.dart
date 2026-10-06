@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import '../theme/tokens.dart';
 
 /// How sure the model is about a proposal: a 44×5 track with an iris fill, and
-/// the « Confiance NN % » caption beside it (`docs/design/00` §Phase 2).
+/// the « Confiance NN % » caption beside it (`docs/design/00` §Gestion & AI additions).
 ///
 /// The bar and the caption ship together because neither is sufficient alone —
 /// the bar is comparable at a glance across rows, the caption is the exact

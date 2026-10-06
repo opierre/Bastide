@@ -43,7 +43,7 @@ Future<RuleFromTransactionResult?> showAlwaysCategorizeModal(
 /// Deliberately the same widgets as the rules panel's editor — the selects,
 /// the labels, and [RuleMatchPreviewBanner] — rather than a second form. Two
 /// rule editors that drift apart is exactly the bug this shares code to avoid;
-/// what differs here is only what the card asks for: no priority field (a rule
+/// what differs here is only what this flow needs: no priority field (a rule
 /// learned from a correction always files last), and an apply-now checkbox in
 /// place of the active toggle.
 class AlwaysCategorizeModal extends ConsumerStatefulWidget {

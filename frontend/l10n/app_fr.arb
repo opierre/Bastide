@@ -3075,7 +3075,7 @@
   },
   "navSectionWealth": "Patrimoine",
   "@navSectionWealth": {
-    "description": "Left nav section heading grouping the loans, simulator and net-worth destinations (Phase 3). Rendered uppercase."
+    "description": "Left nav section heading grouping the loans, simulator and net-worth destinations. Rendered uppercase."
   },
   "navMortgages": "Crédits",
   "@navMortgages": {

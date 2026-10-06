@@ -63,6 +63,6 @@ class DashboardSummary {
 
 /// The savings-rate goal the dashboard measures against, as a `0..1` ratio.
 ///
-/// A fixed 20 % in Phase 1 (see `docs/design/04-dashboard.md` — « Objectif : 20 % »); it becomes
-/// a per-user setting when Goals ship in a later phase.
+/// A fixed 20 % (see `docs/design/04-dashboard.md` — « Objectif : 20 % »), not a
+/// per-user setting.
 const savingsRateGoal = 0.20;

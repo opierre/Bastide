@@ -5,7 +5,7 @@ import 'category_chip.dart';
 import 'dashed_border.dart';
 
 /// A category the model *proposed* but did not assign — the review queue's
-/// stage-2 chip (`docs/design/00` §Phase 2 additions).
+/// stage-2 chip (`docs/design/00` §Gestion & AI additions).
 ///
 /// Same geometry as [CategoryChip], with a dashed outline in the category hue
 /// over a transparent fill. That makes it a third, distinct state rather than a

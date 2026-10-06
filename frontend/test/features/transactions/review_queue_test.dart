@@ -99,7 +99,7 @@ Transaction _unproposed({String id = 't-none'}) => Transaction(
 
 /// A row a deterministic rule already settled. It never reaches the queue in
 /// the app, but the widget must not decorate it if it somehow does — rules
-/// always win over AI proposals (`docs/design/07` §Phase 2, Rules).
+/// always win over AI proposals (`docs/design/07` §Amendment — AI proposals, Rules).
 Transaction _ruleRow() => Transaction(
   id: 't-rule',
   accountId: 'a1',
@@ -290,7 +290,7 @@ void main() {
   });
 
   testWidgets(
-    'with AI off the queue is the Phase 1 queue plus one invitation',
+    'with AI off the queue is the rules-only queue plus one invitation',
     (tester) async {
       _useDesktopSurface(tester);
       final controller = _controller([_proposed(), _unproposed()]);
@@ -311,7 +311,7 @@ void main() {
 
       expect(find.byKey(const Key('reviewAiInvitation')), findsOneWidget);
       expect(find.byKey(const Key('reviewAiInvitationLink')), findsOneWidget);
-      // Still fully usable: every row keeps its Phase 1 chip and picker.
+      // Still fully usable: every row keeps its rules-only chip and picker.
       expect(find.byKey(const Key('reviewRowCategoryChip')), findsNWidgets(2));
     },
   );

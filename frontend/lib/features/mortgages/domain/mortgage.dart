@@ -1,6 +1,6 @@
 import 'package:flutter/foundation.dart';
 
-/// The credit product the panel prints on every card (`PROJECT.md` §4c).
+/// The credit product the panel prints on every card (`PROJECT.md` §4).
 ///
 /// A label only: the schedule never reads it. It is a separate axis from
 /// [RepaymentType] — a works loan can be constant-payment or in fine — so

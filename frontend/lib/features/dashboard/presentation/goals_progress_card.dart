@@ -8,7 +8,7 @@ import '../../../l10n/app_localizations.dart';
 import '../../goals/domain/goal.dart';
 import '../../goals/presentation/goal_card.dart';
 
-/// The dashboard's Objectifs card (`docs/design/04` §Row 3 — Phase 2): the top
+/// The dashboard's Objectifs card (`docs/design/04` §Row 3): the top
 /// three active goals as compact rows, under an iris tint.
 ///
 /// A read-only window onto the Objectifs panel — nothing here allocates or

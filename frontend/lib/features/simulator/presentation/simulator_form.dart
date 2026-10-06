@@ -257,7 +257,7 @@ class _SimulatorFormState extends ConsumerState<SimulatorForm> {
   }
 }
 
-/// The Phase 2 slider over 5–30 years, a year at a time, labelled in both
+/// The shared slider over 5–30 years, a year at a time, labelled in both
 /// units so neither has to be converted in the head.
 class _TermSlider extends ConsumerWidget {
   const _TermSlider({required this.termMonths});

@@ -95,7 +95,7 @@ Widget _wrap({
       accountsControllerProvider.overrideWith(
         () => FakeAccountsController(initialAccounts: [_account]),
       ),
-      // Phase 1 expectations: no opted-in AI, so no stage-2 chrome anywhere —
+      // Rules-only expectations: no opted-in AI, so no stage-2 chrome anywhere —
       // and no health probe leaving the test either.
       aiAvailabilityProvider.overrideWith(
         (ref) async => AiAvailability.unavailable,

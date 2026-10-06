@@ -51,7 +51,7 @@ enum RunStatus {
 }
 
 /// One stage-2 categorization run, polled for progress while it is in flight
-/// (PROJECT.md §4b/§7).
+/// (PROJECT.md §4/§7).
 @immutable
 class CategorizationRun {
   const CategorizationRun({

@@ -66,7 +66,7 @@ class GoalsState {
   bool get isOverAllocated =>
       savingsAccounts.isNotEmpty && allocatedTotalMinor > savingsTotalMinor;
 
-  /// The currency every figure on this panel is in. Phase 1 is one currency per
+  /// The currency every figure on this panel is in. The app is one currency per
   /// user, so the first thing carrying one answers for all of them.
   String get currency =>
       goals.firstOrNull?.currency ??

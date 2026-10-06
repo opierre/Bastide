@@ -140,7 +140,7 @@ class _GoalFormModalState extends ConsumerState<GoalFormModal> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final locale = Localizations.localeOf(context).toString();
-    // The goal's own currency when it has one, else the profile's. Phase 1 is
+    // The goal's own currency when it has one, else the profile's. The app is
     // one currency per user, so the two only ever differ while the profile is
     // still loading.
     final currency =

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../theme/tokens.dart';
 
-/// The spec's slider (`docs/design/00` §Phase 2 additions): a 5px `#1E2634`
+/// The spec's slider (`docs/design/00` §Gestion & AI additions): a 5px `#1E2634`
 /// track, an iris-gradient fill up to the value, and a 16px `#EDF1F7` thumb
 /// carrying `0 2px 8px rgba(0,0,0,.5)`.
 ///

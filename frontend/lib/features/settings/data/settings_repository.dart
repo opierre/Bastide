@@ -5,7 +5,7 @@ import '../../../core/api/api_client_provider.dart';
 import '../domain/user_settings.dart';
 
 /// Calls `/settings` and the runtime probe at `/settings/inference/health`
-/// (`PROJECT.md` §5b). The only place that knows those wire shapes.
+/// (`PROJECT.md` §5). The only place that knows those wire shapes.
 class SettingsRepository {
   SettingsRepository(this._apiClient);
 

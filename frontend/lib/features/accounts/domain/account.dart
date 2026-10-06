@@ -70,7 +70,7 @@ class AccountPrefill {
 }
 
 /// An account as returned by the API, including its derived current balance.
-/// Currency is set by the backend from the user's currency (Phase 1: one
+/// Currency is set by the backend from the user's currency (one
 /// currency per user) and is never picked per account — see the
 /// multi-currency skill.
 @immutable
