@@ -1,4 +1,4 @@
-"""The amortisation schedule engine (PROJECT.md §15).
+"""The amortisation schedule engine.
 
 A pure function of the declared loan inputs: plain integers and a date in, a full instalment
 schedule and its cost totals out. No ORM, no HTTP, no I/O — the Crédits panel and the Simulateur
@@ -168,7 +168,7 @@ def taeg_bps(schedule: Schedule) -> int:
 
     The internal rate of return of the actual flows — the advance ``principal − upfront_fees``
     against every instalment including insurance — solved by bisection on the monthly rate and
-    annualised as ``(1 + m)^12 − 1``. Indicative only (§15): a real TAEG includes fees we never
+    annualised as ``(1 + m)^12 − 1``. Indicative only: a real TAEG includes fees we never
     see.
 
     Raises:

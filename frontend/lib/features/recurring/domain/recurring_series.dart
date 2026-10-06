@@ -4,8 +4,8 @@ import 'package:flutter/foundation.dart';
 /// (`backend/app/features/recurring/schemas.py`).
 ///
 /// [irregular] is user-declared only: the detector emits a series when it
-/// recognises a rhythm and nothing otherwise, so it never produces one
-/// (`PROJECT.md` §12). The manual-creation form is the only place it can be
+/// recognises a rhythm and nothing otherwise, so it never produces one.
+/// The manual-creation form is the only place it can be
 /// chosen.
 enum Cadence {
   weekly(52),
@@ -88,8 +88,7 @@ class RecurringSeries {
   final Cadence cadence;
   final int medianIntervalDays;
 
-  /// Signed integer minor units, so negative — a subscription is an outflow
-  /// (`PROJECT.md` §8).
+  /// Signed integer minor units, so negative — a subscription is an outflow.
   final int expectedAmountMinor;
 
   final String currency;

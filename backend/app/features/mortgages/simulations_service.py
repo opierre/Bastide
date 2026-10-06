@@ -1,4 +1,4 @@
-"""The simulator (§17): a stateless compute over the mortgages engine, and saved scenarios.
+"""The simulator: a stateless compute over the mortgages engine, and saved scenarios.
 
 It lives inside the mortgages feature because it computes through that feature's engine — one
 implementation, so a simulated loan and a declared one can never disagree about the same inputs.
@@ -42,11 +42,11 @@ from app.features.mortgages.service import (
 
 _BPS_PER_UNIT = 10_000
 
-#: The §15 maximum term the simulation's duration is read against: 25 years — the same HCSF
+#: The maximum term the simulation's duration is read against: 25 years — the same HCSF
 #: decision (the 27-year VEFA allowance for deferred amortisation is not modelled).
 HCSF_MAX_TERM_MONTHS = 300
 
-#: The panel compares at most 3 (§17); an unbounded list is a list nobody curates.
+#: The panel compares at most 3; an unbounded list is a list nobody curates.
 MAX_SIMULATIONS_PER_USER = 20
 
 #: Validating a saved scenario needs a dated schedule, but no amount depends on the date.
@@ -161,7 +161,7 @@ class SimulationService:
         ]
 
     def create(self, user: User, data: SimulationCreate) -> SimulationRead:
-        """Save a scenario's inputs. No HCSF reading ever refuses it (§15, §17).
+        """Save a scenario's inputs. No HCSF reading ever refuses it.
 
         Raises:
             SimulationLimitReachedError: the user already holds the maximum number of scenarios.
@@ -227,7 +227,7 @@ class SimulationService:
     def compute(self, user: User, data: SimulationCompute, today: date) -> SimulationResult:
         """Cost, yearly projection and HCSF reading of a loan nobody has declared.
 
-        Writes nothing. An HCSF breach is reported, never refused (§15, §17).
+        Writes nothing. An HCSF breach is reported, never refused.
 
         Raises:
             MortgageFeesExceedPrincipalError: the fees are not smaller than the principal.

@@ -56,7 +56,7 @@ class SimulatorState {
   /// The id the live, unsaved simulation takes in the scenario list.
   static const liveId = 'live';
 
-  /// Side by side stops being readable beyond this (§17).
+  /// Side by side stops being readable beyond this.
   static const maxCompared = 3;
 
   final SimulatorInputs inputs;
@@ -151,7 +151,7 @@ class SimulatorState {
 /// scenarios and the comparison.
 ///
 /// The result is fed by a debounced `POST /simulations/compute` and never by a
-/// formula written here (§17: one engine). The only arithmetic this class does
+/// formula written here (one engine). The only arithmetic this class does
 /// is the borrowed amount's default, a convenience the user can overwrite.
 class SimulatorController extends AsyncNotifier<SimulatorState> {
   /// Long enough to let a figure be typed out, short enough to feel live.

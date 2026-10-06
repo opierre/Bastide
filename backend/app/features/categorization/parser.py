@@ -1,6 +1,6 @@
 """Parses a model reply into suggestions, defensively.
 
-The governing rule (`PROJECT.md` §7): **a malformed reply is a deferral, never an exception.**
+The governing rule: **a malformed reply is a deferral, never an exception.**
 A small model will, sooner or later, emit prose around its JSON, fence it, truncate mid-array,
 repeat an index, invent a category id, or return a confidence of 1.7. None of those may abort
 a run — every one of them just means "we don't know", which is precisely what the review queue

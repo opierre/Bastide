@@ -1,8 +1,8 @@
-"""Business logic for the net-worth synthesis (PROJECT.md §18).
+"""Business logic for the net-worth synthesis.
 
 One derived view and no stored money. Assets are account balances plus held property shares;
 liabilities are the outstanding principal of active loans. Goals and subscriptions take no part:
-a goal labels money already inside an account (§13), and a future charge is not a debt. The held
+a goal labels money already inside an account, and a future charge is not a debt. The held
 share and the schedule come from their own features — reused, not recomputed.
 """
 
@@ -121,7 +121,7 @@ class NetWorthService:
 
         A month without any snapshot is omitted rather than zeroed: a zero net worth because
         nothing was imported yet is a false statement. In a month that has one, every account
-        counts at its §4 point-in-time balance — nearest snapshot at or before the month end
+        counts at its point-in-time balance — nearest snapshot at or before the month end
         plus the rows since, or the opening balance plus the rows when it has no snapshot yet.
         Property values are held flat at their one declared value; loans follow their schedule.
         """

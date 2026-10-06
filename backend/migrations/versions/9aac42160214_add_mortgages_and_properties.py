@@ -24,7 +24,7 @@ def upgrade() -> None:
     `properties` precedes `mortgages` so the nullable `property_id` FK has its target; it sets
     null on delete, so a loan outlives the property it financed. The per-user uniqueness of tax
     profiles, brackets and parameters and the `mortgages.kind` check are enforced here, in the
-    database. No derived figure (schedule, estimate, simulation result) gets a column (§4).
+    database. No derived figure (schedule, estimate, simulation result) gets a column.
     """
     op.create_table(
         "mortgage_simulations",

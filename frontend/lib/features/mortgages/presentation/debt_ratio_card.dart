@@ -173,7 +173,7 @@ class DebtRatioCard extends StatelessWidget {
           ],
           const SizedBox(height: AppSpacing.sm + AppSpacing.xs),
           // Body content, never a tooltip: the app makes no lending decisions
-          // and says so where the ratio is read (`PROJECT.md` §15).
+          // and says so where the ratio is read.
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [

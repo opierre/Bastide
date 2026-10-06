@@ -9,7 +9,7 @@ import '../domain/dashboard_trends.dart';
 ///
 /// The month is always the first of that month. [trends] is *not* keyed to it: both its windows
 /// end at the current calendar month, so paging the picker back leaves the bars and the savings
-/// line where they are (see `PROJECT.md` §5).
+/// line where they are.
 @immutable
 class DashboardState {
   const DashboardState({

@@ -11,7 +11,7 @@ from pydantic import AfterValidator, BaseModel, ConfigDict, Field
 def _validate_loopback_url(value: str) -> str:
     """Accept only `http(s)` URLs pointing at a loopback host.
 
-    The sidecar is loopback-only by design (`PROJECT.md` §3/§8). `inference_base_url` is
+    The sidecar is loopback-only by design. `inference_base_url` is
     the one setting that decides where transaction descriptions get sent, so a value
     naming a remote host would quietly move the user's data off their machine — that is
     a rejected value, not a supported configuration.
@@ -56,7 +56,7 @@ class SettingsUpdate(BaseModel):
     inference_base_url: InferenceBaseUrl | None = None
     model_tag: str | None = Field(default=None, max_length=255)
     confidence_threshold: ConfidenceThreshold | None = None
-    #: Monthly income the debt ratio runs on (§15). An explicit `null` clears the declaration so
+    #: Monthly income the debt ratio runs on. An explicit `null` clears the declaration so
     #: the ratio falls back to the ledger median.
     declared_monthly_income_minor: int | None = Field(default=None, gt=0)
 

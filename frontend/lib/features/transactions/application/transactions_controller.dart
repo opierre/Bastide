@@ -181,7 +181,7 @@ class TransactionsController extends AsyncNotifier<TransactionsPage> {
   /// The same patch a correction makes, and deliberately so: a confirmed guess
   /// becomes `source = user`, because the user has now said it — the run that
   /// guessed it is no longer what the row rests on, and a later run must never
-  /// reconsider it (PROJECT.md §7).
+  /// reconsider it.
   Future<void> confirmProposal(Transaction transaction) async {
     final proposed = transaction.category;
     if (proposed == null) return;

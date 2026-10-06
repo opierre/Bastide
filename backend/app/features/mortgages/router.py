@@ -68,7 +68,7 @@ async def get_summary(
 ) -> MortgageSummary:
     """Totals over active loans, the debt ratio with its income source, and the trajectory.
 
-    `over_limit` is a reading, never a refusal: the app makes no lending decisions (§15).
+    `over_limit` is a reading, never a refusal: the app makes no lending decisions.
     """
     return service.summary(user, today)
 

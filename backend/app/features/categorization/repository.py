@@ -39,8 +39,8 @@ class CategorizationRunRepository:
         """Return the ids of the transactions a run of ``scope`` would reconsider.
 
         `source='user'` and `source='rule'` rows are excluded by construction rather than
-        filtered out later: user intent and a deterministic rule both outrank the model
-        (`PROJECT.md` §7), so there is no branch anywhere that could let one through.
+        filtered out later: user intent and a deterministic rule both outrank the model,
+        so there is no branch anywhere that could let one through.
 
         Args:
             user_id: the owner; the join to `accounts` is what scopes the query.
@@ -91,7 +91,7 @@ class CategorizationRunRepository:
         The check and the insert are one statement — `INSERT … SELECT … WHERE NOT EXISTS` —
         rather than a read followed by a write. A check-then-insert has a window between the
         two in which a second request passes the same check, and two runs over the same rows
-        would race on `category_id` (`PROJECT.md` §7). Here the database evaluates the
+        would race on `category_id`. Here the database evaluates the
         condition and the insert together, so at most one of them can win.
         """
         for _ in range(2):

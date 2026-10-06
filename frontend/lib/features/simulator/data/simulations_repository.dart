@@ -45,7 +45,7 @@ class SimulationsRepository {
     return _parseSaved(json);
   }
 
-  /// Hard-deletes a scenario — a scratchpad row, not history (§5).
+  /// Hard-deletes a scenario — a scratchpad row, not history.
   Future<void> delete(String simulationId) =>
       _apiClient.delete('/simulations/$simulationId');
 

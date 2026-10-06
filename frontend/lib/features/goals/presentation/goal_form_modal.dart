@@ -27,7 +27,7 @@ Future<Goal?> showGoalForm(BuildContext context, {Goal? initial}) {
 ///
 /// Deliberately short: a goal is a name, an amount, and — optionally — a date
 /// it is wanted by. Nothing here asks about an account, because a goal has
-/// none (`PROJECT.md` §13).
+/// none.
 class GoalFormModal extends ConsumerStatefulWidget {
   const GoalFormModal({super.key, this.initial});
 

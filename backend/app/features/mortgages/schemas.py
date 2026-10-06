@@ -5,7 +5,7 @@ from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field
 
-#: The credit product the panel prints on every card (§4). A label, never an engine input.
+#: The credit product the panel prints on every card. A label, never an engine input.
 MortgageKind = Literal["mortgage", "works", "consumer", "auto"]
 
 #: The maths the schedule runs on; mirrors the engine's `RepaymentType`.
@@ -20,7 +20,7 @@ class MortgageCreate(BaseModel):
     """Payload declaring a loan.
 
     `currency` is absent: it is the user's, per the one-currency rule (multi-currency
-    skill), and a derived figure is absent because nothing derived is stored (§15).
+    skill), and a derived figure is absent because nothing derived is stored.
     """
 
     model_config = ConfigDict(extra="forbid")
@@ -100,7 +100,7 @@ class MortgageDetail(MortgageRead):
     total_insurance_minor: int
     #: Interest, insurance and upfront fees.
     total_cost_minor: int
-    #: Indicative (§15): a real TAEG includes fees the app never sees.
+    #: Indicative: a real TAEG includes fees the app never sees.
     taeg_bps: int
     last_payment_on: date
 
@@ -142,7 +142,7 @@ class ScheduleTotals(BaseModel):
 
 
 class ScheduleRead(BaseModel):
-    """A window of a loan's schedule, derived per request and stored nowhere (§15)."""
+    """A window of a loan's schedule, derived per request and stored nowhere."""
 
     granularity: ScheduleGranularity
     rows: list[ScheduleMonthRow] | list[ScheduleYearRow]
@@ -150,7 +150,7 @@ class ScheduleRead(BaseModel):
     currency: str
 
 
-#: Where the ratio's denominator came from, so the user can check it (§15).
+#: Where the ratio's denominator came from, so the user can check it.
 IncomeSource = Literal["declared", "ledger", "unknown"]
 
 
@@ -181,7 +181,7 @@ class LoanEndMarker(BaseModel):
 class MortgageSummary(BaseModel):
     """Totals over **active** loans, the debt ratio and the combined trajectory.
 
-    `over_limit` is information only: the app makes no lending decisions (§15).
+    `over_limit` is information only: the app makes no lending decisions.
     """
 
     #: Sum of every active loan's `total_instalment_minor`, insurance included.
@@ -208,7 +208,7 @@ class MortgageSummary(BaseModel):
 
 
 class SimulationCreate(BaseModel):
-    """Payload saving a scenario: inputs only, never a result (§4).
+    """Payload saving a scenario: inputs only, never a result.
 
     The mortgage validation minus the loan-only fields (lender, kind, repayment type, dates,
     property link).
@@ -259,7 +259,7 @@ class SimulationRead(BaseModel):
 
 
 class SimulationCompute(BaseModel):
-    """Inputs of a stateless simulation (§17); POST only because they travel as a body."""
+    """Inputs of a stateless simulation; POST only because they travel as a body."""
 
     model_config = ConfigDict(extra="forbid")
 
@@ -292,7 +292,7 @@ class SimulationYearRow(BaseModel):
 
 class HcsfReading(BaseModel):
     """The HCSF reference points and where the simulation sits against them — data, never a
-    refusal (§15)."""
+    refusal."""
 
     #: Null when income is unknown: there is no ratio to hold against the limit.
     within_ratio: bool | None
@@ -313,7 +313,7 @@ class SimulationResult(BaseModel):
     #: Interest, insurance and upfront fees.
     total_cost_minor: int
     cost_over_price_bps: int | None
-    #: Indicative (§15).
+    #: Indicative.
     taeg_bps: int
     yearly: list[SimulationYearRow]
     debt_ratio_bps: int | None

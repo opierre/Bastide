@@ -1,6 +1,6 @@
 """Idempotent seed of the rich, localized (fr/en) system category catalog.
 
-``categories.name`` stores the i18n key for system rows (PROJECT.md §4); the frontend resolves
+``categories.name`` stores the i18n key for system rows; the frontend resolves
 it to a localized string via its own ARB entries.  The fr/en names below are the catalog's
 source of truth for those translations, not persisted columns.
 

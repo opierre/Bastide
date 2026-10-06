@@ -2,7 +2,7 @@
 
 `llama-server` (llama.cpp) and Ollama both expose that surface, so which engine is running
 is configuration — `inference_base_url` and `model_tag` on the user's settings row — not
-code (`PROJECT.md` §3). Nothing above this module may learn which one answered, which is
+code. Nothing above this module may learn which one answered, which is
 why only `/v1/models` and `/v1/chat/completions` are called and why every transport failure
 is re-raised as one of the three errors below.
 """

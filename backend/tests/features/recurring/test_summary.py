@@ -168,7 +168,7 @@ def test_the_summary_matches_the_set_the_panel_draws(client: TestClient, tmp_pat
 
     summary = _summary(owner, tmp_path)
 
-    # « 212,08 € », signed as an outflow (PROJECT.md §8).
+    # « 212,08 € », signed as an outflow.
     assert summary.monthly_total_minor == -21208
     assert summary.active_count == 7
     assert summary.cancelled_count == 1

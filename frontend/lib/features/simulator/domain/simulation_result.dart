@@ -23,7 +23,7 @@ class SimulationYear {
 }
 
 /// The HCSF reference points and where the simulation stands against them.
-/// Data, never a verdict: nothing is refused for being outside them (§15).
+/// Data, never a verdict: nothing is refused for being outside them.
 @immutable
 class HcsfReading {
   const HcsfReading({
@@ -41,7 +41,7 @@ class HcsfReading {
 }
 
 /// `POST /simulations/compute` — every figure the panel prints, all from the
-/// one engine (§17). Nothing here is computed in Dart.
+/// one engine. Nothing here is computed in Dart.
 @immutable
 class SimulationResult {
   const SimulationResult({
@@ -74,7 +74,7 @@ class SimulationResult {
   /// `null` without a property price.
   final int? costOverPriceBps;
 
-  /// Indicative only: a real TAEG includes fees the app never sees (§15).
+  /// Indicative only: a real TAEG includes fees the app never sees.
   final int taegBps;
   final List<SimulationYear> yearly;
 

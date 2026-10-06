@@ -10,7 +10,7 @@ from pydantic import BaseModel, ConfigDict, Field
 GoalStatus = Literal["active", "reached", "archived"]
 
 #: The statuses a client may ask for. Archiving and restoring are the user's two decisions
-#: about a goal (`PROJECT.md` §13); whether a restored goal lands on `active` or `reached` is
+#: about a goal; whether a restored goal lands on `active` or `reached` is
 #: the backend's arithmetic, so `reached` is not something a payload may claim.
 GoalStatusPatch = Literal["active", "archived"]
 
@@ -18,8 +18,8 @@ GoalStatusPatch = Literal["active", "archived"]
 class GoalCreate(BaseModel):
     """Payload creating a savings goal.
 
-    `extra="forbid"` is what rejects an `account_id`: a goal is not linked to an account
-    (`PROJECT.md` §13), and silently dropping the field would let a client believe it had
+    `extra="forbid"` is what rejects an `account_id`: a goal is not linked to an account,
+    and silently dropping the field would let a client believe it had
     stored something. `currency` is absent for the same reason it is absent from every other
     payload — it is the user's, not a per-row choice (multi-currency skill).
     """
@@ -27,8 +27,8 @@ class GoalCreate(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     name: str = Field(min_length=1, max_length=255)
-    #: A target is an amount to reach, so positive — the money sign convention (`PROJECT.md`
-    #: §8) applies to movements, and a goal is not one.
+    #: A target is an amount to reach, so positive — the money sign convention
+    #: applies to movements, and a goal is not one.
     target_minor: int = Field(gt=0)
     target_date: date | None = None
     icon: str = Field(min_length=1, max_length=50)
@@ -66,7 +66,7 @@ class GoalRead(BaseModel):
     #: The signed sum of the goal's allocations, so it falls again when money is taken back out.
     progress_minor: int
     #: `progress_minor / target_minor`, **unclamped**: an over-funded goal reports past 1.0 and
-    #: the UI decides what to draw (`PROJECT.md` §13). A ratio, never a money value.
+    #: the UI decides what to draw. A ratio, never a money value.
     progress_pct: float
     created_at: datetime
     updated_at: datetime

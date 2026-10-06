@@ -9,7 +9,7 @@ from app.features.transactions.schemas import TransactionRead
 
 #: Every value `recurring_series.cadence` may carry. `irregular` exists for user-declared series
 #: only: the detector emits a series when it recognises a rhythm and nothing otherwise, so it
-#: never produces one (`PROJECT.md` §12).
+#: never produces one.
 Cadence = Literal["weekly", "monthly", "quarterly", "yearly", "irregular"]
 
 #: The subset detection can conclude — the four bands a median gap is classified into.
@@ -48,7 +48,7 @@ class SeriesRead(BaseModel):
     category_id: str | None
     cadence: Cadence
     median_interval_days: int
-    #: Signed, so negative — a subscription is an outflow (`PROJECT.md` §8).
+    #: Signed, so negative — a subscription is an outflow.
     expected_amount_minor: int
     currency: str
     first_seen_date: date
@@ -94,8 +94,8 @@ class SeriesCreate(BaseModel):
     account_id: str
     expected_amount_minor: int = Field(
         description=(
-            "Signed minor units, so negative for the ordinary case of a subscription "
-            "(`PROJECT.md` §8). Not constrained to negatives: the sign is the client's "
+            "Signed minor units, so negative for the ordinary case of a subscription. "
+            "Not constrained to negatives: the sign is the client's "
             "statement about the charge, not something this endpoint may overrule."
         )
     )
@@ -160,7 +160,7 @@ class RecurringSummary(BaseModel):
     """
 
     #: Every non-dismissed, non-cancelled series normalised to a monthly figure and summed.
-    #: Signed, so negative (`PROJECT.md` §8); `irregular` series are excluded, having no period
+    #: Signed, so negative; `irregular` series are excluded, having no period
     #: to normalise from.
     monthly_total_minor: int
     #: Non-dismissed, non-cancelled series — what the panel calls « Abonnements actifs ».

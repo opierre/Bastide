@@ -35,7 +35,7 @@ class RunEnqueuer(Protocol):
     lets an import with no enqueuer wired behave as a rules-only import.
 
     Implementations must be silent — an import that has already committed cannot be failed by
-    anything that happens after it (`PROJECT.md` §7).
+    anything that happens after it.
     """
 
     def __call__(self, user: User, account_id: str, import_batch_id: str) -> None: ...
@@ -193,7 +193,7 @@ class ImportService:
 
         # Only once the batch has committed, and only from the success path: a run over rows
         # that were never persisted would have nothing to categorise. The import does not wait
-        # on the model — the enqueuer starts the run and returns (`PROJECT.md` §7).
+        # on the model — the enqueuer starts the run and returns.
         if self._run_enqueuer is not None:
             self._run_enqueuer(user, account.id, saved.id)
 

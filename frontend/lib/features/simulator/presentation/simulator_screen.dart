@@ -18,7 +18,7 @@ import 'yearly_projection_chart.dart';
 /// right — on screen together, so a keystroke's effect is seen where it lands.
 ///
 /// No loan figure on it is computed in Dart — every amount, share and ratio is
-/// the backend engine's (`PROJECT.md` §17).
+/// the backend engine's.
 class SimulatorScreen extends ConsumerWidget {
   const SimulatorScreen({super.key});
 

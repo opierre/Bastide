@@ -14,7 +14,7 @@ import '../application/settings_controller.dart';
 import 'lock_callout.dart';
 
 /// Where « En savoir plus » sends a user with no engine: the download page of
-/// the runtime `PROJECT.md` §3 names as the default.
+/// Ollama, the default runtime.
 ///
 /// The one link in the app that leaves it, and it carries nothing about the
 /// user — the privacy callout two rows above stays true.

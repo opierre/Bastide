@@ -1,4 +1,4 @@
-"""Response schemas for the net-worth summary. Every figure is derived; none is stored (§18)."""
+"""Response schemas for the net-worth summary. Every figure is derived; none is stored."""
 
 from datetime import date
 from typing import Literal

@@ -56,7 +56,7 @@ class MortgagesState {
 /// re-read together after every write.
 ///
 /// The summary is never adjusted locally. Every figure on it — the charge, the
-/// outstanding, the ratio, the trajectory — is the engine's (`PROJECT.md` §15),
+/// outstanding, the ratio, the trajectory — is the engine's,
 /// and a client that patched it from the rows it holds would be a second
 /// amortisation implementation.
 class MortgagesController extends AsyncNotifier<MortgagesState> {
@@ -235,7 +235,7 @@ final scheduleWindowProvider =
 /// The loan form's live « Mensualité calculée » plate.
 ///
 /// Fed by a debounced `POST /simulations/compute` — stateless and free to call —
-/// never by a payment formula written in Dart (§17: one engine). `null` means
+/// never by a payment formula written in Dart (one engine). `null` means
 /// there is nothing to compute yet; a later request supersedes any answer still
 /// in flight, so a slow response can't overwrite a newer one.
 class LoanInstalmentPreview extends Notifier<AsyncValue<ComputedInstalment>?> {

@@ -144,7 +144,7 @@ def test_patch_declares_and_clears_the_monthly_income(client: TestClient) -> Non
         "/api/v1/settings", json={"declared_monthly_income_minor": 460_000}, headers=headers
     )
     untouched = client.patch("/api/v1/settings", json={"ai_enabled": True}, headers=headers)
-    # An explicit null is the way back to the ledger median (PROJECT.md §15).
+    # An explicit null is the way back to the ledger median.
     cleared = client.patch(
         "/api/v1/settings", json={"declared_monthly_income_minor": None}, headers=headers
     )

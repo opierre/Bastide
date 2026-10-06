@@ -35,7 +35,7 @@ Future<MortgageDetail?> showMortgageForm(
 
 /// Reads a typed percent as basis points — « 3,45 » → 345.
 ///
-/// The one place a rate changes unit (`PROJECT.md` §4: rates are bps).
+/// The one place a rate changes unit (rates are bps).
 /// Done on the digits rather than through a double, so 3,45 can never come out
 /// as 344. Accepts a comma or a point, at most two decimals.
 int? parseRateBps(String raw) {

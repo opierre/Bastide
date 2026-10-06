@@ -32,7 +32,7 @@ Future<RecurringSeries?> showSeriesForm(
 /// for the kebab's « Modifier ».
 ///
 /// This is the only place `Irrégulier` can be chosen. Detection concludes a
-/// cadence or concludes nothing (`PROJECT.md` §12), so an irregular series only
+/// cadence or concludes nothing, so an irregular series only
 /// ever exists because a user said so here.
 class SeriesFormModal extends ConsumerStatefulWidget {
   const SeriesFormModal({super.key, this.initial});
@@ -113,7 +113,7 @@ class _SeriesFormModalState extends ConsumerState<SeriesFormModal> {
     final controller = ref.read(subscriptionsControllerProvider.notifier);
     try {
       // Stored negative: a subscription is an outflow, and the ledger's sign
-      // convention is not something a form may opt out of (`PROJECT.md` §8).
+      // convention is not something a form may opt out of.
       final saved = _isEditing
           ? await controller.updateSeries(
               widget.initial!.id,

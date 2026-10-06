@@ -4,7 +4,7 @@ import '../../../core/api/api_client.dart';
 import '../../../core/api/api_client_provider.dart';
 import '../domain/database_reset.dart';
 
-/// Calls `/database` (`PROJECT.md` §5, §14). The only place that knows its
+/// Calls `/database`. The only place that knows its
 /// wire shapes.
 class DatabaseRepository {
   DatabaseRepository(this._apiClient);

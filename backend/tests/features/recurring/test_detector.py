@@ -1,4 +1,4 @@
-"""Tests for the detection algorithm — one table per rule in `PROJECT.md` §12.
+"""Tests for the detection algorithm — one table per rule.
 
 Both directions matter for every rule: what qualifies, and what a hair outside the tolerance
 does not. A detector that is too generous fills the subscriptions screen with noise the user
@@ -108,7 +108,7 @@ def test_median_gap_classifies_the_cadence(offsets: list[int], cadence: str, int
 
 @pytest.mark.parametrize("offsets", [[0, 3, 6], [0, 15, 30], [0, 60, 120], [0, 200, 400]])
 def test_a_median_gap_outside_every_band_yields_no_series(offsets: list[int]) -> None:
-    """Fortnightly, bimonthly, twice-yearly: regular, but not a cadence §12 recognises."""
+    """Fortnightly, bimonthly, twice-yearly: regular, but not a recognised cadence."""
     assert detect(_series(offsets, [-999] * len(offsets))) == []
 
 

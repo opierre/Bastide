@@ -42,7 +42,7 @@ Future<Property?> showRevalueForm(BuildContext context, Property property) {
 /// Reads a typed ownership percent as basis points — « 50 » → 5000,
 /// « 33,33 » → 3333.
 ///
-/// The one place ownership changes unit (`PROJECT.md` §4: shares are bps).
+/// The one place ownership changes unit (shares are bps).
 /// Done on the digits rather than through a double, so 33,33 can never come
 /// out as 3332. Accepts a comma or a point, at most two decimals, and only a
 /// share the API accepts: above 0 and at most 100 %.
@@ -442,7 +442,7 @@ class _PropertyFormModalState extends ConsumerState<PropertyFormModal> {
 
 /// « Nouvelle estimation »: a new declared value with the date it was given.
 ///
-/// The API keeps one declared value per property (§4), so this replaces the
+/// The API keeps one declared value per property, so this replaces the
 /// previous one; the card then shows it with its « estimée le … » line.
 class PropertyRevalueModal extends ConsumerStatefulWidget {
   const PropertyRevalueModal({super.key, required this.property});

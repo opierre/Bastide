@@ -1,7 +1,7 @@
 """Business logic for declared loans: CRUD and every figure derived from the schedule.
 
 Nothing in here writes a transaction, moves a balance or persists a schedule row. A loan is
-declared and standalone (§15); its schedule is a pure function of the row, built by the engine
+declared and standalone; its schedule is a pure function of the row, built by the engine
 once per loan per request and reused for every figure that request needs.
 """
 
@@ -47,7 +47,7 @@ DEFAULT_STATUSES: tuple[MortgageStatus, ...] = ("active", "repaid")
 
 _BPS_PER_UNIT = 10_000
 
-#: The §15 debt-ratio reference the ratio is read against: 35 %, insurance included — HCSF
+#: The debt-ratio reference the ratio is read against: 35 %, insurance included — HCSF
 #: décision n° D-HCSF-2021-7 du 29 septembre 2021, binding on lenders since 1 January 2022.
 HCSF_LIMIT_BPS = 3500
 
@@ -55,7 +55,7 @@ HCSF_LIMIT_BPS = 3500
 LEDGER_INCOME_MONTHS = 12
 
 #: Below this many months of ledger income the ratio is unknown: a ratio invented from one
-#: month of data is worse than no ratio (§15).
+#: month of data is worse than no ratio.
 MIN_LEDGER_INCOME_MONTHS = 3
 
 #: The columns the schedule is a function of — a patch touching none of them cannot break it.
@@ -86,7 +86,7 @@ class MortgagePropertyInvalidError(ValidationError):
 
 
 class MortgageNonAmortizingError(ValidationError):
-    """Raised when the instalment does not repay the principal (§15: rejected, never grown)."""
+    """Raised when the instalment does not repay the principal (rejected, never grown)."""
 
     code = "MORTGAGE_NON_AMORTIZING"
 
@@ -141,7 +141,7 @@ def outstanding_series(
 ) -> tuple[list[OutstandingPoint], list[LoanEndMarker]]:
     """The combined outstanding principal per month, and the month each loan ends.
 
-    Joined here because the frontend may not sum schedules itself (§15: one engine). A loan
+    Joined here because the frontend may not sum schedules itself (one engine). A loan
     contributes nothing before its first instalment's month — which is what draws the step a
     later loan adds — then its engine row's `outstanding_after_minor` for each month, then 0.
     """
@@ -244,7 +244,7 @@ class MortgageService:
         return self._detail(self._owned(user.id, mortgage_id), user.currency, today)
 
     def create(self, user: User, data: MortgageCreate, today: date) -> MortgageDetail:
-        """Declare a loan. Currency is the user's; no debt-ratio reading ever refuses it (§15).
+        """Declare a loan. Currency is the user's; no debt-ratio reading ever refuses it.
 
         Raises:
             MortgagePropertyInvalidError: `property_id` is not one of the user's properties.
@@ -412,7 +412,7 @@ class MortgageService:
         """The ratio's denominator and where it came from: declared › ledger median › unknown.
 
         The median, not the mean, of the complete months holding income: a 13th-month bonus
-        must not lift a ratio the user will plan around (§15). Shared with the simulator, so a
+        must not lift a ratio the user will plan around. Shared with the simulator, so a
         simulated ratio and the summary's divide by the same income.
         """
         declared = self._repository.declared_monthly_income_minor(user_id)

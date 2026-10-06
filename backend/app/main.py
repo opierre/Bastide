@@ -43,7 +43,7 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     this both seeds a fresh install and carries later catalog additions to an existing one.
 
     A categorisation run executes as an in-process task, so one still `pending`/`running` in
-    the database lost its executor when that process stopped (`PROJECT.md` §7). Left alone it
+    the database lost its executor when that process stopped. Left alone it
     would show as in flight forever and block every future run behind the one-at-a-time check.
 
     The session factory is resolved through `dependency_overrides` because startup has no

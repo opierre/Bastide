@@ -38,7 +38,7 @@ class BackupCounts {
   final int simulations;
 }
 
-/// An archive's manifest (`PROJECT.md` §14), as inspect and restore return it
+/// An archive's manifest, as inspect and restore return it
 /// and as an export reports it.
 @immutable
 class BackupSummary {

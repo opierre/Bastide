@@ -14,7 +14,7 @@ import 'goal_labels.dart';
 /// **No account line, deliberately.** A goal is not linked to an account, and
 /// the design shows none anywhere in this feature — putting one here would
 /// promise the user that allocating moves money in a particular account, which
-/// is exactly the thing a virtual envelope never does (`PROJECT.md` §13).
+/// is exactly the thing a virtual envelope never does.
 class GoalCard extends StatelessWidget {
   const GoalCard({
     super.key,
@@ -166,7 +166,7 @@ class GoalValueLine extends StatelessWidget {
               Flexible(
                 // Neutral, never green or red: what is set aside is a standing
                 // quantity, not a movement, so the ledger's sign colors would
-                // state something false about it (`PROJECT.md` §8).
+                // state something false about it.
                 child: AmountText(
                   key: Key('goalSaved-${goal.id}'),
                   amountMinor: goal.progressMinor,

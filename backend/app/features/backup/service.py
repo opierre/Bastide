@@ -1,4 +1,4 @@
-"""Full export and restore of everything one user owns (`PROJECT.md` §14)."""
+"""Full export and restore of everything one user owns."""
 
 from collections.abc import Callable
 from datetime import UTC, date, datetime

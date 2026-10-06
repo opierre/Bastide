@@ -2,7 +2,7 @@ import 'package:flutter/foundation.dart';
 
 /// The authenticated user's profile. Locale and currency are account-wide
 /// (one currency per user, chosen at registration — see
-/// `PROJECT.md` §2 and the multi-currency skill).
+/// the multi-currency skill).
 @immutable
 class AuthUser {
   const AuthUser({

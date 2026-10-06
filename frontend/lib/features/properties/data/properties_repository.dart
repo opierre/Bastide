@@ -45,7 +45,7 @@ class PropertiesRepository {
   }
 
   /// « Nouvelle estimation »: a new declared value with its date, sent together.
-  /// The property keeps one declared value (§4), so this replaces it.
+  /// The property keeps one declared value, so this replaces it.
   Future<Property> revalue(
     String propertyId, {
     required int marketValueMinor,

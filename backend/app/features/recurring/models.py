@@ -53,7 +53,7 @@ class RecurringSeries(Base):
     last_seen_date: Mapped[date] = mapped_column(Date)
     #: Stored (`last_seen_date + median_interval_days`) because the detector computes it.
     #: "Missed charge" is deliberately *not* stored — it stops being true the moment the
-    #: charge lands, so it is derived at read time (PROJECT.md §12).
+    #: charge lands, so it is derived at read time.
     next_expected_date: Mapped[date] = mapped_column(Date)
     occurrence_count: Mapped[int] = mapped_column(Integer)
     status: Mapped[str] = mapped_column(String(10))

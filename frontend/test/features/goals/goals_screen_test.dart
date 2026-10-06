@@ -201,7 +201,7 @@ void main() {
       'Vous avez réparti ${_money(2445000)} alors que vos comptes '
       "d'épargne totalisent ${_money(2210000)}.",
     );
-    // The grid is still there: the warning informs, it never blocks (§13).
+    // The grid is still there: the warning informs, it never blocks.
     expect(find.byKey(const Key('goalCard-g1')), findsOneWidget);
 
     await tester.tap(

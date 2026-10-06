@@ -7,7 +7,7 @@ from app.features.settings.repository import SettingsRepository
 from app.features.settings.schemas import SettingsUpdate
 
 # The columns a patch may legitimately set back to null — clearing a declared income is how the
-# debt ratio returns to the ledger median (PROJECT.md §15). For the others an explicit `null` is
+# debt ratio returns to the ledger median. For the others an explicit `null` is
 # not a value the column accepts, so it is treated as "leave alone" rather than writing a null
 # the schema forbids.
 _NULLABLE_FIELDS = frozenset({"model_tag", "declared_monthly_income_minor"})

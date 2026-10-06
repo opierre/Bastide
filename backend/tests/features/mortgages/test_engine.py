@@ -1,4 +1,4 @@
-"""The amortisation engine against its invariants and a hand-computed reference (§15)."""
+"""The amortisation engine against its invariants and a hand-computed reference."""
 
 import inspect
 from datetime import date

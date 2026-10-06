@@ -1,6 +1,6 @@
 import 'package:flutter/foundation.dart';
 
-/// The nature of a declared property (`PROJECT.md` §4). A label only: no
+/// The nature of a declared property. A label only: no
 /// computation reads it.
 enum PropertyKind {
   primaryResidence('primary_residence'),

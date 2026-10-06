@@ -1,6 +1,6 @@
 import 'package:flutter/foundation.dart';
 
-/// The credit product the panel prints on every card (`PROJECT.md` §4).
+/// The credit product the panel prints on every card.
 ///
 /// A label only: the schedule never reads it. It is a separate axis from
 /// [RepaymentType] — a works loan can be constant-payment or in fine — so
@@ -46,7 +46,7 @@ enum MortgageStatus {
       values.firstWhere((status) => status.wireValue == value);
 }
 
-/// Where the debt ratio's denominator came from (`PROJECT.md` §15).
+/// Where the debt ratio's denominator came from.
 enum IncomeSource {
   declared('declared'),
   ledger('ledger'),
@@ -62,7 +62,7 @@ enum IncomeSource {
 
 /// A declared loan with the figures the backend derives from its schedule as of
 /// today. Every figure is server-computed: a second amortisation in Dart would
-/// drift from the engine the tests pin (§15).
+/// drift from the engine the tests pin.
 @immutable
 class Mortgage {
   const Mortgage({
@@ -138,7 +138,7 @@ class MortgageDetail {
   /// Interest, insurance and upfront fees.
   final int totalCostMinor;
 
-  /// Indicative only (§15): a real TAEG includes fees the app never sees.
+  /// Indicative only: a real TAEG includes fees the app never sees.
   final int taegBps;
   final DateTime lastPaymentOn;
 }
@@ -223,7 +223,7 @@ class MortgageSummary {
   final DateTime? nextPaymentOn;
   final int nextPaymentCount;
 
-  /// `null` when the income is unknown: no ratio is invented (§15).
+  /// `null` when the income is unknown: no ratio is invented.
   final int? debtRatioBps;
   final int? monthlyIncomeMinor;
   final IncomeSource incomeSource;

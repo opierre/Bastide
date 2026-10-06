@@ -92,8 +92,8 @@ class TransactionRepository:
 
         Deliberately unpaginated and unfiltered: the recurring detector re-reads every row
         rather than only the new ones, because a third occurrence promotes a group that has
-        been sitting below the threshold since long before this import (`PROJECT.md` §12).
-        The scan is one pass over an account's rows at a scale §4 sizes in the thousands.
+        been sitting below the threshold since long before this import.
+        The scan is one pass over an account's rows at a scale of thousands.
         """
         query = (
             select(Transaction)

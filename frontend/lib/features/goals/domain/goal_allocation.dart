@@ -6,7 +6,7 @@ import 'package:flutter/foundation.dart';
 /// real correction is an offsetting line rather than a rewritten one. Taking
 /// money back out of an envelope is a *negative* allocation, not a second kind
 /// of record — which is why the modal has one signed amount field and the
-/// history is one list (`PROJECT.md` §13).
+/// history is one list.
 @immutable
 class GoalAllocation {
   const GoalAllocation({

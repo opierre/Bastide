@@ -3450,7 +3450,7 @@ abstract class AppLocalizations {
   /// **'Répartition sur le papier : vos comptes ne sont pas modifiés.'**
   String get goalsReassurance;
 
-  /// The over-allocation banner. Informative and dismissible, never blocking (`PROJECT.md` §13).
+  /// The over-allocation banner. Informative and dismissible, never blocking.
   ///
   /// In fr, this message translates to:
   /// **'Vous avez réparti {allocated} alors que vos comptes d\'épargne totalisent {savings}.'**

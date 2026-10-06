@@ -255,7 +255,7 @@ def test_a_non_active_loan_is_excluded(client: TestClient, retire: str) -> None:
 
 
 def test_a_funded_goal_is_not_counted(client: TestClient) -> None:
-    """An allocation labels money already inside an account (§13); counting it is double."""
+    """An allocation labels money already inside an account; counting it is double."""
     headers = register(client)
     create_account(client, headers, 1_250_000, "savings")
     before = summary(client, headers)
@@ -422,7 +422,7 @@ def test_a_user_with_no_snapshot_has_an_empty_series(client: TestClient) -> None
 
 
 def test_rows_after_the_nearest_snapshot_are_added_to_it() -> None:
-    """The ledger half of §4's point-in-time balance, over a mocked repository."""
+    """The ledger half of the point-in-time balance, over a mocked repository."""
     account = Account(id="a1", type="checking", opening_balance_minor=0, cached_balance_minor=0)
     fresh = Account(id="a2", type="cash", opening_balance_minor=5_000, cached_balance_minor=0)
     repository = MagicMock(spec=NetWorthRepository)

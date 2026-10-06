@@ -40,7 +40,7 @@ class GoalsState {
 
   final bool showArchived;
 
-  /// The over-allocation banner is dismissible and never blocking (§13), so a
+  /// The over-allocation banner is dismissible and never blocking, so a
   /// dismissal is panel state rather than a stored preference.
   final bool bannerDismissed;
 
@@ -61,8 +61,8 @@ class GoalsState {
   ///
   /// Requires at least one savings account. With none there is nothing to
   /// compare against — the app is not entitled to decide which of a user's
-  /// other accounts holds "savings", which is the same reason §13 refuses to
-  /// let this block anything.
+  /// other accounts holds "savings", which is the same reason the API refuses
+  /// to let this block anything.
   bool get isOverAllocated =>
       savingsAccounts.isNotEmpty && allocatedTotalMinor > savingsTotalMinor;
 
@@ -100,8 +100,8 @@ class GoalsState {
 /// savings balances behind the over-allocation warning, loaded together.
 ///
 /// Every write reloads rather than patching a row in place. Progress and
-/// `reached` are both derived from the allocation ledger server-side
-/// (`PROJECT.md` §13), so a client that adjusted them locally would be
+/// `reached` are both derived from the allocation ledger server-side,
+/// so a client that adjusted them locally would be
 /// answering a question the backend owns — and would get the reached moment,
 /// the one this whole panel is built around, wrong at exactly the boundary.
 class GoalsController extends AsyncNotifier<GoalsState> {

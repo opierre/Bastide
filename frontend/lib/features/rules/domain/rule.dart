@@ -38,7 +38,7 @@ enum RuleMatchType {
 }
 
 /// A categorization rule. Evaluated ascending by [priority], first match wins,
-/// and never over a transaction the user categorized by hand (PROJECT.md §7).
+/// and never over a transaction the user categorized by hand.
 @immutable
 class Rule {
   const Rule({
@@ -148,8 +148,8 @@ class RulePreview {
 ///
 /// A default, not a constraint — the form may override every field. Derived
 /// server-side because knowing which parts of a French bank label are noise is
-/// the same knowledge the import pipeline applies when it cleans a description
-/// (PROJECT.md §5); a second copy of those heuristics in Dart would drift and
+/// the same knowledge the import pipeline applies when it cleans a description;
+/// a second copy of those heuristics in Dart would drift and
 /// suggest rules that don't match the row they came from.
 @immutable
 class RuleSuggestion {

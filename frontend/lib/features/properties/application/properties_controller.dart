@@ -44,7 +44,7 @@ class PropertiesState {
 /// unarchive, each followed by a re-read of both lists.
 ///
 /// No share is adjusted locally — the held share and the acquisition delta are
-/// the server's (`PROJECT.md` §18).
+/// the server's.
 class PropertiesController extends AsyncNotifier<PropertiesState> {
   PropertiesRepository get _repository =>
       ref.read(propertiesRepositoryProvider);

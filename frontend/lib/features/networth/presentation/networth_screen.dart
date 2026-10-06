@@ -23,7 +23,7 @@ import 'networth_summary_card.dart';
 /// is where a user thinks about what they own.
 ///
 /// Two controllers, one panel: the read-only net-worth summary and the
-/// properties CRUD. No figure on it is computed in Dart (`PROJECT.md` §18).
+/// properties CRUD. No figure on it is computed in Dart.
 class NetworthScreen extends ConsumerWidget {
   const NetworthScreen({super.key});
 

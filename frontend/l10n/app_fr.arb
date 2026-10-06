@@ -2725,7 +2725,7 @@
   },
   "goalsOverAllocated": "Vous avez réparti {allocated} alors que vos comptes d'épargne totalisent {savings}.",
   "@goalsOverAllocated": {
-    "description": "The over-allocation banner. Informative and dismissible, never blocking (`PROJECT.md` §13).",
+    "description": "The over-allocation banner. Informative and dismissible, never blocking.",
     "placeholders": {
       "allocated": {
         "type": "String"

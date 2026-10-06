@@ -105,7 +105,7 @@ class SimulationResultRow extends StatelessWidget {
             child: _ResultCard(
               key: const Key('resultTaegCard'),
               label: l10n.simulatorTaegLabel,
-              // « indicatif » is always attached to the TAEG label (§15).
+              // « indicatif » is always attached to the TAEG label.
               labelTrailing: SimulatorMarkerPill(
                 key: const Key('resultTaegIndicative'),
                 label: l10n.simulatorIndicativePill,
@@ -294,7 +294,7 @@ class HcsfReadingCard extends StatelessWidget {
               ],
               const Spacer(),
               // Body content, never a tooltip: the app makes no lending
-              // decisions and says so where the reading is shown (§15, §17).
+              // decisions and says so where the reading is shown.
               const Icon(
                 Icons.info_outline_rounded,
                 size: 12,

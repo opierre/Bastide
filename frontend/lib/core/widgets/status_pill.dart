@@ -8,7 +8,7 @@ import '../theme/tokens.dart';
 enum StatusPillTone {
   /// Something worth a look: a price rise, a charge that hasn't landed. Amber
   /// rather than red on purpose — the panel reports, it does not scold
-  /// (`PROJECT.md` §9: never punitive).
+  /// (never punitive).
   warning(AppColors.warning, null),
 
   /// A settled, no-longer-running state — a cancelled subscription. Opaque
