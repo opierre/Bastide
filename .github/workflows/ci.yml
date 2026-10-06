@@ -22,11 +22,14 @@ env:
 # graph draws as one box: Lint (ci-lint.yml), Test (ci-test.yml) and Security
 # (ci-security.yml). Stages run in parallel - none waits on another - so one
 # red stage never hides the verdict of the others.
+#
+# Every job pins `ubuntu-24.04` rather than `ubuntu-latest`, which moves to
+# Ubuntu 26.04 from 2026-10-19: an image upgrade is its own deliberate commit.
 jobs:
   # Skips the heavy SDK jobs when a PR touches only one side of the monorepo.
   changes:
     name: changes
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     permissions:
       contents: read
       pull-requests: read
@@ -82,7 +85,7 @@ jobs:
   # otherwise sit pending forever under branch protection and deadlock merges.
   ci-ok:
     name: ci-ok
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     if: always()
     needs:
       - changes

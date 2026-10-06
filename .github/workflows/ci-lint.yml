@@ -30,7 +30,7 @@ jobs:
   backend:
     name: backend
     if: inputs.backend
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     defaults:
       run:
         working-directory: backend
@@ -86,7 +86,7 @@ jobs:
   frontend:
     name: frontend
     if: inputs.frontend
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     defaults:
       run:
         working-directory: frontend
