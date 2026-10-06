@@ -236,11 +236,13 @@ jobs:
       - name: Scan lockfiles
         run: |
           set -uo pipefail
+          # `|| code=$?`: the runner's shell is `bash -e`, so a bare findings exit (1)
+          # would end the step here and the policy step below would never decide.
+          code=0
           "${RUNNER_TEMP}/osv-scanner" scan source \
             --lockfile backend/uv.lock \
             --lockfile frontend/pubspec.lock \
-            --format json --output-file "${RUNNER_TEMP}/osv.json"
-          code=$?
+            --format json --output-file "${RUNNER_TEMP}/osv.json" || code=$?
           # 0 = clean, 1 = findings (osv_policy.py decides), >=127 = real error.
           if [ "${code}" -ge 127 ]; then
             echo "::error::osv-scanner failed with exit code ${code} (127=error, 128=no packages found)"
@@ -267,9 +269,9 @@ jobs:
             exit 0
           fi
           # shellcheck disable=SC2086
+          code=0
           "${RUNNER_TEMP}/osv-scanner" scan source ${args} \
-            --format json --output-file "${RUNNER_TEMP}/osv-baseline.json"
-          code=$?
+            --format json --output-file "${RUNNER_TEMP}/osv-baseline.json" || code=$?
           if [ "${code}" -ge 127 ]; then
             echo "::warning::baseline scan failed (exit ${code}); every finding counts as new."
             rm -f "${RUNNER_TEMP}/osv-baseline.json"
