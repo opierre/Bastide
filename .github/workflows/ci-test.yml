@@ -16,6 +16,12 @@ on:
       flutter-version:
         type: string
         required: true
+    # One result per job, so ci-ok can summarise the pipeline job by job.
+    outputs:
+      backend:
+        value: ${{ jobs.backend.result }}
+      frontend:
+        value: ${{ jobs.frontend.result }}
 
 permissions:
   contents: read
@@ -46,7 +52,6 @@ jobs:
         if: always()
         run: |
           python3 "${GITHUB_WORKSPACE}/.github/scripts/ci_summary.py" \
-            --title "Test / backend" \
             --pytest-junit "${RUNNER_TEMP}/pytest-junit.xml"
       - name: Upload test report
         if: always()
@@ -84,7 +89,6 @@ jobs:
         if: always()
         run: |
           python3 "${GITHUB_WORKSPACE}/.github/scripts/ci_summary.py" \
-            --title "Test / frontend" \
             --dart-json "${RUNNER_TEMP}/dart-tests.json"
       - name: Upload test report
         if: always()

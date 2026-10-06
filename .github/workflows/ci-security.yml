@@ -5,6 +5,12 @@ name: Security
 # Both scanners run in ~20s, so they are deliberately not path-filtered.
 on:
   workflow_call:
+    # One result per job, so ci-ok can summarise the pipeline job by job.
+    outputs:
+      dependency-vulnerabilities:
+        value: ${{ jobs.dependencies.result }}
+      secrets:
+        value: ${{ jobs.secrets.result }}
 
 permissions:
   contents: read
@@ -74,6 +80,7 @@ jobs:
             echo "::warning::baseline scan failed (exit ${code}); every finding counts as new."
             rm -f "${RUNNER_TEMP}/osv-baseline.json"
           fi
+      # Also writes the job summary.
       - name: Apply severity policy
         env:
           EVENT_NAME: ${{ github.event_name }}
@@ -112,10 +119,10 @@ jobs:
           echo "${expected}  ${RUNNER_TEMP}/gitleaks.tar.gz" | sha256sum -c -
           tar -xzf "${RUNNER_TEMP}/gitleaks.tar.gz" -C "${RUNNER_TEMP}" gitleaks
           chmod +x "${RUNNER_TEMP}/gitleaks"
-      # --redact keeps any matched secret out of the job log. Both events scan only
-      # the commits they introduce: history cannot change without a force-push, so
-      # every new secret arrives inside some PR or push range, and re-scanning old
-      # history would only re-report what was already judged.
+      # --redact keeps any matched secret out of the job log and the report. Both
+      # events scan only the commits they introduce: history cannot change without
+      # a force-push, so every new secret arrives inside some PR or push range, and
+      # re-scanning old history would only re-report what was already judged.
       - name: Scan for secrets
         env:
           EVENT_NAME: ${{ github.event_name }}
@@ -133,4 +140,10 @@ jobs:
             echo "::warning::no previous commit to diff against; scanning HEAD only"
             range="-1 HEAD"
           fi
-          "${RUNNER_TEMP}/gitleaks" git . --redact --no-banner --log-opts="${range}"
+          "${RUNNER_TEMP}/gitleaks" git . --redact --no-banner --log-opts="${range}" \
+            --report-format json --report-path "${RUNNER_TEMP}/gitleaks.json"
+      - name: Job summary
+        if: always()
+        run: |
+          python3 "${GITHUB_WORKSPACE}/.github/scripts/ci_summary.py" \
+            --gitleaks "${RUNNER_TEMP}/gitleaks.json"

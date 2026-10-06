@@ -26,6 +26,8 @@ import os
 import sys
 from pathlib import Path
 
+from summary_md import callout, details, plural, table, write
+
 # CVSS v3 qualitative rating scale.
 RANK = {"CRITICAL": 4, "HIGH": 3, "MEDIUM": 2, "LOW": 1, "UNKNOWN": 0}
 
@@ -50,7 +52,7 @@ def severity_of(max_severity: str | None) -> str:
 
 
 class Finding:
-    __slots__ = ("ecosystem", "package", "version", "ids", "severity", "source")
+    __slots__ = ("ecosystem", "ids", "package", "severity", "source", "version")
 
     def __init__(
         self,
@@ -111,23 +113,45 @@ def parse(path: Path) -> list[Finding]:
     return findings
 
 
-def render(title: str, findings: list[Finding]) -> list[str]:
+SEVERITY_ICON = {
+    "CRITICAL": "🔴",
+    "HIGH": "🟠",
+    "MEDIUM": "🟡",
+    "LOW": "🔵",
+    "UNKNOWN": "⚪",
+}
+
+
+def render(title: str, findings: list[Finding], *, open_: bool = False) -> list[str]:
     if not findings:
         return []
-    lines = [f"### {title}", "", "| Severity | Package | Version | Advisory | Lockfile |", "| --- | --- | --- | --- | --- |"]
+    rows = []
     for f in sorted(findings, key=lambda f: -RANK[f.severity]):
-        advisory = f"[{f.primary_id}](https://osv.dev/{f.primary_id})"
-        lines.append(
-            f"| {f.severity} | `{f.ecosystem}/{f.package}` | {f.version} | {advisory} | {f.source} |"
+        rows.append(
+            [
+                f"{SEVERITY_ICON[f.severity]} {f.severity.title()}",
+                f"`{f.package}` {f.version}",
+                f.ecosystem,
+                f"[{f.primary_id}](https://osv.dev/{f.primary_id})",
+                f"`{f.source}`",
+            ]
         )
-    lines.append("")
-    return lines
+    body = table(
+        ["Severity", "Package", "Ecosystem", "Advisory", "Lockfile"], rows, limit=None
+    )
+    return details(f"{title} ({len(findings)})", body, open_=open_)
 
 
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__)
-    ap.add_argument("--results", type=Path, required=True, help="osv-scanner JSON report")
-    ap.add_argument("--baseline", type=Path, help="report for the base ref; its findings never fail the build")
+    ap.add_argument(
+        "--results", type=Path, required=True, help="osv-scanner JSON report"
+    )
+    ap.add_argument(
+        "--baseline",
+        type=Path,
+        help="report for the base ref; its findings never fail the build",
+    )
     ap.add_argument("--threshold", choices=("high", "any"), required=True)
     args = ap.parse_args()
 
@@ -147,25 +171,37 @@ def main() -> int:
 
     tolerated = [f for f in new if f not in blocking]
 
-    summary: list[str] = ["## Dependency vulnerability scan", ""]
-    scope = "new in this PR" if baseline_keys else "whole tree"
-    summary.append(
-        f"Threshold `{args.threshold}` | scope _{scope}_ | "
-        f"{len(blocking)} blocking, {len(tolerated)} reported, {len(inherited)} pre-existing."
-    )
-    summary.append("")
-    summary += render("Blocking", blocking)
-    summary += render("Reported (below threshold)", tolerated)
-    summary += render("Pre-existing on the base ref", inherited)
-    if not findings:
-        summary.append("No known vulnerabilities. :white_check_mark:")
+    rule = "High and Critical" if args.threshold == "high" else "any severity"
+    scope = "introduced by this PR" if baseline_keys else "across the whole tree"
+    summary: list[str] = []
+    if blocking:
+        summary += callout(
+            "fail",
+            f"**{plural(len(blocking), 'vulnerable dependency', 'vulnerable dependencies')} "
+            f"{'blocks' if len(blocking) == 1 else 'block'} this build.**",
+            f"The gate fails on {rule} findings {scope}. Upgrade the package or pin a fixed version.",
+        )
+    elif tolerated:
+        summary += callout(
+            "warn",
+            f"**{plural(len(tolerated), 'advisory', 'advisories')} below the blocking threshold.**",
+            f"Not blocking: the gate fails on {rule} findings {scope}. Worth a look before merging.",
+        )
+    elif inherited:
+        summary += callout(
+            "info",
+            f"**Nothing new.** {plural(len(inherited), 'advisory', 'advisories')} "
+            "already present on the base branch; this PR does not add any.",
+        )
+    else:
+        summary += callout(
+            "pass", "**No known vulnerabilities** in `uv.lock` or `pubspec.lock`."
+        )
+    summary += render("Blocking", blocking, open_=True)
+    summary += render("Below threshold", tolerated, open_=not blocking)
+    summary += render("Already on the base branch", inherited)
 
-    text = "\n".join(summary)
-    print(text)
-    step_summary = os.environ.get("GITHUB_STEP_SUMMARY")
-    if step_summary:
-        with open(step_summary, "a", encoding="utf-8") as fh:
-            fh.write(text + "\n")
+    write(summary)
 
     for f in blocking:
         print(
