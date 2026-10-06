@@ -93,17 +93,6 @@ jobs:
       - test
       - security
     steps:
-      # Sparse: only the summary scripts are needed here.
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          persist-credentials: false
-          sparse-checkout: .github/scripts
-      # Informational only: it must never stand between the gate and its verdict.
-      - name: Pipeline overview
-        continue-on-error: true
-        env:
-          NEEDS: ${{ toJSON(needs) }}
-        run: python3 .github/scripts/ci_overview.py
       - name: Verify no job failed
         env:
           RESULTS: ${{ join(needs.*.result, ' ') }}

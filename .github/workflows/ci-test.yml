@@ -16,12 +16,6 @@ on:
       flutter-version:
         type: string
         required: true
-    # One result per job, so ci-ok can summarise the pipeline job by job.
-    outputs:
-      backend:
-        value: ${{ jobs.backend.result }}
-      frontend:
-        value: ${{ jobs.frontend.result }}
 
 permissions:
   contents: read
