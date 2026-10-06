@@ -5,14 +5,14 @@ from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field
 
-#: The four natures a declared property can take (§4c); a label, used by no computation.
+#: The four natures a declared property can take (§4); a label, used by no computation.
 PropertyKind = Literal["primary_residence", "rental", "secondary", "other"]
 
 
 class PropertyCreate(BaseModel):
     """Payload declaring a property.
 
-    `currency` is absent: it is the user's, per the Phase 1 one-currency rule (multi-currency
+    `currency` is absent: it is the user's, per the one-currency rule (multi-currency
     skill), and the share figures are absent because nothing derived is stored.
     """
 
@@ -34,7 +34,7 @@ class PropertyUpdate(BaseModel):
     in this API, so clearing an acquisition price is not expressible here.
 
     « Nouvelle estimation » is this payload carrying `market_value_minor` and `valued_on`
-    together: a property has exactly one declared value (§4c), so a re-valuation replaces it
+    together: a property has exactly one declared value (§4), so a re-valuation replaces it
     rather than appending to a history that does not exist.
     """
 

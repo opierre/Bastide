@@ -1,4 +1,4 @@
-"""SQLAlchemy models for declared loans and saved simulator scenarios (Phase 3).
+"""SQLAlchemy models for declared loans and saved simulator scenarios.
 
 Neither table stores a derived figure: the amortisation schedule and every simulation result are
 pure functions of the declared inputs (PROJECT.md §15, §17), computed per request.

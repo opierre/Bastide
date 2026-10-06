@@ -1,4 +1,4 @@
-"""add phase 1 schema
+"""add initial schema
 
 Revision ID: 24ef282f7623
 Revises:

@@ -1,4 +1,4 @@
-"""Tests for the Phase 3 schema: the migration, its constraints, and the property FK."""
+"""Tests for the mortgage and property tables: the migration, constraints, and property FK."""
 
 import shutil
 from datetime import date
@@ -16,20 +16,20 @@ from app.features.properties.models import Property
 from app.features.settings.models import UserSettings
 from tests.migrations import downgrade, upgrade
 
-# The revision *below* the Phase 3 migration, named so a later migration cannot silently
-# retarget the round-trip (see test_phase2_models.py).
-PRE_PHASE3_REVISION = "a8d3f2c61e05"
+# The revision *below* the migration adding these tables, named so a later migration cannot silently
+# retarget the round-trip (see test_goals_recurring_runs_models.py).
+PRE_MIGRATION_REVISION = "a8d3f2c61e05"
 
-PHASE3_TABLES = {
+MIGRATION_TABLES = {
     "mortgages",
     "properties",
     "mortgage_simulations",
 }
 
-# Created by the Phase 3 migration and dropped again when the tax feature was removed.
+# Created by the same migration and dropped again when the tax feature was removed.
 TAX_TABLES = {"tax_profiles", "tax_brackets", "tax_parameters"}
 
-PHASE3_MODELS = (Mortgage, MortgageSimulation, Property)
+MIGRATION_MODELS = (Mortgage, MortgageSimulation, Property)
 
 
 def _schema(db_path: Path) -> tuple[set[str], set[str]]:
@@ -42,9 +42,9 @@ def _schema(db_path: Path) -> tuple[set[str], set[str]]:
     return tables, columns
 
 
-def test_alembic_upgrade_builds_phase3_schema_on_empty_db(migrated_template: Path) -> None:
+def test_alembic_upgrade_builds_its_schema_on_empty_db(migrated_template: Path) -> None:
     tables, settings_columns = _schema(migrated_template)
-    assert PHASE3_TABLES.issubset(tables)
+    assert MIGRATION_TABLES.issubset(tables)
     assert not (TAX_TABLES & tables)
     assert "declared_monthly_income_minor" in settings_columns
 
@@ -53,19 +53,19 @@ def test_downgrade_then_upgrade_is_clean(tmp_path: Path, migrated_template: Path
     db_path = tmp_path / "roundtrip.db"
     shutil.copyfile(migrated_template, db_path)
 
-    downgrade(db_path, PRE_PHASE3_REVISION)
+    downgrade(db_path, PRE_MIGRATION_REVISION)
     tables, settings_columns = _schema(db_path)
-    assert not (PHASE3_TABLES & tables)
+    assert not (MIGRATION_TABLES & tables)
     assert "declared_monthly_income_minor" not in settings_columns
 
     upgrade(db_path)
     tables, settings_columns = _schema(db_path)
-    assert PHASE3_TABLES.issubset(tables)
+    assert MIGRATION_TABLES.issubset(tables)
     assert "declared_monthly_income_minor" in settings_columns
 
 
 def test_money_and_rates_are_integers_keys_uuid_strings_timestamps_utc_aware() -> None:
-    for model in PHASE3_MODELS:
+    for model in MIGRATION_MODELS:
         for column in model.__table__.columns:
             if column.name.endswith(("_minor", "_bps")):
                 assert isinstance(column.type, Integer), f"{model.__tablename__}.{column.name}"

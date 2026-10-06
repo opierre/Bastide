@@ -1,6 +1,6 @@
 """Business logic for declared properties: CRUD and the held share.
 
-A property is declared, never observed: the app has no statement to read one from (§4c). Net
+A property is declared, never observed: the app has no statement to read one from (§4). Net
 worth (§18) reads it, so the share arithmetic lives here once and no panel keeps its own copy of
 a valuation.
 """
@@ -101,7 +101,7 @@ class PropertyService:
         return self._detail(self._owned(user.id, property_id), user.currency)
 
     def create(self, user: User, data: PropertyCreate, today: date) -> PropertyDetail:
-        """Declare a property. Currency is the user's; no per-property currency exists (§4c).
+        """Declare a property. Currency is the user's; no per-property currency exists (§4).
 
         Raises:
             PropertyValuationInFutureError: `valued_on` is ahead of `today`.
@@ -117,7 +117,7 @@ class PropertyService:
 
         The patch is validated before anything is assigned, so a rejected edit leaves the
         property exactly as it was. A "nouvelle estimation" is this call carrying
-        `market_value_minor` and `valued_on` together (§4c: one declared value).
+        `market_value_minor` and `valued_on` together (§4: one declared value).
 
         Raises:
             PropertyNotFoundError: no such property, or it belongs to another user.

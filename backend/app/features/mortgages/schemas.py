@@ -5,7 +5,7 @@ from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field
 
-#: The credit product the panel prints on every card (§4c). A label, never an engine input.
+#: The credit product the panel prints on every card (§4). A label, never an engine input.
 MortgageKind = Literal["mortgage", "works", "consumer", "auto"]
 
 #: The maths the schedule runs on; mirrors the engine's `RepaymentType`.
@@ -19,7 +19,7 @@ MortgageStatus = Literal["active", "repaid", "archived"]
 class MortgageCreate(BaseModel):
     """Payload declaring a loan.
 
-    `currency` is absent: it is the user's, per the Phase 1 one-currency rule (multi-currency
+    `currency` is absent: it is the user's, per the one-currency rule (multi-currency
     skill), and a derived figure is absent because nothing derived is stored (§15).
     """
 
@@ -208,7 +208,7 @@ class MortgageSummary(BaseModel):
 
 
 class SimulationCreate(BaseModel):
-    """Payload saving a scenario: inputs only, never a result (§4c).
+    """Payload saving a scenario: inputs only, never a result (§4).
 
     The mortgage validation minus the loan-only fields (lender, kind, repayment type, dates,
     property link).

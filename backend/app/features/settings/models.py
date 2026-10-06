@@ -1,4 +1,4 @@
-"""SQLAlchemy model for per-user settings (Phase 2: the AI configuration)."""
+"""SQLAlchemy model for per-user settings (the AI configuration)."""
 
 from datetime import UTC, datetime
 from uuid import uuid4

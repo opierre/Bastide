@@ -20,7 +20,7 @@ class GoalCreate(BaseModel):
 
     `extra="forbid"` is what rejects an `account_id`: a goal is not linked to an account
     (`PROJECT.md` §13), and silently dropping the field would let a client believe it had
-    stored something. `currency` is absent for the same reason it is absent from every Phase 1
+    stored something. `currency` is absent for the same reason it is absent from every other
     payload — it is the user's, not a per-row choice (multi-currency skill).
     """
 

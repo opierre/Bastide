@@ -1,4 +1,4 @@
-"""Tests for the Phase 2 schema: the migration, its unique constraints, and its cascades."""
+"""Tests for the goals, recurring and run tables: migration, unique constraints, cascades."""
 
 import shutil
 from datetime import date
@@ -19,12 +19,12 @@ from app.features.recurring.models import RecurringOccurrence, RecurringSeries
 from app.features.transactions.models import Transaction
 from tests.migrations import downgrade, upgrade
 
-# The revision *below* the Phase 2 migration. Named rather than reached with
-# `downgrade -1`, which only meant "undo Phase 2" while Phase 2 happened to be
+# The revision *below* the migration adding these tables. Named rather than reached with
+# `downgrade -1`, which only meant "undo it" while that migration happened to be
 # head — every migration added since silently retargeted the test.
-PRE_PHASE2_REVISION = "e4a1c6f20b73"
+PRE_MIGRATION_REVISION = "e4a1c6f20b73"
 
-PHASE2_TABLES = {
+MIGRATION_TABLES = {
     "categorization_runs",
     "recurring_series",
     "recurring_occurrences",
@@ -33,9 +33,9 @@ PHASE2_TABLES = {
 }
 
 
-def test_alembic_upgrade_builds_phase2_tables_on_empty_db(migrated_template: Path) -> None:
+def test_alembic_upgrade_builds_its_tables_on_empty_db(migrated_template: Path) -> None:
     engine = create_engine(f"sqlite:///{migrated_template}")
-    assert PHASE2_TABLES.issubset(inspect(engine).get_table_names())
+    assert MIGRATION_TABLES.issubset(inspect(engine).get_table_names())
     engine.dispose()
 
 
@@ -43,14 +43,14 @@ def test_downgrade_then_upgrade_is_clean(tmp_path: Path, migrated_template: Path
     db_path = tmp_path / "roundtrip.db"
     shutil.copyfile(migrated_template, db_path)
 
-    downgrade(db_path, PRE_PHASE2_REVISION)
+    downgrade(db_path, PRE_MIGRATION_REVISION)
     engine = create_engine(f"sqlite:///{db_path}")
-    assert not (PHASE2_TABLES & set(inspect(engine).get_table_names()))
+    assert not (MIGRATION_TABLES & set(inspect(engine).get_table_names()))
     engine.dispose()
 
     upgrade(db_path)
     engine = create_engine(f"sqlite:///{db_path}")
-    assert PHASE2_TABLES.issubset(inspect(engine).get_table_names())
+    assert MIGRATION_TABLES.issubset(inspect(engine).get_table_names())
     engine.dispose()
 
 

@@ -5,7 +5,7 @@ from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
-# Practical subset of active ISO-4217 currency codes (national currencies a Phase 1 user would
+# Practical subset of active ISO-4217 currency codes (national currencies a user would
 # plausibly register with). Excludes precious metals, IMF/bond units, and test codes (XAU, XDR,
 # XTS, XXX, ...).
 ISO_4217_CURRENCIES = frozenset(

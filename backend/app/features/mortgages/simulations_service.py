@@ -103,7 +103,7 @@ def simulated_schedule(
 ) -> Schedule:
     """The engine's schedule for simulator inputs: constant payment, first instalment dated.
 
-    Refuses what a declared loan refuses, with the same errors (P3-04 step 1).
+    Refuses what a declared loan refuses, with the same errors.
 
     Raises:
         MortgageFeesExceedPrincipalError: the fees are not smaller than the principal.
@@ -150,7 +150,7 @@ class SimulationService:
     def __init__(self, mortgages: MortgageRepository, simulations: SimulationRepository) -> None:
         self._mortgages = mortgages
         self._simulations = simulations
-        # Income resolution is P3-04's, shared unchanged.
+        # Income resolution is the declared-loan service's, shared unchanged.
         self._mortgage_service = MortgageService(mortgages)
 
     def list_for_user(self, user: User) -> list[SimulationRead]:

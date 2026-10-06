@@ -1,4 +1,4 @@
-"""SQLAlchemy model for categorization runs (Phase 2: the AI categorisation pass)."""
+"""SQLAlchemy model for categorization runs (the AI categorisation pass)."""
 
 from datetime import UTC, datetime
 from uuid import uuid4

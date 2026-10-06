@@ -78,7 +78,7 @@ class GoalService:
         return found
 
     def create(self, user: User, data: GoalCreate) -> tuple[Goal, int]:
-        """Create a goal. Currency is copied from the user, per the Phase 1 one-currency rule."""
+        """Create a goal. Currency is copied from the user, per the one-currency rule."""
         goal = Goal(
             user_id=user.id,
             name=data.name,

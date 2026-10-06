@@ -32,7 +32,7 @@ class RunEnqueuer(Protocol):
 
     A protocol rather than a direct call into the categorisation feature: the import pipeline
     has no business knowing a model exists, and stating the dependency this narrowly is what
-    lets an import with no enqueuer wired behave exactly as it did in Phase 1.
+    lets an import with no enqueuer wired behave as a rules-only import.
 
     Implementations must be silent — an import that has already committed cannot be failed by
     anything that happens after it (`PROJECT.md` §7).
@@ -63,8 +63,8 @@ class ImportService:
         self._db = db
         self._clock = clock
         # Absent means stage 2 is simply not wired here: the import behaves as it did before
-        # the model existed, which is also what every Phase 1 test constructing this service
-        # continues to get.
+        # the model existed, which is also what every test constructing this service without
+        # one gets.
         self._run_enqueuer = run_enqueuer
 
     def list_for_user(self, user_id: str) -> list[ImportBatch]:

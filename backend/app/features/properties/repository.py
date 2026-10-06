@@ -38,7 +38,7 @@ class PropertyRepository:
         """Ids of the caller's loans pointing at this property, oldest first.
 
         No status filter: archiving a property keeps the link intact because the loan still
-        exists (P3-01's `ON DELETE SET NULL` covers the hard delete this API never does).
+        exists (the FK's `ON DELETE SET NULL` covers the hard delete this API never does).
         """
         return list(
             self._db.scalars(

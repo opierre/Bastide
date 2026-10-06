@@ -1,6 +1,6 @@
 """Tests for the schedule endpoint: date windows, yearly aggregation, the term cap.
 
-The endpoint is a view over the P3-03 engine's rows, so every assertion reconciles against the
+The endpoint is a view over the schedule engine's rows, so every assertion reconciles against the
 engine itself — the endpoint must never become a second formula.
 """
 

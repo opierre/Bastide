@@ -1,4 +1,4 @@
-"""SQLAlchemy model for declared real-estate properties (Phase 3)."""
+"""SQLAlchemy model for declared real-estate properties."""
 
 from datetime import UTC, date, datetime
 from uuid import uuid4

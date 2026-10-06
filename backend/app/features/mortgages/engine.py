@@ -34,7 +34,7 @@ class NonAmortizingLoanError(Exception):
 
     The closed form has no answer for a balance that does not shrink — typically a first
     instalment that does not cover its first interest — and the panel has nothing to draw.
-    P3-04 maps it to a 422.
+    The mortgages API maps it to a 422.
     """
 
 
