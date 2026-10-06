@@ -19,7 +19,7 @@ env:
   FLUTTER_VERSION: "3.44.8"
 
 # The pipeline runs in three stages, each a reusable workflow that the run
-# graph draws as one box: Lint (ci-lint.yml), Test (ci-test.yml) and Security
+# graph draws as one box: lint (ci-lint.yml), test (ci-test.yml) and security
 # (ci-security.yml). Stages run in parallel - none waits on another - so one
 # red stage never hides the verdict of the others.
 #
@@ -60,7 +60,7 @@ jobs:
               - '.github/scripts/**'
 
   lint:
-    name: Lint
+    name: lint
     needs: changes
     uses: ./.github/workflows/ci-lint.yml
     with:
@@ -69,7 +69,7 @@ jobs:
       flutter-version: ${{ needs.changes.outputs.flutter-version }}
 
   test:
-    name: Test
+    name: test
     needs: changes
     uses: ./.github/workflows/ci-test.yml
     with:
@@ -78,7 +78,7 @@ jobs:
       flutter-version: ${{ needs.changes.outputs.flutter-version }}
 
   security:
-    name: Security
+    name: security
     uses: ./.github/workflows/ci-security.yml
 
   # The single required status check. Path-filtered jobs that get skipped would

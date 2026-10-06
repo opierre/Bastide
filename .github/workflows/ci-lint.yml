@@ -1,7 +1,7 @@
-name: Lint
+name: lint
 
 # Stage of ci.yml; not triggered on its own. Its jobs show up as
-# "Lint / backend" and "Lint / frontend".
+# "lint / backend" and "lint / frontend".
 on:
   workflow_call:
     inputs:

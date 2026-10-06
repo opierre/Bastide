@@ -1,7 +1,7 @@
-name: Test
+name: test
 
 # Stage of ci.yml; not triggered on its own. Its jobs show up as
-# "Test / backend" and "Test / frontend".
+# "test / backend" and "test / frontend".
 on:
   workflow_call:
     inputs:

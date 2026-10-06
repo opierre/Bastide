@@ -1,7 +1,7 @@
-name: Security
+name: security
 
 # Stage of ci.yml; not triggered on its own. Its jobs show up as
-# "Security / dependency vulnerabilities" and "Security / secrets".
+# "security / dependency vulnerabilities" and "security / secrets".
 # Both scanners run in ~20s, so they are deliberately not path-filtered.
 on:
   workflow_call:
