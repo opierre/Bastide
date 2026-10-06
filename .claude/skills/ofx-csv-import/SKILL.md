@@ -34,7 +34,7 @@ description_clean, memo?, merchant?, fitid?, dedup_hash`.
    uppercase-fold for matching), attempt `merchant` extraction, compute signed `amount_minor`,
    set `currency` = account currency.
 5. **Dedup**: `fitid` if present else `dedup_hash`; mark duplicates, insert only new rows.
-6. **Categorize**: run the rule engine (Phase 1) / + model (Phase 2). See **ai-categorization**.
+6. **Categorize**: run the rule engine, then enqueue an async model run for the rest. See **ai-categorization**.
 7. **Persist**: insert new rows in one DB transaction; write the `import_batch` with
    `transaction_count / new_count / duplicate_count`, derived `period_start/end`, and `status`.
 

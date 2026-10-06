@@ -1,6 +1,6 @@
 ---
 name: ai-categorization
-description: Use for transaction categorization and the AI insights feature in the finstride. Covers the deterministic rule engine (Phase 1) and the Phase 2 SLM layer running on a local inference runtime (llama.cpp or Ollama) — the rules→model→confidence-deferral pattern, the async run model, the human review/confirm queue, learning corrections back into rules, model selection (Gemma 4 default, finance-tuned 8B for insights), graceful degradation when no runtime answers, and full mocking of the model in tests.
+description: Use for transaction categorization and the AI insights feature in the finstride. Covers the deterministic rule engine and the optional SLM layer running on a local inference runtime (llama.cpp or Ollama) — the rules→model→confidence-deferral pattern, the async run model, the human review/confirm queue, learning corrections back into rules, model selection (Gemma 4 default; a finance-tuned 8B for insights is undecided), graceful degradation when no runtime answers, and full mocking of the model in tests.
 ---
 
 # AI Categorization
@@ -12,11 +12,11 @@ only on the uncertain remainder and a human in the loop. Source of truth: `PROJE
 
 ```
 transaction → [1] rule engine → matched? → done (source=rule, needs_review=false)
-                               → no match → [2] SLM (Phase 2) → confident? → done (source=model)
+                               → no match → [2] SLM (opt-in) → confident? → done (source=model)
                                                               → uncertain → review queue (needs_review=true)
 ```
 
-### Stage 1 — rule engine (Phase 1, always on, deterministic)
+### Stage 1 — rule engine (always on, deterministic)
 
 - Evaluate enabled `categorization_rules` ordered by `priority` ascending; **first match wins**.
 - Match types: `contains | equals | regex` on `description_clean`/`merchant`, `range` on amount.
@@ -28,12 +28,12 @@ transaction → [1] rule engine → matched? → done (source=rule, needs_review
 This stage handles the easy majority (recurring merchants, salary, known patterns) with zero
 tokens and full reproducibility.
 
-### Stage 2 — SLM on a local runtime (Phase 2, optional)
+### Stage 2 — SLM on a local runtime (opt-in)
 
 - The runtime is reached over an **OpenAI-compatible `/v1` HTTP API on loopback**, which both
   `llama-server` (llama.cpp) and Ollama expose. Never call runtime-specific endpoints: the base
   URL and model tag are user settings, so which engine is running must not be visible above the
-  client. See `PROJECT.md` §3 for why that choice is deferred to packaging.
+  client. See `PROJECT.md` §3 for why, and §19 for the open packaging decision.
 - Only **unmatched** transactions reach the model. The prompt contains: the localized category
   list (id + name + kind), the transaction's `description_clean`/`merchant`/amount sign, and a
   small few-shot set. The model returns a `category_id` + a `confidence` in [0,1].
@@ -66,8 +66,8 @@ This is the small-model-with-deferral pattern: cheap model on the easy part, hum
 - **Insights / advisory feature: a finance-tuned ~8B model** (e.g. the AGEFI/Dragon LLM Open
   Finance Initiative models, Llama-3.1/Qwen-3 based, strong fr+en financial vocabulary). The
   domain tuning helps with French financial terminology where a general small model is weaker.
-  Runs on the same runtime, selectable in settings. **Deferred to Phase 3** — Phase 2 builds the
-  categorization path only.
+  Would run on the same runtime, selectable in settings. **Not built and not scheduled**
+  (`PROJECT.md` §19) — only the categorization path exists.
 - Model names/tags are **config**, never hardcoded in logic. Settings exposes model choice and
   the confidence threshold.
 
@@ -95,5 +95,5 @@ The app must fully work with **no inference runtime installed**. If the endpoint
   crash; runtime unreachable → Stage-1-only path, import still succeeds.
 - Test the learning loop: a user correction with "always" creates a rule that then matches in
   Stage 1 on the next run.
-- Rule engine tests (Phase 1): priority ordering, first-match-wins, `source=user` never
+- Rule engine tests: priority ordering, first-match-wins, `source=user` never
   overridden, `range`/`regex` matching.

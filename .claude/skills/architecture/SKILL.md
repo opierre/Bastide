@@ -18,8 +18,8 @@ Read `PROJECT.md` §3 for the canonical layout; this skill is the enforceable ru
 - **Feature-first, vertical slices.** A feature owns everything it needs. Cross-feature reach-in
   is forbidden — features talk through well-defined service interfaces or the API, never by
   importing each other's internals.
-- **Local-first.** No network calls except (Phase 2) the local Ollama endpoint and (opt-in)
-  ECB FX later. No telemetry, no cloud calls in Phase 1–3.
+- **Local-first.** No network calls except the opt-in local inference runtime on loopback.
+  No telemetry, no cloud calls.
 
 ## Backend layering (strict, one direction)
 

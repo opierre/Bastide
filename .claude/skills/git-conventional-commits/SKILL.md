@@ -21,7 +21,7 @@ change can be rolled back cleanly. `PROJECT.md` §8 states the rule; this skill 
 - **subject:** imperative mood, lower-case, no trailing period, ≤ ~72 chars
   ("add", not "added"/"adds").
 - **body:** explain *why* and any non-obvious *what*. Skip for trivial changes.
-- Reference the task card when relevant (e.g. `refs: docs/tasks/P1-03-ofx-import.md`).
+- Reference the issue or PR when relevant (e.g. `refs: #42`).
 
 ## Allowed types
 
@@ -74,11 +74,11 @@ BREAKING CHANGE: accounts now require a currency; existing rows need migration <
 
 ## Agent workflow (token-efficient, rollback-friendly)
 
-1. Complete one task card slice.
+1. Complete one slice of work.
 2. Stage only the files for that logical change (`git add -p` when a working tree has mixed
    changes — never blanket `git add .` across unrelated work).
 3. Commit with the correct `type(scope): subject`.
-4. If a task card produces several logical changes (e.g. migration, model, service, tests),
+4. If a slice produces several logical changes (e.g. migration, model, service, tests),
    prefer **several focused commits** over one fat commit — this is what makes selective
    rollback possible.
 5. Never amend or force-push shared history; fix forward with a new commit.

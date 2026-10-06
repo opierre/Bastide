@@ -19,8 +19,9 @@
 ## Structure
 
 - `app/core/` — config, db session, security, errors (the foundational types and services).
-- `app/features/` — auth, accounts, imports, transactions, categories, rules, dashboard. Each feature owns its routes, models, and services.
+- `app/features/` — one folder per feature (accounts, imports, transactions, rules, categorization, recurring, goals, mortgages, …). Each feature owns its routes, models, and services.
 - `migrations/` — Alembic schema migrations.
+- `scripts/` — generators for `docs/database.md` (`python -m scripts.schema_doc`) and `docs/api.md` (`python -m scripts.api_doc`); rerun after changing a migration or a route.
 - `tests/` — pytest, mocking.
 - `main.py` — entry point.
 - `pyproject.toml` — dependencies and build config.
@@ -36,4 +37,4 @@
 ## See also
 
 - Root `CLAUDE.md` for global conventions.
-- `PROJECT.md` for the API contract, data model, and architectural overview.
+- `PROJECT.md` for decisions and architecture; `docs/database.md` and `docs/api.md` for the generated schema and endpoint references.

@@ -69,17 +69,18 @@ A global exception handler maps domain exceptions to:
 with the right HTTP status (404, 409, 422, 401, 500). `message` is i18n-key-friendly /
 user-safe; never leak stack traces or SQL.
 
-## Auth (Phase 1, local-first)
+## Auth (local-first)
 
 - Passwords hashed with **Argon2id** (`argon2-cffi` or passlib's argon2 backend).
-- Login returns a bearer token; `get_current_user` validates it. Opaque token in a local store
-  is acceptable for Phase 1; if JWT, keep the secret in local config, not in code.
+- Login returns an opaque bearer token stored in `auth_tokens`; `get_current_user` validates it.
 - Bind the server to `127.0.0.1` only. CORS locked to the local frontend origin.
 
 ## Config & startup
 
 - `core/config.py` via Pydantic Settings, env-overridable. No secrets in code.
 - App factory pattern (`create_app()`), routers included per feature.
+- After adding or changing a route, regenerate the endpoint reference:
+  `uv run python -m scripts.api_doc` from `backend/`. A test fails while `docs/api.md` is stale.
 - DB session is a FastAPI dependency yielding per-request sessions (see database skill).
 - Run in dev: `uv run uvicorn app.main:app --host 127.0.0.1 --port <p>`. Packaged: launched and
   supervised by the Flutter app.
