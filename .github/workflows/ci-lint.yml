@@ -1,0 +1,109 @@
+name: Lint
+
+# Stage of ci.yml; not triggered on its own. Its jobs show up as
+# "Lint / backend" and "Lint / frontend".
+on:
+  workflow_call:
+    inputs:
+      backend:
+        description: Run the backend job (the paths filter saw a change).
+        type: boolean
+        required: true
+      frontend:
+        description: Run the frontend job (the paths filter saw a change).
+        type: boolean
+        required: true
+      flutter-version:
+        type: string
+        required: true
+
+permissions:
+  contents: read
+
+jobs:
+  backend:
+    name: backend
+    if: inputs.backend
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: astral-sh/setup-uv@20cfd1bf945f4377ade1205e4dbc17946fc9a30d # v10.0.1
+        with:
+          working-directory: backend
+          python-version: "3.14"
+          enable-cache: true
+          cache-dependency-glob: uv.lock
+      - name: Install dependencies
+        run: uv sync --frozen
+      # Each tool runs twice: once to a machine-readable report for the job
+      # summary and the artifact, once in `github` format for the inline PR
+      # annotations. The second run is cache-warm and costs milliseconds.
+      # `set -u` without `-e` keeps the annotating run as the step's exit code.
+      - name: ruff check
+        run: |
+          set -uo pipefail
+          uv run ruff check --output-format=json --output-file "${RUNNER_TEMP}/ruff.json" .
+          uv run ruff check --output-format=github .
+      - name: ruff format
+        run: uv run ruff format --check .
+      - name: ty check
+        run: |
+          set -uo pipefail
+          uv run ty check --output-format=junit > "${RUNNER_TEMP}/ty-junit.xml"
+          uv run ty check --output-format=github
+      # always(): the reports matter most when a step above just failed.
+      - name: Job summary
+        if: always()
+        run: |
+          python3 "${GITHUB_WORKSPACE}/.github/scripts/ci_summary.py" \
+            --title "Lint / backend" \
+            --ruff "${RUNNER_TEMP}/ruff.json" \
+            --ty-junit "${RUNNER_TEMP}/ty-junit.xml"
+      - name: Upload lint reports
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: backend-lint-reports
+          path: |
+            ${{ runner.temp }}/ruff.json
+            ${{ runner.temp }}/ty-junit.xml
+          retention-days: 14
+          if-no-files-found: warn
+
+  frontend:
+    name: frontend
+    if: inputs.frontend
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2.23.0
+        with:
+          flutter-version: ${{ inputs.flutter-version }}
+          channel: stable
+          cache: true
+          pub-cache-key: pub-${{ runner.os }}-${{ hashFiles('frontend/pubspec.lock') }}
+      - name: flutter pub get
+        run: flutter pub get
+      - name: flutter analyze
+        run: flutter analyze
+      # i18n day one: the committed AppLocalizations must match the ARB sources.
+      - name: l10n is up to date
+        run: |
+          flutter gen-l10n
+          if ! git diff --quiet -- lib/l10n; then
+            echo "::error::lib/l10n is stale. Run 'flutter gen-l10n' and commit the result."
+            git --no-pager diff --stat -- lib/l10n
+            exit 1
+          fi
+      - name: dart format
+        run: dart format --output=none --set-exit-if-changed lib test

@@ -17,12 +17,13 @@ concurrency:
 
 env:
   FLUTTER_VERSION: "3.44.8"
-  OSV_SCANNER_VERSION: "2.5.1"
-  GITLEAKS_VERSION: "8.30.1"
 
+# The pipeline runs in three stages, each a reusable workflow that the run
+# graph draws as one box: Lint (ci-lint.yml), Test (ci-test.yml) and Security
+# (ci-security.yml). Stages run in parallel - none waits on another - so one
+# red stage never hides the verdict of the others.
 jobs:
   # Skips the heavy SDK jobs when a PR touches only one side of the monorepo.
-  # The scanner jobs run in ~20s, so they are deliberately not gated on this.
   changes:
     name: changes
     runs-on: ubuntu-latest
@@ -32,6 +33,8 @@ jobs:
     outputs:
       backend: ${{ steps.filter.outputs.backend }}
       frontend: ${{ steps.filter.outputs.frontend }}
+      # A reusable workflow call cannot read `env`, so the pin travels as an output.
+      flutter-version: ${{ env.FLUTTER_VERSION }}
     steps:
       # On push, paths-filter diffs against the previous tip via git. Without
       # full history it tries to fetch that commit, which fails once
@@ -46,296 +49,34 @@ jobs:
           filters: |
             backend:
               - 'backend/**'
-              - '.github/workflows/ci.yml'
+              - '.github/workflows/**'
+              - '.github/scripts/**'
             frontend:
               - 'frontend/**'
-              - '.github/workflows/ci.yml'
+              - '.github/workflows/**'
+              - '.github/scripts/**'
 
-  backend-lint:
-    name: backend / lint
+  lint:
+    name: Lint
     needs: changes
-    if: needs.changes.outputs.backend == 'true'
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: backend
-    steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          persist-credentials: false
-      - uses: astral-sh/setup-uv@20cfd1bf945f4377ade1205e4dbc17946fc9a30d # v10.0.1
-        with:
-          working-directory: backend
-          python-version: "3.14"
-          enable-cache: true
-          cache-dependency-glob: uv.lock
-      - name: Install dependencies
-        run: uv sync --frozen
-      # Each tool runs twice: once to a machine-readable report for the job
-      # summary and the artifact, once in `github` format for the inline PR
-      # annotations. The second run is cache-warm and costs milliseconds.
-      # `set -u` without `-e` keeps the annotating run as the step's exit code.
-      - name: ruff check
-        run: |
-          set -uo pipefail
-          uv run ruff check --output-format=json --output-file "${RUNNER_TEMP}/ruff.json" .
-          uv run ruff check --output-format=github .
-      - name: ruff format
-        run: uv run ruff format --check .
-      - name: ty check
-        run: |
-          set -uo pipefail
-          uv run ty check --output-format=junit > "${RUNNER_TEMP}/ty-junit.xml"
-          uv run ty check --output-format=github
-      # always(): the reports matter most when a step above just failed.
-      - name: Job summary
-        if: always()
-        run: |
-          python3 "${GITHUB_WORKSPACE}/.github/scripts/ci_summary.py" \
-            --title "backend / lint" \
-            --ruff "${RUNNER_TEMP}/ruff.json" \
-            --ty-junit "${RUNNER_TEMP}/ty-junit.xml"
-      - name: Upload lint reports
-        if: always()
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
-        with:
-          name: backend-lint-reports
-          path: |
-            ${{ runner.temp }}/ruff.json
-            ${{ runner.temp }}/ty-junit.xml
-          retention-days: 14
-          if-no-files-found: warn
+    uses: ./.github/workflows/ci-lint.yml
+    with:
+      backend: ${{ needs.changes.outputs.backend == 'true' }}
+      frontend: ${{ needs.changes.outputs.frontend == 'true' }}
+      flutter-version: ${{ needs.changes.outputs.flutter-version }}
 
-  backend-test:
-    name: backend / test
+  test:
+    name: Test
     needs: changes
-    if: needs.changes.outputs.backend == 'true'
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: backend
-    steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          persist-credentials: false
-      - uses: astral-sh/setup-uv@20cfd1bf945f4377ade1205e4dbc17946fc9a30d # v10.0.1
-        with:
-          working-directory: backend
-          python-version: "3.14"
-          enable-cache: true
-          cache-dependency-glob: uv.lock
-      - name: Install dependencies
-        run: uv sync --frozen
-      - name: pytest
-        run: uv run pytest -q --junitxml="${RUNNER_TEMP}/pytest-junit.xml"
-      - name: Job summary
-        if: always()
-        run: |
-          python3 "${GITHUB_WORKSPACE}/.github/scripts/ci_summary.py" \
-            --title "backend / test" \
-            --pytest-junit "${RUNNER_TEMP}/pytest-junit.xml"
-      - name: Upload test report
-        if: always()
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
-        with:
-          name: backend-test-report
-          path: ${{ runner.temp }}/pytest-junit.xml
-          retention-days: 14
-          if-no-files-found: warn
+    uses: ./.github/workflows/ci-test.yml
+    with:
+      backend: ${{ needs.changes.outputs.backend == 'true' }}
+      frontend: ${{ needs.changes.outputs.frontend == 'true' }}
+      flutter-version: ${{ needs.changes.outputs.flutter-version }}
 
-  frontend-lint:
-    name: frontend / lint
-    needs: changes
-    if: needs.changes.outputs.frontend == 'true'
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: frontend
-    steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          persist-credentials: false
-      - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2.23.0
-        with:
-          flutter-version: ${{ env.FLUTTER_VERSION }}
-          channel: stable
-          cache: true
-          pub-cache-key: pub-${{ runner.os }}-${{ hashFiles('frontend/pubspec.lock') }}
-      - name: flutter pub get
-        run: flutter pub get
-      - name: flutter analyze
-        run: flutter analyze
-      # i18n day one: the committed AppLocalizations must match the ARB sources.
-      - name: l10n is up to date
-        run: |
-          flutter gen-l10n
-          if ! git diff --quiet -- lib/l10n; then
-            echo "::error::lib/l10n is stale. Run 'flutter gen-l10n' and commit the result."
-            git --no-pager diff --stat -- lib/l10n
-            exit 1
-          fi
-      - name: dart format
-        run: dart format --output=none --set-exit-if-changed lib test
-
-  frontend-test:
-    name: frontend / test
-    needs: changes
-    if: needs.changes.outputs.frontend == 'true'
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: frontend
-    steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          persist-credentials: false
-      - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2.23.0
-        with:
-          flutter-version: ${{ env.FLUTTER_VERSION }}
-          channel: stable
-          cache: true
-          pub-cache-key: pub-${{ runner.os }}-${{ hashFiles('frontend/pubspec.lock') }}
-      - name: flutter pub get
-        run: flutter pub get
-      # --file-reporter adds a machine-readable copy without displacing the
-      # stdout reporter, which is already `github` when running on Actions.
-      - name: flutter test
-        run: flutter test --file-reporter="json:${RUNNER_TEMP}/dart-tests.json"
-      - name: Job summary
-        if: always()
-        run: |
-          python3 "${GITHUB_WORKSPACE}/.github/scripts/ci_summary.py" \
-            --title "frontend / test" \
-            --dart-json "${RUNNER_TEMP}/dart-tests.json"
-      - name: Upload test report
-        if: always()
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
-        with:
-          name: frontend-test-report
-          path: ${{ runner.temp }}/dart-tests.json
-          retention-days: 14
-          if-no-files-found: warn
-
-  deps-vulns:
-    name: security / dependency vulnerabilities
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          persist-credentials: false
-          fetch-depth: 0
-      - name: Install osv-scanner
-        run: |
-          set -euo pipefail
-          base="https://github.com/google/osv-scanner/releases/download/v${OSV_SCANNER_VERSION}"
-          curl -fsSL -o "${RUNNER_TEMP}/osv-scanner" "${base}/osv-scanner_linux_amd64"
-          curl -fsSL -o "${RUNNER_TEMP}/SHA256SUMS" "${base}/osv-scanner_SHA256SUMS"
-          expected="$(grep ' osv-scanner_linux_amd64$' "${RUNNER_TEMP}/SHA256SUMS" | cut -d' ' -f1)"
-          echo "${expected}  ${RUNNER_TEMP}/osv-scanner" | sha256sum -c -
-          chmod +x "${RUNNER_TEMP}/osv-scanner"
-      - name: Scan lockfiles
-        run: |
-          set -uo pipefail
-          # `|| code=$?`: the runner's shell is `bash -e`, so a bare findings exit (1)
-          # would end the step here and the policy step below would never decide.
-          code=0
-          "${RUNNER_TEMP}/osv-scanner" scan source \
-            --lockfile backend/uv.lock \
-            --lockfile frontend/pubspec.lock \
-            --format json --output-file "${RUNNER_TEMP}/osv.json" || code=$?
-          # 0 = clean, 1 = findings (osv_policy.py decides), >=127 = real error.
-          if [ "${code}" -ge 127 ]; then
-            echo "::error::osv-scanner failed with exit code ${code} (127=error, 128=no packages found)"
-            exit 1
-          fi
-      # On a PR, scan the base branch's lockfiles too so the gate only fails on
-      # vulnerabilities this PR actually introduces.
-      - name: Scan base lockfiles (PR only)
-        if: github.event_name == 'pull_request'
-        env:
-          BASE_SHA: ${{ github.event.pull_request.base.sha }}
-        run: |
-          set -uo pipefail
-          mkdir -p "${RUNNER_TEMP}/baseline/backend" "${RUNNER_TEMP}/baseline/frontend"
-          args=""
-          if git show "${BASE_SHA}:backend/uv.lock" > "${RUNNER_TEMP}/baseline/backend/uv.lock" 2>/dev/null; then
-            args="${args} --lockfile ${RUNNER_TEMP}/baseline/backend/uv.lock"
-          fi
-          if git show "${BASE_SHA}:frontend/pubspec.lock" > "${RUNNER_TEMP}/baseline/frontend/pubspec.lock" 2>/dev/null; then
-            args="${args} --lockfile ${RUNNER_TEMP}/baseline/frontend/pubspec.lock"
-          fi
-          if [ -z "${args}" ]; then
-            echo "No lockfiles on the base ref; every finding counts as new."
-            exit 0
-          fi
-          # shellcheck disable=SC2086
-          code=0
-          "${RUNNER_TEMP}/osv-scanner" scan source ${args} \
-            --format json --output-file "${RUNNER_TEMP}/osv-baseline.json" || code=$?
-          if [ "${code}" -ge 127 ]; then
-            echo "::warning::baseline scan failed (exit ${code}); every finding counts as new."
-            rm -f "${RUNNER_TEMP}/osv-baseline.json"
-          fi
-      - name: Apply severity policy
-        env:
-          EVENT_NAME: ${{ github.event_name }}
-        run: |
-          set -euo pipefail
-          baseline=""
-          if [ "${EVENT_NAME}" = "pull_request" ]; then
-            threshold=high
-            if [ -f "${RUNNER_TEMP}/osv-baseline.json" ]; then
-              baseline="--baseline ${RUNNER_TEMP}/osv-baseline.json"
-            fi
-          else
-            threshold=any
-          fi
-          # shellcheck disable=SC2086
-          python3 .github/scripts/osv_policy.py \
-            --results "${RUNNER_TEMP}/osv.json" \
-            --threshold "${threshold}" \
-            ${baseline}
-
-  secrets:
-    name: security / secrets
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          persist-credentials: false
-          fetch-depth: 0
-      - name: Install gitleaks
-        run: |
-          set -euo pipefail
-          base="https://github.com/gitleaks/gitleaks/releases/download/v${GITLEAKS_VERSION}"
-          curl -fsSL -o "${RUNNER_TEMP}/gitleaks.tar.gz" "${base}/gitleaks_${GITLEAKS_VERSION}_linux_x64.tar.gz"
-          curl -fsSL -o "${RUNNER_TEMP}/checksums.txt" "${base}/gitleaks_${GITLEAKS_VERSION}_checksums.txt"
-          expected="$(grep "gitleaks_${GITLEAKS_VERSION}_linux_x64.tar.gz\$" "${RUNNER_TEMP}/checksums.txt" | cut -d' ' -f1)"
-          echo "${expected}  ${RUNNER_TEMP}/gitleaks.tar.gz" | sha256sum -c -
-          tar -xzf "${RUNNER_TEMP}/gitleaks.tar.gz" -C "${RUNNER_TEMP}" gitleaks
-          chmod +x "${RUNNER_TEMP}/gitleaks"
-      # --redact keeps any matched secret out of the job log. Both events scan only
-      # the commits they introduce: history cannot change without a force-push, so
-      # every new secret arrives inside some PR or push range, and re-scanning old
-      # history would only re-report what was already judged.
-      - name: Scan for secrets
-        env:
-          EVENT_NAME: ${{ github.event_name }}
-          BASE_SHA: ${{ github.event.pull_request.base.sha }}
-          BEFORE_SHA: ${{ github.event.before }}
-        run: |
-          set -euo pipefail
-          if [ "${EVENT_NAME}" = "pull_request" ]; then
-            range="--no-merges ${BASE_SHA}..HEAD"
-          elif git cat-file -e "${BEFORE_SHA}^{commit}" 2>/dev/null; then
-            range="${BEFORE_SHA}..HEAD"
-          else
-            # First push to the branch (all-zero before) or a force-push whose old
-            # tip was not fetched: there is no range, so scan the tip commit alone.
-            echo "::warning::no previous commit to diff against; scanning HEAD only"
-            range="-1 HEAD"
-          fi
-          "${RUNNER_TEMP}/gitleaks" git . --redact --no-banner --log-opts="${range}"
+  security:
+    name: Security
+    uses: ./.github/workflows/ci-security.yml
 
   # The single required status check. Path-filtered jobs that get skipped would
   # otherwise sit pending forever under branch protection and deadlock merges.
@@ -345,12 +86,9 @@ jobs:
     if: always()
     needs:
       - changes
-      - backend-lint
-      - backend-test
-      - frontend-lint
-      - frontend-test
-      - deps-vulns
-      - secrets
+      - lint
+      - test
+      - security
     steps:
       - name: Verify no job failed
         env:
