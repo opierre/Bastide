@@ -69,17 +69,18 @@ class _DashedBorderPainter extends CustomPainter {
     // Inset by half the stroke so the dashes sit fully inside the bounds
     // instead of being clipped along the outer edge.
     final inset = strokeWidth / 2;
-    final outline = Path()..addRRect(
-      RRect.fromRectAndRadius(
-        Rect.fromLTWH(
-          inset,
-          inset,
-          math.max(0, size.width - strokeWidth),
-          math.max(0, size.height - strokeWidth),
+    final outline = Path()
+      ..addRRect(
+        RRect.fromRectAndRadius(
+          Rect.fromLTWH(
+            inset,
+            inset,
+            math.max(0, size.width - strokeWidth),
+            math.max(0, size.height - strokeWidth),
+          ),
+          Radius.circular(radius),
         ),
-        Radius.circular(radius),
-      ),
-    );
+      );
 
     final step = dashLength + gapLength;
     for (final metric in outline.computeMetrics()) {

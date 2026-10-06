@@ -78,7 +78,7 @@ def test_reference_loan_matches_the_hand_computed_table() -> None:
     assert [row.ordinal for row in schedule.rows] == [1, 2, 3, 4]
     assert schedule.total_interest_minor == 2_513
     assert schedule.total_insurance_minor == 2_000
-    assert schedule.total_paid_minor == 104_513
+    assert sum(row.instalment_minor for row in schedule.rows) == 104_513
     assert schedule.total_cost_minor == 2_513 + 2_000 + 15_000
 
 
@@ -170,7 +170,9 @@ def test_yearly_aggregation_equals_the_sum_of_its_months() -> None:
         assert totals.insurance_minor == sum(row.insurance_minor for row in months)
         assert totals.outstanding_end_minor == months[-1].outstanding_after_minor
     assert sum(year.principal_minor for year in years) == 20_000_000
-    assert sum(year.instalment_minor for year in years) == schedule.total_paid_minor
+    assert sum(year.instalment_minor for year in years) == sum(
+        row.instalment_minor for row in schedule.rows
+    )
 
 
 def test_outstanding_at_reads_the_generated_rows() -> None:

@@ -28,12 +28,18 @@ class LockCallout extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Icon(Icons.lock_outline_rounded, size: 15, color: AppColors.iris),
+          const Icon(
+            Icons.lock_outline_rounded,
+            size: 15,
+            color: AppColors.iris,
+          ),
           const SizedBox(width: AppSpacing.sm),
           Expanded(
             child: Text(
               message,
-              style: AppTextStyles.helper.copyWith(color: AppColors.textPrimary),
+              style: AppTextStyles.helper.copyWith(
+                color: AppColors.textPrimary,
+              ),
             ),
           ),
         ],

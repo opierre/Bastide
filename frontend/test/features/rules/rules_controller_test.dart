@@ -62,9 +62,9 @@ void main() {
 
   test('create files the new rule last and appends it', () async {
     when(() => apiClient.get('/rules')).thenAnswer((_) async => _threeRules());
-    when(() => apiClient.post('/rules', body: any(named: 'body'))).thenAnswer(
-      (_) async => _ruleJson(id: 'r4', priority: 4, pattern: 'EDF'),
-    );
+    when(
+      () => apiClient.post('/rules', body: any(named: 'body')),
+    ).thenAnswer((_) async => _ruleJson(id: 'r4', priority: 4, pattern: 'EDF'));
 
     await container.read(rulesControllerProvider.future);
     await container
@@ -82,29 +82,35 @@ void main() {
             ).captured.single
             as Map<String, dynamic>;
     expect(body['priority'], 4);
-    expect(container.read(rulesControllerProvider).value!.map((rule) => rule.id), [
-      'r1',
-      'r2',
-      'r3',
-      'r4',
-    ]);
-  });
-
-  test('updateRule replaces the rule and re-sorts on a priority change', () async {
-    when(() => apiClient.get('/rules')).thenAnswer((_) async => _threeRules());
-    when(() => apiClient.patch('/rules/r3', body: any(named: 'body'))).thenAnswer(
-      (_) async => _ruleJson(id: 'r3', priority: 0, pattern: 'AMAZON'),
+    expect(
+      container.read(rulesControllerProvider).value!.map((rule) => rule.id),
+      ['r1', 'r2', 'r3', 'r4'],
     );
-
-    await container.read(rulesControllerProvider.future);
-    await container.read(rulesControllerProvider.notifier).updateRule('r3', priority: 0);
-
-    expect(container.read(rulesControllerProvider).value!.map((rule) => rule.id), [
-      'r3',
-      'r1',
-      'r2',
-    ]);
   });
+
+  test(
+    'updateRule replaces the rule and re-sorts on a priority change',
+    () async {
+      when(
+        () => apiClient.get('/rules'),
+      ).thenAnswer((_) async => _threeRules());
+      when(
+        () => apiClient.patch('/rules/r3', body: any(named: 'body')),
+      ).thenAnswer(
+        (_) async => _ruleJson(id: 'r3', priority: 0, pattern: 'AMAZON'),
+      );
+
+      await container.read(rulesControllerProvider.future);
+      await container
+          .read(rulesControllerProvider.notifier)
+          .updateRule('r3', priority: 0);
+
+      expect(
+        container.read(rulesControllerProvider).value!.map((rule) => rule.id),
+        ['r3', 'r1', 'r2'],
+      );
+    },
+  );
 
   test('delete drops the rule', () async {
     when(() => apiClient.get('/rules')).thenAnswer((_) async => _threeRules());
@@ -113,56 +119,66 @@ void main() {
     await container.read(rulesControllerProvider.future);
     await container.read(rulesControllerProvider.notifier).delete('r2');
 
-    expect(container.read(rulesControllerProvider).value!.map((rule) => rule.id), [
-      'r1',
-      'r3',
-    ]);
+    expect(
+      container.read(rulesControllerProvider).value!.map((rule) => rule.id),
+      ['r1', 'r3'],
+    );
   });
 
-  test('reorder writes the expected priorities, patching only what moved', () async {
-    when(() => apiClient.get('/rules')).thenAnswer((_) async => _threeRules());
-    when(
-      () => apiClient.patch(any(), body: any(named: 'body')),
-    ).thenAnswer((invocation) async => _ruleJson());
+  test(
+    'reorder writes the expected priorities, patching only what moved',
+    () async {
+      when(
+        () => apiClient.get('/rules'),
+      ).thenAnswer((_) async => _threeRules());
+      when(
+        () => apiClient.patch(any(), body: any(named: 'body')),
+      ).thenAnswer((invocation) async => _ruleJson());
 
-    await container.read(rulesControllerProvider.future);
-    // Drag the last rule to the front: 3, 1, 2.
-    await container.read(rulesControllerProvider.notifier).reorder(2, 0);
+      await container.read(rulesControllerProvider.future);
+      // Drag the last rule to the front: 3, 1, 2.
+      await container.read(rulesControllerProvider.notifier).reorder(2, 0);
 
-    final rules = container.read(rulesControllerProvider).value!;
-    expect(rules.map((rule) => rule.id), ['r3', 'r1', 'r2']);
-    expect(rules.map((rule) => rule.priority), [1, 2, 3]);
+      final rules = container.read(rulesControllerProvider).value!;
+      expect(rules.map((rule) => rule.id), ['r3', 'r1', 'r2']);
+      expect(rules.map((rule) => rule.priority), [1, 2, 3]);
 
-    // All three moved, so all three are patched — and each carries its new
-    // priority, not its old one.
-    final patched = verify(
-      () => apiClient.patch(captureAny(), body: captureAny(named: 'body')),
-    ).captured;
-    expect(patched, [
-      '/rules/r3',
-      {'priority': 1},
-      '/rules/r1',
-      {'priority': 2},
-      '/rules/r2',
-      {'priority': 3},
-    ]);
-  });
+      // All three moved, so all three are patched — and each carries its new
+      // priority, not its old one.
+      final patched = verify(
+        () => apiClient.patch(captureAny(), body: captureAny(named: 'body')),
+      ).captured;
+      expect(patched, [
+        '/rules/r3',
+        {'priority': 1},
+        '/rules/r1',
+        {'priority': 2},
+        '/rules/r2',
+        {'priority': 3},
+      ]);
+    },
+  );
 
-  test('reorder patches only the rules whose priority actually changed', () async {
-    when(() => apiClient.get('/rules')).thenAnswer((_) async => _threeRules());
-    when(
-      () => apiClient.patch(any(), body: any(named: 'body')),
-    ).thenAnswer((_) async => _ruleJson());
+  test(
+    'reorder patches only the rules whose priority actually changed',
+    () async {
+      when(
+        () => apiClient.get('/rules'),
+      ).thenAnswer((_) async => _threeRules());
+      when(
+        () => apiClient.patch(any(), body: any(named: 'body')),
+      ).thenAnswer((_) async => _ruleJson());
 
-    await container.read(rulesControllerProvider.future);
-    // Swap the last two: r1 keeps priority 1 and is left alone.
-    await container.read(rulesControllerProvider.notifier).reorder(2, 1);
+      await container.read(rulesControllerProvider.future);
+      // Swap the last two: r1 keeps priority 1 and is left alone.
+      await container.read(rulesControllerProvider.notifier).reorder(2, 1);
 
-    final paths = verify(
-      () => apiClient.patch(captureAny(), body: any(named: 'body')),
-    ).captured;
-    expect(paths, ['/rules/r3', '/rules/r2']);
-  });
+      final paths = verify(
+        () => apiClient.patch(captureAny(), body: any(named: 'body')),
+      ).captured;
+      expect(paths, ['/rules/r3', '/rules/r2']);
+    },
+  );
 
   test('a failed reorder restores the previous order and rethrows', () async {
     when(() => apiClient.get('/rules')).thenAnswer((_) async => _threeRules());
@@ -184,9 +200,9 @@ void main() {
 
   test('setEnabled flips the rule optimistically', () async {
     when(() => apiClient.get('/rules')).thenAnswer((_) async => _threeRules());
-    when(() => apiClient.patch('/rules/r3', body: any(named: 'body'))).thenAnswer(
-      (_) async => _ruleJson(id: 'r3', priority: 3, enabled: false),
-    );
+    when(
+      () => apiClient.patch('/rules/r3', body: any(named: 'body')),
+    ).thenAnswer((_) async => _ruleJson(id: 'r3', priority: 3, enabled: false));
 
     await container.read(rulesControllerProvider.future);
     final pending = container
@@ -199,7 +215,10 @@ void main() {
       isFalse,
     );
     await pending;
-    expect(container.read(rulesControllerProvider).value!.last.enabled, isFalse);
+    expect(
+      container.read(rulesControllerProvider).value!.last.enabled,
+      isFalse,
+    );
   });
 
   test('a failed toggle puts the switch back and rethrows', () async {
@@ -211,7 +230,9 @@ void main() {
     await container.read(rulesControllerProvider.future);
 
     await expectLater(
-      () => container.read(rulesControllerProvider.notifier).setEnabled('r3', false),
+      () => container
+          .read(rulesControllerProvider.notifier)
+          .setEnabled('r3', false),
       throwsA(isA<ApiFailure>()),
     );
     expect(container.read(rulesControllerProvider).value!.last.enabled, isTrue);
@@ -237,7 +258,9 @@ void main() {
       when(
         () => apiClient.get('/transactions', query: any(named: 'query')),
       ).thenAnswer((_) async => _emptyPage());
-      when(() => apiClient.get('/accounts')).thenAnswer((_) async => <dynamic>[]);
+      when(
+        () => apiClient.get('/accounts'),
+      ).thenAnswer((_) async => <dynamic>[]);
       when(
         () => apiClient.get('/dashboard/summary', query: any(named: 'query')),
       ).thenAnswer((_) async => _summaryJson());
@@ -246,16 +269,23 @@ void main() {
       ).thenAnswer((_) async => _trendsJson());
     });
 
-    test('the transaction list is re-read, so the new categories show', () async {
-      await container.read(transactionsControllerProvider.future);
-      await container.read(rulesControllerProvider.future);
-      // The load above is the only read so far; what follows is the refresh.
-      verify(() => apiClient.get('/transactions', query: any(named: 'query'))).called(1);
+    test(
+      'the transaction list is re-read, so the new categories show',
+      () async {
+        await container.read(transactionsControllerProvider.future);
+        await container.read(rulesControllerProvider.future);
+        // The load above is the only read so far; what follows is the refresh.
+        verify(
+          () => apiClient.get('/transactions', query: any(named: 'query')),
+        ).called(1);
 
-      await container.read(rulesControllerProvider.notifier).apply();
+        await container.read(rulesControllerProvider.notifier).apply();
 
-      verify(() => apiClient.get('/transactions', query: any(named: 'query'))).called(1);
-    });
+        verify(
+          () => apiClient.get('/transactions', query: any(named: 'query')),
+        ).called(1);
+      },
+    );
 
     test('the dashboard is invalidated, so the répartition follows', () async {
       await container.read(dashboardControllerProvider.future);
@@ -278,11 +308,15 @@ void main() {
 
       await container.read(transactionsControllerProvider.future);
       await container.read(rulesControllerProvider.future);
-      verify(() => apiClient.get('/transactions', query: any(named: 'query'))).called(1);
+      verify(
+        () => apiClient.get('/transactions', query: any(named: 'query')),
+      ).called(1);
 
       await container.read(rulesControllerProvider.notifier).apply();
 
-      verifyNever(() => apiClient.get('/transactions', query: any(named: 'query')));
+      verifyNever(
+        () => apiClient.get('/transactions', query: any(named: 'query')),
+      );
     });
   });
 }

@@ -13,6 +13,7 @@ from app.features.dashboard.schemas import DashboardTrends
 from app.features.dashboard.service import DashboardService
 from app.features.imports.models import ImportBatch
 from app.features.transactions.models import Transaction
+from tests.api import register as _register
 
 ACCOUNT_PAYLOAD = {
     "name": "Compte courant",
@@ -28,20 +29,6 @@ def _next_unique() -> int:
     global _counter
     _counter += 1
     return _counter
-
-
-def _register(client: TestClient, email: str = "amelie@example.com") -> dict[str, str]:
-    response = client.post(
-        "/api/v1/auth/register",
-        json={
-            "email": email,
-            "password": "correct-horse-battery-staple",
-            "display_name": "Amelie",
-            "locale": "fr",
-            "currency": "eur",
-        },
-    )
-    return {"Authorization": f"Bearer {response.json()['token']}"}
 
 
 def _create_account(client: TestClient, headers: dict[str, str]) -> str:

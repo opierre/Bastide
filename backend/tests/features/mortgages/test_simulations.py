@@ -13,6 +13,7 @@ from sqlalchemy.orm import Session, sessionmaker
 
 from app.features.mortgages.models import MortgageSimulation
 from app.features.mortgages.simulations_service import MAX_SIMULATIONS_PER_USER
+from tests.api import register
 
 SCENARIO = {
     "label": "Lyon 3e — 320 k€",
@@ -31,21 +32,6 @@ INPUT_FIELDS = set(SCENARIO) - {"label"}
 def db(tmp_path: Path) -> Session:
     engine = create_engine(f"sqlite:///{tmp_path / 'test.db'}")
     return sessionmaker(bind=engine)()
-
-
-def register(client: TestClient, email: str = "amelie@example.com") -> dict[str, str]:
-    response = client.post(
-        "/api/v1/auth/register",
-        json={
-            "email": email,
-            "password": "correct-horse-battery-staple",
-            "display_name": "Amelie",
-            "locale": "fr",
-            "currency": "eur",
-        },
-    )
-    assert response.status_code == 201, response.json()
-    return {"Authorization": f"Bearer {response.json()['token']}"}
 
 
 def create(client: TestClient, headers: dict[str, str], **overrides: object) -> dict:

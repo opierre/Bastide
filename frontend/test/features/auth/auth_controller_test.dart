@@ -52,7 +52,9 @@ void main() {
 
   test('build restores the session via me() when a token is stored', () async {
     when(() => tokenStore.read()).thenAnswer((_) async => 'stored-token');
-    when(() => apiClient.get('/auth/me')).thenAnswer((_) async => {'user': _userJson()});
+    when(
+      () => apiClient.get('/auth/me'),
+    ).thenAnswer((_) async => {'user': _userJson()});
 
     final user = await container.read(authControllerProvider.future);
 
@@ -77,8 +79,13 @@ void main() {
   });
 
   test('login failure surfaces an error state and stores no token', () async {
-    when(() => apiClient.post('/auth/login', body: any(named: 'body'))).thenThrow(
-      const ApiFailure(code: 'INVALID_CREDENTIALS', message: 'Incorrect email or password.'),
+    when(
+      () => apiClient.post('/auth/login', body: any(named: 'body')),
+    ).thenThrow(
+      const ApiFailure(
+        code: 'INVALID_CREDENTIALS',
+        message: 'Incorrect email or password.',
+      ),
     );
 
     await container.read(authControllerProvider.future);
@@ -93,18 +100,23 @@ void main() {
     verifyNever(() => tokenStore.write(any()));
   });
 
-  test('logout clears the stored token and resets state to signed out', () async {
-    when(() => tokenStore.read()).thenAnswer((_) async => 'existing-token');
-    when(() => apiClient.get('/auth/me')).thenAnswer((_) async => {'user': _userJson()});
-    when(() => apiClient.post('/auth/logout')).thenAnswer((_) async => null);
+  test(
+    'logout clears the stored token and resets state to signed out',
+    () async {
+      when(() => tokenStore.read()).thenAnswer((_) async => 'existing-token');
+      when(
+        () => apiClient.get('/auth/me'),
+      ).thenAnswer((_) async => {'user': _userJson()});
+      when(() => apiClient.post('/auth/logout')).thenAnswer((_) async => null);
 
-    await container.read(authControllerProvider.future);
-    expect(container.read(authControllerProvider).value, isNotNull);
+      await container.read(authControllerProvider.future);
+      expect(container.read(authControllerProvider).value, isNotNull);
 
-    await container.read(authControllerProvider.notifier).logout();
+      await container.read(authControllerProvider.notifier).logout();
 
-    expect(container.read(authControllerProvider).value, isNull);
-    expect(container.read(authTokenProvider), isNull);
-    verify(() => tokenStore.delete()).called(1);
-  });
+      expect(container.read(authControllerProvider).value, isNull);
+      expect(container.read(authTokenProvider), isNull);
+      verify(() => tokenStore.delete()).called(1);
+    },
+  );
 }

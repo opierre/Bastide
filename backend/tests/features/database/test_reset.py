@@ -4,7 +4,7 @@ from datetime import date
 from pathlib import Path
 
 from fastapi.testclient import TestClient
-from sqlalchemy import create_engine, select
+from sqlalchemy import create_engine, delete, select
 from sqlalchemy.orm import Session, sessionmaker
 
 from app.features.accounts.models import Account
@@ -19,20 +19,7 @@ from app.features.recurring.models import RecurringSeries
 from app.features.rules.models import CategorizationRule
 from app.features.settings.models import UserSettings
 from app.features.transactions.models import Transaction
-
-
-def _register(client: TestClient, email: str) -> dict[str, str]:
-    response = client.post(
-        "/api/v1/auth/register",
-        json={
-            "email": email,
-            "password": "correct-horse-battery-staple",
-            "display_name": "Amelie",
-            "locale": "fr",
-            "currency": "eur",
-        },
-    )
-    return {"Authorization": f"Bearer {response.json()['token']}"}
+from tests.api import register as _register
 
 
 def _session(tmp_path: Path) -> Session:
@@ -258,7 +245,7 @@ def test_reset_restores_a_system_catalog_that_had_gone_missing(
 ) -> None:
     headers = _register(client, "amelie@example.com")
     with _session(tmp_path) as db:
-        db.execute(Category.__table__.delete().where(Category.user_id.is_(None)))
+        db.execute(delete(Category).where(Category.user_id.is_(None)))
         db.commit()
 
     assert client.post("/api/v1/database/reset", headers=headers).status_code == 200

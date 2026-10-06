@@ -6,7 +6,6 @@ through the detector would make every assertion depend on the algorithm's verdic
 on the code under test.
 """
 
-from dataclasses import dataclass
 from datetime import date, timedelta
 from pathlib import Path
 
@@ -19,6 +18,7 @@ from app.features.recurring.models import RecurringOccurrence, RecurringSeries
 from app.features.recurring.normalize import normalize_label
 from app.features.recurring.service import NOMINAL_INTERVAL_DAYS
 from app.features.transactions.models import Transaction
+from tests.api import RegisteredUser as Owner
 
 ACCOUNT_PAYLOAD = {
     "name": "Compte courant",
@@ -26,31 +26,6 @@ ACCOUNT_PAYLOAD = {
     "institution": "BNP Paribas",
     "opening_balance_minor": 100_000,
 }
-
-
-@dataclass(frozen=True, slots=True)
-class Owner:
-    """A registered user: the header every request carries, and the id rows are written under."""
-
-    headers: dict[str, str]
-    user_id: str
-
-
-def register(client: TestClient, email: str = "amelie@example.com") -> Owner:
-    """Register a user and return their auth header and id."""
-    response = client.post(
-        "/api/v1/auth/register",
-        json={
-            "email": email,
-            "password": "correct-horse-battery-staple",
-            "display_name": "Amelie",
-            "locale": "fr",
-            "currency": "eur",
-        },
-    )
-    assert response.status_code == 201, response.json()
-    body = response.json()
-    return Owner(headers={"Authorization": f"Bearer {body['token']}"}, user_id=body["user"]["id"])
 
 
 def create_account(client: TestClient, owner: Owner, name: str = "Compte courant") -> str:

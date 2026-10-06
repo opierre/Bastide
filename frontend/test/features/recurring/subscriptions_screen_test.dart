@@ -51,33 +51,36 @@ void _useDesktopSurface(WidgetTester tester) {
 }
 
 void main() {
-  testWidgets('a healthy row renders cadence, a neutral amount and the next date', (
-    tester,
-  ) async {
-    _useDesktopSurface(tester);
-    await tester.pumpWidget(
-      _wrap(
-        controller: FakeSubscriptionsController(
-          initialSeries: [testSeries()],
-          summary: testSummary(),
+  testWidgets(
+    'a healthy row renders cadence, a neutral amount and the next date',
+    (tester) async {
+      _useDesktopSurface(tester);
+      await tester.pumpWidget(
+        _wrap(
+          controller: FakeSubscriptionsController(
+            initialSeries: [testSeries()],
+            summary: testSummary(),
+          ),
         ),
-      ),
-    );
-    await tester.pumpAndSettle();
+      );
+      await tester.pumpAndSettle();
 
-    expect(find.text('Mensuel'), findsOneWidget);
-    expect(find.text('15/05/2026'), findsOneWidget);
+      expect(find.text('Mensuel'), findsOneWidget);
+      expect(find.text('15/05/2026'), findsOneWidget);
 
-    // Unsigned and in the primary ink: an expected charge is not a ledger
-    // entry, so the money rule's red would state something false about it.
-    final amount = tester.widget<AmountText>(find.byKey(const Key('seriesAmount-s1')));
-    expect(amount.amountMinor, 1549);
-    expect(amount.colorize, isFalse);
-    expect(find.text(_money(1549)), findsOneWidget);
+      // Unsigned and in the primary ink: an expected charge is not a ledger
+      // entry, so the money rule's red would state something false about it.
+      final amount = tester.widget<AmountText>(
+        find.byKey(const Key('seriesAmount-s1')),
+      );
+      expect(amount.amountMinor, 1549);
+      expect(amount.colorize, isFalse);
+      expect(find.text(_money(1549)), findsOneWidget);
 
-    // Nothing is wrong with this subscription, so the Statut cell is empty.
-    expect(find.byType(StatusPill), findsNothing);
-  });
+      // Nothing is wrong with this subscription, so the Statut cell is empty.
+      expect(find.byType(StatusPill), findsNothing);
+    },
+  );
 
   testWidgets('a price increase and a missed charge render as amber pills', (
     tester,
@@ -88,7 +91,11 @@ void main() {
         controller: FakeSubscriptionsController(
           initialSeries: [
             testSeries(),
-            testSeries(id: 's2', label: 'Basic-Fit', expectedAmountMinor: -2999),
+            testSeries(
+              id: 's2',
+              label: 'Basic-Fit',
+              expectedAmountMinor: -2999,
+            ),
           ],
           summary: testSummary(
             activeCount: 2,
@@ -112,14 +119,19 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    final pills = tester.widgetList<StatusPill>(find.byType(StatusPill)).toList();
+    final pills = tester
+        .widgetList<StatusPill>(find.byType(StatusPill))
+        .toList();
     expect(pills, hasLength(2));
     expect(pills.every((pill) => pill.tone == StatusPillTone.warning), isTrue);
     expect(
       find.text('Augmentation · ${_money(1349)} → ${_money(1549)}'),
       findsOneWidget,
     );
-    expect(find.text('Prélèvement manquant · 9 jours de retard'), findsOneWidget);
+    expect(
+      find.text('Prélèvement manquant · 9 jours de retard'),
+      findsOneWidget,
+    );
 
     // The overdue row states what was expected instead of printing a past date
     // under a "next charge" header.
@@ -127,60 +139,67 @@ void main() {
     expect(find.text('attendu le 05/05/2026'), findsOneWidget);
   });
 
-  testWidgets('a cancelled row dims, drops its next date, and takes a gray pill', (
-    tester,
-  ) async {
-    _useDesktopSurface(tester);
-    await tester.pumpWidget(
-      _wrap(
-        controller: FakeSubscriptionsController(
-          initialSeries: [testSeries(label: 'Canal+', status: SeriesStatus.cancelled)],
-          summary: testSummary(activeCount: 0, cancelledCount: 1),
+  testWidgets(
+    'a cancelled row dims, drops its next date, and takes a gray pill',
+    (tester) async {
+      _useDesktopSurface(tester);
+      await tester.pumpWidget(
+        _wrap(
+          controller: FakeSubscriptionsController(
+            initialSeries: [
+              testSeries(label: 'Canal+', status: SeriesStatus.cancelled),
+            ],
+            summary: testSummary(activeCount: 0, cancelledCount: 1),
+          ),
         ),
-      ),
-    );
-    await tester.pumpAndSettle();
+      );
+      await tester.pumpAndSettle();
 
-    final opacity = tester.widget<Opacity>(
-      find.descendant(
-        of: find.byKey(const Key('seriesRow-s1')),
-        matching: find.byType(Opacity),
-      ),
-    );
-    expect(opacity.opacity, 0.55);
-
-    expect(
-      tester.widget<StatusPill>(find.byType(StatusPill)).tone,
-      StatusPillTone.neutral,
-    );
-    expect(find.text('Terminé · dernier prélèvement 15/04/2026'), findsOneWidget);
-    expect(find.text('15/05/2026'), findsNothing);
-  });
-
-  testWidgets('the kebab offers only the transitions the current status allows', (
-    tester,
-  ) async {
-    _useDesktopSurface(tester);
-    await tester.pumpWidget(
-      _wrap(
-        controller: FakeSubscriptionsController(
-          initialSeries: [testSeries(status: SeriesStatus.confirmed)],
-          summary: testSummary(),
+      final opacity = tester.widget<Opacity>(
+        find.descendant(
+          of: find.byKey(const Key('seriesRow-s1')),
+          matching: find.byType(Opacity),
         ),
-      ),
-    );
-    await tester.pumpAndSettle();
+      );
+      expect(opacity.opacity, 0.55);
 
-    await tester.tap(find.byKey(const Key('seriesMenu-s1')));
-    await tester.pumpAndSettle();
+      expect(
+        tester.widget<StatusPill>(find.byType(StatusPill)).tone,
+        StatusPillTone.neutral,
+      );
+      expect(
+        find.text('Terminé · dernier prélèvement 15/04/2026'),
+        findsOneWidget,
+      );
+      expect(find.text('15/05/2026'), findsNothing);
+    },
+  );
 
-    // confirmed → cancelled | dismissed. Confirming again is not a transition
-    // the lifecycle has, so the menu must not offer it.
-    expect(find.byKey(const Key('seriesActionCancel-s1')), findsOneWidget);
-    expect(find.byKey(const Key('seriesActionDismiss-s1')), findsOneWidget);
-    expect(find.byKey(const Key('seriesActionConfirm-s1')), findsNothing);
-    expect(find.byKey(const Key('seriesActionEdit-s1')), findsOneWidget);
-  });
+  testWidgets(
+    'the kebab offers only the transitions the current status allows',
+    (tester) async {
+      _useDesktopSurface(tester);
+      await tester.pumpWidget(
+        _wrap(
+          controller: FakeSubscriptionsController(
+            initialSeries: [testSeries(status: SeriesStatus.confirmed)],
+            summary: testSummary(),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byKey(const Key('seriesMenu-s1')));
+      await tester.pumpAndSettle();
+
+      // confirmed → cancelled | dismissed. Confirming again is not a transition
+      // the lifecycle has, so the menu must not offer it.
+      expect(find.byKey(const Key('seriesActionCancel-s1')), findsOneWidget);
+      expect(find.byKey(const Key('seriesActionDismiss-s1')), findsOneWidget);
+      expect(find.byKey(const Key('seriesActionConfirm-s1')), findsNothing);
+      expect(find.byKey(const Key('seriesActionEdit-s1')), findsOneWidget);
+    },
+  );
 
   testWidgets('a lifecycle action patches the series and refreshes the row', (
     tester,
@@ -205,13 +224,15 @@ void main() {
     tester,
   ) async {
     _useDesktopSurface(tester);
-    final controller = FakeSubscriptionsController(
-      initialSeries: [testSeries()],
-      summary: testSummary(),
-    )..errorOnStatusChange = const ApiFailure(
-      code: 'RECURRING_INVALID_TRANSITION',
-      message: 'nope',
-    );
+    final controller =
+        FakeSubscriptionsController(
+            initialSeries: [testSeries()],
+            summary: testSummary(),
+          )
+          ..errorOnStatusChange = const ApiFailure(
+            code: 'RECURRING_INVALID_TRANSITION',
+            message: 'nope',
+          );
     await tester.pumpWidget(_wrap(controller: controller));
     await tester.pumpAndSettle();
 
@@ -261,33 +282,47 @@ void main() {
 
     expect(find.text(_money(21208)), findsOneWidget);
     expect(find.text('8'), findsOneWidget);
-    expect(find.text('6 mensuels · 1 trimestriel · 1 annuel — 1 terminé'), findsOneWidget);
+    expect(
+      find.text('6 mensuels · 1 trimestriel · 1 annuel — 1 terminé'),
+      findsOneWidget,
+    );
     expect(find.text('Netflix — demain'), findsOneWidget);
     expect(
-      find.textContaining('Charges trimestrielles et annuelles ramenées au mois.'),
+      find.textContaining(
+        'Charges trimestrielles et annuelles ramenées au mois.',
+      ),
       findsOneWidget,
     );
     expect(find.textContaining('1 paiement terminé exclu.'), findsOneWidget);
   });
 
-  testWidgets('the empty state explains the three-repeat rule and offers imports', (
+  testWidgets(
+    'the empty state explains the three-repeat rule and offers imports',
+    (tester) async {
+      _useDesktopSurface(tester);
+      await tester.pumpWidget(_wrap(controller: FakeSubscriptionsController()));
+      await tester.pumpAndSettle();
+
+      expect(find.byKey(const Key('subscriptionsEmptyState')), findsOneWidget);
+      expect(
+        find.text('Aucun paiement récurrent détecté pour l\'instant'),
+        findsOneWidget,
+      );
+      expect(
+        find.textContaining("un prélèvement s'est répété trois fois"),
+        findsOneWidget,
+      );
+      expect(
+        find.byKey(const Key('subscriptionsEmptyImportsButton')),
+        findsOneWidget,
+      );
+      expect(find.text('Aller aux imports'), findsOneWidget);
+    },
+  );
+
+  testWidgets('a failed load offers a retry rather than an empty panel', (
     tester,
   ) async {
-    _useDesktopSurface(tester);
-    await tester.pumpWidget(_wrap(controller: FakeSubscriptionsController()));
-    await tester.pumpAndSettle();
-
-    expect(find.byKey(const Key('subscriptionsEmptyState')), findsOneWidget);
-    expect(find.text('Aucun paiement récurrent détecté pour l\'instant'), findsOneWidget);
-    expect(
-      find.textContaining("un prélèvement s'est répété trois fois"),
-      findsOneWidget,
-    );
-    expect(find.byKey(const Key('subscriptionsEmptyImportsButton')), findsOneWidget);
-    expect(find.text('Aller aux imports'), findsOneWidget);
-  });
-
-  testWidgets('a failed load offers a retry rather than an empty panel', (tester) async {
     _useDesktopSurface(tester);
     await tester.pumpWidget(
       _wrap(
@@ -312,8 +347,16 @@ void main() {
         controller: FakeSubscriptionsController(
           initialSeries: [
             testSeries(),
-            testSeries(id: 's2', label: 'Basic-Fit', expectedAmountMinor: -2999),
-            testSeries(id: 's3', label: 'Canal+', status: SeriesStatus.cancelled),
+            testSeries(
+              id: 's2',
+              label: 'Basic-Fit',
+              expectedAmountMinor: -2999,
+            ),
+            testSeries(
+              id: 's3',
+              label: 'Canal+',
+              status: SeriesStatus.cancelled,
+            ),
           ],
           summary: testSummary(
             activeCount: 2,

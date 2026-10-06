@@ -18,8 +18,10 @@ enum RunTrigger {
   import,
   manual;
 
-  static RunTrigger fromWire(String value) =>
-      values.firstWhere((trigger) => trigger.name == value, orElse: () => RunTrigger.manual);
+  static RunTrigger fromWire(String value) => values.firstWhere(
+    (trigger) => trigger.name == value,
+    orElse: () => RunTrigger.manual,
+  );
 }
 
 /// A run's lifecycle. `pending`/`running` are the in-flight pair the poll
@@ -38,8 +40,10 @@ enum RunStatus {
   failed,
   cancelled;
 
-  static RunStatus fromWire(String value) =>
-      values.firstWhere((status) => status.name == value, orElse: () => RunStatus.pending);
+  static RunStatus fromWire(String value) => values.firstWhere(
+    (status) => status.name == value,
+    orElse: () => RunStatus.pending,
+  );
 
   bool get isInFlight => this == RunStatus.pending || this == RunStatus.running;
 
@@ -68,23 +72,24 @@ class CategorizationRun {
     required this.createdAt,
   });
 
-  factory CategorizationRun.fromJson(Map<String, dynamic> json) => CategorizationRun(
-    id: json['id'] as String,
-    accountId: json['account_id'] as String?,
-    importBatchId: json['import_batch_id'] as String?,
-    trigger: RunTrigger.fromWire(json['trigger'] as String),
-    status: RunStatus.fromWire(json['status'] as String),
-    modelTag: json['model_tag'] as String?,
-    totalCount: json['total_count'] as int,
-    processedCount: json['processed_count'] as int,
-    assignedCount: json['assigned_count'] as int,
-    deferredCount: json['deferred_count'] as int,
-    failedCount: json['failed_count'] as int,
-    errorMessage: json['error_message'] as String?,
-    startedAt: _parseDate(json['started_at']),
-    finishedAt: _parseDate(json['finished_at']),
-    createdAt: DateTime.parse(json['created_at'] as String),
-  );
+  factory CategorizationRun.fromJson(Map<String, dynamic> json) =>
+      CategorizationRun(
+        id: json['id'] as String,
+        accountId: json['account_id'] as String?,
+        importBatchId: json['import_batch_id'] as String?,
+        trigger: RunTrigger.fromWire(json['trigger'] as String),
+        status: RunStatus.fromWire(json['status'] as String),
+        modelTag: json['model_tag'] as String?,
+        totalCount: json['total_count'] as int,
+        processedCount: json['processed_count'] as int,
+        assignedCount: json['assigned_count'] as int,
+        deferredCount: json['deferred_count'] as int,
+        failedCount: json['failed_count'] as int,
+        errorMessage: json['error_message'] as String?,
+        startedAt: _parseDate(json['started_at']),
+        finishedAt: _parseDate(json['finished_at']),
+        createdAt: DateTime.parse(json['created_at'] as String),
+      );
 
   final String id;
   final String? accountId;
@@ -104,8 +109,9 @@ class CategorizationRun {
 
   /// Progress in `[0,1]`. A run with nothing to do reads as complete rather
   /// than as an empty bar sitting at zero forever.
-  double get progress =>
-      totalCount == 0 ? 1 : (processedCount / totalCount).clamp(0, 1).toDouble();
+  double get progress => totalCount == 0
+      ? 1
+      : (processedCount / totalCount).clamp(0, 1).toDouble();
 
   static DateTime? _parseDate(Object? value) =>
       value == null ? null : DateTime.parse(value as String);
@@ -172,7 +178,9 @@ class AiAvailability {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      (other is AiAvailability && other.enabled == enabled && other.reachable == reachable);
+      (other is AiAvailability &&
+          other.enabled == enabled &&
+          other.reachable == reachable);
 
   @override
   int get hashCode => Object.hash(enabled, reachable);

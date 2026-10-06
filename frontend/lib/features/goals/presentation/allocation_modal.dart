@@ -16,7 +16,10 @@ import 'goal_labels.dart';
 
 /// Opens the 440 px « Nouvelle allocation » modal over the goal detail. Resolves
 /// to the appended line, or `null` when the user cancelled.
-Future<GoalAllocation?> showAllocationModal(BuildContext context, {required Goal goal}) {
+Future<GoalAllocation?> showAllocationModal(
+  BuildContext context, {
+  required Goal goal,
+}) {
   return showDialog<GoalAllocation>(
     context: context,
     builder: (_) => AllocationModal(goal: goal),
@@ -154,7 +157,10 @@ class _AllocationModalState extends ConsumerState<AllocationModal> {
             ),
             const SizedBox(height: AppSpacing.md),
             if (_errorText != null) ...[
-              InlineBanner(key: const Key('allocationError'), message: _errorText!),
+              InlineBanner(
+                key: const Key('allocationError'),
+                message: _errorText!,
+              ),
               const SizedBox(height: AppSpacing.md),
             ],
             Row(
@@ -173,7 +179,8 @@ class _AllocationModalState extends ConsumerState<AllocationModal> {
                       currency: currency,
                       allowNegative: true,
                       autofocus: true,
-                      validator: (value) => _parseAmount(value ?? '', locale) == null
+                      validator: (value) =>
+                          _parseAmount(value ?? '', locale) == null
                           ? l10n.allocationAmountInvalid
                           : null,
                     ),

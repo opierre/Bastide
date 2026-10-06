@@ -6,7 +6,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 /// a fixed list state and/or to record which methods were called — without
 /// touching the real API client.
 class FakeAccountsController extends AccountsController {
-  FakeAccountsController({this.initialAccounts = const [], this.createdAccount});
+  FakeAccountsController({
+    this.initialAccounts = const [],
+    this.createdAccount,
+  });
 
   final List<Account> initialAccounts;
 
@@ -104,6 +107,8 @@ class FakeAccountsController extends AccountsController {
   Future<void> archive(String id) async {
     archiveCalls.add(id);
     if (errorOnArchive != null) throw errorOnArchive!;
-    state = AsyncValue.data((state.value ?? const []).where((a) => a.id != id).toList());
+    state = AsyncValue.data(
+      (state.value ?? const []).where((a) => a.id != id).toList(),
+    );
   }
 }

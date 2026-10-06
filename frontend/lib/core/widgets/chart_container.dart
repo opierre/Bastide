@@ -46,7 +46,9 @@ class ChartContainer extends StatelessWidget {
                       const SizedBox(height: 2),
                       Text(
                         subtitle,
-                        style: textTheme.bodySmall?.copyWith(color: AppColors.textSecondary),
+                        style: textTheme.bodySmall?.copyWith(
+                          color: AppColors.textSecondary,
+                        ),
                       ),
                     ],
                   ],

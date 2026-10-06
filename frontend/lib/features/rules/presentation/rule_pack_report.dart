@@ -77,7 +77,9 @@ class _ReportLine extends StatelessWidget {
           Expanded(
             child: Text(
               label,
-              style: textTheme.bodyMedium?.copyWith(color: AppColors.textSecondary),
+              style: textTheme.bodyMedium?.copyWith(
+                color: AppColors.textSecondary,
+              ),
             ),
           ),
           Text(value, style: tabularNumberStyle(textTheme.titleSmall!)),

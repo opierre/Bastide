@@ -17,7 +17,11 @@ import 'dashed_border.dart';
 /// Always paired with a `ConfidenceGauge`: a proposal without its confidence
 /// asks the user to judge a guess without telling them how good it is.
 class ProposedCategoryChip extends StatelessWidget {
-  const ProposedCategoryChip({super.key, required this.label, required this.slug});
+  const ProposedCategoryChip({
+    super.key,
+    required this.label,
+    required this.slug,
+  });
 
   /// The localized category name. This widget never invents copy.
   final String label;
@@ -43,7 +47,9 @@ class ProposedCategoryChip extends StatelessWidget {
               const SizedBox(width: AppSpacing.xs + 1),
               Text(
                 label,
-                style: Theme.of(context).textTheme.labelSmall?.copyWith(color: hue),
+                style: Theme.of(
+                  context,
+                ).textTheme.labelSmall?.copyWith(color: hue),
               ),
             ],
           ),

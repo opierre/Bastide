@@ -20,7 +20,8 @@ class RestoreConfirmModal extends ConsumerStatefulWidget {
   final PendingRestore pending;
 
   @override
-  ConsumerState<RestoreConfirmModal> createState() => _RestoreConfirmModalState();
+  ConsumerState<RestoreConfirmModal> createState() =>
+      _RestoreConfirmModalState();
 }
 
 class _RestoreConfirmModalState extends ConsumerState<RestoreConfirmModal> {
@@ -42,7 +43,9 @@ class _RestoreConfirmModalState extends ConsumerState<RestoreConfirmModal> {
       if (!mounted) return;
       setState(() {
         _isRestoring = false;
-        _failure = error is BackupException ? error.failure : BackupFailure.unknown;
+        _failure = error is BackupException
+            ? error.failure
+            : BackupFailure.unknown;
       });
     }
   }
@@ -137,13 +140,18 @@ class _SummaryPlate extends StatelessWidget {
     final number = NumberFormat.decimalPattern(locale);
     final counts = summary.counts;
     final valueStyle = tabularNumberStyle(
-      Theme.of(context).textTheme.bodyMedium!.copyWith(color: AppColors.textPrimary),
+      Theme.of(
+        context,
+      ).textTheme.bodyMedium!.copyWith(color: AppColors.textPrimary),
     );
 
     final rows = <(String, Widget)>[
       (
         l10n.settingsBackupConfirmExportedAt,
-        Text(formatBackupInstant(l10n, locale, summary.exportedAt), style: valueStyle),
+        Text(
+          formatBackupInstant(l10n, locale, summary.exportedAt),
+          style: valueStyle,
+        ),
       ),
       (
         l10n.settingsBackupConfirmVersion,
@@ -168,7 +176,10 @@ class _SummaryPlate extends StatelessWidget {
 
     return Container(
       key: const Key('backupConfirmSummary'),
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: AppSpacing.xs),
+      padding: const EdgeInsets.symmetric(
+        horizontal: 14,
+        vertical: AppSpacing.xs,
+      ),
       decoration: BoxDecoration(
         color: AppColors.surfaceField,
         borderRadius: BorderRadius.circular(AppRadii.inset),
@@ -187,9 +198,9 @@ class _SummaryPlate extends StatelessWidget {
                     child: Text(
                       label,
                       overflow: TextOverflow.ellipsis,
-                      style: Theme.of(
-                        context,
-                      ).textTheme.bodyMedium?.copyWith(color: AppColors.textSecondary),
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        color: AppColors.textSecondary,
+                      ),
                     ),
                   ),
                   const SizedBox(width: AppSpacing.sm),

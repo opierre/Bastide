@@ -25,7 +25,9 @@ class IncomeVsExpenseChart extends StatelessWidget {
     // The tallest single segment sets the scale, so income and expense stay comparable
     // between months rather than each bar normalising to itself.
     final peak = series.fold<int>(0, (largest, row) {
-      final tallest = row.incomeMinor > row.expenseMinor ? row.incomeMinor : row.expenseMinor;
+      final tallest = row.incomeMinor > row.expenseMinor
+          ? row.incomeMinor
+          : row.expenseMinor;
       return tallest > largest ? tallest : largest;
     });
 
@@ -61,9 +63,15 @@ class _Legend extends StatelessWidget {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        _LegendDot(color: AppColors.positive, label: l10n.dashboardLegendIncome),
+        _LegendDot(
+          color: AppColors.positive,
+          label: l10n.dashboardLegendIncome,
+        ),
         const SizedBox(width: AppSpacing.md),
-        _LegendDot(color: AppColors.negative, label: l10n.dashboardLegendExpense),
+        _LegendDot(
+          color: AppColors.negative,
+          label: l10n.dashboardLegendExpense,
+        ),
       ],
     );
   }
@@ -123,7 +131,9 @@ class MonthBar extends StatelessWidget {
   Widget build(BuildContext context) {
     final locale = Localizations.localeOf(context).toString();
     final textTheme = Theme.of(context).textTheme;
-    final monthLabel = _capitalize(DateFormat('LLL', locale).format(totals.month));
+    final monthLabel = _capitalize(
+      DateFormat('LLL', locale).format(totals.month),
+    );
 
     return SizedBox(
       width: barWidth,
@@ -182,7 +192,9 @@ class MonthBar extends StatelessWidget {
                     fontWeight: FontWeight.w400,
                     // The month being looked at is stated in primary; the ones it is compared
                     // against recede.
-                    color: isCurrent ? AppColors.textPrimary : AppColors.textSecondary,
+                    color: isCurrent
+                        ? AppColors.textPrimary
+                        : AppColors.textSecondary,
                   ),
                 ),
                 const SizedBox(height: 2),
@@ -204,7 +216,11 @@ class MonthBar extends StatelessWidget {
 }
 
 class _Segment extends StatelessWidget {
-  const _Segment({required this.height, required this.color, required this.radius});
+  const _Segment({
+    required this.height,
+    required this.color,
+    required this.radius,
+  });
 
   final double height;
   final Color color;
@@ -246,7 +262,9 @@ class _HoverTooltip extends StatelessWidget {
     );
 
     return Tooltip(
-      key: Key('dashboardBarTooltip-${totals.month.year}-${totals.month.month}'),
+      key: Key(
+        'dashboardBarTooltip-${totals.month.year}-${totals.month.month}',
+      ),
       richMessage: TextSpan(
         children: [
           TextSpan(
@@ -254,13 +272,15 @@ class _HoverTooltip extends StatelessWidget {
             style: tabularNumberStyle(Theme.of(context).textTheme.labelSmall!),
           ),
           TextSpan(
-            text: '${l10n.dashboardLegendIncome}  ${amount(totals.incomeMinor)}\n',
+            text:
+                '${l10n.dashboardLegendIncome}  ${amount(totals.incomeMinor)}\n',
             style: tabularNumberStyle(
               Theme.of(context).textTheme.bodySmall!,
             ).copyWith(color: AppColors.positive),
           ),
           TextSpan(
-            text: '${l10n.dashboardLegendExpense}  ${amount(-totals.expenseMinor)}',
+            text:
+                '${l10n.dashboardLegendExpense}  ${amount(-totals.expenseMinor)}',
             style: tabularNumberStyle(
               Theme.of(context).textTheme.bodySmall!,
             ).copyWith(color: AppColors.negative),

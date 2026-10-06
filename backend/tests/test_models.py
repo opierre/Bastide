@@ -1,8 +1,5 @@
 """Tests for the Phase 1 schema: the migration, and the dedup unique constraints."""
 
-import os
-import subprocess
-import sys
 from datetime import date
 from pathlib import Path
 from uuid import uuid4
@@ -16,7 +13,6 @@ from app.features.accounts.models import AccountBalanceSnapshot
 from app.features.imports.models import ImportBatch
 from app.features.transactions.models import Transaction
 
-BACKEND_DIR = Path(__file__).resolve().parent.parent
 EXPECTED_TABLES = {
     "users",
     "auth_tokens",
@@ -39,22 +35,10 @@ EXPECTED_TABLES = {
 }
 
 
-def test_alembic_upgrade_builds_full_schema_on_empty_db(tmp_path: Path) -> None:
-    db_path = tmp_path / "migrated.db"
-    env = os.environ.copy()
-    env["FINSTRIDE_DB_PATH"] = str(db_path)
-
-    subprocess.run(
-        [sys.executable, "-m", "alembic", "upgrade", "head"],
-        cwd=BACKEND_DIR,
-        env=env,
-        check=True,
-        capture_output=True,
-        text=True,
-    )
-
-    engine = create_engine(f"sqlite:///{db_path}")
+def test_alembic_upgrade_builds_full_schema_on_empty_db(migrated_template: Path) -> None:
+    engine = create_engine(f"sqlite:///{migrated_template}")
     assert set(inspect(engine).get_table_names()) == EXPECTED_TABLES
+    engine.dispose()
 
 
 def _transaction_kwargs(**overrides: object) -> dict[str, object]:

@@ -115,7 +115,10 @@ class _CardState extends ConsumerState<_Card> {
           // The card's centerpiece, and unconditional: what the user is being
           // asked to opt into is exactly the promise this makes, so it is
           // present whether the toggle is on or off.
-          LockCallout(key: const Key('settingsAiPrivacy'), message: l10n.settingsAiPrivacy),
+          LockCallout(
+            key: const Key('settingsAiPrivacy'),
+            message: l10n.settingsAiPrivacy,
+          ),
           const SizedBox(height: AppSpacing.md),
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -132,7 +135,9 @@ class _CardState extends ConsumerState<_Card> {
                     child: TextField(
                       key: const Key('settingsAiBaseUrlField'),
                       controller: _baseUrl,
-                      style: AppTextStyles.mono.copyWith(color: AppColors.textPrimary),
+                      style: AppTextStyles.mono.copyWith(
+                        color: AppColors.textPrimary,
+                      ),
                       decoration: state.baseUrlError == null
                           ? null
                           : errorFieldDecoration(),
@@ -165,7 +170,8 @@ class _CardState extends ConsumerState<_Card> {
               child: AppSlider(
                 key: const Key('settingsAiThresholdSlider'),
                 value: state.thresholdPercent.toDouble(),
-                onChanged: (value) => _controller.setThresholdPercent(value.round()),
+                onChanged: (value) =>
+                    _controller.setThresholdPercent(value.round()),
                 semanticFormatter: (value) =>
                     l10n.settingsAiThresholdLabel(value / 100),
               ),
@@ -202,13 +208,16 @@ class _Header extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(l10n.settingsAiTitle, style: Theme.of(context).textTheme.titleMedium),
+              Text(
+                l10n.settingsAiTitle,
+                style: Theme.of(context).textTheme.titleMedium,
+              ),
               const SizedBox(height: 2),
               Text(
                 l10n.settingsAiSubtitle,
-                style: Theme.of(
-                  context,
-                ).textTheme.bodyMedium?.copyWith(color: AppColors.textSecondary),
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: AppColors.textSecondary,
+                ),
               ),
             ],
           ),
@@ -255,7 +264,10 @@ class _ModelField extends StatelessWidget {
       return LabeledField(
         label: l10n.settingsAiModelLabel,
         helper: l10n.settingsAiModelUnavailable,
-        child: const ReadOnlyField(key: Key('settingsAiModelReadOnly'), value: '—'),
+        child: const ReadOnlyField(
+          key: Key('settingsAiModelReadOnly'),
+          value: '—',
+        ),
       );
     }
 
@@ -323,7 +335,11 @@ class _ModelMenu extends StatelessWidget {
         key: const Key('settingsAiModelMenu'),
         tooltip: l10n.settingsAiModelChoose,
         onPressed: () => menu.isOpen ? menu.close() : menu.open(),
-        icon: const Icon(Icons.expand_more_rounded, size: 17, color: AppColors.iris),
+        icon: const Icon(
+          Icons.expand_more_rounded,
+          size: 17,
+          color: AppColors.iris,
+        ),
       ),
     );
   }
@@ -430,7 +446,8 @@ class _LearnMoreLink extends StatelessWidget {
       cursor: SystemMouseCursors.click,
       child: GestureDetector(
         key: const Key('settingsAiLearnMore'),
-        onTap: () => launchUrl(_runtimeHelpUrl, mode: LaunchMode.externalApplication),
+        onTap: () =>
+            launchUrl(_runtimeHelpUrl, mode: LaunchMode.externalApplication),
         child: Text(
           label,
           style: AppTextStyles.helper.copyWith(

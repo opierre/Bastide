@@ -79,7 +79,9 @@ Widget _wrap({
 }
 
 void main() {
-  testWidgets('renders a batch with fr-formatted dates and counts', (tester) async {
+  testWidgets('renders a batch with fr-formatted dates and counts', (
+    tester,
+  ) async {
     await tester.pumpWidget(
       _wrap(controller: FakeImportsController(initialBatches: [_batch()])),
     );
@@ -88,14 +90,20 @@ void main() {
     final dates = DateFormat.yMd('fr');
     expect(find.text('releve-mai.ofx'), findsOneWidget);
     expect(find.text('OFX'), findsOneWidget);
-    expect(find.text(dates.format(DateTime(2026, 6, 1, 9, 30))), findsOneWidget);
+    expect(
+      find.text(dates.format(DateTime(2026, 6, 1, 9, 30))),
+      findsOneWidget,
+    );
     expect(
       find.text(
         '${dates.format(DateTime(2026, 5, 1))} – ${dates.format(DateTime(2026, 5, 31))}',
       ),
       findsOneWidget,
     );
-    expect(find.text(NumberFormat.decimalPattern('fr').format(42)), findsOneWidget);
+    expect(
+      find.text(NumberFormat.decimalPattern('fr').format(42)),
+      findsOneWidget,
+    );
     expect(find.text('Réussi'), findsOneWidget);
   });
 
@@ -109,7 +117,10 @@ void main() {
     await tester.pumpAndSettle();
 
     final dates = DateFormat.yMd('en');
-    expect(find.text(dates.format(DateTime(2026, 6, 1, 9, 30))), findsOneWidget);
+    expect(
+      find.text(dates.format(DateTime(2026, 6, 1, 9, 30))),
+      findsOneWidget,
+    );
     expect(
       find.text(
         '${dates.format(DateTime(2026, 5, 1))} – ${dates.format(DateTime(2026, 5, 31))}',
@@ -120,21 +131,28 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('a re-import shows its duplicates as a note under the file name', (
-    tester,
-  ) async {
-    await tester.pumpWidget(
-      _wrap(
-        controller: FakeImportsController(
-          initialBatches: [_batch(newCount: 0, duplicateCount: 45)],
+  testWidgets(
+    'a re-import shows its duplicates as a note under the file name',
+    (tester) async {
+      await tester.pumpWidget(
+        _wrap(
+          controller: FakeImportsController(
+            initialBatches: [_batch(newCount: 0, duplicateCount: 45)],
+          ),
         ),
-      ),
-    );
-    await tester.pumpAndSettle();
+      );
+      await tester.pumpAndSettle();
 
-    expect(find.byKey(const Key('importBatchDuplicateNote-b1')), findsOneWidget);
-    expect(find.text('45 opérations déjà présentes, ignorées'), findsOneWidget);
-  });
+      expect(
+        find.byKey(const Key('importBatchDuplicateNote-b1')),
+        findsOneWidget,
+      );
+      expect(
+        find.text('45 opérations déjà présentes, ignorées'),
+        findsOneWidget,
+      );
+    },
+  );
 
   testWidgets('a batch that disagrees with the bank shows the gap as a note', (
     tester,
@@ -161,38 +179,50 @@ void main() {
       showPositiveSign: true,
     );
     final date = DateFormat.yMd('fr').format(DateTime(2024, 2, 29));
-    expect(find.text('Écart de $amount avec le solde de la banque au $date.'), findsOneWidget);
+    expect(
+      find.text('Écart de $amount avec le solde de la banque au $date.'),
+      findsOneWidget,
+    );
   });
 
-  testWidgets('a failed batch states nothing was changed and shows the reason', (
+  testWidgets(
+    'a failed batch states nothing was changed and shows the reason',
+    (tester) async {
+      await tester.pumpWidget(
+        _wrap(
+          controller: FakeImportsController(
+            initialBatches: [
+              _batch(
+                format: ImportFormat.qfx,
+                fileName: 'releve.qfx',
+                newCount: 0,
+                duplicateCount: 0,
+                status: ImportStatus.failed,
+                errorMessage: 'No <STMTTRN> records found',
+              ),
+            ],
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(
+        find.byKey(const Key('importBatchFailureNote-b1')),
+        findsOneWidget,
+      );
+      expect(
+        find.text("Le fichier n'a pas pu être lu — rien n'a été modifié."),
+        findsOneWidget,
+      );
+      expect(find.text('No <STMTTRN> records found'), findsOneWidget);
+      expect(find.text('Échec'), findsOneWidget);
+      expect(find.text('QFX'), findsOneWidget);
+    },
+  );
+
+  testWidgets('renders the empty state when nothing has been imported', (
     tester,
   ) async {
-    await tester.pumpWidget(
-      _wrap(
-        controller: FakeImportsController(
-          initialBatches: [
-            _batch(
-              format: ImportFormat.qfx,
-              fileName: 'releve.qfx',
-              newCount: 0,
-              duplicateCount: 0,
-              status: ImportStatus.failed,
-              errorMessage: 'No <STMTTRN> records found',
-            ),
-          ],
-        ),
-      ),
-    );
-    await tester.pumpAndSettle();
-
-    expect(find.byKey(const Key('importBatchFailureNote-b1')), findsOneWidget);
-    expect(find.text("Le fichier n'a pas pu être lu — rien n'a été modifié."), findsOneWidget);
-    expect(find.text('No <STMTTRN> records found'), findsOneWidget);
-    expect(find.text('Échec'), findsOneWidget);
-    expect(find.text('QFX'), findsOneWidget);
-  });
-
-  testWidgets('renders the empty state when nothing has been imported', (tester) async {
     await tester.pumpWidget(_wrap(controller: FakeImportsController()));
     await tester.pumpAndSettle();
 

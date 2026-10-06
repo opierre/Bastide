@@ -22,26 +22,13 @@ from app.features.mortgages.models import Mortgage, MortgageSimulation
 from app.features.properties.models import Property
 from app.features.rules.models import CategorizationRule
 from app.features.transactions.models import Transaction
+from tests.api import register as _register
 
 PHASE3_MEMBERS = (
     "properties.jsonl",
     "mortgages.jsonl",
     "mortgage_simulations.jsonl",
 )
-
-
-def _register(client: TestClient, email: str, currency: str = "eur") -> dict[str, str]:
-    response = client.post(
-        "/api/v1/auth/register",
-        json={
-            "email": email,
-            "password": "correct-horse-battery-staple",
-            "display_name": "Amelie",
-            "locale": "fr",
-            "currency": currency,
-        },
-    )
-    return {"Authorization": f"Bearer {response.json()['token']}"}
 
 
 def _session(tmp_path: Path) -> Session:

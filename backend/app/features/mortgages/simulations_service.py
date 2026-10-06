@@ -9,6 +9,7 @@ from datetime import date
 from typing import Any
 
 from app.core.errors import NotFoundError, ValidationError
+from app.core.months import first_of_month, month_index
 from app.features.auth.models import User
 from app.features.mortgages.engine import (
     NonAmortizingLoanError,
@@ -40,7 +41,6 @@ from app.features.mortgages.service import (
 )
 
 _BPS_PER_UNIT = 10_000
-_MONTHS_PER_YEAR = 12
 
 #: The §15 maximum term the simulation's duration is read against: 25 years — the same HCSF
 #: decision (the 27-year VEFA allowance for deferred amortisation is not modelled).
@@ -80,8 +80,7 @@ def first_payment_date(today: date) -> date:
     The simulator takes no date, yet the yearly rows are calendar years, so the loan is dated as
     if signed now.
     """
-    month_index = today.year * _MONTHS_PER_YEAR + today.month
-    return date(month_index // _MONTHS_PER_YEAR, month_index % _MONTHS_PER_YEAR + 1, 1)
+    return first_of_month(month_index(today) + 1)
 
 
 def scaled_insurance_minor(insurance_minor: int, reference_minor: int, principal_minor: int) -> int:
@@ -234,8 +233,6 @@ class SimulationService:
             MortgageFeesExceedPrincipalError: the fees are not smaller than the principal.
             MortgageNonAmortizingError: the instalment does not repay the principal.
         """
-        limit_bps = HCSF_LIMIT_BPS
-        max_term_months = HCSF_MAX_TERM_MONTHS
         first_on = first_payment_date(today)
 
         schedule = simulated_schedule(
@@ -257,7 +254,7 @@ class SimulationService:
         max_borrowable: int | None = None
         if income is not None and income > 0:
             debt_ratio = ratio_bps(instalment + existing_charge, income)
-            available = max(limit_bps * income // _BPS_PER_UNIT - existing_charge, 0)
+            available = max(HCSF_LIMIT_BPS * income // _BPS_PER_UNIT - existing_charge, 0)
             max_borrowable = self._max_borrowable(data, available, first_on)
 
         return SimulationResult(
@@ -285,10 +282,10 @@ class SimulationService:
             ],
             debt_ratio_bps=debt_ratio,
             hcsf=HcsfReading(
-                within_ratio=None if debt_ratio is None else debt_ratio <= limit_bps,
-                within_term=data.term_months <= max_term_months,
-                limit_bps=limit_bps,
-                max_term_months=max_term_months,
+                within_ratio=None if debt_ratio is None else debt_ratio <= HCSF_LIMIT_BPS,
+                within_term=data.term_months <= HCSF_MAX_TERM_MONTHS,
+                limit_bps=HCSF_LIMIT_BPS,
+                max_term_months=HCSF_MAX_TERM_MONTHS,
             ),
             max_borrowable_minor=max_borrowable,
             available_instalment_minor=available,

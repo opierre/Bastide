@@ -135,17 +135,18 @@ class RulePackPreview {
     required this.samples,
   });
 
-  factory RulePackPreview.fromJson(Map<String, dynamic> json) => RulePackPreview(
-    name: json['name'] as String,
-    total: json['total'] as int,
-    newCount: json['new_count'] as int,
-    duplicateCount: json['duplicate_count'] as int,
-    unresolved: (json['unresolved'] as List<dynamic>).cast<String>(),
-    wouldMatchCount: json['would_match_count'] as int,
-    samples: (json['samples'] as List<dynamic>)
-        .map((entry) => RuleSample.fromJson(entry as Map<String, dynamic>))
-        .toList(),
-  );
+  factory RulePackPreview.fromJson(Map<String, dynamic> json) =>
+      RulePackPreview(
+        name: json['name'] as String,
+        total: json['total'] as int,
+        newCount: json['new_count'] as int,
+        duplicateCount: json['duplicate_count'] as int,
+        unresolved: (json['unresolved'] as List<dynamic>).cast<String>(),
+        wouldMatchCount: json['would_match_count'] as int,
+        samples: (json['samples'] as List<dynamic>)
+            .map((entry) => RuleSample.fromJson(entry as Map<String, dynamic>))
+            .toList(),
+      );
 
   final String name;
   final int total;

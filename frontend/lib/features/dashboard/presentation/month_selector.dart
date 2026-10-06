@@ -36,7 +36,9 @@ class DashboardTopBarActions extends ConsumerWidget {
           _StepButton(
             key: const Key('dashboardMonthPrev'),
             icon: Icons.chevron_left_rounded,
-            onPressed: month == null ? null : () => controller.changeMonth(_shift(month, -1)),
+            onPressed: month == null
+                ? null
+                : () => controller.changeMonth(_shift(month, -1)),
           ),
           MonthPickerAnchor(
             month: month,
@@ -46,7 +48,9 @@ class DashboardTopBarActions extends ConsumerWidget {
           _StepButton(
             key: const Key('dashboardMonthNext'),
             icon: Icons.chevron_right_rounded,
-            onPressed: month == null ? null : () => controller.changeMonth(_shift(month, 1)),
+            onPressed: month == null
+                ? null
+                : () => controller.changeMonth(_shift(month, 1)),
           ),
         ],
       ),
@@ -224,7 +228,9 @@ class _PickerPanel extends StatelessWidget {
                       child: _MonthCell(
                         month: row * 3 + column + 1,
                         label: _capitalize(
-                          monthFormat.format(DateTime(year, row * 3 + column + 1)),
+                          monthFormat.format(
+                            DateTime(year, row * 3 + column + 1),
+                          ),
                         ),
                         isSelected:
                             selected != null &&
@@ -310,7 +316,8 @@ class _StepButton extends StatelessWidget {
   }
 }
 
-DateTime _shift(DateTime month, int months) => DateTime(month.year, month.month + months);
+DateTime _shift(DateTime month, int months) =>
+    DateTime(month.year, month.month + months);
 
 String _capitalize(String value) =>
     value.isEmpty ? value : value[0].toUpperCase() + value.substring(1);

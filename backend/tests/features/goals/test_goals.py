@@ -9,28 +9,14 @@ from datetime import date
 
 from fastapi.testclient import TestClient
 
+from tests.api import register
+
 GOAL_PAYLOAD = {
     "name": "Fonds d'urgence",
     "target_minor": 1_000_000,
     "icon": "shield",
     "color": "iris",
 }
-
-
-def register(client: TestClient, email: str = "amelie@example.com") -> dict[str, str]:
-    """Register a user and return the auth header their requests carry."""
-    response = client.post(
-        "/api/v1/auth/register",
-        json={
-            "email": email,
-            "password": "correct-horse-battery-staple",
-            "display_name": "Amelie",
-            "locale": "fr",
-            "currency": "eur",
-        },
-    )
-    assert response.status_code == 201, response.json()
-    return {"Authorization": f"Bearer {response.json()['token']}"}
 
 
 def create_goal(client: TestClient, headers: dict[str, str], **overrides: object) -> dict:

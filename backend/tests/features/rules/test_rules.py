@@ -9,6 +9,7 @@ from sqlalchemy.orm import sessionmaker
 
 from app.features.imports.models import ImportBatch
 from app.features.transactions.models import Transaction
+from tests.api import register_user
 
 ACCOUNT_PAYLOAD = {
     "name": "Compte courant",
@@ -34,18 +35,8 @@ RULE_PAYLOAD = {
 
 
 def _register(client: TestClient, email: str = "amelie@example.com") -> tuple[dict[str, str], str]:
-    response = client.post(
-        "/api/v1/auth/register",
-        json={
-            "email": email,
-            "password": "correct-horse-battery-staple",
-            "display_name": "Amelie",
-            "locale": "fr",
-            "currency": "eur",
-        },
-    )
-    body = response.json()
-    return {"Authorization": f"Bearer {body['token']}"}, body["user"]["id"]
+    user = register_user(client, email)
+    return user.headers, user.user_id
 
 
 def _create_account(client: TestClient, headers: dict[str, str]) -> str:

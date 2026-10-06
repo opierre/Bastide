@@ -22,7 +22,10 @@ class RulePackFiles {
   Future<String?> pick() async {
     final file = await openFile(
       acceptedTypeGroups: const [
-        XTypeGroup(label: 'FinStride rule pack', extensions: [rulePackExtension]),
+        XTypeGroup(
+          label: 'FinStride rule pack',
+          extensions: [rulePackExtension],
+        ),
       ],
     );
     return file?.readAsString();
@@ -30,7 +33,10 @@ class RulePackFiles {
 
   /// Asks where to save and writes [contents]. Returns the chosen path, or
   /// `null` if the user cancelled.
-  Future<String?> save({required String suggestedName, required String contents}) async {
+  Future<String?> save({
+    required String suggestedName,
+    required String contents,
+  }) async {
     final location = await getSaveLocation(suggestedName: suggestedName);
     if (location == null) return null;
     final file = XFile.fromData(
@@ -43,7 +49,9 @@ class RulePackFiles {
   }
 }
 
-final rulePackFilesProvider = Provider<RulePackFiles>((ref) => const RulePackFiles());
+final rulePackFilesProvider = Provider<RulePackFiles>(
+  (ref) => const RulePackFiles(),
+);
 
 /// The packs bundled with the app, offered where a user has no rules at all.
 final builtinPacksProvider = FutureProvider<List<BuiltinPack>>((ref) {
@@ -85,7 +93,9 @@ class RulePacksController extends Notifier<void> {
     if (source == null) return null;
 
     final pack = parseRulePack(source);
-    final preview = await ref.read(rulePacksRepositoryProvider).preview(pack: pack);
+    final preview = await ref
+        .read(rulePacksRepositoryProvider)
+        .preview(pack: pack);
     return PendingRulePack(preview: preview, pack: pack);
   }
 
@@ -109,15 +119,24 @@ class RulePacksController extends Notifier<void> {
   }) async {
     final result = await ref
         .read(rulePacksRepositoryProvider)
-        .import(pack: pending.pack, builtinId: pending.builtinId, applyNow: applyNow);
+        .import(
+          pack: pending.pack,
+          builtinId: pending.builtinId,
+          applyNow: applyNow,
+        );
     ref.invalidate(rulesControllerProvider);
     if (result.recategorizedCount > 0) await reloadRecategorizedViews(ref);
     return result;
   }
 
   /// Builds the pack the user will review before saving.
-  Future<RulePackExport> prepareExport({bool enabledOnly = false, String? name}) {
-    return ref.read(rulePacksRepositoryProvider).export(enabledOnly: enabledOnly, name: name);
+  Future<RulePackExport> prepareExport({
+    bool enabledOnly = false,
+    String? name,
+  }) {
+    return ref
+        .read(rulePacksRepositoryProvider)
+        .export(enabledOnly: enabledOnly, name: name);
   }
 
   /// Writes a reviewed pack to disk. Returns the path, or `null` on cancel.

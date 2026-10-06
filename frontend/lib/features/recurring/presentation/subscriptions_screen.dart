@@ -67,7 +67,9 @@ class _SubscriptionsTopBarActionsState
     final l10n = AppLocalizations.of(context)!;
     setState(() => _detecting = true);
     try {
-      final result = await ref.read(subscriptionsControllerProvider.notifier).detect();
+      final result = await ref
+          .read(subscriptionsControllerProvider.notifier)
+          .detect();
       if (!mounted) return;
       showAppToast(
         context,
@@ -98,7 +100,9 @@ class _SubscriptionsTopBarActionsState
           key: const Key('subscriptionsDetectButton'),
           onPressed: _detecting ? null : _detect,
           child: Text(
-            _detecting ? l10n.subscriptionsDetectRunning : l10n.subscriptionsDetect,
+            _detecting
+                ? l10n.subscriptionsDetectRunning
+                : l10n.subscriptionsDetect,
           ),
         ),
         const SizedBox(width: AppSpacing.sm + AppSpacing.xs),
@@ -122,7 +126,8 @@ class _SubscriptionsList extends ConsumerWidget {
     final state = ref.watch(subscriptionsControllerProvider);
 
     return switch (state) {
-      AsyncData(:final value) when value.rows.isEmpty && value.statusFilter == null =>
+      AsyncData(:final value)
+          when value.rows.isEmpty && value.statusFilter == null =>
         EmptyStateView(
           key: const Key('subscriptionsEmptyState'),
           icon: Icons.autorenew_rounded,
@@ -143,7 +148,8 @@ class _SubscriptionsList extends ConsumerWidget {
         messageKey: const Key('subscriptionsErrorText'),
         retryLabel: l10n.subscriptionsRetry,
         retryKey: const Key('subscriptionsRetryButton'),
-        onRetry: () => ref.read(subscriptionsControllerProvider.notifier).refresh(),
+        onRetry: () =>
+            ref.read(subscriptionsControllerProvider.notifier).refresh(),
       ),
       _ => const Padding(
         key: Key('subscriptionsLoadingIndicator'),
@@ -352,7 +358,11 @@ class _NextChargeCard extends StatelessWidget {
 }
 
 class _StatCard extends StatelessWidget {
-  const _StatCard({required this.label, required this.value, required this.caption});
+  const _StatCard({
+    required this.label,
+    required this.value,
+    required this.caption,
+  });
 
   final String label;
   final Widget value;
@@ -435,7 +445,8 @@ class _TableCard extends ConsumerWidget {
                   onOpen: () => ref
                       .read(selectedSeriesProvider.notifier)
                       .open(row.series.id),
-                  onAction: (action) => _handle(context, ref, row.series, action),
+                  onAction: (action) =>
+                      _handle(context, ref, row.series, action),
                 );
               },
             ),

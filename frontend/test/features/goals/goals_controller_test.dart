@@ -94,23 +94,31 @@ void main() {
     ).thenAnswer((_) async => accounts ?? [_accountJson()]);
   }
 
-  test('build loads the grid, the archived goals and the savings balances', () async {
-    stubLoad(
-      goals: [_goalJson(), _goalJson(id: 'g2', name: 'Voyage Japon')],
-      archived: [_goalJson(id: 'g9', name: 'Vieux projet', status: 'archived')],
-    );
+  test(
+    'build loads the grid, the archived goals and the savings balances',
+    () async {
+      stubLoad(
+        goals: [
+          _goalJson(),
+          _goalJson(id: 'g2', name: 'Voyage Japon'),
+        ],
+        archived: [
+          _goalJson(id: 'g9', name: 'Vieux projet', status: 'archived'),
+        ],
+      );
 
-    final state = await container.read(goalsControllerProvider.future);
+      final state = await container.read(goalsControllerProvider.future);
 
-    expect(state.goals, hasLength(2));
-    expect(state.goals.first.name, "Fonds d'urgence");
-    expect(state.goals.first.progressMinor, 640000);
-    expect(state.goals.first.progressPct, closeTo(0.64, 1e-9));
-    // The count the « Afficher les objectifs archivés (N) » link states is on
-    // screen before the list is, so it has to be loaded up front.
-    expect(state.archived, hasLength(1));
-    expect(state.savingsTotalMinor, 2210000);
-  });
+      expect(state.goals, hasLength(2));
+      expect(state.goals.first.name, "Fonds d'urgence");
+      expect(state.goals.first.progressMinor, 640000);
+      expect(state.goals.first.progressPct, closeTo(0.64, 1e-9));
+      // The count the « Afficher les objectifs archivés (N) » link states is on
+      // screen before the list is, so it has to be loaded up front.
+      expect(state.archived, hasLength(1));
+      expect(state.savingsTotalMinor, 2210000);
+    },
+  );
 
   test('a goal is created and the panel reloads behind it', () async {
     stubLoad();
@@ -131,13 +139,16 @@ void main() {
 
     expect(created.name, 'Voyage Japon');
     verify(
-      () => apiClient.post('/goals', body: {
-        'name': 'Voyage Japon',
-        'target_minor': 400000,
-        'target_date': '2026-06-30',
-        'icon': 'travel',
-        'color': '#4FD1E8',
-      }),
+      () => apiClient.post(
+        '/goals',
+        body: {
+          'name': 'Voyage Japon',
+          'target_minor': 400000,
+          'target_date': '2026-06-30',
+          'icon': 'travel',
+          'color': '#4FD1E8',
+        },
+      ),
     ).called(1);
   });
 
@@ -159,102 +170,141 @@ void main() {
     final state = container.read(goalsControllerProvider).value!;
     expect(state.goals.single.progressMinor, 670000);
     verify(
-      () => apiClient.post('/goals/g1/allocations', body: {
-        'amount_minor': 30000,
-        'allocated_on': '2026-05-14',
-      }),
+      () => apiClient.post(
+        '/goals/g1/allocations',
+        body: {'amount_minor': 30000, 'allocated_on': '2026-05-14'},
+      ),
     ).called(1);
   });
 
-  test('a negative allocation goes through the same flow and lowers progress', () async {
-    stubLoad();
-    when(
-      () => apiClient.post('/goals/g1/allocations', body: any(named: 'body')),
-    ).thenAnswer((_) async => _allocationJson(id: 'al2', amountMinor: -15000));
-    await container.read(goalsControllerProvider.future);
+  test(
+    'a negative allocation goes through the same flow and lowers progress',
+    () async {
+      stubLoad();
+      when(
+        () => apiClient.post('/goals/g1/allocations', body: any(named: 'body')),
+      ).thenAnswer(
+        (_) async => _allocationJson(id: 'al2', amountMinor: -15000),
+      );
+      await container.read(goalsControllerProvider.future);
 
-    stubLoad(goals: [_goalJson(progressMinor: 625000)]);
-    await container
-        .read(goalsControllerProvider.notifier)
-        .allocate(
-          'g1',
-          amountMinor: -15000,
-          allocatedOn: DateTime(2026, 3, 12),
-          note: 'Réparation voiture',
-        );
+      stubLoad(goals: [_goalJson(progressMinor: 625000)]);
+      await container
+          .read(goalsControllerProvider.notifier)
+          .allocate(
+            'g1',
+            amountMinor: -15000,
+            allocatedOn: DateTime(2026, 3, 12),
+            note: 'Réparation voiture',
+          );
 
-    expect(
-      container.read(goalsControllerProvider).value!.goals.single.progressMinor,
-      625000,
-    );
-    // One endpoint, one signed field — there is no withdrawal call to reach for.
-    verify(
-      () => apiClient.post('/goals/g1/allocations', body: {
-        'amount_minor': -15000,
-        'allocated_on': '2026-03-12',
-        'note': 'Réparation voiture',
-      }),
-    ).called(1);
-  });
+      expect(
+        container
+            .read(goalsControllerProvider)
+            .value!
+            .goals
+            .single
+            .progressMinor,
+        625000,
+      );
+      // One endpoint, one signed field — there is no withdrawal call to reach for.
+      verify(
+        () => apiClient.post(
+          '/goals/g1/allocations',
+          body: {
+            'amount_minor': -15000,
+            'allocated_on': '2026-03-12',
+            'note': 'Réparation voiture',
+          },
+        ),
+      ).called(1);
+    },
+  );
 
-  test('deleting an allocation recomputes progress and the reached status', () async {
-    stubLoad(goals: [_goalJson(progressMinor: 1000000, status: 'reached')]);
-    when(
-      () => apiClient.delete('/goals/g1/allocations/al1'),
-    ).thenAnswer((_) async => null);
-    await container.read(goalsControllerProvider.future);
-    expect(container.read(goalsControllerProvider).value!.goals.single.isReached, isTrue);
+  test(
+    'deleting an allocation recomputes progress and the reached status',
+    () async {
+      stubLoad(goals: [_goalJson(progressMinor: 1000000, status: 'reached')]);
+      when(
+        () => apiClient.delete('/goals/g1/allocations/al1'),
+      ).thenAnswer((_) async => null);
+      await container.read(goalsControllerProvider.future);
+      expect(
+        container.read(goalsControllerProvider).value!.goals.single.isReached,
+        isTrue,
+      );
 
-    stubLoad(goals: [_goalJson(progressMinor: 700000)]);
-    await container
-        .read(goalsControllerProvider.notifier)
-        .deleteAllocation('g1', 'al1');
+      stubLoad(goals: [_goalJson(progressMinor: 700000)]);
+      await container
+          .read(goalsControllerProvider.notifier)
+          .deleteAllocation('g1', 'al1');
 
-    final goal = container.read(goalsControllerProvider).value!.goals.single;
-    expect(goal.progressMinor, 700000);
-    expect(goal.status, GoalStatus.active);
-    verify(() => apiClient.delete('/goals/g1/allocations/al1')).called(1);
-  });
+      final goal = container.read(goalsControllerProvider).value!.goals.single;
+      expect(goal.progressMinor, 700000);
+      expect(goal.status, GoalStatus.active);
+      verify(() => apiClient.delete('/goals/g1/allocations/al1')).called(1);
+    },
+  );
 
-  test('archiving moves the goal out of the grid and into the archived list', () async {
-    stubLoad();
-    when(() => apiClient.patch('/goals/g1', body: any(named: 'body'))).thenAnswer(
-      (_) async => _goalJson(status: 'archived'),
-    );
-    await container.read(goalsControllerProvider.future);
+  test(
+    'archiving moves the goal out of the grid and into the archived list',
+    () async {
+      stubLoad();
+      when(
+        () => apiClient.patch('/goals/g1', body: any(named: 'body')),
+      ).thenAnswer((_) async => _goalJson(status: 'archived'));
+      await container.read(goalsControllerProvider.future);
 
-    stubLoad(goals: [], archived: [_goalJson(status: 'archived')]);
-    await container.read(goalsControllerProvider.notifier).archive('g1');
+      stubLoad(
+        goals: [],
+        archived: [_goalJson(status: 'archived')],
+      );
+      await container.read(goalsControllerProvider.notifier).archive('g1');
 
-    final state = container.read(goalsControllerProvider).value!;
-    expect(state.goals, isEmpty);
-    expect(state.archived, hasLength(1));
-    verify(() => apiClient.patch('/goals/g1', body: {'status': 'archived'})).called(1);
-  });
+      final state = container.read(goalsControllerProvider).value!;
+      expect(state.goals, isEmpty);
+      expect(state.archived, hasLength(1));
+      verify(
+        () => apiClient.patch('/goals/g1', body: {'status': 'archived'}),
+      ).called(1);
+    },
+  );
 
-  test('restoring brings the goal back, on whatever status the ledger implies', () async {
-    stubLoad(goals: [], archived: [_goalJson(status: 'archived')]);
-    when(() => apiClient.patch('/goals/g1', body: any(named: 'body'))).thenAnswer(
-      (_) async => _goalJson(progressMinor: 1000000, status: 'reached'),
-    );
-    await container.read(goalsControllerProvider.future);
+  test(
+    'restoring brings the goal back, on whatever status the ledger implies',
+    () async {
+      stubLoad(
+        goals: [],
+        archived: [_goalJson(status: 'archived')],
+      );
+      when(
+        () => apiClient.patch('/goals/g1', body: any(named: 'body')),
+      ).thenAnswer(
+        (_) async => _goalJson(progressMinor: 1000000, status: 'reached'),
+      );
+      await container.read(goalsControllerProvider.future);
 
-    stubLoad(
-      goals: [_goalJson(progressMinor: 1000000, status: 'reached')],
-      archived: [],
-    );
-    await container.read(goalsControllerProvider.notifier).restore('g1');
+      stubLoad(
+        goals: [_goalJson(progressMinor: 1000000, status: 'reached')],
+        archived: [],
+      );
+      await container.read(goalsControllerProvider.notifier).restore('g1');
 
-    final state = container.read(goalsControllerProvider).value!;
-    expect(state.archived, isEmpty);
-    // The client asks for `active`; the backend answers `reached` from the sum.
-    expect(state.goals.single.status, GoalStatus.reached);
-    verify(() => apiClient.patch('/goals/g1', body: {'status': 'active'})).called(1);
-  });
+      final state = container.read(goalsControllerProvider).value!;
+      expect(state.archived, isEmpty);
+      // The client asks for `active`; the backend answers `reached` from the sum.
+      expect(state.goals.single.status, GoalStatus.reached);
+      verify(
+        () => apiClient.patch('/goals/g1', body: {'status': 'active'}),
+      ).called(1);
+    },
+  );
 
   test('a refused write keeps the grid standing and reports itself', () async {
     stubLoad();
-    when(() => apiClient.patch('/goals/g1', body: any(named: 'body'))).thenThrow(
+    when(
+      () => apiClient.patch('/goals/g1', body: any(named: 'body')),
+    ).thenThrow(
       const ApiFailure(code: 'GOAL_NOT_FOUND', message: 'Goal not found.'),
     );
     await container.read(goalsControllerProvider.future);
@@ -266,41 +316,49 @@ void main() {
     expect((state.actionError! as ApiFailure).code, 'GOAL_NOT_FOUND');
   });
 
-  test('over-allocation is the allocated total against the savings balances', () async {
-    stubLoad(
-      goals: [
-        _goalJson(progressMinor: 1500000),
-        _goalJson(id: 'g2', progressMinor: 945000),
-      ],
-      accounts: [_accountJson(balanceMinor: 2210000)],
-    );
+  test(
+    'over-allocation is the allocated total against the savings balances',
+    () async {
+      stubLoad(
+        goals: [
+          _goalJson(progressMinor: 1500000),
+          _goalJson(id: 'g2', progressMinor: 945000),
+        ],
+        accounts: [_accountJson(balanceMinor: 2210000)],
+      );
 
-    final state = await container.read(goalsControllerProvider.future);
+      final state = await container.read(goalsControllerProvider.future);
 
-    expect(state.allocatedTotalMinor, 2445000);
-    expect(state.savingsTotalMinor, 2210000);
-    expect(state.isOverAllocated, isTrue);
-  });
+      expect(state.allocatedTotalMinor, 2445000);
+      expect(state.savingsTotalMinor, 2210000);
+      expect(state.isOverAllocated, isTrue);
+    },
+  );
 
-  test('archived goals and non-savings accounts stay out of the comparison', () async {
-    stubLoad(
-      goals: [_goalJson(progressMinor: 500000)],
-      archived: [_goalJson(id: 'g9', progressMinor: 900000, status: 'archived')],
-      accounts: [
-        _accountJson(balanceMinor: 600000),
-        // A current account is not savings, and an archived savings account is
-        // not money the user is holding — neither counts.
-        _accountJson(id: 'a2', type: 'checking', balanceMinor: 5000000),
-        _accountJson(id: 'a3', balanceMinor: 5000000, archived: true),
-      ],
-    );
+  test(
+    'archived goals and non-savings accounts stay out of the comparison',
+    () async {
+      stubLoad(
+        goals: [_goalJson(progressMinor: 500000)],
+        archived: [
+          _goalJson(id: 'g9', progressMinor: 900000, status: 'archived'),
+        ],
+        accounts: [
+          _accountJson(balanceMinor: 600000),
+          // A current account is not savings, and an archived savings account is
+          // not money the user is holding — neither counts.
+          _accountJson(id: 'a2', type: 'checking', balanceMinor: 5000000),
+          _accountJson(id: 'a3', balanceMinor: 5000000, archived: true),
+        ],
+      );
 
-    final state = await container.read(goalsControllerProvider.future);
+      final state = await container.read(goalsControllerProvider.future);
 
-    expect(state.allocatedTotalMinor, 500000);
-    expect(state.savingsTotalMinor, 600000);
-    expect(state.isOverAllocated, isFalse);
-  });
+      expect(state.allocatedTotalMinor, 500000);
+      expect(state.savingsTotalMinor, 600000);
+      expect(state.isOverAllocated, isFalse);
+    },
+  );
 
   test('with no savings account there is nothing to warn against', () async {
     stubLoad(goals: [_goalJson(progressMinor: 500000)], accounts: []);
@@ -312,22 +370,27 @@ void main() {
     expect(state.isOverAllocated, isFalse);
   });
 
-  test('the reveal and the dismissal survive the reload a write triggers', () async {
-    stubLoad(archived: [_goalJson(id: 'g9', status: 'archived')]);
-    when(() => apiClient.patch('/goals/g1', body: any(named: 'body'))).thenAnswer(
-      (_) async => _goalJson(status: 'archived'),
-    );
-    await container.read(goalsControllerProvider.future);
+  test(
+    'the reveal and the dismissal survive the reload a write triggers',
+    () async {
+      stubLoad(
+        archived: [_goalJson(id: 'g9', status: 'archived')],
+      );
+      when(
+        () => apiClient.patch('/goals/g1', body: any(named: 'body')),
+      ).thenAnswer((_) async => _goalJson(status: 'archived'));
+      await container.read(goalsControllerProvider.future);
 
-    final controller = container.read(goalsControllerProvider.notifier);
-    controller.toggleArchived();
-    controller.dismissOverAllocationBanner();
-    await controller.archive('g1');
+      final controller = container.read(goalsControllerProvider.notifier);
+      controller.toggleArchived();
+      controller.dismissOverAllocationBanner();
+      await controller.archive('g1');
 
-    final state = container.read(goalsControllerProvider).value!;
-    expect(state.showArchived, isTrue);
-    expect(state.bannerDismissed, isTrue);
-  });
+      final state = container.read(goalsControllerProvider).value!;
+      expect(state.showArchived, isTrue);
+      expect(state.bannerDismissed, isTrue);
+    },
+  );
 
   test('the panel reports only the top three goals to the dashboard', () async {
     stubLoad(

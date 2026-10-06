@@ -8,6 +8,7 @@ event loop.
 
 import asyncio
 import json
+import shutil
 from collections.abc import Coroutine, Sequence
 from dataclasses import dataclass, field
 from datetime import UTC, date, datetime
@@ -21,7 +22,7 @@ from fastapi.testclient import TestClient
 from sqlalchemy import Engine, create_engine, event, select
 from sqlalchemy.orm import Session, sessionmaker
 
-from app.core.db import Base, SessionFactory
+from app.core.db import SessionFactory
 from app.features.accounts.models import Account
 from app.features.auth.models import User
 from app.features.categories.models import Category
@@ -241,7 +242,8 @@ def _seed_settings(db: Session, user_id: str, *, ai_enabled: bool, model_tag: st
 def seed_categories(session_factory: SessionFactory) -> None:
     """Add the stub leaf categories to a database built with `create_all`.
 
-    The app's real catalog is seeded by a migration, which the test databases never run — so
+    The app's real catalog is seeded at startup, which a database driven directly never goes
+    through — so
     a run against one of them would be offered no categories at all and could assign nothing.
     """
     db = session_factory()
@@ -313,11 +315,11 @@ def _wal_engine(path: Path) -> Engine:
 
 
 @pytest.fixture
-def session_factory(tmp_path: Path) -> SessionFactory:
+def session_factory(tmp_path: Path, schema_template: Path) -> SessionFactory:
     """A session factory on a temp database, for tests that drive the executor directly."""
-    engine = _wal_engine(tmp_path / "runner.db")
-    Base.metadata.create_all(engine)
-    return sessionmaker(bind=engine, autoflush=False, autocommit=False)
+    db_path = tmp_path / "runner.db"
+    shutil.copyfile(schema_template, db_path)
+    return sessionmaker(bind=_wal_engine(db_path), autoflush=False, autocommit=False)
 
 
 @pytest.fixture

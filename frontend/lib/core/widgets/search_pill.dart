@@ -72,20 +72,30 @@ class _SearchPillState extends State<SearchPill> {
           filled: true,
           fillColor: AppColors.surfaceRaised,
           isDense: true,
-          contentPadding: const EdgeInsets.symmetric(vertical: AppSpacing.sm + 2),
+          contentPadding: const EdgeInsets.symmetric(
+            vertical: AppSpacing.sm + 2,
+          ),
           prefixIcon: const Icon(Icons.search_rounded, size: 16),
-          prefixIconConstraints: const BoxConstraints(minWidth: 34, minHeight: 34),
+          prefixIconConstraints: const BoxConstraints(
+            minWidth: 34,
+            minHeight: 34,
+          ),
           // Only takes up space once there's something to clear, so the pill
           // keeps its resting look when empty.
           suffixIcon: _hasText
               ? IconButton(
                   icon: const Icon(Icons.close_rounded, size: 16),
                   splashRadius: 14,
-                  tooltip: MaterialLocalizations.of(context).deleteButtonTooltip,
+                  tooltip: MaterialLocalizations.of(
+                    context,
+                  ).deleteButtonTooltip,
                   onPressed: _clear,
                 )
               : null,
-          suffixIconConstraints: const BoxConstraints(minWidth: 34, minHeight: 34),
+          suffixIconConstraints: const BoxConstraints(
+            minWidth: 34,
+            minHeight: 34,
+          ),
           border: _border(AppColors.border),
           enabledBorder: _border(AppColors.border),
           focusedBorder: _border(AppColors.focusRing),

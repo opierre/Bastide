@@ -58,7 +58,9 @@ void _useDesktopSurface(WidgetTester tester) {
 }
 
 void main() {
-  testWidgets('the header shows the ring, the figures and no account', (tester) async {
+  testWidgets('the header shows the ring, the figures and no account', (
+    tester,
+  ) async {
     _useDesktopSurface(tester);
     await tester.pumpWidget(
       _wrap(controller: FakeGoalsController(initialGoals: [testGoal()])),
@@ -70,8 +72,10 @@ void main() {
     expect(find.text('Sans échéance'), findsOneWidget);
     expect(find.textContaining('BNP'), findsNothing);
     expect(
-      find.text('Aucune transaction n\'est créée : ces lignes n\'existent que sur '
-          "le papier de l'objectif."),
+      find.text(
+        'Aucune transaction n\'est créée : ces lignes n\'existent que sur '
+        "le papier de l'objectif.",
+      ),
       findsOneWidget,
     );
   });
@@ -109,37 +113,41 @@ void main() {
     expect(controller.deleteAllocationCalls, [('g1', 'al2')]);
   });
 
-  testWidgets('the allocation modal submits a negative amount through one field', (
-    tester,
-  ) async {
-    _useDesktopSurface(tester);
-    final controller = FakeGoalsController(initialGoals: [testGoal()]);
-    await tester.pumpWidget(_wrap(controller: controller));
-    await tester.pumpAndSettle();
+  testWidgets(
+    'the allocation modal submits a negative amount through one field',
+    (tester) async {
+      _useDesktopSurface(tester);
+      final controller = FakeGoalsController(initialGoals: [testGoal()]);
+      await tester.pumpWidget(_wrap(controller: controller));
+      await tester.pumpAndSettle();
 
-    await tester.tap(find.byKey(const Key('goalAllocateButton')));
-    await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const Key('goalAllocateButton')));
+      await tester.pumpAndSettle();
 
-    // The goal's name is the only context on the modal — no account.
-    expect(find.byKey(const Key('allocationGoalName')), findsOneWidget);
-    expect(
-      find.text('Un montant négatif retire de l\'objectif.'),
-      findsOneWidget,
-    );
+      // The goal's name is the only context on the modal — no account.
+      expect(find.byKey(const Key('allocationGoalName')), findsOneWidget);
+      expect(
+        find.text('Un montant négatif retire de l\'objectif.'),
+        findsOneWidget,
+      );
 
-    await tester.enterText(find.byKey(const Key('allocationAmount')), '-150');
-    await tester.enterText(find.byKey(const Key('allocationDate')), '12/03/2026');
-    await tester.enterText(
-      find.byKey(const Key('allocationNote')),
-      'Réparation voiture',
-    );
-    await tester.tap(find.byKey(const Key('allocationSubmit')));
-    await tester.pumpAndSettle();
+      await tester.enterText(find.byKey(const Key('allocationAmount')), '-150');
+      await tester.enterText(
+        find.byKey(const Key('allocationDate')),
+        '12/03/2026',
+      );
+      await tester.enterText(
+        find.byKey(const Key('allocationNote')),
+        'Réparation voiture',
+      );
+      await tester.tap(find.byKey(const Key('allocationSubmit')));
+      await tester.pumpAndSettle();
 
-    expect(controller.allocateCalls, [
-      ('g1', -15000, DateTime(2026, 3, 12), 'Réparation voiture'),
-    ]);
-  });
+      expect(controller.allocateCalls, [
+        ('g1', -15000, DateTime(2026, 3, 12), 'Réparation voiture'),
+      ]);
+    },
+  );
 
   testWidgets('archiving is offered from the detail header', (tester) async {
     _useDesktopSurface(tester);
@@ -154,11 +162,15 @@ void main() {
     expect(controller.archiveCalls, ['g1']);
   });
 
-  testWidgets('an archived goal offers restore in the same slot', (tester) async {
+  testWidgets('an archived goal offers restore in the same slot', (
+    tester,
+  ) async {
     _useDesktopSurface(tester);
     final controller = FakeGoalsController(
       initialGoals: [testGoal(id: 'g2')],
-      archivedGoals: [testGoal(name: 'Vieux projet', status: GoalStatus.archived)],
+      archivedGoals: [
+        testGoal(name: 'Vieux projet', status: GoalStatus.archived),
+      ],
     );
     await tester.pumpWidget(_wrap(controller: controller));
     await tester.pumpAndSettle();
@@ -170,22 +182,23 @@ void main() {
     expect(controller.restoreCalls, ['g1']);
   });
 
-  testWidgets('a reached goal keeps its ring green and is not archived for it', (
-    tester,
-  ) async {
-    _useDesktopSurface(tester);
-    final controller = FakeGoalsController(
-      initialGoals: [
-        testGoal(progressMinor: 1000000, status: GoalStatus.reached),
-      ],
-    );
-    await tester.pumpWidget(_wrap(controller: controller));
-    await tester.pumpAndSettle();
+  testWidgets(
+    'a reached goal keeps its ring green and is not archived for it',
+    (tester) async {
+      _useDesktopSurface(tester);
+      final controller = FakeGoalsController(
+        initialGoals: [
+          testGoal(progressMinor: 1000000, status: GoalStatus.reached),
+        ],
+      );
+      await tester.pumpWidget(_wrap(controller: controller));
+      await tester.pumpAndSettle();
 
-    expect(find.text('100 %'), findsOneWidget);
-    // Reaching a target is the rewarding moment, not a filing event: the goal
-    // is still on the panel and « Archiver » is still the user's to press.
-    expect(find.text('Archiver'), findsOneWidget);
-    expect(controller.archiveCalls, isEmpty);
-  });
+      expect(find.text('100 %'), findsOneWidget);
+      // Reaching a target is the rewarding moment, not a filing event: the goal
+      // is still on the panel and « Archiver » is still the user's to press.
+      expect(find.text('Archiver'), findsOneWidget);
+      expect(controller.archiveCalls, isEmpty);
+    },
+  );
 }

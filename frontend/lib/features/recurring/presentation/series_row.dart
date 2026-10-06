@@ -145,7 +145,10 @@ class _SeriesRowState extends State<SeriesRow> {
           opacity: isCancelled ? 0.55 : 1,
           child: seriesRowLayout(
             monogram: Center(
-              child: MonogramAvatar(name: series.label, size: SeriesColumns.monogram),
+              child: MonogramAvatar(
+                name: series.label,
+                size: SeriesColumns.monogram,
+              ),
             ),
             name: GestureDetector(
               key: Key('seriesOpen-${series.id}'),
@@ -167,7 +170,9 @@ class _SeriesRowState extends State<SeriesRow> {
             cadence: Text(
               cadenceLabel(l10n, series.cadence),
               overflow: TextOverflow.ellipsis,
-              style: textTheme.bodySmall?.copyWith(color: AppColors.textSecondary),
+              style: textTheme.bodySmall?.copyWith(
+                color: AppColors.textSecondary,
+              ),
             ),
             amount: Align(
               alignment: Alignment.centerRight,
@@ -217,7 +222,9 @@ class _CategoryCell extends StatelessWidget {
     final l10n = AppLocalizations.of(context)!;
     final target = category;
     if (target == null) {
-      return CategoryChip.uncategorized(label: l10n.subscriptionFormCategoryNone);
+      return CategoryChip.uncategorized(
+        label: l10n.subscriptionFormCategoryNone,
+      );
     }
     return CategoryChip(
       label: localizedCategoryName(l10n, target.name),
@@ -295,7 +302,10 @@ class _StatusCell extends StatelessWidget {
     if (currentSignal == null) return const SizedBox.shrink();
 
     return switch (currentSignal) {
-      PriceIncreaseSignal(:final previousAmountMinor, :final currentAmountMinor) =>
+      PriceIncreaseSignal(
+        :final previousAmountMinor,
+        :final currentAmountMinor,
+      ) =>
         StatusPill(
           tone: StatusPillTone.warning,
           label: l10n.subscriptionSignalIncrease(
@@ -318,8 +328,11 @@ class _StatusCell extends StatelessWidget {
 
   /// The pill states both prices, so both are unsigned magnitudes for the same
   /// reason the amount column is: they are what the subscription costs.
-  String _money(int amountMinor) =>
-      formatAmount(amountMinor: amountMinor.abs(), currency: currency, locale: locale);
+  String _money(int amountMinor) => formatAmount(
+    amountMinor: amountMinor.abs(),
+    currency: currency,
+    locale: locale,
+  );
 }
 
 /// The row's kebab. It offers only the transitions the lifecycle allows out of

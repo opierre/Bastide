@@ -31,11 +31,17 @@ class EmptyStateView extends StatelessWidget {
         children: [
           GlyphPlate(icon: icon, accent: accent),
           const SizedBox(height: AppSpacing.lg),
-          Text(title, style: textTheme.headlineMedium, textAlign: TextAlign.center),
+          Text(
+            title,
+            style: textTheme.headlineMedium,
+            textAlign: TextAlign.center,
+          ),
           const SizedBox(height: AppSpacing.sm + 2),
           Text(
             message,
-            style: textTheme.bodyLarge?.copyWith(color: AppColors.textSecondary),
+            style: textTheme.bodyLarge?.copyWith(
+              color: AppColors.textSecondary,
+            ),
             textAlign: TextAlign.center,
           ),
           if (action != null) ...[
@@ -57,7 +63,11 @@ class EmptyStateView extends StatelessWidget {
 /// turns that into a RenderFlex overflow; scrolling keeps the state readable
 /// and the layout quiet.
 class CenteredStatePane extends StatelessWidget {
-  const CenteredStatePane({super.key, required this.child, this.maxWidth = 420});
+  const CenteredStatePane({
+    super.key,
+    required this.child,
+    this.maxWidth = 420,
+  });
 
   final Widget child;
   final double maxWidth;
@@ -118,7 +128,9 @@ class ErrorStateView extends StatelessWidget {
           Text(
             message,
             key: messageKey,
-            style: textTheme.bodyLarge?.copyWith(color: AppColors.textSecondary),
+            style: textTheme.bodyLarge?.copyWith(
+              color: AppColors.textSecondary,
+            ),
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: AppSpacing.lg + AppSpacing.xs),
@@ -135,7 +147,11 @@ class ErrorStateView extends StatelessWidget {
 
 /// The 64px tinted plate that heads an empty or error state.
 class GlyphPlate extends StatelessWidget {
-  const GlyphPlate({super.key, required this.icon, this.accent = AppColors.iris});
+  const GlyphPlate({
+    super.key,
+    required this.icon,
+    this.accent = AppColors.iris,
+  });
 
   final IconData icon;
   final Color accent;
@@ -169,7 +185,8 @@ class SkeletonList extends StatelessWidget {
       child: ListView.separated(
         physics: const NeverScrollableScrollPhysics(),
         itemCount: itemCount,
-        separatorBuilder: (_, _) => const SizedBox(height: AppSpacing.sm + AppSpacing.xs),
+        separatorBuilder: (_, _) =>
+            const SizedBox(height: AppSpacing.sm + AppSpacing.xs),
         itemBuilder: (_, _) => SkeletonBlock(height: itemHeight),
       ),
     );
@@ -215,9 +232,10 @@ class _SkeletonPulseState extends State<SkeletonPulse>
     if (MediaQuery.disableAnimationsOf(context)) return widget.child;
 
     return FadeTransition(
-      opacity: Tween<double>(begin: 0.45, end: 0.9).animate(
-        CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
-      ),
+      opacity: Tween<double>(
+        begin: 0.45,
+        end: 0.9,
+      ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeInOut)),
       child: widget.child,
     );
   }

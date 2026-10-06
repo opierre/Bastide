@@ -3,6 +3,7 @@
 from datetime import date
 
 from app.core.errors import ValidationError
+from app.core.months import first_of_month, month_index, month_key
 from app.features.dashboard.repository import DashboardRepository
 from app.features.dashboard.schemas import (
     CategoryBreakdown,
@@ -35,11 +36,14 @@ class DashboardService:
         Raises:
             DashboardMonthInvalidError: `month` doesn't parse as `YYYY-MM`.
         """
-        month_start, month_end = _month_bounds(month)
-        prev_start, prev_end = _previous_month_bounds(month_start)
+        current = _parse_month(month)
+        month_start, month_end = first_of_month(current), first_of_month(current + 1)
+        prev_start = first_of_month(current - 1)
 
-        income, expense = self._repository.monthly_totals(user_id, month_start, month_end)
-        prev_income, prev_expense = self._repository.monthly_totals(user_id, prev_start, prev_end)
+        # Both months in one grouped query; a month without rows is absent, which means zero.
+        buckets = self._repository.monthly_totals_by_month(user_id, prev_start, month_end)
+        income, expense = buckets.get((month_start.year, month_start.month), (0, 0))
+        prev_income, prev_expense = buckets.get((prev_start.year, prev_start.month), (0, 0))
 
         savings_rate = _safe_ratio(income - expense, income)
         prev_savings_rate = _safe_ratio(prev_income - prev_expense, prev_income)
@@ -77,29 +81,30 @@ class DashboardService:
         lately", a question the month picker doesn't change. `today` is a parameter rather than
         a `date.today()` call so the series are testable without freezing the clock.
         """
-        current = date(today.year, today.month, 1)
-        months = _months_ending_at(current, SAVINGS_MONTHS)
-        window_end = _next_month(current)
+        current = month_index(today)
+        months = range(current - SAVINGS_MONTHS + 1, current + 1)
+        window_start = first_of_month(months[0])
 
-        buckets = self._repository.monthly_totals_by_month(user_id, months[0], window_end)
+        buckets = self._repository.monthly_totals_by_month(
+            user_id, window_start, first_of_month(current + 1)
+        )
 
         # Everything saved before the window opens, so the line starts at the user's real
         # standing rather than at zero six months ago.
-        running = self._repository.net_before(user_id, months[0])
+        running = self._repository.net_before(user_id, window_start)
         savings_series: list[SavingsPoint] = []
         monthly_series: list[MonthlyTotals] = []
-        bars_from = months[SAVINGS_MONTHS - BARS_MONTHS]
+        bars_from = current - BARS_MONTHS + 1
 
-        for month_start in months:
+        for index in months:
+            month_start = first_of_month(index)
             income, expense = buckets.get((month_start.year, month_start.month), (0, 0))
             running += income - expense
-            savings_series.append(
-                SavingsPoint(month=_month_key(month_start), cumulative_minor=running)
-            )
-            if month_start >= bars_from:
+            savings_series.append(SavingsPoint(month=month_key(index), cumulative_minor=running))
+            if index >= bars_from:
                 monthly_series.append(
                     MonthlyTotals(
-                        month=_month_key(month_start),
+                        month=month_key(index),
                         income_minor=income,
                         expense_minor=expense,
                         net_minor=income - expense,
@@ -113,48 +118,19 @@ class DashboardService:
         )
 
 
-def _month_key(month_start: date) -> str:
-    """`YYYY-MM` for a first-of-month date."""
-    return f"{month_start.year:04d}-{month_start.month:02d}"
+def _parse_month(month: str) -> int:
+    """Parse `YYYY-MM` into a month index.
 
-
-def _next_month(month_start: date) -> date:
-    if month_start.month == 12:
-        return date(month_start.year + 1, 1, 1)
-    return date(month_start.year, month_start.month + 1, 1)
-
-
-def _months_ending_at(current: date, count: int) -> list[date]:
-    """The `count` first-of-month dates ending with `current`, oldest first."""
-    months: list[date] = []
-    for offset in range(count - 1, -1, -1):
-        total = current.year * 12 + (current.month - 1) - offset
-        months.append(date(total // 12, total % 12 + 1, 1))
-    return months
-
-
-def _month_bounds(month: str) -> tuple[date, date]:
-    """Parse `YYYY-MM` into `[month_start, month_end)`."""
+    Raises:
+        DashboardMonthInvalidError: `month` doesn't parse as `YYYY-MM`.
+    """
     parts = month.split("-")
     if len(parts) != 2:
         raise DashboardMonthInvalidError(f"Invalid month '{month}', expected YYYY-MM.")
     try:
-        year, mon = int(parts[0]), int(parts[1])
-        month_start = date(year, mon, 1)
+        return month_index(date(int(parts[0]), int(parts[1]), 1))
     except ValueError as exc:
         raise DashboardMonthInvalidError(f"Invalid month '{month}', expected YYYY-MM.") from exc
-
-    month_end = date(year + 1, 1, 1) if mon == 12 else date(year, mon + 1, 1)
-    return month_start, month_end
-
-
-def _previous_month_bounds(month_start: date) -> tuple[date, date]:
-    """The `[prev_start, prev_end)` window for the month immediately before `month_start`."""
-    if month_start.month == 1:
-        prev_start = date(month_start.year - 1, 12, 1)
-    else:
-        prev_start = date(month_start.year, month_start.month - 1, 1)
-    return prev_start, month_start
 
 
 def _delta_pct(current: int, previous: int) -> float:

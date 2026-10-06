@@ -52,7 +52,8 @@ class DashboardSummary {
   final List<CategoryBreakdown> byCategory;
   final String currency;
 
-  bool get isEmpty => incomeMinor == 0 && expenseMinor == 0 && byCategory.isEmpty;
+  bool get isEmpty =>
+      incomeMinor == 0 && expenseMinor == 0 && byCategory.isEmpty;
 
   /// Whether the month met the savings goal — decides which of the two goal captions the
   /// savings card shows. Lives here rather than in the widget so the threshold comparison

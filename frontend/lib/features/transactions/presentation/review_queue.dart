@@ -103,7 +103,9 @@ class _ReviewQueueState extends ConsumerState<ReviewQueue> {
           ReviewQueueHeaderCard(
             total: widget.total,
             baseline: _baseline,
-            proposedCount: widget.items.where((item) => item.hasModelProposal).length,
+            proposedCount: widget.items
+                .where((item) => item.hasModelProposal)
+                .length,
             aiIsActive: aiIsActive,
             isStarting: runState.isStarting,
           ),
@@ -116,8 +118,10 @@ class _ReviewQueueState extends ConsumerState<ReviewQueue> {
               itemCount: widget.items.length,
               separatorBuilder: (_, _) =>
                   const Divider(height: 1, color: AppColors.borderSubtle),
-              itemBuilder: (context, index) =>
-                  _ReviewRow(transaction: widget.items[index], aiIsActive: aiIsActive),
+              itemBuilder: (context, index) => _ReviewRow(
+                transaction: widget.items[index],
+                aiIsActive: aiIsActive,
+              ),
             ),
           ),
         ),
@@ -198,9 +202,9 @@ class ReviewQueueHeaderCard extends ConsumerWidget {
                           ? l10n.reviewQueueAiSubtitle(proposedCount)
                           : l10n.reviewQueueEncouragement,
                       key: const Key('reviewQueueSubtitle'),
-                      style: Theme.of(
-                        context,
-                      ).textTheme.bodySmall?.copyWith(color: AppColors.textSecondary),
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: AppColors.textSecondary,
+                      ),
                     ),
                   ],
                 ),
@@ -217,9 +221,13 @@ class ReviewQueueHeaderCard extends ConsumerWidget {
                       ? null
                       // `scope: pending` — a run never revisits a row a rule or
                       // the user has settled, so the queue is exactly its input.
-                      : () => ref.read(runControllerProvider.notifier).start(
-                          accountId: ref.read(transactionFiltersProvider).accountId,
-                        ),
+                      : () => ref
+                            .read(runControllerProvider.notifier)
+                            .start(
+                              accountId: ref
+                                  .read(transactionFiltersProvider)
+                                  .accountId,
+                            ),
                 ),
               ],
             ],
@@ -268,7 +276,11 @@ class _AiInvitation extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Icon(Icons.auto_awesome_outlined, size: 15, color: AppColors.info),
+          const Icon(
+            Icons.auto_awesome_outlined,
+            size: 15,
+            color: AppColors.info,
+          ),
           const SizedBox(width: AppSpacing.sm),
           Expanded(
             child: Text(
@@ -344,7 +356,9 @@ class _ReviewRow extends ConsumerWidget {
         children: [
           InstitutionAvatar(name: transaction.descriptionRaw, size: 36),
           const SizedBox(width: AppSpacing.sm + AppSpacing.xs),
-          Expanded(child: _Label(transaction: transaction, showDate: hasProposal)),
+          Expanded(
+            child: _Label(transaction: transaction, showDate: hasProposal),
+          ),
           const SizedBox(width: AppSpacing.sm),
           if (hasProposal)
             _ProposalBlock(transaction: transaction)
@@ -386,7 +400,10 @@ Future<void> _createAlwaysRule(
   Transaction transaction,
 ) async {
   final l10n = AppLocalizations.of(context)!;
-  final result = await showAlwaysCategorizeModal(context, transaction: transaction);
+  final result = await showAlwaysCategorizeModal(
+    context,
+    transaction: transaction,
+  );
   if (result == null || !context.mounted) return;
 
   showAppToast(
@@ -463,9 +480,9 @@ class _ProposalBlockState extends ConsumerState<_ProposalBlock> {
     } catch (error) {
       if (!mounted) return;
       setState(() => _isConfirming = false);
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(localizeTransactionError(l10n, error))));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(localizeTransactionError(l10n, error))),
+      );
     }
   }
 
@@ -487,7 +504,9 @@ class _ProposalBlockState extends ConsumerState<_ProposalBlock> {
         ConfidenceGauge(
           key: const Key('reviewRowConfidenceGauge'),
           confidence: widget.transaction.categorizationConfidence!,
-          label: l10n.reviewConfidence(widget.transaction.categorizationConfidence!),
+          label: l10n.reviewConfidence(
+            widget.transaction.categorizationConfidence!,
+          ),
         ),
         const SizedBox(width: AppSpacing.md),
         PrimaryButton(
@@ -540,7 +559,8 @@ class _NoProposalBlock extends ConsumerWidget {
           builder: (chipContext) => CategoryChip.uncategorized(
             key: const Key('reviewRowCategoryChip'),
             label: l10n.categoryUncategorized,
-            onTap: () => showCategoryPicker(chipContext, ref, transaction: transaction),
+            onTap: () =>
+                showCategoryPicker(chipContext, ref, transaction: transaction),
           ),
         ),
         if (aiIsActive) ...[
@@ -555,8 +575,11 @@ class _NoProposalBlock extends ConsumerWidget {
             builder: (linkContext) => _InlineLink(
               key: const Key('reviewRowChooseCategory'),
               label: l10n.reviewChooseCategory,
-              onTap: () =>
-                  showCategoryPicker(linkContext, ref, transaction: transaction),
+              onTap: () => showCategoryPicker(
+                linkContext,
+                ref,
+                transaction: transaction,
+              ),
             ),
           ),
         ],

@@ -110,7 +110,12 @@ class _GradientTrackShape extends SliderTrackShape with BaseSliderTrackShape {
       Paint()..color = AppColors.surfaceHover,
     );
 
-    final filled = Rect.fromLTRB(rect.left, rect.top, thumbCenter.dx, rect.bottom);
+    final filled = Rect.fromLTRB(
+      rect.left,
+      rect.top,
+      thumbCenter.dx,
+      rect.bottom,
+    );
     if (filled.width <= 0) return;
     canvas.drawRRect(
       RRect.fromRectAndRadius(filled, radius),
@@ -155,6 +160,10 @@ class _ShadowedThumbShape extends SliderComponentShape {
         ..color = const Color(0x80000000)
         ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 4),
     );
-    canvas.drawCircle(center, _thumbRadius, Paint()..color = AppColors.textPrimary);
+    canvas.drawCircle(
+      center,
+      _thumbRadius,
+      Paint()..color = AppColors.textPrimary,
+    );
   }
 }

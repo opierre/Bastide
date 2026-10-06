@@ -41,14 +41,17 @@ class RuleEditorModal extends ConsumerStatefulWidget {
 
 class _RuleEditorModalState extends ConsumerState<RuleEditorModal> {
   final _formKey = GlobalKey<FormState>();
-  late final _patternController = TextEditingController(text: widget.initial?.pattern);
+  late final _patternController = TextEditingController(
+    text: widget.initial?.pattern,
+  );
   late final _priorityController = TextEditingController(
     text: '${widget.initial?.priority ?? _nextPriority}',
   );
 
   late RuleMatchField _matchField =
       widget.initial?.matchField ?? RuleMatchField.descriptionClean;
-  late RuleMatchType _matchType = widget.initial?.matchType ?? RuleMatchType.contains;
+  late RuleMatchType _matchType =
+      widget.initial?.matchType ?? RuleMatchType.contains;
   late String? _categoryId = widget.initial?.categoryId;
   late bool _enabled = widget.initial?.enabled ?? true;
 
@@ -57,7 +60,8 @@ class _RuleEditorModalState extends ConsumerState<RuleEditorModal> {
 
   bool get _isEditing => widget.initial != null;
 
-  int get _nextPriority => (ref.read(rulesControllerProvider).value?.length ?? 0) + 1;
+  int get _nextPriority =>
+      (ref.read(rulesControllerProvider).value?.length ?? 0) + 1;
 
   @override
   void initState() {
@@ -92,7 +96,10 @@ class _RuleEditorModalState extends ConsumerState<RuleEditorModal> {
     if (!(_formKey.currentState?.validate() ?? false)) return;
     final categoryId = _categoryId;
     if (categoryId == null) {
-      setState(() => _errorText = AppLocalizations.of(context)!.ruleFormCategoryRequired);
+      setState(
+        () =>
+            _errorText = AppLocalizations.of(context)!.ruleFormCategoryRequired,
+      );
       return;
     }
 
@@ -139,7 +146,9 @@ class _RuleEditorModalState extends ConsumerState<RuleEditorModal> {
       _errorText = null;
     });
     try {
-      await ref.read(rulesControllerProvider.notifier).delete(widget.initial!.id);
+      await ref
+          .read(rulesControllerProvider.notifier)
+          .delete(widget.initial!.id);
       if (!mounted) return;
       Navigator.of(context).pop();
     } catch (error) {
@@ -154,7 +163,8 @@ class _RuleEditorModalState extends ConsumerState<RuleEditorModal> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final categories = ref.watch(categoriesControllerProvider).value ?? const <AppCategory>[];
+    final categories =
+        ref.watch(categoriesControllerProvider).value ?? const <AppCategory>[];
     final previewState = ref.watch(rulePreviewControllerProvider);
     final patternRejected = isRulePatternInvalid(previewState.error);
 
@@ -185,7 +195,10 @@ class _RuleEditorModalState extends ConsumerState<RuleEditorModal> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             if (_errorText != null) ...[
-              InlineBanner(key: const Key('ruleFormError'), message: _errorText!),
+              InlineBanner(
+                key: const Key('ruleFormError'),
+                message: _errorText!,
+              ),
               const SizedBox(height: AppSpacing.md),
             ],
             Row(
@@ -204,7 +217,10 @@ class _RuleEditorModalState extends ConsumerState<RuleEditorModal> {
                       },
                       items: [
                         for (final field in RuleMatchField.values)
-                          AppSelectItem(value: field, label: ruleFieldLabel(l10n, field)),
+                          AppSelectItem(
+                            value: field,
+                            label: ruleFieldLabel(l10n, field),
+                          ),
                       ],
                     ),
                   ),
@@ -262,7 +278,9 @@ class _RuleEditorModalState extends ConsumerState<RuleEditorModal> {
                 key: const Key('ruleFormPattern'),
                 controller: _patternController,
                 autofocus: true,
-                style: AppTextStyles.mono.copyWith(color: AppColors.textPrimary),
+                style: AppTextStyles.mono.copyWith(
+                  color: AppColors.textPrimary,
+                ),
                 decoration: InputDecoration(
                   hintText: rulePatternHint(l10n, _matchType),
                 ),

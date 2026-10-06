@@ -23,7 +23,10 @@ class RulePacksRepository {
 
   Future<RulePackPreview> preview({RulePack? pack, String? builtinId}) async {
     final json =
-        await _apiClient.post('/rules/packs/preview', body: _source(pack, builtinId))
+        await _apiClient.post(
+              '/rules/packs/preview',
+              body: _source(pack, builtinId),
+            )
             as Map<String, dynamic>;
     return RulePackPreview.fromJson(json);
   }
@@ -45,7 +48,10 @@ class RulePacksRepository {
   /// The caller's rules as a pack, for review. A body rather than a download:
   /// a pattern can hold personal detail — « VIR SALAIRE DUPONT » — so the user
   /// sees the contents before they become a file.
-  Future<RulePackExport> export({bool enabledOnly = false, String? name}) async {
+  Future<RulePackExport> export({
+    bool enabledOnly = false,
+    String? name,
+  }) async {
     final json =
         await _apiClient.get(
               '/rules/packs/export',

@@ -20,7 +20,10 @@ class CategorizationRepository {
   /// Starts a run and returns it immediately (202). Asking while one is in
   /// flight returns that run instead of starting a second — one run at a time
   /// per user (PROJECT.md §7), so the caller polls whatever comes back.
-  Future<CategorizationRun> startRun({String? accountId, required RunScope scope}) async {
+  Future<CategorizationRun> startRun({
+    String? accountId,
+    required RunScope scope,
+  }) async {
     final json = await _apiClient.post(
       '/categorization/runs',
       body: {'account_id': accountId, 'scope': scope.wire},
@@ -50,11 +53,18 @@ class CategorizationRepository {
     final enabled = settings['ai_enabled'] as bool;
     if (!enabled) return AiAvailability.unavailable;
 
-    final health = await _apiClient.get('/settings/inference/health') as Map<String, dynamic>;
-    return AiAvailability(enabled: true, reachable: health['reachable'] as bool);
+    final health =
+        await _apiClient.get('/settings/inference/health')
+            as Map<String, dynamic>;
+    return AiAvailability(
+      enabled: true,
+      reachable: health['reachable'] as bool,
+    );
   }
 }
 
-final categorizationRepositoryProvider = Provider<CategorizationRepository>((ref) {
+final categorizationRepositoryProvider = Provider<CategorizationRepository>((
+  ref,
+) {
   return CategorizationRepository(ref.watch(apiClientProvider));
 });

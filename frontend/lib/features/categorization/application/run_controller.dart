@@ -17,7 +17,12 @@ const runPollInterval = Duration(seconds: 2);
 /// What the review queue knows about the current run.
 @immutable
 class RunState {
-  const RunState({this.run, this.isStarting = false, this.error, this.isBannerDismissed = false});
+  const RunState({
+    this.run,
+    this.isStarting = false,
+    this.error,
+    this.isBannerDismissed = false,
+  });
 
   /// The run being polled, or the last one that finished. `null` before the
   /// user has asked for one this session.
@@ -68,14 +73,20 @@ class RunController extends Notifier<RunState> {
   /// Asks for a run over [scope]. Requesting one while another is in flight
   /// returns the in-flight run (PROJECT.md §7), so this is also how the panel
   /// re-attaches to a run it already started.
-  Future<void> start({String? accountId, RunScope scope = RunScope.pending}) async {
+  Future<void> start({
+    String? accountId,
+    RunScope scope = RunScope.pending,
+  }) async {
     if (state.isStarting || state.isRunning) return;
-    state = state.copyWith(isStarting: true, clearError: true, isBannerDismissed: false);
+    state = state.copyWith(
+      isStarting: true,
+      clearError: true,
+      isBannerDismissed: false,
+    );
     try {
-      final run = await ref.read(categorizationRepositoryProvider).startRun(
-        accountId: accountId,
-        scope: scope,
-      );
+      final run = await ref
+          .read(categorizationRepositoryProvider)
+          .startRun(accountId: accountId, scope: scope);
       state = RunState(run: run);
       _onRunChanged(previous: null, next: run);
     } catch (error) {
@@ -89,7 +100,9 @@ class RunController extends Notifier<RunState> {
     final current = state.run;
     if (current == null || current.status.isTerminal) return;
     try {
-      final cancelled = await ref.read(categorizationRepositoryProvider).cancelRun(current.id);
+      final cancelled = await ref
+          .read(categorizationRepositoryProvider)
+          .cancelRun(current.id);
       _apply(cancelled);
     } catch (error) {
       state = state.copyWith(error: error);
@@ -106,7 +119,10 @@ class RunController extends Notifier<RunState> {
 
   /// Keeps the timer in step with the status, and the transaction list in step
   /// with the rows the run has committed.
-  void _onRunChanged({required CategorizationRun? previous, required CategorizationRun next}) {
+  void _onRunChanged({
+    required CategorizationRun? previous,
+    required CategorizationRun next,
+  }) {
     if (next.status.isTerminal) {
       _stopPolling();
     } else {
@@ -117,10 +133,16 @@ class RunController extends Notifier<RunState> {
     // have actually changed server-side — that is what lets rows leave the
     // queue while the user watches. A terminal status refreshes once more, for
     // the last batch.
-    final advanced = previous == null || previous.processedCount != next.processedCount;
-    final finished = previous != null && previous.status.isInFlight && next.status.isTerminal;
+    final advanced =
+        previous == null || previous.processedCount != next.processedCount;
+    final finished =
+        previous != null &&
+        previous.status.isInFlight &&
+        next.status.isTerminal;
     if (advanced || finished) {
-      unawaited(ref.read(transactionsControllerProvider.notifier).refreshQuietly());
+      unawaited(
+        ref.read(transactionsControllerProvider.notifier).refreshQuietly(),
+      );
     }
   }
 
@@ -141,7 +163,9 @@ class RunController extends Notifier<RunState> {
       return;
     }
     try {
-      _apply(await ref.read(categorizationRepositoryProvider).getRun(current.id));
+      _apply(
+        await ref.read(categorizationRepositoryProvider).getRun(current.id),
+      );
     } catch (error) {
       // A poll that can't reach the sidecar is not the run failing — the run is
       // server-side and may well finish. Stop asking, and say so.

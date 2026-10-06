@@ -21,7 +21,9 @@ import 'rule_error_localizer.dart';
 Future<void> startRulePackExport(BuildContext context, WidgetRef ref) async {
   final l10n = AppLocalizations.of(context)!;
   try {
-    final export = await ref.read(rulePacksControllerProvider.notifier).prepareExport();
+    final export = await ref
+        .read(rulePacksControllerProvider.notifier)
+        .prepareExport();
     if (!context.mounted) return;
     await showDialog<void>(
       context: context,
@@ -46,7 +48,8 @@ class RulePackExportSheet extends ConsumerStatefulWidget {
   final RulePackExport export;
 
   @override
-  ConsumerState<RulePackExportSheet> createState() => _RulePackExportSheetState();
+  ConsumerState<RulePackExportSheet> createState() =>
+      _RulePackExportSheetState();
 }
 
 class _RulePackExportSheetState extends ConsumerState<RulePackExportSheet> {
@@ -104,7 +107,10 @@ class _RulePackExportSheetState extends ConsumerState<RulePackExportSheet> {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           if (_errorText != null) ...[
-            InlineBanner(key: const Key('rulePackExportError'), message: _errorText!),
+            InlineBanner(
+              key: const Key('rulePackExportError'),
+              message: _errorText!,
+            ),
             const SizedBox(height: AppSpacing.md),
           ],
           InlineBanner(
@@ -113,7 +119,10 @@ class _RulePackExportSheetState extends ConsumerState<RulePackExportSheet> {
             message: l10n.rulePackExportPrivacyNotice,
           ),
           const SizedBox(height: AppSpacing.md),
-          Text(l10n.rulePackExportContents(pack.rules.length), style: AppTextStyles.sectionLabel),
+          Text(
+            l10n.rulePackExportContents(pack.rules.length),
+            style: AppTextStyles.sectionLabel,
+          ),
           const SizedBox(height: AppSpacing.sm - 2),
           // The file itself, not a summary of it: the point of the step is that
           // the user reads what leaves their machine.
@@ -127,7 +136,10 @@ class _RulePackExportSheetState extends ConsumerState<RulePackExportSheet> {
               border: Border.all(color: AppColors.border),
             ),
             child: SingleChildScrollView(
-              child: SelectableText(pack.toPrettyJson(), style: AppTextStyles.mono),
+              child: SelectableText(
+                pack.toPrettyJson(),
+                style: AppTextStyles.mono,
+              ),
             ),
           ),
           if (omitted.isNotEmpty) ...[
@@ -141,15 +153,13 @@ class _RulePackExportSheetState extends ConsumerState<RulePackExportSheet> {
               Padding(
                 key: Key('rulePackOmitted-${rule.ruleId}'),
                 padding: const EdgeInsets.only(top: 2),
-                child: Text(
-                  switch (rule.reason) {
-                    RuleOmissionReason.regex => l10n.rulePackOmittedRegex(rule.pattern),
-                    RuleOmissionReason.userCategory => l10n.rulePackOmittedUserCategory(
-                      rule.pattern,
-                    ),
-                  },
-                  style: AppTextStyles.helper,
-                ),
+                child: Text(switch (rule.reason) {
+                  RuleOmissionReason.regex => l10n.rulePackOmittedRegex(
+                    rule.pattern,
+                  ),
+                  RuleOmissionReason.userCategory =>
+                    l10n.rulePackOmittedUserCategory(rule.pattern),
+                }, style: AppTextStyles.helper),
               ),
           ],
           const SizedBox(height: AppSpacing.sm),

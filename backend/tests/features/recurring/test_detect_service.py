@@ -15,6 +15,7 @@ from sqlalchemy.orm import Session, sessionmaker
 from app.features.imports.models import ImportBatch
 from app.features.recurring.models import RecurringOccurrence, RecurringSeries
 from app.features.transactions.models import Transaction
+from tests.api import register as _register
 
 START = date(2026, 1, 15)
 MONTHLY_OFFSETS = (0, 30, 60)
@@ -25,20 +26,6 @@ ACCOUNT_PAYLOAD = {
     "institution": "BNP Paribas",
     "opening_balance_minor": 100_000,
 }
-
-
-def _register(client: TestClient, email: str = "amelie@example.com") -> dict[str, str]:
-    response = client.post(
-        "/api/v1/auth/register",
-        json={
-            "email": email,
-            "password": "correct-horse-battery-staple",
-            "display_name": "Amelie",
-            "locale": "fr",
-            "currency": "eur",
-        },
-    )
-    return {"Authorization": f"Bearer {response.json()['token']}"}
 
 
 def _create_account(client: TestClient, headers: dict[str, str], name: str = "Compte") -> str:

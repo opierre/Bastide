@@ -89,83 +89,84 @@ Map<String, dynamic> _settingsJson({required bool aiEnabled}) => {
 void main() {
   setUpAll(() => registerFallbackValue(<String, dynamic>{}));
 
-  testWidgets('turning AI off returns the review queue to its Phase 1 rendering', (
-    tester,
-  ) async {
-    tester.view.physicalSize = const Size(1440, 1400);
-    tester.view.devicePixelRatio = 1.0;
-    addTearDown(tester.view.reset);
+  testWidgets(
+    'turning AI off returns the review queue to its Phase 1 rendering',
+    (tester) async {
+      tester.view.physicalSize = const Size(1440, 1400);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.reset);
 
-    // The sidecar's copy, so a later GET reports what the PATCH stored — which
-    // is exactly what the availability lookup behind the queue re-reads.
-    var aiEnabled = true;
+      // The sidecar's copy, so a later GET reports what the PATCH stored — which
+      // is exactly what the availability lookup behind the queue re-reads.
+      var aiEnabled = true;
 
-    final apiClient = MockApiClient();
-    when(
-      () => apiClient.get('/settings'),
-    ).thenAnswer((_) async => _settingsJson(aiEnabled: aiEnabled));
-    when(() => apiClient.get('/settings/inference/health')).thenAnswer(
-      (_) async => {
-        'reachable': true,
-        'models': ['gemma3n:e4b'],
-        'detail': null,
-      },
-    );
-    when(() => apiClient.patch('/settings', body: any(named: 'body'))).thenAnswer((
-      invocation,
-    ) async {
-      final body = invocation.namedArguments[#body] as Map<String, Object?>;
-      aiEnabled = body['ai_enabled'] as bool? ?? aiEnabled;
-      return _settingsJson(aiEnabled: aiEnabled);
-    });
+      final apiClient = MockApiClient();
+      when(
+        () => apiClient.get('/settings'),
+      ).thenAnswer((_) async => _settingsJson(aiEnabled: aiEnabled));
+      when(() => apiClient.get('/settings/inference/health')).thenAnswer(
+        (_) async => {
+          'reachable': true,
+          'models': ['gemma3n:e4b'],
+          'detail': null,
+        },
+      );
+      when(
+        () => apiClient.patch('/settings', body: any(named: 'body')),
+      ).thenAnswer((invocation) async {
+        final body = invocation.namedArguments[#body] as Map<String, Object?>;
+        aiEnabled = body['ai_enabled'] as bool? ?? aiEnabled;
+        return _settingsJson(aiEnabled: aiEnabled);
+      });
 
-    await tester.pumpWidget(
-      ProviderScope(
-        overrides: [
-          apiClientProvider.overrideWithValue(apiClient),
-          transactionsControllerProvider.overrideWith(
-            () => FakeTransactionsController(
-              initialPage: TransactionsPage(
-                items: [_row],
-                page: 1,
-                pageSize: 50,
-                total: 1,
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            apiClientProvider.overrideWithValue(apiClient),
+            transactionsControllerProvider.overrideWith(
+              () => FakeTransactionsController(
+                initialPage: TransactionsPage(
+                  items: [_row],
+                  page: 1,
+                  pageSize: 50,
+                  total: 1,
+                ),
+              ),
+            ),
+            transactionCategoriesProvider.overrideWith((ref) async => _catalog),
+            accountsControllerProvider.overrideWith(
+              () => FakeAccountsController(initialAccounts: [_account]),
+            ),
+          ],
+          child: MaterialApp(
+            locale: const Locale('fr'),
+            theme: appDarkTheme,
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+            home: const Scaffold(
+              body: Column(
+                children: [
+                  SizedBox(width: 640, child: AiSettingsCard()),
+                  Expanded(child: _Queue()),
+                ],
               ),
             ),
           ),
-          transactionCategoriesProvider.overrideWith((ref) async => _catalog),
-          accountsControllerProvider.overrideWith(
-            () => FakeAccountsController(initialAccounts: [_account]),
-          ),
-        ],
-        child: MaterialApp(
-          locale: const Locale('fr'),
-          theme: appDarkTheme,
-          localizationsDelegates: AppLocalizations.localizationsDelegates,
-          supportedLocales: AppLocalizations.supportedLocales,
-          home: const Scaffold(
-            body: Column(
-              children: [
-                SizedBox(width: 640, child: AiSettingsCard()),
-                Expanded(child: _Queue()),
-              ],
-            ),
-          ),
         ),
-      ),
-    );
-    await tester.pumpAndSettle();
+      );
+      await tester.pumpAndSettle();
 
-    // AI on and answering: the queue offers its stage-2 rendering, so there is
-    // nothing to invite the user to.
-    expect(find.byKey(const Key('reviewAiInvitation')), findsNothing);
+      // AI on and answering: the queue offers its stage-2 rendering, so there is
+      // nothing to invite the user to.
+      expect(find.byKey(const Key('reviewAiInvitation')), findsNothing);
 
-    await tester.tap(find.byKey(const Key('settingsAiToggle')));
-    await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const Key('settingsAiToggle')));
+      await tester.pumpAndSettle();
 
-    expect(find.byKey(const Key('reviewAiInvitation')), findsOneWidget);
-    expect(find.byKey(const Key('reviewAiInvitationLink')), findsOneWidget);
-  });
+      expect(find.byKey(const Key('reviewAiInvitation')), findsOneWidget);
+      expect(find.byKey(const Key('reviewAiInvitationLink')), findsOneWidget);
+    },
+  );
 }
 
 /// The queue, built with the one proposed row above. A separate widget only so

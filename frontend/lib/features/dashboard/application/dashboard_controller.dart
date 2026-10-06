@@ -43,7 +43,12 @@ class DashboardController extends AsyncNotifier<DashboardState> {
       repository.trends(),
       repository.recentTransactions(),
     ).wait;
-    return DashboardState(month: month, summary: summary, trends: trends, recent: recent);
+    return DashboardState(
+      month: month,
+      summary: summary,
+      trends: trends,
+      recent: recent,
+    );
   }
 
   Future<void> changeMonth(DateTime month) => _load(month);
@@ -90,4 +95,6 @@ DateTime _currentMonth() {
 }
 
 final dashboardControllerProvider =
-    AsyncNotifierProvider<DashboardController, DashboardState>(DashboardController.new);
+    AsyncNotifierProvider<DashboardController, DashboardState>(
+      DashboardController.new,
+    );

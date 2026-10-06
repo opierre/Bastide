@@ -38,7 +38,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     if (!_formKey.currentState!.validate()) return;
     await ref
         .read(authControllerProvider.notifier)
-        .login(email: _emailController.text.trim(), password: _passwordController.text);
+        .login(
+          email: _emailController.text.trim(),
+          password: _passwordController.text,
+        );
   }
 
   @override
@@ -75,8 +78,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 keyboardType: TextInputType.emailAddress,
                 autofillHints: const [AutofillHints.email],
                 decoration: hasCredentialError ? errorFieldDecoration() : null,
-                validator: (value) =>
-                    (value == null || value.trim().isEmpty) ? l10n.authEmailRequired : null,
+                validator: (value) => (value == null || value.trim().isEmpty)
+                    ? l10n.authEmailRequired
+                    : null,
               ),
             ),
             const SizedBox(height: AppSpacing.md + AppSpacing.xs),
@@ -87,8 +91,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 controller: _passwordController,
                 hasError: hasCredentialError,
                 onSubmitted: (_) => isSubmitting ? null : _submit(),
-                validator: (value) =>
-                    (value == null || value.isEmpty) ? l10n.authPasswordRequired : null,
+                validator: (value) => (value == null || value.isEmpty)
+                    ? l10n.authPasswordRequired
+                    : null,
               ),
             ),
             const SizedBox(height: AppSpacing.lg),

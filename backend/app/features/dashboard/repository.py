@@ -24,41 +24,15 @@ class DashboardRepository:
     def __init__(self, db: Session) -> None:
         self._db = db
 
-    def monthly_totals(self, user_id: str, month_start: date, month_end: date) -> tuple[int, int]:
-        """Sum income (positive amounts) and expense (positive magnitude of negative amounts).
-
-        Both are minor-unit integers over `[month_start, month_end)`, excluding `kind=transfer`
-        rows.
-        """
-        income_expr = func.sum(
-            case((Transaction.amount_minor > 0, Transaction.amount_minor), else_=0)
-        )
-        expense_expr = func.sum(
-            case((Transaction.amount_minor < 0, -Transaction.amount_minor), else_=0)
-        )
-        income, expense = self._db.execute(
-            select(income_expr, expense_expr)
-            .select_from(Transaction)
-            .join(Account, Account.id == Transaction.account_id)
-            .outerjoin(Category, Category.id == Transaction.category_id)
-            .where(
-                Account.user_id == user_id,
-                Transaction.booked_date >= month_start,
-                Transaction.booked_date < month_end,
-                or_(Category.kind.is_(None), Category.kind != "transfer"),
-            )
-        ).one()
-        return income or 0, expense or 0
-
     def monthly_totals_by_month(
         self, user_id: str, start: date, end: date
     ) -> dict[tuple[int, int], tuple[int, int]]:
         """`(year, month)` → `(income, expense)` for every month in `[start, end)` that has rows.
 
-        The same aggregation as `monthly_totals`, grouped rather than bounded to one month, so
-        the trend series costs one query instead of one per month. Months with no transactions
-        are simply absent from the mapping; the caller decides what a gap means (for the trend
-        series, zero).
+        Income sums the positive amounts and expense the magnitude of the negative ones, both in
+        minor units, excluding `kind=transfer` rows. Grouped per month so a summary and its
+        comparison month, or a whole trend series, cost one query. Months with no transactions
+        are simply absent from the mapping; the caller decides what a gap means (zero, so far).
 
         Grouped with `extract()` rather than `strftime()` so the query keeps working on
         PostgreSQL in Phase 4 — SQLAlchemy compiles it to each backend's own dialect.

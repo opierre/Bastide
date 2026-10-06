@@ -24,6 +24,7 @@ from app.features.mortgages.engine import RepaymentType, build_schedule
 from app.features.networth.repository import NetWorthRepository
 from app.features.networth.router import get_today
 from app.features.networth.service import NetWorthService, shares_bps
+from tests.api import register
 
 TODAY = date(2026, 5, 15)
 
@@ -54,22 +55,6 @@ LOAN_SCHEDULE = build_schedule(
 @pytest.fixture(autouse=True)
 def pinned_today(client: TestClient) -> None:
     cast(FastAPI, client.app).dependency_overrides[get_today] = lambda: TODAY
-
-
-def register(client: TestClient, email: str = "amelie@example.com") -> dict[str, str]:
-    """Register a user and return the auth header their requests carry."""
-    response = client.post(
-        "/api/v1/auth/register",
-        json={
-            "email": email,
-            "password": "correct-horse-battery-staple",
-            "display_name": "Amelie",
-            "locale": "fr",
-            "currency": "eur",
-        },
-    )
-    assert response.status_code == 201, response.json()
-    return {"Authorization": f"Bearer {response.json()['token']}"}
 
 
 def post(client: TestClient, path: str, headers: dict[str, str], payload: dict) -> dict:
@@ -450,8 +435,8 @@ def test_rows_after_the_nearest_snapshot_are_added_to_it() -> None:
     ]
     months = {(2026, 2): 999_999, (2026, 3): 1_500, (2026, 4): -700}
     repository.monthly_row_sums.return_value = {
-        **{("a1", year * 12 + month - 1): total for (year, month), total in months.items()},
-        ("a2", 2026 * 12 + 1): 250,
+        "a1": {year * 12 + month - 1: total for (year, month), total in months.items()},
+        "a2": {2026 * 12 + 1: 250},
     }
     user = cast(User, SimpleNamespace(id="u1", currency="EUR"))
 

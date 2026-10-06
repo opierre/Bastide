@@ -17,7 +17,15 @@ class FakeAuthController extends AuthController {
 
   final loginCalls = <({String email, String password})>[];
   final registerCalls =
-      <({String email, String password, String displayName, String locale, String currency})>[];
+      <
+        ({
+          String email,
+          String password,
+          String displayName,
+          String locale,
+          String currency,
+        })
+      >[];
   var logoutCallCount = 0;
 
   @override

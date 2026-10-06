@@ -66,7 +66,8 @@ class DashboardTrends {
   }
 
   /// The month the latest point covers — « +635,65 € en mai ».
-  DateTime? get latestMonth => savingsSeries.isEmpty ? null : savingsSeries.last.month;
+  DateTime? get latestMonth =>
+      savingsSeries.isEmpty ? null : savingsSeries.last.month;
 }
 
 /// One row of « Activité récente ».

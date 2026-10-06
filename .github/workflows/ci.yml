@@ -82,11 +82,7 @@ jobs:
           uv run ruff check --output-format=github .
       - name: ruff format
         run: uv run ruff format --check .
-      # NOT blocking yet: `ty check` currently reports 13 pre-existing
-      # invalid-argument-type errors in the CSV import parser and its tests.
-      # Flip to blocking once those are fixed - see CI-PLAN.md.
-      - name: ty check (non-blocking)
-        continue-on-error: true
+      - name: ty check
         run: |
           set -uo pipefail
           uv run ty check --output-format=junit > "${RUNNER_TEMP}/ty-junit.xml"
@@ -178,11 +174,7 @@ jobs:
             git --no-pager diff --stat -- lib/l10n
             exit 1
           fi
-      # NOT blocking yet: the frontend has never been run through the Dart 3.7+
-      # formatter, so 132 of 177 files would fail. Flip to blocking after a
-      # standalone reformat commit - see CI-PLAN.md.
-      - name: dart format (non-blocking)
-        continue-on-error: true
+      - name: dart format
         run: dart format --output=none --set-exit-if-changed lib test
 
   frontend-test:

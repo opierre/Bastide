@@ -142,17 +142,22 @@ void main() {
     expect(state.rows[2].signal, isNull);
   });
 
-  test('a cancelled row reports its last charge, not a summary signal', () async {
-    stubLoad(series: [_seriesJson(status: 'cancelled')]);
+  test(
+    'a cancelled row reports its last charge, not a summary signal',
+    () async {
+      stubLoad(series: [_seriesJson(status: 'cancelled')]);
 
-    final state = await container.read(subscriptionsControllerProvider.future);
+      final state = await container.read(
+        subscriptionsControllerProvider.future,
+      );
 
-    expect(state.rows.single.signal, isA<CancelledSignal>());
-    expect(
-      (state.rows.single.signal! as CancelledSignal).lastChargeOn,
-      DateTime(2026, 4, 15),
-    );
-  });
+      expect(state.rows.single.signal, isA<CancelledSignal>());
+      expect(
+        (state.rows.single.signal! as CancelledSignal).lastChargeOn,
+        DateTime(2026, 4, 15),
+      );
+    },
+  );
 
   test('setStatusFilter re-lists under that status', () async {
     stubLoad();
@@ -186,29 +191,39 @@ void main() {
     final state = container.read(subscriptionsControllerProvider).value!;
     expect(state.series.single.status, SeriesStatus.confirmed);
     expect(state.actionError, isNull);
-    verify(() => apiClient.patch('/recurring/s1', body: {'status': 'confirmed'})).called(1);
+    verify(
+      () => apiClient.patch('/recurring/s1', body: {'status': 'confirmed'}),
+    ).called(1);
   });
 
-  test('a 409 surfaces as an error on the state without losing the list', () async {
-    stubLoad();
-    when(() => apiClient.patch('/recurring/s1', body: any(named: 'body'))).thenThrow(
-      const ApiFailure(
-        code: 'RECURRING_INVALID_TRANSITION',
-        message: 'That status change is not allowed for this series.',
-      ),
-    );
-    await container.read(subscriptionsControllerProvider.future);
+  test(
+    'a 409 surfaces as an error on the state without losing the list',
+    () async {
+      stubLoad();
+      when(
+        () => apiClient.patch('/recurring/s1', body: any(named: 'body')),
+      ).thenThrow(
+        const ApiFailure(
+          code: 'RECURRING_INVALID_TRANSITION',
+          message: 'That status change is not allowed for this series.',
+        ),
+      );
+      await container.read(subscriptionsControllerProvider.future);
 
-    await container
-        .read(subscriptionsControllerProvider.notifier)
-        .changeStatus('s1', SeriesStatus.confirmed);
+      await container
+          .read(subscriptionsControllerProvider.notifier)
+          .changeStatus('s1', SeriesStatus.confirmed);
 
-    final state = container.read(subscriptionsControllerProvider);
-    expect(state.hasError, isFalse);
-    expect(state.value!.series, hasLength(1));
-    expect(state.value!.series.single.status, SeriesStatus.detected);
-    expect((state.value!.actionError! as ApiFailure).code, 'RECURRING_INVALID_TRANSITION');
-  });
+      final state = container.read(subscriptionsControllerProvider);
+      expect(state.hasError, isFalse);
+      expect(state.value!.series, hasLength(1));
+      expect(state.value!.series.single.status, SeriesStatus.detected);
+      expect(
+        (state.value!.actionError! as ApiFailure).code,
+        'RECURRING_INVALID_TRANSITION',
+      );
+    },
+  );
 
   test('a row that leaves the active filter drops out of the list', () async {
     stubLoad();
@@ -224,14 +239,17 @@ void main() {
         .read(subscriptionsControllerProvider.notifier)
         .changeStatus('s1', SeriesStatus.dismissed);
 
-    expect(container.read(subscriptionsControllerProvider).value!.series, isEmpty);
+    expect(
+      container.read(subscriptionsControllerProvider).value!.series,
+      isEmpty,
+    );
   });
 
   test('detect runs a pass and reloads the panel behind it', () async {
     stubLoad();
-    when(() => apiClient.post('/recurring/detect', body: any(named: 'body'))).thenAnswer(
-      (_) async => {'created_count': 2, 'updated_count': 1},
-    );
+    when(
+      () => apiClient.post('/recurring/detect', body: any(named: 'body')),
+    ).thenAnswer((_) async => {'created_count': 2, 'updated_count': 1});
     await container.read(subscriptionsControllerProvider.future);
 
     final result = await container
@@ -240,14 +258,19 @@ void main() {
 
     expect(result.createdCount, 2);
     expect(result.updatedCount, 1);
-    verify(() => apiClient.get('/recurring', query: any(named: 'query'))).called(2);
+    verify(
+      () => apiClient.get('/recurring', query: any(named: 'query')),
+    ).called(2);
     verify(() => apiClient.get('/recurring/summary')).called(2);
   });
 
   test('creating a manual series reloads the list', () async {
     stubLoad();
-    when(() => apiClient.post('/recurring', body: any(named: 'body'))).thenAnswer(
-      (_) async => _seriesJson(id: 's9', label: 'Basic-Fit', expectedAmountMinor: -2999),
+    when(
+      () => apiClient.post('/recurring', body: any(named: 'body')),
+    ).thenAnswer(
+      (_) async =>
+          _seriesJson(id: 's9', label: 'Basic-Fit', expectedAmountMinor: -2999),
     );
     await container.read(subscriptionsControllerProvider.future);
 
@@ -262,12 +285,15 @@ void main() {
 
     expect(created.id, 's9');
     verify(
-      () => apiClient.post('/recurring', body: {
-        'label': 'Basic-Fit',
-        'account_id': 'a1',
-        'expected_amount_minor': -2999,
-        'cadence': 'irregular',
-      }),
+      () => apiClient.post(
+        '/recurring',
+        body: {
+          'label': 'Basic-Fit',
+          'account_id': 'a1',
+          'expected_amount_minor': -2999,
+          'cadence': 'irregular',
+        },
+      ),
     ).called(1);
   });
 
@@ -278,14 +304,20 @@ void main() {
 
     test('weekly multiplies by 52', () {
       expect(
-        testSeries(cadence: Cadence.weekly, priceChangeMinor: step).annualPriceImpactMinor,
+        testSeries(
+          cadence: Cadence.weekly,
+          priceChangeMinor: step,
+        ).annualPriceImpactMinor,
         -10400,
       );
     });
 
     test('monthly multiplies by 12', () {
       expect(
-        testSeries(cadence: Cadence.monthly, priceChangeMinor: step).annualPriceImpactMinor,
+        testSeries(
+          cadence: Cadence.monthly,
+          priceChangeMinor: step,
+        ).annualPriceImpactMinor,
         -2400,
       );
     });
@@ -302,7 +334,10 @@ void main() {
 
     test('yearly is the step itself', () {
       expect(
-        testSeries(cadence: Cadence.yearly, priceChangeMinor: step).annualPriceImpactMinor,
+        testSeries(
+          cadence: Cadence.yearly,
+          priceChangeMinor: step,
+        ).annualPriceImpactMinor,
         step,
       );
     });

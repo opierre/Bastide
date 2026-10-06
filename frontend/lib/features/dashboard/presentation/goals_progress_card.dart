@@ -47,7 +47,12 @@ class GoalsProgressCard extends StatelessWidget {
         children: [
           Row(
             children: [
-              Expanded(child: Text(l10n.dashboardGoalsTitle, style: textTheme.titleMedium)),
+              Expanded(
+                child: Text(
+                  l10n.dashboardGoalsTitle,
+                  style: textTheme.titleMedium,
+                ),
+              ),
               TextButton(
                 key: const Key('dashboardGoalsViewAll'),
                 onPressed: onViewAll,
@@ -93,7 +98,9 @@ class _GoalRow extends StatelessWidget {
                 goal.name,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style: textTheme.bodySmall?.copyWith(fontWeight: FontWeight.w600),
+                style: textTheme.bodySmall?.copyWith(
+                  fontWeight: FontWeight.w600,
+                ),
               ),
             ),
             const SizedBox(width: AppSpacing.sm),
@@ -104,12 +111,18 @@ class _GoalRow extends StatelessWidget {
               Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Icon(Icons.check_rounded, size: 12, color: AppColors.positive),
+                  const Icon(
+                    Icons.check_rounded,
+                    size: 12,
+                    color: AppColors.positive,
+                  ),
                   const SizedBox(width: AppSpacing.xs),
                   Text(
                     l10n.dashboardGoalsReached,
                     key: Key('dashboardGoalReached-${goal.id}'),
-                    style: textTheme.labelSmall?.copyWith(color: AppColors.positive),
+                    style: textTheme.labelSmall?.copyWith(
+                      color: AppColors.positive,
+                    ),
                   ),
                 ],
               )
@@ -128,9 +141,10 @@ class _GoalRow extends StatelessWidget {
                   ),
                 ),
                 key: Key('dashboardGoalAmounts-${goal.id}'),
-                style: tabularNumberStyle(
-                  textTheme.labelSmall!,
-                ).copyWith(fontWeight: FontWeight.w400, color: AppColors.textSecondary),
+                style: tabularNumberStyle(textTheme.labelSmall!).copyWith(
+                  fontWeight: FontWeight.w400,
+                  color: AppColors.textSecondary,
+                ),
               ),
           ],
         ),

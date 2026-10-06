@@ -113,7 +113,9 @@ class _ImportsScreenState extends ConsumerState<ImportsScreen> {
       // Matched needs nothing — the verdict *is* the destination. The two
       // unresolved cases are put to the user by `_DetectedAccountNotice`
       // rather than answered here.
-      case OfxAccountMatched() || OfxAccountAmbiguous() || OfxAccountUnreadable():
+      case OfxAccountMatched() ||
+          OfxAccountAmbiguous() ||
+          OfxAccountUnreadable():
         break;
     }
   }
@@ -123,7 +125,10 @@ class _ImportsScreenState extends ConsumerState<ImportsScreen> {
   /// so the offer can be taken up later.
   Future<void> _createDetectedAccount(OfxAccountInfo info) async {
     final l10n = AppLocalizations.of(context)!;
-    final created = await showAccountForm(context, prefill: _prefillFrom(info, l10n));
+    final created = await showAccountForm(
+      context,
+      prefill: _prefillFrom(info, l10n),
+    );
     if (created == null || !mounted) return;
     ref.read(ofxAccountDetectionProvider.notifier).resolveTo(info, created);
   }
@@ -213,7 +218,9 @@ class _ImportsScreenState extends ConsumerState<ImportsScreen> {
 /// itself. Everything stays editable — the user renames it if they prefer.
 AccountPrefill _prefillFrom(OfxAccountInfo info, AppLocalizations l10n) {
   final type = accountTypeFromOfx(info.accountType);
-  final label = type == null ? info.institutionLabel : accountTypeLabel(l10n, type);
+  final label = type == null
+      ? info.institutionLabel
+      : accountTypeLabel(l10n, type);
   return AccountPrefill(
     name: [?label, info.maskedNumber].join(' '),
     institution: info.institutionLabel,
@@ -293,7 +300,10 @@ class _NewImportCard extends ConsumerWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Text(l10n.importNewTitle, style: Theme.of(context).textTheme.titleMedium),
+          Text(
+            l10n.importNewTitle,
+            style: Theme.of(context).textTheme.titleMedium,
+          ),
           // No destination field: the statement names its own account. All that
           // is left to say up here is when we couldn't even load the accounts to
           // match it against — without which detection stays silent.
@@ -320,7 +330,10 @@ class _NewImportCard extends ConsumerWidget {
             ),
           if (errorText != null) ...[
             const SizedBox(height: AppSpacing.md),
-            InlineBanner(key: const Key('importErrorBanner'), message: errorText!),
+            InlineBanner(
+              key: const Key('importErrorBanner'),
+              message: errorText!,
+            ),
           ],
         ],
       ),
@@ -361,7 +374,9 @@ class _DetectedAccountNotice extends ConsumerWidget {
         OfxAccountAmbiguous(:final info, :final candidates) => _AccountChoice(
           bannerKey: const Key('importAmbiguousAccountBanner'),
           selectKey: const Key('importAmbiguousAccountField'),
-          message: l10n.importDetectedAccountAmbiguous(_detectedAccountLabel(info)),
+          message: l10n.importDetectedAccountAmbiguous(
+            _detectedAccountLabel(info),
+          ),
           candidates: candidates,
           isImporting: isImporting,
         ),
@@ -370,7 +385,9 @@ class _DetectedAccountNotice extends ConsumerWidget {
           children: [
             InlineBanner(
               key: const Key('importUnknownAccountBanner'),
-              message: l10n.importDetectedAccountUnknown(_detectedAccountLabel(info)),
+              message: l10n.importDetectedAccountUnknown(
+                _detectedAccountLabel(info),
+              ),
               tone: BannerTone.warning,
             ),
             TextButton(
@@ -380,7 +397,9 @@ class _DetectedAccountNotice extends ConsumerWidget {
             ),
           ],
         ),
-        OfxAccountUnreadable() => _UnreadableAccountChoice(isImporting: isImporting),
+        OfxAccountUnreadable() => _UnreadableAccountChoice(
+          isImporting: isImporting,
+        ),
       },
     );
   }
@@ -399,7 +418,8 @@ class _UnreadableAccountChoice extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context)!;
-    final accounts = ref.watch(accountsControllerProvider).value ?? const <Account>[];
+    final accounts =
+        ref.watch(accountsControllerProvider).value ?? const <Account>[];
 
     return _AccountChoice(
       bannerKey: const Key('importUnreadableAccountBanner'),
@@ -436,7 +456,11 @@ class _AccountChoice extends ConsumerWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        InlineBanner(key: bannerKey, message: message, tone: BannerTone.warning),
+        InlineBanner(
+          key: bannerKey,
+          message: message,
+          tone: BannerTone.warning,
+        ),
         if (candidates.isNotEmpty) ...[
           const SizedBox(height: AppSpacing.sm),
           LabeledField(
@@ -453,13 +477,17 @@ class _AccountChoice extends ConsumerWidget {
                   AppSelectItem(
                     value: account.id,
                     label: account.name,
-                    leading: InstitutionAvatar(name: account.institution, size: 24),
+                    leading: InstitutionAvatar(
+                      name: account.institution,
+                      size: 24,
+                    ),
                   ),
               ],
               onChanged: isImporting
                   ? (_) {}
-                  : (selected) =>
-                        ref.read(chosenImportAccountProvider.notifier).select(selected),
+                  : (selected) => ref
+                        .read(chosenImportAccountProvider.notifier)
+                        .select(selected),
             ),
           ),
         ],
@@ -598,7 +626,9 @@ class _StagedFile extends ConsumerWidget {
                       ),
                       const SizedBox(height: 2),
                       Text(
-                        l10n.importFileSize(_formatKilobytes(file.bytes.length, locale)),
+                        l10n.importFileSize(
+                          _formatKilobytes(file.bytes.length, locale),
+                        ),
                         style: AppTextStyles.helper,
                       ),
                     ],
@@ -648,8 +678,11 @@ class _ResultCard extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context)!;
     final textTheme = Theme.of(context).textTheme;
-    final accounts = ref.watch(accountsControllerProvider).value ?? const <Account>[];
-    final account = accounts.where((account) => account.id == batch.accountId).firstOrNull;
+    final accounts =
+        ref.watch(accountsControllerProvider).value ?? const <Account>[];
+    final account = accounts
+        .where((account) => account.id == batch.accountId)
+        .firstOrNull;
     final accountName = account?.name;
 
     return AppCard(
@@ -661,7 +694,10 @@ class _ResultCard extends ConsumerWidget {
           Row(
             children: [
               Expanded(
-                child: Text(l10n.importResultTitle, style: textTheme.titleMedium),
+                child: Text(
+                  l10n.importResultTitle,
+                  style: textTheme.titleMedium,
+                ),
               ),
               ImportStatusPill(status: batch.status),
             ],
@@ -672,7 +708,8 @@ class _ResultCard extends ConsumerWidget {
               key: const Key('importResultFailure'),
               message: l10n.importFailedNote,
             ),
-            if (batch.errorMessage case final message? when message.trim().isNotEmpty) ...[
+            if (batch.errorMessage case final message?
+                when message.trim().isNotEmpty) ...[
               const SizedBox(height: AppSpacing.sm),
               Text(message, style: AppTextStyles.mono),
             ],
@@ -692,7 +729,9 @@ class _ResultCard extends ConsumerWidget {
                   child: _CountPlate(
                     valueKey: const Key('importResultDuplicateCount'),
                     value: batch.duplicateCount,
-                    label: l10n.importResultDuplicateLabel(batch.duplicateCount),
+                    label: l10n.importResultDuplicateLabel(
+                      batch.duplicateCount,
+                    ),
                     color: AppColors.warning,
                   ),
                 ),

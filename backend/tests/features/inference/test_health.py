@@ -8,22 +8,9 @@ from fastapi.testclient import TestClient
 
 from app.features.inference.client import HttpInferenceClient
 from app.features.inference.router import get_inference_client
+from tests.api import register as _register
 
 BASE_URL = "http://127.0.0.1:11434/v1"
-
-
-def _register(client: TestClient, email: str = "amelie@example.com") -> dict[str, str]:
-    response = client.post(
-        "/api/v1/auth/register",
-        json={
-            "email": email,
-            "password": "correct-horse-battery-staple",
-            "display_name": "Amelie",
-            "locale": "fr",
-            "currency": "eur",
-        },
-    )
-    return {"Authorization": f"Bearer {response.json()['token']}"}
 
 
 def _use_transport(client: TestClient, handler: Callable[[httpx.Request], httpx.Response]) -> None:

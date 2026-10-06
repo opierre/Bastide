@@ -108,7 +108,10 @@ class _ToastState extends State<_Toast> {
                 margin: const EdgeInsets.only(top: 5),
                 width: 8,
                 height: 8,
-                decoration: BoxDecoration(color: widget.tone.color, shape: BoxShape.circle),
+                decoration: BoxDecoration(
+                  color: widget.tone.color,
+                  shape: BoxShape.circle,
+                ),
               ),
               const SizedBox(width: AppSpacing.sm + AppSpacing.xs),
               Flexible(

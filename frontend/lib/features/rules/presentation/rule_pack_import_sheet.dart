@@ -95,7 +95,8 @@ class RulePackImportSheet extends ConsumerStatefulWidget {
   final PendingRulePack pending;
 
   @override
-  ConsumerState<RulePackImportSheet> createState() => _RulePackImportSheetState();
+  ConsumerState<RulePackImportSheet> createState() =>
+      _RulePackImportSheetState();
 }
 
 class _RulePackImportSheetState extends ConsumerState<RulePackImportSheet> {
@@ -156,7 +157,10 @@ class _RulePackImportSheetState extends ConsumerState<RulePackImportSheet> {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           if (_errorText != null) ...[
-            InlineBanner(key: const Key('rulePackImportError'), message: _errorText!),
+            InlineBanner(
+              key: const Key('rulePackImportError'),
+              message: _errorText!,
+            ),
             const SizedBox(height: AppSpacing.md),
           ],
           // The headline the whole confirmation step exists for.

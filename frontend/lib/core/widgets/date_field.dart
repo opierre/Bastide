@@ -91,7 +91,10 @@ class DateField extends StatelessWidget {
         // The 44 px field height the spec pins is measured without an icon in
         // it; left at Material's default the button's own hit box would push
         // the field taller than the one beside it.
-        suffixIconConstraints: const BoxConstraints(minWidth: 36, minHeight: 36),
+        suffixIconConstraints: const BoxConstraints(
+          minWidth: 36,
+          minHeight: 36,
+        ),
       ),
       validator: validator,
     );

@@ -52,7 +52,9 @@ class CategoryChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final chip = slug == null ? _buildUncategorized(context) : _buildCategorized(context);
+    final chip = slug == null
+        ? _buildUncategorized(context)
+        : _buildCategorized(context);
     if (onTap == null) return chip;
 
     return MouseRegion(
@@ -92,7 +94,9 @@ class CategoryChip extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       children: [
         Icon(
-          slug == null ? Icons.help_outline_rounded : CategoryIcons.forSlug(slug),
+          slug == null
+              ? Icons.help_outline_rounded
+              : CategoryIcons.forSlug(slug),
           size: 11,
           color: foreground,
         ),

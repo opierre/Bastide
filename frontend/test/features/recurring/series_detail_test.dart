@@ -74,7 +74,11 @@ void main() {
           ),
           occurrences: [
             _occurrence(bookedDate: DateTime(2026, 4, 15), amountMinor: -1549),
-            _occurrence(id: 'o2', bookedDate: DateTime(2026, 3, 15), amountMinor: -1349),
+            _occurrence(
+              id: 'o2',
+              bookedDate: DateTime(2026, 3, 15),
+              amountMinor: -1349,
+            ),
           ],
         ),
       ),
@@ -110,36 +114,37 @@ void main() {
     );
   });
 
-  testWidgets('a declared series says it is tracked, not detected, and has no history', (
-    tester,
-  ) async {
-    tester.view.physicalSize = const Size(1440, 900);
-    tester.view.devicePixelRatio = 1.0;
-    addTearDown(tester.view.reset);
+  testWidgets(
+    'a declared series says it is tracked, not detected, and has no history',
+    (tester) async {
+      tester.view.physicalSize = const Size(1440, 900);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.reset);
 
-    await tester.pumpWidget(
-      _wrap(
-        SeriesDetail(
-          series: testSeries(
-            label: 'Basic-Fit',
-            isManual: true,
-            cadence: Cadence.irregular,
-            occurrenceCount: 0,
+      await tester.pumpWidget(
+        _wrap(
+          SeriesDetail(
+            series: testSeries(
+              label: 'Basic-Fit',
+              isManual: true,
+              cadence: Cadence.irregular,
+              occurrenceCount: 0,
+            ),
+            occurrences: const [],
           ),
-          occurrences: const [],
         ),
-      ),
-    );
-    await tester.pumpAndSettle();
+      );
+      await tester.pumpAndSettle();
 
-    expect(
-      find.text('BNP — Compte courant · suivi depuis décembre 2025'),
-      findsOneWidget,
-    );
-    expect(find.byKey(const Key('seriesHistoryEmpty')), findsOneWidget);
-    expect(find.byKey(const Key('seriesIncreaseBanner')), findsNothing);
-    expect(find.text('Irrégulier'), findsOneWidget);
-  });
+      expect(
+        find.text('BNP — Compte courant · suivi depuis décembre 2025'),
+        findsOneWidget,
+      );
+      expect(find.byKey(const Key('seriesHistoryEmpty')), findsOneWidget);
+      expect(find.byKey(const Key('seriesIncreaseBanner')), findsNothing);
+      expect(find.text('Irrégulier'), findsOneWidget);
+    },
+  );
 
   testWidgets('a price that never moved draws one flat level, not a range', (
     tester,
@@ -154,8 +159,16 @@ void main() {
           series: testSeries(),
           occurrences: [
             _occurrence(bookedDate: DateTime(2026, 4, 15), amountMinor: -1549),
-            _occurrence(id: 'o2', bookedDate: DateTime(2026, 3, 15), amountMinor: -1549),
-            _occurrence(id: 'o3', bookedDate: DateTime(2026, 2, 15), amountMinor: -1549),
+            _occurrence(
+              id: 'o2',
+              bookedDate: DateTime(2026, 3, 15),
+              amountMinor: -1549,
+            ),
+            _occurrence(
+              id: 'o3',
+              bookedDate: DateTime(2026, 2, 15),
+              amountMinor: -1549,
+            ),
           ],
         ),
       ),

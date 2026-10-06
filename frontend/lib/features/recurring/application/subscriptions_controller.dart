@@ -49,7 +49,9 @@ class SubscriptionsState {
   }) => SubscriptionsState(
     series: series ?? this.series,
     summary: summary ?? this.summary,
-    statusFilter: clearStatusFilter ? null : (statusFilter ?? this.statusFilter),
+    statusFilter: clearStatusFilter
+        ? null
+        : (statusFilter ?? this.statusFilter),
     actionError: clearActionError ? null : (actionError ?? this.actionError),
   );
 
@@ -58,13 +60,19 @@ class SubscriptionsState {
     RecurringSummary summary,
   ) {
     final increases = {
-      for (final increase in summary.priceIncreases) increase.seriesId: increase,
+      for (final increase in summary.priceIncreases)
+        increase.seriesId: increase,
     };
-    final missed = {for (final charge in summary.missed) charge.seriesId: charge};
+    final missed = {
+      for (final charge in summary.missed) charge.seriesId: charge,
+    };
 
     return [
       for (final row in series)
-        SubscriptionRow(series: row, signal: _signalFor(row, increases, missed)),
+        SubscriptionRow(
+          series: row,
+          signal: _signalFor(row, increases, missed),
+        ),
     ];
   }
 
@@ -117,7 +125,11 @@ class SubscriptionsController extends AsyncNotifier<SubscriptionsState> {
   Future<SubscriptionsState> _load(SeriesStatus? status) async {
     final series = await _repository.list(status: status);
     final summary = await _repository.summary();
-    return SubscriptionsState(series: series, summary: summary, statusFilter: status);
+    return SubscriptionsState(
+      series: series,
+      summary: summary,
+      statusFilter: status,
+    );
   }
 
   Future<void> refresh() async {
@@ -226,7 +238,10 @@ class SubscriptionsController extends AsyncNotifier<SubscriptionsState> {
 
   /// The list with [updated] swapped in — or dropped, when a status change has
   /// moved it out of the filter the list was fetched under.
-  List<RecurringSeries> _replace(SubscriptionsState current, RecurringSeries updated) {
+  List<RecurringSeries> _replace(
+    SubscriptionsState current,
+    RecurringSeries updated,
+  ) {
     final filter = current.statusFilter;
     return [
       for (final row in current.series)
@@ -255,8 +270,11 @@ final subscriptionCategoriesProvider = FutureProvider<List<AppCategory>>((ref) {
 });
 
 /// The catalog keyed by id, so a row can resolve its chip without scanning.
-final subscriptionCategoriesByIdProvider = Provider<Map<String, AppCategory>>((ref) {
-  final categories = ref.watch(subscriptionCategoriesProvider).value ?? const [];
+final subscriptionCategoriesByIdProvider = Provider<Map<String, AppCategory>>((
+  ref,
+) {
+  final categories =
+      ref.watch(subscriptionCategoriesProvider).value ?? const [];
   return {for (final category in categories) category.id: category};
 });
 
@@ -279,6 +297,9 @@ final selectedSeriesProvider = NotifierProvider<SelectedSeries, String?>(
 );
 
 /// One series with the occurrence history it was deduced from.
-final seriesDetailProvider = FutureProvider.family<SeriesDetail, String>((ref, id) {
+final seriesDetailProvider = FutureProvider.family<SeriesDetail, String>((
+  ref,
+  id,
+) {
   return ref.watch(recurringRepositoryProvider).detail(id);
 });

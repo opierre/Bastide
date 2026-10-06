@@ -20,7 +20,8 @@ class RulePackMenu extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context)!;
-    final builtin = ref.watch(builtinPacksProvider).value ?? const <BuiltinPack>[];
+    final builtin =
+        ref.watch(builtinPacksProvider).value ?? const <BuiltinPack>[];
     final firstBuiltin = builtin.isEmpty ? null : builtin.first;
 
     return PopupMenuButton<_PackAction>(
@@ -98,7 +99,8 @@ class BuiltinPackOffer extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context)!;
-    final packs = ref.watch(builtinPacksProvider).value ?? const <BuiltinPack>[];
+    final packs =
+        ref.watch(builtinPacksProvider).value ?? const <BuiltinPack>[];
     if (packs.isEmpty) return const SizedBox.shrink();
 
     // The user's locale first: a French user offered an English merchant pack
@@ -114,7 +116,8 @@ class BuiltinPackOffer extends ConsumerWidget {
       children: [
         OutlinedButton.icon(
           key: const Key('emptyStateBuiltinPackButton'),
-          onPressed: () => startRulePackImport(context, ref, builtinId: pack.id),
+          onPressed: () =>
+              startRulePackImport(context, ref, builtinId: pack.id),
           icon: const Icon(Icons.auto_awesome_outlined, size: 16),
           label: Text(l10n.rulePackStartWith(pack.name, pack.ruleCount)),
         ),

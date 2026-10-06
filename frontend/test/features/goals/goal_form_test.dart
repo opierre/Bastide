@@ -79,22 +79,28 @@ void main() {
     await tester.enterText(find.byKey(const Key('goalFormTarget')), '10000');
     await tester.enterText(find.byKey(const Key('goalFormTarget')), '10000abc');
     expect(
-      tester.widget<TextField>(
-        find.descendant(
-          of: find.byKey(const Key('goalFormTarget')),
-          matching: find.byType(TextField),
-        ),
-      ).controller?.text,
+      tester
+          .widget<TextField>(
+            find.descendant(
+              of: find.byKey(const Key('goalFormTarget')),
+              matching: find.byType(TextField),
+            ),
+          )
+          .controller
+          ?.text,
       '10\u202F000',
     );
     await tester.enterText(find.byKey(const Key('goalFormTarget')), '-5000');
     expect(
-      tester.widget<TextField>(
-        find.descendant(
-          of: find.byKey(const Key('goalFormTarget')),
-          matching: find.byType(TextField),
-        ),
-      ).controller?.text,
+      tester
+          .widget<TextField>(
+            find.descendant(
+              of: find.byKey(const Key('goalFormTarget')),
+              matching: find.byType(TextField),
+            ),
+          )
+          .controller
+          ?.text,
       '10\u202F000',
     );
   });
@@ -104,7 +110,10 @@ void main() {
     await tester.pumpWidget(_wrap(controller: controller));
     await tester.pumpAndSettle();
 
-    await tester.enterText(find.byKey(const Key('goalFormName')), 'Voyage Japon');
+    await tester.enterText(
+      find.byKey(const Key('goalFormName')),
+      'Voyage Japon',
+    );
     await tester.enterText(find.byKey(const Key('goalFormTarget')), '4000');
 
     await tester.tap(find.byIcon(Icons.calendar_today_outlined));
@@ -130,7 +139,10 @@ void main() {
     // A goal has no account, so the form never asks for one.
     expect(find.text('Compte'), findsNothing);
 
-    await tester.enterText(find.byKey(const Key('goalFormName')), 'Voyage Japon');
+    await tester.enterText(
+      find.byKey(const Key('goalFormName')),
+      'Voyage Japon',
+    );
     await tester.enterText(find.byKey(const Key('goalFormTarget')), '4000');
     await tester.enterText(find.byKey(const Key('goalFormDate')), '30/06/2026');
     await tester.tap(find.byKey(const Key('goalFormIcon-travel')));
@@ -152,7 +164,10 @@ void main() {
     await tester.pumpWidget(_wrap(controller: controller));
     await tester.pumpAndSettle();
 
-    await tester.enterText(find.byKey(const Key('goalFormName')), "Fonds d'urgence");
+    await tester.enterText(
+      find.byKey(const Key('goalFormName')),
+      "Fonds d'urgence",
+    );
     await tester.enterText(find.byKey(const Key('goalFormTarget')), '0');
     await tester.enterText(find.byKey(const Key('goalFormDate')), '');
     await tester.tap(find.byKey(const Key('goalFormSubmit')));
@@ -178,8 +193,14 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    await tester.enterText(find.byKey(const Key('goalFormName')), 'Emergency fund');
-    await tester.enterText(find.byKey(const Key('goalFormTarget')), '10,000.50');
+    await tester.enterText(
+      find.byKey(const Key('goalFormName')),
+      'Emergency fund',
+    );
+    await tester.enterText(
+      find.byKey(const Key('goalFormTarget')),
+      '10,000.50',
+    );
     await tester.enterText(find.byKey(const Key('goalFormDate')), '6/30/2026');
     await tester.tap(find.byKey(const Key('goalFormSubmit')));
     await tester.pumpAndSettle();

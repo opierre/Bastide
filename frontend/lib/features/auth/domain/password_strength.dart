@@ -31,7 +31,8 @@ PasswordStrength scorePassword(String password) {
   var score = 0;
   if (password.length >= 8) score++;
   if (password.length >= 12) score++;
-  if (RegExp(r'[a-z]').hasMatch(password) && RegExp(r'[A-Z]').hasMatch(password)) {
+  if (RegExp(r'[a-z]').hasMatch(password) &&
+      RegExp(r'[A-Z]').hasMatch(password)) {
     score++;
   }
   if (RegExp(r'\d').hasMatch(password)) score++;

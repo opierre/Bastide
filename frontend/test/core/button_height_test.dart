@@ -22,17 +22,25 @@ void main() {
     expect(cancelBox.center.dy, confirmBox.center.dy);
   }
 
-  Widget host(Widget child) =>
-      MaterialApp(theme: appDarkTheme, home: Scaffold(body: Center(child: child)));
+  Widget host(Widget child) => MaterialApp(
+    theme: appDarkTheme,
+    home: Scaffold(body: Center(child: child)),
+  );
 
-  testWidgets('a modal footer stands its cancel level with its confirm', (tester) async {
+  testWidgets('a modal footer stands its cancel level with its confirm', (
+    tester,
+  ) async {
     await tester.pumpWidget(
       host(
         AppModal(
           title: 'Période',
           width: 420,
           actions: [
-            OutlinedButton(key: cancel, onPressed: () {}, child: const Text('Annuler')),
+            OutlinedButton(
+              key: cancel,
+              onPressed: () {},
+              child: const Text('Annuler'),
+            ),
             PrimaryButton(key: confirm, label: 'Appliquer', onPressed: () {}),
           ],
           child: const SizedBox(height: 40),
@@ -43,14 +51,20 @@ void main() {
     expectAligned(tester);
   });
 
-  testWidgets('a ghost cancel stands level with its confirm too', (tester) async {
+  testWidgets('a ghost cancel stands level with its confirm too', (
+    tester,
+  ) async {
     await tester.pumpWidget(
       host(
         AppModal(
           title: 'Compte',
           width: 480,
           actions: [
-            TextButton(key: cancel, onPressed: () {}, child: const Text('Annuler')),
+            TextButton(
+              key: cancel,
+              onPressed: () {},
+              child: const Text('Annuler'),
+            ),
             PrimaryButton(key: confirm, label: 'Enregistrer', onPressed: () {}),
           ],
           child: const SizedBox(height: 40),
@@ -61,14 +75,24 @@ void main() {
     expectAligned(tester);
   });
 
-  testWidgets('a confirm dialog outside the modal shell aligns as well', (tester) async {
+  testWidgets('a confirm dialog outside the modal shell aligns as well', (
+    tester,
+  ) async {
     await tester.pumpWidget(
       host(
         AlertDialog(
           title: const Text('Archiver ?'),
           actions: [
-            TextButton(key: cancel, onPressed: () {}, child: const Text('Annuler')),
-            FilledButton(key: confirm, onPressed: () {}, child: const Text('Archiver')),
+            TextButton(
+              key: cancel,
+              onPressed: () {},
+              child: const Text('Annuler'),
+            ),
+            FilledButton(
+              key: confirm,
+              onPressed: () {},
+              child: const Text('Archiver'),
+            ),
           ],
         ),
       ),

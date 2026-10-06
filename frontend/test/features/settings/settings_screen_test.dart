@@ -60,12 +60,17 @@ Widget _wrap() {
 }
 
 void main() {
-  testWidgets('opens on preferences with the four sections listed', (tester) async {
+  testWidgets('opens on preferences with the four sections listed', (
+    tester,
+  ) async {
     await tester.pumpWidget(_wrap());
     await tester.pumpAndSettle();
 
     for (final section in SettingsSection.values) {
-      expect(find.byKey(Key('settingsSection-${section.name}')), findsOneWidget);
+      expect(
+        find.byKey(Key('settingsSection-${section.name}')),
+        findsOneWidget,
+      );
     }
     expect(find.byKey(const Key('settingsCurrencyField')), findsOneWidget);
   });

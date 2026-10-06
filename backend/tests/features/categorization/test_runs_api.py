@@ -3,6 +3,7 @@
 from fastapi.testclient import TestClient
 
 from app.core.db import SessionFactory
+from tests.api import register as _register
 from tests.features.categorization.conftest import (
     GROCERIES_ID,
     Ledger,
@@ -32,20 +33,6 @@ RUN_FIELDS = {
     "finished_at",
     "created_at",
 }
-
-
-def _register(client: TestClient, email: str = "amelie@example.com") -> dict[str, str]:
-    response = client.post(
-        "/api/v1/auth/register",
-        json={
-            "email": email,
-            "password": "correct-horse-battery-staple",
-            "display_name": "Amelie",
-            "locale": "fr",
-            "currency": "eur",
-        },
-    )
-    return {"Authorization": f"Bearer {response.json()['token']}"}
 
 
 def _me(client: TestClient, headers: dict[str, str]) -> str:

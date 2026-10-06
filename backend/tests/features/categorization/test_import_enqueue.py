@@ -11,6 +11,7 @@ from fastapi.testclient import TestClient
 
 from app.core.db import SessionFactory
 from app.features.inference.client import InferenceUnavailable
+from tests.api import register as _register
 from tests.features.categorization.conftest import (
     GROCERIES_ID,
     RunLauncherSpy,
@@ -29,20 +30,6 @@ ACCOUNT_PAYLOAD = {
     "institution": "BNP Paribas",
     "opening_balance_minor": 100_000,
 }
-
-
-def _register(client: TestClient) -> dict[str, str]:
-    response = client.post(
-        "/api/v1/auth/register",
-        json={
-            "email": "amelie@example.com",
-            "password": "correct-horse-battery-staple",
-            "display_name": "Amelie",
-            "locale": "fr",
-            "currency": "eur",
-        },
-    )
-    return {"Authorization": f"Bearer {response.json()['token']}"}
 
 
 def _create_account(client: TestClient, headers: dict[str, str]) -> str:

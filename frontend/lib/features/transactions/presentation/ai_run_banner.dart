@@ -55,11 +55,14 @@ class AiRunBanner extends ConsumerWidget {
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      l10n.runBannerRunningDetail(run.assignedCount, run.deferredCount),
+                      l10n.runBannerRunningDetail(
+                        run.assignedCount,
+                        run.deferredCount,
+                      ),
                       key: const Key('aiRunBannerDetail'),
-                      style: Theme.of(
-                        context,
-                      ).textTheme.bodySmall?.copyWith(color: AppColors.textSecondary),
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: AppColors.textSecondary,
+                      ),
                     ),
                   ],
                 ),
@@ -69,7 +72,8 @@ class AiRunBanner extends ConsumerWidget {
                 height: 30,
                 child: OutlinedButton(
                   key: const Key('aiRunBannerCancel'),
-                  onPressed: () => ref.read(runControllerProvider.notifier).cancel(),
+                  onPressed: () =>
+                      ref.read(runControllerProvider.notifier).cancel(),
                   child: Text(l10n.runBannerCancel),
                 ),
               ),
@@ -194,7 +198,9 @@ class _OutcomeCard extends ConsumerWidget {
           Expanded(
             child: Text(
               message,
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(color: tone),
+              style: Theme.of(
+                context,
+              ).textTheme.bodySmall?.copyWith(color: tone),
             ),
           ),
           if (actionLabel != null) ...[
@@ -224,7 +230,8 @@ class _OutcomeCard extends ConsumerWidget {
             padding: EdgeInsets.zero,
             tooltip: l10n.runBannerDismiss,
             icon: Icon(Icons.close_rounded, color: tone),
-            onPressed: () => ref.read(runControllerProvider.notifier).dismissBanner(),
+            onPressed: () =>
+                ref.read(runControllerProvider.notifier).dismissBanner(),
           ),
         ],
       ),

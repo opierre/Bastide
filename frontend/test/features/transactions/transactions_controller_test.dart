@@ -35,7 +35,10 @@ Map<String, dynamic> _transactionJson({
   'updated_at': '2026-05-14T00:00:00Z',
 };
 
-Map<String, dynamic> _categoryJson({String id = 'c1', String name = 'category.food.groceries'}) => {
+Map<String, dynamic> _categoryJson({
+  String id = 'c1',
+  String name = 'category.food.groceries',
+}) => {
   'id': id,
   'user_id': null,
   'parent_id': null,
@@ -46,12 +49,11 @@ Map<String, dynamic> _categoryJson({String id = 'c1', String name = 'category.fo
   'is_system': true,
 };
 
-Map<String, dynamic> _pageJson(List<Map<String, dynamic>> items, {int page = 1, int total = 1}) => {
-  'items': items,
-  'page': page,
-  'page_size': 50,
-  'total': total,
-};
+Map<String, dynamic> _pageJson(
+  List<Map<String, dynamic>> items, {
+  int page = 1,
+  int total = 1,
+}) => {'items': items, 'page': page, 'page_size': 50, 'total': total};
 
 void main() {
   late MockApiClient apiClient;
@@ -64,7 +66,9 @@ void main() {
 
   setUp(() {
     apiClient = MockApiClient();
-    container = ProviderContainer(overrides: [apiClientProvider.overrideWithValue(apiClient)]);
+    container = ProviderContainer(
+      overrides: [apiClientProvider.overrideWithValue(apiClient)],
+    );
     addTearDown(container.dispose);
   });
 
@@ -100,7 +104,9 @@ void main() {
   test('setPage moves to the next page', () async {
     when(
       () => apiClient.get('/transactions', query: any(named: 'query')),
-    ).thenAnswer((_) async => _pageJson([_transactionJson()], page: 1, total: 120));
+    ).thenAnswer(
+      (_) async => _pageJson([_transactionJson()], page: 1, total: 120),
+    );
 
     await container.read(transactionsControllerProvider.future);
     container.read(transactionFiltersProvider.notifier).setPage(2);
@@ -115,7 +121,9 @@ void main() {
   test('updateCategory patches and clears the review flag in place', () async {
     when(
       () => apiClient.get('/transactions', query: any(named: 'query')),
-    ).thenAnswer((_) async => _pageJson([_transactionJson(id: 't1', needsReview: true)]));
+    ).thenAnswer(
+      (_) async => _pageJson([_transactionJson(id: 't1', needsReview: true)]),
+    );
     when(
       () => apiClient.patch('/transactions/t1', body: any(named: 'body')),
     ).thenAnswer(
@@ -132,16 +140,24 @@ void main() {
         .read(transactionsControllerProvider.notifier)
         .updateCategory(page.items.single, 'c1');
 
-    final updated = container.read(transactionsControllerProvider).value!.items.single;
+    final updated = container
+        .read(transactionsControllerProvider)
+        .value!
+        .items
+        .single;
     expect(updated.needsReview, isFalse);
     expect(updated.category?.id, 'c1');
     expect(updated.categorizationSource, CategorizationSource.user);
   });
 
   test('transactionCategoriesProvider maps the category catalog', () async {
-    when(() => apiClient.get('/categories')).thenAnswer((_) async => [_categoryJson()]);
+    when(
+      () => apiClient.get('/categories'),
+    ).thenAnswer((_) async => [_categoryJson()]);
 
-    final categories = await container.read(transactionCategoriesProvider.future);
+    final categories = await container.read(
+      transactionCategoriesProvider.future,
+    );
 
     expect(categories, hasLength(1));
     expect(categories.single.name, 'category.food.groceries');

@@ -15,6 +15,7 @@ from fastapi.testclient import TestClient
 
 from app.features.mortgages.engine import RepaymentType, Schedule, build_schedule
 from app.features.mortgages.router import get_today
+from tests.api import register
 
 TODAY = date(2026, 5, 15)
 
@@ -37,21 +38,6 @@ AMOUNT_FIELDS = ("instalment_minor", "interest_minor", "principal_minor", "insur
 @pytest.fixture(autouse=True)
 def pinned_today(client: TestClient) -> None:
     cast(FastAPI, client.app).dependency_overrides[get_today] = lambda: TODAY
-
-
-def register(client: TestClient, email: str = "amelie@example.com") -> dict[str, str]:
-    response = client.post(
-        "/api/v1/auth/register",
-        json={
-            "email": email,
-            "password": "correct-horse-battery-staple",
-            "display_name": "Amelie",
-            "locale": "fr",
-            "currency": "eur",
-        },
-    )
-    assert response.status_code == 201, response.json()
-    return {"Authorization": f"Bearer {response.json()['token']}"}
 
 
 def create_loan(client: TestClient, headers: dict[str, str], **overrides: object) -> dict:

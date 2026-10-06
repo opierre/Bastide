@@ -220,7 +220,9 @@ class GoalsController extends AsyncNotifier<GoalsState> {
   void toggleArchived() {
     final current = state.value;
     if (current == null) return;
-    state = AsyncValue.data(current.copyWith(showArchived: !current.showArchived));
+    state = AsyncValue.data(
+      current.copyWith(showArchived: !current.showArchived),
+    );
   }
 
   void dismissOverAllocationBanner() {
@@ -249,9 +251,8 @@ class GoalsController extends AsyncNotifier<GoalsState> {
   }
 }
 
-final goalsControllerProvider = AsyncNotifierProvider<GoalsController, GoalsState>(
-  GoalsController.new,
-);
+final goalsControllerProvider =
+    AsyncNotifierProvider<GoalsController, GoalsState>(GoalsController.new);
 
 /// One goal's allocation history, newest first. Invalidated by the controller
 /// whenever a line is added or removed.

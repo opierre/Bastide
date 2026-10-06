@@ -4,13 +4,14 @@ import '../../../l10n/app_localizations.dart';
 import '../domain/recurring_series.dart';
 
 /// The localized name of a cadence — « Mensuel » / "Monthly".
-String cadenceLabel(AppLocalizations l10n, Cadence cadence) => switch (cadence) {
-  Cadence.weekly => l10n.cadenceWeekly,
-  Cadence.monthly => l10n.cadenceMonthly,
-  Cadence.quarterly => l10n.cadenceQuarterly,
-  Cadence.yearly => l10n.cadenceYearly,
-  Cadence.irregular => l10n.cadenceIrregular,
-};
+String cadenceLabel(AppLocalizations l10n, Cadence cadence) =>
+    switch (cadence) {
+      Cadence.weekly => l10n.cadenceWeekly,
+      Cadence.monthly => l10n.cadenceMonthly,
+      Cadence.quarterly => l10n.cadenceQuarterly,
+      Cadence.yearly => l10n.cadenceYearly,
+      Cadence.irregular => l10n.cadenceIrregular,
+    };
 
 /// « 6 mensuels », « 1 trimestriel » — one cadence's share of the active count.
 String cadenceCountLabel(AppLocalizations l10n, Cadence cadence, int count) =>

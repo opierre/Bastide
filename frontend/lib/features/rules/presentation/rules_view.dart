@@ -51,7 +51,10 @@ class RulesView extends ConsumerWidget {
       AsyncData(:final value) when value.isEmpty => const RulesEmptyState(
         extraAction: BuiltinPackOffer(),
       ),
-      AsyncData(:final value) => _RulesCard(rules: value, canReorder: !filtered),
+      AsyncData(:final value) => _RulesCard(
+        rules: value,
+        canReorder: !filtered,
+      ),
       AsyncError(:final error) => ErrorStateView(
         message: localizeRuleError(l10n, error),
         messageKey: const Key('rulesErrorText'),
@@ -77,7 +80,8 @@ class _RulesCard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context)!;
-    final categories = ref.watch(categoriesControllerProvider).value ?? const <AppCategory>[];
+    final categories =
+        ref.watch(categoriesControllerProvider).value ?? const <AppCategory>[];
     final byId = {for (final category in categories) category.id: category};
 
     return AppCard(
@@ -125,7 +129,9 @@ Future<void> _reorder(
 ) async {
   final l10n = AppLocalizations.of(context)!;
   try {
-    await ref.read(rulesControllerProvider.notifier).reorder(oldIndex, newIndex);
+    await ref
+        .read(rulesControllerProvider.notifier)
+        .reorder(oldIndex, newIndex);
   } catch (error) {
     if (!context.mounted) return;
     showAppToast(
@@ -145,7 +151,9 @@ Future<void> _toggle(
   bool enabled,
 ) async {
   try {
-    await ref.read(rulesControllerProvider.notifier).setEnabled(rule.id, enabled);
+    await ref
+        .read(rulesControllerProvider.notifier)
+        .setEnabled(rule.id, enabled);
   } catch (error) {
     if (!context.mounted) return;
     showAppToast(
@@ -163,10 +171,12 @@ class RulesViewHeaderActions extends ConsumerStatefulWidget {
   const RulesViewHeaderActions({super.key});
 
   @override
-  ConsumerState<RulesViewHeaderActions> createState() => _RulesViewHeaderActionsState();
+  ConsumerState<RulesViewHeaderActions> createState() =>
+      _RulesViewHeaderActionsState();
 }
 
-class _RulesViewHeaderActionsState extends ConsumerState<RulesViewHeaderActions> {
+class _RulesViewHeaderActionsState
+    extends ConsumerState<RulesViewHeaderActions> {
   bool _isApplying = false;
 
   Future<void> _apply() async {
@@ -216,7 +226,9 @@ class _RulesViewHeaderActionsState extends ConsumerState<RulesViewHeaderActions>
         OutlinedButton(
           key: const Key('applyRulesButton'),
           onPressed: _isApplying ? null : _apply,
-          child: Text(_isApplying ? l10n.rulesApplyRunning : l10n.rulesApplyButton),
+          child: Text(
+            _isApplying ? l10n.rulesApplyRunning : l10n.rulesApplyButton,
+          ),
         ),
         const SizedBox(width: AppSpacing.xs),
         const RulePackMenu(),
@@ -236,8 +248,11 @@ class _CategoryFilterChip extends ConsumerWidget {
     if (filter == null) return const SizedBox.shrink();
 
     final l10n = AppLocalizations.of(context)!;
-    final categories = ref.watch(categoriesControllerProvider).value ?? const <AppCategory>[];
-    final category = categories.where((entry) => entry.id == filter).firstOrNull;
+    final categories =
+        ref.watch(categoriesControllerProvider).value ?? const <AppCategory>[];
+    final category = categories
+        .where((entry) => entry.id == filter)
+        .firstOrNull;
 
     return Padding(
       key: const Key('rulesFilterChip'),
@@ -254,7 +269,8 @@ class _CategoryFilterChip extends ConsumerWidget {
             ),
           IconButton(
             key: const Key('rulesFilterClear'),
-            onPressed: () => ref.read(rulesCategoryFilterProvider.notifier).set(null),
+            onPressed: () =>
+                ref.read(rulesCategoryFilterProvider.notifier).set(null),
             tooltip: l10n.rulesFilterClear,
             iconSize: 14,
             visualDensity: VisualDensity.compact,

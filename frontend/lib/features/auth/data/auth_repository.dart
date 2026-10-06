@@ -43,7 +43,10 @@ class AuthRepository {
     return _parseSession(json as Map<String, dynamic>);
   }
 
-  Future<AuthSession> login({required String email, required String password}) async {
+  Future<AuthSession> login({
+    required String email,
+    required String password,
+  }) async {
     final json = await _apiClient.post(
       '/auth/login',
       body: {'email': email, 'password': password},

@@ -4,20 +4,7 @@ import pytest
 from fastapi.testclient import TestClient
 
 from app.features.banks.directory import normalize_bank_code, resolve_bank_name
-
-
-def _register(client: TestClient, email: str = "amelie@example.com") -> dict[str, str]:
-    response = client.post(
-        "/api/v1/auth/register",
-        json={
-            "email": email,
-            "password": "correct-horse-battery-staple",
-            "display_name": "Amelie",
-            "locale": "fr",
-            "currency": "eur",
-        },
-    )
-    return {"Authorization": f"Bearer {response.json()['token']}"}
+from tests.api import register as _register
 
 
 @pytest.mark.parametrize(

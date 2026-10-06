@@ -70,7 +70,12 @@ class CategoryCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            _Header(category: category, hue: hue, onEdit: onEdit, onDelete: onDelete),
+            _Header(
+              category: category,
+              hue: hue,
+              onEdit: onEdit,
+              onDelete: onDelete,
+            ),
             const SizedBox(height: AppSpacing.md),
             Wrap(
               spacing: 6,
@@ -81,7 +86,9 @@ class CategoryCard extends StatelessWidget {
                     key: Key('subcategoryChip-${child.id}'),
                     category: child,
                     hue: hue,
-                    onTap: child.isSystem ? null : () => onEditSubcategory(child),
+                    onTap: child.isSystem
+                        ? null
+                        : () => onEditSubcategory(child),
                   ),
                 _AddSubcategoryChip(
                   key: Key('addSubcategory-${category.id}'),
@@ -93,7 +100,11 @@ class CategoryCard extends StatelessWidget {
             // cards line up whatever each card's chips wrap to.
             const Spacer(),
             const SizedBox(height: AppSpacing.md),
-            _Footer(categoryId: category.id, ruleCount: ruleCount, onOpenRules: onOpenRules),
+            _Footer(
+              categoryId: category.id,
+              ruleCount: ruleCount,
+              onOpenRules: onOpenRules,
+            ),
           ],
         ),
       ),
@@ -207,7 +218,11 @@ enum _CardAction { edit, delete }
 /// The ⋯ on a user category: « Modifier » (name, icon, colour in one modal)
 /// and « Supprimer », which confirms before it fires.
 class _ActionsMenu extends StatelessWidget {
-  const _ActionsMenu({required this.category, required this.onEdit, required this.onDelete});
+  const _ActionsMenu({
+    required this.category,
+    required this.onEdit,
+    required this.onDelete,
+  });
 
   final AppCategory category;
   final VoidCallback? onEdit;
@@ -225,7 +240,10 @@ class _ActionsMenu extends StatelessWidget {
         tooltip: l10n.categoryActionsTooltip,
         padding: EdgeInsets.zero,
         iconSize: 18,
-        icon: const Icon(Icons.more_horiz_rounded, color: AppColors.textSecondary),
+        icon: const Icon(
+          Icons.more_horiz_rounded,
+          color: AppColors.textSecondary,
+        ),
         position: PopupMenuPosition.under,
         onSelected: (action) => switch (action) {
           _CardAction.edit => onEdit?.call(),
@@ -235,12 +253,18 @@ class _ActionsMenu extends StatelessWidget {
           PopupMenuItem(
             key: Key('categoryEdit-${category.id}'),
             value: _CardAction.edit,
-            child: _MenuRow(icon: Icons.edit_outlined, label: l10n.categoryEdit),
+            child: _MenuRow(
+              icon: Icons.edit_outlined,
+              label: l10n.categoryEdit,
+            ),
           ),
           PopupMenuItem(
             key: Key('categoryDelete-${category.id}'),
             value: _CardAction.delete,
-            child: _MenuRow(icon: Icons.delete_outline_rounded, label: l10n.categoryDelete),
+            child: _MenuRow(
+              icon: Icons.delete_outline_rounded,
+              label: l10n.categoryDelete,
+            ),
           ),
         ],
       ),

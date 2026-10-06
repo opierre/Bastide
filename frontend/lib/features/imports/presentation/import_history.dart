@@ -30,14 +30,18 @@ class ImportHistory extends ConsumerWidget {
     // Needed only to format a mismatch amount in the account's own currency;
     // the account list is already loaded for the panel's selector, so this is
     // never a first fetch of its own.
-    final accounts = ref.watch(accountsControllerProvider).value ?? const <Account>[];
+    final accounts =
+        ref.watch(accountsControllerProvider).value ?? const <Account>[];
 
     return AppCard(
       padding: const EdgeInsets.all(AppSpacing.cardPaddingWide),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Text(l10n.importHistoryTitle, style: Theme.of(context).textTheme.titleMedium),
+          Text(
+            l10n.importHistoryTitle,
+            style: Theme.of(context).textTheme.titleMedium,
+          ),
           const SizedBox(height: AppSpacing.md),
           Expanded(
             child: switch (batches) {
@@ -47,13 +51,17 @@ class ImportHistory extends ConsumerWidget {
                 title: l10n.importHistoryEmptyTitle,
                 message: l10n.importHistoryEmptyBody,
               ),
-              AsyncData(:final value) => _HistoryTable(batches: value, accounts: accounts),
+              AsyncData(:final value) => _HistoryTable(
+                batches: value,
+                accounts: accounts,
+              ),
               AsyncError(:final error) => ErrorStateView(
                 message: localizeImportError(l10n, error),
                 messageKey: const Key('importHistoryErrorText'),
                 retryLabel: l10n.importRetry,
                 retryKey: const Key('importHistoryRetryButton'),
-                onRetry: () => ref.read(importsControllerProvider.notifier).refresh(),
+                onRetry: () =>
+                    ref.read(importsControllerProvider.notifier).refresh(),
               ),
               _ => const SkeletonList(
                 key: Key('importHistoryLoading'),
@@ -86,7 +94,8 @@ class _HistoryTable extends StatelessWidget {
           child: ListView.separated(
             key: const Key('importHistoryList'),
             itemCount: batches.length,
-            separatorBuilder: (_, _) => const Divider(color: AppColors.borderSubtle),
+            separatorBuilder: (_, _) =>
+                const Divider(color: AppColors.borderSubtle),
             itemBuilder: (context, index) => _HistoryRow(
               batch: batches[index],
               currency: _currencyFor(accounts, batches[index].accountId),
@@ -230,7 +239,9 @@ class _HistoryRow extends StatelessWidget {
                 Text(
                   message,
                   overflow: TextOverflow.ellipsis,
-                  style: AppTextStyles.mono.copyWith(color: AppColors.textDisabled),
+                  style: AppTextStyles.mono.copyWith(
+                    color: AppColors.textDisabled,
+                  ),
                 ),
               ],
             ] else if (batch.duplicateCount > 0) ...[

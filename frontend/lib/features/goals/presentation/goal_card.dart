@@ -43,7 +43,9 @@ class GoalCard extends StatelessWidget {
       // behind a green edge, so a finished goal is legible as finished from
       // across the grid rather than only in its percentage.
       gradient: goal.isReached ? AppColors.irisTintGradient : null,
-      border: goal.isReached ? Border.all(color: AppColors.positiveBorder) : null,
+      border: goal.isReached
+          ? Border.all(color: AppColors.positiveBorder)
+          : null,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         mainAxisSize: MainAxisSize.min,
@@ -115,7 +117,11 @@ class GoalPill extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           if (reached) ...[
-            const Icon(Icons.check_rounded, size: 12, color: AppColors.positive),
+            const Icon(
+              Icons.check_rounded,
+              size: 12,
+              color: AppColors.positive,
+            ),
             const SizedBox(width: AppSpacing.xs + 1),
           ],
           Text(

@@ -73,7 +73,10 @@ class AppModal extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(title, style: Theme.of(context).textTheme.headlineMedium),
+                        Text(
+                          title,
+                          style: Theme.of(context).textTheme.headlineMedium,
+                        ),
                         if (subtitle != null) ...[
                           const SizedBox(height: AppSpacing.xs),
                           subtitle!,

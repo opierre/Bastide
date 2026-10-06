@@ -51,7 +51,9 @@ class CategoryFormModal extends ConsumerStatefulWidget {
 
 class _CategoryFormModalState extends ConsumerState<CategoryFormModal> {
   final _formKey = GlobalKey<FormState>();
-  late final _nameController = TextEditingController(text: widget.initial?.name);
+  late final _nameController = TextEditingController(
+    text: widget.initial?.name,
+  );
 
   late String _kind = widget.initial?.kind ?? widget.parent?.kind ?? 'expense';
   late String? _parentId = widget.initial?.parentId ?? widget.parent?.id;
@@ -78,7 +80,8 @@ class _CategoryFormModalState extends ConsumerState<CategoryFormModal> {
   /// category parented to itself would vanish from the tree.
   List<AppCategory> _parentOptions(List<AppCategory> categories) => [
     for (final category in categories)
-      if (category.parentId == null && category.id != widget.initial?.id) category,
+      if (category.parentId == null && category.id != widget.initial?.id)
+        category,
   ];
 
   /// The chosen parent, looked up in the loaded list — falling back to the
@@ -99,7 +102,8 @@ class _CategoryFormModalState extends ConsumerState<CategoryFormModal> {
       _errorText = null;
     });
 
-    final categories = ref.read(categoriesControllerProvider).value ?? const <AppCategory>[];
+    final categories =
+        ref.read(categoriesControllerProvider).value ?? const <AppCategory>[];
     final parent = _selectedParent(categories);
     final kind = parent?.kind ?? _kind;
     final icon = parent == null ? _icon : categoryIconSlug(parent);
@@ -129,7 +133,10 @@ class _CategoryFormModalState extends ConsumerState<CategoryFormModal> {
       if (!mounted) return;
       setState(() {
         _isSubmitting = false;
-        _errorText = localizeCategoryError(AppLocalizations.of(context)!, error);
+        _errorText = localizeCategoryError(
+          AppLocalizations.of(context)!,
+          error,
+        );
       });
     }
   }
@@ -153,7 +160,10 @@ class _CategoryFormModalState extends ConsumerState<CategoryFormModal> {
       if (!mounted) return;
       setState(() {
         _isSubmitting = false;
-        _errorText = localizeCategoryError(AppLocalizations.of(context)!, error);
+        _errorText = localizeCategoryError(
+          AppLocalizations.of(context)!,
+          error,
+        );
       });
     }
   }
@@ -161,13 +171,16 @@ class _CategoryFormModalState extends ConsumerState<CategoryFormModal> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final categories = ref.watch(categoriesControllerProvider).value ?? const <AppCategory>[];
+    final categories =
+        ref.watch(categoriesControllerProvider).value ?? const <AppCategory>[];
     // A subcategory's kind, icon and colour are its parent's, so the form drops
     // those fields and names the parent under the title instead.
     final parent = _selectedParent(categories);
 
     return AppModal(
-      title: _isEditing ? l10n.categoryFormEditTitle : l10n.categoryFormCreateTitle,
+      title: _isEditing
+          ? l10n.categoryFormEditTitle
+          : l10n.categoryFormCreateTitle,
       subtitle: parent == null ? null : _ParentLine(parent: parent),
       width: 480,
       actions: [
@@ -195,7 +208,10 @@ class _CategoryFormModalState extends ConsumerState<CategoryFormModal> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             if (_errorText != null) ...[
-              InlineBanner(key: const Key('categoryFormError'), message: _errorText!),
+              InlineBanner(
+                key: const Key('categoryFormError'),
+                message: _errorText!,
+              ),
               const SizedBox(height: AppSpacing.md),
             ],
             LabeledField(
@@ -204,7 +220,9 @@ class _CategoryFormModalState extends ConsumerState<CategoryFormModal> {
                 key: const Key('categoryFormName'),
                 controller: _nameController,
                 autofocus: true,
-                decoration: InputDecoration(hintText: l10n.categoryFormNameHint),
+                decoration: InputDecoration(
+                  hintText: l10n.categoryFormNameHint,
+                ),
                 validator: (value) => (value == null || value.trim().isEmpty)
                     ? l10n.categoryFormNameRequired
                     : null,
@@ -221,7 +239,10 @@ class _CategoryFormModalState extends ConsumerState<CategoryFormModal> {
                   onChanged: (value) => setState(() => _kind = value),
                   items: [
                     for (final kind in const ['expense', 'income', 'transfer'])
-                      AppSelectItem(value: kind, label: categoryKindLabel(l10n, kind)),
+                      AppSelectItem(
+                        value: kind,
+                        label: categoryKindLabel(l10n, kind),
+                      ),
                   ],
                 ),
               ),
@@ -234,7 +255,10 @@ class _CategoryFormModalState extends ConsumerState<CategoryFormModal> {
                 value: _parentId,
                 onChanged: (value) => setState(() => _parentId = value),
                 items: [
-                  AppSelectItem(value: null, label: l10n.categoryFormParentNone),
+                  AppSelectItem(
+                    value: null,
+                    label: l10n.categoryFormParentNone,
+                  ),
                   for (final parent in _parentOptions(categories))
                     AppSelectItem(
                       value: parent.id,
@@ -302,9 +326,9 @@ class _ParentLine extends StatelessWidget {
           child: Text(
             localizedCategoryName(l10n, parent.name),
             overflow: TextOverflow.ellipsis,
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: AppColors.textSecondary,
-            ),
+            style: Theme.of(
+              context,
+            ).textTheme.bodyMedium?.copyWith(color: AppColors.textSecondary),
           ),
         ),
       ],

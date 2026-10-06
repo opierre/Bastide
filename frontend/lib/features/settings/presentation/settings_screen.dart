@@ -142,7 +142,9 @@ class _SectionNavItemState extends State<_SectionNavItem> {
           borderRadius: BorderRadius.circular(AppRadii.md),
           child: Container(
             height: AppChrome.controlPillHeight,
-            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm + AppSpacing.xs),
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppSpacing.sm + AppSpacing.xs,
+            ),
             alignment: Alignment.centerLeft,
             decoration: BoxDecoration(
               color: widget.selected
@@ -333,7 +335,9 @@ class _SettingsCard extends StatelessWidget {
             const SizedBox(height: AppSpacing.sm + AppSpacing.xs),
             Text(
               note!,
-              style: AppTextStyles.helper.copyWith(color: AppColors.textDisabled),
+              style: AppTextStyles.helper.copyWith(
+                color: AppColors.textDisabled,
+              ),
             ),
           ],
         ],

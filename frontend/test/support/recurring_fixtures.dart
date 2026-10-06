@@ -122,7 +122,9 @@ class FakeSubscriptionsController extends SubscriptionsController {
     final current = state.value;
     if (current == null) return;
     if (errorOnStatusChange != null) {
-      state = AsyncValue.data(current.copyWith(actionError: errorOnStatusChange));
+      state = AsyncValue.data(
+        current.copyWith(actionError: errorOnStatusChange),
+      );
       return;
     }
     state = AsyncValue.data(

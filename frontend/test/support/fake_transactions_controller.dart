@@ -19,8 +19,14 @@ class FakeTransactionsController extends TransactionsController {
   Future<TransactionsPage> build() async => initialPage;
 
   @override
-  Future<void> updateCategory(Transaction transaction, String categoryId) async {
-    updateCategoryCalls.add((transactionId: transaction.id, categoryId: categoryId));
+  Future<void> updateCategory(
+    Transaction transaction,
+    String categoryId,
+  ) async {
+    updateCategoryCalls.add((
+      transactionId: transaction.id,
+      categoryId: categoryId,
+    ));
     if (errorOnUpdate != null) throw errorOnUpdate!;
     _applyCategory(transaction.id, categoryId);
   }

@@ -38,12 +38,16 @@ void main() {
 
   setUp(() {
     apiClient = MockApiClient();
-    container = ProviderContainer(overrides: [apiClientProvider.overrideWithValue(apiClient)]);
+    container = ProviderContainer(
+      overrides: [apiClientProvider.overrideWithValue(apiClient)],
+    );
     addTearDown(container.dispose);
   });
 
   test('build loads the accounts list', () async {
-    when(() => apiClient.get('/accounts')).thenAnswer((_) async => [_accountJson()]);
+    when(
+      () => apiClient.get('/accounts'),
+    ).thenAnswer((_) async => [_accountJson()]);
 
     final accounts = await container.read(accountsControllerProvider.future);
 
@@ -56,7 +60,9 @@ void main() {
     when(() => apiClient.get('/accounts')).thenAnswer((_) async => <dynamic>[]);
     when(
       () => apiClient.post('/accounts', body: any(named: 'body')),
-    ).thenAnswer((_) async => _accountJson(id: 'a2', name: 'Livret A', type: 'savings'));
+    ).thenAnswer(
+      (_) async => _accountJson(id: 'a2', name: 'Livret A', type: 'savings'),
+    );
 
     await container.read(accountsControllerProvider.future);
     await container
@@ -73,26 +79,40 @@ void main() {
     expect(state!.single.id, 'a2');
   });
 
-  test('create failure rethrows and leaves the existing list untouched', () async {
-    when(() => apiClient.get('/accounts')).thenAnswer((_) async => [_accountJson()]);
-    when(
-      () => apiClient.post('/accounts', body: any(named: 'body')),
-    ).thenThrow(const ApiFailure(code: 'VALIDATION_ERROR', message: 'Invalid'));
+  test(
+    'create failure rethrows and leaves the existing list untouched',
+    () async {
+      when(
+        () => apiClient.get('/accounts'),
+      ).thenAnswer((_) async => [_accountJson()]);
+      when(
+        () => apiClient.post('/accounts', body: any(named: 'body')),
+      ).thenThrow(
+        const ApiFailure(code: 'VALIDATION_ERROR', message: 'Invalid'),
+      );
 
-    await container.read(accountsControllerProvider.future);
+      await container.read(accountsControllerProvider.future);
 
-    await expectLater(
-      () => container
-          .read(accountsControllerProvider.notifier)
-          .create(name: '', type: AccountType.checking, institution: 'X', openingBalanceMinor: 0),
-      throwsA(isA<ApiFailure>()),
-    );
+      await expectLater(
+        () => container
+            .read(accountsControllerProvider.notifier)
+            .create(
+              name: '',
+              type: AccountType.checking,
+              institution: 'X',
+              openingBalanceMinor: 0,
+            ),
+        throwsA(isA<ApiFailure>()),
+      );
 
-    expect(container.read(accountsControllerProvider).value, hasLength(1));
-  });
+      expect(container.read(accountsControllerProvider).value, hasLength(1));
+    },
+  );
 
   test('archive removes the account from state', () async {
-    when(() => apiClient.get('/accounts')).thenAnswer((_) async => [_accountJson(id: 'a1')]);
+    when(
+      () => apiClient.get('/accounts'),
+    ).thenAnswer((_) async => [_accountJson(id: 'a1')]);
     when(() => apiClient.delete('/accounts/a1')).thenAnswer((_) async => null);
 
     await container.read(accountsControllerProvider.future);

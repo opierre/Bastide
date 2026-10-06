@@ -170,5 +170,6 @@ class _AreaLinePainter extends CustomPainter {
 
   @override
   bool shouldRepaint(_AreaLinePainter oldDelegate) =>
-      !listEquals(oldDelegate.values, values) || oldDelegate.gridlines != gridlines;
+      !listEquals(oldDelegate.values, values) ||
+      oldDelegate.gridlines != gridlines;
 }

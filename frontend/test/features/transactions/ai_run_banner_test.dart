@@ -89,7 +89,10 @@ class FakeRunController extends RunController {
   RunState build() => initial;
 
   @override
-  Future<void> start({String? accountId, RunScope scope = RunScope.pending}) async {
+  Future<void> start({
+    String? accountId,
+    RunScope scope = RunScope.pending,
+  }) async {
     startCalls++;
     lastAccountId = accountId;
   }
@@ -153,7 +156,9 @@ void main() {
   testWidgets('the running banner replaces the header card', (tester) async {
     _useDesktopSurface(tester);
     await tester.pumpWidget(
-      _wrap(run: FakeRunController(RunState(run: _run(status: RunStatus.running)))),
+      _wrap(
+        run: FakeRunController(RunState(run: _run(status: RunStatus.running))),
+      ),
     );
     await tester.pump();
 
@@ -181,7 +186,9 @@ void main() {
 
   testWidgets('the header card is restored once the run ends', (tester) async {
     _useDesktopSurface(tester);
-    final run = FakeRunController(RunState(run: _run(status: RunStatus.running)));
+    final run = FakeRunController(
+      RunState(run: _run(status: RunStatus.running)),
+    );
     await tester.pumpWidget(_wrap(run: run));
     await tester.pump();
 
@@ -212,13 +219,17 @@ void main() {
   ) async {
     _useDesktopSurface(tester);
     final run = FakeRunController(
-      RunState(run: _run(status: RunStatus.partial, processed: 213, failed: 12)),
+      RunState(
+        run: _run(status: RunStatus.partial, processed: 213, failed: 12),
+      ),
     );
     await tester.pumpWidget(_wrap(run: run));
     await tester.pump();
 
     expect(
-      find.text("Catégorisation terminée — 12 transactions n'ont pas pu être analysées."),
+      find.text(
+        "Catégorisation terminée — 12 transactions n'ont pas pu être analysées.",
+      ),
       findsOneWidget,
     );
     expect(find.byKey(const Key('aiRunBannerAction')), findsOneWidget);
@@ -231,7 +242,9 @@ void main() {
     expect(find.byKey(const Key('aiRunPartialBanner')), findsNothing);
   });
 
-  testWidgets('a failed run reports plainly and blocks nothing', (tester) async {
+  testWidgets('a failed run reports plainly and blocks nothing', (
+    tester,
+  ) async {
     _useDesktopSurface(tester);
     final run = FakeRunController(
       RunState(run: _run(status: RunStatus.failed, processed: 0, assigned: 0)),
@@ -240,14 +253,19 @@ void main() {
     await tester.pump();
 
     expect(find.byKey(const Key('aiRunFailedBanner')), findsOneWidget);
-    expect(find.text("La catégorisation n'a pas pu s'exécuter."), findsOneWidget);
+    expect(
+      find.text("La catégorisation n'a pas pu s'exécuter."),
+      findsOneWidget,
+    );
     expect(find.byKey(const Key('reviewQueueList')), findsOneWidget);
   });
 
   testWidgets('a run that succeeded says nothing at all', (tester) async {
     _useDesktopSurface(tester);
     final run = FakeRunController(
-      RunState(run: _run(status: RunStatus.success, processed: 213, deferred: 0)),
+      RunState(
+        run: _run(status: RunStatus.success, processed: 213, deferred: 0),
+      ),
     );
     await tester.pumpWidget(_wrap(run: run));
     await tester.pump();

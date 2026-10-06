@@ -45,7 +45,9 @@ class SeriesFormModal extends ConsumerStatefulWidget {
 
 class _SeriesFormModalState extends ConsumerState<SeriesFormModal> {
   final _formKey = GlobalKey<FormState>();
-  late final _labelController = TextEditingController(text: widget.initial?.label);
+  late final _labelController = TextEditingController(
+    text: widget.initial?.label,
+  );
   final _amountController = TextEditingController();
 
   /// Guards the one-time locale-aware fill of [_amountController]. Done in
@@ -133,7 +135,10 @@ class _SeriesFormModalState extends ConsumerState<SeriesFormModal> {
       if (!mounted) return;
       setState(() {
         _isSubmitting = false;
-        _errorText = localizeRecurringError(AppLocalizations.of(context)!, error);
+        _errorText = localizeRecurringError(
+          AppLocalizations.of(context)!,
+          error,
+        );
       });
     }
   }
@@ -142,11 +147,14 @@ class _SeriesFormModalState extends ConsumerState<SeriesFormModal> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final accounts = ref.watch(subscriptionAccountsProvider).value ?? const [];
-    final categories = ref.watch(subscriptionCategoriesProvider).value ?? const [];
+    final categories =
+        ref.watch(subscriptionCategoriesProvider).value ?? const [];
     final selectedAccount = _accountId ?? accounts.firstOrNull?.id;
 
     return AppModal(
-      title: _isEditing ? l10n.subscriptionFormEditTitle : l10n.subscriptionFormCreateTitle,
+      title: _isEditing
+          ? l10n.subscriptionFormEditTitle
+          : l10n.subscriptionFormCreateTitle,
       width: 480,
       actions: [
         OutlinedButton(
@@ -156,7 +164,9 @@ class _SeriesFormModalState extends ConsumerState<SeriesFormModal> {
         ),
         PrimaryButton(
           key: const Key('seriesFormSubmit'),
-          label: _isEditing ? l10n.subscriptionFormSave : l10n.subscriptionFormSubmit,
+          label: _isEditing
+              ? l10n.subscriptionFormSave
+              : l10n.subscriptionFormSubmit,
           isLoading: _isSubmitting,
           onPressed: _isSubmitting || accounts.isEmpty
               ? null
@@ -176,7 +186,10 @@ class _SeriesFormModalState extends ConsumerState<SeriesFormModal> {
             ),
             const SizedBox(height: AppSpacing.md),
             if (_errorText != null) ...[
-              InlineBanner(key: const Key('seriesFormError'), message: _errorText!),
+              InlineBanner(
+                key: const Key('seriesFormError'),
+                message: _errorText!,
+              ),
               const SizedBox(height: AppSpacing.md),
             ],
             LabeledField(
@@ -204,7 +217,8 @@ class _SeriesFormModalState extends ConsumerState<SeriesFormModal> {
                         // silently does nothing is worse than not offering it.
                         : _isEditing
                         ? ReadOnlyField(
-                            value: accounts
+                            value:
+                                accounts
                                     .where((a) => a.id == selectedAccount)
                                     .firstOrNull
                                     ?.displayName ??
@@ -213,7 +227,8 @@ class _SeriesFormModalState extends ConsumerState<SeriesFormModal> {
                         : AppSelect<String>(
                             key: const Key('seriesFormAccount'),
                             value: selectedAccount ?? accounts.first.id,
-                            onChanged: (value) => setState(() => _accountId = value),
+                            onChanged: (value) =>
+                                setState(() => _accountId = value),
                             items: [
                               for (final account in accounts)
                                 AppSelectItem(
@@ -232,9 +247,13 @@ class _SeriesFormModalState extends ConsumerState<SeriesFormModal> {
                     child: TextFormField(
                       key: const Key('seriesFormAmount'),
                       controller: _amountController,
-                      keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                      keyboardType: const TextInputType.numberWithOptions(
+                        decimal: true,
+                      ),
                       validator: (value) {
-                        final locale = Localizations.localeOf(context).toString();
+                        final locale = Localizations.localeOf(
+                          context,
+                        ).toString();
                         return _parseMinorUnits(value ?? '', locale) == null
                             ? l10n.subscriptionFormAmountInvalid
                             : null;

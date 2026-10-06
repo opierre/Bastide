@@ -24,7 +24,9 @@ class CategoriesTopBarActions extends ConsumerWidget {
     final isRules = view == CategoriesView.rules;
 
     return PrimaryButton(
-      key: isRules ? const Key('addRuleButton') : const Key('addCategoryButton'),
+      key: isRules
+          ? const Key('addRuleButton')
+          : const Key('addCategoryButton'),
       label: isRules ? l10n.rulesAddButton : l10n.categoriesAddButton,
       icon: Icons.add_rounded,
       onPressed: () =>

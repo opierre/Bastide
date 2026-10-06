@@ -7,6 +7,7 @@ from fastapi.testclient import TestClient
 
 from app.features.imports.canonical import normalize
 from app.features.imports.parsers.ofx import OfxParseError, parse, parse_ledger_balance
+from tests.api import register as _register
 
 FIXTURES = Path(__file__).resolve().parent.parent.parent / "fixtures" / "imports"
 
@@ -16,21 +17,6 @@ ACCOUNT_PAYLOAD = {
     "institution": "BNP Paribas",
     "opening_balance_minor": 100_000,
 }
-
-
-def _register(client: TestClient, email: str = "amelie@example.com") -> dict[str, str]:
-    response = client.post(
-        "/api/v1/auth/register",
-        json={
-            "email": email,
-            "password": "correct-horse-battery-staple",
-            "display_name": "Amelie",
-            "locale": "fr",
-            "currency": "eur",
-        },
-    )
-    token = response.json()["token"]
-    return {"Authorization": f"Bearer {token}"}
 
 
 def _create_account(client: TestClient, headers: dict[str, str]) -> str:
