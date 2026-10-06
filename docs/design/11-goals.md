@@ -1,6 +1,6 @@
-# 11 — Objectifs (Phase 2)
+# 11 — Objectifs
 
-Everything below is exactly what the mockup frames `11-Objectifs — *` in `FinStride Phase 2 Mockups.dc.html` show. Colors, amounts, order, and positions are normative — do not invent. Tokens per `00-shared-design-block.md`.
+Everything below is exactly what the mockup frames `11-Objectifs — *` in the Gestion & AI mockup canvas show. Colors, amounts, order, and positions are normative — do not invent. Tokens per `00-shared-design-block.md`.
 
 ## Concept (binding)
 Goals are **virtual envelopes** — on-paper allocations that never modify accounts and never create transactions. A goal is NOT linked to any specific account: no account is shown anywhere on a goal card, in the detail header, or in the allocation modal. The only account-level fact used is the aggregate savings total for the over-allocation banner.

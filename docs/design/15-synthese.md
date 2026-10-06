@@ -1,6 +1,6 @@
-# 15 — Synthèse (Phase 3)
+# 15 — Synthèse
 
-Everything below is exactly what the mockup frames `15-Synthèse — *` in `FinStride Phase 3 Mockups.dc.html` show. Colors, amounts, order and positions are normative — do not invent. Tokens per `00-shared-design-block.md`.
+Everything below is exactly what the mockup frames `15-Synthèse — *` in the Patrimoine mockup canvas show. Colors, amounts, order and positions are normative — do not invent. Tokens per `00-shared-design-block.md`.
 
 ## Concept (binding)
 Net worth = accounts + held share of declared properties − outstanding loan principal. It is a **neutral figure even when positive or negative** (exactly like dashboard « Net »), displayed with a leading `−` (U+2212) when negative. Property values are **held flat at their declared value**: the 12-month series only moves through accounts and loans, and the panel says so inline. What is deliberately **not counted** — objectifs, abonnements — is stated in the panel, one quiet line each. The property list lives here.
