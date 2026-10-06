@@ -30,7 +30,7 @@ jobs:
   backend:
     name: backend
     if: inputs.backend
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     defaults:
       run:
         working-directory: backend
@@ -47,25 +47,28 @@ jobs:
       - name: Install dependencies
         run: uv sync --frozen
       - name: pytest
-        run: uv run pytest -q --junitxml="${RUNNER_TEMP}/pytest-junit.xml"
+        # Coverage settings live in pyproject.toml; this only adds the XML report.
+        run: uv run pytest -q --junitxml="${RUNNER_TEMP}/pytest-junit.xml" --cov --cov-report=xml:"${RUNNER_TEMP}/coverage.xml"
       - name: Job summary
         if: always()
         run: |
           python3 "${GITHUB_WORKSPACE}/.github/scripts/ci_summary.py" \
-            --pytest-junit "${RUNNER_TEMP}/pytest-junit.xml"
+            --pytest-junit "${RUNNER_TEMP}/pytest-junit.xml"             --coverage-xml "${RUNNER_TEMP}/coverage.xml"
       - name: Upload test report
         if: always()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: backend-test-report
-          path: ${{ runner.temp }}/pytest-junit.xml
+          path: |
+            ${{ runner.temp }}/pytest-junit.xml
+            ${{ runner.temp }}/coverage.xml
           retention-days: 14
           if-no-files-found: warn
 
   frontend:
     name: frontend
     if: inputs.frontend
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     defaults:
       run:
         working-directory: frontend
@@ -84,17 +87,20 @@ jobs:
       # --file-reporter adds a machine-readable copy without displacing the
       # stdout reporter, which is already `github` when running on Actions.
       - name: flutter test
-        run: flutter test --file-reporter="json:${RUNNER_TEMP}/dart-tests.json"
+        run: |
+          flutter test --file-reporter="json:${RUNNER_TEMP}/dart-tests.json"             --coverage --coverage-path="${RUNNER_TEMP}/lcov.info"
       - name: Job summary
         if: always()
         run: |
           python3 "${GITHUB_WORKSPACE}/.github/scripts/ci_summary.py" \
-            --dart-json "${RUNNER_TEMP}/dart-tests.json"
+            --dart-json "${RUNNER_TEMP}/dart-tests.json"             --lcov "${RUNNER_TEMP}/lcov.info"
       - name: Upload test report
         if: always()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: frontend-test-report
-          path: ${{ runner.temp }}/dart-tests.json
+          path: |
+            ${{ runner.temp }}/dart-tests.json
+            ${{ runner.temp }}/lcov.info
           retention-days: 14
           if-no-files-found: warn

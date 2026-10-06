@@ -16,7 +16,14 @@ MAX_ROWS = 25
 
 # Alert flavour per verdict. TIP renders green, CAUTION red, WARNING amber.
 ALERT = {"pass": "TIP", "fail": "CAUTION", "warn": "WARNING", "info": "NOTE"}
-ICON = {"pass": "✅", "fail": "❌", "warn": "⚠️", "info": "ℹ️", "skip": "⏭️"}
+ICON = {
+    "pass": "✅",
+    "fail": "❌",
+    "warn": "⚠️",
+    "info": "ℹ️",
+    "skip": "⏭️",
+    "measure": "📊",
+}
 
 
 def relative(path: str) -> str:

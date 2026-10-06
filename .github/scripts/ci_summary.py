@@ -14,6 +14,8 @@ so a red job says what broke without opening the raw log.
   --analyze-log       flutter analyze output
   --dart-format-log   dart format --set-exit-if-changed output
   --dart-json         flutter test --file-reporter=json:<path>
+  --coverage-xml      pytest --cov-report=xml       (informational, never red)
+  --lcov              flutter test --coverage       (informational, never red)
   --gitleaks          gitleaks --report-format=json
 
 Every input is optional, and a missing or unparsable report is noted inline
@@ -53,7 +55,7 @@ class Check:
     """One tool's verdict: `result` fills the table cell, `detail` the fold."""
 
     name: str
-    status: str  # pass | fail | warn
+    status: str  # pass | fail | warn | measure (a number, not a verdict)
     result: str
     detail: list[str] = field(default_factory=list)
     note: str = ""  # one line for the callout when the check did not pass
@@ -353,6 +355,70 @@ def dart_json(name: str, path: Path) -> Check:
     )
 
 
+# --- coverage -----------------------------------------------------------------
+
+# How many of the least covered files the fold lists.
+COVERAGE_ROWS = 10
+
+# `flutter gen-l10n` output: thousands of generated lines no test is meant to drive.
+LCOV_GENERATED = ("lib/l10n/",)
+
+
+def percent(covered: int, total: int) -> str:
+    return f"{100 * covered / total:.1f}%" if total else "n/a"
+
+
+def coverage(name: str, files: list[tuple[str, int, int]], extra: str = "") -> Check:
+    """Shared rendering for (file, covered lines, total lines) rows."""
+    covered = sum(c for _, c, _ in files)
+    total = sum(t for _, _, t in files)
+    result = f"**{percent(covered, total)}** of lines ({covered:,} / {total:,}){extra}"
+    gaps = sorted((f for f in files if f[1] < f[2]), key=lambda f: (f[1] / f[2], -f[2]))
+    rows = [[f"`{path}`", percent(c, t), f"{t - c:,}"] for path, c, t in gaps]
+    detail = (
+        details(
+            f"Least covered files ({min(len(rows), COVERAGE_ROWS)} of {len(rows)} not fully covered)",
+            table(["File", "Lines", "Missed"], rows, limit=COVERAGE_ROWS),
+        )
+        if rows
+        else []
+    )
+    return Check(name, "measure", result, detail)
+
+
+def cobertura(name: str, path: Path) -> Check:
+    """coverage.py's XML report (pytest --cov-report=xml)."""
+    root = ET.parse(path).getroot()
+    files: dict[str, list[int]] = {}
+    for cls in root.iter("class"):
+        hits = [int(line.get("hits", "0")) for line in cls.iter("line")]
+        # Paths are relative to the measured source, `app/` here.
+        entry = files.setdefault(
+            f"app/{cls.get('filename', '?')}".replace("\\", "/"), [0, 0]
+        )
+        entry[0] += sum(1 for h in hits if h)
+        entry[1] += len(hits)
+    extra = ""
+    if int(root.get("branches-valid") or 0):
+        extra = f" · **{percent(int(root.get('branches-covered') or 0), int(root.get('branches-valid') or 0))}** of branches"
+    return coverage(name, [(p, c, t) for p, (c, t) in files.items()], extra)
+
+
+def lcov(name: str, path: Path) -> Check:
+    """flutter test --coverage's lcov.info."""
+    files: list[tuple[str, int, int]] = []
+    current, found, hit = "", 0, 0
+    for line in lines_of(path):
+        if line.startswith("SF:"):
+            current, found, hit = line[3:].replace("\\", "/"), 0, 0
+        elif line.startswith("DA:"):
+            found += 1
+            hit += line.split(",")[1] != "0"
+        elif line == "end_of_record" and not current.startswith(LCOV_GENERATED):
+            files.append((current, hit, found))
+    return coverage(name, files)
+
+
 # --- security -----------------------------------------------------------------
 
 
@@ -446,6 +512,10 @@ def main() -> int:
         "--dart-json", type=Path, help="flutter test --file-reporter=json report"
     )
     parser.add_argument(
+        "--coverage-xml", type=Path, help="pytest --cov-report=xml report"
+    )
+    parser.add_argument("--lcov", type=Path, help="flutter test --coverage lcov.info")
+    parser.add_argument(
         "--gitleaks", type=Path, help="gitleaks --report-format=json report"
     )
     args = parser.parse_args()
@@ -456,9 +526,11 @@ def main() -> int:
         ("ruff format", args.ruff_format_log, ruff_format),
         ("ty check", args.ty_junit, ty_junit),
         ("pytest", args.pytest_junit, pytest_junit),
+        ("coverage", args.coverage_xml, cobertura),
         ("flutter analyze", args.analyze_log, flutter_analyze),
         ("dart format", args.dart_format_log, dart_format),
         ("flutter test", args.dart_json, dart_json),
+        ("coverage", args.lcov, lcov),
         ("gitleaks", args.gitleaks, gitleaks),
     ]
     checks = [run(name, path, parse) for name, path, parse in plan if path]
