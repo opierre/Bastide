@@ -1,5 +1,0 @@
-# False positive: generic-api-key on a nav-glyph description in the P3-11 task card.
-# Don't quote the matched text here, or this file gets flagged too.
-7e99e020f7ada2c3a85ebb2b1764830470b4038d:docs/tasks/Phase3/P3-11-patrimoine-nav.md:generic-api-key:32
-# The first version of this file quoted that text.
-9502014c12431fb102e75abe62f1f31866501ccc:.gitleaksignore:generic-api-key:1
