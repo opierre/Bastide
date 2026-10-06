@@ -15,7 +15,7 @@
 
 1. **Load the relevant skill before working.** Work on the backend? Load `fastapi-backend` + `database` + `testing`. Frontend? Load `flutter-frontend` + `design-system` + `i18n-l10n` + `testing`. Making structural changes? Load `architecture`. Committing? Load `git-conventional-commits`. If unsure, ask.
 
-2. **Stop and ask if a decision isn't covered.** This monorepo spec and the skill docs answer most questions. If something—architecture choice, tech debt, a UI decision—falls outside them, stop and ask the user instead of guessing.
+2. **Stop and ask if a decision isn't covered.** The skills and the generated references answer most questions. If something—architecture choice, tech debt, a UI decision—falls outside them, stop and ask the user instead of guessing.
 
 3. **Conventional Commits.** Every commit must follow the Conventional Commits format: `type(scope): subject` where type ∈ `{feat, fix, docs, refactor, test, chore, build, ci, perf}` and scope is the feature name. One logical change per commit.
 
@@ -29,7 +29,6 @@
 
 ## See also
 
-- `PROJECT.md` for the vision, scope, decisions and their rationale.
 - `docs/database.md` and `docs/api.md` for the schema and endpoints — generated from the code, never edited by hand.
 - `backend/CLAUDE.md` for Python/FastAPI rules.
 - `frontend/CLAUDE.md` for Flutter/Dart rules.

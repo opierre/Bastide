@@ -39,4 +39,4 @@
 ## See also
 
 - Root `CLAUDE.md` for global conventions.
-- `PROJECT.md` for decisions and architecture; `docs/api.md` for the generated endpoint reference; `docs/design/` for the binding design specs.
+- `docs/api.md` for the generated endpoint reference; `docs/design/` for the binding design specs.

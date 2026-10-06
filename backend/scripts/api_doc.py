@@ -23,8 +23,7 @@ _HEADER = f"""\
      Do not edit by hand: run `uv run python -m scripts.api_doc` from `backend/`. -->
 
 > [!NOTE]
-> Generated from the running app's OpenAPI schema, so it always matches the routes. The
-> conventions and the reasoning behind the contract live in [`PROJECT.md`](../PROJECT.md) §5.
+> Generated from the running app's OpenAPI schema, so it always matches the routes.
 > With the sidecar running, the interactive docs are at `http://127.0.0.1:8765/docs`.
 
 Every path is under `{_PREFIX}`, takes a bearer token (except `register`, `login` and `health`),

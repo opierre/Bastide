@@ -6,7 +6,7 @@ description: Use for transaction categorization and the AI insights feature in t
 # AI Categorization
 
 Assigns categories to transactions cheaply, deterministically where possible, with the model
-only on the uncertain remainder and a human in the loop. Source of truth: `PROJECT.md` §7.
+only on the uncertain remainder and a human in the loop.
 
 ## Two-stage pipeline
 
@@ -33,7 +33,9 @@ tokens and full reproducibility.
 - The runtime is reached over an **OpenAI-compatible `/v1` HTTP API on loopback**, which both
   `llama-server` (llama.cpp) and Ollama expose. Never call runtime-specific endpoints: the base
   URL and model tag are user settings, so which engine is running must not be visible above the
-  client. See `PROJECT.md` §3 for why, and §19 for the open packaging decision.
+  client. Whether to bundle `llama-server` and/or model weights with the installer, or
+  require a separate Ollama install, is an **open decision** — ask the user before building
+  anything that depends on it.
 - Only **unmatched** transactions reach the model. The prompt contains: the localized category
   list (id + name + kind), the transaction's `description_clean`/`merchant`/amount sign, and a
   small few-shot set. The model returns a `category_id` + a `confidence` in [0,1].
@@ -45,7 +47,6 @@ tokens and full reproducibility.
   it — and parse defensively regardless: a malformed reply ⇒ treat as uncertain, never crash.
 - **Stage 2 runs asynchronously**, in a tracked `categorization_run`, never inside the import
   request. One run at a time per user; progress committed per batch; cancellation cooperative.
-  `PROJECT.md` §7 holds the full run mechanics.
 
 This is the small-model-with-deferral pattern: cheap model on the easy part, human on the rest.
 
@@ -67,7 +68,7 @@ This is the small-model-with-deferral pattern: cheap model on the easy part, hum
   Finance Initiative models, Llama-3.1/Qwen-3 based, strong fr+en financial vocabulary). The
   domain tuning helps with French financial terminology where a general small model is weaker.
   Would run on the same runtime, selectable in settings. **Not built and not scheduled**
-  (`PROJECT.md` §19) — only the categorization path exists.
+  — only the categorization path exists.
 - Model names/tags are **config**, never hardcoded in logic. Settings exposes model choice and
   the confidence threshold.
 

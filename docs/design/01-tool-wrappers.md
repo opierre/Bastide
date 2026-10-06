@@ -13,7 +13,7 @@ Prompt shape used for this set: paste 00-shared-design-block.md verbatim as bind
 The « Patrimoine » panels (12 Crédits · 14 Simulateur · 15 Synthèse; 13 Impôts was dropped with
 the tax feature) were generated in one run from a dedicated prompt; their frames live in the
 Patrimoine mockup canvas. Regenerating one panel means re-pasting `00-shared-design-block.md` +
-`PROJECT.md` §15–§18 + that panel's file only, after re-reading the amendment paragraphs below.
+that panel's file only, after re-reading the amendment paragraphs below.
 Review decisions recorded during that run: total estimé 4 419,99 € (components account exactly),
 capacity derived from the simulation's own terms, Synthèse = "Net worth" in EN, invented
 comparison/series/charges figures marked « à fournir ».

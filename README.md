@@ -78,7 +78,6 @@ flowchart LR
 
 | Document | What's inside |
 |----------|---------------|
-| [`PROJECT.md`](PROJECT.md) | Vision, scope, architecture, and every design decision with its rationale |
 | [`docs/database.md`](docs/database.md) | ER diagram and constraints, **generated** from the migrated database |
 | [`docs/api.md`](docs/api.md) | Every endpoint, **generated** from the OpenAPI schema |
 | [`docs/development.md`](docs/development.md) | Setup, running, CI checks, and working with coding agents |
@@ -98,7 +97,6 @@ FinStride/
 ├── frontend/           Flutter desktop app · lib/features/<feature>/ · ARB l10n (fr, en)
 ├── docs/               generated references, design specs, JSON schemas, dev guide
 ├── .claude/skills/     conventions for coding agents
-├── PROJECT.md          decisions and architecture
 └── CLAUDE.md           global agent conventions (backend/ and frontend/ extend it)
 ```
 

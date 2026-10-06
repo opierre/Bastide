@@ -10,7 +10,7 @@ AI aesthetics, typography pairing, motion restraint), also follow the **frontend
 This skill supplies the project-specific, non-negotiable tokens and invariants.
 
 > **`docs/design/00-shared-design-block.md` is binding.** It transcribes the drawn mockup and
-> outranks this file and `PROJECT.md` §9 wherever they disagree. Panel specs live in
+> outranks this file wherever they disagree. Panel specs live in
 > `docs/design/02-*.md` … `09-*.md`; each is self-contained when paired with `00`. This skill
 > summarises `00` — if you are about to write UI code, read `00` itself.
 

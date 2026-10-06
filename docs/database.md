@@ -4,8 +4,7 @@
      Do not edit by hand: run `uv run python -m scripts.schema_doc` from `backend/`. -->
 
 > [!NOTE]
-> Generated from the Alembic migrations at head, so it always matches the real schema. The
-> conventions and the reasoning behind each table live in [`PROJECT.md`](../PROJECT.md) §4.
+> Generated from the Alembic migrations at head, so it always matches the real schema.
 
 Conventions visible below: primary keys are UUID strings, money columns end in `_minor`
 (signed integer minor units), rates end in `_bps` (integer basis points), and timestamps are

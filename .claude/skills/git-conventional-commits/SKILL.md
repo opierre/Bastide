@@ -6,7 +6,7 @@ description: Use whenever committing code, splitting work into commits, or writi
 # Git — Conventional Commits
 
 Every change is committed as one or more Conventional Commits so history is readable and any
-change can be rolled back cleanly. `PROJECT.md` §8 states the rule; this skill is the how-to.
+change can be rolled back cleanly.
 
 ## Format
 
@@ -29,7 +29,7 @@ change can be rolled back cleanly. `PROJECT.md` §8 states the rule; this skill 
 |------|---------|
 | `feat` | a user-facing capability or new behaviour |
 | `fix` | a bug fix |
-| `docs` | docs only (PROJECT.md, skills, README, comments-only) |
+| `docs` | docs only (README, docs/, skills, comments-only) |
 | `refactor` | code change that neither fixes a bug nor adds a feature |
 | `test` | adding or correcting tests only |
 | `chore` | tooling, deps, config, scaffolding with no app behaviour change |

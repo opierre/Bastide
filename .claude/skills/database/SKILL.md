@@ -6,8 +6,8 @@ description: Use for any database work in the finstride — defining or changing
 # Database
 
 Persistence rules for the local SQLite datastore, written so a future switch to PostgreSQL
-is a dialect/connection change, not a rewrite. The schema is in `docs/database.md` (generated);
-the rules and the reasoning behind it are in `PROJECT.md` §4.
+is a dialect/connection change, not a rewrite. The schema is in `docs/database.md`, generated
+from the migrations.
 
 ## The stack
 
@@ -50,7 +50,7 @@ the rules and the reasoning behind it are in `PROJECT.md` §4.
 ## Balances — authoritative ledger, fast reads
 
 The ledger is the source of truth; the balance is derived but **not** summed over all rows on
-every read (`PROJECT.md` §4):
+every read:
 
 1. `accounts.cached_balance_minor` is updated by **delta** on every transaction insert / edit /
    delete (`new = old ± Δamount`), inside the same DB transaction as the change. O(1) reads.

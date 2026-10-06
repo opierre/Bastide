@@ -37,4 +37,4 @@
 ## See also
 
 - Root `CLAUDE.md` for global conventions.
-- `PROJECT.md` for decisions and architecture; `docs/database.md` and `docs/api.md` for the generated schema and endpoint references.
+- `docs/database.md` and `docs/api.md` for the generated schema and endpoint references.

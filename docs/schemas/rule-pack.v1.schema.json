@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://finstride.app/schemas/rule-pack.v1.schema.json",
   "title": "FinStride rule pack, version 1",
-  "description": "A portable, shareable set of deterministic categorization rules. Carries no ids, no priorities, and no user data, so the same file imports cleanly on any install. Categories are referenced by their system i18n key rather than by id, which is what makes a pack portable across installs and across locales. See PROJECT.md §4 (Categorisation rules).",
+  "description": "A portable, shareable set of deterministic categorization rules. Carries no ids, no priorities, and no user data, so the same file imports cleanly on any install. Categories are referenced by their system i18n key rather than by id, which is what makes a pack portable across installs and across locales.",
   "type": "object",
   "required": ["format_version", "name", "rules"],
   "additionalProperties": false,

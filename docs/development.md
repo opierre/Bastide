@@ -86,9 +86,8 @@ rules.
 - **Cross-cutting change** (e.g. an API-contract change touching both sides)? Start from the repo
   root so both folders are in scope.
 
-Narrower context means fewer tokens and far less drift. Point the agent at the relevant
-`PROJECT.md` section and the skills it should load, ask it to stop when a decision isn't covered
-by `PROJECT.md` or the skills, and review the diff before committing.
+Narrower context means fewer tokens and far less drift. Point the agent at the skills it should load, ask it to stop when a decision isn't covered by
+the skills, and review the diff before committing.
 
 ---
 
