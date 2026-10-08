@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../features/auth/application/auth_controller.dart';
+import '../../features/settings/application/settings_section_request.dart';
 import '../../l10n/app_localizations.dart';
 import '../navigation/sidebar_controller.dart';
 import '../session/current_user_provider.dart';
@@ -221,6 +222,7 @@ class AppShell extends ConsumerWidget {
                     title: active?.label ?? '',
                     subtitle: active?.subtitle ?? '',
                     actions: actionsBuilder?.call(context) ?? const [],
+                    onNavigate: onNavigate,
                   ),
                   Expanded(
                     child: ColoredBox(
@@ -752,11 +754,13 @@ class _TopBar extends StatelessWidget {
     required this.title,
     required this.subtitle,
     required this.actions,
+    required this.onNavigate,
   });
 
   final String title;
   final String subtitle;
   final List<Widget> actions;
+  final ValueChanged<String> onNavigate;
 
   @override
   Widget build(BuildContext context) {
@@ -802,15 +806,19 @@ class _TopBar extends StatelessWidget {
             action,
           ],
           const SizedBox(width: AppSpacing.sm + AppSpacing.xs),
-          const _UserPill(),
+          _UserPill(onNavigate: onNavigate),
         ],
       ),
     );
   }
 }
 
+enum _UserMenuAction { editProfile, logout }
+
 class _UserPill extends ConsumerWidget {
-  const _UserPill();
+  const _UserPill({required this.onNavigate});
+
+  final ValueChanged<String> onNavigate;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -820,27 +828,38 @@ class _UserPill extends ConsumerWidget {
 
     final textTheme = Theme.of(context).textTheme;
 
-    return PopupMenuButton<void>(
+    // Items carry a non-null value: PopupMenuButton reports a null selection
+    // as a cancel and never calls onSelected.
+    return PopupMenuButton<_UserMenuAction>(
       key: const Key('userMenuButton'),
       tooltip: '',
       position: PopupMenuPosition.under,
       offset: const Offset(0, AppSpacing.sm),
-      onSelected: (_) => ref.read(authControllerProvider.notifier).logout(),
+      onSelected: (action) {
+        switch (action) {
+          case _UserMenuAction.editProfile:
+            ref
+                .read(settingsSectionRequestProvider.notifier)
+                .request(SettingsSection.profile);
+            onNavigate('/settings');
+          case _UserMenuAction.logout:
+            // Signing out flips the session to null; the router's auth
+            // redirect then takes the user back to the login screen.
+            ref.read(authControllerProvider.notifier).logout();
+        }
+      },
       itemBuilder: (context) => [
-        PopupMenuItem<void>(
+        _menuItem(
+          key: const Key('userMenuEditProfileItem'),
+          value: _UserMenuAction.editProfile,
+          icon: Icons.person_outline_rounded,
+          label: l10n.userMenuEditProfile,
+        ),
+        _menuItem(
           key: const Key('userMenuLogoutItem'),
-          value: null,
-          child: Row(
-            children: [
-              const Icon(
-                Icons.logout_rounded,
-                size: 16,
-                color: AppColors.textSecondary,
-              ),
-              const SizedBox(width: AppSpacing.sm),
-              Text(l10n.userMenuLogout),
-            ],
-          ),
+          value: _UserMenuAction.logout,
+          icon: Icons.logout_rounded,
+          label: l10n.userMenuLogout,
         ),
       ],
       child: Container(
@@ -885,6 +904,25 @@ class _UserPill extends ConsumerWidget {
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  PopupMenuItem<_UserMenuAction> _menuItem({
+    required Key key,
+    required _UserMenuAction value,
+    required IconData icon,
+    required String label,
+  }) {
+    return PopupMenuItem<_UserMenuAction>(
+      key: key,
+      value: value,
+      child: Row(
+        children: [
+          Icon(icon, size: 16, color: AppColors.textSecondary),
+          const SizedBox(width: AppSpacing.sm),
+          Flexible(child: Text(label, overflow: TextOverflow.ellipsis)),
+        ],
       ),
     );
   }

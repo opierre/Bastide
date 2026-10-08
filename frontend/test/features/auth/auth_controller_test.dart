@@ -117,6 +117,7 @@ void main() {
       expect(container.read(authControllerProvider).value, isNull);
       expect(container.read(authTokenProvider), isNull);
       verify(() => tokenStore.delete()).called(1);
+      verify(() => apiClient.post('/auth/logout')).called(1);
     },
   );
 }

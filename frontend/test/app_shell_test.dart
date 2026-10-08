@@ -3,6 +3,7 @@ import 'package:finstride/core/l10n/locale_provider.dart';
 import 'package:finstride/features/accounts/application/accounts_controller.dart';
 import 'package:finstride/features/auth/application/auth_controller.dart';
 import 'package:finstride/features/auth/domain/auth_user.dart';
+import 'package:finstride/features/auth/presentation/login_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -151,6 +152,85 @@ void main() {
     expect(find.text('Dashboard'), findsWidgets);
     expect(find.text('Accounts'), findsOneWidget);
     expect(tester.takeException(), isNull);
+  });
+
+  group('user menu', () {
+    late FakeAuthController auth;
+
+    Future<void> pumpApp(WidgetTester tester) async {
+      _useDesignViewport(tester);
+      auth = FakeAuthController(initialUser: _signedInUser);
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            authControllerProvider.overrideWith(() => auth),
+            accountsControllerProvider.overrideWith(
+              () => FakeAccountsController(),
+            ),
+          ],
+          child: const FinStrideApp(),
+        ),
+      );
+      await tester.pumpAndSettle();
+    }
+
+    Future<void> choose(WidgetTester tester, String itemKey) async {
+      await tester.tap(find.byKey(const Key('userMenuButton')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(Key(itemKey)));
+      await tester.pumpAndSettle();
+    }
+
+    testWidgets('log out ends the session and returns to the login screen', (
+      tester,
+    ) async {
+      await pumpApp(tester);
+
+      await choose(tester, 'userMenuLogoutItem');
+
+      expect(auth.logoutCallCount, 1);
+      expect(find.byType(LoginScreen), findsOneWidget);
+      expect(find.byKey(const Key('appTopBar')), findsNothing);
+    });
+
+    testWidgets('edit profile opens Paramètres on the Profil section', (
+      tester,
+    ) async {
+      await pumpApp(tester);
+
+      await choose(tester, 'userMenuEditProfileItem');
+
+      expect(find.byKey(const Key('screen-settings')), findsOneWidget);
+      expect(find.byKey(const Key('settingsRecoveryCard')), findsOneWidget);
+    });
+
+    testWidgets('edit profile switches section when already in Paramètres', (
+      tester,
+    ) async {
+      await pumpApp(tester);
+      await tester.tap(find.text('Paramètres'));
+      await tester.pumpAndSettle();
+      expect(find.byKey(const Key('settingsRecoveryCard')), findsNothing);
+
+      await choose(tester, 'userMenuEditProfileItem');
+
+      expect(find.byKey(const Key('settingsRecoveryCard')), findsOneWidget);
+    });
+
+    testWidgets('the request is spent: a later visit opens on the default', (
+      tester,
+    ) async {
+      await pumpApp(tester);
+      await choose(tester, 'userMenuEditProfileItem');
+
+      await tester.tap(find.text('Comptes'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Paramètres'));
+      await tester.pumpAndSettle();
+
+      expect(find.byKey(const Key('settingsRecoveryCard')), findsNothing);
+      expect(find.byKey(const Key('settingsCurrencyField')), findsOneWidget);
+    });
   });
 }
 

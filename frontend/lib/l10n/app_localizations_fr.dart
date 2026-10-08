@@ -66,6 +66,9 @@ class AppLocalizationsFr extends AppLocalizations {
   String get sidebarExpand => 'Déployer le menu';
 
   @override
+  String get userMenuEditProfile => 'Modifier le profil';
+
+  @override
   String get userMenuLogout => 'Se déconnecter';
 
   @override
