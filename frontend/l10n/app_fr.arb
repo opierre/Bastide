@@ -168,7 +168,7 @@
   "@authPasswordLabel": {
     "description": "Label for the password field on login/register forms."
   },
-  "authDisplayNameLabel": "Nom affiché",
+  "authDisplayNameLabel": "Nom d'utilisateur",
   "@authDisplayNameLabel": {
     "description": "Label for the display name field on the register form."
   },
@@ -240,11 +240,11 @@
   "@authPasswordRequired": {
     "description": "Validation message when the password field is left empty."
   },
-  "authDisplayNameRequired": "Le nom est requis.",
+  "authDisplayNameRequired": "Le nom d'utilisateur est requis.",
   "@authDisplayNameRequired": {
     "description": "Validation message when the display name field is left empty."
   },
-  "authErrorInvalidCredentials": "E-mail ou mot de passe incorrect. Vérifiez vos identifiants et réessayez.",
+  "authErrorInvalidCredentials": "Identifiant ou mot de passe incorrect. Vérifiez vos identifiants et réessayez.",
   "@authErrorInvalidCredentials": {
     "description": "Localized message for the backend's INVALID_CREDENTIALS error code."
   },
@@ -4869,7 +4869,7 @@
   "@authBackToLogin": {
     "description": "Link under the password reset card, returning to the login screen."
   },
-  "authErrorInvalidRecoveryCode": "E-mail ou code de récupération incorrect. Vérifiez le code et réessayez.",
+  "authErrorInvalidRecoveryCode": "Identifiant ou code de récupération incorrect. Vérifiez le code et réessayez.",
   "@authErrorInvalidRecoveryCode": {
     "description": "Banner when a password reset's email and recovery code don't match."
   },
@@ -4940,5 +4940,58 @@
   "settingsRecoveryWrongPassword": "Mot de passe incorrect.",
   "@settingsRecoveryWrongPassword": {
     "description": "Error in the regeneration modal when the confirmation password is wrong."
+  },
+  "authIdentifierLabel": "E-mail ou nom d'utilisateur",
+  "@authIdentifierLabel": {
+    "description": "Label for the field on the login and password-reset forms that accepts either the email or the username."
+  },
+  "authIdentifierRequired": "L'e-mail ou le nom d'utilisateur est requis.",
+  "@authIdentifierRequired": {
+    "description": "Validation error when the login/reset identifier field is empty."
+  },
+  "authDisplayNameHelper": "Sert aussi à vous connecter. 3 à 32 caractères : lettres, chiffres, « . », « _ » ou « - ».",
+  "@authDisplayNameHelper": {
+    "description": "Helper under the username field: what it's for and its format."
+  },
+  "authDisplayNameInvalid": "3 à 32 caractères : lettres sans accent, chiffres, « . », « _ » ou « - ».",
+  "@authDisplayNameInvalid": {
+    "description": "Error when the typed username breaks the format."
+  },
+  "authDisplayNameTaken": "Ce nom d'utilisateur est déjà pris.",
+  "@authDisplayNameTaken": {
+    "description": "Error when the username (display name) is already used by another account."
+  },
+  "settingsProfileNameTitle": "Nom d'utilisateur",
+  "@settingsProfileNameTitle": {
+    "description": "Title of the Settings › Profile card showing the username."
+  },
+  "settingsProfileNameSubtitle": "Vous pouvez vous connecter avec {name} ou avec votre e-mail.",
+  "@settingsProfileNameSubtitle": {
+    "description": "Subtitle of the username card; {name} is the current username.",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "settingsProfileNameButton": "Modifier…",
+  "@settingsProfileNameButton": {
+    "description": "Button opening the modal that changes the username."
+  },
+  "settingsProfileNameModalTitle": "Changer de nom d'utilisateur",
+  "@settingsProfileNameModalTitle": {
+    "description": "Title of the modal that changes the username."
+  },
+  "settingsProfileNameModalLead": "Le nouveau nom remplace l'ancien pour vous connecter.",
+  "@settingsProfileNameModalLead": {
+    "description": "Lead sentence in the change-username modal."
+  },
+  "settingsProfileNameModalSave": "Enregistrer",
+  "@settingsProfileNameModalSave": {
+    "description": "Button saving the new username."
+  },
+  "settingsProfileNameModalCancel": "Annuler",
+  "@settingsProfileNameModalCancel": {
+    "description": "Button closing the change-username modal without saving."
   }
 }

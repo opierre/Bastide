@@ -11,6 +11,7 @@ import '../../../core/widgets/labeled_field.dart';
 import '../../../core/widgets/primary_button.dart';
 import '../../../l10n/app_localizations.dart';
 import '../application/auth_controller.dart';
+import '../domain/display_name.dart';
 import '../domain/password_strength.dart';
 import '../domain/supported_currencies.dart';
 import 'currency_label.dart';
@@ -44,7 +45,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   PasswordStrength _strength = PasswordStrength.empty;
 
   bool get _isValid =>
-      _displayName.trim().isNotEmpty &&
+      isValidDisplayName(_displayName) &&
       _isEmail(_email.trim()) &&
       _strength.isAcceptable;
 
@@ -72,6 +73,20 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
         );
   }
 
+  /// Like the email's: a taken or malformed name is that field's helper.
+  String? _displayNameHelperError(
+    AppLocalizations l10n,
+    AsyncValue<Object?> authState,
+  ) {
+    if (authState.error case ApiFailure(code: 'DISPLAY_NAME_TAKEN')) {
+      return l10n.authDisplayNameTaken;
+    }
+    if (_displayName.isNotEmpty && !isValidDisplayName(_displayName)) {
+      return l10n.authDisplayNameInvalid;
+    }
+    return null;
+  }
+
   /// The taken-email failure belongs to the email field, so it renders as that
   /// field's helper rather than as a banner over the whole form.
   String? _emailHelperError(
@@ -93,6 +108,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     final authState = ref.watch(authControllerProvider);
     final isSubmitting = authState.isLoading;
     final emailError = _emailHelperError(l10n, authState);
+    final displayNameError = _displayNameHelperError(l10n, authState);
 
     return AuthScaffold.register(
       form: Form(
@@ -103,10 +119,15 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
           children: [
             LabeledField(
               label: l10n.authDisplayNameLabel,
+              helper: l10n.authDisplayNameHelper,
+              errorText: displayNameError,
               child: TextFormField(
                 key: const Key('registerDisplayNameField'),
                 controller: _displayNameController,
-                autofillHints: const [AutofillHints.name],
+                autofillHints: const [AutofillHints.newUsername],
+                decoration: displayNameError != null
+                    ? errorFieldDecoration()
+                    : null,
                 onChanged: (value) => setState(() => _displayName = value),
                 validator: (value) => (value == null || value.trim().isEmpty)
                     ? l10n.authDisplayNameRequired

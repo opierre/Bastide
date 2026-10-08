@@ -353,7 +353,7 @@ abstract class AppLocalizations {
   /// Label for the display name field on the register form.
   ///
   /// In fr, this message translates to:
-  /// **'Nom affiché'**
+  /// **'Nom d\'utilisateur'**
   String get authDisplayNameLabel;
 
   /// Verdict beside the password strength meter at its lowest levels.
@@ -461,13 +461,13 @@ abstract class AppLocalizations {
   /// Validation message when the display name field is left empty.
   ///
   /// In fr, this message translates to:
-  /// **'Le nom est requis.'**
+  /// **'Le nom d\'utilisateur est requis.'**
   String get authDisplayNameRequired;
 
   /// Localized message for the backend's INVALID_CREDENTIALS error code.
   ///
   /// In fr, this message translates to:
-  /// **'E-mail ou mot de passe incorrect. Vérifiez vos identifiants et réessayez.'**
+  /// **'Identifiant ou mot de passe incorrect. Vérifiez vos identifiants et réessayez.'**
   String get authErrorInvalidCredentials;
 
   /// Localized message for the backend's EMAIL_TAKEN error code.
@@ -5884,7 +5884,7 @@ abstract class AppLocalizations {
   /// Banner when a password reset's email and recovery code don't match.
   ///
   /// In fr, this message translates to:
-  /// **'E-mail ou code de récupération incorrect. Vérifiez le code et réessayez.'**
+  /// **'Identifiant ou code de récupération incorrect. Vérifiez le code et réessayez.'**
   String get authErrorInvalidRecoveryCode;
 
   /// Line under the brand lockup on the screen showing a newly issued recovery code.
@@ -5988,6 +5988,78 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Mot de passe incorrect.'**
   String get settingsRecoveryWrongPassword;
+
+  /// Label for the field on the login and password-reset forms that accepts either the email or the username.
+  ///
+  /// In fr, this message translates to:
+  /// **'E-mail ou nom d\'utilisateur'**
+  String get authIdentifierLabel;
+
+  /// Validation error when the login/reset identifier field is empty.
+  ///
+  /// In fr, this message translates to:
+  /// **'L\'e-mail ou le nom d\'utilisateur est requis.'**
+  String get authIdentifierRequired;
+
+  /// Helper under the username field: what it's for and its format.
+  ///
+  /// In fr, this message translates to:
+  /// **'Sert aussi à vous connecter. 3 à 32 caractères : lettres, chiffres, « . », « _ » ou « - ».'**
+  String get authDisplayNameHelper;
+
+  /// Error when the typed username breaks the format.
+  ///
+  /// In fr, this message translates to:
+  /// **'3 à 32 caractères : lettres sans accent, chiffres, « . », « _ » ou « - ».'**
+  String get authDisplayNameInvalid;
+
+  /// Error when the username (display name) is already used by another account.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ce nom d\'utilisateur est déjà pris.'**
+  String get authDisplayNameTaken;
+
+  /// Title of the Settings › Profile card showing the username.
+  ///
+  /// In fr, this message translates to:
+  /// **'Nom d\'utilisateur'**
+  String get settingsProfileNameTitle;
+
+  /// Subtitle of the username card; {name} is the current username.
+  ///
+  /// In fr, this message translates to:
+  /// **'Vous pouvez vous connecter avec {name} ou avec votre e-mail.'**
+  String settingsProfileNameSubtitle(String name);
+
+  /// Button opening the modal that changes the username.
+  ///
+  /// In fr, this message translates to:
+  /// **'Modifier…'**
+  String get settingsProfileNameButton;
+
+  /// Title of the modal that changes the username.
+  ///
+  /// In fr, this message translates to:
+  /// **'Changer de nom d\'utilisateur'**
+  String get settingsProfileNameModalTitle;
+
+  /// Lead sentence in the change-username modal.
+  ///
+  /// In fr, this message translates to:
+  /// **'Le nouveau nom remplace l\'ancien pour vous connecter.'**
+  String get settingsProfileNameModalLead;
+
+  /// Button saving the new username.
+  ///
+  /// In fr, this message translates to:
+  /// **'Enregistrer'**
+  String get settingsProfileNameModalSave;
+
+  /// Button closing the change-username modal without saving.
+  ///
+  /// In fr, this message translates to:
+  /// **'Annuler'**
+  String get settingsProfileNameModalCancel;
 }
 
 class _AppLocalizationsDelegate

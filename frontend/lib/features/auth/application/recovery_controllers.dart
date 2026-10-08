@@ -10,8 +10,9 @@ class PasswordResetController extends AsyncNotifier<void> {
   @override
   Future<void> build() async {}
 
+  /// [identifier] is the email or the display name, as at login.
   Future<void> submit({
-    required String email,
+    required String identifier,
     required String recoveryCode,
     required String newPassword,
   }) async {
@@ -20,7 +21,7 @@ class PasswordResetController extends AsyncNotifier<void> {
       final session = await ref
           .read(authRepositoryProvider)
           .resetPassword(
-            email: email,
+            identifier: identifier,
             recoveryCode: recoveryCode,
             newPassword: newPassword,
           );

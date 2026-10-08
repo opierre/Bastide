@@ -70,12 +70,18 @@ void main() {
     await container.read(authControllerProvider.future);
     await container
         .read(authControllerProvider.notifier)
-        .login(email: 'ada@example.com', password: 'secret');
+        .login(identifier: 'ada@example.com', password: 'secret');
 
     final state = container.read(authControllerProvider);
     expect(state.value?.email, 'ada@example.com');
     expect(container.read(authTokenProvider), 'tok-1');
     verify(() => tokenStore.write('tok-1')).called(1);
+    verify(
+      () => apiClient.post(
+        '/auth/login',
+        body: {'identifier': 'ada@example.com', 'password': 'secret'},
+      ),
+    ).called(1);
   });
 
   test('login failure surfaces an error state and stores no token', () async {
@@ -91,7 +97,7 @@ void main() {
     await container.read(authControllerProvider.future);
     await container
         .read(authControllerProvider.notifier)
-        .login(email: 'ada@example.com', password: 'wrong');
+        .login(identifier: 'ada@example.com', password: 'wrong');
 
     final state = container.read(authControllerProvider);
     expect(state.hasError, isTrue);

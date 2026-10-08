@@ -15,6 +15,9 @@ class AuthRepository:
     def get_user_by_email(self, email: str) -> User | None:
         return self._db.scalar(select(User).where(User.email == email))
 
+    def get_user_by_display_name(self, display_name: str) -> User | None:
+        return self._db.scalar(select(User).where(User.display_name == display_name))
+
     def get_user_by_id(self, user_id: str) -> User | None:
         return self._db.get(User, user_id)
 

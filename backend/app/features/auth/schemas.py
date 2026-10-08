@@ -1,9 +1,27 @@
 """Request/response schemas for the auth feature."""
 
+import re
 from datetime import datetime
-from typing import Literal
+from typing import Annotated, Literal
 
-from pydantic import BaseModel, ConfigDict, Field, field_validator
+from pydantic import AfterValidator, BaseModel, ConfigDict, Field, field_validator
+
+# The display name doubles as the username. No "@" is allowed, so a login identifier that holds
+# one is an email and anything else is a display name.
+DISPLAY_NAME_PATTERN = re.compile(r"[a-z0-9._-]{3,32}")
+
+
+def _normalize_display_name(value: str) -> str:
+    name = value.strip().lower()
+    if DISPLAY_NAME_PATTERN.fullmatch(name) is None:
+        raise ValueError(
+            "Display name must be 3 to 32 characters: letters, digits, '.', '_' or '-'."
+        )
+    return name
+
+
+# Stored lowercased, so lookups are case-insensitive by construction.
+DisplayName = Annotated[str, AfterValidator(_normalize_display_name)]
 
 # Practical subset of active ISO-4217 currency codes (national currencies a user would
 # plausibly register with). Excludes precious metals, IMF/bond units, and test codes (XAU, XDR,
@@ -174,9 +192,17 @@ class UserRegister(BaseModel):
 
     email: str = Field(min_length=1, max_length=255)
     password: str = Field(min_length=1)
-    display_name: str = Field(min_length=1, max_length=255)
+    display_name: DisplayName
     locale: Literal["fr", "en"]
     currency: str
+
+    @field_validator("email")
+    @classmethod
+    def _validate_email(cls, value: str) -> str:
+        # Login tells an email from a display name by its "@".
+        if "@" not in value:
+            raise ValueError("Email must contain '@'.")
+        return value
 
     @field_validator("currency")
     @classmethod
@@ -188,10 +214,16 @@ class UserRegister(BaseModel):
 
 
 class UserLogin(BaseModel):
-    """Login payload."""
+    """Login payload: the identifier is either the email or the display name."""
 
-    email: str
+    identifier: str = Field(min_length=1)
     password: str
+
+
+class ProfileUpdate(BaseModel):
+    """Change the caller's profile."""
+
+    display_name: DisplayName
 
 
 class UserRead(BaseModel):
@@ -221,9 +253,12 @@ class RegisterResponse(TokenResponse):
 
 
 class PasswordReset(BaseModel):
-    """Reset a forgotten password with the recovery code issued earlier."""
+    """Reset a forgotten password with the recovery code issued earlier.
 
-    email: str
+    The identifier is either the email or the display name, as at login.
+    """
+
+    identifier: str = Field(min_length=1)
     recovery_code: str = Field(min_length=1)
     new_password: str = Field(min_length=1)
 

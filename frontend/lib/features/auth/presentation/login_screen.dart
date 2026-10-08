@@ -25,12 +25,12 @@ class LoginScreen extends ConsumerStatefulWidget {
 
 class _LoginScreenState extends ConsumerState<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
-  final _emailController = TextEditingController();
+  final _identifierController = TextEditingController();
   final _passwordController = TextEditingController();
 
   @override
   void dispose() {
-    _emailController.dispose();
+    _identifierController.dispose();
     _passwordController.dispose();
     super.dispose();
   }
@@ -40,7 +40,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     await ref
         .read(authControllerProvider.notifier)
         .login(
-          email: _emailController.text.trim(),
+          identifier: _identifierController.text.trim(),
           password: _passwordController.text,
         );
   }
@@ -72,15 +72,17 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               const SizedBox(height: AppSpacing.md + AppSpacing.xs),
             ],
             LabeledField(
-              label: l10n.authEmailLabel,
+              label: l10n.authIdentifierLabel,
               child: TextFormField(
-                key: const Key('loginEmailField'),
-                controller: _emailController,
-                keyboardType: TextInputType.emailAddress,
-                autofillHints: const [AutofillHints.email],
+                key: const Key('loginIdentifierField'),
+                controller: _identifierController,
+                autofillHints: const [
+                  AutofillHints.username,
+                  AutofillHints.email,
+                ],
                 decoration: hasCredentialError ? errorFieldDecoration() : null,
                 validator: (value) => (value == null || value.trim().isEmpty)
-                    ? l10n.authEmailRequired
+                    ? l10n.authIdentifierRequired
                     : null,
               ),
             ),

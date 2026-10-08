@@ -63,7 +63,7 @@
   },
   "authEmailLabel": "Email address",
   "authPasswordLabel": "Password",
-  "authDisplayNameLabel": "Display name",
+  "authDisplayNameLabel": "Username",
   "authPasswordStrengthWeak": "Too weak",
   "@authPasswordStrengthWeak": {
     "description": "Verdict beside the password strength meter at its lowest levels."
@@ -102,8 +102,8 @@
   "authGoToLogin": "Already have an account? Log in",
   "authEmailRequired": "Email is required.",
   "authPasswordRequired": "Password is required.",
-  "authDisplayNameRequired": "Display name is required.",
-  "authErrorInvalidCredentials": "Incorrect email or password. Check your details and try again.",
+  "authDisplayNameRequired": "Username is required.",
+  "authErrorInvalidCredentials": "Incorrect username, email or password. Check your details and try again.",
   "authErrorEmailTaken": "An account with this email already exists.",
   "authErrorValidation": "Some information is invalid.",
   "authErrorGeneric": "Something went wrong. Please try again.",
@@ -1008,7 +1008,7 @@
   "authResetSubmitting": "Resetting…",
   "authResetNote": "You were given this code when you created your account. Without it the password can't be reset: your data never leaves this computer.",
   "authBackToLogin": "Back to sign in",
-  "authErrorInvalidRecoveryCode": "Incorrect email or recovery code. Check the code and try again.",
+  "authErrorInvalidRecoveryCode": "Incorrect username, email or recovery code. Check the code and try again.",
   "authRecoveryCodeTagline": "Keep your recovery code",
   "authRecoveryCodeIntro": "If you forget your password, this code is the only way to reset it. Write it down or print it, and keep it somewhere safe away from this computer.",
   "authRecoveryCodeShownOnce": "It won't be shown again. You can generate a new one in Settings › Profile.",
@@ -1025,5 +1025,17 @@
   "settingsRecoveryModalGenerate": "Generate",
   "settingsRecoveryModalCancel": "Cancel",
   "settingsRecoveryModalDone": "Done",
-  "settingsRecoveryWrongPassword": "Incorrect password."
+  "settingsRecoveryWrongPassword": "Incorrect password.",
+  "authIdentifierLabel": "Email or username",
+  "authIdentifierRequired": "Email or username is required.",
+  "authDisplayNameHelper": "Also used to sign in. 3 to 32 characters: letters, digits, '.', '_' or '-'.",
+  "authDisplayNameInvalid": "3 to 32 characters: unaccented letters, digits, '.', '_' or '-'.",
+  "authDisplayNameTaken": "This username is already taken.",
+  "settingsProfileNameTitle": "Username",
+  "settingsProfileNameSubtitle": "You can sign in with {name} or with your email.",
+  "settingsProfileNameButton": "Change…",
+  "settingsProfileNameModalTitle": "Change username",
+  "settingsProfileNameModalLead": "The new name replaces the old one for signing in.",
+  "settingsProfileNameModalSave": "Save",
+  "settingsProfileNameModalCancel": "Cancel"
 }

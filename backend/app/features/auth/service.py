@@ -11,13 +11,19 @@ from app.core.security import (
 )
 from app.features.auth.models import AuthToken, User
 from app.features.auth.repository import AuthRepository
-from app.features.auth.schemas import PasswordReset, UserLogin, UserRegister
+from app.features.auth.schemas import PasswordReset, ProfileUpdate, UserLogin, UserRegister
 
 
 class EmailTakenError(ConflictError):
     """Raised when registering with an email that's already in use."""
 
     code = "EMAIL_TAKEN"
+
+
+class DisplayNameTakenError(ConflictError):
+    """Raised when a display name, which doubles as the username, is already in use."""
+
+    code = "DISPLAY_NAME_TAKEN"
 
 
 class InvalidCredentialsError(AuthError):
@@ -27,9 +33,9 @@ class InvalidCredentialsError(AuthError):
 
 
 class InvalidRecoveryCodeError(AuthError):
-    """Raised when a reset's email and recovery code don't match a known user.
+    """Raised when a reset's identifier and recovery code don't match a known user.
 
-    The same error covers an unknown email, so a reset can't probe which emails exist.
+    The same error covers an unknown identifier, so a reset can't probe which users exist.
     """
 
     code = "INVALID_RECOVERY_CODE"
@@ -50,9 +56,12 @@ class AuthService:
 
         Raises:
             EmailTakenError: the email is already registered.
+            DisplayNameTakenError: the display name is already registered.
         """
         if self._repository.get_user_by_email(data.email) is not None:
             raise EmailTakenError("A user with this email already exists.")
+        if self._repository.get_user_by_display_name(data.display_name) is not None:
+            raise DisplayNameTakenError("A user with this display name already exists.")
 
         recovery_code = generate_recovery_code()
         user = User(
@@ -71,11 +80,11 @@ class AuthService:
         """Verify credentials and issue a new session token.
 
         Raises:
-            InvalidCredentialsError: the email or password is wrong.
+            InvalidCredentialsError: the identifier or password is wrong.
         """
-        user = self._repository.get_user_by_email(data.email)
+        user = self._find_user(data.identifier)
         if user is None or not verify_password(data.password, user.password_hash):
-            raise InvalidCredentialsError("Incorrect email or password.")
+            raise InvalidCredentialsError("Incorrect identifier or password.")
 
         token = self._issue_token(user)
         return user, token
@@ -89,16 +98,16 @@ class AuthService:
             The user, a new session token, and the replacement plaintext recovery code.
 
         Raises:
-            InvalidRecoveryCodeError: the email is unknown, has no recovery code, or the code
-                doesn't match.
+            InvalidRecoveryCodeError: the identifier is unknown, its user has no recovery code,
+                or the code doesn't match.
         """
-        user = self._repository.get_user_by_email(data.email)
+        user = self._find_user(data.identifier)
         if (
             user is None
             or user.recovery_code_hash is None
             or not verify_recovery_code(data.recovery_code, user.recovery_code_hash)
         ):
-            raise InvalidRecoveryCodeError("Incorrect email or recovery code.")
+            raise InvalidRecoveryCodeError("Incorrect identifier or recovery code.")
 
         recovery_code = generate_recovery_code()
         self._repository.reset_credentials(
@@ -128,6 +137,19 @@ class AuthService:
         self._repository.save_user(user)
         return recovery_code
 
+    def update_profile(self, user: User, data: ProfileUpdate) -> User:
+        """Change the user's display name, which is also their username.
+
+        Raises:
+            DisplayNameTakenError: another user already has this display name.
+        """
+        owner = self._repository.get_user_by_display_name(data.display_name)
+        if owner is not None and owner.id != user.id:
+            raise DisplayNameTakenError("A user with this display name already exists.")
+
+        user.display_name = data.display_name
+        return self._repository.save_user(user)
+
     def logout(self, token: str) -> None:
         """Invalidate a session token. A no-op if the token is already gone."""
         record = self._repository.get_token(token)
@@ -149,6 +171,12 @@ class AuthService:
             raise AuthError("Invalid or expired token.")
 
         return user
+
+    def _find_user(self, identifier: str) -> User | None:
+        """Look a user up by email if the identifier has an "@", by display name otherwise."""
+        if "@" in identifier:
+            return self._repository.get_user_by_email(identifier)
+        return self._repository.get_user_by_display_name(identifier.strip().lower())
 
     def _issue_token(self, user: User) -> str:
         token = generate_token()
