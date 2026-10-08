@@ -5,7 +5,7 @@
 **A local-first personal finance manager for the desktop.**
 Import your bank statements, see where your money goes, and keep your data on your machine.
 
-[![CI](https://github.com/opierre/FinStride/actions/workflows/ci.yml/badge.svg)](https://github.com/opierre/FinStride/actions/workflows/ci.yml)
+[![CI](https://github.com/opierre/Bastide/actions/workflows/ci.yml/badge.svg)](https://github.com/opierre/Bastide/actions/workflows/ci.yml)
 ![Flutter](https://img.shields.io/badge/Flutter-desktop-02569B?logo=flutter&logoColor=white)
 ![Python](https://img.shields.io/badge/Python-3.14-3776AB?logo=python&logoColor=white)
 ![FastAPI](https://img.shields.io/badge/FastAPI-sidecar-009688?logo=fastapi&logoColor=white)
