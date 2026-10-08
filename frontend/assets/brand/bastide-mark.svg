@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+  <title>Bastide</title>
+  <defs>
+    <linearGradient id="bastide-mark-tile" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#8B8CF9"/>
+      <stop offset="1" stop-color="#6C6AF0"/>
+    </linearGradient>
+  </defs>
+  <rect width="24" height="24" rx="5.28" fill="url(#bastide-mark-tile)"/>
+  <path fill="#0E1030" d="M3 21V14H5V16H7V14H9V9H11V11H13V9H15V4H17V6H19V4H21V21Z"/>
+</svg>
