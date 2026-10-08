@@ -1,6 +1,6 @@
 import 'package:flutter/foundation.dart';
 
-/// What a `.finstride` archive holds, in the terms the restore modal lists.
+/// What a `.bastide` archive holds, in the terms the restore modal lists.
 @immutable
 class BackupCounts {
   const BackupCounts({

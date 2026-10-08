@@ -1,7 +1,7 @@
 import 'dart:async';
 
-import 'package:finstride/core/navigation/sidebar_controller.dart';
-import 'package:finstride/features/dashboard/application/dashboard_controller.dart';
+import 'package:bastide/core/navigation/sidebar_controller.dart';
+import 'package:bastide/features/dashboard/application/dashboard_controller.dart';
 
 /// A no-network `DashboardController` double for widget tests: holds a fixed state without
 /// touching the real API client — see `fake_transactions_controller.dart` for the same pattern.

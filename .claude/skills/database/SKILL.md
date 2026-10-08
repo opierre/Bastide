@@ -1,6 +1,6 @@
 ---
 name: database
-description: Use for any database work in the finstride — defining or changing SQLAlchemy models, writing Alembic migrations, querying, handling money/currency, account balances, or anything touching persistence. Encodes the integer-minor-units money rule, UUID keys, the keep-Postgres-open constraints, the balance cache/snapshot strategy, and SQLite WAL specifics. Consult before writing any model, migration, or query.
+description: Use for any database work in Bastide — defining or changing SQLAlchemy models, writing Alembic migrations, querying, handling money/currency, account balances, or anything touching persistence. Encodes the integer-minor-units money rule, UUID keys, the keep-Postgres-open constraints, the balance cache/snapshot strategy, and SQLite WAL specifics. Consult before writing any model, migration, or query.
 ---
 
 # Database

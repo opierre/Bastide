@@ -1,6 +1,6 @@
-import 'package:finstride/core/theme/app_theme.dart';
-import 'package:finstride/features/transactions/presentation/date_range_modal.dart';
-import 'package:finstride/l10n/app_localizations.dart';
+import 'package:bastide/core/theme/app_theme.dart';
+import 'package:bastide/features/transactions/presentation/date_range_modal.dart';
+import 'package:bastide/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 

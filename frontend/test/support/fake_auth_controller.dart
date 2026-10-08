@@ -1,5 +1,5 @@
-import 'package:finstride/features/auth/application/auth_controller.dart';
-import 'package:finstride/features/auth/domain/auth_user.dart';
+import 'package:bastide/features/auth/application/auth_controller.dart';
+import 'package:bastide/features/auth/domain/auth_user.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 /// A no-network `AuthController` double for widget tests that only need a

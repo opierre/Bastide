@@ -1,4 +1,4 @@
-"""FastAPI application factory for the FinStride sidecar."""
+"""FastAPI application factory for the Bastide sidecar."""
 
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
@@ -59,7 +59,7 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
 def create_app() -> FastAPI:
     """Build the FastAPI app: error envelope, local-only CORS, feature routers."""
     settings = get_settings()
-    app = FastAPI(title="FinStride", lifespan=lifespan)
+    app = FastAPI(title="Bastide", lifespan=lifespan)
 
     register_exception_handlers(app)
 

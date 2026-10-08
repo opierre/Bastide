@@ -4,7 +4,7 @@ from app.core.errors import ConflictError, ValidationError
 
 
 class BackupInvalidError(ValidationError):
-    """The file is not a FinStride backup, or its contents do not hold together."""
+    """The file is not a Bastide backup, or its contents do not hold together."""
 
     code = "BACKUP_INVALID"
 

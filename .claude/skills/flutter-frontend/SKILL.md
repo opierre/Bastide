@@ -1,6 +1,6 @@
 ---
 name: flutter-frontend
-description: Use for any Flutter/Dart work in the finstride — building screens or widgets, Riverpod controllers/providers, the API client, DTO mapping, navigation, or wiring state. Encodes the no-logic-in-widgets rule, the feature folder shape, money/locale formatting at the edge, and the fixed-chrome invariant. Pairs with architecture, i18n-l10n, and design-system skills.
+description: Use for any Flutter/Dart work in Bastide — building screens or widgets, Riverpod controllers/providers, the API client, DTO mapping, navigation, or wiring state. Encodes the no-logic-in-widgets rule, the feature folder shape, money/locale formatting at the edge, and the fixed-chrome invariant. Pairs with architecture, i18n-l10n, and design-system skills.
 ---
 
 # Flutter Frontend

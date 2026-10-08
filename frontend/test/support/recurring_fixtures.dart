@@ -1,6 +1,6 @@
-import 'package:finstride/features/recurring/application/subscriptions_controller.dart';
-import 'package:finstride/features/recurring/domain/recurring_series.dart';
-import 'package:finstride/features/recurring/domain/recurring_summary.dart';
+import 'package:bastide/features/recurring/application/subscriptions_controller.dart';
+import 'package:bastide/features/recurring/domain/recurring_series.dart';
+import 'package:bastide/features/recurring/domain/recurring_summary.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 /// May 2026 — the month every mockup and fixture in the project is set in.

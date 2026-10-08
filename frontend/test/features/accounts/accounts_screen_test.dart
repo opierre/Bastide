@@ -1,8 +1,8 @@
-import 'package:finstride/core/theme/app_theme.dart';
-import 'package:finstride/features/accounts/application/accounts_controller.dart';
-import 'package:finstride/features/accounts/domain/account.dart';
-import 'package:finstride/features/accounts/presentation/accounts_screen.dart';
-import 'package:finstride/l10n/app_localizations.dart';
+import 'package:bastide/core/theme/app_theme.dart';
+import 'package:bastide/features/accounts/application/accounts_controller.dart';
+import 'package:bastide/features/accounts/domain/account.dart';
+import 'package:bastide/features/accounts/presentation/accounts_screen.dart';
+import 'package:bastide/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';

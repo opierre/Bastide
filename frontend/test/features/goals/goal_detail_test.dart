@@ -1,10 +1,10 @@
-import 'package:finstride/core/theme/app_theme.dart';
-import 'package:finstride/core/widgets/amount_text.dart';
-import 'package:finstride/features/goals/application/goals_controller.dart';
-import 'package:finstride/features/goals/domain/goal.dart';
-import 'package:finstride/features/goals/domain/goal_allocation.dart';
-import 'package:finstride/features/goals/presentation/goals_screen.dart';
-import 'package:finstride/l10n/app_localizations.dart';
+import 'package:bastide/core/theme/app_theme.dart';
+import 'package:bastide/core/widgets/amount_text.dart';
+import 'package:bastide/features/goals/application/goals_controller.dart';
+import 'package:bastide/features/goals/domain/goal.dart';
+import 'package:bastide/features/goals/domain/goal_allocation.dart';
+import 'package:bastide/features/goals/presentation/goals_screen.dart';
+import 'package:bastide/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';

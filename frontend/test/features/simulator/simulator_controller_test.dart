@@ -1,8 +1,8 @@
-import 'package:finstride/core/api/api_client.dart';
-import 'package:finstride/core/api/api_client_provider.dart';
-import 'package:finstride/features/simulator/application/simulator_controller.dart';
-import 'package:finstride/features/simulator/data/simulations_repository.dart';
-import 'package:finstride/features/simulator/domain/simulation.dart';
+import 'package:bastide/core/api/api_client.dart';
+import 'package:bastide/core/api/api_client_provider.dart';
+import 'package:bastide/features/simulator/application/simulator_controller.dart';
+import 'package:bastide/features/simulator/data/simulations_repository.dart';
+import 'package:bastide/features/simulator/domain/simulation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';

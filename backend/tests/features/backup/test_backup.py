@@ -190,7 +190,7 @@ def _upload(client: TestClient, path: str, headers: dict[str, str], content: byt
     return client.post(
         f"/api/v1/backup/{path}",
         headers=headers,
-        files={"file": ("sauvegarde.finstride", content, "application/zip")},
+        files={"file": ("sauvegarde.bastide", content, "application/zip")},
     )
 
 
@@ -233,7 +233,7 @@ def test_export_writes_a_manifest_and_one_jsonl_per_table(
     }
     archive = zipfile.ZipFile(io.BytesIO(response.content))
     manifest = json.loads(archive.read("manifest.json"))
-    assert manifest["format"] == "finstride-backup"
+    assert manifest["format"] == "bastide-backup"
     assert manifest["format_version"] == 2
     assert manifest["currency"] == "EUR"
     assert "users.jsonl" not in archive.namelist()
@@ -538,6 +538,6 @@ def test_restore_is_refused_while_a_run_is_in_flight(client: TestClient, tmp_pat
 def test_backup_endpoints_require_auth(client: TestClient) -> None:
     assert client.post("/api/v1/backup/export").status_code == 401
     response = client.post(
-        "/api/v1/backup/restore", files={"file": ("x.finstride", b"x", "application/zip")}
+        "/api/v1/backup/restore", files={"file": ("x.bastide", b"x", "application/zip")}
     )
     assert response.status_code == 401

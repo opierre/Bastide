@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Apply FinStride's severity policy to an osv-scanner JSON report.
+"""Apply Bastide's severity policy to an osv-scanner JSON report.
 
 osv-scanner exits 1 whenever it finds anything, with no severity threshold of
 its own. This script reads its JSON output and decides whether the job fails:

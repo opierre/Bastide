@@ -273,7 +273,7 @@ wheels = [
 ]
 
 [[package]]
-name = "finstride-backend"
+name = "bastide-backend"
 version = "0.1.0"
 source = { virtual = "." }
 dependencies = [

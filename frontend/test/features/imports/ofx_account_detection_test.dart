@@ -1,12 +1,12 @@
 import 'dart:convert';
 
-import 'package:finstride/core/api/api_client.dart';
-import 'package:finstride/features/accounts/domain/account.dart';
-import 'package:finstride/features/banks/data/banks_repository.dart';
-import 'package:finstride/features/imports/application/imports_controller.dart';
-import 'package:finstride/features/imports/application/ofx_account_detection.dart';
-import 'package:finstride/features/imports/data/ofx_account_parser.dart';
-import 'package:finstride/features/imports/domain/ofx_account_info.dart';
+import 'package:bastide/core/api/api_client.dart';
+import 'package:bastide/features/accounts/domain/account.dart';
+import 'package:bastide/features/banks/data/banks_repository.dart';
+import 'package:bastide/features/imports/application/imports_controller.dart';
+import 'package:bastide/features/imports/application/ofx_account_detection.dart';
+import 'package:bastide/features/imports/data/ofx_account_parser.dart';
+import 'package:bastide/features/imports/domain/ofx_account_info.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 

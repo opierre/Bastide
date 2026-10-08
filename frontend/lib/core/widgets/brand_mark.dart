@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../theme/tokens.dart';
 
-/// The FinStride logomark: three ascending bars cut out of an iris gradient
+/// The Bastide logomark: three ascending bars cut out of an iris gradient
 /// plate. Drawn rather than shipped as an asset so it stays crisp at any size
 /// and re-tints with the palette.
 class BrandMark extends StatelessWidget {
@@ -90,7 +90,7 @@ class BrandLockup extends StatelessWidget {
           child: Text(
             // The product name is a proper noun, so it is intentionally not
             // localized (see the i18n-l10n skill).
-            'FinStride',
+            'Bastide',
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
             style: TextStyle(

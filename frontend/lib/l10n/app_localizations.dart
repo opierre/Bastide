@@ -101,7 +101,7 @@ abstract class AppLocalizations {
   /// The application title, shown in the OS window title and task switcher.
   ///
   /// In fr, this message translates to:
-  /// **'FinStride'**
+  /// **'Bastide'**
   String get appTitle;
 
   /// Left nav label for the dashboard screen.
@@ -299,7 +299,7 @@ abstract class AppLocalizations {
   /// Local-privacy statement in the About section.
   ///
   /// In fr, this message translates to:
-  /// **'Toutes vos données restent sur cet ordinateur. FinStride ne se connecte à aucune banque et n\'envoie rien sur Internet.'**
+  /// **'Toutes vos données restent sur cet ordinateur. Bastide ne se connecte à aucune banque et n\'envoie rien sur Internet.'**
   String get settingsAboutPrivacy;
 
   /// Encouraging placeholder body on panels whose feature isn't built yet.
@@ -2237,13 +2237,13 @@ abstract class AppLocalizations {
   /// Refusal reason: the file isn't a pack-shaped JSON document.
   ///
   /// In fr, this message translates to:
-  /// **'Ce fichier n\'est pas un pack de règles FinStride. Attendu : un fichier JSON avec un nom, une version de format et une liste de règles.'**
+  /// **'Ce fichier n\'est pas un pack de règles Bastide. Attendu : un fichier JSON avec un nom, une version de format et une liste de règles.'**
   String get rulePackRefusedMalformed;
 
   /// Refusal reason: unsupported format_version. Says why the pack is refused outright rather than read best-effort.
   ///
   /// In fr, this message translates to:
-  /// **'Ce pack utilise une version de format que cette version de FinStride ne lit pas. Elle lit la version {version}. Un pack partiellement compris perdrait silencieusement des règles, il est donc refusé en entier.'**
+  /// **'Ce pack utilise une version de format que cette version de Bastide ne lit pas. Elle lit la version {version}. Un pack partiellement compris perdrait silencieusement des règles, il est donc refusé en entier.'**
   String rulePackRefusedVersion(int version);
 
   /// Refusal reason: the pack contains a regex rule. Names the risk, and the three types that are accepted.
@@ -2687,7 +2687,7 @@ abstract class AppLocalizations {
   /// Caption under the export row's label: what the file contains.
   ///
   /// In fr, this message translates to:
-  /// **'Fichier .finstride — comptes, transactions, catégories, règles, objectifs, crédits, biens, paramètres.'**
+  /// **'Fichier .bastide — comptes, transactions, catégories, règles, objectifs, crédits, biens, paramètres.'**
   String get settingsBackupExportCaption;
 
   /// Replaces the export caption while the archive is being built.
@@ -2753,13 +2753,13 @@ abstract class AppLocalizations {
   /// Restore refused: the archive was written by a newer app version (BACKUP_TOO_NEW).
   ///
   /// In fr, this message translates to:
-  /// **'Ce fichier provient d\'une version plus récente de FinStride. Mettez l\'application à jour pour le restaurer.'**
+  /// **'Ce fichier provient d\'une version plus récente de Bastide. Mettez l\'application à jour pour le restaurer.'**
   String get settingsBackupErrorTooNew;
 
-  /// Restore refused: not a FinStride archive or corrupted (BACKUP_INVALID).
+  /// Restore refused: not a Bastide archive or corrupted (BACKUP_INVALID).
   ///
   /// In fr, this message translates to:
-  /// **'Ce fichier n\'est pas une sauvegarde FinStride valide, ou il est endommagé.'**
+  /// **'Ce fichier n\'est pas une sauvegarde Bastide valide, ou il est endommagé.'**
   String get settingsBackupErrorInvalid;
 
   /// Restore refused: the archive's currency differs from the user's (BACKUP_CURRENCY_MISMATCH).
@@ -3244,7 +3244,7 @@ abstract class AppLocalizations {
   /// Empty-state body, stating the three-repeat rule so the absence reads as a threshold rather than a failure.
   ///
   /// In fr, this message translates to:
-  /// **'FinStride repère un paiement récurrent lorsqu\'un prélèvement s\'est répété trois fois. Importer davantage d\'historique accélère la détection.'**
+  /// **'Bastide repère un paiement récurrent lorsqu\'un prélèvement s\'est répété trois fois. Importer davantage d\'historique accélère la détection.'**
   String get subscriptionsEmptyBody;
 
   /// Empty-state CTA. It goes to imports rather than to manual creation because more history is the actual remedy.
@@ -3327,7 +3327,7 @@ abstract class AppLocalizations {
   /// Foot note under the history: the user is being asked to trust a deduction, so the evidence is part of the screen.
   ///
   /// In fr, this message translates to:
-  /// **'FinStride déduit la série de ces occurrences — vérifiez-les avant de confirmer un changement.'**
+  /// **'Bastide déduit la série de ces occurrences — vérifiez-les avant de confirmer un changement.'**
   String get subscriptionDetailFootnote;
 
   /// Error state replacing the detail when it failed to load.
@@ -3981,7 +3981,7 @@ abstract class AppLocalizations {
   /// Empty state reassurance line of the loans panel.
   ///
   /// In fr, this message translates to:
-  /// **'Ajoutez vos emprunts pour suivre leur coût réel, leur trajectoire et votre capacité — sans jamais relier FinStride à une banque.'**
+  /// **'Ajoutez vos emprunts pour suivre leur coût réel, leur trajectoire et votre capacité — sans jamais relier Bastide à une banque.'**
   String get mortgagesEmptyBody;
 
   /// Label of the monthly charge summary card. Rendered uppercase.
@@ -4330,7 +4330,7 @@ abstract class AppLocalizations {
   /// TAEG disclaimer read by assistive tech on the INDICATIF pill.
   ///
   /// In fr, this message translates to:
-  /// **'Indicatif : un TAEG réel inclut des frais que FinStride ne voit pas.'**
+  /// **'Indicatif : un TAEG réel inclut des frais que Bastide ne voit pas.'**
   String get mortgageCostTaegDisclaimer;
 
   /// Cost row: caption under the TAEG.

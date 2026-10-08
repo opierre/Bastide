@@ -35,16 +35,16 @@ def _run(action: Any, db_path: Path, revision: str) -> None:
     """
     config = Config()
     config.set_main_option("script_location", str(BACKEND_DIR / "migrations"))
-    previous = os.environ.get("FINSTRIDE_DB_PATH")
-    os.environ["FINSTRIDE_DB_PATH"] = str(db_path)
+    previous = os.environ.get("BASTIDE_DB_PATH")
+    os.environ["BASTIDE_DB_PATH"] = str(db_path)
     get_settings.cache_clear()
     try:
         action(config, revision)
     finally:
         if previous is None:
-            del os.environ["FINSTRIDE_DB_PATH"]
+            del os.environ["BASTIDE_DB_PATH"]
         else:
-            os.environ["FINSTRIDE_DB_PATH"] = previous
+            os.environ["BASTIDE_DB_PATH"] = previous
         get_settings.cache_clear()
 
 

@@ -1,23 +1,23 @@
-import 'package:finstride/core/theme/app_theme.dart';
-import 'package:finstride/core/widgets/amount_text.dart';
-import 'package:finstride/features/accounts/application/accounts_controller.dart';
-import 'package:finstride/features/accounts/domain/account.dart';
-import 'package:finstride/features/categorization/application/run_controller.dart';
-import 'package:finstride/features/categorization/domain/categorization_run.dart';
-import 'package:finstride/features/rules/application/rule_preview_controller.dart';
-import 'package:finstride/features/rules/domain/rule.dart';
-import 'package:finstride/features/transactions/application/transactions_controller.dart';
-import 'package:finstride/features/categories/domain/category.dart';
-import 'package:finstride/features/transactions/domain/transaction.dart';
-import 'package:finstride/features/transactions/presentation/always_categorize_modal.dart';
-import 'package:finstride/features/transactions/presentation/transactions_screen.dart';
-import 'package:finstride/l10n/app_localizations.dart';
+import 'package:bastide/core/theme/app_theme.dart';
+import 'package:bastide/core/widgets/amount_text.dart';
+import 'package:bastide/features/accounts/application/accounts_controller.dart';
+import 'package:bastide/features/accounts/domain/account.dart';
+import 'package:bastide/features/categorization/application/run_controller.dart';
+import 'package:bastide/features/categorization/domain/categorization_run.dart';
+import 'package:bastide/features/rules/application/rule_preview_controller.dart';
+import 'package:bastide/features/rules/domain/rule.dart';
+import 'package:bastide/features/transactions/application/transactions_controller.dart';
+import 'package:bastide/features/categories/domain/category.dart';
+import 'package:bastide/features/transactions/domain/transaction.dart';
+import 'package:bastide/features/transactions/presentation/always_categorize_modal.dart';
+import 'package:bastide/features/transactions/presentation/transactions_screen.dart';
+import 'package:bastide/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../../support/fake_accounts_controller.dart';
-import 'package:finstride/features/transactions/presentation/transaction_row.dart';
+import 'package:bastide/features/transactions/presentation/transaction_row.dart';
 
 import '../../support/fake_transactions_controller.dart';
 

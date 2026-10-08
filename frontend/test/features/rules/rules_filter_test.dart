@@ -1,4 +1,4 @@
-import 'package:finstride/features/rules/application/rules_filter.dart';
+import 'package:bastide/features/rules/application/rules_filter.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../../support/fake_categories_controller.dart';

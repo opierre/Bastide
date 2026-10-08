@@ -1,6 +1,6 @@
 ---
 name: git-conventional-commits
-description: Use whenever committing code, splitting work into commits, or writing commit/PR messages in the finstride. Defines the Conventional Commits format, the allowed types, the feature-based scope vocabulary, the one-logical-change-per-commit rule, and how to keep history clean and rollback-friendly. Consult before every commit.
+description: Use whenever committing code, splitting work into commits, or writing commit/PR messages in Bastide. Defines the Conventional Commits format, the allowed types, the feature-based scope vocabulary, the one-logical-change-per-commit rule, and how to keep history clean and rollback-friendly. Consult before every commit.
 ---
 
 # Git — Conventional Commits

@@ -1,6 +1,6 @@
 {
   "@@locale": "fr",
-  "appTitle": "FinStride",
+  "appTitle": "Bastide",
   "@appTitle": {
     "description": "The application title, shown in the OS window title and task switcher."
   },
@@ -132,7 +132,7 @@
   "@settingsAboutVersion": {
     "description": "Label beside the application version number in the About section."
   },
-  "settingsAboutPrivacy": "Toutes vos données restent sur cet ordinateur. FinStride ne se connecte à aucune banque et n'envoie rien sur Internet.",
+  "settingsAboutPrivacy": "Toutes vos données restent sur cet ordinateur. Bastide ne se connecte à aucune banque et n'envoie rien sur Internet.",
   "@settingsAboutPrivacy": {
     "description": "Local-privacy statement in the About section."
   },
@@ -1623,11 +1623,11 @@
   "@rulePackRefusedTitle": {
     "description": "Title of the dialog explaining why a pack was refused."
   },
-  "rulePackRefusedMalformed": "Ce fichier n'est pas un pack de règles FinStride. Attendu : un fichier JSON avec un nom, une version de format et une liste de règles.",
+  "rulePackRefusedMalformed": "Ce fichier n'est pas un pack de règles Bastide. Attendu : un fichier JSON avec un nom, une version de format et une liste de règles.",
   "@rulePackRefusedMalformed": {
     "description": "Refusal reason: the file isn't a pack-shaped JSON document."
   },
-  "rulePackRefusedVersion": "Ce pack utilise une version de format que cette version de FinStride ne lit pas. Elle lit la version {version}. Un pack partiellement compris perdrait silencieusement des règles, il est donc refusé en entier.",
+  "rulePackRefusedVersion": "Ce pack utilise une version de format que cette version de Bastide ne lit pas. Elle lit la version {version}. Un pack partiellement compris perdrait silencieusement des règles, il est donc refusé en entier.",
   "@rulePackRefusedVersion": {
     "description": "Refusal reason: unsupported format_version. Says why the pack is refused outright rather than read best-effort.",
     "placeholders": {
@@ -2055,7 +2055,7 @@
   "@settingsBackupExportLabel": {
     "description": "Label of the export row on the backup card."
   },
-  "settingsBackupExportCaption": "Fichier .finstride — comptes, transactions, catégories, règles, objectifs, crédits, biens, paramètres.",
+  "settingsBackupExportCaption": "Fichier .bastide — comptes, transactions, catégories, règles, objectifs, crédits, biens, paramètres.",
   "@settingsBackupExportCaption": {
     "description": "Caption under the export row's label: what the file contains."
   },
@@ -2115,13 +2115,13 @@
   "@settingsBackupRestoreFailedLead": {
     "description": "Bold lead of the error banner shown when a chosen backup cannot be restored."
   },
-  "settingsBackupErrorTooNew": "Ce fichier provient d'une version plus récente de FinStride. Mettez l'application à jour pour le restaurer.",
+  "settingsBackupErrorTooNew": "Ce fichier provient d'une version plus récente de Bastide. Mettez l'application à jour pour le restaurer.",
   "@settingsBackupErrorTooNew": {
     "description": "Restore refused: the archive was written by a newer app version (BACKUP_TOO_NEW)."
   },
-  "settingsBackupErrorInvalid": "Ce fichier n'est pas une sauvegarde FinStride valide, ou il est endommagé.",
+  "settingsBackupErrorInvalid": "Ce fichier n'est pas une sauvegarde Bastide valide, ou il est endommagé.",
   "@settingsBackupErrorInvalid": {
-    "description": "Restore refused: not a FinStride archive or corrupted (BACKUP_INVALID)."
+    "description": "Restore refused: not a Bastide archive or corrupted (BACKUP_INVALID)."
   },
   "settingsBackupErrorCurrency": "Cette sauvegarde utilise une autre devise que votre compte.",
   "@settingsBackupErrorCurrency": {
@@ -2544,7 +2544,7 @@
   "@subscriptionsEmptyTitle": {
     "description": "Empty-state title on the recurring payments panel."
   },
-  "subscriptionsEmptyBody": "FinStride repère un paiement récurrent lorsqu'un prélèvement s'est répété trois fois. Importer davantage d'historique accélère la détection.",
+  "subscriptionsEmptyBody": "Bastide repère un paiement récurrent lorsqu'un prélèvement s'est répété trois fois. Importer davantage d'historique accélère la détection.",
   "@subscriptionsEmptyBody": {
     "description": "Empty-state body, stating the three-repeat rule so the absence reads as a threshold rather than a failure."
   },
@@ -2639,7 +2639,7 @@
       }
     }
   },
-  "subscriptionDetailFootnote": "FinStride déduit la série de ces occurrences — vérifiez-les avant de confirmer un changement.",
+  "subscriptionDetailFootnote": "Bastide déduit la série de ces occurrences — vérifiez-les avant de confirmer un changement.",
   "@subscriptionDetailFootnote": {
     "description": "Foot note under the history: the user is being asked to trust a deduction, so the evidence is part of the screen."
   },
@@ -3121,7 +3121,7 @@
   "@mortgagesEmptyTitle": {
     "description": "Empty state title of the loans panel."
   },
-  "mortgagesEmptyBody": "Ajoutez vos emprunts pour suivre leur coût réel, leur trajectoire et votre capacité — sans jamais relier FinStride à une banque.",
+  "mortgagesEmptyBody": "Ajoutez vos emprunts pour suivre leur coût réel, leur trajectoire et votre capacité — sans jamais relier Bastide à une banque.",
   "@mortgagesEmptyBody": {
     "description": "Empty state reassurance line of the loans panel."
   },
@@ -3490,7 +3490,7 @@
   "@mortgageCostIndicative": {
     "description": "Iris marker pill beside the TAEG label. Rendered uppercase."
   },
-  "mortgageCostTaegDisclaimer": "Indicatif : un TAEG réel inclut des frais que FinStride ne voit pas.",
+  "mortgageCostTaegDisclaimer": "Indicatif : un TAEG réel inclut des frais que Bastide ne voit pas.",
   "@mortgageCostTaegDisclaimer": {
     "description": "TAEG disclaimer read by assistive tech on the INDICATIF pill."
   },

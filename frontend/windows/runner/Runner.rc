@@ -89,13 +89,13 @@ BEGIN
     BEGIN
         BLOCK "040904e4"
         BEGIN
-            VALUE "CompanyName", "com.finstride" "\0"
-            VALUE "FileDescription", "finstride" "\0"
+            VALUE "CompanyName", "com.bastide" "\0"
+            VALUE "FileDescription", "bastide" "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
-            VALUE "InternalName", "finstride" "\0"
-            VALUE "LegalCopyright", "Copyright (C) 2026 com.finstride. All rights reserved." "\0"
-            VALUE "OriginalFilename", "finstride.exe" "\0"
-            VALUE "ProductName", "finstride" "\0"
+            VALUE "InternalName", "bastide" "\0"
+            VALUE "LegalCopyright", "Copyright (C) 2026 com.bastide. All rights reserved." "\0"
+            VALUE "OriginalFilename", "bastide.exe" "\0"
+            VALUE "ProductName", "bastide" "\0"
             VALUE "ProductVersion", VERSION_AS_STRING "\0"
         END
     END

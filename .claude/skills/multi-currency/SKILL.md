@@ -1,6 +1,6 @@
 ---
 name: multi-currency
-description: Use whenever currency, FX, or per-account currency comes up in the finstride. Defines the current rule (one currency per user, chosen at registration, applied to all accounts), why the per-account currency column must stay anyway, and the outline of a future multi-currency design — so agents neither build FX prematurely nor strip the forward-compatible structure.
+description: Use whenever currency, FX, or per-account currency comes up in Bastide. Defines the current rule (one currency per user, chosen at registration, applied to all accounts), why the per-account currency column must stay anyway, and the outline of a future multi-currency design — so agents neither build FX prematurely nor strip the forward-compatible structure.
 ---
 
 # Multi-currency

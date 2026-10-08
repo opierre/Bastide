@@ -1,7 +1,7 @@
-import 'package:finstride/core/api/api_client.dart';
-import 'package:finstride/core/api/api_client_provider.dart';
-import 'package:finstride/features/goals/application/goals_controller.dart';
-import 'package:finstride/features/goals/domain/goal.dart';
+import 'package:bastide/core/api/api_client.dart';
+import 'package:bastide/core/api/api_client_provider.dart';
+import 'package:bastide/features/goals/application/goals_controller.dart';
+import 'package:bastide/features/goals/domain/goal.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';

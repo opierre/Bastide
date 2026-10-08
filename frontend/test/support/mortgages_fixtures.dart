@@ -1,6 +1,6 @@
-import 'package:finstride/features/mortgages/application/mortgages_controller.dart';
-import 'package:finstride/features/mortgages/domain/mortgage.dart';
-import 'package:finstride/features/mortgages/domain/schedule_row.dart';
+import 'package:bastide/features/mortgages/application/mortgages_controller.dart';
+import 'package:bastide/features/mortgages/domain/mortgage.dart';
+import 'package:bastide/features/mortgages/domain/schedule_row.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 /// May 2026 — the month every mockup and fixture in the project is set in.

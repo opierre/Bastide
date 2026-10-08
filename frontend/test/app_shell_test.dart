@@ -1,9 +1,9 @@
-import 'package:finstride/app.dart';
-import 'package:finstride/core/l10n/locale_provider.dart';
-import 'package:finstride/features/accounts/application/accounts_controller.dart';
-import 'package:finstride/features/auth/application/auth_controller.dart';
-import 'package:finstride/features/auth/domain/auth_user.dart';
-import 'package:finstride/features/auth/presentation/login_screen.dart';
+import 'package:bastide/app.dart';
+import 'package:bastide/core/l10n/locale_provider.dart';
+import 'package:bastide/features/accounts/application/accounts_controller.dart';
+import 'package:bastide/features/auth/application/auth_controller.dart';
+import 'package:bastide/features/auth/domain/auth_user.dart';
+import 'package:bastide/features/auth/presentation/login_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -42,7 +42,7 @@ void main() {
     await tester.pumpWidget(
       ProviderScope(
         overrides: _authenticatedOverrides,
-        child: const FinStrideApp(),
+        child: const BastideApp(),
       ),
     );
     await tester.pumpAndSettle();
@@ -59,7 +59,7 @@ void main() {
       await tester.pumpWidget(
         ProviderScope(
           overrides: _authenticatedOverrides,
-          child: const FinStrideApp(),
+          child: const BastideApp(),
         ),
       );
       await tester.pumpAndSettle();
@@ -76,7 +76,7 @@ void main() {
     await tester.pumpWidget(
       ProviderScope(
         overrides: _authenticatedOverrides,
-        child: const FinStrideApp(),
+        child: const BastideApp(),
       ),
     );
     await tester.pumpAndSettle();
@@ -103,7 +103,7 @@ void main() {
     await tester.pumpWidget(
       ProviderScope(
         overrides: _authenticatedOverrides,
-        child: const FinStrideApp(),
+        child: const BastideApp(),
       ),
     );
     await tester.pumpAndSettle();
@@ -124,7 +124,7 @@ void main() {
     await tester.pumpWidget(
       ProviderScope(
         overrides: _authenticatedOverrides,
-        child: const FinStrideApp(),
+        child: const BastideApp(),
       ),
     );
     await tester.pumpAndSettle();
@@ -144,7 +144,7 @@ void main() {
           ..._authenticatedOverrides,
           localeProvider.overrideWith(() => _EnLocaleController()),
         ],
-        child: const FinStrideApp(),
+        child: const BastideApp(),
       ),
     );
     await tester.pumpAndSettle();
@@ -168,7 +168,7 @@ void main() {
               () => FakeAccountsController(),
             ),
           ],
-          child: const FinStrideApp(),
+          child: const BastideApp(),
         ),
       );
       await tester.pumpAndSettle();

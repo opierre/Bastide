@@ -1,4 +1,4 @@
-# CLAUDE.md — FinStride Agent Conventions
+# CLAUDE.md — Bastide Agent Conventions
 
 > Global conventions for the monorepo. Backend and frontend have their own `CLAUDE.md` files; those inherit and extend this one.
 

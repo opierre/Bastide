@@ -1,6 +1,6 @@
 ---
 name: fastapi-backend
-description: Use for any Python backend work in the finstride — adding endpoints, Pydantic schemas, services, dependency injection, error handling, auth wiring, or running the sidecar. Encodes the thin-route pattern, the error envelope, Pydantic v2 conventions, the uv/ruff/ty toolchain, and the ty-beta escape-hatch rule. Pairs with the architecture and database skills.
+description: Use for any Python backend work in Bastide — adding endpoints, Pydantic schemas, services, dependency injection, error handling, auth wiring, or running the sidecar. Encodes the thin-route pattern, the error envelope, Pydantic v2 conventions, the uv/ruff/ty toolchain, and the ty-beta escape-hatch rule. Pairs with the architecture and database skills.
 ---
 
 # FastAPI Backend

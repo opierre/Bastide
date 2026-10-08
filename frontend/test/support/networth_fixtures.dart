@@ -1,5 +1,5 @@
-import 'package:finstride/features/networth/application/networth_controller.dart';
-import 'package:finstride/features/networth/domain/networth_summary.dart';
+import 'package:bastide/features/networth/application/networth_controller.dart';
+import 'package:bastide/features/networth/domain/networth_summary.dart';
 
 /// The frame's composition (`15-synthese.md` §Row 2): two account types and
 /// two property kinds, shares summing to 10000.

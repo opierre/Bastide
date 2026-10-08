@@ -1,8 +1,8 @@
-import 'package:finstride/core/theme/app_theme.dart';
-import 'package:finstride/features/dashboard/application/dashboard_controller.dart';
-import 'package:finstride/features/dashboard/domain/dashboard_summary.dart';
-import 'package:finstride/features/dashboard/presentation/month_selector.dart';
-import 'package:finstride/l10n/app_localizations.dart';
+import 'package:bastide/core/theme/app_theme.dart';
+import 'package:bastide/features/dashboard/application/dashboard_controller.dart';
+import 'package:bastide/features/dashboard/domain/dashboard_summary.dart';
+import 'package:bastide/features/dashboard/presentation/month_selector.dart';
+import 'package:bastide/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';

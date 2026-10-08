@@ -1,4 +1,4 @@
-"""The `.finstride` container: a ZIP holding `manifest.json` and one `<table>.jsonl` per table.
+"""The `.bastide` container: a ZIP holding `manifest.json` and one `<table>.jsonl` per table.
 
 The manifest sits beside the data rather than inside it so a restore can show what a file
 holds, and refuse one from a newer format, without parsing a single row. JSONL keeps each table
@@ -13,7 +13,7 @@ from typing import Any
 
 from app.features.backup.errors import BackupInvalidError
 
-FORMAT_MARKER = "finstride-backup"
+FORMAT_MARKER = "bastide-backup"
 # Bump when the archive layout or a table's columns change in a way an older build cannot read.
 # 2: properties, mortgages and simulations — an older build would restore such an archive
 # and silently drop them.
@@ -62,7 +62,7 @@ class ArchiveReader:
         try:
             self._archive = zipfile.ZipFile(io.BytesIO(content))
         except zipfile.BadZipFile as exc:
-            raise BackupInvalidError("The file is not a FinStride backup.") from exc
+            raise BackupInvalidError("The file is not a Bastide backup.") from exc
 
     def manifest(self) -> dict[str, Any]:
         try:
@@ -70,7 +70,7 @@ class ArchiveReader:
         except (KeyError, ValueError, zipfile.BadZipFile) as exc:
             raise BackupInvalidError("The backup has no readable manifest.") from exc
         if not isinstance(manifest, dict) or manifest.get("format") != FORMAT_MARKER:
-            raise BackupInvalidError("The file is not a FinStride backup.")
+            raise BackupInvalidError("The file is not a Bastide backup.")
         return manifest
 
     def rows(self, table: str) -> Iterator[Any]:
