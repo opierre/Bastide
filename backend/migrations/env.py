@@ -4,7 +4,7 @@ from alembic import context
 from sqlalchemy import engine_from_config, pool
 
 from app.core.config import get_settings
-from app.core.db import Base
+from app.core.db import Base, sqlite_url
 from app.features.accounts import models as accounts_models  # noqa: F401
 from app.features.auth import models as auth_models  # noqa: F401
 from app.features.categories import models as categories_models  # noqa: F401
@@ -32,7 +32,7 @@ target_metadata = Base.metadata
 
 # The sidecar's own settings (env-overridable) are authoritative over the
 # static alembic.ini placeholder, so migrations always target the real DB.
-config.set_main_option("sqlalchemy.url", f"sqlite:///{get_settings().db_path}")
+config.set_main_option("sqlalchemy.url", sqlite_url(get_settings().db_path))
 
 
 def run_migrations_offline() -> None:

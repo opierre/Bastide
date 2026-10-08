@@ -1,6 +1,7 @@
 """SQLAlchemy engine, session factory, and the per-request session dependency."""
 
 from collections.abc import Callable, Generator
+from pathlib import Path
 from typing import Any
 
 from sqlalchemy import Engine, create_engine, event
@@ -11,6 +12,16 @@ from app.core.config import get_settings
 
 class Base(DeclarativeBase):
     """Declarative base; its metadata is Alembic's autogenerate target."""
+
+
+def sqlite_url(db_path: str) -> str:
+    """Return the SQLAlchemy URL for `db_path`, creating its folder on first use.
+
+    SQLite creates a missing file but not a missing folder, and the per-user data dir does not
+    exist until the sidecar first runs for that OS account.
+    """
+    Path(db_path).parent.mkdir(parents=True, exist_ok=True)
+    return f"sqlite:///{db_path}"
 
 
 def configure_sqlite(engine: Engine) -> Engine:
@@ -38,7 +49,7 @@ settings = get_settings()
 
 engine: Engine = configure_sqlite(
     create_engine(
-        f"sqlite:///{settings.db_path}",
+        sqlite_url(settings.db_path),
         connect_args={"check_same_thread": False},
     )
 )
