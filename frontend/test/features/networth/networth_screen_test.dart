@@ -1,15 +1,15 @@
 import 'dart:async';
 
-import 'package:finstride/core/theme/app_theme.dart';
-import 'package:finstride/core/theme/tokens.dart';
-import 'package:finstride/core/widgets/amount_text.dart';
-import 'package:finstride/features/networth/application/networth_controller.dart';
-import 'package:finstride/features/networth/domain/networth_summary.dart';
-import 'package:finstride/features/networth/presentation/composition_breakdown.dart';
-import 'package:finstride/features/networth/presentation/networth_screen.dart';
-import 'package:finstride/features/networth/presentation/networth_summary_card.dart';
-import 'package:finstride/features/properties/application/properties_controller.dart';
-import 'package:finstride/l10n/app_localizations.dart';
+import 'package:bastide/core/theme/app_theme.dart';
+import 'package:bastide/core/theme/tokens.dart';
+import 'package:bastide/core/widgets/amount_text.dart';
+import 'package:bastide/features/networth/application/networth_controller.dart';
+import 'package:bastide/features/networth/domain/networth_summary.dart';
+import 'package:bastide/features/networth/presentation/composition_breakdown.dart';
+import 'package:bastide/features/networth/presentation/networth_screen.dart';
+import 'package:bastide/features/networth/presentation/networth_summary_card.dart';
+import 'package:bastide/features/properties/application/properties_controller.dart';
+import 'package:bastide/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';

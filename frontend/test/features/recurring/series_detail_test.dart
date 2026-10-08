@@ -1,9 +1,9 @@
-import 'package:finstride/core/theme/app_theme.dart';
-import 'package:finstride/core/widgets/amount_text.dart';
-import 'package:finstride/features/recurring/application/subscriptions_controller.dart';
-import 'package:finstride/features/recurring/domain/recurring_series.dart';
-import 'package:finstride/features/recurring/presentation/series_detail.dart';
-import 'package:finstride/l10n/app_localizations.dart';
+import 'package:bastide/core/theme/app_theme.dart';
+import 'package:bastide/core/widgets/amount_text.dart';
+import 'package:bastide/features/recurring/application/subscriptions_controller.dart';
+import 'package:bastide/features/recurring/domain/recurring_series.dart';
+import 'package:bastide/features/recurring/presentation/series_detail.dart';
+import 'package:bastide/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';

@@ -1,5 +1,5 @@
-import 'package:finstride/core/theme/app_theme.dart';
-import 'package:finstride/core/widgets/area_line.dart';
+import 'package:bastide/core/theme/app_theme.dart';
+import 'package:bastide/core/widgets/area_line.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 

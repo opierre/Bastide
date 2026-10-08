@@ -23,7 +23,7 @@ class RulePackFiles {
     final file = await openFile(
       acceptedTypeGroups: const [
         XTypeGroup(
-          label: 'FinStride rule pack',
+          label: 'Bastide rule pack',
           extensions: [rulePackExtension],
         ),
       ],
@@ -152,7 +152,7 @@ class RulePacksController extends Notifier<void> {
   /// A pack name can hold anything the user typed; a filename cannot.
   static String _fileSafe(String name) {
     final cleaned = name.replaceAll(RegExp(r'[^\w\- ]+'), '').trim();
-    return cleaned.isEmpty ? 'finstride-rules' : cleaned.replaceAll(' ', '-');
+    return cleaned.isEmpty ? 'bastide-rules' : cleaned.replaceAll(' ', '-');
   }
 }
 

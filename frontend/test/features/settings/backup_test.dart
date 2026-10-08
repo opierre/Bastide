@@ -2,14 +2,14 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:typed_data';
 
-import 'package:finstride/core/api/api_client.dart';
-import 'package:finstride/core/api/api_client_provider.dart';
-import 'package:finstride/core/theme/app_theme.dart';
-import 'package:finstride/features/settings/application/backup_controller.dart';
-import 'package:finstride/features/settings/application/settings_controller.dart';
-import 'package:finstride/features/settings/domain/backup.dart';
-import 'package:finstride/features/settings/presentation/backup_card.dart';
-import 'package:finstride/l10n/app_localizations.dart';
+import 'package:bastide/core/api/api_client.dart';
+import 'package:bastide/core/api/api_client_provider.dart';
+import 'package:bastide/core/theme/app_theme.dart';
+import 'package:bastide/features/settings/application/backup_controller.dart';
+import 'package:bastide/features/settings/application/settings_controller.dart';
+import 'package:bastide/features/settings/domain/backup.dart';
+import 'package:bastide/features/settings/presentation/backup_card.dart';
+import 'package:bastide/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -20,7 +20,7 @@ class MockApiClient extends Mock implements ApiClient {}
 
 /// Stands in for the platform file dialogs.
 class FakeBackupFiles implements BackupFiles {
-  String? savePath = 'C:/sauvegardes/finstride';
+  String? savePath = 'C:/sauvegardes/bastide';
   ({String name, Uint8List bytes})? picked;
   final written = <String, Uint8List>{};
 
@@ -138,7 +138,7 @@ void main() {
         final summary = await controller().export();
 
         expect(summary?.counts.transactions, 1284);
-        expect(files.written, {'C:/sauvegardes/finstride.finstride': _archive});
+        expect(files.written, {'C:/sauvegardes/bastide.bastide': _archive});
         expect(
           container
               .read(settingsControllerProvider)
@@ -159,7 +159,7 @@ void main() {
     });
 
     test('a file from a newer version is refused before the modal', () async {
-      files.picked = (name: 'future.finstride', bytes: _archive);
+      files.picked = (name: 'future.bastide', bytes: _archive);
       stubUpload('/backup/inspect', throws: failure('BACKUP_TOO_NEW'));
 
       expect(await controller().pickForRestore(), isNull);
@@ -172,14 +172,14 @@ void main() {
     test(
       'a readable file comes back with its summary, and clears a past refusal',
       () async {
-        files.picked = (name: 'future.finstride', bytes: _archive);
+        files.picked = (name: 'future.bastide', bytes: _archive);
         stubUpload('/backup/inspect', throws: failure('BACKUP_INVALID'));
         await controller().pickForRestore();
         stubUpload('/backup/inspect');
 
         final pending = await controller().pickForRestore();
 
-        expect(pending?.fileName, 'future.finstride');
+        expect(pending?.fileName, 'future.bastide');
         expect(pending?.summary.counts.accounts, 4);
         expect(container.read(backupControllerProvider).restoreFailure, isNull);
       },
@@ -188,7 +188,7 @@ void main() {
     test('a refused restore surfaces as a typed failure', () async {
       stubUpload('/backup/restore', throws: failure('BACKUP_CONFLICT'));
       final pending = PendingRestore(
-        fileName: 'x.finstride',
+        fileName: 'x.bastide',
         bytes: _archive,
         summary: BackupSummary.fromJson(_summaryJson()),
       );
@@ -282,7 +282,7 @@ void main() {
     testWidgets('⑨ a newer-version file shows the refusal in the card', (
       tester,
     ) async {
-      files.picked = (name: 'future.finstride', bytes: _archive);
+      files.picked = (name: 'future.bastide', bytes: _archive);
       stubUpload('/backup/inspect', throws: failure('BACKUP_TOO_NEW'));
 
       await tester.pumpWidget(wrap());
@@ -302,7 +302,7 @@ void main() {
     testWidgets('⑧ confirms with the file summary, then restores', (
       tester,
     ) async {
-      files.picked = (name: 'finstride-2026-09-11.finstride', bytes: _archive);
+      files.picked = (name: 'bastide-2026-09-11.bastide', bytes: _archive);
       stubUpload('/backup/inspect');
       stubUpload('/backup/restore');
 
@@ -313,7 +313,7 @@ void main() {
 
       expect(find.text('Restaurer cette sauvegarde ?'), findsOneWidget);
       expect(
-        find.textContaining('finstride-2026-09-11.finstride'),
+        find.textContaining('bastide-2026-09-11.bastide'),
         findsOneWidget,
       );
       expect(find.text('0.1.0'), findsOneWidget);
@@ -340,7 +340,7 @@ void main() {
     testWidgets('a refused restore keeps the modal open with the reason', (
       tester,
     ) async {
-      files.picked = (name: 'x.finstride', bytes: _archive);
+      files.picked = (name: 'x.bastide', bytes: _archive);
       stubUpload('/backup/inspect');
       stubUpload('/backup/restore', throws: failure('BACKUP_RUN_ACTIVE'));
 

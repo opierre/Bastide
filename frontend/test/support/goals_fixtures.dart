@@ -1,6 +1,6 @@
-import 'package:finstride/features/goals/application/goals_controller.dart';
-import 'package:finstride/features/goals/domain/goal.dart';
-import 'package:finstride/features/goals/domain/goal_allocation.dart';
+import 'package:bastide/features/goals/application/goals_controller.dart';
+import 'package:bastide/features/goals/domain/goal.dart';
+import 'package:bastide/features/goals/domain/goal_allocation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 /// The four goals of `docs/design/11-goals.md` frame ①, in the drawn order —

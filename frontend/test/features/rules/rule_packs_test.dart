@@ -1,14 +1,14 @@
 import 'dart:convert';
 
-import 'package:finstride/core/api/api_client.dart';
-import 'package:finstride/core/api/api_client_provider.dart';
-import 'package:finstride/core/theme/app_theme.dart';
-import 'package:finstride/features/categories/application/categories_controller.dart';
-import 'package:finstride/features/categories/presentation/categories_screen.dart';
-import 'package:finstride/features/rules/application/rule_packs_controller.dart';
-import 'package:finstride/features/rules/application/rules_controller.dart';
-import 'package:finstride/features/rules/domain/rule_pack.dart';
-import 'package:finstride/l10n/app_localizations.dart';
+import 'package:bastide/core/api/api_client.dart';
+import 'package:bastide/core/api/api_client_provider.dart';
+import 'package:bastide/core/theme/app_theme.dart';
+import 'package:bastide/features/categories/application/categories_controller.dart';
+import 'package:bastide/features/categories/presentation/categories_screen.dart';
+import 'package:bastide/features/rules/application/rule_packs_controller.dart';
+import 'package:bastide/features/rules/application/rules_controller.dart';
+import 'package:bastide/features/rules/domain/rule_pack.dart';
+import 'package:bastide/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -87,7 +87,7 @@ Map<String, dynamic> _exportJson({
 }) => {
   'pack': {
     'format_version': 1,
-    'name': 'FinStride rules',
+    'name': 'Bastide rules',
     'locale': 'fr',
     'rules': [
       {
@@ -329,7 +329,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(files.saved, hasLength(1));
-      expect(files.saved.single.name, 'FinStride-rules.json');
+      expect(files.saved.single.name, 'Bastide-rules.json');
       expect(files.saved.single.contents, contains('VIR SALAIRE DUPONT'));
     },
   );

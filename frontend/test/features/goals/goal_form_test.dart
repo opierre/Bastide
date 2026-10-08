@@ -1,10 +1,10 @@
-import 'package:finstride/core/session/current_user_provider.dart';
-import 'package:finstride/core/theme/app_theme.dart';
-import 'package:finstride/features/auth/domain/auth_user.dart';
-import 'package:finstride/features/goals/application/goals_controller.dart';
-import 'package:finstride/features/goals/domain/goal.dart';
-import 'package:finstride/features/goals/presentation/goal_form_modal.dart';
-import 'package:finstride/l10n/app_localizations.dart';
+import 'package:bastide/core/session/current_user_provider.dart';
+import 'package:bastide/core/theme/app_theme.dart';
+import 'package:bastide/features/auth/domain/auth_user.dart';
+import 'package:bastide/features/goals/application/goals_controller.dart';
+import 'package:bastide/features/goals/domain/goal.dart';
+import 'package:bastide/features/goals/presentation/goal_form_modal.dart';
+import 'package:bastide/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';

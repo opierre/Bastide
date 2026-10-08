@@ -1,5 +1,5 @@
-import 'package:finstride/features/transactions/application/transactions_controller.dart';
-import 'package:finstride/features/transactions/domain/transaction.dart';
+import 'package:bastide/features/transactions/application/transactions_controller.dart';
+import 'package:bastide/features/transactions/domain/transaction.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 /// A no-network `TransactionsController` double for widget tests: holds a

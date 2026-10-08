@@ -9,7 +9,7 @@ class AppLocalizationsFr extends AppLocalizations {
   AppLocalizationsFr([String locale = 'fr']) : super(locale);
 
   @override
-  String get appTitle => 'FinStride';
+  String get appTitle => 'Bastide';
 
   @override
   String get navDashboard => 'Tableau de bord';
@@ -114,7 +114,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get settingsAboutPrivacy =>
-      'Toutes vos données restent sur cet ordinateur. FinStride ne se connecte à aucune banque et n\'envoie rien sur Internet.';
+      'Toutes vos données restent sur cet ordinateur. Bastide ne se connecte à aucune banque et n\'envoie rien sur Internet.';
 
   @override
   String get comingSoonBody =>
@@ -1286,11 +1286,11 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get rulePackRefusedMalformed =>
-      'Ce fichier n\'est pas un pack de règles FinStride. Attendu : un fichier JSON avec un nom, une version de format et une liste de règles.';
+      'Ce fichier n\'est pas un pack de règles Bastide. Attendu : un fichier JSON avec un nom, une version de format et une liste de règles.';
 
   @override
   String rulePackRefusedVersion(int version) {
-    return 'Ce pack utilise une version de format que cette version de FinStride ne lit pas. Elle lit la version $version. Un pack partiellement compris perdrait silencieusement des règles, il est donc refusé en entier.';
+    return 'Ce pack utilise une version de format que cette version de Bastide ne lit pas. Elle lit la version $version. Un pack partiellement compris perdrait silencieusement des règles, il est donc refusé en entier.';
   }
 
   @override
@@ -1662,7 +1662,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get settingsBackupExportCaption =>
-      'Fichier .finstride — comptes, transactions, catégories, règles, objectifs, crédits, biens, paramètres.';
+      'Fichier .bastide — comptes, transactions, catégories, règles, objectifs, crédits, biens, paramètres.';
 
   @override
   String get settingsBackupExportPreparing => 'Préparation de l\'archive…';
@@ -1702,11 +1702,11 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get settingsBackupErrorTooNew =>
-      'Ce fichier provient d\'une version plus récente de FinStride. Mettez l\'application à jour pour le restaurer.';
+      'Ce fichier provient d\'une version plus récente de Bastide. Mettez l\'application à jour pour le restaurer.';
 
   @override
   String get settingsBackupErrorInvalid =>
-      'Ce fichier n\'est pas une sauvegarde FinStride valide, ou il est endommagé.';
+      'Ce fichier n\'est pas une sauvegarde Bastide valide, ou il est endommagé.';
 
   @override
   String get settingsBackupErrorCurrency =>
@@ -2081,7 +2081,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get subscriptionsEmptyBody =>
-      'FinStride repère un paiement récurrent lorsqu\'un prélèvement s\'est répété trois fois. Importer davantage d\'historique accélère la détection.';
+      'Bastide repère un paiement récurrent lorsqu\'un prélèvement s\'est répété trois fois. Importer davantage d\'historique accélère la détection.';
 
   @override
   String get subscriptionsEmptyCta => 'Aller aux imports';
@@ -2137,7 +2137,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get subscriptionDetailFootnote =>
-      'FinStride déduit la série de ces occurrences — vérifiez-les avant de confirmer un changement.';
+      'Bastide déduit la série de ces occurrences — vérifiez-les avant de confirmer un changement.';
 
   @override
   String get subscriptionDetailLoadFailed =>
@@ -2502,7 +2502,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get mortgagesEmptyBody =>
-      'Ajoutez vos emprunts pour suivre leur coût réel, leur trajectoire et votre capacité — sans jamais relier FinStride à une banque.';
+      'Ajoutez vos emprunts pour suivre leur coût réel, leur trajectoire et votre capacité — sans jamais relier Bastide à une banque.';
 
   @override
   String get mortgagesChargeLabel => 'Charge mensuelle';
@@ -2756,7 +2756,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get mortgageCostTaegDisclaimer =>
-      'Indicatif : un TAEG réel inclut des frais que FinStride ne voit pas.';
+      'Indicatif : un TAEG réel inclut des frais que Bastide ne voit pas.';
 
   @override
   String get mortgageCostTaegCaption => 'taux, assurance et frais inclus';

@@ -1,5 +1,5 @@
-import 'package:finstride/features/rules/application/rules_controller.dart';
-import 'package:finstride/features/rules/domain/rule.dart';
+import 'package:bastide/features/rules/application/rules_controller.dart';
+import 'package:bastide/features/rules/domain/rule.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 /// A no-network `RulesController` double for widget tests.

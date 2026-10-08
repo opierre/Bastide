@@ -1,5 +1,5 @@
-import 'package:finstride/features/categories/application/categories_controller.dart';
-import 'package:finstride/features/categories/domain/category.dart';
+import 'package:bastide/features/categories/application/categories_controller.dart';
+import 'package:bastide/features/categories/domain/category.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 /// A no-network `CategoriesController` double for widget tests: a fixed

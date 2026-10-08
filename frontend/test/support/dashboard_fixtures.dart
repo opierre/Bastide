@@ -1,5 +1,5 @@
-import 'package:finstride/features/dashboard/domain/dashboard_summary.dart';
-import 'package:finstride/features/dashboard/domain/dashboard_trends.dart';
+import 'package:bastide/features/dashboard/domain/dashboard_summary.dart';
+import 'package:bastide/features/dashboard/domain/dashboard_trends.dart';
 
 /// The seven categories exactly as `docs/design/04-dashboard.md` tabulates them, in the spec's
 /// descending order. The i18n keys are the ones `categorySlugFor` buckets into the pinned hues,

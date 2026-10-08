@@ -1,14 +1,14 @@
 import 'dart:async';
 
-import 'package:finstride/core/theme/app_theme.dart';
-import 'package:finstride/core/theme/tokens.dart';
-import 'package:finstride/core/widgets/amount_text.dart';
-import 'package:finstride/core/widgets/status_pill.dart';
-import 'package:finstride/features/mortgages/application/mortgages_controller.dart';
-import 'package:finstride/features/mortgages/domain/mortgage.dart';
-import 'package:finstride/features/mortgages/presentation/mortgages_screen.dart';
-import 'package:finstride/features/mortgages/presentation/trajectory_chart.dart';
-import 'package:finstride/l10n/app_localizations.dart';
+import 'package:bastide/core/theme/app_theme.dart';
+import 'package:bastide/core/theme/tokens.dart';
+import 'package:bastide/core/widgets/amount_text.dart';
+import 'package:bastide/core/widgets/status_pill.dart';
+import 'package:bastide/features/mortgages/application/mortgages_controller.dart';
+import 'package:bastide/features/mortgages/domain/mortgage.dart';
+import 'package:bastide/features/mortgages/presentation/mortgages_screen.dart';
+import 'package:bastide/features/mortgages/presentation/trajectory_chart.dart';
+import 'package:bastide/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';

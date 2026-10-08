@@ -1,5 +1,5 @@
-import 'package:finstride/features/imports/application/imports_controller.dart';
-import 'package:finstride/features/imports/domain/import_batch.dart';
+import 'package:bastide/features/imports/application/imports_controller.dart';
+import 'package:bastide/features/imports/domain/import_batch.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 /// No-network `ImportsController` double: a fixed history and a canned import

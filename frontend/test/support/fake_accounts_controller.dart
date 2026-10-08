@@ -1,5 +1,5 @@
-import 'package:finstride/features/accounts/application/accounts_controller.dart';
-import 'package:finstride/features/accounts/domain/account.dart';
+import 'package:bastide/features/accounts/application/accounts_controller.dart';
+import 'package:bastide/features/accounts/domain/account.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 /// A no-network `AccountsController` double for widget tests that only need

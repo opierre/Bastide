@@ -1,7 +1,7 @@
-import 'package:finstride/core/navigation/sidebar_controller.dart';
-import 'package:finstride/core/theme/app_theme.dart';
-import 'package:finstride/core/widgets/app_shell.dart';
-import 'package:finstride/l10n/app_localizations.dart';
+import 'package:bastide/core/navigation/sidebar_controller.dart';
+import 'package:bastide/core/theme/app_theme.dart';
+import 'package:bastide/core/widgets/app_shell.dart';
+import 'package:bastide/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';

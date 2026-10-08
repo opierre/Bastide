@@ -1,5 +1,5 @@
-import 'package:finstride/features/properties/application/properties_controller.dart';
-import 'package:finstride/features/properties/domain/property.dart';
+import 'package:bastide/features/properties/application/properties_controller.dart';
+import 'package:bastide/features/properties/domain/property.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 /// The frame's résidence principale (`15-synthese.md` §Biens, card 1).

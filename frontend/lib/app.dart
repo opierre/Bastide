@@ -6,8 +6,8 @@ import 'core/router/app_router.dart';
 import 'core/theme/app_theme.dart';
 import 'l10n/app_localizations.dart';
 
-class FinStrideApp extends ConsumerWidget {
-  const FinStrideApp({super.key});
+class BastideApp extends ConsumerWidget {
+  const BastideApp({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {

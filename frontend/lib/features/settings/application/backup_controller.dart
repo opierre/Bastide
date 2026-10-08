@@ -10,10 +10,10 @@ import 'settings_controller.dart';
 import 'user_data_reload.dart';
 
 /// The extension a backup is written and read as.
-const backupExtension = 'finstride';
+const backupExtension = 'bastide';
 
 const _typeGroup = XTypeGroup(
-  label: 'FinStride backup',
+  label: 'Bastide backup',
   extensions: [backupExtension],
 );
 
@@ -97,7 +97,7 @@ class BackupController extends Notifier<BackupState> {
     final date = DateFormat('yyyy-MM-dd').format(DateTime.now());
     final path = await ref
         .read(backupFilesProvider)
-        .chooseSaveLocation('finstride-$date.$backupExtension');
+        .chooseSaveLocation('bastide-$date.$backupExtension');
     if (path == null) return null;
 
     state = state.copyWith(isExporting: true);

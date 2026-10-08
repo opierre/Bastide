@@ -1,5 +1,5 @@
-import 'package:finstride/features/simulator/domain/simulation.dart';
-import 'package:finstride/features/simulator/domain/simulation_result.dart';
+import 'package:bastide/features/simulator/domain/simulation.dart';
+import 'package:bastide/features/simulator/domain/simulation_result.dart';
 
 /// The frame's live simulation (`14-simulateur.md` ①): 320 000 € with 40 000 €
 /// down and 4 500 € of fees, 3,25 % over 25 years, 32 € of insurance a month.
