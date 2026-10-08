@@ -89,7 +89,7 @@ def test_export_names_the_pack_from_the_query_and_falls_back(client: TestClient)
     headers, _ = _register(client)
     import_pack(client, headers, pack=pack(entry("CARREFOUR", GROCERIES)))
 
-    assert export_pack(client, headers)["pack"]["name"] == "FinStride rules"
+    assert export_pack(client, headers)["pack"]["name"] == "Bastide rules"
     assert export_pack(client, headers, name="Mes règles")["pack"]["name"] == "Mes règles"
 
 

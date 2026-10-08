@@ -155,7 +155,7 @@ def _type_name(sql_type: Any) -> str:
 
 def _migrated_engine(db_path: Path) -> Engine:
     """Bring an empty SQLite file to head with the Alembic CLI and return an engine on it."""
-    env = {**os.environ, "FINSTRIDE_DB_PATH": str(db_path)}
+    env = {**os.environ, "BASTIDE_DB_PATH": str(db_path)}
     subprocess.run(
         [sys.executable, "-m", "alembic", "upgrade", "head"],
         cwd=BACKEND_DIR,

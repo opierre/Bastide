@@ -16,19 +16,19 @@ def test_db_path_defaults_to_the_os_users_local_data_dir(
 
     def fake_user_data_dir(appname: str, appauthor: object, roaming: object) -> str:
         calls.append((appname, appauthor, roaming))
-        return str(tmp_path / "FinStride")
+        return str(tmp_path / "Bastide")
 
     monkeypatch.setattr(config, "user_data_dir", fake_user_data_dir)
-    monkeypatch.delenv("FINSTRIDE_DB_PATH", raising=False)
+    monkeypatch.delenv("BASTIDE_DB_PATH", raising=False)
 
     settings = Settings(_env_file=None)  # ty: ignore[unknown-argument] — pydantic-settings init kwarg
 
-    assert Path(settings.db_path) == tmp_path / "FinStride" / "finstride.db"
-    assert calls == [("FinStride", False, False)]
+    assert Path(settings.db_path) == tmp_path / "Bastide" / "bastide.db"
+    assert calls == [("Bastide", False, False)]
 
 
 def test_db_path_env_override_wins(monkeypatch: pytest.MonkeyPatch) -> None:
-    monkeypatch.setenv("FINSTRIDE_DB_PATH", "custom.db")
+    monkeypatch.setenv("BASTIDE_DB_PATH", "custom.db")
 
     settings = Settings(_env_file=None)  # ty: ignore[unknown-argument] — pydantic-settings init kwarg
 
@@ -36,7 +36,7 @@ def test_db_path_env_override_wins(monkeypatch: pytest.MonkeyPatch) -> None:
 
 
 def test_sqlite_url_creates_the_missing_data_dir(tmp_path: Path) -> None:
-    db_path = tmp_path / "first" / "run" / "finstride.db"
+    db_path = tmp_path / "first" / "run" / "bastide.db"
 
     url = sqlite_url(db_path.as_posix())
 

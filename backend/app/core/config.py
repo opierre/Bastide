@@ -1,4 +1,4 @@
-"""Application settings, env-overridable (prefix ``FINSTRIDE_``)."""
+"""Application settings, env-overridable (prefix ``BASTIDE_``)."""
 
 from functools import lru_cache
 from pathlib import Path
@@ -11,7 +11,7 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 class Settings(BaseSettings):
     """Sidecar configuration: bind address, datastore path, and allowed CORS origins."""
 
-    model_config = SettingsConfigDict(env_prefix="FINSTRIDE_", env_file=".env", extra="ignore")
+    model_config = SettingsConfigDict(env_prefix="BASTIDE_", env_file=".env", extra="ignore")
 
     host: str = "127.0.0.1"
     # Each OS account gets its own datastore under its private data dir (%LOCALAPPDATA% on
@@ -26,7 +26,7 @@ class Settings(BaseSettings):
 def default_db_path() -> Path:
     """Return the datastore path inside the current OS user's local (non-roaming) data dir."""
     # Local, not roaming: a SQLite file and its WAL must stay on a local disk, never synced.
-    return Path(user_data_dir("FinStride", appauthor=False, roaming=False)) / "finstride.db"
+    return Path(user_data_dir("Bastide", appauthor=False, roaming=False)) / "bastide.db"
 
 
 @lru_cache

@@ -37,13 +37,13 @@ _RESTORE_BATCH = 500
 
 def _app_version() -> str:
     try:
-        return version("finstride-backend")
+        return version("bastide-backend")
     except PackageNotFoundError:
         return "0.0.0"
 
 
 class BackupService:
-    """Builds `.finstride` archives and replaces a user's data with one."""
+    """Builds `.bastide` archives and replaces a user's data with one."""
 
     def __init__(
         self,
@@ -79,7 +79,7 @@ class BackupService:
         """Report what an archive holds, refusing one this build or this user cannot restore.
 
         Raises:
-            BackupInvalidError: not a FinStride archive, or its manifest is malformed.
+            BackupInvalidError: not a Bastide archive, or its manifest is malformed.
             BackupTooNewError: written by a newer archive format.
             BackupCurrencyMismatchError: its currency is not the user's.
         """
@@ -140,7 +140,7 @@ class BackupService:
         # exactly the fields the checks below would read.
         if format_version > FORMAT_VERSION:
             raise BackupTooNewError(
-                "The backup comes from a newer version of FinStride.",
+                "The backup comes from a newer version of Bastide.",
                 details={"format_version": format_version, "supported": FORMAT_VERSION},
             )
         currency = manifest.get("currency")

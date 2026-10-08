@@ -30,14 +30,14 @@ async def export_backup(
     service: Annotated[BackupService, Depends(_service)],
     user: Annotated[User, Depends(get_current_user)],
 ) -> Response:
-    """The caller's data as a `.finstride` archive; its summary rides in a header."""
+    """The caller's data as a `.bastide` archive; its summary rides in a header."""
     content, summary = service.export(user)
     stamp = summary.exported_at.strftime("%Y-%m-%d")
     return Response(
         content=content,
         media_type="application/zip",
         headers={
-            "Content-Disposition": f'attachment; filename="finstride-{stamp}.finstride"',
+            "Content-Disposition": f'attachment; filename="bastide-{stamp}.bastide"',
             SUMMARY_HEADER: summary.model_dump_json(),
         },
     )

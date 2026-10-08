@@ -82,7 +82,7 @@ class RulePack(BaseModel):
         if value != SUPPORTED_FORMAT_VERSION:
             raise ValueError(
                 f"Unsupported rule pack format_version {value}; "
-                f"this version of FinStride reads format_version {SUPPORTED_FORMAT_VERSION}."
+                f"this version of Bastide reads format_version {SUPPORTED_FORMAT_VERSION}."
             )
         return value
 
@@ -162,4 +162,4 @@ class RulePackExportResult(BaseModel):
 
 #: The name an export carries when the caller supplies none. Deliberately untranslated: it ends
 #: up inside a file the user may share, not on a screen, so it is a constant, not a locale string.
-DEFAULT_EXPORT_PACK_NAME = "FinStride rules"
+DEFAULT_EXPORT_PACK_NAME = "Bastide rules"
