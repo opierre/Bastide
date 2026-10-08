@@ -169,6 +169,9 @@ class ImportService:
                 transaction.needs_review = False
             new_transactions.append(transaction)
 
+        # The batch goes in first: the rows reference it, and the flush below would otherwise
+        # insert them pointing at a batch that does not exist yet.
+        self._db.add(batch)
         self._db.add_all(new_transactions)
         self._db.flush()
 

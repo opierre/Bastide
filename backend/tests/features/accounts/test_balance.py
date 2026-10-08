@@ -9,31 +9,22 @@ from sqlalchemy.orm import Session
 from app.features.accounts import balance
 from app.features.accounts.models import Account, AccountBalanceSnapshot
 from app.features.transactions.models import Transaction
+from tests.factories import make_account, make_import_batch
 
 
 def _make_account(db: Session, **overrides: object) -> Account:
-    kwargs: dict[str, object] = {
-        "user_id": str(uuid4()),
-        "name": "Compte courant",
-        "type": "checking",
-        "institution": "BNP Paribas",
-        "currency": "EUR",
-        "opening_balance_minor": 0,
-        "cached_balance_minor": 0,
-        "archived": False,
-    }
-    kwargs.update(overrides)
-    account = Account(**kwargs)
-    db.add(account)
+    account = make_account(db, **overrides)
     db.commit()
     db.refresh(account)
     return account
 
 
-def _make_transaction(account_id: str, booked_date: date, amount_minor: int) -> Transaction:
+def _make_transaction(
+    db: Session, account: Account, booked_date: date, amount_minor: int
+) -> Transaction:
     return Transaction(
-        account_id=account_id,
-        import_batch_id=str(uuid4()),
+        account_id=account.id,
+        import_batch_id=make_import_batch(db, account).id,
         booked_date=booked_date,
         amount_minor=amount_minor,
         currency="EUR",
@@ -62,9 +53,9 @@ def test_point_in_time_balance_uses_nearest_snapshot_plus_rows_since(db_session:
             account_id=account.id, period_end=date(2026, 1, 31), balance_minor=500
         )
     )
-    db_session.add(_make_transaction(account.id, date(2026, 2, 5), -100))
-    db_session.add(_make_transaction(account.id, date(2026, 2, 10), 50))
-    db_session.add(_make_transaction(account.id, date(2026, 3, 1), 1000))
+    db_session.add(_make_transaction(db_session, account, date(2026, 2, 5), -100))
+    db_session.add(_make_transaction(db_session, account, date(2026, 2, 10), 50))
+    db_session.add(_make_transaction(db_session, account, date(2026, 3, 1), 1000))
     db_session.commit()
 
     result = balance.point_in_time_balance(db_session, account, date(2026, 2, 10))
@@ -76,8 +67,8 @@ def test_point_in_time_balance_without_snapshot_falls_back_to_opening_balance(
     db_session: Session,
 ) -> None:
     account = _make_account(db_session, opening_balance_minor=1000, cached_balance_minor=800)
-    db_session.add(_make_transaction(account.id, date(2026, 1, 15), -200))
-    db_session.add(_make_transaction(account.id, date(2026, 2, 15), -500))
+    db_session.add(_make_transaction(db_session, account, date(2026, 1, 15), -200))
+    db_session.add(_make_transaction(db_session, account, date(2026, 2, 15), -500))
     db_session.commit()
 
     result = balance.point_in_time_balance(db_session, account, date(2026, 1, 31))

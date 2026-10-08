@@ -94,7 +94,7 @@ def client(app: FastAPI, tmp_path: Path, seeded_template: Path) -> Generator[Tes
     """A TestClient whose DB session dependency points at a temp SQLite file."""
     db_path = tmp_path / "test.db"
     shutil.copyfile(seeded_template, db_path)
-    engine = create_engine(f"sqlite:///{db_path}", connect_args={"check_same_thread": False})
+    engine = engine_with_foreign_keys(db_path)
 
     @event.listens_for(engine, "connect")
     def _skip_fsync(dbapi_connection: Any, connection_record: Any) -> None:
@@ -131,7 +131,7 @@ def db_session(tmp_path: Path, schema_template: Path) -> Generator[Session]:
     """A Session on an empty temp database built from the ORM metadata (all feature models)."""
     db_path = tmp_path / "models.db"
     shutil.copyfile(schema_template, db_path)
-    engine = create_engine(f"sqlite:///{db_path}", connect_args={"check_same_thread": False})
+    engine = engine_with_foreign_keys(db_path)
     db = sessionmaker(bind=engine, autoflush=False, autocommit=False)()
     try:
         yield db

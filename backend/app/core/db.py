@@ -24,20 +24,35 @@ def sqlite_url(db_path: str) -> str:
     return f"sqlite:///{db_path}"
 
 
+def configure_sqlite(engine: Engine) -> Engine:
+    """Apply the pragmas every app connection needs, and return the engine.
+
+    WAL lets one writer and many readers coexist. Foreign keys are declared in the schema but
+    SQLite only enforces them — cascades included — when each connection opts in; without it a
+    dangling reference is stored silently, where Postgres would reject it.
+
+    Alembic deliberately keeps its own engine without these: batch migrations rebuild tables,
+    and with foreign keys on, dropping the old copy would cascade into the rows that point at it.
+    """
+
+    @event.listens_for(engine, "connect")
+    def _set_pragmas(dbapi_connection: Any, connection_record: Any) -> None:
+        cursor = dbapi_connection.cursor()
+        cursor.execute("PRAGMA journal_mode=WAL")
+        cursor.execute("PRAGMA foreign_keys=ON")
+        cursor.close()
+
+    return engine
+
+
 settings = get_settings()
 
-engine: Engine = create_engine(
-    sqlite_url(settings.db_path),
-    connect_args={"check_same_thread": False},
+engine: Engine = configure_sqlite(
+    create_engine(
+        sqlite_url(settings.db_path),
+        connect_args={"check_same_thread": False},
+    )
 )
-
-
-@event.listens_for(engine, "connect")
-def _enable_wal(dbapi_connection: Any, connection_record: Any) -> None:
-    """Enable WAL journal mode so one writer and many readers can coexist."""
-    cursor = dbapi_connection.cursor()
-    cursor.execute("PRAGMA journal_mode=WAL")
-    cursor.close()
 
 
 SessionLocal = sessionmaker(bind=engine, autoflush=False, autocommit=False)
