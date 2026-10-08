@@ -214,6 +214,38 @@ class TokenResponse(BaseModel):
     user: UserRead
 
 
+class RegisterResponse(TokenResponse):
+    """Response for register: the session plus the recovery code, shown to the user once."""
+
+    recovery_code: str
+
+
+class PasswordReset(BaseModel):
+    """Reset a forgotten password with the recovery code issued earlier."""
+
+    email: str
+    recovery_code: str = Field(min_length=1)
+    new_password: str = Field(min_length=1)
+
+
+class PasswordResetResponse(TokenResponse):
+    """Response for a password reset: a fresh session and the replacement recovery code."""
+
+    recovery_code: str
+
+
+class RecoveryCodeRegenerate(BaseModel):
+    """Re-confirm the password before replacing the recovery code."""
+
+    password: str
+
+
+class RecoveryCodeResponse(BaseModel):
+    """A newly generated recovery code, shown to the user once."""
+
+    recovery_code: str
+
+
 class MeResponse(BaseModel):
     """Response for GET /auth/me."""
 

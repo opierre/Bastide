@@ -1,6 +1,6 @@
 """Data access for `User` and `AuthToken` rows. The only place that queries these tables."""
 
-from sqlalchemy import select
+from sqlalchemy import delete, select
 from sqlalchemy.orm import Session
 
 from app.features.auth.models import AuthToken, User
@@ -35,4 +35,16 @@ class AuthRepository:
 
     def delete_token(self, token: AuthToken) -> None:
         self._db.delete(token)
+        self._db.commit()
+
+    def save_user(self, user: User) -> User:
+        self._db.commit()
+        self._db.refresh(user)
+        return user
+
+    def reset_credentials(self, user: User, password_hash: str, recovery_code_hash: str) -> None:
+        """Replace both secrets and drop every session of the user, in one transaction."""
+        user.password_hash = password_hash
+        user.recovery_code_hash = recovery_code_hash
+        self._db.execute(delete(AuthToken).where(AuthToken.user_id == user.id))
         self._db.commit()
