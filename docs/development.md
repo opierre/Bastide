@@ -46,6 +46,12 @@ The Flutter API client targets `http://127.0.0.1:8765/api/v1`. The backend binds
 only** — never `0.0.0.0`. With the backend running, the interactive API docs are at
 `http://127.0.0.1:8765/docs`.
 
+The datastore lives in the current OS user's local data folder, so each account on a shared
+computer keeps its own: `%LOCALAPPDATA%\FinStride\finstride.db` on Windows,
+`~/Library/Application Support/FinStride/` on macOS, `~/.local/share/FinStride/` on Linux. Set
+`FINSTRIDE_DB_PATH` (environment or `backend/.env`) to point the sidecar and Alembic elsewhere,
+e.g. a throwaway dev database.
+
 For AI categorisation, run a local inference runtime (Ollama or `llama-server`) with a small
 model such as Gemma 4 E4B, then enable it in **Paramètres → Données → IA locale**. Without one,
 categorisation runs on rules alone.

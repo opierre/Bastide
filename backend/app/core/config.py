@@ -1,7 +1,10 @@
 """Application settings, env-overridable (prefix ``FINSTRIDE_``)."""
 
 from functools import lru_cache
+from pathlib import Path
 
+from platformdirs import user_data_dir
+from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -11,10 +14,19 @@ class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_prefix="FINSTRIDE_", env_file=".env", extra="ignore")
 
     host: str = "127.0.0.1"
-    db_path: str = "finstride.db"
+    # Each OS account gets its own datastore under its private data dir (%LOCALAPPDATA% on
+    # Windows, ~/Library/Application Support on macOS, ~/.local/share on Linux), so the OS file
+    # permissions keep one person's finances from another's, not only the app's login.
+    db_path: str = Field(default_factory=lambda: default_db_path().as_posix())
     # Regex (not a fixed port) since the Flutter frontend's dev origin/port isn't pinned yet;
     # restricts CORS to loopback origins without falling back to a wildcard.
     frontend_origin_regex: str = r"^http://(127\.0\.0\.1|localhost)(:\d+)?$"
+
+
+def default_db_path() -> Path:
+    """Return the datastore path inside the current OS user's local (non-roaming) data dir."""
+    # Local, not roaming: a SQLite file and its WAL must stay on a local disk, never synced.
+    return Path(user_data_dir("FinStride", appauthor=False, roaming=False)) / "finstride.db"
 
 
 @lru_cache
