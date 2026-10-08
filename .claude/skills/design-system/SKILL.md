@@ -1,6 +1,6 @@
 ---
 name: design-system
-description: Use for any visual/UI work in the finstride — building screens, styling, theming, layout, icons, brand logos, or writing design-tool prompts. Summarises the binding spec in docs/design/00-shared-design-block.md — the dark-first iris palette, Geist/Space Grotesk typography, the fixed sidebar/top bar invariant (no bottom bar), monogram-only brand logos, the component inventory, and the encouraging-UX direction. Builds on the general frontend-design skill for craft; this skill supplies the project-specific tokens and invariants.
+description: Use for any visual/UI work in Bastide — building screens, styling, theming, layout, icons, brand logos, or writing design-tool prompts. Summarises the binding spec in docs/design/00-shared-design-block.md — the dark-first iris palette, Geist/Space Grotesk typography, the fixed sidebar/top bar invariant (no bottom bar), monogram-only brand logos, the component inventory, and the encouraging-UX direction. Builds on the general frontend-design skill for craft; this skill supplies the project-specific tokens and invariants.
 ---
 
 # Design System

@@ -1,6 +1,6 @@
 # 04 — Dashboard
 
-Everything below is exactly what the mockup frames `04-Dashboard — *` in `FinStride Mockups.dc.html` show. Do not guess: colors, amounts, order, and positions are normative. Colors reference the tokens in `00-shared-design-block.md`.
+Everything below is exactly what the mockup frames `04-Dashboard — *` in `Bastide Mockups.dc.html` show. Do not guess: colors, amounts, order, and positions are normative. Colors reference the tokens in `00-shared-design-block.md`.
 
 ## Top bar (this panel)
 Title « Tableau de bord » / "Dashboard" + descriptor « Votre mois en un coup d'œil » / "Your month at a glance". Right side, in order: month selector pill (‹ Mai 2026 › / ‹ May 2026 ›, 38 px, raised surface), global search pill (250 px, placeholder « Rechercher… » / "Search…"), user pill.

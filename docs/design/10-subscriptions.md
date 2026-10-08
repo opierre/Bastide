@@ -34,7 +34,7 @@ Header row 32 px uppercase `#5A6579`: (36 monogram) · Abonnement (flex) · Cat�
 **Kebab menu** (open on Netflix in frame ①): 230 px popover, overlay surface `#19202B`, border `#232B38`, radius 14, shadow `0 18px 44px rgba(0,0,0,.55)`; items 34 px: Confirmer (green check) · Ignorer · Marquer comme résilié · Modifier.
 
 ## Detail state (frame ②, Netflix)
-Iris back link « Retour aux abonnements ». Header Card: 48 px NF monogram · name (Space Grotesk 20) + Loisirs chip · sub « BNP — Compte courant · détecté depuis décembre 2025 » · right stat trio (Cadence Mensuel / Montant attendu 15,49 € / Prochain prélèvement 15/05/2026). Below: amber banner « Augmentation : 13,49 € → 15,49 € le 15/04/2026 — soit +24,00 € par an. » Then history Card « Historique des prélèvements », sub « Les transactions dont cette série est déduite · BNP — Compte courant », holding the **price curve** (see below) over an amber change pill « 13,49 € → 15,49 € » aligned left as its legend. Foot note: « FinStride déduit la série de ces occurrences — vérifiez-les avant de confirmer un changement. »
+Iris back link « Retour aux abonnements ». Header Card: 48 px NF monogram · name (Space Grotesk 20) + Loisirs chip · sub « BNP — Compte courant · détecté depuis décembre 2025 » · right stat trio (Cadence Mensuel / Montant attendu 15,49 € / Prochain prélèvement 15/05/2026). Below: amber banner « Augmentation : 13,49 € → 15,49 € le 15/04/2026 — soit +24,00 € par an. » Then history Card « Historique des prélèvements », sub « Les transactions dont cette série est déduite · BNP — Compte courant », holding the **price curve** (see below) over an amber change pill « 13,49 € → 15,49 € » aligned left as its legend. Foot note: « Bastide déduit la série de ces occurrences — vérifiez-les avant de confirmer un changement. »
 
 ### Price curve (history Card body)
 Replaces the occurrence table the frame was first drawn with: five near-identical amounts asked the reader to do the comparison, where a line has already done it. The amounts are not lost — see the axis and the hover below.
@@ -50,7 +50,7 @@ Replaces the occurrence table the frame was first drawn with: five near-identica
 **Hover.** A full-height column per charge (the moment, not the 3 px dot) carrying the dashboard's tooltip: date (tabular) over the signed, colorized amount — `−15,49 €` in `#FF5C6C` — plus « 13,49 € → 15,49 € » in amber on the charge that stepped.
 
 ## Empty state (frame ③)
-Centered: 64 px iris plate with cycle glyph; « Aucun abonnement détecté pour l'instant »; « FinStride repère un abonnement lorsqu'un prélèvement s'est répété trois fois. Importer davantage d'historique accélère la détection. »; gradient CTA « Aller aux imports ».
+Centered: 64 px iris plate with cycle glyph; « Aucun abonnement détecté pour l'instant »; « Bastide repère un abonnement lorsqu'un prélèvement s'est répété trois fois. Importer davantage d'historique accélère la détection. »; gradient CTA « Aller aux imports ».
 
 ## New-subscription modal (frame ④, over list)
 480 px modal on `rgba(4,6,11,.62)` scrim. Title « Nouvel abonnement », sub « Suivez un prélèvement que la détection n'a pas encore repéré. » Fields: Nom (focused: iris border + focus ring) = Basic-Fit; row Compte (select, BNP — Compte courant) + Montant 130 px (29,99 €); row Cadence (select « Mensuel », help « Mensuel · Trimestriel · Annuel · Irrégulier ») + Catégorie (select with swatch, Santé). Footer right: Annuler (secondary) · Créer l'abonnement (gradient).

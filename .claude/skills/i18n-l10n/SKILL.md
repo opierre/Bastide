@@ -1,6 +1,6 @@
 ---
 name: i18n-l10n
-description: Use whenever adding or changing any user-facing text, formatting dates/numbers/currency, or handling locale in the finstride. Enforces no-hardcoded-strings, the ARB workflow for Flutter, fr/en parity, locale-aware formatting via intl, backend i18n-key-friendly error messages, and localized seed data. French-first, English-second.
+description: Use whenever adding or changing any user-facing text, formatting dates/numbers/currency, or handling locale in Bastide. Enforces no-hardcoded-strings, the ARB workflow for Flutter, fr/en parity, locale-aware formatting via intl, backend i18n-key-friendly error messages, and localized seed data. French-first, English-second.
 ---
 
 # i18n / l10n

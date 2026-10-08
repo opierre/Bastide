@@ -65,7 +65,7 @@ No amortisation curve in the detail — rejected: the table carries the numbers 
 600 px Modal (`#19202B`, radius 20, scrim `rgba(4,6,11,.62)`), title « Nouveau crédit », sub « La mensualité est calculée à partir du capital, du taux et de la durée. » Two-column FormField grid (gap 12/14): Libellé (full width, focused) · Prêteur (Select with 24 px monogram) · Type (Select: Crédit immobilier / Prêt travaux / Crédit à la consommation / Crédit auto) · Capital emprunté · Taux nominal · Durée (« mois » unit) · 1re échéance (date) · Assurance / mois · Frais de dossier. Amount fields right-aligned tabular. Below: read-only plate (`#0A0F15`, dashed `#3A4556`, lock glyph) « Mensualité calculée **282,38 €** · échéance totale 282,38 € — intérêts totaux 1 942,80 € », live as the fields change. Footer « Annuler » · gradient « Ajouter le crédit ». Frame shows the Prêt travaux values as the worked example.
 
 ## Empty state (frame ⑥)
-Centered EmptyState: 64 px iris plate with the house glyph; « Aucun crédit enregistré »; « Ajoutez vos emprunts pour suivre leur coût réel, leur trajectoire et votre capacité — sans jamais relier FinStride à une banque. »; gradient CTA « Nouveau crédit ». Summary row and chart are not drawn.
+Centered EmptyState: 64 px iris plate with the house glyph; « Aucun crédit enregistré »; « Ajoutez vos emprunts pour suivre leur coût réel, leur trajectoire et votre capacité — sans jamais relier Bastide à une banque. »; gradient CTA « Nouveau crédit ». Summary row and chart are not drawn.
 
 ## States to show
 ① liste (fr) ② détail + tableau d'amortissement (fr) ③ modal nouveau crédit (fr) ④ ratio sur revenu du grand livre, au-dessus du repère (fr) ⑤ ratio sans revenu connu (fr) ⑥ vide (fr) ⑦ liste (en, rail replié 76 px).

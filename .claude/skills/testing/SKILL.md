@@ -1,6 +1,6 @@
 ---
 name: testing
-description: Use whenever writing or changing tests, or deciding what to mock, in the finstride. Defines the backend (pytest) and frontend (flutter_test + mocktail) conventions, the mock-everything-external rule, what to use real vs mock, the money/dedup/i18n assertions every feature needs, and the per-slice definition of done. Consult before finishing any feature slice.
+description: Use whenever writing or changing tests, or deciding what to mock, in Bastide. Defines the backend (pytest) and frontend (flutter_test + mocktail) conventions, the mock-everything-external rule, what to use real vs mock, the money/dedup/i18n assertions every feature needs, and the per-slice definition of done. Consult before finishing any feature slice.
 ---
 
 # Testing

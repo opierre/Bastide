@@ -1,6 +1,6 @@
 ---
 name: architecture
-description: Use whenever creating or moving files, adding a feature, wiring the Flutter frontend to the Python backend, or making any structural/layering decision in the finstride monorepo. Defines the monorepo layout, feature-first boundaries, the localhost sidecar coupling, and the dependency rules every other skill assumes. Consult before scaffolding anything new.
+description: Use whenever creating or moving files, adding a feature, wiring the Flutter frontend to the Python backend, or making any structural/layering decision in the Bastide monorepo. Defines the monorepo layout, feature-first boundaries, the localhost sidecar coupling, and the dependency rules every other skill assumes. Consult before scaffolding anything new.
 ---
 
 # Architecture

@@ -1,6 +1,6 @@
 # Development workflow
 
-How to work on FinStride day to day: editor setup, running both halves, the checks CI runs,
+How to work on Bastide day to day: editor setup, running both halves, the checks CI runs,
 regenerating the reference docs, working with coding agents, and committing.
 
 ---
@@ -8,7 +8,7 @@ regenerating the reference docs, working with coding agents, and committing.
 ## 1. One-time setup
 
 ### Workspace
-Open `finstride.code-workspace` (**File → Open Workspace from File…**). It is a multi-root
+Open `bastide.code-workspace` (**File → Open Workspace from File…**). It is a multi-root
 workspace — `backend`, `frontend`, `docs` and the repo root — so each package gets its own
 integrated terminal and formatter.
 
@@ -47,9 +47,9 @@ only** — never `0.0.0.0`. With the backend running, the interactive API docs a
 `http://127.0.0.1:8765/docs`.
 
 The datastore lives in the current OS user's local data folder, so each account on a shared
-computer keeps its own: `%LOCALAPPDATA%\FinStride\finstride.db` on Windows,
-`~/Library/Application Support/FinStride/` on macOS, `~/.local/share/FinStride/` on Linux. Set
-`FINSTRIDE_DB_PATH` (environment or `backend/.env`) to point the sidecar and Alembic elsewhere,
+computer keeps its own: `%LOCALAPPDATA%\Bastide\bastide.db` on Windows,
+`~/Library/Application Support/Bastide/` on macOS, `~/.local/share/Bastide/` on Linux. Set
+`BASTIDE_DB_PATH` (environment or `backend/.env`) to point the sidecar and Alembic elsewhere,
 e.g. a throwaway dev database.
 
 For AI categorisation, run a local inference runtime (Ollama or `llama-server`) with a small

@@ -1,6 +1,6 @@
 ---
 name: ai-categorization
-description: Use for transaction categorization and the AI insights feature in the finstride. Covers the deterministic rule engine and the optional SLM layer running on a local inference runtime (llama.cpp or Ollama) — the rules→model→confidence-deferral pattern, the async run model, the human review/confirm queue, learning corrections back into rules, model selection (Gemma 4 default; a finance-tuned 8B for insights is undecided), graceful degradation when no runtime answers, and full mocking of the model in tests.
+description: Use for transaction categorization and the AI insights feature in Bastide. Covers the deterministic rule engine and the optional SLM layer running on a local inference runtime (llama.cpp or Ollama) — the rules→model→confidence-deferral pattern, the async run model, the human review/confirm queue, learning corrections back into rules, model selection (Gemma 4 default; a finance-tuned 8B for insights is undecided), graceful degradation when no runtime answers, and full mocking of the model in tests.
 ---
 
 # AI Categorization

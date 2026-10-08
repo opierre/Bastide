@@ -1,6 +1,6 @@
 <div align="center">
 
-# FinStride
+# Bastide
 
 **A local-first personal finance manager for the desktop.**
 Import your bank statements, see where your money goes, and keep your data on your machine.
@@ -30,7 +30,7 @@ Import your bank statements, see where your money goes, and keep your data on yo
 | 🔁 **Subscriptions** | Recurring charges detected automatically, including price changes and missed payments. |
 | 🎯 **Goals** | Virtual savings envelopes that track progress without moving any money. |
 | 🏠 **Patrimoine** | Mortgages with derived amortisation schedules and the debt ratio, a new-loan simulator against the HCSF limits, and a net-worth view across accounts, properties and loans. |
-| 💾 **Backup** | Export everything to one `.finstride` file and restore it anywhere. |
+| 💾 **Backup** | Export everything to one `.bastide` file and restore it anywhere. |
 
 ## 🚀 Quick start
 
@@ -92,7 +92,7 @@ flowchart LR
 ## 🗂️ Repository layout
 
 ```
-FinStride/
+Bastide/
 ├── backend/            FastAPI sidecar · app/features/<feature>/ · Alembic migrations · pytest
 ├── frontend/           Flutter desktop app · lib/features/<feature>/ · ARB l10n (fr, en)
 ├── docs/               generated references, design specs, JSON schemas, dev guide
