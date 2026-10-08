@@ -15,7 +15,7 @@ class FakeAuthController extends AuthController {
   final Object? loginError;
   final Object? registerError;
 
-  final loginCalls = <({String email, String password})>[];
+  final loginCalls = <({String identifier, String password})>[];
   final registerCalls =
       <
         ({
@@ -32,8 +32,11 @@ class FakeAuthController extends AuthController {
   Future<AuthUser?> build() async => initialUser;
 
   @override
-  Future<void> login({required String email, required String password}) async {
-    loginCalls.add((email: email, password: password));
+  Future<void> login({
+    required String identifier,
+    required String password,
+  }) async {
+    loginCalls.add((identifier: identifier, password: password));
     if (loginError case final error?) {
       state = AsyncValue.error(error, StackTrace.current);
     }

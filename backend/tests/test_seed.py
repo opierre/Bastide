@@ -64,14 +64,14 @@ def test_startup_seeds_the_catalog(client: TestClient) -> None:
         json={
             "email": "seed@example.com",
             "password": "correct-horse-battery-staple",
-            "display_name": "Seed",
+            "display_name": "seed",
             "locale": "fr",
             "currency": "eur",
         },
     )
     token = client.post(
         "/api/v1/auth/login",
-        json={"email": "seed@example.com", "password": "correct-horse-battery-staple"},
+        json={"identifier": "seed@example.com", "password": "correct-horse-battery-staple"},
     ).json()["token"]
 
     body = client.get("/api/v1/categories", headers={"Authorization": f"Bearer {token}"}).json()

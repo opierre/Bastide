@@ -124,13 +124,16 @@ void main() {
     expect(find.byKey(const Key('settingsCurrencyField')), findsNothing);
   });
 
-  testWidgets('Profil offers the recovery code card', (tester) async {
+  testWidgets('Profil offers the username and recovery code cards', (
+    tester,
+  ) async {
     await tester.pumpWidget(_wrap());
     await tester.pumpAndSettle();
 
     await tester.tap(find.byKey(const Key('settingsSection-profile')));
     await tester.pumpAndSettle();
 
+    expect(find.byKey(const Key('settingsDisplayNameCard')), findsOneWidget);
     expect(find.byKey(const Key('settingsRecoveryCard')), findsOneWidget);
     expect(find.text('Bientôt disponible'), findsNothing);
   });

@@ -24,7 +24,8 @@ def register_user(
         json={
             "email": email,
             "password": PASSWORD,
-            "display_name": "Amelie",
+            # Display names are unique usernames: derive one per email.
+            "display_name": email.split("@")[0],
             "locale": "fr",
             "currency": currency,
         },

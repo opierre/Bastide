@@ -30,7 +30,7 @@ Widget _wrap({
 Future<void> _fillValidForm(WidgetTester tester) async {
   await tester.enterText(
     find.byKey(const Key('registerDisplayNameField')),
-    'Ada Lovelace',
+    'ada.lovelace',
   );
   await tester.enterText(
     find.byKey(const Key('registerEmailField')),
@@ -88,7 +88,7 @@ void main() {
 
     await tester.enterText(
       find.byKey(const Key('registerDisplayNameField')),
-      'Ada Lovelace',
+      'ada.lovelace',
     );
     await tester.enterText(
       find.byKey(const Key('registerEmailField')),
@@ -136,6 +136,49 @@ void main() {
     );
   });
 
+  testWidgets('a malformed username is flagged and keeps submit disabled', (
+    tester,
+  ) async {
+    await tester.pumpWidget(_wrap(controller: FakeAuthController()));
+    await tester.pumpAndSettle();
+
+    await _fillValidForm(tester);
+    expect(_submitEnabled(tester), isTrue);
+
+    await tester.enterText(
+      find.byKey(const Key('registerDisplayNameField')),
+      'Ada Lovelace',
+    );
+    await tester.pumpAndSettle();
+
+    expect(
+      find.text(
+        '3 à 32 caractères : lettres sans accent, chiffres, « . », « _ » ou « - ».',
+      ),
+      findsOneWidget,
+    );
+    expect(_submitEnabled(tester), isFalse);
+  });
+
+  testWidgets('a taken username is reported on its field', (tester) async {
+    final controller = FakeAuthController(
+      registerError: const ApiFailure(
+        code: 'DISPLAY_NAME_TAKEN',
+        message: 'taken',
+      ),
+    );
+    await tester.pumpWidget(_wrap(controller: controller));
+    await tester.pumpAndSettle();
+
+    await _fillValidForm(tester);
+    await tester.ensureVisible(find.byKey(const Key('registerSubmitButton')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('registerSubmitButton')));
+    await tester.pumpAndSettle();
+
+    expect(find.text("Ce nom d'utilisateur est déjà pris."), findsOneWidget);
+  });
+
   testWidgets(
     'submitting calls the controller with the chosen locale and currency',
     (tester) async {
@@ -176,7 +219,7 @@ void main() {
       final call = controller.registerCalls.single;
       expect(call.email, 'ada@example.com');
       expect(call.password, 'Secret123!');
-      expect(call.displayName, 'Ada Lovelace');
+      expect(call.displayName, 'ada.lovelace');
       expect(call.locale, 'en');
       expect(call.currency, 'USD');
     },

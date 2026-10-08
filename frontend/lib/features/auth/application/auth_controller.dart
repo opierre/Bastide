@@ -30,12 +30,16 @@ class AuthController extends AsyncNotifier<AuthUser?> {
     }
   }
 
-  Future<void> login({required String email, required String password}) async {
+  /// Signs in with [identifier]: the email or the display name.
+  Future<void> login({
+    required String identifier,
+    required String password,
+  }) async {
     state = const AsyncValue.loading();
     state = await AsyncValue.guard(() async {
       final session = await ref
           .read(authRepositoryProvider)
-          .login(email: email, password: password);
+          .login(identifier: identifier, password: password);
       await _persistSession(session);
       return session.user;
     });
@@ -70,6 +74,10 @@ class AuthController extends AsyncNotifier<AuthUser?> {
     await _persistSession(session);
     state = AsyncValue.data(session.user);
   }
+
+  /// Swaps in the signed-in user's updated profile, so everything watching
+  /// the session (the top bar's user pill) shows the change at once.
+  void replaceUser(AuthUser user) => state = AsyncValue.data(user);
 
   Future<void> logout() async {
     try {

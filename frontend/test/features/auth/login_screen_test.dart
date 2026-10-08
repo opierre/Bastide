@@ -34,7 +34,7 @@ void main() {
 
     expect(find.text('Votre argent, en clair.'), findsOneWidget);
     expect(find.byKey(const Key('authPrivacyLine')), findsOneWidget);
-    expect(find.byKey(const Key('loginEmailField')), findsOneWidget);
+    expect(find.byKey(const Key('loginIdentifierField')), findsOneWidget);
     expect(find.byKey(const Key('loginPasswordField')), findsOneWidget);
   });
 
@@ -72,7 +72,7 @@ void main() {
     await tester.pumpAndSettle();
 
     await tester.enterText(
-      find.byKey(const Key('loginEmailField')),
+      find.byKey(const Key('loginIdentifierField')),
       'ada@example.com',
     );
     await tester.enterText(
@@ -85,7 +85,7 @@ void main() {
     expect(find.byKey(const Key('loginErrorText')), findsOneWidget);
     expect(
       find.text(
-        'E-mail ou mot de passe incorrect. Vérifiez vos identifiants et réessayez.',
+        'Identifiant ou mot de passe incorrect. Vérifiez vos identifiants et réessayez.',
       ),
       findsOneWidget,
     );
@@ -99,7 +99,7 @@ void main() {
     await tester.pumpAndSettle();
 
     await tester.enterText(
-      find.byKey(const Key('loginEmailField')),
+      find.byKey(const Key('loginIdentifierField')),
       'ada@example.com',
     );
     await tester.enterText(
@@ -111,8 +111,30 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(controller.loginCalls, hasLength(1));
-    expect(controller.loginCalls.single.email, 'ada@example.com');
+    expect(controller.loginCalls.single.identifier, 'ada@example.com');
     expect(controller.loginCalls.single.password, 'secret123');
+  });
+
+  testWidgets('a username is submitted as the identifier, like an email', (
+    tester,
+  ) async {
+    final controller = FakeAuthController();
+    await tester.pumpWidget(_wrap(controller: controller));
+    await tester.pumpAndSettle();
+
+    expect(find.text("E-mail ou nom d'utilisateur"), findsOneWidget);
+    await tester.enterText(
+      find.byKey(const Key('loginIdentifierField')),
+      '  ada.lovelace ',
+    );
+    await tester.enterText(
+      find.byKey(const Key('loginPasswordField')),
+      'secret123',
+    );
+    await tester.tap(find.byKey(const Key('loginSubmitButton')));
+    await tester.pumpAndSettle();
+
+    expect(controller.loginCalls.single.identifier, 'ada.lovelace');
   });
 
   testWidgets('renders under en without missing localized keys', (

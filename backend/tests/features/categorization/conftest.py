@@ -149,7 +149,7 @@ def seed_ledger(
                     id=user_id,
                     email=f"{user_id}@example.com",
                     password_hash="x",
-                    display_name="Amelie",
+                    display_name=f"amelie-{user_id[:8]}",
                     locale="fr",
                     currency="EUR",
                 )

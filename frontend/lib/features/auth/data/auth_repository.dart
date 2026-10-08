@@ -51,28 +51,30 @@ class AuthRepository {
     return _parseSession(json as Map<String, dynamic>);
   }
 
+  /// Signs in with [identifier]: the email or the display name.
   Future<AuthSession> login({
-    required String email,
+    required String identifier,
     required String password,
   }) async {
     final json = await _apiClient.post(
       '/auth/login',
-      body: {'email': email, 'password': password},
+      body: {'identifier': identifier, 'password': password},
     );
     return _parseSession(json as Map<String, dynamic>);
   }
 
-  /// Sets a new password with the recovery code. The code is spent: the
-  /// returned session carries its replacement.
+  /// Sets a new password with the recovery code. [identifier] is the email or
+  /// the display name. The code is spent: the returned session carries its
+  /// replacement.
   Future<AuthSession> resetPassword({
-    required String email,
+    required String identifier,
     required String recoveryCode,
     required String newPassword,
   }) async {
     final json = await _apiClient.post(
       '/auth/password-reset',
       body: {
-        'email': email,
+        'identifier': identifier,
         'recovery_code': recoveryCode,
         'new_password': newPassword,
       },
@@ -89,6 +91,14 @@ class AuthRepository {
             )
             as Map<String, dynamic>;
     return json['recovery_code'] as String;
+  }
+
+  /// Changes the signed-in user's display name, which is also their username.
+  Future<AuthUser> updateProfile({required String displayName}) async {
+    final json =
+        await _apiClient.patch('/auth/me', body: {'display_name': displayName})
+            as Map<String, dynamic>;
+    return _parseUser(json['user'] as Map<String, dynamic>);
   }
 
   Future<void> logout() async {

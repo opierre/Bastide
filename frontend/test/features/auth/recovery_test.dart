@@ -98,7 +98,7 @@ void main() {
       await container.read(authControllerProvider.future);
       await container
           .read(authControllerProvider.notifier)
-          .login(email: 'ada@example.com', password: 'secret');
+          .login(identifier: 'ada@example.com', password: 'secret');
 
       expect(container.read(pendingRecoveryCodeProvider), isNull);
     });
@@ -107,7 +107,7 @@ void main() {
   group('forgot password screen', () {
     Future<void> fillAndSubmit(WidgetTester tester) async {
       await tester.enterText(
-        find.byKey(const Key('resetEmailField')),
+        find.byKey(const Key('resetIdentifierField')),
         'ada@example.com',
       );
       await tester.enterText(find.byKey(const Key('resetCodeField')), _code);
@@ -136,7 +136,7 @@ void main() {
         () => apiClient.post(
           '/auth/password-reset',
           body: {
-            'email': 'ada@example.com',
+            'identifier': 'ada@example.com',
             'recovery_code': _code,
             'new_password': _strongPassword,
           },
@@ -163,7 +163,7 @@ void main() {
       expect(find.byKey(const Key('resetErrorText')), findsOneWidget);
       expect(
         find.text(
-          'E-mail ou code de récupération incorrect. Vérifiez le code et réessayez.',
+          'Identifiant ou code de récupération incorrect. Vérifiez le code et réessayez.',
         ),
         findsOneWidget,
       );
@@ -291,7 +291,7 @@ void main() {
       await tester.pumpAndSettle();
 
       await tester.enterText(
-        find.byKey(const Key('resetEmailField')),
+        find.byKey(const Key('resetIdentifierField')),
         'ada@example.com',
       );
       await tester.enterText(find.byKey(const Key('resetCodeField')), _code);

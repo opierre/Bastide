@@ -34,7 +34,7 @@ class ForgotPasswordScreen extends ConsumerStatefulWidget {
 
 class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
   final _formKey = GlobalKey<FormState>();
-  final _emailController = TextEditingController();
+  final _identifierController = TextEditingController();
   final _codeController = TextEditingController();
   final _passwordController = TextEditingController();
 
@@ -43,7 +43,7 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
 
   @override
   void dispose() {
-    _emailController.dispose();
+    _identifierController.dispose();
     _codeController.dispose();
     _passwordController.dispose();
     super.dispose();
@@ -54,7 +54,7 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
     await ref
         .read(passwordResetControllerProvider.notifier)
         .submit(
-          email: _emailController.text.trim(),
+          identifier: _identifierController.text.trim(),
           recoveryCode: _codeController.text.trim(),
           newPassword: _passwordController.text,
         );
@@ -65,7 +65,7 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
     final l10n = AppLocalizations.of(context)!;
     final resetState = ref.watch(passwordResetControllerProvider);
     final isSubmitting = resetState.isLoading;
-    // Like login's credential error: the email/code pair failed, not a field,
+    // Like login's credential error: the identifier/code pair failed, not a field,
     // so the reason is stated once and both fields take the error border.
     final hasPairError = resetState.hasError;
 
@@ -86,15 +86,17 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
               const SizedBox(height: AppSpacing.md + AppSpacing.xs),
             ],
             LabeledField(
-              label: l10n.authEmailLabel,
+              label: l10n.authIdentifierLabel,
               child: TextFormField(
-                key: const Key('resetEmailField'),
-                controller: _emailController,
-                keyboardType: TextInputType.emailAddress,
-                autofillHints: const [AutofillHints.email],
+                key: const Key('resetIdentifierField'),
+                controller: _identifierController,
+                autofillHints: const [
+                  AutofillHints.username,
+                  AutofillHints.email,
+                ],
                 decoration: hasPairError ? errorFieldDecoration() : null,
                 validator: (value) => (value == null || value.trim().isEmpty)
-                    ? l10n.authEmailRequired
+                    ? l10n.authIdentifierRequired
                     : null,
               ),
             ),

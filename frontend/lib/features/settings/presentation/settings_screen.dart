@@ -13,6 +13,7 @@ import '../../../core/widgets/app_segmented.dart';
 import '../../../core/widgets/labeled_field.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../auth/presentation/currency_label.dart';
+import '../../auth/presentation/display_name_card.dart';
 import '../../auth/presentation/recovery_code_card.dart';
 import '../application/settings_section_request.dart';
 import 'ai_settings_card.dart';
@@ -319,15 +320,18 @@ class _AboutPanel extends StatelessWidget {
   }
 }
 
-/// Name and email edits need a PATCH /me the backend doesn't expose yet, so
-/// the recovery code is the profile's only card for now.
+/// The username, then the recovery code. Email edits aren't exposed yet.
 class _ProfilePanel extends StatelessWidget {
   const _ProfilePanel();
 
   @override
   Widget build(BuildContext context) => const Column(
     crossAxisAlignment: CrossAxisAlignment.stretch,
-    children: [RecoveryCodeCard()],
+    children: [
+      DisplayNameCard(),
+      SizedBox(height: AppSpacing.gridGap),
+      RecoveryCodeCard(),
+    ],
   );
 }
 

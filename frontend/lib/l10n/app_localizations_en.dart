@@ -142,7 +142,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get authPasswordLabel => 'Password';
 
   @override
-  String get authDisplayNameLabel => 'Display name';
+  String get authDisplayNameLabel => 'Username';
 
   @override
   String get authPasswordStrengthWeak => 'Too weak';
@@ -199,11 +199,11 @@ class AppLocalizationsEn extends AppLocalizations {
   String get authPasswordRequired => 'Password is required.';
 
   @override
-  String get authDisplayNameRequired => 'Display name is required.';
+  String get authDisplayNameRequired => 'Username is required.';
 
   @override
   String get authErrorInvalidCredentials =>
-      'Incorrect email or password. Check your details and try again.';
+      'Incorrect username, email or password. Check your details and try again.';
 
   @override
   String get authErrorEmailTaken =>
@@ -3730,7 +3730,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get authErrorInvalidRecoveryCode =>
-      'Incorrect email or recovery code. Check the code and try again.';
+      'Incorrect username, email or recovery code. Check the code and try again.';
 
   @override
   String get authRecoveryCodeTagline => 'Keep your recovery code';
@@ -3787,4 +3787,45 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get settingsRecoveryWrongPassword => 'Incorrect password.';
+
+  @override
+  String get authIdentifierLabel => 'Email or username';
+
+  @override
+  String get authIdentifierRequired => 'Email or username is required.';
+
+  @override
+  String get authDisplayNameHelper =>
+      'Also used to sign in. 3 to 32 characters: letters, digits, \'.\', \'_\' or \'-\'.';
+
+  @override
+  String get authDisplayNameInvalid =>
+      '3 to 32 characters: unaccented letters, digits, \'.\', \'_\' or \'-\'.';
+
+  @override
+  String get authDisplayNameTaken => 'This username is already taken.';
+
+  @override
+  String get settingsProfileNameTitle => 'Username';
+
+  @override
+  String settingsProfileNameSubtitle(String name) {
+    return 'You can sign in with $name or with your email.';
+  }
+
+  @override
+  String get settingsProfileNameButton => 'Change…';
+
+  @override
+  String get settingsProfileNameModalTitle => 'Change username';
+
+  @override
+  String get settingsProfileNameModalLead =>
+      'The new name replaces the old one for signing in.';
+
+  @override
+  String get settingsProfileNameModalSave => 'Save';
+
+  @override
+  String get settingsProfileNameModalCancel => 'Cancel';
 }

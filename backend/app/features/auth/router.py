@@ -1,4 +1,4 @@
-"""Auth endpoints: register, login, logout, me, and password recovery."""
+"""Auth endpoints: register, login, logout, me, profile, and password recovery."""
 
 from typing import Annotated
 
@@ -13,6 +13,7 @@ from app.features.auth.schemas import (
     MeResponse,
     PasswordReset,
     PasswordResetResponse,
+    ProfileUpdate,
     RecoveryCodeRegenerate,
     RecoveryCodeResponse,
     RegisterResponse,
@@ -86,3 +87,13 @@ async def logout(
 async def me(user: Annotated[User, Depends(get_current_user)]) -> MeResponse:
     """Return the authenticated user's profile."""
     return MeResponse(user=UserRead.model_validate(user))
+
+
+@router.patch("/me", response_model=MeResponse)
+async def update_me(
+    payload: ProfileUpdate,
+    service: Annotated[AuthService, Depends(_service)],
+    user: Annotated[User, Depends(get_current_user)],
+) -> MeResponse:
+    """Change the authenticated user's profile."""
+    return MeResponse(user=UserRead.model_validate(service.update_profile(user, payload)))

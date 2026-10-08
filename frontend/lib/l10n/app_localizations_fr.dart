@@ -143,7 +143,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get authPasswordLabel => 'Mot de passe';
 
   @override
-  String get authDisplayNameLabel => 'Nom affiché';
+  String get authDisplayNameLabel => 'Nom d\'utilisateur';
 
   @override
   String get authPasswordStrengthWeak => 'Trop faible';
@@ -200,11 +200,11 @@ class AppLocalizationsFr extends AppLocalizations {
   String get authPasswordRequired => 'Le mot de passe est requis.';
 
   @override
-  String get authDisplayNameRequired => 'Le nom est requis.';
+  String get authDisplayNameRequired => 'Le nom d\'utilisateur est requis.';
 
   @override
   String get authErrorInvalidCredentials =>
-      'E-mail ou mot de passe incorrect. Vérifiez vos identifiants et réessayez.';
+      'Identifiant ou mot de passe incorrect. Vérifiez vos identifiants et réessayez.';
 
   @override
   String get authErrorEmailTaken => 'Un compte existe déjà avec cet e-mail.';
@@ -3757,7 +3757,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get authErrorInvalidRecoveryCode =>
-      'E-mail ou code de récupération incorrect. Vérifiez le code et réessayez.';
+      'Identifiant ou code de récupération incorrect. Vérifiez le code et réessayez.';
 
   @override
   String get authRecoveryCodeTagline => 'Conservez votre code de récupération';
@@ -3814,4 +3814,46 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get settingsRecoveryWrongPassword => 'Mot de passe incorrect.';
+
+  @override
+  String get authIdentifierLabel => 'E-mail ou nom d\'utilisateur';
+
+  @override
+  String get authIdentifierRequired =>
+      'L\'e-mail ou le nom d\'utilisateur est requis.';
+
+  @override
+  String get authDisplayNameHelper =>
+      'Sert aussi à vous connecter. 3 à 32 caractères : lettres, chiffres, « . », « _ » ou « - ».';
+
+  @override
+  String get authDisplayNameInvalid =>
+      '3 à 32 caractères : lettres sans accent, chiffres, « . », « _ » ou « - ».';
+
+  @override
+  String get authDisplayNameTaken => 'Ce nom d\'utilisateur est déjà pris.';
+
+  @override
+  String get settingsProfileNameTitle => 'Nom d\'utilisateur';
+
+  @override
+  String settingsProfileNameSubtitle(String name) {
+    return 'Vous pouvez vous connecter avec $name ou avec votre e-mail.';
+  }
+
+  @override
+  String get settingsProfileNameButton => 'Modifier…';
+
+  @override
+  String get settingsProfileNameModalTitle => 'Changer de nom d\'utilisateur';
+
+  @override
+  String get settingsProfileNameModalLead =>
+      'Le nouveau nom remplace l\'ancien pour vous connecter.';
+
+  @override
+  String get settingsProfileNameModalSave => 'Enregistrer';
+
+  @override
+  String get settingsProfileNameModalCancel => 'Annuler';
 }

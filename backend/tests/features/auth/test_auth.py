@@ -39,7 +39,7 @@ def test_register_login_me_happy_path(client: TestClient) -> None:
 
     login_response = client.post(
         "/api/v1/auth/login",
-        json={"email": REGISTER_PAYLOAD["email"], "password": REGISTER_PAYLOAD["password"]},
+        json={"identifier": REGISTER_PAYLOAD["email"], "password": REGISTER_PAYLOAD["password"]},
     )
     assert login_response.status_code == 200
     token = login_response.json()["token"]
@@ -60,12 +60,67 @@ def test_register_duplicate_email_returns_409(client: TestClient) -> None:
     assert response.json()["error"]["code"] == "EMAIL_TAKEN"
 
 
+def test_register_stores_display_name_lowercased(client: TestClient) -> None:
+    body = _register(client)
+
+    assert body["user"]["display_name"] == "amelie"
+
+
+@pytest.mark.parametrize("name", ["ab", "a" * 33, "amélie", "ame lie", "amelie@home", "  "])
+def test_register_malformed_display_name_returns_422(client: TestClient, name: str) -> None:
+    response = client.post("/api/v1/auth/register", json={**REGISTER_PAYLOAD, "display_name": name})
+
+    assert response.status_code == 422
+
+
+def test_register_email_without_at_returns_422(client: TestClient) -> None:
+    response = client.post("/api/v1/auth/register", json={**REGISTER_PAYLOAD, "email": "amelie"})
+
+    assert response.status_code == 422
+
+
+def test_register_duplicate_display_name_any_case_returns_409(client: TestClient) -> None:
+    client.post("/api/v1/auth/register", json=REGISTER_PAYLOAD)
+
+    response = client.post(
+        "/api/v1/auth/register",
+        json={**REGISTER_PAYLOAD, "email": "other@example.com", "display_name": "AMELIE"},
+    )
+
+    assert response.status_code == 409
+    assert response.json()["error"]["code"] == "DISPLAY_NAME_TAKEN"
+
+
+@pytest.mark.parametrize("identifier", ["amelie", "Amelie", " AMELIE "])
+def test_login_with_display_name_any_case(client: TestClient, identifier: str) -> None:
+    client.post("/api/v1/auth/register", json=REGISTER_PAYLOAD)
+
+    response = client.post(
+        "/api/v1/auth/login",
+        json={"identifier": identifier, "password": REGISTER_PAYLOAD["password"]},
+    )
+
+    assert response.status_code == 200
+    assert response.json()["user"]["email"] == REGISTER_PAYLOAD["email"]
+
+
+def test_login_display_name_wrong_password_returns_401(client: TestClient) -> None:
+    client.post("/api/v1/auth/register", json=REGISTER_PAYLOAD)
+
+    response = client.post(
+        "/api/v1/auth/login", json={"identifier": "amelie", "password": "not-the-password"}
+    )
+
+    assert response.status_code == 401
+    assert response.json()["error"]["code"] == "INVALID_CREDENTIALS"
+
+
 def test_login_wrong_password_returns_401(client: TestClient) -> None:
     client.post("/api/v1/auth/register", json=REGISTER_PAYLOAD)
 
     response = client.post(
         "/api/v1/auth/login",
-        json={"email": REGISTER_PAYLOAD["email"], "password": "not-the-password"},
+        json={"identifier": REGISTER_PAYLOAD["email"], "password": "not-the-password"},
     )
 
     assert response.status_code == 401
@@ -75,7 +130,7 @@ def test_login_wrong_password_returns_401(client: TestClient) -> None:
 def test_login_unknown_email_returns_401(client: TestClient) -> None:
     response = client.post(
         "/api/v1/auth/login",
-        json={"email": "nobody@example.com", "password": "whatever"},
+        json={"identifier": "nobody@example.com", "password": "whatever"},
     )
 
     assert response.status_code == 401
@@ -100,7 +155,7 @@ def test_logout_invalidates_token(client: TestClient) -> None:
     client.post("/api/v1/auth/register", json=REGISTER_PAYLOAD)
     login_response = client.post(
         "/api/v1/auth/login",
-        json={"email": REGISTER_PAYLOAD["email"], "password": REGISTER_PAYLOAD["password"]},
+        json={"identifier": REGISTER_PAYLOAD["email"], "password": REGISTER_PAYLOAD["password"]},
     )
     token = login_response.json()["token"]
     headers = {"Authorization": f"Bearer {token}"}
@@ -149,7 +204,7 @@ def _reset(client: TestClient, recovery_code: str, new_password: str = "new-pass
     return client.post(
         "/api/v1/auth/password-reset",
         json={
-            "email": REGISTER_PAYLOAD["email"],
+            "identifier": REGISTER_PAYLOAD["email"],
             "recovery_code": recovery_code,
             "new_password": new_password,
         },
@@ -176,12 +231,12 @@ def test_password_reset_sets_new_password_and_revokes_sessions(client: TestClien
     assert client.get("/api/v1/auth/me", headers=new_headers).status_code == 200
     old_login = client.post(
         "/api/v1/auth/login",
-        json={"email": REGISTER_PAYLOAD["email"], "password": REGISTER_PAYLOAD["password"]},
+        json={"identifier": REGISTER_PAYLOAD["email"], "password": REGISTER_PAYLOAD["password"]},
     )
     assert old_login.status_code == 401
     new_login = client.post(
         "/api/v1/auth/login",
-        json={"email": REGISTER_PAYLOAD["email"], "password": "new-password"},
+        json={"identifier": REGISTER_PAYLOAD["email"], "password": "new-password"},
     )
     assert new_login.status_code == 200
 
@@ -206,6 +261,22 @@ def test_password_reset_accepts_code_as_typed_by_hand(client: TestClient) -> Non
     assert _reset(client, typed).status_code == 200
 
 
+def test_password_reset_with_display_name(client: TestClient) -> None:
+    body = _register(client)
+
+    response = client.post(
+        "/api/v1/auth/password-reset",
+        json={
+            "identifier": "Amelie",
+            "recovery_code": body["recovery_code"],
+            "new_password": "new-password",
+        },
+    )
+
+    assert response.status_code == 200
+    assert response.json()["user"]["email"] == REGISTER_PAYLOAD["email"]
+
+
 def test_password_reset_wrong_code_returns_401(client: TestClient) -> None:
     _register(client)
 
@@ -219,7 +290,7 @@ def test_password_reset_unknown_email_returns_same_error(client: TestClient) -> 
     response = client.post(
         "/api/v1/auth/password-reset",
         json={
-            "email": "nobody@example.com",
+            "identifier": "nobody@example.com",
             "recovery_code": "0000-0000-0000-0000-0000",
             "new_password": "new-password",
         },
@@ -278,7 +349,7 @@ def test_password_reset_for_user_without_code_returns_401() -> None:
     with pytest.raises(InvalidRecoveryCodeError):
         service.reset_password(
             PasswordReset(
-                email=REGISTER_PAYLOAD["email"],
+                identifier=REGISTER_PAYLOAD["email"],
                 recovery_code="0000-0000-0000-0000-0000",
                 new_password="new-password",
             )
@@ -294,3 +365,60 @@ def test_recovery_code_hashed_with_argon2id_and_normalized() -> None:
     assert code not in code_hash
     assert verify_recovery_code(code.lower().replace("-", ""), code_hash) is True
     assert verify_recovery_code(generate_recovery_code(), code_hash) is False
+
+
+def test_update_profile_changes_the_login_name(client: TestClient) -> None:
+    body = _register(client)
+    headers = {"Authorization": f"Bearer {body['token']}"}
+
+    response = client.patch("/api/v1/auth/me", json={"display_name": "Amelie.R"}, headers=headers)
+
+    assert response.status_code == 200
+    assert response.json()["user"]["display_name"] == "amelie.r"
+    password = REGISTER_PAYLOAD["password"]
+    new_login = client.post(
+        "/api/v1/auth/login", json={"identifier": "amelie.r", "password": password}
+    )
+    old_login = client.post(
+        "/api/v1/auth/login", json={"identifier": "amelie", "password": password}
+    )
+    assert new_login.status_code == 200
+    assert old_login.status_code == 401
+
+
+def test_update_profile_keeping_own_name_succeeds(client: TestClient) -> None:
+    body = _register(client)
+    headers = {"Authorization": f"Bearer {body['token']}"}
+
+    response = client.patch("/api/v1/auth/me", json={"display_name": "AMELIE"}, headers=headers)
+
+    assert response.status_code == 200
+
+
+def test_update_profile_taken_name_returns_409(client: TestClient) -> None:
+    body = _register(client)
+    client.post(
+        "/api/v1/auth/register",
+        json={**REGISTER_PAYLOAD, "email": "bruno@example.com", "display_name": "bruno"},
+    )
+    headers = {"Authorization": f"Bearer {body['token']}"}
+
+    response = client.patch("/api/v1/auth/me", json={"display_name": "Bruno"}, headers=headers)
+
+    assert response.status_code == 409
+    assert response.json()["error"]["code"] == "DISPLAY_NAME_TAKEN"
+
+
+def test_update_profile_malformed_name_returns_422(client: TestClient) -> None:
+    body = _register(client)
+    headers = {"Authorization": f"Bearer {body['token']}"}
+
+    response = client.patch("/api/v1/auth/me", json={"display_name": "a b"}, headers=headers)
+
+    assert response.status_code == 422
+
+
+def test_update_profile_requires_auth(client: TestClient) -> None:
+    response = client.patch("/api/v1/auth/me", json={"display_name": "amelie"})
+
+    assert response.status_code == 401
