@@ -3722,4 +3722,93 @@ class AppLocalizationsFr extends AppLocalizations {
   String networthSeriesCaveat(String date) {
     return 'Les biens sont maintenus à leur valeur déclarée (estimation la plus ancienne : $date) : seuls les comptes et les crédits bougent d\'un mois à l\'autre. Les mois sans donnée sont simplement absents.';
   }
+
+  @override
+  String get authForgotPasswordLink => 'Mot de passe oublié ?';
+
+  @override
+  String get authForgotPasswordTagline =>
+      'Réinitialisez votre mot de passe avec votre code de récupération.';
+
+  @override
+  String get authRecoveryCodeLabel => 'Code de récupération';
+
+  @override
+  String get authRecoveryCodeRequired => 'Le code de récupération est requis.';
+
+  @override
+  String get authNewPasswordLabel => 'Nouveau mot de passe';
+
+  @override
+  String get authResetSubmit => 'Réinitialiser le mot de passe';
+
+  @override
+  String get authResetSubmitting => 'Réinitialisation…';
+
+  @override
+  String get authResetNote =>
+      'Le code vous a été remis à la création du compte. Sans lui, le mot de passe ne peut pas être réinitialisé : vos données ne quittent jamais cet ordinateur.';
+
+  @override
+  String get authBackToLogin => 'Retour à la connexion';
+
+  @override
+  String get authErrorInvalidRecoveryCode =>
+      'E-mail ou code de récupération incorrect. Vérifiez le code et réessayez.';
+
+  @override
+  String get authRecoveryCodeTagline => 'Conservez votre code de récupération';
+
+  @override
+  String get authRecoveryCodeIntro =>
+      'Si vous oubliez votre mot de passe, ce code est le seul moyen de le réinitialiser. Notez-le ou imprimez-le, et gardez-le en lieu sûr hors de cet ordinateur.';
+
+  @override
+  String get authRecoveryCodeShownOnce =>
+      'Il ne sera plus affiché. Vous pourrez en générer un nouveau dans Paramètres › Profil.';
+
+  @override
+  String get authRecoveryCodeCopy => 'Copier';
+
+  @override
+  String get authRecoveryCodeCopied => 'Copié';
+
+  @override
+  String get authRecoveryCodeConfirm => 'J\'ai conservé ce code en lieu sûr';
+
+  @override
+  String get authRecoveryCodeContinue => 'Continuer';
+
+  @override
+  String get settingsRecoveryTitle => 'Code de récupération';
+
+  @override
+  String get settingsRecoverySubtitle =>
+      'Permet de réinitialiser votre mot de passe si vous l\'oubliez. En générer un nouveau invalide l\'ancien.';
+
+  @override
+  String get settingsRecoveryButton => 'Générer un nouveau code…';
+
+  @override
+  String get settingsRecoveryModalTitle => 'Nouveau code de récupération';
+
+  @override
+  String get settingsRecoveryModalLead =>
+      'Confirmez votre mot de passe pour générer un nouveau code. L\'ancien cessera de fonctionner.';
+
+  @override
+  String get settingsRecoveryModalGenerated =>
+      'Notez ce code et gardez-le en lieu sûr : il ne sera plus affiché.';
+
+  @override
+  String get settingsRecoveryModalGenerate => 'Générer';
+
+  @override
+  String get settingsRecoveryModalCancel => 'Annuler';
+
+  @override
+  String get settingsRecoveryModalDone => 'Terminé';
+
+  @override
+  String get settingsRecoveryWrongPassword => 'Mot de passe incorrect.';
 }

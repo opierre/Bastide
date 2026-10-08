@@ -9,7 +9,8 @@ final tokenStoreProvider = Provider<TokenStore>((ref) => SecureTokenStore());
 
 /// Session state: `null` = signed out, otherwise the current user.
 /// `build()` restores a session from a stored token on app launch; `login`,
-/// `register`, and `logout` drive the rest of the lifecycle. The router
+/// `register`, `startSession` (after a password reset), and `logout` drive the
+/// rest of the lifecycle. The router
 /// watches this to gate navigation (see `core/router/app_router.dart`).
 class AuthController extends AsyncNotifier<AuthUser?> {
   @override
@@ -63,6 +64,13 @@ class AuthController extends AsyncNotifier<AuthUser?> {
     });
   }
 
+  /// Adopts a session obtained outside [login]/[register] — a password reset —
+  /// so the router treats the user as signed in from here on.
+  Future<void> startSession(AuthSession session) async {
+    await _persistSession(session);
+    state = AsyncValue.data(session.user);
+  }
+
   Future<void> logout() async {
     try {
       await ref.read(authRepositoryProvider).logout();
@@ -77,9 +85,29 @@ class AuthController extends AsyncNotifier<AuthUser?> {
   Future<void> _persistSession(AuthSession session) async {
     await ref.read(tokenStoreProvider).write(session.token);
     ref.read(authTokenProvider.notifier).state = session.token;
+    // Set before the session state flips to signed-in, so the router's first
+    // redirect already sees the code waiting and shows it before the dashboard.
+    if (session.recoveryCode case final code?) {
+      ref.read(pendingRecoveryCodeProvider.notifier).show(code);
+    }
   }
 }
 
 final authControllerProvider = AsyncNotifierProvider<AuthController, AuthUser?>(
   AuthController.new,
 );
+
+/// A recovery code the user hasn't acknowledged yet. While set, the router
+/// keeps a signed-in user on the recovery-code screen: the code is never stored
+/// unhashed, so leaving that screen without noting it loses it.
+class PendingRecoveryCode extends Notifier<String?> {
+  @override
+  String? build() => null;
+
+  void show(String code) => state = code;
+
+  void acknowledge() => state = null;
+}
+
+final pendingRecoveryCodeProvider =
+    NotifierProvider<PendingRecoveryCode, String?>(PendingRecoveryCode.new);

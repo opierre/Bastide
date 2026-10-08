@@ -16,8 +16,8 @@ class AuthScaffold extends StatelessWidget {
   const AuthScaffold({
     super.key,
     required this.form,
-    required this.footer,
     required this.lockup,
+    this.footer,
     this.cardWidth = 416,
     this.tagline,
   });
@@ -45,8 +45,9 @@ class AuthScaffold extends StatelessWidget {
   final Widget form;
 
   /// The "switch to the other screen" link, kept outside the card so the card
-  /// contains only the task at hand.
-  final Widget footer;
+  /// contains only the task at hand. Absent where there is nowhere else to go —
+  /// the recovery-code screen must be acknowledged, not skipped.
+  final Widget? footer;
 
   final Widget lockup;
   final double cardWidth;
@@ -105,8 +106,10 @@ class AuthScaffold extends StatelessWidget {
                         ),
                         child: form,
                       ),
-                      const SizedBox(height: AppSpacing.md + AppSpacing.xs),
-                      Center(child: footer),
+                      if (footer case final footer?) ...[
+                        const SizedBox(height: AppSpacing.md + AppSpacing.xs),
+                        Center(child: footer),
+                      ],
                     ],
                   ),
                 ),

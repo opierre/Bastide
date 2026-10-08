@@ -9,6 +9,8 @@ String localizeAuthError(AppLocalizations l10n, Object? error) {
     switch (error.code) {
       case 'INVALID_CREDENTIALS':
         return l10n.authErrorInvalidCredentials;
+      case 'INVALID_RECOVERY_CODE':
+        return l10n.authErrorInvalidRecoveryCode;
       case 'EMAIL_TAKEN':
         return l10n.authErrorEmailTaken;
       case 'VALIDATION_ERROR':

@@ -11,9 +11,9 @@ import '../../../core/widgets/amount_text.dart';
 import '../../../core/widgets/app_card.dart';
 import '../../../core/widgets/app_segmented.dart';
 import '../../../core/widgets/labeled_field.dart';
-import '../../../core/widgets/state_views.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../auth/presentation/currency_label.dart';
+import '../../auth/presentation/recovery_code_card.dart';
 import 'ai_settings_card.dart';
 import 'backup_card.dart';
 import 'danger_zone_card.dart';
@@ -56,13 +56,10 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               child: ConstrainedBox(
                 constraints: const BoxConstraints(maxWidth: 640),
                 child: switch (_section) {
+                  SettingsSection.profile => const _ProfilePanel(),
                   SettingsSection.preferences => const _PreferencesPanel(),
                   SettingsSection.data => const _DataPanel(),
                   SettingsSection.about => const _AboutPanel(),
-                  // Profile edits need a PATCH /me the backend doesn't expose,
-                  // so this section announces itself rather than offering
-                  // controls that would fail.
-                  _ => const _UnavailablePanel(),
                 },
               ),
             ),
@@ -294,21 +291,16 @@ class _AboutPanel extends StatelessWidget {
   }
 }
 
-class _UnavailablePanel extends StatelessWidget {
-  const _UnavailablePanel();
+/// Name and email edits need a PATCH /me the backend doesn't expose yet, so
+/// the recovery code is the profile's only card for now.
+class _ProfilePanel extends StatelessWidget {
+  const _ProfilePanel();
 
   @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
-    return Padding(
-      padding: const EdgeInsets.only(top: AppSpacing.xxl),
-      child: EmptyStateView(
-        icon: Icons.tune_outlined,
-        title: l10n.comingSoonTitle,
-        message: l10n.comingSoonBody,
-      ),
-    );
-  }
+  Widget build(BuildContext context) => const Column(
+    crossAxisAlignment: CrossAxisAlignment.stretch,
+    children: [RecoveryCodeCard()],
+  );
 }
 
 /// One grouped card: a title, the control, and an optional note explaining the

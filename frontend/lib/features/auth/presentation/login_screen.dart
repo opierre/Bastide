@@ -10,6 +10,7 @@ import '../../../l10n/app_localizations.dart';
 import '../application/auth_controller.dart';
 import 'auth_error_localizer.dart';
 import 'auth_scaffold.dart';
+import 'forgot_password_screen.dart';
 import 'password_field.dart';
 import 'register_screen.dart';
 
@@ -96,7 +97,15 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     : null,
               ),
             ),
-            const SizedBox(height: AppSpacing.lg),
+            Align(
+              alignment: Alignment.centerRight,
+              child: TextButton(
+                key: const Key('goToForgotPasswordButton'),
+                onPressed: () => context.go(ForgotPasswordScreen.path),
+                child: Text(l10n.authForgotPasswordLink),
+              ),
+            ),
+            const SizedBox(height: AppSpacing.sm),
             PrimaryButton.submit(
               key: const Key('loginSubmitButton'),
               label: l10n.authLoginSubmit,

@@ -4828,5 +4828,113 @@
         "type": "String"
       }
     }
+  },
+  "authForgotPasswordLink": "Mot de passe oublié ?",
+  "@authForgotPasswordLink": {
+    "description": "Link under the login form's password field, opening the password reset screen."
+  },
+  "authForgotPasswordTagline": "Réinitialisez votre mot de passe avec votre code de récupération.",
+  "@authForgotPasswordTagline": {
+    "description": "Line under the brand lockup on the password reset screen, saying what the screen is for."
+  },
+  "authRecoveryCodeLabel": "Code de récupération",
+  "@authRecoveryCodeLabel": {
+    "description": "Label for the recovery code field on the password reset form."
+  },
+  "authRecoveryCodeRequired": "Le code de récupération est requis.",
+  "@authRecoveryCodeRequired": {
+    "description": "Validation message when the recovery code field is left empty."
+  },
+  "authNewPasswordLabel": "Nouveau mot de passe",
+  "@authNewPasswordLabel": {
+    "description": "Label for the new password field on the password reset form."
+  },
+  "authResetSubmit": "Réinitialiser le mot de passe",
+  "@authResetSubmit": {
+    "description": "Submit button of the password reset form."
+  },
+  "authResetSubmitting": "Réinitialisation…",
+  "@authResetSubmitting": {
+    "description": "Label replacing the reset button text while the request is in flight."
+  },
+  "authResetNote": "Le code vous a été remis à la création du compte. Sans lui, le mot de passe ne peut pas être réinitialisé : vos données ne quittent jamais cet ordinateur.",
+  "@authResetNote": {
+    "description": "Note under the password reset form explaining where the code comes from and why there is no other way."
+  },
+  "authBackToLogin": "Retour à la connexion",
+  "@authBackToLogin": {
+    "description": "Link under the password reset card, returning to the login screen."
+  },
+  "authErrorInvalidRecoveryCode": "E-mail ou code de récupération incorrect. Vérifiez le code et réessayez.",
+  "@authErrorInvalidRecoveryCode": {
+    "description": "Banner when a password reset's email and recovery code don't match."
+  },
+  "authRecoveryCodeTagline": "Conservez votre code de récupération",
+  "@authRecoveryCodeTagline": {
+    "description": "Line under the brand lockup on the screen showing a newly issued recovery code."
+  },
+  "authRecoveryCodeIntro": "Si vous oubliez votre mot de passe, ce code est le seul moyen de le réinitialiser. Notez-le ou imprimez-le, et gardez-le en lieu sûr hors de cet ordinateur.",
+  "@authRecoveryCodeIntro": {
+    "description": "Explanation above a newly issued recovery code."
+  },
+  "authRecoveryCodeShownOnce": "Il ne sera plus affiché. Vous pourrez en générer un nouveau dans Paramètres › Profil.",
+  "@authRecoveryCodeShownOnce": {
+    "description": "Note under a newly issued recovery code: it is shown once, and where to replace it."
+  },
+  "authRecoveryCodeCopy": "Copier",
+  "@authRecoveryCodeCopy": {
+    "description": "Button copying the recovery code to the clipboard."
+  },
+  "authRecoveryCodeCopied": "Copié",
+  "@authRecoveryCodeCopied": {
+    "description": "Label the copy button takes once the recovery code has been copied."
+  },
+  "authRecoveryCodeConfirm": "J'ai conservé ce code en lieu sûr",
+  "@authRecoveryCodeConfirm": {
+    "description": "Checkbox the user ticks before leaving the recovery code screen."
+  },
+  "authRecoveryCodeContinue": "Continuer",
+  "@authRecoveryCodeContinue": {
+    "description": "Button leaving the recovery code screen for the app, enabled once the checkbox is ticked."
+  },
+  "settingsRecoveryTitle": "Code de récupération",
+  "@settingsRecoveryTitle": {
+    "description": "Title of the recovery code card in Settings › Profile."
+  },
+  "settingsRecoverySubtitle": "Permet de réinitialiser votre mot de passe si vous l'oubliez. En générer un nouveau invalide l'ancien.",
+  "@settingsRecoverySubtitle": {
+    "description": "Subtitle of the recovery code card in Settings › Profile."
+  },
+  "settingsRecoveryButton": "Générer un nouveau code…",
+  "@settingsRecoveryButton": {
+    "description": "Button on the recovery code card opening the regeneration modal."
+  },
+  "settingsRecoveryModalTitle": "Nouveau code de récupération",
+  "@settingsRecoveryModalTitle": {
+    "description": "Title of the modal generating a new recovery code."
+  },
+  "settingsRecoveryModalLead": "Confirmez votre mot de passe pour générer un nouveau code. L'ancien cessera de fonctionner.",
+  "@settingsRecoveryModalLead": {
+    "description": "Lead of the regeneration modal, before the password is entered."
+  },
+  "settingsRecoveryModalGenerated": "Notez ce code et gardez-le en lieu sûr : il ne sera plus affiché.",
+  "@settingsRecoveryModalGenerated": {
+    "description": "Lead of the regeneration modal once the new code is shown."
+  },
+  "settingsRecoveryModalGenerate": "Générer",
+  "@settingsRecoveryModalGenerate": {
+    "description": "Confirm button of the regeneration modal."
+  },
+  "settingsRecoveryModalCancel": "Annuler",
+  "@settingsRecoveryModalCancel": {
+    "description": "Cancel button of the regeneration modal."
+  },
+  "settingsRecoveryModalDone": "Terminé",
+  "@settingsRecoveryModalDone": {
+    "description": "Button closing the regeneration modal once the new code has been shown."
+  },
+  "settingsRecoveryWrongPassword": "Mot de passe incorrect.",
+  "@settingsRecoveryWrongPassword": {
+    "description": "Error in the regeneration modal when the confirmation password is wrong."
   }
 }

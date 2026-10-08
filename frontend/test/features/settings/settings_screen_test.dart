@@ -124,14 +124,15 @@ void main() {
     expect(find.byKey(const Key('settingsCurrencyField')), findsNothing);
   });
 
-  testWidgets('Profil still announces itself as unbuilt', (tester) async {
+  testWidgets('Profil offers the recovery code card', (tester) async {
     await tester.pumpWidget(_wrap());
     await tester.pumpAndSettle();
 
     await tester.tap(find.byKey(const Key('settingsSection-profile')));
     await tester.pumpAndSettle();
 
-    expect(find.text('Bientôt disponible'), findsOneWidget);
+    expect(find.byKey(const Key('settingsRecoveryCard')), findsOneWidget);
+    expect(find.text('Bientôt disponible'), findsNothing);
   });
 
   testWidgets('about states the version and the local-privacy promise', (
