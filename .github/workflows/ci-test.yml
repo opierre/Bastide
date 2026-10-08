@@ -1,0 +1,100 @@
+name: test
+
+# Stage of ci.yml; not triggered on its own. Its jobs show up as
+# "test / backend" and "test / frontend".
+on:
+  workflow_call:
+    inputs:
+      backend:
+        description: Run the backend job (the paths filter saw a change).
+        type: boolean
+        required: true
+      frontend:
+        description: Run the frontend job (the paths filter saw a change).
+        type: boolean
+        required: true
+      flutter-version:
+        type: string
+        required: true
+
+permissions:
+  contents: read
+
+jobs:
+  backend:
+    name: backend
+    if: inputs.backend
+    runs-on: ubuntu-24.04
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: astral-sh/setup-uv@20cfd1bf945f4377ade1205e4dbc17946fc9a30d # v10.0.1
+        with:
+          working-directory: backend
+          python-version: "3.14"
+          enable-cache: true
+          cache-dependency-glob: uv.lock
+      - name: Install dependencies
+        run: uv sync --frozen
+      - name: pytest
+        # Coverage settings live in pyproject.toml; this only adds the XML report.
+        run: uv run pytest -q --junitxml="${RUNNER_TEMP}/pytest-junit.xml" --cov --cov-report=xml:"${RUNNER_TEMP}/coverage.xml"
+      - name: Job summary
+        if: always()
+        run: |
+          python3 "${GITHUB_WORKSPACE}/.github/scripts/ci_summary.py" \
+            --pytest-junit "${RUNNER_TEMP}/pytest-junit.xml"             --coverage-xml "${RUNNER_TEMP}/coverage.xml"
+      - name: Upload test report
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: backend-test-report
+          path: |
+            ${{ runner.temp }}/pytest-junit.xml
+            ${{ runner.temp }}/coverage.xml
+          retention-days: 14
+          if-no-files-found: warn
+
+  frontend:
+    name: frontend
+    if: inputs.frontend
+    runs-on: ubuntu-24.04
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2.23.0
+        with:
+          flutter-version: ${{ inputs.flutter-version }}
+          channel: stable
+          cache: true
+          pub-cache-key: pub-${{ runner.os }}-${{ hashFiles('frontend/pubspec.lock') }}
+      - name: flutter pub get
+        run: flutter pub get
+      # --file-reporter adds a machine-readable copy without displacing the
+      # stdout reporter, which is already `github` when running on Actions.
+      - name: flutter test
+        run: |
+          flutter test --file-reporter="json:${RUNNER_TEMP}/dart-tests.json"             --coverage --coverage-path="${RUNNER_TEMP}/lcov.info"
+      - name: Job summary
+        if: always()
+        run: |
+          python3 "${GITHUB_WORKSPACE}/.github/scripts/ci_summary.py" \
+            --dart-json "${RUNNER_TEMP}/dart-tests.json"             --lcov "${RUNNER_TEMP}/lcov.info"
+      - name: Upload test report
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: frontend-test-report
+          path: |
+            ${{ runner.temp }}/dart-tests.json
+            ${{ runner.temp }}/lcov.info
+          retention-days: 14
+          if-no-files-found: warn

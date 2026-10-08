@@ -1,16 +1,22 @@
 #!/usr/bin/env python3
-"""Render lint and test reports into the GitHub Actions job summary.
+"""Render lint, test and scan reports into the GitHub Actions job summary.
 
-ruff, ty, pytest and `flutter test` all gate the build on their own exit code;
-none of them leaves anything readable behind once the log scrolls past. This
-script turns their machine-readable reports into markdown tables on the run
-page, so a red job says what broke without opening the raw log, and a green
-non-blocking job still shows the backlog it is tolerating.
+ruff, ty, pytest, flutter and gitleaks all gate the build on their own exit
+code; none of them leaves anything readable behind once the log scrolls past.
+This script turns their reports into one summary per job: a callout with the
+verdict, a table with one row per check, and the findings folded underneath,
+so a red job says what broke without opening the raw log.
 
-  --ruff          ruff --output-format=json
-  --ty-junit      ty check --output-format=junit
-  --pytest-junit  pytest --junitxml
-  --dart-json     flutter test --file-reporter=json:<path>
+  --ruff              ruff check --output-format=json
+  --ruff-format-log   ruff format --check output
+  --ty-junit          ty check --output-format=junit
+  --pytest-junit      pytest --junitxml
+  --analyze-log       flutter analyze output
+  --dart-format-log   dart format --set-exit-if-changed output
+  --dart-json         flutter test --file-reporter=json:<path>
+  --coverage-xml      pytest --cov-report=xml       (informational, never red)
+  --lcov              flutter test --coverage       (informational, never red)
+  --gitleaks          gitleaks --report-format=json
 
 Every input is optional, and a missing or unparsable report is noted inline
 rather than raised: this script never decides whether the build passes, so it
@@ -24,63 +30,71 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import re
 import sys
 import xml.etree.ElementTree as ET
+from collections.abc import Callable, Iterator
+from dataclasses import dataclass, field
 from pathlib import Path
 
-# The tables are a summary, not the report - the artifact holds every row.
-MAX_ROWS = 25
+from summary_md import (
+    ICON,
+    callout,
+    clean,
+    counts,
+    details,
+    plural,
+    relative,
+    table,
+    write,
+)
 
 
-def relative(path: str) -> str:
-    """Shorten an absolute runner path to something repo-relative."""
-    workspace = os.environ.get("GITHUB_WORKSPACE")
-    normalised = path.replace("\\", "/")
-    if workspace:
-        prefix = workspace.replace("\\", "/").rstrip("/") + "/"
-        if normalised.startswith(prefix):
-            return normalised[len(prefix) :]
-    return normalised
+@dataclass
+class Check:
+    """One tool's verdict: `result` fills the table cell, `detail` the fold."""
+
+    name: str
+    status: str  # pass | fail | warn | measure (a number, not a verdict)
+    result: str
+    detail: list[str] = field(default_factory=list)
+    note: str = ""  # one line for the callout when the check did not pass
 
 
-def clean(text: str) -> str:
-    """Make a tool message safe for a single markdown table cell."""
-    return " ".join(str(text).split()).replace("|", "\\|")[:200]
-
-
-def table(headers: list[str], rows: list[list[str]]) -> list[str]:
-    """Render rows as a markdown table, truncated to MAX_ROWS."""
-    lines = [
-        "| " + " | ".join(headers) + " |",
-        "| " + " | ".join("---" for _ in headers) + " |",
-    ]
-    for row in rows[:MAX_ROWS]:
-        lines.append("| " + " | ".join(row) + " |")
-    lines.append("")
-    if len(rows) > MAX_ROWS:
-        hidden = len(rows) - MAX_ROWS
-        lines.append(f"_...and {hidden} more; the full report is in the job artifact._")
-        lines.append("")
-    return lines
-
-
-def section(title: str, path: Path, parse) -> list[str]:
+def run(name: str, path: Path, parse: Callable[[str, Path], Check]) -> Check:
     """Run one parser, turning any failure into a visible note instead of a crash."""
-    lines = [f"## {title}", ""]
     if not path.exists():
-        lines += [f"_No report at `{path.name}` - the step did not run._", ""]
-        return lines
+        return Check(
+            name,
+            "warn",
+            "No report",
+            note=f"**{name}** did not run; no report at `{path.name}`.",
+        )
     try:
-        lines += parse(path)
+        return parse(name, path)
     except Exception as exc:  # noqa: BLE001 - a broken report must not fail the job
-        lines += [f"_Could not read `{path.name}`: {exc.__class__.__name__}: {exc}_", ""]
-    return lines
+        reason = f"{exc.__class__.__name__}: {exc}"
+        return Check(
+            name,
+            "warn",
+            "Unreadable report",
+            note=f"**{name}** report could not be read ({clean(reason)}).",
+        )
 
 
-def ruff(path: Path) -> list[str]:
+def lines_of(path: Path) -> Iterator[str]:
+    # Tool logs may carry ANSI colour even when piped.
+    for line in path.read_text(encoding="utf-8", errors="replace").splitlines():
+        yield re.sub(r"\x1b\[[0-9;]*m", "", line).rstrip()
+
+
+# --- lint ---------------------------------------------------------------------
+
+
+def ruff(name: str, path: Path) -> Check:
     diagnostics = json.loads(path.read_text(encoding="utf-8") or "[]")
     if not diagnostics:
-        return ["No lint violations. :white_check_mark:", ""]
+        return Check(name, "pass", "No violations")
 
     by_rule: dict[str, int] = {}
     rows: list[list[str]] = []
@@ -92,21 +106,58 @@ def ruff(path: Path) -> list[str]:
         url = diagnostic.get("url")
         rows.append(
             [
-                f"[{code}]({url})" if url else code,
+                f"[`{code}`]({url})" if url else f"`{code}`",
                 f"`{relative(diagnostic.get('filename', '?'))}:{location.get('row', '?')}`",
                 clean(diagnostic.get("message", "")),
             ]
         )
-
-    counts = ", ".join(
-        f"`{code}` x{n}" for code, n in sorted(by_rule.items(), key=lambda kv: -kv[1])
+    found = plural(len(diagnostics), "violation")
+    return Check(
+        name,
+        "fail",
+        found,
+        details(
+            f"{found}: {counts(by_rule)}",
+            table(["Rule", "Location", "Message"], rows),
+            open_=True,
+        ),
+        note=f"**{name}** found {found}.",
     )
-    return [f"**{len(diagnostics)} violations** - {counts}", ""] + table(
-        ["Rule", "Location", "Message"], rows
+
+
+def ruff_format(name: str, path: Path) -> Check:
+    files = [
+        line.removeprefix("Would reformat: ")
+        for line in lines_of(path)
+        if line.startswith("Would reformat: ")
+    ]
+    return formatter(name, files, "uv run ruff format")
+
+
+def dart_format(name: str, path: Path) -> Check:
+    files = [
+        line.removeprefix("Changed ")
+        for line in lines_of(path)
+        if line.startswith("Changed ")
+    ]
+    return formatter(name, files, "dart format lib test")
+
+
+def formatter(name: str, files: list[str], fix: str) -> Check:
+    if not files:
+        return Check(name, "pass", "Formatted")
+    found = plural(len(files), "file")
+    rows = [[f"`{relative(f)}`"] for f in files]
+    return Check(
+        name,
+        "fail",
+        f"{found} to reformat",
+        details(f"{found} to reformat", table(["File"], rows), open_=True),
+        note=f"**{name}**: {found} to reformat. Run `{fix}` and commit.",
     )
 
 
-def junit_cases(path: Path):
+def junit_cases(path: Path) -> Iterator[tuple[str, ET.Element]]:
     """Yield (suite name, testcase) for both <testsuites> and bare <testsuite> roots."""
     root = ET.parse(path).getroot()
     suites = root.iter("testsuite") if root.tag == "testsuites" else [root]
@@ -115,7 +166,7 @@ def junit_cases(path: Path):
             yield suite.get("name", "?"), case
 
 
-def ty_junit(path: Path) -> list[str]:
+def ty_junit(name: str, path: Path) -> Check:
     by_rule: dict[str, int] = {}
     rows: list[list[str]] = []
     for suite_name, case in junit_cases(path):
@@ -127,27 +178,82 @@ def ty_junit(path: Path) -> list[str]:
         by_rule[rule] = by_rule.get(rule, 0) + 1
         rows.append(
             [
-                rule,
+                f"`{rule}`",
                 f"`{relative(suite_name)}:{case.get('line', '?')}`",
                 clean(failure.get("message", "")),
             ]
         )
-
     if not rows:
-        return ["No type errors. :white_check_mark:", ""]
-
-    counts = ", ".join(
-        f"`{rule}` x{n}" for rule, n in sorted(by_rule.items(), key=lambda kv: -kv[1])
+        return Check(name, "pass", "No type errors")
+    found = plural(len(rows), "diagnostic")
+    return Check(
+        name,
+        "fail",
+        found,
+        details(
+            f"{found}: {counts(by_rule)}",
+            table(["Rule", "Location", "Message"], rows),
+            open_=True,
+        ),
+        note=f"**{name}** reported {found}.",
     )
-    return [
-        f"**{len(rows)} diagnostics** - {counts}",
-        "",
-        "> `ty check` is not blocking yet, so these do not fail the build. See CI-PLAN.md.",
-        "",
-    ] + table(["Rule", "Location", "Message"], rows)
 
 
-def pytest_junit(path: Path) -> list[str]:
+# `  error • Message • lib/x.dart:3:7 • rule_name` - `•` on Linux, `-` on Windows.
+ANALYZE_LINE = re.compile(
+    r"^\s*(?P<severity>error|warning|info)\s+[•-]\s+(?P<message>.+)\s+[•-]\s+"
+    r"(?P<file>\S+):(?P<line>\d+):\d+\s+[•-]\s+(?P<rule>\S+)\s*$"
+)
+
+
+def flutter_analyze(name: str, path: Path) -> Check:
+    by_rule: dict[str, int] = {}
+    rows: list[list[str]] = []
+    for line in lines_of(path):
+        match = ANALYZE_LINE.match(line)
+        if not match:
+            continue
+        rule = match["rule"]
+        by_rule[rule] = by_rule.get(rule, 0) + 1
+        rows.append(
+            [
+                match["severity"],
+                f"`{rule}`",
+                f"`{relative(match['file'])}:{match['line']}`",
+                clean(match["message"]),
+            ]
+        )
+    if not rows:
+        return Check(name, "pass", "No issues")
+    found = plural(len(rows), "issue")
+    return Check(
+        name,
+        "fail",
+        found,
+        details(
+            f"{found}: {counts(by_rule)}",
+            table(["Severity", "Rule", "Location", "Message"], rows),
+            open_=True,
+        ),
+        note=f"**{name}** found {found}.",
+    )
+
+
+# --- test ---------------------------------------------------------------------
+
+
+def tally(passed: int, failed: int, skipped: int, seconds: float | None = None) -> str:
+    parts = [f"{passed} passed"]
+    if failed:
+        parts.append(f"{failed} failed")
+    if skipped:
+        parts.append(f"{skipped} skipped")
+    if seconds is not None:
+        parts.append(f"{seconds:.1f}s")
+    return " · ".join(parts)
+
+
+def pytest_junit(name: str, path: Path) -> Check:
     passed = failed = skipped = 0
     duration = 0.0
     rows: list[list[str]] = []
@@ -165,29 +271,35 @@ def pytest_junit(path: Path) -> list[str]:
                 passed += 1
             continue
         failed += 1
-        name = f"{case.get('classname', '')}::{case.get('name', '?')}".lstrip(":")
-        rows.append([kind, f"`{name}`", clean(outcome.get("message", ""))])
+        test = f"{case.get('classname', '')}::{case.get('name', '?')}".lstrip(":")
+        rows.append([kind, f"`{test}`", clean(outcome.get("message", ""))])
 
-    total = passed + failed + skipped
-    headline = (
-        f"**{passed} passed**, {failed} failed, {skipped} skipped "
-        f"of {total} in {duration:.1f}s"
-    )
+    result = tally(passed, failed, skipped, duration)
     if not rows:
-        return [f"{headline} :white_check_mark:", ""]
-    return [headline, ""] + table(["Kind", "Test", "Message"], rows)
+        return Check(name, "pass", result)
+    return Check(
+        name,
+        "fail",
+        result,
+        details(
+            f"{plural(failed, 'failing test')}",
+            table(["Kind", "Test", "Message"], rows),
+            open_=True,
+        ),
+        note=f"**{name}**: {plural(failed, 'test')} failed out of {passed + failed + skipped}.",
+    )
 
 
-def dart_json(path: Path) -> list[str]:
+def dart_json(name: str, path: Path) -> Check:
     """Parse the dart test JSON reporter's newline-delimited event stream."""
-    suites: dict[int, str] = {}
-    tests: dict[int, dict] = {}
+    suites: dict[object, str] = {}
+    tests: dict[object, dict] = {}
     passed = failed = skipped = 0
+    started = finished = None
     rows: list[list[str]] = []
 
-    for line in path.read_text(encoding="utf-8").splitlines():
-        line = line.strip()
-        if not line:
+    for line in lines_of(path):
+        if not line.strip():
             continue
         try:
             event = json.loads(line)
@@ -196,7 +308,11 @@ def dart_json(path: Path) -> list[str]:
             continue
 
         kind = event.get("type")
-        if kind == "suite":
+        if kind == "start":
+            started = event.get("time")
+        elif kind == "done":
+            finished = event.get("time")
+        elif kind == "suite":
             suite = event.get("suite") or {}
             suites[suite.get("id")] = suite.get("path") or "?"
         elif kind == "testStart":
@@ -221,38 +337,205 @@ def dart_json(path: Path) -> list[str]:
                     ]
                 )
 
-    total = passed + failed + skipped
-    headline = f"**{passed} passed**, {failed} failed, {skipped} skipped of {total}"
+    # Event times are milliseconds since the run started.
+    seconds = (finished - (started or 0)) / 1000 if finished is not None else None
+    result = tally(passed, failed, skipped, seconds)
     if not rows:
-        return [f"{headline} :white_check_mark:", ""]
-    return [headline, ""] + table(["Test", "Location"], rows)
+        return Check(name, "pass", result)
+    return Check(
+        name,
+        "fail",
+        result,
+        details(
+            f"{plural(failed, 'failing test')}",
+            table(["Test", "Location"], rows),
+            open_=True,
+        ),
+        note=f"**{name}**: {plural(failed, 'test')} failed out of {passed + failed + skipped}.",
+    )
+
+
+# --- coverage -----------------------------------------------------------------
+
+# How many of the least covered files the fold lists.
+COVERAGE_ROWS = 10
+
+# `flutter gen-l10n` output: thousands of generated lines no test is meant to drive.
+LCOV_GENERATED = ("lib/l10n/",)
+
+
+def percent(covered: int, total: int) -> str:
+    return f"{100 * covered / total:.1f}%" if total else "n/a"
+
+
+def coverage(name: str, files: list[tuple[str, int, int]], extra: str = "") -> Check:
+    """Shared rendering for (file, covered lines, total lines) rows."""
+    covered = sum(c for _, c, _ in files)
+    total = sum(t for _, _, t in files)
+    result = f"**{percent(covered, total)}** of lines ({covered:,} / {total:,}){extra}"
+    gaps = sorted((f for f in files if f[1] < f[2]), key=lambda f: (f[1] / f[2], -f[2]))
+    rows = [[f"`{path}`", percent(c, t), f"{t - c:,}"] for path, c, t in gaps]
+    detail = (
+        details(
+            f"Least covered files ({min(len(rows), COVERAGE_ROWS)} of {len(rows)} not fully covered)",
+            table(["File", "Lines", "Missed"], rows, limit=COVERAGE_ROWS),
+        )
+        if rows
+        else []
+    )
+    return Check(name, "measure", result, detail)
+
+
+def cobertura(name: str, path: Path) -> Check:
+    """coverage.py's XML report (pytest --cov-report=xml)."""
+    root = ET.parse(path).getroot()
+    files: dict[str, list[int]] = {}
+    for cls in root.iter("class"):
+        hits = [int(line.get("hits", "0")) for line in cls.iter("line")]
+        # Paths are relative to the measured source, `app/` here.
+        entry = files.setdefault(
+            f"app/{cls.get('filename', '?')}".replace("\\", "/"), [0, 0]
+        )
+        entry[0] += sum(1 for h in hits if h)
+        entry[1] += len(hits)
+    extra = ""
+    if int(root.get("branches-valid") or 0):
+        extra = f" · **{percent(int(root.get('branches-covered') or 0), int(root.get('branches-valid') or 0))}** of branches"
+    return coverage(name, [(p, c, t) for p, (c, t) in files.items()], extra)
+
+
+def lcov(name: str, path: Path) -> Check:
+    """flutter test --coverage's lcov.info."""
+    files: list[tuple[str, int, int]] = []
+    current, found, hit = "", 0, 0
+    for line in lines_of(path):
+        if line.startswith("SF:"):
+            current, found, hit = line[3:].replace("\\", "/"), 0, 0
+        elif line.startswith("DA:"):
+            found += 1
+            hit += line.split(",")[1] != "0"
+        elif line == "end_of_record" and not current.startswith(LCOV_GENERATED):
+            files.append((current, hit, found))
+    return coverage(name, files)
+
+
+# --- security -----------------------------------------------------------------
+
+
+def gitleaks(name: str, path: Path) -> Check:
+    leaks = json.loads(path.read_text(encoding="utf-8") or "[]")
+    if not leaks:
+        return Check(name, "pass", "No secrets in the scanned commits")
+
+    server = os.environ.get("GITHUB_SERVER_URL", "https://github.com")
+    repo = os.environ.get("GITHUB_REPOSITORY")
+    by_rule: dict[str, int] = {}
+    rows: list[list[str]] = []
+    for leak in leaks:
+        rule = leak.get("RuleID", "?")
+        by_rule[rule] = by_rule.get(rule, 0) + 1
+        sha = leak.get("Commit", "")
+        commit = (
+            f"[`{sha[:7]}`]({server}/{repo}/commit/{sha})"
+            if sha and repo
+            else f"`{sha[:7] or '?'}`"
+        )
+        # The secret itself is redacted by --redact; only its location is shown.
+        rows.append(
+            [
+                f"`{rule}`",
+                f"`{leak.get('File', '?')}:{leak.get('StartLine', '?')}`",
+                commit,
+            ]
+        )
+    found = plural(len(leaks), "secret")
+    return Check(
+        name,
+        "fail",
+        f"{found} found",
+        details(
+            f"{found}: {counts(by_rule)}",
+            table(["Rule", "Location", "Commit"], rows),
+            open_=True,
+        ),
+        note=(
+            f"**{name}** found {found}. Rotate each credential first: "
+            "removing it from the branch does not remove it from history."
+        ),
+    )
+
+
+# --- rendering ----------------------------------------------------------------
+
+
+def render(checks: list[Check]) -> list[str]:
+    failing = [c for c in checks if c.status == "fail"]
+    warning = [c for c in checks if c.status == "warn"]
+
+    lines: list[str] = []
+    if failing:
+        lines += callout("fail", *[c.note for c in failing])
+    if warning:
+        lines += callout("warn", *[c.note for c in warning])
+    if not failing and not warning:
+        lines += callout("pass", "**All checks passed.**")
+
+    lines += table(
+        ["", "Check", "Result"],
+        [[ICON[c.status], f"**{c.name}**", c.result] for c in checks],
+        limit=None,
+    )
+    for check in checks:
+        lines += check.detail
+    return lines
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--title", default="Report", help="heading for this job's block")
-    parser.add_argument("--ruff", type=Path, help="ruff --output-format=json report")
-    parser.add_argument("--ty-junit", type=Path, help="ty check --output-format=junit report")
+    parser = argparse.ArgumentParser(
+        description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter
+    )
+    parser.add_argument(
+        "--ruff", type=Path, help="ruff check --output-format=json report"
+    )
+    parser.add_argument(
+        "--ruff-format-log", type=Path, help="ruff format --check output"
+    )
+    parser.add_argument(
+        "--ty-junit", type=Path, help="ty check --output-format=junit report"
+    )
     parser.add_argument("--pytest-junit", type=Path, help="pytest --junitxml report")
-    parser.add_argument("--dart-json", type=Path, help="flutter test --file-reporter=json report")
+    parser.add_argument("--analyze-log", type=Path, help="flutter analyze output")
+    parser.add_argument(
+        "--dart-format-log", type=Path, help="dart format --set-exit-if-changed output"
+    )
+    parser.add_argument(
+        "--dart-json", type=Path, help="flutter test --file-reporter=json report"
+    )
+    parser.add_argument(
+        "--coverage-xml", type=Path, help="pytest --cov-report=xml report"
+    )
+    parser.add_argument("--lcov", type=Path, help="flutter test --coverage lcov.info")
+    parser.add_argument(
+        "--gitleaks", type=Path, help="gitleaks --report-format=json report"
+    )
     args = parser.parse_args()
 
-    lines = [f"# {args.title}", ""]
-    if args.ruff:
-        lines += section("ruff", args.ruff, ruff)
-    if args.ty_junit:
-        lines += section("ty", args.ty_junit, ty_junit)
-    if args.pytest_junit:
-        lines += section("pytest", args.pytest_junit, pytest_junit)
-    if args.dart_json:
-        lines += section("flutter test", args.dart_json, dart_json)
-
-    text = "\n".join(lines)
-    print(text)
-    step_summary = os.environ.get("GITHUB_STEP_SUMMARY")
-    if step_summary:
-        with open(step_summary, "a", encoding="utf-8") as fh:
-            fh.write(text + "\n")
+    # Table order follows the order the job runs its steps in.
+    plan = [
+        ("ruff check", args.ruff, ruff),
+        ("ruff format", args.ruff_format_log, ruff_format),
+        ("ty check", args.ty_junit, ty_junit),
+        ("pytest", args.pytest_junit, pytest_junit),
+        ("coverage", args.coverage_xml, cobertura),
+        ("flutter analyze", args.analyze_log, flutter_analyze),
+        ("dart format", args.dart_format_log, dart_format),
+        ("flutter test", args.dart_json, dart_json),
+        ("coverage", args.lcov, lcov),
+        ("gitleaks", args.gitleaks, gitleaks),
+    ]
+    checks = [run(name, path, parse) for name, path, parse in plan if path]
+    if checks:
+        write(render(checks))
     return 0
 
 
