@@ -230,7 +230,7 @@ erDiagram
         text id PK
         text email UK
         text password_hash
-        text display_name
+        text display_name UK
         text locale
         text currency
         datetime created_at

@@ -289,7 +289,7 @@ def _seed(db_session: Session) -> tuple[str, str, str]:
     user = User(
         email="amelie@example.com",
         password_hash="hash",
-        display_name="Amelie",
+        display_name="amelie",
         locale="fr",
         currency="EUR",
     )

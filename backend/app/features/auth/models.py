@@ -19,7 +19,8 @@ class User(Base):
     password_hash: Mapped[str] = mapped_column(String(255))
     # Null for users created before recovery codes existed, until they generate one.
     recovery_code_hash: Mapped[str | None] = mapped_column(String(255), nullable=True)
-    display_name: Mapped[str] = mapped_column(String(255))
+    # Doubles as the username: unique, stored lowercased (see `schemas.DisplayName`).
+    display_name: Mapped[str] = mapped_column(String(255), unique=True, index=True)
     locale: Mapped[str] = mapped_column(String(5))
     currency: Mapped[str] = mapped_column(String(3))
     created_at: Mapped[datetime] = mapped_column(

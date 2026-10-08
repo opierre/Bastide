@@ -19,7 +19,7 @@ def make_user(db: Session) -> User:
     user = User(
         email=f"{uuid4()}@example.test",
         password_hash="hash",
-        display_name="Camille",
+        display_name=f"camille-{uuid4().hex[:8]}",
         locale="fr",
         currency="EUR",
     )
