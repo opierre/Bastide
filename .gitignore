@@ -61,7 +61,6 @@ htmlcov/
 .dart_tool/
 .flutter-plugins
 .flutter-plugins-dependencies
-build/
 **/android/Flutter/Flutter.iml
 
 # Frontend build
@@ -69,7 +68,6 @@ frontend/web/
 frontend/macos/Flutter/GeneratedPluginRegistrant.swift
 
 # OS
-.DS_Store
 Thumbs.db
 
 # Editor
