@@ -6,9 +6,10 @@ from typing import Any
 
 from alembic import command
 from alembic.config import Config
-from sqlalchemy import Engine, create_engine, event
+from sqlalchemy import Engine, create_engine
 
 from app.core.config import get_settings
+from app.core.db import configure_sqlite
 
 BACKEND_DIR = Path(__file__).resolve().parent.parent
 
@@ -48,13 +49,7 @@ def _run(action: Any, db_path: Path, revision: str) -> None:
 
 
 def engine_with_foreign_keys(db_path: Path) -> Engine:
-    """An engine that enforces foreign keys — without the pragma, cascades silently do nothing."""
-    engine = create_engine(f"sqlite:///{db_path}", connect_args={"check_same_thread": False})
-
-    @event.listens_for(engine, "connect")
-    def _enable_foreign_keys(dbapi_connection: Any, connection_record: Any) -> None:
-        cursor = dbapi_connection.cursor()
-        cursor.execute("PRAGMA foreign_keys=ON")
-        cursor.close()
-
-    return engine
+    """An engine configured as the app's — foreign keys enforced, so cascades actually run."""
+    return configure_sqlite(
+        create_engine(f"sqlite:///{db_path}", connect_args={"check_same_thread": False})
+    )

@@ -2,7 +2,6 @@
 
 from datetime import date
 from pathlib import Path
-from uuid import uuid4
 
 import pytest
 from sqlalchemy import create_engine, inspect
@@ -12,6 +11,7 @@ from sqlalchemy.orm import Session
 from app.features.accounts.models import AccountBalanceSnapshot
 from app.features.imports.models import ImportBatch
 from app.features.transactions.models import Transaction
+from tests.factories import make_account, make_import_batch
 
 EXPECTED_TABLES = {
     "users",
@@ -41,10 +41,11 @@ def test_alembic_upgrade_builds_full_schema_on_empty_db(migrated_template: Path)
     engine.dispose()
 
 
-def _transaction_kwargs(**overrides: object) -> dict[str, object]:
+def _transaction_kwargs(db: Session, **overrides: object) -> dict[str, object]:
+    account = make_account(db)
     kwargs: dict[str, object] = {
-        "account_id": str(uuid4()),
-        "import_batch_id": str(uuid4()),
+        "account_id": account.id,
+        "import_batch_id": make_import_batch(db, account).id,
         "booked_date": date(2026, 1, 1),
         "amount_minor": -1000,
         "currency": "EUR",
@@ -62,7 +63,7 @@ def _transaction_kwargs(**overrides: object) -> dict[str, object]:
 def test_transaction_unique_constraint_rejects_duplicate_account_fitid(
     db_session: Session,
 ) -> None:
-    kwargs = _transaction_kwargs()
+    kwargs = _transaction_kwargs(db_session)
     db_session.add(Transaction(**kwargs))
     db_session.commit()
 
@@ -72,13 +73,10 @@ def test_transaction_unique_constraint_rejects_duplicate_account_fitid(
 
 
 def test_transaction_allows_multiple_rows_without_fitid(db_session: Session) -> None:
-    account_id = str(uuid4())
-    db_session.add(
-        Transaction(**_transaction_kwargs(account_id=account_id, fitid=None, dedup_hash="hash-a"))
-    )
-    db_session.add(
-        Transaction(**_transaction_kwargs(account_id=account_id, fitid=None, dedup_hash="hash-b"))
-    )
+    kwargs = _transaction_kwargs(db_session, fitid=None)
+    account_id = kwargs["account_id"]
+    db_session.add(Transaction(**{**kwargs, "dedup_hash": "hash-a"}))
+    db_session.add(Transaction(**{**kwargs, "dedup_hash": "hash-b"}))
     db_session.commit()
 
     count = db_session.query(Transaction).filter_by(account_id=account_id).count()
@@ -88,9 +86,10 @@ def test_transaction_allows_multiple_rows_without_fitid(db_session: Session) -> 
 def test_import_batch_unique_constraint_rejects_duplicate_file_hash_per_account(
     db_session: Session,
 ) -> None:
+    account = make_account(db_session)
     kwargs = {
-        "user_id": str(uuid4()),
-        "account_id": str(uuid4()),
+        "user_id": account.user_id,
+        "account_id": account.id,
         "source_format": "ofx",
         "file_name": "jan.ofx",
         "file_hash": "abc123",
@@ -111,7 +110,7 @@ def test_import_batch_unique_constraint_rejects_duplicate_file_hash_per_account(
 
 def test_account_balance_snapshot_unique_per_account_and_period_end(db_session: Session) -> None:
     kwargs = {
-        "account_id": str(uuid4()),
+        "account_id": make_account(db_session).id,
         "period_end": date(2026, 1, 31),
         "balance_minor": 150_000,
     }

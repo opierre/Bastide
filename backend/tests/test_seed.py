@@ -7,6 +7,7 @@ from sqlalchemy.orm import Session
 
 from app.core.seed import SYSTEM_CATEGORIES, CategorySeed, seed_categories
 from app.features.categories.models import Category
+from tests.factories import make_user
 
 VALID_KINDS = {"income", "expense", "transfer"}
 
@@ -82,7 +83,7 @@ def test_startup_seeds_the_catalog(client: TestClient) -> None:
 
 def test_seed_does_not_touch_user_created_categories(db_session: Session) -> None:
     user_category = Category(
-        user_id="some-user-id",
+        user_id=make_user(db_session).id,
         parent_id=None,
         name="My custom category",
         kind="expense",

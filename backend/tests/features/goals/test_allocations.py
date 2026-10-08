@@ -11,6 +11,7 @@ from sqlalchemy.orm import Session
 
 from app.features.goals.models import Goal, GoalAllocation
 from app.features.goals.repository import GoalRepository
+from tests.factories import make_user
 from tests.features.goals.test_goals import (
     allocate,
     create_goal,
@@ -227,8 +228,10 @@ def test_progress_comes_from_one_aggregate_not_from_loading_the_ledger(
 ) -> None:
     """The panel draws every goal at once, so summing in Python would mean reading the whole
     allocation history to render a handful of progress bars."""
+    # Read before the commit expires it, so the listener below sees only the list query.
+    user_id = make_user(db_session).id
     goal = Goal(
-        user_id="user-1",
+        user_id=user_id,
         name="Fonds d'urgence",
         target_minor=1_000_000,
         currency="EUR",
@@ -255,7 +258,7 @@ def test_progress_comes_from_one_aggregate_not_from_loading_the_ledger(
 
     event.listen(db_session.bind, "before_cursor_execute", record)
     try:
-        listed = GoalRepository(db_session).list_for_user("user-1", ("active",))
+        listed = GoalRepository(db_session).list_for_user(user_id, ("active",))
     finally:
         event.remove(db_session.bind, "before_cursor_execute", record)
 

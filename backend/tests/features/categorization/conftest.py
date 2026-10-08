@@ -19,10 +19,10 @@ from uuid import uuid4
 import pytest
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
-from sqlalchemy import Engine, create_engine, event, select
+from sqlalchemy import Engine, create_engine, select
 from sqlalchemy.orm import Session, sessionmaker
 
-from app.core.db import SessionFactory
+from app.core.db import SessionFactory, configure_sqlite
 from app.features.accounts.models import Account
 from app.features.auth.models import User
 from app.features.categories.models import Category
@@ -303,15 +303,9 @@ def _wal_engine(path: Path) -> Engine:
     (cancelling a run) while the executor holds one open, which is exactly the one-writer,
     many-readers case WAL exists for. Under the default journal mode it deadlocks.
     """
-    engine = create_engine(f"sqlite:///{path}", connect_args={"check_same_thread": False})
-
-    @event.listens_for(engine, "connect")
-    def _enable_wal(dbapi_connection: Any, connection_record: Any) -> None:
-        cursor = dbapi_connection.cursor()
-        cursor.execute("PRAGMA journal_mode=WAL")
-        cursor.close()
-
-    return engine
+    return configure_sqlite(
+        create_engine(f"sqlite:///{path}", connect_args={"check_same_thread": False})
+    )
 
 
 @pytest.fixture
