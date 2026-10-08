@@ -235,6 +235,7 @@ erDiagram
         text currency
         datetime created_at
         datetime updated_at
+        text recovery_code_hash "nullable"
     }
     accounts ||--o{ account_balance_snapshots : "account_id"
     users ||--o{ accounts : "user_id"
