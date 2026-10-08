@@ -72,6 +72,10 @@
   "@sidebarExpand": {
     "description": "Tooltip on the control that expands the collapsed sidebar back to full width."
   },
+  "userMenuEditProfile": "Modifier le profil",
+  "@userMenuEditProfile": {
+    "description": "Item in the top-bar user menu that opens Settings on the Profile section."
+  },
   "userMenuLogout": "Se déconnecter",
   "@userMenuLogout": {
     "description": "Item in the top-bar user menu that ends the session."

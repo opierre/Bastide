@@ -206,6 +206,12 @@ abstract class AppLocalizations {
   /// **'Déployer le menu'**
   String get sidebarExpand;
 
+  /// Item in the top-bar user menu that opens Settings on the Profile section.
+  ///
+  /// In fr, this message translates to:
+  /// **'Modifier le profil'**
+  String get userMenuEditProfile;
+
   /// Item in the top-bar user menu that ends the session.
   ///
   /// In fr, this message translates to:

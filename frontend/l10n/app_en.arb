@@ -27,6 +27,7 @@
   "@sidebarExpand": {
     "description": "Tooltip on the control that expands the collapsed sidebar back to full width."
   },
+  "userMenuEditProfile": "Edit profile",
   "userMenuLogout": "Log out",
   "comingSoonTitle": "Coming soon",
   "comingSoonBody": "This screen arrives in a later step. In the meantime, add your accounts to get set up.",
