@@ -1,0 +1,9 @@
+# Normalize to LF everywhere: Flutter, Dart and ruff all write LF, and CI runs
+# on Linux. Without this, core.autocrlf on Windows flags regenerated files as
+# modified when only their line endings differ.
+* text=auto eol=lf
+
+# Binary assets — never touch.
+*.png binary
+*.ico binary
+*.ttf binary
