@@ -1,6 +1,6 @@
 <div align="center">
 
-# Bastide
+# <img src="frontend/assets/brand/bastide-mark.svg" alt="" height="36" align="top"> Bastide
 
 **A local-first personal finance manager for the desktop.**
 Import your bank statements, see where your money goes, and keep your data on your machine.
