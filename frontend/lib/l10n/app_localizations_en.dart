@@ -3695,4 +3695,93 @@ class AppLocalizationsEn extends AppLocalizations {
   String networthSeriesCaveat(String date) {
     return 'Properties are held at their declared value (oldest estimate: $date): only accounts and loans move from month to month. Months without data are simply absent.';
   }
+
+  @override
+  String get authForgotPasswordLink => 'Forgot your password?';
+
+  @override
+  String get authForgotPasswordTagline =>
+      'Reset your password with your recovery code.';
+
+  @override
+  String get authRecoveryCodeLabel => 'Recovery code';
+
+  @override
+  String get authRecoveryCodeRequired => 'The recovery code is required.';
+
+  @override
+  String get authNewPasswordLabel => 'New password';
+
+  @override
+  String get authResetSubmit => 'Reset password';
+
+  @override
+  String get authResetSubmitting => 'Resetting…';
+
+  @override
+  String get authResetNote =>
+      'You were given this code when you created your account. Without it the password can\'t be reset: your data never leaves this computer.';
+
+  @override
+  String get authBackToLogin => 'Back to sign in';
+
+  @override
+  String get authErrorInvalidRecoveryCode =>
+      'Incorrect email or recovery code. Check the code and try again.';
+
+  @override
+  String get authRecoveryCodeTagline => 'Keep your recovery code';
+
+  @override
+  String get authRecoveryCodeIntro =>
+      'If you forget your password, this code is the only way to reset it. Write it down or print it, and keep it somewhere safe away from this computer.';
+
+  @override
+  String get authRecoveryCodeShownOnce =>
+      'It won\'t be shown again. You can generate a new one in Settings › Profile.';
+
+  @override
+  String get authRecoveryCodeCopy => 'Copy';
+
+  @override
+  String get authRecoveryCodeCopied => 'Copied';
+
+  @override
+  String get authRecoveryCodeConfirm => 'I\'ve kept this code somewhere safe';
+
+  @override
+  String get authRecoveryCodeContinue => 'Continue';
+
+  @override
+  String get settingsRecoveryTitle => 'Recovery code';
+
+  @override
+  String get settingsRecoverySubtitle =>
+      'Lets you reset your password if you forget it. Generating a new one invalidates the previous code.';
+
+  @override
+  String get settingsRecoveryButton => 'Generate a new code…';
+
+  @override
+  String get settingsRecoveryModalTitle => 'New recovery code';
+
+  @override
+  String get settingsRecoveryModalLead =>
+      'Confirm your password to generate a new code. The previous one will stop working.';
+
+  @override
+  String get settingsRecoveryModalGenerated =>
+      'Write this code down and keep it safe: it won\'t be shown again.';
+
+  @override
+  String get settingsRecoveryModalGenerate => 'Generate';
+
+  @override
+  String get settingsRecoveryModalCancel => 'Cancel';
+
+  @override
+  String get settingsRecoveryModalDone => 'Done';
+
+  @override
+  String get settingsRecoveryWrongPassword => 'Incorrect password.';
 }

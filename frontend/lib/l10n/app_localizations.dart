@@ -5820,6 +5820,168 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Les biens sont maintenus à leur valeur déclarée (estimation la plus ancienne : {date}) : seuls les comptes et les crédits bougent d\'un mois à l\'autre. Les mois sans donnée sont simplement absents.'**
   String networthSeriesCaveat(String date);
+
+  /// Link under the login form's password field, opening the password reset screen.
+  ///
+  /// In fr, this message translates to:
+  /// **'Mot de passe oublié ?'**
+  String get authForgotPasswordLink;
+
+  /// Line under the brand lockup on the password reset screen, saying what the screen is for.
+  ///
+  /// In fr, this message translates to:
+  /// **'Réinitialisez votre mot de passe avec votre code de récupération.'**
+  String get authForgotPasswordTagline;
+
+  /// Label for the recovery code field on the password reset form.
+  ///
+  /// In fr, this message translates to:
+  /// **'Code de récupération'**
+  String get authRecoveryCodeLabel;
+
+  /// Validation message when the recovery code field is left empty.
+  ///
+  /// In fr, this message translates to:
+  /// **'Le code de récupération est requis.'**
+  String get authRecoveryCodeRequired;
+
+  /// Label for the new password field on the password reset form.
+  ///
+  /// In fr, this message translates to:
+  /// **'Nouveau mot de passe'**
+  String get authNewPasswordLabel;
+
+  /// Submit button of the password reset form.
+  ///
+  /// In fr, this message translates to:
+  /// **'Réinitialiser le mot de passe'**
+  String get authResetSubmit;
+
+  /// Label replacing the reset button text while the request is in flight.
+  ///
+  /// In fr, this message translates to:
+  /// **'Réinitialisation…'**
+  String get authResetSubmitting;
+
+  /// Note under the password reset form explaining where the code comes from and why there is no other way.
+  ///
+  /// In fr, this message translates to:
+  /// **'Le code vous a été remis à la création du compte. Sans lui, le mot de passe ne peut pas être réinitialisé : vos données ne quittent jamais cet ordinateur.'**
+  String get authResetNote;
+
+  /// Link under the password reset card, returning to the login screen.
+  ///
+  /// In fr, this message translates to:
+  /// **'Retour à la connexion'**
+  String get authBackToLogin;
+
+  /// Banner when a password reset's email and recovery code don't match.
+  ///
+  /// In fr, this message translates to:
+  /// **'E-mail ou code de récupération incorrect. Vérifiez le code et réessayez.'**
+  String get authErrorInvalidRecoveryCode;
+
+  /// Line under the brand lockup on the screen showing a newly issued recovery code.
+  ///
+  /// In fr, this message translates to:
+  /// **'Conservez votre code de récupération'**
+  String get authRecoveryCodeTagline;
+
+  /// Explanation above a newly issued recovery code.
+  ///
+  /// In fr, this message translates to:
+  /// **'Si vous oubliez votre mot de passe, ce code est le seul moyen de le réinitialiser. Notez-le ou imprimez-le, et gardez-le en lieu sûr hors de cet ordinateur.'**
+  String get authRecoveryCodeIntro;
+
+  /// Note under a newly issued recovery code: it is shown once, and where to replace it.
+  ///
+  /// In fr, this message translates to:
+  /// **'Il ne sera plus affiché. Vous pourrez en générer un nouveau dans Paramètres › Profil.'**
+  String get authRecoveryCodeShownOnce;
+
+  /// Button copying the recovery code to the clipboard.
+  ///
+  /// In fr, this message translates to:
+  /// **'Copier'**
+  String get authRecoveryCodeCopy;
+
+  /// Label the copy button takes once the recovery code has been copied.
+  ///
+  /// In fr, this message translates to:
+  /// **'Copié'**
+  String get authRecoveryCodeCopied;
+
+  /// Checkbox the user ticks before leaving the recovery code screen.
+  ///
+  /// In fr, this message translates to:
+  /// **'J\'ai conservé ce code en lieu sûr'**
+  String get authRecoveryCodeConfirm;
+
+  /// Button leaving the recovery code screen for the app, enabled once the checkbox is ticked.
+  ///
+  /// In fr, this message translates to:
+  /// **'Continuer'**
+  String get authRecoveryCodeContinue;
+
+  /// Title of the recovery code card in Settings › Profile.
+  ///
+  /// In fr, this message translates to:
+  /// **'Code de récupération'**
+  String get settingsRecoveryTitle;
+
+  /// Subtitle of the recovery code card in Settings › Profile.
+  ///
+  /// In fr, this message translates to:
+  /// **'Permet de réinitialiser votre mot de passe si vous l\'oubliez. En générer un nouveau invalide l\'ancien.'**
+  String get settingsRecoverySubtitle;
+
+  /// Button on the recovery code card opening the regeneration modal.
+  ///
+  /// In fr, this message translates to:
+  /// **'Générer un nouveau code…'**
+  String get settingsRecoveryButton;
+
+  /// Title of the modal generating a new recovery code.
+  ///
+  /// In fr, this message translates to:
+  /// **'Nouveau code de récupération'**
+  String get settingsRecoveryModalTitle;
+
+  /// Lead of the regeneration modal, before the password is entered.
+  ///
+  /// In fr, this message translates to:
+  /// **'Confirmez votre mot de passe pour générer un nouveau code. L\'ancien cessera de fonctionner.'**
+  String get settingsRecoveryModalLead;
+
+  /// Lead of the regeneration modal once the new code is shown.
+  ///
+  /// In fr, this message translates to:
+  /// **'Notez ce code et gardez-le en lieu sûr : il ne sera plus affiché.'**
+  String get settingsRecoveryModalGenerated;
+
+  /// Confirm button of the regeneration modal.
+  ///
+  /// In fr, this message translates to:
+  /// **'Générer'**
+  String get settingsRecoveryModalGenerate;
+
+  /// Cancel button of the regeneration modal.
+  ///
+  /// In fr, this message translates to:
+  /// **'Annuler'**
+  String get settingsRecoveryModalCancel;
+
+  /// Button closing the regeneration modal once the new code has been shown.
+  ///
+  /// In fr, this message translates to:
+  /// **'Terminé'**
+  String get settingsRecoveryModalDone;
+
+  /// Error in the regeneration modal when the confirmation password is wrong.
+  ///
+  /// In fr, this message translates to:
+  /// **'Mot de passe incorrect.'**
+  String get settingsRecoveryWrongPassword;
 }
 
 class _AppLocalizationsDelegate

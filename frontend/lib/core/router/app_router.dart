@@ -5,7 +5,9 @@ import 'package:go_router/go_router.dart';
 import '../../features/accounts/presentation/accounts_screen.dart';
 import '../../features/accounts/presentation/accounts_top_bar_actions.dart';
 import '../../features/auth/application/auth_controller.dart';
+import '../../features/auth/presentation/forgot_password_screen.dart';
 import '../../features/auth/presentation/login_screen.dart';
+import '../../features/auth/presentation/recovery_code_screen.dart';
 import '../../features/auth/presentation/register_screen.dart';
 import '../../features/categories/presentation/categories_screen.dart';
 import '../../features/categories/presentation/categories_top_bar_actions.dart';
@@ -22,13 +24,23 @@ import '../../features/transactions/presentation/transactions_screen.dart';
 import '../widgets/app_shell.dart';
 
 /// Notifies go_router's `redirect` to re-run whenever auth state changes
-/// (session restore resolving, login, logout) so a single router instance
-/// can be reused instead of rebuilt on every state change.
+/// (session restore resolving, login, logout, a recovery code shown or
+/// acknowledged) so a single router instance can be reused instead of rebuilt
+/// on every state change.
 class _AuthRefreshListenable extends ChangeNotifier {
   _AuthRefreshListenable(Ref ref) {
     ref.listen(authControllerProvider, (_, _) => notifyListeners());
+    ref.listen(pendingRecoveryCodeProvider, (_, _) => notifyListeners());
   }
 }
+
+/// The signed-out screens: reachable without a session, and left for the
+/// dashboard as soon as one exists.
+const _signedOutPaths = {
+  LoginScreen.path,
+  RegisterScreen.path,
+  ForgotPasswordScreen.path,
+};
 
 /// The contextual controls each panel contributes to the top bar.
 ///
@@ -60,12 +72,19 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       if (authState.isLoading) return null;
 
       final isAuthenticated = authState.value != null;
-      final isAuthRoute =
-          state.matchedLocation == LoginScreen.path ||
-          state.matchedLocation == RegisterScreen.path;
+      final location = state.matchedLocation;
+      final isSignedOutRoute = _signedOutPaths.contains(location);
+      final isRecoveryCodeRoute = location == RecoveryCodeScreen.path;
 
-      if (!isAuthenticated && !isAuthRoute) return LoginScreen.path;
-      if (isAuthenticated && isAuthRoute) return DashboardScreen.path;
+      if (!isAuthenticated) {
+        return isSignedOutRoute ? null : LoginScreen.path;
+      }
+      // A fresh recovery code exists only in memory; hold the user on it until
+      // they confirm they've kept it.
+      if (ref.read(pendingRecoveryCodeProvider) != null) {
+        return isRecoveryCodeRoute ? null : RecoveryCodeScreen.path;
+      }
+      if (isSignedOutRoute || isRecoveryCodeRoute) return DashboardScreen.path;
       return null;
     },
     routes: [
@@ -76,6 +95,14 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: RegisterScreen.path,
         builder: (context, state) => const RegisterScreen(),
+      ),
+      GoRoute(
+        path: ForgotPasswordScreen.path,
+        builder: (context, state) => const ForgotPasswordScreen(),
+      ),
+      GoRoute(
+        path: RecoveryCodeScreen.path,
+        builder: (context, state) => const RecoveryCodeScreen(),
       ),
       ShellRoute(
         builder: (context, state, child) {

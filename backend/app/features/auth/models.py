@@ -17,6 +17,8 @@ class User(Base):
     id: Mapped[str] = mapped_column(String(36), primary_key=True, default=lambda: str(uuid4()))
     email: Mapped[str] = mapped_column(String(255), unique=True, index=True)
     password_hash: Mapped[str] = mapped_column(String(255))
+    # Null for users created before recovery codes existed, until they generate one.
+    recovery_code_hash: Mapped[str | None] = mapped_column(String(255), nullable=True)
     display_name: Mapped[str] = mapped_column(String(255))
     locale: Mapped[str] = mapped_column(String(5))
     currency: Mapped[str] = mapped_column(String(3))
