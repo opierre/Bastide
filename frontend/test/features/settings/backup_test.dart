@@ -312,10 +312,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('Restaurer cette sauvegarde ?'), findsOneWidget);
-      expect(
-        find.textContaining('bastide-2026-09-11.bastide'),
-        findsOneWidget,
-      );
+      expect(find.textContaining('bastide-2026-09-11.bastide'), findsOneWidget);
       expect(find.text('0.1.0'), findsOneWidget);
       expect(find.text('30'), findsOneWidget);
       expect(find.byKey(const Key('backupConfirmWarning')), findsOneWidget);

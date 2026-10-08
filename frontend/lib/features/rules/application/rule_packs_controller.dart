@@ -22,10 +22,7 @@ class RulePackFiles {
   Future<String?> pick() async {
     final file = await openFile(
       acceptedTypeGroups: const [
-        XTypeGroup(
-          label: 'Bastide rule pack',
-          extensions: [rulePackExtension],
-        ),
+        XTypeGroup(label: 'Bastide rule pack', extensions: [rulePackExtension]),
       ],
     );
     return file?.readAsString();
