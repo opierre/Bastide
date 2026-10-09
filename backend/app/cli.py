@@ -13,6 +13,9 @@ from pathlib import Path
 
 import uvicorn
 
+from app import __version__
+from app.core.logs import configure_logging
+
 DEFAULT_PORT = 8765
 
 
@@ -58,9 +61,27 @@ def bind(host: str, port: int) -> socket.socket:
     return sock
 
 
+class _Server(uvicorn.Server):
+    """A uvicorn server that announces itself on stdout once it accepts requests."""
+
+    async def startup(self, sockets: list[socket.socket] | None = None) -> None:
+        await super().startup(sockets=sockets)
+        if self.started and sockets:
+            announce_ready(sockets[0].getsockname()[1])
+
+
+def announce_ready(port: int) -> None:
+    """Print the handshake line the desktop app waits for: `READY <port> <version>`.
+
+    Flushed at once: stdout is a pipe there, which Python buffers until it fills.
+    """
+    print(f"READY {port} {__version__}", flush=True)
+
+
 def main(argv: Sequence[str] | None = None) -> int:
     """Start the sidecar and serve until stopped; returns the process exit code."""
     args = parse_args(argv)
+    configure_logging()
     if args.data_dir is not None:
         # Settings are read from the environment, and the database engine is built when
         # `app.core.db` is first imported, so this must happen before importing the app.
@@ -72,6 +93,8 @@ def main(argv: Sequence[str] | None = None) -> int:
 
     migrate(Path(get_settings().db_path))
     sock = bind(args.host, args.port)
-    server = uvicorn.Server(uvicorn.Config(create_app(), access_log=False))
+    # No uvicorn log config: its records reach the root logger's stderr handler. No access
+    # log either, since request paths carry record ids.
+    server = _Server(uvicorn.Config(create_app(), log_config=None, access_log=False))
     server.run(sockets=[sock])
     return 0

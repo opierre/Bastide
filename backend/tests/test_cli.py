@@ -59,6 +59,7 @@ def test_main_migrates_the_data_dir_then_serves_on_the_bound_socket(
     get_settings.cache_clear()
     try:
         with (
+            patch.object(cli, "configure_logging"),
             patch("app.core.schema.migrate") as migrate,
             patch.object(cli.uvicorn.Server, "run") as run,
         ):
