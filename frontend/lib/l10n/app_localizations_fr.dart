@@ -113,6 +113,9 @@ class AppLocalizationsFr extends AppLocalizations {
   String get settingsAboutVersion => 'Version';
 
   @override
+  String get settingsAboutVersionUnavailable => 'Indisponible';
+
+  @override
   String get settingsAboutPrivacy =>
       'Toutes vos données restent sur cet ordinateur. Bastide ne se connecte à aucune banque et n\'envoie rien sur Internet.';
 

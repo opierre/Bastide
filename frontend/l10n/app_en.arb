@@ -43,6 +43,7 @@
   "settingsFormatsDates": "Dates",
   "settingsFormatsAmounts": "Amounts",
   "settingsAboutVersion": "Version",
+  "settingsAboutVersionUnavailable": "Unavailable",
   "settingsAboutPrivacy": "All your data stays on this computer. Bastide connects to no bank and sends nothing over the internet.",
   "authTagline": "Your money, clearly.",
   "authPrivacyLine": "Local and private — your data never leaves this computer.",

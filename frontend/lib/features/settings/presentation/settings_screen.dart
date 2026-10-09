@@ -301,20 +301,30 @@ class _DataPanel extends StatelessWidget {
   );
 }
 
-class _AboutPanel extends StatelessWidget {
+class _AboutPanel extends ConsumerWidget {
   const _AboutPanel();
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context)!;
+    final style = Theme.of(context).textTheme.bodyLarge!;
+    // The read is local and near-instant, so loading shows an empty line of
+    // the same height rather than a spinner that would only flash.
+    final version = ref
+        .watch(appVersionProvider)
+        .when(
+          data: (version) => version,
+          loading: () => '',
+          error: (_, _) => l10n.settingsAboutVersionUnavailable,
+        );
 
     return _SettingsCard(
       title: l10n.settingsAboutVersion,
       note: l10n.settingsAboutPrivacy,
       child: Text(
-        appVersion,
+        version,
         key: const Key('settingsAppVersion'),
-        style: tabularNumberStyle(Theme.of(context).textTheme.bodyLarge!),
+        style: tabularNumberStyle(style),
       ),
     );
   }

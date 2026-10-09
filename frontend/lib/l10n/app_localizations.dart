@@ -296,6 +296,12 @@ abstract class AppLocalizations {
   /// **'Version'**
   String get settingsAboutVersion;
 
+  /// Shown in place of the version number when the app could not read it.
+  ///
+  /// In fr, this message translates to:
+  /// **'Indisponible'**
+  String get settingsAboutVersionUnavailable;
+
   /// Local-privacy statement in the About section.
   ///
   /// In fr, this message translates to:

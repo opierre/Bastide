@@ -132,6 +132,10 @@
   "@settingsAboutVersion": {
     "description": "Label beside the application version number in the About section."
   },
+  "settingsAboutVersionUnavailable": "Indisponible",
+  "@settingsAboutVersionUnavailable": {
+    "description": "Shown in place of the version number when the app could not read it."
+  },
   "settingsAboutPrivacy": "Toutes vos données restent sur cet ordinateur. Bastide ne se connecte à aucune banque et n'envoie rien sur Internet.",
   "@settingsAboutPrivacy": {
     "description": "Local-privacy statement in the About section."

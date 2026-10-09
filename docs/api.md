@@ -15,7 +15,7 @@ details?}}`. Model names refer to the Pydantic schemas in `backend/app/features/
 
 | Method | Path | Query | Body | Response |
 |--------|------|-------|------|----------|
-| `GET` | `/health` |  |  | 200 `object` |
+| `GET` | `/health` |  |  | 200 `HealthRead` |
 
 ## auth
 

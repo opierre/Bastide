@@ -2,11 +2,11 @@
 
 from collections.abc import Callable
 from datetime import UTC, date, datetime
-from importlib.metadata import PackageNotFoundError, version
 from typing import Any
 
 from sqlalchemy.exc import IntegrityError
 
+from app import __version__
 from app.features.auth.models import User
 from app.features.backup.archive import (
     FORMAT_MARKER,
@@ -35,13 +35,6 @@ from app.features.settings.service import SettingsService
 _RESTORE_BATCH = 500
 
 
-def _app_version() -> str:
-    try:
-        return version("bastide-backend")
-    except PackageNotFoundError:
-        return "0.0.0"
-
-
 class BackupService:
     """Builds `.bastide` archives and replaces a user's data with one."""
 
@@ -63,7 +56,7 @@ class BackupService:
         manifest = {
             "format": FORMAT_MARKER,
             "format_version": FORMAT_VERSION,
-            "app_version": _app_version(),
+            "app_version": __version__,
             "exported_at": exported_at.isoformat(),
             "currency": user.currency,
         }
