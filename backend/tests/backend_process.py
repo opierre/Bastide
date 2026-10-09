@@ -4,6 +4,7 @@ import os
 import subprocess
 import sys
 import threading
+from collections.abc import Sequence
 from pathlib import Path
 from queue import Empty, Queue
 from typing import IO
@@ -14,8 +15,20 @@ BACKEND_DIR = Path(__file__).resolve().parent.parent
 STARTUP_TIMEOUT = 60.0
 
 
-def start(data_dir: Path, *args: str, env: dict[str, str] | None = None) -> subprocess.Popen[str]:
-    """Run `python -m app --port 0 --data-dir <data_dir>` with piped stdin and stdout.
+#: The backend run from source, with the interpreter running the tests.
+SOURCE_COMMAND = (sys.executable, "-m", "app")
+
+
+def start(
+    data_dir: Path,
+    *args: str,
+    env: dict[str, str] | None = None,
+    command: Sequence[str] = SOURCE_COMMAND,
+    cwd: Path = BACKEND_DIR,
+) -> subprocess.Popen[str]:
+    """Run `<command> --port 0 --data-dir <data_dir>` in `cwd`, with piped stdin and stdout.
+
+    `command` defaults to `python -m app`; a frozen build passes its executable instead.
 
     Stderr goes to `stderr_log(data_dir)` rather than a pipe: nothing reads it while the test
     runs, and a full pipe would block the backend's next log call. The `BASTIDE_*` variables
@@ -26,8 +39,8 @@ def start(data_dir: Path, *args: str, env: dict[str, str] | None = None) -> subp
     # The child gets its own handle on the file, so this one can close right away.
     with stderr_log(data_dir).open("w", encoding="utf-8") as stderr:
         return subprocess.Popen(
-            [sys.executable, "-m", "app", "--port", "0", "--data-dir", str(data_dir), *args],
-            cwd=BACKEND_DIR,
+            [*command, "--port", "0", "--data-dir", str(data_dir), *args],
+            cwd=cwd,
             env=child_env,
             stdin=subprocess.PIPE,
             stdout=subprocess.PIPE,

@@ -16,6 +16,10 @@
 - **ty** — type checking (Astral, primary in CI + editor). Run `ty check` to typecheck. Pydantic inference is still maturing; `mypy --strict` is an optional per-file escape hatch, not part of the normal loop.
 - **pytest** — testing. Run `pytest` to run all tests.
 
+## Frozen build
+
+`uv run tools/build_backend.py` (from the repo root) freezes the sidecar with PyInstaller into `backend/dist/bastide-backend/`, from `bastide-backend.spec`. `--smoke` then runs `pytest -m frozen`, the smoke test of that build, which the default run skips. A module loaded by name or a file read by path at runtime must be added to the spec, or it is missing from the build.
+
 ## Structure
 
 - `app/core/` — config, db session, security, errors (the foundational types and services).
