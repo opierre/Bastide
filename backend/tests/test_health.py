@@ -3,14 +3,15 @@
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
 
+from app import __version__
 from app.core.errors import AuthError, NotFoundError, register_exception_handlers
 
 
-def test_health_returns_ok(client: TestClient) -> None:
+def test_health_returns_ok_and_the_version(client: TestClient) -> None:
     response = client.get("/api/v1/health")
 
     assert response.status_code == 200
-    assert response.json() == {"status": "ok"}
+    assert response.json() == {"status": "ok", "version": __version__}
 
 
 def test_not_found_error_maps_to_envelope_and_404() -> None:
