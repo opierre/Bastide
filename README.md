@@ -113,5 +113,9 @@ Bastide/
 
 ## 📄 License
 
-> [!WARNING]
-> No license has been chosen yet. Until one is added, all rights are reserved.
+Bastide is licensed under the [GNU Affero General Public License v3.0](LICENSE). You may use,
+modify and share it, but if you distribute a modified version or offer it as a network service,
+you must release its source under the same license.
+
+The bundled Geist and Space Grotesk fonts keep their own SIL Open Font License. The Bastide name
+and logo are not covered by the AGPL.
