@@ -16,6 +16,16 @@ dependencies = [
     "uvicorn>=0.51.0",
 ]
 
+# The project is installed (editable) so `app.__version__` can read this version from the
+# package metadata instead of a second hand-kept copy.
+[build-system]
+requires = ["uv_build>=0.9,<0.12"]
+build-backend = "uv_build"
+
+[tool.uv.build-backend]
+module-name = "app"
+module-root = ""
+
 [dependency-groups]
 dev = [
     "httpx>=0.28.1",
