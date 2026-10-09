@@ -1,5 +1,8 @@
 import 'package:flutter/foundation.dart';
 
+/// The header carrying the per-launch session token (`app/core/session.py`).
+const sessionTokenHeader = 'X-Bastide-Session';
+
 /// Where the running backend answers, and how to prove we are the app that
 /// started it.
 @immutable
@@ -35,6 +38,9 @@ enum BackendFailureKind {
 
   /// Its first line on stdout was not the expected handshake.
   badHandshake,
+
+  /// A backend the app did not start (dev mode) did not answer.
+  unreachable,
 
   /// The database was written by a newer version of the app (exit code 10).
   schemaTooNew,

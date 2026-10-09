@@ -14,6 +14,7 @@ void main() {
     launched = [];
     container = ProviderContainer(
       overrides: [
+        externalBackendProvider.overrideWithValue(null),
         backendSupervisorProvider.overrideWith((ref) {
           final supervisor = BackendSupervisor(
             executable: 'bastide-backend',
