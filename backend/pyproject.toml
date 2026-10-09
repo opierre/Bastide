@@ -16,6 +16,9 @@ dependencies = [
     "uvicorn>=0.51.0",
 ]
 
+[project.scripts]
+bastide-backend = "app.cli:main"
+
 # The project is installed (editable) so `app.__version__` can read this version from the
 # package metadata instead of a second hand-kept copy.
 [build-system]
