@@ -10,8 +10,10 @@ import logging
 import os
 import socket
 import sys
+import threading
 from collections.abc import Sequence
 from pathlib import Path
+from typing import IO
 
 import uvicorn
 
@@ -36,6 +38,11 @@ def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
         "--data-dir",
         type=Path,
         help="Folder for the database (default: the OS user's local data dir).",
+    )
+    parser.add_argument(
+        "--exit-on-stdin-close",
+        action="store_true",
+        help="Shut down when stdin closes, i.e. when the app that started the backend exits.",
     )
     return parser.parse_args(argv)
 
@@ -86,6 +93,25 @@ def announce_ready(port: int) -> None:
     print(f"READY {port} {__version__}", flush=True)
 
 
+def watch_stdin(server: uvicorn.Server, stdin: IO[bytes]) -> threading.Thread:
+    """Shut the server down gracefully once `stdin` reaches end of file.
+
+    The desktop app holds the write end of the pipe and never writes to it. When the app exits
+    or crashes, the OS closes that end, and the read here returns. Opt-in, because a backend
+    started from an IDE or a script may have no stdin at all.
+    """
+
+    def _watch() -> None:
+        while stdin.read(4096):
+            pass
+        server.should_exit = True
+        logger.info("Stdin closed: the parent process is gone, shutting down.")
+
+    thread = threading.Thread(target=_watch, name="stdin-watcher", daemon=True)
+    thread.start()
+    return thread
+
+
 def report_fatal(code: str) -> None:
     """Print `FATAL <code>` on stderr: a line the desktop app parses and shows translated."""
     print(f"FATAL {code}", file=sys.stderr, flush=True)
@@ -114,5 +140,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     # No uvicorn log config: its records reach the root logger's stderr handler. No access
     # log either, since request paths carry record ids.
     server = _Server(uvicorn.Config(create_app(), log_config=None, access_log=False))
+    if args.exit_on_stdin_close:
+        watch_stdin(server, sys.stdin.buffer)
     server.run(sockets=[sock])
     return 0

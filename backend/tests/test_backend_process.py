@@ -6,6 +6,7 @@ import re
 import shutil
 import sqlite3
 import subprocess
+import time
 from pathlib import Path
 from typing import Any
 
@@ -84,9 +85,26 @@ def test_exits_with_a_dedicated_code_on_a_newer_database(
 
     process = backend_process.start(tmp_path)
     try:
-        _, stderr = process.communicate(timeout=backend_process.STARTUP_TIMEOUT)
+        process.wait(timeout=backend_process.STARTUP_TIMEOUT)
     finally:
         backend_process.stop(process)
 
     assert process.returncode == EXIT_SCHEMA_TOO_NEW
+    stderr = backend_process.stderr_log(tmp_path).read_text(encoding="utf-8")
     assert "FATAL DATABASE_SCHEMA_TOO_NEW" in stderr.splitlines()
+
+
+def test_exits_within_two_seconds_once_its_stdin_closes(tmp_path: Path) -> None:
+    process = backend_process.start(tmp_path, "--exit-on-stdin-close")
+    try:
+        _ready_port(process)
+        assert process.stdin is not None
+
+        closed_at = time.monotonic()
+        process.stdin.close()
+        process.wait(timeout=10)
+
+        assert time.monotonic() - closed_at < 2
+        assert process.returncode == 0
+    finally:
+        backend_process.stop(process)

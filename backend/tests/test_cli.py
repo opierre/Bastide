@@ -1,5 +1,6 @@
 """Tests for the `bastide-backend` command line."""
 
+import io
 import socket
 from pathlib import Path
 from unittest.mock import patch
@@ -17,6 +18,7 @@ def test_defaults_to_loopback_on_the_dev_port() -> None:
     assert args.host == "127.0.0.1"
     assert args.port == cli.DEFAULT_PORT
     assert args.data_dir is None
+    assert args.exit_on_stdin_close is False
 
 
 def test_accepts_port_zero_and_a_data_dir(tmp_path: Path) -> None:
@@ -93,3 +95,11 @@ def test_main_reports_a_database_newer_than_the_build(
     assert exit_code == cli.EXIT_SCHEMA_TOO_NEW
     assert "FATAL DATABASE_SCHEMA_TOO_NEW" in capsys.readouterr().err.splitlines()
     run.assert_not_called()
+
+
+def test_the_stdin_watcher_stops_the_server_at_end_of_file() -> None:
+    server = cli.uvicorn.Server(cli.uvicorn.Config(app="app.main:app"))
+
+    cli.watch_stdin(server, io.BytesIO(b"ignored input")).join(timeout=5)
+
+    assert server.should_exit is True
