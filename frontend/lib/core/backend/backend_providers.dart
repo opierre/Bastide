@@ -13,6 +13,7 @@ import 'backend_supervisor.dart';
 import 'data_dir.dart';
 import 'external_backend.dart';
 import 'product_version.dart';
+import 'windows_job.dart';
 
 /// The backend executable this app starts, or `null` when the packaged build
 /// has none. `--dart-define=BASTIDE_BACKEND_EXECUTABLE=<path>` points a dev
@@ -52,6 +53,9 @@ final refuseMismatchedBackendProvider = Provider<bool>((ref) => !kDebugMode);
 final backendSupervisorProvider = Provider<BackendSupervisor>((ref) {
   final supervisor = BackendSupervisor(
     executable: ref.watch(backendExecutableProvider),
+    onStarted: Platform.isWindows
+        ? (process) => WindowsJob.killWithApp(process.pid)
+        : null,
   );
   ref.onDispose(supervisor.stop);
   return supervisor;
