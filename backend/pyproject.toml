@@ -55,7 +55,9 @@ python-version = "3.14"
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 # Every test owns its temp database, so the suite runs across all cores; `-n 0` runs it serially.
-addopts = ["-n", "auto"]
+# The frozen-build smoke test needs a PyInstaller build first: `pytest -m frozen` runs it.
+addopts = ["-n", "auto", "-m", "not frozen"]
+markers = ["frozen: runs the PyInstaller build in dist/ (build it first)"]
 
 # Used by `uv run pytest --cov`; CI adds the XML report for the job summary.
 [tool.coverage.run]
