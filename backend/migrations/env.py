@@ -31,8 +31,10 @@ if config.config_file_name is not None:
 target_metadata = Base.metadata
 
 # The sidecar's own settings (env-overridable) are authoritative over the
-# static alembic.ini placeholder, so migrations always target the real DB.
-config.set_main_option("sqlalchemy.url", sqlite_url(get_settings().db_path))
+# static alembic.ini placeholder, so migrations always target the real DB. The app's startup
+# migration names its file explicitly instead (`app.core.schema`).
+db_path = config.attributes.get("db_path") or get_settings().db_path
+config.set_main_option("sqlalchemy.url", sqlite_url(str(db_path)))
 
 
 def run_migrations_offline() -> None:
