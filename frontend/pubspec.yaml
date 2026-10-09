@@ -50,6 +50,11 @@ dependencies:
   # The version shown in Settings › À propos is read from the built app, so it
   # can't drift from `version:` above (or from `--build-name` in release CI).
   package_info_plus: ^10.2.2
+  # Finds the frozen backend beside the app's own executable.
+  path: ^1.9.1
+  # Native memory for the Windows job object that ends the backend with the
+  # app (core/backend/windows_job.dart).
+  ffi: ^2.2.0
 
 dev_dependencies:
   flutter_test:

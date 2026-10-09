@@ -3831,4 +3831,58 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get settingsProfileNameModalCancel => 'Cancel';
+
+  @override
+  String get startupLoading => 'Starting Bastide…';
+
+  @override
+  String get startupRetry => 'Try again';
+
+  @override
+  String get startupOpenLogs => 'Open logs folder';
+
+  @override
+  String get startupDidNotStartTitle => 'Bastide couldn\'t start';
+
+  @override
+  String get startupDidNotStartMessage =>
+      'The app\'s local engine didn\'t start. Try again; if it happens again, the logs say why.';
+
+  @override
+  String get startupNotFoundMessage =>
+      'Some of the app\'s files are missing. Reinstall Bastide: your data is kept separately and won\'t be touched.';
+
+  @override
+  String get startupUnreachableMessage =>
+      'No local engine is answering. Start it, then try again.';
+
+  @override
+  String get startupCrashedTitle => 'Bastide stopped unexpectedly';
+
+  @override
+  String get startupCrashedMessage =>
+      'The local engine stopped. Your data is saved as you go; try again to restart it.';
+
+  @override
+  String get startupSchemaTooNewTitle => 'This data comes from a newer version';
+
+  @override
+  String get startupSchemaTooNewMessage =>
+      'Your data was saved by a newer version of Bastide. Install that version again to open it; nothing has been changed.';
+
+  @override
+  String get startupVersionMismatchTitle => 'Mismatched versions';
+
+  @override
+  String startupVersionMismatchMessage(String app, String backend) {
+    return 'The app ($app) and its local engine ($backend) come from different versions. Reinstall Bastide to bring them back in line; your data isn\'t touched.';
+  }
+
+  @override
+  String startupVersionMismatchDebugMessage(String app, String backend) {
+    return 'The local engine ($backend) doesn\'t match the app ($app): it was probably left running from an earlier session. Restart it, or continue anyway.';
+  }
+
+  @override
+  String get startupContinueAnyway => 'Continue anyway';
 }

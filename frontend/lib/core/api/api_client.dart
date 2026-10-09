@@ -3,6 +3,8 @@ import 'dart:typed_data';
 
 import 'package:http/http.dart' as http;
 
+import '../backend/backend_connection.dart';
+
 /// Typed failure mapped from the backend's `{error:{code,message,details}}`
 /// envelope. `code` is a stable, translatable key the
 /// frontend maps to a localized message.
@@ -32,11 +34,20 @@ class ApiBytesResponse {
 /// injection, JSON encode/decode, and error-envelope mapping so no other
 /// layer talks HTTP directly.
 class ApiClient {
-  ApiClient({Uri? baseUrl, http.Client? httpClient, this.tokenProvider})
-    : baseUrl = baseUrl ?? Uri.parse('http://127.0.0.1:8765/api/v1'),
-      _httpClient = httpClient ?? http.Client();
+  ApiClient({
+    required this.baseUrl,
+    this.sessionToken,
+    http.Client? httpClient,
+    this.tokenProvider,
+  }) : _httpClient = httpClient ?? http.Client();
 
+  /// The API root of the running backend; its port changes on every launch.
   final Uri baseUrl;
+
+  /// Proves to the backend that the caller is the app that started it. Sent
+  /// on every request, separately from the user's bearer token.
+  final String? sessionToken;
+
   final http.Client _httpClient;
 
   /// Hook returning the current bearer token, injected by the auth feature.
@@ -125,6 +136,7 @@ class ApiClient {
     final headers = <String, String>{
       if (json) 'Content-Type': 'application/json',
       'Accept': 'application/json',
+      sessionTokenHeader: ?sessionToken,
     };
     final token = tokenProvider?.call();
     if (token != null) {

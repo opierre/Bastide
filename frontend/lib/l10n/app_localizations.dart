@@ -6066,6 +6066,96 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Annuler'**
   String get settingsProfileNameModalCancel;
+
+  /// Shown under the logo while the app starts its local engine.
+  ///
+  /// In fr, this message translates to:
+  /// **'Démarrage de Bastide…'**
+  String get startupLoading;
+
+  /// Button on the startup error screen that starts the local engine again.
+  ///
+  /// In fr, this message translates to:
+  /// **'Réessayer'**
+  String get startupRetry;
+
+  /// Button on the startup error screen that opens the folder holding the app's log files.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ouvrir le dossier des journaux'**
+  String get startupOpenLogs;
+
+  /// Title when the local engine did not start.
+  ///
+  /// In fr, this message translates to:
+  /// **'Bastide n\'a pas pu démarrer'**
+  String get startupDidNotStartTitle;
+
+  /// Message when the local engine did not start or did not answer in time.
+  ///
+  /// In fr, this message translates to:
+  /// **'Le moteur local de l\'application ne s\'est pas lancé. Réessayez ; si cela se reproduit, les journaux indiquent pourquoi.'**
+  String get startupDidNotStartMessage;
+
+  /// Message when the local engine is missing from the installed app.
+  ///
+  /// In fr, this message translates to:
+  /// **'Des fichiers de l\'application manquent. Réinstallez Bastide : vos données sont conservées à part et ne seront pas touchées.'**
+  String get startupNotFoundMessage;
+
+  /// Message when the app was told to use an engine started separately (development) and none answers.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucun moteur local ne répond. Lancez-le, puis réessayez.'**
+  String get startupUnreachableMessage;
+
+  /// Title when the local engine stopped while the app was running.
+  ///
+  /// In fr, this message translates to:
+  /// **'Bastide s\'est arrêté de façon inattendue'**
+  String get startupCrashedTitle;
+
+  /// Message when the local engine stopped while the app was running.
+  ///
+  /// In fr, this message translates to:
+  /// **'Le moteur local s\'est interrompu. Vos données sont enregistrées au fil de l\'eau ; réessayez pour le relancer.'**
+  String get startupCrashedMessage;
+
+  /// Title when the database was written by a newer version of the app (the user downgraded).
+  ///
+  /// In fr, this message translates to:
+  /// **'Ces données viennent d\'une version plus récente'**
+  String get startupSchemaTooNewTitle;
+
+  /// Message when the database was written by a newer version of the app.
+  ///
+  /// In fr, this message translates to:
+  /// **'Vos données ont été enregistrées par une version plus récente de Bastide. Réinstallez cette version pour les ouvrir ; rien n\'a été modifié.'**
+  String get startupSchemaTooNewMessage;
+
+  /// Title when the app and its local engine come from different versions.
+  ///
+  /// In fr, this message translates to:
+  /// **'Versions incompatibles'**
+  String get startupVersionMismatchTitle;
+
+  /// Message when the app and its local engine come from different versions (release builds).
+  ///
+  /// In fr, this message translates to:
+  /// **'L\'application ({app}) et son moteur local ({backend}) ne viennent pas de la même version. Réinstallez Bastide pour les remettre d\'accord ; vos données ne sont pas touchées.'**
+  String startupVersionMismatchMessage(String app, String backend);
+
+  /// Developer warning when a debug build reaches a local engine from another version.
+  ///
+  /// In fr, this message translates to:
+  /// **'Le moteur local ({backend}) ne correspond pas à l\'application ({app}) : il est sans doute resté d\'une session précédente. Relancez-le, ou continuez quand même.'**
+  String startupVersionMismatchDebugMessage(String app, String backend);
+
+  /// Button on the developer version warning that opens the app anyway.
+  ///
+  /// In fr, this message translates to:
+  /// **'Continuer quand même'**
+  String get startupContinueAnyway;
 }
 
 class _AppLocalizationsDelegate

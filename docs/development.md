@@ -42,7 +42,10 @@ uv run uvicorn app.main:app --host 127.0.0.1 --port 8765 --reload
 flutter run -d windows          # or -d macos / -d linux
 ```
 
-The Flutter API client targets `http://127.0.0.1:8765/api/v1`. The backend binds **loopback
+A debug build that finds no packaged backend talks to the one already running at
+`http://127.0.0.1:8765`, so both halves keep their hot reload. The packaged app instead starts
+its own backend on a free port; see `frontend/CLAUDE.md` § Backend modes for the
+`--dart-define`s that switch between the two. The backend binds **loopback
 only** — never `0.0.0.0`. With the backend running, the interactive API docs are at
 `http://127.0.0.1:8765/docs`.
 
