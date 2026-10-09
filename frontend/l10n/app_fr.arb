@@ -5041,5 +5041,41 @@
   "startupSchemaTooNewMessage": "Vos données ont été enregistrées par une version plus récente de Bastide. Réinstallez cette version pour les ouvrir ; rien n'a été modifié.",
   "@startupSchemaTooNewMessage": {
     "description": "Message when the database was written by a newer version of the app."
+  },
+  "startupVersionMismatchTitle": "Versions incompatibles",
+  "@startupVersionMismatchTitle": {
+    "description": "Title when the app and its local engine come from different versions."
+  },
+  "startupVersionMismatchMessage": "L'application ({app}) et son moteur local ({backend}) ne viennent pas de la même version. Réinstallez Bastide pour les remettre d'accord ; vos données ne sont pas touchées.",
+  "@startupVersionMismatchMessage": {
+    "description": "Message when the app and its local engine come from different versions (release builds).",
+    "placeholders": {
+      "app": {
+        "type": "String",
+        "example": "0.2.0"
+      },
+      "backend": {
+        "type": "String",
+        "example": "0.1.0"
+      }
+    }
+  },
+  "startupVersionMismatchDebugMessage": "Le moteur local ({backend}) ne correspond pas à l'application ({app}) : il est sans doute resté d'une session précédente. Relancez-le, ou continuez quand même.",
+  "@startupVersionMismatchDebugMessage": {
+    "description": "Developer warning when a debug build reaches a local engine from another version.",
+    "placeholders": {
+      "app": {
+        "type": "String",
+        "example": "0.2.0"
+      },
+      "backend": {
+        "type": "String",
+        "example": "0.1.0"
+      }
+    }
+  },
+  "startupContinueAnyway": "Continuer quand même",
+  "@startupContinueAnyway": {
+    "description": "Button on the developer version warning that opens the app anyway."
   }
 }

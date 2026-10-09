@@ -6132,6 +6132,30 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Vos données ont été enregistrées par une version plus récente de Bastide. Réinstallez cette version pour les ouvrir ; rien n\'a été modifié.'**
   String get startupSchemaTooNewMessage;
+
+  /// Title when the app and its local engine come from different versions.
+  ///
+  /// In fr, this message translates to:
+  /// **'Versions incompatibles'**
+  String get startupVersionMismatchTitle;
+
+  /// Message when the app and its local engine come from different versions (release builds).
+  ///
+  /// In fr, this message translates to:
+  /// **'L\'application ({app}) et son moteur local ({backend}) ne viennent pas de la même version. Réinstallez Bastide pour les remettre d\'accord ; vos données ne sont pas touchées.'**
+  String startupVersionMismatchMessage(String app, String backend);
+
+  /// Developer warning when a debug build reaches a local engine from another version.
+  ///
+  /// In fr, this message translates to:
+  /// **'Le moteur local ({backend}) ne correspond pas à l\'application ({app}) : il est sans doute resté d\'une session précédente. Relancez-le, ou continuez quand même.'**
+  String startupVersionMismatchDebugMessage(String app, String backend);
+
+  /// Button on the developer version warning that opens the app anyway.
+  ///
+  /// In fr, this message translates to:
+  /// **'Continuer quand même'**
+  String get startupContinueAnyway;
 }
 
 class _AppLocalizationsDelegate

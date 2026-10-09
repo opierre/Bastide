@@ -11,6 +11,7 @@ class BackendConnection {
     required this.baseUrl,
     required this.version,
     this.sessionToken,
+    this.mismatchedAppVersion,
   });
 
   /// The API root, e.g. `http://127.0.0.1:52144/api/v1`.
@@ -22,6 +23,19 @@ class BackendConnection {
   /// Sent as `X-Bastide-Session` on every request. `null` only for a dev
   /// backend started without one, which then answers any local caller.
   final String? sessionToken;
+
+  /// The app's own version when it differs from [version]. Only a debug
+  /// build carries on with such a backend (usually a stale dev one), and
+  /// warns about it; a release build refuses it.
+  final String? mismatchedAppVersion;
+
+  BackendConnection withMismatchedAppVersion(String appVersion) =>
+      BackendConnection(
+        baseUrl: baseUrl,
+        version: version,
+        sessionToken: sessionToken,
+        mismatchedAppVersion: appVersion,
+      );
 }
 
 /// Why the backend could not be reached. Each kind gets its own localized
@@ -50,7 +64,13 @@ enum BackendFailureKind {
 }
 
 class BackendFailure implements Exception {
-  const BackendFailure(this.kind, {this.exitCode, this.detail});
+  const BackendFailure(
+    this.kind, {
+    this.exitCode,
+    this.detail,
+    this.appVersion,
+    this.backendVersion,
+  });
 
   final BackendFailureKind kind;
 
@@ -60,6 +80,11 @@ class BackendFailure implements Exception {
   /// Diagnostic text for logs (the bad line, the backend's version…), never
   /// shown to the user as is.
   final String? detail;
+
+  /// For [BackendFailureKind.versionMismatch]: the two versions, shown to
+  /// the user so a support request says which install is out of step.
+  final String? appVersion;
+  final String? backendVersion;
 
   @override
   String toString() =>

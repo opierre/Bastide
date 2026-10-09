@@ -3898,4 +3898,20 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get startupSchemaTooNewMessage =>
       'Vos données ont été enregistrées par une version plus récente de Bastide. Réinstallez cette version pour les ouvrir ; rien n\'a été modifié.';
+
+  @override
+  String get startupVersionMismatchTitle => 'Versions incompatibles';
+
+  @override
+  String startupVersionMismatchMessage(String app, String backend) {
+    return 'L\'application ($app) et son moteur local ($backend) ne viennent pas de la même version. Réinstallez Bastide pour les remettre d\'accord ; vos données ne sont pas touchées.';
+  }
+
+  @override
+  String startupVersionMismatchDebugMessage(String app, String backend) {
+    return 'Le moteur local ($backend) ne correspond pas à l\'application ($app) : il est sans doute resté d\'une session précédente. Relancez-le, ou continuez quand même.';
+  }
+
+  @override
+  String get startupContinueAnyway => 'Continuer quand même';
 }

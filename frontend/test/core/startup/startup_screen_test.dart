@@ -132,4 +132,50 @@ void main() {
     expect(backend.retries, 1);
     expect(logsOpened, 1);
   });
+
+  testWidgets('release: a version mismatch names both versions', (
+    tester,
+  ) async {
+    await pumpApp(
+      tester,
+      failure: const BackendFailure(
+        BackendFailureKind.versionMismatch,
+        appVersion: '0.2.0',
+        backendVersion: '0.1.0',
+      ),
+      english: true,
+    );
+
+    expect(textOf(tester, 'startupFailureTitle'), 'Mismatched versions');
+    expect(textOf(tester, 'startupFailureMessage'), contains('(0.2.0)'));
+    expect(textOf(tester, 'startupFailureMessage'), contains('(0.1.0)'));
+    expect(find.byKey(const Key('startupContinueAnyway')), findsNothing);
+  });
+
+  testWidgets('debug: a version mismatch warns, then lets the dev through', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          backendControllerProvider.overrideWith(
+            () => ReadyBackendController(
+              readyConnection.withMismatchedAppVersion('0.2.0'),
+            ),
+          ),
+          authControllerProvider.overrideWith(FakeAuthController.new),
+        ],
+        child: const BastideApp(),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(textOf(tester, 'startupFailureTitle'), 'Versions incompatibles');
+    expect(find.byKey(const Key('authPrivacyLine')), findsNothing);
+
+    await tester.tap(find.byKey(const Key('startupContinueAnyway')));
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(const Key('authPrivacyLine')), findsOneWidget);
+  });
 }

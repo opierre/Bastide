@@ -1049,5 +1049,9 @@
   "startupCrashedTitle": "Bastide stopped unexpectedly",
   "startupCrashedMessage": "The local engine stopped. Your data is saved as you go; try again to restart it.",
   "startupSchemaTooNewTitle": "This data comes from a newer version",
-  "startupSchemaTooNewMessage": "Your data was saved by a newer version of Bastide. Install that version again to open it; nothing has been changed."
+  "startupSchemaTooNewMessage": "Your data was saved by a newer version of Bastide. Install that version again to open it; nothing has been changed.",
+  "startupVersionMismatchTitle": "Mismatched versions",
+  "startupVersionMismatchMessage": "The app ({app}) and its local engine ({backend}) come from different versions. Reinstall Bastide to bring them back in line; your data isn't touched.",
+  "startupVersionMismatchDebugMessage": "The local engine ({backend}) doesn't match the app ({app}): it was probably left running from an earlier session. Restart it, or continue anyway.",
+  "startupContinueAnyway": "Continue anyway"
 }

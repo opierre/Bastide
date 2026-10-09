@@ -1,3 +1,4 @@
+import 'package:bastide/core/app_info.dart';
 import 'package:bastide/core/backend/backend_connection.dart';
 import 'package:bastide/core/backend/backend_providers.dart';
 import 'package:bastide/core/backend/external_backend.dart';
@@ -127,6 +128,7 @@ void main() {
     );
     final container = ProviderContainer(
       overrides: [
+        appVersionProvider.overrideWith((ref) async => '0.1.0'),
         externalBackendProvider.overrideWithValue(external),
         externalBackendProbeProvider.overrideWithValue(
           (backend) async =>

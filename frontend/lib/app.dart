@@ -18,7 +18,13 @@ class BastideApp extends ConsumerWidget {
 
     // Everything behind the router calls the API, so none of it is built
     // until the backend answers — and all of it goes away if the backend dies.
-    if (backend.isLoading || backend.hasError || !backend.hasValue) {
+    final unconfirmedMismatch =
+        backend.value?.mismatchedAppVersion != null &&
+        !ref.watch(versionWarningDismissedProvider);
+    if (backend.isLoading ||
+        backend.hasError ||
+        !backend.hasValue ||
+        unconfirmedMismatch) {
       return MaterialApp(
         onGenerateTitle: (context) => AppLocalizations.of(context)!.appTitle,
         theme: appDarkTheme,

@@ -22,6 +22,7 @@ class StartupScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final backend = ref.watch(backendControllerProvider);
     final failure = backend.isLoading ? null : backend.error;
+    final mismatch = backend.isLoading ? null : backend.value;
 
     return Scaffold(
       backgroundColor: AppColors.surfaceSunken,
@@ -33,9 +34,7 @@ class StartupScreen extends ConsumerWidget {
             children: [
               const BrandLockup.login(),
               const SizedBox(height: AppSpacing.xl),
-              if (failure == null)
-                const _Starting()
-              else
+              if (failure != null)
                 _Failed(
                   failure: failure is BackendFailure
                       ? failure
@@ -43,7 +42,19 @@ class StartupScreen extends ConsumerWidget {
                   onRetry: () =>
                       ref.read(backendControllerProvider.notifier).retry(),
                   onOpenLogs: () => ref.read(openLogsFolderProvider)(),
-                ),
+                )
+              else if (mismatch?.mismatchedAppVersion case final appVersion?)
+                _VersionWarning(
+                  appVersion: appVersion,
+                  backendVersion: mismatch!.version,
+                  onRetry: () =>
+                      ref.read(backendControllerProvider.notifier).retry(),
+                  onContinue: () =>
+                      ref.read(versionWarningDismissedProvider.notifier).state =
+                          true,
+                )
+              else
+                const _Starting(),
             ],
           ),
         ),
@@ -97,8 +108,84 @@ class _Failed extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    final (title, message) = startupFailureText(l10n, failure);
+
+    return _Notice(
+      title: title,
+      message: message,
+      actions: [
+        PrimaryButton(
+          key: const Key('startupRetry'),
+          label: l10n.startupRetry,
+          onPressed: onRetry,
+        ),
+        OutlinedButton(
+          key: const Key('startupOpenLogs'),
+          onPressed: onOpenLogs,
+          child: Text(l10n.startupOpenLogs),
+        ),
+      ],
+    );
+  }
+}
+
+/// Debug builds only: the backend answering is from another version, most
+/// likely a dev backend left running on an older checkout.
+class _VersionWarning extends StatelessWidget {
+  const _VersionWarning({
+    required this.appVersion,
+    required this.backendVersion,
+    required this.onRetry,
+    required this.onContinue,
+  });
+
+  final String appVersion;
+  final String backendVersion;
+  final VoidCallback onRetry;
+  final VoidCallback onContinue;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
+    return _Notice(
+      title: l10n.startupVersionMismatchTitle,
+      message: l10n.startupVersionMismatchDebugMessage(
+        appVersion,
+        backendVersion,
+      ),
+      actions: [
+        PrimaryButton(
+          key: const Key('startupRetry'),
+          label: l10n.startupRetry,
+          onPressed: onRetry,
+        ),
+        OutlinedButton(
+          key: const Key('startupContinueAnyway'),
+          onPressed: onContinue,
+          child: Text(l10n.startupContinueAnyway),
+        ),
+      ],
+    );
+  }
+}
+
+/// The warning plate, title, message and actions shared by the failure and
+/// the version warning — the silhouette of [ErrorStateView].
+class _Notice extends StatelessWidget {
+  const _Notice({
+    required this.title,
+    required this.message,
+    required this.actions,
+  });
+
+  final String title;
+  final String message;
+  final List<Widget> actions;
+
+  @override
+  Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
-    final (title, message) = startupFailureText(l10n, failure.kind);
 
     return Column(
       mainAxisSize: MainAxisSize.min,
@@ -126,18 +213,7 @@ class _Failed extends StatelessWidget {
           alignment: WrapAlignment.center,
           spacing: AppSpacing.sm + 2,
           runSpacing: AppSpacing.sm + 2,
-          children: [
-            PrimaryButton(
-              key: const Key('startupRetry'),
-              label: l10n.startupRetry,
-              onPressed: onRetry,
-            ),
-            OutlinedButton(
-              key: const Key('startupOpenLogs'),
-              onPressed: onOpenLogs,
-              child: Text(l10n.startupOpenLogs),
-            ),
-          ],
+          children: actions,
         ),
       ],
     );
@@ -147,8 +223,8 @@ class _Failed extends StatelessWidget {
 /// The localized title and message for a startup failure.
 (String, String) startupFailureText(
   AppLocalizations l10n,
-  BackendFailureKind kind,
-) => switch (kind) {
+  BackendFailure failure,
+) => switch (failure.kind) {
   BackendFailureKind.notFound => (
     l10n.startupDidNotStartTitle,
     l10n.startupNotFoundMessage,
@@ -169,9 +245,11 @@ class _Failed extends StatelessWidget {
     l10n.startupSchemaTooNewTitle,
     l10n.startupSchemaTooNewMessage,
   ),
-  // Until the version check lands, a mismatch reads as a failed start.
   BackendFailureKind.versionMismatch => (
-    l10n.startupDidNotStartTitle,
-    l10n.startupDidNotStartMessage,
+    l10n.startupVersionMismatchTitle,
+    l10n.startupVersionMismatchMessage(
+      failure.appVersion ?? '?',
+      failure.backendVersion ?? '?',
+    ),
   ),
 };
