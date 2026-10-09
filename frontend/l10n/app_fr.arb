@@ -4997,5 +4997,49 @@
   "settingsProfileNameModalCancel": "Annuler",
   "@settingsProfileNameModalCancel": {
     "description": "Button closing the change-username modal without saving."
+  },
+  "startupLoading": "Démarrage de Bastide…",
+  "@startupLoading": {
+    "description": "Shown under the logo while the app starts its local engine."
+  },
+  "startupRetry": "Réessayer",
+  "@startupRetry": {
+    "description": "Button on the startup error screen that starts the local engine again."
+  },
+  "startupOpenLogs": "Ouvrir le dossier des journaux",
+  "@startupOpenLogs": {
+    "description": "Button on the startup error screen that opens the folder holding the app's log files."
+  },
+  "startupDidNotStartTitle": "Bastide n'a pas pu démarrer",
+  "@startupDidNotStartTitle": {
+    "description": "Title when the local engine did not start."
+  },
+  "startupDidNotStartMessage": "Le moteur local de l'application ne s'est pas lancé. Réessayez ; si cela se reproduit, les journaux indiquent pourquoi.",
+  "@startupDidNotStartMessage": {
+    "description": "Message when the local engine did not start or did not answer in time."
+  },
+  "startupNotFoundMessage": "Des fichiers de l'application manquent. Réinstallez Bastide : vos données sont conservées à part et ne seront pas touchées.",
+  "@startupNotFoundMessage": {
+    "description": "Message when the local engine is missing from the installed app."
+  },
+  "startupUnreachableMessage": "Aucun moteur local ne répond. Lancez-le, puis réessayez.",
+  "@startupUnreachableMessage": {
+    "description": "Message when the app was told to use an engine started separately (development) and none answers."
+  },
+  "startupCrashedTitle": "Bastide s'est arrêté de façon inattendue",
+  "@startupCrashedTitle": {
+    "description": "Title when the local engine stopped while the app was running."
+  },
+  "startupCrashedMessage": "Le moteur local s'est interrompu. Vos données sont enregistrées au fil de l'eau ; réessayez pour le relancer.",
+  "@startupCrashedMessage": {
+    "description": "Message when the local engine stopped while the app was running."
+  },
+  "startupSchemaTooNewTitle": "Ces données viennent d'une version plus récente",
+  "@startupSchemaTooNewTitle": {
+    "description": "Title when the database was written by a newer version of the app (the user downgraded)."
+  },
+  "startupSchemaTooNewMessage": "Vos données ont été enregistrées par une version plus récente de Bastide. Réinstallez cette version pour les ouvrir ; rien n'a été modifié.",
+  "@startupSchemaTooNewMessage": {
+    "description": "Message when the database was written by a newer version of the app."
   }
 }

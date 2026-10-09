@@ -3,10 +3,12 @@ import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import 'backend_connection.dart';
 import 'backend_locator.dart';
 import 'backend_supervisor.dart';
+import 'data_dir.dart';
 import 'external_backend.dart';
 
 /// The backend executable this app starts, or `null` when the packaged build
@@ -79,7 +81,32 @@ class BackendController extends AsyncNotifier<BackendConnection> {
   }
 }
 
+/// Never retried automatically, unlike Riverpod's default: a backend that
+/// failed to start is restarted only when the user asks, since relaunching it
+/// on its own would repeat a backup and migration attempt, or hide that the
+/// database is from a newer version.
 final backendControllerProvider =
     AsyncNotifierProvider<BackendController, BackendConnection>(
       BackendController.new,
+      retry: (_, _) => null,
     );
+
+/// The backend's data folder (see [bastideDataDir]).
+final dataDirProvider = Provider<String?>((ref) {
+  return bastideDataDir(
+    operatingSystem: Platform.operatingSystem,
+    environment: Platform.environment,
+  );
+});
+
+/// Opens the backend's logs folder in the OS file manager — the data folder
+/// itself when the backend never got far enough to create `logs/`.
+final openLogsFolderProvider = Provider<Future<void> Function()>((ref) {
+  return () async {
+    final dataDir = ref.read(dataDirProvider);
+    if (dataDir == null) return;
+    final logs = Directory('$dataDir${Platform.pathSeparator}logs');
+    final folder = logs.existsSync() ? logs.path : dataDir;
+    await launchUrl(Uri.directory(folder));
+  };
+});

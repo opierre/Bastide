@@ -1038,5 +1038,16 @@
   "settingsProfileNameModalTitle": "Change username",
   "settingsProfileNameModalLead": "The new name replaces the old one for signing in.",
   "settingsProfileNameModalSave": "Save",
-  "settingsProfileNameModalCancel": "Cancel"
+  "settingsProfileNameModalCancel": "Cancel",
+  "startupLoading": "Starting Bastide…",
+  "startupRetry": "Try again",
+  "startupOpenLogs": "Open logs folder",
+  "startupDidNotStartTitle": "Bastide couldn't start",
+  "startupDidNotStartMessage": "The app's local engine didn't start. Try again; if it happens again, the logs say why.",
+  "startupNotFoundMessage": "Some of the app's files are missing. Reinstall Bastide: your data is kept separately and won't be touched.",
+  "startupUnreachableMessage": "No local engine is answering. Start it, then try again.",
+  "startupCrashedTitle": "Bastide stopped unexpectedly",
+  "startupCrashedMessage": "The local engine stopped. Your data is saved as you go; try again to restart it.",
+  "startupSchemaTooNewTitle": "This data comes from a newer version",
+  "startupSchemaTooNewMessage": "Your data was saved by a newer version of Bastide. Install that version again to open it; nothing has been changed."
 }

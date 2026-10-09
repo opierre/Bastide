@@ -1,4 +1,5 @@
 import 'package:bastide/app.dart';
+import 'package:bastide/core/backend/backend_providers.dart';
 import 'package:bastide/core/l10n/locale_provider.dart';
 import 'package:bastide/features/accounts/application/accounts_controller.dart';
 import 'package:bastide/features/auth/application/auth_controller.dart';
@@ -10,6 +11,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'support/fake_accounts_controller.dart';
 import 'support/fake_auth_controller.dart';
+import 'support/fake_backend.dart';
 
 const _signedInUser = AuthUser(
   id: 'u1',
@@ -20,6 +22,7 @@ const _signedInUser = AuthUser(
 );
 
 final _authenticatedOverrides = [
+  backendControllerProvider.overrideWith(ReadyBackendController.new),
   authControllerProvider.overrideWith(
     () => FakeAuthController(initialUser: _signedInUser),
   ),
@@ -163,6 +166,7 @@ void main() {
       await tester.pumpWidget(
         ProviderScope(
           overrides: [
+            backendControllerProvider.overrideWith(ReadyBackendController.new),
             authControllerProvider.overrideWith(() => auth),
             accountsControllerProvider.overrideWith(
               () => FakeAccountsController(),

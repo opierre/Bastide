@@ -3859,4 +3859,43 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get settingsProfileNameModalCancel => 'Annuler';
+
+  @override
+  String get startupLoading => 'Démarrage de Bastide…';
+
+  @override
+  String get startupRetry => 'Réessayer';
+
+  @override
+  String get startupOpenLogs => 'Ouvrir le dossier des journaux';
+
+  @override
+  String get startupDidNotStartTitle => 'Bastide n\'a pas pu démarrer';
+
+  @override
+  String get startupDidNotStartMessage =>
+      'Le moteur local de l\'application ne s\'est pas lancé. Réessayez ; si cela se reproduit, les journaux indiquent pourquoi.';
+
+  @override
+  String get startupNotFoundMessage =>
+      'Des fichiers de l\'application manquent. Réinstallez Bastide : vos données sont conservées à part et ne seront pas touchées.';
+
+  @override
+  String get startupUnreachableMessage =>
+      'Aucun moteur local ne répond. Lancez-le, puis réessayez.';
+
+  @override
+  String get startupCrashedTitle => 'Bastide s\'est arrêté de façon inattendue';
+
+  @override
+  String get startupCrashedMessage =>
+      'Le moteur local s\'est interrompu. Vos données sont enregistrées au fil de l\'eau ; réessayez pour le relancer.';
+
+  @override
+  String get startupSchemaTooNewTitle =>
+      'Ces données viennent d\'une version plus récente';
+
+  @override
+  String get startupSchemaTooNewMessage =>
+      'Vos données ont été enregistrées par une version plus récente de Bastide. Réinstallez cette version pour les ouvrir ; rien n\'a été modifié.';
 }
