@@ -6,11 +6,13 @@ from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from unittest.mock import patch
 
+import pytest
 from alembic.script import ScriptDirectory
 
 from app.core import schema
 from app.core.schema import (
     BACKUPS_KEPT,
+    SchemaTooNewError,
     alembic_config,
     backup_database,
     current_revisions,
@@ -133,3 +135,25 @@ def test_only_the_newest_backups_are_kept(tmp_path: Path) -> None:
     made = [backup_database(db_path, "rev", NOW + timedelta(days=day)) for day in range(7)]
 
     assert _backups(db_path) == sorted(made[-BACKUPS_KEPT:])
+
+
+def _stamp_future_revision(db_path: Path, migrated_template: Path) -> None:
+    shutil.copyfile(migrated_template, db_path)
+    with sqlite3.connect(db_path) as connection:
+        connection.execute("UPDATE alembic_version SET version_num = 'f0f0f0f0f0f0'")
+    connection.close()
+
+
+def test_a_database_from_a_newer_build_is_refused_untouched(
+    tmp_path: Path, migrated_template: Path
+) -> None:
+    db_path = tmp_path / "bastide.db"
+    _stamp_future_revision(db_path, migrated_template)
+    before = db_path.read_bytes()
+
+    with pytest.raises(SchemaTooNewError) as raised:
+        migrate(db_path, now=lambda: NOW)
+
+    assert raised.value.revisions == {"f0f0f0f0f0f0"}
+    assert db_path.read_bytes() == before
+    assert _backups(db_path) == []

@@ -25,6 +25,18 @@ MIGRATIONS_DIR = Path(__file__).resolve().parents[2] / "migrations"
 BACKUPS_KEPT = 5
 
 
+class SchemaTooNewError(Exception):
+    """The database carries a revision this build doesn't know: a newer build migrated it.
+
+    Running on it would break in unpredictable places, and downgrading it would need the
+    newer build's migrations, so the only safe move is to refuse to start.
+    """
+
+    def __init__(self, revisions: set[str]) -> None:
+        self.revisions = revisions
+        super().__init__(f"Unknown database revision(s): {', '.join(sorted(revisions))}")
+
+
 def alembic_config(db_path: Path) -> Config:
     """An Alembic config aimed at `db_path`, built without `alembic.ini`.
 
@@ -54,10 +66,17 @@ def migrate(db_path: Path, now: Callable[[], datetime] = lambda: datetime.now(UT
 
     A database that already holds a schema is backed up first, into `backups/` beside it. A
     new one has nothing to lose, so it is migrated straight away.
+
+    Raises:
+        SchemaTooNewError: The database was migrated by a newer build; it is left untouched.
     """
     config = alembic_config(db_path)
-    heads = set(ScriptDirectory.from_config(config).get_heads())
+    script = ScriptDirectory.from_config(config)
+    heads = set(script.get_heads())
     current = current_revisions(db_path)
+    unknown = current - {revision.revision for revision in script.walk_revisions()}
+    if unknown:
+        raise SchemaTooNewError(unknown)
     if current == heads:
         return
     if current:

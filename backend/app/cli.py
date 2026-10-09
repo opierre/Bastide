@@ -6,8 +6,10 @@ Runs uvicorn programmatically rather than through its CLI, so a frozen build nee
 
 import argparse
 import ipaddress
+import logging
 import os
 import socket
+import sys
 from collections.abc import Sequence
 from pathlib import Path
 
@@ -16,7 +18,13 @@ import uvicorn
 from app import __version__
 from app.core.logs import configure_logging
 
+logger = logging.getLogger(__name__)
+
 DEFAULT_PORT = 8765
+
+#: Exit code when the database is newer than this build. Distinct from uvicorn's own (3) and
+#: from argparse's (2), so the desktop app can tell the user what happened.
+EXIT_SCHEMA_TOO_NEW = 10
 
 
 def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
@@ -78,6 +86,11 @@ def announce_ready(port: int) -> None:
     print(f"READY {port} {__version__}", flush=True)
 
 
+def report_fatal(code: str) -> None:
+    """Print `FATAL <code>` on stderr: a line the desktop app parses and shows translated."""
+    print(f"FATAL {code}", file=sys.stderr, flush=True)
+
+
 def main(argv: Sequence[str] | None = None) -> int:
     """Start the sidecar and serve until stopped; returns the process exit code."""
     args = parse_args(argv)
@@ -88,10 +101,15 @@ def main(argv: Sequence[str] | None = None) -> int:
         os.environ["BASTIDE_DB_PATH"] = str(args.data_dir / "bastide.db")
 
     from app.core.config import get_settings
-    from app.core.schema import migrate
+    from app.core.schema import SchemaTooNewError, migrate
     from app.main import create_app
 
-    migrate(Path(get_settings().db_path))
+    try:
+        migrate(Path(get_settings().db_path))
+    except SchemaTooNewError as error:
+        logger.error("%s", error)
+        report_fatal("DATABASE_SCHEMA_TOO_NEW")
+        return EXIT_SCHEMA_TOO_NEW
     sock = bind(args.host, args.port)
     # No uvicorn log config: its records reach the root logger's stderr handler. No access
     # log either, since request paths carry record ids.

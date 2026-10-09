@@ -3,11 +3,14 @@
 import http.client
 import json
 import re
+import shutil
+import sqlite3
 import subprocess
 from pathlib import Path
 from typing import Any
 
 from app import __version__
+from app.cli import EXIT_SCHEMA_TOO_NEW
 from app.core.session import SESSION_TOKEN_HEADER
 from tests import backend_process
 
@@ -68,3 +71,22 @@ def test_requires_the_session_token_it_was_started_with(tmp_path: Path) -> None:
         assert accepted == 200
     finally:
         backend_process.stop(process)
+
+
+def test_exits_with_a_dedicated_code_on_a_newer_database(
+    tmp_path: Path, migrated_template: Path
+) -> None:
+    db_path = tmp_path / "bastide.db"
+    shutil.copyfile(migrated_template, db_path)
+    with sqlite3.connect(db_path) as connection:
+        connection.execute("UPDATE alembic_version SET version_num = 'f0f0f0f0f0f0'")
+    connection.close()
+
+    process = backend_process.start(tmp_path)
+    try:
+        _, stderr = process.communicate(timeout=backend_process.STARTUP_TIMEOUT)
+    finally:
+        backend_process.stop(process)
+
+    assert process.returncode == EXIT_SCHEMA_TOO_NEW
+    assert "FATAL DATABASE_SCHEMA_TOO_NEW" in stderr.splitlines()
