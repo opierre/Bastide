@@ -21,6 +21,14 @@ class Settings(BaseSettings):
     # Regex (not a fixed port) since the Flutter frontend's dev origin/port isn't pinned yet;
     # restricts CORS to loopback origins without falling back to a wildcard.
     frontend_origin_regex: str = r"^http://(127\.0\.0\.1|localhost)(:\d+)?$"
+    # Set by the desktop app on every launch (`app.core.session`). Unset in dev, where the
+    # API then answers any local caller.
+    session_token: str | None = None
+
+    @property
+    def data_dir(self) -> Path:
+        """The folder holding the datastore, and beside it the backups and logs."""
+        return Path(self.db_path).parent
 
 
 def default_db_path() -> Path:

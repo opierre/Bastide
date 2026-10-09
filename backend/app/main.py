@@ -1,5 +1,6 @@
 """FastAPI application factory for the Bastide sidecar."""
 
+import logging
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 
@@ -10,6 +11,7 @@ from app.core.config import get_settings
 from app.core.db import get_session_factory
 from app.core.errors import register_exception_handlers
 from app.core.seed import seed_system_categories
+from app.core.session import SessionTokenMiddleware
 from app.features.accounts.router import router as accounts_router
 from app.features.auth.router import router as auth_router
 from app.features.backup.router import router as backup_router
@@ -31,6 +33,8 @@ from app.features.recurring.router import router as recurring_router
 from app.features.rules.router import router as rules_router
 from app.features.settings.router import router as settings_router
 from app.features.transactions.router import router as transactions_router
+
+logger = logging.getLogger(__name__)
 
 
 @asynccontextmanager
@@ -57,11 +61,16 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
 
 
 def create_app() -> FastAPI:
-    """Build the FastAPI app: error envelope, local-only CORS, feature routers."""
+    """Build the FastAPI app: error envelope, session token, local-only CORS, feature routers."""
     settings = get_settings()
     app = FastAPI(title="Bastide", lifespan=lifespan)
 
     register_exception_handlers(app)
+
+    if settings.session_token:
+        app.add_middleware(SessionTokenMiddleware, token=settings.session_token)
+    else:
+        logger.warning("BASTIDE_SESSION_TOKEN is not set: the API answers any local process.")
 
     app.add_middleware(
         CORSMiddleware,

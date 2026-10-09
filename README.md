@@ -51,6 +51,12 @@ flutter pub get
 flutter run -d windows   # or macos / linux
 ```
 
+`uv run python -m app` (or `bastide-backend`) starts the backend the way the desktop app will:
+it backs up and migrates the database itself, then prints `READY <port> <version>`. It takes
+`--port 0` for a free port, `--data-dir` for another data folder, and `--exit-on-stdin-close`.
+Logs go to stderr and to `logs/backend.log` in the data folder. Use the `uvicorn` command above
+when you want `--reload`.
+
 > [!TIP]
 > **AI categorisation is optional.** Run [Ollama](https://ollama.com) or `llama-server` with a
 > small model (Gemma 4 E4B by default), then switch it on under **Paramètres → Données → IA
