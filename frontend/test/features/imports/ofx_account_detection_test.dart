@@ -109,7 +109,8 @@ const _bankCodeOnlySgml = '''
 
 /// Stands in for the backend's bank directory.
 class _FakeBanksRepository extends BanksRepository {
-  _FakeBanksRepository(this.names) : super(ApiClient());
+  _FakeBanksRepository(this.names)
+    : super(ApiClient(baseUrl: Uri.parse('http://127.0.0.1:1/api/v1')));
 
   final Map<String, String> names;
   final lookups = <String>[];
