@@ -3,10 +3,12 @@
 import http.client
 import json
 import re
+import subprocess
 from pathlib import Path
 from typing import Any
 
 from app import __version__
+from app.core.session import SESSION_TOKEN_HEADER
 from tests import backend_process
 
 READY = re.compile(r"^READY (\d+) (\S+)$")
@@ -27,6 +29,13 @@ def get_json(port: int, path: str, headers: dict[str, str] | None = None) -> tup
         connection.close()
 
 
+def _ready_port(process: subprocess.Popen[str]) -> int:
+    assert process.stdout is not None
+    line = backend_process.read_line(process.stdout)
+    assert line is not None and line.startswith("READY "), f"not a READY line: {line!r}"
+    return int(line.split()[1])
+
+
 def test_prints_ready_with_its_port_and_version_then_serves(tmp_path: Path) -> None:
     process = backend_process.start(tmp_path)
     try:
@@ -43,5 +52,19 @@ def test_prints_ready_with_its_port_and_version_then_serves(tmp_path: Path) -> N
         status, health = get_json(port, "/api/v1/health")
         assert status == 200
         assert health == {"status": "ok", "version": __version__}
+    finally:
+        backend_process.stop(process)
+
+
+def test_requires_the_session_token_it_was_started_with(tmp_path: Path) -> None:
+    process = backend_process.start(tmp_path, env={"BASTIDE_SESSION_TOKEN": "launch-token"})
+    try:
+        port = _ready_port(process)
+
+        rejected, _ = get_json(port, "/api/v1/health")
+        accepted, _ = get_json(port, "/api/v1/health", {SESSION_TOKEN_HEADER: "launch-token"})
+
+        assert rejected == 401
+        assert accepted == 200
     finally:
         backend_process.stop(process)
