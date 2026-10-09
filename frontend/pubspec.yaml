@@ -47,6 +47,9 @@ dependencies:
   # runtime's own download page — the one link in the app that leaves it.
   # Nothing about the user is carried across; it opens the default browser.
   url_launcher: ^6.3.2
+  # The version shown in Settings › À propos is read from the built app, so it
+  # can't drift from `version:` above (or from `--build-name` in release CI).
+  package_info_plus: ^10.2.2
 
 dev_dependencies:
   flutter_test:

@@ -1,5 +1,6 @@
 import 'package:bastide/core/api/api_client.dart';
 import 'package:bastide/core/api/api_client_provider.dart';
+import 'package:bastide/core/app_info.dart';
 import 'package:bastide/core/l10n/locale_provider.dart';
 import 'package:bastide/core/session/current_user_provider.dart';
 import 'package:bastide/core/theme/app_theme.dart';
@@ -40,7 +41,7 @@ class _Harness extends ConsumerWidget {
 
 /// Données now renders the local-AI card, which reads `/settings` — so the
 /// screen needs a stubbed client even in the tests that never open that tab.
-Widget _wrap() {
+Widget _wrap({Future<String> Function()? readVersion}) {
   final apiClient = _MockApiClient();
   when(() => apiClient.get('/settings')).thenAnswer(
     (_) async => {
@@ -54,6 +55,9 @@ Widget _wrap() {
     overrides: [
       currentUserProvider.overrideWithValue(_user),
       apiClientProvider.overrideWithValue(apiClient),
+      appVersionProvider.overrideWith(
+        (ref) => (readVersion ?? () async => '0.1.0')(),
+      ),
     ],
     child: const _Harness(),
   );
@@ -147,7 +151,24 @@ void main() {
     await tester.tap(find.byKey(const Key('settingsSection-about')));
     await tester.pumpAndSettle();
 
-    expect(find.byKey(const Key('settingsAppVersion')), findsOneWidget);
+    expect(
+      tester.widget<Text>(find.byKey(const Key('settingsAppVersion'))).data,
+      '0.1.0',
+    );
     expect(find.textContaining('restent sur cet ordinateur'), findsOneWidget);
+  });
+
+  testWidgets('about says the version is unavailable when it cannot be read', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      _wrap(readVersion: () async => throw StateError('no package info')),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byKey(const Key('settingsSection-about')));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Indisponible'), findsOneWidget);
   });
 }
