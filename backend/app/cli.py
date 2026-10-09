@@ -120,13 +120,15 @@ def report_fatal(code: str) -> None:
 def main(argv: Sequence[str] | None = None) -> int:
     """Start the sidecar and serve until stopped; returns the process exit code."""
     args = parse_args(argv)
-    configure_logging()
     if args.data_dir is not None:
         # Settings are read from the environment, and the database engine is built when
         # `app.core.db` is first imported, so this must happen before importing the app.
         os.environ["BASTIDE_DB_PATH"] = str(args.data_dir / "bastide.db")
 
     from app.core.config import get_settings
+
+    configure_logging(get_settings().data_dir / "logs")
+
     from app.core.schema import SchemaTooNewError, migrate
     from app.main import create_app
 

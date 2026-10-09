@@ -108,3 +108,14 @@ def test_exits_within_two_seconds_once_its_stdin_closes(tmp_path: Path) -> None:
         assert process.returncode == 0
     finally:
         backend_process.stop(process)
+
+
+def test_writes_its_log_file_in_the_data_dir(tmp_path: Path) -> None:
+    process = backend_process.start(tmp_path)
+    try:
+        _ready_port(process)
+    finally:
+        backend_process.stop(process)
+
+    log = (tmp_path / "logs" / "backend.log").read_text(encoding="utf-8")
+    assert "Application startup complete." in log

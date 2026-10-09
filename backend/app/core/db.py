@@ -51,6 +51,8 @@ engine: Engine = configure_sqlite(
     create_engine(
         sqlite_url(settings.db_path),
         connect_args={"check_same_thread": False},
+        # Keeps amounts and labels out of error messages, and so out of the log file.
+        hide_parameters=True,
     )
 )
 

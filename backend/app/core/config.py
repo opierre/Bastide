@@ -25,6 +25,11 @@ class Settings(BaseSettings):
     # API then answers any local caller.
     session_token: str | None = None
 
+    @property
+    def data_dir(self) -> Path:
+        """The folder holding the datastore, and beside it the backups and logs."""
+        return Path(self.db_path).parent
+
 
 def default_db_path() -> Path:
     """Return the datastore path inside the current OS user's local (non-roaming) data dir."""
