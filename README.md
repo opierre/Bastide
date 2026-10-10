@@ -34,6 +34,11 @@ Import your bank statements, see where your money goes, and keep your data on yo
 
 ## 🚀 Quick start
 
+> [!TIP]
+> **Just want to use Bastide?** Download it from the [Releases page](https://github.com/opierre/Bastide/releases)
+> and follow the [install guide](docs/install.md) ([en français](docs/install.fr.md)). The steps
+> below are for working on the code.
+
 > [!NOTE]
 > You need [uv](https://docs.astral.sh/uv/) and the [Flutter SDK](https://docs.flutter.dev/get-started/install)
 > with desktop support enabled for your OS.
@@ -86,6 +91,7 @@ flowchart LR
 |----------|---------------|
 | [`docs/database.md`](docs/database.md) | ER diagram and constraints, **generated** from the migrated database |
 | [`docs/api.md`](docs/api.md) | Every endpoint, **generated** from the OpenAPI schema |
+| [`docs/install.md`](docs/install.md) | Installing, updating and uninstalling the app, where the data lives ([fr](docs/install.fr.md)) |
 | [`docs/development.md`](docs/development.md) | Setup, running, CI checks, and working with coding agents |
 | [`docs/design/`](docs/design/) | The binding design system and one spec per panel |
 | [`.claude/skills/`](.claude/skills/) | Area-by-area rules for coding agents (database, testing, i18n, …) |
