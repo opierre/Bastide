@@ -1,8 +1,6 @@
 """Response schemas for the inference feature."""
 
-from typing import Literal
-
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel
 
 
 class InferenceHealth(BaseModel):
@@ -26,27 +24,3 @@ class OllamaDetection(BaseModel):
     found: bool
     base_url: str
     models: list[str] = []
-
-
-class RuntimeStatus(BaseModel):
-    """The opt-in local runtime: whether it is on disk, and how far its download got.
-
-    `total_bytes` is what is still missing, so before a download starts it is the size to
-    show the user; `downloaded_bytes` counts what of it is already on disk. `error` says why
-    the runtime is not usable, as a code the frontend localizes: why the last download
-    stopped short, or `server_removed` when something (antivirus, in practice) deleted the
-    server after it was installed. Downloading again reinstalls it.
-    """
-
-    model_config = ConfigDict(protected_namespaces=())
-
-    state: Literal["unsupported", "absent", "downloading", "installed", "failed"]
-    downloaded_bytes: int
-    total_bytes: int
-    error: Literal["network", "hash_mismatch", "disk_full", "extract", "server_removed"] | None = (
-        None
-    )
-    #: The model tag the runtime serves its model under, for settings to store.
-    model_tag: str
-    #: Whether the server is up. It starts on the first request that needs a model.
-    running: bool = False

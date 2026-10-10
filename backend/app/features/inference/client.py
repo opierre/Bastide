@@ -13,6 +13,7 @@ from typing import Any, Protocol
 import httpx
 
 from app.core.tls import tls_context
+from app.features.settings.models import UserSettings
 
 # A chat message as the `/v1/chat/completions` body carries it: {"role": ..., "content": ...}.
 type Message = dict[str, str]
@@ -209,6 +210,11 @@ class HttpInferenceClient:
             raise InferenceProtocolError(
                 "The inference runtime returned a body that is not JSON."
             ) from exc
+
+
+def client_from_settings(settings: UserSettings) -> HttpInferenceClient:
+    """Build the HTTP client for the runtime a user has configured."""
+    return HttpInferenceClient(settings.inference_base_url)
 
 
 def _normalize_base_url(base_url: str) -> str:

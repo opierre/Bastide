@@ -13,7 +13,6 @@ from tests.api import register as _register
 DEFAULTS = {
     "ai_enabled": False,
     "inference_base_url": "http://127.0.0.1:11434/v1",
-    "inference_runtime": "external",
     "model_tag": None,
     "confidence_threshold": 0.80,
     "last_backup_at": None,
@@ -64,7 +63,6 @@ def test_patch_updates_only_supplied_fields(client: TestClient) -> None:
     assert response.json() == {
         "ai_enabled": True,
         "inference_base_url": "http://127.0.0.1:11434/v1",
-        "inference_runtime": "external",
         "model_tag": "gemma4:e4b",
         "confidence_threshold": 0.9,
         "last_backup_at": None,
@@ -163,33 +161,6 @@ def test_patch_rejects_a_non_positive_declared_income(client: TestClient, income
 
     response = client.patch(
         "/api/v1/settings", json={"declared_monthly_income_minor": income}, headers=headers
-    )
-
-    assert response.status_code == 422
-
-
-def test_patch_chooses_the_downloaded_runtime_and_back(client: TestClient) -> None:
-    headers = _register(client)
-
-    chosen = client.patch(
-        "/api/v1/settings",
-        json={"inference_runtime": "managed", "model_tag": "gemma-4-e4b-it"},
-        headers=headers,
-    )
-    assert chosen.status_code == 200
-    assert chosen.json()["inference_runtime"] == "managed"
-    # The stored address is kept, so going back to it needs nothing re-typed.
-    assert chosen.json()["inference_base_url"] == "http://127.0.0.1:11434/v1"
-
-    back = client.patch("/api/v1/settings", json={"inference_runtime": "external"}, headers=headers)
-    assert back.json()["inference_runtime"] == "external"
-
-
-def test_patch_rejects_an_unknown_runtime(client: TestClient) -> None:
-    headers = _register(client)
-
-    response = client.patch(
-        "/api/v1/settings", json={"inference_runtime": "cloud"}, headers=headers
     )
 
     assert response.status_code == 422

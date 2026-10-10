@@ -55,13 +55,9 @@ computer keeps its own: `%LOCALAPPDATA%\Bastide\bastide.db` on Windows,
 `BASTIDE_DB_PATH` (environment or `backend/.env`) to point the sidecar and Alembic elsewhere,
 e.g. a throwaway dev database.
 
-For AI categorisation, enable it in **Paramètres → Données → IA locale**, then point it at a
-local runtime: an Ollama install on its default port is detected and offered, any other
-OpenAI-compatible runtime on loopback can be typed in, or the built-in engine can be downloaded.
-That last one is a pinned `llama-server` build and Gemma 4 E4B model, listed with their SHA-256
-in `backend/app/features/inference/runtime_manifest.py`. They go into `<data dir>/runtime/`, and
-the backend starts the server on demand and stops it on exit. Without a runtime, categorisation
-runs on rules alone.
+For AI categorisation, run a local inference runtime (Ollama or `llama-server`) with a small
+model such as Gemma 4 E4B, then enable it in **Paramètres → Données → IA locale**. Without one,
+categorisation runs on rules alone.
 
 ---
 

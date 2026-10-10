@@ -225,7 +225,6 @@ erDiagram
         datetime updated_at
         datetime last_backup_at "nullable"
         int declared_monthly_income_minor "nullable"
-        text inference_runtime
     }
     users {
         text id PK
@@ -301,7 +300,3 @@ erDiagram
 ### `transactions`
 
 - unique `(account_id, fitid)`
-
-### `user_settings`
-
-- check `inference_runtime IN ('external', 'managed')`

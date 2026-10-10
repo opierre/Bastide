@@ -2,8 +2,6 @@
 
 from app.features.inference.client import InferenceClient, InferenceError
 from app.features.inference.ollama import OLLAMA_BASE_URL
-from app.features.inference.runtime_install import InstallStatus, RuntimeInstaller
-from app.features.inference.runtime_process import ManagedRuntime
 from app.features.inference.schemas import InferenceHealth, OllamaDetection
 
 
@@ -40,44 +38,3 @@ async def detect_ollama(client: InferenceClient) -> OllamaDetection:
     except InferenceError:
         return OllamaDetection(found=False, base_url=OLLAMA_BASE_URL)
     return OllamaDetection(found=True, base_url=OLLAMA_BASE_URL, models=models)
-
-
-class LocalRuntimeService:
-    """The downloadable runtime as settings sees it: on disk or not, running or not."""
-
-    def __init__(self, installer: RuntimeInstaller, runtime: ManagedRuntime) -> None:
-        self._installer = installer
-        self._runtime = runtime
-
-    @property
-    def running(self) -> bool:
-        """Whether the server is up right now."""
-        return self._runtime.running
-
-    def status(self) -> InstallStatus:
-        """What is on disk, and how far a running download got."""
-        return self._installer.status()
-
-    def download(self) -> InstallStatus:
-        """Start or resume the download.
-
-        Raises:
-            RuntimeUnsupportedError: no build is pinned for this platform.
-        """
-        return self._installer.start()
-
-    def cancel(self) -> InstallStatus:
-        """Stop the download, keeping what it fetched."""
-        return self._installer.cancel()
-
-    def remove(self) -> InstallStatus:
-        """Stop the server, then delete it and its model.
-
-        Stopped first because a running server holds its files open, which on Windows makes
-        them impossible to delete.
-
-        Raises:
-            RuntimeBusyError: a download is still running.
-        """
-        self._runtime.stop()
-        return self._installer.remove()

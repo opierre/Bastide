@@ -19,9 +19,8 @@ from app.features.inference.client import (
     InferenceProtocolError,
     InferenceTimeout,
     InferenceUnavailable,
+    client_from_settings,
 )
-from app.features.inference.resolve import client_from_settings
-from app.features.inference.runtime_process import ManagedRuntimeClient
 from app.features.settings.models import UserSettings
 
 BASE_URL = "http://127.0.0.1:11434/v1"
@@ -242,19 +241,8 @@ def test_timeouts_are_configurable() -> None:
 
 
 def test_client_from_settings_uses_the_configured_base_url() -> None:
-    settings = UserSettings(
-        user_id="u1", inference_base_url="http://localhost:8080/v1", inference_runtime="external"
-    )
+    settings = UserSettings(user_id="u1", inference_base_url="http://localhost:8080/v1")
 
     client = client_from_settings(settings)
 
-    assert isinstance(client, HttpInferenceClient)
     assert client.base_url == "http://localhost:8080/v1"
-
-
-def test_client_from_settings_reaches_the_downloaded_runtime_when_chosen() -> None:
-    settings = UserSettings(
-        user_id="u1", inference_base_url="http://localhost:8080/v1", inference_runtime="managed"
-    )
-
-    assert isinstance(client_from_settings(settings), ManagedRuntimeClient)

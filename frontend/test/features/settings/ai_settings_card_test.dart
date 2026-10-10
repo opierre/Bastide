@@ -294,37 +294,6 @@ void main() {
     });
   });
 
-  group('built-in engine in use', () {
-    testWidgets('shows its model read-only and starts it on test', (
-      tester,
-    ) async {
-      stub(
-        settings: {
-          ..._settingsJson(modelTag: 'gemma-4-e4b-it'),
-          'inference_runtime': 'managed',
-        },
-      );
-
-      await tester.pumpWidget(wrap());
-      await tester.pumpAndSettle();
-
-      expect(find.byKey(const Key('settingsAiModelReadOnly')), findsOneWidget);
-      expect(find.text('gemma-4-e4b-it'), findsOneWidget);
-      expect(find.text('Modèle du moteur intégré.'), findsOneWidget);
-
-      final probe = Completer<Map<String, dynamic>>();
-      when(
-        () => apiClient.get('/settings/inference/health'),
-      ).thenAnswer((_) => probe.future);
-      await tester.tap(find.byKey(const Key('settingsAiTestButton')));
-      await tester.pump();
-
-      expect(find.text('Démarrage du moteur…'), findsOneWidget);
-      probe.complete(_healthJson(models: ['gemma-4-e4b-it']));
-      await tester.pumpAndSettle();
-    });
-  });
-
   group('connection test', () {
     testWidgets('the button triggers a probe and reports its progress', (
       tester,

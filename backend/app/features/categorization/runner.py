@@ -29,8 +29,7 @@ from app.features.categorization.prompt import leaf_categories
 from app.features.categorization.repository import CategorizationRunRepository, new_run
 from app.features.categorization.schemas import RunCreate, RunTrigger
 from app.features.categorization.service import BATCH_SIZE, categorize_batch
-from app.features.inference.client import InferenceClient
-from app.features.inference.resolve import client_from_settings
+from app.features.inference.client import InferenceClient, client_from_settings
 from app.features.settings.models import UserSettings
 from app.features.settings.repository import SettingsRepository
 from app.features.settings.service import SettingsService

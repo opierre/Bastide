@@ -3,7 +3,7 @@
 from datetime import UTC, datetime
 from uuid import uuid4
 
-from sqlalchemy import Boolean, CheckConstraint, DateTime, Float, ForeignKey, Integer, String
+from sqlalchemy import Boolean, DateTime, Float, ForeignKey, Integer, String
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.core.db import Base
@@ -18,12 +18,6 @@ class UserSettings(Base):
     """One row per user, created lazily the first time settings are read."""
 
     __tablename__ = "user_settings"
-    __table_args__ = (
-        CheckConstraint(
-            "inference_runtime IN ('external', 'managed')",
-            name="ck_user_settings_inference_runtime",
-        ),
-    )
 
     id: Mapped[str] = mapped_column(String(36), primary_key=True, default=lambda: str(uuid4()))
     # Unique rather than merely indexed: it is what makes lazy creation safe under
@@ -32,12 +26,6 @@ class UserSettings(Base):
     user_id: Mapped[str] = mapped_column(String(36), ForeignKey("users.id"), unique=True)
     ai_enabled: Mapped[bool] = mapped_column(Boolean, default=False)
     inference_base_url: Mapped[str] = mapped_column(String(255), default=DEFAULT_INFERENCE_BASE_URL)
-    # `external`: the runtime at `inference_base_url` (Ollama, or one the user runs).
-    # `managed`: the `llama-server` Bastide downloaded and starts itself, on a port of its
-    # own choosing — which is why it is a choice of its own and not an address.
-    inference_runtime: Mapped[str] = mapped_column(
-        String(16), default="external", server_default="external"
-    )
     model_tag: Mapped[str | None] = mapped_column(String(255), nullable=True)
     confidence_threshold: Mapped[float] = mapped_column(Float, default=DEFAULT_CONFIDENCE_THRESHOLD)
     # When the user last exported a full backup; null until the first one.
