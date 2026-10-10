@@ -82,6 +82,15 @@ uv run python -m scripts.schema_doc   # docs/database.md, from a freshly migrate
 uv run python -m scripts.api_doc      # docs/api.md, from the OpenAPI schema
 ```
 
+### Building the app for users
+`uv run tools/package_app.py` (from anywhere) freezes the backend, builds the Flutter release
+with the backend inside it, and wraps it into `dist/`: the Inno Setup installer and a portable
+zip on Windows, a `.dmg` on macOS, an AppImage on Linux. It builds for the OS it runs on only.
+It needs [Inno Setup](https://jrsoftware.org/isinfo.php) on Windows and
+[`appimagetool`](https://github.com/AppImage/appimagetool) on Linux. `--skip-backend` reuses
+the backend already frozen in `backend/dist/`. The user-facing install guide is
+`docs/install.md`.
+
 ---
 
 ## 4. Working with coding agents
