@@ -75,12 +75,14 @@ jobs:
           cache: true
           pub-cache-key: pub-${{ runner.os }}-${{ hashFiles('frontend/pubspec.lock') }}
 
-      # GTK for the Flutter shell; libsecret for flutter_secure_storage (the login token).
+      # GTK for the Flutter shell; libsecret for flutter_secure_storage (the login token);
+      # zlib headers for the PyInstaller bootloader compiled below.
       - name: Install the Linux build dependencies
         if: matrix.os == 'linux'
         run: |
           sudo apt-get update
-          sudo apt-get install -y --no-install-recommends ninja-build libgtk-3-dev libsecret-1-dev
+          sudo apt-get install -y --no-install-recommends \
+            ninja-build libgtk-3-dev libsecret-1-dev zlib1g-dev
       - name: Install appimagetool
         if: matrix.os == 'linux'
         run: |
@@ -107,8 +109,10 @@ jobs:
       # file read by path can be missing from a build the source tests never notice. The
       # smoke test runs the frozen binary through startup, migrations, an OFX import and
       # shutdown, and a failure here stops this OS's release before anything is packaged.
+      # The bootloader is compiled here rather than taken prebuilt from PyPI: the prebuilt
+      # ones are what antivirus heuristics flag most.
       - name: Freeze the backend and smoke-test it
-        run: uv run tools/build_backend.py --smoke
+        run: uv run tools/build_backend.py --bootloader-from-source --smoke
       - name: Build and package
         env:
           VERSION: ${{ needs.version.outputs.version }}
@@ -117,6 +121,23 @@ jobs:
           uv run tools/package_app.py --skip-backend \
             --build-number "${BUILD_NUMBER}" --version-label "${VERSION}"
 
+      # package_app.py ad-hoc signs the app inside out (unsigned code doesn't run on Apple
+      # Silicon) and verifies it in the build folder. Check again what users actually get:
+      # the app inside the dmg, every backend binary sealed into an ad-hoc signature.
+      - name: Verify the ad-hoc signature in the dmg
+        if: matrix.os == 'macos'
+        run: |
+          set -euo pipefail
+          mount="${RUNNER_TEMP}/dmg"
+          mkdir -p "${mount}"
+          hdiutil attach dist/Bastide-*.dmg -readonly -nobrowse -mountpoint "${mount}"
+          trap 'hdiutil detach "${mount}"' EXIT
+          app="${mount}/Bastide.app"
+          codesign --verify --deep --strict --verbose=2 "${app}"
+          codesign --verify --strict --verbose=2 "${app}/Contents/Resources/backend/bastide-backend"
+          codesign --display --verbose=2 "${app}" 2>&1 | tee "${RUNNER_TEMP}/codesign.txt"
+          grep -q '^Signature=adhoc$' "${RUNNER_TEMP}/codesign.txt"
+
       - name: Upload the packages
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
@@ -124,6 +145,34 @@ jobs:
           path: dist/Bastide-*
           retention-days: 14
           if-no-files-found: error
+
+  # Antivirus false positives are the price of unsigned builds: scan every package before
+  # the draft is published. It runs beside the draft job, so a slow VirusTotal queue never
+  # holds the draft back, but a file an engine calls malicious turns the run red.
+  virustotal:
+    name: virustotal
+    needs: package
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          pattern: bastide-*
+          path: dist
+          merge-multiple: true
+      - name: Scan the packages
+        env:
+          VIRUSTOTAL_API_KEY: ${{ secrets.VIRUSTOTAL_API_KEY }}
+        run: |
+          set -euo pipefail
+          if [ -z "${VIRUSTOTAL_API_KEY}" ]; then
+            echo "::warning::No VIRUSTOTAL_API_KEY secret: the packages were not scanned."
+            exit 0
+          fi
+          python3 .github/scripts/virustotal_scan.py dist/Bastide-*
 
   # A draft, never a published release: you check it and publish it by hand.
   draft:

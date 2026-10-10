@@ -114,6 +114,26 @@ When every OS is built, the run opens a **draft** GitHub Release with the packag
 Review the draft and publish it by hand. Re-running the workflow on the same tag refreshes the
 draft, but never touches a release that has already been published.
 
+The app is not code-signed (see `docs/install.md`), so the release run takes these steps to
+keep antivirus warnings down:
+
+- **Compiled bootloader.** Each runner freezes the backend with
+  `tools/build_backend.py --bootloader-from-source`, which compiles PyInstaller's bootloader
+  instead of using the prebuilt one that antivirus heuristics flag most. It needs a C compiler;
+  local builds skip it unless you pass the flag. Both Windows executables carry a version
+  resource (company, product, description).
+- **macOS signature check.** The app is ad-hoc signed inside out by `tools/package_app.py`; the
+  run then mounts the `.dmg` and checks the app in it with `codesign --verify --deep --strict`.
+- **VirusTotal.** A `virustotal` job uploads every package and lists the detections in the run
+  summary (`.github/scripts/virustotal_scan.py`). A file any engine calls malicious turns the
+  run red; don't publish the draft until that is sorted out. It needs a free VirusTotal API key
+  in the `VIRUSTOTAL_API_KEY` repository secret, and is skipped with a warning without one.
+
+Before publishing each release, if Windows Defender or SmartScreen flags them, submit the setup
+`.exe` and `bastide-backend.exe` (from the portable zip) to Microsoft's
+[false-positive submission portal](https://www.microsoft.com/en-us/wdsi/filesubmission) as
+software developer. Do the same for any other vendor VirusTotal shows flagging a file.
+
 ---
 
 ## 4. Working with coding agents
