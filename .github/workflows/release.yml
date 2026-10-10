@@ -121,6 +121,23 @@ jobs:
           uv run tools/package_app.py --skip-backend \
             --build-number "${BUILD_NUMBER}" --version-label "${VERSION}"
 
+      # package_app.py ad-hoc signs the app inside out (unsigned code doesn't run on Apple
+      # Silicon) and verifies it in the build folder. Check again what users actually get:
+      # the app inside the dmg, every backend binary sealed into an ad-hoc signature.
+      - name: Verify the ad-hoc signature in the dmg
+        if: matrix.os == 'macos'
+        run: |
+          set -euo pipefail
+          mount="${RUNNER_TEMP}/dmg"
+          mkdir -p "${mount}"
+          hdiutil attach dist/Bastide-*.dmg -readonly -nobrowse -mountpoint "${mount}"
+          trap 'hdiutil detach "${mount}"' EXIT
+          app="${mount}/Bastide.app"
+          codesign --verify --deep --strict --verbose=2 "${app}"
+          codesign --verify --strict --verbose=2 "${app}/Contents/Resources/backend/bastide-backend"
+          codesign --display --verbose=2 "${app}" 2>&1 | tee "${RUNNER_TEMP}/codesign.txt"
+          grep -q '^Signature=adhoc$' "${RUNNER_TEMP}/codesign.txt"
+
       - name: Upload the packages
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
