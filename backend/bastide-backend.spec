@@ -6,6 +6,9 @@
 # PyInstaller only follows `import` statements it can see. Everything below is something the
 # backend loads by path or by name at runtime, so the analysis would miss it.
 
+import re
+import sys
+from importlib.metadata import version
 from pathlib import Path
 
 from PyInstaller.utils.hooks import collect_submodules, copy_metadata
@@ -35,6 +38,46 @@ datas = [
     *copy_metadata("bastide-backend"),
 ]
 
+
+def windows_version_info():
+    """The Windows version resource: an executable without one is an antivirus red flag."""
+    from PyInstaller.utils.win32.versioninfo import (
+        FixedFileInfo,
+        StringFileInfo,
+        StringStruct,
+        StringTable,
+        VarFileInfo,
+        VarStruct,
+        VSVersionInfo,
+    )
+
+    product_version = version("bastide-backend")
+    # The fixed part takes four numbers: `0.1.0-rc.1` becomes 0.1.0.0.
+    numbers = [int(part) for part in re.match(r"\d+(\.\d+)*", product_version)[0].split(".")]
+    numbers = tuple((numbers + [0, 0, 0, 0])[:4])
+    strings = {
+        # Same identity as the Flutter shell's resource (frontend/windows/runner/Runner.rc).
+        "CompanyName": "Bastide",
+        "FileDescription": "Bastide backend",
+        "FileVersion": product_version,
+        "InternalName": "bastide-backend",
+        "LegalCopyright": "Copyright (C) 2026 Bastide contributors. AGPL-3.0.",
+        "OriginalFilename": "bastide-backend.exe",
+        "ProductName": "Bastide",
+        "ProductVersion": product_version,
+    }
+    return VSVersionInfo(
+        ffi=FixedFileInfo(filevers=numbers, prodvers=numbers),
+        kids=[
+            # US English, code page 1252: the same translation as Runner.rc.
+            StringFileInfo(
+                [StringTable("040904E4", [StringStruct(k, v) for k, v in strings.items()])]
+            ),
+            VarFileInfo([VarStruct("Translation", [0x0409, 1252])]),
+        ],
+    )
+
+
 a = Analysis(
     [str(BACKEND / "app" / "__main__.py")],
     pathex=[str(BACKEND)],
@@ -54,5 +97,6 @@ exe = EXE(
     console=True,
     # UPX-packed executables are a classic antivirus trigger, and it saves little here.
     upx=False,
+    version=windows_version_info() if sys.platform == "win32" else None,
 )
 coll = COLLECT(exe, a.binaries, a.datas, name="bastide-backend", upx=False)
