@@ -98,12 +98,19 @@ jobs:
             choco install innosetup --yes --no-progress
           }
 
+      # PyInstaller only bundles the imports it can see: a module loaded by name or a data
+      # file read by path can be missing from a build the source tests never notice. The
+      # smoke test runs the frozen binary through startup, migrations, an OFX import and
+      # shutdown, and a failure here stops this OS's release before anything is packaged.
+      - name: Freeze the backend and smoke-test it
+        run: uv run tools/build_backend.py --smoke
       - name: Build and package
         env:
           VERSION: ${{ needs.version.outputs.version }}
           BUILD_NUMBER: ${{ github.run_number }}
         run: |
-          uv run tools/package_app.py --build-number "${BUILD_NUMBER}" --version-label "${VERSION}"
+          uv run tools/package_app.py --skip-backend \
+            --build-number "${BUILD_NUMBER}" --version-label "${VERSION}"
 
       - name: Upload the packages
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
