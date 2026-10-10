@@ -17,7 +17,7 @@ import httpx
 import pytest
 from fastapi.testclient import TestClient
 
-from app.features.inference.router import get_runtime_installer
+from app.features.inference.local_runtime import get_managed_runtime, get_runtime_installer
 from app.features.inference.runtime_install import (
     RuntimeBusyError,
     RuntimeInstaller,
@@ -31,6 +31,7 @@ from app.features.inference.runtime_manifest import (
     RuntimeBuild,
     platform_key,
 )
+from app.features.inference.runtime_process import ManagedRuntime
 from tests.api import register as _register
 
 ARCHIVE_URL = "https://example.test/llama.zip"
@@ -382,6 +383,9 @@ def api_installer(client: TestClient, tmp_path: Path) -> RuntimeInstaller:
     handler, _ = _serve({ARCHIVE_URL: ZIP_BYTES, MODEL_URL: MODEL_BYTES})
     installer = _installer(tmp_path, handler)
     client.app.dependency_overrides[get_runtime_installer] = lambda: installer
+    client.app.dependency_overrides[get_managed_runtime] = lambda: ManagedRuntime(
+        installer, tmp_path / "llama-server.log"
+    )
     return installer
 
 
@@ -399,6 +403,7 @@ def test_the_status_endpoint_reports_the_size_to_download(
         "total_bytes": len(ZIP_BYTES) + len(MODEL_BYTES),
         "error": None,
         "model_tag": "gemma-4-e4b-it",
+        "running": False,
     }
 
 

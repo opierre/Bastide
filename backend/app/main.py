@@ -24,6 +24,7 @@ from app.features.database.router import router as database_router
 from app.features.goals.router import router as goals_router
 from app.features.health.router import router as health_router
 from app.features.imports.router import router as imports_router
+from app.features.inference.local_runtime import stop_managed_runtime
 from app.features.inference.router import router as inference_router
 from app.features.mortgages.router import router as mortgages_router
 from app.features.mortgages.simulations_router import router as simulations_router
@@ -39,7 +40,7 @@ logger = logging.getLogger(__name__)
 
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncIterator[None]:
-    """Seed the system categories, then reconcile runs orphaned by the previous process.
+    """Seed the system categories and reconcile orphaned runs; stop the local runtime on exit.
 
     The catalog is seeded first because everything that categorises assigns one of its ids, so
     an unseeded install has a rule engine with nothing to assign. It is global rather than
@@ -58,6 +59,8 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     seed_system_categories(provider())
     reconcile_orphaned_runs(provider())
     yield
+    # The downloaded runtime is the backend's child: it leaves with it.
+    stop_managed_runtime()
 
 
 def create_app() -> FastAPI:

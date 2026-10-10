@@ -44,3 +44,5 @@ class RuntimeStatus(BaseModel):
     error: Literal["network", "hash_mismatch", "disk_full", "extract"] | None = None
     #: The model tag the runtime serves its model under, for settings to store.
     model_tag: str
+    #: Whether the server is up. It starts on the first request that needs a model.
+    running: bool = False

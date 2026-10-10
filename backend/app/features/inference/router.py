@@ -1,21 +1,21 @@
 """Inference endpoints, mounted under the settings prefix so the frontend has one surface."""
 
-from functools import lru_cache
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, status
 from sqlalchemy.orm import Session
 
-from app.core.config import get_settings
 from app.core.db import get_db
 from app.features.auth.deps import get_current_user
 from app.features.auth.models import User
 from app.features.inference.client import InferenceClient, client_from_settings
+from app.features.inference.local_runtime import get_managed_runtime, get_runtime_installer
 from app.features.inference.ollama import ollama_client
 from app.features.inference.runtime_install import InstallStatus, RuntimeInstaller
-from app.features.inference.runtime_manifest import MODEL_ALIAS, runtime_build
+from app.features.inference.runtime_manifest import MODEL_ALIAS
+from app.features.inference.runtime_process import ManagedRuntime
 from app.features.inference.schemas import InferenceHealth, OllamaDetection, RuntimeStatus
-from app.features.inference.service import InferenceService, detect_ollama
+from app.features.inference.service import InferenceService, LocalRuntimeService, detect_ollama
 from app.features.settings.repository import SettingsRepository
 from app.features.settings.service import SettingsService
 
@@ -39,12 +39,6 @@ def get_ollama_client() -> InferenceClient:
     return ollama_client()
 
 
-@lru_cache
-def get_runtime_installer() -> RuntimeInstaller:
-    """The process-wide installer: one data dir, one download at a time. Overridden in tests."""
-    return RuntimeInstaller(get_settings().data_dir / "runtime", runtime_build())
-
-
 def _service(client: Annotated[InferenceClient, Depends(get_inference_client)]) -> InferenceService:
     return InferenceService(client)
 
@@ -65,13 +59,21 @@ async def read_ollama_detection(
     return await detect_ollama(client)
 
 
-def _runtime_status(install: InstallStatus) -> RuntimeStatus:
+def _runtime_service(
+    installer: Annotated[RuntimeInstaller, Depends(get_runtime_installer)],
+    runtime: Annotated[ManagedRuntime, Depends(get_managed_runtime)],
+) -> LocalRuntimeService:
+    return LocalRuntimeService(installer, runtime)
+
+
+def _runtime_status(service: LocalRuntimeService, install: InstallStatus) -> RuntimeStatus:
     return RuntimeStatus(
         state=install.state,
         downloaded_bytes=install.downloaded_bytes,
         total_bytes=install.total_bytes,
         error=install.error,
         model_tag=MODEL_ALIAS,
+        running=service.running,
     )
 
 
@@ -81,10 +83,10 @@ def _runtime_status(install: InstallStatus) -> RuntimeStatus:
 
 @router.get("/runtime", response_model=RuntimeStatus, dependencies=[Depends(get_current_user)])
 def read_runtime(
-    installer: Annotated[RuntimeInstaller, Depends(get_runtime_installer)],
+    service: Annotated[LocalRuntimeService, Depends(_runtime_service)],
 ) -> RuntimeStatus:
     """Report whether the local runtime is installed, and the size still to download."""
-    return _runtime_status(installer.status())
+    return _runtime_status(service, service.status())
 
 
 @router.post(
@@ -94,29 +96,29 @@ def read_runtime(
     dependencies=[Depends(get_current_user)],
 )
 def start_runtime_download(
-    installer: Annotated[RuntimeInstaller, Depends(get_runtime_installer)],
+    service: Annotated[LocalRuntimeService, Depends(_runtime_service)],
 ) -> RuntimeStatus:
     """Start downloading the pinned runtime and model; poll `GET /runtime` for progress.
 
     Resumes a download that was cancelled or interrupted. Asking again while one runs
     changes nothing.
     """
-    return _runtime_status(installer.start())
+    return _runtime_status(service, service.download())
 
 
 @router.post(
     "/runtime/cancel", response_model=RuntimeStatus, dependencies=[Depends(get_current_user)]
 )
 def cancel_runtime_download(
-    installer: Annotated[RuntimeInstaller, Depends(get_runtime_installer)],
+    service: Annotated[LocalRuntimeService, Depends(_runtime_service)],
 ) -> RuntimeStatus:
     """Stop the download, keeping what it fetched so the next one resumes."""
-    return _runtime_status(installer.cancel())
+    return _runtime_status(service, service.cancel())
 
 
 @router.delete("/runtime", response_model=RuntimeStatus, dependencies=[Depends(get_current_user)])
 def remove_runtime(
-    installer: Annotated[RuntimeInstaller, Depends(get_runtime_installer)],
+    service: Annotated[LocalRuntimeService, Depends(_runtime_service)],
 ) -> RuntimeStatus:
-    """Delete the downloaded runtime and model to free the disk space."""
-    return _runtime_status(installer.remove())
+    """Stop the local runtime and delete it and its model to free the disk space."""
+    return _runtime_status(service, service.remove())
