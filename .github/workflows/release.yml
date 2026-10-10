@@ -1,0 +1,114 @@
+name: Release
+
+# Builds the app for users on every `v*` tag: one runner per OS, since nothing
+# cross-compiles (PyInstaller and `flutter build` only target the host). Each
+# runner goes through `tools/package_app.py`, the same script as a local build.
+on:
+  push:
+    tags: ["v*"]
+
+# Least privilege by default; jobs elevate only what they need.
+permissions:
+  contents: read
+
+# A release must never be half-replaced by a second run on the same tag.
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  # Same pin as ci.yml: a release is built with the toolchain CI tested.
+  FLUTTER_VERSION: "3.44.8"
+  APPIMAGETOOL_VERSION: "1.9.1"
+  APPIMAGETOOL_SHA256: "ed4ce84f0d9caff66f50bcca6ff6f35aae54ce8135408b3fa33abfc3cb384eb0"
+
+jobs:
+  version:
+    name: version
+    runs-on: ubuntu-24.04
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+    steps:
+      - name: Version from the tag
+        id: version
+        env:
+          TAG: ${{ github.ref_name }}
+        run: echo "version=${TAG#v}" >> "${GITHUB_OUTPUT}"
+
+  package:
+    name: package (${{ matrix.os }})
+    needs: version
+    strategy:
+      # One broken OS must not hide whether the others build.
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows
+            runner: windows-2025
+          # Apple Silicon only (SHIP.md D3).
+          - os: macos
+            runner: macos-15
+          - os: linux
+            runner: ubuntu-24.04
+    runs-on: ${{ matrix.runner }}
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: astral-sh/setup-uv@20cfd1bf945f4377ade1205e4dbc17946fc9a30d # v10.0.1
+        with:
+          working-directory: backend
+          python-version: "3.14"
+          enable-cache: true
+          cache-dependency-glob: uv.lock
+      - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2.23.0
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+          pub-cache-key: pub-${{ runner.os }}-${{ hashFiles('frontend/pubspec.lock') }}
+
+      - name: Install the Linux build dependencies
+        if: matrix.os == 'linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends ninja-build libgtk-3-dev
+      - name: Install appimagetool
+        if: matrix.os == 'linux'
+        run: |
+          set -euo pipefail
+          tool="${RUNNER_TEMP}/appimagetool"
+          curl -fsSL -o "${tool}" \
+            "https://github.com/AppImage/appimagetool/releases/download/${APPIMAGETOOL_VERSION}/appimagetool-x86_64.AppImage"
+          echo "${APPIMAGETOOL_SHA256}  ${tool}" | sha256sum -c -
+          chmod +x "${tool}"
+          echo "APPIMAGETOOL=${tool}" >> "${GITHUB_ENV}"
+          # The runner has no FUSE to mount an AppImage: unpack it on each run instead.
+          echo "APPIMAGE_EXTRACT_AND_RUN=1" >> "${GITHUB_ENV}"
+      # GitHub's Windows images ship Inno Setup 6; install it only if one ever stops.
+      - name: Check Inno Setup
+        if: matrix.os == 'windows'
+        shell: pwsh
+        run: |
+          if (-not (Get-Command iscc -ErrorAction SilentlyContinue) -and
+              -not (Test-Path "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe")) {
+            choco install innosetup --yes --no-progress
+          }
+
+      - name: Build and package
+        env:
+          VERSION: ${{ needs.version.outputs.version }}
+          BUILD_NUMBER: ${{ github.run_number }}
+        run: |
+          uv run tools/package_app.py --build-number "${BUILD_NUMBER}" --version-label "${VERSION}"
+
+      - name: Upload the packages
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: bastide-${{ matrix.os }}
+          path: dist/Bastide-*
+          retention-days: 14
+          if-no-files-found: error

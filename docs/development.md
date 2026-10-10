@@ -91,6 +91,17 @@ It needs [Inno Setup](https://jrsoftware.org/isinfo.php) on Windows and
 the backend already frozen in `backend/dist/`. The user-facing install guide is
 `docs/install.md`.
 
+### Releasing
+Releases are built by CI only (`.github/workflows/release.yml`), never on a dev machine. Pushing
+a `v*` tag runs `tools/package_app.py` on a Windows, a macOS (Apple Silicon) and a Linux runner
+and keeps each OS's packages as a workflow artifact:
+
+```bash
+git tag v0.1.0-rc.1 && git push origin v0.1.0-rc.1
+```
+
+The tag, without its `v`, names the packages; the run number is the build number.
+
 ---
 
 ## 4. Working with coding agents

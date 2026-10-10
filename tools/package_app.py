@@ -211,6 +211,11 @@ def main() -> int:
     parser.add_argument(
         "--build-number", help="the build number (default: the one in pubspec.yaml)"
     )
+    parser.add_argument(
+        "--version-label",
+        help="the version that names the packages, e.g. 0.1.0-rc.1 for a release candidate"
+        " (default: the one in pubspec.yaml)",
+    )
     args = parser.parse_args()
 
     platform = {"win32": "windows", "darwin": "macos"}.get(sys.platform, sys.platform)
@@ -230,15 +235,17 @@ def main() -> int:
         cwd=FRONTEND,
     )  # fmt: skip
 
+    # The app itself keeps the pubspec version: it must match the backend's on startup.
+    label = args.version_label or version
     DIST.mkdir(exist_ok=True)
     if platform == "windows":
-        package_windows(version)
+        package_windows(label)
     elif platform == "macos":
-        dmg_macos(bundle_macos(), version)
+        dmg_macos(bundle_macos(), label)
     else:
-        appimage_linux(version)
+        appimage_linux(label)
 
-    print(f"Packaged Bastide {version} into {DIST}")
+    print(f"Packaged Bastide {label} into {DIST}")
     return 0
 
 
