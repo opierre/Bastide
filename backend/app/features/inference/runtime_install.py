@@ -15,7 +15,6 @@ process leaves only a `.part` file behind, which the next download resumes from.
 import hashlib
 import logging
 import shutil
-import ssl
 import tarfile
 import threading
 import zipfile
@@ -23,10 +22,10 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Literal
 
-import certifi
 import httpx
 
 from app.core.errors import ConflictError
+from app.core.tls import tls_context
 from app.features.inference.runtime_manifest import (
     LLAMA_CPP_BUILD,
     MODEL,
@@ -242,7 +241,7 @@ class RuntimeInstaller:
                 transport=self._transport,
                 follow_redirects=True,
                 timeout=_TIMEOUT,
-                verify=_tls_context(),
+                verify=tls_context(),
             ) as http:
                 for file in missing:
                     verified = self._download(http, file)
@@ -351,22 +350,6 @@ class RuntimeInstaller:
             raise _Failed("extract")
         shutil.rmtree(self._server_dir, ignore_errors=True)
         staging.replace(self._server_dir)
-
-
-def _tls_context() -> ssl.SSLContext:
-    """Certificate checking for the download, built by hand rather than by `httpx`.
-
-    Two things on real machines break the default. Antivirus HTTPS scanning (Avast, AVG)
-    re-signs traffic with a root it installs in the OS store, which `certifi` alone does not
-    trust, so both stores are loaded. The same products set `SSLKEYLOGFILE` to a named pipe,
-    and the key logging that `httpx` and `ssl.create_default_context` switch on from it
-    aborts a Windows process outright (`OPENSSL_Applink`); a bare `SSLContext` never opens
-    a key log.
-    """
-    context = ssl.SSLContext(ssl.PROTOCOL_TLS_CLIENT)
-    context.load_default_certs()
-    context.load_verify_locations(certifi.where())
-    return context
 
 
 def _is_within(root: Path, candidate: Path) -> bool:
