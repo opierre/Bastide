@@ -5094,5 +5094,113 @@
   "settingsAiOllamaUse": "Utiliser Ollama",
   "@settingsAiOllamaUse": {
     "description": "Button pointing the engine address at the detected Ollama."
+  },
+  "settingsAiRuntimeTitle": "Moteur intégré",
+  "@settingsAiRuntimeTitle": {
+    "description": "Title of the plate offering to download llama.cpp and the default model."
+  },
+  "settingsAiRuntimeOffer": "llama.cpp et Gemma 4 E4B — {size}, téléchargés une seule fois depuis GitHub et Hugging Face.",
+  "@settingsAiRuntimeOffer": {
+    "description": "Caption before any download: what is fetched, how big, and from where. The only network access the app makes for AI.",
+    "placeholders": {
+      "size": {
+        "type": "String"
+      }
+    }
+  },
+  "settingsAiRuntimeResumable": "{done} sur {total} déjà téléchargés — le téléchargement reprendra là où il s'est arrêté.",
+  "@settingsAiRuntimeResumable": {
+    "description": "Caption when a cancelled or interrupted download left bytes to resume.",
+    "placeholders": {
+      "done": {
+        "type": "String"
+      },
+      "total": {
+        "type": "String"
+      }
+    }
+  },
+  "settingsAiRuntimeProgress": "Téléchargement… {done} sur {total}",
+  "@settingsAiRuntimeProgress": {
+    "description": "Caption while downloading.",
+    "placeholders": {
+      "done": {
+        "type": "String"
+      },
+      "total": {
+        "type": "String"
+      }
+    }
+  },
+  "settingsAiRuntimeInstalled": "Installé sur cet ordinateur.",
+  "@settingsAiRuntimeInstalled": {
+    "description": "Caption once the engine and model are on disk."
+  },
+  "settingsAiRuntimeDownload": "Télécharger",
+  "@settingsAiRuntimeDownload": {
+    "description": "Button starting the download."
+  },
+  "settingsAiRuntimeResume": "Reprendre",
+  "@settingsAiRuntimeResume": {
+    "description": "Button resuming a partial download."
+  },
+  "settingsAiRuntimeCancel": "Annuler",
+  "@settingsAiRuntimeCancel": {
+    "description": "Button cancelling the download, and the cancel of the removal modal."
+  },
+  "settingsAiRuntimeRetry": "Réessayer",
+  "@settingsAiRuntimeRetry": {
+    "description": "Button retrying a failed download."
+  },
+  "settingsAiRuntimeRemove": "Supprimer",
+  "@settingsAiRuntimeRemove": {
+    "description": "Button removing the downloaded engine and model."
+  },
+  "settingsAiRuntimeRemoveTitle": "Supprimer le moteur intégré ?",
+  "@settingsAiRuntimeRemoveTitle": {
+    "description": "Title of the removal confirmation."
+  },
+  "settingsAiRuntimeRemoveBody": "Le moteur et son modèle seront effacés de cet ordinateur. Vos données ne sont pas touchées ; il faudra tout retélécharger pour réutiliser le moteur.",
+  "@settingsAiRuntimeRemoveBody": {
+    "description": "Body of the removal confirmation."
+  },
+  "settingsAiRuntimeErrorNetwork": "Téléchargement interrompu — vérifiez votre connexion, puis réessayez.",
+  "@settingsAiRuntimeErrorNetwork": {
+    "description": "Failure: network error or error status."
+  },
+  "settingsAiRuntimeErrorHash": "Fichier refusé : il ne correspond pas à la version attendue. Rien n'a été installé.",
+  "@settingsAiRuntimeErrorHash": {
+    "description": "Failure: a downloaded file did not match its pinned SHA-256."
+  },
+  "settingsAiRuntimeErrorDisk": "Espace disque insuffisant — {size} nécessaires.",
+  "@settingsAiRuntimeErrorDisk": {
+    "description": "Failure: not enough free disk space.",
+    "placeholders": {
+      "size": {
+        "type": "String"
+      }
+    }
+  },
+  "settingsAiRuntimeErrorExtract": "L'archive du moteur n'a pas pu être extraite.",
+  "@settingsAiRuntimeErrorExtract": {
+    "description": "Failure: the verified archive could not be unpacked."
+  },
+  "settingsAiRuntimeSizeGb": "{value} Go",
+  "@settingsAiRuntimeSizeGb": {
+    "description": "A size in gigabytes; value is already locale-formatted.",
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "settingsAiRuntimeSizeMb": "{value} Mo",
+  "@settingsAiRuntimeSizeMb": {
+    "description": "A size in megabytes; value is already locale-formatted.",
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
   }
 }

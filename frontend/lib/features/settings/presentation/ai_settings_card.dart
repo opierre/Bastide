@@ -12,6 +12,7 @@ import '../../../core/widgets/state_views.dart';
 import '../../../l10n/app_localizations.dart';
 import '../application/settings_controller.dart';
 import 'engine_plate.dart';
+import 'local_runtime_plate.dart';
 import 'lock_callout.dart';
 
 /// Where « En savoir plus » sends a user with no engine: the download page of
@@ -140,6 +141,10 @@ class _CardState extends ConsumerState<_Card> {
               modelCount: state.ollama!.models.length,
               onUse: _controller.useOllama,
             ),
+          ],
+          if (state.settings.aiEnabled) ...[
+            const SizedBox(height: AppSpacing.md),
+            const LocalRuntimePlate(),
           ],
           const SizedBox(height: AppSpacing.md),
           Row(

@@ -6174,6 +6174,114 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Utiliser Ollama'**
   String get settingsAiOllamaUse;
+
+  /// Title of the plate offering to download llama.cpp and the default model.
+  ///
+  /// In fr, this message translates to:
+  /// **'Moteur intégré'**
+  String get settingsAiRuntimeTitle;
+
+  /// Caption before any download: what is fetched, how big, and from where. The only network access the app makes for AI.
+  ///
+  /// In fr, this message translates to:
+  /// **'llama.cpp et Gemma 4 E4B — {size}, téléchargés une seule fois depuis GitHub et Hugging Face.'**
+  String settingsAiRuntimeOffer(String size);
+
+  /// Caption when a cancelled or interrupted download left bytes to resume.
+  ///
+  /// In fr, this message translates to:
+  /// **'{done} sur {total} déjà téléchargés — le téléchargement reprendra là où il s\'est arrêté.'**
+  String settingsAiRuntimeResumable(String done, String total);
+
+  /// Caption while downloading.
+  ///
+  /// In fr, this message translates to:
+  /// **'Téléchargement… {done} sur {total}'**
+  String settingsAiRuntimeProgress(String done, String total);
+
+  /// Caption once the engine and model are on disk.
+  ///
+  /// In fr, this message translates to:
+  /// **'Installé sur cet ordinateur.'**
+  String get settingsAiRuntimeInstalled;
+
+  /// Button starting the download.
+  ///
+  /// In fr, this message translates to:
+  /// **'Télécharger'**
+  String get settingsAiRuntimeDownload;
+
+  /// Button resuming a partial download.
+  ///
+  /// In fr, this message translates to:
+  /// **'Reprendre'**
+  String get settingsAiRuntimeResume;
+
+  /// Button cancelling the download, and the cancel of the removal modal.
+  ///
+  /// In fr, this message translates to:
+  /// **'Annuler'**
+  String get settingsAiRuntimeCancel;
+
+  /// Button retrying a failed download.
+  ///
+  /// In fr, this message translates to:
+  /// **'Réessayer'**
+  String get settingsAiRuntimeRetry;
+
+  /// Button removing the downloaded engine and model.
+  ///
+  /// In fr, this message translates to:
+  /// **'Supprimer'**
+  String get settingsAiRuntimeRemove;
+
+  /// Title of the removal confirmation.
+  ///
+  /// In fr, this message translates to:
+  /// **'Supprimer le moteur intégré ?'**
+  String get settingsAiRuntimeRemoveTitle;
+
+  /// Body of the removal confirmation.
+  ///
+  /// In fr, this message translates to:
+  /// **'Le moteur et son modèle seront effacés de cet ordinateur. Vos données ne sont pas touchées ; il faudra tout retélécharger pour réutiliser le moteur.'**
+  String get settingsAiRuntimeRemoveBody;
+
+  /// Failure: network error or error status.
+  ///
+  /// In fr, this message translates to:
+  /// **'Téléchargement interrompu — vérifiez votre connexion, puis réessayez.'**
+  String get settingsAiRuntimeErrorNetwork;
+
+  /// Failure: a downloaded file did not match its pinned SHA-256.
+  ///
+  /// In fr, this message translates to:
+  /// **'Fichier refusé : il ne correspond pas à la version attendue. Rien n\'a été installé.'**
+  String get settingsAiRuntimeErrorHash;
+
+  /// Failure: not enough free disk space.
+  ///
+  /// In fr, this message translates to:
+  /// **'Espace disque insuffisant — {size} nécessaires.'**
+  String settingsAiRuntimeErrorDisk(String size);
+
+  /// Failure: the verified archive could not be unpacked.
+  ///
+  /// In fr, this message translates to:
+  /// **'L\'archive du moteur n\'a pas pu être extraite.'**
+  String get settingsAiRuntimeErrorExtract;
+
+  /// A size in gigabytes; value is already locale-formatted.
+  ///
+  /// In fr, this message translates to:
+  /// **'{value} Go'**
+  String settingsAiRuntimeSizeGb(String value);
+
+  /// A size in megabytes; value is already locale-formatted.
+  ///
+  /// In fr, this message translates to:
+  /// **'{value} Mo'**
+  String settingsAiRuntimeSizeMb(String value);
 }
 
 class _AppLocalizationsDelegate

@@ -3903,4 +3903,74 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get settingsAiOllamaUse => 'Use Ollama';
+
+  @override
+  String get settingsAiRuntimeTitle => 'Built-in engine';
+
+  @override
+  String settingsAiRuntimeOffer(String size) {
+    return 'llama.cpp and Gemma 4 E4B — $size, downloaded once from GitHub and Hugging Face.';
+  }
+
+  @override
+  String settingsAiRuntimeResumable(String done, String total) {
+    return '$done of $total already downloaded — the download will pick up where it stopped.';
+  }
+
+  @override
+  String settingsAiRuntimeProgress(String done, String total) {
+    return 'Downloading… $done of $total';
+  }
+
+  @override
+  String get settingsAiRuntimeInstalled => 'Installed on this computer.';
+
+  @override
+  String get settingsAiRuntimeDownload => 'Download';
+
+  @override
+  String get settingsAiRuntimeResume => 'Resume';
+
+  @override
+  String get settingsAiRuntimeCancel => 'Cancel';
+
+  @override
+  String get settingsAiRuntimeRetry => 'Try again';
+
+  @override
+  String get settingsAiRuntimeRemove => 'Remove';
+
+  @override
+  String get settingsAiRuntimeRemoveTitle => 'Remove the built-in engine?';
+
+  @override
+  String get settingsAiRuntimeRemoveBody =>
+      'The engine and its model will be deleted from this computer. Your data is not touched; using the engine again means downloading it again.';
+
+  @override
+  String get settingsAiRuntimeErrorNetwork =>
+      'Download interrupted — check your connection, then try again.';
+
+  @override
+  String get settingsAiRuntimeErrorHash =>
+      'File refused: it does not match the expected version. Nothing was installed.';
+
+  @override
+  String settingsAiRuntimeErrorDisk(String size) {
+    return 'Not enough disk space — $size needed.';
+  }
+
+  @override
+  String get settingsAiRuntimeErrorExtract =>
+      'The engine archive could not be unpacked.';
+
+  @override
+  String settingsAiRuntimeSizeGb(String value) {
+    return '$value GB';
+  }
+
+  @override
+  String settingsAiRuntimeSizeMb(String value) {
+    return '$value MB';
+  }
 }

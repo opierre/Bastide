@@ -1,6 +1,8 @@
 """Response schemas for the inference feature."""
 
-from pydantic import BaseModel
+from typing import Literal
+
+from pydantic import BaseModel, ConfigDict
 
 
 class InferenceHealth(BaseModel):
@@ -24,3 +26,21 @@ class OllamaDetection(BaseModel):
     found: bool
     base_url: str
     models: list[str] = []
+
+
+class RuntimeStatus(BaseModel):
+    """The opt-in local runtime: whether it is on disk, and how far its download got.
+
+    `total_bytes` is what is still missing, so before a download starts it is the size to
+    show the user; `downloaded_bytes` counts what of it is already on disk. `error` says why
+    the last download stopped short, as a code the frontend localizes.
+    """
+
+    model_config = ConfigDict(protected_namespaces=())
+
+    state: Literal["unsupported", "absent", "downloading", "installed", "failed"]
+    downloaded_bytes: int
+    total_bytes: int
+    error: Literal["network", "hash_mismatch", "disk_full", "extract"] | None = None
+    #: The model tag the runtime serves its model under, for settings to store.
+    model_tag: str

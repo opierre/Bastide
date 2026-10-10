@@ -3932,4 +3932,74 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get settingsAiOllamaUse => 'Utiliser Ollama';
+
+  @override
+  String get settingsAiRuntimeTitle => 'Moteur intégré';
+
+  @override
+  String settingsAiRuntimeOffer(String size) {
+    return 'llama.cpp et Gemma 4 E4B — $size, téléchargés une seule fois depuis GitHub et Hugging Face.';
+  }
+
+  @override
+  String settingsAiRuntimeResumable(String done, String total) {
+    return '$done sur $total déjà téléchargés — le téléchargement reprendra là où il s\'est arrêté.';
+  }
+
+  @override
+  String settingsAiRuntimeProgress(String done, String total) {
+    return 'Téléchargement… $done sur $total';
+  }
+
+  @override
+  String get settingsAiRuntimeInstalled => 'Installé sur cet ordinateur.';
+
+  @override
+  String get settingsAiRuntimeDownload => 'Télécharger';
+
+  @override
+  String get settingsAiRuntimeResume => 'Reprendre';
+
+  @override
+  String get settingsAiRuntimeCancel => 'Annuler';
+
+  @override
+  String get settingsAiRuntimeRetry => 'Réessayer';
+
+  @override
+  String get settingsAiRuntimeRemove => 'Supprimer';
+
+  @override
+  String get settingsAiRuntimeRemoveTitle => 'Supprimer le moteur intégré ?';
+
+  @override
+  String get settingsAiRuntimeRemoveBody =>
+      'Le moteur et son modèle seront effacés de cet ordinateur. Vos données ne sont pas touchées ; il faudra tout retélécharger pour réutiliser le moteur.';
+
+  @override
+  String get settingsAiRuntimeErrorNetwork =>
+      'Téléchargement interrompu — vérifiez votre connexion, puis réessayez.';
+
+  @override
+  String get settingsAiRuntimeErrorHash =>
+      'Fichier refusé : il ne correspond pas à la version attendue. Rien n\'a été installé.';
+
+  @override
+  String settingsAiRuntimeErrorDisk(String size) {
+    return 'Espace disque insuffisant — $size nécessaires.';
+  }
+
+  @override
+  String get settingsAiRuntimeErrorExtract =>
+      'L\'archive du moteur n\'a pas pu être extraite.';
+
+  @override
+  String settingsAiRuntimeSizeGb(String value) {
+    return '$value Go';
+  }
+
+  @override
+  String settingsAiRuntimeSizeMb(String value) {
+    return '$value Mo';
+  }
 }

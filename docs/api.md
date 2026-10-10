@@ -122,6 +122,10 @@ details?}}`. Model names refer to the Pydantic schemas in `backend/app/features/
 |--------|------|-------|------|----------|
 | `GET` | `/settings/inference/health` |  |  | 200 `InferenceHealth` |
 | `GET` | `/settings/inference/ollama` |  |  | 200 `OllamaDetection` |
+| `GET` | `/settings/inference/runtime` |  |  | 200 `RuntimeStatus` |
+| `DELETE` | `/settings/inference/runtime` |  |  | 200 `RuntimeStatus` |
+| `POST` | `/settings/inference/runtime/download` |  |  | 202 `RuntimeStatus` |
+| `POST` | `/settings/inference/runtime/cancel` |  |  | 200 `RuntimeStatus` |
 
 ## categorization
 
