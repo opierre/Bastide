@@ -16,11 +16,15 @@ through this script, so they run the same steps:
      and the portable ``Bastide-<version>-windows.zip``.
    - macOS: ``Bastide.app``, ad-hoc signed (unsigned code doesn't run on Apple Silicon),
      in ``Bastide-<version>-macos.dmg``.
+   - Linux: ``Bastide-<version>-<arch>.AppImage``, with ``appimagetool`` on the PATH or
+     in ``$APPIMAGETOOL``.
 
 Like the backend freeze, nothing here cross-compiles: each OS packages itself.
 """
 
 import argparse
+import os
+import platform as host
 import re
 import shutil
 import subprocess
@@ -153,6 +157,52 @@ def dmg_macos(app: Path, version: str) -> None:
     shutil.rmtree(staging)
 
 
+DESKTOP_ENTRY = """[Desktop Entry]
+Type=Application
+Name=Bastide
+Comment=Local-first personal finance
+Exec=bastide
+Icon=bastide
+Categories=Office;Finance;
+Terminal=false
+"""
+
+APP_RUN = """#!/bin/sh
+HERE="$(dirname "$(readlink -f "$0")")"
+exec "$HERE/bastide" "$@"
+"""
+
+
+def appimage_linux(version: str) -> None:
+    """Turn the Flutter bundle, backend included, into one AppImage."""
+    arch = {"x86_64": "x64", "aarch64": "arm64"}[host.machine()]
+    bundle = FRONTEND / "build" / "linux" / arch / "release" / "bundle"
+    # The CMake install step copies the backend in (frontend/linux/CMakeLists.txt).
+    if not (bundle / "backend" / "bastide-backend").is_file():
+        sys.exit(f"No backend in {bundle}: the frozen build is missing")
+
+    appdir = DIST / "Bastide.AppDir"
+    shutil.rmtree(appdir, ignore_errors=True)
+    shutil.copytree(bundle, appdir, symlinks=True)
+    shutil.copy2(LICENSE, appdir / "LICENSE.txt")
+    (appdir / "bastide.desktop").write_text(DESKTOP_ENTRY, encoding="utf-8")
+    shutil.copy2(FRONTEND / "assets" / "brand" / "bastide-mark-256.png", appdir / "bastide.png")
+    (appdir / ".DirIcon").symlink_to("bastide.png")
+    app_run = appdir / "AppRun"
+    app_run.write_text(APP_RUN, encoding="utf-8")
+    app_run.chmod(0o755)
+
+    tool = os.environ.get("APPIMAGETOOL") or require("appimagetool")
+    image = DIST / f"Bastide-{version}-{host.machine()}.AppImage"
+    print(f"$ {tool} {appdir} {image}", flush=True)
+    subprocess.run(
+        [str(tool), str(appdir), str(image)],
+        env={**os.environ, "ARCH": host.machine()},
+        check=True,
+    )
+    shutil.rmtree(appdir)
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument(
@@ -164,7 +214,7 @@ def main() -> int:
     args = parser.parse_args()
 
     platform = {"win32": "windows", "darwin": "macos"}.get(sys.platform, sys.platform)
-    if platform not in {"windows", "macos"}:
+    if platform not in {"windows", "macos", "linux"}:
         sys.exit(f"Packaging is not set up for {sys.platform}")
 
     if not args.skip_backend:
@@ -183,8 +233,10 @@ def main() -> int:
     DIST.mkdir(exist_ok=True)
     if platform == "windows":
         package_windows(version)
-    else:
+    elif platform == "macos":
         dmg_macos(bundle_macos(), version)
+    else:
+        appimage_linux(version)
 
     print(f"Packaged Bastide {version} into {DIST}")
     return 0
