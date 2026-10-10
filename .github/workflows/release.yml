@@ -1,0 +1,183 @@
+name: Release
+
+# Builds the app for users on every `v*` tag: one runner per OS, since nothing
+# cross-compiles (PyInstaller and `flutter build` only target the host). Each
+# runner goes through `tools/package_app.py`, the same script as a local build.
+on:
+  push:
+    tags: ["v*"]
+
+# Least privilege by default; jobs elevate only what they need.
+permissions:
+  contents: read
+
+# A release must never be half-replaced by a second run on the same tag.
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  # Same pin as ci.yml: a release is built with the toolchain CI tested.
+  FLUTTER_VERSION: "3.44.8"
+  APPIMAGETOOL_VERSION: "1.9.1"
+  APPIMAGETOOL_SHA256: "ed4ce84f0d9caff66f50bcca6ff6f35aae54ce8135408b3fa33abfc3cb384eb0"
+
+jobs:
+  version:
+    name: version
+    runs-on: ubuntu-24.04
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      # Fails before any build when the tag disagrees with pyproject.toml / pubspec.yaml.
+      - name: Check the tag against the source versions
+        id: version
+        env:
+          TAG: ${{ github.ref_name }}
+        run: python3 .github/scripts/release_version.py "${TAG}"
+
+  package:
+    name: package (${{ matrix.os }})
+    needs: version
+    strategy:
+      # One broken OS must not hide whether the others build.
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows
+            runner: windows-2025
+          # Apple Silicon only (SHIP.md D3).
+          - os: macos
+            runner: macos-15
+          - os: linux
+            runner: ubuntu-24.04
+    runs-on: ${{ matrix.runner }}
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: astral-sh/setup-uv@20cfd1bf945f4377ade1205e4dbc17946fc9a30d # v10.0.1
+        with:
+          working-directory: backend
+          python-version: "3.14"
+          enable-cache: true
+          cache-dependency-glob: uv.lock
+      - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2.23.0
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+          pub-cache-key: pub-${{ runner.os }}-${{ hashFiles('frontend/pubspec.lock') }}
+
+      # GTK for the Flutter shell; libsecret for flutter_secure_storage (the login token).
+      - name: Install the Linux build dependencies
+        if: matrix.os == 'linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends ninja-build libgtk-3-dev libsecret-1-dev
+      - name: Install appimagetool
+        if: matrix.os == 'linux'
+        run: |
+          set -euo pipefail
+          tool="${RUNNER_TEMP}/appimagetool"
+          curl -fsSL -o "${tool}" \
+            "https://github.com/AppImage/appimagetool/releases/download/${APPIMAGETOOL_VERSION}/appimagetool-x86_64.AppImage"
+          echo "${APPIMAGETOOL_SHA256}  ${tool}" | sha256sum -c -
+          chmod +x "${tool}"
+          echo "APPIMAGETOOL=${tool}" >> "${GITHUB_ENV}"
+          # The runner has no FUSE to mount an AppImage: unpack it on each run instead.
+          echo "APPIMAGE_EXTRACT_AND_RUN=1" >> "${GITHUB_ENV}"
+      # GitHub's Windows images ship Inno Setup 6; install it only if one ever stops.
+      - name: Check Inno Setup
+        if: matrix.os == 'windows'
+        shell: pwsh
+        run: |
+          if (-not (Get-Command iscc -ErrorAction SilentlyContinue) -and
+              -not (Test-Path "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe")) {
+            choco install innosetup --yes --no-progress
+          }
+
+      # PyInstaller only bundles the imports it can see: a module loaded by name or a data
+      # file read by path can be missing from a build the source tests never notice. The
+      # smoke test runs the frozen binary through startup, migrations, an OFX import and
+      # shutdown, and a failure here stops this OS's release before anything is packaged.
+      - name: Freeze the backend and smoke-test it
+        run: uv run tools/build_backend.py --smoke
+      - name: Build and package
+        env:
+          VERSION: ${{ needs.version.outputs.version }}
+          BUILD_NUMBER: ${{ github.run_number }}
+        run: |
+          uv run tools/package_app.py --skip-backend \
+            --build-number "${BUILD_NUMBER}" --version-label "${VERSION}"
+
+      - name: Upload the packages
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: bastide-${{ matrix.os }}
+          path: dist/Bastide-*
+          retention-days: 14
+          if-no-files-found: error
+
+  # A draft, never a published release: you check it and publish it by hand.
+  draft:
+    name: draft release
+    needs: [version, package]
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+    steps:
+      # Full history and tags: the notes list the commits since the previous tag.
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          pattern: bastide-*
+          path: dist
+          merge-multiple: true
+      - name: Checksums
+        working-directory: dist
+        run: |
+          set -euo pipefail
+          sha256sum Bastide-* > SHA256SUMS
+          cat SHA256SUMS
+      - name: Release notes
+        env:
+          TAG: ${{ github.ref_name }}
+        run: |
+          python3 .github/scripts/release_notes.py \
+            --tag "${TAG}" --repo "${GITHUB_REPOSITORY}" --output "${RUNNER_TEMP}/notes.md"
+          cat "${RUNNER_TEMP}/notes.md" >> "${GITHUB_STEP_SUMMARY}"
+      # A re-run on the same tag refreshes the draft's files and notes instead of failing.
+      - name: Create or update the draft
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ github.ref_name }}
+          VERSION: ${{ needs.version.outputs.version }}
+        run: |
+          set -euo pipefail
+          prerelease=""
+          if [[ "${VERSION}" == *-* ]]; then
+            prerelease="--prerelease"
+          fi
+          if gh release view "${TAG}" --repo "${GITHUB_REPOSITORY}" > /dev/null 2>&1; then
+            if [ "$(gh release view "${TAG}" --repo "${GITHUB_REPOSITORY}" --json isDraft --jq .isDraft)" != "true" ]; then
+              echo "::error::${TAG} is already published; it is never overwritten."
+              exit 1
+            fi
+            gh release upload "${TAG}" dist/* --clobber --repo "${GITHUB_REPOSITORY}"
+            gh release edit "${TAG}" --notes-file "${RUNNER_TEMP}/notes.md" --repo "${GITHUB_REPOSITORY}"
+          else
+            # shellcheck disable=SC2086
+            gh release create "${TAG}" dist/* --draft ${prerelease} --verify-tag \
+              --title "Bastide ${VERSION}" --notes-file "${RUNNER_TEMP}/notes.md" \
+              --repo "${GITHUB_REPOSITORY}"
+          fi

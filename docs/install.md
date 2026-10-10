@@ -98,10 +98,14 @@ Drag **Bastide** from Applications to the Trash. Your data stays on your compute
 
 2. Double-click it, or run `./Bastide-<version>-x86_64.AppImage`.
 
-If nothing happens, your system may lack FUSE, which AppImages need. On Ubuntu 24.04:
-`sudo apt install libfuse2t64` (Ubuntu 22.04: `libfuse2`). Bastide stores your login in the
-system keyring, so a keyring service (GNOME Keyring or KWallet) must be running, which is the
-case on standard desktops.
+Bastide needs two system libraries that standard desktops already have. If nothing happens
+when you launch it, install the missing one:
+
+- **FUSE**, which every AppImage needs: `sudo apt install libfuse2t64` on Ubuntu 24.04
+  (`libfuse2` on Ubuntu 22.04).
+- **libsecret**, through which Bastide keeps your login in the system keyring:
+  `sudo apt install libsecret-1-0` (Fedora: `sudo dnf install libsecret`). A keyring service
+  (GNOME Keyring or KWallet) must also be running.
 
 To update, download the new AppImage and delete the old one. To uninstall, delete the file.
 
