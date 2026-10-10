@@ -65,7 +65,7 @@ when you want `--reload`.
 > [!TIP]
 > **AI categorisation is optional.** Run [Ollama](https://ollama.com) or `llama-server` with a
 > small model (Gemma 4 E4B by default), then switch it on under **Paramètres → Données → IA
-> locale**. Without a model, the rules still categorise everything they match, and the rest goes
+> locale**; an Ollama on its default port is detected and offered there. Without a model, the rules still categorise everything they match, and the rest goes
 > to the review queue.
 
 With the backend running, interactive API docs are served at <http://127.0.0.1:8765/docs>.
