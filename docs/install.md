@@ -124,7 +124,9 @@ That folder holds:
 
 - `bastide.db`: the database;
 - `backups/`: a copy taken automatically before each update changes the database;
-- `logs/`: technical logs, without your transactions.
+- `logs/`: technical logs, without your transactions;
+- `runtime/`: the built-in AI engine and its model (about 5 GB), only if you downloaded them
+  from **Paramètres → Données → IA locale**. Remove them from there, or delete the folder.
 
 Uninstalling Bastide never deletes this folder. To erase everything, delete it yourself after
 uninstalling.

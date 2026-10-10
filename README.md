@@ -63,10 +63,11 @@ Logs go to stderr and to `logs/backend.log` in the data folder. Use the `uvicorn
 when you want `--reload`.
 
 > [!TIP]
-> **AI categorisation is optional.** Run [Ollama](https://ollama.com) or `llama-server` with a
-> small model (Gemma 4 E4B by default), then switch it on under **Paramètres → Données → IA
-> locale**. Without a model, the rules still categorise everything they match, and the rest goes
-> to the review queue.
+> **AI categorisation is optional.** Switch it on under **Paramètres → Données → IA locale**,
+> then either use an [Ollama](https://ollama.com) install (detected automatically) or let Bastide
+> download its built-in engine: `llama-server` and Gemma 4 E4B, about 5 GB, checked against
+> SHA-256 hashes pinned in the code. Without a model, the rules still categorise everything they
+> match, and the rest goes to the review queue.
 
 With the backend running, interactive API docs are served at <http://127.0.0.1:8765/docs>.
 
@@ -76,7 +77,7 @@ With the backend running, interactive API docs are served at <http://127.0.0.1:8
 flowchart LR
     UI["Flutter desktop app<br/>Riverpod · fr/en"] -- "REST · loopback only" --> API["FastAPI sidecar<br/>Python 3.14"]
     API --> DB[("SQLite · WAL<br/>SQLAlchemy + Alembic")]
-    API -. optional .-> LLM["Local LLM runtime<br/>Ollama / llama-server"]
+    API -. optional .-> LLM["Local LLM runtime<br/>Ollama / downloaded llama-server"]
 ```
 
 - **Money is integer minor units**, and rates are integer basis points. Floats are never used.

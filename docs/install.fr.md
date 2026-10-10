@@ -132,7 +132,10 @@ Ce dossier contient :
 
 - `bastide.db` : la base de données ;
 - `backups/` : une copie faite automatiquement avant chaque mise à jour qui modifie la base ;
-- `logs/` : des journaux techniques, sans vos opérations.
+- `logs/` : des journaux techniques, sans vos opérations ;
+- `runtime/` : le moteur d'IA intégré et son modèle (environ 5 Go), seulement si vous les avez
+  téléchargés depuis **Paramètres → Données → IA locale**. Supprimez-les depuis cet écran, ou
+  supprimez le dossier.
 
 Désinstaller Bastide ne supprime jamais ce dossier. Pour tout effacer, supprimez-le vous-même
 après la désinstallation.
