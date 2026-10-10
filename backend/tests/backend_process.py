@@ -72,4 +72,8 @@ def stop(process: subprocess.Popen[str]) -> None:
     """Kill the process if it is still running, and release its pipes."""
     if process.poll() is None:
         process.kill()
-    process.communicate(timeout=10)
+    # Not `communicate()`: on POSIX it flushes stdin, which fails once a test has closed it.
+    process.wait(timeout=10)
+    for pipe in (process.stdin, process.stdout):
+        if pipe is not None:
+            pipe.close()
