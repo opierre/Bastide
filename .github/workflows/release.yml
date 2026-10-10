@@ -29,11 +29,15 @@ jobs:
     outputs:
       version: ${{ steps.version.outputs.version }}
     steps:
-      - name: Version from the tag
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      # Fails before any build when the tag disagrees with pyproject.toml / pubspec.yaml.
+      - name: Check the tag against the source versions
         id: version
         env:
           TAG: ${{ github.ref_name }}
-        run: echo "version=${TAG#v}" >> "${GITHUB_OUTPUT}"
+        run: python3 .github/scripts/release_version.py "${TAG}"
 
   package:
     name: package (${{ matrix.os }})

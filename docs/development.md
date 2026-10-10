@@ -100,6 +100,12 @@ and keeps each OS's packages as a workflow artifact:
 git tag v0.1.0-rc.1 && git push origin v0.1.0-rc.1
 ```
 
+The committed versions are the source of truth, and CI never rewrites them: the tag must be
+`v` + the version that `backend/pyproject.toml` and `frontend/pubspec.yaml` both declare,
+optionally followed by a pre-release suffix such as `-rc.1`. Otherwise the run fails before
+building anything (`.github/scripts/release_version.py`). To release, bump both files in one
+commit, merge it, then tag that commit.
+
 The tag, without its `v`, names the packages; the run number is the build number. Each runner
 smoke-tests its frozen backend before packaging, so a missing hidden import fails the release.
 When every OS is built, the run opens a **draft** GitHub Release with the packages, a
