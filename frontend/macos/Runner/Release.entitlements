@@ -2,7 +2,11 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<!-- No sandbox: the app starts the frozen backend as a child process, and both keep their
+	     data in ~/Library/Application Support/Bastide (core/backend/data_dir.dart). Inside the
+	     sandbox, every backend binary would need the inherit entitlement and the data would move
+	     into the app's container. The sandbox is only required on the Mac App Store. -->
 	<key>com.apple.security.app-sandbox</key>
-	<true/>
+	<false/>
 </dict>
 </plist>

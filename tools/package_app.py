@@ -14,6 +14,7 @@ through this script, so they run the same steps:
 
    - Windows: ``Bastide-Setup-<version>.exe`` (Inno Setup, ``tools/windows/bastide.iss``)
      and the portable ``Bastide-<version>-windows.zip``.
+   - macOS: ``Bastide.app``, ad-hoc signed (unsigned code doesn't run on Apple Silicon).
 
 Like the backend freeze, nothing here cross-compiles: each OS packages itself.
 """
@@ -96,6 +97,46 @@ def package_windows(version: str) -> None:
     zip_folder(release, DIST / f"Bastide-{version}-windows.zip", "Bastide")
 
 
+MACH_O_MAGICS = {
+    bytes.fromhex(magic)
+    for magic in ("feedface", "feedfacf", "cefaedfe", "cffaedfe", "cafebabe", "bebafeca")
+}
+
+
+def is_mach_o(path: Path) -> bool:
+    """Whether ``path`` is compiled code (an executable, ``.dylib`` or ``.so``)."""
+    if path.is_symlink() or not path.is_file():
+        return False
+    with path.open("rb") as file:
+        return file.read(4) in MACH_O_MAGICS
+
+
+def bundle_macos() -> Path:
+    """Put the backend in ``Bastide.app/Contents/Resources/backend/`` and ad-hoc sign the app."""
+    app = FRONTEND / "build" / "macos" / "Build" / "Products" / "Release" / "Bastide.app"
+    resources = app / "Contents" / "Resources"
+    backend = resources / "backend"
+    shutil.rmtree(backend, ignore_errors=True)
+    # PyInstaller's macOS output links its Python framework through symlinks: keep them.
+    shutil.copytree(BACKEND_DIST, backend, symlinks=True)
+    shutil.copy2(LICENSE, resources / "LICENSE.txt")
+
+    # Inside out: each backend binary first, deepest first, then the app, which seals them.
+    # Flutter's build already signed the frameworks in Contents/Frameworks.
+    codesign = require("codesign")
+    binaries = sorted(
+        (path for path in backend.rglob("*") if is_mach_o(path)),
+        key=lambda path: len(path.parts),
+        reverse=True,
+    )
+    for path in binaries:
+        run(codesign, "--force", "--sign", "-", "--timestamp=none", path)
+    entitlements = FRONTEND / "macos" / "Runner" / "Release.entitlements"
+    run(codesign, "--force", "--sign", "-", "--entitlements", entitlements, app)
+    run(codesign, "--verify", "--deep", "--strict", "--verbose=2", app)
+    return app
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument(
@@ -107,7 +148,7 @@ def main() -> int:
     args = parser.parse_args()
 
     platform = {"win32": "windows", "darwin": "macos"}.get(sys.platform, sys.platform)
-    if platform not in {"windows"}:
+    if platform not in {"windows", "macos"}:
         sys.exit(f"Packaging is not set up for {sys.platform}")
 
     if not args.skip_backend:
@@ -124,7 +165,10 @@ def main() -> int:
     )  # fmt: skip
 
     DIST.mkdir(exist_ok=True)
-    package_windows(version)
+    if platform == "windows":
+        package_windows(version)
+    else:
+        bundle_macos()
 
     print(f"Packaged Bastide {version} into {DIST}")
     return 0
