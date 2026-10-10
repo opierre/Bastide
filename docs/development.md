@@ -100,7 +100,13 @@ and keeps each OS's packages as a workflow artifact:
 git tag v0.1.0-rc.1 && git push origin v0.1.0-rc.1
 ```
 
-The tag, without its `v`, names the packages; the run number is the build number.
+The tag, without its `v`, names the packages; the run number is the build number. Each runner
+smoke-tests its frozen backend before packaging, so a missing hidden import fails the release.
+When every OS is built, the run opens a **draft** GitHub Release with the packages, a
+`SHA256SUMS` file and notes made from the Conventional Commits since the previous tag
+(`.github/scripts/release_notes.py`); a tag with a `-` suffix is marked as a pre-release.
+Review the draft and publish it by hand. Re-running the workflow on the same tag refreshes the
+draft, but never touches a release that has already been published.
 
 ---
 
