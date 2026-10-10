@@ -75,12 +75,14 @@ jobs:
           cache: true
           pub-cache-key: pub-${{ runner.os }}-${{ hashFiles('frontend/pubspec.lock') }}
 
-      # GTK for the Flutter shell; libsecret for flutter_secure_storage (the login token).
+      # GTK for the Flutter shell; libsecret for flutter_secure_storage (the login token);
+      # zlib headers for the PyInstaller bootloader compiled below.
       - name: Install the Linux build dependencies
         if: matrix.os == 'linux'
         run: |
           sudo apt-get update
-          sudo apt-get install -y --no-install-recommends ninja-build libgtk-3-dev libsecret-1-dev
+          sudo apt-get install -y --no-install-recommends \
+            ninja-build libgtk-3-dev libsecret-1-dev zlib1g-dev
       - name: Install appimagetool
         if: matrix.os == 'linux'
         run: |
@@ -107,8 +109,10 @@ jobs:
       # file read by path can be missing from a build the source tests never notice. The
       # smoke test runs the frozen binary through startup, migrations, an OFX import and
       # shutdown, and a failure here stops this OS's release before anything is packaged.
+      # The bootloader is compiled here rather than taken prebuilt from PyPI: the prebuilt
+      # ones are what antivirus heuristics flag most.
       - name: Freeze the backend and smoke-test it
-        run: uv run tools/build_backend.py --smoke
+        run: uv run tools/build_backend.py --bootloader-from-source --smoke
       - name: Build and package
         env:
           VERSION: ${{ needs.version.outputs.version }}
