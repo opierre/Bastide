@@ -129,6 +129,52 @@ def test_a_verified_download_installs_the_server_and_the_model(tmp_path: Path) -
     assert list((tmp_path / "downloads").iterdir()) == []
 
 
+def test_progress_never_runs_past_the_total(tmp_path: Path) -> None:
+    """Bytes of a finished file stay received after it leaves the missing list."""
+    release = threading.Event()
+
+    def stream() -> Iterator[bytes]:
+        yield MODEL_BYTES[:1000]
+        release.wait(5)
+        yield MODEL_BYTES[1000:]
+
+    def handle(request: httpx.Request) -> httpx.Response:
+        if str(request.url) == ARCHIVE_URL:
+            return httpx.Response(200, content=ZIP_BYTES)
+        return httpx.Response(200, content=stream())
+
+    installer = _installer(tmp_path, handle)
+    installer.start()
+    try:
+        _wait_for(lambda: installer.status().downloaded_bytes >= len(ZIP_BYTES) + 1000)
+        status = installer.status()
+        assert status.total_bytes == len(ZIP_BYTES) + len(MODEL_BYTES)
+        assert status.downloaded_bytes <= status.total_bytes
+    finally:
+        release.set()
+        installer.wait(5)
+
+
+def test_a_server_deleted_after_install_is_reported_and_reinstalled(tmp_path: Path) -> None:
+    """Antivirus quarantining `llama-server` is told apart from a runtime never downloaded."""
+    handler, seen = _serve({ARCHIVE_URL: ZIP_BYTES, MODEL_URL: MODEL_BYTES})
+    installer = _installer(tmp_path, handler)
+    _install(installer)
+    assert installer.server_path is not None
+    installer.server_path.unlink()
+
+    status = installer.status()
+    assert status.state == "failed"
+    assert status.error == "server_removed"
+    # Only the server is fetched again, not the model.
+    assert status.total_bytes == len(ZIP_BYTES)
+
+    _install(installer)
+
+    assert installer.status().state == "installed"
+    assert [str(request.url) for request in seen].count(MODEL_URL) == 1
+
+
 def test_a_tar_build_is_extracted_with_its_folder(tmp_path: Path) -> None:
     server = f"llama-{LLAMA_CPP_BUILD}/llama-server"
     archive = _tar({server: b"\x7fELF server", f"llama-{LLAMA_CPP_BUILD}/libllama.so": b"lib"})

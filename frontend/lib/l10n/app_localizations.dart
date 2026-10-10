@@ -6312,6 +6312,12 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Démarrage du moteur…'**
   String get settingsAiStartingRuntime;
+
+  /// Failure: the installed llama-server executable was deleted since, in practice by antivirus quarantine. Retrying reinstalls it (the model is kept).
+  ///
+  /// In fr, this message translates to:
+  /// **'Le moteur a été supprimé de cet ordinateur après son installation, sans doute par votre antivirus. Autorisez le dossier « runtime » des données de Bastide dans votre antivirus, puis réessayez.'**
+  String get settingsAiRuntimeErrorRemoved;
 }
 
 class _AppLocalizationsDelegate

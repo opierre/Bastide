@@ -3990,4 +3990,8 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get settingsAiStartingRuntime => 'Starting the engine…';
+
+  @override
+  String get settingsAiRuntimeErrorRemoved =>
+      'The engine was deleted from this computer after it was installed, most likely by your antivirus. Allow the « runtime » folder of Bastide\'s data in your antivirus, then try again.';
 }

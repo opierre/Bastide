@@ -14,8 +14,16 @@ enum LocalRuntimeState {
   failed,
 }
 
-/// Why the last download stopped short, as the backend's stable codes.
-enum LocalRuntimeError { network, hashMismatch, diskFull, extract }
+/// Why the engine is not usable, as the backend's stable codes: why the last
+/// download stopped short, or — [serverRemoved] — that something deleted the
+/// installed server since, which in practice is an antivirus quarantining it.
+enum LocalRuntimeError {
+  network,
+  hashMismatch,
+  diskFull,
+  extract,
+  serverRemoved,
+}
 
 /// What `GET /settings/inference/runtime` reports.
 @immutable
@@ -46,6 +54,7 @@ class LocalRuntime {
       'hash_mismatch' => LocalRuntimeError.hashMismatch,
       'disk_full' => LocalRuntimeError.diskFull,
       'extract' => LocalRuntimeError.extract,
+      'server_removed' => LocalRuntimeError.serverRemoved,
       _ => null,
     },
   );

@@ -214,6 +214,12 @@ void main() {
       ),
       ('disk_full', 'Espace disque insuffisant — 5,2 Go nécessaires.'),
       ('extract', "L'archive du moteur n'a pas pu être extraite."),
+      (
+        'server_removed',
+        'Le moteur a été supprimé de cet ordinateur après son installation, '
+            'sans doute par votre antivirus. Autorisez le dossier « runtime » '
+            'des données de Bastide dans votre antivirus, puis réessayez.',
+      ),
     ]) {
       testWidgets('$code is explained and can be retried', (tester) async {
         stubRead(_runtime(state: 'failed', error: code));

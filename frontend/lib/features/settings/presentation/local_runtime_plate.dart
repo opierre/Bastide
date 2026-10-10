@@ -144,6 +144,7 @@ class LocalRuntimePlate extends ConsumerWidget {
       size(runtime.totalBytes),
     ),
     LocalRuntimeError.extract => l10n.settingsAiRuntimeErrorExtract,
+    LocalRuntimeError.serverRemoved => l10n.settingsAiRuntimeErrorRemoved,
     LocalRuntimeError.network || null => l10n.settingsAiRuntimeErrorNetwork,
   };
 

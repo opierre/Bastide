@@ -37,8 +37,11 @@ logger = logging.getLogger(__name__)
 
 type InstallState = Literal["unsupported", "absent", "downloading", "installed", "failed"]
 
-#: Why the last download stopped short. Stable codes the frontend localizes.
-type InstallError = Literal["network", "hash_mismatch", "disk_full", "extract"]
+#: Why the runtime is not usable. Stable codes the frontend localizes. All but
+#: `server_removed` say why the last download stopped short; `server_removed` says that an
+#: install which completed has since lost its executable, which in practice is antivirus
+#: quarantining it the first time it runs a model.
+type InstallError = Literal["network", "hash_mismatch", "disk_full", "extract", "server_removed"]
 
 _CHUNK_BYTES = 1024 * 1024
 
@@ -113,6 +116,7 @@ class RuntimeInstaller:
         self._cancel = threading.Event()
         self._thread: threading.Thread | None = None
         self._received = 0
+        self._total = 0
         self._error: InstallError | None = None
 
     @property
@@ -145,12 +149,19 @@ class RuntimeInstaller:
             downloading = self._downloading()
             error = self._error
             received = self._received
+            started_total = self._total
+        if downloading:
+            # Measured against what was missing when the download started: a file that
+            # finishes leaves the missing list, but its bytes stay in what was received.
+            return InstallStatus(
+                state="downloading", downloaded_bytes=received, total_bytes=started_total
+            )
         missing = self._missing()
         total = sum(file.size for file in missing)
-        if downloading:
-            return InstallStatus(state="downloading", downloaded_bytes=received, total_bytes=total)
         if not missing:
             return InstallStatus(state="installed")
+        if error is None and self._server_removed():
+            error = "server_removed"
         on_disk = sum(self._part_size(file) for file in missing)
         return InstallStatus(
             state="failed" if error is not None else "absent",
@@ -174,7 +185,9 @@ class RuntimeInstaller:
             if not self._downloading() and self._missing():
                 self._cancel.clear()
                 self._error = None
-                self._received = sum(self._part_size(file) for file in self._missing())
+                missing = self._missing()
+                self._received = sum(self._part_size(file) for file in missing)
+                self._total = sum(file.size for file in missing)
                 self._thread = threading.Thread(
                     target=self._run, name="runtime-download", daemon=True
                 )
@@ -209,6 +222,20 @@ class RuntimeInstaller:
     @property
     def _server_dir(self) -> Path:
         return self._root / "llama" / LLAMA_CPP_BUILD
+
+    def _server_removed(self) -> bool:
+        """The install completed, then lost its server: the folder is there, the file is not.
+
+        The folder is only ever moved into place whole, after extraction, so its presence
+        without the executable is something outside the app deleting it.
+        """
+        server = self.server_path
+        return (
+            server is not None
+            and self._server_dir.is_dir()
+            and not server.is_file()
+            and self.model_path.is_file()
+        )
 
     def _downloading(self) -> bool:
         return self._thread is not None and self._thread.is_alive()

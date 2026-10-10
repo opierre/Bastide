@@ -5222,5 +5222,9 @@
   "settingsAiStartingRuntime": "Démarrage du moteur…",
   "@settingsAiStartingRuntime": {
     "description": "Probe button label while the downloaded engine starts and loads its model."
+  },
+  "settingsAiRuntimeErrorRemoved": "Le moteur a été supprimé de cet ordinateur après son installation, sans doute par votre antivirus. Autorisez le dossier « runtime » des données de Bastide dans votre antivirus, puis réessayez.",
+  "@settingsAiRuntimeErrorRemoved": {
+    "description": "Failure: the installed llama-server executable was deleted since, in practice by antivirus quarantine. Retrying reinstalls it (the model is kept)."
   }
 }

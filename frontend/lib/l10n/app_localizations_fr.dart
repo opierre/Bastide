@@ -4019,4 +4019,8 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get settingsAiStartingRuntime => 'Démarrage du moteur…';
+
+  @override
+  String get settingsAiRuntimeErrorRemoved =>
+      'Le moteur a été supprimé de cet ordinateur après son installation, sans doute par votre antivirus. Autorisez le dossier « runtime » des données de Bastide dans votre antivirus, puis réessayez.';
 }
