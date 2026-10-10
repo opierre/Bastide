@@ -12,7 +12,8 @@ through this script, so they run the same steps:
 3. put the frozen backend inside the app, where the supervisor looks for it;
 4. wrap the app for this OS:
 
-   - Windows: ``Bastide-Setup-<version>.exe`` (Inno Setup, ``tools/windows/bastide.iss``).
+   - Windows: ``Bastide-Setup-<version>.exe`` (Inno Setup, ``tools/windows/bastide.iss``)
+     and the portable ``Bastide-<version>-windows.zip``.
 
 Like the backend freeze, nothing here cross-compiles: each OS packages itself.
 """
@@ -22,6 +23,7 @@ import re
 import shutil
 import subprocess
 import sys
+import zipfile
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -65,6 +67,15 @@ def numeric_version(version: str) -> str:
     return match[0]
 
 
+def zip_folder(folder: Path, archive: Path, top: str) -> None:
+    """Zip ``folder``'s contents under one ``top`` folder, so unzipping makes no mess."""
+    archive.unlink(missing_ok=True)
+    with zipfile.ZipFile(archive, "w", zipfile.ZIP_DEFLATED, compresslevel=9) as zf:
+        for path in sorted(folder.rglob("*")):
+            zf.write(path, Path(top) / path.relative_to(folder))
+    print(f"Wrote {archive}")
+
+
 def package_windows(version: str) -> None:
     release = FRONTEND / "build" / "windows" / "x64" / "runner" / "Release"
     # The CMake install step copies the backend in (frontend/windows/CMakeLists.txt).
@@ -82,6 +93,7 @@ def package_windows(version: str) -> None:
         f"/DSourceDir={release}", f"/DOutputDir={DIST}", "/Q",
         ROOT / "tools" / "windows" / "bastide.iss",
     )  # fmt: skip
+    zip_folder(release, DIST / f"Bastide-{version}-windows.zip", "Bastide")
 
 
 def main() -> int:
