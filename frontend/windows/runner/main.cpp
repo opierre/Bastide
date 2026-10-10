@@ -8,7 +8,7 @@
 namespace {
 
 // The window title, also how a second launch finds the first instance's window.
-constexpr const wchar_t kWindowTitle[] = L"bastide";
+constexpr const wchar_t kWindowTitle[] = L"Bastide";
 
 // Brings the running instance's window to the front. The new process may do
 // so: it is the one the user just launched, so it owns the foreground.

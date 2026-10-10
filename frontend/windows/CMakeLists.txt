@@ -106,3 +106,20 @@ install(DIRECTORY "${PROJECT_BUILD_DIR}/${FLUTTER_ASSET_DIR_NAME}"
 install(FILES "${AOT_LIBRARY}" DESTINATION "${INSTALL_BUNDLE_DATA_DIR}"
   CONFIGURATIONS Profile;Release
   COMPONENT Runtime)
+
+# The frozen backend (`uv run tools/build_backend.py`) goes in `backend/` beside
+# the executable, where the app's supervisor looks for it. Debug builds leave it
+# out and talk to a backend you run yourself (frontend/CLAUDE.md, Backend modes).
+set(BASTIDE_BACKEND_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../../backend/dist/bastide-backend")
+install(CODE "
+  file(REMOVE_RECURSE \"${CMAKE_INSTALL_PREFIX}/backend\")
+  " COMPONENT Runtime)
+if(EXISTS "${BASTIDE_BACKEND_DIR}/bastide-backend.exe")
+  install(DIRECTORY "${BASTIDE_BACKEND_DIR}/"
+    DESTINATION "${CMAKE_INSTALL_PREFIX}/backend"
+    CONFIGURATIONS Profile;Release
+    COMPONENT Runtime)
+else()
+  message(WARNING "No frozen backend at ${BASTIDE_BACKEND_DIR}: a release "
+    "build will not start. Run `uv run tools/build_backend.py` first.")
+endif()
