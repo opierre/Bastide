@@ -6,7 +6,8 @@
 User-facing changes (feat, fix, perf) are listed by section; everything else (docs, build,
 ci, ...) goes in a collapsed list. A `!` after the type or a `BREAKING CHANGE:` footer puts
 the commit under "Breaking changes" as well. Merge commits are skipped: the commits they
-bring in are listed on their own. With no earlier `v*` tag, the whole history counts.
+bring in are listed on their own. With no earlier `v*` tag, the whole history counts, and
+there are no breaking changes: nothing was released before, so nothing can break.
 
 Runs on the runner's system Python; standard library only.
 """
@@ -68,7 +69,7 @@ def notes(tag: str, repo: str) -> str:
             other.append(f"- {subject} ({sha})")
             continue
         entry = line(sha, match["scope"], match["subject"])
-        if match["bang"] or "BREAKING CHANGE:" in body:
+        if since and (match["bang"] or "BREAKING CHANGE:" in body):
             breaking.append(entry)
         if match["type"] in SECTIONS:
             sections[SECTIONS[match["type"]]].append(entry)
