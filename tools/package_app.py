@@ -14,7 +14,8 @@ through this script, so they run the same steps:
 
    - Windows: ``Bastide-Setup-<version>.exe`` (Inno Setup, ``tools/windows/bastide.iss``)
      and the portable ``Bastide-<version>-windows.zip``.
-   - macOS: ``Bastide.app``, ad-hoc signed (unsigned code doesn't run on Apple Silicon).
+   - macOS: ``Bastide.app``, ad-hoc signed (unsigned code doesn't run on Apple Silicon),
+     in ``Bastide-<version>-macos.dmg``.
 
 Like the backend freeze, nothing here cross-compiles: each OS packages itself.
 """
@@ -137,6 +138,21 @@ def bundle_macos() -> Path:
     return app
 
 
+def dmg_macos(app: Path, version: str) -> None:
+    """Wrap ``app`` in a disk image with an Applications shortcut to drag it onto."""
+    staging = DIST / "dmg"
+    shutil.rmtree(staging, ignore_errors=True)
+    staging.mkdir()
+    shutil.copytree(app, staging / app.name, symlinks=True)
+    (staging / "Applications").symlink_to("/Applications")
+    dmg = DIST / f"Bastide-{version}-macos.dmg"
+    run(
+        require("hdiutil"), "create", "-volname", "Bastide", "-srcfolder", staging,
+        "-fs", "HFS+", "-format", "UDZO", "-ov", dmg,
+    )  # fmt: skip
+    shutil.rmtree(staging)
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument(
@@ -168,7 +184,7 @@ def main() -> int:
     if platform == "windows":
         package_windows(version)
     else:
-        bundle_macos()
+        dmg_macos(bundle_macos(), version)
 
     print(f"Packaged Bastide {version} into {DIST}")
     return 0
