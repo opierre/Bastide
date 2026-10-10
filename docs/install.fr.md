@@ -105,10 +105,14 @@ ordinateur.
 
 2. Double-cliquez dessus, ou lancez `./Bastide-<version>-x86_64.AppImage`.
 
-Si rien ne se passe, il manque peut-être FUSE, dont les AppImage ont besoin. Sur Ubuntu 24.04 :
-`sudo apt install libfuse2t64` (Ubuntu 22.04 : `libfuse2`). Bastide garde votre connexion dans
-le trousseau du système : un service de trousseau (GNOME Keyring ou KWallet) doit tourner, ce
-qui est le cas sur les bureaux courants.
+Bastide a besoin de deux bibliothèques système, déjà présentes sur les bureaux courants. Si rien
+ne se passe au lancement, installez celle qui manque :
+
+- **FUSE**, dont toute AppImage a besoin : `sudo apt install libfuse2t64` sur Ubuntu 24.04
+  (`libfuse2` sur Ubuntu 22.04).
+- **libsecret**, par laquelle Bastide garde votre connexion dans le trousseau du système :
+  `sudo apt install libsecret-1-0` (Fedora : `sudo dnf install libsecret`). Un service de
+  trousseau (GNOME Keyring ou KWallet) doit aussi tourner.
 
 Pour mettre à jour, téléchargez la nouvelle AppImage et supprimez l'ancienne. Pour désinstaller,
 supprimez le fichier.
