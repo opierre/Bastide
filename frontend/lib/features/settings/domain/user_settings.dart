@@ -1,5 +1,17 @@
 import 'package:flutter/foundation.dart';
 
+/// Which engine categorization asks: the one at the stored address, or the one
+/// Bastide downloaded and starts itself.
+enum InferenceRuntime {
+  external,
+  managed;
+
+  static InferenceRuntime fromWire(Object? value) =>
+      value == 'managed' ? InferenceRuntime.managed : InferenceRuntime.external;
+
+  String get wire => name;
+}
+
 /// The user's server-side settings.
 ///
 /// These live on the backend, not in the Flutter store, because the *backend*
@@ -12,12 +24,14 @@ class UserSettings {
     required this.inferenceBaseUrl,
     required this.modelTag,
     required this.confidenceThreshold,
+    this.inferenceRuntime = InferenceRuntime.external,
     this.lastBackupAt,
   });
 
   factory UserSettings.fromJson(Map<String, dynamic> json) => UserSettings(
     aiEnabled: json['ai_enabled'] as bool,
     inferenceBaseUrl: json['inference_base_url'] as String,
+    inferenceRuntime: InferenceRuntime.fromWire(json['inference_runtime']),
     modelTag: json['model_tag'] as String?,
     confidenceThreshold: (json['confidence_threshold'] as num).toDouble(),
     lastBackupAt: switch (json['last_backup_at']) {
@@ -36,6 +50,10 @@ class UserSettings {
   /// OpenAI-compatible base, loopback only. A non-loopback value is refused by
   /// the backend with a 422 (see `SettingsController.baseUrlError`).
   final String inferenceBaseUrl;
+
+  /// Whether [inferenceBaseUrl] is in use, or the downloaded engine is. The
+  /// address is kept either way, so going back to it needs nothing re-typed.
+  final InferenceRuntime inferenceRuntime;
 
   /// The runtime's own model identifier; `null` means "whatever it lists first".
   final String? modelTag;
@@ -57,12 +75,14 @@ class UserSettings {
   UserSettings copyWith({
     bool? aiEnabled,
     String? inferenceBaseUrl,
+    InferenceRuntime? inferenceRuntime,
     String? modelTag,
     double? confidenceThreshold,
     DateTime? lastBackupAt,
   }) => UserSettings(
     aiEnabled: aiEnabled ?? this.aiEnabled,
     inferenceBaseUrl: inferenceBaseUrl ?? this.inferenceBaseUrl,
+    inferenceRuntime: inferenceRuntime ?? this.inferenceRuntime,
     modelTag: modelTag ?? this.modelTag,
     confidenceThreshold: confidenceThreshold ?? this.confidenceThreshold,
     lastBackupAt: lastBackupAt ?? this.lastBackupAt,
@@ -74,6 +94,7 @@ class UserSettings {
       (other is UserSettings &&
           other.aiEnabled == aiEnabled &&
           other.inferenceBaseUrl == inferenceBaseUrl &&
+          other.inferenceRuntime == inferenceRuntime &&
           other.modelTag == modelTag &&
           other.confidenceThreshold == confidenceThreshold &&
           other.lastBackupAt == lastBackupAt);
@@ -82,6 +103,7 @@ class UserSettings {
   int get hashCode => Object.hash(
     aiEnabled,
     inferenceBaseUrl,
+    inferenceRuntime,
     modelTag,
     confidenceThreshold,
     lastBackupAt,

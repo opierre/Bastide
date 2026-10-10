@@ -415,11 +415,116 @@ void main() {
                 ),
               ).captured.single
               as Map<String, dynamic>;
-      expect(body, {'inference_base_url': 'http://127.0.0.1:11434/v1'});
+      expect(body, {
+        'inference_base_url': 'http://127.0.0.1:11434/v1',
+        'inference_runtime': 'external',
+      });
       final state = container.read(settingsControllerProvider).value!;
       expect(state.settings.inferenceBaseUrl, 'http://127.0.0.1:11434/v1');
       expect(state.connection, InferenceConnection.reachable);
       expect(state.offersOllama, isFalse);
     });
+  });
+
+  group('built-in engine', () {
+    test('using it stores the runtime and its tag, then probes it', () async {
+      stubSettings(_settingsJson(aiEnabled: true));
+      stubHealth(_healthJson(reachable: false, models: []));
+      await load();
+
+      stubPatch({
+        ..._settingsJson(aiEnabled: true, modelTag: 'gemma-4-e4b-it'),
+        'inference_runtime': 'managed',
+      });
+      stubHealth(_healthJson(models: ['gemma-4-e4b-it']));
+      await controller().useLocalRuntime('gemma-4-e4b-it');
+
+      final body =
+          verify(
+                () => apiClient.patch(
+                  '/settings',
+                  body: captureAny(named: 'body'),
+                ),
+              ).captured.single
+              as Map<String, dynamic>;
+      expect(body, {
+        'inference_runtime': 'managed',
+        'model_tag': 'gemma-4-e4b-it',
+      });
+      final state = container.read(settingsControllerProvider).value!;
+      expect(state.usesLocalRuntime, isTrue);
+      expect(state.connection, InferenceConnection.reachable);
+    });
+
+    test('typing an address goes back to the engine at it', () async {
+      stubSettings({
+        ..._settingsJson(aiEnabled: true),
+        'inference_runtime': 'managed',
+      });
+      stubHealth(_healthJson());
+      await load();
+
+      stubPatch(
+        _settingsJson(aiEnabled: true, baseUrl: 'http://127.0.0.1:8080/v1'),
+      );
+      controller().setBaseUrl('http://127.0.0.1:8080/v1');
+      expect(
+        container.read(settingsControllerProvider).value!.usesLocalRuntime,
+        isFalse,
+      );
+      await controller().probe();
+
+      final body =
+          verify(
+                () => apiClient.patch(
+                  '/settings',
+                  body: captureAny(named: 'body'),
+                ),
+              ).captured.single
+              as Map<String, dynamic>;
+      expect(body['inference_runtime'], 'external');
+      expect(body['inference_base_url'], 'http://127.0.0.1:8080/v1');
+    });
+
+    test('removing it while in use returns to the stored address', () async {
+      stubSettings({
+        ..._settingsJson(aiEnabled: true),
+        'inference_runtime': 'managed',
+      });
+      stubHealth(_healthJson());
+      await load();
+
+      stubPatch(_settingsJson(aiEnabled: true));
+      await controller().useStoredAddress();
+
+      final body =
+          verify(
+                () => apiClient.patch(
+                  '/settings',
+                  body: captureAny(named: 'body'),
+                ),
+              ).captured.single
+              as Map<String, dynamic>;
+      expect(body, {'inference_runtime': 'external'});
+      expect(
+        container.read(settingsControllerProvider).value!.usesLocalRuntime,
+        isFalse,
+      );
+    });
+
+    test(
+      'returning to the stored address is a no-op when already there',
+      () async {
+        stubSettings(_settingsJson(aiEnabled: true));
+        stubHealth(_healthJson());
+        await load();
+
+        await controller().useStoredAddress();
+
+        verifyNever(
+          () => apiClient.patch('/settings', body: any(named: 'body')),
+        );
+      },
+    );
   });
 }

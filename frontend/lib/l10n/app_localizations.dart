@@ -6282,6 +6282,36 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'{value} Mo'**
   String settingsAiRuntimeSizeMb(String value);
+
+  /// Button switching categorization to the downloaded engine.
+  ///
+  /// In fr, this message translates to:
+  /// **'Utiliser'**
+  String get settingsAiRuntimeUse;
+
+  /// Caption of the installed engine while it is the one in use.
+  ///
+  /// In fr, this message translates to:
+  /// **'Utilisé pour la catégorisation — il démarre à la première demande et s\'arrête avec Bastide.'**
+  String get settingsAiRuntimeInUse;
+
+  /// Helper under the address field while the downloaded engine is in use.
+  ///
+  /// In fr, this message translates to:
+  /// **'Le moteur intégré est utilisé. Saisir une adresse revient à un moteur externe.'**
+  String get settingsAiBaseUrlHelpLocalRuntime;
+
+  /// Helper under the read-only model field while the downloaded engine is in use.
+  ///
+  /// In fr, this message translates to:
+  /// **'Modèle du moteur intégré.'**
+  String get settingsAiModelLocalRuntime;
+
+  /// Probe button label while the downloaded engine starts and loads its model.
+  ///
+  /// In fr, this message translates to:
+  /// **'Démarrage du moteur…'**
+  String get settingsAiStartingRuntime;
 }
 
 class _AppLocalizationsDelegate

@@ -89,6 +89,12 @@ class _CardState extends ConsumerState<_Card> {
         baseUrl != _baseUrl.text) {
       _baseUrl.text = baseUrl;
     }
+    // « Utiliser » on the built-in engine stores its model tag the same way.
+    final modelTag = widget.state.settings.modelTag ?? '';
+    if (modelTag != (oldWidget.state.settings.modelTag ?? '') &&
+        modelTag != _modelTag.text) {
+      _modelTag.text = modelTag;
+    }
   }
 
   @override
@@ -144,7 +150,11 @@ class _CardState extends ConsumerState<_Card> {
           ],
           if (state.settings.aiEnabled) ...[
             const SizedBox(height: AppSpacing.md),
-            const LocalRuntimePlate(),
+            LocalRuntimePlate(
+              inUse: state.usesLocalRuntime,
+              onUse: _controller.useLocalRuntime,
+              onRemoved: _controller.useStoredAddress,
+            ),
           ],
           const SizedBox(height: AppSpacing.md),
           Row(
@@ -154,7 +164,9 @@ class _CardState extends ConsumerState<_Card> {
                 flex: 13,
                 child: LabeledField(
                   label: l10n.settingsAiBaseUrlLabel,
-                  helper: l10n.settingsAiBaseUrlHelp,
+                  helper: state.usesLocalRuntime
+                      ? l10n.settingsAiBaseUrlHelpLocalRuntime
+                      : l10n.settingsAiBaseUrlHelp,
                   errorText: state.baseUrlError == null
                       ? null
                       : l10n.settingsAiBaseUrlRejected,
@@ -178,6 +190,7 @@ class _CardState extends ConsumerState<_Card> {
                 flex: 10,
                 child: _ModelField(
                   controller: _modelTag,
+                  usesLocalRuntime: state.usesLocalRuntime,
                   connection: state.connection,
                   models: state.models,
                   onTyped: _controller.setModelTag,
@@ -211,6 +224,11 @@ class _CardState extends ConsumerState<_Card> {
             connection: state.connection,
             modelCount: state.models.length,
             isProbing: state.isProbing,
+            // The first probe of the built-in engine is what starts it, and
+            // loading the model takes a while: say so rather than « Test ».
+            probingLabel: state.usesLocalRuntime
+                ? l10n.settingsAiStartingRuntime
+                : l10n.settingsAiTesting,
             onTest: () => _controller.probe(),
           ),
         ],
@@ -300,6 +318,7 @@ class _OllamaPlate extends StatelessWidget {
 class _ModelField extends StatelessWidget {
   const _ModelField({
     required this.controller,
+    required this.usesLocalRuntime,
     required this.connection,
     required this.models,
     required this.onTyped,
@@ -307,6 +326,9 @@ class _ModelField extends StatelessWidget {
   });
 
   final TextEditingController controller;
+
+  /// The built-in engine serves one model under one tag: nothing to choose.
+  final bool usesLocalRuntime;
   final InferenceConnection connection;
   final List<String> models;
   final ValueChanged<String> onTyped;
@@ -315,6 +337,17 @@ class _ModelField extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+
+    if (usesLocalRuntime) {
+      return LabeledField(
+        label: l10n.settingsAiModelLabel,
+        helper: l10n.settingsAiModelLocalRuntime,
+        child: ReadOnlyField(
+          key: const Key('settingsAiModelReadOnly'),
+          value: controller.text,
+        ),
+      );
+    }
 
     if (connection.isUnreachable) {
       return LabeledField(
@@ -408,12 +441,14 @@ class _StatusRow extends StatelessWidget {
     required this.connection,
     required this.modelCount,
     required this.isProbing,
+    required this.probingLabel,
     required this.onTest,
   });
 
   final InferenceConnection connection;
   final int modelCount;
   final bool isProbing;
+  final String probingLabel;
   final VoidCallback onTest;
 
   Color get _dotColor => switch (connection) {
@@ -477,7 +512,7 @@ class _StatusRow extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(width: AppSpacing.sm),
-                      Text(l10n.settingsAiTesting),
+                      Text(probingLabel),
                     ],
                   )
                 : Text(l10n.settingsAiTest),

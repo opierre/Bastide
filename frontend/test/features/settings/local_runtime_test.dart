@@ -29,24 +29,38 @@ Map<String, dynamic> _runtime({
 
 void main() {
   late MockApiClient apiClient;
+  late List<String> used;
+  late int removedCalls;
 
-  setUp(() => apiClient = MockApiClient());
+  setUp(() {
+    apiClient = MockApiClient();
+    used = [];
+    removedCalls = 0;
+  });
 
   void stubRead(Map<String, dynamic> json) =>
       when(() => apiClient.get(_path)).thenAnswer((_) async => json);
 
-  Widget wrap({Locale locale = const Locale('fr')}) => ProviderScope(
-    overrides: [apiClientProvider.overrideWithValue(apiClient)],
-    child: MaterialApp(
-      locale: locale,
-      theme: appDarkTheme,
-      localizationsDelegates: AppLocalizations.localizationsDelegates,
-      supportedLocales: AppLocalizations.supportedLocales,
-      home: const Scaffold(
-        body: SizedBox(width: 600, child: LocalRuntimePlate()),
-      ),
-    ),
-  );
+  Widget wrap({Locale locale = const Locale('fr'), bool inUse = false}) =>
+      ProviderScope(
+        overrides: [apiClientProvider.overrideWithValue(apiClient)],
+        child: MaterialApp(
+          locale: locale,
+          theme: appDarkTheme,
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: Scaffold(
+            body: SizedBox(
+              width: 640,
+              child: LocalRuntimePlate(
+                inUse: inUse,
+                onUse: used.add,
+                onRemoved: () => removedCalls++,
+              ),
+            ),
+          ),
+        ),
+      );
 
   String caption(WidgetTester tester) => tester
       .widget<Text>(find.byKey(const Key('settingsAiRuntimeCaption')))
@@ -230,6 +244,7 @@ void main() {
       await tester.pumpAndSettle();
 
       verify(() => apiClient.delete(_path)).called(1);
+      expect(removedCalls, 1);
       expect(find.text('Télécharger'), findsOneWidget);
     });
 
@@ -244,7 +259,31 @@ void main() {
       await tester.pumpAndSettle();
 
       verifyNever(() => apiClient.delete(_path));
+      expect(removedCalls, 0);
       expect(find.text('Installé sur cet ordinateur.'), findsOneWidget);
+    });
+
+    testWidgets('offers to use it, under the tag it serves', (tester) async {
+      stubRead(_runtime(state: 'installed', total: 0));
+
+      await tester.pumpWidget(wrap());
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const Key('settingsAiRuntimeUse')));
+
+      expect(used, ['gemma-4-e4b-it']);
+    });
+
+    testWidgets('in use, it says so and offers no second « Utiliser »', (
+      tester,
+    ) async {
+      stubRead(_runtime(state: 'installed', total: 0));
+
+      await tester.pumpWidget(wrap(inUse: true));
+      await tester.pumpAndSettle();
+
+      expect(caption(tester), startsWith('Utilisé pour la catégorisation'));
+      expect(find.byKey(const Key('settingsAiRuntimeUse')), findsNothing);
+      expect(find.byKey(const Key('settingsAiRuntimeRemove')), findsOneWidget);
     });
   });
 }

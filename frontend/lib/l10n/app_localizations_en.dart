@@ -3973,4 +3973,21 @@ class AppLocalizationsEn extends AppLocalizations {
   String settingsAiRuntimeSizeMb(String value) {
     return '$value MB';
   }
+
+  @override
+  String get settingsAiRuntimeUse => 'Use';
+
+  @override
+  String get settingsAiRuntimeInUse =>
+      'Used for categorization — it starts on the first request and stops with Bastide.';
+
+  @override
+  String get settingsAiBaseUrlHelpLocalRuntime =>
+      'The built-in engine is in use. Typing an address switches back to an external engine.';
+
+  @override
+  String get settingsAiModelLocalRuntime => 'The built-in engine\'s model.';
+
+  @override
+  String get settingsAiStartingRuntime => 'Starting the engine…';
 }

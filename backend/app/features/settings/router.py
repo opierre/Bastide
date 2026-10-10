@@ -25,6 +25,7 @@ def _to_read(settings: UserSettings) -> SettingsRead:
     return SettingsRead(
         ai_enabled=settings.ai_enabled,
         inference_base_url=settings.inference_base_url,
+        inference_runtime="managed" if settings.inference_runtime == "managed" else "external",
         model_tag=settings.model_tag,
         confidence_threshold=settings.confidence_threshold,
         # SQLite hands timestamps back naive; they were written in UTC, so say so on the wire.

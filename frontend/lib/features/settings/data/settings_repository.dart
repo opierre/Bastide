@@ -27,6 +27,7 @@ class SettingsRepository {
   Future<UserSettings> update({
     bool? aiEnabled,
     String? inferenceBaseUrl,
+    InferenceRuntime? inferenceRuntime,
     String? modelTag,
     double? confidenceThreshold,
   }) async {
@@ -35,6 +36,7 @@ class SettingsRepository {
       body: <String, Object?>{
         'ai_enabled': ?aiEnabled,
         'inference_base_url': ?inferenceBaseUrl,
+        'inference_runtime': ?inferenceRuntime?.wire,
         'model_tag': ?modelTag,
         'confidence_threshold': ?confidenceThreshold,
       },

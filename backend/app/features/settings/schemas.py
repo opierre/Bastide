@@ -2,7 +2,7 @@
 
 import ipaddress
 from datetime import datetime
-from typing import Annotated
+from typing import Annotated, Literal
 from urllib.parse import urlparse
 
 from pydantic import AfterValidator, BaseModel, ConfigDict, Field
@@ -44,6 +44,9 @@ InferenceBaseUrl = Annotated[
 ]
 ConfidenceThreshold = Annotated[float, Field(ge=0, le=1)]
 
+#: Which runtime categorization uses: the one at `inference_base_url`, or the downloaded one.
+InferenceRuntime = Literal["external", "managed"]
+
 
 class SettingsUpdate(BaseModel):
     """Patch payload; omitted fields keep their stored value."""
@@ -54,6 +57,7 @@ class SettingsUpdate(BaseModel):
 
     ai_enabled: bool | None = None
     inference_base_url: InferenceBaseUrl | None = None
+    inference_runtime: InferenceRuntime | None = None
     model_tag: str | None = Field(default=None, max_length=255)
     confidence_threshold: ConfidenceThreshold | None = None
     #: Monthly income the debt ratio runs on. An explicit `null` clears the declaration so
@@ -68,6 +72,7 @@ class SettingsRead(BaseModel):
 
     ai_enabled: bool
     inference_base_url: str
+    inference_runtime: InferenceRuntime
     model_tag: str | None
     confidence_threshold: float
     last_backup_at: datetime | None

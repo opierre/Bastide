@@ -5202,5 +5202,25 @@
         "type": "String"
       }
     }
+  },
+  "settingsAiRuntimeUse": "Utiliser",
+  "@settingsAiRuntimeUse": {
+    "description": "Button switching categorization to the downloaded engine."
+  },
+  "settingsAiRuntimeInUse": "Utilisé pour la catégorisation — il démarre à la première demande et s'arrête avec Bastide.",
+  "@settingsAiRuntimeInUse": {
+    "description": "Caption of the installed engine while it is the one in use."
+  },
+  "settingsAiBaseUrlHelpLocalRuntime": "Le moteur intégré est utilisé. Saisir une adresse revient à un moteur externe.",
+  "@settingsAiBaseUrlHelpLocalRuntime": {
+    "description": "Helper under the address field while the downloaded engine is in use."
+  },
+  "settingsAiModelLocalRuntime": "Modèle du moteur intégré.",
+  "@settingsAiModelLocalRuntime": {
+    "description": "Helper under the read-only model field while the downloaded engine is in use."
+  },
+  "settingsAiStartingRuntime": "Démarrage du moteur…",
+  "@settingsAiStartingRuntime": {
+    "description": "Probe button label while the downloaded engine starts and loads its model."
   }
 }

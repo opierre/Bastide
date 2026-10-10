@@ -1074,5 +1074,10 @@
   "settingsAiRuntimeErrorDisk": "Not enough disk space — {size} needed.",
   "settingsAiRuntimeErrorExtract": "The engine archive could not be unpacked.",
   "settingsAiRuntimeSizeGb": "{value} GB",
-  "settingsAiRuntimeSizeMb": "{value} MB"
+  "settingsAiRuntimeSizeMb": "{value} MB",
+  "settingsAiRuntimeUse": "Use",
+  "settingsAiRuntimeInUse": "Used for categorization — it starts on the first request and stops with Bastide.",
+  "settingsAiBaseUrlHelpLocalRuntime": "The built-in engine is in use. Typing an address switches back to an external engine.",
+  "settingsAiModelLocalRuntime": "The built-in engine's model.",
+  "settingsAiStartingRuntime": "Starting the engine…"
 }

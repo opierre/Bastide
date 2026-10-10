@@ -8,9 +8,10 @@ from sqlalchemy.orm import Session
 from app.core.db import get_db
 from app.features.auth.deps import get_current_user
 from app.features.auth.models import User
-from app.features.inference.client import InferenceClient, client_from_settings
+from app.features.inference.client import InferenceClient
 from app.features.inference.local_runtime import get_managed_runtime, get_runtime_installer
 from app.features.inference.ollama import ollama_client
+from app.features.inference.resolve import client_from_settings
 from app.features.inference.runtime_install import InstallStatus, RuntimeInstaller
 from app.features.inference.runtime_manifest import MODEL_ALIAS
 from app.features.inference.runtime_process import ManagedRuntime

@@ -18,7 +18,21 @@ import 'engine_plate.dart';
 /// build exists for this machine: it is an offer next to the address field,
 /// not a part of the card the user needs.
 class LocalRuntimePlate extends ConsumerWidget {
-  const LocalRuntimePlate({super.key});
+  const LocalRuntimePlate({
+    super.key,
+    required this.inUse,
+    required this.onUse,
+    required this.onRemoved,
+  });
+
+  /// Categorization asks this engine rather than the stored address.
+  final bool inUse;
+
+  /// Switches to this engine, under the model tag it serves.
+  final ValueChanged<String> onUse;
+
+  /// The engine was deleted: whatever used it has to stop.
+  final VoidCallback onRemoved;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -38,6 +52,10 @@ class LocalRuntimePlate extends ConsumerWidget {
           size(runtime.downloadedBytes),
           size(runtime.totalBytes),
         ),
+        AppColors.textSecondary,
+      ),
+      LocalRuntimeState.installed when inUse => (
+        l10n.settingsAiRuntimeInUse,
         AppColors.textSecondary,
       ),
       LocalRuntimeState.installed => (
@@ -67,10 +85,24 @@ class LocalRuntimePlate extends ConsumerWidget {
         label: l10n.settingsAiRuntimeCancel,
         onPressed: controller.cancel,
       ),
-      LocalRuntimeState.installed => _SecondaryButton(
-        key: const Key('settingsAiRuntimeRemove'),
-        label: l10n.settingsAiRuntimeRemove,
-        onPressed: () => _confirmRemove(context, controller),
+      LocalRuntimeState.installed => Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          _SecondaryButton(
+            key: const Key('settingsAiRuntimeRemove'),
+            label: l10n.settingsAiRuntimeRemove,
+            onPressed: () => _confirmRemove(context, controller),
+          ),
+          if (!inUse) ...[
+            const SizedBox(width: AppSpacing.sm),
+            PrimaryButton(
+              key: const Key('settingsAiRuntimeUse'),
+              label: l10n.settingsAiRuntimeUse,
+              height: 34,
+              onPressed: () => onUse(runtime.modelTag),
+            ),
+          ],
+        ],
       ),
       LocalRuntimeState.failed => PrimaryButton(
         key: const Key('settingsAiRuntimeRetry'),
@@ -146,7 +178,9 @@ class LocalRuntimePlate extends ConsumerWidget {
         ),
       ),
     );
-    if (confirmed ?? false) await controller.remove();
+    if (!(confirmed ?? false)) return;
+    await controller.remove();
+    onRemoved();
   }
 }
 

@@ -4002,4 +4002,21 @@ class AppLocalizationsFr extends AppLocalizations {
   String settingsAiRuntimeSizeMb(String value) {
     return '$value Mo';
   }
+
+  @override
+  String get settingsAiRuntimeUse => 'Utiliser';
+
+  @override
+  String get settingsAiRuntimeInUse =>
+      'Utilisé pour la catégorisation — il démarre à la première demande et s\'arrête avec Bastide.';
+
+  @override
+  String get settingsAiBaseUrlHelpLocalRuntime =>
+      'Le moteur intégré est utilisé. Saisir une adresse revient à un moteur externe.';
+
+  @override
+  String get settingsAiModelLocalRuntime => 'Modèle du moteur intégré.';
+
+  @override
+  String get settingsAiStartingRuntime => 'Démarrage du moteur…';
 }

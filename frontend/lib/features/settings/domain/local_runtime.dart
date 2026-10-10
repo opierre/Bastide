@@ -25,6 +25,7 @@ class LocalRuntime {
     required this.downloadedBytes,
     required this.totalBytes,
     required this.modelTag,
+    this.running = false,
     this.error,
   });
 
@@ -39,6 +40,7 @@ class LocalRuntime {
     downloadedBytes: json['downloaded_bytes'] as int,
     totalBytes: json['total_bytes'] as int,
     modelTag: json['model_tag'] as String,
+    running: json['running'] as bool? ?? false,
     error: switch (json['error']) {
       'network' => LocalRuntimeError.network,
       'hash_mismatch' => LocalRuntimeError.hashMismatch,
@@ -59,6 +61,9 @@ class LocalRuntime {
   /// The tag the engine serves its model under, to store as the model.
   final String modelTag;
 
+  /// The server is up. It starts on the first request that needs a model.
+  final bool running;
+
   final LocalRuntimeError? error;
 
   /// Share of the download done, in `[0,1]`.
@@ -76,9 +81,10 @@ class LocalRuntime {
           other.downloadedBytes == downloadedBytes &&
           other.totalBytes == totalBytes &&
           other.modelTag == modelTag &&
+          other.running == running &&
           other.error == error);
 
   @override
   int get hashCode =>
-      Object.hash(state, downloadedBytes, totalBytes, modelTag, error);
+      Object.hash(state, downloadedBytes, totalBytes, modelTag, running, error);
 }

@@ -74,8 +74,12 @@ class SettingsState {
     return settings.aiEnabled &&
         detected != null &&
         detected.found &&
-        detected.baseUrl != settings.inferenceBaseUrl;
+        (usesLocalRuntime || detected.baseUrl != settings.inferenceBaseUrl);
   }
+
+  /// The downloaded engine, not the address, is what categorization asks.
+  bool get usesLocalRuntime =>
+      settings.inferenceRuntime == InferenceRuntime.managed;
 
   /// The threshold as the whole percent the slider works in.
   int get thresholdPercent => settings.confidenceThresholdPercent;
@@ -111,16 +115,18 @@ class SettingsController extends AsyncNotifier<SettingsState> {
   Timer? _debounce;
 
   // Edits made since the last flush; `null` means "untouched", which is also
-  // what the repository reads as "do not send this field". Four typed slots
+  // what the repository reads as "do not send this field". Typed slots
   // rather than a map of wire names keeps the JSON vocabulary in `data/`.
   bool? _pendingAiEnabled;
   String? _pendingBaseUrl;
+  InferenceRuntime? _pendingRuntime;
   String? _pendingModelTag;
   double? _pendingThreshold;
 
   bool get _hasPendingEdits =>
       _pendingAiEnabled != null ||
       _pendingBaseUrl != null ||
+      _pendingRuntime != null ||
       _pendingModelTag != null ||
       _pendingThreshold != null;
 
@@ -171,12 +177,48 @@ class SettingsController extends AsyncNotifier<SettingsState> {
 
   /// The engine address. Debounced, then probed — the backend dials whatever it
   /// has *stored*, so the probe has to follow the patch rather than race it.
+  ///
+  /// Typing an address is choosing it: a user on the downloaded engine who
+  /// edits the field is back on the engine at that address.
   void setBaseUrl(String value) {
     _pendingBaseUrl = value;
+    _pendingRuntime = InferenceRuntime.external;
     _edit(
-      (settings) => settings.copyWith(inferenceBaseUrl: value),
+      (settings) => settings.copyWith(
+        inferenceBaseUrl: value,
+        inferenceRuntime: InferenceRuntime.external,
+      ),
       clearsBaseUrlError: true,
     );
+  }
+
+  /// Switches to the downloaded engine, under the model tag it serves, then
+  /// probes it — which is what starts it, so the status row reports the
+  /// engine actually answering rather than a setting being saved.
+  Future<void> useLocalRuntime(String modelTag) async {
+    _pendingRuntime = InferenceRuntime.managed;
+    _pendingModelTag = modelTag;
+    _edit(
+      (settings) => settings.copyWith(
+        inferenceRuntime: InferenceRuntime.managed,
+        modelTag: modelTag,
+      ),
+    );
+    final accepted = await _flush();
+    if (accepted) await probe();
+  }
+
+  /// Back to the engine at the stored address — after the downloaded one was
+  /// removed, say. Does nothing when that is already the case.
+  Future<void> useStoredAddress() async {
+    if (!(state.value?.usesLocalRuntime ?? false)) return;
+    _pendingRuntime = InferenceRuntime.external;
+    _edit(
+      (settings) =>
+          settings.copyWith(inferenceRuntime: InferenceRuntime.external),
+    );
+    final accepted = await _flush();
+    if (accepted) await probe();
   }
 
   /// The model tag, whether picked from the probe's list or typed by hand.
@@ -284,10 +326,12 @@ class SettingsController extends AsyncNotifier<SettingsState> {
 
     final aiEnabled = _pendingAiEnabled;
     final baseUrl = _pendingBaseUrl;
+    final runtime = _pendingRuntime;
     final modelTag = _pendingModelTag;
     final threshold = _pendingThreshold;
     _pendingAiEnabled = null;
     _pendingBaseUrl = null;
+    _pendingRuntime = null;
     _pendingModelTag = null;
     _pendingThreshold = null;
 
@@ -299,6 +343,7 @@ class SettingsController extends AsyncNotifier<SettingsState> {
           .update(
             aiEnabled: aiEnabled,
             inferenceBaseUrl: baseUrl,
+            inferenceRuntime: runtime,
             modelTag: modelTag,
             confidenceThreshold: threshold,
           );
