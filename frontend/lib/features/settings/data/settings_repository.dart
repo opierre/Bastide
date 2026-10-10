@@ -4,8 +4,9 @@ import '../../../core/api/api_client.dart';
 import '../../../core/api/api_client_provider.dart';
 import '../domain/user_settings.dart';
 
-/// Calls `/settings` and the runtime probe at `/settings/inference/health`.
-/// The only place that knows those wire shapes.
+/// Calls `/settings`, the runtime probe at `/settings/inference/health` and
+/// the Ollama detection at `/settings/inference/ollama`. The only place that
+/// knows those wire shapes.
 class SettingsRepository {
   SettingsRepository(this._apiClient);
 
@@ -49,6 +50,12 @@ class SettingsRepository {
   Future<InferenceHealth> probe() async {
     final json = await _apiClient.get('/settings/inference/health');
     return InferenceHealth.fromJson(json as Map<String, dynamic>);
+  }
+
+  /// Asks whether Ollama answers on its default loopback address.
+  Future<OllamaDetection> detectOllama() async {
+    final json = await _apiClient.get('/settings/inference/ollama');
+    return OllamaDetection.fromJson(json as Map<String, dynamic>);
   }
 }
 

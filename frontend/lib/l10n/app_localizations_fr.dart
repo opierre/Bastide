@@ -3914,4 +3914,22 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get startupContinueAnyway => 'Continuer quand même';
+
+  @override
+  String get settingsAiOllamaFound => 'Ollama détecté sur cet ordinateur';
+
+  @override
+  String settingsAiOllamaModels(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count modèles installés',
+      one: '1 modèle installé',
+      zero: 'Aucun modèle installé pour l\'instant',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get settingsAiOllamaUse => 'Utiliser Ollama';
 }

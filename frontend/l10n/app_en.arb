@@ -1053,5 +1053,8 @@
   "startupVersionMismatchTitle": "Mismatched versions",
   "startupVersionMismatchMessage": "The app ({app}) and its local engine ({backend}) come from different versions. Reinstall Bastide to bring them back in line; your data isn't touched.",
   "startupVersionMismatchDebugMessage": "The local engine ({backend}) doesn't match the app ({app}): it was probably left running from an earlier session. Restart it, or continue anyway.",
-  "startupContinueAnyway": "Continue anyway"
+  "startupContinueAnyway": "Continue anyway",
+  "settingsAiOllamaFound": "Ollama found on this computer",
+  "settingsAiOllamaModels": "{count, plural, =0{No models installed yet} =1{1 model installed} other{{count} models installed}}",
+  "settingsAiOllamaUse": "Use Ollama"
 }

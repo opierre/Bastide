@@ -5077,5 +5077,22 @@
   "startupContinueAnyway": "Continuer quand même",
   "@startupContinueAnyway": {
     "description": "Button on the developer version warning that opens the app anyway."
+  },
+  "settingsAiOllamaFound": "Ollama détecté sur cet ordinateur",
+  "@settingsAiOllamaFound": {
+    "description": "Title of the plate offering an Ollama install found on its default loopback address."
+  },
+  "settingsAiOllamaModels": "{count, plural, =0{Aucun modèle installé pour l'instant} =1{1 modèle installé} other{{count} modèles installés}}",
+  "@settingsAiOllamaModels": {
+    "description": "Caption under settingsAiOllamaFound: how many models that Ollama lists.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "settingsAiOllamaUse": "Utiliser Ollama",
+  "@settingsAiOllamaUse": {
+    "description": "Button pointing the engine address at the detected Ollama."
   }
 }

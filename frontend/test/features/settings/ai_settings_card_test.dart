@@ -69,7 +69,13 @@ void main() {
       theme: appDarkTheme,
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
-      home: const Scaffold(body: SizedBox(width: 640, child: AiSettingsCard())),
+      // Scrollable like the settings panel the card lives in, so a card taller
+      // than the test viewport lays out as it does in the app.
+      home: const Scaffold(
+        body: SingleChildScrollView(
+          child: SizedBox(width: 640, child: AiSettingsCard()),
+        ),
+      ),
     ),
   );
 
@@ -218,6 +224,73 @@ void main() {
         isFalse,
       );
       expect(find.text('Catégorisation par IA désactivée.'), findsOneWidget);
+    });
+  });
+
+  group('ollama', () {
+    void stubOllama({required bool found}) {
+      when(() => apiClient.get('/settings/inference/ollama')).thenAnswer(
+        (_) async => {
+          'found': found,
+          'base_url': 'http://127.0.0.1:11434/v1',
+          'models': found ? ['gemma4:e4b', 'qwen3:4b'] : <String>[],
+        },
+      );
+    }
+
+    testWidgets('a detected Ollama is offered when the address differs', (
+      tester,
+    ) async {
+      stub(
+        settings: _settingsJson(baseUrl: 'http://127.0.0.1:8080/v1'),
+        health: _healthJson(reachable: false, models: []),
+      );
+      stubOllama(found: true);
+
+      await tester.pumpWidget(wrap());
+      await tester.pumpAndSettle();
+
+      expect(find.text('Ollama détecté sur cet ordinateur'), findsOneWidget);
+      expect(find.text('2 modèles installés'), findsOneWidget);
+    });
+
+    testWidgets('using it rewrites the address field', (tester) async {
+      stub(
+        settings: _settingsJson(baseUrl: 'http://127.0.0.1:8080/v1'),
+        health: _healthJson(reachable: false, models: []),
+      );
+      stubOllama(found: true);
+
+      await tester.pumpWidget(wrap());
+      await tester.pumpAndSettle();
+
+      when(
+        () => apiClient.patch('/settings', body: any(named: 'body')),
+      ).thenAnswer((_) async => _settingsJson());
+      when(
+        () => apiClient.get('/settings/inference/health'),
+      ).thenAnswer((_) async => _healthJson());
+      await tester.tap(find.byKey(const Key('settingsAiOllamaUse')));
+      await tester.pumpAndSettle();
+
+      final field = tester.widget<TextField>(
+        find.byKey(const Key('settingsAiBaseUrlField')),
+      );
+      expect(field.controller!.text, 'http://127.0.0.1:11434/v1');
+      expect(find.byKey(const Key('settingsAiOllamaPlate')), findsNothing);
+    });
+
+    testWidgets('nothing is offered when no Ollama answers', (tester) async {
+      stub(
+        settings: _settingsJson(baseUrl: 'http://127.0.0.1:8080/v1'),
+        health: _healthJson(reachable: false, models: []),
+      );
+      stubOllama(found: false);
+
+      await tester.pumpWidget(wrap());
+      await tester.pumpAndSettle();
+
+      expect(find.byKey(const Key('settingsAiOllamaPlate')), findsNothing);
     });
   });
 

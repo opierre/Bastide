@@ -332,4 +332,94 @@ void main() {
       expect(state.models, isNotEmpty);
     });
   });
+
+  group('ollama detection', () {
+    void stubOllama({
+      bool found = true,
+      List<String> models = const ['gemma4:e4b'],
+    }) {
+      when(() => apiClient.get('/settings/inference/ollama')).thenAnswer(
+        (_) async => {
+          'found': found,
+          'base_url': 'http://127.0.0.1:11434/v1',
+          'models': models,
+        },
+      );
+    }
+
+    test('runs with the probe on mount once opted in', () async {
+      stubSettings(
+        _settingsJson(aiEnabled: true, baseUrl: 'http://127.0.0.1:8080/v1'),
+      );
+      stubHealth(_healthJson(reachable: false, models: []));
+      stubOllama();
+
+      final state = await load();
+
+      expect(state.ollama?.found, isTrue);
+      expect(state.ollama?.models, ['gemma4:e4b']);
+      expect(state.offersOllama, isTrue);
+    });
+
+    test('is not offered when the address already points at it', () async {
+      stubSettings(_settingsJson(aiEnabled: true));
+      stubHealth(_healthJson());
+      stubOllama();
+
+      final state = await load();
+
+      expect(state.ollama?.found, isTrue);
+      expect(state.offersOllama, isFalse);
+    });
+
+    test('is not offered when nothing answers', () async {
+      stubSettings(
+        _settingsJson(aiEnabled: true, baseUrl: 'http://127.0.0.1:8080/v1'),
+      );
+      stubHealth(_healthJson(reachable: false, models: []));
+      stubOllama(found: false, models: []);
+
+      expect((await load()).offersOllama, isFalse);
+    });
+
+    test('a detection that fails reads as nothing found', () async {
+      stubSettings(_settingsJson(aiEnabled: true));
+      stubHealth(_healthJson());
+      when(
+        () => apiClient.get('/settings/inference/ollama'),
+      ).thenThrow(const ApiFailure(code: 'UNKNOWN_ERROR', message: 'boom'));
+
+      final state = await load();
+
+      expect(state.ollama, isNull);
+      expect(state.offersOllama, isFalse);
+    });
+
+    test('using it stores its address and probes it at once', () async {
+      stubSettings(
+        _settingsJson(aiEnabled: true, baseUrl: 'http://127.0.0.1:8080/v1'),
+      );
+      stubHealth(_healthJson(reachable: false, models: []));
+      stubOllama();
+      await load();
+
+      stubPatch(_settingsJson(aiEnabled: true));
+      stubHealth(_healthJson());
+      await controller().useOllama();
+
+      final body =
+          verify(
+                () => apiClient.patch(
+                  '/settings',
+                  body: captureAny(named: 'body'),
+                ),
+              ).captured.single
+              as Map<String, dynamic>;
+      expect(body, {'inference_base_url': 'http://127.0.0.1:11434/v1'});
+      final state = container.read(settingsControllerProvider).value!;
+      expect(state.settings.inferenceBaseUrl, 'http://127.0.0.1:11434/v1');
+      expect(state.connection, InferenceConnection.reachable);
+      expect(state.offersOllama, isFalse);
+    });
+  });
 }

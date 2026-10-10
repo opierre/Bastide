@@ -13,3 +13,14 @@ class InferenceHealth(BaseModel):
     reachable: bool
     models: list[str] = []
     detail: str | None = None
+
+
+class OllamaDetection(BaseModel):
+    """Whether an Ollama install answers on its default loopback address.
+
+    `found: false` is the common case and, like an unreachable runtime, travels on a 200.
+    """
+
+    found: bool
+    base_url: str
+    models: list[str] = []

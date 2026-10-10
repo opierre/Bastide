@@ -121,6 +121,7 @@ details?}}`. Model names refer to the Pydantic schemas in `backend/app/features/
 | Method | Path | Query | Body | Response |
 |--------|------|-------|------|----------|
 | `GET` | `/settings/inference/health` |  |  | 200 `InferenceHealth` |
+| `GET` | `/settings/inference/ollama` |  |  | 200 `OllamaDetection` |
 
 ## categorization
 

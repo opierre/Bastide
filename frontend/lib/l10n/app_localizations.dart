@@ -6156,6 +6156,24 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Continuer quand même'**
   String get startupContinueAnyway;
+
+  /// Title of the plate offering an Ollama install found on its default loopback address.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ollama détecté sur cet ordinateur'**
+  String get settingsAiOllamaFound;
+
+  /// Caption under settingsAiOllamaFound: how many models that Ollama lists.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, =0{Aucun modèle installé pour l\'instant} =1{1 modèle installé} other{{count} modèles installés}}'**
+  String settingsAiOllamaModels(int count);
+
+  /// Button pointing the engine address at the detected Ollama.
+  ///
+  /// In fr, this message translates to:
+  /// **'Utiliser Ollama'**
+  String get settingsAiOllamaUse;
 }
 
 class _AppLocalizationsDelegate
