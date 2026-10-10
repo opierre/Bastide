@@ -11,6 +11,7 @@ import '../../../core/widgets/labeled_field.dart';
 import '../../../core/widgets/state_views.dart';
 import '../../../l10n/app_localizations.dart';
 import '../application/settings_controller.dart';
+import 'engine_plate.dart';
 import 'lock_callout.dart';
 
 /// Where « En savoir plus » sends a user with no engine: the download page of
@@ -75,6 +76,20 @@ class _CardState extends ConsumerState<_Card> {
     text: widget.state.settings.modelTag ?? '',
   );
 
+  /// Follows a value the controller changed on the user's behalf — « Utiliser
+  /// Ollama » rewrites the address. While the user types, the state already
+  /// holds what they typed, so the two never differ and nothing is reset
+  /// mid-edit.
+  @override
+  void didUpdateWidget(covariant _Card oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    final baseUrl = widget.state.settings.inferenceBaseUrl;
+    if (baseUrl != oldWidget.state.settings.inferenceBaseUrl &&
+        baseUrl != _baseUrl.text) {
+      _baseUrl.text = baseUrl;
+    }
+  }
+
   @override
   void dispose() {
     _baseUrl.dispose();
@@ -119,6 +134,13 @@ class _CardState extends ConsumerState<_Card> {
             key: const Key('settingsAiPrivacy'),
             message: l10n.settingsAiPrivacy,
           ),
+          if (state.offersOllama) ...[
+            const SizedBox(height: AppSpacing.md),
+            _OllamaPlate(
+              modelCount: state.ollama!.models.length,
+              onUse: _controller.useOllama,
+            ),
+          ],
           const SizedBox(height: AppSpacing.md),
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -230,6 +252,35 @@ class _Header extends StatelessWidget {
           semanticLabel: l10n.settingsAiToggleLabel,
         ),
       ],
+    );
+  }
+}
+
+/// « Ollama détecté » — offered only when Ollama answers on its default address
+/// and the engine address points somewhere else.
+class _OllamaPlate extends StatelessWidget {
+  const _OllamaPlate({required this.modelCount, required this.onUse});
+
+  final int modelCount;
+  final VoidCallback onUse;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
+    return EnginePlate(
+      key: const Key('settingsAiOllamaPlate'),
+      icon: Icons.memory_rounded,
+      title: l10n.settingsAiOllamaFound,
+      caption: l10n.settingsAiOllamaModels(modelCount),
+      trailing: SizedBox(
+        height: 34,
+        child: OutlinedButton(
+          key: const Key('settingsAiOllamaUse'),
+          onPressed: onUse,
+          child: Text(l10n.settingsAiOllamaUse),
+        ),
+      ),
     );
   }
 }

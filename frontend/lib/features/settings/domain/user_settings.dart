@@ -132,3 +132,43 @@ class InferenceHealth {
   @override
   int get hashCode => Object.hash(reachable, Object.hashAll(models), detail);
 }
+
+/// What `GET /settings/inference/ollama` found at Ollama's default address.
+///
+/// `found: false` is the usual answer and, like an unreachable runtime, never a
+/// failure.
+@immutable
+class OllamaDetection {
+  const OllamaDetection({
+    required this.found,
+    required this.baseUrl,
+    this.models = const [],
+  });
+
+  factory OllamaDetection.fromJson(Map<String, dynamic> json) =>
+      OllamaDetection(
+        found: json['found'] as bool,
+        baseUrl: json['base_url'] as String,
+        models: (json['models'] as List<dynamic>? ?? const [])
+            .map((tag) => tag as String)
+            .toList(growable: false),
+      );
+
+  final bool found;
+
+  /// The address Ollama answered on, ready to store as the engine address.
+  final String baseUrl;
+
+  final List<String> models;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is OllamaDetection &&
+          other.found == found &&
+          other.baseUrl == baseUrl &&
+          listEquals(other.models, models));
+
+  @override
+  int get hashCode => Object.hash(found, baseUrl, Object.hashAll(models));
+}

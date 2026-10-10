@@ -105,6 +105,7 @@ source = { editable = "." }
 dependencies = [
     { name = "alembic" },
     { name = "argon2-cffi" },
+    { name = "certifi" },
     { name = "fastapi" },
     { name = "httpx" },
     { name = "platformdirs" },
@@ -132,6 +133,7 @@ dev = [
 requires-dist = [
     { name = "alembic", specifier = ">=1.18.5" },
     { name = "argon2-cffi", specifier = ">=25.1.0" },
+    { name = "certifi", specifier = ">=2026.6.17" },
     { name = "fastapi", specifier = ">=0.139.2" },
     { name = "httpx", specifier = ">=0.28.1" },
     { name = "platformdirs", specifier = ">=4.12.4" },

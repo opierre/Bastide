@@ -43,6 +43,7 @@ class SettingsState {
     this.models = const [],
     this.isProbing = false,
     this.baseUrlError,
+    this.ollama,
   });
 
   final UserSettings settings;
@@ -63,6 +64,19 @@ class SettingsState {
   /// and act on.
   final Object? baseUrlError;
 
+  /// What the last Ollama detection found; `null` until one has run.
+  final OllamaDetection? ollama;
+
+  /// An Ollama install answers on this machine and the engine address points
+  /// somewhere else — the one case where offering it changes anything.
+  bool get offersOllama {
+    final detected = ollama;
+    return settings.aiEnabled &&
+        detected != null &&
+        detected.found &&
+        detected.baseUrl != settings.inferenceBaseUrl;
+  }
+
   /// The threshold as the whole percent the slider works in.
   int get thresholdPercent => settings.confidenceThresholdPercent;
 
@@ -73,6 +87,7 @@ class SettingsState {
     bool? isProbing,
     Object? baseUrlError,
     bool clearBaseUrlError = false,
+    OllamaDetection? ollama,
   }) => SettingsState(
     settings: settings ?? this.settings,
     connection: connection ?? this.connection,
@@ -81,6 +96,7 @@ class SettingsState {
     baseUrlError: clearBaseUrlError
         ? null
         : (baseUrlError ?? this.baseUrlError),
+    ollama: ollama ?? this.ollama,
   );
 }
 
@@ -126,7 +142,8 @@ class SettingsController extends AsyncNotifier<SettingsState> {
         connection: InferenceConnection.disabled,
       );
     }
-    return _withHealth(settings, await _safeProbe());
+    final (health, ollama) = await (_safeProbe(), _safeDetectOllama()).wait;
+    return _withHealth(settings, health).copyWith(ollama: ollama);
   }
 
   /// Opts in or out. Not debounced: a toggle is a decision, not typing, and it
@@ -199,13 +216,30 @@ class SettingsController extends AsyncNotifier<SettingsState> {
 
     state = AsyncData(before.copyWith(isProbing: true));
     final probeId = ++_probeId;
-    final health = await _safeProbe();
+    final (health, ollama) = await (_safeProbe(), _safeDetectOllama()).wait;
     if (probeId != _probeId) return;
 
     final latest = state.value;
     if (latest == null) return;
-    state = AsyncData(_withHealth(latest.settings, health, from: latest));
+    state = AsyncData(
+      _withHealth(
+        latest.settings,
+        health,
+        from: latest,
+      ).copyWith(ollama: ollama),
+    );
     _syncReviewQueue();
+  }
+
+  /// Points the engine address at the Ollama install detection found, then
+  /// probes it. Not debounced: it is one click, not typing.
+  Future<void> useOllama() async {
+    final detected = state.value?.ollama;
+    if (detected == null || !detected.found) return;
+
+    setBaseUrl(detected.baseUrl);
+    final accepted = await _flush();
+    if (accepted) await probe();
   }
 
   /// Applies an edit locally, then schedules the patch that persists it.
@@ -297,6 +331,15 @@ class SettingsController extends AsyncNotifier<SettingsState> {
     }
   }
 
+  /// Like [_safeProbe], detection never throws: no Ollama is the usual answer.
+  Future<OllamaDetection?> _safeDetectOllama() async {
+    try {
+      return await ref.read(settingsRepositoryProvider).detectOllama();
+    } catch (_) {
+      return null;
+    }
+  }
+
   SettingsState _withHealth(
     UserSettings settings,
     InferenceHealth health, {
@@ -308,6 +351,7 @@ class SettingsController extends AsyncNotifier<SettingsState> {
         : InferenceConnection.unreachable,
     models: health.models,
     baseUrlError: from?.baseUrlError,
+    ollama: from?.ollama,
   );
 
   /// Makes the review queue re-ask whether there is an AI to show.

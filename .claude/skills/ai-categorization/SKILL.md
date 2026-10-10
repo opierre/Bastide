@@ -33,9 +33,10 @@ tokens and full reproducibility.
 - The runtime is reached over an **OpenAI-compatible `/v1` HTTP API on loopback**, which both
   `llama-server` (llama.cpp) and Ollama expose. Never call runtime-specific endpoints: the base
   URL and model tag are user settings, so which engine is running must not be visible above the
-  client. Whether to bundle `llama-server` and/or model weights with the installer, or
-  require a separate Ollama install, is an **open decision** — ask the user before building
-  anything that depends on it.
+  client. **Decided: the runtime stays external.** Bastide never bundles, downloads or
+  supervises `llama-server` or model weights; the user runs Ollama (detected on its default
+  loopback port and offered in settings) or any OpenAI-compatible runtime on loopback, and
+  without one the app runs on rules alone.
 - Only **unmatched** transactions reach the model. The prompt contains: the localized category
   list (id + name + kind), the transaction's `description_clean`/`merchant`/amount sign, and a
   small few-shot set. The model returns a `category_id` + a `confidence` in [0,1].

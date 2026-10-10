@@ -12,6 +12,7 @@ from typing import Any, Protocol
 
 import httpx
 
+from app.core.tls import tls_context
 from app.features.settings.models import UserSettings
 
 # A chat message as the `/v1/chat/completions` body carries it: {"role": ..., "content": ...}.
@@ -170,7 +171,9 @@ class HttpInferenceClient:
         """
         url = f"{self._base_url}{path}"
         try:
-            async with httpx.AsyncClient(transport=self._transport, timeout=timeout) as http:
+            async with httpx.AsyncClient(
+                transport=self._transport, timeout=timeout, verify=tls_context()
+            ) as http:
                 return await http.request(method, url, json=json)
         except (httpx.ConnectTimeout, httpx.ConnectError) as exc:
             # ConnectTimeout is also a TimeoutException; caught first because an
