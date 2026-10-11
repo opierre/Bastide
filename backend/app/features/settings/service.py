@@ -36,6 +36,13 @@ class SettingsService:
         settings.last_backup_at = at
         return self._repository.update(settings)
 
+    def record_update_check(self, user_id: str, at: datetime, latest: str | None) -> UserSettings:
+        """Stamp a successful update check and the newest release it found."""
+        settings = self.get_or_create(user_id)
+        settings.update_checked_at = at
+        settings.update_latest_version = latest
+        return self._repository.update(settings)
+
     def update(self, user_id: str, data: SettingsUpdate) -> UserSettings:
         """Patch the supplied fields; omitted ones keep their stored value."""
         settings = self.get_or_create(user_id)

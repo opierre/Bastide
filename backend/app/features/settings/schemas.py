@@ -59,6 +59,7 @@ class SettingsUpdate(BaseModel):
     #: Monthly income the debt ratio runs on. An explicit `null` clears the declaration so
     #: the ratio falls back to the ledger median.
     declared_monthly_income_minor: int | None = Field(default=None, gt=0)
+    update_check_enabled: bool | None = None
 
 
 class SettingsRead(BaseModel):
@@ -72,3 +73,4 @@ class SettingsRead(BaseModel):
     confidence_threshold: float
     last_backup_at: datetime | None
     declared_monthly_income_minor: int | None
+    update_check_enabled: bool

@@ -34,6 +34,7 @@ def _to_read(settings: UserSettings) -> SettingsRead:
             else None
         ),
         declared_monthly_income_minor=settings.declared_monthly_income_minor,
+        update_check_enabled=settings.update_check_enabled,
     )
 
 

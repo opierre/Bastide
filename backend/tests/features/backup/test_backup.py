@@ -420,6 +420,40 @@ def test_restore_keeps_the_install_s_last_backup_time(client: TestClient) -> Non
     assert client.get("/api/v1/settings", headers=headers).json()["last_backup_at"] == before
 
 
+def test_restore_keeps_the_install_s_update_check(client: TestClient) -> None:
+    headers = _register(client, "amelie@example.com")
+    client.get("/api/v1/settings", headers=headers)
+    content = _export(client, headers)  # taken with the update check off
+    client.patch("/api/v1/settings", json={"update_check_enabled": True}, headers=headers)
+
+    _upload(client, "restore", headers, content)
+
+    settings = client.get("/api/v1/settings", headers=headers).json()
+    assert settings["update_check_enabled"] is True
+
+
+def test_restore_accepts_settings_archived_before_a_column_existed(client: TestClient) -> None:
+    """A backup taken before the update check was added has no `update_check_enabled`."""
+    headers = _register(client, "amelie@example.com")
+    client.patch("/api/v1/settings", json={"model_tag": "gemma4:e4b"}, headers=headers)
+    content = _export(client, headers)
+    with zipfile.ZipFile(io.BytesIO(content)) as archive:
+        rows = [json.loads(line) for line in archive.read("user_settings.jsonl").splitlines()]
+    for row in rows:
+        for column in ("update_check_enabled", "update_checked_at", "update_latest_version"):
+            del row[column]
+    older = _rewrite(
+        content, user_settings_jsonl="\n".join(json.dumps(row) for row in rows).encode()
+    )
+
+    response = _upload(client, "restore", headers, older)
+
+    assert response.status_code == 200, response.json()
+    settings = client.get("/api/v1/settings", headers=headers).json()
+    assert settings["model_tag"] == "gemma4:e4b"
+    assert settings["update_check_enabled"] is False
+
+
 def test_restore_leaves_other_users_untouched(client: TestClient, tmp_path: Path) -> None:
     headers = _register(client, "amelie@example.com")
     _register(client, "bruno@example.com")
