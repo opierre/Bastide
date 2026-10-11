@@ -36,9 +36,9 @@ Ce que vous pouvez vérifier à la place d'un certificat :
 1. Lancez `Bastide-Setup-<version>.exe`.
 2. Windows affiche **« Windows a protégé votre ordinateur »**. Cliquez sur **Informations
    complémentaires**, puis sur **Exécuter quand même**.
-3. Suivez les étapes. Aucun mot de passe administrateur n'est demandé : Bastide s'installe pour
-   votre utilisateur seulement, dans `%LOCALAPPDATA%\Programs\Bastide`.
-4. Ouvrez Bastide depuis le menu Démarrer.
+3. Il n'y a aucune étape à suivre : Bastide s'installe pour votre utilisateur seulement, sans
+   mot de passe administrateur, dans `%LOCALAPPDATA%\Bastide.App`, puis s'ouvre. Ensuite,
+   ouvrez-la depuis le menu Démarrer.
 
 Il arrive que Windows Defender bloque aussi l'application. Dans ce cas,
 [ouvrez un ticket](https://github.com/opierre/Bastide/issues) : nous signalons chaque fausse
@@ -54,14 +54,17 @@ dossier mais dans votre dossier utilisateur, comme avec l'installateur (voir
 
 ### Mettre à jour
 
-Fermez Bastide, puis lancez l'installateur de la nouvelle version. Si Bastide est encore
-ouverte, l'installateur vous demande de la fermer d'abord.
+Fermez Bastide, puis lancez l'installateur de la nouvelle version : il remplace la version
+installée et conserve vos données. Pour être prévenu des nouvelles versions, activez
+**Paramètres → À propos → Mises à jour** : une fois par jour au plus, Bastide demande à GitHub
+le numéro de la dernière version publiée, et n'envoie rien d'autre.
 
 ### Désinstaller
 
-**Paramètres → Applications → Applications installées → Bastide → Désinstaller**. Pour la
-version portable, supprimez son dossier. Vos données restent sur votre ordinateur : voir
-plus bas pour les supprimer aussi.
+**Paramètres → Applications → Applications installées → Bastide → Désinstaller**. Cela
+supprime `%LOCALAPPDATA%\Bastide.App`, le dossier de l'application. Pour la version portable,
+supprimez son dossier. Dans les deux cas, vos données restent sur votre ordinateur, dans un
+dossier à part : voir plus bas pour les supprimer aussi.
 
 ## macOS
 

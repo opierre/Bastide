@@ -33,9 +33,9 @@ What you can do instead of trusting a certificate:
 
 1. Run `Bastide-Setup-<version>.exe`.
 2. Windows shows **"Windows protected your PC"**. Click **More info**, then **Run anyway**.
-3. Follow the steps. No administrator password is needed: Bastide installs
-   for your user only, in `%LOCALAPPDATA%\Programs\Bastide`.
-4. Open Bastide from the Start menu.
+3. There are no steps to follow: Bastide installs for your user only, without an administrator
+   password, into `%LOCALAPPDATA%\Bastide.App`, then opens. Afterwards, open it from the Start
+   menu.
 
 Windows Defender may also stop the app. If it does, please
 [open an issue](https://github.com/opierre/Bastide/issues): we report each false alarm to
@@ -50,13 +50,15 @@ stored in that folder but in your user folder, as with the installer (see
 
 ### Update
 
-Close Bastide, then run the new version's installer. If Bastide is still open, the installer
-asks you to close it first.
+Close Bastide, then run the new version's installer: it replaces the installed version and
+keeps your data. To hear about new versions, turn on **Settings → About → Updates**: at most
+once a day, Bastide asks GitHub for the number of the latest release, and sends nothing else.
 
 ### Uninstall
 
-**Settings → Apps → Installed apps → Bastide → Uninstall**. For the portable version, delete
-its folder. Your data stays on your computer: see below to remove it too.
+**Settings → Apps → Installed apps → Bastide → Uninstall**. This removes
+`%LOCALAPPDATA%\Bastide.App`, the app's folder. For the portable version, delete its folder.
+Either way your data stays on your computer, in a separate folder: see below to remove it too.
 
 ## macOS
 
