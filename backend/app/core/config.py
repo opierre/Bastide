@@ -34,6 +34,9 @@ class Settings(BaseSettings):
 def default_db_path() -> Path:
     """Return the datastore path inside the current OS user's local (non-roaming) data dir."""
     # Local, not roaming: a SQLite file and its WAL must stay on a local disk, never synced.
+    # On Windows this is %LOCALAPPDATA%\Bastide, beside (never inside) the Velopack install
+    # folder %LOCALAPPDATA%\Bastide.App, which uninstalling deletes whole: renaming either one
+    # to the other would make uninstalling delete the database (tools/package_app.py refuses).
     return Path(user_data_dir("Bastide", appauthor=False, roaming=False)) / "bastide.db"
 
 
