@@ -18,7 +18,9 @@ This skill is the enforceable rule set.
 - **Feature-first, vertical slices.** A feature owns everything it needs. Cross-feature reach-in
   is forbidden — features talk through well-defined service interfaces or the API, never by
   importing each other's internals.
-- **Local-first.** No network calls except the opt-in local inference runtime on loopback.
+- **Local-first.** No network calls except the opt-in local inference runtime on loopback, and
+  the opt-in update check (`features/updates`: GitHub's latest-release API, at most once a
+  day, carrying nothing about the user).
   No telemetry, no cloud calls.
 
 ## Backend layering (strict, one direction)
