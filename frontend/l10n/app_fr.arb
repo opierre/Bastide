@@ -136,7 +136,69 @@
   "@settingsAboutVersionUnavailable": {
     "description": "Shown in place of the version number when the app could not read it."
   },
-  "settingsAboutPrivacy": "Toutes vos données restent sur cet ordinateur. Bastide ne se connecte à aucune banque et n'envoie rien sur Internet.",
+  "settingsUpdatesTitle": "Mises à jour",
+  "@settingsUpdatesTitle": {
+    "description": "Title of the update-check card in Settings › About."
+  },
+  "settingsUpdatesSubtitle": "Me prévenir quand une nouvelle version est publiée",
+  "@settingsUpdatesSubtitle": {
+    "description": "Subtitle beside the update-check toggle."
+  },
+  "settingsUpdatesToggleLabel": "Vérifier les mises à jour",
+  "@settingsUpdatesToggleLabel": {
+    "description": "Accessibility label of the update-check toggle."
+  },
+  "settingsUpdatesNote": "Une fois par jour au plus, Bastide demande à GitHub le numéro de la dernière version publiée. Rien d'autre n'est envoyé, et rien n'est installé sans vous.",
+  "@settingsUpdatesNote": {
+    "description": "Says exactly what the opt-in update check sends."
+  },
+  "settingsUpdatesChecking": "Vérification…",
+  "@settingsUpdatesChecking": {
+    "description": "Shown while the update check runs."
+  },
+  "settingsUpdatesAvailable": "Bastide {version} est disponible",
+  "@settingsUpdatesAvailable": {
+    "description": "Title of the plate announcing a newer release.",
+    "placeholders": {
+      "version": {
+        "type": "String",
+        "example": "0.2.0"
+      }
+    }
+  },
+  "settingsUpdatesCurrent": "Vous utilisez la version {version}.",
+  "@settingsUpdatesCurrent": {
+    "description": "Caption under the newer-release title: the installed version.",
+    "placeholders": {
+      "version": {
+        "type": "String",
+        "example": "0.2.0"
+      }
+    }
+  },
+  "settingsUpdatesDownload": "Télécharger",
+  "@settingsUpdatesDownload": {
+    "description": "Opens the release page in the browser."
+  },
+  "settingsUpdatesUpToDate": "Vous utilisez la dernière version ({version}).",
+  "@settingsUpdatesUpToDate": {
+    "description": "The installed version is the newest release.",
+    "placeholders": {
+      "version": {
+        "type": "String",
+        "example": "0.2.0"
+      }
+    }
+  },
+  "settingsUpdatesOffline": "GitHub n'a pas pu être joint. Nouvel essai à la prochaine ouverture de cet écran.",
+  "@settingsUpdatesOffline": {
+    "description": "The update check could not reach GitHub."
+  },
+  "settingsUpdatesUnavailable": "État des mises à jour indisponible.",
+  "@settingsUpdatesUnavailable": {
+    "description": "The app could not read the update status from its backend."
+  },
+  "settingsAboutPrivacy": "Toutes vos données restent sur cet ordinateur. Bastide ne se connecte à aucune banque et n'envoie rien sur Internet, hormis la vérification des mises à jour si vous l'activez.",
   "@settingsAboutPrivacy": {
     "description": "Local-privacy statement in the About section."
   },

@@ -2,11 +2,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/api/api_client.dart';
 import '../../../core/api/api_client_provider.dart';
+import '../domain/update_status.dart';
 import '../domain/user_settings.dart';
 
-/// Calls `/settings`, the runtime probe at `/settings/inference/health` and
-/// the Ollama detection at `/settings/inference/ollama`. The only place that
-/// knows those wire shapes.
+/// Calls `/settings`, the runtime probe at `/settings/inference/health`, the
+/// Ollama detection at `/settings/inference/ollama` and the update check at
+/// `/settings/updates`. The only place that knows those wire shapes.
 class SettingsRepository {
   SettingsRepository(this._apiClient);
 
@@ -29,6 +30,7 @@ class SettingsRepository {
     String? inferenceBaseUrl,
     String? modelTag,
     double? confidenceThreshold,
+    bool? updateCheckEnabled,
   }) async {
     final json = await _apiClient.patch(
       '/settings',
@@ -37,6 +39,7 @@ class SettingsRepository {
         'inference_base_url': ?inferenceBaseUrl,
         'model_tag': ?modelTag,
         'confidence_threshold': ?confidenceThreshold,
+        'update_check_enabled': ?updateCheckEnabled,
       },
     );
     return UserSettings.fromJson(json as Map<String, dynamic>);
@@ -50,6 +53,13 @@ class SettingsRepository {
   Future<InferenceHealth> probe() async {
     final json = await _apiClient.get('/settings/inference/health');
     return InferenceHealth.fromJson(json as Map<String, dynamic>);
+  }
+
+  /// Whether a newer release is published. The backend asks GitHub at most
+  /// once a day, and only when the user turned the check on.
+  Future<UpdateStatus> updateStatus() async {
+    final json = await _apiClient.get('/settings/updates');
+    return UpdateStatus.fromJson(json as Map<String, dynamic>);
   }
 
   /// Asks whether Ollama answers on its default loopback address.

@@ -51,6 +51,9 @@ Widget _wrap({Future<String> Function()? readVersion}) {
       'confidence_threshold': 0.8,
     },
   );
+  when(
+    () => apiClient.get('/settings/updates'),
+  ).thenAnswer((_) async => {'enabled': false, 'current_version': '0.1.0'});
   return ProviderScope(
     overrides: [
       currentUserProvider.overrideWithValue(_user),

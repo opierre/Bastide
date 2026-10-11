@@ -19,6 +19,7 @@ import '../application/settings_section_request.dart';
 import 'ai_settings_card.dart';
 import 'backup_card.dart';
 import 'danger_zone_card.dart';
+import 'update_check_card.dart';
 
 export '../application/settings_section_request.dart' show SettingsSection;
 
@@ -318,14 +319,21 @@ class _AboutPanel extends ConsumerWidget {
           error: (_, _) => l10n.settingsAboutVersionUnavailable,
         );
 
-    return _SettingsCard(
-      title: l10n.settingsAboutVersion,
-      note: l10n.settingsAboutPrivacy,
-      child: Text(
-        version,
-        key: const Key('settingsAppVersion'),
-        style: tabularNumberStyle(style),
-      ),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        _SettingsCard(
+          title: l10n.settingsAboutVersion,
+          note: l10n.settingsAboutPrivacy,
+          child: Text(
+            version,
+            key: const Key('settingsAppVersion'),
+            style: tabularNumberStyle(style),
+          ),
+        ),
+        const SizedBox(height: AppSpacing.gridGap),
+        const UpdateCheckCard(),
+      ],
     );
   }
 }

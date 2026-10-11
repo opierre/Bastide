@@ -115,8 +115,50 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingsAboutVersionUnavailable => 'Unavailable';
 
   @override
+  String get settingsUpdatesTitle => 'Updates';
+
+  @override
+  String get settingsUpdatesSubtitle =>
+      'Tell me when a new version is released';
+
+  @override
+  String get settingsUpdatesToggleLabel => 'Check for updates';
+
+  @override
+  String get settingsUpdatesNote =>
+      'At most once a day, Bastide asks GitHub for the number of the latest release. Nothing else is sent, and nothing is installed without you.';
+
+  @override
+  String get settingsUpdatesChecking => 'Checking…';
+
+  @override
+  String settingsUpdatesAvailable(String version) {
+    return 'Bastide $version is available';
+  }
+
+  @override
+  String settingsUpdatesCurrent(String version) {
+    return 'You are on version $version.';
+  }
+
+  @override
+  String get settingsUpdatesDownload => 'Download';
+
+  @override
+  String settingsUpdatesUpToDate(String version) {
+    return 'You are on the latest version ($version).';
+  }
+
+  @override
+  String get settingsUpdatesOffline =>
+      'GitHub could not be reached. Bastide will try again next time you open this screen.';
+
+  @override
+  String get settingsUpdatesUnavailable => 'Update status unavailable.';
+
+  @override
   String get settingsAboutPrivacy =>
-      'All your data stays on this computer. Bastide connects to no bank and sends nothing over the internet.';
+      'All your data stays on this computer. Bastide connects to no bank and sends nothing over the internet, apart from the update check if you turn it on.';
 
   @override
   String get comingSoonBody =>
