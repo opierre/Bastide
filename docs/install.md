@@ -34,8 +34,8 @@ What you can do instead of trusting a certificate:
 1. Run `Bastide-Setup-<version>.exe`.
 2. Windows shows **"Windows protected your PC"**. Click **More info**, then **Run anyway**.
 3. There are no steps to follow: Bastide installs for your user only, without an administrator
-   password, into `%LOCALAPPDATA%\Bastide.App`, then opens. Afterwards, open it from the Start
-   menu.
+   password, into `%LOCALAPPDATA%\Bastide.App`, then opens. Afterwards, open it from its desktop
+   shortcut or the Start menu.
 
 Windows Defender may also stop the app. If it does, please
 [open an issue](https://github.com/opierre/Bastide/issues): we report each false alarm to

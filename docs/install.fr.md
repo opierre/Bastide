@@ -38,7 +38,7 @@ Ce que vous pouvez vérifier à la place d'un certificat :
    complémentaires**, puis sur **Exécuter quand même**.
 3. Il n'y a aucune étape à suivre : Bastide s'installe pour votre utilisateur seulement, sans
    mot de passe administrateur, dans `%LOCALAPPDATA%\Bastide.App`, puis s'ouvre. Ensuite,
-   ouvrez-la depuis le menu Démarrer.
+   ouvrez-la depuis son raccourci sur le bureau ou le menu Démarrer.
 
 Il arrive que Windows Defender bloque aussi l'application. Dans ce cas,
 [ouvrez un ticket](https://github.com/opierre/Bastide/issues) : nous signalons chaque fausse

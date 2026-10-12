@@ -125,7 +125,7 @@ def package_windows(version: str) -> None:
         "--icon", FRONTEND / "windows" / "runner" / "resources" / "app_icon.ico",
         "--splashImage", FRONTEND / "windows" / "installer" / "splash.png",
         "--splashProgressColor", "#8B8CF9",
-        "--shortcuts", "StartMenuRoot", "--noPortable", "--outputDir", velopack,
+        "--shortcuts", "Desktop,StartMenuRoot", "--noPortable", "--outputDir", velopack,
     )  # fmt: skip
     setup = DIST / f"Bastide-Setup-{version}.exe"
     shutil.move(velopack / f"{VELOPACK_PACK_ID}-win-Setup.exe", setup)
