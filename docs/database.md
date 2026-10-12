@@ -225,6 +225,9 @@ erDiagram
         datetime updated_at
         datetime last_backup_at "nullable"
         int declared_monthly_income_minor "nullable"
+        bool update_check_enabled
+        datetime update_checked_at "nullable"
+        text update_latest_version "nullable"
     }
     users {
         text id PK

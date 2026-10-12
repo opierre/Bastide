@@ -17,6 +17,7 @@ DEFAULTS = {
     "confidence_threshold": 0.80,
     "last_backup_at": None,
     "declared_monthly_income_minor": None,
+    "update_check_enabled": False,
 }
 
 
@@ -67,6 +68,7 @@ def test_patch_updates_only_supplied_fields(client: TestClient) -> None:
         "confidence_threshold": 0.9,
         "last_backup_at": None,
         "declared_monthly_income_minor": None,
+        "update_check_enabled": False,
     }
 
 

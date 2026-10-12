@@ -116,8 +116,51 @@ class AppLocalizationsFr extends AppLocalizations {
   String get settingsAboutVersionUnavailable => 'Indisponible';
 
   @override
+  String get settingsUpdatesTitle => 'Mises à jour';
+
+  @override
+  String get settingsUpdatesSubtitle =>
+      'Me prévenir quand une nouvelle version est publiée';
+
+  @override
+  String get settingsUpdatesToggleLabel => 'Vérifier les mises à jour';
+
+  @override
+  String get settingsUpdatesNote =>
+      'Une fois par jour au plus, Bastide demande à GitHub le numéro de la dernière version publiée. Rien d\'autre n\'est envoyé, et rien n\'est installé sans vous.';
+
+  @override
+  String get settingsUpdatesChecking => 'Vérification…';
+
+  @override
+  String settingsUpdatesAvailable(String version) {
+    return 'Bastide $version est disponible';
+  }
+
+  @override
+  String settingsUpdatesCurrent(String version) {
+    return 'Vous utilisez la version $version.';
+  }
+
+  @override
+  String get settingsUpdatesDownload => 'Télécharger';
+
+  @override
+  String settingsUpdatesUpToDate(String version) {
+    return 'Vous utilisez la dernière version ($version).';
+  }
+
+  @override
+  String get settingsUpdatesOffline =>
+      'GitHub n\'a pas pu être joint. Nouvel essai à la prochaine ouverture de cet écran.';
+
+  @override
+  String get settingsUpdatesUnavailable =>
+      'État des mises à jour indisponible.';
+
+  @override
   String get settingsAboutPrivacy =>
-      'Toutes vos données restent sur cet ordinateur. Bastide ne se connecte à aucune banque et n\'envoie rien sur Internet.';
+      'Toutes vos données restent sur cet ordinateur. Bastide ne se connecte à aucune banque et n\'envoie rien sur Internet, hormis la vérification des mises à jour si vous l\'activez.';
 
   @override
   String get comingSoonBody =>

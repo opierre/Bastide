@@ -84,9 +84,10 @@ uv run python -m scripts.api_doc      # docs/api.md, from the OpenAPI schema
 
 ### Building the app for users
 `uv run tools/package_app.py` (from anywhere) freezes the backend, builds the Flutter release
-with the backend inside it, and wraps it into `dist/`: the Inno Setup installer and a portable
+with the backend inside it, and wraps it into `dist/`: the Velopack installer and a portable
 zip on Windows, a `.dmg` on macOS, an AppImage on Linux. It builds for the OS it runs on only.
-It needs [Inno Setup](https://jrsoftware.org/isinfo.php) on Windows and
+It needs [Velopack's `vpk`](https://docs.velopack.io) on Windows
+(`dotnet tool install -g vpk --version 1.2.161`, the version `release.yml` pins) and
 [`appimagetool`](https://github.com/AppImage/appimagetool) on Linux. `--skip-backend` reuses
 the backend already frozen in `backend/dist/`. The user-facing install guide is
 `docs/install.md`.

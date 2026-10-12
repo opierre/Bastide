@@ -123,3 +123,17 @@ else()
   message(WARNING "No frozen backend at ${BASTIDE_BACKEND_DIR}: a release "
     "build will not start. Run `uv run tools/build_backend.py` first.")
 endif()
+
+# The runner and the plugins need the Visual C++ runtime (vcruntime140.dll,
+# msvcp140.dll, …), which a clean Windows lacks. Ship it beside the executable
+# (app-local, as Microsoft allows) so the installer and the portable zip both run
+# without the redistributable installed. The backend carries its own copies.
+set(CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS_SKIP TRUE)
+include(InstallRequiredSystemLibraries)
+if(NOT CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS)
+  message(FATAL_ERROR "Can't find the Visual C++ runtime DLLs to bundle.")
+endif()
+install(FILES ${CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS}
+  DESTINATION "${INSTALL_BUNDLE_LIB_DIR}"
+  CONFIGURATIONS Profile;Release
+  COMPONENT Runtime)

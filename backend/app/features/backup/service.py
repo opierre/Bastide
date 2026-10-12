@@ -95,8 +95,15 @@ class BackupService:
         manifest = self._checked_manifest(reader, user)
         if self._repository.has_active_run(user.id):
             raise BackupRunActiveError("A categorisation run is in progress.")
-        # The time of the latest backup is a fact about this install, not about the archive.
-        last_backup_at = self._settings.get_or_create(user.id).last_backup_at
+        # The time of the latest backup and the update check are facts about this install, not
+        # about the archive.
+        current = self._settings.get_or_create(user.id)
+        install_facts = {
+            "last_backup_at": current.last_backup_at,
+            "update_check_enabled": current.update_check_enabled,
+            "update_checked_at": current.update_checked_at,
+            "update_latest_version": current.update_latest_version,
+        }
 
         try:
             self._repository.delete_user_data(user.id)
@@ -109,7 +116,7 @@ class BackupService:
                 for raw in reader.rows(name):
                     row = self._decode_row(name, specs, raw, user.id, known)
                     if name == "user_settings":
-                        row["last_backup_at"] = last_backup_at
+                        row.update(install_facts)
                     batch.append(row)
                     if len(batch) >= _RESTORE_BATCH:
                         self._repository.insert_rows(name, batch)
@@ -193,6 +200,9 @@ class BackupService:
         row: dict[str, Any] = {}
         for spec in specs:
             value = raw.get(spec.name)
+            if spec.name not in raw and spec.default is not None:
+                # Archived before this column existed.
+                value = spec.default
             if value is None:
                 if not spec.nullable:
                     raise BackupInvalidError(f"A {name} row is missing {spec.name}.")
