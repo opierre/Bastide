@@ -113,6 +113,8 @@ def package_windows(version: str) -> None:
     # Per-user, no admin rights, into %LOCALAPPDATA%\Bastide.App. The app answers Velopack's
     # install/update/uninstall hooks by exiting at once (frontend/windows/runner/main.cpp).
     # The portable zip below stays ours: Velopack's own adds its updater beside the app.
+    # While installing, Setup shows the splash at its pixel size × the display scale, with
+    # its progress bar drawn as a 12 px strip across the image's bottom edge, in iris.
     velopack = DIST / "velopack"
     shutil.rmtree(velopack, ignore_errors=True)
     run(
@@ -121,6 +123,8 @@ def package_windows(version: str) -> None:
         "--packDir", release, "--mainExe", "bastide.exe", "--runtime", "win-x64",
         "--packTitle", "Bastide", "--packAuthors", "Bastide",
         "--icon", FRONTEND / "windows" / "runner" / "resources" / "app_icon.ico",
+        "--splashImage", FRONTEND / "windows" / "installer" / "splash.png",
+        "--splashProgressColor", "#8B8CF9",
         "--shortcuts", "StartMenuRoot", "--noPortable", "--outputDir", velopack,
     )  # fmt: skip
     setup = DIST / f"Bastide-Setup-{version}.exe"
