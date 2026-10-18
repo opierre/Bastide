@@ -127,7 +127,9 @@ keep antivirus warnings down:
   run then mounts the `.dmg` and checks the app in it with `codesign --verify --deep --strict`.
 - **VirusTotal.** A `virustotal` job uploads every package and lists the detections in the run
   summary (`.github/scripts/virustotal_scan.py`). A file any engine calls malicious turns the
-  run red; don't publish the draft until that is sorted out. It needs a free VirusTotal API key
+  run red; don't publish the draft until that is sorted out. Engines known for false positives
+  on unsigned apps (Bkav, in `IGNORED_ENGINES`) never fail the run; their verdicts are only
+  listed. It needs a free VirusTotal API key
   in the `VIRUSTOTAL_API_KEY` repository secret, and is skipped with a warning without one.
 
 Before publishing each release, if Windows Defender or SmartScreen flags them, submit the setup

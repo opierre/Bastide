@@ -7,7 +7,8 @@ Uploads each file, waits for its analysis, and prints a Markdown table with the
 detection counts and a link to each report (appended to $GITHUB_STEP_SUMMARY when
 set). Exits 1 when any engine calls a file malicious, so a flagged build is caught
 before the draft release is published by hand; "suspicious" verdicts are only
-reported, since generic heuristics raise them on many unsigned programs.
+reported, since generic heuristics raise them on many unsigned programs. Engines in
+IGNORED_ENGINES are left out of the counts; their detections are only listed.
 
 The packages are public once the release is, so uploading them reveals nothing new.
 Paced for the free public API (4 requests a minute). Runs on the runner's system
@@ -33,6 +34,10 @@ DIRECT_UPLOAD_LIMIT = 32 * 1024 * 1024
 REQUEST_INTERVAL = 16.0
 # A large package can sit in VirusTotal's queue for a while.
 ANALYSIS_TIMEOUT = 30 * 60
+# Engines whose verdicts never fail the run. Bkav flagged unmodified PyPI binaries
+# (MarkupSafe and SQLAlchemy speedups, matched against the official wheels) as
+# malicious on v0.1.0-rc.1, where every other engine found nothing.
+IGNORED_ENGINES = frozenset({"bkav"})
 
 
 class Client:
@@ -79,11 +84,11 @@ class Client:
         return answer["data"]["id"]
 
     def wait_for(self, analysis_id: str, deadline: float) -> dict:
-        """The detection stats of a finished analysis."""
+        """The per-engine results of a finished analysis."""
         while True:
             attributes = self.request(f"{API}/analyses/{analysis_id}")["data"]["attributes"]
             if attributes["status"] == "completed":
-                return attributes["stats"]
+                return attributes["results"]
             if time.monotonic() > deadline:
                 sys.exit(f"::error::VirusTotal analysis {analysis_id} did not finish in time")
 
@@ -94,6 +99,11 @@ def sha256(path: Path) -> str:
         for chunk in iter(lambda: file.read(1 << 20), b""):
             digest.update(chunk)
     return digest.hexdigest()
+
+
+def is_ignored(engine: str) -> bool:
+    # VirusTotal names some engines with an edition suffix ("Bkav Pro").
+    return any(engine.casefold().startswith(name) for name in IGNORED_ENGINES)
 
 
 def main() -> int:
@@ -115,17 +125,29 @@ def main() -> int:
     lines = [
         "## VirusTotal",
         "",
-        "| File | Malicious | Suspicious | Report |",
-        "| --- | ---: | ---: | --- |",
+        "| File | Malicious | Suspicious | Ignored | Report |",
+        "| --- | ---: | ---: | --- | --- |",
     ]
     flagged = []
     for path, analysis_id in analyses.items():
-        stats = client.wait_for(analysis_id, deadline)
-        malicious, suspicious = stats.get("malicious", 0), stats.get("suspicious", 0)
+        results = client.wait_for(analysis_id, deadline)
+        counted = [r for engine, r in results.items() if not is_ignored(engine)]
+        malicious = sum(r["category"] == "malicious" for r in counted)
+        suspicious = sum(r["category"] == "suspicious" for r in counted)
+        ignored = (
+            ", ".join(
+                f"{engine}: {r['result']}"
+                for engine, r in sorted(results.items())
+                if is_ignored(engine) and r["category"] in ("malicious", "suspicious")
+            )
+            or "-"
+        )
         if malicious:
             flagged.append(path.name)
         report = f"https://www.virustotal.com/gui/file/{sha256(path)}"
-        lines.append(f"| `{path.name}` | {malicious} | {suspicious} | [report]({report}) |")
+        lines.append(
+            f"| `{path.name}` | {malicious} | {suspicious} | {ignored} | [report]({report}) |"
+        )
         print(f"{path.name}: {malicious} malicious, {suspicious} suspicious", flush=True)
 
     table = "\n".join(lines) + "\n"
