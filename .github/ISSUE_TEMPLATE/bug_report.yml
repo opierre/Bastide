@@ -1,0 +1,103 @@
+name: Bug report
+description: Something doesn't work the way it should.
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to report a bug.
+
+        > **Keep your data private.** Don't attach real bank statements, `bastide.db` or `.bastide` backups, and don't paste real account numbers, names or amounts. Replace them with made-up values.
+
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: Describe the problem, and what you expected to happen instead.
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      description: The shortest sequence of actions that shows the problem.
+      placeholder: |
+        1. Open Imports
+        2. Import a statement with …
+        3. See …
+    validations:
+      required: true
+
+  - type: input
+    id: version
+    attributes:
+      label: Bastide version
+      description: Shown under Paramètres / Settings, or the release you downloaded. Use the commit hash if you run from source.
+      placeholder: 0.1.0
+    validations:
+      required: true
+
+  - type: dropdown
+    id: os
+    attributes:
+      label: Operating system
+      options:
+        - Windows
+        - macOS
+        - Linux
+    validations:
+      required: true
+
+  - type: dropdown
+    id: install
+    attributes:
+      label: How do you run Bastide?
+      options:
+        - Windows installer
+        - Windows portable zip
+        - macOS .dmg
+        - Linux AppImage
+        - From source
+    validations:
+      required: true
+
+  - type: dropdown
+    id: locale
+    attributes:
+      label: App language
+      options:
+        - Français
+        - English
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      description: Where in the app the problem shows up, if you know.
+      options:
+        - Imports (OFX/QFX)
+        - Transactions
+        - Dashboard
+        - Categorisation / AI
+        - Subscriptions
+        - Goals
+        - Patrimoine (loans, net worth)
+        - Backup / restore
+        - Settings
+        - Install / update
+        - Other
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs
+      description: |
+        Relevant lines from `logs/backend.log` in the data folder (see docs/install.md for where it lives). Read them for personal data before pasting.
+      render: text
+
+  - type: textarea
+    id: extra
+    attributes:
+      label: Anything else?
+      description: Screenshots (with personal data hidden), the local AI runtime and model if relevant, or anything else that helps.

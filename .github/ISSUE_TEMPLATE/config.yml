@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Report a security vulnerability
+    url: https://github.com/opierre/Bastide/security/advisories/new
+    about: Please report security issues privately, not in a public issue.
+  - name: Install guide
+    url: https://github.com/opierre/Bastide/blob/main/docs/install.md
+    about: Installing, updating and uninstalling Bastide, and where your data lives.
