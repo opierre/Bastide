@@ -32,6 +32,15 @@ class UserSettings(Base):
     last_backup_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     # Monthly income the debt ratio runs on. Null = derive it from the ledger.
     declared_monthly_income_minor: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    # Opt-in: off until the user turns it on, because the check is the one request that
+    # leaves the machine (to GitHub's release API, see app/features/updates).
+    update_check_enabled: Mapped[bool] = mapped_column(Boolean, default=False)
+    # The last successful check and the newest release it found, so the app asks at most
+    # once a day however often it starts.
+    update_checked_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
+    update_latest_version: Mapped[str | None] = mapped_column(String(64), nullable=True)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), default=lambda: datetime.now(UTC)
     )

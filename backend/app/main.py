@@ -33,6 +33,7 @@ from app.features.recurring.router import router as recurring_router
 from app.features.rules.router import router as rules_router
 from app.features.settings.router import router as settings_router
 from app.features.transactions.router import router as transactions_router
+from app.features.updates.router import router as updates_router
 
 logger = logging.getLogger(__name__)
 
@@ -93,6 +94,7 @@ def create_app() -> FastAPI:
     app.include_router(backup_router)
     app.include_router(database_router)
     app.include_router(inference_router)
+    app.include_router(updates_router)
     app.include_router(categorization_router)
     app.include_router(recurring_router)
     app.include_router(goals_router)

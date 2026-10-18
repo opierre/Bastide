@@ -302,10 +302,76 @@ abstract class AppLocalizations {
   /// **'Indisponible'**
   String get settingsAboutVersionUnavailable;
 
+  /// Title of the update-check card in Settings › About.
+  ///
+  /// In fr, this message translates to:
+  /// **'Mises à jour'**
+  String get settingsUpdatesTitle;
+
+  /// Subtitle beside the update-check toggle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Me prévenir quand une nouvelle version est publiée'**
+  String get settingsUpdatesSubtitle;
+
+  /// Accessibility label of the update-check toggle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Vérifier les mises à jour'**
+  String get settingsUpdatesToggleLabel;
+
+  /// Says exactly what the opt-in update check sends.
+  ///
+  /// In fr, this message translates to:
+  /// **'Une fois par jour au plus, Bastide demande à GitHub le numéro de la dernière version publiée. Rien d\'autre n\'est envoyé, et rien n\'est installé sans vous.'**
+  String get settingsUpdatesNote;
+
+  /// Shown while the update check runs.
+  ///
+  /// In fr, this message translates to:
+  /// **'Vérification…'**
+  String get settingsUpdatesChecking;
+
+  /// Title of the plate announcing a newer release.
+  ///
+  /// In fr, this message translates to:
+  /// **'Bastide {version} est disponible'**
+  String settingsUpdatesAvailable(String version);
+
+  /// Caption under the newer-release title: the installed version.
+  ///
+  /// In fr, this message translates to:
+  /// **'Vous utilisez la version {version}.'**
+  String settingsUpdatesCurrent(String version);
+
+  /// Opens the release page in the browser.
+  ///
+  /// In fr, this message translates to:
+  /// **'Télécharger'**
+  String get settingsUpdatesDownload;
+
+  /// The installed version is the newest release.
+  ///
+  /// In fr, this message translates to:
+  /// **'Vous utilisez la dernière version ({version}).'**
+  String settingsUpdatesUpToDate(String version);
+
+  /// The update check could not reach GitHub.
+  ///
+  /// In fr, this message translates to:
+  /// **'GitHub n\'a pas pu être joint. Nouvel essai à la prochaine ouverture de cet écran.'**
+  String get settingsUpdatesOffline;
+
+  /// The app could not read the update status from its backend.
+  ///
+  /// In fr, this message translates to:
+  /// **'État des mises à jour indisponible.'**
+  String get settingsUpdatesUnavailable;
+
   /// Local-privacy statement in the About section.
   ///
   /// In fr, this message translates to:
-  /// **'Toutes vos données restent sur cet ordinateur. Bastide ne se connecte à aucune banque et n\'envoie rien sur Internet.'**
+  /// **'Toutes vos données restent sur cet ordinateur. Bastide ne se connecte à aucune banque et n\'envoie rien sur Internet, hormis la vérification des mises à jour si vous l\'activez.'**
   String get settingsAboutPrivacy;
 
   /// Encouraging placeholder body on panels whose feature isn't built yet.

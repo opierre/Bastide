@@ -12,8 +12,8 @@ through this script, so they run the same steps:
 3. put the frozen backend inside the app, where the supervisor looks for it;
 4. wrap the app for this OS:
 
-   - Windows: ``Bastide-Setup-<version>.exe`` (Inno Setup, ``tools/windows/bastide.iss``)
-     and the portable ``Bastide-<version>-windows.zip``.
+   - Windows: ``Bastide-Setup-<version>.exe`` (Velopack, ``vpk`` on the PATH) and the
+     portable ``Bastide-<version>-windows.zip``.
    - macOS: ``Bastide.app``, ad-hoc signed (unsigned code doesn't run on Apple Silicon),
      in ``Bastide-<version>-macos.dmg``.
    - Linux: ``Bastide-<version>-<arch>.AppImage``, with ``appimagetool`` on the PATH or
@@ -37,6 +37,13 @@ FRONTEND = ROOT / "frontend"
 BACKEND_DIST = ROOT / "backend" / "dist" / "bastide-backend"
 LICENSE = ROOT / "LICENSE"
 DIST = ROOT / "dist"
+
+# Velopack installs into %LOCALAPPDATA%\<pack id> and uninstalling deletes that whole folder.
+# The user's data lives in %LOCALAPPDATA%\<data dir name> (platformdirs, see
+# ``data_dir_name``), so the two names must never be the same: with a pack id of "Bastide",
+# uninstalling would delete the database. Never change it once released either: upgrades
+# find the installed copy by it.
+VELOPACK_PACK_ID = "Bastide.App"
 
 
 def run(*command: str | Path, cwd: Path = ROOT) -> None:
@@ -65,12 +72,25 @@ def pubspec_version() -> tuple[str, str]:
     return match[1], match[2] or "1"
 
 
-def numeric_version(version: str) -> str:
-    """``1.2.3`` out of ``1.2.3-rc.1``: Windows version resources take numbers only."""
-    match = re.match(r"\d+(\.\d+)*", version)
+def data_dir_name() -> str:
+    """The folder name the backend keeps the user's data under (``backend/app/core/config.py``)."""
+    config = (ROOT / "backend" / "app" / "core" / "config.py").read_text(encoding="utf-8")
+    match = re.search(r"user_data_dir\(\s*\"([^\"]+)\"", config)
     if match is None:
-        sys.exit(f"{version} doesn't start with a version number")
-    return match[0]
+        sys.exit("Can't find the data dir name in backend/app/core/config.py")
+    return match[1]
+
+
+def check_install_root_spares_data(pack_id: str, data_name: str) -> None:
+    """Refuse a pack id whose install folder is the data folder: uninstalling would delete it.
+
+    Both are folders directly under %LOCALAPPDATA%, compared the way Windows does: ignoring case.
+    """
+    if pack_id.casefold() == data_name.casefold():
+        sys.exit(
+            f"Velopack pack id {pack_id!r} would install into the user's data folder"
+            f" %LOCALAPPDATA%\\{data_name}, and uninstalling would delete their database."
+        )
 
 
 def zip_folder(folder: Path, archive: Path, top: str) -> None:
@@ -89,16 +109,27 @@ def package_windows(version: str) -> None:
         sys.exit(f"No backend in {release}: the frozen build is missing")
     shutil.copy2(LICENSE, release / "LICENSE.txt")
 
-    iscc = require(
-        "iscc",
-        Path.home() / "AppData/Local/Programs/Inno Setup 6/ISCC.exe",
-        Path("C:/Program Files (x86)/Inno Setup 6/ISCC.exe"),
-    )
+    check_install_root_spares_data(VELOPACK_PACK_ID, data_dir_name())
+    # Per-user, no admin rights, into %LOCALAPPDATA%\Bastide.App. The app answers Velopack's
+    # install/update/uninstall hooks by exiting at once (frontend/windows/runner/main.cpp).
+    # The portable zip below stays ours: Velopack's own adds its updater beside the app.
+    # While installing, Setup shows the splash at its pixel size × the display scale, with
+    # its progress bar drawn as a 12 px strip across the image's bottom edge, in iris.
+    velopack = DIST / "velopack"
+    shutil.rmtree(velopack, ignore_errors=True)
     run(
-        iscc, f"/DAppVersion={version}", f"/DNumericVersion={numeric_version(version)}",
-        f"/DSourceDir={release}", f"/DOutputDir={DIST}", "/Q",
-        ROOT / "tools" / "windows" / "bastide.iss",
+        require("vpk"), "pack",
+        "--packId", VELOPACK_PACK_ID, "--packVersion", version,
+        "--packDir", release, "--mainExe", "bastide.exe", "--runtime", "win-x64",
+        "--packTitle", "Bastide", "--packAuthors", "Bastide",
+        "--icon", FRONTEND / "windows" / "runner" / "resources" / "app_icon.ico",
+        "--splashImage", FRONTEND / "windows" / "installer" / "splash.png",
+        "--splashProgressColor", "#8B8CF9",
+        "--shortcuts", "Desktop,StartMenuRoot", "--noPortable", "--outputDir", velopack,
     )  # fmt: skip
+    setup = DIST / f"Bastide-Setup-{version}.exe"
+    shutil.move(velopack / f"{VELOPACK_PACK_ID}-win-Setup.exe", setup)
+    print(f"Wrote {setup}")
     zip_folder(release, DIST / f"Bastide-{version}-windows.zip", "Bastide")
 
 

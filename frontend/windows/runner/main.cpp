@@ -2,6 +2,8 @@
 #include <flutter/flutter_view_controller.h>
 #include <windows.h>
 
+#include <cwchar>
+
 #include "flutter_window.h"
 #include "utils.h"
 
@@ -23,10 +25,26 @@ void FocusRunningInstance() {
   ::SetForegroundWindow(existing);
 }
 
+// Whether the installer started us for one of its hooks rather than the user:
+// Velopack runs the app with `--veloapp-install`, `--veloapp-updated`,
+// `--veloapp-obsolete` or `--veloapp-uninstall <version>` and kills it if it
+// hasn't exited within 15 to 30 seconds. Bastide has nothing to do at those
+// moments, and above all no backend to start, so it leaves at once.
+bool IsInstallerHook(const wchar_t *command_line) {
+  return command_line != nullptr &&
+         ::wcsstr(command_line, L"--veloapp-") != nullptr;
+}
+
 }  // namespace
 
 int APIENTRY wWinMain(_In_ HINSTANCE instance, _In_opt_ HINSTANCE prev,
                       _In_ wchar_t *command_line, _In_ int show_command) {
+  // Before the single-instance check: `--veloapp-obsolete` runs while the old
+  // version may still be open, and must not focus its window.
+  if (IsInstallerHook(command_line)) {
+    return EXIT_SUCCESS;
+  }
+
 #ifdef NDEBUG
   // One running instance per user session: two would start two backends on
   // one database. A second launch focuses the first window and exits. Debug

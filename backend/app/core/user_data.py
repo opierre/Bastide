@@ -11,7 +11,8 @@ from dataclasses import dataclass
 from datetime import date, datetime
 from typing import Any
 
-from sqlalchemy import ColumnElement, Table, select
+from sqlalchemy import Column, ColumnElement, Table, select
+from sqlalchemy.sql.schema import ScalarElementColumnDefault
 
 from app.core.db import Base
 
@@ -66,6 +67,8 @@ class ColumnSpec:
     python_type: type
     nullable: bool
     references: str | None  # the table a foreign key points at, if any
+    # The column's constant default, which a row archived before the column existed gets.
+    default: Any = None
 
 
 def table(name: str) -> Table:
@@ -93,9 +96,18 @@ def describe(name: str) -> list[ColumnSpec]:
                 python_type=column.type.python_type,
                 nullable=bool(column.nullable),
                 references=foreign.column.table.name if foreign is not None else None,
+                default=_constant_default(column),
             )
         )
     return specs
+
+
+def _constant_default(column: Column[Any]) -> Any:
+    """The column's default when it is a plain value; `None` for none or a callable one."""
+    default = column.default
+    if isinstance(default, ScalarElementColumnDefault):
+        return default.arg
+    return None
 
 
 def encode(value: Any) -> Any:
