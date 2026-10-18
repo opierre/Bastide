@@ -123,6 +123,8 @@ Bastide/
   `gen-l10n` and `test` on the frontend, plus dependency-vulnerability and secret scanners.
 - **Fixed chrome.** The sidebar and top bar are identical on every panel.
 
+Want to help? Read [`CONTRIBUTING.md`](CONTRIBUTING.md) and the [Code of Conduct](CODE_OF_CONDUCT.md).
+
 ## 📄 License
 
 Bastide is licensed under the [GNU Affero General Public License v3.0](LICENSE). You may use,
