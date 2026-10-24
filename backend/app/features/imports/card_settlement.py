@@ -18,6 +18,11 @@ from app.features.imports.ledger import Booked
 #: The system category a settlement is filed under (seeded in `app/core/seed.py`).
 CARD_SETTLEMENT_CATEGORY_KEY = "category.finance.card_settlement"
 
+#: `categorization_source` of a settlement found by its label and awaiting the user's word.
+#: Neither `rule` (no rule of the user's matched) nor `model`: stage 2 leaves it alone, and the
+#: review queue offers it for confirmation whether or not local AI is on.
+DETECTED_SOURCE = "detected"
+
 #: How far from the settlement a card statement's own reset line may sit and still be taken for
 #: it. Banks date that line on the cycle close or on the debit, rarely more than a few days apart.
 RESET_WINDOW = timedelta(days=10)

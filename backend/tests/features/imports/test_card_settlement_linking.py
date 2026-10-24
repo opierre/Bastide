@@ -93,6 +93,32 @@ def _offsets(rows: list[dict]) -> list[dict]:
     return [row for row in rows if row["amount_minor"] > 0]
 
 
+def _category_id(client: TestClient, headers: dict[str, str], key: str) -> str:
+    categories = client.get("/api/v1/categories", headers=headers).json()
+    return next(category["id"] for category in categories if category["name"] == key)
+
+
+def _recategorize(
+    client: TestClient, headers: dict[str, str], transaction_id: str, category_id: str
+) -> dict:
+    response = client.patch(
+        f"/api/v1/transactions/{transaction_id}",
+        json={"category_id": category_id},
+        headers=headers,
+    )
+    assert response.status_code == 200, response.json()
+    return response.json()
+
+
+def _settled(client: TestClient, headers: dict[str, str]) -> tuple[str, str, dict]:
+    """A card cycle matched to its settlement: the checking id, the card id, the settlement."""
+    checking_id = _create_account(client, headers, "checking")
+    card_id = _create_account(client, headers, "deferred_card")
+    _import(client, headers, card_id, _statement("CC", _CARD_ROWS), "carte.ofx")
+    _import(client, headers, checking_id, _statement("BANK", [_SETTLEMENT]), "releve.ofx")
+    return checking_id, card_id, _rows(client, headers, checking_id)[0]
+
+
 # --- cycle matching ---------------------------------------------------------------------
 
 
@@ -167,7 +193,8 @@ def test_a_settlement_imported_before_its_card_existed_is_linked_later(
 
     settlement = _rows(client, headers, checking_id)[0]
     assert settlement["category"]["name"] == CARD_SETTLEMENT_CATEGORY_KEY
-    assert settlement["needs_review"] is False
+    assert settlement["categorization_source"] == "detected"
+    assert settlement["needs_review"] is True
     assert _balance(client, headers, card_id) == -4_000
 
 
@@ -256,3 +283,61 @@ def test_a_card_first_import_reconciles_against_the_offset(client: TestClient) -
     card = client.get(f"/api/v1/accounts/{card_id}", headers=headers).json()
     assert card["opening_balance_minor"] == 0
     assert card["balance_minor"] == -4_000
+
+
+# --- confirming and correcting a detected settlement ------------------------------------
+
+
+def test_confirming_a_settlement_keeps_its_link(client: TestClient) -> None:
+    headers = _register(client)
+    checking_id, card_id, settlement = _settled(client, headers)
+
+    confirmed = _recategorize(client, headers, settlement["id"], settlement["category"]["id"])
+
+    assert confirmed["categorization_source"] == "user"
+    assert confirmed["needs_review"] is False
+    assert len(_offsets(_rows(client, headers, card_id))) == 1
+    assert _balance(client, headers, card_id) == -4_000
+
+
+def test_correcting_a_settlement_removes_the_posted_credit(client: TestClient) -> None:
+    headers = _register(client)
+    checking_id, card_id, settlement = _settled(client, headers)
+    other = _category_id(client, headers, "category.other.uncategorized")
+
+    _recategorize(client, headers, settlement["id"], other)
+
+    # The cycle is owed again, as if the settlement had never been matched.
+    assert _offsets(_rows(client, headers, card_id)) == []
+    assert _balance(client, headers, card_id) == -49_210
+
+    # And it stays the user's call: a later import does not match it again.
+    later = [("S2", "20260210", "-20.00", "CB PHARMACIE")]
+    _import(client, headers, checking_id, _statement("BANK", later), "releve-2.ofx")
+    assert _offsets(_rows(client, headers, card_id)) == []
+
+
+def test_correcting_a_settlement_sends_the_bank_reset_line_back_to_review(
+    client: TestClient,
+) -> None:
+    headers = _register(client)
+    checking_id = _create_account(client, headers, "checking")
+    card_id = _create_account(client, headers, "deferred_card")
+    reset = ("R1", "20260204", "452.10", "RELEVE DIFFERE AU 310126")
+    _import(client, headers, card_id, _statement("CC", [*_CARD_ROWS, reset]), "carte.ofx")
+    _import(client, headers, checking_id, _statement("BANK", [_SETTLEMENT]), "releve.ofx")
+    settlement = _rows(client, headers, checking_id)[0]
+
+    _recategorize(
+        client,
+        headers,
+        settlement["id"],
+        _category_id(client, headers, "category.other.uncategorized"),
+    )
+
+    # The bank's line is a real row, so it stays; only our reading of it is withdrawn.
+    line = _offsets(_rows(client, headers, card_id))[0]
+    assert line["description_raw"] == "RELEVE DIFFERE AU 310126"
+    assert line["category"] is None
+    assert line["needs_review"] is True
+    assert _balance(client, headers, card_id) == -4_000

@@ -459,6 +459,7 @@
   "reviewConfirm": "Confirm",
   "reviewCorrect": "Correct",
   "reviewNoProposal": "— no proposal",
+  "reviewSettlementDetected": "card settlement detected",
   "reviewChooseCategory": "Choose a category",
   "alwaysRuleSubtitle": "A rule files these transactions without AI, on every import — pre-filled from “{label}”.",
   "alwaysRuleCategoryLabel": "Target category",

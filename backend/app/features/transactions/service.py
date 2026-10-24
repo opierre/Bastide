@@ -1,6 +1,7 @@
 """Business logic for listing, fetching, and patching transactions."""
 
 from datetime import date
+from typing import Protocol
 
 from app.core.errors import NotFoundError
 from app.features.categories.repository import CategoryRepository
@@ -18,12 +19,30 @@ class TransactionNotFoundError(NotFoundError):
     code = "TRANSACTION_NOT_FOUND"
 
 
+class RecategorizationHook(Protocol):
+    """Told when the user files a transaction under another category.
+
+    A protocol so this feature needn't know what depends on a row's category: today, the
+    import feature's card-settlement links, which a correction must undo.
+    """
+
+    def recategorized(
+        self, user_id: str, transaction: Transaction, previous_category_id: str | None
+    ) -> None: ...
+
+
 class TransactionService:
     """Transaction listing/detail (user-scoped) and the user category/description override."""
 
-    def __init__(self, repository: TransactionRepository, categories: CategoryRepository) -> None:
+    def __init__(
+        self,
+        repository: TransactionRepository,
+        categories: CategoryRepository,
+        on_recategorized: RecategorizationHook | None = None,
+    ) -> None:
         self._repository = repository
         self._categories = categories
+        self._on_recategorized = on_recategorized
 
     def list_for_user(
         self,
@@ -81,9 +100,13 @@ class TransactionService:
                     "Category not found.",
                     {"field": "category_id", "category_id": data.category_id},
                 )
+            previous_category_id = transaction.category_id
             transaction.category_id = data.category_id
             transaction.categorization_source = "user"
             transaction.needs_review = False
+            if self._on_recategorized is not None and previous_category_id != data.category_id:
+                # Before the commit below, so the row and what depends on it change together.
+                self._on_recategorized.recategorized(user_id, transaction, previous_category_id)
         if data.description_clean is not None:
             transaction.description_clean = data.description_clean
         if data.merchant is not None:

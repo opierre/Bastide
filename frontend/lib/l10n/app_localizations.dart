@@ -2546,6 +2546,12 @@ abstract class AppLocalizations {
   /// **'— aucune proposition'**
   String get reviewNoProposal;
 
+  /// Note after the date on a review row whose proposal is a deferred-card settlement the import recognised from its label (a model proposal shows its confidence instead).
+  ///
+  /// In fr, this message translates to:
+  /// **'règlement de carte détecté'**
+  String get reviewSettlementDetected;
+
   /// Link on a review row with no proposal, opening the category picker.
   ///
   /// In fr, this message translates to:

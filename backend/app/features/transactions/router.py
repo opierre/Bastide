@@ -10,6 +10,8 @@ from app.core.db import get_db
 from app.features.auth.deps import get_current_user
 from app.features.auth.models import User
 from app.features.categories.repository import CategoryRepository
+from app.features.imports.repository import ImportRepository
+from app.features.imports.settlements import CardSettlementService
 from app.features.transactions.models import Transaction
 from app.features.transactions.repository import TransactionRepository
 from app.features.transactions.schemas import (
@@ -24,7 +26,11 @@ router = APIRouter(prefix="/api/v1/transactions", tags=["transactions"])
 
 
 def _service(db: Annotated[Session, Depends(get_db)]) -> TransactionService:
-    return TransactionService(TransactionRepository(db), CategoryRepository(db))
+    return TransactionService(
+        TransactionRepository(db),
+        CategoryRepository(db),
+        on_recategorized=CardSettlementService(ImportRepository(db), db),
+    )
 
 
 def _to_read(transaction: Transaction) -> TransactionRead:

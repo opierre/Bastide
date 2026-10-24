@@ -1539,6 +1539,9 @@ class AppLocalizationsFr extends AppLocalizations {
   String get reviewNoProposal => '— aucune proposition';
 
   @override
+  String get reviewSettlementDetected => 'règlement de carte détecté';
+
+  @override
   String get reviewChooseCategory => 'Choisir une catégorie';
 
   @override

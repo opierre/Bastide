@@ -84,8 +84,9 @@ def test_a_settlement_is_a_transfer_when_the_card_is_tracked(client: TestClient)
     settlement = rows["FACTURE CARTE DU 310126"]
     assert settlement["category"]["name"] == CARD_SETTLEMENT_CATEGORY_KEY
     assert settlement["category"]["kind"] == "transfer"
-    assert settlement["categorization_source"] == "rule"
-    assert settlement["needs_review"] is False
+    # Proposed, not decided: the row waits in the review queue for the user's confirmation.
+    assert settlement["categorization_source"] == "detected"
+    assert settlement["needs_review"] is True
     assert settlement["amount_minor"] == -45_210
     # An ordinary card purchase on the current account is left to the usual pipeline.
     assert rows["CB BOULANGERIE DU PARC"]["category"] is None

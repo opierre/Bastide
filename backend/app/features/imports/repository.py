@@ -125,6 +125,19 @@ class ImportRepository:
             .limit(1)
         )
 
+    def rows_settled_by(self, settlement_id: str) -> list[Transaction]:
+        """Every row linked to this settlement: its cycle's card rows and its offset."""
+        return list(
+            self._db.scalars(
+                select(Transaction).where(Transaction.card_settlement_id == settlement_id)
+            )
+        )
+
+    def delete_transaction(self, transaction: Transaction) -> None:
+        """Remove a row from the ledger. Not committed; the caller owns its balance effects."""
+        self._db.delete(transaction)
+        self._db.flush()
+
     def save(self, batch: ImportBatch, transactions: list[Transaction]) -> ImportBatch:
         """Persist the batch and its new transactions in one DB transaction.
 

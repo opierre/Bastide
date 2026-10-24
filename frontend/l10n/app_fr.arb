@@ -1935,6 +1935,10 @@
   "@reviewNoProposal": {
     "description": "Italic note on a review row the model made no proposal for."
   },
+  "reviewSettlementDetected": "règlement de carte détecté",
+  "@reviewSettlementDetected": {
+    "description": "Note after the date on a review row whose proposal is a deferred-card settlement the import recognised from its label (a model proposal shows its confidence instead)."
+  },
   "reviewChooseCategory": "Choisir une catégorie",
   "@reviewChooseCategory": {
     "description": "Link on a review row with no proposal, opening the category picker."

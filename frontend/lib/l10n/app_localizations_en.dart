@@ -1529,6 +1529,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get reviewNoProposal => '— no proposal';
 
   @override
+  String get reviewSettlementDetected => 'card settlement detected';
+
+  @override
   String get reviewChooseCategory => 'Choose a category';
 
   @override

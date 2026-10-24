@@ -5,6 +5,9 @@ A service of its own rather than part of the import pipeline: imports create the
 link must also be undone from wherever the settlement is recategorised.
 """
 
+from dataclasses import dataclass
+from datetime import date
+
 from sqlalchemy.orm import Session
 
 from app.features.accounts.balance import apply_delta
@@ -12,6 +15,7 @@ from app.features.accounts.models import Account
 from app.features.categories.repository import CategoryRepository
 from app.features.imports.card_settlement import (
     CARD_SETTLEMENT_CATEGORY_KEY,
+    DETECTED_SOURCE,
     RESET_WINDOW,
     cycle_length,
     is_card_settlement,
@@ -21,6 +25,14 @@ from app.features.imports.ledger import settle_earlier_mismatches, shift_later_s
 from app.features.imports.models import ImportBatch
 from app.features.imports.repository import ImportRepository
 from app.features.transactions.models import Transaction
+
+
+@dataclass(frozen=True)
+class _Movement:
+    """A change to an account's ledger that is not a row of it — a removed row, negated."""
+
+    booked_date: date
+    amount_minor: int
 
 
 class CardSettlementService:
@@ -85,10 +97,12 @@ class CardSettlementService:
                 continue
 
             card, cycle, reset = matches[0]
-            # A settlement imported before its card existed was left uncategorised; it is one now.
-            settlement.category_id = settlement_category_id
-            settlement.categorization_source = "rule"
-            settlement.needs_review = False
+            if settlement.categorization_source != "user":
+                # Proposed, like any detected settlement — including one imported before its card
+                # existed and left uncategorised then. One the user already confirmed stays theirs.
+                settlement.category_id = settlement_category_id
+                settlement.categorization_source = DETECTED_SOURCE
+                settlement.needs_review = True
             for row in cycle:
                 row.card_settlement_id = settlement.id
             if reset is not None:
@@ -136,3 +150,49 @@ class CardSettlementService:
         apply_delta(card, offset.amount_minor)
         shift_later_snapshots(self._db, card, [offset])
         settle_earlier_mismatches(self._db, card, [offset])
+
+    def recategorized(
+        self, user_id: str, transaction: Transaction, previous_category_id: str | None
+    ) -> None:
+        """Undo a settlement's link once the user files it as something else.
+
+        "Corriger" on a proposed settlement means it was not one: the cycle it was matched to
+        is unpaid again, and the credit closing that cycle must go with it.
+        """
+        settlement_category_id = self.settlement_category_id(user_id)
+        if (
+            settlement_category_id is None
+            or previous_category_id != settlement_category_id
+            or transaction.category_id == settlement_category_id
+        ):
+            return
+        self.unlink(transaction, settlement_category_id)
+
+    def unlink(self, settlement: Transaction, settlement_category_id: str) -> None:
+        """Release every row a settlement claimed, removing the credit posted for it.
+
+        The cycle's card rows — refunds included — are simply unclaimed, free for another
+        settlement to match. A reset line the card statement printed is a real row, so it
+        stays, but goes back to the review queue: the settlement category was only ever ours,
+        and without the settlement it closed, nobody has said what the line is.
+        """
+        for row in self._repository.rows_settled_by(settlement.id):
+            if row.dedup_hash == offset_dedup_hash(settlement.id):
+                card = self._db.get(Account, row.account_id)
+                if card is not None:
+                    self._remove_offset(card, row)
+                continue
+            row.card_settlement_id = None
+            if row.category_id == settlement_category_id and row.categorization_source != "user":
+                row.category_id = None
+                row.categorization_source = "uncategorized"
+                row.needs_review = True
+        self._db.flush()
+
+    def _remove_offset(self, card: Account, offset: Transaction) -> None:
+        """Delete a posted credit and take it back out of the card's balance and history."""
+        removal = _Movement(booked_date=offset.booked_date, amount_minor=-offset.amount_minor)
+        self._repository.delete_transaction(offset)
+        apply_delta(card, removal.amount_minor)
+        shift_later_snapshots(self._db, card, [removal])
+        settle_earlier_mismatches(self._db, card, [removal])

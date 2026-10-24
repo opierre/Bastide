@@ -16,7 +16,7 @@ from app.features.accounts.models import Account, AccountBalanceSnapshot
 from app.features.accounts.service import AccountService
 from app.features.auth.models import User
 from app.features.imports.canonical import CanonicalTransaction, normalize
-from app.features.imports.card_settlement import is_card_settlement
+from app.features.imports.card_settlement import DETECTED_SOURCE, is_card_settlement
 from app.features.imports.ledger import settle_earlier_mismatches, shift_later_snapshots
 from app.features.imports.models import ImportBatch
 from app.features.imports.parsers.ofx import LedgerBalance, OfxParseError, parse_ledger_balance
@@ -182,9 +182,11 @@ class ImportService:
             ):
                 # After the user's own rules, which state intent this built-in reading must not
                 # override; before the model, which has no way to know a card account exists.
+                # Only proposed: a label is a strong hint, not proof, so the row waits in the
+                # review queue for the user to confirm it.
                 transaction.category_id = settlement_category_id
-                transaction.categorization_source = "rule"
-                transaction.needs_review = False
+                transaction.categorization_source = DETECTED_SOURCE
+                transaction.needs_review = True
             new_transactions.append(transaction)
 
         # The batch goes in first: the rows reference it, and the flush below would otherwise

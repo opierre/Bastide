@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../data/transactions_repository.dart';
 import '../../categories/domain/category.dart' show AppCategory;
 import '../domain/transaction.dart';
+import 'settlement_reload.dart';
 
 /// The active list filters, held separately from the loaded page so a filter
 /// change is a single state transition the controller can watch and react to
@@ -174,6 +175,14 @@ class TransactionsController extends AsyncNotifier<TransactionsPage> {
         .read(transactionsRepositoryProvider)
         .update(transaction.id, categoryId: categoryId);
     _replace(updated);
+    // Turning down a detected settlement unlinks it server-side, which moves
+    // the card's ledger too — not just this row. The list may show the card's
+    // credit that just left it.
+    if (transaction.hasSettlementProposal &&
+        categoryId != transaction.category?.id) {
+      await refreshQuietly();
+      invalidateSettlementViews(ref);
+    }
   }
 
   /// Accepts the model's proposal for [transaction] as-is.
