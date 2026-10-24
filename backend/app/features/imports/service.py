@@ -181,6 +181,7 @@ class ImportService:
         # Before the balance check, which reads point-in-time balances off these snapshots.
         if new_rows:
             self._shift_later_snapshots(account, new_rows)
+            self._settle_earlier_mismatches(account, new_rows)
 
         # Before any snapshot is written, so they are taken from the corrected base.
         if declared_balance is not None:
@@ -352,6 +353,35 @@ class ImportService:
             )
         # The session doesn't autoflush, and the balance reads that follow query the table.
         self._db.flush()
+
+    def _settle_earlier_mismatches(
+        self, account: Account, new_rows: list[CanonicalTransaction]
+    ) -> None:
+        """Take the newly imported rows off the mismatches earlier imports recorded.
+
+        A mismatch is the declared balance minus the ledger's at its as-of date, so each row
+        that arrives on or before that date moves it by its own amount. Importing the missing
+        statement brings it to zero, which clears it: left as it was, the history would
+        still warn about a gap that has been filled.
+        """
+        earliest = min(row.booked_date for row in new_rows)
+        batches = self._db.scalars(
+            select(ImportBatch).where(
+                ImportBatch.account_id == account.id,
+                ImportBatch.balance_mismatch_minor.is_not(None),
+                ImportBatch.balance_mismatch_as_of >= earliest,
+            )
+        )
+        for batch in batches:
+            as_of = batch.balance_mismatch_as_of
+            mismatch = (batch.balance_mismatch_minor or 0) - sum(
+                row.amount_minor for row in new_rows if as_of and row.booked_date <= as_of
+            )
+            if mismatch == 0:
+                batch.balance_mismatch_minor = None
+                batch.balance_mismatch_as_of = None
+            else:
+                batch.balance_mismatch_minor = mismatch
 
     def _sync_month_boundary_snapshots(
         self, account: Account, period_start: date, period_end: date

@@ -346,6 +346,31 @@ def test_filling_a_gap_updates_the_snapshots_taken_after_it(client: TestClient) 
     assert account["balance_minor"] == 147_750
 
 
+def test_filling_a_gap_clears_the_mismatch_it_caused(client: TestClient) -> None:
+    """The March–April statement is 50.00 short of the bank: February is missing.
+
+    Once February is imported, the earlier warning is settled rather than kept in
+    the history for a gap that no longer exists.
+    """
+    headers = _register(client)
+    account_id = _create_account(client, headers)
+    _upload(client, headers, account_id, FIXTURES / "sample_sgml.ofx", "jan.ofx")
+    after_gap = _upload(
+        client, headers, account_id, FIXTURES / "sample_sgml_after_gap.ofx", "mar-apr.ofx"
+    ).json()
+    assert after_gap["balance_mismatch_minor"] == -5_000
+    assert after_gap["balance_mismatch_as_of"] == "2024-04-30"
+
+    feb = _upload(
+        client, headers, account_id, FIXTURES / "sample_sgml_second_matching.ofx", "feb.ofx"
+    ).json()
+
+    assert feb["balance_mismatch_minor"] is None
+    settled = client.get(f"/api/v1/imports/{after_gap['id']}", headers=headers).json()
+    assert settled["balance_mismatch_minor"] is None
+    assert settled["balance_mismatch_as_of"] is None
+
+
 def test_first_import_never_reports_a_mismatch(client: TestClient) -> None:
     """The first import derives the opening balance from LEDGERBAL; nothing to compare yet."""
     headers = _register(client)
