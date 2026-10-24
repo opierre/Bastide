@@ -201,6 +201,22 @@ class CardSettlementService:
             row.needs_review = False
             self._remove_offset(card, posted)
 
+    def follows_its_settlement(self, transaction: Transaction) -> bool:
+        """Whether a row's category belongs to its link rather than to the rules.
+
+        True for the card-side credit closing a cycle — posted here, or the statement's own
+        reset line. It carries the settlement's wording, so a rule written for the settlement
+        matches it too, but it is a transfer for as long as the link stands and goes when the
+        link does. A cycle's purchases and refunds are ordinary rows and stay rule-able.
+        """
+        settlement_id = transaction.card_settlement_id
+        if settlement_id is None or transaction.amount_minor <= 0:
+            return False
+        if transaction.dedup_hash == offset_dedup_hash(settlement_id):
+            return True
+        settlement = self._db.get(Transaction, settlement_id)
+        return settlement is not None and -settlement.amount_minor == transaction.amount_minor
+
     def recategorized(
         self, user_id: str, transaction: Transaction, previous_category_id: str | None
     ) -> None:

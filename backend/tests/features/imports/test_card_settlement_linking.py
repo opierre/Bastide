@@ -384,3 +384,58 @@ def test_a_late_reset_line_counts_toward_the_declared_balance(client: TestClient
 
     assert batch["balance_mismatch_minor"] is None
     assert _balance(client, headers, card_id) == -4_000
+
+
+def test_a_rule_moving_a_settlement_elsewhere_removes_the_posted_credit(
+    client: TestClient,
+) -> None:
+    # « Exécuter les règles » is the user's instruction too: a rule filing the settlement under
+    # another category undoes the link exactly as « Corriger » would.
+    headers = _register(client)
+    _, card_id, _ = _settled(client, headers)
+    created = client.post(
+        "/api/v1/rules",
+        json={
+            "priority": 1,
+            "match_field": "description_clean",
+            "match_type": "contains",
+            "pattern": "FACTURE CARTE",
+            "category_id": _category_id(client, headers, "category.other.uncategorized"),
+        },
+        headers=headers,
+    )
+    assert created.status_code == 201, created.json()
+
+    applied = client.post("/api/v1/rules/apply", json={}, headers=headers)
+
+    assert applied.status_code == 200, applied.json()
+    assert applied.json()["recategorized_count"] == 1
+    assert _offsets(_rows(client, headers, card_id)) == []
+    assert _balance(client, headers, card_id) == -49_210
+
+
+def test_a_rule_never_recategorises_the_card_credit_on_its_own(client: TestClient) -> None:
+    # The credit carries the settlement's wording, so a rule written for that wording matches
+    # it too. With the settlement confirmed — and so out of the rules' reach — the credit must
+    # keep following its link rather than become an income line on the card.
+    headers = _register(client)
+    _, card_id, settlement = _settled(client, headers)
+    _recategorize(client, headers, settlement["id"], settlement["category"]["id"])
+    client.post(
+        "/api/v1/rules",
+        json={
+            "priority": 1,
+            "match_field": "description_clean",
+            "match_type": "contains",
+            "pattern": "FACTURE CARTE",
+            "category_id": _category_id(client, headers, "category.other.uncategorized"),
+        },
+        headers=headers,
+    )
+
+    applied = client.post("/api/v1/rules/apply", json={}, headers=headers)
+
+    assert applied.json()["recategorized_count"] == 0
+    offsets = _offsets(_rows(client, headers, card_id))
+    assert [row["category"]["name"] for row in offsets] == [CARD_SETTLEMENT_CATEGORY_KEY]
+    assert _balance(client, headers, card_id) == -4_000
