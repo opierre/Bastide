@@ -12,12 +12,12 @@ import pytest
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine, func, inspect, select, text
-from sqlalchemy.orm import sessionmaker
 
 from app.features.mortgages.engine import RepaymentType, build_schedule, taeg_bps
 from app.features.mortgages.router import get_today
 from app.features.properties.models import Property
 from tests.api import register
+from tests.db import open_session
 
 TODAY = date(2026, 5, 15)
 
@@ -58,8 +58,7 @@ def user_id_of(client: TestClient, headers: dict[str, str]) -> str:
 
 def insert_property(tmp_path: Path, user_id: str) -> str:
     """Insert a property straight into the client's database (its API is another card)."""
-    engine = create_engine(f"sqlite:///{tmp_path / 'test.db'}")
-    with sessionmaker(bind=engine)() as session:
+    with open_session(tmp_path / "test.db") as session:
         prop = Property(
             user_id=user_id,
             label="Appartement Lyon 3e",
@@ -70,7 +69,6 @@ def insert_property(tmp_path: Path, user_id: str) -> str:
         session.add(prop)
         session.commit()
         property_id = prop.id
-    engine.dispose()
     return property_id
 
 

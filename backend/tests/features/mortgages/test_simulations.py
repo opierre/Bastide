@@ -8,12 +8,13 @@ from pathlib import Path
 
 import pytest
 from fastapi.testclient import TestClient
-from sqlalchemy import create_engine, func, select
-from sqlalchemy.orm import Session, sessionmaker
+from sqlalchemy import func, select
+from sqlalchemy.orm import Session
 
 from app.features.mortgages.models import MortgageSimulation
 from app.features.mortgages.simulations_service import MAX_SIMULATIONS_PER_USER
 from tests.api import register
+from tests.db import open_session
 
 SCENARIO = {
     "label": "Lyon 3e — 320 k€",
@@ -30,8 +31,7 @@ INPUT_FIELDS = set(SCENARIO) - {"label"}
 
 
 def db(tmp_path: Path) -> Session:
-    engine = create_engine(f"sqlite:///{tmp_path / 'test.db'}")
-    return sessionmaker(bind=engine)()
+    return open_session(tmp_path / "test.db")
 
 
 def create(client: TestClient, headers: dict[str, str], **overrides: object) -> dict:

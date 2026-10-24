@@ -10,8 +10,7 @@ from datetime import date, timedelta
 from pathlib import Path
 
 from fastapi.testclient import TestClient
-from sqlalchemy import create_engine
-from sqlalchemy.orm import Session, sessionmaker
+from sqlalchemy.orm import Session
 
 from app.features.imports.models import ImportBatch
 from app.features.recurring.models import RecurringOccurrence, RecurringSeries
@@ -19,6 +18,7 @@ from app.features.recurring.normalize import normalize_label
 from app.features.recurring.service import NOMINAL_INTERVAL_DAYS
 from app.features.transactions.models import Transaction
 from tests.api import RegisteredUser as Owner
+from tests.db import open_session as open_db_session
 
 ACCOUNT_PAYLOAD = {
     "name": "Compte courant",
@@ -39,10 +39,7 @@ def create_account(client: TestClient, owner: Owner, name: str = "Compte courant
 
 def open_session(tmp_path: Path) -> Session:
     """A session on the very SQLite file the TestClient's dependency override points at."""
-    engine = create_engine(
-        f"sqlite:///{tmp_path / 'test.db'}", connect_args={"check_same_thread": False}
-    )
-    return sessionmaker(bind=engine)()
+    return open_db_session(tmp_path / "test.db")
 
 
 def insert_series(

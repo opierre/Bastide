@@ -4,13 +4,13 @@ from pathlib import Path
 
 import pytest
 from fastapi.testclient import TestClient
-from sqlalchemy import create_engine, select
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy import select
 
 from app.core.seed import SYSTEM_CATEGORIES
 from app.features.rules.models import CategorizationRule
 from app.features.rules.packs.service import _load_builtin_packs
 from app.features.rules.repository import RuleRepository
+from tests.db import open_session
 from tests.features.rules.packs.helpers import (
     GROCERIES,
     SALARY,
@@ -37,10 +37,7 @@ def _rules(client: TestClient, headers: dict[str, str]) -> list[dict]:
 
 
 def _count_rules(tmp_path: Path) -> int:
-    engine = create_engine(
-        f"sqlite:///{tmp_path / 'test.db'}", connect_args={"check_same_thread": False}
-    )
-    session = sessionmaker(bind=engine)()
+    session = open_session(tmp_path / "test.db")
     count = len(list(session.scalars(select(CategorizationRule))))
     session.close()
     return count

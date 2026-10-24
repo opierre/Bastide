@@ -3,11 +3,10 @@
 from pathlib import Path
 
 from fastapi.testclient import TestClient
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
 
 from app.features.categories.models import Category
 from tests.api import register as _register
+from tests.db import open_session
 
 USER_CATEGORY_PAYLOAD = {
     "name": "Vacances",
@@ -19,10 +18,7 @@ USER_CATEGORY_PAYLOAD = {
 
 def _insert_system_category(tmp_path: Path, name: str = "category.housing") -> str:
     """Insert a system category directly (there's no create-system-category endpoint)."""
-    engine = create_engine(
-        f"sqlite:///{tmp_path / 'test.db'}", connect_args={"check_same_thread": False}
-    )
-    session = sessionmaker(bind=engine)()
+    session = open_session(tmp_path / "test.db")
     category = Category(
         user_id=None,
         parent_id=None,
