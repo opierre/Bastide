@@ -6,7 +6,7 @@ requires-python = ">=3.14"
 dependencies = [
     "alembic>=1.18.5",
     "argon2-cffi>=25.1.0",
-    "certifi>=2026.6.17",
+    "certifi>=2026.10.23",
     "fastapi>=0.139.2",
     "httpx>=0.28.1",
     "platformdirs>=4.12.4",
