@@ -2,7 +2,7 @@
 
 import hashlib
 from calendar import monthrange
-from collections.abc import Callable, Sequence
+from collections.abc import Callable
 from datetime import date
 from typing import Protocol
 from uuid import uuid4
@@ -15,20 +15,14 @@ from app.features.accounts.balance import apply_delta, point_in_time_balance, sh
 from app.features.accounts.models import Account, AccountBalanceSnapshot
 from app.features.accounts.service import AccountService
 from app.features.auth.models import User
-from app.features.categories.repository import CategoryRepository
 from app.features.imports.canonical import CanonicalTransaction, normalize
-from app.features.imports.card_settlement import (
-    CARD_SETTLEMENT_CATEGORY_KEY,
-    RESET_WINDOW,
-    Booked,
-    cycle_length,
-    is_card_settlement,
-    offset_dedup_hash,
-)
+from app.features.imports.card_settlement import is_card_settlement
+from app.features.imports.ledger import settle_earlier_mismatches, shift_later_snapshots
 from app.features.imports.models import ImportBatch
 from app.features.imports.parsers.ofx import LedgerBalance, OfxParseError, parse_ledger_balance
 from app.features.imports.parsers.ofx import parse as parse_ofx
 from app.features.imports.repository import ImportRepository
+from app.features.imports.settlements import CardSettlementService
 from app.features.rules.engine import match_category
 from app.features.rules.repository import RuleRepository
 from app.features.transactions.models import Transaction
@@ -75,6 +69,7 @@ class ImportService:
         # the model existed, which is also what every test constructing this service without
         # one gets.
         self._run_enqueuer = run_enqueuer
+        self._settlements = CardSettlementService(repository, db)
 
     def list_for_user(self, user_id: str) -> list[ImportBatch]:
         """List a user's import batches, most recent first (the import history)."""
@@ -137,7 +132,9 @@ class ImportService:
         new_rows, duplicate_count = self._dedup(account.id, canonical_transactions)
         rules = RuleRepository(self._db).list_enabled_by_user(user.id)
         cards = self._tracked_cards(user.id)
-        settlement_category_id = self._settlement_category_id(user.id) if cards else None
+        settlement_category_id = (
+            self._settlements.settlement_category_id(user.id) if cards else None
+        )
 
         batch = ImportBatch(
             id=str(uuid4()),
@@ -201,13 +198,13 @@ class ImportService:
 
         # Before the balance check, which reads point-in-time balances off these snapshots.
         if new_rows:
-            self._shift_later_snapshots(account, new_rows)
-            self._settle_earlier_mismatches(account, new_rows)
+            shift_later_snapshots(self._db, account, new_rows)
+            settle_earlier_mismatches(self._db, account, new_rows)
 
         # Before the balance check too: on a card's own import, the offsets posted here are part
         # of the ledger its declared balance is compared against.
         if settlement_category_id is not None:
-            self._link_card_settlements(user.id, batch, cards, settlement_category_id)
+            self._settlements.link_pending(user.id, batch, cards, settlement_category_id)
 
         # Before any snapshot is written, so they are taken from the corrected base.
         if declared_balance is not None:
@@ -245,113 +242,6 @@ class ImportService:
             for account in self._account_service.list_for_user(user_id)
             if account.type == "deferred_card"
         ]
-
-    def _settlement_category_id(self, user_id: str) -> str | None:
-        """The id of the system category card settlements are filed under."""
-        categories = CategoryRepository(self._db).list_system_by_names_for_user(
-            [CARD_SETTLEMENT_CATEGORY_KEY], user_id
-        )
-        return categories[0].id if categories else None
-
-    def _link_card_settlements(
-        self,
-        user_id: str,
-        batch: ImportBatch,
-        cards: list[Account],
-        settlement_category_id: str,
-    ) -> None:
-        """Match each unmatched settlement to the card cycle it paid, and offset it on the card.
-
-        Runs on every import, whichever side it brings in: the settlement and the cycle it pays
-        may arrive in either order, months apart, so each import retries what is still open.
-
-        A settlement is matched only when exactly one card has a cycle totalling it — two cards
-        fitting the same amount is a guess, and a wrong link moves money between cards. The
-        matched card then gets a credit equal to the settlement, closing the cycle: the
-        statement's own reset line when it printed one, else a row posted here, tied to this
-        import's batch since it is this import that settled it.
-        """
-        for settlement in self._repository.unlinked_settlement_candidates(
-            user_id, settlement_category_id
-        ):
-            if settlement.category_id is None and not is_card_settlement(
-                settlement.description_clean, settlement.amount_minor
-            ):
-                continue
-
-            matches: list[tuple[Account, list[Transaction], Transaction | None]] = []
-            for card in cards:
-                if card.currency != settlement.currency:
-                    continue
-                reset = self._repository.find_card_reset(
-                    card.id,
-                    -settlement.amount_minor,
-                    settlement.booked_date - RESET_WINDOW,
-                    settlement.booked_date + RESET_WINDOW,
-                )
-                rows = [
-                    row
-                    for row in self._repository.unsettled_card_rows(card.id, settlement.booked_date)
-                    if row is not reset
-                ]
-                length = cycle_length(rows, settlement.amount_minor)
-                if length is not None:
-                    matches.append((card, rows[:length], reset))
-            if len(matches) != 1:
-                continue
-
-            card, cycle, reset = matches[0]
-            # A settlement imported before its card existed was left uncategorised; it is one now.
-            settlement.category_id = settlement_category_id
-            settlement.categorization_source = "rule"
-            settlement.needs_review = False
-            for row in cycle:
-                row.card_settlement_id = settlement.id
-            if reset is not None:
-                reset.card_settlement_id = settlement.id
-                reset.category_id = settlement_category_id
-                reset.categorization_source = "rule"
-                reset.needs_review = False
-            else:
-                self._post_card_offset(card, settlement, batch, settlement_category_id)
-            self._db.flush()
-
-    def _post_card_offset(
-        self,
-        card: Account,
-        settlement: Transaction,
-        batch: ImportBatch,
-        settlement_category_id: str,
-    ) -> None:
-        """Credit the card with what the settlement paid, keeping its balance cache and history.
-
-        The credit is a transfer like the debit it mirrors, so neither side counts as income or
-        spending — the cycle's purchases already did. It carries the bank's own wording for the
-        settlement, the one label the user will recognise.
-        """
-        offset = Transaction(
-            account_id=card.id,
-            import_batch_id=batch.id,
-            booked_date=settlement.booked_date,
-            value_date=None,
-            amount_minor=-settlement.amount_minor,
-            currency=card.currency,
-            description_raw=settlement.description_raw,
-            description_clean=settlement.description_clean,
-            memo=None,
-            merchant=None,
-            category_id=settlement_category_id,
-            categorization_source="rule",
-            needs_review=False,
-            fitid=None,
-            dedup_hash=offset_dedup_hash(settlement.id),
-            card_settlement_id=settlement.id,
-        )
-        self._db.add(offset)
-        self._db.flush()
-        apply_delta(card, offset.amount_minor)
-        self._shift_later_snapshots(card, [offset])
-        self._settle_earlier_mismatches(card, [offset])
 
     def _failed_batch(
         self,
@@ -475,56 +365,6 @@ class ImportService:
             batch.balance_mismatch_minor = mismatch
             batch.balance_mismatch_as_of = as_of
 
-    def _shift_later_snapshots(self, account: Account, new_rows: Sequence[Booked]) -> None:
-        """Add the newly imported rows to every snapshot already taken after them.
-
-        A snapshot is cumulative — the whole balance at its month end — so rows booked on or
-        before that date belong in it, even when they arrive after it was written. That is
-        the case when a statement fills a gap behind later imports: without this, every
-        balance read from a later snapshot (and the net-worth history) would still be missing
-        the gap's rows.
-        """
-        earliest = min(row.booked_date for row in new_rows)
-        snapshots = self._db.scalars(
-            select(AccountBalanceSnapshot).where(
-                AccountBalanceSnapshot.account_id == account.id,
-                AccountBalanceSnapshot.period_end >= earliest,
-            )
-        )
-        for snapshot in snapshots:
-            snapshot.balance_minor += sum(
-                row.amount_minor for row in new_rows if row.booked_date <= snapshot.period_end
-            )
-        # The session doesn't autoflush, and the balance reads that follow query the table.
-        self._db.flush()
-
-    def _settle_earlier_mismatches(self, account: Account, new_rows: Sequence[Booked]) -> None:
-        """Take the newly imported rows off the mismatches earlier imports recorded.
-
-        A mismatch is the declared balance minus the ledger's at its as-of date, so each row
-        that arrives on or before that date moves it by its own amount. Importing the missing
-        statement brings it to zero, which clears it: left as it was, the history would
-        still warn about a gap that has been filled.
-        """
-        earliest = min(row.booked_date for row in new_rows)
-        batches = self._db.scalars(
-            select(ImportBatch).where(
-                ImportBatch.account_id == account.id,
-                ImportBatch.balance_mismatch_minor.is_not(None),
-                ImportBatch.balance_mismatch_as_of >= earliest,
-            )
-        )
-        for batch in batches:
-            as_of = batch.balance_mismatch_as_of
-            mismatch = (batch.balance_mismatch_minor or 0) - sum(
-                row.amount_minor for row in new_rows if as_of and row.booked_date <= as_of
-            )
-            if mismatch == 0:
-                batch.balance_mismatch_minor = None
-                batch.balance_mismatch_as_of = None
-            else:
-                batch.balance_mismatch_minor = mismatch
-
     def _sync_month_boundary_snapshots(
         self, account: Account, period_start: date, period_end: date
     ) -> None:
@@ -532,7 +372,7 @@ class ImportService:
 
         A month only "closes" once the import has rows past its end, so the in-progress final
         month (period_end's own month) is never snapshotted here. A month that already has a
-        snapshot is left alone: `_shift_later_snapshots` has already added this import's rows.
+        snapshot is left alone: `shift_later_snapshots` has already added this import's rows.
         """
         year, month = period_start.year, period_start.month
         while (year, month) < (period_end.year, period_end.month):

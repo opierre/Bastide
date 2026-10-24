@@ -11,8 +11,9 @@ settlement is the *only* record of that spending, and filing it as a transfer wo
 import hashlib
 import unicodedata
 from collections.abc import Sequence
-from datetime import date, timedelta
-from typing import Protocol
+from datetime import timedelta
+
+from app.features.imports.ledger import Booked
 
 #: The system category a settlement is filed under (seeded in `app/core/seed.py`).
 CARD_SETTLEMENT_CATEGORY_KEY = "category.finance.card_settlement"
@@ -20,16 +21,6 @@ CARD_SETTLEMENT_CATEGORY_KEY = "category.finance.card_settlement"
 #: How far from the settlement a card statement's own reset line may sit and still be taken for
 #: it. Banks date that line on the cycle close or on the debit, rarely more than a few days apart.
 RESET_WINDOW = timedelta(days=10)
-
-
-class Booked(Protocol):
-    """A ledger movement as far as cycle matching cares: when, and by how much."""
-
-    @property
-    def booked_date(self) -> date: ...
-
-    @property
-    def amount_minor(self) -> int: ...
 
 
 #: Label fragments French banks use for the settlement debit, accent-folded and uppercased.
