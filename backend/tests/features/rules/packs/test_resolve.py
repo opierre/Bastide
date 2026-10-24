@@ -3,10 +3,10 @@
 from pathlib import Path
 
 from fastapi.testclient import TestClient
-from sqlalchemy import create_engine, select
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy import select
 
 from app.features.categories.models import Category
+from tests.db import open_session
 from tests.features.rules.packs.helpers import (
     GROCERIES,
     SALARY,
@@ -20,10 +20,7 @@ from tests.features.rules.test_rules import _register
 
 
 def _count_categories(tmp_path: Path) -> int:
-    engine = create_engine(
-        f"sqlite:///{tmp_path / 'test.db'}", connect_args={"check_same_thread": False}
-    )
-    session = sessionmaker(bind=engine)()
+    session = open_session(tmp_path / "test.db")
     count = len(list(session.scalars(select(Category))))
     session.close()
     return count

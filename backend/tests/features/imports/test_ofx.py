@@ -1,10 +1,16 @@
 """Tests for the OFX/QFX parser, canonical normalization, and the import endpoint."""
 
+from datetime import date
 from pathlib import Path
+from typing import cast
 
 import pytest
+from fastapi import FastAPI
 from fastapi.testclient import TestClient
+from sqlalchemy import select
 
+from app.core.db import get_db
+from app.features.accounts.models import AccountBalanceSnapshot
 from app.features.imports.canonical import normalize
 from app.features.imports.parsers.ofx import OfxParseError, parse, parse_ledger_balance
 from tests.api import register as _register
@@ -34,6 +40,19 @@ def _upload(
             data={"account_id": account_id},
             files={"file": (filename, fh, "application/octet-stream")},
         )
+
+
+def _snapshots(client: TestClient, account_id: str) -> dict[date, int]:
+    """The account's monthly snapshots, which no endpoint returns directly."""
+    sessions = cast(FastAPI, client.app).dependency_overrides[get_db]()
+    try:
+        db = next(sessions)
+        rows = db.scalars(
+            select(AccountBalanceSnapshot).where(AccountBalanceSnapshot.account_id == account_id)
+        )
+        return {row.period_end: row.balance_minor for row in rows}
+    finally:
+        sessions.close()
 
 
 # --- parser: OFX 1.x SGML, OFX 2.x XML, QFX, Latin-1 ------------------------------------
@@ -305,6 +324,51 @@ def test_a_matching_later_statement_reports_no_mismatch(client: TestClient) -> N
 
     assert response.json()["balance_mismatch_minor"] is None
     assert response.json()["balance_mismatch_as_of"] is None
+
+
+def test_filling_a_gap_updates_the_snapshots_taken_after_it(client: TestClient) -> None:
+    """January, then March–April, then the February statement that was skipped.
+
+    The March–April import closes March, so a snapshot is taken at Mar 31 without
+    February's −50.00 in it. Importing February later must add that row to the
+    snapshot, or every balance read past Mar 31 stays 50.00 too high.
+    """
+    headers = _register(client)
+    account_id = _create_account(client, headers)
+    _upload(client, headers, account_id, FIXTURES / "sample_sgml.ofx", "jan.ofx")
+    _upload(client, headers, account_id, FIXTURES / "sample_sgml_after_gap.ofx", "mar-apr.ofx")
+    assert _snapshots(client, account_id) == {date(2024, 3, 31): 145_750 - 3_000}
+
+    _upload(client, headers, account_id, FIXTURES / "sample_sgml_second_matching.ofx", "feb.ofx")
+
+    assert _snapshots(client, account_id) == {date(2024, 3, 31): 145_750 - 5_000 - 3_000}
+    account = client.get(f"/api/v1/accounts/{account_id}", headers=headers).json()
+    assert account["balance_minor"] == 147_750
+
+
+def test_filling_a_gap_clears_the_mismatch_it_caused(client: TestClient) -> None:
+    """The March–April statement is 50.00 short of the bank: February is missing.
+
+    Once February is imported, the earlier warning is settled rather than kept in
+    the history for a gap that no longer exists.
+    """
+    headers = _register(client)
+    account_id = _create_account(client, headers)
+    _upload(client, headers, account_id, FIXTURES / "sample_sgml.ofx", "jan.ofx")
+    after_gap = _upload(
+        client, headers, account_id, FIXTURES / "sample_sgml_after_gap.ofx", "mar-apr.ofx"
+    ).json()
+    assert after_gap["balance_mismatch_minor"] == -5_000
+    assert after_gap["balance_mismatch_as_of"] == "2024-04-30"
+
+    feb = _upload(
+        client, headers, account_id, FIXTURES / "sample_sgml_second_matching.ofx", "feb.ofx"
+    ).json()
+
+    assert feb["balance_mismatch_minor"] is None
+    settled = client.get(f"/api/v1/imports/{after_gap['id']}", headers=headers).json()
+    assert settled["balance_mismatch_minor"] is None
+    assert settled["balance_mismatch_as_of"] is None
 
 
 def test_first_import_never_reports_a_mismatch(client: TestClient) -> None:

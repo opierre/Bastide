@@ -178,6 +178,11 @@ class ImportService:
         delta_minor = sum(row.amount_minor for row in new_rows)
         apply_delta(account, delta_minor)
 
+        # Before the balance check, which reads point-in-time balances off these snapshots.
+        if new_rows:
+            self._shift_later_snapshots(account, new_rows)
+            self._settle_earlier_mismatches(account, new_rows)
+
         # Before any snapshot is written, so they are taken from the corrected base.
         if declared_balance is not None:
             if had_transactions:
@@ -324,13 +329,68 @@ class ImportService:
             batch.balance_mismatch_minor = mismatch
             batch.balance_mismatch_as_of = as_of
 
+    def _shift_later_snapshots(
+        self, account: Account, new_rows: list[CanonicalTransaction]
+    ) -> None:
+        """Add the newly imported rows to every snapshot already taken after them.
+
+        A snapshot is cumulative — the whole balance at its month end — so rows booked on or
+        before that date belong in it, even when they arrive after it was written. That is
+        the case when a statement fills a gap behind later imports: without this, every
+        balance read from a later snapshot (and the net-worth history) would still be missing
+        the gap's rows.
+        """
+        earliest = min(row.booked_date for row in new_rows)
+        snapshots = self._db.scalars(
+            select(AccountBalanceSnapshot).where(
+                AccountBalanceSnapshot.account_id == account.id,
+                AccountBalanceSnapshot.period_end >= earliest,
+            )
+        )
+        for snapshot in snapshots:
+            snapshot.balance_minor += sum(
+                row.amount_minor for row in new_rows if row.booked_date <= snapshot.period_end
+            )
+        # The session doesn't autoflush, and the balance reads that follow query the table.
+        self._db.flush()
+
+    def _settle_earlier_mismatches(
+        self, account: Account, new_rows: list[CanonicalTransaction]
+    ) -> None:
+        """Take the newly imported rows off the mismatches earlier imports recorded.
+
+        A mismatch is the declared balance minus the ledger's at its as-of date, so each row
+        that arrives on or before that date moves it by its own amount. Importing the missing
+        statement brings it to zero, which clears it: left as it was, the history would
+        still warn about a gap that has been filled.
+        """
+        earliest = min(row.booked_date for row in new_rows)
+        batches = self._db.scalars(
+            select(ImportBatch).where(
+                ImportBatch.account_id == account.id,
+                ImportBatch.balance_mismatch_minor.is_not(None),
+                ImportBatch.balance_mismatch_as_of >= earliest,
+            )
+        )
+        for batch in batches:
+            as_of = batch.balance_mismatch_as_of
+            mismatch = (batch.balance_mismatch_minor or 0) - sum(
+                row.amount_minor for row in new_rows if as_of and row.booked_date <= as_of
+            )
+            if mismatch == 0:
+                batch.balance_mismatch_minor = None
+                batch.balance_mismatch_as_of = None
+            else:
+                batch.balance_mismatch_minor = mismatch
+
     def _sync_month_boundary_snapshots(
         self, account: Account, period_start: date, period_end: date
     ) -> None:
-        """Write/refresh a monthly snapshot for each calendar month this import closes.
+        """Write a monthly snapshot for each calendar month this import closes.
 
         A month only "closes" once the import has rows past its end, so the in-progress final
-        month (period_end's own month) is never snapshotted here.
+        month (period_end's own month) is never snapshotted here. A month that already has a
+        snapshot is left alone: `_shift_later_snapshots` has already added this import's rows.
         """
         year, month = period_start.year, period_start.month
         while (year, month) < (period_end.year, period_end.month):
@@ -341,15 +401,13 @@ class ImportService:
                     AccountBalanceSnapshot.period_end == month_end,
                 )
             )
-            balance_minor = point_in_time_balance(self._db, account, month_end)
             if snapshot is None:
+                balance_minor = point_in_time_balance(self._db, account, month_end)
                 self._db.add(
                     AccountBalanceSnapshot(
                         account_id=account.id, period_end=month_end, balance_minor=balance_minor
                     )
                 )
-            else:
-                snapshot.balance_minor = balance_minor
 
             if month == 12:
                 year, month = year + 1, 1

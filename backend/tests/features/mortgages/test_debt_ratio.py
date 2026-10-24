@@ -12,8 +12,8 @@ from typing import cast
 import pytest
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
-from sqlalchemy import create_engine, select
-from sqlalchemy.orm import Session, sessionmaker
+from sqlalchemy import select
+from sqlalchemy.orm import Session
 
 from app.features.accounts.models import Account
 from app.features.categories.models import Category
@@ -22,6 +22,7 @@ from app.features.mortgages.router import get_today
 from app.features.settings.models import UserSettings
 from app.features.transactions.models import Transaction
 from tests.api import register
+from tests.db import open_session
 
 TODAY = date(2026, 5, 15)
 
@@ -63,8 +64,7 @@ def pinned_today(client: TestClient) -> None:
 
 
 def db(tmp_path: Path) -> Session:
-    engine = create_engine(f"sqlite:///{tmp_path / 'test.db'}")
-    return sessionmaker(bind=engine)()
+    return open_session(tmp_path / "test.db")
 
 
 def user_id_of(client: TestClient, headers: dict[str, str]) -> str:

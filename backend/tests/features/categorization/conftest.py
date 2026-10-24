@@ -9,7 +9,7 @@ event loop.
 import asyncio
 import json
 import shutil
-from collections.abc import Coroutine, Sequence
+from collections.abc import Coroutine, Generator, Sequence
 from dataclasses import dataclass, field
 from datetime import UTC, date, datetime
 from pathlib import Path
@@ -309,17 +309,21 @@ def _wal_engine(path: Path) -> Engine:
 
 
 @pytest.fixture
-def session_factory(tmp_path: Path, schema_template: Path) -> SessionFactory:
+def session_factory(tmp_path: Path, schema_template: Path) -> Generator[SessionFactory]:
     """A session factory on a temp database, for tests that drive the executor directly."""
     db_path = tmp_path / "runner.db"
     shutil.copyfile(schema_template, db_path)
-    return sessionmaker(bind=_wal_engine(db_path), autoflush=False, autocommit=False)
+    engine = _wal_engine(db_path)
+    yield sessionmaker(bind=engine, autoflush=False, autocommit=False)
+    engine.dispose()
 
 
 @pytest.fixture
-def api_session_factory(tmp_path: Path) -> SessionFactory:
+def api_session_factory(tmp_path: Path) -> Generator[SessionFactory]:
     """A session factory on the `client` fixture's own temp database."""
-    return sessionmaker(bind=_wal_engine(tmp_path / "test.db"), autoflush=False, autocommit=False)
+    engine = _wal_engine(tmp_path / "test.db")
+    yield sessionmaker(bind=engine, autoflush=False, autocommit=False)
+    engine.dispose()
 
 
 @pytest.fixture

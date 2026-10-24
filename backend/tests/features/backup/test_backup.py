@@ -9,8 +9,8 @@ from typing import Any
 
 import pytest
 from fastapi.testclient import TestClient
-from sqlalchemy import create_engine, select
-from sqlalchemy.orm import Session, sessionmaker
+from sqlalchemy import select
+from sqlalchemy.orm import Session
 
 from app.features.accounts.models import Account
 from app.features.auth.models import User
@@ -23,6 +23,7 @@ from app.features.properties.models import Property
 from app.features.rules.models import CategorizationRule
 from app.features.transactions.models import Transaction
 from tests.api import register as _register
+from tests.db import open_session
 
 PATRIMOINE_MEMBERS = (
     "properties.jsonl",
@@ -33,8 +34,7 @@ PATRIMOINE_MEMBERS = (
 
 def _session(tmp_path: Path) -> Session:
     """A session on the `client` fixture's temp database."""
-    engine = create_engine(f"sqlite:///{tmp_path / 'test.db'}")
-    return sessionmaker(bind=engine)()
+    return open_session(tmp_path / "test.db")
 
 
 def _seed(db: Session, email: str) -> dict[str, str]:

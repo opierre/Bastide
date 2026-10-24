@@ -9,13 +9,13 @@ from datetime import date, timedelta
 from pathlib import Path
 
 from fastapi.testclient import TestClient
-from sqlalchemy import create_engine
-from sqlalchemy.orm import Session, sessionmaker
+from sqlalchemy.orm import Session
 
 from app.features.imports.models import ImportBatch
 from app.features.recurring.models import RecurringOccurrence, RecurringSeries
 from app.features.transactions.models import Transaction
 from tests.api import register as _register
+from tests.db import open_session
 
 START = date(2026, 1, 15)
 MONTHLY_OFFSETS = (0, 30, 60)
@@ -35,10 +35,7 @@ def _create_account(client: TestClient, headers: dict[str, str], name: str = "Co
 
 def _session(tmp_path: Path) -> Session:
     """A session on the very SQLite file the TestClient's dependency override points at."""
-    engine = create_engine(
-        f"sqlite:///{tmp_path / 'test.db'}", connect_args={"check_same_thread": False}
-    )
-    return sessionmaker(bind=engine)()
+    return open_session(tmp_path / "test.db")
 
 
 def _insert_subscription(

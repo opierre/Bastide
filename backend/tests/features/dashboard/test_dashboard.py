@@ -4,8 +4,6 @@ from datetime import date
 from pathlib import Path
 
 from fastapi.testclient import TestClient
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
 
 from app.features.accounts.models import Account
 from app.features.dashboard.repository import DashboardRepository
@@ -14,6 +12,7 @@ from app.features.dashboard.service import DashboardService
 from app.features.imports.models import ImportBatch
 from app.features.transactions.models import Transaction
 from tests.api import register as _register
+from tests.db import open_session
 
 ACCOUNT_PAYLOAD = {
     "name": "Compte courant",
@@ -56,10 +55,7 @@ def _insert_transaction(
     category_id: str | None = None,
 ) -> str:
     """Insert a transaction straight into the client's SQLite file (no import pipeline here)."""
-    engine = create_engine(
-        f"sqlite:///{tmp_path / 'test.db'}", connect_args={"check_same_thread": False}
-    )
-    session = sessionmaker(bind=engine)()
+    session = open_session(tmp_path / "test.db")
     unique = f"{_next_unique()}-{amount_minor}-{booked_date.isoformat()}"
     account = session.get(Account, account_id)
     assert account is not None
@@ -484,10 +480,7 @@ def _trends_service(
     same way `_insert_transaction` does.
     """
     user = client.get("/api/v1/auth/me", headers=headers).json()["user"]
-    engine = create_engine(
-        f"sqlite:///{tmp_path / 'test.db'}", connect_args={"check_same_thread": False}
-    )
-    session = sessionmaker(bind=engine)()
+    session = open_session(tmp_path / "test.db")
     try:
         service = DashboardService(DashboardRepository(session))
         return service.trends(user["id"], user["currency"], today)

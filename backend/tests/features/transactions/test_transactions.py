@@ -4,13 +4,13 @@ from datetime import date
 from pathlib import Path
 
 from fastapi.testclient import TestClient
-from sqlalchemy import create_engine
-from sqlalchemy.orm import Session, sessionmaker
+from sqlalchemy.orm import Session
 
 from app.features.accounts.models import Account
 from app.features.imports.models import ImportBatch
 from app.features.transactions.models import Transaction
 from tests.api import register_user
+from tests.db import open_session
 
 ACCOUNT_PAYLOAD = {
     "name": "Compte courant",
@@ -67,10 +67,7 @@ def _insert_transaction(
     needs_review: bool = True,
 ) -> str:
     """Insert a transaction straight into the client's SQLite file (no import pipeline here)."""
-    engine = create_engine(
-        f"sqlite:///{tmp_path / 'test.db'}", connect_args={"check_same_thread": False}
-    )
-    session = sessionmaker(bind=engine)()
+    session = open_session(tmp_path / "test.db")
     unique = f"{_next_unique()}-{description_clean}-{amount_minor}-{booked_date.isoformat()}"
     batch = ImportBatch(
         user_id=_account_user_id(session, account_id),

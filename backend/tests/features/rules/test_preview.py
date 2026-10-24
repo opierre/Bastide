@@ -3,11 +3,11 @@
 from pathlib import Path
 
 from fastapi.testclient import TestClient
-from sqlalchemy import create_engine, select
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy import select
 
 from app.features.rules.models import CategorizationRule
 from app.features.transactions.models import Transaction
+from tests.db import open_session
 from tests.features.rules.test_rules import (
     ACCOUNT_PAYLOAD,
     _create_account,
@@ -47,20 +47,14 @@ def _apply_as_rule(
 
 
 def _count_rules(tmp_path: Path) -> int:
-    engine = create_engine(
-        f"sqlite:///{tmp_path / 'test.db'}", connect_args={"check_same_thread": False}
-    )
-    session = sessionmaker(bind=engine)()
+    session = open_session(tmp_path / "test.db")
     count = len(list(session.scalars(select(CategorizationRule))))
     session.close()
     return count
 
 
 def _count_categorized(tmp_path: Path) -> int:
-    engine = create_engine(
-        f"sqlite:///{tmp_path / 'test.db'}", connect_args={"check_same_thread": False}
-    )
-    session = sessionmaker(bind=engine)()
+    session = open_session(tmp_path / "test.db")
     rows = list(session.scalars(select(Transaction)))
     session.close()
     return len([row for row in rows if row.category_id is not None])

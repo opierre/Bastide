@@ -4,11 +4,11 @@ from pathlib import Path
 
 import pytest
 from fastapi.testclient import TestClient
-from sqlalchemy import create_engine, func, select
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy import func, select
 
 from app.features.settings.models import UserSettings
 from tests.api import register as _register
+from tests.db import open_session
 
 DEFAULTS = {
     "ai_enabled": False,
@@ -23,8 +23,7 @@ DEFAULTS = {
 
 def _settings_row_count(tmp_path: Path) -> int:
     """Count `user_settings` rows straight from the `client` fixture's temp database."""
-    engine = create_engine(f"sqlite:///{tmp_path / 'test.db'}")
-    with sessionmaker(bind=engine)() as db:
+    with open_session(tmp_path / "test.db") as db:
         return db.scalar(select(func.count()).select_from(UserSettings)) or 0
 
 
