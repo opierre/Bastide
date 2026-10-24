@@ -15,7 +15,9 @@ from app.features.accounts.balance import apply_delta, point_in_time_balance, sh
 from app.features.accounts.models import Account, AccountBalanceSnapshot
 from app.features.accounts.service import AccountService
 from app.features.auth.models import User
+from app.features.categories.repository import CategoryRepository
 from app.features.imports.canonical import CanonicalTransaction, normalize
+from app.features.imports.card_settlement import CARD_SETTLEMENT_CATEGORY_KEY, is_card_settlement
 from app.features.imports.models import ImportBatch
 from app.features.imports.parsers.ofx import LedgerBalance, OfxParseError, parse_ledger_balance
 from app.features.imports.parsers.ofx import parse as parse_ofx
@@ -127,6 +129,11 @@ class ImportService:
 
         new_rows, duplicate_count = self._dedup(account.id, canonical_transactions)
         rules = RuleRepository(self._db).list_enabled_by_user(user.id)
+        settlement_category_id = (
+            self._settlement_category_id(user.id)
+            if account.type != "deferred_card" and self._tracked_cards(user.id)
+            else None
+        )
 
         batch = ImportBatch(
             id=str(uuid4()),
@@ -165,6 +172,14 @@ class ImportService:
             matched_category_id = match_category(transaction, rules)
             if matched_category_id is not None:
                 transaction.category_id = matched_category_id
+                transaction.categorization_source = "rule"
+                transaction.needs_review = False
+            elif settlement_category_id is not None and is_card_settlement(
+                row.description_clean, row.amount_minor
+            ):
+                # After the user's own rules, which state intent this built-in reading must not
+                # override; before the model, which has no way to know a card account exists.
+                transaction.category_id = settlement_category_id
                 transaction.categorization_source = "rule"
                 transaction.needs_review = False
             new_transactions.append(transaction)
@@ -206,6 +221,26 @@ class ImportService:
             self._run_enqueuer(user, account.id, saved.id)
 
         return saved
+
+    def _tracked_cards(self, user_id: str) -> list[Account]:
+        """The user's deferred-debit card accounts.
+
+        Settlement handling is off without one: only when the purchases a settlement pays are
+        booked on a card account is filing it as a transfer honest rather than a way of losing
+        a month's spending.
+        """
+        return [
+            account
+            for account in self._account_service.list_for_user(user_id)
+            if account.type == "deferred_card"
+        ]
+
+    def _settlement_category_id(self, user_id: str) -> str | None:
+        """The id of the system category card settlements are filed under."""
+        categories = CategoryRepository(self._db).list_system_by_names_for_user(
+            [CARD_SETTLEMENT_CATEGORY_KEY], user_id
+        )
+        return categories[0].id if categories else None
 
     def _failed_batch(
         self,

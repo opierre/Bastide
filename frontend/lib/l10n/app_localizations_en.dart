@@ -821,6 +821,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get categorySystemFinanceSavings => 'Savings';
 
   @override
+  String get categorySystemFinanceCardSettlement => 'Deferred card settlement';
+
+  @override
   String get categorySystemFinanceInterest => 'Interest';
 
   @override

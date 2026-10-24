@@ -280,6 +280,7 @@
   "categorySystemFinanceBankFees": "Bank fees",
   "categorySystemFinanceTaxes": "Taxes",
   "categorySystemFinanceSavings": "Savings",
+  "categorySystemFinanceCardSettlement": "Deferred card settlement",
   "categorySystemFinanceInterest": "Interest",
   "categorySystemIncome": "Income",
   "categorySystemIncomeSalary": "Salary",

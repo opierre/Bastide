@@ -828,6 +828,9 @@ class AppLocalizationsFr extends AppLocalizations {
   String get categorySystemFinanceSavings => 'Épargne';
 
   @override
+  String get categorySystemFinanceCardSettlement => 'Règlement carte différée';
+
+  @override
   String get categorySystemFinanceInterest => 'Intérêts';
 
   @override

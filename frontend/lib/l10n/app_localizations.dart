@@ -1472,6 +1472,12 @@ abstract class AppLocalizations {
   /// **'Épargne'**
   String get categorySystemFinanceSavings;
 
+  /// Display name for the system category with i18n key category.finance.card_settlement: the monthly debit settling a deferred-debit card on the current account.
+  ///
+  /// In fr, this message translates to:
+  /// **'Règlement carte différée'**
+  String get categorySystemFinanceCardSettlement;
+
   /// Display name for the system category with i18n key category.finance.interest.
   ///
   /// In fr, this message translates to:

@@ -1046,6 +1046,10 @@
   "@categorySystemFinanceSavings": {
     "description": "Display name for the system category with i18n key category.finance.savings."
   },
+  "categorySystemFinanceCardSettlement": "Règlement carte différée",
+  "@categorySystemFinanceCardSettlement": {
+    "description": "Display name for the system category with i18n key category.finance.card_settlement: the monthly debit settling a deferred-debit card on the current account."
+  },
   "categorySystemFinanceInterest": "Intérêts",
   "@categorySystemFinanceInterest": {
     "description": "Display name for the system category with i18n key category.finance.interest."
