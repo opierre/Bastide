@@ -131,7 +131,7 @@ class ImportService:
 
         new_rows, duplicate_count = self._dedup(account.id, canonical_transactions)
         rules = RuleRepository(self._db).list_enabled_by_user(user.id)
-        cards = self._tracked_cards(user.id)
+        cards = self._settlements.tracked_cards(user.id)
         settlement_category_id = (
             self._settlements.settlement_category_id(user.id) if cards else None
         )
@@ -210,7 +210,7 @@ class ImportService:
                 self._settlements.adopt_late_resets(
                     account, new_transactions, settlement_category_id
                 )
-            self._settlements.link_pending(user.id, batch, cards, settlement_category_id)
+            self._settlements.link_pending(user.id, cards, settlement_category_id)
 
         # Before any snapshot is written, so they are taken from the corrected base.
         if declared_balance is not None:
@@ -235,19 +235,6 @@ class ImportService:
             self._run_enqueuer(user, account.id, saved.id)
 
         return saved
-
-    def _tracked_cards(self, user_id: str) -> list[Account]:
-        """The user's deferred-debit card accounts.
-
-        Settlement handling is off without one: only when the purchases a settlement pays are
-        booked on a card account is filing it as a transfer honest rather than a way of losing
-        a month's spending.
-        """
-        return [
-            account
-            for account in self._account_service.list_for_user(user_id)
-            if account.type == "deferred_card"
-        ]
 
     def _failed_batch(
         self,

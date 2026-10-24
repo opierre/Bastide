@@ -65,9 +65,10 @@ class ImportRepository:
     ) -> list[Transaction]:
         """Debits on the user's non-card accounts that could be an unmatched card settlement.
 
-        Rows already filed as a settlement, plus uncategorised rows the user hasn't touched —
-        a settlement imported before its card account existed was left uncategorised, and the
-        caller re-reads its label. Rows a cycle already references are matched and excluded.
+        Rows already filed as a settlement, plus rows the user hasn't settled — uncategorised,
+        or filed by the model: a settlement imported before its card account existed was left
+        to either, and the caller re-reads its label. Rows a cycle already references are
+        matched and excluded.
         """
         claimed = aliased(Transaction)
         return list(
@@ -83,6 +84,7 @@ class ImportRepository:
                         Transaction.category_id == settlement_category_id,
                         Transaction.category_id.is_(None)
                         & (Transaction.categorization_source != "user"),
+                        Transaction.categorization_source == "model",
                     ),
                     ~exists().where(claimed.card_settlement_id == Transaction.id),
                 )

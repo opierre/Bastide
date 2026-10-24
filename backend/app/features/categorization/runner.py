@@ -29,6 +29,8 @@ from app.features.categorization.prompt import leaf_categories
 from app.features.categorization.repository import CategorizationRunRepository, new_run
 from app.features.categorization.schemas import RunCreate, RunTrigger
 from app.features.categorization.service import BATCH_SIZE, categorize_batch
+from app.features.imports.repository import ImportRepository
+from app.features.imports.settlements import CardSettlementService
 from app.features.inference.client import InferenceClient, client_from_settings
 from app.features.settings.models import UserSettings
 from app.features.settings.repository import SettingsRepository
@@ -285,10 +287,17 @@ async def _execute(
     repository.commit()
 
     settings = SettingsService(SettingsRepository(db)).get_or_create(user_id)
+    settlements = CardSettlementService(ImportRepository(db), db)
+    cards = settlements.tracked_cards(user_id)
+    card_ids = {card.id for card in cards}
+    settlement_category_id = settlements.settlement_category_id(user_id)
+    offered = CategoryRepository(db).list_for_user(user_id)
+    if not cards:
+        # Without a card account, a settlement is the only record of that month's card
+        # spending: the model must not be able to file it as a transfer and make it vanish.
+        offered = [category for category in offered if category.id != settlement_category_id]
     # Built once for the whole run: the category list is the fixed part of every prompt.
-    categories = leaf_categories(
-        CategoryRepository(db).list_for_user(user_id), _locale(db, user_id)
-    )
+    categories = leaf_categories(offered, _locale(db, user_id))
     client = client_factory(settings)
 
     for start in range(0, len(transaction_ids), BATCH_SIZE):
@@ -304,23 +313,41 @@ async def _execute(
 
         outcomes = await categorize_batch(rows, categories, settings, client=client)
         for row, outcome in zip(rows, outcomes, strict=True):
-            if outcome.status == "assigned":
+            status = outcome.status
+            if status == "assigned" and outcome.category_id == settlement_category_id:
+                status = "deferred"
+                # A settlement is a debit on the account the card is drawn from — never a
+                # row of the card itself, never a credit. Anything else is a wrong guess.
+                if row.account_id not in card_ids and row.amount_minor < 0:
+                    # Proposed, however confident: every settlement waits for the user's
+                    # word, since confirming one moves money onto a card account.
+                    row.category_id = outcome.category_id
+                    row.categorization_source = "model"
+                    row.categorization_confidence = outcome.confidence
+                    row.needs_review = True
+            elif status == "assigned":
                 row.category_id = outcome.category_id
                 row.categorization_source = "model"
                 row.categorization_confidence = outcome.confidence
                 row.needs_review = False
-            # A deferred or failed row is left exactly as it was: it stays in the review
-            # queue, which is where it already was.
+            # A deferred or failed row is otherwise left exactly as it was: it stays in the
+            # review queue, which is where it already was.
             run.processed_count += 1
-            if outcome.status == "assigned":
+            if status == "assigned":
                 run.assigned_count += 1
-            elif outcome.status == "deferred":
+            elif status == "deferred":
                 run.deferred_count += 1
             else:
                 run.failed_count += 1
 
         # Per batch, not at the end: a process killed here keeps every row applied so far and
         # a `processed_count` that still tells the truth about them.
+        repository.commit()
+
+    if cards and settlement_category_id is not None:
+        # The model may have recognised settlements the import's labels missed, or ones left
+        # over from before the card existed: match them now rather than at the next import.
+        settlements.link_pending(user_id, cards, settlement_category_id)
         repository.commit()
 
     run.status = _terminal_status(run)

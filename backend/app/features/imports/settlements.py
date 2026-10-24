@@ -12,6 +12,7 @@ from sqlalchemy.orm import Session
 
 from app.features.accounts.balance import apply_delta
 from app.features.accounts.models import Account
+from app.features.accounts.repository import AccountRepository
 from app.features.categories.repository import CategoryRepository
 from app.features.imports.card_settlement import (
     CARD_SETTLEMENT_CATEGORY_KEY,
@@ -22,7 +23,6 @@ from app.features.imports.card_settlement import (
     offset_dedup_hash,
 )
 from app.features.imports.ledger import settle_earlier_mismatches, shift_later_snapshots
-from app.features.imports.models import ImportBatch
 from app.features.imports.repository import ImportRepository
 from app.features.transactions.models import Transaction
 
@@ -49,28 +49,42 @@ class CardSettlementService:
         )
         return categories[0].id if categories else None
 
+    def tracked_cards(self, user_id: str) -> list[Account]:
+        """The user's deferred-debit card accounts.
+
+        Settlement handling is off without one: only when the purchases a settlement pays are
+        booked on a card account is filing it as a transfer honest rather than a way of losing
+        a month's spending.
+        """
+        return [
+            account
+            for account in AccountRepository(self._db).list_by_user(user_id)
+            if account.type == "deferred_card"
+        ]
+
     def link_pending(
         self,
         user_id: str,
-        batch: ImportBatch,
         cards: list[Account],
         settlement_category_id: str,
     ) -> None:
         """Match each unmatched settlement to the card cycle it paid, and offset it on the card.
 
-        Runs on every import, whichever side it brings in: the settlement and the cycle it pays
-        may arrive in either order, months apart, so each import retries what is still open.
+        Runs on every import, whichever side it brings in, and after every categorisation run:
+        the settlement and the cycle it pays may arrive in either order, months apart, and the
+        model may only now have recognised a settlement, so each pass retries what is open.
 
         A settlement is matched only when exactly one card has a cycle totalling it — two cards
         fitting the same amount is a guess, and a wrong link moves money between cards. The
         matched card then gets a credit equal to the settlement, closing the cycle: the
-        statement's own reset line when it printed one, else a row posted here, tied to this
-        import's batch since it is this import that settled it.
+        statement's own reset line when it printed one, else a row posted here.
         """
         for settlement in self._repository.unlinked_settlement_candidates(
             user_id, settlement_category_id
         ):
-            if settlement.category_id is None and not is_card_settlement(
+            # A row filed elsewhere — uncategorised, or by the model before the card existed —
+            # is only a candidate if its label reads as a settlement.
+            if settlement.category_id != settlement_category_id and not is_card_settlement(
                 settlement.description_clean, settlement.amount_minor
             ):
                 continue
@@ -97,9 +111,13 @@ class CardSettlementService:
                 continue
 
             card, cycle, reset = matches[0]
-            if settlement.categorization_source != "user":
+            if (
+                settlement.categorization_source != "user"
+                and settlement.category_id != settlement_category_id
+            ):
                 # Proposed, like any detected settlement — including one imported before its card
-                # existed and left uncategorised then. One the user already confirmed stays theirs.
+                # existed and left uncategorised or filed elsewhere by the model then. One the user
+                # confirmed stays theirs, and one already proposed as a settlement stays as it is.
                 settlement.category_id = settlement_category_id
                 settlement.categorization_source = DETECTED_SOURCE
                 settlement.needs_review = True
@@ -111,25 +129,22 @@ class CardSettlementService:
                 reset.categorization_source = "rule"
                 reset.needs_review = False
             else:
-                self._post_offset(card, settlement, batch, settlement_category_id)
+                self._post_offset(card, settlement, settlement_category_id)
             self._db.flush()
 
     def _post_offset(
-        self,
-        card: Account,
-        settlement: Transaction,
-        batch: ImportBatch,
-        settlement_category_id: str,
+        self, card: Account, settlement: Transaction, settlement_category_id: str
     ) -> None:
         """Credit the card with what the settlement paid, keeping its balance cache and history.
 
         The credit is a transfer like the debit it mirrors, so neither side counts as income or
         spending — the cycle's purchases already did. It carries the bank's own wording for the
-        settlement, the one label the user will recognise.
+        settlement, the one label the user will recognise, and the settlement's import batch:
+        it exists because of that statement, and a categorisation run has no batch of its own.
         """
         offset = Transaction(
             account_id=card.id,
-            import_batch_id=batch.id,
+            import_batch_id=settlement.import_batch_id,
             booked_date=settlement.booked_date,
             value_date=None,
             amount_minor=-settlement.amount_minor,
