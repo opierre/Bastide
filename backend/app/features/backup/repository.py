@@ -41,6 +41,10 @@ class BackupRepository:
         if name == "categories":
             # A subcategory must follow its parent so a restore can check the reference.
             query = query.order_by(target.c.parent_id.is_not(None))
+        elif name == "transactions":
+            # Likewise a card row must follow the settlement it points at; settlements and every
+            # other row carry no such link, so they all go first.
+            query = query.order_by(target.c.card_settlement_id.is_not(None))
         for row in self._db.execute(query).mappings():
             yield {key: encode(value) for key, value in row.items()}
 

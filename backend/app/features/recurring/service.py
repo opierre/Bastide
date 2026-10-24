@@ -17,6 +17,7 @@ from app.core.errors import ConflictError, NotFoundError
 from app.features.accounts.service import AccountService
 from app.features.categories.repository import CategoryRepository
 from app.features.categories.service import CategoryInvalidError
+from app.features.imports.card_settlement import CARD_SETTLEMENT_CATEGORY_KEY, is_card_settlement
 from app.features.recurring.detector import (
     INTERVAL_TOLERANCE_FLOOR_DAYS,
     INTERVAL_TOLERANCE_PERCENT,
@@ -86,7 +87,11 @@ class RecurringDetectionService:
         if account_id is not None:
             self._accounts.get(user_id, account_id)
 
-        transactions = self._transactions.list_all_for_user(user_id, account_id=account_id)
+        transactions = [
+            transaction
+            for transaction in self._transactions.list_all_for_user(user_id, account_id=account_id)
+            if not _is_card_settlement(transaction)
+        ]
         existing = {
             (series.account_id, series.merchant_key): series
             for series in self._repository.list_for_user(user_id, account_id=account_id)
@@ -139,6 +144,21 @@ class RecurringDetectionService:
                 self._repository.stage_occurrence(
                     RecurringOccurrence(series_id=series.id, transaction_id=transaction_id)
                 )
+
+
+def _is_card_settlement(transaction: Transaction) -> bool:
+    """Whether ``transaction`` is a deferred-debit card's monthly settlement.
+
+    Kept out of detection: it lands every month, and a user whose card spending is steady
+    pays a near-constant sum, so it passes for a subscription — but it is the total of that
+    month's purchases, not a service anyone subscribed to. Recognised by its category, which
+    is how a settlement the model or the user identified shows up, or by its label, which
+    still marks one nobody has categorised.
+    """
+    category = transaction.category
+    if category is not None and category.name == CARD_SETTLEMENT_CATEGORY_KEY:
+        return True
+    return is_card_settlement(transaction.description_clean, transaction.amount_minor)
 
 
 def _is_frozen(series: RecurringSeries) -> bool:

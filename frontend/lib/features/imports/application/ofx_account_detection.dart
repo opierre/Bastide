@@ -81,13 +81,29 @@ bool _sameInstitution(String a, String b) {
 }
 
 /// Maps the OFX account-type literal onto ours.
+///
+/// A card statement maps to [AccountType.deferredCard]: a French bank that
+/// exports a card on its own statement is almost always reporting the holding
+/// account of a deferred-debit card, revolving credit cards being rare there.
+/// It is only the proposal — the account form asks the user to confirm it.
 AccountType? accountTypeFromOfx(String? ofxType) =>
     switch (ofxType?.toUpperCase()) {
       'CHECKING' || 'MONEYMRKT' => AccountType.checking,
       'SAVINGS' => AccountType.savings,
-      'CREDITCARD' || 'CREDITLINE' => AccountType.credit,
+      'CREDITCARD' => AccountType.deferredCard,
+      'CREDITLINE' => AccountType.credit,
       _ => null,
     };
+
+/// Whether an account of [type] can be the one a statement of [ofxType]
+/// describes. A card statement fits either card type, since the file can't
+/// tell them apart and the user settled it when the account was created.
+bool _typeFits(AccountType type, String? ofxType) {
+  if (ofxType?.toUpperCase() == 'CREDITCARD') {
+    return type == AccountType.deferredCard || type == AccountType.credit;
+  }
+  return type == accountTypeFromOfx(ofxType);
+}
 
 /// Every digit run in [value], so an account number can be recognized inside a
 /// free-text account name ("Courant ••4567", "Livret A 12345678").
@@ -134,8 +150,9 @@ OfxAccountMatch matchOfxAccount(OfxAccountInfo info, List<Account> accounts) {
       .toList();
   if (sameBank.isEmpty) return OfxAccountUnmatched(info);
 
-  final type = accountTypeFromOfx(info.accountType);
-  final sameType = sameBank.where((account) => account.type == type).toList();
+  final sameType = sameBank
+      .where((account) => _typeFits(account.type, info.accountType))
+      .toList();
   final candidates = sameType.length == 1 ? sameType : sameBank;
 
   return candidates.length == 1

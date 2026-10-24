@@ -160,6 +160,39 @@ def test_a_group_that_does_not_qualify_persists_nothing(client: TestClient, tmp_
     assert _series_rows(tmp_path) == []
 
 
+def test_a_card_settlement_is_never_taken_for_a_subscription(
+    client: TestClient, tmp_path: Path
+) -> None:
+    # Steady card spending: three monthly settlements within the amount tolerance. Without the
+    # exclusion they would qualify as a « RELEVE CB DIFFERE » subscription.
+    headers = _register(client)
+    account_id = _create_account(client, headers)
+    _insert_subscription(
+        tmp_path, account_id, label="RELEVE CB DIFFERE", amounts=(-45210, -47100, -44050)
+    )
+
+    assert _detect(client, headers) == {"created_count": 0, "updated_count": 0}
+
+
+def test_a_row_filed_as_a_card_settlement_is_never_taken_for_a_subscription(
+    client: TestClient, tmp_path: Path
+) -> None:
+    # A wording the label check doesn't know, which the model or the user filed as a settlement.
+    headers = _register(client)
+    account_id = _create_account(client, headers)
+    ids = _insert_subscription(tmp_path, account_id, label="PRLV MENSUEL VISA PREMIER")
+    categories = client.get("/api/v1/categories", headers=headers).json()
+    settlement = next(c for c in categories if c["name"] == "category.finance.card_settlement")
+    session = _session(tmp_path)
+    for row in session.query(Transaction).filter(Transaction.id.in_(ids)):
+        row.category_id = settlement["id"]
+        row.categorization_source = "user"
+    session.commit()
+    session.close()
+
+    assert _detect(client, headers) == {"created_count": 0, "updated_count": 0}
+
+
 # --- idempotence -----------------------------------------------------------------------------
 
 

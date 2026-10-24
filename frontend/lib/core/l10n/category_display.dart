@@ -94,6 +94,8 @@ String localizedCategoryName(AppLocalizations l10n, String name) =>
       'category.finance.bank_fees' => l10n.categorySystemFinanceBankFees,
       'category.finance.taxes' => l10n.categorySystemFinanceTaxes,
       'category.finance.savings' => l10n.categorySystemFinanceSavings,
+      'category.finance.card_settlement' =>
+        l10n.categorySystemFinanceCardSettlement,
       'category.finance.interest' => l10n.categorySystemFinanceInterest,
       'category.income' => l10n.categorySystemIncome,
       'category.income.salary' => l10n.categorySystemIncomeSalary,

@@ -351,6 +351,19 @@ class AppLocalizationsFr extends AppLocalizations {
   String get accountTypeOther => 'Autre';
 
   @override
+  String get accountCardDebitLabel => 'Débit de la carte';
+
+  @override
+  String get accountCardDebitDeferred => 'Débit différé';
+
+  @override
+  String get accountCardDebitCredit => 'Crédit';
+
+  @override
+  String get accountCardDebitHelper =>
+      'Une carte à débit différé est prélevée en une fois sur votre compte courant chaque mois.';
+
+  @override
   String get accountInstitutionLabel => 'Établissement';
 
   @override
@@ -460,6 +473,9 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get importCreateDetectedAccount => 'Créer ce compte';
+
+  @override
+  String get importCardAccountName => 'Carte';
 
   @override
   String get importChooseAccount => 'Choisissez un compte';
@@ -810,6 +826,9 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get categorySystemFinanceSavings => 'Épargne';
+
+  @override
+  String get categorySystemFinanceCardSettlement => 'Règlement carte différée';
 
   @override
   String get categorySystemFinanceInterest => 'Intérêts';
@@ -1518,6 +1537,9 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get reviewNoProposal => '— aucune proposition';
+
+  @override
+  String get reviewSettlementDetected => 'règlement de carte détecté';
 
   @override
   String get reviewChooseCategory => 'Choisir une catégorie';

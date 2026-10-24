@@ -150,6 +150,78 @@ void main() {
     expect(updated.categorizationSource, CategorizationSource.user);
   });
 
+  group('a detected card settlement', () {
+    final settlement = _categoryJson(
+      id: 'c-settlement',
+      name: 'category.finance.card_settlement',
+    );
+
+    setUp(() {
+      when(
+        () => apiClient.get('/transactions', query: any(named: 'query')),
+      ).thenAnswer(
+        (_) async => _pageJson([
+          _transactionJson(
+            id: 't1',
+            needsReview: true,
+            category: settlement,
+            categorizationSource: 'detected',
+          ),
+        ]),
+      );
+    });
+
+    test('is a settlement proposal', () async {
+      final page = await container.read(transactionsControllerProvider.future);
+
+      expect(page.items.single.hasSettlementProposal, isTrue);
+      expect(page.items.single.hasModelProposal, isFalse);
+    });
+
+    test('corrected, re-reads the list its unlink changed', () async {
+      when(
+        () => apiClient.patch('/transactions/t1', body: any(named: 'body')),
+      ).thenAnswer(
+        (_) async => _transactionJson(
+          id: 't1',
+          category: _categoryJson(),
+          categorizationSource: 'user',
+        ),
+      );
+
+      final page = await container.read(transactionsControllerProvider.future);
+      await container
+          .read(transactionsControllerProvider.notifier)
+          .updateCategory(page.items.single, 'c1');
+
+      // Once to build, once more because the card's credit left the ledger.
+      verify(
+        () => apiClient.get('/transactions', query: any(named: 'query')),
+      ).called(2);
+    });
+
+    test('confirmed, changes nothing beyond its own row', () async {
+      when(
+        () => apiClient.patch('/transactions/t1', body: any(named: 'body')),
+      ).thenAnswer(
+        (_) async => _transactionJson(
+          id: 't1',
+          category: settlement,
+          categorizationSource: 'user',
+        ),
+      );
+
+      final page = await container.read(transactionsControllerProvider.future);
+      await container
+          .read(transactionsControllerProvider.notifier)
+          .confirmProposal(page.items.single);
+
+      verify(
+        () => apiClient.get('/transactions', query: any(named: 'query')),
+      ).called(1);
+    });
+  });
+
   test('transactionCategoriesProvider maps the category catalog', () async {
     when(
       () => apiClient.get('/categories'),

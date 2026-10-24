@@ -433,6 +433,22 @@
   "@accountTypeOther": {
     "description": "Account type option: other."
   },
+  "accountCardDebitLabel": "Débit de la carte",
+  "@accountCardDebitLabel": {
+    "description": "Label of the question the account form asks when created from a card statement: how the card is debited."
+  },
+  "accountCardDebitDeferred": "Débit différé",
+  "@accountCardDebitDeferred": {
+    "description": "Answer to the card-debit question: a deferred-debit card, settled once a month on the current account."
+  },
+  "accountCardDebitCredit": "Crédit",
+  "@accountCardDebitCredit": {
+    "description": "Answer to the card-debit question: a credit card repaid on a credit line."
+  },
+  "accountCardDebitHelper": "Une carte à débit différé est prélevée en une fois sur votre compte courant chaque mois.",
+  "@accountCardDebitHelper": {
+    "description": "Helper under the card-debit question, explaining what deferred debit means so the user can recognise their card."
+  },
   "accountInstitutionLabel": "Établissement",
   "@accountInstitutionLabel": {
     "description": "Label for the institution field on the account form."
@@ -578,6 +594,10 @@
   "importCreateDetectedAccount": "Créer ce compte",
   "@importCreateDetectedAccount": {
     "description": "Action opening the account form pre-filled with the account read from the statement."
+  },
+  "importCardAccountName": "Carte",
+  "@importCardAccountName": {
+    "description": "Leading word of the name proposed for an account created from a card statement, followed by the masked card number."
   },
   "importChooseAccount": "Choisissez un compte",
   "@importChooseAccount": {
@@ -1025,6 +1045,10 @@
   "categorySystemFinanceSavings": "Épargne",
   "@categorySystemFinanceSavings": {
     "description": "Display name for the system category with i18n key category.finance.savings."
+  },
+  "categorySystemFinanceCardSettlement": "Règlement carte différée",
+  "@categorySystemFinanceCardSettlement": {
+    "description": "Display name for the system category with i18n key category.finance.card_settlement: the monthly debit settling a deferred-debit card on the current account."
   },
   "categorySystemFinanceInterest": "Intérêts",
   "@categorySystemFinanceInterest": {
@@ -1910,6 +1934,10 @@
   "reviewNoProposal": "— aucune proposition",
   "@reviewNoProposal": {
     "description": "Italic note on a review row the model made no proposal for."
+  },
+  "reviewSettlementDetected": "règlement de carte détecté",
+  "@reviewSettlementDetected": {
+    "description": "Note after the date on a review row whose proposal is a deferred-card settlement the import recognised from its label (a model proposal shows its confidence instead)."
   },
   "reviewChooseCategory": "Choisir une catégorie",
   "@reviewChooseCategory": {
