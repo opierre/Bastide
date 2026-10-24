@@ -121,6 +121,63 @@ void main() {
     },
   );
 
+  testWidgets(
+    'a card statement asks how the card is debited instead of the type list',
+    (tester) async {
+      final controller = FakeAccountsController();
+      await tester.pumpWidget(
+        _wrap(
+          controller: controller,
+          prefill: const AccountPrefill(
+            name: 'Carte ••9876',
+            institution: 'BOURSORAMA BANQUE',
+            type: AccountType.deferredCard,
+            balanceMinor: -45210,
+            isCardStatement: true,
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.byKey(const Key('accountCardDebitField')), findsOneWidget);
+      expect(find.byKey(const Key('accountTypeField')), findsNothing);
+      expect(find.text('Débit de la carte'), findsOneWidget);
+
+      // Deferred debit is the proposal; the user answers credit instead.
+      await tester.tap(find.byKey(const Key('accountCardDebitCredit')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const Key('accountFormSubmitButton')));
+      await tester.pumpAndSettle();
+
+      expect(controller.createCalls.single.type, AccountType.credit);
+      expect(controller.createCalls.single.openingBalanceMinor, -45210);
+    },
+  );
+
+  testWidgets('a card statement left as proposed creates a deferred card', (
+    tester,
+  ) async {
+    final controller = FakeAccountsController();
+    await tester.pumpWidget(
+      _wrap(
+        controller: controller,
+        prefill: const AccountPrefill(
+          name: 'Carte ••9876',
+          institution: 'BOURSORAMA BANQUE',
+          type: AccountType.deferredCard,
+          balanceMinor: 0,
+          isCardStatement: true,
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byKey(const Key('accountFormSubmitButton')));
+    await tester.pumpAndSettle();
+
+    expect(controller.createCalls.single.type, AccountType.deferredCard);
+  });
+
   testWidgets('the balance field is named for what it means at creation', (
     tester,
   ) async {

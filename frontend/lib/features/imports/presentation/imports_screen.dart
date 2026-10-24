@@ -218,13 +218,19 @@ class _ImportsScreenState extends ConsumerState<ImportsScreen> {
 /// itself. Everything stays editable — the user renames it if they prefer.
 AccountPrefill _prefillFrom(OfxAccountInfo info, AppLocalizations l10n) {
   final type = accountTypeFromOfx(info.accountType);
-  final label = type == null
+  // A card is named "Carte", not after its proposed type: the form asks how the
+  // card is debited, and a name spelling out the answer would contradict a
+  // user who picks the other one.
+  final label = info.isCardStatement
+      ? l10n.importCardAccountName
+      : type == null
       ? info.institutionLabel
       : accountTypeLabel(l10n, type);
   return AccountPrefill(
     name: [?label, info.maskedNumber].join(' '),
     institution: info.institutionLabel,
     type: type,
+    isCardStatement: info.isCardStatement,
     // Bound to the account so the next statement from it matches on identity
     // rather than on how the bank happens to spell its own name.
     ofxAccountId: info.accountNumber.trim(),

@@ -68,6 +68,11 @@ class OfxAccountInfo {
     return null;
   }
 
+  /// The statement is a card's (`CCACCTFROM`). OFX has no way to say whether
+  /// the card is deferred-debit or revolving credit — the two settle very
+  /// differently, so only the user can answer.
+  bool get isCardStatement => accountType?.toUpperCase() == 'CREDITCARD';
+
   /// This account block with the bank its code was resolved to attached.
   OfxAccountInfo withBankName(String? name) => OfxAccountInfo(
     accountNumber: accountNumber,

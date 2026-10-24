@@ -349,6 +349,19 @@ class AppLocalizationsEn extends AppLocalizations {
   String get accountTypeOther => 'Other';
 
   @override
+  String get accountCardDebitLabel => 'Card debit';
+
+  @override
+  String get accountCardDebitDeferred => 'Deferred debit';
+
+  @override
+  String get accountCardDebitCredit => 'Credit';
+
+  @override
+  String get accountCardDebitHelper =>
+      'A deferred-debit card is charged to your current account in one sum each month.';
+
+  @override
   String get accountInstitutionLabel => 'Institution';
 
   @override
@@ -457,6 +470,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get importCreateDetectedAccount => 'Create this account';
+
+  @override
+  String get importCardAccountName => 'Card';
 
   @override
   String get importChooseAccount => 'Choose an account';

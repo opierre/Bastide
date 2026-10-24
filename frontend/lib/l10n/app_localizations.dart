@@ -704,6 +704,30 @@ abstract class AppLocalizations {
   /// **'Autre'**
   String get accountTypeOther;
 
+  /// Label of the question the account form asks when created from a card statement: how the card is debited.
+  ///
+  /// In fr, this message translates to:
+  /// **'Débit de la carte'**
+  String get accountCardDebitLabel;
+
+  /// Answer to the card-debit question: a deferred-debit card, settled once a month on the current account.
+  ///
+  /// In fr, this message translates to:
+  /// **'Débit différé'**
+  String get accountCardDebitDeferred;
+
+  /// Answer to the card-debit question: a credit card repaid on a credit line.
+  ///
+  /// In fr, this message translates to:
+  /// **'Crédit'**
+  String get accountCardDebitCredit;
+
+  /// Helper under the card-debit question, explaining what deferred debit means so the user can recognise their card.
+  ///
+  /// In fr, this message translates to:
+  /// **'Une carte à débit différé est prélevée en une fois sur votre compte courant chaque mois.'**
+  String get accountCardDebitHelper;
+
   /// Label for the institution field on the account form.
   ///
   /// In fr, this message translates to:
@@ -883,6 +907,12 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Créer ce compte'**
   String get importCreateDetectedAccount;
+
+  /// Leading word of the name proposed for an account created from a card statement, followed by the masked card number.
+  ///
+  /// In fr, this message translates to:
+  /// **'Carte'**
+  String get importCardAccountName;
 
   /// Placeholder option in the account picker shown when a statement could not name its own destination — the unanswered state.
   ///
