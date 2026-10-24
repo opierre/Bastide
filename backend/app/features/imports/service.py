@@ -206,6 +206,10 @@ class ImportService:
         # Before the balance check too: on a card's own import, the offsets posted here are part
         # of the ledger its declared balance is compared against.
         if settlement_category_id is not None:
+            if account.type == "deferred_card":
+                self._settlements.adopt_late_resets(
+                    account, new_transactions, settlement_category_id
+                )
             self._settlements.link_pending(user.id, batch, cards, settlement_category_id)
 
         # Before any snapshot is written, so they are taken from the corrected base.

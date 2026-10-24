@@ -341,3 +341,46 @@ def test_correcting_a_settlement_sends_the_bank_reset_line_back_to_review(
     assert line["category"] is None
     assert line["needs_review"] is True
     assert _balance(client, headers, card_id) == -4_000
+
+
+# --- a reset line arriving after the credit was posted -----------------------------------
+
+
+def test_a_late_reset_line_replaces_the_posted_credit(client: TestClient) -> None:
+    headers = _register(client)
+    _, card_id, _ = _settled(client, headers)
+    assert [row["description_raw"] for row in _offsets(_rows(client, headers, card_id))] == [
+        "FACTURE CARTE DU 310126"
+    ]
+
+    # February's card statement prints the settlement as its own reset line.
+    february = [
+        ("R1", "20260204", "452.10", "RELEVE DIFFERE AU 310126"),
+        ("C4", "20260215", "-25.00", "CB BOULANGERIE"),
+    ]
+    _import(client, headers, card_id, _statement("CC", february), "carte-2.ofx")
+
+    offsets = _offsets(_rows(client, headers, card_id))
+    assert [row["description_raw"] for row in offsets] == ["RELEVE DIFFERE AU 310126"]
+    assert offsets[0]["category"]["name"] == CARD_SETTLEMENT_CATEGORY_KEY
+    # Credited once: −300.00 −152.10 −40.00 +452.10 −25.00.
+    assert _balance(client, headers, card_id) == -6_500
+
+
+def test_a_late_reset_line_counts_toward_the_declared_balance(client: TestClient) -> None:
+    # The second statement declares what the card owes after the swap. Had the posted credit
+    # stayed beside the reset line, the ledger would sit 452.10 above it and flag a mismatch.
+    headers = _register(client)
+    _, card_id, _ = _settled(client, headers)
+    february = [("R1", "20260204", "452.10", "RELEVE DIFFERE AU 310126")]
+
+    batch = _import(
+        client,
+        headers,
+        card_id,
+        _statement("CC", february, ledger=("-40.00", "20260204")),
+        "carte-2.ofx",
+    )
+
+    assert batch["balance_mismatch_minor"] is None
+    assert _balance(client, headers, card_id) == -4_000

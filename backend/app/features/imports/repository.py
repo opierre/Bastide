@@ -133,6 +133,22 @@ class ImportRepository:
             )
         )
 
+    def linked_credits(
+        self, account_id: str, amount_minor: int, start: date, end: date
+    ) -> list[Transaction]:
+        """Cycle-closing credits of exactly ``amount_minor`` on the card, between the dates."""
+        return list(
+            self._db.scalars(
+                select(Transaction).where(
+                    Transaction.account_id == account_id,
+                    Transaction.card_settlement_id.is_not(None),
+                    Transaction.amount_minor == amount_minor,
+                    Transaction.booked_date >= start,
+                    Transaction.booked_date <= end,
+                )
+            )
+        )
+
     def delete_transaction(self, transaction: Transaction) -> None:
         """Remove a row from the ledger. Not committed; the caller owns its balance effects."""
         self._db.delete(transaction)

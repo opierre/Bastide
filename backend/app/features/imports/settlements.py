@@ -151,6 +151,41 @@ class CardSettlementService:
         shift_later_snapshots(self._db, card, [offset])
         settle_earlier_mismatches(self._db, card, [offset])
 
+    def adopt_late_resets(
+        self, card: Account, new_rows: list[Transaction], settlement_category_id: str
+    ) -> None:
+        """Let a card statement's reset line take over from a credit posted in its absence.
+
+        A settlement matched before the card statement printing its reset line was imported got
+        a posted credit; the reset line then arrives as a new row of the same amount. Kept
+        both, the card would be credited twice. The bank's line is the record, so it inherits
+        the link and the posted credit is removed.
+        """
+        for row in new_rows:
+            if row.amount_minor <= 0:
+                continue
+            posted = next(
+                (
+                    credit
+                    for credit in self._repository.linked_credits(
+                        card.id,
+                        row.amount_minor,
+                        row.booked_date - RESET_WINDOW,
+                        row.booked_date + RESET_WINDOW,
+                    )
+                    if credit.card_settlement_id is not None
+                    and credit.dedup_hash == offset_dedup_hash(credit.card_settlement_id)
+                ),
+                None,
+            )
+            if posted is None:
+                continue
+            row.card_settlement_id = posted.card_settlement_id
+            row.category_id = settlement_category_id
+            row.categorization_source = "rule"
+            row.needs_review = False
+            self._remove_offset(card, posted)
+
     def recategorized(
         self, user_id: str, transaction: Transaction, previous_category_id: str | None
     ) -> None:
