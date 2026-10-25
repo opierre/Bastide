@@ -2,10 +2,11 @@
 
 from datetime import date
 
-from sqlalchemy import exists, or_, select
+from sqlalchemy import exists, func, or_, select
 from sqlalchemy.orm import Session, aliased
 
 from app.features.accounts.models import Account
+from app.features.imports.card_settlement import DETECTED_SOURCE
 from app.features.imports.models import ImportBatch
 from app.features.transactions.models import Transaction
 
@@ -103,6 +104,35 @@ class ImportRepository:
                     Transaction.booked_date <= through,
                 )
                 .order_by(Transaction.booked_date, Transaction.id)
+            )
+        )
+
+    def count_proposed_settlements(self, user_id: str, settlement_category_id: str) -> int:
+        """Settlements recognised by their label and still waiting for the user's word."""
+        return (
+            self._db.scalar(
+                select(func.count(Transaction.id))
+                .join(Account, Transaction.account_id == Account.id)
+                .where(
+                    Account.user_id == user_id,
+                    Account.archived.is_(False),
+                    Transaction.category_id == settlement_category_id,
+                    Transaction.categorization_source == DETECTED_SOURCE,
+                    Transaction.needs_review.is_(True),
+                )
+            )
+            or 0
+        )
+
+    def latest_booked_off_card(self, user_id: str) -> date | None:
+        """The last booked date across the user's accounts that are not deferred cards."""
+        return self._db.scalar(
+            select(func.max(Transaction.booked_date))
+            .join(Account, Transaction.account_id == Account.id)
+            .where(
+                Account.user_id == user_id,
+                Account.type != "deferred_card",
+                Account.archived.is_(False),
             )
         )
 

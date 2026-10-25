@@ -21,7 +21,7 @@ from app.features.categorization.runner import (
 )
 from app.features.imports.models import ImportBatch
 from app.features.imports.repository import ImportRepository
-from app.features.imports.schemas import ImportBatchRead
+from app.features.imports.schemas import CardSettlementStatus, ImportBatchRead
 from app.features.imports.service import ImportService
 from app.features.settings.repository import SettingsRepository
 from app.features.settings.service import SettingsService
@@ -100,6 +100,16 @@ async def list_imports(
 ) -> list[ImportBatchRead]:
     """The caller's import history, most recent first."""
     return [_to_read(batch) for batch in service.list_for_user(user.id)]
+
+
+# Before `/imports/{batch_id}`, which would otherwise take `card-settlements` for a batch id.
+@router.get("/imports/card-settlements", response_model=CardSettlementStatus)
+async def card_settlement_status(
+    service: Annotated[ImportService, Depends(_import_service)],
+    user: Annotated[User, Depends(get_current_user)],
+) -> CardSettlementStatus:
+    """Deferred-card settlements awaiting confirmation, and card purchases none has claimed."""
+    return service.card_settlement_status(user.id)
 
 
 @router.get("/imports/{batch_id}", response_model=ImportBatchRead)

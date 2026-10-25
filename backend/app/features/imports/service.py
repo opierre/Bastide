@@ -26,6 +26,7 @@ from app.features.imports.parsers.ofx import (
     parse_statements,
 )
 from app.features.imports.repository import ImportRepository
+from app.features.imports.schemas import CardSettlementStatus
 from app.features.imports.settlements import CardSettlementService
 from app.features.rules.engine import match_category
 from app.features.rules.repository import RuleRepository
@@ -113,6 +114,10 @@ class ImportService:
     def list_for_user(self, user_id: str) -> list[ImportBatch]:
         """List a user's import batches, most recent first (the import history)."""
         return self._repository.list_by_user(user_id)
+
+    def card_settlement_status(self, user_id: str) -> CardSettlementStatus:
+        """What the user still has to settle for their deferred cards to count once."""
+        return self._settlements.status(user_id)
 
     def get(self, user_id: str, batch_id: str) -> ImportBatch:
         """Fetch a single import batch the user owns.

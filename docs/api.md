@@ -51,6 +51,7 @@ details?}}`. Model names refer to the Pydantic schemas in `backend/app/features/
 |--------|------|-------|------|----------|
 | `GET` | `/imports` |  |  | 200 [`ImportBatchRead`] |
 | `POST` | `/imports` |  | multipart | 201 `ImportBatchRead` |
+| `GET` | `/imports/card-settlements` |  |  | 200 `CardSettlementStatus` |
 | `GET` | `/imports/{batch_id}` |  |  | 200 `ImportBatchRead` |
 
 ## categories

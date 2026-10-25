@@ -525,6 +525,43 @@ class AppLocalizationsFr extends AppLocalizations {
   }
 
   @override
+  String importSettlementsProposed(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          '$count prélèvements de carte à débit différé ont été reconnus : confirmez-les pour que les achats de la carte ne comptent qu\'une fois.',
+      one:
+          'Un prélèvement de carte à débit différé a été reconnu : confirmez-le pour que les achats de la carte ne comptent qu\'une fois.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get importSettlementsReview => 'Voir les opérations à vérifier';
+
+  @override
+  String importCardUnmatched(
+    int count,
+    String card,
+    String amount,
+    DateTime date,
+  ) {
+    final intl.DateFormat dateDateFormat = intl.DateFormat.yMd(localeName);
+    final String dateString = dateDateFormat.format(date);
+
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          '$count achats de $card ($amount) ne sont rattachés à aucun prélèvement depuis le $dateString : ils comptent deux fois tant que ce prélèvement n\'est pas classé en « Règlement carte différée ».',
+      one:
+          'Un achat de $card ($amount) n\'est rattaché à aucun prélèvement depuis le $dateString : il compte deux fois tant que ce prélèvement n\'est pas classé en « Règlement carte différée ».',
+    );
+    return '$_temp0';
+  }
+
+  @override
   String importPeriodRange(DateTime start, DateTime end) {
     final intl.DateFormat startDateFormat = intl.DateFormat.yMd(localeName);
     final String startString = startDateFormat.format(start);

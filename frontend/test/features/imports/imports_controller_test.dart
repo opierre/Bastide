@@ -252,6 +252,49 @@ void main() {
       ).called(2);
     });
 
+    test(
+      'the card-settlement status is read and re-read after an import',
+      () async {
+        when(
+          () => apiClient.get('/imports'),
+        ).thenAnswer((_) async => <dynamic>[]);
+        when(() => apiClient.get('/imports/card-settlements')).thenAnswer(
+          (_) async => {
+            'proposed_count': 1,
+            'unmatched': [
+              {
+                'account_id': 'c1',
+                'amount_minor': -49210,
+                'count': 3,
+                'since': '2026-01-05',
+              },
+            ],
+          },
+        );
+        _stubMultipart(apiClient, '/imports', _batchJson());
+
+        final subscription = container.listen(
+          cardSettlementStatusProvider,
+          (_, _) {},
+        );
+        addTearDown(subscription.close);
+        final status = await container.read(
+          cardSettlementStatusProvider.future,
+        );
+        expect(status.proposedCount, 1);
+        expect(status.unmatched.single.amountMinor, -49210);
+        expect(status.unmatched.single.since, DateTime(2026, 1, 5));
+
+        await container.read(importsControllerProvider.future);
+        await container
+            .read(importsControllerProvider.notifier)
+            .importFile(accountId: 'a1', file: _file);
+        await container.read(cardSettlementStatusProvider.future);
+
+        verify(() => apiClient.get('/imports/card-settlements')).called(2);
+      },
+    );
+
     test('a successful import invalidates the net-worth summary', () async {
       // Synthèse read before the first import kept its empty state — only
       // « Nouveau bien » on offer — until a restart.

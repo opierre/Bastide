@@ -956,6 +956,29 @@ abstract class AppLocalizations {
   /// **'Le relevé indique un solde à {amount} de votre suivi au {date}. Vérifiez un import manquant, ou corrigez le solde d\'ouverture du compte si l\'écart persiste.'**
   String importResultBalanceMismatchBody(String amount, DateTime date);
 
+  /// Warning on the import result card: deferred-card settlements were recognised by their label and wait in the review queue for confirmation.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, =1{Un prélèvement de carte à débit différé a été reconnu : confirmez-le pour que les achats de la carte ne comptent qu\'une fois.} other{{count} prélèvements de carte à débit différé ont été reconnus : confirmez-les pour que les achats de la carte ne comptent qu\'une fois.}}'**
+  String importSettlementsProposed(int count);
+
+  /// Button under the settlements warning, opening the transactions panel on its review queue.
+  ///
+  /// In fr, this message translates to:
+  /// **'Voir les opérations à vérifier'**
+  String get importSettlementsReview;
+
+  /// Warning on the import result card: a deferred card's purchases were paid by a debit on the current account that nothing recognised, so they count as spending twice. `amount` is pre-formatted, without a sign.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, =1{Un achat de {card} ({amount}) n\'est rattaché à aucun prélèvement depuis le {date} : il compte deux fois tant que ce prélèvement n\'est pas classé en « Règlement carte différée ».} other{{count} achats de {card} ({amount}) ne sont rattachés à aucun prélèvement depuis le {date} : ils comptent deux fois tant que ce prélèvement n\'est pas classé en « Règlement carte différée ».}}'**
+  String importCardUnmatched(
+    int count,
+    String card,
+    String amount,
+    DateTime date,
+  );
+
   /// The coverage window of an import batch, derived from the file's contents.
   ///
   /// In fr, this message translates to:

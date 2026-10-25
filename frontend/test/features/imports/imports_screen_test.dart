@@ -9,6 +9,7 @@ import 'package:bastide/features/auth/domain/auth_user.dart';
 import 'package:bastide/features/accounts/application/accounts_controller.dart';
 import 'package:bastide/features/accounts/domain/account.dart';
 import 'package:bastide/features/imports/application/imports_controller.dart';
+import 'package:bastide/features/imports/domain/card_settlement_status.dart';
 import 'package:bastide/features/imports/domain/import_batch.dart';
 import 'package:bastide/features/imports/presentation/imports_screen.dart';
 import 'package:bastide/l10n/app_localizations.dart';
@@ -122,6 +123,10 @@ Widget _wrap({
   required PickedImportFile file,
   FakeAccountsController? accounts,
   Locale locale = const Locale('fr'),
+  CardSettlementStatus settlements = const CardSettlementStatus(
+    proposedCount: 0,
+    unmatched: [],
+  ),
 }) {
   return ProviderScope(
     overrides: [
@@ -131,6 +136,7 @@ Widget _wrap({
       currentUserProvider.overrideWithValue(_user),
       importsControllerProvider.overrideWith(() => imports),
       importFilePickerProvider.overrideWithValue(FakeImportFilePicker(file)),
+      cardSettlementStatusProvider.overrideWith((ref) async => settlements),
     ],
     child: MaterialApp(
       locale: locale,
@@ -784,6 +790,92 @@ void main() {
           .onPressed,
       isNull,
     );
+  });
+
+  testWidgets('recognised settlements ask to be confirmed', (tester) async {
+    _useDesktopSurface(tester);
+    await tester.pumpWidget(
+      _wrap(
+        imports: FakeImportsController(importResult: _batch()),
+        file: PickedImportFile(name: 'releve.ofx', bytes: _ofxBytes),
+        settlements: const CardSettlementStatus(
+          proposedCount: 2,
+          unmatched: [],
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    await _stageFile(tester);
+    await tester.tap(find.byKey(const Key('importSubmitButton')));
+    await tester.pumpAndSettle();
+
+    expect(
+      find.text(
+        '2 prélèvements de carte à débit différé ont été reconnus : '
+        "confirmez-les pour que les achats de la carte ne comptent qu'une fois.",
+      ),
+      findsOneWidget,
+    );
+    expect(
+      find.byKey(const Key('importSettlementsReviewButton')),
+      findsOneWidget,
+    );
+  });
+
+  testWidgets('card purchases no settlement claimed are flagged', (
+    tester,
+  ) async {
+    _useDesktopSurface(tester);
+    final card = Account(
+      id: 'c1',
+      name: 'Carte Visa',
+      type: AccountType.deferredCard,
+      institution: 'Boursorama',
+      currency: 'EUR',
+      openingBalanceMinor: 0,
+      balanceMinor: 0,
+      archived: false,
+      createdAt: DateTime.utc(2026, 1, 1),
+      updatedAt: DateTime.utc(2026, 1, 1),
+    );
+    await tester.pumpWidget(
+      _wrap(
+        imports: FakeImportsController(importResult: _batch()),
+        accounts: FakeAccountsController(initialAccounts: [_account, card]),
+        file: PickedImportFile(name: 'releve.ofx', bytes: _ofxBytes),
+        settlements: CardSettlementStatus(
+          proposedCount: 0,
+          unmatched: [
+            UnmatchedCardPurchases(
+              accountId: 'c1',
+              amountMinor: -49210,
+              count: 3,
+              since: DateTime(2026, 1, 5),
+            ),
+          ],
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    await _stageFile(tester);
+    await tester.tap(find.byKey(const Key('importSubmitButton')));
+    await tester.pumpAndSettle();
+
+    final amount = formatAmount(
+      amountMinor: 49210,
+      currency: 'EUR',
+      locale: 'fr',
+    );
+    final date = DateFormat.yMd('fr').format(DateTime(2026, 1, 5));
+    expect(
+      find.text(
+        '3 achats de Carte Visa ($amount) ne sont rattachés à aucun '
+        'prélèvement depuis le $date : ils comptent deux fois tant que ce '
+        'prélèvement n\'est pas classé en « Règlement carte différée ».',
+      ),
+      findsOneWidget,
+    );
+    expect(find.byKey(const Key('importSettlementsProposed')), findsNothing);
   });
 }
 
