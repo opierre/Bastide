@@ -956,6 +956,29 @@ abstract class AppLocalizations {
   /// **'Le relevé indique un solde à {amount} de votre suivi au {date}. Vérifiez un import manquant, ou corrigez le solde d\'ouverture du compte si l\'écart persiste.'**
   String importResultBalanceMismatchBody(String amount, DateTime date);
 
+  /// Warning on the import result card: deferred-card settlements were recognised by their label and wait in the review queue for confirmation.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, =1{Un prélèvement de carte à débit différé a été reconnu : confirmez-le pour que les achats de la carte ne comptent qu\'une fois.} other{{count} prélèvements de carte à débit différé ont été reconnus : confirmez-les pour que les achats de la carte ne comptent qu\'une fois.}}'**
+  String importSettlementsProposed(int count);
+
+  /// Button under the settlements warning, opening the transactions panel on its review queue.
+  ///
+  /// In fr, this message translates to:
+  /// **'Voir les opérations à vérifier'**
+  String get importSettlementsReview;
+
+  /// Warning on the import result card: a deferred card's purchases were paid by a debit on the current account that nothing recognised, so they count as spending twice. `amount` is pre-formatted, without a sign.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, =1{Un achat de {card} ({amount}) n\'est rattaché à aucun prélèvement depuis le {date} : il compte deux fois tant que ce prélèvement n\'est pas classé en « Règlement carte différée ».} other{{count} achats de {card} ({amount}) ne sont rattachés à aucun prélèvement depuis le {date} : ils comptent deux fois tant que ce prélèvement n\'est pas classé en « Règlement carte différée ».}}'**
+  String importCardUnmatched(
+    int count,
+    String card,
+    String amount,
+    DateTime date,
+  );
+
   /// The coverage window of an import batch, derived from the file's contents.
   ///
   /// In fr, this message translates to:
@@ -1075,6 +1098,30 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Import introuvable.'**
   String get importErrorBatchNotFound;
+
+  /// Localized message for the backend's IMPORT_STATEMENT_REQUIRED error code: a multi-account file was uploaded without naming the statement to import.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ce fichier contient plusieurs comptes et aucun n\'a été désigné.'**
+  String get importErrorStatementRequired;
+
+  /// Localized message for the backend's IMPORT_STATEMENT_NOT_FOUND error code: the named statement is not in the file.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ce compte est introuvable dans le fichier.'**
+  String get importErrorStatementNotFound;
+
+  /// Shown when a multi-account file failed part-way: some statements were imported (listed in the result card), the rest were not. {error} is the localized error.
+  ///
+  /// In fr, this message translates to:
+  /// **'Import interrompu ({done} relevés sur {total}) : {error}'**
+  String importErrorPartial(int done, int total, String error);
+
+  /// Warning shown when two statements of a multi-account file resolve to the same account; the import stays disabled until each has its own.
+  ///
+  /// In fr, this message translates to:
+  /// **'Deux relevés de ce fichier vont vers le même compte — choisissez une destination différente pour chacun.'**
+  String get importDuplicateDestination;
 
   /// Fallback localized message for unrecognized or network errors on the imports panel.
   ///

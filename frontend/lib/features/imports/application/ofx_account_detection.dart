@@ -160,50 +160,124 @@ OfxAccountMatch matchOfxAccount(OfxAccountInfo info, List<Account> accounts) {
       : OfxAccountAmbiguous(info, candidates);
 }
 
-/// The verdict for the staged file, or `null` when there is no file staged to
-/// have a verdict about.
+/// Resolves every statement of a file at once, so two statements never settle
+/// on the same account.
+///
+/// Identity first: a statement whose ACCTID an account is bound to claims it
+/// outright, and the other statements are matched only against what is left.
+/// Two statements whose evidence still points at one account (two Livrets at a
+/// bank where the user has a single account) both become ambiguous rather than
+/// importing one of them into the wrong place.
+List<OfxAccountMatch> matchOfxStatements(
+  List<OfxAccountInfo> statements,
+  List<Account> accounts,
+) {
+  final matches = List<OfxAccountMatch?>.filled(statements.length, null);
+  final claimed = <String>{};
+  for (var i = 0; i < statements.length; i++) {
+    final number = statements[i].accountNumber.trim();
+    for (final account in accounts) {
+      if (account.ofxAccountId == number && claimed.add(account.id)) {
+        matches[i] = OfxAccountMatched(statements[i], account);
+        break;
+      }
+    }
+  }
+
+  final free = accounts.where((a) => !claimed.contains(a.id)).toList();
+  for (var i = 0; i < statements.length; i++) {
+    matches[i] ??= matchOfxAccount(statements[i], free);
+  }
+
+  final guessed = <String, int>{};
+  for (final match in matches) {
+    if (match is OfxAccountMatched && !claimed.contains(match.account.id)) {
+      guessed.update(match.account.id, (n) => n + 1, ifAbsent: () => 1);
+    }
+  }
+  return [
+    for (final match in matches.cast<OfxAccountMatch>())
+      if (match is OfxAccountMatched && (guessed[match.account.id] ?? 0) > 1)
+        OfxAccountAmbiguous(match.info, [
+          for (final account in free)
+            if (account.id == match.account.id ||
+                _sameInstitution(
+                  account.institution,
+                  match.info.institutionLabel ?? '',
+                ))
+              account,
+        ])
+      else
+        match,
+  ];
+}
+
+/// The verdicts for the staged file — one per statement it holds — or `null`
+/// when there is no file staged to have a verdict about.
 ///
 /// Since the panel dropped its destination selector, this is what decides where
 /// an import goes: [OfxAccountMatched] carries the account, and every other
 /// case is a question the panel has to put to the user before it can import.
-class OfxAccountDetection extends Notifier<OfxAccountMatch?> {
+/// A file naming no account at all is the single [OfxAccountUnreadable].
+class OfxAccountDetection extends Notifier<List<OfxAccountMatch>?> {
   @override
-  OfxAccountMatch? build() => null;
+  List<OfxAccountMatch>? build() => null;
 
-  /// Reads [file] and resolves it against [accounts]. Returns the verdict so
-  /// the caller can act on it (import into the account, or offer to create it)
-  /// without re-reading state it just wrote.
+  /// Reads [file] and resolves its statements against [accounts]. Returns the
+  /// verdicts so the caller can act on them (offer to create the accounts the
+  /// file names) without re-reading state it just wrote.
   ///
   /// Asynchronous because a statement that names no bank still carries its bank
   /// code, and the backend's directory is what turns that code into a name —
   /// which both the matcher and the account it proposes are better for.
-  Future<OfxAccountMatch> detect(
+  Future<List<OfxAccountMatch>> detect(
     PickedImportFile file,
     List<Account> accounts,
   ) async {
-    var info = parseOfxAccountInfo(file.bytes);
-    if (info == null) return state = const OfxAccountUnreadable();
+    final statements = parseOfxStatements(file.bytes);
+    if (statements.isEmpty) return state = const [OfxAccountUnreadable()];
 
-    // Only worth asking when the file didn't already name its bank.
-    final bankId = info.bankId;
-    if (info.organization == null && bankId != null) {
-      info = info.withBankName(
-        await ref.read(banksRepositoryProvider).nameForCode(bankId),
-      );
-    }
+    final named = [
+      for (final info in statements)
+        // Only worth asking when the file didn't already name its bank.
+        if (info.organization == null && info.bankId != null)
+          info.withBankName(
+            await ref.read(banksRepositoryProvider).nameForCode(info.bankId!),
+          )
+        else
+          info,
+    ];
 
-    return state = matchOfxAccount(info, accounts);
+    return state = matchOfxStatements(named, accounts);
   }
 
-  /// Records that [account] — just created from [info] — is this statement's
+  /// Records that [account] — just created from [info] — is that statement's
   /// account, so the panel stops offering to create it.
-  void resolveTo(OfxAccountInfo info, Account account) =>
-      state = OfxAccountMatched(info, account);
+  void resolveTo(OfxAccountInfo info, Account account) {
+    final current = state;
+    if (current == null) return;
+    state = [
+      for (final match in current)
+        if (statementKey(match) == info.accountNumber)
+          OfxAccountMatched(info, account)
+        else
+          match,
+    ];
+  }
 
   void clear() => state = null;
 }
 
+/// The statement a verdict is about, as the backend names it: its `ACCTID`, or
+/// `null` for a file that names no account.
+String? statementKey(OfxAccountMatch match) => switch (match) {
+  OfxAccountMatched(:final info) ||
+  OfxAccountAmbiguous(:final info) ||
+  OfxAccountUnmatched(:final info) => info.accountNumber,
+  OfxAccountUnreadable() => null,
+};
+
 final ofxAccountDetectionProvider =
-    NotifierProvider<OfxAccountDetection, OfxAccountMatch?>(
+    NotifierProvider<OfxAccountDetection, List<OfxAccountMatch>?>(
       OfxAccountDetection.new,
     );

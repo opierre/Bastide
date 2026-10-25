@@ -1,6 +1,7 @@
 import 'package:desktop_drop/desktop_drop.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
 import '../../../core/theme/app_theme.dart';
@@ -19,6 +20,8 @@ import '../../accounts/application/accounts_controller.dart';
 import '../../accounts/domain/account.dart';
 import '../../accounts/presentation/account_form.dart';
 import '../../accounts/presentation/account_type_label.dart';
+import '../../transactions/application/transactions_controller.dart';
+import '../../transactions/presentation/transactions_screen.dart';
 import '../application/imports_controller.dart';
 import '../application/ofx_account_detection.dart';
 import '../domain/import_batch.dart';
@@ -49,16 +52,16 @@ class _ImportsScreenState extends ConsumerState<ImportsScreen> {
   bool _isImporting = false;
   String? _errorText;
 
-  /// The account this import will land in.
+  /// Where each statement of the file will land.
   ///
-  /// Read from the statement itself, falling back to the account the user
-  /// picked only when the file couldn't name one (see
-  /// [resolveImportDestination]). There is deliberately no default: with the
+  /// Read from the statements themselves, falling back to the account the user
+  /// picked only when a statement couldn't name one (see
+  /// [resolveImportTargets]). There is deliberately no default: with the
   /// destination selector gone, an unresolved destination leaves the import
-  /// button disabled rather than filing the statement somewhere nobody chose.
-  Account? get _destination => resolveImportDestination(
+  /// button disabled rather than filing a statement somewhere nobody chose.
+  List<ImportTarget>? get _targets => resolveImportTargets(
     ref.read(ofxAccountDetectionProvider),
-    ref.read(chosenImportAccountProvider),
+    ref.read(chosenImportAccountsProvider),
     ref.read(accountsControllerProvider).value ?? const <Account>[],
   );
 
@@ -69,8 +72,8 @@ class _ImportsScreenState extends ConsumerState<ImportsScreen> {
 
   Future<void> _stage(PickedImportFile file) async {
     setState(() => _errorText = null);
-    // A choice made for the previous statement says nothing about this one.
-    ref.read(chosenImportAccountProvider.notifier).clear();
+    // A choice made for the previous file says nothing about this one.
+    ref.read(chosenImportAccountsProvider.notifier).clear();
     ref.read(selectedImportFileProvider.notifier).select(file);
     await _detectAccount(file);
   }
@@ -79,16 +82,16 @@ class _ImportsScreenState extends ConsumerState<ImportsScreen> {
     setState(() => _errorText = null);
     ref.read(selectedImportFileProvider.notifier).clear();
     ref.read(ofxAccountDetectionProvider.notifier).clear();
-    ref.read(chosenImportAccountProvider.notifier).clear();
+    ref.read(chosenImportAccountsProvider.notifier).clear();
   }
 
-  /// Points the import at the account the statement itself names.
+  /// Points each statement at the account it names.
   ///
-  /// An OFX file carries its own account block, so the panel reads the
-  /// destination out of the file rather than asking for it. When no account
-  /// matches, the statement is describing an account the user hasn't created
-  /// yet, so we offer to create it from what the file says; when the file
-  /// can't settle it alone, `_DetectedAccountNotice` asks.
+  /// An OFX file carries its own account blocks, so the panel reads the
+  /// destinations out of the file rather than asking for them. A statement no
+  /// account matches describes an account the user hasn't created yet, so we
+  /// offer to create each in turn from what the file says; when the file can't
+  /// settle one alone, `_DetectedAccountNotice` asks.
   Future<void> _detectAccount(PickedImportFile file) async {
     final List<Account> accounts;
     try {
@@ -102,21 +105,18 @@ class _ImportsScreenState extends ConsumerState<ImportsScreen> {
     // The staged file may have been replaced or cleared while we waited.
     if (!mounted || ref.read(selectedImportFileProvider) != file) return;
 
-    final match = await ref
+    final matches = await ref
         .read(ofxAccountDetectionProvider.notifier)
         .detect(file, accounts);
-    if (!mounted || ref.read(selectedImportFileProvider) != file) return;
 
-    switch (match) {
-      case OfxAccountUnmatched(:final info):
+    // Matched needs nothing — the verdict *is* the destination. The two
+    // unresolved cases are put to the user by `_DetectedAccountNotice` rather
+    // than answered here.
+    for (final match in matches) {
+      if (!mounted || ref.read(selectedImportFileProvider) != file) return;
+      if (match case OfxAccountUnmatched(:final info)) {
         await _createDetectedAccount(info);
-      // Matched needs nothing — the verdict *is* the destination. The two
-      // unresolved cases are put to the user by `_DetectedAccountNotice`
-      // rather than answered here.
-      case OfxAccountMatched() ||
-          OfxAccountAmbiguous() ||
-          OfxAccountUnreadable():
-        break;
+      }
     }
   }
 
@@ -133,40 +133,61 @@ class _ImportsScreenState extends ConsumerState<ImportsScreen> {
     ref.read(ofxAccountDetectionProvider.notifier).resolveTo(info, created);
   }
 
-  /// Uploads the staged statement into the destination the file resolved to.
+  /// Uploads each statement of the staged file into the account it resolved to.
+  ///
+  /// One request per statement, in file order. A failure part-way leaves the
+  /// file staged and shows what did land: retrying is safe, since a statement
+  /// already imported into its account comes back as its original batch.
   Future<void> _import() async {
     final l10n = AppLocalizations.of(context)!;
-    final account = _destination;
+    final targets = _targets;
     final file = ref.read(selectedImportFileProvider);
-    if (account == null || file == null) return;
+    if (targets == null || file == null) return;
 
     setState(() {
       _isImporting = true;
       _errorText = null;
     });
 
+    final batches = <ImportBatch>[];
     try {
-      final batch = await ref
-          .read(importsControllerProvider.notifier)
-          .importFile(accountId: account.id, file: file);
-      _finish(batch);
+      for (final target in targets) {
+        batches.add(
+          await ref
+              .read(importsControllerProvider.notifier)
+              .importFile(
+                accountId: target.account.id,
+                file: file,
+                statement: target.statement,
+              ),
+        );
+      }
+      _finish(batches);
     } catch (error) {
       if (!mounted) return;
-      setState(() => _errorText = localizeImportError(l10n, error));
+      final message = localizeImportError(l10n, error);
+      if (batches.isNotEmpty) {
+        ref.read(lastImportResultProvider.notifier).set(batches);
+      }
+      setState(
+        () => _errorText = batches.isEmpty
+            ? message
+            : l10n.importErrorPartial(batches.length, targets.length, message),
+      );
     } finally {
       if (mounted) setState(() => _isImporting = false);
     }
   }
 
-  /// Clears the drop zone and promotes the batch to the result card. Runs for a
-  /// `failed` batch too — the file was handled, and its outcome belongs in the
-  /// result card rather than as an error over the drop zone.
-  void _finish(ImportBatch batch) {
+  /// Clears the drop zone and promotes the batches to the result card. Runs for
+  /// `failed` batches too — the file was handled, and its outcome belongs in
+  /// the result card rather than as an error over the drop zone.
+  void _finish(List<ImportBatch> batches) {
     if (!mounted) return;
-    ref.read(lastImportResultProvider.notifier).set(batch);
+    ref.read(lastImportResultProvider.notifier).set(batches);
     ref.read(selectedImportFileProvider.notifier).clear();
     ref.read(ofxAccountDetectionProvider.notifier).clear();
-    ref.read(chosenImportAccountProvider.notifier).clear();
+    ref.read(chosenImportAccountsProvider.notifier).clear();
   }
 
   @override
@@ -200,7 +221,7 @@ class _ImportsScreenState extends ConsumerState<ImportsScreen> {
                 ),
                 if (lastResult != null) ...[
                   const SizedBox(width: AppSpacing.gridGap),
-                  Expanded(flex: 100, child: _ResultCard(batch: lastResult)),
+                  Expanded(flex: 100, child: _ResultCard(batches: lastResult)),
                 ],
               ],
             ),
@@ -251,29 +272,53 @@ AccountPrefill _prefillFrom(OfxAccountInfo info, AppLocalizations l10n) {
 String _detectedAccountLabel(OfxAccountInfo info) =>
     [?info.institutionLabel, info.maskedNumber].join(' ');
 
-/// The account an import will land in: the one the statement resolved to, else
-/// the one the user picked to settle a statement that couldn't resolve itself.
+/// One statement of the staged file and the account it will be imported into.
+typedef ImportTarget = ({String? statement, Account account});
+
+/// Where each statement of the file lands: the account it resolved to, else the
+/// one the user picked to settle a statement that couldn't resolve itself.
 ///
-/// `null` means nothing has settled it yet, and the panel must not import.
-/// Deliberately without a "first account" fallback: the panel no longer carries
-/// a destination selector, so a default here would file a statement against an
-/// account nobody chose and nothing on screen would say so.
+/// `null` means some statement isn't settled yet — or two would land in the
+/// same account — and the panel must not import. Deliberately without a "first
+/// account" fallback: the panel no longer carries a destination selector, so a
+/// default here would file a statement against an account nobody chose and
+/// nothing on screen would say so.
 ///
 /// Pure so the rule is testable on its own, and shared by the staged-file row
 /// and the import action so what is shown and what is imported into can't
 /// diverge.
-Account? resolveImportDestination(
-  OfxAccountMatch? match,
-  String? chosenId,
+List<ImportTarget>? resolveImportTargets(
+  List<OfxAccountMatch>? matches,
+  Map<String?, String> chosen,
   List<Account> accounts,
 ) {
-  if (match is OfxAccountMatched) return match.account;
-  if (chosenId == null) return null;
-  for (final account in accounts) {
-    if (account.id == chosenId) return account;
-  }
-  return null;
+  final targets = _settledTargets(matches, chosen, accounts);
+  return targets == null || hasSharedDestination(targets) ? null : targets;
 }
+
+/// Every statement's account, or `null` while any is still unanswered.
+List<ImportTarget>? _settledTargets(
+  List<OfxAccountMatch>? matches,
+  Map<String?, String> chosen,
+  List<Account> accounts,
+) {
+  if (matches == null || matches.isEmpty) return null;
+  final targets = <ImportTarget>[];
+  for (final match in matches) {
+    final statement = statementKey(match);
+    final account = match is OfxAccountMatched
+        ? match.account
+        : accounts.where((a) => a.id == chosen[statement]).firstOrNull;
+    if (account == null) return null;
+    targets.add((statement: statement, account: account));
+  }
+  return targets;
+}
+
+/// Whether two statements would land in the same account — always a mistake,
+/// and the backend would silently keep only the first.
+bool hasSharedDestination(List<ImportTarget> targets) =>
+    targets.map((target) => target.account.id).toSet().length != targets.length;
 
 /// Region A — the drop zone and what the staged statement says about itself.
 class _NewImportCard extends ConsumerWidget {
@@ -347,8 +392,8 @@ class _NewImportCard extends ConsumerWidget {
   }
 }
 
-/// What the staged statement says about its own account — and, when the file
-/// can't answer that on its own, the one control that asks the user.
+/// What each statement of the staged file says about its own account — and,
+/// when the file can't answer that on its own, the controls that ask the user.
 ///
 /// Renders nothing at all when there is nothing to say (no file staged).
 class _DetectedAccountNotice extends ConsumerWidget {
@@ -363,53 +408,81 @@ class _DetectedAccountNotice extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context)!;
-    final match = ref.watch(ofxAccountDetectionProvider);
-    if (match == null) return const SizedBox.shrink();
+    final matches = ref.watch(ofxAccountDetectionProvider);
+    if (matches == null) return const SizedBox.shrink();
+    final settled = _settledTargets(
+      matches,
+      ref.watch(chosenImportAccountsProvider),
+      ref.watch(accountsControllerProvider).value ?? const <Account>[],
+    );
 
-    return Padding(
-      padding: const EdgeInsets.only(top: AppSpacing.sm),
-      child: switch (match) {
-        OfxAccountMatched(:final account) => InlineBanner(
-          key: const Key('importDetectedAccountBanner'),
-          message: l10n.importDetectedAccount(account.name),
-          tone: BannerTone.success,
-        ),
-        // The file names a bank the user has several accounts with. Only those
-        // candidates are offered: the rest of the list is already ruled out by
-        // the file, and showing it would invite filing the statement wrongly.
-        OfxAccountAmbiguous(:final info, :final candidates) => _AccountChoice(
-          bannerKey: const Key('importAmbiguousAccountBanner'),
-          selectKey: const Key('importAmbiguousAccountField'),
-          message: l10n.importDetectedAccountAmbiguous(
-            _detectedAccountLabel(info),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        for (final match in matches)
+          Padding(
+            padding: const EdgeInsets.only(top: AppSpacing.sm),
+            child: _statementNotice(l10n, match),
           ),
-          candidates: candidates,
-          isImporting: isImporting,
-        ),
-        OfxAccountUnmatched(:final info) => Column(
-          crossAxisAlignment: CrossAxisAlignment.end,
-          children: [
-            InlineBanner(
-              key: const Key('importUnknownAccountBanner'),
-              message: l10n.importDetectedAccountUnknown(
-                _detectedAccountLabel(info),
-              ),
-              tone: BannerTone.warning,
+        if (settled != null && hasSharedDestination(settled))
+          Padding(
+            padding: const EdgeInsets.only(top: AppSpacing.sm),
+            child: InlineBanner(
+              key: const Key('importSharedDestinationBanner'),
+              message: l10n.importDuplicateDestination,
             ),
-            TextButton(
-              key: const Key('importCreateDetectedAccountButton'),
-              onPressed: isImporting ? null : () => onCreateAccount(info),
-              child: Text(l10n.importCreateDetectedAccount),
-            ),
-          ],
-        ),
-        OfxAccountUnreadable() => _UnreadableAccountChoice(
-          isImporting: isImporting,
-        ),
-      },
+          ),
+      ],
     );
   }
+
+  Widget _statementNotice(
+    AppLocalizations l10n,
+    OfxAccountMatch match,
+  ) => switch (match) {
+    OfxAccountMatched(:final info, :final account) => InlineBanner(
+      key: _statementWidgetKey('importDetectedAccountBanner', info),
+      message: l10n.importDetectedAccount(account.name),
+      tone: BannerTone.success,
+    ),
+    // The file names a bank the user has several accounts with. Only those
+    // candidates are offered: the rest of the list is already ruled out by
+    // the file, and showing it would invite filing the statement wrongly.
+    OfxAccountAmbiguous(:final info, :final candidates) => _AccountChoice(
+      statement: info.accountNumber,
+      bannerKey: _statementWidgetKey('importAmbiguousAccountBanner', info),
+      selectKey: _statementWidgetKey('importAmbiguousAccountField', info),
+      message: l10n.importDetectedAccountAmbiguous(_detectedAccountLabel(info)),
+      candidates: candidates,
+      isImporting: isImporting,
+    ),
+    OfxAccountUnmatched(:final info) => Column(
+      crossAxisAlignment: CrossAxisAlignment.end,
+      children: [
+        InlineBanner(
+          key: _statementWidgetKey('importUnknownAccountBanner', info),
+          message: l10n.importDetectedAccountUnknown(
+            _detectedAccountLabel(info),
+          ),
+          tone: BannerTone.warning,
+        ),
+        TextButton(
+          key: _statementWidgetKey('importCreateDetectedAccountButton', info),
+          onPressed: isImporting ? null : () => onCreateAccount(info),
+          child: Text(l10n.importCreateDetectedAccount),
+        ),
+      ],
+    ),
+    OfxAccountUnreadable() => _UnreadableAccountChoice(
+      isImporting: isImporting,
+    ),
+  };
 }
+
+/// A per-statement widget key: [base] suffixed with the statement's `ACCTID`,
+/// since a file covering several accounts shows one of each.
+Key _statementWidgetKey(String base, OfxAccountInfo info) =>
+    Key('$base-${info.accountNumber}');
 
 /// The fallback for a file that declares no account at all: nothing can be
 /// matched or proposed from it, so the user picks from every account they have.
@@ -428,6 +501,7 @@ class _UnreadableAccountChoice extends ConsumerWidget {
         ref.watch(accountsControllerProvider).value ?? const <Account>[];
 
     return _AccountChoice(
+      statement: null,
       bannerKey: const Key('importUnreadableAccountBanner'),
       selectKey: const Key('importUnreadableAccountField'),
       message: l10n.importUnreadableAccount,
@@ -438,9 +512,10 @@ class _UnreadableAccountChoice extends ConsumerWidget {
 }
 
 /// A warning plus a picker over [candidates] — the panel's only manual account
-/// choice, shown only when the statement could not name its own destination.
+/// choice, shown only when a statement could not name its own destination.
 class _AccountChoice extends ConsumerWidget {
   const _AccountChoice({
+    required this.statement,
     required this.bannerKey,
     required this.selectKey,
     required this.message,
@@ -448,6 +523,9 @@ class _AccountChoice extends ConsumerWidget {
     required this.isImporting,
   });
 
+  /// The statement this choice settles — its `ACCTID`, or `null` for a file
+  /// that names no account.
+  final String? statement;
   final Key bannerKey;
   final Key selectKey;
   final String message;
@@ -457,7 +535,7 @@ class _AccountChoice extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context)!;
-    final chosenId = ref.watch(chosenImportAccountProvider);
+    final chosenId = ref.watch(chosenImportAccountsProvider)[statement];
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -492,8 +570,8 @@ class _AccountChoice extends ConsumerWidget {
               onChanged: isImporting
                   ? (_) {}
                   : (selected) => ref
-                        .read(chosenImportAccountProvider.notifier)
-                        .select(selected),
+                        .read(chosenImportAccountsProvider.notifier)
+                        .select(statement, selected),
             ),
           ),
         ],
@@ -597,9 +675,9 @@ class _StagedFile extends ConsumerWidget {
     final format = ImportFormat.fromWire(file.extension);
     // Watched, not read: the button turns live the moment detection lands or
     // the user answers the picker above.
-    final destination = resolveImportDestination(
+    final targets = resolveImportTargets(
       ref.watch(ofxAccountDetectionProvider),
-      ref.watch(chosenImportAccountProvider),
+      ref.watch(chosenImportAccountsProvider),
       ref.watch(accountsControllerProvider).value ?? const <Account>[],
     );
 
@@ -659,10 +737,10 @@ class _StagedFile extends ConsumerWidget {
               label: l10n.importSubmit,
               loadingLabel: l10n.importSubmitting,
               isLoading: isImporting,
-              // Disabled until something has named the destination. The notice
-              // above always says what is missing, so this never reads as an
-              // unexplained dead button.
-              onPressed: destination == null ? null : onImport,
+              // Disabled until every statement has its own destination. The
+              // notice above always says what is missing, so this never reads
+              // as an unexplained dead button.
+              onPressed: targets == null ? null : onImport,
             ),
           ],
         ),
@@ -674,11 +752,24 @@ class _StagedFile extends ConsumerWidget {
 String _formatKilobytes(int bytes, String locale) =>
     NumberFormat('#,##0.#', locale).format(bytes / 1024);
 
-/// Region A' — what the import that just ran actually did.
+/// Region A' — what the import that just ran actually did: the counts summed
+/// over every statement of the file, then each statement's own period,
+/// destination and warnings.
 class _ResultCard extends ConsumerWidget {
-  const _ResultCard({required this.batch});
+  const _ResultCard({required this.batches});
 
-  final ImportBatch batch;
+  final List<ImportBatch> batches;
+
+  /// Failed only when nothing landed, success only when everything did.
+  ImportStatus get _status {
+    if (batches.every((b) => b.status == ImportStatus.failed)) {
+      return ImportStatus.failed;
+    }
+    if (batches.every((b) => b.status == ImportStatus.success)) {
+      return ImportStatus.success;
+    }
+    return ImportStatus.partial;
+  }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -686,10 +777,9 @@ class _ResultCard extends ConsumerWidget {
     final textTheme = Theme.of(context).textTheme;
     final accounts =
         ref.watch(accountsControllerProvider).value ?? const <Account>[];
-    final account = accounts
-        .where((account) => account.id == batch.accountId)
-        .firstOrNull;
-    final accountName = account?.name;
+    final status = _status;
+    final newCount = batches.fold(0, (sum, b) => sum + b.newCount);
+    final duplicateCount = batches.fold(0, (sum, b) => sum + b.duplicateCount);
 
     return AppCard(
       key: const Key('importResultCard'),
@@ -705,28 +795,23 @@ class _ResultCard extends ConsumerWidget {
                   style: textTheme.titleMedium,
                 ),
               ),
-              ImportStatusPill(status: batch.status),
+              ImportStatusPill(status: status),
             ],
           ),
           const SizedBox(height: AppSpacing.md),
-          if (batch.status == ImportStatus.failed) ...[
+          if (status == ImportStatus.failed)
             InlineBanner(
               key: const Key('importResultFailure'),
               message: l10n.importFailedNote,
-            ),
-            if (batch.errorMessage case final message?
-                when message.trim().isNotEmpty) ...[
-              const SizedBox(height: AppSpacing.sm),
-              Text(message, style: AppTextStyles.mono),
-            ],
-          ] else
+            )
+          else
             Row(
               children: [
                 Expanded(
                   child: _CountPlate(
                     valueKey: const Key('importResultNewCount'),
-                    value: batch.newCount,
-                    label: l10n.importResultNewLabel(batch.newCount),
+                    value: newCount,
+                    label: l10n.importResultNewLabel(newCount),
                     color: AppColors.positive,
                   ),
                 ),
@@ -734,49 +819,148 @@ class _ResultCard extends ConsumerWidget {
                 Expanded(
                   child: _CountPlate(
                     valueKey: const Key('importResultDuplicateCount'),
-                    value: batch.duplicateCount,
-                    label: l10n.importResultDuplicateLabel(
-                      batch.duplicateCount,
-                    ),
+                    value: duplicateCount,
+                    label: l10n.importResultDuplicateLabel(duplicateCount),
                     color: AppColors.warning,
                   ),
                 ),
               ],
             ),
-          if (batch.balanceMismatchMinor case final mismatch?) ...[
+          const _SettlementWarnings(),
+          for (final batch in batches)
+            _BatchOutcome(
+              batch: batch,
+              account: accounts
+                  .where((account) => account.id == batch.accountId)
+                  .firstOrNull,
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+/// What still stands between the user's deferred cards and a ledger counting
+/// them once: settlements to confirm, and card purchases no settlement claimed.
+///
+/// Silent while loading or when the status can't be read — it qualifies the
+/// import, and a failure to read it says nothing about the import itself.
+class _SettlementWarnings extends ConsumerWidget {
+  const _SettlementWarnings();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final status = ref.watch(cardSettlementStatusProvider).value;
+    if (status == null) return const SizedBox.shrink();
+    final l10n = AppLocalizations.of(context)!;
+    final locale = Localizations.localeOf(context).toString();
+    final accounts =
+        ref.watch(accountsControllerProvider).value ?? const <Account>[];
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        if (status.proposedCount > 0) ...[
+          const SizedBox(height: AppSpacing.md),
+          InlineBanner(
+            key: const Key('importSettlementsProposed'),
+            message: l10n.importSettlementsProposed(status.proposedCount),
+            tone: BannerTone.warning,
+          ),
+          Align(
+            alignment: Alignment.centerRight,
+            child: TextButton(
+              key: const Key('importSettlementsReviewButton'),
+              onPressed: () {
+                ref
+                    .read(transactionFiltersProvider.notifier)
+                    .setNeedsReview(true);
+                context.go(TransactionsScreen.path);
+              },
+              child: Text(l10n.importSettlementsReview),
+            ),
+          ),
+        ],
+        for (final unmatched in status.unmatched)
+          if (accounts.where((a) => a.id == unmatched.accountId).firstOrNull
+              case final card?) ...[
             const SizedBox(height: AppSpacing.md),
             InlineBanner(
-              key: const Key('importResultBalanceMismatch'),
-              message: l10n.importResultBalanceMismatchBody(
+              key: Key('importCardUnmatched-${card.id}'),
+              message: l10n.importCardUnmatched(
+                unmatched.count,
+                card.name,
                 formatAmount(
-                  amountMinor: mismatch,
-                  currency: account?.currency ?? '',
-                  locale: Localizations.localeOf(context).toString(),
-                  showPositiveSign: true,
+                  amountMinor: unmatched.amountMinor.abs(),
+                  currency: card.currency,
+                  locale: locale,
                 ),
-                batch.balanceMismatchAsOf!,
+                unmatched.since,
               ),
               tone: BannerTone.warning,
             ),
           ],
+      ],
+    );
+  }
+}
+
+/// One statement's line in the result card: its own warnings, the period it
+/// covered and the account it went to.
+class _BatchOutcome extends StatelessWidget {
+  const _BatchOutcome({required this.batch, required this.account});
+
+  final ImportBatch batch;
+  final Account? account;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final textTheme = Theme.of(context).textTheme;
+    final accountName = account?.name;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        if (batch.status == ImportStatus.failed)
+          if (batch.errorMessage case final message?
+              when message.trim().isNotEmpty) ...[
+            const SizedBox(height: AppSpacing.sm),
+            Text(message, style: AppTextStyles.mono),
+          ],
+        if (batch.balanceMismatchMinor case final mismatch?) ...[
           const SizedBox(height: AppSpacing.md),
-          Text(
-            l10n.importPeriodRange(batch.periodStart, batch.periodEnd),
-            key: const Key('importResultPeriod'),
-            style: tabularNumberStyle(
-              textTheme.bodySmall!,
-            ).copyWith(color: AppColors.textSecondary),
-          ),
-          const SizedBox(height: AppSpacing.xs),
-          Text(
-            accountName == null
-                ? batch.fileName
-                : l10n.importResultTarget(batch.fileName, accountName),
-            overflow: TextOverflow.ellipsis,
-            style: AppTextStyles.helper,
+          InlineBanner(
+            key: Key('importResultBalanceMismatch-${batch.id}'),
+            message: l10n.importResultBalanceMismatchBody(
+              formatAmount(
+                amountMinor: mismatch,
+                currency: account?.currency ?? '',
+                locale: Localizations.localeOf(context).toString(),
+                showPositiveSign: true,
+              ),
+              batch.balanceMismatchAsOf!,
+            ),
+            tone: BannerTone.warning,
           ),
         ],
-      ),
+        const SizedBox(height: AppSpacing.md),
+        Text(
+          l10n.importPeriodRange(batch.periodStart, batch.periodEnd),
+          key: Key('importResultPeriod-${batch.id}'),
+          style: tabularNumberStyle(
+            textTheme.bodySmall!,
+          ).copyWith(color: AppColors.textSecondary),
+        ),
+        const SizedBox(height: AppSpacing.xs),
+        Text(
+          accountName == null
+              ? batch.fileName
+              : l10n.importResultTarget(batch.fileName, accountName),
+          overflow: TextOverflow.ellipsis,
+          style: AppTextStyles.helper,
+        ),
+      ],
     );
   }
 }

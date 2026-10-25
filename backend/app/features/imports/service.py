@@ -10,7 +10,7 @@ from uuid import uuid4
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
-from app.core.errors import NotFoundError
+from app.core.errors import NotFoundError, ValidationError
 from app.features.accounts.balance import apply_delta, point_in_time_balance, shift_opening_balance
 from app.features.accounts.models import Account, AccountBalanceSnapshot
 from app.features.accounts.service import AccountService
@@ -19,9 +19,14 @@ from app.features.imports.canonical import CanonicalTransaction, normalize
 from app.features.imports.card_settlement import DETECTED_SOURCE, is_card_settlement
 from app.features.imports.ledger import settle_earlier_mismatches, shift_later_snapshots
 from app.features.imports.models import ImportBatch
-from app.features.imports.parsers.ofx import LedgerBalance, OfxParseError, parse_ledger_balance
-from app.features.imports.parsers.ofx import parse as parse_ofx
+from app.features.imports.parsers.ofx import (
+    LedgerBalance,
+    OfxParseError,
+    Statement,
+    parse_statements,
+)
 from app.features.imports.repository import ImportRepository
+from app.features.imports.schemas import CardSettlementStatus
 from app.features.imports.settlements import CardSettlementService
 from app.features.rules.engine import match_category
 from app.features.rules.repository import RuleRepository
@@ -50,6 +55,41 @@ class ImportBatchNotFoundError(NotFoundError):
     code = "IMPORT_BATCH_NOT_FOUND"
 
 
+class ImportStatementRequiredError(ValidationError):
+    """Raised when a file holds several statements and the caller named none of them."""
+
+    code = "IMPORT_STATEMENT_REQUIRED"
+
+
+class ImportStatementNotFoundError(ValidationError):
+    """Raised when the file holds no statement for the account number the caller named."""
+
+    code = "IMPORT_STATEMENT_NOT_FOUND"
+
+
+def _select_statement(statements: list[Statement], account_number: str | None) -> Statement:
+    """The statement to import: the one named, else the file's only one.
+
+    Raises:
+        ImportStatementRequiredError: several statements and none named.
+        ImportStatementNotFoundError: none matches ``account_number``.
+    """
+    if account_number is None:
+        if len(statements) > 1:
+            raise ImportStatementRequiredError(
+                "This file holds several statements; name the one to import.",
+                details={"statements": [s.account_number for s in statements]},
+            )
+        return statements[0]
+    for statement in statements:
+        if statement.account_number == account_number.strip():
+            return statement
+    raise ImportStatementNotFoundError(
+        "This file holds no statement for that account.",
+        details={"statement": account_number},
+    )
+
+
 class ImportService:
     """Parses an uploaded OFX/QFX file into the ledger, atomically, once per unique file."""
 
@@ -75,6 +115,10 @@ class ImportService:
         """List a user's import batches, most recent first (the import history)."""
         return self._repository.list_by_user(user_id)
 
+    def card_settlement_status(self, user_id: str) -> CardSettlementStatus:
+        """What the user still has to settle for their deferred cards to count once."""
+        return self._settlements.status(user_id)
+
     def get(self, user_id: str, batch_id: str) -> ImportBatch:
         """Fetch a single import batch the user owns.
 
@@ -92,15 +136,23 @@ class ImportService:
         account_id: str,
         file_name: str,
         content: bytes,
+        statement: str | None = None,
     ) -> ImportBatch:
-        """Import an OFX/QFX file into ``account_id``, scoped to ``user``.
+        """Import one statement of an OFX/QFX file into ``account_id``, scoped to ``user``.
+
+        ``statement`` is the `ACCTID` of the statement to import. It may be left out when the
+        file holds a single statement; a file covering several accounts is imported one
+        statement per call, each into its own account.
 
         Raises:
             AccountNotFoundError: no such account, or it belongs to another user.
+            ImportStatementRequiredError: the file holds several statements and none was named.
+            ImportStatementNotFoundError: the file holds no statement for ``statement``.
         """
         account = self._account_service.get(user.id, account_id)
         file_hash = hashlib.sha256(content).hexdigest()
 
+        # Keyed by account, so each statement of a multi-account file gets its own batch.
         existing_batch = self._repository.find_batch_by_file_hash(account.id, file_hash)
         if existing_batch is not None:
             return existing_batch
@@ -108,21 +160,22 @@ class ImportService:
         had_transactions = self._has_transactions(account.id)
         source_format = "qfx" if file_name.lower().endswith(_QFX_EXTENSION) else "ofx"
 
-        # A statement declares where the account stands, not just how it moved — but the
-        # tag is optional, so this stays None for an exporter that omits `LEDGERBAL`.
-        declared_balance: LedgerBalance | None = None
         try:
-            raw_transactions = parse_ofx(content)
-            declared_balance = parse_ledger_balance(content)
+            statements = parse_statements(content)
         except OfxParseError as exc:
             return self._repository.save(
                 self._failed_batch(user, account, source_format, file_name, file_hash, exc),
                 transactions=[],
             )
+        selected = _select_statement(statements, statement)
+
+        # A statement declares where the account stands, not just how it moved — but the
+        # tag is optional, so this stays None for an exporter that omits `LEDGERBAL`.
+        declared_balance = selected.ledger_balance
 
         canonical_transactions = [
             normalize(raw, account_id=account.id, currency=account.currency)
-            for raw in raw_transactions
+            for raw in selected.transactions
         ]
 
         today = self._clock()

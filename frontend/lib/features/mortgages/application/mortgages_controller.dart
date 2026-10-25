@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/api/api_client.dart';
+import '../../networth/application/networth_controller.dart';
 import '../data/mortgages_repository.dart';
 import '../domain/mortgage.dart';
 import '../domain/schedule_row.dart';
@@ -148,7 +149,11 @@ class MortgagesController extends AsyncNotifier<MortgagesState> {
 
   /// Re-reads list and summary without passing through a loading state, so a
   /// save doesn't blank the panel behind the closing modal.
+  ///
+  /// Every loan write passes through here, and each one moves the liabilities
+  /// Synthèse subtracts — so its summary is dropped along with ours.
   Future<void> _reload() async {
+    ref.invalidate(networthControllerProvider);
     final status = state.value?.statusFilter;
     state = await AsyncValue.guard(() => _load(status));
   }

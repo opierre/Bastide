@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../networth/application/networth_controller.dart';
 import '../data/accounts_repository.dart';
 import '../domain/account.dart';
 
@@ -42,6 +43,7 @@ class AccountsController extends AsyncNotifier<List<Account>> {
           currency: currency,
         );
     state = AsyncValue.data([...?state.value, account]);
+    _invalidateNetWorth();
     return account;
   }
 
@@ -65,6 +67,7 @@ class AccountsController extends AsyncNotifier<List<Account>> {
       for (final account in state.value ?? const <Account>[])
         if (account.id == id) updated else account,
     ]);
+    _invalidateNetWorth();
   }
 
   Future<void> archive(String id) async {
@@ -74,7 +77,12 @@ class AccountsController extends AsyncNotifier<List<Account>> {
           .where((account) => account.id != id)
           .toList(),
     );
+    _invalidateNetWorth();
   }
+
+  /// Synthèse sums every non-archived account's balance, so any account write
+  /// leaves it describing a set of accounts that no longer exists.
+  void _invalidateNetWorth() => ref.invalidate(networthControllerProvider);
 }
 
 final accountsControllerProvider =

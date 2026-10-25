@@ -439,3 +439,64 @@ def test_a_rule_never_recategorises_the_card_credit_on_its_own(client: TestClien
     offsets = _offsets(_rows(client, headers, card_id))
     assert [row["category"]["name"] for row in offsets] == [CARD_SETTLEMENT_CATEGORY_KEY]
     assert _balance(client, headers, card_id) == -4_000
+
+
+# --- what is left to settle -------------------------------------------------------------
+
+
+def _status(client: TestClient, headers: dict[str, str]) -> dict:
+    response = client.get("/api/v1/imports/card-settlements", headers=headers)
+    assert response.status_code == 200, response.json()
+    return response.json()
+
+
+def test_a_user_tracking_no_card_has_nothing_to_settle(client: TestClient) -> None:
+    headers = _register(client)
+    checking_id = _create_account(client, headers, "checking")
+    # A settlement-looking debit with no card to pay: it is the only record of that
+    # spending, so there is nothing to confirm and nothing counted twice.
+    _import(client, headers, checking_id, _statement("BANK", [_SETTLEMENT]), "releve.ofx")
+
+    assert _status(client, headers) == {"proposed_count": 0, "unmatched": []}
+
+
+def test_a_detected_settlement_waits_for_confirmation(client: TestClient) -> None:
+    headers = _register(client)
+    _, _, settlement = _settled(client, headers)
+
+    assert _status(client, headers)["proposed_count"] == 1
+
+    _recategorize(client, headers, settlement["id"], settlement["category"]["id"])
+
+    assert _status(client, headers)["proposed_count"] == 0
+
+
+def test_a_settled_cycle_and_a_recent_purchase_are_not_flagged(client: TestClient) -> None:
+    headers = _register(client)
+    _settled(client, headers)
+
+    # January is settled, and February's −40.00 is not due yet on 5 February.
+    assert _status(client, headers)["unmatched"] == []
+
+
+def test_purchases_an_unrecognised_debit_paid_are_flagged(client: TestClient) -> None:
+    headers = _register(client)
+    checking_id = _create_account(client, headers, "checking")
+    card_id = _create_account(client, headers, "deferred_card")
+    _import(client, headers, card_id, _statement("CC", _CARD_ROWS), "carte.ofx")
+    # The bank words the debit in a way no marker reads, and the current account runs on
+    # well past it: the card purchases now count twice.
+    unrecognised = [
+        ("S1", "20260205", "-452.10", "PRLV BNP PARIBAS 0126"),
+        ("S2", "20260325", "-12.00", "CB BOULANGERIE"),
+    ]
+    _import(client, headers, checking_id, _statement("BANK", unrecognised), "releve.ofx")
+
+    assert _status(client, headers)["unmatched"] == [
+        {
+            "account_id": card_id,
+            "amount_minor": -49_210,
+            "count": 3,
+            "since": "2026-01-05",
+        }
+    ]

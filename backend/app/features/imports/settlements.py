@@ -18,12 +18,14 @@ from app.features.imports.card_settlement import (
     CARD_SETTLEMENT_CATEGORY_KEY,
     DETECTED_SOURCE,
     RESET_WINDOW,
+    SETTLEMENT_OVERDUE,
     cycle_length,
     is_card_settlement,
     offset_dedup_hash,
 )
 from app.features.imports.ledger import settle_earlier_mismatches, shift_later_snapshots
 from app.features.imports.repository import ImportRepository
+from app.features.imports.schemas import CardSettlementStatus, UnmatchedCardPurchases
 from app.features.transactions.models import Transaction
 
 
@@ -61,6 +63,50 @@ class CardSettlementService:
             for account in AccountRepository(self._db).list_by_user(user_id)
             if account.type == "deferred_card"
         ]
+
+    def status(self, user_id: str) -> CardSettlementStatus:
+        """What stands between the user's deferred cards and a ledger that counts them once.
+
+        Two things, both empty for a user tracking no card: settlements recognised by their
+        label that still wait for confirmation, and card purchases no settlement has claimed
+        although the user's other accounts are imported well past the debit that paid them —
+        which means the debit is there, unrecognised, and the purchases count twice.
+
+        Only purchases are counted: a refund or a statement's reset line waiting for its
+        settlement double-counts nothing.
+        """
+        cards = self.tracked_cards(user_id)
+        settlement_category_id = self.settlement_category_id(user_id)
+        if not cards or settlement_category_id is None:
+            return CardSettlementStatus(proposed_count=0, unmatched=[])
+
+        unmatched: list[UnmatchedCardPurchases] = []
+        latest = self._repository.latest_booked_off_card(user_id)
+        if latest is not None:
+            for card in cards:
+                purchases = [
+                    row
+                    for row in self._repository.unsettled_card_rows(
+                        card.id, latest - SETTLEMENT_OVERDUE
+                    )
+                    if row.amount_minor < 0
+                ]
+                if purchases:
+                    unmatched.append(
+                        UnmatchedCardPurchases(
+                            account_id=card.id,
+                            amount_minor=sum(row.amount_minor for row in purchases),
+                            count=len(purchases),
+                            since=purchases[0].booked_date,
+                        )
+                    )
+
+        return CardSettlementStatus(
+            proposed_count=self._repository.count_proposed_settlements(
+                user_id, settlement_category_id
+            ),
+            unmatched=unmatched,
+        )
 
     def link_pending(
         self,

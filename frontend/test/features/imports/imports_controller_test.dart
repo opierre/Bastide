@@ -2,10 +2,13 @@ import 'package:bastide/core/api/api_client.dart';
 import 'package:bastide/core/api/api_client_provider.dart';
 import 'package:bastide/features/imports/application/imports_controller.dart';
 import 'package:bastide/features/imports/domain/import_batch.dart';
+import 'package:bastide/features/networth/application/networth_controller.dart';
 import 'package:bastide/features/transactions/application/transactions_controller.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
+
+import '../../support/networth_fixtures.dart';
 
 class MockApiClient extends Mock implements ApiClient {}
 
@@ -141,6 +144,35 @@ void main() {
     );
 
     test(
+      'a statement of a multi-account file is named in the upload',
+      () async {
+        when(
+          () => apiClient.get('/imports'),
+        ).thenAnswer((_) async => <dynamic>[]);
+        _stubMultipart(apiClient, '/imports', _batchJson());
+
+        await container.read(importsControllerProvider.future);
+        await container
+            .read(importsControllerProvider.notifier)
+            .importFile(accountId: 'a1', file: _file, statement: '0001234567');
+
+        final captured =
+            verify(
+                  () => apiClient.postMultipart(
+                    '/imports',
+                    fileField: any(named: 'fileField'),
+                    fileName: any(named: 'fileName'),
+                    fileBytes: any(named: 'fileBytes'),
+                    fields: captureAny(named: 'fields'),
+                  ),
+                ).captured.single
+                as Map<String, String>;
+
+        expect(captured, {'account_id': 'a1', 'statement': '0001234567'});
+      },
+    );
+
+    test(
       're-importing the same file replaces its entry instead of listing it twice',
       () async {
         // The backend returns the *original* batch for an already-imported file,
@@ -218,6 +250,78 @@ void main() {
       verify(
         () => apiClient.get('/transactions', query: any(named: 'query')),
       ).called(2);
+    });
+
+    test(
+      'the card-settlement status is read and re-read after an import',
+      () async {
+        when(
+          () => apiClient.get('/imports'),
+        ).thenAnswer((_) async => <dynamic>[]);
+        when(() => apiClient.get('/imports/card-settlements')).thenAnswer(
+          (_) async => {
+            'proposed_count': 1,
+            'unmatched': [
+              {
+                'account_id': 'c1',
+                'amount_minor': -49210,
+                'count': 3,
+                'since': '2026-01-05',
+              },
+            ],
+          },
+        );
+        _stubMultipart(apiClient, '/imports', _batchJson());
+
+        final subscription = container.listen(
+          cardSettlementStatusProvider,
+          (_, _) {},
+        );
+        addTearDown(subscription.close);
+        final status = await container.read(
+          cardSettlementStatusProvider.future,
+        );
+        expect(status.proposedCount, 1);
+        expect(status.unmatched.single.amountMinor, -49210);
+        expect(status.unmatched.single.since, DateTime(2026, 1, 5));
+
+        await container.read(importsControllerProvider.future);
+        await container
+            .read(importsControllerProvider.notifier)
+            .importFile(accountId: 'a1', file: _file);
+        await container.read(cardSettlementStatusProvider.future);
+
+        verify(() => apiClient.get('/imports/card-settlements')).called(2);
+      },
+    );
+
+    test('a successful import invalidates the net-worth summary', () async {
+      // Synthèse read before the first import kept its empty state — only
+      // « Nouveau bien » on offer — until a restart.
+      when(
+        () => apiClient.get('/imports'),
+      ).thenAnswer((_) async => <dynamic>[]);
+      when(
+        () => apiClient.get('/networth/summary'),
+      ).thenAnswer((_) async => emptyNetworthSummaryJson);
+      when(
+        () => apiClient.get('/mortgages/summary'),
+      ).thenAnswer((_) async => {'active_count': 0});
+      _stubMultipart(apiClient, '/imports', _batchJson());
+
+      final subscription = container.listen(
+        networthControllerProvider,
+        (_, _) {},
+      );
+      addTearDown(subscription.close);
+      await container.read(importsControllerProvider.future);
+      await container.read(networthControllerProvider.future);
+      await container
+          .read(importsControllerProvider.notifier)
+          .importFile(accountId: 'a1', file: _file);
+      await container.read(networthControllerProvider.future);
+
+      verify(() => apiClient.get('/networth/summary')).called(2);
     });
 
     test('a failed import leaves the transactions list alone', () async {

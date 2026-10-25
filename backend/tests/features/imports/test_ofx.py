@@ -11,8 +11,8 @@ from sqlalchemy import select
 
 from app.core.db import get_db
 from app.features.accounts.models import AccountBalanceSnapshot
-from app.features.imports.canonical import normalize
-from app.features.imports.parsers.ofx import OfxParseError, parse, parse_ledger_balance
+from app.features.imports.canonical import RawTransaction, normalize
+from app.features.imports.parsers.ofx import LedgerBalance, OfxParseError, parse_statements
 from tests.api import register as _register
 
 FIXTURES = Path(__file__).resolve().parent.parent.parent / "fixtures" / "imports"
@@ -31,13 +31,21 @@ def _create_account(client: TestClient, headers: dict[str, str]) -> str:
 
 
 def _upload(
-    client: TestClient, headers: dict[str, str], account_id: str, path: Path, filename: str
+    client: TestClient,
+    headers: dict[str, str],
+    account_id: str,
+    path: Path,
+    filename: str,
+    statement: str | None = None,
 ):
+    data = {"account_id": account_id}
+    if statement is not None:
+        data["statement"] = statement
     with path.open("rb") as fh:
         return client.post(
             "/api/v1/imports",
             headers=headers,
-            data={"account_id": account_id},
+            data=data,
             files={"file": (filename, fh, "application/octet-stream")},
         )
 
@@ -55,11 +63,21 @@ def _snapshots(client: TestClient, account_id: str) -> dict[date, int]:
         sessions.close()
 
 
+def _transactions(raw: bytes) -> list[RawTransaction]:
+    """The transactions of a single-statement file."""
+    return parse_statements(raw)[0].transactions
+
+
+def _ledger_balance(raw: bytes) -> LedgerBalance | None:
+    """The declared balance of a single-statement file."""
+    return parse_statements(raw)[0].ledger_balance
+
+
 # --- parser: OFX 1.x SGML, OFX 2.x XML, QFX, Latin-1 ------------------------------------
 
 
 def test_parse_ofx_sgml_extracts_transactions() -> None:
-    transactions = parse((FIXTURES / "sample_sgml.ofx").read_bytes())
+    transactions = _transactions((FIXTURES / "sample_sgml.ofx").read_bytes())
 
     assert len(transactions) == 2
     assert transactions[0].amount_minor == -4250
@@ -69,7 +87,7 @@ def test_parse_ofx_sgml_extracts_transactions() -> None:
 
 
 def test_parse_ofx_xml_extracts_transactions() -> None:
-    transactions = parse((FIXTURES / "sample_xml.ofx").read_bytes())
+    transactions = _transactions((FIXTURES / "sample_xml.ofx").read_bytes())
 
     assert len(transactions) == 2
     assert transactions[0].amount_minor == -1990
@@ -77,7 +95,7 @@ def test_parse_ofx_xml_extracts_transactions() -> None:
 
 
 def test_parse_qfx_tolerates_quicken_extras() -> None:
-    transactions = parse((FIXTURES / "sample.qfx").read_bytes())
+    transactions = _transactions((FIXTURES / "sample.qfx").read_bytes())
 
     assert len(transactions) == 1
     assert transactions[0].amount_minor == -820
@@ -85,7 +103,7 @@ def test_parse_qfx_tolerates_quicken_extras() -> None:
 
 
 def test_parse_keeps_memo_out_of_the_description() -> None:
-    transactions = parse((FIXTURES / "sample.qfx").read_bytes())
+    transactions = _transactions((FIXTURES / "sample.qfx").read_bytes())
 
     assert transactions[0].description_raw == "PRLV ABONNEMENT"
     assert transactions[0].memo == "Abonnement mensuel"
@@ -94,7 +112,7 @@ def test_parse_keeps_memo_out_of_the_description() -> None:
 def test_parse_promotes_a_memo_only_record_to_the_description() -> None:
     raw = b"<OFX><STMTTRN><DTPOSTED>20240410<TRNAMT>-8.20<MEMO>Frais de tenue</STMTTRN></OFX>"
 
-    transactions = parse(raw)
+    transactions = _transactions(raw)
 
     assert transactions[0].description_raw == "Frais de tenue"
     assert transactions[0].memo is None
@@ -106,14 +124,14 @@ def test_parse_drops_a_memo_echoing_the_name() -> None:
         b"<NAME>CARREFOUR<MEMO>CARREFOUR</STMTTRN></OFX>"
     )
 
-    transactions = parse(raw)
+    transactions = _transactions(raw)
 
     assert transactions[0].description_raw == "CARREFOUR"
     assert transactions[0].memo is None
 
 
 def test_parse_handles_latin1_encoding() -> None:
-    transactions = parse((FIXTURES / "sample_latin1.ofx").read_bytes())
+    transactions = _transactions((FIXTURES / "sample_latin1.ofx").read_bytes())
 
     assert len(transactions) == 1
     assert "CAFÉ DE PARIS ÉTÉ" in transactions[0].description_raw
@@ -121,14 +139,14 @@ def test_parse_handles_latin1_encoding() -> None:
 
 def test_parse_rejects_non_ofx_file() -> None:
     with pytest.raises(OfxParseError):
-        parse((FIXTURES / "not_ofx.txt").read_bytes())
+        parse_statements((FIXTURES / "not_ofx.txt").read_bytes())
 
 
 # --- parser: the declared closing balance ----------------------------------------------
 
 
 def test_parse_ledger_balance_reads_the_declared_closing_balance() -> None:
-    declared = parse_ledger_balance((FIXTURES / "sample_sgml.ofx").read_bytes())
+    declared = _ledger_balance((FIXTURES / "sample_sgml.ofx").read_bytes())
 
     assert declared is not None
     assert declared.amount_minor == 145_750
@@ -137,7 +155,7 @@ def test_parse_ledger_balance_reads_the_declared_closing_balance() -> None:
 
 
 def test_parse_ledger_balance_tolerates_a_missing_dtasof() -> None:
-    declared = parse_ledger_balance((FIXTURES / "sample_sgml_no_dtasof.ofx").read_bytes())
+    declared = _ledger_balance((FIXTURES / "sample_sgml_no_dtasof.ofx").read_bytes())
 
     assert declared is not None
     assert declared.amount_minor == 38_000
@@ -145,14 +163,41 @@ def test_parse_ledger_balance_tolerates_a_missing_dtasof() -> None:
 
 
 def test_parse_ledger_balance_returns_none_when_nothing_is_declared() -> None:
-    # A statement need not carry one, and an unreadable file must not raise here:
-    # the balance is a bonus, the transactions are the job.
-    assert parse_ledger_balance((FIXTURES / "sample_xml.ofx").read_bytes()) is None
-    assert parse_ledger_balance((FIXTURES / "not_ofx.txt").read_bytes()) is None
+    # A statement need not carry one: the balance is a bonus, the transactions are the job.
+    assert _ledger_balance((FIXTURES / "sample_xml.ofx").read_bytes()) is None
+
+
+# --- parser: several statements in one file --------------------------------------------
+
+
+def test_parse_reads_each_statement_on_its_own() -> None:
+    statements = parse_statements((FIXTURES / "sample_sgml_multi_account.ofx").read_bytes())
+
+    assert [s.account_number for s in statements] == [
+        "0001234567",
+        "0007654321",
+        "4970XXXXXXXX1234",
+    ]
+    assert [len(s.transactions) for s in statements] == [2, 1, 1]
+    assert [s.ledger_balance.amount_minor for s in statements if s.ledger_balance] == [
+        145_750,
+        520_000,
+        -1990,
+    ]
+
+
+def test_parse_reads_a_file_without_statement_aggregates_as_one_statement() -> None:
+    raw = b"<OFX><STMTTRN><DTPOSTED>20240410<TRNAMT>-8.20<NAME>FRAIS</STMTTRN></OFX>"
+
+    statements = parse_statements(raw)
+
+    assert len(statements) == 1
+    assert statements[0].account_number is None
+    assert len(statements[0].transactions) == 1
 
 
 def test_normalize_builds_canonical_transaction() -> None:
-    raw = parse((FIXTURES / "sample_sgml.ofx").read_bytes())[0]
+    raw = _transactions((FIXTURES / "sample_sgml.ofx").read_bytes())[0]
 
     canonical = normalize(raw, account_id="acct-1", currency="EUR")
 
@@ -168,7 +213,7 @@ def test_normalize_drops_a_placeholder_memo() -> None:
     # otherwise render as a stray dot in front of the account name.
     raw = b"<OFX><STMTTRN><DTPOSTED>20240410<TRNAMT>-8.20<NAME>CARREFOUR<MEMO>.</STMTTRN></OFX>"
 
-    canonical = normalize(parse(raw)[0], account_id="acct-1", currency="EUR")
+    canonical = normalize(_transactions(raw)[0], account_id="acct-1", currency="EUR")
 
     assert canonical.description_clean == "CARREFOUR"
     assert canonical.memo is None
@@ -180,7 +225,7 @@ def test_normalize_keeps_a_memo_that_says_something() -> None:
         b"<NAME>CARREFOUR<MEMO>Retrait  DAB 12</STMTTRN></OFX>"
     )
 
-    canonical = normalize(parse(raw)[0], account_id="acct-1", currency="EUR")
+    canonical = normalize(_transactions(raw)[0], account_id="acct-1", currency="EUR")
 
     assert canonical.memo == "Retrait DAB 12"
 
@@ -411,6 +456,55 @@ def test_import_invalid_file_records_failed_batch_with_no_rows(client: TestClien
 
     account_response = client.get(f"/api/v1/accounts/{account_id}", headers=headers)
     assert account_response.json()["balance_minor"] == 100_000
+
+
+MULTI_ACCOUNT = FIXTURES / "sample_sgml_multi_account.ofx"
+
+
+def test_each_statement_of_a_multi_account_file_lands_in_its_own_account(
+    client: TestClient,
+) -> None:
+    headers = _register(client)
+    checking_id = _create_account(client, headers)
+    savings_id = _create_account(client, headers)
+
+    checking = _upload(client, headers, checking_id, MULTI_ACCOUNT, "all.ofx", "0001234567")
+    savings = _upload(client, headers, savings_id, MULTI_ACCOUNT, "all.ofx", "0007654321")
+
+    assert checking.status_code == 201
+    assert savings.status_code == 201
+    # The same file, two batches: one per account, each holding its own statement only.
+    assert checking.json()["id"] != savings.json()["id"]
+    assert checking.json()["new_count"] == 2
+    assert savings.json()["new_count"] == 1
+    # And each account's balance is reconciled against its own statement's LEDGERBAL.
+    balances = {
+        account_id: client.get(f"/api/v1/accounts/{account_id}", headers=headers).json()[
+            "balance_minor"
+        ]
+        for account_id in (checking_id, savings_id)
+    }
+    assert balances == {checking_id: 145_750, savings_id: 520_000}
+
+
+def test_a_multi_account_file_requires_a_statement(client: TestClient) -> None:
+    headers = _register(client)
+    account_id = _create_account(client, headers)
+
+    response = _upload(client, headers, account_id, MULTI_ACCOUNT, "all.ofx")
+
+    assert response.status_code == 422
+    assert response.json()["error"]["code"] == "IMPORT_STATEMENT_REQUIRED"
+
+
+def test_naming_a_statement_the_file_lacks_is_refused(client: TestClient) -> None:
+    headers = _register(client)
+    account_id = _create_account(client, headers)
+
+    response = _upload(client, headers, account_id, MULTI_ACCOUNT, "all.ofx", "999")
+
+    assert response.status_code == 422
+    assert response.json()["error"]["code"] == "IMPORT_STATEMENT_NOT_FOUND"
 
 
 def test_import_requires_existing_account(client: TestClient) -> None:

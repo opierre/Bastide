@@ -522,6 +522,43 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String importSettlementsProposed(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          '$count deferred-card settlements were recognised: confirm them so the card\'s purchases only count once.',
+      one:
+          'A deferred-card settlement was recognised: confirm it so the card\'s purchases only count once.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get importSettlementsReview => 'Review transactions';
+
+  @override
+  String importCardUnmatched(
+    int count,
+    String card,
+    String amount,
+    DateTime date,
+  ) {
+    final intl.DateFormat dateDateFormat = intl.DateFormat.yMd(localeName);
+    final String dateString = dateDateFormat.format(date);
+
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          '$count purchases on $card ($amount) have had no matching debit since $dateString: they count twice until that debit is filed as a card settlement.',
+      one:
+          'One purchase on $card ($amount) has had no matching debit since $dateString: it counts twice until that debit is filed as a card settlement.',
+    );
+    return '$_temp0';
+  }
+
+  @override
   String importPeriodRange(DateTime start, DateTime end) {
     final intl.DateFormat startDateFormat = intl.DateFormat.yMd(localeName);
     final String startString = startDateFormat.format(start);
@@ -602,6 +639,22 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get importErrorBatchNotFound => 'Import not found.';
+
+  @override
+  String get importErrorStatementRequired =>
+      'This file holds several accounts and none was named.';
+
+  @override
+  String get importErrorStatementNotFound => 'That account isn\'t in the file.';
+
+  @override
+  String importErrorPartial(int done, int total, String error) {
+    return 'Import stopped ($done of $total statements): $error';
+  }
+
+  @override
+  String get importDuplicateDestination =>
+      'Two statements in this file go to the same account — choose a different destination for each.';
 
   @override
   String get importErrorGeneric => 'Something went wrong. Please try again.';

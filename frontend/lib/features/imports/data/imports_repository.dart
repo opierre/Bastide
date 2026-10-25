@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/api/api_client.dart';
 import '../../../core/api/api_client_provider.dart';
+import '../domain/card_settlement_status.dart';
 import '../domain/import_batch.dart';
 
 /// Calls the `/imports` endpoints and maps the wire JSON to domain models. The
@@ -20,7 +21,8 @@ class ImportsRepository {
         .toList();
   }
 
-  /// Uploads an OFX/QFX statement.
+  /// Uploads an OFX/QFX file, importing its [statement] (the `ACCTID`) — which
+  /// may be left out when the file holds a single one.
   ///
   /// Re-uploading a file already imported into the account is a no-op on the
   /// backend, which returns the original batch — so a double import shows the
@@ -29,15 +31,36 @@ class ImportsRepository {
     required String accountId,
     required String fileName,
     required List<int> bytes,
+    String? statement,
   }) async {
     final json = await _apiClient.postMultipart(
       '/imports',
       fileField: 'file',
       fileName: fileName,
       fileBytes: bytes,
-      fields: {'account_id': accountId},
+      fields: {'account_id': accountId, 'statement': ?statement},
     );
     return _parseBatch(json as Map<String, dynamic>);
+  }
+
+  Future<CardSettlementStatus> cardSettlementStatus() async {
+    final json =
+        await _apiClient.get('/imports/card-settlements')
+            as Map<String, dynamic>;
+    return CardSettlementStatus(
+      proposedCount: json['proposed_count'] as int,
+      unmatched: [
+        for (final entry
+            in (json['unmatched'] as List<dynamic>)
+                .cast<Map<String, dynamic>>())
+          UnmatchedCardPurchases(
+            accountId: entry['account_id'] as String,
+            amountMinor: entry['amount_minor'] as int,
+            count: entry['count'] as int,
+            since: DateTime.parse(entry['since'] as String),
+          ),
+      ],
+    );
   }
 
   ImportBatch _parseBatch(Map<String, dynamic> json) => ImportBatch(

@@ -9,13 +9,18 @@ import '../theme/tokens.dart';
 /// gridlines behind it, a dot on the current (last) point, and a month axis beneath
 /// (`docs/design/00` §Components → AreaLine).
 ///
+/// Each point sits at the centre of its axis label's slot rather than spreading edge to edge,
+/// so a month's dot stands over its own label instead of drifting toward the slot boundary.
+/// Hovering a slot rings its point and, when [tooltips] are given, names its figure.
+///
 /// Deliberately not animated — the spec allows only the spinner and skeleton keyframes, so a
 /// chart appears drawn rather than growing in.
-class AreaLine extends StatelessWidget {
+class AreaLine extends StatefulWidget {
   const AreaLine({
     super.key,
     required this.values,
     required this.labels,
+    this.tooltips,
     this.gridlines = 4,
   });
 
@@ -26,14 +31,34 @@ class AreaLine extends StatelessWidget {
   /// Axis label per point — same length as [values].
   final List<String> labels;
 
+  /// Hover message per point — same length as [values] when given. Spans rather than strings,
+  /// so the caller styles the figure the way the rest of its card does.
+  final List<InlineSpan>? tooltips;
+
   /// Horizontal hairlines behind the plot.
   final int gridlines;
 
   /// Height reserved beneath the plot for the month axis.
   static const axisHeight = 22.0;
 
+  /// The horizontal centre of point [index] of [count] across [width]: the middle of its
+  /// label's slot. Shared by the painter and the axis so the two can never disagree.
+  static double pointX(int index, int count, double width) =>
+      width * (index + 0.5) / count;
+
+  @override
+  State<AreaLine> createState() => _AreaLineState();
+}
+
+class _AreaLineState extends State<AreaLine> {
+  /// The slot under the pointer — hover ephemera, not chart state.
+  int? _hovered;
+
   @override
   Widget build(BuildContext context) {
+    final values = widget.values;
+    final labels = widget.labels;
+    final tooltips = widget.tooltips;
     final textTheme = Theme.of(context).textTheme;
 
     // The axis is a fixed band under a flexible plot, so a card shorter than the band has
@@ -42,20 +67,50 @@ class AreaLine extends StatelessWidget {
     return LayoutBuilder(
       builder: (context, constraints) {
         final axis = constraints.hasBoundedHeight
-            ? math.min(axisHeight, constraints.maxHeight)
-            : axisHeight;
+            ? math.min(AreaLine.axisHeight, constraints.maxHeight)
+            : AreaLine.axisHeight;
 
         return Column(
           children: [
             Expanded(
-              child: RepaintBoundary(
-                child: CustomPaint(
-                  size: Size.infinite,
-                  painter: _AreaLinePainter(
-                    values: values,
-                    gridlines: gridlines,
+              child: Stack(
+                fit: StackFit.expand,
+                children: [
+                  RepaintBoundary(
+                    child: CustomPaint(
+                      size: Size.infinite,
+                      painter: _AreaLinePainter(
+                        values: values,
+                        gridlines: widget.gridlines,
+                        hovered: _hovered,
+                      ),
+                    ),
                   ),
-                ),
+                  // One full-height slice per point, matching the axis slots below: the
+                  // dot is a few pixels wide, but the thing worth hovering is the month.
+                  MouseRegion(
+                    onExit: (_) => setState(() => _hovered = null),
+                    child: Row(
+                      children: [
+                        for (var i = 0; i < values.length; i++)
+                          Expanded(
+                            child: MouseRegion(
+                              onEnter: (_) => setState(() => _hovered = i),
+                              child: tooltips == null
+                                  ? const SizedBox.expand()
+                                  : Tooltip(
+                                      key: Key('areaLineTooltip-$i'),
+                                      richMessage: TextSpan(
+                                        children: [tooltips[i]],
+                                      ),
+                                      child: const SizedBox.expand(),
+                                    ),
+                            ),
+                          ),
+                      ],
+                    ),
+                  ),
+                ],
               ),
             ),
             SizedBox(
@@ -63,7 +118,7 @@ class AreaLine extends StatelessWidget {
               child: ClipRect(
                 child: OverflowBox(
                   alignment: Alignment.topCenter,
-                  maxHeight: axisHeight,
+                  maxHeight: AreaLine.axisHeight,
                   child: Row(
                     children: [
                       for (final label in labels)
@@ -91,10 +146,15 @@ class AreaLine extends StatelessWidget {
 }
 
 class _AreaLinePainter extends CustomPainter {
-  _AreaLinePainter({required this.values, required this.gridlines});
+  _AreaLinePainter({
+    required this.values,
+    required this.gridlines,
+    required this.hovered,
+  });
 
   final List<num> values;
   final int gridlines;
+  final int? hovered;
 
   static const _stroke = 2.5;
   static const _dotRadius = 5.0;
@@ -102,11 +162,12 @@ class _AreaLinePainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    // Inset by the dot so the current point isn't clipped by the plot's own edge.
+    // Inset vertically by the dot so an extreme point isn't clipped by the plot's own edge.
+    // Horizontally the points already sit half a slot in from either side.
     final plot = Rect.fromLTWH(
+      0,
       _dotRadius,
-      _dotRadius,
-      size.width - _dotRadius * 2,
+      size.width,
       size.height - _dotRadius * 2,
     );
 
@@ -127,7 +188,7 @@ class _AreaLinePainter extends CustomPainter {
     final points = [
       for (var i = 0; i < values.length; i++)
         Offset(
-          plot.left + plot.width * (i / (values.length - 1)),
+          AreaLine.pointX(i, values.length, plot.width),
           range == 0
               ? plot.center.dy
               : plot.bottom - plot.height * ((values[i] - min) / range),
@@ -154,22 +215,28 @@ class _AreaLinePainter extends CustomPainter {
         ..strokeCap = StrokeCap.round,
     );
 
-    // The current point, ringed in the card's own surface so the dot reads as sitting on the
-    // line rather than as a bead threaded onto it.
-    canvas.drawCircle(
-      points.last,
-      _dotRadius,
-      Paint()..color = AppColors.surfaceRaised,
-    );
-    canvas.drawCircle(
-      points.last,
-      _dotRadius - _stroke / 2,
-      Paint()..color = AppColors.iris,
-    );
+    // The current point, and the hovered one, ringed in the card's own surface so the dot
+    // reads as sitting on the line rather than as a bead threaded onto it.
+    for (final index in {
+      values.length - 1,
+      if (hovered case final hovered? when hovered < values.length) hovered,
+    }) {
+      canvas.drawCircle(
+        points[index],
+        _dotRadius,
+        Paint()..color = AppColors.surfaceRaised,
+      );
+      canvas.drawCircle(
+        points[index],
+        _dotRadius - _stroke / 2,
+        Paint()..color = AppColors.iris,
+      );
+    }
   }
 
   @override
   bool shouldRepaint(_AreaLinePainter oldDelegate) =>
       !listEquals(oldDelegate.values, values) ||
-      oldDelegate.gridlines != gridlines;
+      oldDelegate.gridlines != gridlines ||
+      oldDelegate.hovered != hovered;
 }

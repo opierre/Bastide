@@ -3,11 +3,13 @@ import 'package:bastide/core/api/api_client_provider.dart';
 import 'package:bastide/features/mortgages/application/mortgages_controller.dart';
 import 'package:bastide/features/mortgages/domain/mortgage.dart';
 import 'package:bastide/features/mortgages/domain/schedule_row.dart';
+import 'package:bastide/features/networth/application/networth_controller.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 
 import '../../support/mortgages_fixtures.dart';
+import '../../support/networth_fixtures.dart';
 
 class MockApiClient extends Mock implements ApiClient {}
 
@@ -263,6 +265,32 @@ void main() {
         verify(() => apiClient.get('/mortgages/summary')).called(2);
       },
     );
+
+    test('a loan write invalidates the net-worth summary', () async {
+      // Synthèse subtracts the outstanding principal: left cached, it kept
+      // describing the loans as they were before the write.
+      stubLoad();
+      when(
+        () => apiClient.get('/networth/summary'),
+      ).thenAnswer((_) async => emptyNetworthSummaryJson);
+      when(
+        () => apiClient.post('/mortgages', body: any(named: 'body')),
+      ).thenAnswer((_) async => _detailJson(id: 'm2'));
+      final subscription = container.listen(
+        networthControllerProvider,
+        (_, _) {},
+      );
+      addTearDown(subscription.close);
+      await container.read(mortgagesControllerProvider.future);
+      await container.read(networthControllerProvider.future);
+
+      await container
+          .read(mortgagesControllerProvider.notifier)
+          .create(_draftWithDate());
+      await container.read(networthControllerProvider.future);
+
+      verify(() => apiClient.get('/networth/summary')).called(2);
+    });
 
     test('a refused create is rethrown for the form to show inline', () async {
       stubLoad();

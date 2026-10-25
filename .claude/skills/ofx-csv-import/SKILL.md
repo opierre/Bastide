@@ -56,6 +56,12 @@ with `error_message`.
   route the import: the panel resolves the file's account block against the user's accounts,
   imports into the match, offers to create the account when there is none, and asks only when
   the file leaves the question genuinely open (several candidates, or no readable block).
+- **One file, several accounts.** A file may hold one `STMTRS`/`CCSTMTRS` per account. Both
+  sides read each statement on its own (transactions *and* `LEDGERBAL`). The panel resolves
+  every statement, refuses to send two to the same account, then calls `POST /imports` once per
+  statement with `statement=<ACCTID>`; the backend imports only that statement and answers
+  `IMPORT_STATEMENT_REQUIRED` when a multi-statement file names none. Each statement gets its
+  own batch; the file-hash dedup is per account, so they never collide.
 
 ## Dedup hash
 

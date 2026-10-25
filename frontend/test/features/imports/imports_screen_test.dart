@@ -9,6 +9,7 @@ import 'package:bastide/features/auth/domain/auth_user.dart';
 import 'package:bastide/features/accounts/application/accounts_controller.dart';
 import 'package:bastide/features/accounts/domain/account.dart';
 import 'package:bastide/features/imports/application/imports_controller.dart';
+import 'package:bastide/features/imports/domain/card_settlement_status.dart';
 import 'package:bastide/features/imports/domain/import_batch.dart';
 import 'package:bastide/features/imports/presentation/imports_screen.dart';
 import 'package:bastide/l10n/app_localizations.dart';
@@ -52,6 +53,8 @@ final _account = Account(
 );
 
 ImportBatch _batch({
+  String id = 'b1',
+  String accountId = 'a1',
   ImportFormat format = ImportFormat.ofx,
   String fileName = 'releve.ofx',
   int newCount = 42,
@@ -59,8 +62,8 @@ ImportBatch _batch({
   int? balanceMismatchMinor,
   DateTime? balanceMismatchAsOf,
 }) => ImportBatch(
-  id: 'b1',
-  accountId: 'a1',
+  id: id,
+  accountId: accountId,
   sourceFormat: format,
   fileName: fileName,
   fileHash: 'hash-1',
@@ -120,6 +123,10 @@ Widget _wrap({
   required PickedImportFile file,
   FakeAccountsController? accounts,
   Locale locale = const Locale('fr'),
+  CardSettlementStatus settlements = const CardSettlementStatus(
+    proposedCount: 0,
+    unmatched: [],
+  ),
 }) {
   return ProviderScope(
     overrides: [
@@ -129,6 +136,7 @@ Widget _wrap({
       currentUserProvider.overrideWithValue(_user),
       importsControllerProvider.overrideWith(() => imports),
       importFilePickerProvider.overrideWithValue(FakeImportFilePicker(file)),
+      cardSettlementStatusProvider.overrideWith((ref) async => settlements),
     ],
     child: MaterialApp(
       locale: locale,
@@ -213,7 +221,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(
-      find.byKey(const Key('importResultBalanceMismatch')),
+      find.byKey(const Key('importResultBalanceMismatch-b1')),
       findsOneWidget,
     );
     final amount = formatAmount(
@@ -262,7 +270,7 @@ void main() {
     await _stageFile(tester);
 
     expect(
-      find.byKey(const Key('importDetectedAccountBanner')),
+      find.byKey(const Key('importDetectedAccountBanner-0001234567')),
       findsOneWidget,
     );
 
@@ -303,7 +311,7 @@ void main() {
     await _stageFile(tester);
 
     expect(
-      find.byKey(const Key('importAmbiguousAccountBanner')),
+      find.byKey(const Key('importAmbiguousAccountBanner-0001234567')),
       findsOneWidget,
     );
     // Nothing has named a destination, so there is nothing to import yet.
@@ -314,7 +322,9 @@ void main() {
       isNull,
     );
 
-    await tester.tap(find.byKey(const Key('importAmbiguousAccountField')));
+    await tester.tap(
+      find.byKey(const Key('importAmbiguousAccountField-0001234567')),
+    );
     await tester.pumpAndSettle();
     await tester.tap(find.text('Compte joint').last);
     await tester.pumpAndSettle();
@@ -365,7 +375,9 @@ void main() {
     await tester.pumpAndSettle();
 
     await _stageFile(tester);
-    await tester.tap(find.byKey(const Key('importAmbiguousAccountField')));
+    await tester.tap(
+      find.byKey(const Key('importAmbiguousAccountField-0001234567')),
+    );
     await tester.pumpAndSettle();
 
     // The statement is Boursorama's, so the BNP account is not a destination
@@ -500,7 +512,7 @@ void main() {
 
     // The new account becomes the destination, and the file imports into it.
     expect(
-      find.byKey(const Key('importDetectedAccountBanner')),
+      find.byKey(const Key('importDetectedAccountBanner-0001234567')),
       findsOneWidget,
     );
     await tester.tap(find.byKey(const Key('importSubmitButton')));
@@ -555,11 +567,14 @@ void main() {
     await tester.tap(find.byKey(const Key('accountFormCancelButton')));
     await tester.pumpAndSettle();
 
-    expect(find.byKey(const Key('importUnknownAccountBanner')), findsOneWidget);
+    expect(
+      find.byKey(const Key('importUnknownAccountBanner-0001234567')),
+      findsOneWidget,
+    );
 
     // The offer stays available rather than being lost with the dialog.
     await tester.tap(
-      find.byKey(const Key('importCreateDetectedAccountButton')),
+      find.byKey(const Key('importCreateDetectedAccountButton-0001234567')),
     );
     await tester.pumpAndSettle();
 
@@ -676,4 +691,244 @@ void main() {
     expect(find.text('No imports yet'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
+
+  testWidgets('a multi-account file imports each statement into its account', (
+    tester,
+  ) async {
+    _useDesktopSurface(tester);
+    final imports = FakeImportsController(
+      importResults: [
+        _batch(id: 'b1', accountId: 'a1', newCount: 2, duplicateCount: 0),
+        _batch(id: 'b2', accountId: 'a2', newCount: 1, duplicateCount: 1),
+      ],
+    );
+    await tester.pumpWidget(
+      _wrap(
+        imports: imports,
+        accounts: FakeAccountsController(
+          initialAccounts: [
+            _bound(_account, '0001234567'),
+            _bound(_savings, '0007654321'),
+          ],
+        ),
+        file: PickedImportFile(name: 'releve.ofx', bytes: _multiOfxBytes),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await _stageFile(tester);
+    expect(
+      find.byKey(const Key('importDetectedAccountBanner-0001234567')),
+      findsOneWidget,
+    );
+    expect(
+      find.byKey(const Key('importDetectedAccountBanner-0007654321')),
+      findsOneWidget,
+    );
+
+    await tester.tap(find.byKey(const Key('importSubmitButton')));
+    await tester.pumpAndSettle();
+
+    expect(
+      imports.importCalls.map((call) => (call.accountId, call.statement)),
+      [('a1', '0001234567'), ('a2', '0007654321')],
+    );
+    // The card sums the statements, then names each one's destination.
+    expect(
+      tester.widget<Text>(find.byKey(const Key('importResultNewCount'))).data,
+      '3',
+    );
+    expect(find.byKey(const Key('importResultPeriod-b1')), findsOneWidget);
+    expect(find.byKey(const Key('importResultPeriod-b2')), findsOneWidget);
+  });
+
+  testWidgets('two statements may not be sent to the same account', (
+    tester,
+  ) async {
+    _useDesktopSurface(tester);
+    final imports = FakeImportsController(importResult: _batch());
+    // Neither statement is bound and a single Boursorama account fits both
+    // guesses — so the panel asks for each rather than guessing.
+    final only = Account(
+      id: 'a1',
+      name: 'Compte unique',
+      type: AccountType.other,
+      institution: 'Boursorama',
+      currency: 'EUR',
+      openingBalanceMinor: 0,
+      balanceMinor: 0,
+      archived: false,
+      createdAt: DateTime.utc(2026, 1, 1),
+      updatedAt: DateTime.utc(2026, 1, 1),
+    );
+    await tester.pumpWidget(
+      _wrap(
+        imports: imports,
+        accounts: FakeAccountsController(initialAccounts: [only]),
+        file: PickedImportFile(name: 'releve.ofx', bytes: _multiOfxBytes),
+      ),
+    );
+    await tester.pumpAndSettle();
+    await _stageFile(tester);
+
+    for (final statement in ['0001234567', '0007654321']) {
+      await tester.tap(
+        find.byKey(Key('importAmbiguousAccountField-$statement')),
+      );
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Compte unique').last);
+      await tester.pumpAndSettle();
+    }
+
+    expect(
+      find.byKey(const Key('importSharedDestinationBanner')),
+      findsOneWidget,
+    );
+    expect(
+      tester
+          .widget<PrimaryButton>(find.byKey(const Key('importSubmitButton')))
+          .onPressed,
+      isNull,
+    );
+  });
+
+  testWidgets('recognised settlements ask to be confirmed', (tester) async {
+    _useDesktopSurface(tester);
+    await tester.pumpWidget(
+      _wrap(
+        imports: FakeImportsController(importResult: _batch()),
+        file: PickedImportFile(name: 'releve.ofx', bytes: _ofxBytes),
+        settlements: const CardSettlementStatus(
+          proposedCount: 2,
+          unmatched: [],
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    await _stageFile(tester);
+    await tester.tap(find.byKey(const Key('importSubmitButton')));
+    await tester.pumpAndSettle();
+
+    expect(
+      find.text(
+        '2 prélèvements de carte à débit différé ont été reconnus : '
+        "confirmez-les pour que les achats de la carte ne comptent qu'une fois.",
+      ),
+      findsOneWidget,
+    );
+    expect(
+      find.byKey(const Key('importSettlementsReviewButton')),
+      findsOneWidget,
+    );
+  });
+
+  testWidgets('card purchases no settlement claimed are flagged', (
+    tester,
+  ) async {
+    _useDesktopSurface(tester);
+    final card = Account(
+      id: 'c1',
+      name: 'Carte Visa',
+      type: AccountType.deferredCard,
+      institution: 'Boursorama',
+      currency: 'EUR',
+      openingBalanceMinor: 0,
+      balanceMinor: 0,
+      archived: false,
+      createdAt: DateTime.utc(2026, 1, 1),
+      updatedAt: DateTime.utc(2026, 1, 1),
+    );
+    await tester.pumpWidget(
+      _wrap(
+        imports: FakeImportsController(importResult: _batch()),
+        accounts: FakeAccountsController(initialAccounts: [_account, card]),
+        file: PickedImportFile(name: 'releve.ofx', bytes: _ofxBytes),
+        settlements: CardSettlementStatus(
+          proposedCount: 0,
+          unmatched: [
+            UnmatchedCardPurchases(
+              accountId: 'c1',
+              amountMinor: -49210,
+              count: 3,
+              since: DateTime(2026, 1, 5),
+            ),
+          ],
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    await _stageFile(tester);
+    await tester.tap(find.byKey(const Key('importSubmitButton')));
+    await tester.pumpAndSettle();
+
+    final amount = formatAmount(
+      amountMinor: 49210,
+      currency: 'EUR',
+      locale: 'fr',
+    );
+    final date = DateFormat.yMd('fr').format(DateTime(2026, 1, 5));
+    expect(
+      find.text(
+        '3 achats de Carte Visa ($amount) ne sont rattachés à aucun '
+        'prélèvement depuis le $date : ils comptent deux fois tant que ce '
+        'prélèvement n\'est pas classé en « Règlement carte différée ».',
+      ),
+      findsOneWidget,
+    );
+    expect(find.byKey(const Key('importSettlementsProposed')), findsNothing);
+  });
 }
+
+final _savings = Account(
+  id: 'a2',
+  name: 'Livret',
+  type: AccountType.savings,
+  institution: 'Boursorama',
+  currency: 'EUR',
+  openingBalanceMinor: 0,
+  balanceMinor: 0,
+  archived: false,
+  createdAt: DateTime.utc(2026, 1, 1),
+  updatedAt: DateTime.utc(2026, 1, 1),
+);
+
+/// [account], bound to the statement whose `ACCTID` is [ofxAccountId].
+Account _bound(Account account, String ofxAccountId) => Account(
+  id: account.id,
+  name: account.name,
+  type: account.type,
+  institution: account.institution,
+  ofxAccountId: ofxAccountId,
+  currency: account.currency,
+  openingBalanceMinor: account.openingBalanceMinor,
+  balanceMinor: account.balanceMinor,
+  archived: account.archived,
+  createdAt: account.createdAt,
+  updatedAt: account.updatedAt,
+);
+
+/// One Boursorama customer's checking and savings statements in a single file.
+final _multiOfxBytes = utf8.encode('''
+<OFX>
+<SIGNONMSGSRSV1><SONRS><FI><ORG>BOURSORAMA BANQUE
+</FI></SONRS></SIGNONMSGSRSV1>
+<BANKMSGSRSV1>
+<STMTTRNRS><STMTRS>
+<CURDEF>EUR
+<BANKACCTFROM>
+<BANKID>40618
+<ACCTID>0001234567
+<ACCTTYPE>CHECKING
+</BANKACCTFROM>
+</STMTRS></STMTTRNRS>
+<STMTTRNRS><STMTRS>
+<CURDEF>EUR
+<BANKACCTFROM>
+<BANKID>40618
+<ACCTID>0007654321
+<ACCTTYPE>SAVINGS
+</BANKACCTFROM>
+</STMTRS></STMTTRNRS>
+</BANKMSGSRSV1>
+</OFX>
+''');

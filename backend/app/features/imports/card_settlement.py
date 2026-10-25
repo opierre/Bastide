@@ -27,6 +27,12 @@ DETECTED_SOURCE = "detected"
 #: it. Banks date that line on the cycle close or on the debit, rarely more than a few days apart.
 RESET_WINDOW = timedelta(days=10)
 
+#: How long a card purchase may wait for its settlement before it reads as missed. A cycle runs
+#: about a month and its debit lands within days of the close, wherever in the month the bank
+#: closes it — so a purchase this old, with the current account imported past it, was paid by a
+#: debit nothing recognised.
+SETTLEMENT_OVERDUE = timedelta(days=45)
+
 
 #: Label fragments French banks use for the settlement debit, accent-folded and uppercased.
 #: Each names the settlement itself; a bare `CARTE` or `CB` would match every card purchase.
