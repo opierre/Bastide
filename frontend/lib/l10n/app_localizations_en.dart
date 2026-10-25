@@ -3747,7 +3747,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get networthRetry => 'Retry';
 
   @override
-  String get networthSeriesTitle => 'Net worth · 12 months';
+  String get networthSeriesTitle => 'Net worth';
 
   @override
   String get networthSeriesSubtitle => 'Accounts and loans, month by month';
@@ -3759,12 +3759,87 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get networthSeriesEmpty =>
-      'No history yet: the series starts with the first closed month of an imported account.';
+      'No history yet: the series starts with the first closed month of an imported account, or with the first total you declare.';
 
   @override
   String networthSeriesCaveat(String date) {
     return 'Properties are held at their declared value (oldest estimate: $date): only accounts and loans move from month to month. Months without data are simply absent.';
   }
+
+  @override
+  String get networthRangeYear => '12 months';
+
+  @override
+  String get networthRangeThreeYears => '3 years';
+
+  @override
+  String get networthRangeAll => 'All';
+
+  @override
+  String get networthLegendLedger => 'Imported accounts';
+
+  @override
+  String get networthLegendDeclared => 'Declared totals';
+
+  @override
+  String get networthDeclaredOpen => 'Declared history';
+
+  @override
+  String get networthDeclaredTitle => 'Declared history';
+
+  @override
+  String get networthDeclaredSubtitle =>
+      'The total of all your accounts at a month end, for the time before your imports. A month your imports cover keeps the imported figure.';
+
+  @override
+  String get networthDeclaredMonth => 'Month';
+
+  @override
+  String get networthDeclaredMonthHint => 'MM/YYYY';
+
+  @override
+  String get networthDeclaredMonthInvalid => 'Enter a month as MM/YYYY.';
+
+  @override
+  String get networthDeclaredMonthNotClosed =>
+      'Only a month that has ended can be declared.';
+
+  @override
+  String get networthDeclaredAmount => 'Accounts total';
+
+  @override
+  String get networthDeclaredAmountInvalid => 'Enter an amount.';
+
+  @override
+  String get networthDeclaredSave => 'Save';
+
+  @override
+  String get networthDeclaredClose => 'Close';
+
+  @override
+  String get networthDeclaredEmpty => 'No declared total yet.';
+
+  @override
+  String get networthDeclaredSuperseded => 'Covered by your imports';
+
+  @override
+  String get networthDeclaredEdit => 'Edit';
+
+  @override
+  String get networthDeclaredDelete => 'Delete';
+
+  @override
+  String get networthDeclaredLoadFailed =>
+      'Couldn\'t load the declared history.';
+
+  @override
+  String get networthDeclaredRetry => 'Retry';
+
+  @override
+  String get networthDeclaredErrorNotFound => 'This total no longer exists.';
+
+  @override
+  String get networthDeclaredErrorGeneric => 'Saving failed. Try again.';
 
   @override
   String get authForgotPasswordLink => 'Forgot your password?';

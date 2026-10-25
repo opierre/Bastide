@@ -1,5 +1,6 @@
 import 'package:bastide/features/networth/application/networth_controller.dart';
 import 'package:bastide/features/networth/domain/networth_summary.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 /// The frame's composition (`15-synthese.md` §Row 2): two account types and
 /// two property kinds, shares summing to 10000.
@@ -114,5 +115,60 @@ class FakeNetworthController extends NetworthController {
   Future<NetWorthSummary> build() async {
     if (loadError != null) throw loadError!;
     return summary;
+  }
+}
+
+/// Thirty closed months, Dec 2023 → May 2026: the first eighteen declared,
+/// the last twelve imported — the shape a user with a year of statements and
+/// a notebook of older totals has.
+List<NetWorthPoint> longSeries() => [
+  for (var index = 0; index < 30; index++)
+    NetWorthPoint(
+      month: DateTime(2023, 12 + index),
+      netWorthMinor: 25000000 + index * 100000,
+      declared: index < 18,
+    ),
+];
+
+/// A no-network [DeclaredBalancesController] double that records writes.
+class FakeDeclaredBalancesController extends DeclaredBalancesController {
+  FakeDeclaredBalancesController({
+    List<DeclaredBalance>? entries,
+    this.writeError,
+  }) : entries = entries ?? const [];
+
+  List<DeclaredBalance> entries;
+  final Object? writeError;
+  final declaredWrites = <(DateTime, int)>[];
+  final removed = <DateTime>[];
+
+  @override
+  Future<List<DeclaredBalance>> build() async => entries;
+
+  @override
+  Future<void> declare(DateTime month, int amountMinor) async {
+    if (writeError != null) throw writeError!;
+    declaredWrites.add((month, amountMinor));
+    entries = [
+      for (final entry in entries)
+        if (entry.month != month) entry,
+      DeclaredBalance(
+        month: month,
+        amountMinor: amountMinor,
+        currency: 'EUR',
+        superseded: false,
+      ),
+    ]..sort((a, b) => a.month.compareTo(b.month));
+    state = AsyncValue.data(entries);
+  }
+
+  @override
+  Future<void> remove(DateTime month) async {
+    removed.add(month);
+    entries = [
+      for (final entry in entries)
+        if (entry.month != month) entry,
+    ];
+    state = AsyncValue.data(entries);
   }
 }

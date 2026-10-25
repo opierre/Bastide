@@ -1,6 +1,7 @@
 """Business logic for the net-worth synthesis.
 
-One derived view and no stored money. Assets are account balances plus held property shares;
+One derived view, and one kind of stored money: the month-end totals a user declares for the
+time before their first import. Assets are account balances plus held property shares;
 liabilities are the outstanding principal of active loans. Goals and subscriptions take no part:
 a goal labels money already inside an account, and a future charge is not a debt. The held
 share and the schedule come from their own features — reused, not recomputed.
@@ -9,26 +10,55 @@ share and the schedule come from their own features — reused, not recomputed.
 from collections.abc import Sequence
 from datetime import date
 
-from app.core.months import first_of_month, last_of_month, month_index, month_key
+from app.core.errors import NotFoundError, ValidationError
+from app.core.months import (
+    MONTHS_PER_YEAR,
+    first_of_month,
+    last_of_month,
+    month_index,
+    month_key,
+)
 from app.features.accounts.models import Account
 from app.features.auth.models import User
 from app.features.mortgages.engine import Schedule
 from app.features.mortgages.service import ACTIVE, schedule_for
+from app.features.networth.models import DeclaredBalance
 from app.features.networth.repository import NetWorthRepository
 from app.features.networth.schemas import (
     CompositionEntry,
     CompositionGroup,
+    DeclaredBalanceRead,
     NetWorthAssets,
     NetWorthLiabilities,
     NetWorthPoint,
     NetWorthSummary,
+    PointSource,
 )
 from app.features.properties.service import held_share_minor
 
-#: How many closed months the series looks back over, ending with last month.
-SERIES_MONTHS = 12
-
 _BPS_PER_UNIT = 10_000
+
+
+class DeclaredMonthNotClosedError(ValidationError):
+    """Raised when a total is declared for the current month or a later one.
+
+    The series holds closed months only, and a month still running has no end-of-month figure
+    yet: such a total could never be drawn, so it is refused rather than stored.
+    """
+
+    code = "DECLARED_MONTH_NOT_CLOSED"
+
+
+class DeclaredBalanceNotFoundError(NotFoundError):
+    """Raised when the caller has no declared total for that month."""
+
+    code = "DECLARED_BALANCE_NOT_FOUND"
+
+
+def parse_month(key: str) -> int:
+    """The month index of a `YYYY-MM` key; the route has already checked its shape."""
+    year, month = key.split("-")
+    return int(year) * MONTHS_PER_YEAR + int(month) - 1
 
 
 def shares_bps(amounts: Sequence[int]) -> list[int]:
@@ -59,7 +89,7 @@ class NetWorthService:
         self._repository = repository
 
     def summary(self, user: User, today: date) -> NetWorthSummary:
-        """The summary as of `today`, with the series over the closed months before it.
+        """The summary as of `today`, with the series over every closed month before it.
 
         The series is built from month-end figures only: the current month has no snapshot,
         so it is not in the series, and `month_delta_minor` compares the last two closed months.
@@ -117,12 +147,15 @@ class NetWorthService:
         schedules: Sequence[Schedule],
         today: date,
     ) -> list[NetWorthPoint]:
-        """Net worth at each closed month end of the window that holds at least one snapshot.
+        """Net worth at each closed month end that has a snapshot or a declared total.
 
-        A month without any snapshot is omitted rather than zeroed: a zero net worth because
-        nothing was imported yet is a false statement. In a month that has one, every account
+        The series runs from the oldest such month to last month; the panel picks the range it
+        shows. A month with neither is omitted rather than zeroed: a zero net worth because
+        nothing was imported yet is a false statement. In a month with a snapshot, every account
         counts at its point-in-time balance — nearest snapshot at or before the month end
         plus the rows since, or the opening balance plus the rows when it has no snapshot yet.
+        A month without one takes the user's declared total in place of the accounts: the
+        ledger, when it has the month, always wins, and the two are never added up.
         Property values are held flat at their one declared value; loans follow their schedule.
         """
         current = month_index(today)
@@ -135,29 +168,96 @@ class NetWorthService:
             snapshots.setdefault(account_id, {})[month_index(period_end)] = balance
         row_sums = self._repository.monthly_row_sums(user_id, account_ids, window_end)
         snapshot_months = {month for months in snapshots.values() for month in months}
+        declared = {
+            month_index(row.period_end): row.amount_minor
+            for row in self._repository.declared(user_id, window_end)
+        }
+        data_months = snapshot_months | declared.keys()
+        if not data_months:
+            return []
 
         points: list[NetWorthPoint] = []
-        for month in range(current - SERIES_MONTHS, current):
-            if month not in snapshot_months:
+        for month in range(min(data_months), current):
+            source: PointSource
+            if month in snapshot_months:
+                source = "ledger"
+                accounts_minor = sum(
+                    _balance_at(
+                        account,
+                        snapshots.get(account.id, {}),
+                        row_sums.get(account.id, {}),
+                        month,
+                    )
+                    for account in accounts
+                )
+            elif month in declared:
+                source = "declared"
+                accounts_minor = declared[month]
+            else:
                 continue
             month_end = last_of_month(month)
-            accounts_minor = sum(
-                _balance_at(
-                    account,
-                    snapshots.get(account.id, {}),
-                    row_sums.get(account.id, {}),
-                    month,
-                )
-                for account in accounts
-            )
             mortgages_minor = sum(schedule.outstanding_at(month_end) for schedule in schedules)
             points.append(
                 NetWorthPoint(
                     month=month_key(month),
                     net_worth_minor=accounts_minor + properties_minor - mortgages_minor,
+                    source=source,
                 )
             )
         return points
+
+    def declared(self, user: User) -> list[DeclaredBalanceRead]:
+        """The user's declared totals, oldest first, each flagged when the ledger covers it."""
+        ledger = self._repository.snapshot_month_ends(user.id)
+        return [
+            _declared_read(row, row.period_end in ledger)
+            for row in self._repository.declared(user.id)
+        ]
+
+    def declare(
+        self, user: User, month: str, amount_minor: int, today: date
+    ) -> DeclaredBalanceRead:
+        """Record, or replace, the total all accounts held at the end of `month`.
+
+        Raises:
+            DeclaredMonthNotClosedError: `month` is the current month or a later one.
+        """
+        index = parse_month(month)
+        if index >= month_index(today):
+            raise DeclaredMonthNotClosedError(
+                "A balance can only be declared for a month that has ended.",
+                details={"month": month},
+            )
+        period_end = last_of_month(index)
+        row = self._repository.declared_at(user.id, period_end) or DeclaredBalance(
+            user_id=user.id, period_end=period_end
+        )
+        row.amount_minor = amount_minor
+        row.currency = user.currency
+        row = self._repository.save_declared(row)
+        return _declared_read(row, period_end in self._repository.snapshot_month_ends(user.id))
+
+    def remove_declared(self, user: User, month: str) -> None:
+        """Delete the user's declared total for `month`.
+
+        Raises:
+            DeclaredBalanceNotFoundError: there is none for that month.
+        """
+        row = self._repository.declared_at(user.id, last_of_month(parse_month(month)))
+        if row is None:
+            raise DeclaredBalanceNotFoundError(
+                "No balance is declared for that month.", details={"month": month}
+            )
+        self._repository.delete_declared(row)
+
+
+def _declared_read(row: DeclaredBalance, superseded: bool) -> DeclaredBalanceRead:
+    return DeclaredBalanceRead(
+        month=month_key(month_index(row.period_end)),
+        amount_minor=row.amount_minor,
+        currency=row.currency,
+        superseded=superseded,
+    )
 
 
 def _balance_at(

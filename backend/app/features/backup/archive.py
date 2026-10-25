@@ -17,7 +17,8 @@ FORMAT_MARKER = "bastide-backup"
 # Bump when the archive layout or a table's columns change in a way an older build cannot read.
 # 2: properties, mortgages and simulations — an older build would restore such an archive
 # and silently drop them.
-FORMAT_VERSION = 2
+# 3: declared month-end balances, for the same reason.
+FORMAT_VERSION = 3
 MANIFEST_NAME = "manifest.json"
 
 #: The format version that first archived each table; tables absent here date from version 1.
@@ -28,6 +29,7 @@ TABLE_SINCE_VERSION: dict[str, int] = {
     "properties": 2,
     "mortgages": 2,
     "mortgage_simulations": 2,
+    "declared_balances": 3,
 }
 
 

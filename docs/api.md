@@ -199,3 +199,6 @@ details?}}`. Model names refer to the Pydantic schemas in `backend/app/features/
 | Method | Path | Query | Body | Response |
 |--------|------|-------|------|----------|
 | `GET` | `/networth/summary` |  |  | 200 `NetWorthSummary` |
+| `GET` | `/networth/declared` |  |  | 200 [`DeclaredBalanceRead`] |
+| `PUT` | `/networth/declared/{month}` |  | `DeclaredBalanceWrite` | 200 `DeclaredBalanceRead` |
+| `DELETE` | `/networth/declared/{month}` |  |  | 204 |

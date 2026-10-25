@@ -5914,7 +5914,7 @@ abstract class AppLocalizations {
   /// Title of the net-worth series card.
   ///
   /// In fr, this message translates to:
-  /// **'Patrimoine net · 12 mois'**
+  /// **'Patrimoine net'**
   String get networthSeriesTitle;
 
   /// Subtitle of the net-worth series card.
@@ -5932,7 +5932,7 @@ abstract class AppLocalizations {
   /// Shown in place of the chart when the series has no closed month yet.
   ///
   /// In fr, this message translates to:
-  /// **'Pas encore d\'historique : la série commence au premier mois clos d\'un compte importé.'**
+  /// **'Pas encore d\'historique : la série commence au premier mois clos d\'un compte importé, ou au premier montant que vous déclarez.'**
   String get networthSeriesEmpty;
 
   /// Info banner under the series when property values are held flat, naming the oldest current valuation date.
@@ -5940,6 +5940,150 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Les biens sont maintenus à leur valeur déclarée (estimation la plus ancienne : {date}) : seuls les comptes et les crédits bougent d\'un mois à l\'autre. Les mois sans donnée sont simplement absents.'**
   String networthSeriesCaveat(String date);
+
+  /// Series range segment: the last 12 months.
+  ///
+  /// In fr, this message translates to:
+  /// **'12 mois'**
+  String get networthRangeYear;
+
+  /// Series range segment: the last 3 years.
+  ///
+  /// In fr, this message translates to:
+  /// **'3 ans'**
+  String get networthRangeThreeYears;
+
+  /// Series range segment: the whole history.
+  ///
+  /// In fr, this message translates to:
+  /// **'Tout'**
+  String get networthRangeAll;
+
+  /// Chart legend for the solid line: months computed from imported statements.
+  ///
+  /// In fr, this message translates to:
+  /// **'Comptes importés'**
+  String get networthLegendLedger;
+
+  /// Chart legend for the dashed line: months the user declared a total for.
+  ///
+  /// In fr, this message translates to:
+  /// **'Montants déclarés'**
+  String get networthLegendDeclared;
+
+  /// Link on the series card opening the declared-history modal.
+  ///
+  /// In fr, this message translates to:
+  /// **'Historique déclaré'**
+  String get networthDeclaredOpen;
+
+  /// Declared-history modal title.
+  ///
+  /// In fr, this message translates to:
+  /// **'Historique déclaré'**
+  String get networthDeclaredTitle;
+
+  /// Declared-history modal subtitle: what a declared total is, and that imports win.
+  ///
+  /// In fr, this message translates to:
+  /// **'Le total de tous vos comptes à la fin d\'un mois, pour la période avant vos imports. Un mois couvert par vos imports garde le chiffre importé.'**
+  String get networthDeclaredSubtitle;
+
+  /// Label of the month field.
+  ///
+  /// In fr, this message translates to:
+  /// **'Mois'**
+  String get networthDeclaredMonth;
+
+  /// Placeholder of the month field.
+  ///
+  /// In fr, this message translates to:
+  /// **'MM/AAAA'**
+  String get networthDeclaredMonthHint;
+
+  /// Month field error: the input doesn't read as a month.
+  ///
+  /// In fr, this message translates to:
+  /// **'Saisissez un mois au format MM/AAAA.'**
+  String get networthDeclaredMonthInvalid;
+
+  /// Month field error: the current month or a later one (DECLARED_MONTH_NOT_CLOSED).
+  ///
+  /// In fr, this message translates to:
+  /// **'Seul un mois terminé peut être déclaré.'**
+  String get networthDeclaredMonthNotClosed;
+
+  /// Label of the amount field: all accounts together at that month end.
+  ///
+  /// In fr, this message translates to:
+  /// **'Total des comptes'**
+  String get networthDeclaredAmount;
+
+  /// Amount field error.
+  ///
+  /// In fr, this message translates to:
+  /// **'Saisissez un montant.'**
+  String get networthDeclaredAmountInvalid;
+
+  /// Saves the month's total (adds or replaces).
+  ///
+  /// In fr, this message translates to:
+  /// **'Enregistrer'**
+  String get networthDeclaredSave;
+
+  /// Closes the declared-history modal.
+  ///
+  /// In fr, this message translates to:
+  /// **'Fermer'**
+  String get networthDeclaredClose;
+
+  /// Shown in the modal when nothing is declared.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucun montant déclaré pour l\'instant.'**
+  String get networthDeclaredEmpty;
+
+  /// Chip on a declared month the imports cover: the chart shows the imported figure.
+  ///
+  /// In fr, this message translates to:
+  /// **'Couvert par vos imports'**
+  String get networthDeclaredSuperseded;
+
+  /// Tooltip: load this month into the form.
+  ///
+  /// In fr, this message translates to:
+  /// **'Modifier'**
+  String get networthDeclaredEdit;
+
+  /// Tooltip: delete this month's total.
+  ///
+  /// In fr, this message translates to:
+  /// **'Supprimer'**
+  String get networthDeclaredDelete;
+
+  /// Error state of the declared-history list.
+  ///
+  /// In fr, this message translates to:
+  /// **'Impossible de charger l\'historique déclaré.'**
+  String get networthDeclaredLoadFailed;
+
+  /// Retry action on the declared-history list.
+  ///
+  /// In fr, this message translates to:
+  /// **'Réessayer'**
+  String get networthDeclaredRetry;
+
+  /// DECLARED_BALANCE_NOT_FOUND.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ce montant n\'existe plus.'**
+  String get networthDeclaredErrorNotFound;
+
+  /// Any other failure writing a declared total.
+  ///
+  /// In fr, this message translates to:
+  /// **'L\'enregistrement a échoué. Réessayez.'**
+  String get networthDeclaredErrorGeneric;
 
   /// Link under the login form's password field, opening the password reset screen.
   ///

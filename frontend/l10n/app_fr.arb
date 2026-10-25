@@ -4894,7 +4894,7 @@
   "@networthRetry": {
     "description": "Retry action on the net-worth error state."
   },
-  "networthSeriesTitle": "Patrimoine net · 12 mois",
+  "networthSeriesTitle": "Patrimoine net",
   "@networthSeriesTitle": {
     "description": "Title of the net-worth series card."
   },
@@ -4914,7 +4914,7 @@
       }
     }
   },
-  "networthSeriesEmpty": "Pas encore d'historique : la série commence au premier mois clos d'un compte importé.",
+  "networthSeriesEmpty": "Pas encore d'historique : la série commence au premier mois clos d'un compte importé, ou au premier montant que vous déclarez.",
   "@networthSeriesEmpty": {
     "description": "Shown in place of the chart when the series has no closed month yet."
   },
@@ -4926,6 +4926,102 @@
         "type": "String"
       }
     }
+  },
+  "networthRangeYear": "12 mois",
+  "@networthRangeYear": {
+    "description": "Series range segment: the last 12 months."
+  },
+  "networthRangeThreeYears": "3 ans",
+  "@networthRangeThreeYears": {
+    "description": "Series range segment: the last 3 years."
+  },
+  "networthRangeAll": "Tout",
+  "@networthRangeAll": {
+    "description": "Series range segment: the whole history."
+  },
+  "networthLegendLedger": "Comptes importés",
+  "@networthLegendLedger": {
+    "description": "Chart legend for the solid line: months computed from imported statements."
+  },
+  "networthLegendDeclared": "Montants déclarés",
+  "@networthLegendDeclared": {
+    "description": "Chart legend for the dashed line: months the user declared a total for."
+  },
+  "networthDeclaredOpen": "Historique déclaré",
+  "@networthDeclaredOpen": {
+    "description": "Link on the series card opening the declared-history modal."
+  },
+  "networthDeclaredTitle": "Historique déclaré",
+  "@networthDeclaredTitle": {
+    "description": "Declared-history modal title."
+  },
+  "networthDeclaredSubtitle": "Le total de tous vos comptes à la fin d'un mois, pour la période avant vos imports. Un mois couvert par vos imports garde le chiffre importé.",
+  "@networthDeclaredSubtitle": {
+    "description": "Declared-history modal subtitle: what a declared total is, and that imports win."
+  },
+  "networthDeclaredMonth": "Mois",
+  "@networthDeclaredMonth": {
+    "description": "Label of the month field."
+  },
+  "networthDeclaredMonthHint": "MM/AAAA",
+  "@networthDeclaredMonthHint": {
+    "description": "Placeholder of the month field."
+  },
+  "networthDeclaredMonthInvalid": "Saisissez un mois au format MM/AAAA.",
+  "@networthDeclaredMonthInvalid": {
+    "description": "Month field error: the input doesn't read as a month."
+  },
+  "networthDeclaredMonthNotClosed": "Seul un mois terminé peut être déclaré.",
+  "@networthDeclaredMonthNotClosed": {
+    "description": "Month field error: the current month or a later one (DECLARED_MONTH_NOT_CLOSED)."
+  },
+  "networthDeclaredAmount": "Total des comptes",
+  "@networthDeclaredAmount": {
+    "description": "Label of the amount field: all accounts together at that month end."
+  },
+  "networthDeclaredAmountInvalid": "Saisissez un montant.",
+  "@networthDeclaredAmountInvalid": {
+    "description": "Amount field error."
+  },
+  "networthDeclaredSave": "Enregistrer",
+  "@networthDeclaredSave": {
+    "description": "Saves the month's total (adds or replaces)."
+  },
+  "networthDeclaredClose": "Fermer",
+  "@networthDeclaredClose": {
+    "description": "Closes the declared-history modal."
+  },
+  "networthDeclaredEmpty": "Aucun montant déclaré pour l'instant.",
+  "@networthDeclaredEmpty": {
+    "description": "Shown in the modal when nothing is declared."
+  },
+  "networthDeclaredSuperseded": "Couvert par vos imports",
+  "@networthDeclaredSuperseded": {
+    "description": "Chip on a declared month the imports cover: the chart shows the imported figure."
+  },
+  "networthDeclaredEdit": "Modifier",
+  "@networthDeclaredEdit": {
+    "description": "Tooltip: load this month into the form."
+  },
+  "networthDeclaredDelete": "Supprimer",
+  "@networthDeclaredDelete": {
+    "description": "Tooltip: delete this month's total."
+  },
+  "networthDeclaredLoadFailed": "Impossible de charger l'historique déclaré.",
+  "@networthDeclaredLoadFailed": {
+    "description": "Error state of the declared-history list."
+  },
+  "networthDeclaredRetry": "Réessayer",
+  "@networthDeclaredRetry": {
+    "description": "Retry action on the declared-history list."
+  },
+  "networthDeclaredErrorNotFound": "Ce montant n'existe plus.",
+  "@networthDeclaredErrorNotFound": {
+    "description": "DECLARED_BALANCE_NOT_FOUND."
+  },
+  "networthDeclaredErrorGeneric": "L'enregistrement a échoué. Réessayez.",
+  "@networthDeclaredErrorGeneric": {
+    "description": "Any other failure writing a declared total."
   },
   "authForgotPasswordLink": "Mot de passe oublié ?",
   "@authForgotPasswordLink": {

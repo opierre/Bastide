@@ -22,11 +22,9 @@ from app.features.accounts.models import Account, AccountBalanceSnapshot
 from app.features.auth.models import User
 from app.features.mortgages.engine import RepaymentType, build_schedule
 from app.features.networth.repository import NetWorthRepository
-from app.features.networth.router import get_today
 from app.features.networth.service import NetWorthService, shares_bps
 from tests.api import register
-
-TODAY = date(2026, 5, 15)
+from tests.features.networth.conftest import TODAY
 
 LOAN_PAYLOAD = {
     "label": "Appartement Lyon 3e",
@@ -50,11 +48,6 @@ LOAN_SCHEDULE = build_schedule(
     first_payment_date=date(2023, 9, 1),
     upfront_fees_minor=145_000,
 )
-
-
-@pytest.fixture(autouse=True)
-def pinned_today(client: TestClient) -> None:
-    cast(FastAPI, client.app).dependency_overrides[get_today] = lambda: TODAY
 
 
 def post(client: TestClient, path: str, headers: dict[str, str], payload: dict) -> dict:
@@ -337,6 +330,7 @@ def test_the_series_follows_snapshots_and_the_amortising_loan(client: TestClient
         {
             "month": month,
             "net_worth_minor": balance + 42_000_000 - LOAN_SCHEDULE.outstanding_at(month_end),
+            "source": "ledger",
         }
         for month, balance, month_end in expected
     ]
@@ -382,16 +376,17 @@ def test_months_without_a_snapshot_are_omitted_not_zeroed(client: TestClient) ->
     assert months == ["2026-01", "2026-04"]
 
 
-def test_the_window_is_the_twelve_closed_months_before_today(client: TestClient) -> None:
-    """The current month has no snapshot and is never in the series."""
+def test_the_series_holds_every_closed_month_before_today(client: TestClient) -> None:
+    """The panel picks the range it shows; the current month is never in the series."""
     headers = register(client)
     account = create_account(client, headers, 1_180_000)
-    add_snapshot(client, account["id"], date(2025, 4, 30), 800_000)
-    add_snapshot(client, account["id"], date(2025, 5, 31), 810_000)
+    add_snapshot(client, account["id"], date(2023, 4, 30), 800_000)
+    add_snapshot(client, account["id"], date(2026, 4, 30), 810_000)
+    add_snapshot(client, account["id"], date(2026, 5, 31), 820_000)
 
     months = [point["month"] for point in summary(client, headers)["series"]]
 
-    assert months == ["2025-05"]
+    assert months == ["2023-04", "2026-04"]
 
 
 def test_an_account_without_that_months_snapshot_counts_at_its_point_in_time_balance(
@@ -408,7 +403,11 @@ def test_an_account_without_that_months_snapshot_counts_at_its_point_in_time_bal
     series = summary(client, headers)["series"]
 
     # April: first's snapshot, second's March snapshot carried, cash at its opening balance.
-    assert series[-1] == {"month": "2026-04", "net_worth_minor": 1_120_000 + 1_200_000 + 30_000}
+    assert series[-1] == {
+        "month": "2026-04",
+        "net_worth_minor": 1_120_000 + 1_200_000 + 30_000,
+        "source": "ledger",
+    }
 
 
 def test_a_user_with_no_snapshot_has_an_empty_series(client: TestClient) -> None:
@@ -480,7 +479,7 @@ def test_past_points_hold_the_property_value_flat(client: TestClient) -> None:
     add_snapshot(client, account["id"], date(2025, 6, 30), 0)
 
     assert summary(client, headers)["series"] == [
-        {"month": "2025-06", "net_worth_minor": 42_000_000}
+        {"month": "2025-06", "net_worth_minor": 42_000_000, "source": "ledger"}
     ]
 
 
