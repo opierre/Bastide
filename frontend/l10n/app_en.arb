@@ -1017,7 +1017,7 @@
   "networthSeriesSubtitle": "Accounts and loans, month by month",
   "networthSeriesRange": "{from} → {to}",
   "networthSeriesEmpty": "No history yet: the series starts with the first closed month of an imported account, or with the first total you declare.",
-  "networthSeriesCaveat": "Properties are held at their declared value (oldest estimate: {date}): only accounts and loans move from month to month. Months without data are simply absent.",
+  "networthSeriesCaveat": "Properties are held at their declared value (oldest estimate: {date}) and count only from their acquisition date, loans only from their payout. Months without data are simply absent.",
   "networthRangeYear": "12 months",
   "networthRangeThreeYears": "3 years",
   "networthRangeAll": "All",

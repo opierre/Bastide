@@ -3763,7 +3763,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String networthSeriesCaveat(String date) {
-    return 'Properties are held at their declared value (oldest estimate: $date): only accounts and loans move from month to month. Months without data are simply absent.';
+    return 'Properties are held at their declared value (oldest estimate: $date) and count only from their acquisition date, loans only from their payout. Months without data are simply absent.';
   }
 
   @override

@@ -217,3 +217,55 @@ def test_a_backup_carries_the_declared_totals(client: TestClient) -> None:
 
     assert restored.status_code == 200, restored.json()
     assert [row["amount_minor"] for row in listed(client, headers)] == [812_345]
+
+
+# --- what existed that month -----------------------------------------------------------------
+
+
+def test_a_property_counts_from_its_acquisition_month(client: TestClient) -> None:
+    headers = register(client)
+    create_property(client, headers, acquired_on="2024-03-15")
+    declare(client, headers, "2024-02", 100_000)
+    declare(client, headers, "2024-03", 100_000)
+
+    assert [point["net_worth_minor"] for point in summary(client, headers)["series"]] == [
+        100_000,
+        100_000 + 42_000_000,
+    ]
+
+
+def test_a_loan_counts_from_the_month_before_its_first_payment(client: TestClient) -> None:
+    """Paid out the month before the first instalment (2023-09-01): owed in full from August."""
+    headers = register(client)
+    create_loan(client, headers)
+    declare(client, headers, "2023-07", 100_000)
+    declare(client, headers, "2023-08", 100_000)
+
+    assert [point["net_worth_minor"] for point in summary(client, headers)["series"]] == [
+        100_000,
+        100_000 - 24_000_000,
+    ]
+
+
+def test_the_down_payment_is_not_counted_twice_before_the_purchase(client: TestClient) -> None:
+    """Before the flat and its loan, net worth is the cash alone; after, cash + flat − loan."""
+    headers = register(client)
+    create_property(client, headers, acquired_on="2023-08-10")
+    create_loan(client, headers)
+    declare(client, headers, "2022-06", 6_000_000)
+    declare(client, headers, "2023-08", 1_000_000)
+
+    before, after = summary(client, headers)["series"]
+
+    assert before["net_worth_minor"] == 6_000_000
+    assert after["net_worth_minor"] == 1_000_000 + 42_000_000 - LOAN_SCHEDULE.outstanding_at(
+        date(2023, 8, 31)
+    )
+
+
+def test_a_property_without_an_acquisition_date_counts_all_along(client: TestClient) -> None:
+    headers = register(client)
+    create_property(client, headers)
+    declare(client, headers, "2015-01", 0)
+
+    assert summary(client, headers)["series"][0]["net_worth_minor"] == 42_000_000

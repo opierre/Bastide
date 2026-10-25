@@ -96,12 +96,19 @@ class NetWorthService:
         """
         accounts = self._repository.accounts(user.id)
         properties = self._repository.properties(user.id)
-        schedules = [schedule_for(loan) for loan in self._repository.mortgages(user.id, (ACTIVE,))]
+        loans = [
+            (loan.first_payment_date, schedule_for(loan))
+            for loan in self._repository.mortgages(user.id, (ACTIVE,))
+        ]
+        schedules = [schedule for _, schedule in loans]
 
         accounts_minor = sum(account.cached_balance_minor for account in accounts)
         held = [
             (prop.kind, held_share_minor(prop.market_value_minor, prop.ownership_bps))
             for prop in properties
+        ]
+        holdings = [
+            (prop.acquired_on, share) for prop, (_, share) in zip(properties, held, strict=True)
         ]
         properties_minor = sum(share for _, share in held)
         mortgages_minor = sum(schedule.outstanding_at(today) for schedule in schedules)
@@ -122,7 +129,7 @@ class NetWorthService:
             )
         ]
 
-        series = self._series(user.id, accounts, properties_minor, schedules, today)
+        series = self._series(user.id, accounts, holdings, loans, today)
         return NetWorthSummary(
             assets=NetWorthAssets(accounts_minor=accounts_minor, properties_minor=properties_minor),
             liabilities=NetWorthLiabilities(mortgages_minor=mortgages_minor),
@@ -143,8 +150,8 @@ class NetWorthService:
         self,
         user_id: str,
         accounts: Sequence[Account],
-        properties_minor: int,
-        schedules: Sequence[Schedule],
+        holdings: Sequence[tuple[date | None, int]],
+        loans: Sequence[tuple[date, Schedule]],
         today: date,
     ) -> list[NetWorthPoint]:
         """Net worth at each closed month end that has a snapshot or a declared total.
@@ -157,6 +164,13 @@ class NetWorthService:
         A month without one takes the user's declared total in place of the accounts: the
         ledger, when it has the month, always wins, and the two are never added up.
         Property values are held flat at their one declared value; loans follow their schedule.
+
+        `holdings` are `(acquired_on, held share)` and `loans` are `(first payment date,
+        schedule)`. Neither counts before it existed: a property enters at its acquisition
+        month, a loan the month before its first payment — when it is paid out, the date the
+        app does not record. Counting both all along would add the down payment twice before
+        the purchase: once as the cash still in the accounts, once inside property − loan.
+        A property without an acquisition date counts all along, as there is no date to start at.
         """
         current = month_index(today)
         window_end = first_of_month(current)
@@ -196,7 +210,16 @@ class NetWorthService:
             else:
                 continue
             month_end = last_of_month(month)
-            mortgages_minor = sum(schedule.outstanding_at(month_end) for schedule in schedules)
+            properties_minor = sum(
+                share
+                for acquired_on, share in holdings
+                if acquired_on is None or acquired_on <= month_end
+            )
+            mortgages_minor = sum(
+                schedule.outstanding_at(month_end)
+                for first_payment, schedule in loans
+                if month >= month_index(first_payment) - 1
+            )
             points.append(
                 NetWorthPoint(
                     month=month_key(month),

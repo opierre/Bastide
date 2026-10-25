@@ -5938,7 +5938,7 @@ abstract class AppLocalizations {
   /// Info banner under the series when property values are held flat, naming the oldest current valuation date.
   ///
   /// In fr, this message translates to:
-  /// **'Les biens sont maintenus à leur valeur déclarée (estimation la plus ancienne : {date}) : seuls les comptes et les crédits bougent d\'un mois à l\'autre. Les mois sans donnée sont simplement absents.'**
+  /// **'Les biens sont maintenus à leur valeur déclarée (estimation la plus ancienne : {date}) et ne comptent qu\'à partir de leur date d\'acquisition, les crédits qu\'à partir de leur déblocage. Les mois sans donnée sont simplement absents.'**
   String networthSeriesCaveat(String date);
 
   /// Series range segment: the last 12 months.
