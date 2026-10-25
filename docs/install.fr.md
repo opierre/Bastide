@@ -36,7 +36,10 @@ Ce que vous pouvez vérifier à la place d'un certificat :
 1. Lancez `Bastide-Setup-<version>.exe`.
 2. Windows affiche **« Windows a protégé votre ordinateur »**. Cliquez sur **Informations
    complémentaires**, puis sur **Exécuter quand même**.
-3. Il n'y a aucune étape à suivre : Bastide s'installe pour votre utilisateur seulement, sans
+3. Windows peut aussi demander **« Voulez-vous exécuter ce fichier ? »**, avec **Éditeur :
+   Éditeur inconnu**. Cliquez sur **Exécuter**. Pour éviter cette question, débloquez le
+   fichier avant de le lancer (voir [Débloquer un téléchargement](#débloquer-un-téléchargement)).
+4. Il n'y a aucune étape à suivre : Bastide s'installe pour votre utilisateur seulement, sans
    mot de passe administrateur, dans `%LOCALAPPDATA%\Bastide.App`, puis s'ouvre. Ensuite,
    ouvrez-la depuis son raccourci sur le bureau ou le menu Démarrer.
 
@@ -47,10 +50,24 @@ alerte à Microsoft.
 ### Version portable
 
 Décompressez `Bastide-<version>-windows.zip` où vous voulez (une clé USB convient), ouvrez le
-dossier `Bastide` et lancez `bastide.exe`. Le même avertissement **Informations
-complémentaires → Exécuter quand même** apparaît. Vos données ne sont pas enregistrées dans ce
-dossier mais dans votre dossier utilisateur, comme avec l'installateur (voir
-[Où sont vos données](#où-sont-vos-données)).
+dossier `Bastide` et lancez `bastide.exe`. Les mêmes avertissements apparaissent. Débloquez le
+zip **avant** de le décompresser (voir [Débloquer un téléchargement](#débloquer-un-téléchargement)) :
+sinon Windows marque chaque fichier décompressé comme téléchargé et redemande à chaque ouverture
+de l'application. Vos données ne sont pas enregistrées dans ce dossier mais dans votre dossier
+utilisateur, comme avec l'installateur (voir [Où sont vos données](#où-sont-vos-données)).
+
+### Débloquer un téléchargement
+
+Windows marque chaque fichier venu d'internet, et demande confirmation avant de lancer un
+programme marqué dont il ne peut pas vérifier l'éditeur. Une fois
+[votre téléchargement vérifié](#vérifier-votre-téléchargement), vous pouvez retirer cette marque :
+
+- Clic droit sur le fichier → **Propriétés**, cochez **Débloquer** en bas de l'onglet
+  **Général**, puis cliquez sur **OK**.
+- Ou dans PowerShell : `Unblock-File .\Bastide-Setup-<version>.exe` (ou le `.zip`).
+
+« Windows a protégé votre ordinateur » peut encore apparaître : ce message ne disparaît
+qu'une fois qu'une version a été téléchargée par assez de personnes.
 
 ### Mettre à jour
 
