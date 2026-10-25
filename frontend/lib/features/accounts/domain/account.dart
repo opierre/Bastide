@@ -40,11 +40,18 @@ class AccountPrefill {
     this.balanceMinor,
     this.balanceAsOf,
     this.currency,
+    this.isCardStatement = false,
   });
 
   final String? name;
   final String? institution;
   final AccountType? type;
+
+  /// The source is a card statement, which cannot say how the card is
+  /// debited. The form then asks that one question — deferred debit or
+  /// credit — in place of the full type list, since a card is neither a
+  /// checking nor a savings account.
+  final bool isCardStatement;
 
   /// The currency the source declares its figures are in — an OFX statement's
   /// `CURDEF`. Preferred over the profile currency and sent on to the backend,

@@ -6,6 +6,7 @@ import '../../../core/session/current_user_provider.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/tokens.dart';
 import '../../../core/widgets/app_modal.dart';
+import '../../../core/widgets/app_segmented.dart';
 import '../../../core/widgets/app_select.dart';
 import '../../../core/widgets/inline_banner.dart';
 import '../../../core/widgets/institution_avatar.dart';
@@ -76,7 +77,11 @@ class _AccountFormState extends ConsumerState<AccountForm> {
   bool _openingBalanceFilled = false;
 
   late AccountType _type =
-      widget.initial?.type ?? widget.prefill?.type ?? AccountType.checking;
+      widget.initial?.type ??
+      widget.prefill?.type ??
+      (widget.prefill?.isCardStatement ?? false
+          ? AccountType.deferredCard
+          : AccountType.checking);
 
   /// Mirrors the institution field so the logo preview updates as it is typed.
   late String _institution =
@@ -91,6 +96,13 @@ class _AccountFormState extends ConsumerState<AccountForm> {
   /// rather than asking for it.
   bool get _balanceFromStatement =>
       !_isEditing && widget.prefill?.balanceMinor != null;
+
+  /// A card statement can't say how the card is debited, and the two answers
+  /// book very differently — a deferred-debit card is settled in one lump on
+  /// the current account each month — so the form puts that question in
+  /// place of the type list.
+  bool get _asksCardDebit =>
+      !_isEditing && (widget.prefill?.isCardStatement ?? false);
 
   /// The statement named its bank, so the institution field states it too.
   bool get _institutionFromStatement =>
@@ -254,21 +266,44 @@ class _AccountFormState extends ConsumerState<AccountForm> {
               ),
             ),
             const SizedBox(height: AppSpacing.md),
-            LabeledField(
-              label: l10n.accountTypeLabel,
-              child: AppSelect<AccountType>(
-                key: const Key('accountTypeField'),
-                value: _type,
-                items: [
-                  for (final type in AccountType.values)
-                    AppSelectItem(
-                      value: type,
-                      label: accountTypeLabel(l10n, type),
+            if (_asksCardDebit)
+              LabeledField(
+                label: l10n.accountCardDebitLabel,
+                helper: l10n.accountCardDebitHelper,
+                child: AppSegmented<AccountType>(
+                  key: const Key('accountCardDebitField'),
+                  value: _type,
+                  segments: [
+                    AppSegment(
+                      key: const Key('accountCardDebitDeferred'),
+                      value: AccountType.deferredCard,
+                      label: l10n.accountCardDebitDeferred,
                     ),
-                ],
-                onChanged: (value) => setState(() => _type = value),
+                    AppSegment(
+                      key: const Key('accountCardDebitCredit'),
+                      value: AccountType.credit,
+                      label: l10n.accountCardDebitCredit,
+                    ),
+                  ],
+                  onChanged: (value) => setState(() => _type = value),
+                ),
+              )
+            else
+              LabeledField(
+                label: l10n.accountTypeLabel,
+                child: AppSelect<AccountType>(
+                  key: const Key('accountTypeField'),
+                  value: _type,
+                  items: [
+                    for (final type in AccountType.values)
+                      AppSelectItem(
+                        value: type,
+                        label: accountTypeLabel(l10n, type),
+                      ),
+                  ],
+                  onChanged: (value) => setState(() => _type = value),
+                ),
               ),
-            ),
             const SizedBox(height: AppSpacing.md),
             LabeledField(
               // The same stored figure, named for what it means at each end of

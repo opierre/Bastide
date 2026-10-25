@@ -281,6 +281,17 @@ SYSTEM_CATEGORIES: tuple[CategorySeed, ...] = (
                 "savings",
                 _AUTRES_EPARGNE,
             ),
+            # The one debit a deferred-debit card makes on the current account each month. A
+            # transfer, because the purchases it settles are already booked one by one on the
+            # card's own account — counting the lump sum too would double the month's spending.
+            CategorySeed(
+                "category.finance.card_settlement",
+                "Règlement carte différée",
+                "Deferred card settlement",
+                "transfer",
+                "credit_card",
+                _AUTRES_EPARGNE,
+            ),
             CategorySeed(
                 "category.finance.interest",
                 "Intérêts",

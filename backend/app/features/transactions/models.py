@@ -50,6 +50,17 @@ class Transaction(Base):
     categorization_confidence: Mapped[float | None] = mapped_column(Float, nullable=True)
     needs_review: Mapped[bool] = mapped_column(Boolean, default=True)
     fitid: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    #: The current-account debit that settled this row, on a deferred-debit card's rows: every
+    #: purchase of the cycle it paid, and the card-side credit offsetting it. `None` everywhere
+    #: else, including on the settlement itself.
+    card_settlement_id: Mapped[str | None] = mapped_column(
+        String(36),
+        ForeignKey(
+            "transactions.id", ondelete="SET NULL", name="fk_transactions_card_settlement_id"
+        ),
+        nullable=True,
+        index=True,
+    )
     dedup_hash: Mapped[str] = mapped_column(String(64))
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), default=lambda: datetime.now(UTC)

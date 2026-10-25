@@ -16,10 +16,13 @@ from app.features.accounts.models import Account, AccountBalanceSnapshot
 from app.features.accounts.service import AccountService
 from app.features.auth.models import User
 from app.features.imports.canonical import CanonicalTransaction, normalize
+from app.features.imports.card_settlement import DETECTED_SOURCE, is_card_settlement
+from app.features.imports.ledger import settle_earlier_mismatches, shift_later_snapshots
 from app.features.imports.models import ImportBatch
 from app.features.imports.parsers.ofx import LedgerBalance, OfxParseError, parse_ledger_balance
 from app.features.imports.parsers.ofx import parse as parse_ofx
 from app.features.imports.repository import ImportRepository
+from app.features.imports.settlements import CardSettlementService
 from app.features.rules.engine import match_category
 from app.features.rules.repository import RuleRepository
 from app.features.transactions.models import Transaction
@@ -66,6 +69,7 @@ class ImportService:
         # the model existed, which is also what every test constructing this service without
         # one gets.
         self._run_enqueuer = run_enqueuer
+        self._settlements = CardSettlementService(repository, db)
 
     def list_for_user(self, user_id: str) -> list[ImportBatch]:
         """List a user's import batches, most recent first (the import history)."""
@@ -127,6 +131,10 @@ class ImportService:
 
         new_rows, duplicate_count = self._dedup(account.id, canonical_transactions)
         rules = RuleRepository(self._db).list_enabled_by_user(user.id)
+        cards = self._settlements.tracked_cards(user.id)
+        settlement_category_id = (
+            self._settlements.settlement_category_id(user.id) if cards else None
+        )
 
         batch = ImportBatch(
             id=str(uuid4()),
@@ -167,6 +175,18 @@ class ImportService:
                 transaction.category_id = matched_category_id
                 transaction.categorization_source = "rule"
                 transaction.needs_review = False
+            elif (
+                settlement_category_id is not None
+                and account.type != "deferred_card"
+                and is_card_settlement(row.description_clean, row.amount_minor)
+            ):
+                # After the user's own rules, which state intent this built-in reading must not
+                # override; before the model, which has no way to know a card account exists.
+                # Only proposed: a label is a strong hint, not proof, so the row waits in the
+                # review queue for the user to confirm it.
+                transaction.category_id = settlement_category_id
+                transaction.categorization_source = DETECTED_SOURCE
+                transaction.needs_review = True
             new_transactions.append(transaction)
 
         # The batch goes in first: the rows reference it, and the flush below would otherwise
@@ -180,8 +200,17 @@ class ImportService:
 
         # Before the balance check, which reads point-in-time balances off these snapshots.
         if new_rows:
-            self._shift_later_snapshots(account, new_rows)
-            self._settle_earlier_mismatches(account, new_rows)
+            shift_later_snapshots(self._db, account, new_rows)
+            settle_earlier_mismatches(self._db, account, new_rows)
+
+        # Before the balance check too: on a card's own import, the offsets posted here are part
+        # of the ledger its declared balance is compared against.
+        if settlement_category_id is not None:
+            if account.type == "deferred_card":
+                self._settlements.adopt_late_resets(
+                    account, new_transactions, settlement_category_id
+                )
+            self._settlements.link_pending(user.id, cards, settlement_category_id)
 
         # Before any snapshot is written, so they are taken from the corrected base.
         if declared_balance is not None:
@@ -329,60 +358,6 @@ class ImportService:
             batch.balance_mismatch_minor = mismatch
             batch.balance_mismatch_as_of = as_of
 
-    def _shift_later_snapshots(
-        self, account: Account, new_rows: list[CanonicalTransaction]
-    ) -> None:
-        """Add the newly imported rows to every snapshot already taken after them.
-
-        A snapshot is cumulative — the whole balance at its month end — so rows booked on or
-        before that date belong in it, even when they arrive after it was written. That is
-        the case when a statement fills a gap behind later imports: without this, every
-        balance read from a later snapshot (and the net-worth history) would still be missing
-        the gap's rows.
-        """
-        earliest = min(row.booked_date for row in new_rows)
-        snapshots = self._db.scalars(
-            select(AccountBalanceSnapshot).where(
-                AccountBalanceSnapshot.account_id == account.id,
-                AccountBalanceSnapshot.period_end >= earliest,
-            )
-        )
-        for snapshot in snapshots:
-            snapshot.balance_minor += sum(
-                row.amount_minor for row in new_rows if row.booked_date <= snapshot.period_end
-            )
-        # The session doesn't autoflush, and the balance reads that follow query the table.
-        self._db.flush()
-
-    def _settle_earlier_mismatches(
-        self, account: Account, new_rows: list[CanonicalTransaction]
-    ) -> None:
-        """Take the newly imported rows off the mismatches earlier imports recorded.
-
-        A mismatch is the declared balance minus the ledger's at its as-of date, so each row
-        that arrives on or before that date moves it by its own amount. Importing the missing
-        statement brings it to zero, which clears it: left as it was, the history would
-        still warn about a gap that has been filled.
-        """
-        earliest = min(row.booked_date for row in new_rows)
-        batches = self._db.scalars(
-            select(ImportBatch).where(
-                ImportBatch.account_id == account.id,
-                ImportBatch.balance_mismatch_minor.is_not(None),
-                ImportBatch.balance_mismatch_as_of >= earliest,
-            )
-        )
-        for batch in batches:
-            as_of = batch.balance_mismatch_as_of
-            mismatch = (batch.balance_mismatch_minor or 0) - sum(
-                row.amount_minor for row in new_rows if as_of and row.booked_date <= as_of
-            )
-            if mismatch == 0:
-                batch.balance_mismatch_minor = None
-                batch.balance_mismatch_as_of = None
-            else:
-                batch.balance_mismatch_minor = mismatch
-
     def _sync_month_boundary_snapshots(
         self, account: Account, period_start: date, period_end: date
     ) -> None:
@@ -390,7 +365,7 @@ class ImportService:
 
         A month only "closes" once the import has rows past its end, so the in-progress final
         month (period_end's own month) is never snapshotted here. A month that already has a
-        snapshot is left alone: `_shift_later_snapshots` has already added this import's rows.
+        snapshot is left alone: `shift_later_snapshots` has already added this import's rows.
         """
         year, month = period_start.year, period_start.month
         while (year, month) < (period_end.year, period_end.month):

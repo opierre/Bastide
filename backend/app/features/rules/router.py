@@ -9,6 +9,8 @@ from app.core.db import get_db
 from app.features.auth.deps import get_current_user
 from app.features.auth.models import User
 from app.features.categories.repository import CategoryRepository
+from app.features.imports.repository import ImportRepository
+from app.features.imports.settlements import CardSettlementService
 from app.features.rules.models import CategorizationRule
 from app.features.rules.packs.schema import (
     BuiltinPackRead,
@@ -40,7 +42,13 @@ router = APIRouter(prefix="/api/v1/rules", tags=["rules"])
 
 
 def _service(db: Annotated[Session, Depends(get_db)]) -> RuleService:
-    return RuleService(RuleRepository(db), TransactionRepository(db), CategoryRepository(db), db)
+    return RuleService(
+        RuleRepository(db),
+        TransactionRepository(db),
+        CategoryRepository(db),
+        db,
+        on_recategorized=CardSettlementService(ImportRepository(db), db),
+    )
 
 
 def _pack_service(db: Annotated[Session, Depends(get_db)]) -> RulePackService:

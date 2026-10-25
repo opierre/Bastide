@@ -97,6 +97,24 @@ final _ofxBytes = utf8.encode('''
 </OFX>
 ''');
 
+/// A card statement: a `CCACCTFROM` block, which carries no `ACCTTYPE`.
+final _cardOfxBytes = utf8.encode('''
+<OFX>
+<SIGNONMSGSRSV1><SONRS><FI><ORG>BOURSORAMA BANQUE
+</FI></SONRS></SIGNONMSGSRSV1>
+<CREDITCARDMSGSRSV1><CCSTMTTRNRS><CCSTMTRS>
+<CURDEF>EUR
+<CCACCTFROM>
+<ACCTID>5555444433339876
+</CCACCTFROM>
+<LEDGERBAL>
+<BALAMT>-452.10
+<DTASOF>20260131
+</LEDGERBAL>
+</CCSTMTRS></CCSTMTTRNRS></CREDITCARDMSGSRSV1>
+</OFX>
+''');
+
 Widget _wrap({
   required FakeImportsController imports,
   required PickedImportFile file,
@@ -489,6 +507,35 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(imports.importCalls.single.accountId, 'a1');
+  });
+
+  testWidgets('a card statement proposes a deferred-debit card', (
+    tester,
+  ) async {
+    _useDesktopSurface(tester);
+    final imports = FakeImportsController(importResult: _batch());
+    final accounts = FakeAccountsController(createdAccount: _account);
+    await tester.pumpWidget(
+      _wrap(
+        imports: imports,
+        accounts: accounts,
+        file: PickedImportFile(name: 'carte.ofx', bytes: _cardOfxBytes),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await _stageFile(tester);
+
+    // Named for what it is, not for an answer the user hasn't given yet.
+    expect(find.text('Carte ••9876'), findsOneWidget);
+    expect(find.byKey(const Key('accountCardDebitField')), findsOneWidget);
+
+    await tester.tap(find.byKey(const Key('accountFormSubmitButton')));
+    await tester.pumpAndSettle();
+
+    expect(accounts.createCalls.single.type, AccountType.deferredCard);
+    expect(accounts.createCalls.single.openingBalanceMinor, -45210);
+    expect(accounts.createCalls.single.ofxAccountId, '5555444433339876');
   });
 
   testWidgets('cancelling the offered account leaves it on the banner', (

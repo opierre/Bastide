@@ -216,7 +216,10 @@ void main() {
 
       expect(info.accountNumber, '5555444433339876');
       expect(info.accountType, 'CREDITCARD');
-      expect(accountTypeFromOfx(info.accountType), AccountType.credit);
+      expect(info.isCardStatement, isTrue);
+      // A French card statement is a deferred-debit card's until the user says
+      // otherwise — the account form asks.
+      expect(accountTypeFromOfx(info.accountType), AccountType.deferredCard);
       // No FI block: the label falls back to nothing rather than inventing one.
       expect(info.institutionLabel, isNull);
     });
@@ -288,6 +291,26 @@ void main() {
       final match = matchOfxAccount(_info, [_account(), savings]);
 
       expect((match as OfxAccountMatched).account.id, 'a1');
+    });
+
+    test('a card statement fits a card account of either kind', () {
+      const card = OfxAccountInfo(
+        accountNumber: '5555444433339876',
+        accountType: 'CREDITCARD',
+        organization: 'BOURSORAMA BANQUE',
+      );
+
+      for (final type in [AccountType.deferredCard, AccountType.credit]) {
+        final cardAccount = _account(id: 'a2', name: 'Carte', type: type);
+
+        final match = matchOfxAccount(card, [_account(), cardAccount]);
+
+        expect((match as OfxAccountMatched).account.id, 'a2', reason: '$type');
+      }
+    });
+
+    test('a credit line stays a credit account', () {
+      expect(accountTypeFromOfx('CREDITLINE'), AccountType.credit);
     });
 
     test('refuses to guess between same-bank, same-type accounts', () {
