@@ -607,6 +607,23 @@ class AppLocalizationsFr extends AppLocalizations {
   String get importErrorBatchNotFound => 'Import introuvable.';
 
   @override
+  String get importErrorStatementRequired =>
+      'Ce fichier contient plusieurs comptes et aucun n\'a été désigné.';
+
+  @override
+  String get importErrorStatementNotFound =>
+      'Ce compte est introuvable dans le fichier.';
+
+  @override
+  String importErrorPartial(int done, int total, String error) {
+    return 'Import interrompu ($done relevés sur $total) : $error';
+  }
+
+  @override
+  String get importDuplicateDestination =>
+      'Deux relevés de ce fichier vont vers le même compte — choisissez une destination différente pour chacun.';
+
+  @override
   String get importErrorGeneric =>
       'Une erreur est survenue. Veuillez réessayer.';
 

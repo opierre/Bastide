@@ -604,6 +604,22 @@ class AppLocalizationsEn extends AppLocalizations {
   String get importErrorBatchNotFound => 'Import not found.';
 
   @override
+  String get importErrorStatementRequired =>
+      'This file holds several accounts and none was named.';
+
+  @override
+  String get importErrorStatementNotFound => 'That account isn\'t in the file.';
+
+  @override
+  String importErrorPartial(int done, int total, String error) {
+    return 'Import stopped ($done of $total statements): $error';
+  }
+
+  @override
+  String get importDuplicateDestination =>
+      'Two statements in this file go to the same account — choose a different destination for each.';
+
+  @override
   String get importErrorGeneric => 'Something went wrong. Please try again.';
 
   @override

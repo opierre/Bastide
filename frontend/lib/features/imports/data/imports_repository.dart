@@ -20,7 +20,8 @@ class ImportsRepository {
         .toList();
   }
 
-  /// Uploads an OFX/QFX statement.
+  /// Uploads an OFX/QFX file, importing its [statement] (the `ACCTID`) — which
+  /// may be left out when the file holds a single one.
   ///
   /// Re-uploading a file already imported into the account is a no-op on the
   /// backend, which returns the original batch — so a double import shows the
@@ -29,13 +30,14 @@ class ImportsRepository {
     required String accountId,
     required String fileName,
     required List<int> bytes,
+    String? statement,
   }) async {
     final json = await _apiClient.postMultipart(
       '/imports',
       fileField: 'file',
       fileName: fileName,
       fileBytes: bytes,
-      fields: {'account_id': accountId},
+      fields: {'account_id': accountId, 'statement': ?statement},
     );
     return _parseBatch(json as Map<String, dynamic>);
   }

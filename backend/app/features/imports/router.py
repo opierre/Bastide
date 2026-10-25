@@ -81,10 +81,16 @@ async def create_import(
     user: Annotated[User, Depends(get_current_user)],
     file: Annotated[UploadFile, File()],
     account_id: Annotated[str, Form()],
+    statement: Annotated[str | None, Form()] = None,
 ) -> ImportBatchRead:
-    """Upload an OFX/QFX statement for an account; re-uploading the same file changes nothing."""
+    """Upload an OFX/QFX statement for an account; re-uploading the same file changes nothing.
+
+    `statement` names the `ACCTID` to import from a file covering several accounts.
+    """
     content = await file.read()
-    return _to_read(service.import_file(user, account_id, file.filename or "import", content))
+    return _to_read(
+        service.import_file(user, account_id, file.filename or "import", content, statement)
+    )
 
 
 @router.get("/imports", response_model=list[ImportBatchRead])

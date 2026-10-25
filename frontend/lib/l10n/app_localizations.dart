@@ -1076,6 +1076,30 @@ abstract class AppLocalizations {
   /// **'Import introuvable.'**
   String get importErrorBatchNotFound;
 
+  /// Localized message for the backend's IMPORT_STATEMENT_REQUIRED error code: a multi-account file was uploaded without naming the statement to import.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ce fichier contient plusieurs comptes et aucun n\'a été désigné.'**
+  String get importErrorStatementRequired;
+
+  /// Localized message for the backend's IMPORT_STATEMENT_NOT_FOUND error code: the named statement is not in the file.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ce compte est introuvable dans le fichier.'**
+  String get importErrorStatementNotFound;
+
+  /// Shown when a multi-account file failed part-way: some statements were imported (listed in the result card), the rest were not. {error} is the localized error.
+  ///
+  /// In fr, this message translates to:
+  /// **'Import interrompu ({done} relevés sur {total}) : {error}'**
+  String importErrorPartial(int done, int total, String error);
+
+  /// Warning shown when two statements of a multi-account file resolve to the same account; the import stays disabled until each has its own.
+  ///
+  /// In fr, this message translates to:
+  /// **'Deux relevés de ce fichier vont vers le même compte — choisissez une destination différente pour chacun.'**
+  String get importDuplicateDestination;
+
   /// Fallback localized message for unrecognized or network errors on the imports panel.
   ///
   /// In fr, this message translates to:

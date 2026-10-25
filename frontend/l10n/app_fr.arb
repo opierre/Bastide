@@ -758,6 +758,27 @@
   "@importErrorBatchNotFound": {
     "description": "Localized message for the backend's IMPORT_BATCH_NOT_FOUND error code."
   },
+  "importErrorStatementRequired": "Ce fichier contient plusieurs comptes et aucun n'a été désigné.",
+  "@importErrorStatementRequired": {
+    "description": "Localized message for the backend's IMPORT_STATEMENT_REQUIRED error code: a multi-account file was uploaded without naming the statement to import."
+  },
+  "importErrorStatementNotFound": "Ce compte est introuvable dans le fichier.",
+  "@importErrorStatementNotFound": {
+    "description": "Localized message for the backend's IMPORT_STATEMENT_NOT_FOUND error code: the named statement is not in the file."
+  },
+  "importErrorPartial": "Import interrompu ({done} relevés sur {total}) : {error}",
+  "@importErrorPartial": {
+    "description": "Shown when a multi-account file failed part-way: some statements were imported (listed in the result card), the rest were not. {error} is the localized error.",
+    "placeholders": {
+      "done": {"type": "int"},
+      "total": {"type": "int"},
+      "error": {"type": "String"}
+    }
+  },
+  "importDuplicateDestination": "Deux relevés de ce fichier vont vers le même compte — choisissez une destination différente pour chacun.",
+  "@importDuplicateDestination": {
+    "description": "Warning shown when two statements of a multi-account file resolve to the same account; the import stays disabled until each has its own."
+  },
   "importErrorGeneric": "Une erreur est survenue. Veuillez réessayer.",
   "@importErrorGeneric": {
     "description": "Fallback localized message for unrecognized or network errors on the imports panel."

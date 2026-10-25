@@ -123,7 +123,7 @@ class _FakeBanksRepository extends BanksRepository {
 }
 
 /// Runs [detect] against a container wired to [banks].
-Future<OfxAccountMatch> _detect(
+Future<List<OfxAccountMatch>> _detect(
   String ofx,
   List<Account> accounts,
   _FakeBanksRepository banks,
@@ -141,6 +141,10 @@ Future<OfxAccountMatch> _detect(
       );
 }
 
+/// The one statement of a single-account file, or `null` when it names none.
+OfxAccountInfo? _single(List<int> bytes) =>
+    parseOfxStatements(bytes).singleOrNull;
+
 const _info = OfxAccountInfo(
   accountNumber: '0001234567',
   bankId: '40618',
@@ -150,9 +154,9 @@ const _info = OfxAccountInfo(
 );
 
 void main() {
-  group('parseOfxAccountInfo', () {
+  group('parseOfxStatements', () {
     test('reads the account block out of unclosed SGML tags', () {
-      final info = parseOfxAccountInfo(utf8.encode(_sgml))!;
+      final info = _single(utf8.encode(_sgml))!;
 
       expect(info.accountNumber, '0001234567');
       expect(info.bankId, '40618');
@@ -173,7 +177,7 @@ void main() {
       );
 
       expect(
-        parseOfxAccountInfo(utf8.encode(dated))!.ledgerBalanceAsOf,
+        _single(utf8.encode(dated))!.ledgerBalanceAsOf,
         DateTime(2026, 1, 31),
       );
     });
@@ -184,16 +188,13 @@ void main() {
         '<DTASOF>20260231',
       );
 
-      final info = parseOfxAccountInfo(utf8.encode(undated))!;
+      final info = _single(utf8.encode(undated))!;
       expect(info.ledgerBalanceMinor, 123456);
       expect(info.ledgerBalanceAsOf, isNull);
     });
 
     test('reads no balance out of a statement that declares none', () {
-      expect(
-        parseOfxAccountInfo(utf8.encode(_creditCardXml))!.ledgerBalanceMinor,
-        isNull,
-      );
+      expect(_single(utf8.encode(_creditCardXml))!.ledgerBalanceMinor, isNull);
     });
 
     test(
@@ -204,15 +205,12 @@ void main() {
           '<BALAMT>-42.05',
         );
 
-        expect(
-          parseOfxAccountInfo(utf8.encode(overdrawn))!.ledgerBalanceMinor,
-          -4205,
-        );
+        expect(_single(utf8.encode(overdrawn))!.ledgerBalanceMinor, -4205);
       },
     );
 
     test('reads closed XML tags and types a CCACCTFROM block as a card', () {
-      final info = parseOfxAccountInfo(utf8.encode(_creditCardXml))!;
+      final info = _single(utf8.encode(_creditCardXml))!;
 
       expect(info.accountNumber, '5555444433339876');
       expect(info.accountType, 'CREDITCARD');
@@ -229,19 +227,13 @@ void main() {
         _sgml.replaceAll('BOURSORAMA BANQUE', 'CAISSE D\'ÉPARGNE'),
       );
 
-      expect(parseOfxAccountInfo(bytes)!.organization, "CAISSE D'ÉPARGNE");
+      expect(_single(bytes)!.organization, "CAISSE D'ÉPARGNE");
     });
 
     test('returns null for files that are not OFX or declare no account', () {
-      expect(
-        parseOfxAccountInfo(utf8.encode('date;montant\n01/01/2026;-12,00')),
-        isNull,
-      );
-      expect(
-        parseOfxAccountInfo(utf8.encode('<OFX>\n<SONRS>\n</SONRS>\n</OFX>')),
-        isNull,
-      );
-      expect(parseOfxAccountInfo(const [1, 2, 3]), isNull);
+      expect(_single(utf8.encode('date;montant\n01/01/2026;-12,00')), isNull);
+      expect(_single(utf8.encode('<OFX>\n<SONRS>\n</SONRS>\n</OFX>')), isNull);
+      expect(_single(const [1, 2, 3]), isNull);
     });
   });
 
@@ -352,7 +344,7 @@ void main() {
       () async {
         final banks = _FakeBanksRepository({'13306': 'Crédit Agricole'});
 
-        final match = await _detect(_bankCodeOnlySgml, const [], banks);
+        final [match] = await _detect(_bankCodeOnlySgml, const [], banks);
 
         expect(banks.lookups, ['13306']);
         expect(match, isA<OfxAccountUnmatched>());
@@ -372,7 +364,7 @@ void main() {
           institution: 'Crédit Agricole',
         );
 
-        final match = await _detect(_bankCodeOnlySgml, [account], banks);
+        final [match] = await _detect(_bankCodeOnlySgml, [account], banks);
 
         expect((match as OfxAccountMatched).account, account);
       },
@@ -381,7 +373,7 @@ void main() {
     test('an unknown code leaves the file speaking for itself', () async {
       final banks = _FakeBanksRepository(const {});
 
-      final match = await _detect(_bankCodeOnlySgml, const [], banks);
+      final [match] = await _detect(_bankCodeOnlySgml, const [], banks);
 
       expect((match as OfxAccountUnmatched).info.institutionLabel, '13306');
     });
@@ -397,7 +389,7 @@ void main() {
         );
         addTearDown(container.dispose);
 
-        final match = await container
+        final [match] = await container
             .read(ofxAccountDetectionProvider.notifier)
             .detect(
               const PickedImportFile(name: 'releve.ofx', bytes: [1, 2, 3]),
@@ -406,7 +398,7 @@ void main() {
 
         expect(match, isA<OfxAccountUnreadable>());
         expect(
-          container.read(ofxAccountDetectionProvider),
+          container.read(ofxAccountDetectionProvider)!.single,
           isA<OfxAccountUnreadable>(),
         );
       },
@@ -420,4 +412,78 @@ void main() {
       expect(banks.lookups, isEmpty);
     });
   });
+
+  group('several statements in one file', () {
+    test('each statement is read on its own, balance included', () {
+      final statements = parseOfxStatements(utf8.encode(_multiSgml));
+
+      expect(statements.map((s) => s.accountNumber), [
+        '0001234567',
+        '0007654321',
+      ]);
+      expect(statements.map((s) => s.accountType), ['CHECKING', 'SAVINGS']);
+      expect(statements.map((s) => s.ledgerBalanceMinor), [123456, 520000]);
+      // The signon block names the bank once, for every statement.
+      expect(
+        statements.map((s) => s.organization),
+        everyElement('BOURSORAMA BANQUE'),
+      );
+    });
+
+    test('a bound account is claimed before any guess is made', () {
+      // The savings statement alone would match the checking account by bank;
+      // the checking statement's binding takes it off the table first.
+      final checking = _account(ofxAccountId: '0001234567');
+      final statements = parseOfxStatements(utf8.encode(_multiSgml));
+
+      final matches = matchOfxStatements(statements, [checking]);
+
+      expect((matches[0] as OfxAccountMatched).account, checking);
+      expect(matches[1], isA<OfxAccountUnmatched>());
+    });
+
+    test('two statements guessing the same account are both asked', () {
+      final only = _account(type: AccountType.other);
+      final statements = parseOfxStatements(utf8.encode(_multiSgml));
+
+      final matches = matchOfxStatements(statements, [only]);
+
+      expect(matches, everyElement(isA<OfxAccountAmbiguous>()));
+      expect((matches[0] as OfxAccountAmbiguous).candidates, [only]);
+    });
+  });
 }
+
+/// Two statements of one Boursorama customer in a single file.
+const _multiSgml = '''
+<OFX>
+<SIGNONMSGSRSV1><SONRS><FI><ORG>BOURSORAMA BANQUE
+</FI></SONRS></SIGNONMSGSRSV1>
+<BANKMSGSRSV1>
+<STMTTRNRS><STMTRS>
+<CURDEF>EUR
+<BANKACCTFROM>
+<BANKID>40618
+<ACCTID>0001234567
+<ACCTTYPE>CHECKING
+</BANKACCTFROM>
+<LEDGERBAL>
+<BALAMT>1234.56
+<DTASOF>20260131
+</LEDGERBAL>
+</STMTRS></STMTTRNRS>
+<STMTTRNRS><STMTRS>
+<CURDEF>EUR
+<BANKACCTFROM>
+<BANKID>40618
+<ACCTID>0007654321
+<ACCTTYPE>SAVINGS
+</BANKACCTFROM>
+<LEDGERBAL>
+<BALAMT>5200.00
+<DTASOF>20260131
+</LEDGERBAL>
+</STMTRS></STMTTRNRS>
+</BANKMSGSRSV1>
+</OFX>
+''';

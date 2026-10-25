@@ -11,6 +11,10 @@ String localizeImportError(AppLocalizations l10n, Object? error) {
         return l10n.importErrorAccountNotFound;
       case 'IMPORT_BATCH_NOT_FOUND':
         return l10n.importErrorBatchNotFound;
+      case 'IMPORT_STATEMENT_REQUIRED':
+        return l10n.importErrorStatementRequired;
+      case 'IMPORT_STATEMENT_NOT_FOUND':
+        return l10n.importErrorStatementNotFound;
     }
   }
   return l10n.importErrorGeneric;

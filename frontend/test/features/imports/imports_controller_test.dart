@@ -144,6 +144,35 @@ void main() {
     );
 
     test(
+      'a statement of a multi-account file is named in the upload',
+      () async {
+        when(
+          () => apiClient.get('/imports'),
+        ).thenAnswer((_) async => <dynamic>[]);
+        _stubMultipart(apiClient, '/imports', _batchJson());
+
+        await container.read(importsControllerProvider.future);
+        await container
+            .read(importsControllerProvider.notifier)
+            .importFile(accountId: 'a1', file: _file, statement: '0001234567');
+
+        final captured =
+            verify(
+                  () => apiClient.postMultipart(
+                    '/imports',
+                    fileField: any(named: 'fileField'),
+                    fileName: any(named: 'fileName'),
+                    fileBytes: any(named: 'fileBytes'),
+                    fields: captureAny(named: 'fields'),
+                  ),
+                ).captured.single
+                as Map<String, String>;
+
+        expect(captured, {'account_id': 'a1', 'statement': '0001234567'});
+      },
+    );
+
+    test(
       're-importing the same file replaces its entry instead of listing it twice',
       () async {
         // The backend returns the *original* batch for an already-imported file,

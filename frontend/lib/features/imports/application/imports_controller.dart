@@ -69,7 +69,8 @@ class ImportsController extends AsyncNotifier<List<ImportBatch>> {
     );
   }
 
-  /// Imports [file] into [accountId].
+  /// Imports [file] into [accountId] — only its [statement] (the `ACCTID`)
+  /// when the file covers several accounts.
   ///
   /// Returns the batch so the panel can show its result. A `failed` batch is a
   /// normal return, not a throw: the backend records the rejected file in the
@@ -77,6 +78,7 @@ class ImportsController extends AsyncNotifier<List<ImportBatch>> {
   Future<ImportBatch> importFile({
     required String accountId,
     required PickedImportFile file,
+    String? statement,
   }) async {
     final batch = await ref
         .read(importsRepositoryProvider)
@@ -84,6 +86,7 @@ class ImportsController extends AsyncNotifier<List<ImportBatch>> {
           accountId: accountId,
           fileName: file.name,
           bytes: file.bytes,
+          statement: statement,
         );
 
     // Re-importing an identical file returns the original batch rather than a
@@ -116,24 +119,31 @@ final importsControllerProvider =
       ImportsController.new,
     );
 
-/// The account the user picked to settle a statement that couldn't name its own
-/// destination — an ambiguous match, or a file with no readable account block.
+/// The accounts the user picked to settle statements that couldn't name their
+/// own destination — an ambiguous match, or a file with no readable account
+/// block — keyed by the statement's `ACCTID` (`null` for that unreadable file).
 ///
 /// Not a destination selector: it is empty on every well-formed statement, and
 /// is only ever consulted when [ofxAccountDetectionProvider] came back without
 /// an answer. Cleared whenever the staged file changes, so a choice made for
-/// one statement can never carry over to the next.
-class ChosenImportAccount extends Notifier<String?> {
+/// one file can never carry over to the next.
+class ChosenImportAccounts extends Notifier<Map<String?, String>> {
   @override
-  String? build() => null;
+  Map<String?, String> build() => const {};
 
-  void select(String? accountId) => state = accountId;
+  void select(String? statement, String? accountId) => state = {
+    for (final entry in state.entries)
+      if (entry.key != statement) entry.key: entry.value,
+    statement: ?accountId,
+  };
 
-  void clear() => state = null;
+  void clear() => state = const {};
 }
 
-final chosenImportAccountProvider =
-    NotifierProvider<ChosenImportAccount, String?>(ChosenImportAccount.new);
+final chosenImportAccountsProvider =
+    NotifierProvider<ChosenImportAccounts, Map<String?, String>>(
+      ChosenImportAccounts.new,
+    );
 
 /// The file staged in the drop zone, before it is imported.
 class SelectedImportFile extends Notifier<PickedImportFile?> {
@@ -150,17 +160,20 @@ final selectedImportFileProvider =
       SelectedImportFile.new,
     );
 
-/// The batch from the import run in this session, shown in the result card.
+/// The batches from the import run in this session — one per statement of the
+/// file — shown in the result card.
 ///
 /// Separate from the history list because it answers a different question —
 /// "what just happened" rather than "what have I imported" — and it stays
 /// empty until the user actually imports something.
-class LastImportResult extends Notifier<ImportBatch?> {
+class LastImportResult extends Notifier<List<ImportBatch>?> {
   @override
-  ImportBatch? build() => null;
+  List<ImportBatch>? build() => null;
 
-  void set(ImportBatch? batch) => state = batch;
+  void set(List<ImportBatch>? batches) => state = batches;
 }
 
 final lastImportResultProvider =
-    NotifierProvider<LastImportResult, ImportBatch?>(LastImportResult.new);
+    NotifierProvider<LastImportResult, List<ImportBatch>?>(
+      LastImportResult.new,
+    );

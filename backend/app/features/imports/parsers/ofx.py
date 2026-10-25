@@ -5,6 +5,10 @@ French banks commonly emit OFX 1.x SGML with unclosed leaf tags (`<NAME>foo` wit
 an XML parser: it scans for `<STMTTRN>...</STMTTRN>` blocks (always closed, since STMTTRN is a
 repeated container) and pulls leaf values with a tag-bounded regex that stops at the next tag
 or line end, which works whether or not that leaf tag is itself closed.
+
+A file may hold several statements — one `STMTRS`/`CCSTMTRS` aggregate per account, which some
+banks emit for a whole customer at once. Each is read on its own, so a statement's
+transactions and closing balance never leak into another account's.
 """
 
 import re
@@ -36,7 +40,22 @@ class LedgerBalance:
     as_of: date | None
 
 
+@dataclass(frozen=True, slots=True)
+class Statement:
+    """One account's statement inside an OFX file."""
+
+    #: `ACCTID` from the statement's `BANKACCTFROM`/`CCACCTFROM`, or `None` when it names none.
+    account_number: str | None
+    transactions: list[RawTransaction]
+    ledger_balance: LedgerBalance | None
+
+
 _OFX_ROOT_RE = re.compile(r"<OFX[>\s]", re.IGNORECASE)
+# Aggregates are always closed, even in SGML — only leaf tags may be left open.
+_STMTRS_RE = re.compile(r"<(?:CC)?STMTRS>(.*?)</(?:CC)?STMTRS>", re.IGNORECASE | re.DOTALL)
+_ACCTFROM_RE = re.compile(
+    r"<(BANK|CC)ACCTFROM>(.*?)(?:</\1ACCTFROM>|\Z)", re.IGNORECASE | re.DOTALL
+)
 _STMTTRN_RE = re.compile(r"<STMTTRN>(.*?)</STMTTRN>", re.IGNORECASE | re.DOTALL)
 # `AVAILBAL` carries a different figure (funds available, including holds), so
 # the tag is matched exactly rather than on a `BAL` suffix.
@@ -76,8 +95,11 @@ def _parse_amount_minor(value: str) -> int:
     return int(minor)
 
 
-def parse(raw_bytes: bytes) -> list[RawTransaction]:
-    """Parse OFX/QFX bytes into raw transactions (no dedup/normalization).
+def parse_statements(raw_bytes: bytes) -> list[Statement]:
+    """Parse OFX/QFX bytes into one statement per account (no dedup/normalization).
+
+    A file without statement aggregates — a bare list of `STMTTRN` — is read as a single
+    statement naming no account.
 
     Raises:
         OfxParseError: the file isn't OFX at all, or a `STMTTRN` is missing `DTPOSTED`/`TRNAMT`.
@@ -86,24 +108,38 @@ def parse(raw_bytes: bytes) -> list[RawTransaction]:
     if _OFX_ROOT_RE.search(text) is None:
         raise OfxParseError("Not an OFX file: missing <OFX> root element.")
 
+    blocks = _STMTRS_RE.findall(text) or [text]
+    return [_statement(block) for block in blocks]
+
+
+def _statement(block: str) -> Statement:
+    acct_from = _ACCTFROM_RE.search(block)
+    return Statement(
+        account_number=_tag(acct_from.group(2), "ACCTID") if acct_from else None,
+        transactions=_transactions(block),
+        ledger_balance=_ledger_balance(block),
+    )
+
+
+def _transactions(block: str) -> list[RawTransaction]:
     transactions: list[RawTransaction] = []
-    for block in _STMTTRN_RE.findall(text):
-        dtposted = _tag(block, "DTPOSTED")
-        trnamt = _tag(block, "TRNAMT")
+    for record in _STMTTRN_RE.findall(block):
+        dtposted = _tag(record, "DTPOSTED")
+        trnamt = _tag(record, "TRNAMT")
         if dtposted is None or trnamt is None:
             raise OfxParseError("STMTTRN missing DTPOSTED or TRNAMT.")
 
         # `NAME` is the payee/label and `MEMO` the bank's free-text detail. They are kept
         # apart so the description (and everything derived from it — merchant, rules,
         # dedup hash) stays the label alone, with the memo carried as its own field.
-        name = _tag(block, "NAME")
-        memo = _tag(block, "MEMO")
+        name = _tag(record, "NAME")
+        memo = _tag(record, "MEMO")
         description_raw = name or memo or ""
         # A memo echoing the name adds nothing to display, and a memo-only record has
         # already been promoted to the description above.
         memo = memo if memo and memo != name and memo != description_raw else None
 
-        dtuser = _tag(block, "DTUSER") or _tag(block, "DTAVAIL")
+        dtuser = _tag(record, "DTUSER") or _tag(record, "DTAVAIL")
 
         transactions.append(
             RawTransaction(
@@ -112,22 +148,19 @@ def parse(raw_bytes: bytes) -> list[RawTransaction]:
                 amount_minor=_parse_amount_minor(trnamt),
                 description_raw=description_raw,
                 memo=memo,
-                fitid=_tag(block, "FITID"),
+                fitid=_tag(record, "FITID"),
             )
         )
     return transactions
 
 
-def parse_ledger_balance(raw_bytes: bytes) -> LedgerBalance | None:
+def _ledger_balance(block: str) -> LedgerBalance | None:
     """The closing balance the statement declares, or `None` when it declares none.
 
-    Never raises: the balance is a bonus the file may or may not carry, and a
-    statement we can't read one out of must still import its transactions. A
-    file holding several statements is read for the first, matching how the
-    client picks the account block it routes on.
+    Never raises: the balance is a bonus the statement may or may not carry, and one we
+    can't read must not stop its transactions from importing.
     """
-    text = decode(raw_bytes)
-    match = _LEDGERBAL_RE.search(text)
+    match = _LEDGERBAL_RE.search(block)
     if match is None:
         return None
 
