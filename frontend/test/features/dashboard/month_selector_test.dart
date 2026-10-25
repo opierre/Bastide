@@ -59,6 +59,30 @@ void main() {
     expect(controller.changeMonthCalls, [DateTime(2026, 4)]);
   });
 
+  testWidgets('the pill keeps its width whichever month it names', (
+    tester,
+  ) async {
+    // « Mai 2026 » and « Septembre 2026 » differ by a third: a pill sized to
+    // its label moved the chevron out from under a pointer stepping through.
+    await tester.pumpWidget(_wrap(_controllerAt(DateTime(2026, 5))));
+    await tester.pumpAndSettle();
+    final may = tester.getRect(find.byType(DashboardTopBarActions));
+    final mayNext = tester.getCenter(
+      find.byKey(const Key('dashboardMonthNext')),
+    );
+
+    await tester.pumpWidget(const SizedBox());
+    await tester.pumpWidget(_wrap(_controllerAt(DateTime(2026, 9))));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Septembre 2026'), findsOneWidget);
+    expect(tester.getRect(find.byType(DashboardTopBarActions)), may);
+    expect(
+      tester.getCenter(find.byKey(const Key('dashboardMonthNext'))),
+      mayNext,
+    );
+  });
+
   testWidgets('tapping the label opens the picker on the selected month', (
     tester,
   ) async {

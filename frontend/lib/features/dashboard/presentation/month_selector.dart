@@ -101,9 +101,10 @@ class _MonthPickerAnchorState extends State<MonthPickerAnchor> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final label = widget.month == null
-        ? ''
-        : _capitalize(DateFormat.yMMMM(widget.locale).format(widget.month!));
+    final month = widget.month;
+    final style = Theme.of(context).textTheme.bodyMedium;
+    String labelFor(DateTime value) =>
+        _capitalize(DateFormat.yMMMM(widget.locale).format(value));
 
     return MenuAnchor(
       controller: _menuController,
@@ -148,12 +149,26 @@ class _MonthPickerAnchorState extends State<MonthPickerAnchor> {
               horizontal: AppSpacing.sm,
               vertical: AppSpacing.xs,
             ),
-            child: Text(
-              label,
-              key: const Key('dashboardMonthLabel'),
-              textAlign: TextAlign.center,
-              style: Theme.of(context).textTheme.bodyMedium,
-            ),
+            // Sized to the year's widest month rather than to the one shown: « Mai 2026 » and
+            // « Septembre 2026 » differ by a third, and a pill that resized on every step
+            // moved the chevron out from under the pointer clicking it.
+            child: month == null
+                ? Text('', key: const Key('dashboardMonthLabel'), style: style)
+                : IndexedStack(
+                    index: month.month - 1,
+                    alignment: Alignment.center,
+                    children: [
+                      for (var m = 1; m <= 12; m++)
+                        Text(
+                          labelFor(DateTime(month.year, m)),
+                          key: m == month.month
+                              ? const Key('dashboardMonthLabel')
+                              : null,
+                          textAlign: TextAlign.center,
+                          style: style,
+                        ),
+                    ],
+                  ),
           ),
         ),
       ),
