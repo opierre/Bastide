@@ -4,7 +4,8 @@ import '../../../core/api/api_client.dart';
 import '../../../core/api/api_client_provider.dart';
 import '../domain/networth_summary.dart';
 
-/// Calls `/networth/summary` and maps the wire JSON to the domain model.
+/// Calls `/networth/summary` and the declared-total endpoints, and maps the
+/// wire JSON to the domain models.
 ///
 /// It also reads `/mortgages/summary` for one figure the net-worth response
 /// doesn't carry — the active loan count the Passif card names — the same
@@ -45,8 +46,9 @@ class NetworthRepository {
         for (final point
             in (json['series'] as List<dynamic>).cast<Map<String, dynamic>>())
           NetWorthPoint(
-            month: DateTime.parse('${point['month'] as String}-01'),
+            month: _month(point['month'] as String),
             netWorthMinor: point['net_worth_minor'] as int,
+            declared: point['source'] == 'declared',
           ),
       ],
       propertyValuesHeldFlat: json['property_values_held_flat'] as bool,
@@ -57,6 +59,44 @@ class NetworthRepository {
       currency: json['currency'] as String,
     );
   }
+
+  /// The month-end totals the user declared, oldest first.
+  Future<List<DeclaredBalance>> declared() async {
+    final json = await _apiClient.get('/networth/declared') as List<dynamic>;
+    return [
+      for (final entry in json.cast<Map<String, dynamic>>())
+        _parseDeclared(entry),
+    ];
+  }
+
+  /// Declares, or replaces, the total for [month] (its first day).
+  Future<DeclaredBalance> declare(DateTime month, int amountMinor) async {
+    final json =
+        await _apiClient.put(
+              '/networth/declared/${_monthKey(month)}',
+              body: {'amount_minor': amountMinor},
+            )
+            as Map<String, dynamic>;
+    return _parseDeclared(json);
+  }
+
+  Future<void> removeDeclared(DateTime month) async {
+    await _apiClient.delete('/networth/declared/${_monthKey(month)}');
+  }
+
+  static DeclaredBalance _parseDeclared(Map<String, dynamic> json) =>
+      DeclaredBalance(
+        month: _month(json['month'] as String),
+        amountMinor: json['amount_minor'] as int,
+        currency: json['currency'] as String,
+        superseded: json['superseded'] as bool,
+      );
+
+  static DateTime _month(String key) => DateTime.parse('$key-01');
+
+  static String _monthKey(DateTime month) =>
+      '${month.year.toString().padLeft(4, '0')}-'
+      '${month.month.toString().padLeft(2, '0')}';
 }
 
 final networthRepositoryProvider = Provider<NetworthRepository>((ref) {

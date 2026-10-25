@@ -65,6 +65,10 @@ class ApiClient {
     return _send('PATCH', path, body: body);
   }
 
+  Future<dynamic> put(String path, {Object? body}) {
+    return _send('PUT', path, body: body);
+  }
+
   Future<dynamic> delete(String path) {
     return _send('DELETE', path);
   }

@@ -1,4 +1,7 @@
-"""Response schemas for the net-worth summary. Every figure is derived; none is stored."""
+"""Schemas for the net-worth summary and the month-end totals a user declares.
+
+Every summary figure is derived; only a declared total is stored, and it is the user's own.
+"""
 
 from datetime import date
 from typing import Literal
@@ -6,6 +9,9 @@ from typing import Literal
 from pydantic import BaseModel
 
 CompositionGroup = Literal["account", "property"]
+#: Where a series point's account total comes from: the imported ledger, or a figure the user
+#: declared for a month the ledger does not cover.
+PointSource = Literal["ledger", "declared"]
 
 
 class NetWorthAssets(BaseModel):
@@ -40,10 +46,11 @@ class NetWorthPoint(BaseModel):
 
     month: str
     net_worth_minor: int
+    source: PointSource
 
 
 class NetWorthSummary(BaseModel):
-    """`GET /networth/summary`: what the user owns, what they owe, and the recent history."""
+    """`GET /networth/summary`: what the user owns, what they owe, and the month-end history."""
 
     assets: NetWorthAssets
     liabilities: NetWorthLiabilities
@@ -54,3 +61,22 @@ class NetWorthSummary(BaseModel):
     property_values_held_flat: bool
     valued_on_oldest: date | None
     currency: str
+
+
+class DeclaredBalanceWrite(BaseModel):
+    """`PUT /networth/declared/{month}`: what every account held together at that month end."""
+
+    amount_minor: int
+
+
+class DeclaredBalanceRead(BaseModel):
+    """One declared month-end total.
+
+    `superseded` is true when the ledger has a snapshot for that month: the series then draws
+    the imported figure, and this one is kept but not shown on the chart.
+    """
+
+    month: str
+    amount_minor: int
+    currency: str
+    superseded: bool

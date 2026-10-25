@@ -3775,7 +3775,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get networthRetry => 'Réessayer';
 
   @override
-  String get networthSeriesTitle => 'Patrimoine net · 12 mois';
+  String get networthSeriesTitle => 'Patrimoine net';
 
   @override
   String get networthSeriesSubtitle => 'Comptes et crédits, mois après mois';
@@ -3787,12 +3787,89 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get networthSeriesEmpty =>
-      'Pas encore d\'historique : la série commence au premier mois clos d\'un compte importé.';
+      'Pas encore d\'historique : la série commence au premier mois clos d\'un compte importé, ou au premier montant que vous déclarez.';
 
   @override
   String networthSeriesCaveat(String date) {
-    return 'Les biens sont maintenus à leur valeur déclarée (estimation la plus ancienne : $date) : seuls les comptes et les crédits bougent d\'un mois à l\'autre. Les mois sans donnée sont simplement absents.';
+    return 'Les biens sont maintenus à leur valeur déclarée (estimation la plus ancienne : $date) et ne comptent qu\'à partir de leur date d\'acquisition, les crédits qu\'à partir de leur déblocage. Les mois sans donnée sont simplement absents.';
   }
+
+  @override
+  String get networthRangeYear => '12 mois';
+
+  @override
+  String get networthRangeThreeYears => '3 ans';
+
+  @override
+  String get networthRangeAll => 'Tout';
+
+  @override
+  String get networthLegendLedger => 'Comptes importés';
+
+  @override
+  String get networthLegendDeclared => 'Montants déclarés';
+
+  @override
+  String get networthDeclaredOpen => 'Historique déclaré';
+
+  @override
+  String get networthDeclaredTitle => 'Historique déclaré';
+
+  @override
+  String get networthDeclaredSubtitle =>
+      'Le total de tous vos comptes à la fin d\'un mois, pour la période avant vos imports. Un mois couvert par vos imports garde le chiffre importé.';
+
+  @override
+  String get networthDeclaredMonth => 'Mois';
+
+  @override
+  String get networthDeclaredMonthHint => 'MM/AAAA';
+
+  @override
+  String get networthDeclaredMonthInvalid =>
+      'Saisissez un mois au format MM/AAAA.';
+
+  @override
+  String get networthDeclaredMonthNotClosed =>
+      'Seul un mois terminé peut être déclaré.';
+
+  @override
+  String get networthDeclaredAmount => 'Total des comptes';
+
+  @override
+  String get networthDeclaredAmountInvalid => 'Saisissez un montant.';
+
+  @override
+  String get networthDeclaredSave => 'Enregistrer';
+
+  @override
+  String get networthDeclaredClose => 'Fermer';
+
+  @override
+  String get networthDeclaredEmpty => 'Aucun montant déclaré pour l\'instant.';
+
+  @override
+  String get networthDeclaredSuperseded => 'Couvert par vos imports';
+
+  @override
+  String get networthDeclaredEdit => 'Modifier';
+
+  @override
+  String get networthDeclaredDelete => 'Supprimer';
+
+  @override
+  String get networthDeclaredLoadFailed =>
+      'Impossible de charger l\'historique déclaré.';
+
+  @override
+  String get networthDeclaredRetry => 'Réessayer';
+
+  @override
+  String get networthDeclaredErrorNotFound => 'Ce montant n\'existe plus.';
+
+  @override
+  String get networthDeclaredErrorGeneric =>
+      'L\'enregistrement a échoué. Réessayez.';
 
   @override
   String get authForgotPasswordLink => 'Mot de passe oublié ?';

@@ -31,6 +31,7 @@ EXPECTED_TABLES = {
     "mortgages",
     "properties",
     "mortgage_simulations",
+    "declared_balances",
     "alembic_version",
 }
 

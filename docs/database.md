@@ -80,6 +80,15 @@ erDiagram
         datetime finished_at "nullable"
         datetime created_at
     }
+    declared_balances {
+        text id PK
+        text user_id FK
+        date period_end
+        int amount_minor
+        text currency
+        datetime created_at
+        datetime updated_at
+    }
     goal_allocations {
         text id PK
         text goal_id FK
@@ -251,6 +260,7 @@ erDiagram
     accounts |o--o{ categorization_runs : "account_id"
     import_batches |o--o{ categorization_runs : "import_batch_id"
     users ||--o{ categorization_runs : "user_id"
+    users ||--o{ declared_balances : "user_id"
     goals ||--o{ goal_allocations : "goal_id"
     users ||--o{ goals : "user_id"
     accounts ||--o{ import_batches : "account_id"
@@ -280,6 +290,10 @@ erDiagram
 ### `accounts`
 
 - unique `(user_id, ofx_account_id)`
+
+### `declared_balances`
+
+- unique `(user_id, period_end)`
 
 ### `goal_allocations`
 

@@ -35,11 +35,39 @@ class CompositionEntry {
 /// Net worth at the end of one closed month.
 @immutable
 class NetWorthPoint {
-  const NetWorthPoint({required this.month, required this.netWorthMinor});
+  const NetWorthPoint({
+    required this.month,
+    required this.netWorthMinor,
+    this.declared = false,
+  });
 
   /// First day of the month.
   final DateTime month;
   final int netWorthMinor;
+
+  /// The accounts part is a total the user declared, not the imported ledger:
+  /// the chart draws it dashed.
+  final bool declared;
+}
+
+/// A month-end total of every account, declared by the user for a month the
+/// imports don't cover.
+@immutable
+class DeclaredBalance {
+  const DeclaredBalance({
+    required this.month,
+    required this.amountMinor,
+    required this.currency,
+    required this.superseded,
+  });
+
+  /// First day of the month.
+  final DateTime month;
+  final int amountMinor;
+  final String currency;
+
+  /// The imports cover this month: the chart shows their figure instead.
+  final bool superseded;
 }
 
 /// `GET /networth/summary`, plus the active loan count the Passif card names.
@@ -79,7 +107,8 @@ class NetWorthSummary {
   /// The last two series points' difference; `null` with fewer than two.
   final int? monthDeltaMinor;
 
-  /// Closed months only, oldest first. A month without data is absent.
+  /// Every closed month with data, oldest first — the panel picks the range
+  /// it shows. A month without data is absent.
   final List<NetWorthPoint> series;
   final bool propertyValuesHeldFlat;
 
@@ -88,7 +117,8 @@ class NetWorthSummary {
   final int activeLoanCount;
   final String currency;
 
-  /// Nothing to add up: no account, no property, no loan. The one case the
-  /// panel drops its segmented control for a full empty state.
-  bool get isEmpty => composition.isEmpty && activeLoanCount == 0;
+  /// Nothing to add up: no account, no property, no loan, no history. The one
+  /// case the panel drops its segmented control for a full empty state.
+  bool get isEmpty =>
+      composition.isEmpty && activeLoanCount == 0 && series.isEmpty;
 }

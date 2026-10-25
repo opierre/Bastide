@@ -12,6 +12,7 @@ from app.features.categorization import models as categorization_models  # noqa:
 from app.features.goals import models as goals_models  # noqa: F401
 from app.features.imports import models as imports_models  # noqa: F401
 from app.features.mortgages import models as mortgages_models  # noqa: F401
+from app.features.networth import models as networth_models  # noqa: F401
 from app.features.properties import models as properties_models  # noqa: F401
 from app.features.recurring import models as recurring_models  # noqa: F401
 from app.features.rules import models as rules_models  # noqa: F401
