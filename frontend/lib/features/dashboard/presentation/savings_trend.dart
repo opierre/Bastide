@@ -24,6 +24,7 @@ class SavingsTrendChart extends StatelessWidget {
     // Standalone month abbreviations ("déc.", "janv."), not the genitive form a full date
     // would take — these label an axis tick, not a date.
     final monthFormat = DateFormat('LLL', locale);
+    final textTheme = Theme.of(context).textTheme;
 
     return ChartContainer(
       title: l10n.dashboardSavingsTrendTitle,
@@ -37,6 +38,28 @@ class SavingsTrendChart extends StatelessWidget {
         labels: [
           for (final point in series)
             _capitalize(monthFormat.format(point.month)),
+        ],
+        // Hovering a month names its running total — the line alone shows the trend, not the
+        // figure. Neutral, like the header's total: the movement is not what this states.
+        tooltips: [
+          for (final point in series)
+            TextSpan(
+              children: [
+                TextSpan(
+                  text:
+                      '${_capitalize(DateFormat.yMMMM(locale).format(point.month))}\n',
+                  style: tabularNumberStyle(textTheme.labelSmall!),
+                ),
+                TextSpan(
+                  text: formatAmount(
+                    amountMinor: point.cumulativeMinor,
+                    currency: trends.currency,
+                    locale: locale,
+                  ),
+                  style: tabularNumberStyle(textTheme.bodySmall!),
+                ),
+              ],
+            ),
         ],
       ),
     );
