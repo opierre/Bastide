@@ -33,7 +33,10 @@ What you can do instead of trusting a certificate:
 
 1. Run `Bastide-Setup-<version>.exe`.
 2. Windows shows **"Windows protected your PC"**. Click **More info**, then **Run anyway**.
-3. There are no steps to follow: Bastide installs for your user only, without an administrator
+3. Windows may also ask **"Do you want to run this file?"**, with **Publisher: Unknown
+   Publisher**. Click **Run**. To skip this question, unblock the file before running it (see
+   [Unblock a download](#unblock-a-download)).
+4. There are no steps to follow: Bastide installs for your user only, without an administrator
    password, into `%LOCALAPPDATA%\Bastide.App`, then opens. Afterwards, open it from its desktop
    shortcut or the Start menu.
 
@@ -44,9 +47,24 @@ Microsoft.
 ### Portable version
 
 Unzip `Bastide-<version>-windows.zip` anywhere (a USB stick works), open the `Bastide` folder
-and run `bastide.exe`. The same **More info → Run anyway** warning appears. Your data is not
+and run `bastide.exe`. The same warnings appear. Unblock the zip **before** unzipping it (see
+[Unblock a download](#unblock-a-download)): otherwise Windows marks every unzipped file as
+downloaded and asks again each time you open the app. Your data is not
 stored in that folder but in your user folder, as with the installer (see
 [Where your data lives](#where-your-data-lives)).
+
+### Unblock a download
+
+Windows marks every file that comes from the internet, and asks before running a marked
+program whose publisher it can't verify. Once you have
+[checked your download](#check-your-download), you can remove that mark:
+
+- Right-click the file → **Properties**, tick **Unblock** at the bottom of the **General**
+  tab, then click **OK**.
+- Or in PowerShell: `Unblock-File .\Bastide-Setup-<version>.exe` (or the `.zip`).
+
+"Windows protected your PC" may still appear: that one only goes away once a version has been
+downloaded by enough people.
 
 ### Update
 
