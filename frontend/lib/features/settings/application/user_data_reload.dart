@@ -6,6 +6,9 @@ import '../../categorization/application/run_controller.dart';
 import '../../dashboard/application/dashboard_controller.dart';
 import '../../goals/application/goals_controller.dart';
 import '../../imports/application/imports_controller.dart';
+import '../../mortgages/application/mortgages_controller.dart';
+import '../../networth/application/networth_controller.dart';
+import '../../properties/application/properties_controller.dart';
 import '../../recurring/application/subscriptions_controller.dart';
 import '../../rules/application/rules_controller.dart';
 import '../../transactions/application/transactions_controller.dart';
@@ -28,6 +31,10 @@ void reloadUserData(Ref ref) {
     ..invalidate(goalsControllerProvider)
     ..invalidate(goalAllocationsProvider)
     ..invalidate(importsControllerProvider)
+    ..invalidate(networthControllerProvider)
+    ..invalidate(declaredBalancesControllerProvider)
+    ..invalidate(propertiesControllerProvider)
+    ..invalidate(mortgagesControllerProvider)
     ..invalidate(runControllerProvider)
     ..invalidate(aiAvailabilityProvider);
 }

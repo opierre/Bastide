@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../accounts/application/accounts_controller.dart';
 import '../../dashboard/application/dashboard_controller.dart';
+import '../../networth/application/networth_controller.dart';
 import '../../transactions/application/transactions_controller.dart';
 import '../data/imports_repository.dart';
 import '../domain/import_batch.dart';
@@ -102,6 +103,9 @@ class ImportsController extends AsyncNotifier<List<ImportBatch>> {
       ref.invalidate(transactionsControllerProvider);
       ref.invalidate(accountsControllerProvider);
       ref.invalidate(dashboardControllerProvider);
+      // Synthèse sums the same balances; left cached, it kept the empty state it read
+      // before the first import and offered only « Nouveau bien ».
+      ref.invalidate(networthControllerProvider);
     }
     return batch;
   }

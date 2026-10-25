@@ -172,3 +172,17 @@ class FakeDeclaredBalancesController extends DeclaredBalancesController {
     state = AsyncValue.data(entries);
   }
 }
+
+/// `GET /networth/summary` with nothing to add up — for tests that only count
+/// how often the summary is read.
+const emptyNetworthSummaryJson = {
+  'assets': {'accounts_minor': 0, 'properties_minor': 0},
+  'liabilities': {'mortgages_minor': 0},
+  'net_worth_minor': 0,
+  'composition': <Map<String, dynamic>>[],
+  'month_delta_minor': null,
+  'series': <Map<String, dynamic>>[],
+  'property_values_held_flat': false,
+  'valued_on_oldest': null,
+  'currency': 'EUR',
+};

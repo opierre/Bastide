@@ -2,10 +2,13 @@ import 'package:bastide/core/api/api_client.dart';
 import 'package:bastide/core/api/api_client_provider.dart';
 import 'package:bastide/features/imports/application/imports_controller.dart';
 import 'package:bastide/features/imports/domain/import_batch.dart';
+import 'package:bastide/features/networth/application/networth_controller.dart';
 import 'package:bastide/features/transactions/application/transactions_controller.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
+
+import '../../support/networth_fixtures.dart';
 
 class MockApiClient extends Mock implements ApiClient {}
 
@@ -218,6 +221,35 @@ void main() {
       verify(
         () => apiClient.get('/transactions', query: any(named: 'query')),
       ).called(2);
+    });
+
+    test('a successful import invalidates the net-worth summary', () async {
+      // Synthèse read before the first import kept its empty state — only
+      // « Nouveau bien » on offer — until a restart.
+      when(
+        () => apiClient.get('/imports'),
+      ).thenAnswer((_) async => <dynamic>[]);
+      when(
+        () => apiClient.get('/networth/summary'),
+      ).thenAnswer((_) async => emptyNetworthSummaryJson);
+      when(
+        () => apiClient.get('/mortgages/summary'),
+      ).thenAnswer((_) async => {'active_count': 0});
+      _stubMultipart(apiClient, '/imports', _batchJson());
+
+      final subscription = container.listen(
+        networthControllerProvider,
+        (_, _) {},
+      );
+      addTearDown(subscription.close);
+      await container.read(importsControllerProvider.future);
+      await container.read(networthControllerProvider.future);
+      await container
+          .read(importsControllerProvider.notifier)
+          .importFile(accountId: 'a1', file: _file);
+      await container.read(networthControllerProvider.future);
+
+      verify(() => apiClient.get('/networth/summary')).called(2);
     });
 
     test('a failed import leaves the transactions list alone', () async {
