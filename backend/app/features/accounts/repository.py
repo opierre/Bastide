@@ -1,9 +1,12 @@
 """Data access for `Account` rows. The only place that queries this table."""
 
-from sqlalchemy import select
+from datetime import date
+
+from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 from app.features.accounts.models import Account
+from app.features.transactions.models import Transaction
 
 
 class AccountRepository:
@@ -38,6 +41,17 @@ class AccountRepository:
                 Account.user_id == user_id,
             )
         )
+
+    def last_booked_dates(self, account_ids: list[str]) -> dict[str, date]:
+        """`account_id` → booking date of its latest transaction; accounts with none are absent."""
+        if not account_ids:
+            return {}
+        rows = self._db.execute(
+            select(Transaction.account_id, func.max(Transaction.booked_date))
+            .where(Transaction.account_id.in_(account_ids))
+            .group_by(Transaction.account_id)
+        ).all()
+        return {account_id: booked for account_id, booked in rows}
 
     def add(self, account: Account) -> Account:
         self._db.add(account)

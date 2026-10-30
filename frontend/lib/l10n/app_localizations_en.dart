@@ -300,6 +300,14 @@ class AppLocalizationsEn extends AppLocalizations {
   String get accountEdit => 'Edit';
 
   @override
+  String accountLastTransaction(String date) {
+    return 'Last transaction on $date';
+  }
+
+  @override
+  String get accountNoTransactions => 'No transactions yet';
+
+  @override
   String get accountArchive => 'Archive';
 
   @override

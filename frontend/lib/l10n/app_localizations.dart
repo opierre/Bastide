@@ -608,6 +608,18 @@ abstract class AppLocalizations {
   /// **'Modifier'**
   String get accountEdit;
 
+  /// Account card line giving the booking date of the account's latest transaction.
+  ///
+  /// In fr, this message translates to:
+  /// **'Dernière opération le {date}'**
+  String accountLastTransaction(String date);
+
+  /// Account card line for an account with no transaction yet.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucune opération'**
+  String get accountNoTransactions;
+
   /// Menu item and confirm-dialog action to archive an account.
   ///
   /// In fr, this message translates to:
