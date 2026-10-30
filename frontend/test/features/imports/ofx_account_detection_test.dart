@@ -442,6 +442,44 @@ void main() {
       expect(matches[1], isA<OfxAccountUnmatched>());
     });
 
+    test('a card statement borrows the bank code of its bank statements', () {
+      final statements = parseOfxStatements(utf8.encode(_bankAndCardSgml));
+
+      expect(statements.map((s) => s.accountType), ['CHECKING', 'CREDITCARD']);
+      expect(statements.map((s) => s.bankId), everyElement('13306'));
+    });
+
+    test('a card statement on its own still names no bank', () {
+      expect(_single(utf8.encode(_creditCardXml))!.bankId, isNull);
+    });
+
+    test('bank statements that disagree lend the card no code', () {
+      final ofx = _bankAndCardSgml.replaceFirst(
+        '</STMTRS></STMTTRNRS></BANKMSGSRSV1>',
+        '</STMTRS></STMTTRNRS><STMTTRNRS><STMTRS>\n<BANKACCTFROM>\n'
+            '<BANKID>30004\n<ACCTID>0001111111\n<ACCTTYPE>SAVINGS\n'
+            '</BANKACCTFROM>\n</STMTRS></STMTTRNRS></BANKMSGSRSV1>',
+      );
+
+      final statements = parseOfxStatements(utf8.encode(ofx));
+
+      expect(statements.map((s) => s.bankId), ['13306', '30004', null]);
+    });
+
+    test(
+      'the borrowed code names the card bank when the file does not',
+      () async {
+        final banks = _FakeBanksRepository({'13306': 'Crédit Agricole'});
+
+        final matches = await _detect(_bankAndCardSgml, const [], banks);
+
+        expect(
+          matches.map((m) => (m as OfxAccountUnmatched).info.institutionLabel),
+          everyElement('Crédit Agricole'),
+        );
+      },
+    );
+
     test('two statements guessing the same account are both asked', () {
       final only = _account(type: AccountType.other);
       final statements = parseOfxStatements(utf8.encode(_multiSgml));
@@ -485,5 +523,27 @@ const _multiSgml = '''
 </LEDGERBAL>
 </STMTRS></STMTTRNRS>
 </BANKMSGSRSV1>
+</OFX>
+''';
+
+/// A Crédit Agricole export holding the current account and the deferred-debit
+/// card drawn on it. Neither the signon block nor the card names the bank: only
+/// the current account's `BANKID` does.
+const _bankAndCardSgml = '''
+<OFX>
+<BANKMSGSRSV1><STMTTRNRS><STMTRS>
+<CURDEF>EUR
+<BANKACCTFROM>
+<BANKID>13306
+<ACCTID>0009876543
+<ACCTTYPE>CHECKING
+</BANKACCTFROM>
+</STMTRS></STMTTRNRS></BANKMSGSRSV1>
+<CREDITCARDMSGSRSV1><CCSTMTTRNRS><CCSTMTRS>
+<CURDEF>EUR
+<CCACCTFROM>
+<ACCTID>4970XXXXXXXX1234
+</CCACCTFROM>
+</CCSTMTRS></CCSTMTTRNRS></CREDITCARDMSGSRSV1>
 </OFX>
 ''';
