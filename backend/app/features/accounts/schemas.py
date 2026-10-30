@@ -36,6 +36,13 @@ class AccountCreate(BaseModel):
             "the account holding them has to agree or every balance it shows is mislabelled."
         ),
     )
+    settlement_account_id: str | None = Field(
+        default=None,
+        description=(
+            "Deferred cards only, and required for one: the account the card's monthly debit "
+            "is drawn from. Must be another of the user's accounts, not itself a card."
+        ),
+    )
 
 
 class AccountUpdate(BaseModel):
@@ -54,6 +61,13 @@ class AccountUpdate(BaseModel):
     institution: str | None = Field(default=None, min_length=1, max_length=255)
     ofx_account_id: str | None = Field(default=None, max_length=255)
     opening_balance_minor: int | None = None
+    settlement_account_id: str | None = Field(
+        default=None,
+        description=(
+            "Deferred cards only: the account the card's monthly debit is drawn from, or "
+            "null to clear it. Must be another of the user's accounts, not itself a card."
+        ),
+    )
 
 
 class AccountRead(BaseModel):
@@ -65,6 +79,7 @@ class AccountRead(BaseModel):
     institution: str
     currency: str
     ofx_account_id: str | None
+    settlement_account_id: str | None
     opening_balance_minor: int
     balance_minor: int
     archived: bool

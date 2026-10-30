@@ -32,6 +32,13 @@ class Account(Base):
     opening_balance_minor: Mapped[int] = mapped_column(Integer)
     archived: Mapped[bool] = mapped_column(Boolean, default=False)
     cached_balance_minor: Mapped[int] = mapped_column(Integer)
+    # A deferred-debit card's only: the account its monthly debit is drawn from. That debit is a
+    # transfer between the two, and this is how the app knows which two.
+    settlement_account_id: Mapped[str | None] = mapped_column(
+        String(36),
+        ForeignKey("accounts.id", ondelete="SET NULL", name="fk_accounts_settlement_account_id"),
+        nullable=True,
+    )
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), default=lambda: datetime.now(UTC)
     )

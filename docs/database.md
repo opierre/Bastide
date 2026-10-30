@@ -34,6 +34,7 @@ erDiagram
         int cached_balance_minor
         datetime created_at
         datetime updated_at
+        text settlement_account_id FK "nullable"
     }
     auth_tokens {
         text id PK
@@ -251,6 +252,7 @@ erDiagram
         text recovery_code_hash "nullable"
     }
     accounts ||--o{ account_balance_snapshots : "account_id"
+    accounts |o--o{ accounts : "settlement_account_id"
     users ||--o{ accounts : "user_id"
     users ||--o{ auth_tokens : "user_id"
     categories |o--o{ categories : "parent_id"
@@ -290,6 +292,7 @@ erDiagram
 ### `accounts`
 
 - unique `(user_id, ofx_account_id)`
+- `settlement_account_id` → `accounts` on delete set null
 
 ### `declared_balances`
 

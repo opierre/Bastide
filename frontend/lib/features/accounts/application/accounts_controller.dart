@@ -31,6 +31,7 @@ class AccountsController extends AsyncNotifier<List<Account>> {
     required int openingBalanceMinor,
     String? ofxAccountId,
     String? currency,
+    String? settlementAccountId,
   }) async {
     final account = await ref
         .read(accountsRepositoryProvider)
@@ -41,6 +42,7 @@ class AccountsController extends AsyncNotifier<List<Account>> {
           openingBalanceMinor: openingBalanceMinor,
           ofxAccountId: ofxAccountId,
           currency: currency,
+          settlementAccountId: settlementAccountId,
         );
     state = AsyncValue.data([...?state.value, account]);
     _invalidateNetWorth();
@@ -53,6 +55,7 @@ class AccountsController extends AsyncNotifier<List<Account>> {
     required AccountType type,
     required String institution,
     required int openingBalanceMinor,
+    String? settlementAccountId,
   }) async {
     final updated = await ref
         .read(accountsRepositoryProvider)
@@ -62,6 +65,7 @@ class AccountsController extends AsyncNotifier<List<Account>> {
           type: type,
           institution: institution,
           openingBalanceMinor: openingBalanceMinor,
+          settlementAccountId: settlementAccountId,
         );
     state = AsyncValue.data([
       for (final account in state.value ?? const <Account>[])

@@ -526,7 +526,24 @@ void main() {
   ) async {
     _useDesktopSurface(tester);
     final imports = FakeImportsController(importResult: _batch());
-    final accounts = FakeAccountsController(createdAccount: _account);
+    // The user's one account, at another bank: not the card's, but the only
+    // account the card can be paid from.
+    final lcl = Account(
+      id: 'lcl',
+      name: 'Courant',
+      type: AccountType.checking,
+      institution: 'LCL',
+      currency: 'EUR',
+      openingBalanceMinor: 0,
+      balanceMinor: 0,
+      archived: false,
+      createdAt: DateTime.utc(2026, 1, 1),
+      updatedAt: DateTime.utc(2026, 1, 1),
+    );
+    final accounts = FakeAccountsController(
+      initialAccounts: [lcl],
+      createdAccount: _account,
+    );
     await tester.pumpWidget(
       _wrap(
         imports: imports,
@@ -548,6 +565,7 @@ void main() {
     expect(accounts.createCalls.single.type, AccountType.deferredCard);
     expect(accounts.createCalls.single.openingBalanceMinor, -45210);
     expect(accounts.createCalls.single.ofxAccountId, '5555444433339876');
+    expect(accounts.createCalls.single.settlementAccountId, 'lcl');
   });
 
   testWidgets('cancelling the offered account leaves it on the banner', (

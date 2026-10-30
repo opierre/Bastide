@@ -360,6 +360,27 @@ class AppLocalizationsFr extends AppLocalizations {
   String get accountCardDebitCredit => 'Crédit';
 
   @override
+  String get accountSettlementLabel => 'Prélevée sur';
+
+  @override
+  String get accountSettlementHelper =>
+      'Le compte débité chaque mois du total de la carte : ce prélèvement est un virement entre les deux, pas une dépense.';
+
+  @override
+  String get accountSettlementPlaceholder => 'Choisir un compte';
+
+  @override
+  String get accountSettlementRequired => 'Choisissez le compte prélevé.';
+
+  @override
+  String get accountErrorSettlementRequired =>
+      'Une carte à débit différé doit indiquer le compte sur lequel elle est prélevée.';
+
+  @override
+  String get accountErrorSettlementInvalid =>
+      'Ce compte ne peut pas régler la carte.';
+
+  @override
   String get accountCardDebitHelper =>
       'Une carte à débit différé est prélevée en une fois sur votre compte courant chaque mois.';
 

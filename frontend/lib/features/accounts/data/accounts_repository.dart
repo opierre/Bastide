@@ -26,6 +26,7 @@ class AccountsRepository {
     required int openingBalanceMinor,
     String? ofxAccountId,
     String? currency,
+    String? settlementAccountId,
   }) async {
     final json = await _apiClient.post(
       '/accounts',
@@ -40,6 +41,7 @@ class AccountsRepository {
         // Likewise: sent only when a source declared it (an OFX `CURDEF`), so
         // omitting it leaves the backend on its default — the user's currency.
         'currency': ?currency,
+        'settlement_account_id': ?settlementAccountId,
       },
     );
     return _parse(json as Map<String, dynamic>);
@@ -51,6 +53,7 @@ class AccountsRepository {
     required AccountType type,
     required String institution,
     required int openingBalanceMinor,
+    String? settlementAccountId,
   }) async {
     final json = await _apiClient.patch(
       '/accounts/$id',
@@ -62,6 +65,9 @@ class AccountsRepository {
         // snapshot by the delta rather than treating this as an independent
         // figure — see `shift_opening_balance`.
         'opening_balance_minor': openingBalanceMinor,
+        // Always sent: a card's form always states it, and for any other
+        // account it is null, which is what the backend keeps there anyway.
+        'settlement_account_id': settlementAccountId,
       },
     );
     return _parse(json as Map<String, dynamic>);
@@ -78,6 +84,7 @@ class AccountsRepository {
     institution: json['institution'] as String,
     currency: json['currency'] as String,
     ofxAccountId: json['ofx_account_id'] as String?,
+    settlementAccountId: json['settlement_account_id'] as String?,
     openingBalanceMinor: json['opening_balance_minor'] as int,
     balanceMinor: json['balance_minor'] as int,
     archived: json['archived'] as bool,

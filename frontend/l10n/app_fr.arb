@@ -445,6 +445,30 @@
   "@accountCardDebitCredit": {
     "description": "Answer to the card-debit question: a credit card repaid on a credit line."
   },
+  "accountSettlementLabel": "Prélevée sur",
+  "@accountSettlementLabel": {
+    "description": "Label of the account form field choosing the account a deferred-debit card's monthly debit is drawn from."
+  },
+  "accountSettlementHelper": "Le compte débité chaque mois du total de la carte : ce prélèvement est un virement entre les deux, pas une dépense.",
+  "@accountSettlementHelper": {
+    "description": "Helper under the settlement-account field of the account form."
+  },
+  "accountSettlementPlaceholder": "Choisir un compte",
+  "@accountSettlementPlaceholder": {
+    "description": "Placeholder of the settlement-account select when none is chosen yet."
+  },
+  "accountSettlementRequired": "Choisissez le compte prélevé.",
+  "@accountSettlementRequired": {
+    "description": "Validation error when a deferred-debit card is saved without its settlement account."
+  },
+  "accountErrorSettlementRequired": "Une carte à débit différé doit indiquer le compte sur lequel elle est prélevée.",
+  "@accountErrorSettlementRequired": {
+    "description": "Localized message for the backend's ACCOUNT_SETTLEMENT_ACCOUNT_REQUIRED error code."
+  },
+  "accountErrorSettlementInvalid": "Ce compte ne peut pas régler la carte.",
+  "@accountErrorSettlementInvalid": {
+    "description": "Localized message for the backend's ACCOUNT_SETTLEMENT_ACCOUNT_INVALID error code: the chosen settlement account is a card, archived, or not the user's."
+  },
   "accountCardDebitHelper": "Une carte à débit différé est prélevée en une fois sur votre compte courant chaque mois.",
   "@accountCardDebitHelper": {
     "description": "Helper under the card-debit question, explaining what deferred debit means so the user can recognise their card."

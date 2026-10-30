@@ -59,10 +59,28 @@ def _create_account(client: TestClient, headers: dict[str, str], type_: str) -> 
             "type": type_,
             "institution": "BNP Paribas",
             "opening_balance_minor": 0,
+            "settlement_account_id": _settlement_account(client, headers)
+            if type_ == "deferred_card"
+            else None,
         },
         headers=headers,
     )
     assert response.status_code == 201, response.json()
+    return response.json()["id"]
+
+
+def _settlement_account(client: TestClient, headers: dict[str, str]) -> str:
+    """An account for a card to be settled from; cards must name one."""
+    response = client.post(
+        "/api/v1/accounts",
+        json={
+            "name": "Payer",
+            "type": "savings",
+            "institution": "Autre",
+            "opening_balance_minor": 0,
+        },
+        headers=headers,
+    )
     return response.json()["id"]
 
 

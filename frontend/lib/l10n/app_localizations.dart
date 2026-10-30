@@ -722,6 +722,42 @@ abstract class AppLocalizations {
   /// **'Crédit'**
   String get accountCardDebitCredit;
 
+  /// Label of the account form field choosing the account a deferred-debit card's monthly debit is drawn from.
+  ///
+  /// In fr, this message translates to:
+  /// **'Prélevée sur'**
+  String get accountSettlementLabel;
+
+  /// Helper under the settlement-account field of the account form.
+  ///
+  /// In fr, this message translates to:
+  /// **'Le compte débité chaque mois du total de la carte : ce prélèvement est un virement entre les deux, pas une dépense.'**
+  String get accountSettlementHelper;
+
+  /// Placeholder of the settlement-account select when none is chosen yet.
+  ///
+  /// In fr, this message translates to:
+  /// **'Choisir un compte'**
+  String get accountSettlementPlaceholder;
+
+  /// Validation error when a deferred-debit card is saved without its settlement account.
+  ///
+  /// In fr, this message translates to:
+  /// **'Choisissez le compte prélevé.'**
+  String get accountSettlementRequired;
+
+  /// Localized message for the backend's ACCOUNT_SETTLEMENT_ACCOUNT_REQUIRED error code.
+  ///
+  /// In fr, this message translates to:
+  /// **'Une carte à débit différé doit indiquer le compte sur lequel elle est prélevée.'**
+  String get accountErrorSettlementRequired;
+
+  /// Localized message for the backend's ACCOUNT_SETTLEMENT_ACCOUNT_INVALID error code: the chosen settlement account is a card, archived, or not the user's.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ce compte ne peut pas régler la carte.'**
+  String get accountErrorSettlementInvalid;
+
   /// Helper under the card-debit question, explaining what deferred debit means so the user can recognise their card.
   ///
   /// In fr, this message translates to:

@@ -358,6 +358,27 @@ class AppLocalizationsEn extends AppLocalizations {
   String get accountCardDebitCredit => 'Credit';
 
   @override
+  String get accountSettlementLabel => 'Paid from';
+
+  @override
+  String get accountSettlementHelper =>
+      'The account charged the card\'s total each month: that debit is a transfer between the two, not spending.';
+
+  @override
+  String get accountSettlementPlaceholder => 'Choose an account';
+
+  @override
+  String get accountSettlementRequired => 'Choose the account it is paid from.';
+
+  @override
+  String get accountErrorSettlementRequired =>
+      'A deferred-debit card must name the account it is paid from.';
+
+  @override
+  String get accountErrorSettlementInvalid =>
+      'This account cannot pay the card.';
+
+  @override
   String get accountCardDebitHelper =>
       'A deferred-debit card is charged to your current account in one sum each month.';
 

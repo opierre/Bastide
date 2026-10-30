@@ -2,7 +2,7 @@
 
 from sqlalchemy.orm import Session
 
-from app.core.errors import ConflictError, NotFoundError
+from app.core.errors import ConflictError, NotFoundError, ValidationError
 from app.features.accounts.balance import shift_opening_balance
 from app.features.accounts.models import Account
 from app.features.accounts.repository import AccountRepository
@@ -20,6 +20,22 @@ class OfxAccountIdTakenError(ConflictError):
     """Raised when another of the user's accounts already carries that bank account id."""
 
     code = "ACCOUNT_OFX_ID_TAKEN"
+
+
+class SettlementAccountRequiredError(ValidationError):
+    """Raised when a deferred card is opened without the account its debit is drawn from."""
+
+    code = "ACCOUNT_SETTLEMENT_ACCOUNT_REQUIRED"
+
+
+class SettlementAccountInvalidError(ValidationError):
+    """Raised when a settlement account is given that cannot settle this account.
+
+    Not a card's own account to name one, or not another of the user's open, non-card
+    accounts.
+    """
+
+    code = "ACCOUNT_SETTLEMENT_ACCOUNT_INVALID"
 
 
 def _normalize_ofx_account_id(value: str | None) -> str | None:
@@ -76,10 +92,22 @@ class AccountService:
         profile currency instead would relabel — not convert — every figure the
         import goes on to write.
 
+        A deferred card must name the account its debit is drawn from: that is what makes
+        the debit a transfer the app can place.
+
         Raises:
             OfxAccountIdTakenError: another account of this user already carries
                 the given `ofx_account_id`.
+            SettlementAccountRequiredError: a deferred card without a settlement account.
+            SettlementAccountInvalidError: a settlement account that cannot settle it.
         """
+        if data.type == "deferred_card" and data.settlement_account_id is None:
+            raise SettlementAccountRequiredError(
+                "A deferred card needs the account its debit is drawn from."
+            )
+        settlement_account_id = self._check_settlement_account(
+            user.id, data.type, data.settlement_account_id, own_id=None
+        )
         ofx_account_id = self._claim_ofx_account_id(user.id, data.ofx_account_id)
         account = Account(
             user_id=user.id,
@@ -88,6 +116,7 @@ class AccountService:
             institution=data.institution,
             currency=(data.currency or user.currency).upper(),
             ofx_account_id=ofx_account_id,
+            settlement_account_id=settlement_account_id,
             opening_balance_minor=data.opening_balance_minor,
             cached_balance_minor=data.opening_balance_minor,
         )
@@ -106,6 +135,10 @@ class AccountService:
             AccountNotFoundError: no such account, or it belongs to another user.
             OfxAccountIdTakenError: another account of this user already carries
                 the given `ofx_account_id`.
+            SettlementAccountInvalidError: a settlement account that cannot settle it.
+
+        A card opened before settlement accounts existed has none; patching one in is how it
+        gets it. An account that stops being a card drops it.
         """
         account = self.get(user_id, account_id)
         if data.name is not None:
@@ -118,9 +151,40 @@ class AccountService:
             account.ofx_account_id = self._claim_ofx_account_id(
                 user_id, data.ofx_account_id, allow_account_id=account.id
             )
+        if "settlement_account_id" in data.model_fields_set:
+            account.settlement_account_id = self._check_settlement_account(
+                user_id, account.type, data.settlement_account_id, own_id=account.id
+            )
+        if account.type != "deferred_card":
+            account.settlement_account_id = None
         if data.opening_balance_minor is not None:
             shift_opening_balance(self._db, account, data.opening_balance_minor)
         return self._repository.update(account)
+
+    def _check_settlement_account(
+        self, user_id: str, account_type: str, value: str | None, own_id: str | None
+    ) -> str | None:
+        """The settlement account to store, checked: one of the user's open accounts, neither
+        the card itself nor another card — a card is paid from where money is.
+
+        Raises:
+            SettlementAccountInvalidError: given for an account that is not a deferred card,
+                or naming an account that cannot settle one.
+        """
+        if value is None:
+            return None
+        settling = self._repository.get_by_id_for_user(value, user_id)
+        if (
+            account_type != "deferred_card"
+            or settling is None
+            or settling.id == own_id
+            or settling.archived
+            or settling.type == "deferred_card"
+        ):
+            raise SettlementAccountInvalidError(
+                "This account cannot settle the card.", details={"account_id": value}
+            )
+        return settling.id
 
     def _claim_ofx_account_id(
         self, user_id: str, value: str | None, allow_account_id: str | None = None

@@ -14,6 +14,7 @@ import '../../../core/widgets/labeled_field.dart';
 import '../../../core/widgets/primary_button.dart';
 import '../../../l10n/app_localizations.dart';
 import '../application/accounts_controller.dart';
+import '../application/settlement_account.dart';
 import '../domain/account.dart';
 import 'account_error_localizer.dart';
 import 'account_type_label.dart';
@@ -87,6 +88,13 @@ class _AccountFormState extends ConsumerState<AccountForm> {
   late String _institution =
       widget.initial?.institution ?? widget.prefill?.institution ?? '';
 
+  /// The settlement account the user picked, or the one they were given —
+  /// `null` until either, in which case [_settlementAccountIdFor] proposes one.
+  late String? _settlementAccountId =
+      widget.initial?.settlementAccountId ??
+      widget.prefill?.settlementAccountId;
+  String? _settlementError;
+
   bool _isSubmitting = false;
   String? _errorText;
 
@@ -130,9 +138,31 @@ class _AccountFormState extends ConsumerState<AccountForm> {
     super.dispose();
   }
 
+  /// The candidates for this card's settlement account.
+  List<Account> _settlementCandidates() => settlementCandidates(
+    ref.read(accountsControllerProvider).value ?? const [],
+    cardId: widget.initial?.id,
+  );
+
+  /// The settlement account the form stands on: the one picked or given, else
+  /// the obvious one if there is one.
+  String? _settlementAccountIdFor(List<Account> candidates) =>
+      _settlementAccountId ??
+      proposedSettlementAccountId(candidates, institution: _institution);
+
   Future<void> _submit() async {
     final l10n = AppLocalizations.of(context)!;
-    if (!_formKey.currentState!.validate()) return;
+    final isCard = _type == AccountType.deferredCard;
+    final settlementAccountId = isCard
+        ? _settlementAccountIdFor(_settlementCandidates())
+        : null;
+    setState(
+      () => _settlementError = isCard && settlementAccountId == null
+          ? l10n.accountSettlementRequired
+          : null,
+    );
+    final valid = _formKey.currentState!.validate();
+    if (!valid || _settlementError != null) return;
 
     setState(() {
       _isSubmitting = true;
@@ -157,6 +187,7 @@ class _AccountFormState extends ConsumerState<AccountForm> {
               type: _type,
               institution: _institutionController.text.trim(),
               openingBalanceMinor: openingBalanceMinor,
+              settlementAccountId: settlementAccountId,
             );
       } else {
         created = await ref
@@ -173,6 +204,7 @@ class _AccountFormState extends ConsumerState<AccountForm> {
               // declares one — otherwise the backend keeps defaulting to the
               // user's currency, which is what every hand-made account gets.
               currency: widget.prefill?.currency,
+              settlementAccountId: settlementAccountId,
             );
       }
       if (mounted) Navigator.of(context).pop(created);
@@ -304,6 +336,21 @@ class _AccountFormState extends ConsumerState<AccountForm> {
                   onChanged: (value) => setState(() => _type = value),
                 ),
               ),
+            if (_type == AccountType.deferredCard) ...[
+              const SizedBox(height: AppSpacing.md),
+              _SettlementAccountField(
+                candidates: settlementCandidates(
+                  ref.watch(accountsControllerProvider).value ?? const [],
+                  cardId: widget.initial?.id,
+                ),
+                selectedFor: _settlementAccountIdFor,
+                errorText: _settlementError,
+                onChanged: (id) => setState(() {
+                  _settlementAccountId = id;
+                  _settlementError = null;
+                }),
+              ),
+            ],
             const SizedBox(height: AppSpacing.md),
             LabeledField(
               // The same stored figure, named for what it means at each end of
@@ -410,6 +457,53 @@ class _AccountFormState extends ConsumerState<AccountForm> {
             ],
           ],
         ),
+      ),
+    );
+  }
+}
+
+/// The account a deferred card's monthly debit is drawn from. The debit is a
+/// transfer between the two, and this is the only place the app learns which
+/// two — so a card can't be saved without it.
+class _SettlementAccountField extends StatelessWidget {
+  const _SettlementAccountField({
+    required this.candidates,
+    required this.selectedFor,
+    required this.errorText,
+    required this.onChanged,
+  });
+
+  final List<Account> candidates;
+  final String? Function(List<Account>) selectedFor;
+  final String? errorText;
+  final ValueChanged<String?> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final selected = selectedFor(candidates);
+
+    return LabeledField(
+      label: l10n.accountSettlementLabel,
+      helper: l10n.accountSettlementHelper,
+      errorText: errorText,
+      child: AppSelect<String?>(
+        key: const Key('accountSettlementField'),
+        value: selected,
+        items: [
+          if (selected == null)
+            AppSelectItem(
+              value: null,
+              label: l10n.accountSettlementPlaceholder,
+            ),
+          for (final account in candidates)
+            AppSelectItem(
+              value: account.id,
+              label: '${account.name} · ${account.institution}',
+              leading: InstitutionAvatar(name: account.institution, size: 20),
+            ),
+        ],
+        onChanged: onChanged,
       ),
     );
   }

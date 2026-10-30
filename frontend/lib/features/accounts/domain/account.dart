@@ -41,6 +41,7 @@ class AccountPrefill {
     this.balanceAsOf,
     this.currency,
     this.isCardStatement = false,
+    this.settlementAccountId,
   });
 
   final String? name;
@@ -74,6 +75,11 @@ class AccountPrefill {
   /// Carried through creation but never shown as a field: it is the bank's
   /// identifier, not something the user has an opinion about.
   final String? ofxAccountId;
+
+  /// The account a deferred card is most likely settled from — the bank
+  /// account the same file carries. Only a proposal: the form shows it as the
+  /// selected settlement account, which the user can change.
+  final String? settlementAccountId;
 }
 
 /// An account as returned by the API, including its derived current balance.
@@ -89,6 +95,7 @@ class Account {
     required this.institution,
     required this.currency,
     this.ofxAccountId,
+    this.settlementAccountId,
     required this.openingBalanceMinor,
     required this.balanceMinor,
     required this.archived,
@@ -105,6 +112,11 @@ class Account {
   /// The bank's own id for this account (OFX `ACCTID`), when we know it —
   /// what makes a statement identify its account exactly rather than by name.
   final String? ofxAccountId;
+
+  /// A deferred card's only: the account its monthly debit is drawn from —
+  /// which makes that debit a transfer between the two. `null` on every other
+  /// account, and on a card opened before the app asked for it.
+  final String? settlementAccountId;
   final int openingBalanceMinor;
   final int balanceMinor;
   final bool archived;
@@ -121,6 +133,7 @@ class Account {
           other.institution == institution &&
           other.currency == currency &&
           other.ofxAccountId == ofxAccountId &&
+          other.settlementAccountId == settlementAccountId &&
           other.openingBalanceMinor == openingBalanceMinor &&
           other.balanceMinor == balanceMinor &&
           other.archived == archived &&
@@ -135,6 +148,7 @@ class Account {
     institution,
     currency,
     ofxAccountId,
+    settlementAccountId,
     openingBalanceMinor,
     balanceMinor,
     archived,

@@ -577,6 +577,42 @@ def test_backup_endpoints_require_auth(client: TestClient) -> None:
     assert response.status_code == 401
 
 
+def test_backup_round_trips_a_card_settled_from_a_later_account(
+    client: TestClient, tmp_path: Path
+) -> None:
+    # The card is moved to an account opened after it, so it is stored before the account it
+    # points at: a restore writing rows in that order would find the reference dangling.
+    headers = _register(client, "amelie@example.com")
+
+    def create(name: str, type_: str, settlement_account_id: str | None = None) -> str:
+        response = client.post(
+            "/api/v1/accounts",
+            json={
+                "name": name,
+                "type": type_,
+                "institution": "BNP",
+                "opening_balance_minor": 0,
+                "settlement_account_id": settlement_account_id,
+            },
+            headers=headers,
+        )
+        assert response.status_code == 201, response.json()
+        return response.json()["id"]
+
+    first = create("Courant", "checking")
+    card = create("Carte", "deferred_card", first)
+    later = create("Joint", "checking")
+    client.patch(f"/api/v1/accounts/{card}", json={"settlement_account_id": later}, headers=headers)
+
+    response = _upload(client, "restore", headers, _export(client, headers))
+
+    assert response.status_code == 200, response.json()
+    with _session(tmp_path) as db:
+        restored = db.get(Account, card)
+        assert restored is not None
+        assert restored.settlement_account_id == later
+
+
 def test_backup_round_trips_a_settled_card_cycle(client: TestClient, tmp_path: Path) -> None:
     # The card is imported first, so its rows predate the settlement they end up pointing at:
     # a restore that wrote them in that order would find the reference dangling.
@@ -585,7 +621,13 @@ def test_backup_round_trips_a_settled_card_cycle(client: TestClient, tmp_path: P
     for type_ in ("checking", "deferred_card"):
         response = client.post(
             "/api/v1/accounts",
-            json={"name": type_, "type": type_, "institution": "BNP", "opening_balance_minor": 0},
+            json={
+                "name": type_,
+                "type": type_,
+                "institution": "BNP",
+                "opening_balance_minor": 0,
+                "settlement_account_id": account_ids.get("checking"),
+            },
             headers=headers,
         )
         account_ids[type_] = response.json()["id"]

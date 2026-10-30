@@ -127,7 +127,16 @@ class _ImportsScreenState extends ConsumerState<ImportsScreen> {
     final l10n = AppLocalizations.of(context)!;
     final created = await showAccountForm(
       context,
-      prefill: _prefillFrom(info, l10n),
+      prefill: _prefillFrom(
+        info,
+        l10n,
+        settlementAccountId: info.isCardStatement
+            ? settlingAccountFor(
+                info,
+                ref.read(ofxAccountDetectionProvider) ?? const [],
+              )?.id
+            : null,
+      ),
     );
     if (created == null || !mounted) return;
     ref.read(ofxAccountDetectionProvider.notifier).resolveTo(info, created);
@@ -237,7 +246,11 @@ class _ImportsScreenState extends ConsumerState<ImportsScreen> {
 /// The statement's account phrased for the account form: a name built from the
 /// type and the last digits of the account number, plus the bank's own name for
 /// itself. Everything stays editable — the user renames it if they prefer.
-AccountPrefill _prefillFrom(OfxAccountInfo info, AppLocalizations l10n) {
+AccountPrefill _prefillFrom(
+  OfxAccountInfo info,
+  AppLocalizations l10n, {
+  String? settlementAccountId,
+}) {
   final type = accountTypeFromOfx(info.accountType);
   // A card is named "Carte", not after its proposed type: the form asks how the
   // card is debited, and a name spelling out the answer would contradict a
@@ -264,6 +277,7 @@ AccountPrefill _prefillFrom(OfxAccountInfo info, AppLocalizations l10n) {
     // file rather than inherited from the profile: the balance just above comes
     // from this statement, and naming it in another currency would misstate it.
     currency: info.currency,
+    settlementAccountId: settlementAccountId,
   );
 }
 

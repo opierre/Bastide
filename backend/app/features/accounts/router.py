@@ -29,6 +29,7 @@ def _to_read(account: Account) -> AccountRead:
         institution=account.institution,
         currency=account.currency,
         ofx_account_id=account.ofx_account_id,
+        settlement_account_id=account.settlement_account_id,
         opening_balance_minor=account.opening_balance_minor,
         balance_minor=balance.current_balance(account),
         archived=account.archived,
