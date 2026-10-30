@@ -9,13 +9,14 @@ from sqlalchemy.orm import Session
 from app.core.db import get_db
 from app.features.accounts import balance
 from app.features.accounts.models import Account
+from app.features.accounts.overview import AccountOverviewService, rule_read
 from app.features.accounts.repository import AccountRepository
 from app.features.accounts.schemas import (
     AccountCreate,
+    AccountOverview,
     AccountRead,
     AccountUpdate,
     CardSettlementStatus,
-    SettlementRuleRead,
     SettlementRuleSaved,
     SettlementRuleState,
     SettlementRuleWrite,
@@ -24,13 +25,17 @@ from app.features.accounts.service import AccountService
 from app.features.accounts.settlement_rule import SettlementRuleService
 from app.features.auth.deps import get_current_user
 from app.features.auth.models import User
-from app.features.rules.models import CategorizationRule
 
 router = APIRouter(prefix="/api/v1/accounts", tags=["accounts"])
 
 
 def _service(db: Annotated[Session, Depends(get_db)]) -> AccountService:
     return AccountService(AccountRepository(db), db)
+
+
+def today() -> date:
+    """The day figures are computed as of. A dependency so tests can pin it."""
+    return date.today()
 
 
 def _to_read(account: Account, service: AccountService) -> AccountRead:
@@ -112,6 +117,19 @@ async def get_account(
     return _to_read(service.get(user.id, account_id), service)
 
 
+@router.get("/{account_id}/overview", response_model=AccountOverview)
+async def get_account_overview(
+    account_id: str,
+    service: Annotated[AccountService, Depends(_service)],
+    db: Annotated[Session, Depends(get_db)],
+    user: Annotated[User, Depends(get_current_user)],
+    as_of: Annotated[date, Depends(today)],
+) -> AccountOverview:
+    """The account detail page's figures: balance history, 12-month stats, card settlement."""
+    account = service.get(user.id, account_id)
+    return AccountOverviewService(db).overview(account, _to_read(account, service), as_of)
+
+
 @router.patch("/{account_id}", response_model=AccountRead)
 async def update_account(
     account_id: str,
@@ -133,16 +151,6 @@ async def delete_account(
     service.archive(user.id, account_id)
 
 
-def _rule_read(rule: CategorizationRule) -> SettlementRuleRead:
-    return SettlementRuleRead(
-        id=rule.id,
-        match_type=rule.match_type,
-        pattern=rule.pattern,
-        enabled=rule.enabled,
-        applies_from=rule.applies_from,
-    )
-
-
 @router.get("/{account_id}/settlement-rule", response_model=SettlementRuleState)
 async def get_settlement_rule(
     account_id: str,
@@ -158,7 +166,7 @@ async def get_settlement_rule(
     pattern = rule.pattern if rule is not None else suggested
     match_type = rule.match_type if rule is not None else "contains"
     return SettlementRuleState(
-        rule=_rule_read(rule) if rule is not None else None,
+        rule=rule_read(rule) if rule is not None else None,
         suggested_pattern=suggested,
         suggested_applies_from=(
             rules.suggest_applies_from(card, match_type, pattern) if pattern else None
@@ -179,4 +187,4 @@ async def put_settlement_rule(
     rule, moved = SettlementRuleService(db).save(
         card, payload.match_type, payload.pattern, payload.applies_from
     )
-    return SettlementRuleSaved(rule=_rule_read(rule), recategorized_count=moved)
+    return SettlementRuleSaved(rule=rule_read(rule), recategorized_count=moved)
