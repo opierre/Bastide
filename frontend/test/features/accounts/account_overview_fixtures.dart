@@ -32,9 +32,9 @@ Map<String, dynamic> checkingOverviewJson() => {
   'first_transaction_date': '2025-01-03',
   'last_import_at': '2026-10-28T09:30:00Z',
   'balance_history': [
-    {'month_end': '2026-08-31', 'balance_minor': 289045},
-    {'month_end': '2026-09-30', 'balance_minor': 307420},
-    {'month_end': '2026-10-30', 'balance_minor': 348612},
+    {'as_of': '2026-08-31', 'balance_minor': 289045},
+    {'as_of': '2026-09-30', 'balance_minor': 307420},
+    {'as_of': '2026-10-30', 'balance_minor': 348612},
   ],
   'period': {
     'since': '2025-10-31',
@@ -45,25 +45,26 @@ Map<String, dynamic> checkingOverviewJson() => {
   },
   'linked_cards': [
     {
-      'account_id': 'card-1',
+      'id': 'card-1',
       'name': 'Visa Premier',
       'institution': 'BNP Paribas',
       'card_last_digits': '4821',
-      'cycle_minor': -61240,
+      'cycle_amount_minor': -61240,
       'next_debit_date': '2026-11-05',
-      'has_rule': true,
+      'issue': null,
     },
     {
-      'account_id': 'card-2',
+      'id': 'card-2',
       'name': 'Carte Business',
       'institution': 'BNP Paribas',
       'card_last_digits': null,
-      'cycle_minor': -18490,
+      'cycle_amount_minor': -18490,
       'next_debit_date': null,
-      'has_rule': false,
+      'issue': 'no_rule',
     },
   ],
-  'settlement': null,
+  'card_last_digits': null,
+  'card_settlement': null,
 };
 
 Map<String, dynamic> cardOverviewJson() => {
@@ -77,8 +78,8 @@ Map<String, dynamic> cardOverviewJson() => {
   'first_transaction_date': '2025-02-07',
   'last_import_at': '2026-10-28T09:30:00Z',
   'balance_history': [
-    {'month_end': '2026-09-30', 'balance_minor': -80360},
-    {'month_end': '2026-10-30', 'balance_minor': -61240},
+    {'as_of': '2026-09-30', 'balance_minor': -80360},
+    {'as_of': '2026-10-30', 'balance_minor': -61240},
   ],
   'period': {
     'since': '2025-10-31',
@@ -88,9 +89,9 @@ Map<String, dynamic> cardOverviewJson() => {
     'consecutive_rising_months': 0,
   },
   'linked_cards': <dynamic>[],
-  'settlement': {
-    'paying_account_id': 'acc-1',
-    'card_last_digits': '4821',
+  'card_last_digits': '4821',
+  'card_settlement': {
+    'settlement_account_id': 'acc-1',
     'rule': {
       'id': 'rule-1',
       'match_type': 'contains',
@@ -99,24 +100,11 @@ Map<String, dynamic> cardOverviewJson() => {
       'applies_from': '2025-02-05',
     },
     'cycles': [
-      {
-        'settled_on': '2026-08-05',
-        'amount_minor': -93175,
-        'in_progress': false,
-      },
-      {
-        'settled_on': '2026-09-05',
-        'amount_minor': -88420,
-        'in_progress': false,
-      },
-      {
-        'settled_on': '2026-10-05',
-        'amount_minor': -80360,
-        'in_progress': false,
-      },
-      {'settled_on': null, 'amount_minor': -61240, 'in_progress': true},
+      {'settled_on': '2026-08-05', 'amount_minor': -93175},
+      {'settled_on': '2026-09-05', 'amount_minor': -88420},
+      {'settled_on': '2026-10-05', 'amount_minor': -80360},
+      {'settled_on': null, 'amount_minor': -61240},
     ],
-    'current_cycle_minor': -61240,
     'next_debit_date': '2026-11-05',
   },
 };
@@ -130,18 +118,17 @@ Map<String, dynamic> freshOverviewJson() => {
   ),
   'first_transaction_date': null,
   'last_import_at': null,
-  'balance_history': [
-    {'month_end': '2026-10-30', 'balance_minor': 0},
-  ],
+  'balance_history': <dynamic>[],
   'period': {
-    'since': null,
+    'since': '2025-10-31',
     'change_minor': 0,
     'inflow_minor': 0,
     'outflow_minor': 0,
     'consecutive_rising_months': 0,
   },
   'linked_cards': <dynamic>[],
-  'settlement': null,
+  'card_last_digits': null,
+  'card_settlement': null,
 };
 
 AccountOverview overviewFrom(Map<String, dynamic> json) =>

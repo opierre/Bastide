@@ -90,7 +90,7 @@ class AccountsRepository {
   /// against fixed JSON without a client.
   static AccountOverview parseOverview(Map<String, dynamic> json) {
     final period = json['period'] as Map<String, dynamic>;
-    final settlement = json['settlement'] as Map<String, dynamic>?;
+    final settlement = json['card_settlement'] as Map<String, dynamic>?;
     return AccountOverview(
       account: parseAccount(json['account'] as Map<String, dynamic>),
       firstTransactionDate: _date(json['first_transaction_date']),
@@ -103,7 +103,7 @@ class AccountsRepository {
             in (json['balance_history'] as List<dynamic>)
                 .cast<Map<String, dynamic>>())
           BalancePoint(
-            monthEnd: DateTime.parse(point['month_end'] as String),
+            monthEnd: DateTime.parse(point['as_of'] as String),
             balanceMinor: point['balance_minor'] as int,
           ),
       ],
@@ -119,24 +119,41 @@ class AccountsRepository {
             in (json['linked_cards'] as List<dynamic>)
                 .cast<Map<String, dynamic>>())
           LinkedCard(
-            accountId: card['account_id'] as String,
+            accountId: card['id'] as String,
             name: card['name'] as String,
             institution: card['institution'] as String,
             cardLastDigits: card['card_last_digits'] as String?,
-            cycleMinor: card['cycle_minor'] as int,
+            cycleMinor: card['cycle_amount_minor'] as int,
             nextDebitDate: _date(card['next_debit_date']),
-            hasRule: card['has_rule'] as bool,
+            // The card is linked here, so it has its settlement account: only
+            // a missing rule is left to report as "no rule".
+            hasRule: card['issue'] != 'no_rule',
           ),
       ],
-      settlement: settlement == null ? null : _parseSettlement(settlement),
+      settlement: settlement == null
+          ? null
+          : _parseSettlement(settlement, json['card_last_digits'] as String?),
     );
   }
 
-  static CardSettlement _parseSettlement(Map<String, dynamic> json) {
+  static CardSettlement _parseSettlement(
+    Map<String, dynamic> json,
+    String? cardLastDigits,
+  ) {
     final rule = json['rule'] as Map<String, dynamic>?;
+    final cycles = [
+      for (final cycle
+          in (json['cycles'] as List<dynamic>).cast<Map<String, dynamic>>())
+        SettlementCycle(
+          settledOn: _date(cycle['settled_on']),
+          amountMinor: cycle['amount_minor'] as int,
+          // The open cycle is the one not settled yet.
+          inProgress: cycle['settled_on'] == null,
+        ),
+    ];
     return CardSettlement(
-      payingAccountId: json['paying_account_id'] as String?,
-      cardLastDigits: json['card_last_digits'] as String?,
+      payingAccountId: json['settlement_account_id'] as String?,
+      cardLastDigits: cardLastDigits,
       rule: rule == null
           ? null
           : SettlementRuleSummary(
@@ -144,16 +161,9 @@ class AccountsRepository {
               enabled: rule['enabled'] as bool,
               appliesFrom: _date(rule['applies_from']),
             ),
-      cycles: [
-        for (final cycle
-            in (json['cycles'] as List<dynamic>).cast<Map<String, dynamic>>())
-          SettlementCycle(
-            settledOn: _date(cycle['settled_on']),
-            amountMinor: cycle['amount_minor'] as int,
-            inProgress: cycle['in_progress'] as bool,
-          ),
-      ],
-      currentCycleMinor: json['current_cycle_minor'] as int,
+      cycles: cycles,
+      // The backend always ends the list with the open cycle.
+      currentCycleMinor: cycles.isEmpty ? 0 : cycles.last.amountMinor,
       nextDebitDate: _date(json['next_debit_date']),
     );
   }

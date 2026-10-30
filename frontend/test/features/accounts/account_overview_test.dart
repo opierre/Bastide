@@ -59,7 +59,7 @@ void main() {
 
       expect(overview.firstTransactionDate, isNull);
       expect(overview.lastImportAt, isNull);
-      expect(overview.period.since, isNull);
+      expect(overview.balanceHistory, isEmpty);
       expect(overview.hasChartHistory, isFalse);
     });
   });

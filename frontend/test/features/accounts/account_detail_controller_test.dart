@@ -100,7 +100,7 @@ void main() {
     final history = [
       for (var month = 1; month <= 20; month++)
         {
-          'month_end': DateTime(
+          'as_of': DateTime(
             2025,
             month + 1,
             0,
