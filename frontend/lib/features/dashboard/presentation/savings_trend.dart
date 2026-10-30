@@ -39,6 +39,12 @@ class SavingsTrendChart extends StatelessWidget {
           for (final point in series)
             _capitalize(monthFormat.format(point.month)),
         ],
+        // Scaled like the Synthèse's « Patrimoine net »: compact figures at min / mid / max, so
+        // the line's height reads as an amount and not only as a shape.
+        valueLabel: (minor) => NumberFormat.compactSimpleCurrency(
+          locale: locale,
+          name: trends.currency,
+        ).format(minor / 100).replaceAll('-', '−'),
         // Hovering a month names its running total — the line alone shows the trend, not the
         // figure. Neutral, like the header's total: the movement is not what this states.
         tooltips: [
