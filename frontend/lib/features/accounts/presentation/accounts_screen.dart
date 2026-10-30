@@ -147,7 +147,7 @@ class _SummaryCard extends ConsumerWidget {
               ),
               const SizedBox(height: AppSpacing.xs),
               Text(
-                l10n.accountsBalancesAsOf(asOf),
+                l10n.accountsBalancesAsOf(asOf.toLocal()),
                 style: AppTextStyles.helper.copyWith(
                   color: AppColors.textDisabled,
                 ),
