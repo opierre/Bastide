@@ -125,6 +125,9 @@ class _ImportsScreenState extends ConsumerState<ImportsScreen> {
     final l10n = AppLocalizations.of(context)!;
     final created = await showAccountForm(
       context,
+      // Its rule is offered with the import's result, once the card's history
+      // is in: that is what the rule's start date is read from.
+      offerSettlementRule: false,
       prefill: _prefillFrom(
         info,
         l10n,

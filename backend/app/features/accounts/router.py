@@ -124,7 +124,11 @@ async def delete_account(
 
 def _rule_read(rule: CategorizationRule) -> SettlementRuleRead:
     return SettlementRuleRead(
-        id=rule.id, match_type=rule.match_type, pattern=rule.pattern, enabled=rule.enabled
+        id=rule.id,
+        match_type=rule.match_type,
+        pattern=rule.pattern,
+        enabled=rule.enabled,
+        applies_from=rule.applies_from,
     )
 
 
@@ -140,8 +144,14 @@ async def get_settlement_rule(
     rules = SettlementRuleService(db)
     suggested = rules.suggest(card)
     rule = rules.rule_for(card)
+    pattern = rule.pattern if rule is not None else suggested
+    match_type = rule.match_type if rule is not None else "contains"
     return SettlementRuleState(
-        rule=_rule_read(rule) if rule is not None else None, suggested_pattern=suggested
+        rule=_rule_read(rule) if rule is not None else None,
+        suggested_pattern=suggested,
+        suggested_applies_from=(
+            rules.suggest_applies_from(card, match_type, pattern) if pattern else None
+        ),
     )
 
 
@@ -155,5 +165,7 @@ async def put_settlement_rule(
 ) -> SettlementRuleSaved:
     """Create or replace a deferred card's settlement rule, and file what it already matches."""
     card = service.get(user.id, account_id)
-    rule, moved = SettlementRuleService(db).save(card, payload.match_type, payload.pattern)
+    rule, moved = SettlementRuleService(db).save(
+        card, payload.match_type, payload.pattern, payload.applies_from
+    )
     return SettlementRuleSaved(rule=_rule_read(rule), recategorized_count=moved)

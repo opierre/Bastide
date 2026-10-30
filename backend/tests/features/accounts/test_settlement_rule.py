@@ -6,7 +6,11 @@ from uuid import uuid4
 from fastapi.testclient import TestClient
 
 from app.features.accounts.models import Account
-from app.features.accounts.settlement_rule import card_digits, suggest_settlement_pattern
+from app.features.accounts.settlement_rule import (
+    card_digits,
+    suggest_applies_from,
+    suggest_settlement_pattern,
+)
 from tests.api import register as _register
 
 _CHECKING_OFX = b"""<OFX><BANKMSGSRSV1><STMTTRNRS><STMTRS><CURDEF>EUR
@@ -95,7 +99,12 @@ def test_a_card_without_a_rule_is_proposed_one(client: TestClient) -> None:
     response = client.get(f"/api/v1/accounts/{card}/settlement-rule", headers=headers)
 
     assert response.status_code == 200
-    assert response.json() == {"rule": None, "suggested_pattern": "DEPENSES CARTE X4821"}
+    # The card has no transaction yet: no history to start the rule from.
+    assert response.json() == {
+        "rule": None,
+        "suggested_pattern": "DEPENSES CARTE X4821",
+        "suggested_applies_from": None,
+    }
 
 
 def test_saving_the_rule_files_the_debits_already_imported(client: TestClient) -> None:
@@ -258,3 +267,71 @@ def test_purchases_no_debit_matched_long_after_are_flagged(client: TestClient) -
             "since": "2026-06-02",
         }
     ]
+
+
+def test_the_rule_starts_at_the_first_debit_the_cards_history_fully_covers() -> None:
+    # A card ••4821: history from 30/12/2025; the 31/12 debit paid purchases since 28/11.
+    debits = [date(2025, 10, 31), date(2025, 11, 28), date(2025, 12, 31), date(2026, 1, 30)]
+
+    assert suggest_applies_from(date(2025, 12, 30), debits) == date(2026, 1, 30)
+    # A card whose history reaches back before every debit: the first one counts already.
+    assert suggest_applies_from(date(2025, 9, 1), debits) == date(2025, 10, 31)
+    # No debit qualifies yet: from the card's first day. No history: nothing to propose.
+    assert suggest_applies_from(date(2026, 1, 15), debits) == date(2026, 1, 15)
+    assert suggest_applies_from(None, debits) is None
+
+
+_EARLY_CARD_OFX = b"""<OFX><CREDITCARDMSGSRSV1><CCSTMTTRNRS><CCSTMTRS><CURDEF>EUR
+<CCACCTFROM><ACCTID>400000XXXXXX4821</CCACCTFROM>
+<BANKTRANLIST>
+<STMTTRN><TRNAMT>-80.00<DTPOSTED>20260430<FITID>C1<NAME>FNAC</STMTTRN>
+</BANKTRANLIST></CCSTMTRS></CCSTMTTRNRS></CREDITCARDMSGSRSV1></OFX>"""
+
+
+def test_a_card_with_history_is_proposed_a_start_date(client: TestClient) -> None:
+    headers, _, card = _setup(client)
+    _import(client, headers, card, _EARLY_CARD_OFX)
+
+    response = client.get(f"/api/v1/accounts/{card}/settlement-rule", headers=headers)
+
+    # The card's history starts 30/04: the 30/04 debit paid the month before it, the 29/05 one
+    # paid purchases the card's statements hold.
+    assert response.json()["suggested_applies_from"] == "2026-05-29"
+
+
+def test_debits_before_the_start_date_stay_spending(client: TestClient) -> None:
+    headers, checking, card = _setup(client)
+    url = f"/api/v1/accounts/{card}/settlement-rule"
+
+    client.put(url, json={"pattern": "DEPENSES CARTE X4821"}, headers=headers)
+    response = client.put(
+        url, json={"pattern": "DEPENSES CARTE X4821", "applies_from": "2026-05-01"}, headers=headers
+    )
+
+    # The April debit the first save filed goes back to the review queue.
+    assert response.json()["recategorized_count"] == 1
+    assert response.json()["rule"]["applies_from"] == "2026-05-01"
+    rows = _rows(client, headers, checking)
+    april = rows["DEPENSES CARTE X4821 AU 29/04/26"]
+    assert april["category"] is None
+    assert april["needs_review"] is True
+    may = rows["DEPENSES CARTE X4821 AU 28/05/26"]
+    assert may["category"]["name"] == "category.finance.card_settlement"
+    rule = client.get("/api/v1/rules", headers=headers).json()[0]
+    assert rule["applies_from"] == "2026-05-01"
+
+
+def test_a_preview_counts_from_the_start_date(client: TestClient) -> None:
+    headers, _, _ = _setup(client)
+    body = {
+        "match_field": "description_clean",
+        "match_type": "contains",
+        "pattern": "DEPENSES CARTE X4821",
+    }
+
+    every = client.post("/api/v1/rules/preview", json=body, headers=headers).json()
+    since = client.post(
+        "/api/v1/rules/preview", json={**body, "applies_from": "2026-05-01"}, headers=headers
+    ).json()
+
+    assert (every["match_count"], since["match_count"]) == (2, 1)

@@ -28,17 +28,21 @@ import 'settlement_rule_dialog.dart';
 ///
 /// A deferred card just created is offered its settlement rule straight away:
 /// until it has one, its monthly debit counts as spending on top of its
-/// purchases.
+/// purchases. Unless [offerSettlementRule] is false — the imports panel creates
+/// a card before importing its statement, and the rule's start date is read
+/// from that statement's history, so the panel offers the rule afterwards.
 Future<Account?> showAccountForm(
   BuildContext context, {
   Account? initial,
   AccountPrefill? prefill,
+  bool offerSettlementRule = true,
 }) async {
   final created = await showDialog<Account>(
     context: context,
     builder: (_) => AccountForm(initial: initial, prefill: prefill),
   );
-  if (created != null &&
+  if (offerSettlementRule &&
+      created != null &&
       created.type == AccountType.deferredCard &&
       context.mounted) {
     await showSettlementRuleDialog(context, created);

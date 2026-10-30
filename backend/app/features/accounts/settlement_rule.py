@@ -13,14 +13,14 @@ from collections import Counter
 from collections.abc import Iterable
 from datetime import date, timedelta
 
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 from app.core.errors import ValidationError
 from app.features.accounts.models import Account
 from app.features.accounts.schemas import CardSettlementIssue, CardSettlementStatus
 from app.features.categories.repository import CategoryRepository
-from app.features.rules.engine import matches
+from app.features.rules.engine import matches, matches_condition
 from app.features.rules.models import CategorizationRule
 from app.features.rules.service import validate_pattern
 from app.features.transactions.models import Transaction
@@ -81,6 +81,28 @@ def suggest_settlement_pattern(
     return max(counts, key=lambda fragment: (counts[fragment], len(fragment)))
 
 
+def suggest_applies_from(first_card_day: date | None, debit_days: Iterable[date]) -> date | None:
+    """The first day the card's rule should file debits from: the first debit whose whole cycle
+    the card's own statements cover.
+
+    A debit pays the purchases since the debit before it. When that earlier debit falls before
+    the card's first imported transaction, part of what it pays was never imported — it is the
+    only record of that spending, and must stay spending. So the rule starts at the first debit
+    whose predecessor is on or after the card's first day; a first debit with no predecessor
+    qualifies once its cycle (taken as a month) starts within the card's history. Failing any,
+    the card's first day — and `None` for a card with no transaction yet.
+    """
+    if first_card_day is None:
+        return None
+    previous: date | None = None
+    for day in sorted(debit_days):
+        cycle_start = previous if previous is not None else day - timedelta(days=31)
+        if cycle_start >= first_card_day:
+            return day
+        previous = day
+    return first_card_day
+
+
 class SettlementRuleService:
     """Reads, proposes and saves the settlement rule of a user's deferred cards."""
 
@@ -112,13 +134,40 @@ class SettlementRuleService:
         labels = [(booked, label) for booked, label in self._db.execute(query)]
         return suggest_settlement_pattern(card_digits(card), labels)
 
-    def save(self, card: Account, match_type: str, pattern: str) -> tuple[CategorizationRule, int]:
+    def suggest_applies_from(self, card: Account, match_type: str, pattern: str) -> date | None:
+        """The start date to propose for ``card``'s rule — see `suggest_applies_from`.
+
+        The debits are what this pattern matches on the account paying the card, whatever
+        their date.
+        """
+        first_card_day = self._db.scalar(
+            select(func.min(Transaction.booked_date)).where(Transaction.account_id == card.id)
+        )
+        if first_card_day is None or card.settlement_account_id is None:
+            return first_card_day
+        probe = CategorizationRule(
+            match_field=SETTLEMENT_MATCH_FIELD, match_type=match_type, pattern=pattern
+        )
+        debits = [
+            row.booked_date
+            for row in self._db.scalars(
+                select(Transaction).where(Transaction.account_id == card.settlement_account_id)
+            )
+            if matches_condition(row, probe)
+        ]
+        return suggest_applies_from(first_card_day, debits)
+
+    def save(
+        self, card: Account, match_type: str, pattern: str, applies_from: date | None
+    ) -> tuple[CategorizationRule, int]:
         """Create or replace ``card``'s rule, then file what it matches. Committed.
 
         A new rule goes ahead of every other: it names one card, so it is the most specific
         rule the user has. Applied at once over the user's transactions, so the debits already
         imported stop counting as spending now rather than at the next import; rows the user
-        filed by hand stay theirs. Returns the rule and how many rows it moved.
+        filed by hand stay theirs. A debit the rule had filed but now falls before
+        ``applies_from`` goes back to the review queue: it is spending again, uncategorised.
+        Returns the rule and how many rows it moved, either way.
 
         Raises:
             NotADeferredCardError: ``card`` is not a deferred card.
@@ -149,6 +198,7 @@ class SettlementRuleService:
         rule.pattern = pattern
         rule.category_id = category.id
         rule.enabled = True
+        rule.applies_from = applies_from
 
         moved = 0
         for transaction in self._db.scalars(
@@ -159,16 +209,23 @@ class SettlementRuleService:
                 Transaction.categorization_source != "user",
             )
         ):
-            if not matches(transaction, rule) or (
+            filed = (
                 transaction.category_id == category.id
                 and transaction.categorization_source == "rule"
-                and not transaction.needs_review
-            ):
-                continue
-            transaction.category_id = category.id
-            transaction.categorization_source = "rule"
-            transaction.needs_review = False
-            moved += 1
+            )
+            if matches(transaction, rule):
+                if filed and not transaction.needs_review:
+                    continue
+                transaction.category_id = category.id
+                transaction.categorization_source = "rule"
+                transaction.needs_review = False
+                moved += 1
+            elif filed and matches_condition(transaction, rule):
+                # Before the rule's start: a debit paying purchases the ledger doesn't hold.
+                transaction.category_id = None
+                transaction.categorization_source = "uncategorized"
+                transaction.needs_review = True
+                moved += 1
 
         self._db.commit()
         self._db.refresh(rule)

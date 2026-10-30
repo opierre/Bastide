@@ -19,12 +19,21 @@ def match_category(transaction: Transaction, rules: Sequence[CategorizationRule]
 
 
 def matches(transaction: Transaction, rule: CategorizationRule) -> bool:
-    """True if ``rule``'s condition holds for ``transaction``, ignoring priority and `enabled`.
+    """True if ``rule`` holds for ``transaction``, ignoring priority and `enabled`.
+
+    Its condition, on a transaction booked no earlier than the rule's `applies_from`.
 
     Public so the match preview can evaluate an unsaved rule through the very code that will
     later apply it: a `regex` or `range` condition has no `LIKE` equivalent, and a preview that
     disagreed with the rule it previews would be worse than none.
     """
+    if rule.applies_from is not None and transaction.booked_date < rule.applies_from:
+        return False
+    return matches_condition(transaction, rule)
+
+
+def matches_condition(transaction: Transaction, rule: CategorizationRule) -> bool:
+    """True if ``rule``'s condition holds for ``transaction``, whatever its `applies_from`."""
     if rule.match_type == "range":
         return _matches_range(transaction.amount_minor, rule.pattern)
 

@@ -32,10 +32,10 @@ class SettlementRuleController {
   /// Resolves to how many imported rows the rule filed as a settlement. The
   /// rows it moved left the spending figures and the transaction list stale,
   /// and the rule list gained or changed a rule.
-  Future<int> save(String cardId, String pattern) async {
+  Future<int> save(String cardId, String pattern, DateTime? appliesFrom) async {
     final moved = await _ref
         .read(accountsRepositoryProvider)
-        .saveSettlementRule(cardId, pattern.trim());
+        .saveSettlementRule(cardId, pattern.trim(), appliesFrom);
     _ref
       ..invalidate(settlementRuleProvider(cardId))
       ..invalidate(cardSettlementStatusProvider)

@@ -366,6 +366,24 @@ class AppLocalizationsFr extends AppLocalizations {
       'Indiquez le texte qui désigne le prélèvement.';
 
   @override
+  String get settlementRuleFromLabel => 'S\'applique à partir du';
+
+  @override
+  String get settlementRuleFromHelper =>
+      'Les prélèvements plus anciens restent des dépenses : les achats qu\'ils ont payés ne sont pas dans l\'application. Proposé à partir de l\'historique importé de la carte.';
+
+  @override
+  String get settlementRuleFromInvalid => 'Date invalide.';
+
+  @override
+  String ruleAppliesFrom(DateTime date) {
+    final intl.DateFormat dateDateFormat = intl.DateFormat.yMd(localeName);
+    final String dateString = dateDateFormat.format(date);
+
+    return 'à partir du $dateString';
+  }
+
+  @override
   String get settlementRuleSave => 'Enregistrer la règle';
 
   @override

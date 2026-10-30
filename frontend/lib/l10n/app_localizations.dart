@@ -691,6 +691,30 @@ abstract class AppLocalizations {
   /// **'Indiquez le texte qui désigne le prélèvement.'**
   String get settlementRulePatternRequired;
 
+  /// Label of the start-date field of the settlement-rule dialog.
+  ///
+  /// In fr, this message translates to:
+  /// **'S\'applique à partir du'**
+  String get settlementRuleFromLabel;
+
+  /// Helper under the start-date field of the settlement-rule dialog.
+  ///
+  /// In fr, this message translates to:
+  /// **'Les prélèvements plus anciens restent des dépenses : les achats qu\'ils ont payés ne sont pas dans l\'application. Proposé à partir de l\'historique importé de la carte.'**
+  String get settlementRuleFromHelper;
+
+  /// Validation error when the settlement-rule start date can't be read.
+  ///
+  /// In fr, this message translates to:
+  /// **'Date invalide.'**
+  String get settlementRuleFromInvalid;
+
+  /// Rules list: the date a rule starts applying from (deferred-card settlement rules).
+  ///
+  /// In fr, this message translates to:
+  /// **'à partir du {date}'**
+  String ruleAppliesFrom(DateTime date);
+
   /// Primary action of the settlement-rule dialog.
   ///
   /// In fr, this message translates to:

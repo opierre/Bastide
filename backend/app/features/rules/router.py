@@ -67,6 +67,7 @@ def _to_read(rule: CategorizationRule) -> RuleRead:
         pattern=rule.pattern,
         category_id=rule.category_id,
         enabled=rule.enabled,
+        applies_from=rule.applies_from,
         created_at=rule.created_at,
     )
 

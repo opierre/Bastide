@@ -107,6 +107,26 @@ void main() {
     },
   );
 
+  testWidgets('a rule with a start date says from when it applies', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      _wrap(
+        rules: FakeRulesController(
+          initialRules: [
+            testRule(),
+            testRule(id: 'r2', appliesFrom: DateTime(2026, 1, 30)),
+          ],
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    await _openRules(tester);
+
+    expect(find.byKey(const Key('ruleAppliesFrom-r1')), findsNothing);
+    expect(find.text('à partir du 30/01/2026'), findsOneWidget);
+  });
+
   testWidgets('toggling a rule calls the controller', (tester) async {
     final rules = FakeRulesController(initialRules: [testRule()]);
     await tester.pumpWidget(_wrap(rules: rules));

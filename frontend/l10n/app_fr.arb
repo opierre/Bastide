@@ -454,6 +454,28 @@
   "@settlementRulePatternRequired": {
     "description": "Validation error when the settlement-rule pattern is empty."
   },
+  "settlementRuleFromLabel": "S'applique à partir du",
+  "@settlementRuleFromLabel": {
+    "description": "Label of the start-date field of the settlement-rule dialog."
+  },
+  "settlementRuleFromHelper": "Les prélèvements plus anciens restent des dépenses : les achats qu'ils ont payés ne sont pas dans l'application. Proposé à partir de l'historique importé de la carte.",
+  "@settlementRuleFromHelper": {
+    "description": "Helper under the start-date field of the settlement-rule dialog."
+  },
+  "settlementRuleFromInvalid": "Date invalide.",
+  "@settlementRuleFromInvalid": {
+    "description": "Validation error when the settlement-rule start date can't be read."
+  },
+  "ruleAppliesFrom": "à partir du {date}",
+  "@ruleAppliesFrom": {
+    "description": "Rules list: the date a rule starts applying from (deferred-card settlement rules).",
+    "placeholders": {
+      "date": {
+        "type": "DateTime",
+        "format": "yMd"
+      }
+    }
+  },
   "settlementRuleSave": "Enregistrer la règle",
   "@settlementRuleSave": {
     "description": "Primary action of the settlement-rule dialog."

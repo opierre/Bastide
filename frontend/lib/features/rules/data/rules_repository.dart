@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
 
 import '../../../core/api/api_client.dart';
 import '../../../core/api/api_client_provider.dart';
@@ -125,6 +126,7 @@ class RulesRepository {
     required RuleMatchField matchField,
     required RuleMatchType matchType,
     required String pattern,
+    DateTime? appliesFrom,
   }) async {
     final json =
         await _apiClient.post(
@@ -133,6 +135,8 @@ class RulesRepository {
                 'match_field': matchField.wire,
                 'match_type': matchType.wire,
                 'pattern': pattern,
+                if (appliesFrom != null)
+                  'applies_from': DateFormat('yyyy-MM-dd').format(appliesFrom),
               },
             )
             as Map<String, dynamic>;

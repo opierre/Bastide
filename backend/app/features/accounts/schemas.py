@@ -97,6 +97,7 @@ class SettlementRuleRead(BaseModel):
     match_type: str
     pattern: str
     enabled: bool
+    applies_from: date | None
 
 
 class SettlementRuleState(BaseModel):
@@ -109,6 +110,13 @@ class SettlementRuleState(BaseModel):
             "card that recurs month after month. Null when the card's number is unknown."
         )
     )
+    suggested_applies_from: date | None = Field(
+        description=(
+            "The first debit, among those the rule's pattern (else the suggested one) matches, "
+            "whose whole cycle the card's imported history covers: earlier debits pay purchases "
+            "the ledger doesn't hold, and stay spending. Null when the card has no transaction."
+        )
+    )
 
 
 class SettlementRuleWrite(BaseModel):
@@ -116,6 +124,10 @@ class SettlementRuleWrite(BaseModel):
 
     match_type: SettlementMatchType = "contains"
     pattern: str = Field(min_length=1, max_length=255)
+    applies_from: date | None = Field(
+        default=None,
+        description="Debits booked before this date are left to count as spending.",
+    )
 
 
 class SettlementRuleSaved(BaseModel):

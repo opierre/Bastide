@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
 
 import '../../../core/api/api_client.dart';
 import '../../../core/api/api_client_provider.dart';
@@ -83,17 +84,32 @@ class AccountsRepository {
     return SettlementRuleState(
       ruleId: rule?['id'] as String?,
       pattern: rule?['pattern'] as String?,
+      appliesFrom: _date(rule?['applies_from']),
       suggestedPattern: json['suggested_pattern'] as String?,
+      suggestedAppliesFrom: _date(json['suggested_applies_from']),
     );
   }
 
+  static DateTime? _date(Object? value) =>
+      value is String ? DateTime.parse(value) : null;
+
   /// Creates or replaces the card's rule; resolves to how many imported rows
   /// it filed as a settlement.
-  Future<int> saveSettlementRule(String cardId, String pattern) async {
+  Future<int> saveSettlementRule(
+    String cardId,
+    String pattern,
+    DateTime? appliesFrom,
+  ) async {
     final json =
         await _apiClient.put(
               '/accounts/$cardId/settlement-rule',
-              body: {'match_type': 'contains', 'pattern': pattern},
+              body: {
+                'match_type': 'contains',
+                'pattern': pattern,
+                'applies_from': appliesFrom == null
+                    ? null
+                    : DateFormat('yyyy-MM-dd').format(appliesFrom),
+              },
             )
             as Map<String, dynamic>;
     return json['recategorized_count'] as int;

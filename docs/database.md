@@ -63,6 +63,7 @@ erDiagram
         bool enabled
         datetime created_at
         text settlement_card_id FK, UK "nullable"
+        date applies_from "nullable"
     }
     categorization_runs {
         text id PK

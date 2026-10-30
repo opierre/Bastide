@@ -365,6 +365,24 @@ class AppLocalizationsEn extends AppLocalizations {
       'Enter the text that names the debit.';
 
   @override
+  String get settlementRuleFromLabel => 'Applies from';
+
+  @override
+  String get settlementRuleFromHelper =>
+      'Earlier debits stay spending: the purchases they paid aren\'t in the app. Proposed from the card\'s imported history.';
+
+  @override
+  String get settlementRuleFromInvalid => 'Invalid date.';
+
+  @override
+  String ruleAppliesFrom(DateTime date) {
+    final intl.DateFormat dateDateFormat = intl.DateFormat.yMd(localeName);
+    final String dateString = dateDateFormat.format(date);
+
+    return 'from $dateString';
+  }
+
+  @override
   String get settlementRuleSave => 'Save rule';
 
   @override

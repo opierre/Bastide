@@ -181,6 +181,7 @@ class RuleService:
             RulePatternInvalidError: `match_type` is `regex` and the pattern doesn't compile.
         """
         candidate = self._candidate_rule(user_id, data.match_field, data.match_type, data.pattern)
+        candidate.applies_from = data.applies_from
         query = (
             self._transactions_query(user_id, data.account_id)
             .options(selectinload(Transaction.category))

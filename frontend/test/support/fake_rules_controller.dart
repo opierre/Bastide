@@ -56,6 +56,7 @@ Rule testRule({
   String pattern = 'CARREFOUR',
   String categoryId = 'groceries',
   bool enabled = true,
+  DateTime? appliesFrom,
 }) => Rule(
   id: id,
   priority: priority,
@@ -64,5 +65,6 @@ Rule testRule({
   pattern: pattern,
   categoryId: categoryId,
   enabled: enabled,
+  appliesFrom: appliesFrom,
   createdAt: DateTime.utc(2026, 1, 1),
 );

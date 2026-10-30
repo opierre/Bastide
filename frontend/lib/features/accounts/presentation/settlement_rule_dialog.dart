@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/theme/tokens.dart';
 import '../../../core/widgets/app_modal.dart';
+import '../../../core/widgets/date_field.dart';
 import '../../../core/widgets/inline_banner.dart';
 import '../../../core/widgets/labeled_field.dart';
 import '../../../core/widgets/primary_button.dart';
@@ -51,11 +52,13 @@ class SettlementRuleDialog extends ConsumerStatefulWidget {
 
 class _SettlementRuleDialogState extends ConsumerState<SettlementRuleDialog> {
   final _patternController = TextEditingController();
+  final _fromController = TextEditingController();
 
   /// Guards the one-time fill of the field from the loaded state.
   bool _filled = false;
   bool _isSaving = false;
   String? _patternError;
+  String? _fromError;
   String? _errorText;
 
   @override
@@ -70,35 +73,49 @@ class _SettlementRuleDialogState extends ConsumerState<SettlementRuleDialog> {
   @override
   void dispose() {
     _patternController.dispose();
+    _fromController.dispose();
     super.dispose();
   }
 
-  void _preview(String pattern) {
+  /// The start date as typed, or `null` when the field is empty or unreadable
+  /// — an unreadable one is refused on save, never sent as "no limit".
+  DateTime? _appliesFrom() => parseDateInput(
+    _fromController.text,
+    Localizations.localeOf(context).toString(),
+  );
+
+  void _preview() {
     ref
         .read(rulePreviewControllerProvider.notifier)
         .request(
           matchField: RuleMatchField.descriptionClean,
           matchType: RuleMatchType.contains,
-          pattern: pattern,
+          pattern: _patternController.text,
+          appliesFrom: _appliesFrom(),
         );
   }
 
   Future<void> _save() async {
     final l10n = AppLocalizations.of(context)!;
     final pattern = _patternController.text.trim();
-    if (pattern.isEmpty) {
-      setState(() => _patternError = l10n.settlementRulePatternRequired);
-      return;
-    }
+    final appliesFrom = _appliesFrom();
+    final fromUnreadable =
+        _fromController.text.trim().isNotEmpty && appliesFrom == null;
+    setState(() {
+      _patternError = pattern.isEmpty
+          ? l10n.settlementRulePatternRequired
+          : null;
+      _fromError = fromUnreadable ? l10n.settlementRuleFromInvalid : null;
+    });
+    if (_patternError != null || _fromError != null) return;
     setState(() {
       _isSaving = true;
-      _patternError = null;
       _errorText = null;
     });
     try {
       final moved = await ref
           .read(settlementRuleControllerProvider)
-          .save(widget.card.id, pattern);
+          .save(widget.card.id, pattern, appliesFrom);
       if (mounted) Navigator.of(context).pop(moved);
     } catch (_) {
       if (mounted) setState(() => _errorText = l10n.settlementRuleSaveFailed);
@@ -115,7 +132,15 @@ class _SettlementRuleDialogState extends ConsumerState<SettlementRuleDialog> {
     if (loaded != null && !_filled) {
       _filled = true;
       _patternController.text = loaded.pattern ?? loaded.suggestedPattern ?? '';
-      Future.microtask(() => _preview(_patternController.text));
+      // A saved rule keeps its date, even none: the user chose it.
+      final from = loaded.hasRule
+          ? loaded.appliesFrom
+          : loaded.suggestedAppliesFrom;
+      final locale = Localizations.localeOf(context).toString();
+      _fromController.text = from == null
+          ? ''
+          : appDateFormat(locale).format(from);
+      Future.microtask(_preview);
     }
 
     return AppModal(
@@ -158,7 +183,20 @@ class _SettlementRuleDialogState extends ConsumerState<SettlementRuleDialog> {
               child: TextField(
                 key: const Key('settlementRulePatternField'),
                 controller: _patternController,
-                onChanged: _preview,
+                onChanged: (_) => _preview(),
+              ),
+            ),
+            const SizedBox(height: AppSpacing.md),
+            LabeledField(
+              label: l10n.settlementRuleFromLabel,
+              helper: l10n.settlementRuleFromHelper,
+              errorText: _fromError,
+              child: DateField(
+                key: const Key('settlementRuleFromField'),
+                controller: _fromController,
+                firstDate: DateTime(2000),
+                lastDate: DateTime(2100),
+                onChanged: (_) => _preview(),
               ),
             ),
             const SizedBox(height: AppSpacing.sm),

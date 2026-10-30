@@ -113,6 +113,22 @@ class RuleRow extends StatelessWidget {
                           ),
                         ),
                       ),
+                      if (rule.appliesFrom case final from?) ...[
+                        const SizedBox(width: AppSpacing.sm),
+                        // Shares the row with the pattern rather than pushing
+                        // the target chip out of it on a narrow panel.
+                        Flexible(
+                          child: Text(
+                            l10n.ruleAppliesFrom(from),
+                            key: Key('ruleAppliesFrom-${rule.id}'),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: textTheme.bodySmall?.copyWith(
+                              color: AppColors.textSecondary,
+                            ),
+                          ),
+                        ),
+                      ],
                       const SizedBox(width: AppSpacing.sm),
                       const Icon(
                         Icons.arrow_forward_rounded,
