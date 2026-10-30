@@ -9,10 +9,20 @@ from app.core.db import get_db
 from app.features.accounts import balance
 from app.features.accounts.models import Account
 from app.features.accounts.repository import AccountRepository
-from app.features.accounts.schemas import AccountCreate, AccountRead, AccountUpdate
+from app.features.accounts.schemas import (
+    AccountCreate,
+    AccountRead,
+    AccountUpdate,
+    SettlementRuleRead,
+    SettlementRuleSaved,
+    SettlementRuleState,
+    SettlementRuleWrite,
+)
 from app.features.accounts.service import AccountService
+from app.features.accounts.settlement_rule import SettlementRuleService
 from app.features.auth.deps import get_current_user
 from app.features.auth.models import User
+from app.features.rules.models import CategorizationRule
 
 router = APIRouter(prefix="/api/v1/accounts", tags=["accounts"])
 
@@ -99,3 +109,40 @@ async def delete_account(
 ) -> None:
     """Archive an account (never hard-deletes)."""
     service.archive(user.id, account_id)
+
+
+def _rule_read(rule: CategorizationRule) -> SettlementRuleRead:
+    return SettlementRuleRead(
+        id=rule.id, match_type=rule.match_type, pattern=rule.pattern, enabled=rule.enabled
+    )
+
+
+@router.get("/{account_id}/settlement-rule", response_model=SettlementRuleState)
+async def get_settlement_rule(
+    account_id: str,
+    service: Annotated[AccountService, Depends(_service)],
+    db: Annotated[Session, Depends(get_db)],
+    user: Annotated[User, Depends(get_current_user)],
+) -> SettlementRuleState:
+    """A deferred card's settlement rule, and the pattern proposed for it."""
+    card = service.get(user.id, account_id)
+    rules = SettlementRuleService(db)
+    suggested = rules.suggest(card)
+    rule = rules.rule_for(card)
+    return SettlementRuleState(
+        rule=_rule_read(rule) if rule is not None else None, suggested_pattern=suggested
+    )
+
+
+@router.put("/{account_id}/settlement-rule", response_model=SettlementRuleSaved)
+async def put_settlement_rule(
+    account_id: str,
+    payload: SettlementRuleWrite,
+    service: Annotated[AccountService, Depends(_service)],
+    db: Annotated[Session, Depends(get_db)],
+    user: Annotated[User, Depends(get_current_user)],
+) -> SettlementRuleSaved:
+    """Create or replace a deferred card's settlement rule, and file what it already matches."""
+    card = service.get(user.id, account_id)
+    rule, moved = SettlementRuleService(db).save(card, payload.match_type, payload.pattern)
+    return SettlementRuleSaved(rule=_rule_read(rule), recategorized_count=moved)

@@ -18,21 +18,32 @@ import '../application/settlement_account.dart';
 import '../domain/account.dart';
 import 'account_error_localizer.dart';
 import 'account_type_label.dart';
+import 'settlement_rule_dialog.dart';
 
 /// Opens the create/edit account modal.
 ///
 /// Resolves to the account that was created, or `null` when the user cancelled
 /// or was editing — so a caller that opened the form to fill a gap (the imports
 /// panel, needing an account for the statement it holds) can carry on with it.
+///
+/// A deferred card just created is offered its settlement rule straight away:
+/// until it has one, its monthly debit counts as spending on top of its
+/// purchases.
 Future<Account?> showAccountForm(
   BuildContext context, {
   Account? initial,
   AccountPrefill? prefill,
-}) {
-  return showDialog<Account>(
+}) async {
+  final created = await showDialog<Account>(
     context: context,
     builder: (_) => AccountForm(initial: initial, prefill: prefill),
   );
+  if (created != null &&
+      created.type == AccountType.deferredCard &&
+      context.mounted) {
+    await showSettlementRuleDialog(context, created);
+  }
+  return created;
 }
 
 /// Create/edit modal. The balance field means something different at each end

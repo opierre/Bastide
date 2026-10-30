@@ -15,6 +15,7 @@ import '../domain/account.dart';
 import 'account_error_localizer.dart';
 import 'account_form.dart';
 import 'account_type_label.dart';
+import 'settlement_rule_dialog.dart';
 
 class AccountsScreen extends ConsumerWidget {
   const AccountsScreen({super.key});
@@ -222,7 +223,7 @@ class _AccountsGrid extends StatelessWidget {
   }
 }
 
-enum _AccountAction { edit, archive }
+enum _AccountAction { edit, settlementRule, archive }
 
 class _AccountCard extends StatelessWidget {
   const _AccountCard({
@@ -281,6 +282,10 @@ class _AccountCard extends StatelessWidget {
                 // and deleting it would take them with it.
                 onSelected: (action) => switch (action) {
                   _AccountAction.edit => onEdit(),
+                  _AccountAction.settlementRule => showSettlementRuleDialog(
+                    context,
+                    account,
+                  ),
                   _AccountAction.archive => onArchive(),
                 },
                 itemBuilder: (context) => [
@@ -291,6 +296,15 @@ class _AccountCard extends StatelessWidget {
                       label: l10n.accountEdit,
                     ),
                   ),
+                  if (account.type == AccountType.deferredCard)
+                    PopupMenuItem(
+                      key: Key('accountSettlementRule-${account.id}'),
+                      value: _AccountAction.settlementRule,
+                      child: _MenuRow(
+                        icon: Icons.rule_rounded,
+                        label: l10n.accountSettlementRule,
+                      ),
+                    ),
                   PopupMenuItem(
                     value: _AccountAction.archive,
                     child: _MenuRow(

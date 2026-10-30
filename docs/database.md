@@ -62,6 +62,7 @@ erDiagram
         text category_id FK
         bool enabled
         datetime created_at
+        text settlement_card_id FK, UK "nullable"
     }
     categorization_runs {
         text id PK
@@ -258,6 +259,7 @@ erDiagram
     categories |o--o{ categories : "parent_id"
     users |o--o{ categories : "user_id"
     categories ||--o{ categorization_rules : "category_id"
+    accounts |o--o| categorization_rules : "settlement_card_id"
     users ||--o{ categorization_rules : "user_id"
     accounts |o--o{ categorization_runs : "account_id"
     import_batches |o--o{ categorization_runs : "import_batch_id"
@@ -293,6 +295,10 @@ erDiagram
 
 - unique `(user_id, ofx_account_id)`
 - `settlement_account_id` → `accounts` on delete set null
+
+### `categorization_rules`
+
+- `settlement_card_id` → `accounts` on delete set null
 
 ### `declared_balances`
 

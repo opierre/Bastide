@@ -303,6 +303,52 @@ class AppLocalizationsEn extends AppLocalizations {
   String get accountArchive => 'Archive';
 
   @override
+  String get accountSettlementRule => 'Settlement rule';
+
+  @override
+  String get settlementRuleTitle => 'Card settlement rule';
+
+  @override
+  String settlementRuleBody(String card) {
+    return 'Each month, the bank charges the total of $card to the account that pays it. That debit is a transfer, not spending: the card\'s purchases are already counted one by one.';
+  }
+
+  @override
+  String get settlementRulePatternLabel => 'The debit\'s label contains';
+
+  @override
+  String get settlementRulePatternHelper =>
+      'Proposed from the labels that recur each month on the account paying the card.';
+
+  @override
+  String get settlementRulePatternRequired =>
+      'Enter the text that names the debit.';
+
+  @override
+  String get settlementRuleSave => 'Save rule';
+
+  @override
+  String get settlementRuleLater => 'Later';
+
+  @override
+  String settlementRuleSaved(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Rule saved: $count debits filed as transfers.',
+      one: 'Rule saved: 1 debit filed as a transfer.',
+      zero: 'Rule saved.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get settlementRuleLoadFailed => 'Couldn\'t load the card\'s rule.';
+
+  @override
+  String get settlementRuleSaveFailed => 'Couldn\'t save the rule. Try again.';
+
+  @override
   String get accountFormCancel => 'Cancel';
 
   @override

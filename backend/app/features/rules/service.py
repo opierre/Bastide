@@ -94,7 +94,7 @@ class RuleService:
             RulePatternInvalidError: `match_type` is `regex` and the pattern doesn't compile.
             CategoryInvalidError: no such category, or it is another user's.
         """
-        _validate_pattern(data.match_type, data.pattern)
+        validate_pattern(data.match_type, data.pattern)
         self._require_assignable_category(user_id, data.category_id)
 
         rule = CategorizationRule(
@@ -120,7 +120,7 @@ class RuleService:
             CategoryInvalidError: no such category, or it is another user's.
         """
         rule = self.get(user_id, rule_id)
-        _validate_pattern(
+        validate_pattern(
             data.match_type if data.match_type is not None else rule.match_type,
             data.pattern if data.pattern is not None else rule.pattern,
         )
@@ -253,7 +253,7 @@ class RuleService:
             TransactionNotFoundError: no such transaction, or it belongs to another user.
             CategoryInvalidError: no such category, or it is another user's.
         """
-        _validate_pattern(data.match_type, data.pattern)
+        validate_pattern(data.match_type, data.pattern)
 
         transaction = self._transactions.get_by_id_for_user(data.transaction_id, user_id)
         if transaction is None:
@@ -307,7 +307,7 @@ class RuleService:
         `category_id` is left blank: the engine's match predicate doesn't read it, and a preview
         has no category to speak of.
         """
-        _validate_pattern(match_type, pattern)
+        validate_pattern(match_type, pattern)
         return CategorizationRule(
             user_id=user_id,
             priority=0,
@@ -331,7 +331,7 @@ class RuleService:
         return query
 
 
-def _validate_pattern(match_type: str, pattern: str) -> None:
+def validate_pattern(match_type: str, pattern: str) -> None:
     """Reject a `regex` pattern that doesn't compile.
 
     Takes a plain `str` rather than `MatchType` because the update path checks the *resulting*

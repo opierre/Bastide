@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/api/api_client.dart';
 import '../../../core/api/api_client_provider.dart';
 import '../domain/account.dart';
+import '../domain/settlement_rule.dart';
 
 /// Calls the `/accounts` endpoints and maps the wire JSON to domain models.
 /// The only place in the accounts feature that knows the response shape —
@@ -71,6 +72,30 @@ class AccountsRepository {
       },
     );
     return _parse(json as Map<String, dynamic>);
+  }
+
+  Future<SettlementRuleState> settlementRule(String cardId) async {
+    final json =
+        await _apiClient.get('/accounts/$cardId/settlement-rule')
+            as Map<String, dynamic>;
+    final rule = json['rule'] as Map<String, dynamic>?;
+    return SettlementRuleState(
+      ruleId: rule?['id'] as String?,
+      pattern: rule?['pattern'] as String?,
+      suggestedPattern: json['suggested_pattern'] as String?,
+    );
+  }
+
+  /// Creates or replaces the card's rule; resolves to how many imported rows
+  /// it filed as a settlement.
+  Future<int> saveSettlementRule(String cardId, String pattern) async {
+    final json =
+        await _apiClient.put(
+              '/accounts/$cardId/settlement-rule',
+              body: {'match_type': 'contains', 'pattern': pattern},
+            )
+            as Map<String, dynamic>;
+    return json['recategorized_count'] as int;
   }
 
   Future<void> archive(String id) async {

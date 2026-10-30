@@ -614,6 +614,72 @@ abstract class AppLocalizations {
   /// **'Archiver'**
   String get accountArchive;
 
+  /// Account card menu item, deferred-debit cards only: opens the rule filing the card's monthly debit as a transfer.
+  ///
+  /// In fr, this message translates to:
+  /// **'Règle de prélèvement'**
+  String get accountSettlementRule;
+
+  /// Title of the dialog proposing the rule that files a deferred-debit card's monthly debit as a transfer.
+  ///
+  /// In fr, this message translates to:
+  /// **'Règle de prélèvement de la carte'**
+  String get settlementRuleTitle;
+
+  /// Explanation at the top of the settlement-rule dialog.
+  ///
+  /// In fr, this message translates to:
+  /// **'Chaque mois, la banque prélève le total de {card} sur le compte qui la règle. Ce prélèvement est un virement, pas une dépense : les achats de la carte sont déjà comptés un par un.'**
+  String settlementRuleBody(String card);
+
+  /// Label of the pattern field of the settlement-rule dialog.
+  ///
+  /// In fr, this message translates to:
+  /// **'Le libellé du prélèvement contient'**
+  String get settlementRulePatternLabel;
+
+  /// Helper under the settlement-rule pattern field.
+  ///
+  /// In fr, this message translates to:
+  /// **'Proposé à partir des libellés qui reviennent chaque mois sur le compte qui paie la carte.'**
+  String get settlementRulePatternHelper;
+
+  /// Validation error when the settlement-rule pattern is empty.
+  ///
+  /// In fr, this message translates to:
+  /// **'Indiquez le texte qui désigne le prélèvement.'**
+  String get settlementRulePatternRequired;
+
+  /// Primary action of the settlement-rule dialog.
+  ///
+  /// In fr, this message translates to:
+  /// **'Enregistrer la règle'**
+  String get settlementRuleSave;
+
+  /// Dismisses the settlement-rule dialog without saving.
+  ///
+  /// In fr, this message translates to:
+  /// **'Plus tard'**
+  String get settlementRuleLater;
+
+  /// Snackbar after saving a card's settlement rule, with how many imported debits it filed.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, =0{Règle enregistrée.} =1{Règle enregistrée : 1 prélèvement classé en virement.} other{Règle enregistrée : {count} prélèvements classés en virement.}}'**
+  String settlementRuleSaved(int count);
+
+  /// Shown in the settlement-rule dialog when its state fails to load.
+  ///
+  /// In fr, this message translates to:
+  /// **'Impossible de charger la règle de la carte.'**
+  String get settlementRuleLoadFailed;
+
+  /// Shown in the settlement-rule dialog when saving fails.
+  ///
+  /// In fr, this message translates to:
+  /// **'Impossible d\'enregistrer la règle. Réessayez.'**
+  String get settlementRuleSaveFailed;
+
   /// Cancel action on the account form and archive confirmation dialogs.
   ///
   /// In fr, this message translates to:

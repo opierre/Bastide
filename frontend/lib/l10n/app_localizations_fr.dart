@@ -304,6 +304,54 @@ class AppLocalizationsFr extends AppLocalizations {
   String get accountArchive => 'Archiver';
 
   @override
+  String get accountSettlementRule => 'Règle de prélèvement';
+
+  @override
+  String get settlementRuleTitle => 'Règle de prélèvement de la carte';
+
+  @override
+  String settlementRuleBody(String card) {
+    return 'Chaque mois, la banque prélève le total de $card sur le compte qui la règle. Ce prélèvement est un virement, pas une dépense : les achats de la carte sont déjà comptés un par un.';
+  }
+
+  @override
+  String get settlementRulePatternLabel => 'Le libellé du prélèvement contient';
+
+  @override
+  String get settlementRulePatternHelper =>
+      'Proposé à partir des libellés qui reviennent chaque mois sur le compte qui paie la carte.';
+
+  @override
+  String get settlementRulePatternRequired =>
+      'Indiquez le texte qui désigne le prélèvement.';
+
+  @override
+  String get settlementRuleSave => 'Enregistrer la règle';
+
+  @override
+  String get settlementRuleLater => 'Plus tard';
+
+  @override
+  String settlementRuleSaved(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Règle enregistrée : $count prélèvements classés en virement.',
+      one: 'Règle enregistrée : 1 prélèvement classé en virement.',
+      zero: 'Règle enregistrée.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get settlementRuleLoadFailed =>
+      'Impossible de charger la règle de la carte.';
+
+  @override
+  String get settlementRuleSaveFailed =>
+      'Impossible d\'enregistrer la règle. Réessayez.';
+
+  @override
   String get accountFormCancel => 'Annuler';
 
   @override

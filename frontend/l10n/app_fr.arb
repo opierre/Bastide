@@ -373,6 +373,62 @@
   "@accountArchive": {
     "description": "Menu item and confirm-dialog action to archive an account."
   },
+  "accountSettlementRule": "Règle de prélèvement",
+  "@accountSettlementRule": {
+    "description": "Account card menu item, deferred-debit cards only: opens the rule filing the card's monthly debit as a transfer."
+  },
+  "settlementRuleTitle": "Règle de prélèvement de la carte",
+  "@settlementRuleTitle": {
+    "description": "Title of the dialog proposing the rule that files a deferred-debit card's monthly debit as a transfer."
+  },
+  "settlementRuleBody": "Chaque mois, la banque prélève le total de {card} sur le compte qui la règle. Ce prélèvement est un virement, pas une dépense : les achats de la carte sont déjà comptés un par un.",
+  "@settlementRuleBody": {
+    "description": "Explanation at the top of the settlement-rule dialog.",
+    "placeholders": {
+      "card": {
+        "type": "String",
+        "example": "Carte ••4821"
+      }
+    }
+  },
+  "settlementRulePatternLabel": "Le libellé du prélèvement contient",
+  "@settlementRulePatternLabel": {
+    "description": "Label of the pattern field of the settlement-rule dialog."
+  },
+  "settlementRulePatternHelper": "Proposé à partir des libellés qui reviennent chaque mois sur le compte qui paie la carte.",
+  "@settlementRulePatternHelper": {
+    "description": "Helper under the settlement-rule pattern field."
+  },
+  "settlementRulePatternRequired": "Indiquez le texte qui désigne le prélèvement.",
+  "@settlementRulePatternRequired": {
+    "description": "Validation error when the settlement-rule pattern is empty."
+  },
+  "settlementRuleSave": "Enregistrer la règle",
+  "@settlementRuleSave": {
+    "description": "Primary action of the settlement-rule dialog."
+  },
+  "settlementRuleLater": "Plus tard",
+  "@settlementRuleLater": {
+    "description": "Dismisses the settlement-rule dialog without saving."
+  },
+  "settlementRuleSaved": "{count, plural, =0{Règle enregistrée.} =1{Règle enregistrée : 1 prélèvement classé en virement.} other{Règle enregistrée : {count} prélèvements classés en virement.}}",
+  "@settlementRuleSaved": {
+    "description": "Snackbar after saving a card's settlement rule, with how many imported debits it filed.",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "9"
+      }
+    }
+  },
+  "settlementRuleLoadFailed": "Impossible de charger la règle de la carte.",
+  "@settlementRuleLoadFailed": {
+    "description": "Shown in the settlement-rule dialog when its state fails to load."
+  },
+  "settlementRuleSaveFailed": "Impossible d'enregistrer la règle. Réessayez.",
+  "@settlementRuleSaveFailed": {
+    "description": "Shown in the settlement-rule dialog when saving fails."
+  },
   "accountFormCancel": "Annuler",
   "@accountFormCancel": {
     "description": "Cancel action on the account form and archive confirmation dialogs."

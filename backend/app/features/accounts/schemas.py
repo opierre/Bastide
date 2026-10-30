@@ -85,3 +85,41 @@ class AccountRead(BaseModel):
     archived: bool
     created_at: datetime
     updated_at: datetime
+
+
+SettlementMatchType = Literal["contains", "equals", "regex"]
+
+
+class SettlementRuleRead(BaseModel):
+    """A deferred card's settlement rule: what in a debit's label says it pays this card."""
+
+    id: str
+    match_type: str
+    pattern: str
+    enabled: bool
+
+
+class SettlementRuleState(BaseModel):
+    """A card's settlement rule, if it has one, and the pattern proposed for it."""
+
+    rule: SettlementRuleRead | None
+    suggested_pattern: str | None = Field(
+        description=(
+            "Read from the labels of the account that pays the card: the fragment naming the "
+            "card that recurs month after month. Null when the card's number is unknown."
+        )
+    )
+
+
+class SettlementRuleWrite(BaseModel):
+    """Create or replace a card's settlement rule. It matches the cleaned label."""
+
+    match_type: SettlementMatchType = "contains"
+    pattern: str = Field(min_length=1, max_length=255)
+
+
+class SettlementRuleSaved(BaseModel):
+    """The saved rule, and how many already-imported rows it filed as a settlement."""
+
+    rule: SettlementRuleRead
+    recategorized_count: int
