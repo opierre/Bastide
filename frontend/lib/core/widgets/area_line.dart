@@ -26,6 +26,7 @@ class AreaLine extends StatefulWidget {
     this.tooltips,
     this.valueLabel,
     this.gridlines = 4,
+    this.color = AppColors.iris,
   });
 
   /// One value per point, oldest first. Rendered on its own min/max, so a series that never
@@ -44,6 +45,11 @@ class AreaLine extends StatefulWidget {
 
   /// Horizontal hairlines behind the plot.
   final int gridlines;
+
+  /// The line, its fill and its dots. Iris on the dashboard's savings chart, where the
+  /// figure is the app's hero metric; an account's balance takes the leading chart hue
+  /// instead, since iris is the accent role and never data (`docs/design/16` §Row 2).
+  final Color color;
 
   /// Height reserved beneath the plot for the month axis.
   static const axisHeight = 22.0;
@@ -99,6 +105,7 @@ class _AreaLineState extends State<AreaLine> {
                       painter: _AreaLinePainter(
                         values: values,
                         gridlines: widget.gridlines,
+                        color: widget.color,
                         hovered: _hovered,
                         gutter: gutter,
                         levelLabels: levels,
@@ -189,6 +196,7 @@ class _AreaLinePainter extends CustomPainter {
   _AreaLinePainter({
     required this.values,
     required this.gridlines,
+    required this.color,
     required this.hovered,
     required this.gutter,
     required this.levelLabels,
@@ -197,6 +205,7 @@ class _AreaLinePainter extends CustomPainter {
 
   final List<num> values;
   final int gridlines;
+  final Color color;
   final int? hovered;
 
   /// Left inset of the plot, holding the value axis; zero without one.
@@ -269,14 +278,11 @@ class _AreaLinePainter extends CustomPainter {
       ..lineTo(points.first.dx, plot.bottom)
       ..close();
 
-    canvas.drawPath(
-      area,
-      Paint()..color = AppColors.iris.withValues(alpha: _fillAlpha),
-    );
+    canvas.drawPath(area, Paint()..color = color.withValues(alpha: _fillAlpha));
     canvas.drawPath(
       line,
       Paint()
-        ..color = AppColors.iris
+        ..color = color
         ..style = PaintingStyle.stroke
         ..strokeWidth = _stroke
         ..strokeJoin = StrokeJoin.round
@@ -297,7 +303,7 @@ class _AreaLinePainter extends CustomPainter {
       canvas.drawCircle(
         points[index],
         _dotRadius - _stroke / 2,
-        Paint()..color = AppColors.iris,
+        Paint()..color = color,
       );
     }
   }
@@ -306,6 +312,7 @@ class _AreaLinePainter extends CustomPainter {
   bool shouldRepaint(_AreaLinePainter oldDelegate) =>
       !listEquals(oldDelegate.values, values) ||
       oldDelegate.gridlines != gridlines ||
+      oldDelegate.color != color ||
       oldDelegate.hovered != hovered ||
       oldDelegate.gutter != gutter ||
       !listEquals(oldDelegate.levelLabels, levelLabels) ||
