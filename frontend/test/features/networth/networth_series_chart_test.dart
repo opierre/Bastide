@@ -7,6 +7,7 @@ import 'package:bastide/features/networth/presentation/networth_screen.dart';
 import 'package:bastide/features/networth/presentation/networth_series_chart.dart';
 import 'package:bastide/features/properties/application/properties_controller.dart';
 import 'package:bastide/l10n/app_localizations.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -66,6 +67,26 @@ void main() {
     expect(plot.months, hasLength(12));
     expect(plot.values.last, 28267079);
     expect(_text(tester, 'networthSeriesRange'), 'juin 2025 → mai 2026');
+  });
+
+  testWidgets('hovering a month names its net worth', (tester) async {
+    _useDesktopSurface(tester);
+    await tester.pumpWidget(_wrap(testNetworthSummary()));
+    await tester.pumpAndSettle();
+
+    final gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    addTearDown(gesture.removePointer);
+    await gesture.addPointer(location: Offset.zero);
+    await gesture.moveTo(
+      tester.getCenter(find.byKey(const Key('networthSeriesTooltip-11'))),
+    );
+    await tester.pump(const Duration(seconds: 1));
+
+    expect(
+      find.textContaining('Mai 2026\n282 670,79 €', findRichText: true),
+      findsOneWidget,
+    );
+    expect(tester.takeException(), isNull);
   });
 
   testWidgets('a month the API omitted is absent, never plotted as zero', (

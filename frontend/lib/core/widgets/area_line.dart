@@ -3,6 +3,7 @@ import 'dart:math' as math;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
+import '../theme/app_theme.dart';
 import '../theme/tokens.dart';
 
 /// The savings-evolution area line: an iris 2.5px stroke over a 16% iris fill, hairline
@@ -12,6 +13,8 @@ import '../theme/tokens.dart';
 /// Each point sits at the centre of its axis label's slot rather than spreading edge to edge,
 /// so a month's dot stands over its own label instead of drifting toward the slot boundary.
 /// Hovering a slot rings its point and, when [tooltips] are given, names its figure.
+/// Given a [valueLabel], the min / mid / max gridlines are labelled in a gutter on the left,
+/// as on the Synthèse's « Patrimoine net » chart.
 ///
 /// Deliberately not animated — the spec allows only the spinner and skeleton keyframes, so a
 /// chart appears drawn rather than growing in.
@@ -21,6 +24,7 @@ class AreaLine extends StatefulWidget {
     required this.values,
     required this.labels,
     this.tooltips,
+    this.valueLabel,
     this.gridlines = 4,
   });
 
@@ -35,11 +39,17 @@ class AreaLine extends StatefulWidget {
   /// so the caller styles the figure the way the rest of its card does.
   final List<InlineSpan>? tooltips;
 
+  /// Formats a value for the left axis; without it the chart has no value axis.
+  final String Function(num value)? valueLabel;
+
   /// Horizontal hairlines behind the plot.
   final int gridlines;
 
   /// Height reserved beneath the plot for the month axis.
   static const axisHeight = 22.0;
+
+  /// Width reserved left of the plot for the value axis, when there is one.
+  static const valueGutter = 56.0;
 
   /// The horizontal centre of point [index] of [count] across [width]: the middle of its
   /// label's slot. Shared by the painter and the axis so the two can never disagree.
@@ -60,6 +70,13 @@ class _AreaLineState extends State<AreaLine> {
     final labels = widget.labels;
     final tooltips = widget.tooltips;
     final textTheme = Theme.of(context).textTheme;
+    final valueLabel = widget.valueLabel;
+    final gutter = valueLabel == null ? 0.0 : AreaLine.valueGutter;
+    // Bottom to top: the series' min, mid and max, where the painter draws them — or the one
+    // level a flat series sits on.
+    final levels = values.length < 2 || valueLabel == null
+        ? const <String>[]
+        : _levels(values).map(valueLabel).toList();
 
     // The axis is a fixed band under a flexible plot, so a card shorter than the band has
     // nothing left to give it and the column overflows its own box. On a short window the
@@ -83,6 +100,13 @@ class _AreaLineState extends State<AreaLine> {
                         values: values,
                         gridlines: widget.gridlines,
                         hovered: _hovered,
+                        gutter: gutter,
+                        levelLabels: levels,
+                        labelStyle: tabularNumberStyle(textTheme.labelSmall!)
+                            .copyWith(
+                              fontWeight: FontWeight.w400,
+                              color: AppColors.textSecondary,
+                            ),
                       ),
                     ),
                   ),
@@ -92,21 +116,8 @@ class _AreaLineState extends State<AreaLine> {
                     onExit: (_) => setState(() => _hovered = null),
                     child: Row(
                       children: [
-                        for (var i = 0; i < values.length; i++)
-                          Expanded(
-                            child: MouseRegion(
-                              onEnter: (_) => setState(() => _hovered = i),
-                              child: tooltips == null
-                                  ? const SizedBox.expand()
-                                  : Tooltip(
-                                      key: Key('areaLineTooltip-$i'),
-                                      richMessage: TextSpan(
-                                        children: [tooltips[i]],
-                                      ),
-                                      child: const SizedBox.expand(),
-                                    ),
-                            ),
-                          ),
+                        SizedBox(width: gutter),
+                        Expanded(child: _slots(values.length, tooltips)),
                       ],
                     ),
                   ),
@@ -121,6 +132,7 @@ class _AreaLineState extends State<AreaLine> {
                   maxHeight: AreaLine.axisHeight,
                   child: Row(
                     children: [
+                      SizedBox(width: gutter),
                       for (final label in labels)
                         Expanded(
                           child: Text(
@@ -143,6 +155,34 @@ class _AreaLineState extends State<AreaLine> {
       },
     );
   }
+
+  /// One full-height slice per point, matching the axis slots below: the dot is a few pixels
+  /// wide, but the thing worth hovering is the month.
+  Widget _slots(int count, List<InlineSpan>? tooltips) => Row(
+    children: [
+      for (var i = 0; i < count; i++)
+        Expanded(
+          child: MouseRegion(
+            onEnter: (_) => setState(() => _hovered = i),
+            child: tooltips == null
+                ? const SizedBox.expand()
+                : Tooltip(
+                    key: Key('areaLineTooltip-$i'),
+                    richMessage: TextSpan(children: [tooltips[i]]),
+                    child: const SizedBox.expand(),
+                  ),
+          ),
+        ),
+    ],
+  );
+}
+
+/// The values the min / mid / max gridlines stand for, bottom to top — just one for a flat
+/// series, whose line is centred rather than spread across the plot.
+List<num> _levels(List<num> values) {
+  final min = values.reduce((a, b) => a < b ? a : b);
+  final max = values.reduce((a, b) => a > b ? a : b);
+  return min == max ? [min] : [min, (min + max) / 2, max];
 }
 
 class _AreaLinePainter extends CustomPainter {
@@ -150,11 +190,21 @@ class _AreaLinePainter extends CustomPainter {
     required this.values,
     required this.gridlines,
     required this.hovered,
+    required this.gutter,
+    required this.levelLabels,
+    required this.labelStyle,
   });
 
   final List<num> values;
   final int gridlines;
   final int? hovered;
+
+  /// Left inset of the plot, holding the value axis; zero without one.
+  final double gutter;
+
+  /// The value axis' labels, bottom to top — see [_levels]. Empty without an axis.
+  final List<String> levelLabels;
+  final TextStyle labelStyle;
 
   static const _stroke = 2.5;
   static const _dotRadius = 5.0;
@@ -165,18 +215,36 @@ class _AreaLinePainter extends CustomPainter {
     // Inset vertically by the dot so an extreme point isn't clipped by the plot's own edge.
     // Horizontally the points already sit half a slot in from either side.
     final plot = Rect.fromLTWH(
-      0,
+      gutter,
       _dotRadius,
-      size.width,
+      size.width - gutter,
       size.height - _dotRadius * 2,
     );
+    if (plot.width <= 0) return;
 
     final grid = Paint()
       ..color = AppColors.borderSubtle
       ..strokeWidth = 1;
     for (var i = 0; i <= gridlines; i++) {
       final y = plot.top + plot.height * (i / gridlines);
-      canvas.drawLine(Offset(0, y), Offset(size.width, y), grid);
+      canvas.drawLine(Offset(plot.left, y), Offset(size.width, y), grid);
+    }
+
+    // Min at the bottom gridline, max at the top, mid halfway — the one level of a flat
+    // series sits at the centre, where its line is drawn.
+    for (var i = 0; i < levelLabels.length; i++) {
+      final y = levelLabels.length == 1
+          ? plot.center.dy
+          : plot.bottom - plot.height * (i / (levelLabels.length - 1));
+      final label = TextPainter(
+        text: TextSpan(text: levelLabels[i], style: labelStyle),
+        textDirection: TextDirection.ltr,
+        maxLines: 1,
+      )..layout();
+      label.paint(
+        canvas,
+        Offset(plot.left - AppSpacing.sm - label.width, y - label.height / 2),
+      );
     }
 
     if (values.length < 2) return;
@@ -188,7 +256,7 @@ class _AreaLinePainter extends CustomPainter {
     final points = [
       for (var i = 0; i < values.length; i++)
         Offset(
-          AreaLine.pointX(i, values.length, plot.width),
+          plot.left + AreaLine.pointX(i, values.length, plot.width),
           range == 0
               ? plot.center.dy
               : plot.bottom - plot.height * ((values[i] - min) / range),
@@ -238,5 +306,8 @@ class _AreaLinePainter extends CustomPainter {
   bool shouldRepaint(_AreaLinePainter oldDelegate) =>
       !listEquals(oldDelegate.values, values) ||
       oldDelegate.gridlines != gridlines ||
-      oldDelegate.hovered != hovered;
+      oldDelegate.hovered != hovered ||
+      oldDelegate.gutter != gutter ||
+      !listEquals(oldDelegate.levelLabels, levelLabels) ||
+      oldDelegate.labelStyle != labelStyle;
 }

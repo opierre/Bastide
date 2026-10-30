@@ -19,6 +19,7 @@ Account _account({
   AccountType type = AccountType.checking,
   String institution = 'BNP Paribas',
   int balanceMinor = 123456,
+  DateTime? lastTransactionDate,
 }) => Account(
   id: id,
   name: name,
@@ -27,6 +28,7 @@ Account _account({
   currency: 'EUR',
   openingBalanceMinor: balanceMinor,
   balanceMinor: balanceMinor,
+  lastTransactionDate: lastTransactionDate,
   archived: false,
   createdAt: DateTime.utc(2026, 1, 1),
   updatedAt: DateTime.utc(2026, 1, 1),
@@ -115,6 +117,39 @@ void main() {
     expect(find.byKey(const Key('cardSettlementWarning-c1')), findsOneWidget);
     expect(find.text('Choisir le compte'), findsOneWidget);
   });
+
+  for (final (locale, dated, undated) in [
+    ('fr', 'Dernière opération le 29 sept. 2026', 'Aucune opération'),
+    ('en', 'Last transaction on Sep 29, 2026', 'No transactions yet'),
+  ]) {
+    testWidgets('shows when each account last moved ($locale)', (tester) async {
+      await tester.pumpWidget(
+        _wrap(
+          locale: Locale(locale),
+          controller: FakeAccountsController(
+            initialAccounts: [
+              _account(lastTransactionDate: DateTime(2026, 9, 29)),
+              _account(id: 'a2', name: 'Livret A'),
+            ],
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(
+        tester
+            .widget<Text>(find.byKey(const Key('accountLastTransaction-a1')))
+            .data,
+        dated,
+      );
+      expect(
+        tester
+            .widget<Text>(find.byKey(const Key('accountLastTransaction-a2')))
+            .data,
+        undated,
+      );
+    });
+  }
 
   testWidgets('renders the balance formatted for the fr locale', (
     tester,

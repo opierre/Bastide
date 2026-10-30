@@ -149,6 +149,10 @@ class AccountsRepository {
     settlementAccountId: json['settlement_account_id'] as String?,
     openingBalanceMinor: json['opening_balance_minor'] as int,
     balanceMinor: json['balance_minor'] as int,
+    lastTransactionDate: switch (json['last_transaction_date']) {
+      final String date => DateTime.parse(date),
+      _ => null,
+    },
     archived: json['archived'] as bool,
     createdAt: DateTime.parse(json['created_at'] as String),
     updatedAt: DateTime.parse(json['updated_at'] as String),

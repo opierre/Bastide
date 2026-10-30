@@ -127,6 +127,8 @@
   "accountsEmptyBody": "Track your balances and activity in one place.",
   "accountsRetry": "Retry",
   "accountEdit": "Edit",
+  "accountLastTransaction": "Last transaction on {date}",
+  "accountNoTransactions": "No transactions yet",
   "accountArchive": "Archive",
   "accountSettlementRule": "Settlement rule",
   "cardSettlementNoAccount": "{card}: choose the account the card is paid from, so its purchases count only once.",

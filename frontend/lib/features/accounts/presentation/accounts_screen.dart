@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
 
 import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/tokens.dart';
@@ -211,9 +212,9 @@ class _AccountsGrid extends StatelessWidget {
         crossAxisCount: 2,
         mainAxisSpacing: AppSpacing.gridGap,
         crossAxisSpacing: AppSpacing.gridGap,
-        // Two lines of identity above a footer row; fixed so every card in the
-        // grid is the same height regardless of how long its name runs.
-        mainAxisExtent: 132,
+        // Three lines of identity above a footer row; fixed so every card in
+        // the grid is the same height regardless of how long its name runs.
+        mainAxisExtent: 152,
       ),
       itemCount: accounts.length,
       itemBuilder: (context, index) {
@@ -277,6 +278,8 @@ class _AccountCard extends StatelessWidget {
                       ),
                       overflow: TextOverflow.ellipsis,
                     ),
+                    const SizedBox(height: 2),
+                    _LastTransaction(account: account, l10n: l10n),
                   ],
                 ),
               ),
@@ -347,6 +350,32 @@ class _AccountCard extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+/// When the account last moved — read at a glance, it is what singles out the
+/// dormant accounts worth archiving.
+class _LastTransaction extends StatelessWidget {
+  const _LastTransaction({required this.account, required this.l10n});
+
+  final Account account;
+  final AppLocalizations l10n;
+
+  @override
+  Widget build(BuildContext context) {
+    final date = account.lastTransactionDate;
+    final locale = Localizations.localeOf(context).toString();
+
+    return Text(
+      date == null
+          ? l10n.accountNoTransactions
+          : l10n.accountLastTransaction(DateFormat.yMMMd(locale).format(date)),
+      key: Key('accountLastTransaction-${account.id}'),
+      style: Theme.of(
+        context,
+      ).textTheme.bodySmall?.copyWith(color: AppColors.textDisabled),
+      overflow: TextOverflow.ellipsis,
     );
   }
 }

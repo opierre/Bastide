@@ -279,3 +279,31 @@ def test_create_account_rejects_an_unknown_type(client: TestClient) -> None:
     )
 
     assert response.status_code == 422
+
+
+def test_accounts_report_the_date_of_their_latest_transaction(client: TestClient) -> None:
+    headers = _register(client, "amelie@example.com")
+    active_id = client.post("/api/v1/accounts", json=ACCOUNT_PAYLOAD, headers=headers).json()["id"]
+    dormant_id = client.post(
+        "/api/v1/accounts", json={**ACCOUNT_PAYLOAD, "name": "Livret"}, headers=headers
+    ).json()["id"]
+    ofx = b"""<OFX><BANKMSGSRSV1><STMTTRNRS><STMTRS><CURDEF>EUR
+<BANKACCTFROM><BANKID>30004<ACCTID>0001234567<ACCTTYPE>CHECKING</BANKACCTFROM>
+<BANKTRANLIST>
+<STMTTRN><TRNAMT>-12.40<DTPOSTED>20260112<FITID>P1<NAME>CB BOULANGERIE</STMTTRN>
+<STMTTRN><TRNAMT>-8.00<DTPOSTED>20260203<FITID>P2<NAME>CB PRESSE</STMTTRN>
+</BANKTRANLIST></STMTRS></STMTTRNRS></BANKMSGSRSV1></OFX>"""
+    imported = client.post(
+        "/api/v1/imports",
+        headers=headers,
+        data={"account_id": active_id},
+        files={"file": ("releve.ofx", ofx, "application/octet-stream")},
+    )
+    assert imported.status_code == 201, imported.json()
+
+    listed = {a["id"]: a for a in client.get("/api/v1/accounts", headers=headers).json()}
+    single = client.get(f"/api/v1/accounts/{active_id}", headers=headers).json()
+
+    assert listed[active_id]["last_transaction_date"] == "2026-02-03"
+    assert listed[dormant_id]["last_transaction_date"] is None
+    assert single["last_transaction_date"] == "2026-02-03"

@@ -7,6 +7,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/tokens.dart';
+import '../../../core/widgets/amount_text.dart';
 import '../../../core/widgets/app_card.dart';
 import '../../../core/widgets/app_segmented.dart';
 import '../../../core/widgets/date_field.dart';
@@ -287,7 +288,10 @@ Path dashPath(Path source, {double dash = 5, double gap = 4}) {
 /// a segment across the gap would draw a value nobody measured. A segment
 /// touching a declared month is dashed. Over a year, every point keeps its
 /// label; past that, labels go to evenly spaced months so they never collide.
-class NetworthSeriesPlot extends StatelessWidget {
+///
+/// Hovering a month rings its point and names its net worth, as the dashboard's
+/// « Évolution de l'épargne » does.
+class NetworthSeriesPlot extends StatefulWidget {
   const NetworthSeriesPlot({
     super.key,
     required this.months,
@@ -308,38 +312,139 @@ class NetworthSeriesPlot extends StatelessWidget {
   final String currency;
 
   @override
-  Widget build(BuildContext context) {
-    final locale = Localizations.localeOf(context).toString();
-    final labelStyle = tabularNumberStyle(
-      Theme.of(context).textTheme.labelSmall!,
-    ).copyWith(fontWeight: FontWeight.w400, color: AppColors.textSecondary);
+  State<NetworthSeriesPlot> createState() => _NetworthSeriesPlotState();
+}
 
-    return RepaintBoundary(
+class _NetworthSeriesPlotState extends State<NetworthSeriesPlot> {
+  /// The month under the pointer — hover ephemera, not chart state.
+  int? _hovered;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final locale = Localizations.localeOf(context).toString();
+    final textTheme = Theme.of(context).textTheme;
+    final labelStyle = tabularNumberStyle(
+      textTheme.labelSmall!,
+    ).copyWith(fontWeight: FontWeight.w400, color: AppColors.textSecondary);
+    final months = widget.months;
+    final values = widget.values;
+
+    final painter = RepaintBoundary(
       child: CustomPaint(
         size: Size.infinite,
         painter: _SeriesPainter(
           months: months,
           values: values,
-          declared: declared,
+          declared: widget.declared,
+          hovered: _hovered,
           monthLabel: DateFormat.MMM(locale).format,
           // Past a year the month alone is ambiguous: « janv. 24 ».
           longMonthLabel: DateFormat('MMM yy', locale).format,
           valueLabel: (minor) => NumberFormat.compactSimpleCurrency(
             locale: locale,
-            name: currency,
+            name: widget.currency,
           ).format(minor / 100).replaceAll('-', '−'),
           labelStyle: labelStyle,
         ),
       ),
     );
+
+    // Built from flex weights rather than measured: the Synthèse lays this card
+    // out by its intrinsic size, which a LayoutBuilder cannot report.
+    return Stack(
+      fit: StackFit.expand,
+      children: [
+        painter,
+        Column(
+          children: [
+            Expanded(
+              child: Row(
+                children: [
+                  const SizedBox(width: _SeriesPainter._gutter),
+                  for (final (i, flex) in _bandFlexes(months).indexed)
+                    Expanded(
+                      flex: flex,
+                      child: MouseRegion(
+                        onEnter: (_) => setState(() => _hovered = i),
+                        onExit: (_) => setState(() {
+                          if (_hovered == i) _hovered = null;
+                        }),
+                        child: Tooltip(
+                          key: Key('networthSeriesTooltip-$i'),
+                          richMessage: _tooltip(i, l10n, locale, textTheme),
+                          child: const SizedBox.expand(),
+                        ),
+                      ),
+                    ),
+                  const SizedBox(width: _SeriesPainter._lastDot),
+                ],
+              ),
+            ),
+            const SizedBox(height: _SeriesPainter._axis),
+          ],
+        ),
+      ],
+    );
+  }
+
+  /// The month and its net worth — neutral, like every net-worth figure — and,
+  /// for a declared month, that it was declared: the dash alone is easy to miss
+  /// on a single point.
+  TextSpan _tooltip(
+    int i,
+    AppLocalizations l10n,
+    String locale,
+    TextTheme textTheme,
+  ) {
+    final month = DateFormat.yMMMM(locale).format(widget.months[i]);
+    return TextSpan(
+      children: [
+        TextSpan(
+          text: '${_capitalize(month)}\n',
+          style: tabularNumberStyle(textTheme.labelSmall!),
+        ),
+        TextSpan(
+          text: formatAmount(
+            amountMinor: widget.values[i],
+            currency: widget.currency,
+            locale: locale,
+          ),
+          style: tabularNumberStyle(textTheme.bodySmall!),
+        ),
+        if (i < widget.declared.length && widget.declared[i])
+          TextSpan(
+            text: '\n${l10n.networthLegendDeclared}',
+            style: textTheme.labelSmall,
+          ),
+      ],
+    );
   }
 }
+
+/// The width of each month's hover band, in half-months: a band reaches halfway
+/// to its neighbour on either side, so it covers exactly the stretch of line
+/// nearer its point than any other — the dot is a few pixels wide, but the thing
+/// worth hovering is the month. Whole numbers, so they can be flex weights.
+List<int> _bandFlexes(List<DateTime> months) {
+  int index(DateTime month) => _SeriesPainter._index(month);
+  if (months.length < 2) return [for (final _ in months) 1];
+  return [
+    for (var i = 0; i < months.length; i++)
+      (i == months.length - 1 ? index(months[i]) : index(months[i + 1])) -
+          (i == 0 ? index(months[i]) : index(months[i - 1])),
+  ];
+}
+
+String _capitalize(String value) =>
+    value.isEmpty ? value : value[0].toUpperCase() + value.substring(1);
 
 class _SeriesPainter extends CustomPainter {
   _SeriesPainter({
     required this.months,
     required this.values,
     required this.declared,
+    required this.hovered,
     required this.monthLabel,
     required this.longMonthLabel,
     required this.valueLabel,
@@ -349,6 +454,7 @@ class _SeriesPainter extends CustomPainter {
   final List<DateTime> months;
   final List<int> values;
   final List<bool> declared;
+  final int? hovered;
   final String Function(DateTime) monthLabel;
   final String Function(DateTime) longMonthLabel;
   final String Function(int) valueLabel;
@@ -462,14 +568,15 @@ class _SeriesPainter extends CustomPainter {
     canvas.drawPath(solid, line);
     canvas.drawPath(dashed, _seriesStroke());
 
-    // Ring dots on the card's surface; the last month's is larger.
+    // Ring dots on the card's surface; the last month's and the hovered one's
+    // are larger.
     final ring = Paint()
       ..color = AppColors.iris
       ..style = PaintingStyle.stroke
       ..strokeWidth = 1.5;
     final hole = Paint()..color = AppColors.surfaceRaised;
     for (var i = 0; i < points.length; i++) {
-      final radius = i == points.length - 1 ? _lastDot : _dot;
+      final radius = i == points.length - 1 || i == hovered ? _lastDot : _dot;
       canvas.drawCircle(points[i], radius, hole);
       canvas.drawCircle(points[i], radius, ring);
     }
@@ -502,5 +609,6 @@ class _SeriesPainter extends CustomPainter {
       !listEquals(oldDelegate.months, months) ||
       !listEquals(oldDelegate.values, values) ||
       !listEquals(oldDelegate.declared, declared) ||
+      oldDelegate.hovered != hovered ||
       oldDelegate.labelStyle != labelStyle;
 }

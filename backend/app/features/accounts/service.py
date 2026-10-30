@@ -1,5 +1,7 @@
 """Business logic for account creation, updates, and archive-on-delete."""
 
+from datetime import date
+
 from sqlalchemy.orm import Session
 
 from app.core.errors import ConflictError, NotFoundError, ValidationError
@@ -58,6 +60,10 @@ class AccountService:
     def list_for_user(self, user_id: str) -> list[Account]:
         """List a user's non-archived accounts."""
         return self._repository.list_by_user(user_id)
+
+    def last_transaction_dates(self, accounts: list[Account]) -> dict[str, date]:
+        """When each account last moved — what tells a dormant account from a live one."""
+        return self._repository.last_booked_dates([account.id for account in accounts])
 
     def get(self, user_id: str, account_id: str) -> Account:
         """Fetch a single account the user owns.

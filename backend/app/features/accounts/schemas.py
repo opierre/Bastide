@@ -82,6 +82,9 @@ class AccountRead(BaseModel):
     settlement_account_id: str | None
     opening_balance_minor: int
     balance_minor: int
+    last_transaction_date: date | None = Field(
+        description="Booking date of the account's latest transaction; null when it has none."
+    )
     archived: bool
     created_at: datetime
     updated_at: datetime

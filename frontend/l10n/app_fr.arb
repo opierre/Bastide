@@ -369,6 +369,20 @@
   "@accountEdit": {
     "description": "Menu item to edit an account."
   },
+  "accountLastTransaction": "Dernière opération le {date}",
+  "@accountLastTransaction": {
+    "description": "Account card line giving the booking date of the account's latest transaction.",
+    "placeholders": {
+      "date": {
+        "type": "String",
+        "example": "29 sept. 2026"
+      }
+    }
+  },
+  "accountNoTransactions": "Aucune opération",
+  "@accountNoTransactions": {
+    "description": "Account card line for an account with no transaction yet."
+  },
   "accountArchive": "Archiver",
   "@accountArchive": {
     "description": "Menu item and confirm-dialog action to archive an account."

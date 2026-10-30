@@ -98,6 +98,7 @@ class Account {
     this.settlementAccountId,
     required this.openingBalanceMinor,
     required this.balanceMinor,
+    this.lastTransactionDate,
     required this.archived,
     required this.createdAt,
     required this.updatedAt,
@@ -119,6 +120,10 @@ class Account {
   final String? settlementAccountId;
   final int openingBalanceMinor;
   final int balanceMinor;
+
+  /// Booking date of the account's latest transaction, or `null` when it has
+  /// none — what shows an account gone dormant, ready to be archived.
+  final DateTime? lastTransactionDate;
   final bool archived;
   final DateTime createdAt;
   final DateTime updatedAt;
@@ -136,6 +141,7 @@ class Account {
           other.settlementAccountId == settlementAccountId &&
           other.openingBalanceMinor == openingBalanceMinor &&
           other.balanceMinor == balanceMinor &&
+          other.lastTransactionDate == lastTransactionDate &&
           other.archived == archived &&
           other.createdAt == createdAt &&
           other.updatedAt == updatedAt);
@@ -151,6 +157,7 @@ class Account {
     settlementAccountId,
     openingBalanceMinor,
     balanceMinor,
+    lastTransactionDate,
     archived,
     createdAt,
     updatedAt,

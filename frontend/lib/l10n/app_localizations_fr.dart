@@ -301,6 +301,14 @@ class AppLocalizationsFr extends AppLocalizations {
   String get accountEdit => 'Modifier';
 
   @override
+  String accountLastTransaction(String date) {
+    return 'Dernière opération le $date';
+  }
+
+  @override
+  String get accountNoTransactions => 'Aucune opération';
+
+  @override
   String get accountArchive => 'Archiver';
 
   @override
