@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 import '../../../core/api/api_client.dart';
 import '../../../core/api/api_client_provider.dart';
 import '../domain/account.dart';
+import '../domain/account_overview.dart';
 import '../domain/card_settlement_status.dart';
 import '../domain/settlement_rule.dart';
 
@@ -19,7 +20,9 @@ class AccountsRepository {
 
   Future<List<Account>> list() async {
     final json = await _apiClient.get('/accounts') as List<dynamic>;
-    return json.map((entry) => _parse(entry as Map<String, dynamic>)).toList();
+    return json
+        .map((entry) => parseAccount(entry as Map<String, dynamic>))
+        .toList();
   }
 
   Future<Account> create({
@@ -47,7 +50,7 @@ class AccountsRepository {
         'settlement_account_id': ?settlementAccountId,
       },
     );
-    return _parse(json as Map<String, dynamic>);
+    return parseAccount(json as Map<String, dynamic>);
   }
 
   Future<Account> update(
@@ -73,7 +76,86 @@ class AccountsRepository {
         'settlement_account_id': settlementAccountId,
       },
     );
-    return _parse(json as Map<String, dynamic>);
+    return parseAccount(json as Map<String, dynamic>);
+  }
+
+  /// Everything the account detail panel shows, in one read.
+  Future<AccountOverview> overview(String id) async {
+    final json =
+        await _apiClient.get('/accounts/$id/overview') as Map<String, dynamic>;
+    return parseOverview(json);
+  }
+
+  /// Maps the `AccountOverview` wire shape. Public so the mapping is tested
+  /// against fixed JSON without a client.
+  static AccountOverview parseOverview(Map<String, dynamic> json) {
+    final period = json['period'] as Map<String, dynamic>;
+    final settlement = json['settlement'] as Map<String, dynamic>?;
+    return AccountOverview(
+      account: parseAccount(json['account'] as Map<String, dynamic>),
+      firstTransactionDate: _date(json['first_transaction_date']),
+      lastImportAt: switch (json['last_import_at']) {
+        final String at => DateTime.parse(at),
+        _ => null,
+      },
+      balanceHistory: [
+        for (final point
+            in (json['balance_history'] as List<dynamic>)
+                .cast<Map<String, dynamic>>())
+          BalancePoint(
+            monthEnd: DateTime.parse(point['month_end'] as String),
+            balanceMinor: point['balance_minor'] as int,
+          ),
+      ],
+      period: PeriodStats(
+        since: _date(period['since']),
+        changeMinor: period['change_minor'] as int,
+        inflowMinor: period['inflow_minor'] as int,
+        outflowMinor: period['outflow_minor'] as int,
+        consecutiveRisingMonths: period['consecutive_rising_months'] as int,
+      ),
+      linkedCards: [
+        for (final card
+            in (json['linked_cards'] as List<dynamic>)
+                .cast<Map<String, dynamic>>())
+          LinkedCard(
+            accountId: card['account_id'] as String,
+            name: card['name'] as String,
+            institution: card['institution'] as String,
+            cardLastDigits: card['card_last_digits'] as String?,
+            cycleMinor: card['cycle_minor'] as int,
+            nextDebitDate: _date(card['next_debit_date']),
+            hasRule: card['has_rule'] as bool,
+          ),
+      ],
+      settlement: settlement == null ? null : _parseSettlement(settlement),
+    );
+  }
+
+  static CardSettlement _parseSettlement(Map<String, dynamic> json) {
+    final rule = json['rule'] as Map<String, dynamic>?;
+    return CardSettlement(
+      payingAccountId: json['paying_account_id'] as String?,
+      cardLastDigits: json['card_last_digits'] as String?,
+      rule: rule == null
+          ? null
+          : SettlementRuleSummary(
+              pattern: rule['pattern'] as String,
+              enabled: rule['enabled'] as bool,
+              appliesFrom: _date(rule['applies_from']),
+            ),
+      cycles: [
+        for (final cycle
+            in (json['cycles'] as List<dynamic>).cast<Map<String, dynamic>>())
+          SettlementCycle(
+            settledOn: _date(cycle['settled_on']),
+            amountMinor: cycle['amount_minor'] as int,
+            inProgress: cycle['in_progress'] as bool,
+          ),
+      ],
+      currentCycleMinor: json['current_cycle_minor'] as int,
+      nextDebitDate: _date(json['next_debit_date']),
+    );
   }
 
   Future<SettlementRuleState> settlementRule(String cardId) async {
@@ -139,7 +221,7 @@ class AccountsRepository {
     await _apiClient.delete('/accounts/$id');
   }
 
-  Account _parse(Map<String, dynamic> json) => Account(
+  static Account parseAccount(Map<String, dynamic> json) => Account(
     id: json['id'] as String,
     name: json['name'] as String,
     type: AccountType.fromWire(json['type'] as String),
