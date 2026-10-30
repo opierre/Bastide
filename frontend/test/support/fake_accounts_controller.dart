@@ -27,6 +27,7 @@ class FakeAccountsController extends AccountsController {
           int openingBalanceMinor,
           String? ofxAccountId,
           String? currency,
+          String? settlementAccountId,
         })
       >[];
   final updateCalls =
@@ -37,6 +38,7 @@ class FakeAccountsController extends AccountsController {
           AccountType type,
           String institution,
           int openingBalanceMinor,
+          String? settlementAccountId,
         })
       >[];
   final archiveCalls = <String>[];
@@ -56,6 +58,7 @@ class FakeAccountsController extends AccountsController {
     required int openingBalanceMinor,
     String? ofxAccountId,
     String? currency,
+    String? settlementAccountId,
   }) async {
     createCalls.add((
       name: name,
@@ -64,6 +67,7 @@ class FakeAccountsController extends AccountsController {
       openingBalanceMinor: openingBalanceMinor,
       ofxAccountId: ofxAccountId,
       currency: currency,
+      settlementAccountId: settlementAccountId,
     ));
     if (errorOnCreate != null) throw errorOnCreate!;
     final account =
@@ -75,6 +79,7 @@ class FakeAccountsController extends AccountsController {
           institution: institution,
           currency: currency ?? 'EUR',
           ofxAccountId: ofxAccountId,
+          settlementAccountId: settlementAccountId,
           openingBalanceMinor: openingBalanceMinor,
           balanceMinor: openingBalanceMinor,
           archived: false,
@@ -92,6 +97,7 @@ class FakeAccountsController extends AccountsController {
     required AccountType type,
     required String institution,
     required int openingBalanceMinor,
+    String? settlementAccountId,
   }) async {
     updateCalls.add((
       id: id,
@@ -99,6 +105,7 @@ class FakeAccountsController extends AccountsController {
       type: type,
       institution: institution,
       openingBalanceMinor: openingBalanceMinor,
+      settlementAccountId: settlementAccountId,
     ));
     if (errorOnUpdate != null) throw errorOnUpdate!;
   }

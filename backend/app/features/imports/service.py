@@ -16,7 +16,6 @@ from app.features.accounts.models import Account, AccountBalanceSnapshot
 from app.features.accounts.service import AccountService
 from app.features.auth.models import User
 from app.features.imports.canonical import CanonicalTransaction, normalize
-from app.features.imports.card_settlement import DETECTED_SOURCE, is_card_settlement
 from app.features.imports.ledger import settle_earlier_mismatches, shift_later_snapshots
 from app.features.imports.models import ImportBatch
 from app.features.imports.parsers.ofx import (
@@ -26,8 +25,6 @@ from app.features.imports.parsers.ofx import (
     parse_statements,
 )
 from app.features.imports.repository import ImportRepository
-from app.features.imports.schemas import CardSettlementStatus
-from app.features.imports.settlements import CardSettlementService
 from app.features.rules.engine import match_category
 from app.features.rules.repository import RuleRepository
 from app.features.transactions.models import Transaction
@@ -109,15 +106,10 @@ class ImportService:
         # the model existed, which is also what every test constructing this service without
         # one gets.
         self._run_enqueuer = run_enqueuer
-        self._settlements = CardSettlementService(repository, db)
 
     def list_for_user(self, user_id: str) -> list[ImportBatch]:
         """List a user's import batches, most recent first (the import history)."""
         return self._repository.list_by_user(user_id)
-
-    def card_settlement_status(self, user_id: str) -> CardSettlementStatus:
-        """What the user still has to settle for their deferred cards to count once."""
-        return self._settlements.status(user_id)
 
     def get(self, user_id: str, batch_id: str) -> ImportBatch:
         """Fetch a single import batch the user owns.
@@ -184,10 +176,6 @@ class ImportService:
 
         new_rows, duplicate_count = self._dedup(account.id, canonical_transactions)
         rules = RuleRepository(self._db).list_enabled_by_user(user.id)
-        cards = self._settlements.tracked_cards(user.id)
-        settlement_category_id = (
-            self._settlements.settlement_category_id(user.id) if cards else None
-        )
 
         batch = ImportBatch(
             id=str(uuid4()),
@@ -228,18 +216,6 @@ class ImportService:
                 transaction.category_id = matched_category_id
                 transaction.categorization_source = "rule"
                 transaction.needs_review = False
-            elif (
-                settlement_category_id is not None
-                and account.type != "deferred_card"
-                and is_card_settlement(row.description_clean, row.amount_minor)
-            ):
-                # After the user's own rules, which state intent this built-in reading must not
-                # override; before the model, which has no way to know a card account exists.
-                # Only proposed: a label is a strong hint, not proof, so the row waits in the
-                # review queue for the user to confirm it.
-                transaction.category_id = settlement_category_id
-                transaction.categorization_source = DETECTED_SOURCE
-                transaction.needs_review = True
             new_transactions.append(transaction)
 
         # The batch goes in first: the rows reference it, and the flush below would otherwise
@@ -255,15 +231,6 @@ class ImportService:
         if new_rows:
             shift_later_snapshots(self._db, account, new_rows)
             settle_earlier_mismatches(self._db, account, new_rows)
-
-        # Before the balance check too: on a card's own import, the offsets posted here are part
-        # of the ledger its declared balance is compared against.
-        if settlement_category_id is not None:
-            if account.type == "deferred_card":
-                self._settlements.adopt_late_resets(
-                    account, new_transactions, settlement_category_id
-                )
-            self._settlements.link_pending(user.id, cards, settlement_category_id)
 
         # Before any snapshot is written, so they are taken from the corrected base.
         if declared_balance is not None:

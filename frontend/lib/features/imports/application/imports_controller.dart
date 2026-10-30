@@ -7,7 +7,7 @@ import '../../dashboard/application/dashboard_controller.dart';
 import '../../networth/application/networth_controller.dart';
 import '../../transactions/application/transactions_controller.dart';
 import '../data/imports_repository.dart';
-import '../domain/card_settlement_status.dart';
+import '../../accounts/application/settlement_rule_controller.dart';
 import '../domain/import_batch.dart';
 
 /// Extensions the file picker and the drop target both accept.
@@ -115,16 +115,6 @@ class ImportsController extends AsyncNotifier<List<ImportBatch>> {
     return batch;
   }
 }
-
-/// What the user still has to settle for their deferred cards to count once,
-/// shown with the result of an import.
-///
-/// Auto-disposed, so the panel reads it afresh each time it is opened: the
-/// settlements it counts are confirmed from the review queue, elsewhere.
-final cardSettlementStatusProvider =
-    FutureProvider.autoDispose<CardSettlementStatus>(
-      (ref) => ref.read(importsRepositoryProvider).cardSettlementStatus(),
-    );
 
 final importsControllerProvider =
     AsyncNotifierProvider<ImportsController, List<ImportBatch>>(

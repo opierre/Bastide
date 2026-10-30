@@ -311,6 +311,110 @@ class AppLocalizationsEn extends AppLocalizations {
   String get accountArchive => 'Archive';
 
   @override
+  String get accountSettlementRule => 'Settlement rule';
+
+  @override
+  String cardSettlementNoAccount(String card) {
+    return '$card: choose the account the card is paid from, so its purchases count only once.';
+  }
+
+  @override
+  String get cardSettlementChooseAccount => 'Choose the account';
+
+  @override
+  String cardSettlementNoRule(String card) {
+    return '$card\'s monthly debit counts as spending on top of the card\'s purchases: create its settlement rule.';
+  }
+
+  @override
+  String get cardSettlementCreateRule => 'Create the rule';
+
+  @override
+  String cardSettlementUnsettled(
+    int count,
+    String card,
+    String amount,
+    DateTime date,
+  ) {
+    final intl.DateFormat dateDateFormat = intl.DateFormat.yMd(localeName);
+    final String dateString = dateDateFormat.format(date);
+
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          '$count purchases on $card ($amount) have waited for their debit since $dateString: the card\'s rule may no longer match the bank\'s wording.',
+      one:
+          'One purchase on $card ($amount) has waited for its debit since $dateString: the card\'s rule may no longer match the bank\'s wording.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get cardSettlementCheckRule => 'Check the rule';
+
+  @override
+  String get settlementRuleTitle => 'Card settlement rule';
+
+  @override
+  String settlementRuleBody(String card) {
+    return 'Each month, the bank charges the total of $card to the account that pays it. That debit is a transfer, not spending: the card\'s purchases are already counted one by one.';
+  }
+
+  @override
+  String get settlementRulePatternLabel => 'The debit\'s label contains';
+
+  @override
+  String get settlementRulePatternHelper =>
+      'Proposed from the labels that recur each month on the account paying the card.';
+
+  @override
+  String get settlementRulePatternRequired =>
+      'Enter the text that names the debit.';
+
+  @override
+  String get settlementRuleFromLabel => 'Applies from';
+
+  @override
+  String get settlementRuleFromHelper =>
+      'Earlier debits stay spending: the purchases they paid aren\'t in the app. Proposed from the card\'s imported history.';
+
+  @override
+  String get settlementRuleFromInvalid => 'Invalid date.';
+
+  @override
+  String ruleAppliesFrom(DateTime date) {
+    final intl.DateFormat dateDateFormat = intl.DateFormat.yMd(localeName);
+    final String dateString = dateDateFormat.format(date);
+
+    return 'from $dateString';
+  }
+
+  @override
+  String get settlementRuleSave => 'Save rule';
+
+  @override
+  String get settlementRuleLater => 'Later';
+
+  @override
+  String settlementRuleSaved(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Rule saved: $count debits filed as transfers.',
+      one: 'Rule saved: 1 debit filed as a transfer.',
+      zero: 'Rule saved.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get settlementRuleLoadFailed => 'Couldn\'t load the card\'s rule.';
+
+  @override
+  String get settlementRuleSaveFailed => 'Couldn\'t save the rule. Try again.';
+
+  @override
   String get accountFormCancel => 'Cancel';
 
   @override
@@ -364,6 +468,27 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get accountCardDebitCredit => 'Credit';
+
+  @override
+  String get accountSettlementLabel => 'Paid from';
+
+  @override
+  String get accountSettlementHelper =>
+      'The account charged the card\'s total each month: that debit is a transfer between the two, not spending.';
+
+  @override
+  String get accountSettlementPlaceholder => 'Choose an account';
+
+  @override
+  String get accountSettlementRequired => 'Choose the account it is paid from.';
+
+  @override
+  String get accountErrorSettlementRequired =>
+      'A deferred-debit card must name the account it is paid from.';
+
+  @override
+  String get accountErrorSettlementInvalid =>
+      'This account cannot pay the card.';
 
   @override
   String get accountCardDebitHelper =>
@@ -527,43 +652,6 @@ class AppLocalizationsEn extends AppLocalizations {
     final String dateString = dateDateFormat.format(date);
 
     return 'The statement declares a balance $amount from your ledger as of $dateString. Check for a missed import, or correct the account\'s opening balance if this keeps happening.';
-  }
-
-  @override
-  String importSettlementsProposed(int count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other:
-          '$count deferred-card settlements were recognised: confirm them so the card\'s purchases only count once.',
-      one:
-          'A deferred-card settlement was recognised: confirm it so the card\'s purchases only count once.',
-    );
-    return '$_temp0';
-  }
-
-  @override
-  String get importSettlementsReview => 'Review transactions';
-
-  @override
-  String importCardUnmatched(
-    int count,
-    String card,
-    String amount,
-    DateTime date,
-  ) {
-    final intl.DateFormat dateDateFormat = intl.DateFormat.yMd(localeName);
-    final String dateString = dateDateFormat.format(date);
-
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other:
-          '$count purchases on $card ($amount) have had no matching debit since $dateString: they count twice until that debit is filed as a card settlement.',
-      one:
-          'One purchase on $card ($amount) has had no matching debit since $dateString: it counts twice until that debit is filed as a card settlement.',
-    );
-    return '$_temp0';
   }
 
   @override
@@ -1588,9 +1676,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get reviewNoProposal => '— no proposal';
-
-  @override
-  String get reviewSettlementDetected => 'card settlement detected';
 
   @override
   String get reviewChooseCategory => 'Choose a category';

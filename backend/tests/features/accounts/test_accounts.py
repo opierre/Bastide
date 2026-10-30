@@ -183,18 +183,92 @@ def test_list_accounts_requires_auth(client: TestClient) -> None:
     assert response.status_code == 401
 
 
+def _card_payload(**overrides: object) -> dict[str, object]:
+    return {
+        **ACCOUNT_PAYLOAD,
+        "name": "Carte à débit différé",
+        "type": "deferred_card",
+        **overrides,
+    }
+
+
 def test_create_deferred_card_account(client: TestClient) -> None:
-    """The holding account a deferred-debit card posts to is an account type of its own."""
+    """The holding account a deferred-debit card posts to is an account type of its own, and
+    it names the account its debit is drawn from."""
     headers = _register(client, "amelie@example.com")
+    checking_id = client.post("/api/v1/accounts", json=ACCOUNT_PAYLOAD, headers=headers).json()[
+        "id"
+    ]
 
     response = client.post(
         "/api/v1/accounts",
-        json={**ACCOUNT_PAYLOAD, "name": "Carte à débit différé", "type": "deferred_card"},
+        json=_card_payload(settlement_account_id=checking_id),
         headers=headers,
     )
 
     assert response.status_code == 201
     assert response.json()["type"] == "deferred_card"
+    assert response.json()["settlement_account_id"] == checking_id
+
+
+def test_a_deferred_card_needs_its_settlement_account(client: TestClient) -> None:
+    headers = _register(client, "amelie@example.com")
+
+    response = client.post("/api/v1/accounts", json=_card_payload(), headers=headers)
+
+    assert response.status_code == 422
+    assert response.json()["error"]["code"] == "ACCOUNT_SETTLEMENT_ACCOUNT_REQUIRED"
+
+
+def test_a_card_cannot_be_settled_from_another_card_or_a_strangers_account(
+    client: TestClient,
+) -> None:
+    headers = _register(client, "amelie@example.com")
+    checking_id = client.post("/api/v1/accounts", json=ACCOUNT_PAYLOAD, headers=headers).json()[
+        "id"
+    ]
+    card_id = client.post(
+        "/api/v1/accounts", json=_card_payload(settlement_account_id=checking_id), headers=headers
+    ).json()["id"]
+    other = _register(client, "bruno@example.com")
+    strangers_id = client.post("/api/v1/accounts", json=ACCOUNT_PAYLOAD, headers=other).json()["id"]
+
+    for settling in (card_id, strangers_id):
+        response = client.post(
+            "/api/v1/accounts", json=_card_payload(settlement_account_id=settling), headers=headers
+        )
+        assert response.status_code == 422
+        assert response.json()["error"]["code"] == "ACCOUNT_SETTLEMENT_ACCOUNT_INVALID"
+    response = client.post(
+        "/api/v1/accounts",
+        json={**ACCOUNT_PAYLOAD, "settlement_account_id": checking_id},
+        headers=headers,
+    )
+    assert response.json()["error"]["code"] == "ACCOUNT_SETTLEMENT_ACCOUNT_INVALID"
+
+
+def test_an_existing_card_is_given_its_settlement_account_by_patch(client: TestClient) -> None:
+    headers = _register(client, "amelie@example.com")
+    checking_id = client.post("/api/v1/accounts", json=ACCOUNT_PAYLOAD, headers=headers).json()[
+        "id"
+    ]
+    savings_id = client.post(
+        "/api/v1/accounts", json={**ACCOUNT_PAYLOAD, "type": "savings"}, headers=headers
+    ).json()["id"]
+    card_id = client.post(
+        "/api/v1/accounts", json=_card_payload(settlement_account_id=checking_id), headers=headers
+    ).json()["id"]
+
+    moved = client.patch(
+        f"/api/v1/accounts/{card_id}", json={"settlement_account_id": savings_id}, headers=headers
+    )
+    renamed = client.patch(f"/api/v1/accounts/{card_id}", json={"name": "Visa"}, headers=headers)
+    retyped = client.patch(f"/api/v1/accounts/{card_id}", json={"type": "credit"}, headers=headers)
+
+    assert moved.json()["settlement_account_id"] == savings_id
+    # A patch that doesn't mention it leaves it alone; one that ends the card clears it.
+    assert renamed.json()["settlement_account_id"] == savings_id
+    assert retyped.json()["settlement_account_id"] is None
 
 
 def test_create_account_rejects_an_unknown_type(client: TestClient) -> None:

@@ -36,6 +36,13 @@ class AccountCreate(BaseModel):
             "the account holding them has to agree or every balance it shows is mislabelled."
         ),
     )
+    settlement_account_id: str | None = Field(
+        default=None,
+        description=(
+            "Deferred cards only, and required for one: the account the card's monthly debit "
+            "is drawn from. Must be another of the user's accounts, not itself a card."
+        ),
+    )
 
 
 class AccountUpdate(BaseModel):
@@ -54,6 +61,13 @@ class AccountUpdate(BaseModel):
     institution: str | None = Field(default=None, min_length=1, max_length=255)
     ofx_account_id: str | None = Field(default=None, max_length=255)
     opening_balance_minor: int | None = None
+    settlement_account_id: str | None = Field(
+        default=None,
+        description=(
+            "Deferred cards only: the account the card's monthly debit is drawn from, or "
+            "null to clear it. Must be another of the user's accounts, not itself a card."
+        ),
+    )
 
 
 class AccountRead(BaseModel):
@@ -65,6 +79,7 @@ class AccountRead(BaseModel):
     institution: str
     currency: str
     ofx_account_id: str | None
+    settlement_account_id: str | None
     opening_balance_minor: int
     balance_minor: int
     last_transaction_date: date | None = Field(
@@ -73,3 +88,79 @@ class AccountRead(BaseModel):
     archived: bool
     created_at: datetime
     updated_at: datetime
+
+
+SettlementMatchType = Literal["contains", "equals", "regex"]
+
+
+class SettlementRuleRead(BaseModel):
+    """A deferred card's settlement rule: what in a debit's label says it pays this card."""
+
+    id: str
+    match_type: str
+    pattern: str
+    enabled: bool
+    applies_from: date | None
+
+
+class SettlementRuleState(BaseModel):
+    """A card's settlement rule, if it has one, and the pattern proposed for it."""
+
+    rule: SettlementRuleRead | None
+    suggested_pattern: str | None = Field(
+        description=(
+            "Read from the labels of the account that pays the card: the fragment naming the "
+            "card that recurs month after month. Null when the card's number is unknown."
+        )
+    )
+    suggested_applies_from: date | None = Field(
+        description=(
+            "The first debit, among those the rule's pattern (else the suggested one) matches, "
+            "whose whole cycle the card's imported history covers: earlier debits pay purchases "
+            "the ledger doesn't hold, and stay spending. Null when the card has no transaction."
+        )
+    )
+
+
+class SettlementRuleWrite(BaseModel):
+    """Create or replace a card's settlement rule. It matches the cleaned label."""
+
+    match_type: SettlementMatchType = "contains"
+    pattern: str = Field(min_length=1, max_length=255)
+    applies_from: date | None = Field(
+        default=None,
+        description="Debits booked before this date are left to count as spending.",
+    )
+
+
+class SettlementRuleSaved(BaseModel):
+    """The saved rule, and how many already-imported rows it filed as a settlement."""
+
+    rule: SettlementRuleRead
+    recategorized_count: int
+
+
+CardSettlementIssueKind = Literal["no_settlement_account", "no_rule", "unsettled"]
+
+
+class CardSettlementIssue(BaseModel):
+    """What keeps one deferred card's purchases from counting exactly once.
+
+    The first missing step only: a card with no settlement account is not also told it lacks
+    a rule.
+    """
+
+    account_id: str
+    issue: CardSettlementIssueKind
+    #: `unsettled` only: the card's purchases since its last settlement that its paying account,
+    #: imported well past them, shows no settlement for — the rule no longer matches the bank's
+    #: wording, most likely. Their total, signed (negative), how many, and the oldest's date.
+    amount_minor: int | None = None
+    count: int | None = None
+    since: date | None = None
+
+
+class CardSettlementStatus(BaseModel):
+    """Every deferred card that needs the user's attention; empty when all count once."""
+
+    cards: list[CardSettlementIssue]

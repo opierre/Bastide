@@ -15,9 +15,9 @@ from sqlalchemy.orm import Session
 
 from app.core.errors import ConflictError, NotFoundError
 from app.features.accounts.service import AccountService
+from app.features.accounts.settlement_rule import CARD_SETTLEMENT_CATEGORY_KEY
 from app.features.categories.repository import CategoryRepository
 from app.features.categories.service import CategoryInvalidError
-from app.features.imports.card_settlement import CARD_SETTLEMENT_CATEGORY_KEY, is_card_settlement
 from app.features.recurring.detector import (
     INTERVAL_TOLERANCE_FLOOR_DAYS,
     INTERVAL_TOLERANCE_PERCENT,
@@ -152,13 +152,10 @@ def _is_card_settlement(transaction: Transaction) -> bool:
     Kept out of detection: it lands every month, and a user whose card spending is steady
     pays a near-constant sum, so it passes for a subscription — but it is the total of that
     month's purchases, not a service anyone subscribed to. Recognised by its category, which
-    is how a settlement the model or the user identified shows up, or by its label, which
-    still marks one nobody has categorised.
+    the card's settlement rule files it under.
     """
     category = transaction.category
-    if category is not None and category.name == CARD_SETTLEMENT_CATEGORY_KEY:
-        return True
-    return is_card_settlement(transaction.description_clean, transaction.amount_minor)
+    return category is not None and category.name == CARD_SETTLEMENT_CATEGORY_KEY
 
 
 def _is_frozen(series: RecurringSeries) -> bool:

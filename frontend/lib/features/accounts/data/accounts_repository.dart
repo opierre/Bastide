@@ -1,8 +1,11 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
 
 import '../../../core/api/api_client.dart';
 import '../../../core/api/api_client_provider.dart';
 import '../domain/account.dart';
+import '../domain/card_settlement_status.dart';
+import '../domain/settlement_rule.dart';
 
 /// Calls the `/accounts` endpoints and maps the wire JSON to domain models.
 /// The only place in the accounts feature that knows the response shape —
@@ -26,6 +29,7 @@ class AccountsRepository {
     required int openingBalanceMinor,
     String? ofxAccountId,
     String? currency,
+    String? settlementAccountId,
   }) async {
     final json = await _apiClient.post(
       '/accounts',
@@ -40,6 +44,7 @@ class AccountsRepository {
         // Likewise: sent only when a source declared it (an OFX `CURDEF`), so
         // omitting it leaves the backend on its default — the user's currency.
         'currency': ?currency,
+        'settlement_account_id': ?settlementAccountId,
       },
     );
     return _parse(json as Map<String, dynamic>);
@@ -51,6 +56,7 @@ class AccountsRepository {
     required AccountType type,
     required String institution,
     required int openingBalanceMinor,
+    String? settlementAccountId,
   }) async {
     final json = await _apiClient.patch(
       '/accounts/$id',
@@ -62,9 +68,71 @@ class AccountsRepository {
         // snapshot by the delta rather than treating this as an independent
         // figure — see `shift_opening_balance`.
         'opening_balance_minor': openingBalanceMinor,
+        // Always sent: a card's form always states it, and for any other
+        // account it is null, which is what the backend keeps there anyway.
+        'settlement_account_id': settlementAccountId,
       },
     );
     return _parse(json as Map<String, dynamic>);
+  }
+
+  Future<SettlementRuleState> settlementRule(String cardId) async {
+    final json =
+        await _apiClient.get('/accounts/$cardId/settlement-rule')
+            as Map<String, dynamic>;
+    final rule = json['rule'] as Map<String, dynamic>?;
+    return SettlementRuleState(
+      ruleId: rule?['id'] as String?,
+      pattern: rule?['pattern'] as String?,
+      appliesFrom: _date(rule?['applies_from']),
+      suggestedPattern: json['suggested_pattern'] as String?,
+      suggestedAppliesFrom: _date(json['suggested_applies_from']),
+    );
+  }
+
+  static DateTime? _date(Object? value) =>
+      value is String ? DateTime.parse(value) : null;
+
+  /// Creates or replaces the card's rule; resolves to how many imported rows
+  /// it filed as a settlement.
+  Future<int> saveSettlementRule(
+    String cardId,
+    String pattern,
+    DateTime? appliesFrom,
+  ) async {
+    final json =
+        await _apiClient.put(
+              '/accounts/$cardId/settlement-rule',
+              body: {
+                'match_type': 'contains',
+                'pattern': pattern,
+                'applies_from': appliesFrom == null
+                    ? null
+                    : DateFormat('yyyy-MM-dd').format(appliesFrom),
+              },
+            )
+            as Map<String, dynamic>;
+    return json['recategorized_count'] as int;
+  }
+
+  Future<List<CardSettlementIssue>> settlementStatus() async {
+    final json =
+        await _apiClient.get('/accounts/settlement-status')
+            as Map<String, dynamic>;
+    return [
+      for (final entry
+          in (json['cards'] as List<dynamic>).cast<Map<String, dynamic>>())
+        CardSettlementIssue(
+          accountId: entry['account_id'] as String,
+          kind: CardSettlementIssueKind.fromWire(entry['issue'] as String),
+          amountMinor: entry['amount_minor'] as int?,
+          count: entry['count'] as int?,
+          since: switch (entry['since']) {
+            final String date => DateTime.parse(date),
+            _ => null,
+          },
+        ),
+    ];
   }
 
   Future<void> archive(String id) async {
@@ -78,6 +146,7 @@ class AccountsRepository {
     institution: json['institution'] as String,
     currency: json['currency'] as String,
     ofxAccountId: json['ofx_account_id'] as String?,
+    settlementAccountId: json['settlement_account_id'] as String?,
     openingBalanceMinor: json['opening_balance_minor'] as int,
     balanceMinor: json['balance_minor'] as int,
     lastTransactionDate: switch (json['last_transaction_date']) {

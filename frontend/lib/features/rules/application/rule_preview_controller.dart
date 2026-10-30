@@ -50,6 +50,7 @@ class RulePreviewController extends Notifier<RulePreviewState> {
     required RuleMatchField matchField,
     required RuleMatchType matchType,
     required String pattern,
+    DateTime? appliesFrom,
   }) {
     _debounce?.cancel();
     final trimmed = pattern.trim();
@@ -60,7 +61,7 @@ class RulePreviewController extends Notifier<RulePreviewState> {
 
     state = RulePreviewState(isLoading: true, preview: state.preview);
     _debounce = Timer(rulePreviewDebounce, () {
-      unawaited(_run(matchField, matchType, trimmed));
+      unawaited(_run(matchField, matchType, trimmed, appliesFrom));
     });
   }
 
@@ -74,6 +75,7 @@ class RulePreviewController extends Notifier<RulePreviewState> {
     RuleMatchField matchField,
     RuleMatchType matchType,
     String pattern,
+    DateTime? appliesFrom,
   ) async {
     final requestId = ++_requestId;
     try {
@@ -83,6 +85,7 @@ class RulePreviewController extends Notifier<RulePreviewState> {
             matchField: matchField,
             matchType: matchType,
             pattern: pattern,
+            appliesFrom: appliesFrom,
           );
       if (requestId != _requestId) return;
       state = RulePreviewState(preview: preview);

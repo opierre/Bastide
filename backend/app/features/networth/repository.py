@@ -27,11 +27,20 @@ class NetWorthRepository:
         self._db = db
 
     def accounts(self, user_id: str) -> list[Account]:
-        """The user's non-archived accounts, oldest first."""
+        """The user's non-archived accounts that net worth counts, oldest first.
+
+        Deferred cards are left out. What a card owes is at most one cycle, and the account it
+        is paid from settles it: counted too, a month's card spending would leave net worth
+        twice — once when bought, once when the debit lands.
+        """
         return list(
             self._db.scalars(
                 select(Account)
-                .where(Account.user_id == user_id, Account.archived.is_(False))
+                .where(
+                    Account.user_id == user_id,
+                    Account.archived.is_(False),
+                    Account.type != "deferred_card",
+                )
                 .order_by(Account.created_at)
             )
         )
@@ -105,16 +114,20 @@ class NetWorthRepository:
         return sums
 
     def snapshot_month_ends(self, user_id: str) -> set[date]:
-        """Every month end at which at least one of the user's non-archived accounts has a snapshot.
+        """Every month end at which at least one account net worth counts has a snapshot.
 
-        Archived accounts are left out as the summary leaves them out: a month only they cover
-        is not a month the series draws from the ledger.
+        Archived accounts and deferred cards are left out as the summary leaves them out: a
+        month only they cover is not a month the series draws from the ledger.
         """
         return set(
             self._db.scalars(
                 select(AccountBalanceSnapshot.period_end)
                 .join(Account, Account.id == AccountBalanceSnapshot.account_id)
-                .where(Account.user_id == user_id, Account.archived.is_(False))
+                .where(
+                    Account.user_id == user_id,
+                    Account.archived.is_(False),
+                    Account.type != "deferred_card",
+                )
                 .distinct()
             )
         )

@@ -1,9 +1,9 @@
 """SQLAlchemy model for deterministic categorization rules."""
 
-from datetime import UTC, datetime
+from datetime import UTC, date, datetime
 from uuid import uuid4
 
-from sqlalchemy import Boolean, DateTime, ForeignKey, Integer, String
+from sqlalchemy import Boolean, Date, DateTime, ForeignKey, Integer, String
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.core.db import Base
@@ -22,6 +22,21 @@ class CategorizationRule(Base):
     pattern: Mapped[str] = mapped_column(String(255))
     category_id: Mapped[str] = mapped_column(String(36), ForeignKey("categories.id"))
     enabled: Mapped[bool] = mapped_column(Boolean, default=True)
+    # No transaction booked before this date matches the rule; `None` for no limit. Set on a
+    # deferred card's settlement rule, whose debits before the card's history pay purchases the
+    # ledger doesn't hold.
+    applies_from: Mapped[date | None] = mapped_column(Date, nullable=True)
+    # Set on the one rule that files a deferred card's monthly debit: the card it settles. The
+    # rule itself is ordinary — this only says whose it is.
+    settlement_card_id: Mapped[str | None] = mapped_column(
+        String(36),
+        ForeignKey(
+            "accounts.id", ondelete="SET NULL", name="fk_categorization_rules_settlement_card_id"
+        ),
+        nullable=True,
+        unique=True,
+        index=True,
+    )
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), default=lambda: datetime.now(UTC)
     )

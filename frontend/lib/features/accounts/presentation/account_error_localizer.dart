@@ -11,6 +11,10 @@ String localizeAccountError(AppLocalizations l10n, Object? error) {
         return l10n.accountErrorNotFound;
       case 'ACCOUNT_OFX_ID_TAKEN':
         return l10n.accountErrorOfxIdTaken;
+      case 'ACCOUNT_SETTLEMENT_ACCOUNT_REQUIRED':
+        return l10n.accountErrorSettlementRequired;
+      case 'ACCOUNT_SETTLEMENT_ACCOUNT_INVALID':
+        return l10n.accountErrorSettlementInvalid;
       case 'VALIDATION_ERROR':
         return l10n.accountErrorValidation;
     }

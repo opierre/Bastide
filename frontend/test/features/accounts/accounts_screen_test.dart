@@ -1,6 +1,9 @@
 import 'package:bastide/core/theme/app_theme.dart';
+import 'package:bastide/core/widgets/amount_text.dart';
 import 'package:bastide/features/accounts/application/accounts_controller.dart';
+import 'package:bastide/features/accounts/application/settlement_rule_controller.dart';
 import 'package:bastide/features/accounts/domain/account.dart';
+import 'package:bastide/features/accounts/domain/card_settlement_status.dart';
 import 'package:bastide/features/accounts/presentation/accounts_screen.dart';
 import 'package:bastide/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
@@ -34,9 +37,13 @@ Account _account({
 Widget _wrap({
   required FakeAccountsController controller,
   Locale locale = const Locale('fr'),
+  List<CardSettlementIssue> settlements = const [],
 }) {
   return ProviderScope(
-    overrides: [accountsControllerProvider.overrideWith(() => controller)],
+    overrides: [
+      accountsControllerProvider.overrideWith(() => controller),
+      cardSettlementStatusProvider.overrideWith((ref) async => settlements),
+    ],
     child: MaterialApp(
       locale: locale,
       theme: appDarkTheme,
@@ -56,6 +63,61 @@ Finder _balanceInGrid(String formatted) => find.descendant(
 );
 
 void main() {
+  testWidgets('a deferred card stays out of the total, as from net worth', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      _wrap(
+        controller: FakeAccountsController(
+          initialAccounts: [
+            _account(balanceMinor: 100000),
+            _account(
+              id: 'c1',
+              name: 'Carte',
+              type: AccountType.deferredCard,
+              balanceMinor: -32040,
+            ),
+          ],
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    final total = tester.widget<AmountText>(
+      find.byKey(const Key('accountsTotalBalance')),
+    );
+    expect(total.amountMinor, 100000);
+  });
+
+  testWidgets('a card without its settlement account says so above the grid', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      _wrap(
+        controller: FakeAccountsController(
+          initialAccounts: [
+            _account(),
+            _account(
+              id: 'c1',
+              name: 'Carte ••4821',
+              type: AccountType.deferredCard,
+            ),
+          ],
+        ),
+        settlements: const [
+          CardSettlementIssue(
+            accountId: 'c1',
+            kind: CardSettlementIssueKind.noSettlementAccount,
+          ),
+        ],
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(const Key('cardSettlementWarning-c1')), findsOneWidget);
+    expect(find.text('Choisir le compte'), findsOneWidget);
+  });
+
   for (final (locale, dated, undated) in [
     ('fr', 'Dernière opération le 29 sept. 2026', 'Aucune opération'),
     ('en', 'Last transaction on Sep 29, 2026', 'No transactions yet'),

@@ -414,6 +414,17 @@ void main() {
   });
 
   group('several statements in one file', () {
+    test('a card is proposed the bank account its file carries', () {
+      final checking = _account(ofxAccountId: '0009876543');
+      final other = _account(id: 'a2', ofxAccountId: '0001111111');
+      final statements = parseOfxStatements(utf8.encode(_bankAndCardSgml));
+      final matches = matchOfxStatements(statements, [checking, other]);
+
+      expect(settlingAccountFor(statements.last, matches), checking);
+      // A file with no bank statement says nothing about where a card is paid.
+      expect(settlingAccountFor(statements.last, [matches.last]), isNull);
+    });
+
     test('each statement is read on its own, balance included', () {
       final statements = parseOfxStatements(utf8.encode(_multiSgml));
 

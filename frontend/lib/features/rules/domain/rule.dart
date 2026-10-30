@@ -49,6 +49,7 @@ class Rule {
     required this.pattern,
     required this.categoryId,
     required this.enabled,
+    this.appliesFrom,
     required this.createdAt,
   });
 
@@ -60,6 +61,10 @@ class Rule {
     pattern: json['pattern'] as String,
     categoryId: json['category_id'] as String,
     enabled: json['enabled'] as bool,
+    appliesFrom: switch (json['applies_from']) {
+      final String date => DateTime.parse(date),
+      _ => null,
+    },
     createdAt: DateTime.parse(json['created_at'] as String),
   );
 
@@ -70,6 +75,10 @@ class Rule {
   final String pattern;
   final String categoryId;
   final bool enabled;
+
+  /// The rule matches no transaction booked before this day; `null` for no
+  /// limit. Set on a deferred card's settlement rule.
+  final DateTime? appliesFrom;
   final DateTime createdAt;
 
   Rule copyWith({int? priority, bool? enabled}) => Rule(
@@ -80,6 +89,7 @@ class Rule {
     pattern: pattern,
     categoryId: categoryId,
     enabled: enabled ?? this.enabled,
+    appliesFrom: appliesFrom,
     createdAt: createdAt,
   );
 
@@ -93,6 +103,7 @@ class Rule {
           other.matchType == matchType &&
           other.pattern == pattern &&
           other.categoryId == categoryId &&
+          other.appliesFrom == appliesFrom &&
           other.enabled == enabled &&
           other.createdAt == createdAt);
 

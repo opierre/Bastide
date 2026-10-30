@@ -5,10 +5,6 @@ enum CategorizationSource {
   rule,
   model,
   user,
-
-  /// A card settlement the import recognised by its label: proposed, and
-  /// waiting for the user to confirm it.
-  detected,
   uncategorized;
 
   static CategorizationSource fromWire(String value) =>
@@ -112,14 +108,6 @@ class Transaction {
       categorizationSource == CategorizationSource.model &&
       category != null &&
       categorizationConfidence != null;
-
-  /// True when this row is a deferred-card settlement the import detected and
-  /// the user has yet to confirm. Independent of local AI: the proposal comes
-  /// from the import, so it is offered with or without a model.
-  bool get hasSettlementProposal =>
-      needsReview &&
-      categorizationSource == CategorizationSource.detected &&
-      category != null;
 
   Transaction copyWith({
     TransactionCategory? category,

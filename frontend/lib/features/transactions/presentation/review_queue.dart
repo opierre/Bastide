@@ -343,8 +343,7 @@ class _ReviewRow extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context)!;
-    final hasModelProposal = aiIsActive && transaction.hasModelProposal;
-    final hasProposal = hasModelProposal || transaction.hasSettlementProposal;
+    final hasProposal = aiIsActive && transaction.hasModelProposal;
 
     return Container(
       key: Key('reviewRow-${transaction.id}'),
@@ -358,20 +357,11 @@ class _ReviewRow extends ConsumerWidget {
           InstitutionAvatar(name: transaction.descriptionRaw, size: 36),
           const SizedBox(width: AppSpacing.sm + AppSpacing.xs),
           Expanded(
-            child: _Label(
-              transaction: transaction,
-              showDate: hasProposal,
-              note: transaction.hasSettlementProposal
-                  ? l10n.reviewSettlementDetected
-                  : null,
-            ),
+            child: _Label(transaction: transaction, showDate: hasProposal),
           ),
           const SizedBox(width: AppSpacing.sm),
           if (hasProposal)
-            _ProposalBlock(
-              transaction: transaction,
-              showConfidence: hasModelProposal,
-            )
+            _ProposalBlock(transaction: transaction)
           else
             _NoProposalBlock(transaction: transaction, aiIsActive: aiIsActive),
           const SizedBox(width: AppSpacing.sm),
@@ -424,18 +414,13 @@ Future<void> _createAlwaysRule(
 }
 
 class _Label extends StatelessWidget {
-  const _Label({required this.transaction, required this.showDate, this.note});
+  const _Label({required this.transaction, required this.showDate});
 
   final Transaction transaction;
 
   /// The booked date under the raw label, which frame ⑥ draws only on the
   /// amended (proposal-bearing) row.
   final bool showDate;
-
-  /// Where a proposal with no confidence came from, after the date. Here
-  /// rather than in the proposal block, whose controls are fixed-width: this
-  /// column is the one that gives way to a longer French label.
-  final String? note;
 
   @override
   Widget build(BuildContext context) {
@@ -456,11 +441,7 @@ class _Label extends StatelessWidget {
         if (showDate) ...[
           const SizedBox(height: 2),
           Text(
-            [
-              DateFormat.yMd(locale).format(transaction.bookedDate),
-              ?note,
-            ].join(' · '),
-            key: note == null ? null : const Key('reviewRowSettlementNote'),
+            DateFormat.yMd(locale).format(transaction.bookedDate),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
             style: Theme.of(
@@ -475,16 +456,9 @@ class _Label extends StatelessWidget {
 
 /// The chip + gauge + actions that a proposed row carries.
 class _ProposalBlock extends ConsumerStatefulWidget {
-  const _ProposalBlock({
-    required this.transaction,
-    required this.showConfidence,
-  });
+  const _ProposalBlock({required this.transaction});
 
   final Transaction transaction;
-
-  /// A model proposal shows how sure the model was. A detected settlement has
-  /// no such figure; its row's label says where the proposal came from.
-  final bool showConfidence;
 
   @override
   ConsumerState<_ProposalBlock> createState() => _ProposalBlockState();
@@ -528,16 +502,14 @@ class _ProposalBlockState extends ConsumerState<_ProposalBlock> {
           label: localizedCategoryName(l10n, category.name),
           slug: slug,
         ),
-        if (widget.showConfidence) ...[
-          const SizedBox(width: AppSpacing.sm + AppSpacing.xs),
-          ConfidenceGauge(
-            key: const Key('reviewRowConfidenceGauge'),
-            confidence: widget.transaction.categorizationConfidence!,
-            label: l10n.reviewConfidence(
-              widget.transaction.categorizationConfidence!,
-            ),
+        const SizedBox(width: AppSpacing.sm + AppSpacing.xs),
+        ConfidenceGauge(
+          key: const Key('reviewRowConfidenceGauge'),
+          confidence: widget.transaction.categorizationConfidence!,
+          label: l10n.reviewConfidence(
+            widget.transaction.categorizationConfidence!,
           ),
-        ],
+        ),
         const SizedBox(width: AppSpacing.md),
         PrimaryButton(
           key: const Key('reviewRowConfirmButton'),

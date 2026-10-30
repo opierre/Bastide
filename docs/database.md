@@ -34,6 +34,7 @@ erDiagram
         int cached_balance_minor
         datetime created_at
         datetime updated_at
+        text settlement_account_id FK "nullable"
     }
     auth_tokens {
         text id PK
@@ -61,6 +62,8 @@ erDiagram
         text category_id FK
         bool enabled
         datetime created_at
+        text settlement_card_id FK, UK "nullable"
+        date applies_from "nullable"
     }
     categorization_runs {
         text id PK
@@ -222,7 +225,6 @@ erDiagram
         datetime created_at
         datetime updated_at
         text memo "nullable"
-        text card_settlement_id FK "nullable"
     }
     user_settings {
         text id PK
@@ -251,11 +253,13 @@ erDiagram
         text recovery_code_hash "nullable"
     }
     accounts ||--o{ account_balance_snapshots : "account_id"
+    accounts |o--o{ accounts : "settlement_account_id"
     users ||--o{ accounts : "user_id"
     users ||--o{ auth_tokens : "user_id"
     categories |o--o{ categories : "parent_id"
     users |o--o{ categories : "user_id"
     categories ||--o{ categorization_rules : "category_id"
+    accounts |o--o| categorization_rules : "settlement_card_id"
     users ||--o{ categorization_rules : "user_id"
     accounts |o--o{ categorization_runs : "account_id"
     import_batches |o--o{ categorization_runs : "import_batch_id"
@@ -275,7 +279,6 @@ erDiagram
     categories |o--o{ recurring_series : "category_id"
     users ||--o{ recurring_series : "user_id"
     accounts ||--o{ transactions : "account_id"
-    transactions |o--o{ transactions : "card_settlement_id"
     categories |o--o{ transactions : "category_id"
     import_batches ||--o{ transactions : "import_batch_id"
     users ||--o| user_settings : "user_id"
@@ -290,6 +293,11 @@ erDiagram
 ### `accounts`
 
 - unique `(user_id, ofx_account_id)`
+- `settlement_account_id` → `accounts` on delete set null
+
+### `categorization_rules`
+
+- `settlement_card_id` → `accounts` on delete set null
 
 ### `declared_balances`
 
@@ -319,4 +327,3 @@ erDiagram
 ### `transactions`
 
 - unique `(account_id, fitid)`
-- `card_settlement_id` → `transactions` on delete set null

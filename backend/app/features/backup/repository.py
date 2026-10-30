@@ -35,16 +35,16 @@ class BackupRepository:
         self._db = db
 
     def iter_rows(self, name: str, user_id: str) -> Iterator[dict[str, Any]]:
-        """The user's rows of one table, JSON-ready, parents before children in `categories`."""
+        """The user's rows of one table, JSON-ready, referenced rows before those pointing at
+        them within a table (categories, accounts)."""
         target = table(name)
         query = select(target).where(owned_by(name, user_id))
         if name == "categories":
             # A subcategory must follow its parent so a restore can check the reference.
             query = query.order_by(target.c.parent_id.is_not(None))
-        elif name == "transactions":
-            # Likewise a card row must follow the settlement it points at; settlements and every
-            # other row carry no such link, so they all go first.
-            query = query.order_by(target.c.card_settlement_id.is_not(None))
+        elif name == "accounts":
+            # A deferred card follows the account it is settled from.
+            query = query.order_by(target.c.settlement_account_id.is_not(None))
         for row in self._db.execute(query).mappings():
             yield {key: encode(value) for key, value in row.items()}
 
@@ -69,6 +69,13 @@ class BackupRepository:
                 # Subcategories before their parents, for databases that enforce the FK.
                 self._db.execute(
                     delete(target).where(owned_by(name, user_id), target.c.parent_id.is_not(None))
+                )
+            elif name == "accounts":
+                # Cards before the accounts they are settled from, likewise.
+                self._db.execute(
+                    delete(target).where(
+                        owned_by(name, user_id), target.c.settlement_account_id.is_not(None)
+                    )
                 )
             self._db.execute(delete(target).where(owned_by(name, user_id)))
 

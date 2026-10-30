@@ -1,6 +1,6 @@
 """Request/response schemas for the rules feature."""
 
-from datetime import datetime
+from datetime import date, datetime
 from typing import Literal
 
 from pydantic import BaseModel, Field
@@ -43,6 +43,9 @@ class RuleRead(BaseModel):
     pattern: str
     category_id: str
     enabled: bool
+    applies_from: date | None = Field(
+        description="The rule matches no transaction booked before this date; null for none."
+    )
     created_at: datetime
 
 
@@ -73,6 +76,9 @@ class RulePreviewRequest(BaseModel):
     match_type: MatchType
     pattern: str = Field(min_length=1, max_length=255)
     account_id: str | None = None
+    applies_from: date | None = Field(
+        default=None, description="Count only transactions booked on or after this date."
+    )
 
 
 class RulePreviewResult(BaseModel):

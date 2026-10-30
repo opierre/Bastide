@@ -212,6 +212,33 @@ List<OfxAccountMatch> matchOfxStatements(
   ];
 }
 
+/// The account a card statement's card is most likely settled from, read from
+/// the file it came in: the bank account a sibling statement resolved to.
+///
+/// Banks export a card with the account it is drawn from, so a sibling of the
+/// same bank — the code the card borrowed from it — is the answer; failing
+/// that, the file's only bank account. `null` when the file says nothing either
+/// way, and the form proposes from the user's accounts instead.
+Account? settlingAccountFor(
+  OfxAccountInfo card,
+  List<OfxAccountMatch> matches,
+) {
+  final banks = [
+    for (final match in matches)
+      if (match case OfxAccountMatched(
+        :final info,
+        :final account,
+      ) when !info.isCardStatement && account.type != AccountType.deferredCard)
+        (info: info, account: account),
+  ];
+  final sameBank = [
+    for (final bank in banks)
+      if (card.bankId != null && bank.info.bankId == card.bankId) bank.account,
+  ];
+  if (sameBank.length == 1) return sameBank.single;
+  return banks.length == 1 ? banks.single.account : null;
+}
+
 /// The verdicts for the staged file — one per statement it holds — or `null`
 /// when there is no file staged to have a verdict about.
 ///

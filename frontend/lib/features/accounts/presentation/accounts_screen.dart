@@ -16,6 +16,8 @@ import '../domain/account.dart';
 import 'account_error_localizer.dart';
 import 'account_form.dart';
 import 'account_type_label.dart';
+import 'card_settlement_warnings.dart';
+import 'settlement_rule_dialog.dart';
 
 class AccountsScreen extends ConsumerWidget {
   const AccountsScreen({super.key});
@@ -41,6 +43,9 @@ class AccountsScreen extends ConsumerWidget {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             const _SummaryCard(),
+            // A card whose purchases may count twice says so above the grid,
+            // where the fix — its settlement account or rule — is one tap away.
+            const CardSettlementWarnings(),
             const SizedBox(height: AppSpacing.gridGap),
             Expanded(
               child: _AccountsGrid(
@@ -122,10 +127,12 @@ class _SummaryCard extends ConsumerWidget {
         ref.watch(accountsControllerProvider).value ?? const <Account>[];
     if (accounts.isEmpty) return const SizedBox.shrink();
 
-    final total = accounts.fold<int>(
-      0,
-      (sum, account) => sum + account.balanceMinor,
-    );
+    // Deferred cards stay out, as they do from net worth: the account a card
+    // is paid from settles what it owes, and counting both would take a
+    // month's card spending off the total twice.
+    final total = accounts
+        .where((account) => account.type != AccountType.deferredCard)
+        .fold<int>(0, (sum, account) => sum + account.balanceMinor);
     final currency = accounts.first.currency;
     // The backend has no "balances recalculated at" field yet; the newest
     // account mutation is the closest honest stand-in for it.
@@ -223,7 +230,7 @@ class _AccountsGrid extends StatelessWidget {
   }
 }
 
-enum _AccountAction { edit, archive }
+enum _AccountAction { edit, settlementRule, archive }
 
 class _AccountCard extends StatelessWidget {
   const _AccountCard({
@@ -284,6 +291,10 @@ class _AccountCard extends StatelessWidget {
                 // and deleting it would take them with it.
                 onSelected: (action) => switch (action) {
                   _AccountAction.edit => onEdit(),
+                  _AccountAction.settlementRule => showSettlementRuleDialog(
+                    context,
+                    account,
+                  ),
                   _AccountAction.archive => onArchive(),
                 },
                 itemBuilder: (context) => [
@@ -294,6 +305,15 @@ class _AccountCard extends StatelessWidget {
                       label: l10n.accountEdit,
                     ),
                   ),
+                  if (account.type == AccountType.deferredCard)
+                    PopupMenuItem(
+                      key: Key('accountSettlementRule-${account.id}'),
+                      value: _AccountAction.settlementRule,
+                      child: _MenuRow(
+                        icon: Icons.rule_rounded,
+                        label: l10n.accountSettlementRule,
+                      ),
+                    ),
                   PopupMenuItem(
                     value: _AccountAction.archive,
                     child: _MenuRow(

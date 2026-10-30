@@ -43,6 +43,22 @@ Widget _wrap({
   );
 }
 
+Account _checking({
+  String id = 'checking-1',
+  String institution = 'BNP Paribas',
+}) => Account(
+  id: id,
+  name: 'Courant',
+  type: AccountType.checking,
+  institution: institution,
+  currency: 'EUR',
+  openingBalanceMinor: 0,
+  balanceMinor: 0,
+  archived: false,
+  createdAt: DateTime.utc(2026, 1, 1),
+  updatedAt: DateTime.utc(2026, 1, 1),
+);
+
 void main() {
   testWidgets(
     'submitting the create form calls the controller with the chosen values',
@@ -157,7 +173,12 @@ void main() {
   testWidgets('a card statement left as proposed creates a deferred card', (
     tester,
   ) async {
-    final controller = FakeAccountsController();
+    final controller = FakeAccountsController(
+      initialAccounts: [
+        _checking(id: 'other-bank'),
+        _checking(id: 'same-bank', institution: 'BOURSORAMA BANQUE'),
+      ],
+    );
     await tester.pumpWidget(
       _wrap(
         controller: controller,
@@ -176,6 +197,8 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(controller.createCalls.single.type, AccountType.deferredCard);
+    // The only current account at the card's bank is the obvious payer.
+    expect(controller.createCalls.single.settlementAccountId, 'same-bank');
   });
 
   testWidgets('the balance field is named for what it means at creation', (
@@ -372,7 +395,7 @@ void main() {
   testWidgets('a deferred-debit card is offered as its own account type', (
     tester,
   ) async {
-    final controller = FakeAccountsController();
+    final controller = FakeAccountsController(initialAccounts: [_checking()]);
     await tester.pumpWidget(_wrap(controller: controller));
     await tester.pumpAndSettle();
 
@@ -398,6 +421,74 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(controller.createCalls.single.type, AccountType.deferredCard);
+    expect(controller.createCalls.single.settlementAccountId, 'checking-1');
+  });
+
+  testWidgets('a card the form cannot place asks for its settlement account', (
+    tester,
+  ) async {
+    final controller = FakeAccountsController(
+      initialAccounts: [
+        _checking(id: 'a', institution: 'LCL'),
+        _checking(id: 'b', institution: 'Société Générale'),
+      ],
+    );
+    await tester.pumpWidget(
+      _wrap(
+        controller: controller,
+        prefill: const AccountPrefill(
+          name: 'Carte ••9876',
+          institution: 'BOURSORAMA BANQUE',
+          balanceMinor: 0,
+          isCardStatement: true,
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byKey(const Key('accountFormSubmitButton')));
+    await tester.pumpAndSettle();
+
+    expect(controller.createCalls, isEmpty);
+    expect(find.text('Choisissez le compte prélevé.'), findsOneWidget);
+
+    await tester.tap(find.byKey(const Key('accountSettlementField')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Courant · LCL').last);
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('accountFormSubmitButton')));
+    await tester.pumpAndSettle();
+
+    expect(controller.createCalls.single.settlementAccountId, 'a');
+  });
+
+  testWidgets('the account a statement file proposes outranks the guess', (
+    tester,
+  ) async {
+    final controller = FakeAccountsController(
+      initialAccounts: [
+        _checking(id: 'guess', institution: 'BOURSORAMA BANQUE'),
+        _checking(id: 'sibling', institution: 'Joint'),
+      ],
+    );
+    await tester.pumpWidget(
+      _wrap(
+        controller: controller,
+        prefill: const AccountPrefill(
+          name: 'Carte ••9876',
+          institution: 'BOURSORAMA BANQUE',
+          balanceMinor: 0,
+          isCardStatement: true,
+          settlementAccountId: 'sibling',
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byKey(const Key('accountFormSubmitButton')));
+    await tester.pumpAndSettle();
+
+    expect(controller.createCalls.single.settlementAccountId, 'sibling');
   });
 
   testWidgets('the opening balance is editable, and prefilled, when editing', (

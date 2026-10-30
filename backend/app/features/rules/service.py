@@ -1,7 +1,6 @@
 """Business logic for categorization rule CRUD and re-applying the rule engine."""
 
 import re
-from typing import Protocol
 
 from sqlalchemy import Select, select
 from sqlalchemy.orm import Session, selectinload
@@ -24,7 +23,7 @@ from app.features.rules.schemas import (
 from app.features.rules.suggest import RuleSuggestion, suggest_rule
 from app.features.transactions.models import Transaction
 from app.features.transactions.repository import TransactionRepository
-from app.features.transactions.service import RecategorizationHook, TransactionNotFoundError
+from app.features.transactions.service import TransactionNotFoundError
 
 #: Examples shown next to a preview's count. Enough to recognise what the rule caught, few
 #: enough that the modal stays a modal.
@@ -43,16 +42,6 @@ class RulePatternInvalidError(ValidationError):
     code = "RULE_PATTERN_INVALID"
 
 
-class SettlementHook(RecategorizationHook, Protocol):
-    """The recategorisation hook, plus which rows rules must leave to their settlement link.
-
-    A protocol, as in the transactions feature, so the rules needn't know what a card
-    settlement is — only that some rows take their category from something other than a rule.
-    """
-
-    def follows_its_settlement(self, transaction: Transaction) -> bool: ...
-
-
 class RuleService:
     """Rule CRUD, scoped to a user, plus re-running the rule engine over transactions."""
 
@@ -62,15 +51,11 @@ class RuleService:
         transactions: TransactionRepository,
         categories: CategoryRepository,
         db: Session,
-        on_recategorized: SettlementHook | None = None,
     ) -> None:
         self._repository = repository
         self._transactions = transactions
         self._categories = categories
         self._db = db
-        # The same hook a hand correction calls: a rule moving a row off its category is the
-        # user's own instruction too, and whatever hangs off that category must follow.
-        self._on_recategorized = on_recategorized
 
     def list_for_user(self, user_id: str) -> list[CategorizationRule]:
         """List a user's rules in priority order."""
@@ -94,7 +79,7 @@ class RuleService:
             RulePatternInvalidError: `match_type` is `regex` and the pattern doesn't compile.
             CategoryInvalidError: no such category, or it is another user's.
         """
-        _validate_pattern(data.match_type, data.pattern)
+        validate_pattern(data.match_type, data.pattern)
         self._require_assignable_category(user_id, data.category_id)
 
         rule = CategorizationRule(
@@ -120,7 +105,7 @@ class RuleService:
             CategoryInvalidError: no such category, or it is another user's.
         """
         rule = self.get(user_id, rule_id)
-        _validate_pattern(
+        validate_pattern(
             data.match_type if data.match_type is not None else rule.match_type,
             data.pattern if data.pattern is not None else rule.pattern,
         )
@@ -163,10 +148,6 @@ class RuleService:
         for transaction in transactions:
             if transaction.categorization_source == "user":
                 continue
-            if self._on_recategorized is not None and (
-                self._on_recategorized.follows_its_settlement(transaction)
-            ):
-                continue
 
             category_id = match_category(transaction, rules)
             if category_id is None:
@@ -180,12 +161,9 @@ class RuleService:
             if already_applied:
                 continue
 
-            previous_category_id = transaction.category_id
             transaction.category_id = category_id
             transaction.categorization_source = "rule"
             transaction.needs_review = False
-            if self._on_recategorized is not None and previous_category_id != category_id:
-                self._on_recategorized.recategorized(user_id, transaction, previous_category_id)
             recategorized_count += 1
 
         self._db.commit()
@@ -203,6 +181,7 @@ class RuleService:
             RulePatternInvalidError: `match_type` is `regex` and the pattern doesn't compile.
         """
         candidate = self._candidate_rule(user_id, data.match_field, data.match_type, data.pattern)
+        candidate.applies_from = data.applies_from
         query = (
             self._transactions_query(user_id, data.account_id)
             .options(selectinload(Transaction.category))
@@ -253,7 +232,7 @@ class RuleService:
             TransactionNotFoundError: no such transaction, or it belongs to another user.
             CategoryInvalidError: no such category, or it is another user's.
         """
-        _validate_pattern(data.match_type, data.pattern)
+        validate_pattern(data.match_type, data.pattern)
 
         transaction = self._transactions.get_by_id_for_user(data.transaction_id, user_id)
         if transaction is None:
@@ -307,7 +286,7 @@ class RuleService:
         `category_id` is left blank: the engine's match predicate doesn't read it, and a preview
         has no category to speak of.
         """
-        _validate_pattern(match_type, pattern)
+        validate_pattern(match_type, pattern)
         return CategorizationRule(
             user_id=user_id,
             priority=0,
@@ -331,7 +310,7 @@ class RuleService:
         return query
 
 
-def _validate_pattern(match_type: str, pattern: str) -> None:
+def validate_pattern(match_type: str, pattern: str) -> None:
     """Reject a `regex` pattern that doesn't compile.
 
     Takes a plain `str` rather than `MatchType` because the update path checks the *resulting*

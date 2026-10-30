@@ -1,7 +1,6 @@
 import 'package:desktop_drop/desktop_drop.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
 import '../../../core/theme/app_theme.dart';
@@ -19,9 +18,8 @@ import '../../../l10n/app_localizations.dart';
 import '../../accounts/application/accounts_controller.dart';
 import '../../accounts/domain/account.dart';
 import '../../accounts/presentation/account_form.dart';
+import '../../accounts/presentation/card_settlement_warnings.dart';
 import '../../accounts/presentation/account_type_label.dart';
-import '../../transactions/application/transactions_controller.dart';
-import '../../transactions/presentation/transactions_screen.dart';
 import '../application/imports_controller.dart';
 import '../application/ofx_account_detection.dart';
 import '../domain/import_batch.dart';
@@ -127,7 +125,19 @@ class _ImportsScreenState extends ConsumerState<ImportsScreen> {
     final l10n = AppLocalizations.of(context)!;
     final created = await showAccountForm(
       context,
-      prefill: _prefillFrom(info, l10n),
+      // Its rule is offered with the import's result, once the card's history
+      // is in: that is what the rule's start date is read from.
+      offerSettlementRule: false,
+      prefill: _prefillFrom(
+        info,
+        l10n,
+        settlementAccountId: info.isCardStatement
+            ? settlingAccountFor(
+                info,
+                ref.read(ofxAccountDetectionProvider) ?? const [],
+              )?.id
+            : null,
+      ),
     );
     if (created == null || !mounted) return;
     ref.read(ofxAccountDetectionProvider.notifier).resolveTo(info, created);
@@ -237,7 +247,11 @@ class _ImportsScreenState extends ConsumerState<ImportsScreen> {
 /// The statement's account phrased for the account form: a name built from the
 /// type and the last digits of the account number, plus the bank's own name for
 /// itself. Everything stays editable — the user renames it if they prefer.
-AccountPrefill _prefillFrom(OfxAccountInfo info, AppLocalizations l10n) {
+AccountPrefill _prefillFrom(
+  OfxAccountInfo info,
+  AppLocalizations l10n, {
+  String? settlementAccountId,
+}) {
   final type = accountTypeFromOfx(info.accountType);
   // A card is named "Carte", not after its proposed type: the form asks how the
   // card is debited, and a name spelling out the answer would contradict a
@@ -264,6 +278,7 @@ AccountPrefill _prefillFrom(OfxAccountInfo info, AppLocalizations l10n) {
     // file rather than inherited from the profile: the balance just above comes
     // from this statement, and naming it in another currency would misstate it.
     currency: info.currency,
+    settlementAccountId: settlementAccountId,
   );
 }
 
@@ -826,7 +841,7 @@ class _ResultCard extends ConsumerWidget {
                 ),
               ],
             ),
-          const _SettlementWarnings(),
+          const CardSettlementWarnings(),
           for (final batch in batches)
             _BatchOutcome(
               batch: batch,
@@ -840,73 +855,6 @@ class _ResultCard extends ConsumerWidget {
   }
 }
 
-/// What still stands between the user's deferred cards and a ledger counting
-/// them once: settlements to confirm, and card purchases no settlement claimed.
-///
-/// Silent while loading or when the status can't be read — it qualifies the
-/// import, and a failure to read it says nothing about the import itself.
-class _SettlementWarnings extends ConsumerWidget {
-  const _SettlementWarnings();
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final status = ref.watch(cardSettlementStatusProvider).value;
-    if (status == null) return const SizedBox.shrink();
-    final l10n = AppLocalizations.of(context)!;
-    final locale = Localizations.localeOf(context).toString();
-    final accounts =
-        ref.watch(accountsControllerProvider).value ?? const <Account>[];
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        if (status.proposedCount > 0) ...[
-          const SizedBox(height: AppSpacing.md),
-          InlineBanner(
-            key: const Key('importSettlementsProposed'),
-            message: l10n.importSettlementsProposed(status.proposedCount),
-            tone: BannerTone.warning,
-          ),
-          Align(
-            alignment: Alignment.centerRight,
-            child: TextButton(
-              key: const Key('importSettlementsReviewButton'),
-              onPressed: () {
-                ref
-                    .read(transactionFiltersProvider.notifier)
-                    .setNeedsReview(true);
-                context.go(TransactionsScreen.path);
-              },
-              child: Text(l10n.importSettlementsReview),
-            ),
-          ),
-        ],
-        for (final unmatched in status.unmatched)
-          if (accounts.where((a) => a.id == unmatched.accountId).firstOrNull
-              case final card?) ...[
-            const SizedBox(height: AppSpacing.md),
-            InlineBanner(
-              key: Key('importCardUnmatched-${card.id}'),
-              message: l10n.importCardUnmatched(
-                unmatched.count,
-                card.name,
-                formatAmount(
-                  amountMinor: unmatched.amountMinor.abs(),
-                  currency: card.currency,
-                  locale: locale,
-                ),
-                unmatched.since,
-              ),
-              tone: BannerTone.warning,
-            ),
-          ],
-      ],
-    );
-  }
-}
-
-/// One statement's line in the result card: its own warnings, the period it
-/// covered and the account it went to.
 class _BatchOutcome extends StatelessWidget {
   const _BatchOutcome({required this.batch, required this.account});
 
