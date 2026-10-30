@@ -99,9 +99,21 @@ Map<String, dynamic> cardOverviewJson() => {
       'applies_from': '2025-02-05',
     },
     'cycles': [
-      {'settled_on': '2026-08-05', 'amount_minor': -93175, 'in_progress': false},
-      {'settled_on': '2026-09-05', 'amount_minor': -88420, 'in_progress': false},
-      {'settled_on': '2026-10-05', 'amount_minor': -80360, 'in_progress': false},
+      {
+        'settled_on': '2026-08-05',
+        'amount_minor': -93175,
+        'in_progress': false,
+      },
+      {
+        'settled_on': '2026-09-05',
+        'amount_minor': -88420,
+        'in_progress': false,
+      },
+      {
+        'settled_on': '2026-10-05',
+        'amount_minor': -80360,
+        'in_progress': false,
+      },
       {'settled_on': null, 'amount_minor': -61240, 'in_progress': true},
     ],
     'current_cycle_minor': -61240,

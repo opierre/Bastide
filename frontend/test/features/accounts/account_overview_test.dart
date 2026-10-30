@@ -106,7 +106,11 @@ void main() {
         cardLastDigits: null,
         rule: null,
         cycles: [
-          SettlementCycle(settledOn: null, amountMinor: -1000, inProgress: true),
+          SettlementCycle(
+            settledOn: null,
+            amountMinor: -1000,
+            inProgress: true,
+          ),
         ],
         currentCycleMinor: -1000,
         nextDebitDate: null,
