@@ -217,6 +217,29 @@ def test_an_archived_account_is_excluded(client: TestClient) -> None:
     assert [e["key"] for e in body["composition"]] == ["checking"]
 
 
+def test_a_deferred_card_is_excluded(client: TestClient) -> None:
+    # What the card owes is settled by the account it is paid from, which already counts.
+    headers = register(client)
+    checking = create_account(client, headers, 100_000)
+    post(
+        client,
+        "/api/v1/accounts",
+        headers,
+        {
+            "name": "Carte",
+            "type": "deferred_card",
+            "institution": "BNP Paribas",
+            "opening_balance_minor": -32_040,
+            "settlement_account_id": checking["id"],
+        },
+    )
+
+    body = summary(client, headers)
+
+    assert body["assets"]["accounts_minor"] == 100_000
+    assert [e["key"] for e in body["composition"]] == ["checking"]
+
+
 def test_an_archived_property_is_excluded(client: TestClient) -> None:
     headers = register(client)
     archived = create_property(client, headers)

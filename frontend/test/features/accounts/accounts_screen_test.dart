@@ -1,4 +1,5 @@
 import 'package:bastide/core/theme/app_theme.dart';
+import 'package:bastide/core/widgets/amount_text.dart';
 import 'package:bastide/features/accounts/application/accounts_controller.dart';
 import 'package:bastide/features/accounts/application/settlement_rule_controller.dart';
 import 'package:bastide/features/accounts/domain/account.dart';
@@ -60,6 +61,32 @@ Finder _balanceInGrid(String formatted) => find.descendant(
 );
 
 void main() {
+  testWidgets('a deferred card stays out of the total, as from net worth', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      _wrap(
+        controller: FakeAccountsController(
+          initialAccounts: [
+            _account(balanceMinor: 100000),
+            _account(
+              id: 'c1',
+              name: 'Carte',
+              type: AccountType.deferredCard,
+              balanceMinor: -32040,
+            ),
+          ],
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    final total = tester.widget<AmountText>(
+      find.byKey(const Key('accountsTotalBalance')),
+    );
+    expect(total.amountMinor, 100000);
+  });
+
   testWidgets('a card without its settlement account says so above the grid', (
     tester,
   ) async {

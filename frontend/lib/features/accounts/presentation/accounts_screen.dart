@@ -126,10 +126,12 @@ class _SummaryCard extends ConsumerWidget {
         ref.watch(accountsControllerProvider).value ?? const <Account>[];
     if (accounts.isEmpty) return const SizedBox.shrink();
 
-    final total = accounts.fold<int>(
-      0,
-      (sum, account) => sum + account.balanceMinor,
-    );
+    // Deferred cards stay out, as they do from net worth: the account a card
+    // is paid from settles what it owes, and counting both would take a
+    // month's card spending off the total twice.
+    final total = accounts
+        .where((account) => account.type != AccountType.deferredCard)
+        .fold<int>(0, (sum, account) => sum + account.balanceMinor);
     final currency = accounts.first.currency;
     // The backend has no "balances recalculated at" field yet; the newest
     // account mutation is the closest honest stand-in for it.
