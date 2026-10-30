@@ -1,6 +1,6 @@
 """Request/response schemas for the accounts feature."""
 
-from datetime import datetime
+from datetime import date, datetime
 from typing import Literal
 
 from pydantic import BaseModel, Field
@@ -123,3 +123,29 @@ class SettlementRuleSaved(BaseModel):
 
     rule: SettlementRuleRead
     recategorized_count: int
+
+
+CardSettlementIssueKind = Literal["no_settlement_account", "no_rule", "unsettled"]
+
+
+class CardSettlementIssue(BaseModel):
+    """What keeps one deferred card's purchases from counting exactly once.
+
+    The first missing step only: a card with no settlement account is not also told it lacks
+    a rule.
+    """
+
+    account_id: str
+    issue: CardSettlementIssueKind
+    #: `unsettled` only: the card's purchases since its last settlement that its paying account,
+    #: imported well past them, shows no settlement for — the rule no longer matches the bank's
+    #: wording, most likely. Their total, signed (negative), how many, and the oldest's date.
+    amount_minor: int | None = None
+    count: int | None = None
+    since: date | None = None
+
+
+class CardSettlementStatus(BaseModel):
+    """Every deferred card that needs the user's attention; empty when all count once."""
+
+    cards: list[CardSettlementIssue]

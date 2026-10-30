@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../networth/application/networth_controller.dart';
 import '../data/accounts_repository.dart';
 import '../domain/account.dart';
+import 'settlement_rule_controller.dart';
 
 /// Accounts list state: `AsyncValue<List<Account>>` per the flutter-frontend
 /// skill. Mutations (`create`/`update`/`archive`) only replace `state` on
@@ -86,7 +87,10 @@ class AccountsController extends AsyncNotifier<List<Account>> {
 
   /// Synthèse sums every non-archived account's balance, so any account write
   /// leaves it describing a set of accounts that no longer exists.
-  void _invalidateNetWorth() => ref.invalidate(networthControllerProvider);
+  void _invalidateNetWorth() => ref
+    ..invalidate(networthControllerProvider)
+    // A card's settlement account, or the card itself, may just have changed.
+    ..invalidate(cardSettlementStatusProvider);
 }
 
 final accountsControllerProvider =

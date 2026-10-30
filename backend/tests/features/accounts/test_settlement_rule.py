@@ -1,6 +1,7 @@
 """Tests for a deferred card's settlement rule: the proposal, and saving it."""
 
 from datetime import date
+from uuid import uuid4
 
 from fastapi.testclient import TestClient
 
@@ -173,3 +174,87 @@ def test_a_strangers_card_is_not_found(client: TestClient) -> None:
     response = client.get(f"/api/v1/accounts/{card}/settlement-rule", headers=other)
 
     assert response.status_code == 404
+
+
+_CARD_OFX = b"""<OFX><CREDITCARDMSGSRSV1><CCSTMTTRNRS><CCSTMTRS><CURDEF>EUR
+<CCACCTFROM><ACCTID>400000XXXXXX4821</CCACCTFROM>
+<BANKTRANLIST>
+<STMTTRN><TRNAMT>-80.00<DTPOSTED>20260410<FITID>C1<NAME>FNAC</STMTTRN>
+<STMTTRN><TRNAMT>-30.00<DTPOSTED>20260602<FITID>C2<NAME>LECLERC</STMTTRN>
+<STMTTRN><TRNAMT>-12.00<DTPOSTED>20260605<FITID>C3<NAME>PRESSE</STMTTRN>
+<STMTTRN><TRNAMT>15.00<DTPOSTED>20260606<FITID>C4<NAME>REMBOURSEMENT</STMTTRN>
+</BANKTRANLIST></CCSTMTRS></CCSTMTTRNRS></CREDITCARDMSGSRSV1></OFX>"""
+
+#: The paying account, imported through the end of August: the debit for June's purchases
+#: should have landed by then, and none matches the card's rule.
+_LATER_CHECKING_OFX = b"""<OFX><BANKMSGSRSV1><STMTTRNRS><STMTRS><CURDEF>EUR
+<BANKACCTFROM><BANKID>13306<ACCTID>0009876543<ACCTTYPE>CHECKING</BANKACCTFROM>
+<BANKTRANLIST>
+<STMTTRN><TRNAMT>-42.00<DTPOSTED>20260630<FITID>S3<NAME>PRELEVEMENT CB 4821 JUIN</STMTTRN>
+<STMTTRN><TRNAMT>-9.00<DTPOSTED>20260831<FITID>P9<NAME>PRLV EDF</STMTTRN>
+</BANKTRANLIST></STMTRS></STMTTRNRS></BANKMSGSRSV1></OFX>"""
+
+
+def _status(client: TestClient, headers: dict[str, str]) -> list[dict]:
+    response = client.get("/api/v1/accounts/settlement-status", headers=headers)
+    assert response.status_code == 200
+    return response.json()["cards"]
+
+
+def _import(client: TestClient, headers: dict[str, str], account_id: str, content: bytes) -> None:
+    response = client.post(
+        "/api/v1/imports",
+        headers=headers,
+        data={"account_id": account_id},
+        files={"file": (f"{uuid4()}.ofx", content, "application/octet-stream")},
+    )
+    assert response.status_code == 201, response.json()
+
+
+def test_a_card_without_its_settlement_account_or_rule_is_flagged(client: TestClient) -> None:
+    headers, checking, card = _setup(client)
+
+    assert _status(client, headers) == [
+        {"account_id": card, "issue": "no_rule", "amount_minor": None, "count": None, "since": None}
+    ]
+
+    client.patch(f"/api/v1/accounts/{card}", json={"settlement_account_id": None}, headers=headers)
+    assert [card_issue["issue"] for card_issue in _status(client, headers)] == [
+        "no_settlement_account"
+    ]
+
+
+def test_a_card_whose_rule_matches_its_debits_is_not_flagged(client: TestClient) -> None:
+    headers, _, card = _setup(client)
+    _import(client, headers, card, _CARD_OFX.replace(b"202606", b"202604"))
+    client.put(
+        f"/api/v1/accounts/{card}/settlement-rule",
+        json={"pattern": "DEPENSES CARTE X4821"},
+        headers=headers,
+    )
+
+    assert _status(client, headers) == []
+
+
+def test_purchases_no_debit_matched_long_after_are_flagged(client: TestClient) -> None:
+    headers, checking, card = _setup(client)
+    client.put(
+        f"/api/v1/accounts/{card}/settlement-rule",
+        json={"pattern": "DEPENSES CARTE X4821"},
+        headers=headers,
+    )
+    _import(client, headers, card, _CARD_OFX)
+    _import(client, headers, checking, _LATER_CHECKING_OFX)
+
+    # The April purchase came before the last matched debit (29 May); June's two did not, and
+    # the paying account runs to 31 August — more than 45 days past them. The refund is no
+    # purchase.
+    assert _status(client, headers) == [
+        {
+            "account_id": card,
+            "issue": "unsettled",
+            "amount_minor": -4_200,
+            "count": 2,
+            "since": "2026-06-02",
+        }
+    ]

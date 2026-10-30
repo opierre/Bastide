@@ -15,6 +15,7 @@ import '../domain/account.dart';
 import 'account_error_localizer.dart';
 import 'account_form.dart';
 import 'account_type_label.dart';
+import 'card_settlement_warnings.dart';
 import 'settlement_rule_dialog.dart';
 
 class AccountsScreen extends ConsumerWidget {
@@ -41,6 +42,9 @@ class AccountsScreen extends ConsumerWidget {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             const _SummaryCard(),
+            // A card whose purchases may count twice says so above the grid,
+            // where the fix — its settlement account or rule — is one tap away.
+            const CardSettlementWarnings(),
             const SizedBox(height: AppSpacing.gridGap),
             Expanded(
               child: _AccountsGrid(

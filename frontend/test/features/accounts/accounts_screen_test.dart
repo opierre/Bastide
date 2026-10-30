@@ -1,6 +1,8 @@
 import 'package:bastide/core/theme/app_theme.dart';
 import 'package:bastide/features/accounts/application/accounts_controller.dart';
+import 'package:bastide/features/accounts/application/settlement_rule_controller.dart';
 import 'package:bastide/features/accounts/domain/account.dart';
+import 'package:bastide/features/accounts/domain/card_settlement_status.dart';
 import 'package:bastide/features/accounts/presentation/accounts_screen.dart';
 import 'package:bastide/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
@@ -32,9 +34,13 @@ Account _account({
 Widget _wrap({
   required FakeAccountsController controller,
   Locale locale = const Locale('fr'),
+  List<CardSettlementIssue> settlements = const [],
 }) {
   return ProviderScope(
-    overrides: [accountsControllerProvider.overrideWith(() => controller)],
+    overrides: [
+      accountsControllerProvider.overrideWith(() => controller),
+      cardSettlementStatusProvider.overrideWith((ref) async => settlements),
+    ],
     child: MaterialApp(
       locale: locale,
       theme: appDarkTheme,
@@ -54,6 +60,35 @@ Finder _balanceInGrid(String formatted) => find.descendant(
 );
 
 void main() {
+  testWidgets('a card without its settlement account says so above the grid', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      _wrap(
+        controller: FakeAccountsController(
+          initialAccounts: [
+            _account(),
+            _account(
+              id: 'c1',
+              name: 'Carte ••4821',
+              type: AccountType.deferredCard,
+            ),
+          ],
+        ),
+        settlements: const [
+          CardSettlementIssue(
+            accountId: 'c1',
+            kind: CardSettlementIssueKind.noSettlementAccount,
+          ),
+        ],
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(const Key('cardSettlementWarning-c1')), findsOneWidget);
+    expect(find.text('Choisir le compte'), findsOneWidget);
+  });
+
   testWidgets('renders the balance formatted for the fr locale', (
     tester,
   ) async {

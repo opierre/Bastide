@@ -9,7 +9,8 @@ import 'package:bastide/features/auth/domain/auth_user.dart';
 import 'package:bastide/features/accounts/application/accounts_controller.dart';
 import 'package:bastide/features/accounts/domain/account.dart';
 import 'package:bastide/features/imports/application/imports_controller.dart';
-import 'package:bastide/features/imports/domain/card_settlement_status.dart';
+import 'package:bastide/features/accounts/application/settlement_rule_controller.dart';
+import 'package:bastide/features/accounts/domain/card_settlement_status.dart';
 import 'package:bastide/features/imports/domain/import_batch.dart';
 import 'package:bastide/features/imports/presentation/imports_screen.dart';
 import 'package:bastide/l10n/app_localizations.dart';
@@ -123,10 +124,7 @@ Widget _wrap({
   required PickedImportFile file,
   FakeAccountsController? accounts,
   Locale locale = const Locale('fr'),
-  CardSettlementStatus settlements = const CardSettlementStatus(
-    proposedCount: 0,
-    unmatched: [],
-  ),
+  List<CardSettlementIssue> settlements = const [],
 }) {
   return ProviderScope(
     overrides: [
@@ -810,16 +808,34 @@ void main() {
     );
   });
 
-  testWidgets('recognised settlements ask to be confirmed', (tester) async {
+  testWidgets('a card without its rule is flagged with the fix', (
+    tester,
+  ) async {
     _useDesktopSurface(tester);
+    final card = Account(
+      id: 'c1',
+      name: 'Carte Visa',
+      type: AccountType.deferredCard,
+      institution: 'Boursorama',
+      currency: 'EUR',
+      settlementAccountId: 'a1',
+      openingBalanceMinor: 0,
+      balanceMinor: 0,
+      archived: false,
+      createdAt: DateTime.utc(2026, 1, 1),
+      updatedAt: DateTime.utc(2026, 1, 1),
+    );
     await tester.pumpWidget(
       _wrap(
         imports: FakeImportsController(importResult: _batch()),
+        accounts: FakeAccountsController(initialAccounts: [_account, card]),
         file: PickedImportFile(name: 'releve.ofx', bytes: _ofxBytes),
-        settlements: const CardSettlementStatus(
-          proposedCount: 2,
-          unmatched: [],
-        ),
+        settlements: const [
+          CardSettlementIssue(
+            accountId: 'c1',
+            kind: CardSettlementIssueKind.noRule,
+          ),
+        ],
       ),
     );
     await tester.pumpAndSettle();
@@ -829,20 +845,15 @@ void main() {
 
     expect(
       find.text(
-        '2 prélèvements de carte à débit différé ont été reconnus : '
-        "confirmez-les pour que les achats de la carte ne comptent qu'une fois.",
+        'Le prélèvement mensuel de Carte Visa compte comme une dépense, en '
+        'plus des achats de la carte : créez sa règle de prélèvement.',
       ),
       findsOneWidget,
     );
-    expect(
-      find.byKey(const Key('importSettlementsReviewButton')),
-      findsOneWidget,
-    );
+    expect(find.text('Créer la règle'), findsOneWidget);
   });
 
-  testWidgets('card purchases no settlement claimed are flagged', (
-    tester,
-  ) async {
+  testWidgets('card purchases no debit matched are flagged', (tester) async {
     _useDesktopSurface(tester);
     final card = Account(
       id: 'c1',
@@ -861,17 +872,15 @@ void main() {
         imports: FakeImportsController(importResult: _batch()),
         accounts: FakeAccountsController(initialAccounts: [_account, card]),
         file: PickedImportFile(name: 'releve.ofx', bytes: _ofxBytes),
-        settlements: CardSettlementStatus(
-          proposedCount: 0,
-          unmatched: [
-            UnmatchedCardPurchases(
-              accountId: 'c1',
-              amountMinor: -49210,
-              count: 3,
-              since: DateTime(2026, 1, 5),
-            ),
-          ],
-        ),
+        settlements: [
+          CardSettlementIssue(
+            accountId: 'c1',
+            kind: CardSettlementIssueKind.unsettled,
+            amountMinor: -49210,
+            count: 3,
+            since: DateTime(2026, 1, 5),
+          ),
+        ],
       ),
     );
     await tester.pumpAndSettle();
@@ -887,13 +896,13 @@ void main() {
     final date = DateFormat.yMd('fr').format(DateTime(2026, 1, 5));
     expect(
       find.text(
-        '3 achats de Carte Visa ($amount) ne sont rattachés à aucun '
-        'prélèvement depuis le $date : ils comptent deux fois tant que ce '
-        'prélèvement n\'est pas classé en « Règlement carte différée ».',
+        '3 achats de Carte Visa ($amount) attendent leur prélèvement depuis '
+        'le $date : la règle de la carte ne reconnaît peut-être plus le '
+        'libellé de la banque.',
       ),
       findsOneWidget,
     );
-    expect(find.byKey(const Key('importSettlementsProposed')), findsNothing);
+    expect(find.text('Vérifier la règle'), findsOneWidget);
   });
 }
 

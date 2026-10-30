@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/api/api_client.dart';
 import '../../../core/api/api_client_provider.dart';
 import '../domain/account.dart';
+import '../domain/card_settlement_status.dart';
 import '../domain/settlement_rule.dart';
 
 /// Calls the `/accounts` endpoints and maps the wire JSON to domain models.
@@ -96,6 +97,26 @@ class AccountsRepository {
             )
             as Map<String, dynamic>;
     return json['recategorized_count'] as int;
+  }
+
+  Future<List<CardSettlementIssue>> settlementStatus() async {
+    final json =
+        await _apiClient.get('/accounts/settlement-status')
+            as Map<String, dynamic>;
+    return [
+      for (final entry
+          in (json['cards'] as List<dynamic>).cast<Map<String, dynamic>>())
+        CardSettlementIssue(
+          accountId: entry['account_id'] as String,
+          kind: CardSettlementIssueKind.fromWire(entry['issue'] as String),
+          amountMinor: entry['amount_minor'] as int?,
+          count: entry['count'] as int?,
+          since: switch (entry['since']) {
+            final String date => DateTime.parse(date),
+            _ => null,
+          },
+        ),
+    ];
   }
 
   Future<void> archive(String id) async {

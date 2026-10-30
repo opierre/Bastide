@@ -307,6 +307,46 @@ class AppLocalizationsFr extends AppLocalizations {
   String get accountSettlementRule => 'Règle de prélèvement';
 
   @override
+  String cardSettlementNoAccount(String card) {
+    return '$card : choisissez le compte sur lequel la carte est prélevée, pour que ses achats ne comptent qu\'une fois.';
+  }
+
+  @override
+  String get cardSettlementChooseAccount => 'Choisir le compte';
+
+  @override
+  String cardSettlementNoRule(String card) {
+    return 'Le prélèvement mensuel de $card compte comme une dépense, en plus des achats de la carte : créez sa règle de prélèvement.';
+  }
+
+  @override
+  String get cardSettlementCreateRule => 'Créer la règle';
+
+  @override
+  String cardSettlementUnsettled(
+    int count,
+    String card,
+    String amount,
+    DateTime date,
+  ) {
+    final intl.DateFormat dateDateFormat = intl.DateFormat.yMd(localeName);
+    final String dateString = dateDateFormat.format(date);
+
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          '$count achats de $card ($amount) attendent leur prélèvement depuis le $dateString : la règle de la carte ne reconnaît peut-être plus le libellé de la banque.',
+      one:
+          'Un achat de $card ($amount) attend son prélèvement depuis le $dateString : la règle de la carte ne reconnaît peut-être plus le libellé de la banque.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get cardSettlementCheckRule => 'Vérifier la règle';
+
+  @override
   String get settlementRuleTitle => 'Règle de prélèvement de la carte';
 
   @override
@@ -591,43 +631,6 @@ class AppLocalizationsFr extends AppLocalizations {
     final String dateString = dateDateFormat.format(date);
 
     return 'Le relevé indique un solde à $amount de votre suivi au $dateString. Vérifiez un import manquant, ou corrigez le solde d\'ouverture du compte si l\'écart persiste.';
-  }
-
-  @override
-  String importSettlementsProposed(int count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other:
-          '$count prélèvements de carte à débit différé ont été reconnus : confirmez-les pour que les achats de la carte ne comptent qu\'une fois.',
-      one:
-          'Un prélèvement de carte à débit différé a été reconnu : confirmez-le pour que les achats de la carte ne comptent qu\'une fois.',
-    );
-    return '$_temp0';
-  }
-
-  @override
-  String get importSettlementsReview => 'Voir les opérations à vérifier';
-
-  @override
-  String importCardUnmatched(
-    int count,
-    String card,
-    String amount,
-    DateTime date,
-  ) {
-    final intl.DateFormat dateDateFormat = intl.DateFormat.yMd(localeName);
-    final String dateString = dateDateFormat.format(date);
-
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other:
-          '$count achats de $card ($amount) ne sont rattachés à aucun prélèvement depuis le $dateString : ils comptent deux fois tant que ce prélèvement n\'est pas classé en « Règlement carte différée ».',
-      one:
-          'Un achat de $card ($amount) n\'est rattaché à aucun prélèvement depuis le $dateString : il compte deux fois tant que ce prélèvement n\'est pas classé en « Règlement carte différée ».',
-    );
-    return '$_temp0';
   }
 
   @override
@@ -1660,9 +1663,6 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get reviewNoProposal => '— aucune proposition';
-
-  @override
-  String get reviewSettlementDetected => 'règlement de carte détecté';
 
   @override
   String get reviewChooseCategory => 'Choisir une catégorie';

@@ -35,6 +35,7 @@ details?}}`. Model names refer to the Pydantic schemas in `backend/app/features/
 |--------|------|-------|------|----------|
 | `GET` | `/accounts` | `ofx_account_id` |  | 200 [`AccountRead`] |
 | `POST` | `/accounts` |  | `AccountCreate` | 201 `AccountRead` |
+| `GET` | `/accounts/settlement-status` |  |  | 200 `CardSettlementStatus` |
 | `GET` | `/accounts/{account_id}` |  |  | 200 `AccountRead` |
 | `PATCH` | `/accounts/{account_id}` |  | `AccountUpdate` | 200 `AccountRead` |
 | `DELETE` | `/accounts/{account_id}` |  |  | 204 |
@@ -53,7 +54,6 @@ details?}}`. Model names refer to the Pydantic schemas in `backend/app/features/
 |--------|------|-------|------|----------|
 | `GET` | `/imports` |  |  | 200 [`ImportBatchRead`] |
 | `POST` | `/imports` |  | multipart | 201 `ImportBatchRead` |
-| `GET` | `/imports/card-settlements` |  |  | 200 `CardSettlementStatus` |
 | `GET` | `/imports/{batch_id}` |  |  | 200 `ImportBatchRead` |
 
 ## categories

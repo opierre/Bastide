@@ -11,13 +11,14 @@ guesses: every bank words the debit its own way, and a rule is what the user can
 import re
 from collections import Counter
 from collections.abc import Iterable
-from datetime import date
+from datetime import date, timedelta
 
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.core.errors import ValidationError
 from app.features.accounts.models import Account
+from app.features.accounts.schemas import CardSettlementIssue, CardSettlementStatus
 from app.features.categories.repository import CategoryRepository
 from app.features.rules.engine import matches
 from app.features.rules.models import CategorizationRule
@@ -29,6 +30,12 @@ CARD_SETTLEMENT_CATEGORY_KEY = "category.finance.card_settlement"
 
 #: Rules for a card's debit match the cleaned label; the other fields name no card.
 SETTLEMENT_MATCH_FIELD = "description_clean"
+
+#: How long a card purchase may wait for its settlement before it reads as missed. A cycle runs
+#: about a month and its debit lands within days of the close, wherever in the month the bank
+#: closes it — so a purchase this old, with the paying account imported past it, was paid by a
+#: debit the card's rule didn't match.
+SETTLEMENT_OVERDUE = timedelta(days=45)
 
 
 class NotADeferredCardError(ValidationError):
@@ -166,6 +173,71 @@ class SettlementRuleService:
         self._db.commit()
         self._db.refresh(rule)
         return rule, moved
+
+    def status(self, user_id: str) -> CardSettlementStatus:
+        """Every open deferred card of the user that doesn't yet count exactly once, and why.
+
+        In order of what the user must do: name the account the card is paid from, save the
+        card's rule, and — once both are in place — notice when the rule stopped matching: the
+        card has purchases since its last settlement older than `SETTLEMENT_OVERDUE`, counted
+        from the latest row of its paying account.
+        """
+        cards = self._db.scalars(
+            select(Account)
+            .where(
+                Account.user_id == user_id,
+                Account.type == "deferred_card",
+                Account.archived.is_(False),
+            )
+            .order_by(Account.created_at)
+        )
+        issues: list[CardSettlementIssue] = []
+        for card in cards:
+            if card.settlement_account_id is None:
+                issues.append(
+                    CardSettlementIssue(account_id=card.id, issue="no_settlement_account")
+                )
+                continue
+            rule = self.rule_for(card)
+            if rule is None or not rule.enabled:
+                issues.append(CardSettlementIssue(account_id=card.id, issue="no_rule"))
+                continue
+            unsettled = self._unsettled_purchases(card, rule)
+            if unsettled:
+                issues.append(
+                    CardSettlementIssue(
+                        account_id=card.id,
+                        issue="unsettled",
+                        amount_minor=sum(row.amount_minor for row in unsettled),
+                        count=len(unsettled),
+                        since=unsettled[0].booked_date,
+                    )
+                )
+        return CardSettlementStatus(cards=issues)
+
+    def _unsettled_purchases(self, card: Account, rule: CategorizationRule) -> list[Transaction]:
+        """The card's purchases after its last settlement, overdue against its paying account."""
+        paying = list(
+            self._db.scalars(
+                select(Transaction).where(Transaction.account_id == card.settlement_account_id)
+            )
+        )
+        if not paying:
+            return []
+        latest = max(row.booked_date for row in paying)
+        settled = [row.booked_date for row in paying if matches(row, rule)]
+        query = (
+            select(Transaction)
+            .where(
+                Transaction.account_id == card.id,
+                Transaction.amount_minor < 0,
+                Transaction.booked_date <= latest - SETTLEMENT_OVERDUE,
+            )
+            .order_by(Transaction.booked_date)
+        )
+        if settled:
+            query = query.where(Transaction.booked_date > max(settled))
+        return list(self._db.scalars(query))
 
 
 def _require_card(account: Account) -> None:

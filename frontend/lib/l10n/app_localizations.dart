@@ -620,6 +620,47 @@ abstract class AppLocalizations {
   /// **'Règle de prélèvement'**
   String get accountSettlementRule;
 
+  /// Warning for a deferred-debit card with no settlement account.
+  ///
+  /// In fr, this message translates to:
+  /// **'{card} : choisissez le compte sur lequel la carte est prélevée, pour que ses achats ne comptent qu\'une fois.'**
+  String cardSettlementNoAccount(String card);
+
+  /// Action on the no-settlement-account warning: opens the card's account form.
+  ///
+  /// In fr, this message translates to:
+  /// **'Choisir le compte'**
+  String get cardSettlementChooseAccount;
+
+  /// Warning for a deferred-debit card without a settlement rule.
+  ///
+  /// In fr, this message translates to:
+  /// **'Le prélèvement mensuel de {card} compte comme une dépense, en plus des achats de la carte : créez sa règle de prélèvement.'**
+  String cardSettlementNoRule(String card);
+
+  /// Action on the no-rule warning: opens the settlement-rule dialog.
+  ///
+  /// In fr, this message translates to:
+  /// **'Créer la règle'**
+  String get cardSettlementCreateRule;
+
+  /// Warning: a deferred card's purchases since its last settlement have no matching debit although the paying account is imported well past them. `amount` is pre-formatted, without a sign.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, =1{Un achat de {card} ({amount}) attend son prélèvement depuis le {date} : la règle de la carte ne reconnaît peut-être plus le libellé de la banque.} other{{count} achats de {card} ({amount}) attendent leur prélèvement depuis le {date} : la règle de la carte ne reconnaît peut-être plus le libellé de la banque.}}'**
+  String cardSettlementUnsettled(
+    int count,
+    String card,
+    String amount,
+    DateTime date,
+  );
+
+  /// Action on the unsettled-purchases warning: opens the settlement-rule dialog.
+  ///
+  /// In fr, this message translates to:
+  /// **'Vérifier la règle'**
+  String get cardSettlementCheckRule;
+
   /// Title of the dialog proposing the rule that files a deferred-debit card's monthly debit as a transfer.
   ///
   /// In fr, this message translates to:
@@ -1057,29 +1098,6 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Le relevé indique un solde à {amount} de votre suivi au {date}. Vérifiez un import manquant, ou corrigez le solde d\'ouverture du compte si l\'écart persiste.'**
   String importResultBalanceMismatchBody(String amount, DateTime date);
-
-  /// Warning on the import result card: deferred-card settlements were recognised by their label and wait in the review queue for confirmation.
-  ///
-  /// In fr, this message translates to:
-  /// **'{count, plural, =1{Un prélèvement de carte à débit différé a été reconnu : confirmez-le pour que les achats de la carte ne comptent qu\'une fois.} other{{count} prélèvements de carte à débit différé ont été reconnus : confirmez-les pour que les achats de la carte ne comptent qu\'une fois.}}'**
-  String importSettlementsProposed(int count);
-
-  /// Button under the settlements warning, opening the transactions panel on its review queue.
-  ///
-  /// In fr, this message translates to:
-  /// **'Voir les opérations à vérifier'**
-  String get importSettlementsReview;
-
-  /// Warning on the import result card: a deferred card's purchases were paid by a debit on the current account that nothing recognised, so they count as spending twice. `amount` is pre-formatted, without a sign.
-  ///
-  /// In fr, this message translates to:
-  /// **'{count, plural, =1{Un achat de {card} ({amount}) n\'est rattaché à aucun prélèvement depuis le {date} : il compte deux fois tant que ce prélèvement n\'est pas classé en « Règlement carte différée ».} other{{count} achats de {card} ({amount}) ne sont rattachés à aucun prélèvement depuis le {date} : ils comptent deux fois tant que ce prélèvement n\'est pas classé en « Règlement carte différée ».}}'**
-  String importCardUnmatched(
-    int count,
-    String card,
-    String amount,
-    DateTime date,
-  );
 
   /// The coverage window of an import batch, derived from the file's contents.
   ///
@@ -2694,12 +2712,6 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'— aucune proposition'**
   String get reviewNoProposal;
-
-  /// Note after the date on a review row whose proposal is a deferred-card settlement the import recognised from its label (a model proposal shows its confidence instead).
-  ///
-  /// In fr, this message translates to:
-  /// **'règlement de carte détecté'**
-  String get reviewSettlementDetected;
 
   /// Link on a review row with no proposal, opening the category picker.
   ///

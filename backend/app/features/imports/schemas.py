@@ -29,26 +29,3 @@ class ImportBatchRead(BaseModel):
     balance_mismatch_minor: int | None
     balance_mismatch_as_of: date | None
     imported_at: datetime
-
-
-class UnmatchedCardPurchases(BaseModel):
-    """A deferred card's purchases that no settlement has claimed, though one is overdue.
-
-    Until the debit paying them is filed as a card settlement, they count as spending twice:
-    once on the card, once as that debit on the current account.
-    """
-
-    account_id: str
-    #: Their total — signed, so negative.
-    amount_minor: int
-    count: int
-    #: The oldest of them.
-    since: date
-
-
-class CardSettlementStatus(BaseModel):
-    """What the user still has to settle for their deferred cards to count once."""
-
-    #: Settlements recognised by their label, waiting in the review queue.
-    proposed_count: int
-    unmatched: list[UnmatchedCardPurchases]

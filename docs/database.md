@@ -224,7 +224,6 @@ erDiagram
         datetime created_at
         datetime updated_at
         text memo "nullable"
-        text card_settlement_id FK "nullable"
     }
     user_settings {
         text id PK
@@ -279,7 +278,6 @@ erDiagram
     categories |o--o{ recurring_series : "category_id"
     users ||--o{ recurring_series : "user_id"
     accounts ||--o{ transactions : "account_id"
-    transactions |o--o{ transactions : "card_settlement_id"
     categories |o--o{ transactions : "category_id"
     import_batches ||--o{ transactions : "import_batch_id"
     users ||--o| user_settings : "user_id"
@@ -328,4 +326,3 @@ erDiagram
 ### `transactions`
 
 - unique `(account_id, fitid)`
-- `card_settlement_id` → `transactions` on delete set null

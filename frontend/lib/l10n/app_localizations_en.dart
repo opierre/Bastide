@@ -306,6 +306,46 @@ class AppLocalizationsEn extends AppLocalizations {
   String get accountSettlementRule => 'Settlement rule';
 
   @override
+  String cardSettlementNoAccount(String card) {
+    return '$card: choose the account the card is paid from, so its purchases count only once.';
+  }
+
+  @override
+  String get cardSettlementChooseAccount => 'Choose the account';
+
+  @override
+  String cardSettlementNoRule(String card) {
+    return '$card\'s monthly debit counts as spending on top of the card\'s purchases: create its settlement rule.';
+  }
+
+  @override
+  String get cardSettlementCreateRule => 'Create the rule';
+
+  @override
+  String cardSettlementUnsettled(
+    int count,
+    String card,
+    String amount,
+    DateTime date,
+  ) {
+    final intl.DateFormat dateDateFormat = intl.DateFormat.yMd(localeName);
+    final String dateString = dateDateFormat.format(date);
+
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          '$count purchases on $card ($amount) have waited for their debit since $dateString: the card\'s rule may no longer match the bank\'s wording.',
+      one:
+          'One purchase on $card ($amount) has waited for its debit since $dateString: the card\'s rule may no longer match the bank\'s wording.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get cardSettlementCheckRule => 'Check the rule';
+
+  @override
   String get settlementRuleTitle => 'Card settlement rule';
 
   @override
@@ -586,43 +626,6 @@ class AppLocalizationsEn extends AppLocalizations {
     final String dateString = dateDateFormat.format(date);
 
     return 'The statement declares a balance $amount from your ledger as of $dateString. Check for a missed import, or correct the account\'s opening balance if this keeps happening.';
-  }
-
-  @override
-  String importSettlementsProposed(int count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other:
-          '$count deferred-card settlements were recognised: confirm them so the card\'s purchases only count once.',
-      one:
-          'A deferred-card settlement was recognised: confirm it so the card\'s purchases only count once.',
-    );
-    return '$_temp0';
-  }
-
-  @override
-  String get importSettlementsReview => 'Review transactions';
-
-  @override
-  String importCardUnmatched(
-    int count,
-    String card,
-    String amount,
-    DateTime date,
-  ) {
-    final intl.DateFormat dateDateFormat = intl.DateFormat.yMd(localeName);
-    final String dateString = dateDateFormat.format(date);
-
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other:
-          '$count purchases on $card ($amount) have had no matching debit since $dateString: they count twice until that debit is filed as a card settlement.',
-      one:
-          'One purchase on $card ($amount) has had no matching debit since $dateString: it counts twice until that debit is filed as a card settlement.',
-    );
-    return '$_temp0';
   }
 
   @override
@@ -1647,9 +1650,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get reviewNoProposal => '— no proposal';
-
-  @override
-  String get reviewSettlementDetected => 'card settlement detected';
 
   @override
   String get reviewChooseCategory => 'Choose a category';

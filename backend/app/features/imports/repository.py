@@ -1,12 +1,8 @@
 """Data access for import batches and the transactions an import creates."""
 
-from datetime import date
+from sqlalchemy import select
+from sqlalchemy.orm import Session
 
-from sqlalchemy import exists, func, or_, select
-from sqlalchemy.orm import Session, aliased
-
-from app.features.accounts.models import Account
-from app.features.imports.card_settlement import DETECTED_SOURCE
 from app.features.imports.models import ImportBatch
 from app.features.transactions.models import Transaction
 
@@ -60,131 +56,6 @@ class ImportRepository:
             )
         )
         return set(rows)
-
-    def unlinked_settlement_candidates(
-        self, user_id: str, settlement_category_id: str
-    ) -> list[Transaction]:
-        """Debits on the user's non-card accounts that could be an unmatched card settlement.
-
-        Rows already filed as a settlement, plus rows the user hasn't settled — uncategorised,
-        or filed by the model: a settlement imported before its card account existed was left
-        to either, and the caller re-reads its label. Rows a cycle already references are
-        matched and excluded.
-        """
-        claimed = aliased(Transaction)
-        return list(
-            self._db.scalars(
-                select(Transaction)
-                .join(Account, Transaction.account_id == Account.id)
-                .where(
-                    Account.user_id == user_id,
-                    Account.type != "deferred_card",
-                    Account.archived.is_(False),
-                    Transaction.amount_minor < 0,
-                    or_(
-                        Transaction.category_id == settlement_category_id,
-                        Transaction.category_id.is_(None)
-                        & (Transaction.categorization_source != "user"),
-                        Transaction.categorization_source == "model",
-                    ),
-                    ~exists().where(claimed.card_settlement_id == Transaction.id),
-                )
-                .order_by(Transaction.booked_date, Transaction.id)
-            )
-        )
-
-    def unsettled_card_rows(self, account_id: str, through: date) -> list[Transaction]:
-        """A card's rows no settlement has claimed yet, booked up to ``through``, oldest first."""
-        return list(
-            self._db.scalars(
-                select(Transaction)
-                .where(
-                    Transaction.account_id == account_id,
-                    Transaction.card_settlement_id.is_(None),
-                    Transaction.booked_date <= through,
-                )
-                .order_by(Transaction.booked_date, Transaction.id)
-            )
-        )
-
-    def count_proposed_settlements(self, user_id: str, settlement_category_id: str) -> int:
-        """Settlements recognised by their label and still waiting for the user's word."""
-        return (
-            self._db.scalar(
-                select(func.count(Transaction.id))
-                .join(Account, Transaction.account_id == Account.id)
-                .where(
-                    Account.user_id == user_id,
-                    Account.archived.is_(False),
-                    Transaction.category_id == settlement_category_id,
-                    Transaction.categorization_source == DETECTED_SOURCE,
-                    Transaction.needs_review.is_(True),
-                )
-            )
-            or 0
-        )
-
-    def latest_booked_off_card(self, user_id: str) -> date | None:
-        """The last booked date across the user's accounts that are not deferred cards."""
-        return self._db.scalar(
-            select(func.max(Transaction.booked_date))
-            .join(Account, Transaction.account_id == Account.id)
-            .where(
-                Account.user_id == user_id,
-                Account.type != "deferred_card",
-                Account.archived.is_(False),
-            )
-        )
-
-    def find_card_reset(
-        self, account_id: str, amount_minor: int, start: date, end: date
-    ) -> Transaction | None:
-        """An unclaimed credit of exactly ``amount_minor`` on the card between the two dates.
-
-        Some banks print the settlement on the card's own statement as a credit resetting the
-        cycle; when it is there, it is the offset, and posting another would count it twice.
-        """
-        return self._db.scalar(
-            select(Transaction)
-            .where(
-                Transaction.account_id == account_id,
-                Transaction.card_settlement_id.is_(None),
-                Transaction.amount_minor == amount_minor,
-                Transaction.booked_date >= start,
-                Transaction.booked_date <= end,
-            )
-            .order_by(Transaction.booked_date)
-            .limit(1)
-        )
-
-    def rows_settled_by(self, settlement_id: str) -> list[Transaction]:
-        """Every row linked to this settlement: its cycle's card rows and its offset."""
-        return list(
-            self._db.scalars(
-                select(Transaction).where(Transaction.card_settlement_id == settlement_id)
-            )
-        )
-
-    def linked_credits(
-        self, account_id: str, amount_minor: int, start: date, end: date
-    ) -> list[Transaction]:
-        """Cycle-closing credits of exactly ``amount_minor`` on the card, between the dates."""
-        return list(
-            self._db.scalars(
-                select(Transaction).where(
-                    Transaction.account_id == account_id,
-                    Transaction.card_settlement_id.is_not(None),
-                    Transaction.amount_minor == amount_minor,
-                    Transaction.booked_date >= start,
-                    Transaction.booked_date <= end,
-                )
-            )
-        )
-
-    def delete_transaction(self, transaction: Transaction) -> None:
-        """Remove a row from the ledger. Not committed; the caller owns its balance effects."""
-        self._db.delete(transaction)
-        self._db.flush()
 
     def save(self, batch: ImportBatch, transactions: list[Transaction]) -> ImportBatch:
         """Persist the batch and its new transactions in one DB transaction.

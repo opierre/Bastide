@@ -1,3 +1,5 @@
+import 'package:bastide/features/accounts/application/settlement_rule_controller.dart';
+import 'package:bastide/features/accounts/domain/card_settlement_status.dart';
 import 'package:bastide/core/api/api_client.dart';
 import 'package:bastide/core/api/api_client_provider.dart';
 import 'package:bastide/features/imports/application/imports_controller.dart';
@@ -258,12 +260,12 @@ void main() {
         when(
           () => apiClient.get('/imports'),
         ).thenAnswer((_) async => <dynamic>[]);
-        when(() => apiClient.get('/imports/card-settlements')).thenAnswer(
+        when(() => apiClient.get('/accounts/settlement-status')).thenAnswer(
           (_) async => {
-            'proposed_count': 1,
-            'unmatched': [
+            'cards': [
               {
                 'account_id': 'c1',
+                'issue': 'unsettled',
                 'amount_minor': -49210,
                 'count': 3,
                 'since': '2026-01-05',
@@ -281,9 +283,9 @@ void main() {
         final status = await container.read(
           cardSettlementStatusProvider.future,
         );
-        expect(status.proposedCount, 1);
-        expect(status.unmatched.single.amountMinor, -49210);
-        expect(status.unmatched.single.since, DateTime(2026, 1, 5));
+        expect(status.single.kind, CardSettlementIssueKind.unsettled);
+        expect(status.single.amountMinor, -49210);
+        expect(status.single.since, DateTime(2026, 1, 5));
 
         await container.read(importsControllerProvider.future);
         await container
@@ -291,7 +293,7 @@ void main() {
             .importFile(accountId: 'a1', file: _file);
         await container.read(cardSettlementStatusProvider.future);
 
-        verify(() => apiClient.get('/imports/card-settlements')).called(2);
+        verify(() => apiClient.get('/accounts/settlement-status')).called(2);
       },
     );
 

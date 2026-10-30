@@ -121,37 +121,6 @@ Transaction _ruleRow() => Transaction(
   updatedAt: DateTime.utc(2026, 5, 7),
 );
 
-const _cardSettlement = TransactionCategory(
-  id: 'c-card-settlement',
-  name: 'category.finance.card_settlement',
-  kind: 'transfer',
-  icon: 'credit_card',
-  color: '#64748B',
-);
-
-/// « FACTURE CARTE DU 310126 », which the import recognised as a deferred-card
-/// settlement and proposes for confirmation.
-Transaction _detectedSettlement() => Transaction(
-  id: 't-settlement',
-  accountId: 'a1',
-  bookedDate: DateTime(2026, 2, 5),
-  valueDate: null,
-  amountMinor: -45210,
-  currency: 'EUR',
-  descriptionRaw: 'FACTURE CARTE DU 310126',
-  descriptionClean: 'FACTURE CARTE DU 310126',
-  memo: null,
-  merchant: null,
-  category: _cardSettlement,
-  categorizationSource: CategorizationSource.detected,
-  categorizationConfidence: null,
-  needsReview: true,
-  fitid: null,
-  dedupHash: 'hash-settlement',
-  createdAt: DateTime.utc(2026, 2, 5),
-  updatedAt: DateTime.utc(2026, 2, 5),
-);
-
 Widget _wrap({
   required FakeTransactionsController controller,
   required AiAvailability availability,
@@ -196,7 +165,6 @@ void _useDesktopSurface(WidgetTester tester) {
 }
 
 const _aiOn = AiAvailability(enabled: true, reachable: true);
-const _aiOff = AiAvailability(enabled: false, reachable: false);
 
 void main() {
   testWidgets(
@@ -261,31 +229,6 @@ void main() {
 
     expect(controller.updateCategoryCalls, [
       (transactionId: 't-proposed', categoryId: 'c-electronics'),
-    ]);
-  });
-
-  testWidgets('a detected settlement asks for confirmation, AI or not', (
-    tester,
-  ) async {
-    _useDesktopSurface(tester);
-    final controller = _controller([_detectedSettlement()]);
-    await tester.pumpWidget(
-      _wrap(controller: controller, availability: _aiOff, total: 1),
-    );
-    await tester.pumpAndSettle();
-
-    expect(find.byType(ProposedCategoryChip), findsOneWidget);
-    expect(find.text('Règlement carte différée'), findsOneWidget);
-    // No model guessed it, so there is no confidence to show — only its origin.
-    expect(find.byType(ConfidenceGauge), findsNothing);
-    expect(find.byKey(const Key('reviewRowSettlementNote')), findsOneWidget);
-    expect(find.byKey(const Key('reviewRowCorrectButton')), findsOneWidget);
-
-    await tester.tap(find.byKey(const Key('reviewRowConfirmButton')));
-    await tester.pumpAndSettle();
-
-    expect(controller.updateCategoryCalls, [
-      (transactionId: 't-settlement', categoryId: 'c-card-settlement'),
     ]);
   });
 

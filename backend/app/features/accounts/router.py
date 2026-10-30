@@ -13,6 +13,7 @@ from app.features.accounts.schemas import (
     AccountCreate,
     AccountRead,
     AccountUpdate,
+    CardSettlementStatus,
     SettlementRuleRead,
     SettlementRuleSaved,
     SettlementRuleState,
@@ -68,6 +69,16 @@ async def list_accounts(
         match = service.find_by_ofx_account_id(user.id, ofx_account_id)
         return [_to_read(match)] if match is not None else []
     return [_to_read(account) for account in service.list_for_user(user.id)]
+
+
+# Before `/{account_id}`, which would otherwise take `settlement-status` for an account id.
+@router.get("/settlement-status", response_model=CardSettlementStatus)
+async def settlement_status(
+    db: Annotated[Session, Depends(get_db)],
+    user: Annotated[User, Depends(get_current_user)],
+) -> CardSettlementStatus:
+    """The deferred cards whose purchases may not count exactly once, and what each lacks."""
+    return SettlementRuleService(db).status(user.id)
 
 
 @router.post("", response_model=AccountRead, status_code=status.HTTP_201_CREATED)

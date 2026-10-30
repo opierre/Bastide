@@ -1,7 +1,7 @@
 """Keeping an account's history in step when rows land on (or leave) its ledger after the fact.
 
-Shared by the import pipeline and the card-settlement handling, which both add rows behind
-snapshots and recorded mismatches that were computed without them. A removal is passed as a
+Used by the import pipeline, which adds rows behind snapshots and recorded mismatches that
+were computed without them. A removal is passed as a
 movement of the opposite sign.
 """
 
