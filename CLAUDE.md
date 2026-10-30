@@ -13,7 +13,7 @@
 
 ## Core principles
 
-1. **Load the relevant skill before working.** Work on the backend? Load `fastapi-backend` + `database` + `testing`. Frontend? Load `flutter-frontend` + `design-system` + `i18n-l10n` + `testing`. Making structural changes? Load `architecture`. Committing? Load `git-conventional-commits`. If unsure, ask.
+1. **Load the relevant skill before working.** Work on the backend? Load `fastapi-backend` + `database` + `testing`. Frontend? Load `flutter-frontend` + `design-system` + `i18n-l10n` + `testing`. Making structural changes? Load `architecture`. Creating a branch? Load `versioning`: its first commit bumps the version. Committing? Load `git-conventional-commits`. If unsure, ask.
 
 2. **Stop and ask if a decision isn't covered.** The skills and the generated references answer most questions. If something—architecture choice, tech debt, a UI decision—falls outside them, stop and ask the user instead of guessing.
 
