@@ -39,6 +39,7 @@ details?}}`. Model names refer to the Pydantic schemas in `backend/app/features/
 | `GET` | `/accounts/{account_id}` |  |  | 200 `AccountRead` |
 | `PATCH` | `/accounts/{account_id}` |  | `AccountUpdate` | 200 `AccountRead` |
 | `DELETE` | `/accounts/{account_id}` |  |  | 204 |
+| `GET` | `/accounts/{account_id}/overview` |  |  | 200 `AccountOverview` |
 | `GET` | `/accounts/{account_id}/settlement-rule` |  |  | 200 `SettlementRuleState` |
 | `PUT` | `/accounts/{account_id}/settlement-rule` |  | `SettlementRuleWrite` | 200 `SettlementRuleSaved` |
 

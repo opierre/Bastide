@@ -164,3 +164,81 @@ class CardSettlementStatus(BaseModel):
     """Every deferred card that needs the user's attention; empty when all count once."""
 
     cards: list[CardSettlementIssue]
+
+
+class BalancePoint(BaseModel):
+    """An account's balance at one month's end — at today, for the current month."""
+
+    as_of: date
+    balance_minor: int
+
+
+class PeriodStats(BaseModel):
+    """How an account moved over the last twelve months.
+
+    `change_minor` is `inflow_minor + outflow_minor`: every row booked after `since` counts,
+    transfers included, so the three figures reconcile with the balance itself.
+    """
+
+    since: date = Field(description="The month-end the period starts after.")
+    change_minor: int
+    inflow_minor: int
+    outflow_minor: int
+    consecutive_rising_months: int = Field(
+        description="How many month-ends in a row, up to today, closed above the one before."
+    )
+
+
+class LinkedCard(BaseModel):
+    """A deferred card settled from the account, and what its current cycle holds so far."""
+
+    id: str
+    name: str
+    institution: str
+    card_last_digits: str | None
+    cycle_amount_minor: int = Field(
+        description=(
+            "The card's rows since its last settlement — since the first of the month while no "
+            "settlement is known. Signed: negative for spending."
+        )
+    )
+    next_debit_date: date | None = Field(
+        description="A month after the last settlement; null while none is known."
+    )
+    issue: CardSettlementIssueKind | None
+
+
+class SettlementCycle(BaseModel):
+    """One settlement cycle of a deferred card: a settled debit, or the open cycle."""
+
+    settled_on: date | None = Field(description="The debit's date; null for the open cycle.")
+    amount_minor: int
+
+
+class CardSettlement(BaseModel):
+    """A deferred card's settlement: who pays it, by which rule, and its cycles."""
+
+    settlement_account_id: str | None
+    rule: SettlementRuleRead | None
+    cycles: list[SettlementCycle] = Field(
+        description="Oldest first; the last one is always the open cycle."
+    )
+    next_debit_date: date | None
+
+
+class AccountOverview(BaseModel):
+    """Everything the account detail page shows beyond the transaction list."""
+
+    account: AccountRead
+    card_last_digits: str | None
+    first_transaction_date: date | None
+    last_import_at: datetime | None
+    balance_history: list[BalancePoint] = Field(
+        description=(
+            "One point per month, oldest first, from the first transaction's month to today's; "
+            "empty while the account has no transaction."
+        )
+    )
+    period: PeriodStats
+    linked_cards: list[LinkedCard]
+    card_settlement: CardSettlement | None = Field(description="Deferred cards only.")
