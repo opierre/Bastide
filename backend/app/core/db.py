@@ -1,17 +1,45 @@
 """SQLAlchemy engine, session factory, and the per-request session dependency."""
 
 from collections.abc import Callable, Generator
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
-from sqlalchemy import Engine, create_engine, event
+from sqlalchemy import DateTime, Dialect, Engine, create_engine, event
 from sqlalchemy.orm import DeclarativeBase, Session, sessionmaker
+from sqlalchemy.types import TypeDecorator
 
 from app.core.config import get_settings
 
 
 class Base(DeclarativeBase):
     """Declarative base; its metadata is Alembic's autogenerate target."""
+
+
+class UtcDateTime(TypeDecorator[datetime]):
+    """A timestamp stored in UTC and always read back timezone-aware.
+
+    SQLite keeps no offset: it hands every timestamp back naive, which the API would then
+    serialize without a zone, and a client would read it as local time. Values are moved to
+    UTC on the way in and tagged UTC on the way out, so both dialects behave like Postgres.
+    """
+
+    impl = DateTime(timezone=True)
+    cache_ok = True
+
+    @property
+    def python_type(self) -> type[datetime]:
+        return datetime
+
+    def process_bind_param(self, value: datetime | None, dialect: Dialect) -> datetime | None:
+        if value is None or value.tzinfo is None:
+            return value
+        return value.astimezone(UTC)
+
+    def process_result_value(self, value: datetime | None, dialect: Dialect) -> datetime | None:
+        if value is None:
+            return None
+        return value.replace(tzinfo=UTC) if value.tzinfo is None else value.astimezone(UTC)
 
 
 def sqlite_url(db_path: str) -> str:

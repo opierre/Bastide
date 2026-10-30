@@ -3,10 +3,10 @@
 from datetime import UTC, date, datetime
 from uuid import uuid4
 
-from sqlalchemy import Date, DateTime, ForeignKey, Index, Integer, String
+from sqlalchemy import Date, ForeignKey, Index, Integer, String
 from sqlalchemy.orm import Mapped, mapped_column
 
-from app.core.db import Base
+from app.core.db import Base, UtcDateTime
 
 
 class Goal(Base):
@@ -28,11 +28,9 @@ class Goal(Base):
     icon: Mapped[str] = mapped_column(String(50))
     color: Mapped[str] = mapped_column(String(20))
     status: Mapped[str] = mapped_column(String(10))
-    created_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), default=lambda: datetime.now(UTC)
-    )
+    created_at: Mapped[datetime] = mapped_column(UtcDateTime(), default=lambda: datetime.now(UTC))
     updated_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True),
+        UtcDateTime(),
         default=lambda: datetime.now(UTC),
         onupdate=lambda: datetime.now(UTC),
     )
@@ -54,6 +52,4 @@ class GoalAllocation(Base):
     amount_minor: Mapped[int] = mapped_column(Integer)
     allocated_on: Mapped[date] = mapped_column(Date)
     note: Mapped[str | None] = mapped_column(String, nullable=True)
-    created_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), default=lambda: datetime.now(UTC)
-    )
+    created_at: Mapped[datetime] = mapped_column(UtcDateTime(), default=lambda: datetime.now(UTC))

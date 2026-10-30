@@ -3,10 +3,10 @@
 from datetime import UTC, date, datetime
 from uuid import uuid4
 
-from sqlalchemy import Date, DateTime, ForeignKey, Integer, String, UniqueConstraint
+from sqlalchemy import Date, ForeignKey, Integer, String, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column
 
-from app.core.db import Base
+from app.core.db import Base, UtcDateTime
 
 
 class ImportBatch(Base):
@@ -36,6 +36,4 @@ class ImportBatch(Base):
     # opening balance from this same figure instead of comparing against it.
     balance_mismatch_minor: Mapped[int | None] = mapped_column(Integer, nullable=True)
     balance_mismatch_as_of: Mapped[date | None] = mapped_column(Date, nullable=True)
-    imported_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), default=lambda: datetime.now(UTC)
-    )
+    imported_at: Mapped[datetime] = mapped_column(UtcDateTime(), default=lambda: datetime.now(UTC))

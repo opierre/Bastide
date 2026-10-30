@@ -51,10 +51,7 @@ class UpdateService:
 
         now = self._now()
         latest = settings.update_latest_version
-        # SQLite hands timestamps back naive; they were written in UTC.
         checked_at = settings.update_checked_at
-        if checked_at is not None and checked_at.tzinfo is None:
-            checked_at = checked_at.replace(tzinfo=UTC)
 
         reachable = True
         # A check stamped in the future (the clock was set back) is treated as due.
