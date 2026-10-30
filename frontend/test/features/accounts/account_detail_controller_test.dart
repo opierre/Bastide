@@ -2,6 +2,8 @@ import 'package:bastide/core/api/api_client.dart';
 import 'package:bastide/core/api/api_client_provider.dart';
 import 'package:bastide/features/accounts/application/account_detail_controller.dart';
 import 'package:bastide/features/accounts/domain/account_overview.dart';
+import 'package:bastide/features/transactions/application/transactions_controller.dart';
+import 'package:bastide/features/transactions/domain/transaction.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
@@ -93,6 +95,39 @@ void main() {
             ).captured.single
             as Map<String, String>;
     expect(query['account_id'], 'acc-1');
+  });
+
+  test('recent transactions are re-read after a category edit', () async {
+    var category = 'uncategorized';
+    when(
+      () => apiClient.get('/transactions', query: any(named: 'query')),
+    ).thenAnswer(
+      (_) async => {
+        'items': [
+          {..._transactionJson(0), 'categorization_source': category},
+        ],
+        'page': 1,
+        'page_size': 50,
+        'total': 1,
+      },
+    );
+    final sub = container.listen(
+      recentAccountTransactionsProvider('acc-1'),
+      (_, _) {},
+    );
+    addTearDown(sub.close);
+    await container.read(recentAccountTransactionsProvider('acc-1').future);
+
+    category = 'user';
+    container.read(transactionEditsProvider.notifier).saved();
+    final recent = await container.read(
+      recentAccountTransactionsProvider('acc-1').future,
+    );
+
+    expect(recent.single.categorizationSource, CategorizationSource.user);
+    verify(
+      () => apiClient.get('/transactions', query: any(named: 'query')),
+    ).called(2);
   });
 
   test('the chart opens on twelve months and follows the range', () async {

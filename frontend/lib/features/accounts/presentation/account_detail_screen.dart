@@ -1240,8 +1240,10 @@ class _RecentTransactionsCard extends ConsumerWidget {
             ),
           ),
           const SizedBox(height: 6),
+          // Matched on the value, not the state: a re-read after a category
+          // edit keeps the rows on screen instead of a skeleton.
           switch (transactions) {
-            AsyncData(:final value) when value.isEmpty => Padding(
+            AsyncValue(:final value?) when value.isEmpty => Padding(
               padding: const EdgeInsets.only(bottom: AppSpacing.sm),
               child: _DashedRow(
                 key: const Key('accountDetailNoTransactions'),
@@ -1249,7 +1251,7 @@ class _RecentTransactionsCard extends ConsumerWidget {
                 text: l10n.accountDetailNoTransactions,
               ),
             ),
-            AsyncData(:final value) => Column(
+            AsyncValue(:final value?) => Column(
               children: [
                 for (final transaction in value) ...[
                   const Divider(height: 1, color: AppColors.borderSubtle),

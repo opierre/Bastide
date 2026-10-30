@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../transactions/application/transactions_controller.dart';
 import '../../transactions/data/transactions_repository.dart';
 import '../../transactions/domain/transaction.dart';
 import '../data/accounts_repository.dart';
@@ -20,9 +21,11 @@ final accountOverviewProvider = FutureProvider.autoDispose
       return ref.read(accountsRepositoryProvider).overview(accountId);
     });
 
-/// The account's latest transactions, newest first.
+/// The account's latest transactions, newest first. Re-read after a category
+/// edit, which the rows' own picker saves outside this provider.
 final recentAccountTransactionsProvider = FutureProvider.autoDispose
     .family<List<Transaction>, String>((ref, accountId) async {
+      ref.watch(transactionEditsProvider);
       final page = await ref
           .read(transactionsRepositoryProvider)
           .list(accountId: accountId);
