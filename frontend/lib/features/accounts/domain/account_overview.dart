@@ -224,7 +224,8 @@ class SettlementCycle {
   final bool inProgress;
 }
 
-/// How much balance history the chart shows.
+/// How much history the chart shows: month-ends for an account, settlement
+/// cycles (one a month) for a deferred card.
 enum BalanceRange {
   sixMonths(6),
   twelveMonths(12),

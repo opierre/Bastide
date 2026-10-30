@@ -348,6 +348,7 @@ class _ChartCard extends ConsumerWidget {
       body = settlement.cycles.isEmpty
           ? const _ChartEmpty()
           : _CycleChart(
+              accountId: accountId,
               settlement: settlement,
               currency: overview.account.currency,
             );
@@ -381,7 +382,9 @@ class _ChartCard extends ConsumerWidget {
                     ),
                   ),
                 ),
-                if (settlement == null && overview.hasChartHistory)
+                if (settlement == null
+                    ? overview.hasChartHistory
+                    : settlement.cycles.isNotEmpty)
                   SizedBox(
                     width: 240,
                     child: AppSegmented<BalanceRange>(
@@ -531,24 +534,25 @@ class _BalanceChart extends ConsumerWidget {
   }
 }
 
-class _CycleChart extends StatelessWidget {
-  const _CycleChart({required this.settlement, required this.currency});
+class _CycleChart extends ConsumerWidget {
+  const _CycleChart({
+    required this.accountId,
+    required this.settlement,
+    required this.currency,
+  });
 
+  final String accountId;
   final CardSettlement settlement;
   final String currency;
 
-  /// A year of cycles: the card's chart has no range control, and older
-  /// cycles are on the transactions panel.
-  static const _shown = 12;
-
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context)!;
     final textTheme = Theme.of(context).textTheme;
     final locale = _locale(context);
-    final cycles = settlement.cycles.length > _shown
-        ? settlement.cycles.sublist(settlement.cycles.length - _shown)
-        : settlement.cycles;
+    final cycles = ref
+        .watch(balanceRangeControllerProvider(accountId))
+        .slice(settlement.cycles);
     final month = DateFormat.MMM(locale);
     final day = DateFormat.yMMMd(locale);
     // The open cycle is labelled by the month it will be debited in, else
@@ -562,7 +566,14 @@ class _CycleChart extends StatelessWidget {
     return CycleBars(
       key: const Key('accountDetailCycleChart'),
       values: [for (final cycle in cycles) -cycle.amountMinor],
-      labels: [for (final cycle in cycles) label(cycle)],
+      labels: [
+        for (var i = 0; i < cycles.length; i++)
+          // As on the balance chart: past a year, every other cycle, anchored
+          // on the open one.
+          cycles.length > 12 && (cycles.length - 1 - i).isOdd
+              ? ''
+              : label(cycles[i]),
+      ],
       lastInProgress: cycles.isNotEmpty && cycles.last.inProgress,
       valueLabel: _compactMoney(context, currency),
       tooltips: [

@@ -7,6 +7,7 @@ import 'package:bastide/features/accounts/application/settlement_rule_controller
 import 'package:bastide/features/accounts/domain/account_overview.dart';
 import 'package:bastide/features/accounts/domain/settlement_rule.dart';
 import 'package:bastide/features/accounts/presentation/account_detail_screen.dart';
+import 'package:bastide/features/accounts/presentation/cycle_bars.dart';
 import 'package:bastide/features/accounts/presentation/settlement_rule_dialog.dart';
 import 'package:bastide/features/transactions/domain/transaction.dart';
 import 'package:bastide/l10n/app_localizations.dart';
@@ -186,6 +187,46 @@ void main() {
       findsOneWidget,
     );
     expect(find.text('Cartes rattachées'), findsNothing);
+  });
+
+  testWidgets('a card cycle chart follows the 6/12/all switch', (tester) async {
+    final json = cardOverviewJson();
+    final settlement = json['card_settlement'] as Map<String, dynamic>;
+    // Twenty cycles: nineteen settled, then the open one.
+    final cycles = [
+      for (var month = 1; month <= 19; month++)
+        {
+          'settled_on': DateTime(
+            2025,
+            month,
+            5,
+          ).toIso8601String().substring(0, 10),
+          'amount_minor': -50000 - month * 100,
+        },
+      {'settled_on': null, 'amount_minor': -12000},
+    ];
+    await _pump(
+      tester,
+      _wrap(
+        accountId: 'card-1',
+        overview: () => overviewFrom({
+          ...json,
+          'card_settlement': {...settlement, 'cycles': cycles},
+        }),
+      ),
+    );
+    int bars() =>
+        tester.widget<CycleBars>(find.byType(CycleBars)).values.length;
+
+    expect(bars(), 12);
+
+    await tester.tap(find.byKey(const Key('accountDetailRange-six')));
+    await tester.pumpAndSettle();
+    expect(bars(), 6);
+
+    await tester.tap(find.byKey(const Key('accountDetailRange-all')));
+    await tester.pumpAndSettle();
+    expect(bars(), 20);
   });
 
   testWidgets('a fresh account says what comes next, never hides a section', (

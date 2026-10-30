@@ -32,8 +32,8 @@ final recentAccountTransactionsProvider = FutureProvider.autoDispose
       return page.items.take(recentTransactionCount).toList();
     });
 
-/// The range the balance chart shows. Opens on twelve months, the window the
-/// stats card beside it describes.
+/// The range the chart shows — balance months, or a card's cycles. Opens on
+/// twelve, the window the stats card beside it describes.
 class BalanceRangeController extends Notifier<BalanceRange> {
   BalanceRangeController(this.accountId);
 
