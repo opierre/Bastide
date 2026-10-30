@@ -118,13 +118,37 @@ List<OfxAccountInfo> parseOfxStatements(List<int> bytes) {
   ];
   // The signon block names the bank once for the whole file.
   final organization = _tag(text, 'ORG');
+  final statements = blocks.isEmpty ? [text] : blocks;
+  final fileBankId = _soleBankId(statements);
   return [
-    for (final block in blocks.isEmpty ? [text] : blocks)
-      ?_statementInfo(block, organization),
+    for (final block in statements)
+      ?_statementInfo(block, organization, fileBankId),
   ];
 }
 
-OfxAccountInfo? _statementInfo(String statement, String? organization) {
+/// The one bank code every `BANKACCTFROM` of the file agrees on, or `null` when
+/// there is none or they disagree.
+///
+/// A `CCACCTFROM` has no `BANKID` in the spec — only the card number — so a
+/// card statement names no bank of its own. When the same file carries the
+/// customer's bank accounts, the card is theirs too: it borrows their code.
+/// Two different codes mean an aggregated export, and no card can be pinned on
+/// either of them.
+String? _soleBankId(List<String> statements) {
+  final codes = {
+    for (final statement in statements)
+      if (_acctFromRe.firstMatch(statement) case final acctFrom?
+          when acctFrom.group(1)!.toUpperCase() == 'BANK')
+        ?_tag(acctFrom.group(2)!, 'BANKID'),
+  };
+  return codes.length == 1 ? codes.single : null;
+}
+
+OfxAccountInfo? _statementInfo(
+  String statement,
+  String? organization,
+  String? fileBankId,
+) {
   final acctFrom = _acctFromRe.firstMatch(statement);
   if (acctFrom == null) return null;
   final block = acctFrom.group(2)!;
@@ -138,7 +162,7 @@ OfxAccountInfo? _statementInfo(String statement, String? organization) {
 
   return OfxAccountInfo(
     accountNumber: accountNumber,
-    bankId: _tag(block, 'BANKID'),
+    bankId: _tag(block, 'BANKID') ?? (isCreditCard ? fileBankId : null),
     accountType: isCreditCard ? 'CREDITCARD' : _tag(block, 'ACCTTYPE'),
     organization: organization,
     currency: _tag(statement, 'CURDEF'),
