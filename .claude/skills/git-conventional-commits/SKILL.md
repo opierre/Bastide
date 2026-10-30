@@ -87,4 +87,7 @@ BREAKING CHANGE: accounts now require a currency; existing rows need migration <
 
 - Secrets, local `.env`, the SQLite db file, build artifacts, `__pycache__`, `.dart_tool`,
   coverage output. Keep `.gitignore` authoritative.
+- The user's real financial data, in a diff, a commit message or a PR description. A change
+  checked against a copy of their database says what came out ("each card's debits are filed
+  as transfers"), never the card numbers, amounts, banks or dates it was checked on.
 - Generated files only if the project decides to vendor them (note it in the body).

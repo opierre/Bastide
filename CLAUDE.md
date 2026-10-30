@@ -25,7 +25,7 @@
 
 6. **Money is always signed integer minor units.** E.g. cents. Never floats. Negative = outflow/expense, positive = inflow/income.
 
-7. **Local-first, privacy-first.** All data and AI run on the user's machine. The sidecar is loopback-only; an optional cloud tier, if ever built, reuses the same architecture.
+7. **Local-first, privacy-first.** All data and AI run on the user's machine. The sidecar is loopback-only; an optional cloud tier, if ever built, reuses the same architecture. Nothing from the user's real data — card or account numbers, amounts, merchants, dates — ever goes into code, tests, comments, commits, PRs or docs: diagnose on real data, then write invented values. The repo is public.
 
 ## See also
 
