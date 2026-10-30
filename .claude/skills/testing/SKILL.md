@@ -28,6 +28,9 @@ Definition of Done, not an afterthought.
   temp DB). Assert status codes, the **error envelope** shape, auth gating, and user-scoping
   (a user cannot read another user's rows).
 - Use fixtures/factories for data; **no float money in any fixture** (lint your own fixtures).
+- **Invented data only.** A bug found on the user's statements is reproduced with made-up values
+  (`CARTE X4821`, `400000XXXXXX4821`, `-512.40`, `CAFE DU PORT`), never their card digits,
+  amounts, merchants or dates.
 - Tooling: `uv run pytest`; coverage reported. `ruff` + `ty` must pass on test code too.
 
 ## Frontend (flutter_test + mocktail)
