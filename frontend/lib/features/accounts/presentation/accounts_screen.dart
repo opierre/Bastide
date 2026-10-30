@@ -13,6 +13,7 @@ import '../../../core/widgets/state_views.dart';
 import '../../../l10n/app_localizations.dart';
 import '../application/accounts_controller.dart';
 import '../domain/account.dart';
+import 'account_archive.dart';
 import 'account_error_localizer.dart';
 import 'account_form.dart';
 import 'account_type_label.dart';
@@ -52,7 +53,7 @@ class AccountsScreen extends ConsumerWidget {
                 accounts: value,
                 onEdit: (account) => showAccountForm(context, initial: account),
                 onArchive: (account) =>
-                    _confirmArchive(context, ref, l10n, account),
+                    confirmArchiveAccount(context, ref, account),
               ),
             ),
           ],
@@ -72,42 +73,6 @@ class AccountsScreen extends ConsumerWidget {
         ),
       },
     );
-  }
-
-  Future<void> _confirmArchive(
-    BuildContext context,
-    WidgetRef ref,
-    AppLocalizations l10n,
-    Account account,
-  ) async {
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (dialogContext) => AlertDialog(
-        title: Text(l10n.accountArchiveConfirmTitle),
-        content: Text(l10n.accountArchiveConfirmBody),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(dialogContext).pop(false),
-            child: Text(l10n.accountFormCancel),
-          ),
-          FilledButton(
-            key: const Key('accountArchiveConfirmButton'),
-            onPressed: () => Navigator.of(dialogContext).pop(true),
-            child: Text(l10n.accountArchive),
-          ),
-        ],
-      ),
-    );
-    if (confirmed != true) return;
-
-    try {
-      await ref.read(accountsControllerProvider.notifier).archive(account.id);
-    } catch (error) {
-      if (!context.mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(localizeAccountError(l10n, error))),
-      );
-    }
   }
 }
 
