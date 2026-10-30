@@ -69,8 +69,9 @@ settlement rule summary « Libellé : CARTE X4821 · Appliquée depuis le 5 fév
 ## States to show
 ① populated, checking account with 2 linked cards (fr)
 ② populated, deferred card variant (fr)
-③ populated (en) — same as ①; « Tracked since 3 Jan 2025 », « Linked cards », « Balance over
-   time »; dates and numbers in en-GB formatting, € suffix kept.
+③ populated (en) — same as ①; « Tracked since Jan 3, 2025 », « Linked cards », « Balance over
+   time »; dates and amounts in the app's `en` locale, as on every other panel: month first
+   (« Jan 3, 2025 », « Debited on Nov 5 »), symbol first (« €3,486.12 »).
 ④ fresh account, < 2 months of history: chart Card shows EmptyStateView inside its silhouette
    « Le graphique apparaîtra après votre deuxième mois d'historique » + ghost « Importer un
    relevé »; meta strip shows « Pas encore d'opérations » instead of the history date.
