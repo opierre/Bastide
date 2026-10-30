@@ -459,6 +459,7 @@ class _BalanceChart extends ConsumerWidget {
     return AreaLine(
       key: const Key('accountDetailBalanceChart'),
       color: AppColors.cyan,
+      markZero: true,
       gridlines: 2,
       values: [for (final point in points) point.balanceMinor],
       labels: [
