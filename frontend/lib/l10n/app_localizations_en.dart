@@ -4188,4 +4188,194 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get settingsAiOllamaUse => 'Use Ollama';
+
+  @override
+  String get accountDetailBack => 'All accounts';
+
+  @override
+  String get accountDetailMoreActions => 'More actions';
+
+  @override
+  String get accountDetailBalanceLabel => 'Current balance';
+
+  @override
+  String get accountDetailCycleLabel => 'Current cycle';
+
+  @override
+  String accountDetailAsOf(String date) {
+    return 'As of $date';
+  }
+
+  @override
+  String accountDetailCycleAsOf(String date, String debit) {
+    return 'As of $date · debited on $debit';
+  }
+
+  @override
+  String accountDetailHistorySince(String date) {
+    return 'Tracked since $date';
+  }
+
+  @override
+  String get accountDetailNoHistory => 'No transactions yet';
+
+  @override
+  String accountDetailLastImport(String date) {
+    return 'Last import: $date';
+  }
+
+  @override
+  String get accountDetailNoImport => 'No import yet';
+
+  @override
+  String accountDetailMaskedNumber(String digits) {
+    return '•••• $digits';
+  }
+
+  @override
+  String get accountDetailBalanceChartTitle => 'Balance over time';
+
+  @override
+  String get accountDetailCyclesChartTitle => 'Amount settled per cycle';
+
+  @override
+  String get accountDetailRangeSixMonths => '6 months';
+
+  @override
+  String get accountDetailRangeTwelveMonths => '12 months';
+
+  @override
+  String get accountDetailRangeAll => 'All';
+
+  @override
+  String get accountDetailChartEmpty =>
+      'The chart will appear after your second month of history';
+
+  @override
+  String get accountDetailImportCta => 'Import a statement';
+
+  @override
+  String accountDetailTooltipDelta(String amount) {
+    return '$amount vs previous month';
+  }
+
+  @override
+  String get accountDetailTooltipFirstMonth => 'First tracked month';
+
+  @override
+  String accountDetailCycleSettledOn(String date) {
+    return 'Settled on $date';
+  }
+
+  @override
+  String get accountDetailCycleOpen => 'In progress';
+
+  @override
+  String get accountDetailPeriodLabel => 'Last 12 months';
+
+  @override
+  String get accountDetailChange => 'Change over 12 months';
+
+  @override
+  String get accountDetailInflow => 'Money in';
+
+  @override
+  String get accountDetailOutflow => 'Money out';
+
+  @override
+  String accountDetailRisingStreak(int count) {
+    return 'Your balance has grown for $count months in a row.';
+  }
+
+  @override
+  String get accountDetailCyclesPeriod => 'Settled cycles';
+
+  @override
+  String get accountDetailCycleAverage => 'Average per cycle';
+
+  @override
+  String accountDetailCycleHighest(String month) {
+    return 'Highest cycle · $month';
+  }
+
+  @override
+  String accountDetailCycleLast(String month) {
+    return 'Last settled cycle · $month';
+  }
+
+  @override
+  String accountDetailFallingStreak(int count) {
+    return 'Your card spending has fallen for $count cycles in a row.';
+  }
+
+  @override
+  String get accountDetailNoStats => '—';
+
+  @override
+  String get accountDetailLinkedTitle => 'Linked cards';
+
+  @override
+  String get accountDetailLinkedCaption =>
+      'Deferred-debit cards settled from this account';
+
+  @override
+  String get accountDetailThisCycle => 'This month so far';
+
+  @override
+  String accountDetailDebitOn(String date) {
+    return 'Debited on $date';
+  }
+
+  @override
+  String get accountDetailNoDebitScheduled => 'No debit scheduled';
+
+  @override
+  String get accountDetailRuleMissing => 'Settlement rule to set up';
+
+  @override
+  String get accountDetailNoCards => 'No linked card';
+
+  @override
+  String accountDetailOpenAccount(String name) {
+    return 'Open $name';
+  }
+
+  @override
+  String get accountDetailSettleTitle => 'Settlement account';
+
+  @override
+  String get accountDetailSettleCaption =>
+      'The account debited at the end of each cycle';
+
+  @override
+  String get accountDetailNoPayingAccount => 'No settlement account';
+
+  @override
+  String accountDetailRuleSummary(String pattern, String date) {
+    return 'Label: $pattern · Applied since $date';
+  }
+
+  @override
+  String accountDetailRuleSummaryUndated(String pattern) {
+    return 'Label: $pattern';
+  }
+
+  @override
+  String get accountDetailNoRule =>
+      'No settlement rule: the debit still counts as spending';
+
+  @override
+  String get accountDetailEditRule => 'Edit the rule';
+
+  @override
+  String get accountDetailSetUpRule => 'Set up the rule';
+
+  @override
+  String get accountDetailRecentTitle => 'Recent transactions';
+
+  @override
+  String get accountDetailSeeAll => 'See all';
+
+  @override
+  String get accountDetailNoTransactions => 'No transactions yet';
 }

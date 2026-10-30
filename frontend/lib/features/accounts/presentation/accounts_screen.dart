@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
 import '../../../core/theme/app_theme.dart';
@@ -14,6 +15,7 @@ import '../../../l10n/app_localizations.dart';
 import '../application/accounts_controller.dart';
 import '../domain/account.dart';
 import 'account_archive.dart';
+import 'account_detail_screen.dart';
 import 'account_error_localizer.dart';
 import 'account_form.dart';
 import 'account_type_label.dart';
@@ -51,6 +53,8 @@ class AccountsScreen extends ConsumerWidget {
             Expanded(
               child: _AccountsGrid(
                 accounts: value,
+                onOpen: (account) =>
+                    context.go(AccountDetailScreen.location(account.id)),
                 onEdit: (account) => showAccountForm(context, initial: account),
                 onArchive: (account) =>
                     confirmArchiveAccount(context, ref, account),
@@ -159,11 +163,13 @@ class _SummaryCard extends ConsumerWidget {
 class _AccountsGrid extends StatelessWidget {
   const _AccountsGrid({
     required this.accounts,
+    required this.onOpen,
     required this.onEdit,
     required this.onArchive,
   });
 
   final List<Account> accounts;
+  final ValueChanged<Account> onOpen;
   final ValueChanged<Account> onEdit;
   final ValueChanged<Account> onArchive;
 
@@ -187,6 +193,7 @@ class _AccountsGrid extends StatelessWidget {
         return _AccountCard(
           account: account,
           l10n: l10n,
+          onOpen: () => onOpen(account),
           onEdit: () => onEdit(account),
           onArchive: () => onArchive(account),
         );
@@ -201,12 +208,17 @@ class _AccountCard extends StatelessWidget {
   const _AccountCard({
     required this.account,
     required this.l10n,
+    required this.onOpen,
     required this.onEdit,
     required this.onArchive,
   });
 
   final Account account;
   final AppLocalizations l10n;
+
+  /// Opens the account's detail — the card's whole face is the way in; editing
+  /// stays one step away in its menu.
+  final VoidCallback onOpen;
   final VoidCallback onEdit;
   final VoidCallback onArchive;
 
@@ -217,7 +229,7 @@ class _AccountCard extends StatelessWidget {
     return AppCard(
       key: Key('accountCard-${account.id}'),
       padding: const EdgeInsets.all(AppSpacing.cardPadding),
-      onTap: onEdit,
+      onTap: onOpen,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [

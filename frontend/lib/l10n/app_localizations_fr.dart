@@ -4223,4 +4223,194 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get settingsAiOllamaUse => 'Utiliser Ollama';
+
+  @override
+  String get accountDetailBack => 'Tous les comptes';
+
+  @override
+  String get accountDetailMoreActions => 'Plus d’actions';
+
+  @override
+  String get accountDetailBalanceLabel => 'Solde actuel';
+
+  @override
+  String get accountDetailCycleLabel => 'Encours du cycle';
+
+  @override
+  String accountDetailAsOf(String date) {
+    return 'Au $date';
+  }
+
+  @override
+  String accountDetailCycleAsOf(String date, String debit) {
+    return 'Au $date · prélevé le $debit';
+  }
+
+  @override
+  String accountDetailHistorySince(String date) {
+    return 'Historique depuis le $date';
+  }
+
+  @override
+  String get accountDetailNoHistory => 'Pas encore d’opérations';
+
+  @override
+  String accountDetailLastImport(String date) {
+    return 'Dernier import : $date';
+  }
+
+  @override
+  String get accountDetailNoImport => 'Aucun import pour l’instant';
+
+  @override
+  String accountDetailMaskedNumber(String digits) {
+    return '•••• $digits';
+  }
+
+  @override
+  String get accountDetailBalanceChartTitle => 'Évolution du solde';
+
+  @override
+  String get accountDetailCyclesChartTitle => 'Montant réglé par cycle';
+
+  @override
+  String get accountDetailRangeSixMonths => '6 mois';
+
+  @override
+  String get accountDetailRangeTwelveMonths => '12 mois';
+
+  @override
+  String get accountDetailRangeAll => 'Tout';
+
+  @override
+  String get accountDetailChartEmpty =>
+      'Le graphique apparaîtra après votre deuxième mois d’historique';
+
+  @override
+  String get accountDetailImportCta => 'Importer un relevé';
+
+  @override
+  String accountDetailTooltipDelta(String amount) {
+    return '$amount vs mois précédent';
+  }
+
+  @override
+  String get accountDetailTooltipFirstMonth => 'Premier mois suivi';
+
+  @override
+  String accountDetailCycleSettledOn(String date) {
+    return 'Réglé le $date';
+  }
+
+  @override
+  String get accountDetailCycleOpen => 'En cours';
+
+  @override
+  String get accountDetailPeriodLabel => '12 derniers mois';
+
+  @override
+  String get accountDetailChange => 'Variation sur 12 mois';
+
+  @override
+  String get accountDetailInflow => 'Entrées';
+
+  @override
+  String get accountDetailOutflow => 'Sorties';
+
+  @override
+  String accountDetailRisingStreak(int count) {
+    return 'Votre solde progresse depuis $count mois consécutifs.';
+  }
+
+  @override
+  String get accountDetailCyclesPeriod => 'Cycles réglés';
+
+  @override
+  String get accountDetailCycleAverage => 'Moyenne par cycle';
+
+  @override
+  String accountDetailCycleHighest(String month) {
+    return 'Cycle le plus élevé · $month';
+  }
+
+  @override
+  String accountDetailCycleLast(String month) {
+    return 'Dernier cycle réglé · $month';
+  }
+
+  @override
+  String accountDetailFallingStreak(int count) {
+    return 'Vos dépenses par carte baissent depuis $count cycles.';
+  }
+
+  @override
+  String get accountDetailNoStats => '—';
+
+  @override
+  String get accountDetailLinkedTitle => 'Cartes rattachées';
+
+  @override
+  String get accountDetailLinkedCaption =>
+      'Cartes à débit différé réglées sur ce compte';
+
+  @override
+  String get accountDetailThisCycle => 'En cours ce mois';
+
+  @override
+  String accountDetailDebitOn(String date) {
+    return 'Prélevé le $date';
+  }
+
+  @override
+  String get accountDetailNoDebitScheduled => 'Prélèvement non planifié';
+
+  @override
+  String get accountDetailRuleMissing => 'Règle de règlement à configurer';
+
+  @override
+  String get accountDetailNoCards => 'Aucune carte rattachée';
+
+  @override
+  String accountDetailOpenAccount(String name) {
+    return 'Ouvrir $name';
+  }
+
+  @override
+  String get accountDetailSettleTitle => 'Compte de règlement';
+
+  @override
+  String get accountDetailSettleCaption =>
+      'Le compte débité à chaque fin de cycle';
+
+  @override
+  String get accountDetailNoPayingAccount => 'Aucun compte de règlement';
+
+  @override
+  String accountDetailRuleSummary(String pattern, String date) {
+    return 'Libellé : $pattern · Appliquée depuis le $date';
+  }
+
+  @override
+  String accountDetailRuleSummaryUndated(String pattern) {
+    return 'Libellé : $pattern';
+  }
+
+  @override
+  String get accountDetailNoRule =>
+      'Aucune règle de règlement : le prélèvement compte encore comme une dépense';
+
+  @override
+  String get accountDetailEditRule => 'Modifier la règle';
+
+  @override
+  String get accountDetailSetUpRule => 'Configurer la règle';
+
+  @override
+  String get accountDetailRecentTitle => 'Dernières opérations';
+
+  @override
+  String get accountDetailSeeAll => 'Tout voir';
+
+  @override
+  String get accountDetailNoTransactions => 'Aucune opération pour l’instant';
 }
