@@ -6,25 +6,34 @@ import 'package:flutter/material.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/tokens.dart';
 import '../../../core/widgets/area_line.dart';
+import '../application/dashboard_controller.dart';
 
-/// What each month put aside, one bar per month around a zero line: income
-/// green above it, expense red below it for a month that spent more than it
-/// earned. The direction doubles the color, so the sign never rests on hue
-/// alone.
+/// What each month put aside, drawn around a zero line in one of two [SavingsChartView]s.
 ///
-/// Bars rather than a line: each month's saving is its own figure, not a step
-/// of a running total, and a line through twelve independent amounts would draw
-/// a trend that isn't there. The last bar is the current month, still moving,
-/// so it is drawn as a dashed outline — as the open cycle is on a card's chart.
+/// - **Bars**: one bar per month, income green above zero, expense red below it for a
+///   month that spent more than it earned. Each month's saving is its own figure, not a
+///   step of a running total, so bars are the default.
+/// - **Line**: the same twelve figures joined in order, which reads the direction over
+///   many months better. Each point is still dotted in its sign's color, and a dashed zero
+///   baseline marks where a month turns negative.
 ///
-/// Laid out like [AreaLine] (value gutter, slots, month axis) so the card reads
-/// like the other charts. Not animated, per the spec's motion rules.
-class SavingsBars extends StatefulWidget {
-  const SavingsBars({
+/// Either way the direction doubles the color, so the sign never rests on hue alone, and
+/// the last month — the current one, still moving — is drawn open: a dashed outline bar,
+/// or a dashed last segment ending on a hollow dot.
+///
+/// Both views share one frame: the [_Scale], the labelled gridlines, the hover slots and
+/// the month axis. Only the mark layer differs, so a reference drawn over the marks (an
+/// average line, say) is one more step in [_SavingsChartPainter.paint] and lands in both.
+///
+/// Laid out like [AreaLine] (value gutter, slots, month axis) so the card reads like the
+/// other charts. Not animated, per the spec's motion rules.
+class SavingsChart extends StatefulWidget {
+  const SavingsChart({
     super.key,
     required this.values,
     required this.labels,
     required this.valueLabel,
+    this.view = SavingsChartView.bars,
     this.tooltips,
   });
 
@@ -32,13 +41,14 @@ class SavingsBars extends StatefulWidget {
   final List<int> values;
   final List<String> labels;
   final String Function(num value) valueLabel;
+  final SavingsChartView view;
   final List<InlineSpan>? tooltips;
 
   @override
-  State<SavingsBars> createState() => _SavingsBarsState();
+  State<SavingsChart> createState() => _SavingsChartState();
 }
 
-class _SavingsBarsState extends State<SavingsBars> {
+class _SavingsChartState extends State<SavingsChart> {
   /// The slot under the pointer — hover ephemera, not chart state.
   int? _hovered;
 
@@ -61,8 +71,9 @@ class _SavingsBarsState extends State<SavingsBars> {
               RepaintBoundary(
                 child: CustomPaint(
                   size: Size.infinite,
-                  painter: _SavingsBarsPainter(
+                  painter: _SavingsChartPainter(
                     values: widget.values,
+                    view: widget.view,
                     scale: scale,
                     hovered: _hovered,
                     levelLabels: scale.levels.map(widget.valueLabel).toList(),
@@ -82,7 +93,7 @@ class _SavingsBarsState extends State<SavingsBars> {
                           child: tooltips == null
                               ? const SizedBox.expand()
                               : Tooltip(
-                                  key: Key('savingsBarsTooltip-$i'),
+                                  key: Key('savingsChartTooltip-$i'),
                                   richMessage: TextSpan(
                                     children: [tooltips[i]],
                                   ),
@@ -157,9 +168,10 @@ class _Scale {
   int get hashCode => Object.hash(bottom, top);
 }
 
-class _SavingsBarsPainter extends CustomPainter {
-  _SavingsBarsPainter({
+class _SavingsChartPainter extends CustomPainter {
+  _SavingsChartPainter({
     required this.values,
+    required this.view,
     required this.scale,
     required this.hovered,
     required this.levelLabels,
@@ -167,6 +179,7 @@ class _SavingsBarsPainter extends CustomPainter {
   });
 
   final List<int> values;
+  final SavingsChartView view;
   final _Scale scale;
   final int? hovered;
   final List<String> levelLabels;
@@ -179,12 +192,32 @@ class _SavingsBarsPainter extends CustomPainter {
   static const _hoverAlpha = 0.9;
   static const _openFillAlpha = 0.08;
 
+  /// The line view's stroke and dots, as on [AreaLine], whose iris line this chart drew
+  /// before it took bars.
+  static const _lineStroke = 2.5;
+  static const _dotRadius = 4.0;
+  static const _hoverDotRadius = 5.0;
+
   @override
   void paint(Canvas canvas, Size size) {
     const gutter = AreaLine.valueGutter;
     final plot = Rect.fromLTWH(gutter, 4, size.width - gutter, size.height - 8);
     if (plot.width <= 0 || plot.height <= 0) return;
 
+    _paintGrid(canvas, size, plot);
+    if (values.isEmpty) return;
+    switch (view) {
+      case SavingsChartView.bars:
+        _paintBars(canvas, plot);
+      case SavingsChartView.line:
+        _paintLine(canvas, size, plot);
+    }
+    // Overlays shared by both views (a reference line on the same scale) paint here,
+    // after the marks.
+  }
+
+  /// The labelled gridlines both views stand on.
+  void _paintGrid(Canvas canvas, Size size, Rect plot) {
     final grid = Paint()
       ..color = AppColors.borderSubtle
       ..strokeWidth = 1;
@@ -202,26 +235,32 @@ class _SavingsBarsPainter extends CustomPainter {
         Offset(plot.left - AppSpacing.sm - label.width, y - label.height / 2),
       );
     }
+  }
 
-    if (values.isEmpty) return;
+  /// Month [index]'s position: its slot's centre, at its value on the shared scale.
+  Offset _point(int index, Rect plot) => Offset(
+    plot.left + AreaLine.pointX(index, values.length, plot.width),
+    scale.y(values[index].toDouble(), plot),
+  );
+
+  void _paintBars(Canvas canvas, Rect plot) {
     final zeroY = scale.y(0, plot);
     final slot = plot.width / values.length;
     final barWidth = math.min(_maxBarWidth, slot * 0.56);
     for (var i = 0; i < values.length; i++) {
       final value = values[i];
       if (value == 0) continue;
-      final centre = plot.left + AreaLine.pointX(i, values.length, plot.width);
-      final valueY = scale.y(value.toDouble(), plot);
+      final point = _point(i, plot);
       final up = value > 0;
       // The rounded end is the tip, away from zero, whichever way the bar runs.
       const tip = Radius.circular(_tipRadius);
       const base = Radius.circular(_baseRadius);
       final rect = RRect.fromRectAndCorners(
         Rect.fromLTRB(
-          centre - barWidth / 2,
-          up ? valueY : zeroY,
-          centre + barWidth / 2,
-          up ? zeroY : valueY,
+          point.dx - barWidth / 2,
+          up ? point.dy : zeroY,
+          point.dx + barWidth / 2,
+          up ? zeroY : point.dy,
         ),
         topLeft: up ? tip : base,
         topRight: up ? tip : base,
@@ -242,11 +281,84 @@ class _SavingsBarsPainter extends CustomPainter {
     }
   }
 
-  void _drawDashed(Canvas canvas, Path path, Color color) {
+  void _paintLine(Canvas canvas, Size size, Rect plot) {
+    final points = [for (var i = 0; i < values.length; i++) _point(i, plot)];
+
+    // The zero baseline, dashed as on [AreaLine]'s `markZero`, so a dip below it reads
+    // as a month that spent more than it earned. Drawn whenever zero is not the plot's
+    // own floor, where the bottom gridline already marks it.
+    final zeroY = scale.y(0, plot);
+    if (scale.bottom < 0) {
+      final dash = Paint()
+        ..color = AppColors.borderDashed
+        ..strokeWidth = 1;
+      for (var x = plot.left; x < size.width; x += 7) {
+        canvas.drawLine(
+          Offset(x, zeroY),
+          Offset(math.min(x + 4, size.width), zeroY),
+          dash,
+        );
+      }
+    }
+
+    final stroke = Paint()
+      ..color = AppColors.iris
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = _lineStroke
+      ..strokeJoin = StrokeJoin.round
+      ..strokeCap = StrokeCap.round;
+    // Settled months as one solid path; the segment into the open month dashed, as the
+    // open bar is outlined.
+    final settled = points.length > 1
+        ? points.sublist(0, points.length - 1)
+        : points;
+    canvas.drawPath(Path()..addPolygon(settled, false), stroke);
+    if (points.length > 1) {
+      _drawDashed(
+        canvas,
+        Path()
+          ..moveTo(points[points.length - 2].dx, points[points.length - 2].dy)
+          ..lineTo(points.last.dx, points.last.dy),
+        AppColors.iris,
+        strokeWidth: _lineStroke,
+      );
+    }
+
+    // A dot per month in its sign's color, ringed in the card's surface so it reads as
+    // sitting on the line. The open month's dot is hollow.
+    for (var i = 0; i < points.length; i++) {
+      final radius = hovered == i ? _hoverDotRadius : _dotRadius;
+      final color = values[i] < 0 ? AppColors.negative : AppColors.positive;
+      canvas.drawCircle(
+        points[i],
+        radius + 1.5,
+        Paint()..color = AppColors.surfaceRaised,
+      );
+      if (i == points.length - 1) {
+        canvas.drawCircle(
+          points[i],
+          radius - 0.75,
+          Paint()
+            ..color = color
+            ..style = PaintingStyle.stroke
+            ..strokeWidth = 1.5,
+        );
+      } else {
+        canvas.drawCircle(points[i], radius, Paint()..color = color);
+      }
+    }
+  }
+
+  void _drawDashed(
+    Canvas canvas,
+    Path path,
+    Color color, {
+    double strokeWidth = 1.5,
+  }) {
     final paint = Paint()
       ..color = color
       ..style = PaintingStyle.stroke
-      ..strokeWidth = 1.5;
+      ..strokeWidth = strokeWidth;
     for (final metric in path.computeMetrics()) {
       var distance = 0.0;
       while (distance < metric.length) {
@@ -257,8 +369,9 @@ class _SavingsBarsPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(_SavingsBarsPainter oldDelegate) =>
+  bool shouldRepaint(_SavingsChartPainter oldDelegate) =>
       !listEquals(oldDelegate.values, values) ||
+      oldDelegate.view != view ||
       oldDelegate.scale != scale ||
       oldDelegate.hovered != hovered ||
       !listEquals(oldDelegate.levelLabels, levelLabels) ||

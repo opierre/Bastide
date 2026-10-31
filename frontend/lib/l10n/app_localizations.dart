@@ -1807,7 +1807,7 @@ abstract class AppLocalizations {
   /// **'dépensés'**
   String get dashboardDonutCenterCaption;
 
-  /// Title of the monthly savings bar chart.
+  /// Title of the monthly savings chart (bar or line view).
   ///
   /// In fr, this message translates to:
   /// **'Évolution de l\'épargne'**
@@ -1824,6 +1824,18 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'en moyenne par mois'**
   String get dashboardSavingsTrendAverage;
+
+  /// Savings chart view switch: one bar per month.
+  ///
+  /// In fr, this message translates to:
+  /// **'Barres'**
+  String get dashboardSavingsViewBars;
+
+  /// Savings chart view switch: the same months joined as a line.
+  ///
+  /// In fr, this message translates to:
+  /// **'Courbe'**
+  String get dashboardSavingsViewLine;
 
   /// Title of the stacked income-vs-expense bar chart.
   ///

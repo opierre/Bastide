@@ -338,6 +338,8 @@
   "dashboardSavingsTrendTitle": "Savings over time",
   "dashboardSavingsTrendSubtitle": "Saved per month · {count} months",
   "dashboardSavingsTrendAverage": "on average per month",
+  "dashboardSavingsViewBars": "Bars",
+  "dashboardSavingsViewLine": "Line",
   "dashboardIncomeVsExpenseTitle": "Income vs expenses",
   "dashboardIncomeVsExpenseSubtitle": "Last {count} months",
   "dashboardLegendIncome": "Income",
