@@ -1353,28 +1353,20 @@
   },
   "dashboardSavingsTrendTitle": "Évolution de l'épargne",
   "@dashboardSavingsTrendTitle": {
-    "description": "Title of the cumulative savings area chart."
+    "description": "Title of the monthly savings bar chart."
   },
-  "dashboardSavingsTrendSubtitle": "Épargne cumulée · {count} mois",
+  "dashboardSavingsTrendSubtitle": "Épargne mensuelle · {count} mois",
   "@dashboardSavingsTrendSubtitle": {
-    "description": "Subtitle of the cumulative savings chart, naming the window it covers.",
+    "description": "Subtitle of the monthly savings chart, naming the window it covers.",
     "placeholders": {
       "count": {
         "type": "int"
       }
     }
   },
-  "dashboardSavingsTrendDelta": "{amount} en {month}",
-  "@dashboardSavingsTrendDelta": {
-    "description": "The savings chart's header delta — how much the latest month added, e.g. « +635,65 € en mai ».",
-    "placeholders": {
-      "amount": {
-        "type": "String"
-      },
-      "month": {
-        "type": "String"
-      }
-    }
+  "dashboardSavingsTrendAverage": "en moyenne par mois",
+  "@dashboardSavingsTrendAverage": {
+    "description": "Caption under the savings chart's headline: the average a month put aside over the window."
   },
   "dashboardIncomeVsExpenseTitle": "Revenus vs dépenses",
   "@dashboardIncomeVsExpenseTitle": {

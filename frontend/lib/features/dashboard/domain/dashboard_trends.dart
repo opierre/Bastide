@@ -19,16 +19,17 @@ class MonthlyTotals {
   final int netMinor;
 }
 
-/// One point on the cumulative-savings line.
+/// One month on the savings chart.
 @immutable
 class SavingsPoint {
-  const SavingsPoint({required this.month, required this.cumulativeMinor});
+  const SavingsPoint({required this.month, required this.savedMinor});
 
   /// First of the month.
   final DateTime month;
 
-  /// Running total of net through this month, including months before the returned window.
-  final int cumulativeMinor;
+  /// What the month put aside — its own net, not a running total. Negative when it spent
+  /// more than it earned.
+  final int savedMinor;
 }
 
 /// The dashboard's two trend series.
@@ -48,26 +49,17 @@ class DashboardTrends {
   /// The last 4 months ending with the current one, oldest first.
   final List<MonthlyTotals> monthlySeries;
 
-  /// The last 6 months ending with the current one, oldest first.
+  /// The last 12 months ending with the current one, oldest first.
   final List<SavingsPoint> savingsSeries;
   final String currency;
 
-  /// The latest cumulative total — the savings card's headline figure.
-  int get totalSavedMinor =>
-      savingsSeries.isEmpty ? 0 : savingsSeries.last.cumulativeMinor;
-
-  /// How much the latest month added, i.e. the last step of the line. This is the *month's*
-  /// net rather than a recomputed difference, so it matches the net card exactly.
-  int get latestMonthNetMinor {
+  /// What the window's months put aside on average — the savings card's headline. Rounded to
+  /// the nearest minor unit: money stays an integer even when the mean isn't.
+  int get averageSavedMinor {
     if (savingsSeries.isEmpty) return 0;
-    if (savingsSeries.length == 1) return savingsSeries.single.cumulativeMinor;
-    return savingsSeries.last.cumulativeMinor -
-        savingsSeries[savingsSeries.length - 2].cumulativeMinor;
+    final total = savingsSeries.fold<int>(0, (sum, p) => sum + p.savedMinor);
+    return (total / savingsSeries.length).round();
   }
-
-  /// The month the latest point covers — « +635,65 € en mai ».
-  DateTime? get latestMonth =>
-      savingsSeries.isEmpty ? null : savingsSeries.last.month;
 }
 
 /// One row of « Activité récente ».

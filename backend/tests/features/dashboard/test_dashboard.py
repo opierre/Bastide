@@ -488,7 +488,7 @@ def _trends_service(
         session.close()
 
 
-def test_trends_returns_four_bar_months_and_six_savings_months(
+def test_trends_returns_four_bar_months_and_twelve_savings_months(
     client: TestClient, tmp_path: Path
 ) -> None:
     headers = _register(client)
@@ -512,6 +512,12 @@ def test_trends_returns_four_bar_months_and_six_savings_months(
         "2026-05",
     ]
     assert [row.month for row in trends.savings_series] == [
+        "2025-06",
+        "2025-07",
+        "2025-08",
+        "2025-09",
+        "2025-10",
+        "2025-11",
         "2025-12",
         "2026-01",
         "2026-02",
@@ -537,7 +543,7 @@ def test_trends_windows_ignore_the_selected_month_and_end_at_today(
         "2026-01",
         "2026-02",
     ]
-    assert trends.savings_series[0].month == "2025-09"
+    assert trends.savings_series[0].month == "2025-03"
 
 
 def test_trends_bars_carry_income_expense_and_net_per_month(
@@ -576,20 +582,26 @@ def test_trends_bars_carry_income_expense_and_net_per_month(
     assert trends.monthly_series[0].net_minor == 0
 
 
-def test_savings_series_accumulates_and_opens_from_prior_months(
-    client: TestClient, tmp_path: Path
-) -> None:
+def test_savings_series_carries_each_months_own_net(client: TestClient, tmp_path: Path) -> None:
     headers = _register(client)
     account_id = _create_account(client, headers)
     income_category = _create_category(client, headers, kind="income")
+    expense_category = _create_category(client, headers, kind="expense")
 
-    # Before the 6-month window — must still be counted, or the line understates the total.
+    # Before the 12-month window: counted nowhere, since no point is a running total.
     _insert_transaction(
         tmp_path,
         account_id,
         amount_minor=500_000,
-        booked_date=date(2025, 6, 1),
+        booked_date=date(2025, 5, 1),
         category_id=income_category,
+    )
+    _insert_transaction(
+        tmp_path,
+        account_id,
+        amount_minor=-40_000,
+        booked_date=date(2026, 3, 9),
+        category_id=expense_category,
     )
     _insert_transaction(
         tmp_path,
@@ -607,10 +619,10 @@ def test_savings_series_accumulates_and_opens_from_prior_months(
     )
 
     trends = _trends_service(client, headers, tmp_path, date(2026, 5, 20))
-    cumulative = [row.cumulative_minor for row in trends.savings_series]
+    saved = [row.saved_minor for row in trends.savings_series]
 
-    # Opens at the pre-window total, then only ever moves by that month's net.
-    assert cumulative == [500_000, 500_000, 500_000, 500_000, 600_000, 663_565]
+    # Each month stands alone — one that spent more than it earned is negative.
+    assert saved == [0] * 9 + [-40_000, 100_000, 63_565]
 
 
 def test_trends_excludes_transfers(client: TestClient, tmp_path: Path) -> None:
@@ -629,7 +641,7 @@ def test_trends_excludes_transfers(client: TestClient, tmp_path: Path) -> None:
     trends = _trends_service(client, headers, tmp_path, date(2026, 5, 20))
 
     assert trends.monthly_series[-1].expense_minor == 0
-    assert trends.savings_series[-1].cumulative_minor == 0
+    assert trends.savings_series[-1].saved_minor == 0
 
 
 def test_trends_is_user_scoped(client: TestClient, tmp_path: Path) -> None:
