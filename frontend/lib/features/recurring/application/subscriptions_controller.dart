@@ -156,17 +156,26 @@ class SubscriptionsController extends AsyncNotifier<SubscriptionsState> {
     () => _repository.keepApart(suggestion.target.id, suggestion.source.id),
   );
 
+  /// Sends the user's answer, then reloads the panel behind it.
+  ///
+  /// Every failure of the write is kept as [SubscriptionsState.actionError],
+  /// not only a refusal from the server: a sidecar that cannot be reached
+  /// throws something else, and letting it escape would leave the banner
+  /// spinning with nothing said. The reload is a separate step, because once
+  /// the write has landed the answer is given — a reload that then fails turns
+  /// the panel into its error state with a retry rather than leaving the
+  /// answered suggestion on screen as if nothing had happened.
   Future<bool> _answer(Future<Object?> Function() write) async {
     final current = state.value;
     if (current == null) return false;
     try {
       await write();
-      state = AsyncValue.data(await _load(current.statusFilter));
-      return true;
-    } on ApiFailure catch (failure) {
-      state = AsyncValue.data(current.copyWith(actionError: failure));
+    } on Object catch (error) {
+      state = AsyncValue.data(current.copyWith(actionError: error));
       return false;
     }
+    state = await AsyncValue.guard(() => _load(current.statusFilter));
+    return true;
   }
 
   Future<void> refresh() async {

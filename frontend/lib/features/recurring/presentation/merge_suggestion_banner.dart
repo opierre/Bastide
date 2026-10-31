@@ -31,15 +31,18 @@ class _MergeSuggestionBannerState extends ConsumerState<MergeSuggestionBanner> {
   Future<void> _merge() async {
     final l10n = AppLocalizations.of(context)!;
     final target = widget.suggestion.target.label;
+    // Looked up before the await: the reload that follows a merge takes this
+    // suggestion off the panel, and with it this banner, so the confirmation
+    // cannot depend on the banner still being mounted.
+    final overlay = Overlay.maybeOf(context);
     setState(() => _busy = true);
     final merged = await ref
         .read(subscriptionsControllerProvider.notifier)
         .merge(widget.suggestion);
-    if (!mounted) return;
-    setState(() => _busy = false);
-    if (merged) {
-      showAppToast(
-        context,
+    if (mounted) setState(() => _busy = false);
+    if (merged && overlay != null && overlay.mounted) {
+      showAppToastOn(
+        overlay,
         title: l10n.subscriptionsMergeDone,
         message: l10n.subscriptionsMergeDoneDetail(target),
       );
