@@ -280,6 +280,49 @@ void main() {
     expect(state.mergeSuggestions, hasLength(1));
   });
 
+  test('a merge that never reaches the server is reported too', () async {
+    stubLoad(
+      suggestions: [
+        {'target': _seriesJson(id: 's2'), 'source': _seriesJson()},
+      ],
+    );
+    when(
+      () => apiClient.post('/recurring/s2/merge', body: any(named: 'body')),
+    ).thenThrow(Exception('connection refused'));
+    final loaded = await container.read(subscriptionsControllerProvider.future);
+
+    final merged = await container
+        .read(subscriptionsControllerProvider.notifier)
+        .merge(loaded.mergeSuggestions.single);
+
+    expect(merged, isFalse);
+    final state = container.read(subscriptionsControllerProvider).value!;
+    expect(state.actionError, isA<Exception>());
+    expect(state.mergeSuggestions, hasLength(1));
+  });
+
+  test('a merge that lands but cannot reload shows the retry state', () async {
+    stubLoad(
+      suggestions: [
+        {'target': _seriesJson(id: 's2'), 'source': _seriesJson()},
+      ],
+    );
+    when(
+      () => apiClient.post('/recurring/s2/merge', body: any(named: 'body')),
+    ).thenAnswer((_) async => _seriesJson(id: 's2'));
+    final loaded = await container.read(subscriptionsControllerProvider.future);
+    when(
+      () => apiClient.get('/recurring/summary'),
+    ).thenThrow(const ApiFailure(code: 'INTERNAL', message: 'Unexpected'));
+
+    final merged = await container
+        .read(subscriptionsControllerProvider.notifier)
+        .merge(loaded.mergeSuggestions.single);
+
+    expect(merged, isTrue);
+    expect(container.read(subscriptionsControllerProvider).hasError, isTrue);
+  });
+
   test('a transition patch updates the row in place', () async {
     stubLoad();
     when(
