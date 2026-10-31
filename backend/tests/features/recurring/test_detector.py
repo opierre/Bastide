@@ -281,9 +281,33 @@ def test_an_alias_groups_a_renamed_label_with_the_series_it_was_merged_into() ->
     # Without the alias the two renamed charges are too few to be a series of their own.
     assert [c.merchant_key for c in detect(old + new)] == ["streamco"]
 
-    [merged] = detect(old + new, {("account-1", "streamco streamco tv"): "streamco"})
+    [merged] = detect(old + new, {("account-1", "streamco streamco tv"): ("account-1", "streamco")})
 
     assert merged.merchant_key == "streamco"
     assert merged.occurrence_count == 5
     assert merged.first_seen_date == START
     assert merged.last_seen_date == START + timedelta(days=120)
+
+
+def test_an_alias_can_bring_another_accounts_charges_into_the_series() -> None:
+    old = _series([0, 30], [-2499, -2499], description="PRLV SEPA STREAMCO")
+    moved = [
+        _transaction(
+            offset,
+            -2499,
+            description="PRLV SEPA STREAMCO - STREAMCO TV",
+            account_id="account-2",
+            index=9 + i,
+        )
+        for i, offset in enumerate([60, 90])
+    ]
+
+    [merged] = detect(
+        old + moved, {("account-1", "streamco"): ("account-2", "streamco streamco tv")}
+    )
+
+    # Kept on the account the subscription moved to, with both accounts' charges.
+    assert merged.account_id == "account-2"
+    assert merged.merchant_key == "streamco streamco tv"
+    assert merged.occurrence_count == 4
+    assert merged.first_seen_date == START

@@ -165,20 +165,41 @@ def test_merging_a_series_into_itself_or_with_a_manual_one_is_refused(
         assert response.json()["error"]["code"] == "RECURRING_MERGE_INVALID"
 
 
-def test_merging_across_accounts_is_refused(client: TestClient, tmp_path: Path) -> None:
+def test_a_subscription_moved_to_another_account_merges_into_one(
+    client: TestClient, tmp_path: Path
+) -> None:
+    """Three charges on one account, then three on another under the new label."""
     owner = register(client)
     first = create_account(client, owner, name="Compte courant")
     second = create_account(client, owner, name="Compte joint")
-    a = insert_series(tmp_path, owner, first, label="Streamco", next_expected_date=date(2026, 6, 1))
-    b = insert_series(
-        tmp_path, owner, second, label="Streamco TV", next_expected_date=date(2026, 6, 1)
-    )
+    for month in range(6):
+        insert_transaction(
+            tmp_path,
+            first if month < 3 else second,
+            booked_date=START + timedelta(days=30 * month),
+            amount_minor=-2499,
+            description=OLD_LABEL if month < 3 else NEW_LABEL,
+        )
+    _detect(client, owner)
+    [suggestion] = _suggestions(client, owner)
+    assert suggestion["target"]["account_id"] == second
+    assert suggestion["source"]["account_id"] == first
 
-    response = client.post(
-        f"/api/v1/recurring/{a}/merge", json={"source_id": b}, headers=owner.headers
-    )
+    merged = _merge(client, owner, suggestion["target"]["id"], suggestion["source"]["id"])
 
-    assert response.status_code == 409
+    assert merged["account_id"] == second
+    assert merged["occurrence_count"] == 6
+    assert merged["first_seen_date"] == START.isoformat()
+
+    # A pass over either account alone still sees both halves of the history.
+    for account_id in (first, second):
+        response = client.post(
+            "/api/v1/recurring/detect", json={"account_id": account_id}, headers=owner.headers
+        )
+        assert response.status_code == 200
+        [only] = _series(client, owner)
+        assert only["id"] == merged["id"]
+        assert only["occurrence_count"] == 6
 
 
 def test_another_users_series_cannot_be_merged_or_kept_apart(

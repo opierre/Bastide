@@ -82,7 +82,6 @@ def test_the_series_still_charging_is_the_target() -> None:
 @pytest.mark.parametrize(
     "other",
     [
-        _series("streamco streamco tv", account_id="account-2"),
         _series("streamco streamco tv", cadence="yearly"),
         # More than 25 % apart.
         _series("streamco streamco tv", amount=-3500),
@@ -111,10 +110,29 @@ def test_a_cancelled_series_can_still_be_the_old_half() -> None:
 
 
 def test_a_pair_the_user_kept_apart_is_not_proposed_again() -> None:
-    dismissed = {dismissal_key("account-1", "streamco streamco tv", "streamco")}
+    dismissed = {dismissal_key(("account-1", "streamco streamco tv"), ("account-1", "streamco"))}
 
     assert propose_merges([_series("streamco"), _series("streamco streamco tv")], dismissed) == []
 
 
+def test_a_subscription_moved_to_another_account_is_still_proposed() -> None:
+    old = _series("streamco", account_id="account-1", last_seen=date(2026, 1, 3))
+    new = _series("streamco streamco tv", account_id="account-2")
+
+    [proposal] = propose_merges([old, new], dismissed=set())
+
+    assert proposal.target is new
+    assert proposal.source is old
+
+
+def test_a_pair_kept_apart_across_accounts_is_not_proposed_again() -> None:
+    old = _series("streamco", account_id="account-1")
+    new = _series("streamco streamco tv", account_id="account-2")
+    dismissed = {dismissal_key(("account-2", "streamco streamco tv"), ("account-1", "streamco"))}
+
+    assert propose_merges([old, new], dismissed) == []
+
+
 def test_the_dismissal_key_ignores_the_order_of_the_pair() -> None:
-    assert dismissal_key("a", "y", "x") == dismissal_key("a", "x", "y") == ("a", "x", "y")
+    a, b = ("acc-a", "y"), ("acc-b", "x")
+    assert dismissal_key(a, b) == dismissal_key(b, a) == (a, b)

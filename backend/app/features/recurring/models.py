@@ -125,23 +125,30 @@ class RecurringMerchantAlias(Base):
 class RecurringMergeDismissal(Base):
     """Two grouping keys the user said are distinct subscriptions, so never proposed again.
 
-    Keyed on the merchant keys rather than on series ids: a series can be deleted and detected
-    again under a new id, and the user's « these are two subscriptions » is about the merchants,
-    not the rows. The pair is stored in sorted order so one row answers for both directions.
+    Keyed on `(account, merchant key)` rather than on series ids: a series can be deleted and
+    detected again under a new id, and the user's « these are two subscriptions » is about the
+    merchants, not the rows. The two sides may sit on different accounts, since one
+    subscription can move between them. They are stored in sorted order so one row answers for
+    both directions.
     """
 
     __tablename__ = "recurring_merge_dismissals"
     __table_args__ = (
         UniqueConstraint(
-            "account_id", "first_key", "second_key", name="uq_recurring_merge_dismissal_pair"
+            "first_account_id",
+            "first_key",
+            "second_account_id",
+            "second_key",
+            name="uq_recurring_merge_dismissal_pair",
         ),
     )
 
     id: Mapped[str] = mapped_column(String(36), primary_key=True, default=lambda: str(uuid4()))
     user_id: Mapped[str] = mapped_column(String(36), ForeignKey("users.id"))
-    account_id: Mapped[str] = mapped_column(String(36), ForeignKey("accounts.id"))
-    #: The lower of the two keys.
+    #: The lower of the two `(account, key)` sides.
+    first_account_id: Mapped[str] = mapped_column(String(36), ForeignKey("accounts.id"))
     first_key: Mapped[str] = mapped_column(String(255))
-    #: The higher of the two keys.
+    #: The higher of the two sides.
+    second_account_id: Mapped[str] = mapped_column(String(36), ForeignKey("accounts.id"))
     second_key: Mapped[str] = mapped_column(String(255))
     created_at: Mapped[datetime] = mapped_column(UtcDateTime(), default=lambda: datetime.now(UTC))

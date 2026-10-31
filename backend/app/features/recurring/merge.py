@@ -18,11 +18,16 @@ from app.features.recurring.service import (
     RecurringDetectionService,
     RecurringService,
 )
-from app.features.recurring.similarity import MergeProposal, dismissal_key, propose_merges
+from app.features.recurring.similarity import (
+    MergeProposal,
+    dismissal_key,
+    propose_merges,
+    side,
+)
 
 
 class SeriesMergeInvalidError(ConflictError):
-    """Raised when two series cannot be merged: the same one, other accounts, or a manual one."""
+    """Raised when two series cannot be merged: the same one, or one declared by hand."""
 
     code = "RECURRING_MERGE_INVALID"
 
@@ -54,17 +59,12 @@ class RecurringMergeService:
 
         Raises:
             SeriesNotFoundError: either series does not exist or is another user's.
-            SeriesMergeInvalidError: both ids name one series, they belong to different
-                accounts, or either was declared by hand.
+            SeriesMergeInvalidError: both ids name one series, or either was declared by hand.
+                The accounts may differ: a subscription moved between accounts is still one.
         """
         target = self._series.get(user_id, target_id)
         source = self._series.get(user_id, source_id)
-        if (
-            target.id == source.id
-            or target.account_id != source.account_id
-            or target.is_manual
-            or source.is_manual
-        ):
+        if target.id == source.id or target.is_manual or source.is_manual:
             raise SeriesMergeInvalidError("These two series cannot be merged.")
 
         if target.category_id is None:
@@ -82,7 +82,8 @@ class RecurringMergeService:
         )
         self._repository.stage_delete(source)
         self._repository.flush()
-        # Commits the merge with the rebuilt series, in one transaction.
+        # Commits the merge with the rebuilt series, in one transaction. Scoped to the target's
+        # account, which now reaches the source's through the alias.
         self._detection.detect(user_id, target.account_id)
         self._repository.refresh(target)
         return target
@@ -92,22 +93,22 @@ class RecurringMergeService:
 
         Raises:
             SeriesNotFoundError: either series does not exist or is another user's.
-            SeriesMergeInvalidError: both ids name one series, or they belong to different
-                accounts.
+            SeriesMergeInvalidError: both ids name one series.
         """
         first = self._series.get(user_id, first_id)
         second = self._series.get(user_id, second_id)
-        if first.id == second.id or first.account_id != second.account_id:
+        if first.id == second.id:
             raise SeriesMergeInvalidError("These two series cannot be compared.")
-        key = dismissal_key(first.account_id, first.merchant_key, second.merchant_key)
+        key = dismissal_key(side(first), side(second))
         if key in self._repository.dismissed_pairs(user_id):
             return
-        account_id, first_key, second_key = key
+        (first_account, first_key), (second_account, second_key) = key
         self._repository.add_dismissal(
             RecurringMergeDismissal(
                 user_id=user_id,
-                account_id=account_id,
+                first_account_id=first_account,
                 first_key=first_key,
+                second_account_id=second_account,
                 second_key=second_key,
             )
         )

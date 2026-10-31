@@ -5,9 +5,10 @@ TV ») splits into two series, because detection groups on the label. This modul
 *proposes* the pair; the user decides, and a merge or a « these are two » is remembered by
 the service.
 
-The test is deliberately narrow — same account, same cadence, close amounts, and labels where
-one extends the other or both share their leading word and most of the rest — because a wrong
-proposal costs the user a click, but the two series it names must at least plausibly be one.
+The test is deliberately narrow — same cadence, close amounts, and labels where one extends
+the other or both share their leading word and most of the rest — because a wrong proposal
+costs the user a click, but the two series it names must at least plausibly be one. The account
+is not part of it: a subscription moved to another account is still the same subscription.
 """
 
 from collections.abc import Collection, Sequence
@@ -37,14 +38,23 @@ class MergeProposal:
     source: RecurringSeries
 
 
-def dismissal_key(account_id: str, key_a: str, key_b: str) -> tuple[str, str, str]:
+#: One side of a pair: `(account_id, merchant_key)`.
+type Side = tuple[str, str]
+
+
+def dismissal_key(side_a: Side, side_b: Side) -> tuple[Side, Side]:
     """The order-free identity of a pair, as `recurring_merge_dismissals` stores it."""
-    first, second = sorted((key_a, key_b))
-    return account_id, first, second
+    first, second = sorted((side_a, side_b))
+    return first, second
+
+
+def side(series: RecurringSeries) -> Side:
+    """The `(account_id, merchant_key)` a series is grouped under."""
+    return series.account_id, series.merchant_key
 
 
 def propose_merges(
-    series: Sequence[RecurringSeries], dismissed: Collection[tuple[str, str, str]]
+    series: Sequence[RecurringSeries], dismissed: Collection[tuple[Side, Side]]
 ) -> list[MergeProposal]:
     """Every pair of ``series`` that looks like one subscription, newest-charging target first.
 
@@ -58,9 +68,7 @@ def propose_merges(
         for second in eligible[index + 1 :]:
             if not _alike(first, second):
                 continue
-            if dismissal_key(first.account_id, first.merchant_key, second.merchant_key) in (
-                dismissed
-            ):
+            if dismissal_key(side(first), side(second)) in dismissed:
                 continue
             target, source = _order(first, second)
             proposals.append(MergeProposal(target=target, source=source))
@@ -70,8 +78,7 @@ def propose_merges(
 
 def _alike(a: RecurringSeries, b: RecurringSeries) -> bool:
     return (
-        a.account_id == b.account_id
-        and a.cadence == b.cadence
+        a.cadence == b.cadence
         and _amounts_close(a.expected_amount_minor, b.expected_amount_minor)
         and keys_alike(a.merchant_key, b.merchant_key)
     )

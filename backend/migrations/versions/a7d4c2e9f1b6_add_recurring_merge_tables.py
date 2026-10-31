@@ -22,8 +22,9 @@ def upgrade() -> None:
     """Create the tables behind merging two recurring series into one.
 
     `recurring_merchant_aliases` maps a merged-away grouping key to the series that absorbed
-    it, so detection groups both labels together; `recurring_merge_dismissals` remembers the
-    pairs the user said are distinct, so they are never proposed again.
+    it, on the same account or another, so detection groups both labels together;
+    `recurring_merge_dismissals` remembers the pairs the user said are distinct, so they are
+    never proposed again.
     """
     op.create_table(
         "recurring_merchant_aliases",
@@ -49,15 +50,21 @@ def upgrade() -> None:
         "recurring_merge_dismissals",
         sa.Column("id", sa.String(length=36), nullable=False),
         sa.Column("user_id", sa.String(length=36), nullable=False),
-        sa.Column("account_id", sa.String(length=36), nullable=False),
+        sa.Column("first_account_id", sa.String(length=36), nullable=False),
         sa.Column("first_key", sa.String(length=255), nullable=False),
+        sa.Column("second_account_id", sa.String(length=36), nullable=False),
         sa.Column("second_key", sa.String(length=255), nullable=False),
         sa.Column("created_at", sa.DateTime(timezone=True), nullable=False),
-        sa.ForeignKeyConstraint(["account_id"], ["accounts.id"]),
+        sa.ForeignKeyConstraint(["first_account_id"], ["accounts.id"]),
+        sa.ForeignKeyConstraint(["second_account_id"], ["accounts.id"]),
         sa.ForeignKeyConstraint(["user_id"], ["users.id"]),
         sa.PrimaryKeyConstraint("id"),
         sa.UniqueConstraint(
-            "account_id", "first_key", "second_key", name="uq_recurring_merge_dismissal_pair"
+            "first_account_id",
+            "first_key",
+            "second_account_id",
+            "second_key",
+            name="uq_recurring_merge_dismissal_pair",
         ),
     )
 

@@ -188,8 +188,9 @@ erDiagram
     recurring_merge_dismissals {
         text id PK
         text user_id FK
-        text account_id FK
+        text first_account_id FK
         text first_key
+        text second_account_id FK
         text second_key
         datetime created_at
     }
@@ -292,7 +293,8 @@ erDiagram
     accounts ||--o{ recurring_merchant_aliases : "account_id"
     recurring_series ||--o{ recurring_merchant_aliases : "series_id"
     users ||--o{ recurring_merchant_aliases : "user_id"
-    accounts ||--o{ recurring_merge_dismissals : "account_id"
+    accounts ||--o{ recurring_merge_dismissals : "first_account_id"
+    accounts ||--o{ recurring_merge_dismissals : "second_account_id"
     users ||--o{ recurring_merge_dismissals : "user_id"
     recurring_series ||--o{ recurring_occurrences : "series_id"
     transactions ||--o| recurring_occurrences : "transaction_id"
@@ -344,7 +346,7 @@ erDiagram
 
 ### `recurring_merge_dismissals`
 
-- unique `(account_id, first_key, second_key)`
+- unique `(first_account_id, first_key, second_account_id, second_key)`
 
 ### `recurring_occurrences`
 

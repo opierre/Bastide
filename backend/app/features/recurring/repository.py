@@ -152,12 +152,13 @@ class RecurringRepository:
 
     def aliases_for_user(
         self, user_id: str, *, account_id: str | None = None
-    ) -> dict[tuple[str, str], str]:
-        """`(account_id, merged-away key)` → the key of the series that absorbed it."""
+    ) -> dict[tuple[str, str], tuple[str, str]]:
+        """`(account_id, merged-away key)` → `(account_id, key)` of the series that absorbed it."""
         query = (
             select(
                 RecurringMerchantAlias.account_id,
                 RecurringMerchantAlias.merchant_key,
+                RecurringSeries.account_id,
                 RecurringSeries.merchant_key,
             )
             .join(RecurringSeries, RecurringSeries.id == RecurringMerchantAlias.series_id)
@@ -166,8 +167,8 @@ class RecurringRepository:
         if account_id is not None:
             query = query.where(RecurringMerchantAlias.account_id == account_id)
         return {
-            (account, alias_key): series_key
-            for account, alias_key, series_key in self._db.execute(query)
+            (account, alias_key): (series_account, series_key)
+            for account, alias_key, series_account, series_key in self._db.execute(query)
         }
 
     def stage_alias(self, alias: RecurringMerchantAlias) -> None:
@@ -191,16 +192,17 @@ class RecurringRepository:
         """Mark a series for deletion without committing."""
         self._db.delete(series)
 
-    def dismissed_pairs(self, user_id: str) -> set[tuple[str, str, str]]:
-        """`(account_id, first_key, second_key)` of every pair the user kept apart."""
+    def dismissed_pairs(self, user_id: str) -> set[tuple[tuple[str, str], tuple[str, str]]]:
+        """`((account_id, key), (account_id, key))` of every pair the user kept apart."""
         rows = self._db.execute(
             select(
-                RecurringMergeDismissal.account_id,
+                RecurringMergeDismissal.first_account_id,
                 RecurringMergeDismissal.first_key,
+                RecurringMergeDismissal.second_account_id,
                 RecurringMergeDismissal.second_key,
             ).where(RecurringMergeDismissal.user_id == user_id)
         )
-        return {(account, first, second) for account, first, second in rows}
+        return {((a1, k1), (a2, k2)) for a1, k1, a2, k2 in rows}
 
     def add_dismissal(self, dismissal: RecurringMergeDismissal) -> None:
         """Record a pair the user kept apart, and commit."""
