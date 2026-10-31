@@ -115,6 +115,20 @@ def test_a_pair_the_user_kept_apart_is_not_proposed_again() -> None:
     assert propose_merges([_series("streamco"), _series("streamco streamco tv")], dismissed) == []
 
 
+def test_every_pair_is_proposed_not_only_the_first() -> None:
+    streamco_old = _series("streamco", last_seen=date(2026, 1, 3))
+    streamco_new = _series("streamco streamco tv")
+    gym_old = _series("gym club paris", amount=-3990, last_seen=date(2026, 2, 3))
+    gym_new = _series("gym club paris 11", amount=-3990, account_id="account-2")
+
+    proposals = propose_merges([streamco_old, gym_new, streamco_new, gym_old], dismissed=set())
+
+    assert [(p.source, p.target) for p in proposals] == [
+        (gym_old, gym_new),
+        (streamco_old, streamco_new),
+    ]
+
+
 def test_a_subscription_moved_to_another_account_is_still_proposed() -> None:
     old = _series("streamco", account_id="account-1", last_seen=date(2026, 1, 3))
     new = _series("streamco streamco tv", account_id="account-2")
