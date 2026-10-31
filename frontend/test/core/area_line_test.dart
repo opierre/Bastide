@@ -27,6 +27,22 @@ Widget _wrap({
   ),
 );
 
+/// Whether [box] covers any point of [points] or any stretch of the line
+/// joining them, sampled every pixel or so.
+bool _touchesLine(Rect box, List<Offset> points) {
+  for (var i = 0; i < points.length; i++) {
+    if (box.contains(points[i])) return true;
+    if (i == 0) continue;
+    final a = points[i - 1];
+    final b = points[i];
+    final steps = (b - a).distance.ceil();
+    for (var s = 0; s <= steps; s++) {
+      if (box.contains(Offset.lerp(a, b, s / steps)!)) return true;
+    }
+  }
+  return false;
+}
+
 void main() {
   testWidgets(
     'draws the plot over its month axis when there is room for both',
@@ -87,13 +103,133 @@ void main() {
     addTearDown(gesture.removePointer);
     await gesture.addPointer(location: Offset.zero);
     await gesture.moveTo(
-      tester.getCenter(find.byKey(const Key('areaLineTooltip-2'))),
+      tester.getCenter(find.byKey(const Key('areaLineSlot-2'))),
     );
-    await tester.pump(const Duration(seconds: 1));
+    await tester.pump();
 
     expect(find.text('Avril 2026'), findsOneWidget);
     expect(find.text('Mai 2026'), findsNothing);
     expect(tester.takeException(), isNull);
+
+    await gesture.moveTo(Offset.zero);
+    await tester.pump();
+    expect(find.byKey(const Key('areaLineTooltip')), findsNothing);
+  });
+
+  testWidgets('the hover card keeps clear of every point and of the line', (
+    tester,
+  ) async {
+    const tooltips = [
+      TextSpan(text: 'Février 2026\n1 000,00 €\n—'),
+      TextSpan(text: 'Mars 2026\n2 400,00 €\n+1 400,00 €'),
+      TextSpan(text: 'Avril 2026\n1 800,00 €\n−600,00 €'),
+      TextSpan(text: 'Mai 2026\n3 200,00 €\n+1 400,00 €'),
+    ];
+    await tester.pumpWidget(
+      _wrap(height: 240, tooltips: tooltips, valueLabel: (v) => 'v$v'),
+    );
+    await tester.pumpAndSettle();
+
+    final chart = tester.getRect(find.byType(AreaLine));
+    // Mirrors the painter: the plot sits right of the gutter, inset by the
+    // 5px dot, above the month axis.
+    final plot = Rect.fromLTRB(
+      chart.left + AreaLine.valueGutter,
+      chart.top + 5,
+      chart.right,
+      chart.bottom - AreaLine.axisHeight - 5,
+    );
+    const values = [1000, 2400, 1800, 3200];
+    final points = [
+      for (var i = 0; i < values.length; i++)
+        Offset(
+          plot.left + AreaLine.pointX(i, values.length, plot.width),
+          plot.bottom - plot.height * (values[i] - 1000) / 2200,
+        ),
+    ];
+
+    final gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    addTearDown(gesture.removePointer);
+    await gesture.addPointer(location: Offset.zero);
+    for (var i = 0; i < values.length; i++) {
+      await gesture.moveTo(
+        tester.getCenter(find.byKey(Key('areaLineSlot-$i'))),
+      );
+      await tester.pump();
+
+      final card = tester.getRect(find.byKey(const Key('areaLineTooltip')));
+      expect(_touchesLine(card, points), isFalse, reason: 'month $i');
+      expect(chart.contains(card.topLeft), isTrue);
+      expect(
+        card.bottom,
+        lessThanOrEqualTo(chart.bottom - AreaLine.axisHeight),
+      );
+    }
+    expect(tester.takeException(), isNull);
+  });
+
+  group('placeAreaLineTooltip', () {
+    const area = Rect.fromLTWH(0, 0, 400, 200);
+    const card = Size(120, 56);
+
+    test('sits beside the hovered point, not on it', () {
+      const points = [
+        Offset(50, 180),
+        Offset(150, 120),
+        Offset(250, 60),
+        Offset(350, 10),
+      ];
+      final box =
+          placeAreaLineTooltip(
+            area: area,
+            points: points,
+            hovered: 3,
+            tooltip: card,
+          ) &
+          card;
+
+      expect(_touchesLine(box, points), isFalse);
+      expect(area.contains(box.topLeft), isTrue);
+      expect(area.contains(box.bottomRight - const Offset(1, 1)), isTrue);
+    });
+
+    test('a zig-zag with no free room still spares the point being read', () {
+      // Every spot the card could take touches some segment: it keeps clear
+      // of the hovered point and its two neighbouring segments instead.
+      const points = [
+        Offset(25, 195),
+        Offset(75, 5),
+        Offset(125, 195),
+        Offset(175, 5),
+        Offset(225, 195),
+        Offset(275, 5),
+        Offset(325, 195),
+        Offset(375, 5),
+      ];
+      final box =
+          placeAreaLineTooltip(
+            area: area,
+            points: points,
+            hovered: 3,
+            tooltip: card,
+          ) &
+          card;
+
+      expect(_touchesLine(box, points.sublist(2, 5)), isFalse);
+    });
+
+    test('keeps off the value gutter when the plot has room', () {
+      const points = [Offset(80, 100), Offset(390, 100)];
+      final corner = placeAreaLineTooltip(
+        area: area,
+        points: points,
+        hovered: 0,
+        tooltip: card,
+        leftBound: 56,
+      );
+
+      expect(corner.dx, greaterThanOrEqualTo(56));
+    });
   });
 
   testWidgets('a value axis leaves its gutter and keeps points over labels', (

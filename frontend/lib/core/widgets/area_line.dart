@@ -12,7 +12,8 @@ import '../theme/tokens.dart';
 ///
 /// Each point sits at the centre of its axis label's slot rather than spreading edge to edge,
 /// so a month's dot stands over its own label instead of drifting toward the slot boundary.
-/// Hovering a slot rings its point and, when [tooltips] are given, names its figure.
+/// Hovering a slot rings its point and, when [tooltips] are given, names its figure in a card
+/// placed clear of the line — see [placeAreaLineTooltip].
 /// Given a [valueLabel], the min / mid / max gridlines are labelled in a gutter on the left,
 /// as on the Synthèse's « Patrimoine net » chart.
 ///
@@ -136,6 +137,22 @@ class _AreaLineState extends State<AreaLine> {
                       ],
                     ),
                   ),
+                  if ((_hovered, tooltips) case (
+                    final hovered?,
+                    final tooltips?,
+                  ) when hovered < tooltips.length && hovered < values.length)
+                    // Laid out over the plot but never hit-tested, so the card can't steal
+                    // the pointer from the slot beneath it and flicker.
+                    IgnorePointer(
+                      child: CustomSingleChildLayout(
+                        delegate: _TooltipPlacement(
+                          values: values,
+                          gutter: gutter,
+                          hovered: hovered,
+                        ),
+                        child: _TooltipCard(message: tooltips[hovered]),
+                      ),
+                    ),
                 ],
               ),
             ),
@@ -172,24 +189,202 @@ class _AreaLineState extends State<AreaLine> {
   }
 
   /// One full-height slice per point, matching the axis slots below: the dot is a few pixels
-  /// wide, but the thing worth hovering is the month.
+  /// wide, but the thing worth hovering is the month. Each slice carries its message as a
+  /// semantics label, since the card itself only exists while a pointer hovers.
   Widget _slots(int count, List<InlineSpan>? tooltips) => Row(
     children: [
       for (var i = 0; i < count; i++)
         Expanded(
           child: MouseRegion(
+            key: Key('areaLineSlot-$i'),
             onEnter: (_) => setState(() => _hovered = i),
-            child: tooltips == null
-                ? const SizedBox.expand()
-                : Tooltip(
-                    key: Key('areaLineTooltip-$i'),
-                    richMessage: TextSpan(children: [tooltips[i]]),
-                    child: const SizedBox.expand(),
-                  ),
+            child: Semantics(
+              label: tooltips == null || i >= tooltips.length
+                  ? null
+                  : tooltips[i].toPlainText(),
+              child: const SizedBox.expand(),
+            ),
           ),
         ),
     ],
   );
+}
+
+/// The hover card, dressed as the app's tooltips are (the theme's [TooltipThemeData]) so it
+/// reads as the same overlay as the dashboard's charts.
+class _TooltipCard extends StatelessWidget {
+  const _TooltipCard({required this.message});
+
+  final InlineSpan message;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = TooltipTheme.of(context);
+    return Container(
+      key: const Key('areaLineTooltip'),
+      padding: theme.padding,
+      decoration: theme.decoration,
+      child: Text.rich(TextSpan(children: [message]), style: theme.textStyle),
+    );
+  }
+}
+
+/// Lays the hover card out where [placeAreaLineTooltip] says, from the same geometry the
+/// painter draws with.
+class _TooltipPlacement extends SingleChildLayoutDelegate {
+  _TooltipPlacement({
+    required this.values,
+    required this.gutter,
+    required this.hovered,
+  });
+
+  final List<num> values;
+  final double gutter;
+  final int hovered;
+
+  @override
+  BoxConstraints getConstraintsForChild(BoxConstraints constraints) =>
+      constraints.loosen();
+
+  @override
+  Offset getPositionForChild(Size size, Size childSize) => placeAreaLineTooltip(
+    area: Offset.zero & size,
+    points: _points(values, _plotRect(size, gutter)),
+    hovered: hovered,
+    tooltip: childSize,
+    leftBound: gutter,
+  );
+
+  @override
+  bool shouldRelayout(_TooltipPlacement oldDelegate) =>
+      !listEquals(oldDelegate.values, values) ||
+      oldDelegate.gutter != gutter ||
+      oldDelegate.hovered != hovered;
+}
+
+/// Where the hover card for point [hovered] goes, as its top-left corner inside [area].
+///
+/// A tooltip anchored to the pointer covers whatever the reader is looking at, so the card
+/// instead looks for room off the line: the spot nearest the hovered point whose box, padded
+/// by a margin, touches neither the point nor any segment of the line. When the line leaves
+/// no such room (a sharp zig-zag on a short chart), it settles for keeping clear of the
+/// hovered point and the two segments either side of it — the part being read. Only a chart
+/// too small to hold the card anywhere else falls back to the plot's top-left corner.
+///
+/// [leftBound] keeps the card off the value-axis gutter when the plot is wide enough.
+@visibleForTesting
+Offset placeAreaLineTooltip({
+  required Rect area,
+  required List<Offset> points,
+  required int hovered,
+  required Size tooltip,
+  double leftBound = 0,
+}) {
+  final anchor = points[hovered];
+  final minX = area.right - tooltip.width >= area.left + leftBound
+      ? area.left + leftBound
+      : area.left;
+  final maxX = math.max(minX, area.right - tooltip.width);
+  final minY = area.top;
+  final maxY = math.max(minY, area.bottom - tooltip.height);
+
+  final segments = [
+    for (var i = 0; i + 1 < points.length; i++) (points[i], points[i + 1]),
+  ];
+  final nearby = [
+    if (hovered > 0) segments[hovered - 1],
+    if (hovered < segments.length) segments[hovered],
+  ];
+
+  bool clear(Rect box, List<(Offset, Offset)> lines) {
+    final padded = box.inflate(_tooltipMargin);
+    if (padded.inflate(_AreaLinePainter._dotRadius).contains(anchor)) {
+      return false;
+    }
+    return !lines.any((line) => _segmentHitsRect(line.$1, line.$2, padded));
+  }
+
+  Offset? nearest(List<(Offset, Offset)> lines) {
+    Offset? best;
+    var bestDistance = double.infinity;
+    // A coarse grid is plenty: the card only has to be clear, not pixel-snug.
+    for (var y = minY; y <= maxY + _tooltipStep - 1; y += _tooltipStep) {
+      for (var x = minX; x <= maxX + _tooltipStep - 1; x += _tooltipStep) {
+        final corner = Offset(math.min(x, maxX), math.min(y, maxY));
+        final box = corner & tooltip;
+        if (!clear(box, lines)) continue;
+        final distance = (box.center - anchor).distanceSquared;
+        if (distance < bestDistance) {
+          bestDistance = distance;
+          best = corner;
+        }
+      }
+    }
+    return best;
+  }
+
+  return nearest(segments) ?? nearest(nearby) ?? Offset(minX, minY);
+}
+
+/// The clear space kept between the hover card and the line or its point.
+const _tooltipMargin = AppSpacing.sm;
+
+/// The grid the hover card's position is searched on.
+const _tooltipStep = AppSpacing.xs;
+
+/// Whether the segment [a]–[b] crosses or lies inside [rect] (Liang–Barsky clipping).
+bool _segmentHitsRect(Offset a, Offset b, Rect rect) {
+  final d = b - a;
+  var t0 = 0.0;
+  var t1 = 1.0;
+  for (final (p, q) in [
+    (-d.dx, a.dx - rect.left),
+    (d.dx, rect.right - a.dx),
+    (-d.dy, a.dy - rect.top),
+    (d.dy, rect.bottom - a.dy),
+  ]) {
+    if (p == 0) {
+      if (q < 0) return false;
+      continue;
+    }
+    final t = q / p;
+    if (p < 0) {
+      if (t > t1) return false;
+      if (t > t0) t0 = t;
+    } else {
+      if (t < t0) return false;
+      if (t < t1) t1 = t;
+    }
+  }
+  return true;
+}
+
+/// The plot inside a chart of [size]: inset vertically by the dot so an extreme point isn't
+/// clipped by the plot's own edge, with the value [gutter] on its left. Horizontally the
+/// points already sit half a slot in from either side.
+Rect _plotRect(Size size, double gutter) => Rect.fromLTWH(
+  gutter,
+  _AreaLinePainter._dotRadius,
+  size.width - gutter,
+  size.height - _AreaLinePainter._dotRadius * 2,
+);
+
+/// Where each value is drawn in [plot], on the series' own min / max. A flat series has no
+/// range to normalise against, so it sits on the plot's centre line rather than divide by zero.
+List<Offset> _points(List<num> values, Rect plot) {
+  if (values.isEmpty) return const [];
+  final min = values.reduce((a, b) => a < b ? a : b).toDouble();
+  final max = values.reduce((a, b) => a > b ? a : b).toDouble();
+  final range = max - min;
+  return [
+    for (var i = 0; i < values.length; i++)
+      Offset(
+        plot.left + AreaLine.pointX(i, values.length, plot.width),
+        range == 0
+            ? plot.center.dy
+            : plot.bottom - plot.height * ((values[i] - min) / range),
+      ),
+  ];
 }
 
 /// The values the min / mid / max gridlines stand for, bottom to top — just one for a flat
@@ -234,14 +429,7 @@ class _AreaLinePainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    // Inset vertically by the dot so an extreme point isn't clipped by the plot's own edge.
-    // Horizontally the points already sit half a slot in from either side.
-    final plot = Rect.fromLTWH(
-      gutter,
-      _dotRadius,
-      size.width - gutter,
-      size.height - _dotRadius * 2,
-    );
+    final plot = _plotRect(size, gutter);
     if (plot.width <= 0) return;
 
     final grid = Paint()
@@ -273,17 +461,8 @@ class _AreaLinePainter extends CustomPainter {
 
     final min = values.reduce((a, b) => a < b ? a : b).toDouble();
     final max = values.reduce((a, b) => a > b ? a : b).toDouble();
-    // A flat series has no range to normalise against; centre it rather than divide by zero.
     final range = max - min;
-    final points = [
-      for (var i = 0; i < values.length; i++)
-        Offset(
-          plot.left + AreaLine.pointX(i, values.length, plot.width),
-          range == 0
-              ? plot.center.dy
-              : plot.bottom - plot.height * ((values[i] - min) / range),
-        ),
-    ];
+    final points = _points(values, plot);
 
     final line = Path()..addPolygon(points, false);
     final crossesZero = markZero && range > 0 && min < 0 && max > 0;
