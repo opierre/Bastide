@@ -180,7 +180,8 @@ class _SummaryView extends StatelessWidget {
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      // `minmax(0,1fr) minmax(0,1.5fr)`, gap 18.
+                      // `minmax(0,1fr) minmax(0,2fr)`, gap 18: the series
+                      // needs the width more than the composition's rows do.
                       Expanded(
                         flex: 100,
                         child: CompositionBreakdownCard(
@@ -194,7 +195,7 @@ class _SummaryView extends StatelessWidget {
                       ),
                       const SizedBox(width: AppSpacing.gridGap),
                       Expanded(
-                        flex: 150,
+                        flex: 200,
                         child: NetworthSeriesCard(summary: summary),
                       ),
                     ],

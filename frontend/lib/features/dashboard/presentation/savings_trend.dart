@@ -4,13 +4,13 @@ import 'package:intl/intl.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/tokens.dart';
 import '../../../core/widgets/amount_text.dart';
-import '../../../core/widgets/area_line.dart';
 import '../../../core/widgets/chart_container.dart';
 import '../../../l10n/app_localizations.dart';
 import '../domain/dashboard_trends.dart';
+import 'savings_bars.dart';
 
-/// « Évolution de l'épargne » — the cumulative-savings area line, headed by the running total
-/// and what the latest month added (see `docs/design/04-dashboard.md` §Row 2).
+/// « Évolution de l'épargne » — what each of the last twelve months put aside, one bar per
+/// month, headed by the monthly average (see `docs/design/04-dashboard.md` §Row 2).
 class SavingsTrendChart extends StatelessWidget {
   const SavingsTrendChart({super.key, required this.trends});
 
@@ -29,24 +29,22 @@ class SavingsTrendChart extends StatelessWidget {
     return ChartContainer(
       title: l10n.dashboardSavingsTrendTitle,
       subtitle: l10n.dashboardSavingsTrendSubtitle(series.length),
-      // The running total and the latest month's step head the card from its trailing edge,
-      // level with the title, rather than sitting above the plot — the chart then owns the
-      // card's whole body, which is what keeps the line readable as the panel narrows.
+      // The headline sits on the card's trailing edge, level with the title, so the bars own
+      // the card's whole body.
       trailing: _Header(trends: trends),
-      child: AreaLine(
-        values: [for (final point in series) point.cumulativeMinor],
+      child: SavingsBars(
+        values: [for (final point in series) point.savedMinor],
         labels: [
           for (final point in series)
             _capitalize(monthFormat.format(point.month)),
         ],
-        // Scaled like the Synthèse's « Patrimoine net »: compact figures at min / mid / max, so
-        // the line's height reads as an amount and not only as a shape.
+        // Compact figures on the gridlines, as on the Synthèse's « Patrimoine net », so a
+        // bar's height reads as an amount and not only as a shape.
         valueLabel: (minor) => NumberFormat.compactSimpleCurrency(
           locale: locale,
           name: trends.currency,
         ).format(minor / 100).replaceAll('-', '−'),
-        // Hovering a month names its running total — the line alone shows the trend, not the
-        // figure. Neutral, like the header's total: the movement is not what this states.
+        // Hovering a month names what it put aside, signed and colored like any movement.
         tooltips: [
           for (final point in series)
             TextSpan(
@@ -58,11 +56,16 @@ class SavingsTrendChart extends StatelessWidget {
                 ),
                 TextSpan(
                   text: formatAmount(
-                    amountMinor: point.cumulativeMinor,
+                    amountMinor: point.savedMinor,
                     currency: trends.currency,
                     locale: locale,
+                    showPositiveSign: true,
                   ),
-                  style: tabularNumberStyle(textTheme.bodySmall!),
+                  style: tabularNumberStyle(textTheme.bodySmall!).copyWith(
+                    color: point.savedMinor < 0
+                        ? AppColors.negative
+                        : AppColors.positive,
+                  ),
                 ),
               ],
             ),
@@ -80,42 +83,27 @@ class _Header extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final locale = Localizations.localeOf(context).toString();
     final textTheme = Theme.of(context).textTheme;
-    final delta = trends.latestMonthNetMinor;
-    final latestMonth = trends.latestMonth;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.end,
       mainAxisSize: MainAxisSize.min,
       children: [
         AmountText(
-          amountMinor: trends.totalSavedMinor,
+          amountMinor: trends.averageSavedMinor,
           currency: trends.currency,
-          // A running total is a neutral figure — the colored movement is the delta below it.
-          colorize: false,
+          showPositiveSign: true,
           style: textTheme.headlineLarge,
-          key: const Key('dashboardTotalSaved'),
+          key: const Key('dashboardAverageSaved'),
         ),
-        if (latestMonth != null) ...[
-          const SizedBox(height: AppSpacing.xs),
-          Text(
-            l10n.dashboardSavingsTrendDelta(
-              formatAmount(
-                amountMinor: delta,
-                currency: trends.currency,
-                locale: locale,
-                showPositiveSign: true,
-              ),
-              DateFormat('LLLL', locale).format(latestMonth),
-            ),
-            key: const Key('dashboardSavingsDelta'),
-            style: tabularNumberStyle(textTheme.labelSmall!).copyWith(
-              fontWeight: FontWeight.w400,
-              color: delta < 0 ? AppColors.negative : AppColors.positive,
-            ),
+        const SizedBox(height: AppSpacing.xs),
+        Text(
+          l10n.dashboardSavingsTrendAverage,
+          style: textTheme.labelSmall?.copyWith(
+            fontWeight: FontWeight.w400,
+            color: AppColors.textSecondary,
           ),
-        ],
+        ),
       ],
     );
   }

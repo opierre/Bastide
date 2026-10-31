@@ -69,6 +69,33 @@ void main() {
     expect(_text(tester, 'networthSeriesRange'), 'juin 2025 → mai 2026');
   });
 
+  testWidgets(
+    'the range switch reads widest first, its caption centred on it',
+    (tester) async {
+      _useDesktopSurface(tester);
+      await tester.pumpWidget(_wrap(testNetworthSummary()));
+      await tester.pumpAndSettle();
+
+      double left(String key) => tester.getCenter(find.byKey(Key(key))).dx;
+      expect(
+        left('networthRangeAll'),
+        lessThan(left('networthRangeThreeYears')),
+      );
+      expect(
+        left('networthRangeThreeYears'),
+        lessThan(left('networthRangeYear')),
+      );
+
+      expect(
+        tester.getCenter(find.byKey(const Key('networthSeriesRange'))).dy,
+        closeTo(
+          tester.getCenter(find.byKey(const Key('networthRangeSwitch'))).dy,
+          0.5,
+        ),
+      );
+    },
+  );
+
   testWidgets('hovering a month names its net worth', (tester) async {
     _useDesktopSurface(tester);
     await tester.pumpWidget(_wrap(testNetworthSummary()));

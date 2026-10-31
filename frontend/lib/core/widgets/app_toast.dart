@@ -27,7 +27,17 @@ void showAppToast(
 }) {
   final overlay = Overlay.maybeOf(context);
   if (overlay == null) return;
+  showAppToastOn(overlay, title: title, message: message, tone: tone);
+}
 
+/// [showAppToast] on an [overlay] looked up beforehand: for a caller that
+/// awaits a dialog first and may no longer be mounted when the toast is due.
+void showAppToastOn(
+  OverlayState overlay, {
+  required String title,
+  String? message,
+  BannerTone tone = BannerTone.success,
+}) {
   late final OverlayEntry entry;
   entry = OverlayEntry(
     builder: (context) => _Toast(

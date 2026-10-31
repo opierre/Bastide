@@ -156,8 +156,10 @@ class _DashboardContent extends ConsumerWidget {
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
+              // `1fr / 1.35fr`: the savings chart takes the wider share, since its twelve
+              // bars need the width more than the donut does (`docs/design/04` §Row 2).
               Expanded(
-                flex: 135,
+                flex: 100,
                 child: CategoryBreakdownChart(
                   categories: summary.byCategory,
                   currency: summary.currency,
@@ -166,7 +168,7 @@ class _DashboardContent extends ConsumerWidget {
               ),
               const SizedBox(width: AppSpacing.gridGap),
               Expanded(
-                flex: 100,
+                flex: 135,
                 child: SavingsTrendChart(trends: state.trends),
               ),
             ],
@@ -272,12 +274,12 @@ class _DashboardSkeleton extends StatelessWidget {
             child: Row(
               children: [
                 Expanded(
-                  flex: 135,
+                  flex: 100,
                   child: SkeletonBlock(height: double.infinity),
                 ),
                 SizedBox(width: AppSpacing.gridGap),
                 Expanded(
-                  flex: 100,
+                  flex: 135,
                   child: SkeletonBlock(height: double.infinity),
                 ),
               ],

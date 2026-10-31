@@ -2,7 +2,6 @@ import 'package:bastide/core/navigation/sidebar_controller.dart';
 import 'package:bastide/core/theme/app_theme.dart';
 import 'package:bastide/core/theme/tokens.dart';
 import 'package:bastide/core/widgets/amount_text.dart';
-import 'package:bastide/core/widgets/area_line.dart';
 import 'package:bastide/core/widgets/app_shell.dart';
 import 'package:bastide/core/widgets/category_chip.dart';
 import 'package:bastide/core/widgets/primary_button.dart';
@@ -15,6 +14,7 @@ import 'package:bastide/features/dashboard/presentation/dashboard_screen.dart';
 import 'package:bastide/features/dashboard/presentation/income_vs_expense.dart';
 import 'package:bastide/features/dashboard/presentation/recent_activity.dart';
 import 'package:bastide/features/dashboard/presentation/savings_trend.dart';
+import 'package:bastide/features/dashboard/presentation/savings_bars.dart';
 import 'package:bastide/features/dashboard/presentation/stat_card.dart';
 import 'package:bastide/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
@@ -340,41 +340,40 @@ void main() {
   );
 
   testWidgets(
-    'the savings line heads with the running total and the latest month\'s step',
+    'the savings chart draws each month on its own, headed by the monthly average',
     (tester) async {
       _useDesktopSurface(tester);
       await tester.pumpWidget(_wrap(state: _state()));
       await tester.pumpAndSettle();
 
       expect(find.text('Évolution de l\'épargne'), findsOneWidget);
-      expect(find.text('Épargne cumulée · 6 mois'), findsOneWidget);
+      expect(find.text('Épargne mensuelle · 12 mois'), findsOneWidget);
+      expect(find.text('en moyenne par mois'), findsOneWidget);
+      // The mean of the fixture's twelve months, signed as a movement.
       expect(
         find.descendant(
-          of: find.byKey(const Key('dashboardTotalSaved')),
+          of: find.byKey(const Key('dashboardAverageSaved')),
           matching: find.text(
-            formatAmount(amountMinor: 1084000, currency: 'EUR', locale: 'fr'),
+            formatAmount(
+              amountMinor: 29917,
+              currency: 'EUR',
+              locale: 'fr',
+              showPositiveSign: true,
+            ),
           ),
         ),
         findsOneWidget,
       );
 
-      // The step into May is May's net, and it is green because it is positive.
-      final delta = tester.widget<Text>(
-        find.byKey(const Key('dashboardSavingsDelta')),
-      );
-      final may = formatAmount(
-        amountMinor: 63565,
-        currency: 'EUR',
-        locale: 'fr',
-        showPositiveSign: true,
-      );
-      expect(delta.data, '$may en mai');
-      expect(delta.style?.color, AppColors.positive);
-
-      // Six points, labelled Déc. → Mai.
-      final area = tester.widget<AreaLine>(find.byType(AreaLine));
-      expect(area.values, hasLength(6));
-      expect(area.labels, ['Déc.', 'Janv.', 'Févr.', 'Mars', 'Avr.', 'Mai']);
+      // Twelve bars, each the month's own net — not a running total — so a month that
+      // spent more than it earned stays negative.
+      final bars = tester.widget<SavingsBars>(find.byType(SavingsBars));
+      expect(bars.values, hasLength(12));
+      expect(bars.values[1], 18050);
+      expect(bars.values[2], -32500);
+      expect(bars.values.last, 63565);
+      expect(bars.labels.first, 'Juin');
+      expect(bars.labels.last, 'Mai');
     },
   );
 
@@ -406,7 +405,7 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('row 2 splits 1.35 / 1, at the same height as row 3', (
+  testWidgets('row 2 splits 1 / 1.35, at the same height as row 3', (
     tester,
   ) async {
     _useDesktopSurface(tester);
@@ -417,7 +416,7 @@ void main() {
     final savingsCard = tester.getSize(find.byType(SavingsTrendChart));
 
     expect(donutCard.height, savingsCard.height);
-    expect(donutCard.width / savingsCard.width, closeTo(1.35, 0.01));
+    expect(savingsCard.width / donutCard.width, closeTo(1.35, 0.01));
 
     // The two chart rows share the height left under the stat grid, so they read as one
     // block. The spec's 322px is measured against its own frame; what has to hold at any
@@ -728,14 +727,14 @@ void main() {
       expect(find.byType(SkeletonBlock), findsNWidgets(8));
 
       // The silhouette must not move the cards when the data lands, so it carries the same
-      // ratios: 1:1:1:1.35 across row 1, and 1.35:1 across row 2.
+      // ratios: 1:1:1:1.35 across row 1, and 1:1.35 across row 2.
       final blocks = [
         for (var i = 0; i < 8; i++)
           tester.getSize(find.byType(SkeletonBlock).at(i)),
       ];
       expect(blocks[0].height, 175);
       expect(blocks[3].width / blocks[0].width, closeTo(1.35, 0.01));
-      expect(blocks[4].width / blocks[5].width, closeTo(1.35, 0.01));
+      expect(blocks[5].width / blocks[4].width, closeTo(1.35, 0.01));
       // Rows 2 and 3 are equal-height in the silhouette too, as they are once data lands.
       expect(blocks[4].height, blocks[6].height);
       expect(blocks[6].width, closeTo(blocks[7].width, 0.5));

@@ -1807,23 +1807,23 @@ abstract class AppLocalizations {
   /// **'dépensés'**
   String get dashboardDonutCenterCaption;
 
-  /// Title of the cumulative savings area chart.
+  /// Title of the monthly savings bar chart.
   ///
   /// In fr, this message translates to:
   /// **'Évolution de l\'épargne'**
   String get dashboardSavingsTrendTitle;
 
-  /// Subtitle of the cumulative savings chart, naming the window it covers.
+  /// Subtitle of the monthly savings chart, naming the window it covers.
   ///
   /// In fr, this message translates to:
-  /// **'Épargne cumulée · {count} mois'**
+  /// **'Épargne mensuelle · {count} mois'**
   String dashboardSavingsTrendSubtitle(int count);
 
-  /// The savings chart's header delta — how much the latest month added, e.g. « +635,65 € en mai ».
+  /// Caption under the savings chart's headline: the average a month put aside over the window.
   ///
   /// In fr, this message translates to:
-  /// **'{amount} en {month}'**
-  String dashboardSavingsTrendDelta(String amount, String month);
+  /// **'en moyenne par mois'**
+  String get dashboardSavingsTrendAverage;
 
   /// Title of the stacked income-vs-expense bar chart.
   ///

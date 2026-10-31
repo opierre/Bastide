@@ -63,26 +63,6 @@ class DashboardRepository:
             for row_year, row_month, income, expense in rows
         }
 
-    def net_before(self, user_id: str, before: date) -> int:
-        """Net (income − expense) over every non-transfer transaction booked before `before`.
-
-        The opening balance the cumulative-savings series starts from: without it the chart
-        would restart at zero six months ago and understate what the user has actually put
-        aside.
-        """
-        total = self._db.execute(
-            select(func.sum(Transaction.amount_minor))
-            .select_from(Transaction)
-            .join(Account, Account.id == Transaction.account_id)
-            .outerjoin(Category, Category.id == Transaction.category_id)
-            .where(
-                Account.user_id == user_id,
-                Transaction.booked_date < before,
-                or_(Category.kind.is_(None), Category.kind != "transfer"),
-            )
-        ).scalar()
-        return total or 0
-
     def expense_breakdown(
         self, user_id: str, month_start: date, month_end: date
     ) -> list[tuple[str | None, str, int]]:

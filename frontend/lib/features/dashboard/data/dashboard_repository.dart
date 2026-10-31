@@ -135,7 +135,7 @@ class DashboardRepository {
 
   SavingsPoint _parseSavingsPoint(Map<String, dynamic> json) => SavingsPoint(
     month: _parseMonth(json['month'] as String),
-    cumulativeMinor: json['cumulative_minor'] as int,
+    savedMinor: json['saved_minor'] as int,
   );
 
   /// `YYYY-MM` → the first of that month. `DateTime.parse` needs a day component, and the wire

@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/theme/tokens.dart';
 import '../../../core/widgets/app_modal.dart';
+import '../../../core/widgets/app_toast.dart';
 import '../../../core/widgets/date_field.dart';
 import '../../../core/widgets/inline_banner.dart';
 import '../../../core/widgets/labeled_field.dart';
@@ -20,16 +21,18 @@ Future<bool> showSettlementRuleDialog(
   BuildContext context,
   Account card,
 ) async {
-  final messenger = ScaffoldMessenger.maybeOf(context);
+  // Looked up before the await: the menu or form that opened the dialog may
+  // be rebuilt away by the time the rule is saved.
+  final overlay = Overlay.maybeOf(context, rootOverlay: true);
   final l10n = AppLocalizations.of(context)!;
   final moved = await showDialog<int>(
     context: context,
     builder: (_) => SettlementRuleDialog(card: card),
   );
   if (moved == null) return false;
-  messenger?.showSnackBar(
-    SnackBar(content: Text(l10n.settlementRuleSaved(moved))),
-  );
+  if (overlay != null && overlay.mounted) {
+    showAppToastOn(overlay, title: l10n.settlementRuleSaved(moved));
+  }
   return true;
 }
 

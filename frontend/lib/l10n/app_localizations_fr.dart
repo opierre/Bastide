@@ -1069,13 +1069,11 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String dashboardSavingsTrendSubtitle(int count) {
-    return 'Épargne cumulée · $count mois';
+    return 'Épargne mensuelle · $count mois';
   }
 
   @override
-  String dashboardSavingsTrendDelta(String amount, String month) {
-    return '$amount en $month';
-  }
+  String get dashboardSavingsTrendAverage => 'en moyenne par mois';
 
   @override
   String get dashboardIncomeVsExpenseTitle => 'Revenus vs dépenses';
