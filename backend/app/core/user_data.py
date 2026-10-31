@@ -42,6 +42,8 @@ USER_DATA_TABLES: tuple[str, ...] = (
     "categorization_rules",
     "recurring_series",
     "recurring_occurrences",
+    "recurring_merchant_aliases",
+    "recurring_merge_dismissals",
     "goals",
     "goal_allocations",
     "categorization_runs",

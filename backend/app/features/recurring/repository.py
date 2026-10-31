@@ -8,10 +8,15 @@ its previous shape. The service owns the transaction boundary.
 
 from collections.abc import Sequence
 
-from sqlalchemy import delete, select
+from sqlalchemy import delete, select, update
 from sqlalchemy.orm import Session
 
-from app.features.recurring.models import RecurringOccurrence, RecurringSeries
+from app.features.recurring.models import (
+    RecurringMerchantAlias,
+    RecurringMergeDismissal,
+    RecurringOccurrence,
+    RecurringSeries,
+)
 from app.features.transactions.models import Transaction
 
 # SQLite caps the parameters of one statement, so id lists are sent in chunks rather than as one
@@ -144,6 +149,69 @@ class RecurringRepository:
                 )
             )
         return linked
+
+    def aliases_for_user(
+        self, user_id: str, *, account_id: str | None = None
+    ) -> dict[tuple[str, str], str]:
+        """`(account_id, merged-away key)` → the key of the series that absorbed it."""
+        query = (
+            select(
+                RecurringMerchantAlias.account_id,
+                RecurringMerchantAlias.merchant_key,
+                RecurringSeries.merchant_key,
+            )
+            .join(RecurringSeries, RecurringSeries.id == RecurringMerchantAlias.series_id)
+            .where(RecurringMerchantAlias.user_id == user_id)
+        )
+        if account_id is not None:
+            query = query.where(RecurringMerchantAlias.account_id == account_id)
+        return {
+            (account, alias_key): series_key
+            for account, alias_key, series_key in self._db.execute(query)
+        }
+
+    def stage_alias(self, alias: RecurringMerchantAlias) -> None:
+        """Add an alias to the session without committing."""
+        self._db.add(alias)
+
+    def repoint_to(self, from_series_id: str, to_series_id: str) -> None:
+        """Move one series' aliases and occurrence links onto another, without committing."""
+        self._db.execute(
+            update(RecurringMerchantAlias)
+            .where(RecurringMerchantAlias.series_id == from_series_id)
+            .values(series_id=to_series_id)
+        )
+        self._db.execute(
+            update(RecurringOccurrence)
+            .where(RecurringOccurrence.series_id == from_series_id)
+            .values(series_id=to_series_id)
+        )
+
+    def stage_delete(self, series: RecurringSeries) -> None:
+        """Mark a series for deletion without committing."""
+        self._db.delete(series)
+
+    def dismissed_pairs(self, user_id: str) -> set[tuple[str, str, str]]:
+        """`(account_id, first_key, second_key)` of every pair the user kept apart."""
+        rows = self._db.execute(
+            select(
+                RecurringMergeDismissal.account_id,
+                RecurringMergeDismissal.first_key,
+                RecurringMergeDismissal.second_key,
+            ).where(RecurringMergeDismissal.user_id == user_id)
+        )
+        return {(account, first, second) for account, first, second in rows}
+
+    def add_dismissal(self, dismissal: RecurringMergeDismissal) -> None:
+        """Record a pair the user kept apart, and commit."""
+        self._db.add(dismissal)
+        self._db.commit()
+
+    def commit(self) -> None:
+        self._db.commit()
+
+    def refresh(self, series: RecurringSeries) -> None:
+        self._db.refresh(series)
 
     def flush(self) -> None:
         """Push staged changes to the database, still inside the caller's transaction.

@@ -96,11 +96,14 @@ class RecurringDetectionService:
             (series.account_id, series.merchant_key): series
             for series in self._repository.list_for_user(user_id, account_id=account_id)
         }
+        # Labels the user merged into another series group with it, so a merge holds across
+        # every later import instead of the merged-away series coming straight back.
+        aliases = self._repository.aliases_for_user(user_id, account_id=account_id)
 
         created_count = 0
         updated_count = 0
         written: list[tuple[RecurringSeries, SeriesCandidate]] = []
-        for candidate in detect_candidates(transactions):
+        for candidate in detect_candidates(transactions, aliases):
             series = existing.get((candidate.account_id, candidate.merchant_key))
             if series is None:
                 series = _new_series(user_id, candidate)

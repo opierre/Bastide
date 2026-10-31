@@ -93,3 +93,55 @@ class RecurringOccurrence(Base):
         String(36), ForeignKey("transactions.id", ondelete="CASCADE")
     )
     created_at: Mapped[datetime] = mapped_column(UtcDateTime(), default=lambda: datetime.now(UTC))
+
+
+class RecurringMerchantAlias(Base):
+    """A grouping key the user merged into a series: its charges count as that series'.
+
+    A merchant that renames itself mid-subscription (« STREAMCO » becoming « STREAMCO -
+    STREAMCO TV ») splits into two series, since detection groups on the label. Merging
+    records the label left behind here, so every later pass groups both under the kept series
+    instead of recreating the one the user merged away.
+    """
+
+    __tablename__ = "recurring_merchant_aliases"
+    __table_args__ = (
+        # A key resolves to one series, or detection could not tell which to group it under.
+        UniqueConstraint("account_id", "merchant_key", name="uq_recurring_alias_account_merchant"),
+        Index("ix_recurring_merchant_aliases_series_id", "series_id"),
+    )
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=lambda: str(uuid4()))
+    user_id: Mapped[str] = mapped_column(String(36), ForeignKey("users.id"))
+    account_id: Mapped[str] = mapped_column(String(36), ForeignKey("accounts.id"))
+    #: Cascades: an alias only means something while the series it points at exists.
+    series_id: Mapped[str] = mapped_column(
+        String(36), ForeignKey("recurring_series.id", ondelete="CASCADE")
+    )
+    merchant_key: Mapped[str] = mapped_column(String(255))
+    created_at: Mapped[datetime] = mapped_column(UtcDateTime(), default=lambda: datetime.now(UTC))
+
+
+class RecurringMergeDismissal(Base):
+    """Two grouping keys the user said are distinct subscriptions, so never proposed again.
+
+    Keyed on the merchant keys rather than on series ids: a series can be deleted and detected
+    again under a new id, and the user's « these are two subscriptions » is about the merchants,
+    not the rows. The pair is stored in sorted order so one row answers for both directions.
+    """
+
+    __tablename__ = "recurring_merge_dismissals"
+    __table_args__ = (
+        UniqueConstraint(
+            "account_id", "first_key", "second_key", name="uq_recurring_merge_dismissal_pair"
+        ),
+    )
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=lambda: str(uuid4()))
+    user_id: Mapped[str] = mapped_column(String(36), ForeignKey("users.id"))
+    account_id: Mapped[str] = mapped_column(String(36), ForeignKey("accounts.id"))
+    #: The lower of the two keys.
+    first_key: Mapped[str] = mapped_column(String(255))
+    #: The higher of the two keys.
+    second_key: Mapped[str] = mapped_column(String(255))
+    created_at: Mapped[datetime] = mapped_column(UtcDateTime(), default=lambda: datetime.now(UTC))

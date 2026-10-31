@@ -266,3 +266,24 @@ def test_the_label_defaults_to_the_prettiest_observed_merchant() -> None:
 
     assert candidate.merchant_key == "spotify"
     assert candidate.label == "SPOTIFY"
+
+
+# --- merged labels ---------------------------------------------------------------------------
+
+
+def test_an_alias_groups_a_renamed_label_with_the_series_it_was_merged_into() -> None:
+    old = _series([0, 30, 60], [-2499, -2499, -2499], description="PRLV SEPA STREAMCO")
+    new = [
+        _transaction(offset, -2499, description="PRLV SEPA STREAMCO - STREAMCO TV", index=9 + i)
+        for i, offset in enumerate([90, 120])
+    ]
+
+    # Without the alias the two renamed charges are too few to be a series of their own.
+    assert [c.merchant_key for c in detect(old + new)] == ["streamco"]
+
+    [merged] = detect(old + new, {("account-1", "streamco streamco tv"): "streamco"})
+
+    assert merged.merchant_key == "streamco"
+    assert merged.occurrence_count == 5
+    assert merged.first_seen_date == START
+    assert merged.last_seen_date == START + timedelta(days=120)

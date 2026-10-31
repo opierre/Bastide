@@ -10,7 +10,7 @@ would turn "I could not find a rhythm" into "I found an irregular subscription".
 """
 
 from collections import Counter
-from collections.abc import Iterable, Sequence
+from collections.abc import Iterable, Mapping, Sequence
 from dataclasses import dataclass
 from datetime import date, timedelta
 from itertools import pairwise
@@ -79,17 +79,27 @@ class _AmountBaseline:
     price_change_minor: int | None
 
 
-def detect(transactions: Iterable[Transaction]) -> list[SeriesCandidate]:
+def detect(
+    transactions: Iterable[Transaction],
+    aliases: Mapping[tuple[str, str], str] | None = None,
+) -> list[SeriesCandidate]:
     """Find every recurring series in ``transactions``, ordered by account then merchant key.
 
     Only outflows are considered: a salary arriving every month is a rhythm, but it is not a
     subscription, and the feature exists to show what the user is paying for.
+
+    ``aliases`` maps `(account_id, merchant_key)` to the key it was merged into: a charge under
+    a merged-away label is grouped with the series that absorbed it, before the group is judged,
+    so the merged history qualifies as one rhythm.
     """
+    aliases = aliases or {}
     groups: dict[tuple[str, str], list[Transaction]] = {}
     for transaction in transactions:
         if transaction.amount_minor >= 0:
             continue
-        group_key = (transaction.account_id, merchant_key(transaction))
+        key = merchant_key(transaction)
+        key = aliases.get((transaction.account_id, key), key)
+        group_key = (transaction.account_id, key)
         groups.setdefault(group_key, []).append(transaction)
 
     candidates = []
