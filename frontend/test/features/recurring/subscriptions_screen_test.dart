@@ -475,6 +475,149 @@ void main() {
       expect(find.text("They're different"), findsOneWidget);
     });
 
+    group('several suggestions', () {
+      final streamco = MergeSuggestion(
+        target: testSeries(id: 's2', label: 'STREAMCO - STREAMCO TV'),
+        source: testSeries(label: 'STREAMCO'),
+      );
+      final gym = MergeSuggestion(
+        target: testSeries(id: 's4', label: 'GYM CLUB PARIS 11'),
+        source: testSeries(id: 's3', label: 'GYM CLUB PARIS'),
+      );
+
+      FakeSubscriptionsController controllerWith(List<MergeSuggestion> pairs) =>
+          FakeSubscriptionsController(
+            initialSeries: [
+              for (final p in pairs) ...[p.source, p.target],
+            ],
+            summary: testSummary(),
+            mergeSuggestions: pairs,
+          );
+
+      Finder bannerOf(MergeSuggestion pair) =>
+          find.byKey(ValueKey('merge-${pair.target.id}-${pair.source.id}'));
+
+      testWidgets('lists every pair under a count', (tester) async {
+        _useDesktopSurface(tester);
+        await tester.pumpWidget(
+          _wrap(controller: controllerWith([streamco, gym])),
+        );
+        await tester.pumpAndSettle();
+
+        expect(find.text('2 suggestions de fusion'), findsOneWidget);
+        expect(
+          find.byKey(const Key('subscriptionsMergeBanner')),
+          findsNWidgets(2),
+        );
+        expect(bannerOf(streamco), findsOneWidget);
+        expect(bannerOf(gym), findsOneWidget);
+      });
+
+      testWidgets('merges the pair it was asked about, and keeps the rest', (
+        tester,
+      ) async {
+        _useDesktopSurface(tester);
+        final controller = controllerWith([streamco, gym]);
+        await tester.pumpWidget(_wrap(controller: controller));
+        await tester.pumpAndSettle();
+
+        await tester.tap(
+          find.descendant(
+            of: bannerOf(gym),
+            matching: find.byKey(const Key('subscriptionsMergeAction')),
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        expect(controller.mergeCalls, [gym]);
+        expect(bannerOf(gym), findsNothing);
+        expect(bannerOf(streamco), findsOneWidget);
+        // Down to one, it reads as the plain banner again.
+        expect(find.byKey(const Key('subscriptionsMergePanel')), findsNothing);
+        await tester.pump(const Duration(seconds: 7));
+      });
+
+      testWidgets('keeps one pair apart without touching the other', (
+        tester,
+      ) async {
+        _useDesktopSurface(tester);
+        final controller = controllerWith([streamco, gym]);
+        await tester.pumpWidget(_wrap(controller: controller));
+        await tester.pumpAndSettle();
+
+        await tester.tap(
+          find.descendant(
+            of: bannerOf(streamco),
+            matching: find.byKey(const Key('subscriptionsMergeKeepApart')),
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        expect(controller.keepApartCalls, [streamco]);
+        expect(controller.mergeCalls, isEmpty);
+        expect(bannerOf(streamco), findsNothing);
+        expect(bannerOf(gym), findsOneWidget);
+      });
+
+      testWidgets('folds away and back under its header', (tester) async {
+        _useDesktopSurface(tester);
+        await tester.pumpWidget(
+          _wrap(controller: controllerWith([streamco, gym])),
+        );
+        await tester.pumpAndSettle();
+
+        await tester.tap(find.byKey(const Key('subscriptionsMergeToggle')));
+        await tester.pumpAndSettle();
+        expect(find.byKey(const Key('subscriptionsMergeBanner')), findsNothing);
+        expect(find.text('2 suggestions de fusion'), findsOneWidget);
+
+        await tester.tap(find.byKey(const Key('subscriptionsMergeToggle')));
+        await tester.pumpAndSettle();
+        expect(
+          find.byKey(const Key('subscriptionsMergeBanner')),
+          findsNWidgets(2),
+        );
+      });
+
+      testWidgets('a long list scrolls instead of pushing the table away', (
+        tester,
+      ) async {
+        _useDesktopSurface(tester);
+        final pairs = [
+          for (var i = 0; i < 6; i++)
+            MergeSuggestion(
+              target: testSeries(id: 't$i', label: 'MUSICO $i PLUS'),
+              source: testSeries(id: 'o$i', label: 'MUSICO $i'),
+            ),
+        ];
+        await tester.pumpWidget(_wrap(controller: controllerWith(pairs)));
+        await tester.pumpAndSettle();
+
+        expect(find.text('6 suggestions de fusion'), findsOneWidget);
+        expect(tester.takeException(), isNull);
+        await tester.dragUntilVisible(
+          bannerOf(pairs.last),
+          find.byKey(const Key('subscriptionsMergeList')),
+          const Offset(0, -60),
+        );
+        expect(bannerOf(pairs.last), findsOneWidget);
+      });
+
+      testWidgets('reads in English', (tester) async {
+        _useDesktopSurface(tester);
+        await tester.pumpWidget(
+          _wrap(
+            locale: const Locale('en'),
+            controller: controllerWith([streamco, gym]),
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        expect(find.text('2 merge suggestions'), findsOneWidget);
+        expect(find.text('Merge'), findsNWidgets(2));
+      });
+    });
+
     testWidgets('no suggestion, no banner', (tester) async {
       _useDesktopSurface(tester);
       await tester.pumpWidget(
