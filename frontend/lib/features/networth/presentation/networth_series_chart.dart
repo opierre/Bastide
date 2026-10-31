@@ -71,45 +71,52 @@ class NetworthSeriesCard extends ConsumerWidget {
                   ],
                 ),
               ),
-              if (series.isNotEmpty)
-                Padding(
-                  padding: const EdgeInsets.only(
-                    top: 2,
-                    right: AppSpacing.sm + AppSpacing.xs,
+              // The range caption is centred on the switch it describes,
+              // not top-aligned with the title column beside them.
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  if (series.isNotEmpty)
+                    Padding(
+                      padding: const EdgeInsets.only(
+                        right: AppSpacing.sm + AppSpacing.xs,
+                      ),
+                      child: Text(
+                        l10n.networthSeriesRange(
+                          monthFormat.format(series.first.month),
+                          monthFormat.format(series.last.month),
+                        ),
+                        key: const Key('networthSeriesRange'),
+                        style: AppTextStyles.helper,
+                      ),
+                    ),
+                  SizedBox(
+                    width: 216,
+                    child: AppSegmented<NetworthRange>(
+                      key: const Key('networthRangeSwitch'),
+                      value: range,
+                      onChanged: ref.read(networthRangeProvider.notifier).set,
+                      // Widest first, so the segments read largest to smallest.
+                      segments: [
+                        AppSegment(
+                          key: const Key('networthRangeAll'),
+                          value: NetworthRange.all,
+                          label: l10n.networthRangeAll,
+                        ),
+                        AppSegment(
+                          key: const Key('networthRangeThreeYears'),
+                          value: NetworthRange.threeYears,
+                          label: l10n.networthRangeThreeYears,
+                        ),
+                        AppSegment(
+                          key: const Key('networthRangeYear'),
+                          value: NetworthRange.year,
+                          label: l10n.networthRangeYear,
+                        ),
+                      ],
+                    ),
                   ),
-                  child: Text(
-                    l10n.networthSeriesRange(
-                      monthFormat.format(series.first.month),
-                      monthFormat.format(series.last.month),
-                    ),
-                    key: const Key('networthSeriesRange'),
-                    style: AppTextStyles.helper,
-                  ),
-                ),
-              SizedBox(
-                width: 216,
-                child: AppSegmented<NetworthRange>(
-                  key: const Key('networthRangeSwitch'),
-                  value: range,
-                  onChanged: ref.read(networthRangeProvider.notifier).set,
-                  segments: [
-                    AppSegment(
-                      key: const Key('networthRangeYear'),
-                      value: NetworthRange.year,
-                      label: l10n.networthRangeYear,
-                    ),
-                    AppSegment(
-                      key: const Key('networthRangeThreeYears'),
-                      value: NetworthRange.threeYears,
-                      label: l10n.networthRangeThreeYears,
-                    ),
-                    AppSegment(
-                      key: const Key('networthRangeAll'),
-                      value: NetworthRange.all,
-                      label: l10n.networthRangeAll,
-                    ),
-                  ],
-                ),
+                ],
               ),
             ],
           ),
@@ -467,6 +474,10 @@ class _SeriesPainter extends CustomPainter {
   static const _lastDot = 4.0;
   static const _areaAlpha = 0.10;
 
+  /// How far below the lowest month the scale starts, as a share of the
+  /// series' range.
+  static const _floorHeadroom = 0.12;
+
   static int _index(DateTime month) => month.year * 12 + month.month - 1;
 
   TextPainter _text(String text) => TextPainter(
@@ -487,8 +498,11 @@ class _SeriesPainter extends CustomPainter {
     );
     if (plot.width <= 0 || plot.height <= 0) return;
 
-    final low = values.reduce((a, b) => a < b ? a : b);
+    final lowest = values.reduce((a, b) => a < b ? a : b);
     final high = values.reduce((a, b) => a > b ? a : b);
+    // The scale's floor sits below the lowest month, so that point keeps some
+    // air under it instead of lying on the plot's bottom edge.
+    final low = lowest - ((high - lowest) * _floorHeadroom).round();
     final range = (high - low).toDouble();
 
     double y(num value) => range == 0
