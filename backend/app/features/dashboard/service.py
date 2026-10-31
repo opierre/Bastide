@@ -15,7 +15,7 @@ from app.features.dashboard.schemas import (
 
 #: How many months each trend series covers, ending with the current month.
 BARS_MONTHS = 4
-SAVINGS_MONTHS = 6
+SAVINGS_MONTHS = 12
 
 
 class DashboardMonthInvalidError(ValidationError):
@@ -89,9 +89,6 @@ class DashboardService:
             user_id, window_start, first_of_month(current + 1)
         )
 
-        # Everything saved before the window opens, so the line starts at the user's real
-        # standing rather than at zero six months ago.
-        running = self._repository.net_before(user_id, window_start)
         savings_series: list[SavingsPoint] = []
         monthly_series: list[MonthlyTotals] = []
         bars_from = current - BARS_MONTHS + 1
@@ -99,8 +96,9 @@ class DashboardService:
         for index in months:
             month_start = first_of_month(index)
             income, expense = buckets.get((month_start.year, month_start.month), (0, 0))
-            running += income - expense
-            savings_series.append(SavingsPoint(month=month_key(index), cumulative_minor=running))
+            savings_series.append(
+                SavingsPoint(month=month_key(index), saved_minor=income - expense)
+            )
             if index >= bars_from:
                 monthly_series.append(
                     MonthlyTotals(

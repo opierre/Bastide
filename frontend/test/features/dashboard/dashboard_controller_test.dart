@@ -72,8 +72,8 @@ Map<String, dynamic> _trendsJson() => {
     },
   ],
   'savings_series': [
-    {'month': '2026-04', 'cumulative_minor': 1020435},
-    {'month': '2026-05', 'cumulative_minor': 1084000},
+    {'month': '2026-04', 'saved_minor': 73710},
+    {'month': '2026-05', 'saved_minor': -11840},
   ],
   'currency': 'EUR',
 };
@@ -210,7 +210,9 @@ void main() {
     expect(state.month, DateTime(2026, 1));
     // Both windows end at the *current* month, so paging back to January leaves them alone —
     // and re-requesting a series that cannot have changed would be wasted work.
-    expect(state.trends.totalSavedMinor, 1084000);
+    expect(state.trends.savingsSeries.last.savedMinor, -11840);
+    // The mean of 73 710 and −11 840, rounded to the cent.
+    expect(state.trends.averageSavedMinor, 30935);
     verify(() => apiClient.get('/dashboard/trends')).called(1);
   });
 

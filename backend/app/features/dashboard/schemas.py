@@ -47,15 +47,15 @@ class MonthlyTotals(BaseModel):
 
 
 class SavingsPoint(BaseModel):
-    """One point on the cumulative-savings line."""
+    """One month on the savings chart."""
 
     #: `YYYY-MM`.
     month: str
 
-    #: Running total of net across every month up to and including this one — including months
-    #: before the returned window, so the line starts where the user's savings actually stand
-    #: rather than at zero.
-    cumulative_minor: int
+    #: What the month put aside: its own net (income − expense), not a running total, so each
+    #: bar answers "how much did I save that month". Negative when the month spent more than
+    #: it earned.
+    saved_minor: int
 
 
 class DashboardTrends(BaseModel):
@@ -70,6 +70,6 @@ class DashboardTrends(BaseModel):
     #: The last 4 months ending with the current one, oldest first.
     monthly_series: list[MonthlyTotals]
 
-    #: The last 6 months ending with the current one, oldest first.
+    #: The last 12 months ending with the current one, oldest first.
     savings_series: list[SavingsPoint]
     currency: str
