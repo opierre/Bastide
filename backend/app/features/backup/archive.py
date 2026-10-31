@@ -18,7 +18,8 @@ FORMAT_MARKER = "bastide-backup"
 # 2: properties, mortgages and simulations — an older build would restore such an archive
 # and silently drop them.
 # 3: declared month-end balances, for the same reason.
-FORMAT_VERSION = 3
+# 4: recurring merges — the aliases a merge left and the pairs the user kept apart.
+FORMAT_VERSION = 4
 MANIFEST_NAME = "manifest.json"
 
 #: The format version that first archived each table; tables absent here date from version 1.
@@ -30,6 +31,8 @@ TABLE_SINCE_VERSION: dict[str, int] = {
     "mortgages": 2,
     "mortgage_simulations": 2,
     "declared_balances": 3,
+    "recurring_merchant_aliases": 4,
+    "recurring_merge_dismissals": 4,
 }
 
 

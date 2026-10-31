@@ -26,6 +26,8 @@ EXPECTED_TABLES = {
     "categorization_runs",
     "recurring_series",
     "recurring_occurrences",
+    "recurring_merchant_aliases",
+    "recurring_merge_dismissals",
     "goals",
     "goal_allocations",
     "mortgages",

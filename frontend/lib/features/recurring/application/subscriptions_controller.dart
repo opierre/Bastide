@@ -20,12 +20,17 @@ class SubscriptionsState {
   SubscriptionsState({
     required this.series,
     required this.summary,
+    this.mergeSuggestions = const [],
     this.statusFilter,
     this.actionError,
   }) : rows = _joinSignals(series, summary);
 
   final List<RecurringSeries> series;
   final RecurringSummary summary;
+
+  /// Pairs the server thinks are one subscription the bank renamed. The panel
+  /// offers the first; the next appears once the user has answered it.
+  final List<MergeSuggestion> mergeSuggestions;
 
   /// The rows as the table draws them — each series beside whatever the summary
   /// reports about it. Joined once here rather than in the row widget, so the
@@ -42,6 +47,7 @@ class SubscriptionsState {
   SubscriptionsState copyWith({
     List<RecurringSeries>? series,
     RecurringSummary? summary,
+    List<MergeSuggestion>? mergeSuggestions,
     SeriesStatus? statusFilter,
     bool clearStatusFilter = false,
     Object? actionError,
@@ -49,6 +55,7 @@ class SubscriptionsState {
   }) => SubscriptionsState(
     series: series ?? this.series,
     summary: summary ?? this.summary,
+    mergeSuggestions: mergeSuggestions ?? this.mergeSuggestions,
     statusFilter: clearStatusFilter
         ? null
         : (statusFilter ?? this.statusFilter),
@@ -123,13 +130,43 @@ class SubscriptionsController extends AsyncNotifier<SubscriptionsState> {
   Future<SubscriptionsState> build() => _load(null);
 
   Future<SubscriptionsState> _load(SeriesStatus? status) async {
-    final series = await _repository.list(status: status);
-    final summary = await _repository.summary();
+    final (series, summary, suggestions) = await (
+      _repository.list(status: status),
+      _repository.summary(),
+      _repository.mergeSuggestions(),
+    ).wait;
     return SubscriptionsState(
       series: series,
       summary: summary,
+      mergeSuggestions: suggestions,
       statusFilter: status,
     );
+  }
+
+  /// Folds [suggestion]'s source into its target, then reloads in place: the
+  /// list, the summary and the remaining suggestions all change with it.
+  /// Resolves to whether the merge went through; a refusal is kept as
+  /// [SubscriptionsState.actionError] with the panel left standing.
+  Future<bool> merge(MergeSuggestion suggestion) => _answer(
+    () => _repository.merge(suggestion.target.id, suggestion.source.id),
+  );
+
+  /// Tells the server the two series are distinct subscriptions.
+  Future<bool> keepApart(MergeSuggestion suggestion) => _answer(
+    () => _repository.keepApart(suggestion.target.id, suggestion.source.id),
+  );
+
+  Future<bool> _answer(Future<Object?> Function() write) async {
+    final current = state.value;
+    if (current == null) return false;
+    try {
+      await write();
+      state = AsyncValue.data(await _load(current.statusFilter));
+      return true;
+    } on ApiFailure catch (failure) {
+      state = AsyncValue.data(current.copyWith(actionError: failure));
+      return false;
+    }
   }
 
   Future<void> refresh() async {

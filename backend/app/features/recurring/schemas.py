@@ -174,3 +174,26 @@ class RecurringSummary(BaseModel):
     price_increases: list[PriceIncrease]
     missed: list[MissedCharge]
     currency: str
+
+
+class MergeSuggestionRead(BaseModel):
+    """Two series that look like one subscription under two labels.
+
+    `target` is the one still charging, kept by a merge; `source` folds into it.
+    """
+
+    target: SeriesRead
+    source: SeriesRead
+
+
+class MergeRequest(BaseModel):
+    """Fold `source_id` into the series in the path."""
+
+    source_id: str
+
+
+class MergeDismissRequest(BaseModel):
+    """Two series the user says are distinct subscriptions."""
+
+    target_id: str
+    source_id: str

@@ -87,20 +87,31 @@ class RecurringDetectionService:
         if account_id is not None:
             self._accounts.get(user_id, account_id)
 
+        # Labels the user merged into another series group with it, so a merge holds across
+        # every later import instead of the merged-away series coming straight back.
+        aliases = self._repository.aliases_for_user(user_id)
+        # A merge can join two accounts: a pass over one of them must see the other's charges
+        # too, or it would rebuild the merged series from half its history.
+        scope = None if account_id is None else _linked_accounts(account_id, aliases)
+
         transactions = [
             transaction
-            for transaction in self._transactions.list_all_for_user(user_id, account_id=account_id)
+            for transaction in self._transactions.list_all_for_user(
+                user_id, account_id=account_id if scope == {account_id} else None
+            )
             if not _is_card_settlement(transaction)
+            and (scope is None or transaction.account_id in scope)
         ]
         existing = {
             (series.account_id, series.merchant_key): series
-            for series in self._repository.list_for_user(user_id, account_id=account_id)
+            for series in self._repository.list_for_user(user_id)
+            if scope is None or series.account_id in scope
         }
 
         created_count = 0
         updated_count = 0
         written: list[tuple[RecurringSeries, SeriesCandidate]] = []
-        for candidate in detect_candidates(transactions):
+        for candidate in detect_candidates(transactions, aliases):
             series = existing.get((candidate.account_id, candidate.merchant_key))
             if series is None:
                 series = _new_series(user_id, candidate)
@@ -144,6 +155,20 @@ class RecurringDetectionService:
                 self._repository.stage_occurrence(
                     RecurringOccurrence(series_id=series.id, transaction_id=transaction_id)
                 )
+
+
+def _linked_accounts(account_id: str, aliases: dict[tuple[str, str], tuple[str, str]]) -> set[str]:
+    """``account_id`` and every account a chain of merges ties it to."""
+    links = [(source[0], target[0]) for source, target in aliases.items()]
+    scope = {account_id}
+    grew = True
+    while grew:
+        grew = False
+        for first, second in links:
+            if (first in scope) != (second in scope):
+                scope.update((first, second))
+                grew = True
+    return scope
 
 
 def _is_card_settlement(transaction: Transaction) -> bool:

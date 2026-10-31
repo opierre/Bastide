@@ -150,9 +150,12 @@ details?}}`. Model names refer to the Pydantic schemas in `backend/app/features/
 | `POST` | `/recurring` |  | `SeriesCreate` | 201 `SeriesRead` |
 | `POST` | `/recurring/detect` |  | `DetectRequest` | 200 `DetectionResultRead` |
 | `GET` | `/recurring/summary` |  |  | 200 `RecurringSummary` |
+| `GET` | `/recurring/merge-suggestions` |  |  | 200 [`MergeSuggestionRead`] |
+| `POST` | `/recurring/merge-suggestions/dismiss` |  | `MergeDismissRequest` | 204 |
 | `GET` | `/recurring/{series_id}` |  |  | 200 `SeriesDetailRead` |
 | `PATCH` | `/recurring/{series_id}` |  | `SeriesUpdate` | 200 `SeriesRead` |
 | `DELETE` | `/recurring/{series_id}` |  |  | 204 |
+| `POST` | `/recurring/{series_id}/merge` |  | `MergeRequest` | 200 `SeriesRead` |
 
 ## goals
 

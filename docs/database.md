@@ -177,6 +177,23 @@ erDiagram
         datetime created_at
         datetime updated_at
     }
+    recurring_merchant_aliases {
+        text id PK
+        text user_id FK
+        text account_id FK
+        text series_id FK
+        text merchant_key
+        datetime created_at
+    }
+    recurring_merge_dismissals {
+        text id PK
+        text user_id FK
+        text first_account_id FK
+        text first_key
+        text second_account_id FK
+        text second_key
+        datetime created_at
+    }
     recurring_occurrences {
         text id PK
         text series_id FK
@@ -273,6 +290,12 @@ erDiagram
     properties |o--o{ mortgages : "property_id"
     users ||--o{ mortgages : "user_id"
     users ||--o{ properties : "user_id"
+    accounts ||--o{ recurring_merchant_aliases : "account_id"
+    recurring_series ||--o{ recurring_merchant_aliases : "series_id"
+    users ||--o{ recurring_merchant_aliases : "user_id"
+    accounts ||--o{ recurring_merge_dismissals : "first_account_id"
+    accounts ||--o{ recurring_merge_dismissals : "second_account_id"
+    users ||--o{ recurring_merge_dismissals : "user_id"
     recurring_series ||--o{ recurring_occurrences : "series_id"
     transactions ||--o| recurring_occurrences : "transaction_id"
     accounts ||--o{ recurring_series : "account_id"
@@ -315,6 +338,15 @@ erDiagram
 
 - check `kind IN ('mortgage', 'works', 'consumer', 'auto')`
 - `property_id` → `properties` on delete set null
+
+### `recurring_merchant_aliases`
+
+- unique `(account_id, merchant_key)`
+- `series_id` → `recurring_series` on delete cascade
+
+### `recurring_merge_dismissals`
+
+- unique `(first_account_id, first_key, second_account_id, second_key)`
 
 ### `recurring_occurrences`
 

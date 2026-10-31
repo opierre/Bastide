@@ -397,4 +397,97 @@ void main() {
 
     expect(find.text('Loisirs'), findsOneWidget);
   });
+
+  group('merge suggestion', () {
+    MergeSuggestion suggestion() => MergeSuggestion(
+      target: testSeries(id: 's2', label: 'STREAMCO - STREAMCO TV'),
+      source: testSeries(label: 'STREAMCO'),
+    );
+
+    testWidgets('names both labels and merges on « Fusionner »', (
+      tester,
+    ) async {
+      _useDesktopSurface(tester);
+      final pair = suggestion();
+      final controller = FakeSubscriptionsController(
+        initialSeries: [pair.source, pair.target],
+        summary: testSummary(),
+        mergeSuggestions: [pair],
+      );
+      await tester.pumpWidget(_wrap(controller: controller));
+      await tester.pumpAndSettle();
+
+      expect(
+        tester
+            .widget<Text>(find.byKey(const Key('subscriptionsMergeText')))
+            .data,
+        '« STREAMCO » et « STREAMCO - STREAMCO TV » semblent être le même '
+        'abonnement, renommé par la banque.',
+      );
+
+      await tester.tap(find.byKey(const Key('subscriptionsMergeAction')));
+      await tester.pumpAndSettle();
+
+      expect(controller.mergeCalls, [pair]);
+      expect(find.byKey(const Key('subscriptionsMergeBanner')), findsNothing);
+      expect(find.text('Abonnements fusionnés'), findsOneWidget);
+      // Let the toast withdraw before the test tears down.
+      await tester.pump(const Duration(seconds: 7));
+    });
+
+    testWidgets('« Ce sont deux abonnements » keeps the pair apart', (
+      tester,
+    ) async {
+      _useDesktopSurface(tester);
+      final pair = suggestion();
+      final controller = FakeSubscriptionsController(
+        initialSeries: [pair.source, pair.target],
+        summary: testSummary(),
+        mergeSuggestions: [pair],
+      );
+      await tester.pumpWidget(_wrap(controller: controller));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byKey(const Key('subscriptionsMergeKeepApart')));
+      await tester.pumpAndSettle();
+
+      expect(controller.keepApartCalls, [pair]);
+      expect(controller.mergeCalls, isEmpty);
+      expect(find.byKey(const Key('subscriptionsMergeBanner')), findsNothing);
+    });
+
+    testWidgets('reads in English', (tester) async {
+      _useDesktopSurface(tester);
+      final pair = suggestion();
+      await tester.pumpWidget(
+        _wrap(
+          locale: const Locale('en'),
+          controller: FakeSubscriptionsController(
+            initialSeries: [pair.source, pair.target],
+            summary: testSummary(),
+            mergeSuggestions: [pair],
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('Merge'), findsOneWidget);
+      expect(find.text("They're different"), findsOneWidget);
+    });
+
+    testWidgets('no suggestion, no banner', (tester) async {
+      _useDesktopSurface(tester);
+      await tester.pumpWidget(
+        _wrap(
+          controller: FakeSubscriptionsController(
+            initialSeries: [testSeries()],
+            summary: testSummary(),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.byKey(const Key('subscriptionsMergeBanner')), findsNothing);
+    });
+  });
 }

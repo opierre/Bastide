@@ -12,10 +12,14 @@ from app.features.accounts.service import AccountService
 from app.features.auth.deps import get_current_user
 from app.features.auth.models import User
 from app.features.categories.repository import CategoryRepository
+from app.features.recurring.merge import RecurringMergeService
 from app.features.recurring.repository import RecurringRepository
 from app.features.recurring.schemas import (
     DetectionResultRead,
     DetectRequest,
+    MergeDismissRequest,
+    MergeRequest,
+    MergeSuggestionRead,
     OccurrenceRead,
     RecurringSummary,
     SeriesCreate,
@@ -47,6 +51,14 @@ def _service(db: Annotated[Session, Depends(get_db)]) -> RecurringService:
         AccountService(AccountRepository(db), db),
         CategoryRepository(db),
     )
+
+
+def _merge_service(
+    db: Annotated[Session, Depends(get_db)],
+    series: Annotated[RecurringService, Depends(_service)],
+    detection: Annotated[RecurringDetectionService, Depends(_detection_service)],
+) -> RecurringMergeService:
+    return RecurringMergeService(RecurringRepository(db), series, detection)
 
 
 @router.get("", response_model=list[SeriesRead])
@@ -113,6 +125,35 @@ async def get_summary(
     return service.summary(user.id, user.currency, date.today())
 
 
+@router.get("/merge-suggestions", response_model=list[MergeSuggestionRead])
+async def list_merge_suggestions(
+    service: Annotated[RecurringMergeService, Depends(_merge_service)],
+    user: Annotated[User, Depends(get_current_user)],
+) -> list[MergeSuggestionRead]:
+    """Pairs of series that look like one subscription the bank renamed.
+
+    Declared above `/{series_id}` so the literal path wins the match. Pairs the user kept apart
+    are not proposed again.
+    """
+    return [
+        MergeSuggestionRead(
+            target=SeriesRead.model_validate(proposal.target),
+            source=SeriesRead.model_validate(proposal.source),
+        )
+        for proposal in service.proposals(user.id)
+    ]
+
+
+@router.post("/merge-suggestions/dismiss", status_code=status.HTTP_204_NO_CONTENT)
+async def dismiss_merge_suggestion(
+    payload: MergeDismissRequest,
+    service: Annotated[RecurringMergeService, Depends(_merge_service)],
+    user: Annotated[User, Depends(get_current_user)],
+) -> None:
+    """Remember that two series are distinct subscriptions, so the pair is never proposed."""
+    service.dismiss(user.id, payload.target_id, payload.source_id)
+
+
 @router.get("/{series_id}", response_model=SeriesDetailRead)
 async def get_series(
     series_id: str,
@@ -143,6 +184,20 @@ async def update_series(
 ) -> SeriesRead:
     """Patch a series; a `status` outside the lifecycle is a 409, not a write."""
     return SeriesRead.model_validate(service.update(user.id, series_id, payload))
+
+
+@router.post("/{series_id}/merge", response_model=SeriesRead)
+async def merge_series(
+    series_id: str,
+    payload: MergeRequest,
+    service: Annotated[RecurringMergeService, Depends(_merge_service)],
+    user: Annotated[User, Depends(get_current_user)],
+) -> SeriesRead:
+    """Fold `source_id` into this series and return it rebuilt from both histories.
+
+    The merged-away label is remembered, so later imports group under this series.
+    """
+    return SeriesRead.model_validate(service.merge(user.id, series_id, payload.source_id))
 
 
 @router.delete("/{series_id}", status_code=status.HTTP_204_NO_CONTENT)

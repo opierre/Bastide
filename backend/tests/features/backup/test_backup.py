@@ -234,7 +234,7 @@ def test_export_writes_a_manifest_and_one_jsonl_per_table(
     archive = zipfile.ZipFile(io.BytesIO(response.content))
     manifest = json.loads(archive.read("manifest.json"))
     assert manifest["format"] == "bastide-backup"
-    assert manifest["format_version"] == 3
+    assert manifest["format_version"] == 4
     assert manifest["currency"] == "EUR"
     assert "users.jsonl" not in archive.namelist()
     assert "auth_tokens.jsonl" not in archive.namelist()
@@ -281,7 +281,7 @@ def test_inspect_summarises_without_touching_data(client: TestClient, tmp_path: 
     assert response.status_code == 200
     body = response.json()
     assert body["counts"]["transactions"] == 1
-    assert body["format_version"] == 3
+    assert body["format_version"] == 4
     assert body["currency"] == "EUR"
 
 
