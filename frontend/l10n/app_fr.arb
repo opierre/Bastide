@@ -2839,6 +2839,23 @@
       }
     }
   },
+  "subscriptionsMergeSuggestionsCount": "{count, plural, =1{1 suggestion de fusion} other{{count} suggestions de fusion}}",
+  "@subscriptionsMergeSuggestionsCount": {
+    "description": "Header above the list of merge suggestions, shown when there are several.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "subscriptionsMergeSuggestionsHide": "Masquer les suggestions",
+  "@subscriptionsMergeSuggestionsHide": {
+    "description": "Tooltip on the chevron that collapses the list of merge suggestions."
+  },
+  "subscriptionsMergeSuggestionsShow": "Afficher les suggestions",
+  "@subscriptionsMergeSuggestionsShow": {
+    "description": "Tooltip on the chevron that expands the collapsed list of merge suggestions."
+  },
   "subscriptionsLoadFailed": "Impossible de charger vos paiements récurrents pour le moment.",
   "@subscriptionsLoadFailed": {
     "description": "Error state replacing the panel when the list or summary failed to load."

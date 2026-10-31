@@ -16,7 +16,7 @@ import '../application/subscriptions_controller.dart';
 import '../domain/recurring_series.dart';
 import '../domain/recurring_summary.dart';
 import 'recurring_error_localizer.dart';
-import 'merge_suggestion_banner.dart';
+import 'merge_suggestions_panel.dart';
 import 'recurring_labels.dart';
 import 'series_detail.dart';
 import 'series_form_modal.dart';
@@ -180,8 +180,8 @@ class _LoadedPanel extends ConsumerWidget {
           ),
           const SizedBox(height: AppSpacing.gridGap),
         ],
-        if (state.mergeSuggestions.firstOrNull case final suggestion?) ...[
-          MergeSuggestionBanner(suggestion: suggestion),
+        if (state.mergeSuggestions.isNotEmpty) ...[
+          MergeSuggestionsPanel(suggestions: state.mergeSuggestions),
           const SizedBox(height: AppSpacing.gridGap),
         ],
         _SummaryRow(summary: state.summary),

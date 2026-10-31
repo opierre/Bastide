@@ -2289,6 +2289,23 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String subscriptionsMergeSuggestionsCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count merge suggestions',
+      one: '1 merge suggestion',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get subscriptionsMergeSuggestionsHide => 'Hide suggestions';
+
+  @override
+  String get subscriptionsMergeSuggestionsShow => 'Show suggestions';
+
+  @override
   String get subscriptionsLoadFailed =>
       'We couldn\'t load your recurring payments right now.';
 
