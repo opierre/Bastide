@@ -68,6 +68,18 @@ class NavSectionSpec {
 /// controls are their own widget and watch whatever providers they need.
 typedef TopBarActionsBuilder = List<Widget> Function(BuildContext context);
 
+/// The top bar's title block for a panel that names something more specific
+/// than its section — an account's detail names the account, with a link back
+/// to the list. Resolved from the route, like [TopBarActionsBuilder]; panels
+/// without one show their section's label and descriptor.
+typedef TopBarTitleBuilder = Widget Function(BuildContext context);
+
+/// Whether [path] is [destinationPath] or a page beneath it: an account's
+/// detail (`/accounts/<id>`) keeps « Comptes » selected, since it is a view
+/// *within* that section rather than a section of its own.
+bool isWithinDestination(String path, String destinationPath) =>
+    path == destinationPath || path.startsWith('$destinationPath/');
+
 /// The fixed sidebar / top bar shell. Position and behaviour of the chrome are
 /// identical on every panel — feature screens render only into [child] and
 /// reach the bar through [actionsBuilder]. See `docs/design/00` §Layout invariant.
@@ -78,6 +90,7 @@ class AppShell extends ConsumerWidget {
     required this.onNavigate,
     required this.child,
     this.actionsBuilder,
+    this.titleBuilder,
   });
 
   final String currentPath;
@@ -86,6 +99,9 @@ class AppShell extends ConsumerWidget {
 
   /// Contextual controls for the current panel, placed left of the user pill.
   final TopBarActionsBuilder? actionsBuilder;
+
+  /// Replaces the section's label and descriptor in the top bar.
+  final TopBarTitleBuilder? titleBuilder;
 
   static List<NavSectionSpec> sections(AppLocalizations l10n) => [
     NavSectionSpec(
@@ -200,7 +216,9 @@ class AppShell extends ConsumerWidget {
     final navSections = sections(l10n);
     final active = navSections
         .expand((section) => section.destinations)
-        .where((destination) => destination.path == currentPath)
+        .where(
+          (destination) => isWithinDestination(currentPath, destination.path),
+        )
         .firstOrNull;
 
     return Scaffold(
@@ -221,6 +239,7 @@ class AppShell extends ConsumerWidget {
                     key: const Key('appTopBar'),
                     title: active?.label ?? '',
                     subtitle: active?.subtitle ?? '',
+                    titleOverride: titleBuilder?.call(context),
                     actions: actionsBuilder?.call(context) ?? const [],
                     onNavigate: onNavigate,
                   ),
@@ -333,7 +352,7 @@ class _Sidebar extends ConsumerWidget {
     for (final destination in section.destinations)
       _NavItem(
         destination: destination,
-        selected: destination.path == currentPath,
+        selected: isWithinDestination(currentPath, destination.path),
         collapsed: collapsed,
         onTap: () => onNavigate(destination.path),
       ),
@@ -753,12 +772,16 @@ class _TopBar extends StatelessWidget {
     super.key,
     required this.title,
     required this.subtitle,
+    this.titleOverride,
     required this.actions,
     required this.onNavigate,
   });
 
   final String title;
   final String subtitle;
+
+  /// A panel's own title block, in place of [title] and [subtitle].
+  final Widget? titleOverride;
   final List<Widget> actions;
   final ValueChanged<String> onNavigate;
 
@@ -776,27 +799,29 @@ class _TopBar extends StatelessWidget {
       child: Row(
         children: [
           Expanded(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  style: textTheme.titleLarge,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                if (subtitle.isNotEmpty) ...[
-                  const SizedBox(height: 3),
-                  Text(
-                    subtitle,
-                    style: textTheme.bodySmall?.copyWith(
-                      color: AppColors.textSecondary,
+            child:
+                titleOverride ??
+                Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      style: textTheme.titleLarge,
+                      overflow: TextOverflow.ellipsis,
                     ),
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ],
-              ],
-            ),
+                    if (subtitle.isNotEmpty) ...[
+                      const SizedBox(height: 3),
+                      Text(
+                        subtitle,
+                        style: textTheme.bodySmall?.copyWith(
+                          color: AppColors.textSecondary,
+                        ),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
+                  ],
+                ),
           ),
           // Actions size naturally and the title takes what's left: making them
           // flexible too would have the two split the bar evenly, squeezing

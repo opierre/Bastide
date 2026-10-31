@@ -26,6 +26,8 @@ class AreaLine extends StatefulWidget {
     this.tooltips,
     this.valueLabel,
     this.gridlines = 4,
+    this.color = AppColors.iris,
+    this.markZero = false,
   });
 
   /// One value per point, oldest first. Rendered on its own min/max, so a series that never
@@ -44,6 +46,17 @@ class AreaLine extends StatefulWidget {
 
   /// Horizontal hairlines behind the plot.
   final int gridlines;
+
+  /// The line, its fill and its dots. Iris on the dashboard's savings chart, where the
+  /// figure is the app's hero metric; an account's balance takes the leading chart hue
+  /// instead, since iris is the accent role and never data (`docs/design/16` §Row 2).
+  final Color color;
+
+  /// Whether a series that crosses zero shows where: a dashed zero baseline, the fill above
+  /// it in [color] and below it in the expense red. An account balance can dip under zero
+  /// and the page must say so (`docs/design/16` §Row 2); a series that stays on one side is
+  /// drawn as usual.
+  final bool markZero;
 
   /// Height reserved beneath the plot for the month axis.
   static const axisHeight = 22.0;
@@ -99,6 +112,8 @@ class _AreaLineState extends State<AreaLine> {
                       painter: _AreaLinePainter(
                         values: values,
                         gridlines: widget.gridlines,
+                        color: widget.color,
+                        markZero: widget.markZero,
                         hovered: _hovered,
                         gutter: gutter,
                         levelLabels: levels,
@@ -189,6 +204,8 @@ class _AreaLinePainter extends CustomPainter {
   _AreaLinePainter({
     required this.values,
     required this.gridlines,
+    required this.color,
+    required this.markZero,
     required this.hovered,
     required this.gutter,
     required this.levelLabels,
@@ -197,6 +214,8 @@ class _AreaLinePainter extends CustomPainter {
 
   final List<num> values;
   final int gridlines;
+  final Color color;
+  final bool markZero;
   final int? hovered;
 
   /// Left inset of the plot, holding the value axis; zero without one.
@@ -209,6 +228,9 @@ class _AreaLinePainter extends CustomPainter {
   static const _stroke = 2.5;
   static const _dotRadius = 5.0;
   static const _fillAlpha = 0.16;
+  static const _negativeFillAlpha = 0.10;
+  static const _dash = 4.0;
+  static const _dashGap = 3.0;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -264,19 +286,52 @@ class _AreaLinePainter extends CustomPainter {
     ];
 
     final line = Path()..addPolygon(points, false);
-    final area = Path.from(line)
-      ..lineTo(points.last.dx, plot.bottom)
-      ..lineTo(points.first.dx, plot.bottom)
-      ..close();
-
-    canvas.drawPath(
-      area,
-      Paint()..color = AppColors.iris.withValues(alpha: _fillAlpha),
-    );
+    final crossesZero = markZero && range > 0 && min < 0 && max > 0;
+    if (crossesZero) {
+      // The fill closes on the zero line rather than the plot's floor, then is split there:
+      // what lies above it is balance, what lies below it is overdraft.
+      final zeroY = plot.bottom - plot.height * (-min / range);
+      final area = Path.from(line)
+        ..lineTo(points.last.dx, zeroY)
+        ..lineTo(points.first.dx, zeroY)
+        ..close();
+      canvas
+        ..save()
+        ..clipRect(Rect.fromLTRB(plot.left, 0, size.width, zeroY))
+        ..drawPath(area, Paint()..color = color.withValues(alpha: _fillAlpha))
+        ..restore()
+        ..save()
+        ..clipRect(Rect.fromLTRB(plot.left, zeroY, size.width, size.height))
+        ..drawPath(
+          area,
+          Paint()
+            ..color = AppColors.negative.withValues(alpha: _negativeFillAlpha),
+        )
+        ..restore();
+      final dash = Paint()
+        ..color = AppColors.borderDashed
+        ..strokeWidth = 1;
+      for (var x = plot.left; x < size.width; x += _dash + _dashGap) {
+        canvas.drawLine(
+          Offset(x, zeroY),
+          Offset(math.min(x + _dash, size.width), zeroY),
+          dash,
+        );
+      }
+    } else {
+      final area = Path.from(line)
+        ..lineTo(points.last.dx, plot.bottom)
+        ..lineTo(points.first.dx, plot.bottom)
+        ..close();
+      canvas.drawPath(
+        area,
+        Paint()..color = color.withValues(alpha: _fillAlpha),
+      );
+    }
     canvas.drawPath(
       line,
       Paint()
-        ..color = AppColors.iris
+        ..color = color
         ..style = PaintingStyle.stroke
         ..strokeWidth = _stroke
         ..strokeJoin = StrokeJoin.round
@@ -297,7 +352,7 @@ class _AreaLinePainter extends CustomPainter {
       canvas.drawCircle(
         points[index],
         _dotRadius - _stroke / 2,
-        Paint()..color = AppColors.iris,
+        Paint()..color = color,
       );
     }
   }
@@ -306,6 +361,8 @@ class _AreaLinePainter extends CustomPainter {
   bool shouldRepaint(_AreaLinePainter oldDelegate) =>
       !listEquals(oldDelegate.values, values) ||
       oldDelegate.gridlines != gridlines ||
+      oldDelegate.color != color ||
+      oldDelegate.markZero != markZero ||
       oldDelegate.hovered != hovered ||
       oldDelegate.gutter != gutter ||
       !listEquals(oldDelegate.levelLabels, levelLabels) ||

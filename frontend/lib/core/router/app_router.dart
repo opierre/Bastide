@@ -2,6 +2,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../features/accounts/presentation/account_detail_screen.dart';
+import '../../features/accounts/presentation/account_detail_top_bar.dart';
 import '../../features/accounts/presentation/accounts_screen.dart';
 import '../../features/accounts/presentation/accounts_top_bar_actions.dart';
 import '../../features/auth/application/auth_controller.dart';
@@ -58,8 +60,19 @@ TopBarActionsBuilder? _topBarActions(String path) => switch (path) {
   '/mortgages' => (context) => const [MortgagesTopBarActions()],
   '/simulations' => (context) => const [SimulatorTopBarActions()],
   '/networth' => (context) => const [NetworthTopBarActions()],
-  _ => null,
+  _ => switch (AccountDetailScreen.idFromPath(path)) {
+    final id? => (context) => [AccountDetailTopBarActions(accountId: id)],
+    null => null,
+  },
 };
+
+/// The top-bar title of the panels that name something more specific than
+/// their section; `null` keeps the section's own label and descriptor.
+TopBarTitleBuilder? _topBarTitle(String path) =>
+    switch (AccountDetailScreen.idFromPath(path)) {
+      final id? => (context) => AccountDetailTitle(accountId: id),
+      null => null,
+    };
 
 final appRouterProvider = Provider<GoRouter>((ref) {
   final authRefresh = _AuthRefreshListenable(ref);
@@ -110,6 +123,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
             currentPath: state.matchedLocation,
             onNavigate: (path) => context.go(path),
             actionsBuilder: _topBarActions(state.matchedLocation),
+            titleBuilder: _topBarTitle(state.matchedLocation),
             child: child,
           );
         },
@@ -121,6 +135,12 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           GoRoute(
             path: AccountsScreen.path,
             builder: (context, state) => const AccountsScreen(),
+          ),
+          GoRoute(
+            path: AccountDetailScreen.path,
+            builder: (context, state) => AccountDetailScreen(
+              accountId: state.pathParameters['accountId']!,
+            ),
           ),
           GoRoute(
             path: TransactionsScreen.path,

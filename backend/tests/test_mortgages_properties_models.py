@@ -6,10 +6,11 @@ from pathlib import Path
 from uuid import uuid4
 
 import pytest
-from sqlalchemy import DateTime, Integer, String, create_engine, inspect
+from sqlalchemy import Integer, String, create_engine, inspect
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
+from app.core.db import UtcDateTime
 from app.features.auth.models import User
 from app.features.mortgages.models import Mortgage, MortgageSimulation
 from app.features.properties.models import Property
@@ -70,8 +71,7 @@ def test_money_and_rates_are_integers_keys_uuid_strings_timestamps_utc_aware() -
             if column.name.endswith(("_minor", "_bps")):
                 assert isinstance(column.type, Integer), f"{model.__tablename__}.{column.name}"
             if column.name in ("created_at", "updated_at"):
-                assert isinstance(column.type, DateTime)
-                assert column.type.timezone, f"{model.__tablename__}.{column.name}"
+                assert isinstance(column.type, UtcDateTime), f"{model.__tablename__}.{column.name}"
         pk = model.__table__.c.id
         assert isinstance(pk.type, String)
         assert pk.type.length == 36

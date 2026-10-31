@@ -1,4 +1,5 @@
 import 'package:bastide/core/theme/app_theme.dart';
+import 'package:bastide/core/theme/tokens.dart';
 import 'package:bastide/core/widgets/area_line.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -116,5 +117,84 @@ void main() {
       );
     }
     expect(tester.takeException(), isNull);
+  });
+
+  group('zero baseline', () {
+    final overdraft = AppColors.negative.withValues(alpha: 0.10);
+
+    Future<RenderObject> pumpSeries(
+      WidgetTester tester,
+      List<num> values, {
+      bool markZero = true,
+    }) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: appDarkTheme,
+          home: Scaffold(
+            body: Center(
+              child: SizedBox(
+                height: 200,
+                width: 400,
+                child: AreaLine(
+                  values: values,
+                  labels: [for (final _ in values) ''],
+                  markZero: markZero,
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+      return tester.renderObject(
+        find.descendant(
+          of: find.byType(AreaLine),
+          matching: find.byType(CustomPaint),
+        ),
+      );
+    }
+
+    testWidgets('a series crossing zero tints what lies below it', (
+      tester,
+    ) async {
+      final chart = await pumpSeries(tester, const [120000, -30000, 80000]);
+
+      // The fill above zero comes first, then the overdraft below it.
+      expect(
+        chart,
+        paints
+          ..path()
+          ..path(color: overdraft),
+      );
+    });
+
+    testWidgets('a series above zero is drawn as usual', (tester) async {
+      final chart = await pumpSeries(tester, const [120000, 30000, 80000]);
+
+      expect(
+        chart,
+        isNot(
+          paints
+            ..path()
+            ..path(color: overdraft),
+        ),
+      );
+    });
+
+    testWidgets('the dashboard chart opts out of it', (tester) async {
+      final chart = await pumpSeries(tester, const [
+        120000,
+        -30000,
+        80000,
+      ], markZero: false);
+
+      expect(
+        chart,
+        isNot(
+          paints
+            ..path()
+            ..path(color: overdraft),
+        ),
+      );
+    });
   });
 }

@@ -5,6 +5,21 @@ import '../data/transactions_repository.dart';
 import '../../categories/domain/category.dart' show AppCategory;
 import '../domain/transaction.dart';
 
+/// Counts the category edits saved through [TransactionsController].
+///
+/// Panels that list transactions outside the controller's page — the account
+/// detail's recent operations — watch it to re-read their rows after an edit.
+class TransactionEdits extends Notifier<int> {
+  @override
+  int build() => 0;
+
+  void saved() => state++;
+}
+
+final transactionEditsProvider = NotifierProvider<TransactionEdits, int>(
+  TransactionEdits.new,
+);
+
 /// The active list filters, held separately from the loaded page so a filter
 /// change is a single state transition the controller can watch and react to
 /// — see [TransactionsController.build].
@@ -174,6 +189,7 @@ class TransactionsController extends AsyncNotifier<TransactionsPage> {
         .read(transactionsRepositoryProvider)
         .update(transaction.id, categoryId: categoryId);
     _replace(updated);
+    ref.read(transactionEditsProvider.notifier).saved();
   }
 
   /// Accepts the model's proposal for [transaction] as-is.

@@ -6,7 +6,6 @@ from uuid import uuid4
 from sqlalchemy import (
     Boolean,
     Date,
-    DateTime,
     ForeignKey,
     Index,
     Integer,
@@ -15,7 +14,7 @@ from sqlalchemy import (
 )
 from sqlalchemy.orm import Mapped, mapped_column
 
-from app.core.db import Base
+from app.core.db import Base, UtcDateTime
 
 
 class RecurringSeries(Base):
@@ -62,11 +61,9 @@ class RecurringSeries(Base):
     #: Last observed step in `expected_amount_minor`, signed.
     price_change_minor: Mapped[int | None] = mapped_column(Integer, nullable=True)
     price_changed_at: Mapped[date | None] = mapped_column(Date, nullable=True)
-    created_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), default=lambda: datetime.now(UTC)
-    )
+    created_at: Mapped[datetime] = mapped_column(UtcDateTime(), default=lambda: datetime.now(UTC))
     updated_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True),
+        UtcDateTime(),
         default=lambda: datetime.now(UTC),
         onupdate=lambda: datetime.now(UTC),
     )
@@ -95,6 +92,4 @@ class RecurringOccurrence(Base):
     transaction_id: Mapped[str] = mapped_column(
         String(36), ForeignKey("transactions.id", ondelete="CASCADE")
     )
-    created_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), default=lambda: datetime.now(UTC)
-    )
+    created_at: Mapped[datetime] = mapped_column(UtcDateTime(), default=lambda: datetime.now(UTC))

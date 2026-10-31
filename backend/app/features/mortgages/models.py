@@ -7,10 +7,10 @@ pure functions of the declared inputs, computed per request.
 from datetime import UTC, date, datetime
 from uuid import uuid4
 
-from sqlalchemy import CheckConstraint, Date, DateTime, ForeignKey, Index, Integer, String
+from sqlalchemy import CheckConstraint, Date, ForeignKey, Index, Integer, String
 from sqlalchemy.orm import Mapped, mapped_column
 
-from app.core.db import Base
+from app.core.db import Base, UtcDateTime
 
 
 class Mortgage(Base):
@@ -55,11 +55,9 @@ class Mortgage(Base):
     #: Frais de dossier + garantie; feeds total cost and TAEG.
     upfront_fees_minor: Mapped[int] = mapped_column(Integer, default=0)
     status: Mapped[str] = mapped_column(String(10))
-    created_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), default=lambda: datetime.now(UTC)
-    )
+    created_at: Mapped[datetime] = mapped_column(UtcDateTime(), default=lambda: datetime.now(UTC))
     updated_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True),
+        UtcDateTime(),
         default=lambda: datetime.now(UTC),
         onupdate=lambda: datetime.now(UTC),
     )
@@ -83,11 +81,9 @@ class MortgageSimulation(Base):
     insurance_monthly_minor: Mapped[int] = mapped_column(Integer)
     term_months: Mapped[int] = mapped_column(Integer)
     upfront_fees_minor: Mapped[int] = mapped_column(Integer)
-    created_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), default=lambda: datetime.now(UTC)
-    )
+    created_at: Mapped[datetime] = mapped_column(UtcDateTime(), default=lambda: datetime.now(UTC))
     updated_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True),
+        UtcDateTime(),
         default=lambda: datetime.now(UTC),
         onupdate=lambda: datetime.now(UTC),
     )
