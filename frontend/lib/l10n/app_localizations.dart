@@ -3534,6 +3534,42 @@ abstract class AppLocalizations {
   /// **'Une erreur est survenue. Réessayez.'**
   String get subscriptionErrorGeneric;
 
+  /// RECURRING_MERGE_INVALID: the two series are on different accounts, one was declared by hand, or they are the same series.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ces deux abonnements ne peuvent pas être fusionnés.'**
+  String get subscriptionErrorMergeInvalid;
+
+  /// Banner on the subscriptions panel proposing to merge two series. source is the older label that would fold into target, the label kept.
+  ///
+  /// In fr, this message translates to:
+  /// **'« {source} » et « {target} » semblent être le même abonnement, renommé par la banque.'**
+  String subscriptionsMergeSuggestion(String source, String target);
+
+  /// Button on the merge banner: fold the two series into one.
+  ///
+  /// In fr, this message translates to:
+  /// **'Fusionner'**
+  String get subscriptionsMergeAction;
+
+  /// Button on the merge banner: the two series are distinct; never propose the pair again.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ce sont deux abonnements'**
+  String get subscriptionsMergeKeepApart;
+
+  /// Toast after a merge.
+  ///
+  /// In fr, this message translates to:
+  /// **'Abonnements fusionnés'**
+  String get subscriptionsMergeDone;
+
+  /// Toast detail after a merge: later charges under either label land in the kept series.
+  ///
+  /// In fr, this message translates to:
+  /// **'Les prochains prélèvements des deux libellés iront dans « {target} ».'**
+  String subscriptionsMergeDoneDetail(String target);
+
   /// Error state replacing the panel when the list or summary failed to load.
   ///
   /// In fr, this message translates to:

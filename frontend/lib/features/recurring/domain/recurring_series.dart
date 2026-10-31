@@ -187,3 +187,13 @@ class SeriesAccount {
   /// « BNP — Compte courant », the form the panel prints everywhere.
   String get displayName => '$institution — $name';
 }
+
+/// Two series that look like one subscription the bank renamed: [source] would
+/// fold into [target], the one still charging, whose label is kept.
+@immutable
+class MergeSuggestion {
+  const MergeSuggestion({required this.target, required this.source});
+
+  final RecurringSeries target;
+  final RecurringSeries source;
+}

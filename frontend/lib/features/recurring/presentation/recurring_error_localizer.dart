@@ -15,6 +15,8 @@ String localizeRecurringError(AppLocalizations l10n, Object? error) {
         return l10n.subscriptionErrorInvalidTransition;
       case 'RECURRING_SERIES_EXISTS':
         return l10n.subscriptionErrorExists;
+      case 'RECURRING_MERGE_INVALID':
+        return l10n.subscriptionErrorMergeInvalid;
       case 'RECURRING_SERIES_NOT_FOUND':
         return l10n.subscriptionErrorNotFound;
       case 'ACCOUNT_NOT_FOUND':

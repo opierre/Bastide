@@ -75,12 +75,17 @@ class FakeSubscriptionsController extends SubscriptionsController {
   FakeSubscriptionsController({
     this.initialSeries = const [],
     RecurringSummary? summary,
+    this.mergeSuggestions = const [],
     this.loadError,
   }) : summary = summary ?? testSummary(activeCount: 0);
 
   final List<RecurringSeries> initialSeries;
   final RecurringSummary summary;
+  final List<MergeSuggestion> mergeSuggestions;
   final Object? loadError;
+
+  final mergeCalls = <MergeSuggestion>[];
+  final keepApartCalls = <MergeSuggestion>[];
 
   final statusCalls = <(String, SeriesStatus)>[];
   final createCalls = <RecurringSeries>[];
@@ -90,7 +95,38 @@ class FakeSubscriptionsController extends SubscriptionsController {
   @override
   Future<SubscriptionsState> build() async {
     if (loadError != null) throw loadError!;
-    return SubscriptionsState(series: initialSeries, summary: summary);
+    return SubscriptionsState(
+      series: initialSeries,
+      summary: summary,
+      mergeSuggestions: mergeSuggestions,
+    );
+  }
+
+  @override
+  Future<bool> merge(MergeSuggestion suggestion) async {
+    mergeCalls.add(suggestion);
+    _drop(suggestion);
+    return true;
+  }
+
+  @override
+  Future<bool> keepApart(MergeSuggestion suggestion) async {
+    keepApartCalls.add(suggestion);
+    _drop(suggestion);
+    return true;
+  }
+
+  void _drop(MergeSuggestion suggestion) {
+    final current = state.value;
+    if (current == null) return;
+    state = AsyncValue.data(
+      current.copyWith(
+        mergeSuggestions: [
+          for (final other in current.mergeSuggestions)
+            if (other != suggestion) other,
+        ],
+      ),
+    );
   }
 
   @override

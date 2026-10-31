@@ -2286,6 +2286,29 @@ class AppLocalizationsFr extends AppLocalizations {
   String get subscriptionErrorGeneric => 'Une erreur est survenue. Réessayez.';
 
   @override
+  String get subscriptionErrorMergeInvalid =>
+      'Ces deux abonnements ne peuvent pas être fusionnés.';
+
+  @override
+  String subscriptionsMergeSuggestion(String source, String target) {
+    return '« $source » et « $target » semblent être le même abonnement, renommé par la banque.';
+  }
+
+  @override
+  String get subscriptionsMergeAction => 'Fusionner';
+
+  @override
+  String get subscriptionsMergeKeepApart => 'Ce sont deux abonnements';
+
+  @override
+  String get subscriptionsMergeDone => 'Abonnements fusionnés';
+
+  @override
+  String subscriptionsMergeDoneDetail(String target) {
+    return 'Les prochains prélèvements des deux libellés iront dans « $target ».';
+  }
+
+  @override
   String get subscriptionsLoadFailed =>
       'Impossible de charger vos paiements récurrents pour le moment.';
 

@@ -56,6 +56,37 @@ class RecurringRepository {
     );
   }
 
+  /// Pairs of series that look like one subscription under two labels.
+  Future<List<MergeSuggestion>> mergeSuggestions() async {
+    final json =
+        await _apiClient.get('/recurring/merge-suggestions') as List<dynamic>;
+    return [
+      for (final entry in json.cast<Map<String, dynamic>>())
+        MergeSuggestion(
+          target: _parseSeries(entry['target'] as Map<String, dynamic>),
+          source: _parseSeries(entry['source'] as Map<String, dynamic>),
+        ),
+    ];
+  }
+
+  /// Folds [sourceId] into [targetId]; the server remembers the old label so
+  /// later imports group under the kept series.
+  Future<RecurringSeries> merge(String targetId, String sourceId) async {
+    final json =
+        await _apiClient.post(
+              '/recurring/$targetId/merge',
+              body: {'source_id': sourceId},
+            )
+            as Map<String, dynamic>;
+    return _parseSeries(json);
+  }
+
+  /// Records that two series are distinct, so the pair is never proposed again.
+  Future<void> keepApart(String targetId, String sourceId) => _apiClient.post(
+    '/recurring/merge-suggestions/dismiss',
+    body: {'target_id': targetId, 'source_id': sourceId},
+  );
+
   /// Runs a detection pass and reports what it created and refreshed.
   Future<DetectionResult> detect({String? accountId}) async {
     final json =

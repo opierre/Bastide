@@ -2268,6 +2268,29 @@ class AppLocalizationsEn extends AppLocalizations {
   String get subscriptionErrorGeneric => 'Something went wrong. Try again.';
 
   @override
+  String get subscriptionErrorMergeInvalid =>
+      'These two subscriptions can\'t be merged.';
+
+  @override
+  String subscriptionsMergeSuggestion(String source, String target) {
+    return '“$source” and “$target” look like the same subscription, renamed by the bank.';
+  }
+
+  @override
+  String get subscriptionsMergeAction => 'Merge';
+
+  @override
+  String get subscriptionsMergeKeepApart => 'They\'re different';
+
+  @override
+  String get subscriptionsMergeDone => 'Subscriptions merged';
+
+  @override
+  String subscriptionsMergeDoneDetail(String target) {
+    return 'Future charges under either label will go to “$target”.';
+  }
+
+  @override
   String get subscriptionsLoadFailed =>
       'We couldn\'t load your recurring payments right now.';
 

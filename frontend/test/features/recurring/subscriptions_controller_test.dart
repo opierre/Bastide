@@ -86,7 +86,11 @@ void main() {
   void stubLoad({
     List<Map<String, dynamic>>? series,
     Map<String, dynamic>? summary,
+    List<Map<String, dynamic>> suggestions = const [],
   }) {
+    when(
+      () => apiClient.get('/recurring/merge-suggestions'),
+    ).thenAnswer((_) async => suggestions);
     when(
       () => apiClient.get('/recurring', query: any(named: 'query')),
     ).thenAnswer((_) async => series ?? [_seriesJson()]);
@@ -175,6 +179,105 @@ void main() {
       container.read(subscriptionsControllerProvider).value?.statusFilter,
       SeriesStatus.confirmed,
     );
+  });
+
+  test('build loads the merge suggestions beside the list', () async {
+    stubLoad(
+      suggestions: [
+        {
+          'target': _seriesJson(id: 's2', label: 'STREAMCO - STREAMCO TV'),
+          'source': _seriesJson(label: 'STREAMCO'),
+        },
+      ],
+    );
+
+    final state = await container.read(subscriptionsControllerProvider.future);
+
+    final suggestion = state.mergeSuggestions.single;
+    expect(suggestion.target.id, 's2');
+    expect(suggestion.source.label, 'STREAMCO');
+  });
+
+  test('a merge posts the pair and reloads the panel in place', () async {
+    final suggestion = {
+      'target': _seriesJson(id: 's2', label: 'STREAMCO - STREAMCO TV'),
+      'source': _seriesJson(label: 'STREAMCO'),
+    };
+    stubLoad(suggestions: [suggestion]);
+    when(
+      () => apiClient.post('/recurring/s2/merge', body: any(named: 'body')),
+    ).thenAnswer((_) async => _seriesJson(id: 's2'));
+    final loaded = await container.read(subscriptionsControllerProvider.future);
+
+    stubLoad(series: [_seriesJson(id: 's2')]);
+    final merged = await container
+        .read(subscriptionsControllerProvider.notifier)
+        .merge(loaded.mergeSuggestions.single);
+
+    expect(merged, isTrue);
+    verify(
+      () => apiClient.post('/recurring/s2/merge', body: {'source_id': 's1'}),
+    ).called(1);
+    final state = container.read(subscriptionsControllerProvider).value!;
+    expect(state.series.single.id, 's2');
+    expect(state.mergeSuggestions, isEmpty);
+  });
+
+  test('keeping a pair apart records it and drops the suggestion', () async {
+    stubLoad(
+      suggestions: [
+        {'target': _seriesJson(id: 's2'), 'source': _seriesJson()},
+      ],
+    );
+    when(
+      () => apiClient.post(
+        '/recurring/merge-suggestions/dismiss',
+        body: any(named: 'body'),
+      ),
+    ).thenAnswer((_) async => null);
+    final loaded = await container.read(subscriptionsControllerProvider.future);
+
+    stubLoad();
+    await container
+        .read(subscriptionsControllerProvider.notifier)
+        .keepApart(loaded.mergeSuggestions.single);
+
+    verify(
+      () => apiClient.post(
+        '/recurring/merge-suggestions/dismiss',
+        body: {'target_id': 's2', 'source_id': 's1'},
+      ),
+    ).called(1);
+    expect(
+      container.read(subscriptionsControllerProvider).value!.mergeSuggestions,
+      isEmpty,
+    );
+  });
+
+  test('a refused merge keeps the panel and reports why', () async {
+    stubLoad(
+      suggestions: [
+        {'target': _seriesJson(id: 's2'), 'source': _seriesJson()},
+      ],
+    );
+    when(
+      () => apiClient.post('/recurring/s2/merge', body: any(named: 'body')),
+    ).thenThrow(
+      const ApiFailure(
+        code: 'RECURRING_MERGE_INVALID',
+        message: 'These two series cannot be merged.',
+      ),
+    );
+    final loaded = await container.read(subscriptionsControllerProvider.future);
+
+    final merged = await container
+        .read(subscriptionsControllerProvider.notifier)
+        .merge(loaded.mergeSuggestions.single);
+
+    expect(merged, isFalse);
+    final state = container.read(subscriptionsControllerProvider).value!;
+    expect((state.actionError! as ApiFailure).code, 'RECURRING_MERGE_INVALID');
+    expect(state.mergeSuggestions, hasLength(1));
   });
 
   test('a transition patch updates the row in place', () async {
