@@ -98,3 +98,22 @@ final dashboardControllerProvider =
     AsyncNotifierProvider<DashboardController, DashboardState>(
       DashboardController.new,
     );
+
+/// How « Évolution de l'épargne » draws its months: one bar each, or joined as a line.
+enum SavingsChartView { bars, line }
+
+/// The savings chart's chosen view. Panel state held for the session: the provider lives as
+/// long as the app's `ProviderScope`, so leaving the dashboard and coming back keeps the
+/// choice, and a relaunch starts again on the bars. Both views draw the same series, so
+/// switching re-reads nothing.
+class SavingsChartViewController extends Notifier<SavingsChartView> {
+  @override
+  SavingsChartView build() => SavingsChartView.bars;
+
+  void set(SavingsChartView view) => state = view;
+}
+
+final savingsChartViewProvider =
+    NotifierProvider<SavingsChartViewController, SavingsChartView>(
+      SavingsChartViewController.new,
+    );

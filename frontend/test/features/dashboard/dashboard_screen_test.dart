@@ -13,8 +13,8 @@ import 'package:bastide/features/dashboard/presentation/category_breakdown.dart'
 import 'package:bastide/features/dashboard/presentation/dashboard_screen.dart';
 import 'package:bastide/features/dashboard/presentation/income_vs_expense.dart';
 import 'package:bastide/features/dashboard/presentation/recent_activity.dart';
+import 'package:bastide/features/dashboard/presentation/savings_chart.dart';
 import 'package:bastide/features/dashboard/presentation/savings_trend.dart';
-import 'package:bastide/features/dashboard/presentation/savings_bars.dart';
 import 'package:bastide/features/dashboard/presentation/stat_card.dart';
 import 'package:bastide/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
@@ -367,13 +367,110 @@ void main() {
 
       // Twelve bars, each the month's own net — not a running total — so a month that
       // spent more than it earned stays negative.
-      final bars = tester.widget<SavingsBars>(find.byType(SavingsBars));
+      final bars = tester.widget<SavingsChart>(find.byType(SavingsChart));
       expect(bars.values, hasLength(12));
       expect(bars.values[1], 18050);
       expect(bars.values[2], -32500);
       expect(bars.values.last, 63565);
       expect(bars.labels.first, 'Juin');
       expect(bars.labels.last, 'Mai');
+    },
+  );
+
+  testWidgets(
+    'the savings chart switches between bars and a line of the same months',
+    (tester) async {
+      _useDesktopSurface(tester);
+      await tester.pumpWidget(_wrap(state: _state()));
+      await tester.pumpAndSettle();
+
+      SavingsChart chart() =>
+          tester.widget<SavingsChart>(find.byType(SavingsChart));
+
+      // Bars until the user asks otherwise.
+      expect(find.text('Barres'), findsOneWidget);
+      expect(find.text('Courbe'), findsOneWidget);
+      expect(chart().view, SavingsChartView.bars);
+      final bars = chart();
+
+      await tester.tap(find.byKey(const Key('savingsViewLine')));
+      await tester.pumpAndSettle();
+      final line = chart();
+      expect(line.view, SavingsChartView.line);
+      // The same series either way: only the marks change.
+      expect(line.values, bars.values);
+      expect(line.labels, bars.labels);
+      expect(tester.takeException(), isNull);
+
+      await tester.tap(find.byKey(const Key('savingsViewBars')));
+      await tester.pumpAndSettle();
+      expect(chart().view, SavingsChartView.bars);
+    },
+  );
+
+  testWidgets('the savings view outlives the dashboard for the session', (
+    tester,
+  ) async {
+    _useDesktopSurface(tester);
+    final container = ProviderContainer(
+      overrides: [
+        dashboardControllerProvider.overrideWith(
+          () => FakeDashboardController(initialState: _state()),
+        ),
+      ],
+    );
+    addTearDown(container.dispose);
+    Widget app(Widget home) => UncontrolledProviderScope(
+      container: container,
+      child: MaterialApp(
+        locale: const Locale('fr'),
+        theme: appDarkTheme,
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        home: Scaffold(body: home),
+      ),
+    );
+
+    await tester.pumpWidget(app(const DashboardScreen()));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('savingsViewLine')));
+    await tester.pumpAndSettle();
+
+    // Leave the panel, then come back: the line is still chosen.
+    await tester.pumpWidget(app(const SizedBox.shrink()));
+    await tester.pumpAndSettle();
+    expect(find.byType(SavingsChart), findsNothing);
+    await tester.pumpWidget(app(const DashboardScreen()));
+    await tester.pumpAndSettle();
+    expect(
+      tester.widget<SavingsChart>(find.byType(SavingsChart)).view,
+      SavingsChartView.line,
+    );
+  });
+
+  testWidgets(
+    'the savings view switch speaks English and fits a narrow window',
+    (tester) async {
+      tester.view.physicalSize = const Size(1280, 800);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.reset);
+      await tester.pumpWidget(
+        _wrap(state: _state(), locale: const Locale('en')),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('Bars'), findsOneWidget);
+      expect(find.text('Line'), findsOneWidget);
+      await tester.tap(find.byKey(const Key('savingsViewLine')));
+      await tester.pumpAndSettle();
+      expect(tester.takeException(), isNull);
+
+      // French runs longer; the card's header must still hold at this width.
+      await tester.pumpWidget(_wrap(state: _state()));
+      await tester.pumpAndSettle();
+      expect(find.text("Évolution de l'épargne"), findsOneWidget);
+      expect(find.text('Courbe'), findsOneWidget);
+      expect(tester.takeException(), isNull);
     },
   );
 

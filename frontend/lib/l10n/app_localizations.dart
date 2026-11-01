@@ -1807,7 +1807,7 @@ abstract class AppLocalizations {
   /// **'dépensés'**
   String get dashboardDonutCenterCaption;
 
-  /// Title of the monthly savings bar chart.
+  /// Title of the monthly savings chart (bar or line view).
   ///
   /// In fr, this message translates to:
   /// **'Évolution de l\'épargne'**
@@ -1824,6 +1824,18 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'en moyenne par mois'**
   String get dashboardSavingsTrendAverage;
+
+  /// Savings chart view switch: one bar per month.
+  ///
+  /// In fr, this message translates to:
+  /// **'Barres'**
+  String get dashboardSavingsViewBars;
+
+  /// Savings chart view switch: the same months joined as a line.
+  ///
+  /// In fr, this message translates to:
+  /// **'Courbe'**
+  String get dashboardSavingsViewLine;
 
   /// Title of the stacked income-vs-expense bar chart.
   ///
@@ -3569,6 +3581,24 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Les prochains prélèvements des deux libellés iront dans « {target} ».'**
   String subscriptionsMergeDoneDetail(String target);
+
+  /// Header above the list of merge suggestions, shown when there are several.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, =1{1 suggestion de fusion} other{{count} suggestions de fusion}}'**
+  String subscriptionsMergeSuggestionsCount(int count);
+
+  /// Tooltip on the chevron that collapses the list of merge suggestions.
+  ///
+  /// In fr, this message translates to:
+  /// **'Masquer les suggestions'**
+  String get subscriptionsMergeSuggestionsHide;
+
+  /// Tooltip on the chevron that expands the collapsed list of merge suggestions.
+  ///
+  /// In fr, this message translates to:
+  /// **'Afficher les suggestions'**
+  String get subscriptionsMergeSuggestionsShow;
 
   /// Error state replacing the panel when the list or summary failed to load.
   ///

@@ -1066,6 +1066,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get dashboardSavingsTrendAverage => 'on average per month';
 
   @override
+  String get dashboardSavingsViewBars => 'Bars';
+
+  @override
+  String get dashboardSavingsViewLine => 'Line';
+
+  @override
   String get dashboardIncomeVsExpenseTitle => 'Income vs expenses';
 
   @override
@@ -2287,6 +2293,23 @@ class AppLocalizationsEn extends AppLocalizations {
   String subscriptionsMergeDoneDetail(String target) {
     return 'Future charges under either label will go to “$target”.';
   }
+
+  @override
+  String subscriptionsMergeSuggestionsCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count merge suggestions',
+      one: '1 merge suggestion',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get subscriptionsMergeSuggestionsHide => 'Hide suggestions';
+
+  @override
+  String get subscriptionsMergeSuggestionsShow => 'Show suggestions';
 
   @override
   String get subscriptionsLoadFailed =>
