@@ -30,6 +30,10 @@ def _previous_revision(db_path: Path) -> str:
     head = script.get_current_head()
     assert head is not None
     previous = script.get_revision(head).down_revision
+    # A merge revision has several parents: any one of them leaves the database a
+    # revision behind, with the other branch and the merge still to apply.
+    if isinstance(previous, tuple):
+        previous = previous[0]
     assert isinstance(previous, str)
     return previous
 
