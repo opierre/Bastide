@@ -7007,6 +7007,204 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Aucune opération pour l’instant'**
   String get accountDetailNoTransactions;
+
+  /// Tooltip of the row action opening the « Marquer comme récurrent » dialog on an outflow.
+  ///
+  /// In fr, this message translates to:
+  /// **'Marquer comme récurrent'**
+  String get markRecurringAction;
+
+  /// Title of the dialog previewing the series a transaction would start.
+  ///
+  /// In fr, this message translates to:
+  /// **'Marquer comme récurrent'**
+  String get markRecurringTitle;
+
+  /// Intro line of the mark-as-recurring dialog.
+  ///
+  /// In fr, this message translates to:
+  /// **'Voici les opérations que Bastide regrouperait. Décochez celles qui n\'en font pas partie.'**
+  String get markRecurringIntro;
+
+  /// Confidence chip: the matches pass the detector as they are.
+  ///
+  /// In fr, this message translates to:
+  /// **'Confiance élevée'**
+  String get markRecurringConfidenceHigh;
+
+  /// Confidence chip: a cadence is recognised but the evidence is thin.
+  ///
+  /// In fr, this message translates to:
+  /// **'Confiance moyenne'**
+  String get markRecurringConfidenceMedium;
+
+  /// Confidence chip: no rhythm was found.
+  ///
+  /// In fr, this message translates to:
+  /// **'Confiance faible'**
+  String get markRecurringConfidenceLow;
+
+  /// Reason: how many matching transactions the preview found.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, =1{1 opération trouvée} other{{count} opérations trouvées}}'**
+  String markRecurringReasonOccurrences(int count);
+
+  /// Reason: the gaps match a weekly cadence.
+  ///
+  /// In fr, this message translates to:
+  /// **'Rythme hebdomadaire reconnu'**
+  String get markRecurringReasonCadenceWeekly;
+
+  /// Reason: the gaps match a monthly cadence.
+  ///
+  /// In fr, this message translates to:
+  /// **'Rythme mensuel reconnu'**
+  String get markRecurringReasonCadenceMonthly;
+
+  /// Reason: the gaps match a quarterly cadence.
+  ///
+  /// In fr, this message translates to:
+  /// **'Rythme trimestriel reconnu'**
+  String get markRecurringReasonCadenceQuarterly;
+
+  /// Reason: the gaps match a yearly cadence.
+  ///
+  /// In fr, this message translates to:
+  /// **'Rythme annuel reconnu'**
+  String get markRecurringReasonCadenceYearly;
+
+  /// Reason: every amount sits within tolerance.
+  ///
+  /// In fr, this message translates to:
+  /// **'Montant stable'**
+  String get markRecurringReasonAmountStable;
+
+  /// Reason: the newest charge is a price change.
+  ///
+  /// In fr, this message translates to:
+  /// **'Le montant a changé récemment'**
+  String get markRecurringReasonAmountChanged;
+
+  /// Reason: one amount is outside tolerance.
+  ///
+  /// In fr, this message translates to:
+  /// **'Un montant s\'écarte des autres'**
+  String get markRecurringReasonAmountOutsideTolerance;
+
+  /// Reason: one gap between charges is outside tolerance.
+  ///
+  /// In fr, this message translates to:
+  /// **'Un intervalle s\'écarte du rythme'**
+  String get markRecurringReasonGapOutsideTolerance;
+
+  /// Reason: fewer charges than detection needs.
+  ///
+  /// In fr, this message translates to:
+  /// **'Moins de trois prélèvements'**
+  String get markRecurringReasonTooFewOccurrences;
+
+  /// Reason: no cadence could be recognised.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucun rythme régulier'**
+  String get markRecurringReasonNoRhythm;
+
+  /// Warning banner shown when the preview's confidence is low.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucun rythme régulier n\'a été trouvé. Vous pouvez tout de même enregistrer la série : elle sera irrégulière.'**
+  String get markRecurringLowWarning;
+
+  /// Label of the proposed cadence in the dialog summary.
+  ///
+  /// In fr, this message translates to:
+  /// **'Rythme proposé'**
+  String get markRecurringCadenceLabel;
+
+  /// Label of the proposed amount in the dialog summary.
+  ///
+  /// In fr, this message translates to:
+  /// **'Montant attendu'**
+  String get markRecurringAmountLabel;
+
+  /// Summary line: how many transactions saving will link.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, =0{Aucune opération cochée} =1{1 opération cochée} other{{count} opérations cochées}}'**
+  String markRecurringTickedCount(int count);
+
+  /// Summary line: the dates of the oldest and newest ticked transactions.
+  ///
+  /// In fr, this message translates to:
+  /// **'du {from} au {to}'**
+  String markRecurringTickedRange(String from, String to);
+
+  /// Hint shown when every transaction is unticked.
+  ///
+  /// In fr, this message translates to:
+  /// **'Cochez au moins une opération pour enregistrer la série.'**
+  String get markRecurringNoneTicked;
+
+  /// Primary button creating the series from the ticked transactions.
+  ///
+  /// In fr, this message translates to:
+  /// **'Enregistrer la série'**
+  String get markRecurringSave;
+
+  /// Closes the dialog without saving.
+  ///
+  /// In fr, this message translates to:
+  /// **'Annuler'**
+  String get markRecurringCancel;
+
+  /// Shown when the preview request failed.
+  ///
+  /// In fr, this message translates to:
+  /// **'Impossible de préparer l\'aperçu.'**
+  String get markRecurringLoadError;
+
+  /// Retries the preview request.
+  ///
+  /// In fr, this message translates to:
+  /// **'Réessayer'**
+  String get markRecurringRetry;
+
+  /// Error RECURRING_PREVIEW_INFLOW: a preview was asked for an inflow.
+  ///
+  /// In fr, this message translates to:
+  /// **'Seule une dépense peut être marquée comme récurrente.'**
+  String get subscriptionErrorPreviewInflow;
+
+  /// Error RECURRING_TRANSACTIONS_INVALID.
+  ///
+  /// In fr, this message translates to:
+  /// **'Certaines opérations ne peuvent pas être rattachées à cette série.'**
+  String get subscriptionErrorTransactionsInvalid;
+
+  /// Error RECURRING_TRANSACTION_LINKED.
+  ///
+  /// In fr, this message translates to:
+  /// **'Certaines opérations appartiennent déjà à une série.'**
+  String get subscriptionErrorTransactionLinked;
+
+  /// Info banner when the transaction's merchant is already tracked by a series.
+  ///
+  /// In fr, this message translates to:
+  /// **'Cette dépense correspond à « {label} », déjà suivi dans vos abonnements. Cochez les opérations à y ajouter.'**
+  String markRecurringExistingIntro(String label);
+
+  /// Closes the dialog and opens the existing series in Abonnements.
+  ///
+  /// In fr, this message translates to:
+  /// **'Voir la série'**
+  String get markRecurringViewSeries;
+
+  /// Primary button adding the ticked transactions to the existing series.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ajouter à cette série'**
+  String get markRecurringAddToSeries;
 }
 
 class _AppLocalizationsDelegate

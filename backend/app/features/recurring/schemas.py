@@ -19,6 +19,24 @@ DetectedCadence = Literal["weekly", "monthly", "quarterly", "yearly"]
 #: re-detection leaves both alone.
 SeriesStatus = Literal["detected", "confirmed", "dismissed", "cancelled"]
 
+#: How sure a preview is that its transactions make a series (see `preview.grade`).
+PreviewConfidence = Literal["high", "medium", "low"]
+
+#: Why a preview graded as it did. i18n keys: the client words them, the server never does.
+PreviewReason = Literal[
+    "occurrences",
+    "cadence_weekly",
+    "cadence_monthly",
+    "cadence_quarterly",
+    "cadence_yearly",
+    "amount_stable",
+    "amount_changed",
+    "amount_outside_tolerance",
+    "gap_outside_tolerance",
+    "too_few_occurrences",
+    "no_rhythm",
+]
+
 
 class DetectRequest(BaseModel):
     """Ask for a detection pass, over one account or over all of them."""
@@ -101,6 +119,14 @@ class SeriesCreate(BaseModel):
     )
     cadence: Cadence
     category_id: str | None = None
+    transaction_ids: list[str] = Field(
+        default_factory=list,
+        description=(
+            "Transactions to link as the series' occurrences, typically the ones ticked in a "
+            "preview. Each must be an outflow of `account_id` not already in a series. The "
+            "series' observed dates and count are then taken from them."
+        ),
+    )
 
 
 class SeriesUpdate(BaseModel):
@@ -197,3 +223,46 @@ class MergeDismissRequest(BaseModel):
 
     target_id: str
     source_id: str
+
+
+class PreviewRequest(BaseModel):
+    """Ask what series one transaction would start."""
+
+    transaction_id: str
+
+
+class SeriesPreview(BaseModel):
+    """The series a transaction and its matches would make, before anything is saved."""
+
+    confidence: PreviewConfidence
+    reasons: list[PreviewReason]
+    #: `irregular` when the confidence is `low`: no rhythm was found.
+    cadence: Cadence
+    median_interval_days: int
+    label: str
+    #: Signed, so negative — a subscription is an outflow.
+    expected_amount_minor: int
+    currency: str
+    account_id: str
+    #: The matching transactions, oldest first, the one the preview started from included.
+    transactions: list[TransactionRead]
+
+
+class RecurringPreviewRead(BaseModel):
+    """Exactly one of `series` and `preview` is set.
+
+    `series` when the transaction already belongs to a series, or its merchant is already
+    tracked by one — the client offers that series instead of proposing a second one. In the
+    second case `addable_transactions` lists the charges that series does not hold yet, the one
+    the preview started from included, oldest first; it is empty in the first.
+    """
+
+    series: SeriesRead | None = None
+    preview: SeriesPreview | None = None
+    addable_transactions: list[TransactionRead] = Field(default_factory=list)
+
+
+class AttachRequest(BaseModel):
+    """Transactions to add to an existing series as occurrences."""
+
+    transaction_ids: list[str] = Field(min_length=1)

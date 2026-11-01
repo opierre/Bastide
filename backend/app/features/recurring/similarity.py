@@ -79,7 +79,7 @@ def propose_merges(
 def _alike(a: RecurringSeries, b: RecurringSeries) -> bool:
     return (
         a.cadence == b.cadence
-        and _amounts_close(a.expected_amount_minor, b.expected_amount_minor)
+        and amounts_close(a.expected_amount_minor, b.expected_amount_minor)
         and keys_alike(a.merchant_key, b.merchant_key)
     )
 
@@ -102,7 +102,7 @@ def keys_alike(key_a: str, key_b: str) -> bool:
     return len(set_a & set_b) * 100 >= len(set_a | set_b) * MIN_SHARED_WORDS_PERCENT
 
 
-def _amounts_close(a: int, b: int) -> bool:
+def amounts_close(a: int, b: int) -> bool:
     # Integer arithmetic: a share of a money value is still money, and floats are forbidden.
     return abs(a - b) * 100 <= max(abs(a), abs(b)) * AMOUNT_TOLERANCE_PERCENT
 

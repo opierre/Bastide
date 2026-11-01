@@ -72,7 +72,7 @@ class SeriesCandidate:
 
 
 @dataclass(frozen=True, slots=True)
-class _AmountBaseline:
+class AmountBaseline:
     """The amount the occurrences agree on, and the step that got them there."""
 
     expected_amount_minor: int
@@ -124,10 +124,10 @@ def _qualify(account_id: str, key: str, group: list[Transaction]) -> SeriesCandi
 
     interval = median_low(gaps)
     cadence = classify_cadence(interval)
-    if cadence is None or not all(_interval_within(gap, interval) for gap in gaps):
+    if cadence is None or not all(interval_within(gap, interval) for gap in gaps):
         return None
 
-    baseline = _amount_baseline([occurrence.amount_minor for occurrence in occurrences])
+    baseline = amount_baseline([occurrence.amount_minor for occurrence in occurrences])
     if baseline is None:
         return None
 
@@ -136,7 +136,7 @@ def _qualify(account_id: str, key: str, group: list[Transaction]) -> SeriesCandi
     return SeriesCandidate(
         account_id=account_id,
         merchant_key=key,
-        label=_label(occurrences),
+        label=series_label(occurrences),
         currency=occurrences[0].currency,
         cadence=cadence,
         median_interval_days=interval,
@@ -159,7 +159,7 @@ def classify_cadence(interval_days: int) -> DetectedCadence | None:
     return None
 
 
-def _interval_within(gap: int, interval: int) -> bool:
+def interval_within(gap: int, interval: int) -> bool:
     """True if ``gap`` sits within the cadence tolerance of the median ``interval``."""
     deviation = abs(gap - interval)
     if deviation <= INTERVAL_TOLERANCE_FLOOR_DAYS:
@@ -168,7 +168,7 @@ def _interval_within(gap: int, interval: int) -> bool:
     return deviation * 100 <= interval * INTERVAL_TOLERANCE_PERCENT
 
 
-def _amount_within(amount: int, baseline: int) -> bool:
+def amount_within(amount: int, baseline: int) -> bool:
     """True if ``amount`` sits within the amount tolerance of ``baseline``."""
     deviation = abs(amount - baseline)
     if deviation <= AMOUNT_TOLERANCE_FLOOR_MINOR:
@@ -178,7 +178,7 @@ def _amount_within(amount: int, baseline: int) -> bool:
     return deviation * 100 <= abs(baseline) * AMOUNT_TOLERANCE_PERCENT
 
 
-def _amount_baseline(amounts: Sequence[int]) -> _AmountBaseline | None:
+def amount_baseline(amounts: Sequence[int]) -> AmountBaseline | None:
     """The amount the occurrences agree on, or `None` if they never agree on one.
 
     Two ways to agree. Either every amount sits within tolerance of the median — the ordinary
@@ -188,21 +188,21 @@ def _amount_baseline(amounts: Sequence[int]) -> _AmountBaseline | None:
     make a series fail the very test it is the explanation for.
     """
     median_all = median_low(amounts)
-    if all(_amount_within(amount, median_all) for amount in amounts):
-        return _AmountBaseline(median_all, None)
+    if all(amount_within(amount, median_all) for amount in amounts):
+        return AmountBaseline(median_all, None)
 
     earlier, newest = amounts[:-1], amounts[-1]
     median_earlier = median_low(earlier)
-    if not all(_amount_within(amount, median_earlier) for amount in earlier):
+    if not all(amount_within(amount, median_earlier) for amount in earlier):
         return None
-    if _amount_within(newest, median_earlier):
+    if amount_within(newest, median_earlier):
         # The group failed the amount test and the newest occurrence is not the explanation —
         # a tolerance measured off a different baseline is not a second chance at qualifying.
         return None
-    return _AmountBaseline(newest, newest - median_earlier)
+    return AmountBaseline(newest, newest - median_earlier)
 
 
-def _label(occurrences: Sequence[Transaction]) -> str:
+def series_label(occurrences: Sequence[Transaction]) -> str:
     """The prettiest observed merchant: the most frequent label, the shortest one when tied.
 
     Only the default a new series is created with — the user renames it and detection never

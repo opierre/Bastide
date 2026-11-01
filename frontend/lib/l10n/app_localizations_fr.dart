@@ -4462,4 +4462,135 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get accountDetailNoTransactions => 'Aucune opération pour l’instant';
+
+  @override
+  String get markRecurringAction => 'Marquer comme récurrent';
+
+  @override
+  String get markRecurringTitle => 'Marquer comme récurrent';
+
+  @override
+  String get markRecurringIntro =>
+      'Voici les opérations que Bastide regrouperait. Décochez celles qui n\'en font pas partie.';
+
+  @override
+  String get markRecurringConfidenceHigh => 'Confiance élevée';
+
+  @override
+  String get markRecurringConfidenceMedium => 'Confiance moyenne';
+
+  @override
+  String get markRecurringConfidenceLow => 'Confiance faible';
+
+  @override
+  String markRecurringReasonOccurrences(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count opérations trouvées',
+      one: '1 opération trouvée',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get markRecurringReasonCadenceWeekly => 'Rythme hebdomadaire reconnu';
+
+  @override
+  String get markRecurringReasonCadenceMonthly => 'Rythme mensuel reconnu';
+
+  @override
+  String get markRecurringReasonCadenceQuarterly =>
+      'Rythme trimestriel reconnu';
+
+  @override
+  String get markRecurringReasonCadenceYearly => 'Rythme annuel reconnu';
+
+  @override
+  String get markRecurringReasonAmountStable => 'Montant stable';
+
+  @override
+  String get markRecurringReasonAmountChanged =>
+      'Le montant a changé récemment';
+
+  @override
+  String get markRecurringReasonAmountOutsideTolerance =>
+      'Un montant s\'écarte des autres';
+
+  @override
+  String get markRecurringReasonGapOutsideTolerance =>
+      'Un intervalle s\'écarte du rythme';
+
+  @override
+  String get markRecurringReasonTooFewOccurrences =>
+      'Moins de trois prélèvements';
+
+  @override
+  String get markRecurringReasonNoRhythm => 'Aucun rythme régulier';
+
+  @override
+  String get markRecurringLowWarning =>
+      'Aucun rythme régulier n\'a été trouvé. Vous pouvez tout de même enregistrer la série : elle sera irrégulière.';
+
+  @override
+  String get markRecurringCadenceLabel => 'Rythme proposé';
+
+  @override
+  String get markRecurringAmountLabel => 'Montant attendu';
+
+  @override
+  String markRecurringTickedCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count opérations cochées',
+      one: '1 opération cochée',
+      zero: 'Aucune opération cochée',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String markRecurringTickedRange(String from, String to) {
+    return 'du $from au $to';
+  }
+
+  @override
+  String get markRecurringNoneTicked =>
+      'Cochez au moins une opération pour enregistrer la série.';
+
+  @override
+  String get markRecurringSave => 'Enregistrer la série';
+
+  @override
+  String get markRecurringCancel => 'Annuler';
+
+  @override
+  String get markRecurringLoadError => 'Impossible de préparer l\'aperçu.';
+
+  @override
+  String get markRecurringRetry => 'Réessayer';
+
+  @override
+  String get subscriptionErrorPreviewInflow =>
+      'Seule une dépense peut être marquée comme récurrente.';
+
+  @override
+  String get subscriptionErrorTransactionsInvalid =>
+      'Certaines opérations ne peuvent pas être rattachées à cette série.';
+
+  @override
+  String get subscriptionErrorTransactionLinked =>
+      'Certaines opérations appartiennent déjà à une série.';
+
+  @override
+  String markRecurringExistingIntro(String label) {
+    return 'Cette dépense correspond à « $label », déjà suivi dans vos abonnements. Cochez les opérations à y ajouter.';
+  }
+
+  @override
+  String get markRecurringViewSeries => 'Voir la série';
+
+  @override
+  String get markRecurringAddToSeries => 'Ajouter à cette série';
 }

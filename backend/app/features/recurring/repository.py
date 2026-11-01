@@ -112,6 +112,60 @@ class RecurringRepository:
             )
         )
 
+    def series_for_transaction(self, transaction_id: str, user_id: str) -> RecurringSeries | None:
+        """The user's series ``transaction_id`` is an occurrence of, if any."""
+        return self._db.scalar(
+            select(RecurringSeries)
+            .join(RecurringOccurrence, RecurringOccurrence.series_id == RecurringSeries.id)
+            .where(
+                RecurringOccurrence.transaction_id == transaction_id,
+                RecurringSeries.user_id == user_id,
+            )
+        )
+
+    def add_with_occurrences(
+        self,
+        series: RecurringSeries,
+        transaction_ids: Sequence[str],
+        alias_keys: Sequence[str],
+    ) -> RecurringSeries:
+        """Insert a series with its occurrence links and merged-in keys, in one commit.
+
+        The links and aliases only make sense with the series they point at, so a half-written
+        result would leave transactions claimed by nothing or a series without its history.
+        """
+        self._db.add(series)
+        self._db.flush()
+        return self.attach(
+            series, transaction_ids, [(series.account_id, key) for key in alias_keys]
+        )
+
+    def attach(
+        self,
+        series: RecurringSeries,
+        transaction_ids: Sequence[str],
+        aliases: Sequence[tuple[str, str]],
+    ) -> RecurringSeries:
+        """Link transactions and `(account_id, merchant_key)` aliases to a series, and commit.
+
+        Commits whatever else is pending on the series too, so its refreshed observations land
+        with the links that justify them.
+        """
+        for transaction_id in transaction_ids:
+            self._db.add(RecurringOccurrence(series_id=series.id, transaction_id=transaction_id))
+        for account_id, key in aliases:
+            self._db.add(
+                RecurringMerchantAlias(
+                    user_id=series.user_id,
+                    account_id=account_id,
+                    series_id=series.id,
+                    merchant_key=key,
+                )
+            )
+        self._db.commit()
+        self._db.refresh(series)
+        return series
+
     def stage(self, series: RecurringSeries) -> None:
         """Add a series to the session without committing."""
         self._db.add(series)

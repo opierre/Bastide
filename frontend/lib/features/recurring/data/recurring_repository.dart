@@ -6,6 +6,7 @@ import '../../../core/api/api_client_provider.dart';
 import '../../categories/domain/category.dart';
 import '../domain/recurring_series.dart';
 import '../domain/recurring_summary.dart';
+import '../domain/series_preview.dart';
 
 /// Calls the `/recurring` endpoints and maps the wire JSON to domain models.
 /// The only place in this feature that knows the response shapes.
@@ -107,6 +108,7 @@ class RecurringRepository {
     required int expectedAmountMinor,
     required Cadence cadence,
     String? categoryId,
+    List<String> transactionIds = const [],
   }) async {
     final json =
         await _apiClient.post(
@@ -117,7 +119,46 @@ class RecurringRepository {
                 'expected_amount_minor': expectedAmountMinor,
                 'cadence': cadence.wireValue,
                 'category_id': ?categoryId,
+                if (transactionIds.isNotEmpty)
+                  'transaction_ids': transactionIds,
               },
+            )
+            as Map<String, dynamic>;
+    return _parseSeries(json);
+  }
+
+  /// What series [transactionId] would start, or the one it already belongs to.
+  Future<PreviewOutcome> preview(String transactionId) async {
+    final json =
+        await _apiClient.post(
+              '/recurring/preview',
+              body: {'transaction_id': transactionId},
+            )
+            as Map<String, dynamic>;
+    final series = json['series'] as Map<String, dynamic>?;
+    if (series != null) {
+      return AlreadyInSeries(
+        _parseSeries(series),
+        addable: [
+          for (final entry
+              in (json['addable_transactions'] as List<dynamic>? ?? const [])
+                  .cast<Map<String, dynamic>>())
+            _parsePreviewTransaction(entry),
+        ],
+      );
+    }
+    return Proposal(_parsePreview(json['preview'] as Map<String, dynamic>));
+  }
+
+  /// Adds [transactionIds] to an existing series as occurrences.
+  Future<RecurringSeries> attach(
+    String seriesId,
+    List<String> transactionIds,
+  ) async {
+    final json =
+        await _apiClient.post(
+              '/recurring/$seriesId/occurrences',
+              body: {'transaction_ids': transactionIds},
             )
             as Map<String, dynamic>;
     return _parseSeries(json);
@@ -195,6 +236,41 @@ class RecurringRepository {
         ? null
         : DateTime.parse(json['price_changed_at'] as String),
   );
+
+  SeriesPreview _parsePreview(Map<String, dynamic> json) => SeriesPreview(
+    confidence: PreviewConfidence.fromWire(json['confidence'] as String),
+    reasons: [
+      for (final key in (json['reasons'] as List<dynamic>).cast<String>())
+        ?PreviewReason.fromWire(key),
+    ],
+    cadence: Cadence.fromWire(json['cadence'] as String),
+    label: json['label'] as String,
+    expectedAmountMinor: json['expected_amount_minor'] as int,
+    currency: json['currency'] as String,
+    accountId: json['account_id'] as String,
+    transactions: [
+      for (final entry
+          in (json['transactions'] as List<dynamic>)
+              .cast<Map<String, dynamic>>())
+        _parsePreviewTransaction(entry),
+    ],
+  );
+
+  PreviewTransaction _parsePreviewTransaction(Map<String, dynamic> json) =>
+      PreviewTransaction(
+        id: json['id'] as String,
+        bookedDate: DateTime.parse(json['booked_date'] as String),
+        amountMinor: json['amount_minor'] as int,
+        currency: json['currency'] as String,
+        label: _transactionLabel(json),
+      );
+
+  /// The merchant when the import found one, the cleaned label otherwise — the
+  /// same choice the transactions feed makes for its rows.
+  String _transactionLabel(Map<String, dynamic> json) {
+    final merchant = (json['merchant'] as String?)?.trim() ?? '';
+    return merchant.isNotEmpty ? merchant : json['description_clean'] as String;
+  }
 
   SeriesOccurrence _parseOccurrence(Map<String, dynamic> json) {
     final transaction = json['transaction'] as Map<String, dynamic>;
