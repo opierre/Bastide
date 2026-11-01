@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:bastide/core/theme/app_theme.dart';
+import 'package:bastide/core/theme/tokens.dart';
 import 'package:bastide/core/widgets/area_line.dart';
 import 'package:bastide/features/dashboard/application/dashboard_controller.dart';
 import 'package:bastide/features/dashboard/presentation/savings_chart.dart';
@@ -81,6 +82,27 @@ Future<void> _moveTo(
 Rect _tooltip(WidgetTester tester, int index) =>
     tester.getRect(find.byKey(Key('savingsChartTooltip-$index')));
 
+RenderObject _painter(WidgetTester tester) => tester.renderObject(
+  find.descendant(
+    of: find.byType(SavingsChart),
+    matching: find.byType(CustomPaint),
+  ),
+);
+
+/// Month [index]'s mark in the painter's own coordinates, and the zero line under it.
+(Offset, Offset) _localMark(WidgetTester tester, int index) {
+  final origin = tester.getTopLeft(find.byType(SavingsChart));
+  final mark = _mark(tester, index) - origin;
+  final chart = tester.getRect(find.byType(SavingsChart));
+  final plotHeight = chart.height - AreaLine.axisHeight - 8;
+  const top = 30000 * 1.15;
+  const bottom = -9000 * 1.15;
+  final zeroY = 4 + plotHeight - plotHeight * ((0 - bottom) / (top - bottom));
+  return (mark, Offset(mark.dx, zeroY));
+}
+
+final _area = AppColors.iris.withValues(alpha: 0.10);
+
 void main() {
   group('bars', () {
     testWidgets('a saving names itself just over its bar', (tester) async {
@@ -134,6 +156,37 @@ void main() {
   });
 
   group('line', () {
+    testWidgets('the area runs from zero to each point, either side', (
+      tester,
+    ) async {
+      await _pump(tester, SavingsChartView.line);
+
+      // A saving fills up to its point and no higher; a shortfall down to its point and
+      // no lower — closed on zero, not on the plot's floor.
+      final (saving, savingZero) = _localMark(tester, 1);
+      final (shortfall, shortfallZero) = _localMark(tester, 2);
+      expect(
+        _painter(tester),
+        paints..path(
+          color: _area,
+          includes: [
+            Offset.lerp(saving, savingZero, 0.5)!,
+            Offset.lerp(shortfall, shortfallZero, 0.5)!,
+          ],
+          excludes: [
+            saving.translate(0, -6),
+            shortfall.translate(0, 6),
+            savingZero.translate(0, 6),
+          ],
+        ),
+      );
+    });
+
+    testWidgets('the bars carry no area', (tester) async {
+      await _pump(tester, SavingsChartView.bars);
+      expect(_painter(tester), isNot(paints..path(color: _area)));
+    });
+
     testWidgets('a point names itself clear of its hovered dot', (
       tester,
     ) async {

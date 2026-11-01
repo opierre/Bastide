@@ -14,8 +14,9 @@ import '../application/dashboard_controller.dart';
 ///   month that spent more than it earned. Each month's saving is its own figure, not a
 ///   step of a running total, so bars are the default.
 /// - **Line**: the same twelve figures joined in order, which reads the direction over
-///   many months better. Each point is still dotted in its sign's color, and a dashed zero
-///   baseline marks where a month turns negative.
+///   many months better. Each point is still dotted in its sign's color, the area between
+///   the line and zero is washed in iris as on the Synthèse's « Patrimoine net », and a
+///   dashed zero baseline marks where a month turns negative.
 ///
 /// Either way the direction doubles the color, so the sign never rests on hue alone, and
 /// the last month — the current one, still moving — is drawn open: a dashed outline bar,
@@ -317,6 +318,9 @@ class _SavingsChartPainter extends CustomPainter {
   static const _hoverDotRadius = 5.0;
   static const _dotRing = 1.5;
 
+  /// The line view's area, at the Synthèse « Patrimoine net » chart's 10 %.
+  static const _areaAlpha = 0.10;
+
   /// The hovered dot's reach, ring included — what the line view's tooltip clears.
   static const hoverDotOuterRadius = _hoverDotRadius + _dotRing;
 
@@ -417,6 +421,21 @@ class _SavingsChartPainter extends CustomPainter {
           dash,
         );
       }
+    }
+
+    // The area between the line and zero, as under the Synthèse's « Patrimoine net »: an
+    // iris wash closed on the zero line rather than the plot's floor, so a saving fills up
+    // to its point and a shortfall down to its own, the same way. Under the line, so the
+    // stroke and dots stay crisp over it.
+    if (points.length > 1) {
+      canvas.drawPath(
+        Path()
+          ..addPolygon(points, false)
+          ..lineTo(points.last.dx, zeroY)
+          ..lineTo(points.first.dx, zeroY)
+          ..close(),
+        Paint()..color = AppColors.iris.withValues(alpha: _areaAlpha),
+      );
     }
 
     final stroke = Paint()
