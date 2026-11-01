@@ -99,11 +99,12 @@ async def create_series(
     service: Annotated[RecurringService, Depends(_service)],
     user: Annotated[User, Depends(get_current_user)],
 ) -> SeriesRead:
-    """Declare a subscription the detector has not found (`is_manual = true`).
+    """Create a series from its charges (`is_manual = true`).
 
-    `transaction_ids`, typically the ones ticked in a preview, become its occurrences.
+    `transaction_ids`, typically the ones ticked in a preview, become its occurrences; at least
+    one is required, so every series starts from real charges detection can follow.
     """
-    return SeriesRead.model_validate(service.create(user.id, payload, date.today()))
+    return SeriesRead.model_validate(service.create(user.id, payload))
 
 
 @router.post("/preview", response_model=RecurringPreviewRead)
@@ -262,9 +263,7 @@ async def attach_occurrences(
     Each must be an outflow of the caller's not already in a series
     (`RECURRING_TRANSACTIONS_INVALID`, `RECURRING_TRANSACTION_LINKED`).
     """
-    return SeriesRead.model_validate(
-        service.attach(user.id, series_id, payload.transaction_ids, date.today())
-    )
+    return SeriesRead.model_validate(service.attach(user.id, series_id, payload.transaction_ids))
 
 
 @router.get("/{series_id}/candidates", response_model=TransactionPage)

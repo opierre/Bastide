@@ -410,7 +410,7 @@ void main() {
     verify(() => apiClient.get('/recurring/summary')).called(2);
   });
 
-  test('creating a manual series reloads the list', () async {
+  test('creating a series from its charges reloads the list', () async {
     stubLoad();
     when(
       () => apiClient.post('/recurring', body: any(named: 'body')),
@@ -427,6 +427,7 @@ void main() {
           accountId: 'a1',
           expectedAmountMinor: -2999,
           cadence: Cadence.irregular,
+          transactionIds: ['t1', 't2'],
         );
 
     expect(created.id, 's9');
@@ -438,6 +439,7 @@ void main() {
           'account_id': 'a1',
           'expected_amount_minor': -2999,
           'cadence': 'irregular',
+          'transaction_ids': ['t1', 't2'],
         },
       ),
     ).called(1);

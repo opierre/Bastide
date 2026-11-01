@@ -16,28 +16,29 @@ import '../domain/recurring_series.dart';
 import 'recurring_error_localizer.dart';
 import 'recurring_labels.dart';
 
-/// Opens the create/edit subscription modal. Resolves to the saved series, or
-/// `null` when the user cancelled.
+/// Opens the edit modal for [series]. Resolves to the saved series, or `null`
+/// when the user cancelled.
 Future<RecurringSeries?> showSeriesForm(
   BuildContext context, {
-  RecurringSeries? initial,
+  required RecurringSeries series,
 }) {
   return showDialog<RecurringSeries>(
     context: context,
-    builder: (_) => SeriesFormModal(initial: initial),
+    builder: (_) => SeriesFormModal(initial: series),
   );
 }
 
-/// The 480 px « Nouveau paiement récurrent » modal (`docs/design/10` frame ④), reused
-/// for the kebab's « Modifier ».
+/// The 480 px « Modifier le paiement récurrent » modal behind the kebab's
+/// « Modifier » (`docs/design/10` frame ④).
 ///
-/// This is the only place `Irrégulier` can be chosen. Detection concludes a
-/// cadence or concludes nothing, so an irregular series only
-/// ever exists because a user said so here.
+/// Edit only. A series is never created from scratch: it starts from its
+/// charges, in « Marquer comme récurrent », so detection can keep it up to
+/// date. Here the user can set a cadence detection never concludes, such as
+/// `Irrégulier`.
 class SeriesFormModal extends ConsumerStatefulWidget {
-  const SeriesFormModal({super.key, this.initial});
+  const SeriesFormModal({super.key, required this.initial});
 
-  final RecurringSeries? initial;
+  final RecurringSeries initial;
 
   @override
   ConsumerState<SeriesFormModal> createState() => _SeriesFormModalState();
@@ -46,7 +47,7 @@ class SeriesFormModal extends ConsumerStatefulWidget {
 class _SeriesFormModalState extends ConsumerState<SeriesFormModal> {
   final _formKey = GlobalKey<FormState>();
   late final _labelController = TextEditingController(
-    text: widget.initial?.label,
+    text: widget.initial.label,
   );
   final _amountController = TextEditingController();
 
@@ -56,21 +57,17 @@ class _SeriesFormModalState extends ConsumerState<SeriesFormModal> {
   /// active locale — unavailable before the widget is mounted.
   bool _amountFilled = false;
 
-  late Cadence _cadence = widget.initial?.cadence ?? Cadence.monthly;
-  late String? _accountId = widget.initial?.accountId;
-  late String? _categoryId = widget.initial?.categoryId;
+  late Cadence _cadence = widget.initial.cadence;
+  late String? _categoryId = widget.initial.categoryId;
 
   bool _isSubmitting = false;
   String? _errorText;
-
-  bool get _isEditing => widget.initial != null;
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     if (_amountFilled) return;
-    final amountMinor = widget.initial?.expectedAmountMinor;
-    if (amountMinor == null) return;
+    final amountMinor = widget.initial.expectedAmountMinor;
     final locale = Localizations.localeOf(context).toString();
     // Shown unsigned: the field asks what the subscription costs, and the sign
     // is this form's own statement that a subscription is an outflow.
@@ -97,13 +94,12 @@ class _SeriesFormModalState extends ConsumerState<SeriesFormModal> {
     }
   }
 
-  Future<void> _submit(List<SeriesAccount> accounts) async {
+  Future<void> _submit() async {
     if (!(_formKey.currentState?.validate() ?? false)) return;
 
     final locale = Localizations.localeOf(context).toString();
     final magnitude = _parseMinorUnits(_amountController.text, locale);
-    final accountId = _accountId ?? accounts.firstOrNull?.id;
-    if (magnitude == null || accountId == null) return;
+    if (magnitude == null) return;
 
     setState(() {
       _isSubmitting = true;
@@ -114,21 +110,13 @@ class _SeriesFormModalState extends ConsumerState<SeriesFormModal> {
     try {
       // Stored negative: a subscription is an outflow, and the ledger's sign
       // convention is not something a form may opt out of.
-      final saved = _isEditing
-          ? await controller.updateSeries(
-              widget.initial!.id,
-              label: _labelController.text.trim(),
-              categoryId: _categoryId,
-              cadence: _cadence,
-              expectedAmountMinor: -magnitude,
-            )
-          : await controller.create(
-              label: _labelController.text.trim(),
-              accountId: accountId,
-              expectedAmountMinor: -magnitude,
-              cadence: _cadence,
-              categoryId: _categoryId,
-            );
+      final saved = await controller.updateSeries(
+        widget.initial.id,
+        label: _labelController.text.trim(),
+        categoryId: _categoryId,
+        cadence: _cadence,
+        expectedAmountMinor: -magnitude,
+      );
       if (!mounted) return;
       Navigator.of(context).pop(saved);
     } catch (error) {
@@ -149,12 +137,13 @@ class _SeriesFormModalState extends ConsumerState<SeriesFormModal> {
     final accounts = ref.watch(subscriptionAccountsProvider).value ?? const [];
     final categories =
         ref.watch(subscriptionCategoriesProvider).value ?? const [];
-    final selectedAccount = _accountId ?? accounts.firstOrNull?.id;
+    final accountName = accounts
+        .where((account) => account.id == widget.initial.accountId)
+        .firstOrNull
+        ?.displayName;
 
     return AppModal(
-      title: _isEditing
-          ? l10n.subscriptionFormEditTitle
-          : l10n.subscriptionFormCreateTitle,
+      title: l10n.subscriptionFormEditTitle,
       width: 480,
       actions: [
         OutlinedButton(
@@ -164,13 +153,9 @@ class _SeriesFormModalState extends ConsumerState<SeriesFormModal> {
         ),
         PrimaryButton(
           key: const Key('seriesFormSubmit'),
-          label: _isEditing
-              ? l10n.subscriptionFormSave
-              : l10n.subscriptionFormSubmit,
+          label: l10n.subscriptionFormSave,
           isLoading: _isSubmitting,
-          onPressed: _isSubmitting || accounts.isEmpty
-              ? null
-              : () => _submit(accounts),
+          onPressed: _isSubmitting ? null : _submit,
         ),
       ],
       child: Form(
@@ -178,13 +163,6 @@ class _SeriesFormModalState extends ConsumerState<SeriesFormModal> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Text(
-              l10n.subscriptionFormIntro,
-              style: Theme.of(
-                context,
-              ).textTheme.bodySmall?.copyWith(color: AppColors.textSecondary),
-            ),
-            const SizedBox(height: AppSpacing.md),
             if (_errorText != null) ...[
               InlineBanner(
                 key: const Key('seriesFormError'),
@@ -210,33 +188,10 @@ class _SeriesFormModalState extends ConsumerState<SeriesFormModal> {
                 Expanded(
                   child: LabeledField(
                     label: l10n.subscriptionFormAccountLabel,
-                    child: accounts.isEmpty
-                        ? ReadOnlyField(value: l10n.subscriptionFormNoAccounts)
-                        // The account is fixed once the series exists: the API
-                        // has no way to move one, and offering a control that
-                        // silently does nothing is worse than not offering it.
-                        : _isEditing
-                        ? ReadOnlyField(
-                            value:
-                                accounts
-                                    .where((a) => a.id == selectedAccount)
-                                    .firstOrNull
-                                    ?.displayName ??
-                                '',
-                          )
-                        : AppSelect<String>(
-                            key: const Key('seriesFormAccount'),
-                            value: selectedAccount ?? accounts.first.id,
-                            onChanged: (value) =>
-                                setState(() => _accountId = value),
-                            items: [
-                              for (final account in accounts)
-                                AppSelectItem(
-                                  value: account.id,
-                                  label: account.displayName,
-                                ),
-                            ],
-                          ),
+                    // The account is fixed once the series exists: the API has
+                    // no way to move one, and offering a control that silently
+                    // does nothing is worse than not offering it.
+                    child: ReadOnlyField(value: accountName ?? ''),
                   ),
                 ),
                 const SizedBox(width: AppSpacing.sm + AppSpacing.xs),

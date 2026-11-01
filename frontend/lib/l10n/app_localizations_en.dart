@@ -2024,9 +2024,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get subscriptionsDetectRunning => 'Detecting…';
 
   @override
-  String get subscriptionsAdd => 'New recurring payment';
-
-  @override
   String subscriptionsDetectResult(int created) {
     String _temp0 = intl.Intl.pluralLogic(
       created,
@@ -2374,10 +2371,6 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get subscriptionDetailHistoryEmpty =>
-      'No charges linked to this payment yet.';
-
-  @override
   String subscriptionDetailChange(String from, String to) {
     return '$from → $to';
   }
@@ -2391,14 +2384,7 @@ class AppLocalizationsEn extends AppLocalizations {
       'We couldn\'t load this recurring payment right now.';
 
   @override
-  String get subscriptionFormCreateTitle => 'New recurring payment';
-
-  @override
   String get subscriptionFormEditTitle => 'Edit recurring payment';
-
-  @override
-  String get subscriptionFormIntro =>
-      'Track a recurring charge detection hasn\'t spotted yet.';
 
   @override
   String get subscriptionFormNameLabel => 'Name';
@@ -2430,14 +2416,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get subscriptionFormCategoryNone => 'None';
 
   @override
-  String get subscriptionFormNoAccounts =>
-      'Create an account first to track a recurring payment in it.';
-
-  @override
   String get subscriptionFormCancel => 'Cancel';
-
-  @override
-  String get subscriptionFormSubmit => 'Create payment';
 
   @override
   String get subscriptionFormSave => 'Save';

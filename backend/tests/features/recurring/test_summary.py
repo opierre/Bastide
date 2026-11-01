@@ -257,7 +257,7 @@ def test_an_irregular_series_is_counted_but_carries_no_burden_or_dates(
         expected_amount_minor=-4500,
         next_expected_date=date(2026, 1, 1),
         is_manual=True,
-        occurrence_count=0,
+        occurrence_count=2,
     )
 
     summary = _summary(owner, tmp_path)

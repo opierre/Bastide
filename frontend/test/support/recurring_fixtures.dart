@@ -137,7 +137,7 @@ class FakeSubscriptionsController extends SubscriptionsController {
     required int expectedAmountMinor,
     required Cadence cadence,
     String? categoryId,
-    List<String> transactionIds = const [],
+    required List<String> transactionIds,
   }) async {
     if (errorOnCreate != null) throw errorOnCreate!;
     createTransactionIds.add(transactionIds);
@@ -149,10 +149,31 @@ class FakeSubscriptionsController extends SubscriptionsController {
       cadence: cadence,
       expectedAmountMinor: expectedAmountMinor,
       isManual: true,
-      occurrenceCount: 0,
+      occurrenceCount: transactionIds.length,
     );
     createCalls.add(created);
     return created;
+  }
+
+  /// `(seriesId, label, expectedAmountMinor)` of each edit the form saved.
+  final updateCalls = <(String, String?, int?)>[];
+  Object? errorOnUpdate;
+
+  @override
+  Future<RecurringSeries> updateSeries(
+    String seriesId, {
+    String? label,
+    String? categoryId,
+    Cadence? cadence,
+    int? expectedAmountMinor,
+  }) async {
+    if (errorOnUpdate != null) throw errorOnUpdate!;
+    updateCalls.add((seriesId, label, expectedAmountMinor));
+    return testSeries(
+      id: seriesId,
+      label: label ?? 'Netflix',
+      expectedAmountMinor: expectedAmountMinor ?? -1549,
+    );
   }
 
   final attachCalls = <(String, List<String>)>[];

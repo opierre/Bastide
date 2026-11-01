@@ -56,7 +56,8 @@ class RecurringSeries(Base):
     next_expected_date: Mapped[date] = mapped_column(Date)
     occurrence_count: Mapped[int] = mapped_column(Integer)
     status: Mapped[str] = mapped_column(String(10))
-    #: True = user-declared; the detector never overwrites it.
+    #: True = created by the user from its charges; the detector never overwrites what
+    #: they declared on it.
     is_manual: Mapped[bool] = mapped_column(Boolean, default=False)
     #: Last observed step in `expected_amount_minor`, signed.
     price_change_minor: Mapped[int | None] = mapped_column(Integer, nullable=True)

@@ -215,16 +215,15 @@ class SubscriptionsController extends AsyncNotifier<SubscriptionsState> {
     }
   }
 
-  /// Declares a subscription detection has not found, linking
-  /// [transactionIds] as its occurrences. Failures are rethrown: the form is
-  /// still open and shows them inline, where the user can fix them.
+  /// Creates a series from [transactionIds], its first occurrences. Failures
+  /// are rethrown: the dialog is still open and shows them inline.
   Future<RecurringSeries> create({
     required String label,
     required String accountId,
     required int expectedAmountMinor,
     required Cadence cadence,
     String? categoryId,
-    List<String> transactionIds = const [],
+    required List<String> transactionIds,
   }) async {
     final created = await _repository.create(
       label: label,

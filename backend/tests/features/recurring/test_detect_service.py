@@ -491,25 +491,6 @@ def test_detecting_twice_leaves_the_same_rows_as_once(client: TestClient, tmp_pa
     assert snapshot() == once
 
 
-def test_a_manual_series_declared_without_charges_is_left_alone(
-    client: TestClient, tmp_path: Path
-) -> None:
-    # Its key is the normalized label, which here happens to be the charges' own key.
-    headers = _register(client)
-    account_id = _create_account(client, headers)
-    series_id = _create_manual(client, headers, account_id, [], label="PRLV SEPA NETFLIX.COM")
-    before = _series(tmp_path, series_id)
-    _insert_subscription(tmp_path, account_id)
-
-    assert _detect(client, headers) == {"created_count": 0, "updated_count": 0}
-
-    after = _series(tmp_path, series_id)
-    assert after.merchant_key == "netflix.com"
-    assert after.occurrence_count == 0
-    assert after.last_seen_date == before.last_seen_date
-    assert _occurrence_rows(tmp_path) == []
-
-
 def test_a_cancelled_manual_series_gains_no_charge(client: TestClient, tmp_path: Path) -> None:
     headers = _register(client)
     account_id = _create_account(client, headers)

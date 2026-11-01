@@ -20,12 +20,11 @@ const _account = SeriesAccount(
 Widget _wrap({
   required FakeSubscriptionsController controller,
   RecurringSeries? initial,
-  List<SeriesAccount> accounts = const [_account],
 }) {
   return ProviderScope(
     overrides: [
       subscriptionsControllerProvider.overrideWith(() => controller),
-      subscriptionAccountsProvider.overrideWith((ref) => accounts),
+      subscriptionAccountsProvider.overrideWith((ref) => const [_account]),
       subscriptionCategoriesProvider.overrideWith((ref) => []),
     ],
     child: MaterialApp(
@@ -33,15 +32,17 @@ Widget _wrap({
       theme: appDarkTheme,
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
-      home: Scaffold(body: SeriesFormModal(initial: initial)),
+      home: Scaffold(
+        body: SeriesFormModal(
+          initial: initial ?? testSeries(id: 's1', label: 'Netflix'),
+        ),
+      ),
     ),
   );
 }
 
 void main() {
-  testWidgets('a declared subscription is stored as a signed outflow', (
-    tester,
-  ) async {
+  testWidgets('saving stores the amount as a signed outflow', (tester) async {
     final controller = FakeSubscriptionsController();
     await tester.pumpWidget(_wrap(controller: controller));
     await tester.pumpAndSettle();
@@ -56,91 +57,77 @@ void main() {
     await tester.tap(find.byKey(const Key('seriesFormSubmit')));
     await tester.pumpAndSettle();
 
-    expect(controller.createCalls, hasLength(1));
-    expect(controller.createCalls.single.expectedAmountMinor, -2999);
-    expect(controller.createCalls.single.label, 'Basic-Fit');
-    expect(controller.createCalls.single.accountId, 'a1');
-    expect(controller.createCalls.single.cadence, Cadence.monthly);
+    final (seriesId, label, amount) = controller.updateCalls.single;
+    expect(seriesId, 's1');
+    expect(label, 'Basic-Fit');
+    expect(amount, -2999);
   });
 
-  testWidgets(
-    'the cadence select offers Irrégulier — the only place it can be chosen',
-    (tester) async {
-      await tester.pumpWidget(_wrap(controller: FakeSubscriptionsController()));
-      await tester.pumpAndSettle();
+  testWidgets('the cadence select offers Irrégulier', (tester) async {
+    await tester.pumpWidget(_wrap(controller: FakeSubscriptionsController()));
+    await tester.pumpAndSettle();
 
-      await tester.tap(find.byKey(const Key('seriesFormCadence')));
-      await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('seriesFormCadence')));
+    await tester.pumpAndSettle();
 
-      for (final label in [
-        'Hebdomadaire',
-        'Mensuel',
-        'Trimestriel',
-        'Annuel',
-        'Irrégulier',
-      ]) {
-        expect(
-          find.text(label),
-          findsWidgets,
-          reason: '$label should be offered',
-        );
-      }
-    },
-  );
+    for (final label in [
+      'Hebdomadaire',
+      'Mensuel',
+      'Trimestriel',
+      'Annuel',
+      'Irrégulier',
+    ]) {
+      expect(
+        find.text(label),
+        findsWidgets,
+        reason: '$label should be offered',
+      );
+    }
+  });
 
   testWidgets('a name and a positive amount are both required', (tester) async {
     final controller = FakeSubscriptionsController();
     await tester.pumpWidget(_wrap(controller: controller));
     await tester.pumpAndSettle();
 
+    await tester.enterText(find.byKey(const Key('seriesFormName')), ' ');
     await tester.enterText(find.byKey(const Key('seriesFormAmount')), '0');
     await tester.tap(find.byKey(const Key('seriesFormSubmit')));
     await tester.pumpAndSettle();
 
     expect(find.text('Donnez un nom à ce paiement.'), findsOneWidget);
     expect(find.text('Saisissez un montant supérieur à zéro.'), findsOneWidget);
-    expect(controller.createCalls, isEmpty);
+    expect(controller.updateCalls, isEmpty);
   });
 
-  testWidgets('a refused create is stated inline and leaves the form open', (
+  testWidgets('a refused save is stated inline and leaves the form open', (
     tester,
   ) async {
     final controller = FakeSubscriptionsController()
-      ..errorOnCreate = const ApiFailure(
-        code: 'RECURRING_SERIES_EXISTS',
-        message: 'taken',
+      ..errorOnUpdate = const ApiFailure(
+        code: 'RECURRING_SERIES_NOT_FOUND',
+        message: 'gone',
       );
     await tester.pumpWidget(_wrap(controller: controller));
     await tester.pumpAndSettle();
 
-    await tester.enterText(find.byKey(const Key('seriesFormName')), 'Netflix');
-    await tester.enterText(find.byKey(const Key('seriesFormAmount')), '15,49');
     await tester.tap(find.byKey(const Key('seriesFormSubmit')));
     await tester.pumpAndSettle();
 
     expect(find.byKey(const Key('seriesFormError')), findsOneWidget);
-    expect(
-      find.text('Ce compte suit déjà un paiement récurrent sous ce nom.'),
-      findsOneWidget,
-    );
     expect(find.byKey(const Key('seriesFormName')), findsOneWidget);
   });
 
-  testWidgets('editing states the account rather than offering to move it', (
+  testWidgets('the account is stated rather than offered for a move', (
     tester,
   ) async {
-    await tester.pumpWidget(
-      _wrap(
-        controller: FakeSubscriptionsController(),
-        initial: testSeries(label: 'Netflix'),
-      ),
-    );
+    await tester.pumpWidget(_wrap(controller: FakeSubscriptionsController()));
     await tester.pumpAndSettle();
 
     expect(find.text('Modifier le paiement récurrent'), findsOneWidget);
-    expect(find.byKey(const Key('seriesFormAccount')), findsNothing);
     expect(find.text('BNP — Compte courant'), findsOneWidget);
     // The amount round-trips unsigned, in the locale's own decimal form.
     expect(find.text('15,49'), findsOneWidget);
+    expect(find.text('Enregistrer'), findsOneWidget);
   });
 }
