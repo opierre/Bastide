@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 
 import '../theme/app_theme.dart';
 import '../theme/tokens.dart';
+import 'chart_scale.dart';
 import 'chart_tooltip.dart';
 
 /// The savings-evolution area line: an iris 2.5px stroke over a 16% iris fill, hairline
@@ -15,8 +16,9 @@ import 'chart_tooltip.dart';
 /// so a month's dot stands over its own label instead of drifting toward the slot boundary.
 /// Hovering a slot rings its point and, when [tooltips] are given, names its figure in a card
 /// placed clear of the line — see [placeAreaLineTooltip].
-/// Given a [valueLabel], the min / mid / max gridlines are labelled in a gutter on the left,
-/// as on the Synthèse's « Patrimoine net » chart.
+/// Given a [valueLabel], every gridline is labelled in a gutter on the left, as on the
+/// Synthèse's « Patrimoine net » chart. The value range is padded past the series' min and
+/// max to clean tick values (see [ChartScale]), so the extremes sit inside the plot.
 ///
 /// Deliberately not animated — the spec allows only the spinner and skeleton keyframes, so a
 /// chart appears drawn rather than growing in.
@@ -30,10 +32,12 @@ class AreaLine extends StatefulWidget {
     this.gridlines = 4,
     this.color = AppColors.iris,
     this.markZero = false,
+    this.minStep = 1,
   });
 
-  /// One value per point, oldest first. Rendered on its own min/max, so a series that never
-  /// approaches zero still fills the plot rather than flattening against the top.
+  /// One value per point, oldest first. Rendered on its own padded range rather than from
+  /// zero, so a series that never approaches zero still fills the plot rather than
+  /// flattening against the top.
   final List<num> values;
 
   /// Axis label per point — same length as [values].
@@ -59,6 +63,10 @@ class AreaLine extends StatefulWidget {
   /// and the page must say so (`docs/design/16` §Row 2); a series that stays on one side is
   /// drawn as usual.
   final bool markZero;
+
+  /// The smallest gap between two gridlines, in the units of [values] — see
+  /// [ChartScale.of]. A chart of minor units passes 100.
+  final num minStep;
 
   /// Height reserved beneath the plot for the month axis.
   static const axisHeight = 22.0;
@@ -87,11 +95,15 @@ class _AreaLineState extends State<AreaLine> {
     final textTheme = Theme.of(context).textTheme;
     final valueLabel = widget.valueLabel;
     final gutter = valueLabel == null ? 0.0 : AreaLine.valueGutter;
-    // Bottom to top: the series' min, mid and max, where the painter draws them — or the one
-    // level a flat series sits on.
+    final scale = ChartScale.of(
+      values,
+      intervals: widget.gridlines,
+      minStep: widget.minStep,
+    );
+    // Bottom to top: one label per gridline, where the painter draws them.
     final levels = values.length < 2 || valueLabel == null
         ? const <String>[]
-        : _levels(values).map(valueLabel).toList();
+        : scale.ticks.map(valueLabel).toList();
 
     // The axis is a fixed band under a flexible plot, so a card shorter than the band has
     // nothing left to give it and the column overflows its own box. On a short window the
@@ -113,6 +125,7 @@ class _AreaLineState extends State<AreaLine> {
                       size: Size.infinite,
                       painter: _AreaLinePainter(
                         values: values,
+                        scale: scale,
                         gridlines: widget.gridlines,
                         color: widget.color,
                         markZero: widget.markZero,
@@ -148,6 +161,7 @@ class _AreaLineState extends State<AreaLine> {
                       child: CustomSingleChildLayout(
                         delegate: _TooltipPlacement(
                           values: values,
+                          scale: scale,
                           gutter: gutter,
                           hovered: hovered,
                         ),
@@ -219,11 +233,13 @@ class _AreaLineState extends State<AreaLine> {
 class _TooltipPlacement extends SingleChildLayoutDelegate {
   _TooltipPlacement({
     required this.values,
+    required this.scale,
     required this.gutter,
     required this.hovered,
   });
 
   final List<num> values;
+  final ChartScale scale;
   final double gutter;
   final int hovered;
 
@@ -234,7 +250,7 @@ class _TooltipPlacement extends SingleChildLayoutDelegate {
   @override
   Offset getPositionForChild(Size size, Size childSize) => placeAreaLineTooltip(
     area: Offset.zero & size,
-    points: _points(values, _plotRect(size, gutter)),
+    points: _points(values, _plotRect(size, gutter), scale),
     hovered: hovered,
     tooltip: childSize,
     leftBound: gutter,
@@ -243,6 +259,7 @@ class _TooltipPlacement extends SingleChildLayoutDelegate {
   @override
   bool shouldRelayout(_TooltipPlacement oldDelegate) =>
       !listEquals(oldDelegate.values, values) ||
+      oldDelegate.scale != scale ||
       oldDelegate.gutter != gutter ||
       oldDelegate.hovered != hovered;
 }
@@ -354,35 +371,19 @@ Rect _plotRect(Size size, double gutter) => Rect.fromLTWH(
   size.height - _AreaLinePainter._dotRadius * 2,
 );
 
-/// Where each value is drawn in [plot], on the series' own min / max. A flat series has no
-/// range to normalise against, so it sits on the plot's centre line rather than divide by zero.
-List<Offset> _points(List<num> values, Rect plot) {
-  if (values.isEmpty) return const [];
-  final min = values.reduce((a, b) => a < b ? a : b).toDouble();
-  final max = values.reduce((a, b) => a > b ? a : b).toDouble();
-  final range = max - min;
-  return [
-    for (var i = 0; i < values.length; i++)
-      Offset(
-        plot.left + AreaLine.pointX(i, values.length, plot.width),
-        range == 0
-            ? plot.center.dy
-            : plot.bottom - plot.height * ((values[i] - min) / range),
-      ),
-  ];
-}
-
-/// The values the min / mid / max gridlines stand for, bottom to top — just one for a flat
-/// series, whose line is centred rather than spread across the plot.
-List<num> _levels(List<num> values) {
-  final min = values.reduce((a, b) => a < b ? a : b);
-  final max = values.reduce((a, b) => a > b ? a : b);
-  return min == max ? [min] : [min, (min + max) / 2, max];
-}
+/// Where each value is drawn in [plot], on the padded [scale] of the series.
+List<Offset> _points(List<num> values, Rect plot, ChartScale scale) => [
+  for (var i = 0; i < values.length; i++)
+    Offset(
+      plot.left + AreaLine.pointX(i, values.length, plot.width),
+      scale.y(values[i], plot),
+    ),
+];
 
 class _AreaLinePainter extends CustomPainter {
   _AreaLinePainter({
     required this.values,
+    required this.scale,
     required this.gridlines,
     required this.color,
     required this.markZero,
@@ -393,6 +394,7 @@ class _AreaLinePainter extends CustomPainter {
   });
 
   final List<num> values;
+  final ChartScale scale;
   final int gridlines;
   final Color color;
   final bool markZero;
@@ -401,7 +403,8 @@ class _AreaLinePainter extends CustomPainter {
   /// Left inset of the plot, holding the value axis; zero without one.
   final double gutter;
 
-  /// The value axis' labels, bottom to top — see [_levels]. Empty without an axis.
+  /// The value axis' labels, one per [ChartScale.ticks], bottom to top. Empty without
+  /// an axis.
   final List<String> levelLabels;
   final TextStyle labelStyle;
 
@@ -420,17 +423,14 @@ class _AreaLinePainter extends CustomPainter {
     final grid = Paint()
       ..color = AppColors.borderSubtle
       ..strokeWidth = 1;
-    for (var i = 0; i <= gridlines; i++) {
-      final y = plot.top + plot.height * (i / gridlines);
+    for (final tick in scale.ticks) {
+      final y = scale.y(tick, plot);
       canvas.drawLine(Offset(plot.left, y), Offset(size.width, y), grid);
     }
 
-    // Min at the bottom gridline, max at the top, mid halfway — the one level of a flat
-    // series sits at the centre, where its line is drawn.
-    for (var i = 0; i < levelLabels.length; i++) {
-      final y = levelLabels.length == 1
-          ? plot.center.dy
-          : plot.bottom - plot.height * (i / (levelLabels.length - 1));
+    // Each label beside the gridline it names, bottom to top.
+    for (var i = 0; i < levelLabels.length && i < scale.ticks.length; i++) {
+      final y = scale.y(scale.ticks[i], plot);
       final label = TextPainter(
         text: TextSpan(text: levelLabels[i], style: labelStyle),
         textDirection: TextDirection.ltr,
@@ -444,17 +444,16 @@ class _AreaLinePainter extends CustomPainter {
 
     if (values.length < 2) return;
 
-    final min = values.reduce((a, b) => a < b ? a : b).toDouble();
-    final max = values.reduce((a, b) => a > b ? a : b).toDouble();
-    final range = max - min;
-    final points = _points(values, plot);
+    final min = values.fold<num>(values.first, math.min);
+    final max = values.fold<num>(values.first, math.max);
+    final points = _points(values, plot, scale);
 
     final line = Path()..addPolygon(points, false);
-    final crossesZero = markZero && range > 0 && min < 0 && max > 0;
+    final crossesZero = markZero && min < 0 && max > 0;
     if (crossesZero) {
       // The fill closes on the zero line rather than the plot's floor, then is split there:
       // what lies above it is balance, what lies below it is overdraft.
-      final zeroY = plot.bottom - plot.height * (-min / range);
+      final zeroY = scale.y(0, plot);
       final area = Path.from(line)
         ..lineTo(points.last.dx, zeroY)
         ..lineTo(points.first.dx, zeroY)
@@ -524,6 +523,7 @@ class _AreaLinePainter extends CustomPainter {
   @override
   bool shouldRepaint(_AreaLinePainter oldDelegate) =>
       !listEquals(oldDelegate.values, values) ||
+      oldDelegate.scale != scale ||
       oldDelegate.gridlines != gridlines ||
       oldDelegate.color != color ||
       oldDelegate.markZero != markZero ||
