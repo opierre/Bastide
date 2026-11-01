@@ -1368,18 +1368,6 @@
   "@dashboardSavingsTrendAverage": {
     "description": "Caption under the savings chart's headline: the average a month put aside over the window."
   },
-  "dashboardSavingsTrendAverageTooltip": "Moyenne sur {count} mois : {amount}",
-  "@dashboardSavingsTrendAverageTooltip": {
-    "description": "Last line of each month's tooltip on the savings chart: the average the window's months put aside, drawn as the dotted line. count is how many months it spans (up to 12), amount a signed, formatted sum.",
-    "placeholders": {
-      "count": {
-        "type": "int"
-      },
-      "amount": {
-        "type": "String"
-      }
-    }
-  },
   "dashboardSavingsViewBars": "Barres",
   "@dashboardSavingsViewBars": {
     "description": "Savings chart view switch: one bar per month."
