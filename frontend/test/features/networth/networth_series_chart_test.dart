@@ -1,5 +1,6 @@
 import 'package:bastide/core/api/api_client.dart';
 import 'package:bastide/core/theme/app_theme.dart';
+import 'package:bastide/core/widgets/chart_scale.dart';
 import 'package:bastide/features/networth/application/networth_controller.dart';
 import 'package:bastide/features/networth/domain/networth_summary.dart';
 import 'package:bastide/features/networth/presentation/declared_balances_modal.dart';
@@ -53,6 +54,22 @@ void _useDesktopSurface(WidgetTester tester) {
 String? _text(WidgetTester tester, String key) =>
     tester.widget<Text>(find.byKey(Key(key))).data;
 
+/// Whether [box] covers any point of [points] or any stretch of the line
+/// joining them, sampled every pixel or so.
+bool _touchesLine(Rect box, List<Offset> points) {
+  for (var i = 0; i < points.length; i++) {
+    if (box.contains(points[i])) return true;
+    if (i == 0) continue;
+    final a = points[i - 1];
+    final b = points[i];
+    final steps = (b - a).distance.ceil();
+    for (var s = 0; s <= steps; s++) {
+      if (box.contains(Offset.lerp(a, b, s / steps)!)) return true;
+    }
+  }
+  return false;
+}
+
 void main() {
   testWidgets('the series draws the API months with their range', (
     tester,
@@ -96,7 +113,68 @@ void main() {
     },
   );
 
-  testWidgets('hovering a month names its net worth', (tester) async {
+  testWidgets('hovering a month names its net worth clear of its point', (
+    tester,
+  ) async {
+    _useDesktopSurface(tester);
+    await tester.pumpWidget(_wrap(testNetworthSummary()));
+    await tester.pumpAndSettle();
+
+    final gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    addTearDown(gesture.removePointer);
+    await gesture.addPointer(location: Offset.zero);
+    final slot = find.byKey(const Key('networthSeriesSlot-11'));
+    await gesture.moveTo(tester.getCenter(slot));
+    // Shown at once, as the other charts' cards are: no Tooltip delay.
+    await tester.pump();
+
+    final card = find.byKey(const Key('networthSeriesTooltip'));
+    expect(card, findsOneWidget);
+    expect(find.byType(Tooltip), findsNothing);
+    expect(
+      find.descendant(
+        of: card,
+        matching: find.textContaining(
+          'Mai 2026\n282 670,79 €',
+          findRichText: true,
+        ),
+      ),
+      findsOneWidget,
+    );
+
+    // Mirrors the painter: twelve contiguous months spread across the plot,
+    // right of the 56px gutter, inset by the 4px last dot, above the 22px
+    // month axis. The card keeps off the line and off the axis.
+    final chart = tester.getRect(find.byKey(const Key('networthSeriesPlot')));
+    final plot = Rect.fromLTRB(
+      chart.left + 56,
+      chart.top + 4,
+      chart.right - 4,
+      chart.bottom - 22,
+    );
+    final values = tester
+        .widget<NetworthSeriesPlot>(find.byKey(const Key('networthSeriesPlot')))
+        .values;
+    final scale = ChartScale.of(values, intervals: 2, minStep: 100);
+    final points = [
+      for (var i = 0; i < values.length; i++)
+        Offset(
+          plot.left + plot.width * i / (values.length - 1),
+          scale.y(values[i], plot),
+        ),
+    ];
+    final cardRect = tester.getRect(card);
+    expect(_touchesLine(cardRect, points), isFalse);
+    expect(cardRect.bottom, lessThanOrEqualTo(plot.bottom));
+    expect(chart.contains(cardRect.topLeft), isTrue);
+
+    await gesture.moveTo(Offset.zero);
+    await tester.pump();
+    expect(card, findsNothing);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('hovering another month moves the card to it', (tester) async {
     _useDesktopSurface(tester);
     await tester.pumpWidget(_wrap(testNetworthSummary()));
     await tester.pumpAndSettle();
@@ -105,15 +183,15 @@ void main() {
     addTearDown(gesture.removePointer);
     await gesture.addPointer(location: Offset.zero);
     await gesture.moveTo(
-      tester.getCenter(find.byKey(const Key('networthSeriesTooltip-11'))),
+      tester.getCenter(find.byKey(const Key('networthSeriesSlot-0'))),
     );
-    await tester.pump(const Duration(seconds: 1));
+    await tester.pump();
 
     expect(
-      find.textContaining('Mai 2026\n282 670,79 €', findRichText: true),
+      find.textContaining('Juin 2025\n', findRichText: true),
       findsOneWidget,
     );
-    expect(tester.takeException(), isNull);
+    expect(find.textContaining('Mai 2026\n', findRichText: true), findsNothing);
   });
 
   testWidgets('a month the API omitted is absent, never plotted as zero', (
