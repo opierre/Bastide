@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/tokens.dart';
 import '../../../core/widgets/area_line.dart';
+import '../../../core/widgets/chart_tooltip.dart';
 import '../application/dashboard_controller.dart';
 
 /// What each month put aside, drawn around a zero line in one of two [SavingsChartView]s.
@@ -195,7 +196,7 @@ class _SavingsChartState extends State<SavingsChart> {
                 top: up ? 0 : clearance,
                 bottom: up ? clearance : 0,
               ),
-              child: _ChartTooltip(
+              child: ChartTooltip(
                 key: Key('savingsChartTooltip-$hovered'),
                 message: tooltips[hovered],
               ),
@@ -227,26 +228,6 @@ Offset _markPoint(List<int> values, _Scale scale, int index, Rect plot) =>
       plot.left + AreaLine.pointX(index, values.length, plot.width),
       scale.y(values[index].toDouble(), plot),
     );
-
-/// The hovered month's tooltip, styled from the app's [TooltipTheme] so it matches every
-/// other tooltip.
-class _ChartTooltip extends StatelessWidget {
-  const _ChartTooltip({super.key, required this.message});
-
-  final InlineSpan message;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = TooltipTheme.of(context);
-    return DecoratedBox(
-      decoration: theme.decoration ?? const BoxDecoration(),
-      child: Padding(
-        padding: theme.padding ?? EdgeInsets.zero,
-        child: Text.rich(TextSpan(children: [message]), style: theme.textStyle),
-      ),
-    );
-  }
-}
 
 /// The plot's value range: zero always inside it, and headroom past the
 /// tallest bar either way so none touches the card's edge.

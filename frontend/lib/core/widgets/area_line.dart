@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 
 import '../theme/app_theme.dart';
 import '../theme/tokens.dart';
+import 'chart_tooltip.dart';
 
 /// The savings-evolution area line: an iris 2.5px stroke over a 16% iris fill, hairline
 /// gridlines behind it, a dot on the current (last) point, and a month axis beneath
@@ -150,7 +151,10 @@ class _AreaLineState extends State<AreaLine> {
                           gutter: gutter,
                           hovered: hovered,
                         ),
-                        child: _TooltipCard(message: tooltips[hovered]),
+                        child: ChartTooltip(
+                          key: const Key('areaLineTooltip'),
+                          message: tooltips[hovered],
+                        ),
                       ),
                     ),
                 ],
@@ -208,25 +212,6 @@ class _AreaLineState extends State<AreaLine> {
         ),
     ],
   );
-}
-
-/// The hover card, dressed as the app's tooltips are (the theme's [TooltipThemeData]) so it
-/// reads as the same overlay as the dashboard's charts.
-class _TooltipCard extends StatelessWidget {
-  const _TooltipCard({required this.message});
-
-  final InlineSpan message;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = TooltipTheme.of(context);
-    return Container(
-      key: const Key('areaLineTooltip'),
-      padding: theme.padding,
-      decoration: theme.decoration,
-      child: Text.rich(TextSpan(children: [message]), style: theme.textStyle),
-    );
-  }
 }
 
 /// Lays the hover card out where [placeAreaLineTooltip] says, from the same geometry the
