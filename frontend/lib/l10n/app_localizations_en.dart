@@ -4427,4 +4427,122 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get accountDetailNoTransactions => 'No transactions yet';
+
+  @override
+  String get markRecurringAction => 'Mark as recurring';
+
+  @override
+  String get markRecurringTitle => 'Mark as recurring';
+
+  @override
+  String get markRecurringIntro =>
+      'These are the transactions Bastide would group together. Untick any that don\'t belong.';
+
+  @override
+  String get markRecurringConfidenceHigh => 'High confidence';
+
+  @override
+  String get markRecurringConfidenceMedium => 'Medium confidence';
+
+  @override
+  String get markRecurringConfidenceLow => 'Low confidence';
+
+  @override
+  String markRecurringReasonOccurrences(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count transactions found',
+      one: '1 transaction found',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get markRecurringReasonCadenceWeekly => 'Weekly rhythm recognised';
+
+  @override
+  String get markRecurringReasonCadenceMonthly => 'Monthly rhythm recognised';
+
+  @override
+  String get markRecurringReasonCadenceQuarterly =>
+      'Quarterly rhythm recognised';
+
+  @override
+  String get markRecurringReasonCadenceYearly => 'Yearly rhythm recognised';
+
+  @override
+  String get markRecurringReasonAmountStable => 'Steady amount';
+
+  @override
+  String get markRecurringReasonAmountChanged => 'The amount changed recently';
+
+  @override
+  String get markRecurringReasonAmountOutsideTolerance =>
+      'One amount differs from the others';
+
+  @override
+  String get markRecurringReasonGapOutsideTolerance =>
+      'One gap breaks the rhythm';
+
+  @override
+  String get markRecurringReasonTooFewOccurrences => 'Fewer than three charges';
+
+  @override
+  String get markRecurringReasonNoRhythm => 'No regular rhythm';
+
+  @override
+  String get markRecurringLowWarning =>
+      'No regular rhythm was found. You can still save the series: it will be irregular.';
+
+  @override
+  String get markRecurringCadenceLabel => 'Proposed cadence';
+
+  @override
+  String get markRecurringAmountLabel => 'Expected amount';
+
+  @override
+  String markRecurringTickedCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count transactions ticked',
+      one: '1 transaction ticked',
+      zero: 'No transaction ticked',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String markRecurringTickedRange(String from, String to) {
+    return 'from $from to $to';
+  }
+
+  @override
+  String get markRecurringNoneTicked =>
+      'Tick at least one transaction to save the series.';
+
+  @override
+  String get markRecurringSave => 'Save series';
+
+  @override
+  String get markRecurringCancel => 'Cancel';
+
+  @override
+  String get markRecurringLoadError => 'The preview could not be prepared.';
+
+  @override
+  String get markRecurringRetry => 'Retry';
+
+  @override
+  String get subscriptionErrorPreviewInflow =>
+      'Only an expense can be marked as recurring.';
+
+  @override
+  String get subscriptionErrorTransactionsInvalid =>
+      'Some transactions cannot be linked to this series.';
+
+  @override
+  String get subscriptionErrorTransactionLinked =>
+      'Some transactions already belong to a series.';
 }

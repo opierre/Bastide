@@ -89,6 +89,7 @@ class FakeSubscriptionsController extends SubscriptionsController {
 
   final statusCalls = <(String, SeriesStatus)>[];
   final createCalls = <RecurringSeries>[];
+  final createTransactionIds = <List<String>>[];
   Object? errorOnStatusChange;
   Object? errorOnCreate;
 
@@ -136,8 +137,10 @@ class FakeSubscriptionsController extends SubscriptionsController {
     required int expectedAmountMinor,
     required Cadence cadence,
     String? categoryId,
+    List<String> transactionIds = const [],
   }) async {
     if (errorOnCreate != null) throw errorOnCreate!;
+    createTransactionIds.add(transactionIds);
     final created = testSeries(
       id: 'created',
       accountId: accountId,

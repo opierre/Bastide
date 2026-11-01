@@ -5836,5 +5836,143 @@
   "accountDetailNoTransactions": "Aucune opération pour l’instant",
   "@accountDetailNoTransactions": {
     "description": "Dashed row in the recent transactions card of an account with none."
+  },
+  "markRecurringAction": "Marquer comme récurrent",
+  "@markRecurringAction": {
+    "description": "Tooltip of the row action opening the « Marquer comme récurrent » dialog on an outflow."
+  },
+  "markRecurringTitle": "Marquer comme récurrent",
+  "@markRecurringTitle": {
+    "description": "Title of the dialog previewing the series a transaction would start."
+  },
+  "markRecurringIntro": "Voici les opérations que Bastide regrouperait. Décochez celles qui n'en font pas partie.",
+  "@markRecurringIntro": {
+    "description": "Intro line of the mark-as-recurring dialog."
+  },
+  "markRecurringConfidenceHigh": "Confiance élevée",
+  "@markRecurringConfidenceHigh": {
+    "description": "Confidence chip: the matches pass the detector as they are."
+  },
+  "markRecurringConfidenceMedium": "Confiance moyenne",
+  "@markRecurringConfidenceMedium": {
+    "description": "Confidence chip: a cadence is recognised but the evidence is thin."
+  },
+  "markRecurringConfidenceLow": "Confiance faible",
+  "@markRecurringConfidenceLow": {
+    "description": "Confidence chip: no rhythm was found."
+  },
+  "markRecurringReasonOccurrences": "{count, plural, =1{1 opération trouvée} other{{count} opérations trouvées}}",
+  "@markRecurringReasonOccurrences": {
+    "description": "Reason: how many matching transactions the preview found.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "markRecurringReasonCadenceWeekly": "Rythme hebdomadaire reconnu",
+  "@markRecurringReasonCadenceWeekly": {
+    "description": "Reason: the gaps match a weekly cadence."
+  },
+  "markRecurringReasonCadenceMonthly": "Rythme mensuel reconnu",
+  "@markRecurringReasonCadenceMonthly": {
+    "description": "Reason: the gaps match a monthly cadence."
+  },
+  "markRecurringReasonCadenceQuarterly": "Rythme trimestriel reconnu",
+  "@markRecurringReasonCadenceQuarterly": {
+    "description": "Reason: the gaps match a quarterly cadence."
+  },
+  "markRecurringReasonCadenceYearly": "Rythme annuel reconnu",
+  "@markRecurringReasonCadenceYearly": {
+    "description": "Reason: the gaps match a yearly cadence."
+  },
+  "markRecurringReasonAmountStable": "Montant stable",
+  "@markRecurringReasonAmountStable": {
+    "description": "Reason: every amount sits within tolerance."
+  },
+  "markRecurringReasonAmountChanged": "Le montant a changé récemment",
+  "@markRecurringReasonAmountChanged": {
+    "description": "Reason: the newest charge is a price change."
+  },
+  "markRecurringReasonAmountOutsideTolerance": "Un montant s'écarte des autres",
+  "@markRecurringReasonAmountOutsideTolerance": {
+    "description": "Reason: one amount is outside tolerance."
+  },
+  "markRecurringReasonGapOutsideTolerance": "Un intervalle s'écarte du rythme",
+  "@markRecurringReasonGapOutsideTolerance": {
+    "description": "Reason: one gap between charges is outside tolerance."
+  },
+  "markRecurringReasonTooFewOccurrences": "Moins de trois prélèvements",
+  "@markRecurringReasonTooFewOccurrences": {
+    "description": "Reason: fewer charges than detection needs."
+  },
+  "markRecurringReasonNoRhythm": "Aucun rythme régulier",
+  "@markRecurringReasonNoRhythm": {
+    "description": "Reason: no cadence could be recognised."
+  },
+  "markRecurringLowWarning": "Aucun rythme régulier n'a été trouvé. Vous pouvez tout de même enregistrer la série : elle sera irrégulière.",
+  "@markRecurringLowWarning": {
+    "description": "Warning banner shown when the preview's confidence is low."
+  },
+  "markRecurringCadenceLabel": "Rythme proposé",
+  "@markRecurringCadenceLabel": {
+    "description": "Label of the proposed cadence in the dialog summary."
+  },
+  "markRecurringAmountLabel": "Montant attendu",
+  "@markRecurringAmountLabel": {
+    "description": "Label of the proposed amount in the dialog summary."
+  },
+  "markRecurringTickedCount": "{count, plural, =0{Aucune opération cochée} =1{1 opération cochée} other{{count} opérations cochées}}",
+  "@markRecurringTickedCount": {
+    "description": "Summary line: how many transactions saving will link.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "markRecurringTickedRange": "du {from} au {to}",
+  "@markRecurringTickedRange": {
+    "description": "Summary line: the dates of the oldest and newest ticked transactions.",
+    "placeholders": {
+      "from": {
+        "type": "String"
+      },
+      "to": {
+        "type": "String"
+      }
+    }
+  },
+  "markRecurringNoneTicked": "Cochez au moins une opération pour enregistrer la série.",
+  "@markRecurringNoneTicked": {
+    "description": "Hint shown when every transaction is unticked."
+  },
+  "markRecurringSave": "Enregistrer la série",
+  "@markRecurringSave": {
+    "description": "Primary button creating the series from the ticked transactions."
+  },
+  "markRecurringCancel": "Annuler",
+  "@markRecurringCancel": {
+    "description": "Closes the dialog without saving."
+  },
+  "markRecurringLoadError": "Impossible de préparer l'aperçu.",
+  "@markRecurringLoadError": {
+    "description": "Shown when the preview request failed."
+  },
+  "markRecurringRetry": "Réessayer",
+  "@markRecurringRetry": {
+    "description": "Retries the preview request."
+  },
+  "subscriptionErrorPreviewInflow": "Seule une dépense peut être marquée comme récurrente.",
+  "@subscriptionErrorPreviewInflow": {
+    "description": "Error RECURRING_PREVIEW_INFLOW: a preview was asked for an inflow."
+  },
+  "subscriptionErrorTransactionsInvalid": "Certaines opérations ne peuvent pas être rattachées à cette série.",
+  "@subscriptionErrorTransactionsInvalid": {
+    "description": "Error RECURRING_TRANSACTIONS_INVALID."
+  },
+  "subscriptionErrorTransactionLinked": "Certaines opérations appartiennent déjà à une série.",
+  "@subscriptionErrorTransactionLinked": {
+    "description": "Error RECURRING_TRANSACTION_LINKED."
   }
 }
