@@ -1,14 +1,24 @@
 import 'package:flutter/material.dart';
 
+import '../theme/app_theme.dart';
 import '../theme/tokens.dart';
 
 /// One choice offered by an [AppSelect].
 @immutable
 class AppSelectItem<T> {
-  const AppSelectItem({required this.value, required this.label, this.leading});
+  const AppSelectItem({
+    required this.value,
+    required this.label,
+    this.leading,
+    this.subtitle,
+  });
 
   final T value;
   final String label;
+
+  /// Optional secondary line under the label in the open menu only (a
+  /// property's address, say); the closed field states the label alone.
+  final String? subtitle;
 
   /// Optional glyph shown before the label (an institution monogram, say).
   final Widget? leading;
@@ -246,14 +256,35 @@ class _Option<T> extends StatelessWidget {
             const SizedBox(width: AppSpacing.sm),
           ],
           Expanded(
-            child: Text(
-              item.label,
-              overflow: TextOverflow.ellipsis,
-              // The same style the anchor states the current choice in, so a
-              // row and the closed field read as the same text, not as a
-              // summary and a smaller list beneath it.
-              style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                color: isSelected ? AppColors.iris : AppColors.textPrimary,
+            child: Padding(
+              // A two-line row keeps the single-line row's breathing room.
+              padding: EdgeInsets.symmetric(
+                vertical: item.subtitle == null ? 0 : AppSpacing.xs,
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    item.label,
+                    overflow: TextOverflow.ellipsis,
+                    // The same style the anchor states the current choice in,
+                    // so a row and the closed field read as the same text, not
+                    // as a summary and a smaller list beneath it.
+                    style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                      color: isSelected
+                          ? AppColors.iris
+                          : AppColors.textPrimary,
+                    ),
+                  ),
+                  if (item.subtitle case final subtitle?)
+                    Text(
+                      subtitle,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: AppTextStyles.helper.copyWith(fontSize: 12),
+                    ),
+                ],
               ),
             ),
           ),

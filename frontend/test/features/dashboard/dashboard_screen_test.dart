@@ -408,12 +408,12 @@ void main() {
     },
   );
 
-  for (final (locale, caption, tooltipLabel) in [
-    ('fr', 'en moyenne par mois', 'Moyenne sur 12 mois : '),
-    ('en', 'on average per month', '12-month average: '),
+  for (final (locale, caption, lastMonth) in [
+    ('fr', 'en moyenne par mois', 'Mai 2026'),
+    ('en', 'on average per month', 'May 2026'),
   ]) {
     testWidgets(
-      '$locale: both views draw the 12-month average, named by legend and tooltip',
+      '$locale: both views draw the 12-month average, named by legend, not tooltip',
       (tester) async {
         _useDesktopSurface(tester);
         await tester.pumpWidget(_wrap(state: _state(), locale: Locale(locale)));
@@ -449,9 +449,33 @@ void main() {
           await tester.pumpAndSettle();
           expect(chart().view, view);
           expect(chart().average, 29917);
-          for (final tooltip in chart().tooltips!) {
-            expect(tooltip.toPlainText(), endsWith('$tooltipLabel$average'));
+          // Hovering a month names that month and its amount, nothing more: the
+          // average is the dotted line and the headline, not a tooltip line.
+          final tooltips = chart().tooltips!;
+          final values = chart().values;
+          for (var i = 0; i < tooltips.length; i++) {
+            final text = tooltips[i].toPlainText();
+            expect(text.split('\n'), hasLength(2));
+            expect(
+              text,
+              endsWith(
+                formatAmount(
+                  amountMinor: values[i],
+                  currency: 'EUR',
+                  locale: locale,
+                  showPositiveSign: true,
+                ),
+              ),
+            );
+            expect(text, isNot(contains(average)));
           }
+          final lastAmount = formatAmount(
+            amountMinor: 63565,
+            currency: 'EUR',
+            locale: locale,
+            showPositiveSign: true,
+          );
+          expect(tooltips.last.toPlainText(), '$lastMonth\n$lastAmount');
         }
         expect(tester.takeException(), isNull);
       },

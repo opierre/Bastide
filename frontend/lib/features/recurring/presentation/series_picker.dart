@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/theme/tokens.dart';
 import '../../../core/widgets/amount_text.dart';
-import '../../../core/widgets/inline_banner.dart';
 import '../../../core/widgets/monogram_avatar.dart';
 import '../../../core/widgets/state_views.dart';
 import '../../../l10n/app_localizations.dart';
@@ -14,20 +13,12 @@ import 'recurring_labels.dart';
 
 /// The « Ajouter à une série existante… » step of the mark-as-recurring
 /// dialog: the user's series on every account, searchable by label, each with
-/// its account, cadence and expected amount. Tapping one hands it to [onPick].
+/// its account, cadence and expected amount. Tapping one only selects it: the
+/// dialog's « Confirmer » adds the transaction.
 class SeriesPickerBody extends ConsumerWidget {
-  const SeriesPickerBody({
-    super.key,
-    required this.onPick,
-    required this.enabled,
-    this.errorText,
-  });
+  const SeriesPickerBody({super.key, required this.enabled});
 
-  final ValueChanged<RecurringSeries> onPick;
   final bool enabled;
-
-  /// Why the last pick failed, shown inline so the user can try another.
-  final String? errorText;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -44,13 +35,6 @@ class SeriesPickerBody extends ConsumerWidget {
           style: textTheme.bodySmall?.copyWith(color: AppColors.textSecondary),
         ),
         const SizedBox(height: AppSpacing.md),
-        if (errorText != null) ...[
-          InlineBanner(
-            key: const Key('seriesPickerError'),
-            message: errorText!,
-          ),
-          const SizedBox(height: AppSpacing.md),
-        ],
         PickerSearchField(
           fieldKey: const Key('seriesPickerSearch'),
           hint: l10n.seriesPickerSearchHint,
@@ -80,7 +64,12 @@ class SeriesPickerBody extends ConsumerWidget {
                 for (final series in value.visible)
                   _SeriesPickRow(
                     series: series,
-                    onTap: enabled ? () => onPick(series) : null,
+                    selected: series.id == value.selectedId,
+                    onTap: enabled
+                        ? () => ref
+                              .read(seriesPickerControllerProvider.notifier)
+                              .select(series.id)
+                        : null,
                   ),
               ],
             ),
@@ -93,9 +82,14 @@ class SeriesPickerBody extends ConsumerWidget {
 }
 
 class _SeriesPickRow extends ConsumerWidget {
-  const _SeriesPickRow({required this.series, required this.onTap});
+  const _SeriesPickRow({
+    required this.series,
+    required this.selected,
+    required this.onTap,
+  });
 
   final RecurringSeries series;
+  final bool selected;
   final VoidCallback? onTap;
 
   @override
@@ -108,49 +102,65 @@ class _SeriesPickRow extends ConsumerWidget {
         .where((candidate) => candidate.id == series.accountId)
         .firstOrNull;
 
-    return InkWell(
-      key: Key('seriesPickerRow-${series.id}'),
-      onTap: onTap,
-      hoverColor: AppColors.surfaceRowHover,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(
-          horizontal: AppSpacing.sm + AppSpacing.xs,
-          vertical: AppSpacing.sm,
-        ),
-        child: Row(
-          children: [
-            MonogramAvatar(name: series.label, size: 28),
-            const SizedBox(width: AppSpacing.sm + AppSpacing.xs),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    series.label,
-                    style: textTheme.bodyMedium,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  Text(
-                    l10n.seriesPickerRowDetail(
-                      account?.displayName ?? '',
-                      cadenceLabel(l10n, series.cadence),
-                      // What the subscription costs, unsigned, as the panel
-                      // prints it everywhere else.
-                      formatAmount(
-                        amountMinor: series.expectedAmountMinor.abs(),
-                        currency: series.currency,
-                        locale: locale,
+    return Semantics(
+      selected: selected,
+      child: Material(
+        color: selected ? AppColors.irisSoft : Colors.transparent,
+        child: InkWell(
+          key: Key('seriesPickerRow-${series.id}'),
+          onTap: onTap,
+          hoverColor: AppColors.surfaceRowHover,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppSpacing.sm + AppSpacing.xs,
+              vertical: AppSpacing.sm,
+            ),
+            child: Row(
+              children: [
+                MonogramAvatar(name: series.label, size: 28),
+                const SizedBox(width: AppSpacing.sm + AppSpacing.xs),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        series.label,
+                        style: textTheme.bodyMedium,
+                        overflow: TextOverflow.ellipsis,
                       ),
-                    ),
-                    style: textTheme.bodySmall?.copyWith(
-                      color: AppColors.textSecondary,
-                    ),
-                    overflow: TextOverflow.ellipsis,
+                      Text(
+                        l10n.seriesPickerRowDetail(
+                          account?.displayName ?? '',
+                          cadenceLabel(l10n, series.cadence),
+                          // What the subscription costs, unsigned, as the panel
+                          // prints it everywhere else.
+                          formatAmount(
+                            amountMinor: series.expectedAmountMinor.abs(),
+                            currency: series.currency,
+                            locale: locale,
+                          ),
+                        ),
+                        style: textTheme.bodySmall?.copyWith(
+                          color: AppColors.textSecondary,
+                        ),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
+                  ),
+                ),
+                // The tick repeats the tint, so the choice never rests on color.
+                if (selected) ...[
+                  const SizedBox(width: AppSpacing.sm),
+                  const Icon(
+                    Icons.check_rounded,
+                    key: Key('seriesPickerSelected'),
+                    size: 18,
+                    color: AppColors.iris,
                   ),
                 ],
-              ),
+              ],
             ),
-          ],
+          ),
         ),
       ),
     );

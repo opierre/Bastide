@@ -1066,11 +1066,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get dashboardSavingsTrendAverage => 'on average per month';
 
   @override
-  String dashboardSavingsTrendAverageTooltip(int count, String amount) {
-    return '$count-month average: $amount';
-  }
-
-  @override
   String get dashboardSavingsViewBars => 'Bars';
 
   @override
@@ -2246,6 +2241,29 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get subscriptionActionEdit => 'Edit';
+
+  @override
+  String get subscriptionActionArchive => 'Archive';
+
+  @override
+  String get subscriptionActionUnarchive => 'Unarchive';
+
+  @override
+  String get subscriptionArchiveFailed =>
+      'Couldn\'t change whether this payment is archived.';
+
+  @override
+  String subscriptionsShowArchived(int count) {
+    return 'Show archived payments ($count)';
+  }
+
+  @override
+  String subscriptionsHideArchived(int count) {
+    return 'Hide archived payments ($count)';
+  }
+
+  @override
+  String get subscriptionsArchivedSection => 'Archived';
 
   @override
   String get subscriptionErrorInvalidTransition =>
@@ -3635,6 +3653,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get propertyFormLabelRequired => 'Give this property a name.';
 
   @override
+  String get propertyFormAddress => 'Address';
+
+  @override
   String get propertyFormKind => 'Type';
 
   @override
@@ -3878,6 +3899,16 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String networthCompositionFootItem(String label, String share, String value) {
     return '$label: $share of $value';
+  }
+
+  @override
+  String networthCompositionFootItemWithAddress(
+    String label,
+    String address,
+    String share,
+    String value,
+  ) {
+    return '$label ($address): $share of $value';
   }
 
   @override
@@ -4564,6 +4595,17 @@ class AppLocalizationsEn extends AppLocalizations {
   String seriesPickerRowDetail(String account, String cadence, String amount) {
     return '$account · $cadence · $amount';
   }
+
+  @override
+  String get seriesPickerConfirm => 'Confirm';
+
+  @override
+  String seriesPickerAdded(String label) {
+    return 'Transaction added to “$label”';
+  }
+
+  @override
+  String get seriesPickerAddFailed => 'The transaction could not be added';
 
   @override
   String get chargePickerAction => 'Add a transaction';

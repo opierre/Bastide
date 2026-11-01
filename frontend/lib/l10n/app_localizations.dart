@@ -1825,12 +1825,6 @@ abstract class AppLocalizations {
   /// **'en moyenne par mois'**
   String get dashboardSavingsTrendAverage;
 
-  /// Last line of each month's tooltip on the savings chart: the average the window's months put aside, drawn as the dotted line. count is how many months it spans (up to 12), amount a signed, formatted sum.
-  ///
-  /// In fr, this message translates to:
-  /// **'Moyenne sur {count} mois : {amount}'**
-  String dashboardSavingsTrendAverageTooltip(int count, String amount);
-
   /// Savings chart view switch: one bar per month.
   ///
   /// In fr, this message translates to:
@@ -3503,6 +3497,42 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Modifier'**
   String get subscriptionActionEdit;
+
+  /// Kebab and detail action putting a series away: it leaves the list, the summary and detection, history kept.
+  ///
+  /// In fr, this message translates to:
+  /// **'Archiver'**
+  String get subscriptionActionArchive;
+
+  /// Kebab and detail action on an archived series: bring it back.
+  ///
+  /// In fr, this message translates to:
+  /// **'Désarchiver'**
+  String get subscriptionActionUnarchive;
+
+  /// Toast title when archiving or unarchiving a series from its detail fails.
+  ///
+  /// In fr, this message translates to:
+  /// **'L\'archivage de ce paiement n\'a pas pu être modifié.'**
+  String get subscriptionArchiveFailed;
+
+  /// Link below the table that reveals archived series in place; the count is the real number.
+  ///
+  /// In fr, this message translates to:
+  /// **'Afficher les paiements archivés ({count})'**
+  String subscriptionsShowArchived(int count);
+
+  /// The same link once the archived series are showing.
+  ///
+  /// In fr, this message translates to:
+  /// **'Masquer les paiements archivés ({count})'**
+  String subscriptionsHideArchived(int count);
+
+  /// Section label in the table above the archived series, once revealed.
+  ///
+  /// In fr, this message translates to:
+  /// **'Archivés'**
+  String get subscriptionsArchivedSection;
 
   /// Localized RECURRING_INVALID_TRANSITION.
   ///
@@ -5694,6 +5724,12 @@ abstract class AppLocalizations {
   /// **'Donnez un nom à ce bien.'**
   String get propertyFormLabelRequired;
 
+  /// Property form field: the property's optional postal address, free text.
+  ///
+  /// In fr, this message translates to:
+  /// **'Adresse'**
+  String get propertyFormAddress;
+
   /// Property form field: the property's nature (select).
   ///
   /// In fr, this message translates to:
@@ -6071,6 +6107,17 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'{label} : {share} sur {value}'**
   String networthCompositionFootItem(String label, String share, String value);
+
+  /// One partly owned property in the composition foot, named with its address.
+  ///
+  /// In fr, this message translates to:
+  /// **'{label} ({address}) : {share} sur {value}'**
+  String networthCompositionFootItemWithAddress(
+    String label,
+    String address,
+    String share,
+    String value,
+  );
 
   /// Dashed plate under the composition when no property is declared.
   ///
@@ -7217,6 +7264,24 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'{account} · {cadence} · {amount}'**
   String seriesPickerRowDetail(String account, String cadence, String amount);
+
+  /// Series picker button adding the transaction to the selected series.
+  ///
+  /// In fr, this message translates to:
+  /// **'Confirmer'**
+  String get seriesPickerConfirm;
+
+  /// Toast once the transaction was added to the series picked.
+  ///
+  /// In fr, this message translates to:
+  /// **'Opération ajoutée à « {label} »'**
+  String seriesPickerAdded(String label);
+
+  /// Toast headline when adding the transaction to the series picked failed; the reason follows beneath.
+  ///
+  /// In fr, this message translates to:
+  /// **'L\'opération n\'a pas pu être ajoutée'**
+  String get seriesPickerAddFailed;
 
   /// Series detail button opening the picker of transactions to add to the series.
   ///

@@ -133,11 +133,19 @@ class CompositionBreakdownCard extends StatelessWidget {
     );
     final items = [
       for (final property in partlyOwned)
-        l10n.networthCompositionFootItem(
-          property.label,
-          money(property.userShareValueMinor),
-          money(property.marketValueMinor),
-        ),
+        if (property.address case final address?)
+          l10n.networthCompositionFootItemWithAddress(
+            property.label,
+            address,
+            money(property.userShareValueMinor),
+            money(property.marketValueMinor),
+          )
+        else
+          l10n.networthCompositionFootItem(
+            property.label,
+            money(property.userShareValueMinor),
+            money(property.marketValueMinor),
+          ),
     ];
     return l10n.networthCompositionFoot(items.join(' · '));
   }

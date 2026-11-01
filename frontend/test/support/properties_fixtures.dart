@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 Property testProperty({
   String id = 'p1',
   String label = 'Appartement Lyon 3e',
+  String? address,
   PropertyKind kind = PropertyKind.primaryResidence,
   int marketValueMinor = 42000000,
   DateTime? valuedOn,
@@ -18,6 +19,7 @@ Property testProperty({
 }) => Property(
   id: id,
   label: label,
+  address: address,
   kind: kind,
   marketValueMinor: marketValueMinor,
   valuedOn: valuedOn ?? DateTime(2026, 1, 12),
@@ -31,9 +33,10 @@ Property testProperty({
 );
 
 /// The frame's locatif held at 50 % (`15-synthese.md` §Biens, card 2).
-Property testStudio({bool archived = false}) => testProperty(
+Property testStudio({bool archived = false, String? address}) => testProperty(
   id: 'p2',
   label: 'Studio Villeurbanne',
+  address: address,
   kind: PropertyKind.rental,
   marketValueMinor: 14500000,
   valuedOn: DateTime(2026, 3, 5),
@@ -115,6 +118,7 @@ class FakePropertiesController extends PropertiesController {
           Property(
             id: p.id,
             label: p.label,
+            address: p.address,
             kind: p.kind,
             marketValueMinor: p.marketValueMinor,
             valuedOn: p.valuedOn,

@@ -56,6 +56,7 @@ def insert_series(
     occurrence_count: int = 3,
     price_change_minor: int | None = None,
     price_changed_at: date | None = None,
+    archived: bool = False,
 ) -> str:
     """Insert one series and return its id.
 
@@ -81,6 +82,7 @@ def insert_series(
         is_manual=is_manual,
         price_change_minor=price_change_minor,
         price_changed_at=price_changed_at,
+        archived=archived,
     )
     session.add(series)
     session.commit()

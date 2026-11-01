@@ -401,21 +401,60 @@ void main() {
       );
     });
 
-    testWidgets('picking a series adds the transaction and closes', (
+    PrimaryButton confirmButton(WidgetTester tester) =>
+        tester.widget(find.byKey(const Key('seriesPickerConfirm')));
+
+    testWidgets('selecting a series only marks it; « Confirmer » adds it', (
       tester,
     ) async {
       final controller = FakeSubscriptionsController();
 
       await _open(tester, repository: repository, controller: controller);
       await openPicker(tester);
+
+      expect(confirmButton(tester).onPressed, isNull);
+
       await tester.tap(find.byKey(const Key('seriesPickerRow-s3')));
       await tester.pumpAndSettle();
 
+      expect(controller.attachCalls, isEmpty);
+      expect(find.byType(MarkRecurringDialog), findsOneWidget);
+      expect(
+        find.descendant(
+          of: find.byKey(const Key('seriesPickerRow-s3')),
+          matching: find.byKey(const Key('seriesPickerSelected')),
+        ),
+        findsOneWidget,
+      );
+      expect(confirmButton(tester).onPressed, isNotNull);
+
+      // Another tap moves the selection rather than adding anything.
+      await tester.tap(find.byKey(const Key('seriesPickerRow-s1')));
+      await tester.pumpAndSettle();
+
+      expect(controller.attachCalls, isEmpty);
+      expect(find.byKey(const Key('seriesPickerSelected')), findsOneWidget);
+
+      await tester.tap(find.byKey(const Key('seriesPickerConfirm')));
+      await tester.pumpAndSettle();
+
       final (seriesId, ids) = controller.attachCalls.single;
-      expect(seriesId, 's3');
+      expect(seriesId, 's1');
       expect(ids, ['t3']);
       expect(controller.createCalls, isEmpty);
       expect(find.byType(MarkRecurringDialog), findsNothing);
+    });
+
+    testWidgets('a confirmed series says so in a toast', (tester) async {
+      await _open(tester, repository: repository, locale: const Locale('en'));
+      await openPicker(tester);
+      await tester.tap(find.byKey(const Key('seriesPickerRow-s1')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const Key('seriesPickerConfirm')));
+      await tester.pumpAndSettle();
+
+      expect(find.byKey(const Key('appToast')), findsOneWidget);
+      expect(find.textContaining('Transaction added to “'), findsOneWidget);
     });
 
     testWidgets('the search narrows the series by label', (tester) async {
@@ -479,7 +518,7 @@ void main() {
       expect(find.byKey(const Key('seriesPickerRow-s1')), findsOneWidget);
     });
 
-    testWidgets('a refused pick stays open with the reason inline', (
+    testWidgets('a refused confirmation stays open with a failure toast', (
       tester,
     ) async {
       final controller = FakeSubscriptionsController()
@@ -492,12 +531,18 @@ void main() {
       await openPicker(tester);
       await tester.tap(find.byKey(const Key('seriesPickerRow-s1')));
       await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const Key('seriesPickerConfirm')));
+      await tester.pumpAndSettle();
 
       expect(find.byType(MarkRecurringDialog), findsOneWidget);
+      expect(find.byKey(const Key('appToast')), findsOneWidget);
+      expect(find.text("L'opération n'a pas pu être ajoutée"), findsOneWidget);
       expect(
         find.text('Certaines opérations appartiennent déjà à une série.'),
         findsOneWidget,
       );
+      // The selection survives, so the user can retry or pick another.
+      expect(confirmButton(tester).onPressed, isNotNull);
     });
   });
 }

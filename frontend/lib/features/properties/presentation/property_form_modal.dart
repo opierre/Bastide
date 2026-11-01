@@ -110,6 +110,9 @@ class _PropertyFormModalState extends ConsumerState<PropertyFormModal> {
   late final _labelController = TextEditingController(
     text: widget.initial?.label,
   );
+  late final _addressController = TextEditingController(
+    text: widget.initial?.address,
+  );
   final _valueController = TextEditingController();
   final _valuedOnController = TextEditingController();
   final _ownershipController = TextEditingController();
@@ -170,6 +173,7 @@ class _PropertyFormModalState extends ConsumerState<PropertyFormModal> {
   void dispose() {
     for (final controller in [
       _labelController,
+      _addressController,
       _valueController,
       _valuedOnController,
       _ownershipController,
@@ -200,8 +204,10 @@ class _PropertyFormModalState extends ConsumerState<PropertyFormModal> {
     final locale = _locale;
     final priceText = _priceController.text.trim();
     final acquiredText = _acquiredOnController.text.trim();
+    final addressText = _addressController.text.trim();
     final draft = PropertyDraft(
       label: _labelController.text.trim(),
+      address: addressText.isEmpty ? null : addressText,
       kind: _kind,
       marketValueMinor: parseMoneyMinor(_valueController.text, locale)!,
       valuedOn: parseDateInput(_valuedOnController.text, locale)!,
@@ -318,6 +324,22 @@ class _PropertyFormModalState extends ConsumerState<PropertyFormModal> {
                       ),
                   ],
                 ),
+              ),
+            ),
+            rowGap,
+            // Optional, full width: an address runs longer than any other
+            // field, and it is what tells two similar biens apart.
+            LabeledField(
+              label: l10n.propertyFormAddress,
+              child: TextFormField(
+                key: const Key('propertyFormAddress'),
+                controller: _addressController,
+                keyboardType: TextInputType.streetAddress,
+                inputFormatters: [
+                  // The API's limit (`ADDRESS_MAX_LENGTH`), so nothing typed
+                  // can be refused on save.
+                  LengthLimitingTextInputFormatter(propertyAddressMaxLength),
+                ],
               ),
             ),
             rowGap,

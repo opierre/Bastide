@@ -24,6 +24,8 @@ class Property(Base):
     id: Mapped[str] = mapped_column(String(36), primary_key=True, default=lambda: str(uuid4()))
     user_id: Mapped[str] = mapped_column(String(36), ForeignKey("users.id"))
     label: Mapped[str] = mapped_column(String(255))
+    #: Free text, optional: tells two similar biens apart. Trimmed, never an empty string.
+    address: Mapped[str | None] = mapped_column(String(255), nullable=True)
     kind: Mapped[str] = mapped_column(String(20))
     #: Declared current value, positive.
     market_value_minor: Mapped[int] = mapped_column(Integer)

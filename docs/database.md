@@ -176,6 +176,7 @@ erDiagram
         bool archived
         datetime created_at
         datetime updated_at
+        text address "nullable"
     }
     recurring_merchant_aliases {
         text id PK
@@ -221,6 +222,7 @@ erDiagram
         date price_changed_at "nullable"
         datetime created_at
         datetime updated_at
+        bool archived
     }
     transactions {
         text id PK

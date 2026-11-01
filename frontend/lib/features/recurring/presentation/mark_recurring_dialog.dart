@@ -6,6 +6,7 @@ import '../../../core/theme/tokens.dart';
 import '../../../core/widgets/amount_text.dart';
 import '../../../core/widgets/app_chip.dart';
 import '../../../core/widgets/app_modal.dart';
+import '../../../core/widgets/app_toast.dart';
 import '../../../core/widgets/inline_banner.dart';
 import '../../../core/widgets/primary_button.dart';
 import '../../../core/widgets/state_views.dart';
@@ -84,7 +85,13 @@ class _MarkRecurringDialogState extends ConsumerState<MarkRecurringDialog> {
   });
 
   /// Adds the transaction to [series], which learns its label, and closes.
-  Future<void> _pick(RecurringSeries series) async {
+  /// Either way a toast says how it went; on a failure the dialog stays open
+  /// so the user can pick another series or cancel.
+  Future<void> _confirm(RecurringSeries series) async {
+    final l10n = AppLocalizations.of(context)!;
+    // Looked up now: the toast outlives the dialog, whose context is gone by
+    // the time a success is due.
+    final overlay = Overlay.maybeOf(context, rootOverlay: true);
     setState(() {
       _isSaving = true;
       _errorText = null;
@@ -93,17 +100,22 @@ class _MarkRecurringDialogState extends ConsumerState<MarkRecurringDialog> {
       final saved = await ref
           .read(seriesPickerControllerProvider.notifier)
           .pick(series.id, widget.transactionId);
+      if (overlay != null && overlay.mounted) {
+        showAppToastOn(overlay, title: l10n.seriesPickerAdded(saved.label));
+      }
       if (!mounted) return;
       Navigator.of(context).pop(SeriesSaved(saved));
     } catch (error) {
-      if (!mounted) return;
-      setState(() {
-        _isSaving = false;
-        _errorText = localizeRecurringError(
-          AppLocalizations.of(context)!,
-          error,
+      if (overlay != null && overlay.mounted) {
+        showAppToastOn(
+          overlay,
+          title: l10n.seriesPickerAddFailed,
+          message: localizeRecurringError(l10n, error),
+          tone: BannerTone.error,
         );
-      });
+      }
+      if (!mounted) return;
+      setState(() => _isSaving = false);
     }
   }
 
@@ -154,6 +166,10 @@ class _MarkRecurringDialogState extends ConsumerState<MarkRecurringDialog> {
         (state.value?.selected.isNotEmpty ?? false);
 
     if (_picking) {
+      final selected = ref
+          .watch(seriesPickerControllerProvider)
+          .value
+          ?.selected;
       return AppModal(
         title: l10n.markRecurringTitle,
         width: 520,
@@ -168,12 +184,16 @@ class _MarkRecurringDialogState extends ConsumerState<MarkRecurringDialog> {
             onPressed: _isSaving ? null : () => Navigator.of(context).pop(),
             child: Text(l10n.markRecurringCancel),
           ),
+          PrimaryButton(
+            key: const Key('seriesPickerConfirm'),
+            label: l10n.seriesPickerConfirm,
+            isLoading: _isSaving,
+            onPressed: selected != null && !_isSaving
+                ? () => _confirm(selected)
+                : null,
+          ),
         ],
-        child: SeriesPickerBody(
-          onPick: _pick,
-          enabled: !_isSaving,
-          errorText: _errorText,
-        ),
+        child: SeriesPickerBody(enabled: !_isSaving),
       );
     }
 

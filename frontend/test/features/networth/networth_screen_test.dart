@@ -269,6 +269,52 @@ void main() {
     expect(find.byKey(const Key('compositionInvite')), findsNothing);
   });
 
+  testWidgets('the held-share foot names a property with its address', (
+    tester,
+  ) async {
+    _useDesktopSurface(tester);
+    await tester.pumpWidget(
+      _wrap(
+        properties: FakePropertiesController(
+          initialProperties: [
+            testProperty(address: '3 rue des Glycines, 69003 Lyon'),
+            testStudio(address: '8 allée des Tilleuls, 69100 Villeurbanne'),
+          ],
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(
+      _text(tester, 'compositionFoot'),
+      'Les biens comptent pour la part détenue seulement '
+      '(Studio Villeurbanne (8 allée des Tilleuls, 69100 Villeurbanne) : '
+      '${_money(7250000)} sur ${_money(14500000)}).',
+    );
+  });
+
+  testWidgets('the same foot in English', (tester) async {
+    _useDesktopSurface(tester);
+    await tester.pumpWidget(
+      _wrap(
+        locale: const Locale('en'),
+        properties: FakePropertiesController(
+          initialProperties: [
+            testStudio(address: '8 allée des Tilleuls, 69100 Villeurbanne'),
+          ],
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(
+      _text(tester, 'compositionFoot'),
+      'Properties count for the held share only '
+      '(Studio Villeurbanne (8 allée des Tilleuls, 69100 Villeurbanne): '
+      '${_money(7250000, locale: 'en')} of ${_money(14500000, locale: 'en')}).',
+    );
+  });
+
   testWidgets('the exclusions are stated in the panel', (tester) async {
     _useDesktopSurface(tester);
     await tester.pumpWidget(_wrap());

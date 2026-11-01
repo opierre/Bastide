@@ -11,11 +11,22 @@ import 'subscriptions_controller.dart';
 /// the user has not dismissed, on any account, and the search typed over them.
 @immutable
 class SeriesPickerState {
-  const SeriesPickerState({required this.series, this.query = ''});
+  const SeriesPickerState({
+    required this.series,
+    this.query = '',
+    this.selectedId,
+  });
 
   /// Detected, confirmed and cancelled series, by label.
   final List<RecurringSeries> series;
   final String query;
+
+  /// The series the user picked, waiting for « Confirmer ». Kept across a
+  /// search that hides it, like the charge picker keeps its ticks.
+  final String? selectedId;
+
+  RecurringSeries? get selected =>
+      series.where((row) => row.id == selectedId).firstOrNull;
 
   /// The series whose label contains [query], ignoring case.
   List<RecurringSeries> get visible {
@@ -28,10 +39,14 @@ class SeriesPickerState {
   }
 
   SeriesPickerState withQuery(String query) =>
-      SeriesPickerState(series: series, query: query);
+      SeriesPickerState(series: series, query: query, selectedId: selectedId);
+
+  SeriesPickerState withSelected(String seriesId) =>
+      SeriesPickerState(series: series, query: query, selectedId: seriesId);
 }
 
-/// Loads the series a charge can join and adds the charge to the one picked.
+/// Loads the series a charge can join, holds the one selected, and adds the
+/// charge to it once the user confirms.
 ///
 /// Dismissed series are left out: the user said they are not subscriptions,
 /// so offering one would ask them to file a charge under a "no". A cancelled
@@ -56,8 +71,16 @@ class SeriesPickerController extends AsyncNotifier<SeriesPickerState> {
     state = AsyncValue.data(current.withQuery(query));
   }
 
+  /// Marks [seriesId] as the one to add the charge to. Nothing is sent: the
+  /// dialog's « Confirmer » does that, so a misclick costs nothing.
+  void select(String seriesId) {
+    final current = state.value;
+    if (current == null) return;
+    state = AsyncValue.data(current.withSelected(seriesId));
+  }
+
   /// Adds [transactionId] to [seriesId]; the server learns its label for the
-  /// series. Failures are rethrown for the dialog to show inline.
+  /// series. Failures are rethrown for the dialog to report.
   Future<RecurringSeries> pick(String seriesId, String transactionId) async {
     final saved = await ref
         .read(subscriptionsControllerProvider.notifier)
