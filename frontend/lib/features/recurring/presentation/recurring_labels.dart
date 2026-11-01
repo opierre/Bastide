@@ -28,12 +28,23 @@ String cadenceCountLabel(AppLocalizations l10n, Cadence cadence, int count) =>
 /// date means the same shape wherever the user meets it.
 DateFormat seriesDateFormat(String locale) => DateFormat.yMd(locale);
 
-/// Axis ticks under the price curve. Day-and-month while the whole history
-/// fits inside a year, month-and-year beyond it: a weekly series would
-/// otherwise print « mai 2026 » under every tick, and a series running over
-/// several years would print a month with no year to place it in.
-DateFormat seriesAxisDateFormat(String locale, {required Duration span}) =>
-    span.inDays > 365 ? DateFormat.yMMM(locale) : DateFormat.MMMd(locale);
+/// Axis ticks under the price curve, for the charges at [dates]. Day-and-month
+/// while the whole history fits inside a year, month-and-year beyond it: a
+/// weekly series would otherwise print « mai 2026 » under every tick, and a
+/// series running over several years would print a month with no year to
+/// place it in. Every charge is labelled, so when two of them share a month in
+/// a history longer than a year, the day comes back — otherwise two ticks
+/// would name the same month and neither would date its charge.
+DateFormat seriesAxisDateFormat(String locale, List<DateTime> dates) {
+  if (dates.isEmpty) return DateFormat.MMMd(locale);
+  final first = dates.reduce((a, b) => a.isBefore(b) ? a : b);
+  final last = dates.reduce((a, b) => a.isAfter(b) ? a : b);
+  if (last.difference(first).inDays <= 365) return DateFormat.MMMd(locale);
+  final months = {for (final date in dates) date.year * 12 + date.month};
+  return months.length == dates.length
+      ? DateFormat.yMMM(locale)
+      : DateFormat.yMMMd(locale);
+}
 
 /// « décembre 2025 » — the month a series has been tracked since.
 String seriesMonthLabel(String locale, DateTime date) =>

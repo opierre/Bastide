@@ -58,7 +58,110 @@ String _axisLabel(WidgetTester tester, String key) => tester
     )
     .data!;
 
+/// [count] invented charges, [every] apart, newest first — as the detail holds
+/// them.
+List<SeriesOccurrence> _charges(int count, Duration every) => [
+  for (var i = 0; i < count; i++)
+    _occurrence(
+      id: 'c$i',
+      bookedDate: DateTime(2026, 6, 1).subtract(every * i),
+      amountMinor: i < count ~/ 2 ? -1299 : -1099,
+    ),
+];
+
+/// Every charge has its own date tick, left to right in time, and no two ticks
+/// overlap.
+void _expectEveryChargeDated(WidgetTester tester, int count) {
+  final rects = [
+    for (var i = count - 1; i >= 0; i--)
+      tester.getRect(find.byKey(Key('seriesDateTick-c$i'))),
+  ];
+  for (var i = 1; i < rects.length; i++) {
+    expect(
+      rects[i].left,
+      greaterThan(rects[i - 1].right),
+      reason: 'the tick of charge $i overlaps the one before it',
+    );
+  }
+}
+
+Future<void> _pumpHistory(
+  WidgetTester tester,
+  int count,
+  Duration every,
+) async {
+  tester.view.physicalSize = const Size(1440, 900);
+  tester.view.devicePixelRatio = 1.0;
+  addTearDown(tester.view.reset);
+
+  await tester.pumpWidget(
+    _wrap(
+      SeriesDetail(
+        series: testSeries(occurrenceCount: count),
+        occurrences: _charges(count, every),
+      ),
+    ),
+  );
+  await tester.pumpAndSettle();
+}
+
 void main() {
+  testWidgets('a year of monthly charges dates every one of them, flat', (
+    tester,
+  ) async {
+    // Twelve charges used to be thinned to five ticks.
+    await _pumpHistory(tester, 12, const Duration(days: 30));
+
+    _expectEveryChargeDated(tester, 12);
+    expect(
+      find.descendant(
+        of: find.byType(PriceHistoryChart),
+        matching: find.byType(RotatedBox),
+      ),
+      findsNothing,
+    );
+    expect(find.byKey(const Key('seriesHistoryScroll')), findsNothing);
+  });
+
+  testWidgets('a weekly series too dense for flat dates turns them on end', (
+    tester,
+  ) async {
+    await _pumpHistory(tester, 30, const Duration(days: 7));
+
+    _expectEveryChargeDated(tester, 30);
+    expect(
+      find.descendant(
+        of: find.byType(PriceHistoryChart),
+        matching: find.byType(RotatedBox),
+      ),
+      findsNWidgets(30),
+    );
+    expect(find.byKey(const Key('seriesHistoryScroll')), findsNothing);
+  });
+
+  testWidgets('a history too long for the card scrolls rather than drop dates', (
+    tester,
+  ) async {
+    await _pumpHistory(tester, 160, const Duration(days: 7));
+
+    expect(find.byKey(const Key('seriesHistoryScroll')), findsOneWidget);
+    _expectEveryChargeDated(tester, 160);
+    // Over a year, two weekly charges share a month: the day stays on the tick
+    // so no two of them read the same.
+    final labels = {
+      for (var i = 0; i < 160; i++)
+        tester
+            .widget<Text>(
+              find.descendant(
+                of: find.byKey(Key('seriesDateTick-c$i')),
+                matching: find.byType(Text),
+              ),
+            )
+            .data,
+    };
+    expect(labels, hasLength(160));
+  });
+
   testWidgets('the detail states the increase with what it costs over a year', (
     tester,
   ) async {
