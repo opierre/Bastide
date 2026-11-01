@@ -1040,6 +1040,7 @@
   "networthCompositionFootWhole": "Properties count for the held share only.",
   "networthCompositionFoot": "Properties count for the held share only ({items}).",
   "networthCompositionFootItem": "{label}: {share} of {value}",
+  "networthCompositionFootItemWithAddress": "{label} ({address}): {share} of {value}",
   "networthCompositionInvite": "No property declared: assets count your accounts only.",
   "networthCompositionInviteAction": "New property →",
   "networthExclusionsLabel": "Deliberately not counted",

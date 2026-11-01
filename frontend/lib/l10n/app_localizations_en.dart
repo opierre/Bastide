@@ -3884,6 +3884,16 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String networthCompositionFootItemWithAddress(
+    String label,
+    String address,
+    String share,
+    String value,
+  ) {
+    return '$label ($address): $share of $value';
+  }
+
+  @override
   String get networthCompositionInvite =>
       'No property declared: assets count your accounts only.';
 

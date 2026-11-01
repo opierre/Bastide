@@ -6078,6 +6078,17 @@ abstract class AppLocalizations {
   /// **'{label} : {share} sur {value}'**
   String networthCompositionFootItem(String label, String share, String value);
 
+  /// One partly owned property in the composition foot, named with its address.
+  ///
+  /// In fr, this message translates to:
+  /// **'{label} ({address}) : {share} sur {value}'**
+  String networthCompositionFootItemWithAddress(
+    String label,
+    String address,
+    String share,
+    String value,
+  );
+
   /// Dashed plate under the composition when no property is declared.
   ///
   /// In fr, this message translates to:

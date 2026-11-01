@@ -5076,6 +5076,24 @@
       }
     }
   },
+  "networthCompositionFootItemWithAddress": "{label} ({address}) : {share} sur {value}",
+  "@networthCompositionFootItemWithAddress": {
+    "description": "One partly owned property in the composition foot, named with its address.",
+    "placeholders": {
+      "label": {
+        "type": "String"
+      },
+      "address": {
+        "type": "String"
+      },
+      "share": {
+        "type": "String"
+      },
+      "value": {
+        "type": "String"
+      }
+    }
+  },
   "networthCompositionInvite": "Aucun bien déclaré : l'actif ne compte que vos comptes.",
   "@networthCompositionInvite": {
     "description": "Dashed plate under the composition when no property is declared."

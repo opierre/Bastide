@@ -3915,6 +3915,16 @@ class AppLocalizationsFr extends AppLocalizations {
   }
 
   @override
+  String networthCompositionFootItemWithAddress(
+    String label,
+    String address,
+    String share,
+    String value,
+  ) {
+    return '$label ($address) : $share sur $value';
+  }
+
+  @override
   String get networthCompositionInvite =>
       'Aucun bien déclaré : l\'actif ne compte que vos comptes.';
 
