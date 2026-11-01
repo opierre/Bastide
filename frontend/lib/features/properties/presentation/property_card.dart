@@ -67,6 +67,7 @@ class PropertyCard extends StatelessWidget {
     final price = property.acquisitionPriceMinor;
     final acquiredOn = property.acquiredOn;
     final delta = property.acquisitionDeltaMinor;
+    final address = property.address;
 
     return AppCard(
       key: Key('propertyCard-$id'),
@@ -99,6 +100,15 @@ class PropertyCard extends StatelessWidget {
               ),
             ],
           ),
+          // Secondary to the label: it tells two similar biens apart.
+          if (address != null)
+            Text(
+              address,
+              key: Key('propertyAddress-$id'),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: AppTextStyles.helper.copyWith(fontSize: 12),
+            ),
           const SizedBox(height: AppSpacing.xs),
           Align(
             alignment: Alignment.centerLeft,

@@ -58,6 +58,7 @@ def to_read(prop: Property, currency: str) -> PropertyRead:
     return PropertyRead(
         id=prop.id,
         label=prop.label,
+        address=prop.address,
         # ty: ignore[invalid-argument-type] — the column is plain str; the Literal is enforced by
         # the create/update schemas, which are the only writers of this field.
         kind=prop.kind,
@@ -117,7 +118,8 @@ class PropertyService:
 
         The patch is validated before anything is assigned, so a rejected edit leaves the
         property exactly as it was. A "nouvelle estimation" is this call carrying
-        `market_value_minor` and `valued_on` together (one declared value).
+        `market_value_minor` and `valued_on` together (one declared value). An `address`
+        sent as null clears it, unlike every other field, where null means "leave alone".
 
         Raises:
             PropertyNotFoundError: no such property, or it belongs to another user.
@@ -129,6 +131,8 @@ class PropertyService:
             self._check_valued_on(changes["valued_on"], today)
         for field, value in changes.items():
             setattr(prop, field, value)
+        if "address" in data.model_fields_set:
+            prop.address = data.address
         return self._detail(self._repository.save(prop), user.currency)
 
     def archive(self, user_id: str, property_id: str) -> None:
