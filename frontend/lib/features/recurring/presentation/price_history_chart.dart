@@ -41,18 +41,18 @@ class PriceHistoryChart extends StatelessWidget {
   static const _axisWidth = 62.0;
   static const _axisGap = 8.0;
 
-  /// Height reserved beneath the plot for the date axis.
+  /// Height reserved beneath the plot for a date axis whose ticks lie flat.
   static const _dateAxisHeight = 20.0;
 
   /// Vertical inset, sized to clear the current-point dot.
   static const _inset = 6.0;
 
+  /// Clear space kept between two neighbouring date ticks.
+  static const _tickGap = 4.0;
+
   /// Above this many charges the per-point dots turn the line into a bead
   /// string; the stroke alone carries the shape from there.
   static const dotCeiling = 24;
-
-  /// Most date ticks the axis prints, however many charges there are.
-  static const _maxDateLabels = 5;
 
   @override
   Widget build(BuildContext context) {
@@ -65,16 +65,32 @@ class PriceHistoryChart extends StatelessWidget {
       for (final point in points) point.amountMinor.abs().toDouble(),
     ];
     final stepIndex = _stepIndex(points);
+    final format = seriesAxisDateFormat(locale, [
+      for (final point in points) point.bookedDate,
+    ]);
+    final ticks = [for (final point in points) format.format(point.bookedDate)];
+    final tickStyle = Theme.of(context).textTheme.labelSmall?.copyWith(
+      fontWeight: FontWeight.w400,
+      color: AppColors.textSecondary,
+    );
 
     return LayoutBuilder(
       builder: (context, constraints) {
         final size = constraints.biggest;
+        final axis = _DateAxis.fit(
+          ticks: ticks,
+          style: tickStyle,
+          textScaler: MediaQuery.textScalerOf(context),
+          textDirection: Directionality.of(context),
+          plotLeft: _axisWidth + _axisGap,
+          width: size.width,
+        );
         final plot = _PlotGeometry.of(
           Rect.fromLTRB(
             _axisWidth + _axisGap,
             _inset,
             size.width,
-            size.height - _dateAxisHeight - _inset,
+            size.height - axis.height - _inset,
           ),
           values,
         );
@@ -90,7 +106,7 @@ class PriceHistoryChart extends StatelessWidget {
               ),
             ),
             ..._valueLabels(plot, locale),
-            ..._dateLabels(context, plot, points, locale),
+            ..._dateLabels(plot, points, ticks, tickStyle, axis, size.width),
             for (var i = 0; i < points.length; i++)
               _hoverSlice(
                 context: context,
@@ -101,6 +117,7 @@ class PriceHistoryChart extends StatelessWidget {
                 occurrence: points[i],
                 isStep: i == stepIndex,
                 width: size.width,
+                axisHeight: axis.height,
               ),
           ],
         );
@@ -161,52 +178,46 @@ class PriceHistoryChart extends StatelessWidget {
     ];
   }
 
-  /// Date ticks under the plot, thinned to [_maxDateLabels] so a weekly series
-  /// doesn't print a year of overlapping dates.
+  /// A date tick under each charge — flat while they fit side by side, turned
+  /// on end when they don't, thinned only when even that collides (see
+  /// [_DateAxis]).
   List<Widget> _dateLabels(
-    BuildContext context,
     _PlotGeometry plot,
     List<SeriesOccurrence> points,
-    String locale,
-  ) {
-    if (points.isEmpty) return const [];
-    final format = seriesAxisDateFormat(
-      locale,
-      span: points.last.bookedDate.difference(points.first.bookedDate),
-    );
-    final style = Theme.of(context).textTheme.labelSmall?.copyWith(
-      fontWeight: FontWeight.w400,
-      color: AppColors.textSecondary,
-    );
-    const slot = 76.0;
-    final maxLeft = math.max(0.0, plot.rect.right - slot);
-
-    return [
-      for (final i in _tickIndices(points.length))
+    List<String> ticks,
+    TextStyle? style,
+    _DateAxis axis,
+    double width,
+  ) => [
+    for (var i = 0; i < points.length; i++)
+      if (axis.shows(i))
         Positioned(
-          // Clamped to the plot: an edge tick leans inward rather than hanging
+          key: Key('seriesDateTick-${points[i].id}'),
+          // Clamped to the chart: an edge tick leans inward rather than hanging
           // off the card.
-          left: (plot.xAt(i) - slot / 2).clamp(0.0, maxLeft),
-          width: slot,
+          left: axis.leftOf(i, plot.xAt(i), width),
+          width: axis.rotated ? axis.lineHeight : axis.widths[i],
           top: plot.rect.bottom + _inset,
-          child: Text(
-            format.format(points[i].bookedDate),
-            textAlign: TextAlign.center,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: style,
-          ),
+          child: axis.rotated
+              // Read bottom to top, the date's end against the plot it names.
+              ? RotatedBox(
+                  quarterTurns: 3,
+                  child: Text(
+                    ticks[i],
+                    maxLines: 1,
+                    softWrap: false,
+                    style: style,
+                  ),
+                )
+              : Text(
+                  ticks[i],
+                  textAlign: TextAlign.center,
+                  maxLines: 1,
+                  softWrap: false,
+                  style: style,
+                ),
         ),
-    ];
-  }
-
-  static List<int> _tickIndices(int count) {
-    if (count <= _maxDateLabels) return [for (var i = 0; i < count; i++) i];
-    final step = (count - 1) / (_maxDateLabels - 1);
-    return {
-      for (var i = 0; i < _maxDateLabels; i++) (i * step).round(),
-    }.toList();
-  }
+  ];
 
   /// A full-height column over each charge: the point is a few pixels wide, but
   /// the thing worth hovering is the moment in time it stands for.
@@ -219,6 +230,7 @@ class PriceHistoryChart extends StatelessWidget {
     required SeriesOccurrence occurrence,
     required bool isStep,
     required double width,
+    required double axisHeight,
   }) {
     final textTheme = Theme.of(context).textTheme;
     final sliceWidth = plot.values.length < 2
@@ -230,7 +242,7 @@ class PriceHistoryChart extends StatelessWidget {
       left: (plot.xAt(index) - sliceWidth / 2).clamp(0.0, maxLeft),
       width: sliceWidth,
       top: 0,
-      bottom: _dateAxisHeight,
+      bottom: axisHeight,
       child: Tooltip(
         key: Key('seriesOccurrence-${occurrence.id}'),
         richMessage: TextSpan(
@@ -274,6 +286,152 @@ class PriceHistoryChart extends StatelessWidget {
     currency: series.currency,
     locale: locale,
   );
+}
+
+/// How the date axis gives every charge its tick.
+///
+/// Flat ticks while each fits beside its neighbours; turned on end — one line
+/// height wide instead of a whole date — when they don't; and when even that
+/// is too tight, every Nth one, keeping the first and the last. A charge
+/// without its date can't be checked at a glance, which is the card's job, so
+/// thinning is the last resort rather than the rule.
+@immutable
+class _DateAxis {
+  const _DateAxis({
+    required this.widths,
+    required this.lineHeight,
+    required this.rotated,
+    required this.height,
+    this.shown,
+  });
+
+  factory _DateAxis.fit({
+    required List<String> ticks,
+    required TextStyle? style,
+    required TextScaler textScaler,
+    required TextDirection textDirection,
+    required double plotLeft,
+    required double width,
+  }) {
+    final sizes = <Size>[];
+    for (final tick in ticks) {
+      final painter = TextPainter(
+        text: TextSpan(text: tick, style: style),
+        textDirection: textDirection,
+        textScaler: textScaler,
+        maxLines: 1,
+      )..layout();
+      sizes.add(painter.size);
+      painter.dispose();
+    }
+    // Rounded up: a fractional glyph run must not spill out of its box.
+    final widths = [for (final size in sizes) size.width.ceilToDouble()];
+    final lineHeight = sizes
+        .fold(0.0, (high, size) => math.max(high, size.height))
+        .ceilToDouble();
+    final widest = widths.fold(0.0, math.max);
+    final xs = _xs(ticks.length, plotLeft, width);
+
+    final flat = _DateAxis(
+      widths: widths,
+      lineHeight: lineHeight,
+      rotated: false,
+      height: math.max(PriceHistoryChart._dateAxisHeight, lineHeight),
+    );
+    if (flat._fits(xs, width)) return flat;
+
+    final upright = _DateAxis(
+      widths: widths,
+      lineHeight: lineHeight,
+      rotated: true,
+      height: widest,
+    );
+    if (upright._fits(xs, width)) return upright;
+
+    // Even on end they collide: keep every Nth tick, with the smallest N that
+    // clears, and always the first and the last so the history's span stays
+    // dated. The thinned charges are still dated on hover.
+    for (var step = 2; step < ticks.length; step++) {
+      final thinned = _DateAxis(
+        widths: widths,
+        lineHeight: lineHeight,
+        rotated: true,
+        height: widest,
+        shown: _everyNth(ticks.length, step),
+      );
+      if (thinned._fits(xs, width)) return thinned;
+    }
+    return _DateAxis(
+      widths: widths,
+      lineHeight: lineHeight,
+      rotated: true,
+      height: widest,
+      shown: [0, if (ticks.length > 1) ticks.length - 1],
+    );
+  }
+
+  /// `0, step, 2·step, …` and the last index — the regular tick nearest the
+  /// end dropped when it would sit closer than [step] to the last one.
+  static List<int> _everyNth(int count, int step) {
+    final last = count - 1;
+    return [
+      for (var i = 0; i < last; i += step)
+        if (i == 0 || last - i >= step) i,
+      last,
+    ];
+  }
+
+  /// Each tick's own width when it lies flat.
+  final List<double> widths;
+
+  /// The tallest tick's line height — a tick's width once it is turned.
+  final double lineHeight;
+
+  /// Whether the ticks are turned on end.
+  final bool rotated;
+
+  /// The band the ticks take beneath the plot.
+  final double height;
+
+  /// The charges that get a tick, by index — all of them unless the axis had
+  /// to be thinned.
+  final List<int>? shown;
+
+  /// Whether the charge at [index] gets a tick.
+  bool shows(int index) => shown?.contains(index) ?? true;
+
+  double _width(int index) => rotated ? lineHeight : widths[index];
+
+  /// Where the tick under charge [index], centred on [x], starts — clamped
+  /// inside `[0, bound]`.
+  double leftOf(int index, double x, double bound) {
+    final width = _width(index);
+    return (x - width / 2).clamp(0.0, math.max(0.0, bound - width));
+  }
+
+  /// The charges' x positions on a plot running from [left] to [right] — the
+  /// same placement [_PlotGeometry.xAt] gives them.
+  static List<double> _xs(int count, double left, double right) => [
+    for (var i = 0; i < count; i++)
+      count < 2
+          ? (left + right) / 2
+          : left + (right - left) * (i / (count - 1)),
+  ];
+
+  bool _fits(List<double> xs, double bound) {
+    final indices = shown ?? [for (var i = 0; i < xs.length; i++) i];
+    for (var k = 1; k < indices.length; k++) {
+      final previous = indices[k - 1];
+      final current = indices[k];
+      final previousEnd =
+          leftOf(previous, xs[previous], bound) + _width(previous);
+      if (leftOf(current, xs[current], bound) - previousEnd <
+          PriceHistoryChart._tickGap) {
+        return false;
+      }
+    }
+    return true;
+  }
 }
 
 /// Where a value and a charge index land inside the plot. Shared by the painter
