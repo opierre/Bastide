@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:bastide/core/theme/app_theme.dart';
 import 'package:bastide/core/theme/tokens.dart';
 import 'package:bastide/core/widgets/area_line.dart';
@@ -140,11 +142,12 @@ void main() {
       chart.bottom - AreaLine.axisHeight - 5,
     );
     const values = [1000, 2400, 1800, 3200];
+    final scale = AreaLineScale.of(values, intervals: 4);
     final points = [
       for (var i = 0; i < values.length; i++)
         Offset(
           plot.left + AreaLine.pointX(i, values.length, plot.width),
-          plot.bottom - plot.height * (values[i] - 1000) / 2200,
+          scale.y(values[i], plot),
         ),
     ];
 
@@ -253,6 +256,141 @@ void main() {
       );
     }
     expect(tester.takeException(), isNull);
+  });
+
+  group('AreaLineScale', () {
+    /// Whether every tick is a whole multiple of the gap between ticks.
+    void expectCleanTicks(AreaLineScale scale, int intervals) {
+      expect(scale.ticks, hasLength(intervals + 1));
+      expect(scale.ticks.first, scale.min);
+      expect(scale.ticks.last, scale.max);
+      final step = scale.ticks[1] - scale.ticks[0];
+      for (var i = 1; i < scale.ticks.length; i++) {
+        expect(scale.ticks[i] - scale.ticks[i - 1], closeTo(step, 1e-9));
+      }
+      for (final tick in scale.ticks) {
+        expect((tick / step - (tick / step).round()).abs(), lessThan(1e-9));
+      }
+    }
+
+    /// Whether [values] sit strictly inside the scale, clear of both edges.
+    void expectHeadroom(AreaLineScale scale, List<num> values) {
+      final low = values.fold<num>(values.first, math.min);
+      final high = values.fold<num>(values.first, math.max);
+      expect(scale.min, lessThan(low));
+      expect(scale.max, greaterThan(high));
+    }
+
+    test('pads a positive series to clean ticks without going below zero', () {
+      const values = [182000, 154500, 197300, 163800];
+      final scale = AreaLineScale.of(values, intervals: 2);
+
+      expectHeadroom(scale, values);
+      expectCleanTicks(scale, 2);
+      expect(scale.min, greaterThanOrEqualTo(0));
+      expect(scale.ticks, [150000, 180000, 210000]);
+    });
+
+    test('never pads a series that stays above zero across it', () {
+      const values = [2000, 95000, 60000];
+      final scale = AreaLineScale.of(values, intervals: 2);
+
+      expect(scale.min, 0);
+      expect(scale.max, greaterThan(95000));
+      expectCleanTicks(scale, 2);
+    });
+
+    test('pads a negative series without lifting it past zero', () {
+      const values = [-42000, -61500, -38200];
+      final scale = AreaLineScale.of(values, intervals: 2);
+
+      expectHeadroom(scale, values);
+      expectCleanTicks(scale, 2);
+      expect(scale.max, lessThanOrEqualTo(0));
+    });
+
+    test('a series crossing zero keeps zero on a gridline', () {
+      const values = [120000, -30000, 80000];
+      final scale = AreaLineScale.of(values, intervals: 2);
+
+      expectHeadroom(scale, values);
+      expectCleanTicks(scale, 2);
+      expect(scale.ticks, contains(0));
+    });
+
+    test('a flat series sits inside the plot, not on an edge', () {
+      for (final value in const [50000, -50000, 0]) {
+        final scale = AreaLineScale.of([value, value, value], intervals: 2);
+
+        expectHeadroom(scale, [value]);
+        expectCleanTicks(scale, 2);
+      }
+    });
+
+    test('follows the gridline count it is given', () {
+      const values = [1000, 2400, 1800, 3200];
+      final scale = AreaLineScale.of(values, intervals: 4);
+
+      expectHeadroom(scale, values);
+      expectCleanTicks(scale, 4);
+    });
+  });
+
+  testWidgets('draws the current point clear of the plot edges', (
+    tester,
+  ) async {
+    // The last value is the series' max, so on an unpadded axis its dot would sit on the
+    // top edge; flat and negative series get the same room.
+    for (final values in const [
+      [154500, 182000, 197300],
+      [-61500, -42000, -38200],
+      [50000, 50000, 50000],
+      [-30000, 120000, 80000, 125000],
+    ]) {
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: appDarkTheme,
+          home: Scaffold(
+            body: Center(
+              child: SizedBox(
+                height: 200,
+                width: 400,
+                child: AreaLine(
+                  values: values,
+                  labels: [for (final _ in values) ''],
+                  gridlines: 2,
+                  markZero: true,
+                  valueLabel: (value) => 'v$value',
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      final plot = Rect.fromLTRB(
+        AreaLine.valueGutter,
+        5,
+        400,
+        200 - AreaLine.axisHeight - 5,
+      );
+      final scale = AreaLineScale.of(values, intervals: 2);
+      final y = scale.y(values.last, plot);
+      expect(y, greaterThan(plot.top), reason: '$values');
+      expect(y, lessThan(plot.bottom), reason: '$values');
+      // The painter rings the current point exactly there.
+      expect(
+        tester.renderObject(
+          find.descendant(
+            of: find.byType(AreaLine),
+            matching: find.byType(CustomPaint),
+          ),
+        ),
+        paints..circle(y: y, radius: 5),
+      );
+      expect(tester.takeException(), isNull);
+    }
   });
 
   group('zero baseline', () {

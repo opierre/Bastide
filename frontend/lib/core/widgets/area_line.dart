@@ -15,8 +15,9 @@ import 'chart_tooltip.dart';
 /// so a month's dot stands over its own label instead of drifting toward the slot boundary.
 /// Hovering a slot rings its point and, when [tooltips] are given, names its figure in a card
 /// placed clear of the line — see [placeAreaLineTooltip].
-/// Given a [valueLabel], the min / mid / max gridlines are labelled in a gutter on the left,
-/// as on the Synthèse's « Patrimoine net » chart.
+/// Given a [valueLabel], every gridline is labelled in a gutter on the left, as on the
+/// Synthèse's « Patrimoine net » chart. The value range is padded past the series' min and
+/// max to clean tick values (see [AreaLineScale]), so the extremes sit inside the plot.
 ///
 /// Deliberately not animated — the spec allows only the spinner and skeleton keyframes, so a
 /// chart appears drawn rather than growing in.
@@ -32,8 +33,9 @@ class AreaLine extends StatefulWidget {
     this.markZero = false,
   });
 
-  /// One value per point, oldest first. Rendered on its own min/max, so a series that never
-  /// approaches zero still fills the plot rather than flattening against the top.
+  /// One value per point, oldest first. Rendered on its own padded range rather than from
+  /// zero, so a series that never approaches zero still fills the plot rather than
+  /// flattening against the top.
   final List<num> values;
 
   /// Axis label per point — same length as [values].
@@ -87,11 +89,11 @@ class _AreaLineState extends State<AreaLine> {
     final textTheme = Theme.of(context).textTheme;
     final valueLabel = widget.valueLabel;
     final gutter = valueLabel == null ? 0.0 : AreaLine.valueGutter;
-    // Bottom to top: the series' min, mid and max, where the painter draws them — or the one
-    // level a flat series sits on.
+    final scale = AreaLineScale.of(values, intervals: widget.gridlines);
+    // Bottom to top: one label per gridline, where the painter draws them.
     final levels = values.length < 2 || valueLabel == null
         ? const <String>[]
-        : _levels(values).map(valueLabel).toList();
+        : scale.ticks.map(valueLabel).toList();
 
     // The axis is a fixed band under a flexible plot, so a card shorter than the band has
     // nothing left to give it and the column overflows its own box. On a short window the
@@ -113,6 +115,7 @@ class _AreaLineState extends State<AreaLine> {
                       size: Size.infinite,
                       painter: _AreaLinePainter(
                         values: values,
+                        scale: scale,
                         gridlines: widget.gridlines,
                         color: widget.color,
                         markZero: widget.markZero,
@@ -148,6 +151,7 @@ class _AreaLineState extends State<AreaLine> {
                       child: CustomSingleChildLayout(
                         delegate: _TooltipPlacement(
                           values: values,
+                          scale: scale,
                           gutter: gutter,
                           hovered: hovered,
                         ),
@@ -219,11 +223,13 @@ class _AreaLineState extends State<AreaLine> {
 class _TooltipPlacement extends SingleChildLayoutDelegate {
   _TooltipPlacement({
     required this.values,
+    required this.scale,
     required this.gutter,
     required this.hovered,
   });
 
   final List<num> values;
+  final AreaLineScale scale;
   final double gutter;
   final int hovered;
 
@@ -234,7 +240,7 @@ class _TooltipPlacement extends SingleChildLayoutDelegate {
   @override
   Offset getPositionForChild(Size size, Size childSize) => placeAreaLineTooltip(
     area: Offset.zero & size,
-    points: _points(values, _plotRect(size, gutter)),
+    points: _points(values, _plotRect(size, gutter), scale),
     hovered: hovered,
     tooltip: childSize,
     leftBound: gutter,
@@ -243,6 +249,7 @@ class _TooltipPlacement extends SingleChildLayoutDelegate {
   @override
   bool shouldRelayout(_TooltipPlacement oldDelegate) =>
       !listEquals(oldDelegate.values, values) ||
+      oldDelegate.scale != scale ||
       oldDelegate.gutter != gutter ||
       oldDelegate.hovered != hovered;
 }
@@ -354,35 +361,147 @@ Rect _plotRect(Size size, double gutter) => Rect.fromLTWH(
   size.height - _AreaLinePainter._dotRadius * 2,
 );
 
-/// Where each value is drawn in [plot], on the series' own min / max. A flat series has no
-/// range to normalise against, so it sits on the plot's centre line rather than divide by zero.
-List<Offset> _points(List<num> values, Rect plot) {
-  if (values.isEmpty) return const [];
-  final min = values.reduce((a, b) => a < b ? a : b).toDouble();
-  final max = values.reduce((a, b) => a > b ? a : b).toDouble();
-  final range = max - min;
-  return [
-    for (var i = 0; i < values.length; i++)
-      Offset(
-        plot.left + AreaLine.pointX(i, values.length, plot.width),
-        range == 0
-            ? plot.center.dy
-            : plot.bottom - plot.height * ((values[i] - min) / range),
-      ),
-  ];
-}
+/// Where each value is drawn in [plot], on the padded [scale] of the series.
+List<Offset> _points(List<num> values, Rect plot, AreaLineScale scale) => [
+  for (var i = 0; i < values.length; i++)
+    Offset(
+      plot.left + AreaLine.pointX(i, values.length, plot.width),
+      scale.y(values[i], plot),
+    ),
+];
 
-/// The values the min / mid / max gridlines stand for, bottom to top — just one for a flat
-/// series, whose line is centred rather than spread across the plot.
-List<num> _levels(List<num> values) {
-  final min = values.reduce((a, b) => a < b ? a : b);
-  final max = values.reduce((a, b) => a > b ? a : b);
-  return min == max ? [min] : [min, (min + max) / 2, max];
+/// The value range an [AreaLine] draws on, and the gridline values inside it.
+///
+/// An axis that starts and ends on the series' own min and max puts those two points on the
+/// plot's edges, where they are hardest to read. The range is instead padded by a share of
+/// the series' spread on either side, then widened to clean tick values (round steps such
+/// as 2, 2.5 or 5 times a power of ten), so each gridline stands for a round figure. A
+/// series that stays on one side of zero is never padded across it: a balance that was
+/// never negative gets no negative tick.
+@immutable
+class AreaLineScale {
+  const AreaLineScale._(this.min, this.max, this.ticks);
+
+  /// The scale for [values] with [intervals] equal gaps between its gridlines.
+  factory AreaLineScale.of(List<num> values, {required int intervals}) {
+    final n = math.max(intervals, 1);
+    if (values.isEmpty) return AreaLineScale._(0, 1, _ticks(0, 1 / n, n));
+    var low = values.fold<num>(values.first, math.min).toDouble();
+    var high = values.fold<num>(values.first, math.max).toDouble();
+
+    // A flat series has no spread to pad by, so it borrows one from its own size (or a
+    // single unit either side of zero) and sits inside the plot like any other.
+    final spread = high - low;
+    final pad = spread > 0
+        ? spread * _headroom
+        : (low == 0 ? 1.0 : low.abs() * _headroom);
+    final positive = low >= 0 && high > 0;
+    final negative = high <= 0 && low < 0;
+    low -= pad;
+    high += pad;
+    if (positive) low = math.max(low, 0);
+    if (negative) high = math.min(high, 0);
+
+    var step = _niceAtLeast((high - low) / n);
+    for (var guard = 0; guard < 64; guard++) {
+      // A series below zero hangs from its top tick, so rounding never lifts it past zero;
+      // anything else stands on its bottom one.
+      final double min;
+      final double max;
+      if (negative) {
+        max = (high / step - _epsilon).ceilToDouble() * step;
+        min = max - n * step;
+      } else {
+        min = (low / step + _epsilon).floorToDouble() * step;
+        max = min + n * step;
+      }
+      if (min <= low + _epsilon * step && max >= high - _epsilon * step) {
+        return AreaLineScale._(min, max, _ticks(min, step, n));
+      }
+      step = _niceAtLeast(step * (1 + 1e-6));
+    }
+    return AreaLineScale._(low, high, _ticks(low, (high - low) / n, n));
+  }
+
+  /// The value at the bottom of the plot.
+  final double min;
+
+  /// The value at the top of the plot.
+  final double max;
+
+  /// The value of each gridline, bottom to top: [min] first, [max] last.
+  final List<num> ticks;
+
+  /// Share of the series' spread added below its min and above its max.
+  static const _headroom = 0.1;
+
+  /// Rounding slack for comparing tick arithmetic done in floating point.
+  static const _epsilon = 1e-9;
+
+  /// Where [value] is drawn in [plot].
+  double y(num value, Rect plot) =>
+      plot.bottom - plot.height * ((value - min) / (max - min));
+
+  @override
+  bool operator ==(Object other) =>
+      other is AreaLineScale &&
+      other.min == min &&
+      other.max == max &&
+      listEquals(other.ticks, ticks);
+
+  @override
+  int get hashCode => Object.hash(min, max, Object.hashAll(ticks));
+
+  /// The clean step sizes within one power of ten. Finer than the classic 1 / 2 / 5, because
+  /// a chart with only two or three gridlines would otherwise round its range far past the
+  /// series and squash the line into a band of the plot.
+  static const _steps = [
+    1.0,
+    1.2,
+    1.5,
+    2.0,
+    2.5,
+    3.0,
+    4.0,
+    5.0,
+    6.0,
+    7.5,
+    8.0,
+    10.0,
+  ];
+
+  /// The smallest clean step (see [_steps]) times a power of ten no smaller than [raw].
+  static double _niceAtLeast(double raw) {
+    if (raw <= 0 || !raw.isFinite) return 1;
+    final magnitude = math
+        .pow(10, (math.log(raw) / math.ln10).floorToDouble())
+        .toDouble();
+    for (final factor in _steps) {
+      final step = factor * magnitude;
+      // Every factor has at most one decimal, so from tens up the step is whole: snap off
+      // the floating-point dust (1.2 × 10⁴ ≠ 12000 exactly).
+      if (step >= raw * (1 - _epsilon)) {
+        return magnitude >= 10 ? step.roundToDouble() : step;
+      }
+    }
+    return 10 * magnitude;
+  }
+
+  /// The [n] + 1 gridline values from [min] up by [step]: whole numbers when the step is,
+  /// so a label never reads 2999.9999.
+  static List<num> _ticks(double min, double step, int n) {
+    final whole = step == step.roundToDouble();
+    return [
+      for (var i = 0; i <= n; i++)
+        whole ? (min + i * step).round() : min + i * step,
+    ];
+  }
 }
 
 class _AreaLinePainter extends CustomPainter {
   _AreaLinePainter({
     required this.values,
+    required this.scale,
     required this.gridlines,
     required this.color,
     required this.markZero,
@@ -393,6 +512,7 @@ class _AreaLinePainter extends CustomPainter {
   });
 
   final List<num> values;
+  final AreaLineScale scale;
   final int gridlines;
   final Color color;
   final bool markZero;
@@ -401,7 +521,8 @@ class _AreaLinePainter extends CustomPainter {
   /// Left inset of the plot, holding the value axis; zero without one.
   final double gutter;
 
-  /// The value axis' labels, bottom to top — see [_levels]. Empty without an axis.
+  /// The value axis' labels, one per [AreaLineScale.ticks], bottom to top. Empty without
+  /// an axis.
   final List<String> levelLabels;
   final TextStyle labelStyle;
 
@@ -420,17 +541,14 @@ class _AreaLinePainter extends CustomPainter {
     final grid = Paint()
       ..color = AppColors.borderSubtle
       ..strokeWidth = 1;
-    for (var i = 0; i <= gridlines; i++) {
-      final y = plot.top + plot.height * (i / gridlines);
+    for (final tick in scale.ticks) {
+      final y = scale.y(tick, plot);
       canvas.drawLine(Offset(plot.left, y), Offset(size.width, y), grid);
     }
 
-    // Min at the bottom gridline, max at the top, mid halfway — the one level of a flat
-    // series sits at the centre, where its line is drawn.
-    for (var i = 0; i < levelLabels.length; i++) {
-      final y = levelLabels.length == 1
-          ? plot.center.dy
-          : plot.bottom - plot.height * (i / (levelLabels.length - 1));
+    // Each label beside the gridline it names, bottom to top.
+    for (var i = 0; i < levelLabels.length && i < scale.ticks.length; i++) {
+      final y = scale.y(scale.ticks[i], plot);
       final label = TextPainter(
         text: TextSpan(text: levelLabels[i], style: labelStyle),
         textDirection: TextDirection.ltr,
@@ -444,17 +562,16 @@ class _AreaLinePainter extends CustomPainter {
 
     if (values.length < 2) return;
 
-    final min = values.reduce((a, b) => a < b ? a : b).toDouble();
-    final max = values.reduce((a, b) => a > b ? a : b).toDouble();
-    final range = max - min;
-    final points = _points(values, plot);
+    final min = values.fold<num>(values.first, math.min);
+    final max = values.fold<num>(values.first, math.max);
+    final points = _points(values, plot, scale);
 
     final line = Path()..addPolygon(points, false);
-    final crossesZero = markZero && range > 0 && min < 0 && max > 0;
+    final crossesZero = markZero && min < 0 && max > 0;
     if (crossesZero) {
       // The fill closes on the zero line rather than the plot's floor, then is split there:
       // what lies above it is balance, what lies below it is overdraft.
-      final zeroY = plot.bottom - plot.height * (-min / range);
+      final zeroY = scale.y(0, plot);
       final area = Path.from(line)
         ..lineTo(points.last.dx, zeroY)
         ..lineTo(points.first.dx, zeroY)
@@ -524,6 +641,7 @@ class _AreaLinePainter extends CustomPainter {
   @override
   bool shouldRepaint(_AreaLinePainter oldDelegate) =>
       !listEquals(oldDelegate.values, values) ||
+      oldDelegate.scale != scale ||
       oldDelegate.gridlines != gridlines ||
       oldDelegate.color != color ||
       oldDelegate.markZero != markZero ||
