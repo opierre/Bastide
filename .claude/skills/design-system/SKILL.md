@@ -115,7 +115,7 @@ lives at the sidebar foot.
 - **Top bar**, 72px on the base surface with a `#1A212C` hairline: panel title 18/700 + 12px
   secondary descriptor beneath it (left), then right-aligned **contextual controls** (38px pills —
   month selector, search, primary CTA; each panel spec names its own) and the user pill (44px,
-  bordered: 32px iris-tint monogram + name/email + chevron).
+  bordered: 32px iris-tint monogram + display name + chevron).
 - **Content region** padding 24×28 — 20 top on panels that open with a filter bar.
 
 Consistency of chrome is a hard acceptance criterion: a screen that moves or restyles the
