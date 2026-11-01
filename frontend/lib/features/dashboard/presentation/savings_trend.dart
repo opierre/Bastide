@@ -30,17 +30,6 @@ class SavingsTrendChart extends ConsumerWidget {
     final monthFormat = DateFormat('LLL', locale);
     final textTheme = Theme.of(context).textTheme;
     final average = trends.averageSavedMinor;
-    // Every month's tooltip ends on the window's average, so a month reads against the
-    // dotted line it sits beside without hunting for the headline.
-    final averageLine = l10n.dashboardSavingsTrendAverageTooltip(
-      trends.averageWindow.length,
-      formatAmount(
-        amountMinor: average,
-        currency: trends.currency,
-        locale: locale,
-        showPositiveSign: true,
-      ),
-    );
 
     return ChartContainer(
       title: l10n.dashboardSavingsTrendTitle,
@@ -111,12 +100,6 @@ class SavingsTrendChart extends ConsumerWidget {
                         ? AppColors.negative
                         : AppColors.positive,
                   ),
-                ),
-                TextSpan(
-                  text: '\n$averageLine',
-                  style: tabularNumberStyle(
-                    textTheme.labelSmall!,
-                  ).copyWith(color: AppColors.textSecondary),
                 ),
               ],
             ),
