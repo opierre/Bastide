@@ -4703,6 +4703,10 @@
   "@propertyFormLabelRequired": {
     "description": "Validation message when the property name is empty."
   },
+  "propertyFormAddress": "Adresse",
+  "@propertyFormAddress": {
+    "description": "Property form field: the property's optional postal address, free text."
+  },
   "propertyFormKind": "Nature",
   "@propertyFormKind": {
     "description": "Property form field: the property's nature (select)."
@@ -5062,6 +5066,24 @@
     "description": "One partly owned property in the composition foot.",
     "placeholders": {
       "label": {
+        "type": "String"
+      },
+      "share": {
+        "type": "String"
+      },
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "networthCompositionFootItemWithAddress": "{label} ({address}) : {share} sur {value}",
+  "@networthCompositionFootItemWithAddress": {
+    "description": "One partly owned property in the composition foot, named with its address.",
+    "placeholders": {
+      "label": {
+        "type": "String"
+      },
+      "address": {
         "type": "String"
       },
       "share": {

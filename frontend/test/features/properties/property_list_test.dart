@@ -102,6 +102,30 @@ void main() {
     expect(find.byKey(const Key('propertyNewTile')), findsOneWidget);
   });
 
+  testWidgets('a card shows the address under the label, when there is one', (
+    tester,
+  ) async {
+    _useDesktopSurface(tester);
+    await tester.pumpWidget(
+      _wrap(
+        FakePropertiesController(
+          initialProperties: [
+            testProperty(address: '3 rue des Glycines, 69003 Lyon'),
+            testStudio(),
+          ],
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    await _openProperties(tester);
+
+    expect(
+      _text(tester, 'propertyAddress-p1'),
+      '3 rue des Glycines, 69003 Lyon',
+    );
+    expect(find.byKey(const Key('propertyAddress-p2')), findsNothing);
+  });
+
   testWidgets('the same cards in English', (tester) async {
     _useDesktopSurface(tester);
     await tester.pumpWidget(

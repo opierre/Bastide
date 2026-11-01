@@ -18,6 +18,10 @@ enum PropertyKind {
   );
 }
 
+/// The longest address the API stores (`ADDRESS_MAX_LENGTH` in
+/// `backend/app/features/properties/schemas.py`).
+const propertyAddressMaxLength = 255;
+
 /// A whole property, in basis points of ownership.
 const fullOwnershipBps = 10000;
 
@@ -31,6 +35,7 @@ class Property {
   const Property({
     required this.id,
     required this.label,
+    this.address,
     required this.kind,
     required this.marketValueMinor,
     required this.valuedOn,
@@ -45,6 +50,9 @@ class Property {
 
   final String id;
   final String label;
+
+  /// Free text, `null` when the user gave none; never blank.
+  final String? address;
   final PropertyKind kind;
   final int marketValueMinor;
   final DateTime valuedOn;
@@ -71,6 +79,7 @@ class Property {
 class PropertyDraft {
   const PropertyDraft({
     required this.label,
+    this.address,
     required this.kind,
     required this.marketValueMinor,
     required this.valuedOn,
@@ -80,6 +89,10 @@ class PropertyDraft {
   });
 
   final String label;
+
+  /// `null` means no address — and, on a patch, clears it: unlike the
+  /// acquisition fields, the API takes a null address as « remove it ».
+  final String? address;
   final PropertyKind kind;
   final int marketValueMinor;
   final DateTime valuedOn;

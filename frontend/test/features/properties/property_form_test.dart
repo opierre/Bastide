@@ -161,8 +161,61 @@ void main() {
       expect(draft.ownershipBps, 5000);
       expect(draft.acquisitionPriceMinor, isNull);
       expect(draft.acquiredOn, isNull);
+      expect(draft.address, isNull);
     },
   );
+
+  testWidgets('the address is optional and saved trimmed', (tester) async {
+    _useDesktopSurface(tester);
+    final controller = FakePropertiesController();
+    await tester.pumpWidget(
+      _wrap(
+        controller: controller,
+        modal: const PropertyFormModal(currency: 'EUR'),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('Adresse'), findsOneWidget);
+    await _fillStudio(tester);
+    await tester.enterText(
+      find.byKey(const Key('propertyFormAddress')),
+      '  8 allée des Tilleuls, 69100 Villeurbanne ',
+    );
+    await tester.tap(find.byKey(const Key('propertyFormSubmit')));
+    await tester.pumpAndSettle();
+
+    expect(
+      controller.createCalls.single.address,
+      '8 allée des Tilleuls, 69100 Villeurbanne',
+    );
+  });
+
+  testWidgets('editing prefills the address, and emptying it clears it', (
+    tester,
+  ) async {
+    _useDesktopSurface(tester);
+    final controller = FakePropertiesController();
+    await tester.pumpWidget(
+      _wrap(
+        controller: controller,
+        locale: const Locale('en'),
+        modal: PropertyFormModal(
+          currency: 'EUR',
+          initial: testStudio(address: '8 allée des Tilleuls'),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('Address'), findsOneWidget);
+    expect(find.text('8 allée des Tilleuls'), findsOneWidget);
+    await tester.enterText(find.byKey(const Key('propertyFormAddress')), ' ');
+    await tester.tap(find.byKey(const Key('propertyFormSubmit')));
+    await tester.pumpAndSettle();
+
+    expect(controller.updateCalls.single.$2.address, isNull);
+  });
 
   testWidgets('a decimal share converts on the digits', (tester) async {
     _useDesktopSurface(tester);

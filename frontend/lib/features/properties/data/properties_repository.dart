@@ -33,7 +33,8 @@ class PropertiesRepository {
   }
 
   /// Patches every declared input. The acquisition fields are only sent when
-  /// set: `null` is indistinguishable from absent on this API.
+  /// set: `null` is indistinguishable from absent on this API. The address is
+  /// always sent, so an emptied field clears it.
   Future<Property> update(String propertyId, PropertyDraft draft) async {
     final json =
         await _apiClient.patch(
@@ -79,6 +80,7 @@ class PropertiesRepository {
 
   Map<String, dynamic> _draftJson(PropertyDraft draft) => {
     'label': draft.label,
+    'address': draft.address,
     'kind': draft.kind.wireValue,
     'market_value_minor': draft.marketValueMinor,
     'valued_on': _date(draft.valuedOn),
@@ -99,6 +101,7 @@ class PropertiesRepository {
   Property _parse(Map<String, dynamic> json) => Property(
     id: json['id'] as String,
     label: json['label'] as String,
+    address: json['address'] as String?,
     kind: PropertyKind.fromWire(json['kind'] as String),
     marketValueMinor: json['market_value_minor'] as int,
     valuedOn: DateTime.parse(json['valued_on'] as String),

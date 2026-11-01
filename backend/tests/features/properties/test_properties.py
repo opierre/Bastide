@@ -123,6 +123,76 @@ def test_patch_updates_only_the_fields_it_carries(client: TestClient) -> None:
     assert response.json()["market_value_minor"] == 42_000_000
 
 
+def test_a_property_has_no_address_unless_given(client: TestClient) -> None:
+    headers = register(client)
+
+    assert create_property(client, headers)["address"] is None
+
+
+def test_create_keeps_the_address_trimmed(client: TestClient) -> None:
+    headers = register(client)
+
+    created = create_property(client, headers, address="  12 rue des Lilas, 69003 Lyon  ")
+
+    assert created["address"] == "12 rue des Lilas, 69003 Lyon"
+    assert list_properties(client, headers)[0]["address"] == "12 rue des Lilas, 69003 Lyon"
+
+
+def test_a_blank_address_is_stored_as_none(client: TestClient) -> None:
+    headers = register(client)
+
+    assert create_property(client, headers, address="   ")["address"] is None
+
+
+def test_an_address_longer_than_the_limit_is_refused(client: TestClient) -> None:
+    headers = register(client)
+
+    response = client.post(
+        "/api/v1/properties", json={**PROPERTY_PAYLOAD, "address": "a" * 256}, headers=headers
+    )
+
+    assert response.status_code == 422, response.json()
+
+
+def test_patch_changes_the_address(client: TestClient) -> None:
+    headers = register(client)
+    created = create_property(client, headers, address="12 rue des Lilas, 69003 Lyon")
+
+    response = client.patch(
+        f"/api/v1/properties/{created['id']}",
+        json={"address": " 4 place du Marché, 69100 Villeurbanne "},
+        headers=headers,
+    )
+
+    assert response.status_code == 200, response.json()
+    assert response.json()["address"] == "4 place du Marché, 69100 Villeurbanne"
+
+
+@pytest.mark.parametrize("cleared", [None, "", "  "])
+def test_patch_clears_the_address_with_null_or_blank(client: TestClient, cleared: object) -> None:
+    headers = register(client)
+    created = create_property(client, headers, address="12 rue des Lilas, 69003 Lyon")
+
+    response = client.patch(
+        f"/api/v1/properties/{created['id']}", json={"address": cleared}, headers=headers
+    )
+
+    assert response.status_code == 200, response.json()
+    assert response.json()["address"] is None
+
+
+def test_patch_without_address_leaves_it_alone(client: TestClient) -> None:
+    headers = register(client)
+    created = create_property(client, headers, address="12 rue des Lilas, 69003 Lyon")
+
+    response = client.patch(
+        f"/api/v1/properties/{created['id']}", json={"label": "Appartement"}, headers=headers
+    )
+
+    assert response.status_code == 200, response.json()
+    assert response.json()["address"] == "12 rue des Lilas, 69003 Lyon"
+
+
 def test_a_new_valuation_is_a_patch_of_the_value_and_its_date(client: TestClient) -> None:
     """No valuation history exists: a re-estimation replaces the single declared value."""
     headers = register(client)

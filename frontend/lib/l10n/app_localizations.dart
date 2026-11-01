@@ -5694,6 +5694,12 @@ abstract class AppLocalizations {
   /// **'Donnez un nom à ce bien.'**
   String get propertyFormLabelRequired;
 
+  /// Property form field: the property's optional postal address, free text.
+  ///
+  /// In fr, this message translates to:
+  /// **'Adresse'**
+  String get propertyFormAddress;
+
   /// Property form field: the property's nature (select).
   ///
   /// In fr, this message translates to:
@@ -6071,6 +6077,17 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'{label} : {share} sur {value}'**
   String networthCompositionFootItem(String label, String share, String value);
+
+  /// One partly owned property in the composition foot, named with its address.
+  ///
+  /// In fr, this message translates to:
+  /// **'{label} ({address}) : {share} sur {value}'**
+  String networthCompositionFootItemWithAddress(
+    String label,
+    String address,
+    String share,
+    String value,
+  );
 
   /// Dashed plate under the composition when no property is declared.
   ///

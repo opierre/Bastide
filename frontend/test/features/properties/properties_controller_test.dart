@@ -11,6 +11,7 @@ class MockApiClient extends Mock implements ApiClient {}
 Map<String, dynamic> _propertyJson({
   String id = 'p2',
   String label = 'Studio Villeurbanne',
+  String? address,
   String kind = 'rental',
   int ownershipBps = 5000,
   bool archived = false,
@@ -20,6 +21,7 @@ Map<String, dynamic> _propertyJson({
 }) => {
   'id': id,
   'label': label,
+  'address': address,
   'kind': kind,
   'market_value_minor': 14500000,
   'valued_on': '2026-03-05',
@@ -35,10 +37,12 @@ Map<String, dynamic> _propertyJson({
 };
 
 PropertyDraft _studioDraft({
+  String? address,
   int? acquisitionPriceMinor,
   DateTime? acquiredOn,
 }) => PropertyDraft(
   label: 'Studio Villeurbanne',
+  address: address,
   kind: PropertyKind.rental,
   marketValueMinor: 14500000,
   valuedOn: DateTime(2026, 3, 5),
@@ -80,7 +84,9 @@ void main() {
 
   test('build maps the live and the archived properties', () async {
     stubLists(
-      live: [_propertyJson()],
+      live: [
+        _propertyJson(address: '8 allée des Tilleuls, 69100 Villeurbanne'),
+      ],
       archived: [_propertyJson(id: 'p9', label: 'Terrain', kind: 'other')],
     );
 
@@ -95,7 +101,9 @@ void main() {
     expect(studio.userShareValueMinor, 7250000);
     expect(studio.acquisitionDeltaMinor, 650000);
     expect(studio.acquiredOn, DateTime(2021, 6, 14));
+    expect(studio.address, '8 allée des Tilleuls, 69100 Villeurbanne');
     expect(state.archived.single.kind, PropertyKind.other);
+    expect(state.archived.single.address, isNull);
     verify(() => apiClient.get('/properties', query: const {})).called(1);
     verify(
       () => apiClient.get('/properties', query: {'archived': 'true'}),
@@ -135,6 +143,7 @@ void main() {
 
     await notifier().create(
       _studioDraft(
+        address: '8 allée des Tilleuls, 69100 Villeurbanne',
         acquisitionPriceMinor: 13200000,
         acquiredOn: DateTime(2021, 6, 14),
       ),
@@ -150,6 +159,7 @@ void main() {
             as Map<String, dynamic>;
     expect(body, {
       'label': 'Studio Villeurbanne',
+      'address': '8 allée des Tilleuls, 69100 Villeurbanne',
       'kind': 'rental',
       'market_value_minor': 14500000,
       'valued_on': '2026-03-05',
@@ -183,6 +193,27 @@ void main() {
     expect(body.containsKey('acquisition_price_minor'), isFalse);
     expect(body.containsKey('acquired_on'), isFalse);
     expect(body['ownership_bps'], 5000);
+  });
+
+  test('update sends a removed address as null, which clears it', () async {
+    stubLists(live: [_propertyJson(address: '8 allée des Tilleuls')]);
+    when(
+      () => apiClient.patch('/properties/p2', body: any(named: 'body')),
+    ).thenAnswer((_) async => _propertyJson());
+    await container.read(propertiesControllerProvider.future);
+
+    await notifier().updateProperty('p2', _studioDraft());
+
+    final body =
+        verify(
+              () => apiClient.patch(
+                '/properties/p2',
+                body: captureAny(named: 'body'),
+              ),
+            ).captured.single
+            as Map<String, dynamic>;
+    expect(body.containsKey('address'), isTrue);
+    expect(body['address'], isNull);
   });
 
   test('a refused create is rethrown for the form to show inline', () async {

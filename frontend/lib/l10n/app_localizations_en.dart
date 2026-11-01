@@ -3635,6 +3635,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get propertyFormLabelRequired => 'Give this property a name.';
 
   @override
+  String get propertyFormAddress => 'Address';
+
+  @override
   String get propertyFormKind => 'Type';
 
   @override
@@ -3878,6 +3881,16 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String networthCompositionFootItem(String label, String share, String value) {
     return '$label: $share of $value';
+  }
+
+  @override
+  String networthCompositionFootItemWithAddress(
+    String label,
+    String address,
+    String share,
+    String value,
+  ) {
+    return '$label ($address): $share of $value';
   }
 
   @override

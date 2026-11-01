@@ -290,8 +290,11 @@ class ComputedInstalment {
 /// A property a loan can be linked to — this panel's narrow view of one.
 @immutable
 class LoanProperty {
-  const LoanProperty({required this.id, required this.label});
+  const LoanProperty({required this.id, required this.label, this.address});
 
   final String id;
   final String label;
+
+  /// Shown under the label in the picker, so two similar biens read apart.
+  final String? address;
 }
