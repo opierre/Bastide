@@ -8,6 +8,7 @@ import '../../../core/widgets/amount_text.dart';
 import '../../../core/widgets/category_chip.dart';
 import '../../../core/widgets/institution_avatar.dart';
 import '../../../l10n/app_localizations.dart';
+import '../../recurring/presentation/mark_recurring_dialog.dart';
 import '../domain/transaction.dart';
 import 'category_picker.dart';
 
@@ -120,6 +121,33 @@ class TransactionRow extends ConsumerWidget {
                 ),
               ],
             ),
+          ),
+          const SizedBox(width: AppSpacing.sm),
+          // A fixed slot on every row, so the date column stays aligned whether
+          // or not the row offers the action. Outflows only: a subscription is
+          // something paid, and the server refuses a preview for an inflow.
+          SizedBox(
+            width: 28,
+            child: transaction.amountMinor < 0
+                ? IconButton(
+                    key: const Key('transactionRowMarkRecurring'),
+                    tooltip: l10n.markRecurringAction,
+                    onPressed: () => showMarkRecurringDialog(
+                      context,
+                      ref,
+                      transactionId: transaction.id,
+                    ),
+                    icon: const Icon(Icons.repeat_rounded),
+                    iconSize: 16,
+                    color: AppColors.textDisabled,
+                    hoverColor: AppColors.irisSoft,
+                    padding: EdgeInsets.zero,
+                    constraints: const BoxConstraints.tightFor(
+                      width: 28,
+                      height: 28,
+                    ),
+                  )
+                : null,
           ),
           // Wider than the row's other gutters: the amount column right-aligns its
           // tabular figures, so for most everyday amounts (one or two digits before

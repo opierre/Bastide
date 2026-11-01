@@ -161,6 +161,36 @@ void main() {
     expect(find.text('Courses'), findsOneWidget);
   });
 
+  testWidgets('only an outflow offers « Marquer comme récurrent »', (
+    tester,
+  ) async {
+    _useDesktopSurface(tester);
+    await tester.pumpWidget(
+      _wrap(
+        controller: FakeTransactionsController(
+          initialPage: TransactionsPage(
+            items: [
+              _transaction(id: 'out', amountMinor: -1250),
+              _transaction(id: 'in', amountMinor: 250000, merchant: 'Salaire'),
+            ],
+            page: 1,
+            pageSize: 50,
+            total: 2,
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    Finder action(String id) => find.descendant(
+      of: find.byKey(Key('transactionRow-$id')),
+      matching: find.byKey(const Key('transactionRowMarkRecurring')),
+    );
+    expect(action('out'), findsOneWidget);
+    expect(action('in'), findsNothing);
+    expect(find.byTooltip('Marquer comme récurrent'), findsOneWidget);
+  });
+
   testWidgets('a row with a memo shows it before the account name', (
     tester,
   ) async {
