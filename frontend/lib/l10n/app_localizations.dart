@@ -7218,6 +7218,24 @@ abstract class AppLocalizations {
   /// **'{account} · {cadence} · {amount}'**
   String seriesPickerRowDetail(String account, String cadence, String amount);
 
+  /// Series picker button adding the transaction to the selected series.
+  ///
+  /// In fr, this message translates to:
+  /// **'Confirmer'**
+  String get seriesPickerConfirm;
+
+  /// Toast once the transaction was added to the series picked.
+  ///
+  /// In fr, this message translates to:
+  /// **'Opération ajoutée à « {label} »'**
+  String seriesPickerAdded(String label);
+
+  /// Toast headline when adding the transaction to the series picked failed; the reason follows beneath.
+  ///
+  /// In fr, this message translates to:
+  /// **'L\'opération n\'a pas pu être ajoutée'**
+  String get seriesPickerAddFailed;
+
   /// Series detail button opening the picker of transactions to add to the series.
   ///
   /// In fr, this message translates to:

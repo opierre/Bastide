@@ -6016,6 +6016,23 @@
       }
     }
   },
+  "seriesPickerConfirm": "Confirmer",
+  "@seriesPickerConfirm": {
+    "description": "Series picker button adding the transaction to the selected series."
+  },
+  "seriesPickerAdded": "Opération ajoutée à « {label} »",
+  "@seriesPickerAdded": {
+    "description": "Toast once the transaction was added to the series picked.",
+    "placeholders": {
+      "label": {
+        "type": "String"
+      }
+    }
+  },
+  "seriesPickerAddFailed": "L'opération n'a pas pu être ajoutée",
+  "@seriesPickerAddFailed": {
+    "description": "Toast headline when adding the transaction to the series picked failed; the reason follows beneath."
+  },
   "chargePickerAction": "Ajouter une opération",
   "@chargePickerAction": {
     "description": "Series detail button opening the picker of transactions to add to the series."
