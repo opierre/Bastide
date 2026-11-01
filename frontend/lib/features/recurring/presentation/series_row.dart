@@ -90,9 +90,9 @@ class SeriesTableHeader extends StatelessWidget {
   }
 }
 
-/// What the kebab can do to a row: move it along the lifecycle, or open it in
-/// the form.
-enum SeriesAction { confirm, dismiss, cancel, edit }
+/// What the kebab can do to a row: move it along the lifecycle, open it in the
+/// form, or put it away and bring it back.
+enum SeriesAction { confirm, dismiss, cancel, edit, archive, unarchive }
 
 /// A 56 px subscription row: monogram · label · category · cadence · amount ·
 /// next charge · status pill · kebab (`docs/design/10` frame ①).
@@ -100,7 +100,8 @@ enum SeriesAction { confirm, dismiss, cancel, edit }
 /// A cancelled row renders at .55 opacity with no next date. It stays listed
 /// rather than disappearing because the subscription is part of the history the
 /// user is reading — and opacity does not affect hit testing, so its kebab
-/// stays reachable, which is the point of keeping it.
+/// stays reachable, which is the point of keeping it. An archived row, revealed
+/// under the live ones, is dimmed the same way for the same reason.
 class SeriesRow extends StatefulWidget {
   const SeriesRow({
     super.key,
@@ -133,6 +134,8 @@ class _SeriesRowState extends State<SeriesRow> {
     final textTheme = Theme.of(context).textTheme;
     final series = widget.row.series;
     final isCancelled = series.status == SeriesStatus.cancelled;
+    // Neither expects a charge the panel is tracking, so neither shows a date.
+    final isSettled = isCancelled || series.isArchived;
 
     return MouseRegion(
       onEnter: (_) => setState(() => _hovered = true),
@@ -142,7 +145,7 @@ class _SeriesRowState extends State<SeriesRow> {
         height: SeriesColumns.rowHeight,
         color: _hovered ? AppColors.surfaceRowHover : Colors.transparent,
         child: Opacity(
-          opacity: isCancelled ? 0.55 : 1,
+          opacity: isSettled ? 0.55 : 1,
           child: seriesRowLayout(
             monogram: Center(
               child: MonogramAvatar(
@@ -193,7 +196,7 @@ class _SeriesRowState extends State<SeriesRow> {
               child: _NextChargeCell(
                 row: widget.row,
                 locale: locale,
-                isCancelled: isCancelled,
+                isSettled: isSettled,
               ),
             ),
             status: Align(
@@ -240,12 +243,14 @@ class _NextChargeCell extends StatelessWidget {
   const _NextChargeCell({
     required this.row,
     required this.locale,
-    required this.isCancelled,
+    required this.isSettled,
   });
 
   final SubscriptionRow row;
   final String locale;
-  final bool isCancelled;
+
+  /// Cancelled or archived: no charge is expected, so no date is printed.
+  final bool isSettled;
 
   @override
   Widget build(BuildContext context) {
@@ -253,7 +258,7 @@ class _NextChargeCell extends StatelessWidget {
     final textTheme = Theme.of(context).textTheme;
     final dateFormat = seriesDateFormat(locale);
 
-    if (isCancelled) {
+    if (isSettled) {
       return Text(
         l10n.subscriptionsValueNone,
         textAlign: TextAlign.end,
@@ -337,7 +342,8 @@ class _StatusCell extends StatelessWidget {
 
 /// The row's kebab. It offers only the transitions the lifecycle allows out of
 /// the current status — a menu that can produce a 409 is a menu that lies about
-/// what the subscription can do.
+/// what the subscription can do. An archived series offers only « Désarchiver »,
+/// as an archived property does: it is put away until the user brings it back.
 class _SeriesKebab extends StatelessWidget {
   const _SeriesKebab({required this.series, required this.onAction});
 
@@ -358,42 +364,61 @@ class _SeriesKebab extends StatelessWidget {
       padding: EdgeInsets.zero,
       onSelected: onAction,
       itemBuilder: (context) => [
-        if (allowed.contains(SeriesStatus.confirmed))
+        if (series.isArchived)
           PopupMenuItem(
-            key: Key('seriesActionConfirm-${series.id}'),
-            value: SeriesAction.confirm,
+            key: Key('seriesActionUnarchive-${series.id}'),
+            value: SeriesAction.unarchive,
             child: _MenuRow(
-              icon: Icons.check_rounded,
-              label: l10n.subscriptionActionConfirm,
-              color: AppColors.positive,
+              icon: Icons.unarchive_outlined,
+              label: l10n.subscriptionActionUnarchive,
+            ),
+          )
+        else ...[
+          if (allowed.contains(SeriesStatus.confirmed))
+            PopupMenuItem(
+              key: Key('seriesActionConfirm-${series.id}'),
+              value: SeriesAction.confirm,
+              child: _MenuRow(
+                icon: Icons.check_rounded,
+                label: l10n.subscriptionActionConfirm,
+                color: AppColors.positive,
+              ),
+            ),
+          if (allowed.contains(SeriesStatus.dismissed))
+            PopupMenuItem(
+              key: Key('seriesActionDismiss-${series.id}'),
+              value: SeriesAction.dismiss,
+              child: _MenuRow(
+                icon: Icons.visibility_off_outlined,
+                label: l10n.subscriptionActionDismiss,
+              ),
+            ),
+          if (allowed.contains(SeriesStatus.cancelled))
+            PopupMenuItem(
+              key: Key('seriesActionCancel-${series.id}'),
+              value: SeriesAction.cancel,
+              child: _MenuRow(
+                icon: Icons.block_outlined,
+                label: l10n.subscriptionActionCancel,
+              ),
+            ),
+          PopupMenuItem(
+            key: Key('seriesActionEdit-${series.id}'),
+            value: SeriesAction.edit,
+            child: _MenuRow(
+              icon: Icons.edit_outlined,
+              label: l10n.subscriptionActionEdit,
             ),
           ),
-        if (allowed.contains(SeriesStatus.dismissed))
           PopupMenuItem(
-            key: Key('seriesActionDismiss-${series.id}'),
-            value: SeriesAction.dismiss,
+            key: Key('seriesActionArchive-${series.id}'),
+            value: SeriesAction.archive,
             child: _MenuRow(
-              icon: Icons.visibility_off_outlined,
-              label: l10n.subscriptionActionDismiss,
+              icon: Icons.archive_outlined,
+              label: l10n.subscriptionActionArchive,
             ),
           ),
-        if (allowed.contains(SeriesStatus.cancelled))
-          PopupMenuItem(
-            key: Key('seriesActionCancel-${series.id}'),
-            value: SeriesAction.cancel,
-            child: _MenuRow(
-              icon: Icons.block_outlined,
-              label: l10n.subscriptionActionCancel,
-            ),
-          ),
-        PopupMenuItem(
-          key: Key('seriesActionEdit-${series.id}'),
-          value: SeriesAction.edit,
-          child: _MenuRow(
-            icon: Icons.edit_outlined,
-            label: l10n.subscriptionActionEdit,
-          ),
-        ),
+        ],
       ],
     );
   }

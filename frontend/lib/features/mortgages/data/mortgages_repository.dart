@@ -179,6 +179,7 @@ class MortgagesRepository {
         LoanProperty(
           id: entry['id'] as String,
           label: entry['label'] as String,
+          address: entry['address'] as String?,
         ),
     ];
   }

@@ -22,9 +22,12 @@ class RecurringRepository {
 
   final ApiClient _apiClient;
 
+  /// The live series, or with [archived] only the archived ones — the server
+  /// never mixes the two in one list.
   Future<List<RecurringSeries>> list({
     SeriesStatus? status,
     String? accountId,
+    bool archived = false,
   }) async {
     final json =
         await _apiClient.get(
@@ -32,6 +35,7 @@ class RecurringRepository {
               query: {
                 if (status != null) 'status': status.wireValue,
                 'account_id': ?accountId,
+                if (archived) 'archived': 'true',
               },
             )
             as List<dynamic>;
@@ -217,6 +221,22 @@ class RecurringRepository {
     return _parseSeries(json);
   }
 
+  /// Puts a series away; its status and history are kept as they are.
+  Future<RecurringSeries> archive(String seriesId) async {
+    final json =
+        await _apiClient.post('/recurring/$seriesId/archive')
+            as Map<String, dynamic>;
+    return _parseSeries(json);
+  }
+
+  /// Brings an archived series back to the list, the summary and detection.
+  Future<RecurringSeries> unarchive(String seriesId) async {
+    final json =
+        await _apiClient.post('/recurring/$seriesId/unarchive')
+            as Map<String, dynamic>;
+    return _parseSeries(json);
+  }
+
   /// Deletes a declared series; a detected one comes back `dismissed` instead —
   /// the server decides which, since only it knows whether the ledger still
   /// supports the deduction.
@@ -258,6 +278,7 @@ class RecurringRepository {
     occurrenceCount: json['occurrence_count'] as int,
     status: SeriesStatus.fromWire(json['status'] as String),
     isManual: json['is_manual'] as bool,
+    isArchived: json['archived'] as bool? ?? false,
     priceChangeMinor: json['price_change_minor'] as int?,
     priceChangedAt: json['price_changed_at'] == null
         ? null

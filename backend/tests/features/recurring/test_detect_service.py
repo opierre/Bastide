@@ -505,6 +505,56 @@ def test_a_cancelled_manual_series_gains_no_charge(client: TestClient, tmp_path:
     assert _links(tmp_path, series_id) == set(ticked)
 
 
+# --- archived series are put away ------------------------------------------------------------
+
+
+def test_an_archived_series_is_neither_refreshed_nor_recreated(
+    client: TestClient, tmp_path: Path
+) -> None:
+    headers = _register(client)
+    account_id = _create_account(client, headers)
+    _insert_subscription(tmp_path, account_id)
+    _detect(client, headers)
+    series_id = _series_rows(tmp_path)[0].id
+    archived = client.post(f"/api/v1/recurring/{series_id}/archive", headers=headers)
+    assert archived.status_code == 200, archived.json()
+    _update_series(tmp_path, series_id, occurrence_count=99)
+
+    assert _detect(client, headers) == {"created_count": 0, "updated_count": 0}
+
+    rows = _series_rows(tmp_path)
+    assert len(rows) == 1
+    assert rows[0].archived is True
+    assert rows[0].occurrence_count == 99
+
+
+def test_an_archived_manual_series_gains_no_charge(client: TestClient, tmp_path: Path) -> None:
+    headers = _register(client)
+    account_id = _create_account(client, headers)
+    ticked = _insert_subscription(tmp_path, account_id, offsets=(0, 30))
+    series_id = _create_manual(client, headers, account_id, ticked)
+    _update_series(tmp_path, series_id, archived=True)
+    _insert_subscription(tmp_path, account_id, label="PRLV SEPA NETFLIX.COM ", offsets=(60,))
+
+    assert _detect(client, headers) == {"created_count": 0, "updated_count": 0}
+
+    assert _series(tmp_path, series_id).occurrence_count == 2
+    assert _links(tmp_path, series_id) == set(ticked)
+
+
+def test_an_unarchived_series_is_refreshed_again(client: TestClient, tmp_path: Path) -> None:
+    headers = _register(client)
+    account_id = _create_account(client, headers)
+    _insert_subscription(tmp_path, account_id)
+    _detect(client, headers)
+    series_id = _series_rows(tmp_path)[0].id
+    _update_series(tmp_path, series_id, archived=True, occurrence_count=99)
+    client.post(f"/api/v1/recurring/{series_id}/unarchive", headers=headers)
+
+    assert _detect(client, headers) == {"created_count": 0, "updated_count": 1}
+    assert _series_rows(tmp_path)[0].occurrence_count == 3
+
+
 # --- scoping ---------------------------------------------------------------------------------
 
 

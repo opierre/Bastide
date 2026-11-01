@@ -31,9 +31,18 @@ class RecurringRepository:
         self._db = db
 
     def list_for_user(
-        self, user_id: str, *, account_id: str | None = None, status: str | None = None
+        self,
+        user_id: str,
+        *,
+        account_id: str | None = None,
+        status: str | None = None,
+        archived: bool | None = None,
     ) -> list[RecurringSeries]:
         """The user's series, soonest charge first, optionally narrowed by account and status.
+
+        ``archived`` keeps only the archived (`True`) or the live (`False`) series; `None`
+        returns both, which is what detection and the merchant-key checks need: an archived
+        series still holds its key, so nothing may be created under it.
 
         The panel is a list of what is coming, so due date is the order it reads in; `created_at`
         only breaks ties, and only so the order is stable rather than whatever the database
@@ -45,6 +54,8 @@ class RecurringRepository:
             query = query.where(RecurringSeries.account_id == account_id)
         if status is not None:
             query = query.where(RecurringSeries.status == status)
+        if archived is not None:
+            query = query.where(RecurringSeries.archived.is_(archived))
         return list(
             self._db.scalars(
                 query.order_by(RecurringSeries.next_expected_date, RecurringSeries.created_at)

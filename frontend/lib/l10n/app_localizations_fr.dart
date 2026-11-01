@@ -1076,11 +1076,6 @@ class AppLocalizationsFr extends AppLocalizations {
   String get dashboardSavingsTrendAverage => 'en moyenne par mois';
 
   @override
-  String dashboardSavingsTrendAverageTooltip(int count, String amount) {
-    return 'Moyenne sur $count mois : $amount';
-  }
-
-  @override
   String get dashboardSavingsViewBars => 'Barres';
 
   @override
@@ -2264,6 +2259,29 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get subscriptionActionEdit => 'Modifier';
+
+  @override
+  String get subscriptionActionArchive => 'Archiver';
+
+  @override
+  String get subscriptionActionUnarchive => 'Désarchiver';
+
+  @override
+  String get subscriptionArchiveFailed =>
+      'L\'archivage de ce paiement n\'a pas pu être modifié.';
+
+  @override
+  String subscriptionsShowArchived(int count) {
+    return 'Afficher les paiements archivés ($count)';
+  }
+
+  @override
+  String subscriptionsHideArchived(int count) {
+    return 'Masquer les paiements archivés ($count)';
+  }
+
+  @override
+  String get subscriptionsArchivedSection => 'Archivés';
 
   @override
   String get subscriptionErrorInvalidTransition =>
@@ -3664,6 +3682,9 @@ class AppLocalizationsFr extends AppLocalizations {
   String get propertyFormLabelRequired => 'Donnez un nom à ce bien.';
 
   @override
+  String get propertyFormAddress => 'Adresse';
+
+  @override
   String get propertyFormKind => 'Nature';
 
   @override
@@ -3909,6 +3930,16 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String networthCompositionFootItem(String label, String share, String value) {
     return '$label : $share sur $value';
+  }
+
+  @override
+  String networthCompositionFootItemWithAddress(
+    String label,
+    String address,
+    String share,
+    String value,
+  ) {
+    return '$label ($address) : $share sur $value';
   }
 
   @override
@@ -4601,6 +4632,17 @@ class AppLocalizationsFr extends AppLocalizations {
   String seriesPickerRowDetail(String account, String cadence, String amount) {
     return '$account · $cadence · $amount';
   }
+
+  @override
+  String get seriesPickerConfirm => 'Confirmer';
+
+  @override
+  String seriesPickerAdded(String label) {
+    return 'Opération ajoutée à « $label »';
+  }
+
+  @override
+  String get seriesPickerAddFailed => 'L\'opération n\'a pas pu être ajoutée';
 
   @override
   String get chargePickerAction => 'Ajouter une opération';

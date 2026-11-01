@@ -1368,18 +1368,6 @@
   "@dashboardSavingsTrendAverage": {
     "description": "Caption under the savings chart's headline: the average a month put aside over the window."
   },
-  "dashboardSavingsTrendAverageTooltip": "Moyenne sur {count} mois : {amount}",
-  "@dashboardSavingsTrendAverageTooltip": {
-    "description": "Last line of each month's tooltip on the savings chart: the average the window's months put aside, drawn as the dotted line. count is how many months it spans (up to 12), amount a signed, formatted sum.",
-    "placeholders": {
-      "count": {
-        "type": "int"
-      },
-      "amount": {
-        "type": "String"
-      }
-    }
-  },
   "dashboardSavingsViewBars": "Barres",
   "@dashboardSavingsViewBars": {
     "description": "Savings chart view switch: one bar per month."
@@ -2789,6 +2777,40 @@
   "subscriptionActionEdit": "Modifier",
   "@subscriptionActionEdit": {
     "description": "Kebab action opening the series in the edit form."
+  },
+  "subscriptionActionArchive": "Archiver",
+  "@subscriptionActionArchive": {
+    "description": "Kebab and detail action putting a series away: it leaves the list, the summary and detection, history kept."
+  },
+  "subscriptionActionUnarchive": "Désarchiver",
+  "@subscriptionActionUnarchive": {
+    "description": "Kebab and detail action on an archived series: bring it back."
+  },
+  "subscriptionArchiveFailed": "L'archivage de ce paiement n'a pas pu être modifié.",
+  "@subscriptionArchiveFailed": {
+    "description": "Toast title when archiving or unarchiving a series from its detail fails."
+  },
+  "subscriptionsShowArchived": "Afficher les paiements archivés ({count})",
+  "@subscriptionsShowArchived": {
+    "description": "Link below the table that reveals archived series in place; the count is the real number.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "subscriptionsHideArchived": "Masquer les paiements archivés ({count})",
+  "@subscriptionsHideArchived": {
+    "description": "The same link once the archived series are showing.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "subscriptionsArchivedSection": "Archivés",
+  "@subscriptionsArchivedSection": {
+    "description": "Section label in the table above the archived series, once revealed."
   },
   "subscriptionErrorInvalidTransition": "Ce changement de statut n'est pas possible pour ce paiement.",
   "@subscriptionErrorInvalidTransition": {
@@ -4703,6 +4725,10 @@
   "@propertyFormLabelRequired": {
     "description": "Validation message when the property name is empty."
   },
+  "propertyFormAddress": "Adresse",
+  "@propertyFormAddress": {
+    "description": "Property form field: the property's optional postal address, free text."
+  },
   "propertyFormKind": "Nature",
   "@propertyFormKind": {
     "description": "Property form field: the property's nature (select)."
@@ -5062,6 +5088,24 @@
     "description": "One partly owned property in the composition foot.",
     "placeholders": {
       "label": {
+        "type": "String"
+      },
+      "share": {
+        "type": "String"
+      },
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "networthCompositionFootItemWithAddress": "{label} ({address}) : {share} sur {value}",
+  "@networthCompositionFootItemWithAddress": {
+    "description": "One partly owned property in the composition foot, named with its address.",
+    "placeholders": {
+      "label": {
+        "type": "String"
+      },
+      "address": {
         "type": "String"
       },
       "share": {
@@ -6015,6 +6059,23 @@
         "type": "String"
       }
     }
+  },
+  "seriesPickerConfirm": "Confirmer",
+  "@seriesPickerConfirm": {
+    "description": "Series picker button adding the transaction to the selected series."
+  },
+  "seriesPickerAdded": "Opération ajoutée à « {label} »",
+  "@seriesPickerAdded": {
+    "description": "Toast once the transaction was added to the series picked.",
+    "placeholders": {
+      "label": {
+        "type": "String"
+      }
+    }
+  },
+  "seriesPickerAddFailed": "L'opération n'a pas pu être ajoutée",
+  "@seriesPickerAddFailed": {
+    "description": "Toast headline when adding the transaction to the series picked failed; the reason follows beneath."
   },
   "chargePickerAction": "Ajouter une opération",
   "@chargePickerAction": {

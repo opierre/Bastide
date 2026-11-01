@@ -59,6 +59,10 @@ class RecurringSeries(Base):
     #: True = created by the user from its charges; the detector never overwrites what
     #: they declared on it.
     is_manual: Mapped[bool] = mapped_column(Boolean, default=False)
+    #: Put away by the user: out of the list, the summary and every detection pass, but kept
+    #: with its history so it can be restored. Separate from `status`, which says what the
+    #: subscription is; archiving says only that the user no longer wants to see it.
+    archived: Mapped[bool] = mapped_column(Boolean, default=False)
     #: Last observed step in `expected_amount_minor`, signed.
     price_change_minor: Mapped[int | None] = mapped_column(Integer, nullable=True)
     price_changed_at: Mapped[date | None] = mapped_column(Date, nullable=True)

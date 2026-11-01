@@ -146,7 +146,7 @@ details?}}`. Model names refer to the Pydantic schemas in `backend/app/features/
 
 | Method | Path | Query | Body | Response |
 |--------|------|-------|------|----------|
-| `GET` | `/recurring` | `status`, `account_id` |  | 200 [`SeriesRead`] |
+| `GET` | `/recurring` | `status`, `account_id`, `archived` |  | 200 [`SeriesRead`] |
 | `POST` | `/recurring` |  | `SeriesCreate` | 201 `SeriesRead` |
 | `POST` | `/recurring/preview` |  | `PreviewRequest` | 200 `RecurringPreviewRead` |
 | `POST` | `/recurring/detect` |  | `DetectRequest` | 200 `DetectionResultRead` |
@@ -156,6 +156,8 @@ details?}}`. Model names refer to the Pydantic schemas in `backend/app/features/
 | `GET` | `/recurring/{series_id}` |  |  | 200 `SeriesDetailRead` |
 | `PATCH` | `/recurring/{series_id}` |  | `SeriesUpdate` | 200 `SeriesRead` |
 | `DELETE` | `/recurring/{series_id}` |  |  | 204 |
+| `POST` | `/recurring/{series_id}/archive` |  |  | 200 `SeriesRead` |
+| `POST` | `/recurring/{series_id}/unarchive` |  |  | 200 `SeriesRead` |
 | `POST` | `/recurring/{series_id}/merge` |  | `MergeRequest` | 200 `SeriesRead` |
 | `POST` | `/recurring/{series_id}/occurrences` |  | `AttachRequest` | 200 `SeriesRead` |
 | `GET` | `/recurring/{series_id}/candidates` | `q`, `page` |  | 200 `TransactionPage` |

@@ -1,12 +1,26 @@
 """Pydantic I/O for declared properties and the share figures derived from them."""
 
 from datetime import date, datetime
-from typing import Literal
+from typing import Annotated, Literal
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import AfterValidator, BaseModel, ConfigDict, Field, StringConstraints
 
 #: The four natures a declared property can take; a label, used by no computation.
 PropertyKind = Literal["primary_residence", "rental", "secondary", "other"]
+
+#: Room for a street, a postcode and a town, with margin; the column is sized to match.
+ADDRESS_MAX_LENGTH = 255
+
+
+def _blank_to_none(value: str | None) -> str | None:
+    return value or None
+
+
+#: Free text, trimmed; a blank address is no address, stored as null rather than "".
+Address = Annotated[
+    Annotated[str, StringConstraints(strip_whitespace=True, max_length=ADDRESS_MAX_LENGTH)] | None,
+    AfterValidator(_blank_to_none),
+]
 
 
 class PropertyCreate(BaseModel):
@@ -19,6 +33,7 @@ class PropertyCreate(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     label: str = Field(min_length=1, max_length=255)
+    address: Address = None
     kind: PropertyKind
     market_value_minor: int = Field(gt=0)
     valued_on: date
@@ -31,7 +46,8 @@ class PropertyUpdate(BaseModel):
     """Patch payload for a property.
 
     Omitted fields are left alone; `None` is indistinguishable from absent, as everywhere else
-    in this API, so clearing an acquisition price is not expressible here.
+    in this API, so clearing an acquisition price is not expressible here. `address` is the
+    exception: sent as null or blank, it clears the address.
 
     « Nouvelle estimation » is this payload carrying `market_value_minor` and `valued_on`
     together: a property has exactly one declared value, so a re-valuation replaces it
@@ -41,6 +57,7 @@ class PropertyUpdate(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     label: str | None = Field(default=None, min_length=1, max_length=255)
+    address: Address = Field(default=None, description="Null or blank clears the address.")
     kind: PropertyKind | None = None
     market_value_minor: int | None = Field(default=None, gt=0)
     valued_on: date | None = None
@@ -56,6 +73,7 @@ class PropertyRead(BaseModel):
 
     id: str
     label: str
+    address: str | None
     kind: PropertyKind
     market_value_minor: int
     valued_on: date
