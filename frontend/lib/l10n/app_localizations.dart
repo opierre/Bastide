@@ -3258,12 +3258,6 @@ abstract class AppLocalizations {
   /// **'Détection…'**
   String get subscriptionsDetectRunning;
 
-  /// Primary top-bar button opening the manual-creation modal.
-  ///
-  /// In fr, this message translates to:
-  /// **'Nouveau paiement récurrent'**
-  String get subscriptionsAdd;
-
   /// Toast headline after a detection pass, counting what it created.
   ///
   /// In fr, this message translates to:
@@ -3719,23 +3713,11 @@ abstract class AppLocalizations {
   /// **'Impossible de charger ce paiement récurrent pour le moment.'**
   String get subscriptionDetailLoadFailed;
 
-  /// Title of the manual-creation modal.
-  ///
-  /// In fr, this message translates to:
-  /// **'Nouveau paiement récurrent'**
-  String get subscriptionFormCreateTitle;
-
   /// Title of the modal when editing an existing series.
   ///
   /// In fr, this message translates to:
   /// **'Modifier le paiement récurrent'**
   String get subscriptionFormEditTitle;
-
-  /// Sub-line under the creation modal's title.
-  ///
-  /// In fr, this message translates to:
-  /// **'Suivez un paiement récurrent que la détection n\'a pas encore repéré.'**
-  String get subscriptionFormIntro;
 
   /// Label of the payment name field.
   ///
@@ -3791,23 +3773,11 @@ abstract class AppLocalizations {
   /// **'Aucune'**
   String get subscriptionFormCategoryNone;
 
-  /// Shown in place of the account select when the user has no accounts yet.
-  ///
-  /// In fr, this message translates to:
-  /// **'Créez d\'abord un compte pour y suivre un paiement récurrent.'**
-  String get subscriptionFormNoAccounts;
-
   /// Cancel action in the recurring payment modal footer.
   ///
   /// In fr, this message translates to:
   /// **'Annuler'**
   String get subscriptionFormCancel;
-
-  /// Confirm action when creating a recurring payment.
-  ///
-  /// In fr, this message translates to:
-  /// **'Créer le paiement récurrent'**
-  String get subscriptionFormSubmit;
 
   /// Confirm action when editing a recurring payment.
   ///

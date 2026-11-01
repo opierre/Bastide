@@ -29,7 +29,7 @@ from app.features.recurring.detector import (
 )
 from app.features.recurring.detector import detect as detect_candidates
 from app.features.recurring.models import RecurringOccurrence, RecurringSeries
-from app.features.recurring.normalize import merchant_key, normalize_label
+from app.features.recurring.normalize import merchant_key
 from app.features.recurring.preview import Grade, grade
 from app.features.recurring.repository import RecurringRepository
 from app.features.recurring.schemas import (
@@ -404,9 +404,10 @@ LEGAL_TRANSITIONS: dict[str, frozenset[str]] = {
 #: own line, but never enters the burden.
 ACTIVE_STATUSES: frozenset[str] = frozenset({"detected", "confirmed"})
 
-#: The interval a *declared* series is seeded with, having no occurrences to measure one from.
-#: `irregular` gets none — that is what irregular means — so its `next_expected_date` is a
-#: placeholder the date-derived signals skip rather than a claim about when it will be charged.
+#: The interval a series created by hand starts with while its charges cannot measure one: a
+#: single charge has no gap. `irregular` gets none — that is what irregular means — so its
+#: `next_expected_date` is a placeholder the date-derived signals skip rather than a claim
+#: about when it will be charged.
 NOMINAL_INTERVAL_DAYS: dict[str, int] = {
     "weekly": 7,
     "monthly": 30,
@@ -520,16 +521,14 @@ class RecurringService:
         series = self.get(user_id, series_id)
         return series, self._repository.list_occurrences(series.id)
 
-    def create(self, user_id: str, data: SeriesCreate, today: date) -> RecurringSeries:
-        """Declare a subscription detection has not found.
+    def create(self, user_id: str, data: SeriesCreate) -> RecurringSeries:
+        """Create a series from the charges the user ticked in a preview.
 
-        Without `transaction_ids` the observed columns have nothing to observe yet, so they are
-        seeded from the creation date and the nominal length of the chosen cadence:
-        `occurrence_count` is `0`, and `first_seen_date` records when the user started tracking
-        the series rather than claiming when it started. With them — the ones ticked in a
-        preview — those transactions become the occurrences and the observed columns are theirs.
-        `is_manual` keeps detection from overwriting what the user declared either way; a series
-        created from charges still gains the later ones under its key in a detection pass.
+        Those transactions become its occurrences and the observed columns are theirs. A series
+        is never created without them: it would be keyed on a typed name no charge is booked
+        under, so detection could never keep it up to date. `is_manual` keeps detection from
+        overwriting what the user declared; the series still gains later charges under its key
+        in a detection pass.
 
         Raises:
             AccountNotFoundError: the account is not one of the user's.
@@ -542,13 +541,9 @@ class RecurringService:
         account = self._accounts.get(user_id, data.account_id)
         self._require_assignable_category(user_id, data.category_id)
         selected = self._selected_transactions(user_id, account.id, data.transaction_ids)
-        if selected:
-            # Keyed on the charges themselves rather than on the label, so a later detection pass
-            # finds this series under the key it groups them by, and leaves it alone as a manual
-            # series, instead of creating a second one beside it.
-            key, alias_keys = _keys_for(account.id, selected, self._taken_keys(user_id))
-        else:
-            key, alias_keys = normalize_label(data.label), []
+        # Keyed on the charges themselves rather than on the label, so a later detection pass
+        # finds this series under the key it groups them by instead of creating a second one.
+        key, alias_keys = _keys_for(account.id, selected, self._taken_keys(user_id))
         existing = self._repository.get_by_merchant_key(user_id, account.id, key)
         if existing is not None:
             raise SeriesAlreadyTrackedError(
@@ -568,9 +563,7 @@ class RecurringService:
             status=INITIAL_STATUS,
             is_manual=True,
         )
-        _seed_observations(series, data.cadence, selected, today)
-        if not selected:
-            return self._repository.add(series)
+        _seed_observations(series, data.cadence, selected)
         return self._repository.add_with_occurrences(
             series, [transaction.id for transaction in selected], alias_keys
         )
@@ -630,9 +623,7 @@ class RecurringService:
         ]
         return PreviewResult(grade=grade(_with_seed(matches, seed)))
 
-    def attach(
-        self, user_id: str, series_id: str, transaction_ids: list[str], today: date
-    ) -> RecurringSeries:
+    def attach(self, user_id: str, series_id: str, transaction_ids: list[str]) -> RecurringSeries:
         """Add transactions to an existing series as occurrences.
 
         The series' observed dates, interval and count are recomputed from its whole history.
@@ -660,7 +651,7 @@ class RecurringService:
             )
             if side != own and side not in taken
         ]
-        _seed_observations(series, series.cadence, everything, today)
+        _seed_observations(series, series.cadence, everything)
         return self._repository.attach(
             series, [transaction.id for transaction in selected], aliases
         )
@@ -959,21 +950,17 @@ def _keys_for(
     return main, aliases
 
 
-def _seed_observations(
-    series: RecurringSeries, cadence: str, selected: list[Transaction], today: date
-) -> None:
-    """Fill the observed columns of a declared series.
+def _seed_observations(series: RecurringSeries, cadence: str, selected: list[Transaction]) -> None:
+    """Fill the observed columns of a series from its charges, ``selected`` oldest first.
 
-    With no transactions there is nothing to observe: the dates start at creation and the
-    interval is the cadence's nominal length. With some, they are what those charges show.
+    The interval is the charges' median gap, or the cadence's nominal length when one charge
+    has no gap to measure or the cadence is `irregular`.
     """
     interval = NOMINAL_INTERVAL_DAYS[cadence]
-    first = last = today
-    if selected:
-        first, last = selected[0].booked_date, selected[-1].booked_date
-        gaps = [(b.booked_date - a.booked_date).days for a, b in pairwise(selected)]
-        if gaps and cadence != "irregular":
-            interval = median_low(gaps)
+    first, last = selected[0].booked_date, selected[-1].booked_date
+    gaps = [(b.booked_date - a.booked_date).days for a, b in pairwise(selected)]
+    if gaps and cadence != "irregular":
+        interval = median_low(gaps)
     series.median_interval_days = interval
     series.first_seen_date = first
     series.last_seen_date = last

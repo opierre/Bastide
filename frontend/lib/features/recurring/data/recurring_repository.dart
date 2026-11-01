@@ -108,7 +108,7 @@ class RecurringRepository {
     required int expectedAmountMinor,
     required Cadence cadence,
     String? categoryId,
-    List<String> transactionIds = const [],
+    required List<String> transactionIds,
   }) async {
     final json =
         await _apiClient.post(
@@ -119,8 +119,7 @@ class RecurringRepository {
                 'expected_amount_minor': expectedAmountMinor,
                 'cadence': cadence.wireValue,
                 'category_id': ?categoryId,
-                if (transactionIds.isNotEmpty)
-                  'transaction_ids': transactionIds,
+                'transaction_ids': transactionIds,
               },
             )
             as Map<String, dynamic>;

@@ -2041,9 +2041,6 @@ class AppLocalizationsFr extends AppLocalizations {
   String get subscriptionsDetectRunning => 'Détection…';
 
   @override
-  String get subscriptionsAdd => 'Nouveau paiement récurrent';
-
-  @override
   String subscriptionsDetectResult(int created) {
     String _temp0 = intl.Intl.pluralLogic(
       created,
@@ -2410,14 +2407,7 @@ class AppLocalizationsFr extends AppLocalizations {
       'Impossible de charger ce paiement récurrent pour le moment.';
 
   @override
-  String get subscriptionFormCreateTitle => 'Nouveau paiement récurrent';
-
-  @override
   String get subscriptionFormEditTitle => 'Modifier le paiement récurrent';
-
-  @override
-  String get subscriptionFormIntro =>
-      'Suivez un paiement récurrent que la détection n\'a pas encore repéré.';
 
   @override
   String get subscriptionFormNameLabel => 'Nom';
@@ -2449,14 +2439,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get subscriptionFormCategoryNone => 'Aucune';
 
   @override
-  String get subscriptionFormNoAccounts =>
-      'Créez d\'abord un compte pour y suivre un paiement récurrent.';
-
-  @override
   String get subscriptionFormCancel => 'Annuler';
-
-  @override
-  String get subscriptionFormSubmit => 'Créer le paiement récurrent';
 
   @override
   String get subscriptionFormSave => 'Enregistrer';

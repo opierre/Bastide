@@ -6,7 +6,7 @@ Everything below is exactly what the mockup frames `10-Abonnements — *` in the
 Sidebar entry « Abonnements » / "Subscriptions" in the Gestion group, order: Imports · Catégories · **Abonnements** · Objectifs (see 00 amendment). Icon: circular-arrow cycle, 1.5 px stroke, round caps (2 px stroke when active).
 
 ## Top bar (this panel)
-Title « Abonnements » / "Subscriptions" + descriptor « Vos prélèvements récurrents, détectés automatiquement » / "Your recurring charges, detected automatically". Right, in order: secondary button « Détecter » / "Detect" (38 px, border `#232B38`), primary gradient button « Nouvel abonnement » / "New subscription", user pill.
+Title « Abonnements » / "Subscriptions" + descriptor « Vos prélèvements récurrents, détectés automatiquement » / "Your recurring charges, detected automatically". Right, in order: secondary button « Détecter » / "Detect" (38 px, border `#232B38`), user pill. (Amendment, 2026-11: the « Nouvel abonnement » button is gone. A series is created only from its charges, with « Marquer comme récurrent » in Transactions, so detection can keep it up to date.)
 
 ## Content — list state
 
@@ -57,11 +57,11 @@ Replaces the occurrence table the frame was first drawn with: five near-identica
 ## Empty state (frame ③)
 Centered: 64 px iris plate with cycle glyph; « Aucun abonnement détecté pour l'instant »; « Bastide repère un abonnement lorsqu'un prélèvement s'est répété trois fois. Importer davantage d'historique accélère la détection. »; gradient CTA « Aller aux imports ».
 
-## New-subscription modal (frame ④, over list)
-480 px modal on `rgba(4,6,11,.62)` scrim. Title « Nouvel abonnement », sub « Suivez un prélèvement que la détection n'a pas encore repéré. » Fields: Nom (focused: iris border + focus ring) = Basic-Fit; row Compte (select, BNP — Compte courant) + Montant 130 px (29,99 €); row Cadence (select « Mensuel », help « Mensuel · Trimestriel · Annuel · Irrégulier ») + Catégorie (select with swatch, Santé). Footer right: Annuler (secondary) · Créer l'abonnement (gradient).
+## Edit modal (frame ④, over list)
+480 px modal on `rgba(4,6,11,.62)` scrim, opened from the kebab's « Modifier ». Title « Modifier le paiement récurrent ». Fields: Nom (focused: iris border + focus ring) = Basic-Fit; row Compte (read-only plate, BNP — Compte courant: a series cannot move account) + Montant 130 px (29,99 €); row Cadence (select « Mensuel », help « Mensuel · Trimestriel · Annuel · Irrégulier ») + Catégorie (select with swatch, Santé). Footer right: Annuler (secondary) · Enregistrer (gradient). (Amendment, 2026-11: the mockup drew this as a creation modal; creation was removed, the same geometry now only edits.)
 
 ## States to show
-① liste (fr, kebab open on Netflix) ② détail série (fr) ③ vide (fr) ④ modal création (fr) ⑤ liste (en) — same geometry; EN strings per mockup (Monthly/Quarterly/Yearly, `€15.49`, "May 15, 2026", "Missed charge · 9 days late", "Cancelled · last charge Mar 18, 2026").
+① liste (fr, kebab open on Netflix) ② détail série (fr) ③ vide (fr) ④ modal édition (fr) ⑤ liste (en) — same geometry; EN strings per mockup (Monthly/Quarterly/Yearly, `€15.49`, "May 15, 2026", "Missed charge · 9 days late", "Cancelled · last charge Mar 18, 2026").
 
 ## Notes
 Detection is deduced from imported transactions (3+ repeats); « Détecter » re-runs it manually. Cancelled subscriptions stay listed (dimmed) and are excluded from the monthly-burden figure. Statut column is empty for healthy subscriptions — no "OK" pill.

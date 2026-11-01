@@ -120,11 +120,12 @@ class SeriesCreate(BaseModel):
     cadence: Cadence
     category_id: str | None = None
     transaction_ids: list[str] = Field(
-        default_factory=list,
+        min_length=1,
         description=(
-            "Transactions to link as the series' occurrences, typically the ones ticked in a "
-            "preview. Each must be an outflow of `account_id` not already in a series. The "
-            "series' observed dates and count are then taken from them."
+            "Transactions to link as the series' first occurrences, typically the ones ticked "
+            "in a preview. Each must be an outflow of `account_id` not already in a series. The "
+            "series' key and observed dates and count are taken from them: a series always "
+            "starts from real charges, so detection can keep it up to date."
         ),
     )
 

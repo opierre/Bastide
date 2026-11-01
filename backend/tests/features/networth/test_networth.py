@@ -8,6 +8,7 @@ in, and the series never reports a month it has no data for.
 from collections.abc import Iterator
 from contextlib import contextmanager
 from datetime import date
+from pathlib import Path
 from types import SimpleNamespace
 from typing import cast
 from unittest.mock import MagicMock
@@ -25,6 +26,7 @@ from app.features.networth.repository import NetWorthRepository
 from app.features.networth.service import NetWorthService, shares_bps
 from tests.api import register
 from tests.features.networth.conftest import TODAY
+from tests.features.recurring.factories import insert_transaction
 
 LOAN_PAYLOAD = {
     "label": "Appartement Lyon 3e",
@@ -291,10 +293,17 @@ def test_a_funded_goal_is_not_counted(client: TestClient) -> None:
     assert summary(client, headers) == before
 
 
-def test_an_active_subscription_is_not_counted(client: TestClient) -> None:
+def test_an_active_subscription_is_not_counted(client: TestClient, tmp_path: Path) -> None:
     """A future charge is not a debt."""
     headers = register(client)
     account = create_account(client, headers, 1_180_000)
+    charge = insert_transaction(
+        tmp_path,
+        account["id"],
+        booked_date=TODAY,
+        amount_minor=-1_799,
+        description="PRLV SEPA NETFLIX.COM",
+    )
     before = summary(client, headers)
     post(
         client,
@@ -305,6 +314,7 @@ def test_an_active_subscription_is_not_counted(client: TestClient) -> None:
             "account_id": account["id"],
             "expected_amount_minor": -1_799,
             "cadence": "monthly",
+            "transaction_ids": [charge],
         },
     )
 

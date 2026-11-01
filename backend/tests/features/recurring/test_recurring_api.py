@@ -248,67 +248,106 @@ def test_patching_another_users_series_is_not_found(client: TestClient, tmp_path
 # --- manual series --------------------------------------------------------------------------
 
 
-def test_manual_creation_marks_the_series_and_seeds_it_from_the_cadence(
-    client: TestClient,
+def _charge(
+    tmp_path: Path, account_id: str, days_ago: int, description: str = "PRLV BASIC FIT"
+) -> str:
+    return insert_transaction(
+        tmp_path,
+        account_id,
+        booked_date=TODAY - timedelta(days=days_ago),
+        amount_minor=-2999,
+        description=description,
+    )
+
+
+def _create_payload(account_id: str, transaction_ids: list[str], **fields: object) -> dict:
+    return {
+        "label": "Basic-Fit",
+        "account_id": account_id,
+        "expected_amount_minor": -2999,
+        "cadence": "monthly",
+        "transaction_ids": transaction_ids,
+        **fields,
+    }
+
+
+def test_manual_creation_marks_the_series_and_takes_its_dates_from_the_charges(
+    client: TestClient, tmp_path: Path
 ) -> None:
     owner = register(client)
     account_id = create_account(client, owner)
+    ids = [_charge(tmp_path, account_id, days_ago) for days_ago in (60, 30)]
 
     response = client.post(
-        "/api/v1/recurring",
-        json={
-            "label": "Basic-Fit",
-            "account_id": account_id,
-            "expected_amount_minor": -2999,
-            "cadence": "monthly",
-        },
-        headers=owner.headers,
+        "/api/v1/recurring", json=_create_payload(account_id, ids), headers=owner.headers
     )
 
     assert response.status_code == 201, response.json()
     body = response.json()
     assert body["is_manual"] is True
-    assert body["occurrence_count"] == 0
+    assert body["occurrence_count"] == 2
     assert body["status"] == "detected"
     assert body["expected_amount_minor"] == -2999
     assert body["currency"] == "EUR"
     assert body["median_interval_days"] == 30
-    assert body["next_expected_date"] == str(date.today() + timedelta(days=30))
+    assert body["next_expected_date"] == str(TODAY)
 
 
-def test_manual_creation_accepts_the_irregular_cadence_detection_never_produces(
-    client: TestClient,
-) -> None:
+def test_manual_creation_without_transactions_is_refused(client: TestClient) -> None:
     owner = register(client)
     account_id = create_account(client, owner)
 
+    for payload in (
+        _create_payload(account_id, []),
+        {
+            key: value
+            for key, value in _create_payload(account_id, []).items()
+            if key != "transaction_ids"
+        },
+    ):
+        response = client.post("/api/v1/recurring", json=payload, headers=owner.headers)
+
+        assert response.status_code == 422
+        assert "transaction_ids" in str(response.json())
+    assert _list(client, owner) == []
+
+
+def test_manual_creation_accepts_the_irregular_cadence_detection_never_produces(
+    client: TestClient, tmp_path: Path
+) -> None:
+    owner = register(client)
+    account_id = create_account(client, owner)
+    ids = [_charge(tmp_path, account_id, days_ago) for days_ago in (90, 20)]
+
     response = client.post(
         "/api/v1/recurring",
-        json={
-            "label": "Assurance scolaire",
-            "account_id": account_id,
-            "expected_amount_minor": -4500,
-            "cadence": "irregular",
-        },
+        json=_create_payload(account_id, ids, cadence="irregular"),
         headers=owner.headers,
     )
 
     assert response.status_code == 201, response.json()
-    assert response.json()["cadence"] == "irregular"
+    body = response.json()
+    assert body["cadence"] == "irregular"
+    # No period: the interval stays the nominal none, whatever the gap between the charges.
+    assert body["median_interval_days"] == NOMINAL_INTERVAL_DAYS["irregular"]
 
 
-def test_manual_creation_rejects_a_name_the_account_already_tracks(client: TestClient) -> None:
+def test_manual_creation_rejects_a_merchant_the_account_already_tracks(
+    client: TestClient, tmp_path: Path
+) -> None:
     owner = register(client)
     account_id = create_account(client, owner)
-    payload = {
-        "label": "Basic-Fit",
-        "account_id": account_id,
-        "expected_amount_minor": -2999,
-        "cadence": "monthly",
-    }
-    first = client.post("/api/v1/recurring", json=payload, headers=owner.headers).json()
+    first = client.post(
+        "/api/v1/recurring",
+        json=_create_payload(account_id, [_charge(tmp_path, account_id, 60)]),
+        headers=owner.headers,
+    ).json()
 
-    response = client.post("/api/v1/recurring", json=payload, headers=owner.headers)
+    response = client.post(
+        "/api/v1/recurring",
+        json=_create_payload(account_id, [_charge(tmp_path, account_id, 30)]),
+        headers=owner.headers,
+    )
 
     assert response.status_code == 409
     error = response.json()["error"]
@@ -316,18 +355,16 @@ def test_manual_creation_rejects_a_name_the_account_already_tracks(client: TestC
     assert error["details"] == {"series_id": first["id"]}
 
 
-def test_manual_creation_rejects_an_account_of_another_user(client: TestClient) -> None:
+def test_manual_creation_rejects_an_account_of_another_user(
+    client: TestClient, tmp_path: Path
+) -> None:
     owner = register(client)
     other = register(client, email="bruno@example.com")
+    foreign_account = create_account(client, other)
 
     response = client.post(
         "/api/v1/recurring",
-        json={
-            "label": "Basic-Fit",
-            "account_id": create_account(client, other),
-            "expected_amount_minor": -2999,
-            "cadence": "monthly",
-        },
+        json=_create_payload(foreign_account, [_charge(tmp_path, foreign_account, 30)]),
         headers=owner.headers,
     )
 
@@ -335,7 +372,9 @@ def test_manual_creation_rejects_an_account_of_another_user(client: TestClient) 
     assert response.json()["error"]["code"] == "ACCOUNT_NOT_FOUND"
 
 
-def test_manual_creation_rejects_a_category_of_another_user(client: TestClient) -> None:
+def test_manual_creation_rejects_a_category_of_another_user(
+    client: TestClient, tmp_path: Path
+) -> None:
     """A series' category is a field, so an id the caller cannot see is a bad value (422).
 
     The foreign key alone would accept it and the panel would then render another user's
@@ -348,16 +387,13 @@ def test_manual_creation_rejects_a_category_of_another_user(client: TestClient) 
         json={"name": "Sport", "kind": "expense", "icon": "fitness", "color": "#10B981"},
         headers=other.headers,
     ).json()["id"]
+    account_id = create_account(client, owner)
 
     response = client.post(
         "/api/v1/recurring",
-        json={
-            "label": "Basic-Fit",
-            "account_id": create_account(client, owner),
-            "expected_amount_minor": -2999,
-            "cadence": "monthly",
-            "category_id": category_id,
-        },
+        json=_create_payload(
+            account_id, [_charge(tmp_path, account_id, 30)], category_id=category_id
+        ),
         headers=owner.headers,
     )
 

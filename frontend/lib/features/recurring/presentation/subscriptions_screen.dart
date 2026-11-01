@@ -106,13 +106,6 @@ class _SubscriptionsTopBarActionsState
                 : l10n.subscriptionsDetect,
           ),
         ),
-        const SizedBox(width: AppSpacing.sm + AppSpacing.xs),
-        PrimaryButton(
-          key: const Key('addSubscriptionButton'),
-          label: l10n.subscriptionsAdd,
-          icon: Icons.add_rounded,
-          onPressed: () => showSeriesForm(context),
-        ),
       ],
     );
   }
@@ -404,7 +397,7 @@ class _TableCard extends ConsumerWidget {
     SeriesAction action,
   ) async {
     if (action == SeriesAction.edit) {
-      await showSeriesForm(context, initial: series);
+      await showSeriesForm(context, series: series);
       return;
     }
 

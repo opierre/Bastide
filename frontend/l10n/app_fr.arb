@@ -2537,10 +2537,6 @@
   "@subscriptionsDetectRunning": {
     "description": "Label the detect button takes while a pass is in flight."
   },
-  "subscriptionsAdd": "Nouveau paiement récurrent",
-  "@subscriptionsAdd": {
-    "description": "Primary top-bar button opening the manual-creation modal."
-  },
   "subscriptionsDetectResult": "{created, plural, =0{Aucun nouveau paiement récurrent détecté} =1{1 nouveau paiement récurrent détecté} other{{created} nouveaux paiements récurrents détectés}}",
   "@subscriptionsDetectResult": {
     "description": "Toast headline after a detection pass, counting what it created.",
@@ -2991,17 +2987,9 @@
   "@subscriptionDetailLoadFailed": {
     "description": "Error state replacing the detail when it failed to load."
   },
-  "subscriptionFormCreateTitle": "Nouveau paiement récurrent",
-  "@subscriptionFormCreateTitle": {
-    "description": "Title of the manual-creation modal."
-  },
   "subscriptionFormEditTitle": "Modifier le paiement récurrent",
   "@subscriptionFormEditTitle": {
     "description": "Title of the modal when editing an existing series."
-  },
-  "subscriptionFormIntro": "Suivez un paiement récurrent que la détection n'a pas encore repéré.",
-  "@subscriptionFormIntro": {
-    "description": "Sub-line under the creation modal's title."
   },
   "subscriptionFormNameLabel": "Nom",
   "@subscriptionFormNameLabel": {
@@ -3039,17 +3027,9 @@
   "@subscriptionFormCategoryNone": {
     "description": "The no-category option in the recurring payment form's category select."
   },
-  "subscriptionFormNoAccounts": "Créez d'abord un compte pour y suivre un paiement récurrent.",
-  "@subscriptionFormNoAccounts": {
-    "description": "Shown in place of the account select when the user has no accounts yet."
-  },
   "subscriptionFormCancel": "Annuler",
   "@subscriptionFormCancel": {
     "description": "Cancel action in the recurring payment modal footer."
-  },
-  "subscriptionFormSubmit": "Créer le paiement récurrent",
-  "@subscriptionFormSubmit": {
-    "description": "Confirm action when creating a recurring payment."
   },
   "subscriptionFormSave": "Enregistrer",
   "@subscriptionFormSave": {

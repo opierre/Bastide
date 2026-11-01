@@ -73,17 +73,6 @@ class RecurringRepository:
         )
         return [(occurrence, transaction) for occurrence, transaction in rows]
 
-    def add(self, series: RecurringSeries) -> RecurringSeries:
-        """Insert a series and commit.
-
-        Unlike the staging writes below, a lifecycle write is one row with nothing to keep it
-        consistent with, so it owns its own transaction the way every other feature's does.
-        """
-        self._db.add(series)
-        self._db.commit()
-        self._db.refresh(series)
-        return series
-
     def save(self, series: RecurringSeries) -> RecurringSeries:
         """Commit pending changes to a series already in the session."""
         self._db.commit()
