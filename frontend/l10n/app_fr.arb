@@ -1353,7 +1353,7 @@
   },
   "dashboardSavingsTrendTitle": "Évolution de l'épargne",
   "@dashboardSavingsTrendTitle": {
-    "description": "Title of the monthly savings bar chart."
+    "description": "Title of the monthly savings chart (bar or line view)."
   },
   "dashboardSavingsTrendSubtitle": "Épargne mensuelle · {count} mois",
   "@dashboardSavingsTrendSubtitle": {
@@ -1367,6 +1367,14 @@
   "dashboardSavingsTrendAverage": "en moyenne par mois",
   "@dashboardSavingsTrendAverage": {
     "description": "Caption under the savings chart's headline: the average a month put aside over the window."
+  },
+  "dashboardSavingsViewBars": "Barres",
+  "@dashboardSavingsViewBars": {
+    "description": "Savings chart view switch: one bar per month."
+  },
+  "dashboardSavingsViewLine": "Courbe",
+  "@dashboardSavingsViewLine": {
+    "description": "Savings chart view switch: the same months joined as a line."
   },
   "dashboardIncomeVsExpenseTitle": "Revenus vs dépenses",
   "@dashboardIncomeVsExpenseTitle": {

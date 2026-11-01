@@ -1066,6 +1066,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get dashboardSavingsTrendAverage => 'on average per month';
 
   @override
+  String get dashboardSavingsViewBars => 'Bars';
+
+  @override
+  String get dashboardSavingsViewLine => 'Line';
+
+  @override
   String get dashboardIncomeVsExpenseTitle => 'Income vs expenses';
 
   @override

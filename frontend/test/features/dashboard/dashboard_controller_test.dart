@@ -287,4 +287,15 @@ void main() {
       () => apiClient.get('/dashboard/summary', query: {'month': '2026-05'}),
     ).called(2);
   });
+
+  test('the savings chart opens on bars and keeps the view it is given', () {
+    final container = ProviderContainer();
+    addTearDown(container.dispose);
+
+    expect(container.read(savingsChartViewProvider), SavingsChartView.bars);
+    container
+        .read(savingsChartViewProvider.notifier)
+        .set(SavingsChartView.line);
+    expect(container.read(savingsChartViewProvider), SavingsChartView.line);
+  });
 }
