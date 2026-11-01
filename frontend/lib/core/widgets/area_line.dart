@@ -15,7 +15,7 @@ import 'chart_tooltip.dart';
 /// Each point sits at the centre of its axis label's slot rather than spreading edge to edge,
 /// so a month's dot stands over its own label instead of drifting toward the slot boundary.
 /// Hovering a slot rings its point and, when [tooltips] are given, names its figure in a card
-/// placed clear of the line — see [placeAreaLineTooltip].
+/// placed clear of the line — see [placeChartTooltip].
 /// Given a [valueLabel], every gridline is labelled in a gutter on the left, as on the
 /// Synthèse's « Patrimoine net » chart. The value range is padded past the series' min and
 /// max to clean tick values (see [ChartScale]), so the extremes sit inside the plot.
@@ -155,21 +155,14 @@ class _AreaLineState extends State<AreaLine> {
                     final hovered?,
                     final tooltips?,
                   ) when hovered < tooltips.length && hovered < values.length)
-                    // Laid out over the plot but never hit-tested, so the card can't steal
-                    // the pointer from the slot beneath it and flicker.
-                    IgnorePointer(
-                      child: CustomSingleChildLayout(
-                        delegate: _TooltipPlacement(
-                          values: values,
-                          scale: scale,
-                          gutter: gutter,
-                          hovered: hovered,
-                        ),
-                        child: ChartTooltip(
-                          key: const Key('areaLineTooltip'),
-                          message: tooltips[hovered],
-                        ),
-                      ),
+                    LineChartTooltip(
+                      cardKey: const Key('areaLineTooltip'),
+                      message: tooltips[hovered],
+                      points: (size) =>
+                          _points(values, _plotRect(size, gutter), scale),
+                      hovered: hovered,
+                      pointRadius: _AreaLinePainter._dotRadius,
+                      leftBound: gutter,
                     ),
                 ],
               ),
@@ -226,139 +219,6 @@ class _AreaLineState extends State<AreaLine> {
         ),
     ],
   );
-}
-
-/// Lays the hover card out where [placeAreaLineTooltip] says, from the same geometry the
-/// painter draws with.
-class _TooltipPlacement extends SingleChildLayoutDelegate {
-  _TooltipPlacement({
-    required this.values,
-    required this.scale,
-    required this.gutter,
-    required this.hovered,
-  });
-
-  final List<num> values;
-  final ChartScale scale;
-  final double gutter;
-  final int hovered;
-
-  @override
-  BoxConstraints getConstraintsForChild(BoxConstraints constraints) =>
-      constraints.loosen();
-
-  @override
-  Offset getPositionForChild(Size size, Size childSize) => placeAreaLineTooltip(
-    area: Offset.zero & size,
-    points: _points(values, _plotRect(size, gutter), scale),
-    hovered: hovered,
-    tooltip: childSize,
-    leftBound: gutter,
-  );
-
-  @override
-  bool shouldRelayout(_TooltipPlacement oldDelegate) =>
-      !listEquals(oldDelegate.values, values) ||
-      oldDelegate.scale != scale ||
-      oldDelegate.gutter != gutter ||
-      oldDelegate.hovered != hovered;
-}
-
-/// Where the hover card for point [hovered] goes, as its top-left corner inside [area].
-///
-/// A tooltip anchored to the pointer covers whatever the reader is looking at, so the card
-/// instead looks for room off the line: the spot nearest the hovered point whose box, padded
-/// by a margin, touches neither the point nor any segment of the line. When the line leaves
-/// no such room (a sharp zig-zag on a short chart), it settles for keeping clear of the
-/// hovered point and the two segments either side of it — the part being read. Only a chart
-/// too small to hold the card anywhere else falls back to the plot's top-left corner.
-///
-/// [leftBound] keeps the card off the value-axis gutter when the plot is wide enough.
-@visibleForTesting
-Offset placeAreaLineTooltip({
-  required Rect area,
-  required List<Offset> points,
-  required int hovered,
-  required Size tooltip,
-  double leftBound = 0,
-}) {
-  final anchor = points[hovered];
-  final minX = area.right - tooltip.width >= area.left + leftBound
-      ? area.left + leftBound
-      : area.left;
-  final maxX = math.max(minX, area.right - tooltip.width);
-  final minY = area.top;
-  final maxY = math.max(minY, area.bottom - tooltip.height);
-
-  final segments = [
-    for (var i = 0; i + 1 < points.length; i++) (points[i], points[i + 1]),
-  ];
-  final nearby = [
-    if (hovered > 0) segments[hovered - 1],
-    if (hovered < segments.length) segments[hovered],
-  ];
-
-  bool clear(Rect box, List<(Offset, Offset)> lines) {
-    final padded = box.inflate(_tooltipMargin);
-    if (padded.inflate(_AreaLinePainter._dotRadius).contains(anchor)) {
-      return false;
-    }
-    return !lines.any((line) => _segmentHitsRect(line.$1, line.$2, padded));
-  }
-
-  Offset? nearest(List<(Offset, Offset)> lines) {
-    Offset? best;
-    var bestDistance = double.infinity;
-    // A coarse grid is plenty: the card only has to be clear, not pixel-snug.
-    for (var y = minY; y <= maxY + _tooltipStep - 1; y += _tooltipStep) {
-      for (var x = minX; x <= maxX + _tooltipStep - 1; x += _tooltipStep) {
-        final corner = Offset(math.min(x, maxX), math.min(y, maxY));
-        final box = corner & tooltip;
-        if (!clear(box, lines)) continue;
-        final distance = (box.center - anchor).distanceSquared;
-        if (distance < bestDistance) {
-          bestDistance = distance;
-          best = corner;
-        }
-      }
-    }
-    return best;
-  }
-
-  return nearest(segments) ?? nearest(nearby) ?? Offset(minX, minY);
-}
-
-/// The clear space kept between the hover card and the line or its point.
-const _tooltipMargin = AppSpacing.sm;
-
-/// The grid the hover card's position is searched on.
-const _tooltipStep = AppSpacing.xs;
-
-/// Whether the segment [a]–[b] crosses or lies inside [rect] (Liang–Barsky clipping).
-bool _segmentHitsRect(Offset a, Offset b, Rect rect) {
-  final d = b - a;
-  var t0 = 0.0;
-  var t1 = 1.0;
-  for (final (p, q) in [
-    (-d.dx, a.dx - rect.left),
-    (d.dx, rect.right - a.dx),
-    (-d.dy, a.dy - rect.top),
-    (d.dy, rect.bottom - a.dy),
-  ]) {
-    if (p == 0) {
-      if (q < 0) return false;
-      continue;
-    }
-    final t = q / p;
-    if (p < 0) {
-      if (t > t1) return false;
-      if (t > t0) t0 = t;
-    } else {
-      if (t < t0) return false;
-      if (t < t1) t1 = t;
-    }
-  }
-  return true;
 }
 
 /// The plot inside a chart of [size]: inset vertically by the dot so an extreme point isn't

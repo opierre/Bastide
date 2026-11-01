@@ -2,6 +2,7 @@ import 'package:bastide/core/theme/app_theme.dart';
 import 'package:bastide/core/theme/tokens.dart';
 import 'package:bastide/core/widgets/area_line.dart';
 import 'package:bastide/core/widgets/chart_scale.dart';
+import 'package:bastide/core/widgets/chart_tooltip.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -170,7 +171,7 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  group('placeAreaLineTooltip', () {
+  group('placeChartTooltip', () {
     const area = Rect.fromLTWH(0, 0, 400, 200);
     const card = Size(120, 56);
 
@@ -182,11 +183,12 @@ void main() {
         Offset(350, 10),
       ];
       final box =
-          placeAreaLineTooltip(
+          placeChartTooltip(
             area: area,
             points: points,
             hovered: 3,
             tooltip: card,
+            pointRadius: 5,
           ) &
           card;
 
@@ -209,11 +211,12 @@ void main() {
         Offset(375, 5),
       ];
       final box =
-          placeAreaLineTooltip(
+          placeChartTooltip(
             area: area,
             points: points,
             hovered: 3,
             tooltip: card,
+            pointRadius: 5,
           ) &
           card;
 
@@ -222,15 +225,60 @@ void main() {
 
     test('keeps off the value gutter when the plot has room', () {
       const points = [Offset(80, 100), Offset(390, 100)];
-      final corner = placeAreaLineTooltip(
+      final corner = placeChartTooltip(
         area: area,
         points: points,
         hovered: 0,
         tooltip: card,
+        pointRadius: 5,
         leftBound: 56,
       );
 
       expect(corner.dx, greaterThanOrEqualTo(56));
+    });
+
+    test('bars are kept clear of like the line', () {
+      // No line joins bars; the card keeps off each of them instead.
+      const tips = [Offset(50, 40), Offset(150, 20), Offset(250, 60)];
+      final bars = [
+        for (final tip in tips)
+          Rect.fromLTRB(tip.dx - 11, tip.dy, tip.dx + 11, 200),
+      ];
+      final box =
+          placeChartTooltip(
+            area: area,
+            points: tips,
+            hovered: 1,
+            tooltip: card,
+            pointRadius: 0,
+            joinsNext: (_) => false,
+            marks: bars,
+          ) &
+          card;
+
+      for (final bar in bars) {
+        expect(box.overlaps(bar), isFalse);
+      }
+    });
+
+    test('a break in the line leaves its gap free for the card', () {
+      // Too short for the card to clear a line across it: once the line
+      // breaks after the hovered point, the gap is where the card goes.
+      const strip = Rect.fromLTWH(0, 0, 400, 60);
+      const points = [Offset(20, 30), Offset(200, 30), Offset(380, 30)];
+      final box =
+          placeChartTooltip(
+            area: strip,
+            points: points,
+            hovered: 1,
+            tooltip: card,
+            pointRadius: 5,
+            joinsNext: (i) => i != 1,
+          ) &
+          card;
+
+      expect(box.left, greaterThan(points[1].dx));
+      expect(_touchesLine(box, points.sublist(0, 2)), isFalse);
     });
   });
 
