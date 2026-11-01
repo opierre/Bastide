@@ -1,6 +1,7 @@
 import 'package:bastide/core/theme/app_theme.dart';
 import 'package:bastide/core/theme/tokens.dart';
 import 'package:bastide/core/widgets/area_line.dart';
+import 'package:bastide/core/widgets/chart_scale.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -140,11 +141,12 @@ void main() {
       chart.bottom - AreaLine.axisHeight - 5,
     );
     const values = [1000, 2400, 1800, 3200];
+    final scale = ChartScale.of(values, intervals: 4);
     final points = [
       for (var i = 0; i < values.length; i++)
         Offset(
           plot.left + AreaLine.pointX(i, values.length, plot.width),
-          plot.bottom - plot.height * (values[i] - 1000) / 2200,
+          scale.y(values[i], plot),
         ),
     ];
 
@@ -253,6 +255,63 @@ void main() {
       );
     }
     expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('draws the current point clear of the plot edges', (
+    tester,
+  ) async {
+    // The last value is the series' max, so on an unpadded axis its dot would sit on the
+    // top edge; flat and negative series get the same room.
+    for (final values in const [
+      [154500, 182000, 197300],
+      [-61500, -42000, -38200],
+      [50000, 50000, 50000],
+      [-30000, 120000, 80000, 125000],
+    ]) {
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: appDarkTheme,
+          home: Scaffold(
+            body: Center(
+              child: SizedBox(
+                height: 200,
+                width: 400,
+                child: AreaLine(
+                  values: values,
+                  labels: [for (final _ in values) ''],
+                  gridlines: 2,
+                  markZero: true,
+                  valueLabel: (value) => 'v$value',
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      final plot = Rect.fromLTRB(
+        AreaLine.valueGutter,
+        5,
+        400,
+        200 - AreaLine.axisHeight - 5,
+      );
+      final scale = ChartScale.of(values, intervals: 2);
+      final y = scale.y(values.last, plot);
+      expect(y, greaterThan(plot.top), reason: '$values');
+      expect(y, lessThan(plot.bottom), reason: '$values');
+      // The painter rings the current point exactly there.
+      expect(
+        tester.renderObject(
+          find.descendant(
+            of: find.byType(AreaLine),
+            matching: find.byType(CustomPaint),
+          ),
+        ),
+        paints..circle(y: y, radius: 5),
+      );
+      expect(tester.takeException(), isNull);
+    }
   });
 
   group('zero baseline', () {

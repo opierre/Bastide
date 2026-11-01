@@ -461,6 +461,8 @@ class _BalanceChart extends ConsumerWidget {
       color: AppColors.cyan,
       markZero: true,
       gridlines: 2,
+      // Minor units: no gridline on cents.
+      minStep: 100,
       values: [for (final point in points) point.balanceMinor],
       labels: [
         for (var i = 0; i < points.length; i++)
