@@ -518,6 +518,112 @@ def test_a_dismissed_series_stays_dismissed_across_a_detection_re_run(
     assert series.status == "dismissed"
 
 
+# --- archive --------------------------------------------------------------------------------
+
+
+def _post(client: TestClient, owner: Owner, path: str) -> dict:
+    response = client.post(f"/api/v1/recurring/{path}", headers=owner.headers)
+    assert response.status_code == 200, response.json()
+    return dict(response.json())
+
+
+def test_an_archived_series_leaves_the_list_and_comes_back_when_restored(
+    client: TestClient, tmp_path: Path
+) -> None:
+    owner = register(client)
+    account_id = create_account(client, owner)
+    kept = insert_series(tmp_path, owner, account_id, label="Streamco", next_expected_date=TODAY)
+    put_away = insert_series(
+        tmp_path,
+        owner,
+        account_id,
+        label="Gymfit Club",
+        status="confirmed",
+        next_expected_date=TODAY,
+    )
+
+    archived = _post(client, owner, f"{put_away}/archive")
+
+    assert archived["archived"] is True
+    # Archiving is not a status change: the series is restored as it was.
+    assert archived["status"] == "confirmed"
+    assert [series["id"] for series in _list(client, owner)] == [kept]
+    assert [series["id"] for series in _list(client, owner, archived="true")] == [put_away]
+
+    restored = _post(client, owner, f"{put_away}/unarchive")
+
+    assert restored["archived"] is False
+    assert restored["status"] == "confirmed"
+    assert {series["id"] for series in _list(client, owner)} == {kept, put_away}
+    assert _list(client, owner, archived="true") == []
+
+
+def test_archiving_and_restoring_are_idempotent(client: TestClient, tmp_path: Path) -> None:
+    owner = register(client)
+    account_id = create_account(client, owner)
+    series_id = insert_series(
+        tmp_path, owner, account_id, label="Streamco", next_expected_date=TODAY
+    )
+
+    _post(client, owner, f"{series_id}/archive")
+    assert _post(client, owner, f"{series_id}/archive")["archived"] is True
+    _post(client, owner, f"{series_id}/unarchive")
+    assert _post(client, owner, f"{series_id}/unarchive")["archived"] is False
+
+
+def test_the_archived_list_takes_the_other_filters_too(client: TestClient, tmp_path: Path) -> None:
+    owner = register(client)
+    first = create_account(client, owner, name="Compte courant")
+    second = create_account(client, owner, name="Compte joint")
+    on_first = insert_series(
+        tmp_path, owner, first, label="Streamco", next_expected_date=TODAY, archived=True
+    )
+    insert_series(
+        tmp_path, owner, second, label="Gymfit Club", next_expected_date=TODAY, archived=True
+    )
+
+    listed = _list(client, owner, archived="true", account_id=first)
+
+    assert [series["id"] for series in listed] == [on_first]
+
+
+def test_an_archived_series_is_never_proposed_for_a_merge(
+    client: TestClient, tmp_path: Path
+) -> None:
+    owner = register(client)
+    account_id = create_account(client, owner)
+    put_away = insert_series(
+        tmp_path, owner, account_id, label="STREAMCO", next_expected_date=TODAY, archived=True
+    )
+    insert_series(tmp_path, owner, account_id, label="STREAMCO TV", next_expected_date=TODAY)
+
+    def suggestions() -> list[dict]:
+        response = client.get("/api/v1/recurring/merge-suggestions", headers=owner.headers)
+        assert response.status_code == 200, response.json()
+        return list(response.json())
+
+    assert suggestions() == []
+    _post(client, owner, f"{put_away}/unarchive")
+    assert len(suggestions()) == 1
+
+
+def test_archiving_another_users_series_is_not_found(client: TestClient, tmp_path: Path) -> None:
+    owner = register(client)
+    other = register(client, email="bruno@example.com")
+    series_id = insert_series(
+        tmp_path, other, create_account(client, other), label="Streamco", next_expected_date=TODAY
+    )
+
+    for action in ("archive", "unarchive"):
+        response = client.post(f"/api/v1/recurring/{series_id}/{action}", headers=owner.headers)
+        assert response.status_code == 404
+        assert response.json()["error"]["code"] == "RECURRING_SERIES_NOT_FOUND"
+    series = read_series(tmp_path, series_id)
+    assert series is not None
+    assert series.archived is False
+    assert _list(client, other, archived="true") == []
+
+
 # --- auth -----------------------------------------------------------------------------------
 
 
@@ -528,3 +634,5 @@ def test_every_route_requires_authentication(client: TestClient) -> None:
     assert client.post("/api/v1/recurring", json={}).status_code == 401
     assert client.patch("/api/v1/recurring/some-id", json={}).status_code == 401
     assert client.delete("/api/v1/recurring/some-id").status_code == 401
+    assert client.post("/api/v1/recurring/some-id/archive").status_code == 401
+    assert client.post("/api/v1/recurring/some-id/unarchive").status_code == 401

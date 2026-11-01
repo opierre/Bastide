@@ -38,6 +38,9 @@ void main() {
       () => repository.list(status: any(named: 'status')),
     ).thenAnswer((_) async => series);
     when(
+      () => repository.list(archived: true),
+    ).thenAnswer((_) async => const <RecurringSeries>[]);
+    when(
       () => repository.mergeSuggestions(),
     ).thenAnswer((_) async => suggestions);
   }

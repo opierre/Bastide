@@ -162,7 +162,7 @@ class RecurringDetectionService:
         its whole history. Nothing is ever unlinked: every link already there was ticked or
         added by the user, tolerances or not.
 
-        A dismissed or cancelled series is left exactly as it is.
+        A dismissed, cancelled or archived series is left exactly as it is.
 
         Returns:
             How many series gained an occurrence.
@@ -170,7 +170,7 @@ class RecurringDetectionService:
         tracked = {
             (series.account_id, series.merchant_key): series
             for series in series_rows
-            if series.is_manual and series.status not in FROZEN_STATUSES
+            if series.is_manual and series.status not in FROZEN_STATUSES and not series.archived
         }
         if not tracked:
             return 0
@@ -265,10 +265,13 @@ def _is_card_settlement(transaction: Transaction) -> bool:
 def _is_frozen(series: RecurringSeries) -> bool:
     """True for a series a detection candidate must not write to.
 
+    An archived series is put away with the history it had: detection neither refreshes it nor,
+    since it still holds its key, creates another in its place. It comes back as it was left.
+
     A manual series is still extended by `_extend_manual_series`, but only its observed columns
     and only with new links; a candidate's view of it would overwrite what the user declared.
     """
-    return series.is_manual or series.status in FROZEN_STATUSES
+    return series.is_manual or series.archived or series.status in FROZEN_STATUSES
 
 
 def _new_series(user_id: str, candidate: SeriesCandidate) -> RecurringSeries:
@@ -485,16 +488,26 @@ class RecurringService:
         self._categories = categories
 
     def list_for_user(
-        self, user_id: str, *, status: str | None = None, account_id: str | None = None
+        self,
+        user_id: str,
+        *,
+        status: str | None = None,
+        account_id: str | None = None,
+        archived: bool = False,
     ) -> list[RecurringSeries]:
         """The user's series, soonest charge first.
+
+        Args:
+            archived: `False` lists the live series, `True` only the archived ones.
 
         Raises:
             AccountNotFoundError: `account_id` is set and is not one of the user's accounts.
         """
         if account_id is not None:
             self._accounts.get(user_id, account_id)
-        return self._repository.list_for_user(user_id, account_id=account_id, status=status)
+        return self._repository.list_for_user(
+            user_id, account_id=account_id, status=status, archived=archived
+        )
 
     def get(self, user_id: str, series_id: str) -> RecurringSeries:
         """One series the user owns.
@@ -826,14 +839,29 @@ class RecurringService:
         series.status = "dismissed"
         self._repository.save(series)
 
+    def set_archived(self, user_id: str, series_id: str, archived: bool) -> RecurringSeries:
+        """Archive a series, or restore one, as accounts and goals are archived.
+
+        Nothing else changes: the status, the occurrences and the merchant key stay, so a
+        restored series is exactly the one that was put away. Idempotent.
+
+        Raises:
+            SeriesNotFoundError: no such series, or it belongs to another user.
+        """
+        series = self.get(user_id, series_id)
+        series.archived = archived
+        return self._repository.save(series)
+
     def summary(self, user_id: str, currency: str, today: date) -> RecurringSummary:
         """The monthly burden, the counts, and the price-increase and missed-charge signals.
+
+        Archived series count nowhere: the user put them away.
 
         Everything here is derived at read time and nothing is written: a missed charge stops
         being true the moment the charge lands, so persisting it would mean carrying a flag that
         is wrong between an import and the next detection pass.
         """
-        series = self._repository.list_for_user(user_id)
+        series = self._repository.list_for_user(user_id, archived=False)
         active = [row for row in series if row.status in ACTIVE_STATUSES]
 
         monthly_total = 0

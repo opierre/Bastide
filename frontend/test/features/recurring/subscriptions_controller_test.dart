@@ -20,6 +20,7 @@ Map<String, dynamic> _seriesJson({
   String? categoryId,
   int? priceChangeMinor,
   String? priceChangedAt,
+  bool archived = false,
 }) => {
   'id': id,
   'account_id': 'a1',
@@ -35,6 +36,7 @@ Map<String, dynamic> _seriesJson({
   'occurrence_count': 5,
   'status': status,
   'is_manual': false,
+  'archived': archived,
   'price_change_minor': priceChangeMinor,
   'price_changed_at': priceChangedAt,
   'created_at': '2026-01-01T00:00:00',
@@ -87,6 +89,7 @@ void main() {
     List<Map<String, dynamic>>? series,
     Map<String, dynamic>? summary,
     List<Map<String, dynamic>> suggestions = const [],
+    List<Map<String, dynamic>> archived = const [],
   }) {
     when(
       () => apiClient.get('/recurring/merge-suggestions'),
@@ -94,6 +97,10 @@ void main() {
     when(
       () => apiClient.get('/recurring', query: any(named: 'query')),
     ).thenAnswer((_) async => series ?? [_seriesJson()]);
+    // Registered after the catch-all above, so it wins for the archived list.
+    when(
+      () => apiClient.get('/recurring', query: {'archived': 'true'}),
+    ).thenAnswer((_) async => archived);
     when(
       () => apiClient.get('/recurring/summary'),
     ).thenAnswer((_) async => summary ?? _summaryJson());
@@ -174,11 +181,110 @@ void main() {
     final captured = verify(
       () => apiClient.get('/recurring', query: captureAny(named: 'query')),
     ).captured;
-    expect(captured.last, {'status': 'confirmed'});
+    expect(captured, contains(equals({'status': 'confirmed'})));
     expect(
       container.read(subscriptionsControllerProvider).value?.statusFilter,
       SeriesStatus.confirmed,
     );
+  });
+
+  group('archive', () {
+    test('build loads the archived series beside the live ones', () async {
+      stubLoad(
+        archived: [_seriesJson(id: 's9', label: 'Gymfit Club', archived: true)],
+      );
+
+      final state = await container.read(
+        subscriptionsControllerProvider.future,
+      );
+
+      expect(state.series.single.isArchived, isFalse);
+      expect(state.archived.single.id, 's9');
+      expect(state.archived.single.isArchived, isTrue);
+      expect(state.archivedRows.single.series.id, 's9');
+      // Folded until the user asks for them.
+      expect(state.showArchived, isFalse);
+    });
+
+    test('archiving posts the series and reloads the panel', () async {
+      stubLoad();
+      when(
+        () => apiClient.post('/recurring/s1/archive'),
+      ).thenAnswer((_) async => _seriesJson(archived: true));
+      await container.read(subscriptionsControllerProvider.future);
+      final notifier = container.read(subscriptionsControllerProvider.notifier)
+        ..toggleArchived();
+      stubLoad(series: [], archived: [_seriesJson(archived: true)]);
+
+      final archived = await notifier.archive('s1');
+
+      expect(archived, isTrue);
+      verify(() => apiClient.post('/recurring/s1/archive')).called(1);
+      final state = container.read(subscriptionsControllerProvider).value!;
+      expect(state.series, isEmpty);
+      expect(state.archived.single.id, 's1');
+      // The reload keeps the archived list open under the user.
+      expect(state.showArchived, isTrue);
+    });
+
+    test('unarchiving posts the series and brings it back', () async {
+      stubLoad(series: [], archived: [_seriesJson(archived: true)]);
+      when(
+        () => apiClient.post('/recurring/s1/unarchive'),
+      ).thenAnswer((_) async => _seriesJson());
+      await container.read(subscriptionsControllerProvider.future);
+      stubLoad();
+
+      final restored = await container
+          .read(subscriptionsControllerProvider.notifier)
+          .unarchive('s1');
+
+      expect(restored, isTrue);
+      verify(() => apiClient.post('/recurring/s1/unarchive')).called(1);
+      final state = container.read(subscriptionsControllerProvider).value!;
+      expect(state.series.single.id, 's1');
+      expect(state.archived, isEmpty);
+    });
+
+    test('a refused archive keeps the panel and reports why', () async {
+      stubLoad();
+      when(() => apiClient.post('/recurring/s1/archive')).thenThrow(
+        const ApiFailure(
+          code: 'RECURRING_SERIES_NOT_FOUND',
+          message: 'Recurring series not found.',
+        ),
+      );
+      await container.read(subscriptionsControllerProvider.future);
+
+      final archived = await container
+          .read(subscriptionsControllerProvider.notifier)
+          .archive('s1');
+
+      expect(archived, isFalse);
+      final state = container.read(subscriptionsControllerProvider).value!;
+      expect(
+        (state.actionError! as ApiFailure).code,
+        'RECURRING_SERIES_NOT_FOUND',
+      );
+      expect(state.series, hasLength(1));
+    });
+
+    test('toggleArchived folds the archived list out and back', () async {
+      stubLoad();
+      await container.read(subscriptionsControllerProvider.future);
+      final notifier = container.read(subscriptionsControllerProvider.notifier);
+
+      notifier.toggleArchived();
+      expect(
+        container.read(subscriptionsControllerProvider).value!.showArchived,
+        isTrue,
+      );
+      notifier.toggleArchived();
+      expect(
+        container.read(subscriptionsControllerProvider).value!.showArchived,
+        isFalse,
+      );
+    });
   });
 
   test('build loads the merge suggestions beside the list', () async {
@@ -405,7 +511,7 @@ void main() {
     expect(result.createdCount, 2);
     expect(result.updatedCount, 1);
     verify(
-      () => apiClient.get('/recurring', query: any(named: 'query')),
+      () => apiClient.get('/recurring', query: const <String, String>{}),
     ).called(2);
     verify(() => apiClient.get('/recurring/summary')).called(2);
   });

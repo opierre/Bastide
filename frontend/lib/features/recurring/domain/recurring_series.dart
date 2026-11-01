@@ -79,6 +79,7 @@ class RecurringSeries {
     required this.isManual,
     required this.priceChangeMinor,
     required this.priceChangedAt,
+    this.isArchived = false,
   });
 
   final String id;
@@ -100,6 +101,11 @@ class RecurringSeries {
 
   /// True for a series the user declared. Detection never writes to one.
   final bool isManual;
+
+  /// Put away by the user: out of the main list, the summary and detection,
+  /// listed only under the archived link. Separate from [status] — archiving
+  /// says nothing about the subscription, only that the user set it aside.
+  final bool isArchived;
 
   /// Signed step in [expectedAmountMinor]; a price *rise* on an outflow is
   /// negative.

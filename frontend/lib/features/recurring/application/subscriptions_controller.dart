@@ -20,13 +20,27 @@ class SubscriptionsState {
   SubscriptionsState({
     required this.series,
     required this.summary,
+    this.archived = const [],
+    this.showArchived = false,
     this.mergeSuggestions = const [],
     this.statusFilter,
     this.actionError,
-  }) : rows = _joinSignals(series, summary);
+  }) : rows = _joinSignals(series, summary),
+       archivedRows = _joinSignals(archived, summary);
 
   final List<RecurringSeries> series;
   final RecurringSummary summary;
+
+  /// The series the user put away, loaded up front so the reveal link can
+  /// state how many there are before anyone clicks it.
+  final List<RecurringSeries> archived;
+
+  /// Whether the archived series are revealed under the live ones.
+  final bool showArchived;
+
+  /// [archived] as the table draws them. The summary leaves archived series
+  /// out, so the only signal one can carry is its own cancelled state.
+  final List<SubscriptionRow> archivedRows;
 
   /// Pairs the server thinks are one subscription the bank renamed. The panel
   /// offers the first; the next appears once the user has answered it.
@@ -47,6 +61,8 @@ class SubscriptionsState {
   SubscriptionsState copyWith({
     List<RecurringSeries>? series,
     RecurringSummary? summary,
+    List<RecurringSeries>? archived,
+    bool? showArchived,
     List<MergeSuggestion>? mergeSuggestions,
     SeriesStatus? statusFilter,
     bool clearStatusFilter = false,
@@ -55,6 +71,8 @@ class SubscriptionsState {
   }) => SubscriptionsState(
     series: series ?? this.series,
     summary: summary ?? this.summary,
+    archived: archived ?? this.archived,
+    showArchived: showArchived ?? this.showArchived,
     mergeSuggestions: mergeSuggestions ?? this.mergeSuggestions,
     statusFilter: clearStatusFilter
         ? null
@@ -129,17 +147,46 @@ class SubscriptionsController extends AsyncNotifier<SubscriptionsState> {
   @override
   Future<SubscriptionsState> build() => _load(null);
 
-  Future<SubscriptionsState> _load(SeriesStatus? status) async {
-    final (series, summary, suggestions) = await (
+  /// [showArchived] is carried over by every reload: it is a view choice, not a
+  /// fact about the data, and a reload behind an archive must not fold the
+  /// archived list back up under the user.
+  Future<SubscriptionsState> _load(
+    SeriesStatus? status, {
+    bool showArchived = false,
+  }) async {
+    final (series, archived, summary, suggestions) = await (
       _repository.list(status: status),
+      _repository.list(archived: true),
       _repository.summary(),
       _repository.mergeSuggestions(),
     ).wait;
     return SubscriptionsState(
       series: series,
+      archived: archived,
+      showArchived: showArchived,
       summary: summary,
       mergeSuggestions: suggestions,
       statusFilter: status,
+    );
+  }
+
+  /// Puts a series away: it leaves the list, the summary and detection, keeps
+  /// its status and history, and can be restored from the archived list.
+  /// Resolves to whether the server took it; a refusal is kept as
+  /// [SubscriptionsState.actionError].
+  Future<bool> archive(String seriesId) =>
+      _answer(() => _repository.archive(seriesId), seriesId: seriesId);
+
+  /// Brings an archived series back exactly as it was put away.
+  Future<bool> unarchive(String seriesId) =>
+      _answer(() => _repository.unarchive(seriesId), seriesId: seriesId);
+
+  /// Reveals the archived series under the live ones, or folds them away.
+  void toggleArchived() {
+    final current = state.value;
+    if (current == null) return;
+    state = AsyncValue.data(
+      current.copyWith(showArchived: !current.showArchived),
     );
   }
 
@@ -165,7 +212,13 @@ class SubscriptionsController extends AsyncNotifier<SubscriptionsState> {
   /// the write has landed the answer is given — a reload that then fails turns
   /// the panel into its error state with a retry rather than leaving the
   /// answered suggestion on screen as if nothing had happened.
-  Future<bool> _answer(Future<Object?> Function() write) async {
+  ///
+  /// [seriesId] names the series the write changed, whose open detail is
+  /// re-read with it.
+  Future<bool> _answer(
+    Future<Object?> Function() write, {
+    String? seriesId,
+  }) async {
     final current = state.value;
     if (current == null) return false;
     try {
@@ -174,20 +227,29 @@ class SubscriptionsController extends AsyncNotifier<SubscriptionsState> {
       state = AsyncValue.data(current.copyWith(actionError: error));
       return false;
     }
-    state = await AsyncValue.guard(() => _load(current.statusFilter));
+    if (seriesId != null) ref.invalidate(seriesDetailProvider(seriesId));
+    state = await AsyncValue.guard(
+      () => _load(current.statusFilter, showArchived: current.showArchived),
+    );
     return true;
   }
 
   Future<void> refresh() async {
     final status = state.value?.statusFilter;
+    final showArchived = state.value?.showArchived ?? false;
     state = const AsyncValue.loading();
-    state = await AsyncValue.guard(() => _load(status));
+    state = await AsyncValue.guard(
+      () => _load(status, showArchived: showArchived),
+    );
   }
 
   /// Narrows the list to one lifecycle status, or back to all of them.
   Future<void> setStatusFilter(SeriesStatus? status) async {
+    final showArchived = state.value?.showArchived ?? false;
     state = const AsyncValue.loading();
-    state = await AsyncValue.guard(() => _load(status));
+    state = await AsyncValue.guard(
+      () => _load(status, showArchived: showArchived),
+    );
   }
 
   /// Moves a series along the lifecycle.

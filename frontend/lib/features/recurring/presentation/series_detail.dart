@@ -6,6 +6,7 @@ import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/tokens.dart';
 import '../../../core/widgets/amount_text.dart';
 import '../../../core/widgets/app_card.dart';
+import '../../../core/widgets/app_toast.dart';
 import '../../../core/widgets/category_chip.dart';
 import '../../../core/widgets/inline_banner.dart';
 import '../../../core/widgets/monogram_avatar.dart';
@@ -16,6 +17,7 @@ import '../application/subscriptions_controller.dart';
 import '../domain/recurring_series.dart';
 import 'add_charges_dialog.dart';
 import 'price_history_chart.dart';
+import 'recurring_error_localizer.dart';
 import 'recurring_labels.dart';
 
 /// One series in full (`docs/design/10` frame ②): the stats, the price-increase
@@ -60,16 +62,31 @@ class SeriesDetailView extends ConsumerWidget {
                 ).textTheme.labelMedium?.copyWith(color: AppColors.iris),
               ),
             ),
-            const Spacer(),
-            // A dismissed series is the user's "no": nothing is added to it.
-            if (detail.value?.series case final series?
-                when series.status != SeriesStatus.dismissed)
-              OutlinedButton.icon(
-                key: const Key('seriesDetailAddCharge'),
-                onPressed: () => showAddChargesDialog(context, series),
-                icon: const Icon(Icons.add_rounded, size: 16),
-                label: Text(l10n.chargePickerAction),
+            const SizedBox(width: AppSpacing.sm),
+            // Wraps rather than overflows on a narrow window: the French
+            // labels of the two actions run long.
+            Expanded(
+              child: Wrap(
+                alignment: WrapAlignment.end,
+                spacing: AppSpacing.sm,
+                runSpacing: AppSpacing.sm,
+                children: [
+                  if (detail.value?.series case final series?) ...[
+                    // A dismissed series is the user's "no", an archived one
+                    // is put away: nothing is added to either.
+                    if (series.status != SeriesStatus.dismissed &&
+                        !series.isArchived)
+                      OutlinedButton.icon(
+                        key: const Key('seriesDetailAddCharge'),
+                        onPressed: () => showAddChargesDialog(context, series),
+                        icon: const Icon(Icons.add_rounded, size: 16),
+                        label: Text(l10n.chargePickerAction),
+                      ),
+                    _ArchiveButton(series: series),
+                  ],
+                ],
               ),
+            ),
           ],
         ),
         const SizedBox(height: AppSpacing.sm),
@@ -91,6 +108,67 @@ class SeriesDetailView extends ConsumerWidget {
           },
         ),
       ],
+    );
+  }
+}
+
+/// « Archiver » on a live series, « Désarchiver » on an archived one.
+///
+/// The view stays open either way and re-reads the series, so the button turns
+/// into its opposite: the user sees the change land and can undo it in place.
+/// A refusal is said in a toast, since the list's banner is out of sight here.
+class _ArchiveButton extends ConsumerStatefulWidget {
+  const _ArchiveButton({required this.series});
+
+  final RecurringSeries series;
+
+  @override
+  ConsumerState<_ArchiveButton> createState() => _ArchiveButtonState();
+}
+
+class _ArchiveButtonState extends ConsumerState<_ArchiveButton> {
+  bool _busy = false;
+
+  Future<void> _toggle() async {
+    final l10n = AppLocalizations.of(context)!;
+    final controller = ref.read(subscriptionsControllerProvider.notifier);
+    final series = widget.series;
+    setState(() => _busy = true);
+    final done = series.isArchived
+        ? await controller.unarchive(series.id)
+        : await controller.archive(series.id);
+    if (!mounted) return;
+    setState(() => _busy = false);
+    if (!done) {
+      showAppToast(
+        context,
+        title: l10n.subscriptionArchiveFailed,
+        message: localizeRecurringError(
+          l10n,
+          ref.read(subscriptionsControllerProvider).value?.actionError,
+        ),
+        tone: BannerTone.error,
+      );
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final archived = widget.series.isArchived;
+
+    return OutlinedButton.icon(
+      key: const Key('seriesDetailArchive'),
+      onPressed: _busy ? null : _toggle,
+      icon: Icon(
+        archived ? Icons.unarchive_outlined : Icons.archive_outlined,
+        size: 16,
+      ),
+      label: Text(
+        archived
+            ? l10n.subscriptionActionUnarchive
+            : l10n.subscriptionActionArchive,
+      ),
     );
   }
 }
