@@ -4556,4 +4556,75 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get markRecurringAddToSeries => 'Add to this series';
+
+  @override
+  String get markRecurringPickSeries => 'Add to an existing series…';
+
+  @override
+  String get seriesPickerIntro =>
+      'Choose the series this transaction belongs to. Bastide will remember its label for the next ones.';
+
+  @override
+  String get seriesPickerSearchHint => 'Search a series';
+
+  @override
+  String get seriesPickerEmpty => 'You don\'t track any series yet.';
+
+  @override
+  String seriesPickerNoMatch(String query) {
+    return 'No series matches “$query”.';
+  }
+
+  @override
+  String get seriesPickerLoadError => 'Your series could not be loaded.';
+
+  @override
+  String get seriesPickerBack => 'Back to the preview';
+
+  @override
+  String seriesPickerRowDetail(String account, String cadence, String amount) {
+    return '$account · $cadence · $amount';
+  }
+
+  @override
+  String get chargePickerAction => 'Add a transaction';
+
+  @override
+  String chargePickerTitle(String label) {
+    return 'Add to “$label”';
+  }
+
+  @override
+  String get chargePickerIntro =>
+      'Transactions that belong to no series, closest first.';
+
+  @override
+  String get chargePickerSearchHint => 'Search a label';
+
+  @override
+  String get chargePickerEmpty =>
+      'Nothing to add: every expense already belongs to a series.';
+
+  @override
+  String chargePickerNoMatch(String query) {
+    return 'No transaction matches “$query”.';
+  }
+
+  @override
+  String get chargePickerLoadError => 'The transactions could not be loaded.';
+
+  @override
+  String get chargePickerLoadMore => 'Show more';
+
+  @override
+  String chargePickerSave(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Add $count transactions',
+      one: 'Add 1 transaction',
+      zero: 'Add',
+    );
+    return '$_temp0';
+  }
 }

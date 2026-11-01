@@ -14,6 +14,7 @@ import '../../../core/widgets/status_pill.dart';
 import '../../../l10n/app_localizations.dart';
 import '../application/subscriptions_controller.dart';
 import '../domain/recurring_series.dart';
+import 'add_charges_dialog.dart';
 import 'price_history_chart.dart';
 import 'recurring_labels.dart';
 
@@ -41,23 +42,35 @@ class SeriesDetailView extends ConsumerWidget {
       key: const Key('seriesDetail'),
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Align(
-          alignment: Alignment.centerLeft,
-          child: TextButton.icon(
-            key: const Key('seriesDetailBack'),
-            onPressed: () => ref.read(selectedSeriesProvider.notifier).close(),
-            icon: const Icon(
-              Icons.arrow_back_rounded,
-              size: 16,
-              color: AppColors.iris,
+        Row(
+          children: [
+            TextButton.icon(
+              key: const Key('seriesDetailBack'),
+              onPressed: () =>
+                  ref.read(selectedSeriesProvider.notifier).close(),
+              icon: const Icon(
+                Icons.arrow_back_rounded,
+                size: 16,
+                color: AppColors.iris,
+              ),
+              label: Text(
+                l10n.subscriptionDetailBack,
+                style: Theme.of(
+                  context,
+                ).textTheme.labelMedium?.copyWith(color: AppColors.iris),
+              ),
             ),
-            label: Text(
-              l10n.subscriptionDetailBack,
-              style: Theme.of(
-                context,
-              ).textTheme.labelMedium?.copyWith(color: AppColors.iris),
-            ),
-          ),
+            const Spacer(),
+            // A dismissed series is the user's "no": nothing is added to it.
+            if (detail.value?.series case final series?
+                when series.status != SeriesStatus.dismissed)
+              OutlinedButton.icon(
+                key: const Key('seriesDetailAddCharge'),
+                onPressed: () => showAddChargesDialog(context, series),
+                icon: const Icon(Icons.add_rounded, size: 16),
+                label: Text(l10n.chargePickerAction),
+              ),
+          ],
         ),
         const SizedBox(height: AppSpacing.sm),
         Expanded(

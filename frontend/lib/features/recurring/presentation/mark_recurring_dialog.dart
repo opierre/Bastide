@@ -10,13 +10,16 @@ import '../../../core/widgets/inline_banner.dart';
 import '../../../core/widgets/primary_button.dart';
 import '../../../core/widgets/state_views.dart';
 import '../../../l10n/app_localizations.dart';
+import '../application/add_to_series_controller.dart';
 import '../application/mark_recurring_controller.dart';
 import '../application/subscriptions_controller.dart';
 import '../domain/recurring_series.dart';
 import '../domain/series_preview.dart';
 import 'recurring_error_localizer.dart';
 import 'recurring_labels.dart';
+import 'series_picker.dart';
 import 'subscriptions_screen.dart';
+import 'transaction_check_row.dart';
 
 /// Opens « Marquer comme récurrent » for [transactionId].
 ///
@@ -71,6 +74,39 @@ class _MarkRecurringDialogState extends ConsumerState<MarkRecurringDialog> {
   bool _isSaving = false;
   String? _errorText;
 
+  /// Whether the series picker replaces the preview. Purely which pane the
+  /// dialog shows: the picker's own state lives in its controller.
+  bool _picking = false;
+
+  void _setPicking(bool picking) => setState(() {
+    _picking = picking;
+    _errorText = null;
+  });
+
+  /// Adds the transaction to [series], which learns its label, and closes.
+  Future<void> _pick(RecurringSeries series) async {
+    setState(() {
+      _isSaving = true;
+      _errorText = null;
+    });
+    try {
+      final saved = await ref
+          .read(seriesPickerControllerProvider.notifier)
+          .pick(series.id, widget.transactionId);
+      if (!mounted) return;
+      Navigator.of(context).pop(SeriesSaved(saved));
+    } catch (error) {
+      if (!mounted) return;
+      setState(() {
+        _isSaving = false;
+        _errorText = localizeRecurringError(
+          AppLocalizations.of(context)!,
+          error,
+        );
+      });
+    }
+  }
+
   Future<void> _save() async {
     setState(() {
       _isSaving = true;
@@ -117,6 +153,30 @@ class _MarkRecurringDialogState extends ConsumerState<MarkRecurringDialog> {
         !state.isLoading &&
         (state.value?.selected.isNotEmpty ?? false);
 
+    if (_picking) {
+      return AppModal(
+        title: l10n.markRecurringTitle,
+        width: 520,
+        actions: [
+          OutlinedButton(
+            key: const Key('seriesPickerBack'),
+            onPressed: _isSaving ? null : () => _setPicking(false),
+            child: Text(l10n.seriesPickerBack),
+          ),
+          OutlinedButton(
+            key: const Key('markRecurringCancel'),
+            onPressed: _isSaving ? null : () => Navigator.of(context).pop(),
+            child: Text(l10n.markRecurringCancel),
+          ),
+        ],
+        child: SeriesPickerBody(
+          onPick: _pick,
+          enabled: !_isSaving,
+          errorText: _errorText,
+        ),
+      );
+    }
+
     return AppModal(
       title: l10n.markRecurringTitle,
       width: 520,
@@ -160,6 +220,7 @@ class _MarkRecurringDialogState extends ConsumerState<MarkRecurringDialog> {
             state: state.requireValue,
             errorText: _errorText,
             enabled: !_isSaving,
+            onPickSeries: () => _setPicking(true),
           ),
         AsyncValue(
           value: MarkRecurringState(
@@ -209,6 +270,7 @@ class _ProposalBody extends ConsumerWidget {
     required this.state,
     required this.errorText,
     required this.enabled,
+    required this.onPickSeries,
   });
 
   final String transactionId;
@@ -216,6 +278,10 @@ class _ProposalBody extends ConsumerWidget {
   final MarkRecurringState state;
   final String? errorText;
   final bool enabled;
+
+  /// Opens the series picker, for a charge whose label has nothing in common
+  /// with the series it belongs to.
+  final VoidCallback onPickSeries;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -303,6 +369,23 @@ class _ProposalBody extends ConsumerWidget {
           state: state,
           enabled: enabled,
         ),
+        const SizedBox(height: AppSpacing.sm),
+        Align(
+          alignment: Alignment.centerLeft,
+          child: TextButton.icon(
+            key: const Key('markRecurringPickSeries'),
+            onPressed: enabled ? onPickSeries : null,
+            icon: const Icon(
+              Icons.playlist_add_rounded,
+              size: 16,
+              color: AppColors.iris,
+            ),
+            label: Text(
+              l10n.markRecurringPickSeries,
+              style: textTheme.labelMedium?.copyWith(color: AppColors.iris),
+            ),
+          ),
+        ),
       ],
     );
   }
@@ -348,7 +431,8 @@ class _Checklist extends ConsumerWidget {
               padding: const EdgeInsets.symmetric(vertical: AppSpacing.xs),
               children: [
                 for (final transaction in state.candidates)
-                  _TransactionCheckRow(
+                  TransactionCheckRow(
+                    tickKey: Key('markRecurringTick-${transaction.id}'),
                     transaction: transaction,
                     date: dates.format(transaction.bookedDate),
                     ticked: state.ticked.contains(transaction.id),
@@ -517,94 +601,6 @@ class _SummaryFigure extends StatelessWidget {
         const SizedBox(height: 2),
         child,
       ],
-    );
-  }
-}
-
-/// One checklist line: the gradient checkbox the rule modal draws, the date,
-/// the label and the signed amount.
-class _TransactionCheckRow extends StatelessWidget {
-  const _TransactionCheckRow({
-    required this.transaction,
-    required this.date,
-    required this.ticked,
-    required this.onChanged,
-  });
-
-  final PreviewTransaction transaction;
-  final String date;
-  final bool ticked;
-  final VoidCallback? onChanged;
-
-  @override
-  Widget build(BuildContext context) {
-    final textTheme = Theme.of(context).textTheme;
-    return MouseRegion(
-      cursor: onChanged == null
-          ? SystemMouseCursors.basic
-          : SystemMouseCursors.click,
-      child: GestureDetector(
-        key: Key('markRecurringTick-${transaction.id}'),
-        onTap: onChanged,
-        behavior: HitTestBehavior.opaque,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(
-            horizontal: AppSpacing.sm + AppSpacing.xs,
-            vertical: AppSpacing.sm,
-          ),
-          child: Row(
-            children: [
-              Semantics(
-                checked: ticked,
-                label: transaction.label,
-                child: Container(
-                  width: 18,
-                  height: 18,
-                  alignment: Alignment.center,
-                  decoration: BoxDecoration(
-                    gradient: ticked ? AppColors.irisGradient : null,
-                    color: ticked ? null : AppColors.surfaceField,
-                    borderRadius: BorderRadius.circular(AppRadii.xs + 1),
-                    border: Border.all(
-                      color: ticked ? Colors.transparent : AppColors.border,
-                    ),
-                  ),
-                  child: ticked
-                      ? const Icon(
-                          Icons.check_rounded,
-                          size: 13,
-                          color: AppColors.irisInk,
-                        )
-                      : null,
-                ),
-              ),
-              const SizedBox(width: AppSpacing.sm + AppSpacing.xs),
-              SizedBox(
-                width: 90,
-                child: Text(
-                  date,
-                  style: textTheme.bodySmall?.copyWith(
-                    color: AppColors.textSecondary,
-                  ),
-                ),
-              ),
-              Expanded(
-                child: Text(
-                  transaction.label,
-                  style: textTheme.bodyMedium,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ),
-              const SizedBox(width: AppSpacing.sm),
-              AmountText(
-                amountMinor: transaction.amountMinor,
-                currency: transaction.currency,
-                style: textTheme.bodyMedium!,
-              ),
-            ],
-          ),
-        ),
-      ),
     );
   }
 }

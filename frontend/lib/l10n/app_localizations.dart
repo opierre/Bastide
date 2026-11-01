@@ -7205,6 +7205,108 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Ajouter à cette série'**
   String get markRecurringAddToSeries;
+
+  /// Opens the picker of the user's series, to add this transaction to one of them.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ajouter à une série existante…'**
+  String get markRecurringPickSeries;
+
+  /// Intro of the series picker in the mark-as-recurring dialog.
+  ///
+  /// In fr, this message translates to:
+  /// **'Choisissez la série dont fait partie cette opération. Bastide retiendra son libellé pour les prochaines.'**
+  String get seriesPickerIntro;
+
+  /// Placeholder of the series picker's search field.
+  ///
+  /// In fr, this message translates to:
+  /// **'Rechercher une série'**
+  String get seriesPickerSearchHint;
+
+  /// Series picker: the user has no series to offer.
+  ///
+  /// In fr, this message translates to:
+  /// **'Vous ne suivez encore aucune série.'**
+  String get seriesPickerEmpty;
+
+  /// Series picker: the search matched nothing.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucune série ne correspond à « {query} ».'**
+  String seriesPickerNoMatch(String query);
+
+  /// Series picker: the list request failed.
+  ///
+  /// In fr, this message translates to:
+  /// **'Impossible de charger vos séries.'**
+  String get seriesPickerLoadError;
+
+  /// Leaves the series picker for the preview.
+  ///
+  /// In fr, this message translates to:
+  /// **'Retour à l\'aperçu'**
+  String get seriesPickerBack;
+
+  /// Second line of a series in the picker: its account, cadence and expected amount.
+  ///
+  /// In fr, this message translates to:
+  /// **'{account} · {cadence} · {amount}'**
+  String seriesPickerRowDetail(String account, String cadence, String amount);
+
+  /// Series detail button opening the picker of transactions to add to the series.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ajouter une opération'**
+  String get chargePickerAction;
+
+  /// Title of the dialog adding transactions to a series.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ajouter à « {label} »'**
+  String chargePickerTitle(String label);
+
+  /// Intro of the dialog adding transactions to a series.
+  ///
+  /// In fr, this message translates to:
+  /// **'Les opérations qui ne font partie d\'aucune série, les plus proches en premier.'**
+  String get chargePickerIntro;
+
+  /// Placeholder of the transaction picker's search field.
+  ///
+  /// In fr, this message translates to:
+  /// **'Rechercher un libellé'**
+  String get chargePickerSearchHint;
+
+  /// Transaction picker: no candidate at all.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucune opération à ajouter : toutes vos dépenses font déjà partie d\'une série.'**
+  String get chargePickerEmpty;
+
+  /// Transaction picker: the search matched nothing.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucune opération ne correspond à « {query} ».'**
+  String chargePickerNoMatch(String query);
+
+  /// Transaction picker: the candidates request failed.
+  ///
+  /// In fr, this message translates to:
+  /// **'Impossible de charger les opérations.'**
+  String get chargePickerLoadError;
+
+  /// Transaction picker: fetches the next page.
+  ///
+  /// In fr, this message translates to:
+  /// **'Afficher plus'**
+  String get chargePickerLoadMore;
+
+  /// Transaction picker's primary button.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, =0{Ajouter} =1{Ajouter 1 opération} other{Ajouter {count} opérations}}'**
+  String chargePickerSave(int count);
 }
 
 class _AppLocalizationsDelegate

@@ -4593,4 +4593,75 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get markRecurringAddToSeries => 'Ajouter à cette série';
+
+  @override
+  String get markRecurringPickSeries => 'Ajouter à une série existante…';
+
+  @override
+  String get seriesPickerIntro =>
+      'Choisissez la série dont fait partie cette opération. Bastide retiendra son libellé pour les prochaines.';
+
+  @override
+  String get seriesPickerSearchHint => 'Rechercher une série';
+
+  @override
+  String get seriesPickerEmpty => 'Vous ne suivez encore aucune série.';
+
+  @override
+  String seriesPickerNoMatch(String query) {
+    return 'Aucune série ne correspond à « $query ».';
+  }
+
+  @override
+  String get seriesPickerLoadError => 'Impossible de charger vos séries.';
+
+  @override
+  String get seriesPickerBack => 'Retour à l\'aperçu';
+
+  @override
+  String seriesPickerRowDetail(String account, String cadence, String amount) {
+    return '$account · $cadence · $amount';
+  }
+
+  @override
+  String get chargePickerAction => 'Ajouter une opération';
+
+  @override
+  String chargePickerTitle(String label) {
+    return 'Ajouter à « $label »';
+  }
+
+  @override
+  String get chargePickerIntro =>
+      'Les opérations qui ne font partie d\'aucune série, les plus proches en premier.';
+
+  @override
+  String get chargePickerSearchHint => 'Rechercher un libellé';
+
+  @override
+  String get chargePickerEmpty =>
+      'Aucune opération à ajouter : toutes vos dépenses font déjà partie d\'une série.';
+
+  @override
+  String chargePickerNoMatch(String query) {
+    return 'Aucune opération ne correspond à « $query ».';
+  }
+
+  @override
+  String get chargePickerLoadError => 'Impossible de charger les opérations.';
+
+  @override
+  String get chargePickerLoadMore => 'Afficher plus';
+
+  @override
+  String chargePickerSave(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Ajouter $count opérations',
+      one: 'Ajouter 1 opération',
+      zero: 'Ajouter',
+    );
+    return '$_temp0';
+  }
 }
