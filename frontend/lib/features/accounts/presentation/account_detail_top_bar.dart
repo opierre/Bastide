@@ -74,11 +74,11 @@ class AccountDetailTitle extends ConsumerWidget {
   }
 }
 
-enum _DetailAction { settlementRule, archive }
+enum _DetailAction { settlementRule }
 
 /// The account detail's contextual controls: edit the account in the existing
-/// modal, and an overflow holding archive (never delete) — plus the settlement
-/// rule, for a card.
+/// modal and archive it (never delete), both one click away. A card adds an
+/// overflow holding its settlement rule.
 class AccountDetailTopBarActions extends ConsumerWidget {
   const AccountDetailTopBarActions({super.key, required this.accountId});
 
@@ -90,6 +90,13 @@ class AccountDetailTopBarActions extends ConsumerWidget {
     final account = ref.watch(accountByIdProvider(accountId));
     if (account == null) return const SizedBox.shrink();
 
+    final pillStyle = TextButton.styleFrom(
+      foregroundColor: AppColors.textSecondary,
+      minimumSize: const Size(0, AppChrome.controlPillHeight),
+      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
+      shape: const StadiumBorder(),
+    );
+
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -99,65 +106,73 @@ class AccountDetailTopBarActions extends ConsumerWidget {
             await showAccountForm(context, initial: account);
             ref.invalidate(accountOverviewProvider(account.id));
           },
-          style: TextButton.styleFrom(
-            foregroundColor: AppColors.textSecondary,
-            minimumSize: const Size(0, AppChrome.controlPillHeight),
-            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
-            shape: const StadiumBorder(),
-          ),
+          style: pillStyle,
           icon: const Icon(Icons.edit_outlined, size: 16),
           label: Text(l10n.accountEdit),
         ),
         const SizedBox(width: AppSpacing.sm),
-        PopupMenuButton<_DetailAction>(
-          key: const Key('accountDetailMore'),
-          tooltip: l10n.accountDetailMoreActions,
-          position: PopupMenuPosition.under,
-          onSelected: (action) => _onSelected(context, ref, account, action),
-          itemBuilder: (context) => [
-            if (account.type == AccountType.deferredCard)
+        TextButton.icon(
+          key: const Key('accountDetailArchive'),
+          onPressed: () => _archive(context, ref, account),
+          style: pillStyle,
+          icon: const Icon(Icons.inventory_2_outlined, size: 16),
+          label: Text(l10n.accountArchive),
+        ),
+        if (account.type == AccountType.deferredCard) ...[
+          const SizedBox(width: AppSpacing.sm),
+          PopupMenuButton<_DetailAction>(
+            key: const Key('accountDetailMore'),
+            tooltip: l10n.accountDetailMoreActions,
+            position: PopupMenuPosition.under,
+            onSelected: (action) => switch (action) {
+              _DetailAction.settlementRule => _editSettlementRule(
+                context,
+                ref,
+                account,
+              ),
+            },
+            itemBuilder: (_) => [
               PopupMenuItem(
+                key: const Key('accountDetailSettlementRule'),
                 value: _DetailAction.settlementRule,
                 child: Text(l10n.accountSettlementRule),
               ),
-            PopupMenuItem(
-              key: const Key('accountDetailArchive'),
-              value: _DetailAction.archive,
-              child: Text(l10n.accountArchive),
-            ),
-          ],
-          child: Container(
-            width: AppChrome.controlPillHeight,
-            height: AppChrome.controlPillHeight,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              border: Border.all(color: AppColors.border),
-            ),
-            child: const Icon(
-              Icons.more_horiz_rounded,
-              size: 18,
-              color: AppColors.textSecondary,
+            ],
+            child: Container(
+              width: AppChrome.controlPillHeight,
+              height: AppChrome.controlPillHeight,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                border: Border.all(color: AppColors.border),
+              ),
+              child: const Icon(
+                Icons.more_horiz_rounded,
+                size: 18,
+                color: AppColors.textSecondary,
+              ),
             ),
           ),
-        ),
+        ],
       ],
     );
   }
 
-  Future<void> _onSelected(
+  Future<void> _editSettlementRule(
     BuildContext context,
     WidgetRef ref,
     Account account,
-    _DetailAction action,
   ) async {
-    switch (action) {
-      case _DetailAction.settlementRule:
-        final saved = await showSettlementRuleDialog(context, account);
-        if (saved) ref.invalidate(accountOverviewProvider(account.id));
-      case _DetailAction.archive:
-        final archived = await confirmArchiveAccount(context, ref, account);
-        // An archived account has no detail to stay on.
-        if (archived && context.mounted) context.go('/accounts');
-    }
+    final saved = await showSettlementRuleDialog(context, account);
+    if (saved) ref.invalidate(accountOverviewProvider(account.id));
+  }
+
+  Future<void> _archive(
+    BuildContext context,
+    WidgetRef ref,
+    Account account,
+  ) async {
+    final archived = await confirmArchiveAccount(context, ref, account);
+    // An archived account has no detail to stay on.
+    if (archived && context.mounted) context.go('/accounts');
   }
 }
