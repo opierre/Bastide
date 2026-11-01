@@ -148,6 +148,7 @@ details?}}`. Model names refer to the Pydantic schemas in `backend/app/features/
 |--------|------|-------|------|----------|
 | `GET` | `/recurring` | `status`, `account_id` |  | 200 [`SeriesRead`] |
 | `POST` | `/recurring` |  | `SeriesCreate` | 201 `SeriesRead` |
+| `POST` | `/recurring/preview` |  | `PreviewRequest` | 200 `RecurringPreviewRead` |
 | `POST` | `/recurring/detect` |  | `DetectRequest` | 200 `DetectionResultRead` |
 | `GET` | `/recurring/summary` |  |  | 200 `RecurringSummary` |
 | `GET` | `/recurring/merge-suggestions` |  |  | 200 [`MergeSuggestionRead`] |

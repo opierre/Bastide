@@ -8,12 +8,15 @@ behind as running it once, and must never talk back to a user who has already ha
 summary — and its only constraint is that the states it writes are states the lifecycle allows.
 """
 
+from collections import Counter
 from dataclasses import dataclass
 from datetime import date, timedelta
+from itertools import pairwise
+from statistics import median_low
 
 from sqlalchemy.orm import Session
 
-from app.core.errors import ConflictError, NotFoundError
+from app.core.errors import ConflictError, NotFoundError, ValidationError
 from app.features.accounts.service import AccountService
 from app.features.accounts.settlement_rule import CARD_SETTLEMENT_CATEGORY_KEY
 from app.features.categories.repository import CategoryRepository
@@ -26,6 +29,7 @@ from app.features.recurring.detector import (
 from app.features.recurring.detector import detect as detect_candidates
 from app.features.recurring.models import RecurringOccurrence, RecurringSeries
 from app.features.recurring.normalize import merchant_key, normalize_label
+from app.features.recurring.preview import Grade, grade
 from app.features.recurring.repository import RecurringRepository
 from app.features.recurring.schemas import (
     MissedCharge,
@@ -36,8 +40,10 @@ from app.features.recurring.schemas import (
     SeriesStatus,
     SeriesUpdate,
 )
+from app.features.recurring.similarity import amounts_close, keys_alike
 from app.features.transactions.models import Transaction
 from app.features.transactions.repository import TransactionRepository
+from app.features.transactions.service import TransactionNotFoundError
 
 #: The status a newly detected series starts in — the detector has found it, the user has not
 #: yet said anything about it.
@@ -245,6 +251,24 @@ class SeriesAlreadyTrackedError(ConflictError):
     code = "RECURRING_SERIES_EXISTS"
 
 
+class PreviewInflowError(ValidationError):
+    """Raised when a preview is asked for an inflow: a subscription is something paid."""
+
+    code = "RECURRING_PREVIEW_INFLOW"
+
+
+class SeriesTransactionsInvalidError(ValidationError):
+    """Raised when a transaction to link is unknown, on another account, or an inflow."""
+
+    code = "RECURRING_TRANSACTIONS_INVALID"
+
+
+class TransactionAlreadyLinkedError(ConflictError):
+    """Raised when a transaction to link already belongs to a series."""
+
+    code = "RECURRING_TRANSACTION_LINKED"
+
+
 class InvalidSeriesTransitionError(ConflictError):
     """Raised when a status change is not one the lifecycle allows."""
 
@@ -388,19 +412,31 @@ class RecurringService:
     def create(self, user_id: str, data: SeriesCreate, today: date) -> RecurringSeries:
         """Declare a subscription detection has not found.
 
-        The observed columns have nothing to observe yet, so they are seeded from the creation
-        date and the nominal length of the chosen cadence: `occurrence_count` is `0`, and
-        `first_seen_date` records when the user started tracking the series rather than claiming
-        when it started. `is_manual` keeps detection off it for good.
+        Without `transaction_ids` the observed columns have nothing to observe yet, so they are
+        seeded from the creation date and the nominal length of the chosen cadence:
+        `occurrence_count` is `0`, and `first_seen_date` records when the user started tracking
+        the series rather than claiming when it started. With them — the ones ticked in a
+        preview — those transactions become the occurrences and the observed columns are theirs.
+        `is_manual` keeps detection off the series for good either way.
 
         Raises:
             AccountNotFoundError: the account is not one of the user's.
             CategoryInvalidError: `category_id` is set and is not one the caller may assign.
+            SeriesTransactionsInvalidError: a transaction to link is unknown, on another
+                account, or an inflow.
+            TransactionAlreadyLinkedError: a transaction to link already belongs to a series.
             SeriesAlreadyTrackedError: that account already tracks a series under this name.
         """
         account = self._accounts.get(user_id, data.account_id)
         self._require_assignable_category(user_id, data.category_id)
-        key = normalize_label(data.label)
+        selected = self._selected_transactions(user_id, account.id, data.transaction_ids)
+        if selected:
+            # Keyed on the charges themselves rather than on the label, so a later detection pass
+            # finds this series under the key it groups them by, and leaves it alone as a manual
+            # series, instead of creating a second one beside it.
+            key, alias_keys = _keys_for(account.id, selected, self._taken_keys(user_id))
+        else:
+            key, alias_keys = normalize_label(data.label), []
         existing = self._repository.get_by_merchant_key(user_id, account.id, key)
         if existing is not None:
             raise SeriesAlreadyTrackedError(
@@ -408,7 +444,6 @@ class RecurringService:
                 details={"series_id": existing.id},
             )
 
-        interval = NOMINAL_INTERVAL_DAYS[data.cadence]
         series = RecurringSeries(
             user_id=user_id,
             account_id=account.id,
@@ -416,17 +451,116 @@ class RecurringService:
             label=data.label,
             category_id=data.category_id,
             cadence=data.cadence,
-            median_interval_days=interval,
             expected_amount_minor=data.expected_amount_minor,
             currency=account.currency,
-            first_seen_date=today,
-            last_seen_date=today,
-            next_expected_date=today + timedelta(days=interval),
-            occurrence_count=0,
             status=INITIAL_STATUS,
             is_manual=True,
         )
-        return self._repository.add(series)
+        _seed_observations(series, data.cadence, selected, today)
+        if not selected:
+            return self._repository.add(series)
+        return self._repository.add_with_occurrences(
+            series, [transaction.id for transaction in selected], alias_keys
+        )
+
+    def preview(
+        self, user_id: str, transaction_id: str
+    ) -> tuple[RecurringSeries | None, Grade | None]:
+        """What series ``transaction_id`` would start, graded, or the series it is already in.
+
+        The matches are the same account's outflows under the transaction's merchant key, plus
+        the near matches `similarity` would call one merchant at a close amount. Transactions
+        already in a series are left out: they cannot be linked twice.
+
+        Returns:
+            `(series, None)` when the transaction already belongs to a series, or its merchant
+            is already tracked on that account; `(None, grade)` otherwise.
+
+        Raises:
+            TransactionNotFoundError: no such transaction, or it belongs to another user.
+            PreviewInflowError: the transaction is an inflow.
+        """
+        seed = self._transactions.get_by_id_for_user(transaction_id, user_id)
+        if seed is None:
+            raise TransactionNotFoundError("Transaction not found.")
+        if seed.amount_minor >= 0:
+            raise PreviewInflowError(
+                "Only an outflow can be marked as recurring.",
+                details={"transaction_id": seed.id},
+            )
+        existing = self._series_tracking(user_id, seed)
+        if existing is not None:
+            return existing, None
+
+        key = merchant_key(seed)
+        outflows = [
+            transaction
+            for transaction in self._transactions.list_all_for_user(
+                user_id, account_id=seed.account_id
+            )
+            if transaction.amount_minor < 0 and not _is_card_settlement(transaction)
+        ]
+        linked = self._repository.linked_transaction_ids([t.id for t in outflows])
+        matches = [
+            transaction
+            for transaction in outflows
+            if transaction.id not in linked
+            and _matches(seed, key, transaction, merchant_key(transaction))
+        ]
+        if seed.id not in {match.id for match in matches}:
+            # A card settlement the user insists on is still the transaction they asked about.
+            matches.append(seed)
+        return None, grade(matches)
+
+    def _series_tracking(self, user_id: str, transaction: Transaction) -> RecurringSeries | None:
+        """The series ``transaction`` is in, or the one tracking its merchant on its account."""
+        linked = self._repository.series_for_transaction(transaction.id, user_id)
+        if linked is not None:
+            return linked
+        own = (transaction.account_id, merchant_key(transaction))
+        account_id, key = self._repository.aliases_for_user(user_id).get(own, own)
+        return self._repository.get_by_merchant_key(user_id, account_id, key)
+
+    def _selected_transactions(
+        self, user_id: str, account_id: str, transaction_ids: list[str]
+    ) -> list[Transaction]:
+        """The transactions to link to a new series, oldest first, checked one by one.
+
+        Raises:
+            SeriesTransactionsInvalidError: an id is unknown, another user's, on another
+                account, or an inflow.
+            TransactionAlreadyLinkedError: one of them already belongs to a series.
+        """
+        wanted = list(dict.fromkeys(transaction_ids))
+        if not wanted:
+            return []
+        by_id = {
+            transaction.id: transaction
+            for transaction in self._transactions.list_all_for_user(user_id, account_id=account_id)
+        }
+        invalid = [
+            transaction_id
+            for transaction_id in wanted
+            if transaction_id not in by_id or by_id[transaction_id].amount_minor >= 0
+        ]
+        if invalid:
+            raise SeriesTransactionsInvalidError(
+                "These transactions cannot be linked to this series.",
+                details={"transaction_ids": invalid},
+            )
+        linked = self._repository.linked_transaction_ids(wanted)
+        if linked:
+            raise TransactionAlreadyLinkedError(
+                "Some of these transactions already belong to a series.",
+                details={"transaction_ids": sorted(linked)},
+            )
+        return sorted((by_id[i] for i in wanted), key=lambda t: (t.booked_date, t.id))
+
+    def _taken_keys(self, user_id: str) -> set[tuple[str, str]]:
+        """Every `(account_id, merchant_key)` a series or an alias already answers for."""
+        series = self._repository.list_for_user(user_id)
+        taken = {(row.account_id, row.merchant_key) for row in series}
+        return taken | set(self._repository.aliases_for_user(user_id))
 
     def update(self, user_id: str, series_id: str, data: SeriesUpdate) -> RecurringSeries:
         """Patch a series' user-owned fields, validating a status change against the lifecycle.
@@ -567,6 +701,52 @@ class RecurringService:
             if previous is None or transaction.booked_date > previous:
                 newest[key] = transaction.booked_date
         return newest
+
+
+def _matches(seed: Transaction, seed_key: str, transaction: Transaction, key: str) -> bool:
+    """Whether ``transaction`` belongs in the preview started from ``seed``."""
+    if key == seed_key:
+        return True
+    return keys_alike(seed_key, key) and amounts_close(seed.amount_minor, transaction.amount_minor)
+
+
+def _keys_for(
+    account_id: str, selected: list[Transaction], taken: set[tuple[str, str]]
+) -> tuple[str, list[str]]:
+    """The key a series built from ``selected`` is tracked under, and the keys merged into it.
+
+    The most frequent key wins, the newest charge's on a tie. The others become aliases, as a
+    merge records them, so detection groups those charges with this series too, unless a
+    series or alias already answers for one, which keeps it.
+    """
+    keys = [merchant_key(transaction) for transaction in selected]
+    counts = Counter(keys)
+    newest = {key: index for index, key in enumerate(keys)}
+    main = max(counts, key=lambda key: (counts[key], newest[key]))
+    aliases = [key for key in counts if key != main and (account_id, key) not in taken]
+    return main, aliases
+
+
+def _seed_observations(
+    series: RecurringSeries, cadence: str, selected: list[Transaction], today: date
+) -> None:
+    """Fill the observed columns of a declared series.
+
+    With no transactions there is nothing to observe: the dates start at creation and the
+    interval is the cadence's nominal length. With some, they are what those charges show.
+    """
+    interval = NOMINAL_INTERVAL_DAYS[cadence]
+    first = last = today
+    if selected:
+        first, last = selected[0].booked_date, selected[-1].booked_date
+        gaps = [(b.booked_date - a.booked_date).days for a, b in pairwise(selected)]
+        if gaps and cadence != "irregular":
+            interval = median_low(gaps)
+    series.median_interval_days = interval
+    series.first_seen_date = first
+    series.last_seen_date = last
+    series.next_expected_date = last + timedelta(days=interval)
+    series.occurrence_count = len(selected)
 
 
 def _check_transition(current: str, requested: str) -> None:

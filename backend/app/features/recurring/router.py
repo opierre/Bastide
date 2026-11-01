@@ -21,9 +21,12 @@ from app.features.recurring.schemas import (
     MergeRequest,
     MergeSuggestionRead,
     OccurrenceRead,
+    PreviewRequest,
+    RecurringPreviewRead,
     RecurringSummary,
     SeriesCreate,
     SeriesDetailRead,
+    SeriesPreview,
     SeriesRead,
     SeriesStatus,
     SeriesUpdate,
@@ -90,8 +93,43 @@ async def create_series(
     service: Annotated[RecurringService, Depends(_service)],
     user: Annotated[User, Depends(get_current_user)],
 ) -> SeriesRead:
-    """Declare a subscription the detector has not found (`is_manual = true`)."""
+    """Declare a subscription the detector has not found (`is_manual = true`).
+
+    `transaction_ids`, typically the ones ticked in a preview, become its occurrences.
+    """
     return SeriesRead.model_validate(service.create(user.id, payload, date.today()))
+
+
+@router.post("/preview", response_model=RecurringPreviewRead)
+async def preview_series(
+    payload: PreviewRequest,
+    service: Annotated[RecurringService, Depends(_service)],
+    user: Annotated[User, Depends(get_current_user)],
+) -> RecurringPreviewRead:
+    """What series one outflow would start, with a confidence level and its reasons.
+
+    Nothing is written: confirming goes through `POST /recurring` with the ticked
+    `transaction_ids`. A transaction already in a series returns that series instead, and an
+    inflow is refused with `RECURRING_PREVIEW_INFLOW`.
+    """
+    series, grade = service.preview(user.id, payload.transaction_id)
+    if series is not None:
+        return RecurringPreviewRead(series=SeriesRead.model_validate(series))
+    assert grade is not None
+    seed = grade.transactions[0]
+    return RecurringPreviewRead(
+        preview=SeriesPreview(
+            confidence=grade.confidence,
+            reasons=list(grade.reasons),
+            cadence=grade.cadence,
+            median_interval_days=grade.median_interval_days,
+            label=grade.label,
+            expected_amount_minor=grade.expected_amount_minor,
+            currency=seed.currency,
+            account_id=seed.account_id,
+            transactions=[TransactionRead.model_validate(t) for t in grade.transactions],
+        )
+    )
 
 
 @router.post("/detect", response_model=DetectionResultRead)
