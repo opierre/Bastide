@@ -1825,6 +1825,12 @@ abstract class AppLocalizations {
   /// **'en moyenne par mois'**
   String get dashboardSavingsTrendAverage;
 
+  /// Last line of each month's tooltip on the savings chart: the average the window's months put aside, drawn as the dotted line. count is how many months it spans (up to 12), amount a signed, formatted sum.
+  ///
+  /// In fr, this message translates to:
+  /// **'Moyenne sur {count} mois : {amount}'**
+  String dashboardSavingsTrendAverageTooltip(int count, String amount);
+
   /// Savings chart view switch: one bar per month.
   ///
   /// In fr, this message translates to:

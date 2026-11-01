@@ -408,6 +408,76 @@ void main() {
     },
   );
 
+  for (final (locale, caption, tooltipLabel) in [
+    ('fr', 'en moyenne par mois', 'Moyenne sur 12 mois : '),
+    ('en', 'on average per month', '12-month average: '),
+  ]) {
+    testWidgets(
+      '$locale: both views draw the 12-month average, named by legend and tooltip',
+      (tester) async {
+        _useDesktopSurface(tester);
+        await tester.pumpWidget(_wrap(state: _state(), locale: Locale(locale)));
+        await tester.pumpAndSettle();
+
+        final average = formatAmount(
+          amountMinor: 29917,
+          currency: 'EUR',
+          locale: locale,
+          showPositiveSign: true,
+        );
+        SavingsChart chart() =>
+            tester.widget<SavingsChart>(find.byType(SavingsChart));
+
+        // The headline's caption doubles as the line's legend.
+        final legend = find.byKey(const Key('savingsAverageSwatch'));
+        expect(legend, findsOneWidget);
+        expect(
+          tester.getCenter(legend).dy,
+          moreOrLessEquals(tester.getCenter(find.text(caption)).dy, epsilon: 1),
+        );
+
+        for (final view in [SavingsChartView.line, SavingsChartView.bars]) {
+          await tester.tap(
+            find.byKey(
+              Key(
+                view == SavingsChartView.line
+                    ? 'savingsViewLine'
+                    : 'savingsViewBars',
+              ),
+            ),
+          );
+          await tester.pumpAndSettle();
+          expect(chart().view, view);
+          expect(chart().average, 29917);
+          for (final tooltip in chart().tooltips!) {
+            expect(tooltip.toPlainText(), endsWith('$tooltipLabel$average'));
+          }
+        }
+        expect(tester.takeException(), isNull);
+      },
+    );
+  }
+
+  testWidgets('a user with no history gets no average line', (tester) async {
+    _useDesktopSurface(tester);
+    await tester.pumpWidget(
+      _wrap(
+        state: DashboardState(
+          month: DateTime(2026, 5),
+          summary: specSummary(),
+          trends: emptyTrends(),
+          recent: specRecent(),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(
+      tester.widget<SavingsChart>(find.byType(SavingsChart)).average,
+      isNull,
+    );
+  });
+
   testWidgets('the savings view outlives the dashboard for the session', (
     tester,
   ) async {

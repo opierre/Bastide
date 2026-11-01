@@ -1066,6 +1066,11 @@ class AppLocalizationsEn extends AppLocalizations {
   String get dashboardSavingsTrendAverage => 'on average per month';
 
   @override
+  String dashboardSavingsTrendAverageTooltip(int count, String amount) {
+    return '$count-month average: $amount';
+  }
+
+  @override
   String get dashboardSavingsViewBars => 'Bars';
 
   @override
