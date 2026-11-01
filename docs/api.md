@@ -158,6 +158,7 @@ details?}}`. Model names refer to the Pydantic schemas in `backend/app/features/
 | `DELETE` | `/recurring/{series_id}` |  |  | 204 |
 | `POST` | `/recurring/{series_id}/merge` |  | `MergeRequest` | 200 `SeriesRead` |
 | `POST` | `/recurring/{series_id}/occurrences` |  | `AttachRequest` | 200 `SeriesRead` |
+| `GET` | `/recurring/{series_id}/candidates` | `q`, `page` |  | 200 `TransactionPage` |
 
 ## goals
 

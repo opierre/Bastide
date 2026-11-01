@@ -34,9 +34,14 @@ from app.features.recurring.schemas import (
 )
 from app.features.recurring.service import RecurringDetectionService, RecurringService
 from app.features.transactions.repository import TransactionRepository
-from app.features.transactions.schemas import TransactionRead
+from app.features.transactions.schemas import TransactionPage, TransactionRead
 
 router = APIRouter(prefix="/api/v1/recurring", tags=["recurring"])
+
+
+#: Outflows per page of `GET /recurring/{series_id}/candidates`. The picker shows the closest
+#: ones first, so one page is usually all it needs.
+CANDIDATE_PAGE_SIZE = 50
 
 
 def _detection_service(db: Annotated[Session, Depends(get_db)]) -> RecurringDetectionService:
@@ -259,6 +264,32 @@ async def attach_occurrences(
     """
     return SeriesRead.model_validate(
         service.attach(user.id, series_id, payload.transaction_ids, date.today())
+    )
+
+
+@router.get("/{series_id}/candidates", response_model=TransactionPage)
+async def list_candidates(
+    series_id: str,
+    service: Annotated[RecurringService, Depends(_service)],
+    user: Annotated[User, Depends(get_current_user)],
+    q: str | None = None,
+    page: Annotated[int, Query(ge=1)] = 1,
+) -> TransactionPage:
+    """Outflows in no series that could be added to this one, closest first, paginated.
+
+    Any of the caller's accounts. Ranked by merchant key (the series' own or an alias, then a
+    similar one), then an amount close to the expected one, then the most recent; `q` keeps the
+    ones whose label or merchant contains it. Adding them goes through
+    `POST /recurring/{series_id}/occurrences`.
+    """
+    items, total = service.candidates(
+        user.id, series_id, q=q, page=page, page_size=CANDIDATE_PAGE_SIZE
+    )
+    return TransactionPage(
+        items=[TransactionRead.model_validate(t) for t in items],
+        page=page,
+        page_size=CANDIDATE_PAGE_SIZE,
+        total=total,
     )
 
 
