@@ -145,15 +145,35 @@ def test_a_transaction_already_in_a_series_returns_that_series(
     assert body["series"]["id"] == series_id
 
 
-def test_a_merchant_already_tracked_returns_its_series(client: TestClient, tmp_path: Path) -> None:
+def test_a_merchant_already_tracked_returns_its_series_with_the_charges_it_lacks(
+    client: TestClient, tmp_path: Path
+) -> None:
+    owner = register(client)
+    account_id = create_account(client, owner)
+    series_id = insert_series(
+        tmp_path, owner, account_id, label="STREAMCO", next_expected_date=START
+    )
+    held, *missing = _charges(tmp_path, account_id, [0, 30, 60], [-999, -999, -999])
+    link_occurrence(tmp_path, series_id, held)
+    _charges(tmp_path, account_id, [45], [-4500], description="CB BOULANGERIE DU PORT")
+
+    body = _preview(client, owner, missing[-1])
+
+    assert body["preview"] is None
+    assert body["series"]["id"] == series_id
+    assert [t["id"] for t in body["addable_transactions"]] == missing
+
+
+def test_a_transaction_in_a_series_has_nothing_to_add(client: TestClient, tmp_path: Path) -> None:
     owner = register(client)
     account_id = create_account(client, owner)
     series_id = insert_series(
         tmp_path, owner, account_id, label="STREAMCO", next_expected_date=START
     )
     (transaction_id,) = _charges(tmp_path, account_id, [0], [-999])
+    link_occurrence(tmp_path, series_id, transaction_id)
 
-    assert _preview(client, owner, transaction_id)["series"]["id"] == series_id
+    assert _preview(client, owner, transaction_id)["addable_transactions"] == []
 
 
 def test_an_inflow_is_refused(client: TestClient, tmp_path: Path) -> None:
@@ -289,3 +309,98 @@ def test_confirming_rejects_an_inflow_or_another_accounts_transaction(
     error = response.json()["error"]
     assert error["code"] == "RECURRING_TRANSACTIONS_INVALID"
     assert error["details"]["transaction_ids"] == [inflow, elsewhere]
+
+
+# --- adding to an existing series -----------------------------------------------------------
+
+
+def _attach(client: TestClient, owner: Owner, series_id: str, ids: list[str]) -> dict:
+    response = client.post(
+        f"/api/v1/recurring/{series_id}/occurrences",
+        json={"transaction_ids": ids},
+        headers=owner.headers,
+    )
+    assert response.status_code == 200, response.json()
+    return dict(response.json())
+
+
+def test_adding_transactions_links_them_and_refreshes_the_dates(
+    client: TestClient, tmp_path: Path
+) -> None:
+    owner = register(client)
+    account_id = create_account(client, owner)
+    created = _create(
+        client,
+        owner,
+        account_id,
+        transaction_ids=_charges(tmp_path, account_id, [0, 30], [-999, -999]),
+    )
+    later = _charges(tmp_path, account_id, [60, 90], [-999, -999])
+
+    updated = _attach(client, owner, created["id"], later)
+
+    assert updated["occurrence_count"] == 4
+    assert updated["first_seen_date"] == str(START)
+    assert updated["last_seen_date"] == str(START + timedelta(days=90))
+    assert updated["next_expected_date"] == str(START + timedelta(days=120))
+    detail = client.get(f"/api/v1/recurring/{created['id']}", headers=owner.headers).json()
+    assert len(detail["occurrences"]) == 4
+
+
+def test_a_renamed_charge_added_to_a_detected_series_survives_detection(
+    client: TestClient, tmp_path: Path
+) -> None:
+    owner = register(client)
+    account_id = create_account(client, owner)
+    _charges(tmp_path, account_id, [0, 30, 60], [-999, -999, -999])
+    client.post("/api/v1/recurring/detect", json={}, headers=owner.headers)
+    (series,) = _series(client, owner)
+    renamed = _charges(tmp_path, account_id, [90], [-999], description="PRLV SEPA STREAMCO TV")
+
+    _attach(client, owner, series["id"], renamed)
+    client.post("/api/v1/recurring/detect", json={}, headers=owner.headers)
+
+    assert [one["id"] for one in _series(client, owner)] == [series["id"]]
+    detail = client.get(f"/api/v1/recurring/{series['id']}", headers=owner.headers).json()
+    assert renamed[0] in {o["transaction"]["id"] for o in detail["occurrences"]}
+    assert detail["occurrence_count"] == 4
+
+
+def test_adding_a_transaction_already_in_a_series_is_refused(
+    client: TestClient, tmp_path: Path
+) -> None:
+    owner = register(client)
+    account_id = create_account(client, owner)
+    first = insert_series(tmp_path, owner, account_id, label="STREAMCO", next_expected_date=START)
+    second = insert_series(
+        tmp_path, owner, account_id, label="Abonnement vidéo", next_expected_date=START
+    )
+    (transaction_id,) = _charges(tmp_path, account_id, [0], [-999])
+    link_occurrence(tmp_path, first, transaction_id)
+
+    response = client.post(
+        f"/api/v1/recurring/{second}/occurrences",
+        json={"transaction_ids": [transaction_id]},
+        headers=owner.headers,
+    )
+
+    assert response.status_code == 409
+    assert response.json()["error"]["code"] == "RECURRING_TRANSACTION_LINKED"
+
+
+def test_adding_to_another_users_series_is_not_found(client: TestClient, tmp_path: Path) -> None:
+    owner = register(client)
+    other = register(client, email="bruno@example.com")
+    foreign = insert_series(
+        tmp_path, other, create_account(client, other), label="STREAMCO", next_expected_date=START
+    )
+    (transaction_id,) = _charges(tmp_path, create_account(client, owner), [0], [-999])
+
+    response = client.post(
+        f"/api/v1/recurring/{foreign}/occurrences",
+        json={"transaction_ids": [transaction_id]},
+        headers=owner.headers,
+    )
+
+    assert response.status_code == 404
+    assert response.json()["error"]["code"] == "RECURRING_SERIES_NOT_FOUND"

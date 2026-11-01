@@ -15,6 +15,7 @@ from app.features.categories.repository import CategoryRepository
 from app.features.recurring.merge import RecurringMergeService
 from app.features.recurring.repository import RecurringRepository
 from app.features.recurring.schemas import (
+    AttachRequest,
     DetectionResultRead,
     DetectRequest,
     MergeDismissRequest,
@@ -109,12 +110,18 @@ async def preview_series(
     """What series one outflow would start, with a confidence level and its reasons.
 
     Nothing is written: confirming goes through `POST /recurring` with the ticked
-    `transaction_ids`. A transaction already in a series returns that series instead, and an
-    inflow is refused with `RECURRING_PREVIEW_INFLOW`.
+    `transaction_ids`. A transaction already in a series, or whose merchant one already tracks,
+    returns that series instead — with the charges it could still take in
+    `addable_transactions`, which `POST /recurring/{series_id}/occurrences` adds. An inflow is
+    refused with `RECURRING_PREVIEW_INFLOW`.
     """
-    series, grade = service.preview(user.id, payload.transaction_id)
-    if series is not None:
-        return RecurringPreviewRead(series=SeriesRead.model_validate(series))
+    result = service.preview(user.id, payload.transaction_id)
+    if result.series is not None:
+        return RecurringPreviewRead(
+            series=SeriesRead.model_validate(result.series),
+            addable_transactions=[TransactionRead.model_validate(t) for t in result.addable],
+        )
+    grade = result.grade
     assert grade is not None
     seed = grade.transactions[0]
     return RecurringPreviewRead(
@@ -236,6 +243,23 @@ async def merge_series(
     The merged-away label is remembered, so later imports group under this series.
     """
     return SeriesRead.model_validate(service.merge(user.id, series_id, payload.source_id))
+
+
+@router.post("/{series_id}/occurrences", response_model=SeriesRead)
+async def attach_occurrences(
+    series_id: str,
+    payload: AttachRequest,
+    service: Annotated[RecurringService, Depends(_service)],
+    user: Annotated[User, Depends(get_current_user)],
+) -> SeriesRead:
+    """Add transactions to this series as occurrences; its dates and count follow.
+
+    Each must be an outflow of the caller's not already in a series
+    (`RECURRING_TRANSACTIONS_INVALID`, `RECURRING_TRANSACTION_LINKED`).
+    """
+    return SeriesRead.model_validate(
+        service.attach(user.id, series_id, payload.transaction_ids, date.today())
+    )
 
 
 @router.delete("/{series_id}", status_code=status.HTTP_204_NO_CONTENT)

@@ -136,13 +136,28 @@ class RecurringRepository:
         """
         self._db.add(series)
         self._db.flush()
+        return self.attach(
+            series, transaction_ids, [(series.account_id, key) for key in alias_keys]
+        )
+
+    def attach(
+        self,
+        series: RecurringSeries,
+        transaction_ids: Sequence[str],
+        aliases: Sequence[tuple[str, str]],
+    ) -> RecurringSeries:
+        """Link transactions and `(account_id, merchant_key)` aliases to a series, and commit.
+
+        Commits whatever else is pending on the series too, so its refreshed observations land
+        with the links that justify them.
+        """
         for transaction_id in transaction_ids:
             self._db.add(RecurringOccurrence(series_id=series.id, transaction_id=transaction_id))
-        for key in alias_keys:
+        for account_id, key in aliases:
             self._db.add(
                 RecurringMerchantAlias(
                     user_id=series.user_id,
-                    account_id=series.account_id,
+                    account_id=account_id,
                     series_id=series.id,
                     merchant_key=key,
                 )
