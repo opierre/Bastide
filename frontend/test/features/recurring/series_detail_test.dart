@@ -58,7 +58,136 @@ String _axisLabel(WidgetTester tester, String key) => tester
     )
     .data!;
 
+/// [count] invented charges, [every] apart, newest first — as the detail holds
+/// them.
+List<SeriesOccurrence> _charges(int count, Duration every) => [
+  for (var i = 0; i < count; i++)
+    _occurrence(
+      id: 'c$i',
+      bookedDate: DateTime(2026, 6, 1).subtract(every * i),
+      amountMinor: i < count ~/ 2 ? -1299 : -1099,
+    ),
+];
+
+/// Every charge has its own date tick, left to right in time, and no two ticks
+/// overlap.
+void _expectEveryChargeDated(WidgetTester tester, int count) {
+  for (var i = 0; i < count; i++) {
+    expect(find.byKey(Key('seriesDateTick-c$i')), findsOneWidget);
+  }
+  _expectNoTicksOverlap(tester, count);
+}
+
+/// The ticks present, oldest charge first, each clear of the one before it.
+void _expectNoTicksOverlap(WidgetTester tester, int count) {
+  final rects = [
+    for (var i = count - 1; i >= 0; i--)
+      if (find.byKey(Key('seriesDateTick-c$i')).evaluate().isNotEmpty)
+        tester.getRect(find.byKey(Key('seriesDateTick-c$i'))),
+  ];
+  for (var i = 1; i < rects.length; i++) {
+    expect(
+      rects[i].left,
+      greaterThan(rects[i - 1].right),
+      reason: 'tick $i overlaps the one before it',
+    );
+  }
+}
+
+/// The chart never scrolls sideways: the whole history sits in the card.
+void _expectNoScroll(WidgetTester tester) => expect(
+  find.descendant(
+    of: find.byType(PriceHistoryChart),
+    matching: find.byType(Scrollable),
+  ),
+  findsNothing,
+);
+
+Future<void> _pumpHistory(
+  WidgetTester tester,
+  int count,
+  Duration every,
+) async {
+  tester.view.physicalSize = const Size(1440, 900);
+  tester.view.devicePixelRatio = 1.0;
+  addTearDown(tester.view.reset);
+
+  await tester.pumpWidget(
+    _wrap(
+      SeriesDetail(
+        series: testSeries(occurrenceCount: count),
+        occurrences: _charges(count, every),
+      ),
+    ),
+  );
+  await tester.pumpAndSettle();
+}
+
 void main() {
+  testWidgets('a year of monthly charges dates every one of them, flat', (
+    tester,
+  ) async {
+    // Twelve charges used to be thinned to five ticks.
+    await _pumpHistory(tester, 12, const Duration(days: 30));
+
+    _expectEveryChargeDated(tester, 12);
+    expect(
+      find.descendant(
+        of: find.byType(PriceHistoryChart),
+        matching: find.byType(RotatedBox),
+      ),
+      findsNothing,
+    );
+    _expectNoScroll(tester);
+  });
+
+  testWidgets('a weekly series too dense for flat dates turns them on end', (
+    tester,
+  ) async {
+    await _pumpHistory(tester, 30, const Duration(days: 7));
+
+    _expectEveryChargeDated(tester, 30);
+    expect(
+      find.descendant(
+        of: find.byType(PriceHistoryChart),
+        matching: find.byType(RotatedBox),
+      ),
+      findsNWidgets(30),
+    );
+    _expectNoScroll(tester);
+  });
+
+  testWidgets('a history too long even for upright dates thins them in place', (
+    tester,
+  ) async {
+    await _pumpHistory(tester, 160, const Duration(days: 7));
+
+    _expectNoScroll(tester);
+    _expectNoTicksOverlap(tester, 160);
+    // The span stays dated: the oldest and the latest charge keep their tick.
+    expect(find.byKey(const Key('seriesDateTick-c159')), findsOneWidget);
+    expect(find.byKey(const Key('seriesDateTick-c0')), findsOneWidget);
+    final ticks = find.descendant(
+      of: find.byType(PriceHistoryChart),
+      matching: find.byType(RotatedBox),
+    );
+    expect(ticks.evaluate().length, inInclusiveRange(2, 159));
+    // Over a year, two weekly charges share a month: the day stays on the tick
+    // so no two of them read the same.
+    final labels = {
+      for (final tick in ticks.evaluate())
+        tester
+            .widget<Text>(
+              find.descendant(
+                of: find.byWidget(tick.widget),
+                matching: find.byType(Text),
+              ),
+            )
+            .data,
+    };
+    expect(labels, hasLength(ticks.evaluate().length));
+  });
+
   testWidgets('the detail states the increase with what it costs over a year', (
     tester,
   ) async {
