@@ -902,23 +902,10 @@ class _UserPill extends ConsumerWidget {
             const SizedBox(width: AppSpacing.sm),
             ConstrainedBox(
               constraints: const BoxConstraints(maxWidth: 160),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    user.displayName,
-                    style: textTheme.labelMedium,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  Text(
-                    user.email,
-                    style: AppTextStyles.helper.copyWith(
-                      color: AppColors.textSecondary,
-                    ),
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ],
+              child: Text(
+                user.displayName,
+                style: textTheme.labelMedium,
+                overflow: TextOverflow.ellipsis,
               ),
             ),
             const SizedBox(width: AppSpacing.xs),

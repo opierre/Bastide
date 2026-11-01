@@ -39,6 +39,30 @@ void _useDesignViewport(WidgetTester tester) {
   addTearDown(tester.view.reset);
 }
 
+/// The user pill carries the avatar, the display name and the chevron only:
+/// the email adds nothing in a local, single-user app. The name sits on the
+/// pill's vertical centre now that it is the only line.
+void _expectUserPillShowsNameOnly(WidgetTester tester) {
+  final pill = find.byKey(const Key('userMenuButton'));
+  final name = find.descendant(
+    of: pill,
+    matching: find.text(_signedInUser.displayName),
+  );
+  expect(name, findsOneWidget);
+  expect(
+    find.descendant(of: pill, matching: find.text(_signedInUser.email)),
+    findsNothing,
+  );
+  expect(
+    find.descendant(of: pill, matching: find.byIcon(Icons.expand_more_rounded)),
+    findsOneWidget,
+  );
+  expect(
+    tester.getCenter(name).dy,
+    moreOrLessEquals(tester.getCenter(pill).dy, epsilon: 1),
+  );
+}
+
 void main() {
   testWidgets('shell renders the fixed sidebar and top bar', (tester) async {
     _useDesignViewport(tester);
@@ -134,6 +158,7 @@ void main() {
 
     expect(find.text('Tableau de bord'), findsWidgets);
     expect(find.text('Comptes'), findsOneWidget);
+    _expectUserPillShowsNameOnly(tester);
     expect(tester.takeException(), isNull);
   });
 
@@ -154,6 +179,7 @@ void main() {
 
     expect(find.text('Dashboard'), findsWidgets);
     expect(find.text('Accounts'), findsOneWidget);
+    _expectUserPillShowsNameOnly(tester);
     expect(tester.takeException(), isNull);
   });
 
