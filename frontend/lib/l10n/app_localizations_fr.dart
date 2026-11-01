@@ -2266,6 +2266,29 @@ class AppLocalizationsFr extends AppLocalizations {
   String get subscriptionActionEdit => 'Modifier';
 
   @override
+  String get subscriptionActionArchive => 'Archiver';
+
+  @override
+  String get subscriptionActionUnarchive => 'Désarchiver';
+
+  @override
+  String get subscriptionArchiveFailed =>
+      'L\'archivage de ce paiement n\'a pas pu être modifié.';
+
+  @override
+  String subscriptionsShowArchived(int count) {
+    return 'Afficher les paiements archivés ($count)';
+  }
+
+  @override
+  String subscriptionsHideArchived(int count) {
+    return 'Masquer les paiements archivés ($count)';
+  }
+
+  @override
+  String get subscriptionsArchivedSection => 'Archivés';
+
+  @override
   String get subscriptionErrorInvalidTransition =>
       'Ce changement de statut n\'est pas possible pour ce paiement.';
 

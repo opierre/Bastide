@@ -22,6 +22,7 @@ RecurringSeries testSeries({
   bool isManual = false,
   int? priceChangeMinor,
   DateTime? priceChangedAt,
+  bool isArchived = false,
 }) => RecurringSeries(
   id: id,
   accountId: accountId,
@@ -39,6 +40,7 @@ RecurringSeries testSeries({
   isManual: isManual,
   priceChangeMinor: priceChangeMinor,
   priceChangedAt: priceChangedAt,
+  isArchived: isArchived,
 );
 
 RecurringSummary testSummary({
@@ -74,12 +76,14 @@ RecurringSummary testSummary({
 class FakeSubscriptionsController extends SubscriptionsController {
   FakeSubscriptionsController({
     this.initialSeries = const [],
+    this.initialArchived = const [],
     RecurringSummary? summary,
     this.mergeSuggestions = const [],
     this.loadError,
   }) : summary = summary ?? testSummary(activeCount: 0);
 
   final List<RecurringSeries> initialSeries;
+  final List<RecurringSeries> initialArchived;
   final RecurringSummary summary;
   final List<MergeSuggestion> mergeSuggestions;
   final Object? loadError;
@@ -98,9 +102,64 @@ class FakeSubscriptionsController extends SubscriptionsController {
     if (loadError != null) throw loadError!;
     return SubscriptionsState(
       series: initialSeries,
+      archived: initialArchived,
       summary: summary,
       mergeSuggestions: mergeSuggestions,
     );
+  }
+
+  final archiveCalls = <String>[];
+  final unarchiveCalls = <String>[];
+
+  /// Set to make the next archive or unarchive fail the way the server would.
+  Object? errorOnArchive;
+
+  @override
+  Future<bool> archive(String seriesId) async {
+    archiveCalls.add(seriesId);
+    return _moveArchived(seriesId, archived: true);
+  }
+
+  @override
+  Future<bool> unarchive(String seriesId) async {
+    unarchiveCalls.add(seriesId);
+    return _moveArchived(seriesId, archived: false);
+  }
+
+  /// Moves a series between the live and the archived lists, as the reload
+  /// behind a real archive would.
+  bool _moveArchived(String seriesId, {required bool archived}) {
+    final current = state.value;
+    if (current == null) return false;
+    if (errorOnArchive != null) {
+      state = AsyncValue.data(current.copyWith(actionError: errorOnArchive));
+      return false;
+    }
+    final moved = [
+      ...current.series,
+      ...current.archived,
+    ].firstWhere((row) => row.id == seriesId);
+    final updated = testSeries(
+      id: moved.id,
+      label: moved.label,
+      status: moved.status,
+      isArchived: archived,
+    );
+    state = AsyncValue.data(
+      current.copyWith(
+        series: [
+          for (final row in current.series)
+            if (row.id != seriesId) row,
+          if (!archived) updated,
+        ],
+        archived: [
+          for (final row in current.archived)
+            if (row.id != seriesId) row,
+          if (archived) updated,
+        ],
+      ),
+    );
+    return true;
   }
 
   @override

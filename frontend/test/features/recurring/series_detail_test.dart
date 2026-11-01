@@ -26,9 +26,11 @@ SeriesOccurrence _occurrence({
   currency: 'EUR',
 );
 
-Widget _wrap(SeriesDetail detail) {
+Widget _wrap(SeriesDetail detail, {FakeSubscriptionsController? controller}) {
   return ProviderScope(
     overrides: [
+      if (controller != null)
+        subscriptionsControllerProvider.overrideWith(() => controller),
       seriesDetailProvider.overrideWith((ref, id) => detail),
       subscriptionAccountsProvider.overrideWith(
         (ref) => [
@@ -58,7 +60,73 @@ String _axisLabel(WidgetTester tester, String key) => tester
     )
     .data!;
 
+void _useDesktopSurface(WidgetTester tester) {
+  tester.view.physicalSize = const Size(1440, 900);
+  tester.view.devicePixelRatio = 1.0;
+  addTearDown(tester.view.reset);
+}
+
 void main() {
+  group('archive', () {
+    testWidgets('« Archiver » puts a live series away', (tester) async {
+      _useDesktopSurface(tester);
+      final controller = FakeSubscriptionsController(
+        initialSeries: [testSeries()],
+      );
+      await tester.pumpWidget(
+        _wrap(
+          SeriesDetail(series: testSeries(), occurrences: const []),
+          controller: controller,
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.byKey(const Key('seriesDetailAddCharge')), findsOneWidget);
+      final button = find.byKey(const Key('seriesDetailArchive'));
+      expect(
+        find.descendant(of: button, matching: find.text('Archiver')),
+        findsOneWidget,
+      );
+
+      await tester.tap(button);
+      await tester.pumpAndSettle();
+
+      expect(controller.archiveCalls, ['s1']);
+      expect(controller.unarchiveCalls, isEmpty);
+    });
+
+    testWidgets('an archived series offers « Désarchiver » and no new charge', (
+      tester,
+    ) async {
+      _useDesktopSurface(tester);
+      final controller = FakeSubscriptionsController(
+        initialArchived: [testSeries(isArchived: true)],
+      );
+      await tester.pumpWidget(
+        _wrap(
+          SeriesDetail(
+            series: testSeries(isArchived: true),
+            occurrences: const [],
+          ),
+          controller: controller,
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.byKey(const Key('seriesDetailAddCharge')), findsNothing);
+      final button = find.byKey(const Key('seriesDetailArchive'));
+      expect(
+        find.descendant(of: button, matching: find.text('Désarchiver')),
+        findsOneWidget,
+      );
+
+      await tester.tap(button);
+      await tester.pumpAndSettle();
+
+      expect(controller.unarchiveCalls, ['s1']);
+    });
+  });
+
   testWidgets('the detail states the increase with what it costs over a year', (
     tester,
   ) async {

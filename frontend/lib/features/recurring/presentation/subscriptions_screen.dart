@@ -121,7 +121,9 @@ class _SubscriptionsList extends ConsumerWidget {
 
     return switch (state) {
       AsyncData(:final value)
-          when value.rows.isEmpty && value.statusFilter == null =>
+          when value.rows.isEmpty &&
+              value.archived.isEmpty &&
+              value.statusFilter == null =>
         EmptyStateView(
           key: const Key('subscriptionsEmptyState'),
           icon: Icons.autorenew_rounded,
@@ -179,7 +181,30 @@ class _LoadedPanel extends ConsumerWidget {
         ],
         _SummaryRow(summary: state.summary),
         const SizedBox(height: AppSpacing.gridGap),
-        Expanded(child: _TableCard(rows: state.rows)),
+        Expanded(
+          child: _TableCard(
+            rows: state.rows,
+            archivedRows: state.showArchived ? state.archivedRows : const [],
+          ),
+        ),
+        if (state.archived.isNotEmpty) ...[
+          const SizedBox(height: AppSpacing.sm),
+          Align(
+            alignment: Alignment.centerLeft,
+            child: TextButton.icon(
+              key: const Key('subscriptionsArchivedToggle'),
+              onPressed: ref
+                  .read(subscriptionsControllerProvider.notifier)
+                  .toggleArchived,
+              icon: const Icon(Icons.archive_outlined, size: 15),
+              label: Text(
+                state.showArchived
+                    ? l10n.subscriptionsHideArchived(state.archived.length)
+                    : l10n.subscriptionsShowArchived(state.archived.length),
+              ),
+            ),
+          ),
+        ],
       ],
     );
   }
@@ -386,9 +411,14 @@ class _StatCard extends StatelessWidget {
 }
 
 class _TableCard extends ConsumerWidget {
-  const _TableCard({required this.rows});
+  const _TableCard({required this.rows, required this.archivedRows});
 
   final List<SubscriptionRow> rows;
+
+  /// The archived series, revealed *in place* under the live ones rather than
+  /// on a screen of their own, as archived goals and properties are: restoring
+  /// one should feel like a change of mind, not a recovery. Empty while folded.
+  final List<SubscriptionRow> archivedRows;
 
   Future<void> _handle(
     BuildContext context,
@@ -396,26 +426,53 @@ class _TableCard extends ConsumerWidget {
     RecurringSeries series,
     SeriesAction action,
   ) async {
-    if (action == SeriesAction.edit) {
-      await showSeriesForm(context, series: series);
-      return;
+    final controller = ref.read(subscriptionsControllerProvider.notifier);
+    switch (action) {
+      case SeriesAction.edit:
+        await showSeriesForm(context, series: series);
+      case SeriesAction.archive:
+        await controller.archive(series.id);
+      case SeriesAction.unarchive:
+        await controller.unarchive(series.id);
+      case SeriesAction.confirm:
+        await controller.changeStatus(series.id, SeriesStatus.confirmed);
+      case SeriesAction.dismiss:
+        await controller.changeStatus(series.id, SeriesStatus.dismissed);
+      case SeriesAction.cancel:
+        await controller.changeStatus(series.id, SeriesStatus.cancelled);
     }
-
-    final status = switch (action) {
-      SeriesAction.confirm => SeriesStatus.confirmed,
-      SeriesAction.dismiss => SeriesStatus.dismissed,
-      SeriesAction.cancel => SeriesStatus.cancelled,
-      SeriesAction.edit => null,
-    };
-    if (status == null) return;
-    await ref
-        .read(subscriptionsControllerProvider.notifier)
-        .changeStatus(series.id, status);
   }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
     final categories = ref.watch(subscriptionCategoriesByIdProvider);
+
+    Widget seriesRow(SubscriptionRow row) => SeriesRow(
+      row: row,
+      category: categories[row.series.categoryId],
+      onOpen: () =>
+          ref.read(selectedSeriesProvider.notifier).open(row.series.id),
+      onAction: (action) => _handle(context, ref, row.series, action),
+    );
+
+    final entries = [
+      for (final row in rows) seriesRow(row),
+      if (archivedRows.isNotEmpty) ...[
+        Padding(
+          key: const Key('subscriptionsArchivedSection'),
+          padding: const EdgeInsets.only(
+            top: AppSpacing.md,
+            bottom: AppSpacing.sm,
+          ),
+          child: Text(
+            l10n.subscriptionsArchivedSection.toUpperCase(),
+            style: AppTextStyles.sectionLabel,
+          ),
+        ),
+        for (final row in archivedRows) seriesRow(row),
+      ],
+    ];
 
     return AppCard(
       padding: const EdgeInsets.symmetric(
@@ -429,24 +486,13 @@ class _TableCard extends ConsumerWidget {
           Expanded(
             child: ListView.separated(
               key: const Key('subscriptionsList'),
-              itemCount: rows.length,
+              itemCount: entries.length,
               separatorBuilder: (_, _) => const Divider(
                 height: 1,
                 thickness: 1,
                 color: AppColors.borderSubtle,
               ),
-              itemBuilder: (context, index) {
-                final row = rows[index];
-                return SeriesRow(
-                  row: row,
-                  category: categories[row.series.categoryId],
-                  onOpen: () => ref
-                      .read(selectedSeriesProvider.notifier)
-                      .open(row.series.id),
-                  onAction: (action) =>
-                      _handle(context, ref, row.series, action),
-                );
-              },
+              itemBuilder: (context, index) => entries[index],
             ),
           ),
         ],
