@@ -5974,5 +5974,22 @@
   "subscriptionErrorTransactionLinked": "Certaines opérations appartiennent déjà à une série.",
   "@subscriptionErrorTransactionLinked": {
     "description": "Error RECURRING_TRANSACTION_LINKED."
+  },
+  "markRecurringExistingIntro": "Cette dépense correspond à « {label} », déjà suivi dans vos abonnements. Cochez les opérations à y ajouter.",
+  "@markRecurringExistingIntro": {
+    "description": "Info banner when the transaction's merchant is already tracked by a series.",
+    "placeholders": {
+      "label": {
+        "type": "String"
+      }
+    }
+  },
+  "markRecurringViewSeries": "Voir la série",
+  "@markRecurringViewSeries": {
+    "description": "Closes the dialog and opens the existing series in Abonnements."
+  },
+  "markRecurringAddToSeries": "Ajouter à cette série",
+  "@markRecurringAddToSeries": {
+    "description": "Primary button adding the ticked transactions to the existing series."
   }
 }

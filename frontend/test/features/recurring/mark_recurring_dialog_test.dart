@@ -283,4 +283,57 @@ void main() {
     expect(find.text('subscriptions'), findsOneWidget);
     expect(container.read(selectedSeriesProvider), 's9');
   });
+
+  testWidgets('a merchant already tracked offers to add the missing charges', (
+    tester,
+  ) async {
+    when(() => repository.preview('t3')).thenAnswer(
+      (_) async => AlreadyInSeries(
+        testSeries(id: 's9', label: 'Streamco'),
+        addable: [_transaction('t2', 2), _transaction('t3', 3)],
+      ),
+    );
+    final controller = FakeSubscriptionsController();
+
+    await _open(tester, repository: repository, controller: controller);
+
+    expect(find.byKey(const Key('markRecurringExisting')), findsOneWidget);
+    expect(find.textContaining('« Streamco »'), findsOneWidget);
+    expect(find.text('2 opérations cochées'), findsOneWidget);
+
+    await tester.tap(find.byKey(const Key('markRecurringTick-t2')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Ajouter à cette série'));
+    await tester.pumpAndSettle();
+
+    final (seriesId, ids) = controller.attachCalls.single;
+    expect(seriesId, 's9');
+    expect(ids, ['t3']);
+    expect(controller.createCalls, isEmpty);
+    expect(find.byType(MarkRecurringDialog), findsNothing);
+  });
+
+  testWidgets('« Voir la série » opens the tracked series without adding', (
+    tester,
+  ) async {
+    when(() => repository.preview('t3')).thenAnswer(
+      (_) async => AlreadyInSeries(
+        testSeries(id: 's9'),
+        addable: [_transaction('t3', 3)],
+      ),
+    );
+    final controller = FakeSubscriptionsController();
+
+    final container = await _open(
+      tester,
+      repository: repository,
+      controller: controller,
+    );
+    await tester.tap(find.byKey(const Key('markRecurringViewSeries')));
+    await tester.pumpAndSettle();
+
+    expect(controller.attachCalls, isEmpty);
+    expect(find.text('subscriptions'), findsOneWidget);
+    expect(container.read(selectedSeriesProvider), 's9');
+  });
 }

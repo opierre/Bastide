@@ -1224,5 +1224,8 @@
   "markRecurringRetry": "Retry",
   "subscriptionErrorPreviewInflow": "Only an expense can be marked as recurring.",
   "subscriptionErrorTransactionsInvalid": "Some transactions cannot be linked to this series.",
-  "subscriptionErrorTransactionLinked": "Some transactions already belong to a series."
+  "subscriptionErrorTransactionLinked": "Some transactions already belong to a series.",
+  "markRecurringExistingIntro": "This expense matches “{label}”, which you already track. Tick the transactions to add to it.",
+  "markRecurringViewSeries": "View series",
+  "markRecurringAddToSeries": "Add to this series"
 }

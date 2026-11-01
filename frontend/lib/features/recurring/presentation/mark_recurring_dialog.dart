@@ -22,7 +22,8 @@ import 'subscriptions_screen.dart';
 ///
 /// When the transaction already belongs to a series, the dialog closes as soon
 /// as the server says so and the Abonnements panel opens on that series
-/// instead: proposing a second one would only end in a conflict.
+/// instead: proposing a second one would only end in a conflict. When a series
+/// only tracks its merchant, the dialog offers to add the charges it lacks.
 Future<void> showMarkRecurringDialog(
   BuildContext context,
   WidgetRef ref, {
@@ -44,7 +45,7 @@ sealed class MarkRecurringResult {
   final RecurringSeries series;
 }
 
-/// A new series was saved from the ticked transactions.
+/// The ticked transactions were saved: as a new series, or added to one.
 final class SeriesSaved extends MarkRecurringResult {
   const SeriesSaved(super.series);
 }
@@ -98,14 +99,22 @@ class _MarkRecurringDialogState extends ConsumerState<MarkRecurringDialog> {
     final l10n = AppLocalizations.of(context)!;
     final provider = markRecurringControllerProvider(widget.transactionId);
     ref.listen(provider, (_, next) {
-      if (next.value?.outcome case AlreadyInSeries(:final series)) {
+      // Nothing left to add: the series already holds this charge.
+      if (next.value?.outcome case AlreadyInSeries(
+        :final series,
+        addable: [],
+      )) {
         Navigator.of(context).pop(OpenExistingSeries(series));
       }
     });
     final state = ref.watch(provider);
+    final existing = switch (state.value?.outcome) {
+      AlreadyInSeries(:final series) => series,
+      _ => null,
+    };
     final canSave =
         !_isSaving &&
-        (state.value?.outcome is Proposal) &&
+        !state.isLoading &&
         (state.value?.selected.isNotEmpty ?? false);
 
     return AppModal(
@@ -117,9 +126,19 @@ class _MarkRecurringDialogState extends ConsumerState<MarkRecurringDialog> {
           onPressed: _isSaving ? null : () => Navigator.of(context).pop(),
           child: Text(l10n.markRecurringCancel),
         ),
+        if (existing != null)
+          OutlinedButton(
+            key: const Key('markRecurringViewSeries'),
+            onPressed: _isSaving
+                ? null
+                : () => Navigator.of(context).pop(OpenExistingSeries(existing)),
+            child: Text(l10n.markRecurringViewSeries),
+          ),
         PrimaryButton(
           key: const Key('markRecurringSave'),
-          label: l10n.markRecurringSave,
+          label: existing != null
+              ? l10n.markRecurringAddToSeries
+              : l10n.markRecurringSave,
           isLoading: _isSaving,
           onPressed: canSave ? _save : null,
         ),
@@ -138,6 +157,19 @@ class _MarkRecurringDialogState extends ConsumerState<MarkRecurringDialog> {
           _ProposalBody(
             transactionId: widget.transactionId,
             preview: preview,
+            state: state.requireValue,
+            errorText: _errorText,
+            enabled: !_isSaving,
+          ),
+        AsyncValue(
+          value: MarkRecurringState(
+            outcome: AlreadyInSeries(:final series, addable: [_, ...]),
+          ),
+        )
+            when !state.isLoading =>
+          _ExistingSeriesBody(
+            transactionId: widget.transactionId,
+            series: series,
             state: state.requireValue,
             errorText: _errorText,
             enabled: !_isSaving,
@@ -189,12 +221,6 @@ class _ProposalBody extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context)!;
     final textTheme = Theme.of(context).textTheme;
-    final locale = Localizations.localeOf(context).toString();
-    final dates = seriesDateFormat(locale);
-    final selected = state.selected;
-    final controller = ref.read(
-      markRecurringControllerProvider(transactionId).notifier,
-    );
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -272,6 +298,43 @@ class _ProposalBody extends ConsumerWidget {
           ],
         ),
         const SizedBox(height: AppSpacing.md),
+        _Checklist(
+          transactionId: transactionId,
+          state: state,
+          enabled: enabled,
+        ),
+      ],
+    );
+  }
+}
+
+/// The checklist of candidate transactions and the summary of the ticked ones,
+/// shared by the proposal and the add-to-series bodies.
+class _Checklist extends ConsumerWidget {
+  const _Checklist({
+    required this.transactionId,
+    required this.state,
+    required this.enabled,
+  });
+
+  final String transactionId;
+  final MarkRecurringState state;
+  final bool enabled;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
+    final textTheme = Theme.of(context).textTheme;
+    final locale = Localizations.localeOf(context).toString();
+    final dates = seriesDateFormat(locale);
+    final selected = state.selected;
+    final controller = ref.read(
+      markRecurringControllerProvider(transactionId).notifier,
+    );
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
         ConstrainedBox(
           constraints: const BoxConstraints(maxHeight: 260),
           child: Container(
@@ -284,7 +347,7 @@ class _ProposalBody extends ConsumerWidget {
               shrinkWrap: true,
               padding: const EdgeInsets.symmetric(vertical: AppSpacing.xs),
               children: [
-                for (final transaction in preview.transactions)
+                for (final transaction in state.candidates)
                   _TransactionCheckRow(
                     transaction: transaction,
                     date: dates.format(transaction.bookedDate),
@@ -326,6 +389,51 @@ class _ProposalBody extends ConsumerWidget {
                 ),
             ],
           ],
+        ),
+      ],
+    );
+  }
+}
+
+/// A series already tracks this merchant: offer to add the charges it lacks.
+class _ExistingSeriesBody extends StatelessWidget {
+  const _ExistingSeriesBody({
+    required this.transactionId,
+    required this.series,
+    required this.state,
+    required this.errorText,
+    required this.enabled,
+  });
+
+  final String transactionId;
+  final RecurringSeries series;
+  final MarkRecurringState state;
+  final String? errorText;
+  final bool enabled;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    return Column(
+      key: const Key('markRecurringExisting'),
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        InlineBanner(
+          tone: BannerTone.info,
+          message: l10n.markRecurringExistingIntro(series.label),
+        ),
+        const SizedBox(height: AppSpacing.md),
+        if (errorText != null) ...[
+          InlineBanner(
+            key: const Key('markRecurringError'),
+            message: errorText!,
+          ),
+          const SizedBox(height: AppSpacing.md),
+        ],
+        _Checklist(
+          transactionId: transactionId,
+          state: state,
+          enabled: enabled,
         ),
       ],
     );

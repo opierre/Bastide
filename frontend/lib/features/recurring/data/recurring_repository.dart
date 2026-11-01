@@ -136,8 +136,32 @@ class RecurringRepository {
             )
             as Map<String, dynamic>;
     final series = json['series'] as Map<String, dynamic>?;
-    if (series != null) return AlreadyInSeries(_parseSeries(series));
+    if (series != null) {
+      return AlreadyInSeries(
+        _parseSeries(series),
+        addable: [
+          for (final entry
+              in (json['addable_transactions'] as List<dynamic>? ?? const [])
+                  .cast<Map<String, dynamic>>())
+            _parsePreviewTransaction(entry),
+        ],
+      );
+    }
     return Proposal(_parsePreview(json['preview'] as Map<String, dynamic>));
+  }
+
+  /// Adds [transactionIds] to an existing series as occurrences.
+  Future<RecurringSeries> attach(
+    String seriesId,
+    List<String> transactionIds,
+  ) async {
+    final json =
+        await _apiClient.post(
+              '/recurring/$seriesId/occurrences',
+              body: {'transaction_ids': transactionIds},
+            )
+            as Map<String, dynamic>;
+    return _parseSeries(json);
   }
 
   /// Patches a series. Omitted fields are left alone — `null` is
@@ -228,15 +252,18 @@ class RecurringRepository {
       for (final entry
           in (json['transactions'] as List<dynamic>)
               .cast<Map<String, dynamic>>())
-        PreviewTransaction(
-          id: entry['id'] as String,
-          bookedDate: DateTime.parse(entry['booked_date'] as String),
-          amountMinor: entry['amount_minor'] as int,
-          currency: entry['currency'] as String,
-          label: _transactionLabel(entry),
-        ),
+        _parsePreviewTransaction(entry),
     ],
   );
+
+  PreviewTransaction _parsePreviewTransaction(Map<String, dynamic> json) =>
+      PreviewTransaction(
+        id: json['id'] as String,
+        bookedDate: DateTime.parse(json['booked_date'] as String),
+        amountMinor: json['amount_minor'] as int,
+        currency: json['currency'] as String,
+        label: _transactionLabel(json),
+      );
 
   /// The merchant when the import found one, the cleaned label otherwise — the
   /// same choice the transactions feed makes for its rows.

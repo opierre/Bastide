@@ -100,12 +100,16 @@ sealed class PreviewOutcome {
   const PreviewOutcome();
 }
 
-/// The transaction is already part of [series]; the client opens it instead of
-/// proposing a second one.
+/// [series] already answers for the transaction: it holds it, or it tracks its
+/// merchant. In the second case [addable] lists the charges the series could
+/// still take, the transaction itself included; it is empty in the first.
 final class AlreadyInSeries extends PreviewOutcome {
-  const AlreadyInSeries(this.series);
+  const AlreadyInSeries(this.series, {this.addable = const []});
 
   final RecurringSeries series;
+
+  /// Oldest first.
+  final List<PreviewTransaction> addable;
 }
 
 /// A new series is proposed.

@@ -18,15 +18,18 @@ class MarkRecurringState {
   /// Ids of the ticked transactions. Every one starts ticked.
   final Set<String> ticked;
 
+  /// Every transaction the checklist offers, oldest first.
+  List<PreviewTransaction> get candidates => switch (outcome) {
+    Proposal(:final preview) => preview.transactions,
+    AlreadyInSeries(:final addable) => addable,
+  };
+
   /// The ticked transactions, oldest first — what the summary describes and
   /// what saving links.
-  List<PreviewTransaction> get selected => switch (outcome) {
-    Proposal(:final preview) => [
-      for (final transaction in preview.transactions)
-        if (ticked.contains(transaction.id)) transaction,
-    ],
-    AlreadyInSeries() => const [],
-  };
+  List<PreviewTransaction> get selected => [
+    for (final transaction in candidates)
+      if (ticked.contains(transaction.id)) transaction,
+  ];
 
   MarkRecurringState withTicked(Set<String> ticked) =>
       MarkRecurringState(outcome: outcome, ticked: ticked);
@@ -48,15 +51,10 @@ class MarkRecurringController extends AsyncNotifier<MarkRecurringState> {
     final outcome = await ref
         .read(recurringRepositoryProvider)
         .preview(transactionId);
-    return MarkRecurringState(
-      outcome: outcome,
-      ticked: switch (outcome) {
-        Proposal(:final preview) => {
-          for (final transaction in preview.transactions) transaction.id,
-        },
-        AlreadyInSeries() => const {},
-      },
-    );
+    final initial = MarkRecurringState(outcome: outcome, ticked: const {});
+    return initial.withTicked({
+      for (final transaction in initial.candidates) transaction.id,
+    });
   }
 
   /// Ticks or unticks one transaction of the proposal.
@@ -68,24 +66,28 @@ class MarkRecurringController extends AsyncNotifier<MarkRecurringState> {
     state = AsyncValue.data(current.withTicked(ticked));
   }
 
-  /// Creates the series from the ticked transactions and refreshes the two
-  /// panels that show it. Failures are rethrown for the dialog to show inline.
+  /// Creates the series from the ticked transactions — or adds them to the
+  /// series that already tracks them — and refreshes the two panels that show
+  /// it. Failures are rethrown for the dialog to show inline.
   Future<RecurringSeries> save() async {
     final current = state.requireValue;
-    final preview = (current.outcome as Proposal).preview;
-    final created = await ref
-        .read(subscriptionsControllerProvider.notifier)
-        .create(
-          label: preview.label,
-          accountId: preview.accountId,
-          expectedAmountMinor: preview.expectedAmountMinor,
-          cadence: preview.cadence,
-          transactionIds: [
-            for (final transaction in current.selected) transaction.id,
-          ],
-        );
+    final ids = [for (final transaction in current.selected) transaction.id];
+    final subscriptions = ref.read(subscriptionsControllerProvider.notifier);
+    final saved = switch (current.outcome) {
+      Proposal(:final preview) => await subscriptions.create(
+        label: preview.label,
+        accountId: preview.accountId,
+        expectedAmountMinor: preview.expectedAmountMinor,
+        cadence: preview.cadence,
+        transactionIds: ids,
+      ),
+      AlreadyInSeries(:final series) => await subscriptions.attach(
+        series.id,
+        ids,
+      ),
+    };
     ref.invalidate(transactionsControllerProvider);
-    return created;
+    return saved;
   }
 }
 

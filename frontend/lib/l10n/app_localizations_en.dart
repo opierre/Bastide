@@ -4545,4 +4545,15 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get subscriptionErrorTransactionLinked =>
       'Some transactions already belong to a series.';
+
+  @override
+  String markRecurringExistingIntro(String label) {
+    return 'This expense matches “$label”, which you already track. Tick the transactions to add to it.';
+  }
+
+  @override
+  String get markRecurringViewSeries => 'View series';
+
+  @override
+  String get markRecurringAddToSeries => 'Add to this series';
 }

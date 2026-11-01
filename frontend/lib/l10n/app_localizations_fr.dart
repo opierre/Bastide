@@ -4582,4 +4582,15 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get subscriptionErrorTransactionLinked =>
       'Certaines opérations appartiennent déjà à une série.';
+
+  @override
+  String markRecurringExistingIntro(String label) {
+    return 'Cette dépense correspond à « $label », déjà suivi dans vos abonnements. Cochez les opérations à y ajouter.';
+  }
+
+  @override
+  String get markRecurringViewSeries => 'Voir la série';
+
+  @override
+  String get markRecurringAddToSeries => 'Ajouter à cette série';
 }

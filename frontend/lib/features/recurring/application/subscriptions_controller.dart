@@ -238,6 +238,18 @@ class SubscriptionsController extends AsyncNotifier<SubscriptionsState> {
     return created;
   }
 
+  /// Adds transactions to an existing series. Like [create], failures reach
+  /// the dialog that asked.
+  Future<RecurringSeries> attach(
+    String seriesId,
+    List<String> transactionIds,
+  ) async {
+    final updated = await _repository.attach(seriesId, transactionIds);
+    ref.invalidate(seriesDetailProvider(seriesId));
+    await refresh();
+    return updated;
+  }
+
   /// Edits a series' user-owned fields. Like [create], failures reach the form.
   Future<RecurringSeries> updateSeries(
     String seriesId, {

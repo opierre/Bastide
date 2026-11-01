@@ -7187,6 +7187,24 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Certaines opérations appartiennent déjà à une série.'**
   String get subscriptionErrorTransactionLinked;
+
+  /// Info banner when the transaction's merchant is already tracked by a series.
+  ///
+  /// In fr, this message translates to:
+  /// **'Cette dépense correspond à « {label} », déjà suivi dans vos abonnements. Cochez les opérations à y ajouter.'**
+  String markRecurringExistingIntro(String label);
+
+  /// Closes the dialog and opens the existing series in Abonnements.
+  ///
+  /// In fr, this message translates to:
+  /// **'Voir la série'**
+  String get markRecurringViewSeries;
+
+  /// Primary button adding the ticked transactions to the existing series.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ajouter à cette série'**
+  String get markRecurringAddToSeries;
 }
 
 class _AppLocalizationsDelegate
