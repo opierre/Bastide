@@ -56,6 +56,17 @@ FROZEN_STATUSES: frozenset[str] = frozenset({"dismissed", "cancelled"})
 
 
 @dataclass(frozen=True, slots=True)
+class PreviewResult:
+    """What a preview found: a series already answering for the transaction, or a proposal."""
+
+    series: RecurringSeries | None = None
+    grade: Grade | None = None
+    #: With `series`: the charges it does not hold yet, oldest first. Empty when the
+    #: transaction is already one of its occurrences.
+    addable: tuple[Transaction, ...] = ()
+
+
+@dataclass(frozen=True, slots=True)
 class DetectionResult:
     """What one pass did. Series it deliberately left alone count in neither number."""
 
@@ -463,9 +474,7 @@ class RecurringService:
             series, [transaction.id for transaction in selected], alias_keys
         )
 
-    def preview(
-        self, user_id: str, transaction_id: str
-    ) -> tuple[RecurringSeries | None, Grade | None]:
+    def preview(self, user_id: str, transaction_id: str) -> PreviewResult:
         """What series ``transaction_id`` would start, graded, or the series it is already in.
 
         The matches are the same account's outflows under the transaction's merchant key, plus
@@ -473,8 +482,9 @@ class RecurringService:
         already in a series are left out: they cannot be linked twice.
 
         Returns:
-            `(series, None)` when the transaction already belongs to a series, or its merchant
-            is already tracked on that account; `(None, grade)` otherwise.
+            The series when the transaction already belongs to one, or when its merchant is
+            already tracked — then with the charges that series could still take; the graded
+            proposal otherwise.
 
         Raises:
             TransactionNotFoundError: no such transaction, or it belongs to another user.
@@ -488,47 +498,93 @@ class RecurringService:
                 "Only an outflow can be marked as recurring.",
                 details={"transaction_id": seed.id},
             )
-        existing = self._series_tracking(user_id, seed)
-        if existing is not None:
-            return existing, None
+        linked = self._repository.series_for_transaction(seed.id, user_id)
+        if linked is not None:
+            return PreviewResult(series=linked)
 
+        aliases = self._repository.aliases_for_user(user_id)
         key = merchant_key(seed)
-        outflows = [
-            transaction
-            for transaction in self._transactions.list_all_for_user(
-                user_id, account_id=seed.account_id
-            )
-            if transaction.amount_minor < 0 and not _is_card_settlement(transaction)
-        ]
-        linked = self._repository.linked_transaction_ids([t.id for t in outflows])
+        tracked_side = aliases.get((seed.account_id, key), (seed.account_id, key))
+        tracked = self._repository.get_by_merchant_key(user_id, *tracked_side)
+
+        outflows = self._unlinked_outflows(user_id, seed.account_id)
+        if tracked is not None:
+            # The same notion of "this series' charges" as detection: the key, or one merged
+            # into it.
+            matches = [
+                transaction
+                for transaction in outflows
+                if aliases.get(
+                    (transaction.account_id, k := merchant_key(transaction)),
+                    (transaction.account_id, k),
+                )
+                == tracked_side
+            ]
+            return PreviewResult(series=tracked, addable=tuple(_with_seed(matches, seed)))
+
         matches = [
             transaction
             for transaction in outflows
-            if transaction.id not in linked
-            and _matches(seed, key, transaction, merchant_key(transaction))
+            if _matches(seed, key, transaction, merchant_key(transaction))
         ]
-        if seed.id not in {match.id for match in matches}:
-            # A card settlement the user insists on is still the transaction they asked about.
-            matches.append(seed)
-        return None, grade(matches)
+        return PreviewResult(grade=grade(_with_seed(matches, seed)))
 
-    def _series_tracking(self, user_id: str, transaction: Transaction) -> RecurringSeries | None:
-        """The series ``transaction`` is in, or the one tracking its merchant on its account."""
-        linked = self._repository.series_for_transaction(transaction.id, user_id)
-        if linked is not None:
-            return linked
-        own = (transaction.account_id, merchant_key(transaction))
-        account_id, key = self._repository.aliases_for_user(user_id).get(own, own)
-        return self._repository.get_by_merchant_key(user_id, account_id, key)
+    def attach(
+        self, user_id: str, series_id: str, transaction_ids: list[str], today: date
+    ) -> RecurringSeries:
+        """Add transactions to an existing series as occurrences.
 
-    def _selected_transactions(
-        self, user_id: str, account_id: str, transaction_ids: list[str]
-    ) -> list[Transaction]:
-        """The transactions to link to a new series, oldest first, checked one by one.
+        The series' observed dates, interval and count are recomputed from its whole history.
+        A transaction under another merchant key has that key recorded as an alias, as a merge
+        does, so a later detection pass groups it with this series rather than dropping the link
+        — unless a series or alias already answers for the key, which keeps it.
 
         Raises:
-            SeriesTransactionsInvalidError: an id is unknown, another user's, on another
-                account, or an inflow.
+            SeriesNotFoundError: no such series, or it belongs to another user.
+            SeriesTransactionsInvalidError: a transaction is unknown, another user's, or an
+                inflow.
+            TransactionAlreadyLinkedError: a transaction already belongs to a series.
+        """
+        series = self.get(user_id, series_id)
+        selected = self._selected_transactions(user_id, None, transaction_ids)
+        history = [transaction for _, transaction in self._repository.list_occurrences(series.id)]
+        everything = sorted([*history, *selected], key=lambda t: (t.booked_date, t.id))
+
+        taken = self._taken_keys(user_id)
+        own = (series.account_id, series.merchant_key)
+        aliases = [
+            side
+            for side in dict.fromkeys(
+                (transaction.account_id, merchant_key(transaction)) for transaction in selected
+            )
+            if side != own and side not in taken
+        ]
+        _seed_observations(series, series.cadence, everything, today)
+        return self._repository.attach(
+            series, [transaction.id for transaction in selected], aliases
+        )
+
+    def _unlinked_outflows(self, user_id: str, account_id: str) -> list[Transaction]:
+        """The account's outflows no series holds yet, card settlements left out, oldest first."""
+        outflows = [
+            transaction
+            for transaction in self._transactions.list_all_for_user(user_id, account_id=account_id)
+            if transaction.amount_minor < 0 and not _is_card_settlement(transaction)
+        ]
+        linked = self._repository.linked_transaction_ids([t.id for t in outflows])
+        return [transaction for transaction in outflows if transaction.id not in linked]
+
+    def _selected_transactions(
+        self, user_id: str, account_id: str | None, transaction_ids: list[str]
+    ) -> list[Transaction]:
+        """The transactions to link to a series, oldest first, checked one by one.
+
+        ``account_id`` confines them to one account; `None` accepts any of the user's, since
+        an existing series may already span accounts through a merge.
+
+        Raises:
+            SeriesTransactionsInvalidError: an id is unknown, another user's, outside
+                ``account_id``, or an inflow.
             TransactionAlreadyLinkedError: one of them already belongs to a series.
         """
         wanted = list(dict.fromkeys(transaction_ids))
@@ -701,6 +757,17 @@ class RecurringService:
             if previous is None or transaction.booked_date > previous:
                 newest[key] = transaction.booked_date
         return newest
+
+
+def _with_seed(matches: list[Transaction], seed: Transaction) -> list[Transaction]:
+    """``matches`` with ``seed`` in it, oldest first.
+
+    A card settlement is left out of the matches, but one the user insists on is still the
+    transaction they asked about.
+    """
+    if any(match.id == seed.id for match in matches):
+        return matches
+    return sorted([*matches, seed], key=lambda t: (t.booked_date, t.id))
 
 
 def _matches(seed: Transaction, seed_key: str, transaction: Transaction, key: str) -> bool:

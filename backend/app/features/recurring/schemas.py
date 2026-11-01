@@ -249,11 +249,20 @@ class SeriesPreview(BaseModel):
 
 
 class RecurringPreviewRead(BaseModel):
-    """Exactly one of the two is set.
+    """Exactly one of `series` and `preview` is set.
 
-    `series` when the transaction already belongs to a series — the client opens it instead of
-    proposing a second one; `preview` otherwise.
+    `series` when the transaction already belongs to a series, or its merchant is already
+    tracked by one — the client offers that series instead of proposing a second one. In the
+    second case `addable_transactions` lists the charges that series does not hold yet, the one
+    the preview started from included, oldest first; it is empty in the first.
     """
 
     series: SeriesRead | None = None
     preview: SeriesPreview | None = None
+    addable_transactions: list[TransactionRead] = Field(default_factory=list)
+
+
+class AttachRequest(BaseModel):
+    """Transactions to add to an existing series as occurrences."""
+
+    transaction_ids: list[str] = Field(min_length=1)
