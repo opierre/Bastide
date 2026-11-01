@@ -29,6 +29,18 @@ class SavingsTrendChart extends ConsumerWidget {
     // would take — these label an axis tick, not a date.
     final monthFormat = DateFormat('LLL', locale);
     final textTheme = Theme.of(context).textTheme;
+    final average = trends.averageSavedMinor;
+    // Every month's tooltip ends on the window's average, so a month reads against the
+    // dotted line it sits beside without hunting for the headline.
+    final averageLine = l10n.dashboardSavingsTrendAverageTooltip(
+      trends.averageWindow.length,
+      formatAmount(
+        amountMinor: average,
+        currency: trends.currency,
+        locale: locale,
+        showPositiveSign: true,
+      ),
+    );
 
     return ChartContainer(
       title: l10n.dashboardSavingsTrendTitle,
@@ -65,6 +77,7 @@ class SavingsTrendChart extends ConsumerWidget {
       ),
       child: SavingsChart(
         view: view,
+        average: series.isEmpty ? null : average,
         values: [for (final point in series) point.savedMinor],
         labels: [
           for (final point in series)
@@ -98,6 +111,12 @@ class SavingsTrendChart extends ConsumerWidget {
                         ? AppColors.negative
                         : AppColors.positive,
                   ),
+                ),
+                TextSpan(
+                  text: '\n$averageLine',
+                  style: tabularNumberStyle(
+                    textTheme.labelSmall!,
+                  ).copyWith(color: AppColors.textSecondary),
                 ),
               ],
             ),
@@ -133,12 +152,21 @@ class _Header extends StatelessWidget {
           key: const Key('dashboardAverageSaved'),
         ),
         const SizedBox(height: AppSpacing.xs),
-        Text(
-          l10n.dashboardSavingsTrendAverage,
-          style: textTheme.labelSmall?.copyWith(
-            fontWeight: FontWeight.w400,
-            color: AppColors.textSecondary,
-          ),
+        // The caption doubles as the average line's legend: the dotted swatch beside it is
+        // drawn exactly as the line across the chart.
+        Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const SavingsAverageSwatch(key: Key('savingsAverageSwatch')),
+            const SizedBox(width: AppSpacing.xs),
+            Text(
+              l10n.dashboardSavingsTrendAverage,
+              style: textTheme.labelSmall?.copyWith(
+                fontWeight: FontWeight.w400,
+                color: AppColors.textSecondary,
+              ),
+            ),
+          ],
         ),
       ],
     );

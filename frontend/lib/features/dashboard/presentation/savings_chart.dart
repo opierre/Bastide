@@ -29,8 +29,10 @@ import '../application/dashboard_controller.dart';
 /// plot into the card's padding rather than cover the mark.
 ///
 /// Both views share one frame: the [_Scale], the labelled gridlines, the hover slots, the
-/// tooltip and the month axis. Only the mark layer differs, so a reference drawn over the marks (an
-/// average line, say) is one more step in [_SavingsChartPainter.paint] and lands in both.
+/// tooltip and the month axis. Only the mark layer differs, so the [average] — a dotted,
+/// half-transparent level across the plot — is one step after the marks in
+/// [_SavingsChartPainter.paint] and lands in both. Drawn over the marks so a bar can't hide
+/// it, and see-through so it can't hide a bar or a dot either.
 ///
 /// Laid out like [AreaLine] (value gutter, slots, month axis) so the card reads like the
 /// other charts. Not animated, per the spec's motion rules.
@@ -42,6 +44,7 @@ class SavingsChart extends StatefulWidget {
     required this.valueLabel,
     this.view = SavingsChartView.bars,
     this.tooltips,
+    this.average,
   });
 
   /// Signed minor units per month, oldest first.
@@ -50,6 +53,21 @@ class SavingsChart extends StatefulWidget {
   final String Function(num value) valueLabel;
   final SavingsChartView view;
   final List<InlineSpan>? tooltips;
+
+  /// The window's average saving in minor units, drawn as a dotted level; none when null.
+  /// Computed by the domain (`DashboardTrends.averageSavedMinor`), not here.
+  final int? average;
+
+  /// The average line's color: the secondary text tone, half-transparent, so it reads as a
+  /// reference rather than a series and stays clear of iris (the line view's own stroke)
+  /// and of the green/red that carry money. [AppColors.borderDashed] would match the
+  /// dashed zero baseline, so the token is the secondary text tone at 60 %, set as an 8-bit
+  /// alpha (153 / 255) so it survives a [Paint] round trip unchanged.
+  static final averageColor = AppColors.textSecondary.withAlpha(153);
+
+  /// The average line's dots: a round cap on a near-zero dash, every [averageDotGap] px.
+  static const averageStroke = 1.5;
+  static const averageDotGap = 5.0;
 
   @override
   State<SavingsChart> createState() => _SavingsChartState();
@@ -135,6 +153,7 @@ class _SavingsChartState extends State<SavingsChart> {
             values: widget.values,
             view: widget.view,
             scale: scale,
+            average: widget.average,
             hovered: _hovered,
             levelLabels: scale.levels.map(widget.valueLabel).toList(),
             labelStyle: tabularNumberStyle(labelStyle),
@@ -273,6 +292,7 @@ class _SavingsChartPainter extends CustomPainter {
     required this.values,
     required this.view,
     required this.scale,
+    required this.average,
     required this.hovered,
     required this.levelLabels,
     required this.labelStyle,
@@ -281,6 +301,7 @@ class _SavingsChartPainter extends CustomPainter {
   final List<int> values;
   final SavingsChartView view;
   final _Scale scale;
+  final int? average;
   final int? hovered;
   final List<String> levelLabels;
   final TextStyle labelStyle;
@@ -318,8 +339,17 @@ class _SavingsChartPainter extends CustomPainter {
       case SavingsChartView.line:
         _paintLine(canvas, size, plot);
     }
-    // Overlays shared by both views (a reference line on the same scale) paint here,
-    // after the marks.
+    // Overlays shared by both views paint after the marks, on the same scale.
+    _paintAverage(canvas, size, plot);
+  }
+
+  /// The [average] as a dotted level across the plot. The scale always holds it: a mean
+  /// lies between the lowest and the highest month.
+  void _paintAverage(Canvas canvas, Size size, Rect plot) {
+    final average = this.average;
+    if (average == null) return;
+    final y = scale.y(average.toDouble(), plot);
+    paintDottedLine(canvas, Offset(plot.left, y), Offset(size.width, y));
   }
 
   /// The labelled gridlines both views stand on.
@@ -491,7 +521,48 @@ class _SavingsChartPainter extends CustomPainter {
       !listEquals(oldDelegate.values, values) ||
       oldDelegate.view != view ||
       oldDelegate.scale != scale ||
+      oldDelegate.average != average ||
       oldDelegate.hovered != hovered ||
       !listEquals(oldDelegate.levelLabels, levelLabels) ||
       oldDelegate.labelStyle != labelStyle;
+}
+
+/// A dotted horizontal run from [from] to [to] in [SavingsChart.averageColor]: the chart's
+/// average line, and the legend swatch that names it.
+void paintDottedLine(Canvas canvas, Offset from, Offset to) {
+  final paint = Paint()
+    ..color = SavingsChart.averageColor
+    ..strokeWidth = SavingsChart.averageStroke
+    ..strokeCap = StrokeCap.round;
+  for (var x = from.dx; x <= to.dx; x += SavingsChart.averageDotGap) {
+    canvas.drawLine(Offset(x, from.dy), Offset(x + 0.01, from.dy), paint);
+  }
+}
+
+/// The average line's legend mark: a short dotted run, drawn exactly as the line is, to
+/// sit beside the caption that names it.
+class SavingsAverageSwatch extends StatelessWidget {
+  const SavingsAverageSwatch({super.key});
+
+  static const width = 16.0;
+
+  @override
+  Widget build(BuildContext context) => const CustomPaint(
+    size: Size(width, SavingsChart.averageStroke * 2),
+    painter: _SwatchPainter(),
+  );
+}
+
+class _SwatchPainter extends CustomPainter {
+  const _SwatchPainter();
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final y = size.height / 2;
+    final inset = SavingsChart.averageStroke / 2;
+    paintDottedLine(canvas, Offset(inset, y), Offset(size.width - inset, y));
+  }
+
+  @override
+  bool shouldRepaint(_SwatchPainter oldDelegate) => false;
 }

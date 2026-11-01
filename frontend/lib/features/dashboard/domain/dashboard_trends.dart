@@ -53,12 +53,31 @@ class DashboardTrends {
   final List<SavingsPoint> savingsSeries;
   final String currency;
 
-  /// What the window's months put aside on average — the savings card's headline. Rounded to
-  /// the nearest minor unit: money stays an integer even when the mean isn't.
+  /// How many months the savings average spans at most: a year, so a seasonal month (a
+  /// bonus, a holiday) is weighed against the rest of the year rather than its neighbours.
+  static const averageWindowMonths = 12;
+
+  /// The months [averageSavedMinor] averages: the last [averageWindowMonths] of
+  /// [savingsSeries], or all of them for a newer user with less history.
+  List<SavingsPoint> get averageWindow =>
+      savingsSeries.length <= averageWindowMonths
+      ? savingsSeries
+      : savingsSeries.sublist(savingsSeries.length - averageWindowMonths);
+
+  /// What the window's months put aside on average — the savings card's headline and the
+  /// chart's dotted reference line. The current month counts as it stands, as its bar does.
+  ///
+  /// Rounded to the nearest minor unit, halves away from zero (so `-0.5` → `-1`, as `0.5` →
+  /// `1`), in integer arithmetic: money stays an integer even when the mean isn't, and no
+  /// float ever holds the total.
   int get averageSavedMinor {
-    if (savingsSeries.isEmpty) return 0;
-    final total = savingsSeries.fold<int>(0, (sum, p) => sum + p.savedMinor);
-    return (total / savingsSeries.length).round();
+    final window = averageWindow;
+    if (window.isEmpty) return 0;
+    final total = window.fold<int>(0, (sum, p) => sum + p.savedMinor);
+    final count = window.length;
+    final quotient = total ~/ count;
+    final remainder = total.remainder(count);
+    return remainder.abs() * 2 >= count ? quotient + total.sign : quotient;
   }
 }
 
