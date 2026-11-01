@@ -565,6 +565,7 @@ class _MortgageFormModalState extends ConsumerState<MortgageFormModal> {
                       AppSelectItem<String?>(
                         value: property.id,
                         label: property.label,
+                        subtitle: property.address,
                       ),
                   ],
                 ),

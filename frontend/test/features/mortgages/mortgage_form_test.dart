@@ -19,12 +19,13 @@ Widget _wrap({
   required FakeMortgagesController controller,
   required MockMortgagesRepository repository,
   Mortgage? initial,
+  List<LoanProperty> properties = const [],
 }) {
   return ProviderScope(
     overrides: [
       mortgagesControllerProvider.overrideWith(() => controller),
       mortgagesRepositoryProvider.overrideWithValue(repository),
-      loanPropertiesProvider.overrideWith((ref) => const <LoanProperty>[]),
+      loanPropertiesProvider.overrideWith((ref) => properties),
     ],
     child: MaterialApp(
       locale: const Locale('fr'),
@@ -192,6 +193,51 @@ void main() {
       );
     },
   );
+
+  testWidgets('the property picker shows an address under its label', (
+    tester,
+  ) async {
+    _useDesktopSurface(tester);
+    await tester.pumpWidget(
+      _wrap(
+        controller: FakeMortgagesController(),
+        repository: repository,
+        properties: const [
+          LoanProperty(
+            id: 'p1',
+            label: 'Appartement Lyon 3e',
+            address: '3 rue des Glycines, 69003 Lyon',
+          ),
+          LoanProperty(id: 'p2', label: 'Studio Villeurbanne'),
+        ],
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    // Closed, the field states the label alone.
+    expect(find.text('3 rue des Glycines, 69003 Lyon'), findsNothing);
+
+    await tester.ensureVisible(find.byKey(const Key('mortgageFormProperty')));
+    await tester.tap(find.byKey(const Key('mortgageFormProperty')));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Appartement Lyon 3e'), findsOneWidget);
+    expect(find.text('3 rue des Glycines, 69003 Lyon'), findsOneWidget);
+    expect(find.text('Studio Villeurbanne'), findsOneWidget);
+    // One address for two biens: the one without shows no secondary line.
+    expect(
+      find.descendant(
+        of: find
+            .ancestor(
+              of: find.text('Studio Villeurbanne'),
+              matching: find.byType(Column),
+            )
+            .first,
+        matching: find.byType(Text),
+      ),
+      findsOneWidget,
+    );
+  });
 
   testWidgets('an in-fine loan never shows a constant-payment figure', (
     tester,
