@@ -665,8 +665,66 @@ class RecurringService:
             series, [transaction.id for transaction in selected], aliases
         )
 
-    def _unlinked_outflows(self, user_id: str, account_id: str) -> list[Transaction]:
-        """The account's outflows no series holds yet, card settlements left out, oldest first."""
+    def candidates(
+        self, user_id: str, series_id: str, *, q: str | None, page: int, page_size: int
+    ) -> tuple[list[Transaction], int]:
+        """Outflows that could be added to a series, closest first, one page at a time.
+
+        Every outflow of the user's that no series holds yet, on any account, since a series
+        may already span accounts and `attach` accepts any of them. Card settlements are left
+        out, as detection leaves them out. Ranked by closeness so the charge the user is looking
+        for is near the top without a search: first those whose merchant key is the series' own
+        or one merged into it, then the same key on another account or one `similarity` would call
+        the same merchant, then the rest; within each, an amount close to the expected one first;
+        then the most recent.
+
+        Args:
+            q: keeps only the outflows whose label or merchant contains it, ignoring case.
+            page: 1-based.
+
+        Returns:
+            The page, and how many outflows match in all.
+
+        Raises:
+            SeriesNotFoundError: no such series, or it belongs to another user.
+        """
+        series = self.get(user_id, series_id)
+        own = (series.account_id, series.merchant_key)
+        aliases = self._repository.aliases_for_user(user_id)
+        needle = q.strip().casefold() if q else ""
+
+        def rank(transaction: Transaction) -> tuple[int, int, int, str]:
+            side = (transaction.account_id, merchant_key(transaction))
+            if aliases.get(side, side) == own:
+                kinship = 0
+            elif side[1] == series.merchant_key or keys_alike(series.merchant_key, side[1]):
+                kinship = 1
+            else:
+                kinship = 2
+            close = amounts_close(series.expected_amount_minor, transaction.amount_minor)
+            return (
+                kinship,
+                0 if close else 1,
+                -transaction.booked_date.toordinal(),
+                transaction.id,
+            )
+
+        matches = sorted(
+            (
+                transaction
+                for transaction in self._unlinked_outflows(user_id, None)
+                if not needle or needle in _searchable(transaction)
+            ),
+            key=rank,
+        )
+        start = (page - 1) * page_size
+        return matches[start : start + page_size], len(matches)
+
+    def _unlinked_outflows(self, user_id: str, account_id: str | None) -> list[Transaction]:
+        """Outflows no series holds yet, card settlements left out, oldest first.
+
+        ``account_id`` narrows them to one account; `None` covers every account of the user's.
+        """
         outflows = [
             transaction
             for transaction in self._transactions.list_all_for_user(user_id, account_id=account_id)
@@ -858,6 +916,12 @@ class RecurringService:
             if previous is None or transaction.booked_date > previous:
                 newest[key] = transaction.booked_date
         return newest
+
+
+def _searchable(transaction: Transaction) -> str:
+    """The text a candidate search looks in, case-folded."""
+    parts = (transaction.description_clean, transaction.description_raw, transaction.merchant)
+    return " ".join(part for part in parts if part).casefold()
 
 
 def _with_seed(matches: list[Transaction], seed: Transaction) -> list[Transaction]:

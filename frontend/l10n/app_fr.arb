@@ -5991,5 +5991,104 @@
   "markRecurringAddToSeries": "Ajouter à cette série",
   "@markRecurringAddToSeries": {
     "description": "Primary button adding the ticked transactions to the existing series."
+  },
+  "markRecurringPickSeries": "Ajouter à une série existante…",
+  "@markRecurringPickSeries": {
+    "description": "Opens the picker of the user's series, to add this transaction to one of them."
+  },
+  "seriesPickerIntro": "Choisissez la série dont fait partie cette opération. Bastide retiendra son libellé pour les prochaines.",
+  "@seriesPickerIntro": {
+    "description": "Intro of the series picker in the mark-as-recurring dialog."
+  },
+  "seriesPickerSearchHint": "Rechercher une série",
+  "@seriesPickerSearchHint": {
+    "description": "Placeholder of the series picker's search field."
+  },
+  "seriesPickerEmpty": "Vous ne suivez encore aucune série.",
+  "@seriesPickerEmpty": {
+    "description": "Series picker: the user has no series to offer."
+  },
+  "seriesPickerNoMatch": "Aucune série ne correspond à « {query} ».",
+  "@seriesPickerNoMatch": {
+    "description": "Series picker: the search matched nothing.",
+    "placeholders": {
+      "query": {
+        "type": "String"
+      }
+    }
+  },
+  "seriesPickerLoadError": "Impossible de charger vos séries.",
+  "@seriesPickerLoadError": {
+    "description": "Series picker: the list request failed."
+  },
+  "seriesPickerBack": "Retour à l'aperçu",
+  "@seriesPickerBack": {
+    "description": "Leaves the series picker for the preview."
+  },
+  "seriesPickerRowDetail": "{account} · {cadence} · {amount}",
+  "@seriesPickerRowDetail": {
+    "description": "Second line of a series in the picker: its account, cadence and expected amount.",
+    "placeholders": {
+      "account": {
+        "type": "String"
+      },
+      "cadence": {
+        "type": "String"
+      },
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "chargePickerAction": "Ajouter une opération",
+  "@chargePickerAction": {
+    "description": "Series detail button opening the picker of transactions to add to the series."
+  },
+  "chargePickerTitle": "Ajouter à « {label} »",
+  "@chargePickerTitle": {
+    "description": "Title of the dialog adding transactions to a series.",
+    "placeholders": {
+      "label": {
+        "type": "String"
+      }
+    }
+  },
+  "chargePickerIntro": "Les opérations qui ne font partie d'aucune série, les plus proches en premier.",
+  "@chargePickerIntro": {
+    "description": "Intro of the dialog adding transactions to a series."
+  },
+  "chargePickerSearchHint": "Rechercher un libellé",
+  "@chargePickerSearchHint": {
+    "description": "Placeholder of the transaction picker's search field."
+  },
+  "chargePickerEmpty": "Aucune opération à ajouter : toutes vos dépenses font déjà partie d'une série.",
+  "@chargePickerEmpty": {
+    "description": "Transaction picker: no candidate at all."
+  },
+  "chargePickerNoMatch": "Aucune opération ne correspond à « {query} ».",
+  "@chargePickerNoMatch": {
+    "description": "Transaction picker: the search matched nothing.",
+    "placeholders": {
+      "query": {
+        "type": "String"
+      }
+    }
+  },
+  "chargePickerLoadError": "Impossible de charger les opérations.",
+  "@chargePickerLoadError": {
+    "description": "Transaction picker: the candidates request failed."
+  },
+  "chargePickerLoadMore": "Afficher plus",
+  "@chargePickerLoadMore": {
+    "description": "Transaction picker: fetches the next page."
+  },
+  "chargePickerSave": "{count, plural, =0{Ajouter} =1{Ajouter 1 opération} other{Ajouter {count} opérations}}",
+  "@chargePickerSave": {
+    "description": "Transaction picker's primary button.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   }
 }

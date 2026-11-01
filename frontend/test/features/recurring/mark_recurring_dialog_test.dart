@@ -336,4 +336,168 @@ void main() {
     expect(find.text('subscriptions'), findsOneWidget);
     expect(container.read(selectedSeriesProvider), 's9');
   });
+
+  group('add to an existing series', () {
+    setUp(() {
+      when(
+        () => repository.preview('t3'),
+      ).thenAnswer((_) async => Proposal(_preview(PreviewConfidence.medium)));
+      when(() => repository.listAccounts()).thenAnswer(
+        (_) async => const [
+          SeriesAccount(
+            id: 'a1',
+            name: 'Compte courant',
+            institution: 'BNP',
+            currency: 'EUR',
+          ),
+          SeriesAccount(
+            id: 'a2',
+            name: 'Compte joint',
+            institution: 'Revolut',
+            currency: 'EUR',
+          ),
+        ],
+      );
+      when(() => repository.list()).thenAnswer(
+        (_) async => [
+          testSeries(id: 's1', label: 'Streamco', accountId: 'a1'),
+          testSeries(
+            id: 's2',
+            label: 'Salle de sport',
+            status: SeriesStatus.dismissed,
+          ),
+          testSeries(
+            id: 's3',
+            label: 'Musique en ligne',
+            accountId: 'a2',
+            cadence: Cadence.yearly,
+            expectedAmountMinor: -9999,
+            status: SeriesStatus.cancelled,
+          ),
+        ],
+      );
+    });
+
+    Future<void> openPicker(WidgetTester tester) async {
+      final link = find.byKey(const Key('markRecurringPickSeries'));
+      await tester.ensureVisible(link);
+      await tester.pumpAndSettle();
+      await tester.tap(link);
+      await tester.pumpAndSettle();
+    }
+
+    testWidgets('offers every series but the dismissed ones, any account', (
+      tester,
+    ) async {
+      await _open(tester, repository: repository);
+      await openPicker(tester);
+
+      expect(find.byKey(const Key('seriesPickerRow-s1')), findsOneWidget);
+      expect(find.byKey(const Key('seriesPickerRow-s3')), findsOneWidget);
+      expect(find.byKey(const Key('seriesPickerRow-s2')), findsNothing);
+      expect(
+        find.textContaining('Revolut — Compte joint · Annuel · 99,99'),
+        findsOneWidget,
+      );
+    });
+
+    testWidgets('picking a series adds the transaction and closes', (
+      tester,
+    ) async {
+      final controller = FakeSubscriptionsController();
+
+      await _open(tester, repository: repository, controller: controller);
+      await openPicker(tester);
+      await tester.tap(find.byKey(const Key('seriesPickerRow-s3')));
+      await tester.pumpAndSettle();
+
+      final (seriesId, ids) = controller.attachCalls.single;
+      expect(seriesId, 's3');
+      expect(ids, ['t3']);
+      expect(controller.createCalls, isEmpty);
+      expect(find.byType(MarkRecurringDialog), findsNothing);
+    });
+
+    testWidgets('the search narrows the series by label', (tester) async {
+      await _open(tester, repository: repository);
+      await openPicker(tester);
+      await tester.enterText(
+        find.byKey(const Key('seriesPickerSearch')),
+        'musi',
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.byKey(const Key('seriesPickerRow-s3')), findsOneWidget);
+      expect(find.byKey(const Key('seriesPickerRow-s1')), findsNothing);
+
+      await tester.enterText(
+        find.byKey(const Key('seriesPickerSearch')),
+        'rien',
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.byKey(const Key('seriesPickerNoMatch')), findsOneWidget);
+    });
+
+    testWidgets('« Retour à l\'aperçu » goes back to the preview', (
+      tester,
+    ) async {
+      await _open(tester, repository: repository);
+      await openPicker(tester);
+      await tester.tap(find.byKey(const Key('seriesPickerBack')));
+      await tester.pumpAndSettle();
+
+      expect(find.byKey(const Key('seriesPicker')), findsNothing);
+      expect(find.byKey(const Key('markRecurringSave')), findsOneWidget);
+    });
+
+    testWidgets('no series at all says so', (tester) async {
+      when(() => repository.list()).thenAnswer((_) async => []);
+
+      await _open(tester, repository: repository, locale: const Locale('en'));
+      await openPicker(tester);
+
+      expect(find.text("You don't track any series yet."), findsOneWidget);
+    });
+
+    testWidgets('a failed load offers a retry', (tester) async {
+      var calls = 0;
+      when(() => repository.list()).thenAnswer((_) async {
+        calls++;
+        if (calls == 1) throw Exception('offline');
+        return [testSeries(id: 's1', label: 'Streamco')];
+      });
+
+      await _open(tester, repository: repository);
+      await openPicker(tester);
+
+      expect(find.text('Impossible de charger vos séries.'), findsOneWidget);
+
+      await tester.tap(find.byKey(const Key('seriesPickerRetry')));
+      await tester.pumpAndSettle();
+
+      expect(find.byKey(const Key('seriesPickerRow-s1')), findsOneWidget);
+    });
+
+    testWidgets('a refused pick stays open with the reason inline', (
+      tester,
+    ) async {
+      final controller = FakeSubscriptionsController()
+        ..errorOnAttach = const ApiFailure(
+          code: 'RECURRING_TRANSACTION_LINKED',
+          message: 'linked',
+        );
+
+      await _open(tester, repository: repository, controller: controller);
+      await openPicker(tester);
+      await tester.tap(find.byKey(const Key('seriesPickerRow-s1')));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(MarkRecurringDialog), findsOneWidget);
+      expect(
+        find.text('Certaines opérations appartiennent déjà à une série.'),
+        findsOneWidget,
+      );
+    });
+  });
 }

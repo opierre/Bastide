@@ -164,6 +164,34 @@ class RecurringRepository {
     return _parseSeries(json);
   }
 
+  /// One page of the outflows in no series that [seriesId] could take, closest
+  /// first, narrowed to those whose label contains [query].
+  Future<CandidatePage> candidates(
+    String seriesId, {
+    String query = '',
+    int page = 1,
+  }) async {
+    final json =
+        await _apiClient.get(
+              '/recurring/$seriesId/candidates',
+              query: {
+                if (query.trim().isNotEmpty) 'q': query.trim(),
+                'page': '$page',
+              },
+            )
+            as Map<String, dynamic>;
+    return CandidatePage(
+      items: [
+        for (final entry
+            in (json['items'] as List<dynamic>).cast<Map<String, dynamic>>())
+          _parsePreviewTransaction(entry),
+      ],
+      page: json['page'] as int,
+      pageSize: json['page_size'] as int,
+      total: json['total'] as int,
+    );
+  }
+
   /// Patches a series. Omitted fields are left alone — `null` is
   /// indistinguishable from absent on this API, so clearing a category is not
   /// expressible and the form does not offer it.
@@ -263,6 +291,7 @@ class RecurringRepository {
         amountMinor: json['amount_minor'] as int,
         currency: json['currency'] as String,
         label: _transactionLabel(json),
+        accountId: json['account_id'] as String?,
       );
 
   /// The merchant when the import found one, the cleaned label otherwise — the

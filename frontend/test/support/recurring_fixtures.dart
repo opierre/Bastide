@@ -156,12 +156,14 @@ class FakeSubscriptionsController extends SubscriptionsController {
   }
 
   final attachCalls = <(String, List<String>)>[];
+  Object? errorOnAttach;
 
   @override
   Future<RecurringSeries> attach(
     String seriesId,
     List<String> transactionIds,
   ) async {
+    if (errorOnAttach != null) throw errorOnAttach!;
     attachCalls.add((seriesId, transactionIds));
     return testSeries(id: seriesId);
   }

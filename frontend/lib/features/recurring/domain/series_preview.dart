@@ -49,6 +49,7 @@ class PreviewTransaction {
     required this.amountMinor,
     required this.currency,
     required this.label,
+    this.accountId,
   });
 
   final String id;
@@ -60,6 +61,31 @@ class PreviewTransaction {
 
   /// The merchant when the import found one, the cleaned bank label otherwise.
   final String label;
+
+  /// The account it was booked on. A preview stays on one account, so only
+  /// the charge picker, which spans every account, has a use for it.
+  final String? accountId;
+}
+
+/// One page of the outflows a series could take, closest first —
+/// `GET /recurring/{id}/candidates`.
+@immutable
+class CandidatePage {
+  const CandidatePage({
+    required this.items,
+    required this.page,
+    required this.pageSize,
+    required this.total,
+  });
+
+  final List<PreviewTransaction> items;
+
+  /// 1-based.
+  final int page;
+  final int pageSize;
+
+  /// How many outflows match in all, across every page.
+  final int total;
 }
 
 /// The series a transaction and its matches would make, before anything is

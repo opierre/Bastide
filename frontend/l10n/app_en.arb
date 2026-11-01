@@ -1227,5 +1227,22 @@
   "subscriptionErrorTransactionLinked": "Some transactions already belong to a series.",
   "markRecurringExistingIntro": "This expense matches “{label}”, which you already track. Tick the transactions to add to it.",
   "markRecurringViewSeries": "View series",
-  "markRecurringAddToSeries": "Add to this series"
+  "markRecurringAddToSeries": "Add to this series",
+  "markRecurringPickSeries": "Add to an existing series…",
+  "seriesPickerIntro": "Choose the series this transaction belongs to. Bastide will remember its label for the next ones.",
+  "seriesPickerSearchHint": "Search a series",
+  "seriesPickerEmpty": "You don't track any series yet.",
+  "seriesPickerNoMatch": "No series matches “{query}”.",
+  "seriesPickerLoadError": "Your series could not be loaded.",
+  "seriesPickerBack": "Back to the preview",
+  "seriesPickerRowDetail": "{account} · {cadence} · {amount}",
+  "chargePickerAction": "Add a transaction",
+  "chargePickerTitle": "Add to “{label}”",
+  "chargePickerIntro": "Transactions that belong to no series, closest first.",
+  "chargePickerSearchHint": "Search a label",
+  "chargePickerEmpty": "Nothing to add: every expense already belongs to a series.",
+  "chargePickerNoMatch": "No transaction matches “{query}”.",
+  "chargePickerLoadError": "The transactions could not be loaded.",
+  "chargePickerLoadMore": "Show more",
+  "chargePickerSave": "{count, plural, =0{Add} =1{Add 1 transaction} other{Add {count} transactions}}"
 }
