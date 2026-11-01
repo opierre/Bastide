@@ -4566,6 +4566,17 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get seriesPickerConfirm => 'Confirm';
+
+  @override
+  String seriesPickerAdded(String label) {
+    return 'Transaction added to “$label”';
+  }
+
+  @override
+  String get seriesPickerAddFailed => 'The transaction could not be added';
+
+  @override
   String get chargePickerAction => 'Add a transaction';
 
   @override

@@ -4603,6 +4603,17 @@ class AppLocalizationsFr extends AppLocalizations {
   }
 
   @override
+  String get seriesPickerConfirm => 'Confirmer';
+
+  @override
+  String seriesPickerAdded(String label) {
+    return 'Opération ajoutée à « $label »';
+  }
+
+  @override
+  String get seriesPickerAddFailed => 'L\'opération n\'a pas pu être ajoutée';
+
+  @override
   String get chargePickerAction => 'Ajouter une opération';
 
   @override
