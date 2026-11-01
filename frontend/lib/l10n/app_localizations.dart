@@ -3504,6 +3504,42 @@ abstract class AppLocalizations {
   /// **'Modifier'**
   String get subscriptionActionEdit;
 
+  /// Kebab and detail action putting a series away: it leaves the list, the summary and detection, history kept.
+  ///
+  /// In fr, this message translates to:
+  /// **'Archiver'**
+  String get subscriptionActionArchive;
+
+  /// Kebab and detail action on an archived series: bring it back.
+  ///
+  /// In fr, this message translates to:
+  /// **'Désarchiver'**
+  String get subscriptionActionUnarchive;
+
+  /// Toast title when archiving or unarchiving a series from its detail fails.
+  ///
+  /// In fr, this message translates to:
+  /// **'L\'archivage de ce paiement n\'a pas pu être modifié.'**
+  String get subscriptionArchiveFailed;
+
+  /// Link below the table that reveals archived series in place; the count is the real number.
+  ///
+  /// In fr, this message translates to:
+  /// **'Afficher les paiements archivés ({count})'**
+  String subscriptionsShowArchived(int count);
+
+  /// The same link once the archived series are showing.
+  ///
+  /// In fr, this message translates to:
+  /// **'Masquer les paiements archivés ({count})'**
+  String subscriptionsHideArchived(int count);
+
+  /// Section label in the table above the archived series, once revealed.
+  ///
+  /// In fr, this message translates to:
+  /// **'Archivés'**
+  String get subscriptionsArchivedSection;
+
   /// Localized RECURRING_INVALID_TRANSITION.
   ///
   /// In fr, this message translates to:

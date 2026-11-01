@@ -2248,6 +2248,29 @@ class AppLocalizationsEn extends AppLocalizations {
   String get subscriptionActionEdit => 'Edit';
 
   @override
+  String get subscriptionActionArchive => 'Archive';
+
+  @override
+  String get subscriptionActionUnarchive => 'Unarchive';
+
+  @override
+  String get subscriptionArchiveFailed =>
+      'Couldn\'t change whether this payment is archived.';
+
+  @override
+  String subscriptionsShowArchived(int count) {
+    return 'Show archived payments ($count)';
+  }
+
+  @override
+  String subscriptionsHideArchived(int count) {
+    return 'Hide archived payments ($count)';
+  }
+
+  @override
+  String get subscriptionsArchivedSection => 'Archived';
+
+  @override
   String get subscriptionErrorInvalidTransition =>
       'That status change isn\'t available for this payment.';
 

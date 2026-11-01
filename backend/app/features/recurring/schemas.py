@@ -75,6 +75,9 @@ class SeriesRead(BaseModel):
     occurrence_count: int
     status: SeriesStatus
     is_manual: bool
+    #: Put away by the user: listed only on `?archived=true`, left out of the summary and of
+    #: detection.
+    archived: bool
     #: Signed step in `expected_amount_minor`; a price *rise* on an outflow is negative.
     price_change_minor: int | None
     price_changed_at: date | None

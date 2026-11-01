@@ -220,6 +220,144 @@ void main() {
     expect(controller.statusCalls, [('s1', SeriesStatus.confirmed)]);
   });
 
+  group('archive', () {
+    testWidgets('an archived series leaves the list and can be restored', (
+      tester,
+    ) async {
+      _useDesktopSurface(tester);
+      final controller = FakeSubscriptionsController(
+        initialSeries: [
+          testSeries(),
+          testSeries(id: 's2', label: 'Gymfit Club'),
+        ],
+        summary: testSummary(activeCount: 2),
+      );
+      await tester.pumpWidget(_wrap(controller: controller));
+      await tester.pumpAndSettle();
+
+      // Nothing archived yet, so no link to reveal an empty list.
+      expect(
+        find.byKey(const Key('subscriptionsArchivedToggle')),
+        findsNothing,
+      );
+
+      await tester.tap(find.byKey(const Key('seriesMenu-s2')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const Key('seriesActionArchive-s2')));
+      await tester.pumpAndSettle();
+
+      expect(controller.archiveCalls, ['s2']);
+      expect(find.byKey(const Key('seriesRow-s2')), findsNothing);
+      expect(find.text('Afficher les paiements archivés (1)'), findsOneWidget);
+
+      await tester.tap(find.byKey(const Key('subscriptionsArchivedToggle')));
+      await tester.pumpAndSettle();
+
+      expect(
+        find.byKey(const Key('subscriptionsArchivedSection')),
+        findsOneWidget,
+      );
+      expect(find.byKey(const Key('seriesRow-s2')), findsOneWidget);
+      expect(find.text('Masquer les paiements archivés (1)'), findsOneWidget);
+
+      // An archived row offers only « Désarchiver ».
+      await tester.tap(find.byKey(const Key('seriesMenu-s2')));
+      await tester.pumpAndSettle();
+      expect(find.byKey(const Key('seriesActionArchive-s2')), findsNothing);
+      expect(find.byKey(const Key('seriesActionEdit-s2')), findsNothing);
+      expect(find.text('Désarchiver'), findsOneWidget);
+      await tester.tap(find.byKey(const Key('seriesActionUnarchive-s2')));
+      await tester.pumpAndSettle();
+
+      expect(controller.unarchiveCalls, ['s2']);
+      expect(find.byKey(const Key('seriesRow-s2')), findsOneWidget);
+      expect(
+        find.byKey(const Key('subscriptionsArchivedSection')),
+        findsNothing,
+      );
+      expect(
+        find.byKey(const Key('subscriptionsArchivedToggle')),
+        findsNothing,
+      );
+    });
+
+    testWidgets('a live row offers « Archiver » beside the lifecycle', (
+      tester,
+    ) async {
+      _useDesktopSurface(tester);
+      await tester.pumpWidget(
+        _wrap(
+          controller: FakeSubscriptionsController(
+            initialSeries: [testSeries()],
+            summary: testSummary(),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byKey(const Key('seriesMenu-s1')));
+      await tester.pumpAndSettle();
+
+      expect(find.byKey(const Key('seriesActionConfirm-s1')), findsOneWidget);
+      expect(find.byKey(const Key('seriesActionArchive-s1')), findsOneWidget);
+      expect(find.text('Archiver'), findsOneWidget);
+    });
+
+    testWidgets(
+      'only archived series still draw the panel, not the empty state',
+      (tester) async {
+        _useDesktopSurface(tester);
+        await tester.pumpWidget(
+          _wrap(
+            controller: FakeSubscriptionsController(
+              initialArchived: [testSeries(isArchived: true)],
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        expect(find.byKey(const Key('subscriptionsEmptyState')), findsNothing);
+        expect(
+          find.byKey(const Key('subscriptionsArchivedToggle')),
+          findsOneWidget,
+        );
+      },
+    );
+
+    testWidgets('reads in English', (tester) async {
+      _useDesktopSurface(tester);
+      await tester.pumpWidget(
+        _wrap(
+          locale: const Locale('en'),
+          controller: FakeSubscriptionsController(
+            initialSeries: [testSeries()],
+            initialArchived: [
+              testSeries(id: 's2', label: 'Gymfit Club', isArchived: true),
+            ],
+            summary: testSummary(),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('Show archived payments (1)'), findsOneWidget);
+      await tester.tap(find.byKey(const Key('subscriptionsArchivedToggle')));
+      await tester.pumpAndSettle();
+      expect(find.text('Hide archived payments (1)'), findsOneWidget);
+      expect(find.text('ARCHIVED'), findsOneWidget);
+
+      await tester.tap(find.byKey(const Key('seriesMenu-s1')));
+      await tester.pumpAndSettle();
+      expect(find.text('Archive'), findsOneWidget);
+      await tester.tapAt(Offset.zero);
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byKey(const Key('seriesMenu-s2')));
+      await tester.pumpAndSettle();
+      expect(find.text('Unarchive'), findsOneWidget);
+    });
+  });
+
   testWidgets('a refused transition shows a message and keeps the list', (
     tester,
   ) async {
