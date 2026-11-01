@@ -10,6 +10,7 @@ import '../../../core/theme/tokens.dart';
 import '../../../core/widgets/amount_text.dart';
 import '../../../core/widgets/app_card.dart';
 import '../../../core/widgets/app_segmented.dart';
+import '../../../core/widgets/chart_scale.dart';
 import '../../../core/widgets/date_field.dart';
 import '../../../l10n/app_localizations.dart';
 import '../application/networth_controller.dart';
@@ -287,8 +288,8 @@ Path dashPath(Path source, {double dash = 5, double gap = 4}) {
 }
 
 /// The AreaLine itself: an iris 2 px line over a 10 % iris area, 2.5 px ring
-/// dots and a 4 px one on the last month, y gridlines at min / mid / max, and
-/// month labels under the points.
+/// dots and a 4 px one on the last month, y gridlines on clean ticks around the
+/// series (see [ChartScale]), and month labels under the points.
 ///
 /// Points sit on the calendar, not on their index: a month the API omitted
 /// leaves its slot empty, and the line breaks there rather than bridging it —
@@ -474,10 +475,6 @@ class _SeriesPainter extends CustomPainter {
   static const _lastDot = 4.0;
   static const _areaAlpha = 0.10;
 
-  /// How far below the lowest month the scale starts, as a share of the
-  /// series' range.
-  static const _floorHeadroom = 0.12;
-
   static int _index(DateTime month) => month.year * 12 + month.month - 1;
 
   TextPainter _text(String text) => TextPainter(
@@ -498,30 +495,25 @@ class _SeriesPainter extends CustomPainter {
     );
     if (plot.width <= 0 || plot.height <= 0) return;
 
-    final lowest = values.reduce((a, b) => a < b ? a : b);
-    final high = values.reduce((a, b) => a > b ? a : b);
-    // The scale's floor sits below the lowest month, so that point keeps some
-    // air under it instead of lying on the plot's bottom edge.
-    final low = lowest - ((high - lowest) * _floorHeadroom).round();
-    final range = (high - low).toDouble();
+    // The scale reaches past the highest and lowest months to clean ticks, so
+    // neither the peak nor the trough lies on the plot's edge.
+    // Same scale as the account balance chart; minor units, so no tick on cents.
+    final scale = ChartScale.of(values, intervals: 2, minStep: 100);
 
-    double y(num value) => range == 0
-        ? plot.center.dy
-        : plot.bottom - plot.height * ((value - low) / range);
+    double y(num value) => scale.y(value, plot);
 
-    // Gridlines at min / mid / max, labelled in the gutter.
+    // Gridlines at floor / mid / ceiling, labelled in the gutter.
     final grid = Paint()
       ..color = AppColors.borderSubtle
       ..strokeWidth = 1;
-    final levels = range == 0 ? [low] : [low, (low + high) ~/ 2, high];
-    for (final level in levels) {
+    for (final level in scale.ticks) {
       final lineY = y(level);
       canvas.drawLine(
         Offset(plot.left, lineY),
         Offset(size.width, lineY),
         grid,
       );
-      final label = _text(valueLabel(level));
+      final label = _text(valueLabel(level.round()));
       label.paint(
         canvas,
         Offset(
