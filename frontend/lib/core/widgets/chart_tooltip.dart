@@ -28,8 +28,8 @@ class ChartTooltip extends StatelessWidget {
   }
 }
 
-/// A line chart's hover card, laid out over the chart where [placeChartTooltip] puts it:
-/// clear of the hovered point and of the line, rather than under the pointer.
+/// A chart's hover card, laid out over the chart where [placeChartTooltip] puts it:
+/// clear of the hovered point, of the line and of any bar, rather than under the pointer.
 ///
 /// Meant as a layer of the chart's own [Stack], sized like the plot's box. [points]
 /// gives the line's points for that box's size, from the same geometry the painter
@@ -43,6 +43,7 @@ class LineChartTooltip extends StatelessWidget {
     required this.hovered,
     required this.pointRadius,
     this.joinsNext,
+    this.marks,
     this.leftBound = 0,
     this.bottomInset = 0,
     this.cardKey,
@@ -63,6 +64,10 @@ class LineChartTooltip extends StatelessWidget {
   /// Whether point `i` is joined to point `i + 1`; every point is when null. A chart whose
   /// line breaks at a gap passes it, so the card may sit in the gap.
   final bool Function(int index)? joinsNext;
+
+  /// Each point's bar in a box of the given size, one per point, for a bar chart: the
+  /// card keeps clear of them as it does of the line. None when null.
+  final List<Rect> Function(Size size)? marks;
 
   /// Width on the left the card keeps off when the plot has room — the value gutter.
   final double leftBound;
@@ -101,6 +106,7 @@ class _LineChartTooltipLayout extends SingleChildLayoutDelegate {
       tooltip: childSize,
       pointRadius: tooltip.pointRadius,
       joinsNext: tooltip.joinsNext,
+      marks: tooltip.marks?.call(size),
       leftBound: tooltip.leftBound,
     );
   }
@@ -121,8 +127,10 @@ class _LineChartTooltipLayout extends SingleChildLayoutDelegate {
 /// read. Only a chart too small to hold the card anywhere else falls back to the plot's
 /// top-left corner.
 ///
-/// [joinsNext] says which points the line joins; all of them when null. [leftBound] keeps
-/// the card off the value-axis gutter when the plot is wide enough.
+/// [joinsNext] says which points the line joins; all of them when null — a bar chart, with
+/// no line, joins none. [marks] are bars, one per point, kept clear of like the line: all
+/// of them, or the hovered one when nothing else leaves room. [leftBound] keeps the card
+/// off the value-axis gutter when the plot is wide enough.
 Offset placeChartTooltip({
   required Rect area,
   required List<Offset> points,
@@ -130,6 +138,7 @@ Offset placeChartTooltip({
   required Size tooltip,
   required double pointRadius,
   bool Function(int index)? joinsNext,
+  List<Rect>? marks,
   double leftBound = 0,
 }) {
   final anchor = points[hovered];
@@ -151,13 +160,18 @@ Offset placeChartTooltip({
       (anchor, points[hovered + 1]),
   ];
 
-  bool clear(Rect box, List<(Offset, Offset)> lines) {
+  final hoveredMarks = [
+    if (marks != null && hovered < marks.length) marks[hovered],
+  ];
+
+  bool clear(Rect box, List<(Offset, Offset)> lines, List<Rect> bars) {
     final padded = box.inflate(_tooltipMargin);
     if (padded.inflate(pointRadius).contains(anchor)) return false;
+    if (bars.any(padded.overlaps)) return false;
     return !lines.any((line) => _segmentHitsRect(line.$1, line.$2, padded));
   }
 
-  Offset? nearest(List<(Offset, Offset)> lines) {
+  Offset? nearest(List<(Offset, Offset)> lines, List<Rect> bars) {
     Offset? best;
     var bestDistance = double.infinity;
     // A coarse grid is plenty: the card only has to be clear, not pixel-snug.
@@ -165,7 +179,7 @@ Offset placeChartTooltip({
       for (var x = minX; x <= maxX + _tooltipStep - 1; x += _tooltipStep) {
         final corner = Offset(math.min(x, maxX), math.min(y, maxY));
         final box = corner & tooltip;
-        if (!clear(box, lines)) continue;
+        if (!clear(box, lines, bars)) continue;
         final distance = (box.center - anchor).distanceSquared;
         if (distance < bestDistance) {
           bestDistance = distance;
@@ -176,7 +190,9 @@ Offset placeChartTooltip({
     return best;
   }
 
-  return nearest(segments) ?? nearest(nearby) ?? Offset(minX, minY);
+  return nearest(segments, marks ?? const []) ??
+      nearest(nearby, hoveredMarks) ??
+      Offset(minX, minY);
 }
 
 /// The clear space kept between the hover card and the line or its point.
