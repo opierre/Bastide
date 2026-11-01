@@ -11,6 +11,7 @@ import '../../../core/widgets/amount_text.dart';
 import '../../../core/widgets/app_card.dart';
 import '../../../core/widgets/app_segmented.dart';
 import '../../../core/widgets/chart_scale.dart';
+import '../../../core/widgets/chart_tooltip.dart';
 import '../../../core/widgets/date_field.dart';
 import '../../../l10n/app_localizations.dart';
 import '../application/networth_controller.dart';
@@ -297,8 +298,9 @@ Path dashPath(Path source, {double dash = 5, double gap = 4}) {
 /// touching a declared month is dashed. Over a year, every point keeps its
 /// label; past that, labels go to evenly spaced months so they never collide.
 ///
-/// Hovering a month rings its point and names its net worth, as the dashboard's
-/// « Évolution de l'épargne » does.
+/// Hovering a month enlarges its point to the last month's dot and names its
+/// net worth in a card placed clear of the line, as the account's « Évolution
+/// du solde » does — see [LineChartTooltip].
 class NetworthSeriesPlot extends StatefulWidget {
   const NetworthSeriesPlot({
     super.key,
@@ -367,31 +369,53 @@ class _NetworthSeriesPlotState extends State<NetworthSeriesPlot> {
         Column(
           children: [
             Expanded(
-              child: Row(
-                children: [
-                  const SizedBox(width: _SeriesPainter._gutter),
-                  for (final (i, flex) in _bandFlexes(months).indexed)
-                    Expanded(
-                      flex: flex,
-                      child: MouseRegion(
-                        onEnter: (_) => setState(() => _hovered = i),
-                        onExit: (_) => setState(() {
-                          if (_hovered == i) _hovered = null;
-                        }),
-                        child: Tooltip(
-                          key: Key('networthSeriesTooltip-$i'),
-                          richMessage: _tooltip(i, l10n, locale, textTheme),
-                          child: const SizedBox.expand(),
+              child: MouseRegion(
+                onExit: (_) => setState(() => _hovered = null),
+                child: Row(
+                  children: [
+                    const SizedBox(width: _SeriesPainter._gutter),
+                    for (final (i, flex) in _bandFlexes(months).indexed)
+                      Expanded(
+                        flex: flex,
+                        child: MouseRegion(
+                          key: Key('networthSeriesSlot-$i'),
+                          onEnter: (_) => setState(() => _hovered = i),
+                          // The card only exists while a pointer hovers, so a
+                          // screen reader gets the month's figure on its band.
+                          child: Semantics(
+                            label: _tooltip(
+                              i,
+                              l10n,
+                              locale,
+                              textTheme,
+                            ).toPlainText(),
+                            child: const SizedBox.expand(),
+                          ),
                         ),
                       ),
-                    ),
-                  const SizedBox(width: _SeriesPainter._lastDot),
-                ],
+                    const SizedBox(width: _SeriesPainter._lastDot),
+                  ],
+                ),
               ),
             ),
             const SizedBox(height: _SeriesPainter._axis),
           ],
         ),
+        if (_hovered case final hovered? when hovered < values.length)
+          LineChartTooltip(
+            cardKey: const Key('networthSeriesTooltip'),
+            message: _tooltip(hovered, l10n, locale, textTheme),
+            points: (size) => _seriesPoints(size, months, values),
+            hovered: hovered,
+            // The hovered dot, ring included.
+            pointRadius: _SeriesPainter._lastDot + _SeriesPainter._ring / 2,
+            joinsNext: (i) =>
+                _SeriesPainter._index(months[i + 1]) -
+                    _SeriesPainter._index(months[i]) ==
+                1,
+            leftBound: _SeriesPainter._gutter,
+            bottomInset: _SeriesPainter._axis,
+          ),
       ],
     );
   }
@@ -444,6 +468,41 @@ List<int> _bandFlexes(List<DateTime> months) {
   ];
 }
 
+/// Where the plot sits in the chart's box: right of the value gutter, above the
+/// month axis, inset by the last month's dot. Shared by the painter and the
+/// tooltip, so the card can't drift off the point it names.
+Rect _plotRect(Size size) => Rect.fromLTRB(
+  _SeriesPainter._gutter,
+  _SeriesPainter._lastDot,
+  size.width - _SeriesPainter._lastDot,
+  size.height - _SeriesPainter._axis,
+);
+
+/// The series' scale: past the highest and lowest months to clean ticks, so
+/// neither the peak nor the trough lies on the plot's edge. Same scale as the
+/// account balance chart; minor units, so no tick on cents.
+ChartScale _seriesScale(List<int> values) =>
+    ChartScale.of(values, intervals: 2, minStep: 100);
+
+/// Each month's point in a chart of [size]: on the calendar, not on its index.
+List<Offset> _seriesPoints(Size size, List<DateTime> months, List<int> values) {
+  final plot = _plotRect(size);
+  final scale = _seriesScale(values);
+  final first = _SeriesPainter._index(months.first);
+  final span = _SeriesPainter._index(months.last) - first;
+  return [
+    for (var i = 0; i < values.length; i++)
+      Offset(
+        span == 0
+            ? plot.center.dx
+            : plot.left +
+                  plot.width *
+                      ((_SeriesPainter._index(months[i]) - first) / span),
+        scale.y(values[i], plot),
+      ),
+  ];
+}
+
 String _capitalize(String value) =>
     value.isEmpty ? value : value[0].toUpperCase() + value.substring(1);
 
@@ -473,6 +532,7 @@ class _SeriesPainter extends CustomPainter {
   static const _dot = 2.5;
   static const _maxLabels = 12;
   static const _lastDot = 4.0;
+  static const _ring = 1.5;
   static const _areaAlpha = 0.10;
 
   static int _index(DateTime month) => month.year * 12 + month.month - 1;
@@ -487,18 +547,10 @@ class _SeriesPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     if (values.isEmpty) return;
 
-    final plot = Rect.fromLTRB(
-      _gutter,
-      _lastDot,
-      size.width - _lastDot,
-      size.height - _axis,
-    );
+    final plot = _plotRect(size);
     if (plot.width <= 0 || plot.height <= 0) return;
 
-    // The scale reaches past the highest and lowest months to clean ticks, so
-    // neither the peak nor the trough lies on the plot's edge.
-    // Same scale as the account balance chart; minor units, so no tick on cents.
-    final scale = ChartScale.of(values, intervals: 2, minStep: 100);
+    final scale = _seriesScale(values);
 
     double y(num value) => scale.y(value, plot);
 
@@ -529,10 +581,7 @@ class _SeriesPainter extends CustomPainter {
         ? plot.center.dx
         : plot.left + plot.width * ((_index(month) - first) / span);
 
-    final points = [
-      for (var i = 0; i < values.length; i++)
-        Offset(x(months[i]), y(values[i])),
-    ];
+    final points = _seriesPoints(size, months, values);
 
     // Contiguous runs of months: the line and its area break at every gap.
     final runs = <List<Offset>>[];
@@ -579,7 +628,7 @@ class _SeriesPainter extends CustomPainter {
     final ring = Paint()
       ..color = AppColors.iris
       ..style = PaintingStyle.stroke
-      ..strokeWidth = 1.5;
+      ..strokeWidth = _ring;
     final hole = Paint()..color = AppColors.surfaceRaised;
     for (var i = 0; i < points.length; i++) {
       final radius = i == points.length - 1 || i == hovered ? _lastDot : _dot;

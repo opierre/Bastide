@@ -90,6 +90,46 @@ Future<void> _moveTo(
 Rect _tooltip(WidgetTester tester, int index) =>
     tester.getRect(find.byKey(Key('savingsChartTooltip-$index')));
 
+/// Month [index]'s bar in global coordinates: 22 px wide at most, from zero to its tip.
+Rect _bar(WidgetTester tester, int index) {
+  final chart = tester.getRect(find.byType(SavingsChart));
+  final (_, zero) = _localMark(tester, index);
+  final tip = _mark(tester, index);
+  final zeroY = chart.top + zero.dy;
+  final slot = (chart.width - AreaLine.valueGutter) / _values.length;
+  final width = slot * 0.56 < 22 ? slot * 0.56 : 22.0;
+  return Rect.fromLTRB(
+    tip.dx - width / 2,
+    tip.dy < zeroY ? tip.dy : zeroY,
+    tip.dx + width / 2,
+    tip.dy < zeroY ? zeroY : tip.dy,
+  );
+}
+
+/// Whether [box] covers any stretch of the line joining [points], sampled
+/// every pixel or so.
+bool _touchesLine(Rect box, List<Offset> points) {
+  for (var i = 1; i < points.length; i++) {
+    final a = points[i - 1];
+    final b = points[i];
+    final steps = (b - a).distance.ceil();
+    for (var s = 0; s <= steps; s++) {
+      if (box.contains(Offset.lerp(a, b, s / steps)!)) return true;
+    }
+  }
+  return false;
+}
+
+/// The card stays in the chart, right of the value gutter and above the
+/// month axis.
+void _expectInPlot(WidgetTester tester, Rect card) {
+  final chart = tester.getRect(find.byType(SavingsChart));
+  expect(card.left, greaterThanOrEqualTo(chart.left + AreaLine.valueGutter));
+  expect(card.top, greaterThanOrEqualTo(chart.top));
+  expect(card.right, lessThanOrEqualTo(chart.right));
+  expect(card.bottom, lessThanOrEqualTo(chart.bottom - AreaLine.axisHeight));
+}
+
 RenderObject _painter(WidgetTester tester) => tester.renderObject(
   find.descendant(
     of: find.byType(SavingsChart),
@@ -143,53 +183,25 @@ List<Offset> _averageDots(WidgetTester tester) {
 
 void main() {
   group('bars', () {
-    testWidgets('a saving names itself just over its bar', (tester) async {
+    testWidgets('each month names itself at once, clear of every bar', (
+      tester,
+    ) async {
       await _pump(tester, SavingsChartView.bars);
-      await _hover(tester, 0);
-
-      final tip = _mark(tester, 0);
-      final tooltip = _tooltip(tester, 0);
-      expect(tooltip.center.dx, moreOrLessEquals(tip.dx, epsilon: 0.5));
-      expect(tooltip.bottom, moreOrLessEquals(tip.dy - 8, epsilon: 0.5));
+      final gesture = await _hover(tester, 0);
+      // One frame, no Tooltip delay: the card is there as the pointer lands.
+      expect(find.byType(Tooltip), findsNothing);
       expect(find.text('Mois 0\n12000', findRichText: true), findsOneWidget);
-    });
 
-    testWidgets('the tallest saving clears its tip past the plot', (
-      tester,
-    ) async {
-      await _pump(tester, SavingsChartView.bars);
-      await _hover(tester, 1);
-
-      // Little headroom over the tallest bar: the tooltip floats above the chart rather
-      // than flipping onto the bar.
-      final tooltip = _tooltip(tester, 1);
-      expect(tooltip.bottom, moreOrLessEquals(_mark(tester, 1).dy - 8));
-      expect(
-        tooltip.top,
-        lessThan(tester.getRect(find.byType(SavingsChart)).top),
-      );
-    });
-
-    testWidgets('a shortfall names itself just under its bar', (tester) async {
-      await _pump(tester, SavingsChartView.bars);
-      await _hover(tester, 2);
-
-      final tip = _mark(tester, 2);
-      final tooltip = _tooltip(tester, 2);
-      expect(tooltip.center.dx, moreOrLessEquals(tip.dx, epsilon: 0.5));
-      expect(tooltip.top, moreOrLessEquals(tip.dy + 8, epsilon: 0.5));
-    });
-
-    testWidgets('an empty month names itself over the zero line', (
-      tester,
-    ) async {
-      await _pump(tester, SavingsChartView.bars);
-      await _hover(tester, 3);
-
-      expect(
-        _tooltip(tester, 3).bottom,
-        moreOrLessEquals(_mark(tester, 3).dy - 8, epsilon: 0.5),
-      );
+      final bars = [for (var i = 0; i < _values.length; i++) _bar(tester, i)];
+      for (var i = 0; i < _values.length; i++) {
+        if (i > 0) await _moveTo(tester, gesture, i);
+        final card = _tooltip(tester, i);
+        for (final bar in bars) {
+          expect(card.overlaps(bar), isFalse, reason: 'month $i');
+        }
+        expect(card.contains(_mark(tester, i)), isFalse, reason: 'month $i');
+        _expectInPlot(tester, card);
+      }
     });
   });
 
@@ -225,25 +237,28 @@ void main() {
       expect(_painter(tester), isNot(paints..path(color: _area)));
     });
 
-    testWidgets('a point names itself clear of its hovered dot', (
+    testWidgets('each point names itself clear of its dot and the line', (
       tester,
     ) async {
       await _pump(tester, SavingsChartView.line);
-      final gesture = await _hover(tester, 4);
+      final gesture = await _hover(tester, 0);
 
-      // The hovered dot's 5 px radius and 1.5 px ring, then the gap.
-      final dot = _mark(tester, 4);
-      final tooltip = _tooltip(tester, 4);
-      expect(tooltip.center.dx, moreOrLessEquals(dot.dx, epsilon: 0.5));
-      expect(tooltip.bottom, moreOrLessEquals(dot.dy - 6.5 - 8, epsilon: 0.5));
-
-      await _moveTo(tester, gesture, 2);
-      final low = _mark(tester, 2);
-      expect(
-        _tooltip(tester, 2).top,
-        moreOrLessEquals(low.dy + 6.5 + 8, epsilon: 0.5),
-      );
-      expect(find.byKey(const Key('savingsChartTooltip-4')), findsNothing);
+      final points = [
+        for (var i = 0; i < _values.length; i++) _mark(tester, i),
+      ];
+      for (var i = 0; i < _values.length; i++) {
+        if (i > 0) await _moveTo(tester, gesture, i);
+        final card = _tooltip(tester, i);
+        // The hovered dot's 5 px radius and 1.5 px ring.
+        expect(
+          card.inflate(6.5).contains(points[i]),
+          isFalse,
+          reason: 'month $i',
+        );
+        expect(_touchesLine(card, points), isFalse, reason: 'month $i');
+        _expectInPlot(tester, card);
+      }
+      expect(find.byKey(const Key('savingsChartTooltip-0')), findsNothing);
     });
   });
 
