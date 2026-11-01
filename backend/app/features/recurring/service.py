@@ -25,6 +25,7 @@ from app.features.recurring.detector import (
     INTERVAL_TOLERANCE_FLOOR_DAYS,
     INTERVAL_TOLERANCE_PERCENT,
     SeriesCandidate,
+    amount_baseline,
 )
 from app.features.recurring.detector import detect as detect_candidates
 from app.features.recurring.models import RecurringOccurrence, RecurringSeries
@@ -142,8 +143,72 @@ class RecurringDetectionService:
             written.append((series, candidate))
 
         self._link_occurrences(written)
+        updated_count += self._extend_manual_series(list(existing.values()), transactions, aliases)
         self._db.commit()
         return DetectionResult(created_count=created_count, updated_count=updated_count)
+
+    def _extend_manual_series(
+        self,
+        series_rows: list[RecurringSeries],
+        transactions: list[Transaction],
+        aliases: dict[tuple[str, str], tuple[str, str]],
+    ) -> int:
+        """Link new charges to the hand-created series they belong to, and refresh what they show.
+
+        A series the user created from its charges is tracked under the key those charges share,
+        so a later charge under that key, or under an alias of it, is the same subscription
+        coming round again. It is linked the way detection links a detected series' charges —
+        only when no series holds it yet — and the series' observed columns are recomputed from
+        its whole history. Nothing is ever unlinked: every link already there was ticked or
+        added by the user, tolerances or not.
+
+        Left exactly as they are: a series declared without charges, whose key is a normalized
+        label no charge was ever seen under, and a dismissed or cancelled one.
+
+        Returns:
+            How many series gained an occurrence.
+        """
+        tracked = {
+            (series.account_id, series.merchant_key): series
+            for series in series_rows
+            if series.is_manual and series.status not in FROZEN_STATUSES
+        }
+        if not tracked:
+            return 0
+
+        charges: dict[str, list[Transaction]] = {}
+        for transaction in transactions:
+            if transaction.amount_minor >= 0:
+                continue
+            own = (transaction.account_id, merchant_key(transaction))
+            series = tracked.get(aliases.get(own, own))
+            if series is not None:
+                charges.setdefault(series.id, []).append(transaction)
+        if not charges:
+            return 0
+
+        # Flushed so the links this pass just staged for detected series count as claimed.
+        self._repository.flush()
+        claimed = self._repository.linked_transaction_ids(
+            [transaction.id for group in charges.values() for transaction in group]
+        )
+        extended = 0
+        for series in tracked.values():
+            new = [t for t in charges.get(series.id, []) if t.id not in claimed]
+            if not new:
+                continue
+            history = [
+                transaction for _, transaction in self._repository.list_occurrences(series.id)
+            ]
+            if not history:
+                continue
+            for transaction in new:
+                self._repository.stage_occurrence(
+                    RecurringOccurrence(series_id=series.id, transaction_id=transaction.id)
+                )
+            _observe(series, sorted([*history, *new], key=lambda t: (t.booked_date, t.id)))
+            extended += 1
+        return extended
 
     def _link_occurrences(self, written: list[tuple[RecurringSeries, SeriesCandidate]]) -> None:
         """Replace the occurrence links of every series this pass wrote.
@@ -201,7 +266,11 @@ def _is_card_settlement(transaction: Transaction) -> bool:
 
 
 def _is_frozen(series: RecurringSeries) -> bool:
-    """True for a series detection must not write to at all."""
+    """True for a series a detection candidate must not write to.
+
+    A manual series is still extended by `_extend_manual_series`, but only its observed columns
+    and only with new links; a candidate's view of it would overwrite what the user declared.
+    """
     return series.is_manual or series.status in FROZEN_STATUSES
 
 
@@ -248,6 +317,37 @@ def _refresh(series: RecurringSeries, candidate: SeriesCandidate) -> None:
     series.occurrence_count = candidate.occurrence_count
     series.price_change_minor = candidate.price_change_minor
     series.price_changed_at = candidate.price_changed_at
+
+
+def _observe(series: RecurringSeries, history: list[Transaction]) -> None:
+    """Write what ``history``, oldest first, shows onto a hand-created series.
+
+    Only the observed columns. `label`, `category_id`, `cadence`, `expected_amount_minor` and
+    `status` are what the user declared, and an `irregular` series keeps its interval, since
+    having none is what the user said about it.
+
+    A price change records the step and its date, so the price-increase signal and the price
+    history pick it up, but leaves `expected_amount_minor` alone: on a manual series that amount
+    is the user's word, not the detector's baseline, and the signal is there to prompt them to
+    change it. The step is judged as detection judges it (`amount_baseline`). When the history
+    no longer agrees on one amount — typically the second charge at a new price, which detection
+    would refuse to qualify — the step already recorded is kept rather than cleared, so the
+    rise stays visible for as long as the summary considers it news.
+    """
+    first, last = history[0].booked_date, history[-1].booked_date
+    if series.cadence != "irregular":
+        gaps = [(b.booked_date - a.booked_date).days for a, b in pairwise(history)]
+        if gaps:
+            series.median_interval_days = median_low(gaps)
+    series.first_seen_date = first
+    series.last_seen_date = last
+    series.next_expected_date = last + timedelta(days=series.median_interval_days)
+    series.occurrence_count = len(history)
+    baseline = amount_baseline([transaction.amount_minor for transaction in history])
+    if baseline is not None:
+        step = baseline.price_change_minor
+        series.price_change_minor = step
+        series.price_changed_at = last if step is not None else None
 
 
 class SeriesNotFoundError(NotFoundError):
@@ -428,7 +528,8 @@ class RecurringService:
         `occurrence_count` is `0`, and `first_seen_date` records when the user started tracking
         the series rather than claiming when it started. With them — the ones ticked in a
         preview — those transactions become the occurrences and the observed columns are theirs.
-        `is_manual` keeps detection off the series for good either way.
+        `is_manual` keeps detection from overwriting what the user declared either way; a series
+        created from charges still gains the later ones under its key in a detection pass.
 
         Raises:
             AccountNotFoundError: the account is not one of the user's.

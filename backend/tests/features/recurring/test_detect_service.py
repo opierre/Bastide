@@ -318,6 +318,212 @@ def test_a_series_left_alone_keeps_its_occurrence_links(client: TestClient, tmp_
     assert {occurrence.transaction_id for occurrence in occurrences} == set(transaction_ids)
 
 
+# --- hand-created series keep up with their charges -----------------------------------------
+
+
+def _create_manual(
+    client: TestClient,
+    headers: dict[str, str],
+    account_id: str,
+    transaction_ids: list[str],
+    *,
+    label: str = "Netflix",
+    expected_amount_minor: int = -1799,
+) -> str:
+    """Create a series by hand from ``transaction_ids``, as « Marquer comme récurrent » does."""
+    response = client.post(
+        "/api/v1/recurring",
+        json={
+            "label": label,
+            "account_id": account_id,
+            "cadence": "monthly",
+            "expected_amount_minor": expected_amount_minor,
+            "transaction_ids": transaction_ids,
+        },
+        headers=headers,
+    )
+    assert response.status_code == 201, response.json()
+    return str(response.json()["id"])
+
+
+def _series(tmp_path: Path, series_id: str) -> RecurringSeries:
+    return next(row for row in _series_rows(tmp_path) if row.id == series_id)
+
+
+def _links(tmp_path: Path, series_id: str) -> set[str]:
+    return {row.transaction_id for row in _occurrence_rows(tmp_path) if row.series_id == series_id}
+
+
+def test_a_manual_series_picks_up_its_next_charge(client: TestClient, tmp_path: Path) -> None:
+    headers = _register(client)
+    account_id = _create_account(client, headers)
+    ticked = _insert_subscription(tmp_path, account_id, offsets=(0, 30))
+    series_id = _create_manual(client, headers, account_id, ticked, expected_amount_minor=-1500)
+    category_id = client.post(
+        "/api/v1/categories",
+        json={"name": "Abonnements", "kind": "expense", "icon": "tv", "color": "#10B981"},
+        headers=headers,
+    ).json()["id"]
+    _update_series(tmp_path, series_id, category_id=category_id, status="confirmed")
+    [third] = _insert_subscription(
+        tmp_path, account_id, label="PRLV SEPA NETFLIX.COM ", offsets=(60,)
+    )
+
+    assert _detect(client, headers) == {"created_count": 0, "updated_count": 1}
+
+    series = _series(tmp_path, series_id)
+    assert series.occurrence_count == 3
+    assert series.first_seen_date == START
+    assert series.last_seen_date == START + timedelta(days=60)
+    assert series.next_expected_date == START + timedelta(days=90)
+    assert series.median_interval_days == 30
+    # What the user declared is theirs.
+    assert series.is_manual is True
+    assert series.label == "Netflix"
+    assert series.cadence == "monthly"
+    assert series.expected_amount_minor == -1500
+    assert series.category_id == category_id
+    assert series.status == "confirmed"
+    assert _links(tmp_path, series_id) == {*ticked, third}
+    assert len(_series_rows(tmp_path)) == 1
+
+
+def test_a_charge_under_an_alias_joins_the_manual_series(
+    client: TestClient, tmp_path: Path
+) -> None:
+    # Two routes for one subscription, both ticked when the series was created.
+    headers = _register(client)
+    account_id = _create_account(client, headers)
+    ticked = [
+        *_insert_subscription(tmp_path, account_id, label="PRLV SEPA STREAMCO", offsets=(0, 30)),
+        *_insert_subscription(tmp_path, account_id, label="PAYPAL *STREAMCO", offsets=(60,)),
+    ]
+    series_id = _create_manual(client, headers, account_id, ticked, label="Streamco")
+    [later] = _insert_subscription(tmp_path, account_id, label="PAYPAL *STREAMCO ", offsets=(90,))
+
+    _detect(client, headers)
+
+    assert _links(tmp_path, series_id) == {*ticked, later}
+    assert _series(tmp_path, series_id).occurrence_count == 4
+
+
+def test_a_price_change_on_a_manual_series_is_recorded_not_applied(
+    client: TestClient, tmp_path: Path
+) -> None:
+    headers = _register(client)
+    account_id = _create_account(client, headers)
+    ticked = _insert_subscription(tmp_path, account_id, offsets=(0, 30))
+    series_id = _create_manual(client, headers, account_id, ticked)
+    _insert_subscription(
+        tmp_path, account_id, label="PRLV SEPA NETFLIX.COM ", offsets=(60,), amounts=(-2199,)
+    )
+
+    _detect(client, headers)
+
+    series = _series(tmp_path, series_id)
+    assert series.price_change_minor == -400
+    assert series.price_changed_at == START + timedelta(days=60)
+    assert series.expected_amount_minor == -1799
+
+
+def test_a_price_rise_stays_recorded_when_the_next_charge_confirms_it(
+    client: TestClient, tmp_path: Path
+) -> None:
+    headers = _register(client)
+    account_id = _create_account(client, headers)
+    ticked = _insert_subscription(tmp_path, account_id, offsets=(0, 30))
+    series_id = _create_manual(client, headers, account_id, ticked)
+    _insert_subscription(
+        tmp_path, account_id, label="PRLV SEPA NETFLIX.COM ", offsets=(60,), amounts=(-2199,)
+    )
+    _detect(client, headers)
+    _insert_subscription(
+        tmp_path, account_id, label="PRLV SEPA NETFLIX.COM  ", offsets=(90,), amounts=(-2199,)
+    )
+
+    _detect(client, headers)
+
+    series = _series(tmp_path, series_id)
+    assert series.occurrence_count == 4
+    assert series.price_change_minor == -400
+    assert series.price_changed_at == START + timedelta(days=60)
+
+
+def test_a_hand_ticked_occurrence_outside_tolerance_survives_detection(
+    client: TestClient, tmp_path: Path
+) -> None:
+    # A one-off charge on day 45, far off in amount and date, ticked anyway.
+    headers = _register(client)
+    account_id = _create_account(client, headers)
+    ticked = _insert_subscription(
+        tmp_path, account_id, offsets=(0, 30, 45), amounts=(-1799, -1799, -5000)
+    )
+    series_id = _create_manual(client, headers, account_id, ticked)
+    [later] = _insert_subscription(
+        tmp_path, account_id, label="PRLV SEPA NETFLIX.COM ", offsets=(60,)
+    )
+
+    _detect(client, headers)
+
+    assert _links(tmp_path, series_id) == {*ticked, later}
+
+
+def test_detecting_twice_leaves_the_same_rows_as_once(client: TestClient, tmp_path: Path) -> None:
+    headers = _register(client)
+    account_id = _create_account(client, headers)
+    ticked = _insert_subscription(tmp_path, account_id, offsets=(0, 30))
+    _create_manual(client, headers, account_id, ticked)
+    _insert_subscription(
+        tmp_path, account_id, label="PRLV SEPA NETFLIX.COM ", offsets=(60,), amounts=(-2199,)
+    )
+    _insert_subscription(tmp_path, account_id, label="PRLV SEPA SPOTIFY")
+    _detect(client, headers)
+
+    def snapshot() -> tuple[list[dict[str, object]], set[tuple[str, str]]]:
+        columns = [c.name for c in RecurringSeries.__table__.columns if c.name != "updated_at"]
+        series = [{c: getattr(row, c) for c in columns} for row in _series_rows(tmp_path)]
+        links = {(row.series_id, row.transaction_id) for row in _occurrence_rows(tmp_path)}
+        return series, links
+
+    once = snapshot()
+    _detect(client, headers)
+
+    assert snapshot() == once
+
+
+def test_a_manual_series_declared_without_charges_is_left_alone(
+    client: TestClient, tmp_path: Path
+) -> None:
+    # Its key is the normalized label, which here happens to be the charges' own key.
+    headers = _register(client)
+    account_id = _create_account(client, headers)
+    series_id = _create_manual(client, headers, account_id, [], label="PRLV SEPA NETFLIX.COM")
+    before = _series(tmp_path, series_id)
+    _insert_subscription(tmp_path, account_id)
+
+    assert _detect(client, headers) == {"created_count": 0, "updated_count": 0}
+
+    after = _series(tmp_path, series_id)
+    assert after.merchant_key == "netflix.com"
+    assert after.occurrence_count == 0
+    assert after.last_seen_date == before.last_seen_date
+    assert _occurrence_rows(tmp_path) == []
+
+
+def test_a_cancelled_manual_series_gains_no_charge(client: TestClient, tmp_path: Path) -> None:
+    headers = _register(client)
+    account_id = _create_account(client, headers)
+    ticked = _insert_subscription(tmp_path, account_id, offsets=(0, 30))
+    series_id = _create_manual(client, headers, account_id, ticked)
+    _update_series(tmp_path, series_id, status="cancelled")
+    _insert_subscription(tmp_path, account_id, label="PRLV SEPA NETFLIX.COM ", offsets=(60,))
+
+    assert _detect(client, headers) == {"created_count": 0, "updated_count": 0}
+
+    assert _series(tmp_path, series_id).occurrence_count == 2
+    assert _links(tmp_path, series_id) == set(ticked)
+
+
 # --- scoping ---------------------------------------------------------------------------------
 
 
