@@ -60,10 +60,10 @@ class SavingsChart extends StatefulWidget {
 
   /// The average line's color: the secondary text tone, half-transparent, so it reads as a
   /// reference rather than a series and stays clear of iris (the line view's own stroke)
-  /// and of the green/red that carry money.
-  /// Spelled as one 8-bit ARGB value (secondary text `#97A3B6` @ 60 %) so it survives
-  /// a [Paint] round trip unchanged.
-  static const averageColor = Color(0x9997A3B6);
+  /// and of the green/red that carry money. [AppColors.borderDashed] would match the
+  /// dashed zero baseline, so the token is the secondary text tone at 60 %, set as an 8-bit
+  /// alpha (153 / 255) so it survives a [Paint] round trip unchanged.
+  static final averageColor = AppColors.textSecondary.withAlpha(153);
 
   /// The average line's dots: a round cap on a near-zero dash, every [averageDotGap] px.
   static const averageStroke = 1.5;
