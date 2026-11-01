@@ -201,9 +201,9 @@ class _HeaderCard extends ConsumerWidget {
                 ),
                 const SizedBox(height: AppSpacing.xs + 2),
                 Text(
-                  // A declared series was never detected, so saying it was
-                  // would misdescribe where it came from — and the user is the
-                  // one who typed it in.
+                  // A series the user created from its charges was never
+                  // detected, so saying it was would misdescribe where it came
+                  // from.
                   series.isManual
                       ? l10n.subscriptionDetailTrackedSince(accountName, since)
                       : l10n.subscriptionDetailDetectedSince(
@@ -317,40 +317,30 @@ class _HistoryCard extends StatelessWidget {
             ),
           ),
           const SizedBox(height: AppSpacing.md),
-          if (detail.occurrences.isEmpty)
-            Text(
-              l10n.subscriptionDetailHistoryEmpty,
-              key: const Key('seriesHistoryEmpty'),
-              style: AppTextStyles.helper,
-            )
-          else ...[
-            SizedBox(
-              height: _chartHeight,
-              child: PriceHistoryChart(
-                series: series,
-                occurrences: detail.occurrences,
-              ),
+          // Every series has charges: it is detected from them, or created
+          // from the ones the user ticked.
+          SizedBox(
+            height: _chartHeight,
+            child: PriceHistoryChart(
+              series: series,
+              occurrences: detail.occurrences,
             ),
-            if (stepped != null) ...[
-              const SizedBox(height: AppSpacing.sm + AppSpacing.xs),
-              // The legend for the amber point on the curve, in the same pill
-              // the list row uses for the same fact.
-              Align(
-                alignment: Alignment.centerLeft,
-                child: StatusPill(
-                  key: Key('seriesOccurrenceChange-${stepped.id}'),
-                  tone: StatusPillTone.warning,
-                  label: l10n.subscriptionDetailChange(
-                    _money(
-                      series.previousAmountMinor!,
-                      series.currency,
-                      locale,
-                    ),
-                    _money(series.expectedAmountMinor, series.currency, locale),
-                  ),
+          ),
+          if (stepped != null) ...[
+            const SizedBox(height: AppSpacing.sm + AppSpacing.xs),
+            // The legend for the amber point on the curve, in the same pill
+            // the list row uses for the same fact.
+            Align(
+              alignment: Alignment.centerLeft,
+              child: StatusPill(
+                key: Key('seriesOccurrenceChange-${stepped.id}'),
+                tone: StatusPillTone.warning,
+                label: l10n.subscriptionDetailChange(
+                  _money(series.previousAmountMinor!, series.currency, locale),
+                  _money(series.expectedAmountMinor, series.currency, locale),
                 ),
               ),
-            ],
+            ),
           ],
         ],
       ),

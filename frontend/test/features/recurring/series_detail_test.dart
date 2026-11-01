@@ -2,6 +2,7 @@ import 'package:bastide/core/theme/app_theme.dart';
 import 'package:bastide/core/widgets/amount_text.dart';
 import 'package:bastide/features/recurring/application/subscriptions_controller.dart';
 import 'package:bastide/features/recurring/domain/recurring_series.dart';
+import 'package:bastide/features/recurring/presentation/price_history_chart.dart';
 import 'package:bastide/features/recurring/presentation/series_detail.dart';
 import 'package:bastide/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
@@ -114,37 +115,47 @@ void main() {
     );
   });
 
-  testWidgets(
-    'a declared series says it is tracked, not detected, and has no history',
-    (tester) async {
-      tester.view.physicalSize = const Size(1440, 900);
-      tester.view.devicePixelRatio = 1.0;
-      addTearDown(tester.view.reset);
+  testWidgets('a series created by the user says it is tracked, not detected', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(1440, 900);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.reset);
 
-      await tester.pumpWidget(
-        _wrap(
-          SeriesDetail(
-            series: testSeries(
-              label: 'Basic-Fit',
-              isManual: true,
-              cadence: Cadence.irregular,
-              occurrenceCount: 0,
-            ),
-            occurrences: const [],
+    await tester.pumpWidget(
+      _wrap(
+        SeriesDetail(
+          series: testSeries(
+            label: 'Basic-Fit',
+            isManual: true,
+            cadence: Cadence.irregular,
+            occurrenceCount: 2,
           ),
+          occurrences: [
+            _occurrence(
+              id: 'o2',
+              bookedDate: DateTime(2026, 3, 2),
+              amountMinor: -2999,
+            ),
+            _occurrence(
+              id: 'o1',
+              bookedDate: DateTime(2025, 12, 15),
+              amountMinor: -2999,
+            ),
+          ],
         ),
-      );
-      await tester.pumpAndSettle();
+      ),
+    );
+    await tester.pumpAndSettle();
 
-      expect(
-        find.text('BNP — Compte courant · suivi depuis décembre 2025'),
-        findsOneWidget,
-      );
-      expect(find.byKey(const Key('seriesHistoryEmpty')), findsOneWidget);
-      expect(find.byKey(const Key('seriesIncreaseBanner')), findsNothing);
-      expect(find.text('Irrégulier'), findsOneWidget);
-    },
-  );
+    expect(
+      find.text('BNP — Compte courant · suivi depuis décembre 2025'),
+      findsOneWidget,
+    );
+    expect(find.byType(PriceHistoryChart), findsOneWidget);
+    expect(find.byKey(const Key('seriesIncreaseBanner')), findsNothing);
+    expect(find.text('Irrégulier'), findsOneWidget);
+  });
 
   testWidgets('a price that never moved draws one flat level, not a range', (
     tester,

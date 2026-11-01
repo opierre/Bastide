@@ -149,7 +149,7 @@ class FakeSubscriptionsController extends SubscriptionsController {
       cadence: cadence,
       expectedAmountMinor: expectedAmountMinor,
       isManual: true,
-      occurrenceCount: 0,
+      occurrenceCount: transactionIds.length,
     );
     createCalls.add(created);
     return created;

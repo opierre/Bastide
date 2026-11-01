@@ -3689,12 +3689,6 @@ abstract class AppLocalizations {
   /// **'Les transactions dont cette série est déduite · {account}'**
   String subscriptionDetailHistorySubtitle(String account);
 
-  /// History card with no rows — the ordinary state of a series the user has just declared.
-  ///
-  /// In fr, this message translates to:
-  /// **'Aucun prélèvement rattaché à ce paiement pour l\'instant.'**
-  String get subscriptionDetailHistoryEmpty;
-
   /// Amber pill marking the occurrence where the price stepped up.
   ///
   /// In fr, this message translates to:

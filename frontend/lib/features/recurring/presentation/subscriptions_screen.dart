@@ -132,7 +132,7 @@ class _SubscriptionsList extends ConsumerWidget {
             label: l10n.subscriptionsEmptyCta,
             height: 44,
             // More history is what actually produces a detection, so the offer
-            // is the imports panel rather than "declare one by hand".
+            // is the imports panel.
             onPressed: () => context.go(ImportsScreen.path),
           ),
         ),

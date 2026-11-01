@@ -2963,10 +2963,6 @@
       }
     }
   },
-  "subscriptionDetailHistoryEmpty": "Aucun prélèvement rattaché à ce paiement pour l'instant.",
-  "@subscriptionDetailHistoryEmpty": {
-    "description": "History card with no rows — the ordinary state of a series the user has just declared."
-  },
   "subscriptionDetailChange": "{from} → {to}",
   "@subscriptionDetailChange": {
     "description": "Amber pill marking the occurrence where the price stepped up.",

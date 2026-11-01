@@ -2371,10 +2371,6 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get subscriptionDetailHistoryEmpty =>
-      'No charges linked to this payment yet.';
-
-  @override
   String subscriptionDetailChange(String from, String to) {
     return '$from → $to';
   }

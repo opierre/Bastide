@@ -11,10 +11,8 @@ from pathlib import Path
 from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session
 
-from app.features.accounts.models import Account
 from app.features.imports.models import ImportBatch
 from app.features.recurring.models import RecurringOccurrence, RecurringSeries
-from app.features.recurring.normalize import normalize_label
 from app.features.transactions.models import Transaction
 from tests.api import register as _register
 from tests.db import open_session
@@ -491,55 +489,6 @@ def test_detecting_twice_leaves_the_same_rows_as_once(client: TestClient, tmp_pa
     _detect(client, headers)
 
     assert snapshot() == once
-
-
-def _insert_series_without_charges(tmp_path: Path, account_id: str, label: str) -> str:
-    """A manual series with no occurrence, as the old « Nouveau paiement récurrent » form made.
-
-    The API no longer creates one, but series created before still sit in users' databases.
-    """
-    session = _session(tmp_path)
-    user_id = session.query(Account).filter(Account.id == account_id).one().user_id
-    series = RecurringSeries(
-        user_id=user_id,
-        account_id=account_id,
-        merchant_key=normalize_label(label),
-        label=label,
-        cadence="monthly",
-        median_interval_days=30,
-        expected_amount_minor=-1799,
-        currency="EUR",
-        first_seen_date=START,
-        last_seen_date=START,
-        next_expected_date=START + timedelta(days=30),
-        occurrence_count=0,
-        status="detected",
-        is_manual=True,
-    )
-    session.add(series)
-    session.commit()
-    series_id = series.id
-    session.close()
-    return series_id
-
-
-def test_a_manual_series_created_without_charges_is_left_alone(
-    client: TestClient, tmp_path: Path
-) -> None:
-    # Its key is the normalized label, which here happens to be the charges' own key.
-    headers = _register(client)
-    account_id = _create_account(client, headers)
-    series_id = _insert_series_without_charges(tmp_path, account_id, "PRLV SEPA NETFLIX.COM")
-    before = _series(tmp_path, series_id)
-    _insert_subscription(tmp_path, account_id)
-
-    assert _detect(client, headers) == {"created_count": 0, "updated_count": 0}
-
-    after = _series(tmp_path, series_id)
-    assert after.merchant_key == "netflix.com"
-    assert after.occurrence_count == 0
-    assert after.last_seen_date == before.last_seen_date
-    assert _occurrence_rows(tmp_path) == []
 
 
 def test_a_cancelled_manual_series_gains_no_charge(client: TestClient, tmp_path: Path) -> None:

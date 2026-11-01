@@ -162,8 +162,7 @@ class RecurringDetectionService:
         its whole history. Nothing is ever unlinked: every link already there was ticked or
         added by the user, tolerances or not.
 
-        Left exactly as they are: a series declared without charges, whose key is a normalized
-        label no charge was ever seen under, and a dismissed or cancelled one.
+        A dismissed or cancelled series is left exactly as it is.
 
         Returns:
             How many series gained an occurrence.
@@ -200,8 +199,6 @@ class RecurringDetectionService:
             history = [
                 transaction for _, transaction in self._repository.list_occurrences(series.id)
             ]
-            if not history:
-                continue
             for transaction in new:
                 self._repository.stage_occurrence(
                     RecurringOccurrence(series_id=series.id, transaction_id=transaction.id)

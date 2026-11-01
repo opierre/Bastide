@@ -647,7 +647,6 @@
   "subscriptionDetailIncrease": "Price increase: {from} → {to} on {date} — that's {annual} a year.",
   "subscriptionDetailHistoryTitle": "Charge history",
   "subscriptionDetailHistorySubtitle": "The transactions this series is deduced from · {account}",
-  "subscriptionDetailHistoryEmpty": "No charges linked to this payment yet.",
   "subscriptionDetailChange": "{from} → {to}",
   "subscriptionDetailFootnote": "Bastide deduces the series from these charges — check them before confirming a change.",
   "subscriptionDetailLoadFailed": "We couldn't load this recurring payment right now.",

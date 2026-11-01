@@ -2390,10 +2390,6 @@ class AppLocalizationsFr extends AppLocalizations {
   }
 
   @override
-  String get subscriptionDetailHistoryEmpty =>
-      'Aucun prélèvement rattaché à ce paiement pour l\'instant.';
-
-  @override
   String subscriptionDetailChange(String from, String to) {
     return '$from → $to';
   }

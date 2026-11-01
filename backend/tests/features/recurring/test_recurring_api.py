@@ -443,7 +443,6 @@ def test_deleting_a_manual_series_removes_it(client: TestClient, tmp_path: Path)
         account_id,
         label="Basic-Fit",
         is_manual=True,
-        occurrence_count=0,
         next_expected_date=TODAY,
     )
 
