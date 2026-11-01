@@ -21,8 +21,13 @@ import '../application/dashboard_controller.dart';
 /// the last month — the current one, still moving — is drawn open: a dashed outline bar,
 /// or a dashed last segment ending on a hollow dot.
 ///
-/// Both views share one frame: the [_Scale], the labelled gridlines, the hover slots and
-/// the month axis. Only the mark layer differs, so a reference drawn over the marks (an
+/// Hovering a month names its figure in a tooltip anchored to the mark itself, not the card
+/// edge: beside the bar's tip or the line's dot, on the side away from zero (above a saving,
+/// below a shortfall). It floats in the overlay like any tooltip, so it may reach past the
+/// plot into the card's padding rather than cover the mark.
+///
+/// Both views share one frame: the [_Scale], the labelled gridlines, the hover slots, the
+/// tooltip and the month axis. Only the mark layer differs, so a reference drawn over the marks (an
 /// average line, say) is one more step in [_SavingsChartPainter.paint] and lands in both.
 ///
 /// Laid out like [AreaLine] (value gutter, slots, month axis) so the card reads like the
@@ -52,6 +57,21 @@ class _SavingsChartState extends State<SavingsChart> {
   /// The slot under the pointer — hover ephemera, not chart state.
   int? _hovered;
 
+  /// The hovered month's tooltip lives in the [Overlay], tied to the plot by [_link], as a
+  /// [Tooltip] does: the plot keeps little headroom past its tallest and deepest months, so
+  /// a tooltip held inside it would have to cover the very mark it names.
+  final _link = LayerLink();
+  final _tooltip = OverlayPortalController();
+
+  void _hover(int? index) {
+    setState(() => _hovered = index);
+    if (index != null && widget.tooltips != null) {
+      _tooltip.show();
+    } else {
+      _tooltip.hide();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
@@ -65,46 +85,16 @@ class _SavingsChartState extends State<SavingsChart> {
     return Column(
       children: [
         Expanded(
-          child: Stack(
-            fit: StackFit.expand,
-            children: [
-              RepaintBoundary(
-                child: CustomPaint(
-                  size: Size.infinite,
-                  painter: _SavingsChartPainter(
-                    values: widget.values,
-                    view: widget.view,
-                    scale: scale,
-                    hovered: _hovered,
-                    levelLabels: scale.levels.map(widget.valueLabel).toList(),
-                    labelStyle: tabularNumberStyle(labelStyle),
-                  ),
-                ),
+          child: LayoutBuilder(
+            builder: (context, constraints) => CompositedTransformTarget(
+              link: _link,
+              child: OverlayPortal(
+                controller: _tooltip,
+                overlayChildBuilder: (context) =>
+                    _hoveredTooltip(constraints.biggest, scale),
+                child: _plot(scale, labelStyle, tooltips),
               ),
-              MouseRegion(
-                onExit: (_) => setState(() => _hovered = null),
-                child: Row(
-                  children: [
-                    const SizedBox(width: AreaLine.valueGutter),
-                    for (var i = 0; i < widget.values.length; i++)
-                      Expanded(
-                        child: MouseRegion(
-                          onEnter: (_) => setState(() => _hovered = i),
-                          child: tooltips == null
-                              ? const SizedBox.expand()
-                              : Tooltip(
-                                  key: Key('savingsChartTooltip-$i'),
-                                  richMessage: TextSpan(
-                                    children: [tooltips[i]],
-                                  ),
-                                  child: const SizedBox.expand(),
-                                ),
-                        ),
-                      ),
-                  ],
-                ),
-              ),
-            ],
+            ),
           ),
         ),
         SizedBox(
@@ -125,6 +115,134 @@ class _SavingsChartState extends State<SavingsChart> {
           ),
         ),
       ],
+    );
+  }
+
+  /// The marks, and one full-height hover slot per month over them.
+  Widget _plot(
+    _Scale scale,
+    TextStyle labelStyle,
+    List<InlineSpan>? tooltips,
+  ) => Stack(
+    fit: StackFit.expand,
+    children: [
+      RepaintBoundary(
+        child: CustomPaint(
+          size: Size.infinite,
+          painter: _SavingsChartPainter(
+            values: widget.values,
+            view: widget.view,
+            scale: scale,
+            hovered: _hovered,
+            levelLabels: scale.levels.map(widget.valueLabel).toList(),
+            labelStyle: tabularNumberStyle(labelStyle),
+          ),
+        ),
+      ),
+      MouseRegion(
+        onExit: (_) => _hover(null),
+        child: Row(
+          children: [
+            const SizedBox(width: AreaLine.valueGutter),
+            for (var i = 0; i < widget.values.length; i++)
+              Expanded(
+                child: MouseRegion(
+                  onEnter: (_) => _hover(i),
+                  // The tooltip is drawn, not a [Tooltip], so a screen reader still
+                  // needs the month's figure on its slot.
+                  child: Semantics(
+                    label: tooltips?[i].toPlainText(),
+                    child: const SizedBox.expand(),
+                  ),
+                ),
+              ),
+          ],
+        ),
+      ),
+    ],
+  );
+
+  /// The hovered month's tooltip, centred on its mark and [_tooltipGap] clear of it on the
+  /// side away from zero: over a saving's bar tip or dot (and an empty month's), under a
+  /// shortfall's — so it names the mark without covering it or the line back to zero.
+  Widget _hoveredTooltip(Size size, _Scale scale) {
+    final hovered = _hovered;
+    final tooltips = widget.tooltips;
+    if (hovered == null ||
+        tooltips == null ||
+        hovered >= widget.values.length) {
+      return const SizedBox.shrink();
+    }
+    final mark = _markPoint(widget.values, scale, hovered, _plotRect(size));
+    final up = widget.values[hovered] >= 0;
+    final clearance = switch (widget.view) {
+      SavingsChartView.bars => _tooltipGap,
+      SavingsChartView.line =>
+        _SavingsChartPainter.hoverDotOuterRadius + _tooltipGap,
+    };
+    return Align(
+      alignment: Alignment.topLeft,
+      child: CompositedTransformFollower(
+        link: _link,
+        showWhenUnlinked: false,
+        offset: mark,
+        child: IgnorePointer(
+          child: FractionalTranslation(
+            translation: Offset(-0.5, up ? -1 : 0),
+            child: Padding(
+              padding: EdgeInsets.only(
+                top: up ? 0 : clearance,
+                bottom: up ? clearance : 0,
+              ),
+              child: _ChartTooltip(
+                key: Key('savingsChartTooltip-$hovered'),
+                message: tooltips[hovered],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Space between a mark's edge and its tooltip.
+const _tooltipGap = AppSpacing.sm;
+
+/// Where the plot sits in the chart's box, right of the value gutter and inset a little
+/// top and bottom. Shared by the painter and the tooltip, so a tooltip can't drift off the
+/// mark it names.
+Rect _plotRect(Size size) => Rect.fromLTWH(
+  AreaLine.valueGutter,
+  4,
+  size.width - AreaLine.valueGutter,
+  size.height - 8,
+);
+
+/// Month [index]'s mark: its slot's centre, at its value on the shared scale — the line's
+/// dot, or the bar's tip.
+Offset _markPoint(List<int> values, _Scale scale, int index, Rect plot) =>
+    Offset(
+      plot.left + AreaLine.pointX(index, values.length, plot.width),
+      scale.y(values[index].toDouble(), plot),
+    );
+
+/// The hovered month's tooltip, styled from the app's [TooltipTheme] so it matches every
+/// other tooltip.
+class _ChartTooltip extends StatelessWidget {
+  const _ChartTooltip({super.key, required this.message});
+
+  final InlineSpan message;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = TooltipTheme.of(context);
+    return DecoratedBox(
+      decoration: theme.decoration ?? const BoxDecoration(),
+      child: Padding(
+        padding: theme.padding ?? EdgeInsets.zero,
+        child: Text.rich(TextSpan(children: [message]), style: theme.textStyle),
+      ),
     );
   }
 }
@@ -197,11 +315,14 @@ class _SavingsChartPainter extends CustomPainter {
   static const _lineStroke = 2.5;
   static const _dotRadius = 4.0;
   static const _hoverDotRadius = 5.0;
+  static const _dotRing = 1.5;
+
+  /// The hovered dot's reach, ring included — what the line view's tooltip clears.
+  static const hoverDotOuterRadius = _hoverDotRadius + _dotRing;
 
   @override
   void paint(Canvas canvas, Size size) {
-    const gutter = AreaLine.valueGutter;
-    final plot = Rect.fromLTWH(gutter, 4, size.width - gutter, size.height - 8);
+    final plot = _plotRect(size);
     if (plot.width <= 0 || plot.height <= 0) return;
 
     _paintGrid(canvas, size, plot);
@@ -238,10 +359,7 @@ class _SavingsChartPainter extends CustomPainter {
   }
 
   /// Month [index]'s position: its slot's centre, at its value on the shared scale.
-  Offset _point(int index, Rect plot) => Offset(
-    plot.left + AreaLine.pointX(index, values.length, plot.width),
-    scale.y(values[index].toDouble(), plot),
-  );
+  Offset _point(int index, Rect plot) => _markPoint(values, scale, index, plot);
 
   void _paintBars(Canvas canvas, Rect plot) {
     final zeroY = scale.y(0, plot);
@@ -331,7 +449,7 @@ class _SavingsChartPainter extends CustomPainter {
       final color = values[i] < 0 ? AppColors.negative : AppColors.positive;
       canvas.drawCircle(
         points[i],
-        radius + 1.5,
+        radius + _dotRing,
         Paint()..color = AppColors.surfaceRaised,
       );
       if (i == points.length - 1) {
