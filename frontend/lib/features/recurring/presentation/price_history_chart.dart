@@ -85,80 +85,40 @@ class PriceHistoryChart extends StatelessWidget {
           plotLeft: _axisWidth + _axisGap,
           width: size.width,
         );
-        final plotBottom = size.height - axis.height - _inset;
-
-        List<Widget> plotLayer(_PlotGeometry plot, double width) => [
-          Positioned.fill(
-            child: RepaintBoundary(
-              child: CustomPaint(
-                size: Size.infinite,
-                painter: _PriceLinePainter(plot: plot, stepIndex: stepIndex),
-              ),
-            ),
-          ),
-          ..._dateLabels(plot, points, ticks, tickStyle, axis, width),
-          for (var i = 0; i < points.length; i++)
-            _hoverSlice(
-              context: context,
-              l10n: l10n,
-              locale: locale,
-              plot: plot,
-              index: i,
-              occurrence: points[i],
-              isStep: i == stepIndex,
-              width: width,
-              axisHeight: axis.height,
-            ),
-        ];
-
-        // The history fits the card: one plot, as wide as the card allows.
-        final scrollWidth = axis.scrollWidth;
-        if (scrollWidth == null) {
-          final plot = _PlotGeometry.of(
-            Rect.fromLTRB(
-              _axisWidth + _axisGap,
-              _inset,
-              size.width,
-              plotBottom,
-            ),
-            values,
-          );
-          return Stack(
-            children: [
-              ..._valueLabels(plot, locale),
-              ...plotLayer(plot, size.width),
-            ],
-          );
-        }
-
-        // Too many charges to date each one inside the card: the plot widens
-        // to give every tick its room and scrolls under a value axis that
-        // stays put, opened on the latest charges.
         final plot = _PlotGeometry.of(
           Rect.fromLTRB(
-            axis.lineHeight / 2,
+            _axisWidth + _axisGap,
             _inset,
-            scrollWidth - axis.lineHeight / 2,
-            plotBottom,
+            size.width,
+            size.height - axis.height - _inset,
           ),
           values,
         );
+
         return Stack(
           children: [
-            ..._valueLabels(plot, locale),
-            Positioned(
-              left: _axisWidth + _axisGap,
-              top: 0,
-              right: 0,
-              bottom: 0,
-              child: _HorizontalScroll(
-                child: SizedBox(
-                  key: const Key('seriesHistoryScroll'),
-                  width: scrollWidth,
-                  child: Stack(children: plotLayer(plot, scrollWidth)),
+            Positioned.fill(
+              child: RepaintBoundary(
+                child: CustomPaint(
+                  size: Size.infinite,
+                  painter: _PriceLinePainter(plot: plot, stepIndex: stepIndex),
                 ),
               ),
             ),
+            ..._valueLabels(plot, locale),
+            ..._dateLabels(plot, points, ticks, tickStyle, axis, size.width),
+            for (var i = 0; i < points.length; i++)
+              _hoverSlice(
+                context: context,
+                l10n: l10n,
+                locale: locale,
+                plot: plot,
+                index: i,
+                occurrence: points[i],
+                isStep: i == stepIndex,
+                width: size.width,
+                axisHeight: axis.height,
+              ),
           ],
         );
       },
@@ -218,8 +178,9 @@ class PriceHistoryChart extends StatelessWidget {
     ];
   }
 
-  /// One date tick under every charge — flat while they fit side by side,
-  /// turned on end when they don't (see [_DateAxis]).
+  /// A date tick under each charge — flat while they fit side by side, turned
+  /// on end when they don't, thinned only when even that collides (see
+  /// [_DateAxis]).
   List<Widget> _dateLabels(
     _PlotGeometry plot,
     List<SeriesOccurrence> points,
@@ -229,32 +190,33 @@ class PriceHistoryChart extends StatelessWidget {
     double width,
   ) => [
     for (var i = 0; i < points.length; i++)
-      Positioned(
-        key: Key('seriesDateTick-${points[i].id}'),
-        // Clamped to the chart: an edge tick leans inward rather than hanging
-        // off the card.
-        left: axis.leftOf(i, plot.xAt(i), width),
-        width: axis.rotated ? axis.lineHeight : axis.widths[i],
-        top: plot.rect.bottom + _inset,
-        child: axis.rotated
-            // Read bottom to top, the date's end against the plot it names.
-            ? RotatedBox(
-                quarterTurns: 3,
-                child: Text(
+      if (axis.shows(i))
+        Positioned(
+          key: Key('seriesDateTick-${points[i].id}'),
+          // Clamped to the chart: an edge tick leans inward rather than hanging
+          // off the card.
+          left: axis.leftOf(i, plot.xAt(i), width),
+          width: axis.rotated ? axis.lineHeight : axis.widths[i],
+          top: plot.rect.bottom + _inset,
+          child: axis.rotated
+              // Read bottom to top, the date's end against the plot it names.
+              ? RotatedBox(
+                  quarterTurns: 3,
+                  child: Text(
+                    ticks[i],
+                    maxLines: 1,
+                    softWrap: false,
+                    style: style,
+                  ),
+                )
+              : Text(
                   ticks[i],
+                  textAlign: TextAlign.center,
                   maxLines: 1,
                   softWrap: false,
                   style: style,
                 ),
-              )
-            : Text(
-                ticks[i],
-                textAlign: TextAlign.center,
-                maxLines: 1,
-                softWrap: false,
-                style: style,
-              ),
-      ),
+        ),
   ];
 
   /// A full-height column over each charge: the point is a few pixels wide, but
@@ -330,9 +292,9 @@ class PriceHistoryChart extends StatelessWidget {
 ///
 /// Flat ticks while each fits beside its neighbours; turned on end — one line
 /// height wide instead of a whole date — when they don't; and when even that
-/// is too tight, the plot widens to [scrollWidth] so the history scrolls
-/// rather than drop a date. A charge without its date can't be checked at a
-/// glance, which is the card's job.
+/// is too tight, every Nth one, keeping the first and the last. A charge
+/// without its date can't be checked at a glance, which is the card's job, so
+/// thinning is the last resort rather than the rule.
 @immutable
 class _DateAxis {
   const _DateAxis({
@@ -340,7 +302,7 @@ class _DateAxis {
     required this.lineHeight,
     required this.rotated,
     required this.height,
-    this.scrollWidth,
+    this.shown,
   });
 
   factory _DateAxis.fit({
@@ -386,19 +348,37 @@ class _DateAxis {
     );
     if (upright._fits(xs, width)) return upright;
 
-    // One line height and a gap per charge, plus half a line at each end so
-    // the edge ticks centre on their charge too.
+    // Even on end they collide: keep every Nth tick, with the smallest N that
+    // clears, and always the first and the last so the history's span stays
+    // dated. The thinned charges are still dated on hover.
+    for (var step = 2; step < ticks.length; step++) {
+      final thinned = _DateAxis(
+        widths: widths,
+        lineHeight: lineHeight,
+        rotated: true,
+        height: widest,
+        shown: _everyNth(ticks.length, step),
+      );
+      if (thinned._fits(xs, width)) return thinned;
+    }
     return _DateAxis(
       widths: widths,
       lineHeight: lineHeight,
       rotated: true,
       height: widest,
-      scrollWidth: math.max(
-        width - plotLeft,
-        (ticks.length - 1) * (lineHeight + PriceHistoryChart._tickGap) +
-            lineHeight,
-      ),
+      shown: [0, if (ticks.length > 1) ticks.length - 1],
     );
+  }
+
+  /// `0, step, 2·step, …` and the last index — the regular tick nearest the
+  /// end dropped when it would sit closer than [step] to the last one.
+  static List<int> _everyNth(int count, int step) {
+    final last = count - 1;
+    return [
+      for (var i = 0; i < last; i += step)
+        if (i == 0 || last - i >= step) i,
+      last,
+    ];
   }
 
   /// Each tick's own width when it lies flat.
@@ -413,8 +393,12 @@ class _DateAxis {
   /// The band the ticks take beneath the plot.
   final double height;
 
-  /// The plot's width when it has to scroll to date every charge, else `null`.
-  final double? scrollWidth;
+  /// The charges that get a tick, by index — all of them unless the axis had
+  /// to be thinned.
+  final List<int>? shown;
+
+  /// Whether the charge at [index] gets a tick.
+  bool shows(int index) => shown?.contains(index) ?? true;
 
   double _width(int index) => rotated ? lineHeight : widths[index];
 
@@ -435,46 +419,19 @@ class _DateAxis {
   ];
 
   bool _fits(List<double> xs, double bound) {
-    for (var i = 1; i < xs.length; i++) {
-      final previousEnd = leftOf(i - 1, xs[i - 1], bound) + _width(i - 1);
-      if (leftOf(i, xs[i], bound) - previousEnd < PriceHistoryChart._tickGap) {
+    final indices = shown ?? [for (var i = 0; i < xs.length; i++) i];
+    for (var k = 1; k < indices.length; k++) {
+      final previous = indices[k - 1];
+      final current = indices[k];
+      final previousEnd =
+          leftOf(previous, xs[previous], bound) + _width(previous);
+      if (leftOf(current, xs[current], bound) - previousEnd <
+          PriceHistoryChart._tickGap) {
         return false;
       }
     }
     return true;
   }
-}
-
-/// The frame a long history's plot scrolls in — opened at its right end, on
-/// the latest charges, with a thumb a mouse can drag.
-class _HorizontalScroll extends StatefulWidget {
-  const _HorizontalScroll({required this.child});
-
-  final Widget child;
-
-  @override
-  State<_HorizontalScroll> createState() => _HorizontalScrollState();
-}
-
-class _HorizontalScrollState extends State<_HorizontalScroll> {
-  final _controller = ScrollController();
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) => Scrollbar(
-    controller: _controller,
-    child: SingleChildScrollView(
-      controller: _controller,
-      scrollDirection: Axis.horizontal,
-      reverse: true,
-      child: widget.child,
-    ),
-  );
 }
 
 /// Where a value and a charge index land inside the plot. Shared by the painter
