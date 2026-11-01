@@ -10,12 +10,12 @@ import '../../../core/theme/tokens.dart';
 import '../../../core/widgets/amount_text.dart';
 import '../../../core/widgets/app_card.dart';
 import '../../../core/widgets/app_segmented.dart';
+import '../../../core/widgets/chart_scale.dart';
 import '../../../core/widgets/date_field.dart';
 import '../../../l10n/app_localizations.dart';
 import '../application/networth_controller.dart';
 import '../domain/networth_summary.dart';
 import 'declared_balances_modal.dart';
-import 'networth_axis.dart';
 import 'networth_summary_card.dart';
 
 /// « Patrimoine net » (`15-synthese.md` §Row 2): the closed-month series as an
@@ -289,7 +289,7 @@ Path dashPath(Path source, {double dash = 5, double gap = 4}) {
 
 /// The AreaLine itself: an iris 2 px line over a 10 % iris area, 2.5 px ring
 /// dots and a 4 px one on the last month, y gridlines on clean ticks around the
-/// series (see [networthAxis]), and month labels under the points.
+/// series (see [ChartScale]), and month labels under the points.
 ///
 /// Points sit on the calendar, not on their index: a month the API omitted
 /// leaves its slot empty, and the line breaks there rather than bridging it —
@@ -497,24 +497,23 @@ class _SeriesPainter extends CustomPainter {
 
     // The scale reaches past the highest and lowest months to clean ticks, so
     // neither the peak nor the trough lies on the plot's edge.
-    final axis = networthAxis(values);
-    final low = axis.low;
-    final range = (axis.high - low).toDouble();
+    // Same scale as the account balance chart; minor units, so no tick on cents.
+    final scale = ChartScale.of(values, intervals: 2, minStep: 100);
 
-    double y(num value) => plot.bottom - plot.height * ((value - low) / range);
+    double y(num value) => scale.y(value, plot);
 
     // Gridlines at floor / mid / ceiling, labelled in the gutter.
     final grid = Paint()
       ..color = AppColors.borderSubtle
       ..strokeWidth = 1;
-    for (final level in axis.levels) {
+    for (final level in scale.ticks) {
       final lineY = y(level);
       canvas.drawLine(
         Offset(plot.left, lineY),
         Offset(size.width, lineY),
         grid,
       );
-      final label = _text(valueLabel(level));
+      final label = _text(valueLabel(level.round()));
       label.paint(
         canvas,
         Offset(
