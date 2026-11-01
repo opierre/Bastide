@@ -3664,6 +3664,9 @@ class AppLocalizationsFr extends AppLocalizations {
   String get propertyFormLabelRequired => 'Donnez un nom à ce bien.';
 
   @override
+  String get propertyFormAddress => 'Adresse';
+
+  @override
   String get propertyFormKind => 'Nature';
 
   @override

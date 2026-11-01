@@ -5694,6 +5694,12 @@ abstract class AppLocalizations {
   /// **'Donnez un nom à ce bien.'**
   String get propertyFormLabelRequired;
 
+  /// Property form field: the property's optional postal address, free text.
+  ///
+  /// In fr, this message translates to:
+  /// **'Adresse'**
+  String get propertyFormAddress;
+
   /// Property form field: the property's nature (select).
   ///
   /// In fr, this message translates to:

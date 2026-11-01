@@ -4703,6 +4703,10 @@
   "@propertyFormLabelRequired": {
     "description": "Validation message when the property name is empty."
   },
+  "propertyFormAddress": "Adresse",
+  "@propertyFormAddress": {
+    "description": "Property form field: the property's optional postal address, free text."
+  },
   "propertyFormKind": "Nature",
   "@propertyFormKind": {
     "description": "Property form field: the property's nature (select)."

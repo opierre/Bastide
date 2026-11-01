@@ -3635,6 +3635,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get propertyFormLabelRequired => 'Give this property a name.';
 
   @override
+  String get propertyFormAddress => 'Address';
+
+  @override
   String get propertyFormKind => 'Type';
 
   @override

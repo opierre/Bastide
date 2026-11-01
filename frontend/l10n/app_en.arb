@@ -976,6 +976,7 @@
   "propertyFormSubtitle": "The declared value counts in your net worth.",
   "propertyFormLabel": "Label",
   "propertyFormLabelRequired": "Give this property a name.",
+  "propertyFormAddress": "Address",
   "propertyFormKind": "Type",
   "propertyFormValue": "Declared value",
   "propertyFormValuedOn": "Valuation date",
