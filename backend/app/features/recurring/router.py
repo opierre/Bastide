@@ -81,15 +81,21 @@ async def list_series(
     account_id: Annotated[
         str | None, Query(description="Return only series of this account.")
     ] = None,
+    archived: Annotated[
+        bool, Query(description="Return the archived series instead of the live ones.")
+    ] = False,
 ) -> list[SeriesRead]:
     """List the caller's series, soonest charge first.
 
     Cancelled and dismissed series are included: the panel dims a cancelled row rather than
-    hiding it, and a client that wants one kind asks for it by `status`.
+    hiding it, and a client that wants one kind asks for it by `status`. Archived series are
+    absent unless asked for with `?archived=true`, which returns only them.
     """
     return [
         SeriesRead.model_validate(series)
-        for series in service.list_for_user(user.id, status=series_status, account_id=account_id)
+        for series in service.list_for_user(
+            user.id, status=series_status, account_id=account_id, archived=archived
+        )
     ]
 
 
@@ -235,6 +241,29 @@ async def update_series(
 ) -> SeriesRead:
     """Patch a series; a `status` outside the lifecycle is a 409, not a write."""
     return SeriesRead.model_validate(service.update(user.id, series_id, payload))
+
+
+@router.post("/{series_id}/archive", response_model=SeriesRead)
+async def archive_series(
+    series_id: str,
+    service: Annotated[RecurringService, Depends(_service)],
+    user: Annotated[User, Depends(get_current_user)],
+) -> SeriesRead:
+    """Put a series away: out of the list, the summary and detection, history kept.
+
+    Idempotent. `POST /recurring/{series_id}/unarchive` restores it as it was.
+    """
+    return SeriesRead.model_validate(service.set_archived(user.id, series_id, archived=True))
+
+
+@router.post("/{series_id}/unarchive", response_model=SeriesRead)
+async def unarchive_series(
+    series_id: str,
+    service: Annotated[RecurringService, Depends(_service)],
+    user: Annotated[User, Depends(get_current_user)],
+) -> SeriesRead:
+    """Restore an archived series to the list, the summary and detection. Idempotent."""
+    return SeriesRead.model_validate(service.set_archived(user.id, series_id, archived=False))
 
 
 @router.post("/{series_id}/merge", response_model=SeriesRead)

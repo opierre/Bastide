@@ -46,9 +46,14 @@ class RecurringMergeService:
         self._detection = detection
 
     def proposals(self, user_id: str) -> list[MergeProposal]:
-        """The pairs of the user's series that look like one subscription."""
+        """The pairs of the user's live series that look like one subscription.
+
+        Archived series are left out: the user put them away, so proposing one would bring it
+        back into view through the side door.
+        """
         return propose_merges(
-            self._repository.list_for_user(user_id), self._repository.dismissed_pairs(user_id)
+            self._repository.list_for_user(user_id, archived=False),
+            self._repository.dismissed_pairs(user_id),
         )
 
     def merge(self, user_id: str, target_id: str, source_id: str) -> RecurringSeries:

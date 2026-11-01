@@ -243,6 +243,34 @@ def test_a_dismissed_series_counts_nowhere(client: TestClient, tmp_path: Path) -
     assert sum(summary.cadence_counts.values()) == summary.active_count
 
 
+def test_an_archived_series_counts_nowhere(client: TestClient, tmp_path: Path) -> None:
+    owner, account_id = _drawn_panel(client, tmp_path)
+    before = _summary(owner, tmp_path)
+    # Overdue, recently pricier and due tomorrow: it would show in every signal if it counted.
+    insert_series(
+        tmp_path,
+        owner,
+        account_id,
+        label="Gymfit Club",
+        expected_amount_minor=-2990,
+        next_expected_date=TODAY - timedelta(days=40),
+        price_change_minor=-500,
+        price_changed_at=TODAY - timedelta(days=10),
+        archived=True,
+    )
+    insert_series(
+        tmp_path,
+        owner,
+        account_id,
+        label="Lecture Plus",
+        status="cancelled",
+        next_expected_date=TODAY + timedelta(days=1),
+        archived=True,
+    )
+
+    assert _summary(owner, tmp_path) == before
+
+
 def test_an_irregular_series_is_counted_but_carries_no_burden_or_dates(
     client: TestClient, tmp_path: Path
 ) -> None:
