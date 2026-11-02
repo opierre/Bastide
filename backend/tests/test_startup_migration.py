@@ -18,7 +18,7 @@ from app.core.schema import (
     current_revisions,
     migrate,
 )
-from tests.migrations import upgrade
+from tests.migrations import downgrade
 
 
 def _heads(db_path: Path) -> set[str]:
@@ -38,12 +38,24 @@ def _previous_revision(db_path: Path) -> str:
     return previous
 
 
-def test_a_new_database_is_created_at_head(tmp_path: Path) -> None:
-    db_path = tmp_path / "data" / "bastide.db"
+@pytest.fixture(scope="module")
+def older_template(tmp_path_factory: pytest.TempPathFactory, migrated_template: Path) -> Path:
+    """The migrated template taken one revision back, once for the module.
 
-    migrate(db_path)
+    Down from head rather than up from empty: one revision's `downgrade` instead of the whole
+    chain's `upgrade` per test.
+    """
+    path = tmp_path_factory.mktemp("older") / "older.db"
+    shutil.copyfile(migrated_template, path)
+    downgrade(path, _previous_revision(path))
+    return path
 
-    assert current_revisions(db_path) == _heads(db_path)
+
+def test_a_new_database_is_created_at_head_without_a_backup(migrated_template: Path) -> None:
+    # The session template is `migrate` run on a path that did not exist, directory included:
+    # checking it covers a first launch without running the whole chain a second time.
+    assert current_revisions(migrated_template) == _heads(migrated_template)
+    assert _backups(migrated_template) == []
 
 
 def test_a_database_at_head_is_left_alone(tmp_path: Path, migrated_template: Path) -> None:
@@ -56,10 +68,9 @@ def test_a_database_at_head_is_left_alone(tmp_path: Path, migrated_template: Pat
     upgrade_command.assert_not_called()
 
 
-def test_an_older_database_is_upgraded_to_head(tmp_path: Path) -> None:
+def test_an_older_database_is_upgraded_to_head(tmp_path: Path, older_template: Path) -> None:
     db_path = tmp_path / "bastide.db"
-    previous = _previous_revision(db_path)
-    upgrade(db_path, previous)
+    shutil.copyfile(older_template, db_path)
 
     migrate(db_path)
 
@@ -86,18 +97,13 @@ def test_no_pending_revision_means_no_backup(tmp_path: Path, migrated_template: 
     assert _backups(db_path) == []
 
 
-def test_a_new_database_is_not_backed_up(tmp_path: Path) -> None:
+def test_pending_revisions_back_up_a_restorable_copy_first(
+    tmp_path: Path, older_template: Path
+) -> None:
     db_path = tmp_path / "bastide.db"
-
-    migrate(db_path, now=lambda: NOW)
-
-    assert _backups(db_path) == []
-
-
-def test_pending_revisions_back_up_a_restorable_copy_first(tmp_path: Path) -> None:
-    db_path = tmp_path / "bastide.db"
-    previous = _previous_revision(db_path)
-    upgrade(db_path, previous)
+    shutil.copyfile(older_template, db_path)
+    # Both parents when head is a merge: the backup is then named after the two.
+    previous = current_revisions(db_path)
     with sqlite3.connect(db_path) as connection:
         connection.execute("CREATE TABLE marker (note TEXT)")
         connection.execute("INSERT INTO marker VALUES ('before the upgrade')")
@@ -106,10 +112,10 @@ def test_pending_revisions_back_up_a_restorable_copy_first(tmp_path: Path) -> No
     migrate(db_path, now=lambda: NOW)
 
     [backup] = _backups(db_path)
-    assert backup.name == f"bastide-{previous}-20261009T083015123456Z.db"
+    assert backup.name == f"bastide-{'+'.join(sorted(previous))}-20261009T083015123456Z.db"
     restored = tmp_path / "restored.db"
     shutil.copyfile(backup, restored)
-    assert current_revisions(restored) == {previous}
+    assert current_revisions(restored) == previous
     with sqlite3.connect(restored) as connection:
         assert connection.execute("SELECT note FROM marker").fetchall() == [("before the upgrade",)]
     connection.close()
