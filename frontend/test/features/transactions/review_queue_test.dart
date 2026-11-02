@@ -1,3 +1,5 @@
+import 'package:bastide/core/api/api_client.dart';
+import 'package:bastide/core/api/api_client_provider.dart';
 import 'package:bastide/core/theme/app_theme.dart';
 import 'package:bastide/core/widgets/confidence_gauge.dart';
 import 'package:bastide/core/widgets/proposed_category_chip.dart';
@@ -6,6 +8,7 @@ import 'package:bastide/features/accounts/domain/account.dart';
 import 'package:bastide/features/categories/domain/category.dart';
 import 'package:bastide/features/categorization/application/run_controller.dart';
 import 'package:bastide/features/categorization/domain/categorization_run.dart';
+import 'package:bastide/features/settings/presentation/ai_settings_card.dart';
 import 'package:bastide/features/transactions/application/transactions_controller.dart';
 import 'package:bastide/features/transactions/domain/transaction.dart';
 import 'package:bastide/features/transactions/presentation/review_queue.dart';
@@ -13,6 +16,7 @@ import 'package:bastide/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mocktail/mocktail.dart';
 
 import '../../support/fake_accounts_controller.dart';
 import '../../support/fake_transactions_controller.dart';
@@ -354,4 +358,92 @@ void main() {
     expect(find.textContaining('Confidence'), findsOneWidget);
     expect(find.textContaining('Confiance'), findsNothing);
   });
+
+  // Turning the toggle off has to return the queue to its rules-only rendering
+  // with the calm invitation — not merely persist a boolean. The settings card
+  // and the queue live in one tree here, sharing the real availability
+  // provider, because that is the only way the wiring between them is
+  // actually exercised.
+  testWidgets(
+    'turning AI off in settings returns the queue to its rules-only rendering',
+    (tester) async {
+      tester.view.physicalSize = const Size(1440, 1400);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.reset);
+      registerFallbackValue(<String, dynamic>{});
+
+      // The sidecar's copy, so a later GET reports what the PATCH stored —
+      // which is exactly what the availability lookup behind the queue
+      // re-reads.
+      var aiEnabled = true;
+      Map<String, dynamic> settingsJson() => {
+        'ai_enabled': aiEnabled,
+        'inference_base_url': 'http://127.0.0.1:11434/v1',
+        'model_tag': 'gemma3n:e4b',
+        'confidence_threshold': 0.8,
+      };
+
+      final apiClient = _MockApiClient();
+      when(
+        () => apiClient.get('/settings'),
+      ).thenAnswer((_) async => settingsJson());
+      when(() => apiClient.get('/settings/inference/health')).thenAnswer(
+        (_) async => {
+          'reachable': true,
+          'models': ['gemma3n:e4b'],
+          'detail': null,
+        },
+      );
+      when(
+        () => apiClient.patch('/settings', body: any(named: 'body')),
+      ).thenAnswer((invocation) async {
+        final body = invocation.namedArguments[#body] as Map<String, Object?>;
+        aiEnabled = body['ai_enabled'] as bool? ?? aiEnabled;
+        return settingsJson();
+      });
+
+      final row = _proposed();
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            apiClientProvider.overrideWithValue(apiClient),
+            transactionsControllerProvider.overrideWith(
+              () => _controller([row]),
+            ),
+            transactionCategoriesProvider.overrideWith((ref) async => _catalog),
+            accountsControllerProvider.overrideWith(
+              () => FakeAccountsController(initialAccounts: [_account]),
+            ),
+          ],
+          child: MaterialApp(
+            locale: const Locale('fr'),
+            theme: appDarkTheme,
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+            home: Scaffold(
+              body: Column(
+                children: [
+                  const SizedBox(width: 640, child: AiSettingsCard()),
+                  Expanded(child: ReviewQueue(items: [row], total: 1)),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      // AI on and answering: the queue offers its stage-2 rendering, so there
+      // is nothing to invite the user to.
+      expect(find.byKey(const Key('reviewAiInvitation')), findsNothing);
+
+      await tester.tap(find.byKey(const Key('settingsAiToggle')));
+      await tester.pumpAndSettle();
+
+      expect(find.byKey(const Key('reviewAiInvitation')), findsOneWidget);
+      expect(find.byKey(const Key('reviewAiInvitationLink')), findsOneWidget);
+    },
+  );
 }
+
+class _MockApiClient extends Mock implements ApiClient {}
