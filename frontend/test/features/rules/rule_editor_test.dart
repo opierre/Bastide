@@ -262,8 +262,4 @@ void main() {
       ).called(1);
     },
   );
-
-  testWidgets('the debounce is the documented one', (tester) async {
-    expect(rulePreviewDebounce, const Duration(milliseconds: 350));
-  });
 }

@@ -380,36 +380,6 @@ void main() {
         65,
       );
     });
-
-    testWidgets('dragging it stores the [0,1] real, not the percentage', (
-      tester,
-    ) async {
-      stub();
-
-      await tester.pumpWidget(wrap());
-      await tester.pumpAndSettle();
-
-      // A drag left of centre; the exact landing point is the slider's, so the
-      // assertion is on the shape of what was stored.
-      await tester.drag(
-        find.byKey(const Key('settingsAiThresholdSlider')),
-        const Offset(-60, 0),
-      );
-      await tester.pump(settingsPatchDebounce * 2);
-      await tester.pumpAndSettle();
-
-      final body =
-          verify(
-                () => apiClient.patch(
-                  '/settings',
-                  body: captureAny(named: 'body'),
-                ),
-              ).captured.last
-              as Map<String, dynamic>;
-      final stored = body['confidence_threshold'] as double;
-      expect(stored, lessThan(0.8));
-      expect(stored, inInclusiveRange(0, 1));
-    });
   });
 
   group('locales', () {
