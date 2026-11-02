@@ -52,6 +52,7 @@ def _to_read(transaction: Transaction) -> TransactionRead:
         needs_review=transaction.needs_review,
         fitid=transaction.fitid,
         dedup_hash=transaction.dedup_hash,
+        recurring_series_id=transaction.recurring_series_id,
         created_at=transaction.created_at,
         updated_at=transaction.updated_at,
     )

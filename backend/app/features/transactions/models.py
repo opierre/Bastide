@@ -4,7 +4,7 @@ from datetime import UTC, date, datetime
 from uuid import uuid4
 
 from sqlalchemy import Boolean, Date, Float, ForeignKey, Index, Integer, String
-from sqlalchemy.orm import Mapped, mapped_column, relationship
+from sqlalchemy.orm import Mapped, mapped_column, query_expression, relationship
 
 from app.core.db import Base, UtcDateTime
 from app.features.categories.models import Category
@@ -51,6 +51,10 @@ class Transaction(Base):
     needs_review: Mapped[bool] = mapped_column(Boolean, default=True)
     fitid: Mapped[str | None] = mapped_column(String(255), nullable=True)
     dedup_hash: Mapped[str] = mapped_column(String(64))
+    #: The recurring series this row is an occurrence of, if any. Not a column: occurrences
+    #: live in their own link table, so the repository fills this in with ``with_expression``
+    #: on the reads that serve the API, and it stays ``None`` everywhere else.
+    recurring_series_id: Mapped[str | None] = query_expression()
     created_at: Mapped[datetime] = mapped_column(UtcDateTime(), default=lambda: datetime.now(UTC))
     updated_at: Mapped[datetime] = mapped_column(
         UtcDateTime(),

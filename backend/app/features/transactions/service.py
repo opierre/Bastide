@@ -92,4 +92,7 @@ class TransactionService:
             transaction.description_clean = data.description_clean
         if data.merchant is not None:
             transaction.merchant = data.merchant
-        return self._repository.update(transaction)
+        self._repository.update(transaction)
+        # Read back rather than returning the refreshed row: a refresh reloads the columns but
+        # not the series id, which the response carries.
+        return self.get(user_id, transaction_id)

@@ -108,6 +108,7 @@ class TransactionsRepository {
       needsReview: json['needs_review'] as bool,
       fitid: json['fitid'] as String?,
       dedupHash: json['dedup_hash'] as String,
+      recurringSeriesId: json['recurring_series_id'] as String?,
       createdAt: DateTime.parse(json['created_at'] as String),
       updatedAt: DateTime.parse(json['updated_at'] as String),
     );

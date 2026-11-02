@@ -3,10 +3,22 @@
 from datetime import date
 
 from sqlalchemy import func, or_, select
-from sqlalchemy.orm import Session, selectinload
+from sqlalchemy.orm import Session, selectinload, with_expression
 
 from app.features.accounts.models import Account
+from app.features.recurring.models import RecurringOccurrence
 from app.features.transactions.models import Transaction
+
+# The series each row belongs to, read alongside it: a transaction is an occurrence of at most
+# one series (a unique constraint), so the correlated lookup yields one id or none. The row
+# screens need it to tell an already-recurring charge from one that could still be marked.
+_SERIES_ID = with_expression(
+    Transaction.recurring_series_id,
+    select(RecurringOccurrence.series_id)
+    .where(RecurringOccurrence.transaction_id == Transaction.id)
+    .correlate(Transaction)
+    .scalar_subquery(),
+)
 
 
 class TransactionRepository:
@@ -61,7 +73,7 @@ class TransactionRepository:
 
         rows = list(
             self._db.scalars(
-                query.options(selectinload(Transaction.category))
+                query.options(selectinload(Transaction.category), _SERIES_ID)
                 .order_by(Transaction.booked_date.desc(), Transaction.id.desc())
                 .offset((page - 1) * page_size)
                 .limit(page_size)
@@ -109,7 +121,10 @@ class TransactionRepository:
             select(Transaction)
             .join(Account, Account.id == Transaction.account_id)
             .where(Transaction.id == transaction_id, Account.user_id == user_id)
-            .options(selectinload(Transaction.category))
+            .options(selectinload(Transaction.category), _SERIES_ID)
+            # The row may already sit in the session without its series id (a refresh drops
+            # it), and an identity-map hit would otherwise skip the expression.
+            .execution_options(populate_existing=True)
         )
 
     def update(self, transaction: Transaction) -> Transaction:
