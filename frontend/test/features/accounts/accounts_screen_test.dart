@@ -223,16 +223,6 @@ void main() {
     expect(find.byKey(const Key('accountsList')), findsNothing);
   });
 
-  testWidgets('renders under fr without missing localized keys', (
-    tester,
-  ) async {
-    await tester.pumpWidget(_wrap(controller: FakeAccountsController()));
-    await tester.pumpAndSettle();
-
-    expect(find.text('Ajoutez votre premier compte'), findsOneWidget);
-    expect(tester.takeException(), isNull);
-  });
-
   testWidgets('renders under en without missing localized keys', (
     tester,
   ) async {

@@ -408,79 +408,79 @@ void main() {
     },
   );
 
-  for (final (locale, caption, lastMonth) in [
-    ('fr', 'en moyenne par mois', 'Mai 2026'),
-    ('en', 'on average per month', 'May 2026'),
-  ]) {
-    testWidgets(
-      '$locale: both views draw the 12-month average, named by legend, not tooltip',
-      (tester) async {
-        _useDesktopSurface(tester);
-        await tester.pumpWidget(_wrap(state: _state(), locale: Locale(locale)));
-        await tester.pumpAndSettle();
+  testWidgets(
+    'both views draw the 12-month average, named by legend, not tooltip',
+    (tester) async {
+      // The average and its legend do not depend on the locale: fr, the
+      // default, is enough.
+      const locale = 'fr';
+      const caption = 'en moyenne par mois';
+      const lastMonth = 'Mai 2026';
+      _useDesktopSurface(tester);
+      await tester.pumpWidget(_wrap(state: _state(), locale: Locale(locale)));
+      await tester.pumpAndSettle();
 
-        final average = formatAmount(
-          amountMinor: 29917,
+      final average = formatAmount(
+        amountMinor: 29917,
+        currency: 'EUR',
+        locale: locale,
+        showPositiveSign: true,
+      );
+      SavingsChart chart() =>
+          tester.widget<SavingsChart>(find.byType(SavingsChart));
+
+      // The headline's caption doubles as the line's legend.
+      final legend = find.byKey(const Key('savingsAverageSwatch'));
+      expect(legend, findsOneWidget);
+      expect(
+        tester.getCenter(legend).dy,
+        moreOrLessEquals(tester.getCenter(find.text(caption)).dy, epsilon: 1),
+      );
+
+      for (final view in [SavingsChartView.line, SavingsChartView.bars]) {
+        await tester.tap(
+          find.byKey(
+            Key(
+              view == SavingsChartView.line
+                  ? 'savingsViewLine'
+                  : 'savingsViewBars',
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+        expect(chart().view, view);
+        expect(chart().average, 29917);
+        // Hovering a month names that month and its amount, nothing more: the
+        // average is the dotted line and the headline, not a tooltip line.
+        final tooltips = chart().tooltips!;
+        final values = chart().values;
+        for (var i = 0; i < tooltips.length; i++) {
+          final text = tooltips[i].toPlainText();
+          expect(text.split('\n'), hasLength(2));
+          expect(
+            text,
+            endsWith(
+              formatAmount(
+                amountMinor: values[i],
+                currency: 'EUR',
+                locale: locale,
+                showPositiveSign: true,
+              ),
+            ),
+          );
+          expect(text, isNot(contains(average)));
+        }
+        final lastAmount = formatAmount(
+          amountMinor: 63565,
           currency: 'EUR',
           locale: locale,
           showPositiveSign: true,
         );
-        SavingsChart chart() =>
-            tester.widget<SavingsChart>(find.byType(SavingsChart));
-
-        // The headline's caption doubles as the line's legend.
-        final legend = find.byKey(const Key('savingsAverageSwatch'));
-        expect(legend, findsOneWidget);
-        expect(
-          tester.getCenter(legend).dy,
-          moreOrLessEquals(tester.getCenter(find.text(caption)).dy, epsilon: 1),
-        );
-
-        for (final view in [SavingsChartView.line, SavingsChartView.bars]) {
-          await tester.tap(
-            find.byKey(
-              Key(
-                view == SavingsChartView.line
-                    ? 'savingsViewLine'
-                    : 'savingsViewBars',
-              ),
-            ),
-          );
-          await tester.pumpAndSettle();
-          expect(chart().view, view);
-          expect(chart().average, 29917);
-          // Hovering a month names that month and its amount, nothing more: the
-          // average is the dotted line and the headline, not a tooltip line.
-          final tooltips = chart().tooltips!;
-          final values = chart().values;
-          for (var i = 0; i < tooltips.length; i++) {
-            final text = tooltips[i].toPlainText();
-            expect(text.split('\n'), hasLength(2));
-            expect(
-              text,
-              endsWith(
-                formatAmount(
-                  amountMinor: values[i],
-                  currency: 'EUR',
-                  locale: locale,
-                  showPositiveSign: true,
-                ),
-              ),
-            );
-            expect(text, isNot(contains(average)));
-          }
-          final lastAmount = formatAmount(
-            amountMinor: 63565,
-            currency: 'EUR',
-            locale: locale,
-            showPositiveSign: true,
-          );
-          expect(tooltips.last.toPlainText(), '$lastMonth\n$lastAmount');
-        }
-        expect(tester.takeException(), isNull);
-      },
-    );
-  }
+        expect(tooltips.last.toPlainText(), '$lastMonth\n$lastAmount');
+      }
+      expect(tester.takeException(), isNull);
+    },
+  );
 
   testWidgets('a user with no history gets no average line', (tester) async {
     _useDesktopSurface(tester);

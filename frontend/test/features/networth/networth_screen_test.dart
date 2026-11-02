@@ -145,27 +145,23 @@ void main() {
       );
     });
 
-    for (final locale in const ['fr', 'en']) {
-      testWidgets('a negative net worth keeps the neutral ink ($locale)', (
-        tester,
-      ) async {
-        _useDesktopSurface(tester);
-        await tester.pumpWidget(
-          _wrap(
-            locale: Locale(locale),
-            networth: FakeNetworthController(summary: testNoPropertySummary()),
-            properties: FakePropertiesController(),
-          ),
-        );
-        await tester.pumpAndSettle();
+    // The ink does not depend on the locale: fr, the default, is enough.
+    testWidgets('a negative net worth keeps the neutral ink', (tester) async {
+      _useDesktopSurface(tester);
+      await tester.pumpWidget(
+        _wrap(
+          networth: FakeNetworthController(summary: testNoPropertySummary()),
+          properties: FakePropertiesController(),
+        ),
+      );
+      await tester.pumpAndSettle();
 
-        final painted = _amount(tester, 'networthValue');
-        expect(painted.data, contains('−'));
-        expect(painted.data, isNot(contains('-')));
-        expect(painted.data, _money(-20982921, locale: locale));
-        expect(painted.style!.color, AppColors.textPrimary);
-      });
-    }
+      final painted = _amount(tester, 'networthValue');
+      expect(painted.data, contains('−'));
+      expect(painted.data, isNot(contains('-')));
+      expect(painted.data, _money(-20982921, locale: 'fr'));
+      expect(painted.style!.color, AppColors.textPrimary);
+    });
   });
 
   group('month delta pill', () {

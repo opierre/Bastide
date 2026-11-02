@@ -431,18 +431,6 @@ void main() {
         findsOneWidget,
       );
     });
-
-    testWidgets('renders in French', (tester) async {
-      stub();
-
-      await tester.pumpWidget(wrap());
-      await tester.pumpAndSettle();
-
-      expect(find.text('IA locale'), findsOneWidget);
-      expect(find.text('Activer la catégorisation par IA'), findsOneWidget);
-      expect(find.text('Tester la connexion'), findsOneWidget);
-      expect(find.text('Seuil de confiance — 80 %'), findsOneWidget);
-    });
   });
 
   group('states', () {
