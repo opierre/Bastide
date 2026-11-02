@@ -145,17 +145,3 @@ def db_session(tmp_path: Path, schema_template: Path) -> Generator[Session]:
     finally:
         db.close()
         engine.dispose()
-
-
-@pytest.fixture
-def migrated_session(tmp_path: Path, migrated_template: Path) -> Generator[Session]:
-    """A Session on a temp database built by Alembic, with FK enforcement on."""
-    db_path = tmp_path / "migrated.db"
-    shutil.copyfile(migrated_template, db_path)
-    engine = engine_with_foreign_keys(db_path)
-    db = sessionmaker(bind=engine, autoflush=False, autocommit=False)()
-    try:
-        yield db
-    finally:
-        db.close()
-        engine.dispose()
