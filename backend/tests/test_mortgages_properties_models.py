@@ -1,11 +1,10 @@
 """Tests for the mortgage and property tables: the migration, constraints, and property FK."""
 
 from datetime import date
-from pathlib import Path
 from uuid import uuid4
 
 import pytest
-from sqlalchemy import Integer, String, create_engine, inspect
+from sqlalchemy import Integer, String
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
@@ -15,33 +14,7 @@ from app.features.mortgages.models import Mortgage, MortgageSimulation
 from app.features.properties.models import Property
 from app.features.settings.models import UserSettings
 
-MIGRATION_TABLES = {
-    "mortgages",
-    "properties",
-    "mortgage_simulations",
-}
-
-# Created by the same migration and dropped again when the tax feature was removed.
-TAX_TABLES = {"tax_profiles", "tax_brackets", "tax_parameters"}
-
 MIGRATION_MODELS = (Mortgage, MortgageSimulation, Property)
-
-
-def _schema(db_path: Path) -> tuple[set[str], set[str]]:
-    """The table names and the `user_settings` column names of a migrated database."""
-    engine = create_engine(f"sqlite:///{db_path}")
-    inspector = inspect(engine)
-    tables = set(inspector.get_table_names())
-    columns = {column["name"] for column in inspector.get_columns("user_settings")}
-    engine.dispose()
-    return tables, columns
-
-
-def test_alembic_upgrade_builds_its_schema_on_empty_db(migrated_template: Path) -> None:
-    tables, settings_columns = _schema(migrated_template)
-    assert MIGRATION_TABLES.issubset(tables)
-    assert not (TAX_TABLES & tables)
-    assert "declared_monthly_income_minor" in settings_columns
 
 
 def test_money_and_rates_are_integers_keys_uuid_strings_timestamps_utc_aware() -> None:

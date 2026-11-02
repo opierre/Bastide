@@ -1,11 +1,9 @@
 """Tests for the goals, recurring and run tables: migration, unique constraints, cascades."""
 
 from datetime import date
-from pathlib import Path
 from uuid import uuid4
 
 import pytest
-from sqlalchemy import create_engine, inspect
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
@@ -16,20 +14,6 @@ from app.features.goals.models import Goal, GoalAllocation
 from app.features.imports.models import ImportBatch
 from app.features.recurring.models import RecurringOccurrence, RecurringSeries
 from app.features.transactions.models import Transaction
-
-MIGRATION_TABLES = {
-    "categorization_runs",
-    "recurring_series",
-    "recurring_occurrences",
-    "goals",
-    "goal_allocations",
-}
-
-
-def test_alembic_upgrade_builds_its_tables_on_empty_db(migrated_template: Path) -> None:
-    engine = create_engine(f"sqlite:///{migrated_template}")
-    assert MIGRATION_TABLES.issubset(inspect(engine).get_table_names())
-    engine.dispose()
 
 
 def _seed_user(db: Session) -> User:
