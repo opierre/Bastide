@@ -1197,6 +1197,7 @@
   "accountDetailSeeAll": "See all",
   "accountDetailNoTransactions": "No transactions yet",
   "markRecurringAction": "Mark as recurring",
+  "markRecurringOpenSeriesAction": "Already recurring — view the series",
   "markRecurringTitle": "Mark as recurring",
   "markRecurringIntro": "These are the transactions Bastide would group together. Untick any that don't belong.",
   "markRecurringConfidenceHigh": "High confidence",

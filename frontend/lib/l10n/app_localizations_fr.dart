@@ -4477,6 +4477,9 @@ class AppLocalizationsFr extends AppLocalizations {
   String get markRecurringAction => 'Marquer comme récurrent';
 
   @override
+  String get markRecurringOpenSeriesAction => 'Déjà récurrent — voir la série';
+
+  @override
   String get markRecurringTitle => 'Marquer comme récurrent';
 
   @override

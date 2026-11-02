@@ -5861,6 +5861,10 @@
   "@markRecurringAction": {
     "description": "Tooltip of the row action opening the « Marquer comme récurrent » dialog on an outflow."
   },
+  "markRecurringOpenSeriesAction": "Déjà récurrent — voir la série",
+  "@markRecurringOpenSeriesAction": {
+    "description": "Tooltip of the same row action on an outflow that already belongs to a recurring series: it opens that series in Abonnements."
+  },
   "markRecurringTitle": "Marquer comme récurrent",
   "@markRecurringTitle": {
     "description": "Title of the dialog previewing the series a transaction would start."

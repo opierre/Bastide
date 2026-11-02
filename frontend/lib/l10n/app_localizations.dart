@@ -7025,6 +7025,12 @@ abstract class AppLocalizations {
   /// **'Marquer comme récurrent'**
   String get markRecurringAction;
 
+  /// Tooltip of the same row action on an outflow that already belongs to a recurring series: it opens that series in Abonnements.
+  ///
+  /// In fr, this message translates to:
+  /// **'Déjà récurrent — voir la série'**
+  String get markRecurringOpenSeriesAction;
+
   /// Title of the dialog previewing the series a transaction would start.
   ///
   /// In fr, this message translates to:

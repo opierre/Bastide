@@ -38,7 +38,16 @@ Future<void> showMarkRecurringDialog(
     builder: (_) => MarkRecurringDialog(transactionId: transactionId),
   );
   if (result is! OpenExistingSeries || !context.mounted) return;
-  ref.read(selectedSeriesProvider.notifier).open(result.series.id);
+  openRecurringSeries(context, ref, seriesId: result.series.id);
+}
+
+/// Opens the Abonnements panel on [seriesId].
+void openRecurringSeries(
+  BuildContext context,
+  WidgetRef ref, {
+  required String seriesId,
+}) {
+  ref.read(selectedSeriesProvider.notifier).open(seriesId);
   context.go(SubscriptionsScreen.path);
 }
 
