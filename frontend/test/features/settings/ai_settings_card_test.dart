@@ -305,12 +305,11 @@ void main() {
       expect(dotColor(tester), AppColors.warning);
 
       // The engine came up between the mount probe and the explicit test.
-      when(() => apiClient.get('/settings/inference/health')).thenAnswer((
-        _,
-      ) async {
-        await Future<void>.delayed(const Duration(milliseconds: 40));
-        return _healthJson();
-      });
+      // Held open until the progress has been checked.
+      final probe = Completer<Map<String, dynamic>>();
+      when(
+        () => apiClient.get('/settings/inference/health'),
+      ).thenAnswer((_) => probe.future);
 
       await tester.tap(find.byKey(const Key('settingsAiTestButton')));
       await tester.pump();
@@ -320,6 +319,7 @@ void main() {
       expect(find.byType(CircularProgressIndicator), findsOneWidget);
       expect(find.byKey(const Key('settingsAiCard')), findsOneWidget);
 
+      probe.complete(_healthJson());
       await tester.pumpAndSettle();
       expect(dotColor(tester), AppColors.positive);
       expect(find.text('Connecté — 3 modèles disponibles'), findsOneWidget);

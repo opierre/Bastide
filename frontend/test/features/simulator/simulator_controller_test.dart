@@ -3,18 +3,20 @@ import 'package:bastide/core/api/api_client_provider.dart';
 import 'package:bastide/features/simulator/application/simulator_controller.dart';
 import 'package:bastide/features/simulator/data/simulations_repository.dart';
 import 'package:bastide/features/simulator/domain/simulation.dart';
+import 'package:fake_async/fake_async.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 
+import '../../support/fake_time.dart';
 import '../../support/simulator_fixtures.dart';
 
 class MockSimulationsRepository extends Mock implements SimulationsRepository {}
 
 class MockApiClient extends Mock implements ApiClient {}
 
-/// Lets the debounce elapse and the answer land.
-Future<void> _settle() => Future<void>.delayed(
+/// Lets the debounce elapse and the answer land, in fake time.
+void _settle(FakeAsync time) => time.elapse(
   SimulatorController.debounce + const Duration(milliseconds: 60),
 );
 
@@ -64,7 +66,9 @@ void main() {
         ..setInsurance(3200);
     }
 
-    test('build loads the household and the saved scenarios', () async {
+    fakeTimeTest('build loads the household and the saved scenarios', (
+      time,
+    ) async {
       when(() => repository.list()).thenAnswer((_) async => [testScenario()]);
 
       final state = await container.read(simulatorControllerProvider.future);
@@ -73,11 +77,13 @@ void main() {
       expect(state.scenarios.single.label, 'Villeurbanne — 265 k€');
       expect(state.result, isNull);
       expect(state.inputs.termMonths, 300);
-      await _settle();
+      _settle(time);
       expect(current().scenarioInstalments, {'s1': 141841});
     });
 
-    test('computes once after the debounce, never saving anything', () async {
+    fakeTimeTest('computes once after the debounce, never saving anything', (
+      time,
+    ) async {
       await container.read(simulatorControllerProvider.future);
 
       typeFrameInputs();
@@ -92,7 +98,7 @@ void main() {
       );
       expect(current().computing, isTrue);
 
-      await _settle();
+      _settle(time);
 
       final captured = verify(
         () => repository.compute(captureAny(), includeExistingLoans: false),
@@ -103,13 +109,13 @@ void main() {
       verifyNever(() => repository.create(any(), any()));
     });
 
-    test(
+    fakeTimeTest(
       'nothing is computed until a borrowed amount and a rate exist',
-      () async {
+      (time) async {
         await container.read(simulatorControllerProvider.future);
 
         notifier().setPropertyPrice(32000000);
-        await _settle();
+        _settle(time);
 
         expect(current().canCompute, isFalse);
         expect(current().result, isNull);
@@ -163,7 +169,9 @@ void main() {
       );
     });
 
-    test('a refused loan is kept as a compute error, not a result', () async {
+    fakeTimeTest('a refused loan is kept as a compute error, not a result', (
+      time,
+    ) async {
       await container.read(simulatorControllerProvider.future);
       when(
         () => repository.compute(
@@ -175,7 +183,7 @@ void main() {
       );
 
       typeFrameInputs();
-      await _settle();
+      _settle(time);
 
       expect(current().result, isNull);
       expect(
@@ -185,13 +193,15 @@ void main() {
       expect(current().canSave, isFalse);
     });
 
-    test('the existing-loans switch recomputes with them included', () async {
+    fakeTimeTest('the existing-loans switch recomputes with them included', (
+      time,
+    ) async {
       await container.read(simulatorControllerProvider.future);
       typeFrameInputs();
-      await _settle();
+      _settle(time);
 
       notifier().setIncludeExistingLoans(true);
-      await _settle();
+      _settle(time);
 
       verify(
         () => repository.compute(testTerms, includeExistingLoans: true),
@@ -199,7 +209,9 @@ void main() {
     });
 
     group('unknown income', () {
-      test('maps to an absent ratio and capacity, never zero', () async {
+      fakeTimeTest('maps to an absent ratio and capacity, never zero', (
+        time,
+      ) async {
         when(
           () => repository.compute(
             any(),
@@ -209,7 +221,7 @@ void main() {
         await container.read(simulatorControllerProvider.future);
 
         typeFrameInputs();
-        await _settle();
+        _settle(time);
 
         final state = current();
         expect(state.incomeKnown, isFalse);
@@ -218,9 +230,9 @@ void main() {
         expect(state.result!.hcsf.withinRatio, isNull);
       });
 
-      test(
+      fakeTimeTest(
         'an over-reference reading still computes and can be saved',
-        () async {
+        (time) async {
           when(
             () => repository.compute(
               any(),
@@ -230,7 +242,7 @@ void main() {
           await container.read(simulatorControllerProvider.future);
 
           typeFrameInputs();
-          await _settle();
+          _settle(time);
 
           expect(current().incomeKnown, isTrue);
           expect(current().result!.hcsf.withinRatio, isFalse);
@@ -240,13 +252,15 @@ void main() {
     });
 
     group('scenarios', () {
-      test('save sends the current inputs and appends the row', () async {
+      fakeTimeTest('save sends the current inputs and appends the row', (
+        time,
+      ) async {
         when(
           () => repository.create(any(), any()),
         ).thenAnswer((_) async => testScenario(id: 's9', label: 'Lyon 3e'));
         await container.read(simulatorControllerProvider.future);
         typeFrameInputs();
-        await _settle();
+        _settle(time);
 
         await notifier().saveScenario('Lyon 3e');
 
@@ -304,10 +318,10 @@ void main() {
         );
       });
 
-      test('the live row counts toward the cap of 3', () async {
+      fakeTimeTest('the live row counts toward the cap of 3', (time) async {
         await container.read(simulatorControllerProvider.future);
         typeFrameInputs();
-        await _settle();
+        _settle(time);
 
         await notifier().toggleSelection(SimulatorState.liveId);
         await notifier().toggleSelection('s1');
@@ -359,17 +373,19 @@ void main() {
       );
     });
 
-    test('declaring an income re-reads the household and recomputes', () async {
+    fakeTimeTest('declaring an income re-reads the household and recomputes', (
+      time,
+    ) async {
       when(() => repository.declareIncome(any())).thenAnswer((_) async {});
       await container.read(simulatorControllerProvider.future);
       typeFrameInputs();
-      await _settle();
+      _settle(time);
 
       when(
         () => repository.household(),
       ).thenAnswer((_) async => testHousehold(monthlyIncomeMinor: 520000));
       await notifier().declareIncome(520000);
-      await _settle();
+      _settle(time);
 
       verify(() => repository.declareIncome(520000)).called(1);
       expect(current().household.monthlyIncomeMinor, 520000);

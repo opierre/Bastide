@@ -1,6 +1,7 @@
 import 'package:bastide/core/api/api_client.dart';
 import 'package:bastide/core/api/api_client_provider.dart';
 import 'package:bastide/features/accounts/application/account_detail_controller.dart';
+import 'package:bastide/features/accounts/application/accounts_controller.dart';
 import 'package:bastide/features/accounts/domain/account_overview.dart';
 import 'package:bastide/features/transactions/application/transactions_controller.dart';
 import 'package:bastide/features/transactions/domain/transaction.dart';
@@ -174,7 +175,7 @@ void main() {
   test('an account is looked up in the accounts list by id', () async {
     final sub = container.listen(accountByIdProvider('acc-1'), (_, _) {});
     addTearDown(sub.close);
-    await Future<void>.delayed(Duration.zero);
+    await container.read(accountsControllerProvider.future);
 
     expect(sub.read()?.name, 'Compte courant');
     expect(container.read(accountByIdProvider(null)), isNull);

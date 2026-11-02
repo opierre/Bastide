@@ -6,6 +6,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 
+import '../../support/fake_time.dart';
+
 class MockApiClient extends Mock implements ApiClient {}
 
 Map<String, dynamic> _settingsJson({
@@ -121,7 +123,9 @@ void main() {
   });
 
   group('patch debounce', () {
-    test('coalesces edits inside the window into one request', () async {
+    fakeTimeTest('coalesces edits inside the window into one request', (
+      time,
+    ) async {
       stubSettings(_settingsJson());
       stubPatch(_settingsJson(modelTag: 'qwen3:4b', threshold: 0.65));
       await load();
@@ -132,7 +136,7 @@ void main() {
 
       verifyNever(() => apiClient.patch('/settings', body: any(named: 'body')));
 
-      await Future<void>.delayed(settingsPatchDebounce * 2);
+      time.elapse(settingsPatchDebounce * 2);
 
       final body = verify(
         () => apiClient.patch('/settings', body: captureAny(named: 'body')),
@@ -157,7 +161,9 @@ void main() {
       );
     });
 
-    test('a rejected address is reported against that field', () async {
+    fakeTimeTest('a rejected address is reported against that field', (
+      time,
+    ) async {
       stubSettings(_settingsJson());
       when(
         () => apiClient.patch('/settings', body: any(named: 'body')),
@@ -167,7 +173,7 @@ void main() {
       await load();
 
       controller().setBaseUrl('http://example.com/v1');
-      await Future<void>.delayed(settingsPatchDebounce * 2);
+      time.elapse(settingsPatchDebounce * 2);
 
       final state = container.read(settingsControllerProvider).value!;
       expect(state.baseUrlError, isA<ApiFailure>());
@@ -175,7 +181,9 @@ void main() {
       expect(state.settings.inferenceBaseUrl, 'http://example.com/v1');
     });
 
-    test('editing the address again clears the previous rejection', () async {
+    fakeTimeTest('editing the address again clears the previous rejection', (
+      time,
+    ) async {
       stubSettings(_settingsJson());
       when(
         () => apiClient.patch('/settings', body: any(named: 'body')),
@@ -185,7 +193,7 @@ void main() {
       await load();
 
       controller().setBaseUrl('http://example.com/v1');
-      await Future<void>.delayed(settingsPatchDebounce * 2);
+      time.elapse(settingsPatchDebounce * 2);
       expect(
         container.read(settingsControllerProvider).value!.baseUrlError,
         isNotNull,
@@ -199,7 +207,9 @@ void main() {
       );
     });
 
-    test('a threshold rejection does not land on the address field', () async {
+    fakeTimeTest('a threshold rejection does not land on the address field', (
+      time,
+    ) async {
       stubSettings(_settingsJson());
       when(
         () => apiClient.patch('/settings', body: any(named: 'body')),
@@ -209,7 +219,7 @@ void main() {
       await load();
 
       controller().setThresholdPercent(50);
-      await Future<void>.delayed(settingsPatchDebounce * 2);
+      time.elapse(settingsPatchDebounce * 2);
 
       expect(
         container.read(settingsControllerProvider).value!.baseUrlError,
@@ -225,13 +235,15 @@ void main() {
       expect((await load()).thresholdPercent, 65);
     });
 
-    test('a percent off the slider is stored as the [0,1] real', () async {
+    fakeTimeTest('a percent off the slider is stored as the [0,1] real', (
+      time,
+    ) async {
       stubSettings(_settingsJson());
       stubPatch(_settingsJson(threshold: 0.45));
       await load();
 
       controller().setThresholdPercent(45);
-      await Future<void>.delayed(settingsPatchDebounce * 2);
+      time.elapse(settingsPatchDebounce * 2);
 
       final body =
           verify(
