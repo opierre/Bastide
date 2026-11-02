@@ -1,6 +1,8 @@
 import 'package:bastide/core/navigation/sidebar_controller.dart';
+import 'package:bastide/core/session/current_user_provider.dart';
 import 'package:bastide/core/theme/app_theme.dart';
 import 'package:bastide/core/widgets/app_shell.dart';
+import 'package:bastide/features/auth/domain/auth_user.dart';
 import 'package:bastide/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -8,6 +10,17 @@ import 'package:flutter_test/flutter_test.dart';
 
 import '../support/fake_dashboard_controller.dart';
 
+const _signedInUser = AuthUser(
+  id: 'u1',
+  email: 'ada@example.com',
+  displayName: 'Ada',
+  locale: 'fr',
+  currency: 'EUR',
+);
+
+/// The chrome alone: no router, no auth flow, no backend. Routing through the
+/// shell and the user menu are covered on the full app in
+/// `test/app_shell_test.dart`.
 Widget _shell({
   required String path,
   Locale locale = const Locale('fr'),
@@ -15,6 +28,7 @@ Widget _shell({
 }) {
   return ProviderScope(
     overrides: [
+      currentUserProvider.overrideWithValue(_signedInUser),
       if (collapsed)
         sidebarCollapsedProvider.overrideWith(FakeCollapsedSidebar.new),
     ],
@@ -26,7 +40,7 @@ Widget _shell({
       home: AppShell(
         currentPath: path,
         onNavigate: (_) {},
-        child: const SizedBox.expand(),
+        child: const SizedBox.expand(key: Key('screen-content')),
       ),
     ),
   );
@@ -52,6 +66,92 @@ const _patrimoine = [
 ];
 
 void main() {
+  testWidgets('shell renders the fixed sidebar and top bar', (tester) async {
+    _useFrame(tester);
+    await tester.pumpWidget(_shell(path: '/dashboard'));
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(const Key('appNavRail')), findsOneWidget);
+    expect(find.byKey(const Key('appTopBar')), findsOneWidget);
+    expect(find.byKey(const Key('screen-content')), findsOneWidget);
+  });
+
+  testWidgets(
+    'the privacy badge sits at the sidebar foot, not in a bottom bar',
+    (tester) async {
+      _useFrame(tester);
+      await tester.pumpWidget(_shell(path: '/dashboard'));
+      await tester.pumpAndSettle();
+
+      expect(find.byKey(const Key('appBottomBar')), findsNothing);
+      expect(
+        _inSidebar(find.byKey(const Key('sidebarPrivacyBadge'))),
+        findsOneWidget,
+      );
+    },
+  );
+
+  testWidgets('collapsing the sidebar keeps the destinations and the lock', (
+    tester,
+  ) async {
+    _useFrame(tester);
+    await tester.pumpWidget(_shell(path: '/dashboard'));
+    await tester.pumpAndSettle();
+
+    double railWidth() =>
+        tester.getSize(find.byKey(const Key('appNavRail'))).width;
+    expect(railWidth(), 252);
+
+    await tester.tap(find.byKey(const Key('sidebarToggleButton')));
+    await tester.pumpAndSettle();
+
+    expect(railWidth(), 76);
+    // The label is gone but the destination itself is not — the collapsed rail
+    // is icon-only, never a shorter menu.
+    expect(find.text('Comptes'), findsNothing);
+    expect(find.byIcon(Icons.account_balance_wallet_outlined), findsOneWidget);
+    expect(find.byIcon(Icons.lock_outline_rounded), findsOneWidget);
+  });
+
+  testWidgets('renders under en, the user pill showing the name only', (
+    tester,
+  ) async {
+    _useFrame(tester);
+    await tester.pumpWidget(
+      _shell(path: '/dashboard', locale: const Locale('en')),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('Dashboard'), findsWidgets);
+    expect(find.text('Accounts'), findsOneWidget);
+
+    // The pill carries the avatar, the display name and the chevron only: the
+    // email adds nothing in a local, single-user app. The name sits on the
+    // pill's vertical centre now that it is the only line.
+    final pill = find.byKey(const Key('userMenuButton'));
+    final name = find.descendant(
+      of: pill,
+      matching: find.text(_signedInUser.displayName),
+    );
+    expect(name, findsOneWidget);
+    expect(
+      find.descendant(of: pill, matching: find.text(_signedInUser.email)),
+      findsNothing,
+    );
+    expect(
+      find.descendant(
+        of: pill,
+        matching: find.byIcon(Icons.expand_more_rounded),
+      ),
+      findsOneWidget,
+    );
+    expect(
+      tester.getCenter(name).dy,
+      moreOrLessEquals(tester.getCenter(pill).dy, epsilon: 1),
+    );
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets(
     'the Patrimoine group sits after Gestion, before the pinned Paramètres, in order',
     (tester) async {

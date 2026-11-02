@@ -1,6 +1,5 @@
 import 'package:bastide/app.dart';
 import 'package:bastide/core/backend/backend_providers.dart';
-import 'package:bastide/core/l10n/locale_provider.dart';
 import 'package:bastide/features/accounts/application/accounts_controller.dart';
 import 'package:bastide/features/auth/application/auth_controller.dart';
 import 'package:bastide/features/auth/domain/auth_user.dart';
@@ -13,6 +12,10 @@ import 'support/fake_accounts_controller.dart';
 import 'support/fake_auth_controller.dart';
 import 'support/fake_backend.dart';
 
+/// The stories that need the whole app: the router behind the shell and the
+/// user menu's effects on the session. The chrome's own layout is tested on
+/// `AppShell` alone, in `test/core/app_shell_test.dart`.
+
 const _signedInUser = AuthUser(
   id: 'u1',
   email: 'ada@example.com',
@@ -20,14 +23,6 @@ const _signedInUser = AuthUser(
   locale: 'fr',
   currency: 'EUR',
 );
-
-final _authenticatedOverrides = [
-  backendControllerProvider.overrideWith(ReadyBackendController.new),
-  authControllerProvider.overrideWith(
-    () => FakeAuthController(initialUser: _signedInUser),
-  ),
-  accountsControllerProvider.overrideWith(() => FakeAccountsController()),
-];
 
 /// The frame is specified at 1440×900 (docs/design/00 §Layout invariant), and
 /// the top bar's contextual controls are sized for it. Testing the chrome at
@@ -39,101 +34,32 @@ void _useDesignViewport(WidgetTester tester) {
   addTearDown(tester.view.reset);
 }
 
-/// The user pill carries the avatar, the display name and the chevron only:
-/// the email adds nothing in a local, single-user app. The name sits on the
-/// pill's vertical centre now that it is the only line.
-void _expectUserPillShowsNameOnly(WidgetTester tester) {
-  final pill = find.byKey(const Key('userMenuButton'));
-  final name = find.descendant(
-    of: pill,
-    matching: find.text(_signedInUser.displayName),
-  );
-  expect(name, findsOneWidget);
-  expect(
-    find.descendant(of: pill, matching: find.text(_signedInUser.email)),
-    findsNothing,
-  );
-  expect(
-    find.descendant(of: pill, matching: find.byIcon(Icons.expand_more_rounded)),
-    findsOneWidget,
-  );
-  expect(
-    tester.getCenter(name).dy,
-    moreOrLessEquals(tester.getCenter(pill).dy, epsilon: 1),
-  );
-}
-
 void main() {
-  testWidgets('shell renders the fixed sidebar and top bar', (tester) async {
+  late FakeAuthController auth;
+
+  Future<void> pumpApp(WidgetTester tester) async {
     _useDesignViewport(tester);
+    auth = FakeAuthController(initialUser: _signedInUser);
     await tester.pumpWidget(
       ProviderScope(
-        overrides: _authenticatedOverrides,
+        overrides: [
+          backendControllerProvider.overrideWith(ReadyBackendController.new),
+          authControllerProvider.overrideWith(() => auth),
+          accountsControllerProvider.overrideWith(
+            () => FakeAccountsController(),
+          ),
+        ],
         child: const BastideApp(),
       ),
     );
     await tester.pumpAndSettle();
-
-    expect(find.byKey(const Key('appNavRail')), findsOneWidget);
-    expect(find.byKey(const Key('appTopBar')), findsOneWidget);
-    expect(find.byKey(const Key('screen-dashboard')), findsOneWidget);
-  });
-
-  testWidgets(
-    'the privacy badge sits at the sidebar foot, not in a bottom bar',
-    (tester) async {
-      _useDesignViewport(tester);
-      await tester.pumpWidget(
-        ProviderScope(
-          overrides: _authenticatedOverrides,
-          child: const BastideApp(),
-        ),
-      );
-      await tester.pumpAndSettle();
-
-      expect(find.byKey(const Key('appBottomBar')), findsNothing);
-      expect(find.byKey(const Key('sidebarPrivacyBadge')), findsOneWidget);
-    },
-  );
-
-  testWidgets('collapsing the sidebar keeps the destinations and the lock', (
-    tester,
-  ) async {
-    _useDesignViewport(tester);
-    await tester.pumpWidget(
-      ProviderScope(
-        overrides: _authenticatedOverrides,
-        child: const BastideApp(),
-      ),
-    );
-    await tester.pumpAndSettle();
-
-    double railWidth() =>
-        tester.getSize(find.byKey(const Key('appNavRail'))).width;
-    expect(railWidth(), 252);
-
-    await tester.tap(find.byKey(const Key('sidebarToggleButton')));
-    await tester.pumpAndSettle();
-
-    expect(railWidth(), 76);
-    // The label is gone but the destination itself is not — the collapsed rail
-    // is icon-only, never a shorter menu.
-    expect(find.text('Comptes'), findsNothing);
-    expect(find.byIcon(Icons.account_balance_wallet_outlined), findsOneWidget);
-    expect(find.byIcon(Icons.lock_outline_rounded), findsOneWidget);
-  });
+  }
 
   testWidgets('tapping a nav item swaps the content region, not the chrome', (
     tester,
   ) async {
-    _useDesignViewport(tester);
-    await tester.pumpWidget(
-      ProviderScope(
-        overrides: _authenticatedOverrides,
-        child: const BastideApp(),
-      ),
-    );
-    await tester.pumpAndSettle();
+    await pumpApp(tester);
+    expect(find.byKey(const Key('screen-dashboard')), findsOneWidget);
 
     await tester.tap(find.text('Comptes'));
     await tester.pumpAndSettle();
@@ -144,66 +70,7 @@ void main() {
     expect(find.byKey(const Key('appTopBar')), findsOneWidget);
   });
 
-  testWidgets('renders under fr without missing localized keys', (
-    tester,
-  ) async {
-    _useDesignViewport(tester);
-    await tester.pumpWidget(
-      ProviderScope(
-        overrides: _authenticatedOverrides,
-        child: const BastideApp(),
-      ),
-    );
-    await tester.pumpAndSettle();
-
-    expect(find.text('Tableau de bord'), findsWidgets);
-    expect(find.text('Comptes'), findsOneWidget);
-    _expectUserPillShowsNameOnly(tester);
-    expect(tester.takeException(), isNull);
-  });
-
-  testWidgets('renders under en without missing localized keys', (
-    tester,
-  ) async {
-    _useDesignViewport(tester);
-    await tester.pumpWidget(
-      ProviderScope(
-        overrides: [
-          ..._authenticatedOverrides,
-          localeProvider.overrideWith(() => _EnLocaleController()),
-        ],
-        child: const BastideApp(),
-      ),
-    );
-    await tester.pumpAndSettle();
-
-    expect(find.text('Dashboard'), findsWidgets);
-    expect(find.text('Accounts'), findsOneWidget);
-    _expectUserPillShowsNameOnly(tester);
-    expect(tester.takeException(), isNull);
-  });
-
   group('user menu', () {
-    late FakeAuthController auth;
-
-    Future<void> pumpApp(WidgetTester tester) async {
-      _useDesignViewport(tester);
-      auth = FakeAuthController(initialUser: _signedInUser);
-      await tester.pumpWidget(
-        ProviderScope(
-          overrides: [
-            backendControllerProvider.overrideWith(ReadyBackendController.new),
-            authControllerProvider.overrideWith(() => auth),
-            accountsControllerProvider.overrideWith(
-              () => FakeAccountsController(),
-            ),
-          ],
-          child: const BastideApp(),
-        ),
-      );
-      await tester.pumpAndSettle();
-    }
-
     Future<void> choose(WidgetTester tester, String itemKey) async {
       await tester.tap(find.byKey(const Key('userMenuButton')));
       await tester.pumpAndSettle();
@@ -262,9 +129,4 @@ void main() {
       expect(find.byKey(const Key('settingsCurrencyField')), findsOneWidget);
     });
   });
-}
-
-class _EnLocaleController extends LocaleController {
-  @override
-  Locale build() => const Locale('en');
 }
