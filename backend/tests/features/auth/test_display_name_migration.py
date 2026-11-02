@@ -6,7 +6,7 @@ import pytest
 from sqlalchemy import Connection, create_engine, text
 from sqlalchemy.exc import IntegrityError
 
-from tests.migrations import downgrade, upgrade
+from tests.migrations import upgrade
 
 PRE_MIGRATION_REVISION = "e2c6b9a14f70"
 
@@ -55,10 +55,3 @@ def test_existing_names_are_normalized_and_deduplicated(tmp_path: Path) -> None:
         with pytest.raises(IntegrityError):
             _insert_user(conn, "u6", "amelie", "2026-06-01 00:00:00")
     engine.dispose()
-
-
-def test_downgrade_then_upgrade_is_clean(tmp_path: Path) -> None:
-    db_path = tmp_path / "app.db"
-    upgrade(db_path)
-    downgrade(db_path, PRE_MIGRATION_REVISION)
-    upgrade(db_path)

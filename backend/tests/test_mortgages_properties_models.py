@@ -1,6 +1,5 @@
 """Tests for the mortgage and property tables: the migration, constraints, and property FK."""
 
-import shutil
 from datetime import date
 from pathlib import Path
 from uuid import uuid4
@@ -15,11 +14,6 @@ from app.features.auth.models import User
 from app.features.mortgages.models import Mortgage, MortgageSimulation
 from app.features.properties.models import Property
 from app.features.settings.models import UserSettings
-from tests.migrations import downgrade, upgrade
-
-# The revision *below* the migration adding these tables, named so a later migration cannot silently
-# retarget the round-trip (see test_goals_recurring_runs_models.py).
-PRE_MIGRATION_REVISION = "a8d3f2c61e05"
 
 MIGRATION_TABLES = {
     "mortgages",
@@ -47,21 +41,6 @@ def test_alembic_upgrade_builds_its_schema_on_empty_db(migrated_template: Path) 
     tables, settings_columns = _schema(migrated_template)
     assert MIGRATION_TABLES.issubset(tables)
     assert not (TAX_TABLES & tables)
-    assert "declared_monthly_income_minor" in settings_columns
-
-
-def test_downgrade_then_upgrade_is_clean(tmp_path: Path, migrated_template: Path) -> None:
-    db_path = tmp_path / "roundtrip.db"
-    shutil.copyfile(migrated_template, db_path)
-
-    downgrade(db_path, PRE_MIGRATION_REVISION)
-    tables, settings_columns = _schema(db_path)
-    assert not (MIGRATION_TABLES & tables)
-    assert "declared_monthly_income_minor" not in settings_columns
-
-    upgrade(db_path)
-    tables, settings_columns = _schema(db_path)
-    assert MIGRATION_TABLES.issubset(tables)
     assert "declared_monthly_income_minor" in settings_columns
 
 

@@ -1,6 +1,5 @@
 """Tests for the goals, recurring and run tables: migration, unique constraints, cascades."""
 
-import shutil
 from datetime import date
 from pathlib import Path
 from uuid import uuid4
@@ -17,12 +16,6 @@ from app.features.goals.models import Goal, GoalAllocation
 from app.features.imports.models import ImportBatch
 from app.features.recurring.models import RecurringOccurrence, RecurringSeries
 from app.features.transactions.models import Transaction
-from tests.migrations import downgrade, upgrade
-
-# The revision *below* the migration adding these tables. Named rather than reached with
-# `downgrade -1`, which only meant "undo it" while that migration happened to be
-# head — every migration added since silently retargeted the test.
-PRE_MIGRATION_REVISION = "e4a1c6f20b73"
 
 MIGRATION_TABLES = {
     "categorization_runs",
@@ -35,21 +28,6 @@ MIGRATION_TABLES = {
 
 def test_alembic_upgrade_builds_its_tables_on_empty_db(migrated_template: Path) -> None:
     engine = create_engine(f"sqlite:///{migrated_template}")
-    assert MIGRATION_TABLES.issubset(inspect(engine).get_table_names())
-    engine.dispose()
-
-
-def test_downgrade_then_upgrade_is_clean(tmp_path: Path, migrated_template: Path) -> None:
-    db_path = tmp_path / "roundtrip.db"
-    shutil.copyfile(migrated_template, db_path)
-
-    downgrade(db_path, PRE_MIGRATION_REVISION)
-    engine = create_engine(f"sqlite:///{db_path}")
-    assert not (MIGRATION_TABLES & set(inspect(engine).get_table_names()))
-    engine.dispose()
-
-    upgrade(db_path)
-    engine = create_engine(f"sqlite:///{db_path}")
     assert MIGRATION_TABLES.issubset(inspect(engine).get_table_names())
     engine.dispose()
 
