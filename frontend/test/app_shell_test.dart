@@ -1,4 +1,8 @@
+import 'dart:typed_data';
+
 import 'package:bastide/app.dart';
+import 'package:bastide/core/api/api_client.dart';
+import 'package:bastide/core/api/api_client_provider.dart';
 import 'package:bastide/core/backend/backend_providers.dart';
 import 'package:bastide/core/l10n/locale_provider.dart';
 import 'package:bastide/features/accounts/application/accounts_controller.dart';
@@ -9,6 +13,7 @@ import 'package:bastide/features/auth/presentation/login_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mocktail/mocktail.dart';
 
 import 'support/fake_accounts_controller.dart';
 import 'support/fake_auth_controller.dart';
@@ -64,7 +69,65 @@ void _expectUserPillShowsNameOnly(WidgetTester tester) {
   );
 }
 
+class _MockApiClient extends Mock implements ApiClient {}
+
 void main() {
+  testWidgets('the pill shows an uploaded picture, fetched once', (
+    tester,
+  ) async {
+    _useDesignViewport(tester);
+    final api = _MockApiClient();
+    when(() => api.getBytes('/auth/me/avatar')).thenAnswer(
+      (_) async => ApiBytesResponse(
+        // A 1×1 transparent PNG.
+        bytes: Uint8List.fromList(const [
+          0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A, 0x00, 0x00, 0x00, //
+          0x0D, 0x49, 0x48, 0x44, 0x52, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00,
+          0x00, 0x01, 0x08, 0x06, 0x00, 0x00, 0x00, 0x1F, 0x15, 0xC4, 0x89,
+          0x00, 0x00, 0x00, 0x0D, 0x49, 0x44, 0x41, 0x54, 0x78, 0x9C, 0x63,
+          0x00, 0x01, 0x00, 0x00, 0x05, 0x00, 0x01, 0x0D, 0x0A, 0x2D, 0xB4,
+          0x00, 0x00, 0x00, 0x00, 0x49, 0x45, 0x4E, 0x44, 0xAE, 0x42, 0x60,
+          0x82,
+        ]),
+        headers: const {'etag': '"1"'},
+      ),
+    );
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          backendControllerProvider.overrideWith(ReadyBackendController.new),
+          authControllerProvider.overrideWith(
+            () => FakeAuthController(
+              initialUser: const AuthUser(
+                id: 'u1',
+                email: 'ada@example.com',
+                displayName: 'Ada',
+                locale: 'fr',
+                currency: 'EUR',
+                avatar: PictureChoice(),
+              ),
+            ),
+          ),
+          accountsControllerProvider.overrideWith(
+            () => FakeAccountsController(),
+          ),
+          apiClientProvider.overrideWithValue(api),
+        ],
+        child: const BastideApp(),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(
+      find.descendant(
+        of: find.byKey(const Key('userMenuButton')),
+        matching: find.byKey(const Key('userAvatarPicture')),
+      ),
+      findsOneWidget,
+    );
+    verify(() => api.getBytes('/auth/me/avatar')).called(1);
+  });
+
   testWidgets('shell renders the fixed sidebar and top bar', (tester) async {
     _useDesignViewport(tester);
     await tester.pumpWidget(

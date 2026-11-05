@@ -52,6 +52,54 @@ void main() {
     );
   });
 
+  test('a conditional GET sends If-None-Match and reports the 304', () async {
+    httpClient = MockClient((request) async {
+      sent.add(request);
+      return http.Response('', 304, headers: {'etag': '"7"'});
+    });
+
+    final response = await client().getBytes(
+      '/auth/me/avatar',
+      ifNoneMatch: '"7"',
+    );
+
+    expect(sent.single.method, 'GET');
+    expect(sent.single.headers['If-None-Match'], '"7"');
+    expect(response.statusCode, 304);
+    expect(response.bytes, isEmpty);
+  });
+
+  test('a binary GET error is thrown from its envelope', () async {
+    httpClient = MockClient(
+      (request) async => http.Response(
+        '{"error":{"code":"AVATAR_NOT_FOUND","message":"none"}}',
+        404,
+      ),
+    );
+
+    await expectLater(
+      client().getBytes('/auth/me/avatar'),
+      throwsA(
+        isA<ApiFailure>().having((f) => f.code, 'code', 'AVATAR_NOT_FOUND'),
+      ),
+    );
+  });
+
+  test('putMultipart sends a PUT with the file', () async {
+    await client().putMultipart(
+      '/auth/me/avatar',
+      fileField: 'file',
+      fileName: 'avatar.png',
+      fileBytes: const [1, 2, 3],
+    );
+
+    // MockClient hands the finalized request over as a plain `Request`.
+    final request = sent.single as http.Request;
+    expect(request.method, 'PUT');
+    expect(request.headers['content-type'], startsWith('multipart/form-data'));
+    expect(request.body, contains('name="file"; filename="avatar.png"'));
+  });
+
   test('omits the header for a dev backend without a token', () async {
     await client().get('/accounts');
 

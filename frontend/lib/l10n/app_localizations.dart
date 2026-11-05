@@ -6611,6 +6611,60 @@ abstract class AppLocalizations {
   /// **'L\'avatar n\'a pas pu être enregistré. Réessayez.'**
   String get settingsAvatarError;
 
+  /// Button of the avatar card opening the file picker for a picture of the user's own.
+  ///
+  /// In fr, this message translates to:
+  /// **'Choisir une photo…'**
+  String get settingsAvatarChoosePicture;
+
+  /// Button of the avatar card dropping the uploaded picture and going back to the previous default avatar.
+  ///
+  /// In fr, this message translates to:
+  /// **'Retirer la photo'**
+  String get settingsAvatarRemovePicture;
+
+  /// Error when the picked picture is over the size limit; {megabytes} is that limit.
+  ///
+  /// In fr, this message translates to:
+  /// **'Cette image est trop lourde : choisissez un fichier de moins de {megabytes} Mo.'**
+  String settingsAvatarPictureTooLarge(int megabytes);
+
+  /// Error when the picked file is not a supported picture.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ce fichier n\'est pas une image PNG, JPEG ou WebP.'**
+  String get settingsAvatarPictureInvalid;
+
+  /// Error when the picture could not be saved for another reason.
+  ///
+  /// In fr, this message translates to:
+  /// **'La photo n\'a pas pu être enregistrée. Réessayez.'**
+  String get settingsAvatarPictureError;
+
+  /// Title of the modal where the user crops the picked picture to a square.
+  ///
+  /// In fr, this message translates to:
+  /// **'Recadrer la photo'**
+  String get settingsAvatarCropTitle;
+
+  /// Lead text of the crop modal.
+  ///
+  /// In fr, this message translates to:
+  /// **'Faites glisser et zoomez pour cadrer votre avatar.'**
+  String get settingsAvatarCropLead;
+
+  /// Cancel button of the crop modal.
+  ///
+  /// In fr, this message translates to:
+  /// **'Annuler'**
+  String get settingsAvatarCropCancel;
+
+  /// Confirm button of the crop modal, uploading the cropped picture.
+  ///
+  /// In fr, this message translates to:
+  /// **'Utiliser cette photo'**
+  String get settingsAvatarCropSave;
+
   /// Title of the modal that changes the username.
   ///
   /// In fr, this message translates to:

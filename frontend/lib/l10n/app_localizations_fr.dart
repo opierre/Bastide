@@ -4231,6 +4231,38 @@ class AppLocalizationsFr extends AppLocalizations {
       'L\'avatar n\'a pas pu être enregistré. Réessayez.';
 
   @override
+  String get settingsAvatarChoosePicture => 'Choisir une photo…';
+
+  @override
+  String get settingsAvatarRemovePicture => 'Retirer la photo';
+
+  @override
+  String settingsAvatarPictureTooLarge(int megabytes) {
+    return 'Cette image est trop lourde : choisissez un fichier de moins de $megabytes Mo.';
+  }
+
+  @override
+  String get settingsAvatarPictureInvalid =>
+      'Ce fichier n\'est pas une image PNG, JPEG ou WebP.';
+
+  @override
+  String get settingsAvatarPictureError =>
+      'La photo n\'a pas pu être enregistrée. Réessayez.';
+
+  @override
+  String get settingsAvatarCropTitle => 'Recadrer la photo';
+
+  @override
+  String get settingsAvatarCropLead =>
+      'Faites glisser et zoomez pour cadrer votre avatar.';
+
+  @override
+  String get settingsAvatarCropCancel => 'Annuler';
+
+  @override
+  String get settingsAvatarCropSave => 'Utiliser cette photo';
+
+  @override
   String get settingsProfileNameModalTitle => 'Changer de nom d\'utilisateur';
 
   @override

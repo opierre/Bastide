@@ -1151,6 +1151,47 @@
   "@settingsAvatarError": {
     "description": "Banner in the avatar card when the choice could not be saved."
   },
+  "settingsAvatarChoosePicture": "Choose a picture…",
+  "@settingsAvatarChoosePicture": {
+    "description": "Button of the avatar card opening the file picker for a picture of the user's own."
+  },
+  "settingsAvatarRemovePicture": "Remove picture",
+  "@settingsAvatarRemovePicture": {
+    "description": "Button of the avatar card dropping the uploaded picture and going back to the previous default avatar."
+  },
+  "settingsAvatarPictureTooLarge": "This picture is too large: choose a file under {megabytes} MB.",
+  "@settingsAvatarPictureTooLarge": {
+    "description": "Error when the picked picture is over the size limit; {megabytes} is that limit.",
+    "placeholders": {
+      "megabytes": {
+        "type": "int"
+      }
+    }
+  },
+  "settingsAvatarPictureInvalid": "This file isn't a PNG, JPEG or WebP picture.",
+  "@settingsAvatarPictureInvalid": {
+    "description": "Error when the picked file is not a supported picture."
+  },
+  "settingsAvatarPictureError": "The picture couldn't be saved. Try again.",
+  "@settingsAvatarPictureError": {
+    "description": "Error when the picture could not be saved for another reason."
+  },
+  "settingsAvatarCropTitle": "Crop the picture",
+  "@settingsAvatarCropTitle": {
+    "description": "Title of the modal where the user crops the picked picture to a square."
+  },
+  "settingsAvatarCropLead": "Drag and zoom to frame your avatar.",
+  "@settingsAvatarCropLead": {
+    "description": "Lead text of the crop modal."
+  },
+  "settingsAvatarCropCancel": "Cancel",
+  "@settingsAvatarCropCancel": {
+    "description": "Cancel button of the crop modal."
+  },
+  "settingsAvatarCropSave": "Use this picture",
+  "@settingsAvatarCropSave": {
+    "description": "Confirm button of the crop modal, uploading the cropped picture."
+  },
   "settingsProfileNameModalTitle": "Change username",
   "settingsProfileNameModalLead": "The new name replaces the old one for signing in.",
   "settingsProfileNameModalSave": "Save",

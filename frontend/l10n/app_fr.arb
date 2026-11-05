@@ -5467,6 +5467,47 @@
   "@settingsAvatarError": {
     "description": "Banner in the avatar card when the choice could not be saved."
   },
+  "settingsAvatarChoosePicture": "Choisir une photo…",
+  "@settingsAvatarChoosePicture": {
+    "description": "Button of the avatar card opening the file picker for a picture of the user's own."
+  },
+  "settingsAvatarRemovePicture": "Retirer la photo",
+  "@settingsAvatarRemovePicture": {
+    "description": "Button of the avatar card dropping the uploaded picture and going back to the previous default avatar."
+  },
+  "settingsAvatarPictureTooLarge": "Cette image est trop lourde : choisissez un fichier de moins de {megabytes} Mo.",
+  "@settingsAvatarPictureTooLarge": {
+    "description": "Error when the picked picture is over the size limit; {megabytes} is that limit.",
+    "placeholders": {
+      "megabytes": {
+        "type": "int"
+      }
+    }
+  },
+  "settingsAvatarPictureInvalid": "Ce fichier n'est pas une image PNG, JPEG ou WebP.",
+  "@settingsAvatarPictureInvalid": {
+    "description": "Error when the picked file is not a supported picture."
+  },
+  "settingsAvatarPictureError": "La photo n'a pas pu être enregistrée. Réessayez.",
+  "@settingsAvatarPictureError": {
+    "description": "Error when the picture could not be saved for another reason."
+  },
+  "settingsAvatarCropTitle": "Recadrer la photo",
+  "@settingsAvatarCropTitle": {
+    "description": "Title of the modal where the user crops the picked picture to a square."
+  },
+  "settingsAvatarCropLead": "Faites glisser et zoomez pour cadrer votre avatar.",
+  "@settingsAvatarCropLead": {
+    "description": "Lead text of the crop modal."
+  },
+  "settingsAvatarCropCancel": "Annuler",
+  "@settingsAvatarCropCancel": {
+    "description": "Cancel button of the crop modal."
+  },
+  "settingsAvatarCropSave": "Utiliser cette photo",
+  "@settingsAvatarCropSave": {
+    "description": "Confirm button of the crop modal, uploading the cropped picture."
+  },
   "settingsProfileNameModalTitle": "Changer de nom d'utilisateur",
   "@settingsProfileNameModalTitle": {
     "description": "Title of the modal that changes the username."

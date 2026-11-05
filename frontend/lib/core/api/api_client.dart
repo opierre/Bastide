@@ -24,10 +24,18 @@ class ApiFailure implements Exception {
 
 /// A binary response body with its headers (lower-cased names).
 class ApiBytesResponse {
-  const ApiBytesResponse({required this.bytes, required this.headers});
+  const ApiBytesResponse({
+    required this.bytes,
+    required this.headers,
+    this.statusCode = 200,
+  });
 
   final Uint8List bytes;
   final Map<String, String> headers;
+
+  /// 304 when a conditional GET found the caller's copy still current; the
+  /// body is then empty.
+  final int statusCode;
 }
 
 /// Single typed HTTP client for the local sidecar. Owns bearer-header
@@ -84,9 +92,40 @@ class ApiClient {
     required String fileName,
     required List<int> fileBytes,
     Map<String, String> fields = const {},
+  }) => _multipart(
+    'POST',
+    path,
+    fileField: fileField,
+    fileName: fileName,
+    fileBytes: fileBytes,
+    fields: fields,
+  );
+
+  /// [postMultipart] for endpoints that replace a resource
+  /// (`PUT /auth/me/avatar`).
+  Future<dynamic> putMultipart(
+    String path, {
+    required String fileField,
+    required String fileName,
+    required List<int> fileBytes,
+  }) => _multipart(
+    'PUT',
+    path,
+    fileField: fileField,
+    fileName: fileName,
+    fileBytes: fileBytes,
+  );
+
+  Future<dynamic> _multipart(
+    String method,
+    String path, {
+    required String fileField,
+    required String fileName,
+    required List<int> fileBytes,
+    Map<String, String> fields = const {},
   }) async {
     final uri = baseUrl.replace(path: '${baseUrl.path}$path');
-    final request = http.MultipartRequest('POST', uri)
+    final request = http.MultipartRequest(method, uri)
       ..headers.addAll(_headers(json: false))
       ..fields.addAll(fields)
       ..files.add(
@@ -113,6 +152,26 @@ class ApiClient {
     return ApiBytesResponse(
       bytes: response.bodyBytes,
       headers: response.headers,
+    );
+  }
+
+  /// GETs a binary resource (`GET /auth/me/avatar`). With [ifNoneMatch], a
+  /// copy that is still current answers 304 with an empty body instead of
+  /// the bytes again. A failure is thrown as [ApiFailure].
+  Future<ApiBytesResponse> getBytes(String path, {String? ifNoneMatch}) async {
+    final uri = baseUrl.replace(path: '${baseUrl.path}$path');
+    final request = http.Request('GET', uri)
+      ..headers.addAll(_headers(json: false))
+      ..headers['Accept'] = '*/*';
+    if (ifNoneMatch != null) request.headers['If-None-Match'] = ifNoneMatch;
+
+    final streamed = await _httpClient.send(request);
+    final response = await http.Response.fromStream(streamed);
+    if (response.statusCode >= 400) _decode(response);
+    return ApiBytesResponse(
+      bytes: response.bodyBytes,
+      headers: response.headers,
+      statusCode: response.statusCode,
     );
   }
 
