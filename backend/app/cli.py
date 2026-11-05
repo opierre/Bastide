@@ -28,6 +28,10 @@ DEFAULT_PORT = 8765
 #: from argparse's (2), so the desktop app can tell the user what happened.
 EXIT_SCHEMA_TOO_NEW = 10
 
+#: Exit code when the database predates the migration baseline, which no migration of this
+#: build can bring up to date.
+EXIT_SCHEMA_TOO_OLD = 11
+
 
 def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
     """Parse the command line; `--port 0` asks the OS for a free port."""
@@ -129,7 +133,7 @@ def main(argv: Sequence[str] | None = None) -> int:
 
     configure_logging(get_settings().data_dir / "logs")
 
-    from app.core.schema import SchemaTooNewError, migrate
+    from app.core.schema import SchemaTooNewError, SchemaTooOldError, migrate
     from app.main import create_app
 
     try:
@@ -138,6 +142,10 @@ def main(argv: Sequence[str] | None = None) -> int:
         logger.error("%s", error)
         report_fatal("DATABASE_SCHEMA_TOO_NEW")
         return EXIT_SCHEMA_TOO_NEW
+    except SchemaTooOldError as error:
+        logger.error("%s", error)
+        report_fatal("DATABASE_SCHEMA_TOO_OLD")
+        return EXIT_SCHEMA_TOO_OLD
     sock = bind(args.host, args.port)
     # No uvicorn log config: its records reach the root logger's stderr handler. No access
     # log either, since request paths carry record ids.

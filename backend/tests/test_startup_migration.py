@@ -12,7 +12,9 @@ from alembic.script import ScriptDirectory
 from app.core import schema
 from app.core.schema import (
     BACKUPS_KEPT,
+    SQUASHED_REVISIONS,
     SchemaTooNewError,
+    SchemaTooOldError,
     alembic_config,
     backup_database,
     current_revisions,
@@ -147,10 +149,10 @@ def test_only_the_newest_backups_are_kept(tmp_path: Path) -> None:
     assert _backups(db_path) == sorted(made[-BACKUPS_KEPT:])
 
 
-def _stamp_future_revision(db_path: Path, migrated_template: Path) -> None:
+def _stamp(db_path: Path, migrated_template: Path, revision: str) -> None:
     shutil.copyfile(migrated_template, db_path)
     with sqlite3.connect(db_path) as connection:
-        connection.execute("UPDATE alembic_version SET version_num = 'f0f0f0f0f0f0'")
+        connection.execute("UPDATE alembic_version SET version_num = ?", (revision,))
     connection.close()
 
 
@@ -158,7 +160,7 @@ def test_a_database_from_a_newer_build_is_refused_untouched(
     tmp_path: Path, migrated_template: Path
 ) -> None:
     db_path = tmp_path / "bastide.db"
-    _stamp_future_revision(db_path, migrated_template)
+    _stamp(db_path, migrated_template, "f0f0f0f0f0f0")
     before = db_path.read_bytes()
 
     with pytest.raises(SchemaTooNewError) as raised:
@@ -167,3 +169,26 @@ def test_a_database_from_a_newer_build_is_refused_untouched(
     assert raised.value.revisions == {"f0f0f0f0f0f0"}
     assert db_path.read_bytes() == before
     assert _backups(db_path) == []
+
+
+def test_a_database_older_than_the_baseline_is_refused_untouched(
+    tmp_path: Path, migrated_template: Path
+) -> None:
+    # A pre-release build's revision, squashed into the baseline since: nothing can upgrade it.
+    db_path = tmp_path / "bastide.db"
+    _stamp(db_path, migrated_template, "f8a2d5c3e910")
+    before = db_path.read_bytes()
+
+    with pytest.raises(SchemaTooOldError) as raised:
+        migrate(db_path, now=lambda: NOW)
+
+    assert raised.value.revisions == {"f8a2d5c3e910"}
+    assert db_path.read_bytes() == before
+    assert _backups(db_path) == []
+
+
+def test_no_squashed_revision_is_still_in_the_chain(tmp_path: Path) -> None:
+    script = ScriptDirectory.from_config(alembic_config(tmp_path / "unused.db"))
+    known = {revision.revision for revision in script.walk_revisions()}
+
+    assert not (SQUASHED_REVISIONS & known)
