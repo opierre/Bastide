@@ -16,6 +16,7 @@ from tests.factories import make_account, make_import_batch
 EXPECTED_TABLES = {
     "users",
     "auth_tokens",
+    "user_avatars",
     "accounts",
     "categories",
     "account_balance_snapshots",

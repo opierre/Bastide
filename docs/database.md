@@ -245,6 +245,13 @@ erDiagram
         datetime updated_at
         text memo "nullable"
     }
+    user_avatars {
+        text user_id PK, FK
+        blob image
+        text content_type
+        text previous_choice
+        datetime updated_at
+    }
     user_settings {
         text id PK
         text user_id FK, UK
@@ -270,6 +277,7 @@ erDiagram
         datetime created_at
         datetime updated_at
         text recovery_code_hash "nullable"
+        text avatar
     }
     accounts ||--o{ account_balance_snapshots : "account_id"
     accounts |o--o{ accounts : "settlement_account_id"
@@ -306,6 +314,7 @@ erDiagram
     accounts ||--o{ transactions : "account_id"
     categories |o--o{ transactions : "category_id"
     import_batches ||--o{ transactions : "import_batch_id"
+    users ||--o{ user_avatars : "user_id"
     users ||--o| user_settings : "user_id"
 ```
 

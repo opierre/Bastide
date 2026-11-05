@@ -28,6 +28,10 @@ details?}}`. Model names refer to the Pydantic schemas in `backend/app/features/
 | `POST` | `/auth/logout` |  |  | 204 |
 | `GET` | `/auth/me` |  |  | 200 `MeResponse` |
 | `PATCH` | `/auth/me` |  | `ProfileUpdate` | 200 `MeResponse` |
+| `GET` | `/auth/me/avatar` |  |  | 200 |
+| `PUT` | `/auth/me/avatar` |  | multipart | 200 `MeResponse` |
+| `DELETE` | `/auth/me/avatar` |  |  | 200 `MeResponse` |
+| `PUT` | `/auth/me/avatar-choice` |  | `AvatarChoiceUpdate` | 200 `MeResponse` |
 
 ## accounts
 
