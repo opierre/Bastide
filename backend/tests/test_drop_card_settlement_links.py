@@ -9,7 +9,6 @@ from sqlalchemy import create_engine, inspect, text
 from sqlalchemy.orm import Session
 
 from app.features.accounts.models import Account
-from app.features.auth.models import User
 from app.features.imports.models import ImportBatch
 from app.features.transactions.models import Transaction
 from tests.migrations import upgrade
@@ -37,17 +36,18 @@ def test_posted_credits_go_and_proposals_return_to_review(tmp_path: Path) -> Non
     upgrade(db_path, PRE_MIGRATION_REVISION)
     engine = create_engine(f"sqlite:///{db_path}")
     with Session(engine) as db:
-        user = User(
-            email="camille@example.test",
-            password_hash="hash",
-            display_name="camille",
-            locale="fr",
-            currency="EUR",
+        # Inserted by hand: the `User` model carries columns added after this revision.
+        user_id = str(uuid4())
+        db.execute(
+            text(
+                "INSERT INTO users (id, email, password_hash, display_name, locale, currency,"
+                " created_at, updated_at) VALUES (:id, 'camille@example.test', 'hash',"
+                " 'camille', 'fr', 'EUR', '2026-01-01 00:00:00', '2026-01-01 00:00:00')"
+            ),
+            {"id": user_id},
         )
-        db.add(user)
-        db.flush()
         checking = Account(
-            user_id=user.id,
+            user_id=user_id,
             name="Courant",
             type="checking",
             institution="Banque",
@@ -56,7 +56,7 @@ def test_posted_credits_go_and_proposals_return_to_review(tmp_path: Path) -> Non
             cached_balance_minor=-45_210,
         )
         card = Account(
-            user_id=user.id,
+            user_id=user_id,
             name="Carte",
             type="deferred_card",
             institution="Banque",
@@ -67,7 +67,7 @@ def test_posted_credits_go_and_proposals_return_to_review(tmp_path: Path) -> Non
         db.add_all([checking, card])
         db.flush()
         batch = ImportBatch(
-            user_id=user.id,
+            user_id=user_id,
             account_id=checking.id,
             source_format="ofx",
             file_name="releve.ofx",
