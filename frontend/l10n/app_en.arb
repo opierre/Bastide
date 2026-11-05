@@ -1198,6 +1198,8 @@
   "accountDetailNoTransactions": "No transactions yet",
   "markRecurringAction": "Mark as recurring",
   "markRecurringOpenSeriesAction": "Already recurring — view the series",
+  "recurringSeriesGoneTitle": "This recurring payment no longer exists",
+  "recurringSeriesGoneMessage": "It was deleted in the meantime: the transaction is no longer marked as recurring.",
   "markRecurringTitle": "Mark as recurring",
   "markRecurringIntro": "These are the transactions Bastide would group together. Untick any that don't belong.",
   "markRecurringConfidenceHigh": "High confidence",

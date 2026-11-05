@@ -1,3 +1,4 @@
+import 'package:bastide/core/api/api_client.dart';
 import 'package:bastide/core/theme/app_theme.dart';
 import 'package:bastide/core/theme/tokens.dart';
 import 'package:bastide/features/recurring/application/subscriptions_controller.dart';
@@ -6,6 +7,7 @@ import 'package:bastide/features/recurring/domain/recurring_series.dart';
 import 'package:bastide/features/recurring/domain/series_preview.dart';
 import 'package:bastide/features/recurring/presentation/mark_recurring_dialog.dart';
 import 'package:bastide/features/recurring/presentation/subscriptions_screen.dart';
+import 'package:bastide/features/transactions/application/transactions_controller.dart';
 import 'package:bastide/features/transactions/domain/transaction.dart';
 import 'package:bastide/features/transactions/presentation/transaction_row.dart';
 import 'package:bastide/l10n/app_localizations.dart';
@@ -181,6 +183,12 @@ void main() {
     tester,
   ) async {
     final repository = MockRecurringRepository();
+    when(() => repository.detail('s9')).thenAnswer(
+      (_) async => SeriesDetail(
+        series: testSeries(id: 's9'),
+        occurrences: [],
+      ),
+    );
 
     final container = await _pump(
       tester,
@@ -197,4 +205,52 @@ void main() {
     expect(find.text('subscriptions'), findsOneWidget);
     expect(container.read(selectedSeriesProvider), 's9');
   });
+
+  for (final (locale, title, message) in [
+    (
+      const Locale('fr'),
+      "Ce paiement récurrent n'existe plus",
+      "Il a été supprimé entre-temps : l'opération n'est plus marquée comme "
+          'récurrente.',
+    ),
+    (
+      const Locale('en'),
+      'This recurring payment no longer exists',
+      'It was deleted in the meantime: the transaction is no longer marked as '
+          'recurring.',
+    ),
+  ]) {
+    testWidgets('a series deleted since the list loaded stays put and says so '
+        '(${locale.languageCode})', (tester) async {
+      final repository = MockRecurringRepository();
+      when(() => repository.detail('s9')).thenThrow(
+        const ApiFailure(
+          code: 'RECURRING_SERIES_NOT_FOUND',
+          message: 'Recurring series not found.',
+        ),
+      );
+
+      final container = await _pump(
+        tester,
+        _transaction(recurringSeriesId: 's9'),
+        repository: repository,
+        locale: locale,
+      );
+      await tester.tap(
+        find.byKey(const Key('transactionRowOpenRecurringSeries')),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('subscriptions'), findsNothing);
+      expect(container.read(selectedSeriesProvider), isNull);
+      expect(find.text(title), findsOneWidget);
+      expect(find.text(message), findsOneWidget);
+      // The rows reload, so the button goes back to « Marquer ».
+      expect(container.read(transactionEditsProvider), 1);
+
+      // Let the toast withdraw, so no timer outlives the test.
+      await tester.pump(const Duration(seconds: 7));
+      await tester.pumpAndSettle();
+    });
+  }
 }

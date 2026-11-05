@@ -4446,6 +4446,14 @@ class AppLocalizationsEn extends AppLocalizations {
       'Already recurring — view the series';
 
   @override
+  String get recurringSeriesGoneTitle =>
+      'This recurring payment no longer exists';
+
+  @override
+  String get recurringSeriesGoneMessage =>
+      'It was deleted in the meantime: the transaction is no longer marked as recurring.';
+
+  @override
   String get markRecurringTitle => 'Mark as recurring';
 
   @override

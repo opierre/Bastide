@@ -13,6 +13,7 @@ import '../../../core/widgets/state_views.dart';
 import '../../../l10n/app_localizations.dart';
 import '../application/add_to_series_controller.dart';
 import '../application/mark_recurring_controller.dart';
+import '../application/open_series.dart';
 import '../application/subscriptions_controller.dart';
 import '../domain/recurring_series.dart';
 import '../domain/series_preview.dart';
@@ -38,17 +39,31 @@ Future<void> showMarkRecurringDialog(
     builder: (_) => MarkRecurringDialog(transactionId: transactionId),
   );
   if (result is! OpenExistingSeries || !context.mounted) return;
-  openRecurringSeries(context, ref, seriesId: result.series.id);
+  ref.read(selectedSeriesProvider.notifier).open(result.series.id);
+  context.go(SubscriptionsScreen.path);
 }
 
-/// Opens the Abonnements panel on [seriesId].
-void openRecurringSeries(
+/// Opens the Abonnements panel on [seriesId], a series a transaction row
+/// points at. When the series was deleted since the row loaded, stays put and
+/// says so in a toast instead; the row then reloads unmarked.
+Future<void> openRecurringSeries(
   BuildContext context,
   WidgetRef ref, {
   required String seriesId,
-}) {
-  ref.read(selectedSeriesProvider.notifier).open(seriesId);
-  context.go(SubscriptionsScreen.path);
+}) async {
+  final l10n = AppLocalizations.of(context)!;
+  final opened = await ref.read(seriesOpenerProvider).open(seriesId);
+  if (!context.mounted) return;
+  if (opened) {
+    context.go(SubscriptionsScreen.path);
+    return;
+  }
+  showAppToast(
+    context,
+    title: l10n.recurringSeriesGoneTitle,
+    message: l10n.recurringSeriesGoneMessage,
+    tone: BannerTone.warning,
+  );
 }
 
 /// How the dialog closed, when it did not simply get cancelled.

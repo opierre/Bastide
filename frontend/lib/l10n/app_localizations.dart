@@ -7031,6 +7031,18 @@ abstract class AppLocalizations {
   /// **'Déjà récurrent — voir la série'**
   String get markRecurringOpenSeriesAction;
 
+  /// Toast title when a row's series was deleted since the list loaded, instead of opening it.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ce paiement récurrent n\'existe plus'**
+  String get recurringSeriesGoneTitle;
+
+  /// Toast body under recurringSeriesGoneTitle; the row reloads with the « Marquer comme récurrent » action.
+  ///
+  /// In fr, this message translates to:
+  /// **'Il a été supprimé entre-temps : l\'opération n\'est plus marquée comme récurrente.'**
+  String get recurringSeriesGoneMessage;
+
   /// Title of the dialog previewing the series a transaction would start.
   ///
   /// In fr, this message translates to:
