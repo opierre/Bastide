@@ -1,5 +1,7 @@
 import 'package:bastide/core/theme/app_theme.dart';
+import 'package:bastide/core/theme/tokens.dart';
 import 'package:bastide/core/widgets/amount_text.dart';
+import 'package:bastide/core/widgets/area_line.dart';
 import 'package:bastide/features/recurring/application/subscriptions_controller.dart';
 import 'package:bastide/features/recurring/domain/recurring_series.dart';
 import 'package:bastide/features/recurring/presentation/price_history_chart.dart';
@@ -390,4 +392,92 @@ void main() {
     expect(find.byKey(const Key('seriesOccurrence-o3')), findsOneWidget);
     expect(find.byKey(const Key('seriesOccurrenceChange-o1')), findsNothing);
   });
+
+  // The window widths the app is drawn and launched at: the 1440 frame, the
+  // runner's 1280 default, and a narrow 1000.
+  for (final width in const [1000.0, 1280.0, 1440.0]) {
+    group('margins at $width px', () {
+      /// The latest charge's dot radius: the plot stops that short of the
+      /// chart's right edge so the dot stays inside it.
+      const latestDot = 5.0;
+
+      Future<Rect> pumpCharges(
+        WidgetTester tester,
+        List<SeriesOccurrence> charges,
+      ) async {
+        tester.view.physicalSize = Size(width, 900);
+        tester.view.devicePixelRatio = 1.0;
+        addTearDown(tester.view.reset);
+        await tester.pumpWidget(
+          _wrap(SeriesDetail(series: testSeries(), occurrences: charges)),
+        );
+        await tester.pumpAndSettle();
+        return tester.getRect(find.byType(PriceHistoryChart));
+      }
+
+      testWidgets('the plot spans the shared chart gutter, edge to edge', (
+        tester,
+      ) async {
+        // One charge: its hover column is the whole plot.
+        final chart = await pumpCharges(tester, [
+          _occurrence(bookedDate: DateTime(2026, 4, 15), amountMinor: -1549),
+        ]);
+        final plot = tester.getRect(
+          find.byKey(const Key('seriesOccurrence-o1')),
+        );
+
+        expect(plot.left, moreOrLessEquals(chart.left + AreaLine.valueGutter));
+        expect(plot.right, moreOrLessEquals(chart.right - latestDot));
+      });
+
+      testWidgets(
+        'the value axis ends a step short of the plot, as elsewhere',
+        (tester) async {
+          final chart = await pumpCharges(
+            tester,
+            // Weekly, so each charge's hover column is narrower than the
+            // gutter and the oldest one is centred on its point, not clamped.
+            _charges(30, const Duration(days: 7)),
+          );
+
+          for (final key in ['seriesPriceAxisMax', 'seriesPriceAxisMin']) {
+            expect(
+              tester.getRect(find.byKey(Key(key))).right,
+              moreOrLessEquals(
+                chart.left + AreaLine.valueGutter - AppSpacing.sm,
+              ),
+            );
+          }
+          // The oldest charge sits on the plot's left edge.
+          expect(
+            tester.getCenter(find.byKey(const Key('seriesOccurrence-c29'))).dx,
+            moreOrLessEquals(chart.left + AreaLine.valueGutter),
+          );
+        },
+      );
+
+      testWidgets('a four-figure price stays whole in the gutter', (
+        tester,
+      ) async {
+        await pumpCharges(tester, [
+          _occurrence(bookedDate: DateTime(2026, 4, 15), amountMinor: -123456),
+          _occurrence(
+            id: 'o2',
+            bookedDate: DateTime(2026, 3, 15),
+            amountMinor: -120000,
+          ),
+        ]);
+
+        final label = tester.widget<Text>(
+          find.descendant(
+            of: find.byKey(const Key('seriesPriceAxisMax')),
+            matching: find.byType(Text),
+          ),
+        );
+        expect(label.data, _money(123456));
+        expect(label.overflow, isNot(TextOverflow.ellipsis));
+        expect(tester.takeException(), isNull);
+      });
+    });
+  }
 }

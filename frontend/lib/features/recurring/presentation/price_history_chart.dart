@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/tokens.dart';
 import '../../../core/widgets/amount_text.dart';
+import '../../../core/widgets/area_line.dart';
 import '../../../l10n/app_localizations.dart';
 import '../domain/recurring_series.dart';
 import 'recurring_labels.dart';
@@ -37,9 +38,16 @@ class PriceHistoryChart extends StatelessWidget {
   /// curve reads left to right in time.
   final List<SeriesOccurrence> occurrences;
 
-  /// Width reserved for the value axis, and the gap between it and the plot.
-  static const _axisWidth = 62.0;
-  static const _axisGap = 8.0;
+  /// Width reserved left of the plot for the value axis: the app-wide chart
+  /// gutter, so this plot starts where the dashboard's, the account's and the
+  /// Synthèse's do. Its labels end [AppSpacing.sm] short of the plot, as theirs
+  /// do.
+  static const _gutter = AreaLine.valueGutter;
+
+  /// Right inset of the plot, so the latest charge's dot sits inside the chart
+  /// rather than spilling into the card's padding — the gridlines still run to
+  /// the edge, like every other chart's.
+  static const _rightInset = _PriceLinePainter._dotRadius;
 
   /// Height reserved beneath the plot for a date axis whose ticks lie flat.
   static const _dateAxisHeight = 20.0;
@@ -82,20 +90,25 @@ class PriceHistoryChart extends StatelessWidget {
           style: tickStyle,
           textScaler: MediaQuery.textScalerOf(context),
           textDirection: Directionality.of(context),
-          plotLeft: _axisWidth + _axisGap,
+          plotLeft: _gutter,
+          plotRight: size.width - _rightInset,
           width: size.width,
         );
         final plot = _PlotGeometry.of(
           Rect.fromLTRB(
-            _axisWidth + _axisGap,
+            _gutter,
             _inset,
-            size.width,
+            size.width - _rightInset,
             size.height - axis.height - _inset,
           ),
           values,
         );
 
         return Stack(
+          // A price too long for the gutter (four figures and more) reaches
+          // into the card's padding rather than being cut, as the painted
+          // labels of the other charts do.
+          clipBehavior: Clip.none,
           children: [
             Positioned.fill(
               child: RepaintBoundary(
@@ -105,7 +118,7 @@ class PriceHistoryChart extends StatelessWidget {
                 ),
               ),
             ),
-            ..._valueLabels(plot, locale),
+            ..._valueLabels(plot, locale, size.width),
             ..._dateLabels(plot, points, ticks, tickStyle, axis, size.width),
             for (var i = 0; i < points.length; i++)
               _hoverSlice(
@@ -143,7 +156,7 @@ class PriceHistoryChart extends StatelessWidget {
   /// left. Two ticks rather than an even scale: the figures that matter here
   /// are the prices actually paid, not round intermediate ones nobody was
   /// billed.
-  List<Widget> _valueLabels(_PlotGeometry plot, String locale) {
+  List<Widget> _valueLabels(_PlotGeometry plot, String locale, double width) {
     if (plot.values.isEmpty) return const [];
     final style = tabularNumberStyle(
       AppTextStyles.helper,
@@ -151,8 +164,8 @@ class PriceHistoryChart extends StatelessWidget {
 
     Widget label(double value, Key key) => Positioned(
       key: key,
-      left: 0,
-      width: _axisWidth,
+      // Anchored by its end, so the figure stays whole however wide it runs.
+      right: width - (_gutter - AppSpacing.sm),
       // Half a line's height, so the text centres on the value it names.
       top: plot.yAt(value) - 8,
       child: Text(
@@ -163,7 +176,7 @@ class PriceHistoryChart extends StatelessWidget {
         ),
         textAlign: TextAlign.end,
         maxLines: 1,
-        overflow: TextOverflow.ellipsis,
+        softWrap: false,
         style: style,
       ),
     );
@@ -311,6 +324,7 @@ class _DateAxis {
     required TextScaler textScaler,
     required TextDirection textDirection,
     required double plotLeft,
+    required double plotRight,
     required double width,
   }) {
     final sizes = <Size>[];
@@ -330,7 +344,7 @@ class _DateAxis {
         .fold(0.0, (high, size) => math.max(high, size.height))
         .ceilToDouble();
     final widest = widths.fold(0.0, math.max);
-    final xs = _xs(ticks.length, plotLeft, width);
+    final xs = _xs(ticks.length, plotLeft, plotRight);
 
     final flat = _DateAxis(
       widths: widths,
@@ -521,7 +535,7 @@ class _PriceLinePainter extends CustomPainter {
       ..strokeWidth = 1;
     for (var i = 0; i <= _gridlines; i++) {
       final y = rect.top + rect.height * (i / _gridlines);
-      canvas.drawLine(Offset(rect.left, y), Offset(rect.right, y), grid);
+      canvas.drawLine(Offset(rect.left, y), Offset(size.width, y), grid);
     }
 
     if (plot.values.isEmpty) return;

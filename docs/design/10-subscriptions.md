@@ -46,7 +46,7 @@ Replaces the occurrence table the frame was first drawn with: five near-identica
 
 **Shape.** A **step**, never a slope: a subscription costs the same until the day it doesn't, so an interpolated segment would draw a price that was never billed. Step-after — hold at the level, then jump at the charge that changed. Same family as the dashboard's AreaLine (`00` §Components): iris `#8B8CF9` 2.5 px stroke over a 16% iris fill, 4 hairline gridlines `#1A212C` across the plot, drawn not animated.
 
-**Box.** 184 px card body. Value axis 62 px + 8 px gap on the left, date axis 20 px beneath, 6 px vertical inset to clear the dot. Scale runs on the series' own min/max with 35% headroom, so an increase reads as a tread rather than as the line leaving the card; a price that never moved has no span and sits centred as one flat level.
+**Box.** 184 px card body. Value axis in the shared 56 px left gutter, labels ending 8 px short of the plot (a four-figure price runs into the card padding rather than being cut); plot inset 5 px on the right so the latest dot stays inside, gridlines still running to the edge; date axis 20 px beneath, 6 px vertical inset to clear the dot. (Amended — was a 62 px axis + 8 px gap, which set this plot 14 px right of every other chart's.) Scale runs on the series' own min/max with 35% headroom, so an increase reads as a tread rather than as the line leaving the card; a price that never moved has no span and sits centred as one flat level.
 
 **Points.** 3 px iris dot per charge, suppressed above 24 charges; 5 px dot on the latest, ringed in `#111620` so it sits *on* the line. The charge the price stepped at takes the 5 px dot in amber `#FFB84D` plus a 1 px `rgba(255,184,77,.35)` guide from plot top to bottom.
 
