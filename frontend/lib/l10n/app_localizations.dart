@@ -6575,6 +6575,42 @@ abstract class AppLocalizations {
   /// **'Modifier…'**
   String get settingsProfileNameButton;
 
+  /// Title of the Settings › Profile card that sets the user's avatar.
+  ///
+  /// In fr, this message translates to:
+  /// **'Avatar'**
+  String get settingsAvatarTitle;
+
+  /// Subtitle of the avatar card.
+  ///
+  /// In fr, this message translates to:
+  /// **'Choisissez comment vous apparaissez dans l\'application.'**
+  String get settingsAvatarSubtitle;
+
+  /// Button of the avatar card going back to the initials monogram.
+  ///
+  /// In fr, this message translates to:
+  /// **'Revenir au monogramme'**
+  String get settingsAvatarReset;
+
+  /// Tooltip and accessible name of the initials monogram option.
+  ///
+  /// In fr, this message translates to:
+  /// **'Monogramme'**
+  String get settingsAvatarMonogram;
+
+  /// Tooltip and accessible name of a preset avatar option: the user's initials on a plate of this hue.
+  ///
+  /// In fr, this message translates to:
+  /// **'{hue, select, cyan{Pastille cyan} blue{Pastille bleue} teal{Pastille sarcelle} pink{Pastille rose} amber{Pastille ambre} lime{Pastille citron vert} green{Pastille verte} iris{Pastille iris} other{Pastille}}'**
+  String settingsAvatarPreset(String hue);
+
+  /// Banner in the avatar card when the choice could not be saved.
+  ///
+  /// In fr, this message translates to:
+  /// **'L\'avatar n\'a pas pu être enregistré. Réessayez.'**
+  String get settingsAvatarError;
+
   /// Title of the modal that changes the username.
   ///
   /// In fr, this message translates to:

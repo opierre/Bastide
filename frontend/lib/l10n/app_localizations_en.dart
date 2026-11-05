@@ -4164,6 +4164,37 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingsProfileNameButton => 'Change…';
 
   @override
+  String get settingsAvatarTitle => 'Avatar';
+
+  @override
+  String get settingsAvatarSubtitle => 'Choose how you appear across the app.';
+
+  @override
+  String get settingsAvatarReset => 'Back to the monogram';
+
+  @override
+  String get settingsAvatarMonogram => 'Monogram';
+
+  @override
+  String settingsAvatarPreset(String hue) {
+    String _temp0 = intl.Intl.selectLogic(hue, {
+      'cyan': 'Cyan plate',
+      'blue': 'Blue plate',
+      'teal': 'Teal plate',
+      'pink': 'Pink plate',
+      'amber': 'Amber plate',
+      'lime': 'Lime plate',
+      'green': 'Green plate',
+      'iris': 'Iris plate',
+      'other': 'Plate',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String get settingsAvatarError => 'The avatar couldn\'t be saved. Try again.';
+
+  @override
   String get settingsProfileNameModalTitle => 'Change username';
 
   @override

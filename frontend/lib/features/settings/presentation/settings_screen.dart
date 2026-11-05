@@ -12,6 +12,7 @@ import '../../../core/widgets/app_card.dart';
 import '../../../core/widgets/app_segmented.dart';
 import '../../../core/widgets/labeled_field.dart';
 import '../../../l10n/app_localizations.dart';
+import '../../auth/presentation/avatar_card.dart';
 import '../../auth/presentation/currency_label.dart';
 import '../../auth/presentation/display_name_card.dart';
 import '../../auth/presentation/recovery_code_card.dart';
@@ -338,7 +339,7 @@ class _AboutPanel extends ConsumerWidget {
   }
 }
 
-/// The username, then the recovery code. Email edits aren't exposed yet.
+/// The avatar, the username, then the recovery code. Email edits aren't exposed yet.
 class _ProfilePanel extends StatelessWidget {
   const _ProfilePanel();
 
@@ -346,6 +347,8 @@ class _ProfilePanel extends StatelessWidget {
   Widget build(BuildContext context) => const Column(
     crossAxisAlignment: CrossAxisAlignment.stretch,
     children: [
+      AvatarCard(),
+      SizedBox(height: AppSpacing.gridGap),
       DisplayNameCard(),
       SizedBox(height: AppSpacing.gridGap),
       RecoveryCodeCard(),

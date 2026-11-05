@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/api/api_client.dart';
 import '../../../core/api/api_client_provider.dart';
 import '../domain/auth_user.dart';
+import '../domain/avatar_choice.dart';
 
 /// The session a successful register/login/reset call returns: a bearer token
 /// plus the user it belongs to.
@@ -101,6 +102,18 @@ class AuthRepository {
     return _parseUser(json['user'] as Map<String, dynamic>);
   }
 
+  /// Makes the monogram or a preset the signed-in user's avatar. The backend
+  /// drops an uploaded picture in the same step.
+  Future<AuthUser> setAvatarChoice(AvatarChoice choice) async {
+    final json =
+        await _apiClient.put(
+              '/auth/me/avatar-choice',
+              body: {'avatar': choice.wire},
+            )
+            as Map<String, dynamic>;
+    return _parseUser(json['user'] as Map<String, dynamic>);
+  }
+
   Future<void> logout() async {
     await _apiClient.post('/auth/logout');
   }
@@ -122,6 +135,7 @@ class AuthRepository {
     displayName: json['display_name'] as String,
     locale: json['locale'] as String,
     currency: json['currency'] as String,
+    avatar: AvatarChoice.fromWire(json['avatar'] as String?),
   );
 }
 
