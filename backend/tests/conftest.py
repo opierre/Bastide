@@ -19,6 +19,7 @@ from sqlalchemy.orm import Session, sessionmaker
 
 from app.core import security
 from app.core.db import Base, get_db, get_session_factory
+from app.core.schema import migrate
 from app.core.seed import seed_categories
 from app.features.accounts import models as _accounts_models  # noqa: F401
 from app.features.auth import models as _auth_models  # noqa: F401
@@ -34,7 +35,7 @@ from app.features.rules import models as _rules_models  # noqa: F401
 from app.features.settings import models as _settings_models  # noqa: F401
 from app.features.transactions import models as _transactions_models  # noqa: F401
 from app.main import create_app
-from tests.migrations import engine_with_foreign_keys, upgrade
+from tests.migrations import engine_with_foreign_keys
 
 
 @pytest.fixture(scope="session", autouse=True)
@@ -73,9 +74,14 @@ def seeded_template(schema_template: Path) -> Path:
 
 @pytest.fixture(scope="session")
 def migrated_template(tmp_path_factory: pytest.TempPathFactory) -> Path:
-    """An empty database brought to head by Alembic, rather than by `create_all`."""
-    path = tmp_path_factory.mktemp("templates") / "migrated.db"
-    upgrade(path)
+    """An empty database brought to head by Alembic, rather than by `create_all`.
+
+    Built by `migrate`, the call the sidecar makes on startup, on a path whose directory does
+    not exist yet: `test_startup_migration.py` checks what that call left here instead of
+    paying for another run of the whole chain.
+    """
+    path = tmp_path_factory.mktemp("templates") / "data" / "migrated.db"
+    migrate(path)
     return path
 
 
@@ -132,20 +138,6 @@ def db_session(tmp_path: Path, schema_template: Path) -> Generator[Session]:
     """A Session on an empty temp database built from the ORM metadata (all feature models)."""
     db_path = tmp_path / "models.db"
     shutil.copyfile(schema_template, db_path)
-    engine = engine_with_foreign_keys(db_path)
-    db = sessionmaker(bind=engine, autoflush=False, autocommit=False)()
-    try:
-        yield db
-    finally:
-        db.close()
-        engine.dispose()
-
-
-@pytest.fixture
-def migrated_session(tmp_path: Path, migrated_template: Path) -> Generator[Session]:
-    """A Session on a temp database built by Alembic, with FK enforcement on."""
-    db_path = tmp_path / "migrated.db"
-    shutil.copyfile(migrated_template, db_path)
     engine = engine_with_foreign_keys(db_path)
     db = sessionmaker(bind=engine, autoflush=False, autocommit=False)()
     try:

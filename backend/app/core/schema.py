@@ -24,6 +24,32 @@ MIGRATIONS_DIR = Path(__file__).resolve().parents[2] / "migrations"
 #: Pre-migration copies kept; the oldest beyond this are deleted.
 BACKUPS_KEPT = 5
 
+#: The revisions folded into the `b7e4d1a9c352` baseline (v0.1.0's head). Every release is at or
+#: past the baseline; only a database last opened by a pre-release build can carry one of these.
+SQUASHED_REVISIONS = frozenset(
+    {
+        "24ef282f7623",
+        "a0343e4ecc95",
+        "662ad14df059",
+        "b1c7a4e9d820",
+        "a83dd88e80a1",
+        "c3f5a1d47e92",
+        "d7b2e5c91f38",
+        "e4a1c6f20b73",
+        "69c99438379e",
+        "f5c81a930d47",
+        "a8d3f2c61e05",
+        "9aac42160214",
+        "c4e8b1d25a97",
+        "d2a7c9e4f613",
+        "e9b3f7a2c418",
+        "b6d4f0e81a53",
+        "c7e2a9d4b150",
+        "e2c6b9a14f70",
+        "f8a2d5c3e910",
+    }
+)
+
 
 class SchemaTooNewError(Exception):
     """The database carries a revision this build doesn't know: a newer build migrated it.
@@ -35,6 +61,20 @@ class SchemaTooNewError(Exception):
     def __init__(self, revisions: set[str]) -> None:
         self.revisions = revisions
         super().__init__(f"Unknown database revision(s): {', '.join(sorted(revisions))}")
+
+
+class SchemaTooOldError(Exception):
+    """The database predates the migration baseline: this build can't upgrade it.
+
+    The migrations it would need were squashed into the baseline, so it is refused untouched;
+    a release up to v0.1.2 can still bring it to the baseline.
+    """
+
+    def __init__(self, revisions: set[str]) -> None:
+        self.revisions = revisions
+        super().__init__(
+            f"Database revision(s) older than the baseline: {', '.join(sorted(revisions))}"
+        )
 
 
 def alembic_config(db_path: Path) -> Config:
@@ -68,12 +108,16 @@ def migrate(db_path: Path, now: Callable[[], datetime] = lambda: datetime.now(UT
     new one has nothing to lose, so it is migrated straight away.
 
     Raises:
+        SchemaTooOldError: The database predates the migration baseline; it is left untouched.
         SchemaTooNewError: The database was migrated by a newer build; it is left untouched.
     """
     config = alembic_config(db_path)
     script = ScriptDirectory.from_config(config)
     heads = set(script.get_heads())
     current = current_revisions(db_path)
+    squashed = current & SQUASHED_REVISIONS
+    if squashed:
+        raise SchemaTooOldError(squashed)
     unknown = current - {revision.revision for revision in script.walk_revisions()}
     if unknown:
         raise SchemaTooNewError(unknown)

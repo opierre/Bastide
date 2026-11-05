@@ -9,7 +9,7 @@ import pytest
 
 from app import cli
 from app.core.config import get_settings
-from app.core.schema import SchemaTooNewError
+from app.core.schema import SchemaTooNewError, SchemaTooOldError
 
 
 def test_defaults_to_loopback_on_the_dev_port() -> None:
@@ -94,6 +94,26 @@ def test_main_reports_a_database_newer_than_the_build(
 
     assert exit_code == cli.EXIT_SCHEMA_TOO_NEW
     assert "FATAL DATABASE_SCHEMA_TOO_NEW" in capsys.readouterr().err.splitlines()
+    run.assert_not_called()
+
+
+def test_main_reports_a_database_older_than_the_baseline(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    monkeypatch.setenv("BASTIDE_DB_PATH", str(tmp_path / "other.db"))
+    get_settings.cache_clear()
+    try:
+        with (
+            patch.object(cli, "configure_logging"),
+            patch("app.core.schema.migrate", side_effect=SchemaTooOldError({"24ef282f7623"})),
+            patch.object(cli.uvicorn.Server, "run") as run,
+        ):
+            exit_code = cli.main(["--data-dir", str(tmp_path)])
+    finally:
+        get_settings.cache_clear()
+
+    assert exit_code == cli.EXIT_SCHEMA_TOO_OLD
+    assert "FATAL DATABASE_SCHEMA_TOO_OLD" in capsys.readouterr().err.splitlines()
     run.assert_not_called()
 
 
