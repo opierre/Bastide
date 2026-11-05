@@ -5861,6 +5861,18 @@
   "@markRecurringAction": {
     "description": "Tooltip of the row action opening the « Marquer comme récurrent » dialog on an outflow."
   },
+  "markRecurringOpenSeriesAction": "Déjà récurrent — voir la série",
+  "@markRecurringOpenSeriesAction": {
+    "description": "Tooltip of the same row action on an outflow that already belongs to a recurring series: it opens that series in Abonnements."
+  },
+  "recurringSeriesGoneTitle": "Ce paiement récurrent n'existe plus",
+  "@recurringSeriesGoneTitle": {
+    "description": "Toast title when a row's series was deleted since the list loaded, instead of opening it."
+  },
+  "recurringSeriesGoneMessage": "Il a été supprimé entre-temps : l'opération n'est plus marquée comme récurrente.",
+  "@recurringSeriesGoneMessage": {
+    "description": "Toast body under recurringSeriesGoneTitle; the row reloads with the « Marquer comme récurrent » action."
+  },
   "markRecurringTitle": "Marquer comme récurrent",
   "@markRecurringTitle": {
     "description": "Title of the dialog previewing the series a transaction would start."

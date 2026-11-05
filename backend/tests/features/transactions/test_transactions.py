@@ -11,6 +11,7 @@ from app.features.imports.models import ImportBatch
 from app.features.transactions.models import Transaction
 from tests.api import register_user
 from tests.db import open_session
+from tests.features.recurring.factories import insert_series, link_occurrence
 
 ACCOUNT_PAYLOAD = {
     "name": "Compte courant",
@@ -442,3 +443,46 @@ def test_patch_accepts_a_system_category(client: TestClient, tmp_path: Path) -> 
 
     assert response.status_code == 200
     assert response.json()["category"]["id"] == system_category["id"]
+
+
+# --- recurring series membership ------------------------------------------------------------
+
+
+def test_transactions_carry_the_series_they_belong_to(client: TestClient, tmp_path: Path) -> None:
+    """The row screens tell an already-recurring charge from one that could still be marked."""
+    user = register_user(client, "amelie@example.com")
+    account_id = _create_account(client, user.headers)
+    linked_id = _insert_transaction(tmp_path, account_id, description_clean="STREAMCO")
+    unlinked_id = _insert_transaction(tmp_path, account_id, description_clean="BOULANGERIE")
+    series_id = insert_series(
+        tmp_path, user, account_id, label="STREAMCO", next_expected_date=date(2026, 2, 15)
+    )
+    link_occurrence(tmp_path, series_id, linked_id)
+
+    items = client.get("/api/v1/transactions", headers=user.headers).json()["items"]
+    detail = client.get(f"/api/v1/transactions/{linked_id}", headers=user.headers).json()
+
+    by_id = {item["id"]: item["recurring_series_id"] for item in items}
+    assert by_id == {linked_id: series_id, unlinked_id: None}
+    assert detail["recurring_series_id"] == series_id
+
+
+def test_patch_keeps_the_series_in_its_response(client: TestClient, tmp_path: Path) -> None:
+    """Recategorising a charge must not make its row forget it is recurring."""
+    user = register_user(client, "amelie@example.com")
+    account_id = _create_account(client, user.headers)
+    category_id = _create_category(client, user.headers)
+    transaction_id = _insert_transaction(tmp_path, account_id, description_clean="STREAMCO")
+    series_id = insert_series(
+        tmp_path, user, account_id, label="STREAMCO", next_expected_date=date(2026, 2, 15)
+    )
+    link_occurrence(tmp_path, series_id, transaction_id)
+
+    response = client.patch(
+        f"/api/v1/transactions/{transaction_id}",
+        json={"category_id": category_id},
+        headers=user.headers,
+    )
+
+    assert response.status_code == 200
+    assert response.json()["recurring_series_id"] == series_id

@@ -85,7 +85,7 @@ class SeriesPickerController extends AsyncNotifier<SeriesPickerState> {
     final saved = await ref
         .read(subscriptionsControllerProvider.notifier)
         .attach(seriesId, [transactionId]);
-    ref.invalidate(transactionsControllerProvider);
+    refreshTransactionRows(ref);
     return saved;
   }
 }
@@ -230,7 +230,7 @@ class ChargePickerController extends AsyncNotifier<ChargePickerState> {
     final saved = await ref
         .read(subscriptionsControllerProvider.notifier)
         .attach(seriesId, ids);
-    ref.invalidate(transactionsControllerProvider);
+    refreshTransactionRows(ref);
     return saved;
   }
 }

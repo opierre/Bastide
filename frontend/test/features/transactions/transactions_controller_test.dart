@@ -84,6 +84,21 @@ void main() {
     expect(page.total, 1);
   });
 
+  test('maps the series a transaction belongs to, or none', () async {
+    when(
+      () => apiClient.get('/transactions', query: any(named: 'query')),
+    ).thenAnswer(
+      (_) async => _pageJson([
+        {..._transactionJson(id: 't1'), 'recurring_series_id': 's9'},
+        {..._transactionJson(id: 't2'), 'recurring_series_id': null},
+      ], total: 2),
+    );
+
+    final page = await container.read(transactionsControllerProvider.future);
+
+    expect(page.items.map((t) => t.recurringSeriesId), ['s9', null]);
+  });
+
   test('changing filters re-fetches with the new query', () async {
     when(
       () => apiClient.get('/transactions', query: any(named: 'query')),

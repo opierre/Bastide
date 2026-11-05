@@ -4477,6 +4477,16 @@ class AppLocalizationsFr extends AppLocalizations {
   String get markRecurringAction => 'Marquer comme récurrent';
 
   @override
+  String get markRecurringOpenSeriesAction => 'Déjà récurrent — voir la série';
+
+  @override
+  String get recurringSeriesGoneTitle => 'Ce paiement récurrent n\'existe plus';
+
+  @override
+  String get recurringSeriesGoneMessage =>
+      'Il a été supprimé entre-temps : l\'opération n\'est plus marquée comme récurrente.';
+
+  @override
   String get markRecurringTitle => 'Marquer comme récurrent';
 
   @override

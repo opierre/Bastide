@@ -38,6 +38,8 @@ class TransactionRead(BaseModel):
     needs_review: bool
     fitid: str | None
     dedup_hash: str
+    #: The recurring series this transaction is an occurrence of, ``None`` when it is in none.
+    recurring_series_id: str | None
     created_at: datetime
     updated_at: datetime
 

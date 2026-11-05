@@ -129,24 +129,7 @@ class TransactionRow extends ConsumerWidget {
           SizedBox(
             width: 28,
             child: transaction.amountMinor < 0
-                ? IconButton(
-                    key: const Key('transactionRowMarkRecurring'),
-                    tooltip: l10n.markRecurringAction,
-                    onPressed: () => showMarkRecurringDialog(
-                      context,
-                      ref,
-                      transactionId: transaction.id,
-                    ),
-                    icon: const Icon(Icons.repeat_rounded),
-                    iconSize: 16,
-                    color: AppColors.textDisabled,
-                    hoverColor: AppColors.irisSoft,
-                    padding: EdgeInsets.zero,
-                    constraints: const BoxConstraints.tightFor(
-                      width: 28,
-                      height: 28,
-                    ),
-                  )
+                ? _RecurringButton(transaction: transaction)
                 : null,
           ),
           // Wider than the row's other gutters: the amount column right-aligns its
@@ -182,6 +165,50 @@ class TransactionRow extends ConsumerWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+/// The row's recurring action. On a charge no series tracks yet it is a quiet
+/// glyph that opens « Marquer comme récurrent »; on one that already belongs to
+/// a series it sits on an iris plate — the cycle glyph on iris is what
+/// Abonnements uses for a series — and opens that series directly, so the
+/// state is carried by the plate and the tooltip as well as by the hue.
+class _RecurringButton extends ConsumerWidget {
+  const _RecurringButton({required this.transaction});
+
+  final Transaction transaction;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
+    final seriesId = transaction.recurringSeriesId;
+    final inSeries = seriesId != null;
+    return IconButton(
+      key: Key(
+        inSeries
+            ? 'transactionRowOpenRecurringSeries'
+            : 'transactionRowMarkRecurring',
+      ),
+      tooltip: inSeries
+          ? l10n.markRecurringOpenSeriesAction
+          : l10n.markRecurringAction,
+      onPressed: () => inSeries
+          ? openRecurringSeries(context, ref, seriesId: seriesId)
+          : showMarkRecurringDialog(
+              context,
+              ref,
+              transactionId: transaction.id,
+            ),
+      icon: const Icon(Icons.repeat_rounded),
+      iconSize: 16,
+      color: inSeries ? AppColors.iris : AppColors.textDisabled,
+      hoverColor: AppColors.irisSoft,
+      style: inSeries
+          ? IconButton.styleFrom(backgroundColor: AppColors.irisSoft)
+          : null,
+      padding: EdgeInsets.zero,
+      constraints: const BoxConstraints.tightFor(width: 28, height: 28),
     );
   }
 }

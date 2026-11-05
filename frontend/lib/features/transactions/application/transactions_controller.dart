@@ -5,7 +5,9 @@ import '../data/transactions_repository.dart';
 import '../../categories/domain/category.dart' show AppCategory;
 import '../domain/transaction.dart';
 
-/// Counts the category edits saved through [TransactionsController].
+/// Counts the edits that move what a transaction row shows: a category saved
+/// through [TransactionsController], or a series linked or found gone (see
+/// [refreshTransactionRows]).
 ///
 /// Panels that list transactions outside the controller's page — the account
 /// detail's recent operations — watch it to re-read their rows after an edit.
@@ -19,6 +21,14 @@ class TransactionEdits extends Notifier<int> {
 final transactionEditsProvider = NotifierProvider<TransactionEdits, int>(
   TransactionEdits.new,
 );
+
+/// Reloads every list of transaction rows — the Transactions panel's page and
+/// the account detail's recent operations — after a change made elsewhere
+/// moved what they show, such as a charge joining or losing a recurring series.
+void refreshTransactionRows(Ref ref) {
+  ref.invalidate(transactionsControllerProvider);
+  ref.read(transactionEditsProvider.notifier).saved();
+}
 
 /// The active list filters, held separately from the loaded page so a filter
 /// change is a single state transition the controller can watch and react to

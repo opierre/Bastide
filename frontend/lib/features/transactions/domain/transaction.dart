@@ -71,6 +71,7 @@ class Transaction {
     required this.needsReview,
     required this.fitid,
     required this.dedupHash,
+    this.recurringSeriesId,
     required this.createdAt,
     required this.updatedAt,
   });
@@ -94,6 +95,10 @@ class Transaction {
   final bool needsReview;
   final String? fitid;
   final String dedupHash;
+
+  /// The recurring series this transaction is an occurrence of, `null` when it
+  /// belongs to none.
+  final String? recurringSeriesId;
   final DateTime createdAt;
   final DateTime updatedAt;
 
@@ -132,6 +137,7 @@ class Transaction {
       needsReview: needsReview ?? this.needsReview,
       fitid: fitid,
       dedupHash: dedupHash,
+      recurringSeriesId: recurringSeriesId,
       createdAt: createdAt,
       updatedAt: updatedAt,
     );
@@ -157,6 +163,7 @@ class Transaction {
           other.needsReview == needsReview &&
           other.fitid == fitid &&
           other.dedupHash == dedupHash &&
+          other.recurringSeriesId == recurringSeriesId &&
           other.createdAt == createdAt &&
           other.updatedAt == updatedAt);
 
@@ -176,7 +183,7 @@ class Transaction {
     categorizationSource,
     categorizationConfidence,
     needsReview,
-    Object.hash(fitid, dedupHash, createdAt, updatedAt),
+    Object.hash(fitid, dedupHash, recurringSeriesId, createdAt, updatedAt),
   );
 }
 
