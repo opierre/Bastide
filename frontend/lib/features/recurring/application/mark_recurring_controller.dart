@@ -86,7 +86,7 @@ class MarkRecurringController extends AsyncNotifier<MarkRecurringState> {
         ids,
       ),
     };
-    ref.invalidate(transactionsControllerProvider);
+    refreshTransactionRows(ref);
     return saved;
   }
 }

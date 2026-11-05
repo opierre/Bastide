@@ -30,8 +30,7 @@ class SeriesOpener {
       await _ref.read(recurringRepositoryProvider).detail(seriesId);
     } on ApiFailure catch (failure) {
       if (failure.code == 'RECURRING_SERIES_NOT_FOUND') {
-        _ref.invalidate(transactionsControllerProvider);
-        _ref.read(transactionEditsProvider.notifier).saved();
+        refreshTransactionRows(_ref);
         return false;
       }
     } catch (_) {
