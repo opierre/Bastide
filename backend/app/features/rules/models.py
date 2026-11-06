@@ -1,10 +1,10 @@
-"""SQLAlchemy model for deterministic categorization rules."""
+"""SQLAlchemy models for deterministic categorization rules and the logos users give them."""
 
 from datetime import UTC, date, datetime
 from uuid import uuid4
 
-from sqlalchemy import Boolean, Date, ForeignKey, Integer, String
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy import Boolean, Date, ForeignKey, Integer, LargeBinary, String
+from sqlalchemy.orm import Mapped, deferred, mapped_column, relationship
 
 from app.core.db import Base, UtcDateTime
 
@@ -38,3 +38,28 @@ class CategorizationRule(Base):
         index=True,
     )
     created_at: Mapped[datetime] = mapped_column(UtcDateTime(), default=lambda: datetime.now(UTC))
+    # Loaded with the rule (without its pixels), so whether a rule has a logo never costs a
+    # query per rule. Deleting the rule deletes its logo.
+    logo: Mapped[RuleLogo | None] = relationship(
+        lazy="selectin", cascade="all, delete-orphan", passive_deletes=True
+    )
+
+
+class RuleLogo(Base):
+    """The picture a user gave a rule, already re-encoded as a square PNG.
+
+    Shown on the merchant chip of the transactions and series the rule matches, in place of
+    the monogram. User data, unlike the avatar: backups carry it and a reset deletes it.
+    """
+
+    __tablename__ = "rule_logos"
+
+    rule_id: Mapped[str] = mapped_column(
+        String(36),
+        ForeignKey("categorization_rules.id", ondelete="CASCADE", name="fk_rule_logos_rule_id"),
+        primary_key=True,
+    )
+    # Deferred: listing rules needs to know a logo exists and when it changed, not its bytes.
+    image: Mapped[bytes] = deferred(mapped_column(LargeBinary()))
+    content_type: Mapped[str] = mapped_column(String(50))
+    updated_at: Mapped[datetime] = mapped_column(UtcDateTime())

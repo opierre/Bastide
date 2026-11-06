@@ -8,7 +8,7 @@ its previous shape. The service owns the transaction boundary.
 
 from collections.abc import Sequence
 
-from sqlalchemy import delete, select, update
+from sqlalchemy import delete, func, select, update
 from sqlalchemy.orm import Session
 
 from app.features.recurring.models import (
@@ -83,6 +83,32 @@ class RecurringRepository:
             .order_by(Transaction.booked_date.desc(), Transaction.id.desc())
         )
         return [(occurrence, transaction) for occurrence, transaction in rows]
+
+    def latest_charges(self, series_ids: Sequence[str]) -> dict[str, Transaction]:
+        """Each series' most recent charge, keyed by series id; a series with none is absent."""
+        latest: dict[str, Transaction] = {}
+        for chunk in _chunks(series_ids):
+            rank = (
+                func.row_number()
+                .over(
+                    partition_by=RecurringOccurrence.series_id,
+                    order_by=(Transaction.booked_date.desc(), Transaction.id.desc()),
+                )
+                .label("rank")
+            )
+            ranked = (
+                select(RecurringOccurrence.series_id, Transaction.id.label("transaction_id"), rank)
+                .join(Transaction, Transaction.id == RecurringOccurrence.transaction_id)
+                .where(RecurringOccurrence.series_id.in_(chunk))
+                .subquery()
+            )
+            rows = self._db.execute(
+                select(ranked.c.series_id, Transaction)
+                .join(Transaction, Transaction.id == ranked.c.transaction_id)
+                .where(ranked.c.rank == 1)
+            )
+            latest.update({series_id: transaction for series_id, transaction in rows})
+        return latest
 
     def save(self, series: RecurringSeries) -> RecurringSeries:
         """Commit pending changes to a series already in the session."""

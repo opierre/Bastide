@@ -46,6 +46,9 @@ class RuleRead(BaseModel):
     applies_from: date | None = Field(
         description="The rule matches no transaction booked before this date; null for none."
     )
+    logo_updated_at: datetime | None = Field(
+        description="When the rule's logo last changed (`GET /rules/{id}/logo`); null for none."
+    )
     created_at: datetime
 
 

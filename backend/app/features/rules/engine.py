@@ -2,12 +2,27 @@
 
 import re
 from collections.abc import Sequence
+from datetime import date
+from typing import Protocol
 
 from app.features.rules.models import CategorizationRule
-from app.features.transactions.models import Transaction
 
 
-def match_category(transaction: Transaction, rules: Sequence[CategorizationRule]) -> str | None:
+class RuleSubject(Protocol):
+    """What a rule reads off a row: a `Transaction`, or anything shaped like one (its API
+    representation, when the logo of a response is resolved)."""
+
+    @property
+    def booked_date(self) -> date: ...
+    @property
+    def amount_minor(self) -> int: ...
+    @property
+    def description_clean(self) -> str: ...
+    @property
+    def merchant(self) -> str | None: ...
+
+
+def match_category(transaction: RuleSubject, rules: Sequence[CategorizationRule]) -> str | None:
     """Return the `category_id` of the first enabled rule (ascending priority) that matches.
 
     Returns None if no enabled rule matches (the caller leaves the transaction uncategorized).
@@ -18,7 +33,7 @@ def match_category(transaction: Transaction, rules: Sequence[CategorizationRule]
     return None
 
 
-def matches(transaction: Transaction, rule: CategorizationRule) -> bool:
+def matches(transaction: RuleSubject, rule: CategorizationRule) -> bool:
     """True if ``rule`` holds for ``transaction``, ignoring priority and `enabled`.
 
     Its condition, on a transaction booked no earlier than the rule's `applies_from`.
@@ -32,7 +47,7 @@ def matches(transaction: Transaction, rule: CategorizationRule) -> bool:
     return matches_condition(transaction, rule)
 
 
-def matches_condition(transaction: Transaction, rule: CategorizationRule) -> bool:
+def matches_condition(transaction: RuleSubject, rule: CategorizationRule) -> bool:
     """True if ``rule``'s condition holds for ``transaction``, whatever its `applies_from`."""
     if rule.match_type == "range":
         return _matches_range(transaction.amount_minor, rule.pattern)
@@ -50,7 +65,7 @@ def matches_condition(transaction: Transaction, rule: CategorizationRule) -> boo
     return False
 
 
-def _field_value(transaction: Transaction, match_field: str) -> str | None:
+def _field_value(transaction: RuleSubject, match_field: str) -> str | None:
     if match_field == "description_clean":
         return transaction.description_clean
     if match_field == "merchant":

@@ -7,6 +7,7 @@ either one. Working on the Core metadata rather than on each feature's ORM class
 column added later is carried without this file changing.
 """
 
+import base64
 from dataclasses import dataclass
 from datetime import date, datetime
 from typing import Any
@@ -40,6 +41,7 @@ USER_DATA_TABLES: tuple[str, ...] = (
     "import_batches",
     "transactions",
     "categorization_rules",
+    "rule_logos",
     "recurring_series",
     "recurring_occurrences",
     "recurring_merchant_aliases",
@@ -60,6 +62,7 @@ _SCOPED_THROUGH: dict[str, tuple[str, str]] = {
     "transactions": ("account_id", "accounts"),
     "recurring_occurrences": ("series_id", "recurring_series"),
     "goal_allocations": ("goal_id", "goals"),
+    "rule_logos": ("rule_id", "categorization_rules"),
 }
 
 
@@ -118,4 +121,7 @@ def encode(value: Any) -> Any:
     """JSON-ready form of one column value."""
     if isinstance(value, datetime | date):
         return value.isoformat()
+    if isinstance(value, bytes):
+        # A picture (a rule's logo): JSON has no bytes.
+        return base64.b64encode(value).decode("ascii")
     return value

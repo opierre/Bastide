@@ -40,6 +40,11 @@ class TransactionRead(BaseModel):
     dedup_hash: str
     #: The recurring series this transaction is an occurrence of, ``None`` when it is in none.
     recurring_series_id: str | None
+    #: The rule whose logo this row shows (`GET /rules/{id}/logo`); ``None`` shows the
+    #: monogram. The first enabled rule, by priority, that has a logo and matches.
+    logo_rule_id: str | None = None
+    #: When that logo last changed, so a client can cache the picture by it.
+    logo_updated_at: datetime | None = None
     created_at: datetime
     updated_at: datetime
 

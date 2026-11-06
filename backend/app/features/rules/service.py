@@ -1,6 +1,8 @@
 """Business logic for categorization rule CRUD and re-applying the rule engine."""
 
 import re
+from collections.abc import Callable
+from datetime import UTC, datetime
 
 from sqlalchemy import Select, select
 from sqlalchemy.orm import Session, selectinload
@@ -10,7 +12,8 @@ from app.features.accounts.models import Account
 from app.features.categories.repository import CategoryRepository
 from app.features.categories.service import CategoryInvalidError
 from app.features.rules.engine import match_category, matches
-from app.features.rules.models import CategorizationRule
+from app.features.rules.logos import LOGO_CONTENT_TYPE, normalize_logo
+from app.features.rules.models import CategorizationRule, RuleLogo
 from app.features.rules.repository import RuleRepository
 from app.features.rules.schemas import (
     MatchField,
@@ -42,6 +45,16 @@ class RulePatternInvalidError(ValidationError):
     code = "RULE_PATTERN_INVALID"
 
 
+class RuleLogoNotFoundError(NotFoundError):
+    """Raised when fetching the logo of a rule that has none."""
+
+    code = "RULE_LOGO_NOT_FOUND"
+
+
+def _utc_now() -> datetime:
+    return datetime.now(UTC)
+
+
 class RuleService:
     """Rule CRUD, scoped to a user, plus re-running the rule engine over transactions."""
 
@@ -51,11 +64,13 @@ class RuleService:
         transactions: TransactionRepository,
         categories: CategoryRepository,
         db: Session,
+        clock: Callable[[], datetime] = _utc_now,
     ) -> None:
         self._repository = repository
         self._transactions = transactions
         self._categories = categories
         self._db = db
+        self._clock = clock
 
     def list_for_user(self, user_id: str) -> list[CategorizationRule]:
         """List a user's rules in priority order."""
@@ -133,6 +148,49 @@ class RuleService:
         """
         rule = self.get(user_id, rule_id)
         self._repository.delete(rule)
+
+    def get_logo(self, user_id: str, rule_id: str) -> RuleLogo:
+        """The logo the user gave one of their rules, with its bytes.
+
+        Raises:
+            RuleNotFoundError: no such rule, or it belongs to another user.
+            RuleLogoNotFoundError: the rule has no logo.
+        """
+        logo = self._repository.get_logo(self.get(user_id, rule_id))
+        if logo is None:
+            raise RuleLogoNotFoundError("This rule has no logo.")
+        return logo
+
+    def upload_logo(self, user_id: str, rule_id: str, data: bytes) -> CategorizationRule:
+        """Make an uploaded picture the rule's logo, re-encoded without its metadata.
+
+        Raises:
+            RuleNotFoundError: no such rule, or it belongs to another user.
+            RuleLogoTooLargeError: the file or its pixel count is over the limit.
+            RuleLogoInvalidImageError: the bytes aren't a PNG, JPEG or WebP picture.
+        """
+        rule = self.get(user_id, rule_id)
+        image = normalize_logo(data)
+        return self._repository.save_logo(
+            rule,
+            RuleLogo(
+                rule_id=rule.id,
+                image=image,
+                content_type=LOGO_CONTENT_TYPE,
+                updated_at=self._clock(),
+            ),
+        )
+
+    def remove_logo(self, user_id: str, rule_id: str) -> CategorizationRule:
+        """Drop the rule's logo, so its rows show the monogram again. A no-op without one.
+
+        Raises:
+            RuleNotFoundError: no such rule, or it belongs to another user.
+        """
+        rule = self.get(user_id, rule_id)
+        if rule.logo is None:
+            return rule
+        return self._repository.delete_logo(rule)
 
     def apply(self, user_id: str, account_id: str | None = None) -> int:
         """Re-run the enabled rules over the user's transactions (optionally one account).

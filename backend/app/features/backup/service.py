@@ -1,5 +1,7 @@
 """Full export and restore of everything one user owns."""
 
+import base64
+import binascii
 from collections.abc import Callable
 from datetime import UTC, date, datetime
 from typing import Any
@@ -218,7 +220,11 @@ class BackupService:
         if name == "categorization_runs" and row["status"] in ("pending", "running"):
             # Its executor is gone; left in flight it would block every future run.
             row["status"] = "failed"
-        known.setdefault(name, set()).add(row["id"])
+        if name == "rule_logos" and row["content_type"] != "image/png":
+            # Served back as-is: only what an upload produces is accepted.
+            raise BackupInvalidError("A rule_logos row has an invalid content_type.")
+        if "id" in row:  # a logo is keyed by its rule, and nothing references it
+            known.setdefault(name, set()).add(row["id"])
         return row
 
 
@@ -229,7 +235,9 @@ def _decode_value(table: str, spec: ColumnSpec, value: Any) -> Any:
             return datetime.fromisoformat(value)
         if kind is date:
             return date.fromisoformat(value)
-    except (TypeError, ValueError) as exc:
+        if kind is bytes:
+            return base64.b64decode(value, validate=True)
+    except (TypeError, ValueError, binascii.Error) as exc:
         raise BackupInvalidError(f"A {table} row has an invalid {spec.name}.") from exc
     # `bool` is an `int`, so a boolean in an integer column (money, above all) is refused
     # explicitly; a float column accepts an integer JSON value.

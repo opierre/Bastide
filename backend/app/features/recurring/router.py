@@ -1,5 +1,6 @@
 """Recurring-series endpoints: detection, the subscription lifecycle, and the panel summary."""
 
+from collections.abc import Iterable, Sequence
 from datetime import date
 from typing import Annotated
 
@@ -13,6 +14,7 @@ from app.features.auth.deps import get_current_user
 from app.features.auth.models import User
 from app.features.categories.repository import CategoryRepository
 from app.features.recurring.merge import RecurringMergeService
+from app.features.recurring.models import RecurringSeries
 from app.features.recurring.repository import RecurringRepository
 from app.features.recurring.schemas import (
     AttachRequest,
@@ -33,6 +35,9 @@ from app.features.recurring.schemas import (
     SeriesUpdate,
 )
 from app.features.recurring.service import RecurringDetectionService, RecurringService
+from app.features.rules.deps import get_logo_resolver
+from app.features.rules.logos import RuleLogoResolver
+from app.features.transactions.models import Transaction
 from app.features.transactions.repository import TransactionRepository
 from app.features.transactions.schemas import TransactionPage, TransactionRead
 
@@ -70,9 +75,31 @@ def _merge_service(
     return RecurringMergeService(RecurringRepository(db), series, detection)
 
 
+def _series_reads(
+    series: Sequence[RecurringSeries], service: RecurringService, logos: RuleLogoResolver
+) -> list[SeriesRead]:
+    """The series as responses, each with the logo its latest charge shows."""
+    return logos.fill_series(
+        (SeriesRead.model_validate(one) for one in series), service.latest_charges(series)
+    )
+
+
+def _series_read(
+    series: RecurringSeries, service: RecurringService, logos: RuleLogoResolver
+) -> SeriesRead:
+    return _series_reads([series], service, logos)[0]
+
+
+def _transaction_reads(
+    transactions: Iterable[Transaction], logos: RuleLogoResolver
+) -> list[TransactionRead]:
+    return logos.fill_rows(TransactionRead.model_validate(t) for t in transactions)
+
+
 @router.get("", response_model=list[SeriesRead])
 async def list_series(
     service: Annotated[RecurringService, Depends(_service)],
+    logos: Annotated[RuleLogoResolver, Depends(get_logo_resolver)],
     user: Annotated[User, Depends(get_current_user)],
     series_status: Annotated[
         SeriesStatus | None,
@@ -91,18 +118,17 @@ async def list_series(
     hiding it, and a client that wants one kind asks for it by `status`. Archived series are
     absent unless asked for with `?archived=true`, which returns only them.
     """
-    return [
-        SeriesRead.model_validate(series)
-        for series in service.list_for_user(
-            user.id, status=series_status, account_id=account_id, archived=archived
-        )
-    ]
+    series = service.list_for_user(
+        user.id, status=series_status, account_id=account_id, archived=archived
+    )
+    return _series_reads(series, service, logos)
 
 
 @router.post("", response_model=SeriesRead, status_code=status.HTTP_201_CREATED)
 async def create_series(
     payload: SeriesCreate,
     service: Annotated[RecurringService, Depends(_service)],
+    logos: Annotated[RuleLogoResolver, Depends(get_logo_resolver)],
     user: Annotated[User, Depends(get_current_user)],
 ) -> SeriesRead:
     """Create a series from its charges (`is_manual = true`).
@@ -110,13 +136,14 @@ async def create_series(
     `transaction_ids`, typically the ones ticked in a preview, become its occurrences; at least
     one is required, so every series starts from real charges detection can follow.
     """
-    return SeriesRead.model_validate(service.create(user.id, payload))
+    return _series_read(service.create(user.id, payload), service, logos)
 
 
 @router.post("/preview", response_model=RecurringPreviewRead)
 async def preview_series(
     payload: PreviewRequest,
     service: Annotated[RecurringService, Depends(_service)],
+    logos: Annotated[RuleLogoResolver, Depends(get_logo_resolver)],
     user: Annotated[User, Depends(get_current_user)],
 ) -> RecurringPreviewRead:
     """What series one outflow would start, with a confidence level and its reasons.
@@ -130,8 +157,8 @@ async def preview_series(
     result = service.preview(user.id, payload.transaction_id)
     if result.series is not None:
         return RecurringPreviewRead(
-            series=SeriesRead.model_validate(result.series),
-            addable_transactions=[TransactionRead.model_validate(t) for t in result.addable],
+            series=_series_read(result.series, service, logos),
+            addable_transactions=_transaction_reads(result.addable, logos),
         )
     grade = result.grade
     assert grade is not None
@@ -146,7 +173,7 @@ async def preview_series(
             expected_amount_minor=grade.expected_amount_minor,
             currency=seed.currency,
             account_id=seed.account_id,
-            transactions=[TransactionRead.model_validate(t) for t in grade.transactions],
+            transactions=_transaction_reads(grade.transactions, logos),
         )
     )
 
@@ -185,6 +212,8 @@ async def get_summary(
 @router.get("/merge-suggestions", response_model=list[MergeSuggestionRead])
 async def list_merge_suggestions(
     service: Annotated[RecurringMergeService, Depends(_merge_service)],
+    series_service: Annotated[RecurringService, Depends(_service)],
+    logos: Annotated[RuleLogoResolver, Depends(get_logo_resolver)],
     user: Annotated[User, Depends(get_current_user)],
 ) -> list[MergeSuggestionRead]:
     """Pairs of series that look like one subscription the bank renamed.
@@ -194,8 +223,8 @@ async def list_merge_suggestions(
     """
     return [
         MergeSuggestionRead(
-            target=SeriesRead.model_validate(proposal.target),
-            source=SeriesRead.model_validate(proposal.source),
+            target=_series_read(proposal.target, series_service, logos),
+            source=_series_read(proposal.source, series_service, logos),
         )
         for proposal in service.proposals(user.id)
     ]
@@ -215,19 +244,19 @@ async def dismiss_merge_suggestion(
 async def get_series(
     series_id: str,
     service: Annotated[RecurringService, Depends(_service)],
+    logos: Annotated[RuleLogoResolver, Depends(get_logo_resolver)],
     user: Annotated[User, Depends(get_current_user)],
 ) -> SeriesDetailRead:
     """One series with the occurrence history it was deduced from, newest charge first."""
     series, occurrences = service.occurrences(user.id, series_id)
+    transactions = _transaction_reads((transaction for _, transaction in occurrences), logos)
     return SeriesDetailRead(
-        **SeriesRead.model_validate(series).model_dump(),
+        **_series_read(series, service, logos).model_dump(),
         occurrences=[
             OccurrenceRead(
-                id=occurrence.id,
-                created_at=occurrence.created_at,
-                transaction=TransactionRead.model_validate(transaction),
+                id=occurrence.id, created_at=occurrence.created_at, transaction=transaction
             )
-            for occurrence, transaction in occurrences
+            for (occurrence, _), transaction in zip(occurrences, transactions, strict=True)
         ],
     )
 
@@ -237,33 +266,36 @@ async def update_series(
     series_id: str,
     payload: SeriesUpdate,
     service: Annotated[RecurringService, Depends(_service)],
+    logos: Annotated[RuleLogoResolver, Depends(get_logo_resolver)],
     user: Annotated[User, Depends(get_current_user)],
 ) -> SeriesRead:
     """Patch a series; a `status` outside the lifecycle is a 409, not a write."""
-    return SeriesRead.model_validate(service.update(user.id, series_id, payload))
+    return _series_read(service.update(user.id, series_id, payload), service, logos)
 
 
 @router.post("/{series_id}/archive", response_model=SeriesRead)
 async def archive_series(
     series_id: str,
     service: Annotated[RecurringService, Depends(_service)],
+    logos: Annotated[RuleLogoResolver, Depends(get_logo_resolver)],
     user: Annotated[User, Depends(get_current_user)],
 ) -> SeriesRead:
     """Put a series away: out of the list, the summary and detection, history kept.
 
     Idempotent. `POST /recurring/{series_id}/unarchive` restores it as it was.
     """
-    return SeriesRead.model_validate(service.set_archived(user.id, series_id, archived=True))
+    return _series_read(service.set_archived(user.id, series_id, archived=True), service, logos)
 
 
 @router.post("/{series_id}/unarchive", response_model=SeriesRead)
 async def unarchive_series(
     series_id: str,
     service: Annotated[RecurringService, Depends(_service)],
+    logos: Annotated[RuleLogoResolver, Depends(get_logo_resolver)],
     user: Annotated[User, Depends(get_current_user)],
 ) -> SeriesRead:
     """Restore an archived series to the list, the summary and detection. Idempotent."""
-    return SeriesRead.model_validate(service.set_archived(user.id, series_id, archived=False))
+    return _series_read(service.set_archived(user.id, series_id, archived=False), service, logos)
 
 
 @router.post("/{series_id}/merge", response_model=SeriesRead)
@@ -271,13 +303,15 @@ async def merge_series(
     series_id: str,
     payload: MergeRequest,
     service: Annotated[RecurringMergeService, Depends(_merge_service)],
+    series_service: Annotated[RecurringService, Depends(_service)],
+    logos: Annotated[RuleLogoResolver, Depends(get_logo_resolver)],
     user: Annotated[User, Depends(get_current_user)],
 ) -> SeriesRead:
     """Fold `source_id` into this series and return it rebuilt from both histories.
 
     The merged-away label is remembered, so later imports group under this series.
     """
-    return SeriesRead.model_validate(service.merge(user.id, series_id, payload.source_id))
+    return _series_read(service.merge(user.id, series_id, payload.source_id), series_service, logos)
 
 
 @router.post("/{series_id}/occurrences", response_model=SeriesRead)
@@ -285,6 +319,7 @@ async def attach_occurrences(
     series_id: str,
     payload: AttachRequest,
     service: Annotated[RecurringService, Depends(_service)],
+    logos: Annotated[RuleLogoResolver, Depends(get_logo_resolver)],
     user: Annotated[User, Depends(get_current_user)],
 ) -> SeriesRead:
     """Add transactions to this series as occurrences; its dates and count follow.
@@ -292,13 +327,14 @@ async def attach_occurrences(
     Each must be an outflow of the caller's not already in a series
     (`RECURRING_TRANSACTIONS_INVALID`, `RECURRING_TRANSACTION_LINKED`).
     """
-    return SeriesRead.model_validate(service.attach(user.id, series_id, payload.transaction_ids))
+    return _series_read(service.attach(user.id, series_id, payload.transaction_ids), service, logos)
 
 
 @router.get("/{series_id}/candidates", response_model=TransactionPage)
 async def list_candidates(
     series_id: str,
     service: Annotated[RecurringService, Depends(_service)],
+    logos: Annotated[RuleLogoResolver, Depends(get_logo_resolver)],
     user: Annotated[User, Depends(get_current_user)],
     q: str | None = None,
     page: Annotated[int, Query(ge=1)] = 1,
@@ -314,7 +350,7 @@ async def list_candidates(
         user.id, series_id, q=q, page=page, page_size=CANDIDATE_PAGE_SIZE
     )
     return TransactionPage(
-        items=[TransactionRead.model_validate(t) for t in items],
+        items=_transaction_reads(items, logos),
         page=page,
         page_size=CANDIDATE_PAGE_SIZE,
         total=total,
