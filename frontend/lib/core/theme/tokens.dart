@@ -274,6 +274,24 @@ abstract final class MonogramHues {
   };
 }
 
+/// Plates of the preset user avatars, keyed by the backend preset key.
+///
+/// Drawn from hues the palette already carries rather than new ones; an avatar
+/// is never next to a category chip in the same role, so the reuse can't be
+/// misread as a category.
+abstract final class AvatarHues {
+  static const byPreset = <String, Color>{
+    'cyan': AppColors.cyan,
+    'blue': AppColors.info,
+    'teal': CategoryHues.transport,
+    'pink': CategoryHues.loisirs,
+    'amber': AppColors.warning,
+    'lime': CategoryHues.sante,
+    'green': AppColors.positive,
+    'iris': AppColors.iris,
+  };
+}
+
 abstract final class AppSpacing {
   static const xs = 4.0;
   static const sm = 8.0;

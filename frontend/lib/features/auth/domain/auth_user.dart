@@ -1,5 +1,7 @@
 import 'package:flutter/foundation.dart';
 
+import 'avatar_choice.dart';
+
 /// The authenticated user's profile. Locale and currency are account-wide
 /// (one currency per user, chosen at registration — see
 /// the multi-currency skill).
@@ -11,6 +13,7 @@ class AuthUser {
     required this.displayName,
     required this.locale,
     required this.currency,
+    this.avatar = const MonogramChoice(),
   });
 
   final String id;
@@ -18,6 +21,7 @@ class AuthUser {
   final String displayName;
   final String locale;
   final String currency;
+  final AvatarChoice avatar;
 
   @override
   bool operator ==(Object other) =>
@@ -27,8 +31,10 @@ class AuthUser {
           other.email == email &&
           other.displayName == displayName &&
           other.locale == locale &&
-          other.currency == currency);
+          other.currency == currency &&
+          other.avatar == avatar);
 
   @override
-  int get hashCode => Object.hash(id, email, displayName, locale, currency);
+  int get hashCode =>
+      Object.hash(id, email, displayName, locale, currency, avatar);
 }

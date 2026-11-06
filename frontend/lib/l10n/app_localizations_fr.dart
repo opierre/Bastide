@@ -4198,6 +4198,39 @@ class AppLocalizationsFr extends AppLocalizations {
   String get settingsProfileNameButton => 'Modifier…';
 
   @override
+  String get settingsAvatarTitle => 'Avatar';
+
+  @override
+  String get settingsAvatarSubtitle =>
+      'Choisissez comment vous apparaissez dans l\'application.';
+
+  @override
+  String get settingsAvatarReset => 'Revenir au monogramme';
+
+  @override
+  String get settingsAvatarMonogram => 'Monogramme';
+
+  @override
+  String settingsAvatarPreset(String hue) {
+    String _temp0 = intl.Intl.selectLogic(hue, {
+      'cyan': 'Pastille cyan',
+      'blue': 'Pastille bleue',
+      'teal': 'Pastille sarcelle',
+      'pink': 'Pastille rose',
+      'amber': 'Pastille ambre',
+      'lime': 'Pastille citron vert',
+      'green': 'Pastille verte',
+      'iris': 'Pastille iris',
+      'other': 'Pastille',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String get settingsAvatarError =>
+      'L\'avatar n\'a pas pu être enregistré. Réessayez.';
+
+  @override
   String get settingsProfileNameModalTitle => 'Changer de nom d\'utilisateur';
 
   @override

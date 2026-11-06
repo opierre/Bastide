@@ -4,6 +4,7 @@ import 'package:bastide/core/l10n/locale_provider.dart';
 import 'package:bastide/features/accounts/application/accounts_controller.dart';
 import 'package:bastide/features/auth/application/auth_controller.dart';
 import 'package:bastide/features/auth/domain/auth_user.dart';
+import 'package:bastide/features/auth/domain/avatar_choice.dart';
 import 'package:bastide/features/auth/presentation/login_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -210,6 +211,29 @@ void main() {
       await tester.tap(find.byKey(Key(itemKey)));
       await tester.pumpAndSettle();
     }
+
+    testWidgets('the pill follows a new avatar choice at once', (tester) async {
+      await pumpApp(tester);
+      final pillPreset = find.descendant(
+        of: find.byKey(const Key('userMenuButton')),
+        matching: find.byKey(const Key('userAvatarPreset')),
+      );
+      expect(pillPreset, findsNothing);
+
+      auth.replaceUser(
+        const AuthUser(
+          id: 'u1',
+          email: 'ada@example.com',
+          displayName: 'Ada',
+          locale: 'fr',
+          currency: 'EUR',
+          avatar: PresetChoice(AvatarPreset.teal),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(pillPreset, findsOneWidget);
+    });
 
     testWidgets('log out ends the session and returns to the login screen', (
       tester,

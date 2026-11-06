@@ -1122,6 +1122,35 @@
   "settingsProfileNameTitle": "Username",
   "settingsProfileNameSubtitle": "You can sign in with {name} or with your email.",
   "settingsProfileNameButton": "Change…",
+  "settingsAvatarTitle": "Avatar",
+  "@settingsAvatarTitle": {
+    "description": "Title of the Settings › Profile card that sets the user's avatar."
+  },
+  "settingsAvatarSubtitle": "Choose how you appear across the app.",
+  "@settingsAvatarSubtitle": {
+    "description": "Subtitle of the avatar card."
+  },
+  "settingsAvatarReset": "Back to the monogram",
+  "@settingsAvatarReset": {
+    "description": "Button of the avatar card going back to the initials monogram."
+  },
+  "settingsAvatarMonogram": "Monogram",
+  "@settingsAvatarMonogram": {
+    "description": "Tooltip and accessible name of the initials monogram option."
+  },
+  "settingsAvatarPreset": "{hue, select, cyan{Cyan plate} blue{Blue plate} teal{Teal plate} pink{Pink plate} amber{Amber plate} lime{Lime plate} green{Green plate} iris{Iris plate} other{Plate}}",
+  "@settingsAvatarPreset": {
+    "description": "Tooltip and accessible name of a preset avatar option: the user's initials on a plate of this hue.",
+    "placeholders": {
+      "hue": {
+        "type": "String"
+      }
+    }
+  },
+  "settingsAvatarError": "The avatar couldn't be saved. Try again.",
+  "@settingsAvatarError": {
+    "description": "Banner in the avatar card when the choice could not be saved."
+  },
   "settingsProfileNameModalTitle": "Change username",
   "settingsProfileNameModalLead": "The new name replaces the old one for signing in.",
   "settingsProfileNameModalSave": "Save",

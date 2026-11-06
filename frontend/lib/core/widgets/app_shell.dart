@@ -12,7 +12,7 @@ import '../theme/app_theme.dart';
 import '../theme/tokens.dart';
 import 'brand_mark.dart';
 import 'frame_texture.dart';
-import 'monogram_avatar.dart';
+import 'user_avatar.dart';
 
 class NavDestinationSpec {
   const NavDestinationSpec({
@@ -898,7 +898,7 @@ class _UserPill extends ConsumerWidget {
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            UserMonogram(name: user.displayName, size: 32),
+            UserAvatar(name: user.displayName, avatar: user.avatar, size: 32),
             const SizedBox(width: AppSpacing.sm),
             ConstrainedBox(
               constraints: const BoxConstraints(maxWidth: 160),
