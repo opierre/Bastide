@@ -14,6 +14,10 @@ import 'avatar_upload_failure_text.dart';
 const _viewport = 320.0;
 const _maxZoom = 5.0;
 
+// Scroll distance per e-fold of zoom. Flutter's default (200) zooms ~1.6× per
+// wheel notch; 1000 gives ~1.1× steps, fine enough to frame a face precisely.
+const _wheelZoomFactor = 1000.0;
+
 /// The square crop step between picking a picture and uploading it: the user
 /// drags and zooms the picture under a square window, and what shows through
 /// the window becomes the avatar.
@@ -108,6 +112,7 @@ class _AvatarCropModalState extends ConsumerState<AvatarCropModal> {
                 boundaryMargin: EdgeInsets.zero,
                 minScale: 1,
                 maxScale: _maxZoom,
+                scaleFactor: _wheelZoomFactor,
                 child: SizedBox(
                   width: _imageSize.width * _scale,
                   height: _imageSize.height * _scale,
