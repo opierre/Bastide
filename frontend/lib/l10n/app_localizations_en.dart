@@ -4195,6 +4195,37 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingsAvatarError => 'The avatar couldn\'t be saved. Try again.';
 
   @override
+  String get settingsAvatarChoosePicture => 'Choose a picture…';
+
+  @override
+  String get settingsAvatarRemovePicture => 'Remove picture';
+
+  @override
+  String settingsAvatarPictureTooLarge(int megabytes) {
+    return 'This picture is too large: choose a file under $megabytes MB.';
+  }
+
+  @override
+  String get settingsAvatarPictureInvalid =>
+      'This file isn\'t a PNG, JPEG or WebP picture.';
+
+  @override
+  String get settingsAvatarPictureError =>
+      'The picture couldn\'t be saved. Try again.';
+
+  @override
+  String get settingsAvatarCropTitle => 'Crop the picture';
+
+  @override
+  String get settingsAvatarCropLead => 'Drag and zoom to frame your avatar.';
+
+  @override
+  String get settingsAvatarCropCancel => 'Cancel';
+
+  @override
+  String get settingsAvatarCropSave => 'Use this picture';
+
+  @override
   String get settingsProfileNameModalTitle => 'Change username';
 
   @override

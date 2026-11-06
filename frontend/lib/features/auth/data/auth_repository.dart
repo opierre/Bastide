@@ -1,9 +1,12 @@
+import 'dart:typed_data';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/api/api_client.dart';
 import '../../../core/api/api_client_provider.dart';
 import '../domain/auth_user.dart';
 import '../domain/avatar_choice.dart';
+import '../domain/avatar_picture.dart';
 
 /// The session a successful register/login/reset call returns: a bearer token
 /// plus the user it belongs to.
@@ -112,6 +115,38 @@ class AuthRepository {
             )
             as Map<String, dynamic>;
     return _parseUser(json['user'] as Map<String, dynamic>);
+  }
+
+  /// Makes [bytes] the signed-in user's avatar picture. The backend re-encodes
+  /// it and refuses a file too large or of the wrong type.
+  Future<AuthUser> uploadAvatar(Uint8List bytes) async {
+    final json =
+        await _apiClient.putMultipart(
+              '/auth/me/avatar',
+              fileField: 'file',
+              fileName: 'avatar.png',
+              fileBytes: bytes,
+            )
+            as Map<String, dynamic>;
+    return _parseUser(json['user'] as Map<String, dynamic>);
+  }
+
+  /// Drops the picture; the backend brings back the default it replaced.
+  Future<AuthUser> removeAvatar() async {
+    final json =
+        await _apiClient.delete('/auth/me/avatar') as Map<String, dynamic>;
+    return _parseUser(json['user'] as Map<String, dynamic>);
+  }
+
+  /// Fetches the avatar picture. Passing the [etag] of the copy already held
+  /// returns `null` when that copy is still current.
+  Future<AvatarPicture?> fetchAvatar({String? etag}) async {
+    final response = await _apiClient.getBytes(
+      '/auth/me/avatar',
+      ifNoneMatch: etag,
+    );
+    if (response.statusCode == 304) return null;
+    return AvatarPicture(bytes: response.bytes, etag: response.headers['etag']);
   }
 
   Future<void> logout() async {

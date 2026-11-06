@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../features/auth/application/auth_controller.dart';
+import '../../features/auth/application/avatar_picture_controllers.dart';
 import '../../features/settings/application/settings_section_request.dart';
 import '../../l10n/app_localizations.dart';
 import '../navigation/sidebar_controller.dart';
@@ -898,7 +899,12 @@ class _UserPill extends ConsumerWidget {
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            UserAvatar(name: user.displayName, avatar: user.avatar, size: 32),
+            UserAvatar(
+              name: user.displayName,
+              avatar: user.avatar,
+              image: ref.watch(avatarPictureProvider).value?.bytes,
+              size: 32,
+            ),
             const SizedBox(width: AppSpacing.sm),
             ConstrainedBox(
               constraints: const BoxConstraints(maxWidth: 160),

@@ -224,7 +224,7 @@ void main() {
       await tester.pumpWidget(wrap());
       await tester.pumpAndSettle();
 
-      final reset = tester.widget<OutlinedButton>(
+      final reset = tester.widget<TextButton>(
         find.byKey(const Key('settingsAvatarReset')),
       );
       expect(reset.onPressed, isNull);
