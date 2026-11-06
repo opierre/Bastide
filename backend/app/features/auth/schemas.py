@@ -6,6 +6,8 @@ from typing import Annotated, Literal
 
 from pydantic import AfterValidator, BaseModel, ConfigDict, Field, field_validator
 
+from app.features.auth.models import AVATAR_MONOGRAM, AVATAR_PRESET_PREFIX
+
 # The display name doubles as the username. No "@" is allowed, so a login identifier that holds
 # one is an email and anything else is a display name.
 DISPLAY_NAME_PATTERN = re.compile(r"[a-z0-9._-]{3,32}")
@@ -226,6 +228,30 @@ class ProfileUpdate(BaseModel):
     display_name: DisplayName
 
 
+#: The preset avatars: the user's initials on a plate of this hue. The keys are the contract;
+#: the app owns the actual colours.
+AVATAR_PRESETS = frozenset({"cyan", "blue", "teal", "pink", "amber", "lime", "green", "iris"})
+
+
+def _validate_avatar_default(value: str) -> str:
+    if value == AVATAR_MONOGRAM:
+        return value
+    key = value.removeprefix(AVATAR_PRESET_PREFIX)
+    if key == value or key not in AVATAR_PRESETS:
+        raise ValueError(f"Avatar must be '{AVATAR_MONOGRAM}' or a known 'preset:<key>'.")
+    return value
+
+
+#: A default avatar: the monogram or one of the presets. A picture is set by uploading it.
+AvatarDefault = Annotated[str, AfterValidator(_validate_avatar_default)]
+
+
+class AvatarChoiceUpdate(BaseModel):
+    """Choose a default avatar; replaces an uploaded picture, if there is one."""
+
+    avatar: AvatarDefault
+
+
 class UserRead(BaseModel):
     """A user's public profile, as returned by the API."""
 
@@ -236,6 +262,8 @@ class UserRead(BaseModel):
     display_name: str
     locale: str
     currency: str
+    #: `monogram`, `preset:<key>`, or `image` (fetched from `GET /auth/me/avatar`).
+    avatar: str
     created_at: datetime
 
 

@@ -1,6 +1,9 @@
-"""Business logic for registration, login, logout, password recovery, and current-user lookup."""
+"""Business logic for registration, login, logout, password recovery, profile and avatar."""
 
-from app.core.errors import AuthError, ConflictError
+from collections.abc import Callable
+from datetime import UTC, datetime
+
+from app.core.errors import AuthError, ConflictError, NotFoundError
 from app.core.security import (
     generate_recovery_code,
     generate_token,
@@ -9,7 +12,8 @@ from app.core.security import (
     verify_password,
     verify_recovery_code,
 )
-from app.features.auth.models import AuthToken, User
+from app.features.auth.avatar import AVATAR_CONTENT_TYPE, normalize_avatar
+from app.features.auth.models import AVATAR_IMAGE, AVATAR_MONOGRAM, AuthToken, User, UserAvatar
 from app.features.auth.repository import AuthRepository
 from app.features.auth.schemas import PasswordReset, ProfileUpdate, UserLogin, UserRegister
 
@@ -41,11 +45,24 @@ class InvalidRecoveryCodeError(AuthError):
     code = "INVALID_RECOVERY_CODE"
 
 
-class AuthService:
-    """Registration, login, logout, and bearer-token resolution."""
+class AvatarNotFoundError(NotFoundError):
+    """Raised when fetching the picture of a user who hasn't uploaded one."""
 
-    def __init__(self, repository: AuthRepository) -> None:
+    code = "AVATAR_NOT_FOUND"
+
+
+def _utc_now() -> datetime:
+    return datetime.now(UTC)
+
+
+class AuthService:
+    """Registration, login, logout, profile and avatar, and bearer-token resolution."""
+
+    def __init__(
+        self, repository: AuthRepository, clock: Callable[[], datetime] = _utc_now
+    ) -> None:
         self._repository = repository
+        self._clock = clock
 
     def register(self, data: UserRegister) -> tuple[User, str, str]:
         """Create a user (locale + currency persisted), a session token, and a recovery code.
@@ -149,6 +166,53 @@ class AuthService:
 
         user.display_name = data.display_name
         return self._repository.save_user(user)
+
+    def get_avatar(self, user: User) -> UserAvatar:
+        """The picture the user uploaded as their avatar.
+
+        Raises:
+            AvatarNotFoundError: the user's avatar is not a picture.
+        """
+        avatar = self._repository.get_avatar(user.id)
+        if avatar is None or user.avatar != AVATAR_IMAGE:
+            raise AvatarNotFoundError("This user has no avatar picture.")
+        return avatar
+
+    def upload_avatar(self, user: User, data: bytes) -> User:
+        """Make an uploaded picture the user's avatar, re-encoded without its metadata.
+
+        The default it replaces is kept, so removing the picture later brings it back.
+
+        Raises:
+            AvatarTooLargeError: the file or its pixel count is over the limit.
+            AvatarInvalidImageError: the bytes aren't a PNG, JPEG or WebP picture.
+        """
+        image = normalize_avatar(data)
+        previous = user.avatar if user.avatar != AVATAR_IMAGE else AVATAR_MONOGRAM
+        return self._repository.save_avatar(
+            user,
+            UserAvatar(
+                user_id=user.id,
+                image=image,
+                content_type=AVATAR_CONTENT_TYPE,
+                previous_choice=previous,
+                updated_at=self._clock(),
+            ),
+        )
+
+    def remove_avatar(self, user: User) -> User:
+        """Drop the user's picture and go back to the default they had before uploading it.
+
+        A no-op for a user without a picture.
+        """
+        avatar = self._repository.get_avatar(user.id)
+        if avatar is None:
+            return user
+        return self._repository.set_avatar_choice(user, avatar.previous_choice)
+
+    def set_avatar_choice(self, user: User, choice: str) -> User:
+        """Make the monogram or a preset the user's avatar, dropping any uploaded picture."""
+        return self._repository.set_avatar_choice(user, choice)
 
     def logout(self, token: str) -> None:
         """Invalidate a session token. A no-op if the token is already gone."""

@@ -3,10 +3,14 @@
 from datetime import UTC, datetime
 from uuid import uuid4
 
-from sqlalchemy import ForeignKey, String
+from sqlalchemy import ForeignKey, LargeBinary, String
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.core.db import Base, UtcDateTime
+
+AVATAR_MONOGRAM = "monogram"
+AVATAR_IMAGE = "image"
+AVATAR_PRESET_PREFIX = "preset:"
 
 
 class User(Base):
@@ -23,12 +27,31 @@ class User(Base):
     display_name: Mapped[str] = mapped_column(String(255), unique=True, index=True)
     locale: Mapped[str] = mapped_column(String(5))
     currency: Mapped[str] = mapped_column(String(3))
+    # `monogram`, `preset:<key>` (see `schemas.AVATAR_PRESETS`) or `image` (a `UserAvatar` row).
+    avatar: Mapped[str] = mapped_column(String(40), default=AVATAR_MONOGRAM)
     created_at: Mapped[datetime] = mapped_column(UtcDateTime(), default=lambda: datetime.now(UTC))
     updated_at: Mapped[datetime] = mapped_column(
         UtcDateTime(),
         default=lambda: datetime.now(UTC),
         onupdate=lambda: datetime.now(UTC),
     )
+
+
+class UserAvatar(Base):
+    """The picture a user uploaded as their avatar, already re-encoded as a 256×256 PNG.
+
+    Part of the profile, like the display name: neither a backup nor a database reset
+    touches it (`app.core.user_data`).
+    """
+
+    __tablename__ = "user_avatars"
+
+    user_id: Mapped[str] = mapped_column(String(36), ForeignKey("users.id"), primary_key=True)
+    image: Mapped[bytes] = mapped_column(LargeBinary())
+    content_type: Mapped[str] = mapped_column(String(50))
+    # The default in effect before the upload, which removing the picture brings back.
+    previous_choice: Mapped[str] = mapped_column(String(40))
+    updated_at: Mapped[datetime] = mapped_column(UtcDateTime())
 
 
 class AuthToken(Base):
