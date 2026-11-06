@@ -1,5 +1,7 @@
 import 'package:flutter/foundation.dart';
 
+import '../../../core/logos/logo_ref.dart';
+
 /// One month's income and expense, for the income-vs-expense bars.
 @immutable
 class MonthlyTotals {
@@ -96,6 +98,7 @@ class RecentTransaction {
     required this.bookedDate,
     required this.amountMinor,
     required this.currency,
+    this.logo,
   });
 
   final String id;
@@ -108,4 +111,7 @@ class RecentTransaction {
   final DateTime bookedDate;
   final int amountMinor;
   final String currency;
+
+  /// The rule logo the chip shows instead of the monogram; `null` for none.
+  final LogoRef? logo;
 }

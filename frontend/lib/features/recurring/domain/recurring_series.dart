@@ -1,5 +1,7 @@
 import 'package:flutter/foundation.dart';
 
+import '../../../core/logos/logo_ref.dart';
+
 /// How often a series is charged. Mirrors the backend's `Cadence` literal
 /// (`backend/app/features/recurring/schemas.py`).
 ///
@@ -80,6 +82,7 @@ class RecurringSeries {
     required this.priceChangeMinor,
     required this.priceChangedAt,
     this.isArchived = false,
+    this.logo,
   });
 
   final String id;
@@ -112,6 +115,9 @@ class RecurringSeries {
   final int? priceChangeMinor;
 
   final DateTime? priceChangedAt;
+
+  /// The rule logo the chip shows instead of the monogram; `null` for none.
+  final LogoRef? logo;
 
   /// What this series cost before the recorded price change, or `null` when
   /// there was none.

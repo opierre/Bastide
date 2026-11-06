@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../data/rules_repository.dart';
 import '../domain/rule.dart';
+import 'logo_views_reload.dart';
 import 'recategorized_reload.dart';
 
 /// The priority-ordered rule list.
@@ -107,15 +108,29 @@ class RulesController extends AsyncNotifier<List<Rule>> {
           if (rule.id == id) updated else rule,
       ]),
     );
+    // A new pattern or priority can move a logo onto other rows.
+    if (updated.logo != null) await reloadLogoViews(ref);
     return updated;
   }
 
+  /// Folds in a rule whose logo was just uploaded, replaced or removed, and
+  /// re-reads the rows that show it.
+  Future<void> logoChanged(Rule rule) async {
+    state = AsyncValue.data([
+      for (final entry in state.value ?? const <Rule>[])
+        if (entry.id == rule.id) rule else entry,
+    ]);
+    await reloadLogoViews(ref);
+  }
+
   Future<void> delete(String id) async {
+    final hadLogo = _hasLogo(id);
     await ref.read(rulesRepositoryProvider).delete(id);
     state = AsyncValue.data([
       for (final rule in state.value ?? const <Rule>[])
         if (rule.id != id) rule,
     ]);
+    if (hadLogo) await reloadLogoViews(ref);
   }
 
   /// Moves the rule at [oldIndex] to [newIndex] and renumbers the list `1..n`.
@@ -150,6 +165,10 @@ class RulesController extends AsyncNotifier<List<Rule>> {
       state = AsyncValue.data(previous);
       rethrow;
     }
+    // Which rule's logo a row shows follows priority.
+    if (renumbered.any((entry) => entry.logo != null)) {
+      await reloadLogoViews(ref);
+    }
   }
 
   /// Flips a rule's `enabled` flag, optimistically.
@@ -168,6 +187,8 @@ class RulesController extends AsyncNotifier<List<Rule>> {
       state = AsyncValue.data(previous);
       rethrow;
     }
+    // A disabled rule's logo leaves its rows.
+    if (_hasLogo(id)) await reloadLogoViews(ref);
   }
 
   /// Re-runs the rules over existing transactions and returns the count the
@@ -181,6 +202,9 @@ class RulesController extends AsyncNotifier<List<Rule>> {
     if (count > 0) await reloadRecategorizedViews(ref);
     return count;
   }
+
+  bool _hasLogo(String id) =>
+      state.value?.any((rule) => rule.id == id && rule.logo != null) ?? false;
 
   /// Priority order, as the backend lists them — kept locally so an optimistic
   /// insert lands where the next reload would put it.

@@ -9,7 +9,7 @@ import '../../../core/widgets/app_card.dart';
 import '../../../core/widgets/app_toast.dart';
 import '../../../core/widgets/category_chip.dart';
 import '../../../core/widgets/inline_banner.dart';
-import '../../../core/widgets/monogram_avatar.dart';
+import '../../../core/widgets/institution_avatar.dart';
 import '../../../core/widgets/state_views.dart';
 import '../../../core/widgets/status_pill.dart';
 import '../../../l10n/app_localizations.dart';
@@ -250,7 +250,7 @@ class _HeaderCard extends ConsumerWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          MonogramAvatar(name: series.label, size: 48),
+          InstitutionAvatar(name: series.label, size: 48, logo: series.logo),
           const SizedBox(width: AppSpacing.md),
           Expanded(
             child: Column(
