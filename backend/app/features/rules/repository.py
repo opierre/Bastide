@@ -1,9 +1,9 @@
 """Data access for `CategorizationRule` rows. The only place that queries this table."""
 
 from sqlalchemy import func, select
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, undefer
 
-from app.features.rules.models import CategorizationRule
+from app.features.rules.models import CategorizationRule, RuleLogo
 
 
 class RuleRepository:
@@ -72,3 +72,23 @@ class RuleRepository:
     def delete(self, rule: CategorizationRule) -> None:
         self._db.delete(rule)
         self._db.commit()
+
+    def get_logo(self, rule: CategorizationRule) -> RuleLogo | None:
+        """The rule's logo with its bytes, which listing rules leaves unloaded."""
+        return self._db.scalar(
+            select(RuleLogo).where(RuleLogo.rule_id == rule.id).options(undefer(RuleLogo.image))
+        )
+
+    def save_logo(self, rule: CategorizationRule, logo: RuleLogo) -> CategorizationRule:
+        """Give the rule this logo, replacing any earlier one."""
+        if rule.logo is None:
+            rule.logo = logo
+        else:
+            rule.logo.image = logo.image
+            rule.logo.content_type = logo.content_type
+            rule.logo.updated_at = logo.updated_at
+        return self.update(rule)
+
+    def delete_logo(self, rule: CategorizationRule) -> CategorizationRule:
+        rule.logo = None
+        return self.update(rule)

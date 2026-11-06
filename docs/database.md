@@ -224,6 +224,12 @@ erDiagram
         datetime updated_at
         bool archived
     }
+    rule_logos {
+        text rule_id PK, FK
+        blob image
+        text content_type
+        datetime updated_at
+    }
     transactions {
         text id PK
         text account_id FK
@@ -311,6 +317,7 @@ erDiagram
     accounts ||--o{ recurring_series : "account_id"
     categories |o--o{ recurring_series : "category_id"
     users ||--o{ recurring_series : "user_id"
+    categorization_rules ||--o{ rule_logos : "rule_id"
     accounts ||--o{ transactions : "account_id"
     categories |o--o{ transactions : "category_id"
     import_batches ||--o{ transactions : "import_batch_id"
@@ -366,6 +373,10 @@ erDiagram
 ### `recurring_series`
 
 - unique `(account_id, merchant_key)`
+
+### `rule_logos`
+
+- `rule_id` → `categorization_rules` on delete cascade
 
 ### `transactions`
 

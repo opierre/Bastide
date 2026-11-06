@@ -9,6 +9,7 @@ summary — and its only constraint is that the states it writes are states the 
 """
 
 from collections import Counter
+from collections.abc import Sequence
 from dataclasses import dataclass
 from datetime import date, timedelta
 from itertools import pairwise
@@ -530,6 +531,14 @@ class RecurringService:
         """
         series = self.get(user_id, series_id)
         return series, self._repository.list_occurrences(series.id)
+
+    def latest_charges(self, series: Sequence[RecurringSeries]) -> dict[str, Transaction]:
+        """The most recent charge of each of these series, keyed by series id.
+
+        What a rule reads to give a series its logo. Takes series already fetched for their
+        owner, so it is user-scoped through them.
+        """
+        return self._repository.latest_charges([s.id for s in series])
 
     def create(self, user_id: str, data: SeriesCreate) -> RecurringSeries:
         """Create a series from the charges the user ticked in a preview.

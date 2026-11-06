@@ -10,6 +10,8 @@ from app.core.db import get_db
 from app.features.auth.deps import get_current_user
 from app.features.auth.models import User
 from app.features.categories.repository import CategoryRepository
+from app.features.rules.deps import get_logo_resolver
+from app.features.rules.logos import RuleLogoResolver
 from app.features.transactions.models import Transaction
 from app.features.transactions.repository import TransactionRepository
 from app.features.transactions.schemas import (
@@ -30,8 +32,8 @@ def _service(db: Annotated[Session, Depends(get_db)]) -> TransactionService:
     )
 
 
-def _to_read(transaction: Transaction) -> TransactionRead:
-    return TransactionRead(
+def _to_read(transaction: Transaction, logos: RuleLogoResolver) -> TransactionRead:
+    read = TransactionRead(
         id=transaction.id,
         account_id=transaction.account_id,
         booked_date=transaction.booked_date,
@@ -56,11 +58,14 @@ def _to_read(transaction: Transaction) -> TransactionRead:
         created_at=transaction.created_at,
         updated_at=transaction.updated_at,
     )
+    logos.fill(read, read)
+    return read
 
 
 @router.get("", response_model=TransactionPage)
 async def list_transactions(
     service: Annotated[TransactionService, Depends(_service)],
+    logos: Annotated[RuleLogoResolver, Depends(get_logo_resolver)],
     user: Annotated[User, Depends(get_current_user)],
     account_id: str | None = None,
     from_: Annotated[date | None, Query(alias="from")] = None,
@@ -82,7 +87,7 @@ async def list_transactions(
         page=page,
     )
     return TransactionPage(
-        items=[_to_read(transaction) for transaction in items],
+        items=[_to_read(transaction, logos) for transaction in items],
         page=page,
         page_size=PAGE_SIZE,
         total=total,
@@ -93,10 +98,11 @@ async def list_transactions(
 async def get_transaction(
     transaction_id: str,
     service: Annotated[TransactionService, Depends(_service)],
+    logos: Annotated[RuleLogoResolver, Depends(get_logo_resolver)],
     user: Annotated[User, Depends(get_current_user)],
 ) -> TransactionRead:
     """Fetch a single transaction the caller owns."""
-    return _to_read(service.get(user.id, transaction_id))
+    return _to_read(service.get(user.id, transaction_id), logos)
 
 
 @router.patch("/{transaction_id}", response_model=TransactionRead)
@@ -104,7 +110,8 @@ async def update_transaction(
     transaction_id: str,
     payload: TransactionUpdate,
     service: Annotated[TransactionService, Depends(_service)],
+    logos: Annotated[RuleLogoResolver, Depends(get_logo_resolver)],
     user: Annotated[User, Depends(get_current_user)],
 ) -> TransactionRead:
     """Patch category/description/merchant. A category edit sets `source=user`."""
-    return _to_read(service.update(user.id, transaction_id, payload))
+    return _to_read(service.update(user.id, transaction_id, payload), logos)

@@ -81,6 +81,11 @@ class SeriesRead(BaseModel):
     #: Signed step in `expected_amount_minor`; a price *rise* on an outflow is negative.
     price_change_minor: int | None
     price_changed_at: date | None
+    #: The rule whose logo this series shows (`GET /rules/{id}/logo`); ``None`` shows the
+    #: monogram. The first enabled rule, by priority, that has a logo and matches its latest charge.
+    logo_rule_id: str | None = None
+    #: When that logo last changed, so a client can cache the picture by it.
+    logo_updated_at: datetime | None = None
     created_at: datetime
     updated_at: datetime
 

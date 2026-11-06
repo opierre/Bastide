@@ -1,25 +1,15 @@
-"""Turn an uploaded picture into the avatar the app stores: a square 256×256 PNG.
+"""Turn an uploaded picture into the avatar the app stores: a square 256×256 PNG."""
 
-Decoding and re-encoding the pixels, rather than keeping the uploaded bytes, is what drops
-every piece of metadata a photo carries (EXIF, GPS position, camera serial, ICC comments):
-only the pixels are written back.
-"""
-
-import io
-import warnings
 from http import HTTPStatus
 
-from PIL import Image, ImageOps, UnidentifiedImageError
-
+from app.core import images
 from app.core.errors import ValidationError
 
 AVATAR_SIZE = 256
-AVATAR_CONTENT_TYPE = "image/png"
-#: Largest upload accepted, in bytes. Phone photos sit well under it.
-MAX_UPLOAD_BYTES = 10 * 1024 * 1024
-#: Largest picture decoded, in pixels: guards against a small file that inflates hugely.
-MAX_PIXELS = 50_000_000
-ACCEPTED_FORMATS = frozenset({"PNG", "JPEG", "WEBP"})
+AVATAR_CONTENT_TYPE = images.PNG_CONTENT_TYPE
+MAX_UPLOAD_BYTES = images.MAX_UPLOAD_BYTES
+MAX_PIXELS = images.MAX_PIXELS
+ACCEPTED_FORMATS = images.ACCEPTED_FORMATS
 
 
 class AvatarTooLargeError(ValidationError):
@@ -42,31 +32,14 @@ def normalize_avatar(data: bytes) -> bytes:
         AvatarTooLargeError: the file or its pixel count is over the limit.
         AvatarInvalidImageError: the bytes aren't a PNG, JPEG or WebP picture.
     """
-    if len(data) > MAX_UPLOAD_BYTES:
-        raise _too_large()
-    try:
-        with warnings.catch_warnings():
-            # Pillow only warns between its limit and twice it; ours is the one that counts.
-            warnings.simplefilter("ignore", Image.DecompressionBombWarning)
-            with Image.open(io.BytesIO(data)) as image:
-                if image.format not in ACCEPTED_FORMATS:
-                    raise _invalid()
-                if image.width * image.height > MAX_PIXELS:
-                    raise _too_large()
-                # A phone photo is often stored sideways with an orientation tag: apply it
-                # before the tag goes, or the avatar comes out rotated.
-                upright = ImageOps.exif_transpose(image)
-                square = ImageOps.fit(
-                    upright.convert("RGBA"),
-                    (AVATAR_SIZE, AVATAR_SIZE),
-                    method=Image.Resampling.LANCZOS,
-                )
-    except (UnidentifiedImageError, Image.DecompressionBombError, OSError, ValueError) as exc:
-        raise _invalid() from exc
-
-    output = io.BytesIO()
-    square.save(output, format="PNG", optimize=True)
-    return output.getvalue()
+    return images.square_png(
+        data,
+        AVATAR_SIZE,
+        too_large=_too_large,
+        invalid=_invalid,
+        max_bytes=MAX_UPLOAD_BYTES,
+        max_pixels=MAX_PIXELS,
+    )
 
 
 def _too_large() -> AvatarTooLargeError:

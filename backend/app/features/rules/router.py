@@ -2,13 +2,15 @@
 
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, Query, status
+from fastapi import APIRouter, Depends, File, Header, Query, Response, UploadFile, status
 from sqlalchemy.orm import Session
 
 from app.core.db import get_db
 from app.features.auth.deps import get_current_user
 from app.features.auth.models import User
 from app.features.categories.repository import CategoryRepository
+from app.features.rules.deps import get_logo_resolver
+from app.features.rules.logos import MAX_UPLOAD_BYTES, RuleLogoResolver
 from app.features.rules.models import CategorizationRule
 from app.features.rules.packs.schema import (
     BuiltinPackRead,
@@ -68,6 +70,7 @@ def _to_read(rule: CategorizationRule) -> RuleRead:
         category_id=rule.category_id,
         enabled=rule.enabled,
         applies_from=rule.applies_from,
+        logo_updated_at=rule.logo.updated_at if rule.logo is not None else None,
         created_at=rule.created_at,
     )
 
@@ -110,13 +113,14 @@ async def suggest_rule_for_transaction(
 async def preview_rule(
     payload: RulePreviewRequest,
     service: Annotated[RuleService, Depends(_service)],
+    logos: Annotated[RuleLogoResolver, Depends(get_logo_resolver)],
     user: Annotated[User, Depends(get_current_user)],
 ) -> RulePreviewResult:
     """Count the transactions an unsaved rule would match, with up to three examples."""
     match_count, samples = service.preview(user.id, payload)
     return RulePreviewResult(
         match_count=match_count,
-        samples=[TransactionRead.model_validate(sample) for sample in samples],
+        samples=logos.fill_rows(TransactionRead.model_validate(sample) for sample in samples),
     )
 
 
@@ -152,6 +156,7 @@ async def list_builtin_packs(
 async def preview_pack(
     payload: RulePackSource,
     service: Annotated[RulePackService, Depends(_pack_service)],
+    logos: Annotated[RuleLogoResolver, Depends(get_logo_resolver)],
     user: Annotated[User, Depends(get_current_user)],
 ) -> RulePackPreviewResult:
     """Report what importing a pack would do, and how much of the backlog it would categorise."""
@@ -163,7 +168,9 @@ async def preview_pack(
         duplicate_count=preview.duplicate_count,
         unresolved=preview.unresolved,
         would_match_count=preview.would_match_count,
-        samples=[TransactionRead.model_validate(sample) for sample in preview.samples],
+        samples=logos.fill_rows(
+            TransactionRead.model_validate(sample) for sample in preview.samples
+        ),
     )
 
 
@@ -225,6 +232,53 @@ async def delete_rule(
 ) -> None:
     """Delete a rule."""
     service.delete(user.id, rule_id)
+
+
+@router.get(
+    "/{rule_id}/logo",
+    response_class=Response,
+    responses={200: {"content": {"image/png": {}}}, 304: {"description": "Not modified"}},
+)
+async def get_rule_logo(
+    rule_id: str,
+    service: Annotated[RuleService, Depends(_service)],
+    user: Annotated[User, Depends(get_current_user)],
+    if_none_match: Annotated[str | None, Header()] = None,
+) -> Response:
+    """Return a rule's logo, or 304 when the caller's cached copy is still current."""
+    logo = service.get_logo(user.id, rule_id)
+    etag = f'"{int(logo.updated_at.timestamp() * 1_000_000)}"'
+    # The app revalidates every time, so a replaced logo shows at once.
+    headers = {"ETag": etag, "Cache-Control": "no-cache"}
+    if if_none_match == etag:
+        return Response(status_code=status.HTTP_304_NOT_MODIFIED, headers=headers)
+    return Response(content=logo.image, media_type=logo.content_type, headers=headers)
+
+
+@router.put("/{rule_id}/logo", response_model=RuleRead)
+async def upload_rule_logo(
+    rule_id: str,
+    file: Annotated[UploadFile, File()],
+    service: Annotated[RuleService, Depends(_service)],
+    user: Annotated[User, Depends(get_current_user)],
+) -> RuleRead:
+    """Make an uploaded PNG, JPEG or WebP picture the rule's logo, replacing any earlier one.
+
+    The transactions and series the rule matches show it in place of their monogram.
+    """
+    # One byte over the cap is enough to know the file is too large, without reading it all.
+    data = await file.read(MAX_UPLOAD_BYTES + 1)
+    return _to_read(service.upload_logo(user.id, rule_id, data))
+
+
+@router.delete("/{rule_id}/logo", response_model=RuleRead)
+async def remove_rule_logo(
+    rule_id: str,
+    service: Annotated[RuleService, Depends(_service)],
+    user: Annotated[User, Depends(get_current_user)],
+) -> RuleRead:
+    """Drop the rule's logo; its rows show their monogram again."""
+    return _to_read(service.remove_logo(user.id, rule_id))
 
 
 @router.post("/apply", response_model=RuleApplyResult)
