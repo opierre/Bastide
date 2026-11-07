@@ -4,10 +4,22 @@ Normative contract: `docs/schemas/rule-pack.v1.schema.json`. These models are th
 enforcement of it, so keep the two in step.
 """
 
-from typing import Any, Literal, Self
+import base64
+import binascii
+from typing import Annotated, Any, Literal, Self
+from urllib.parse import urlsplit
 
-from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
+from pydantic import (
+    BaseModel,
+    ConfigDict,
+    Discriminator,
+    Field,
+    Tag,
+    field_validator,
+    model_validator,
+)
 
+from app.features.rules.logos import MAX_UPLOAD_BYTES
 from app.features.rules.schemas import MatchField
 from app.features.transactions.schemas import TransactionRead
 
@@ -29,6 +41,96 @@ CATEGORY_KEY_PATTERN = r"^category\.[a-z0-9_]+(\.[a-z0-9_]+)*$"
 #: importer chew through an unbounded rule set on every transaction thereafter.
 MAX_PACK_RULES = 1000
 
+#: Largest embedded logo, decoded: the same limit as a logo uploaded by hand.
+MAX_LOGO_BYTES = MAX_UPLOAD_BYTES
+
+#: Largest total of logo bytes one pack may bring, decoded: its embedded logos when the pack is
+#: validated, then embedded plus downloaded ones during an import. A normalized logo is a
+#: 256x256 PNG of a few dozen KB, so this fits hundreds of them while keeping a hostile pack
+#: from making the importer hold or fetch an unbounded amount of pictures.
+MAX_PACK_LOGO_BYTES = 20 * 1024 * 1024
+
+#: The one host a linked logo may point at. Anything else is refused when the pack is
+#: validated, so importing someone else's pack can never make this machine contact a server
+#: they chose.
+ALLOWED_LOGO_HOST = "upload.wikimedia.org"
+
+
+def is_allowed_logo_url(url: str) -> bool:
+    """Whether ``url`` is an `https://upload.wikimedia.org/...` link to a file.
+
+    The authority must be exactly the allowed host: no user info, no port, no other spelling
+    (backslash, whitespace, control character) a URL parser might read differently from the
+    HTTP client.
+    """
+    if not url.isascii() or any(ch.isspace() or not ch.isprintable() or ch == "\\" for ch in url):
+        return False
+    parts = urlsplit(url)
+    return parts.scheme == "https" and parts.netloc == ALLOWED_LOGO_HOST and len(parts.path) > 1
+
+
+def embedded_logo_size(data: str) -> int:
+    """The decoded size of a padded base64 string, without decoding it."""
+    return len(data) // 4 * 3 - (len(data) - len(data.rstrip("=")))
+
+
+class EmbeddedLogo(BaseModel):
+    """A logo carried inside the pack: a PNG, JPEG or WebP picture, base64-encoded."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    data: str = Field(min_length=4)
+
+    @field_validator("data")
+    @classmethod
+    def _valid_base64_within_cap(cls, value: str) -> str:
+        """Refuse a logo over `MAX_LOGO_BYTES` before decoding it, then refuse bad base64."""
+        if embedded_logo_size(value) > MAX_LOGO_BYTES:
+            raise ValueError(f"An embedded logo may not exceed {MAX_LOGO_BYTES} bytes.")
+        try:
+            base64.b64decode(value, validate=True)
+        except (binascii.Error, ValueError) as exc:
+            raise ValueError("An embedded logo must be standard, padded base64.") from exc
+        return value
+
+    def image(self) -> bytes:
+        """The picture's bytes, still to go through `normalize_logo`."""
+        return base64.b64decode(self.data, validate=True)
+
+
+class LinkedLogo(BaseModel):
+    """A logo the pack points at: a file on Wikimedia, with its licence and where it is from.
+
+    Downloaded only when the user asks for it at import (`download_logos`).
+    """
+
+    model_config = ConfigDict(extra="forbid")
+
+    url: str = Field(max_length=500)
+    license: str = Field(min_length=1, max_length=100)
+    source: str = Field(min_length=1, max_length=500)
+
+    @field_validator("url")
+    @classmethod
+    def _allowed_host(cls, value: str) -> str:
+        if not is_allowed_logo_url(value):
+            raise ValueError(f"A linked logo must be an https://{ALLOWED_LOGO_HOST}/ URL.")
+        return value
+
+
+def _logo_form(value: Any) -> str:
+    """Pick the logo form from its keys, so a refusal names the form the author meant."""
+    if isinstance(value, dict):
+        return "link" if "url" in value else "data"
+    return "link" if isinstance(value, LinkedLogo) else "data"
+
+
+#: A pack entry's logo: embedded (`{"data": ...}`) or linked (`{"url", "license", "source"}`).
+type PackLogo = Annotated[
+    Annotated[EmbeddedLogo, Tag("data")] | Annotated[LinkedLogo, Tag("link")],
+    Discriminator(_logo_form),
+]
+
 
 class RulePackEntry(BaseModel):
     """One rule in a pack: a match condition plus the system category key it assigns."""
@@ -41,6 +143,7 @@ class RulePackEntry(BaseModel):
     category_key: str = Field(max_length=100, pattern=CATEGORY_KEY_PATTERN)
     enabled: bool = True
     comment: str | None = Field(default=None, max_length=200)
+    logo: PackLogo | None = None
 
     @field_validator("type", mode="before")
     @classmethod
@@ -86,6 +189,20 @@ class RulePack(BaseModel):
             )
         return value
 
+    @model_validator(mode="after")
+    def _embedded_logos_within_cap(self) -> Self:
+        """Refuse a pack whose embedded logos add up to more than `MAX_PACK_LOGO_BYTES`."""
+        total = sum(
+            embedded_logo_size(rule.logo.data)
+            for rule in self.rules
+            if isinstance(rule.logo, EmbeddedLogo)
+        )
+        if total > MAX_PACK_LOGO_BYTES:
+            raise ValueError(
+                f"A rule pack's embedded logos may not exceed {MAX_PACK_LOGO_BYTES} bytes in all."
+            )
+        return self
+
 
 class RulePackSource(BaseModel):
     """Where a pack comes from: an uploaded document, or one of the bundled packs by id."""
@@ -101,9 +218,11 @@ class RulePackSource(BaseModel):
 
 
 class RulePackImportRequest(RulePackSource):
-    """A pack to import, and whether to re-run the rules over existing transactions after."""
+    """A pack to import, whether to re-run the rules after, and whether to fetch linked logos."""
 
     apply_now: bool = False
+    # Off by default: a linked logo is fetched from Wikimedia only when the user says so.
+    download_logos: bool = False
 
 
 class BuiltinPackRead(BaseModel):
@@ -125,6 +244,24 @@ class RulePackPreviewResult(BaseModel):
     unresolved: list[str]
     would_match_count: int
     samples: list[TransactionRead]
+    #: Logos the import would attach: on new rules, and on matching rules that have none yet.
+    logo_count: int
+    #: How many of those are links, attached only when the import downloads them.
+    logo_download_count: int
+
+
+#: Why a logo was not attached: not a PNG/JPEG/WebP picture, over a size cap, or its download
+#: failed (unreachable, timeout, error status, redirect off the allowed host).
+LogoFailureReason = Literal["invalid_image", "too_large", "download_failed"]
+
+
+class LogoFailureRead(BaseModel):
+    """A pack logo that could not be attached. Its rule was imported regardless."""
+
+    #: The entry's position in the pack's `rules`, from 0.
+    index: int
+    pattern: str
+    reason: LogoFailureReason
 
 
 class RulePackImportResult(BaseModel):
@@ -134,6 +271,11 @@ class RulePackImportResult(BaseModel):
     skipped_count: int
     unresolved: list[str]
     recategorized_count: int
+    #: Logos stored: on new rules, and on matching rules that had none.
+    logo_count: int
+    #: Linked logos left out because the import was not asked to download them.
+    logo_skipped_count: int
+    logo_failures: list[LogoFailureRead]
 
 
 #: Why a rule cannot round-trip: it uses `regex` (which no importer will accept), or it points
@@ -158,6 +300,13 @@ class RulePackExportResult(BaseModel):
 
     pack: RulePack
     omitted: list[OmittedRuleRead]
+    #: Logos embedded in `pack`, when the export was asked for them (`include_logos`).
+    logo_count: int
+    #: The decoded bytes those logos add up to, or would have when `logos_too_large`.
+    logo_bytes: int
+    #: The logos would take the pack over `MAX_PACK_LOGO_BYTES`, which import refuses, so
+    #: `pack` carries none of them (`logo_count` is 0) and its rules are exported regardless.
+    logos_too_large: bool
 
 
 #: The name an export carries when the caller supplies none. Deliberately untranslated: it ends

@@ -6,8 +6,11 @@ from a hand-written one the moment it lands, or the review queue and the rules e
 need to learn about packs.
 """
 
+import base64
 import json
+from collections.abc import Callable
 from dataclasses import dataclass
+from datetime import UTC, datetime
 from functools import lru_cache
 from pathlib import Path
 
@@ -17,17 +20,30 @@ from app.core.errors import NotFoundError, ValidationError
 from app.features.categories.models import Category
 from app.features.categories.repository import CategoryRepository
 from app.features.rules.engine import match_category
-from app.features.rules.models import CategorizationRule
+from app.features.rules.logos import (
+    LOGO_CONTENT_TYPE,
+    RuleLogoInvalidImageError,
+    RuleLogoTooLargeError,
+    normalize_logo,
+)
+from app.features.rules.models import CategorizationRule, RuleLogo
+from app.features.rules.packs.download import LogoDownloadError, LogoFetcher, LogoTooLargeError
 from app.features.rules.packs.resolve import ResolvedEntry, resolve_pack
 from app.features.rules.packs.schema import (
     DEFAULT_EXPORT_PACK_NAME,
+    MAX_PACK_LOGO_BYTES,
     SUPPORTED_FORMAT_VERSION,
     BuiltinPackRead,
+    EmbeddedLogo,
+    LinkedLogo,
+    LogoFailureRead,
+    LogoFailureReason,
     OmissionReason,
     OmittedRuleRead,
     RulePack,
     RulePackEntry,
     RulePackSource,
+    embedded_logo_size,
 )
 from app.features.rules.repository import RuleRepository
 from app.features.rules.service import PREVIEW_SAMPLE_LIMIT, RuleService
@@ -71,6 +87,8 @@ class PackPreview:
     unresolved: list[str]
     would_match_count: int
     samples: list[Transaction]
+    logo_count: int
+    logo_download_count: int
 
 
 @dataclass(frozen=True)
@@ -81,6 +99,9 @@ class PackImport:
     skipped_count: int
     unresolved: list[str]
     recategorized_count: int
+    logo_count: int
+    logo_skipped_count: int
+    logo_failures: list[LogoFailureRead]
 
 
 @dataclass(frozen=True)
@@ -89,6 +110,9 @@ class PackExport:
 
     pack: RulePack
     omitted: list[OmittedRuleRead]
+    logo_count: int = 0
+    logo_bytes: int = 0
+    logos_too_large: bool = False
 
 
 class RulePackService:
@@ -101,12 +125,16 @@ class RulePackService:
         transactions: TransactionRepository,
         rule_service: RuleService,
         db: Session,
+        logo_fetcher: LogoFetcher,
+        clock: Callable[[], datetime] = lambda: datetime.now(UTC),
     ) -> None:
         self._rules = rules
         self._categories = categories
         self._transactions = transactions
         self._rule_service = rule_service
         self._db = db
+        self._logo_fetcher = logo_fetcher
+        self._clock = clock
 
     # --- bundled packs ----------------------------------------------------------------------
 
@@ -168,11 +196,15 @@ class RulePackService:
             unresolved=plan.unresolved,
             would_match_count=would_match_count,
             samples=samples,
+            logo_count=len(plan.logos),
+            logo_download_count=sum(isinstance(p.logo, LinkedLogo) for p in plan.logos),
         )
 
     # --- import -----------------------------------------------------------------------------
 
-    def import_pack(self, user_id: str, pack: RulePack, apply_now: bool) -> PackImport:
+    async def import_pack(
+        self, user_id: str, pack: RulePack, apply_now: bool, download_logos: bool = False
+    ) -> PackImport:
         """Create one rule per resolvable, non-duplicate entry, in one DB transaction.
 
         All of them land or none do: a half-imported pack would leave the user with an arbitrary
@@ -182,10 +214,20 @@ class RulePackService:
         pack order), so an imported rule never preempts one the user ordered deliberately. With
         `apply_now`, the existing P1 apply path then re-runs, honouring its invariant that a row
         carrying `source='user'` is never overridden.
+
+        Logos land in the same transaction, each through `normalize_logo`: on the new rules, and
+        on a duplicate's matching rule only when it has none (an existing logo is never
+        replaced). Linked logos are downloaded only with `download_logos`, the whole list the
+        pack names. A logo that fails is reported and leaves its rule imported without it.
         """
         plan = self._plan(user_id, pack)
         rules = _candidate_rules(user_id, plan.creatable, self._rules.next_priority(user_id))
+        prepared = await self._prepare_logos(plan.logos, download_logos)
+        now = self._clock()
         try:
+            for planned, image in prepared.images:
+                target = planned.rule if planned.rule is not None else rules[planned.new_offset]
+                target.logo = RuleLogo(image=image, content_type=LOGO_CONTENT_TYPE, updated_at=now)
             for rule in rules:
                 self._rules.stage(rule)
             self._db.commit()
@@ -199,17 +241,80 @@ class RulePackService:
             skipped_count=plan.duplicate_count,
             unresolved=plan.unresolved,
             recategorized_count=recategorized_count,
+            logo_count=len(prepared.images),
+            logo_skipped_count=prepared.skipped_count,
+            logo_failures=prepared.failures,
         )
+
+    async def _prepare_logos(
+        self, planned_logos: list[_PlannedLogo], download_logos: bool
+    ) -> _PreparedLogos:
+        """Turn each planned logo into a normalized PNG, or a reported failure.
+
+        Downloads share what is left of `MAX_PACK_LOGO_BYTES` once the embedded logos (already
+        capped by the schema) are counted.
+        """
+        links = [p.logo.url for p in planned_logos if isinstance(p.logo, LinkedLogo)]
+        fetched: dict[str, bytes | LogoDownloadError] = {}
+        if download_logos and links:
+            embedded = sum(
+                embedded_logo_size(p.logo.data)
+                for p in planned_logos
+                if isinstance(p.logo, EmbeddedLogo)
+            )
+            fetched = await self._logo_fetcher.fetch_all(links, MAX_PACK_LOGO_BYTES - embedded)
+
+        images: list[tuple[_PlannedLogo, bytes]] = []
+        failures: list[LogoFailureRead] = []
+        skipped_count = 0
+        for planned in planned_logos:
+            reason: LogoFailureReason | None = None
+            if isinstance(planned.logo, LinkedLogo):
+                if not download_logos:
+                    skipped_count += 1
+                    continue
+                result = fetched.get(planned.logo.url, LogoDownloadError("Not fetched."))
+                if isinstance(result, LogoTooLargeError):
+                    reason = "too_large"
+                elif isinstance(result, LogoDownloadError):
+                    reason = "download_failed"
+                raw = result if isinstance(result, bytes) else b""
+            else:
+                raw = planned.logo.image()
+            if reason is None:
+                try:
+                    images.append((planned, normalize_logo(raw)))
+                except RuleLogoTooLargeError:
+                    reason = "too_large"
+                except RuleLogoInvalidImageError:
+                    reason = "invalid_image"
+            if reason is not None:
+                failures.append(
+                    LogoFailureRead(index=planned.index, pattern=planned.pattern, reason=reason)
+                )
+        return _PreparedLogos(images=images, failures=failures, skipped_count=skipped_count)
 
     # --- export -----------------------------------------------------------------------------
 
-    def export(self, user_id: str, locale: str, enabled_only: bool, name: str | None) -> PackExport:
+    def export(
+        self,
+        user_id: str,
+        locale: str,
+        enabled_only: bool,
+        name: str | None,
+        include_logos: bool = False,
+    ) -> PackExport:
         """Emit the caller's rules in pack format, resolving `category_id` back to its key.
 
         A rule pointing at a user-defined category has no key to emit, and a `regex` rule would
         be refused by the very importer this file targets. Both are omitted and reported rather
         than written out — a pack that fails its own import is worse than one that says what it
         left behind.
+
+        With `include_logos`, each exported rule that has a logo carries its stored PNG,
+        embedded. When those logos add up to more than `MAX_PACK_LOGO_BYTES` the pack carries
+        none of them and says so (`logos_too_large`): import would refuse the whole file, and
+        keeping an arbitrary subset would silently drop the rest.
         """
         rules = self._rules.list_by_user(user_id)
         if enabled_only:
@@ -219,7 +324,7 @@ class RulePackService:
             category.id: category for category in self._categories.list_for_user(user_id)
         }
 
-        entries: list[RulePackEntry] = []
+        exportable: list[tuple[CategorizationRule, Category]] = []
         omitted: list[OmittedRuleRead] = []
         for rule in rules:
             reason = _export_blocker(rule, by_id.get(rule.category_id))
@@ -228,17 +333,29 @@ class RulePackService:
                     OmittedRuleRead(rule_id=rule.id, pattern=rule.pattern, reason=reason)
                 )
                 continue
-            category = by_id[rule.category_id]
-            entries.append(
-                RulePackEntry(
-                    field=rule.match_field,  # ty: ignore[invalid-argument-type] — column is a
-                    # plain str; the literal is enforced on the way in by `RuleCreate`.
-                    type=rule.match_type,  # ty: ignore[invalid-argument-type] — same.
-                    pattern=rule.pattern,
-                    category_key=category.name,
-                    enabled=rule.enabled,
-                )
+            exportable.append((rule, by_id[rule.category_id]))
+
+        images: dict[str, bytes] = {}
+        if include_logos:
+            with_logo = [rule.id for rule, _ in exportable if rule.logo is not None]
+            images = self._rules.logo_images(user_id, with_logo)
+        logo_bytes = sum(len(image) for image in images.values())
+        logos_too_large = logo_bytes > MAX_PACK_LOGO_BYTES
+        if logos_too_large:
+            images = {}
+
+        entries = [
+            RulePackEntry(
+                field=rule.match_field,  # ty: ignore[invalid-argument-type] — column is a
+                # plain str; the literal is enforced on the way in by `RuleCreate`.
+                type=rule.match_type,  # ty: ignore[invalid-argument-type] — same.
+                pattern=rule.pattern,
+                category_key=category.name,
+                enabled=rule.enabled,
+                logo=_embed(images[rule.id]) if rule.id in images else None,
             )
+            for rule, category in exportable
+        ]
 
         pack = RulePack(
             format_version=SUPPORTED_FORMAT_VERSION,
@@ -246,7 +363,13 @@ class RulePackService:
             locale=locale if locale in _PACK_LOCALES else None,  # ty: ignore[invalid-argument-type]
             rules=entries,
         )
-        return PackExport(pack=pack, omitted=omitted)
+        return PackExport(
+            pack=pack,
+            omitted=omitted,
+            logo_count=len(images),
+            logo_bytes=logo_bytes,
+            logos_too_large=logos_too_large,
+        )
 
     # --- shared planning --------------------------------------------------------------------
 
@@ -256,25 +379,74 @@ class RulePackService:
         Deduplication runs against the user's existing rules *and* within the pack itself, so
         re-importing the same file creates nothing the second time and a pack that repeats
         itself does not repeat itself in the database either.
+
+        Each rule the import ends up with — new, or the user's own that a duplicate entry
+        matches — gets at most one logo: the first entry naming one, and none at all on an
+        existing rule that already has a logo.
         """
         resolution = resolve_pack(pack, self._categories, user_id)
 
-        seen: set[_DedupKey] = {_dedup_key(rule) for rule in self._rules.list_by_user(user_id)}
+        existing: dict[_DedupKey, CategorizationRule] = {}
+        for rule in self._rules.list_by_user(user_id):
+            existing.setdefault(_dedup_key(rule), rule)
+        new_offsets: dict[_DedupKey, int] = {}
         creatable: list[ResolvedEntry] = []
+        logos: list[_PlannedLogo] = []
+        with_logo: set[_DedupKey] = set()
         duplicate_count = 0
         for resolved in resolution.resolved:
             key = _entry_dedup_key(resolved)
-            if key in seen:
+            if key in existing or key in new_offsets:
                 duplicate_count += 1
+            else:
+                new_offsets[key] = len(creatable)
+                creatable.append(resolved)
+
+            logo = resolved.entry.logo
+            if logo is None or key in with_logo:
                 continue
-            seen.add(key)
-            creatable.append(resolved)
+            existing_rule = existing.get(key)
+            if existing_rule is not None and existing_rule.logo is not None:
+                continue
+            with_logo.add(key)
+            logos.append(
+                _PlannedLogo(
+                    index=resolved.index,
+                    pattern=resolved.entry.pattern,
+                    logo=logo,
+                    rule=existing_rule,
+                    new_offset=new_offsets.get(key, 0),
+                )
+            )
 
         return _ImportPlan(
             creatable=creatable,
             duplicate_count=duplicate_count,
             unresolved=resolution.unresolved,
+            logos=logos,
         )
+
+
+@dataclass(frozen=True)
+class _PlannedLogo:
+    """A pack logo and the rule it goes on: one of the user's (`rule`) or a new one."""
+
+    index: int
+    pattern: str
+    logo: EmbeddedLogo | LinkedLogo
+    #: The user's existing rule, which has no logo yet; `None` for a rule the import creates.
+    rule: CategorizationRule | None
+    #: The new rule's position among the import's created rules, when `rule` is `None`.
+    new_offset: int
+
+
+@dataclass(frozen=True)
+class _PreparedLogos:
+    """The planned logos once fetched and normalized, and the ones that did not make it."""
+
+    images: list[tuple[_PlannedLogo, bytes]]
+    failures: list[LogoFailureRead]
+    skipped_count: int
 
 
 @dataclass(frozen=True)
@@ -284,6 +456,7 @@ class _ImportPlan:
     creatable: list[ResolvedEntry]
     duplicate_count: int
     unresolved: list[str]
+    logos: list[_PlannedLogo]
 
 
 def _dedup_key(rule: CategorizationRule) -> _DedupKey:
@@ -319,6 +492,11 @@ def _candidate_rules(
         )
         for offset, resolved in enumerate(entries)
     ]
+
+
+def _embed(image: bytes) -> EmbeddedLogo:
+    """A stored logo as the pack carries it: standard, padded base64."""
+    return EmbeddedLogo(data=base64.b64encode(image).decode("ascii"))
 
 
 def _export_blocker(rule: CategorizationRule, category: Category | None) -> OmissionReason | None:
