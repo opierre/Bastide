@@ -13,10 +13,11 @@ from app.features.rules.packs.schema import RulePack, RulePackEntry
 
 @dataclass(frozen=True)
 class ResolvedEntry:
-    """A pack entry paired with the category id it will write."""
+    """A pack entry paired with the category id it will write, and its position in the pack."""
 
     entry: RulePackEntry
     category_id: str
+    index: int
 
 
 @dataclass(frozen=True)
@@ -50,11 +51,11 @@ def resolve_pack(pack: RulePack, categories: CategoryRepository, user_id: str) -
 
     resolved: list[ResolvedEntry] = []
     unresolved: list[str] = []
-    for entry in pack.rules:
+    for index, entry in enumerate(pack.rules):
         category_id = by_key.get(entry.category_key)
         if category_id is None:
             if entry.category_key not in unresolved:
                 unresolved.append(entry.category_key)
             continue
-        resolved.append(ResolvedEntry(entry=entry, category_id=category_id))
+        resolved.append(ResolvedEntry(entry=entry, category_id=category_id, index=index))
     return Resolution(resolved=resolved, unresolved=unresolved)

@@ -8,6 +8,7 @@ from sqlalchemy import select
 
 from app.core.seed import SYSTEM_CATEGORIES
 from app.features.rules.models import CategorizationRule
+from app.features.rules.packs.schema import LinkedLogo, is_allowed_logo_url
 from app.features.rules.packs.service import _load_builtin_packs
 from app.features.rules.repository import RuleRepository
 from tests.db import open_session
@@ -148,6 +149,9 @@ def test_importing_the_same_pack_twice_creates_nothing_the_second_time(client: T
         "skipped_count": 2,
         "unresolved": [],
         "recategorized_count": 0,
+        "logo_count": 0,
+        "logo_skipped_count": 0,
+        "logo_failures": [],
     }
     assert len(_rules(client, headers)) == 2
 
@@ -397,6 +401,31 @@ def test_every_bundled_pack_key_is_in_the_seed_catalog() -> None:
     keys = {rule.category_key for rule in _load_builtin_packs()[BUILTIN_ID].rules}
 
     assert keys <= seeded
+
+
+def test_every_bundled_pack_logo_is_a_licensed_wikimedia_link() -> None:
+    """The bundled pack ships no picture: each logo is a Commons link with its licence."""
+    # Loading validates the pack through the same models as an uploaded one.
+    rules = _load_builtin_packs()[BUILTIN_ID].rules
+    logos = [rule.logo for rule in rules if rule.logo is not None]
+
+    assert logos
+    for logo in logos:
+        assert isinstance(logo, LinkedLogo)
+        assert is_allowed_logo_url(logo.url)
+        assert logo.license.strip()
+        assert logo.source.startswith("https://commons.wikimedia.org/wiki/File:")
+
+
+def test_the_bundled_pack_skips_its_logos_unless_asked_to_download(client: TestClient) -> None:
+    headers, _ = _register(client)
+    linked = sum(rule.logo is not None for rule in _load_builtin_packs()[BUILTIN_ID].rules)
+
+    _, body = import_pack(client, headers, builtin_id=BUILTIN_ID)
+
+    assert body["logo_count"] == 0
+    assert body["logo_skipped_count"] == linked
+    assert body["logo_failures"] == []
 
 
 def test_the_bundled_pack_imports_and_applies(client: TestClient, tmp_path: Path) -> None:
