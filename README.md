@@ -93,6 +93,7 @@ flowchart LR
 | [`docs/api.md`](docs/api.md) | Every endpoint, **generated** from the OpenAPI schema |
 | [`docs/install.md`](docs/install.md) | Installing, updating and uninstalling the app, where the data lives ([fr](docs/install.fr.md)) |
 | [`docs/development.md`](docs/development.md) | Setup, running, CI checks, and working with coding agents |
+| [`docs/logo-packs.md`](docs/logo-packs.md) | Building and sharing a rule pack with logos, and adding logo links to `fr-common` |
 | [`docs/design/`](docs/design/) | The binding design system and one spec per panel |
 | [`.claude/skills/`](.claude/skills/) | Area-by-area rules for coding agents (database, testing, i18n, …) |
 
