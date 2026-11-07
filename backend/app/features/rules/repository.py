@@ -79,6 +79,17 @@ class RuleRepository:
             select(RuleLogo).where(RuleLogo.rule_id == rule.id).options(undefer(RuleLogo.image))
         )
 
+    def logo_images(self, user_id: str, rule_ids: list[str]) -> dict[str, bytes]:
+        """The stored PNG of each of these rules that has a logo, by rule id, in one query."""
+        if not rule_ids:
+            return {}
+        rows = self._db.execute(
+            select(RuleLogo.rule_id, RuleLogo.image)
+            .join(CategorizationRule, CategorizationRule.id == RuleLogo.rule_id)
+            .where(CategorizationRule.user_id == user_id, RuleLogo.rule_id.in_(rule_ids))
+        )
+        return {rule_id: image for rule_id, image in rows.tuples()}
+
     def save_logo(self, rule: CategorizationRule, logo: RuleLogo) -> CategorizationRule:
         """Give the rule this logo, replacing any earlier one."""
         if rule.logo is None:

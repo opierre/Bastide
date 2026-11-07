@@ -1633,6 +1633,75 @@ class AppLocalizationsEn extends AppLocalizations {
       'You\'ll see what the pack would do before importing it.';
 
   @override
+  String get rulePackRulesLabel => 'Rules in the pack';
+
+  @override
+  String get rulePackLogoCount => 'Logos to add';
+
+  @override
+  String rulePackLogoDownload(int count) {
+    return 'Download the logos ($count)';
+  }
+
+  @override
+  String get rulePackLogoDownloadHelper =>
+      'These logos come from Wikimedia Commons and are downloaded only if you tick the box.';
+
+  @override
+  String rulePackLogoFailuresTitle(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count logos couldn\'t be added',
+      one: 'One logo couldn\'t be added',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get rulePackLogoFailuresNotice =>
+      'The rules were imported: only these logos were left out.';
+
+  @override
+  String rulePackLogoFailureInvalidImage(String pattern) {
+    return '“$pattern” — the file isn\'t a PNG, JPEG or WebP picture.';
+  }
+
+  @override
+  String rulePackLogoFailureTooLarge(String pattern) {
+    return '“$pattern” — the picture is over the size limit.';
+  }
+
+  @override
+  String rulePackLogoFailureDownloadFailed(String pattern) {
+    return '“$pattern” — the download failed.';
+  }
+
+  @override
+  String get rulePackExportIncludeLogos => 'Include the logos';
+
+  @override
+  String rulePackExportLogoCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count logos included.',
+      one: '$count logo included.',
+      zero: 'No rule has a logo to include.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get rulePackExportLogosTooLarge =>
+      'The logos were left out: the pack would be too large to import. All the rules are exported, without their logos.';
+
+  @override
+  String rulePackExportLogoElided(int kilobytes) {
+    return '‹ $kilobytes KB picture ›';
+  }
+
+  @override
   String reviewQueueAiSubtitle(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,

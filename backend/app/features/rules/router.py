@@ -12,6 +12,7 @@ from app.features.categories.repository import CategoryRepository
 from app.features.rules.deps import get_logo_resolver
 from app.features.rules.logos import MAX_UPLOAD_BYTES, RuleLogoResolver
 from app.features.rules.models import CategorizationRule
+from app.features.rules.packs.download import LogoFetcher, get_logo_fetcher
 from app.features.rules.packs.schema import (
     BuiltinPackRead,
     RulePackExportResult,
@@ -50,13 +51,17 @@ def _service(db: Annotated[Session, Depends(get_db)]) -> RuleService:
     )
 
 
-def _pack_service(db: Annotated[Session, Depends(get_db)]) -> RulePackService:
+def _pack_service(
+    db: Annotated[Session, Depends(get_db)],
+    logo_fetcher: Annotated[LogoFetcher, Depends(get_logo_fetcher)],
+) -> RulePackService:
     return RulePackService(
         RuleRepository(db),
         CategoryRepository(db),
         TransactionRepository(db),
         _service(db),
         db,
+        logo_fetcher,
     )
 
 
@@ -168,6 +173,8 @@ async def preview_pack(
         duplicate_count=preview.duplicate_count,
         unresolved=preview.unresolved,
         would_match_count=preview.would_match_count,
+        logo_count=preview.logo_count,
+        logo_download_count=preview.logo_download_count,
         samples=logos.fill_rows(
             TransactionRead.model_validate(sample) for sample in preview.samples
         ),
@@ -180,21 +187,34 @@ async def import_pack(
     service: Annotated[RulePackService, Depends(_pack_service)],
     user: Annotated[User, Depends(get_current_user)],
 ) -> RulePackImportResult:
-    """Import a pack's resolvable, non-duplicate rules, optionally re-applying them after."""
-    result = service.import_pack(user.id, service.load_source(payload), payload.apply_now)
+    """Import a pack's resolvable, non-duplicate rules and their logos.
+
+    Optionally re-applies the rules after; linked logos are downloaded only with
+    `download_logos`. A logo that fails is reported and never blocks its rule.
+    """
+    result = await service.import_pack(
+        user.id, service.load_source(payload), payload.apply_now, payload.download_logos
+    )
     return RulePackImportResult(
         created_count=result.created_count,
         skipped_count=result.skipped_count,
         unresolved=result.unresolved,
         recategorized_count=result.recategorized_count,
+        logo_count=result.logo_count,
+        logo_skipped_count=result.logo_skipped_count,
+        logo_failures=result.logo_failures,
     )
 
 
-@router.get("/packs/export", response_model=RulePackExportResult)
+@router.get("/packs/export", response_model=RulePackExportResult, response_model_exclude_none=True)
 async def export_pack(
     service: Annotated[RulePackService, Depends(_pack_service)],
     user: Annotated[User, Depends(get_current_user)],
     enabled_only: bool = False,
+    include_logos: Annotated[
+        bool,
+        Query(description="Embed each exported rule's logo, as its stored PNG."),
+    ] = False,
     name: Annotated[
         str | None,
         Query(
@@ -207,10 +227,19 @@ async def export_pack(
     """Return the caller's rules as a pack for review, plus the ones it could not carry.
 
     A body, not a download: a pattern can hold personal detail, so the user sees the file's
-    contents before it becomes a file.
+    contents before it becomes a file. Unset optional fields are left out rather than sent as
+    null, which `docs/schemas/rule-pack.v1.schema.json` does not admit. When the
+    logos asked for would exceed the per-pack cap, the pack carries none and `logos_too_large`
+    says so.
     """
-    result = service.export(user.id, user.locale, enabled_only, name)
-    return RulePackExportResult(pack=result.pack, omitted=result.omitted)
+    result = service.export(user.id, user.locale, enabled_only, name, include_logos)
+    return RulePackExportResult(
+        pack=result.pack,
+        omitted=result.omitted,
+        logo_count=result.logo_count,
+        logo_bytes=result.logo_bytes,
+        logos_too_large=result.logos_too_large,
+    )
 
 
 @router.patch("/{rule_id}", response_model=RuleRead)

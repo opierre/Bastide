@@ -148,6 +148,9 @@ def test_importing_the_same_pack_twice_creates_nothing_the_second_time(client: T
         "skipped_count": 2,
         "unresolved": [],
         "recategorized_count": 0,
+        "logo_count": 0,
+        "logo_skipped_count": 0,
+        "logo_failures": [],
     }
     assert len(_rules(client, headers)) == 2
 
