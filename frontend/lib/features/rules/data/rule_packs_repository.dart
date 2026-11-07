@@ -35,11 +35,16 @@ class RulePacksRepository {
     RulePack? pack,
     String? builtinId,
     bool applyNow = false,
+    bool downloadLogos = false,
   }) async {
     final json =
         await _apiClient.post(
               '/rules/packs/import',
-              body: {..._source(pack, builtinId), 'apply_now': applyNow},
+              body: {
+                ..._source(pack, builtinId),
+                'apply_now': applyNow,
+                'download_logos': downloadLogos,
+              },
             )
             as Map<String, dynamic>;
     return RulePackImportResult.fromJson(json);
@@ -51,11 +56,16 @@ class RulePacksRepository {
   Future<RulePackExport> export({
     bool enabledOnly = false,
     String? name,
+    bool includeLogos = false,
   }) async {
     final json =
         await _apiClient.get(
               '/rules/packs/export',
-              query: {'enabled_only': '$enabledOnly', 'name': ?name},
+              query: {
+                'enabled_only': '$enabledOnly',
+                'name': ?name,
+                'include_logos': '$includeLogos',
+              },
             )
             as Map<String, dynamic>;
     return RulePackExport.fromJson(json);

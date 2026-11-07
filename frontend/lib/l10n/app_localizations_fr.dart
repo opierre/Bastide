@@ -1646,6 +1646,75 @@ class AppLocalizationsFr extends AppLocalizations {
       'Vous verrez ce que le pack ferait avant de l\'importer.';
 
   @override
+  String get rulePackRulesLabel => 'Règles du pack';
+
+  @override
+  String get rulePackLogoCount => 'Logos à ajouter';
+
+  @override
+  String rulePackLogoDownload(int count) {
+    return 'Télécharger les logos ($count)';
+  }
+
+  @override
+  String get rulePackLogoDownloadHelper =>
+      'Ces logos viennent de Wikimedia Commons et ne sont téléchargés que si vous cochez la case.';
+
+  @override
+  String rulePackLogoFailuresTitle(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count logos n\'ont pas pu être ajoutés',
+      one: 'Un logo n\'a pas pu être ajouté',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get rulePackLogoFailuresNotice =>
+      'Les règles ont bien été importées : seuls ces logos n\'ont pas été ajoutés.';
+
+  @override
+  String rulePackLogoFailureInvalidImage(String pattern) {
+    return '« $pattern » — le fichier n\'est pas une image PNG, JPEG ou WebP.';
+  }
+
+  @override
+  String rulePackLogoFailureTooLarge(String pattern) {
+    return '« $pattern » — l\'image dépasse la taille autorisée.';
+  }
+
+  @override
+  String rulePackLogoFailureDownloadFailed(String pattern) {
+    return '« $pattern » — le téléchargement a échoué.';
+  }
+
+  @override
+  String get rulePackExportIncludeLogos => 'Inclure les logos';
+
+  @override
+  String rulePackExportLogoCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count logos inclus.',
+      one: '$count logo inclus.',
+      zero: 'Aucune règle n\'a de logo à inclure.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get rulePackExportLogosTooLarge =>
+      'Les logos n\'ont pas été inclus : le pack serait trop volumineux pour être importé. Toutes les règles sont exportées, sans leurs logos.';
+
+  @override
+  String rulePackExportLogoElided(int kilobytes) {
+    return '‹ image de $kilobytes Ko ›';
+  }
+
+  @override
   String reviewQueueAiSubtitle(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,

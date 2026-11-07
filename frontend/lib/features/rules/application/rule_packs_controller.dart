@@ -110,9 +110,13 @@ class RulePacksController extends Notifier<void> {
   /// rules at once and renumbers nothing, so the server's ordering is the only
   /// truthful one to show next. An import that also applied the pack has
   /// rewritten categories across the app, so those views are reloaded too.
+  ///
+  /// [downloadLogos] lets the backend fetch the pack's linked logos from
+  /// Wikimedia; off, only embedded logos are attached and nothing is fetched.
   Future<RulePackImportResult> import(
     PendingRulePack pending, {
     bool applyNow = false,
+    bool downloadLogos = false,
   }) async {
     final result = await ref
         .read(rulePacksRepositoryProvider)
@@ -120,20 +124,27 @@ class RulePacksController extends Notifier<void> {
           pack: pending.pack,
           builtinId: pending.builtinId,
           applyNow: applyNow,
+          downloadLogos: downloadLogos,
         );
     ref.invalidate(rulesControllerProvider);
     if (result.recategorizedCount > 0) await reloadRecategorizedViews(ref);
     return result;
   }
 
-  /// Builds the pack the user will review before saving.
+  /// Builds the pack the user will review before saving, with each rule's
+  /// logo embedded when [includeLogos].
   Future<RulePackExport> prepareExport({
     bool enabledOnly = false,
     String? name,
+    bool includeLogos = false,
   }) {
     return ref
         .read(rulePacksRepositoryProvider)
-        .export(enabledOnly: enabledOnly, name: name);
+        .export(
+          enabledOnly: enabledOnly,
+          name: name,
+          includeLogos: includeLogos,
+        );
   }
 
   /// Writes a reviewed pack to disk. Returns the path, or `null` on cancel.

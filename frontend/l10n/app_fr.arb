@@ -2062,6 +2062,96 @@
   "@rulePackStartWithHelper": {
     "description": "Reassurance under the bundled-pack CTA: the preview step always comes first."
   },
+  "rulePackRulesLabel": "Règles du pack",
+  "@rulePackRulesLabel": {
+    "description": "Section label over the list of a pack's rules on the import sheet, each with its logo or monogram."
+  },
+  "rulePackLogoCount": "Logos à ajouter",
+  "@rulePackLogoCount": {
+    "description": "Import report line: how many logos the import would attach."
+  },
+  "rulePackLogoDownload": "Télécharger les logos ({count})",
+  "@rulePackLogoDownload": {
+    "description": "Checkbox on the import sheet, off by default: also download the logos the pack links to.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "rulePackLogoDownloadHelper": "Ces logos viennent de Wikimedia Commons et ne sont téléchargés que si vous cochez la case.",
+  "@rulePackLogoDownloadHelper": {
+    "description": "Line under the logo download checkbox saying where linked logos come from."
+  },
+  "rulePackLogoFailuresTitle": "{count, plural, one{Un logo n'a pas pu être ajouté} other{{count} logos n'ont pas pu être ajoutés}}",
+  "@rulePackLogoFailuresTitle": {
+    "description": "Title of the dialog listing the pack logos an import could not attach.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "rulePackLogoFailuresNotice": "Les règles ont bien été importées : seuls ces logos n'ont pas été ajoutés.",
+  "@rulePackLogoFailuresNotice": {
+    "description": "Reassurance at the top of the logo failures dialog: the import itself succeeded."
+  },
+  "rulePackLogoFailureInvalidImage": "« {pattern} » — le fichier n'est pas une image PNG, JPEG ou WebP.",
+  "@rulePackLogoFailureInvalidImage": {
+    "description": "A logo that failed because it is not a supported picture, named by its rule's pattern.",
+    "placeholders": {
+      "pattern": {
+        "type": "String",
+        "example": "CARREFOUR"
+      }
+    }
+  },
+  "rulePackLogoFailureTooLarge": "« {pattern} » — l'image dépasse la taille autorisée.",
+  "@rulePackLogoFailureTooLarge": {
+    "description": "A logo that failed because it is too large, named by its rule's pattern.",
+    "placeholders": {
+      "pattern": {
+        "type": "String",
+        "example": "CARREFOUR"
+      }
+    }
+  },
+  "rulePackLogoFailureDownloadFailed": "« {pattern} » — le téléchargement a échoué.",
+  "@rulePackLogoFailureDownloadFailed": {
+    "description": "A linked logo that could not be downloaded, named by its rule's pattern.",
+    "placeholders": {
+      "pattern": {
+        "type": "String",
+        "example": "CARREFOUR"
+      }
+    }
+  },
+  "rulePackExportIncludeLogos": "Inclure les logos",
+  "@rulePackExportIncludeLogos": {
+    "description": "Toggle on the export sheet: embed each rule's logo in the pack."
+  },
+  "rulePackExportLogoCount": "{count, plural, =0{Aucune règle n'a de logo à inclure.} one{{count} logo inclus.} other{{count} logos inclus.}}",
+  "@rulePackExportLogoCount": {
+    "description": "Under the include-logos toggle: how many logos the export embeds.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "rulePackExportLogosTooLarge": "Les logos n'ont pas été inclus : le pack serait trop volumineux pour être importé. Toutes les règles sont exportées, sans leurs logos.",
+  "@rulePackExportLogosTooLarge": {
+    "description": "Warning on the export sheet when the logos would take the pack over the size an import accepts."
+  },
+  "rulePackExportLogoElided": "‹ image de {kilobytes} Ko ›",
+  "@rulePackExportLogoElided": {
+    "description": "Stand-in shown in the export preview instead of an embedded logo's base64; the saved file keeps the picture.",
+    "placeholders": {
+      "kilobytes": {
+        "type": "int"
+      }
+    }
+  },
   "reviewQueueAiSubtitle": "{count, plural, =0{Aucune de ces transactions n'a reçu de proposition de l'IA locale — confirmez ou corrigez, rien n'est classé sans vous.} one{L'IA locale propose une catégorie pour l'une d'entre elles — confirmez ou corrigez, rien n'est classé sans vous.} other{L'IA locale propose une catégorie pour {count} d'entre elles — confirmez ou corrigez, rien n'est classé sans vous.}}",
   "@reviewQueueAiSubtitle": {
     "description": "Subtext on the review queue's header card when local AI is active, counting the rows it proposed a category for.",

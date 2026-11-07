@@ -5,6 +5,7 @@ import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/tokens.dart';
 import '../../../core/widgets/app_modal.dart';
 import '../../../core/widgets/app_toast.dart';
+import '../../../core/widgets/app_toggle.dart';
 import '../../../core/widgets/inline_banner.dart';
 import '../../../core/widgets/primary_button.dart';
 import '../../../l10n/app_localizations.dart';
@@ -53,8 +54,42 @@ class RulePackExportSheet extends ConsumerStatefulWidget {
 }
 
 class _RulePackExportSheetState extends ConsumerState<RulePackExportSheet> {
+  late RulePackExport _export = widget.export;
+  bool _includeLogos = false;
+  bool _isRefreshing = false;
   bool _isSaving = false;
   String? _errorText;
+
+  /// Rebuilds the export with or without logos. The pack is the backend's to
+  /// assemble — it alone knows each rule's stored logo and the size cap — so
+  /// toggling re-asks rather than patching the pack here.
+  Future<void> _setIncludeLogos(bool value) async {
+    final l10n = AppLocalizations.of(context)!;
+    setState(() {
+      _includeLogos = value;
+      _isRefreshing = true;
+      _errorText = null;
+    });
+    try {
+      final export = await ref
+          .read(rulePacksControllerProvider.notifier)
+          .prepareExport(includeLogos: value);
+      if (!mounted) return;
+      setState(() {
+        _export = export;
+        _isRefreshing = false;
+      });
+    } catch (error) {
+      if (!mounted) return;
+      setState(() {
+        // The sheet still shows the previous pack, so the toggle goes back to
+        // the state that pack was built with.
+        _includeLogos = !value;
+        _isRefreshing = false;
+        _errorText = localizeRuleError(l10n, error);
+      });
+    }
+  }
 
   Future<void> _save() async {
     final l10n = AppLocalizations.of(context)!;
@@ -65,7 +100,7 @@ class _RulePackExportSheetState extends ConsumerState<RulePackExportSheet> {
     try {
       final path = await ref
           .read(rulePacksControllerProvider.notifier)
-          .saveExport(widget.export.pack);
+          .saveExport(_export.pack);
       if (!mounted) return;
       if (path == null) {
         setState(() => _isSaving = false);
@@ -85,22 +120,23 @@ class _RulePackExportSheetState extends ConsumerState<RulePackExportSheet> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final pack = widget.export.pack;
-    final omitted = widget.export.omitted;
+    final pack = _export.pack;
+    final omitted = _export.omitted;
+    final isBusy = _isSaving || _isRefreshing;
 
     return AppModal(
       title: l10n.rulePackExportTitle,
       width: 520,
       actions: [
         OutlinedButton(
-          onPressed: _isSaving ? null : () => Navigator.of(context).pop(),
+          onPressed: isBusy ? null : () => Navigator.of(context).pop(),
           child: Text(l10n.rulePackCancel),
         ),
         PrimaryButton(
           key: const Key('rulePackExportSave'),
           label: l10n.rulePackExportSave,
           isLoading: _isSaving,
-          onPressed: _isSaving ? null : _save,
+          onPressed: isBusy ? null : _save,
         ),
       ],
       child: Column(
@@ -118,6 +154,39 @@ class _RulePackExportSheetState extends ConsumerState<RulePackExportSheet> {
             tone: BannerTone.warning,
             message: l10n.rulePackExportPrivacyNotice,
           ),
+          const SizedBox(height: AppSpacing.md),
+          Row(
+            children: [
+              AppToggle(
+                key: const Key('rulePackExportIncludeLogos'),
+                value: _includeLogos,
+                semanticLabel: l10n.rulePackExportIncludeLogos,
+                onChanged: isBusy ? null : _setIncludeLogos,
+              ),
+              const SizedBox(width: AppSpacing.sm + AppSpacing.xs),
+              Expanded(
+                child: Text(
+                  l10n.rulePackExportIncludeLogos,
+                  style: Theme.of(context).textTheme.bodyMedium,
+                ),
+              ),
+            ],
+          ),
+          if (_includeLogos && !_isRefreshing) ...[
+            const SizedBox(height: AppSpacing.sm),
+            if (_export.logosTooLarge)
+              InlineBanner(
+                key: const Key('rulePackExportLogosTooLarge'),
+                tone: BannerTone.warning,
+                message: l10n.rulePackExportLogosTooLarge,
+              )
+            else
+              Text(
+                l10n.rulePackExportLogoCount(_export.logoCount),
+                key: const Key('rulePackExportLogoCount'),
+                style: AppTextStyles.helper,
+              ),
+          ],
           const SizedBox(height: AppSpacing.md),
           Text(
             l10n.rulePackExportContents(pack.rules.length),
@@ -137,7 +206,14 @@ class _RulePackExportSheetState extends ConsumerState<RulePackExportSheet> {
             ),
             child: SingleChildScrollView(
               child: SelectableText(
-                pack.toPrettyJson(),
+                // Each embedded logo stands in as its size: the picture is
+                // still in the saved file, but its base64 is nothing a reader
+                // can review, and tens of kilobytes of it per rule would bury
+                // the patterns this step is for.
+                pack.toPrettyJson(
+                  elideLogo: (bytes) =>
+                      l10n.rulePackExportLogoElided((bytes / 1024).ceil()),
+                ),
                 style: AppTextStyles.mono,
               ),
             ),
