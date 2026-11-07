@@ -12,6 +12,7 @@ from app.features.categories.repository import CategoryRepository
 from app.features.rules.deps import get_logo_resolver
 from app.features.rules.logos import MAX_UPLOAD_BYTES, RuleLogoResolver
 from app.features.rules.models import CategorizationRule
+from app.features.rules.packs.download import LogoFetcher, get_logo_fetcher
 from app.features.rules.packs.schema import (
     BuiltinPackRead,
     RulePackExportResult,
@@ -50,13 +51,17 @@ def _service(db: Annotated[Session, Depends(get_db)]) -> RuleService:
     )
 
 
-def _pack_service(db: Annotated[Session, Depends(get_db)]) -> RulePackService:
+def _pack_service(
+    db: Annotated[Session, Depends(get_db)],
+    logo_fetcher: Annotated[LogoFetcher, Depends(get_logo_fetcher)],
+) -> RulePackService:
     return RulePackService(
         RuleRepository(db),
         CategoryRepository(db),
         TransactionRepository(db),
         _service(db),
         db,
+        logo_fetcher,
     )
 
 
@@ -168,6 +173,8 @@ async def preview_pack(
         duplicate_count=preview.duplicate_count,
         unresolved=preview.unresolved,
         would_match_count=preview.would_match_count,
+        logo_count=preview.logo_count,
+        logo_download_count=preview.logo_download_count,
         samples=logos.fill_rows(
             TransactionRead.model_validate(sample) for sample in preview.samples
         ),
@@ -180,13 +187,22 @@ async def import_pack(
     service: Annotated[RulePackService, Depends(_pack_service)],
     user: Annotated[User, Depends(get_current_user)],
 ) -> RulePackImportResult:
-    """Import a pack's resolvable, non-duplicate rules, optionally re-applying them after."""
-    result = service.import_pack(user.id, service.load_source(payload), payload.apply_now)
+    """Import a pack's resolvable, non-duplicate rules and their logos.
+
+    Optionally re-applies the rules after; linked logos are downloaded only with
+    `download_logos`. A logo that fails is reported and never blocks its rule.
+    """
+    result = await service.import_pack(
+        user.id, service.load_source(payload), payload.apply_now, payload.download_logos
+    )
     return RulePackImportResult(
         created_count=result.created_count,
         skipped_count=result.skipped_count,
         unresolved=result.unresolved,
         recategorized_count=result.recategorized_count,
+        logo_count=result.logo_count,
+        logo_skipped_count=result.logo_skipped_count,
+        logo_failures=result.logo_failures,
     )
 
 
