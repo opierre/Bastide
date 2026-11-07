@@ -25,7 +25,9 @@ The picture travels inside the pack. Use it for packs you share as files.
 - The picture must be a PNG, JPEG or WebP. SVG is not accepted.
 - At most 10 MiB per logo, decoded, and at most 20 MiB of logos per pack.
 
-An export that includes logos produces this form.
+An export with logos (`GET /rules/packs/export?include_logos=true`) produces this form, embedding
+each rule's stored 256x256 PNG. If those logos would exceed the 20 MiB per-pack cap, the export
+returns every rule without logos and sets `logos_too_large`.
 
 ### Linked: `{ "url", "license", "source" }`
 
