@@ -1,5 +1,7 @@
 import 'package:flutter/foundation.dart';
 
+import '../../../core/logos/logo_ref.dart';
+
 /// Mirrors the backend's `categorization_source` literal (`schemas.py`).
 enum CategorizationSource {
   rule,
@@ -72,6 +74,7 @@ class Transaction {
     required this.fitid,
     required this.dedupHash,
     this.recurringSeriesId,
+    this.logo,
     required this.createdAt,
     required this.updatedAt,
   });
@@ -99,6 +102,9 @@ class Transaction {
   /// The recurring series this transaction is an occurrence of, `null` when it
   /// belongs to none.
   final String? recurringSeriesId;
+
+  /// The rule logo the chip shows instead of the monogram; `null` for none.
+  final LogoRef? logo;
   final DateTime createdAt;
   final DateTime updatedAt;
 
@@ -138,6 +144,7 @@ class Transaction {
       fitid: fitid,
       dedupHash: dedupHash,
       recurringSeriesId: recurringSeriesId,
+      logo: logo,
       createdAt: createdAt,
       updatedAt: updatedAt,
     );
@@ -164,6 +171,7 @@ class Transaction {
           other.fitid == fitid &&
           other.dedupHash == dedupHash &&
           other.recurringSeriesId == recurringSeriesId &&
+          other.logo == logo &&
           other.createdAt == createdAt &&
           other.updatedAt == updatedAt);
 
@@ -183,7 +191,14 @@ class Transaction {
     categorizationSource,
     categorizationConfidence,
     needsReview,
-    Object.hash(fitid, dedupHash, recurringSeriesId, createdAt, updatedAt),
+    Object.hash(
+      fitid,
+      dedupHash,
+      recurringSeriesId,
+      logo,
+      createdAt,
+      updatedAt,
+    ),
   );
 }
 

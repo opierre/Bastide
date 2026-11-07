@@ -5,7 +5,7 @@ import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/tokens.dart';
 import '../../../core/widgets/amount_text.dart';
 import '../../../core/widgets/category_chip.dart';
-import '../../../core/widgets/monogram_avatar.dart';
+import '../../../core/widgets/institution_avatar.dart';
 import '../../../core/widgets/status_pill.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../categories/domain/category.dart';
@@ -148,9 +148,10 @@ class _SeriesRowState extends State<SeriesRow> {
           opacity: isSettled ? 0.55 : 1,
           child: seriesRowLayout(
             monogram: Center(
-              child: MonogramAvatar(
+              child: InstitutionAvatar(
                 name: series.label,
                 size: SeriesColumns.monogram,
+                logo: series.logo,
               ),
             ),
             name: GestureDetector(

@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
@@ -65,6 +67,25 @@ class RulesRepository {
   }
 
   Future<void> delete(String id) => _apiClient.delete('/rules/$id');
+
+  /// Makes [png] the rule's logo, replacing any earlier one. The backend
+  /// re-encodes it and refuses a file too large or of the wrong type
+  /// (`RULE_LOGO_TOO_LARGE`, `RULE_LOGO_INVALID_IMAGE`).
+  Future<Rule> uploadLogo(String id, Uint8List png) async {
+    final json = await _apiClient.putMultipart(
+      '/rules/$id/logo',
+      fileField: 'file',
+      fileName: 'logo.png',
+      fileBytes: png,
+    );
+    return Rule.fromJson(json as Map<String, dynamic>);
+  }
+
+  /// Drops the rule's logo; its rows show their monogram again.
+  Future<Rule> removeLogo(String id) async {
+    final json = await _apiClient.delete('/rules/$id/logo');
+    return Rule.fromJson(json as Map<String, dynamic>);
+  }
 
   /// Re-runs the enabled rules over existing transactions, returning how many
   /// they actually recategorized. Rows the user categorized by hand are never
