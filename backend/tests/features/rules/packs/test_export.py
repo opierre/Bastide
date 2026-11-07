@@ -55,8 +55,6 @@ def test_export_emits_a_pack_in_rule_order(client: TestClient) -> None:
             "pattern": "CARREFOUR",
             "category_key": GROCERIES,
             "enabled": True,
-            "comment": None,
-            "logo": None,
         },
         {
             "field": "description_clean",
@@ -64,8 +62,6 @@ def test_export_emits_a_pack_in_rule_order(client: TestClient) -> None:
             "pattern": "SNCF",
             "category_key": TRANSIT,
             "enabled": True,
-            "comment": None,
-            "logo": None,
         },
     ]
 
@@ -82,8 +78,6 @@ def test_export_carries_no_ids_or_priorities(client: TestClient) -> None:
         "pattern",
         "category_key",
         "enabled",
-        "comment",
-        "logo",
     }
     assert "user_id" not in body["pack"]
 

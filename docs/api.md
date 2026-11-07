@@ -82,7 +82,7 @@ details?}}`. Model names refer to the Pydantic schemas in `backend/app/features/
 | `GET` | `/rules/packs/builtin` |  |  | 200 [`BuiltinPackRead`] |
 | `POST` | `/rules/packs/preview` |  | `RulePackSource` | 200 `RulePackPreviewResult` |
 | `POST` | `/rules/packs/import` |  | `RulePackImportRequest` | 200 `RulePackImportResult` |
-| `GET` | `/rules/packs/export` | `enabled_only`, `name` |  | 200 `RulePackExportResult` |
+| `GET` | `/rules/packs/export` | `enabled_only`, `include_logos`, `name` |  | 200 `RulePackExportResult` |
 | `PATCH` | `/rules/{rule_id}` |  | `RuleUpdate` | 200 `RuleRead` |
 | `DELETE` | `/rules/{rule_id}` |  |  | 204 |
 | `GET` | `/rules/{rule_id}/logo` |  |  | 200 |
