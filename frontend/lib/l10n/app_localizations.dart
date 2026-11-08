@@ -2857,6 +2857,84 @@ abstract class AppLocalizations {
   /// **'Vous verrez ce que le pack ferait avant de l\'importer.'**
   String get rulePackStartWithHelper;
 
+  /// Section label over the list of a pack's rules on the import sheet, each with its logo or monogram.
+  ///
+  /// In fr, this message translates to:
+  /// **'Règles du pack'**
+  String get rulePackRulesLabel;
+
+  /// Import report line: how many logos the import would attach.
+  ///
+  /// In fr, this message translates to:
+  /// **'Logos à ajouter'**
+  String get rulePackLogoCount;
+
+  /// Checkbox on the import sheet, off by default: also download the logos the pack links to.
+  ///
+  /// In fr, this message translates to:
+  /// **'Télécharger les logos ({count})'**
+  String rulePackLogoDownload(int count);
+
+  /// Line under the logo download checkbox saying where linked logos come from.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ces logos viennent de Wikimedia Commons et ne sont téléchargés que si vous cochez la case.'**
+  String get rulePackLogoDownloadHelper;
+
+  /// Title of the dialog listing the pack logos an import could not attach.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, one{Un logo n\'a pas pu être ajouté} other{{count} logos n\'ont pas pu être ajoutés}}'**
+  String rulePackLogoFailuresTitle(int count);
+
+  /// Reassurance at the top of the logo failures dialog: the import itself succeeded.
+  ///
+  /// In fr, this message translates to:
+  /// **'Les règles ont bien été importées : seuls ces logos n\'ont pas été ajoutés.'**
+  String get rulePackLogoFailuresNotice;
+
+  /// A logo that failed because it is not a supported picture, named by its rule's pattern.
+  ///
+  /// In fr, this message translates to:
+  /// **'« {pattern} » — le fichier n\'est pas une image PNG, JPEG ou WebP.'**
+  String rulePackLogoFailureInvalidImage(String pattern);
+
+  /// A logo that failed because it is too large, named by its rule's pattern.
+  ///
+  /// In fr, this message translates to:
+  /// **'« {pattern} » — l\'image dépasse la taille autorisée.'**
+  String rulePackLogoFailureTooLarge(String pattern);
+
+  /// A linked logo that could not be downloaded, named by its rule's pattern.
+  ///
+  /// In fr, this message translates to:
+  /// **'« {pattern} » — le téléchargement a échoué.'**
+  String rulePackLogoFailureDownloadFailed(String pattern);
+
+  /// Toggle on the export sheet: embed each rule's logo in the pack.
+  ///
+  /// In fr, this message translates to:
+  /// **'Inclure les logos'**
+  String get rulePackExportIncludeLogos;
+
+  /// Under the include-logos toggle: how many logos the export embeds.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, =0{Aucune règle n\'a de logo à inclure.} one{{count} logo inclus.} other{{count} logos inclus.}}'**
+  String rulePackExportLogoCount(int count);
+
+  /// Warning on the export sheet when the logos would take the pack over the size an import accepts.
+  ///
+  /// In fr, this message translates to:
+  /// **'Les logos n\'ont pas été inclus : le pack serait trop volumineux pour être importé. Toutes les règles sont exportées, sans leurs logos.'**
+  String get rulePackExportLogosTooLarge;
+
+  /// Stand-in shown in the export preview instead of an embedded logo's base64; the saved file keeps the picture.
+  ///
+  /// In fr, this message translates to:
+  /// **'‹ image de {kilobytes} Ko ›'**
+  String rulePackExportLogoElided(int kilobytes);
+
   /// Subtext on the review queue's header card when local AI is active, counting the rows it proposed a category for.
   ///
   /// In fr, this message translates to:

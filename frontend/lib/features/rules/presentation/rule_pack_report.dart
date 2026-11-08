@@ -10,7 +10,9 @@ import '../domain/rule_pack.dart';
 /// import will skip, and which category keys this install cannot resolve.
 ///
 /// All four figures are shown even when they are zero. « 0 doublon » is an
-/// answer; a missing line is a question.
+/// answer; a missing line is a question. The logo line is the exception: it
+/// only appears for a pack that brings logos, since most packs carry none and
+/// « 0 logo » there would answer a question nobody asked.
 class RulePackReport extends StatelessWidget {
   const RulePackReport({super.key, required this.preview});
 
@@ -33,6 +35,12 @@ class RulePackReport extends StatelessWidget {
           label: l10n.rulePackUnresolvedCount,
           value: '${preview.unresolved.length}',
         ),
+        if (preview.logoCount > 0)
+          _ReportLine(
+            key: const Key('rulePackLogoCount'),
+            label: l10n.rulePackLogoCount,
+            value: '${preview.logoCount}',
+          ),
         if (preview.unresolved.isNotEmpty) ...[
           const SizedBox(height: AppSpacing.sm),
           Text(
@@ -61,7 +69,7 @@ class RulePackReport extends StatelessWidget {
 }
 
 class _ReportLine extends StatelessWidget {
-  const _ReportLine({required this.label, required this.value});
+  const _ReportLine({super.key, required this.label, required this.value});
 
   final String label;
   final String value;
