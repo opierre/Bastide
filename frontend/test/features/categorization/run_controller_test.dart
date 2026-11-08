@@ -309,6 +309,20 @@ void main() {
     verifyNever(() => apiClient.get(any()));
   });
 
+  test('the progress stream ending on logout is taken quietly', () async {
+    startsWith(_runJson(status: 'running', processed: 40));
+    keepAlive();
+    await container.read(runControllerProvider.notifier).start();
+
+    // The shared client is replaced on logout and ends its watchers' streams.
+    await updates.close();
+    await Future<void>.delayed(Duration.zero);
+
+    expect(read().run?.processedCount, 40);
+    expect(read().error, isNull);
+    verifyNever(() => apiClient.get(any()));
+  });
+
   test('disposing the panel drops the subscription', () async {
     startsWith(_runJson(status: 'running'));
     final subscription = container.listen(runControllerProvider, (_, _) {});

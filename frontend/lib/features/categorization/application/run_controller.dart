@@ -178,7 +178,9 @@ class RunController extends Notifier<RunState> {
     _progress = ref
         .read(runProgressClientProvider)
         .watch(runId)
-        .listen(_onUpdate);
+        // The stream ends when the shared client is replaced (logout, new
+        // session, backend restart): forget it so a later start watches anew.
+        .listen(_onUpdate, onDone: () => _progress = null);
   }
 
   void _unwatch() {

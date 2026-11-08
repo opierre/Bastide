@@ -21,7 +21,7 @@ void main() {
     client = RunProgressClient(
       baseUrl: Uri.parse('http://127.0.0.1:52144/api/v1'),
       sessionToken: 'session-abc',
-      tokenProvider: () => 'bearer-xyz',
+      bearerToken: 'bearer-xyz',
       backoff: (_) => Duration.zero,
       connector: (url, headers) async {
         urlsSeen.add(url);
@@ -168,6 +168,45 @@ void main() {
 
     expect((updates.single as RunConnectionLost).unauthenticated, isTrue);
     expect(sockets, hasLength(1));
+    await sub.cancel();
+  });
+
+  test('a refused token stays refused for later watchers', () async {
+    final first = client.watch('run-1').listen((_) {});
+    await settle();
+    await sockets.single.serverClose(4401);
+    await settle();
+    await first.cancel();
+
+    final updates = <RunUpdate>[];
+    final second = client.watch('run-2').listen(updates.add);
+    await settle();
+    await settle();
+
+    expect((updates.single as RunConnectionLost).unauthenticated, isTrue);
+    expect(sockets, hasLength(1));
+    await second.cancel();
+  });
+
+  test('never connects without a bearer token', () async {
+    final signedOut = RunProgressClient(
+      baseUrl: Uri.parse('http://127.0.0.1:52144/api/v1'),
+      sessionToken: 'session-abc',
+      backoff: (_) => Duration.zero,
+      connector: (url, headers) async {
+        urlsSeen.add(url);
+        return FakeRunSocket();
+      },
+    );
+    addTearDown(signedOut.dispose);
+
+    final updates = <RunUpdate>[];
+    final sub = signedOut.watch('run-1').listen(updates.add);
+    await settle();
+    await settle();
+
+    expect((updates.single as RunConnectionLost).unauthenticated, isTrue);
+    expect(urlsSeen, isEmpty);
     await sub.cancel();
   });
 

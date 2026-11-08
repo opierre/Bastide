@@ -163,8 +163,9 @@ final class RunResync extends RunUpdate {
 /// The socket could not connect, or dropped. The client is already retrying
 /// with backoff; meanwhile events may be missed, so a watcher that must not
 /// stall can re-read the run's REST snapshot. [unauthenticated] is set when
-/// the backend refused the bearer token (close code 4401): the client then
-/// stops retrying until a new watcher subscribes.
+/// the client has no usable bearer token — signed out, or refused by the
+/// backend (close code 4401, e.g. after a logout): that client never retries,
+/// and the next login brings a new one.
 final class RunConnectionLost extends RunUpdate {
   const RunConnectionLost({this.unauthenticated = false});
 

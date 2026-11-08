@@ -29,16 +29,22 @@ Duration defaultRunSocketBackoff(int attempt) {
 /// while no run is on screen. It reconnects on its own with backoff; every
 /// (re)connection starts with the server's snapshot, which each watcher gets
 /// as a [RunResync] — the moment to catch up on whatever was missed.
+///
+/// One client belongs to one session: its bearer token is fixed for its
+/// lifetime, and the provider replaces the whole client when the session
+/// changes (login, logout), so nothing from one session reaches the next.
 class RunProgressClient {
   RunProgressClient({
     required Uri baseUrl,
     this.sessionToken,
-    this.tokenProvider,
+    this.bearerToken,
     RunSocketConnector? connector,
     Duration Function(int attempt)? backoff,
   }) : url = _socketUrl(baseUrl),
        _connector = connector ?? connectIoRunSocket,
-       _backoff = backoff ?? defaultRunSocketBackoff;
+       _backoff = backoff ?? defaultRunSocketBackoff,
+       // Signed out: the backend would only refuse the socket, so never open it.
+       _halted = bearerToken == null;
 
   /// `ws://127.0.0.1:<port>/api/v1/runs/ws`, from the REST API root.
   final Uri url;
@@ -46,9 +52,9 @@ class RunProgressClient {
   /// Sent as `X-Bastide-Session`, as on every REST request.
   final String? sessionToken;
 
-  /// The current bearer token, read at every connection attempt so a socket
-  /// opened after a login carries the new one.
-  final String? Function()? tokenProvider;
+  /// The session's bearer token; `null` when signed out, in which case the
+  /// client never connects.
+  final String? bearerToken;
 
   final RunSocketConnector _connector;
   final Duration Function(int attempt) _backoff;
@@ -72,15 +78,19 @@ class RunProgressClient {
   /// The server has sent this connection's snapshot.
   bool _synced = false;
 
-  /// The backend refused the bearer token; retrying with the same one is
-  /// pointless until a new watcher (likely after a new login) asks again.
-  bool _halted = false;
+  /// No usable bearer token: none to begin with, or the backend refused it
+  /// (close code 4401, e.g. right after a logout). Final for this client —
+  /// retrying the same token is pointless, and a new login builds a new
+  /// client.
+  bool _halted;
   int _attempt = 0;
   bool _disposed = false;
 
   /// Follows one run. Emits a [RunResync] on every (re)connection — right away
   /// when the socket is already up — then a [RunEventUpdate] per event of that
-  /// run, and a [RunConnectionLost] whenever the socket fails or drops.
+  /// run, and a [RunConnectionLost] whenever the socket fails or drops. On a
+  /// client without a usable token, it emits a single unauthenticated
+  /// [RunConnectionLost] and nothing else.
   ///
   /// The stream never closes on its own (except when the client is disposed):
   /// cancel the subscription once the run is over.
@@ -91,8 +101,8 @@ class RunProgressClient {
         if (_disposed) return;
         _watchers.add(watcher);
         if (_halted) {
-          _halted = false;
-          _attempt = 0;
+          watcher.add(const RunConnectionLost(unauthenticated: true));
+          return;
         }
         if (_synced) watcher.add(RunResync(_known(runId)));
         _ensureConnected();
@@ -121,10 +131,9 @@ class RunProgressClient {
   RunEvent? _known(String runId) => _active[runId] ?? _ended[runId];
 
   Map<String, String> _headers() {
-    final token = tokenProvider?.call();
     return {
       sessionTokenHeader: ?sessionToken,
-      if (token != null) 'Authorization': 'Bearer $token',
+      if (bearerToken case final token?) 'Authorization': 'Bearer $token',
     };
   }
 
@@ -218,12 +227,16 @@ class RunProgressClient {
     _socket = null;
     _socketSubscription = null;
     _synced = false;
-    if (_disposed || _watchers.isEmpty) return;
     if (socket.closeCode == runSocketUnauthenticatedCode) {
+      // The token is dead (the backend ends a logged-out session's socket
+      // with 4401): no backoff, no retry, on this client ever again.
       _halted = true;
-      _broadcast(const RunConnectionLost(unauthenticated: true));
+      if (!_disposed) {
+        _broadcast(const RunConnectionLost(unauthenticated: true));
+      }
       return;
     }
+    if (_disposed || _watchers.isEmpty) return;
     _onFailure();
   }
 
