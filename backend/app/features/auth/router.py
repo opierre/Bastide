@@ -6,6 +6,7 @@ from fastapi import APIRouter, Depends, File, Header, Response, UploadFile, stat
 from sqlalchemy.orm import Session
 
 from app.core.db import get_db
+from app.core.live_sessions import LiveSessions, get_live_sessions
 from app.features.auth.avatar import MAX_UPLOAD_BYTES
 from app.features.auth.deps import bearer_token, get_current_user
 from app.features.auth.models import User
@@ -29,8 +30,11 @@ from app.features.auth.service import AuthService
 router = APIRouter(prefix="/api/v1/auth", tags=["auth"])
 
 
-def _service(db: Annotated[Session, Depends(get_db)]) -> AuthService:
-    return AuthService(AuthRepository(db))
+def _service(
+    db: Annotated[Session, Depends(get_db)],
+    live_sessions: Annotated[LiveSessions, Depends(get_live_sessions)],
+) -> AuthService:
+    return AuthService(AuthRepository(db), live_sessions=live_sessions)
 
 
 @router.post("/register", response_model=RegisterResponse, status_code=status.HTTP_201_CREATED)

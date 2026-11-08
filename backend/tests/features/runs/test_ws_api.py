@@ -11,10 +11,11 @@ from fastapi.testclient import TestClient
 from starlette.websockets import WebSocketDisconnect
 
 from app.core.db import SessionFactory
+from app.core.live_sessions import LiveSessions, get_live_sessions
 from app.core.progress import ProgressBus, RunEvent, RunEventType, get_progress_bus
 from app.core.session import SESSION_TOKEN_HEADER, SessionTokenMiddleware
 from app.core.websocket import CLOSE_POLICY_VIOLATION, CLOSE_UNAUTHENTICATED
-from tests.api import register_user
+from tests.api import PASSWORD, register_user
 from tests.features.categorization.conftest import (
     RunLauncherSpy,
     StubRuntime,
@@ -32,6 +33,23 @@ def bus(client: TestClient) -> ProgressBus:
     fresh = ProgressBus()
     cast(FastAPI, client.app).dependency_overrides[get_progress_bus] = lambda: fresh
     return fresh
+
+
+@pytest.fixture
+def live_sessions(client: TestClient) -> LiveSessions:
+    """A fresh registry per test, shared by the socket and the auth routes revoking sessions."""
+    fresh = LiveSessions()
+    cast(FastAPI, client.app).dependency_overrides[get_live_sessions] = lambda: fresh
+    return fresh
+
+
+def _login(client: TestClient, identifier: str) -> dict[str, str]:
+    """Open another session of an existing user."""
+    response = client.post(
+        "/api/v1/auth/login", json={"identifier": identifier, "password": PASSWORD}
+    )
+    assert response.status_code == 200, response.json()
+    return {"Authorization": f"Bearer {response.json()['token']}"}
 
 
 def _event(run_id: str, event: RunEventType, done: int = 0) -> RunEvent:
@@ -129,6 +147,81 @@ def test_disconnecting_removes_the_subscriber(client: TestClient, bus: ProgressB
         _wait_for(lambda: bus.subscriber_count(user.user_id) == 1)
 
     _wait_for(lambda: bus.subscriber_count() == 0)
+
+
+def test_logging_out_closes_that_sessions_socket_only(
+    client: TestClient, bus: ProgressBus, live_sessions: LiveSessions
+) -> None:
+    user = register_user(client)
+    laptop = _login(client, "amelie@example.com")
+
+    with (
+        client.websocket_connect(WS, headers=user.headers) as leaving,
+        client.websocket_connect(WS, headers=laptop) as staying,
+    ):
+        leaving.receive_json()
+        staying.receive_json()
+        _wait_for(lambda: live_sessions.count(user.user_id) == 2)
+
+        assert client.post("/api/v1/auth/logout", headers=user.headers).status_code == 204
+
+        with pytest.raises(WebSocketDisconnect) as closed:
+            leaving.receive_json()
+        assert closed.value.code == CLOSE_UNAUTHENTICATED
+        assert closed.value.reason == "Not authenticated"
+
+        # The other session's socket keeps streaming.
+        bus.publish(user.user_id, _event("run-1", "started"))
+        assert staying.receive_json()["event"]["run_id"] == "run-1"
+        assert live_sessions.count(user.user_id) == 1
+
+    _wait_for(lambda: bus.subscriber_count() == 0 and live_sessions.count() == 0)
+
+
+def test_a_password_reset_closes_every_socket_of_the_user(
+    client: TestClient, bus: ProgressBus, live_sessions: LiveSessions
+) -> None:
+    registered = client.post(
+        "/api/v1/auth/register",
+        json={
+            "email": "amelie@example.com",
+            "password": PASSWORD,
+            "display_name": "amelie",
+            "locale": "fr",
+            "currency": "eur",
+        },
+    ).json()
+    first = {"Authorization": f"Bearer {registered['token']}"}
+    second = _login(client, "amelie")
+    other = register_user(client, "bruno@example.com")
+
+    with (
+        client.websocket_connect(WS, headers=first) as one,
+        client.websocket_connect(WS, headers=second) as two,
+        client.websocket_connect(WS, headers=other.headers) as theirs,
+    ):
+        for socket in (one, two, theirs):
+            socket.receive_json()
+        _wait_for(lambda: live_sessions.count() == 3)
+
+        reset = client.post(
+            "/api/v1/auth/password-reset",
+            json={
+                "identifier": "amelie",
+                "recovery_code": registered["recovery_code"],
+                "new_password": "a-brand-new-passphrase",
+            },
+        )
+        assert reset.status_code == 200, reset.json()
+
+        for socket in (one, two):
+            with pytest.raises(WebSocketDisconnect) as closed:
+                socket.receive_json()
+            assert closed.value.code == CLOSE_UNAUTHENTICATED
+
+        # Another user's socket is untouched.
+        bus.publish(other.user_id, _event("run-theirs", "started"))
+        assert theirs.receive_json()["event"]["run_id"] == "run-theirs"
 
 
 def test_a_categorization_run_streams_its_progress_end_to_end(
