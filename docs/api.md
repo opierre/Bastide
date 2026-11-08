@@ -221,3 +221,46 @@ details?}}`. Model names refer to the Pydantic schemas in `backend/app/features/
 | `GET` | `/networth/declared` |  |  | 200 [`DeclaredBalanceRead`] |
 | `PUT` | `/networth/declared/{month}` |  | `DeclaredBalanceWrite` | 200 `DeclaredBalanceRead` |
 | `DELETE` | `/networth/declared/{month}` |  |  | 204 |
+
+## websockets
+
+Authenticated on connect with the same headers as the REST API. A socket without a
+valid bearer token is accepted, then closed with code `4401`; one without the session
+token is refused at the handshake.
+
+| Path | Sends | Summary |
+|------|-------|---------|
+| `/runs/ws` | `RunSnapshotMessage`, `RunEventMessage` | Stream the caller's run events: a `RunSnapshotMessage`, then one `RunEventMessage` each. |
+
+### `RunEvent`
+
+One step of one run, as a subscriber receives it. ``done``/``total`` are the run's own unit of work (rows for a categorisation run, logos for a pack import). ``counts`` carries kind-specific tallies — `assigned`/`deferred`/`failed` for a categorisation run — so a client can render more than a bar without the bus knowing what they mean.
+
+| Field | Type | Required |
+|-------|------|----------|
+| `run_id` | `string` | yes |
+| `kind` | `"categorization"` | yes |
+| `event` | `"started"` \| `"progress"` \| `"finished"` \| `"failed"` \| `"cancelled"` | yes |
+| `done` | `integer` | yes |
+| `total` | `integer` | yes |
+| `counts` | {string: `integer`} | yes |
+| `error_message` | `string` \| `null` | yes |
+| `occurred_at` | `datetime` | yes |
+
+### `RunSnapshotMessage`
+
+First message on every connection: the latest event of each of the user's active runs.
+
+| Field | Type | Required |
+|-------|------|----------|
+| `type` | `"snapshot"` | yes |
+| `runs` | [`RunEvent`] | yes |
+
+### `RunEventMessage`
+
+Every later message: one run event, in the order the run published it.
+
+| Field | Type | Required |
+|-------|------|----------|
+| `type` | `"event"` | yes |
+| `event` | `RunEvent` | yes |
