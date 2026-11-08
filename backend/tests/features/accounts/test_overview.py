@@ -355,3 +355,23 @@ def test_a_strangers_account_lists_nothing_with_its_cards(pinned: TestClient) ->
 
     assert body["items"] == []
     assert body["total"] == 0
+
+
+def test_a_card_listed_with_the_flag_keeps_to_its_own_rows(pinned: TestClient) -> None:
+    headers, _, card = _setup(pinned)
+
+    body = _list(pinned, headers, card, include_linked_cards=True)
+
+    # A card settles no card of its own: picking it in the filter shows just the card.
+    assert body["total"] == 4
+    assert {row["account_id"] for row in body["items"]} == {card}
+
+
+def test_the_flag_still_narrows_with_the_other_filters(pinned: TestClient) -> None:
+    headers, checking, card = _setup(pinned)
+
+    body = _list(pinned, headers, checking, include_linked_cards=True, q="CAFE DU PORT")
+
+    assert body["total"] >= 1
+    assert {row["account_id"] for row in body["items"]} == {card}
+    assert all(row["description_clean"] == "CAFE DU PORT" for row in body["items"])
