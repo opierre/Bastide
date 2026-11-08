@@ -16,6 +16,7 @@ import '../application/rule_preview_controller.dart';
 import '../application/rules_controller.dart';
 import '../domain/rule.dart';
 import 'rule_error_localizer.dart';
+import 'rule_logo_field.dart';
 import 'rule_labels.dart';
 import 'rule_match_preview_banner.dart';
 
@@ -308,6 +309,11 @@ class _RuleEditorModalState extends ConsumerState<RuleEditorModal> {
                     ),
                 ],
               ),
+            ),
+            const SizedBox(height: AppSpacing.md),
+            RuleLogoField(
+              ruleId: widget.initial?.id,
+              name: widget.initial?.pattern ?? '',
             ),
             const SizedBox(height: AppSpacing.md),
             Row(
