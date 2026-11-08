@@ -14,6 +14,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy.sql.dml import Insert
 
 from app.core.db import Base
+from app.features.accounts.linked_cards import in_account
 from app.features.accounts.models import Account
 from app.features.categorization.models import CategorizationRun
 from app.features.categorization.schemas import RunScope
@@ -34,7 +35,12 @@ class CategorizationRunRepository:
         self._db = db
 
     def select_candidate_ids(
-        self, user_id: str, scope: RunScope, account_id: str | None = None
+        self,
+        user_id: str,
+        scope: RunScope,
+        account_id: str | None = None,
+        *,
+        include_linked_cards: bool = False,
     ) -> list[str]:
         """Return the ids of the transactions a run of ``scope`` would reconsider.
 
@@ -47,6 +53,9 @@ class CategorizationRunRepository:
             scope: `pending` for rows nothing has categorised yet; `all` additionally takes
                 rows a previous run assigned, for a re-run after changing model or threshold.
             account_id: narrows to one account; `None` covers every account.
+            include_linked_cards: with ``account_id``, also takes the rows of the deferred
+                cards settled on it — the same definition as the transaction list's, so a
+                run started from an account's review queue reads exactly that queue.
         """
         uncategorized = and_(
             Transaction.needs_review.is_(True),
@@ -65,7 +74,9 @@ class CategorizationRunRepository:
             .order_by(Transaction.booked_date, Transaction.id)
         )
         if account_id is not None:
-            query = query.where(Transaction.account_id == account_id)
+            query = query.where(
+                in_account(user_id, account_id, include_linked_cards=include_linked_cards)
+            )
         return list(self._db.scalars(query))
 
     def list_transactions(self, user_id: str, transaction_ids: list[str]) -> list[Transaction]:
