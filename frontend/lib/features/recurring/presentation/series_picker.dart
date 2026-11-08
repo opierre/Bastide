@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/theme/tokens.dart';
 import '../../../core/widgets/amount_text.dart';
-import '../../../core/widgets/monogram_avatar.dart';
+import '../../../core/widgets/institution_avatar.dart';
 import '../../../core/widgets/state_views.dart';
 import '../../../l10n/app_localizations.dart';
 import '../application/add_to_series_controller.dart';
@@ -117,7 +117,11 @@ class _SeriesPickRow extends ConsumerWidget {
             ),
             child: Row(
               children: [
-                MonogramAvatar(name: series.label, size: 28),
+                InstitutionAvatar(
+                  name: series.label,
+                  size: 28,
+                  logo: series.logo,
+                ),
                 const SizedBox(width: AppSpacing.sm + AppSpacing.xs),
                 Expanded(
                   child: Column(

@@ -6,9 +6,10 @@ import '../theme/tokens.dart';
 ///
 /// This is the fallback every avatar slot degrades to — an institution with no
 /// brand logo, a merchant we don't recognize, a user with no picture — so the
-/// UI never renders a broken or empty image. It is the *only*
-/// treatment: brand logos are deliberately not embedded (see the design-system
-/// skill and `docs/design/00` §Iconography).
+/// UI never renders a broken or empty image. The app never ships brand logos
+/// or looks one up on its own; the only picture a merchant chip may show
+/// instead is one the user supplied on a rule (see [InstitutionAvatar] and
+/// `docs/design/00` §Iconography).
 class MonogramAvatar extends StatelessWidget {
   const MonogramAvatar({super.key, required this.name, this.size = 40});
 

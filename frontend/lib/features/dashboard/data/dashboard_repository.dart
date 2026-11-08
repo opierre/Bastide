@@ -5,6 +5,7 @@ import '../../../core/api/api_client.dart';
 import '../../../core/api/api_client_provider.dart';
 import '../domain/dashboard_summary.dart';
 import '../domain/dashboard_trends.dart';
+import '../../../core/logos/logo_ref.dart';
 
 final _monthParam = DateFormat('yyyy-MM');
 
@@ -78,6 +79,7 @@ class DashboardRepository {
           bookedDate: DateTime.parse(entry['booked_date'] as String),
           amountMinor: entry['amount_minor'] as int,
           currency: entry['currency'] as String,
+          logo: LogoRef.fromJson(entry),
         ),
     ];
   }
