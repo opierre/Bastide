@@ -157,20 +157,30 @@ def test_a_malformed_logo_is_refused(client: TestClient, logo: dict[str, str]) -
 @pytest.mark.parametrize(
     "url",
     [
+        # Off the host.
         "http://upload.wikimedia.org/wikipedia/commons/a/ab/Logo.png",
-        "https://example.com/logo.png",
+        "https://example.com/wikipedia/commons/a/ab/Logo.png",
         "https://commons.wikimedia.org/wiki/File:Logo.png",
-        "https://upload.wikimedia.org.example.com/logo.png",
-        "https://user@upload.wikimedia.org/logo.png",
-        "https://upload.wikimedia.org:8443/logo.png",
-        "https://UPLOAD.wikimedia.org/logo.png",
-        "https://upload.wikimedia.org\\@example.com/logo.png",
-        "https://upload.wikimedia.org/logo .png",
+        "https://upload.wikimedia.org.example.com/wikipedia/commons/a/ab/Logo.png",
+        "https://user@upload.wikimedia.org/wikipedia/commons/a/ab/Logo.png",
+        "https://upload.wikimedia.org:8443/wikipedia/commons/a/ab/Logo.png",
+        "https://UPLOAD.wikimedia.org/wikipedia/commons/a/ab/Logo.png",
+        "https://upload.wikimedia.org\\@example.com/wikipedia/commons/a/ab/Logo.png",
+        "https://upload.wikimedia.org/wikipedia/commons/a/ab/Logo .png",
+        "ftp://upload.wikimedia.org/wikipedia/commons/a/ab/Logo.png",
+        # On the host, but not a Commons file: fair-use files live under each Wikipedia.
         "https://upload.wikimedia.org/",
-        "ftp://upload.wikimedia.org/logo.png",
+        "https://upload.wikimedia.org/logo.png",
+        "https://upload.wikimedia.org/wikipedia/en/a/ab/Logo.png",
+        "https://upload.wikimedia.org/wikipedia/fr/a/ab/Logo.png",
+        "https://upload.wikimedia.org/wikipedia/commons/",
+        "https://upload.wikimedia.org/wikipedia/commons/../en/a/ab/Logo.png",
+        "https://upload.wikimedia.org/wikipedia/commons/%2e%2e/en/a/ab/Logo.png",
+        "https://upload.wikimedia.org/wikipedia/commons/./a/ab/Logo.png",
+        "https://upload.wikimedia.org/wikipedia/commonsfake/a/ab/Logo.png",
     ],
 )
-def test_a_link_off_the_allowed_host_is_refused_at_validation(
+def test_a_link_off_wikimedia_commons_is_refused_at_validation(
     client: TestClient, web: _Web, url: str
 ) -> None:
     headers, _ = _register(client)
@@ -321,10 +331,21 @@ def test_a_redirect_on_the_allowed_host_is_followed(client: TestClient, web: _We
     assert body["logo_count"] == 1
 
 
-def test_a_redirect_off_the_allowed_host_is_never_followed(client: TestClient, web: _Web) -> None:
+@pytest.mark.parametrize(
+    "location",
+    [
+        "https://example.com/track.png",
+        "https://upload.wikimedia.org/wikipedia/en/a/ab/Fair_use_logo.png",
+        "/wikipedia/en/a/ab/Fair_use_logo.png",
+    ],
+    ids=["other-host", "fair-use", "relative-fair-use"],
+)
+def test_a_redirect_off_wikimedia_commons_is_never_followed(
+    client: TestClient, web: _Web, location: str
+) -> None:
     headers, _ = _register(client)
-    web.serve(LOGO_URL, b"", status=302, location="https://example.com/track.png")
-    web.serve("https://example.com/track.png")
+    web.serve(LOGO_URL, b"", status=302, location=location)
+    web.serve(str(httpx.URL(LOGO_URL).join(location)))
 
     _, body = import_pack(
         client, headers, pack=pack(entry("EPICERIE LUNE", logo=_linked())), download_logos=True

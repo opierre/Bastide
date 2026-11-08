@@ -105,16 +105,16 @@
       }
     },
     "linkedLogo": {
-      "description": "A logo file on Wikimedia. Downloaded only when the user asks for it at import, then held to a timeout, the per-logo and per-pack size caps, and no redirect off the allowed host. Any other host is refused when the pack is validated, so importing a pack can never make the machine contact a server the pack's author chose.",
+      "description": "A logo file on Wikimedia Commons, whose files are all freely licensed (the same host also serves each Wikipedia's non-free fair-use files, which a pack must not link). Downloaded only when the user asks for it at import: paced, retried with backoff when throttled, within an overall deadline, held to the per-logo and per-pack size caps, and never redirected off Commons. Any other link is refused when the pack is validated, so importing a pack can never make the machine contact a server the pack's author chose.",
       "type": "object",
       "required": ["url", "license", "source"],
       "additionalProperties": false,
       "properties": {
         "url": {
-          "description": "Direct link to the file: exactly 'https://upload.wikimedia.org/' followed by its path, with no user info or port.",
+          "description": "Direct link to the file: exactly 'https://upload.wikimedia.org/wikipedia/commons/' followed by its path, with no user info, port, or dot segment ('.', '..', or percent-encoded).",
           "type": "string",
           "format": "uri",
-          "pattern": "^https://upload\\.wikimedia\\.org/[^\\s\\\\]+$",
+          "pattern": "^https://upload\\.wikimedia\\.org/wikipedia/commons/[^\\s\\\\]+$",
           "maxLength": 500
         },
         "license": {
