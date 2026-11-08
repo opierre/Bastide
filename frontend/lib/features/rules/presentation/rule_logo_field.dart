@@ -3,13 +3,18 @@ import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/pictures/picture_download.dart';
 import '../../../core/pictures/pictures.dart';
 import '../../../core/theme/tokens.dart';
+import '../../../core/widgets/app_modal.dart';
+import '../../../core/widgets/inline_banner.dart';
 import '../../../core/widgets/institution_avatar.dart';
 import '../../../core/widgets/labeled_field.dart';
 import '../../../core/widgets/picture_crop_modal.dart';
+import '../../../core/widgets/primary_button.dart';
 import '../../../l10n/app_localizations.dart';
 import '../application/rule_logo_controller.dart';
+import '../application/rule_logo_url_controller.dart';
 import '../application/rules_controller.dart';
 
 const _previewSize = 40.0;
@@ -48,14 +53,26 @@ class RuleLogoField extends ConsumerWidget {
     final state = ref.watch(ruleLogoControllerProvider);
     final controller = ref.read(ruleLogoControllerProvider.notifier);
 
+    Future<void> crop(ui.Image image) => showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => _RuleLogoCropModal(ruleId: ruleId!, image: image),
+    );
+
     Future<void> pick() async {
       final image = await controller.pick();
       if (image == null || !context.mounted) return;
-      await showDialog<void>(
+      await crop(image);
+    }
+
+    Future<void> fromUrl() async {
+      final image = await showDialog<ui.Image>(
         context: context,
         barrierDismissible: false,
-        builder: (_) => _RuleLogoCropModal(ruleId: ruleId!, image: image),
+        builder: (_) => const _RuleLogoUrlModal(),
       );
+      if (image == null || !context.mounted) return;
+      await crop(image);
     }
 
     return LabeledField(
@@ -76,25 +93,38 @@ class RuleLogoField extends ConsumerWidget {
             logo: logo,
           ),
           const SizedBox(width: AppSpacing.md),
-          if (ruleId != null) ...[
-            OutlinedButton(
-              key: const Key('ruleFormLogoChoose'),
-              onPressed: state.busy ? null : pick,
-              child: Text(
-                logo == null
-                    ? l10n.ruleFormLogoChoose
-                    : l10n.ruleFormLogoReplace,
+          if (ruleId != null)
+            // Wraps rather than overflows: the French labels run long.
+            Flexible(
+              child: Wrap(
+                spacing: AppSpacing.sm,
+                runSpacing: AppSpacing.sm,
+                children: [
+                  OutlinedButton(
+                    key: const Key('ruleFormLogoChoose'),
+                    onPressed: state.busy ? null : pick,
+                    child: Text(
+                      logo == null
+                          ? l10n.ruleFormLogoChoose
+                          : l10n.ruleFormLogoReplace,
+                    ),
+                  ),
+                  OutlinedButton(
+                    key: const Key('ruleFormLogoFromUrl'),
+                    onPressed: state.busy ? null : fromUrl,
+                    child: Text(l10n.ruleFormLogoFromUrl),
+                  ),
+                  if (logo != null)
+                    TextButton(
+                      key: const Key('ruleFormLogoRemove'),
+                      onPressed: state.busy
+                          ? null
+                          : () => controller.remove(ruleId),
+                      child: Text(l10n.ruleFormLogoRemove),
+                    ),
+                ],
               ),
             ),
-            if (logo != null) ...[
-              const SizedBox(width: AppSpacing.sm),
-              TextButton(
-                key: const Key('ruleFormLogoRemove'),
-                onPressed: state.busy ? null : () => controller.remove(ruleId),
-                child: Text(l10n.ruleFormLogoRemove),
-              ),
-            ],
-          ],
         ],
       ),
     );
@@ -138,6 +168,97 @@ class _RuleLogoCropModal extends ConsumerWidget {
       onSave: (image, crop) => ref
           .read(ruleLogoControllerProvider.notifier)
           .upload(ruleId, image, crop),
+    );
+  }
+}
+
+/// The localized reason a picture couldn't be downloaded from an address.
+String ruleLogoDownloadFailureText(
+  AppLocalizations l10n,
+  PictureDownloadFailure failure,
+) => switch (failure) {
+  PictureDownloadFailure.invalidAddress => l10n.ruleLogoUrlInvalidAddress,
+  PictureDownloadFailure.unreachable => l10n.ruleLogoUrlUnreachable,
+  PictureDownloadFailure.tooLarge => l10n.ruleLogoUrlTooLarge(
+    maxPictureUploadBytes ~/ (1024 * 1024),
+  ),
+  PictureDownloadFailure.notAPicture => l10n.ruleLogoUrlNotAPicture,
+};
+
+/// Asks for a picture's address and downloads it once the user confirms.
+/// Closes with the decoded picture, for the crop step; a refused download
+/// keeps it open with the reason.
+class _RuleLogoUrlModal extends ConsumerStatefulWidget {
+  const _RuleLogoUrlModal();
+
+  @override
+  ConsumerState<_RuleLogoUrlModal> createState() => _RuleLogoUrlModalState();
+}
+
+class _RuleLogoUrlModalState extends ConsumerState<_RuleLogoUrlModal> {
+  final _address = TextEditingController();
+
+  @override
+  void dispose() {
+    _address.dispose();
+    super.dispose();
+  }
+
+  Future<void> _fetch() async {
+    final image = await ref
+        .read(ruleLogoUrlControllerProvider.notifier)
+        .fetch(_address.text);
+    if (image != null && mounted) Navigator.of(context).pop(image);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final state = ref.watch(ruleLogoUrlControllerProvider);
+    final busy = state.busy;
+    return AppModal(
+      title: l10n.ruleLogoUrlTitle,
+      width: 420,
+      actions: [
+        OutlinedButton(
+          onPressed: busy ? null : () => Navigator.of(context).pop(),
+          child: Text(l10n.ruleLogoUrlCancel),
+        ),
+        PrimaryButton(
+          key: const Key('ruleLogoUrlFetch'),
+          label: l10n.ruleLogoUrlFetch,
+          isLoading: busy,
+          onPressed: busy ? null : _fetch,
+        ),
+      ],
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Text(
+            l10n.ruleLogoUrlLead,
+            style: Theme.of(
+              context,
+            ).textTheme.bodyMedium?.copyWith(color: AppColors.textSecondary),
+          ),
+          const SizedBox(height: AppSpacing.md),
+          LabeledField(
+            label: l10n.ruleLogoUrlLabel,
+            child: TextField(
+              key: const Key('ruleLogoUrlField'),
+              controller: _address,
+              autofocus: true,
+              enabled: !busy,
+              keyboardType: TextInputType.url,
+              decoration: InputDecoration(hintText: l10n.ruleLogoUrlHint),
+              onSubmitted: busy ? null : (_) => _fetch(),
+            ),
+          ),
+          if (state.failure case final failure?) ...[
+            const SizedBox(height: AppSpacing.md),
+            InlineBanner(message: ruleLogoDownloadFailureText(l10n, failure)),
+          ],
+        ],
+      ),
     );
   }
 }

@@ -1474,6 +1474,44 @@ class AppLocalizationsFr extends AppLocalizations {
   }
 
   @override
+  String get ruleFormLogoFromUrl => 'Depuis une adresse…';
+
+  @override
+  String get ruleLogoUrlTitle => 'Logo depuis une adresse';
+
+  @override
+  String get ruleLogoUrlLead =>
+      'Collez l\'adresse d\'une image. Bastide la télécharge depuis cet ordinateur, puis vous la recadrez.';
+
+  @override
+  String get ruleLogoUrlLabel => 'Adresse de l\'image';
+
+  @override
+  String get ruleLogoUrlHint => 'https://…';
+
+  @override
+  String get ruleLogoUrlCancel => 'Annuler';
+
+  @override
+  String get ruleLogoUrlFetch => 'Télécharger';
+
+  @override
+  String get ruleLogoUrlInvalidAddress =>
+      'Saisissez une adresse qui commence par http:// ou https://.';
+
+  @override
+  String get ruleLogoUrlUnreachable =>
+      'L\'image n\'a pas pu être téléchargée. Vérifiez l\'adresse et votre connexion.';
+
+  @override
+  String ruleLogoUrlTooLarge(int megabytes) {
+    return 'Cette image dépasse $megabytes Mo.';
+  }
+
+  @override
+  String get ruleLogoUrlNotAPicture => 'Cette adresse ne mène pas à une image.';
+
+  @override
   String get ruleFormCancel => 'Annuler';
 
   @override
