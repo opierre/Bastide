@@ -354,7 +354,11 @@ class _ReviewRow extends ConsumerWidget {
       ),
       child: Row(
         children: [
-          InstitutionAvatar(name: transaction.descriptionRaw, size: 36),
+          InstitutionAvatar(
+            name: transaction.descriptionRaw,
+            size: 36,
+            logo: transaction.logo,
+          ),
           const SizedBox(width: AppSpacing.sm + AppSpacing.xs),
           Expanded(
             child: _Label(transaction: transaction, showDate: hasProposal),

@@ -1,5 +1,7 @@
 import 'package:flutter/foundation.dart';
 
+import '../../../core/logos/logo_ref.dart';
+
 /// Which part of a transaction a rule looks at. Wire values are the backend's
 /// `MatchField` literals (`backend/app/features/rules/schemas.py`).
 enum RuleMatchField {
@@ -50,6 +52,7 @@ class Rule {
     required this.categoryId,
     required this.enabled,
     this.appliesFrom,
+    this.logoUpdatedAt,
     required this.createdAt,
   });
 
@@ -63,6 +66,10 @@ class Rule {
     enabled: json['enabled'] as bool,
     appliesFrom: switch (json['applies_from']) {
       final String date => DateTime.parse(date),
+      _ => null,
+    },
+    logoUpdatedAt: switch (json['logo_updated_at']) {
+      final String stamp => DateTime.parse(stamp),
       _ => null,
     },
     createdAt: DateTime.parse(json['created_at'] as String),
@@ -79,7 +86,16 @@ class Rule {
   /// The rule matches no transaction booked before this day; `null` for no
   /// limit. Set on a deferred card's settlement rule.
   final DateTime? appliesFrom;
+
+  /// When the rule's logo last changed; `null` when it has none.
+  final DateTime? logoUpdatedAt;
   final DateTime createdAt;
+
+  /// The rule's logo as the rows it matches reference it; `null` for none.
+  LogoRef? get logo => switch (logoUpdatedAt) {
+    final stamp? => LogoRef(ruleId: id, updatedAt: stamp),
+    null => null,
+  };
 
   Rule copyWith({int? priority, bool? enabled}) => Rule(
     id: id,
@@ -90,6 +106,7 @@ class Rule {
     categoryId: categoryId,
     enabled: enabled ?? this.enabled,
     appliesFrom: appliesFrom,
+    logoUpdatedAt: logoUpdatedAt,
     createdAt: createdAt,
   );
 
@@ -104,6 +121,7 @@ class Rule {
           other.pattern == pattern &&
           other.categoryId == categoryId &&
           other.appliesFrom == appliesFrom &&
+          other.logoUpdatedAt == logoUpdatedAt &&
           other.enabled == enabled &&
           other.createdAt == createdAt);
 
@@ -116,6 +134,7 @@ class Rule {
     pattern,
     categoryId,
     enabled,
+    logoUpdatedAt,
     createdAt,
   );
 }
