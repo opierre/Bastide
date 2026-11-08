@@ -243,6 +243,21 @@ class SubscriptionsController extends AsyncNotifier<SubscriptionsState> {
     );
   }
 
+  /// Re-reads the series without a skeleton, keeping the filters, after a
+  /// change made elsewhere moved what the rows show — a rule's logo. A failure
+  /// keeps the rows already shown: nobody asked for this refresh.
+  Future<void> refreshQuietly() async {
+    final current = state.value;
+    if (current == null) return;
+    try {
+      state = AsyncValue.data(
+        await _load(current.statusFilter, showArchived: current.showArchived),
+      );
+    } catch (_) {
+      // Deliberately swallowed, like `TransactionsController.refreshQuietly`.
+    }
+  }
+
   /// Narrows the list to one lifecycle status, or back to all of them.
   Future<void> setStatusFilter(SeriesStatus? status) async {
     final showArchived = state.value?.showArchived ?? false;

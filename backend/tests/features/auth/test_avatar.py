@@ -58,6 +58,19 @@ def test_a_jpeg_with_exif_comes_back_as_a_square_png_without_metadata() -> None:
         assert "exif" not in result.info
 
 
+def test_a_wide_avatar_is_still_cropped_to_its_centre() -> None:
+    image = Image.new("RGB", (400, 100), (0, 160, 0))
+    image.paste((255, 0, 0), (0, 0, 40, 100))  # a red left end the centre crop drops
+    output = io.BytesIO()
+    image.save(output, format="PNG")
+
+    with Image.open(io.BytesIO(normalize_avatar(output.getvalue()))) as result:
+        rgba = result.convert("RGBA")
+    assert rgba.getchannel("A").getextrema() == (255, 255)  # no padding
+    edge = rgba.getpixel((2, 128))
+    assert isinstance(edge, tuple) and edge[0] < 50  # the red end is gone
+
+
 @pytest.mark.parametrize("fmt", ["PNG", "WEBP"])
 def test_png_and_webp_are_accepted(fmt: str) -> None:
     with Image.open(io.BytesIO(normalize_avatar(_picture(fmt)))) as result:

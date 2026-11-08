@@ -7,6 +7,7 @@ import '../../categories/domain/category.dart';
 import '../domain/recurring_series.dart';
 import '../domain/recurring_summary.dart';
 import '../domain/series_preview.dart';
+import '../../../core/logos/logo_ref.dart';
 
 /// Calls the `/recurring` endpoints and maps the wire JSON to domain models.
 /// The only place in this feature that knows the response shapes.
@@ -283,6 +284,7 @@ class RecurringRepository {
     priceChangedAt: json['price_changed_at'] == null
         ? null
         : DateTime.parse(json['price_changed_at'] as String),
+    logo: LogoRef.fromJson(json),
   );
 
   SeriesPreview _parsePreview(Map<String, dynamic> json) => SeriesPreview(

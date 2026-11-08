@@ -1,6 +1,6 @@
 ---
 name: design-system
-description: Use for any visual/UI work in Bastide — building screens, styling, theming, layout, icons, brand logos, or writing design-tool prompts. Summarises the binding spec in docs/design/00-shared-design-block.md — the dark-first iris palette, Geist/Space Grotesk typography, the fixed sidebar/top bar invariant (no bottom bar), monogram-only brand logos, the component inventory, and the encouraging-UX direction. Builds on the general frontend-design skill for craft; this skill supplies the project-specific tokens and invariants.
+description: Use for any visual/UI work in Bastide — building screens, styling, theming, layout, icons, brand logos, or writing design-tool prompts. Summarises the binding spec in docs/design/00-shared-design-block.md — the dark-first iris palette, Geist/Space Grotesk typography, the fixed sidebar/top bar invariant (no bottom bar), monogram brand logos (user-supplied rule logos only), the component inventory, and the encouraging-UX direction. Builds on the general frontend-design skill for craft; this skill supplies the project-specific tokens and invariants.
 ---
 
 # Design System
@@ -84,13 +84,20 @@ spinners, shimmer 1.6s for skeletons), and chrome dimensions (sidebar 252 / coll
   download-to-tray, rotated-square tag, slider rows (settings), magnifier, chevrons, lock, plus,
   drag-handle dots, check, ⋯ overflow. Category chips carry an 11px leading glyph (house, bowl,
   car, star, refresh, cross, coin, up-arrow). **No emoji anywhere.**
-- **Brand logos are always monogram chips** — a deliberate decision instead of embedding
-  third-party logos. Never an image, never broken. Hues are **pinned per brand** (BNP `#2FB574`,
-  Crédit Agricole `#0AA396`, Revolut `#5AA9FF`, Caisse Locale `#4FD1E8`, Carrefour `#3B82F6`,
-  Novatech `#6C6AF0`) at 16% alpha background with a full-strength letter; an unrecognised name
+- **Monogram by default; a logo only when the user supplies one on a rule.** Hues are
+  **pinned per brand** (BNP `#2FB574`, Crédit Agricole `#0AA396`, Revolut `#5AA9FF`, Caisse
+  Locale `#4FD1E8`, Carrefour `#3B82F6`, Novatech `#6C6AF0`) at 16% alpha background with a full-strength letter; an unrecognised name
   renders `?` on `#1E2634`/`#97A3B6`. Pinned rather than hashed: an institution that changes color
   between launches looks like a bug.
-- `InstitutionAvatar` stays the named seam a real logo image would drop into later.
+- **The repo never ships third-party logo files, and the app never looks one up on its own.**
+  A merchant logo is always **user-supplied** on a categorization rule: uploaded, fetched from a
+  URL the user pastes, or brought by a rule pack they import, and stored with their data. A chip
+  whose row a rule with a logo matches shows that picture (`InstitutionAvatar(logo: …)`) in the
+  monogram's exact place — same size and corner radius, the picture cover-cropped to that
+  rounded square, **no tinted plate or colored background behind it**. Every other chip, and
+  every chip while its picture loads or if it fails, is the monogram: never a broken or empty
+  image.
+- `InstitutionAvatar` / `MonogramAvatar` stay the seam a supplied logo drops into.
 
 ## Fixed chrome — the layout invariant (non-negotiable)
 
@@ -134,8 +141,8 @@ drifts from the system. Already in `core/widgets/`:
   hover when tappable. Use instead of Material's `Card`.
 - `AmountText` — locale + sign + tabular figures, with `showPositiveSign` for movements and
   `colorize: false` for neutral figures.
-- `MonogramAvatar` / `InstitutionAvatar` — deterministic tinted monogram plate; the seam a real
-  brand logo drops into later.
+- `MonogramAvatar` / `InstitutionAvatar` — deterministic tinted monogram plate; `InstitutionAvatar`
+  also shows a user-supplied rule logo, falling back to the monogram.
 - `AppChip` — taxonomy pill (account type, category, import status). Use instead of `Chip`.
 - `AppSegmented` — inset segmented control for 2–3 fixed options. Use instead of `ChoiceChip`.
 - `LabeledField` — label *above* the control, not floating inside it; French labels truncate in

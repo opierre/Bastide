@@ -52,7 +52,7 @@ class TransactionRow extends ConsumerWidget {
       key: Key('transactionRow-${transaction.id}'),
       child: Row(
         children: [
-          InstitutionAvatar(name: label, size: 30),
+          InstitutionAvatar(name: label, size: 30, logo: transaction.logo),
           const SizedBox(width: AppSpacing.sm + AppSpacing.xs),
           // The label block is *tight* (Expanded, not Flexible) up to [_labelMaxWidth],
           // so it always occupies the same width regardless of how short the merchant
