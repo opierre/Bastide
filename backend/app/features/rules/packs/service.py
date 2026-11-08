@@ -8,11 +8,12 @@ need to learn about packs.
 
 import base64
 import json
-from collections.abc import Callable
+from collections.abc import Callable, Iterable
 from dataclasses import dataclass
 from datetime import UTC, datetime
 from functools import lru_cache
 from pathlib import Path
+from typing import Protocol
 
 from sqlalchemy.orm import Session
 
@@ -102,6 +103,28 @@ class PackImport:
     logo_count: int
     logo_skipped_count: int
     logo_failures: list[LogoFailureRead]
+
+
+@dataclass(frozen=True)
+class ImportedRules:
+    """What the rules phase of an import did, reported before the logos are downloaded."""
+
+    created_count: int
+    skipped_count: int
+    unresolved_count: int
+    recategorized_count: int
+
+
+class ImportProgress(Protocol):
+    """Hears how an import advances: rules committed, then each logo download settling."""
+
+    def rules_imported(self, rules: ImportedRules, logo_total: int) -> None:
+        """The rules are committed; ``logo_total`` distinct logos are about to be downloaded."""
+        ...
+
+    def logo_fetched(self, *, failed: bool) -> None:
+        """One more distinct logo URL settled, downloaded or not."""
+        ...
 
 
 @dataclass(frozen=True)
@@ -203,29 +226,45 @@ class RulePackService:
     # --- import -----------------------------------------------------------------------------
 
     async def import_pack(
-        self, user_id: str, pack: RulePack, apply_now: bool, download_logos: bool = False
+        self,
+        user_id: str,
+        pack: RulePack,
+        apply_now: bool,
+        download_logos: bool = False,
+        progress: ImportProgress | None = None,
     ) -> PackImport:
-        """Create one rule per resolvable, non-duplicate entry, in one DB transaction.
+        """Import the pack's rules, then download the logos it links to.
 
-        All of them land or none do: a half-imported pack would leave the user with an arbitrary
-        prefix of someone else's rules and no way to tell which.
+        First, one DB transaction creates one rule per resolvable, non-duplicate entry, with
+        the embedded logos: all of them land or none do, since a half-imported pack would leave
+        the user with an arbitrary prefix of someone else's rules and no way to tell which.
 
         The rules append after everything the user already has (`max(priority) + 1`, ascending in
         pack order), so an imported rule never preempts one the user ordered deliberately. With
         `apply_now`, the existing P1 apply path then re-runs, honouring its invariant that a row
         carrying `source='user'` is never overridden.
 
-        Logos land in the same transaction, each through `normalize_logo`: on the new rules, and
-        on a duplicate's matching rule only when it has none (an existing logo is never
-        replaced). Linked logos are downloaded only with `download_logos`, the whole list the
-        pack names. A logo that fails is reported and leaves its rule imported without it.
+        Then, only with `download_logos`, the linked logos are downloaded (the slow part, which
+        is why the rules do not wait for it) and stored in a second transaction. Every logo goes
+        through `normalize_logo`, on the new rules and on a duplicate's matching rule only when
+        it has none: an existing logo is never replaced, including one set while the downloads
+        ran. A logo that fails is reported and leaves its rule imported without it.
+
+        ``progress``, when given, hears when the rules are in and as each download settles.
         """
         plan = self._plan(user_id, pack)
         rules = _candidate_rules(user_id, plan.creatable, self._rules.next_priority(user_id))
-        prepared = await self._prepare_logos(plan.logos, download_logos)
+        embedded = [p for p in plan.logos if isinstance(p.logo, EmbeddedLogo)]
+        linked = [p for p in plan.logos if isinstance(p.logo, LinkedLogo)]
+
+        embedded_images, embedded_failures = _normalize_all(
+            (planned, planned.logo.image())
+            for planned in embedded
+            if isinstance(planned.logo, EmbeddedLogo)
+        )
         now = self._clock()
         try:
-            for planned, image in prepared.images:
+            for planned, image in embedded_images:
                 target = planned.rule if planned.rule is not None else rules[planned.new_offset]
                 target.logo = RuleLogo(image=image, content_type=LOGO_CONTENT_TYPE, updated_at=now)
             for rule in rules:
@@ -234,65 +273,99 @@ class RulePackService:
         except Exception:
             self._db.rollback()
             raise
+        # Read once committed, so the logo phase can find each target again by id.
+        targets = [
+            planned.rule.id if planned.rule is not None else rules[planned.new_offset].id
+            for planned in linked
+        ]
 
         recategorized_count = self._rule_service.apply(user_id) if apply_now else 0
+        links = list(dict.fromkeys(_link(p) for p in linked)) if download_logos else []
+        if progress is not None:
+            progress.rules_imported(
+                ImportedRules(
+                    created_count=len(rules),
+                    skipped_count=plan.duplicate_count,
+                    unresolved_count=len(plan.unresolved),
+                    recategorized_count=recategorized_count,
+                ),
+                logo_total=len(links),
+            )
+
+        linked_images: list[tuple[_PlannedLogo, bytes]] = []
+        linked_failures: list[LogoFailureRead] = []
+        if links:
+            linked_images, linked_failures = await self._download_logos(
+                user_id,
+                linked,
+                targets,
+                links,
+                embedded_bytes=_embedded_bytes(embedded),
+                progress=progress,
+            )
+
         return PackImport(
             created_count=len(rules),
             skipped_count=plan.duplicate_count,
             unresolved=plan.unresolved,
             recategorized_count=recategorized_count,
-            logo_count=len(prepared.images),
-            logo_skipped_count=prepared.skipped_count,
-            logo_failures=prepared.failures,
+            logo_count=len(embedded_images) + len(linked_images),
+            logo_skipped_count=0 if download_logos else len(linked),
+            logo_failures=sorted([*embedded_failures, *linked_failures], key=lambda f: f.index),
         )
 
-    async def _prepare_logos(
-        self, planned_logos: list[_PlannedLogo], download_logos: bool
-    ) -> _PreparedLogos:
-        """Turn each planned logo into a normalized PNG, or a reported failure.
+    async def _download_logos(
+        self,
+        user_id: str,
+        linked: list[_PlannedLogo],
+        targets: list[str],
+        links: list[str],
+        *,
+        embedded_bytes: int,
+        progress: ImportProgress | None,
+    ) -> tuple[list[tuple[_PlannedLogo, bytes]], list[LogoFailureRead]]:
+        """Download, normalize and store the linked logos; return the stored ones and failures.
 
         Downloads share what is left of `MAX_PACK_LOGO_BYTES` once the embedded logos (already
-        capped by the schema) are counted.
+        capped by the schema) are counted. A target rule deleted, or given a logo, while the
+        downloads ran is left alone: neither stored nor reported as a failure.
         """
-        links = [p.logo.url for p in planned_logos if isinstance(p.logo, LinkedLogo)]
-        fetched: dict[str, bytes | LogoDownloadError] = {}
-        if download_logos and links:
-            embedded = sum(
-                embedded_logo_size(p.logo.data)
-                for p in planned_logos
-                if isinstance(p.logo, EmbeddedLogo)
-            )
-            fetched = await self._logo_fetcher.fetch_all(links, MAX_PACK_LOGO_BYTES - embedded)
 
-        images: list[tuple[_PlannedLogo, bytes]] = []
+        def on_result(_url: str, result: bytes | LogoDownloadError) -> None:
+            if progress is not None:
+                progress.logo_fetched(failed=isinstance(result, LogoDownloadError))
+
+        fetched = await self._logo_fetcher.fetch_all(
+            links, MAX_PACK_LOGO_BYTES - embedded_bytes, on_result
+        )
+
         failures: list[LogoFailureRead] = []
-        skipped_count = 0
-        for planned in planned_logos:
-            reason: LogoFailureReason | None = None
-            if isinstance(planned.logo, LinkedLogo):
-                if not download_logos:
-                    skipped_count += 1
-                    continue
-                result = fetched.get(planned.logo.url, LogoDownloadError("Not fetched."))
-                if isinstance(result, LogoTooLargeError):
-                    reason = "too_large"
-                elif isinstance(result, LogoDownloadError):
-                    reason = "download_failed"
-                raw = result if isinstance(result, bytes) else b""
+        candidates: list[tuple[_PlannedLogo, bytes]] = []
+        for planned in linked:
+            result = fetched.get(_link(planned), LogoDownloadError("Not fetched."))
+            if isinstance(result, LogoTooLargeError):
+                failures.append(_failure(planned, "too_large"))
+            elif isinstance(result, LogoDownloadError):
+                failures.append(_failure(planned, "download_failed"))
             else:
-                raw = planned.logo.image()
-            if reason is None:
-                try:
-                    images.append((planned, normalize_logo(raw)))
-                except RuleLogoTooLargeError:
-                    reason = "too_large"
-                except RuleLogoInvalidImageError:
-                    reason = "invalid_image"
-            if reason is not None:
-                failures.append(
-                    LogoFailureRead(index=planned.index, pattern=planned.pattern, reason=reason)
-                )
-        return _PreparedLogos(images=images, failures=failures, skipped_count=skipped_count)
+                candidates.append((planned, result))
+        images, normalize_failures = _normalize_all(candidates)
+
+        target_ids = {p.index: rule_id for p, rule_id in zip(linked, targets, strict=True)}
+        stored: list[tuple[_PlannedLogo, bytes]] = []
+        now = self._clock()
+        try:
+            for planned, image in images:
+                target = self._rules.get_by_id_for_user(target_ids[planned.index], user_id)
+                if target is None or target.logo is not None:
+                    continue
+                target.logo = RuleLogo(image=image, content_type=LOGO_CONTENT_TYPE, updated_at=now)
+                stored.append((planned, image))
+            self._db.commit()
+        except Exception:
+            self._db.rollback()
+            raise
+        return stored, [*failures, *normalize_failures]
 
     # --- export -----------------------------------------------------------------------------
 
@@ -441,15 +514,6 @@ class _PlannedLogo:
 
 
 @dataclass(frozen=True)
-class _PreparedLogos:
-    """The planned logos once fetched and normalized, and the ones that did not make it."""
-
-    images: list[tuple[_PlannedLogo, bytes]]
-    failures: list[LogoFailureRead]
-    skipped_count: int
-
-
-@dataclass(frozen=True)
 class _ImportPlan:
     """What a pack reduces to once resolved against a user's categories and existing rules."""
 
@@ -457,6 +521,39 @@ class _ImportPlan:
     duplicate_count: int
     unresolved: list[str]
     logos: list[_PlannedLogo]
+
+
+def _link(planned: _PlannedLogo) -> str:
+    """The URL of a planned linked logo."""
+    assert isinstance(planned.logo, LinkedLogo)
+    return planned.logo.url
+
+
+def _embedded_bytes(embedded: list[_PlannedLogo]) -> int:
+    """The decoded size of the embedded logos, which the downloads' budget is reduced by."""
+    return sum(
+        embedded_logo_size(p.logo.data) for p in embedded if isinstance(p.logo, EmbeddedLogo)
+    )
+
+
+def _failure(planned: _PlannedLogo, reason: LogoFailureReason) -> LogoFailureRead:
+    return LogoFailureRead(index=planned.index, pattern=planned.pattern, reason=reason)
+
+
+def _normalize_all(
+    raw_logos: Iterable[tuple[_PlannedLogo, bytes]],
+) -> tuple[list[tuple[_PlannedLogo, bytes]], list[LogoFailureRead]]:
+    """Normalize each raw logo to the stored PNG, or report why it could not be."""
+    images: list[tuple[_PlannedLogo, bytes]] = []
+    failures: list[LogoFailureRead] = []
+    for planned, raw in raw_logos:
+        try:
+            images.append((planned, normalize_logo(raw)))
+        except RuleLogoTooLargeError:
+            failures.append(_failure(planned, "too_large"))
+        except RuleLogoInvalidImageError:
+            failures.append(_failure(planned, "invalid_image"))
+    return images, failures
 
 
 def _dedup_key(rule: CategorizationRule) -> _DedupKey:
