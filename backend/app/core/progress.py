@@ -29,7 +29,7 @@ from pydantic import BaseModel, ConfigDict, Field
 logger = logging.getLogger(__name__)
 
 #: What a run is doing. Extend this as a new kind of background work starts publishing.
-RunKind = Literal["categorization"]
+RunKind = Literal["categorization", "rule_pack_import"]
 
 #: ``started`` opens a run on the bus and ``progress`` updates it; the other three are terminal
 #: and close it. A run is "active" — part of the snapshot — between the two.

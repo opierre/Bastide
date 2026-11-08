@@ -625,3 +625,15 @@ def _load_builtin_packs() -> dict[str, RulePack]:
                 "A bundled rule pack could not be read.", {"pack": path.name, "error": str(exc)}
             ) from exc
     return packs
+
+
+def build_pack_service(db: Session, logo_fetcher: LogoFetcher) -> RulePackService:
+    """A `RulePackService` on ``db``: a request's session, or a background run's own."""
+    return RulePackService(
+        RuleRepository(db),
+        CategoryRepository(db),
+        TransactionRepository(db),
+        RuleService(RuleRepository(db), TransactionRepository(db), CategoryRepository(db), db),
+        db,
+        logo_fetcher,
+    )

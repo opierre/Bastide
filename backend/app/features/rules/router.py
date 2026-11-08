@@ -5,7 +5,8 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, File, Header, Query, Response, UploadFile, status
 from sqlalchemy.orm import Session
 
-from app.core.db import get_db
+from app.core.db import SessionFactory, get_db, get_session_factory
+from app.core.progress import ProgressBus, get_progress_bus
 from app.features.auth.deps import get_current_user
 from app.features.auth.models import User
 from app.features.categories.repository import CategoryRepository
@@ -13,15 +14,23 @@ from app.features.rules.deps import get_logo_resolver
 from app.features.rules.logos import MAX_UPLOAD_BYTES, RuleLogoResolver
 from app.features.rules.models import CategorizationRule
 from app.features.rules.packs.download import LogoFetcher, get_logo_fetcher
+from app.features.rules.packs.runs import (
+    PackImportLauncher,
+    PackImportRunService,
+    PackImportRunStore,
+    get_pack_import_launcher,
+    get_pack_import_run_store,
+)
 from app.features.rules.packs.schema import (
     BuiltinPackRead,
     RulePackExportResult,
     RulePackImportRequest,
     RulePackImportResult,
+    RulePackImportRunRead,
     RulePackPreviewResult,
     RulePackSource,
 )
-from app.features.rules.packs.service import RulePackService
+from app.features.rules.packs.service import RulePackService, build_pack_service
 from app.features.rules.repository import RuleRepository
 from app.features.rules.schemas import (
     RuleApplyRequest,
@@ -55,14 +64,17 @@ def _pack_service(
     db: Annotated[Session, Depends(get_db)],
     logo_fetcher: Annotated[LogoFetcher, Depends(get_logo_fetcher)],
 ) -> RulePackService:
-    return RulePackService(
-        RuleRepository(db),
-        CategoryRepository(db),
-        TransactionRepository(db),
-        _service(db),
-        db,
-        logo_fetcher,
-    )
+    return build_pack_service(db, logo_fetcher)
+
+
+def _pack_import_runs(
+    store: Annotated[PackImportRunStore, Depends(get_pack_import_run_store)],
+    session_factory: Annotated[SessionFactory, Depends(get_session_factory)],
+    launcher: Annotated[PackImportLauncher, Depends(get_pack_import_launcher)],
+    logo_fetcher: Annotated[LogoFetcher, Depends(get_logo_fetcher)],
+    bus: Annotated[ProgressBus, Depends(get_progress_bus)],
+) -> PackImportRunService:
+    return PackImportRunService(store, session_factory, launcher, logo_fetcher, bus)
 
 
 def _to_read(rule: CategorizationRule) -> RuleRead:
@@ -204,6 +216,42 @@ async def import_pack(
         logo_skipped_count=result.logo_skipped_count,
         logo_failures=result.logo_failures,
     )
+
+
+@router.post(
+    "/packs/import-runs",
+    response_model=RulePackImportRunRead,
+    status_code=status.HTTP_202_ACCEPTED,
+)
+async def start_pack_import(
+    payload: RulePackImportRequest,
+    packs: Annotated[RulePackService, Depends(_pack_service)],
+    runs: Annotated[PackImportRunService, Depends(_pack_import_runs)],
+    user: Annotated[User, Depends(get_current_user)],
+) -> RulePackImportRunRead:
+    """Start importing a pack in the background and return the run at once.
+
+    The run imports the rules, then downloads the linked logos (with `download_logos`),
+    publishing one `rule_pack_import` event per settled download on `/api/v1/runs/ws`. Read the
+    result with `GET /packs/import-runs/{run_id}`; it has the shape `POST /packs/import`
+    returns. 409 while another of the caller's imports is running.
+    """
+    pack = packs.load_source(payload)
+    run = runs.start(user.id, pack, payload.apply_now, payload.download_logos)
+    return run.to_read()
+
+
+@router.get("/packs/import-runs/{run_id}", response_model=RulePackImportRunRead)
+async def get_pack_import(
+    run_id: str,
+    runs: Annotated[PackImportRunService, Depends(_pack_import_runs)],
+    user: Annotated[User, Depends(get_current_user)],
+) -> RulePackImportRunRead:
+    """Fetch a background pack import: its logo progress, then its result.
+
+    Runs are kept in memory: a restart, or 20 newer imports, forgets them (404).
+    """
+    return runs.get(user.id, run_id).to_read()
 
 
 @router.get("/packs/export", response_model=RulePackExportResult, response_model_exclude_none=True)
