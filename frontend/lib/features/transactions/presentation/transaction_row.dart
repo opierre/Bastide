@@ -25,10 +25,15 @@ class TransactionRow extends ConsumerWidget {
     super.key,
     required this.transaction,
     required this.accountName,
+    this.accountIcon,
   });
 
   final Transaction transaction;
   final String accountName;
+
+  /// A glyph leading the secondary line, marking the account the row comes
+  /// from — the account detail's list uses it for a linked card's rows.
+  final IconData? accountIcon;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -76,13 +81,28 @@ class TransactionRow extends ConsumerWidget {
                           overflow: TextOverflow.ellipsis,
                         ),
                         const SizedBox(height: 2),
-                        Text(
-                          subtitle,
-                          style: textTheme.bodySmall?.copyWith(
-                            color: AppColors.textSecondary,
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
+                        Row(
+                          children: [
+                            if (accountIcon != null) ...[
+                              Icon(
+                                accountIcon,
+                                key: const Key('transactionRowAccountIcon'),
+                                size: 12,
+                                color: AppColors.textSecondary,
+                              ),
+                              const SizedBox(width: AppSpacing.xs),
+                            ],
+                            Flexible(
+                              child: Text(
+                                subtitle,
+                                style: textTheme.bodySmall?.copyWith(
+                                  color: AppColors.textSecondary,
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                          ],
                         ),
                       ],
                     ),

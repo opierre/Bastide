@@ -1232,6 +1232,7 @@ class _RecentTransactionsCard extends ConsumerWidget {
     final transactions = ref.watch(
       recentAccountTransactionsProvider(accountId),
     );
+    final cards = ref.watch(linkedCardsByIdProvider(accountId));
 
     return AppCard(
       key: const Key('accountDetailRecent'),
@@ -1292,9 +1293,20 @@ class _RecentTransactionsCard extends ConsumerWidget {
               children: [
                 for (final transaction in value) ...[
                   const Divider(height: 1, color: AppColors.borderSubtle),
-                  // The account is the one on screen, so the row's second line
-                  // keeps only the bank's memo.
-                  TransactionRow(transaction: transaction, accountName: ''),
+                  // The account is the one on screen, so its own rows' second
+                  // line keeps only the bank's memo; a linked card's rows name
+                  // their card, behind a card glyph.
+                  switch (cards[transaction.accountId]) {
+                    final card? => TransactionRow(
+                      transaction: transaction,
+                      accountName: _cardLabel(l10n, card),
+                      accountIcon: Icons.credit_card_rounded,
+                    ),
+                    null => TransactionRow(
+                      transaction: transaction,
+                      accountName: '',
+                    ),
+                  },
                 ],
               ],
             ),
@@ -1323,6 +1335,15 @@ class _RecentTransactionsCard extends ConsumerWidget {
       ),
     );
   }
+}
+
+/// How a linked card's row names its card: the card's name and, when known,
+/// its masked number.
+String _cardLabel(AppLocalizations l10n, LinkedCard card) {
+  final digits = card.cardLastDigits;
+  return digits == null
+      ? card.name
+      : l10n.accountDetailCardRowLabel(card.name, digits);
 }
 
 // ── Shared bits ─────────────────────────────────────────────────────────────

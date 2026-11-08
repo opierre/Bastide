@@ -30,10 +30,13 @@ class TransactionsRepository {
     bool? needsReview,
     String? q,
     int page = 1,
+    bool includeLinkedCards = false,
   }) async {
     final query = <String, String>{
       'page': '$page',
       'account_id': ?accountId,
+      // Widens the account filter to the deferred cards settled on it.
+      if (includeLinkedCards) 'include_linked_cards': 'true',
       if (dateFrom != null) 'from': _isoDate.format(dateFrom),
       if (dateTo != null) 'to': _isoDate.format(dateTo),
       'category_id': ?categoryId,
