@@ -60,7 +60,7 @@ class _Web:
         self.routes: dict[str, Callable[[httpx.Request], httpx.Response]] = {}
         self.sleeps: list[float] = []
         transport = httpx.MockTransport(self._handle)
-        # Pacing and backoff record their waits instead of sleeping (see test_download.py).
+        # Backoff records its waits instead of sleeping (see test_download.py).
         app.dependency_overrides[get_logo_fetcher] = lambda: HttpLogoFetcher(
             transport, sleep=self._sleep
         )

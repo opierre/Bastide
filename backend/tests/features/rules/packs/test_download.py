@@ -1,4 +1,4 @@
-"""Tests for the logo downloader's pacing, retries and deadline, on a fake clock.
+"""Tests for the logo downloader's retries and deadline, on a fake clock.
 
 `httpx.MockTransport` stands in for the network and the fetcher's `sleep` only advances a fake
 clock, so nothing leaves the process and no test actually waits.
@@ -14,7 +14,6 @@ from app.features.rules.packs import download as download_module
 from app.features.rules.packs.download import (
     MAX_RETRIES,
     MAX_RETRY_AFTER_S,
-    REQUEST_INTERVAL_S,
     RETRY_BASE_S,
     HttpLogoFetcher,
     LogoDownloadError,
@@ -157,7 +156,7 @@ def test_other_error_statuses_are_not_retried(server: _Server, clock: _Clock, st
     assert clock.sleeps == []
 
 
-def test_requests_are_paced(server: _Server, clock: _Clock) -> None:
+def test_downloads_never_wait_unless_throttled(server: _Server, clock: _Clock) -> None:
     urls = [f"{LOGO_URL[:-4]}_{n}.png" for n in range(5)]
     for url in urls:
         server.answer(url, _ok)
@@ -165,9 +164,8 @@ def test_requests_are_paced(server: _Server, clock: _Clock) -> None:
     result = _fetch(server, clock, *urls)
 
     assert all(result[url] == PICTURE for url in urls)
-    starts = [at for _, at in server.arrivals]
-    assert len(starts) == 5
-    assert all(b - a >= REQUEST_INTERVAL_S for a, b in zip(starts, starts[1:], strict=False))
+    assert len(server.arrivals) == 5
+    assert clock.sleeps == []
 
 
 def test_no_retry_starts_past_the_deadline(

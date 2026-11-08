@@ -6,9 +6,9 @@ is sent. The request carries nothing about the user: a fixed app `User-Agent`, n
 query added.
 
 Wikimedia answers 429 to clients that ask too fast, and a national pack links dozens of logos,
-so requests are paced, and a throttled or transiently failing one is retried with backoff. An
-overall deadline keeps a throttled import from hanging: what is still failing then is reported
-as a failed download.
+so few requests run at once, and a throttled or transiently failing one is retried with
+backoff: waiting only costs time when the host actually throttles. An overall deadline keeps a
+throttled import from hanging: what is still failing then is reported as a failed download.
 """
 
 import asyncio
@@ -30,8 +30,6 @@ USER_AGENT = f"Bastide/{__version__} (+https://github.com/opierre/Bastide)"
 _MAX_REDIRECTS = 3
 #: Downloads in flight at once. Kept low: the host throttles bursts.
 CONCURRENCY = 2
-#: Least time between two request starts (redirects and retries included), in seconds.
-REQUEST_INTERVAL_S = 0.25
 #: Retries per URL after a 429, a 503 or a transient connect/read error. Never on other 4xx.
 MAX_RETRIES = 3
 #: Backoff before retry n (from 0) is `RETRY_BASE_S * 2**n` plus up to `RETRY_JITTER_S`.
@@ -81,7 +79,7 @@ class LogoFetcher(Protocol):
 
 
 class HttpLogoFetcher:
-    """`LogoFetcher` over HTTPS: allowed host only, paced, retried, timed out and capped."""
+    """`LogoFetcher` over HTTPS: allowed host only, retried, timed out and capped."""
 
     def __init__(
         self,
@@ -95,8 +93,8 @@ class HttpLogoFetcher:
 
         Args:
             transport: injected in tests so nothing leaves the process.
-            sleep: how to wait (pacing and backoff); tests pass one that only records.
-            clock: monotonic seconds, read for pacing and the deadline.
+            sleep: how to wait before a retry; tests pass one that only records.
+            clock: monotonic seconds, read for the deadline.
             jitter: the random part of a backoff, in seconds.
         """
         self._transport = transport
@@ -145,7 +143,7 @@ class HttpLogoFetcher:
 
 
 class _Run:
-    """The state one `fetch_all` shares between its downloads: budget, pacing, deadline."""
+    """The state one `fetch_all` shares between its downloads: budget and deadline."""
 
     def __init__(
         self,
@@ -163,8 +161,6 @@ class _Run:
         self._sleep = sleep
         self._clock = clock
         self._jitter = jitter
-        self._pace_lock = asyncio.Lock()
-        self._last_start: float | None = None
 
     async def fetch(self, url: str) -> bytes:
         """Download one file, retrying a throttled or transient failure with backoff.
@@ -188,19 +184,6 @@ class _Run:
                 await self._sleep(wait)
         raise AssertionError("unreachable")  # the loop always returns or raises
 
-    async def _pace(self) -> None:
-        """Wait until `REQUEST_INTERVAL_S` has passed since the previous request started."""
-        async with self._pace_lock:
-            now = self._clock()
-            if self._last_start is not None:
-                wait = self._last_start + REQUEST_INTERVAL_S - now
-                if wait > 0:
-                    await self._sleep(wait)
-                    now = self._clock()
-            if now > self._deadline:
-                raise LogoDownloadError("The logo downloads ran out of time.")
-            self._last_start = now
-
     async def _fetch_once(self, url: str) -> bytes:
         """Follow at most `_MAX_REDIRECTS` redirects, all on the allowed host, and read the file.
 
@@ -214,7 +197,8 @@ class _Run:
                 raise LogoDownloadError("The logo URL is not on the allowed host.")
             if self._remaining <= 0:
                 raise LogoTooLargeError("The pack's logos are too large in all.")
-            await self._pace()
+            if self._clock() > self._deadline:
+                raise LogoDownloadError("The logo downloads ran out of time.")
             try:
                 async with self._http.stream("GET", url) as response:
                     if response.is_redirect:

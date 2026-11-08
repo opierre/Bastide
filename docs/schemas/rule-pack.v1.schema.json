@@ -105,7 +105,7 @@
       }
     },
     "linkedLogo": {
-      "description": "A logo file on Wikimedia Commons, whose files are all freely licensed (the same host also serves each Wikipedia's non-free fair-use files, which a pack must not link). Downloaded only when the user asks for it at import: paced, retried with backoff when throttled, within an overall deadline, held to the per-logo and per-pack size caps, and never redirected off Commons. Any other link is refused when the pack is validated, so importing a pack can never make the machine contact a server the pack's author chose.",
+      "description": "A logo file on Wikimedia Commons, whose files are all freely licensed (the same host also serves each Wikipedia's non-free fair-use files, which a pack must not link). Downloaded only when the user asks for it at import: retried with backoff when throttled, within an overall deadline, held to the per-logo and per-pack size caps, and never redirected off Commons. Any other link is refused when the pack is validated, so importing a pack can never make the machine contact a server the pack's author chose.",
       "type": "object",
       "required": ["url", "license", "source"],
       "additionalProperties": false,
