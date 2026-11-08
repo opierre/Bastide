@@ -413,6 +413,8 @@ def test_every_bundled_pack_logo_is_a_licensed_wikimedia_link() -> None:
     for logo in logos:
         assert isinstance(logo, LinkedLogo)
         assert is_allowed_logo_url(logo.url)
+        # Commons only: `/wikipedia/en/` and the like hold non-free, fair-use uploads.
+        assert logo.url.startswith("https://upload.wikimedia.org/wikipedia/commons/")
         assert logo.license.strip()
         assert logo.source.startswith("https://commons.wikimedia.org/wiki/File:")
 
