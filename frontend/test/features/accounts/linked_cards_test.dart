@@ -46,4 +46,67 @@ void main() {
       isEmpty,
     );
   });
+
+  group('panelAccounts', () {
+    List<String> ids(List<Account> accounts) =>
+        panelAccounts(accounts).map((account) => account.id).toList();
+
+    test('hides the cards linked to a shown account, keeps the rest', () {
+      expect(
+        ids([
+          _account('checking', type: AccountType.checking),
+          _account('linked-card', settlementAccountId: 'checking'),
+          _account('unlinked-card'),
+          _account('savings', type: AccountType.savings),
+        ]),
+        ['checking', 'unlinked-card', 'savings'],
+      );
+    });
+
+    test('keeps a card whose settlement account is not in the list', () {
+      expect(
+        ids([
+          _account('checking', type: AccountType.checking),
+          _account('orphan-card', settlementAccountId: 'gone'),
+        ]),
+        ['checking', 'orphan-card'],
+      );
+    });
+
+    test('keeps a card whose settlement account is archived', () {
+      expect(
+        ids([
+          _account('old', type: AccountType.checking, archived: true),
+          _account('card', settlementAccountId: 'old'),
+        ]),
+        ['card'],
+      );
+    });
+
+    test('keeps a card settled from a card that is itself hidden', () {
+      expect(
+        ids([
+          _account('checking', type: AccountType.checking),
+          _account(
+            'credit',
+            type: AccountType.credit,
+            settlementAccountId: 'checking',
+          ),
+          _account('deferred', settlementAccountId: 'credit'),
+        ]),
+        ['checking', 'deferred'],
+      );
+    });
+
+    test('a loop of links still leaves one of its accounts shown', () {
+      expect(
+        ids([
+          _account('card-a', settlementAccountId: 'card-b'),
+          _account('card-b', settlementAccountId: 'card-a'),
+        ]),
+        hasLength(1),
+      );
+      expect(ids([_account('self', settlementAccountId: 'self')]), ['self']);
+    });
+  });
 }

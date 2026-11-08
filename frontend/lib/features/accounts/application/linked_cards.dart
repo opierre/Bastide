@@ -20,3 +20,45 @@ final linkedCardsProvider = Provider.autoDispose.family<List<Account>, String>(
     accountId,
   ),
 );
+
+/// The accounts the panel gives a tile of their own, in list order: every
+/// live account except the cards already listed under a shown account's
+/// card count (see [linkedCards]).
+///
+/// A card keeps its tile until it is linked, and also when the account it
+/// names is missing, archived or itself hidden — otherwise nothing on the
+/// panel would lead to it.
+List<Account> panelAccounts(List<Account> accounts) {
+  final live = {
+    for (final account in accounts)
+      if (!account.archived) account.id: account,
+  };
+  final hidden = <String, bool>{};
+
+  bool isHidden(Account account, Set<String> seen) {
+    final known = hidden[account.id];
+    if (known != null) return known;
+    final parent = live[account.settlementAccountId];
+    // A link that loops back stops at the account it started from, which
+    // keeps its tile, so the loop is still reached from the panel.
+    final result =
+        parent != null &&
+        seen.add(account.id) &&
+        !seen.contains(parent.id) &&
+        !isHidden(parent, seen);
+    return hidden[account.id] = result;
+  }
+
+  return [
+    for (final account in accounts)
+      if (!account.archived && !isHidden(account, <String>{})) account,
+  ];
+}
+
+/// [panelAccounts] over the loaded accounts list; empty while it loads or
+/// fails.
+final panelAccountsProvider = Provider.autoDispose<List<Account>>(
+  (ref) => panelAccounts(
+    ref.watch(accountsControllerProvider).value ?? const <Account>[],
+  ),
+);
