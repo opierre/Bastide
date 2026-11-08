@@ -4,6 +4,7 @@ from collections.abc import Callable
 from datetime import UTC, datetime
 
 from app.core.errors import AuthError, ConflictError, NotFoundError
+from app.core.live_sessions import LiveSessions, get_live_sessions
 from app.core.security import (
     generate_recovery_code,
     generate_token,
@@ -59,10 +60,15 @@ class AuthService:
     """Registration, login, logout, profile and avatar, and bearer-token resolution."""
 
     def __init__(
-        self, repository: AuthRepository, clock: Callable[[], datetime] = _utc_now
+        self,
+        repository: AuthRepository,
+        clock: Callable[[], datetime] = _utc_now,
+        live_sessions: LiveSessions | None = None,
     ) -> None:
         self._repository = repository
         self._clock = clock
+        # Told about every revoked session, so connections opened under it are closed too.
+        self._live_sessions = live_sessions if live_sessions is not None else get_live_sessions()
 
     def register(self, data: UserRegister) -> tuple[User, str, str]:
         """Create a user (locale + currency persisted), a session token, and a recovery code.
@@ -132,6 +138,7 @@ class AuthService:
             password_hash=hash_password(data.new_password),
             recovery_code_hash=hash_recovery_code(recovery_code),
         )
+        self._live_sessions.revoke_user(user.id)
         token = self._issue_token(user)
         return user, token, recovery_code
 
@@ -215,13 +222,25 @@ class AuthService:
         return self._repository.set_avatar_choice(user, choice)
 
     def logout(self, token: str) -> None:
-        """Invalidate a session token. A no-op if the token is already gone."""
+        """Invalidate a session token and close what it opened. A no-op if it is already gone."""
         record = self._repository.get_token(token)
         if record is not None:
             self._repository.delete_token(record)
+            self._live_sessions.revoke_session(record.id)
 
     def get_current_user(self, token: str) -> User:
         """Resolve the user owning a bearer token.
+
+        Raises:
+            AuthError: the token is unknown or its user no longer exists.
+        """
+        return self.get_session(token)[0]
+
+    def get_session(self, token: str) -> tuple[User, str]:
+        """Resolve a bearer token to its user and the id of its session.
+
+        The session id is what a long-lived connection registers under, so it can be closed
+        when that session is revoked without holding on to the token itself.
 
         Raises:
             AuthError: the token is unknown or its user no longer exists.
@@ -234,7 +253,7 @@ class AuthService:
         if user is None:
             raise AuthError("Invalid or expired token.")
 
-        return user
+        return user, record.id
 
     def _find_user(self, identifier: str) -> User | None:
         """Look a user up by email if the identifier has an "@", by display name otherwise."""
