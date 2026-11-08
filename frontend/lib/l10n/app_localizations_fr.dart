@@ -1429,6 +1429,51 @@ class AppLocalizationsFr extends AppLocalizations {
   String get ruleFormEnabledLabel => 'Règle active';
 
   @override
+  String get ruleFormLogoLabel => 'Logo';
+
+  @override
+  String get ruleFormLogoHelper =>
+      'Affiché à la place du monogramme sur les transactions et les abonnements que cette règle reconnaît.';
+
+  @override
+  String get ruleFormLogoChoose => 'Choisir une image…';
+
+  @override
+  String get ruleFormLogoReplace => 'Remplacer…';
+
+  @override
+  String get ruleFormLogoRemove => 'Retirer';
+
+  @override
+  String get ruleFormLogoSaveFirst =>
+      'Enregistrez la règle pour pouvoir lui ajouter un logo.';
+
+  @override
+  String get ruleLogoInvalid =>
+      'Ce fichier n\'est pas une image PNG, JPEG ou WebP.';
+
+  @override
+  String get ruleLogoError => 'Le logo n\'a pas pu être enregistré. Réessayez.';
+
+  @override
+  String get ruleLogoCropTitle => 'Recadrer le logo';
+
+  @override
+  String get ruleLogoCropLead =>
+      'Faites glisser et zoomez pour cadrer le logo.';
+
+  @override
+  String get ruleLogoCropCancel => 'Annuler';
+
+  @override
+  String get ruleLogoCropSave => 'Utiliser ce logo';
+
+  @override
+  String ruleLogoTooLarge(int megabytes) {
+    return 'Cette image est trop lourde : choisissez un fichier de moins de $megabytes Mo.';
+  }
+
+  @override
   String get ruleFormCancel => 'Annuler';
 
   @override

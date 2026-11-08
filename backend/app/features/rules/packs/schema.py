@@ -54,19 +54,33 @@ MAX_PACK_LOGO_BYTES = 20 * 1024 * 1024
 #: validated, so importing someone else's pack can never make this machine contact a server
 #: they chose.
 ALLOWED_LOGO_HOST = "upload.wikimedia.org"
+#: The path a linked logo must sit under: Wikimedia Commons, whose files are all freely
+#: licensed. The same host serves the non-free fair-use files of each Wikipedia under other
+#: paths (`/wikipedia/en/`, `/wikipedia/fr/`), which a pack must not redistribute.
+ALLOWED_LOGO_PATH_PREFIX = "/wikipedia/commons/"
+ALLOWED_LOGO_URL_PREFIX = f"https://{ALLOWED_LOGO_HOST}{ALLOWED_LOGO_PATH_PREFIX}"
 
 
 def is_allowed_logo_url(url: str) -> bool:
-    """Whether ``url`` is an `https://upload.wikimedia.org/...` link to a file.
+    """Whether ``url`` is an `https://upload.wikimedia.org/wikipedia/commons/...` file link.
 
     The authority must be exactly the allowed host: no user info, no port, no other spelling
     (backslash, whitespace, control character) a URL parser might read differently from the
-    HTTP client.
+    HTTP client. The path must sit under Commons, with no dot segment (plain or
+    percent-encoded) that a client could resolve to somewhere else on the host.
     """
     if not url.isascii() or any(ch.isspace() or not ch.isprintable() or ch == "\\" for ch in url):
         return False
     parts = urlsplit(url)
-    return parts.scheme == "https" and parts.netloc == ALLOWED_LOGO_HOST and len(parts.path) > 1
+    path = parts.path
+    return (
+        parts.scheme == "https"
+        and parts.netloc == ALLOWED_LOGO_HOST
+        and path.startswith(ALLOWED_LOGO_PATH_PREFIX)
+        and len(path) > len(ALLOWED_LOGO_PATH_PREFIX)
+        and "%2e" not in path.lower()
+        and not any(segment in (".", "..") for segment in path.split("/"))
+    )
 
 
 def embedded_logo_size(data: str) -> int:
@@ -99,7 +113,7 @@ class EmbeddedLogo(BaseModel):
 
 
 class LinkedLogo(BaseModel):
-    """A logo the pack points at: a file on Wikimedia, with its licence and where it is from.
+    """A logo the pack points at: a Wikimedia Commons file, its licence and where it is from.
 
     Downloaded only when the user asks for it at import (`download_logos`).
     """
@@ -114,7 +128,9 @@ class LinkedLogo(BaseModel):
     @classmethod
     def _allowed_host(cls, value: str) -> str:
         if not is_allowed_logo_url(value):
-            raise ValueError(f"A linked logo must be an https://{ALLOWED_LOGO_HOST}/ URL.")
+            raise ValueError(
+                f"A linked logo must be a Wikimedia Commons file: {ALLOWED_LOGO_URL_PREFIX}..."
+            )
         return value
 
 

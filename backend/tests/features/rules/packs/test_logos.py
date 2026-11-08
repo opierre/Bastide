@@ -58,8 +58,15 @@ class _Web:
     def __init__(self, app: FastAPI) -> None:
         self.requests: list[httpx.Request] = []
         self.routes: dict[str, Callable[[httpx.Request], httpx.Response]] = {}
+        self.sleeps: list[float] = []
         transport = httpx.MockTransport(self._handle)
-        app.dependency_overrides[get_logo_fetcher] = lambda: HttpLogoFetcher(transport)
+        # Backoff records its waits instead of sleeping (see test_download.py).
+        app.dependency_overrides[get_logo_fetcher] = lambda: HttpLogoFetcher(
+            transport, sleep=self._sleep
+        )
+
+    async def _sleep(self, seconds: float) -> None:
+        self.sleeps.append(seconds)
 
     def serve(self, url: str, body: bytes | None = None, status: int = 200, **headers: str):
         self.routes[url] = lambda _: httpx.Response(
@@ -150,20 +157,30 @@ def test_a_malformed_logo_is_refused(client: TestClient, logo: dict[str, str]) -
 @pytest.mark.parametrize(
     "url",
     [
+        # Off the host.
         "http://upload.wikimedia.org/wikipedia/commons/a/ab/Logo.png",
-        "https://example.com/logo.png",
+        "https://example.com/wikipedia/commons/a/ab/Logo.png",
         "https://commons.wikimedia.org/wiki/File:Logo.png",
-        "https://upload.wikimedia.org.example.com/logo.png",
-        "https://user@upload.wikimedia.org/logo.png",
-        "https://upload.wikimedia.org:8443/logo.png",
-        "https://UPLOAD.wikimedia.org/logo.png",
-        "https://upload.wikimedia.org\\@example.com/logo.png",
-        "https://upload.wikimedia.org/logo .png",
+        "https://upload.wikimedia.org.example.com/wikipedia/commons/a/ab/Logo.png",
+        "https://user@upload.wikimedia.org/wikipedia/commons/a/ab/Logo.png",
+        "https://upload.wikimedia.org:8443/wikipedia/commons/a/ab/Logo.png",
+        "https://UPLOAD.wikimedia.org/wikipedia/commons/a/ab/Logo.png",
+        "https://upload.wikimedia.org\\@example.com/wikipedia/commons/a/ab/Logo.png",
+        "https://upload.wikimedia.org/wikipedia/commons/a/ab/Logo .png",
+        "ftp://upload.wikimedia.org/wikipedia/commons/a/ab/Logo.png",
+        # On the host, but not a Commons file: fair-use files live under each Wikipedia.
         "https://upload.wikimedia.org/",
-        "ftp://upload.wikimedia.org/logo.png",
+        "https://upload.wikimedia.org/logo.png",
+        "https://upload.wikimedia.org/wikipedia/en/a/ab/Logo.png",
+        "https://upload.wikimedia.org/wikipedia/fr/a/ab/Logo.png",
+        "https://upload.wikimedia.org/wikipedia/commons/",
+        "https://upload.wikimedia.org/wikipedia/commons/../en/a/ab/Logo.png",
+        "https://upload.wikimedia.org/wikipedia/commons/%2e%2e/en/a/ab/Logo.png",
+        "https://upload.wikimedia.org/wikipedia/commons/./a/ab/Logo.png",
+        "https://upload.wikimedia.org/wikipedia/commonsfake/a/ab/Logo.png",
     ],
 )
-def test_a_link_off_the_allowed_host_is_refused_at_validation(
+def test_a_link_off_wikimedia_commons_is_refused_at_validation(
     client: TestClient, web: _Web, url: str
 ) -> None:
     headers, _ = _register(client)
@@ -302,6 +319,25 @@ def test_a_requested_download_fetches_every_link_once_with_a_generic_agent(
     assert all(rules[name]["logo_updated_at"] for name in rules)
 
 
+def test_a_downloaded_jpeg_thumbnail_is_stored_as_a_png(client: TestClient, web: _Web) -> None:
+    headers, _ = _register(client)
+    url = "https://upload.wikimedia.org/wikipedia/commons/thumb/a/ab/Logo.svg/320px-Logo.jpg"
+    jpeg = _picture("JPEG")
+    web.routes[url] = lambda _: httpx.Response(
+        200, content=jpeg, headers={"content-type": "image/jpeg"}
+    )
+
+    _, body = import_pack(
+        client, headers, pack=pack(entry("EPICERIE LUNE", logo=_linked(url))), download_logos=True
+    )
+
+    assert body["logo_count"] == 1
+    image = _logo(client, headers, _rules(client, headers)["EPICERIE LUNE"]["id"])
+    assert image is not None
+    with Image.open(io.BytesIO(image)) as stored:
+        assert (stored.format, stored.size) == ("PNG", (256, 256))
+
+
 def test_a_redirect_on_the_allowed_host_is_followed(client: TestClient, web: _Web) -> None:
     headers, _ = _register(client)
     web.serve(LOGO_URL, b"", status=301, location=OTHER_LOGO_URL)
@@ -314,10 +350,21 @@ def test_a_redirect_on_the_allowed_host_is_followed(client: TestClient, web: _We
     assert body["logo_count"] == 1
 
 
-def test_a_redirect_off_the_allowed_host_is_never_followed(client: TestClient, web: _Web) -> None:
+@pytest.mark.parametrize(
+    "location",
+    [
+        "https://example.com/track.png",
+        "https://upload.wikimedia.org/wikipedia/en/a/ab/Fair_use_logo.png",
+        "/wikipedia/en/a/ab/Fair_use_logo.png",
+    ],
+    ids=["other-host", "fair-use", "relative-fair-use"],
+)
+def test_a_redirect_off_wikimedia_commons_is_never_followed(
+    client: TestClient, web: _Web, location: str
+) -> None:
     headers, _ = _register(client)
-    web.serve(LOGO_URL, b"", status=302, location="https://example.com/track.png")
-    web.serve("https://example.com/track.png")
+    web.serve(LOGO_URL, b"", status=302, location=location)
+    web.serve(str(httpx.URL(LOGO_URL).join(location)))
 
     _, body = import_pack(
         client, headers, pack=pack(entry("EPICERIE LUNE", logo=_linked())), download_logos=True

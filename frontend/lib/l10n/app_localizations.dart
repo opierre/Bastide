@@ -2449,6 +2449,84 @@ abstract class AppLocalizations {
   /// **'Règle active'**
   String get ruleFormEnabledLabel;
 
+  /// Label of the rule editor's logo section.
+  ///
+  /// In fr, this message translates to:
+  /// **'Logo'**
+  String get ruleFormLogoLabel;
+
+  /// Helper under the rule editor's logo section.
+  ///
+  /// In fr, this message translates to:
+  /// **'Affiché à la place du monogramme sur les transactions et les abonnements que cette règle reconnaît.'**
+  String get ruleFormLogoHelper;
+
+  /// Button of the rule editor picking a logo picture.
+  ///
+  /// In fr, this message translates to:
+  /// **'Choisir une image…'**
+  String get ruleFormLogoChoose;
+
+  /// Button of the rule editor picking a picture to replace the rule's logo.
+  ///
+  /// In fr, this message translates to:
+  /// **'Remplacer…'**
+  String get ruleFormLogoReplace;
+
+  /// Button of the rule editor removing the rule's logo.
+  ///
+  /// In fr, this message translates to:
+  /// **'Retirer'**
+  String get ruleFormLogoRemove;
+
+  /// Shown instead of the logo buttons while creating a rule: a logo is attached to a saved rule.
+  ///
+  /// In fr, this message translates to:
+  /// **'Enregistrez la règle pour pouvoir lui ajouter un logo.'**
+  String get ruleFormLogoSaveFirst;
+
+  /// Error when the picked logo file is not a supported picture.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ce fichier n\'est pas une image PNG, JPEG ou WebP.'**
+  String get ruleLogoInvalid;
+
+  /// Error when the logo could not be saved or removed for another reason.
+  ///
+  /// In fr, this message translates to:
+  /// **'Le logo n\'a pas pu être enregistré. Réessayez.'**
+  String get ruleLogoError;
+
+  /// Title of the modal where the user crops the picked logo to a square.
+  ///
+  /// In fr, this message translates to:
+  /// **'Recadrer le logo'**
+  String get ruleLogoCropTitle;
+
+  /// Lead text of the logo crop modal.
+  ///
+  /// In fr, this message translates to:
+  /// **'Faites glisser et zoomez pour cadrer le logo.'**
+  String get ruleLogoCropLead;
+
+  /// Cancel button of the logo crop modal.
+  ///
+  /// In fr, this message translates to:
+  /// **'Annuler'**
+  String get ruleLogoCropCancel;
+
+  /// Confirm button of the logo crop modal, uploading the cropped logo.
+  ///
+  /// In fr, this message translates to:
+  /// **'Utiliser ce logo'**
+  String get ruleLogoCropSave;
+
+  /// Error when the picked logo is over the size limit; {megabytes} is that limit.
+  ///
+  /// In fr, this message translates to:
+  /// **'Cette image est trop lourde : choisissez un fichier de moins de {megabytes} Mo.'**
+  String ruleLogoTooLarge(int megabytes);
+
   /// Cancel button of the rule editor.
   ///
   /// In fr, this message translates to:
