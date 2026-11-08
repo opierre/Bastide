@@ -152,7 +152,11 @@ class CompactTransactionRow extends StatelessWidget {
       key: Key('dashboardRecentRow-${transaction.id}'),
       child: Row(
         children: [
-          InstitutionAvatar(name: transaction.label, size: monogramSize),
+          InstitutionAvatar(
+            name: transaction.label,
+            size: monogramSize,
+            logo: transaction.logo,
+          ),
           const SizedBox(width: AppSpacing.sm + AppSpacing.xs),
           // The label block takes ~7/10 of what's left rather than everything but the amount:
           // merchant names run long, and a label that ellipsizes hard against the figure

@@ -1805,6 +1805,63 @@
   "@ruleFormEnabledLabel": {
     "description": "Label beside the rule editor's enable switch."
   },
+  "ruleFormLogoLabel": "Logo",
+  "@ruleFormLogoLabel": {
+    "description": "Label of the rule editor's logo section."
+  },
+  "ruleFormLogoHelper": "Affiché à la place du monogramme sur les transactions et les abonnements que cette règle reconnaît.",
+  "@ruleFormLogoHelper": {
+    "description": "Helper under the rule editor's logo section."
+  },
+  "ruleFormLogoChoose": "Choisir une image…",
+  "@ruleFormLogoChoose": {
+    "description": "Button of the rule editor picking a logo picture."
+  },
+  "ruleFormLogoReplace": "Remplacer…",
+  "@ruleFormLogoReplace": {
+    "description": "Button of the rule editor picking a picture to replace the rule's logo."
+  },
+  "ruleFormLogoRemove": "Retirer",
+  "@ruleFormLogoRemove": {
+    "description": "Button of the rule editor removing the rule's logo."
+  },
+  "ruleFormLogoSaveFirst": "Enregistrez la règle pour pouvoir lui ajouter un logo.",
+  "@ruleFormLogoSaveFirst": {
+    "description": "Shown instead of the logo buttons while creating a rule: a logo is attached to a saved rule."
+  },
+  "ruleLogoInvalid": "Ce fichier n'est pas une image PNG, JPEG ou WebP.",
+  "@ruleLogoInvalid": {
+    "description": "Error when the picked logo file is not a supported picture."
+  },
+  "ruleLogoError": "Le logo n'a pas pu être enregistré. Réessayez.",
+  "@ruleLogoError": {
+    "description": "Error when the logo could not be saved or removed for another reason."
+  },
+  "ruleLogoCropTitle": "Recadrer le logo",
+  "@ruleLogoCropTitle": {
+    "description": "Title of the modal where the user crops the picked logo to a square."
+  },
+  "ruleLogoCropLead": "Faites glisser et zoomez pour cadrer le logo.",
+  "@ruleLogoCropLead": {
+    "description": "Lead text of the logo crop modal."
+  },
+  "ruleLogoCropCancel": "Annuler",
+  "@ruleLogoCropCancel": {
+    "description": "Cancel button of the logo crop modal."
+  },
+  "ruleLogoCropSave": "Utiliser ce logo",
+  "@ruleLogoCropSave": {
+    "description": "Confirm button of the logo crop modal, uploading the cropped logo."
+  },
+  "ruleLogoTooLarge": "Cette image est trop lourde : choisissez un fichier de moins de {megabytes} Mo.",
+  "@ruleLogoTooLarge": {
+    "description": "Error when the picked logo is over the size limit; {megabytes} is that limit.",
+    "placeholders": {
+      "megabytes": {
+        "type": "int"
+      }
+    }
+  },
   "ruleFormCancel": "Annuler",
   "@ruleFormCancel": {
     "description": "Cancel button of the rule editor."
