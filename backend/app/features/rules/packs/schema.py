@@ -316,6 +316,13 @@ class RulePackExportResult(BaseModel):
 
     pack: RulePack
     omitted: list[OmittedRuleRead]
+    #: Logos embedded in `pack`, when the export was asked for them (`include_logos`).
+    logo_count: int
+    #: The decoded bytes those logos add up to, or would have when `logos_too_large`.
+    logo_bytes: int
+    #: The logos would take the pack over `MAX_PACK_LOGO_BYTES`, which import refuses, so
+    #: `pack` carries none of them (`logo_count` is 0) and its rules are exported regardless.
+    logos_too_large: bool
 
 
 #: The name an export carries when the caller supplies none. Deliberately untranslated: it ends

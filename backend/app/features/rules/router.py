@@ -206,11 +206,15 @@ async def import_pack(
     )
 
 
-@router.get("/packs/export", response_model=RulePackExportResult)
+@router.get("/packs/export", response_model=RulePackExportResult, response_model_exclude_none=True)
 async def export_pack(
     service: Annotated[RulePackService, Depends(_pack_service)],
     user: Annotated[User, Depends(get_current_user)],
     enabled_only: bool = False,
+    include_logos: Annotated[
+        bool,
+        Query(description="Embed each exported rule's logo, as its stored PNG."),
+    ] = False,
     name: Annotated[
         str | None,
         Query(
@@ -223,10 +227,19 @@ async def export_pack(
     """Return the caller's rules as a pack for review, plus the ones it could not carry.
 
     A body, not a download: a pattern can hold personal detail, so the user sees the file's
-    contents before it becomes a file.
+    contents before it becomes a file. Unset optional fields are left out rather than sent as
+    null, which `docs/schemas/rule-pack.v1.schema.json` does not admit. When the
+    logos asked for would exceed the per-pack cap, the pack carries none and `logos_too_large`
+    says so.
     """
-    result = service.export(user.id, user.locale, enabled_only, name)
-    return RulePackExportResult(pack=result.pack, omitted=result.omitted)
+    result = service.export(user.id, user.locale, enabled_only, name, include_logos)
+    return RulePackExportResult(
+        pack=result.pack,
+        omitted=result.omitted,
+        logo_count=result.logo_count,
+        logo_bytes=result.logo_bytes,
+        logos_too_large=result.logos_too_large,
+    )
 
 
 @router.patch("/{rule_id}", response_model=RuleRead)

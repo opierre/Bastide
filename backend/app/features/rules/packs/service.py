@@ -6,6 +6,7 @@ from a hand-written one the moment it lands, or the review queue and the rules e
 need to learn about packs.
 """
 
+import base64
 import json
 from collections.abc import Callable
 from dataclasses import dataclass
@@ -109,6 +110,9 @@ class PackExport:
 
     pack: RulePack
     omitted: list[OmittedRuleRead]
+    logo_count: int = 0
+    logo_bytes: int = 0
+    logos_too_large: bool = False
 
 
 class RulePackService:
@@ -292,13 +296,25 @@ class RulePackService:
 
     # --- export -----------------------------------------------------------------------------
 
-    def export(self, user_id: str, locale: str, enabled_only: bool, name: str | None) -> PackExport:
+    def export(
+        self,
+        user_id: str,
+        locale: str,
+        enabled_only: bool,
+        name: str | None,
+        include_logos: bool = False,
+    ) -> PackExport:
         """Emit the caller's rules in pack format, resolving `category_id` back to its key.
 
         A rule pointing at a user-defined category has no key to emit, and a `regex` rule would
         be refused by the very importer this file targets. Both are omitted and reported rather
         than written out — a pack that fails its own import is worse than one that says what it
         left behind.
+
+        With `include_logos`, each exported rule that has a logo carries its stored PNG,
+        embedded. When those logos add up to more than `MAX_PACK_LOGO_BYTES` the pack carries
+        none of them and says so (`logos_too_large`): import would refuse the whole file, and
+        keeping an arbitrary subset would silently drop the rest.
         """
         rules = self._rules.list_by_user(user_id)
         if enabled_only:
@@ -308,7 +324,7 @@ class RulePackService:
             category.id: category for category in self._categories.list_for_user(user_id)
         }
 
-        entries: list[RulePackEntry] = []
+        exportable: list[tuple[CategorizationRule, Category]] = []
         omitted: list[OmittedRuleRead] = []
         for rule in rules:
             reason = _export_blocker(rule, by_id.get(rule.category_id))
@@ -317,17 +333,29 @@ class RulePackService:
                     OmittedRuleRead(rule_id=rule.id, pattern=rule.pattern, reason=reason)
                 )
                 continue
-            category = by_id[rule.category_id]
-            entries.append(
-                RulePackEntry(
-                    field=rule.match_field,  # ty: ignore[invalid-argument-type] — column is a
-                    # plain str; the literal is enforced on the way in by `RuleCreate`.
-                    type=rule.match_type,  # ty: ignore[invalid-argument-type] — same.
-                    pattern=rule.pattern,
-                    category_key=category.name,
-                    enabled=rule.enabled,
-                )
+            exportable.append((rule, by_id[rule.category_id]))
+
+        images: dict[str, bytes] = {}
+        if include_logos:
+            with_logo = [rule.id for rule, _ in exportable if rule.logo is not None]
+            images = self._rules.logo_images(user_id, with_logo)
+        logo_bytes = sum(len(image) for image in images.values())
+        logos_too_large = logo_bytes > MAX_PACK_LOGO_BYTES
+        if logos_too_large:
+            images = {}
+
+        entries = [
+            RulePackEntry(
+                field=rule.match_field,  # ty: ignore[invalid-argument-type] — column is a
+                # plain str; the literal is enforced on the way in by `RuleCreate`.
+                type=rule.match_type,  # ty: ignore[invalid-argument-type] — same.
+                pattern=rule.pattern,
+                category_key=category.name,
+                enabled=rule.enabled,
+                logo=_embed(images[rule.id]) if rule.id in images else None,
             )
+            for rule, category in exportable
+        ]
 
         pack = RulePack(
             format_version=SUPPORTED_FORMAT_VERSION,
@@ -335,7 +363,13 @@ class RulePackService:
             locale=locale if locale in _PACK_LOCALES else None,  # ty: ignore[invalid-argument-type]
             rules=entries,
         )
-        return PackExport(pack=pack, omitted=omitted)
+        return PackExport(
+            pack=pack,
+            omitted=omitted,
+            logo_count=len(images),
+            logo_bytes=logo_bytes,
+            logos_too_large=logos_too_large,
+        )
 
     # --- shared planning --------------------------------------------------------------------
 
@@ -458,6 +492,11 @@ def _candidate_rules(
         )
         for offset, resolved in enumerate(entries)
     ]
+
+
+def _embed(image: bytes) -> EmbeddedLogo:
+    """A stored logo as the pack carries it: standard, padded base64."""
+    return EmbeddedLogo(data=base64.b64encode(image).decode("ascii"))
 
 
 def _export_blocker(rule: CategorizationRule, category: Category | None) -> OmissionReason | None:
