@@ -326,6 +326,85 @@ class RulePackImportResult {
   final List<RulePackLogoFailure> logoFailures;
 }
 
+/// Where a background pack import stands — `RulePackImportRunStatus`.
+enum RulePackImportRunStatus {
+  running,
+  finished,
+  failed;
+
+  /// An unknown value reads as [running]: the snapshot is re-read until it
+  /// says something this build understands, rather than ending on a guess.
+  static RulePackImportRunStatus fromWire(String value) => values.firstWhere(
+    (status) => status.name == value,
+    orElse: () => RulePackImportRunStatus.running,
+  );
+
+  bool get isTerminal => this != RulePackImportRunStatus.running;
+}
+
+/// A pack import running in the background: its logo downloads, then what it
+/// did (`GET /rules/packs/import-runs/{id}`).
+@immutable
+class RulePackImportRun {
+  const RulePackImportRun({
+    required this.id,
+    required this.status,
+    this.logoDone = 0,
+    this.logoTotal = 0,
+    this.result,
+    this.errorMessage,
+  });
+
+  factory RulePackImportRun.fromJson(Map<String, dynamic> json) =>
+      RulePackImportRun(
+        id: json['id'] as String,
+        status: RulePackImportRunStatus.fromWire(json['status'] as String),
+        logoDone: json['logo_done'] as int? ?? 0,
+        logoTotal: json['logo_total'] as int? ?? 0,
+        result: switch (json['result']) {
+          final Map<String, dynamic> result => RulePackImportResult.fromJson(
+            result,
+          ),
+          _ => null,
+        },
+        errorMessage: json['error_message'] as String?,
+      );
+
+  final String id;
+  final RulePackImportRunStatus status;
+
+  /// Distinct logo URLs settled so far, downloaded or not, out of [logoTotal].
+  final int logoDone;
+
+  /// Distinct logo URLs to download; 0 until the rules are in, and when the
+  /// import downloads none.
+  final int logoTotal;
+
+  /// What the import did, once [RulePackImportRunStatus.finished].
+  final RulePackImportResult? result;
+
+  /// Set when failed. Not shown as is: it is English, the app says it in the
+  /// user's language.
+  final String? errorMessage;
+
+  /// Share of the logo downloads settled, from 0 to 1.
+  double get logoProgress => logoTotal == 0 ? 0 : logoDone / logoTotal;
+
+  RulePackImportRun withProgress({
+    RulePackImportRunStatus? status,
+    required int logoDone,
+    required int logoTotal,
+    String? errorMessage,
+  }) => RulePackImportRun(
+    id: id,
+    status: status ?? this.status,
+    logoDone: logoDone,
+    logoTotal: logoTotal,
+    result: result,
+    errorMessage: errorMessage ?? this.errorMessage,
+  );
+}
+
 /// Why a rule couldn't be carried into an export.
 enum RuleOmissionReason {
   regex('regex'),
