@@ -6,10 +6,11 @@ import '../logos/logo_ref.dart';
 import 'monogram_avatar.dart';
 
 /// Institution/merchant avatar: the [MonogramAvatar], or the logo the user
-/// uploaded on a categorization rule that matches this row.
+/// set on a categorization rule that matches this row.
 ///
-/// The app never ships or fetches third-party logos; a [logo] is always the
-/// user's own upload, served by the local backend. The monogram stays the
+/// The app never ships third-party logos or looks one up on its own; a [logo]
+/// is always one the user supplied, uploaded or fetched from an address they
+/// pasted, and served by the local backend. The monogram stays the
 /// fallback while the picture loads, when it can't be fetched and when it
 /// doesn't decode, so the chip never renders broken or empty.
 class InstitutionAvatar extends ConsumerWidget {

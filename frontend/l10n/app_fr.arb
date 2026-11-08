@@ -1862,6 +1862,55 @@
       }
     }
   },
+  "ruleFormLogoFromUrl": "Depuis une adresse…",
+  "@ruleFormLogoFromUrl": {
+    "description": "Button of the rule editor opening the dialog that downloads a logo from a web address."
+  },
+  "ruleLogoUrlTitle": "Logo depuis une adresse",
+  "@ruleLogoUrlTitle": {
+    "description": "Title of the dialog where the user pastes the web address of a logo picture."
+  },
+  "ruleLogoUrlLead": "Collez l'adresse d'une image. Bastide la télécharge depuis cet ordinateur, puis vous la recadrez.",
+  "@ruleLogoUrlLead": {
+    "description": "Lead text of the logo-from-address dialog: the app downloads the picture itself, then the crop step follows."
+  },
+  "ruleLogoUrlLabel": "Adresse de l'image",
+  "@ruleLogoUrlLabel": {
+    "description": "Label of the web address field in the logo-from-address dialog."
+  },
+  "ruleLogoUrlHint": "https://…",
+  "@ruleLogoUrlHint": {
+    "description": "Placeholder of the web address field in the logo-from-address dialog."
+  },
+  "ruleLogoUrlCancel": "Annuler",
+  "@ruleLogoUrlCancel": {
+    "description": "Cancel button of the logo-from-address dialog."
+  },
+  "ruleLogoUrlFetch": "Télécharger",
+  "@ruleLogoUrlFetch": {
+    "description": "Confirm button of the logo-from-address dialog: downloads the picture."
+  },
+  "ruleLogoUrlInvalidAddress": "Saisissez une adresse qui commence par http:// ou https://.",
+  "@ruleLogoUrlInvalidAddress": {
+    "description": "Error when the pasted logo address is not an http or https address."
+  },
+  "ruleLogoUrlUnreachable": "L'image n'a pas pu être téléchargée. Vérifiez l'adresse et votre connexion.",
+  "@ruleLogoUrlUnreachable": {
+    "description": "Error when the logo address could not be reached, answered an error or timed out."
+  },
+  "ruleLogoUrlTooLarge": "Cette image dépasse {megabytes} Mo.",
+  "@ruleLogoUrlTooLarge": {
+    "description": "Error when the downloaded logo is over the upload size limit; {megabytes} is that limit.",
+    "placeholders": {
+      "megabytes": {
+        "type": "int"
+      }
+    }
+  },
+  "ruleLogoUrlNotAPicture": "Cette adresse ne mène pas à une image.",
+  "@ruleLogoUrlNotAPicture": {
+    "description": "Error when the downloaded file is not a picture."
+  },
   "ruleFormCancel": "Annuler",
   "@ruleFormCancel": {
     "description": "Cancel button of the rule editor."

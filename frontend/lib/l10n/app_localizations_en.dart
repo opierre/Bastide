@@ -1458,6 +1458,45 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get ruleFormLogoFromUrl => 'From an address…';
+
+  @override
+  String get ruleLogoUrlTitle => 'Logo from an address';
+
+  @override
+  String get ruleLogoUrlLead =>
+      'Paste a picture\'s address. Bastide downloads it from this computer, then you crop it.';
+
+  @override
+  String get ruleLogoUrlLabel => 'Picture address';
+
+  @override
+  String get ruleLogoUrlHint => 'https://…';
+
+  @override
+  String get ruleLogoUrlCancel => 'Cancel';
+
+  @override
+  String get ruleLogoUrlFetch => 'Download';
+
+  @override
+  String get ruleLogoUrlInvalidAddress =>
+      'Enter an address starting with http:// or https://.';
+
+  @override
+  String get ruleLogoUrlUnreachable =>
+      'The picture couldn\'t be downloaded. Check the address and your connection.';
+
+  @override
+  String ruleLogoUrlTooLarge(int megabytes) {
+    return 'This picture is over $megabytes MB.';
+  }
+
+  @override
+  String get ruleLogoUrlNotAPicture =>
+      'This address doesn\'t lead to a picture.';
+
+  @override
   String get ruleFormCancel => 'Cancel';
 
   @override

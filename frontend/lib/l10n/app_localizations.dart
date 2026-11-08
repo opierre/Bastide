@@ -2527,6 +2527,72 @@ abstract class AppLocalizations {
   /// **'Cette image est trop lourde : choisissez un fichier de moins de {megabytes} Mo.'**
   String ruleLogoTooLarge(int megabytes);
 
+  /// Button of the rule editor opening the dialog that downloads a logo from a web address.
+  ///
+  /// In fr, this message translates to:
+  /// **'Depuis une adresse…'**
+  String get ruleFormLogoFromUrl;
+
+  /// Title of the dialog where the user pastes the web address of a logo picture.
+  ///
+  /// In fr, this message translates to:
+  /// **'Logo depuis une adresse'**
+  String get ruleLogoUrlTitle;
+
+  /// Lead text of the logo-from-address dialog: the app downloads the picture itself, then the crop step follows.
+  ///
+  /// In fr, this message translates to:
+  /// **'Collez l\'adresse d\'une image. Bastide la télécharge depuis cet ordinateur, puis vous la recadrez.'**
+  String get ruleLogoUrlLead;
+
+  /// Label of the web address field in the logo-from-address dialog.
+  ///
+  /// In fr, this message translates to:
+  /// **'Adresse de l\'image'**
+  String get ruleLogoUrlLabel;
+
+  /// Placeholder of the web address field in the logo-from-address dialog.
+  ///
+  /// In fr, this message translates to:
+  /// **'https://…'**
+  String get ruleLogoUrlHint;
+
+  /// Cancel button of the logo-from-address dialog.
+  ///
+  /// In fr, this message translates to:
+  /// **'Annuler'**
+  String get ruleLogoUrlCancel;
+
+  /// Confirm button of the logo-from-address dialog: downloads the picture.
+  ///
+  /// In fr, this message translates to:
+  /// **'Télécharger'**
+  String get ruleLogoUrlFetch;
+
+  /// Error when the pasted logo address is not an http or https address.
+  ///
+  /// In fr, this message translates to:
+  /// **'Saisissez une adresse qui commence par http:// ou https://.'**
+  String get ruleLogoUrlInvalidAddress;
+
+  /// Error when the logo address could not be reached, answered an error or timed out.
+  ///
+  /// In fr, this message translates to:
+  /// **'L\'image n\'a pas pu être téléchargée. Vérifiez l\'adresse et votre connexion.'**
+  String get ruleLogoUrlUnreachable;
+
+  /// Error when the downloaded logo is over the upload size limit; {megabytes} is that limit.
+  ///
+  /// In fr, this message translates to:
+  /// **'Cette image dépasse {megabytes} Mo.'**
+  String ruleLogoUrlTooLarge(int megabytes);
+
+  /// Error when the downloaded file is not a picture.
+  ///
+  /// In fr, this message translates to:
+  /// **'Cette adresse ne mène pas à une image.'**
+  String get ruleLogoUrlNotAPicture;
+
   /// Cancel button of the rule editor.
   ///
   /// In fr, this message translates to:
