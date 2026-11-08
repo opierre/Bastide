@@ -6,6 +6,7 @@ enforcement of it, so keep the two in step.
 
 import base64
 import binascii
+from datetime import datetime
 from typing import Annotated, Any, Literal, Self
 from urllib.parse import urlsplit
 
@@ -292,6 +293,36 @@ class RulePackImportResult(BaseModel):
     #: Linked logos left out because the import was not asked to download them.
     logo_skipped_count: int
     logo_failures: list[LogoFailureRead]
+
+
+#: `running` until the import settles; `failed` only when it could not finish at all (a logo
+#: that fails is reported in the result, and the run still `finished`).
+RulePackImportRunStatus = Literal["running", "finished", "failed"]
+
+
+class RulePackImportRunRead(BaseModel):
+    """A pack import running in the background: its logo download progress, then its result.
+
+    The same counts are pushed live on the run progress WebSocket (`kind="rule_pack_import"`);
+    this is the snapshot to read when the socket is not connected, and the only place the full
+    result — logo failures included — is read from.
+    """
+
+    # Every field goes out, nulls included, so the reference must not call any optional.
+    model_config = ConfigDict(json_schema_serialization_defaults_required=True)
+
+    id: str
+    status: RulePackImportRunStatus
+    #: Distinct logo URLs settled so far, downloaded or not, out of `logo_total`.
+    logo_done: int
+    #: Distinct logo URLs to download; 0 until the rules are in, and when none are downloaded.
+    logo_total: int
+    #: What the import did, once `finished`; null before, and when `failed`.
+    result: RulePackImportResult | None = None
+    #: Set when `failed` only: user-safe, never a stack trace.
+    error_message: str | None = None
+    created_at: datetime
+    finished_at: datetime | None = None
 
 
 #: Why a rule cannot round-trip: it uses `regex` (which no importer will accept), or it points

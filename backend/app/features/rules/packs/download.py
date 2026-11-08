@@ -45,6 +45,8 @@ DOWNLOAD_DEADLINE_S = 90.0
 _RETRY_STATUSES = frozenset({429, 503})
 
 type Sleep = Callable[[float], Awaitable[None]]
+#: Told about each URL as soon as its download settles, with its bytes or its failure.
+type OnLogoResult = Callable[[str, bytes | LogoDownloadError], None]
 
 
 class LogoDownloadError(Exception):
@@ -67,13 +69,17 @@ class LogoFetcher(Protocol):
     """Fetches the files a pack's linked logos point at."""
 
     async def fetch_all(
-        self, urls: Iterable[str], max_total_bytes: int
+        self,
+        urls: Iterable[str],
+        max_total_bytes: int,
+        on_result: OnLogoResult | None = None,
     ) -> dict[str, bytes | LogoDownloadError]:
         """Download each distinct URL once; a failure is returned in its place, not raised.
 
         Each file is held to `MAX_LOGO_BYTES`, and all of them together to `max_total_bytes`:
         once that much has been received, the downloads still running or waiting fail with
-        `LogoTooLargeError`.
+        `LogoTooLargeError`. ``on_result``, when given, is called once per distinct URL as soon
+        as it settles, which is what a background import reports its progress from.
         """
         ...
 
@@ -103,7 +109,10 @@ class HttpLogoFetcher:
         self._jitter = jitter
 
     async def fetch_all(
-        self, urls: Iterable[str], max_total_bytes: int
+        self,
+        urls: Iterable[str],
+        max_total_bytes: int,
+        on_result: OnLogoResult | None = None,
     ) -> dict[str, bytes | LogoDownloadError]:
         distinct = list(dict.fromkeys(urls))
         if not distinct:
@@ -128,7 +137,7 @@ class HttpLogoFetcher:
                 jitter=self._jitter,
             )
 
-            async def one(url: str) -> bytes | LogoDownloadError:
+            async def settle(url: str) -> bytes | LogoDownloadError:
                 async with gate:
                     try:
                         async with asyncio.timeout_at(hard_stop):
@@ -137,6 +146,12 @@ class HttpLogoFetcher:
                         return exc
                     except TimeoutError:
                         return LogoDownloadError("The logo downloads ran out of time.")
+
+            async def one(url: str) -> bytes | LogoDownloadError:
+                result = await settle(url)
+                if on_result is not None:
+                    on_result(url, result)
+                return result
 
             results = await asyncio.gather(*(one(url) for url in distinct))
         return dict(zip(distinct, results, strict=True))

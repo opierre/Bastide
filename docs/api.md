@@ -82,6 +82,8 @@ details?}}`. Model names refer to the Pydantic schemas in `backend/app/features/
 | `GET` | `/rules/packs/builtin` |  |  | 200 [`BuiltinPackRead`] |
 | `POST` | `/rules/packs/preview` |  | `RulePackSource` | 200 `RulePackPreviewResult` |
 | `POST` | `/rules/packs/import` |  | `RulePackImportRequest` | 200 `RulePackImportResult` |
+| `POST` | `/rules/packs/import-runs` |  | `RulePackImportRequest` | 202 `RulePackImportRunRead` |
+| `GET` | `/rules/packs/import-runs/{run_id}` |  |  | 200 `RulePackImportRunRead` |
 | `GET` | `/rules/packs/export` | `enabled_only`, `include_logos`, `name` |  | 200 `RulePackExportResult` |
 | `PATCH` | `/rules/{rule_id}` |  | `RuleUpdate` | 200 `RuleRead` |
 | `DELETE` | `/rules/{rule_id}` |  |  | 204 |
@@ -239,7 +241,7 @@ One step of one run, as a subscriber receives it. ``done``/``total`` are the run
 | Field | Type | Required |
 |-------|------|----------|
 | `run_id` | `string` | yes |
-| `kind` | `"categorization"` | yes |
+| `kind` | `"categorization"` \| `"rule_pack_import"` | yes |
 | `event` | `"started"` \| `"progress"` \| `"finished"` \| `"failed"` \| `"cancelled"` | yes |
 | `done` | `integer` | yes |
 | `total` | `integer` | yes |
