@@ -58,8 +58,15 @@ class _Web:
     def __init__(self, app: FastAPI) -> None:
         self.requests: list[httpx.Request] = []
         self.routes: dict[str, Callable[[httpx.Request], httpx.Response]] = {}
+        self.sleeps: list[float] = []
         transport = httpx.MockTransport(self._handle)
-        app.dependency_overrides[get_logo_fetcher] = lambda: HttpLogoFetcher(transport)
+        # Pacing and backoff record their waits instead of sleeping (see test_download.py).
+        app.dependency_overrides[get_logo_fetcher] = lambda: HttpLogoFetcher(
+            transport, sleep=self._sleep
+        )
+
+    async def _sleep(self, seconds: float) -> None:
+        self.sleeps.append(seconds)
 
     def serve(self, url: str, body: bytes | None = None, status: int = 200, **headers: str):
         self.routes[url] = lambda _: httpx.Response(
