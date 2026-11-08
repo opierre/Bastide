@@ -21,7 +21,7 @@ This skill is the enforceable rule set.
 - **Local-first.** No network calls except the opt-in local inference runtime on loopback,
   the opt-in update check (`features/updates`: GitHub's latest-release API, at most once a
   day, carrying nothing about the user), and the opt-in download of a rule pack's linked logos
-  (`features/rules/packs/download.py`: `https://upload.wikimedia.org/` only, redirects
+  (`features/rules/packs/download.py`: `https://upload.wikimedia.org/wikipedia/commons/` only, redirects
   included, nothing about the user).
   No telemetry, no cloud calls.
 
