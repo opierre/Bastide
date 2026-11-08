@@ -3,14 +3,17 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
+import '../../../core/l10n/card_display.dart';
 import '../../../core/l10n/category_display.dart';
 import '../../../core/theme/tokens.dart';
 import '../../../core/widgets/app_card.dart';
 import '../../../core/widgets/search_pill.dart';
 import '../../../core/widgets/state_views.dart';
 import '../../../l10n/app_localizations.dart';
+import '../../accounts/application/account_detail_controller.dart';
 import '../../accounts/application/accounts_controller.dart';
 import '../../accounts/domain/account.dart';
+import '../../accounts/domain/account_overview.dart';
 import '../../imports/presentation/imports_screen.dart';
 import '../application/transactions_controller.dart';
 import '../../categories/domain/category.dart';
@@ -398,6 +401,12 @@ class _TransactionsListCard extends ConsumerWidget {
     final accountNames = {
       for (final account in accounts) account.id: account.name,
     };
+    // Filtered to an account, its linked cards' rows come along; they are
+    // marked with their card as on the account detail.
+    final accountId = filters.accountId;
+    final cards = accountId == null
+        ? const <String, LinkedCard>{}
+        : ref.watch(linkedCardsByIdProvider(accountId));
     final from = page.total == 0 ? 0 : ((page.page - 1) * page.pageSize) + 1;
     final to = ((page.page - 1) * page.pageSize) + page.items.length;
 
@@ -413,10 +422,21 @@ class _TransactionsListCard extends ConsumerWidget {
                   const Divider(height: 1, color: AppColors.borderSubtle),
               itemBuilder: (context, index) {
                 final transaction = page.items[index];
-                return TransactionRow(
-                  transaction: transaction,
-                  accountName: accountNames[transaction.accountId] ?? '',
-                );
+                return switch (cards[transaction.accountId]) {
+                  final card? => TransactionRow(
+                    transaction: transaction,
+                    accountName: cardRowLabel(
+                      l10n,
+                      card.name,
+                      card.cardLastDigits,
+                    ),
+                    accountIcon: cardRowIcon,
+                  ),
+                  null => TransactionRow(
+                    transaction: transaction,
+                    accountName: accountNames[transaction.accountId] ?? '',
+                  ),
+                };
               },
             ),
           ),

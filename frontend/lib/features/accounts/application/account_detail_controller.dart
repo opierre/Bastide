@@ -40,8 +40,8 @@ final recentAccountTransactionsProvider = FutureProvider.autoDispose
       return page.items.take(recentTransactionCount).toList();
     });
 
-/// The account's linked cards by id, so a card's row in the recent list can
-/// name its card. Empty while the overview loads, or for an account without
+/// The account's linked cards by id, so a card's row — in the recent list, or
+/// in the Transactions panel filtered to the account — can name its card. Empty while the overview loads, or for an account without
 /// cards.
 final linkedCardsByIdProvider = Provider.autoDispose
     .family<Map<String, LinkedCard>, String>((ref, accountId) {
