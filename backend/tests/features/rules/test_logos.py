@@ -3,6 +3,7 @@
 import io
 from datetime import date
 from pathlib import Path
+from typing import cast
 
 import pytest
 from fastapi.testclient import TestClient
@@ -137,6 +138,76 @@ def test_a_jpeg_with_exif_comes_back_as_a_square_png_without_metadata() -> None:
         assert result.size == (256, 256)
         assert len(result.getexif()) == 0
         assert "exif" not in result.info
+
+
+_RED, _GREEN, _BLUE = (255, 0, 0), (0, 160, 0), (0, 0, 255)
+
+
+def _banded(size: tuple[int, int], fmt: str = "PNG") -> bytes:
+    """A picture whose two ends (left/right if wide, top/bottom if tall) are red and blue."""
+    width, height = size
+    image = Image.new("RGB", size, _GREEN)
+    if width >= height:
+        band = width // 10
+        image.paste(_RED, (0, 0, band, height))
+        image.paste(_BLUE, (width - band, 0, width, height))
+    else:
+        band = height // 10
+        image.paste(_RED, (0, 0, width, band))
+        image.paste(_BLUE, (0, height - band, width, height))
+    output = io.BytesIO()
+    image.save(output, format=fmt, quality=95)
+    return output.getvalue()
+
+
+def _pixels(data: bytes) -> Image.Image:
+    with Image.open(io.BytesIO(data)) as result:
+        assert (result.format, result.size) == ("PNG", (256, 256))
+        return result.convert("RGBA")
+
+
+def _close(pixel: object, colour: tuple[int, int, int]) -> bool:
+    assert isinstance(pixel, tuple)
+    channels = cast(tuple[int, int, int, int], pixel)
+    return channels[3] == 255 and all(
+        abs(a - b) < 40 for a, b in zip(channels[:3], colour, strict=False)
+    )
+
+
+def _transparent(pixel: object) -> bool:
+    assert isinstance(pixel, tuple)
+    return pixel[3] == 0
+
+
+@pytest.mark.parametrize("fmt", ["PNG", "JPEG"])
+def test_a_wide_logo_is_padded_whole_not_cropped(fmt: str) -> None:
+    result = _pixels(normalize_logo(_banded((400, 100), fmt)))
+
+    # Both ends survive, on a 256x64 strip centred between transparent bands.
+    assert _close(result.getpixel((5, 128)), _RED)
+    assert _close(result.getpixel((250, 128)), _BLUE)
+    assert _close(result.getpixel((128, 128)), _GREEN)
+    assert _transparent(result.getpixel((128, 10)))
+    assert _transparent(result.getpixel((128, 245)))
+
+
+def test_a_tall_logo_is_padded_whole_not_cropped() -> None:
+    result = _pixels(normalize_logo(_banded((100, 400))))
+
+    assert _close(result.getpixel((128, 5)), _RED)
+    assert _close(result.getpixel((128, 250)), _BLUE)
+    assert _transparent(result.getpixel((10, 128)))
+    assert _transparent(result.getpixel((245, 128)))
+
+
+def test_a_square_logo_fills_the_square_without_padding() -> None:
+    result = _pixels(normalize_logo(_banded((300, 300))))
+
+    assert _close(result.getpixel((5, 128)), _RED)
+    assert _close(result.getpixel((250, 128)), _BLUE)
+    assert _close(result.getpixel((128, 0)), _GREEN)
+    alpha = result.getchannel("A")
+    assert alpha.getextrema() == (255, 255)
 
 
 def test_bytes_that_are_no_picture_are_refused() -> None:

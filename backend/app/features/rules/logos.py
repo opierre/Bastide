@@ -37,7 +37,10 @@ class RuleLogoInvalidImageError(ValidationError):
 
 
 def normalize_logo(data: bytes) -> bytes:
-    """Decode an uploaded logo, crop it to its centre square and re-encode it as a PNG.
+    """Decode an uploaded logo, fit it whole inside a square and re-encode it as a PNG.
+
+    Padded rather than cropped: many logos are wide wordmarks, and a crop would cut off their
+    ends. The padding is transparent, so the chip's own background shows around the logo.
 
     Raises:
         RuleLogoTooLargeError: the file or its pixel count is over the limit.
@@ -56,6 +59,7 @@ def normalize_logo(data: bytes) -> bytes:
         ),
         max_bytes=MAX_UPLOAD_BYTES,
         max_pixels=MAX_PIXELS,
+        fit="pad",
     )
 
 

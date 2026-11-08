@@ -2,13 +2,13 @@ import 'dart:typed_data';
 import 'dart:ui' as ui;
 
 import 'package:bastide/core/api/api_client.dart';
+import 'package:bastide/core/pictures/pictures.dart';
 import 'package:bastide/core/api/api_client_provider.dart';
 import 'package:bastide/core/theme/app_theme.dart';
 import 'package:bastide/features/auth/application/auth_controller.dart';
 import 'package:bastide/features/auth/application/avatar_picture_controllers.dart';
 import 'package:bastide/features/auth/domain/auth_user.dart';
 import 'package:bastide/features/auth/domain/avatar_choice.dart';
-import 'package:bastide/features/auth/domain/avatar_picture.dart';
 import 'package:bastide/features/auth/presentation/avatar_card.dart';
 import 'package:bastide/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
@@ -21,9 +21,9 @@ import '../../support/fake_auth_controller.dart';
 
 class _MockApiClient extends Mock implements ApiClient {}
 
-class _MockAvatarFiles extends Mock implements AvatarFiles {}
+class _MockPictureFiles extends Mock implements PictureFiles {}
 
-class _MockAvatarImaging extends Mock implements AvatarImaging {}
+class _MockPictureImaging extends Mock implements PictureImaging {}
 
 class _FakeImage extends Fake implements ui.Image {}
 
@@ -72,8 +72,8 @@ PickedPictureFile _file(int length) =>
 
 void main() {
   late _MockApiClient api;
-  late _MockAvatarFiles files;
-  late _MockAvatarImaging imaging;
+  late _MockPictureFiles files;
+  late _MockPictureImaging imaging;
 
   setUpAll(() {
     registerFallbackValue(_FakeImage());
@@ -83,8 +83,8 @@ void main() {
 
   setUp(() {
     api = _MockApiClient();
-    files = _MockAvatarFiles();
-    imaging = _MockAvatarImaging();
+    files = _MockPictureFiles();
+    imaging = _MockPictureImaging();
   });
 
   List<Override> overrides(AuthUser user) => [
@@ -92,8 +92,8 @@ void main() {
       () => FakeAuthController(initialUser: user),
     ),
     apiClientProvider.overrideWithValue(api),
-    avatarFilesProvider.overrideWithValue(files),
-    avatarImagingProvider.overrideWithValue(imaging),
+    pictureFilesProvider.overrideWithValue(files),
+    pictureImagingProvider.overrideWithValue(imaging),
   ];
 
   group('cropRectFor', () {
@@ -200,7 +200,7 @@ void main() {
       var read = false;
       when(() => files.pick()).thenAnswer(
         (_) async => (
-          length: maxAvatarUploadBytes + 1,
+          length: maxPictureUploadBytes + 1,
           read: () async {
             read = true;
             return Uint8List(0);
@@ -217,7 +217,7 @@ void main() {
       expect(read, isFalse);
       expect(
         c.read(profilePictureControllerProvider).failure,
-        AvatarUploadFailure.tooLarge,
+        PictureUploadFailure.tooLarge,
       );
     });
 
@@ -233,7 +233,7 @@ void main() {
       expect(image, isNull);
       expect(
         c.read(profilePictureControllerProvider).failure,
-        AvatarUploadFailure.invalidType,
+        PictureUploadFailure.invalidType,
       );
     });
 
@@ -271,7 +271,7 @@ void main() {
       expect(saved, isFalse);
       expect(
         c.read(profilePictureControllerProvider).failure,
-        AvatarUploadFailure.invalidType,
+        PictureUploadFailure.invalidType,
       );
       expect(
         c.read(authControllerProvider).value?.avatar,
@@ -323,12 +323,12 @@ void main() {
 
       await tester.tap(find.byKey(const Key('settingsAvatarChoosePicture')));
       await tester.pumpAndSettle();
-      expect(find.byKey(const Key('avatarCropViewport')), findsOneWidget);
+      expect(find.byKey(const Key('pictureCropViewport')), findsOneWidget);
 
-      await tester.tap(find.byKey(const Key('avatarCropSave')));
+      await tester.tap(find.byKey(const Key('pictureCropSave')));
       await tester.pumpAndSettle();
 
-      expect(find.byKey(const Key('avatarCropViewport')), findsNothing);
+      expect(find.byKey(const Key('pictureCropViewport')), findsNothing);
       expect(previewPicture(), findsOneWidget);
       expect(
         find.byKey(const Key('settingsAvatarRemovePicture')),
@@ -341,14 +341,14 @@ void main() {
     ) async {
       when(
         () => files.pick(),
-      ).thenAnswer((_) async => _file(maxAvatarUploadBytes + 1));
+      ).thenAnswer((_) async => _file(maxPictureUploadBytes + 1));
       await tester.pumpWidget(wrap(_user(const MonogramChoice())));
       await tester.pumpAndSettle();
 
       await tester.tap(find.byKey(const Key('settingsAvatarChoosePicture')));
       await tester.pumpAndSettle();
 
-      expect(find.byKey(const Key('avatarCropViewport')), findsNothing);
+      expect(find.byKey(const Key('pictureCropViewport')), findsNothing);
       expect(
         find.text(
           'Cette image est trop lourde : choisissez un fichier de moins de 10 Mo.',
@@ -398,13 +398,13 @@ void main() {
 
       await tester.tap(find.byKey(const Key('settingsAvatarChoosePicture')));
       await tester.pumpAndSettle();
-      await tester.tap(find.byKey(const Key('avatarCropSave')));
+      await tester.tap(find.byKey(const Key('pictureCropSave')));
       await tester.pumpAndSettle();
 
-      expect(find.byKey(const Key('avatarCropViewport')), findsOneWidget);
+      expect(find.byKey(const Key('pictureCropViewport')), findsOneWidget);
       expect(
         find.descendant(
-          of: find.byKey(const Key('avatarCropViewport')).hitTestable(),
+          of: find.byKey(const Key('pictureCropViewport')).hitTestable(),
           matching: find.byType(RawImage),
         ),
         findsOneWidget,

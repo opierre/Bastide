@@ -5,6 +5,7 @@ import '../../../core/api/api_client.dart';
 import '../../../core/api/api_client_provider.dart';
 import '../../categories/domain/category.dart';
 import '../domain/transaction.dart';
+import '../../../core/logos/logo_ref.dart';
 
 final _isoDate = DateFormat('yyyy-MM-dd');
 
@@ -109,6 +110,7 @@ class TransactionsRepository {
       fitid: json['fitid'] as String?,
       dedupHash: json['dedup_hash'] as String,
       recurringSeriesId: json['recurring_series_id'] as String?,
+      logo: LogoRef.fromJson(json),
       createdAt: DateTime.parse(json['created_at'] as String),
       updatedAt: DateTime.parse(json['updated_at'] as String),
     );
