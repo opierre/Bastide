@@ -61,9 +61,11 @@ looks like `https://upload.wikimedia.org/wikipedia/commons/thumb/x/xy/Name.svg/5
   `logo_skipped_count`, and their rules are imported without them.
 - **Each download** has a timeout, is held to the size caps, follows at most a few redirects
   (each one checked against the allowed host and path again), and sends only a fixed `User-Agent`
-  naming the app: no cookies, nothing about the user.
-- **Every logo** is decoded, cropped to its centre square and re-encoded as a 256x256 PNG. Give
-  wide logos some padding to make them square, or the crop cuts their sides off.
+  naming the app: no cookies, nothing about the user. Two run at a time; one Wikimedia throttles
+  (429, 503) is retried with backoff, within an overall deadline for the whole import.
+- **Every logo** is decoded, fitted whole inside a square (aspect ratio kept, centred on a
+  transparent background) and re-encoded as a 256x256 PNG, so a wide wordmark keeps its ends.
+  PNG, JPEG and WebP files, Wikimedia's JPEG or PNG thumbnails included, all work.
 - **Existing logos are kept.** A new rule gets its logo; a rule the user already has gets it
   only if it has none.
 - **A logo that fails** (`invalid_image`, `too_large`, `download_failed`) is listed in
