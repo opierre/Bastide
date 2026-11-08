@@ -79,6 +79,55 @@
           "description": "Optional note for pack authors and reviewers. Not persisted as part of the rule.",
           "type": "string",
           "maxLength": 200
+        },
+        "logo": {
+          "description": "Optional logo for the rule, embedded or linked. Every logo is decoded and re-encoded as a 256x256 PNG before it is stored. A new rule gets its logo; a rule the user already has gets it only when it has none, so an existing logo is never replaced. A logo that fails (not a picture, too large, download error) is reported and its rule imported without it.",
+          "oneOf": [
+            { "$ref": "#/$defs/embeddedLogo" },
+            { "$ref": "#/$defs/linkedLogo" }
+          ]
+        }
+      }
+    },
+    "embeddedLogo": {
+      "description": "A PNG, JPEG or WebP picture carried inside the pack. At most 10 MiB per logo decoded (the upload limit), and at most 20 MiB of embedded and downloaded logos per pack.",
+      "type": "object",
+      "required": ["data"],
+      "additionalProperties": false,
+      "properties": {
+        "data": {
+          "description": "The picture's bytes, standard padded base64 (RFC 4648 section 4) without line breaks.",
+          "type": "string",
+          "contentEncoding": "base64",
+          "minLength": 4,
+          "pattern": "^[A-Za-z0-9+/]*={0,2}$"
+        }
+      }
+    },
+    "linkedLogo": {
+      "description": "A logo file on Wikimedia Commons, whose files are all freely licensed (the same host also serves each Wikipedia's non-free fair-use files, which a pack must not link). Downloaded only when the user asks for it at import: retried with backoff when throttled, within an overall deadline, held to the per-logo and per-pack size caps, and never redirected off Commons. Any other link is refused when the pack is validated, so importing a pack can never make the machine contact a server the pack's author chose.",
+      "type": "object",
+      "required": ["url", "license", "source"],
+      "additionalProperties": false,
+      "properties": {
+        "url": {
+          "description": "Direct link to the file: exactly 'https://upload.wikimedia.org/wikipedia/commons/' followed by its path, with no user info, port, or dot segment ('.', '..', or percent-encoded).",
+          "type": "string",
+          "format": "uri",
+          "pattern": "^https://upload\\.wikimedia\\.org/wikipedia/commons/[^\\s\\\\]+$",
+          "maxLength": 500
+        },
+        "license": {
+          "description": "The file's licence as Wikimedia states it (e.g. 'CC0', 'CC BY-SA 4.0', 'Public domain').",
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100
+        },
+        "source": {
+          "description": "The file's description page, for attribution (e.g. 'https://commons.wikimedia.org/wiki/File:...'). Displayed only, never fetched.",
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 500
         }
       }
     }
