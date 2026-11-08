@@ -22,6 +22,10 @@ hiddenimports = [
     # uvicorn's loops and protocols, the SQLAlchemy dialects and argon2's cffi binding are
     # covered by the hooks shipped with PyInstaller and pyinstaller-hooks-contrib.
     *collect_submodules("app"),
+    # uvicorn picks its WebSocket protocol by name at startup, and `websockets` resolves its own
+    # public names lazily; without these the run progress socket is refused in the build.
+    *collect_submodules("uvicorn.protocols.websockets"),
+    *collect_submodules("websockets"),
 ]
 
 datas = [
