@@ -9,9 +9,10 @@ the backend enforces it in `backend/app/features/rules/packs/schema.py`.
 
 ## Your responsibility
 
-Whoever builds and shares a pack is responsible for the rights to the logos in it. Brand logos
-are usually copyrighted and almost always trademarks. Only put a logo in a pack you share when
-its licence allows it, and keep the licence and source with it.
+Whoever builds and shares a pack with embedded logos is responsible for the rights to them.
+Brand logos are usually copyrighted and almost always trademarks. Only embed a logo in a pack
+you share when its licence allows it. A linked logo is different: the pack carries only a link
+to a file on Wikimedia Commons, which the user downloads onto their own machine if they choose.
 
 ## The two forms
 
@@ -31,18 +32,21 @@ returns every rule without logos and sets `logos_too_large`.
 
 ### Linked: `{ "url", "license", "source" }`
 
-The pack points at a file on Wikimedia, and the importer downloads it only if the user asks.
+The pack points at a file on Wikimedia Commons, and the importer downloads it only if the user
+asks. Any Commons file may be linked, whatever its free licence.
 
-- `url` is a direct link to the file, exactly `https://upload.wikimedia.org/` followed by its
-  path: no other host, no port, no user info.
-- `license` is the file's licence as Wikimedia states it (`Public domain`, `CC0`, ...).
-- `source` is the file's description page on Commons, for attribution. It is shown, never
-  fetched.
+- `url` is a direct link to the file, starting with
+  `https://upload.wikimedia.org/wikipedia/commons/`: no other host or path, no port, no user
+  info. Files under other paths, such as `/wikipedia/en/`, are non-free fair-use uploads to a
+  single wiki and are refused.
+- `license` is the file's actual licence as its Commons page shows it (`Public domain`, `CC0`,
+  `CC BY-SA 4.0`, ...).
+- `source` is the file's Commons page, for attribution. It is shown, never fetched.
 
-**Why only `upload.wikimedia.org`.** A pack comes from someone else. If it could name any URL,
+**Why only Wikimedia Commons.** A pack comes from someone else. If it could name any URL,
 importing it would make your machine contact a server its author chose, and tell them your IP
-address and when you imported. With a single allowed host, a pack can do no more than ask for a
-public file from Wikimedia. Any other host fails validation, before anything is imported.
+address and when you imported. With a single allowed host and path, a pack can do no more than ask for a
+freely licensed file from Commons. Any other link fails validation, before anything is imported.
 
 Commons logos are often SVG files, which Bastide does not read. Link to the PNG rendering
 Commons generates instead: on the file's page, pick a size under "Other resolutions"; its URL
@@ -50,13 +54,13 @@ looks like `https://upload.wikimedia.org/wikipedia/commons/thumb/x/xy/Name.svg/5
 
 ## What happens at import
 
-- **Validation.** The whole pack is checked first: base64, sizes, the link's host. A pack that
+- **Validation.** The whole pack is checked first: base64, sizes, the link's host and path. A pack that
   fails is refused, and nothing is imported.
 - **Downloads are opt-in.** Linked logos are fetched only when the import is asked to
   (`download_logos: true` on `POST /rules/packs/import`). Otherwise they are counted in
   `logo_skipped_count`, and their rules are imported without them.
 - **Each download** has a timeout, is held to the size caps, follows at most a few redirects
-  (each one checked against the allowed host again), and sends only a fixed `User-Agent`
+  (each one checked against the allowed host and path again), and sends only a fixed `User-Agent`
   naming the app: no cookies, nothing about the user.
 - **Every logo** is decoded, cropped to its centre square and re-encoded as a 256x256 PNG. Give
   wide logos some padding to make them square, or the crop cuts their sides off.
@@ -111,10 +115,8 @@ The bundled pack `backend/app/features/rules/packs/builtin/fr-common.v1.json` ma
 logos, never embedded ones: the repo ships no logo files. To add one for a brand:
 
 1. Find the brand's logo on [Wikimedia Commons](https://commons.wikimedia.org/).
-2. Check its licence by hand on the file's description page. Only **public-domain** files
-   qualify (for example, a text-only logo tagged as below the threshold of originality). A file
-   under CC BY-SA or with an unclear status does not.
-3. Add a `logo` to the brand's rule with the file's PNG rendering as `url`, `Public domain` as
-   `license`, and the description page as `source`.
+2. Read its licence on the file's Commons page. Any free licence Commons accepts will do.
+3. Add a `logo` to the brand's rule with the file's PNG rendering as `url`, that licence as
+   `license`, and the Commons page as `source`.
 4. Run the rule pack tests from `backend/` (`uv run pytest tests/features/rules/packs`), which
-   load the bundled pack, and say in the PR which page you checked the licence on.
+   load the bundled pack, and link the Commons page in the PR.
