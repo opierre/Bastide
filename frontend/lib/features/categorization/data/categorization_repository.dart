@@ -19,7 +19,7 @@ class CategorizationRepository {
 
   /// Starts a run and returns it immediately (202). Asking while one is in
   /// flight returns that run instead of starting a second — one run at a time
-  /// per user, so the caller polls whatever comes back.
+  /// per user, so the caller follows whatever comes back.
   Future<CategorizationRun> startRun({
     String? accountId,
     required RunScope scope,
@@ -31,7 +31,7 @@ class CategorizationRepository {
     return CategorizationRun.fromJson(json as Map<String, dynamic>);
   }
 
-  /// The progress poll.
+  /// The run as stored: read when the progress socket cannot tell on its own.
   Future<CategorizationRun> getRun(String id) async {
     final json = await _apiClient.get('/categorization/runs/$id');
     return CategorizationRun.fromJson(json as Map<String, dynamic>);
