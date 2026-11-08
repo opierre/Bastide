@@ -4642,6 +4642,37 @@ class AppLocalizationsEn extends AppLocalizations {
   String get accountDetailSetUpRule => 'Set up the rule';
 
   @override
+  String get accountDetailLinkCard => 'Link a card';
+
+  @override
+  String get linkCardTitle => 'Link a card';
+
+  @override
+  String linkCardBody(String account) {
+    return 'Choose the deferred debit card whose monthly statement is drawn from $account.';
+  }
+
+  @override
+  String get linkCardLabel => 'Card';
+
+  @override
+  String get linkCardPlaceholder => 'Choose a card';
+
+  @override
+  String get linkCardCancel => 'Cancel';
+
+  @override
+  String get linkCardConfirm => 'Link';
+
+  @override
+  String get linkCardFailed => 'Couldn\'t link the card. Try again.';
+
+  @override
+  String linkCardLinked(String card) {
+    return '$card is now linked to this account';
+  }
+
+  @override
   String get accountDetailRecentTitle => 'Recent transactions';
 
   @override

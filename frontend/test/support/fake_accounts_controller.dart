@@ -42,10 +42,12 @@ class FakeAccountsController extends AccountsController {
         })
       >[];
   final archiveCalls = <String>[];
+  final linkCardCalls = <({String cardId, String settlementAccountId})>[];
 
   Object? errorOnCreate;
   Object? errorOnUpdate;
   Object? errorOnArchive;
+  Object? errorOnLinkCard;
 
   @override
   Future<List<Account>> build() async => initialAccounts;
@@ -108,6 +110,36 @@ class FakeAccountsController extends AccountsController {
       settlementAccountId: settlementAccountId,
     ));
     if (errorOnUpdate != null) throw errorOnUpdate!;
+  }
+
+  @override
+  Future<void> linkCard(String cardId, String settlementAccountId) async {
+    linkCardCalls.add((
+      cardId: cardId,
+      settlementAccountId: settlementAccountId,
+    ));
+    if (errorOnLinkCard != null) throw errorOnLinkCard!;
+    state = AsyncValue.data([
+      for (final account in state.value ?? const <Account>[])
+        if (account.id == cardId)
+          Account(
+            id: account.id,
+            name: account.name,
+            type: account.type,
+            institution: account.institution,
+            currency: account.currency,
+            ofxAccountId: account.ofxAccountId,
+            settlementAccountId: settlementAccountId,
+            openingBalanceMinor: account.openingBalanceMinor,
+            balanceMinor: account.balanceMinor,
+            lastTransactionDate: account.lastTransactionDate,
+            archived: account.archived,
+            createdAt: account.createdAt,
+            updatedAt: account.updatedAt,
+          )
+        else
+          account,
+    ]);
   }
 
   @override

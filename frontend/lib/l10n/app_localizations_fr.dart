@@ -4682,6 +4682,37 @@ class AppLocalizationsFr extends AppLocalizations {
   String get accountDetailSetUpRule => 'Configurer la règle';
 
   @override
+  String get accountDetailLinkCard => 'Lier une carte';
+
+  @override
+  String get linkCardTitle => 'Lier une carte';
+
+  @override
+  String linkCardBody(String account) {
+    return 'Choisissez la carte à débit différé dont le relevé mensuel est prélevé sur $account.';
+  }
+
+  @override
+  String get linkCardLabel => 'Carte';
+
+  @override
+  String get linkCardPlaceholder => 'Choisir une carte';
+
+  @override
+  String get linkCardCancel => 'Annuler';
+
+  @override
+  String get linkCardConfirm => 'Lier';
+
+  @override
+  String get linkCardFailed => 'Impossible de lier la carte. Réessayez.';
+
+  @override
+  String linkCardLinked(String card) {
+    return '$card est liée à ce compte';
+  }
+
+  @override
   String get accountDetailRecentTitle => 'Dernières opérations';
 
   @override

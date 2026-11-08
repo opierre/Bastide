@@ -7313,6 +7313,60 @@ abstract class AppLocalizations {
   /// **'Configurer la règle'**
   String get accountDetailSetUpRule;
 
+  /// Ghost button in an account's linked-cards section opening the dialog that links an unlinked deferred card to it.
+  ///
+  /// In fr, this message translates to:
+  /// **'Lier une carte'**
+  String get accountDetailLinkCard;
+
+  /// Title of the dialog linking a deferred card to an account.
+  ///
+  /// In fr, this message translates to:
+  /// **'Lier une carte'**
+  String get linkCardTitle;
+
+  /// Explanation in the link-card dialog.
+  ///
+  /// In fr, this message translates to:
+  /// **'Choisissez la carte à débit différé dont le relevé mensuel est prélevé sur {account}.'**
+  String linkCardBody(String account);
+
+  /// Label of the card picker in the link-card dialog.
+  ///
+  /// In fr, this message translates to:
+  /// **'Carte'**
+  String get linkCardLabel;
+
+  /// Placeholder of the card picker before a card is chosen.
+  ///
+  /// In fr, this message translates to:
+  /// **'Choisir une carte'**
+  String get linkCardPlaceholder;
+
+  /// Button closing the link-card dialog without linking.
+  ///
+  /// In fr, this message translates to:
+  /// **'Annuler'**
+  String get linkCardCancel;
+
+  /// Button linking the chosen card to the account.
+  ///
+  /// In fr, this message translates to:
+  /// **'Lier'**
+  String get linkCardConfirm;
+
+  /// Shown in the link-card dialog when linking fails.
+  ///
+  /// In fr, this message translates to:
+  /// **'Impossible de lier la carte. Réessayez.'**
+  String get linkCardFailed;
+
+  /// Toast once a card is linked to the account.
+  ///
+  /// In fr, this message translates to:
+  /// **'{card} est liée à ce compte'**
+  String linkCardLinked(String card);
+
   /// Title of the account detail's recent transactions card.
   ///
   /// In fr, this message translates to:
