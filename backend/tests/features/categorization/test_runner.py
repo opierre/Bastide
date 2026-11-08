@@ -9,10 +9,12 @@ from collections.abc import Coroutine
 from typing import Any
 
 from app.core.db import SessionFactory
+from app.core.progress import ProgressBus, RunEvent
 from app.features.categorization.models import CategorizationRun
 from app.features.categorization.repository import CategorizationRunRepository, new_run
 from app.features.categorization.runner import (
     ORPHANED_RUN_MESSAGE,
+    RUNTIME_UNREACHABLE_MESSAGE,
     execute_run,
     reconcile_orphaned_runs,
 )
@@ -97,6 +99,7 @@ def _execute(
     run_id: str,
     runtime: StubRuntime,
     transaction_ids: list[str] | None = None,
+    bus: ProgressBus | None = None,
 ) -> None:
     run(
         execute_run(
@@ -105,6 +108,7 @@ def _execute(
             ledger.transaction_ids if transaction_ids is None else transaction_ids,
             session_factory=session_factory,
             client_factory=runtime.factory,
+            bus=ProgressBus() if bus is None else bus,
         )
     )
 
@@ -551,3 +555,69 @@ def test_transactions_are_reloaded_in_the_order_they_were_selected(
         assert all(isinstance(row, Transaction) for row in rows)
     finally:
         db.close()
+
+
+class RecordingBus(ProgressBus):
+    """A real bus that also keeps every event it was handed, dropped ones included."""
+
+    def __init__(self) -> None:
+        super().__init__()
+        self.published: list[tuple[str, RunEvent]] = []
+
+    def publish(self, user_id: str, event: RunEvent) -> None:
+        self.published.append((user_id, event))
+        super().publish(user_id, event)
+
+
+def test_a_run_publishes_started_progress_per_batch_then_finished(
+    session_factory: SessionFactory,
+) -> None:
+    row_count = BATCH_SIZE + 2
+    ledger = seed_ledger(session_factory, _pending_rows(row_count))
+    started = _start_run(session_factory, ledger, row_count)
+    runtime = StubRuntime()
+    runtime.replies = [assign_all(BATCH_SIZE), assign_all(2)]
+    bus = RecordingBus()
+
+    _execute(session_factory, ledger, started.id, runtime, bus=bus)
+
+    assert {user_id for user_id, _ in bus.published} == {ledger.user_id}
+    events = [event for _, event in bus.published]
+    assert [event.event for event in events] == ["started", "progress", "progress", "finished"]
+    assert [event.done for event in events] == [0, BATCH_SIZE, row_count, row_count]
+    assert all(event.total == row_count for event in events)
+    assert all(event.run_id == started.id for event in events)
+    assert all(event.kind == "categorization" for event in events)
+    assert events[-1].counts == {"assigned": row_count, "deferred": 0, "failed": 0}
+    # Terminal: the run is no longer part of anyone's snapshot.
+    assert bus.active_runs(ledger.user_id) == []
+
+
+def test_a_run_that_got_nowhere_publishes_failed_with_its_message(
+    session_factory: SessionFactory,
+) -> None:
+    ledger = seed_ledger(session_factory, _pending_rows(2))
+    started = _start_run(session_factory, ledger, 2)
+    runtime = StubRuntime()
+    runtime.default = InferenceUnavailable("nothing is listening")
+    bus = RecordingBus()
+
+    _execute(session_factory, ledger, started.id, runtime, bus=bus)
+
+    last = bus.published[-1][1]
+    assert last.event == "failed"
+    assert last.error_message == RUNTIME_UNREACHABLE_MESSAGE
+    assert last.counts["failed"] == 2
+
+
+def test_a_run_cancelled_before_it_starts_publishes_nothing(
+    session_factory: SessionFactory,
+) -> None:
+    ledger = seed_ledger(session_factory, _pending_rows(2))
+    started = _start_run(session_factory, ledger, 2)
+    _cancel(session_factory, started.id)
+    bus = RecordingBus()
+
+    _execute(session_factory, ledger, started.id, StubRuntime(), bus=bus)
+
+    assert bus.published == []
