@@ -9,6 +9,7 @@ import '../../../core/widgets/app_toggle.dart';
 import '../../../core/widgets/inline_banner.dart';
 import '../../../core/widgets/primary_button.dart';
 import '../../../l10n/app_localizations.dart';
+import '../application/rule_pack_import_controller.dart';
 import '../application/rule_packs_controller.dart';
 import '../domain/rule_pack.dart';
 import 'rule_error_localizer.dart';
@@ -107,142 +108,298 @@ class _RulePackImportSheetState extends ConsumerState<RulePackImportSheet> {
   // Off by default: a linked logo is fetched from Wikimedia only when the user
   // ticks the box, never as a side effect of importing someone's pack.
   bool _downloadLogos = false;
-  bool _isImporting = false;
-  String? _errorText;
 
   RulePackPreview get _preview => widget.pending.preview;
 
-  Future<void> _import() async {
-    final l10n = AppLocalizations.of(context)!;
-    setState(() {
-      _isImporting = true;
-      _errorText = null;
-    });
-    try {
-      final result = await ref
-          .read(rulePacksControllerProvider.notifier)
-          .import(
-            widget.pending,
-            applyNow: _applyNow,
-            downloadLogos: _downloadLogos,
-          );
-      if (!mounted) return;
-      final navigator = Navigator.of(context);
-      navigator.pop();
-      showAppToast(
-        context,
-        title: l10n.rulePackImportedTitle(result.createdCount),
-        message: _applyNow
-            ? l10n.rulePackImportedBody(result.recategorizedCount)
-            : l10n.rulesApplyToastBody,
-      );
-      // The import succeeded either way; the logos that didn't make it are
-      // listed so the user knows which rules still show a monogram, and why.
-      if (result.logoFailures.isNotEmpty) {
-        await showDialog<void>(
-          context: navigator.context,
-          builder: (_) =>
-              RulePackLogoFailuresDialog(failures: result.logoFailures),
+  void _import() {
+    ref
+        .read(rulePackImportControllerProvider.notifier)
+        .start(
+          widget.pending,
+          applyNow: _applyNow,
+          downloadLogos: _downloadLogos,
         );
-      }
-    } catch (error) {
-      if (!mounted) return;
-      setState(() {
-        _isImporting = false;
-        _errorText = localizeRuleError(l10n, error);
-      });
+  }
+
+  /// An import with no logos to download ends as it always did: the sheet
+  /// closes on a toast. One that downloaded logos keeps the sheet open, so
+  /// its result replaces the progress bar the user was watching.
+  void _onStateChanged(
+    RulePackImportState? previous,
+    RulePackImportState next,
+  ) {
+    final result = next.result;
+    if (result == null || previous?.result != null || next.hasLogoDownloads) {
+      return;
     }
+    final l10n = AppLocalizations.of(context)!;
+    final navigator = Navigator.of(context);
+    navigator.pop();
+    showAppToast(
+      context,
+      title: l10n.rulePackImportedTitle(result.createdCount),
+      message: _applyNow
+          ? l10n.rulePackImportedBody(result.recategorizedCount)
+          : l10n.rulesApplyToastBody,
+    );
+    // The import succeeded either way; the logos that didn't make it (an
+    // embedded picture that isn't one) are listed so the user knows which
+    // rules still show a monogram, and why.
+    if (result.logoFailures.isNotEmpty) {
+      showDialog<void>(
+        context: navigator.context,
+        builder: (_) =>
+            RulePackLogoFailuresDialog(failures: result.logoFailures),
+      );
+    }
+  }
+
+  String? _errorText(AppLocalizations l10n, RulePackImportState state) {
+    if (state.hasFailed) return l10n.rulePackImportRunFailed;
+    if (state.error case final error?) return localizeRuleError(l10n, error);
+    return null;
   }
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    ref.listen(rulePackImportControllerProvider, _onStateChanged);
+    final state = ref.watch(rulePackImportControllerProvider);
+    final errorText = _errorText(l10n, state);
 
-    return AppModal(
-      title: _preview.name,
-      width: 520,
-      actions: [
-        OutlinedButton(
-          onPressed: _isImporting ? null : () => Navigator.of(context).pop(),
-          child: Text(l10n.rulePackCancel),
-        ),
-        PrimaryButton(
-          key: const Key('rulePackImportConfirm'),
-          label: l10n.rulePackImportConfirm,
-          isLoading: _isImporting,
-          onPressed: _isImporting || !_preview.hasAnythingToImport
-              ? null
-              : _import,
-        ),
-      ],
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          if (_errorText != null) ...[
-            InlineBanner(
-              key: const Key('rulePackImportError'),
-              message: _errorText!,
-            ),
-            const SizedBox(height: AppSpacing.md),
-          ],
-          // The headline the whole confirmation step exists for.
-          InlineBanner(
-            key: const Key('rulePackHeadline'),
-            tone: BannerTone.info,
-            message: l10n.rulePackWouldMatch(_preview.wouldMatchCount),
+    // The run cannot be cancelled, and closing the sheet would lose its
+    // result: the sheet stays until the import ends, unless following it
+    // failed — then the user is not held hostage to a run they can't see.
+    final canClose = !state.isInFlight || state.error != null;
+
+    if (state.result case final result? when state.hasLogoDownloads) {
+      return AppModal(
+        title: _preview.name,
+        width: 520,
+        actions: [
+          PrimaryButton(
+            key: const Key('rulePackImportDone'),
+            label: l10n.rulePackClose,
+            onPressed: () => Navigator.of(context).pop(),
           ),
-          const SizedBox(height: AppSpacing.md),
-          RulePackReport(preview: _preview),
-          if (widget.pending.pack case final pack?
-              when pack.rules.isNotEmpty) ...[
-            const SizedBox(height: AppSpacing.md),
-            _PackRulesList(rules: pack.rules),
-          ],
-          const SizedBox(height: AppSpacing.md),
-          if (_preview.linksLogos) ...[
-            _LogoDownloadCheckbox(
-              value: _downloadLogos,
-              label: l10n.rulePackLogoDownload(_preview.logoDownloadCount),
-              onChanged: _isImporting
+        ],
+        child: _ImportResultView(result: result, appliedNow: _applyNow),
+      );
+    }
+
+    final isImporting = state.isInFlight;
+    return PopScope(
+      canPop: canClose,
+      child: AppModal(
+        title: _preview.name,
+        width: 520,
+        actions: [
+          OutlinedButton(
+            key: const Key('rulePackImportCancel'),
+            onPressed: canClose ? () => Navigator.of(context).pop() : null,
+            child: Text(l10n.rulePackCancel),
+          ),
+          if (!state.isDownloading)
+            PrimaryButton(
+              key: const Key('rulePackImportConfirm'),
+              label: l10n.rulePackImportConfirm,
+              isLoading: isImporting,
+              onPressed: isImporting || !_preview.hasAnythingToImport
                   ? null
-                  : (value) => setState(() => _downloadLogos = value),
+                  : _import,
             ),
-            const SizedBox(height: AppSpacing.xs),
-            Padding(
-              // Aligned with the label, past the box and its gap.
-              padding: const EdgeInsets.only(
-                left: 18 + AppSpacing.sm + AppSpacing.xs,
+        ],
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            if (errorText != null) ...[
+              InlineBanner(
+                key: const Key('rulePackImportError'),
+                message: errorText,
               ),
-              child: Text(
-                l10n.rulePackLogoDownloadHelper,
-                key: const Key('rulePackLogoDownloadHelper'),
-                style: AppTextStyles.helper,
-              ),
-            ),
-            const SizedBox(height: AppSpacing.md),
-          ],
-          Row(
-            children: [
-              AppToggle(
-                key: const Key('rulePackApplyNow'),
-                value: _applyNow,
-                semanticLabel: l10n.rulePackApplyNowLabel,
-                onChanged: _isImporting
-                    ? null
-                    : (value) => setState(() => _applyNow = value),
-              ),
-              const SizedBox(width: AppSpacing.sm + AppSpacing.xs),
-              Expanded(
-                child: Text(
-                  l10n.rulePackApplyNowLabel,
-                  style: Theme.of(context).textTheme.bodyMedium,
-                ),
-              ),
+              const SizedBox(height: AppSpacing.md),
             ],
+            if (state.run case final run? when state.isDownloading)
+              _LogoDownloadProgress(run: run)
+            else
+              ..._form(context, l10n, isImporting),
+          ],
+        ),
+      ),
+    );
+  }
+
+  List<Widget> _form(
+    BuildContext context,
+    AppLocalizations l10n,
+    bool isImporting,
+  ) {
+    return [
+      // The headline the whole confirmation step exists for.
+      InlineBanner(
+        key: const Key('rulePackHeadline'),
+        tone: BannerTone.info,
+        message: l10n.rulePackWouldMatch(_preview.wouldMatchCount),
+      ),
+      const SizedBox(height: AppSpacing.md),
+      RulePackReport(preview: _preview),
+      if (widget.pending.pack case final pack? when pack.rules.isNotEmpty) ...[
+        const SizedBox(height: AppSpacing.md),
+        _PackRulesList(rules: pack.rules),
+      ],
+      const SizedBox(height: AppSpacing.md),
+      if (_preview.linksLogos) ...[
+        _LogoDownloadCheckbox(
+          value: _downloadLogos,
+          label: l10n.rulePackLogoDownload(_preview.logoDownloadCount),
+          onChanged: isImporting
+              ? null
+              : (value) => setState(() => _downloadLogos = value),
+        ),
+        const SizedBox(height: AppSpacing.xs),
+        Padding(
+          // Aligned with the label, past the box and its gap.
+          padding: const EdgeInsets.only(
+            left: 18 + AppSpacing.sm + AppSpacing.xs,
           ),
-          const SizedBox(height: AppSpacing.sm),
+          child: Text(
+            l10n.rulePackLogoDownloadHelper,
+            key: const Key('rulePackLogoDownloadHelper'),
+            style: AppTextStyles.helper,
+          ),
+        ),
+        const SizedBox(height: AppSpacing.md),
+      ],
+      Row(
+        children: [
+          AppToggle(
+            key: const Key('rulePackApplyNow'),
+            value: _applyNow,
+            semanticLabel: l10n.rulePackApplyNowLabel,
+            onChanged: isImporting
+                ? null
+                : (value) => setState(() => _applyNow = value),
+          ),
+          const SizedBox(width: AppSpacing.sm + AppSpacing.xs),
+          Expanded(
+            child: Text(
+              l10n.rulePackApplyNowLabel,
+              style: Theme.of(context).textTheme.bodyMedium,
+            ),
+          ),
         ],
       ),
+      const SizedBox(height: AppSpacing.sm),
+    ];
+  }
+}
+
+/// The logo downloads, settled out of total, while the run fetches them.
+class _LogoDownloadProgress extends StatelessWidget {
+  const _LogoDownloadProgress({required this.run});
+
+  final RulePackImportRun run;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
+    return Column(
+      key: const Key('rulePackLogoProgress'),
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Text(
+          l10n.rulePackLogoProgress(run.logoDone, run.logoTotal),
+          key: const Key('rulePackLogoProgressLabel'),
+          style: Theme.of(context).textTheme.titleMedium?.copyWith(
+            fontFeatures: const [FontFeature.tabularFigures()],
+          ),
+        ),
+        const SizedBox(height: AppSpacing.sm + AppSpacing.xs),
+        Semantics(
+          label: l10n.rulePackLogoProgress(run.logoDone, run.logoTotal),
+          child: _ProgressBar(fraction: run.logoProgress),
+        ),
+        const SizedBox(height: AppSpacing.sm + AppSpacing.xs),
+        Text(l10n.rulePackLogoProgressNotice, style: AppTextStyles.helper),
+        const SizedBox(height: AppSpacing.sm),
+      ],
+    );
+  }
+}
+
+/// The 6px iris-gradient run bar, as the categorization banner draws it
+/// (`transactions/presentation/ai_run_banner.dart`); redrawn here rather than
+/// imported, since one feature does not reach into another's widgets.
+class _ProgressBar extends StatelessWidget {
+  const _ProgressBar({required this.fraction});
+
+  final double fraction;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: 6,
+      decoration: BoxDecoration(
+        color: AppColors.surfaceHover,
+        borderRadius: BorderRadius.circular(AppRadii.xs),
+      ),
+      child: FractionallySizedBox(
+        alignment: Alignment.centerLeft,
+        widthFactor: fraction.clamp(0.0, 1.0),
+        child: Container(
+          decoration: BoxDecoration(
+            gradient: const LinearGradient(
+              colors: [AppColors.irisDeep, AppColors.iris],
+            ),
+            borderRadius: BorderRadius.circular(AppRadii.xs),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// What an import that downloaded logos did, in the sheet that showed its
+/// progress: the same words as the toast an import without logos ends on,
+/// then the logos that could not be attached.
+class _ImportResultView extends StatelessWidget {
+  const _ImportResultView({required this.result, required this.appliedNow});
+
+  final RulePackImportResult result;
+  final bool appliedNow;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
+    return Column(
+      key: const Key('rulePackImportResult'),
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        InlineBanner(
+          key: const Key('rulePackImportedBanner'),
+          tone: BannerTone.success,
+          message: l10n.rulePackImportedTitle(result.createdCount),
+        ),
+        const SizedBox(height: AppSpacing.sm),
+        Text(
+          appliedNow
+              ? l10n.rulePackImportedBody(result.recategorizedCount)
+              : l10n.rulesApplyToastBody,
+          style: Theme.of(context).textTheme.bodyMedium,
+        ),
+        if (result.logoFailures.isNotEmpty) ...[
+          const SizedBox(height: AppSpacing.md),
+          Text(
+            l10n.rulePackLogoFailuresTitle(result.logoFailures.length),
+            style: Theme.of(context).textTheme.titleSmall,
+          ),
+          const SizedBox(height: AppSpacing.sm),
+          RulePackLogoFailuresList(failures: result.logoFailures),
+        ],
+        const SizedBox(height: AppSpacing.sm),
+      ],
     );
   }
 }
@@ -393,22 +550,41 @@ class RulePackLogoFailuresDialog extends StatelessWidget {
             message: l10n.rulePackLogoFailuresNotice,
           ),
           const SizedBox(height: AppSpacing.md),
-          for (final failure in failures)
-            Padding(
-              key: Key('rulePackLogoFailure-${failure.index}'),
-              padding: const EdgeInsets.only(top: 2),
-              child: Text(switch (failure.reason) {
-                RulePackLogoFailureReason.invalidImage =>
-                  l10n.rulePackLogoFailureInvalidImage(failure.pattern),
-                RulePackLogoFailureReason.tooLarge =>
-                  l10n.rulePackLogoFailureTooLarge(failure.pattern),
-                RulePackLogoFailureReason.downloadFailed =>
-                  l10n.rulePackLogoFailureDownloadFailed(failure.pattern),
-              }, style: AppTextStyles.helper),
-            ),
+          RulePackLogoFailuresList(failures: failures),
           const SizedBox(height: AppSpacing.sm),
         ],
       ),
+    );
+  }
+}
+
+/// Each logo an import could not attach, with its reason.
+class RulePackLogoFailuresList extends StatelessWidget {
+  const RulePackLogoFailuresList({super.key, required this.failures});
+
+  final List<RulePackLogoFailure> failures;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        for (final failure in failures)
+          Padding(
+            key: Key('rulePackLogoFailure-${failure.index}'),
+            padding: const EdgeInsets.only(top: 2),
+            child: Text(switch (failure.reason) {
+              RulePackLogoFailureReason.invalidImage =>
+                l10n.rulePackLogoFailureInvalidImage(failure.pattern),
+              RulePackLogoFailureReason.tooLarge =>
+                l10n.rulePackLogoFailureTooLarge(failure.pattern),
+              RulePackLogoFailureReason.downloadFailed =>
+                l10n.rulePackLogoFailureDownloadFailed(failure.pattern),
+            }, style: AppTextStyles.helper),
+          ),
+      ],
     );
   }
 }

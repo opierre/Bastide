@@ -2,6 +2,8 @@ import 'dart:convert';
 
 import 'package:bastide/core/api/api_client.dart';
 import 'package:bastide/core/api/api_client_provider.dart';
+import 'package:bastide/core/runs/run_progress_client.dart';
+import 'package:bastide/core/runs/run_progress_provider.dart';
 import 'package:bastide/core/theme/app_theme.dart';
 import 'package:bastide/core/widgets/monogram_avatar.dart';
 import 'package:bastide/features/categories/application/categories_controller.dart';
@@ -17,6 +19,7 @@ import 'package:mocktail/mocktail.dart';
 
 import '../../support/fake_categories_controller.dart';
 import '../../support/fake_rules_controller.dart';
+import '../../support/pack_import_runs.dart';
 
 class MockApiClient extends Mock implements ApiClient {}
 
@@ -128,10 +131,14 @@ Widget _wrap(
   MockApiClient apiClient, {
   required FakeRulePackFiles files,
   required Locale locale,
+  RunProgressClient? progress,
 }) {
   return ProviderScope(
     overrides: [
       apiClientProvider.overrideWithValue(apiClient),
+      runProgressClientProvider.overrideWithValue(
+        progress ?? MockRunProgressClient(),
+      ),
       rulePackFilesProvider.overrideWithValue(files),
       rulesControllerProvider.overrideWith(() => FakeRulesController()),
       categoriesControllerProvider.overrideWith(
@@ -199,14 +206,17 @@ void main() {
           () =>
               apiClient.post('/rules/packs/preview', body: any(named: 'body')),
         ).thenAnswer((_) async => _previewJson(withLogos: true));
-        when(
-          () => apiClient.post('/rules/packs/import', body: any(named: 'body')),
-        ).thenAnswer((_) async => _importJson(failures: failures));
+        final progress = stubQuickPackImport(
+          apiClient,
+          result: _importJson(failures: failures),
+        );
 
         final files = FakeRulePackFiles(
           pickedSource: _packSource(withLogos: true),
         );
-        await tester.pumpWidget(_wrap(apiClient, files: files, locale: locale));
+        await tester.pumpWidget(
+          _wrap(apiClient, files: files, locale: locale, progress: progress),
+        );
         await tester.pumpAndSettle();
         await _openMenuItem(tester, l10n.rulePackImportFile);
 
@@ -221,7 +231,7 @@ void main() {
 
         return verify(
               () => apiClient.post(
-                '/rules/packs/import',
+                '/rules/packs/import-runs',
                 body: captureAny(named: 'body'),
               ),
             ).captured.single
