@@ -5,6 +5,7 @@ from datetime import date
 from sqlalchemy import func, or_, select
 from sqlalchemy.orm import Session, selectinload, with_expression
 
+from app.features.accounts.linked_cards import in_account
 from app.features.accounts.models import Account
 from app.features.recurring.models import RecurringOccurrence
 from app.features.transactions.models import Transaction
@@ -55,18 +56,10 @@ class TransactionRepository:
             .join(Account, Account.id == Transaction.account_id)
             .where(Account.user_id == user_id)
         )
-        if account_id is not None and include_linked_cards:
-            cards = select(Account.id).where(
-                Account.user_id == user_id,
-                Account.settlement_account_id == account_id,
-                Account.type == "deferred_card",
-                Account.archived.is_(False),
-            )
+        if account_id is not None:
             query = query.where(
-                or_(Transaction.account_id == account_id, Transaction.account_id.in_(cards))
+                in_account(user_id, account_id, include_linked_cards=include_linked_cards)
             )
-        elif account_id is not None:
-            query = query.where(Transaction.account_id == account_id)
         if date_from is not None:
             query = query.where(Transaction.booked_date >= date_from)
         if date_to is not None:
