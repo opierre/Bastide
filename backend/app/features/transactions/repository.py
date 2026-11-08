@@ -39,8 +39,13 @@ class TransactionRepository:
         q: str | None,
         page: int,
         page_size: int,
+        include_linked_cards: bool = False,
     ) -> tuple[list[Transaction], int]:
         """Filtered, paginated transactions for a user, newest first.
+
+        With `include_linked_cards`, an `account_id` filter also takes in the rows of the
+        deferred cards settled on that account (not archived), so the account reads with the
+        card purchases its monthly debit pays.
 
         Eager-loads `category` (`selectinload`) so rendering a page never triggers one query
         per row.
@@ -50,7 +55,17 @@ class TransactionRepository:
             .join(Account, Account.id == Transaction.account_id)
             .where(Account.user_id == user_id)
         )
-        if account_id is not None:
+        if account_id is not None and include_linked_cards:
+            cards = select(Account.id).where(
+                Account.user_id == user_id,
+                Account.settlement_account_id == account_id,
+                Account.type == "deferred_card",
+                Account.archived.is_(False),
+            )
+            query = query.where(
+                or_(Transaction.account_id == account_id, Transaction.account_id.in_(cards))
+            )
+        elif account_id is not None:
             query = query.where(Transaction.account_id == account_id)
         if date_from is not None:
             query = query.where(Transaction.booked_date >= date_from)
