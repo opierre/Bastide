@@ -5904,9 +5904,9 @@
       }
     }
   },
-  "accountDetailCardRowLabel": "{card} · •••• {digits}",
-  "@accountDetailCardRowLabel": {
-    "description": "Second line of a linked card's transaction in an account's recent transactions: which card it was made with.",
+  "transactionRowCardLabel": "{card} · •••• {digits}",
+  "@transactionRowCardLabel": {
+    "description": "Second line of a linked card's transaction listed with its settlement account (account detail, Transactions filtered by that account): which card it was made with.",
     "placeholders": {
       "card": {
         "type": "String",

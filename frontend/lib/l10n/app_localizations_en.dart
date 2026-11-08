@@ -4515,7 +4515,7 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String accountDetailCardRowLabel(String card, String digits) {
+  String transactionRowCardLabel(String card, String digits) {
     return '$card · •••• $digits';
   }
 

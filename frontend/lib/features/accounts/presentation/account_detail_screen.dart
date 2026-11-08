@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
+import '../../../core/l10n/card_display.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/tokens.dart';
 import '../../../core/widgets/amount_text.dart';
@@ -1299,8 +1300,12 @@ class _RecentTransactionsCard extends ConsumerWidget {
                   switch (cards[transaction.accountId]) {
                     final card? => TransactionRow(
                       transaction: transaction,
-                      accountName: _cardLabel(l10n, card),
-                      accountIcon: Icons.credit_card_rounded,
+                      accountName: cardRowLabel(
+                        l10n,
+                        card.name,
+                        card.cardLastDigits,
+                      ),
+                      accountIcon: cardRowIcon,
                     ),
                     null => TransactionRow(
                       transaction: transaction,
@@ -1335,15 +1340,6 @@ class _RecentTransactionsCard extends ConsumerWidget {
       ),
     );
   }
-}
-
-/// How a linked card's row names its card: the card's name and, when known,
-/// its masked number.
-String _cardLabel(AppLocalizations l10n, LinkedCard card) {
-  final digits = card.cardLastDigits;
-  return digits == null
-      ? card.name
-      : l10n.accountDetailCardRowLabel(card.name, digits);
 }
 
 // ── Shared bits ─────────────────────────────────────────────────────────────
