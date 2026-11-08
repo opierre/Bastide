@@ -160,6 +160,35 @@ void main() {
     verifyNever(() => apiClient.get(any()));
   });
 
+  test('a run from the queue reads the same rows as the queue', () async {
+    startsWith(_runJson(status: 'success'));
+    keepAlive();
+    final filters = container.read(transactionFiltersProvider.notifier)
+      ..setNeedsReview(true);
+
+    // No account picked: every account, nothing to widen.
+    await container.read(runControllerProvider.notifier).startFromQueue();
+    // An account picked: it and the deferred cards it settles, exactly as the
+    // queue lists them.
+    filters.setAccount('a1');
+    await container.read(runControllerProvider.notifier).startFromQueue();
+
+    final bodies = verify(
+      () => apiClient.post(
+        '/categorization/runs',
+        body: captureAny(named: 'body'),
+      ),
+    ).captured;
+    expect(bodies, [
+      {'account_id': null, 'scope': 'pending'},
+      {'account_id': 'a1', 'scope': 'pending', 'include_linked_cards': true},
+    ]);
+    expect(
+      takesInLinkedCards(container.read(transactionFiltersProvider)),
+      isTrue,
+    );
+  });
+
   test('a finish event ends the run, reads the final row once, and '
       'stops listening', () async {
     startsWith(_runJson(status: 'running'));

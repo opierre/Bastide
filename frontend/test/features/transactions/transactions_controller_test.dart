@@ -140,11 +140,10 @@ void main() {
     // Filtered: the account and the deferred cards it settles.
     expect(queries[1]['account_id'], 'a1');
     expect(queries[1]['include_linked_cards'], 'true');
-    // The review queue keeps to the account's own rows, the input of a run
-    // started from it.
+    // The review queue is widened too, as is a run started from it.
     expect(queries[2]['account_id'], 'a1');
     expect(queries[2]['needs_review'], 'true');
-    expect(queries[2].containsKey('include_linked_cards'), isFalse);
+    expect(queries[2]['include_linked_cards'], 'true');
     // Back to all accounts: the flag goes with the filter.
     expect(queries[3].containsKey('account_id'), isFalse);
     expect(queries[3].containsKey('include_linked_cards'), isFalse);

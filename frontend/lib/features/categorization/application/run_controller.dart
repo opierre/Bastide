@@ -86,6 +86,7 @@ class RunController extends Notifier<RunState> {
   /// re-attaches to a run it already started.
   Future<void> start({
     String? accountId,
+    bool includeLinkedCards = false,
     RunScope scope = RunScope.pending,
   }) async {
     if (state.isStarting || state.isRunning) return;
@@ -98,13 +99,29 @@ class RunController extends Notifier<RunState> {
     try {
       final run = await ref
           .read(categorizationRepositoryProvider)
-          .startRun(accountId: accountId, scope: scope);
+          .startRun(
+            accountId: accountId,
+            scope: scope,
+            includeLinkedCards: includeLinkedCards,
+          );
       _unwatch();
       state = RunState(run: run);
       _onRunChanged(previous: null, next: run);
     } catch (error) {
       state = state.copyWith(isStarting: false, error: error);
     }
+  }
+
+  /// Starts a `pending` run over exactly the rows the review queue lists: the
+  /// picked account, widened to its linked cards by the same rule as the list
+  /// ([takesInLinkedCards]). A run never revisits a row a rule or the user has
+  /// settled, so the queue is exactly its input.
+  Future<void> startFromQueue() {
+    final filters = ref.read(transactionFiltersProvider);
+    return start(
+      accountId: filters.accountId,
+      includeLinkedCards: takesInLinkedCards(filters),
+    );
   }
 
   /// Cancels the run in flight. The executor stops after the batch it is on;

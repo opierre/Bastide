@@ -30,6 +30,20 @@ void refreshTransactionRows(Ref ref) {
   ref.read(transactionEditsProvider.notifier).saved();
 }
 
+/// Whether [filters] widen their account to the deferred cards settled on it.
+///
+/// An account filter takes in those cards, so the panel lists what the account
+/// detail lists (its « Voir tout » lands here). A card picked in the filter has
+/// no cards of its own and reads alone. The settlement debit is filed as a
+/// transfer, so the card's monthly debit and the purchases it pays are never
+/// both counted as spending.
+///
+/// The review queue is widened the same way, and so is a categorization run
+/// started from it (`RunController.startFromQueue`): the queue must be exactly
+/// the run's input, so both read this one rule.
+bool takesInLinkedCards(TransactionFilters filters) =>
+    filters.accountId != null;
+
 /// The active list filters, held separately from the loaded page so a filter
 /// change is a single state transition the controller can watch and react to
 /// — see [TransactionsController.build].
@@ -152,22 +166,12 @@ class TransactionsController extends AsyncNotifier<TransactionsPage> {
     return _fetch(filters);
   }
 
-  /// An account filter takes in the deferred cards settled on that account,
-  /// so the panel lists what the account detail lists (its « Voir tout » lands
-  /// here). A card picked in the filter has no cards of its own and reads
-  /// alone. The settlement debit is filed as a transfer, so the card's monthly
-  /// debit and the purchases it pays are never both counted as spending.
-  ///
-  /// The review queue stays on the account's own rows: a run started from it
-  /// is scoped to that account alone, and the queue must be exactly the run's
-  /// input (see `ReviewQueueHeaderCard`).
   Future<TransactionsPage> _fetch(TransactionFilters filters) {
     return ref
         .read(transactionsRepositoryProvider)
         .list(
           accountId: filters.accountId,
-          includeLinkedCards:
-              filters.accountId != null && filters.needsReview != true,
+          includeLinkedCards: takesInLinkedCards(filters),
           dateFrom: filters.dateFrom,
           dateTo: filters.dateTo,
           categoryId: filters.categoryId,
