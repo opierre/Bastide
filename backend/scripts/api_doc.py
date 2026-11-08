@@ -7,8 +7,12 @@ compares the committed file against a fresh render; after changing a route, rege
     uv run python -m scripts.api_doc
 """
 
+from collections.abc import Sequence
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
+
+from pydantic import BaseModel
 
 BACKEND_DIR = Path(__file__).resolve().parent.parent
 OUTPUT = BACKEND_DIR.parent / "docs" / "api.md"
@@ -32,8 +36,35 @@ details?}}}}`. Model names refer to the Pydantic schemas in `backend/app/feature
 """
 
 
-def render(spec: dict[str, Any]) -> str:
-    """Render an OpenAPI ``spec`` as the Markdown document, one table per tag."""
+@dataclass(frozen=True, slots=True)
+class WebSocketDoc:
+    """A WebSocket endpoint, which OpenAPI leaves out: its path, summary and messages."""
+
+    path: str
+    summary: str
+    messages: tuple[type[BaseModel], ...]
+
+
+def websocket_docs(app: Any) -> list[WebSocketDoc]:
+    """The app's WebSocket routes, with the messages each declared through `sends`."""
+    from fastapi.routing import APIWebSocketRoute, iter_route_contexts
+
+    from app.core.websocket import sent_messages
+
+    # Included routers stay nested in `app.routes`; walking the contexts flattens them.
+    return [
+        WebSocketDoc(
+            path=route.path,
+            summary=(route.endpoint.__doc__ or "").strip().splitlines()[0],
+            messages=sent_messages(route.endpoint),
+        )
+        for context in iter_route_contexts(app.routes)
+        if isinstance(route := context.original_route, APIWebSocketRoute)
+    ]
+
+
+def render(spec: dict[str, Any], websockets: Sequence[WebSocketDoc] = ()) -> str:
+    """Render an OpenAPI ``spec`` and the WebSocket endpoints as the Markdown document."""
     by_tag: dict[str, list[str]] = {}
     for path, operations in spec["paths"].items():
         for method in _METHOD_ORDER:
@@ -55,7 +86,71 @@ def render(spec: dict[str, Any]) -> str:
                 "",
             ]
         )
+    if websockets:
+        lines.extend(_websockets(websockets))
     return "\n".join(lines).rstrip() + "\n"
+
+
+def _websockets(websockets: Sequence[WebSocketDoc]) -> list[str]:
+    """The WebSocket section: one row per endpoint, then every message model it sends."""
+    lines = [
+        "## websockets",
+        "",
+        "Authenticated on connect with the same headers as the REST API. A socket without a",
+        "valid bearer token is accepted, then closed with code `4401`; one without the session",
+        "token is refused at the handshake.",
+        "",
+        "| Path | Sends | Summary |",
+        "|------|-------|---------|",
+    ]
+    schemas: dict[str, dict[str, Any]] = {}
+    for socket in websockets:
+        names = ", ".join(f"`{model.__name__}`" for model in socket.messages)
+        lines.append(f"| `{socket.path.removeprefix(_PREFIX)}` | {names} | {socket.summary} |")
+        for model in socket.messages:
+            schema = model.model_json_schema(mode="serialization")
+            schemas.update(schema.pop("$defs", {}))
+            schemas.setdefault(model.__name__, schema)
+    lines.append("")
+    for name, schema in schemas.items():
+        lines.extend(_message(name, schema))
+    return lines
+
+
+def _message(name: str, schema: dict[str, Any]) -> list[str]:
+    """One message model as a field table."""
+    required = set(schema.get("required", []))
+    lines = [
+        f"### `{name}`",
+        "",
+        " ".join(schema.get("description", "").split()),
+        "",
+        "| Field | Type | Required |",
+        "|-------|------|----------|",
+    ]
+    for field, prop in schema.get("properties", {}).items():
+        lines.append(f"| `{field}` | {_type(prop)} | {'yes' if field in required else 'no'} |")
+    lines.append("")
+    return lines
+
+
+def _type(prop: dict[str, Any]) -> str:
+    """A JSON schema property as a short Markdown type, e.g. `[RunEvent]` or `string`."""
+    if "$ref" in prop:
+        return f"`{prop['$ref'].rsplit('/', 1)[-1]}`"
+    if "const" in prop:
+        return f'`"{prop["const"]}"`'
+    if "enum" in prop:
+        return " \\| ".join(f'`"{value}"`' for value in prop["enum"])
+    if "anyOf" in prop:
+        return " \\| ".join(_type(option) for option in prop["anyOf"])
+    if prop.get("type") == "array":
+        return f"[{_type(prop.get('items', {}))}]"
+    if prop.get("type") == "object" and "additionalProperties" in prop:
+        return f"{{string: {_type(prop['additionalProperties'])}}}"
+    if prop.get("format") == "date-time":
+        return "`datetime`"
+    return f"`{prop.get('type', 'object')}`"
 
 
 def _row(path: str, method: str, operation: dict[str, Any]) -> str:
@@ -103,7 +198,8 @@ def _schema_name(schema: dict[str, Any]) -> str:
 def main() -> None:
     from app.main import create_app
 
-    OUTPUT.write_text(render(create_app().openapi()), encoding="utf-8", newline="\n")
+    app = create_app()
+    OUTPUT.write_text(render(app.openapi(), websocket_docs(app)), encoding="utf-8", newline="\n")
     print(f"wrote {OUTPUT.relative_to(BACKEND_DIR.parent)}")
 
 
