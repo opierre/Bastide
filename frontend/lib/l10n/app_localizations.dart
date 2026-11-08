@@ -626,11 +626,17 @@ abstract class AppLocalizations {
   /// **'Archiver'**
   String get accountArchive;
 
-  /// Account card menu item, deferred-debit cards only: opens the rule filing the card's monthly debit as a transfer.
+  /// Linked-card menu item, deferred-debit cards only: opens the rule filing the card's monthly debit as a transfer.
   ///
   /// In fr, this message translates to:
   /// **'Règle de prélèvement'**
   String get accountSettlementRule;
+
+  /// Tooltip and accessible label of the account card's linked-cards button, which shows a card icon and the count; opens the list of cards settled from the account.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, =1{1 carte liée} other{{count} cartes liées}}'**
+  String accountLinkedCards(int count);
 
   /// Warning for a deferred-debit card with no settlement account.
   ///

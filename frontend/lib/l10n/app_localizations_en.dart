@@ -314,6 +314,17 @@ class AppLocalizationsEn extends AppLocalizations {
   String get accountSettlementRule => 'Settlement rule';
 
   @override
+  String accountLinkedCards(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count linked cards',
+      one: '1 linked card',
+    );
+    return '$_temp0';
+  }
+
+  @override
   String cardSettlementNoAccount(String card) {
     return '$card: choose the account the card is paid from, so its purchases count only once.';
   }

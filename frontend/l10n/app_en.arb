@@ -131,6 +131,7 @@
   "accountNoTransactions": "No transactions yet",
   "accountArchive": "Archive",
   "accountSettlementRule": "Settlement rule",
+  "accountLinkedCards": "{count, plural, =1{1 linked card} other{{count} linked cards}}",
   "cardSettlementNoAccount": "{card}: choose the account the card is paid from, so its purchases count only once.",
   "cardSettlementChooseAccount": "Choose the account",
   "cardSettlementNoRule": "{card}'s monthly debit counts as spending on top of the card's purchases: create its settlement rule.",

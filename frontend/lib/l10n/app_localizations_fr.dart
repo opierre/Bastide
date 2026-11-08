@@ -315,6 +315,17 @@ class AppLocalizationsFr extends AppLocalizations {
   String get accountSettlementRule => 'Règle de prélèvement';
 
   @override
+  String accountLinkedCards(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count cartes liées',
+      one: '1 carte liée',
+    );
+    return '$_temp0';
+  }
+
+  @override
   String cardSettlementNoAccount(String card) {
     return '$card : choisissez le compte sur lequel la carte est prélevée, pour que ses achats ne comptent qu\'une fois.';
   }
