@@ -31,3 +31,14 @@ String? proposedSettlementAccountId(
   if (sameBankChecking.length == 1) return sameBankChecking.single.id;
   return candidates.length == 1 ? candidates.single.id : null;
 }
+
+/// The deferred cards an account's detail can link to it: the user's open
+/// cards that have no settlement account yet. A card already settled
+/// elsewhere is moved from its own form, not taken over from here.
+List<Account> linkableCards(List<Account> accounts) => [
+  for (final account in accounts)
+    if (account.type == AccountType.deferredCard &&
+        !account.archived &&
+        account.settlementAccountId == null)
+      account,
+];

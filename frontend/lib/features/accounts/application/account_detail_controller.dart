@@ -7,6 +7,7 @@ import '../data/accounts_repository.dart';
 import '../domain/account.dart';
 import '../domain/account_overview.dart';
 import 'accounts_controller.dart';
+import 'settlement_account.dart';
 
 /// How many of the account's latest transactions the detail panel lists.
 const recentTransactionCount = 8;
@@ -69,4 +70,11 @@ final accountByIdProvider = Provider.autoDispose.family<Account?, String?>((
   if (accountId == null) return null;
   final accounts = ref.watch(accountsControllerProvider).value;
   return accounts?.where((account) => account.id == accountId).firstOrNull;
+});
+
+/// The cards the linked-cards section offers to link: the user's open
+/// deferred cards with no settlement account. Empty while the list loads.
+final linkableCardsProvider = Provider.autoDispose<List<Account>>((ref) {
+  final accounts = ref.watch(accountsControllerProvider).value;
+  return accounts == null ? const [] : linkableCards(accounts);
 });

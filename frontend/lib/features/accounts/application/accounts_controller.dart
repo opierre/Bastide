@@ -75,6 +75,19 @@ class AccountsController extends AsyncNotifier<List<Account>> {
     _invalidateNetWorth();
   }
 
+  /// Links deferred card [cardId] to [settlementAccountId], from that account's
+  /// detail. The caller refreshes the account's overview, which lists it.
+  Future<void> linkCard(String cardId, String settlementAccountId) async {
+    final updated = await ref
+        .read(accountsRepositoryProvider)
+        .linkCard(cardId, settlementAccountId);
+    state = AsyncValue.data([
+      for (final account in state.value ?? const <Account>[])
+        if (account.id == cardId) updated else account,
+    ]);
+    _invalidateNetWorth();
+  }
+
   Future<void> archive(String id) async {
     await ref.read(accountsRepositoryProvider).archive(id);
     state = AsyncValue.data(

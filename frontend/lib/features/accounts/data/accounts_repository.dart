@@ -79,6 +79,17 @@ class AccountsRepository {
     return parseAccount(json as Map<String, dynamic>);
   }
 
+  /// Links deferred card [cardId] to the account its monthly debit is drawn
+  /// from. The same `PATCH` the account form sends, carrying only the
+  /// settlement account, so nothing else about the card is touched.
+  Future<Account> linkCard(String cardId, String settlementAccountId) async {
+    final json = await _apiClient.patch(
+      '/accounts/$cardId',
+      body: {'settlement_account_id': settlementAccountId},
+    );
+    return parseAccount(json as Map<String, dynamic>);
+  }
+
   /// Everything the account detail panel shows, in one read.
   Future<AccountOverview> overview(String id) async {
     final json =
