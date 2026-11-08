@@ -319,6 +319,25 @@ def test_a_requested_download_fetches_every_link_once_with_a_generic_agent(
     assert all(rules[name]["logo_updated_at"] for name in rules)
 
 
+def test_a_downloaded_jpeg_thumbnail_is_stored_as_a_png(client: TestClient, web: _Web) -> None:
+    headers, _ = _register(client)
+    url = "https://upload.wikimedia.org/wikipedia/commons/thumb/a/ab/Logo.svg/320px-Logo.jpg"
+    jpeg = _picture("JPEG")
+    web.routes[url] = lambda _: httpx.Response(
+        200, content=jpeg, headers={"content-type": "image/jpeg"}
+    )
+
+    _, body = import_pack(
+        client, headers, pack=pack(entry("EPICERIE LUNE", logo=_linked(url))), download_logos=True
+    )
+
+    assert body["logo_count"] == 1
+    image = _logo(client, headers, _rules(client, headers)["EPICERIE LUNE"]["id"])
+    assert image is not None
+    with Image.open(io.BytesIO(image)) as stored:
+        assert (stored.format, stored.size) == ("PNG", (256, 256))
+
+
 def test_a_redirect_on_the_allowed_host_is_followed(client: TestClient, web: _Web) -> None:
     headers, _ = _register(client)
     web.serve(LOGO_URL, b"", status=301, location=OTHER_LOGO_URL)
