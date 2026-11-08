@@ -6,6 +6,7 @@ from fastapi import APIRouter, Depends, Query, status
 from sqlalchemy.orm import Session
 
 from app.core.db import SessionFactory, get_db, get_session_factory
+from app.core.progress import ProgressBus, get_progress_bus
 from app.features.accounts.repository import AccountRepository
 from app.features.accounts.service import AccountService
 from app.features.auth.deps import get_current_user
@@ -33,6 +34,7 @@ def _service(
     session_factory: Annotated[SessionFactory, Depends(get_session_factory)],
     launcher: Annotated[RunLauncher, Depends(get_run_launcher)],
     client_factory: Annotated[ClientFactory, Depends(get_client_factory)],
+    bus: Annotated[ProgressBus, Depends(get_progress_bus)],
 ) -> CategorizationRunService:
     return CategorizationRunService(
         CategorizationRunRepository(db),
@@ -41,6 +43,7 @@ def _service(
         session_factory,
         launcher,
         client_factory,
+        bus,
     )
 
 
