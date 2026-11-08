@@ -1,9 +1,9 @@
 """Which transactions an account filter covers once its linked cards are taken in.
 
 One definition, shared by every query that widens an account to the deferred cards settled
-on it: the transaction list (`include_linked_cards`) and the categorization run started from
-the review queue. The queue must be exactly the run's input, so the two may never disagree on
-what a linked card is.
+on it: the transaction list (`include_linked_cards`), the categorization run started from the
+review queue, and the account overview's list of linked cards. The queue must be exactly the
+run's input, so none of them may disagree on what a linked card is.
 """
 
 from typing import Any
@@ -14,14 +14,24 @@ from app.features.accounts.models import Account
 from app.features.transactions.models import Transaction
 
 
-def linked_card_ids(user_id: str, account_id: str) -> Select[Any]:
-    """The ids of the user's non-archived deferred cards settled on ``account_id``."""
-    return select(Account.id).where(
+def _is_linked_card(user_id: str, account_id: str) -> tuple[ColumnElement[bool], ...]:
+    """What makes an account one of ``account_id``'s linked cards."""
+    return (
         Account.user_id == user_id,
         Account.settlement_account_id == account_id,
         Account.type == "deferred_card",
         Account.archived.is_(False),
     )
+
+
+def linked_card_ids(user_id: str, account_id: str) -> Select[Any]:
+    """The ids of the user's non-archived deferred cards settled on ``account_id``."""
+    return select(Account.id).where(*_is_linked_card(user_id, account_id))
+
+
+def linked_cards(user_id: str, account_id: str) -> Select[tuple[Account]]:
+    """The user's non-archived deferred cards settled on ``account_id``, oldest first."""
+    return select(Account).where(*_is_linked_card(user_id, account_id)).order_by(Account.created_at)
 
 
 def in_account(user_id: str, account_id: str, *, include_linked_cards: bool) -> ColumnElement[bool]:

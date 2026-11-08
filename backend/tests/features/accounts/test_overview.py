@@ -191,6 +191,13 @@ def test_a_settled_card_shows_its_open_cycle_on_the_paying_account(pinned: TestC
     assert linked["issue"] is None
 
 
+def test_an_archived_card_is_not_listed_on_the_paying_account(pinned: TestClient) -> None:
+    headers, checking, card = _setup(pinned)
+    assert pinned.delete(f"/api/v1/accounts/{card}", headers=headers).status_code == 204
+
+    assert _overview(pinned, headers, checking)["linked_cards"] == []
+
+
 def test_a_cards_cycles_end_with_the_open_one(pinned: TestClient) -> None:
     headers, checking, card = _setup(pinned)
     pinned.put(
