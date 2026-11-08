@@ -176,7 +176,7 @@ class TransactionsController extends AsyncNotifier<TransactionsPage> {
   ///
   /// What a categorization run needs: it commits a batch every couple of
   /// seconds, and rows leave the review queue as it does. Going through
-  /// [refresh] would blank the list into a skeleton on every poll, which is
+  /// [refresh] would blank the list into a skeleton on every progress update, which is
   /// the opposite of the calm, non-blocking progress the panel promises — and
   /// a failed background refresh leaves the rows already on screen rather than
   /// replacing them with an error.

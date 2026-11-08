@@ -1,5 +1,10 @@
+import 'dart:async';
+
 import 'package:bastide/core/api/api_client.dart';
 import 'package:bastide/core/api/api_client_provider.dart';
+import 'package:bastide/core/runs/run_event.dart';
+import 'package:bastide/core/runs/run_progress_client.dart';
+import 'package:bastide/core/runs/run_progress_provider.dart';
 import 'package:bastide/features/categorization/application/run_controller.dart';
 import 'package:bastide/features/categorization/domain/categorization_run.dart';
 import 'package:bastide/features/transactions/application/transactions_controller.dart';
@@ -11,6 +16,8 @@ import 'package:mocktail/mocktail.dart';
 import '../../support/fake_transactions_controller.dart';
 
 class MockApiClient extends Mock implements ApiClient {}
+
+class MockRunProgressClient extends Mock implements RunProgressClient {}
 
 Map<String, dynamic> _runJson({
   String id = 'run-1',
@@ -38,6 +45,22 @@ Map<String, dynamic> _runJson({
   'created_at': '2026-05-14T10:00:00Z',
 };
 
+RunEvent _event(
+  RunEventType type, {
+  String runId = 'run-1',
+  int done = 0,
+  int total = 200,
+  Map<String, int> counts = const {},
+}) => RunEvent(
+  runId: runId,
+  kind: 'categorization',
+  type: type,
+  done: done,
+  total: total,
+  counts: counts,
+  occurredAt: DateTime.utc(2026, 5, 14, 10),
+);
+
 const _emptyPage = TransactionsPage(
   items: <Transaction>[],
   page: 1,
@@ -47,6 +70,8 @@ const _emptyPage = TransactionsPage(
 
 void main() {
   late MockApiClient apiClient;
+  late MockRunProgressClient progress;
+  late StreamController<RunUpdate> updates;
   late FakeTransactionsController transactions;
   late ProviderContainer container;
 
@@ -54,14 +79,19 @@ void main() {
 
   setUp(() {
     apiClient = MockApiClient();
+    progress = MockRunProgressClient();
+    updates = StreamController<RunUpdate>.broadcast();
+    when(() => progress.watch(any())).thenAnswer((_) => updates.stream);
     transactions = FakeTransactionsController(initialPage: _emptyPage);
     container = ProviderContainer(
       overrides: [
         apiClientProvider.overrideWithValue(apiClient),
+        runProgressClientProvider.overrideWithValue(progress),
         transactionsControllerProvider.overrideWith(() => transactions),
       ],
     );
     addTearDown(container.dispose);
+    addTearDown(updates.close);
   });
 
   /// The controller is `autoDispose`, so something has to be watching it for
@@ -69,100 +99,198 @@ void main() {
   ProviderSubscription<RunState> keepAlive() =>
       container.listen(runControllerProvider, (_, _) {}, fireImmediately: true);
 
-  testWidgets('start posts the requested scope and holds the returned run', (
-    tester,
-  ) async {
-    when(
-      () => apiClient.post('/categorization/runs', body: any(named: 'body')),
-    ).thenAnswer((_) async => _runJson(status: 'pending'));
-    final subscription = keepAlive();
+  RunState read() => container.read(runControllerProvider);
 
-    await container.read(runControllerProvider.notifier).start(accountId: 'a1');
+  Future<void> push(RunUpdate update) async {
+    updates.add(update);
+    await Future<void>.delayed(Duration.zero);
+  }
 
-    final captured = verify(
-      () => apiClient.post(
-        '/categorization/runs',
-        body: captureAny(named: 'body'),
+  void startsWith(Map<String, dynamic> json) => when(
+    () => apiClient.post('/categorization/runs', body: any(named: 'body')),
+  ).thenAnswer((_) async => json);
+
+  test(
+    'start posts the requested scope and follows the returned run',
+    () async {
+      startsWith(_runJson(status: 'pending'));
+      keepAlive();
+
+      await container
+          .read(runControllerProvider.notifier)
+          .start(accountId: 'a1');
+
+      final captured = verify(
+        () => apiClient.post(
+          '/categorization/runs',
+          body: captureAny(named: 'body'),
+        ),
+      ).captured.single;
+      expect(captured, {'account_id': 'a1', 'scope': 'pending'});
+      expect(read().run?.id, 'run-1');
+      expect(read().isRunning, isTrue);
+      verify(() => progress.watch('run-1')).called(1);
+      expect(updates.hasListener, isTrue);
+    },
+  );
+
+  test('progress events move the run with no REST read', () async {
+    startsWith(_runJson(status: 'pending'));
+    keepAlive();
+    await container.read(runControllerProvider.notifier).start();
+
+    await push(RunResync(_event(RunEventType.started)));
+    expect(read().run?.status, RunStatus.running);
+
+    await push(
+      RunEventUpdate(
+        _event(
+          RunEventType.progress,
+          done: 80,
+          counts: {'assigned': 60, 'deferred': 20, 'failed': 0},
+        ),
       ),
-    ).captured.single;
-    expect(captured, {'account_id': 'a1', 'scope': 'pending'});
-    expect(container.read(runControllerProvider).run?.id, 'run-1');
-    expect(container.read(runControllerProvider).isRunning, isTrue);
+    );
 
-    // Disposing the controller is what stops the poll; the pump lets Riverpod's
-    // own dispose task run, so no timer outlives the test.
-    subscription.close();
-    container.dispose();
-    await tester.pump(runPollInterval);
+    final run = read().run!;
+    expect(run.processedCount, 80);
+    expect(run.assignedCount, 60);
+    expect(run.deferredCount, 20);
+    expect(run.status, RunStatus.running);
+    verifyNever(() => apiClient.get(any()));
   });
 
-  testWidgets('polls until a terminal status, then stops', (tester) async {
-    when(
-      () => apiClient.post('/categorization/runs', body: any(named: 'body')),
-    ).thenAnswer((_) async => _runJson(status: 'running', processed: 0));
-
-    final replies = [
-      _runJson(status: 'running', processed: 80, assigned: 60, deferred: 20),
-      _runJson(
-        status: 'success',
-        total: 200,
+  test('a finish event ends the run, reads the final row once, and '
+      'stops listening', () async {
+    startsWith(_runJson(status: 'running'));
+    when(() => apiClient.get('/categorization/runs/run-1')).thenAnswer(
+      (_) async => _runJson(
+        status: 'partial',
         processed: 200,
         assigned: 150,
-        deferred: 50,
+        deferred: 40,
+        failed: 10,
       ),
-    ];
-    var call = 0;
-    when(
-      () => apiClient.get('/categorization/runs/run-1'),
-    ).thenAnswer((_) async => replies[call++]);
-
+    );
     keepAlive();
     await container.read(runControllerProvider.notifier).start();
 
-    await tester.pump(runPollInterval);
-    await tester.pump();
-    expect(container.read(runControllerProvider).run?.processedCount, 80);
-
-    await tester.pump(runPollInterval);
-    await tester.pump();
-    expect(
-      container.read(runControllerProvider).run?.status,
-      RunStatus.success,
+    await push(
+      RunEventUpdate(
+        _event(
+          RunEventType.finished,
+          done: 200,
+          counts: {'assigned': 150, 'deferred': 40, 'failed': 10},
+        ),
+      ),
     );
-    expect(container.read(runControllerProvider).isRunning, isFalse);
+    await Future<void>.delayed(Duration.zero);
 
-    // The poll must be gone, not merely idle: a terminal run is never going to
-    // change again, and a live timer here is a conversation with the sidecar
-    // that never ends.
-    await tester.pump(runPollInterval * 5);
-    await tester.pump();
-    verify(() => apiClient.get('/categorization/runs/run-1')).called(2);
+    expect(read().run?.status, RunStatus.partial);
+    expect(read().run?.processedCount, 200);
+    expect(read().isRunning, isFalse);
+    verify(() => apiClient.get('/categorization/runs/run-1')).called(1);
+    expect(updates.hasListener, isFalse);
   });
 
-  testWidgets('refreshes the transaction list as batches land', (tester) async {
-    when(
-      () => apiClient.post('/categorization/runs', body: any(named: 'body')),
-    ).thenAnswer((_) async => _runJson(status: 'running', processed: 0));
-    when(() => apiClient.get('/categorization/runs/run-1')).thenAnswer(
-      (_) async => _runJson(status: 'success', processed: 200, assigned: 200),
-    );
-
+  test('refreshes the transaction list as batches land', () async {
+    startsWith(_runJson(status: 'running'));
     keepAlive();
     await container.read(runControllerProvider.notifier).start();
-    // Once for the accepted run, once for the batch that finished it.
+    // Once for the accepted run.
     expect(transactions.refreshQuietlyCalls, 1);
 
-    await tester.pump(runPollInterval);
-    await tester.pump();
+    await push(RunEventUpdate(_event(RunEventType.progress, done: 40)));
+    expect(transactions.refreshQuietlyCalls, 2);
+
+    // Same count again: nothing committed, nothing to reload.
+    await push(RunEventUpdate(_event(RunEventType.progress, done: 40)));
     expect(transactions.refreshQuietlyCalls, 2);
   });
 
-  testWidgets('cancel moves the run to cancelled and stops polling', (
-    tester,
-  ) async {
+  test('reconnecting mid-run catches up from the snapshot', () async {
+    startsWith(_runJson(status: 'running'));
     when(
-      () => apiClient.post('/categorization/runs', body: any(named: 'body')),
-    ).thenAnswer((_) async => _runJson(status: 'running'));
+      () => apiClient.get('/categorization/runs/run-1'),
+    ).thenAnswer((_) async => _runJson(status: 'running', processed: 40));
+    keepAlive();
+    await container.read(runControllerProvider.notifier).start();
+    await push(RunEventUpdate(_event(RunEventType.progress, done: 40)));
+
+    // The socket drops: one REST read stands in while it is down.
+    await push(const RunConnectionLost());
+    verify(() => apiClient.get('/categorization/runs/run-1')).called(1);
+    expect(read().run?.processedCount, 40);
+
+    // Back up: the snapshot carries what was missed.
+    await push(RunResync(_event(RunEventType.progress, done: 160)));
+    expect(read().run?.processedCount, 160);
+    expect(read().isRunning, isTrue);
+    verifyNever(() => apiClient.get(any()));
+  });
+
+  test('a reconnection that no longer knows the run reads it once', () async {
+    startsWith(_runJson(status: 'running'));
+    when(() => apiClient.get('/categorization/runs/run-1')).thenAnswer(
+      (_) async => _runJson(status: 'success', processed: 200, assigned: 200),
+    );
+    keepAlive();
+    await container.read(runControllerProvider.notifier).start();
+
+    // It ended while the socket was down, so the snapshot is empty.
+    await push(const RunResync(null));
+
+    expect(read().run?.status, RunStatus.success);
+    expect(read().isRunning, isFalse);
+    expect(updates.hasListener, isFalse);
+  });
+
+  test('a stale REST read never moves the run backwards', () async {
+    startsWith(_runJson(status: 'running'));
+    final reply = Completer<Map<String, dynamic>>();
+    when(
+      () => apiClient.get('/categorization/runs/run-1'),
+    ).thenAnswer((_) => reply.future);
+    keepAlive();
+    await container.read(runControllerProvider.notifier).start();
+
+    await push(const RunConnectionLost());
+    await push(RunResync(_event(RunEventType.progress, done: 120)));
+    reply.complete(_runJson(status: 'running', processed: 40));
+    await Future<void>.delayed(Duration.zero);
+
+    expect(read().run?.processedCount, 120);
+  });
+
+  test(
+    'a failed REST read is reported and cleared once one succeeds',
+    () async {
+      startsWith(_runJson(status: 'running'));
+      var fail = true;
+      when(() => apiClient.get('/categorization/runs/run-1')).thenAnswer((
+        _,
+      ) async {
+        if (fail) {
+          throw const ApiFailure(code: 'UNKNOWN_ERROR', message: 'down');
+        }
+        return _runJson(status: 'running', processed: 60);
+      });
+      keepAlive();
+      await container.read(runControllerProvider.notifier).start();
+
+      await push(const RunConnectionLost());
+      expect(read().error, isA<ApiFailure>());
+      expect(read().isRunning, isTrue);
+
+      fail = false;
+      await push(const RunConnectionLost());
+      expect(read().error, isNull);
+      expect(read().run?.processedCount, 60);
+    },
+  );
+
+  test('cancel moves the run to cancelled and stops listening', () async {
+    startsWith(_runJson(status: 'running'));
     when(() => apiClient.post('/categorization/runs/run-1/cancel')).thenAnswer(
       (_) async => _runJson(
         status: 'cancelled',
@@ -171,66 +299,45 @@ void main() {
         deferred: 20,
       ),
     );
-
     keepAlive();
     await container.read(runControllerProvider.notifier).start();
     await container.read(runControllerProvider.notifier).cancel();
 
-    expect(
-      container.read(runControllerProvider).run?.status,
-      RunStatus.cancelled,
-    );
-    expect(container.read(runControllerProvider).isRunning, isFalse);
-
-    await tester.pump(runPollInterval * 3);
-    await tester.pump();
+    expect(read().run?.status, RunStatus.cancelled);
+    expect(read().isRunning, isFalse);
+    expect(updates.hasListener, isFalse);
     verifyNever(() => apiClient.get(any()));
   });
 
-  testWidgets('disposing the panel cancels the timer', (tester) async {
-    when(
-      () => apiClient.post('/categorization/runs', body: any(named: 'body')),
-    ).thenAnswer((_) async => _runJson(status: 'running'));
-    when(
-      () => apiClient.get('/categorization/runs/run-1'),
-    ).thenAnswer((_) async => _runJson(status: 'running', processed: 40));
-
+  test('disposing the panel drops the subscription', () async {
+    startsWith(_runJson(status: 'running'));
     final subscription = container.listen(runControllerProvider, (_, _) {});
     await container.read(runControllerProvider.notifier).start();
-
-    await tester.pump(runPollInterval);
-    await tester.pump();
-    verify(() => apiClient.get('/categorization/runs/run-1')).called(1);
+    expect(updates.hasListener, isTrue);
 
     // Dropping the last listener disposes the `autoDispose` controller, the way
     // leaving the transactions panel does.
     subscription.close();
+    await Future<void>.delayed(Duration.zero);
 
-    await tester.pump(runPollInterval * 4);
-    await tester.pump();
-    verifyNever(() => apiClient.get('/categorization/runs/run-1'));
+    expect(updates.hasListener, isFalse);
   });
 
-  testWidgets('a failed start is reported without losing the queue', (
-    tester,
-  ) async {
+  test('a failed start is reported without losing the queue', () async {
     when(
       () => apiClient.post('/categorization/runs', body: any(named: 'body')),
     ).thenThrow(
       const ApiFailure(code: 'INFERENCE_UNAVAILABLE', message: 'no runtime'),
     );
-    final subscription = keepAlive();
+    keepAlive();
 
     await container.read(runControllerProvider.notifier).start();
 
-    final state = container.read(runControllerProvider);
+    final state = read();
     expect(state.error, isA<ApiFailure>());
     expect(state.run, isNull);
     expect(state.isStarting, isFalse);
-
-    subscription.close();
-    container.dispose();
-    await tester.pump(runPollInterval);
+    verifyNever(() => progress.watch(any()));
   });
 
   test(
