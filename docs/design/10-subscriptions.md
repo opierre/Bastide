@@ -55,7 +55,7 @@ Replaces the occurrence table the frame was first drawn with: five near-identica
 **Hover.** A full-height column per charge (the moment, not the 3 px dot) carrying the dashboard's tooltip: date (tabular) over the signed, colorized amount — `−15,49 €` in `#FF5C6C` — plus « 13,49 € → 15,49 € » in amber on the charge that stepped.
 
 ## Empty state (frame ③)
-Centered: 64 px iris plate with cycle glyph; « Aucun abonnement détecté pour l'instant »; « Bastide repère un abonnement lorsqu'un prélèvement s'est répété trois fois. Importer davantage d'historique accélère la détection. »; gradient CTA « Aller aux imports ».
+Centered: 64 px iris plate with cycle glyph; « Aucun abonnement détecté pour l'instant »; « Bastide repère un abonnement lorsqu'un prélèvement s'est répété trois fois. Importer davantage d'historique accélère la détection. »; gradient CTA « Détecter », running the same detection as the top bar button (shared running state, same result toast).
 
 ## Edit modal (frame ④, over list)
 480 px modal on `rgba(4,6,11,.62)` scrim, opened from the kebab's « Modifier ». Title « Modifier le paiement récurrent ». Fields: Nom (focused: iris border + focus ring) = Basic-Fit; row Compte (read-only plate, BNP — Compte courant: a series cannot move account) + Montant 130 px (29,99 €); row Cadence (select « Mensuel », help « Mensuel · Trimestriel · Annuel · Irrégulier ») + Catégorie (select with swatch, Santé). Footer right: Annuler (secondary) · Enregistrer (gradient). (Amendment, 2026-11: the mockup drew this as a creation modal; creation was removed, the same geometry now only edits.)
