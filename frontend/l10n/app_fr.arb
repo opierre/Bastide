@@ -389,7 +389,16 @@
   },
   "accountSettlementRule": "Règle de prélèvement",
   "@accountSettlementRule": {
-    "description": "Account card menu item, deferred-debit cards only: opens the rule filing the card's monthly debit as a transfer."
+    "description": "Linked-card menu item, deferred-debit cards only: opens the rule filing the card's monthly debit as a transfer."
+  },
+  "accountLinkedCards": "{count, plural, =1{1 carte liée} other{{count} cartes liées}}",
+  "@accountLinkedCards": {
+    "description": "Tooltip and accessible label of the account card's linked-cards button, which shows a card icon and the count; opens the list of cards settled from the account.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   },
   "cardSettlementNoAccount": "{card} : choisissez le compte sur lequel la carte est prélevée, pour que ses achats ne comptent qu'une fois.",
   "@cardSettlementNoAccount": {
