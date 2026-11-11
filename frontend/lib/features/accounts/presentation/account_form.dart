@@ -157,6 +157,7 @@ class _AccountFormState extends ConsumerState<AccountForm> {
   List<Account> _settlementCandidates() => settlementCandidates(
     ref.read(accountsControllerProvider).value ?? const [],
     cardId: widget.initial?.id,
+    currentId: widget.initial?.settlementAccountId,
   );
 
   /// The settlement account the form stands on: the one picked or given, else
@@ -357,6 +358,7 @@ class _AccountFormState extends ConsumerState<AccountForm> {
                 candidates: settlementCandidates(
                   ref.watch(accountsControllerProvider).value ?? const [],
                   cardId: widget.initial?.id,
+                  currentId: widget.initial?.settlementAccountId,
                 ),
                 selectedFor: _settlementAccountIdFor,
                 errorText: _settlementError,

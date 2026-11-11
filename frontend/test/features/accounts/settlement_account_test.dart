@@ -23,6 +23,59 @@ Account _account(
 );
 
 void main() {
+  group('settlementCandidates', () {
+    test('offers only open current accounts, never the card itself', () {
+      final candidates = settlementCandidates([
+        _account('checking', AccountType.checking),
+        _account('savings', AccountType.savings),
+        _account('credit', AccountType.credit),
+        _account('cash', AccountType.cash),
+        _account('other', AccountType.other),
+        _account('card', AccountType.deferredCard),
+        _account('other-card', AccountType.deferredCard),
+        _account('closed', AccountType.checking, archived: true),
+      ], cardId: 'card');
+
+      expect(candidates.map((account) => account.id), ['checking']);
+    });
+
+    test("keeps the card's saved settlement account whatever its type", () {
+      final candidates = settlementCandidates([
+        _account('checking', AccountType.checking),
+        _account('savings', AccountType.savings),
+        _account('cash', AccountType.cash),
+      ], currentId: 'savings');
+
+      expect(candidates.map((account) => account.id), ['checking', 'savings']);
+    });
+  });
+
+  group('proposedSettlementAccountId', () {
+    test('preselects the only current account once savings are left out', () {
+      final candidates = settlementCandidates([
+        _account('checking', AccountType.checking),
+        _account('savings', AccountType.savings),
+      ]);
+
+      expect(
+        proposedSettlementAccountId(candidates, institution: 'Autre Banque'),
+        'checking',
+      );
+    });
+
+    test('leaves the choice open with two current accounts elsewhere', () {
+      final candidates = settlementCandidates([
+        _account('checking-1', AccountType.checking),
+        _account('checking-2', AccountType.checking),
+      ]);
+
+      expect(
+        proposedSettlementAccountId(candidates, institution: 'Autre Banque'),
+        isNull,
+      );
+    });
+  });
+
   test('linkableCards keeps only open deferred cards with no settlement', () {
     final cards = linkableCards([
       _account('checking', AccountType.checking),
