@@ -4,7 +4,9 @@ import 'package:bastide/features/categories/application/categories_controller.da
 import 'package:bastide/features/categories/presentation/categories_screen.dart';
 import 'package:bastide/features/rules/application/rules_controller.dart';
 import 'package:bastide/l10n/app_localizations.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -106,6 +108,29 @@ void main() {
       expect(toggle.value, isFalse);
     },
   );
+
+  testWidgets('hovering the reorder handle shows a hand cursor', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      _wrap(rules: FakeRulesController(initialRules: [testRule()])),
+    );
+    await tester.pumpAndSettle();
+    await _openRules(tester);
+
+    final gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    addTearDown(gesture.removePointer);
+    await gesture.addPointer(location: Offset.zero);
+    await gesture.moveTo(
+      tester.getCenter(find.byKey(const Key('ruleHandle-r1'))),
+    );
+    await tester.pump();
+
+    expect(
+      RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
+      SystemMouseCursors.click,
+    );
+  });
 
   testWidgets('a rule with a start date says from when it applies', (
     tester,
