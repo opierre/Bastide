@@ -1,4 +1,7 @@
+import 'dart:async';
+
 import 'package:bastide/features/recurring/application/subscriptions_controller.dart';
+import 'package:bastide/features/recurring/data/recurring_repository.dart';
 import 'package:bastide/features/recurring/domain/recurring_series.dart';
 import 'package:bastide/features/recurring/domain/recurring_summary.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -246,6 +249,18 @@ class FakeSubscriptionsController extends SubscriptionsController {
     if (errorOnAttach != null) throw errorOnAttach!;
     attachCalls.add((seriesId, transactionIds));
     return testSeries(id: seriesId);
+  }
+
+  int detectCalls = 0;
+
+  /// Holds the pass open until completed, so a test can see the running state.
+  Completer<void>? detectGate;
+
+  @override
+  Future<DetectionResult> detect() async {
+    detectCalls++;
+    await detectGate?.future;
+    return const DetectionResult(createdCount: 2, updatedCount: 1);
   }
 
   @override

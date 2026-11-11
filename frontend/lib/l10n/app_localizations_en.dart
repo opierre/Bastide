@@ -2617,9 +2617,6 @@ class AppLocalizationsEn extends AppLocalizations {
       'Bastide spots a recurring payment once a charge has repeated three times. Importing more history speeds detection up.';
 
   @override
-  String get subscriptionsEmptyCta => 'Go to imports';
-
-  @override
   String get subscriptionDetailBack => 'Back to recurring payments';
 
   @override

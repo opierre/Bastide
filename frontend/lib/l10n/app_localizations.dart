@@ -3654,7 +3654,7 @@ abstract class AppLocalizations {
   /// **'Vos paiements récurrents, détectés automatiquement'**
   String get navSubscriptionsSubtitle;
 
-  /// Secondary top-bar button re-running detection over the imported ledger.
+  /// Button re-running detection over the imported ledger: secondary in the top bar, primary on the empty state.
   ///
   /// In fr, this message translates to:
   /// **'Détecter'**
@@ -4097,12 +4097,6 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Bastide repère un paiement récurrent lorsqu\'un prélèvement s\'est répété trois fois. Importer davantage d\'historique accélère la détection.'**
   String get subscriptionsEmptyBody;
-
-  /// Empty-state CTA. It goes to imports rather than to manual creation because more history is the actual remedy.
-  ///
-  /// In fr, this message translates to:
-  /// **'Aller aux imports'**
-  String get subscriptionsEmptyCta;
 
   /// Iris back link at the top of the series detail.
   ///

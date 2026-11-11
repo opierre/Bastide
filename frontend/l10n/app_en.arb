@@ -716,7 +716,6 @@
   "subscriptionsRetry": "Try again",
   "subscriptionsEmptyTitle": "No recurring payments detected yet",
   "subscriptionsEmptyBody": "Bastide spots a recurring payment once a charge has repeated three times. Importing more history speeds detection up.",
-  "subscriptionsEmptyCta": "Go to imports",
   "subscriptionDetailBack": "Back to recurring payments",
   "subscriptionDetailDetectedSince": "{account} · detected since {month}",
   "subscriptionDetailTrackedSince": "{account} · tracked since {month}",

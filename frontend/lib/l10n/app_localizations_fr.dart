@@ -2638,9 +2638,6 @@ class AppLocalizationsFr extends AppLocalizations {
       'Bastide repère un paiement récurrent lorsqu\'un prélèvement s\'est répété trois fois. Importer davantage d\'historique accélère la détection.';
 
   @override
-  String get subscriptionsEmptyCta => 'Aller aux imports';
-
-  @override
   String get subscriptionDetailBack => 'Retour aux récurrents';
 
   @override

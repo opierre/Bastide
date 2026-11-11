@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:bastide/core/api/api_client.dart';
 import 'package:bastide/core/theme/app_theme.dart';
 import 'package:bastide/core/widgets/amount_text.dart';
@@ -25,6 +27,7 @@ Widget _wrap({
   Locale locale = const Locale('fr'),
   List<AppCategory> categories = const [],
   List<SeriesAccount> accounts = const [],
+  bool withTopBar = false,
 }) {
   return ProviderScope(
     overrides: [
@@ -37,7 +40,12 @@ Widget _wrap({
       theme: appDarkTheme,
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
-      home: const Scaffold(body: SubscriptionsScreen()),
+      home: Scaffold(
+        appBar: withTopBar
+            ? AppBar(actions: const [SubscriptionsTopBarActions()])
+            : null,
+        body: const SubscriptionsScreen(),
+      ),
     ),
   );
 }
@@ -435,7 +443,7 @@ void main() {
   });
 
   testWidgets(
-    'the empty state explains the three-repeat rule and offers imports',
+    'the empty state explains the three-repeat rule and offers detection',
     (tester) async {
       _useDesktopSurface(tester);
       await tester.pumpWidget(_wrap(controller: FakeSubscriptionsController()));
@@ -451,10 +459,47 @@ void main() {
         findsOneWidget,
       );
       expect(
-        find.byKey(const Key('subscriptionsEmptyImportsButton')),
+        find.byKey(const Key('subscriptionsEmptyDetectButton')),
         findsOneWidget,
       );
-      expect(find.text('Aller aux imports'), findsOneWidget);
+      expect(find.text('Détecter'), findsOneWidget);
+      expect(find.text('Aller aux imports'), findsNothing);
+    },
+  );
+
+  testWidgets(
+    'the empty state button runs the top bar detection, toast included',
+    (tester) async {
+      _useDesktopSurface(tester);
+      final controller = FakeSubscriptionsController()
+        ..detectGate = Completer<void>();
+      await tester.pumpWidget(_wrap(controller: controller, withTopBar: true));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byKey(const Key('subscriptionsEmptyDetectButton')));
+      await tester.pump();
+
+      expect(controller.detectCalls, 1);
+      // One running state for both buttons: the top bar's stands down too.
+      expect(find.text('Détection…'), findsNWidgets(2));
+      final topBar = tester.widget<OutlinedButton>(
+        find.byKey(const Key('subscriptionsDetectButton')),
+      );
+      expect(topBar.onPressed, isNull);
+
+      controller.detectGate!.complete();
+      await tester.pump();
+      await tester.pump();
+
+      expect(
+        find.text('2 nouveaux paiements récurrents détectés'),
+        findsOneWidget,
+      );
+      expect(find.text('1 série existante mise à jour'), findsOneWidget);
+      expect(find.text('Détection…'), findsNothing);
+
+      // Let the toast withdraw so no timer outlives the test.
+      await tester.pump(const Duration(seconds: 7));
     },
   );
 

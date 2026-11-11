@@ -2848,7 +2848,7 @@
   },
   "subscriptionsDetect": "Détecter",
   "@subscriptionsDetect": {
-    "description": "Secondary top-bar button re-running detection over the imported ledger."
+    "description": "Button re-running detection over the imported ledger: secondary in the top bar, primary on the empty state."
   },
   "subscriptionsDetectRunning": "Détection…",
   "@subscriptionsDetectRunning": {
@@ -3258,10 +3258,6 @@
   "subscriptionsEmptyBody": "Bastide repère un paiement récurrent lorsqu'un prélèvement s'est répété trois fois. Importer davantage d'historique accélère la détection.",
   "@subscriptionsEmptyBody": {
     "description": "Empty-state body, stating the three-repeat rule so the absence reads as a threshold rather than a failure."
-  },
-  "subscriptionsEmptyCta": "Aller aux imports",
-  "@subscriptionsEmptyCta": {
-    "description": "Empty-state CTA. It goes to imports rather than to manual creation because more history is the actual remedy."
   },
   "subscriptionDetailBack": "Retour aux récurrents",
   "@subscriptionDetailBack": {
