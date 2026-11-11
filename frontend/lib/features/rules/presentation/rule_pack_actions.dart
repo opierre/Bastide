@@ -20,9 +20,8 @@ class RulePackActions extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context)!;
-    final builtin =
-        ref.watch(builtinPacksProvider).value ?? const <BuiltinPack>[];
-    final firstBuiltin = builtin.isEmpty ? null : builtin.first;
+    final offered = ref.watch(offeredBuiltinPacksProvider);
+    final firstBuiltin = offered.isEmpty ? null : offered.first;
 
     return Row(
       mainAxisSize: MainAxisSize.min,
@@ -33,7 +32,8 @@ class RulePackActions extends ConsumerWidget {
           tooltip: l10n.rulePackImportFile,
           onPressed: () => startRulePackImport(context, ref),
         ),
-        // Only when the app bundles a pack: there is nothing to offer otherwise.
+        // Only when the app bundles a pack the user has not imported yet: there
+        // is nothing to offer otherwise.
         if (firstBuiltin != null)
           _PackActionButton(
             key: const Key('rulePackImportBuiltinButton'),
@@ -107,6 +107,8 @@ class BuiltinPackOffer extends ConsumerWidget {
       (candidate) => candidate.locale == locale,
       orElse: () => packs.first,
     );
+    // Already imported: offering it again would only report duplicates.
+    if (pack.imported) return const SizedBox.shrink();
 
     return Column(
       mainAxisSize: MainAxisSize.min,

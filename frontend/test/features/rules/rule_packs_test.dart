@@ -63,6 +63,14 @@ String _packSource({
   ],
 });
 
+Map<String, dynamic> _builtinJson({bool imported = false}) => {
+  'id': 'fr-starter',
+  'name': 'Commerçants français',
+  'locale': 'fr',
+  'rule_count': 12,
+  'imported': imported,
+};
+
 Map<String, dynamic> _previewJson({
   int total = 12,
   int newCount = 10,
@@ -147,16 +155,9 @@ void main() {
 
   setUp(() {
     apiClient = MockApiClient();
-    when(() => apiClient.get('/rules/packs/builtin')).thenAnswer(
-      (_) async => [
-        {
-          'id': 'fr-starter',
-          'name': 'Commerçants français',
-          'locale': 'fr',
-          'rule_count': 12,
-        },
-      ],
-    );
+    when(
+      () => apiClient.get('/rules/packs/builtin'),
+    ).thenAnswer((_) async => [_builtinJson()]);
   });
 
   group('parseRulePack', () {
@@ -470,6 +471,67 @@ void main() {
         findsNothing,
       );
       expect(find.byKey(const Key('rulePackExportButton')), findsOneWidget);
+    });
+
+    testWidgets('no built-in pack offer once that pack is imported', (
+      tester,
+    ) async {
+      when(
+        () => apiClient.get('/rules/packs/builtin'),
+      ).thenAnswer((_) async => [_builtinJson(imported: true)]);
+
+      await tester.pumpWidget(_wrap(apiClient, files: FakeRulePackFiles()));
+      await tester.pumpAndSettle();
+      await _openRules(tester);
+
+      expect(find.byKey(const Key('rulePackImportButton')), findsOneWidget);
+      expect(
+        find.byKey(const Key('rulePackImportBuiltinButton')),
+        findsNothing,
+      );
+      expect(find.byKey(const Key('rulesEmptyState')), findsOneWidget);
+      expect(
+        find.byKey(const Key('emptyStateBuiltinPackButton')),
+        findsNothing,
+      );
+    });
+
+    testWidgets('importing the built-in pack hides its button', (tester) async {
+      when(
+        () => apiClient.post('/rules/packs/preview', body: any(named: 'body')),
+      ).thenAnswer((_) async => _previewJson());
+      final progress = stubQuickPackImport(
+        apiClient,
+        result: {
+          'created_count': 10,
+          'skipped_count': 2,
+          'unresolved': <String>[],
+          'recategorized_count': 0,
+        },
+      );
+      var imported = false;
+      when(
+        () => apiClient.get('/rules/packs/builtin'),
+      ).thenAnswer((_) async => [_builtinJson(imported: imported)]);
+
+      await tester.pumpWidget(
+        _wrap(apiClient, files: FakeRulePackFiles(), progress: progress),
+      );
+      await tester.pumpAndSettle();
+      await _openRules(tester);
+      await tester.tap(find.byKey(const Key('rulePackImportBuiltinButton')));
+      await tester.pumpAndSettle();
+
+      // The backend records the import with the rules: the next list says so.
+      imported = true;
+      await tester.tap(find.byKey(const Key('rulePackImportConfirm')));
+      await tester.pumpAndSettle();
+
+      expect(
+        find.byKey(const Key('rulePackImportBuiltinButton')),
+        findsNothing,
+      );
+      expect(find.byKey(const Key('rulePackImportButton')), findsOneWidget);
     });
   });
 }
