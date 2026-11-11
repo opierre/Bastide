@@ -7,6 +7,7 @@ import '../../../core/l10n/card_display.dart';
 import '../../../core/l10n/category_display.dart';
 import '../../../core/theme/tokens.dart';
 import '../../../core/widgets/app_card.dart';
+import '../../../core/widgets/category_chip.dart';
 import '../../../core/widgets/search_pill.dart';
 import '../../../core/widgets/state_views.dart';
 import '../../../l10n/app_localizations.dart';
@@ -142,8 +143,7 @@ class _FilterBar extends ConsumerWidget {
     final filters = ref.watch(transactionFiltersProvider);
     final accounts =
         ref.watch(accountsControllerProvider).value ?? const <Account>[];
-    final categories =
-        ref.watch(transactionCategoriesProvider).value ?? const <AppCategory>[];
+    final categories = ref.watch(transactionFilterCategoriesProvider);
     final notifier = ref.read(transactionFiltersProvider.notifier);
 
     return Row(
@@ -300,7 +300,7 @@ class _CategoryFilterPill extends StatelessWidget {
         for (final category in categories)
           PopupMenuItem<String?>(
             value: category.id,
-            child: Text(localizedCategoryName(l10n, category.name)),
+            child: _CategoryFilterItem(category: category),
           ),
       ],
       child: _FilterPillButton(
@@ -308,6 +308,38 @@ class _CategoryFilterPill extends StatelessWidget {
             ? l10n.transactionsFilterAllCategories
             : localizedCategoryName(l10n, selected.name),
       ),
+    );
+  }
+}
+
+/// One entry of the category filter menu: the category's glyph in its hue,
+/// then its name — the same glyph and hue as the category picker and chips.
+class _CategoryFilterItem extends StatelessWidget {
+  const _CategoryFilterItem({required this.category});
+
+  final AppCategory category;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final slug = categorySlugFor(name: category.name, kind: category.kind);
+
+    return Row(
+      key: Key('transactionsCategoryFilterItem-${category.id}'),
+      children: [
+        Icon(
+          CategoryIcons.forSlug(slug),
+          size: 14,
+          color: CategoryHues.forSlug(slug),
+        ),
+        const SizedBox(width: AppSpacing.sm),
+        Flexible(
+          child: Text(
+            localizedCategoryName(l10n, category.name),
+            overflow: TextOverflow.ellipsis,
+          ),
+        ),
+      ],
     );
   }
 }
