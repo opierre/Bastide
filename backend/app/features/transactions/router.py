@@ -80,6 +80,7 @@ async def list_transactions(
 
     `include_linked_cards` widens an `account_id` filter to the deferred cards settled on that
     account. Each row keeps its own `account_id`, so a client can tell the card's apart.
+    `category_id` matches that category and its sub-categories.
     """
     items, total = service.list_for_user(
         user.id,

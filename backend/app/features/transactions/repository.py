@@ -7,6 +7,7 @@ from sqlalchemy.orm import Session, selectinload, with_expression
 
 from app.features.accounts.linked_cards import in_account
 from app.features.accounts.models import Account
+from app.features.categories.models import Category
 from app.features.recurring.models import RecurringOccurrence
 from app.features.transactions.models import Transaction
 
@@ -48,6 +49,9 @@ class TransactionRepository:
         deferred cards settled on that account (not archived), so the account reads with the
         card purchases its monthly debit pays.
 
+        A `category_id` filter also takes in the rows filed under that category's
+        sub-categories, so picking a main category shows everything beneath it.
+
         Eager-loads `category` (`selectinload`) so rendering a page never triggers one query
         per row.
         """
@@ -65,7 +69,13 @@ class TransactionRepository:
         if date_to is not None:
             query = query.where(Transaction.booked_date <= date_to)
         if category_id is not None:
-            query = query.where(Transaction.category_id == category_id)
+            subcategory_ids = select(Category.id).where(Category.parent_id == category_id)
+            query = query.where(
+                or_(
+                    Transaction.category_id == category_id,
+                    Transaction.category_id.in_(subcategory_ids),
+                )
+            )
         if needs_review is not None:
             query = query.where(Transaction.needs_review == needs_review)
         if q:

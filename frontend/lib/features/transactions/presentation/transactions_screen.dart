@@ -7,6 +7,7 @@ import '../../../core/l10n/card_display.dart';
 import '../../../core/l10n/category_display.dart';
 import '../../../core/theme/tokens.dart';
 import '../../../core/widgets/app_card.dart';
+import '../../../core/widgets/category_chip.dart';
 import '../../../core/widgets/search_pill.dart';
 import '../../../core/widgets/state_views.dart';
 import '../../../l10n/app_localizations.dart';
@@ -142,8 +143,7 @@ class _FilterBar extends ConsumerWidget {
     final filters = ref.watch(transactionFiltersProvider);
     final accounts =
         ref.watch(accountsControllerProvider).value ?? const <Account>[];
-    final categories =
-        ref.watch(transactionCategoriesProvider).value ?? const <AppCategory>[];
+    final categories = ref.watch(transactionFilterCategoriesProvider);
     final notifier = ref.read(transactionFiltersProvider.notifier);
 
     return Row(
@@ -233,6 +233,14 @@ class _FilterPillButton extends StatelessWidget {
   }
 }
 
+/// Menu value of the « all » entries. [PopupMenuButton] reads a null result
+/// as a dismissal and never calls `onSelected`, so « all » needs a non-null
+/// value, mapped back to a null filter on selection (ids are never empty).
+const _allFilterValue = '';
+
+String? _filterIdFromMenu(String value) =>
+    value == _allFilterValue ? null : value;
+
 class _AccountFilterPill extends StatelessWidget {
   const _AccountFilterPill({
     required this.accounts,
@@ -251,17 +259,17 @@ class _AccountFilterPill extends StatelessWidget {
         .where((account) => account.id == selectedId)
         .firstOrNull;
 
-    return PopupMenuButton<String?>(
+    return PopupMenuButton<String>(
       key: const Key('transactionsAccountFilter'),
       position: PopupMenuPosition.under,
-      onSelected: onChanged,
+      onSelected: (value) => onChanged(_filterIdFromMenu(value)),
       itemBuilder: (context) => [
-        PopupMenuItem<String?>(
-          value: null,
+        PopupMenuItem<String>(
+          value: _allFilterValue,
           child: Text(l10n.transactionsFilterAllAccounts),
         ),
         for (final account in accounts)
-          PopupMenuItem<String?>(value: account.id, child: Text(account.name)),
+          PopupMenuItem<String>(value: account.id, child: Text(account.name)),
       ],
       child: _FilterPillButton(
         label: selected?.name ?? l10n.transactionsFilterAllAccounts,
@@ -288,19 +296,19 @@ class _CategoryFilterPill extends StatelessWidget {
         .where((category) => category.id == selectedId)
         .firstOrNull;
 
-    return PopupMenuButton<String?>(
+    return PopupMenuButton<String>(
       key: const Key('transactionsCategoryFilter'),
       position: PopupMenuPosition.under,
-      onSelected: onChanged,
+      onSelected: (value) => onChanged(_filterIdFromMenu(value)),
       itemBuilder: (context) => [
-        PopupMenuItem<String?>(
-          value: null,
+        PopupMenuItem<String>(
+          value: _allFilterValue,
           child: Text(l10n.transactionsFilterAllCategories),
         ),
         for (final category in categories)
-          PopupMenuItem<String?>(
+          PopupMenuItem<String>(
             value: category.id,
-            child: Text(localizedCategoryName(l10n, category.name)),
+            child: _CategoryFilterItem(category: category),
           ),
       ],
       child: _FilterPillButton(
@@ -308,6 +316,38 @@ class _CategoryFilterPill extends StatelessWidget {
             ? l10n.transactionsFilterAllCategories
             : localizedCategoryName(l10n, selected.name),
       ),
+    );
+  }
+}
+
+/// One entry of the category filter menu: the category's glyph in its hue,
+/// then its name — the same glyph and hue as the category picker and chips.
+class _CategoryFilterItem extends StatelessWidget {
+  const _CategoryFilterItem({required this.category});
+
+  final AppCategory category;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final slug = categorySlugFor(name: category.name, kind: category.kind);
+
+    return Row(
+      key: Key('transactionsCategoryFilterItem-${category.id}'),
+      children: [
+        Icon(
+          CategoryIcons.forSlug(slug),
+          size: 14,
+          color: CategoryHues.forSlug(slug),
+        ),
+        const SizedBox(width: AppSpacing.sm),
+        Flexible(
+          child: Text(
+            localizedCategoryName(l10n, category.name),
+            overflow: TextOverflow.ellipsis,
+          ),
+        ),
+      ],
     );
   }
 }

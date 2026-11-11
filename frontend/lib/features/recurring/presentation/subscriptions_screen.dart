@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 
 import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/tokens.dart';
@@ -11,7 +10,7 @@ import '../../../core/widgets/inline_banner.dart';
 import '../../../core/widgets/primary_button.dart';
 import '../../../core/widgets/state_views.dart';
 import '../../../l10n/app_localizations.dart';
-import '../../imports/presentation/imports_screen.dart';
+import '../application/recurring_detection.dart';
 import '../application/series_sort.dart';
 import '../application/subscriptions_controller.dart';
 import '../domain/recurring_series.dart';
@@ -53,61 +52,58 @@ class SubscriptionsScreen extends ConsumerWidget {
 /// Both stay available on the detail view. The detail is a state of this panel,
 /// not a different one, and chrome that rearranged itself under the user would
 /// break the invariant the shell exists to hold (`docs/design/00` §Layout).
-class SubscriptionsTopBarActions extends ConsumerStatefulWidget {
+class SubscriptionsTopBarActions extends ConsumerWidget {
   const SubscriptionsTopBarActions({super.key});
 
   @override
-  ConsumerState<SubscriptionsTopBarActions> createState() =>
-      _SubscriptionsTopBarActionsState();
-}
-
-class _SubscriptionsTopBarActionsState
-    extends ConsumerState<SubscriptionsTopBarActions> {
-  bool _detecting = false;
-
-  Future<void> _detect() async {
+  Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context)!;
-    setState(() => _detecting = true);
-    try {
-      final result = await ref
-          .read(subscriptionsControllerProvider.notifier)
-          .detect();
-      if (!mounted) return;
-      showAppToast(
-        context,
-        title: l10n.subscriptionsDetectResult(result.createdCount),
-        message: l10n.subscriptionsDetectResultDetail(result.updatedCount),
-      );
-    } catch (error) {
-      if (!mounted) return;
-      showAppToast(
-        context,
-        title: l10n.subscriptionsDetectFailed,
-        message: localizeRecurringError(l10n, error),
-        tone: BannerTone.error,
-      );
-    } finally {
-      if (mounted) setState(() => _detecting = false);
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
+    final detecting = ref.watch(recurringDetectionProvider);
 
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
         OutlinedButton(
           key: const Key('subscriptionsDetectButton'),
-          onPressed: _detecting ? null : _detect,
+          onPressed: detecting
+              ? null
+              : () => runRecurringDetection(context, ref),
           child: Text(
-            _detecting
+            detecting
                 ? l10n.subscriptionsDetectRunning
                 : l10n.subscriptionsDetect,
           ),
         ),
       ],
+    );
+  }
+}
+
+/// Runs a detection pass and reports it in a toast: the one path behind every
+/// « Détecter » button, so the running state and the result read the same
+/// wherever the pass was started.
+///
+/// The overlay and the strings are taken before the await: the empty state's
+/// button is gone once the reload behind the pass lands, and its result still
+/// has to be said.
+Future<void> runRecurringDetection(BuildContext context, WidgetRef ref) async {
+  final l10n = AppLocalizations.of(context)!;
+  final overlay = Overlay.maybeOf(context);
+  try {
+    final result = await ref.read(recurringDetectionProvider.notifier).run();
+    if (result == null || overlay == null || !overlay.mounted) return;
+    showAppToastOn(
+      overlay,
+      title: l10n.subscriptionsDetectResult(result.createdCount),
+      message: l10n.subscriptionsDetectResultDetail(result.updatedCount),
+    );
+  } catch (error) {
+    if (overlay == null || !overlay.mounted) return;
+    showAppToastOn(
+      overlay,
+      title: l10n.subscriptionsDetectFailed,
+      message: localizeRecurringError(l10n, error),
+      tone: BannerTone.error,
     );
   }
 }
@@ -119,6 +115,7 @@ class _SubscriptionsList extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context)!;
     final state = ref.watch(subscriptionsControllerProvider);
+    final detecting = ref.watch(recurringDetectionProvider);
 
     return switch (state) {
       AsyncData(:final value)
@@ -131,12 +128,14 @@ class _SubscriptionsList extends ConsumerWidget {
           title: l10n.subscriptionsEmptyTitle,
           message: l10n.subscriptionsEmptyBody,
           action: PrimaryButton(
-            key: const Key('subscriptionsEmptyImportsButton'),
-            label: l10n.subscriptionsEmptyCta,
+            key: const Key('subscriptionsEmptyDetectButton'),
+            label: l10n.subscriptionsDetect,
+            loadingLabel: l10n.subscriptionsDetectRunning,
+            isLoading: detecting,
             height: 44,
-            // More history is what actually produces a detection, so the offer
-            // is the imports panel.
-            onPressed: () => context.go(ImportsScreen.path),
+            // The transactions may already be imported: running detection
+            // over them is the step that fills this panel.
+            onPressed: () => runRecurringDetection(context, ref),
           ),
         ),
       AsyncData(:final value) => _LoadedPanel(state: value),
