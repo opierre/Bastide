@@ -5,13 +5,18 @@ refuses any other link, and every request here (redirects included) is checked a
 is sent. The request carries nothing about the user: a fixed app `User-Agent`, no cookies, no
 query added.
 
-Wikimedia answers 429 to clients that ask too fast, and a national pack links dozens of logos,
-so few requests run at once, and a throttled or transiently failing one is retried with
-backoff: waiting only costs time when the host actually throttles. An overall deadline keeps a
-throttled import from hanging: what is still failing then is reported as a failed download.
+Wikimedia's robot policy asks for at most two requests at once and for a 429's `Retry-After` to
+be waited out in full. Measured, the host also answers 429 once a client sends about 30 requests
+within 10 seconds, asks for an 11 s wait, and counts the requests it refuses, so a burst ends in
+long pauses and asking early only prolongs them. Requests are therefore spaced evenly, just under
+that rate, which keeps the progress moving without ever being throttled; a 429 that still comes
+holds every request of the import until its `Retry-After` has passed. A transient failure is
+retried with backoff. An overall deadline keeps a throttled import from hanging: what is still
+failing then is reported as a failed download.
 """
 
 import asyncio
+import logging
 import random
 import time
 from collections.abc import Awaitable, Callable, Iterable
@@ -23,20 +28,26 @@ from app import __version__
 from app.core.tls import tls_context
 from app.features.rules.packs.schema import MAX_LOGO_BYTES, is_allowed_logo_url
 
+logger = logging.getLogger(__name__)
+
 _TIMEOUT = httpx.Timeout(10.0, connect=5.0)
 #: Wikimedia's policy asks for an identifying agent; this names the app, never the user.
 USER_AGENT = f"Bastide/{__version__} (+https://github.com/opierre/Bastide)"
 #: Wikimedia redirects a renamed file once in a while; a chain longer than this is not a logo.
 _MAX_REDIRECTS = 3
-#: Downloads in flight at once. Kept low: the host throttles bursts.
+#: Downloads in flight at once: the most Wikimedia's robot policy allows.
 CONCURRENCY = 2
+#: The least time between two requests of one import, redirects and retries included. The host
+#: throttles past about 30 requests in 10 seconds; this keeps a steady pace just under that.
+REQUEST_INTERVAL_S = 0.35
 #: Retries per URL after a 429, a 503 or a transient connect/read error. Never on other 4xx.
 MAX_RETRIES = 3
 #: Backoff before retry n (from 0) is `RETRY_BASE_S * 2**n` plus up to `RETRY_JITTER_S`.
 RETRY_BASE_S = 1.0
 RETRY_JITTER_S = 0.5
-#: A `Retry-After` (in seconds) is honoured up to this; a longer one is cut to it.
-MAX_RETRY_AFTER_S = 10.0
+#: A `Retry-After` (in seconds) is honoured in full up to this; a longer one is cut to it, and
+#: the deadline usually ends the download first. Wikimedia asks for about 11 s.
+MAX_RETRY_AFTER_S = 30.0
 #: The longest one import spends downloading logos, in seconds. A download still unfinished
 #: then is abandoned and reported as failed; no retry starts if its wait would end past it.
 DOWNLOAD_DEADLINE_S = 90.0
@@ -132,6 +143,7 @@ class HttpLogoFetcher:
                 http,
                 remaining=max_total_bytes,
                 deadline=self._clock() + DOWNLOAD_DEADLINE_S,
+                pacer=_Pacer(self._sleep, self._clock),
                 sleep=self._sleep,
                 clock=self._clock,
                 jitter=self._jitter,
@@ -157,6 +169,35 @@ class HttpLogoFetcher:
         return dict(zip(distinct, results, strict=True))
 
 
+class _Pacer:
+    """Spaces the requests of one import `REQUEST_INTERVAL_S` apart, and holds them after a 429.
+
+    Each request takes the next free slot before it is sent. Taking a slot never yields, so on
+    one event loop no two requests get the same one.
+    """
+
+    def __init__(self, sleep: Sleep, clock: Callable[[], float]) -> None:
+        self._sleep = sleep
+        self._clock = clock
+        self._next = float("-inf")
+        self._held_until = float("-inf")
+
+    async def wait_turn(self) -> None:
+        """Wait for this request's slot, then out any hold that began while it waited."""
+        now = self._clock()
+        start = max(now, self._next, self._held_until)
+        self._next = start + REQUEST_INTERVAL_S
+        if start > now:
+            await self._sleep(start - now)
+        held = self._held_until - self._clock()
+        if held > 0:
+            await self._sleep(held)
+
+    def hold(self, seconds: float) -> None:
+        """Send nothing more for ``seconds``: the host asked every request to wait."""
+        self._held_until = max(self._held_until, self._clock() + seconds)
+
+
 class _Run:
     """The state one `fetch_all` shares between its downloads: budget and deadline."""
 
@@ -166,6 +207,7 @@ class _Run:
         *,
         remaining: int,
         deadline: float,
+        pacer: _Pacer,
         sleep: Sleep,
         clock: Callable[[], float],
         jitter: Callable[[], float],
@@ -173,6 +215,7 @@ class _Run:
         self._http = http
         self._remaining = remaining
         self._deadline = deadline
+        self._pacer = pacer
         self._sleep = sleep
         self._clock = clock
         self._jitter = jitter
@@ -196,6 +239,9 @@ class _Run:
                     wait = RETRY_BASE_S * 2**attempt + self._jitter()
                 if self._clock() + wait > self._deadline:
                     raise LogoDownloadError("The logo downloads ran out of time.") from exc
+                if exc.retry_after is not None:
+                    self._pacer.hold(wait)
+                logger.debug("Logo download retry %d in %.2f s: %s", attempt + 1, wait, exc)
                 await self._sleep(wait)
         raise AssertionError("unreachable")  # the loop always returns or raises
 
@@ -212,10 +258,17 @@ class _Run:
                 raise LogoDownloadError("The logo URL is not on the allowed host.")
             if self._remaining <= 0:
                 raise LogoTooLargeError("The pack's logos are too large in all.")
+            await self._pacer.wait_turn()
             if self._clock() > self._deadline:
                 raise LogoDownloadError("The logo downloads ran out of time.")
+            sent = time.perf_counter()
             try:
                 async with self._http.stream("GET", url) as response:
+                    logger.debug(
+                        "Logo download: HTTP %d after %.0f ms",
+                        response.status_code,
+                        (time.perf_counter() - sent) * 1000,
+                    )
                     if response.is_redirect:
                         location = response.headers.get("location")
                         if location is None:
