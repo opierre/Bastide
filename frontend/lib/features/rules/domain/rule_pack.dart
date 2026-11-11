@@ -171,6 +171,7 @@ class BuiltinPack {
     required this.name,
     required this.locale,
     required this.ruleCount,
+    required this.imported,
   });
 
   factory BuiltinPack.fromJson(Map<String, dynamic> json) => BuiltinPack(
@@ -178,12 +179,16 @@ class BuiltinPack {
     name: json['name'] as String,
     locale: json['locale'] as String?,
     ruleCount: json['rule_count'] as int,
+    imported: json['imported'] as bool,
   );
 
   final String id;
   final String name;
   final String? locale;
   final int ruleCount;
+
+  /// The user has already imported this pack: the app no longer offers it.
+  final bool imported;
 }
 
 /// What an import *would* do. Shown before anything is written — the count is

@@ -230,6 +230,12 @@ erDiagram
         text content_type
         datetime updated_at
     }
+    rule_pack_imports {
+        text id PK
+        text user_id FK
+        text builtin_id
+        datetime imported_at
+    }
     transactions {
         text id PK
         text account_id FK
@@ -318,6 +324,7 @@ erDiagram
     categories |o--o{ recurring_series : "category_id"
     users ||--o{ recurring_series : "user_id"
     categorization_rules ||--o{ rule_logos : "rule_id"
+    users ||--o{ rule_pack_imports : "user_id"
     accounts ||--o{ transactions : "account_id"
     categories |o--o{ transactions : "category_id"
     import_batches ||--o{ transactions : "import_batch_id"
@@ -377,6 +384,10 @@ erDiagram
 ### `rule_logos`
 
 - `rule_id` → `categorization_rules` on delete cascade
+
+### `rule_pack_imports`
+
+- unique `(user_id, builtin_id)`
 
 ### `transactions`
 

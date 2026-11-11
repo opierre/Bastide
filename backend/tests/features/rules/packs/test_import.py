@@ -382,6 +382,62 @@ def test_the_bundled_pack_is_listed(client: TestClient) -> None:
     assert [entry_["id"] for entry_ in body] == [BUILTIN_ID]
     assert body[0]["locale"] == "fr"
     assert body[0]["rule_count"] > 0
+    assert body[0]["imported"] is False
+
+
+def _builtin_imported(client: TestClient, headers: dict[str, str]) -> bool:
+    body = client.get("/api/v1/rules/packs/builtin", headers=headers).json()
+    return next(entry_ for entry_ in body if entry_["id"] == BUILTIN_ID)["imported"]
+
+
+def test_importing_the_bundled_pack_marks_it_imported(client: TestClient) -> None:
+    headers, _ = _register(client)
+
+    import_pack(client, headers, builtin_id=BUILTIN_ID)
+
+    assert _builtin_imported(client, headers) is True
+
+
+def test_the_bundled_pack_stays_imported_after_a_second_import(
+    client: TestClient, tmp_path: Path
+) -> None:
+    headers, user_id = _register(client)
+
+    import_pack(client, headers, builtin_id=BUILTIN_ID)
+    import_pack(client, headers, builtin_id=BUILTIN_ID)
+
+    assert _builtin_imported(client, headers) is True
+    session = open_session(tmp_path / "test.db")
+    try:
+        assert RuleRepository(session).imported_builtin_ids(user_id) == {BUILTIN_ID}
+    finally:
+        session.close()
+
+
+def test_importing_an_uploaded_pack_does_not_mark_the_bundled_one(client: TestClient) -> None:
+    headers, _ = _register(client)
+
+    import_pack(client, headers, pack=pack(entry("CARREFOUR")))
+
+    assert _builtin_imported(client, headers) is False
+
+
+def test_previewing_the_bundled_pack_does_not_mark_it_imported(client: TestClient) -> None:
+    headers, _ = _register(client)
+
+    preview(client, headers, builtin_id=BUILTIN_ID)
+
+    assert _builtin_imported(client, headers) is False
+
+
+def test_the_bundled_pack_is_marked_imported_for_its_importer_only(client: TestClient) -> None:
+    headers_a, _ = _register(client)
+    headers_b, _ = _register(client, "bruno@example.com")
+
+    import_pack(client, headers_a, builtin_id=BUILTIN_ID)
+
+    assert _builtin_imported(client, headers_a) is True
+    assert _builtin_imported(client, headers_b) is False
 
 
 def test_every_bundled_pack_key_resolves_on_a_freshly_seeded_user(client: TestClient) -> None:

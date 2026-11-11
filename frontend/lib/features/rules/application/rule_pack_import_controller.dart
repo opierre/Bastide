@@ -118,6 +118,8 @@ class RulePackImportController extends Notifier<RulePackImportState> {
     // The rules are written before the logos are fetched, so even a failed
     // run may have created some: the list is reloaded either way.
     ref.invalidate(rulesControllerProvider);
+    // A bundled pack is recorded as imported with its rules: stop offering it.
+    ref.invalidate(builtinPacksProvider);
     if ((run.result?.recategorizedCount ?? 0) > 0) {
       await reloadRecategorizedViews(ref);
     }

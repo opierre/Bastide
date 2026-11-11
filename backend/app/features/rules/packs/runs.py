@@ -166,9 +166,16 @@ class PackImportRunService:
         self._clock = clock
 
     def start(
-        self, user_id: str, pack: RulePack, apply_now: bool, download_logos: bool
+        self,
+        user_id: str,
+        pack: RulePack,
+        apply_now: bool,
+        download_logos: bool,
+        builtin_id: str | None = None,
     ) -> PackImportRun:
         """Start importing ``pack`` for the user and return the running import at once.
+
+        ``builtin_id`` names the bundled pack, if it is one, so the import records it.
 
         Raises:
             PackImportInProgressError: another of the user's imports is still running.
@@ -184,6 +191,7 @@ class PackImportRunService:
                 logo_fetcher=self._logo_fetcher,
                 bus=self._bus,
                 clock=self._clock,
+                builtin_id=builtin_id,
             )
         )
         return run
@@ -239,6 +247,7 @@ async def execute_pack_import(
     logo_fetcher: LogoFetcher,
     bus: ProgressBus,
     clock: Callable[[], datetime] = lambda: datetime.now(UTC),
+    builtin_id: str | None = None,
 ) -> None:
     """Import ``pack`` on a session of its own, settling ``run`` and publishing each step.
 
@@ -250,7 +259,7 @@ async def execute_pack_import(
     db = session_factory()
     try:
         outcome = await build_pack_service(db, logo_fetcher).import_pack(
-            run.user_id, pack, apply_now, download_logos, progress
+            run.user_id, pack, apply_now, download_logos, progress, builtin_id=builtin_id
         )
     except Exception:  # noqa: BLE001 — the last frame before the task is discarded.
         logger.exception("Rule pack import run %s failed.", run.id)

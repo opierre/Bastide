@@ -1,9 +1,11 @@
-"""Data access for `CategorizationRule` rows. The only place that queries this table."""
+"""Data access for rules, their logos and imported built-in packs. The only place querying them."""
+
+from datetime import datetime
 
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session, undefer
 
-from app.features.rules.models import CategorizationRule, RuleLogo
+from app.features.rules.models import CategorizationRule, RuleLogo, RulePackImport
 
 
 class RuleRepository:
@@ -103,3 +105,25 @@ class RuleRepository:
     def delete_logo(self, rule: CategorizationRule) -> CategorizationRule:
         rule.logo = None
         return self.update(rule)
+
+    def imported_builtin_ids(self, user_id: str) -> set[str]:
+        """The ids of the built-in packs the user has imported."""
+        return set(
+            self._db.scalars(
+                select(RulePackImport.builtin_id).where(RulePackImport.user_id == user_id)
+            )
+        )
+
+    def stage_pack_import(self, user_id: str, builtin_id: str, now: datetime) -> None:
+        """Record, *without* committing, that the user imported a built-in pack.
+
+        Staged so it lands in the same transaction as the pack's rules. A pack already recorded
+        keeps its first row.
+        """
+        recorded = self._db.scalar(
+            select(RulePackImport.id).where(
+                RulePackImport.user_id == user_id, RulePackImport.builtin_id == builtin_id
+            )
+        )
+        if recorded is None:
+            self._db.add(RulePackImport(user_id=user_id, builtin_id=builtin_id, imported_at=now))

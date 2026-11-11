@@ -53,6 +53,16 @@ final builtinPacksProvider = FutureProvider<List<BuiltinPack>>((ref) {
   return ref.read(rulePacksRepositoryProvider).listBuiltin();
 });
 
+/// The bundled packs still worth offering: those the user has not imported.
+/// Importing one again would only report every rule as a duplicate.
+final offeredBuiltinPacksProvider = Provider<List<BuiltinPack>>((ref) {
+  final packs = ref.watch(builtinPacksProvider).value ?? const <BuiltinPack>[];
+  return [
+    for (final pack in packs)
+      if (!pack.imported) pack,
+  ];
+});
+
 /// A pack the user has chosen but not yet imported: where it came from, and
 /// what importing it would do.
 ///

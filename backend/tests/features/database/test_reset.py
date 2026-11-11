@@ -16,7 +16,7 @@ from app.features.imports.models import ImportBatch
 from app.features.mortgages.models import Mortgage, MortgageSimulation
 from app.features.properties.models import Property
 from app.features.recurring.models import RecurringSeries
-from app.features.rules.models import CategorizationRule
+from app.features.rules.models import CategorizationRule, RulePackImport
 from app.features.settings.models import UserSettings
 from app.features.transactions.models import Transaction
 from tests.api import register as _register
@@ -114,6 +114,7 @@ def _seed(db: Session, email: str) -> dict[str, str]:
         status="active",
     )
     db.add_all([transaction, rule, goal, series])
+    db.add(RulePackImport(user_id=user.id, builtin_id="fr-common.v1"))
     db.flush()
     db.add(GoalAllocation(goal_id=goal.id, amount_minor=20_000, allocated_on=date(2026, 8, 20)))
     home = Property(
@@ -214,6 +215,8 @@ def test_reset_deletes_everything_the_user_owns_and_reports_it(
         assert db.get(Goal, ids["goal"]) is None
         assert db.scalars(select(GoalAllocation)).all() == []
         assert db.scalars(select(CategorizationRule)).all() == []
+        # Otherwise the app would stop offering a pack whose rules the reset just deleted.
+        assert db.scalars(select(RulePackImport)).all() == []
         assert db.scalars(select(RecurringSeries)).all() == []
         assert db.scalars(select(Category).where(Category.user_id == ids["user"])).all() == []
     after = client.get("/api/v1/database/summary", headers=headers).json()["counts"]
