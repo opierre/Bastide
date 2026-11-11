@@ -578,7 +578,7 @@ query($p:ID!, $c:String {''.join(', ' + v for v in var_decl)}) {{
             assignees(first:5) {{ nodes {{ login }} }}
             parent {{ number repository {{ nameWithOwner }} }}
             subIssuesSummary {{ total completed percentCompleted }}
-            subIssues(first:50) {{ nodes {{ number state repository {{ nameWithOwner }} }} }}
+            subIssues(first:100) {{ nodes {{ number state repository {{ nameWithOwner }} }} }}
             blockedBy(first:20) {{ nodes {{ number title state repository {{ nameWithOwner }} }} }}
           }}
           ... on PullRequest {{ number title url state merged updatedAt repository {{ nameWithOwner }} }}
