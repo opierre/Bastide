@@ -1577,10 +1577,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get ruleErrorGeneric => 'Une erreur est survenue. Veuillez réessayer.';
 
   @override
-  String get rulePackMenuTooltip => 'Importer / Exporter des règles';
-
-  @override
-  String get rulePackImportFile => 'Importer un fichier…';
+  String get rulePackImportFile => 'Importer un pack de règles';
 
   @override
   String rulePackImportBuiltin(String name) {
@@ -1588,7 +1585,7 @@ class AppLocalizationsFr extends AppLocalizations {
   }
 
   @override
-  String get rulePackExportAction => 'Exporter mes règles…';
+  String get rulePackExportAction => 'Exporter mes règles';
 
   @override
   String get rulePackCancel => 'Annuler';

@@ -155,12 +155,10 @@ Widget _wrap(
   );
 }
 
-Future<void> _openMenuItem(WidgetTester tester, String label) async {
+Future<void> _tapPackAction(WidgetTester tester, String key) async {
   await tester.tap(find.byKey(const Key('rulesViewSegment')));
   await tester.pumpAndSettle();
-  await tester.tap(find.byKey(const Key('rulePackMenu')));
-  await tester.pumpAndSettle();
-  await tester.tap(find.text(label));
+  await tester.tap(find.byKey(Key(key)));
   await tester.pumpAndSettle();
 }
 
@@ -218,7 +216,7 @@ void main() {
           _wrap(apiClient, files: files, locale: locale, progress: progress),
         );
         await tester.pumpAndSettle();
-        await _openMenuItem(tester, l10n.rulePackImportFile);
+        await _tapPackAction(tester, 'rulePackImportButton');
 
         if (tickDownload) {
           final checkbox = find.byKey(const Key('rulePackDownloadLogos'));
@@ -255,7 +253,7 @@ void main() {
           ),
         );
         await tester.pumpAndSettle();
-        await _openMenuItem(tester, l10n.rulePackImportFile);
+        await _tapPackAction(tester, 'rulePackImportButton');
 
         expect(find.byKey(const Key('rulePackRulesList')), findsOneWidget);
         expect(find.text('CAFE DU PORT'), findsOneWidget);
@@ -301,7 +299,7 @@ void main() {
           ),
         );
         await tester.pumpAndSettle();
-        await _openMenuItem(tester, l10n.rulePackImportFile);
+        await _tapPackAction(tester, 'rulePackImportButton');
 
         expect(find.byKey(const Key('rulePackHeadline')), findsOneWidget);
         expect(find.byKey(const Key('rulePackLogoImage')), findsNothing);
@@ -408,7 +406,7 @@ void main() {
           _wrap(apiClient, files: files ?? FakeRulePackFiles(), locale: locale),
         );
         await tester.pumpAndSettle();
-        await _openMenuItem(tester, l10n.rulePackExportAction);
+        await _tapPackAction(tester, 'rulePackExportButton');
 
         expect(find.text(l10n.rulePackExportIncludeLogos), findsOneWidget);
         await tester.tap(find.byKey(const Key('rulePackExportIncludeLogos')));

@@ -1982,17 +1982,13 @@
   "@ruleErrorGeneric": {
     "description": "Fallback message for unrecognized or network errors on the rules view."
   },
-  "rulePackMenuTooltip": "Importer / Exporter des règles",
-  "@rulePackMenuTooltip": {
-    "description": "Tooltip on the rules view's pack menu."
-  },
-  "rulePackImportFile": "Importer un fichier…",
+  "rulePackImportFile": "Importer un pack de règles",
   "@rulePackImportFile": {
-    "description": "Pack menu entry opening the file picker."
+    "description": "Tooltip on the rules view's button opening the pack file picker."
   },
   "rulePackImportBuiltin": "Importer « {name} »",
   "@rulePackImportBuiltin": {
-    "description": "Pack menu entry importing one of the packs bundled with the app.",
+    "description": "Tooltip on the rules view's button importing one of the packs bundled with the app.",
     "placeholders": {
       "name": {
         "type": "String",
@@ -2000,9 +1996,9 @@
       }
     }
   },
-  "rulePackExportAction": "Exporter mes règles…",
+  "rulePackExportAction": "Exporter mes règles",
   "@rulePackExportAction": {
-    "description": "Pack menu entry opening the export review sheet."
+    "description": "Tooltip on the rules view's button opening the export review sheet."
   },
   "rulePackCancel": "Annuler",
   "@rulePackCancel": {
