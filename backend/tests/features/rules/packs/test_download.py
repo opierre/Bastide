@@ -5,6 +5,7 @@ clock, so nothing leaves the process and no test actually waits.
 """
 
 import asyncio
+import itertools
 from collections.abc import Callable
 
 import httpx
@@ -14,6 +15,7 @@ from app.features.rules.packs import download as download_module
 from app.features.rules.packs.download import (
     MAX_RETRIES,
     MAX_RETRY_AFTER_S,
+    REQUEST_INTERVAL_S,
     RETRY_BASE_S,
     HttpLogoFetcher,
     LogoDownloadError,
@@ -156,7 +158,8 @@ def test_other_error_statuses_are_not_retried(server: _Server, clock: _Clock, st
     assert clock.sleeps == []
 
 
-def test_downloads_never_wait_unless_throttled(server: _Server, clock: _Clock) -> None:
+def test_requests_are_spaced_evenly_from_the_first(server: _Server, clock: _Clock) -> None:
+    start = clock.now
     urls = [f"{LOGO_URL[:-4]}_{n}.png" for n in range(5)]
     for url in urls:
         server.answer(url, _ok)
@@ -164,8 +167,35 @@ def test_downloads_never_wait_unless_throttled(server: _Server, clock: _Clock) -
     result = _fetch(server, clock, *urls)
 
     assert all(result[url] == PICTURE for url in urls)
-    assert len(server.arrivals) == 5
-    assert clock.sleeps == []
+    times = [at for _, at in server.arrivals]
+    assert len(times) == 5
+    # The first goes at once; each next one waits its slot instead of bursting into a 429.
+    assert times[0] == start
+    assert all(b - a >= REQUEST_INTERVAL_S - 1e-9 for a, b in itertools.pairwise(times))
+
+
+def test_an_11_s_retry_after_is_waited_in_full(server: _Server, clock: _Clock) -> None:
+    server.answer(LOGO_URL, _status(429, **{"retry-after": "11"}), _ok)
+
+    result = _fetch(server, clock, LOGO_URL)
+
+    assert result[LOGO_URL] == PICTURE
+    assert clock.sleeps == [11.0]
+
+
+def test_a_429_holds_every_download_until_its_retry_after(server: _Server, clock: _Clock) -> None:
+    server.answer(LOGO_URL, _status(429, **{"retry-after": "11"}), _ok)
+    others = [f"{OTHER_LOGO_URL[:-4]}_{n}.png" for n in range(3)]
+    for url in others:
+        server.answer(url, _ok)
+
+    result = _fetch(server, clock, LOGO_URL, *others)
+
+    assert all(result[url] == PICTURE for url in [LOGO_URL, *others])
+    throttled_at = server.arrivals[0][1]
+    # Nothing at all is sent while the host asked to wait: a refused request would only
+    # extend its window.
+    assert all(at >= throttled_at + 11.0 for _, at in server.arrivals[1:])
 
 
 def test_no_retry_starts_past_the_deadline(

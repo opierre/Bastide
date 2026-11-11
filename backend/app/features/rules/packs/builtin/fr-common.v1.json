@@ -4,7 +4,7 @@
   "description": "Enseignes, opérateurs et services récurrents les plus fréquents sur un relevé bancaire français. Chaque règle vise une catégorie système, donc ce pack s'importe sur n'importe quelle installation.",
   "locale": "fr",
   "rules": [
-    { "field": "merchant", "type": "contains", "pattern": "CARREFOUR", "category_key": "category.food.groceries", "logo": { "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/39/Carrefour_logo_2022.svg/330px-Carrefour_logo_2022.svg.png", "license": "CC0", "source": "https://commons.wikimedia.org/wiki/File:Carrefour_logo_2022.svg" } },
+    { "field": "merchant", "type": "contains", "pattern": "CARREFOUR", "category_key": "category.food.groceries" },
     { "field": "merchant", "type": "contains", "pattern": "LECLERC", "category_key": "category.food.groceries", "logo": { "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/1/14/E.Leclerc_logo.svg/330px-E.Leclerc_logo.svg.png", "license": "PD-textlogo", "source": "https://commons.wikimedia.org/wiki/File:E.Leclerc_logo.svg" } },
     { "field": "merchant", "type": "contains", "pattern": "INTERMARCHE", "category_key": "category.food.groceries", "logo": { "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/9/96/Intermarch%C3%A9_logo_2009_classic.svg/330px-Intermarch%C3%A9_logo_2009_classic.svg.png", "license": "PD-textlogo", "source": "https://commons.wikimedia.org/wiki/File:Intermarch%C3%A9_logo_2009_classic.svg" } },
     { "field": "merchant", "type": "contains", "pattern": "SUPER U", "category_key": "category.food.groceries" },
