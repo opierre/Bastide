@@ -8,10 +8,15 @@ source of truth for those translations, not persisted columns.
 (Logement/Alimentation/Transport/Loisirs/Abonnements/Santé/Autres·Épargne/Revenus) rather than
 invented per category — the design spec is the source of truth for color, this catalog follows
 it. Every child inherits its top-level bucket's hue. Categories with no dedicated pinned hue
-(Achats, Finances) take the shared "Autres/Épargne" catch-all (#64748B), which is also why
-Épargne needs no color of its own — it's the same hue as Autres, just a different bucket.
-Abonnements is a top-level bucket, not a child of Loisirs, because the design spec pins it as
-its own hue distinct from Loisirs.
+(Achats, Finances, Enfants, Animaux) take the shared "Autres/Épargne" catch-all (#64748B), which
+is also why Épargne needs no color of its own — it's the same hue as Autres, just a different
+bucket. Abonnements is a top-level bucket, not a child of Loisirs, because the design spec pins
+it as its own hue distinct from Loisirs. It also stays childless: the categorisation prompt only
+offers leaves, and the built-in rule pack files every streaming and telecom merchant under it.
+
+Keys are permanent: rules and rule packs reference categories by key, so an entry is only ever
+added, never renamed or moved to another parent. A new entry reaches existing installs through
+the idempotent seed at the next boot.
 """
 
 import logging
@@ -79,6 +84,30 @@ SYSTEM_CATEGORIES: tuple[CategorySeed, ...] = (
                 "shield_home",
                 _LOGEMENT,
             ),
+            CategorySeed(
+                "category.housing.condo_fees",
+                "Charges de copropriété",
+                "Condo fees",
+                "expense",
+                "apartment",
+                _LOGEMENT,
+            ),
+            CategorySeed(
+                "category.housing.maintenance",
+                "Travaux et entretien",
+                "Repairs and maintenance",
+                "expense",
+                "handyman",
+                _LOGEMENT,
+            ),
+            CategorySeed(
+                "category.housing.home_services",
+                "Services à domicile",
+                "Home services",
+                "expense",
+                "cleaning_services",
+                _LOGEMENT,
+            ),
         ),
     ),
     CategorySeed(
@@ -107,6 +136,22 @@ SYSTEM_CATEGORIES: tuple[CategorySeed, ...] = (
             ),
             CategorySeed(
                 "category.food.coffee", "Café", "Coffee", "expense", "local_cafe", _ALIMENTATION
+            ),
+            CategorySeed(
+                "category.food.takeaway",
+                "Livraison et à emporter",
+                "Takeaway and delivery",
+                "expense",
+                "takeout_dining",
+                _ALIMENTATION,
+            ),
+            CategorySeed(
+                "category.food.canteen",
+                "Cantine",
+                "Canteen",
+                "expense",
+                "lunch_dining",
+                _ALIMENTATION,
             ),
         ),
     ),
@@ -150,6 +195,38 @@ SYSTEM_CATEGORIES: tuple[CategorySeed, ...] = (
                 "car_repair",
                 _TRANSPORT,
             ),
+            CategorySeed(
+                "category.transport.car_insurance",
+                "Assurance auto",
+                "Car insurance",
+                "expense",
+                "shield_car",
+                _TRANSPORT,
+            ),
+            CategorySeed(
+                "category.transport.tolls",
+                "Péages",
+                "Tolls",
+                "expense",
+                "toll",
+                _TRANSPORT,
+            ),
+            CategorySeed(
+                "category.transport.taxi",
+                "Taxi et VTC",
+                "Taxi and ride-hailing",
+                "expense",
+                "local_taxi",
+                _TRANSPORT,
+            ),
+            CategorySeed(
+                "category.transport.rental",
+                "Location de véhicule",
+                "Vehicle rental",
+                "expense",
+                "car_rental",
+                _TRANSPORT,
+            ),
         ),
     ),
     CategorySeed(
@@ -184,6 +261,22 @@ SYSTEM_CATEGORIES: tuple[CategorySeed, ...] = (
                 "shield_health",
                 _SANTE,
             ),
+            CategorySeed(
+                "category.health.dentist",
+                "Dentiste",
+                "Dentist",
+                "expense",
+                "dentistry",
+                _SANTE,
+            ),
+            CategorySeed(
+                "category.health.optician",
+                "Optique",
+                "Optician",
+                "expense",
+                "visibility",
+                _SANTE,
+            ),
         ),
     ),
     CategorySeed(
@@ -204,6 +297,30 @@ SYSTEM_CATEGORIES: tuple[CategorySeed, ...] = (
             ),
             CategorySeed(
                 "category.leisure.travel", "Voyages", "Travel", "expense", "flight", _LOISIRS
+            ),
+            CategorySeed(
+                "category.leisure.accommodation",
+                "Hébergement",
+                "Accommodation",
+                "expense",
+                "hotel",
+                _LOISIRS,
+            ),
+            CategorySeed(
+                "category.leisure.sports",
+                "Sport",
+                "Sports",
+                "expense",
+                "fitness_center",
+                _LOISIRS,
+            ),
+            CategorySeed(
+                "category.leisure.culture",
+                "Culture",
+                "Culture",
+                "expense",
+                "menu_book",
+                _LOISIRS,
             ),
         ),
     ),
@@ -245,6 +362,22 @@ SYSTEM_CATEGORIES: tuple[CategorySeed, ...] = (
                 "Home",
                 "expense",
                 "chair",
+                _AUTRES_EPARGNE,
+            ),
+            CategorySeed(
+                "category.shopping.personal_care",
+                "Beauté et soins",
+                "Personal care",
+                "expense",
+                "spa",
+                _AUTRES_EPARGNE,
+            ),
+            CategorySeed(
+                "category.shopping.gifts",
+                "Cadeaux",
+                "Gifts",
+                "expense",
+                "redeem",
                 _AUTRES_EPARGNE,
             ),
         ),
@@ -300,6 +433,24 @@ SYSTEM_CATEGORIES: tuple[CategorySeed, ...] = (
                 "trending_up",
                 _AUTRES_EPARGNE,
             ),
+            # A transfer, like savings: money moved to a brokerage or life-insurance contract
+            # still belongs to the user, so it is not spending.
+            CategorySeed(
+                "category.finance.investments",
+                "Investissements",
+                "Investments",
+                "transfer",
+                "show_chart",
+                _AUTRES_EPARGNE,
+            ),
+            CategorySeed(
+                "category.finance.loans",
+                "Remboursement de crédit",
+                "Loan repayment",
+                "expense",
+                "credit_score",
+                _AUTRES_EPARGNE,
+            ),
         ),
     ),
     CategorySeed(
@@ -334,6 +485,30 @@ SYSTEM_CATEGORIES: tuple[CategorySeed, ...] = (
                 "Refunds",
                 "income",
                 "replay",
+                _REVENUS,
+            ),
+            CategorySeed(
+                "category.income.benefits",
+                "Allocations et aides",
+                "Benefits",
+                "income",
+                "family_restroom",
+                _REVENUS,
+            ),
+            CategorySeed(
+                "category.income.rental",
+                "Revenus locatifs",
+                "Rental income",
+                "income",
+                "real_estate_agent",
+                _REVENUS,
+            ),
+            CategorySeed(
+                "category.income.sales",
+                "Ventes",
+                "Sales",
+                "income",
+                "sell",
                 _REVENUS,
             ),
             CategorySeed(
@@ -374,6 +549,74 @@ SYSTEM_CATEGORIES: tuple[CategorySeed, ...] = (
                 "Cash withdrawals",
                 "expense",
                 "atm",
+                _AUTRES_EPARGNE,
+            ),
+            CategorySeed(
+                "category.other.donations",
+                "Dons",
+                "Donations",
+                "expense",
+                "volunteer_activism",
+                _AUTRES_EPARGNE,
+            ),
+        ),
+    ),
+    CategorySeed(
+        "category.children",
+        "Enfants",
+        "Children",
+        "expense",
+        "child_care",
+        _AUTRES_EPARGNE,
+        children=(
+            CategorySeed(
+                "category.children.childcare",
+                "Garde d'enfants",
+                "Childcare",
+                "expense",
+                "child_friendly",
+                _AUTRES_EPARGNE,
+            ),
+            CategorySeed(
+                "category.children.school",
+                "Scolarité",
+                "Schooling",
+                "expense",
+                "school",
+                _AUTRES_EPARGNE,
+            ),
+            CategorySeed(
+                "category.children.activities",
+                "Activités enfants",
+                "Kids' activities",
+                "expense",
+                "toys",
+                _AUTRES_EPARGNE,
+            ),
+        ),
+    ),
+    CategorySeed(
+        "category.pets",
+        "Animaux",
+        "Pets",
+        "expense",
+        "pets",
+        _AUTRES_EPARGNE,
+        children=(
+            CategorySeed(
+                "category.pets.food",
+                "Alimentation animaux",
+                "Pet food",
+                "expense",
+                "pet_supplies",
+                _AUTRES_EPARGNE,
+            ),
+            CategorySeed(
+                "category.pets.vet",
+                "Vétérinaire",
+                "Vet",
+                "expense",
+                "vaccines",
                 _AUTRES_EPARGNE,
             ),
         ),

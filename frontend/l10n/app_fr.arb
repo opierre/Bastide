@@ -1143,6 +1143,18 @@
   "@categorySystemHousingHomeInsurance": {
     "description": "Display name for the system category with i18n key category.housing.home_insurance."
   },
+  "categorySystemHousingCondoFees": "Charges de copropriété",
+  "@categorySystemHousingCondoFees": {
+    "description": "Display name for the system category with i18n key category.housing.condo_fees."
+  },
+  "categorySystemHousingMaintenance": "Travaux et entretien",
+  "@categorySystemHousingMaintenance": {
+    "description": "Display name for the system category with i18n key category.housing.maintenance."
+  },
+  "categorySystemHousingHomeServices": "Services à domicile",
+  "@categorySystemHousingHomeServices": {
+    "description": "Display name for the system category with i18n key category.housing.home_services."
+  },
   "categorySystemFood": "Alimentation",
   "@categorySystemFood": {
     "description": "Display name for the system category with i18n key category.food."
@@ -1158,6 +1170,14 @@
   "categorySystemFoodCoffee": "Café",
   "@categorySystemFoodCoffee": {
     "description": "Display name for the system category with i18n key category.food.coffee."
+  },
+  "categorySystemFoodTakeaway": "Livraison et à emporter",
+  "@categorySystemFoodTakeaway": {
+    "description": "Display name for the system category with i18n key category.food.takeaway."
+  },
+  "categorySystemFoodCanteen": "Cantine",
+  "@categorySystemFoodCanteen": {
+    "description": "Display name for the system category with i18n key category.food.canteen."
   },
   "categorySystemTransport": "Transport",
   "@categorySystemTransport": {
@@ -1179,6 +1199,22 @@
   "@categorySystemTransportCarMaintenance": {
     "description": "Display name for the system category with i18n key category.transport.car_maintenance."
   },
+  "categorySystemTransportCarInsurance": "Assurance auto",
+  "@categorySystemTransportCarInsurance": {
+    "description": "Display name for the system category with i18n key category.transport.car_insurance."
+  },
+  "categorySystemTransportTolls": "Péages",
+  "@categorySystemTransportTolls": {
+    "description": "Display name for the system category with i18n key category.transport.tolls."
+  },
+  "categorySystemTransportTaxi": "Taxi et VTC",
+  "@categorySystemTransportTaxi": {
+    "description": "Display name for the system category with i18n key category.transport.taxi."
+  },
+  "categorySystemTransportRental": "Location de véhicule",
+  "@categorySystemTransportRental": {
+    "description": "Display name for the system category with i18n key category.transport.rental."
+  },
   "categorySystemHealth": "Santé",
   "@categorySystemHealth": {
     "description": "Display name for the system category with i18n key category.health."
@@ -1195,6 +1231,14 @@
   "@categorySystemHealthInsurance": {
     "description": "Display name for the system category with i18n key category.health.insurance."
   },
+  "categorySystemHealthDentist": "Dentiste",
+  "@categorySystemHealthDentist": {
+    "description": "Display name for the system category with i18n key category.health.dentist."
+  },
+  "categorySystemHealthOptician": "Optique",
+  "@categorySystemHealthOptician": {
+    "description": "Display name for the system category with i18n key category.health.optician."
+  },
   "categorySystemLeisure": "Loisirs",
   "@categorySystemLeisure": {
     "description": "Display name for the system category with i18n key category.leisure."
@@ -1206,6 +1250,18 @@
   "categorySystemLeisureTravel": "Voyages",
   "@categorySystemLeisureTravel": {
     "description": "Display name for the system category with i18n key category.leisure.travel."
+  },
+  "categorySystemLeisureAccommodation": "Hébergement",
+  "@categorySystemLeisureAccommodation": {
+    "description": "Display name for the system category with i18n key category.leisure.accommodation."
+  },
+  "categorySystemLeisureSports": "Sport",
+  "@categorySystemLeisureSports": {
+    "description": "Display name for the system category with i18n key category.leisure.sports."
+  },
+  "categorySystemLeisureCulture": "Culture",
+  "@categorySystemLeisureCulture": {
+    "description": "Display name for the system category with i18n key category.leisure.culture."
   },
   "categorySystemSubscriptions": "Abonnements",
   "@categorySystemSubscriptions": {
@@ -1226,6 +1282,14 @@
   "categorySystemShoppingHome": "Maison",
   "@categorySystemShoppingHome": {
     "description": "Display name for the system category with i18n key category.shopping.home."
+  },
+  "categorySystemShoppingPersonalCare": "Beauté et soins",
+  "@categorySystemShoppingPersonalCare": {
+    "description": "Display name for the system category with i18n key category.shopping.personal_care."
+  },
+  "categorySystemShoppingGifts": "Cadeaux",
+  "@categorySystemShoppingGifts": {
+    "description": "Display name for the system category with i18n key category.shopping.gifts."
   },
   "categorySystemFinance": "Finances",
   "@categorySystemFinance": {
@@ -1251,6 +1315,14 @@
   "@categorySystemFinanceInterest": {
     "description": "Display name for the system category with i18n key category.finance.interest."
   },
+  "categorySystemFinanceInvestments": "Investissements",
+  "@categorySystemFinanceInvestments": {
+    "description": "Display name for the system category with i18n key category.finance.investments."
+  },
+  "categorySystemFinanceLoans": "Remboursement de crédit",
+  "@categorySystemFinanceLoans": {
+    "description": "Display name for the system category with i18n key category.finance.loans."
+  },
   "categorySystemIncome": "Revenus",
   "@categorySystemIncome": {
     "description": "Display name for the system category with i18n key category.income."
@@ -1271,6 +1343,18 @@
   "@categorySystemIncomeRefunds": {
     "description": "Display name for the system category with i18n key category.income.refunds."
   },
+  "categorySystemIncomeBenefits": "Allocations et aides",
+  "@categorySystemIncomeBenefits": {
+    "description": "Display name for the system category with i18n key category.income.benefits."
+  },
+  "categorySystemIncomeRental": "Revenus locatifs",
+  "@categorySystemIncomeRental": {
+    "description": "Display name for the system category with i18n key category.income.rental."
+  },
+  "categorySystemIncomeSales": "Ventes",
+  "@categorySystemIncomeSales": {
+    "description": "Display name for the system category with i18n key category.income.sales."
+  },
   "categorySystemIncomeOther": "Autres revenus",
   "@categorySystemIncomeOther": {
     "description": "Display name for the system category with i18n key category.income.other."
@@ -1282,6 +1366,42 @@
   "categorySystemOtherUncategorized": "Non catégorisé",
   "@categorySystemOtherUncategorized": {
     "description": "Display name for the system category with i18n key category.other.uncategorized."
+  },
+  "categorySystemOtherCash": "Retraits espèces",
+  "@categorySystemOtherCash": {
+    "description": "Display name for the system category with i18n key category.other.cash."
+  },
+  "categorySystemOtherDonations": "Dons",
+  "@categorySystemOtherDonations": {
+    "description": "Display name for the system category with i18n key category.other.donations."
+  },
+  "categorySystemChildren": "Enfants",
+  "@categorySystemChildren": {
+    "description": "Display name for the system category with i18n key category.children."
+  },
+  "categorySystemChildrenChildcare": "Garde d'enfants",
+  "@categorySystemChildrenChildcare": {
+    "description": "Display name for the system category with i18n key category.children.childcare."
+  },
+  "categorySystemChildrenSchool": "Scolarité",
+  "@categorySystemChildrenSchool": {
+    "description": "Display name for the system category with i18n key category.children.school."
+  },
+  "categorySystemChildrenActivities": "Activités enfants",
+  "@categorySystemChildrenActivities": {
+    "description": "Display name for the system category with i18n key category.children.activities."
+  },
+  "categorySystemPets": "Animaux",
+  "@categorySystemPets": {
+    "description": "Display name for the system category with i18n key category.pets."
+  },
+  "categorySystemPetsFood": "Alimentation animaux",
+  "@categorySystemPetsFood": {
+    "description": "Display name for the system category with i18n key category.pets.food."
+  },
+  "categorySystemPetsVet": "Vétérinaire",
+  "@categorySystemPetsVet": {
+    "description": "Display name for the system category with i18n key category.pets.vet."
   },
   "dashboardStatIncome": "Revenus (mois)",
   "@dashboardStatIncome": {

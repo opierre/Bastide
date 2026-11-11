@@ -906,6 +906,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get categorySystemHousingHomeInsurance => 'Home insurance';
 
   @override
+  String get categorySystemHousingCondoFees => 'Condo fees';
+
+  @override
+  String get categorySystemHousingMaintenance => 'Repairs and maintenance';
+
+  @override
+  String get categorySystemHousingHomeServices => 'Home services';
+
+  @override
   String get categorySystemFood => 'Food';
 
   @override
@@ -916,6 +925,12 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get categorySystemFoodCoffee => 'Coffee';
+
+  @override
+  String get categorySystemFoodTakeaway => 'Takeaway and delivery';
+
+  @override
+  String get categorySystemFoodCanteen => 'Canteen';
 
   @override
   String get categorySystemTransport => 'Transport';
@@ -933,6 +948,18 @@ class AppLocalizationsEn extends AppLocalizations {
   String get categorySystemTransportCarMaintenance => 'Car maintenance';
 
   @override
+  String get categorySystemTransportCarInsurance => 'Car insurance';
+
+  @override
+  String get categorySystemTransportTolls => 'Tolls';
+
+  @override
+  String get categorySystemTransportTaxi => 'Taxi and ride-hailing';
+
+  @override
+  String get categorySystemTransportRental => 'Vehicle rental';
+
+  @override
   String get categorySystemHealth => 'Health';
 
   @override
@@ -945,6 +972,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get categorySystemHealthInsurance => 'Health insurance';
 
   @override
+  String get categorySystemHealthDentist => 'Dentist';
+
+  @override
+  String get categorySystemHealthOptician => 'Optician';
+
+  @override
   String get categorySystemLeisure => 'Leisure';
 
   @override
@@ -952,6 +985,15 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get categorySystemLeisureTravel => 'Travel';
+
+  @override
+  String get categorySystemLeisureAccommodation => 'Accommodation';
+
+  @override
+  String get categorySystemLeisureSports => 'Sports';
+
+  @override
+  String get categorySystemLeisureCulture => 'Culture';
 
   @override
   String get categorySystemSubscriptions => 'Subscriptions';
@@ -967,6 +1009,12 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get categorySystemShoppingHome => 'Home';
+
+  @override
+  String get categorySystemShoppingPersonalCare => 'Personal care';
+
+  @override
+  String get categorySystemShoppingGifts => 'Gifts';
 
   @override
   String get categorySystemFinance => 'Finances';
@@ -987,6 +1035,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get categorySystemFinanceInterest => 'Interest';
 
   @override
+  String get categorySystemFinanceInvestments => 'Investments';
+
+  @override
+  String get categorySystemFinanceLoans => 'Loan repayment';
+
+  @override
   String get categorySystemIncome => 'Income';
 
   @override
@@ -1002,6 +1056,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get categorySystemIncomeRefunds => 'Refunds';
 
   @override
+  String get categorySystemIncomeBenefits => 'Benefits';
+
+  @override
+  String get categorySystemIncomeRental => 'Rental income';
+
+  @override
+  String get categorySystemIncomeSales => 'Sales';
+
+  @override
   String get categorySystemIncomeOther => 'Other income';
 
   @override
@@ -1009,6 +1072,33 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get categorySystemOtherUncategorized => 'Uncategorized';
+
+  @override
+  String get categorySystemOtherCash => 'Cash withdrawals';
+
+  @override
+  String get categorySystemOtherDonations => 'Donations';
+
+  @override
+  String get categorySystemChildren => 'Children';
+
+  @override
+  String get categorySystemChildrenChildcare => 'Childcare';
+
+  @override
+  String get categorySystemChildrenSchool => 'Schooling';
+
+  @override
+  String get categorySystemChildrenActivities => 'Kids\' activities';
+
+  @override
+  String get categorySystemPets => 'Pets';
+
+  @override
+  String get categorySystemPetsFood => 'Pet food';
+
+  @override
+  String get categorySystemPetsVet => 'Vet';
 
   @override
   String get dashboardStatIncome => 'Income (month)';
