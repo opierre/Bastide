@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../logos/logo_image_provider.dart';
 import '../logos/logo_ref.dart';
+import 'logo_zoom.dart';
 import 'monogram_avatar.dart';
 
 /// Institution/merchant avatar: the [MonogramAvatar], or the logo the user
@@ -19,6 +20,7 @@ class InstitutionAvatar extends ConsumerWidget {
     required this.name,
     this.size = 40,
     this.logo,
+    this.zoomable = false,
   });
 
   final String name;
@@ -27,6 +29,10 @@ class InstitutionAvatar extends ConsumerWidget {
   /// The rule logo this row shows; `null` for the monogram.
   final LogoRef? logo;
 
+  /// Whether clicking the logo opens it larger. Only the picture is
+  /// clickable: the monogram fallback stays inert.
+  final bool zoomable;
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final monogram = MonogramAvatar(name: name, size: size);
@@ -34,7 +40,7 @@ class InstitutionAvatar extends ConsumerWidget {
     if (logo == null) return monogram;
     final bytes = ref.watch(logoImageProvider(logo)).value;
     if (bytes == null) return monogram;
-    return ClipRRect(
+    final picture = ClipRRect(
       key: const Key('institutionAvatarLogo'),
       borderRadius: BorderRadius.circular(size * 0.3),
       child: Image.memory(
@@ -46,5 +52,7 @@ class InstitutionAvatar extends ConsumerWidget {
         errorBuilder: (_, _, _) => monogram,
       ),
     );
+    if (!zoomable) return picture;
+    return LogoZoomTarget(bytes: bytes, child: picture);
   }
 }

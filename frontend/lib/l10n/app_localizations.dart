@@ -2491,6 +2491,18 @@ abstract class AppLocalizations {
   /// **'Enregistrez la règle pour pouvoir lui ajouter un logo.'**
   String get ruleFormLogoSaveFirst;
 
+  /// Screen-reader label of a small logo picture that opens it enlarged when clicked.
+  ///
+  /// In fr, this message translates to:
+  /// **'Afficher le logo en grand'**
+  String get logoZoomOpen;
+
+  /// Screen-reader label of the enlarged logo picture in its dialog.
+  ///
+  /// In fr, this message translates to:
+  /// **'Logo agrandi'**
+  String get logoZoomLabel;
+
   /// Error when the picked logo file is not a supported picture.
   ///
   /// In fr, this message translates to:

@@ -1446,6 +1446,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get ruleFormLogoSaveFirst => 'Save the rule to add a logo to it.';
 
   @override
+  String get logoZoomOpen => 'Show the logo larger';
+
+  @override
+  String get logoZoomLabel => 'Enlarged logo';
+
+  @override
   String get ruleLogoInvalid => 'This file isn\'t a PNG, JPEG or WebP picture.';
 
   @override
