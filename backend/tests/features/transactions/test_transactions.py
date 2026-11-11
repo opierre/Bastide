@@ -184,6 +184,37 @@ def test_list_filters_by_category(client: TestClient, tmp_path: Path) -> None:
     assert body["items"][0]["category"]["id"] == category_id
 
 
+def test_list_filter_by_main_category_includes_its_subcategories(
+    client: TestClient, tmp_path: Path
+) -> None:
+    headers, _ = _register(client)
+    account_id = _create_account(client, headers)
+    parent_id = _create_category(client, headers, name="Maison")
+    child_id = _create_category(client, headers, name="Travaux", parent_id=parent_id)
+    other_id = _create_category(client, headers, name="Voyages")
+    for category_id in (parent_id, child_id, other_id):
+        _insert_transaction(
+            tmp_path,
+            account_id,
+            category_id=category_id,
+            categorization_source="user",
+            needs_review=False,
+        )
+    _insert_transaction(tmp_path, account_id)
+
+    by_parent = client.get(
+        "/api/v1/transactions", params={"category_id": parent_id}, headers=headers
+    ).json()
+    by_child = client.get(
+        "/api/v1/transactions", params={"category_id": child_id}, headers=headers
+    ).json()
+
+    assert by_parent["total"] == 2
+    assert {item["category"]["id"] for item in by_parent["items"]} == {parent_id, child_id}
+    assert by_child["total"] == 1
+    assert by_child["items"][0]["category"]["id"] == child_id
+
+
 def test_list_filters_by_needs_review(client: TestClient, tmp_path: Path) -> None:
     headers, _ = _register(client)
     account_id = _create_account(client, headers)
