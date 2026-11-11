@@ -409,6 +409,75 @@ void main() {
     );
   });
 
+  testWidgets(
+    'the account pill opens its menu and filters to the picked account',
+    (tester) async {
+      _useDesktopSurface(tester);
+      await tester.pumpWidget(
+        _wrap(
+          controller: FakeTransactionsController(
+            initialPage: TransactionsPage(
+              items: [_transaction()],
+              page: 1,
+              pageSize: 50,
+              total: 1,
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byKey(const Key('transactionsAccountFilter')));
+      await tester.pumpAndSettle();
+      final item = find.widgetWithText(
+        PopupMenuItem<String?>,
+        'Compte courant',
+      );
+      expect(item, findsOneWidget);
+
+      await tester.tap(item);
+      await tester.pumpAndSettle();
+
+      expect(
+        _container(tester).read(transactionFiltersProvider).accountId,
+        'a1',
+      );
+    },
+  );
+
+  testWidgets(
+    'the category pill opens its menu and filters to the picked category',
+    (tester) async {
+      _useDesktopSurface(tester);
+      await tester.pumpWidget(
+        _wrap(
+          controller: FakeTransactionsController(
+            initialPage: TransactionsPage(
+              items: [_transaction()],
+              page: 1,
+              pageSize: 50,
+              total: 1,
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byKey(const Key('transactionsCategoryFilter')));
+      await tester.pumpAndSettle();
+      final item = find.widgetWithText(PopupMenuItem<String?>, 'Courses');
+      expect(item, findsOneWidget);
+
+      await tester.tap(item);
+      await tester.pumpAndSettle();
+
+      expect(
+        _container(tester).read(transactionFiltersProvider).categoryId,
+        'c1',
+      );
+    },
+  );
+
   testWidgets('renders the row amount, sign and category for the en locale', (
     tester,
   ) async {

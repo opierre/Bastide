@@ -181,14 +181,13 @@ class _FilterBar extends ConsumerWidget {
 }
 
 class _FilterPillButton extends StatelessWidget {
-  const _FilterPillButton({
-    required this.label,
-    required this.onTap,
-    this.icon,
-  });
+  const _FilterPillButton({required this.label, this.onTap, this.icon});
 
   final String label;
-  final VoidCallback onTap;
+
+  /// Null when the pill is the child of a [PopupMenuButton]: an inner tap
+  /// handler would win the gesture arena and the menu would never open.
+  final VoidCallback? onTap;
   final IconData? icon;
 
   @override
@@ -266,7 +265,6 @@ class _AccountFilterPill extends StatelessWidget {
       ],
       child: _FilterPillButton(
         label: selected?.name ?? l10n.transactionsFilterAllAccounts,
-        onTap: () {},
       ),
     );
   }
@@ -309,7 +307,6 @@ class _CategoryFilterPill extends StatelessWidget {
         label: selected == null
             ? l10n.transactionsFilterAllCategories
             : localizedCategoryName(l10n, selected.name),
-        onTap: () {},
       ),
     );
   }
