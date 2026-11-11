@@ -1,5 +1,6 @@
 import 'package:bastide/core/api/api_client.dart';
 import 'package:bastide/core/api/api_client_provider.dart';
+import 'package:bastide/features/recurring/application/series_sort.dart';
 import 'package:bastide/features/recurring/application/subscriptions_controller.dart';
 import 'package:bastide/features/recurring/domain/recurring_series.dart';
 import 'package:bastide/features/recurring/domain/recurring_summary.dart';
@@ -549,6 +550,101 @@ void main() {
         },
       ),
     ).called(1);
+  });
+
+  group('sorting', () {
+    List<String> labels(SubscriptionsState state) => [
+      for (final row in state.rows) row.series.label,
+    ];
+
+    void stubThree() => stubLoad(
+      series: [
+        _seriesJson(id: 's1', label: 'Gym', expectedAmountMinor: -2999),
+        _seriesJson(id: 's2', label: 'Assurance', expectedAmountMinor: -4500),
+        _seriesJson(id: 's3', label: 'Musique', expectedAmountMinor: -1099),
+      ],
+      summary: _summaryJson(activeCount: 3),
+    );
+
+    test('the rows keep the server order until a sort is chosen', () async {
+      stubThree();
+
+      final state = await container.read(
+        subscriptionsControllerProvider.future,
+      );
+
+      expect(state.sort, isNull);
+      expect(labels(state), ['Gym', 'Assurance', 'Musique']);
+    });
+
+    test('a new column starts in its default direction, the same one flips '
+        'it', () async {
+      stubThree();
+      await container.read(subscriptionsControllerProvider.future);
+      final controller = container.read(
+        subscriptionsControllerProvider.notifier,
+      );
+
+      controller.sortBy(SeriesSortField.amount);
+      var state = container.read(subscriptionsControllerProvider).value!;
+      expect(
+        state.sort,
+        const SeriesSort(SeriesSortField.amount, ascending: false),
+      );
+      expect(labels(state), ['Assurance', 'Gym', 'Musique']);
+
+      controller.sortBy(SeriesSortField.amount);
+      state = container.read(subscriptionsControllerProvider).value!;
+      expect(state.sort!.ascending, isTrue);
+      expect(labels(state), ['Musique', 'Gym', 'Assurance']);
+
+      controller.sortBy(SeriesSortField.name);
+      state = container.read(subscriptionsControllerProvider).value!;
+      expect(
+        state.sort,
+        const SeriesSort(SeriesSortField.name, ascending: true),
+      );
+      expect(labels(state), ['Assurance', 'Gym', 'Musique']);
+    });
+
+    test('the sort survives a reload and a filter change', () async {
+      stubThree();
+      await container.read(subscriptionsControllerProvider.future);
+      final controller = container.read(
+        subscriptionsControllerProvider.notifier,
+      );
+      controller.sortBy(SeriesSortField.name);
+
+      await controller.refresh();
+      var state = container.read(subscriptionsControllerProvider).value!;
+      expect(state.sort?.field, SeriesSortField.name);
+      expect(labels(state), ['Assurance', 'Gym', 'Musique']);
+
+      await controller.setStatusFilter(SeriesStatus.detected);
+      state = container.read(subscriptionsControllerProvider).value!;
+      expect(state.sort?.field, SeriesSortField.name);
+      expect(labels(state), ['Assurance', 'Gym', 'Musique']);
+    });
+
+    test('the archived rows are sorted the same way', () async {
+      stubLoad(
+        archived: [
+          _seriesJson(id: 'a1', label: 'Presse', archived: true),
+          _seriesJson(id: 'a2', label: 'Cloud', archived: true),
+        ],
+      );
+      await container.read(subscriptionsControllerProvider.future);
+
+      container
+          .read(subscriptionsControllerProvider.notifier)
+          .sortBy(SeriesSortField.name);
+
+      final state = container.read(subscriptionsControllerProvider).value!;
+      expect(
+        [for (final row in state.archivedRows) row.series.label],
+        ['Cloud', 'Presse'],
+      );
+    });
   });
 
   group('annualised impact of a price change', () {

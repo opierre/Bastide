@@ -12,6 +12,7 @@ import '../../../core/widgets/primary_button.dart';
 import '../../../core/widgets/state_views.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../imports/presentation/imports_screen.dart';
+import '../application/series_sort.dart';
 import '../application/subscriptions_controller.dart';
 import '../domain/recurring_series.dart';
 import '../domain/recurring_summary.dart';
@@ -183,6 +184,7 @@ class _LoadedPanel extends ConsumerWidget {
         const SizedBox(height: AppSpacing.gridGap),
         Expanded(
           child: _TableCard(
+            sort: state.sort,
             rows: state.rows,
             archivedRows: state.showArchived ? state.archivedRows : const [],
           ),
@@ -411,7 +413,14 @@ class _StatCard extends StatelessWidget {
 }
 
 class _TableCard extends ConsumerWidget {
-  const _TableCard({required this.rows, required this.archivedRows});
+  const _TableCard({
+    required this.sort,
+    required this.rows,
+    required this.archivedRows,
+  });
+
+  /// The order [rows] arrive in, for the header to show; already applied.
+  final SeriesSort? sort;
 
   final List<SubscriptionRow> rows;
 
@@ -482,7 +491,10 @@ class _TableCard extends ConsumerWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          const SeriesTableHeader(),
+          SeriesTableHeader(
+            sort: sort,
+            onSort: ref.read(subscriptionsControllerProvider.notifier).sortBy,
+          ),
           Expanded(
             child: ListView.separated(
               key: const Key('subscriptionsList'),

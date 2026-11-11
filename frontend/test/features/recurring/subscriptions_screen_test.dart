@@ -771,4 +771,112 @@ void main() {
       expect(find.byKey(const Key('subscriptionsMergeBanner')), findsNothing);
     });
   });
+
+  group('sorting', () {
+    FakeSubscriptionsController controller() => FakeSubscriptionsController(
+      initialSeries: [
+        testSeries(
+          id: 's1',
+          label: 'Gym',
+          expectedAmountMinor: -2999,
+          nextExpectedDate: DateTime(2026, 5, 20),
+        ),
+        testSeries(
+          id: 's2',
+          label: 'Assurance',
+          expectedAmountMinor: -4500,
+          status: SeriesStatus.cancelled,
+        ),
+        testSeries(
+          id: 's3',
+          label: 'Musique',
+          expectedAmountMinor: -1099,
+          nextExpectedDate: DateTime(2026, 5, 16),
+        ),
+      ],
+      summary: testSummary(activeCount: 2),
+    );
+
+    /// The row ids top to bottom, as drawn.
+    List<String> drawnOrder(WidgetTester tester) {
+      double top(String id) =>
+          tester.getTopLeft(find.byKey(Key('seriesRow-$id'))).dy;
+      return ['s1', 's2', 's3']..sort((a, b) => top(a).compareTo(top(b)));
+    }
+
+    testWidgets('clicking a header sorts on it, clicking again reverses', (
+      tester,
+    ) async {
+      _useDesktopSurface(tester);
+      await tester.pumpWidget(_wrap(controller: controller()));
+      await tester.pumpAndSettle();
+
+      expect(drawnOrder(tester), ['s1', 's2', 's3']);
+      expect(find.byKey(const Key('seriesSortArrow-ascending')), findsNothing);
+      expect(find.byKey(const Key('seriesSortArrow-descending')), findsNothing);
+
+      await tester.tap(find.byKey(const Key('seriesSortHeader-amount')));
+      await tester.pumpAndSettle();
+      expect(drawnOrder(tester), ['s2', 's1', 's3']);
+      expect(
+        find.byKey(const Key('seriesSortArrow-descending')),
+        findsOneWidget,
+      );
+
+      await tester.tap(find.byKey(const Key('seriesSortHeader-amount')));
+      await tester.pumpAndSettle();
+      expect(drawnOrder(tester), ['s3', 's1', 's2']);
+      expect(
+        find.byKey(const Key('seriesSortArrow-ascending')),
+        findsOneWidget,
+      );
+
+      await tester.tap(find.byKey(const Key('seriesSortHeader-name')));
+      await tester.pumpAndSettle();
+      expect(drawnOrder(tester), ['s2', 's1', 's3']);
+    });
+
+    testWidgets('next charge puts the soonest first and the cancelled last', (
+      tester,
+    ) async {
+      _useDesktopSurface(tester);
+      await tester.pumpWidget(_wrap(controller: controller()));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byKey(const Key('seriesSortHeader-nextCharge')));
+      await tester.pumpAndSettle();
+      expect(drawnOrder(tester), ['s3', 's1', 's2']);
+
+      await tester.tap(find.byKey(const Key('seriesSortHeader-nextCharge')));
+      await tester.pumpAndSettle();
+      expect(drawnOrder(tester), ['s1', 's3', 's2']);
+    });
+
+    for (final (locale, idle, active) in [
+      (const Locale('fr'), 'Trier par montant', 'Tri décroissant'),
+      (const Locale('en'), 'Sort by amount', 'Sorted descending'),
+    ]) {
+      testWidgets('the header tooltips read in ${locale.languageCode}', (
+        tester,
+      ) async {
+        _useDesktopSurface(tester);
+        await tester.pumpWidget(
+          _wrap(controller: controller(), locale: locale),
+        );
+        await tester.pumpAndSettle();
+
+        Tooltip amountTooltip() => tester.widget<Tooltip>(
+          find.descendant(
+            of: find.byKey(const Key('seriesSortHeader-amount')),
+            matching: find.byType(Tooltip),
+          ),
+        );
+
+        expect(amountTooltip().message, idle);
+        await tester.tap(find.byKey(const Key('seriesSortHeader-amount')));
+        await tester.pumpAndSettle();
+        expect(amountTooltip().message, startsWith(active));
+      });
+    }
+  });
 }

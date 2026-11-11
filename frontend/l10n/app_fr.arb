@@ -2900,6 +2900,26 @@
   "@subscriptionsColumnStatus": {
     "description": "Table header over the status-pill column, which is empty for a healthy row."
   },
+  "subscriptionsSortByName": "Trier par libellé",
+  "@subscriptionsSortByName": {
+    "description": "Tooltip on the subscriptions table's name header while it is not the sort column."
+  },
+  "subscriptionsSortByAmount": "Trier par montant",
+  "@subscriptionsSortByAmount": {
+    "description": "Tooltip on the subscriptions table's amount header while it is not the sort column."
+  },
+  "subscriptionsSortByNext": "Trier par prochaine échéance",
+  "@subscriptionsSortByNext": {
+    "description": "Tooltip on the subscriptions table's next-charge header while it is not the sort column."
+  },
+  "subscriptionsSortedAscending": "Tri croissant — cliquer pour inverser",
+  "@subscriptionsSortedAscending": {
+    "description": "Tooltip on the header the subscriptions table is sorted on, ascending."
+  },
+  "subscriptionsSortedDescending": "Tri décroissant — cliquer pour inverser",
+  "@subscriptionsSortedDescending": {
+    "description": "Tooltip on the header the subscriptions table is sorted on, descending."
+  },
   "subscriptionsValueNone": "—",
   "@subscriptionsValueNone": {
     "description": "Placeholder in a cell with nothing to state — a cancelled row's next charge."

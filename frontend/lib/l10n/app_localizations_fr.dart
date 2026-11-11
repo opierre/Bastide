@@ -2365,6 +2365,23 @@ class AppLocalizationsFr extends AppLocalizations {
   String get subscriptionsColumnStatus => 'Statut';
 
   @override
+  String get subscriptionsSortByName => 'Trier par libellé';
+
+  @override
+  String get subscriptionsSortByAmount => 'Trier par montant';
+
+  @override
+  String get subscriptionsSortByNext => 'Trier par prochaine échéance';
+
+  @override
+  String get subscriptionsSortedAscending =>
+      'Tri croissant — cliquer pour inverser';
+
+  @override
+  String get subscriptionsSortedDescending =>
+      'Tri décroissant — cliquer pour inverser';
+
+  @override
   String get subscriptionsValueNone => '—';
 
   @override

@@ -9,6 +9,7 @@ import '../../../core/widgets/institution_avatar.dart';
 import '../../../core/widgets/status_pill.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../categories/domain/category.dart';
+import '../application/series_sort.dart';
 import '../domain/recurring_series.dart';
 import '../domain/recurring_summary.dart';
 import 'recurring_labels.dart';
@@ -57,12 +58,24 @@ Widget seriesRowLayout({
 );
 
 /// The 32 px uppercase header over the table.
+///
+/// Libellé, Montant and Prochain double as the sort control: a click sorts on
+/// that column, a second click reverses it. The active column is drawn in iris
+/// with an arrow, so the order is not carried by color alone. The header only
+/// reports the click; the ordering itself is the controller's.
 class SeriesTableHeader extends StatelessWidget {
-  const SeriesTableHeader({super.key});
+  const SeriesTableHeader({super.key, this.sort, this.onSort});
+
+  /// The sort the rows are drawn in, or `null` for the server's order.
+  final SeriesSort? sort;
+
+  /// Called with the column the user clicked; `null` makes the header inert.
+  final ValueChanged<SeriesSortField>? onSort;
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    final onSort = this.onSort;
 
     Widget cell(String label, {TextAlign align = TextAlign.start}) => Text(
       label.toUpperCase(),
@@ -71,19 +84,133 @@ class SeriesTableHeader extends StatelessWidget {
       style: AppTextStyles.sectionLabel,
     );
 
+    Widget sortable(
+      SeriesSortField field,
+      String label,
+      String tooltip, {
+      bool alignEnd = false,
+    }) => _SortableHeaderCell(
+      key: Key('seriesSortHeader-${field.name}'),
+      label: label,
+      tooltip: tooltip,
+      alignEnd: alignEnd,
+      active: sort?.field == field ? sort : null,
+      onTap: onSort == null ? null : () => onSort(field),
+    );
+
     return SizedBox(
       height: SeriesColumns.headerHeight,
       child: Align(
         alignment: Alignment.centerLeft,
         child: seriesRowLayout(
           monogram: const SizedBox.shrink(),
-          name: cell(l10n.subscriptionsColumnName),
+          name: sortable(
+            SeriesSortField.name,
+            l10n.subscriptionsColumnName,
+            l10n.subscriptionsSortByName,
+          ),
           category: cell(l10n.subscriptionsColumnCategory),
           cadence: cell(l10n.subscriptionsColumnCadence),
-          amount: cell(l10n.subscriptionsColumnAmount, align: TextAlign.end),
-          next: cell(l10n.subscriptionsColumnNext, align: TextAlign.end),
+          amount: sortable(
+            SeriesSortField.amount,
+            l10n.subscriptionsColumnAmount,
+            l10n.subscriptionsSortByAmount,
+            alignEnd: true,
+          ),
+          next: sortable(
+            SeriesSortField.nextCharge,
+            l10n.subscriptionsColumnNext,
+            l10n.subscriptionsSortByNext,
+            alignEnd: true,
+          ),
           status: cell(l10n.subscriptionsColumnStatus, align: TextAlign.end),
           trailing: const SizedBox.shrink(),
+        ),
+      ),
+    );
+  }
+}
+
+/// One clickable header label, with a direction arrow while it is the sort
+/// column.
+class _SortableHeaderCell extends StatelessWidget {
+  const _SortableHeaderCell({
+    super.key,
+    required this.label,
+    required this.tooltip,
+    required this.alignEnd,
+    required this.active,
+    required this.onTap,
+  });
+
+  final String label;
+
+  /// What a click does while this is not the sort column.
+  final String tooltip;
+
+  final bool alignEnd;
+
+  /// The sort, when it is on this column; `null` otherwise.
+  final SeriesSort? active;
+
+  final VoidCallback? onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final sort = active;
+
+    final text = Flexible(
+      child: Text(
+        label.toUpperCase(),
+        overflow: TextOverflow.ellipsis,
+        style: sort == null
+            ? AppTextStyles.sectionLabel
+            : AppTextStyles.sectionLabel.copyWith(color: AppColors.iris),
+      ),
+    );
+    final arrow = sort == null
+        ? null
+        : Icon(
+            sort.ascending
+                ? Icons.arrow_upward_rounded
+                : Icons.arrow_downward_rounded,
+            key: Key(
+              'seriesSortArrow-${sort.ascending ? 'ascending' : 'descending'}',
+            ),
+            size: 12,
+            color: AppColors.iris,
+          );
+
+    return Tooltip(
+      message: switch (sort) {
+        null => tooltip,
+        SeriesSort(ascending: true) => l10n.subscriptionsSortedAscending,
+        _ => l10n.subscriptionsSortedDescending,
+      },
+      child: MouseRegion(
+        cursor: onTap == null ? MouseCursor.defer : SystemMouseCursors.click,
+        child: GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onTap: onTap,
+          child: Row(
+            mainAxisAlignment: alignEnd
+                ? MainAxisAlignment.end
+                : MainAxisAlignment.start,
+            children: [
+              // The arrow sits on the inner side, so the label stays aligned
+              // with the figures under it.
+              if (alignEnd && arrow != null) ...[
+                arrow,
+                const SizedBox(width: AppSpacing.xs),
+              ],
+              text,
+              if (!alignEnd && arrow != null) ...[
+                const SizedBox(width: AppSpacing.xs),
+                arrow,
+              ],
+            ],
+          ),
         ),
       ),
     );
@@ -133,9 +260,8 @@ class _SeriesRowState extends State<SeriesRow> {
     final locale = Localizations.localeOf(context).toString();
     final textTheme = Theme.of(context).textTheme;
     final series = widget.row.series;
-    final isCancelled = series.status == SeriesStatus.cancelled;
-    // Neither expects a charge the panel is tracking, so neither shows a date.
-    final isSettled = isCancelled || series.isArchived;
+    // A cancelled or archived series expects no charge, so shows no date.
+    final isSettled = widget.row.isSettled;
 
     return MouseRegion(
       onEnter: (_) => setState(() => _hovered = true),

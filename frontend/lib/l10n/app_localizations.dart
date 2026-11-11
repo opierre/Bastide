@@ -3636,6 +3636,36 @@ abstract class AppLocalizations {
   /// **'Statut'**
   String get subscriptionsColumnStatus;
 
+  /// Tooltip on the subscriptions table's name header while it is not the sort column.
+  ///
+  /// In fr, this message translates to:
+  /// **'Trier par libellé'**
+  String get subscriptionsSortByName;
+
+  /// Tooltip on the subscriptions table's amount header while it is not the sort column.
+  ///
+  /// In fr, this message translates to:
+  /// **'Trier par montant'**
+  String get subscriptionsSortByAmount;
+
+  /// Tooltip on the subscriptions table's next-charge header while it is not the sort column.
+  ///
+  /// In fr, this message translates to:
+  /// **'Trier par prochaine échéance'**
+  String get subscriptionsSortByNext;
+
+  /// Tooltip on the header the subscriptions table is sorted on, ascending.
+  ///
+  /// In fr, this message translates to:
+  /// **'Tri croissant — cliquer pour inverser'**
+  String get subscriptionsSortedAscending;
+
+  /// Tooltip on the header the subscriptions table is sorted on, descending.
+  ///
+  /// In fr, this message translates to:
+  /// **'Tri décroissant — cliquer pour inverser'**
+  String get subscriptionsSortedDescending;
+
   /// Placeholder in a cell with nothing to state — a cancelled row's next charge.
   ///
   /// In fr, this message translates to:
