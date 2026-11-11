@@ -13,6 +13,7 @@ import '../../../core/widgets/primary_button.dart';
 import '../../../core/widgets/state_views.dart';
 import '../../../l10n/app_localizations.dart';
 import '../application/accounts_controller.dart';
+import '../application/linked_cards.dart';
 import '../domain/account.dart';
 import 'account_archive.dart';
 import 'account_detail_screen.dart';
@@ -20,7 +21,7 @@ import 'account_error_localizer.dart';
 import 'account_form.dart';
 import 'account_type_label.dart';
 import 'card_settlement_warnings.dart';
-import 'settlement_rule_dialog.dart';
+import 'linked_cards_button.dart';
 
 class AccountsScreen extends ConsumerWidget {
   const AccountsScreen({super.key});
@@ -42,7 +43,7 @@ class AccountsScreen extends ConsumerWidget {
         AsyncData(:final value) when value.isEmpty => _EmptyState(
           onAdd: () => showAccountForm(context),
         ),
-        AsyncData(:final value) => Column(
+        AsyncData() => Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             const _SummaryCard(),
@@ -51,8 +52,10 @@ class AccountsScreen extends ConsumerWidget {
             const CardSettlementWarnings(),
             const SizedBox(height: AppSpacing.gridGap),
             Expanded(
+              // Linked cards sit under their account's card count rather than
+              // on tiles of their own; the summary above still counts them.
               child: _AccountsGrid(
-                accounts: value,
+                accounts: ref.watch(panelAccountsProvider),
                 onOpen: (account) =>
                     context.go(AccountDetailScreen.location(account.id)),
                 onEdit: (account) => showAccountForm(context, initial: account),
@@ -194,33 +197,34 @@ class _AccountsGrid extends StatelessWidget {
           account: account,
           l10n: l10n,
           onOpen: () => onOpen(account),
-          onEdit: () => onEdit(account),
-          onArchive: () => onArchive(account),
+          onEditCard: onEdit,
+          onArchiveCard: onArchive,
         );
       },
     );
   }
 }
 
-enum _AccountAction { edit, settlementRule, archive }
-
 class _AccountCard extends StatelessWidget {
   const _AccountCard({
     required this.account,
     required this.l10n,
     required this.onOpen,
-    required this.onEdit,
-    required this.onArchive,
+    required this.onEditCard,
+    required this.onArchiveCard,
   });
 
   final Account account;
   final AppLocalizations l10n;
 
-  /// Opens the account's detail — the card's whole face is the way in; editing
-  /// stays one step away in its menu.
+  /// Opens the account's detail — the card's whole face is the way in, and
+  /// the account's own edit and archive sit in that detail's top bar.
   final VoidCallback onOpen;
-  final VoidCallback onEdit;
-  final VoidCallback onArchive;
+
+  /// Edit or archive one of the cards settled from this account, picked from
+  /// its linked-cards list.
+  final ValueChanged<Account> onEditCard;
+  final ValueChanged<Account> onArchiveCard;
 
   @override
   Widget build(BuildContext context) {
@@ -260,45 +264,10 @@ class _AccountCard extends StatelessWidget {
                   ],
                 ),
               ),
-              PopupMenuButton<_AccountAction>(
-                key: Key('accountMenu-${account.id}'),
-                icon: const Icon(Icons.more_horiz_rounded, size: 18),
-                position: PopupMenuPosition.under,
-                // Archive, never delete: an account's transactions are history,
-                // and deleting it would take them with it.
-                onSelected: (action) => switch (action) {
-                  _AccountAction.edit => onEdit(),
-                  _AccountAction.settlementRule => showSettlementRuleDialog(
-                    context,
-                    account,
-                  ),
-                  _AccountAction.archive => onArchive(),
-                },
-                itemBuilder: (context) => [
-                  PopupMenuItem(
-                    value: _AccountAction.edit,
-                    child: _MenuRow(
-                      icon: Icons.edit_outlined,
-                      label: l10n.accountEdit,
-                    ),
-                  ),
-                  if (account.type == AccountType.deferredCard)
-                    PopupMenuItem(
-                      key: Key('accountSettlementRule-${account.id}'),
-                      value: _AccountAction.settlementRule,
-                      child: _MenuRow(
-                        icon: Icons.rule_rounded,
-                        label: l10n.accountSettlementRule,
-                      ),
-                    ),
-                  PopupMenuItem(
-                    value: _AccountAction.archive,
-                    child: _MenuRow(
-                      icon: Icons.inventory_2_outlined,
-                      label: l10n.accountArchive,
-                    ),
-                  ),
-                ],
+              LinkedCardsButton(
+                account: account,
+                onEditCard: onEditCard,
+                onArchiveCard: onArchiveCard,
               ),
             ],
           ),
@@ -353,24 +322,6 @@ class _LastTransaction extends StatelessWidget {
         context,
       ).textTheme.bodySmall?.copyWith(color: AppColors.textDisabled),
       overflow: TextOverflow.ellipsis,
-    );
-  }
-}
-
-class _MenuRow extends StatelessWidget {
-  const _MenuRow({required this.icon, required this.label});
-
-  final IconData icon;
-  final String label;
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: [
-        Icon(icon, size: 16, color: AppColors.textSecondary),
-        const SizedBox(width: AppSpacing.sm),
-        Text(label),
-      ],
     );
   }
 }

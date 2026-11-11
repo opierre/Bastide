@@ -2,6 +2,8 @@ import 'dart:convert';
 
 import 'package:bastide/core/api/api_client.dart';
 import 'package:bastide/core/api/api_client_provider.dart';
+import 'package:bastide/core/runs/run_progress_client.dart';
+import 'package:bastide/core/runs/run_progress_provider.dart';
 import 'package:bastide/core/theme/app_theme.dart';
 import 'package:bastide/features/categories/application/categories_controller.dart';
 import 'package:bastide/features/categories/presentation/categories_screen.dart';
@@ -16,6 +18,7 @@ import 'package:mocktail/mocktail.dart';
 
 import '../../support/fake_categories_controller.dart';
 import '../../support/fake_rules_controller.dart';
+import '../../support/pack_import_runs.dart';
 
 class MockApiClient extends Mock implements ApiClient {}
 
@@ -106,10 +109,14 @@ Widget _wrap(
   MockApiClient apiClient, {
   required FakeRulePackFiles files,
   FakeRulesController? rules,
+  RunProgressClient? progress,
 }) {
   return ProviderScope(
     overrides: [
       apiClientProvider.overrideWithValue(apiClient),
+      runProgressClientProvider.overrideWithValue(
+        progress ?? MockRunProgressClient(),
+      ),
       rulePackFilesProvider.overrideWithValue(files),
       rulesControllerProvider.overrideWith(
         () => rules ?? FakeRulesController(),
@@ -205,10 +212,9 @@ void main() {
       when(
         () => apiClient.post('/rules/packs/preview', body: any(named: 'body')),
       ).thenAnswer((_) async => _previewJson());
-      when(
-        () => apiClient.post('/rules/packs/import', body: any(named: 'body')),
-      ).thenAnswer(
-        (_) async => {
+      final progress = stubQuickPackImport(
+        apiClient,
+        result: {
           'created_count': 10,
           'skipped_count': 2,
           'unresolved': <String>[],
@@ -217,7 +223,9 @@ void main() {
       );
 
       final files = FakeRulePackFiles(pickedSource: _packSource());
-      await tester.pumpWidget(_wrap(apiClient, files: files));
+      await tester.pumpWidget(
+        _wrap(apiClient, files: files, progress: progress),
+      );
       await tester.pumpAndSettle();
       await _openRules(tester);
 
@@ -228,7 +236,10 @@ void main() {
 
       // Nothing written yet — the report comes first, always.
       verifyNever(
-        () => apiClient.post('/rules/packs/import', body: any(named: 'body')),
+        () => apiClient.post(
+          '/rules/packs/import-runs',
+          body: any(named: 'body'),
+        ),
       );
       expect(
         find.text(
@@ -243,7 +254,10 @@ void main() {
       await tester.pumpAndSettle();
 
       verify(
-        () => apiClient.post('/rules/packs/import', body: any(named: 'body')),
+        () => apiClient.post(
+          '/rules/packs/import-runs',
+          body: any(named: 'body'),
+        ),
       ).called(1);
       expect(find.text('10 règles importées'), findsOneWidget);
     },

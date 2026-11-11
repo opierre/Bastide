@@ -24,8 +24,7 @@ enum RunTrigger {
   );
 }
 
-/// A run's lifecycle. `pending`/`running` are the in-flight pair the poll
-/// watches for; the other four are terminal.
+/// A run's lifecycle. `pending`/`running` are the in-flight pair the app\n/// follows; the other four are terminal.
 enum RunStatus {
   pending,
   running,
@@ -50,7 +49,7 @@ enum RunStatus {
   bool get isTerminal => !isInFlight;
 }
 
-/// One stage-2 categorization run, polled for progress while it is in flight.
+/// One stage-2 categorization run, followed for progress while it is in flight.
 @immutable
 class CategorizationRun {
   const CategorizationRun({
@@ -111,6 +110,34 @@ class CategorizationRun {
   double get progress => totalCount == 0
       ? 1
       : (processedCount / totalCount).clamp(0, 1).toDouble();
+
+  /// This run moved on to [status] with the given tallies, as a progress event
+  /// reports it. Everything an event does not carry is kept.
+  CategorizationRun withProgress({
+    required RunStatus status,
+    int? totalCount,
+    int? processedCount,
+    int? assignedCount,
+    int? deferredCount,
+    int? failedCount,
+    String? errorMessage,
+  }) => CategorizationRun(
+    id: id,
+    accountId: accountId,
+    importBatchId: importBatchId,
+    trigger: trigger,
+    status: status,
+    modelTag: modelTag,
+    totalCount: totalCount ?? this.totalCount,
+    processedCount: processedCount ?? this.processedCount,
+    assignedCount: assignedCount ?? this.assignedCount,
+    deferredCount: deferredCount ?? this.deferredCount,
+    failedCount: failedCount ?? this.failedCount,
+    errorMessage: errorMessage ?? this.errorMessage,
+    startedAt: startedAt,
+    finishedAt: finishedAt,
+    createdAt: createdAt,
+  );
 
   static DateTime? _parseDate(Object? value) =>
       value == null ? null : DateTime.parse(value as String);

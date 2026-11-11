@@ -131,6 +131,7 @@
   "accountNoTransactions": "No transactions yet",
   "accountArchive": "Archive",
   "accountSettlementRule": "Settlement rule",
+  "accountLinkedCards": "{count, plural, =1{1 linked card} other{{count} linked cards}}",
   "cardSettlementNoAccount": "{card}: choose the account the card is paid from, so its purchases count only once.",
   "cardSettlementChooseAccount": "Choose the account",
   "cardSettlementNoRule": "{card}'s monthly debit counts as spending on top of the card's purchases: create its settlement rule.",
@@ -1367,5 +1368,11 @@
   "chargePickerNoMatch": "No transaction matches “{query}”.",
   "chargePickerLoadError": "The transactions could not be loaded.",
   "chargePickerLoadMore": "Show more",
-  "chargePickerSave": "{count, plural, =0{Add} =1{Add 1 transaction} other{Add {count} transactions}}"
+  "chargePickerSave": "{count, plural, =0{Add} =1{Add 1 transaction} other{Add {count} transactions}}",
+  "rulePackLogoProgress": "Downloading logos… {done} / {total}",
+  "rulePackLogoProgressNotice": "The rules are imported: only their logos are left.",
+  "rulePackImportRunFailed": "The import could not finish. Check your rules before trying again.",
+  "ruleErrorPackNotFound": "This rule pack could not be found.",
+  "ruleErrorPackImportInProgress": "Another rule import is already running. Wait for it to finish.",
+  "ruleErrorPackImportRunNotFound": "This import can no longer be followed. Check your rules."
 }

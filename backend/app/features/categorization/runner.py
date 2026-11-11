@@ -15,12 +15,13 @@ import asyncio
 import logging
 from collections.abc import Callable, Coroutine
 from datetime import UTC, datetime
-from typing import Any
+from typing import Any, Literal
 
 from sqlalchemy.orm import Session
 
 from app.core.db import SessionFactory
 from app.core.errors import ConflictError, NotFoundError
+from app.core.progress import ProgressBus, RunReporter
 from app.features.accounts.service import AccountService
 from app.features.accounts.settlement_rule import CARD_SETTLEMENT_CATEGORY_KEY
 from app.features.auth.models import User
@@ -113,6 +114,7 @@ class CategorizationRunService:
         session_factory: SessionFactory,
         launcher: RunLauncher,
         client_factory: ClientFactory,
+        bus: ProgressBus,
     ) -> None:
         self._repository = repository
         self._account_service = account_service
@@ -120,6 +122,7 @@ class CategorizationRunService:
         self._session_factory = session_factory
         self._launcher = launcher
         self._client_factory = client_factory
+        self._bus = bus
 
     def request(
         self,
@@ -165,6 +168,7 @@ class CategorizationRunService:
                 candidate_ids,
                 session_factory=self._session_factory,
                 client_factory=self._client_factory,
+                bus=self._bus,
             )
         )
         return run
@@ -204,6 +208,9 @@ class CategorizationRunService:
         run.status = "cancelled"
         run.finished_at = datetime.now(UTC)
         self._repository.commit()
+        # Published here rather than by the executor: this is the moment the run becomes
+        # terminal, and the bus drops any progress the batch in flight reports after it.
+        _report_terminal(reporter(self._bus, run), run, "cancelled")
         return run
 
 
@@ -250,19 +257,20 @@ async def execute_run(
     *,
     session_factory: SessionFactory,
     client_factory: ClientFactory,
+    bus: ProgressBus,
 ) -> None:
     """Run stage 2 over ``transaction_ids``, committing progress after every batch.
 
     Opens and owns its own session: the request that created the run is long gone by the time
     most of this executes. Never raises — a run reports its own failure in its row, since
-    there is no caller left to tell.
+    there is no caller left to tell. Every step it commits is also published on ``bus``.
     """
     db = session_factory()
     try:
-        await _execute(db, run_id, user_id, transaction_ids, client_factory)
+        await _execute(db, run_id, user_id, transaction_ids, client_factory, bus)
     except Exception as exc:  # noqa: BLE001 — the last frame before the task is discarded.
         logger.exception("Categorization run %s failed unexpectedly.", run_id)
-        _fail_quietly(session_factory, run_id, str(exc))
+        _fail_quietly(session_factory, run_id, str(exc), bus)
     finally:
         db.close()
 
@@ -273,6 +281,7 @@ async def _execute(
     user_id: str,
     transaction_ids: list[str],
     client_factory: ClientFactory,
+    bus: ProgressBus,
 ) -> None:
     """Drive one run from `pending` to a terminal status."""
     repository = CategorizationRunRepository(db)
@@ -284,6 +293,8 @@ async def _execute(
     run.status = "running"
     run.started_at = datetime.now(UTC)
     repository.commit()
+    progress = reporter(bus, run)
+    progress.started(run.total_count, done=run.processed_count, counts=_counts(run))
 
     settings = SettingsService(SettingsRepository(db)).get_or_create(user_id)
     # A card's settlement is filed by the card's own rule, never by the model: filing a debit
@@ -329,12 +340,43 @@ async def _execute(
         # Per batch, not at the end: a process killed here keeps every row applied so far and
         # a `processed_count` that still tells the truth about them.
         repository.commit()
+        progress.progress(run.processed_count, run.total_count, counts=_counts(run))
 
     run.status = _terminal_status(run)
     if run.status == "failed":
         run.error_message = RUNTIME_UNREACHABLE_MESSAGE
     run.finished_at = datetime.now(UTC)
     repository.commit()
+    _report_terminal(progress, run, "failed" if run.status == "failed" else "finished")
+
+
+def reporter(bus: ProgressBus, run: CategorizationRun) -> RunReporter:
+    """The bus reporter for ``run``, keyed by its owner."""
+    return RunReporter(bus, run.user_id, run.id, "categorization")
+
+
+def _counts(run: CategorizationRun) -> dict[str, int]:
+    """The run's tallies, as the `counts` of its progress events."""
+    return {
+        "assigned": run.assigned_count,
+        "deferred": run.deferred_count,
+        "failed": run.failed_count,
+    }
+
+
+def _report_terminal(
+    progress: RunReporter,
+    run: CategorizationRun,
+    event: Literal["finished", "failed", "cancelled"],
+) -> None:
+    """Publish the terminal event matching what ``run`` settled on."""
+    done, total, counts = run.processed_count, run.total_count, _counts(run)
+    if event == "failed":
+        progress.failed(done, total, run.error_message or "", counts=counts)
+    elif event == "cancelled":
+        progress.cancelled(done, total, counts=counts)
+    else:
+        progress.finished(done, total, counts=counts)
 
 
 def _terminal_status(run: CategorizationRun) -> str:
@@ -358,7 +400,9 @@ def _locale(db: Session, user_id: str) -> str:
     return user.locale if user is not None else "fr"
 
 
-def _fail_quietly(session_factory: SessionFactory, run_id: str, message: str) -> None:
+def _fail_quietly(
+    session_factory: SessionFactory, run_id: str, message: str, bus: ProgressBus
+) -> None:
     """Record an unexpected failure on the run, on a session known not to be poisoned.
 
     The session the run died on may hold a broken transaction, so the status is written
@@ -373,6 +417,7 @@ def _fail_quietly(session_factory: SessionFactory, run_id: str, message: str) ->
             run.error_message = message[:1000]
             run.finished_at = datetime.now(UTC)
             db.commit()
+            _report_terminal(reporter(bus, run), run, "failed")
     except Exception:
         logger.exception("Could not record the failure of categorization run %s.", run_id)
     finally:

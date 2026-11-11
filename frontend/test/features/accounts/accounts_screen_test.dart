@@ -20,12 +20,14 @@ Account _account({
   String institution = 'BNP Paribas',
   int balanceMinor = 123456,
   DateTime? lastTransactionDate,
+  String? settlementAccountId,
 }) => Account(
   id: id,
   name: name,
   type: type,
   institution: institution,
   currency: 'EUR',
+  settlementAccountId: settlementAccountId,
   openingBalanceMinor: balanceMinor,
   balanceMinor: balanceMinor,
   lastTransactionDate: lastTransactionDate,
@@ -61,6 +63,37 @@ Finder _balanceInGrid(String formatted) => find.descendant(
   of: find.byKey(const Key('accountsList')),
   matching: find.text(formatted),
 );
+
+/// A fake whose edit lands in the list, so a test can watch the panel follow
+/// a card being linked.
+class _LinkingAccountsController extends FakeAccountsController {
+  _LinkingAccountsController({super.initialAccounts});
+
+  @override
+  Future<void> updateAccount(
+    String id, {
+    required String name,
+    required AccountType type,
+    required String institution,
+    required int openingBalanceMinor,
+    String? settlementAccountId,
+  }) async {
+    state = AsyncData([
+      for (final account in state.value ?? const <Account>[])
+        if (account.id == id)
+          _account(
+            id: id,
+            name: name,
+            type: type,
+            institution: institution,
+            balanceMinor: openingBalanceMinor,
+            settlementAccountId: settlementAccountId,
+          )
+        else
+          account,
+    ]);
+  }
+}
 
 void main() {
   testWidgets('a deferred card stays out of the total, as from net worth', (
@@ -243,5 +276,235 @@ void main() {
 
     expect(find.text('Add your first account'), findsOneWidget);
     expect(tester.takeException(), isNull);
+  });
+
+  group('card tiles', () {
+    List<Account> accountsWithCards() => [
+      _account(balanceMinor: 100000),
+      _account(
+        id: 'c1',
+        name: 'Carte ••4821',
+        type: AccountType.deferredCard,
+        balanceMinor: -32040,
+        settlementAccountId: 'a1',
+      ),
+      _account(
+        id: 'c2',
+        name: 'Carte ••7310',
+        type: AccountType.credit,
+        balanceMinor: -15000,
+        settlementAccountId: 'a1',
+      ),
+      _account(
+        id: 'c3',
+        name: 'Carte ••5902',
+        type: AccountType.credit,
+        balanceMinor: -2500,
+      ),
+    ];
+
+    testWidgets('a linked card has no tile, an unlinked card keeps its own', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        _wrap(
+          controller: FakeAccountsController(
+            initialAccounts: accountsWithCards(),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.byKey(const Key('accountCard-a1')), findsOneWidget);
+      expect(find.byKey(const Key('accountCard-c1')), findsNothing);
+      expect(find.byKey(const Key('accountCard-c2')), findsNothing);
+      expect(find.byKey(const Key('accountCard-c3')), findsOneWidget);
+      // The hidden cards are still reached from their account.
+      expect(
+        find.descendant(
+          of: find.byKey(const Key('accountLinkedCards-a1')),
+          matching: find.text('2'),
+        ),
+        findsOneWidget,
+      );
+    });
+
+    testWidgets('hiding linked cards leaves the summary total as it was', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        _wrap(
+          controller: FakeAccountsController(
+            initialAccounts: accountsWithCards(),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      // Deferred card out (its account settles it), credit cards in, whether
+      // or not they have a tile: 100000 - 15000 - 2500.
+      final total = tester.widget<AmountText>(
+        find.byKey(const Key('accountsTotalBalance')),
+      );
+      expect(total.amountMinor, 82500);
+    });
+
+    testWidgets('linking a card takes its tile off the grid', (tester) async {
+      final controller = _LinkingAccountsController(
+        initialAccounts: [
+          _account(),
+          _account(id: 'c1', name: 'Carte ••4821', type: AccountType.credit),
+        ],
+      );
+      await tester.pumpWidget(_wrap(controller: controller));
+      await tester.pumpAndSettle();
+      expect(find.byKey(const Key('accountCard-c1')), findsOneWidget);
+
+      await controller.updateAccount(
+        'c1',
+        name: 'Carte ••4821',
+        type: AccountType.credit,
+        institution: 'BNP Paribas',
+        openingBalanceMinor: 123456,
+        settlementAccountId: 'a1',
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.byKey(const Key('accountCard-c1')), findsNothing);
+      expect(find.byKey(const Key('accountLinkedCards-a1')), findsOneWidget);
+    });
+  });
+
+  group('linked cards', () {
+    List<Account> withTwoCards() => [
+      _account(),
+      _account(
+        id: 'c1',
+        name: 'Carte ••4821',
+        type: AccountType.deferredCard,
+        settlementAccountId: 'a1',
+      ),
+      _account(
+        id: 'c2',
+        name: 'Carte ••7310',
+        type: AccountType.credit,
+        settlementAccountId: 'a1',
+      ),
+    ];
+
+    for (final (locale, tooltip, edit, rule, archive) in [
+      ('fr', '2 cartes liées', 'Modifier', 'Règle de prélèvement', 'Archiver'),
+      ('en', '2 linked cards', 'Edit', 'Settlement rule', 'Archive'),
+    ]) {
+      testWidgets(
+        'an account with two cards lists them with their actions ($locale)',
+        (tester) async {
+          await tester.pumpWidget(
+            _wrap(
+              controller: FakeAccountsController(
+                initialAccounts: withTwoCards(),
+              ),
+              locale: Locale(locale),
+            ),
+          );
+          await tester.pumpAndSettle();
+
+          final button = find.byKey(const Key('accountLinkedCards-a1'));
+          expect(button, findsOneWidget);
+          expect(
+            find.descendant(of: button, matching: find.text('2')),
+            findsOneWidget,
+          );
+          expect(find.byTooltip(tooltip), findsOneWidget);
+
+          await tester.tap(button);
+          await tester.pumpAndSettle();
+          expect(find.byKey(const Key('linkedCard-c1')), findsOneWidget);
+          expect(find.byKey(const Key('linkedCard-c2')), findsOneWidget);
+
+          // A deferred card offers its settlement rule beside edit and archive.
+          await tester.tap(find.byKey(const Key('linkedCard-c1')));
+          await tester.pumpAndSettle();
+          for (final (key, label) in [
+            ('linkedCardEdit-c1', edit),
+            ('linkedCardSettlementRule-c1', rule),
+            ('linkedCardArchive-c1', archive),
+          ]) {
+            expect(
+              find.descendant(
+                of: find.byKey(Key(key)),
+                matching: find.text(label),
+              ),
+              findsOneWidget,
+            );
+          }
+
+          // A credit card has no settlement rule to offer.
+          await tester.tap(find.byKey(const Key('linkedCard-c2')));
+          await tester.pumpAndSettle();
+          expect(find.byKey(const Key('linkedCardEdit-c2')), findsOneWidget);
+          expect(find.byKey(const Key('linkedCardArchive-c2')), findsOneWidget);
+          expect(
+            find.byKey(const Key('linkedCardSettlementRule-c2')),
+            findsNothing,
+          );
+          expect(tester.takeException(), isNull);
+        },
+      );
+    }
+
+    testWidgets('archiving a card from the list archives that card', (
+      tester,
+    ) async {
+      final controller = FakeAccountsController(
+        initialAccounts: withTwoCards(),
+      );
+      await tester.pumpWidget(_wrap(controller: controller));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byKey(const Key('accountLinkedCards-a1')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const Key('linkedCard-c1')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const Key('linkedCardArchive-c1')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const Key('accountArchiveConfirmButton')));
+      await tester.pumpAndSettle();
+
+      expect(controller.archiveCalls, ['c1']);
+    });
+
+    testWidgets('an account without cards shows no card count', (tester) async {
+      await tester.pumpWidget(
+        _wrap(
+          controller: FakeAccountsController(initialAccounts: [_account()]),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.byKey(const Key('accountLinkedCards-a1')), findsNothing);
+      expect(find.byIcon(Icons.more_horiz_rounded), findsNothing);
+    });
+
+    testWidgets('one card reads in the singular', (tester) async {
+      await tester.pumpWidget(
+        _wrap(
+          controller: FakeAccountsController(
+            initialAccounts: [
+              _account(),
+              _account(
+                id: 'c1',
+                name: 'Carte ••4821',
+                type: AccountType.deferredCard,
+                settlementAccountId: 'a1',
+              ),
+            ],
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.byTooltip('1 carte liée'), findsOneWidget);
+    });
   });
 }

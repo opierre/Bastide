@@ -27,6 +27,12 @@ String localizeRuleError(AppLocalizations l10n, Object? error) {
         return l10n.ruleErrorCategoryNotFound;
       case 'VALIDATION_ERROR':
         return l10n.ruleErrorValidation;
+      case 'RULE_PACK_NOT_FOUND':
+        return l10n.ruleErrorPackNotFound;
+      case 'RULE_PACK_IMPORT_IN_PROGRESS':
+        return l10n.ruleErrorPackImportInProgress;
+      case 'RULE_PACK_IMPORT_RUN_NOT_FOUND':
+        return l10n.ruleErrorPackImportRunNotFound;
     }
   }
   return l10n.ruleErrorGeneric;

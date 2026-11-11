@@ -181,3 +181,23 @@ def test_no_retry_starts_past_the_deadline(
     assert isinstance(result[LOGO_URL], LogoDownloadError)
     assert [url for url, _ in server.arrivals].count(LOGO_URL) == 2
     assert result[OTHER_LOGO_URL] == PICTURE
+
+
+def test_each_distinct_url_is_reported_once_as_it_settles(server: _Server, clock: _Clock) -> None:
+    server.answer(LOGO_URL, _ok)
+    server.answer(OTHER_LOGO_URL, _status(404))
+    settled: list[tuple[str, bytes | LogoDownloadError]] = []
+    fetcher = HttpLogoFetcher(
+        httpx.MockTransport(server.handle), sleep=clock.sleep, clock=clock, jitter=lambda: 0.0
+    )
+
+    result = asyncio.run(
+        fetcher.fetch_all(
+            [LOGO_URL, OTHER_LOGO_URL, LOGO_URL],
+            10_000_000,
+            lambda url, outcome: settled.append((url, outcome)),
+        )
+    )
+
+    assert sorted(url for url, _ in settled) == sorted([LOGO_URL, OTHER_LOGO_URL])
+    assert dict(settled) == result
