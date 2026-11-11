@@ -1,15 +1,22 @@
 import '../domain/account.dart';
 
-/// The accounts a deferred card can be settled from: the user's other
-/// accounts, cards excepted — a card is paid from where money is.
-List<Account> settlementCandidates(List<Account> accounts, {String? cardId}) =>
-    [
-      for (final account in accounts)
-        if (account.id != cardId &&
-            !account.archived &&
-            account.type != AccountType.deferredCard)
-          account,
-    ];
+/// The accounts a deferred card can be settled from: the user's open current
+/// accounts — a card only ever settles against one.
+///
+/// [currentId] is the card's saved settlement account, kept even when it is
+/// not a current account so editing an older card still shows its choice.
+List<Account> settlementCandidates(
+  List<Account> accounts, {
+  String? cardId,
+  String? currentId,
+}) => [
+  for (final account in accounts)
+    if (account.id != cardId &&
+        !account.archived &&
+        (account.type == AccountType.checking ||
+            (currentId != null && account.id == currentId)))
+      account,
+];
 
 /// The settlement account to preselect for a card at [institution], when one
 /// answer is obvious: the only current account at that bank, else the only
