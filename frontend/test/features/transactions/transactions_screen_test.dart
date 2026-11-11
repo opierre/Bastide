@@ -1,5 +1,8 @@
+import 'package:bastide/core/l10n/category_display.dart';
 import 'package:bastide/core/theme/app_theme.dart';
+import 'package:bastide/core/theme/tokens.dart';
 import 'package:bastide/core/widgets/amount_text.dart';
+import 'package:bastide/core/widgets/category_chip.dart';
 import 'package:bastide/features/accounts/application/account_detail_controller.dart';
 import 'package:bastide/features/accounts/application/accounts_controller.dart';
 import 'package:bastide/features/accounts/domain/account.dart';
@@ -472,6 +475,71 @@ void main() {
         _container(tester).read(transactionFiltersProvider).categoryId,
         'c1',
       );
+    },
+  );
+
+  testWidgets(
+    'the category filter lists main categories only, each with its glyph',
+    (tester) async {
+      _useDesktopSurface(tester);
+      await tester.pumpWidget(
+        _wrap(
+          controller: FakeTransactionsController(
+            initialPage: TransactionsPage(
+              items: [_transaction()],
+              page: 1,
+              pageSize: 50,
+              total: 1,
+            ),
+          ),
+          categories: const [
+            AppCategory(
+              id: 'c1',
+              userId: null,
+              parentId: null,
+              name: 'category.food.groceries',
+              kind: 'expense',
+              icon: 'shopping_cart',
+              color: '#10B981',
+              isSystem: true,
+            ),
+            AppCategory(
+              id: 'c2',
+              userId: 'u1',
+              parentId: 'c1',
+              name: 'Marché bio',
+              kind: 'expense',
+              icon: 'shopping_cart',
+              color: '#10B981',
+              isSystem: false,
+            ),
+          ],
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byKey(const Key('transactionsCategoryFilter')));
+      await tester.pumpAndSettle();
+
+      final mainItem = find.byKey(
+        const Key('transactionsCategoryFilterItem-c1'),
+      );
+      expect(mainItem, findsOneWidget);
+      expect(
+        find.byKey(const Key('transactionsCategoryFilterItem-c2')),
+        findsNothing,
+      );
+      expect(find.text('Marché bio'), findsNothing);
+
+      final slug = categorySlugFor(
+        name: 'category.food.groceries',
+        kind: 'expense',
+      );
+      final icon = tester.widget<Icon>(
+        find.descendant(of: mainItem, matching: find.byType(Icon)),
+      );
+      expect(icon.icon, CategoryIcons.forSlug(slug));
+      expect(icon.color, CategoryHues.forSlug(slug));
     },
   );
 

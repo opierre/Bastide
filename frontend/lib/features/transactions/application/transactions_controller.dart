@@ -257,3 +257,15 @@ final transactionsControllerProvider =
 final transactionCategoriesProvider = FutureProvider<List<AppCategory>>((ref) {
   return ref.read(transactionsRepositoryProvider).listCategories();
 });
+
+/// The categories the list's category filter offers: main categories only.
+/// Picking one also matches its sub-categories (the API widens the filter), so
+/// listing them too would only make the menu long and hard to scan.
+final transactionFilterCategoriesProvider = Provider<List<AppCategory>>((ref) {
+  final categories =
+      ref.watch(transactionCategoriesProvider).value ?? const <AppCategory>[];
+  return [
+    for (final category in categories)
+      if (category.parentId == null) category,
+  ];
+});
