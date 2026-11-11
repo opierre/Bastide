@@ -916,6 +916,15 @@ class AppLocalizationsFr extends AppLocalizations {
   String get categorySystemHousingHomeInsurance => 'Assurance habitation';
 
   @override
+  String get categorySystemHousingCondoFees => 'Charges de copropriété';
+
+  @override
+  String get categorySystemHousingMaintenance => 'Travaux et entretien';
+
+  @override
+  String get categorySystemHousingHomeServices => 'Services à domicile';
+
+  @override
   String get categorySystemFood => 'Alimentation';
 
   @override
@@ -926,6 +935,12 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get categorySystemFoodCoffee => 'Café';
+
+  @override
+  String get categorySystemFoodTakeaway => 'Livraison et à emporter';
+
+  @override
+  String get categorySystemFoodCanteen => 'Cantine';
 
   @override
   String get categorySystemTransport => 'Transport';
@@ -943,6 +958,18 @@ class AppLocalizationsFr extends AppLocalizations {
   String get categorySystemTransportCarMaintenance => 'Entretien auto';
 
   @override
+  String get categorySystemTransportCarInsurance => 'Assurance auto';
+
+  @override
+  String get categorySystemTransportTolls => 'Péages';
+
+  @override
+  String get categorySystemTransportTaxi => 'Taxi et VTC';
+
+  @override
+  String get categorySystemTransportRental => 'Location de véhicule';
+
+  @override
   String get categorySystemHealth => 'Santé';
 
   @override
@@ -955,6 +982,12 @@ class AppLocalizationsFr extends AppLocalizations {
   String get categorySystemHealthInsurance => 'Mutuelle';
 
   @override
+  String get categorySystemHealthDentist => 'Dentiste';
+
+  @override
+  String get categorySystemHealthOptician => 'Optique';
+
+  @override
   String get categorySystemLeisure => 'Loisirs';
 
   @override
@@ -962,6 +995,15 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get categorySystemLeisureTravel => 'Voyages';
+
+  @override
+  String get categorySystemLeisureAccommodation => 'Hébergement';
+
+  @override
+  String get categorySystemLeisureSports => 'Sport';
+
+  @override
+  String get categorySystemLeisureCulture => 'Culture';
 
   @override
   String get categorySystemSubscriptions => 'Abonnements';
@@ -977,6 +1019,12 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get categorySystemShoppingHome => 'Maison';
+
+  @override
+  String get categorySystemShoppingPersonalCare => 'Beauté et soins';
+
+  @override
+  String get categorySystemShoppingGifts => 'Cadeaux';
 
   @override
   String get categorySystemFinance => 'Finances';
@@ -997,6 +1045,12 @@ class AppLocalizationsFr extends AppLocalizations {
   String get categorySystemFinanceInterest => 'Intérêts';
 
   @override
+  String get categorySystemFinanceInvestments => 'Investissements';
+
+  @override
+  String get categorySystemFinanceLoans => 'Remboursement de crédit';
+
+  @override
   String get categorySystemIncome => 'Revenus';
 
   @override
@@ -1012,6 +1066,15 @@ class AppLocalizationsFr extends AppLocalizations {
   String get categorySystemIncomeRefunds => 'Remboursements';
 
   @override
+  String get categorySystemIncomeBenefits => 'Allocations et aides';
+
+  @override
+  String get categorySystemIncomeRental => 'Revenus locatifs';
+
+  @override
+  String get categorySystemIncomeSales => 'Ventes';
+
+  @override
   String get categorySystemIncomeOther => 'Autres revenus';
 
   @override
@@ -1019,6 +1082,33 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get categorySystemOtherUncategorized => 'Non catégorisé';
+
+  @override
+  String get categorySystemOtherCash => 'Retraits espèces';
+
+  @override
+  String get categorySystemOtherDonations => 'Dons';
+
+  @override
+  String get categorySystemChildren => 'Enfants';
+
+  @override
+  String get categorySystemChildrenChildcare => 'Garde d\'enfants';
+
+  @override
+  String get categorySystemChildrenSchool => 'Scolarité';
+
+  @override
+  String get categorySystemChildrenActivities => 'Activités enfants';
+
+  @override
+  String get categorySystemPets => 'Animaux';
+
+  @override
+  String get categorySystemPetsFood => 'Alimentation animaux';
+
+  @override
+  String get categorySystemPetsVet => 'Vétérinaire';
 
   @override
   String get dashboardStatIncome => 'Revenus (mois)';

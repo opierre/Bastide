@@ -1531,6 +1531,24 @@ abstract class AppLocalizations {
   /// **'Assurance habitation'**
   String get categorySystemHousingHomeInsurance;
 
+  /// Display name for the system category with i18n key category.housing.condo_fees.
+  ///
+  /// In fr, this message translates to:
+  /// **'Charges de copropriété'**
+  String get categorySystemHousingCondoFees;
+
+  /// Display name for the system category with i18n key category.housing.maintenance.
+  ///
+  /// In fr, this message translates to:
+  /// **'Travaux et entretien'**
+  String get categorySystemHousingMaintenance;
+
+  /// Display name for the system category with i18n key category.housing.home_services.
+  ///
+  /// In fr, this message translates to:
+  /// **'Services à domicile'**
+  String get categorySystemHousingHomeServices;
+
   /// Display name for the system category with i18n key category.food.
   ///
   /// In fr, this message translates to:
@@ -1554,6 +1572,18 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Café'**
   String get categorySystemFoodCoffee;
+
+  /// Display name for the system category with i18n key category.food.takeaway.
+  ///
+  /// In fr, this message translates to:
+  /// **'Livraison et à emporter'**
+  String get categorySystemFoodTakeaway;
+
+  /// Display name for the system category with i18n key category.food.canteen.
+  ///
+  /// In fr, this message translates to:
+  /// **'Cantine'**
+  String get categorySystemFoodCanteen;
 
   /// Display name for the system category with i18n key category.transport.
   ///
@@ -1585,6 +1615,30 @@ abstract class AppLocalizations {
   /// **'Entretien auto'**
   String get categorySystemTransportCarMaintenance;
 
+  /// Display name for the system category with i18n key category.transport.car_insurance.
+  ///
+  /// In fr, this message translates to:
+  /// **'Assurance auto'**
+  String get categorySystemTransportCarInsurance;
+
+  /// Display name for the system category with i18n key category.transport.tolls.
+  ///
+  /// In fr, this message translates to:
+  /// **'Péages'**
+  String get categorySystemTransportTolls;
+
+  /// Display name for the system category with i18n key category.transport.taxi.
+  ///
+  /// In fr, this message translates to:
+  /// **'Taxi et VTC'**
+  String get categorySystemTransportTaxi;
+
+  /// Display name for the system category with i18n key category.transport.rental.
+  ///
+  /// In fr, this message translates to:
+  /// **'Location de véhicule'**
+  String get categorySystemTransportRental;
+
   /// Display name for the system category with i18n key category.health.
   ///
   /// In fr, this message translates to:
@@ -1609,6 +1663,18 @@ abstract class AppLocalizations {
   /// **'Mutuelle'**
   String get categorySystemHealthInsurance;
 
+  /// Display name for the system category with i18n key category.health.dentist.
+  ///
+  /// In fr, this message translates to:
+  /// **'Dentiste'**
+  String get categorySystemHealthDentist;
+
+  /// Display name for the system category with i18n key category.health.optician.
+  ///
+  /// In fr, this message translates to:
+  /// **'Optique'**
+  String get categorySystemHealthOptician;
+
   /// Display name for the system category with i18n key category.leisure.
   ///
   /// In fr, this message translates to:
@@ -1626,6 +1692,24 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Voyages'**
   String get categorySystemLeisureTravel;
+
+  /// Display name for the system category with i18n key category.leisure.accommodation.
+  ///
+  /// In fr, this message translates to:
+  /// **'Hébergement'**
+  String get categorySystemLeisureAccommodation;
+
+  /// Display name for the system category with i18n key category.leisure.sports.
+  ///
+  /// In fr, this message translates to:
+  /// **'Sport'**
+  String get categorySystemLeisureSports;
+
+  /// Display name for the system category with i18n key category.leisure.culture.
+  ///
+  /// In fr, this message translates to:
+  /// **'Culture'**
+  String get categorySystemLeisureCulture;
 
   /// Display name for the system category with i18n key category.subscriptions — a top-level category (not a child of Loisirs), pinned to its own design-system hue.
   ///
@@ -1656,6 +1740,18 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Maison'**
   String get categorySystemShoppingHome;
+
+  /// Display name for the system category with i18n key category.shopping.personal_care.
+  ///
+  /// In fr, this message translates to:
+  /// **'Beauté et soins'**
+  String get categorySystemShoppingPersonalCare;
+
+  /// Display name for the system category with i18n key category.shopping.gifts.
+  ///
+  /// In fr, this message translates to:
+  /// **'Cadeaux'**
+  String get categorySystemShoppingGifts;
 
   /// Display name for the system category with i18n key category.finance.
   ///
@@ -1693,6 +1789,18 @@ abstract class AppLocalizations {
   /// **'Intérêts'**
   String get categorySystemFinanceInterest;
 
+  /// Display name for the system category with i18n key category.finance.investments.
+  ///
+  /// In fr, this message translates to:
+  /// **'Investissements'**
+  String get categorySystemFinanceInvestments;
+
+  /// Display name for the system category with i18n key category.finance.loans.
+  ///
+  /// In fr, this message translates to:
+  /// **'Remboursement de crédit'**
+  String get categorySystemFinanceLoans;
+
   /// Display name for the system category with i18n key category.income.
   ///
   /// In fr, this message translates to:
@@ -1723,6 +1831,24 @@ abstract class AppLocalizations {
   /// **'Remboursements'**
   String get categorySystemIncomeRefunds;
 
+  /// Display name for the system category with i18n key category.income.benefits.
+  ///
+  /// In fr, this message translates to:
+  /// **'Allocations et aides'**
+  String get categorySystemIncomeBenefits;
+
+  /// Display name for the system category with i18n key category.income.rental.
+  ///
+  /// In fr, this message translates to:
+  /// **'Revenus locatifs'**
+  String get categorySystemIncomeRental;
+
+  /// Display name for the system category with i18n key category.income.sales.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ventes'**
+  String get categorySystemIncomeSales;
+
   /// Display name for the system category with i18n key category.income.other.
   ///
   /// In fr, this message translates to:
@@ -1740,6 +1866,60 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Non catégorisé'**
   String get categorySystemOtherUncategorized;
+
+  /// Display name for the system category with i18n key category.other.cash.
+  ///
+  /// In fr, this message translates to:
+  /// **'Retraits espèces'**
+  String get categorySystemOtherCash;
+
+  /// Display name for the system category with i18n key category.other.donations.
+  ///
+  /// In fr, this message translates to:
+  /// **'Dons'**
+  String get categorySystemOtherDonations;
+
+  /// Display name for the system category with i18n key category.children.
+  ///
+  /// In fr, this message translates to:
+  /// **'Enfants'**
+  String get categorySystemChildren;
+
+  /// Display name for the system category with i18n key category.children.childcare.
+  ///
+  /// In fr, this message translates to:
+  /// **'Garde d\'enfants'**
+  String get categorySystemChildrenChildcare;
+
+  /// Display name for the system category with i18n key category.children.school.
+  ///
+  /// In fr, this message translates to:
+  /// **'Scolarité'**
+  String get categorySystemChildrenSchool;
+
+  /// Display name for the system category with i18n key category.children.activities.
+  ///
+  /// In fr, this message translates to:
+  /// **'Activités enfants'**
+  String get categorySystemChildrenActivities;
+
+  /// Display name for the system category with i18n key category.pets.
+  ///
+  /// In fr, this message translates to:
+  /// **'Animaux'**
+  String get categorySystemPets;
+
+  /// Display name for the system category with i18n key category.pets.food.
+  ///
+  /// In fr, this message translates to:
+  /// **'Alimentation animaux'**
+  String get categorySystemPetsFood;
+
+  /// Display name for the system category with i18n key category.pets.vet.
+  ///
+  /// In fr, this message translates to:
+  /// **'Vétérinaire'**
+  String get categorySystemPetsVet;
 
   /// Label on the income stat card.
   ///
