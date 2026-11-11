@@ -233,6 +233,14 @@ class _FilterPillButton extends StatelessWidget {
   }
 }
 
+/// Menu value of the « all » entries. [PopupMenuButton] reads a null result
+/// as a dismissal and never calls `onSelected`, so « all » needs a non-null
+/// value, mapped back to a null filter on selection (ids are never empty).
+const _allFilterValue = '';
+
+String? _filterIdFromMenu(String value) =>
+    value == _allFilterValue ? null : value;
+
 class _AccountFilterPill extends StatelessWidget {
   const _AccountFilterPill({
     required this.accounts,
@@ -251,17 +259,17 @@ class _AccountFilterPill extends StatelessWidget {
         .where((account) => account.id == selectedId)
         .firstOrNull;
 
-    return PopupMenuButton<String?>(
+    return PopupMenuButton<String>(
       key: const Key('transactionsAccountFilter'),
       position: PopupMenuPosition.under,
-      onSelected: onChanged,
+      onSelected: (value) => onChanged(_filterIdFromMenu(value)),
       itemBuilder: (context) => [
-        PopupMenuItem<String?>(
-          value: null,
+        PopupMenuItem<String>(
+          value: _allFilterValue,
           child: Text(l10n.transactionsFilterAllAccounts),
         ),
         for (final account in accounts)
-          PopupMenuItem<String?>(value: account.id, child: Text(account.name)),
+          PopupMenuItem<String>(value: account.id, child: Text(account.name)),
       ],
       child: _FilterPillButton(
         label: selected?.name ?? l10n.transactionsFilterAllAccounts,
@@ -288,17 +296,17 @@ class _CategoryFilterPill extends StatelessWidget {
         .where((category) => category.id == selectedId)
         .firstOrNull;
 
-    return PopupMenuButton<String?>(
+    return PopupMenuButton<String>(
       key: const Key('transactionsCategoryFilter'),
       position: PopupMenuPosition.under,
-      onSelected: onChanged,
+      onSelected: (value) => onChanged(_filterIdFromMenu(value)),
       itemBuilder: (context) => [
-        PopupMenuItem<String?>(
-          value: null,
+        PopupMenuItem<String>(
+          value: _allFilterValue,
           child: Text(l10n.transactionsFilterAllCategories),
         ),
         for (final category in categories)
-          PopupMenuItem<String?>(
+          PopupMenuItem<String>(
             value: category.id,
             child: Text(localizedCategoryName(l10n, category.name)),
           ),
