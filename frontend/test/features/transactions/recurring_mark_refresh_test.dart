@@ -44,6 +44,7 @@ class _FakeTransactionsRepository extends Fake
     bool? needsReview,
     String? q,
     int page = 1,
+    bool includeLinkedCards = false,
   }) async => TransactionsPage(
     items: [
       _transaction(

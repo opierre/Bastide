@@ -59,6 +59,9 @@ class RunCreate(BaseModel):
 
     account_id: str | None = None
     scope: RunScope
+    #: With ``account_id``, also take the rows of the deferred cards settled on that account,
+    #: as `GET /transactions?include_linked_cards=true` lists them. Ignored without one.
+    include_linked_cards: bool = False
 
 
 class CategorizationRunRead(BaseModel):

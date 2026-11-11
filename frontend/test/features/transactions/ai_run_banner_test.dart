@@ -84,6 +84,7 @@ class FakeRunController extends RunController {
   int cancelCalls = 0;
   int startCalls = 0;
   String? lastAccountId;
+  bool? lastIncludeLinkedCards;
 
   @override
   RunState build() => initial;
@@ -91,10 +92,12 @@ class FakeRunController extends RunController {
   @override
   Future<void> start({
     String? accountId,
+    bool includeLinkedCards = false,
     RunScope scope = RunScope.pending,
   }) async {
     startCalls++;
     lastAccountId = accountId;
+    lastIncludeLinkedCards = includeLinkedCards;
   }
 
   @override
@@ -212,6 +215,9 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(run.startCalls, 1);
+    // No account picked: nothing to widen.
+    expect(run.lastAccountId, isNull);
+    expect(run.lastIncludeLinkedCards, isFalse);
   });
 
   testWidgets('a partial run reports what it could not analyse, dismissibly', (

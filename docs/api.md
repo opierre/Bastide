@@ -96,7 +96,7 @@ details?}}`. Model names refer to the Pydantic schemas in `backend/app/features/
 
 | Method | Path | Query | Body | Response |
 |--------|------|-------|------|----------|
-| `GET` | `/transactions` | `account_id`, `from`, `to`, `category_id`, `needs_review`, `q`, `page` |  | 200 `TransactionPage` |
+| `GET` | `/transactions` | `account_id`, `from`, `to`, `category_id`, `needs_review`, `q`, `page`, `include_linked_cards` |  | 200 `TransactionPage` |
 | `GET` | `/transactions/{transaction_id}` |  |  | 200 `TransactionRead` |
 | `PATCH` | `/transactions/{transaction_id}` |  | `TransactionUpdate` | 200 `TransactionRead` |
 

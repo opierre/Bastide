@@ -5,6 +5,7 @@ from datetime import date
 from sqlalchemy import func, or_, select
 from sqlalchemy.orm import Session, selectinload, with_expression
 
+from app.features.accounts.linked_cards import in_account
 from app.features.accounts.models import Account
 from app.features.recurring.models import RecurringOccurrence
 from app.features.transactions.models import Transaction
@@ -39,8 +40,13 @@ class TransactionRepository:
         q: str | None,
         page: int,
         page_size: int,
+        include_linked_cards: bool = False,
     ) -> tuple[list[Transaction], int]:
         """Filtered, paginated transactions for a user, newest first.
+
+        With `include_linked_cards`, an `account_id` filter also takes in the rows of the
+        deferred cards settled on that account (not archived), so the account reads with the
+        card purchases its monthly debit pays.
 
         Eager-loads `category` (`selectinload`) so rendering a page never triggers one query
         per row.
@@ -51,7 +57,9 @@ class TransactionRepository:
             .where(Account.user_id == user_id)
         )
         if account_id is not None:
-            query = query.where(Transaction.account_id == account_id)
+            query = query.where(
+                in_account(user_id, account_id, include_linked_cards=include_linked_cards)
+            )
         if date_from is not None:
             query = query.where(Transaction.booked_date >= date_from)
         if date_to is not None:

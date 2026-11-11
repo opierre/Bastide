@@ -7091,6 +7091,12 @@ abstract class AppLocalizations {
   /// **'•••• {digits}'**
   String accountDetailMaskedNumber(String digits);
 
+  /// Second line of a linked card's transaction listed with its settlement account (account detail, Transactions filtered by that account): which card it was made with.
+  ///
+  /// In fr, this message translates to:
+  /// **'{card} · •••• {digits}'**
+  String transactionRowCardLabel(String card, String digits);
+
   /// Title of the account detail's month-end balance chart.
   ///
   /// In fr, this message translates to:

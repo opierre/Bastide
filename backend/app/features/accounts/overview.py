@@ -12,6 +12,7 @@ from datetime import date, datetime, timedelta
 from sqlalchemy import extract, func, select
 from sqlalchemy.orm import Session
 
+from app.features.accounts.linked_cards import linked_cards
 from app.features.accounts.models import Account
 from app.features.accounts.schemas import (
     AccountOverview,
@@ -150,16 +151,7 @@ class AccountOverviewService:
         )
 
     def _linked_cards(self, account: Account, today: date) -> list[LinkedCard]:
-        cards = self._db.scalars(
-            select(Account)
-            .where(
-                Account.user_id == account.user_id,
-                Account.settlement_account_id == account.id,
-                Account.type == "deferred_card",
-                Account.archived.is_(False),
-            )
-            .order_by(Account.created_at)
-        )
+        cards = self._db.scalars(linked_cards(account.user_id, account.id))
         issues = {
             issue.account_id: issue.issue for issue in self._rules.status(account.user_id).cards
         }

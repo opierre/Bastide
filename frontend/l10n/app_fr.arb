@@ -5904,6 +5904,20 @@
       }
     }
   },
+  "transactionRowCardLabel": "{card} · •••• {digits}",
+  "@transactionRowCardLabel": {
+    "description": "Second line of a linked card's transaction listed with its settlement account (account detail, Transactions filtered by that account): which card it was made with.",
+    "placeholders": {
+      "card": {
+        "type": "String",
+        "example": "Visa Premier"
+      },
+      "digits": {
+        "type": "String",
+        "example": "4821"
+      }
+    }
+  },
   "accountDetailBalanceChartTitle": "Évolution du solde",
   "@accountDetailBalanceChartTitle": {
     "description": "Title of the account detail's month-end balance chart."

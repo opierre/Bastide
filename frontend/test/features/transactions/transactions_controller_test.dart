@@ -116,6 +116,39 @@ void main() {
     expect(lastQuery['page'], '1');
   });
 
+  test('an account filter takes in the account\'s linked cards', () async {
+    when(
+      () => apiClient.get('/transactions', query: any(named: 'query')),
+    ).thenAnswer((_) async => _pageJson([_transactionJson()]));
+
+    await container.read(transactionsControllerProvider.future);
+    container.read(transactionFiltersProvider.notifier).setAccount('a1');
+    await container.read(transactionsControllerProvider.future);
+    container.read(transactionFiltersProvider.notifier).setNeedsReview(true);
+    await container.read(transactionsControllerProvider.future);
+    container.read(transactionFiltersProvider.notifier)
+      ..setNeedsReview(null)
+      ..setAccount(null);
+    await container.read(transactionsControllerProvider.future);
+
+    final queries = verify(
+      () => apiClient.get('/transactions', query: captureAny(named: 'query')),
+    ).captured.cast<Map<String, String>>();
+    expect(queries, hasLength(4));
+    // Unfiltered: no account, nothing to widen.
+    expect(queries[0].containsKey('include_linked_cards'), isFalse);
+    // Filtered: the account and the deferred cards it settles.
+    expect(queries[1]['account_id'], 'a1');
+    expect(queries[1]['include_linked_cards'], 'true');
+    // The review queue is widened too, as is a run started from it.
+    expect(queries[2]['account_id'], 'a1');
+    expect(queries[2]['needs_review'], 'true');
+    expect(queries[2]['include_linked_cards'], 'true');
+    // Back to all accounts: the flag goes with the filter.
+    expect(queries[3].containsKey('account_id'), isFalse);
+    expect(queries[3].containsKey('include_linked_cards'), isFalse);
+  });
+
   test('setPage moves to the next page', () async {
     when(
       () => apiClient.get('/transactions', query: any(named: 'query')),

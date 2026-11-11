@@ -74,8 +74,13 @@ async def list_transactions(
     needs_review: bool | None = None,
     q: str | None = None,
     page: Annotated[int, Query(ge=1)] = 1,
+    include_linked_cards: bool = False,
 ) -> TransactionPage:
-    """List the caller's transactions, filtered, searched, and paginated."""
+    """List the caller's transactions, filtered, searched, and paginated.
+
+    `include_linked_cards` widens an `account_id` filter to the deferred cards settled on that
+    account. Each row keeps its own `account_id`, so a client can tell the card's apart.
+    """
     items, total = service.list_for_user(
         user.id,
         account_id=account_id,
@@ -85,6 +90,7 @@ async def list_transactions(
         needs_review=needs_review,
         q=q,
         page=page,
+        include_linked_cards=include_linked_cards,
     )
     return TransactionPage(
         items=[_to_read(transaction, logos) for transaction in items],

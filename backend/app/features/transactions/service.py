@@ -40,8 +40,13 @@ class TransactionService:
         needs_review: bool | None,
         q: str | None,
         page: int,
+        include_linked_cards: bool = False,
     ) -> tuple[list[Transaction], int]:
-        """A filtered, paginated page of the user's transactions. Page size is fixed."""
+        """A filtered, paginated page of the user's transactions. Page size is fixed.
+
+        `include_linked_cards` adds, to an account filter, the rows of the deferred cards
+        settled on that account.
+        """
         return self._repository.list_for_user(
             user_id,
             account_id=account_id,
@@ -52,6 +57,7 @@ class TransactionService:
             q=q,
             page=max(page, 1),
             page_size=PAGE_SIZE,
+            include_linked_cards=include_linked_cards,
         )
 
     def get(self, user_id: str, transaction_id: str) -> Transaction:

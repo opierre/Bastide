@@ -1263,6 +1263,7 @@
   "accountDetailLastImport": "Last import: {date}",
   "accountDetailNoImport": "No import yet",
   "accountDetailMaskedNumber": "•••• {digits}",
+  "transactionRowCardLabel": "{card} · •••• {digits}",
   "accountDetailBalanceChartTitle": "Balance over time",
   "accountDetailCyclesChartTitle": "Amount settled per cycle",
   "accountDetailRangeSixMonths": "6 months",

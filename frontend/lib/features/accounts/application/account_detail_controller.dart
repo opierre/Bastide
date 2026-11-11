@@ -22,15 +22,34 @@ final accountOverviewProvider = FutureProvider.autoDispose
       return ref.read(accountsRepositoryProvider).overview(accountId);
     });
 
-/// The account's latest transactions, newest first. Re-read after a category
-/// edit, which the rows' own picker saves outside this provider.
+/// The account's latest transactions, newest first, its linked cards' purchases
+/// among them — card spending is paid from this account, so the list reads
+/// incomplete without it. Re-read after a category edit, which the rows' own
+/// picker saves outside this provider.
+///
+/// Both a card's monthly settlement debit and the purchases it pays show here;
+/// the settlement rule files the debit as a transfer, and the page's figures
+/// (balance, period stats) stay the account's own ledger, so nothing is summed
+/// twice.
 final recentAccountTransactionsProvider = FutureProvider.autoDispose
     .family<List<Transaction>, String>((ref, accountId) async {
       ref.watch(transactionEditsProvider);
       final page = await ref
           .read(transactionsRepositoryProvider)
-          .list(accountId: accountId);
+          .list(accountId: accountId, includeLinkedCards: true);
       return page.items.take(recentTransactionCount).toList();
+    });
+
+/// The account's linked cards by id, so a card's row — in the recent list, or
+/// in the Transactions panel filtered to the account — can name its card. Empty while the overview loads, or for an account without
+/// cards.
+final linkedCardsByIdProvider = Provider.autoDispose
+    .family<Map<String, LinkedCard>, String>((ref, accountId) {
+      final overview = ref.watch(accountOverviewProvider(accountId)).value;
+      return {
+        for (final card in overview?.linkedCards ?? const <LinkedCard>[])
+          card.accountId: card,
+      };
     });
 
 /// The range the chart shows — balance months, or a card's cycles. Opens on

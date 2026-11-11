@@ -4555,6 +4555,11 @@ class AppLocalizationsFr extends AppLocalizations {
   }
 
   @override
+  String transactionRowCardLabel(String card, String digits) {
+    return '$card · •••• $digits';
+  }
+
+  @override
   String get accountDetailBalanceChartTitle => 'Évolution du solde';
 
   @override

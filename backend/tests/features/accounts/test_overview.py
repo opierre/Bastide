@@ -191,6 +191,13 @@ def test_a_settled_card_shows_its_open_cycle_on_the_paying_account(pinned: TestC
     assert linked["issue"] is None
 
 
+def test_an_archived_card_is_not_listed_on_the_paying_account(pinned: TestClient) -> None:
+    headers, checking, card = _setup(pinned)
+    assert pinned.delete(f"/api/v1/accounts/{card}", headers=headers).status_code == 204
+
+    assert _overview(pinned, headers, checking)["linked_cards"] == []
+
+
 def test_a_cards_cycles_end_with_the_open_one(pinned: TestClient) -> None:
     headers, checking, card = _setup(pinned)
     pinned.put(
@@ -260,3 +267,118 @@ def test_the_overview_requires_authentication(client: TestClient) -> None:
     response = client.get(f"/api/v1/accounts/{uuid4()}/overview")
 
     assert response.status_code == 401
+
+
+# --- the account's transaction list, with its linked cards' rows -----------------------------
+
+
+def _list(client: TestClient, headers: dict[str, str], account_id: str, **params: object) -> dict:
+    response = client.get(
+        "/api/v1/transactions", params={"account_id": account_id, **params}, headers=headers
+    )
+    assert response.status_code == 200, response.json()
+    return response.json()
+
+
+def test_an_accounts_list_takes_in_its_linked_cards_rows(pinned: TestClient) -> None:
+    headers, checking, card = _setup(pinned)
+
+    body = _list(pinned, headers, checking, include_linked_cards=True)
+
+    assert body["total"] == 8
+    rows = [(row["account_id"], row["description_clean"]) for row in body["items"]]
+    assert sum(1 for account_id, _ in rows if account_id == card) == 4
+    assert (card, "CAFE DU PORT") in rows
+    assert (checking, "PRLV EDF") in rows
+    # One list, newest first: the card's rows interleave with the account's by date.
+    dates = [row["booked_date"] for row in body["items"]]
+    assert dates == sorted(dates, reverse=True)
+
+
+def test_without_the_flag_an_accounts_list_keeps_to_its_own_rows(pinned: TestClient) -> None:
+    headers, checking, _ = _setup(pinned)
+
+    body = _list(pinned, headers, checking)
+
+    assert body["total"] == 4
+    assert {row["account_id"] for row in body["items"]} == {checking}
+
+
+def test_the_settlement_and_the_card_purchases_are_not_counted_twice(
+    pinned: TestClient,
+) -> None:
+    headers, checking, card = _setup(pinned)
+    pinned.put(
+        f"/api/v1/accounts/{card}/settlement-rule",
+        json={"pattern": "DEPENSES CARTE X4821"},
+        headers=headers,
+    )
+
+    items = _list(pinned, headers, checking, include_linked_cards=True)["items"]
+
+    # The monthly debits are filed as transfers: neither income nor spending.
+    settlements = [row for row in items if row["description_clean"].startswith("DEPENSES")]
+    assert len(settlements) == 2
+    assert all(row["category"]["kind"] == "transfer" for row in settlements)
+    # So the list's spending is each card purchase once, plus the account's own debit.
+    spending = sum(
+        row["amount_minor"]
+        for row in items
+        if row["amount_minor"] < 0 and (row["category"] or {}).get("kind") != "transfer"
+    )
+    assert spending == -43000 + -10000
+    # And the page's figures stay the account's own ledger: the card's rows add nothing.
+    body = _overview(pinned, headers, checking)
+    assert body["period"]["outflow_minor"] == -115000
+    assert body["account"]["balance_minor"] == 235000
+
+
+def test_an_archived_cards_rows_are_left_out(pinned: TestClient) -> None:
+    headers, checking, card = _setup(pinned)
+    assert pinned.delete(f"/api/v1/accounts/{card}", headers=headers).status_code == 204
+
+    body = _list(pinned, headers, checking, include_linked_cards=True)
+
+    assert {row["account_id"] for row in body["items"]} == {checking}
+
+
+def test_a_card_unlinked_from_the_account_is_left_out(pinned: TestClient) -> None:
+    headers, checking, card = _setup(pinned)
+    response = pinned.patch(
+        f"/api/v1/accounts/{card}", json={"settlement_account_id": None}, headers=headers
+    )
+    assert response.status_code == 200, response.json()
+
+    body = _list(pinned, headers, checking, include_linked_cards=True)
+
+    assert body["total"] == 4
+
+
+def test_a_strangers_account_lists_nothing_with_its_cards(pinned: TestClient) -> None:
+    _, checking, _ = _setup(pinned)
+    stranger = _register(pinned, "bruno@example.com")
+
+    body = _list(pinned, stranger, checking, include_linked_cards=True)
+
+    assert body["items"] == []
+    assert body["total"] == 0
+
+
+def test_a_card_listed_with_the_flag_keeps_to_its_own_rows(pinned: TestClient) -> None:
+    headers, _, card = _setup(pinned)
+
+    body = _list(pinned, headers, card, include_linked_cards=True)
+
+    # A card settles no card of its own: picking it in the filter shows just the card.
+    assert body["total"] == 4
+    assert {row["account_id"] for row in body["items"]} == {card}
+
+
+def test_the_flag_still_narrows_with_the_other_filters(pinned: TestClient) -> None:
+    headers, checking, card = _setup(pinned)
+
+    body = _list(pinned, headers, checking, include_linked_cards=True, q="CAFE DU PORT")
+
+    assert body["total"] >= 1
+    assert {row["account_id"] for row in body["items"]} == {card}
+    assert all(row["description_clean"] == "CAFE DU PORT" for row in body["items"])

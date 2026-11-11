@@ -1,5 +1,6 @@
 import 'package:bastide/core/theme/app_theme.dart';
 import 'package:bastide/core/widgets/amount_text.dart';
+import 'package:bastide/features/accounts/application/account_detail_controller.dart';
 import 'package:bastide/features/accounts/application/accounts_controller.dart';
 import 'package:bastide/features/accounts/domain/account.dart';
 import 'package:bastide/features/categorization/application/run_controller.dart';
@@ -17,6 +18,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../../support/fake_accounts_controller.dart';
+import '../accounts/account_overview_fixtures.dart';
 import 'package:bastide/features/transactions/presentation/transaction_row.dart';
 
 import '../../support/fake_transactions_controller.dart';
@@ -36,6 +38,7 @@ final _account = Account(
 
 Transaction _transaction({
   String id = 't1',
+  String accountId = 'a1',
   int amountMinor = -1250,
   bool needsReview = false,
   TransactionCategory? category,
@@ -43,7 +46,7 @@ Transaction _transaction({
   String? memo,
 }) => Transaction(
   id: id,
-  accountId: 'a1',
+  accountId: accountId,
   bookedDate: DateTime(2026, 5, 14),
   valueDate: null,
   amountMinor: amountMinor,
@@ -86,14 +89,23 @@ Widget _wrap({
       isSystem: true,
     ),
   ],
+  List<Account>? accounts,
   Locale locale = const Locale('fr'),
 }) {
   return ProviderScope(
     overrides: [
+      // Filtered to an account, the panel names its linked cards from the
+      // account's overview: the checking account settles « Visa Premier »
+      // (card-1, •••• 4821) and « Carte Business » (card-2); a card has none.
+      accountOverviewProvider.overrideWith(
+        (ref, accountId) async => overviewFrom(
+          accountId == 'card-1' ? cardOverviewJson() : checkingOverviewJson(),
+        ),
+      ),
       transactionsControllerProvider.overrideWith(() => controller),
       transactionCategoriesProvider.overrideWith((ref) async => categories),
       accountsControllerProvider.overrideWith(
-        () => FakeAccountsController(initialAccounts: [_account]),
+        () => FakeAccountsController(initialAccounts: accounts ?? [_account]),
       ),
       // Rules-only expectations: no opted-in AI, so no stage-2 chrome anywhere —
       // and no health probe leaving the test either.
@@ -292,6 +304,110 @@ void main() {
       );
     },
   );
+
+  for (final (locale, cardLabel) in [
+    (const Locale('fr'), 'Visa Premier · •••• 4821'),
+    (const Locale('en'), 'Visa Premier · •••• 4821'),
+  ]) {
+    testWidgets(
+      'filtered to an account, its linked cards\' rows are marked with their '
+      'card (${locale.languageCode})',
+      (tester) async {
+        _useDesktopSurface(tester);
+        await tester.pumpWidget(
+          _wrap(
+            locale: locale,
+            controller: FakeTransactionsController(
+              initialPage: TransactionsPage(
+                items: [
+                  _transaction(id: 't1'),
+                  _transaction(id: 't2', accountId: 'card-1'),
+                  _transaction(id: 't3', accountId: 'card-2'),
+                ],
+                page: 1,
+                pageSize: 50,
+                total: 3,
+              ),
+            ),
+          ),
+        );
+        _container(
+          tester,
+        ).read(transactionFiltersProvider.notifier).setAccount('a1');
+        await tester.pumpAndSettle();
+
+        Finder inRow(String id, Finder finder) => find.descendant(
+          of: find.byKey(Key('transactionRow-$id')),
+          matching: finder,
+        );
+        final icon = find.byKey(const Key('transactionRowAccountIcon'));
+        // The account's own row keeps its account name, unmarked.
+        expect(inRow('t1', icon), findsNothing);
+        expect(inRow('t1', find.text('Compte courant')), findsOneWidget);
+        // A card's row names its card, with its masked number when known.
+        expect(inRow('t2', icon), findsOneWidget);
+        expect(inRow('t2', find.text(cardLabel)), findsOneWidget);
+        expect(inRow('t3', icon), findsOneWidget);
+        expect(inRow('t3', find.text('Carte Business')), findsOneWidget);
+      },
+    );
+  }
+
+  testWidgets('unfiltered, a card\'s rows keep the card\'s account name', (
+    tester,
+  ) async {
+    _useDesktopSurface(tester);
+    await tester.pumpWidget(
+      _wrap(
+        accounts: [_account, accountFrom(cardOverviewJson()['account'])],
+        controller: FakeTransactionsController(
+          initialPage: TransactionsPage(
+            items: [_transaction(id: 't2', accountId: 'card-1')],
+            page: 1,
+            pageSize: 50,
+            total: 1,
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(const Key('transactionRowAccountIcon')), findsNothing);
+    expect(find.text('Visa Premier'), findsOneWidget);
+  });
+
+  testWidgets('filtered to a card, its rows read as the card\'s own', (
+    tester,
+  ) async {
+    _useDesktopSurface(tester);
+    await tester.pumpWidget(
+      _wrap(
+        accounts: [_account, accountFrom(cardOverviewJson()['account'])],
+        controller: FakeTransactionsController(
+          initialPage: TransactionsPage(
+            items: [_transaction(id: 't2', accountId: 'card-1')],
+            page: 1,
+            pageSize: 50,
+            total: 1,
+          ),
+        ),
+      ),
+    );
+    _container(
+      tester,
+    ).read(transactionFiltersProvider.notifier).setAccount('card-1');
+    await tester.pumpAndSettle();
+
+    // A card settles no card of its own: no mark, just the card's name.
+    expect(find.byKey(const Key('transactionRowAccountIcon')), findsNothing);
+    expect(
+      find.descendant(
+        of: find.byKey(const Key('transactionRow-t2')),
+        matching: find.text('Visa Premier'),
+      ),
+      findsOneWidget,
+    );
+  });
 
   testWidgets('renders the row amount, sign and category for the en locale', (
     tester,

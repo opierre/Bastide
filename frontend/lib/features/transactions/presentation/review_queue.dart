@@ -219,15 +219,9 @@ class ReviewQueueHeaderCard extends ConsumerWidget {
                   isLoading: isStarting,
                   onPressed: isStarting
                       ? null
-                      // `scope: pending` — a run never revisits a row a rule or
-                      // the user has settled, so the queue is exactly its input.
                       : () => ref
                             .read(runControllerProvider.notifier)
-                            .start(
-                              accountId: ref
-                                  .read(transactionFiltersProvider)
-                                  .accountId,
-                            ),
+                            .startFromQueue(),
                 ),
               ],
             ],

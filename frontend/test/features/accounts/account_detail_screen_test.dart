@@ -20,9 +20,13 @@ import 'package:flutter_test/flutter_test.dart';
 import '../../support/fake_accounts_controller.dart';
 import 'account_overview_fixtures.dart';
 
-Transaction _transaction(String id, int amountMinor) => Transaction(
+Transaction _transaction(
+  String id,
+  int amountMinor, {
+  String accountId = 'acc-1',
+}) => Transaction(
   id: id,
-  accountId: 'acc-1',
+  accountId: accountId,
   bookedDate: DateTime(2026, 10, 29),
   valueDate: null,
   amountMinor: amountMinor,
@@ -143,6 +147,43 @@ void main() {
     expect(find.text('Prélèvement non planifié'), findsOneWidget);
     expect(find.byKey(const Key('transactionRow-t1')), findsOneWidget);
   });
+
+  for (final (locale, cardLabel) in [
+    (const Locale('fr'), 'Visa Premier · •••• 4821'),
+    (const Locale('en'), 'Visa Premier · •••• 4821'),
+  ]) {
+    testWidgets(
+      'linked cards\' rows are marked with their card (${locale.languageCode})',
+      (tester) async {
+        await _pump(
+          tester,
+          _wrap(
+            accountId: 'acc-1',
+            locale: locale,
+            overview: () => overviewFrom(checkingOverviewJson()),
+            transactions: [
+              _transaction('t1', -2999),
+              _transaction('t2', -1250, accountId: 'card-1'),
+              _transaction('t3', -800, accountId: 'card-2'),
+            ],
+          ),
+        );
+
+        Finder inRow(String id, Finder finder) => find.descendant(
+          of: find.byKey(Key('transactionRow-$id')),
+          matching: finder,
+        );
+        final icon = find.byKey(const Key('transactionRowAccountIcon'));
+        // The account's own row carries no mark.
+        expect(inRow('t1', icon), findsNothing);
+        // A card's row names its card, with its masked number when known.
+        expect(inRow('t2', icon), findsOneWidget);
+        expect(inRow('t2', find.text(cardLabel)), findsOneWidget);
+        expect(inRow('t3', icon), findsOneWidget);
+        expect(inRow('t3', find.text('Carte Business')), findsOneWidget);
+      },
+    );
+  }
 
   testWidgets('no streak line under two rises', (tester) async {
     final json = checkingOverviewJson();

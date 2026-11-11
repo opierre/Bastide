@@ -95,6 +95,23 @@ void main() {
             ).captured.single
             as Map<String, String>;
     expect(query['account_id'], 'acc-1');
+    // The account's list takes in its linked cards' purchases.
+    expect(query['include_linked_cards'], 'true');
+  });
+
+  test('linked cards are looked up by id from the overview', () async {
+    when(
+      () => apiClient.get('/accounts/acc-1/overview'),
+    ).thenAnswer((_) async => checkingOverviewJson());
+
+    final sub = container.listen(linkedCardsByIdProvider('acc-1'), (_, _) {});
+    addTearDown(sub.close);
+    expect(container.read(linkedCardsByIdProvider('acc-1')), isEmpty);
+    await container.read(accountOverviewProvider('acc-1').future);
+
+    final cards = container.read(linkedCardsByIdProvider('acc-1'));
+    expect(cards.keys, ['card-1', 'card-2']);
+    expect(cards['card-1']!.name, 'Visa Premier');
   });
 
   test('recent transactions are re-read after a category edit', () async {

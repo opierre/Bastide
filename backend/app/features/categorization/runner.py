@@ -145,7 +145,12 @@ class CategorizationRunService:
             self._account_service.get(user.id, data.account_id)
 
         settings = self._settings_service.get_or_create(user.id)
-        candidate_ids = self._repository.select_candidate_ids(user.id, data.scope, data.account_id)
+        candidate_ids = self._repository.select_candidate_ids(
+            user.id,
+            data.scope,
+            data.account_id,
+            include_linked_cards=data.include_linked_cards,
+        )
 
         candidate = new_run(
             user.id,

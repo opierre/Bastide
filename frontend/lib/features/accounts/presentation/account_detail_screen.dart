@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
+import '../../../core/l10n/card_display.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/tokens.dart';
 import '../../../core/widgets/amount_text.dart';
@@ -1232,6 +1233,7 @@ class _RecentTransactionsCard extends ConsumerWidget {
     final transactions = ref.watch(
       recentAccountTransactionsProvider(accountId),
     );
+    final cards = ref.watch(linkedCardsByIdProvider(accountId));
 
     return AppCard(
       key: const Key('accountDetailRecent'),
@@ -1292,9 +1294,24 @@ class _RecentTransactionsCard extends ConsumerWidget {
               children: [
                 for (final transaction in value) ...[
                   const Divider(height: 1, color: AppColors.borderSubtle),
-                  // The account is the one on screen, so the row's second line
-                  // keeps only the bank's memo.
-                  TransactionRow(transaction: transaction, accountName: ''),
+                  // The account is the one on screen, so its own rows' second
+                  // line keeps only the bank's memo; a linked card's rows name
+                  // their card, behind a card glyph.
+                  switch (cards[transaction.accountId]) {
+                    final card? => TransactionRow(
+                      transaction: transaction,
+                      accountName: cardRowLabel(
+                        l10n,
+                        card.name,
+                        card.cardLastDigits,
+                      ),
+                      accountIcon: cardRowIcon,
+                    ),
+                    null => TransactionRow(
+                      transaction: transaction,
+                      accountName: '',
+                    ),
+                  },
                 ],
               ],
             ),

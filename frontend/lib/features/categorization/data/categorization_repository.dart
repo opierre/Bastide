@@ -20,13 +20,21 @@ class CategorizationRepository {
   /// Starts a run and returns it immediately (202). Asking while one is in
   /// flight returns that run instead of starting a second — one run at a time
   /// per user, so the caller follows whatever comes back.
+  ///
+  /// [includeLinkedCards] widens [accountId] to the deferred cards settled on
+  /// it, as the transaction list's `include_linked_cards` does.
   Future<CategorizationRun> startRun({
     String? accountId,
     required RunScope scope,
+    bool includeLinkedCards = false,
   }) async {
     final json = await _apiClient.post(
       '/categorization/runs',
-      body: {'account_id': accountId, 'scope': scope.wire},
+      body: {
+        'account_id': accountId,
+        'scope': scope.wire,
+        if (includeLinkedCards) 'include_linked_cards': true,
+      },
     );
     return CategorizationRun.fromJson(json as Map<String, dynamic>);
   }
