@@ -6,6 +6,7 @@ import '../../categories/domain/category.dart';
 import '../data/recurring_repository.dart';
 import '../domain/recurring_series.dart';
 import '../domain/recurring_summary.dart';
+import 'series_sort.dart';
 
 /// Everything the subscriptions panel renders in one value: the series, the
 /// server-computed summary, the filter they were fetched under, and the last
@@ -24,9 +25,10 @@ class SubscriptionsState {
     this.showArchived = false,
     this.mergeSuggestions = const [],
     this.statusFilter,
+    this.sort,
     this.actionError,
-  }) : rows = _joinSignals(series, summary),
-       archivedRows = _joinSignals(archived, summary);
+  }) : rows = sortSeriesRows(_joinSignals(series, summary), sort),
+       archivedRows = sortSeriesRows(_joinSignals(archived, summary), sort);
 
   final List<RecurringSeries> series;
   final RecurringSummary summary;
@@ -55,6 +57,10 @@ class SubscriptionsState {
   /// is dimmed, not hidden.
   final SeriesStatus? statusFilter;
 
+  /// How [rows] and [archivedRows] are ordered; `null` keeps the server's
+  /// order. A view choice, kept across reloads for the session.
+  final SeriesSort? sort;
+
   /// The last write the panel attempted and the server refused, or `null`.
   final Object? actionError;
 
@@ -66,6 +72,7 @@ class SubscriptionsState {
     List<MergeSuggestion>? mergeSuggestions,
     SeriesStatus? statusFilter,
     bool clearStatusFilter = false,
+    SeriesSort? sort,
     Object? actionError,
     bool clearActionError = false,
   }) => SubscriptionsState(
@@ -77,6 +84,7 @@ class SubscriptionsState {
     statusFilter: clearStatusFilter
         ? null
         : (statusFilter ?? this.statusFilter),
+    sort: sort ?? this.sort,
     actionError: clearActionError ? null : (actionError ?? this.actionError),
   );
 
@@ -147,12 +155,13 @@ class SubscriptionsController extends AsyncNotifier<SubscriptionsState> {
   @override
   Future<SubscriptionsState> build() => _load(null);
 
-  /// [showArchived] is carried over by every reload: it is a view choice, not a
-  /// fact about the data, and a reload behind an archive must not fold the
-  /// archived list back up under the user.
+  /// [showArchived] and [sort] are carried over by every reload: they are view
+  /// choices, not facts about the data, and a reload behind an archive must
+  /// not fold the archived list back up or reshuffle the rows under the user.
   Future<SubscriptionsState> _load(
     SeriesStatus? status, {
     bool showArchived = false,
+    SeriesSort? sort,
   }) async {
     final (series, archived, summary, suggestions) = await (
       _repository.list(status: status),
@@ -167,6 +176,24 @@ class SubscriptionsController extends AsyncNotifier<SubscriptionsState> {
       summary: summary,
       mergeSuggestions: suggestions,
       statusFilter: status,
+      sort: sort,
+    );
+  }
+
+  /// Sorts the table on [field]. Choosing the column already sorted on flips
+  /// its direction; a new column starts in its own default direction (see
+  /// [SeriesSortField.ascendingByDefault]). Local only: the rows are all
+  /// loaded, so there is nothing to refetch.
+  void sortBy(SeriesSortField field) {
+    final current = state.value;
+    if (current == null) return;
+    final sort = current.sort;
+    state = AsyncValue.data(
+      current.copyWith(
+        sort: sort != null && sort.field == field
+            ? sort.flipped
+            : SeriesSort.byDefault(field),
+      ),
     );
   }
 
@@ -229,7 +256,11 @@ class SubscriptionsController extends AsyncNotifier<SubscriptionsState> {
     }
     if (seriesId != null) ref.invalidate(seriesDetailProvider(seriesId));
     state = await AsyncValue.guard(
-      () => _load(current.statusFilter, showArchived: current.showArchived),
+      () => _load(
+        current.statusFilter,
+        showArchived: current.showArchived,
+        sort: current.sort,
+      ),
     );
     return true;
   }
@@ -237,9 +268,10 @@ class SubscriptionsController extends AsyncNotifier<SubscriptionsState> {
   Future<void> refresh() async {
     final status = state.value?.statusFilter;
     final showArchived = state.value?.showArchived ?? false;
+    final sort = state.value?.sort;
     state = const AsyncValue.loading();
     state = await AsyncValue.guard(
-      () => _load(status, showArchived: showArchived),
+      () => _load(status, showArchived: showArchived, sort: sort),
     );
   }
 
@@ -251,7 +283,11 @@ class SubscriptionsController extends AsyncNotifier<SubscriptionsState> {
     if (current == null) return;
     try {
       state = AsyncValue.data(
-        await _load(current.statusFilter, showArchived: current.showArchived),
+        await _load(
+          current.statusFilter,
+          showArchived: current.showArchived,
+          sort: current.sort,
+        ),
       );
     } catch (_) {
       // Deliberately swallowed, like `TransactionsController.refreshQuietly`.
@@ -261,9 +297,10 @@ class SubscriptionsController extends AsyncNotifier<SubscriptionsState> {
   /// Narrows the list to one lifecycle status, or back to all of them.
   Future<void> setStatusFilter(SeriesStatus? status) async {
     final showArchived = state.value?.showArchived ?? false;
+    final sort = state.value?.sort;
     state = const AsyncValue.loading();
     state = await AsyncValue.guard(
-      () => _load(status, showArchived: showArchived),
+      () => _load(status, showArchived: showArchived, sort: sort),
     );
   }
 

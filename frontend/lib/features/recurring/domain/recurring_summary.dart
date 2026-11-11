@@ -146,4 +146,17 @@ class SubscriptionRow {
   /// `null` for a healthy subscription — the Statut cell is then empty, with no
   /// "OK" pill (`docs/design/10` §Notes).
   final SeriesSignal? signal;
+
+  /// A cancelled or archived series: neither expects a charge the panel is
+  /// tracking, so neither has a next date.
+  bool get isSettled =>
+      series.status == SeriesStatus.cancelled || series.isArchived;
+
+  /// The next charge the row shows — the missed date when one is overdue,
+  /// otherwise the expected one — or `null` when [isSettled].
+  DateTime? get nextChargeOn {
+    if (isSettled) return null;
+    if (signal case MissedChargeSignal(:final expectedOn)) return expectedOn;
+    return series.nextExpectedDate;
+  }
 }

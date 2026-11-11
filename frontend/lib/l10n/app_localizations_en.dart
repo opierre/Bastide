@@ -2345,6 +2345,23 @@ class AppLocalizationsEn extends AppLocalizations {
   String get subscriptionsColumnStatus => 'Status';
 
   @override
+  String get subscriptionsSortByName => 'Sort by name';
+
+  @override
+  String get subscriptionsSortByAmount => 'Sort by amount';
+
+  @override
+  String get subscriptionsSortByNext => 'Sort by next charge';
+
+  @override
+  String get subscriptionsSortedAscending =>
+      'Sorted ascending — click to reverse';
+
+  @override
+  String get subscriptionsSortedDescending =>
+      'Sorted descending — click to reverse';
+
+  @override
   String get subscriptionsValueNone => '—';
 
   @override
