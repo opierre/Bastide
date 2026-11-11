@@ -319,6 +319,27 @@ def test_a_requested_download_fetches_every_link_once_with_a_generic_agent(
     assert all(rules[name]["logo_updated_at"] for name in rules)
 
 
+def test_re_importing_a_pack_downloads_no_logo_already_stored(
+    client: TestClient, web: _Web
+) -> None:
+    headers, _ = _register(client)
+    web.serve(LOGO_URL)
+    web.serve(OTHER_LOGO_URL)
+    payload = pack(
+        entry("EPICERIE LUNE", logo=_linked()),
+        entry("VELO RAPIDE", TRANSIT, logo=_linked(OTHER_LOGO_URL)),
+    )
+    import_pack(client, headers, pack=payload, download_logos=True)
+    web.requests.clear()
+
+    _, body = import_pack(client, headers, pack=payload, download_logos=True)
+
+    # Both rules already carry their logo: the second import has nothing to fetch.
+    assert body["logo_count"] == 0
+    assert body["logo_failures"] == []
+    assert web.requests == []
+
+
 def test_a_downloaded_jpeg_thumbnail_is_stored_as_a_png(client: TestClient, web: _Web) -> None:
     headers, _ = _register(client)
     url = "https://upload.wikimedia.org/wikipedia/commons/thumb/a/ab/Logo.svg/320px-Logo.jpg"
