@@ -13,6 +13,7 @@ import '../../../core/widgets/primary_button.dart';
 import '../../../core/widgets/state_views.dart';
 import '../../../l10n/app_localizations.dart';
 import '../application/accounts_controller.dart';
+import '../application/linked_cards.dart';
 import '../domain/account.dart';
 import 'account_archive.dart';
 import 'account_detail_screen.dart';
@@ -42,7 +43,7 @@ class AccountsScreen extends ConsumerWidget {
         AsyncData(:final value) when value.isEmpty => _EmptyState(
           onAdd: () => showAccountForm(context),
         ),
-        AsyncData(:final value) => Column(
+        AsyncData() => Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             const _SummaryCard(),
@@ -51,8 +52,10 @@ class AccountsScreen extends ConsumerWidget {
             const CardSettlementWarnings(),
             const SizedBox(height: AppSpacing.gridGap),
             Expanded(
+              // Linked cards sit under their account's card count rather than
+              // on tiles of their own; the summary above still counts them.
               child: _AccountsGrid(
-                accounts: value,
+                accounts: ref.watch(panelAccountsProvider),
                 onOpen: (account) =>
                     context.go(AccountDetailScreen.location(account.id)),
                 onEdit: (account) => showAccountForm(context, initial: account),
