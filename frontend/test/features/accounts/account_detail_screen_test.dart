@@ -4,10 +4,12 @@ import 'package:bastide/core/theme/app_theme.dart';
 import 'package:bastide/features/accounts/application/account_detail_controller.dart';
 import 'package:bastide/features/accounts/application/accounts_controller.dart';
 import 'package:bastide/features/accounts/application/settlement_rule_controller.dart';
+import 'package:bastide/features/accounts/domain/account.dart';
 import 'package:bastide/features/accounts/domain/account_overview.dart';
 import 'package:bastide/features/accounts/domain/settlement_rule.dart';
 import 'package:bastide/features/accounts/presentation/account_detail_screen.dart';
 import 'package:bastide/features/accounts/presentation/cycle_bars.dart';
+import 'package:bastide/features/accounts/presentation/link_card_dialog.dart';
 import 'package:bastide/features/accounts/presentation/settlement_rule_dialog.dart';
 import 'package:bastide/features/transactions/domain/transaction.dart';
 import 'package:bastide/l10n/app_localizations.dart';
@@ -39,30 +41,40 @@ Transaction _transaction(String id, int amountMinor) => Transaction(
   updatedAt: DateTime.utc(2026, 10, 30),
 );
 
+List<Account> _accounts([List<Account> extra = const []]) => [
+  accountFrom(accountJson()),
+  accountFrom(
+    accountJson(
+      id: 'card-2',
+      name: 'Carte Business',
+      type: 'deferred_card',
+      settlementAccountId: 'acc-1',
+    ),
+  ),
+  ...extra,
+];
+
+/// A deferred card no account settles yet — the one the link action offers.
+final _unlinkedCard = accountFrom(
+  accountJson(id: 'card-3', name: 'Carte Voyage', type: 'deferred_card'),
+);
+
 Widget _wrap({
   required String accountId,
   FutureOr<AccountOverview> Function()? overview,
   List<Transaction> transactions = const [],
   Locale locale = const Locale('fr'),
+  List<Account> extraAccounts = const [],
+  FakeAccountsController? accounts,
 }) {
   return ProviderScope(
     // A failed read surfaces at once rather than after Riverpod's retries.
     retry: (_, _) => null,
     overrides: [
       accountsControllerProvider.overrideWith(
-        () => FakeAccountsController(
-          initialAccounts: [
-            accountFrom(accountJson()),
-            accountFrom(
-              accountJson(
-                id: 'card-2',
-                name: 'Carte Business',
-                type: 'deferred_card',
-                settlementAccountId: 'acc-1',
-              ),
-            ),
-          ],
-        ),
+        () =>
+            accounts ??
+            FakeAccountsController(initialAccounts: _accounts(extraAccounts)),
       ),
       accountOverviewProvider.overrideWith(
         (ref, id) async =>
@@ -159,6 +171,119 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.byType(SettlementRuleDialog), findsOneWidget);
+  });
+
+  testWidgets('no card to link, no link action', (tester) async {
+    await _pump(
+      tester,
+      _wrap(
+        accountId: 'acc-1',
+        overview: () => overviewFrom(checkingOverviewJson()),
+      ),
+    );
+
+    expect(find.byKey(const Key('accountDetailLinkCard')), findsNothing);
+  });
+
+  testWidgets('an unlinked card is linked from the section and shows at once', (
+    tester,
+  ) async {
+    final accounts = FakeAccountsController(
+      initialAccounts: _accounts([_unlinkedCard]),
+    );
+    var reads = 0;
+    AccountOverview overview() {
+      reads++;
+      final json = checkingOverviewJson();
+      // Once linked, the backend lists the card among the account's own.
+      if (accounts.linkCardCalls.isNotEmpty) {
+        (json['linked_cards'] as List<dynamic>).add({
+          'id': 'card-3',
+          'name': 'Carte Voyage',
+          'institution': 'BNP Paribas',
+          'card_last_digits': '1234',
+          'cycle_amount_minor': -4500,
+          'next_debit_date': '2026-11-05',
+          'issue': 'no_rule',
+        });
+      }
+      return overviewFrom(json);
+    }
+
+    await _pump(
+      tester,
+      _wrap(accountId: 'acc-1', overview: overview, accounts: accounts),
+    );
+    expect(
+      find.byKey(const Key('accountDetailLinkedCard-card-3')),
+      findsNothing,
+    );
+
+    await tester.tap(find.byKey(const Key('accountDetailLinkCard')));
+    await tester.pumpAndSettle();
+    expect(find.byType(LinkCardDialog), findsOneWidget);
+
+    await tester.tap(find.byKey(const Key('linkCardField')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Carte Voyage · BNP Paribas').last);
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('linkCardConfirmButton')));
+    await tester.pumpAndSettle();
+
+    expect(accounts.linkCardCalls, [
+      (cardId: 'card-3', settlementAccountId: 'acc-1'),
+    ]);
+    expect(find.byType(LinkCardDialog), findsNothing);
+    expect(reads, 2);
+    expect(
+      find.byKey(const Key('accountDetailLinkedCard-card-3')),
+      findsOneWidget,
+    );
+    expect(find.text('Carte Voyage est liée à ce compte'), findsOneWidget);
+    // Nothing left to link: the action goes with the last unlinked card.
+    expect(find.byKey(const Key('accountDetailLinkCard')), findsNothing);
+  });
+
+  testWidgets('a failed link keeps the dialog open with an error', (
+    tester,
+  ) async {
+    final accounts = FakeAccountsController(
+      initialAccounts: _accounts([_unlinkedCard]),
+    )..errorOnLinkCard = Exception('boom');
+
+    await _pump(
+      tester,
+      _wrap(
+        accountId: 'acc-1',
+        overview: () => overviewFrom(checkingOverviewJson()),
+        accounts: accounts,
+      ),
+    );
+    await tester.tap(find.byKey(const Key('accountDetailLinkCard')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('linkCardField')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Carte Voyage · BNP Paribas').last);
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('linkCardConfirmButton')));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(LinkCardDialog), findsOneWidget);
+    expect(find.byKey(const Key('linkCardErrorText')), findsOneWidget);
+  });
+
+  testWidgets('the link action is offered in English', (tester) async {
+    await _pump(
+      tester,
+      _wrap(
+        accountId: 'acc-1',
+        locale: const Locale('en'),
+        overview: () => overviewFrom(checkingOverviewJson()),
+        extraAccounts: [_unlinkedCard],
+      ),
+    );
+
+    expect(find.text('Link a card'), findsOneWidget);
   });
 
   testWidgets('a deferred card shows its cycles and settlement account', (

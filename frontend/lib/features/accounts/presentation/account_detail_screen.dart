@@ -24,6 +24,7 @@ import '../domain/account_overview.dart';
 import 'account_error_localizer.dart';
 import 'account_type_label.dart';
 import 'cycle_bars.dart';
+import 'link_card_dialog.dart';
 import 'settlement_rule_dialog.dart';
 
 /// One account, in depth: its balance and how it moved, the deferred cards on
@@ -916,6 +917,11 @@ class _LinkedCardsSection extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context)!;
     final cards = overview.linkedCards;
+    // Offered only when there is a card to link, and never on an archived
+    // account, which can no longer settle one.
+    final canLink =
+        !overview.account.archived &&
+        ref.watch(linkableCardsProvider).isNotEmpty;
 
     return _SectionCard(
       key: const Key('accountDetailLinkedCards'),
@@ -937,6 +943,23 @@ class _LinkedCardsSection extends ConsumerWidget {
               accountId: overview.account.id,
             ),
           ],
+        if (canLink) ...[
+          if (cards.isNotEmpty)
+            const Divider(height: 1, color: AppColors.borderSubtle),
+          Align(
+            alignment: Alignment.centerRight,
+            child: Padding(
+              padding: const EdgeInsets.only(top: 6),
+              child: TextButton.icon(
+                key: const Key('accountDetailLinkCard'),
+                onPressed: () => showLinkCardDialog(context, overview.account),
+                style: TextButton.styleFrom(foregroundColor: AppColors.iris),
+                icon: const Icon(Icons.add_card_rounded, size: 16),
+                label: Text(l10n.accountDetailLinkCard),
+              ),
+            ),
+          ),
+        ],
       ],
     );
   }

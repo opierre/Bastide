@@ -109,6 +109,40 @@ void main() {
     },
   );
 
+  test('linkCard patches only the settlement account', () async {
+    when(() => apiClient.get('/accounts')).thenAnswer(
+      (_) async => [
+        _accountJson(id: 'a1'),
+        _accountJson(id: 'c1', name: 'Carte Voyage', type: 'deferred_card'),
+      ],
+    );
+    when(
+      () => apiClient.patch('/accounts/c1', body: any(named: 'body')),
+    ).thenAnswer(
+      (_) async => {
+        ..._accountJson(id: 'c1', name: 'Carte Voyage', type: 'deferred_card'),
+        'settlement_account_id': 'a1',
+      },
+    );
+
+    await container.read(accountsControllerProvider.future);
+    await container
+        .read(accountsControllerProvider.notifier)
+        .linkCard('c1', 'a1');
+
+    verify(
+      () => apiClient.patch(
+        '/accounts/c1',
+        body: {'settlement_account_id': 'a1'},
+      ),
+    ).called(1);
+    final card = container
+        .read(accountsControllerProvider)
+        .value!
+        .singleWhere((account) => account.id == 'c1');
+    expect(card.settlementAccountId, 'a1');
+  });
+
   test('archive removes the account from state', () async {
     when(
       () => apiClient.get('/accounts'),

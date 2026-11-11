@@ -6120,6 +6120,54 @@
   "@accountDetailSetUpRule": {
     "description": "Ghost button opening the settlement rule dialog for a card with none."
   },
+  "accountDetailLinkCard": "Lier une carte",
+  "@accountDetailLinkCard": {
+    "description": "Ghost button in an account's linked-cards section opening the dialog that links an unlinked deferred card to it."
+  },
+  "linkCardTitle": "Lier une carte",
+  "@linkCardTitle": {
+    "description": "Title of the dialog linking a deferred card to an account."
+  },
+  "linkCardBody": "Choisissez la carte à débit différé dont le relevé mensuel est prélevé sur {account}.",
+  "@linkCardBody": {
+    "description": "Explanation in the link-card dialog.",
+    "placeholders": {
+      "account": {
+        "type": "String",
+        "example": "Compte courant"
+      }
+    }
+  },
+  "linkCardLabel": "Carte",
+  "@linkCardLabel": {
+    "description": "Label of the card picker in the link-card dialog."
+  },
+  "linkCardPlaceholder": "Choisir une carte",
+  "@linkCardPlaceholder": {
+    "description": "Placeholder of the card picker before a card is chosen."
+  },
+  "linkCardCancel": "Annuler",
+  "@linkCardCancel": {
+    "description": "Button closing the link-card dialog without linking."
+  },
+  "linkCardConfirm": "Lier",
+  "@linkCardConfirm": {
+    "description": "Button linking the chosen card to the account."
+  },
+  "linkCardFailed": "Impossible de lier la carte. Réessayez.",
+  "@linkCardFailed": {
+    "description": "Shown in the link-card dialog when linking fails."
+  },
+  "linkCardLinked": "{card} est liée à ce compte",
+  "@linkCardLinked": {
+    "description": "Toast once a card is linked to the account.",
+    "placeholders": {
+      "card": {
+        "type": "String",
+        "example": "Visa Premier"
+      }
+    }
+  },
   "accountDetailRecentTitle": "Dernières opérations",
   "@accountDetailRecentTitle": {
     "description": "Title of the account detail's recent transactions card."
