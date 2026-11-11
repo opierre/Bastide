@@ -449,6 +449,8 @@
   "ruleFormLogoReplace": "Replace…",
   "ruleFormLogoRemove": "Remove",
   "ruleFormLogoSaveFirst": "Save the rule to add a logo to it.",
+  "logoZoomOpen": "Show the logo larger",
+  "logoZoomLabel": "Enlarged logo",
   "ruleLogoTooLarge": "This picture is too large: choose a file under {megabytes} MB.",
   "ruleLogoInvalid": "This file isn't a PNG, JPEG or WebP picture.",
   "ruleLogoError": "The logo couldn't be saved. Try again.",

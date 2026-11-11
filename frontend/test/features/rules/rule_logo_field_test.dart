@@ -1,5 +1,3 @@
-import 'dart:typed_data';
-
 import 'package:bastide/core/api/api_client.dart';
 import 'package:bastide/core/api/api_client_provider.dart';
 import 'package:bastide/core/theme/app_theme.dart';
@@ -10,6 +8,7 @@ import 'package:bastide/features/rules/domain/rule.dart';
 import 'package:bastide/features/rules/presentation/rule_editor_modal.dart';
 import 'package:bastide/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
@@ -166,4 +165,36 @@ void main() {
       expect(find.byKey(const Key('ruleFormLogoRemove')), findsNothing);
     },
   );
+
+  testWidgets(
+    'clicking the logo preview opens it larger, and Escape closes it',
+    (tester) async {
+      await tester.pumpWidget(
+        _wrap(api, rule: Rule.fromJson(_ruleJson(logo: true))),
+      );
+      await _open(tester);
+
+      await tester.tap(
+        find.descendant(
+          of: find.byKey(const Key('ruleFormLogoPreview')),
+          matching: find.byKey(const Key('logoZoomTarget')),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(find.byKey(const Key('logoZoomDialog')), findsOneWidget);
+
+      await tester.sendKeyEvent(LogicalKeyboardKey.escape);
+      await tester.pumpAndSettle();
+      expect(find.byKey(const Key('logoZoomDialog')), findsNothing);
+      // Escape closed the enlarged logo only, not the editor under it.
+      expect(find.byKey(const Key('ruleFormLogoPreview')), findsOneWidget);
+    },
+  );
+
+  testWidgets('the monogram preview is not clickable', (tester) async {
+    await tester.pumpWidget(_wrap(api, rule: Rule.fromJson(_ruleJson())));
+    await _open(tester);
+
+    expect(find.byKey(const Key('logoZoomTarget')), findsNothing);
+  });
 }

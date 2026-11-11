@@ -1838,6 +1838,14 @@
   "@ruleFormLogoSaveFirst": {
     "description": "Shown instead of the logo buttons while creating a rule: a logo is attached to a saved rule."
   },
+  "logoZoomOpen": "Afficher le logo en grand",
+  "@logoZoomOpen": {
+    "description": "Screen-reader label of a small logo picture that opens it enlarged when clicked."
+  },
+  "logoZoomLabel": "Logo agrandi",
+  "@logoZoomLabel": {
+    "description": "Screen-reader label of the enlarged logo picture in its dialog."
+  },
   "ruleLogoInvalid": "Ce fichier n'est pas une image PNG, JPEG ou WebP.",
   "@ruleLogoInvalid": {
     "description": "Error when the picked logo file is not a supported picture."

@@ -1460,6 +1460,12 @@ class AppLocalizationsFr extends AppLocalizations {
       'Enregistrez la règle pour pouvoir lui ajouter un logo.';
 
   @override
+  String get logoZoomOpen => 'Afficher le logo en grand';
+
+  @override
+  String get logoZoomLabel => 'Logo agrandi';
+
+  @override
   String get ruleLogoInvalid =>
       'Ce fichier n\'est pas une image PNG, JPEG ou WebP.';
 

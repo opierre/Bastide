@@ -91,6 +91,7 @@ class RuleLogoField extends ConsumerWidget {
             name: name,
             size: _previewSize,
             logo: logo,
+            zoomable: true,
           ),
           const SizedBox(width: AppSpacing.md),
           if (ruleId != null)
