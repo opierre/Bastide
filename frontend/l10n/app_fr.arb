@@ -1832,7 +1832,7 @@
   },
   "ruleFormLogoRemove": "Retirer",
   "@ruleFormLogoRemove": {
-    "description": "Button of the rule editor removing the rule's logo."
+    "description": "Tooltip and semantic label of the rule editor's bin icon button removing the rule's logo."
   },
   "ruleFormLogoSaveFirst": "Enregistrez la règle pour pouvoir lui ajouter un logo.",
   "@ruleFormLogoSaveFirst": {

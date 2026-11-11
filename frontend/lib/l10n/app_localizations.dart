@@ -2479,7 +2479,7 @@ abstract class AppLocalizations {
   /// **'Remplacer…'**
   String get ruleFormLogoReplace;
 
-  /// Button of the rule editor removing the rule's logo.
+  /// Tooltip and semantic label of the rule editor's bin icon button removing the rule's logo.
   ///
   /// In fr, this message translates to:
   /// **'Retirer'**
