@@ -6,8 +6,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../data/rule_packs_repository.dart';
 import '../domain/rule_pack.dart';
-import 'recategorized_reload.dart';
-import 'rules_controller.dart';
 
 /// The extension a pack is written and read as.
 const rulePackExtension = 'json';
@@ -102,33 +100,6 @@ class RulePacksController extends Notifier<void> {
         .read(rulePacksRepositoryProvider)
         .preview(builtinId: builtinId);
     return PendingRulePack(preview: preview, builtinId: builtinId);
-  }
-
-  /// Imports a pack the user has seen the report for.
-  ///
-  /// The rules list is reloaded rather than patched: an import creates several
-  /// rules at once and renumbers nothing, so the server's ordering is the only
-  /// truthful one to show next. An import that also applied the pack has
-  /// rewritten categories across the app, so those views are reloaded too.
-  ///
-  /// [downloadLogos] lets the backend fetch the pack's linked logos from
-  /// Wikimedia; off, only embedded logos are attached and nothing is fetched.
-  Future<RulePackImportResult> import(
-    PendingRulePack pending, {
-    bool applyNow = false,
-    bool downloadLogos = false,
-  }) async {
-    final result = await ref
-        .read(rulePacksRepositoryProvider)
-        .import(
-          pack: pending.pack,
-          builtinId: pending.builtinId,
-          applyNow: applyNow,
-          downloadLogos: downloadLogos,
-        );
-    ref.invalidate(rulesControllerProvider);
-    if (result.recategorizedCount > 0) await reloadRecategorizedViews(ref);
-    return result;
   }
 
   /// Builds the pack the user will review before saving, with each rule's

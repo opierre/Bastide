@@ -14,6 +14,8 @@ from fastapi.responses import JSONResponse
 from starlette.datastructures import Headers
 from starlette.types import ASGIApp, Receive, Scope, Send
 
+from app.core.websocket import CLOSE_POLICY_VIOLATION
+
 SESSION_TOKEN_HEADER = "X-Bastide-Session"
 
 
@@ -32,6 +34,11 @@ class SessionTokenMiddleware:
         # Constant-time, so response timing doesn't reveal how much of a guess was right.
         if hmac.compare_digest(supplied, self._token):
             await self.app(scope, receive, send)
+            return
+        if scope["type"] == "websocket":
+            # Closing before accepting refuses the handshake (HTTP 403): a process without the
+            # token never gets a socket at all, rather than one that closes straight after.
+            await send({"type": "websocket.close", "code": CLOSE_POLICY_VIOLATION})
             return
         response = JSONResponse(
             status_code=401,

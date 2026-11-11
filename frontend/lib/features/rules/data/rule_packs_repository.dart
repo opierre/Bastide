@@ -31,7 +31,9 @@ class RulePacksRepository {
     return RulePackPreview.fromJson(json);
   }
 
-  Future<RulePackImportResult> import({
+  /// Starts importing a pack in the background; the run's progress comes over
+  /// the run progress socket and its result from [getImportRun].
+  Future<RulePackImportRun> startImport({
     RulePack? pack,
     String? builtinId,
     bool applyNow = false,
@@ -39,7 +41,7 @@ class RulePacksRepository {
   }) async {
     final json =
         await _apiClient.post(
-              '/rules/packs/import',
+              '/rules/packs/import-runs',
               body: {
                 ..._source(pack, builtinId),
                 'apply_now': applyNow,
@@ -47,7 +49,14 @@ class RulePacksRepository {
               },
             )
             as Map<String, dynamic>;
-    return RulePackImportResult.fromJson(json);
+    return RulePackImportRun.fromJson(json);
+  }
+
+  Future<RulePackImportRun> getImportRun(String runId) async {
+    final json =
+        await _apiClient.get('/rules/packs/import-runs/$runId')
+            as Map<String, dynamic>;
+    return RulePackImportRun.fromJson(json);
   }
 
   /// The caller's rules as a pack, for review. A body rather than a download:

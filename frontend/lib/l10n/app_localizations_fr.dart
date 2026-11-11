@@ -4923,4 +4923,28 @@ class AppLocalizationsFr extends AppLocalizations {
     );
     return '$_temp0';
   }
+
+  @override
+  String rulePackLogoProgress(int done, int total) {
+    return 'Téléchargement des logos… $done / $total';
+  }
+
+  @override
+  String get rulePackLogoProgressNotice =>
+      'Les règles sont importées : il ne reste que leurs logos.';
+
+  @override
+  String get rulePackImportRunFailed =>
+      'L\'import n\'a pas pu aller jusqu\'au bout. Vérifiez vos règles avant de réessayer.';
+
+  @override
+  String get ruleErrorPackNotFound => 'Ce pack de règles est introuvable.';
+
+  @override
+  String get ruleErrorPackImportInProgress =>
+      'Un autre import de règles est déjà en cours. Attendez qu\'il se termine.';
+
+  @override
+  String get ruleErrorPackImportRunNotFound =>
+      'Le suivi de cet import a été perdu. Vérifiez vos règles.';
 }

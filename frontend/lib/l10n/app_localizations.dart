@@ -7672,6 +7672,42 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'{count, plural, =0{Ajouter} =1{Ajouter 1 opération} other{Ajouter {count} opérations}}'**
   String chargePickerSave(int count);
+
+  /// Progress line in the pack import sheet while the pack's linked logos download.
+  ///
+  /// In fr, this message translates to:
+  /// **'Téléchargement des logos… {done} / {total}'**
+  String rulePackLogoProgress(int done, int total);
+
+  /// Under the logo progress bar: the rules are already in, only the logos are left.
+  ///
+  /// In fr, this message translates to:
+  /// **'Les règles sont importées : il ne reste que leurs logos.'**
+  String get rulePackLogoProgressNotice;
+
+  /// Shown in the pack import sheet when the background import failed.
+  ///
+  /// In fr, this message translates to:
+  /// **'L\'import n\'a pas pu aller jusqu\'au bout. Vérifiez vos règles avant de réessayer.'**
+  String get rulePackImportRunFailed;
+
+  /// Error when the bundled pack to import no longer exists (RULE_PACK_NOT_FOUND).
+  ///
+  /// In fr, this message translates to:
+  /// **'Ce pack de règles est introuvable.'**
+  String get ruleErrorPackNotFound;
+
+  /// Error when another pack import of the user is still running (RULE_PACK_IMPORT_IN_PROGRESS).
+  ///
+  /// In fr, this message translates to:
+  /// **'Un autre import de règles est déjà en cours. Attendez qu\'il se termine.'**
+  String get ruleErrorPackImportInProgress;
+
+  /// Error when the background pack import can no longer be read (RULE_PACK_IMPORT_RUN_NOT_FOUND).
+  ///
+  /// In fr, this message translates to:
+  /// **'Le suivi de cet import a été perdu. Vérifiez vos règles.'**
+  String get ruleErrorPackImportRunNotFound;
 }
 
 class _AppLocalizationsDelegate

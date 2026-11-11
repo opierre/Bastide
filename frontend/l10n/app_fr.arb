@@ -6414,5 +6414,37 @@
         "type": "int"
       }
     }
+  },
+  "rulePackLogoProgress": "Téléchargement des logos… {done} / {total}",
+  "@rulePackLogoProgress": {
+    "description": "Progress line in the pack import sheet while the pack's linked logos download.",
+    "placeholders": {
+      "done": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "rulePackLogoProgressNotice": "Les règles sont importées : il ne reste que leurs logos.",
+  "@rulePackLogoProgressNotice": {
+    "description": "Under the logo progress bar: the rules are already in, only the logos are left."
+  },
+  "rulePackImportRunFailed": "L'import n'a pas pu aller jusqu'au bout. Vérifiez vos règles avant de réessayer.",
+  "@rulePackImportRunFailed": {
+    "description": "Shown in the pack import sheet when the background import failed."
+  },
+  "ruleErrorPackNotFound": "Ce pack de règles est introuvable.",
+  "@ruleErrorPackNotFound": {
+    "description": "Error when the bundled pack to import no longer exists (RULE_PACK_NOT_FOUND)."
+  },
+  "ruleErrorPackImportInProgress": "Un autre import de règles est déjà en cours. Attendez qu'il se termine.",
+  "@ruleErrorPackImportInProgress": {
+    "description": "Error when another pack import of the user is still running (RULE_PACK_IMPORT_IN_PROGRESS)."
+  },
+  "ruleErrorPackImportRunNotFound": "Le suivi de cet import a été perdu. Vérifiez vos règles.",
+  "@ruleErrorPackImportRunNotFound": {
+    "description": "Error when the background pack import can no longer be read (RULE_PACK_IMPORT_RUN_NOT_FOUND)."
   }
 }
