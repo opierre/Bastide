@@ -432,10 +432,7 @@ void main() {
 
       await tester.tap(find.byKey(const Key('transactionsAccountFilter')));
       await tester.pumpAndSettle();
-      final item = find.widgetWithText(
-        PopupMenuItem<String?>,
-        'Compte courant',
-      );
+      final item = find.widgetWithText(PopupMenuItem<String>, 'Compte courant');
       expect(item, findsOneWidget);
 
       await tester.tap(item);
@@ -468,7 +465,7 @@ void main() {
 
       await tester.tap(find.byKey(const Key('transactionsCategoryFilter')));
       await tester.pumpAndSettle();
-      final item = find.widgetWithText(PopupMenuItem<String?>, 'Courses');
+      final item = find.widgetWithText(PopupMenuItem<String>, 'Courses');
       expect(item, findsOneWidget);
 
       await tester.tap(item);
@@ -545,6 +542,95 @@ void main() {
       expect(icon.color, CategoryHues.forSlug(slug));
     },
   );
+
+  testWidgets('« Tous les comptes » clears a picked account filter', (
+    tester,
+  ) async {
+    _useDesktopSurface(tester);
+    await tester.pumpWidget(
+      _wrap(
+        controller: FakeTransactionsController(
+          initialPage: TransactionsPage(
+            items: [_transaction()],
+            page: 1,
+            pageSize: 50,
+            total: 1,
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    final pill = find.byKey(const Key('transactionsAccountFilter'));
+
+    await tester.tap(pill);
+    await tester.pumpAndSettle();
+    await tester.tap(
+      find.widgetWithText(PopupMenuItem<String>, 'Compte courant'),
+    );
+    await tester.pumpAndSettle();
+    expect(_container(tester).read(transactionFiltersProvider).accountId, 'a1');
+
+    await tester.tap(pill);
+    await tester.pumpAndSettle();
+    await tester.tap(
+      find.widgetWithText(PopupMenuItem<String>, 'Tous les comptes'),
+    );
+    await tester.pumpAndSettle();
+
+    expect(
+      _container(tester).read(transactionFiltersProvider).accountId,
+      isNull,
+    );
+    expect(
+      find.descendant(of: pill, matching: find.text('Tous les comptes')),
+      findsOneWidget,
+    );
+  });
+
+  testWidgets('« Toutes les catégories » clears a picked category filter', (
+    tester,
+  ) async {
+    _useDesktopSurface(tester);
+    await tester.pumpWidget(
+      _wrap(
+        controller: FakeTransactionsController(
+          initialPage: TransactionsPage(
+            items: [_transaction()],
+            page: 1,
+            pageSize: 50,
+            total: 1,
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    final pill = find.byKey(const Key('transactionsCategoryFilter'));
+
+    await tester.tap(pill);
+    await tester.pumpAndSettle();
+    await tester.tap(find.widgetWithText(PopupMenuItem<String>, 'Courses'));
+    await tester.pumpAndSettle();
+    expect(
+      _container(tester).read(transactionFiltersProvider).categoryId,
+      'c1',
+    );
+
+    await tester.tap(pill);
+    await tester.pumpAndSettle();
+    await tester.tap(
+      find.widgetWithText(PopupMenuItem<String>, 'Toutes les catégories'),
+    );
+    await tester.pumpAndSettle();
+
+    expect(
+      _container(tester).read(transactionFiltersProvider).categoryId,
+      isNull,
+    );
+    expect(
+      find.descendant(of: pill, matching: find.text('Toutes les catégories')),
+      findsOneWidget,
+    );
+  });
 
   testWidgets('renders the row amount, sign and category for the en locale', (
     tester,
