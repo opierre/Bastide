@@ -61,9 +61,13 @@ class RuleRow extends StatelessWidget {
             if (canReorder)
               ReorderableDragStartListener(
                 index: index,
-                child: const MouseRegion(
-                  cursor: SystemMouseCursors.grab,
-                  child: Icon(
+                // `click`, not `grab`: Flutter on Windows has no native grab
+                // cursor and falls back to the arrow, which hides that the
+                // row can be dragged at all.
+                child: MouseRegion(
+                  key: Key('ruleHandle-${rule.id}'),
+                  cursor: SystemMouseCursors.click,
+                  child: const Icon(
                     Icons.drag_indicator_rounded,
                     size: 18,
                     color: AppColors.textDisabled,
