@@ -229,9 +229,7 @@ void main() {
       await tester.pumpAndSettle();
       await _openRules(tester);
 
-      await tester.tap(find.byKey(const Key('rulePackMenu')));
-      await tester.pumpAndSettle();
-      await tester.tap(find.text('Importer un fichier…'));
+      await tester.tap(find.byKey(const Key('rulePackImportButton')));
       await tester.pumpAndSettle();
 
       // Nothing written yet — the report comes first, always.
@@ -271,9 +269,7 @@ void main() {
     await tester.pumpAndSettle();
     await _openRules(tester);
 
-    await tester.tap(find.byKey(const Key('rulePackMenu')));
-    await tester.pumpAndSettle();
-    await tester.tap(find.text('Importer un fichier…'));
+    await tester.tap(find.byKey(const Key('rulePackImportButton')));
     await tester.pumpAndSettle();
 
     expect(find.byKey(const Key('rulePackRefusal')), findsOneWidget);
@@ -293,9 +289,7 @@ void main() {
     await tester.pumpAndSettle();
     await _openRules(tester);
 
-    await tester.tap(find.byKey(const Key('rulePackMenu')));
-    await tester.pumpAndSettle();
-    await tester.tap(find.text('Importer un fichier…'));
+    await tester.tap(find.byKey(const Key('rulePackImportButton')));
     await tester.pumpAndSettle();
 
     expect(find.textContaining('la version 1'), findsOneWidget);
@@ -319,9 +313,7 @@ void main() {
       await tester.pumpAndSettle();
       await _openRules(tester);
 
-      await tester.tap(find.byKey(const Key('rulePackMenu')));
-      await tester.pumpAndSettle();
-      await tester.tap(find.text('Exporter mes règles…'));
+      await tester.tap(find.byKey(const Key('rulePackExportButton')));
       await tester.pumpAndSettle();
 
       // The contents, verbatim — including the pattern that carries a name.
@@ -382,5 +374,102 @@ void main() {
             ).captured.single
             as Map<String, dynamic>;
     expect(body['builtin_id'], 'fr-starter');
+  });
+
+  group('pack action buttons', () {
+    testWidgets(
+      'show every action without opening a menu, each with a tooltip',
+      (tester) async {
+        await tester.pumpWidget(_wrap(apiClient, files: FakeRulePackFiles()));
+        await tester.pumpAndSettle();
+        await _openRules(tester);
+
+        expect(find.byKey(const Key('rulePackImportButton')), findsOneWidget);
+        expect(
+          find.byKey(const Key('rulePackImportBuiltinButton')),
+          findsOneWidget,
+        );
+        expect(find.byKey(const Key('rulePackExportButton')), findsOneWidget);
+        expect(find.byTooltip('Importer un pack de règles'), findsOneWidget);
+        expect(
+          find.byTooltip('Importer « Commerçants français »'),
+          findsOneWidget,
+        );
+        expect(find.byTooltip('Exporter mes règles'), findsOneWidget);
+      },
+    );
+
+    testWidgets('the import button opens the file picker', (tester) async {
+      final files = FakeRulePackFiles(pickedSource: _packSource(type: 'regex'));
+      await tester.pumpWidget(_wrap(apiClient, files: files));
+      await tester.pumpAndSettle();
+      await _openRules(tester);
+
+      await tester.tap(find.byKey(const Key('rulePackImportButton')));
+      await tester.pumpAndSettle();
+
+      // The picked file was read: this one is refused, which only a pick shows.
+      expect(find.byKey(const Key('rulePackRefusal')), findsOneWidget);
+    });
+
+    testWidgets('the built-in pack button previews that pack, no file', (
+      tester,
+    ) async {
+      when(
+        () => apiClient.post('/rules/packs/preview', body: any(named: 'body')),
+      ).thenAnswer((_) async => _previewJson());
+
+      await tester.pumpWidget(_wrap(apiClient, files: FakeRulePackFiles()));
+      await tester.pumpAndSettle();
+      await _openRules(tester);
+
+      await tester.tap(find.byKey(const Key('rulePackImportBuiltinButton')));
+      await tester.pumpAndSettle();
+
+      expect(find.byKey(const Key('rulePackHeadline')), findsOneWidget);
+      final body =
+          verify(
+                () => apiClient.post(
+                  '/rules/packs/preview',
+                  body: captureAny(named: 'body'),
+                ),
+              ).captured.single
+              as Map<String, dynamic>;
+      expect(body['builtin_id'], 'fr-starter');
+    });
+
+    testWidgets('the export button opens the export review', (tester) async {
+      when(
+        () => apiClient.get('/rules/packs/export', query: any(named: 'query')),
+      ).thenAnswer((_) async => _exportJson());
+
+      await tester.pumpWidget(_wrap(apiClient, files: FakeRulePackFiles()));
+      await tester.pumpAndSettle();
+      await _openRules(tester);
+
+      await tester.tap(find.byKey(const Key('rulePackExportButton')));
+      await tester.pumpAndSettle();
+
+      expect(find.byKey(const Key('rulePackExportPreview')), findsOneWidget);
+    });
+
+    testWidgets('no built-in pack button when the app bundles none', (
+      tester,
+    ) async {
+      when(
+        () => apiClient.get('/rules/packs/builtin'),
+      ).thenAnswer((_) async => <dynamic>[]);
+
+      await tester.pumpWidget(_wrap(apiClient, files: FakeRulePackFiles()));
+      await tester.pumpAndSettle();
+      await _openRules(tester);
+
+      expect(find.byKey(const Key('rulePackImportButton')), findsOneWidget);
+      expect(
+        find.byKey(const Key('rulePackImportBuiltinButton')),
+        findsNothing,
+      );
+      expect(find.byKey(const Key('rulePackExportButton')), findsOneWidget);
+    });
   });
 }

@@ -2857,28 +2857,22 @@ abstract class AppLocalizations {
   /// **'Une erreur est survenue. Veuillez réessayer.'**
   String get ruleErrorGeneric;
 
-  /// Tooltip on the rules view's pack menu.
+  /// Tooltip on the rules view's button opening the pack file picker.
   ///
   /// In fr, this message translates to:
-  /// **'Importer / Exporter des règles'**
-  String get rulePackMenuTooltip;
-
-  /// Pack menu entry opening the file picker.
-  ///
-  /// In fr, this message translates to:
-  /// **'Importer un fichier…'**
+  /// **'Importer un pack de règles'**
   String get rulePackImportFile;
 
-  /// Pack menu entry importing one of the packs bundled with the app.
+  /// Tooltip on the rules view's button importing one of the packs bundled with the app.
   ///
   /// In fr, this message translates to:
   /// **'Importer « {name} »'**
   String rulePackImportBuiltin(String name);
 
-  /// Pack menu entry opening the export review sheet.
+  /// Tooltip on the rules view's button opening the export review sheet.
   ///
   /// In fr, this message translates to:
-  /// **'Exporter mes règles…'**
+  /// **'Exporter mes règles'**
   String get rulePackExportAction;
 
   /// Cancel button on the pack import and export sheets.

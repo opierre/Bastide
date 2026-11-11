@@ -8,14 +8,14 @@ import '../domain/rule_pack.dart';
 import 'rule_pack_export_sheet.dart';
 import 'rule_pack_import_sheet.dart';
 
-enum _PackAction { importFile, importBuiltin, export }
-
-/// The « Importer / Exporter » affordance on the rules view.
+/// The pack actions on the rules view, one icon button each, beside
+/// « Exécuter les règles ».
 ///
-/// A menu rather than two buttons: packs are an occasional errand beside the
-/// rules themselves, and the header's weight belongs to « Exécuter les règles ».
-class RulePackMenu extends ConsumerWidget {
-  const RulePackMenu({super.key});
+/// Buttons rather than a menu: behind a single icon, users did not find them.
+/// Icon-only so the header's weight still belongs to « Exécuter les règles »;
+/// each button names its action in a tooltip.
+class RulePackActions extends ConsumerWidget {
+  const RulePackActions({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -24,65 +24,62 @@ class RulePackMenu extends ConsumerWidget {
         ref.watch(builtinPacksProvider).value ?? const <BuiltinPack>[];
     final firstBuiltin = builtin.isEmpty ? null : builtin.first;
 
-    return PopupMenuButton<_PackAction>(
-      key: const Key('rulePackMenu'),
-      icon: const Icon(Icons.import_export_rounded, size: 18),
-      tooltip: l10n.rulePackMenuTooltip,
-      position: PopupMenuPosition.under,
-      onSelected: (action) => switch (action) {
-        _PackAction.importFile => startRulePackImport(context, ref),
-        _PackAction.importBuiltin => startRulePackImport(
-          context,
-          ref,
-          builtinId: firstBuiltin!.id,
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        _PackActionButton(
+          key: const Key('rulePackImportButton'),
+          icon: Icons.file_upload_outlined,
+          tooltip: l10n.rulePackImportFile,
+          onPressed: () => startRulePackImport(context, ref),
         ),
-        _PackAction.export => startRulePackExport(context, ref),
-      },
-      itemBuilder: (context) => [
-        PopupMenuItem(
-          value: _PackAction.importFile,
-          child: _MenuRow(
-            icon: Icons.file_upload_outlined,
-            label: l10n.rulePackImportFile,
-          ),
-        ),
+        // Only when the app bundles a pack: there is nothing to offer otherwise.
         if (firstBuiltin != null)
-          PopupMenuItem(
-            value: _PackAction.importBuiltin,
-            child: _MenuRow(
-              icon: Icons.auto_awesome_outlined,
-              label: l10n.rulePackImportBuiltin(firstBuiltin.name),
-            ),
+          _PackActionButton(
+            key: const Key('rulePackImportBuiltinButton'),
+            icon: Icons.auto_awesome_outlined,
+            tooltip: l10n.rulePackImportBuiltin(firstBuiltin.name),
+            onPressed: () =>
+                startRulePackImport(context, ref, builtinId: firstBuiltin.id),
           ),
-        PopupMenuItem(
-          value: _PackAction.export,
-          child: _MenuRow(
-            icon: Icons.file_download_outlined,
-            label: l10n.rulePackExportAction,
-          ),
+        _PackActionButton(
+          key: const Key('rulePackExportButton'),
+          icon: Icons.file_download_outlined,
+          tooltip: l10n.rulePackExportAction,
+          onPressed: () => startRulePackExport(context, ref),
         ),
       ],
     );
   }
 }
 
-class _MenuRow extends StatelessWidget {
-  const _MenuRow({required this.icon, required this.label});
+class _PackActionButton extends StatelessWidget {
+  const _PackActionButton({
+    super.key,
+    required this.icon,
+    required this.tooltip,
+    required this.onPressed,
+  });
 
   final IconData icon;
-  final String label;
+  final String tooltip;
+  final VoidCallback onPressed;
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      children: [
-        Icon(icon, size: 16, color: AppColors.textSecondary),
-        const SizedBox(width: AppSpacing.sm),
-        // Flexible, because these labels carry a pack's own name — « Importer
-        // "Commerçants français" » — and a menu is not wide enough to promise
-        // any of them will fit.
-        Flexible(child: Text(label, overflow: TextOverflow.ellipsis)),
-      ],
+    return IconButton(
+      onPressed: onPressed,
+      tooltip: tooltip,
+      iconSize: 18,
+      // 34 px, the search pill's icon targets: three Material 48 px buttons
+      // crowd the header beside a French « Exécuter les règles » label.
+      padding: EdgeInsets.zero,
+      constraints: const BoxConstraints(minWidth: 34, minHeight: 34),
+      style: IconButton.styleFrom(
+        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+      ),
+      color: AppColors.textSecondary,
+      icon: Icon(icon),
     );
   }
 }
@@ -91,8 +88,8 @@ class _MenuRow extends StatelessWidget {
 /// rule count, one click from a preview.
 ///
 /// This is where a new user with no rules actually is, so it is where the
-/// bundled pack has to be — a menu entry two clicks away on a screen that says
-/// « you have no rules » is not an offer.
+/// bundled pack has to be — an unlabelled icon on a screen that says « you
+/// have no rules » is not an offer.
 class BuiltinPackOffer extends ConsumerWidget {
   const BuiltinPackOffer({super.key});
 

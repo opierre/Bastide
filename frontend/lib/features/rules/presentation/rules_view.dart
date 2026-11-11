@@ -17,7 +17,7 @@ import '../application/rules_filter.dart';
 import '../domain/rule.dart';
 import 'rule_editor_modal.dart';
 import 'rule_error_localizer.dart';
-import 'rule_pack_menu.dart';
+import 'rule_pack_actions.dart';
 import 'rule_row.dart';
 
 /// The rules half of the categories panel: the priority note and the « Exécuter
@@ -214,12 +214,20 @@ class _RulesViewHeaderActionsState
     return Row(
       children: [
         const _CategoryFilterChip(),
+        // At most two lines: the pack buttons leave the note little width in
+        // a narrow window, and an unbounded wrap pushes the rules list off
+        // screen. The tooltip keeps the whole sentence reachable.
         Expanded(
-          child: Text(
-            l10n.rulesPriorityNote,
-            style: Theme.of(
-              context,
-            ).textTheme.bodySmall?.copyWith(color: AppColors.textSecondary),
+          child: Tooltip(
+            message: l10n.rulesPriorityNote,
+            child: Text(
+              l10n.rulesPriorityNote,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              style: Theme.of(
+                context,
+              ).textTheme.bodySmall?.copyWith(color: AppColors.textSecondary),
+            ),
           ),
         ),
         const SizedBox(width: AppSpacing.md),
@@ -231,7 +239,7 @@ class _RulesViewHeaderActionsState
           ),
         ),
         const SizedBox(width: AppSpacing.xs),
-        const RulePackMenu(),
+        const RulePackActions(),
       ],
     );
   }
