@@ -115,12 +115,20 @@ class RuleLogoField extends ConsumerWidget {
                     child: Text(l10n.ruleFormLogoFromUrl),
                   ),
                   if (logo != null)
-                    TextButton(
+                    // A bin rather than a text button: lighter next to the
+                    // two outlined ones; the label stays as the tooltip,
+                    // which also gives it its semantic label.
+                    IconButton(
                       key: const Key('ruleFormLogoRemove'),
                       onPressed: state.busy
                           ? null
                           : () => controller.remove(ruleId),
-                      child: Text(l10n.ruleFormLogoRemove),
+                      tooltip: l10n.ruleFormLogoRemove,
+                      iconSize: 18,
+                      icon: const Icon(
+                        Icons.delete_outline_rounded,
+                        color: AppColors.textSecondary,
+                      ),
                     ),
                 ],
               ),

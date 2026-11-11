@@ -157,6 +157,16 @@ void main() {
 
       expect(find.byKey(const Key('institutionAvatarLogo')), findsOneWidget);
       expect(find.text('Remplacer…'), findsOneWidget);
+      // The remove action is a bin icon, its label only a tooltip.
+      expect(find.text('Retirer'), findsNothing);
+      expect(
+        find.descendant(
+          of: find.byKey(const Key('ruleFormLogoRemove')),
+          matching: find.byIcon(Icons.delete_outline_rounded),
+        ),
+        findsOneWidget,
+      );
+      expect(find.byTooltip('Retirer'), findsOneWidget);
 
       await tester.tap(find.byKey(const Key('ruleFormLogoRemove')));
       await tester.pumpAndSettle();
