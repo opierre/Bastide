@@ -18,6 +18,7 @@ EXPECTED_TABLES = {
     "auth_tokens",
     "user_avatars",
     "rule_logos",
+    "rule_pack_imports",
     "accounts",
     "categories",
     "account_balance_snapshots",

@@ -163,10 +163,13 @@ async def create_rule_from_transaction(
 @router.get("/packs/builtin", response_model=list[BuiltinPackRead])
 async def list_builtin_packs(
     service: Annotated[RulePackService, Depends(_pack_service)],
-    _user: Annotated[User, Depends(get_current_user)],
+    user: Annotated[User, Depends(get_current_user)],
 ) -> list[BuiltinPackRead]:
-    """List the packs bundled with the app, so the frontend can offer one without a file."""
-    return service.list_builtin()
+    """List the packs bundled with the app, so the frontend can offer one without a file.
+
+    `imported` is true once the caller has imported that pack, by either import endpoint.
+    """
+    return service.list_builtin(user.id)
 
 
 @router.post("/packs/preview", response_model=RulePackPreviewResult)
@@ -205,7 +208,11 @@ async def import_pack(
     `download_logos`. A logo that fails is reported and never blocks its rule.
     """
     result = await service.import_pack(
-        user.id, service.load_source(payload), payload.apply_now, payload.download_logos
+        user.id,
+        service.load_source(payload),
+        payload.apply_now,
+        payload.download_logos,
+        builtin_id=payload.builtin_id,
     )
     return RulePackImportResult(
         created_count=result.created_count,
@@ -237,7 +244,9 @@ async def start_pack_import(
     returns. 409 while another of the caller's imports is running.
     """
     pack = packs.load_source(payload)
-    run = runs.start(user.id, pack, payload.apply_now, payload.download_logos)
+    run = runs.start(
+        user.id, pack, payload.apply_now, payload.download_logos, builtin_id=payload.builtin_id
+    )
     return run.to_read()
 
 

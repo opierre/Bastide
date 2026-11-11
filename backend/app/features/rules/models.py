@@ -3,7 +3,15 @@
 from datetime import UTC, date, datetime
 from uuid import uuid4
 
-from sqlalchemy import Boolean, Date, ForeignKey, Integer, LargeBinary, String
+from sqlalchemy import (
+    Boolean,
+    Date,
+    ForeignKey,
+    Integer,
+    LargeBinary,
+    String,
+    UniqueConstraint,
+)
 from sqlalchemy.orm import Mapped, deferred, mapped_column, relationship
 
 from app.core.db import Base, UtcDateTime
@@ -63,3 +71,20 @@ class RuleLogo(Base):
     image: Mapped[bytes] = deferred(mapped_column(LargeBinary()))
     content_type: Mapped[str] = mapped_column(String(50))
     updated_at: Mapped[datetime] = mapped_column(UtcDateTime())
+
+
+class RulePackImport(Base):
+    """A built-in rule pack the user has imported, so the app stops offering it.
+
+    Keyed by the bundled pack's id (its file stem), one row per user and pack: importing the
+    same pack again keeps the first row. Not touched when the user later deletes the pack's
+    rules — the user imported it and can do so again from a file.
+    """
+
+    __tablename__ = "rule_pack_imports"
+    __table_args__ = (UniqueConstraint("user_id", "builtin_id"),)
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=lambda: str(uuid4()))
+    user_id: Mapped[str] = mapped_column(String(36), ForeignKey("users.id"), index=True)
+    builtin_id: Mapped[str] = mapped_column(String(100))
+    imported_at: Mapped[datetime] = mapped_column(UtcDateTime(), default=lambda: datetime.now(UTC))

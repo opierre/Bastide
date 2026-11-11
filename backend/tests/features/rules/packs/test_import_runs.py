@@ -209,6 +209,20 @@ def test_an_unknown_builtin_pack_is_refused_before_any_run_starts(
     assert launcher.pending == []
 
 
+def test_a_background_import_of_the_bundled_pack_marks_it_imported(
+    client: TestClient, overrides: tuple[FakeFetcher, RunLauncherSpy, ProgressBus]
+) -> None:
+    _, launcher, _ = overrides
+    user = register_user(client)
+
+    response = client.post(RUNS, json={"builtin_id": "fr-common.v1"}, headers=user.headers)
+    assert response.status_code == 202, response.text
+    launcher.drain()
+
+    listed = client.get("/api/v1/rules/packs/builtin", headers=user.headers).json()
+    assert [entry_["imported"] for entry_ in listed] == [True]
+
+
 def test_a_run_is_only_visible_to_its_user(
     client: TestClient, overrides: tuple[FakeFetcher, RunLauncherSpy, ProgressBus]
 ) -> None:

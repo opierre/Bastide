@@ -161,11 +161,19 @@ class RulePackService:
 
     # --- bundled packs ----------------------------------------------------------------------
 
-    def list_builtin(self) -> list[BuiltinPackRead]:
-        """Summarise the bundled packs, so the frontend can offer one without a file picker."""
+    def list_builtin(self, user_id: str) -> list[BuiltinPackRead]:
+        """Summarise the bundled packs, so the frontend can offer one without a file picker.
+
+        Each says whether the user has already imported it, so the app stops offering it.
+        """
+        imported = self._rules.imported_builtin_ids(user_id)
         return [
             BuiltinPackRead(
-                id=pack_id, name=pack.name, locale=pack.locale, rule_count=len(pack.rules)
+                id=pack_id,
+                name=pack.name,
+                locale=pack.locale,
+                rule_count=len(pack.rules),
+                imported=pack_id in imported,
             )
             for pack_id, pack in sorted(_load_builtin_packs().items())
         ]
@@ -232,6 +240,7 @@ class RulePackService:
         apply_now: bool,
         download_logos: bool = False,
         progress: ImportProgress | None = None,
+        builtin_id: str | None = None,
     ) -> PackImport:
         """Import the pack's rules, then download the logos it links to.
 
@@ -251,6 +260,9 @@ class RulePackService:
         ran. A logo that fails is reported and leaves its rule imported without it.
 
         ``progress``, when given, hears when the rules are in and as each download settles.
+
+        ``builtin_id`` names the bundled pack being imported, if it is one: the import is then
+        recorded with the rules, so the pack is listed as imported from then on.
         """
         plan = self._plan(user_id, pack)
         rules = _candidate_rules(user_id, plan.creatable, self._rules.next_priority(user_id))
@@ -269,6 +281,8 @@ class RulePackService:
                 target.logo = RuleLogo(image=image, content_type=LOGO_CONTENT_TYPE, updated_at=now)
             for rule in rules:
                 self._rules.stage(rule)
+            if builtin_id is not None:
+                self._rules.stage_pack_import(user_id, builtin_id, now)
             self._db.commit()
         except Exception:
             self._db.rollback()

@@ -249,6 +249,8 @@ class BuiltinPackRead(BaseModel):
     name: str
     locale: str | None
     rule_count: int
+    #: Whether the caller has imported this pack; the app stops offering it once they have.
+    imported: bool
 
 
 class RulePackPreviewResult(BaseModel):
