@@ -411,9 +411,17 @@ void main() {
 
           final button = find.byKey(const Key('accountLinkedCards-a1'));
           expect(button, findsOneWidget);
+          final count = find.descendant(of: button, matching: find.text('2'));
+          final icon = find.descendant(
+            of: button,
+            matching: find.byIcon(Icons.credit_card_rounded),
+          );
+          expect(count, findsOneWidget);
+          expect(icon, findsOneWidget);
+          // The count reads first, then the card icon.
           expect(
-            find.descendant(of: button, matching: find.text('2')),
-            findsOneWidget,
+            tester.getCenter(count).dx,
+            lessThan(tester.getCenter(icon).dx),
           );
           expect(find.byTooltip(tooltip), findsOneWidget);
 
