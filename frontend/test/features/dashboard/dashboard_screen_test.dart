@@ -666,6 +666,56 @@ void main() {
   });
 
   testWidgets(
+    'each month draws its income and expense bars side by side on one baseline',
+    (tester) async {
+      _useDesktopSurface(tester);
+      await tester.pumpWidget(_wrap(state: _state()));
+      await tester.pumpAndSettle();
+
+      Finder barOf(String kind, int month) =>
+          find.byKey(Key('dashboard${kind}Bar-2026-$month'));
+      Rect bar(String kind, int month) => tester.getRect(barOf(kind, month));
+      Color? color(String kind, int month) {
+        final box = tester.widget<Container>(
+          find.descendant(
+            of: barOf(kind, month),
+            matching: find.byType(Container),
+          ),
+        );
+        return (box.decoration! as BoxDecoration).color;
+      }
+
+      // Avril: 2 850,00 € in, 2 112,90 € out.
+      final aprilIncome = bar('Income', 4);
+      final heightPerMinor = aprilIncome.height / 285000;
+
+      for (final month in [2, 3, 4, 5]) {
+        final income = bar('Income', month);
+        final expense = bar('Expense', month);
+
+        // Next to each other, income first, never stacked or overlapping.
+        expect(income.right, lessThan(expense.left), reason: 'month $month');
+        expect(expense.left - income.right, closeTo(MonthBar.pairGap, 0.01));
+        // Rising from one zero baseline shared by every month.
+        expect(income.bottom, closeTo(expense.bottom, 0.01));
+        expect(
+          income.bottom,
+          closeTo(aprilIncome.bottom, 0.01),
+          reason: 'month $month',
+        );
+        expect(color('Income', month), AppColors.positive);
+        expect(color('Expense', month), AppColors.negative);
+      }
+
+      // One scale across all months: heights are proportional to the amounts.
+      expect(bar('Expense', 4).height, closeTo(211290 * heightPerMinor, 0.5));
+      expect(bar('Expense', 2).height, closeTo(296840 * heightPerMinor, 0.5));
+      // Février's expense is the period's largest figure, so it is the tallest bar.
+      expect(bar('Expense', 2).height, greaterThan(aprilIncome.height));
+    },
+  );
+
+  testWidgets(
     'the current month\'s bar label is primary, earlier months recede',
     (tester) async {
       _useDesktopSurface(tester);
