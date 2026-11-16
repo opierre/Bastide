@@ -1111,10 +1111,10 @@ class AppLocalizationsFr extends AppLocalizations {
   String get categorySystemPetsVet => 'Vétérinaire';
 
   @override
-  String get dashboardStatIncome => 'Revenus (mois)';
+  String get dashboardStatIncome => 'Revenus';
 
   @override
-  String get dashboardStatExpense => 'Dépenses (mois)';
+  String get dashboardStatExpense => 'Dépenses';
 
   @override
   String get dashboardStatNet => 'Net';
@@ -1131,21 +1131,18 @@ class AppLocalizationsFr extends AppLocalizations {
   }
 
   @override
-  String get dashboardStatNetCaption => 'revenus − dépenses';
-
-  @override
   String dashboardSavingsDeltaPoints(String delta) {
     return '$delta pt';
   }
 
   @override
   String dashboardSavingsGoalReached(String goal) {
-    return 'Objectif : $goal · atteint';
+    return 'Objectif $goal atteint';
   }
 
   @override
   String dashboardSavingsGoalPending(String goal) {
-    return 'Objectif : $goal · en cours';
+    return 'Objectif $goal en cours';
   }
 
   @override
