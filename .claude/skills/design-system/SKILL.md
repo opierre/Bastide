@@ -158,7 +158,8 @@ drifts from the system. Already in `core/widgets/`:
   `#3A4556` neutral variant when uncategorized.
 - `FrameTexture` — the film-grain overlay and top hairline, applied once by the shell.
 
-Still to build (see the panel specs for exact geometry): `StatCard`, `SavingsRateCard` (96px ring),
+Still to build (see the panel specs for exact geometry; the dashboard's stat figures are
+columns of its one-card `KpiStrip`, no longer separate cards):
 `TransactionRow` (52px + 48px compact), `DataTable`, `DropZone`, `ChartContainer`, `Donut`
 (r80 stroke24), `HorizontalBars`, `Sparkline`, `AreaLine`, `StackedBars`, `GroupedBars`, `Toggle` (34×20 with an
 explicit knob), `Toast`, `Modal`, `Select`/`Combobox` popover.

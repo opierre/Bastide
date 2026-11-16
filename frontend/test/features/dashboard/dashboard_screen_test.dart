@@ -2,6 +2,7 @@ import 'package:bastide/core/navigation/sidebar_controller.dart';
 import 'package:bastide/core/theme/app_theme.dart';
 import 'package:bastide/core/theme/tokens.dart';
 import 'package:bastide/core/widgets/amount_text.dart';
+import 'package:bastide/core/widgets/app_card.dart';
 import 'package:bastide/core/widgets/app_shell.dart';
 import 'package:bastide/core/widgets/category_chip.dart';
 import 'package:bastide/core/widgets/primary_button.dart';
@@ -15,7 +16,8 @@ import 'package:bastide/features/dashboard/presentation/income_vs_expense.dart';
 import 'package:bastide/features/dashboard/presentation/recent_activity.dart';
 import 'package:bastide/features/dashboard/presentation/savings_chart.dart';
 import 'package:bastide/features/dashboard/presentation/savings_trend.dart';
-import 'package:bastide/features/dashboard/presentation/stat_card.dart';
+import 'package:bastide/features/goals/presentation/goal_card.dart';
+import 'package:bastide/features/dashboard/presentation/kpi_strip.dart';
 import 'package:bastide/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -62,196 +64,227 @@ void _useDesktopSurface(WidgetTester tester) {
 }
 
 void main() {
-  // --- row 1: the stat grid --------------------------------------------------------------
+  // --- row 1: the KPI strip --------------------------------------------------------------
 
-  testWidgets('renders stat cards with formatted values and trend semantics for fr', (
-    tester,
-  ) async {
-    _useDesktopSurface(tester);
-    await tester.pumpWidget(_wrap(state: _state()));
-    await tester.pumpAndSettle();
+  Finder kpi(String id) => find.byKey(Key('dashboardKpi-$id'));
 
-    expect(
-      find.descendant(
-        of: find.byType(StatCard),
-        matching: find.text(
-          formatAmount(
-            amountMinor: 285000,
-            currency: 'EUR',
-            locale: 'fr',
-            showPositiveSign: true,
-          ),
-        ),
-      ),
-      findsOneWidget,
-    );
-    expect(
-      find.text(
-        formatAmount(
-          amountMinor: -221435,
-          currency: 'EUR',
-          locale: 'fr',
-          showPositiveSign: true,
-        ),
-      ),
-      findsOneWidget,
-    );
-    // Net is the row's one colorized headline: a surplus reads green, a shortfall red — and
-    // it stays signed either way, so direction never rests on the color alone.
-    final netText = formatAmount(
-      amountMinor: 63565,
-      currency: 'EUR',
-      locale: 'fr',
-      showPositiveSign: true,
-    );
-    final netInCard = find.descendant(
-      of: find.byType(StatCard),
-      matching: find.text(netText),
-    );
-    expect(netInCard, findsOneWidget);
-    expect(tester.widget<Text>(netInCard).style?.color, AppColors.positive);
+  Text deltaText(WidgetTester tester, String id) =>
+      tester.widget<Text>(find.byKey(Key('dashboardKpiDelta-$id')));
 
-    // A trend pill is colored by whether the movement is good news, not by its sign: income
-    // up is green, net down is red — and the expense card inverts, because spending 4,8 %
-    // more than last month is the one rise the panel should not congratulate.
-    Color? pillColor(double delta) => tester
-        .widget<Text>(find.text(formatDeltaPct(delta, 'fr')))
-        .style
-        ?.color;
-
-    expect(find.text(formatDeltaPct(2.1, 'fr')), findsOneWidget);
-    expect(find.text(formatDeltaPct(4.8, 'fr')), findsOneWidget);
-    expect(find.text(formatDeltaPct(-6.1, 'fr')), findsOneWidget);
-    expect(pillColor(2.1), AppColors.positive);
-    expect(pillColor(4.8), AppColors.negative);
-    expect(pillColor(-6.1), AppColors.negative);
-
-    // The savings rate's change is in percentage *points*, not percent.
-    expect(find.text('+1,9 pt'), findsOneWidget);
-    expect(find.text(formatDeltaPct(1.9, 'fr')), findsNothing);
-    expect(
-      tester
-          .widget<Text>(find.byKey(const Key('dashboardSavingsRateValue')))
-          .data,
-      formatPct(22.3, 'fr'),
-    );
-
-    // Captions naming what each trend is measured against.
-    expect(find.text('vs avril'), findsNWidgets(2));
-    expect(find.text('revenus − dépenses'), findsOneWidget);
-    expect(find.text('Objectif : 20 % · atteint'), findsOneWidget);
-  });
-
-  testWidgets(
-    'an expense card that fell reads green — spending less is the good news',
-    (tester) async {
-      _useDesktopSurface(tester);
-      await tester.pumpWidget(
-        _wrap(state: _state(summary: specSummary(expenseDeltaPct: -4.6))),
-      );
-      await tester.pumpAndSettle();
-
-      final pill = find.text(formatDeltaPct(-4.6, 'fr'));
-      expect(pill, findsOneWidget);
-      expect(tester.widget<Text>(pill).style?.color, AppColors.positive);
-    },
+  Icon trendIcon(WidgetTester tester, String id) => tester.widget<Icon>(
+    find.descendant(
+      of: find.byKey(Key('dashboardKpiTrend-$id')),
+      matching: find.byType(Icon),
+    ),
   );
 
+  Finder byKey(String key) => find.byKey(Key(key));
+
   testWidgets(
-    'the savings hero card is outlined in iris, not the neutral card border',
+    'row 1 is one card: savings rate, net, income, expenses, left to right',
     (tester) async {
       _useDesktopSurface(tester);
       await tester.pumpWidget(_wrap(state: _state()));
       await tester.pumpAndSettle();
 
-      // The card's own ramp is a few percent of lightness wide, so the border is what carries
-      // the hero apart from the three neutral cards beside it.
-      final decorated = tester.widget<Container>(
-        find
-            .descendant(
-              of: find.byType(SavingsRateCard),
-              matching: find.byType(Container),
-            )
-            .first,
-      );
-      final decoration = decorated.decoration! as BoxDecoration;
-      expect(decoration.gradient, AppColors.irisTintGradient);
+      expect(find.byType(KpiStrip), findsOneWidget);
+      // The skeleton's row 1 is drawn at this measured height.
+      expect(tester.getSize(find.byType(KpiStrip)).height, 162);
+      // One plate, not four.
       expect(
-        (decoration.border! as Border).top.color,
-        AppColors.irisBorderStrong,
-      );
-
-      // The tint is a wash over the same base the neutral cards use, so the ring reads against
-      // the app's inset-plate track and the pill keeps its ordinary semantic green — neither
-      // of which a saturated iris ground could carry.
-      final ring = tester.widget<CircularProgressIndicator>(
         find.descendant(
-          of: find.byType(SavingsRateRing),
-          matching: find.byType(CircularProgressIndicator),
+          of: find.byType(KpiStrip),
+          matching: find.byType(AppCard),
         ),
-      );
-      expect(ring.value, closeTo(0.223, 0.0001));
-      expect(ring.backgroundColor, AppColors.surfaceHover);
-      expect(ring.valueColor?.value, AppColors.iris);
-      expect(
-        tester.widget<Text>(find.text('+1,9 pt')).style?.color,
-        AppColors.positive,
+        findsOneWidget,
       );
 
-      // The label is iris rather than the gray every other stat label takes.
-      expect(
-        tester
-            .widget<Text>(find.text('Taux d\'épargne'.toUpperCase()))
-            .style
-            ?.color,
-        AppColors.iris,
-      );
+      final xs = [
+        for (final id in ['savings', 'net', 'income', 'expense'])
+          tester.getTopLeft(kpi(id)).dx,
+      ];
+      for (var i = 1; i < xs.length; i++) {
+        expect(xs[i], greaterThan(xs[i - 1]));
+      }
+
+      // The savings column is the wider one; the other three share the rest evenly.
+      final savingsWidth = tester.getSize(kpi('savings')).width;
+      final netWidth = tester.getSize(kpi('net')).width;
+      expect(tester.getSize(kpi('income')).width, closeTo(netWidth, 0.5));
+      expect(tester.getSize(kpi('expense')).width, closeTo(netWidth, 0.5));
+      expect(savingsWidth / netWidth, closeTo(1.35, 0.01));
     },
   );
 
   testWidgets(
-    'the savings caption frames a missed goal as progress, not shortfall',
+    'the figure columns show signed amounts and their fr trend lines',
     (tester) async {
       _useDesktopSurface(tester);
-      await tester.pumpWidget(
-        _wrap(state: _state(summary: specSummary(savingsRate: 0.118))),
-      );
+      await tester.pumpWidget(_wrap(state: _state()));
       await tester.pumpAndSettle();
 
-      expect(find.text('Objectif : 20 % · en cours'), findsOneWidget);
+      String amount(int minor) => formatAmount(
+        amountMinor: minor,
+        currency: 'EUR',
+        locale: 'fr',
+        showPositiveSign: true,
+      );
+
+      expect(
+        find.descendant(of: kpi('income'), matching: find.text(amount(285000))),
+        findsOneWidget,
+      );
+      expect(
+        find.descendant(
+          of: kpi('expense'),
+          matching: find.text(amount(-221435)),
+        ),
+        findsOneWidget,
+      );
+      final net = find.descendant(
+        of: kpi('net'),
+        matching: find.text(amount(63565)),
+      );
+      expect(net, findsOneWidget);
+      // Net is the strip's one colorized figure.
+      expect(tester.widget<Text>(net).style?.color, AppColors.positive);
+
+      expect(find.text('REVENUS'), findsOneWidget);
+      expect(find.text('DÉPENSES'), findsOneWidget);
+      expect(find.text('NET'), findsOneWidget);
+      // Every figure column compares against the previous month.
+      expect(find.text('vs avril'), findsNWidgets(3));
+      expect(deltaText(tester, 'income').data, formatRatioPct(0.021, 'fr'));
+      expect(deltaText(tester, 'expense').data, formatRatioPct(0.048, 'fr'));
+      // The arrow carries the direction, so the percentage itself is unsigned.
+      expect(deltaText(tester, 'net').data, formatRatioPct(0.061, 'fr'));
     },
   );
 
-  testWidgets('row 1 lays the four cards out on the spec 1:1:1:1.35 grid', (
+  testWidgets(
+    'each trend arrow points with its delta and is colored by good or bad news',
+    (tester) async {
+      _useDesktopSurface(tester);
+      await tester.pumpWidget(_wrap(state: _state()));
+      await tester.pumpAndSettle();
+
+      // Income up: green, up.
+      expect(trendIcon(tester, 'income').icon, Icons.arrow_upward_rounded);
+      expect(trendIcon(tester, 'income').color, AppColors.positive);
+      expect(deltaText(tester, 'income').style?.color, AppColors.positive);
+      // Net down: red, down.
+      expect(trendIcon(tester, 'net').icon, Icons.arrow_downward_rounded);
+      expect(trendIcon(tester, 'net').color, AppColors.negative);
+      expect(deltaText(tester, 'net').style?.color, AppColors.negative);
+      // Expenses up: inverted, so a rise is red.
+      expect(trendIcon(tester, 'expense').icon, Icons.arrow_upward_rounded);
+      expect(trendIcon(tester, 'expense').color, AppColors.negative);
+      expect(deltaText(tester, 'expense').style?.color, AppColors.negative);
+    },
+  );
+
+  testWidgets('expenses that fell read green, still pointing down', (
     tester,
   ) async {
     _useDesktopSurface(tester);
-    await tester.pumpWidget(_wrap(state: _state()));
+    await tester.pumpWidget(
+      _wrap(
+        state: _state(
+          summary: specSummary(
+            expenseDeltaPct: -4.6,
+            incomeDeltaPct: -1.2,
+            netDeltaPct: 0,
+          ),
+        ),
+      ),
+    );
     await tester.pumpAndSettle();
 
-    expect(find.byType(StatCard), findsNWidgets(3));
-    final statWidth = tester.getSize(find.byType(StatCard).first).width;
-    final savingsWidth = tester.getSize(find.byType(SavingsRateCard)).width;
-
-    for (var i = 1; i < 3; i++) {
-      expect(
-        tester.getSize(find.byType(StatCard).at(i)).width,
-        closeTo(statWidth, 0.5),
-      );
-    }
-    expect(savingsWidth / statWidth, closeTo(1.35, 0.01));
+    expect(trendIcon(tester, 'expense').icon, Icons.arrow_downward_rounded);
+    expect(deltaText(tester, 'expense').style?.color, AppColors.positive);
+    expect(trendIcon(tester, 'income').icon, Icons.arrow_downward_rounded);
+    expect(deltaText(tester, 'income').style?.color, AppColors.negative);
+    // A flat month is neither good nor bad news.
+    expect(trendIcon(tester, 'net').icon, Icons.remove_rounded);
+    expect(deltaText(tester, 'net').style?.color, AppColors.textSecondary);
   });
 
-  testWidgets('renders stat cards with formatted values for en', (
-    tester,
-  ) async {
+  testWidgets(
+    'the savings column: rate, bar toward the goal, and the reached line',
+    (tester) async {
+      _useDesktopSurface(tester);
+      await tester.pumpWidget(_wrap(state: _state()));
+      await tester.pumpAndSettle();
+
+      expect(find.text('TAUX D\'ÉPARGNE'), findsOneWidget);
+      expect(
+        tester.widget<Text>(byKey('dashboardSavingsRateValue')).data,
+        formatRatioPct(0.223, 'fr'),
+      );
+      // The ring is gone; a bar toward the goal replaces it, full once the goal is met.
+      expect(find.byType(CircularProgressIndicator), findsNothing);
+      final bar = tester.widget<GoalProgressBar>(
+        byKey('dashboardSavingsGoalBar'),
+      );
+      expect(bar.fraction, 1.0);
+
+      // « ✓ Objectif 20 % atteint · +1,9 pt »
+      final goal = formatRatioPct(0.20, 'fr', decimalDigits: 0);
+      expect(byKey('dashboardSavingsGoalReachedIcon'), findsOneWidget);
+      final goalText = tester.widget<Text>(byKey('dashboardSavingsGoalText'));
+      expect(goalText.data, 'Objectif $goal atteint');
+      expect(goalText.style?.color, AppColors.positive);
+      final delta = tester.widget<Text>(byKey('dashboardSavingsDelta'));
+      expect(delta.data, '+1,9 pt');
+      expect(delta.style?.color, AppColors.positive);
+
+      // The check leads the line, the delta closes it.
+      final checkX = tester
+          .getTopLeft(byKey('dashboardSavingsGoalReachedIcon'))
+          .dx;
+      final textX = tester.getTopLeft(byKey('dashboardSavingsGoalText')).dx;
+      final deltaX = tester.getTopLeft(byKey('dashboardSavingsDelta')).dx;
+      expect(checkX, lessThan(textX));
+      expect(deltaX, greaterThan(textX));
+    },
+  );
+
+  testWidgets(
+    'a goal not yet met reads as progress: partial bar, no check, falling delta in red',
+    (tester) async {
+      _useDesktopSurface(tester);
+      await tester.pumpWidget(
+        _wrap(
+          state: _state(
+            summary: specSummary(savingsRate: 0.118, savingsRateDeltaPct: -0.4),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      final bar = tester.widget<GoalProgressBar>(
+        byKey('dashboardSavingsGoalBar'),
+      );
+      expect(bar.fraction, closeTo(0.59, 0.0001));
+      expect(byKey('dashboardSavingsGoalReachedIcon'), findsNothing);
+      final goal = formatRatioPct(0.20, 'fr', decimalDigits: 0);
+      final goalText = tester.widget<Text>(byKey('dashboardSavingsGoalText'));
+      expect(goalText.data, 'Objectif $goal en cours');
+      expect(goalText.style?.color, AppColors.textSecondary);
+      final delta = tester.widget<Text>(byKey('dashboardSavingsDelta'));
+      expect(delta.data, '−0,4 pt');
+      expect(delta.style?.color, AppColors.negative);
+    },
+  );
+
+  testWidgets('renders the KPI strip in en', (tester) async {
     _useDesktopSurface(tester);
     await tester.pumpWidget(_wrap(state: _state(), locale: const Locale('en')));
     await tester.pumpAndSettle();
 
     expect(
       find.descendant(
-        of: find.byType(StatCard),
+        of: kpi('income'),
         matching: find.text(
           formatAmount(
             amountMinor: 285000,
@@ -263,9 +296,20 @@ void main() {
       ),
       findsOneWidget,
     );
-    expect(find.text(formatDeltaPct(2.1, 'en')), findsOneWidget);
-    expect(find.text('Income (month)'.toUpperCase()), findsOneWidget);
-    expect(find.text('income − expenses'), findsOneWidget);
+    expect(find.text('SAVINGS RATE'), findsOneWidget);
+    expect(find.text('INCOME'), findsOneWidget);
+    expect(find.text('EXPENSES'), findsOneWidget);
+    expect(find.text('vs April'), findsNWidgets(3));
+    // English writes its percentages without the French space.
+    expect(deltaText(tester, 'income').data, '2.1%');
+    expect(
+      tester.widget<Text>(byKey('dashboardSavingsRateValue')).data,
+      '22.3%',
+    );
+    expect(
+      tester.widget<Text>(byKey('dashboardSavingsGoalText')).data,
+      'Goal 20% reached',
+    );
     expect(tester.takeException(), isNull);
   });
 
@@ -933,7 +977,7 @@ void main() {
       expect(find.byType(PrimaryButton), findsOneWidget);
 
       // Nothing else is on screen: the empty state replaces the whole panel.
-      expect(find.byType(StatCard), findsNothing);
+      expect(find.byType(KpiStrip), findsNothing);
       expect(find.byType(CategoryDonut), findsNothing);
       expect(find.byType(IncomeVsExpenseChart), findsNothing);
     },
@@ -964,21 +1008,20 @@ void main() {
         find.byKey(const Key('dashboardLoadingIndicator')),
         findsOneWidget,
       );
-      // 4 stat silhouettes + 2 for row 2 + 2 for row 3.
-      expect(find.byType(SkeletonBlock), findsNWidgets(8));
+      // 1 strip silhouette + 2 for row 2 + 2 for row 3.
+      expect(find.byType(SkeletonBlock), findsNWidgets(5));
 
       // The silhouette must not move the cards when the data lands, so it carries the same
-      // ratios: 1:1:1:1.35 across row 1, and 1:1.35 across row 2.
+      // shape: one full-width strip across row 1, and 1:1.35 across row 2.
       final blocks = [
-        for (var i = 0; i < 8; i++)
+        for (var i = 0; i < 5; i++)
           tester.getSize(find.byType(SkeletonBlock).at(i)),
       ];
-      expect(blocks[0].height, 175);
-      expect(blocks[3].width / blocks[0].width, closeTo(1.35, 0.01));
-      expect(blocks[5].width / blocks[4].width, closeTo(1.35, 0.01));
+      expect(blocks[0].height, 162);
+      expect(blocks[2].width / blocks[1].width, closeTo(1.35, 0.01));
       // Rows 2 and 3 are equal-height in the silhouette too, as they are once data lands.
-      expect(blocks[4].height, blocks[6].height);
-      expect(blocks[6].width, closeTo(blocks[7].width, 0.5));
+      expect(blocks[1].height, blocks[3].height);
+      expect(blocks[3].width, closeTo(blocks[4].width, 0.5));
     },
   );
 
@@ -1011,7 +1054,7 @@ void main() {
 
     // Collapsing the nav is chrome state, not panel state — the same data is drawn, just in
     // the wider content region the 76px rail leaves behind.
-    expect(find.byType(StatCard), findsNWidgets(3));
+    expect(find.byType(KpiStrip), findsOneWidget);
     expect(find.byType(CategoryDonut), findsOneWidget);
     expect(find.byType(IncomeVsExpenseChart), findsOneWidget);
     expect(find.byType(CompactTransactionRow), findsNWidgets(4));

@@ -59,6 +59,12 @@ class DashboardSummary {
   /// savings card shows. Lives here rather than in the widget so the threshold comparison
   /// isn't business logic sitting in presentation.
   bool get savingsGoalReached => savingsRate >= savingsRateGoal;
+
+  /// How far the month has come toward the savings goal, `0..1` — the fill of the KPI strip's
+  /// progress bar. Full once the goal is met: the bar measures the way to the goal, not the rate
+  /// itself, and a negative rate (spent more than earned) shows an empty bar.
+  double get savingsGoalProgress =>
+      (savingsRate / savingsRateGoal).clamp(0.0, 1.0);
 }
 
 /// The savings-rate goal the dashboard measures against, as a `0..1` ratio.
