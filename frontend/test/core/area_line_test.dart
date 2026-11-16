@@ -134,12 +134,12 @@ void main() {
 
     final chart = tester.getRect(find.byType(AreaLine));
     // Mirrors the painter: the plot sits right of the gutter, inset by the
-    // 5px dot, above the month axis.
+    // current dot, above the month axis.
     final plot = Rect.fromLTRB(
-      chart.left + AreaLine.valueGutter,
-      chart.top + 5,
+      chart.left + AppChart.valueGutter,
+      chart.top + AppChart.dotReach,
       chart.right,
-      chart.bottom - AreaLine.axisHeight - 5,
+      chart.bottom - AppChart.axisHeight - AppChart.dotReach,
     );
     const values = [1000, 2400, 1800, 3200];
     final scale = ChartScale.of(values, intervals: 4);
@@ -165,7 +165,7 @@ void main() {
       expect(chart.contains(card.topLeft), isTrue);
       expect(
         card.bottom,
-        lessThanOrEqualTo(chart.bottom - AreaLine.axisHeight),
+        lessThanOrEqualTo(chart.bottom - AppChart.axisHeight),
       );
     }
     expect(tester.takeException(), isNull);
@@ -292,12 +292,12 @@ void main() {
 
     final chart = tester.getRect(find.byType(AreaLine));
     const labels = ['Févr.', 'Mars', 'Avr.', 'Mai'];
-    const plotWidth = 400 - AreaLine.valueGutter;
+    const plotWidth = 400 - AppChart.valueGutter;
     for (var i = 0; i < labels.length; i++) {
       expect(
         tester.getCenter(find.text(labels[i])).dx - chart.left,
         closeTo(
-          AreaLine.valueGutter + AreaLine.pointX(i, labels.length, plotWidth),
+          AppChart.valueGutter + AreaLine.pointX(i, labels.length, plotWidth),
           0.01,
         ),
       );
@@ -339,10 +339,10 @@ void main() {
       await tester.pumpAndSettle();
 
       final plot = Rect.fromLTRB(
-        AreaLine.valueGutter,
-        5,
+        AppChart.valueGutter,
+        AppChart.dotReach,
         400,
-        200 - AreaLine.axisHeight - 5,
+        200 - AppChart.axisHeight - AppChart.dotReach,
       );
       final scale = ChartScale.of(values, intervals: 2);
       final y = scale.y(values.last, plot);
@@ -356,7 +356,12 @@ void main() {
             matching: find.byType(CustomPaint),
           ),
         ),
-        paints..circle(y: y, radius: 5),
+        paints..something(
+          (method, arguments) =>
+              method == #drawCircle &&
+              (arguments[0] as Offset).dy == y &&
+              arguments[1] == AppChart.currentDotRadius,
+        ),
       );
       expect(tester.takeException(), isNull);
     }
@@ -437,6 +442,87 @@ void main() {
             ..path()
             ..path(color: overdraft),
         ),
+      );
+    });
+  });
+
+  group('shared curve style', () {
+    /// The radius of every coloured dot the chart drew, in paint order.
+    Future<List<double>> dotRadii(WidgetTester tester, int count) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: appDarkTheme,
+          home: Scaffold(
+            body: Center(
+              child: SizedBox(
+                height: 200,
+                width: 800,
+                child: AreaLine(
+                  values: [for (var i = 0; i < count; i++) 1000 + i * 100],
+                  labels: [for (var i = 0; i < count; i++) ''],
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+      final radii = <double>[];
+      expect(
+        tester.renderObject(
+          find.descendant(
+            of: find.byType(AreaLine),
+            matching: find.byType(CustomPaint),
+          ),
+        ),
+        paints..everything((method, arguments) {
+          if (method == #drawCircle &&
+              (arguments[2] as Paint).color.toARGB32() ==
+                  AppColors.iris.toARGB32()) {
+            radii.add(arguments[1] as double);
+          }
+          return true;
+        }),
+      );
+      return radii;
+    }
+
+    testWidgets('a small dot on every point, the current one full size', (
+      tester,
+    ) async {
+      expect(await dotRadii(tester, 4), [
+        AppChart.pointDotRadius,
+        AppChart.pointDotRadius,
+        AppChart.pointDotRadius,
+        AppChart.currentDotRadius,
+      ]);
+    });
+
+    testWidgets('past the ceiling only the current point keeps its dot', (
+      tester,
+    ) async {
+      expect(await dotRadii(tester, AppChart.dotCeiling + 1), [
+        AppChart.currentDotRadius,
+      ]);
+    });
+
+    testWidgets('the line and its area take the shared stroke and fill', (
+      tester,
+    ) async {
+      await dotRadii(tester, 4);
+      expect(
+        tester.renderObject(
+          find.descendant(
+            of: find.byType(AreaLine),
+            matching: find.byType(CustomPaint),
+          ),
+        ),
+        paints
+          ..path(color: AppColors.iris.withValues(alpha: AppChart.areaAlpha))
+          ..path(
+            color: AppColors.iris,
+            strokeWidth: AppChart.lineStroke,
+            style: PaintingStyle.stroke,
+          ),
       );
     });
   });

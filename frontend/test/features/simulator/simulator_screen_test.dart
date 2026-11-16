@@ -9,6 +9,7 @@ import 'package:bastide/features/simulator/domain/simulation.dart';
 import 'package:bastide/features/simulator/presentation/simulator_screen.dart';
 import 'package:bastide/features/simulator/presentation/yearly_projection_chart.dart';
 import 'package:bastide/l10n/app_localizations.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -222,6 +223,55 @@ void main() {
     expect(plot.capital, [for (final row in yearly) row.principalMinor]);
     expect(plot.interest, [for (final row in yearly) row.interestMinor]);
   });
+
+  for (final (locale, capital, interest) in const [
+    (Locale('fr'), 'Capital : ', 'Intérêts : '),
+    (Locale('en'), 'Principal: ', 'Interest: '),
+  ]) {
+    testWidgets(
+      '${locale.languageCode}: hovering a year names its split in the chart card',
+      (tester) async {
+        _useDesktopSurface(tester);
+        await tester.pumpWidget(_wrap(repository, locale: locale));
+        await _load(tester);
+        await _typeFrame(tester);
+
+        final gesture = await tester.createGesture(
+          kind: PointerDeviceKind.mouse,
+        );
+        addTearDown(gesture.removePointer);
+        await gesture.addPointer(location: Offset.zero);
+        await gesture.moveTo(
+          tester.getCenter(find.byKey(const Key('projectionSlot-0'))),
+        );
+        await tester.pump();
+
+        final row = testResult().yearly.first;
+        String money(int minor) => formatAmount(
+          amountMinor: minor,
+          currency: 'EUR',
+          locale: locale.languageCode,
+        );
+        final card = find.byKey(const Key('projectionTooltip'));
+        expect(card, findsOneWidget);
+        expect(
+          find.descendant(
+            of: card,
+            matching: find.text(
+              '${row.year}\n$capital${money(row.principalMinor)}\n'
+              '$interest${money(row.interestMinor)}',
+              findRichText: true,
+            ),
+          ),
+          findsOneWidget,
+        );
+
+        await gesture.moveTo(Offset.zero);
+        await tester.pump();
+        expect(card, findsNothing);
+      },
+    );
+  }
 
   testWidgets('over the reference only the HCSF card changes, and nothing is '
       'blocked', (tester) async {

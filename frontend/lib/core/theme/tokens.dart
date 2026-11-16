@@ -441,3 +441,61 @@ abstract final class AppTexture {
     colors: [Color(0x008B8CF9), Color(0x8C8B8CF9), Color(0x008B8CF9)],
   );
 }
+
+/// The one curve style every chart draws with (`docs/design/00` §Components →
+/// « Shared curve style »): the dashboard's savings line, an account's balance,
+/// the Synthèse's net worth, a subscription's price history, a deferred card's
+/// cycles, the credits trajectory and the simulator's projection. A chart keeps
+/// a value of its own only where its panel spec says why; `ChartPaints` in
+/// `core/widgets/chart_style.dart` applies these.
+abstract final class AppChart {
+  /// Width left of the plot for the value axis.
+  static const valueGutter = 56.0;
+
+  /// Height beneath the plot for the x axis.
+  static const axisHeight = 22.0;
+
+  /// Clear space between a value label and the plot it names.
+  static const labelGap = AppSpacing.sm;
+
+  /// Gridlines: 1 px hairlines, from the plot's left edge to the chart's right
+  /// edge.
+  static const gridColor = AppColors.borderSubtle;
+  static const gridStroke = 1.0;
+
+  /// The series line, round-joined and round-capped.
+  static const lineStroke = 2.5;
+
+  /// The area under a line, in the line's own hue.
+  static const areaAlpha = 0.16;
+
+  /// The area under zero when a series crosses it, in expense red.
+  static const negativeAreaAlpha = 0.10;
+
+  /// A dot on every point while there are at most [dotCeiling] of them.
+  static const pointDotRadius = 3.0;
+
+  /// The current (last) point's dot, and the hovered one's.
+  static const currentDotRadius = 5.0;
+
+  /// The card-surface ring around every dot, so it reads as sitting *on* the
+  /// line rather than as a bead threaded onto it.
+  static const dotRing = 1.5;
+
+  /// How far the largest dot reaches past its point: the plot's inset, so an
+  /// extreme point isn't clipped, and what a hover card keeps clear of.
+  static const dotReach = currentDotRadius + dotRing;
+
+  /// Above this many points the dots turn the line into a bead string; the
+  /// stroke alone carries the shape from there.
+  static const dotCeiling = 24;
+
+  /// Every dashed chart line — zero baseline, open segment, declared months,
+  /// annotations — on the `DashedBorder` rhythm, 5 on / 4 off.
+  static const dash = 5.0;
+  static const dashGap = 4.0;
+
+  /// The dashed zero baseline and annotation verticals.
+  static const baselineColor = AppColors.borderDashed;
+  static const baselineStroke = 1.0;
+}
