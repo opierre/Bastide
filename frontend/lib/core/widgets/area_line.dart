@@ -3,19 +3,20 @@ import 'dart:math' as math;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
-import '../theme/app_theme.dart';
 import '../theme/tokens.dart';
 import 'chart_scale.dart';
+import 'chart_style.dart';
 import 'chart_tooltip.dart';
 
-/// The savings-evolution area line: an iris 2.5px stroke over a 16% iris fill, hairline
-/// gridlines behind it, a dot on the current (last) point, and a month axis beneath
-/// (`docs/design/00` §Components → AreaLine).
+/// The area line, drawn in the shared curve style ([AppChart], [ChartPaints]): a 2.5px
+/// stroke over a 16% fill of its [color], hairline gridlines behind it, a small dot on each
+/// point (up to [AppChart.dotCeiling]) and a larger one on the current (last) point, and a
+/// month axis beneath (`docs/design/00` §Components → AreaLine).
 ///
 /// Each point sits at the centre of its axis label's slot rather than spreading edge to edge,
 /// so a month's dot stands over its own label instead of drifting toward the slot boundary.
-/// Hovering a slot rings its point and, when [tooltips] are given, names its figure in a card
-/// placed clear of the line — see [placeChartTooltip].
+/// Hovering a slot enlarges its point and, when [tooltips] are given, names its figure in a
+/// card placed clear of the line — see [placeChartTooltip].
 /// Given a [valueLabel], every gridline is labelled in a gutter on the left, as on the
 /// Synthèse's « Patrimoine net » chart. The value range is padded past the series' min and
 /// max to clean tick values (see [ChartScale]), so the extremes sit inside the plot.
@@ -68,12 +69,6 @@ class AreaLine extends StatefulWidget {
   /// [ChartScale.of]. A chart of minor units passes 100.
   final num minStep;
 
-  /// Height reserved beneath the plot for the month axis.
-  static const axisHeight = 22.0;
-
-  /// Width reserved left of the plot for the value axis, when there is one.
-  static const valueGutter = 56.0;
-
   /// The horizontal centre of point [index] of [count] across [width]: the middle of its
   /// label's slot. Shared by the painter and the axis so the two can never disagree.
   static double pointX(int index, int count, double width) =>
@@ -92,9 +87,9 @@ class _AreaLineState extends State<AreaLine> {
     final values = widget.values;
     final labels = widget.labels;
     final tooltips = widget.tooltips;
-    final textTheme = Theme.of(context).textTheme;
+    final labelStyle = ChartPaints.labelStyle(Theme.of(context).textTheme);
     final valueLabel = widget.valueLabel;
-    final gutter = valueLabel == null ? 0.0 : AreaLine.valueGutter;
+    final gutter = valueLabel == null ? 0.0 : AppChart.valueGutter;
     final scale = ChartScale.of(
       values,
       intervals: widget.gridlines,
@@ -111,8 +106,8 @@ class _AreaLineState extends State<AreaLine> {
     return LayoutBuilder(
       builder: (context, constraints) {
         final axis = constraints.hasBoundedHeight
-            ? math.min(AreaLine.axisHeight, constraints.maxHeight)
-            : AreaLine.axisHeight;
+            ? math.min(AppChart.axisHeight, constraints.maxHeight)
+            : AppChart.axisHeight;
 
         return Column(
           children: [
@@ -132,11 +127,7 @@ class _AreaLineState extends State<AreaLine> {
                         hovered: _hovered,
                         gutter: gutter,
                         levelLabels: levels,
-                        labelStyle: tabularNumberStyle(textTheme.labelSmall!)
-                            .copyWith(
-                              fontWeight: FontWeight.w400,
-                              color: AppColors.textSecondary,
-                            ),
+                        labelStyle: labelStyle,
                       ),
                     ),
                   ),
@@ -161,7 +152,7 @@ class _AreaLineState extends State<AreaLine> {
                       points: (size) =>
                           _points(values, _plotRect(size, gutter), scale),
                       hovered: hovered,
-                      pointRadius: _AreaLinePainter._dotRadius,
+                      pointRadius: AppChart.dotReach,
                       leftBound: gutter,
                     ),
                 ],
@@ -172,7 +163,7 @@ class _AreaLineState extends State<AreaLine> {
               child: ClipRect(
                 child: OverflowBox(
                   alignment: Alignment.topCenter,
-                  maxHeight: AreaLine.axisHeight,
+                  maxHeight: AppChart.axisHeight,
                   child: Row(
                     children: [
                       SizedBox(width: gutter),
@@ -182,10 +173,7 @@ class _AreaLineState extends State<AreaLine> {
                             label,
                             textAlign: TextAlign.center,
                             overflow: TextOverflow.ellipsis,
-                            style: textTheme.labelSmall?.copyWith(
-                              fontWeight: FontWeight.w400,
-                              color: AppColors.textSecondary,
-                            ),
+                            style: labelStyle,
                           ),
                         ),
                     ],
@@ -221,14 +209,14 @@ class _AreaLineState extends State<AreaLine> {
   );
 }
 
-/// The plot inside a chart of [size]: inset vertically by the dot so an extreme point isn't
-/// clipped by the plot's own edge, with the value [gutter] on its left. Horizontally the
-/// points already sit half a slot in from either side.
+/// The plot inside a chart of [size]: inset vertically by the current dot so an extreme
+/// point isn't clipped by the plot's own edge, with the value [gutter] on its left.
+/// Horizontally the points already sit half a slot in from either side.
 Rect _plotRect(Size size, double gutter) => Rect.fromLTWH(
   gutter,
-  _AreaLinePainter._dotRadius,
+  AppChart.dotReach,
   size.width - gutter,
-  size.height - _AreaLinePainter._dotRadius * 2,
+  size.height - AppChart.dotReach * 2,
 );
 
 /// Where each value is drawn in [plot], on the padded [scale] of the series.
@@ -268,39 +256,19 @@ class _AreaLinePainter extends CustomPainter {
   final List<String> levelLabels;
   final TextStyle labelStyle;
 
-  static const _stroke = 2.5;
-  static const _dotRadius = 5.0;
-  static const _fillAlpha = 0.16;
-  static const _negativeFillAlpha = 0.10;
-  static const _dash = 4.0;
-  static const _dashGap = 3.0;
-
   @override
   void paint(Canvas canvas, Size size) {
     final plot = _plotRect(size, gutter);
     if (plot.width <= 0) return;
 
-    final grid = Paint()
-      ..color = AppColors.borderSubtle
-      ..strokeWidth = 1;
-    for (final tick in scale.ticks) {
-      final y = scale.y(tick, plot);
-      canvas.drawLine(Offset(plot.left, y), Offset(size.width, y), grid);
-    }
-
-    // Each label beside the gridline it names, bottom to top.
-    for (var i = 0; i < levelLabels.length && i < scale.ticks.length; i++) {
-      final y = scale.y(scale.ticks[i], plot);
-      final label = TextPainter(
-        text: TextSpan(text: levelLabels[i], style: labelStyle),
-        textDirection: TextDirection.ltr,
-        maxLines: 1,
-      )..layout();
-      label.paint(
-        canvas,
-        Offset(plot.left - AppSpacing.sm - label.width, y - label.height / 2),
-      );
-    }
+    ChartPaints.grid(
+      canvas,
+      size,
+      plot,
+      [for (final tick in scale.ticks) scale.y(tick, plot)],
+      labels: levelLabels,
+      style: labelStyle,
+    );
 
     if (values.length < 2) return;
 
@@ -321,62 +289,40 @@ class _AreaLinePainter extends CustomPainter {
       canvas
         ..save()
         ..clipRect(Rect.fromLTRB(plot.left, 0, size.width, zeroY))
-        ..drawPath(area, Paint()..color = color.withValues(alpha: _fillAlpha))
+        ..drawPath(area, ChartPaints.area(color))
         ..restore()
         ..save()
         ..clipRect(Rect.fromLTRB(plot.left, zeroY, size.width, size.height))
-        ..drawPath(
-          area,
-          Paint()
-            ..color = AppColors.negative.withValues(alpha: _negativeFillAlpha),
-        )
+        ..drawPath(area, ChartPaints.negativeArea())
         ..restore();
-      final dash = Paint()
-        ..color = AppColors.borderDashed
-        ..strokeWidth = 1;
-      for (var x = plot.left; x < size.width; x += _dash + _dashGap) {
-        canvas.drawLine(
-          Offset(x, zeroY),
-          Offset(math.min(x + _dash, size.width), zeroY),
-          dash,
-        );
-      }
+      ChartPaints.baseline(
+        canvas,
+        Offset(plot.left, zeroY),
+        Offset(size.width, zeroY),
+      );
     } else {
       final area = Path.from(line)
         ..lineTo(points.last.dx, plot.bottom)
         ..lineTo(points.first.dx, plot.bottom)
         ..close();
-      canvas.drawPath(
-        area,
-        Paint()..color = color.withValues(alpha: _fillAlpha),
-      );
+      canvas.drawPath(area, ChartPaints.area(color));
     }
-    canvas.drawPath(
-      line,
-      Paint()
-        ..color = color
-        ..style = PaintingStyle.stroke
-        ..strokeWidth = _stroke
-        ..strokeJoin = StrokeJoin.round
-        ..strokeCap = StrokeCap.round,
-    );
+    canvas.drawPath(line, ChartPaints.stroke(color));
 
-    // The current point, and the hovered one, ringed in the card's own surface so the dot
-    // reads as sitting on the line rather than as a bead threaded onto it.
-    for (final index in {
+    // A small dot on every point while they stay few; the current point and the hovered
+    // one at full size.
+    final large = {
       values.length - 1,
       if (hovered case final hovered? when hovered < values.length) hovered,
-    }) {
-      canvas.drawCircle(
-        points[index],
-        _dotRadius,
-        Paint()..color = AppColors.surfaceRaised,
-      );
-      canvas.drawCircle(
-        points[index],
-        _dotRadius - _stroke / 2,
-        Paint()..color = color,
-      );
+    };
+    if (points.length <= AppChart.dotCeiling) {
+      for (var i = 0; i < points.length; i++) {
+        if (large.contains(i)) continue;
+        ChartPaints.dot(canvas, points[i], AppChart.pointDotRadius, color);
+      }
+    }
+    for (final index in large) {
+      ChartPaints.dot(canvas, points[index], AppChart.currentDotRadius, color);
     }
   }
 

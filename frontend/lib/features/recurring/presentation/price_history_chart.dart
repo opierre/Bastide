@@ -6,7 +6,6 @@ import 'package:flutter/material.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/tokens.dart';
 import '../../../core/widgets/amount_text.dart';
-import '../../../core/widgets/area_line.dart';
 import '../../../l10n/app_localizations.dart';
 import '../domain/recurring_series.dart';
 import 'recurring_labels.dart';
@@ -42,7 +41,7 @@ class PriceHistoryChart extends StatelessWidget {
   /// gutter, so this plot starts where the dashboard's, the account's and the
   /// Synthèse's do. Its labels end [AppSpacing.sm] short of the plot, as theirs
   /// do.
-  static const _gutter = AreaLine.valueGutter;
+  static const _gutter = AppChart.valueGutter;
 
   /// Right inset of the plot, so the latest charge's dot sits inside the chart
   /// rather than spilling into the card's padding — the gridlines still run to

@@ -76,7 +76,7 @@ class _CycleBarsState extends State<CycleBars> {
                 onExit: (_) => setState(() => _hovered = null),
                 child: Row(
                   children: [
-                    const SizedBox(width: AreaLine.valueGutter),
+                    const SizedBox(width: AppChart.valueGutter),
                     for (var i = 0; i < widget.values.length; i++)
                       Expanded(
                         child: MouseRegion(
@@ -99,10 +99,10 @@ class _CycleBarsState extends State<CycleBars> {
           ),
         ),
         SizedBox(
-          height: AreaLine.axisHeight,
+          height: AppChart.axisHeight,
           child: Row(
             children: [
-              const SizedBox(width: AreaLine.valueGutter),
+              const SizedBox(width: AppChart.valueGutter),
               for (final label in widget.labels)
                 Expanded(
                   child: Text(
@@ -152,7 +152,7 @@ class _CycleBarsPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    const gutter = AreaLine.valueGutter;
+    const gutter = AppChart.valueGutter;
     final plot = Rect.fromLTWH(gutter, 4, size.width - gutter, size.height - 4);
     if (plot.width <= 0) return;
 

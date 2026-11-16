@@ -92,10 +92,10 @@ class _SavingsChartState extends State<SavingsChart> {
       children: [
         Expanded(child: _plot(scale, labelStyle, tooltips)),
         SizedBox(
-          height: AreaLine.axisHeight,
+          height: AppChart.axisHeight,
           child: Row(
             children: [
-              const SizedBox(width: AreaLine.valueGutter),
+              const SizedBox(width: AppChart.valueGutter),
               for (final label in widget.labels)
                 Expanded(
                   child: Text(
@@ -138,7 +138,7 @@ class _SavingsChartState extends State<SavingsChart> {
         onExit: (_) => _hover(null),
         child: Row(
           children: [
-            const SizedBox(width: AreaLine.valueGutter),
+            const SizedBox(width: AppChart.valueGutter),
             for (var i = 0; i < widget.values.length; i++)
               Expanded(
                 child: MouseRegion(
@@ -183,7 +183,7 @@ class _SavingsChartState extends State<SavingsChart> {
                 _barRect(values, scale, i, _plotRect(size)),
             ]
           : null,
-      leftBound: AreaLine.valueGutter,
+      leftBound: AppChart.valueGutter,
     );
   }
 }
@@ -192,9 +192,9 @@ class _SavingsChartState extends State<SavingsChart> {
 /// top and bottom. Shared by the painter and the tooltip, so a tooltip can't drift off the
 /// mark it names.
 Rect _plotRect(Size size) => Rect.fromLTWH(
-  AreaLine.valueGutter,
+  AppChart.valueGutter,
   4,
-  size.width - AreaLine.valueGutter,
+  size.width - AppChart.valueGutter,
   size.height - 8,
 );
 
