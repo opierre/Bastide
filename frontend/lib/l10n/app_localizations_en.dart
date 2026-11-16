@@ -1108,10 +1108,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get categorySystemPetsVet => 'Vet';
 
   @override
-  String get dashboardStatIncome => 'Income (month)';
+  String get dashboardStatIncome => 'Income';
 
   @override
-  String get dashboardStatExpense => 'Expenses (month)';
+  String get dashboardStatExpense => 'Expenses';
 
   @override
   String get dashboardStatNet => 'Net';
@@ -1128,21 +1128,18 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get dashboardStatNetCaption => 'income − expenses';
-
-  @override
   String dashboardSavingsDeltaPoints(String delta) {
     return '$delta pt';
   }
 
   @override
   String dashboardSavingsGoalReached(String goal) {
-    return 'Goal: $goal · reached';
+    return 'Goal $goal reached';
   }
 
   @override
   String dashboardSavingsGoalPending(String goal) {
-    return 'Goal: $goal · in progress';
+    return 'Goal $goal in progress';
   }
 
   @override
@@ -3803,6 +3800,16 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get simulatorChartInterest => 'Interest';
+
+  @override
+  String simulatorChartTooltipCapital(String amount) {
+    return 'Principal: $amount';
+  }
+
+  @override
+  String simulatorChartTooltipInterest(String amount) {
+    return 'Interest: $amount';
+  }
 
   @override
   String get simulatorChartEmpty =>

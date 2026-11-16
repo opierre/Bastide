@@ -12,13 +12,12 @@ import '../../goals/presentation/goals_screen.dart';
 import '../../imports/presentation/imports_screen.dart';
 import '../../transactions/presentation/transactions_screen.dart';
 import '../application/dashboard_controller.dart';
-import '../domain/dashboard_summary.dart';
 import 'category_breakdown.dart';
 import 'goals_progress_card.dart';
 import 'income_vs_expense.dart';
+import 'kpi_strip.dart';
 import 'recent_activity.dart';
 import 'savings_trend.dart';
-import 'stat_card.dart';
 
 class DashboardScreen extends ConsumerWidget {
   const DashboardScreen({super.key});
@@ -69,84 +68,17 @@ class _DashboardContent extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final l10n = AppLocalizations.of(context)!;
     // The top three active goals, or nothing at all — a goals load that hasn't
     // landed or has failed simply leaves row 3 with its two cards, rather
     // than putting an error about a side card on the dashboard.
     final goals =
         ref.watch(goalsControllerProvider).value?.topGoals ?? const [];
-    final locale = Localizations.localeOf(context).toString();
     final summary = state.summary;
-    // The month the deltas compare against — « vs avril » when May is selected.
-    final previousMonth = DateTime(state.month.year, state.month.month - 1);
-    final goal = formatWholePct(savingsRateGoal * 100, locale);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        IntrinsicHeight(
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              // `1fr 1fr 1fr 1.35fr` from the spec's grid, expressed as integer flex —
-              // Flutter's `flex` is a whole number, so the ratio is scaled by 100 rather
-              // than rounded to 1:1:1:1 (too narrow) or 1:1:1:2 (too wide).
-              Expanded(
-                flex: 100,
-                child: StatCard(
-                  label: l10n.dashboardStatIncome,
-                  amountMinor: summary.incomeMinor,
-                  currency: summary.currency,
-                  deltaPct: summary.incomeDeltaPct,
-                  caption: l10n.dashboardStatVsPreviousMonth(previousMonth),
-                ),
-              ),
-              const SizedBox(width: AppSpacing.gridGap),
-              Expanded(
-                flex: 100,
-                child: StatCard(
-                  label: l10n.dashboardStatExpense,
-                  amountMinor: -summary.expenseMinor,
-                  currency: summary.currency,
-                  deltaPct: summary.expenseDeltaPct,
-                  caption: l10n.dashboardStatVsPreviousMonth(previousMonth),
-                  // The one card where a rise is bad news: spending more than last month is
-                  // red, spending less is green.
-                  invertTrendColor: true,
-                ),
-              ),
-              const SizedBox(width: AppSpacing.gridGap),
-              Expanded(
-                flex: 100,
-                child: StatCard(
-                  label: l10n.dashboardStatNet,
-                  amountMinor: summary.netMinor,
-                  currency: summary.currency,
-                  deltaPct: summary.netDeltaPct,
-                  caption: l10n.dashboardStatNetCaption,
-                  // The only colorized headline of the row: a positive net is green, a
-                  // negative one red.
-                  colorizeAmount: true,
-                ),
-              ),
-              const SizedBox(width: AppSpacing.gridGap),
-              Expanded(
-                flex: 135,
-                child: SavingsRateCard(
-                  label: l10n.dashboardStatSavingsRate,
-                  rate: summary.savingsRate,
-                  deltaPct: summary.savingsRateDeltaPct,
-                  deltaLabel: l10n.dashboardSavingsDeltaPoints(
-                    formatSignedMagnitude(summary.savingsRateDeltaPct, locale),
-                  ),
-                  caption: summary.savingsGoalReached
-                      ? l10n.dashboardSavingsGoalReached(goal)
-                      : l10n.dashboardSavingsGoalPending(goal),
-                ),
-              ),
-            ],
-          ),
-        ),
+        KpiStrip(summary: summary, month: state.month),
         const SizedBox(height: AppSpacing.gridGap),
         // Rows 2 and 3 split whatever is left below the stat grid, equally. The spec pins
         // row 2 at 322 px against its 1440×900 frame, but two 322 px rows overrun the content
@@ -243,8 +175,8 @@ class _EmptyState extends StatelessWidget {
   }
 }
 
-/// The stat grid's measured height, so the skeleton's row 1 doesn't resize when data lands.
-const _statRowHeight = 175.0;
+/// The KPI strip's measured height, so the skeleton's row 1 doesn't resize when data lands.
+const _statRowHeight = 162.0;
 
 class _DashboardSkeleton extends StatelessWidget {
   const _DashboardSkeleton({super.key});
@@ -258,17 +190,7 @@ class _DashboardSkeleton extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Row(
-            children: [
-              Expanded(flex: 100, child: SkeletonBlock(height: _statRowHeight)),
-              SizedBox(width: AppSpacing.gridGap),
-              Expanded(flex: 100, child: SkeletonBlock(height: _statRowHeight)),
-              SizedBox(width: AppSpacing.gridGap),
-              Expanded(flex: 100, child: SkeletonBlock(height: _statRowHeight)),
-              SizedBox(width: AppSpacing.gridGap),
-              Expanded(flex: 135, child: SkeletonBlock(height: _statRowHeight)),
-            ],
-          ),
+          SkeletonBlock(height: _statRowHeight),
           SizedBox(height: AppSpacing.gridGap),
           Expanded(
             child: Row(

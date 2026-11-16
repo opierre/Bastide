@@ -35,7 +35,7 @@ class AppCard extends StatefulWidget {
   /// stretched sibling row gives it (see the dashboard's `IntrinsicHeight` +
   /// `CrossAxisAlignment.stretch` grid). Defaults to the top-start the
   /// internal [Stack] would use anyway, so every existing card keeps its
-  /// current look; [SavingsRateCard] is the one caller that overrides it.
+  /// current look.
   final AlignmentGeometry alignment;
 
   @override

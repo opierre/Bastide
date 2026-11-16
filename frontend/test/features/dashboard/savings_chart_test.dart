@@ -4,7 +4,6 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'package:bastide/core/theme/app_theme.dart';
 import 'package:bastide/core/theme/tokens.dart';
-import 'package:bastide/core/widgets/area_line.dart';
 import 'package:bastide/features/dashboard/application/dashboard_controller.dart';
 import 'package:bastide/features/dashboard/presentation/savings_chart.dart';
 
@@ -55,10 +54,10 @@ Future<void> _pump(
 Offset _mark(WidgetTester tester, int index) {
   final chart = tester.getRect(find.byType(SavingsChart));
   final plot = Rect.fromLTWH(
-    chart.left + AreaLine.valueGutter,
+    chart.left + AppChart.valueGutter,
     chart.top + 4,
-    chart.width - AreaLine.valueGutter,
-    chart.height - AreaLine.axisHeight - 8,
+    chart.width - AppChart.valueGutter,
+    chart.height - AppChart.axisHeight - 8,
   );
   const top = 30000 * 1.15;
   const bottom = -9000 * 1.15;
@@ -96,7 +95,7 @@ Rect _bar(WidgetTester tester, int index) {
   final (_, zero) = _localMark(tester, index);
   final tip = _mark(tester, index);
   final zeroY = chart.top + zero.dy;
-  final slot = (chart.width - AreaLine.valueGutter) / _values.length;
+  final slot = (chart.width - AppChart.valueGutter) / _values.length;
   final width = slot * 0.56 < 22 ? slot * 0.56 : 22.0;
   return Rect.fromLTRB(
     tip.dx - width / 2,
@@ -124,10 +123,10 @@ bool _touchesLine(Rect box, List<Offset> points) {
 /// month axis.
 void _expectInPlot(WidgetTester tester, Rect card) {
   final chart = tester.getRect(find.byType(SavingsChart));
-  expect(card.left, greaterThanOrEqualTo(chart.left + AreaLine.valueGutter));
+  expect(card.left, greaterThanOrEqualTo(chart.left + AppChart.valueGutter));
   expect(card.top, greaterThanOrEqualTo(chart.top));
   expect(card.right, lessThanOrEqualTo(chart.right));
-  expect(card.bottom, lessThanOrEqualTo(chart.bottom - AreaLine.axisHeight));
+  expect(card.bottom, lessThanOrEqualTo(chart.bottom - AppChart.axisHeight));
 }
 
 RenderObject _painter(WidgetTester tester) => tester.renderObject(
@@ -142,19 +141,19 @@ RenderObject _painter(WidgetTester tester) => tester.renderObject(
   final origin = tester.getTopLeft(find.byType(SavingsChart));
   final mark = _mark(tester, index) - origin;
   final chart = tester.getRect(find.byType(SavingsChart));
-  final plotHeight = chart.height - AreaLine.axisHeight - 8;
+  final plotHeight = chart.height - AppChart.axisHeight - 8;
   const top = 30000 * 1.15;
   const bottom = -9000 * 1.15;
   final zeroY = 4 + plotHeight - plotHeight * ((0 - bottom) / (top - bottom));
   return (mark, Offset(mark.dx, zeroY));
 }
 
-final _area = AppColors.iris.withValues(alpha: 0.10);
+final _area = AppColors.iris.withValues(alpha: AppChart.areaAlpha);
 
 /// The painter's y for [value], in its own coordinates.
 double _localY(WidgetTester tester, num value) {
   final chart = tester.getRect(find.byType(SavingsChart));
-  final plotHeight = chart.height - AreaLine.axisHeight - 8;
+  final plotHeight = chart.height - AppChart.axisHeight - 8;
   const top = 30000 * 1.15;
   const bottom = -9000 * 1.15;
   return 4 + plotHeight - plotHeight * ((value - bottom) / (top - bottom));
@@ -217,18 +216,21 @@ void main() {
       final (shortfall, shortfallZero) = _localMark(tester, 2);
       expect(
         _painter(tester),
-        paints..path(
-          color: _area,
-          includes: [
-            Offset.lerp(saving, savingZero, 0.5)!,
-            Offset.lerp(shortfall, shortfallZero, 0.5)!,
-          ],
-          excludes: [
-            saving.translate(0, -6),
-            shortfall.translate(0, 6),
-            savingZero.translate(0, 6),
-          ],
-        ),
+        paints
+          // The dashed zero baseline, under the area.
+          ..path()
+          ..path(
+            color: _area,
+            includes: [
+              Offset.lerp(saving, savingZero, 0.5)!,
+              Offset.lerp(shortfall, shortfallZero, 0.5)!,
+            ],
+            excludes: [
+              saving.translate(0, -6),
+              shortfall.translate(0, 6),
+              savingZero.translate(0, 6),
+            ],
+          ),
       );
     });
 
@@ -249,9 +251,9 @@ void main() {
       for (var i = 0; i < _values.length; i++) {
         if (i > 0) await _moveTo(tester, gesture, i);
         final card = _tooltip(tester, i);
-        // The hovered dot's 5 px radius and 1.5 px ring.
+        // The hovered dot, ring included.
         expect(
-          card.inflate(6.5).contains(points[i]),
+          card.inflate(AppChart.dotReach).contains(points[i]),
           isFalse,
           reason: 'month $i',
         );
@@ -277,7 +279,7 @@ void main() {
           for (final dot in dots) {
             expect(dot.dy, moreOrLessEquals(y, epsilon: 0.01));
           }
-          expect(dots.first.dx, moreOrLessEquals(AreaLine.valueGutter));
+          expect(dots.first.dx, moreOrLessEquals(AppChart.valueGutter));
           expect(dots.last.dx, greaterThan(width - SavingsChart.averageDotGap));
           expect(
             dots[1].dx - dots[0].dx,

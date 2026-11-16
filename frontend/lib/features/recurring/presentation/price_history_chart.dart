@@ -6,7 +6,8 @@ import 'package:flutter/material.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/tokens.dart';
 import '../../../core/widgets/amount_text.dart';
-import '../../../core/widgets/area_line.dart';
+import '../../../core/widgets/chart_style.dart';
+import '../../../core/widgets/chart_tooltip.dart';
 import '../../../l10n/app_localizations.dart';
 import '../domain/recurring_series.dart';
 import 'recurring_labels.dart';
@@ -23,9 +24,9 @@ import 'recurring_labels.dart';
 /// trusted evidence is worse than a blunter line.
 ///
 /// The literal amounts are not lost — the extremes are labelled on the value
-/// axis, and every charge names its date and amount on hover, the same way the
-/// dashboard's bars do.
-class PriceHistoryChart extends StatelessWidget {
+/// axis, and every charge names its date and amount on hover, in the card every
+/// chart uses (see [LineChartTooltip]).
+class PriceHistoryChart extends StatefulWidget {
   const PriceHistoryChart({
     super.key,
     required this.series,
@@ -39,34 +40,40 @@ class PriceHistoryChart extends StatelessWidget {
   final List<SeriesOccurrence> occurrences;
 
   /// Width reserved left of the plot for the value axis: the app-wide chart
-  /// gutter, so this plot starts where the dashboard's, the account's and the
-  /// Synthèse's do. Its labels end [AppSpacing.sm] short of the plot, as theirs
-  /// do.
-  static const _gutter = AreaLine.valueGutter;
+  /// gutter, so this plot starts where every other chart's does. Its labels end
+  /// [AppChart.labelGap] short of the plot, as theirs do.
+  static const _gutter = AppChart.valueGutter;
 
   /// Right inset of the plot, so the latest charge's dot sits inside the chart
   /// rather than spilling into the card's padding — the gridlines still run to
   /// the edge, like every other chart's.
-  static const _rightInset = _PriceLinePainter._dotRadius;
+  static const _rightInset = AppChart.dotReach;
 
   /// Height reserved beneath the plot for a date axis whose ticks lie flat.
-  static const _dateAxisHeight = 20.0;
+  static const _dateAxisHeight = AppChart.axisHeight;
 
   /// Vertical inset, sized to clear the current-point dot.
-  static const _inset = 6.0;
+  static const _inset = AppChart.dotReach;
 
   /// Clear space kept between two neighbouring date ticks.
   static const _tickGap = 4.0;
 
-  /// Above this many charges the per-point dots turn the line into a bead
-  /// string; the stroke alone carries the shape from there.
-  static const dotCeiling = 24;
+  @override
+  State<PriceHistoryChart> createState() => _PriceHistoryChartState();
+}
+
+class _PriceHistoryChartState extends State<PriceHistoryChart> {
+  /// The charge under the pointer — hover ephemera, not chart state.
+  int? _hovered;
+
+  RecurringSeries get series => widget.series;
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final locale = Localizations.localeOf(context).toString();
-    final points = occurrences.reversed.toList();
+    final textTheme = Theme.of(context).textTheme;
+    final points = widget.occurrences.reversed.toList();
     // Unsigned: the chart plots what the subscription costs, not a movement on
     // the ledger, so the line climbs when the price climbs.
     final values = [
@@ -77,29 +84,30 @@ class PriceHistoryChart extends StatelessWidget {
       for (final point in points) point.bookedDate,
     ]);
     final ticks = [for (final point in points) format.format(point.bookedDate)];
-    final tickStyle = Theme.of(context).textTheme.labelSmall?.copyWith(
-      fontWeight: FontWeight.w400,
-      color: AppColors.textSecondary,
-    );
+    final labelStyle = ChartPaints.labelStyle(textTheme);
+    final tooltips = [
+      for (var i = 0; i < points.length; i++)
+        _tooltip(l10n, locale, textTheme, points[i], isStep: i == stepIndex),
+    ];
 
     return LayoutBuilder(
       builder: (context, constraints) {
         final size = constraints.biggest;
         final axis = _DateAxis.fit(
           ticks: ticks,
-          style: tickStyle,
+          style: labelStyle,
           textScaler: MediaQuery.textScalerOf(context),
           textDirection: Directionality.of(context),
-          plotLeft: _gutter,
-          plotRight: size.width - _rightInset,
+          plotLeft: PriceHistoryChart._gutter,
+          plotRight: size.width - PriceHistoryChart._rightInset,
           width: size.width,
         );
         final plot = _PlotGeometry.of(
           Rect.fromLTRB(
-            _gutter,
-            _inset,
-            size.width - _rightInset,
-            size.height - axis.height - _inset,
+            PriceHistoryChart._gutter,
+            PriceHistoryChart._inset,
+            size.width - PriceHistoryChart._rightInset,
+            size.height - axis.height - PriceHistoryChart._inset,
           ),
           values,
         );
@@ -114,23 +122,48 @@ class PriceHistoryChart extends StatelessWidget {
               child: RepaintBoundary(
                 child: CustomPaint(
                   size: Size.infinite,
-                  painter: _PriceLinePainter(plot: plot, stepIndex: stepIndex),
+                  painter: _PriceLinePainter(
+                    plot: plot,
+                    stepIndex: stepIndex,
+                    hovered: _hovered,
+                  ),
                 ),
               ),
             ),
-            ..._valueLabels(plot, locale, size.width),
-            ..._dateLabels(plot, points, ticks, tickStyle, axis, size.width),
-            for (var i = 0; i < points.length; i++)
-              _hoverSlice(
-                context: context,
-                l10n: l10n,
-                locale: locale,
-                plot: plot,
-                index: i,
-                occurrence: points[i],
-                isStep: i == stepIndex,
-                width: size.width,
-                axisHeight: axis.height,
+            ..._valueLabels(plot, locale, size.width, labelStyle),
+            ..._dateLabels(plot, points, ticks, labelStyle, axis, size.width),
+            Positioned.fill(
+              child: MouseRegion(
+                onExit: (_) => setState(() => _hovered = null),
+                child: Stack(
+                  children: [
+                    for (var i = 0; i < points.length; i++)
+                      _hoverSlice(
+                        plot: plot,
+                        index: i,
+                        occurrence: points[i],
+                        label: tooltips[i].toPlainText(),
+                        width: size.width,
+                        axisHeight: axis.height,
+                      ),
+                  ],
+                ),
+              ),
+            ),
+            if (_hovered case final hovered? when hovered < points.length)
+              Positioned.fill(
+                child: LineChartTooltip(
+                  cardKey: const Key('seriesPriceTooltip'),
+                  message: tooltips[hovered],
+                  // The step line's own corners, so the card keeps clear of
+                  // the treads and risers actually drawn: charge i is vertex
+                  // 2i, the corner before it 2i − 1.
+                  points: (_) => _stepVertices(plot),
+                  hovered: hovered * 2,
+                  pointRadius: AppChart.dotReach,
+                  leftBound: PriceHistoryChart._gutter,
+                  bottomInset: axis.height,
+                ),
               ),
           ],
         );
@@ -156,28 +189,34 @@ class PriceHistoryChart extends StatelessWidget {
   /// left. Two ticks rather than an even scale: the figures that matter here
   /// are the prices actually paid, not round intermediate ones nobody was
   /// billed.
-  List<Widget> _valueLabels(_PlotGeometry plot, String locale, double width) {
+  List<Widget> _valueLabels(
+    _PlotGeometry plot,
+    String locale,
+    double width,
+    TextStyle style,
+  ) {
     if (plot.values.isEmpty) return const [];
-    final style = tabularNumberStyle(
-      AppTextStyles.helper,
-    ).copyWith(color: AppColors.textSecondary);
 
     Widget label(double value, Key key) => Positioned(
       key: key,
       // Anchored by its end, so the figure stays whole however wide it runs.
-      right: width - (_gutter - AppSpacing.sm),
-      // Half a line's height, so the text centres on the value it names.
-      top: plot.yAt(value) - 8,
-      child: Text(
-        formatAmount(
-          amountMinor: value.round(),
-          currency: series.currency,
-          locale: locale,
+      right: width - (PriceHistoryChart._gutter - AppChart.labelGap),
+      top: plot.yAt(value),
+      // Lifted by half its own height, so the text centres on the value it
+      // names.
+      child: FractionalTranslation(
+        translation: const Offset(0, -0.5),
+        child: Text(
+          formatAmount(
+            amountMinor: value.round(),
+            currency: series.currency,
+            locale: locale,
+          ),
+          textAlign: TextAlign.end,
+          maxLines: 1,
+          softWrap: false,
+          style: style,
         ),
-        textAlign: TextAlign.end,
-        maxLines: 1,
-        softWrap: false,
-        style: style,
       ),
     );
 
@@ -210,7 +249,7 @@ class PriceHistoryChart extends StatelessWidget {
           // off the card.
           left: axis.leftOf(i, plot.xAt(i), width),
           width: axis.rotated ? axis.lineHeight : axis.widths[i],
-          top: plot.rect.bottom + _inset,
+          top: plot.rect.bottom + PriceHistoryChart._inset,
           child: axis.rotated
               // Read bottom to top, the date's end against the plot it names.
               ? RotatedBox(
@@ -232,20 +271,30 @@ class PriceHistoryChart extends StatelessWidget {
         ),
   ];
 
+  /// The step line's corners: each charge, and before every charge but the
+  /// first the corner where the previous price meets its riser.
+  List<Offset> _stepVertices(_PlotGeometry plot) {
+    final vertices = <Offset>[];
+    for (var i = 0; i < plot.values.length; i++) {
+      final y = plot.yAt(plot.values[i]);
+      if (i > 0) vertices.add(Offset(plot.xAt(i), vertices.last.dy));
+      vertices.add(Offset(plot.xAt(i), y));
+    }
+    return vertices;
+  }
+
   /// A full-height column over each charge: the point is a few pixels wide, but
-  /// the thing worth hovering is the moment in time it stands for.
+  /// the thing worth hovering is the moment in time it stands for. It carries
+  /// the card's text as a semantics label, since the card itself only exists
+  /// while a pointer hovers.
   Widget _hoverSlice({
-    required BuildContext context,
-    required AppLocalizations l10n,
-    required String locale,
     required _PlotGeometry plot,
     required int index,
     required SeriesOccurrence occurrence,
-    required bool isStep,
+    required String label,
     required double width,
     required double axisHeight,
   }) {
-    final textTheme = Theme.of(context).textTheme;
     final sliceWidth = plot.values.length < 2
         ? plot.rect.width
         : plot.rect.width / (plot.values.length - 1);
@@ -256,43 +305,52 @@ class PriceHistoryChart extends StatelessWidget {
       width: sliceWidth,
       top: 0,
       bottom: axisHeight,
-      child: Tooltip(
+      child: MouseRegion(
         key: Key('seriesOccurrence-${occurrence.id}'),
-        richMessage: TextSpan(
-          children: [
-            TextSpan(
-              text:
-                  '${seriesDateFormat(locale).format(occurrence.bookedDate)}\n',
-              style: tabularNumberStyle(textTheme.labelSmall!),
-            ),
-            TextSpan(
-              // Signed and colorized here, unlike the axis: the tooltip names
-              // the transaction itself, money that actually left the account.
-              text: formatAmount(
-                amountMinor: occurrence.amountMinor,
-                currency: occurrence.currency,
-                locale: locale,
-              ),
-              style: tabularNumberStyle(textTheme.bodySmall!).copyWith(
-                color: occurrence.amountMinor < 0
-                    ? AppColors.negative
-                    : AppColors.positive,
-              ),
-            ),
-            if (isStep && series.previousAmountMinor != null)
-              TextSpan(
-                text:
-                    '\n${l10n.subscriptionDetailChange(_money(series.previousAmountMinor!, locale), _money(series.expectedAmountMinor, locale))}',
-                style: tabularNumberStyle(
-                  textTheme.bodySmall!,
-                ).copyWith(color: AppColors.warning),
-              ),
-          ],
-        ),
-        child: const ColoredBox(color: Colors.transparent),
+        onEnter: (_) => setState(() => _hovered = index),
+        child: Semantics(label: label, child: const SizedBox.expand()),
       ),
     );
   }
+
+  /// The charge's date (tabular) over its signed, colorized amount, and on the
+  /// charge that stepped, the change in amber.
+  TextSpan _tooltip(
+    AppLocalizations l10n,
+    String locale,
+    TextTheme textTheme,
+    SeriesOccurrence occurrence, {
+    required bool isStep,
+  }) => TextSpan(
+    children: [
+      TextSpan(
+        text: '${seriesDateFormat(locale).format(occurrence.bookedDate)}\n',
+        style: tabularNumberStyle(textTheme.labelSmall!),
+      ),
+      TextSpan(
+        // Signed and colorized here, unlike the axis: the tooltip names the
+        // transaction itself, money that actually left the account.
+        text: formatAmount(
+          amountMinor: occurrence.amountMinor,
+          currency: occurrence.currency,
+          locale: locale,
+        ),
+        style: tabularNumberStyle(textTheme.bodySmall!).copyWith(
+          color: occurrence.amountMinor < 0
+              ? AppColors.negative
+              : AppColors.positive,
+        ),
+      ),
+      if (isStep && series.previousAmountMinor != null)
+        TextSpan(
+          text:
+              '\n${l10n.subscriptionDetailChange(_money(series.previousAmountMinor!, locale), _money(series.expectedAmountMinor, locale))}',
+          style: tabularNumberStyle(
+            textTheme.bodySmall!,
+          ).copyWith(color: AppColors.warning),
+        ),
+    ],
+  );
 
   String _money(int amountMinor, String locale) => formatAmount(
     amountMinor: amountMinor.abs(),
@@ -508,35 +566,35 @@ class _PlotGeometry {
   int get hashCode => Object.hash(rect, low, high, Object.hashAll(values));
 }
 
-/// The step line itself: the same iris stroke over a 16% iris fill the savings
-/// area line uses (`docs/design/00` §Components → AreaLine), so the two charts
-/// read as one family.
+/// The step line itself, in the shared curve style ([AppChart]): the iris
+/// stroke, area, gridlines and dots every line chart draws with, so the
+/// subscription's history reads as one family with the rest.
 ///
 /// Deliberately not animated, like every other chart here — the spec allows
 /// only the spinner and skeleton keyframes.
 class _PriceLinePainter extends CustomPainter {
-  _PriceLinePainter({required this.plot, required this.stepIndex});
+  _PriceLinePainter({
+    required this.plot,
+    required this.stepIndex,
+    required this.hovered,
+  });
 
   final _PlotGeometry plot;
   final int? stepIndex;
+  final int? hovered;
 
-  static const _stroke = 2.5;
-  static const _dotRadius = 5.0;
-  static const _pointRadius = 3.0;
-  static const _fillAlpha = 0.16;
   static const _gridlines = 4;
 
   @override
   void paint(Canvas canvas, Size size) {
     final rect = plot.rect;
 
-    final grid = Paint()
-      ..color = AppColors.borderSubtle
-      ..strokeWidth = 1;
-    for (var i = 0; i <= _gridlines; i++) {
-      final y = rect.top + rect.height * (i / _gridlines);
-      canvas.drawLine(Offset(rect.left, y), Offset(size.width, y), grid);
-    }
+    // Unlabelled: the axis names the prices paid, not round levels (see
+    // [_PriceHistoryChartState._valueLabels]).
+    ChartPaints.grid(canvas, size, rect, [
+      for (var i = 0; i <= _gridlines; i++)
+        rect.top + rect.height * (i / _gridlines),
+    ]);
 
     if (plot.values.isEmpty) return;
 
@@ -560,31 +618,19 @@ class _PriceLinePainter extends CustomPainter {
         ..lineTo(points.first.dx, rect.bottom)
         ..close();
 
-      canvas.drawPath(
-        area,
-        Paint()..color = AppColors.iris.withValues(alpha: _fillAlpha),
-      );
-      canvas.drawPath(
-        line,
-        Paint()
-          ..color = AppColors.iris
-          ..style = PaintingStyle.stroke
-          ..strokeWidth = _stroke
-          ..strokeJoin = StrokeJoin.round
-          ..strokeCap = StrokeCap.round,
-      );
+      canvas.drawPath(area, ChartPaints.area(AppColors.iris));
+      canvas.drawPath(line, ChartPaints.stroke(AppColors.iris));
     }
 
-    if (points.length <= PriceHistoryChart.dotCeiling) {
-      for (var i = 0; i < points.length - 1; i++) {
-        _dot(canvas, points[i], _pointRadius, AppColors.iris);
-      }
-    }
+    final last = points.length - 1;
+    final step = stepIndex != null && stepIndex! < points.length
+        ? stepIndex
+        : null;
 
-    // The charge the price stepped at, in the same amber the increase banner
-    // and the list's pill use — the one point on the line the user is being
-    // asked to look at.
-    if (stepIndex case final step? when step < points.length) {
+    // The charge the price stepped at gets a guide from plot top to bottom,
+    // under the dots, in the same amber the increase banner and the list's pill
+    // use — the one point on the line the user is being asked to look at.
+    if (step != null) {
       canvas.drawLine(
         Offset(points[step].dx, rect.top),
         Offset(points[step].dx, rect.bottom),
@@ -592,23 +638,23 @@ class _PriceLinePainter extends CustomPainter {
           ..color = AppColors.warning.withValues(alpha: 0.35)
           ..strokeWidth = 1,
       );
-      _dot(canvas, points[step], _dotRadius, AppColors.warning);
     }
 
-    // The latest charge, ringed in the card's own surface so it reads as
-    // sitting on the line rather than as a bead threaded onto it.
-    if (stepIndex != points.length - 1) {
-      _dot(canvas, points.last, _dotRadius, AppColors.iris);
+    for (var i = 0; i < points.length; i++) {
+      final large = i == last || i == step || i == hovered;
+      if (!large && points.length > AppChart.dotCeiling) continue;
+      ChartPaints.dot(
+        canvas,
+        points[i],
+        large ? AppChart.currentDotRadius : AppChart.pointDotRadius,
+        i == step ? AppColors.warning : AppColors.iris,
+      );
     }
-  }
-
-  void _dot(Canvas canvas, Offset center, double radius, Color color) {
-    canvas
-      ..drawCircle(center, radius, Paint()..color = AppColors.surfaceRaised)
-      ..drawCircle(center, radius - _stroke / 2, Paint()..color = color);
   }
 
   @override
   bool shouldRepaint(_PriceLinePainter oldDelegate) =>
-      oldDelegate.plot != plot || oldDelegate.stepIndex != stepIndex;
+      oldDelegate.plot != plot ||
+      oldDelegate.stepIndex != stepIndex ||
+      oldDelegate.hovered != hovered;
 }

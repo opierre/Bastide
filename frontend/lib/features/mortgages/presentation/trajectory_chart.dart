@@ -8,6 +8,9 @@ import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/tokens.dart';
 import '../../../core/widgets/amount_text.dart';
 import '../../../core/widgets/app_card.dart';
+import '../../../core/widgets/chart_scale.dart';
+import '../../../core/widgets/chart_style.dart';
+import '../../../core/widgets/chart_tooltip.dart';
 import '../../../l10n/app_localizations.dart';
 import '../application/mortgages_controller.dart';
 import 'mortgage_labels.dart';
@@ -138,7 +141,29 @@ class TrajectoryChartCard extends StatelessWidget {
                 name: summary.currency,
                 decimalDigits: 0,
               ).format(minor / 100),
-              labelStyle: AppTextStyles.helper.copyWith(fontSize: 11),
+              labelStyle: ChartPaints.labelStyle(textTheme),
+              // The month and what is still owed then — a neutral figure, like
+              // every amount on this panel.
+              tooltips: [
+                for (final point in series)
+                  TextSpan(
+                    children: [
+                      TextSpan(
+                        text:
+                            '${_capitalize(DateFormat.yMMMM(locale).format(point.month))}\n',
+                        style: tabularNumberStyle(textTheme.labelSmall!),
+                      ),
+                      TextSpan(
+                        text: formatAmount(
+                          amountMinor: point.outstandingMinor,
+                          currency: summary.currency,
+                          locale: locale,
+                        ),
+                        style: tabularNumberStyle(textTheme.bodySmall!),
+                      ),
+                    ],
+                  ),
+              ],
             ),
           ),
         ],
@@ -146,6 +171,9 @@ class TrajectoryChartCard extends StatelessWidget {
     );
   }
 }
+
+String _capitalize(String value) =>
+    value.isEmpty ? value : value[0].toUpperCase() + value.substring(1);
 
 class _LegendItem extends StatelessWidget {
   const _LegendItem({required this.label, required this.dashed});
@@ -170,6 +198,8 @@ class _LegendItem extends StatelessWidget {
   }
 }
 
+/// A legend mark drawn exactly as the plot draws what it names: the shared
+/// curve stroke, or today's dashed vertical laid on its side.
 class _LegendSwatchPainter extends CustomPainter {
   const _LegendSwatchPainter({required this.dashed});
 
@@ -182,23 +212,16 @@ class _LegendSwatchPainter extends CustomPainter {
       canvas.drawLine(
         Offset(0, y),
         Offset(size.width, y),
-        Paint()
-          ..color = AppColors.iris
-          ..strokeWidth = 2.5
-          ..strokeCap = StrokeCap.round,
+        ChartPaints.stroke(AppColors.iris),
       );
       return;
     }
-    final paint = Paint()
-      ..color = AppColors.textSecondary
-      ..strokeWidth = 1;
-    for (var x = 0.0; x < size.width; x += 5) {
-      canvas.drawLine(
-        Offset(x, y),
-        Offset(math.min(x + 3, size.width), y),
-        paint,
-      );
-    }
+    ChartPaints.baseline(
+      canvas,
+      Offset(0, y),
+      Offset(size.width, y),
+      color: TrajectoryPlot.todayColor,
+    );
   }
 
   @override
@@ -206,9 +229,20 @@ class _LegendSwatchPainter extends CustomPainter {
       oldDelegate.dashed != dashed;
 }
 
-/// The plot itself: y gridlines from zero, the iris area line, five-yearly x
-/// labels and the dashed annotations. Not animated — charts appear drawn.
-class TrajectoryPlot extends StatelessWidget {
+/// The plot itself, in the shared curve style ([AppChart]): labelled y
+/// gridlines on clean ticks from zero (see [ChartScale]), the iris area line,
+/// five-yearly x labels and the dashed annotations. Not animated — charts
+/// appear drawn.
+///
+/// Its own on purpose (`12-credits.md` §3): a monthly series runs to the last
+/// instalment, far past [AppChart.dotCeiling], so only the annotated months
+/// carry a dot — today's full size, each loan end small — and the x axis names
+/// every fifth year rather than every month. A band above the plot holds the
+/// annotation labels.
+///
+/// Hovering anywhere over the plot rings the nearest month and names what is
+/// still owed then, in the card every chart uses (see [LineChartTooltip]).
+class TrajectoryPlot extends StatefulWidget {
   const TrajectoryPlot({
     super.key,
     required this.months,
@@ -216,6 +250,7 @@ class TrajectoryPlot extends StatelessWidget {
     required this.annotations,
     required this.yLabel,
     required this.labelStyle,
+    this.tooltips,
   });
 
   final List<DateTime> months;
@@ -224,22 +259,135 @@ class TrajectoryPlot extends StatelessWidget {
   final String Function(int minor) yLabel;
   final TextStyle labelStyle;
 
+  /// Hover message per month — same length as [months] when given.
+  final List<InlineSpan>? tooltips;
+
+  /// Today's dashed vertical, a step brighter than the end markers.
+  static const todayColor = AppColors.textSecondary;
+
+  /// A loan end's dashed vertical and label.
+  static const endColor = AppColors.textDisabled;
+
+  @override
+  State<TrajectoryPlot> createState() => _TrajectoryPlotState();
+}
+
+class _TrajectoryPlotState extends State<TrajectoryPlot> {
+  /// The month nearest the pointer — hover ephemera, not chart state.
+  int? _hovered;
+
+  void _hover(Offset local, Size size) {
+    final months = widget.months;
+    if (months.length < 2) return;
+    final plot = _trajectoryPlotRect(size);
+    final span = math.max(1, _monthOffset(months, months.last));
+    final offset = ((local.dx - plot.left) / plot.width * span).round().clamp(
+      0,
+      span,
+    );
+    // The series is monthly and gapless, but find the month rather than trust
+    // that its index is its offset.
+    var nearest = 0;
+    var best = 1 << 30;
+    for (var i = 0; i < months.length; i++) {
+      final distance = (_monthOffset(months, months[i]) - offset).abs();
+      if (distance < best) {
+        best = distance;
+        nearest = i;
+      }
+    }
+    if (nearest != _hovered) setState(() => _hovered = nearest);
+  }
+
   @override
   Widget build(BuildContext context) {
-    return RepaintBoundary(
-      child: CustomPaint(
-        size: Size.infinite,
-        painter: _TrajectoryPainter(
-          months: months,
-          values: values,
-          annotations: annotations,
-          yLabel: yLabel,
-          labelStyle: labelStyle,
-          textDirection: Directionality.of(context),
+    final tooltips = widget.tooltips;
+    // No LayoutBuilder: the credits panel lays this card out by its intrinsic
+    // size, which a LayoutBuilder cannot report. The hover reads the box's
+    // size when the pointer moves instead.
+    return Stack(
+      fit: StackFit.expand,
+      children: [
+        RepaintBoundary(
+          child: CustomPaint(
+            size: Size.infinite,
+            painter: _TrajectoryPainter(
+              months: widget.months,
+              values: widget.values,
+              annotations: widget.annotations,
+              yLabel: widget.yLabel,
+              labelStyle: widget.labelStyle,
+              textDirection: Directionality.of(context),
+              hovered: _hovered,
+            ),
+          ),
         ),
-      ),
+        if (tooltips != null)
+          MouseRegion(
+            key: const Key('trajectoryHover'),
+            onHover: (event) {
+              final size = context.size;
+              if (size != null) _hover(event.localPosition, size);
+            },
+            onExit: (_) => setState(() => _hovered = null),
+            child: const SizedBox.expand(),
+          ),
+        if ((_hovered, tooltips) case (
+          final hovered?,
+          final tooltips?,
+        ) when hovered < tooltips.length && hovered < widget.values.length)
+          LineChartTooltip(
+            cardKey: const Key('trajectoryTooltip'),
+            message: tooltips[hovered],
+            points: (size) =>
+                _trajectoryPoints(size, widget.months, widget.values),
+            hovered: hovered,
+            pointRadius: AppChart.dotReach,
+            leftBound: AppChart.valueGutter,
+            bottomInset: AppChart.axisHeight,
+          ),
+      ],
     );
   }
+}
+
+/// Months from the series' first to [month].
+int _monthOffset(List<DateTime> months, DateTime month) =>
+    (month.year - months.first.year) * 12 + month.month - months.first.month;
+
+/// Where the plot sits in the chart's box: right of the value gutter, under
+/// the annotation band, above the year axis, inset on the right by the dot.
+/// Shared by the painter, the hover and the card.
+Rect _trajectoryPlotRect(Size size) => Rect.fromLTRB(
+  AppChart.valueGutter,
+  _TrajectoryPainter._topBand,
+  size.width - AppChart.dotReach,
+  size.height - AppChart.axisHeight,
+);
+
+/// The series' scale: from zero, the debt's floor, to a clean tick past the
+/// peak — « 0 · 100 k€ · 200 k€ · 300 k€ » for a 255 000 € peak. Minor units,
+/// so no gridline on cents.
+ChartScale _trajectoryScale(List<int> values) =>
+    ChartScale.of([0, ...values], intervals: 3, minStep: 100);
+
+/// Each month's point in a chart of [size].
+List<Offset> _trajectoryPoints(
+  Size size,
+  List<DateTime> months,
+  List<int> values,
+) {
+  if (months.isEmpty) return const [];
+  final plot = _trajectoryPlotRect(size);
+  final scale = _trajectoryScale(values);
+  final span = math.max(1, _monthOffset(months, months.last));
+  return [
+    for (var i = 0; i < months.length; i++)
+      Offset(
+        plot.left + plot.width * (_monthOffset(months, months[i]) / span),
+        scale.y(values[i], plot),
+      ),
+  ];
 }
 
 class _TrajectoryPainter extends CustomPainter {
@@ -250,6 +398,7 @@ class _TrajectoryPainter extends CustomPainter {
     required this.yLabel,
     required this.labelStyle,
     required this.textDirection,
+    required this.hovered,
   });
 
   final List<DateTime> months;
@@ -258,103 +407,61 @@ class _TrajectoryPainter extends CustomPainter {
   final String Function(int minor) yLabel;
   final TextStyle labelStyle;
   final TextDirection textDirection;
+  final int? hovered;
 
-  static const _leftGutter = 56.0;
-  static const _bottomAxis = 22.0;
+  /// The band above the plot that holds the annotation labels.
   static const _topBand = 20.0;
 
-  int _monthIndex(DateTime month) =>
-      (month.year - months.first.year) * 12 + month.month - months.first.month;
+  /// Gap between the plot's floor and a year label.
+  static const _axisLabelGap = 6.0;
+
+  /// Gap between an annotation's vertical and its label.
+  static const _annotationLabelGap = 6.0;
 
   TextPainter _text(String text, TextStyle style) => TextPainter(
     text: TextSpan(text: text, style: style),
     textDirection: textDirection,
   )..layout();
 
-  /// The gridline step: the smallest 1/2/5 × 10ⁿ that keeps three lines or
-  /// fewer under the peak — « 0 · 100 k€ · 200 k€ » for the frame's 255 000 €.
-  static int _gridStep(int peak) {
-    var magnitude = 1;
-    while (true) {
-      for (final factor in const [1, 2, 5]) {
-        final step = factor * magnitude;
-        if (peak / step <= 3) return step;
-      }
-      magnitude *= 10;
-    }
-  }
-
   @override
   void paint(Canvas canvas, Size size) {
-    if (months.length < 2 || size.width <= _leftGutter) return;
+    if (months.length < 2 || size.width <= AppChart.valueGutter) return;
 
-    final peak = values.reduce(math.max);
-    final top = math.max(1, (peak * 1.08).round());
-    final plot = Rect.fromLTRB(
-      _leftGutter,
-      _topBand,
-      size.width - 4,
-      size.height - _bottomAxis,
-    );
-    final span = math.max(1, _monthIndex(months.last));
-
+    final plot = _trajectoryPlotRect(size);
+    if (plot.width <= 0 || plot.height <= 0) return;
+    final scale = _trajectoryScale(values);
+    final span = math.max(1, _monthOffset(months, months.last));
     double xOf(DateTime month) =>
-        plot.left + plot.width * (_monthIndex(month) / span);
-    double yOf(int value) => plot.bottom - plot.height * (value / top);
+        plot.left + plot.width * (_monthOffset(months, month) / span);
 
-    final grid = Paint()
-      ..color = AppColors.borderSubtle
-      ..strokeWidth = 1;
-    final step = _gridStep(math.max(1, peak));
-    for (var value = 0; value <= top; value += step) {
-      final y = yOf(value);
-      canvas.drawLine(Offset(plot.left, y), Offset(plot.right, y), grid);
-      final label = _text(
-        yLabel(value),
-        labelStyle.copyWith(color: AppColors.textDisabled),
-      );
-      label.paint(
-        canvas,
-        Offset(plot.left - label.width - 8, y - label.height / 2),
-      );
-    }
+    ChartPaints.grid(
+      canvas,
+      size,
+      plot,
+      [for (final tick in scale.ticks) scale.y(tick, plot)],
+      labels: [for (final tick in scale.ticks) yLabel(tick.round())],
+      style: labelStyle,
+    );
 
     for (var year = months.first.year; year <= months.last.year; year++) {
       if (year % 5 != 0) continue;
       final month = DateTime(year);
-      if (_monthIndex(month) < 0) continue;
-      final label = _text(
-        '$year',
-        labelStyle.copyWith(color: AppColors.textSecondary),
-      );
+      if (_monthOffset(months, month) < 0) continue;
+      final label = _text('$year', labelStyle);
       label.paint(
         canvas,
-        Offset(xOf(month) - label.width / 2, plot.bottom + 5),
+        Offset(xOf(month) - label.width / 2, plot.bottom + _axisLabelGap),
       );
     }
 
-    final points = [
-      for (var i = 0; i < months.length; i++)
-        Offset(xOf(months[i]), yOf(values[i])),
-    ];
+    final points = _trajectoryPoints(size, months, values);
     final line = Path()..addPolygon(points, false);
     final area = Path.from(line)
       ..lineTo(points.last.dx, plot.bottom)
       ..lineTo(points.first.dx, plot.bottom)
       ..close();
-    canvas.drawPath(
-      area,
-      Paint()..color = AppColors.iris.withValues(alpha: 0.16),
-    );
-    canvas.drawPath(
-      line,
-      Paint()
-        ..color = AppColors.iris
-        ..style = PaintingStyle.stroke
-        ..strokeWidth = 2.5
-        ..strokeJoin = StrokeJoin.round
-        ..strokeCap = StrokeCap.round,
-    );
+    canvas.drawPath(area, ChartPaints.area(AppColors.iris));
+    canvas.drawPath(line, ChartPaints.stroke(AppColors.iris));
 
     for (final annotation in annotations) {
       final index = months.indexWhere(
@@ -365,28 +472,23 @@ class _TrajectoryPainter extends CustomPainter {
       if (index < 0) continue;
       final point = points[index];
       final color = annotation.isToday
-          ? AppColors.textSecondary
-          : AppColors.textDisabled;
+          ? TrajectoryPlot.todayColor
+          : TrajectoryPlot.endColor;
 
-      final dash = Paint()
-        ..color = color
-        ..strokeWidth = 1;
-      for (var y = plot.top; y < plot.bottom; y += 6) {
-        canvas.drawLine(
-          Offset(point.dx, y),
-          Offset(point.dx, math.min(y + 3, plot.bottom)),
-          dash,
-        );
-      }
-
-      canvas.drawCircle(point, 3.5, Paint()..color = AppColors.surfaceRaised);
-      canvas.drawCircle(
+      ChartPaints.baseline(
+        canvas,
+        Offset(point.dx, plot.top),
+        Offset(point.dx, plot.bottom),
+        color: color,
+      );
+      // Today is this chart's current point; a loan end is an ordinary one.
+      ChartPaints.dot(
+        canvas,
         point,
-        3.5,
-        Paint()
-          ..color = AppColors.iris
-          ..style = PaintingStyle.stroke
-          ..strokeWidth = 2,
+        annotation.isToday
+            ? AppChart.currentDotRadius
+            : AppChart.pointDotRadius,
+        AppColors.iris,
       );
 
       final label = _text(
@@ -394,14 +496,23 @@ class _TrajectoryPainter extends CustomPainter {
         labelStyle.copyWith(
           color: annotation.isToday
               ? AppColors.textPrimary
-              : AppColors.textDisabled,
+              : TrajectoryPlot.endColor,
         ),
       );
       // Set right of its line, or left of it when that would run off the plot.
-      final x = point.dx + 6 + label.width > plot.right
-          ? point.dx - 6 - label.width
-          : point.dx + 6;
+      final x = point.dx + _annotationLabelGap + label.width > plot.right
+          ? point.dx - _annotationLabelGap - label.width
+          : point.dx + _annotationLabelGap;
       label.paint(canvas, Offset(x, plot.top - label.height));
+    }
+
+    if (hovered case final hovered? when hovered < points.length) {
+      ChartPaints.dot(
+        canvas,
+        points[hovered],
+        AppChart.currentDotRadius,
+        AppColors.iris,
+      );
     }
   }
 
@@ -410,5 +521,6 @@ class _TrajectoryPainter extends CustomPainter {
       !listEquals(oldDelegate.months, months) ||
       !listEquals(oldDelegate.values, values) ||
       !listEquals(oldDelegate.annotations, annotations) ||
-      oldDelegate.labelStyle != labelStyle;
+      oldDelegate.labelStyle != labelStyle ||
+      oldDelegate.hovered != hovered;
 }

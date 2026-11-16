@@ -1933,58 +1933,52 @@ abstract class AppLocalizations {
   /// **'Vétérinaire'**
   String get categorySystemPetsVet;
 
-  /// Label on the income stat card.
+  /// Label on the income column of the dashboard's KPI strip.
   ///
   /// In fr, this message translates to:
-  /// **'Revenus (mois)'**
+  /// **'Revenus'**
   String get dashboardStatIncome;
 
-  /// Label on the expense stat card.
+  /// Label on the expense column of the dashboard's KPI strip.
   ///
   /// In fr, this message translates to:
-  /// **'Dépenses (mois)'**
+  /// **'Dépenses'**
   String get dashboardStatExpense;
 
-  /// Label on the net (income minus expense) stat card.
+  /// Label on the net (income minus expense) column of the dashboard's KPI strip.
   ///
   /// In fr, this message translates to:
   /// **'Net'**
   String get dashboardStatNet;
 
-  /// Label on the savings rate hero card.
+  /// Label on the savings rate column, the first and widest of the dashboard's KPI strip.
   ///
   /// In fr, this message translates to:
   /// **'Taux d\'épargne'**
   String get dashboardStatSavingsRate;
 
-  /// Caption beside the income and expense trend pills, naming the month compared against. French renders the month lowercase (« vs avril »), English capitalized ("vs April").
+  /// Trend line under the net, income and expense figures, after the arrow and percentage: names the month compared against. French renders the month lowercase (« vs avril »), English capitalized ("vs April").
   ///
   /// In fr, this message translates to:
   /// **'vs {month}'**
   String dashboardStatVsPreviousMonth(DateTime month);
 
-  /// Caption beside the net card's trend pill, restating how net is derived. The minus is U+2212, matching the money rule.
-  ///
-  /// In fr, this message translates to:
-  /// **'revenus − dépenses'**
-  String get dashboardStatNetCaption;
-
-  /// The savings-rate trend pill. A change in a rate is measured in percentage *points*, not percent, so the unit differs from the other three cards.
+  /// The savings rate's month-over-month change, closing its goal line. A change in a rate is measured in percentage *points*, not percent, so the unit differs from the other three columns.
   ///
   /// In fr, this message translates to:
   /// **'{delta} pt'**
   String dashboardSavingsDeltaPoints(String delta);
 
-  /// Caption on the savings rate card when the rate meets or beats the goal.
+  /// Goal line under the savings rate's progress bar when the rate meets or beats the goal; a check glyph precedes it and the point delta follows it.
   ///
   /// In fr, this message translates to:
-  /// **'Objectif : {goal} · atteint'**
+  /// **'Objectif {goal} atteint'**
   String dashboardSavingsGoalReached(String goal);
 
-  /// Caption on the savings rate card when the rate is still below the goal. Phrased as progress rather than shortfall — the panel leads with encouragement.
+  /// Goal line under the savings rate's progress bar when the rate is still below the goal; the point delta follows it. Phrased as progress rather than shortfall — the panel leads with encouragement.
   ///
   /// In fr, this message translates to:
-  /// **'Objectif : {goal} · en cours'**
+  /// **'Objectif {goal} en cours'**
   String dashboardSavingsGoalPending(String goal);
 
   /// Title of the by-category expense breakdown chart card.
@@ -6011,6 +6005,18 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Intérêts'**
   String get simulatorChartInterest;
+
+  /// Projection hover card: the principal repaid that year.
+  ///
+  /// In fr, this message translates to:
+  /// **'Capital : {amount}'**
+  String simulatorChartTooltipCapital(String amount);
+
+  /// Projection hover card: the interest paid that year.
+  ///
+  /// In fr, this message translates to:
+  /// **'Intérêts : {amount}'**
+  String simulatorChartTooltipInterest(String amount);
 
   /// Projection chart invitation before anything can be computed.
   ///

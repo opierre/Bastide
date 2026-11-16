@@ -1,3 +1,4 @@
+import 'package:bastide/core/theme/tokens.dart';
 import 'package:bastide/core/api/api_client.dart';
 import 'package:bastide/core/theme/app_theme.dart';
 import 'package:bastide/core/widgets/chart_scale.dart';
@@ -143,14 +144,14 @@ void main() {
     );
 
     // Mirrors the painter: twelve contiguous months spread across the plot,
-    // right of the 56px gutter, inset by the 4px last dot, above the 22px
+    // right of the value gutter, inset by the current dot, above the
     // month axis. The card keeps off the line and off the axis.
     final chart = tester.getRect(find.byKey(const Key('networthSeriesPlot')));
     final plot = Rect.fromLTRB(
-      chart.left + 56,
-      chart.top + 4,
-      chart.right - 4,
-      chart.bottom - 22,
+      chart.left + AppChart.valueGutter,
+      chart.top + AppChart.dotReach,
+      chart.right - AppChart.dotReach,
+      chart.bottom - AppChart.axisHeight,
     );
     final values = tester
         .widget<NetworthSeriesPlot>(find.byKey(const Key('networthSeriesPlot')))

@@ -1411,25 +1411,25 @@
   "@categorySystemPetsVet": {
     "description": "Display name for the system category with i18n key category.pets.vet."
   },
-  "dashboardStatIncome": "Revenus (mois)",
+  "dashboardStatIncome": "Revenus",
   "@dashboardStatIncome": {
-    "description": "Label on the income stat card."
+    "description": "Label on the income column of the dashboard's KPI strip."
   },
-  "dashboardStatExpense": "Dépenses (mois)",
+  "dashboardStatExpense": "Dépenses",
   "@dashboardStatExpense": {
-    "description": "Label on the expense stat card."
+    "description": "Label on the expense column of the dashboard's KPI strip."
   },
   "dashboardStatNet": "Net",
   "@dashboardStatNet": {
-    "description": "Label on the net (income minus expense) stat card."
+    "description": "Label on the net (income minus expense) column of the dashboard's KPI strip."
   },
   "dashboardStatSavingsRate": "Taux d'épargne",
   "@dashboardStatSavingsRate": {
-    "description": "Label on the savings rate hero card."
+    "description": "Label on the savings rate column, the first and widest of the dashboard's KPI strip."
   },
   "dashboardStatVsPreviousMonth": "vs {month}",
   "@dashboardStatVsPreviousMonth": {
-    "description": "Caption beside the income and expense trend pills, naming the month compared against. French renders the month lowercase (« vs avril »), English capitalized (\"vs April\").",
+    "description": "Trend line under the net, income and expense figures, after the arrow and percentage: names the month compared against. French renders the month lowercase (« vs avril »), English capitalized (\"vs April\").",
     "placeholders": {
       "month": {
         "type": "DateTime",
@@ -1437,31 +1437,27 @@
       }
     }
   },
-  "dashboardStatNetCaption": "revenus − dépenses",
-  "@dashboardStatNetCaption": {
-    "description": "Caption beside the net card's trend pill, restating how net is derived. The minus is U+2212, matching the money rule."
-  },
   "dashboardSavingsDeltaPoints": "{delta} pt",
   "@dashboardSavingsDeltaPoints": {
-    "description": "The savings-rate trend pill. A change in a rate is measured in percentage *points*, not percent, so the unit differs from the other three cards.",
+    "description": "The savings rate's month-over-month change, closing its goal line. A change in a rate is measured in percentage *points*, not percent, so the unit differs from the other three columns.",
     "placeholders": {
       "delta": {
         "type": "String"
       }
     }
   },
-  "dashboardSavingsGoalReached": "Objectif : {goal} · atteint",
+  "dashboardSavingsGoalReached": "Objectif {goal} atteint",
   "@dashboardSavingsGoalReached": {
-    "description": "Caption on the savings rate card when the rate meets or beats the goal.",
+    "description": "Goal line under the savings rate's progress bar when the rate meets or beats the goal; a check glyph precedes it and the point delta follows it.",
     "placeholders": {
       "goal": {
         "type": "String"
       }
     }
   },
-  "dashboardSavingsGoalPending": "Objectif : {goal} · en cours",
+  "dashboardSavingsGoalPending": "Objectif {goal} en cours",
   "@dashboardSavingsGoalPending": {
-    "description": "Caption on the savings rate card when the rate is still below the goal. Phrased as progress rather than shortfall — the panel leads with encouragement.",
+    "description": "Goal line under the savings rate's progress bar when the rate is still below the goal; the point delta follows it. Phrased as progress rather than shortfall — the panel leads with encouragement.",
     "placeholders": {
       "goal": {
         "type": "String"
@@ -4901,6 +4897,24 @@
   "simulatorChartInterest": "Intérêts",
   "@simulatorChartInterest": {
     "description": "Projection legend: interest paid."
+  },
+  "simulatorChartTooltipCapital": "Capital : {amount}",
+  "@simulatorChartTooltipCapital": {
+    "description": "Projection hover card: the principal repaid that year.",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "simulatorChartTooltipInterest": "Intérêts : {amount}",
+  "@simulatorChartTooltipInterest": {
+    "description": "Projection hover card: the interest paid that year.",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
   },
   "simulatorChartEmpty": "Renseignez un prix et un taux : la répartition capital / intérêts par année s'affiche ici.",
   "@simulatorChartEmpty": {
