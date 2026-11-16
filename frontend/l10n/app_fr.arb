@@ -4774,6 +4774,24 @@
   "@simulatorChartInterest": {
     "description": "Projection legend: interest paid."
   },
+  "simulatorChartTooltipCapital": "Capital : {amount}",
+  "@simulatorChartTooltipCapital": {
+    "description": "Projection hover card: the principal repaid that year.",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "simulatorChartTooltipInterest": "Intérêts : {amount}",
+  "@simulatorChartTooltipInterest": {
+    "description": "Projection hover card: the interest paid that year.",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
   "simulatorChartEmpty": "Renseignez un prix et un taux : la répartition capital / intérêts par année s'affiche ici.",
   "@simulatorChartEmpty": {
     "description": "Projection chart invitation before anything can be computed."

@@ -3737,6 +3737,16 @@ class AppLocalizationsFr extends AppLocalizations {
   String get simulatorChartInterest => 'Intérêts';
 
   @override
+  String simulatorChartTooltipCapital(String amount) {
+    return 'Capital : $amount';
+  }
+
+  @override
+  String simulatorChartTooltipInterest(String amount) {
+    return 'Intérêts : $amount';
+  }
+
+  @override
   String get simulatorChartEmpty =>
       'Renseignez un prix et un taux : la répartition capital / intérêts par année s\'affiche ici.';
 

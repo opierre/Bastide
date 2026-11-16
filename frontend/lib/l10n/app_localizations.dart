@@ -5820,6 +5820,18 @@ abstract class AppLocalizations {
   /// **'Intérêts'**
   String get simulatorChartInterest;
 
+  /// Projection hover card: the principal repaid that year.
+  ///
+  /// In fr, this message translates to:
+  /// **'Capital : {amount}'**
+  String simulatorChartTooltipCapital(String amount);
+
+  /// Projection hover card: the interest paid that year.
+  ///
+  /// In fr, this message translates to:
+  /// **'Intérêts : {amount}'**
+  String simulatorChartTooltipInterest(String amount);
+
   /// Projection chart invitation before anything can be computed.
   ///
   /// In fr, this message translates to:
