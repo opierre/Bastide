@@ -8,8 +8,8 @@ import '../application/linked_cards.dart';
 import '../domain/account.dart';
 import 'settlement_rule_dialog.dart';
 
-/// The account card's corner control: a card icon and how many cards are
-/// settled from the account, opening the list of them. Each card keeps its own
+/// The account card's corner control: how many cards are settled from the
+/// account, then a card icon, opening the list of them. Each card keeps its own
 /// actions there — the account's own edit and archive live in its detail's
 /// top bar. Renders nothing when no card hangs off the account.
 class LinkedCardsButton extends ConsumerWidget {
@@ -87,17 +87,17 @@ class LinkedCardsButton extends ConsumerWidget {
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Icon(
-                    Icons.credit_card_rounded,
-                    size: 18,
-                    color: AppColors.textSecondary,
-                  ),
-                  const SizedBox(width: AppSpacing.xs),
                   Text(
                     '${cards.length}',
                     style: tabularNumberStyle(
                       Theme.of(context).textTheme.bodySmall!,
                     ).copyWith(color: AppColors.textSecondary),
+                  ),
+                  const SizedBox(width: AppSpacing.xs),
+                  const Icon(
+                    Icons.credit_card_rounded,
+                    size: 18,
+                    color: AppColors.textSecondary,
                   ),
                 ],
               ),
