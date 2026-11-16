@@ -1,0 +1,99 @@
+# 08 — Catégories et règles
+
+Mockup: `#panel=categories`. Ticket #210. Read `00-design-system.md` first.
+
+## Title bar
+Title « Catégories et règles ». Right: secondary « Exécuter les règles » (`play`), primary
+« Nouvelle règle » (`plus`).
+
+## Layout
+Flush panel, two panes: **category tree** (340 px, right hairline, padding 16 12) · **rules**
+(flexible). The tree selects what the rules pane shows. There is no segmented control.
+
+## Content
+
+### Category tree
+- Header row, padding 0 8 8: « Catégories » 13/600 · spacer · ghost icon button `plus`
+  (new category).
+- First item: « Toutes les règles » with the total count; selected by default.
+- One item per top-level category, in the user's order (30 px, radius 6, the nav-item recipe):
+  `chevron-right` / `chevron-down` 14 px `textTertiary` · 8 px dot in the category hue ·
+  category icon 14 px · name · on the right, 11 `textTertiary`: « 2 règles », or « aucune
+  règle » in `warning`.
+- An open category lists its subcategories indented 52 px (no dot, no icon), then a
+  `textTertiary` item `plus` + « Sous-catégorie ».
+- Selected item: `hover` ground, `text`.
+- A system category shows a `lock` 14 px `textTertiary` on hover in place of the menu; a
+  custom one shows `ellipsis` (menu: « Modifier », « Supprimer »). A custom subcategory opens
+  its form on click; a system subcategory is inert.
+- Foot of the pane, a Note: `lock` + « Les catégories fournies avec Bastide ne peuvent pas
+  être supprimées. »
+
+### Rules pane
+- Header row, padding 16 32 0: « Règles » 13/600 · when a category is selected, a 28 px
+  select-look holding its category label and an `x` that returns to « Toutes les règles » ·
+  spacer · 12 `textTertiary`: « Appliquées dans cet ordre. Une catégorie choisie à la main
+  n’est jamais remplacée. »
+- Table, edge to edge:
+
+| Column | Content |
+|---|---|
+| Ordre | `grip-vertical` 14 px `textTertiary` + the rule's position |
+| Champ | « Description », « Montant »… `textSecondary` |
+| Condition | « contient », « égal à », « regex », « plage », `textSecondary` (plain text, no badge) |
+| Motif | Geist Mono |
+| Catégorie | Category label with its subcategory |
+| Correspondances | right, count of operations the rule classed, `textSecondary` |
+| Active | right, toggle |
+
+  A disabled rule's row is dimmed. A row opens the rule editor. A rule that carries a user
+  logo shows it as the 22 px monogram before the pattern.
+
+### Rule editor (modal, 520 px)
+Title « Nouvelle règle » / « Modifier la règle ». One row: Champ · Condition · Priorité. Then
+Motif (Geist Mono) · Catégorie cible (select) · a Note « Correspond à 7 opérations existantes,
+dont « CB CARREFOUR PARIS 15 » du 14 mai 2026. » · Logo (22 px preview, secondary « Choisir une
+image », ghost « Retirer »; on a new rule only the helper « Enregistrez la règle pour lui
+ajouter un logo. ») · toggle « Active ». Footer: ghost « Supprimer » on the left (edit only,
+confirmed) · « Annuler » · « Enregistrer ».
+
+### Category form (modal, 480 px)
+Nom · Type (Dépense, Revenu, Transfert) · Parent (select, optional) · Icône (a grid of the
+curated Lucide set, 32 px cells, selected cell `hover` + `accent` outline) · Couleur (the seven
+category slots as 20 px squares). With a parent set, Type, Icône and Couleur are hidden and the
+modal's lead repeats the parent's category label.
+
+### Rule packs
+The import and export sheets keep their content and become modals (560 px) built from the
+standard table, checkbox and note components. The built-in pack button hides once that pack is
+imported.
+
+## States
+| State | What shows |
+|---|---|
+| All rules | Tree with « Toutes les règles » selected; rules can be dragged to reorder. |
+| Filtered on a category | That category's rules (its subcategories' included); drag-reorder off; the grip is hidden. |
+| No rule at all | In the rules pane, an empty state: « Aucune règle » · « Une règle reconnaît un libellé, « CARREFOUR » par exemple, et attribue sa catégorie à chaque opération correspondante, aujourd’hui et aux prochains imports. » · primary « Nouvelle règle ». |
+| No rule for the selected category | Note: « Aucune règle pour cette catégorie. » + link « Nouvelle règle ». |
+| Rules run | Toast: « 48 opérations recatégorisées » / second line « Vos catégories choisies à la main n’ont pas été modifiées. » |
+| Loading | Silhouettes of both panes. |
+
+## Behaviour (kept)
+- No amount or spending share appears here: this is taxonomy management. Spending lives on the
+  Dashboard.
+- Categories are always active; there is no enable toggle for a category.
+- Rules are evaluated in priority order, first match wins; a rule never replaces a category
+  chosen by hand.
+- Regex rules and rules that target a custom category cannot go into a rule pack.
+- A logo on a rule is the user's own file; it stays on their machine and is never looked up.
+- System and custom categories differ by the lock versus the menu; no badge.
+
+## Copy
+Delete `navCategoriesSubtitle`. `rulesPriorityNote`, `rulesEmptyTitle`, `categoriesEmptyTitle`
+per `00` §14. Remove the « Système » / « Personnalisée » badge strings. New: « Toutes les
+règles », « Correspondances », « aucune règle », « Sous-catégorie ».
+
+## Removed from v1
+The Catégories | Règles segmented control, the 4-column CategoryCard grid, tinted icon tiles,
+SubcategoryChips, « Système » / « Personnalisée » badges, kind label under the name, priority
+plate, condition badge, card frame around the rules, the arrow before the target category.

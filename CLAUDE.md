@@ -19,7 +19,7 @@
 
 3. **Conventional Commits.** Every commit must follow the Conventional Commits format: `type(scope): subject` where type ∈ `{feat, fix, docs, refactor, test, chore, build, ci, perf}` and scope is the feature name. One logical change per commit.
 
-4. **Dark-first design.** All UI starts in dark mode. The palette is coherent and readable in dark.
+4. **Dark-first design, two themes.** Dark is the default and the reference; the light theme is at parity. Both follow `docs/design/00-design-system.md` to the letter, and each panel follows its spec in `docs/design/`.
 
 5. **i18n day one.** No hard-coded user-facing strings. French first, English second. Locale chosen at registration, switchable in settings. Dates, numbers, currency formatted per locale.
 

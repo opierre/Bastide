@@ -34,7 +34,7 @@
 - **No hard-coded strings.** All user-facing text comes from ARB files and localizations.
 - **Format at the edge.** Money, dates, numbers are formatted using `intl` and the current locale at the point of display.
 - **Fixed chrome invariant.** The sidebar and top bar keep the same position and behaviour on every screen. There is no bottom bar. A panel reaches the chrome only through the top bar's contextual-controls slot (`AppShell.actionsBuilder`); the collapsible sidebar is chrome state, not panel state.
-- **`docs/design/00-shared-design-block.md` is binding** for every visual value, and `docs/design/NN-*.md` for each panel. Never invent a color, font, radius, or spacing value — add it to `core/theme/tokens.dart` from the spec.
+- **`docs/design/00-design-system.md` is binding** for every visual value, and `docs/design/NN-*.md` for each panel (`01-index.md` lists them). Never invent a color, font, radius, or spacing value — add it to the design system first, then to `core/theme/tokens.dart`.
 
 ## Backend modes
 
