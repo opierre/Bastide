@@ -38,7 +38,7 @@ Donut segments use the same colors in the same order (starting at 12 o'clock, cl
 ### Row 3 — three-card split `1fr .95fr .85fr` (three cards)
 Normative reference: frame `04-Dashboard — avec carte objectifs (fr)` in the Gestion & AI mockup canvas) re-splits row 3 into three columns: **col 1 « Revenus vs dépenses »** · **col 2 « Activité récente »** · **col 3 « Objectifs »** (new). Objectifs card: soft iris tint `linear-gradient(160deg,rgba(139,140,249,.10),rgba(108,106,240,.03) 55%),#111620`, border `rgba(139,140,249,.3)`; header « Objectifs » + iris link « Voir tout »; three compact goal rows (name 12.5/600 · right `6 400 € / 10 000 €` 11 px `#97A3B6` · 6 px iris-gradient progress bar, track `#1E2634`): Fonds d'urgence 64 % · Apport immobilier 43 % · Voyage Japon 100 % with green check « Atteint » instead of the amounts. Shows the top 3 active (non-archived) goals; hidden if none exist.
 
-**Left — « Revenus vs dépenses » / "Income vs expenses"**, sub « 4 derniers mois » / "Last 4 months"; green/red dot legend « Revenus / Dépenses » in the header. One 44 px-wide stacked bar per month, income segment `#4ADE80` on top, expense `#FF5C6C` below, 2 px gap. Beneath each bar: month label + net (green if positive, red if negative). Exact data:
+**Left — « Revenus vs dépenses » / "Income vs expenses"**, sub « 4 derniers mois » / "Last 4 months"; green/red dot legend « Revenus / Dépenses » in the header. Per month, a 44 px-wide pair of bars side by side (GroupedBars): income `#4ADE80` left, expense `#FF5C6C` right, 2 px apart, both from a shared zero baseline on one scale across the four months. (Amended — issue #187: drawn as one stacked bar per month, income above expense, which made the two hard to compare; side by side from one baseline, the comparison reads at a glance.) Beneath each bar: month label + net (green if positive, red if negative). Exact data:
 
 | Month | Income | Expense | Net (color) |
 |---|---|---|---|
@@ -47,7 +47,7 @@ Normative reference: frame `04-Dashboard — avec carte objectifs (fr)` in the G
 | Avr. / Apr | +2 850,00 € | −2 112,90 € | +737,10 € (green) |
 | Mai / May | +2 850,00 € | −2 214,35 € | +635,65 € (green) |
 
-Current month (Mai) label is `#EDF1F7`; earlier months `#97A3B6`. Hovering a bar shows an overlay tooltip with that month's income and expense amounts.
+Current month (Mai) label is `#EDF1F7`; earlier months `#97A3B6`. Hovering a month's pair shows an overlay tooltip with that month's income and expense amounts.
 
 **Right — « Activité récente » / "Recent activity"**. Compact rows (28 px monogram chip · merchant + account name block · right column: amount over date; **no CategoryChip** in this compact variant), with the « Voir toutes les transactions » / "View all transactions" iris link on the **top right**, level with the card title. The list is drawn to *fill* the card: as many rows as fit at 48 px, sharing any remainder (rows grow no more than a quarter over 48). The card is as tall as row 2 beside it, so the count follows the window — four on this frame. Exact rows:
 

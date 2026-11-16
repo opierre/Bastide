@@ -8,8 +8,9 @@ import '../../../core/widgets/chart_container.dart';
 import '../../../l10n/app_localizations.dart';
 import '../domain/dashboard_trends.dart';
 
-/// « Revenus vs dépenses » — one stacked bar per month, income above expense, with the month
-/// and its net beneath (see `docs/design/04-dashboard.md` §Row 3).
+/// « Revenus vs dépenses » — per month, an income bar and an expense bar side by side on a
+/// shared zero baseline, with the month and its net beneath (see `docs/design/04-dashboard.md`
+/// §Row 3).
 class IncomeVsExpenseChart extends StatelessWidget {
   const IncomeVsExpenseChart({super.key, required this.trends});
 
@@ -22,8 +23,8 @@ class IncomeVsExpenseChart extends StatelessWidget {
     // The last month in the series is the current one — the series ends at today's month by
     // construction, so "current" is the tail rather than a date comparison.
     final currentMonth = series.isEmpty ? null : series.last.month;
-    // The tallest single segment sets the scale, so income and expense stay comparable
-    // between months rather than each bar normalising to itself.
+    // The tallest single bar sets the scale, so income and expense stay comparable between
+    // months rather than each pair normalising to itself.
     final peak = series.fold<int>(0, (largest, row) {
       final tallest = row.incomeMinor > row.expenseMinor
           ? row.incomeMinor
@@ -106,7 +107,7 @@ class _LegendDot extends StatelessWidget {
   }
 }
 
-/// One month: the stacked bar, its label, and its net.
+/// One month: its income and expense bars side by side, its label, and its net.
 class MonthBar extends StatelessWidget {
   const MonthBar({
     super.key,
@@ -121,11 +122,15 @@ class MonthBar extends StatelessWidget {
   final String currency;
   final bool isCurrent;
 
-  /// Bar width, gap between the two segments, and the corner radii — all pinned by the spec.
+  /// Column width, gap between the pair's two bars, and the corner radii — all pinned by the
+  /// spec. Each bar takes half the column, less half the gap.
   static const barWidth = 44.0;
-  static const segmentGap = 2.0;
-  static const outerRadius = Radius.circular(6);
-  static const innerRadius = Radius.circular(2);
+  static const pairGap = 2.0;
+  static const _singleBarWidth = (barWidth - pairGap) / 2;
+  static const _barRadius = BorderRadius.vertical(
+    top: Radius.circular(6),
+    bottom: Radius.circular(2),
+  );
 
   @override
   Widget build(BuildContext context) {
@@ -147,30 +152,24 @@ class MonthBar extends StatelessWidget {
               monthLabel: monthLabel,
               child: LayoutBuilder(
                 builder: (context, constraints) {
-                  // Both segments share one scale, minus the gap between them, so a bar can
-                  // never exceed the plot it is drawn in.
-                  final usable = constraints.maxHeight - segmentGap;
-                  final scale = peak == 0 ? 0.0 : usable / (peak * 2);
+                  // One scale for both bars and every month: the tallest single figure fills
+                  // the plot, so a bar can never exceed the height it is drawn in.
+                  final scale = peak == 0 ? 0.0 : constraints.maxHeight / peak;
+                  final month = '${totals.month.year}-${totals.month.month}';
 
-                  return Column(
-                    mainAxisAlignment: MainAxisAlignment.end,
+                  return Row(
+                    crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
-                      _Segment(
+                      _Bar(
+                        key: Key('dashboardIncomeBar-$month'),
                         height: totals.incomeMinor * scale,
                         color: AppColors.positive,
-                        radius: const BorderRadius.vertical(
-                          top: outerRadius,
-                          bottom: innerRadius,
-                        ),
                       ),
-                      const SizedBox(height: segmentGap),
-                      _Segment(
+                      const SizedBox(width: pairGap),
+                      _Bar(
+                        key: Key('dashboardExpenseBar-$month'),
                         height: totals.expenseMinor * scale,
                         color: AppColors.negative,
-                        radius: const BorderRadius.vertical(
-                          top: innerRadius,
-                          bottom: outerRadius,
-                        ),
                       ),
                     ],
                   );
@@ -186,12 +185,12 @@ class MonthBar extends StatelessWidget {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Text(
-                  monthLabel,
+                _MonthLabel(
+                  label: monthLabel,
                   style: textTheme.labelSmall?.copyWith(
                     fontWeight: FontWeight.w400,
-                    // The month being looked at is stated in primary; the ones it is compared
-                    // against recede.
+                    // The month being looked at is stated in primary; the ones it is
+                    // compared against recede.
                     color: isCurrent
                         ? AppColors.textPrimary
                         : AppColors.textSecondary,
@@ -215,27 +214,59 @@ class MonthBar extends StatelessWidget {
   }
 }
 
-class _Segment extends StatelessWidget {
-  const _Segment({
-    required this.height,
-    required this.color,
-    required this.radius,
-  });
+/// The month's name, always on one line at full size, centred under its column and free to
+/// spill into the space between columns. A label that wrapped (or shrank to fit) would change
+/// its own height and lift that month's bars off the baseline the others stand on, so the
+/// zone's height comes from one invisible line in the same style instead of from the label.
+class _MonthLabel extends StatelessWidget {
+  const _MonthLabel({required this.label, required this.style});
 
-  final double height;
-  final Color color;
-  final BorderRadius radius;
+  final String label;
+  final TextStyle? style;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      height: height.isFinite && height > 0 ? height : 0,
-      decoration: BoxDecoration(color: color, borderRadius: radius),
+    return Stack(
+      clipBehavior: Clip.none,
+      children: [
+        ExcludeSemantics(child: Text(' ', maxLines: 1, style: style)),
+        Positioned(
+          top: 0,
+          left: -MonthBar.barWidth,
+          right: -MonthBar.barWidth,
+          child: Text(
+            label,
+            maxLines: 1,
+            softWrap: false,
+            textAlign: TextAlign.center,
+            style: style,
+          ),
+        ),
+      ],
     );
   }
 }
 
-/// Hovering a bar names the month's two figures — the bar alone shows proportion, not amount.
+class _Bar extends StatelessWidget {
+  const _Bar({super.key, required this.height, required this.color});
+
+  final double height;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: MonthBar._singleBarWidth,
+      height: height.isFinite && height > 0 ? height : 0,
+      decoration: BoxDecoration(
+        color: color,
+        borderRadius: MonthBar._barRadius,
+      ),
+    );
+  }
+}
+
+/// Hovering a month's pair names its two figures — the bars alone shows proportion, not amount.
 class _HoverTooltip extends StatelessWidget {
   const _HoverTooltip({
     required this.totals,
