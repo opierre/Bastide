@@ -302,6 +302,18 @@ abstract class AppLocalizations {
   /// **'Indisponible'**
   String get settingsAboutVersionUnavailable;
 
+  /// Title of the third-party credits card in the About section.
+  ///
+  /// In fr, this message translates to:
+  /// **'Crédits'**
+  String get settingsAboutCreditsTitle;
+
+  /// Credit line for the Lucide icon set and its license, in the About section.
+  ///
+  /// In fr, this message translates to:
+  /// **'Icônes : Lucide (lucide.dev), sous licence ISC.'**
+  String get settingsAboutCreditsIcons;
+
   /// Title of the update-check card in Settings › About.
   ///
   /// In fr, this message translates to:
@@ -2341,17 +2353,191 @@ abstract class AppLocalizations {
   /// **'Revenus'**
   String get categoryIconIncome;
 
-  /// Icon choice in the category form: coin glyph.
+  /// Icon choice in the category form: piggy bank glyph.
   ///
   /// In fr, this message translates to:
   /// **'Épargne'**
   String get categoryIconSavings;
 
-  /// Icon choice in the category form: the neutral fallback glyph.
+  /// Icon choice in the category form: coins glyph.
   ///
   /// In fr, this message translates to:
   /// **'Autre'**
   String get categoryIconOther;
+
+  /// Icon choice in the category form: key glyph.
+  ///
+  /// In fr, this message translates to:
+  /// **'Clé'**
+  String get categoryIconKey;
+
+  /// Icon choice in the category form: lightning bolt glyph.
+  ///
+  /// In fr, this message translates to:
+  /// **'Énergie'**
+  String get categoryIconEnergy;
+
+  /// Icon choice in the category form: wrench glyph.
+  ///
+  /// In fr, this message translates to:
+  /// **'Travaux'**
+  String get categoryIconRepairs;
+
+  /// Icon choice in the category form: sofa glyph.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ameublement'**
+  String get categoryIconFurniture;
+
+  /// Icon choice in the category form: shopping cart glyph.
+  ///
+  /// In fr, this message translates to:
+  /// **'Courses'**
+  String get categoryIconGroceries;
+
+  /// Icon choice in the category form: fork and knife glyph.
+  ///
+  /// In fr, this message translates to:
+  /// **'Restaurant'**
+  String get categoryIconRestaurant;
+
+  /// Icon choice in the category form: coffee cup glyph.
+  ///
+  /// In fr, this message translates to:
+  /// **'Café'**
+  String get categoryIconCoffee;
+
+  /// Icon choice in the category form: bus glyph.
+  ///
+  /// In fr, this message translates to:
+  /// **'Transports en commun'**
+  String get categoryIconPublicTransport;
+
+  /// Icon choice in the category form: fuel pump glyph.
+  ///
+  /// In fr, this message translates to:
+  /// **'Carburant'**
+  String get categoryIconFuel;
+
+  /// Icon choice in the category form: plane glyph.
+  ///
+  /// In fr, this message translates to:
+  /// **'Voyages'**
+  String get categoryIconTravel;
+
+  /// Icon choice in the category form: ticket glyph.
+  ///
+  /// In fr, this message translates to:
+  /// **'Sorties'**
+  String get categoryIconOutings;
+
+  /// Icon choice in the category form: game controller glyph.
+  ///
+  /// In fr, this message translates to:
+  /// **'Jeux'**
+  String get categoryIconGames;
+
+  /// Icon choice in the category form: open book glyph.
+  ///
+  /// In fr, this message translates to:
+  /// **'Lecture'**
+  String get categoryIconReading;
+
+  /// Icon choice in the category form: dumbbell glyph.
+  ///
+  /// In fr, this message translates to:
+  /// **'Sport'**
+  String get categoryIconSport;
+
+  /// Icon choice in the category form: smartphone glyph.
+  ///
+  /// In fr, this message translates to:
+  /// **'Téléphone'**
+  String get categoryIconPhone;
+
+  /// Icon choice in the category form: wifi glyph.
+  ///
+  /// In fr, this message translates to:
+  /// **'Internet'**
+  String get categoryIconInternet;
+
+  /// Icon choice in the category form: pill glyph.
+  ///
+  /// In fr, this message translates to:
+  /// **'Pharmacie'**
+  String get categoryIconPharmacy;
+
+  /// Icon choice in the category form: credit card glyph.
+  ///
+  /// In fr, this message translates to:
+  /// **'Carte bancaire'**
+  String get categoryIconCard;
+
+  /// Icon choice in the category form: bank building glyph.
+  ///
+  /// In fr, this message translates to:
+  /// **'Banque'**
+  String get categoryIconBank;
+
+  /// Icon choice in the category form: rising chart glyph.
+  ///
+  /// In fr, this message translates to:
+  /// **'Placements'**
+  String get categoryIconInvestments;
+
+  /// Icon choice in the category form: receipt glyph.
+  ///
+  /// In fr, this message translates to:
+  /// **'Factures'**
+  String get categoryIconBills;
+
+  /// Icon choice in the category form: briefcase glyph.
+  ///
+  /// In fr, this message translates to:
+  /// **'Salaire'**
+  String get categoryIconSalary;
+
+  /// Icon choice in the category form: gift glyph.
+  ///
+  /// In fr, this message translates to:
+  /// **'Cadeaux'**
+  String get categoryIconGifts;
+
+  /// Icon choice in the category form: shirt glyph.
+  ///
+  /// In fr, this message translates to:
+  /// **'Vêtements'**
+  String get categoryIconClothing;
+
+  /// Icon choice in the category form: shopping bag glyph.
+  ///
+  /// In fr, this message translates to:
+  /// **'Achats'**
+  String get categoryIconShopping;
+
+  /// Icon choice in the category form: graduation cap glyph.
+  ///
+  /// In fr, this message translates to:
+  /// **'Éducation'**
+  String get categoryIconEducation;
+
+  /// Icon choice in the category form: baby glyph.
+  ///
+  /// In fr, this message translates to:
+  /// **'Enfants'**
+  String get categoryIconChildren;
+
+  /// Icon choice in the category form: paw print glyph.
+  ///
+  /// In fr, this message translates to:
+  /// **'Animaux'**
+  String get categoryIconPets;
+
+  /// Icon choice in the category form: hand holding a heart glyph.
+  ///
+  /// In fr, this message translates to:
+  /// **'Dons'**
+  String get categoryIconDonations;
 
   /// Localized message for the backend's CATEGORY_NOT_FOUND code, which is also what a forced edit of a system category returns.
   ///

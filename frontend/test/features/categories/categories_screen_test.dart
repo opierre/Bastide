@@ -1,6 +1,7 @@
 import 'package:bastide/core/theme/app_theme.dart';
 import 'package:bastide/core/theme/tokens.dart';
 import 'package:bastide/core/widgets/app_select.dart';
+import 'package:bastide/core/widgets/category_icons.dart';
 import 'package:bastide/features/categories/application/categories_controller.dart';
 import 'package:bastide/features/categories/presentation/categories_screen.dart';
 import 'package:bastide/features/rules/application/rules_controller.dart';
@@ -9,6 +10,7 @@ import 'package:bastide/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:lucide_icons_flutter/lucide_icons_300.dart';
 
 import '../../support/fake_categories_controller.dart';
 import '../../support/fake_rules_controller.dart';
@@ -111,12 +113,12 @@ void main() {
       final food = tester.widget<Icon>(
         find.byKey(const Key('categoryIcon-food')),
       );
-      expect(food.icon, Icons.rice_bowl_outlined);
+      expect(food.icon, LucideIcons300.soup);
       expect(food.color, CategoryHues.alimentation);
       final own = tester.widget<Icon>(
         find.byKey(const Key('categoryIcon-own')),
       );
-      expect(own.icon, Icons.star_outline_rounded);
+      expect(own.icon, LucideIcons300.star);
     },
   );
 
@@ -294,7 +296,7 @@ void main() {
       final glyph = tester.widget<Icon>(
         find.descendant(of: header, matching: find.byType(Icon)),
       );
-      expect(glyph.icon, Icons.rice_bowl_outlined);
+      expect(glyph.icon, LucideIcons300.soup);
       expect(glyph.color, CategoryHues.alimentation);
       expect(find.byKey(const Key('categoryFormKind')), findsNothing);
       expect(find.byKey(const Key('categoryFormIcon')), findsNothing);
@@ -316,6 +318,71 @@ void main() {
       );
     },
   );
+
+  testWidgets(
+    'editing a pre-Lucide category preselects the Lucide glyph its key maps to',
+    (tester) async {
+      _useDesktopSurface(tester);
+      await tester.pumpWidget(
+        _wrap(controller: FakeCategoriesController(initialCategories: [_own])),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byKey(const Key('categoryMenu-own')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const Key('categoryEdit-own')));
+      await tester.pumpAndSettle();
+
+      final select = tester.widget<AppSelect<String>>(
+        find.byKey(const Key('categoryFormIcon')),
+      );
+      // `_own` stores the old « loisirs » slug.
+      expect(select.value, 'star');
+      expect(select.items.map((item) => item.value), CategoryIcons.glyphs.keys);
+      expect(find.text('Loisirs'), findsWidgets);
+    },
+  );
+
+  testWidgets('a custom category with a Lucide key draws that glyph', (
+    tester,
+  ) async {
+    _useDesktopSurface(tester);
+    await tester.pumpWidget(
+      _wrap(
+        controller: FakeCategoriesController(
+          initialCategories: [
+            testCategory(
+              id: 'pet',
+              userId: 'u1',
+              name: 'Chat',
+              icon: 'paw-print',
+              color: '#64748B',
+              isSystem: false,
+            ),
+            testCategory(
+              id: 'odd',
+              userId: 'u1',
+              name: 'Bizarre',
+              icon: 'not-an-icon',
+              color: '#64748B',
+              isSystem: false,
+            ),
+          ],
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(
+      tester.widget<Icon>(find.byKey(const Key('categoryIcon-pet'))).icon,
+      LucideIcons300.pawPrint,
+    );
+    // An unknown key falls back to its chip's glyph, never a blank square.
+    expect(
+      tester.widget<Icon>(find.byKey(const Key('categoryIcon-odd'))).icon,
+      LucideIcons300.coins,
+    );
+  });
 
   // --- the rule-count footer ----------------------------------------------------------
 

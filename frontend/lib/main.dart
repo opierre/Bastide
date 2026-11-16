@@ -6,8 +6,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'app.dart';
 import 'core/backend/backend_providers.dart';
 import 'core/backend/instance_lock.dart';
+import 'core/third_party_licenses.dart';
 
 void main() {
+  registerThirdPartyLicenses();
   final container = ProviderContainer();
 
   // Only an app that starts its own backend owns the data folder; a dev

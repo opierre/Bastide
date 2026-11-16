@@ -16,7 +16,7 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
 # In Windows, build-name is used as the major, minor, and patch parts
 # of the product and file versions while build-number is used as the build suffix.
-version: 0.1.3-dev.49+4
+version: 0.1.3-dev.50+4
 
 environment:
   sdk: ^3.12.0
@@ -55,6 +55,7 @@ dependencies:
   # Native memory for the Windows job object that ends the backend with the
   # app (core/backend/windows_job.dart).
   ffi: ^2.2.0
+  lucide_icons_flutter: ^4.0.3
 
 dev_dependencies:
   flutter_test:
@@ -80,6 +81,13 @@ flutter:
   uses-material-design: true
 
   generate: true
+
+  # Third-party notices the app registers with Flutter's LicenseRegistry
+  # (`lib/core/third_party_licenses.dart`). Lucide's ISC notice must travel
+  # with every copy of the icons; the package that ships the font carries only
+  # its own MIT licence.
+  assets:
+    - assets/licenses/lucide/LICENSE
 
   # Geist carries the UI (400 body, 600 emphasis/labels, 700 headings) and
   # Space Grotesk 700 the display role — wordmark, panel titles, headline

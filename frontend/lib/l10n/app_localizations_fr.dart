@@ -116,6 +116,13 @@ class AppLocalizationsFr extends AppLocalizations {
   String get settingsAboutVersionUnavailable => 'Indisponible';
 
   @override
+  String get settingsAboutCreditsTitle => 'Crédits';
+
+  @override
+  String get settingsAboutCreditsIcons =>
+      'Icônes : Lucide (lucide.dev), sous licence ISC.';
+
+  @override
   String get settingsUpdatesTitle => 'Mises à jour';
 
   @override
@@ -1367,6 +1374,93 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get categoryIconOther => 'Autre';
+
+  @override
+  String get categoryIconKey => 'Clé';
+
+  @override
+  String get categoryIconEnergy => 'Énergie';
+
+  @override
+  String get categoryIconRepairs => 'Travaux';
+
+  @override
+  String get categoryIconFurniture => 'Ameublement';
+
+  @override
+  String get categoryIconGroceries => 'Courses';
+
+  @override
+  String get categoryIconRestaurant => 'Restaurant';
+
+  @override
+  String get categoryIconCoffee => 'Café';
+
+  @override
+  String get categoryIconPublicTransport => 'Transports en commun';
+
+  @override
+  String get categoryIconFuel => 'Carburant';
+
+  @override
+  String get categoryIconTravel => 'Voyages';
+
+  @override
+  String get categoryIconOutings => 'Sorties';
+
+  @override
+  String get categoryIconGames => 'Jeux';
+
+  @override
+  String get categoryIconReading => 'Lecture';
+
+  @override
+  String get categoryIconSport => 'Sport';
+
+  @override
+  String get categoryIconPhone => 'Téléphone';
+
+  @override
+  String get categoryIconInternet => 'Internet';
+
+  @override
+  String get categoryIconPharmacy => 'Pharmacie';
+
+  @override
+  String get categoryIconCard => 'Carte bancaire';
+
+  @override
+  String get categoryIconBank => 'Banque';
+
+  @override
+  String get categoryIconInvestments => 'Placements';
+
+  @override
+  String get categoryIconBills => 'Factures';
+
+  @override
+  String get categoryIconSalary => 'Salaire';
+
+  @override
+  String get categoryIconGifts => 'Cadeaux';
+
+  @override
+  String get categoryIconClothing => 'Vêtements';
+
+  @override
+  String get categoryIconShopping => 'Achats';
+
+  @override
+  String get categoryIconEducation => 'Éducation';
+
+  @override
+  String get categoryIconChildren => 'Enfants';
+
+  @override
+  String get categoryIconPets => 'Animaux';
+
+  @override
+  String get categoryIconDonations => 'Dons';
 
   @override
   String get categoryErrorNotEditable =>

@@ -1,27 +1,10 @@
 import 'package:flutter/material.dart';
 
 import '../theme/tokens.dart';
+import 'category_icons.dart';
 import 'dashed_border.dart';
 
-/// Category glyphs, one per pinned hue. Paired with the hue so a chip carries
-/// its category twice over — meaning is never on color alone.
-abstract final class CategoryIcons {
-  static const bySlug = <String, IconData>{
-    'logement': Icons.home_outlined,
-    'alimentation': Icons.rice_bowl_outlined,
-    'transport': Icons.directions_car_outlined,
-    'loisirs': Icons.star_outline_rounded,
-    'abonnements': Icons.autorenew_rounded,
-    'sante': Icons.local_hospital_outlined,
-    'autres': Icons.monetization_on_outlined,
-    'epargne': Icons.monetization_on_outlined,
-    'revenus': Icons.arrow_upward_rounded,
-  };
-
-  static const fallback = Icons.sell_outlined;
-
-  static IconData forSlug(String? slug) => bySlug[slug] ?? fallback;
-}
+export 'category_icons.dart';
 
 /// A category label: 22px pill, the category's pinned hue at 14% with the
 /// full-strength hue for text and glyph.
@@ -95,7 +78,7 @@ class CategoryChip extends StatelessWidget {
       children: [
         Icon(
           slug == null
-              ? Icons.help_outline_rounded
+              ? CategoryIcons.uncategorized
               : CategoryIcons.forSlug(slug),
           size: 11,
           color: foreground,
