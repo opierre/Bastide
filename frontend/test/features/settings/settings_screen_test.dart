@@ -159,6 +159,11 @@ void main() {
       '0.1.0',
     );
     expect(find.textContaining('restent sur cet ordinateur'), findsOneWidget);
+    // Lucide's ISC notice is named where a user looks for credits.
+    expect(
+      tester.widget<Text>(find.byKey(const Key('settingsAboutCredits'))).data,
+      contains('Lucide'),
+    );
   });
 
   testWidgets('about says the version is unavailable when it cannot be read', (

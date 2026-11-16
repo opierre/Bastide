@@ -334,6 +334,18 @@ class _AboutPanel extends ConsumerWidget {
         ),
         const SizedBox(height: AppSpacing.gridGap),
         const UpdateCheckCard(),
+        const SizedBox(height: AppSpacing.gridGap),
+        // Lucide's ISC licence asks for its notice in every copy: the full
+        // text ships as an asset (`core/third_party_licenses.dart`), and this
+        // line names it where a user looks for it.
+        _SettingsCard(
+          title: l10n.settingsAboutCreditsTitle,
+          child: Text(
+            l10n.settingsAboutCreditsIcons,
+            key: const Key('settingsAboutCredits'),
+            style: style.copyWith(color: AppColors.textSecondary),
+          ),
+        ),
       ],
     );
   }

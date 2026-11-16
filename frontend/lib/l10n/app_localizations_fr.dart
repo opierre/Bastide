@@ -116,6 +116,13 @@ class AppLocalizationsFr extends AppLocalizations {
   String get settingsAboutVersionUnavailable => 'Indisponible';
 
   @override
+  String get settingsAboutCreditsTitle => 'Crédits';
+
+  @override
+  String get settingsAboutCreditsIcons =>
+      'Icônes : Lucide (lucide.dev), sous licence ISC.';
+
+  @override
   String get settingsUpdatesTitle => 'Mises à jour';
 
   @override

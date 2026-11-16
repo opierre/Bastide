@@ -115,6 +115,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingsAboutVersionUnavailable => 'Unavailable';
 
   @override
+  String get settingsAboutCreditsTitle => 'Credits';
+
+  @override
+  String get settingsAboutCreditsIcons =>
+      'Icons: Lucide (lucide.dev), ISC license.';
+
+  @override
   String get settingsUpdatesTitle => 'Updates';
 
   @override

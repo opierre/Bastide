@@ -136,6 +136,14 @@
   "@settingsAboutVersionUnavailable": {
     "description": "Shown in place of the version number when the app could not read it."
   },
+  "settingsAboutCreditsTitle": "Crédits",
+  "@settingsAboutCreditsTitle": {
+    "description": "Title of the third-party credits card in the About section."
+  },
+  "settingsAboutCreditsIcons": "Icônes : Lucide (lucide.dev), sous licence ISC.",
+  "@settingsAboutCreditsIcons": {
+    "description": "Credit line for the Lucide icon set and its license, in the About section."
+  },
   "settingsUpdatesTitle": "Mises à jour",
   "@settingsUpdatesTitle": {
     "description": "Title of the update-check card in Settings › About."

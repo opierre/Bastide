@@ -44,6 +44,8 @@
   "settingsFormatsAmounts": "Amounts",
   "settingsAboutVersion": "Version",
   "settingsAboutVersionUnavailable": "Unavailable",
+  "settingsAboutCreditsTitle": "Credits",
+  "settingsAboutCreditsIcons": "Icons: Lucide (lucide.dev), ISC license.",
   "settingsUpdatesTitle": "Updates",
   "settingsUpdatesSubtitle": "Tell me when a new version is released",
   "settingsUpdatesToggleLabel": "Check for updates",

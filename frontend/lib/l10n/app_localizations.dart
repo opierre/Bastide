@@ -302,6 +302,18 @@ abstract class AppLocalizations {
   /// **'Indisponible'**
   String get settingsAboutVersionUnavailable;
 
+  /// Title of the third-party credits card in the About section.
+  ///
+  /// In fr, this message translates to:
+  /// **'Crédits'**
+  String get settingsAboutCreditsTitle;
+
+  /// Credit line for the Lucide icon set and its license, in the About section.
+  ///
+  /// In fr, this message translates to:
+  /// **'Icônes : Lucide (lucide.dev), sous licence ISC.'**
+  String get settingsAboutCreditsIcons;
+
   /// Title of the update-check card in Settings › About.
   ///
   /// In fr, this message translates to:

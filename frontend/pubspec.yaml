@@ -82,6 +82,13 @@ flutter:
 
   generate: true
 
+  # Third-party notices the app registers with Flutter's LicenseRegistry
+  # (`lib/core/third_party_licenses.dart`). Lucide's ISC notice must travel
+  # with every copy of the icons; the package that ships the font carries only
+  # its own MIT licence.
+  assets:
+    - assets/licenses/lucide/LICENSE
+
   # Geist carries the UI (400 body, 600 emphasis/labels, 700 headings) and
   # Space Grotesk 700 the display role — wordmark, panel titles, headline
   # amounts. Only the weights the type scale actually uses are bundled.
