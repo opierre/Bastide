@@ -1739,11 +1739,127 @@
   },
   "categoryIconSavings": "Épargne",
   "@categoryIconSavings": {
-    "description": "Icon choice in the category form: coin glyph."
+    "description": "Icon choice in the category form: piggy bank glyph."
   },
   "categoryIconOther": "Autre",
   "@categoryIconOther": {
-    "description": "Icon choice in the category form: the neutral fallback glyph."
+    "description": "Icon choice in the category form: coins glyph."
+  },
+  "categoryIconKey": "Clé",
+  "@categoryIconKey": {
+    "description": "Icon choice in the category form: key glyph."
+  },
+  "categoryIconEnergy": "Énergie",
+  "@categoryIconEnergy": {
+    "description": "Icon choice in the category form: lightning bolt glyph."
+  },
+  "categoryIconRepairs": "Travaux",
+  "@categoryIconRepairs": {
+    "description": "Icon choice in the category form: wrench glyph."
+  },
+  "categoryIconFurniture": "Ameublement",
+  "@categoryIconFurniture": {
+    "description": "Icon choice in the category form: sofa glyph."
+  },
+  "categoryIconGroceries": "Courses",
+  "@categoryIconGroceries": {
+    "description": "Icon choice in the category form: shopping cart glyph."
+  },
+  "categoryIconRestaurant": "Restaurant",
+  "@categoryIconRestaurant": {
+    "description": "Icon choice in the category form: fork and knife glyph."
+  },
+  "categoryIconCoffee": "Café",
+  "@categoryIconCoffee": {
+    "description": "Icon choice in the category form: coffee cup glyph."
+  },
+  "categoryIconPublicTransport": "Transports en commun",
+  "@categoryIconPublicTransport": {
+    "description": "Icon choice in the category form: bus glyph."
+  },
+  "categoryIconFuel": "Carburant",
+  "@categoryIconFuel": {
+    "description": "Icon choice in the category form: fuel pump glyph."
+  },
+  "categoryIconTravel": "Voyages",
+  "@categoryIconTravel": {
+    "description": "Icon choice in the category form: plane glyph."
+  },
+  "categoryIconOutings": "Sorties",
+  "@categoryIconOutings": {
+    "description": "Icon choice in the category form: ticket glyph."
+  },
+  "categoryIconGames": "Jeux",
+  "@categoryIconGames": {
+    "description": "Icon choice in the category form: game controller glyph."
+  },
+  "categoryIconReading": "Lecture",
+  "@categoryIconReading": {
+    "description": "Icon choice in the category form: open book glyph."
+  },
+  "categoryIconSport": "Sport",
+  "@categoryIconSport": {
+    "description": "Icon choice in the category form: dumbbell glyph."
+  },
+  "categoryIconPhone": "Téléphone",
+  "@categoryIconPhone": {
+    "description": "Icon choice in the category form: smartphone glyph."
+  },
+  "categoryIconInternet": "Internet",
+  "@categoryIconInternet": {
+    "description": "Icon choice in the category form: wifi glyph."
+  },
+  "categoryIconPharmacy": "Pharmacie",
+  "@categoryIconPharmacy": {
+    "description": "Icon choice in the category form: pill glyph."
+  },
+  "categoryIconCard": "Carte bancaire",
+  "@categoryIconCard": {
+    "description": "Icon choice in the category form: credit card glyph."
+  },
+  "categoryIconBank": "Banque",
+  "@categoryIconBank": {
+    "description": "Icon choice in the category form: bank building glyph."
+  },
+  "categoryIconInvestments": "Placements",
+  "@categoryIconInvestments": {
+    "description": "Icon choice in the category form: rising chart glyph."
+  },
+  "categoryIconBills": "Factures",
+  "@categoryIconBills": {
+    "description": "Icon choice in the category form: receipt glyph."
+  },
+  "categoryIconSalary": "Salaire",
+  "@categoryIconSalary": {
+    "description": "Icon choice in the category form: briefcase glyph."
+  },
+  "categoryIconGifts": "Cadeaux",
+  "@categoryIconGifts": {
+    "description": "Icon choice in the category form: gift glyph."
+  },
+  "categoryIconClothing": "Vêtements",
+  "@categoryIconClothing": {
+    "description": "Icon choice in the category form: shirt glyph."
+  },
+  "categoryIconShopping": "Achats",
+  "@categoryIconShopping": {
+    "description": "Icon choice in the category form: shopping bag glyph."
+  },
+  "categoryIconEducation": "Éducation",
+  "@categoryIconEducation": {
+    "description": "Icon choice in the category form: graduation cap glyph."
+  },
+  "categoryIconChildren": "Enfants",
+  "@categoryIconChildren": {
+    "description": "Icon choice in the category form: baby glyph."
+  },
+  "categoryIconPets": "Animaux",
+  "@categoryIconPets": {
+    "description": "Icon choice in the category form: paw print glyph."
+  },
+  "categoryIconDonations": "Dons",
+  "@categoryIconDonations": {
+    "description": "Icon choice in the category form: hand holding a heart glyph."
   },
   "categoryErrorNotEditable": "Cette catégorie appartient au système : elle ne peut pas être modifiée ni supprimée.",
   "@categoryErrorNotEditable": {

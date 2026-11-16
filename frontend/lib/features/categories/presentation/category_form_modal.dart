@@ -57,7 +57,11 @@ class _CategoryFormModalState extends ConsumerState<CategoryFormModal> {
 
   late String _kind = widget.initial?.kind ?? widget.parent?.kind ?? 'expense';
   late String? _parentId = widget.initial?.parentId ?? widget.parent?.id;
-  late String _icon = widget.initial?.icon ?? 'autres';
+  // A row saved before Lucide carries a legacy key: the form shows (and saves
+  // back) its Lucide equivalent rather than an empty select.
+  late String _icon =
+      CategoryIcons.resolveKey(widget.initial?.icon) ??
+      CategoryIcons.slugKeys['autres']!;
   late Color _color = switch ((widget.initial, widget.parent)) {
     (final AppCategory initial, _) => categoryColor(initial),
     (null, final AppCategory parent) => categoryColor(parent),
@@ -106,7 +110,7 @@ class _CategoryFormModalState extends ConsumerState<CategoryFormModal> {
         ref.read(categoriesControllerProvider).value ?? const <AppCategory>[];
     final parent = _selectedParent(categories);
     final kind = parent?.kind ?? _kind;
-    final icon = parent == null ? _icon : categoryIconSlug(parent);
+    final icon = parent == null ? _icon : categoryIconKey(parent);
     final color = hexOf(parent == null ? _color : categoryColor(parent));
     final controller = ref.read(categoriesControllerProvider.notifier);
     try {
@@ -276,12 +280,12 @@ class _CategoryFormModalState extends ConsumerState<CategoryFormModal> {
                   value: _icon,
                   onChanged: (value) => setState(() => _icon = value),
                   items: [
-                    for (final slug in CategoryIcons.bySlug.keys)
+                    for (final key in CategoryIcons.glyphs.keys)
                       AppSelectItem(
-                        value: slug,
-                        label: categoryIconLabel(l10n, slug),
+                        value: key,
+                        label: categoryIconLabel(l10n, key),
                         leading: Icon(
-                          CategoryIcons.forSlug(slug),
+                          CategoryIcons.forKey(key),
                           size: 15,
                           color: AppColors.textSecondary,
                         ),

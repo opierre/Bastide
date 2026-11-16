@@ -25,20 +25,19 @@ Color categoryColor(AppCategory category) {
 ///
 /// A system category takes its chip's glyph, so a category looks the same on
 /// the panel as on every transaction row (`docs/design/08`). A user category
-/// takes the icon chosen in its modal — the form stores one of the
-/// [CategoryIcons] slugs — falling back to the chip's glyph for a slug the app
-/// doesn't know.
+/// takes the icon chosen in its modal — a [CategoryIcons] key, or a pre-Lucide
+/// key [CategoryIcons.resolveKey] maps — falling back to the chip's glyph for
+/// a key the app doesn't know.
 IconData categoryIcon(AppCategory category) =>
-    CategoryIcons.forSlug(categoryIconSlug(category));
+    CategoryIcons.forKey(categoryIconKey(category));
 
-/// The [CategoryIcons] slug behind [categoryIcon] — what a subcategory stores
+/// The [CategoryIcons] key behind [categoryIcon] — what a subcategory stores
 /// to wear its parent's glyph.
-String categoryIconSlug(AppCategory category) {
-  final chipSlug = categorySlugFor(name: category.name, kind: category.kind);
-  if (category.isSystem || !CategoryIcons.bySlug.containsKey(category.icon)) {
-    return chipSlug;
-  }
-  return category.icon;
+String categoryIconKey(AppCategory category) {
+  final chipKey = CategoryIcons
+      .slugKeys[categorySlugFor(name: category.name, kind: category.kind)]!;
+  if (category.isSystem) return chipKey;
+  return CategoryIcons.resolveKey(category.icon) ?? chipKey;
 }
 
 /// The palette the create/edit form offers. The design system pins these hues
