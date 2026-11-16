@@ -148,7 +148,7 @@ RenderObject _painter(WidgetTester tester) => tester.renderObject(
   return (mark, Offset(mark.dx, zeroY));
 }
 
-final _area = AppColors.iris.withValues(alpha: 0.10);
+final _area = AppColors.iris.withValues(alpha: AppChart.areaAlpha);
 
 /// The painter's y for [value], in its own coordinates.
 double _localY(WidgetTester tester, num value) {
@@ -216,18 +216,21 @@ void main() {
       final (shortfall, shortfallZero) = _localMark(tester, 2);
       expect(
         _painter(tester),
-        paints..path(
-          color: _area,
-          includes: [
-            Offset.lerp(saving, savingZero, 0.5)!,
-            Offset.lerp(shortfall, shortfallZero, 0.5)!,
-          ],
-          excludes: [
-            saving.translate(0, -6),
-            shortfall.translate(0, 6),
-            savingZero.translate(0, 6),
-          ],
-        ),
+        paints
+          // The dashed zero baseline, under the area.
+          ..path()
+          ..path(
+            color: _area,
+            includes: [
+              Offset.lerp(saving, savingZero, 0.5)!,
+              Offset.lerp(shortfall, shortfallZero, 0.5)!,
+            ],
+            excludes: [
+              saving.translate(0, -6),
+              shortfall.translate(0, 6),
+              savingZero.translate(0, 6),
+            ],
+          ),
       );
     });
 
@@ -248,9 +251,9 @@ void main() {
       for (var i = 0; i < _values.length; i++) {
         if (i > 0) await _moveTo(tester, gesture, i);
         final card = _tooltip(tester, i);
-        // The hovered dot's 5 px radius and 1.5 px ring.
+        // The hovered dot, ring included.
         expect(
-          card.inflate(6.5).contains(points[i]),
+          card.inflate(AppChart.dotReach).contains(points[i]),
           isFalse,
           reason: 'month $i',
         );

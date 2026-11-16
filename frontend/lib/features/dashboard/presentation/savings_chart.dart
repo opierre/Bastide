@@ -3,9 +3,9 @@ import 'dart:math' as math;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
-import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/tokens.dart';
 import '../../../core/widgets/area_line.dart';
+import '../../../core/widgets/chart_style.dart';
 import '../../../core/widgets/chart_tooltip.dart';
 import '../application/dashboard_controller.dart';
 
@@ -80,11 +80,7 @@ class _SavingsChartState extends State<SavingsChart> {
 
   @override
   Widget build(BuildContext context) {
-    final textTheme = Theme.of(context).textTheme;
-    final labelStyle = textTheme.labelSmall!.copyWith(
-      fontWeight: FontWeight.w400,
-      color: AppColors.textSecondary,
-    );
+    final labelStyle = ChartPaints.labelStyle(Theme.of(context).textTheme);
     final scale = _Scale.of(widget.values);
     final tooltips = widget.tooltips;
 
@@ -130,7 +126,7 @@ class _SavingsChartState extends State<SavingsChart> {
             average: widget.average,
             hovered: _hovered,
             levelLabels: scale.levels.map(widget.valueLabel).toList(),
-            labelStyle: tabularNumberStyle(labelStyle),
+            labelStyle: labelStyle,
           ),
         ),
       ),
@@ -175,7 +171,7 @@ class _SavingsChartState extends State<SavingsChart> {
           _markPoint(values, scale, i, _plotRect(size)),
       ],
       hovered: hovered,
-      pointRadius: bars ? 0 : _SavingsChartPainter.hoverDotOuterRadius,
+      pointRadius: bars ? 0 : AppChart.dotReach,
       joinsNext: bars ? (_) => false : null,
       marks: bars
           ? (size) => [
@@ -288,18 +284,8 @@ class _SavingsChartPainter extends CustomPainter {
   static const _hoverAlpha = 0.9;
   static const _openFillAlpha = 0.08;
 
-  /// The line view's stroke and dots, as on [AreaLine], whose iris line this chart drew
-  /// before it took bars.
-  static const _lineStroke = 2.5;
-  static const _dotRadius = 4.0;
-  static const _hoverDotRadius = 5.0;
-  static const _dotRing = 1.5;
-
-  /// The line view's area, at the Synthèse « Patrimoine net » chart's 10 %.
-  static const _areaAlpha = 0.10;
-
-  /// The hovered dot's reach, ring included — what the line view's tooltip clears.
-  static const hoverDotOuterRadius = _hoverDotRadius + _dotRing;
+  /// The open bar's dashed outline.
+  static const _openOutline = 1.5;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -328,25 +314,14 @@ class _SavingsChartPainter extends CustomPainter {
   }
 
   /// The labelled gridlines both views stand on.
-  void _paintGrid(Canvas canvas, Size size, Rect plot) {
-    final grid = Paint()
-      ..color = AppColors.borderSubtle
-      ..strokeWidth = 1;
-    final levels = scale.levels;
-    for (var i = 0; i < levels.length; i++) {
-      final y = scale.y(levels[i], plot);
-      canvas.drawLine(Offset(plot.left, y), Offset(size.width, y), grid);
-      final label = TextPainter(
-        text: TextSpan(text: levelLabels[i], style: labelStyle),
-        textDirection: TextDirection.ltr,
-        maxLines: 1,
-      )..layout();
-      label.paint(
-        canvas,
-        Offset(plot.left - AppSpacing.sm - label.width, y - label.height / 2),
-      );
-    }
-  }
+  void _paintGrid(Canvas canvas, Size size, Rect plot) => ChartPaints.grid(
+    canvas,
+    size,
+    plot,
+    [for (final level in scale.levels) scale.y(level, plot)],
+    labels: levelLabels,
+    style: labelStyle,
+  );
 
   /// Month [index]'s position: its slot's centre, at its value on the shared scale.
   Offset _point(int index, Rect plot) => _markPoint(values, scale, index, plot);
@@ -372,7 +347,13 @@ class _SavingsChartPainter extends CustomPainter {
           rect,
           Paint()..color = color.withValues(alpha: _openFillAlpha),
         );
-        _drawDashed(canvas, Path()..addRRect(rect), color);
+        canvas.drawPath(
+          ChartPaints.dashed(Path()..addRRect(rect)),
+          Paint()
+            ..color = color
+            ..style = PaintingStyle.stroke
+            ..strokeWidth = _openOutline,
+        );
       } else {
         final alpha = hovered == i ? _hoverAlpha : _barAlpha;
         canvas.drawRRect(rect, Paint()..color = color.withValues(alpha: alpha));
@@ -388,22 +369,17 @@ class _SavingsChartPainter extends CustomPainter {
     // own floor, where the bottom gridline already marks it.
     final zeroY = scale.y(0, plot);
     if (scale.bottom < 0) {
-      final dash = Paint()
-        ..color = AppColors.borderDashed
-        ..strokeWidth = 1;
-      for (var x = plot.left; x < size.width; x += 7) {
-        canvas.drawLine(
-          Offset(x, zeroY),
-          Offset(math.min(x + 4, size.width), zeroY),
-          dash,
-        );
-      }
+      ChartPaints.baseline(
+        canvas,
+        Offset(plot.left, zeroY),
+        Offset(size.width, zeroY),
+      );
     }
 
-    // The area between the line and zero, as under the Synthèse's « Patrimoine net »: an
-    // iris wash closed on the zero line rather than the plot's floor, so a saving fills up
-    // to its point and a shortfall down to its own, the same way. Under the line, so the
-    // stroke and dots stay crisp over it.
+    // The area between the line and zero, in the shared curve fill: closed on the zero
+    // line rather than the plot's floor, so a saving fills up to its point and a shortfall
+    // down to its own, the same way. Under the line, so the stroke and dots stay crisp
+    // over it.
     if (points.length > 1) {
       canvas.drawPath(
         Path()
@@ -411,73 +387,49 @@ class _SavingsChartPainter extends CustomPainter {
           ..lineTo(points.last.dx, zeroY)
           ..lineTo(points.first.dx, zeroY)
           ..close(),
-        Paint()..color = AppColors.iris.withValues(alpha: _areaAlpha),
+        ChartPaints.area(AppColors.iris),
       );
     }
 
-    final stroke = Paint()
-      ..color = AppColors.iris
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = _lineStroke
-      ..strokeJoin = StrokeJoin.round
-      ..strokeCap = StrokeCap.round;
     // Settled months as one solid path; the segment into the open month dashed, as the
     // open bar is outlined.
     final settled = points.length > 1
         ? points.sublist(0, points.length - 1)
         : points;
-    canvas.drawPath(Path()..addPolygon(settled, false), stroke);
+    canvas.drawPath(
+      Path()..addPolygon(settled, false),
+      ChartPaints.stroke(AppColors.iris),
+    );
     if (points.length > 1) {
-      _drawDashed(
-        canvas,
-        Path()
-          ..moveTo(points[points.length - 2].dx, points[points.length - 2].dy)
-          ..lineTo(points.last.dx, points.last.dy),
-        AppColors.iris,
-        strokeWidth: _lineStroke,
+      canvas.drawPath(
+        ChartPaints.dashed(
+          Path()
+            ..moveTo(points[points.length - 2].dx, points[points.length - 2].dy)
+            ..lineTo(points.last.dx, points.last.dy),
+        ),
+        ChartPaints.stroke(AppColors.iris)..strokeCap = StrokeCap.butt,
       );
     }
 
-    // A dot per month in its sign's color, ringed in the card's surface so it reads as
-    // sitting on the line. The open month's dot is hollow.
+    // A dot per month in its sign's color — the one place a curve's dots don't take the
+    // line's hue, since the sign is what each month says. The hovered month's dot is the
+    // full-size one; the open month's is full-size and hollow.
     for (var i = 0; i < points.length; i++) {
-      final radius = hovered == i ? _hoverDotRadius : _dotRadius;
       final color = values[i] < 0 ? AppColors.negative : AppColors.positive;
-      canvas.drawCircle(
-        points[i],
-        radius + _dotRing,
-        Paint()..color = AppColors.surfaceRaised,
-      );
       if (i == points.length - 1) {
-        canvas.drawCircle(
+        ChartPaints.hollowDot(
+          canvas,
           points[i],
-          radius - 0.75,
-          Paint()
-            ..color = color
-            ..style = PaintingStyle.stroke
-            ..strokeWidth = 1.5,
+          AppChart.currentDotRadius,
+          color,
         );
       } else {
-        canvas.drawCircle(points[i], radius, Paint()..color = color);
-      }
-    }
-  }
-
-  void _drawDashed(
-    Canvas canvas,
-    Path path,
-    Color color, {
-    double strokeWidth = 1.5,
-  }) {
-    final paint = Paint()
-      ..color = color
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = strokeWidth;
-    for (final metric in path.computeMetrics()) {
-      var distance = 0.0;
-      while (distance < metric.length) {
-        canvas.drawPath(metric.extractPath(distance, distance + 4), paint);
-        distance += 7;
+        ChartPaints.dot(
+          canvas,
+          points[i],
+          hovered == i ? AppChart.currentDotRadius : AppChart.pointDotRadius,
+          color,
+        );
       }
     }
   }
