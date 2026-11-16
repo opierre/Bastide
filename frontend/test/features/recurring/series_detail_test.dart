@@ -6,6 +6,7 @@ import 'package:bastide/features/recurring/domain/recurring_series.dart';
 import 'package:bastide/features/recurring/presentation/price_history_chart.dart';
 import 'package:bastide/features/recurring/presentation/series_detail.dart';
 import 'package:bastide/l10n/app_localizations.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -313,6 +314,68 @@ void main() {
     );
   });
 
+  testWidgets('hovering a charge names it at once in the shared chart card', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(1440, 900);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.reset);
+
+    await tester.pumpWidget(
+      _wrap(
+        SeriesDetail(
+          series: testSeries(
+            priceChangeMinor: -200,
+            priceChangedAt: DateTime(2026, 4, 15),
+          ),
+          occurrences: [
+            _occurrence(bookedDate: DateTime(2026, 4, 15), amountMinor: -1549),
+            _occurrence(
+              id: 'o2',
+              bookedDate: DateTime(2026, 3, 15),
+              amountMinor: -1349,
+            ),
+          ],
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    final gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    addTearDown(gesture.removePointer);
+    await gesture.addPointer(location: Offset.zero);
+    await gesture.moveTo(
+      // Near its own point: the two charges' columns overlap mid-plot.
+      tester
+          .getRect(find.byKey(const Key('seriesOccurrence-o2')))
+          .centerLeft
+          .translate(AppChart.valueGutter + 4, 0),
+    );
+    await tester.pump();
+
+    // One frame, no Tooltip delay, as on every other chart.
+    final card = find.byKey(const Key('seriesPriceTooltip'));
+    expect(card, findsOneWidget);
+    expect(
+      find.descendant(
+        of: find.byType(PriceHistoryChart),
+        matching: find.byType(Tooltip),
+      ),
+      findsNothing,
+    );
+    expect(
+      find.descendant(
+        of: card,
+        matching: find.textContaining(_money(-1349), findRichText: true),
+      ),
+      findsOneWidget,
+    );
+
+    await gesture.moveTo(Offset.zero);
+    await tester.pump();
+    expect(card, findsNothing);
+  });
+
   testWidgets('a series created by the user says it is tracked, not detected', (
     tester,
   ) async {
@@ -398,7 +461,7 @@ void main() {
     group('margins at $width px', () {
       /// The latest charge's dot radius: the plot stops that short of the
       /// chart's right edge so the dot stays inside it.
-      const latestDot = 5.0;
+      const latestDot = AppChart.dotReach;
 
       Future<Rect> pumpCharges(
         WidgetTester tester,
