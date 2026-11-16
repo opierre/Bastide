@@ -36,6 +36,10 @@ at 10 %. Value axis labels the min / mid / max gridlines in a 56 px left gutter 
 amounts (« 3,5 k€ »), as on the dashboard's savings chart; x-axis month abbreviations
 (« janv. », « févr. »…). Hover tooltip (overlay surface, radius 14): month, balance, delta vs
 previous month signed and colored (« +412,30 € »). No animate-in.
+(Amended — issue #188: the line takes the shared curve style of `00` §Components — cyan 2.5 px
+over a flat 16 % cyan area, a 3 px point dot on each month and the 5 px dot on today's and the
+hovered one, the zero baseline 5 on / 4 off; no value label on the last point, the hover card
+carries it. Kept as its own: the cyan hue, since iris is the accent role.)
 Stats card, 3 stacked rows separated by `#1A212C`: « Variation sur 12 mois » +1 240,50 € (green,
 with up-arrow glyph) · « Entrées » +28 410,00 € · « Sorties » −27 169,50 €. Under the rows, an
 encouraging one-liner in 12.5 secondary: « Votre solde progresse depuis 4 mois consécutifs. »
@@ -61,7 +65,9 @@ account). 8 TransactionRow (52 px) with CategoryChip, signed AmountText, date co
 Row 1 chip « Débit différé », masked number in the meta strip. Headline label becomes « Encours
 du cycle » (the balance resets each month). Row 2 swaps the AreaLine for single bars: one bar per
 settlement cycle = total charged that cycle (expense red at 70 %, the current in-progress cycle
-drawn as a dashed outline), because a sawtooth balance line reads as noise. Row 3 becomes
+drawn as a dashed outline), because a sawtooth balance line reads as noise. (Amended — issue
+#188: framed like the balance line — clean ticks from zero, the shared gridlines, labels and
+5 on / 4 off dashes — and hovering a cycle shows the shared chart card at once.) Row 3 becomes
 « Compte de règlement »: one row with the paying account (avatar, name, balance) + the
 settlement rule summary « Libellé : CARTE X4821 · Appliquée depuis le 5 févr. 2025 » + ghost
 « Modifier la règle ».
