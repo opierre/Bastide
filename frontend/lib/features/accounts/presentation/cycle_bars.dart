@@ -3,9 +3,11 @@ import 'dart:math' as math;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
-import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/tokens.dart';
 import '../../../core/widgets/area_line.dart';
+import '../../../core/widgets/chart_scale.dart';
+import '../../../core/widgets/chart_style.dart';
+import '../../../core/widgets/chart_tooltip.dart';
 
 /// A deferred card's spending, one bar per settlement cycle
 /// (`docs/design/16-account-detail.md` §Variant). A card's balance resets each
@@ -13,9 +15,10 @@ import '../../../core/widgets/area_line.dart';
 /// figure that means something.
 ///
 /// Bars are expense red at 70%; the open cycle, still moving, is drawn as a
-/// dashed outline instead. Laid out like [AreaLine] — the same value gutter,
-/// slots and month axis — so the two charts sit interchangeably in one card.
-/// Not animated, per the spec's motion rules.
+/// dashed outline instead. Framed in the shared curve style ([AppChart]) — the
+/// same value gutter, labelled gridlines on clean ticks (see [ChartScale]),
+/// slots, month axis and hover card as [AreaLine] — so the two charts sit
+/// interchangeably in one card. Not animated, per the spec's motion rules.
 class CycleBars extends StatefulWidget {
   const CycleBars({
     super.key,
@@ -26,7 +29,8 @@ class CycleBars extends StatefulWidget {
     this.tooltips,
   });
 
-  /// What each cycle charged, as a positive magnitude, oldest first.
+  /// What each cycle charged, as a positive magnitude in minor units, oldest
+  /// first.
   final List<int> values;
   final List<String> labels;
 
@@ -40,18 +44,16 @@ class CycleBars extends StatefulWidget {
 }
 
 class _CycleBarsState extends State<CycleBars> {
+  /// The cycle under the pointer — hover ephemera, not chart state.
   int? _hovered;
 
   @override
   Widget build(BuildContext context) {
-    final textTheme = Theme.of(context).textTheme;
-    final labelStyle = textTheme.labelSmall!.copyWith(
-      fontWeight: FontWeight.w400,
-      color: AppColors.textSecondary,
-    );
-    final top = _niceTop(widget.values);
-    final levels = [0, top / 2, top].map(widget.valueLabel).toList();
+    final labelStyle = ChartPaints.labelStyle(Theme.of(context).textTheme);
+    final scale = _scale(widget.values);
+    final levels = scale.ticks.map(widget.valueLabel).toList();
     final tooltips = widget.tooltips;
+    final values = widget.values;
 
     return Column(
       children: [
@@ -63,12 +65,12 @@ class _CycleBarsState extends State<CycleBars> {
                 child: CustomPaint(
                   size: Size.infinite,
                   painter: _CycleBarsPainter(
-                    values: widget.values,
-                    top: top,
+                    values: values,
+                    scale: scale,
                     lastInProgress: widget.lastInProgress,
                     hovered: _hovered,
                     levelLabels: levels,
-                    labelStyle: tabularNumberStyle(labelStyle),
+                    labelStyle: labelStyle,
                   ),
                 ),
               ),
@@ -77,24 +79,45 @@ class _CycleBarsState extends State<CycleBars> {
                 child: Row(
                   children: [
                     const SizedBox(width: AppChart.valueGutter),
-                    for (var i = 0; i < widget.values.length; i++)
+                    for (var i = 0; i < values.length; i++)
                       Expanded(
                         child: MouseRegion(
+                          key: Key('cycleBarsSlot-$i'),
                           onEnter: (_) => setState(() => _hovered = i),
-                          child: tooltips == null
-                              ? const SizedBox.expand()
-                              : Tooltip(
-                                  key: Key('cycleBarsTooltip-$i'),
-                                  richMessage: TextSpan(
-                                    children: [tooltips[i]],
-                                  ),
-                                  child: const SizedBox.expand(),
-                                ),
+                          // The card is drawn, not a [Tooltip], so a screen
+                          // reader still needs the cycle's figure on its slot.
+                          child: Semantics(
+                            label: tooltips == null || i >= tooltips.length
+                                ? null
+                                : tooltips[i].toPlainText(),
+                            child: const SizedBox.expand(),
+                          ),
                         ),
                       ),
                   ],
                 ),
               ),
+              if ((_hovered, tooltips) case (
+                final hovered?,
+                final tooltips?,
+              ) when hovered < tooltips.length && hovered < values.length)
+                LineChartTooltip(
+                  cardKey: Key('cycleBarsTooltip-$hovered'),
+                  message: tooltips[hovered],
+                  points: (size) => [
+                    for (var i = 0; i < values.length; i++)
+                      _barRect(values, scale, i, _plotRect(size)).topCenter,
+                  ],
+                  hovered: hovered,
+                  pointRadius: 0,
+                  // Bars, not a line: the card keeps clear of every one.
+                  joinsNext: (_) => false,
+                  marks: (size) => [
+                    for (var i = 0; i < values.length; i++)
+                      _barRect(values, scale, i, _plotRect(size)),
+                  ],
+                  leftBound: AppChart.valueGutter,
+                ),
             ],
           ),
         ),
@@ -120,17 +143,44 @@ class _CycleBarsState extends State<CycleBars> {
   }
 }
 
-/// The value at the top gridline: the tallest bar plus headroom, so it never
-/// touches the card's title. Never zero, so an empty series still lays out.
-double _niceTop(List<int> values) {
-  final highest = values.isEmpty ? 0 : values.reduce(math.max);
-  return highest <= 0 ? 1 : highest * 1.15;
+/// The bars' scale: from zero, so a bar's height is its total, to a clean tick
+/// past the tallest one — the same [ChartScale] the account's balance line
+/// stands on. Minor units, so no gridline on cents.
+ChartScale _scale(List<int> values) =>
+    ChartScale.of([0, ...values], intervals: 2, minStep: 100);
+
+/// Where the plot sits in the chart's box: right of the value gutter, inset a
+/// little at the top so the top label isn't clipped. Shared by the painter and
+/// the hover card, so the card can't drift off the bar it names.
+Rect _plotRect(Size size) => Rect.fromLTWH(
+  AppChart.valueGutter,
+  _CycleBarsPainter._topInset,
+  size.width - AppChart.valueGutter,
+  size.height - _CycleBarsPainter._topInset,
+);
+
+/// Cycle [index]'s bar: [_CycleBarsPainter._maxBarWidth] at most, or 56 % of
+/// its slot, from zero to its total.
+Rect _barRect(List<int> values, ChartScale scale, int index, Rect plot) {
+  final barWidth = math.min(
+    _CycleBarsPainter._maxBarWidth,
+    plot.width / values.length * 0.56,
+  );
+  final centre = plot.left + AreaLine.pointX(index, values.length, plot.width);
+  final tip = scale.y(values[index], plot);
+  final zero = scale.y(0, plot);
+  return Rect.fromLTRB(
+    centre - barWidth / 2,
+    math.min(tip, zero),
+    centre + barWidth / 2,
+    math.max(tip, zero),
+  );
 }
 
 class _CycleBarsPainter extends CustomPainter {
   _CycleBarsPainter({
     required this.values,
-    required this.top,
+    required this.scale,
     required this.lastInProgress,
     required this.hovered,
     required this.levelLabels,
@@ -138,54 +188,38 @@ class _CycleBarsPainter extends CustomPainter {
   });
 
   final List<int> values;
-  final double top;
+  final ChartScale scale;
   final bool lastInProgress;
   final int? hovered;
   final List<String> levelLabels;
   final TextStyle labelStyle;
 
+  static const _topInset = 4.0;
   static const _maxBarWidth = 28.0;
   static const _topRadius = 6.0;
   static const _baseRadius = 2.0;
   static const _barAlpha = 0.7;
   static const _hoverAlpha = 0.9;
+  static const _openFillAlpha = 0.08;
+  static const _openOutline = 1.5;
 
   @override
   void paint(Canvas canvas, Size size) {
-    const gutter = AppChart.valueGutter;
-    final plot = Rect.fromLTWH(gutter, 4, size.width - gutter, size.height - 4);
-    if (plot.width <= 0) return;
+    final plot = _plotRect(size);
+    if (plot.width <= 0 || plot.height <= 0) return;
 
-    final grid = Paint()
-      ..color = AppColors.borderSubtle
-      ..strokeWidth = 1;
-    for (var i = 0; i < levelLabels.length; i++) {
-      final y = plot.bottom - plot.height * (i / (levelLabels.length - 1));
-      canvas.drawLine(Offset(plot.left, y), Offset(size.width, y), grid);
-      final label = TextPainter(
-        text: TextSpan(text: levelLabels[i], style: labelStyle),
-        textDirection: TextDirection.ltr,
-        maxLines: 1,
-      )..layout();
-      label.paint(
-        canvas,
-        Offset(plot.left - AppSpacing.sm - label.width, y - label.height / 2),
-      );
-    }
+    ChartPaints.grid(
+      canvas,
+      size,
+      plot,
+      [for (final tick in scale.ticks) scale.y(tick, plot)],
+      labels: levelLabels,
+      style: labelStyle,
+    );
 
-    if (values.isEmpty) return;
-    final slot = plot.width / values.length;
-    final barWidth = math.min(_maxBarWidth, slot * 0.56);
     for (var i = 0; i < values.length; i++) {
-      final height = plot.height * (values[i] / top);
-      final centre = plot.left + AreaLine.pointX(i, values.length, plot.width);
       final rect = RRect.fromRectAndCorners(
-        Rect.fromLTWH(
-          centre - barWidth / 2,
-          plot.bottom - height,
-          barWidth,
-          height,
-        ),
+        _barRect(values, scale, i, plot),
         topLeft: const Radius.circular(_topRadius),
         topRight: const Radius.circular(_topRadius),
         bottomLeft: const Radius.circular(_baseRadius),
@@ -195,9 +229,15 @@ class _CycleBarsPainter extends CustomPainter {
       if (open) {
         canvas.drawRRect(
           rect,
-          Paint()..color = AppColors.negative.withValues(alpha: 0.08),
+          Paint()..color = AppColors.negative.withValues(alpha: _openFillAlpha),
         );
-        _drawDashed(canvas, Path()..addRRect(rect));
+        canvas.drawPath(
+          ChartPaints.dashed(Path()..addRRect(rect)),
+          Paint()
+            ..color = AppColors.negative
+            ..style = PaintingStyle.stroke
+            ..strokeWidth = _openOutline,
+        );
       } else {
         final alpha = hovered == i ? _hoverAlpha : _barAlpha;
         canvas.drawRRect(
@@ -208,24 +248,10 @@ class _CycleBarsPainter extends CustomPainter {
     }
   }
 
-  void _drawDashed(Canvas canvas, Path path) {
-    final paint = Paint()
-      ..color = AppColors.negative
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 1.5;
-    for (final metric in path.computeMetrics()) {
-      var distance = 0.0;
-      while (distance < metric.length) {
-        canvas.drawPath(metric.extractPath(distance, distance + 4), paint);
-        distance += 7;
-      }
-    }
-  }
-
   @override
   bool shouldRepaint(_CycleBarsPainter oldDelegate) =>
       !listEquals(oldDelegate.values, values) ||
-      oldDelegate.top != top ||
+      oldDelegate.scale != scale ||
       oldDelegate.lastInProgress != lastInProgress ||
       oldDelegate.hovered != hovered ||
       !listEquals(oldDelegate.levelLabels, levelLabels) ||
