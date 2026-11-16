@@ -998,6 +998,8 @@
   "simulatorChartSubtitle": "Principal repaid and interest paid, year by year",
   "simulatorChartCapital": "Principal",
   "simulatorChartInterest": "Interest",
+  "simulatorChartTooltipCapital": "Principal: {amount}",
+  "simulatorChartTooltipInterest": "Interest: {amount}",
   "simulatorChartEmpty": "Enter a price and a rate: the yearly split between principal and interest shows here.",
   "simulatorComputeFailed": "The calculation didn't go through. Try again in a moment.",
   "simulatorErrorNonAmortizing": "At this rate the instalment doesn't repay the principal: lower the rate or lengthen the term.",

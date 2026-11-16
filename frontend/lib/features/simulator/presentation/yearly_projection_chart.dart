@@ -6,7 +6,12 @@ import 'package:intl/intl.dart' show NumberFormat;
 
 import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/tokens.dart';
+import '../../../core/widgets/amount_text.dart';
 import '../../../core/widgets/app_card.dart';
+import '../../../core/widgets/area_line.dart';
+import '../../../core/widgets/chart_scale.dart';
+import '../../../core/widgets/chart_style.dart';
+import '../../../core/widgets/chart_tooltip.dart';
 import '../../../l10n/app_localizations.dart';
 import '../domain/simulation_result.dart';
 
@@ -97,7 +102,26 @@ class YearlyProjectionCard extends StatelessWidget {
                       name: result.currency,
                       decimalDigits: 0,
                     ).format(minor / 100),
-                    labelStyle: AppTextStyles.helper.copyWith(fontSize: 11),
+                    labelStyle: ChartPaints.labelStyle(textTheme),
+                    // The year, then its two API figures — neutral, like every
+                    // amount on this panel.
+                    tooltips: [
+                      for (final row in result.yearly)
+                        TextSpan(
+                          children: [
+                            TextSpan(
+                              text: '${row.year}\n',
+                              style: tabularNumberStyle(textTheme.labelSmall!),
+                            ),
+                            TextSpan(
+                              text:
+                                  '${l10n.simulatorChartTooltipCapital(formatAmount(amountMinor: row.principalMinor, currency: result.currency, locale: locale))}\n'
+                                  '${l10n.simulatorChartTooltipInterest(formatAmount(amountMinor: row.interestMinor, currency: result.currency, locale: locale))}',
+                              style: tabularNumberStyle(textTheme.bodySmall!),
+                            ),
+                          ],
+                        ),
+                    ],
                   ),
           ),
         ],
@@ -132,9 +156,11 @@ class _LegendItem extends StatelessWidget {
   }
 }
 
-/// The StackedBars plot: y gridlines from zero, a bar per year, x labels every
-/// fourth year and the last. Not animated — charts appear drawn.
-class YearlyProjectionPlot extends StatelessWidget {
+/// The StackedBars plot, framed in the shared curve style ([AppChart]):
+/// labelled y gridlines on clean ticks from zero (see [ChartScale]), a bar per
+/// year, x labels every fourth year and the last, and the chart card on hover.
+/// Not animated — charts appear drawn.
+class YearlyProjectionPlot extends StatefulWidget {
   const YearlyProjectionPlot({
     super.key,
     required this.years,
@@ -142,6 +168,7 @@ class YearlyProjectionPlot extends StatelessWidget {
     required this.interest,
     required this.yLabel,
     required this.labelStyle,
+    this.tooltips,
   });
 
   final List<int> years;
@@ -150,22 +177,122 @@ class YearlyProjectionPlot extends StatelessWidget {
   final String Function(int minor) yLabel;
   final TextStyle labelStyle;
 
+  /// Hover message per year — same length as [years] when given.
+  final List<InlineSpan>? tooltips;
+
+  @override
+  State<YearlyProjectionPlot> createState() => _YearlyProjectionPlotState();
+}
+
+class _YearlyProjectionPlotState extends State<YearlyProjectionPlot> {
+  /// The year under the pointer — hover ephemera, not chart state.
+  int? _hovered;
+
   @override
   Widget build(BuildContext context) {
-    return RepaintBoundary(
-      child: CustomPaint(
-        size: Size.infinite,
-        painter: _StackedBarsPainter(
-          years: years,
-          capital: capital,
-          interest: interest,
-          yLabel: yLabel,
-          labelStyle: labelStyle,
-          textDirection: Directionality.of(context),
+    final tooltips = widget.tooltips;
+    final years = widget.years;
+    return Stack(
+      fit: StackFit.expand,
+      children: [
+        RepaintBoundary(
+          child: CustomPaint(
+            size: Size.infinite,
+            painter: _StackedBarsPainter(
+              years: years,
+              capital: widget.capital,
+              interest: widget.interest,
+              yLabel: widget.yLabel,
+              labelStyle: widget.labelStyle,
+              textDirection: Directionality.of(context),
+            ),
+          ),
         ),
-      ),
+        // One full-height slot per year, matching the bars' slots: the thing
+        // worth hovering is the year, not the bar's few pixels.
+        MouseRegion(
+          onExit: (_) => setState(() => _hovered = null),
+          child: Row(
+            children: [
+              const SizedBox(width: AppChart.valueGutter),
+              for (var i = 0; i < years.length; i++)
+                Expanded(
+                  child: MouseRegion(
+                    key: Key('projectionSlot-$i'),
+                    onEnter: (_) => setState(() => _hovered = i),
+                    child: Semantics(
+                      label: tooltips == null || i >= tooltips.length
+                          ? null
+                          : tooltips[i].toPlainText(),
+                      child: const SizedBox.expand(),
+                    ),
+                  ),
+                ),
+            ],
+          ),
+        ),
+        if ((_hovered, tooltips) case (
+          final hovered?,
+          final tooltips?,
+        ) when hovered < tooltips.length && hovered < years.length)
+          LineChartTooltip(
+            cardKey: const Key('projectionTooltip'),
+            message: tooltips[hovered],
+            points: (size) => [for (final bar in _bars(size)) bar.topCenter],
+            hovered: hovered,
+            pointRadius: 0,
+            // Bars, not a line: the card keeps clear of every one.
+            joinsNext: (_) => false,
+            marks: _bars,
+            leftBound: AppChart.valueGutter,
+            bottomInset: AppChart.axisHeight,
+          ),
+      ],
     );
   }
+
+  /// Each year's whole stacked bar in a chart of [size].
+  List<Rect> _bars(Size size) => [
+    for (var i = 0; i < widget.years.length; i++)
+      _barRect(size, widget.capital, widget.interest, i),
+  ];
+}
+
+/// Where the plot sits in the chart's box: right of the value gutter, above
+/// the year axis, a little below the top so the top label isn't clipped.
+Rect _projectionPlotRect(Size size) => Rect.fromLTRB(
+  AppChart.valueGutter,
+  _StackedBarsPainter._topPad,
+  size.width,
+  size.height - AppChart.axisHeight,
+);
+
+/// The bars' scale: from zero to a clean tick past the tallest year. A bar's
+/// height is the two API figures laid end to end — geometry for the scale, not
+/// a figure the panel prints. Minor units, so no gridline on cents.
+ChartScale _projectionScale(List<int> capital, List<int> interest) =>
+    ChartScale.of(
+      [0, for (var i = 0; i < capital.length; i++) capital[i] + interest[i]],
+      intervals: 2,
+      minStep: 100,
+    );
+
+/// Year [index]'s whole stacked bar, gap included.
+Rect _barRect(Size size, List<int> capital, List<int> interest, int index) {
+  final plot = _projectionPlotRect(size);
+  final scale = _projectionScale(capital, interest);
+  final width = math.min(
+    _StackedBarsPainter._maxBarWidth,
+    plot.width / capital.length * 0.62,
+  );
+  final center = plot.left + AreaLine.pointX(index, capital.length, plot.width);
+  final top = scale.y(capital[index] + interest[index], plot);
+  return Rect.fromLTRB(
+    center - width / 2,
+    interest[index] > 0 ? top - _StackedBarsPainter._stackGap : top,
+    center + width / 2,
+    plot.bottom,
+  );
 }
 
 class _StackedBarsPainter extends CustomPainter {
@@ -185,76 +312,44 @@ class _StackedBarsPainter extends CustomPainter {
   final TextStyle labelStyle;
   final TextDirection textDirection;
 
-  static const _leftGutter = 52.0;
-  static const _bottomAxis = 22.0;
   static const _topPad = 8.0;
   static const _stackGap = 2.0;
   static const _maxBarWidth = 44.0;
 
-  TextPainter _text(String text, Color color) => TextPainter(
-    text: TextSpan(
-      text: text,
-      style: labelStyle.copyWith(color: color),
-    ),
+  /// Gap between the plot's floor and a year label.
+  static const _axisLabelGap = 6.0;
+
+  TextPainter _text(String text) => TextPainter(
+    text: TextSpan(text: text, style: labelStyle),
     textDirection: textDirection,
   )..layout();
 
-  /// The gridline step: the smallest 1/2/4/5/8 × 10ⁿ that keeps two lines or
-  /// so above zero — « 0 · 8 k€ · 16 k€ » for the frame's yearly bars.
-  static int _gridStep(int peak) {
-    var magnitude = 1;
-    while (true) {
-      for (final factor in const [1, 2, 4, 5, 8]) {
-        final step = factor * magnitude;
-        if (peak / step <= 2.5) return step;
-      }
-      magnitude *= 10;
-    }
-  }
-
   @override
   void paint(Canvas canvas, Size size) {
-    if (years.isEmpty || size.width <= _leftGutter) return;
+    if (years.isEmpty || size.width <= AppChart.valueGutter) return;
 
-    // The bar height is the two API figures laid end to end — geometry for
-    // the scale, not a figure the panel prints.
-    var peak = 1;
-    for (var index = 0; index < years.length; index++) {
-      peak = math.max(peak, capital[index] + interest[index]);
-    }
-    final step = _gridStep(peak);
-    final top = step * (peak / step).ceil();
-    final plot = Rect.fromLTRB(
-      _leftGutter,
-      _topPad,
-      size.width - 4,
-      size.height - _bottomAxis,
+    final plot = _projectionPlotRect(size);
+    if (plot.width <= 0 || plot.height <= 0) return;
+    final scale = _projectionScale(capital, interest);
+    double heightOf(int value) => plot.bottom - scale.y(value, plot);
+
+    ChartPaints.grid(
+      canvas,
+      size,
+      plot,
+      [for (final tick in scale.ticks) scale.y(tick, plot)],
+      labels: [for (final tick in scale.ticks) yLabel(tick.round())],
+      style: labelStyle,
     );
-    double heightOf(int value) => plot.height * (value / top);
 
-    final grid = Paint()
-      ..color = AppColors.borderSubtle
-      ..strokeWidth = 1;
-    for (var value = 0; value <= top; value += step) {
-      final y = plot.bottom - heightOf(value);
-      canvas.drawLine(Offset(plot.left, y), Offset(plot.right, y), grid);
-      final label = _text(yLabel(value), AppColors.textDisabled);
-      label.paint(
-        canvas,
-        Offset(plot.left - label.width - 8, y - label.height / 2),
-      );
-    }
-
-    final slot = plot.width / years.length;
-    final width = math.min(_maxBarWidth, slot * 0.62);
+    final width = math.min(_maxBarWidth, plot.width / years.length * 0.62);
     final capRadius = math.min(6.0, width / 2);
     const baseRadius = Radius.circular(2);
-    final capitalPaint = Paint()..color = AppColors.iris;
-    final interestPaint = Paint()..color = AppColors.cyan;
     final last = years.length - 1;
 
     for (var index = 0; index < years.length; index++) {
-      final center = plot.left + slot * (index + 0.5);
+      final center =
+          plot.left + AreaLine.pointX(index, years.length, plot.width);
       final left = center - width / 2;
       final capitalHeight = heightOf(capital[index]);
       final interestHeight = heightOf(interest[index]);
@@ -273,7 +368,7 @@ class _StackedBarsPainter extends CustomPainter {
             bottomLeft: baseRadius,
             bottomRight: baseRadius,
           ),
-          capitalPaint,
+          Paint()..color = AppColors.iris,
         );
       }
       if (interestHeight > 0) {
@@ -286,7 +381,7 @@ class _StackedBarsPainter extends CustomPainter {
             bottomLeft: baseRadius,
             bottomRight: baseRadius,
           ),
-          interestPaint,
+          Paint()..color = AppColors.cyan,
         );
       }
 
@@ -294,8 +389,11 @@ class _StackedBarsPainter extends CustomPainter {
       // would crowd the last one.
       final labelled = index == last || (index % 4 == 0 && last - index >= 2);
       if (!labelled) continue;
-      final label = _text('${years[index]}', AppColors.textSecondary);
-      label.paint(canvas, Offset(center - label.width / 2, plot.bottom + 5));
+      final label = _text('${years[index]}');
+      label.paint(
+        canvas,
+        Offset(center - label.width / 2, plot.bottom + _axisLabelGap),
+      );
     }
   }
 
