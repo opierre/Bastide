@@ -160,7 +160,7 @@ drifts from the system. Already in `core/widgets/`:
 
 Still to build (see the panel specs for exact geometry): `StatCard`, `SavingsRateCard` (96px ring),
 `TransactionRow` (52px + 48px compact), `DataTable`, `DropZone`, `ChartContainer`, `Donut`
-(r80 stroke24), `HorizontalBars`, `Sparkline`, `AreaLine`, `StackedBars`, `Toggle` (34×20 with an
+(r80 stroke24), `HorizontalBars`, `Sparkline`, `AreaLine`, `StackedBars`, `GroupedBars`, `Toggle` (34×20 with an
 explicit knob), `Toast`, `Modal`, `Select`/`Combobox` popover.
 
 ## Motion & feel
