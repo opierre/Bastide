@@ -11,6 +11,7 @@ import '../../../core/widgets/amount_text.dart';
 import '../../../core/widgets/app_card.dart';
 import '../../../core/widgets/app_segmented.dart';
 import '../../../core/widgets/chart_scale.dart';
+import '../../../core/widgets/chart_style.dart';
 import '../../../core/widgets/chart_tooltip.dart';
 import '../../../core/widgets/date_field.dart';
 import '../../../l10n/app_localizations.dart';
@@ -260,7 +261,7 @@ class _StrokeSwatchPainter extends CustomPainter {
     final path = Path()
       ..moveTo(0, size.height / 2)
       ..lineTo(size.width, size.height / 2);
-    canvas.drawPath(dashed ? dashPath(path) : path, _seriesStroke());
+    canvas.drawPath(dashed ? ChartPaints.dashed(path) : path, _seriesStroke());
   }
 
   @override
@@ -268,29 +269,16 @@ class _StrokeSwatchPainter extends CustomPainter {
       oldDelegate.dashed != dashed;
 }
 
-/// The series line's stroke, shared by the chart and its legend.
-Paint _seriesStroke() => Paint()
-  ..color = AppColors.iris
-  ..style = PaintingStyle.stroke
-  ..strokeWidth = 2
-  ..strokeJoin = StrokeJoin.round
-  ..strokeCap = StrokeCap.butt;
+/// The series line's stroke, shared by the chart and its legend: the shared
+/// curve stroke, butt-capped so a dash ends where the rhythm says.
+Paint _seriesStroke() =>
+    ChartPaints.stroke(AppColors.iris)..strokeCap = StrokeCap.butt;
 
-/// [source] cut into 5 px dashes with 4 px gaps — the dash rhythm of
-/// `DashedBorder`, so every dashed line in the app reads the same.
-Path dashPath(Path source, {double dash = 5, double gap = 4}) {
-  final dashed = Path();
-  for (final metric in source.computeMetrics()) {
-    for (var start = 0.0; start < metric.length; start += dash + gap) {
-      dashed.addPath(metric.extractPath(start, start + dash), Offset.zero);
-    }
-  }
-  return dashed;
-}
-
-/// The AreaLine itself: an iris 2 px line over a 10 % iris area, 2.5 px ring
-/// dots and a 4 px one on the last month, y gridlines on clean ticks around the
-/// series (see [ChartScale]), and month labels under the points.
+/// The AreaLine itself, in the shared curve style ([AppChart]): an iris 2.5 px
+/// line over a 16 % iris area, a small dot on each month (up to
+/// [AppChart.dotCeiling]) and a full-size one on the last, y gridlines on clean
+/// ticks around the series (see [ChartScale]), and month labels under the
+/// points.
 ///
 /// Points sit on the calendar, not on their index: a month the API omitted
 /// leaves its slot empty, and the line breaks there rather than bridging it —
@@ -334,9 +322,7 @@ class _NetworthSeriesPlotState extends State<NetworthSeriesPlot> {
     final l10n = AppLocalizations.of(context)!;
     final locale = Localizations.localeOf(context).toString();
     final textTheme = Theme.of(context).textTheme;
-    final labelStyle = tabularNumberStyle(
-      textTheme.labelSmall!,
-    ).copyWith(fontWeight: FontWeight.w400, color: AppColors.textSecondary);
+    final labelStyle = ChartPaints.labelStyle(textTheme);
     final months = widget.months;
     final values = widget.values;
 
@@ -373,7 +359,7 @@ class _NetworthSeriesPlotState extends State<NetworthSeriesPlot> {
                 onExit: (_) => setState(() => _hovered = null),
                 child: Row(
                   children: [
-                    const SizedBox(width: _SeriesPainter._gutter),
+                    const SizedBox(width: AppChart.valueGutter),
                     for (final (i, flex) in _bandFlexes(months).indexed)
                       Expanded(
                         flex: flex,
@@ -393,12 +379,12 @@ class _NetworthSeriesPlotState extends State<NetworthSeriesPlot> {
                           ),
                         ),
                       ),
-                    const SizedBox(width: _SeriesPainter._lastDot),
+                    const SizedBox(width: AppChart.dotReach),
                   ],
                 ),
               ),
             ),
-            const SizedBox(height: _SeriesPainter._axis),
+            const SizedBox(height: AppChart.axisHeight),
           ],
         ),
         if (_hovered case final hovered? when hovered < values.length)
@@ -408,13 +394,13 @@ class _NetworthSeriesPlotState extends State<NetworthSeriesPlot> {
             points: (size) => _seriesPoints(size, months, values),
             hovered: hovered,
             // The hovered dot, ring included.
-            pointRadius: _SeriesPainter._lastDot + _SeriesPainter._ring / 2,
+            pointRadius: AppChart.dotReach,
             joinsNext: (i) =>
                 _SeriesPainter._index(months[i + 1]) -
                     _SeriesPainter._index(months[i]) ==
                 1,
-            leftBound: _SeriesPainter._gutter,
-            bottomInset: _SeriesPainter._axis,
+            leftBound: AppChart.valueGutter,
+            bottomInset: AppChart.axisHeight,
           ),
       ],
     );
@@ -472,10 +458,10 @@ List<int> _bandFlexes(List<DateTime> months) {
 /// month axis, inset by the last month's dot. Shared by the painter and the
 /// tooltip, so the card can't drift off the point it names.
 Rect _plotRect(Size size) => Rect.fromLTRB(
-  _SeriesPainter._gutter,
-  _SeriesPainter._lastDot,
-  size.width - _SeriesPainter._lastDot,
-  size.height - _SeriesPainter._axis,
+  AppChart.valueGutter,
+  AppChart.dotReach,
+  size.width - AppChart.dotReach,
+  size.height - AppChart.axisHeight,
 );
 
 /// The series' scale: past the highest and lowest months to clean ticks, so
@@ -527,13 +513,7 @@ class _SeriesPainter extends CustomPainter {
   final String Function(int) valueLabel;
   final TextStyle labelStyle;
 
-  static const _gutter = 56.0;
-  static const _axis = 22.0;
-  static const _dot = 2.5;
   static const _maxLabels = 12;
-  static const _lastDot = 4.0;
-  static const _ring = 1.5;
-  static const _areaAlpha = 0.10;
 
   static int _index(DateTime month) => month.year * 12 + month.month - 1;
 
@@ -552,28 +532,15 @@ class _SeriesPainter extends CustomPainter {
 
     final scale = _seriesScale(values);
 
-    double y(num value) => scale.y(value, plot);
-
     // Gridlines at floor / mid / ceiling, labelled in the gutter.
-    final grid = Paint()
-      ..color = AppColors.borderSubtle
-      ..strokeWidth = 1;
-    for (final level in scale.ticks) {
-      final lineY = y(level);
-      canvas.drawLine(
-        Offset(plot.left, lineY),
-        Offset(size.width, lineY),
-        grid,
-      );
-      final label = _text(valueLabel(level.round()));
-      label.paint(
-        canvas,
-        Offset(
-          plot.left - AppSpacing.sm - label.width,
-          lineY - label.height / 2,
-        ),
-      );
-    }
+    ChartPaints.grid(
+      canvas,
+      size,
+      plot,
+      [for (final level in scale.ticks) scale.y(level, plot)],
+      labels: [for (final level in scale.ticks) valueLabel(level.round())],
+      style: labelStyle,
+    );
 
     final first = _index(months.first);
     final span = _index(months.last) - first;
@@ -594,8 +561,7 @@ class _SeriesPainter extends CustomPainter {
       }
     }
 
-    final area = Paint()..color = AppColors.iris.withValues(alpha: _areaAlpha);
-    final line = _seriesStroke()..strokeCap = StrokeCap.round;
+    final area = ChartPaints.area(AppColors.iris);
     for (final run in runs.where((run) => run.length > 1)) {
       final path = Path()..addPolygon(run, false);
       canvas.drawPath(
@@ -615,25 +581,27 @@ class _SeriesPainter extends CustomPainter {
         ..moveTo(points[i - 1].dx, points[i - 1].dy)
         ..lineTo(points[i].dx, points[i].dy);
       if (_isDeclared(i - 1) || _isDeclared(i)) {
-        dashed.addPath(dashPath(segment), Offset.zero);
+        dashed.addPath(ChartPaints.dashed(segment), Offset.zero);
       } else {
         solid.addPath(segment, Offset.zero);
       }
     }
-    canvas.drawPath(solid, line);
+    canvas.drawPath(solid, ChartPaints.stroke(AppColors.iris));
     canvas.drawPath(dashed, _seriesStroke());
 
-    // Ring dots on the card's surface; the last month's and the hovered one's
-    // are larger.
-    final ring = Paint()
-      ..color = AppColors.iris
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = _ring;
-    final hole = Paint()..color = AppColors.surfaceRaised;
+    // A small dot on every month while they stay few — a lone month between
+    // two gaps has no segment, so its dot is all that draws it — and the last
+    // month's and the hovered one's at full size.
+    final last = points.length - 1;
     for (var i = 0; i < points.length; i++) {
-      final radius = i == points.length - 1 || i == hovered ? _lastDot : _dot;
-      canvas.drawCircle(points[i], radius, hole);
-      canvas.drawCircle(points[i], radius, ring);
+      final large = i == last || i == hovered;
+      if (!large && points.length > AppChart.dotCeiling) continue;
+      ChartPaints.dot(
+        canvas,
+        points[i],
+        large ? AppChart.currentDotRadius : AppChart.pointDotRadius,
+        AppColors.iris,
+      );
     }
 
     // Up to a year: a month label under each point drawn, none under an

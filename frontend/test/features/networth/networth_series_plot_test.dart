@@ -1,4 +1,5 @@
 import 'package:bastide/core/theme/app_theme.dart';
+import 'package:bastide/core/theme/tokens.dart';
 import 'package:bastide/features/networth/presentation/networth_series_chart.dart';
 import 'package:bastide/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
@@ -46,6 +47,43 @@ void main() {
       await pump(tester, [-4520000, -3810000, -2975000]);
       expect(tester.takeException(), isNull);
       expect(find.byType(NetworthSeriesPlot), findsOneWidget);
+    });
+
+    testWidgets('draws in the shared curve style', (tester) async {
+      await pump(tester, [3200000, 3410000, 3375000]);
+      final painter = tester.renderObject(
+        find.descendant(
+          of: find.byType(NetworthSeriesPlot),
+          matching: find.byType(CustomPaint),
+        ),
+      );
+      final radii = <double>[];
+      expect(
+        painter,
+        paints..everything((method, arguments) {
+          if (method == #drawCircle &&
+              (arguments[2] as Paint).color.toARGB32() ==
+                  AppColors.iris.toARGB32()) {
+            radii.add(arguments[1] as double);
+          }
+          return true;
+        }),
+      );
+      expect(radii, [
+        AppChart.pointDotRadius,
+        AppChart.pointDotRadius,
+        AppChart.currentDotRadius,
+      ]);
+      expect(
+        painter,
+        paints
+          ..path(color: AppColors.iris.withValues(alpha: AppChart.areaAlpha))
+          ..path(
+            color: AppColors.iris,
+            strokeWidth: AppChart.lineStroke,
+            style: PaintingStyle.stroke,
+          ),
+      );
     });
   });
 }
