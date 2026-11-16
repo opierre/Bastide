@@ -9,6 +9,7 @@ import 'package:bastide/features/mortgages/domain/mortgage.dart';
 import 'package:bastide/features/mortgages/presentation/mortgages_screen.dart';
 import 'package:bastide/features/mortgages/presentation/trajectory_chart.dart';
 import 'package:bastide/l10n/app_localizations.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -300,6 +301,40 @@ void main() {
         'fin crédit immobilier · 08/2048',
       ]);
       expect(plot.annotations.first.isToday, isTrue);
+    },
+  );
+
+  testWidgets(
+    'hovering the trajectory names the nearest month in the chart card',
+    (tester) async {
+      _useDesktopSurface(tester);
+      await tester.pumpWidget(_wrap(controller: _twoLoans()));
+      await tester.pumpAndSettle();
+
+      final gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+      addTearDown(gesture.removePointer);
+      await gesture.addPointer(location: Offset.zero);
+      // The plot's right edge: the last instalment, nothing left owed.
+      final plot = tester.getRect(find.byKey(const Key('trajectoryPlot')));
+      await gesture.moveTo(
+        plot.centerRight - const Offset(AppChart.dotReach, 0),
+      );
+      await tester.pump();
+
+      final card = find.byKey(const Key('trajectoryTooltip'));
+      expect(card, findsOneWidget);
+      expect(find.byType(Tooltip), findsNothing);
+      expect(
+        find.descendant(
+          of: card,
+          matching: find.textContaining(_money(0), findRichText: true),
+        ),
+        findsOneWidget,
+      );
+
+      await gesture.moveTo(Offset.zero);
+      await tester.pump();
+      expect(card, findsNothing);
     },
   );
 

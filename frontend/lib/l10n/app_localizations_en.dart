@@ -3711,6 +3711,16 @@ class AppLocalizationsEn extends AppLocalizations {
   String get simulatorChartInterest => 'Interest';
 
   @override
+  String simulatorChartTooltipCapital(String amount) {
+    return 'Principal: $amount';
+  }
+
+  @override
+  String simulatorChartTooltipInterest(String amount) {
+    return 'Interest: $amount';
+  }
+
+  @override
   String get simulatorChartEmpty =>
       'Enter a price and a rate: the yearly split between principal and interest shows here.';
 
