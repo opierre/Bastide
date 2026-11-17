@@ -69,7 +69,7 @@ void main() {
         'Simulateur',
         'Synthèse',
         'Paramètres',
-        'Données 100 % locales',
+        'Données locales',
       ];
       for (var i = 1; i < order.length; i++) {
         expect(top(order[i]), greaterThan(top(order[i - 1])), reason: order[i]);

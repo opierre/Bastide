@@ -145,7 +145,7 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(find.text('Your money, clearly.'), findsNothing);
+    expect(find.text('Your data stays on this computer.'), findsOneWidget);
     expect(find.text('Log in'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });

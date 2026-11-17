@@ -211,7 +211,7 @@ void main() {
         findsOneWidget,
       );
       expect(
-        find.text("Le fichier n'a pas pu être lu — rien n'a été modifié."),
+        find.text('Fichier illisible. Rien n’a été modifié.'),
         findsOneWidget,
       );
       expect(find.text('No <STMTTRN> records found'), findsOneWidget);
@@ -227,7 +227,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.byKey(const Key('importHistoryEmpty')), findsOneWidget);
-    expect(find.text('Aucun import pour l\'instant'), findsOneWidget);
+    expect(find.text('Aucun import'), findsOneWidget);
     expect(find.byKey(const Key('importHistoryList')), findsNothing);
   });
 
@@ -237,7 +237,7 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(find.text('No imports yet'), findsOneWidget);
+    expect(find.text('No imports'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
 }

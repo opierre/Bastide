@@ -238,7 +238,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.byKey(const Key('goalsEmptyState')), findsOneWidget);
-    expect(find.text('Donnez un nom à ce qui compte'), findsOneWidget);
+    expect(find.text('Aucun objectif'), findsOneWidget);
     expect(find.byKey(const Key('goalsEmptyAddButton')), findsOneWidget);
   });
 

@@ -762,7 +762,7 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      expect(find.text('Aucune transaction pour l\'instant'), findsOneWidget);
+      expect(find.text('Aucune transaction'), findsOneWidget);
       expect(find.byKey(const Key('transactionsList')), findsNothing);
     },
   );
@@ -785,7 +785,7 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(find.text('No transactions yet'), findsOneWidget);
+    expect(find.text('No transactions'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
 }

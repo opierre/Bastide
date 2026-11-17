@@ -163,7 +163,7 @@ void main() {
       button.style?.backgroundColor?.resolve(<WidgetState>{}),
       AppColors.irisSoft,
     );
-    expect(button.tooltip, 'Déjà récurrent — voir la série');
+    expect(button.tooltip, 'Déjà récurrent : voir la série');
   });
 
   testWidgets('the marked state reads in English too', (tester) async {
@@ -175,7 +175,7 @@ void main() {
 
     expect(
       _button(tester, 'transactionRowOpenRecurringSeries').tooltip,
-      'Already recurring — view the series',
+      'Already recurring: view the series',
     );
   });
 

@@ -36,7 +36,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get navSectionManage => 'Gestion';
 
   @override
-  String get sidebarPrivacyBadge => 'Données 100 % locales';
+  String get sidebarPrivacyBadge => 'Données locales';
 
   @override
   String get sidebarCollapse => 'Réduire le menu';
@@ -153,8 +153,7 @@ class AppLocalizationsFr extends AppLocalizations {
       'Cet écran arrive dans une prochaine étape. En attendant, ajoutez vos comptes pour préparer le terrain.';
 
   @override
-  String get authPrivacyLine =>
-      'Local et privé — vos données ne quittent jamais cet ordinateur.';
+  String get authPrivacyLine => 'Vos données restent sur cet ordinateur.';
 
   @override
   String get authLoginSubmitting => 'Connexion…';
@@ -192,8 +191,7 @@ class AppLocalizationsFr extends AppLocalizations {
       'Vous pourrez changer la langue plus tard ; la devise s\'applique à tous vos comptes et ne pourra plus être modifiée dans cette version.';
 
   @override
-  String get authEmailTaken =>
-      'Cet e-mail est déjà utilisé — connectez-vous plutôt.';
+  String get authEmailTaken => 'Cet e-mail a déjà un compte. Connectez-vous.';
 
   @override
   String get authEmailInvalid => 'Saisissez une adresse e-mail valide.';
@@ -275,7 +273,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get accountsEmptyBody =>
-      'Suivez vos soldes et vos mouvements en un seul endroit.';
+      'Créez un compte, ou importez un relevé : Bastide crée le compte qu’il décrit.';
 
   @override
   String get accountsRetry => 'Réessayer';
@@ -526,7 +524,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get accountOpeningBalanceEditNote =>
-      'Corriger cette valeur décale le solde du compte et son historique enregistré du même montant — aucune transaction n\'est modifiée.';
+      'Corriger cette valeur décale le solde du compte et son historique enregistré du même montant. Aucune transaction n\'est modifiée.';
 
   @override
   String get accountOpeningBalanceRequired => 'Le solde est requis.';
@@ -569,7 +567,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get importDropZoneHint =>
-      'ou cliquez pour parcourir — le relevé indique lui-même son compte';
+      'Le relevé indique son compte. Rien n’est importé avant votre confirmation.';
 
   @override
   String importFileSize(String size) {
@@ -592,7 +590,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String importDetectedAccountAmbiguous(String account) {
-    return 'Ce relevé vient de $account, mais plusieurs comptes y correspondent — choisissez la destination.';
+    return 'Ce relevé vient de $account, mais plusieurs comptes y correspondent. Choisissez la destination.';
   }
 
   @override
@@ -611,7 +609,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get importUnreadableAccount =>
-      'Ce fichier n\'indique aucun compte — choisissez la destination.';
+      'Ce fichier n’indique aucun compte. Choisissez la destination.';
 
   @override
   String get importResultTitle => 'Dernier import';
@@ -664,8 +662,7 @@ class AppLocalizationsFr extends AppLocalizations {
   }
 
   @override
-  String get importFailedNote =>
-      'Le fichier n\'a pas pu être lu — rien n\'a été modifié.';
+  String get importFailedNote => 'Fichier illisible. Rien n’a été modifié.';
 
   @override
   String importDuplicatesNote(int count) {
@@ -699,7 +696,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get importHistoryTitle => 'Historique des imports';
 
   @override
-  String get importHistoryEmptyTitle => 'Aucun import pour l\'instant';
+  String get importHistoryEmptyTitle => 'Aucun import';
 
   @override
   String get importHistoryEmptyBody =>
@@ -750,7 +747,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get importDuplicateDestination =>
-      'Deux relevés de ce fichier vont vers le même compte — choisissez une destination différente pour chacun.';
+      'Deux relevés de ce fichier vont vers le même compte. Choisissez une destination différente pour chacun.';
 
   @override
   String get importErrorGeneric =>
@@ -768,7 +765,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get transactionsRetry => 'Réessayer';
 
   @override
-  String get transactionsEmptyTitle => 'Aucune transaction pour l\'instant';
+  String get transactionsEmptyTitle => 'Aucune transaction';
 
   @override
   String get transactionsEmptyBody =>
@@ -1184,12 +1181,11 @@ class AppLocalizationsFr extends AppLocalizations {
       'Vos transactions apparaîtront ici.';
 
   @override
-  String get dashboardEmptyTitle =>
-      'Importez un relevé pour donner vie à votre argent';
+  String get dashboardEmptyTitle => 'Aucune donnée pour ce mois';
 
   @override
   String get dashboardEmptyBody =>
-      'Tout reste sur cet ordinateur — rien n\'est envoyé en ligne.';
+      'Importez un relevé OFX ou QFX pour voir vos revenus, vos dépenses et votre taux d’épargne.';
 
   @override
   String get dashboardGoToImports => 'Aller aux imports';
@@ -1217,7 +1213,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get categoriesAddButton => 'Nouvelle catégorie';
 
   @override
-  String get categoriesEmptyTitle => 'Aucune catégorie pour l\'instant';
+  String get categoriesEmptyTitle => 'Aucune catégorie';
 
   @override
   String get categoriesEmptyBody =>
@@ -1458,7 +1454,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get rulesPriorityNote =>
-      'Évaluées dans l\'ordre de priorité — une règle ne remplace jamais une catégorie choisie manuellement.';
+      'Appliquées dans cet ordre. Une catégorie choisie à la main n’est jamais remplacée.';
 
   @override
   String get rulesApplyButton => 'Exécuter les règles';
@@ -1501,11 +1497,11 @@ class AppLocalizationsFr extends AppLocalizations {
   String get rulesRetry => 'Réessayer';
 
   @override
-  String get rulesEmptyTitle => 'Automatisez votre classement';
+  String get rulesEmptyTitle => 'Aucune règle';
 
   @override
   String get rulesEmptyBody =>
-      'Une règle reconnaît un libellé — « CARREFOUR » — et attribue sa catégorie à chaque transaction correspondante, aujourd\'hui et aux prochains imports.';
+      'Une règle reconnaît un libellé, comme « CARREFOUR », et attribue sa catégorie à chaque transaction correspondante, aujourd\'hui et aux prochains imports.';
 
   @override
   String get ruleToggleSemantics => 'Activer la règle';
@@ -1713,8 +1709,8 @@ class AppLocalizationsFr extends AppLocalizations {
       count,
       locale: localeName,
       other:
-          'Correspond à $count transactions existantes — dont « $sample » du $date.',
-      one: 'Correspond à $count transaction existante — « $sample » du $date.',
+          'Correspond à $count transactions existantes, dont « $sample » du $date.',
+      one: 'Correspond à $count transaction existante : « $sample » du $date.',
     );
     return '$_temp0';
   }
@@ -1843,16 +1839,16 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get rulePackExportPrivacyNotice =>
-      'Relisez avant d\'enregistrer : un motif peut contenir des informations personnelles — le nom de votre propriétaire, « VIR SALAIRE DUPONT ».';
+      'Relisez avant d\'enregistrer. Un motif peut contenir des informations personnelles, comme le nom de votre propriétaire : « VIR SALAIRE DUPONT ».';
 
   @override
   String rulePackExportContents(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: 'Contenu du fichier — $count règles',
-      one: 'Contenu du fichier — $count règle',
-      zero: 'Contenu du fichier — aucune règle',
+      other: 'Contenu du fichier : $count règles',
+      one: 'Contenu du fichier : $count règle',
+      zero: 'Contenu du fichier : aucune règle',
     );
     return '$_temp0';
   }
@@ -1870,12 +1866,12 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String rulePackOmittedRegex(String pattern) {
-    return '« $pattern » — les règles regex ne peuvent pas figurer dans un pack.';
+    return '« $pattern » : les règles regex ne peuvent pas figurer dans un pack.';
   }
 
   @override
   String rulePackOmittedUserCategory(String pattern) {
-    return '« $pattern » — vise une catégorie personnalisée, qui n\'a pas d\'identifiant partageable.';
+    return '« $pattern » : vise une catégorie personnalisée, qui n\'a pas d\'identifiant partageable.';
   }
 
   @override
@@ -1928,17 +1924,17 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String rulePackLogoFailureInvalidImage(String pattern) {
-    return '« $pattern » — le fichier n\'est pas une image PNG, JPEG ou WebP.';
+    return '« $pattern » : le fichier n\'est pas une image PNG, JPEG ou WebP.';
   }
 
   @override
   String rulePackLogoFailureTooLarge(String pattern) {
-    return '« $pattern » — l\'image dépasse la taille autorisée.';
+    return '« $pattern » : l\'image dépasse la taille autorisée.';
   }
 
   @override
   String rulePackLogoFailureDownloadFailed(String pattern) {
-    return '« $pattern » — le téléchargement a échoué.';
+    return '« $pattern » : le téléchargement a échoué.';
   }
 
   @override
@@ -1971,11 +1967,11 @@ class AppLocalizationsFr extends AppLocalizations {
       count,
       locale: localeName,
       other:
-          'L\'IA locale propose une catégorie pour $count d\'entre elles — confirmez ou corrigez, rien n\'est classé sans vous.',
+          'L\'IA locale propose une catégorie pour $count d\'entre elles. Confirmez ou corrigez : rien n\'est classé sans vous.',
       one:
-          'L\'IA locale propose une catégorie pour l\'une d\'entre elles — confirmez ou corrigez, rien n\'est classé sans vous.',
+          'L\'IA locale propose une catégorie pour l\'une d\'entre elles. Confirmez ou corrigez : rien n\'est classé sans vous.',
       zero:
-          'Aucune de ces transactions n\'a reçu de proposition de l\'IA locale — confirmez ou corrigez, rien n\'est classé sans vous.',
+          'Aucune de ces transactions n\'a reçu de proposition de l\'IA locale. Confirmez ou corrigez : rien n\'est classé sans vous.',
     );
     return '$_temp0';
   }
@@ -2012,14 +2008,14 @@ class AppLocalizationsFr extends AppLocalizations {
   String get reviewCorrect => 'Corriger';
 
   @override
-  String get reviewNoProposal => '— aucune proposition';
+  String get reviewNoProposal => 'Aucune proposition';
 
   @override
   String get reviewChooseCategory => 'Choisir une catégorie';
 
   @override
   String alwaysRuleSubtitle(String label) {
-    return 'Une règle classe ces transactions sans IA, à chaque import — pré-remplie depuis « $label ».';
+    return 'Une règle classe ces transactions sans IA, à chaque import. Elle est pré-remplie depuis « $label ».';
   }
 
   @override
@@ -2058,8 +2054,8 @@ class AppLocalizationsFr extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       total,
       locale: localeName,
-      other: 'Catégorisation en cours — $processed sur $total transactions',
-      one: 'Catégorisation en cours — $processed sur $total transaction',
+      other: 'Catégorisation en cours : $processed sur $total transactions',
+      one: 'Catégorisation en cours : $processed sur $total transaction',
     );
     return '$_temp0';
   }
@@ -2086,9 +2082,9 @@ class AppLocalizationsFr extends AppLocalizations {
       count,
       locale: localeName,
       other:
-          'Catégorisation terminée — $count transactions n\'ont pas pu être analysées.',
+          'Catégorisation terminée. $count transactions n\'ont pas pu être analysées.',
       one:
-          'Catégorisation terminée — $count transaction n\'a pas pu être analysée.',
+          'Catégorisation terminée. $count transaction n\'a pas pu être analysée.',
     );
     return '$_temp0';
   }
@@ -2110,7 +2106,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get settingsAiTitle => 'IA locale';
 
   @override
-  String get settingsAiSubtitle => 'Activer la catégorisation par IA';
+  String get settingsAiSubtitle => 'Catégorisation par IA';
 
   @override
   String get settingsAiToggleLabel => 'Catégorisation par IA';
@@ -2124,7 +2120,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get settingsAiBaseUrlHelp =>
-      'Adresse locale uniquement — 127.0.0.1 ou localhost.';
+      'Adresse locale uniquement : 127.0.0.1 ou localhost.';
 
   @override
   String get settingsAiBaseUrlRejected =>
@@ -2135,10 +2131,11 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get settingsAiModelHelp =>
-      'Liste fournie par le moteur — saisie manuelle possible.';
+      'Liste fournie par le moteur. Saisie manuelle possible.';
 
   @override
-  String get settingsAiModelUnavailable => 'Aucun modèle — moteur injoignable.';
+  String get settingsAiModelUnavailable =>
+      'Moteur injoignable : aucun modèle à proposer.';
 
   @override
   String get settingsAiModelChoose => 'Choisir un modèle';
@@ -2149,7 +2146,7 @@ class AppLocalizationsFr extends AppLocalizations {
         intl.NumberFormat.percentPattern(localeName);
     final String thresholdString = thresholdNumberFormat.format(threshold);
 
-    return 'Seuil de confiance — $thresholdString';
+    return 'Seuil de confiance : $thresholdString';
   }
 
   @override
@@ -2161,9 +2158,9 @@ class AppLocalizationsFr extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: 'Connecté — $count modèles disponibles',
-      one: 'Connecté — 1 modèle disponible',
-      zero: 'Connecté — aucun modèle disponible',
+      other: 'Connecté · $count modèles disponibles',
+      one: 'Connecté · 1 modèle disponible',
+      zero: 'Connecté · aucun modèle disponible',
     );
     return '$_temp0';
   }
@@ -2203,7 +2200,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get settingsBackupExportCaption =>
-      'Fichier .bastide — comptes, transactions, catégories, règles, objectifs, crédits, biens, paramètres.';
+      'Fichier .bastide : comptes, transactions, catégories, règles, objectifs, crédits, biens, paramètres.';
 
   @override
   String get settingsBackupExportPreparing => 'Préparation de l\'archive…';
@@ -2217,7 +2214,7 @@ class AppLocalizationsFr extends AppLocalizations {
   }
 
   @override
-  String get settingsBackupNone => 'Aucune sauvegarde pour l\'instant.';
+  String get settingsBackupNone => 'Aucune sauvegarde.';
 
   @override
   String settingsBackupDateTime(String date, String time) {
@@ -2226,7 +2223,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get settingsBackupPrivacy =>
-      'Le fichier n\'est pas chiffré. Conservez-le en lieu sûr — il contient tout votre historique financier.';
+      'Ce fichier n’est pas chiffré et contient tout votre historique. Conservez-le en lieu sûr.';
 
   @override
   String get settingsBackupRestoreTitle => 'Restaurer une sauvegarde';
@@ -2284,7 +2281,7 @@ class AppLocalizationsFr extends AppLocalizations {
       other: '$accounts comptes',
       one: '$accounts compte',
     );
-    return 'Sauvegarde enregistrée — $_temp0, $_temp1.';
+    return 'Sauvegarde enregistrée : $_temp0, $_temp1.';
   }
 
   @override
@@ -2471,7 +2468,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String subscriptionsNextValue(String label, String when) {
-    return '$label — $when';
+    return '$label · $when';
   }
 
   @override
@@ -2528,11 +2525,11 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get subscriptionsSortedAscending =>
-      'Tri croissant — cliquer pour inverser';
+      'Tri croissant. Cliquez pour inverser.';
 
   @override
   String get subscriptionsSortedDescending =>
-      'Tri décroissant — cliquer pour inverser';
+      'Tri décroissant. Cliquez pour inverser.';
 
   @override
   String get subscriptionsValueNone => '—';
@@ -2554,7 +2551,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String subscriptionSignalIncrease(String from, String to) {
-    return 'Augmentation · $from → $to';
+    return 'Hausse · $from → $to';
   }
 
   @override
@@ -2690,8 +2687,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get subscriptionsRetry => 'Réessayer';
 
   @override
-  String get subscriptionsEmptyTitle =>
-      'Aucun paiement récurrent détecté pour l\'instant';
+  String get subscriptionsEmptyTitle => 'Aucun paiement récurrent détecté';
 
   @override
   String get subscriptionsEmptyBody =>
@@ -2726,7 +2722,7 @@ class AppLocalizationsFr extends AppLocalizations {
     String date,
     String annual,
   ) {
-    return 'Augmentation : $from → $to le $date — soit $annual par an.';
+    return 'Hausse : $from → $to le $date, soit $annual par an.';
   }
 
   @override
@@ -2734,7 +2730,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String subscriptionDetailHistorySubtitle(String account) {
-    return 'Les transactions dont cette série est déduite · $account';
+    return '$account';
   }
 
   @override
@@ -2744,7 +2740,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get subscriptionDetailFootnote =>
-      'Bastide déduit la série de ces occurrences — vérifiez-les avant de confirmer un changement.';
+      'La série est déduite de ces prélèvements. Vérifiez-les avant de confirmer un changement.';
 
   @override
   String get subscriptionDetailLoadFailed =>
@@ -2817,11 +2813,11 @@ class AppLocalizationsFr extends AppLocalizations {
   }
 
   @override
-  String get goalsEmptyTitle => 'Donnez un nom à ce qui compte';
+  String get goalsEmptyTitle => 'Aucun objectif';
 
   @override
   String get goalsEmptyBody =>
-      'Un objectif est une enveloppe virtuelle : vous y mettez de côté à votre rythme, sans toucher à vos comptes.';
+      'Un objectif réserve une somme sur le papier. Vos comptes ne sont pas modifiés.';
 
   @override
   String get goalsLoadFailed =>
@@ -2885,7 +2881,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get goalHistoryDelete => 'Supprimer cette allocation';
 
   @override
-  String get goalHistoryEmpty => 'Aucune allocation pour l\'instant.';
+  String get goalHistoryEmpty => 'Aucune allocation.';
 
   @override
   String get goalFormCreateTitle => 'Nouvel objectif';
@@ -3074,7 +3070,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get mortgagesEmptyBody =>
-      'Ajoutez vos emprunts pour suivre leur coût réel, leur trajectoire et votre capacité — sans jamais relier Bastide à une banque.';
+      'Ajoutez un emprunt pour suivre son coût, son échéancier et votre taux d’endettement.';
 
   @override
   String get mortgagesChargeLabel => 'Charge mensuelle';
@@ -3138,14 +3134,14 @@ class AppLocalizationsFr extends AppLocalizations {
       'Aucun revenu connu : le grand livre ne contient pas de revenus réguliers et aucun revenu n\'est déclaré. Sans revenu, il n\'y a pas de taux à calculer.';
 
   @override
-  String get mortgagesRatioDeclareLink => 'Déclarer un revenu →';
+  String get mortgagesRatioDeclareLink => 'Déclarer un revenu';
 
   @override
   String get mortgagesRatioDeclareButton => 'Déclarer un revenu';
 
   @override
   String get mortgagesRatioCaveat =>
-      'Lecture informative : ce repère ne lie aucun prêteur.';
+      'Lecture indicative, qui n’engage aucun prêteur.';
 
   @override
   String get mortgagesIncomeTitle => 'Déclarer un revenu';
@@ -3407,7 +3403,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String mortgageFormPlateDetail(String instalment, String interest) {
-    return 'échéance totale $instalment — intérêts totaux $interest';
+    return 'échéance totale $instalment · intérêts totaux $interest';
   }
 
   @override
@@ -3663,7 +3659,8 @@ class AppLocalizationsFr extends AppLocalizations {
   String get simulatorHcsfOver => 'Au-dessus du repère';
 
   @override
-  String get simulatorHcsfCaveat => 'Informative — ne lie aucun prêteur';
+  String get simulatorHcsfCaveat =>
+      'Lecture indicative, qui n’engage aucun prêteur.';
 
   @override
   String simulatorReference(String value) {
@@ -3730,7 +3727,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String simulatorCapacityCaptionExisting(String available) {
-    return 'il ne reste que $available d\'échéance sous le repère une fois vos crédits actuels comptés — c\'est ce qui rend la capacité si faible, pas le bien visé';
+    return 'Vos crédits actuels laissent $available d’échéance sous le repère. C’est ce qui limite la capacité, pas le bien visé.';
   }
 
   @override
@@ -3814,7 +3811,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String simulatorSaveNamePrefill(String price) {
-    return ' — $price';
+    return ', $price';
   }
 
   @override
@@ -3928,12 +3925,12 @@ class AppLocalizationsFr extends AppLocalizations {
       'declared': 'déclaré',
       'other': 'médian constaté',
     });
-    return 'Taux d\'endettement sur un revenu $_temp0 de $income · repère HCSF $limit · lecture informative, ne lie aucun prêteur.';
+    return 'Taux d\'endettement sur un revenu $_temp0 de $income · repère HCSF $limit. Lecture indicative, qui n’engage aucun prêteur.';
   }
 
   @override
   String simulatorCompareFootUnknown(String limit) {
-    return 'Aucun revenu connu, donc aucun taux d\'endettement · repère HCSF $limit · lecture informative, ne lie aucun prêteur.';
+    return 'Aucun revenu connu, donc aucun taux d\'endettement · repère HCSF $limit. Lecture indicative, qui n’engage aucun prêteur.';
   }
 
   @override
@@ -4000,7 +3997,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get propertyFormAmountOptionalInvalid =>
-      'Montant illisible — laissez vide s\'il est inconnu.';
+      'Montant illisible. Laissez vide s\'il est inconnu.';
 
   @override
   String get propertyFormDateInvalid => 'Date invalide (JJ/MM/AAAA).';
@@ -4140,7 +4137,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String networthDeltaCaptionFlat(String month) {
-    return 'vs $month — valeur des biens inchangée';
+    return 'vs $month · valeur des biens inchangée';
   }
 
   @override
@@ -4226,17 +4223,17 @@ class AppLocalizationsFr extends AppLocalizations {
       'Aucun bien déclaré : l\'actif ne compte que vos comptes.';
 
   @override
-  String get networthCompositionInviteAction => 'Nouveau bien →';
+  String get networthCompositionInviteAction => 'Nouveau bien';
 
   @override
-  String get networthExclusionsLabel => 'Volontairement non compté';
+  String get networthExclusionsLabel => 'À savoir';
 
   @override
   String get networthExclusionGoalsTitle => 'Objectifs';
 
   @override
   String get networthExclusionGoalsBody =>
-      'Une allocation étiquette de l\'argent déjà présent sur un compte — le compter reviendrait à le compter deux fois.';
+      'Les objectifs réservent de l’argent déjà présent sur un compte. Ils ne sont pas comptés une seconde fois.';
 
   @override
   String get networthExclusionSubscriptionsTitle => 'Abonnements';
@@ -4246,11 +4243,11 @@ class AppLocalizationsFr extends AppLocalizations {
       'Un prélèvement récurrent est une dépense à venir, pas une dette due aujourd\'hui.';
 
   @override
-  String get networthEmptyTitle => 'Rien à additionner pour l\'instant';
+  String get networthEmptyTitle => 'Aucun compte, bien ou crédit';
 
   @override
   String get networthEmptyBody =>
-      'Importez un compte ou déclarez un bien : la synthèse additionne ce que vous possédez et soustrait vos crédits, sans rien inventer entre les deux.';
+      'Importez un compte ou déclarez un bien. La synthèse additionne vos avoirs et soustrait vos crédits.';
 
   @override
   String get networthEmptyImport => 'Importer un fichier';
@@ -4271,11 +4268,11 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get networthSeriesEmpty =>
-      'Pas encore d\'historique : la série commence au premier mois clos d\'un compte importé, ou au premier montant que vous déclarez.';
+      'Aucun historique : la série commence au premier mois clos d\'un compte importé, ou au premier montant que vous déclarez.';
 
   @override
   String networthSeriesCaveat(String date) {
-    return 'Les biens sont maintenus à leur valeur déclarée (estimation la plus ancienne : $date) et ne comptent qu\'à partir de leur date d\'acquisition, les crédits qu\'à partir de leur déblocage. Les mois sans donnée sont simplement absents.';
+    return 'Les biens sont maintenus à leur valeur déclarée (estimation la plus ancienne : $date) et ne comptent qu\'à partir de leur date d\'acquisition, les crédits qu\'à partir de leur déblocage. Les mois sans donnée sont absents.';
   }
 
   @override
@@ -4330,7 +4327,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get networthDeclaredClose => 'Fermer';
 
   @override
-  String get networthDeclaredEmpty => 'Aucun montant déclaré pour l\'instant.';
+  String get networthDeclaredEmpty => 'Aucun montant déclaré.';
 
   @override
   String get networthDeclaredSuperseded => 'Couvert par vos imports';
@@ -4616,7 +4613,7 @@ class AppLocalizationsFr extends AppLocalizations {
       locale: localeName,
       other: '$count modèles installés',
       one: '1 modèle installé',
-      zero: 'Aucun modèle installé pour l\'instant',
+      zero: 'Aucun modèle installé',
     );
     return '$_temp0';
   }
@@ -4652,7 +4649,7 @@ class AppLocalizationsFr extends AppLocalizations {
   }
 
   @override
-  String get accountDetailNoHistory => 'Pas encore d’opérations';
+  String get accountDetailNoHistory => 'Aucune opération';
 
   @override
   String accountDetailLastImport(String date) {
@@ -4660,7 +4657,7 @@ class AppLocalizationsFr extends AppLocalizations {
   }
 
   @override
-  String get accountDetailNoImport => 'Aucun import pour l’instant';
+  String get accountDetailNoImport => 'Aucun import';
 
   @override
   String accountDetailMaskedNumber(String digits) {
@@ -4848,13 +4845,13 @@ class AppLocalizationsFr extends AppLocalizations {
   String get accountDetailSeeAll => 'Tout voir';
 
   @override
-  String get accountDetailNoTransactions => 'Aucune opération pour l’instant';
+  String get accountDetailNoTransactions => 'Aucune opération';
 
   @override
   String get markRecurringAction => 'Marquer comme récurrent';
 
   @override
-  String get markRecurringOpenSeriesAction => 'Déjà récurrent — voir la série';
+  String get markRecurringOpenSeriesAction => 'Déjà récurrent : voir la série';
 
   @override
   String get recurringSeriesGoneTitle => 'Ce paiement récurrent n\'existe plus';
@@ -5002,7 +4999,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get seriesPickerSearchHint => 'Rechercher une série';
 
   @override
-  String get seriesPickerEmpty => 'Vous ne suivez encore aucune série.';
+  String get seriesPickerEmpty => 'Vous ne suivez aucune série.';
 
   @override
   String seriesPickerNoMatch(String query) {

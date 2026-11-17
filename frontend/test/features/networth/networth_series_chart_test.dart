@@ -227,7 +227,7 @@ void main() {
       'Les biens sont maintenus à leur valeur déclarée (estimation la plus '
       'ancienne : 12/01/2026) et ne comptent qu\'à partir de leur date '
       'd\'acquisition, les crédits qu\'à partir de leur déblocage. Les mois '
-      'sans donnée sont simplement absents.',
+      'sans donnée sont absents.',
     );
   });
 

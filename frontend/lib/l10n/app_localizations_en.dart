@@ -36,7 +36,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get navSectionManage => 'Manage';
 
   @override
-  String get sidebarPrivacyBadge => 'All data stays on this device';
+  String get sidebarPrivacyBadge => 'Local data';
 
   @override
   String get sidebarCollapse => 'Collapse menu';
@@ -152,8 +152,7 @@ class AppLocalizationsEn extends AppLocalizations {
       'This screen arrives in a later step. In the meantime, add your accounts to get set up.';
 
   @override
-  String get authPrivacyLine =>
-      'Local and private — your data never leaves this computer.';
+  String get authPrivacyLine => 'Your data stays on this computer.';
 
   @override
   String get authLoginSubmitting => 'Signing in…';
@@ -191,8 +190,7 @@ class AppLocalizationsEn extends AppLocalizations {
       'You can change the language later; the currency applies to all your accounts and cannot be changed in this version.';
 
   @override
-  String get authEmailTaken =>
-      'That email is already in use — sign in instead.';
+  String get authEmailTaken => 'This email already has an account. Sign in.';
 
   @override
   String get authEmailInvalid => 'Enter a valid email address.';
@@ -275,7 +273,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get accountsEmptyBody =>
-      'Track your balances and activity in one place.';
+      'Create an account, or import a statement: Bastide creates the account it describes.';
 
   @override
   String get accountsRetry => 'Retry';
@@ -289,7 +287,7 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get accountNoTransactions => 'No transactions yet';
+  String get accountNoTransactions => 'No transactions';
 
   @override
   String get accountArchive => 'Archive';
@@ -523,7 +521,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get accountOpeningBalanceEditNote =>
-      'Correcting this shifts the account\'s balance and any saved history by the same amount — it never touches a transaction.';
+      'Correcting this shifts the account\'s balance and any saved history by the same amount. It never touches a transaction.';
 
   @override
   String get accountOpeningBalanceRequired => 'Balance is required.';
@@ -565,7 +563,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get importDropZoneHint =>
-      'or click to browse — the statement names its own account';
+      'The statement names its own account. Nothing is imported until you confirm.';
 
   @override
   String importFileSize(String size) {
@@ -588,7 +586,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String importDetectedAccountAmbiguous(String account) {
-    return 'This statement is from $account, but several accounts match it — choose the destination.';
+    return 'This statement is from $account, but several accounts match it. Choose the destination.';
   }
 
   @override
@@ -607,7 +605,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get importUnreadableAccount =>
-      'This file names no account — choose the destination.';
+      'This file names no account. Choose the destination.';
 
   @override
   String get importResultTitle => 'Last import';
@@ -660,8 +658,7 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get importFailedNote =>
-      'The file couldn\'t be read — nothing was changed.';
+  String get importFailedNote => 'Unreadable file. Nothing was changed.';
 
   @override
   String importDuplicatesNote(int count) {
@@ -695,7 +692,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get importHistoryTitle => 'Import history';
 
   @override
-  String get importHistoryEmptyTitle => 'No imports yet';
+  String get importHistoryEmptyTitle => 'No imports';
 
   @override
   String get importHistoryEmptyBody =>
@@ -745,7 +742,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get importDuplicateDestination =>
-      'Two statements in this file go to the same account — choose a different destination for each.';
+      'Two statements in this file go to the same account. Choose a different destination for each.';
 
   @override
   String get importErrorGeneric => 'Something went wrong. Please try again.';
@@ -760,7 +757,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get transactionsRetry => 'Retry';
 
   @override
-  String get transactionsEmptyTitle => 'No transactions yet';
+  String get transactionsEmptyTitle => 'No transactions';
 
   @override
   String get transactionsEmptyBody =>
@@ -1175,12 +1172,11 @@ class AppLocalizationsEn extends AppLocalizations {
       'Your transactions will show up here.';
 
   @override
-  String get dashboardEmptyTitle =>
-      'Import a statement to see your money come to life';
+  String get dashboardEmptyTitle => 'No data for this month';
 
   @override
   String get dashboardEmptyBody =>
-      'Everything stays on this computer — nothing is sent online.';
+      'Import an OFX or QFX statement to see your income, your spending and your savings rate.';
 
   @override
   String get dashboardGoToImports => 'Go to imports';
@@ -1207,7 +1203,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get categoriesAddButton => 'New category';
 
   @override
-  String get categoriesEmptyTitle => 'No categories yet';
+  String get categoriesEmptyTitle => 'No categories';
 
   @override
   String get categoriesEmptyBody =>
@@ -1447,7 +1443,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get rulesPriorityNote =>
-      'Evaluated in priority order — a rule never replaces a category you chose yourself.';
+      'Applied in this order. A category you chose by hand is never replaced.';
 
   @override
   String get rulesApplyButton => 'Run the rules';
@@ -1490,11 +1486,11 @@ class AppLocalizationsEn extends AppLocalizations {
   String get rulesRetry => 'Try again';
 
   @override
-  String get rulesEmptyTitle => 'Automate your sorting';
+  String get rulesEmptyTitle => 'No rules';
 
   @override
   String get rulesEmptyBody =>
-      'A rule recognizes a label — “CARREFOUR” — and applies its category to every matching transaction, today and on every import after.';
+      'A rule recognizes a label, such as “CARREFOUR”, and applies its category to every matching transaction, today and on every import after.';
 
   @override
   String get ruleToggleSemantics => 'Enable rule';
@@ -1698,8 +1694,8 @@ class AppLocalizationsEn extends AppLocalizations {
       count,
       locale: localeName,
       other:
-          'Matches $count existing transactions — including “$sample” of $date.',
-      one: 'Matches $count existing transaction — “$sample” of $date.',
+          'Matches $count existing transactions, including “$sample” of $date.',
+      one: 'Matches $count existing transaction: “$sample” of $date.',
     );
     return '$_temp0';
   }
@@ -1829,16 +1825,16 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get rulePackExportPrivacyNotice =>
-      'Read it before saving: a pattern can hold personal details — your landlord\'s name, “VIR SALAIRE DUPONT”.';
+      'Read it before saving. A pattern can hold personal details, such as your landlord\'s name: “VIR SALAIRE DUPONT”.';
 
   @override
   String rulePackExportContents(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: 'File contents — $count rules',
-      one: 'File contents — $count rule',
-      zero: 'File contents — no rules',
+      other: 'File contents: $count rules',
+      one: 'File contents: $count rule',
+      zero: 'File contents: no rules',
     );
     return '$_temp0';
   }
@@ -1856,12 +1852,12 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String rulePackOmittedRegex(String pattern) {
-    return '“$pattern” — regex rules cannot appear in a pack.';
+    return '“$pattern”: regex rules cannot appear in a pack.';
   }
 
   @override
   String rulePackOmittedUserCategory(String pattern) {
-    return '“$pattern” — targets a custom category, which has no shareable identifier.';
+    return '“$pattern”: targets a custom category, which has no shareable identifier.';
   }
 
   @override
@@ -1914,17 +1910,17 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String rulePackLogoFailureInvalidImage(String pattern) {
-    return '“$pattern” — the file isn\'t a PNG, JPEG or WebP picture.';
+    return '“$pattern”: the file isn\'t a PNG, JPEG or WebP picture.';
   }
 
   @override
   String rulePackLogoFailureTooLarge(String pattern) {
-    return '“$pattern” — the picture is over the size limit.';
+    return '“$pattern”: the picture is over the size limit.';
   }
 
   @override
   String rulePackLogoFailureDownloadFailed(String pattern) {
-    return '“$pattern” — the download failed.';
+    return '“$pattern”: the download failed.';
   }
 
   @override
@@ -1957,11 +1953,11 @@ class AppLocalizationsEn extends AppLocalizations {
       count,
       locale: localeName,
       other:
-          'Local AI proposes a category for $count of them — confirm or correct, nothing is filed without you.',
+          'Local AI proposes a category for $count of them. Confirm or correct: nothing is filed without you.',
       one:
-          'Local AI proposes a category for one of them — confirm or correct, nothing is filed without you.',
+          'Local AI proposes a category for one of them. Confirm or correct: nothing is filed without you.',
       zero:
-          'Local AI hasn\'t proposed a category for any of these — confirm or correct, nothing is filed without you.',
+          'Local AI hasn\'t proposed a category for any of these. Confirm or correct: nothing is filed without you.',
     );
     return '$_temp0';
   }
@@ -1998,14 +1994,14 @@ class AppLocalizationsEn extends AppLocalizations {
   String get reviewCorrect => 'Correct';
 
   @override
-  String get reviewNoProposal => '— no proposal';
+  String get reviewNoProposal => 'No proposal';
 
   @override
   String get reviewChooseCategory => 'Choose a category';
 
   @override
   String alwaysRuleSubtitle(String label) {
-    return 'A rule files these transactions without AI, on every import — pre-filled from “$label”.';
+    return 'A rule files these transactions without AI, on every import. It is pre-filled from “$label”.';
   }
 
   @override
@@ -2044,8 +2040,8 @@ class AppLocalizationsEn extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       total,
       locale: localeName,
-      other: 'Categorizing — $processed of $total transactions',
-      one: 'Categorizing — $processed of $total transaction',
+      other: 'Categorizing: $processed of $total transactions',
+      one: 'Categorizing: $processed of $total transaction',
     );
     return '$_temp0';
   }
@@ -2070,9 +2066,8 @@ class AppLocalizationsEn extends AppLocalizations {
       count,
       locale: localeName,
       other:
-          'Categorization finished — $count transactions couldn\'t be analysed.',
-      one:
-          'Categorization finished — $count transaction couldn\'t be analysed.',
+          'Categorization finished. $count transactions couldn\'t be analysed.',
+      one: 'Categorization finished. $count transaction couldn\'t be analysed.',
     );
     return '$_temp0';
   }
@@ -2093,7 +2088,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingsAiTitle => 'Local AI';
 
   @override
-  String get settingsAiSubtitle => 'Enable AI categorization';
+  String get settingsAiSubtitle => 'AI categorization';
 
   @override
   String get settingsAiToggleLabel => 'AI categorization';
@@ -2107,7 +2102,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get settingsAiBaseUrlHelp =>
-      'Local addresses only — 127.0.0.1 or localhost.';
+      'Local addresses only: 127.0.0.1 or localhost.';
 
   @override
   String get settingsAiBaseUrlRejected =>
@@ -2118,10 +2113,11 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get settingsAiModelHelp =>
-      'List provided by the engine — manual entry allowed.';
+      'List provided by the engine. Manual entry allowed.';
 
   @override
-  String get settingsAiModelUnavailable => 'No model — engine unreachable.';
+  String get settingsAiModelUnavailable =>
+      'Engine unreachable: no model to offer.';
 
   @override
   String get settingsAiModelChoose => 'Choose a model';
@@ -2132,7 +2128,7 @@ class AppLocalizationsEn extends AppLocalizations {
         intl.NumberFormat.percentPattern(localeName);
     final String thresholdString = thresholdNumberFormat.format(threshold);
 
-    return 'Confidence threshold — $thresholdString';
+    return 'Confidence threshold: $thresholdString';
   }
 
   @override
@@ -2144,9 +2140,9 @@ class AppLocalizationsEn extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: 'Connected — $count models available',
-      one: 'Connected — 1 model available',
-      zero: 'Connected — no model available',
+      other: 'Connected · $count models available',
+      one: 'Connected · 1 model available',
+      zero: 'Connected · no model available',
     );
     return '$_temp0';
   }
@@ -2186,7 +2182,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get settingsBackupExportCaption =>
-      '.bastide file — accounts, transactions, categories, rules, goals, loans, properties, settings.';
+      '.bastide file: accounts, transactions, categories, rules, goals, loans, properties, settings.';
 
   @override
   String get settingsBackupExportPreparing => 'Preparing the archive…';
@@ -2200,7 +2196,7 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get settingsBackupNone => 'No backup yet.';
+  String get settingsBackupNone => 'No backup.';
 
   @override
   String settingsBackupDateTime(String date, String time) {
@@ -2209,7 +2205,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get settingsBackupPrivacy =>
-      'The file isn\'t encrypted. Keep it somewhere safe — it holds your entire financial history.';
+      'This file isn\'t encrypted and holds your entire history. Keep it somewhere safe.';
 
   @override
   String get settingsBackupRestoreTitle => 'Restore a backup';
@@ -2266,7 +2262,7 @@ class AppLocalizationsEn extends AppLocalizations {
       other: '$accounts accounts',
       one: '$accounts account',
     );
-    return 'Backup saved — $_temp0, $_temp1.';
+    return 'Backup saved: $_temp0, $_temp1.';
   }
 
   @override
@@ -2452,7 +2448,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String subscriptionsNextValue(String label, String when) {
-    return '$label — $when';
+    return '$label · $when';
   }
 
   @override
@@ -2509,11 +2505,11 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get subscriptionsSortedAscending =>
-      'Sorted ascending — click to reverse';
+      'Sorted ascending. Click to reverse.';
 
   @override
   String get subscriptionsSortedDescending =>
-      'Sorted descending — click to reverse';
+      'Sorted descending. Click to reverse.';
 
   @override
   String get subscriptionsValueNone => '—';
@@ -2535,7 +2531,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String subscriptionSignalIncrease(String from, String to) {
-    return 'Price increase · $from → $to';
+    return 'Increase · $from → $to';
   }
 
   @override
@@ -2671,7 +2667,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get subscriptionsRetry => 'Try again';
 
   @override
-  String get subscriptionsEmptyTitle => 'No recurring payments detected yet';
+  String get subscriptionsEmptyTitle => 'No recurring payments detected';
 
   @override
   String get subscriptionsEmptyBody =>
@@ -2706,7 +2702,7 @@ class AppLocalizationsEn extends AppLocalizations {
     String date,
     String annual,
   ) {
-    return 'Price increase: $from → $to on $date — that\'s $annual a year.';
+    return 'Increase: $from → $to on $date, that\'s $annual a year.';
   }
 
   @override
@@ -2714,7 +2710,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String subscriptionDetailHistorySubtitle(String account) {
-    return 'The transactions this series is deduced from · $account';
+    return '$account';
   }
 
   @override
@@ -2724,7 +2720,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get subscriptionDetailFootnote =>
-      'Bastide deduces the series from these charges — check them before confirming a change.';
+      'The series is deduced from these charges. Check them before confirming a change.';
 
   @override
   String get subscriptionDetailLoadFailed =>
@@ -2797,11 +2793,11 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get goalsEmptyTitle => 'Give a name to what matters';
+  String get goalsEmptyTitle => 'No goals';
 
   @override
   String get goalsEmptyBody =>
-      'A goal is a virtual envelope: you set money aside at your own pace, without touching your accounts.';
+      'A goal sets an amount aside on paper. Your accounts are not changed.';
 
   @override
   String get goalsLoadFailed => 'We couldn\'t load your goals right now.';
@@ -2864,7 +2860,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get goalHistoryDelete => 'Delete this allocation';
 
   @override
-  String get goalHistoryEmpty => 'No allocations yet.';
+  String get goalHistoryEmpty => 'No allocations.';
 
   @override
   String get goalFormCreateTitle => 'New goal';
@@ -3052,7 +3048,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get mortgagesEmptyBody =>
-      'Add your loans to follow their real cost, their trajectory and your capacity — without ever connecting Bastide to a bank.';
+      'Add a loan to follow its cost, its schedule and your debt ratio.';
 
   @override
   String get mortgagesChargeLabel => 'Monthly charge';
@@ -3116,14 +3112,14 @@ class AppLocalizationsEn extends AppLocalizations {
       'No known income: the ledger holds no regular income and none is declared. Without an income there is no ratio to compute.';
 
   @override
-  String get mortgagesRatioDeclareLink => 'Declare an income →';
+  String get mortgagesRatioDeclareLink => 'Declare an income';
 
   @override
   String get mortgagesRatioDeclareButton => 'Declare an income';
 
   @override
   String get mortgagesRatioCaveat =>
-      'An informative reading: this reference binds no lender.';
+      'An indicative reading that binds no lender.';
 
   @override
   String get mortgagesIncomeTitle => 'Declare an income';
@@ -3384,7 +3380,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String mortgageFormPlateDetail(String instalment, String interest) {
-    return 'total instalment $instalment — total interest $interest';
+    return 'total instalment $instalment · total interest $interest';
   }
 
   @override
@@ -3640,7 +3636,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get simulatorHcsfOver => 'Above the reference';
 
   @override
-  String get simulatorHcsfCaveat => 'Informative — binds no lender';
+  String get simulatorHcsfCaveat =>
+      'An indicative reading that binds no lender.';
 
   @override
   String simulatorReference(String value) {
@@ -3707,7 +3704,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String simulatorCapacityCaptionExisting(String available) {
-    return 'only $available of instalment is left under the reference once your current loans are counted — that is what keeps the capacity so low, not the property';
+    return 'Your current loans leave $available of instalment under the reference. That is what limits the capacity, not the property.';
   }
 
   @override
@@ -3789,7 +3786,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String simulatorSaveNamePrefill(String price) {
-    return ' — $price';
+    return ', $price';
   }
 
   @override
@@ -3903,12 +3900,12 @@ class AppLocalizationsEn extends AppLocalizations {
       'declared': 'declared',
       'other': 'median observed',
     });
-    return 'Debt ratio against a $_temp0 income of $income · HCSF reference $limit · an informative reading that binds no lender.';
+    return 'Debt ratio against a $_temp0 income of $income · HCSF reference $limit. An indicative reading that binds no lender.';
   }
 
   @override
   String simulatorCompareFootUnknown(String limit) {
-    return 'No known income, so no debt ratio · HCSF reference $limit · an informative reading that binds no lender.';
+    return 'No known income, so no debt ratio · HCSF reference $limit. An indicative reading that binds no lender.';
   }
 
   @override
@@ -3974,7 +3971,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get propertyFormAmountOptionalInvalid =>
-      'Unreadable amount — leave it empty if unknown.';
+      'Unreadable amount. Leave it empty if unknown.';
 
   @override
   String get propertyFormDateInvalid => 'Invalid date (M/D/YYYY).';
@@ -4113,7 +4110,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String networthDeltaCaptionFlat(String month) {
-    return 'vs $month — property values unchanged';
+    return 'vs $month · property values unchanged';
   }
 
   @override
@@ -4199,17 +4196,17 @@ class AppLocalizationsEn extends AppLocalizations {
       'No property declared: assets count your accounts only.';
 
   @override
-  String get networthCompositionInviteAction => 'New property →';
+  String get networthCompositionInviteAction => 'New property';
 
   @override
-  String get networthExclusionsLabel => 'Deliberately not counted';
+  String get networthExclusionsLabel => 'Good to know';
 
   @override
   String get networthExclusionGoalsTitle => 'Goals';
 
   @override
   String get networthExclusionGoalsBody =>
-      'An allocation labels money already in an account — counting it would count it twice.';
+      'Goals set aside money already in an account. They are not counted a second time.';
 
   @override
   String get networthExclusionSubscriptionsTitle => 'Subscriptions';
@@ -4219,11 +4216,11 @@ class AppLocalizationsEn extends AppLocalizations {
       'A recurring charge is a future expense, not a debt owed today.';
 
   @override
-  String get networthEmptyTitle => 'Nothing to add up yet';
+  String get networthEmptyTitle => 'No accounts, properties or loans';
 
   @override
   String get networthEmptyBody =>
-      'Import an account or declare a property: net worth adds up what you own and subtracts your loans, inventing nothing in between.';
+      'Import an account or declare a property. Net worth adds up what you own and subtracts your loans.';
 
   @override
   String get networthEmptyImport => 'Import a file';
@@ -4244,11 +4241,11 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get networthSeriesEmpty =>
-      'No history yet: the series starts with the first closed month of an imported account, or with the first total you declare.';
+      'No history: the series starts with the first closed month of an imported account, or with the first total you declare.';
 
   @override
   String networthSeriesCaveat(String date) {
-    return 'Properties are held at their declared value (oldest estimate: $date) and count only from their acquisition date, loans only from their payout. Months without data are simply absent.';
+    return 'Properties are held at their declared value (oldest estimate: $date) and count only from their acquisition date, loans only from their payout. Months without data are absent.';
   }
 
   @override
@@ -4302,7 +4299,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get networthDeclaredClose => 'Close';
 
   @override
-  String get networthDeclaredEmpty => 'No declared total yet.';
+  String get networthDeclaredEmpty => 'No declared total.';
 
   @override
   String get networthDeclaredSuperseded => 'Covered by your imports';
@@ -4582,7 +4579,7 @@ class AppLocalizationsEn extends AppLocalizations {
       locale: localeName,
       other: '$count models installed',
       one: '1 model installed',
-      zero: 'No models installed yet',
+      zero: 'No models installed',
     );
     return '$_temp0';
   }
@@ -4618,7 +4615,7 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get accountDetailNoHistory => 'No transactions yet';
+  String get accountDetailNoHistory => 'No transactions';
 
   @override
   String accountDetailLastImport(String date) {
@@ -4626,7 +4623,7 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get accountDetailNoImport => 'No import yet';
+  String get accountDetailNoImport => 'No import';
 
   @override
   String accountDetailMaskedNumber(String digits) {
@@ -4814,14 +4811,14 @@ class AppLocalizationsEn extends AppLocalizations {
   String get accountDetailSeeAll => 'See all';
 
   @override
-  String get accountDetailNoTransactions => 'No transactions yet';
+  String get accountDetailNoTransactions => 'No transactions';
 
   @override
   String get markRecurringAction => 'Mark as recurring';
 
   @override
   String get markRecurringOpenSeriesAction =>
-      'Already recurring — view the series';
+      'Already recurring: view the series';
 
   @override
   String get recurringSeriesGoneTitle =>
@@ -4968,7 +4965,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get seriesPickerSearchHint => 'Search a series';
 
   @override
-  String get seriesPickerEmpty => 'You don\'t track any series yet.';
+  String get seriesPickerEmpty => 'You don\'t track any series.';
 
   @override
   String seriesPickerNoMatch(String query) {

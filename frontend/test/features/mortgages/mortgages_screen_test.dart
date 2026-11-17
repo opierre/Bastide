@@ -180,7 +180,7 @@ void main() {
       // Body content, not a tooltip.
       expect(
         _text(tester, 'ratioCaveat'),
-        'Lecture informative : ce repère ne lie aucun prêteur.',
+        'Lecture indicative, qui n’engage aucun prêteur.',
       );
       expect(find.byType(Tooltip), findsNothing);
     });

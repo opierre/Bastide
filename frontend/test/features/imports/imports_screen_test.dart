@@ -704,7 +704,7 @@ void main() {
 
     expect(find.text('New import'), findsOneWidget);
     expect(find.text('Drop an OFX or QFX file'), findsOneWidget);
-    expect(find.text('No imports yet'), findsOneWidget);
+    expect(find.text('No imports'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
 

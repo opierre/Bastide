@@ -152,10 +152,10 @@ abstract class AppLocalizations {
   /// **'Gestion'**
   String get navSectionManage;
 
-  /// Reassurance badge pinned at the foot of the sidebar, beside a lock glyph.
+  /// Privacy badge pinned at the foot of the sidebar, beside a lock glyph.
   ///
   /// In fr, this message translates to:
-  /// **'Données 100 % locales'**
+  /// **'Données locales'**
   String get sidebarPrivacyBadge;
 
   /// Tooltip on the control that collapses the sidebar to an icon-only rail.
@@ -356,10 +356,10 @@ abstract class AppLocalizations {
   /// **'Cet écran arrive dans une prochaine étape. En attendant, ajoutez vos comptes pour préparer le terrain.'**
   String get comingSoonBody;
 
-  /// Reassurance line shown under the tagline on the signed-out screens, beside a lock glyph.
+  /// Privacy line on the signed-out screens, beside a lock glyph. One of the three places the privacy promise appears.
   ///
   /// In fr, this message translates to:
-  /// **'Local et privé — vos données ne quittent jamais cet ordinateur.'**
+  /// **'Vos données restent sur cet ordinateur.'**
   String get authPrivacyLine;
 
   /// Label replacing the sign-in button text while the request is in flight.
@@ -431,7 +431,7 @@ abstract class AppLocalizations {
   /// Validation helper shown when the chosen email already has an account.
   ///
   /// In fr, this message translates to:
-  /// **'Cet e-mail est déjà utilisé — connectez-vous plutôt.'**
+  /// **'Cet e-mail a déjà un compte. Connectez-vous.'**
   String get authEmailTaken;
 
   /// Validation helper shown when the typed email is not a valid address.
@@ -563,7 +563,7 @@ abstract class AppLocalizations {
   /// Encouraging subtext under the empty-state heading on the accounts screen.
   ///
   /// In fr, this message translates to:
-  /// **'Suivez vos soldes et vos mouvements en un seul endroit.'**
+  /// **'Créez un compte, ou importez un relevé : Bastide crée le compte qu’il décrit.'**
   String get accountsEmptyBody;
 
   /// Retry button label shown when the accounts list fails to load.
@@ -934,7 +934,7 @@ abstract class AppLocalizations {
   /// Helper under the balance field when editing an existing account: explains that a manual correction shifts the cached balance and every saved snapshot by the same delta rather than rewriting the ledger.
   ///
   /// In fr, this message translates to:
-  /// **'Corriger cette valeur décale le solde du compte et son historique enregistré du même montant — aucune transaction n\'est modifiée.'**
+  /// **'Corriger cette valeur décale le solde du compte et son historique enregistré du même montant. Aucune transaction n\'est modifiée.'**
   String get accountOpeningBalanceEditNote;
 
   /// Validation message when the balance field is left empty, whether creating an account or correcting it while editing.
@@ -1012,7 +1012,7 @@ abstract class AppLocalizations {
   /// Sub-line inside the imports drop zone, stating that the file itself names the destination account.
   ///
   /// In fr, this message translates to:
-  /// **'ou cliquez pour parcourir — le relevé indique lui-même son compte'**
+  /// **'Le relevé indique son compte. Rien n’est importé avant votre confirmation.'**
   String get importDropZoneHint;
 
   /// Size of the staged file, shown under its name. The number is already formatted for the locale.
@@ -1048,7 +1048,7 @@ abstract class AppLocalizations {
   /// Banner shown when the statement's bank matches several accounts and nothing in the file separates them; the user picks the destination.
   ///
   /// In fr, this message translates to:
-  /// **'Ce relevé vient de {account}, mais plusieurs comptes y correspondent — choisissez la destination.'**
+  /// **'Ce relevé vient de {account}, mais plusieurs comptes y correspondent. Choisissez la destination.'**
   String importDetectedAccountAmbiguous(String account);
 
   /// Banner shown when the account declared by the statement matches none of the user's accounts.
@@ -1078,7 +1078,7 @@ abstract class AppLocalizations {
   /// Warning shown when the staged file declares no account block at all, so the user has to pick the destination from every account.
   ///
   /// In fr, this message translates to:
-  /// **'Ce fichier n\'indique aucun compte — choisissez la destination.'**
+  /// **'Ce fichier n’indique aucun compte. Choisissez la destination.'**
   String get importUnreadableAccount;
 
   /// Title of the card summarising the import that just ran.
@@ -1120,7 +1120,7 @@ abstract class AppLocalizations {
   /// Calm explanation shown on a failed import, stating that nothing was written.
   ///
   /// In fr, this message translates to:
-  /// **'Le fichier n\'a pas pu être lu — rien n\'a été modifié.'**
+  /// **'Fichier illisible. Rien n’a été modifié.'**
   String get importFailedNote;
 
   /// Note under a history row's filename when the run skipped duplicates.
@@ -1162,7 +1162,7 @@ abstract class AppLocalizations {
   /// Heading shown when the import history is empty.
   ///
   /// In fr, this message translates to:
-  /// **'Aucun import pour l\'instant'**
+  /// **'Aucun import'**
   String get importHistoryEmptyTitle;
 
   /// Encouraging subtext under the empty import-history heading.
@@ -1252,7 +1252,7 @@ abstract class AppLocalizations {
   /// Warning shown when two statements of a multi-account file resolve to the same account; the import stays disabled until each has its own.
   ///
   /// In fr, this message translates to:
-  /// **'Deux relevés de ce fichier vont vers le même compte — choisissez une destination différente pour chacun.'**
+  /// **'Deux relevés de ce fichier vont vers le même compte. Choisissez une destination différente pour chacun.'**
   String get importDuplicateDestination;
 
   /// Fallback localized message for unrecognized or network errors on the imports panel.
@@ -1282,7 +1282,7 @@ abstract class AppLocalizations {
   /// Heading shown when the user has no transactions at all yet.
   ///
   /// In fr, this message translates to:
-  /// **'Aucune transaction pour l\'instant'**
+  /// **'Aucune transaction'**
   String get transactionsEmptyTitle;
 
   /// Encouraging subtext under the empty-state heading on the transactions screen.
@@ -2023,16 +2023,16 @@ abstract class AppLocalizations {
   /// **'Vos transactions apparaîtront ici.'**
   String get dashboardRecentActivityEmpty;
 
-  /// Encouraging heading shown when the user has no transactions yet for any month.
+  /// Heading shown when the dashboard has no transactions to show.
   ///
   /// In fr, this message translates to:
-  /// **'Importez un relevé pour donner vie à votre argent'**
+  /// **'Aucune donnée pour ce mois'**
   String get dashboardEmptyTitle;
 
-  /// Reassurance under the dashboard empty-state heading. Leads with privacy rather than with what the panel will contain: the user has just been asked to hand over a bank statement, and that is the doubt worth answering first.
+  /// Body under the dashboard empty-state heading, saying what to do.
   ///
   /// In fr, this message translates to:
-  /// **'Tout reste sur cet ordinateur — rien n\'est envoyé en ligne.'**
+  /// **'Importez un relevé OFX ou QFX pour voir vos revenus, vos dépenses et votre taux d’épargne.'**
   String get dashboardEmptyBody;
 
   /// CTA on the dashboard empty state, navigating to the imports panel.
@@ -2086,7 +2086,7 @@ abstract class AppLocalizations {
   /// Heading of the categories empty state.
   ///
   /// In fr, this message translates to:
-  /// **'Aucune catégorie pour l\'instant'**
+  /// **'Aucune catégorie'**
   String get categoriesEmptyTitle;
 
   /// Reassuring line under the categories empty-state heading.
@@ -2530,7 +2530,7 @@ abstract class AppLocalizations {
   /// Note beside the view switch on the rules view, stating both how rules are ordered and what they will never overwrite.
   ///
   /// In fr, this message translates to:
-  /// **'Évaluées dans l\'ordre de priorité — une règle ne remplace jamais une catégorie choisie manuellement.'**
+  /// **'Appliquées dans cet ordre. Une catégorie choisie à la main n’est jamais remplacée.'**
   String get rulesPriorityNote;
 
   /// Secondary action re-running the rules over existing transactions.
@@ -2596,13 +2596,13 @@ abstract class AppLocalizations {
   /// Heading of the rules empty state.
   ///
   /// In fr, this message translates to:
-  /// **'Automatisez votre classement'**
+  /// **'Aucune règle'**
   String get rulesEmptyTitle;
 
   /// Body of the rules empty state, explaining what a rule does before asking the user to write one.
   ///
   /// In fr, this message translates to:
-  /// **'Une règle reconnaît un libellé — « CARREFOUR » — et attribue sa catégorie à chaque transaction correspondante, aujourd\'hui et aux prochains imports.'**
+  /// **'Une règle reconnaît un libellé, comme « CARREFOUR », et attribue sa catégorie à chaque transaction correspondante, aujourd\'hui et aux prochains imports.'**
   String get rulesEmptyBody;
 
   /// Accessible label of the enable switch on a rule row.
@@ -2956,7 +2956,7 @@ abstract class AppLocalizations {
   /// Match-preview banner naming one of the matched transactions, so the user can tell whether the rule caught what they meant.
   ///
   /// In fr, this message translates to:
-  /// **'{count, plural, one{Correspond à {count} transaction existante — « {sample} » du {date}.} other{Correspond à {count} transactions existantes — dont « {sample} » du {date}.}}'**
+  /// **'{count, plural, one{Correspond à {count} transaction existante : « {sample} » du {date}.} other{Correspond à {count} transactions existantes, dont « {sample} » du {date}.}}'**
   String rulePreviewCountWithSample(int count, String sample, String date);
 
   /// Localized message for RULE_PATTERN_INVALID. Rendered on the pattern field, never as a match count of zero.
@@ -3124,13 +3124,13 @@ abstract class AppLocalizations {
   /// Warning at the top of the export sheet. Names a concrete example, because the abstract warning is the one nobody reads.
   ///
   /// In fr, this message translates to:
-  /// **'Relisez avant d\'enregistrer : un motif peut contenir des informations personnelles — le nom de votre propriétaire, « VIR SALAIRE DUPONT ».'**
+  /// **'Relisez avant d\'enregistrer. Un motif peut contenir des informations personnelles, comme le nom de votre propriétaire : « VIR SALAIRE DUPONT ».'**
   String get rulePackExportPrivacyNotice;
 
   /// Section label above the verbatim pack contents in the export sheet.
   ///
   /// In fr, this message translates to:
-  /// **'{count, plural, =0{Contenu du fichier — aucune règle} one{Contenu du fichier — {count} règle} other{Contenu du fichier — {count} règles}}'**
+  /// **'{count, plural, =0{Contenu du fichier : aucune règle} one{Contenu du fichier : {count} règle} other{Contenu du fichier : {count} règles}}'**
   String rulePackExportContents(int count);
 
   /// Section label above the rules an export could not carry.
@@ -3142,13 +3142,13 @@ abstract class AppLocalizations {
   /// Explains one omitted rule: it uses a regex, which no importer accepts.
   ///
   /// In fr, this message translates to:
-  /// **'« {pattern} » — les règles regex ne peuvent pas figurer dans un pack.'**
+  /// **'« {pattern} » : les règles regex ne peuvent pas figurer dans un pack.'**
   String rulePackOmittedRegex(String pattern);
 
   /// Explains one omitted rule: it targets a user-defined category, which has no portable key.
   ///
   /// In fr, this message translates to:
-  /// **'« {pattern} » — vise une catégorie personnalisée, qui n\'a pas d\'identifiant partageable.'**
+  /// **'« {pattern} » : vise une catégorie personnalisée, qui n\'a pas d\'identifiant partageable.'**
   String rulePackOmittedUserCategory(String pattern);
 
   /// Save button on the export sheet.
@@ -3220,19 +3220,19 @@ abstract class AppLocalizations {
   /// A logo that failed because it is not a supported picture, named by its rule's pattern.
   ///
   /// In fr, this message translates to:
-  /// **'« {pattern} » — le fichier n\'est pas une image PNG, JPEG ou WebP.'**
+  /// **'« {pattern} » : le fichier n\'est pas une image PNG, JPEG ou WebP.'**
   String rulePackLogoFailureInvalidImage(String pattern);
 
   /// A logo that failed because it is too large, named by its rule's pattern.
   ///
   /// In fr, this message translates to:
-  /// **'« {pattern} » — l\'image dépasse la taille autorisée.'**
+  /// **'« {pattern} » : l\'image dépasse la taille autorisée.'**
   String rulePackLogoFailureTooLarge(String pattern);
 
   /// A linked logo that could not be downloaded, named by its rule's pattern.
   ///
   /// In fr, this message translates to:
-  /// **'« {pattern} » — le téléchargement a échoué.'**
+  /// **'« {pattern} » : le téléchargement a échoué.'**
   String rulePackLogoFailureDownloadFailed(String pattern);
 
   /// Toggle on the export sheet: embed each rule's logo in the pack.
@@ -3262,7 +3262,7 @@ abstract class AppLocalizations {
   /// Subtext on the review queue's header card when local AI is active, counting the rows it proposed a category for.
   ///
   /// In fr, this message translates to:
-  /// **'{count, plural, =0{Aucune de ces transactions n\'a reçu de proposition de l\'IA locale — confirmez ou corrigez, rien n\'est classé sans vous.} one{L\'IA locale propose une catégorie pour l\'une d\'entre elles — confirmez ou corrigez, rien n\'est classé sans vous.} other{L\'IA locale propose une catégorie pour {count} d\'entre elles — confirmez ou corrigez, rien n\'est classé sans vous.}}'**
+  /// **'{count, plural, =0{Aucune de ces transactions n\'a reçu de proposition de l\'IA locale. Confirmez ou corrigez : rien n\'est classé sans vous.} one{L\'IA locale propose une catégorie pour l\'une d\'entre elles. Confirmez ou corrigez : rien n\'est classé sans vous.} other{L\'IA locale propose une catégorie pour {count} d\'entre elles. Confirmez ou corrigez : rien n\'est classé sans vous.}}'**
   String reviewQueueAiSubtitle(int count);
 
   /// Resolved-progress label on the review queue's header card: rows already dealt with, out of the queue's size this session.
@@ -3304,7 +3304,7 @@ abstract class AppLocalizations {
   /// Italic note on a review row the model made no proposal for.
   ///
   /// In fr, this message translates to:
-  /// **'— aucune proposition'**
+  /// **'Aucune proposition'**
   String get reviewNoProposal;
 
   /// Link on a review row with no proposal, opening the category picker.
@@ -3316,7 +3316,7 @@ abstract class AppLocalizations {
   /// Subtext under the always-categorize modal's title, naming the transaction the rule was derived from.
   ///
   /// In fr, this message translates to:
-  /// **'Une règle classe ces transactions sans IA, à chaque import — pré-remplie depuis « {label} ».'**
+  /// **'Une règle classe ces transactions sans IA, à chaque import. Elle est pré-remplie depuis « {label} ».'**
   String alwaysRuleSubtitle(String label);
 
   /// Label of the always-categorize modal's target-category select.
@@ -3364,7 +3364,7 @@ abstract class AppLocalizations {
   /// Headline of the banner that replaces the review queue's header card while a run is classifying.
   ///
   /// In fr, this message translates to:
-  /// **'{total, plural, one{Catégorisation en cours — {processed} sur {total} transaction} other{Catégorisation en cours — {processed} sur {total} transactions}}'**
+  /// **'{total, plural, one{Catégorisation en cours : {processed} sur {total} transaction} other{Catégorisation en cours : {processed} sur {total} transactions}}'**
   String runBannerRunning(int processed, int total);
 
   /// Sub-line under the running banner: what the run has settled, what it has left for the user, and the reassurance that nothing is blocked.
@@ -3382,7 +3382,7 @@ abstract class AppLocalizations {
   /// Dismissible amber banner after a run that ended `partial`. A report, not an error wall.
   ///
   /// In fr, this message translates to:
-  /// **'{count, plural, one{Catégorisation terminée — {count} transaction n\'a pas pu être analysée.} other{Catégorisation terminée — {count} transactions n\'ont pas pu être analysées.}}'**
+  /// **'{count, plural, one{Catégorisation terminée. {count} transaction n\'a pas pu être analysée.} other{Catégorisation terminée. {count} transactions n\'ont pas pu être analysées.}}'**
   String runBannerPartial(int count);
 
   /// Link on the partial-run banner, showing the transactions the run could not analyse.
@@ -3415,10 +3415,10 @@ abstract class AppLocalizations {
   /// **'IA locale'**
   String get settingsAiTitle;
 
-  /// Sub-line under the card title, naming what the toggle beside it does.
+  /// Label of the AI card's opt-in toggle, shown beside it.
   ///
   /// In fr, this message translates to:
-  /// **'Activer la catégorisation par IA'**
+  /// **'Catégorisation par IA'**
   String get settingsAiSubtitle;
 
   /// Accessible label of the card's opt-in toggle.
@@ -3442,7 +3442,7 @@ abstract class AppLocalizations {
   /// Helper under the engine address field, stating the loopback-only rule.
   ///
   /// In fr, this message translates to:
-  /// **'Adresse locale uniquement — 127.0.0.1 ou localhost.'**
+  /// **'Adresse locale uniquement : 127.0.0.1 ou localhost.'**
   String get settingsAiBaseUrlHelp;
 
   /// Inline validation shown on the address field when the backend refuses a non-loopback URL (422). States why it was refused, not only that it was.
@@ -3460,13 +3460,13 @@ abstract class AppLocalizations {
   /// Helper under the model field: the list comes from the engine, but any tag can be typed.
   ///
   /// In fr, this message translates to:
-  /// **'Liste fournie par le moteur — saisie manuelle possible.'**
+  /// **'Liste fournie par le moteur. Saisie manuelle possible.'**
   String get settingsAiModelHelp;
 
   /// Helper under the model field when no engine answered, where the field degrades to a dashed read-only dash.
   ///
   /// In fr, this message translates to:
-  /// **'Aucun modèle — moteur injoignable.'**
+  /// **'Moteur injoignable : aucun modèle à proposer.'**
   String get settingsAiModelUnavailable;
 
   /// Accessible label of the control opening the list of models the engine reported.
@@ -3478,7 +3478,7 @@ abstract class AppLocalizations {
   /// Label above the threshold slider, carrying its live percentage. Only this label is a percentage — the stored value is the [0,1] real the API defines.
   ///
   /// In fr, this message translates to:
-  /// **'Seuil de confiance — {threshold}'**
+  /// **'Seuil de confiance : {threshold}'**
   String settingsAiThresholdLabel(double threshold);
 
   /// Helper under the threshold slider, stating what the threshold decides.
@@ -3490,7 +3490,7 @@ abstract class AppLocalizations {
   /// Status row when the runtime answered, with the number of models it reported.
   ///
   /// In fr, this message translates to:
-  /// **'{count, plural, =0{Connecté — aucun modèle disponible} =1{Connecté — 1 modèle disponible} other{Connecté — {count} modèles disponibles}}'**
+  /// **'{count, plural, =0{Connecté · aucun modèle disponible} =1{Connecté · 1 modèle disponible} other{Connecté · {count} modèles disponibles}}'**
   String settingsAiStatusConnected(int count);
 
   /// Status row when nothing answered at the configured address.
@@ -3556,7 +3556,7 @@ abstract class AppLocalizations {
   /// Caption under the export row's label: what the file contains.
   ///
   /// In fr, this message translates to:
-  /// **'Fichier .bastide — comptes, transactions, catégories, règles, objectifs, crédits, biens, paramètres.'**
+  /// **'Fichier .bastide : comptes, transactions, catégories, règles, objectifs, crédits, biens, paramètres.'**
   String get settingsBackupExportCaption;
 
   /// Replaces the export caption while the archive is being built.
@@ -3580,7 +3580,7 @@ abstract class AppLocalizations {
   /// Shown under the export row when the user has never exported a backup.
   ///
   /// In fr, this message translates to:
-  /// **'Aucune sauvegarde pour l\'instant.'**
+  /// **'Aucune sauvegarde.'**
   String get settingsBackupNone;
 
   /// A backup timestamp: a locale-formatted date then time.
@@ -3592,7 +3592,7 @@ abstract class AppLocalizations {
   /// Lock callout on the backup card warning that the archive is unencrypted.
   ///
   /// In fr, this message translates to:
-  /// **'Le fichier n\'est pas chiffré. Conservez-le en lieu sûr — il contient tout votre historique financier.'**
+  /// **'Ce fichier n’est pas chiffré et contient tout votre historique. Conservez-le en lieu sûr.'**
   String get settingsBackupPrivacy;
 
   /// Label of the restore row on the backup card.
@@ -3658,7 +3658,7 @@ abstract class AppLocalizations {
   /// Toast after a backup was written. The String placeholders are the locale-formatted counts.
   ///
   /// In fr, this message translates to:
-  /// **'Sauvegarde enregistrée — {transactionCount, plural, one{{transactions} transaction} other{{transactions} transactions}}, {accountCount, plural, one{{accounts} compte} other{{accounts} comptes}}.'**
+  /// **'Sauvegarde enregistrée : {transactionCount, plural, one{{transactions} transaction} other{{transactions} transactions}}, {accountCount, plural, one{{accounts} compte} other{{accounts} comptes}}.'**
   String settingsBackupExported(
     int transactionCount,
     String transactions,
@@ -3879,7 +3879,7 @@ abstract class AppLocalizations {
   /// Value line of the next-charge card: the payment and how far off it is.
   ///
   /// In fr, this message translates to:
-  /// **'{label} — {when}'**
+  /// **'{label} · {when}'**
   String subscriptionsNextValue(String label, String when);
 
   /// Caption of the next-charge card: the amount and the exact date.
@@ -3969,13 +3969,13 @@ abstract class AppLocalizations {
   /// Tooltip on the header the subscriptions table is sorted on, ascending.
   ///
   /// In fr, this message translates to:
-  /// **'Tri croissant — cliquer pour inverser'**
+  /// **'Tri croissant. Cliquez pour inverser.'**
   String get subscriptionsSortedAscending;
 
   /// Tooltip on the header the subscriptions table is sorted on, descending.
   ///
   /// In fr, this message translates to:
-  /// **'Tri décroissant — cliquer pour inverser'**
+  /// **'Tri décroissant. Cliquez pour inverser.'**
   String get subscriptionsSortedDescending;
 
   /// Placeholder in a cell with nothing to state — a cancelled row's next charge.
@@ -4017,7 +4017,7 @@ abstract class AppLocalizations {
   /// Amber status pill on a row whose charge recently grew.
   ///
   /// In fr, this message translates to:
-  /// **'Augmentation · {from} → {to}'**
+  /// **'Hausse · {from} → {to}'**
   String subscriptionSignalIncrease(String from, String to);
 
   /// Amber status pill on a row whose charge has not landed past its tolerance.
@@ -4215,7 +4215,7 @@ abstract class AppLocalizations {
   /// Empty-state title on the recurring payments panel.
   ///
   /// In fr, this message translates to:
-  /// **'Aucun paiement récurrent détecté pour l\'instant'**
+  /// **'Aucun paiement récurrent détecté'**
   String get subscriptionsEmptyTitle;
 
   /// Empty-state body, stating the three-repeat rule so the absence reads as a threshold rather than a failure.
@@ -4263,7 +4263,7 @@ abstract class AppLocalizations {
   /// Amber banner on the detail. The annualised figure is stated rather than left as a multiplication for the reader.
   ///
   /// In fr, this message translates to:
-  /// **'Augmentation : {from} → {to} le {date} — soit {annual} par an.'**
+  /// **'Hausse : {from} → {to} le {date}, soit {annual} par an.'**
   String subscriptionDetailIncrease(
     String from,
     String to,
@@ -4280,7 +4280,7 @@ abstract class AppLocalizations {
   /// Sub-line of the history card, naming the evidence and the account it comes from.
   ///
   /// In fr, this message translates to:
-  /// **'Les transactions dont cette série est déduite · {account}'**
+  /// **'{account}'**
   String subscriptionDetailHistorySubtitle(String account);
 
   /// Amber pill marking the occurrence where the price stepped up.
@@ -4292,7 +4292,7 @@ abstract class AppLocalizations {
   /// Foot note under the history: the user is being asked to trust a deduction, so the evidence is part of the screen.
   ///
   /// In fr, this message translates to:
-  /// **'Bastide déduit la série de ces occurrences — vérifiez-les avant de confirmer un changement.'**
+  /// **'La série est déduite de ces prélèvements. Vérifiez-les avant de confirmer un changement.'**
   String get subscriptionDetailFootnote;
 
   /// Error state replacing the detail when it failed to load.
@@ -4418,13 +4418,13 @@ abstract class AppLocalizations {
   /// Empty-state title of the goals panel.
   ///
   /// In fr, this message translates to:
-  /// **'Donnez un nom à ce qui compte'**
+  /// **'Aucun objectif'**
   String get goalsEmptyTitle;
 
   /// Empty-state body explaining what a virtual envelope is.
   ///
   /// In fr, this message translates to:
-  /// **'Un objectif est une enveloppe virtuelle : vous y mettez de côté à votre rythme, sans toucher à vos comptes.'**
+  /// **'Un objectif réserve une somme sur le papier. Vos comptes ne sont pas modifiés.'**
   String get goalsEmptyBody;
 
   /// Error state when the goals list fails to load.
@@ -4538,7 +4538,7 @@ abstract class AppLocalizations {
   /// Shown when a goal has no allocations yet.
   ///
   /// In fr, this message translates to:
-  /// **'Aucune allocation pour l\'instant.'**
+  /// **'Aucune allocation.'**
   String get goalHistoryEmpty;
 
   /// Title of the goal modal when creating.
@@ -4886,7 +4886,7 @@ abstract class AppLocalizations {
   /// Empty state reassurance line of the loans panel.
   ///
   /// In fr, this message translates to:
-  /// **'Ajoutez vos emprunts pour suivre leur coût réel, leur trajectoire et votre capacité — sans jamais relier Bastide à une banque.'**
+  /// **'Ajoutez un emprunt pour suivre son coût, son échéancier et votre taux d’endettement.'**
   String get mortgagesEmptyBody;
 
   /// Label of the monthly charge summary card. Rendered uppercase.
@@ -4964,7 +4964,7 @@ abstract class AppLocalizations {
   /// Iris link on the ledger-income ratio card.
   ///
   /// In fr, this message translates to:
-  /// **'Déclarer un revenu →'**
+  /// **'Déclarer un revenu'**
   String get mortgagesRatioDeclareLink;
 
   /// Outline button on the unknown-income ratio card.
@@ -4976,7 +4976,7 @@ abstract class AppLocalizations {
   /// HCSF caveat, always shown as body content on the ratio card, never as a tooltip.
   ///
   /// In fr, this message translates to:
-  /// **'Lecture informative : ce repère ne lie aucun prêteur.'**
+  /// **'Lecture indicative, qui n’engage aucun prêteur.'**
   String get mortgagesRatioCaveat;
 
   /// Title of the declare-income modal.
@@ -5403,7 +5403,7 @@ abstract class AppLocalizations {
   /// Computed instalment plate: total instalment and total interest.
   ///
   /// In fr, this message translates to:
-  /// **'échéance totale {instalment} — intérêts totaux {interest}'**
+  /// **'échéance totale {instalment} · intérêts totaux {interest}'**
   String mortgageFormPlateDetail(String instalment, String interest);
 
   /// Computed instalment plate before the inputs are complete.
@@ -5770,7 +5770,7 @@ abstract class AppLocalizations {
   /// HCSF caveat, always shown as body content on the card: no lender is bound by this reading.
   ///
   /// In fr, this message translates to:
-  /// **'Informative — ne lie aucun prêteur'**
+  /// **'Lecture indicative, qui n’engage aucun prêteur.'**
   String get simulatorHcsfCaveat;
 
   /// The HCSF reference beside a reading.
@@ -5853,7 +5853,7 @@ abstract class AppLocalizations {
   /// Capacity caption when the current loans use up the room under the reference: explains the cause calmly.
   ///
   /// In fr, this message translates to:
-  /// **'il ne reste que {available} d\'échéance sous le repère une fois vos crédits actuels comptés — c\'est ce qui rend la capacité si faible, pas le bien visé'**
+  /// **'Vos crédits actuels laissent {available} d’échéance sous le repère. C’est ce qui limite la capacité, pas le bien visé.'**
   String simulatorCapacityCaptionExisting(String available);
 
   /// Capacity caption before anything can be computed.
@@ -5988,10 +5988,10 @@ abstract class AppLocalizations {
   /// **'Nom'**
   String get simulatorSaveName;
 
-  /// Prefill of the scenario name on the « lieu — prix k€ » pattern, with an empty place slot before the dash for the user to type into. Keep the leading space.
+  /// Prefill of the scenario name on the « lieu, prix k€ » pattern, with an empty place slot before the comma for the user to type into.
   ///
   /// In fr, this message translates to:
-  /// **' — {price}'**
+  /// **', {price}'**
   String simulatorSaveNamePrefill(String price);
 
   /// Save-scenario modal validation error.
@@ -6159,13 +6159,13 @@ abstract class AppLocalizations {
   /// Comparison foot: the income the ratios are read against, the reference, and the no-lender-is-bound statement.
   ///
   /// In fr, this message translates to:
-  /// **'Taux d\'endettement sur un revenu {source, select, declared{déclaré} other{médian constaté}} de {income} · repère HCSF {limit} · lecture informative, ne lie aucun prêteur.'**
+  /// **'Taux d\'endettement sur un revenu {source, select, declared{déclaré} other{médian constaté}} de {income} · repère HCSF {limit}. Lecture indicative, qui n’engage aucun prêteur.'**
   String simulatorCompareFoot(String source, String income, String limit);
 
   /// Comparison foot when no income is known.
   ///
   /// In fr, this message translates to:
-  /// **'Aucun revenu connu, donc aucun taux d\'endettement · repère HCSF {limit} · lecture informative, ne lie aucun prêteur.'**
+  /// **'Aucun revenu connu, donc aucun taux d\'endettement · repère HCSF {limit}. Lecture indicative, qui n’engage aucun prêteur.'**
   String simulatorCompareFootUnknown(String limit);
 
   /// Property nature: the household's main home (wire value primary_residence).
@@ -6285,7 +6285,7 @@ abstract class AppLocalizations {
   /// Validation message when an optional amount cannot be read.
   ///
   /// In fr, this message translates to:
-  /// **'Montant illisible — laissez vide s\'il est inconnu.'**
+  /// **'Montant illisible. Laissez vide s\'il est inconnu.'**
   String get propertyFormAmountOptionalInvalid;
 
   /// Validation message when a date cannot be read.
@@ -6501,7 +6501,7 @@ abstract class AppLocalizations {
   /// Caption beside the month delta pill when property values are held flat.
   ///
   /// In fr, this message translates to:
-  /// **'vs {month} — valeur des biens inchangée'**
+  /// **'vs {month} · valeur des biens inchangée'**
   String networthDeltaCaptionFlat(String month);
 
   /// Label of the assets card.
@@ -6620,13 +6620,13 @@ abstract class AppLocalizations {
   /// Link in the no-property plate that opens the new-property form.
   ///
   /// In fr, this message translates to:
-  /// **'Nouveau bien →'**
+  /// **'Nouveau bien'**
   String get networthCompositionInviteAction;
 
-  /// Section label of the card listing what net worth deliberately leaves out.
+  /// Label above the list of things the net worth leaves out on purpose.
   ///
   /// In fr, this message translates to:
-  /// **'Volontairement non compté'**
+  /// **'À savoir'**
   String get networthExclusionsLabel;
 
   /// Exclusion: savings goals.
@@ -6638,7 +6638,7 @@ abstract class AppLocalizations {
   /// Why goals are not counted in net worth.
   ///
   /// In fr, this message translates to:
-  /// **'Une allocation étiquette de l\'argent déjà présent sur un compte — le compter reviendrait à le compter deux fois.'**
+  /// **'Les objectifs réservent de l’argent déjà présent sur un compte. Ils ne sont pas comptés une seconde fois.'**
   String get networthExclusionGoalsBody;
 
   /// Exclusion: subscriptions.
@@ -6656,13 +6656,13 @@ abstract class AppLocalizations {
   /// Empty-state title when there are no accounts, properties or loans.
   ///
   /// In fr, this message translates to:
-  /// **'Rien à additionner pour l\'instant'**
+  /// **'Aucun compte, bien ou crédit'**
   String get networthEmptyTitle;
 
   /// Empty-state body of the net-worth panel.
   ///
   /// In fr, this message translates to:
-  /// **'Importez un compte ou déclarez un bien : la synthèse additionne ce que vous possédez et soustrait vos crédits, sans rien inventer entre les deux.'**
+  /// **'Importez un compte ou déclarez un bien. La synthèse additionne vos avoirs et soustrait vos crédits.'**
   String get networthEmptyBody;
 
   /// Empty-state secondary action that goes to imports.
@@ -6698,13 +6698,13 @@ abstract class AppLocalizations {
   /// Shown in place of the chart when the series has no closed month yet.
   ///
   /// In fr, this message translates to:
-  /// **'Pas encore d\'historique : la série commence au premier mois clos d\'un compte importé, ou au premier montant que vous déclarez.'**
+  /// **'Aucun historique : la série commence au premier mois clos d\'un compte importé, ou au premier montant que vous déclarez.'**
   String get networthSeriesEmpty;
 
   /// Info banner under the series when property values are held flat, naming the oldest current valuation date.
   ///
   /// In fr, this message translates to:
-  /// **'Les biens sont maintenus à leur valeur déclarée (estimation la plus ancienne : {date}) et ne comptent qu\'à partir de leur date d\'acquisition, les crédits qu\'à partir de leur déblocage. Les mois sans donnée sont simplement absents.'**
+  /// **'Les biens sont maintenus à leur valeur déclarée (estimation la plus ancienne : {date}) et ne comptent qu\'à partir de leur date d\'acquisition, les crédits qu\'à partir de leur déblocage. Les mois sans donnée sont absents.'**
   String networthSeriesCaveat(String date);
 
   /// Series range segment: the last 12 months.
@@ -6806,7 +6806,7 @@ abstract class AppLocalizations {
   /// Shown in the modal when nothing is declared.
   ///
   /// In fr, this message translates to:
-  /// **'Aucun montant déclaré pour l\'instant.'**
+  /// **'Aucun montant déclaré.'**
   String get networthDeclaredEmpty;
 
   /// Chip on a declared month the imports cover: the chart shows the imported figure.
@@ -7274,7 +7274,7 @@ abstract class AppLocalizations {
   /// Caption under settingsAiOllamaFound: how many models that Ollama lists.
   ///
   /// In fr, this message translates to:
-  /// **'{count, plural, =0{Aucun modèle installé pour l\'instant} =1{1 modèle installé} other{{count} modèles installés}}'**
+  /// **'{count, plural, =0{Aucun modèle installé} =1{1 modèle installé} other{{count} modèles installés}}'**
   String settingsAiOllamaModels(int count);
 
   /// Button pointing the engine address at the detected Ollama.
@@ -7328,7 +7328,7 @@ abstract class AppLocalizations {
   /// Meta strip fact on an account with no transaction yet.
   ///
   /// In fr, this message translates to:
-  /// **'Pas encore d’opérations'**
+  /// **'Aucune opération'**
   String get accountDetailNoHistory;
 
   /// Meta strip link to the imports panel: when a statement was last imported into this account.
@@ -7340,7 +7340,7 @@ abstract class AppLocalizations {
   /// Meta strip fact on an account no statement was imported into.
   ///
   /// In fr, this message translates to:
-  /// **'Aucun import pour l’instant'**
+  /// **'Aucun import'**
   String get accountDetailNoImport;
 
   /// A card number masked to its last four digits.
@@ -7652,7 +7652,7 @@ abstract class AppLocalizations {
   /// Dashed row in the recent transactions card of an account with none.
   ///
   /// In fr, this message translates to:
-  /// **'Aucune opération pour l’instant'**
+  /// **'Aucune opération'**
   String get accountDetailNoTransactions;
 
   /// Tooltip of the row action opening the « Marquer comme récurrent » dialog on an outflow.
@@ -7664,7 +7664,7 @@ abstract class AppLocalizations {
   /// Tooltip of the same row action on an outflow that already belongs to a recurring series: it opens that series in Abonnements.
   ///
   /// In fr, this message translates to:
-  /// **'Déjà récurrent — voir la série'**
+  /// **'Déjà récurrent : voir la série'**
   String get markRecurringOpenSeriesAction;
 
   /// Toast title when a row's series was deleted since the list loaded, instead of opening it.
@@ -7892,7 +7892,7 @@ abstract class AppLocalizations {
   /// Series picker: the user has no series to offer.
   ///
   /// In fr, this message translates to:
-  /// **'Vous ne suivez encore aucune série.'**
+  /// **'Vous ne suivez aucune série.'**
   String get seriesPickerEmpty;
 
   /// Series picker: the search matched nothing.

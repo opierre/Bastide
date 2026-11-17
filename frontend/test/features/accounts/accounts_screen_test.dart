@@ -153,7 +153,7 @@ void main() {
 
   for (final (locale, dated, undated) in [
     ('fr', 'Dernière opération le 29 sept. 2026', 'Aucune opération'),
-    ('en', 'Last transaction on Sep 29, 2026', 'No transactions yet'),
+    ('en', 'Last transaction on Sep 29, 2026', 'No transactions'),
   ]) {
     testWidgets('shows when each account last moved ($locale)', (tester) async {
       await tester.pumpWidget(

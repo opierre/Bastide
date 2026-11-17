@@ -168,7 +168,7 @@ void main() {
     expect(find.byKey(const Key('aiRunBanner')), findsOneWidget);
     expect(find.byKey(const Key('reviewQueueHeaderCard')), findsNothing);
     expect(
-      find.text('Catégorisation en cours — 84 sur 213 transactions'),
+      find.text('Catégorisation en cours : 84 sur 213 transactions'),
       findsOneWidget,
     );
     expect(
@@ -234,7 +234,7 @@ void main() {
 
     expect(
       find.text(
-        "Catégorisation terminée — 12 transactions n'ont pas pu être analysées.",
+        "Catégorisation terminée. 12 transactions n'ont pas pu être analysées.",
       ),
       findsOneWidget,
     );
@@ -317,7 +317,7 @@ void main() {
     );
     await tester.pump();
 
-    expect(find.text('Categorizing — 84 of 213 transactions'), findsOneWidget);
+    expect(find.text('Categorizing: 84 of 213 transactions'), findsOneWidget);
     expect(find.text('Cancel'), findsOneWidget);
     expect(find.textContaining('Catégorisation'), findsNothing);
   });

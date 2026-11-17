@@ -282,21 +282,32 @@ class HcsfReadingCard extends StatelessWidget {
                   tone: StatusPillTone.warning,
                 ),
               ],
-              const Spacer(),
+              const SizedBox(width: AppSpacing.md),
               // Body content, never a tooltip: the app makes no lending
-              // decisions and says so where the reading is shown.
-              const Icon(
-                Icons.info_outline_rounded,
-                size: 12,
-                color: AppColors.textDisabled,
-              ),
-              const SizedBox(width: AppSpacing.xs + 1),
-              Text(
-                l10n.simulatorHcsfCaveat,
-                key: const Key('hcsfCaveat'),
-                style: AppTextStyles.helper.copyWith(
-                  fontSize: 11,
-                  color: AppColors.textDisabled,
+              // decisions and says so where the reading is shown. It takes
+              // the room left of the title and wraps rather than overflow.
+              Expanded(
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    const Icon(
+                      Icons.info_outline_rounded,
+                      size: 12,
+                      color: AppColors.textDisabled,
+                    ),
+                    const SizedBox(width: AppSpacing.xs + 1),
+                    Flexible(
+                      child: Text(
+                        l10n.simulatorHcsfCaveat,
+                        key: const Key('hcsfCaveat'),
+                        textAlign: TextAlign.end,
+                        style: AppTextStyles.helper.copyWith(
+                          fontSize: 11,
+                          color: AppColors.textDisabled,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ],
