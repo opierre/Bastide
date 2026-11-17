@@ -53,13 +53,6 @@ class YearlyProjectionCard extends StatelessWidget {
                       l10n.simulatorChartTitle,
                       style: textTheme.titleMedium,
                     ),
-                    const SizedBox(height: 2),
-                    Text(
-                      l10n.simulatorChartSubtitle,
-                      style: textTheme.bodySmall?.copyWith(
-                        color: AppColors.textSecondary,
-                      ),
-                    ),
                   ],
                 ),
               ),

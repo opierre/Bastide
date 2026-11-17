@@ -71,8 +71,8 @@ String localizeSimulatorError(AppLocalizations l10n, Object? error) {
   return l10n.simulatorErrorGeneric;
 }
 
-/// The 16 px uppercase marker pill (`00` §Patrimoine additions): iris for
-/// « INDICATIF » and « EN COURS », gray for « DÉRIVÉ ».
+/// The 16 px uppercase marker pill (`00` §Patrimoine additions), left only on
+/// « EN COURS » until the simulator gets its v2 layout.
 class SimulatorMarkerPill extends StatelessWidget {
   const SimulatorMarkerPill({
     super.key,

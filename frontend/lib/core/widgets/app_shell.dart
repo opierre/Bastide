@@ -21,7 +21,6 @@ class NavDestinationSpec {
     required IconData this.icon,
     required IconData this.selectedIcon,
     required this.label,
-    required this.subtitle,
   }) : glyph = null;
 
   /// A destination whose icon is drawn from the frames' paths rather than
@@ -31,7 +30,6 @@ class NavDestinationSpec {
     required this.path,
     required NavGlyph this.glyph,
     required this.label,
-    required this.subtitle,
   }) : icon = null,
        selectedIcon = null;
 
@@ -47,9 +45,6 @@ class NavDestinationSpec {
   /// same outline/filled swap.
   final NavGlyph? glyph;
   final String label;
-
-  /// One-line descriptor of the panel, shown under the title in the top bar.
-  final String subtitle;
 }
 
 class NavSectionSpec {
@@ -113,21 +108,18 @@ class AppShell extends ConsumerWidget {
           icon: Icons.space_dashboard_outlined,
           selectedIcon: Icons.space_dashboard_rounded,
           label: l10n.navDashboard,
-          subtitle: l10n.navDashboardSubtitle,
         ),
         NavDestinationSpec(
           path: '/accounts',
           icon: Icons.account_balance_wallet_outlined,
           selectedIcon: Icons.account_balance_wallet_rounded,
           label: l10n.navAccounts,
-          subtitle: l10n.navAccountsSubtitle,
         ),
         NavDestinationSpec(
           path: '/transactions',
           icon: Icons.swap_vert_outlined,
           selectedIcon: Icons.swap_vert_rounded,
           label: l10n.navTransactions,
-          subtitle: l10n.navTransactionsSubtitle,
         ),
       ],
     ),
@@ -139,14 +131,12 @@ class AppShell extends ConsumerWidget {
           icon: Icons.download_outlined,
           selectedIcon: Icons.download_rounded,
           label: l10n.navImports,
-          subtitle: l10n.navImportsSubtitle,
         ),
         NavDestinationSpec(
           path: '/categories',
           icon: Icons.sell_outlined,
           selectedIcon: Icons.sell_rounded,
           label: l10n.navCategories,
-          subtitle: l10n.navCategoriesSubtitle,
         ),
         // The circular-arrow cycle glyph the nav spec names
         // (`docs/design/00`). The spec thickens its stroke when active, which
@@ -157,7 +147,6 @@ class AppShell extends ConsumerWidget {
           icon: Icons.autorenew_outlined,
           selectedIcon: Icons.autorenew_rounded,
           label: l10n.navSubscriptions,
-          subtitle: l10n.navSubscriptionsSubtitle,
         ),
         // Last of the Gestion group, per the nav spec
         // (`docs/design/00`). The flag glyph the spec names, with the same
@@ -167,7 +156,6 @@ class AppShell extends ConsumerWidget {
           icon: Icons.flag_outlined,
           selectedIcon: Icons.flag_rounded,
           label: l10n.navGoals,
-          subtitle: l10n.navGoalsSubtitle,
         ),
       ],
     ),
@@ -181,19 +169,16 @@ class AppShell extends ConsumerWidget {
           path: '/mortgages',
           glyph: NavGlyph.house,
           label: l10n.navMortgages,
-          subtitle: l10n.navMortgagesSubtitle,
         ),
         NavDestinationSpec.drawn(
           path: '/simulations',
           glyph: NavGlyph.calculator,
           label: l10n.navSimulator,
-          subtitle: l10n.navSimulatorSubtitle,
         ),
         NavDestinationSpec.drawn(
           path: '/networth',
           glyph: NavGlyph.pie,
           label: l10n.navNetworth,
-          subtitle: l10n.navNetworthSubtitle,
         ),
       ],
     ),
@@ -205,7 +190,6 @@ class AppShell extends ConsumerWidget {
           icon: Icons.tune_outlined,
           selectedIcon: Icons.tune_rounded,
           label: l10n.navSettings,
-          subtitle: l10n.navSettingsSubtitle,
         ),
       ],
     ),
@@ -239,7 +223,6 @@ class AppShell extends ConsumerWidget {
                   _TopBar(
                     key: const Key('appTopBar'),
                     title: active?.label ?? '',
-                    subtitle: active?.subtitle ?? '',
                     titleOverride: titleBuilder?.call(context),
                     actions: actionsBuilder?.call(context) ?? const [],
                     onNavigate: onNavigate,
@@ -772,16 +755,14 @@ class _TopBar extends StatelessWidget {
   const _TopBar({
     super.key,
     required this.title,
-    required this.subtitle,
     this.titleOverride,
     required this.actions,
     required this.onNavigate,
   });
 
   final String title;
-  final String subtitle;
 
-  /// A panel's own title block, in place of [title] and [subtitle].
+  /// A panel's own title block, in place of [title].
   final Widget? titleOverride;
   final List<Widget> actions;
   final ValueChanged<String> onNavigate;
@@ -811,16 +792,6 @@ class _TopBar extends StatelessWidget {
                       style: textTheme.titleLarge,
                       overflow: TextOverflow.ellipsis,
                     ),
-                    if (subtitle.isNotEmpty) ...[
-                      const SizedBox(height: 3),
-                      Text(
-                        subtitle,
-                        style: textTheme.bodySmall?.copyWith(
-                          color: AppColors.textSecondary,
-                        ),
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ],
                   ],
                 ),
           ),

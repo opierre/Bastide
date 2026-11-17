@@ -38,22 +38,7 @@ class DangerZoneCard extends ConsumerWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // A [Wrap]: the French title runs longer than the English
-                    // one and the pill beside it is fixed width, so on a narrow
-                    // column the pill drops to its own line instead of pushing
-                    // the title out of the card.
-                    Wrap(
-                      crossAxisAlignment: WrapCrossAlignment.center,
-                      spacing: AppSpacing.sm,
-                      runSpacing: AppSpacing.xs,
-                      children: [
-                        Text(
-                          l10n.settingsResetTitle,
-                          style: textTheme.titleMedium,
-                        ),
-                        const _IrreversibleBadge(),
-                      ],
-                    ),
+                    Text(l10n.settingsResetTitle, style: textTheme.titleMedium),
                     const SizedBox(height: 2),
                     Text(
                       l10n.settingsResetSubtitle,
@@ -84,36 +69,6 @@ class DangerZoneCard extends ConsumerWidget {
             ),
           ],
         ],
-      ),
-    );
-  }
-}
-
-/// The « IRRÉVERSIBLE » pill beside the title. States the stake in a word, so
-/// the card does not rely on its border colour to carry it.
-class _IrreversibleBadge extends StatelessWidget {
-  const _IrreversibleBadge();
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppSpacing.sm - 2,
-        vertical: 3,
-      ),
-      decoration: BoxDecoration(
-        color: AppColors.negative.withValues(alpha: 0.12),
-        borderRadius: BorderRadius.circular(5),
-      ),
-      child: Text(
-        AppLocalizations.of(context)!.settingsResetBadge,
-        style: const TextStyle(
-          fontFamily: AppFonts.geist,
-          fontSize: 10,
-          fontWeight: FontWeight.w700,
-          letterSpacing: 1,
-          color: AppColors.negative,
-        ),
       ),
     );
   }

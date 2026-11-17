@@ -82,13 +82,6 @@ class CompositionBreakdownCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Text(l10n.networthCompositionTitle, style: textTheme.titleMedium),
-          const SizedBox(height: 2),
-          Text(
-            l10n.networthCompositionSubtitle,
-            style: textTheme.bodySmall?.copyWith(
-              color: AppColors.textSecondary,
-            ),
-          ),
           const SizedBox(height: AppSpacing.md),
           _Strip(entries: summary.composition, hue: _hue),
           const SizedBox(height: AppSpacing.sm),

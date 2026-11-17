@@ -153,7 +153,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.byKey(const Key('mortgageDetail')), findsOneWidget);
-      expect(find.byKey(const Key('mortgageTaegIndicative')), findsOneWidget);
+      expect(find.text('TAEG INDICATIF'), findsOneWidget);
     });
   });
 

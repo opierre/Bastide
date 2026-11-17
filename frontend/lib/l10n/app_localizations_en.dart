@@ -36,26 +36,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get navSectionManage => 'Manage';
 
   @override
-  String get navDashboardSubtitle => 'Your month at a glance';
-
-  @override
-  String get navAccountsSubtitle => 'All your accounts, one currency';
-
-  @override
-  String get navTransactionsSubtitle => 'Every transaction, in a single feed';
-
-  @override
-  String get navImportsSubtitle =>
-      'OFX and QFX statements — processed on this computer';
-
-  @override
-  String get navCategoriesSubtitle =>
-      'Organize your spending, automate it with rules';
-
-  @override
-  String get navSettingsSubtitle => 'Profile, preferences and your local data';
-
-  @override
   String get sidebarPrivacyBadge => 'All data stays on this device';
 
   @override
@@ -170,9 +150,6 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get comingSoonBody =>
       'This screen arrives in a later step. In the meantime, add your accounts to get set up.';
-
-  @override
-  String get authTagline => 'Your money, clearly.';
 
   @override
   String get authPrivacyLine =>
@@ -864,9 +841,6 @@ class AppLocalizationsEn extends AppLocalizations {
     );
     return '$_temp0';
   }
-
-  @override
-  String get reviewQueueEncouragement => 'You\'re almost there — keep going!';
 
   @override
   String get reviewAlwaysCategorize => 'Always categorize like this';
@@ -2354,10 +2328,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get navSubscriptions => 'Recurring';
 
   @override
-  String get navSubscriptionsSubtitle =>
-      'Your recurring charges, detected automatically';
-
-  @override
   String get subscriptionsDetect => 'Detect';
 
   @override
@@ -2802,9 +2772,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get navGoals => 'Goals';
 
   @override
-  String get navGoalsSubtitle => 'Set money aside, virtually, for what matters';
-
-  @override
   String get goalsAdd => 'New goal';
 
   @override
@@ -2883,10 +2850,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get goalHistoryTitle => 'Allocation history';
-
-  @override
-  String get goalHistorySubtitle =>
-      'One list, signed amounts — a withdrawal is a negative line.';
 
   @override
   String get goalHistoryDate => 'Date';
@@ -3016,9 +2979,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingsResetTitle => 'Danger zone';
 
   @override
-  String get settingsResetBadge => 'IRREVERSIBLE';
-
-  @override
   String get settingsResetSubtitle =>
       'Resetting the database deletes this profile\'s transactions, accounts, rules, custom categories, goals, subscriptions, loans, properties and simulations. Exported backups aren\'t touched.';
 
@@ -3073,19 +3033,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get navMortgages => 'Loans';
 
   @override
-  String get navMortgagesSubtitle => 'Your loans, their cost and your capacity';
-
-  @override
   String get navSimulator => 'Simulator';
 
   @override
-  String get navSimulatorSubtitle => 'What a new loan would change';
-
-  @override
   String get navNetworth => 'Net worth';
-
-  @override
-  String get navNetworthSubtitle => 'What you own, what you owe';
 
   @override
   String get mortgagesAdd => 'New loan';
@@ -3260,19 +3211,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get mortgagesChartTitle => 'Outstanding principal trajectory';
 
   @override
-  String mortgagesChartSubtitle(int count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other:
-          'All $count loans, instalment by instalment, to the last repayment',
-      two: 'Both loans, instalment by instalment, to the last repayment',
-      one: 'The loan, instalment by instalment, to the last repayment',
-    );
-    return '$_temp0';
-  }
-
-  @override
   String get mortgagesChartLegendTotal => 'Total outstanding principal';
 
   @override
@@ -3346,14 +3284,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get mortgageCostRateCaption => 'fixed for the whole term';
 
   @override
-  String get mortgageCostTaegLabel => 'APR';
-
-  @override
-  String get mortgageCostIndicative => 'Indicative';
-
-  @override
-  String get mortgageCostTaegDisclaimer =>
-      'Indicative: a real APR includes fees Bastide never sees.';
+  String get mortgageCostTaegLabel => 'Indicative APR';
 
   @override
   String get mortgageCostTaegCaption => 'rate, insurance and fees included';
@@ -3573,9 +3504,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get simulatorFormTitle => 'New loan';
 
   @override
-  String get simulatorFormSubtitle => 'The result updates as you type';
-
-  @override
   String get simulatorPrice => 'Property price';
 
   @override
@@ -3588,7 +3516,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get simulatorPrincipal => 'Amount borrowed';
 
   @override
-  String get simulatorDerivedPill => 'Derived';
+  String get simulatorPrincipalDerivedHelper =>
+      'calculated: price − down payment + fees';
 
   @override
   String get simulatorRate => 'Nominal rate';
@@ -3699,10 +3628,7 @@ class AppLocalizationsEn extends AppLocalizations {
       'Enter a price and a rate to see the total cost and its share of the price.';
 
   @override
-  String get simulatorTaegLabel => 'APR';
-
-  @override
-  String get simulatorIndicativePill => 'Indicative';
+  String get simulatorTaegLabel => 'Indicative APR';
 
   @override
   String get simulatorTaegCaption => 'rate, insurance and fees included';
@@ -3790,10 +3716,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get simulatorChartTitle => 'Yearly projection';
-
-  @override
-  String get simulatorChartSubtitle =>
-      'Principal repaid and interest paid, year by year';
 
   @override
   String get simulatorChartCapital => 'Principal';
@@ -3953,10 +3875,6 @@ class AppLocalizationsEn extends AppLocalizations {
     );
     return '$_temp0';
   }
-
-  @override
-  String get simulatorCompareSubtitle =>
-      'Same rows for every column · a dash where a figure doesn\'t apply';
 
   @override
   String get simulatorCompareClose => 'Close comparison';
@@ -4230,10 +4148,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get networthCompositionTitle => 'Asset composition';
 
   @override
-  String get networthCompositionSubtitle =>
-      'Accounts by type, properties by kind';
-
-  @override
   String get networthCompositionChecking => 'Current accounts';
 
   @override
@@ -4322,9 +4236,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get networthSeriesTitle => 'Net worth';
-
-  @override
-  String get networthSeriesSubtitle => 'Accounts and loans, month by month';
 
   @override
   String networthSeriesRange(String from, String to) {

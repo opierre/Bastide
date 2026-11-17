@@ -176,7 +176,7 @@ void main() {
     verifyNever(() => repository.create(any(), any()));
     expect(_text(tester, 'resultInstalment'), _money(141841));
     expect(_text(tester, 'resultCost'), _money(14552300));
-    expect(find.byKey(const Key('simulatorDerivedPill')), findsOneWidget);
+    expect(find.text('calculé : prix − apport + frais'), findsOneWidget);
     expect(find.text('284 500'.replaceAll(' ', ' ')), findsOneWidget);
   });
 
@@ -193,15 +193,11 @@ void main() {
       '300 échéances',
     );
     expect(
-      tester
-          .widget<Text>(
-            find.descendant(
-              of: find.byKey(const Key('resultTaegIndicative')),
-              matching: find.byType(Text),
-            ),
-          )
-          .data,
-      'INDICATIF',
+      find.descendant(
+        of: find.byKey(const Key('resultTaegCard')),
+        matching: find.text('TAEG INDICATIF'),
+      ),
+      findsOneWidget,
     );
     expect(_text(tester, 'resultTaeg'), startsWith('3,67'));
     expect(_text(tester, 'resultCostCaption'), contains('45,5'));
@@ -375,7 +371,7 @@ void main() {
     );
     await _settleCompute(tester);
 
-    expect(find.byKey(const Key('simulatorDerivedPill')), findsNothing);
+    expect(find.text('calculé : prix − apport + frais'), findsNothing);
     verify(
       () => repository.compute(
         any(
@@ -430,7 +426,7 @@ void main() {
     expect(_text(tester, 'resultInstalment'), '€1,418.41');
     expect(_text(tester, 'resultTaeg'), '3.67%');
     expect(find.text('MONTHLY INSTALMENT'), findsOneWidget);
-    expect(find.text('INDICATIVE'), findsOneWidget);
+    expect(find.text('INDICATIVE APR'), findsOneWidget);
     expect(_text(tester, 'simulatorTermValue'), '300 months · 25 years');
     expect(
       _text(tester, 'hcsfRatioCaption'),

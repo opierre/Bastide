@@ -196,16 +196,16 @@ class ReviewQueueHeaderCard extends ConsumerWidget {
                       key: const Key('reviewQueueCount'),
                       style: Theme.of(context).textTheme.titleMedium,
                     ),
-                    const SizedBox(height: 2),
-                    Text(
-                      aiIsActive
-                          ? l10n.reviewQueueAiSubtitle(proposedCount)
-                          : l10n.reviewQueueEncouragement,
-                      key: const Key('reviewQueueSubtitle'),
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: AppColors.textSecondary,
+                    if (aiIsActive) ...[
+                      const SizedBox(height: 2),
+                      Text(
+                        l10n.reviewQueueAiSubtitle(proposedCount),
+                        key: const Key('reviewQueueSubtitle'),
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: AppColors.textSecondary,
+                        ),
                       ),
-                    ),
+                    ],
                   ],
                 ),
               ),

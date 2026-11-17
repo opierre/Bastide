@@ -60,13 +60,6 @@ class ScenarioCompareCard extends ConsumerWidget {
                       key: const Key('compareTitle'),
                       style: textTheme.titleMedium,
                     ),
-                    const SizedBox(height: 2),
-                    Text(
-                      l10n.simulatorCompareSubtitle,
-                      style: textTheme.bodySmall?.copyWith(
-                        color: AppColors.textSecondary,
-                      ),
-                    ),
                   ],
                 ),
               ),

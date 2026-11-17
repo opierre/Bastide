@@ -36,30 +36,6 @@
   "@navSectionManage": {
     "description": "Left nav section heading grouping the imports and categories destinations. Rendered uppercase."
   },
-  "navDashboardSubtitle": "Votre mois en un coup d'œil",
-  "@navDashboardSubtitle": {
-    "description": "One-line descriptor shown under the panel title in the top bar, on the dashboard."
-  },
-  "navAccountsSubtitle": "Tous vos comptes, une seule devise",
-  "@navAccountsSubtitle": {
-    "description": "One-line descriptor shown under the panel title in the top bar, on the accounts screen."
-  },
-  "navTransactionsSubtitle": "Toutes vos opérations, en un seul fil",
-  "@navTransactionsSubtitle": {
-    "description": "One-line descriptor shown under the panel title in the top bar, on the transactions screen."
-  },
-  "navImportsSubtitle": "Relevés OFX et QFX — traités sur cet ordinateur",
-  "@navImportsSubtitle": {
-    "description": "One-line descriptor shown under the panel title in the top bar, on the imports screen."
-  },
-  "navCategoriesSubtitle": "Organisez vos dépenses, automatisez avec des règles",
-  "@navCategoriesSubtitle": {
-    "description": "One-line descriptor shown under the panel title in the top bar, on the categories screen."
-  },
-  "navSettingsSubtitle": "Profil, préférences et vos données locales",
-  "@navSettingsSubtitle": {
-    "description": "One-line descriptor shown under the panel title in the top bar, on the settings screen."
-  },
   "sidebarPrivacyBadge": "Données 100 % locales",
   "@sidebarPrivacyBadge": {
     "description": "Reassurance badge pinned at the foot of the sidebar, beside a lock glyph."
@@ -213,10 +189,6 @@
   "comingSoonBody": "Cet écran arrive dans une prochaine étape. En attendant, ajoutez vos comptes pour préparer le terrain.",
   "@comingSoonBody": {
     "description": "Encouraging placeholder body on panels whose feature isn't built yet."
-  },
-  "authTagline": "Votre argent, en clair.",
-  "@authTagline": {
-    "description": "Reassuring subheading under the brand lockup on the login and register screens."
   },
   "authPrivacyLine": "Local et privé — vos données ne quittent jamais cet ordinateur.",
   "@authPrivacyLine": {
@@ -1090,10 +1062,6 @@
         "type": "int"
       }
     }
-  },
-  "reviewQueueEncouragement": "Vous y êtes presque, continuez !",
-  "@reviewQueueEncouragement": {
-    "description": "Encouraging subtext under the review queue's progress headline — framed as progress, not a backlog."
   },
   "reviewAlwaysCategorize": "Toujours catégoriser ainsi",
   "@reviewAlwaysCategorize": {
@@ -2962,10 +2930,6 @@
   "@navSubscriptions": {
     "description": "Sidebar entry for the recurring payments panel, third in the Gestion group."
   },
-  "navSubscriptionsSubtitle": "Vos paiements récurrents, détectés automatiquement",
-  "@navSubscriptionsSubtitle": {
-    "description": "Top-bar descriptor under the recurring payments panel title."
-  },
   "subscriptionsDetect": "Détecter",
   "@subscriptionsDetect": {
     "description": "Button re-running detection over the imported ledger: secondary in the top bar, primary on the empty state."
@@ -3522,10 +3486,6 @@
   "@navGoals": {
     "description": "Sidebar label of the goals panel, last of the Gestion group."
   },
-  "navGoalsSubtitle": "Mettez de côté, virtuellement, pour ce qui compte",
-  "@navGoalsSubtitle": {
-    "description": "Top-bar descriptor of the goals panel."
-  },
   "goalsAdd": "Nouvel objectif",
   "@goalsAdd": {
     "description": "Primary top-bar action opening the goal form."
@@ -3641,10 +3601,6 @@
   "goalHistoryTitle": "Historique des allocations",
   "@goalHistoryTitle": {
     "description": "Title of the allocation history card."
-  },
-  "goalHistorySubtitle": "Une seule liste, montants signés — un retrait est une ligne négative.",
-  "@goalHistorySubtitle": {
-    "description": "Sub-line stating that the ledger is one signed list."
   },
   "goalHistoryDate": "Date",
   "@goalHistoryDate": {
@@ -3818,10 +3774,6 @@
   "@settingsResetTitle": {
     "description": "Title of the danger zone card in Settings › Données."
   },
-  "settingsResetBadge": "IRRÉVERSIBLE",
-  "@settingsResetBadge": {
-    "description": "Pill beside the danger zone title, stating the stake in a word."
-  },
   "settingsResetSubtitle": "Réinitialiser la base de données supprime transactions, comptes, règles, catégories personnalisées, objectifs, abonnements, crédits, biens et simulations de ce profil. Les sauvegardes exportées ne sont pas touchées.",
   "@settingsResetSubtitle": {
     "description": "What a database reset deletes, and what it leaves alone."
@@ -3892,25 +3844,13 @@
   "@navMortgages": {
     "description": "Left nav label for the loans screen."
   },
-  "navMortgagesSubtitle": "Vos emprunts, leur coût et votre capacité",
-  "@navMortgagesSubtitle": {
-    "description": "Top-bar descriptor under the loans panel title."
-  },
   "navSimulator": "Simulateur",
   "@navSimulator": {
     "description": "Left nav label for the new-loan simulator screen."
   },
-  "navSimulatorSubtitle": "Ce qu'un nouveau crédit changerait",
-  "@navSimulatorSubtitle": {
-    "description": "Top-bar descriptor under the simulator panel title."
-  },
   "navNetworth": "Synthèse",
   "@navNetworth": {
     "description": "Left nav label for the net-worth screen. The EN label is 'Net worth', not 'Overview': the Overview group already owns that word."
-  },
-  "navNetworthSubtitle": "Ce que vous possédez, ce que vous devez",
-  "@navNetworthSubtitle": {
-    "description": "Top-bar descriptor under the net-worth panel title."
   },
   "mortgagesAdd": "Nouveau crédit",
   "@mortgagesAdd": {
@@ -4155,15 +4095,6 @@
   "@mortgagesChartTitle": {
     "description": "Title of the trajectory chart."
   },
-  "mortgagesChartSubtitle": "{count, plural, =1{Le crédit, échéance après échéance, jusqu'au dernier remboursement} =2{Les deux crédits, échéance après échéance, jusqu'au dernier remboursement} other{Les {count} crédits, échéance après échéance, jusqu'au dernier remboursement}}",
-  "@mortgagesChartSubtitle": {
-    "description": "Subtitle of the trajectory chart, by active loan count.",
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
   "mortgagesChartLegendTotal": "Capital restant dû total",
   "@mortgagesChartLegendTotal": {
     "description": "Chart legend for the combined outstanding line."
@@ -4289,17 +4220,9 @@
   "@mortgageCostRateCaption": {
     "description": "Cost row: caption under the nominal rate."
   },
-  "mortgageCostTaegLabel": "TAEG",
+  "mortgageCostTaegLabel": "TAEG indicatif",
   "@mortgageCostTaegLabel": {
     "description": "Cost row: TAEG label."
-  },
-  "mortgageCostIndicative": "Indicatif",
-  "@mortgageCostIndicative": {
-    "description": "Iris marker pill beside the TAEG label. Rendered uppercase."
-  },
-  "mortgageCostTaegDisclaimer": "Indicatif : un TAEG réel inclut des frais que Bastide ne voit pas.",
-  "@mortgageCostTaegDisclaimer": {
-    "description": "TAEG disclaimer read by assistive tech on the INDICATIF pill."
   },
   "mortgageCostTaegCaption": "taux, assurance et frais inclus",
   "@mortgageCostTaegCaption": {
@@ -4606,10 +4529,6 @@
   "@simulatorFormTitle": {
     "description": "Title of the simulator input card."
   },
-  "simulatorFormSubtitle": "Le résultat se recalcule à chaque saisie",
-  "@simulatorFormSubtitle": {
-    "description": "Subtitle of the simulator input card: results are live, nothing is saved."
-  },
   "simulatorPrice": "Prix du bien",
   "@simulatorPrice": {
     "description": "Simulator field: property price."
@@ -4626,9 +4545,9 @@
   "@simulatorPrincipal": {
     "description": "Simulator field: borrowed amount, derived from price + fees − down payment until edited."
   },
-  "simulatorDerivedPill": "Dérivé",
-  "@simulatorDerivedPill": {
-    "description": "Gray marker pill beside the borrowed amount while it is still derived. Rendered uppercase."
+  "simulatorPrincipalDerivedHelper": "calculé : prix − apport + frais",
+  "@simulatorPrincipalDerivedHelper": {
+    "description": "Helper under the borrowed amount while it is still computed from the price, the down payment and the fees. Editing the field takes it over."
   },
   "simulatorRate": "Taux nominal",
   "@simulatorRate": {
@@ -4759,13 +4678,9 @@
   "@simulatorCostEmpty": {
     "description": "Total cost caption before anything can be computed."
   },
-  "simulatorTaegLabel": "TAEG",
+  "simulatorTaegLabel": "TAEG indicatif",
   "@simulatorTaegLabel": {
     "description": "Annual percentage rate result card label."
-  },
-  "simulatorIndicativePill": "Indicatif",
-  "@simulatorIndicativePill": {
-    "description": "Iris marker pill always attached to the TAEG. Rendered uppercase."
   },
   "simulatorTaegCaption": "taux, assurance et frais inclus",
   "@simulatorTaegCaption": {
@@ -4885,10 +4800,6 @@
   "simulatorChartTitle": "Projection annuelle",
   "@simulatorChartTitle": {
     "description": "Title of the yearly projection chart."
-  },
-  "simulatorChartSubtitle": "Capital remboursé et intérêts versés, année par année",
-  "@simulatorChartSubtitle": {
-    "description": "Subtitle of the yearly projection chart."
   },
   "simulatorChartCapital": "Capital",
   "@simulatorChartCapital": {
@@ -5115,10 +5026,6 @@
         "type": "int"
       }
     }
-  },
-  "simulatorCompareSubtitle": "Mêmes lignes pour chaque colonne · un tiret quand la donnée ne s'applique pas",
-  "@simulatorCompareSubtitle": {
-    "description": "Subtitle of the comparison card."
   },
   "simulatorCompareClose": "Fermer la comparaison",
   "@simulatorCompareClose": {
@@ -5516,10 +5423,6 @@
   "@networthCompositionTitle": {
     "description": "Title of the asset composition card."
   },
-  "networthCompositionSubtitle": "Comptes par type, biens par nature",
-  "@networthCompositionSubtitle": {
-    "description": "Subtitle of the asset composition card."
-  },
   "networthCompositionChecking": "Comptes courants",
   "@networthCompositionChecking": {
     "description": "Composition row: checking accounts."
@@ -5650,10 +5553,6 @@
   "networthSeriesTitle": "Patrimoine net",
   "@networthSeriesTitle": {
     "description": "Title of the net-worth series card."
-  },
-  "networthSeriesSubtitle": "Comptes et crédits, mois après mois",
-  "@networthSeriesSubtitle": {
-    "description": "Subtitle of the net-worth series card."
   },
   "networthSeriesRange": "{from} → {to}",
   "@networthSeriesRange": {

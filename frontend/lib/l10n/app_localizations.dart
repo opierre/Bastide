@@ -152,42 +152,6 @@ abstract class AppLocalizations {
   /// **'Gestion'**
   String get navSectionManage;
 
-  /// One-line descriptor shown under the panel title in the top bar, on the dashboard.
-  ///
-  /// In fr, this message translates to:
-  /// **'Votre mois en un coup d\'œil'**
-  String get navDashboardSubtitle;
-
-  /// One-line descriptor shown under the panel title in the top bar, on the accounts screen.
-  ///
-  /// In fr, this message translates to:
-  /// **'Tous vos comptes, une seule devise'**
-  String get navAccountsSubtitle;
-
-  /// One-line descriptor shown under the panel title in the top bar, on the transactions screen.
-  ///
-  /// In fr, this message translates to:
-  /// **'Toutes vos opérations, en un seul fil'**
-  String get navTransactionsSubtitle;
-
-  /// One-line descriptor shown under the panel title in the top bar, on the imports screen.
-  ///
-  /// In fr, this message translates to:
-  /// **'Relevés OFX et QFX — traités sur cet ordinateur'**
-  String get navImportsSubtitle;
-
-  /// One-line descriptor shown under the panel title in the top bar, on the categories screen.
-  ///
-  /// In fr, this message translates to:
-  /// **'Organisez vos dépenses, automatisez avec des règles'**
-  String get navCategoriesSubtitle;
-
-  /// One-line descriptor shown under the panel title in the top bar, on the settings screen.
-  ///
-  /// In fr, this message translates to:
-  /// **'Profil, préférences et vos données locales'**
-  String get navSettingsSubtitle;
-
   /// Reassurance badge pinned at the foot of the sidebar, beside a lock glyph.
   ///
   /// In fr, this message translates to:
@@ -391,12 +355,6 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Cet écran arrive dans une prochaine étape. En attendant, ajoutez vos comptes pour préparer le terrain.'**
   String get comingSoonBody;
-
-  /// Reassuring subheading under the brand lockup on the login and register screens.
-  ///
-  /// In fr, this message translates to:
-  /// **'Votre argent, en clair.'**
-  String get authTagline;
 
   /// Reassurance line shown under the tagline on the signed-out screens, beside a lock glyph.
   ///
@@ -1452,12 +1410,6 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'{count, plural, =0{Aucune transaction à vérifier} =1{1 transaction à vérifier} other{{count} transactions à vérifier}}'**
   String reviewQueueCount(int count);
-
-  /// Encouraging subtext under the review queue's progress headline — framed as progress, not a backlog.
-  ///
-  /// In fr, this message translates to:
-  /// **'Vous y êtes presque, continuez !'**
-  String get reviewQueueEncouragement;
 
   /// Affordance on a review queue row that, alongside picking a category, creates a matching categorization rule.
   ///
@@ -3828,12 +3780,6 @@ abstract class AppLocalizations {
   /// **'Récurrents'**
   String get navSubscriptions;
 
-  /// Top-bar descriptor under the recurring payments panel title.
-  ///
-  /// In fr, this message translates to:
-  /// **'Vos paiements récurrents, détectés automatiquement'**
-  String get navSubscriptionsSubtitle;
-
   /// Button re-running detection over the imported ledger: secondary in the top bar, primary on the empty state.
   ///
   /// In fr, this message translates to:
@@ -4433,12 +4379,6 @@ abstract class AppLocalizations {
   /// **'Objectifs'**
   String get navGoals;
 
-  /// Top-bar descriptor of the goals panel.
-  ///
-  /// In fr, this message translates to:
-  /// **'Mettez de côté, virtuellement, pour ce qui compte'**
-  String get navGoalsSubtitle;
-
   /// Primary top-bar action opening the goal form.
   ///
   /// In fr, this message translates to:
@@ -4570,12 +4510,6 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Historique des allocations'**
   String get goalHistoryTitle;
-
-  /// Sub-line stating that the ledger is one signed list.
-  ///
-  /// In fr, this message translates to:
-  /// **'Une seule liste, montants signés — un retrait est une ligne négative.'**
-  String get goalHistorySubtitle;
 
   /// Date column of the allocation history.
   ///
@@ -4823,12 +4757,6 @@ abstract class AppLocalizations {
   /// **'Zone de danger'**
   String get settingsResetTitle;
 
-  /// Pill beside the danger zone title, stating the stake in a word.
-  ///
-  /// In fr, this message translates to:
-  /// **'IRRÉVERSIBLE'**
-  String get settingsResetBadge;
-
   /// What a database reset deletes, and what it leaves alone.
   ///
   /// In fr, this message translates to:
@@ -4919,35 +4847,17 @@ abstract class AppLocalizations {
   /// **'Crédits'**
   String get navMortgages;
 
-  /// Top-bar descriptor under the loans panel title.
-  ///
-  /// In fr, this message translates to:
-  /// **'Vos emprunts, leur coût et votre capacité'**
-  String get navMortgagesSubtitle;
-
   /// Left nav label for the new-loan simulator screen.
   ///
   /// In fr, this message translates to:
   /// **'Simulateur'**
   String get navSimulator;
 
-  /// Top-bar descriptor under the simulator panel title.
-  ///
-  /// In fr, this message translates to:
-  /// **'Ce qu\'un nouveau crédit changerait'**
-  String get navSimulatorSubtitle;
-
   /// Left nav label for the net-worth screen. The EN label is 'Net worth', not 'Overview': the Overview group already owns that word.
   ///
   /// In fr, this message translates to:
   /// **'Synthèse'**
   String get navNetworth;
-
-  /// Top-bar descriptor under the net-worth panel title.
-  ///
-  /// In fr, this message translates to:
-  /// **'Ce que vous possédez, ce que vous devez'**
-  String get navNetworthSubtitle;
 
   /// Top-bar primary CTA of the loans panel.
   ///
@@ -5207,12 +5117,6 @@ abstract class AppLocalizations {
   /// **'Trajectoire du capital restant dû'**
   String get mortgagesChartTitle;
 
-  /// Subtitle of the trajectory chart, by active loan count.
-  ///
-  /// In fr, this message translates to:
-  /// **'{count, plural, =1{Le crédit, échéance après échéance, jusqu\'au dernier remboursement} =2{Les deux crédits, échéance après échéance, jusqu\'au dernier remboursement} other{Les {count} crédits, échéance après échéance, jusqu\'au dernier remboursement}}'**
-  String mortgagesChartSubtitle(int count);
-
   /// Chart legend for the combined outstanding line.
   ///
   /// In fr, this message translates to:
@@ -5313,20 +5217,8 @@ abstract class AppLocalizations {
   /// Cost row: TAEG label.
   ///
   /// In fr, this message translates to:
-  /// **'TAEG'**
+  /// **'TAEG indicatif'**
   String get mortgageCostTaegLabel;
-
-  /// Iris marker pill beside the TAEG label. Rendered uppercase.
-  ///
-  /// In fr, this message translates to:
-  /// **'Indicatif'**
-  String get mortgageCostIndicative;
-
-  /// TAEG disclaimer read by assistive tech on the INDICATIF pill.
-  ///
-  /// In fr, this message translates to:
-  /// **'Indicatif : un TAEG réel inclut des frais que Bastide ne voit pas.'**
-  String get mortgageCostTaegDisclaimer;
 
   /// Cost row: caption under the TAEG.
   ///
@@ -5706,12 +5598,6 @@ abstract class AppLocalizations {
   /// **'Nouveau crédit'**
   String get simulatorFormTitle;
 
-  /// Subtitle of the simulator input card: results are live, nothing is saved.
-  ///
-  /// In fr, this message translates to:
-  /// **'Le résultat se recalcule à chaque saisie'**
-  String get simulatorFormSubtitle;
-
   /// Simulator field: property price.
   ///
   /// In fr, this message translates to:
@@ -5736,11 +5622,11 @@ abstract class AppLocalizations {
   /// **'Montant emprunté'**
   String get simulatorPrincipal;
 
-  /// Gray marker pill beside the borrowed amount while it is still derived. Rendered uppercase.
+  /// Helper under the borrowed amount while it is still computed from the price, the down payment and the fees. Editing the field takes it over.
   ///
   /// In fr, this message translates to:
-  /// **'Dérivé'**
-  String get simulatorDerivedPill;
+  /// **'calculé : prix − apport + frais'**
+  String get simulatorPrincipalDerivedHelper;
 
   /// Simulator field: nominal annual rate, typed as a percent.
   ///
@@ -5860,14 +5746,8 @@ abstract class AppLocalizations {
   /// Annual percentage rate result card label.
   ///
   /// In fr, this message translates to:
-  /// **'TAEG'**
+  /// **'TAEG indicatif'**
   String get simulatorTaegLabel;
-
-  /// Iris marker pill always attached to the TAEG. Rendered uppercase.
-  ///
-  /// In fr, this message translates to:
-  /// **'Indicatif'**
-  String get simulatorIndicativePill;
 
   /// TAEG caption.
   ///
@@ -5987,12 +5867,6 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Projection annuelle'**
   String get simulatorChartTitle;
-
-  /// Subtitle of the yearly projection chart.
-  ///
-  /// In fr, this message translates to:
-  /// **'Capital remboursé et intérêts versés, année par année'**
-  String get simulatorChartSubtitle;
 
   /// Projection legend: principal repaid.
   ///
@@ -6239,12 +6113,6 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'{count, plural, =1{Comparaison d\'un scénario} other{Comparaison de {count} scénarios}}'**
   String simulatorCompareTitle(int count);
-
-  /// Subtitle of the comparison card.
-  ///
-  /// In fr, this message translates to:
-  /// **'Mêmes lignes pour chaque colonne · un tiret quand la donnée ne s\'applique pas'**
-  String get simulatorCompareSubtitle;
 
   /// Secondary button closing the comparison.
   ///
@@ -6672,12 +6540,6 @@ abstract class AppLocalizations {
   /// **'Composition de l\'actif'**
   String get networthCompositionTitle;
 
-  /// Subtitle of the asset composition card.
-  ///
-  /// In fr, this message translates to:
-  /// **'Comptes par type, biens par nature'**
-  String get networthCompositionSubtitle;
-
   /// Composition row: checking accounts.
   ///
   /// In fr, this message translates to:
@@ -6826,12 +6688,6 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Patrimoine net'**
   String get networthSeriesTitle;
-
-  /// Subtitle of the net-worth series card.
-  ///
-  /// In fr, this message translates to:
-  /// **'Comptes et crédits, mois après mois'**
-  String get networthSeriesSubtitle;
 
   /// First and last month the series covers.
   ///

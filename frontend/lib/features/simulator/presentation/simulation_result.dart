@@ -104,12 +104,8 @@ class SimulationResultRow extends StatelessWidget {
             flex: 100,
             child: _ResultCard(
               key: const Key('resultTaegCard'),
+              // « indicatif » is part of the TAEG label itself.
               label: l10n.simulatorTaegLabel,
-              // « indicatif » is always attached to the TAEG label.
-              labelTrailing: SimulatorMarkerPill(
-                key: const Key('resultTaegIndicative'),
-                label: l10n.simulatorIndicativePill,
-              ),
               valueKey: const Key('resultTaeg'),
               value: result == null ? null : formatRate(result.taegBps, locale),
               valueStyle: valueStyle,
@@ -131,7 +127,6 @@ class _ResultCard extends StatelessWidget {
     required this.valueStyle,
     required this.caption,
     this.hero = false,
-    this.labelTrailing,
     this.valueKey,
     this.captionKey,
   });
@@ -143,7 +138,6 @@ class _ResultCard extends StatelessWidget {
   final TextStyle valueStyle;
   final String caption;
   final bool hero;
-  final Widget? labelTrailing;
   final Key? valueKey;
   final Key? captionKey;
 
@@ -170,10 +164,6 @@ class _ResultCard extends StatelessWidget {
                   ),
                 ),
               ),
-              if (labelTrailing != null) ...[
-                const SizedBox(width: AppSpacing.sm),
-                labelTrailing!,
-              ],
             ],
           ),
           const SizedBox(height: AppSpacing.sm),

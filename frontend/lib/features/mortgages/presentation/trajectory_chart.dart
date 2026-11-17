@@ -113,13 +113,6 @@ class TrajectoryChartCard extends StatelessWidget {
                       l10n.mortgagesChartTitle,
                       style: textTheme.titleMedium,
                     ),
-                    const SizedBox(height: 2),
-                    Text(
-                      l10n.mortgagesChartSubtitle(summary.activeCount),
-                      style: textTheme.bodySmall?.copyWith(
-                        color: AppColors.textSecondary,
-                      ),
-                    ),
                   ],
                 ),
               ),

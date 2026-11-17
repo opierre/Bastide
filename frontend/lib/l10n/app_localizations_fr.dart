@@ -36,27 +36,6 @@ class AppLocalizationsFr extends AppLocalizations {
   String get navSectionManage => 'Gestion';
 
   @override
-  String get navDashboardSubtitle => 'Votre mois en un coup d\'œil';
-
-  @override
-  String get navAccountsSubtitle => 'Tous vos comptes, une seule devise';
-
-  @override
-  String get navTransactionsSubtitle => 'Toutes vos opérations, en un seul fil';
-
-  @override
-  String get navImportsSubtitle =>
-      'Relevés OFX et QFX — traités sur cet ordinateur';
-
-  @override
-  String get navCategoriesSubtitle =>
-      'Organisez vos dépenses, automatisez avec des règles';
-
-  @override
-  String get navSettingsSubtitle =>
-      'Profil, préférences et vos données locales';
-
-  @override
   String get sidebarPrivacyBadge => 'Données 100 % locales';
 
   @override
@@ -172,9 +151,6 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get comingSoonBody =>
       'Cet écran arrive dans une prochaine étape. En attendant, ajoutez vos comptes pour préparer le terrain.';
-
-  @override
-  String get authTagline => 'Votre argent, en clair.';
 
   @override
   String get authPrivacyLine =>
@@ -873,9 +849,6 @@ class AppLocalizationsFr extends AppLocalizations {
     );
     return '$_temp0';
   }
-
-  @override
-  String get reviewQueueEncouragement => 'Vous y êtes presque, continuez !';
 
   @override
   String get reviewAlwaysCategorize => 'Toujours catégoriser ainsi';
@@ -2373,10 +2346,6 @@ class AppLocalizationsFr extends AppLocalizations {
   String get navSubscriptions => 'Récurrents';
 
   @override
-  String get navSubscriptionsSubtitle =>
-      'Vos paiements récurrents, détectés automatiquement';
-
-  @override
   String get subscriptionsDetect => 'Détecter';
 
   @override
@@ -2823,10 +2792,6 @@ class AppLocalizationsFr extends AppLocalizations {
   String get navGoals => 'Objectifs';
 
   @override
-  String get navGoalsSubtitle =>
-      'Mettez de côté, virtuellement, pour ce qui compte';
-
-  @override
   String get goalsAdd => 'Nouvel objectif';
 
   @override
@@ -2906,10 +2871,6 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get goalHistoryTitle => 'Historique des allocations';
-
-  @override
-  String get goalHistorySubtitle =>
-      'Une seule liste, montants signés — un retrait est une ligne négative.';
 
   @override
   String get goalHistoryDate => 'Date';
@@ -3040,9 +3001,6 @@ class AppLocalizationsFr extends AppLocalizations {
   String get settingsResetTitle => 'Zone de danger';
 
   @override
-  String get settingsResetBadge => 'IRRÉVERSIBLE';
-
-  @override
   String get settingsResetSubtitle =>
       'Réinitialiser la base de données supprime transactions, comptes, règles, catégories personnalisées, objectifs, abonnements, crédits, biens et simulations de ce profil. Les sauvegardes exportées ne sont pas touchées.';
 
@@ -3097,20 +3055,10 @@ class AppLocalizationsFr extends AppLocalizations {
   String get navMortgages => 'Crédits';
 
   @override
-  String get navMortgagesSubtitle =>
-      'Vos emprunts, leur coût et votre capacité';
-
-  @override
   String get navSimulator => 'Simulateur';
 
   @override
-  String get navSimulatorSubtitle => 'Ce qu\'un nouveau crédit changerait';
-
-  @override
   String get navNetworth => 'Synthèse';
-
-  @override
-  String get navNetworthSubtitle => 'Ce que vous possédez, ce que vous devez';
 
   @override
   String get mortgagesAdd => 'Nouveau crédit';
@@ -3285,21 +3233,6 @@ class AppLocalizationsFr extends AppLocalizations {
   String get mortgagesChartTitle => 'Trajectoire du capital restant dû';
 
   @override
-  String mortgagesChartSubtitle(int count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other:
-          'Les $count crédits, échéance après échéance, jusqu\'au dernier remboursement',
-      two:
-          'Les deux crédits, échéance après échéance, jusqu\'au dernier remboursement',
-      one:
-          'Le crédit, échéance après échéance, jusqu\'au dernier remboursement',
-    );
-    return '$_temp0';
-  }
-
-  @override
   String get mortgagesChartLegendTotal => 'Capital restant dû total';
 
   @override
@@ -3373,14 +3306,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get mortgageCostRateCaption => 'fixe sur toute la durée';
 
   @override
-  String get mortgageCostTaegLabel => 'TAEG';
-
-  @override
-  String get mortgageCostIndicative => 'Indicatif';
-
-  @override
-  String get mortgageCostTaegDisclaimer =>
-      'Indicatif : un TAEG réel inclut des frais que Bastide ne voit pas.';
+  String get mortgageCostTaegLabel => 'TAEG indicatif';
 
   @override
   String get mortgageCostTaegCaption => 'taux, assurance et frais inclus';
@@ -3601,10 +3527,6 @@ class AppLocalizationsFr extends AppLocalizations {
   String get simulatorFormTitle => 'Nouveau crédit';
 
   @override
-  String get simulatorFormSubtitle =>
-      'Le résultat se recalcule à chaque saisie';
-
-  @override
   String get simulatorPrice => 'Prix du bien';
 
   @override
@@ -3617,7 +3539,8 @@ class AppLocalizationsFr extends AppLocalizations {
   String get simulatorPrincipal => 'Montant emprunté';
 
   @override
-  String get simulatorDerivedPill => 'Dérivé';
+  String get simulatorPrincipalDerivedHelper =>
+      'calculé : prix − apport + frais';
 
   @override
   String get simulatorRate => 'Taux nominal';
@@ -3728,10 +3651,7 @@ class AppLocalizationsFr extends AppLocalizations {
       'Renseignez un prix et un taux pour voir le coût total et sa part du prix.';
 
   @override
-  String get simulatorTaegLabel => 'TAEG';
-
-  @override
-  String get simulatorIndicativePill => 'Indicatif';
+  String get simulatorTaegLabel => 'TAEG indicatif';
 
   @override
   String get simulatorTaegCaption => 'taux, assurance et frais inclus';
@@ -3819,10 +3739,6 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get simulatorChartTitle => 'Projection annuelle';
-
-  @override
-  String get simulatorChartSubtitle =>
-      'Capital remboursé et intérêts versés, année par année';
 
   @override
   String get simulatorChartCapital => 'Capital';
@@ -3984,10 +3900,6 @@ class AppLocalizationsFr extends AppLocalizations {
     );
     return '$_temp0';
   }
-
-  @override
-  String get simulatorCompareSubtitle =>
-      'Mêmes lignes pour chaque colonne · un tiret quand la donnée ne s\'applique pas';
 
   @override
   String get simulatorCompareClose => 'Fermer la comparaison';
@@ -4263,10 +4175,6 @@ class AppLocalizationsFr extends AppLocalizations {
   String get networthCompositionTitle => 'Composition de l\'actif';
 
   @override
-  String get networthCompositionSubtitle =>
-      'Comptes par type, biens par nature';
-
-  @override
   String get networthCompositionChecking => 'Comptes courants';
 
   @override
@@ -4355,9 +4263,6 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get networthSeriesTitle => 'Patrimoine net';
-
-  @override
-  String get networthSeriesSubtitle => 'Comptes et crédits, mois après mois';
 
   @override
   String networthSeriesRange(String from, String to) {
