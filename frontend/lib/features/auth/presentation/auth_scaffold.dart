@@ -2,10 +2,12 @@ import 'package:flutter/material.dart';
 
 import '../../../core/theme/tokens.dart';
 import '../../../core/widgets/brand_mark.dart';
+import '../../../core/widgets/tomettes.dart';
 import '../../../l10n/app_localizations.dart';
 
-/// Shared chrome for the signed-out screens: an ink page lit by two soft iris
-/// glows, with the form on a single raised card.
+/// Shared chrome for the signed-out screens: the page on tomettes faded to
+/// nothing behind the form (`docs/design/00-design-system.md` §12), with the
+/// form on a single raised card.
 ///
 /// The card holds *only the task* — no heading. What the screen is for is said
 /// once, above the card, by the lockup and the tagline; repeating it as a card
@@ -60,6 +62,7 @@ class AuthScaffold extends StatelessWidget {
       backgroundColor: context.colors.bg,
       body: Stack(
         children: [
+          const Positioned.fill(child: Tomettes()),
           Center(
             child: SingleChildScrollView(
               padding: const EdgeInsets.all(AppSpacing.xl),
