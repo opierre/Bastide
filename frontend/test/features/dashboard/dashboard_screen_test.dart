@@ -6,6 +6,7 @@ import 'package:bastide/core/widgets/app_card.dart';
 import 'package:bastide/core/widgets/app_shell.dart';
 import 'package:bastide/core/widgets/category_chip.dart';
 import 'package:bastide/core/widgets/primary_button.dart';
+import 'package:bastide/core/widgets/repere_meter.dart';
 import 'package:bastide/core/widgets/state_views.dart';
 import 'package:bastide/features/dashboard/application/dashboard_controller.dart';
 import 'package:bastide/features/dashboard/domain/dashboard_summary.dart';
@@ -13,11 +14,10 @@ import 'package:bastide/features/dashboard/domain/dashboard_trends.dart';
 import 'package:bastide/features/dashboard/presentation/category_breakdown.dart';
 import 'package:bastide/features/dashboard/presentation/dashboard_screen.dart';
 import 'package:bastide/features/dashboard/presentation/income_vs_expense.dart';
+import 'package:bastide/features/dashboard/presentation/kpi_strip.dart';
 import 'package:bastide/features/dashboard/presentation/recent_activity.dart';
 import 'package:bastide/features/dashboard/presentation/savings_chart.dart';
 import 'package:bastide/features/dashboard/presentation/savings_trend.dart';
-import 'package:bastide/features/goals/presentation/goal_card.dart';
-import 'package:bastide/features/dashboard/presentation/kpi_strip.dart';
 import 'package:bastide/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -226,9 +226,7 @@ void main() {
       );
       // The ring is gone; a bar toward the goal replaces it, full once the goal is met.
       expect(find.byType(CircularProgressIndicator), findsNothing);
-      final bar = tester.widget<GoalProgressBar>(
-        byKey('dashboardSavingsGoalBar'),
-      );
+      final bar = tester.widget<RepereMeter>(byKey('dashboardSavingsGoalBar'));
       expect(bar.fraction, 1.0);
 
       // « ✓ Objectif 20 % atteint · +1,9 pt »
@@ -265,9 +263,7 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      final bar = tester.widget<GoalProgressBar>(
-        byKey('dashboardSavingsGoalBar'),
-      );
+      final bar = tester.widget<RepereMeter>(byKey('dashboardSavingsGoalBar'));
       expect(bar.fraction, closeTo(0.59, 0.0001));
       expect(byKey('dashboardSavingsGoalReachedIcon'), findsNothing);
       final goal = formatRatioPct(0.20, 'fr', decimalDigits: 0);

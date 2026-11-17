@@ -10,6 +10,7 @@ import '../../../core/widgets/inline_banner.dart';
 import '../../../core/widgets/labeled_field.dart';
 import '../../../core/widgets/money_field.dart';
 import '../../../core/widgets/primary_button.dart';
+import '../../../core/widgets/repere_meter.dart';
 import '../../../core/widgets/status_pill.dart';
 import '../../../l10n/app_localizations.dart';
 import '../application/mortgages_controller.dart';
@@ -106,10 +107,14 @@ class DebtRatioCard extends StatelessWidget {
           ),
           const SizedBox(height: AppSpacing.sm + AppSpacing.xs),
           if (known) ...[
-            RatioGauge(
-              ratioBps: ratio,
-              referenceBps: summary.hcsfLimitBps,
-              overLimit: summary.overLimit,
+            // The tone follows the API's `over_limit` rather than a
+            // comparison made here; the scale is the fixed 0–60 % of `00` §8.
+            RepereMeter(
+              key: const Key('ratioGauge'),
+              fraction: ratio / ratioGaugeScaleBps,
+              tone: summary.overLimit ? RepereTone.over : RepereTone.normal,
+              markFraction: summary.hcsfLimitBps / ratioGaugeScaleBps,
+              markLabel: formatBps(summary.hcsfLimitBps, locale, digits: 0),
             ),
             const SizedBox(height: AppSpacing.sm + AppSpacing.xs),
             Text(
@@ -202,100 +207,6 @@ class DebtRatioCard extends StatelessWidget {
           ),
         ],
       ),
-    );
-  }
-}
-
-/// The 8 px ratio gauge on a fixed 0–60 % scale, with the reference tick.
-///
-/// Iris under the reference, amber above it — the tone follows the API's
-/// `over_limit` rather than a comparison made here. A ratio past the scale
-/// clamps the fill; the card still prints the exact percent beside it.
-class RatioGauge extends StatelessWidget {
-  const RatioGauge({
-    super.key,
-    required this.ratioBps,
-    required this.referenceBps,
-    required this.overLimit,
-  });
-
-  final int ratioBps;
-  final int referenceBps;
-  final bool overLimit;
-
-  @override
-  Widget build(BuildContext context) {
-    final locale = Localizations.localeOf(context).toString();
-    final fill = (ratioBps / ratioGaugeScaleBps).clamp(0.0, 1.0);
-    final tick = (referenceBps / ratioGaugeScaleBps).clamp(0.0, 1.0);
-
-    return Column(
-      key: const Key('ratioGauge'),
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        SizedBox(
-          height: 16,
-          child: FractionallySizedBox(
-            alignment: Alignment.centerLeft,
-            widthFactor: tick,
-            child: Align(
-              alignment: Alignment.centerRight,
-              child: FractionalTranslation(
-                translation: const Offset(0.5, 0),
-                child: Text(
-                  formatBps(referenceBps, locale, digits: 0),
-                  style: context.textStyles.helper.copyWith(
-                    fontSize: 10.5,
-                    color: context.colors.textSecondary,
-                  ),
-                ),
-              ),
-            ),
-          ),
-        ),
-        const SizedBox(height: 2),
-        SizedBox(
-          height: 12,
-          child: Stack(
-            alignment: Alignment.centerLeft,
-            children: [
-              ClipRRect(
-                borderRadius: BorderRadius.circular(AppRadii.xs),
-                child: Container(
-                  height: 8,
-                  color: context.colors.hover,
-                  child: FractionallySizedBox(
-                    key: const Key('ratioGaugeFill'),
-                    alignment: Alignment.centerLeft,
-                    widthFactor: fill,
-                    child: ColoredBox(
-                      color: overLimit
-                          ? context.colors.warning
-                          : context.colors.accent,
-                    ),
-                  ),
-                ),
-              ),
-              FractionallySizedBox(
-                alignment: Alignment.centerLeft,
-                widthFactor: tick,
-                child: Align(
-                  alignment: Alignment.centerRight,
-                  child: FractionalTranslation(
-                    translation: const Offset(0.5, 0),
-                    child: Container(
-                      key: const Key('ratioGaugeTick'),
-                      width: 2,
-                      height: 12,
-                      color: context.colors.text,
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ],
     );
   }
 }

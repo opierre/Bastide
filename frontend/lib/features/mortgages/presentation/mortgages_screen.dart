@@ -8,6 +8,7 @@ import '../../../core/widgets/app_card.dart';
 import '../../../core/widgets/app_shell.dart';
 import '../../../core/widgets/inline_banner.dart';
 import '../../../core/widgets/primary_button.dart';
+import '../../../core/widgets/repere_meter.dart';
 import '../../../core/widgets/state_views.dart';
 import '../../../l10n/app_localizations.dart';
 import '../application/mortgages_controller.dart';
@@ -416,7 +417,7 @@ class _OutstandingCard extends StatelessWidget {
             style: context.textStyles.helper.copyWith(fontSize: 12),
           ),
           const SizedBox(height: AppSpacing.sm + AppSpacing.xs),
-          LoanProgressBar(bps: summary.repaidBps),
+          RepereMeter(fraction: summary.repaidBps / 10000),
           const SizedBox(height: AppSpacing.xs + 2),
           Text(
             l10n.mortgagesRepaidLine(

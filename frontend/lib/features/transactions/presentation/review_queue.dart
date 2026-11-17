@@ -10,12 +10,13 @@ import '../../../core/theme/tokens.dart';
 import '../../../core/widgets/amount_text.dart';
 import '../../../core/widgets/app_card.dart';
 import '../../../core/widgets/app_toast.dart';
-import '../../../core/widgets/inline_banner.dart';
 import '../../../core/widgets/category_chip.dart';
 import '../../../core/widgets/confidence_gauge.dart';
+import '../../../core/widgets/inline_banner.dart';
 import '../../../core/widgets/institution_avatar.dart';
 import '../../../core/widgets/primary_button.dart';
 import '../../../core/widgets/proposed_category_chip.dart';
+import '../../../core/widgets/repere_meter.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../categorization/application/run_controller.dart';
 import '../../settings/presentation/settings_screen.dart';
@@ -224,7 +225,7 @@ class ReviewQueueHeaderCard extends ConsumerWidget {
             ],
           ),
           const SizedBox(height: AppSpacing.sm + AppSpacing.xs),
-          RunProgressBar(fraction: fraction),
+          RepereMeter(fraction: fraction),
           const SizedBox(height: AppSpacing.sm - 2),
           Text(
             l10n.reviewQueueProgress(resolved, baseline, fraction),

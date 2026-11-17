@@ -4,6 +4,7 @@ import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/tokens.dart';
 import '../../../core/widgets/amount_text.dart';
 import '../../../core/widgets/app_card.dart';
+import '../../../core/widgets/repere_meter.dart';
 import '../../../l10n/app_localizations.dart';
 import '../domain/goal.dart';
 import 'goal_labels.dart';
@@ -68,7 +69,10 @@ class GoalCard extends StatelessWidget {
           const SizedBox(height: AppSpacing.md - 2),
           GoalValueLine(goal: goal),
           const SizedBox(height: AppSpacing.sm + AppSpacing.xs),
-          GoalProgressBar(fraction: goal.barFraction),
+          RepereMeter(
+            fraction: goal.barFraction,
+            tone: goal.isReached ? RepereTone.done : RepereTone.normal,
+          ),
         ],
       ),
     );
@@ -201,35 +205,6 @@ class GoalValueLine extends StatelessWidget {
           ),
         ),
       ],
-    );
-  }
-}
-
-/// The 8 px progress bar: an inset track with an iris-gradient fill.
-///
-/// [fraction] is already clamped by the caller — this widget draws what it is
-/// given and holds no opinion about over-funding.
-class GoalProgressBar extends StatelessWidget {
-  const GoalProgressBar({super.key, required this.fraction, this.height = 8});
-
-  final double fraction;
-  final double height;
-
-  @override
-  Widget build(BuildContext context) {
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(AppRadii.xs),
-      child: Container(
-        height: height,
-        color: context.colors.hover,
-        child: FractionallySizedBox(
-          alignment: Alignment.centerLeft,
-          widthFactor: fraction,
-          child: DecoratedBox(
-            decoration: BoxDecoration(color: context.colors.accent),
-          ),
-        ),
-      ),
     );
   }
 }

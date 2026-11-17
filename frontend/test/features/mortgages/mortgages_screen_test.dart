@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:bastide/core/theme/app_theme.dart';
 import 'package:bastide/core/theme/tokens.dart';
 import 'package:bastide/core/widgets/amount_text.dart';
+import 'package:bastide/core/widgets/repere_meter.dart';
 import 'package:bastide/core/widgets/status_pill.dart';
 import 'package:bastide/features/mortgages/application/mortgages_controller.dart';
 import 'package:bastide/features/mortgages/domain/mortgage.dart';
@@ -172,11 +173,12 @@ void main() {
         _text(tester, 'ratioCaption'),
         'Charge ${_money(150625)} sur un revenu déclaré de ${_money(460000)}',
       );
-      final fill = tester.widget<FractionallySizedBox>(
-        find.byKey(const Key('ratioGaugeFill')),
+      final meter = tester.widget<RepereMeter>(
+        find.byKey(const Key('ratioGauge')),
       );
-      expect(fill.widthFactor, closeTo(3274 / 6000, 1e-9));
-      expect((fill.child! as ColoredBox).color, AppColors.dark.accent);
+      expect(meter.fraction, closeTo(3274 / 6000, 1e-9));
+      expect(meter.tone, RepereTone.normal);
+      expect(meter.markFraction, closeTo(3500 / 6000, 1e-9));
       // Body content, not a tooltip.
       expect(
         _text(tester, 'ratioCaveat'),
@@ -208,10 +210,10 @@ void main() {
         );
         expect(pill.tone, StatusPillTone.warning);
         expect(pill.label, 'Au-dessus du repère');
-        final fill = tester.widget<FractionallySizedBox>(
-          find.byKey(const Key('ratioGaugeFill')),
+        final meter = tester.widget<RepereMeter>(
+          find.byKey(const Key('ratioGauge')),
         );
-        expect((fill.child! as ColoredBox).color, AppColors.dark.warning);
+        expect(meter.tone, RepereTone.over);
         expect(
           _text(tester, 'ratioCaption'),
           contains('revenu médian constaté'),
@@ -275,10 +277,11 @@ void main() {
         );
         await tester.pumpAndSettle();
 
-        final fill = tester.widget<FractionallySizedBox>(
-          find.byKey(const Key('ratioGaugeFill')),
+        // The meter clamps its fill; it is handed the exact position.
+        final meter = tester.widget<RepereMeter>(
+          find.byKey(const Key('ratioGauge')),
         );
-        expect(fill.widthFactor, 1.0);
+        expect(meter.fraction, closeTo(7200 / 6000, 1e-9));
         expect(_text(tester, 'ratioValue'), startsWith('72,0'));
       },
     );

@@ -3,6 +3,7 @@ import 'package:bastide/core/theme/tokens.dart';
 import 'package:bastide/core/widgets/amount_text.dart';
 import 'package:bastide/core/widgets/app_card.dart';
 import 'package:bastide/core/widgets/inline_banner.dart';
+import 'package:bastide/core/widgets/repere_meter.dart';
 import 'package:bastide/features/goals/application/goals_controller.dart';
 import 'package:bastide/features/goals/domain/goal.dart';
 import 'package:bastide/features/goals/presentation/goal_card.dart';
@@ -58,10 +59,10 @@ void main() {
     expect(find.text('/ ${_money(1000000)}'), findsOneWidget);
     expect(find.text('64 %'), findsOneWidget);
 
-    final bar = tester.widget<GoalProgressBar>(
+    final bar = tester.widget<RepereMeter>(
       find.descendant(
         of: find.byKey(const Key('goalCard-g1')),
-        matching: find.byType(GoalProgressBar),
+        matching: find.byType(RepereMeter),
       ),
     );
     expect(bar.fraction, closeTo(0.64, 1e-9));
@@ -110,7 +111,7 @@ void main() {
 
       // A bar past its own track reads as a rendering bug; a percentage rounded
       // down to 100 would be a lie about the user's money.
-      final bar = tester.widget<GoalProgressBar>(find.byType(GoalProgressBar));
+      final bar = tester.widget<RepereMeter>(find.byType(RepereMeter));
       expect(bar.fraction, 1.0);
       expect(find.text('118 %'), findsOneWidget);
     },

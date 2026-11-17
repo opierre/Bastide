@@ -5,6 +5,7 @@ import '../../../core/theme/tokens.dart';
 import '../../../core/widgets/amount_text.dart';
 import '../../../core/widgets/app_card.dart';
 import '../../../core/widgets/institution_avatar.dart';
+import '../../../core/widgets/repere_meter.dart';
 import '../../../l10n/app_localizations.dart';
 import '../domain/mortgage.dart';
 import 'mortgage_labels.dart';
@@ -128,7 +129,7 @@ class MortgageCard extends StatelessWidget {
             ],
           ),
           const SizedBox(height: AppSpacing.sm),
-          LoanProgressBar(bps: mortgage.paidPrincipalBps),
+          RepereMeter(fraction: mortgage.paidPrincipalBps / 10000),
           const SizedBox(height: AppSpacing.sm),
           Row(
             children: [
@@ -243,34 +244,6 @@ class _FooterStat extends StatelessWidget {
           ).copyWith(fontWeight: FontWeight.w600),
         ),
       ],
-    );
-  }
-}
-
-/// The 8 px repaid-share bar: an inset track with the iris gradient fill.
-///
-/// Takes the API's basis points as they are; the fraction is only the bar's
-/// width, clamped so a rounding edge can never draw past the track.
-class LoanProgressBar extends StatelessWidget {
-  const LoanProgressBar({super.key, required this.bps});
-
-  final int bps;
-
-  @override
-  Widget build(BuildContext context) {
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(AppRadii.xs),
-      child: Container(
-        height: 8,
-        color: context.colors.hover,
-        child: FractionallySizedBox(
-          alignment: Alignment.centerLeft,
-          widthFactor: (bps / 10000).clamp(0.0, 1.0),
-          child: DecoratedBox(
-            decoration: BoxDecoration(color: context.colors.accent),
-          ),
-        ),
-      ),
     );
   }
 }
