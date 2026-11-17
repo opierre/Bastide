@@ -4630,7 +4630,16 @@ class AppLocalizationsEn extends AppLocalizations {
   String get startupLoading => 'Starting Bastide…';
 
   @override
+  String get startupPrivacy => 'Your data stays on this computer.';
+
+  @override
+  String get startupEngineStarting => 'Starting the local engine…';
+
+  @override
   String get startupRetry => 'Try again';
+
+  @override
+  String get startupRelaunch => 'Restart';
 
   @override
   String get startupOpenLogs => 'Open logs folder';

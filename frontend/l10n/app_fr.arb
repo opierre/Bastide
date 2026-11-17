@@ -6035,9 +6035,21 @@
   "@startupLoading": {
     "description": "Shown under the logo while the app starts its local engine."
   },
+  "startupPrivacy": "Vos données restent sur cet ordinateur.",
+  "@startupPrivacy": {
+    "description": "The privacy promise under the product name on the startup screen."
+  },
+  "startupEngineStarting": "Démarrage du moteur local…",
+  "@startupEngineStarting": {
+    "description": "Status line under the privacy promise while the app starts its local engine."
+  },
   "startupRetry": "Réessayer",
   "@startupRetry": {
     "description": "Button on the startup error screen that starts the local engine again."
+  },
+  "startupRelaunch": "Relancer",
+  "@startupRelaunch": {
+    "description": "Button on the developer version warning that restarts the local engine."
   },
   "startupOpenLogs": "Ouvrir le dossier des journaux",
   "@startupOpenLogs": {

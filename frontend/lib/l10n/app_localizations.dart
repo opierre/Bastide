@@ -7361,11 +7361,29 @@ abstract class AppLocalizations {
   /// **'Démarrage de Bastide…'**
   String get startupLoading;
 
+  /// The privacy promise under the product name on the startup screen.
+  ///
+  /// In fr, this message translates to:
+  /// **'Vos données restent sur cet ordinateur.'**
+  String get startupPrivacy;
+
+  /// Status line under the privacy promise while the app starts its local engine.
+  ///
+  /// In fr, this message translates to:
+  /// **'Démarrage du moteur local…'**
+  String get startupEngineStarting;
+
   /// Button on the startup error screen that starts the local engine again.
   ///
   /// In fr, this message translates to:
   /// **'Réessayer'**
   String get startupRetry;
+
+  /// Button on the developer version warning that restarts the local engine.
+  ///
+  /// In fr, this message translates to:
+  /// **'Relancer'**
+  String get startupRelaunch;
 
   /// Button on the startup error screen that opens the folder holding the app's log files.
   ///

@@ -2,6 +2,8 @@ import 'package:bastide/app.dart';
 import 'package:bastide/core/backend/backend_connection.dart';
 import 'package:bastide/core/backend/backend_providers.dart';
 import 'package:bastide/core/l10n/locale_provider.dart';
+import 'package:bastide/core/widgets/brand_mark.dart';
+import 'package:bastide/core/widgets/tomettes.dart';
 import 'package:bastide/features/auth/application/auth_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -51,7 +53,14 @@ void main() {
     await pumpApp(tester);
 
     expect(find.byKey(const Key('startupLoading')), findsOneWidget);
-    expect(find.text('Démarrage de Bastide…'), findsOneWidget);
+    expect(find.text('Démarrage du moteur local…'), findsOneWidget);
+    expect(
+      find.text('Vos données restent sur cet ordinateur.'),
+      findsOneWidget,
+    );
+    expect(find.byType(BrandMark), findsOneWidget);
+    expect(tester.getSize(find.byType(BrandMark)), const Size.square(64));
+    expect(find.byType(Tomettes), findsOneWidget);
     expect(find.byKey(const Key('startupRetry')), findsNothing);
   });
 

@@ -4669,7 +4669,16 @@ class AppLocalizationsFr extends AppLocalizations {
   String get startupLoading => 'Démarrage de Bastide…';
 
   @override
+  String get startupPrivacy => 'Vos données restent sur cet ordinateur.';
+
+  @override
+  String get startupEngineStarting => 'Démarrage du moteur local…';
+
+  @override
   String get startupRetry => 'Réessayer';
+
+  @override
+  String get startupRelaunch => 'Relancer';
 
   @override
   String get startupOpenLogs => 'Ouvrir le dossier des journaux';
