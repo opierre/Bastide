@@ -312,10 +312,7 @@ void main() {
       expect(header, findsNothing);
       expect(find.byKey(const Key('categoryFormKind')), findsOneWidget);
       expect(find.byKey(const Key('categoryFormIcon')), findsOneWidget);
-      expect(
-        find.byKey(const Key('categoryFormColor-cat0')),
-        findsOneWidget,
-      );
+      expect(find.byKey(const Key('categoryFormColor-cat0')), findsOneWidget);
     },
   );
 
