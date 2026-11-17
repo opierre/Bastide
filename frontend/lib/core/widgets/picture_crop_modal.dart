@@ -115,7 +115,7 @@ class _PictureCropModalState extends State<PictureCropModal> {
               width: _viewport,
               height: _viewport,
               decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(AppRadii.xl),
+                borderRadius: BorderRadius.circular(AppRadii.container),
                 border: Border.all(color: context.colors.line),
               ),
               clipBehavior: Clip.antiAlias,

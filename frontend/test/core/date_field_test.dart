@@ -2,6 +2,7 @@ import 'package:bastide/core/theme/app_theme.dart';
 import 'package:bastide/core/widgets/date_field.dart';
 import 'package:bastide/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
+import 'package:lucide_icons_flutter/lucide_icons_300.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 Widget _wrap({
@@ -35,7 +36,7 @@ void main() {
     await tester.pumpWidget(_wrap(controller: controller));
     await tester.pumpAndSettle();
 
-    await tester.tap(find.byIcon(Icons.calendar_today_outlined));
+    await tester.tap(find.byIcon(LucideIcons300.calendar));
     await tester.pumpAndSettle();
 
     // It opens on the date already typed rather than back on today, so a
@@ -54,7 +55,7 @@ void main() {
     await tester.pumpWidget(_wrap(controller: controller));
     await tester.pumpAndSettle();
 
-    await tester.tap(find.byIcon(Icons.calendar_today_outlined));
+    await tester.tap(find.byIcon(LucideIcons300.calendar));
     await tester.pumpAndSettle();
     await tester.tap(find.text('22'));
     await tester.tap(find.text('Annuler'));
@@ -81,7 +82,7 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    await tester.tap(find.byIcon(Icons.calendar_today_outlined));
+    await tester.tap(find.byIcon(LucideIcons300.calendar));
     await tester.pumpAndSettle();
     await tester.tap(find.text('22'));
     await tester.tap(find.text('OK'));

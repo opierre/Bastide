@@ -72,11 +72,11 @@ class LogoZoomDialog extends StatelessWidget {
         label: l10n.logoZoomLabel,
         child: DecoratedBox(
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(AppRadii.xl),
+            borderRadius: BorderRadius.circular(AppRadii.modal),
             boxShadow: context.colors.shadow,
           ),
           child: ClipRRect(
-            borderRadius: BorderRadius.circular(AppRadii.xl),
+            borderRadius: BorderRadius.circular(AppRadii.modal),
             child: Image.memory(
               bytes,
               width: size,

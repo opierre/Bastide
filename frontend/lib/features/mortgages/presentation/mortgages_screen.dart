@@ -141,7 +141,6 @@ class _EmptyState extends StatelessWidget {
             key: const Key('mortgagesEmptyCta'),
             label: l10n.mortgagesAdd,
             icon: Icons.add_rounded,
-            height: 44,
             onPressed: () => showMortgageForm(context),
           ),
         ],

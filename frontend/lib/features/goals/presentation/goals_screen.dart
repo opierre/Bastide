@@ -78,7 +78,6 @@ class _GoalsGrid extends ConsumerWidget {
           action: PrimaryButton(
             key: const Key('goalsEmptyAddButton'),
             label: l10n.goalsAdd,
-            height: 44,
             onPressed: () => showGoalForm(context),
           ),
         ),

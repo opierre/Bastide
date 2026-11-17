@@ -1345,6 +1345,12 @@ abstract class AppLocalizations {
   /// **'Rechercher une description ou un marchand…'**
   String get transactionsSearchHint;
 
+  /// Keyboard shortcut shown at the end of a search field; pressing it focuses the field.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ctrl K'**
+  String get searchShortcutHint;
+
   /// Shown in place of the transaction list when the filters/search match nothing.
   ///
   /// In fr, this message translates to:

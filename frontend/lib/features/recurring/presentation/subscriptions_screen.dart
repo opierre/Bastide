@@ -132,7 +132,6 @@ class _SubscriptionsList extends ConsumerWidget {
             label: l10n.subscriptionsDetect,
             loadingLabel: l10n.subscriptionsDetectRunning,
             isLoading: detecting,
-            height: 44,
             // The transactions may already be imported: running detection
             // over them is the step that fills this panel.
             onPressed: () => runRecurringDetection(context, ref),

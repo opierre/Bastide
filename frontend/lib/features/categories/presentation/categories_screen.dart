@@ -104,7 +104,6 @@ class _CategoriesView extends ConsumerWidget {
           key: const Key('emptyStateAddCategoryButton'),
           label: l10n.categoriesAddButton,
           icon: Icons.add_rounded,
-          height: 44,
           onPressed: () => showCategoryForm(context),
         ),
       ),

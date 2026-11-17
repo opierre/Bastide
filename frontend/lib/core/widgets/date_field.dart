@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
+import 'package:lucide_icons_flutter/lucide_icons_300.dart';
 
 import '../theme/app_theme.dart';
 import '../theme/tokens.dart';
@@ -76,24 +77,25 @@ class DateField extends StatelessWidget {
       controller: controller,
       keyboardType: TextInputType.datetime,
       inputFormatters: [_DateInputFormatter.forLocale(locale)],
-      style: tabularNumberStyle(Theme.of(context).textTheme.bodyLarge!),
+      style: tabularNumberStyle(Theme.of(context).textTheme.bodyMedium!),
       decoration: InputDecoration(
         suffixIcon: IconButton(
           onPressed: () => _pick(context),
           tooltip: calendarTooltip,
-          iconSize: 16,
+          iconSize: AppSizes.iconSmall,
           visualDensity: VisualDensity.compact,
+          padding: EdgeInsets.zero,
           icon: Icon(
-            Icons.calendar_today_outlined,
-            color: context.colors.textSecondary,
+            LucideIcons300.calendar,
+            color: context.colors.textTertiary,
           ),
         ),
-        // The 44 px field height the spec pins is measured without an icon in
-        // it; left at Material's default the button's own hit box would push
-        // the field taller than the one beside it.
+        // The 32 px field height is measured without an icon in it; left at
+        // Material's default the button's own hit box would push the field
+        // taller than the one beside it.
         suffixIconConstraints: const BoxConstraints(
-          minWidth: 36,
-          minHeight: 36,
+          minWidth: AppSizes.formField - 2,
+          maxHeight: AppSizes.formField - 2,
         ),
       ),
       validator: validator,

@@ -161,7 +161,6 @@ class _ExportPlate extends StatelessWidget {
     final button = PrimaryButton(
       key: const Key('settingsBackupExportButton'),
       label: l10n.settingsBackupExport,
-      height: 34,
       isLoading: isExporting,
       onPressed: onExport,
     );

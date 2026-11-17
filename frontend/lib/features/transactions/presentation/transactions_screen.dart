@@ -8,7 +8,7 @@ import '../../../core/l10n/category_display.dart';
 import '../../../core/theme/tokens.dart';
 import '../../../core/widgets/app_card.dart';
 import '../../../core/widgets/category_chip.dart';
-import '../../../core/widgets/search_pill.dart';
+import '../../../core/widgets/search_field.dart';
 import '../../../core/widgets/state_views.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../accounts/application/account_detail_controller.dart';
@@ -102,10 +102,9 @@ class TransactionsTopBarActions extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context)!;
 
-    return SearchPill(
+    return AppSearchField(
       key: const Key('transactionsSearchField'),
       hint: l10n.transactionsSearchHint,
-      width: 300,
       initialValue: ref.read(transactionFiltersProvider).q,
       onChanged: (value) =>
           ref.read(transactionFiltersProvider.notifier).setQuery(value),

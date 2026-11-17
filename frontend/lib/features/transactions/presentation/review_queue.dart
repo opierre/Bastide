@@ -213,7 +213,6 @@ class ReviewQueueHeaderCard extends ConsumerWidget {
                   key: const Key('reviewQueueRunButton'),
                   label: l10n.reviewQueueRunAction,
                   icon: Icons.auto_awesome_outlined,
-                  height: 30,
                   isLoading: isStarting,
                   onPressed: isStarting
                       ? null
@@ -513,7 +512,6 @@ class _ProposalBlockState extends ConsumerState<_ProposalBlock> {
           key: const Key('reviewRowConfirmButton'),
           label: l10n.reviewConfirm,
           icon: Icons.check_rounded,
-          height: 30,
           isLoading: _isConfirming,
           onPressed: _isConfirming ? null : _confirm,
         ),

@@ -254,7 +254,6 @@ class _DeclaredBalancesModalState extends ConsumerState<DeclaredBalancesModal> {
                   child: PrimaryButton(
                     key: const Key('declaredSave'),
                     label: l10n.networthDeclaredSave,
-                    height: 44,
                     isLoading: _isSubmitting,
                     onPressed: _isSubmitting ? null : _submit,
                   ),

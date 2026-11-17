@@ -342,7 +342,6 @@ class _EmptyState extends StatelessWidget {
         key: const Key('emptyStateAddAccountButton'),
         label: l10n.accountsAddButton,
         icon: Icons.add_rounded,
-        height: 44,
         onPressed: onAdd,
       ),
     );

@@ -314,7 +314,6 @@ class RulesEmptyState extends StatelessWidget {
             key: const Key('emptyStateAddRuleButton'),
             label: l10n.rulesAddButton,
             icon: Icons.add_rounded,
-            height: 44,
             onPressed: () => showRuleEditor(context),
           ),
           if (extraAction != null) ...[
