@@ -131,6 +131,39 @@ erDiagram
         int balance_mismatch_minor "nullable"
         date balance_mismatch_as_of "nullable"
     }
+    investment_movements {
+        text id PK
+        text investment_id FK
+        date occurred_on
+        int amount_minor
+        text currency
+        text note "nullable"
+        text transaction_id FK, UK "nullable"
+        datetime created_at
+        datetime updated_at
+    }
+    investment_valuations {
+        text id PK
+        text investment_id FK
+        date valued_on
+        int value_minor
+        text currency
+        text note "nullable"
+        datetime created_at
+        datetime updated_at
+    }
+    investments {
+        text id PK
+        text user_id FK
+        text name
+        text institution
+        text envelope
+        date opened_on
+        date closed_on "nullable"
+        text currency
+        datetime created_at
+        datetime updated_at
+    }
     mortgage_simulations {
         text id PK
         text user_id FK
@@ -308,6 +341,10 @@ erDiagram
     users ||--o{ goals : "user_id"
     accounts ||--o{ import_batches : "account_id"
     users ||--o{ import_batches : "user_id"
+    investments ||--o{ investment_movements : "investment_id"
+    transactions |o--o| investment_movements : "transaction_id"
+    investments ||--o{ investment_valuations : "investment_id"
+    users ||--o{ investments : "user_id"
     users ||--o{ mortgage_simulations : "user_id"
     properties |o--o{ mortgages : "property_id"
     users ||--o{ mortgages : "user_id"
@@ -358,6 +395,16 @@ erDiagram
 ### `import_batches`
 
 - unique `(account_id, file_hash)`
+
+### `investment_movements`
+
+- `investment_id` → `investments` on delete cascade
+- `transaction_id` → `transactions` on delete set null
+
+### `investment_valuations`
+
+- unique `(investment_id, valued_on)`
+- `investment_id` → `investments` on delete cascade
 
 ### `mortgages`
 
