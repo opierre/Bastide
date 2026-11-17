@@ -31,6 +31,7 @@ from app.features.backup.repository import (
     describe,
 )
 from app.features.backup.schemas import BackupCounts, BackupSummary
+from app.features.categories.hues import slot_for
 from app.features.settings.service import SettingsService
 
 # Rows the restore buffers before inserting, so a large table never sits in memory whole.
@@ -217,6 +218,9 @@ class BackupService:
                 raise BackupInvalidError(f"A {name} row references a missing {spec.references}.")
             row[spec.name] = value
 
+        if name == "categories":
+            # An archive from before hue slots holds v1 hex colours.
+            row["color"] = slot_for(row["color"])
         if name == "categorization_runs" and row["status"] in ("pending", "running"):
             # Its executor is gone; left in flight it would block every future run.
             row["status"] = "failed"

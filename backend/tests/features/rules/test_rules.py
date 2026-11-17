@@ -21,7 +21,7 @@ CATEGORY_PAYLOAD = {
     "name": "Courses",
     "kind": "expense",
     "icon": "shopping_cart",
-    "color": "#10B981",
+    "color": "cat3",
 }
 
 RULE_PAYLOAD = {

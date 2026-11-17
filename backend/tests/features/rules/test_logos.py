@@ -56,7 +56,7 @@ class _Ledger:
         ).json()["id"]
         self.category_id = client.post(
             "/api/v1/categories",
-            json={"name": "Loisirs", "kind": "expense", "icon": "movie", "color": "#10B981"},
+            json={"name": "Loisirs", "kind": "expense", "icon": "movie", "color": "cat3"},
             headers=self.headers,
         ).json()["id"]
 

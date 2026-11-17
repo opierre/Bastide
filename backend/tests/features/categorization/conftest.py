@@ -268,7 +268,7 @@ def _seed_categories(db: Session) -> None:
             name="Courses",
             kind="expense",
             icon="cart",
-            color="#7C7CF0",
+            color="cat3",
             is_system=True,
         )
     )
@@ -278,7 +278,7 @@ def _seed_categories(db: Session) -> None:
             name="Salaire",
             kind="income",
             icon="wallet",
-            color="#5CC8A8",
+            color="cat3",
             is_system=True,
         )
     )

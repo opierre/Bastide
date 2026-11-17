@@ -384,7 +384,7 @@ def test_manual_creation_rejects_a_category_of_another_user(
     other = register(client, email="bruno@example.com")
     category_id = client.post(
         "/api/v1/categories",
-        json={"name": "Sport", "kind": "expense", "icon": "fitness", "color": "#10B981"},
+        json={"name": "Sport", "kind": "expense", "icon": "fitness", "color": "cat3"},
         headers=other.headers,
     ).json()["id"]
     account_id = create_account(client, owner)
@@ -413,7 +413,7 @@ def test_patching_a_category_of_another_user_is_rejected(
     other = register(client, email="bruno@example.com")
     category_id = client.post(
         "/api/v1/categories",
-        json={"name": "Sport", "kind": "expense", "icon": "fitness", "color": "#10B981"},
+        json={"name": "Sport", "kind": "expense", "icon": "fitness", "color": "cat3"},
         headers=other.headers,
     ).json()["id"]
 

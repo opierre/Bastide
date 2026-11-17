@@ -32,7 +32,7 @@ def _category(
         name=name,
         kind=kind,
         icon="category",
-        color="#64748B",
+        color="cat0",
         is_system=is_system,
     )
 

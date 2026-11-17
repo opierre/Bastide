@@ -251,7 +251,7 @@ def test_a_user_edited_label_and_category_survive_re_detection(
     _detect(client, headers)
     category_id = client.post(
         "/api/v1/categories",
-        json={"name": "Abonnements", "kind": "expense", "icon": "tv", "color": "#10B981"},
+        json={"name": "Abonnements", "kind": "expense", "icon": "tv", "color": "cat3"},
         headers=headers,
     ).json()["id"]
     series_id = _series_rows(tmp_path)[0].id
@@ -361,7 +361,7 @@ def test_a_manual_series_picks_up_its_next_charge(client: TestClient, tmp_path: 
     series_id = _create_manual(client, headers, account_id, ticked, expected_amount_minor=-1500)
     category_id = client.post(
         "/api/v1/categories",
-        json={"name": "Abonnements", "kind": "expense", "icon": "tv", "color": "#10B981"},
+        json={"name": "Abonnements", "kind": "expense", "icon": "tv", "color": "cat3"},
         headers=headers,
     ).json()["id"]
     _update_series(tmp_path, series_id, category_id=category_id, status="confirmed")
