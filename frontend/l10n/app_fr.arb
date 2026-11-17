@@ -100,6 +100,30 @@
   "@settingsSectionAbout": {
     "description": "Settings section nav item for the version and privacy statement."
   },
+  "settingsThemeTitle": "Thème",
+  "@settingsThemeTitle": {
+    "description": "Title of the theme row in settings preferences."
+  },
+  "settingsThemeNote": "Sombre, clair, ou celui de votre système.",
+  "@settingsThemeNote": {
+    "description": "Note under the theme segmented control."
+  },
+  "settingsThemeSystem": "Système",
+  "@settingsThemeSystem": {
+    "description": "Theme option that follows the operating system."
+  },
+  "settingsThemeDark": "Sombre",
+  "@settingsThemeDark": {
+    "description": "Theme option for the dark theme."
+  },
+  "settingsThemeLight": "Clair",
+  "@settingsThemeLight": {
+    "description": "Theme option for the light theme."
+  },
+  "settingsThemeSaveFailed": "Le thème n'a pas pu être enregistré. Rien n'a été modifié. Réessayez.",
+  "@settingsThemeSaveFailed": {
+    "description": "Toast shown when saving the theme preference fails; the previous theme is restored."
+  },
   "settingsLanguageTitle": "Langue",
   "@settingsLanguageTitle": {
     "description": "Title of the language card in settings preferences."

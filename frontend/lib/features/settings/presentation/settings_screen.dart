@@ -10,8 +10,12 @@ import '../../../core/theme/tokens.dart';
 import '../../../core/widgets/amount_text.dart';
 import '../../../core/widgets/app_card.dart';
 import '../../../core/widgets/app_segmented.dart';
+import '../../../core/widgets/app_toast.dart';
+import '../../../core/widgets/inline_banner.dart';
 import '../../../core/widgets/labeled_field.dart';
 import '../../../l10n/app_localizations.dart';
+import '../../auth/application/profile_controllers.dart';
+import '../../auth/domain/theme_preference.dart';
 import '../../auth/presentation/avatar_card.dart';
 import '../../auth/presentation/currency_label.dart';
 import '../../auth/presentation/display_name_card.dart';
@@ -202,11 +206,52 @@ class _PreferencesPanel extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context)!;
     final activeLocale = Localizations.localeOf(context);
-    final currency = ref.watch(currentUserProvider)?.currency ?? '';
+    final user = ref.watch(currentUserProvider);
+    final currency = user?.currency ?? '';
+    // The switch is applied before the save answers; a refusal has already
+    // put the previous theme back, so all that is left is to say so.
+    ref.listen(themePreferenceControllerProvider, (_, next) {
+      if (next.hasError) {
+        showAppToast(
+          context,
+          title: l10n.settingsThemeSaveFailed,
+          tone: BannerTone.error,
+        );
+      }
+    });
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
+        _SettingsCard(
+          title: l10n.settingsThemeTitle,
+          note: l10n.settingsThemeNote,
+          child: AppSegmented<ThemePreference>(
+            value: user?.theme ?? ThemePreference.dark,
+            // Applies at once, like the language below.
+            onChanged: (value) => ref
+                .read(themePreferenceControllerProvider.notifier)
+                .choose(value),
+            segments: [
+              AppSegment(
+                key: const Key('settingsThemeSystemOption'),
+                value: ThemePreference.system,
+                label: l10n.settingsThemeSystem,
+              ),
+              AppSegment(
+                key: const Key('settingsThemeDarkOption'),
+                value: ThemePreference.dark,
+                label: l10n.settingsThemeDark,
+              ),
+              AppSegment(
+                key: const Key('settingsThemeLightOption'),
+                value: ThemePreference.light,
+                label: l10n.settingsThemeLight,
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: AppSpacing.gridGap),
         _SettingsCard(
           title: l10n.settingsLanguageTitle,
           note: l10n.settingsLanguageNote,

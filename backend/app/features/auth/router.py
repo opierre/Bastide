@@ -20,6 +20,7 @@ from app.features.auth.schemas import (
     RecoveryCodeRegenerate,
     RecoveryCodeResponse,
     RegisterResponse,
+    ThemeUpdate,
     TokenResponse,
     UserLogin,
     UserRead,
@@ -154,3 +155,13 @@ async def set_avatar_choice(
 ) -> MeResponse:
     """Make the monogram or a preset the caller's avatar, replacing any picture."""
     return MeResponse(user=UserRead.model_validate(service.set_avatar_choice(user, payload.avatar)))
+
+
+@router.put("/me/theme", response_model=MeResponse)
+async def set_theme(
+    payload: ThemeUpdate,
+    service: Annotated[AuthService, Depends(_service)],
+    user: Annotated[User, Depends(get_current_user)],
+) -> MeResponse:
+    """Make the system, dark or light theme the caller's theme."""
+    return MeResponse(user=UserRead.model_validate(service.set_theme(user, payload.theme)))
