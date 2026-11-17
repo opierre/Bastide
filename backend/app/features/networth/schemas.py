@@ -8,17 +8,19 @@ from typing import Literal
 
 from pydantic import BaseModel
 
-CompositionGroup = Literal["account", "property"]
+CompositionGroup = Literal["account", "property", "investment"]
 #: Where a series point's account total comes from: the imported ledger, or a figure the user
 #: declared for a month the ledger does not cover.
 PointSource = Literal["ledger", "declared"]
 
 
 class NetWorthAssets(BaseModel):
-    """The asset side: derived account balances and held property shares."""
+    """The asset side: derived account balances, held property shares and placements."""
 
     accounts_minor: int
     properties_minor: int
+    #: Each open placement at its last declared value (net payments before the first).
+    investments_minor: int
 
 
 class NetWorthLiabilities(BaseModel):
@@ -28,9 +30,10 @@ class NetWorthLiabilities(BaseModel):
 
 
 class CompositionEntry(BaseModel):
-    """One slice of the asset strip: an account type or a property kind.
+    """One slice of the asset strip: an account type, a property kind or a placement envelope.
 
-    `key` is the account `type` or the property `kind`, labelled from ARB by the frontend.
+    `key` is the account `type`, the property `kind` or the placement `envelope`, labelled
+    from ARB by the frontend.
     `share_bps` is of total assets; the entries' shares sum to exactly 10000 when assets are
     positive, and are all 0 otherwise.
     """

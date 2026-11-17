@@ -141,7 +141,11 @@ def test_figures_reconcile_with_their_parts(client: TestClient) -> None:
     body = summary(client, headers)
 
     outstanding = LOAN_SCHEDULE.outstanding_at(TODAY)
-    assert body["assets"] == {"accounts_minor": 2_430_000, "properties_minor": 49_250_000}
+    assert body["assets"] == {
+        "accounts_minor": 2_430_000,
+        "properties_minor": 49_250_000,
+        "investments_minor": 0,
+    }
     assert body["liabilities"] == {"mortgages_minor": outstanding}
     assert body["net_worth_minor"] == 2_430_000 + 49_250_000 - outstanding
     assert body["currency"] == "EUR"
@@ -523,7 +527,7 @@ def test_an_empty_user_gets_zeros_and_an_empty_series(client: TestClient) -> Non
     headers = register(client)
 
     assert summary(client, headers) == {
-        "assets": {"accounts_minor": 0, "properties_minor": 0},
+        "assets": {"accounts_minor": 0, "properties_minor": 0, "investments_minor": 0},
         "liabilities": {"mortgages_minor": 0},
         "net_worth_minor": 0,
         "composition": [],
@@ -544,7 +548,7 @@ def test_every_figure_is_scoped_to_the_caller(client: TestClient) -> None:
 
     body = summary(client, intruder)
 
-    assert body["assets"] == {"accounts_minor": 0, "properties_minor": 0}
+    assert body["assets"] == {"accounts_minor": 0, "properties_minor": 0, "investments_minor": 0}
     assert body["liabilities"] == {"mortgages_minor": 0}
     assert body["net_worth_minor"] == 0
     assert body["composition"] == []

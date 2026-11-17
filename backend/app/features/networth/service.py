@@ -1,7 +1,8 @@
 """Business logic for the net-worth synthesis.
 
 One derived view, and one kind of stored money: the month-end totals a user declares for the
-time before their first import. Assets are account balances plus held property shares;
+time before their first import. Assets are account balances, held property shares and
+placements at their declared value;
 liabilities are the outstanding principal of active loans. Goals and subscriptions take no part:
 a goal labels money already inside an account, and a future charge is not a debt. The held
 share and the schedule come from their own features — reused, not recomputed.
@@ -34,6 +35,7 @@ from app.features.networth.schemas import (
     NetWorthSummary,
     PointSource,
 )
+from app.features.placements.engine import Holding
 from app.features.properties.service import held_share_minor
 
 _BPS_PER_UNIT = 10_000
@@ -112,6 +114,14 @@ class NetWorthService:
         ]
         properties_minor = sum(share for _, share in held)
         mortgages_minor = sum(schedule.outstanding_at(today) for schedule in schedules)
+        investments = self._repository.investments(user.id)
+        by_envelope: dict[str, int] = {}
+        for investment in investments:
+            if investment.is_held_on(today):
+                by_envelope[investment.envelope] = by_envelope.get(
+                    investment.envelope, 0
+                ) + investment.value_on(today)
+        investments_minor = sum(by_envelope.values())
 
         by_type: dict[str, int] = {}
         for account in accounts:
@@ -122,6 +132,7 @@ class NetWorthService:
         slices: list[tuple[CompositionGroup, str, int]] = [
             ("account", key, amount) for key, amount in by_type.items()
         ] + [("property", key, amount) for key, amount in by_kind.items()]
+        slices += [("investment", key, amount) for key, amount in by_envelope.items()]
         composition = [
             CompositionEntry(group=group, key=key, amount_minor=amount, share_bps=share)
             for (group, key, amount), share in zip(
@@ -129,11 +140,15 @@ class NetWorthService:
             )
         ]
 
-        series = self._series(user.id, accounts, holdings, loans, today)
+        series = self._series(user.id, accounts, holdings, loans, today, investments)
         return NetWorthSummary(
-            assets=NetWorthAssets(accounts_minor=accounts_minor, properties_minor=properties_minor),
+            assets=NetWorthAssets(
+                accounts_minor=accounts_minor,
+                properties_minor=properties_minor,
+                investments_minor=investments_minor,
+            ),
             liabilities=NetWorthLiabilities(mortgages_minor=mortgages_minor),
-            net_worth_minor=accounts_minor + properties_minor - mortgages_minor,
+            net_worth_minor=accounts_minor + properties_minor + investments_minor - mortgages_minor,
             composition=composition,
             month_delta_minor=(
                 series[-1].net_worth_minor - series[-2].net_worth_minor
@@ -153,6 +168,7 @@ class NetWorthService:
         holdings: Sequence[tuple[date | None, int]],
         loans: Sequence[tuple[date, Schedule]],
         today: date,
+        investments: Sequence[Holding],
     ) -> list[NetWorthPoint]:
         """Net worth at each closed month end that has a snapshot or a declared total.
 
@@ -171,6 +187,8 @@ class NetWorthService:
         app does not record. Counting both all along would add the down payment twice before
         the purchase: once as the cash still in the accounts, once inside property − loan.
         A property without an acquisition date counts all along, as there is no date to start at.
+        A placement counts from its opening to its closing, at its last declared value on or
+        before the month end, or its net payments before its first declaration.
         """
         current = month_index(today)
         window_end = first_of_month(current)
@@ -220,10 +238,13 @@ class NetWorthService:
                 for first_payment, schedule in loans
                 if month >= month_index(first_payment) - 1
             )
+            investments_minor = sum(investment.value_on(month_end) for investment in investments)
             points.append(
                 NetWorthPoint(
                     month=month_key(month),
-                    net_worth_minor=accounts_minor + properties_minor - mortgages_minor,
+                    net_worth_minor=(
+                        accounts_minor + properties_minor + investments_minor - mortgages_minor
+                    ),
                     source=source,
                 )
             )

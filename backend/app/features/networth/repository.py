@@ -1,7 +1,8 @@
 """Data access for the net-worth summary and the declared month-end totals.
 
 Every other query here reads another feature's rows — accounts, snapshots, the ledger,
-properties, loans — the way the dashboard reads the ledger: aggregates over them, never a write.
+properties, loans, placements — the way the dashboard reads the ledger: aggregates over them,
+never a write.
 One query per table for the whole summary, so the cost does not grow with the number of accounts
 or loans. The declared totals are this feature's own table, and the only one it writes.
 """
@@ -16,6 +17,8 @@ from app.core.months import MONTHS_PER_YEAR
 from app.features.accounts.models import Account, AccountBalanceSnapshot
 from app.features.mortgages.models import Mortgage
 from app.features.networth.models import DeclaredBalance
+from app.features.placements.engine import Holding
+from app.features.placements.models import Investment, InvestmentMovement, InvestmentValuation
 from app.features.properties.models import Property
 from app.features.transactions.models import Transaction
 
@@ -54,6 +57,50 @@ class NetWorthRepository:
                 .order_by(Property.created_at)
             )
         )
+
+    def investments(self, user_id: str) -> list[Holding]:
+        """Every placement of the user's with its dated history, oldest first.
+
+        Closed ones are included: they counted until their closing date, which the series
+        needs. Three queries whatever the number of placements.
+        """
+        investments = list(
+            self._db.scalars(
+                select(Investment)
+                .where(Investment.user_id == user_id)
+                .order_by(Investment.created_at)
+            )
+        )
+        ids = [investment.id for investment in investments]
+        movements: dict[str, list[tuple[date, int]]] = {}
+        valuations: dict[str, list[tuple[date, int]]] = {}
+        if ids:
+            for investment_id, day, amount in self._db.execute(
+                select(
+                    InvestmentMovement.investment_id,
+                    InvestmentMovement.occurred_on,
+                    InvestmentMovement.amount_minor,
+                ).where(InvestmentMovement.investment_id.in_(ids))
+            ):
+                movements.setdefault(investment_id, []).append((day, amount))
+            for investment_id, day, value in self._db.execute(
+                select(
+                    InvestmentValuation.investment_id,
+                    InvestmentValuation.valued_on,
+                    InvestmentValuation.value_minor,
+                ).where(InvestmentValuation.investment_id.in_(ids))
+            ):
+                valuations.setdefault(investment_id, []).append((day, value))
+        return [
+            Holding(
+                envelope=investment.envelope,
+                opened_on=investment.opened_on,
+                closed_on=investment.closed_on,
+                movements=tuple(movements.get(investment.id, ())),
+                valuations=tuple(valuations.get(investment.id, ())),
+            )
+            for investment in investments
+        ]
 
     def mortgages(self, user_id: str, statuses: Sequence[str]) -> list[Mortgage]:
         """The user's loans in the given statuses, oldest first."""
