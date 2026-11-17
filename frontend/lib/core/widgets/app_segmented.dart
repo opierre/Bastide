@@ -81,7 +81,7 @@ class _Segment extends StatelessWidget {
           decoration: BoxDecoration(
             // Fill only: a border on the active segment reads as a second
             // control nested inside the track.
-            color: selected ? const Color(0x248B8CF9) : Colors.transparent,
+            color: selected ? context.colors.hover : Colors.transparent,
             borderRadius: BorderRadius.circular(AppRadii.sm + 1),
           ),
           child: Text(

@@ -642,7 +642,7 @@ class _DropZoneState extends State<_DropZone> {
               height: 168,
               alignment: Alignment.center,
               decoration: BoxDecoration(
-                color: _dragging ? const Color(0x128B8CF9) : Colors.transparent,
+                color: _dragging ? context.colors.accentSoft : Colors.transparent,
                 borderRadius: BorderRadius.circular(AppRadii.inset),
               ),
               child: Column(
