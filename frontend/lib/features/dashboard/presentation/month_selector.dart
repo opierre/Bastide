@@ -26,9 +26,9 @@ class DashboardTopBarActions extends ConsumerWidget {
       height: AppChrome.controlPillHeight,
       padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xs),
       decoration: BoxDecoration(
-        color: AppColors.surfaceRaised,
+        color: context.colors.bg,
         borderRadius: BorderRadius.circular(AppRadii.md),
-        border: Border.all(color: AppColors.border),
+        border: Border.all(color: context.colors.line),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -112,15 +112,15 @@ class _MonthPickerAnchorState extends State<MonthPickerAnchor> {
       style: MenuStyle(
         // The same floating treatment as [AppSelect]'s popover, so every
         // overlay in the app reads as the same material.
-        backgroundColor: const WidgetStatePropertyAll(AppColors.surfacePopover),
+        backgroundColor: WidgetStatePropertyAll(context.colors.surface),
         surfaceTintColor: const WidgetStatePropertyAll(Colors.transparent),
-        shadowColor: const WidgetStatePropertyAll(AppShadows.popoverShadow),
+        shadowColor: WidgetStatePropertyAll(context.colors.shadow.first.color),
         elevation: const WidgetStatePropertyAll(AppShadows.popoverElevation),
         padding: const WidgetStatePropertyAll(EdgeInsets.zero),
-        shape: const WidgetStatePropertyAll(
+        shape: WidgetStatePropertyAll(
           RoundedRectangleBorder(
             borderRadius: BorderRadius.all(Radius.circular(AppRadii.inset)),
-            side: BorderSide(color: AppColors.border),
+            side: BorderSide(color: context.colors.line),
           ),
         ),
       ),
@@ -139,7 +139,7 @@ class _MonthPickerAnchorState extends State<MonthPickerAnchor> {
         child: InkWell(
           key: const Key('dashboardMonthPickerButton'),
           borderRadius: BorderRadius.circular(AppRadii.sm),
-          hoverColor: AppColors.overlayWash,
+          hoverColor: context.colors.hover,
           // Disabled while the month is unknown: the picker would have nothing
           // to open on, and the label beside it is empty anyway.
           onTap: widget.month == null ? null : _open,
@@ -283,12 +283,12 @@ class _MonthCell extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: isSelected ? AppColors.irisSoft : Colors.transparent,
+      color: isSelected ? context.colors.accentSoft : Colors.transparent,
       borderRadius: BorderRadius.circular(AppRadii.sm),
       child: InkWell(
         key: Key('dashboardPickerMonth-$month'),
         borderRadius: BorderRadius.circular(AppRadii.sm),
-        hoverColor: AppColors.overlayWash,
+        hoverColor: context.colors.hover,
         onTap: () => onTap(month),
         child: Container(
           height: 32,
@@ -296,7 +296,7 @@ class _MonthCell extends StatelessWidget {
           child: Text(
             label,
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: isSelected ? AppColors.iris : AppColors.textPrimary,
+              color: isSelected ? context.colors.accent : context.colors.text,
               fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
             ),
           ),

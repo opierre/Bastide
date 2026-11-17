@@ -24,7 +24,7 @@ Widget _wrap(
     overrides: [simulationsRepositoryProvider.overrideWithValue(repository)],
     child: MaterialApp(
       locale: locale,
-      theme: appDarkTheme,
+      theme: AppTheme.dark,
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
       home: const Scaffold(

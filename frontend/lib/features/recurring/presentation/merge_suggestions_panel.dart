@@ -49,10 +49,10 @@ class _MergeSuggestionsPanelState extends State<MergeSuggestionsPanel> {
       children: [
         Row(
           children: [
-            const Icon(
+            Icon(
               Icons.merge_type_rounded,
               size: 15,
-              color: AppColors.info,
+              color: context.colors.textSecondary,
             ),
             const SizedBox(width: AppSpacing.sm),
             Expanded(
@@ -60,7 +60,7 @@ class _MergeSuggestionsPanelState extends State<MergeSuggestionsPanel> {
                 l10n.subscriptionsMergeSuggestionsCount(suggestions.length),
                 key: const Key('subscriptionsMergeCount'),
                 style: textTheme.bodySmall?.copyWith(
-                  color: AppColors.textSecondary,
+                  color: context.colors.textSecondary,
                   fontWeight: FontWeight.w600,
                 ),
               ),
@@ -72,7 +72,7 @@ class _MergeSuggestionsPanelState extends State<MergeSuggestionsPanel> {
                   : l10n.subscriptionsMergeSuggestionsHide,
               visualDensity: VisualDensity.compact,
               iconSize: 18,
-              color: AppColors.textSecondary,
+              color: context.colors.textSecondary,
               icon: Icon(
                 _collapsed
                     ? Icons.expand_more_rounded

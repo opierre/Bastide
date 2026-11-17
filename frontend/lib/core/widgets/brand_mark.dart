@@ -26,12 +26,12 @@ class BrandMark extends StatelessWidget {
       width: size,
       height: size,
       decoration: BoxDecoration(
-        gradient: AppColors.irisGradient,
+        color: context.colors.accent,
         borderRadius: BorderRadius.circular(size * _tileRadius / _grid),
       ),
       child: CustomPaint(
         painter: _RampartPainter(
-          color: AppColors.irisInk,
+          color: context.colors.onAccent,
           outline: size < smallSizeThreshold ? _smallOutline : _mainOutline,
         ),
       ),
@@ -140,11 +140,11 @@ class BrandLockup extends StatelessWidget {
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
             style: TextStyle(
-              fontFamily: AppFonts.spaceGrotesk,
+              fontFamily: AppFonts.geist,
               fontSize: wordmarkSize,
               fontWeight: FontWeight.w700,
               letterSpacing: -0.4,
-              color: AppColors.textPrimary,
+              color: context.colors.text,
             ),
           ),
         ),

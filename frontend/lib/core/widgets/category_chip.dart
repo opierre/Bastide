@@ -47,7 +47,7 @@ class CategoryChip extends StatelessWidget {
   }
 
   Widget _buildCategorized(BuildContext context) {
-    final hue = CategoryHues.forSlug(slug);
+    final hue = context.categoryColors.forSlug(slug);
     return Container(
       height: 22,
       padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm + 2),
@@ -66,7 +66,7 @@ class CategoryChip extends StatelessWidget {
         height: 22,
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm + 2),
-          child: _content(context, AppColors.textSecondary),
+          child: _content(context, context.colors.textSecondary),
         ),
       ),
     );

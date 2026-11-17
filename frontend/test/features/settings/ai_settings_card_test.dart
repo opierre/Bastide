@@ -66,7 +66,7 @@ void main() {
     overrides: [apiClientProvider.overrideWithValue(apiClient)],
     child: MaterialApp(
       locale: locale,
-      theme: appDarkTheme,
+      theme: AppTheme.dark,
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
       // Scrollable like the settings panel the card lives in, so a card taller
@@ -95,7 +95,7 @@ void main() {
       await tester.pumpWidget(wrap());
       await tester.pumpAndSettle();
 
-      expect(dotColor(tester), AppColors.positive);
+      expect(dotColor(tester), AppColors.dark.positive);
       expect(find.text('Connecté — 3 modèles disponibles'), findsOneWidget);
     });
 
@@ -167,7 +167,7 @@ void main() {
         await tester.pumpWidget(wrap());
         await tester.pumpAndSettle();
 
-        expect(dotColor(tester), AppColors.warning);
+        expect(dotColor(tester), AppColors.dark.warning);
         expect(
           find.text('Aucun moteur détecté à cette adresse.'),
           findsOneWidget,
@@ -302,7 +302,7 @@ void main() {
 
       await tester.pumpWidget(wrap());
       await tester.pumpAndSettle();
-      expect(dotColor(tester), AppColors.warning);
+      expect(dotColor(tester), AppColors.dark.warning);
 
       // The engine came up between the mount probe and the explicit test.
       when(() => apiClient.get('/settings/inference/health')).thenAnswer((
@@ -321,7 +321,7 @@ void main() {
       expect(find.byKey(const Key('settingsAiCard')), findsOneWidget);
 
       await tester.pumpAndSettle();
-      expect(dotColor(tester), AppColors.positive);
+      expect(dotColor(tester), AppColors.dark.positive);
       expect(find.text('Connecté — 3 modèles disponibles'), findsOneWidget);
     });
   });

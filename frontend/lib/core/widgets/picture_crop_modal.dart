@@ -104,9 +104,9 @@ class _PictureCropModalState extends State<PictureCropModal> {
         children: [
           Text(
             widget.lead,
-            style: Theme.of(
-              context,
-            ).textTheme.bodyMedium?.copyWith(color: AppColors.textSecondary),
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              color: context.colors.textSecondary,
+            ),
           ),
           const SizedBox(height: AppSpacing.md),
           Center(
@@ -116,7 +116,7 @@ class _PictureCropModalState extends State<PictureCropModal> {
               height: _viewport,
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(AppRadii.xl),
-                border: Border.all(color: AppColors.borderCard),
+                border: Border.all(color: context.colors.line),
               ),
               clipBehavior: Clip.antiAlias,
               child: InteractiveViewer(

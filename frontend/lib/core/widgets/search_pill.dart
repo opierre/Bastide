@@ -70,7 +70,7 @@ class _SearchPillState extends State<SearchPill> {
         decoration: InputDecoration(
           hintText: widget.hint,
           filled: true,
-          fillColor: AppColors.surfaceRaised,
+          fillColor: context.colors.bg,
           isDense: true,
           contentPadding: const EdgeInsets.symmetric(
             vertical: AppSpacing.sm + 2,
@@ -96,9 +96,9 @@ class _SearchPillState extends State<SearchPill> {
             minWidth: 34,
             minHeight: 34,
           ),
-          border: _border(AppColors.border),
-          enabledBorder: _border(AppColors.border),
-          focusedBorder: _border(AppColors.focusRing),
+          border: _border(context.colors.line),
+          enabledBorder: _border(context.colors.line),
+          focusedBorder: _border(context.colors.accent),
         ),
       ),
     );

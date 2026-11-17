@@ -29,7 +29,7 @@ Widget _wrap({
     ],
     child: MaterialApp(
       locale: locale,
-      theme: appDarkTheme,
+      theme: AppTheme.dark,
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
       home: const Scaffold(body: CategoriesScreen()),
@@ -61,7 +61,7 @@ final _own = testCategory(
   userId: 'u1',
   name: 'Épargne projet',
   icon: 'loisirs',
-  color: '#64748B',
+  color: 'cat0',
   isSystem: false,
 );
 
@@ -114,7 +114,7 @@ void main() {
         find.byKey(const Key('categoryIcon-food')),
       );
       expect(food.icon, LucideIcons300.soup);
-      expect(food.color, CategoryHues.alimentation);
+      expect(food.color, CategoryColors.dark.cat2);
       final own = tester.widget<Icon>(
         find.byKey(const Key('categoryIcon-own')),
       );
@@ -297,10 +297,10 @@ void main() {
         find.descendant(of: header, matching: find.byType(Icon)),
       );
       expect(glyph.icon, LucideIcons300.soup);
-      expect(glyph.color, CategoryHues.alimentation);
+      expect(glyph.color, CategoryColors.dark.cat2);
       expect(find.byKey(const Key('categoryFormKind')), findsNothing);
       expect(find.byKey(const Key('categoryFormIcon')), findsNothing);
-      expect(find.byKey(const Key('categoryFormColor-#64748B')), findsNothing);
+      expect(find.byKey(const Key('categoryFormColor-cat0')), findsNothing);
 
       tester
           .widget<AppSelect<String?>>(
@@ -313,7 +313,7 @@ void main() {
       expect(find.byKey(const Key('categoryFormKind')), findsOneWidget);
       expect(find.byKey(const Key('categoryFormIcon')), findsOneWidget);
       expect(
-        find.byKey(const Key('categoryFormColor-#64748B')),
+        find.byKey(const Key('categoryFormColor-cat0')),
         findsOneWidget,
       );
     },
@@ -356,7 +356,7 @@ void main() {
               userId: 'u1',
               name: 'Chat',
               icon: 'paw-print',
-              color: '#64748B',
+              color: 'cat0',
               isSystem: false,
             ),
             testCategory(
@@ -364,7 +364,7 @@ void main() {
               userId: 'u1',
               name: 'Bizarre',
               icon: 'not-an-icon',
-              color: '#64748B',
+              color: 'cat0',
               isSystem: false,
             ),
           ],
@@ -406,7 +406,7 @@ void main() {
     expect(_inCard('food', find.text('2 règles automatiques')), findsOneWidget);
 
     final none = tester.widget<Text>(_inCard('own', find.text('Aucune règle')));
-    expect(none.style?.color, AppColors.warning);
+    expect(none.style?.color, AppColors.dark.warning);
   });
 
   testWidgets('the footer opens the rules view filtered on the category', (

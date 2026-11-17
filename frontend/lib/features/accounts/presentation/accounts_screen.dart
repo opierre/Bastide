@@ -123,7 +123,7 @@ class _SummaryCard extends ConsumerWidget {
               children: [
                 Text(
                   l10n.accountsTotalBalanceLabel.toUpperCase(),
-                  style: AppTextStyles.sectionLabel,
+                  style: context.textStyles.sectionLabel,
                 ),
                 const SizedBox(height: AppSpacing.sm + 2),
                 AmountText(
@@ -145,14 +145,14 @@ class _SummaryCard extends ConsumerWidget {
               Text(
                 '${l10n.accountsActiveCount(accounts.length)} · $currency',
                 style: textTheme.bodySmall?.copyWith(
-                  color: AppColors.textSecondary,
+                  color: context.colors.textSecondary,
                 ),
               ),
               const SizedBox(height: AppSpacing.xs),
               Text(
                 l10n.accountsBalancesAsOf(asOf.toLocal()),
-                style: AppTextStyles.helper.copyWith(
-                  color: AppColors.textDisabled,
+                style: context.textStyles.helper.copyWith(
+                  color: context.colors.textTertiary,
                 ),
               ),
             ],
@@ -255,7 +255,7 @@ class _AccountCard extends StatelessWidget {
                     Text(
                       account.institution,
                       style: textTheme.bodySmall?.copyWith(
-                        color: AppColors.textSecondary,
+                        color: context.colors.textSecondary,
                       ),
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -320,7 +320,7 @@ class _LastTransaction extends StatelessWidget {
       key: Key('accountLastTransaction-${account.id}'),
       style: Theme.of(
         context,
-      ).textTheme.bodySmall?.copyWith(color: AppColors.textDisabled),
+      ).textTheme.bodySmall?.copyWith(color: context.colors.textTertiary),
       overflow: TextOverflow.ellipsis,
     );
   }

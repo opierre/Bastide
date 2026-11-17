@@ -126,9 +126,9 @@ class RuleLogoField extends ConsumerWidget {
                           : () => controller.remove(ruleId),
                       tooltip: l10n.ruleFormLogoRemove,
                       iconSize: 18,
-                      icon: const Icon(
+                      icon: Icon(
                         Icons.delete_outline_rounded,
-                        color: AppColors.textSecondary,
+                        color: context.colors.textSecondary,
                       ),
                     ),
                 ],
@@ -245,9 +245,9 @@ class _RuleLogoUrlModalState extends ConsumerState<_RuleLogoUrlModal> {
         children: [
           Text(
             l10n.ruleLogoUrlLead,
-            style: Theme.of(
-              context,
-            ).textTheme.bodyMedium?.copyWith(color: AppColors.textSecondary),
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              color: context.colors.textSecondary,
+            ),
           ),
           const SizedBox(height: AppSpacing.md),
           LabeledField(

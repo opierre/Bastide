@@ -40,8 +40,7 @@ class GoalsProgressCard extends StatelessWidget {
     return AppCard(
       key: const Key('dashboardGoalsCard'),
       padding: const EdgeInsets.all(AppSpacing.cardPadding),
-      gradient: AppColors.irisTintGradientSoft,
-      border: Border.all(color: AppColors.irisBorder),
+      border: Border.all(color: context.colors.line),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -58,7 +57,9 @@ class GoalsProgressCard extends StatelessWidget {
                 onPressed: onViewAll,
                 child: Text(
                   l10n.dashboardGoalsViewAll,
-                  style: textTheme.labelSmall?.copyWith(color: AppColors.iris),
+                  style: textTheme.labelSmall?.copyWith(
+                    color: context.colors.accent,
+                  ),
                 ),
               ),
             ],
@@ -111,17 +112,17 @@ class _GoalRow extends StatelessWidget {
               Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Icon(
+                  Icon(
                     Icons.check_rounded,
                     size: 12,
-                    color: AppColors.positive,
+                    color: context.colors.positive,
                   ),
                   const SizedBox(width: AppSpacing.xs),
                   Text(
                     l10n.dashboardGoalsReached,
                     key: Key('dashboardGoalReached-${goal.id}'),
                     style: textTheme.labelSmall?.copyWith(
-                      color: AppColors.positive,
+                      color: context.colors.positive,
                     ),
                   ),
                 ],
@@ -143,7 +144,7 @@ class _GoalRow extends StatelessWidget {
                 key: Key('dashboardGoalAmounts-${goal.id}'),
                 style: tabularNumberStyle(textTheme.labelSmall!).copyWith(
                   fontWeight: FontWeight.w400,
-                  color: AppColors.textSecondary,
+                  color: context.colors.textSecondary,
                 ),
               ),
           ],

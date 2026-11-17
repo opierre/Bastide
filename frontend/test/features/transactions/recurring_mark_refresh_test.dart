@@ -146,7 +146,7 @@ Future<void> _pump(WidgetTester tester, Widget home) async {
       ],
       child: MaterialApp(
         locale: const Locale('fr'),
-        theme: appDarkTheme,
+        theme: AppTheme.dark,
         localizationsDelegates: AppLocalizations.localizationsDelegates,
         supportedLocales: AppLocalizations.supportedLocales,
         home: Scaffold(body: home),
@@ -169,7 +169,7 @@ void _expectMarked(WidgetTester tester) {
   final button = tester.widget<IconButton>(
     find.byKey(const Key('transactionRowOpenRecurringSeries')),
   );
-  expect(button.color, AppColors.iris);
+  expect(button.color, AppColors.dark.accent);
 }
 
 void main() {

@@ -65,12 +65,12 @@ class _Legend extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       children: [
         _LegendDot(
-          color: AppColors.positive,
+          color: context.colors.positive,
           label: l10n.dashboardLegendIncome,
         ),
         const SizedBox(width: AppSpacing.md),
         _LegendDot(
-          color: AppColors.negative,
+          color: context.colors.negative,
           label: l10n.dashboardLegendExpense,
         ),
       ],
@@ -99,7 +99,7 @@ class _LegendDot extends StatelessWidget {
           label,
           style: Theme.of(context).textTheme.labelSmall?.copyWith(
             fontWeight: FontWeight.w400,
-            color: AppColors.textSecondary,
+            color: context.colors.textSecondary,
           ),
         ),
       ],
@@ -163,13 +163,13 @@ class MonthBar extends StatelessWidget {
                       _Bar(
                         key: Key('dashboardIncomeBar-$month'),
                         height: totals.incomeMinor * scale,
-                        color: AppColors.positive,
+                        color: context.colors.positive,
                       ),
                       const SizedBox(width: pairGap),
                       _Bar(
                         key: Key('dashboardExpenseBar-$month'),
                         height: totals.expenseMinor * scale,
-                        color: AppColors.negative,
+                        color: context.colors.negative,
                       ),
                     ],
                   );
@@ -192,8 +192,8 @@ class MonthBar extends StatelessWidget {
                     // The month being looked at is stated in primary; the ones it is
                     // compared against recede.
                     color: isCurrent
-                        ? AppColors.textPrimary
-                        : AppColors.textSecondary,
+                        ? context.colors.text
+                        : context.colors.textSecondary,
                   ),
                 ),
                 const SizedBox(height: 2),
@@ -307,14 +307,14 @@ class _HoverTooltip extends StatelessWidget {
                 '${l10n.dashboardLegendIncome}  ${amount(totals.incomeMinor)}\n',
             style: tabularNumberStyle(
               Theme.of(context).textTheme.bodySmall!,
-            ).copyWith(color: AppColors.positive),
+            ).copyWith(color: context.colors.positive),
           ),
           TextSpan(
             text:
                 '${l10n.dashboardLegendExpense}  ${amount(-totals.expenseMinor)}',
             style: tabularNumberStyle(
               Theme.of(context).textTheme.bodySmall!,
-            ).copyWith(color: AppColors.negative),
+            ).copyWith(color: context.colors.negative),
           ),
         ],
       ),

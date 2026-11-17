@@ -45,7 +45,7 @@ Map<String, dynamic> _categoryJson({
   'name': name,
   'kind': 'expense',
   'icon': 'shopping_cart',
-  'color': '#10B981',
+  'color': 'cat3',
   'is_system': true,
 };
 

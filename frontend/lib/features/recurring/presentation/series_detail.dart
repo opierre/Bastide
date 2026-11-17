@@ -50,16 +50,16 @@ class SeriesDetailView extends ConsumerWidget {
               key: const Key('seriesDetailBack'),
               onPressed: () =>
                   ref.read(selectedSeriesProvider.notifier).close(),
-              icon: const Icon(
+              icon: Icon(
                 Icons.arrow_back_rounded,
                 size: 16,
-                color: AppColors.iris,
+                color: context.colors.accent,
               ),
               label: Text(
                 l10n.subscriptionDetailBack,
                 style: Theme.of(
                   context,
-                ).textTheme.labelMedium?.copyWith(color: AppColors.iris),
+                ).textTheme.labelMedium?.copyWith(color: context.colors.accent),
               ),
             ),
             const SizedBox(width: AppSpacing.sm),
@@ -222,7 +222,9 @@ class _DetailBody extends ConsumerWidget {
         Text(
           l10n.subscriptionDetailFootnote,
           key: const Key('seriesDetailFootnote'),
-          style: AppTextStyles.helper.copyWith(color: AppColors.textDisabled),
+          style: context.textStyles.helper.copyWith(
+            color: context.colors.textTertiary,
+          ),
         ),
       ],
     );
@@ -291,7 +293,7 @@ class _HeaderCard extends ConsumerWidget {
                   key: const Key('seriesDetailSubline'),
                   overflow: TextOverflow.ellipsis,
                   style: textTheme.bodySmall?.copyWith(
-                    color: AppColors.textSecondary,
+                    color: context.colors.textSecondary,
                   ),
                 ),
               ],
@@ -344,7 +346,7 @@ class _Stat extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.end,
       mainAxisSize: MainAxisSize.min,
       children: [
-        Text(label.toUpperCase(), style: AppTextStyles.sectionLabel),
+        Text(label.toUpperCase(), style: context.textStyles.sectionLabel),
         const SizedBox(height: AppSpacing.xs + 2),
         child,
       ],
@@ -391,7 +393,7 @@ class _HistoryCard extends StatelessWidget {
           Text(
             l10n.subscriptionDetailHistorySubtitle(accountName),
             style: textTheme.bodySmall?.copyWith(
-              color: AppColors.textSecondary,
+              color: context.colors.textSecondary,
             ),
           ),
           const SizedBox(height: AppSpacing.md),

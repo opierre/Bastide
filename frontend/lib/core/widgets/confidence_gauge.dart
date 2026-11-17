@@ -38,7 +38,7 @@ class ConfidenceGauge extends StatelessWidget {
             width: 44,
             height: 5,
             decoration: BoxDecoration(
-              color: AppColors.surfaceHover,
+              color: context.colors.hover,
               borderRadius: BorderRadius.circular(AppRadii.xs),
             ),
             child: FractionallySizedBox(
@@ -46,7 +46,7 @@ class ConfidenceGauge extends StatelessWidget {
               widthFactor: fraction,
               child: Container(
                 decoration: BoxDecoration(
-                  color: AppColors.iris,
+                  color: context.colors.accent,
                   borderRadius: BorderRadius.circular(AppRadii.xs),
                 ),
               ),
@@ -58,7 +58,7 @@ class ConfidenceGauge extends StatelessWidget {
           label,
           style: Theme.of(
             context,
-          ).textTheme.labelSmall?.copyWith(color: AppColors.textSecondary),
+          ).textTheme.labelSmall?.copyWith(color: context.colors.textSecondary),
         ),
       ],
     );

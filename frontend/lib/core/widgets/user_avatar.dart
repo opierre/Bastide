@@ -33,7 +33,10 @@ class UserAvatar extends StatelessWidget {
       MonogramChoice() => monogram,
       PresetChoice(:final preset) => _InitialsPlate(
         name: name,
-        hue: AvatarHues.byPreset[preset.name] ?? AppColors.iris,
+        hue: context.categoryColors.forAvatarPreset(
+          preset.name,
+          context.colors,
+        ),
         size: size,
       ),
       PictureChoice() when image != null => ClipRRect(

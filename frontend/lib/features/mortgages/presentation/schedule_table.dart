@@ -66,7 +66,7 @@ class ScheduleTableCard extends ConsumerWidget {
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: textTheme.bodySmall?.copyWith(
-                        color: AppColors.textSecondary,
+                        color: context.colors.textSecondary,
                       ),
                     ),
                   ],
@@ -151,9 +151,9 @@ class YearSwitcher extends StatelessWidget {
           height: 34,
           padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xs),
           decoration: BoxDecoration(
-            color: AppColors.surfaceRaised,
+            color: context.colors.bg,
             borderRadius: BorderRadius.circular(AppRadii.md),
-            border: Border.all(color: AppColors.border),
+            border: Border.all(color: context.colors.line),
           ),
           child: Row(
             mainAxisSize: MainAxisSize.min,
@@ -187,9 +187,9 @@ class YearSwitcher extends StatelessWidget {
           height: 34,
           padding: const EdgeInsets.all(3),
           decoration: BoxDecoration(
-            color: AppColors.surfaceField,
+            color: context.colors.field,
             borderRadius: BorderRadius.circular(AppRadii.md),
-            border: Border.all(color: AppColors.border),
+            border: Border.all(color: context.colors.line),
           ),
           child: Row(
             mainAxisSize: MainAxisSize.min,
@@ -211,7 +211,7 @@ class YearSwitcher extends StatelessWidget {
                       '… ${years.lastYear}',
                       style: tabularNumberStyle(
                         textTheme.bodySmall!,
-                      ).copyWith(color: AppColors.textDisabled),
+                      ).copyWith(color: context.colors.textTertiary),
                     ),
                   ),
                 ),
@@ -262,12 +262,12 @@ class _YearCell extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: selected ? AppColors.irisSoft : Colors.transparent,
+      color: selected ? context.colors.accentSoft : Colors.transparent,
       borderRadius: BorderRadius.circular(AppRadii.sm),
       child: InkWell(
         key: Key('yearSwitcherYear-$year'),
         borderRadius: BorderRadius.circular(AppRadii.sm),
-        hoverColor: AppColors.overlayWash,
+        hoverColor: context.colors.hover,
         onTap: onTap,
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm + 2),
@@ -276,7 +276,9 @@ class _YearCell extends StatelessWidget {
               '$year',
               style: tabularNumberStyle(Theme.of(context).textTheme.bodySmall!)
                   .copyWith(
-                    color: selected ? AppColors.iris : AppColors.textSecondary,
+                    color: selected
+                        ? context.colors.accent
+                        : context.colors.textSecondary,
                     fontWeight: selected ? FontWeight.w600 : FontWeight.w400,
                   ),
             ),
@@ -300,7 +302,6 @@ class ScheduleTable extends StatelessWidget {
   static const footHeight = 34.0;
 
   /// The current instalment's wash — iris at 6 %.
-  static const _currentWash = Color(0x0F8B8CF9);
 
   @override
   Widget build(BuildContext context) {
@@ -309,7 +310,7 @@ class ScheduleTable extends StatelessWidget {
     final textTheme = Theme.of(context).textTheme;
     final cellStyle = tabularNumberStyle(textTheme.bodySmall!);
     final footStyle = cellStyle.copyWith(fontWeight: FontWeight.w700);
-    final headerStyle = AppTextStyles.sectionLabel.copyWith(
+    final headerStyle = context.textStyles.sectionLabel.copyWith(
       fontSize: 10.5,
       letterSpacing: 1,
     );
@@ -326,7 +327,7 @@ class ScheduleTable extends StatelessWidget {
       children: [
         _Line(
           height: headerHeight,
-          color: AppColors.surfaceRowHover,
+          color: context.colors.hover,
           cells: [
             for (final label in [
               l10n.mortgageScheduleDue,
@@ -340,11 +341,18 @@ class ScheduleTable extends StatelessWidget {
           ],
         ),
         for (final row in window.rows)
-          _row(row, years.isCurrentInstalment(row), cellStyle, money, locale),
+          _row(
+            context,
+            row,
+            years.isCurrentInstalment(row),
+            cellStyle,
+            money,
+            locale,
+          ),
         _Line(
           key: const Key('scheduleFoot'),
           height: footHeight,
-          color: AppColors.surfaceRowHover,
+          color: context.colors.hover,
           cells: [
             Text(
               l10n.mortgageScheduleFootTotal('${window.year}'),
@@ -378,7 +386,7 @@ class ScheduleTable extends StatelessWidget {
                 money(window.outstandingAtYearEndMinor),
               ),
               key: const Key('scheduleFootOutstanding'),
-              style: cellStyle.copyWith(color: AppColors.textSecondary),
+              style: cellStyle.copyWith(color: context.colors.textSecondary),
             ),
           ],
         ),
@@ -387,6 +395,7 @@ class ScheduleTable extends StatelessWidget {
   }
 
   Widget _row(
+    BuildContext context,
     ScheduleRow row,
     bool isCurrent,
     TextStyle style,
@@ -400,14 +409,14 @@ class ScheduleTable extends StatelessWidget {
     return _Line(
       key: Key('scheduleRow-$id'),
       height: rowHeight,
-      color: isCurrent ? _currentWash : null,
+      color: isCurrent ? context.colors.accentSoft : null,
       divider: true,
       cells: [
         Text(
           mortgageDateFormat(locale).format(row.dueOn),
           style: isCurrent
               ? style.copyWith(
-                  color: AppColors.iris,
+                  color: context.colors.accent,
                   fontWeight: FontWeight.w700,
                 )
               : style,
@@ -475,7 +484,7 @@ class _Line extends StatelessWidget {
       decoration: BoxDecoration(
         color: color,
         border: divider
-            ? const Border(bottom: BorderSide(color: AppColors.borderSubtle))
+            ? Border(bottom: BorderSide(color: context.colors.line))
             : null,
       ),
       child: Row(

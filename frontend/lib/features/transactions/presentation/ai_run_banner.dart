@@ -27,20 +27,19 @@ class AiRunBanner extends ConsumerWidget {
     return AppCard(
       key: const Key('aiRunBanner'),
       padding: const EdgeInsets.all(AppSpacing.cardPadding),
-      gradient: AppColors.irisTintGradient,
-      border: Border.all(color: AppColors.irisBorderStrong),
+      border: Border.all(color: context.colors.line),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const SizedBox(
+              SizedBox(
                 width: 18,
                 height: 18,
                 child: CircularProgressIndicator(
                   strokeWidth: 2.5,
-                  color: AppColors.iris,
+                  color: context.colors.accent,
                 ),
               ),
               const SizedBox(width: AppSpacing.sm + AppSpacing.xs),
@@ -61,7 +60,7 @@ class AiRunBanner extends ConsumerWidget {
                       ),
                       key: const Key('aiRunBannerDetail'),
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: AppColors.textSecondary,
+                        color: context.colors.textSecondary,
                       ),
                     ),
                   ],
@@ -100,7 +99,7 @@ class RunProgressBar extends StatelessWidget {
     return Container(
       height: 6,
       decoration: BoxDecoration(
-        color: AppColors.surfaceHover,
+        color: context.colors.hover,
         borderRadius: BorderRadius.circular(AppRadii.xs),
       ),
       child: FractionallySizedBox(
@@ -108,9 +107,7 @@ class RunProgressBar extends StatelessWidget {
         widthFactor: fraction.clamp(0.0, 1.0),
         child: Container(
           decoration: BoxDecoration(
-            gradient: const LinearGradient(
-              colors: [AppColors.irisDeep, AppColors.iris],
-            ),
+            color: context.colors.accent,
             borderRadius: BorderRadius.circular(AppRadii.xs),
           ),
         ),
@@ -137,7 +134,7 @@ class RunOutcomeBanner extends ConsumerWidget {
     return switch (run.status) {
       RunStatus.partial => _OutcomeCard(
         cardKey: const Key('aiRunPartialBanner'),
-        tone: AppColors.warning,
+        tone: context.colors.warning,
         icon: Icons.warning_amber_rounded,
         message: l10n.runBannerPartial(run.failedCount),
         actionLabel: l10n.runBannerPartialAction,
@@ -150,7 +147,7 @@ class RunOutcomeBanner extends ConsumerWidget {
       ),
       RunStatus.failed => _OutcomeCard(
         cardKey: const Key('aiRunFailedBanner'),
-        tone: AppColors.warning,
+        tone: context.colors.warning,
         icon: Icons.info_outline_rounded,
         message: l10n.runBannerFailed,
       ),

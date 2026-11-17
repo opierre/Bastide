@@ -290,7 +290,7 @@ class _LoadingBody extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const SizedBox(
+    return SizedBox(
       key: Key('markRecurringLoading'),
       height: 160,
       child: Center(
@@ -299,7 +299,7 @@ class _LoadingBody extends StatelessWidget {
           height: 22,
           child: CircularProgressIndicator(
             strokeWidth: 2.5,
-            color: AppColors.iris,
+            color: context.colors.accent,
           ),
         ),
       ),
@@ -337,7 +337,9 @@ class _ProposalBody extends ConsumerWidget {
       children: [
         Text(
           l10n.markRecurringIntro,
-          style: textTheme.bodySmall?.copyWith(color: AppColors.textSecondary),
+          style: textTheme.bodySmall?.copyWith(
+            color: context.colors.textSecondary,
+          ),
         ),
         const SizedBox(height: AppSpacing.md),
         if (errorText != null) ...[
@@ -370,7 +372,7 @@ class _ProposalBody extends ConsumerWidget {
               Text(
                 _reasonLabel(l10n, reason, preview.transactions.length),
                 style: textTheme.bodySmall?.copyWith(
-                  color: AppColors.textSecondary,
+                  color: context.colors.textSecondary,
                 ),
               ),
           ],
@@ -419,14 +421,16 @@ class _ProposalBody extends ConsumerWidget {
           child: TextButton.icon(
             key: const Key('markRecurringPickSeries'),
             onPressed: enabled ? onPickSeries : null,
-            icon: const Icon(
+            icon: Icon(
               Icons.playlist_add_rounded,
               size: 16,
-              color: AppColors.iris,
+              color: context.colors.accent,
             ),
             label: Text(
               l10n.markRecurringPickSeries,
-              style: textTheme.labelMedium?.copyWith(color: AppColors.iris),
+              style: textTheme.labelMedium?.copyWith(
+                color: context.colors.accent,
+              ),
             ),
           ),
         ),
@@ -466,9 +470,9 @@ class _Checklist extends ConsumerWidget {
           constraints: const BoxConstraints(maxHeight: 260),
           child: Container(
             decoration: BoxDecoration(
-              color: AppColors.surfaceField,
+              color: context.colors.field,
               borderRadius: BorderRadius.circular(AppRadii.md),
-              border: Border.all(color: AppColors.border),
+              border: Border.all(color: context.colors.line),
             ),
             child: ListView(
               shrinkWrap: true,
@@ -496,13 +500,15 @@ class _Checklist extends ConsumerWidget {
             if (selected.isEmpty)
               Text(
                 l10n.markRecurringNoneTicked,
-                style: textTheme.bodySmall?.copyWith(color: AppColors.warning),
+                style: textTheme.bodySmall?.copyWith(
+                  color: context.colors.warning,
+                ),
               )
             else ...[
               Text(
                 l10n.markRecurringTickedCount(selected.length),
                 style: textTheme.bodySmall?.copyWith(
-                  color: AppColors.textSecondary,
+                  color: context.colors.textSecondary,
                 ),
               ),
               if (selected.length > 1)
@@ -512,7 +518,7 @@ class _Checklist extends ConsumerWidget {
                     dates.format(selected.last.bookedDate),
                   ),
                   style: textTheme.bodySmall?.copyWith(
-                    color: AppColors.textSecondary,
+                    color: context.colors.textSecondary,
                   ),
                 ),
             ],
@@ -602,17 +608,17 @@ class _ConfidenceChip extends StatelessWidget {
     final (label, color, icon) = switch (confidence) {
       PreviewConfidence.high => (
         l10n.markRecurringConfidenceHigh,
-        AppColors.positive,
+        context.colors.positive,
         Icons.check_circle_outline_rounded,
       ),
       PreviewConfidence.medium => (
         l10n.markRecurringConfidenceMedium,
-        AppColors.info,
+        context.colors.textSecondary,
         Icons.adjust_rounded,
       ),
       PreviewConfidence.low => (
         l10n.markRecurringConfidenceLow,
-        AppColors.warning,
+        context.colors.warning,
         Icons.warning_amber_rounded,
       ),
     };
@@ -640,7 +646,7 @@ class _SummaryFigure extends StatelessWidget {
           label,
           style: Theme.of(
             context,
-          ).textTheme.labelSmall?.copyWith(color: AppColors.textSecondary),
+          ).textTheme.labelSmall?.copyWith(color: context.colors.textSecondary),
         ),
         const SizedBox(height: 2),
         child,

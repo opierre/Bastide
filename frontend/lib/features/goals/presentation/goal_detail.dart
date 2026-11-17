@@ -47,16 +47,16 @@ class GoalDetailView extends ConsumerWidget {
           child: TextButton.icon(
             key: const Key('goalDetailBack'),
             onPressed: () => ref.read(selectedGoalProvider.notifier).close(),
-            icon: const Icon(
+            icon: Icon(
               Icons.arrow_back_rounded,
               size: 16,
-              color: AppColors.iris,
+              color: context.colors.accent,
             ),
             label: Text(
               l10n.goalDetailBack,
               style: Theme.of(
                 context,
-              ).textTheme.labelMedium?.copyWith(color: AppColors.iris),
+              ).textTheme.labelMedium?.copyWith(color: context.colors.accent),
             ),
           ),
         ),
@@ -126,7 +126,9 @@ class _DetailBody extends ConsumerWidget {
         Text(
           l10n.goalDetailFootnote,
           key: const Key('goalDetailFootnote'),
-          style: AppTextStyles.helper.copyWith(color: AppColors.textDisabled),
+          style: context.textStyles.helper.copyWith(
+            color: context.colors.textTertiary,
+          ),
         ),
       ],
     );
@@ -176,7 +178,7 @@ class _HeaderCard extends ConsumerWidget {
                         ),
                   key: const Key('goalDetailSubline'),
                   style: textTheme.bodySmall?.copyWith(
-                    color: AppColors.textSecondary,
+                    color: context.colors.textSecondary,
                   ),
                 ),
                 const SizedBox(height: AppSpacing.sm + AppSpacing.xs),
@@ -198,7 +200,7 @@ class _HeaderCard extends ConsumerWidget {
                         key: const Key('goalDetailTarget'),
                         style: tabularNumberStyle(
                           textTheme.bodyMedium!,
-                        ).copyWith(color: AppColors.textSecondary),
+                        ).copyWith(color: context.colors.textSecondary),
                       ),
                     ),
                   ],
@@ -255,7 +257,9 @@ class GoalProgressRing extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final locale = Localizations.localeOf(context).toString();
-    final accent = goal.isReached ? AppColors.positive : AppColors.iris;
+    final accent = goal.isReached
+        ? context.colors.positive
+        : context.colors.accent;
 
     return SizedBox(
       width: _size,
@@ -270,7 +274,7 @@ class GoalProgressRing extends StatelessWidget {
               value: goal.barFraction,
               strokeWidth: _stroke,
               strokeCap: StrokeCap.round,
-              backgroundColor: AppColors.surfaceHover,
+              backgroundColor: context.colors.hover,
               valueColor: AlwaysStoppedAnimation(accent),
             ),
           ),
@@ -303,16 +307,18 @@ class GoalReassuranceLine extends StatelessWidget {
       key: const Key('goalReassuranceLine'),
       mainAxisSize: MainAxisSize.min,
       children: [
-        const Icon(
+        Icon(
           Icons.lock_outline_rounded,
           size: 13,
-          color: AppColors.textDisabled,
+          color: context.colors.textTertiary,
         ),
         const SizedBox(width: AppSpacing.sm - 2),
         Flexible(
           child: Text(
             l10n.goalsReassurance,
-            style: AppTextStyles.helper.copyWith(color: AppColors.textDisabled),
+            style: context.textStyles.helper.copyWith(
+              color: context.colors.textTertiary,
+            ),
           ),
         ),
       ],
@@ -342,7 +348,7 @@ class _HistoryCard extends ConsumerWidget {
           Text(
             l10n.goalHistorySubtitle,
             style: textTheme.bodySmall?.copyWith(
-              color: AppColors.textSecondary,
+              color: context.colors.textSecondary,
             ),
           ),
           const SizedBox(height: AppSpacing.md),
@@ -350,7 +356,7 @@ class _HistoryCard extends ConsumerWidget {
             Text(
               l10n.goalHistoryEmpty,
               key: const Key('goalHistoryEmpty'),
-              style: AppTextStyles.helper,
+              style: context.textStyles.helper,
             )
           else ...[
             const _HistoryHeader(),
@@ -384,7 +390,7 @@ class _HistoryHeader extends StatelessWidget {
             width: 140,
             child: Text(
               l10n.goalHistoryDate.toUpperCase(),
-              style: AppTextStyles.sectionLabel,
+              style: context.textStyles.sectionLabel,
             ),
           ),
           SizedBox(
@@ -392,14 +398,14 @@ class _HistoryHeader extends StatelessWidget {
             child: Text(
               l10n.goalHistoryAmount.toUpperCase(),
               textAlign: TextAlign.end,
-              style: AppTextStyles.sectionLabel,
+              style: context.textStyles.sectionLabel,
             ),
           ),
           const SizedBox(width: AppSpacing.md),
           Expanded(
             child: Text(
               l10n.goalHistoryNote.toUpperCase(),
-              style: AppTextStyles.sectionLabel,
+              style: context.textStyles.sectionLabel,
             ),
           ),
         ],
@@ -436,7 +442,7 @@ class _HistoryRow extends StatelessWidget {
               appDateFormat(locale).format(allocation.allocatedOn),
               style: tabularNumberStyle(
                 textTheme.bodyMedium!,
-              ).copyWith(color: AppColors.textSecondary),
+              ).copyWith(color: context.colors.textSecondary),
             ),
           ),
           SizedBox(
@@ -462,7 +468,7 @@ class _HistoryRow extends StatelessWidget {
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               style: textTheme.bodyMedium?.copyWith(
-                color: AppColors.textSecondary,
+                color: context.colors.textSecondary,
               ),
             ),
           ),
@@ -472,10 +478,7 @@ class _HistoryRow extends StatelessWidget {
             iconSize: 16,
             visualDensity: VisualDensity.compact,
             tooltip: l10n.goalHistoryDelete,
-            icon: const Icon(
-              Icons.close_rounded,
-              color: AppColors.textDisabled,
-            ),
+            icon: Icon(Icons.close_rounded, color: context.colors.textTertiary),
           ),
         ],
       ),

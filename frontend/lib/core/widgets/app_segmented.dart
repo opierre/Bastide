@@ -32,9 +32,9 @@ class AppSegmented<T> extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(3),
       decoration: BoxDecoration(
-        color: AppColors.surfaceField,
+        color: context.colors.field,
         borderRadius: BorderRadius.circular(AppRadii.md),
-        border: Border.all(color: AppColors.border),
+        border: Border.all(color: context.colors.line),
       ),
       child: Row(
         children: [
@@ -88,7 +88,9 @@ class _Segment extends StatelessWidget {
             label,
             overflow: TextOverflow.ellipsis,
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: selected ? AppColors.iris : AppColors.textSecondary,
+              color: selected
+                  ? context.colors.accent
+                  : context.colors.textSecondary,
               fontWeight: selected ? FontWeight.w600 : FontWeight.w400,
             ),
           ),

@@ -83,9 +83,9 @@ class DateField extends StatelessWidget {
           tooltip: calendarTooltip,
           iconSize: 16,
           visualDensity: VisualDensity.compact,
-          icon: const Icon(
+          icon: Icon(
             Icons.calendar_today_outlined,
-            color: AppColors.textSecondary,
+            color: context.colors.textSecondary,
           ),
         ),
         // The 44 px field height the spec pins is measured without an icon in

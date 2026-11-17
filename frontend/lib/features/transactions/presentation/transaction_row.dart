@@ -88,7 +88,7 @@ class TransactionRow extends ConsumerWidget {
                                 accountIcon,
                                 key: const Key('transactionRowAccountIcon'),
                                 size: 12,
-                                color: AppColors.textSecondary,
+                                color: context.colors.textSecondary,
                               ),
                               const SizedBox(width: AppSpacing.xs),
                             ],
@@ -96,7 +96,7 @@ class TransactionRow extends ConsumerWidget {
                               child: Text(
                                 subtitle,
                                 style: textTheme.bodySmall?.copyWith(
-                                  color: AppColors.textSecondary,
+                                  color: context.colors.textSecondary,
                                 ),
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
@@ -163,7 +163,7 @@ class TransactionRow extends ConsumerWidget {
             child: Text(
               DateFormat.yMd(locale).format(transaction.bookedDate),
               style: textTheme.bodySmall?.copyWith(
-                color: AppColors.textSecondary,
+                color: context.colors.textSecondary,
               ),
               overflow: TextOverflow.ellipsis,
             ),
@@ -222,10 +222,10 @@ class _RecurringButton extends ConsumerWidget {
             ),
       icon: const Icon(Icons.repeat_rounded),
       iconSize: 16,
-      color: inSeries ? AppColors.iris : AppColors.textDisabled,
-      hoverColor: AppColors.irisSoft,
+      color: inSeries ? context.colors.accent : context.colors.textTertiary,
+      hoverColor: context.colors.accentSoft,
       style: inSeries
-          ? IconButton.styleFrom(backgroundColor: AppColors.irisSoft)
+          ? IconButton.styleFrom(backgroundColor: context.colors.accentSoft)
           : null,
       padding: EdgeInsets.zero,
       constraints: const BoxConstraints.tightFor(width: 28, height: 28),
@@ -256,7 +256,7 @@ class _HoverableRowState extends State<_HoverableRow> {
       child: Container(
         height: 52,
         padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
-        color: _hovered ? AppColors.surfaceRowHover : Colors.transparent,
+        color: _hovered ? context.colors.hover : Colors.transparent,
         child: widget.child,
       ),
     );

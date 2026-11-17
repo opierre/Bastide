@@ -31,7 +31,7 @@ class ProposedCategoryChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final hue = CategoryHues.forSlug(slug);
+    final hue = context.categoryColors.forSlug(slug);
 
     return DashedBorder(
       color: hue,

@@ -1,7 +1,7 @@
 import 'package:flutter/foundation.dart';
 
 /// The preset plates a user can pick in Settings › Profil. The names are the
-/// wire keys (`preset:<name>`); the hue each one paints is `AvatarHues`'.
+/// wire keys (`preset:<name>`); the hue each one paints is `CategoryColors.forAvatarPreset`'s.
 enum AvatarPreset { cyan, blue, teal, pink, amber, lime, green, iris }
 
 /// What the user's avatar shows: their initials monogram, their initials on a

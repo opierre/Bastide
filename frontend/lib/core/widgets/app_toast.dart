@@ -105,10 +105,10 @@ class _ToastState extends State<_Toast> {
             vertical: AppSpacing.sm + AppSpacing.xs,
           ),
           decoration: BoxDecoration(
-            color: AppColors.surfaceOverlay,
+            color: context.colors.surface,
             borderRadius: BorderRadius.circular(AppRadii.inset),
-            border: Border.all(color: AppColors.border),
-            boxShadow: AppShadows.card,
+            border: Border.all(color: context.colors.line),
+            boxShadow: context.colors.shadow,
           ),
           child: Row(
             mainAxisSize: MainAxisSize.min,
@@ -119,7 +119,7 @@ class _ToastState extends State<_Toast> {
                 width: 8,
                 height: 8,
                 decoration: BoxDecoration(
-                  color: widget.tone.color,
+                  color: widget.tone.color(context.colors),
                   shape: BoxShape.circle,
                 ),
               ),
@@ -135,7 +135,7 @@ class _ToastState extends State<_Toast> {
                       Text(
                         widget.message!,
                         style: textTheme.bodySmall?.copyWith(
-                          color: AppColors.textSecondary,
+                          color: context.colors.textSecondary,
                         ),
                       ),
                     ],

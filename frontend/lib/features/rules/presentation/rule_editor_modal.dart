@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/tokens.dart';
 import '../../../core/widgets/app_modal.dart';
 import '../../../core/widgets/app_select.dart';
@@ -279,8 +278,8 @@ class _RuleEditorModalState extends ConsumerState<RuleEditorModal> {
                 key: const Key('ruleFormPattern'),
                 controller: _patternController,
                 autofocus: true,
-                style: AppTextStyles.mono.copyWith(
-                  color: AppColors.textPrimary,
+                style: context.textStyles.mono.copyWith(
+                  color: context.colors.text,
                 ),
                 decoration: InputDecoration(
                   hintText: rulePatternHint(l10n, _matchType),

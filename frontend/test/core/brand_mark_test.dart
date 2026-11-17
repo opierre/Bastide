@@ -5,7 +5,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   Widget host(Widget child) => MaterialApp(
-    theme: appDarkTheme,
+    theme: AppTheme.dark,
     home: Scaffold(body: Center(child: child)),
   );
 

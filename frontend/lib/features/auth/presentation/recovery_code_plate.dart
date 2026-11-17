@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/tokens.dart';
 import '../../../l10n/app_localizations.dart';
 
@@ -40,9 +39,9 @@ class _RecoveryCodePlateState extends State<RecoveryCodePlate> {
         AppSpacing.sm + AppSpacing.xs,
       ),
       decoration: BoxDecoration(
-        color: AppColors.surfaceField,
+        color: context.colors.field,
         borderRadius: BorderRadius.circular(AppRadii.inset),
-        border: Border.all(color: AppColors.border),
+        border: Border.all(color: context.colors.line),
       ),
       child: Row(
         children: [
@@ -50,11 +49,11 @@ class _RecoveryCodePlateState extends State<RecoveryCodePlate> {
             child: SelectableText(
               widget.code,
               key: const Key('recoveryCodeText'),
-              style: AppTextStyles.mono.copyWith(
+              style: context.textStyles.mono.copyWith(
                 fontSize: 16,
                 fontWeight: FontWeight.w600,
                 letterSpacing: 1.5,
-                color: AppColors.textPrimary,
+                color: context.colors.text,
               ),
             ),
           ),

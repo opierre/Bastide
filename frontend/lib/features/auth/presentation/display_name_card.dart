@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/api/api_client.dart';
 import '../../../core/session/current_user_provider.dart';
-import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/tokens.dart';
 import '../../../core/widgets/app_card.dart';
 import '../../../core/widgets/app_modal.dart';
@@ -40,8 +39,8 @@ class DisplayNameCard extends ConsumerWidget {
                 const SizedBox(height: 2),
                 Text(
                   l10n.settingsProfileNameSubtitle(name),
-                  style: AppTextStyles.helper.copyWith(
-                    color: AppColors.textSecondary,
+                  style: context.textStyles.helper.copyWith(
+                    color: context.colors.textSecondary,
                   ),
                 ),
               ],
@@ -140,9 +139,9 @@ class _DisplayNameModalState extends ConsumerState<DisplayNameModal> {
         children: [
           Text(
             l10n.settingsProfileNameModalLead,
-            style: Theme.of(
-              context,
-            ).textTheme.bodyMedium?.copyWith(color: AppColors.textSecondary),
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              color: context.colors.textSecondary,
+            ),
           ),
           const SizedBox(height: AppSpacing.md),
           LabeledField(
@@ -154,7 +153,9 @@ class _DisplayNameModalState extends ConsumerState<DisplayNameModal> {
               controller: _nameController,
               autofocus: true,
               autofillHints: const [AutofillHints.newUsername],
-              decoration: errorText != null ? errorFieldDecoration() : null,
+              decoration: errorText != null
+                  ? errorFieldDecoration(context)
+                  : null,
               onFieldSubmitted: (_) => isSaving || !_canSave ? null : _save(),
             ),
           ),

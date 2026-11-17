@@ -145,18 +145,20 @@ class _NewPropertyTile extends StatelessWidget {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const Icon(Icons.add_rounded, size: 22, color: AppColors.iris),
+                Icon(Icons.add_rounded, size: 22, color: context.colors.accent),
                 const SizedBox(height: AppSpacing.sm),
                 Text(
                   l10n.propertiesNewTileTitle,
-                  style: textTheme.titleSmall?.copyWith(color: AppColors.iris),
+                  style: textTheme.titleSmall?.copyWith(
+                    color: context.colors.accent,
+                  ),
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: AppSpacing.xs),
                 Text(
                   l10n.propertiesNewTileBody,
                   style: textTheme.bodySmall?.copyWith(
-                    color: AppColors.textSecondary,
+                    color: context.colors.textSecondary,
                   ),
                   textAlign: TextAlign.center,
                 ),

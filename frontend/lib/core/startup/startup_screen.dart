@@ -6,7 +6,6 @@ import '../backend/backend_connection.dart';
 import '../backend/backend_providers.dart';
 import '../theme/tokens.dart';
 import '../widgets/brand_mark.dart';
-import '../widgets/frame_texture.dart';
 import '../widgets/primary_button.dart';
 import '../widgets/state_views.dart';
 
@@ -25,38 +24,36 @@ class StartupScreen extends ConsumerWidget {
     final mismatch = backend.isLoading ? null : backend.value;
 
     return Scaffold(
-      backgroundColor: AppColors.surfaceSunken,
-      body: FrameTexture(
-        child: CenteredStatePane(
-          maxWidth: 440,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const BrandLockup.login(),
-              const SizedBox(height: AppSpacing.xl),
-              if (failure != null)
-                _Failed(
-                  failure: failure is BackendFailure
-                      ? failure
-                      : const BackendFailure(BackendFailureKind.crashed),
-                  onRetry: () =>
-                      ref.read(backendControllerProvider.notifier).retry(),
-                  onOpenLogs: () => ref.read(openLogsFolderProvider)(),
-                )
-              else if (mismatch?.mismatchedAppVersion case final appVersion?)
-                _VersionWarning(
-                  appVersion: appVersion,
-                  backendVersion: mismatch!.version,
-                  onRetry: () =>
-                      ref.read(backendControllerProvider.notifier).retry(),
-                  onContinue: () =>
-                      ref.read(versionWarningDismissedProvider.notifier).state =
-                          true,
-                )
-              else
-                const _Starting(),
-            ],
-          ),
+      backgroundColor: context.colors.bg,
+      body: CenteredStatePane(
+        maxWidth: 440,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const BrandLockup.login(),
+            const SizedBox(height: AppSpacing.xl),
+            if (failure != null)
+              _Failed(
+                failure: failure is BackendFailure
+                    ? failure
+                    : const BackendFailure(BackendFailureKind.crashed),
+                onRetry: () =>
+                    ref.read(backendControllerProvider.notifier).retry(),
+                onOpenLogs: () => ref.read(openLogsFolderProvider)(),
+              )
+            else if (mismatch?.mismatchedAppVersion case final appVersion?)
+              _VersionWarning(
+                appVersion: appVersion,
+                backendVersion: mismatch!.version,
+                onRetry: () =>
+                    ref.read(backendControllerProvider.notifier).retry(),
+                onContinue: () =>
+                    ref.read(versionWarningDismissedProvider.notifier).state =
+                        true,
+              )
+            else
+              const _Starting(),
+          ],
         ),
       ),
     );
@@ -74,12 +71,12 @@ class _Starting extends StatelessWidget {
       key: const Key('startupLoading'),
       mainAxisSize: MainAxisSize.min,
       children: [
-        const SizedBox(
+        SizedBox(
           width: 15,
           height: 15,
           child: CircularProgressIndicator(
             strokeWidth: 2,
-            color: AppColors.iris,
+            color: context.colors.accent,
           ),
         ),
         const SizedBox(width: AppSpacing.sm + 2),
@@ -87,7 +84,7 @@ class _Starting extends StatelessWidget {
           l10n.startupLoading,
           style: Theme.of(
             context,
-          ).textTheme.bodyLarge?.copyWith(color: AppColors.textSecondary),
+          ).textTheme.bodyLarge?.copyWith(color: context.colors.textSecondary),
         ),
       ],
     );
@@ -190,9 +187,9 @@ class _Notice extends StatelessWidget {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        const GlyphPlate(
+        GlyphPlate(
           icon: Icons.warning_amber_rounded,
-          accent: AppColors.warning,
+          accent: context.colors.warning,
         ),
         const SizedBox(height: AppSpacing.lg),
         Text(
@@ -205,7 +202,9 @@ class _Notice extends StatelessWidget {
         Text(
           message,
           key: const Key('startupFailureMessage'),
-          style: textTheme.bodyLarge?.copyWith(color: AppColors.textSecondary),
+          style: textTheme.bodyLarge?.copyWith(
+            color: context.colors.textSecondary,
+          ),
           textAlign: TextAlign.center,
         ),
         const SizedBox(height: AppSpacing.lg + AppSpacing.xs),

@@ -50,7 +50,7 @@ class RecentActivityCard extends StatelessWidget {
                 onPressed: onViewAll,
                 style: TextButton.styleFrom(
                   padding: EdgeInsets.zero,
-                  foregroundColor: AppColors.iris,
+                  foregroundColor: context.colors.accent,
                   minimumSize: Size.zero,
                   tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                 ),
@@ -65,7 +65,7 @@ class RecentActivityCard extends StatelessWidget {
                     child: Text(
                       l10n.dashboardRecentActivityEmpty,
                       style: textTheme.bodySmall?.copyWith(
-                        color: AppColors.textSecondary,
+                        color: context.colors.textSecondary,
                       ),
                     ),
                   )
@@ -177,7 +177,7 @@ class CompactTransactionRow extends StatelessWidget {
                   transaction.accountLabel,
                   style: textTheme.labelSmall?.copyWith(
                     fontWeight: FontWeight.w400,
-                    color: AppColors.textDisabled,
+                    color: context.colors.textTertiary,
                   ),
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -209,7 +209,7 @@ class CompactTransactionRow extends StatelessWidget {
                   overflow: TextOverflow.ellipsis,
                   style: textTheme.labelSmall?.copyWith(
                     fontWeight: FontWeight.w400,
-                    color: AppColors.textDisabled,
+                    color: context.colors.textTertiary,
                   ),
                 ),
               ],

@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/api/api_client.dart';
-import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/tokens.dart';
 import '../../../core/widgets/app_card.dart';
 import '../../../core/widgets/app_modal.dart';
@@ -39,8 +38,8 @@ class RecoveryCodeCard extends StatelessWidget {
                 const SizedBox(height: 2),
                 Text(
                   l10n.settingsRecoverySubtitle,
-                  style: AppTextStyles.helper.copyWith(
-                    color: AppColors.textSecondary,
+                  style: context.textStyles.helper.copyWith(
+                    color: context.colors.textSecondary,
                   ),
                 ),
               ],
@@ -140,7 +139,7 @@ class _RegenerateRecoveryCodeModalState
                 ? l10n.settingsRecoveryModalGenerated
                 : l10n.settingsRecoveryModalLead,
             style: textTheme.bodyMedium?.copyWith(
-              color: AppColors.textSecondary,
+              color: context.colors.textSecondary,
             ),
           ),
           const SizedBox(height: AppSpacing.md),

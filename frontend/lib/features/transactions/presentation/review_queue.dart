@@ -6,7 +6,6 @@ import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
 import '../../../core/l10n/category_display.dart';
-import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/tokens.dart';
 import '../../../core/widgets/amount_text.dart';
 import '../../../core/widgets/app_card.dart';
@@ -70,7 +69,7 @@ class _ReviewQueueState extends ConsumerState<ReviewQueue> {
           key: const Key('reviewQueueEmpty'),
           style: Theme.of(
             context,
-          ).textTheme.bodyLarge?.copyWith(color: AppColors.textSecondary),
+          ).textTheme.bodyLarge?.copyWith(color: context.colors.textSecondary),
         ),
       );
     }
@@ -117,7 +116,7 @@ class _ReviewQueueState extends ConsumerState<ReviewQueue> {
               key: const Key('reviewQueueList'),
               itemCount: widget.items.length,
               separatorBuilder: (_, _) =>
-                  const Divider(height: 1, color: AppColors.borderSubtle),
+                  Divider(height: 1, color: context.colors.line),
               itemBuilder: (context, index) => _ReviewRow(
                 transaction: widget.items[index],
                 aiIsActive: aiIsActive,
@@ -164,8 +163,7 @@ class ReviewQueueHeaderCard extends ConsumerWidget {
     return AppCard(
       key: const Key('reviewQueueHeaderCard'),
       padding: const EdgeInsets.all(AppSpacing.cardPadding),
-      gradient: AppColors.irisTintGradient,
-      border: Border.all(color: AppColors.irisBorderStrong),
+      border: Border.all(color: context.colors.line),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -177,13 +175,13 @@ class ReviewQueueHeaderCard extends ConsumerWidget {
                 height: 40,
                 alignment: Alignment.center,
                 decoration: BoxDecoration(
-                  color: AppColors.irisSoft,
+                  color: context.colors.accentSoft,
                   borderRadius: BorderRadius.circular(AppRadii.md),
                 ),
-                child: const Icon(
+                child: Icon(
                   Icons.fact_check_outlined,
                   size: 18,
-                  color: AppColors.iris,
+                  color: context.colors.accent,
                 ),
               ),
               const SizedBox(width: AppSpacing.sm + AppSpacing.xs),
@@ -203,7 +201,7 @@ class ReviewQueueHeaderCard extends ConsumerWidget {
                           : l10n.reviewQueueEncouragement,
                       key: const Key('reviewQueueSubtitle'),
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: AppColors.textSecondary,
+                        color: context.colors.textSecondary,
                       ),
                     ),
                   ],
@@ -232,9 +230,9 @@ class ReviewQueueHeaderCard extends ConsumerWidget {
           Text(
             l10n.reviewQueueProgress(resolved, baseline, fraction),
             key: const Key('reviewQueueProgressLabel'),
-            style: Theme.of(
-              context,
-            ).textTheme.labelSmall?.copyWith(color: AppColors.textSecondary),
+            style: Theme.of(context).textTheme.labelSmall?.copyWith(
+              color: context.colors.textSecondary,
+            ),
           ),
           if (!aiIsActive) ...[
             const SizedBox(height: AppSpacing.sm + AppSpacing.xs),
@@ -263,25 +261,27 @@ class _AiInvitation extends StatelessWidget {
         vertical: AppSpacing.sm + 2,
       ),
       decoration: BoxDecoration(
-        color: AppColors.info.withValues(alpha: 0.10),
+        color: context.colors.textSecondary.withValues(alpha: 0.10),
         borderRadius: BorderRadius.circular(AppRadii.md),
-        border: Border.all(color: AppColors.info.withValues(alpha: 0.32)),
+        border: Border.all(
+          color: context.colors.textSecondary.withValues(alpha: 0.32),
+        ),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Icon(
+          Icon(
             Icons.auto_awesome_outlined,
             size: 15,
-            color: AppColors.info,
+            color: context.colors.textSecondary,
           ),
           const SizedBox(width: AppSpacing.sm),
           Expanded(
             child: Text(
               l10n.reviewAiInvitation,
-              style: Theme.of(
-                context,
-              ).textTheme.bodySmall?.copyWith(color: AppColors.info),
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: context.colors.textSecondary,
+              ),
             ),
           ),
           const SizedBox(width: AppSpacing.sm),
@@ -314,7 +314,7 @@ class _InlineLink extends StatelessWidget {
           label,
           style: Theme.of(
             context,
-          ).textTheme.labelSmall?.copyWith(color: AppColors.iris),
+          ).textTheme.labelSmall?.copyWith(color: context.colors.accent),
         ),
       ),
     );
@@ -442,9 +442,9 @@ class _Label extends StatelessWidget {
             DateFormat.yMd(locale).format(transaction.bookedDate),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
-            style: Theme.of(
-              context,
-            ).textTheme.labelSmall?.copyWith(color: AppColors.textDisabled),
+            style: Theme.of(context).textTheme.labelSmall?.copyWith(
+              color: context.colors.textTertiary,
+            ),
           ),
         ],
       ],
@@ -568,7 +568,7 @@ class _NoProposalBlock extends ConsumerWidget {
           Text(
             l10n.reviewNoProposal,
             key: const Key('reviewRowNoProposal'),
-            style: AppTextStyles.reviewNoProposal,
+            style: context.textStyles.reviewNoProposal,
           ),
           const SizedBox(width: AppSpacing.sm + AppSpacing.xs),
           Builder(

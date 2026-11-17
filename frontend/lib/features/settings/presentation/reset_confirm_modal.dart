@@ -71,13 +71,13 @@ class _ResetConfirmModalState extends ConsumerState<ResetConfirmModal> {
         width: 38,
         height: 38,
         decoration: BoxDecoration(
-          color: AppColors.negative.withValues(alpha: 0.12),
+          color: context.colors.negative.withValues(alpha: 0.12),
           borderRadius: BorderRadius.circular(AppRadii.md),
         ),
-        child: const Icon(
+        child: Icon(
           Icons.delete_outline_rounded,
           size: 19,
-          color: AppColors.negative,
+          color: context.colors.negative,
         ),
       ),
       actions: [
@@ -90,10 +90,12 @@ class _ResetConfirmModalState extends ConsumerState<ResetConfirmModal> {
           // Disabled until the word matches exactly, and while the delete runs.
           onPressed: confirmed && !isResetting ? _confirm : null,
           style: FilledButton.styleFrom(
-            backgroundColor: AppColors.negative,
-            foregroundColor: AppColors.negativeInk,
-            disabledBackgroundColor: AppColors.negative.withValues(alpha: 0.45),
-            disabledForegroundColor: AppColors.negativeInk.withValues(
+            backgroundColor: context.colors.negative,
+            foregroundColor: context.colors.onPrimary,
+            disabledBackgroundColor: context.colors.negative.withValues(
+              alpha: 0.45,
+            ),
+            disabledForegroundColor: context.colors.onPrimary.withValues(
               alpha: 0.45,
             ),
           ),
@@ -101,12 +103,12 @@ class _ResetConfirmModalState extends ConsumerState<ResetConfirmModal> {
             mainAxisSize: MainAxisSize.min,
             children: [
               if (isResetting) ...[
-                const SizedBox(
+                SizedBox(
                   width: 13,
                   height: 13,
                   child: CircularProgressIndicator(
                     strokeWidth: 2,
-                    color: AppColors.negativeInk,
+                    color: context.colors.onPrimary,
                   ),
                 ),
                 const SizedBox(width: AppSpacing.sm),
@@ -122,13 +124,14 @@ class _ResetConfirmModalState extends ConsumerState<ResetConfirmModal> {
           Text.rich(
             TextSpan(
               children: _leadSpans(
+                context,
                 l10n.settingsResetConfirmLead,
                 ref.watch(currentUserProvider)?.displayName ?? '',
               ),
             ),
             key: const Key('resetConfirmLead'),
             style: textTheme.bodyMedium?.copyWith(
-              color: AppColors.textSecondary,
+              color: context.colors.textSecondary,
             ),
           ),
           const SizedBox(height: AppSpacing.md),
@@ -136,9 +139,9 @@ class _ResetConfirmModalState extends ConsumerState<ResetConfirmModal> {
           const SizedBox(height: AppSpacing.sm + AppSpacing.xs),
           Text(
             l10n.settingsResetConfirmNote,
-            style: AppTextStyles.helper.copyWith(
+            style: context.textStyles.helper.copyWith(
               fontSize: 11.5,
-              color: AppColors.textDisabled,
+              color: context.colors.textTertiary,
             ),
           ),
           const SizedBox(height: AppSpacing.md),
@@ -157,8 +160,8 @@ class _ResetConfirmModalState extends ConsumerState<ResetConfirmModal> {
                 controller: _typed,
                 enabled: !isResetting,
                 autofocus: true,
-                style: AppTextStyles.mono.copyWith(
-                  color: AppColors.textPrimary,
+                style: context.textStyles.mono.copyWith(
+                  color: context.colors.text,
                 ),
               ),
             ),
@@ -175,7 +178,11 @@ class _ResetConfirmModalState extends ConsumerState<ResetConfirmModal> {
 /// Built by locating the name inside the localized sentence rather than by
 /// concatenating fragments: the placeholder sits mid-sentence in French and at
 /// the head in English, and only the translation knows where.
-List<TextSpan> _leadSpans(String Function(String) lead, String name) {
+List<TextSpan> _leadSpans(
+  BuildContext context,
+  String Function(String) lead,
+  String name,
+) {
   final sentence = lead(name);
   final at = name.isEmpty ? -1 : sentence.indexOf(name);
   if (at < 0) return [TextSpan(text: sentence)];
@@ -183,10 +190,7 @@ List<TextSpan> _leadSpans(String Function(String) lead, String name) {
     TextSpan(text: sentence.substring(0, at)),
     TextSpan(
       text: name,
-      style: const TextStyle(
-        fontWeight: FontWeight.w700,
-        color: AppColors.textPrimary,
-      ),
+      style: TextStyle(fontWeight: FontWeight.w700, color: context.colors.text),
     ),
     TextSpan(text: sentence.substring(at + name.length)),
   ];
@@ -207,7 +211,7 @@ class _CountsPlate extends StatelessWidget {
     );
     final textTheme = Theme.of(context).textTheme;
     final valueStyle = tabularNumberStyle(
-      textTheme.bodyMedium!.copyWith(color: AppColors.textPrimary),
+      textTheme.bodyMedium!.copyWith(color: context.colors.text),
     );
 
     final rows = <(String, int?)>[
@@ -229,9 +233,9 @@ class _CountsPlate extends StatelessWidget {
         vertical: AppSpacing.xs,
       ),
       decoration: BoxDecoration(
-        color: AppColors.surfaceField,
+        color: context.colors.field,
         borderRadius: BorderRadius.circular(AppRadii.inset),
-        border: Border.all(color: AppColors.borderSubtle),
+        border: Border.all(color: context.colors.line),
       ),
       child: Column(
         children: [
@@ -247,7 +251,7 @@ class _CountsPlate extends StatelessWidget {
                       label,
                       overflow: TextOverflow.ellipsis,
                       style: textTheme.bodyMedium?.copyWith(
-                        color: AppColors.textSecondary,
+                        color: context.colors.textSecondary,
                       ),
                     ),
                   ),

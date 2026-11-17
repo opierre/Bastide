@@ -157,8 +157,8 @@ class _SectionNavItemState extends State<_SectionNavItem> {
   @override
   Widget build(BuildContext context) {
     final foreground = widget.selected
-        ? AppColors.iris
-        : (_hovered ? AppColors.textPrimary : AppColors.textSecondary);
+        ? context.colors.accent
+        : (_hovered ? context.colors.text : context.colors.textSecondary);
 
     return Padding(
       padding: const EdgeInsets.only(bottom: 2),
@@ -176,8 +176,8 @@ class _SectionNavItemState extends State<_SectionNavItem> {
             alignment: Alignment.centerLeft,
             decoration: BoxDecoration(
               color: widget.selected
-                  ? AppColors.irisSoft
-                  : (_hovered ? AppColors.sidebarHover : Colors.transparent),
+                  ? context.colors.accentSoft
+                  : (_hovered ? context.colors.hover : Colors.transparent),
               borderRadius: BorderRadius.circular(AppRadii.md),
             ),
             child: Text(
@@ -343,7 +343,7 @@ class _AboutPanel extends ConsumerWidget {
           child: Text(
             l10n.settingsAboutCreditsIcons,
             key: const Key('settingsAboutCredits'),
-            style: style.copyWith(color: AppColors.textSecondary),
+            style: style.copyWith(color: context.colors.textSecondary),
           ),
         ),
       ],
@@ -392,8 +392,8 @@ class _SettingsCard extends StatelessWidget {
             const SizedBox(height: AppSpacing.sm + AppSpacing.xs),
             Text(
               note!,
-              style: AppTextStyles.helper.copyWith(
-                color: AppColors.textDisabled,
+              style: context.textStyles.helper.copyWith(
+                color: context.colors.textTertiary,
               ),
             ),
           ],
@@ -418,14 +418,14 @@ class _FormatPlate extends StatelessWidget {
         vertical: AppSpacing.sm + AppSpacing.xs,
       ),
       decoration: BoxDecoration(
-        color: AppColors.surfaceField,
+        color: context.colors.field,
         borderRadius: BorderRadius.circular(AppRadii.md),
-        border: Border.all(color: AppColors.borderSubtle),
+        border: Border.all(color: context.colors.line),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(label.toUpperCase(), style: AppTextStyles.sectionLabel),
+          Text(label.toUpperCase(), style: context.textStyles.sectionLabel),
           const SizedBox(height: AppSpacing.xs + 2),
           child,
         ],

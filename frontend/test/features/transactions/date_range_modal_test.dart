@@ -11,7 +11,7 @@ Widget _wrap({
 }) {
   return MaterialApp(
     locale: locale,
-    theme: appDarkTheme,
+    theme: AppTheme.dark,
     localizationsDelegates: AppLocalizations.localizationsDelegates,
     supportedLocales: AppLocalizations.supportedLocales,
     home: Scaffold(
@@ -37,7 +37,7 @@ Future<(DateTime?, DateTime?)?> _openAndSubmit(
   await tester.pumpWidget(
     MaterialApp(
       locale: const Locale('fr'),
-      theme: appDarkTheme,
+      theme: AppTheme.dark,
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
       home: Scaffold(

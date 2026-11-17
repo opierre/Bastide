@@ -49,14 +49,16 @@ class AppToggle extends StatelessWidget {
               padding: const EdgeInsets.all(2),
               alignment: value ? Alignment.centerRight : Alignment.centerLeft,
               decoration: BoxDecoration(
-                color: value ? AppColors.iris : AppColors.surfaceHover,
+                color: value ? context.colors.accent : context.colors.hover,
                 borderRadius: BorderRadius.circular(AppRadii.pill),
               ),
               child: Container(
                 width: 16,
                 height: 16,
                 decoration: BoxDecoration(
-                  color: value ? AppColors.irisInk : AppColors.textSecondary,
+                  color: value
+                      ? context.colors.onAccent
+                      : context.colors.textSecondary,
                   shape: BoxShape.circle,
                 ),
               ),

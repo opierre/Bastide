@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/tokens.dart';
 
 /// One way to get an engine, as an inset plate inside the « IA locale » card:
@@ -17,7 +16,7 @@ class EnginePlate extends StatelessWidget {
     required this.title,
     required this.caption,
     this.captionKey,
-    this.captionColor = AppColors.textSecondary,
+    this.captionColor,
     this.trailing,
     this.footer,
   });
@@ -29,7 +28,7 @@ class EnginePlate extends StatelessWidget {
 
   /// Secondary by default; a failure caption takes the negative hue, always
   /// next to words that say what failed.
-  final Color captionColor;
+  final Color? captionColor;
 
   final Widget? trailing;
   final Widget? footer;
@@ -44,9 +43,9 @@ class EnginePlate extends StatelessWidget {
         vertical: AppSpacing.sm + AppSpacing.xs,
       ),
       decoration: BoxDecoration(
-        color: AppColors.surfaceField,
+        color: context.colors.field,
         borderRadius: BorderRadius.circular(AppRadii.inset),
-        border: Border.all(color: AppColors.borderSubtle),
+        border: Border.all(color: context.colors.line),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -57,10 +56,10 @@ class EnginePlate extends StatelessWidget {
                 width: 36,
                 height: 36,
                 decoration: BoxDecoration(
-                  color: AppColors.irisSoft,
+                  color: context.colors.accentSoft,
                   borderRadius: BorderRadius.circular(AppRadii.md),
                 ),
-                child: Icon(icon, size: 18, color: AppColors.iris),
+                child: Icon(icon, size: 18, color: context.colors.accent),
               ),
               const SizedBox(width: AppSpacing.sm + AppSpacing.xs),
               Expanded(
@@ -71,14 +70,16 @@ class EnginePlate extends StatelessWidget {
                       title,
                       style: textTheme.bodyMedium?.copyWith(
                         fontWeight: FontWeight.w700,
-                        color: AppColors.textPrimary,
+                        color: context.colors.text,
                       ),
                     ),
                     const SizedBox(height: 2),
                     Text(
                       caption,
                       key: captionKey,
-                      style: AppTextStyles.helper.copyWith(color: captionColor),
+                      style: context.textStyles.helper.copyWith(
+                        color: captionColor ?? context.colors.textSecondary,
+                      ),
                     ),
                   ],
                 ),

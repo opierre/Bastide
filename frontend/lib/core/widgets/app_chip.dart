@@ -21,18 +21,20 @@ class AppChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final tint = color;
-    final foreground = tint ?? AppColors.textSecondary;
+    final foreground = tint ?? context.colors.textSecondary;
 
     return Container(
       height: 22,
       padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm + 2),
       decoration: BoxDecoration(
         color: tint == null
-            ? AppColors.surfaceOverlay
+            ? context.colors.surface
             : tint.withValues(alpha: 0.12),
         borderRadius: BorderRadius.circular(AppRadii.pill),
         border: Border.all(
-          color: tint == null ? AppColors.border : tint.withValues(alpha: 0.30),
+          color: tint == null
+              ? context.colors.line
+              : tint.withValues(alpha: 0.30),
         ),
       ),
       child: Row(

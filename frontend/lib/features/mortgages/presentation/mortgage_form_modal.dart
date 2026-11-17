@@ -262,8 +262,8 @@ class _MortgageFormModalState extends ConsumerState<MortgageFormModal> {
           FilledButton(
             key: const Key('mortgageDeleteConfirm'),
             style: FilledButton.styleFrom(
-              backgroundColor: AppColors.negative,
-              foregroundColor: AppColors.negativeInk,
+              backgroundColor: context.colors.negative,
+              foregroundColor: context.colors.onPrimary,
             ),
             onPressed: () => Navigator.of(dialogContext).pop(true),
             child: Text(l10n.mortgageDeleteConfirm),
@@ -276,7 +276,7 @@ class _MortgageFormModalState extends ConsumerState<MortgageFormModal> {
           key: const Key('mortgageDeleteBody'),
           style: Theme.of(
             dialogContext,
-          ).textTheme.bodyMedium?.copyWith(color: AppColors.textSecondary),
+          ).textTheme.bodyMedium?.copyWith(color: context.colors.textSecondary),
         ),
       ),
     );
@@ -334,7 +334,7 @@ class _MortgageFormModalState extends ConsumerState<MortgageFormModal> {
         l10n.mortgageFormSubtitle,
         style: Theme.of(
           context,
-        ).textTheme.bodySmall?.copyWith(color: AppColors.textSecondary),
+        ).textTheme.bodySmall?.copyWith(color: context.colors.textSecondary),
       ),
       width: 600,
       actions: [
@@ -597,7 +597,7 @@ class _InstalmentPlate extends StatelessWidget {
     final locale = Localizations.localeOf(context).toString();
     final textTheme = Theme.of(context).textTheme;
     final secondary = textTheme.bodySmall?.copyWith(
-      color: AppColors.textSecondary,
+      color: context.colors.textSecondary,
     );
 
     final Widget content;
@@ -631,7 +631,7 @@ class _InstalmentPlate extends StatelessWidget {
         AsyncError(:final error) => Text(
           localizeMortgageError(l10n, error),
           key: const Key('mortgageFormPlateError'),
-          style: textTheme.bodySmall?.copyWith(color: AppColors.negative),
+          style: textTheme.bodySmall?.copyWith(color: context.colors.negative),
         ),
         _ => Text(
           l10n.mortgageFormPlatePending,
@@ -646,15 +646,15 @@ class _InstalmentPlate extends StatelessWidget {
         key: const Key('mortgageFormPlate'),
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
         decoration: BoxDecoration(
-          color: AppColors.surfaceField,
+          color: context.colors.field,
           borderRadius: BorderRadius.circular(AppRadii.md),
         ),
         child: Row(
           children: [
-            const Icon(
+            Icon(
               Icons.lock_outline_rounded,
               size: 15,
-              color: AppColors.textDisabled,
+              color: context.colors.textTertiary,
             ),
             const SizedBox(width: 10),
             Expanded(child: content),

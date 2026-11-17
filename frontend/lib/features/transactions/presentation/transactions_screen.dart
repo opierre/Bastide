@@ -65,7 +65,7 @@ class TransactionsScreen extends ConsumerWidget {
                         l10n.transactionsSearchEmpty,
                         key: const Key('transactionsSearchEmpty'),
                         style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                          color: AppColors.textSecondary,
+                          color: context.colors.textSecondary,
                         ),
                       ),
                     )
@@ -202,15 +202,15 @@ class _FilterPillButton extends StatelessWidget {
           horizontal: AppSpacing.sm + AppSpacing.xs,
         ),
         decoration: BoxDecoration(
-          color: AppColors.surfaceRaised,
+          color: context.colors.bg,
           borderRadius: BorderRadius.circular(AppRadii.md),
-          border: Border.all(color: AppColors.border),
+          border: Border.all(color: context.colors.line),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
             if (icon != null) ...[
-              Icon(icon, size: 14, color: AppColors.textSecondary),
+              Icon(icon, size: 14, color: context.colors.textSecondary),
               const SizedBox(width: AppSpacing.xs + 1),
             ],
             Flexible(
@@ -221,10 +221,10 @@ class _FilterPillButton extends StatelessWidget {
               ),
             ),
             const SizedBox(width: AppSpacing.xs),
-            const Icon(
+            Icon(
               Icons.expand_more_rounded,
               size: 14,
-              color: AppColors.textSecondary,
+              color: context.colors.textSecondary,
             ),
           ],
         ),
@@ -338,7 +338,7 @@ class _CategoryFilterItem extends StatelessWidget {
         Icon(
           CategoryIcons.forSlug(slug),
           size: 14,
-          color: CategoryHues.forSlug(slug),
+          color: context.categoryColors.forSlug(slug),
         ),
         const SizedBox(width: AppSpacing.sm),
         Flexible(
@@ -407,15 +407,15 @@ class _NeedsReviewToggle extends StatelessWidget {
         height: 20,
         padding: const EdgeInsets.all(2),
         decoration: BoxDecoration(
-          color: value ? AppColors.iris : AppColors.surfaceHover,
+          color: value ? context.colors.accent : context.colors.hover,
           borderRadius: BorderRadius.circular(AppRadii.pill),
         ),
         alignment: value ? Alignment.centerRight : Alignment.centerLeft,
         child: Container(
           width: 16,
           height: 16,
-          decoration: const BoxDecoration(
-            color: Colors.white,
+          decoration: BoxDecoration(
+            color: context.colors.bg,
             shape: BoxShape.circle,
           ),
         ),
@@ -456,7 +456,7 @@ class _TransactionsListCard extends ConsumerWidget {
               key: const Key('transactionsList'),
               itemCount: page.items.length,
               separatorBuilder: (_, _) =>
-                  const Divider(height: 1, color: AppColors.borderSubtle),
+                  Divider(height: 1, color: context.colors.line),
               itemBuilder: (context, index) {
                 final transaction = page.items[index];
                 return switch (cards[transaction.accountId]) {
@@ -480,8 +480,8 @@ class _TransactionsListCard extends ConsumerWidget {
           Container(
             height: 52,
             padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
-            decoration: const BoxDecoration(
-              border: Border(top: BorderSide(color: AppColors.borderSubtle)),
+            decoration: BoxDecoration(
+              border: Border(top: BorderSide(color: context.colors.line)),
             ),
             child: Row(
               children: [
@@ -489,7 +489,7 @@ class _TransactionsListCard extends ConsumerWidget {
                   l10n.transactionsPager(from, to, page.total),
                   key: const Key('transactionsPagerLabel'),
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: AppColors.textSecondary,
+                    color: context.colors.textSecondary,
                   ),
                 ),
                 const Spacer(),

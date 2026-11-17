@@ -25,7 +25,7 @@ Future<void> _pump(
   addTearDown(tester.view.reset);
   await tester.pumpWidget(
     MaterialApp(
-      theme: appDarkTheme,
+      theme: AppTheme.dark,
       home: Scaffold(
         body: Center(
           child: SizedBox.fromSize(
@@ -148,7 +148,7 @@ RenderObject _painter(WidgetTester tester) => tester.renderObject(
   return (mark, Offset(mark.dx, zeroY));
 }
 
-final _area = AppColors.iris.withValues(alpha: AppChart.areaAlpha);
+final _area = AppColors.dark.accent.withValues(alpha: AppChart.areaAlpha);
 
 /// The painter's y for [value], in its own coordinates.
 double _localY(WidgetTester tester, num value) {
@@ -169,7 +169,8 @@ List<Offset> _averageDots(WidgetTester tester) {
       if (method == #drawLine) {
         final paint = arguments[2] as Paint;
         // By 8-bit value: a [Paint] holds its color in single precision.
-        if (paint.color.toARGB32() == SavingsChart.averageColor.toARGB32() &&
+        if (paint.color.toARGB32() ==
+                SavingsChart.averageColor(AppColors.dark).toARGB32() &&
             paint.strokeCap == StrokeCap.round) {
           dots.add(arguments[0] as Offset);
         }
@@ -294,7 +295,7 @@ void main() {
     ) async {
       await _pump(tester, SavingsChartView.bars, average: _average);
 
-      expect(SavingsChart.averageColor.a, lessThan(1));
+      expect(SavingsChart.averageColor(AppColors.dark).a, lessThan(1));
       // Every bar paints before the first average dot.
       final calls = <Symbol>[];
       int? firstDot;
@@ -304,7 +305,7 @@ void main() {
           if (firstDot == null &&
               method == #drawLine &&
               (arguments[2] as Paint).color.toARGB32() ==
-                  SavingsChart.averageColor.toARGB32()) {
+                  SavingsChart.averageColor(AppColors.dark).toARGB32()) {
             firstDot = calls.length;
           }
           calls.add(method);

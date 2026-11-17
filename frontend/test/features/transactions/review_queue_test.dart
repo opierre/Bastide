@@ -35,7 +35,7 @@ const _electronics = TransactionCategory(
   name: 'category.shopping.electronics',
   kind: 'expense',
   icon: 'devices',
-  color: '#64748B',
+  color: 'cat0',
 );
 
 const _catalog = [
@@ -46,7 +46,7 @@ const _catalog = [
     name: 'category.shopping.electronics',
     kind: 'expense',
     icon: 'devices',
-    color: '#64748B',
+    color: 'cat0',
     isSystem: true,
   ),
 ];
@@ -138,7 +138,7 @@ Widget _wrap({
     ],
     child: MaterialApp(
       locale: locale,
-      theme: appDarkTheme,
+      theme: AppTheme.dark,
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
       home: Scaffold(

@@ -7,7 +7,6 @@ import '../../../core/widgets/amount_text.dart';
 import '../../../core/widgets/app_card.dart';
 import '../../../core/widgets/app_shell.dart';
 import '../../../core/widgets/inline_banner.dart';
-import '../../../core/widgets/monogram_avatar.dart';
 import '../../../core/widgets/primary_button.dart';
 import '../../../core/widgets/state_views.dart';
 import '../../../l10n/app_localizations.dart';
@@ -109,16 +108,16 @@ class _EmptyState extends StatelessWidget {
             height: 64,
             alignment: Alignment.center,
             decoration: BoxDecoration(
-              color: AppColors.irisSoft,
+              color: context.colors.accentSoft,
               borderRadius: BorderRadius.circular(AppRadii.xl),
             ),
-            child: const SizedBox.square(
+            child: SizedBox.square(
               dimension: 27,
               child: FittedBox(
                 child: NavGlyphIcon(
                   glyph: NavGlyph.house,
                   filled: false,
-                  color: AppColors.iris,
+                  color: context.colors.accent,
                 ),
               ),
             ),
@@ -133,7 +132,7 @@ class _EmptyState extends StatelessWidget {
           Text(
             l10n.mortgagesEmptyBody,
             style: textTheme.bodyLarge?.copyWith(
-              color: AppColors.textSecondary,
+              color: context.colors.textSecondary,
             ),
             textAlign: TextAlign.center,
           ),
@@ -293,15 +292,16 @@ class _ChargeCard extends StatelessWidget {
         horizontal: 22,
         vertical: AppSpacing.cardPadding,
       ),
-      gradient: AppColors.irisTintGradient,
-      border: Border.all(color: AppColors.irisBorderStrong),
+      border: Border.all(color: context.colors.line),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
         children: [
           Text(
             l10n.mortgagesChargeLabel.toUpperCase(),
-            style: AppTextStyles.statLabel.copyWith(color: AppColors.iris),
+            style: context.textStyles.statLabel.copyWith(
+              color: context.colors.accent,
+            ),
           ),
           const SizedBox(height: AppSpacing.sm),
           AmountText(
@@ -321,7 +321,7 @@ class _ChargeCard extends StatelessWidget {
                     mortgageDateFormat(locale).format(next),
                   ),
             key: const Key('mortgagesChargeCaption'),
-            style: AppTextStyles.helper.copyWith(fontSize: 12),
+            style: context.textStyles.helper.copyWith(fontSize: 12),
           ),
           const SizedBox(height: AppSpacing.sm + AppSpacing.xs),
           Wrap(
@@ -336,9 +336,7 @@ class _ChargeCard extends StatelessWidget {
                       width: 8,
                       height: 8,
                       decoration: BoxDecoration(
-                        color:
-                            MonogramAvatar.hueFor(charge.lender) ??
-                            MonogramHues.unknownForeground,
+                        color: context.colors.textTertiary,
                         borderRadius: BorderRadius.circular(2),
                       ),
                     ),
@@ -348,7 +346,7 @@ class _ChargeCard extends StatelessWidget {
                         charge.lender,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        style: AppTextStyles.helper.copyWith(fontSize: 11),
+                        style: context.textStyles.helper.copyWith(fontSize: 11),
                       ),
                     ),
                     const SizedBox(width: AppSpacing.xs),
@@ -359,8 +357,8 @@ class _ChargeCard extends StatelessWidget {
                         locale: locale,
                       ),
                       style: tabularNumberStyle(
-                        AppTextStyles.helper,
-                      ).copyWith(fontSize: 11, color: AppColors.textPrimary),
+                        context.textStyles.helper,
+                      ).copyWith(fontSize: 11, color: context.colors.text),
                     ),
                   ],
                 ),
@@ -399,7 +397,7 @@ class _OutstandingCard extends StatelessWidget {
         children: [
           Text(
             l10n.mortgagesOutstandingLabel.toUpperCase(),
-            style: AppTextStyles.statLabel,
+            style: context.textStyles.statLabel,
           ),
           const SizedBox(height: AppSpacing.sm),
           AmountText(
@@ -416,7 +414,7 @@ class _OutstandingCard extends StatelessWidget {
               money(summary.totalPrincipalMinor),
               summary.activeCount,
             ),
-            style: AppTextStyles.helper.copyWith(fontSize: 12),
+            style: context.textStyles.helper.copyWith(fontSize: 12),
           ),
           const SizedBox(height: AppSpacing.sm + AppSpacing.xs),
           LoanProgressBar(bps: summary.repaidBps),
@@ -428,7 +426,7 @@ class _OutstandingCard extends StatelessWidget {
             ),
             key: const Key('mortgagesRepaidLine'),
             style: tabularNumberStyle(
-              AppTextStyles.helper,
+              context.textStyles.helper,
             ).copyWith(fontSize: 11),
           ),
         ],

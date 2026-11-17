@@ -49,7 +49,7 @@ class _CycleBarsState extends State<CycleBars> {
 
   @override
   Widget build(BuildContext context) {
-    final labelStyle = ChartPaints.labelStyle(Theme.of(context).textTheme);
+    final labelStyle = ChartPaints.labelStyle(context);
     final scale = _scale(widget.values);
     final levels = scale.ticks.map(widget.valueLabel).toList();
     final tooltips = widget.tooltips;
@@ -65,6 +65,7 @@ class _CycleBarsState extends State<CycleBars> {
                 child: CustomPaint(
                   size: Size.infinite,
                   painter: _CycleBarsPainter(
+                    colors: context.colors,
                     values: values,
                     scale: scale,
                     lastInProgress: widget.lastInProgress,
@@ -178,7 +179,11 @@ Rect _barRect(List<int> values, ChartScale scale, int index, Rect plot) {
 }
 
 class _CycleBarsPainter extends CustomPainter {
+  /// The active theme's colours.
+  final AppColors colors;
+
   _CycleBarsPainter({
+    required this.colors,
     required this.values,
     required this.scale,
     required this.lastInProgress,
@@ -209,6 +214,7 @@ class _CycleBarsPainter extends CustomPainter {
     if (plot.width <= 0 || plot.height <= 0) return;
 
     ChartPaints.grid(
+      colors,
       canvas,
       size,
       plot,
@@ -229,12 +235,12 @@ class _CycleBarsPainter extends CustomPainter {
       if (open) {
         canvas.drawRRect(
           rect,
-          Paint()..color = AppColors.negative.withValues(alpha: _openFillAlpha),
+          Paint()..color = colors.negative.withValues(alpha: _openFillAlpha),
         );
         canvas.drawPath(
           ChartPaints.dashed(Path()..addRRect(rect)),
           Paint()
-            ..color = AppColors.negative
+            ..color = colors.negative
             ..style = PaintingStyle.stroke
             ..strokeWidth = _openOutline,
         );
@@ -242,7 +248,7 @@ class _CycleBarsPainter extends CustomPainter {
         final alpha = hovered == i ? _hoverAlpha : _barAlpha;
         canvas.drawRRect(
           rect,
-          Paint()..color = AppColors.negative.withValues(alpha: alpha),
+          Paint()..color = colors.negative.withValues(alpha: alpha),
         );
       }
     }
@@ -250,6 +256,7 @@ class _CycleBarsPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(_CycleBarsPainter oldDelegate) =>
+      oldDelegate.colors != colors ||
       !listEquals(oldDelegate.values, values) ||
       oldDelegate.scale != scale ||
       oldDelegate.lastInProgress != lastInProgress ||

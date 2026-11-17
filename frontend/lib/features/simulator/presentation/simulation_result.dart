@@ -154,8 +154,7 @@ class _ResultCard extends StatelessWidget {
         horizontal: 22,
         vertical: AppSpacing.cardPadding,
       ),
-      gradient: hero ? AppColors.irisTintGradient : null,
-      border: hero ? Border.all(color: AppColors.irisBorderStrong) : null,
+      border: hero ? Border.all(color: context.colors.line) : null,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
@@ -165,8 +164,8 @@ class _ResultCard extends StatelessWidget {
               Flexible(
                 child: Text(
                   label.toUpperCase(),
-                  style: AppTextStyles.statLabel.copyWith(
-                    color: hero ? AppColors.iris : null,
+                  style: context.textStyles.statLabel.copyWith(
+                    color: hero ? context.colors.accent : null,
                   ),
                 ),
               ),
@@ -184,8 +183,8 @@ class _ResultCard extends StatelessWidget {
             overflow: TextOverflow.ellipsis,
             style: valueStyle.copyWith(
               color: value == null
-                  ? AppColors.textDisabled
-                  : AppColors.textPrimary,
+                  ? context.colors.textTertiary
+                  : context.colors.text,
             ),
           ),
           const SizedBox(height: AppSpacing.xs + 2),
@@ -193,7 +192,7 @@ class _ResultCard extends StatelessWidget {
             caption,
             key: captionKey,
             style: tabularNumberStyle(
-              AppTextStyles.helper,
+              context.textStyles.helper,
             ).copyWith(fontSize: 12),
           ),
         ],
@@ -276,7 +275,7 @@ class HcsfReadingCard extends StatelessWidget {
     return AppCard(
       key: const Key('hcsfCard'),
       padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 16),
-      border: over ? Border.all(color: AppColors.warningBorder) : null,
+      border: over ? Border.all(color: context.colors.lineStrong) : null,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         mainAxisSize: MainAxisSize.min,
@@ -295,18 +294,18 @@ class HcsfReadingCard extends StatelessWidget {
               const Spacer(),
               // Body content, never a tooltip: the app makes no lending
               // decisions and says so where the reading is shown.
-              const Icon(
+              Icon(
                 Icons.info_outline_rounded,
                 size: 12,
-                color: AppColors.textDisabled,
+                color: context.colors.textTertiary,
               ),
               const SizedBox(width: AppSpacing.xs + 1),
               Text(
                 l10n.simulatorHcsfCaveat,
                 key: const Key('hcsfCaveat'),
-                style: AppTextStyles.helper.copyWith(
+                style: context.textStyles.helper.copyWith(
                   fontSize: 11,
-                  color: AppColors.textDisabled,
+                  color: context.colors.textTertiary,
                 ),
               ),
             ],
@@ -487,7 +486,7 @@ class _ReadingColumn extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       mainAxisSize: MainAxisSize.min,
       children: [
-        Text(label.toUpperCase(), style: AppTextStyles.statLabel),
+        Text(label.toUpperCase(), style: context.textStyles.statLabel),
         const SizedBox(height: AppSpacing.xs + 2),
         Row(
           crossAxisAlignment: CrossAxisAlignment.baseline,
@@ -504,8 +503,8 @@ class _ReadingColumn extends StatelessWidget {
                       textTheme.displayMedium!.copyWith(fontSize: 22),
                     ).copyWith(
                       color: value == null
-                          ? AppColors.textDisabled
-                          : AppColors.textPrimary,
+                          ? context.colors.textTertiary
+                          : context.colors.text,
                     ),
               ),
             ),
@@ -513,7 +512,7 @@ class _ReadingColumn extends StatelessWidget {
               const SizedBox(width: AppSpacing.sm),
               Text(
                 reference!,
-                style: AppTextStyles.helper.copyWith(fontSize: 12),
+                style: context.textStyles.helper.copyWith(fontSize: 12),
               ),
             ],
           ],
@@ -525,7 +524,7 @@ class _ReadingColumn extends StatelessWidget {
             caption!,
             key: captionKey,
             style: tabularNumberStyle(
-              AppTextStyles.helper,
+              context.textStyles.helper,
             ).copyWith(fontSize: 11.5),
           ),
         ],
@@ -561,12 +560,14 @@ class _ReadingGauge extends StatelessWidget {
             borderRadius: BorderRadius.circular(3),
             child: Container(
               height: 6,
-              color: AppColors.surfaceHover,
+              color: context.colors.hover,
               child: FractionallySizedBox(
                 alignment: Alignment.centerLeft,
                 widthFactor: fill.clamp(0.0, 1.0),
                 child: ColoredBox(
-                  color: warning ? AppColors.warning : AppColors.iris,
+                  color: warning
+                      ? context.colors.warning
+                      : context.colors.accent,
                 ),
               ),
             ),
@@ -581,7 +582,7 @@ class _ReadingGauge extends StatelessWidget {
                 child: Container(
                   width: 2,
                   height: 12,
-                  color: AppColors.textPrimary,
+                  color: context.colors.text,
                 ),
               ),
             ),
@@ -609,7 +610,7 @@ class _UnknownIncomeBlock extends StatelessWidget {
       children: [
         Text(
           l10n.simulatorRatioLabel.toUpperCase(),
-          style: AppTextStyles.statLabel,
+          style: context.textStyles.statLabel,
         ),
         const SizedBox(height: AppSpacing.xs + 2),
         Text(
@@ -617,14 +618,14 @@ class _UnknownIncomeBlock extends StatelessWidget {
           key: const Key('hcsfRatioValue'),
           style: textTheme.displayMedium!.copyWith(
             fontSize: 22,
-            color: AppColors.textDisabled,
+            color: context.colors.textTertiary,
           ),
         ),
         const SizedBox(height: AppSpacing.xs + 2),
         Text(
           l10n.simulatorRatioUnknown,
           key: const Key('hcsfUnknownIncomeText'),
-          style: AppTextStyles.helper.copyWith(fontSize: 12),
+          style: context.textStyles.helper.copyWith(fontSize: 12),
         ),
         const SizedBox(height: AppSpacing.sm + 2),
         SizedBox(
@@ -636,8 +637,8 @@ class _UnknownIncomeBlock extends StatelessWidget {
               builder: (_) => const SimulatorIncomeModal(),
             ),
             style: OutlinedButton.styleFrom(
-              foregroundColor: AppColors.iris,
-              side: const BorderSide(color: AppColors.irisBorderStrong),
+              foregroundColor: context.colors.accent,
+              side: BorderSide(color: context.colors.line),
               padding: const EdgeInsets.symmetric(
                 horizontal: AppSpacing.sm + AppSpacing.xs,
               ),
@@ -726,9 +727,9 @@ class _SimulatorIncomeModalState extends ConsumerState<SimulatorIncomeModal> {
           children: [
             Text(
               l10n.simulatorIncomeBody,
-              style: Theme.of(
-                context,
-              ).textTheme.bodySmall?.copyWith(color: AppColors.textSecondary),
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: context.colors.textSecondary,
+              ),
             ),
             const SizedBox(height: AppSpacing.md),
             if (_errorText != null) ...[

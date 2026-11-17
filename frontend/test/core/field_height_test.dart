@@ -14,7 +14,7 @@ void main() {
     (tester) async {
       await tester.pumpWidget(
         MaterialApp(
-          theme: appDarkTheme,
+          theme: AppTheme.dark,
           home: Scaffold(
             body: Center(
               child: SizedBox(

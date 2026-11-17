@@ -51,8 +51,8 @@ class AmountText extends StatelessWidget {
     final color = !colorize
         ? base.color
         : switch (amountMinor) {
-            > 0 => AppColors.positive,
-            < 0 => AppColors.negative,
+            > 0 => context.colors.positive,
+            < 0 => context.colors.negative,
             _ => base.color,
           };
 

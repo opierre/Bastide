@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/tokens.dart';
 import '../../../core/widgets/app_modal.dart';
 import '../../../core/widgets/app_toast.dart';
@@ -265,7 +264,7 @@ class _RulePackImportSheetState extends ConsumerState<RulePackImportSheet> {
           child: Text(
             l10n.rulePackLogoDownloadHelper,
             key: const Key('rulePackLogoDownloadHelper'),
-            style: AppTextStyles.helper,
+            style: context.textStyles.helper,
           ),
         ),
         const SizedBox(height: AppSpacing.md),
@@ -321,7 +320,7 @@ class _LogoDownloadProgress extends StatelessWidget {
           child: _ProgressBar(fraction: run.logoProgress),
         ),
         const SizedBox(height: AppSpacing.sm + AppSpacing.xs),
-        Text(l10n.rulePackLogoProgressNotice, style: AppTextStyles.helper),
+        Text(l10n.rulePackLogoProgressNotice, style: context.textStyles.helper),
         const SizedBox(height: AppSpacing.sm),
       ],
     );
@@ -341,7 +340,7 @@ class _ProgressBar extends StatelessWidget {
     return Container(
       height: 6,
       decoration: BoxDecoration(
-        color: AppColors.surfaceHover,
+        color: context.colors.hover,
         borderRadius: BorderRadius.circular(AppRadii.xs),
       ),
       child: FractionallySizedBox(
@@ -349,9 +348,7 @@ class _ProgressBar extends StatelessWidget {
         widthFactor: fraction.clamp(0.0, 1.0),
         child: Container(
           decoration: BoxDecoration(
-            gradient: const LinearGradient(
-              colors: [AppColors.irisDeep, AppColors.iris],
-            ),
+            color: context.colors.accent,
             borderRadius: BorderRadius.circular(AppRadii.xs),
           ),
         ),
@@ -418,7 +415,7 @@ class _PackRulesList extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Text(l10n.rulePackRulesLabel, style: AppTextStyles.sectionLabel),
+        Text(l10n.rulePackRulesLabel, style: context.textStyles.sectionLabel),
         const SizedBox(height: AppSpacing.sm - 2),
         ConstrainedBox(
           // A pack can hold up to a thousand rules: the list scrolls inside a
@@ -441,7 +438,7 @@ class _PackRulesList extends StatelessWidget {
                       child: Text(
                         rule.pattern,
                         overflow: TextOverflow.ellipsis,
-                        style: AppTextStyles.mono,
+                        style: context.textStyles.mono,
                       ),
                     ),
                   ],
@@ -491,18 +488,17 @@ class _LogoDownloadCheckbox extends StatelessWidget {
                 height: 18,
                 alignment: Alignment.center,
                 decoration: BoxDecoration(
-                  gradient: value ? AppColors.irisGradient : null,
-                  color: value ? null : AppColors.surfaceField,
+                  color: value ? context.colors.accent : context.colors.field,
                   borderRadius: BorderRadius.circular(AppRadii.xs + 1),
                   border: Border.all(
-                    color: value ? Colors.transparent : AppColors.border,
+                    color: value ? Colors.transparent : context.colors.line,
                   ),
                 ),
                 child: value
-                    ? const Icon(
+                    ? Icon(
                         Icons.check_rounded,
                         size: 13,
-                        color: AppColors.irisInk,
+                        color: context.colors.onAccent,
                       )
                     : null,
               ),
@@ -582,7 +578,7 @@ class RulePackLogoFailuresList extends StatelessWidget {
                 l10n.rulePackLogoFailureTooLarge(failure.pattern),
               RulePackLogoFailureReason.downloadFailed =>
                 l10n.rulePackLogoFailureDownloadFailed(failure.pattern),
-            }, style: AppTextStyles.helper),
+            }, style: context.textStyles.helper),
           ),
       ],
     );

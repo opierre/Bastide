@@ -27,8 +27,8 @@ class BastideApp extends ConsumerWidget {
         unconfirmedMismatch) {
       return MaterialApp(
         onGenerateTitle: (context) => AppLocalizations.of(context)!.appTitle,
-        theme: appDarkTheme,
-        darkTheme: appDarkTheme,
+        theme: AppTheme.dark,
+        darkTheme: AppTheme.dark,
         themeMode: ThemeMode.dark,
         locale: locale,
         supportedLocales: AppLocalizations.supportedLocales,
@@ -39,8 +39,8 @@ class BastideApp extends ConsumerWidget {
 
     return MaterialApp.router(
       onGenerateTitle: (context) => AppLocalizations.of(context)!.appTitle,
-      theme: appDarkTheme,
-      darkTheme: appDarkTheme,
+      theme: AppTheme.dark,
+      darkTheme: AppTheme.dark,
       themeMode: ThemeMode.dark,
       locale: locale,
       supportedLocales: AppLocalizations.supportedLocales,
