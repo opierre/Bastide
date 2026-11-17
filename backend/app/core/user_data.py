@@ -25,6 +25,7 @@ from app.features.goals import models as _goals_models  # noqa: F401
 from app.features.imports import models as _imports_models  # noqa: F401
 from app.features.mortgages import models as _mortgages_models  # noqa: F401
 from app.features.networth import models as _networth_models  # noqa: F401
+from app.features.placements import models as _placements_models  # noqa: F401
 from app.features.properties import models as _properties_models  # noqa: F401
 from app.features.recurring import models as _recurring_models  # noqa: F401
 from app.features.rules import models as _rules_models  # noqa: F401
@@ -54,6 +55,9 @@ USER_DATA_TABLES: tuple[str, ...] = (
     "mortgages",
     "mortgage_simulations",
     "declared_balances",
+    "investments",
+    "investment_movements",
+    "investment_valuations",
     "user_settings",
 )
 
@@ -64,6 +68,8 @@ _SCOPED_THROUGH: dict[str, tuple[str, str]] = {
     "recurring_occurrences": ("series_id", "recurring_series"),
     "goal_allocations": ("goal_id", "goals"),
     "rule_logos": ("rule_id", "categorization_rules"),
+    "investment_movements": ("investment_id", "investments"),
+    "investment_valuations": ("investment_id", "investments"),
 }
 
 

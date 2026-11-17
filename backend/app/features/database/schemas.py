@@ -19,6 +19,7 @@ class DatabaseCounts(BaseModel):
     mortgages: int
     properties: int
     simulations: int
+    investments: int
 
 
 class DatabaseSummary(BaseModel):

@@ -17,6 +17,7 @@ class BackupCounts(BaseModel):
     mortgages: int
     properties: int
     simulations: int
+    investments: int
 
 
 class BackupSummary(BaseModel):

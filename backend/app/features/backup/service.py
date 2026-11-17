@@ -178,6 +178,8 @@ class BackupService:
                     mortgages=tables.get("mortgages", 0),
                     properties=tables.get("properties", 0),
                     simulations=tables.get("mortgage_simulations", 0),
+                    # Absent before format 7.
+                    investments=tables.get("investments", 0),
                 ),
             )
         except (KeyError, TypeError, ValueError) as exc:
