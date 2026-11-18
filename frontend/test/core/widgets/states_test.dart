@@ -2,6 +2,7 @@ import 'package:bastide/core/theme/app_theme.dart';
 import 'package:bastide/core/theme/tokens.dart';
 import 'package:bastide/core/widgets/inspector_pane.dart';
 import 'package:bastide/core/widgets/state_views.dart';
+import 'package:bastide/core/widgets/tomettes.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:lucide_icons_flutter/lucide_icons_300.dart';
@@ -52,6 +53,16 @@ void main() {
             .width,
         lessThanOrEqualTo(CenteredStatePane.maxSentenceWidth),
       );
+    });
+
+    testWidgets('the faded tomettes sit behind it by default', (tester) async {
+      await pumpHost(tester, empty());
+      final tomettes = find.descendant(
+        of: find.byType(EmptyStateView),
+        matching: find.byType(Tomettes),
+      );
+      expect(tomettes, findsOneWidget);
+      expect(tester.widget<Tomettes>(tomettes).fade, TomettesFade.radial);
     });
 
     testWidgets('a background fills the state behind the sentence', (
