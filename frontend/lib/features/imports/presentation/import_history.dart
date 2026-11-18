@@ -47,7 +47,6 @@ class ImportHistory extends ConsumerWidget {
             child: switch (batches) {
               AsyncData(:final value) when value.isEmpty => EmptyStateView(
                 key: const Key('importHistoryEmpty'),
-                icon: Icons.download_outlined,
                 title: l10n.importHistoryEmptyTitle,
                 message: l10n.importHistoryEmptyBody,
               ),

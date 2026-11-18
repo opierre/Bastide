@@ -121,7 +121,6 @@ class _EmptyState extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     return EmptyStateView(
-      icon: Icons.receipt_long_outlined,
       title: l10n.transactionsEmptyTitle,
       message: l10n.transactionsEmptyBody,
       action: OutlinedButton(

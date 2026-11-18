@@ -335,7 +335,6 @@ class _EmptyState extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     return EmptyStateView(
-      icon: Icons.account_balance_wallet_outlined,
       title: l10n.accountsEmptyTitle,
       message: l10n.accountsEmptyBody,
       action: PrimaryButton(

@@ -304,7 +304,6 @@ class RulesEmptyState extends StatelessWidget {
 
     return EmptyStateView(
       key: const Key('rulesEmptyState'),
-      icon: Icons.rule_rounded,
       title: l10n.rulesEmptyTitle,
       message: l10n.rulesEmptyBody,
       action: Column(

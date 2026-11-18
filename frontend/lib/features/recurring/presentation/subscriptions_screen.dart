@@ -124,7 +124,6 @@ class _SubscriptionsList extends ConsumerWidget {
               value.statusFilter == null =>
         EmptyStateView(
           key: const Key('subscriptionsEmptyState'),
-          icon: Icons.autorenew_rounded,
           title: l10n.subscriptionsEmptyTitle,
           message: l10n.subscriptionsEmptyBody,
           action: PrimaryButton(
