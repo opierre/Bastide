@@ -9,8 +9,14 @@ enum CompositionGroup {
 
   final String wireValue;
 
-  static CompositionGroup fromWire(String value) =>
-      values.firstWhere((group) => group.wireValue == value);
+  /// The group named [value], or null for a group this build doesn't know
+  /// yet (a newer backend), so the slice is skipped instead of failing.
+  static CompositionGroup? tryFromWire(String value) {
+    for (final group in values) {
+      if (group.wireValue == value) return group;
+    }
+    return null;
+  }
 }
 
 /// One slice of the assets: an account type or a property kind, with its

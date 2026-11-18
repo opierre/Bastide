@@ -103,6 +103,26 @@ void main() {
     ]);
   });
 
+  test('a composition group this build does not know is skipped', () async {
+    final json = _summaryJson();
+    (json['composition'] as List).add({
+      'group': 'investment',
+      'key': 'pea',
+      'amount_minor': 500000,
+      'share_bps': 100,
+    });
+    when(
+      () => apiClient.get('/networth/summary'),
+    ).thenAnswer((_) async => json);
+
+    final summary = await container.read(networthControllerProvider.future);
+
+    expect(summary.composition.map((entry) => entry.key), [
+      'checking',
+      'rental',
+    ]);
+  });
+
   test('a user with nothing maps to an empty summary, not an error', () async {
     when(
       () => apiClient.get('/mortgages/summary'),
