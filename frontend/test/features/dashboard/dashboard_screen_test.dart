@@ -614,12 +614,13 @@ void main() {
   testWidgets('the donut shrinks with the window instead of crowding its card', (
     tester,
   ) async {
-    tester.view.physicalSize = const Size(1280, 800);
+    tester.view.physicalSize = const Size(1280, 720);
     tester.view.devicePixelRatio = 1.0;
     addTearDown(tester.view.reset);
     await tester.pumpWidget(_wrap(state: _state()));
     await tester.pumpAndSettle();
 
+    // The chart section has no card padding since v2, so the window is shorter here.
     // A fixed 212 ring in a card this short would either overflow it or squeeze the legend
     // out; the donut is the part that gives way.
     final donut = tester.getSize(find.byType(CategoryDonut));
