@@ -96,7 +96,6 @@ flutter:
   # Both ship from Google Fonts as `wght` variable fonts only; the statics here
   # were instanced from them so the weights the scale asks for resolve through
   # `fontWeight` alone, without every call site carrying `fontVariations`.
-  # Bold 700 stays for the few widgets still asking for it until #200.
   fonts:
     - family: Geist
       fonts:
@@ -106,8 +105,6 @@ flutter:
           weight: 500
         - asset: assets/fonts/Geist/static/Geist-SemiBold.ttf
           weight: 600
-        - asset: assets/fonts/Geist/static/Geist-Bold.ttf
-          weight: 700
     - family: Geist Mono
       fonts:
         - asset: assets/fonts/GeistMono/static/GeistMono-Regular.ttf

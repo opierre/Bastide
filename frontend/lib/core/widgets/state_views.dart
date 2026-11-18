@@ -192,34 +192,6 @@ class ErrorStateView extends StatelessWidget {
   }
 }
 
-/// The 64 px tinted plate the startup screen still heads its states with.
-///
-/// v2 has no icon plate (`00` §7); this stays only until the startup screen
-/// is rebuilt with the brand work (#202). No panel uses it.
-class GlyphPlate extends StatelessWidget {
-  const GlyphPlate({super.key, required this.icon, this.accent});
-
-  final IconData icon;
-
-  /// `null` takes `accent`.
-  final Color? accent;
-
-  @override
-  Widget build(BuildContext context) {
-    final accent = this.accent ?? context.colors.accent;
-    return Container(
-      width: 64,
-      height: 64,
-      alignment: Alignment.center,
-      decoration: BoxDecoration(
-        color: accent.withValues(alpha: 0.12),
-        borderRadius: BorderRadius.circular(AppRadii.modal),
-      ),
-      child: Icon(icon, size: 27, color: accent),
-    );
-  }
-}
-
 /// Placeholder rows shown while a list loads: the layout's own silhouette in
 /// `hover` blocks, pulsing together. No spinner for a whole panel (`00` §7).
 class SkeletonList extends StatelessWidget {
