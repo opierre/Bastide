@@ -65,7 +65,7 @@ class DebtRatioCard extends StatelessWidget {
               Expanded(
                 child: Text(
                   l10n.mortgagesRatioLabel.toUpperCase(),
-                  style: AppTextStyles.statLabel,
+                  style: context.textStyles.statLabel,
                 ),
               ),
               if (known && summary.overLimit)
@@ -85,7 +85,9 @@ class DebtRatioCard extends StatelessWidget {
                 known ? formatBps(ratio, locale) : '—',
                 key: const Key('ratioValue'),
                 style: tabularNumberStyle(textTheme.displayMedium!).copyWith(
-                  color: known ? AppColors.textPrimary : AppColors.textDisabled,
+                  color: known
+                      ? context.colors.text
+                      : context.colors.textTertiary,
                 ),
               ),
               const SizedBox(width: AppSpacing.sm + 2),
@@ -96,7 +98,7 @@ class DebtRatioCard extends StatelessWidget {
                   ),
                   style: textTheme.bodySmall?.copyWith(
                     fontSize: 12,
-                    color: AppColors.textSecondary,
+                    color: context.colors.textSecondary,
                   ),
                 ),
               ),
@@ -121,7 +123,7 @@ class DebtRatioCard extends StatelessWidget {
                       money(income),
                     ),
               key: const Key('ratioCaption'),
-              style: AppTextStyles.helper.copyWith(fontSize: 12),
+              style: context.textStyles.helper.copyWith(fontSize: 12),
             ),
             if (summary.incomeSource == IncomeSource.ledger) ...[
               const SizedBox(height: AppSpacing.xs + 2),
@@ -135,7 +137,7 @@ class DebtRatioCard extends StatelessWidget {
                     style: textTheme.bodySmall?.copyWith(
                       fontSize: 12,
                       fontWeight: FontWeight.w600,
-                      color: AppColors.iris,
+                      color: context.colors.accent,
                     ),
                   ),
                 ),
@@ -147,7 +149,7 @@ class DebtRatioCard extends StatelessWidget {
               key: const Key('ratioUnknownText'),
               style: textTheme.bodySmall?.copyWith(
                 fontSize: 12,
-                color: AppColors.textSecondary,
+                color: context.colors.textSecondary,
               ),
             ),
             const SizedBox(height: AppSpacing.sm + 2),
@@ -159,8 +161,8 @@ class DebtRatioCard extends StatelessWidget {
                   key: const Key('ratioDeclareIncomeButton'),
                   onPressed: () => showDeclareIncomeModal(context),
                   style: OutlinedButton.styleFrom(
-                    foregroundColor: AppColors.iris,
-                    side: const BorderSide(color: AppColors.irisBorderStrong),
+                    foregroundColor: context.colors.accent,
+                    side: BorderSide(color: context.colors.line),
                     padding: const EdgeInsets.symmetric(
                       horizontal: AppSpacing.sm + AppSpacing.xs,
                     ),
@@ -177,12 +179,12 @@ class DebtRatioCard extends StatelessWidget {
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Padding(
+              Padding(
                 padding: EdgeInsets.only(top: 1),
                 child: Icon(
                   Icons.info_outline_rounded,
                   size: 12,
-                  color: AppColors.textDisabled,
+                  color: context.colors.textTertiary,
                 ),
               ),
               const SizedBox(width: AppSpacing.xs + 1),
@@ -190,9 +192,9 @@ class DebtRatioCard extends StatelessWidget {
                 child: Text(
                   l10n.mortgagesRatioCaveat,
                   key: const Key('ratioCaveat'),
-                  style: AppTextStyles.helper.copyWith(
+                  style: context.textStyles.helper.copyWith(
                     fontSize: 11,
-                    color: AppColors.textDisabled,
+                    color: context.colors.textTertiary,
                   ),
                 ),
               ),
@@ -242,9 +244,9 @@ class RatioGauge extends StatelessWidget {
                 translation: const Offset(0.5, 0),
                 child: Text(
                   formatBps(referenceBps, locale, digits: 0),
-                  style: AppTextStyles.helper.copyWith(
+                  style: context.textStyles.helper.copyWith(
                     fontSize: 10.5,
-                    color: AppColors.textSecondary,
+                    color: context.colors.textSecondary,
                   ),
                 ),
               ),
@@ -261,13 +263,15 @@ class RatioGauge extends StatelessWidget {
                 borderRadius: BorderRadius.circular(AppRadii.xs),
                 child: Container(
                   height: 8,
-                  color: AppColors.surfaceHover,
+                  color: context.colors.hover,
                   child: FractionallySizedBox(
                     key: const Key('ratioGaugeFill'),
                     alignment: Alignment.centerLeft,
                     widthFactor: fill,
                     child: ColoredBox(
-                      color: overLimit ? AppColors.warning : AppColors.iris,
+                      color: overLimit
+                          ? context.colors.warning
+                          : context.colors.accent,
                     ),
                   ),
                 ),
@@ -283,7 +287,7 @@ class RatioGauge extends StatelessWidget {
                       key: const Key('ratioGaugeTick'),
                       width: 2,
                       height: 12,
-                      color: AppColors.textPrimary,
+                      color: context.colors.text,
                     ),
                   ),
                 ),
@@ -377,9 +381,9 @@ class _DeclareIncomeModalState extends ConsumerState<DeclareIncomeModal> {
           children: [
             Text(
               l10n.mortgagesIncomeBody,
-              style: Theme.of(
-                context,
-              ).textTheme.bodySmall?.copyWith(color: AppColors.textSecondary),
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: context.colors.textSecondary,
+              ),
             ),
             const SizedBox(height: AppSpacing.md),
             if (_errorText != null) ...[

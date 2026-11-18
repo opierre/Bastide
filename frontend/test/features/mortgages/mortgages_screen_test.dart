@@ -42,7 +42,7 @@ Widget _wrap({
     ],
     child: MaterialApp(
       locale: locale,
-      theme: appDarkTheme,
+      theme: AppTheme.dark,
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
       home: const Scaffold(
@@ -176,7 +176,7 @@ void main() {
         find.byKey(const Key('ratioGaugeFill')),
       );
       expect(fill.widthFactor, closeTo(3274 / 6000, 1e-9));
-      expect((fill.child! as ColoredBox).color, AppColors.iris);
+      expect((fill.child! as ColoredBox).color, AppColors.dark.accent);
       // Body content, not a tooltip.
       expect(
         _text(tester, 'ratioCaveat'),
@@ -211,7 +211,7 @@ void main() {
         final fill = tester.widget<FractionallySizedBox>(
           find.byKey(const Key('ratioGaugeFill')),
         );
-        expect((fill.child! as ColoredBox).color, AppColors.warning);
+        expect((fill.child! as ColoredBox).color, AppColors.dark.warning);
         expect(
           _text(tester, 'ratioCaption'),
           contains('revenu médian constaté'),

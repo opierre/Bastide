@@ -64,7 +64,7 @@ class ScenarioCompareCard extends ConsumerWidget {
                     Text(
                       l10n.simulatorCompareSubtitle,
                       style: textTheme.bodySmall?.copyWith(
-                        color: AppColors.textSecondary,
+                        color: context.colors.textSecondary,
                       ),
                     ),
                   ],
@@ -92,7 +92,7 @@ class ScenarioCompareCard extends ConsumerWidget {
                   l10n.simulatorCompareFailed,
                   key: const Key('compareFailed'),
                   style: textTheme.bodySmall?.copyWith(
-                    color: AppColors.textSecondary,
+                    color: context.colors.textSecondary,
                   ),
                 ),
               ),
@@ -272,7 +272,7 @@ class _CompareTable extends StatelessWidget {
           height: 44,
           padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm + 4),
           decoration: BoxDecoration(
-            color: AppColors.surfaceRowHover,
+            color: context.colors.hover,
             borderRadius: BorderRadius.circular(AppRadii.sm),
           ),
           child: Row(
@@ -313,13 +313,13 @@ class _CompareTable extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm + 4),
             decoration: BoxDecoration(
               color: row.emphasised
-                  ? AppColors.iris.withValues(alpha: 0.05)
+                  ? context.colors.accent.withValues(alpha: 0.05)
                   : null,
               border: Border(
                 top: row.sectionBreak
-                    ? const BorderSide(color: AppColors.border)
+                    ? BorderSide(color: context.colors.line)
                     : BorderSide.none,
-                bottom: const BorderSide(color: AppColors.borderSubtle),
+                bottom: BorderSide(color: context.colors.line),
               ),
             ),
             child: Row(
@@ -331,7 +331,7 @@ class _CompareTable extends StatelessWidget {
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: textTheme.bodySmall?.copyWith(
-                      color: AppColors.textSecondary,
+                      color: context.colors.textSecondary,
                       fontWeight: row.emphasised ? FontWeight.w700 : null,
                     ),
                   ),
@@ -350,8 +350,8 @@ class _CompareTable extends StatelessWidget {
                           style: valueStyle.copyWith(
                             fontWeight: row.emphasised ? FontWeight.w700 : null,
                             color: value == null
-                                ? AppColors.textDisabled
-                                : AppColors.textPrimary,
+                                ? context.colors.textTertiary
+                                : context.colors.text,
                           ),
                         );
                       },
@@ -373,9 +373,9 @@ class _CompareTable extends StatelessWidget {
                   )
                 : l10n.simulatorCompareFootUnknown(limit),
             key: const Key('compareFoot'),
-            style: AppTextStyles.helper.copyWith(
+            style: context.textStyles.helper.copyWith(
               fontSize: 11,
-              color: AppColors.textDisabled,
+              color: context.colors.textTertiary,
             ),
           ),
         ],

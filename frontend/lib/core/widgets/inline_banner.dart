@@ -5,15 +5,23 @@ import '../theme/tokens.dart';
 /// What an [InlineBanner] is telling the user. Drives hue and glyph together,
 /// so the message never rests on color alone.
 enum BannerTone {
-  error(AppColors.negative, Icons.error_outline_rounded),
-  warning(AppColors.warning, Icons.warning_amber_rounded),
-  info(AppColors.info, Icons.info_outline_rounded),
-  success(AppColors.positive, Icons.check_circle_outline_rounded);
+  error(Icons.error_outline_rounded),
+  warning(Icons.warning_amber_rounded),
+  info(Icons.info_outline_rounded),
+  success(Icons.check_circle_outline_rounded);
 
-  const BannerTone(this.color, this.icon);
+  const BannerTone(this.icon);
 
-  final Color color;
   final IconData icon;
+
+  /// The tone's hue in the active theme. Informational banners are neutral
+  /// (`docs/design/00-design-system.md` §2.2).
+  Color color(AppColors colors) => switch (this) {
+    error => colors.negative,
+    warning => colors.warning,
+    info => colors.textSecondary,
+    success => colors.positive,
+  };
 }
 
 /// Inline message for a form or a panel section: a tinted plate at 10% with a
@@ -54,21 +62,23 @@ class InlineBanner extends StatelessWidget {
         vertical: AppSpacing.sm + 2,
       ),
       decoration: BoxDecoration(
-        color: tone.color.withValues(alpha: 0.10),
+        color: tone.color(context.colors).withValues(alpha: 0.10),
         borderRadius: BorderRadius.circular(AppRadii.md),
-        border: Border.all(color: tone.color.withValues(alpha: 0.32)),
+        border: Border.all(
+          color: tone.color(context.colors).withValues(alpha: 0.32),
+        ),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(icon ?? tone.icon, size: 15, color: tone.color),
+          Icon(icon ?? tone.icon, size: 15, color: tone.color(context.colors)),
           const SizedBox(width: AppSpacing.sm),
           Expanded(
             child: Text(
               message,
-              style: Theme.of(
-                context,
-              ).textTheme.bodySmall?.copyWith(color: tone.color),
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: tone.color(context.colors),
+              ),
             ),
           ),
           if (onDismiss != null)
@@ -79,7 +89,10 @@ class InlineBanner extends StatelessWidget {
               constraints: const BoxConstraints(),
               padding: EdgeInsets.zero,
               tooltip: dismissTooltip,
-              icon: Icon(Icons.close_rounded, color: tone.color),
+              icon: Icon(
+                Icons.close_rounded,
+                color: tone.color(context.colors),
+              ),
             ),
         ],
       ),

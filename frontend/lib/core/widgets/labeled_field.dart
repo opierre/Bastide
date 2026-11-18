@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-import '../theme/app_theme.dart';
 import '../theme/tokens.dart';
 import 'dashed_border.dart';
 
@@ -44,7 +43,7 @@ class LabeledField extends StatelessWidget {
               child: Text(
                 label,
                 style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                  color: AppColors.textSecondary,
+                  color: context.colors.textSecondary,
                 ),
               ),
             ),
@@ -84,8 +83,8 @@ class FieldHelper extends StatelessWidget {
               margin: const EdgeInsets.only(top: 5),
               width: 5,
               height: 5,
-              decoration: const BoxDecoration(
-                color: AppColors.negative,
+              decoration: BoxDecoration(
+                color: context.colors.negative,
                 shape: BoxShape.circle,
               ),
             ),
@@ -94,8 +93,10 @@ class FieldHelper extends StatelessWidget {
           Expanded(
             child: Text(
               text,
-              style: AppTextStyles.helper.copyWith(
-                color: isError ? AppColors.negative : AppColors.textSecondary,
+              style: context.textStyles.helper.copyWith(
+                color: isError
+                    ? context.colors.negative
+                    : context.colors.textSecondary,
               ),
             ),
           ),
@@ -110,10 +111,10 @@ class FieldHelper extends StatelessWidget {
 /// For failures that belong to the form as a whole rather than to one field —
 /// a rejected credential pair, say — where the reason is already stated once in
 /// a banner and repeating it under each input would bury the fix.
-InputDecoration errorFieldDecoration() {
+InputDecoration errorFieldDecoration(BuildContext context) {
   final border = OutlineInputBorder(
     borderRadius: BorderRadius.circular(AppRadii.md),
-    borderSide: const BorderSide(color: Color(0x8CFF5C6C)),
+    borderSide: BorderSide(color: context.colors.negative),
   );
   return InputDecoration(enabledBorder: border, focusedBorder: border);
 }
@@ -126,7 +127,7 @@ InputDecoration errorFieldDecoration() {
 /// so an amount reads the same whether or not the user can change it.
 TextStyle fieldSuffixStyle(BuildContext context) => Theme.of(
   context,
-).textTheme.bodyLarge!.copyWith(color: AppColors.textSecondary);
+).textTheme.bodyLarge!.copyWith(color: context.colors.textSecondary);
 
 /// A value the user is shown but cannot change.
 ///
@@ -160,7 +161,7 @@ class ReadOnlyField extends StatelessWidget {
           horizontal: AppSpacing.sm + AppSpacing.xs,
         ),
         decoration: BoxDecoration(
-          color: AppColors.surfaceField,
+          color: context.colors.field,
           borderRadius: BorderRadius.circular(AppRadii.md),
         ),
         child: Row(
@@ -177,10 +178,10 @@ class ReadOnlyField extends StatelessWidget {
               Text(suffix!, style: fieldSuffixStyle(context)),
             ],
             const SizedBox(width: AppSpacing.sm),
-            const Icon(
+            Icon(
               Icons.lock_outline_rounded,
               size: 15,
-              color: AppColors.textDisabled,
+              color: context.colors.textTertiary,
             ),
           ],
         ),
@@ -215,9 +216,9 @@ class _FocusGlowState extends State<FocusGlow> {
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(widget.radius),
           boxShadow: _focused
-              ? const [
+              ? [
                   BoxShadow(
-                    color: Color(0x268B8CF9),
+                    color: context.colors.accentSoft,
                     spreadRadius: 3,
                     blurRadius: 0,
                   ),

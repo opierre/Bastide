@@ -56,15 +56,16 @@ class _NetWorthHero extends StatelessWidget {
         horizontal: 22,
         vertical: AppSpacing.cardPadding,
       ),
-      gradient: AppColors.irisTintGradient,
-      border: Border.all(color: AppColors.irisBorderStrong),
+      border: Border.all(color: context.colors.line),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
         children: [
           Text(
             l10n.networthHeroLabel.toUpperCase(),
-            style: AppTextStyles.statLabel.copyWith(color: AppColors.iris),
+            style: context.textStyles.statLabel.copyWith(
+              color: context.colors.accent,
+            ),
           ),
           const SizedBox(height: AppSpacing.sm),
           AmountText(
@@ -102,7 +103,7 @@ class _NetWorthHero extends StatelessWidget {
                           ).format(series[series.length - 2].month),
                         ),
                   key: const Key('networthDeltaCaption'),
-                  style: AppTextStyles.helper,
+                  style: context.textStyles.helper,
                 ),
               ],
             ),
@@ -126,8 +127,8 @@ class NetworthDeltaPill extends StatelessWidget {
   final int deltaMinor;
   final String currency;
 
-  /// The pill's fill: iris at 14 %.
-  static final fill = AppColors.iris.withValues(alpha: 0.14);
+  /// The pill's fill: `accentSoft`.
+  static Color fill(AppColors colors) => colors.accentSoft;
 
   @override
   Widget build(BuildContext context) {
@@ -137,7 +138,7 @@ class NetworthDeltaPill extends StatelessWidget {
       height: 22,
       padding: const EdgeInsets.only(left: 4, right: AppSpacing.sm),
       decoration: BoxDecoration(
-        color: fill,
+        color: fill(context.colors),
         borderRadius: BorderRadius.circular(AppRadii.pill),
       ),
       child: Row(
@@ -146,10 +147,10 @@ class NetworthDeltaPill extends StatelessWidget {
           RotatedBox(
             key: const Key('networthDeltaTriangle'),
             quarterTurns: deltaMinor < 0 ? 2 : 0,
-            child: const Icon(
+            child: Icon(
               Icons.arrow_drop_up_rounded,
               size: 18,
-              color: AppColors.iris,
+              color: context.colors.accent,
             ),
           ),
           Text(
@@ -162,7 +163,7 @@ class NetworthDeltaPill extends StatelessWidget {
             key: const Key('networthDeltaAmount'),
             style: tabularNumberStyle(
               Theme.of(context).textTheme.labelSmall!,
-            ).copyWith(color: AppColors.iris),
+            ).copyWith(color: context.colors.accent),
           ),
         ],
       ),
@@ -250,7 +251,7 @@ class _FigureCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
         children: [
-          Text(label.toUpperCase(), style: AppTextStyles.statLabel),
+          Text(label.toUpperCase(), style: context.textStyles.statLabel),
           const SizedBox(height: AppSpacing.sm),
           AmountText(
             key: amountKey,
@@ -267,7 +268,7 @@ class _FigureCard extends StatelessWidget {
             caption,
             key: captionKey,
             style: tabularNumberStyle(
-              AppTextStyles.helper,
+              context.textStyles.helper,
             ).copyWith(fontSize: 12),
           ),
         ],
@@ -292,7 +293,7 @@ class NetworthExclusionsCard extends StatelessWidget {
       children: [
         Text(title, style: Theme.of(context).textTheme.labelMedium),
         const SizedBox(height: 2),
-        Text(why, style: AppTextStyles.helper),
+        Text(why, style: context.textStyles.helper),
       ],
     );
 
@@ -305,7 +306,7 @@ class NetworthExclusionsCard extends StatelessWidget {
         children: [
           Text(
             l10n.networthExclusionsLabel.toUpperCase(),
-            style: AppTextStyles.sectionLabel,
+            style: context.textStyles.sectionLabel,
           ),
           const SizedBox(height: AppSpacing.sm + 2),
           Row(

@@ -9,18 +9,22 @@ enum StatusPillTone {
   /// Something worth a look: a price rise, a charge that hasn't landed. Amber
   /// rather than red on purpose — the panel reports, it does not scold
   /// (never punitive).
-  warning(AppColors.warning, null),
+  warning,
 
   /// A settled, no-longer-running state — a cancelled subscription. Opaque
   /// slate rather than a tint, so it reads as inert beside an amber signal.
-  neutral(AppColors.textSecondary, AppColors.surfaceHover);
+  neutral;
 
-  const StatusPillTone(this.foreground, this.background);
-
-  final Color foreground;
+  Color foreground(AppColors colors) => switch (this) {
+    warning => colors.warning,
+    neutral => colors.textSecondary,
+  };
 
   /// `null` means "the foreground at 14 %", the spec's tinted variant.
-  final Color? background;
+  Color? background(AppColors colors) => switch (this) {
+    warning => null,
+    neutral => colors.hover,
+  };
 }
 
 /// The 22 px status pill of the subscriptions panel (`docs/design/00`
@@ -40,7 +44,8 @@ class StatusPill extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final background =
-        tone.background ?? tone.foreground.withValues(alpha: 0.14);
+        tone.background(context.colors) ??
+        tone.foreground(context.colors).withValues(alpha: 0.14);
 
     return Container(
       height: 22,
@@ -56,7 +61,7 @@ class StatusPill extends StatelessWidget {
             width: 6,
             height: 6,
             decoration: BoxDecoration(
-              color: tone.foreground,
+              color: tone.foreground(context.colors),
               shape: BoxShape.circle,
             ),
           ),
@@ -69,7 +74,7 @@ class StatusPill extends StatelessWidget {
                 fontFamily: AppFonts.geist,
                 fontSize: 11,
                 fontWeight: FontWeight.w700,
-                color: tone.foreground,
+                color: tone.foreground(context.colors),
               ),
             ),
           ),

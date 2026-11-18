@@ -29,7 +29,7 @@ Widget _wrap(FakeDashboardController controller) {
     overrides: [dashboardControllerProvider.overrideWith(() => controller)],
     child: MaterialApp(
       locale: const Locale('fr'),
-      theme: appDarkTheme,
+      theme: AppTheme.dark,
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
       home: const Scaffold(body: Center(child: DashboardTopBarActions())),

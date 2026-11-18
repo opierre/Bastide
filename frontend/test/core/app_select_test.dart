@@ -5,7 +5,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 Widget _wrap({double width = 420}) {
   return MaterialApp(
-    theme: appDarkTheme,
+    theme: AppTheme.dark,
     home: Scaffold(
       body: Center(
         child: SizedBox(

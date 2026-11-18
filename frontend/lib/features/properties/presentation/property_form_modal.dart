@@ -270,7 +270,7 @@ class _PropertyFormModalState extends ConsumerState<PropertyFormModal> {
         l10n.propertyFormSubtitle,
         style: Theme.of(
           context,
-        ).textTheme.bodySmall?.copyWith(color: AppColors.textSecondary),
+        ).textTheme.bodySmall?.copyWith(color: context.colors.textSecondary),
       ),
       width: 620,
       actions: [
@@ -394,7 +394,7 @@ class _PropertyFormModalState extends ConsumerState<PropertyFormModal> {
                         key: const Key('propertyFormOwnershipShare'),
                         style: tabularNumberStyle(
                           Theme.of(context).textTheme.labelMedium!,
-                        ).copyWith(color: AppColors.iris),
+                        ).copyWith(color: context.colors.accent),
                       ),
                 child: TextFormField(
                   key: const Key('propertyFormOwnership'),
@@ -546,7 +546,7 @@ class _PropertyRevalueModalState extends ConsumerState<PropertyRevalueModal> {
         key: const Key('propertyRevalueSubtitle'),
         style: Theme.of(
           context,
-        ).textTheme.bodySmall?.copyWith(color: AppColors.textSecondary),
+        ).textTheme.bodySmall?.copyWith(color: context.colors.textSecondary),
       ),
       width: 480,
       actions: [

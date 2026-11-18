@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/tokens.dart';
 import '../../../core/widgets/app_card.dart';
 import '../../../core/widgets/app_toggle.dart';
@@ -46,7 +45,7 @@ class UpdateCheckCard extends ConsumerWidget {
                     Text(
                       l10n.settingsUpdatesSubtitle,
                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: AppColors.textSecondary,
+                        color: context.colors.textSecondary,
                       ),
                     ),
                   ],
@@ -86,7 +85,9 @@ class UpdateCheckCard extends ConsumerWidget {
           const SizedBox(height: AppSpacing.sm + AppSpacing.xs),
           Text(
             l10n.settingsUpdatesNote,
-            style: AppTextStyles.helper.copyWith(color: AppColors.textDisabled),
+            style: context.textStyles.helper.copyWith(
+              color: context.colors.textTertiary,
+            ),
           ),
         ],
       ),
@@ -150,11 +151,11 @@ class _StatusLine extends StatelessWidget {
   Widget build(BuildContext context) {
     final style = Theme.of(
       context,
-    ).textTheme.bodyMedium?.copyWith(color: AppColors.textSecondary);
+    ).textTheme.bodyMedium?.copyWith(color: context.colors.textSecondary);
     return Row(
       children: [
         if (icon case final icon?) ...[
-          Icon(icon, size: 16, color: AppColors.textSecondary),
+          Icon(icon, size: 16, color: context.colors.textSecondary),
           const SizedBox(width: AppSpacing.sm),
         ],
         Expanded(child: Text(text, style: style)),

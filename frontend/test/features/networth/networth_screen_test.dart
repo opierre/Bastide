@@ -45,7 +45,7 @@ Widget _wrap({
     ],
     child: MaterialApp(
       locale: locale,
-      theme: appDarkTheme,
+      theme: AppTheme.dark,
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
       home: const Scaffold(
@@ -105,7 +105,7 @@ void main() {
       expect(value.colorize, isFalse);
       final painted = _amount(tester, 'networthValue');
       expect(painted.data, _money(28267079));
-      expect(painted.style!.color, AppColors.textPrimary);
+      expect(painted.style!.color, AppColors.dark.text);
 
       expect(_amount(tester, 'networthAssets').data, _money(51680000));
       expect(
@@ -163,7 +163,7 @@ void main() {
         expect(painted.data, contains('−'));
         expect(painted.data, isNot(contains('-')));
         expect(painted.data, _money(-20982921, locale: locale));
-        expect(painted.style!.color, AppColors.textPrimary);
+        expect(painted.style!.color, AppColors.dark.text);
       });
     }
   });
@@ -186,7 +186,7 @@ void main() {
         );
         expect(
           (pill.decoration! as BoxDecoration).color,
-          NetworthDeltaPill.fill,
+          NetworthDeltaPill.fill(AppColors.dark),
         );
         expect(
           tester
@@ -202,12 +202,12 @@ void main() {
             matching: find.byType(Icon),
           ),
         );
-        expect(icon.color, AppColors.iris);
+        expect(icon.color, AppColors.dark.accent);
         final amount = tester.widget<Text>(
           find.byKey(const Key('networthDeltaAmount')),
         );
         expect(amount.data, _money(delta, sign: true));
-        expect(amount.style!.color, AppColors.iris);
+        expect(amount.style!.color, AppColors.dark.accent);
         expect(
           _text(tester, 'networthDeltaCaption'),
           'vs avril 2026 — valeur des biens inchangée',

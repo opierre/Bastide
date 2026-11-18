@@ -107,9 +107,11 @@ class ScenarioListCard extends ConsumerWidget {
                   style: count == 0
                       ? null
                       : OutlinedButton.styleFrom(
-                          foregroundColor: AppColors.iris,
+                          foregroundColor: context.colors.accent,
                           side: BorderSide(
-                            color: AppColors.iris.withValues(alpha: 0.45),
+                            color: context.colors.accent.withValues(
+                              alpha: 0.45,
+                            ),
                           ),
                         ),
                   child: Text(
@@ -174,9 +176,9 @@ class ScenarioListCard extends ConsumerWidget {
             Text(
               note,
               key: const Key('scenarioNote'),
-              style: AppTextStyles.helper.copyWith(
+              style: context.textStyles.helper.copyWith(
                 fontSize: 11,
-                color: AppColors.textDisabled,
+                color: context.colors.textTertiary,
               ),
             ),
           ],
@@ -242,8 +244,8 @@ class _ScenarioRow extends ConsumerWidget {
       child: Container(
         key: Key('scenarioRow-$id'),
         height: 46,
-        decoration: const BoxDecoration(
-          border: Border(bottom: BorderSide(color: AppColors.borderSubtle)),
+        decoration: BoxDecoration(
+          border: Border(bottom: BorderSide(color: context.colors.line)),
         ),
         child: InkWell(
           onTap: selectable ? toggle : null,
@@ -287,9 +289,11 @@ class _ScenarioRow extends ConsumerWidget {
                       key: Key('scenarioSub-$id'),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: tabularNumberStyle(
-                        AppTextStyles.helper,
-                      ).copyWith(fontSize: 11, color: AppColors.textDisabled),
+                      style: tabularNumberStyle(context.textStyles.helper)
+                          .copyWith(
+                            fontSize: 11,
+                            color: context.colors.textTertiary,
+                          ),
                     ),
                   ],
                 ),
@@ -298,7 +302,7 @@ class _ScenarioRow extends ConsumerWidget {
                 PopupMenuButton<void>(
                   key: Key('scenarioMenu-$id'),
                   icon: const Icon(Icons.more_horiz_rounded, size: 18),
-                  iconColor: AppColors.textSecondary,
+                  iconColor: context.colors.textSecondary,
                   tooltip: l10n.simulatorScenarioActions,
                   position: PopupMenuPosition.under,
                   padding: EdgeInsets.zero,
@@ -308,10 +312,10 @@ class _ScenarioRow extends ConsumerWidget {
                       onTap: onDelete,
                       child: Row(
                         children: [
-                          const Icon(
+                          Icon(
                             Icons.delete_outline_rounded,
                             size: 16,
-                            color: AppColors.textSecondary,
+                            color: context.colors.textSecondary,
                           ),
                           const SizedBox(width: AppSpacing.sm),
                           Text(l10n.simulatorScenarioDelete),
@@ -352,15 +356,15 @@ class _Checkbox extends StatelessWidget {
         width: 18,
         height: 18,
         decoration: BoxDecoration(
-          color: value ? AppColors.iris : AppColors.surfaceField,
+          color: value ? context.colors.accent : context.colors.field,
           borderRadius: BorderRadius.circular(5),
-          border: value ? null : Border.all(color: AppColors.borderDashed),
+          border: value ? null : Border.all(color: context.colors.lineStrong),
         ),
         child: value
-            ? const Icon(
+            ? Icon(
                 Icons.check_rounded,
                 size: 14,
-                color: AppColors.irisInk,
+                color: context.colors.onAccent,
               )
             : null,
       ),
@@ -389,13 +393,13 @@ class _MiniEmptyState extends StatelessWidget {
               height: 44,
               alignment: Alignment.center,
               decoration: BoxDecoration(
-                color: AppColors.irisSoft,
+                color: context.colors.accentSoft,
                 borderRadius: BorderRadius.circular(AppRadii.inset),
               ),
-              child: const Icon(
+              child: Icon(
                 Icons.bookmark_border_rounded,
                 size: 20,
-                color: AppColors.iris,
+                color: context.colors.accent,
               ),
             ),
             const SizedBox(height: AppSpacing.sm + 4),
@@ -408,7 +412,7 @@ class _MiniEmptyState extends StatelessWidget {
             Text(
               l10n.simulatorScenariosEmptyBody,
               style: textTheme.bodySmall?.copyWith(
-                color: AppColors.textSecondary,
+                color: context.colors.textSecondary,
               ),
               textAlign: TextAlign.center,
             ),
@@ -521,9 +525,9 @@ class _SaveScenarioModalState extends ConsumerState<SaveScenarioModal> {
           children: [
             Text(
               l10n.simulatorSaveBody,
-              style: Theme.of(
-                context,
-              ).textTheme.bodySmall?.copyWith(color: AppColors.textSecondary),
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: context.colors.textSecondary,
+              ),
             ),
             const SizedBox(height: AppSpacing.md),
             if (_errorText != null) ...[

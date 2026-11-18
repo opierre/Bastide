@@ -280,7 +280,7 @@ class _Swatch extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final hue = CategoryHues.forSlug(
+    final hue = context.categoryColors.forSlug(
       categorySlugFor(name: category.name, kind: category.kind),
     );
     return Container(

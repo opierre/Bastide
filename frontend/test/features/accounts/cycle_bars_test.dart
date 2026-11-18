@@ -11,7 +11,7 @@ Future<void> _pump(
   String Function(num value)? valueLabel,
 }) => tester.pumpWidget(
   MaterialApp(
-    theme: appDarkTheme,
+    theme: AppTheme.dark,
     home: Scaffold(
       body: Center(
         child: SizedBox(

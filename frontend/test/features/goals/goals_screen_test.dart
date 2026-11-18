@@ -27,7 +27,7 @@ Widget _wrap({
     overrides: [goalsControllerProvider.overrideWith(() => controller)],
     child: MaterialApp(
       locale: locale,
-      theme: appDarkTheme,
+      theme: AppTheme.dark,
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
       home: const Scaffold(body: GoalsScreen()),
@@ -130,11 +130,11 @@ void main() {
     final percent = tester.widget<Text>(
       find.byKey(const Key('goalPercent-g3')),
     );
-    expect(percent.style?.color, AppColors.positive);
+    expect(percent.style?.color, AppColors.dark.positive);
 
     // The reached card is outlined in green rather than the card hairline.
     final card = tester.widget<AppCard>(find.byKey(const Key('goalCard-g3')));
-    expect((card.border! as Border).top.color, AppColors.positiveBorder);
+    expect((card.border! as Border).top.color, AppColors.dark.lineStrong);
   });
 
   testWidgets('the archived link states the count and reveals dimmed cards', (

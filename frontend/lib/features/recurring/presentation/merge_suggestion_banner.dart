@@ -69,13 +69,19 @@ class _MergeSuggestionBannerState extends ConsumerState<MergeSuggestionBanner> {
         vertical: AppSpacing.sm,
       ),
       decoration: BoxDecoration(
-        color: AppColors.info.withValues(alpha: 0.10),
+        color: context.colors.textSecondary.withValues(alpha: 0.10),
         borderRadius: BorderRadius.circular(AppRadii.md),
-        border: Border.all(color: AppColors.info.withValues(alpha: 0.32)),
+        border: Border.all(
+          color: context.colors.textSecondary.withValues(alpha: 0.32),
+        ),
       ),
       child: Row(
         children: [
-          const Icon(Icons.merge_type_rounded, size: 15, color: AppColors.info),
+          Icon(
+            Icons.merge_type_rounded,
+            size: 15,
+            color: context.colors.textSecondary,
+          ),
           const SizedBox(width: AppSpacing.sm),
           Expanded(
             child: Text(
@@ -84,9 +90,7 @@ class _MergeSuggestionBannerState extends ConsumerState<MergeSuggestionBanner> {
                 widget.suggestion.target.label,
               ),
               key: const Key('subscriptionsMergeText'),
-              style: textTheme.bodySmall?.copyWith(
-                color: AppColors.textPrimary,
-              ),
+              style: textTheme.bodySmall?.copyWith(color: context.colors.text),
             ),
           ),
           const SizedBox(width: AppSpacing.md),

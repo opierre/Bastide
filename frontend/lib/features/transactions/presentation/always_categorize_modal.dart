@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/tokens.dart';
 import '../../../core/widgets/app_modal.dart';
 import '../../../core/widgets/app_select.dart';
@@ -172,9 +171,9 @@ class _AlwaysCategorizeModalState extends ConsumerState<AlwaysCategorizeModal> {
             Text(
               l10n.alwaysRuleSubtitle(widget.transaction.descriptionRaw),
               key: const Key('alwaysRuleSubtitle'),
-              style: Theme.of(
-                context,
-              ).textTheme.bodySmall?.copyWith(color: AppColors.textSecondary),
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: context.colors.textSecondary,
+              ),
             ),
             const SizedBox(height: AppSpacing.md),
             if (_errorText != null) ...[
@@ -250,8 +249,8 @@ class _AlwaysCategorizeModalState extends ConsumerState<AlwaysCategorizeModal> {
                 key: const Key('alwaysRulePattern'),
                 controller: _patternController,
                 autofocus: true,
-                style: AppTextStyles.mono.copyWith(
-                  color: AppColors.textPrimary,
+                style: context.textStyles.mono.copyWith(
+                  color: context.colors.text,
                 ),
                 decoration: InputDecoration(
                   hintText: rulePatternHint(l10n, _matchType),
@@ -326,18 +325,17 @@ class _ApplyNowCheckbox extends StatelessWidget {
                 height: 18,
                 alignment: Alignment.center,
                 decoration: BoxDecoration(
-                  gradient: value ? AppColors.irisGradient : null,
-                  color: value ? null : AppColors.surfaceField,
+                  color: value ? context.colors.accent : context.colors.field,
                   borderRadius: BorderRadius.circular(AppRadii.xs + 1),
                   border: Border.all(
-                    color: value ? Colors.transparent : AppColors.border,
+                    color: value ? Colors.transparent : context.colors.line,
                   ),
                 ),
                 child: value
-                    ? const Icon(
+                    ? Icon(
                         Icons.check_rounded,
                         size: 13,
-                        color: AppColors.irisInk,
+                        color: context.colors.onAccent,
                       )
                     : null,
               ),

@@ -46,10 +46,10 @@ class AppModal extends StatelessWidget {
       child: Container(
         width: width,
         decoration: BoxDecoration(
-          color: AppColors.surfaceOverlay,
+          color: context.colors.surface,
           borderRadius: BorderRadius.circular(AppRadii.xl),
-          border: Border.all(color: AppColors.border),
-          boxShadow: AppShadows.modal,
+          border: Border.all(color: context.colors.line),
+          boxShadow: context.colors.shadow,
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,

@@ -42,9 +42,8 @@ class GoalCard extends StatelessWidget {
       // The reached card is the panel's one celebratory surface: an iris tint
       // behind a green edge, so a finished goal is legible as finished from
       // across the grid rather than only in its percentage.
-      gradient: goal.isReached ? AppColors.irisTintGradient : null,
       border: goal.isReached
-          ? Border.all(color: AppColors.positiveBorder)
+          ? Border.all(color: context.colors.lineStrong)
           : null,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -109,19 +108,15 @@ class GoalPill extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm + 2),
       decoration: BoxDecoration(
         color: reached
-            ? AppColors.positive.withValues(alpha: 0.12)
-            : AppColors.surfaceHover,
+            ? context.colors.positive.withValues(alpha: 0.12)
+            : context.colors.hover,
         borderRadius: BorderRadius.circular(11),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
           if (reached) ...[
-            const Icon(
-              Icons.check_rounded,
-              size: 12,
-              color: AppColors.positive,
-            ),
+            Icon(Icons.check_rounded, size: 12, color: context.colors.positive),
             const SizedBox(width: AppSpacing.xs + 1),
           ],
           Text(
@@ -130,7 +125,9 @@ class GoalPill extends StatelessWidget {
               fontFamily: AppFonts.geist,
               fontSize: 11,
               fontWeight: FontWeight.w700,
-              color: reached ? AppColors.positive : AppColors.textSecondary,
+              color: reached
+                  ? context.colors.positive
+                  : context.colors.textSecondary,
             ),
           ),
         ],
@@ -183,7 +180,7 @@ class GoalValueLine extends StatelessWidget {
                   key: Key('goalTarget-${goal.id}'),
                   style: tabularNumberStyle(
                     textTheme.bodyMedium!,
-                  ).copyWith(color: AppColors.textSecondary),
+                  ).copyWith(color: context.colors.textSecondary),
                 ),
               ),
             ],
@@ -197,7 +194,9 @@ class GoalValueLine extends StatelessWidget {
             key: Key('goalPercent-${goal.id}'),
             style: tabularNumberStyle(textTheme.titleSmall!).copyWith(
               fontSize: 14,
-              color: goal.isReached ? AppColors.positive : AppColors.iris,
+              color: goal.isReached
+                  ? context.colors.positive
+                  : context.colors.accent,
             ),
           ),
         ),
@@ -222,12 +221,12 @@ class GoalProgressBar extends StatelessWidget {
       borderRadius: BorderRadius.circular(AppRadii.xs),
       child: Container(
         height: height,
-        color: AppColors.surfaceHover,
+        color: context.colors.hover,
         child: FractionallySizedBox(
           alignment: Alignment.centerLeft,
           widthFactor: fraction,
-          child: const DecoratedBox(
-            decoration: BoxDecoration(gradient: AppColors.goalProgressGradient),
+          child: DecoratedBox(
+            decoration: BoxDecoration(color: context.colors.accent),
           ),
         ),
       ),

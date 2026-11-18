@@ -30,7 +30,7 @@ Widget _wrap(
     overrides: [simulationsRepositoryProvider.overrideWithValue(repository)],
     child: MaterialApp(
       locale: locale,
-      theme: appDarkTheme,
+      theme: AppTheme.dark,
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
       home: const Scaffold(
@@ -289,7 +289,7 @@ void main() {
     await _settleCompute(tester);
 
     expect(find.byKey(const Key('hcsfOverPill')), findsOneWidget);
-    expect(_borderColor(tester, 'hcsfCard'), AppColors.warningBorder);
+    expect(_borderColor(tester, 'hcsfCard'), AppColors.dark.lineStrong);
     expect(_borderColor(tester, 'resultInstalmentCard'), instalmentBorder);
     expect(_borderColor(tester, 'resultCostCard'), costBorder);
     expect(_text(tester, 'resultInstalment'), _money(141841));

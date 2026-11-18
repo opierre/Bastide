@@ -48,7 +48,7 @@ Widget _wrap({
     ],
     child: MaterialApp(
       locale: locale,
-      theme: appDarkTheme,
+      theme: AppTheme.dark,
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
       home: const Scaffold(body: DashboardScreen()),
@@ -89,7 +89,7 @@ void main() {
 
       expect(find.byType(KpiStrip), findsOneWidget);
       // The skeleton's row 1 is drawn at this measured height.
-      expect(tester.getSize(find.byType(KpiStrip)).height, 162);
+      expect(tester.getSize(find.byType(KpiStrip)).height, 153);
       // One plate, not four.
       expect(
         find.descendant(
@@ -147,7 +147,7 @@ void main() {
       );
       expect(net, findsOneWidget);
       // Net is the strip's one colorized figure.
-      expect(tester.widget<Text>(net).style?.color, AppColors.positive);
+      expect(tester.widget<Text>(net).style?.color, AppColors.dark.positive);
 
       expect(find.text('REVENUS'), findsOneWidget);
       expect(find.text('DÉPENSES'), findsOneWidget);
@@ -170,16 +170,19 @@ void main() {
 
       // Income up: green, up.
       expect(trendIcon(tester, 'income').icon, Icons.arrow_upward_rounded);
-      expect(trendIcon(tester, 'income').color, AppColors.positive);
-      expect(deltaText(tester, 'income').style?.color, AppColors.positive);
+      expect(trendIcon(tester, 'income').color, AppColors.dark.positive);
+      expect(deltaText(tester, 'income').style?.color, AppColors.dark.positive);
       // Net down: red, down.
       expect(trendIcon(tester, 'net').icon, Icons.arrow_downward_rounded);
-      expect(trendIcon(tester, 'net').color, AppColors.negative);
-      expect(deltaText(tester, 'net').style?.color, AppColors.negative);
+      expect(trendIcon(tester, 'net').color, AppColors.dark.negative);
+      expect(deltaText(tester, 'net').style?.color, AppColors.dark.negative);
       // Expenses up: inverted, so a rise is red.
       expect(trendIcon(tester, 'expense').icon, Icons.arrow_upward_rounded);
-      expect(trendIcon(tester, 'expense').color, AppColors.negative);
-      expect(deltaText(tester, 'expense').style?.color, AppColors.negative);
+      expect(trendIcon(tester, 'expense').color, AppColors.dark.negative);
+      expect(
+        deltaText(tester, 'expense').style?.color,
+        AppColors.dark.negative,
+      );
     },
   );
 
@@ -201,12 +204,12 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(trendIcon(tester, 'expense').icon, Icons.arrow_downward_rounded);
-    expect(deltaText(tester, 'expense').style?.color, AppColors.positive);
+    expect(deltaText(tester, 'expense').style?.color, AppColors.dark.positive);
     expect(trendIcon(tester, 'income').icon, Icons.arrow_downward_rounded);
-    expect(deltaText(tester, 'income').style?.color, AppColors.negative);
+    expect(deltaText(tester, 'income').style?.color, AppColors.dark.negative);
     // A flat month is neither good nor bad news.
     expect(trendIcon(tester, 'net').icon, Icons.remove_rounded);
-    expect(deltaText(tester, 'net').style?.color, AppColors.textSecondary);
+    expect(deltaText(tester, 'net').style?.color, AppColors.dark.textSecondary);
   });
 
   testWidgets(
@@ -233,10 +236,10 @@ void main() {
       expect(byKey('dashboardSavingsGoalReachedIcon'), findsOneWidget);
       final goalText = tester.widget<Text>(byKey('dashboardSavingsGoalText'));
       expect(goalText.data, 'Objectif $goal atteint');
-      expect(goalText.style?.color, AppColors.positive);
+      expect(goalText.style?.color, AppColors.dark.positive);
       final delta = tester.widget<Text>(byKey('dashboardSavingsDelta'));
       expect(delta.data, '+1,9 pt');
-      expect(delta.style?.color, AppColors.positive);
+      expect(delta.style?.color, AppColors.dark.positive);
 
       // The check leads the line, the delta closes it.
       final checkX = tester
@@ -270,10 +273,10 @@ void main() {
       final goal = formatRatioPct(0.20, 'fr', decimalDigits: 0);
       final goalText = tester.widget<Text>(byKey('dashboardSavingsGoalText'));
       expect(goalText.data, 'Objectif $goal en cours');
-      expect(goalText.style?.color, AppColors.textSecondary);
+      expect(goalText.style?.color, AppColors.dark.textSecondary);
       final delta = tester.widget<Text>(byKey('dashboardSavingsDelta'));
       expect(delta.data, '−0,4 pt');
-      expect(delta.style?.color, AppColors.negative);
+      expect(delta.style?.color, AppColors.dark.negative);
     },
   );
 
@@ -562,7 +565,7 @@ void main() {
       container: container,
       child: MaterialApp(
         locale: const Locale('fr'),
-        theme: appDarkTheme,
+        theme: AppTheme.dark,
         localizationsDelegates: AppLocalizations.localizationsDelegates,
         supportedLocales: AppLocalizations.supportedLocales,
         home: Scaffold(body: home),
@@ -703,9 +706,15 @@ void main() {
         ),
       ),
     );
-    expect(tester.widget<Text>(net(-11840)).style?.color, AppColors.negative);
+    expect(
+      tester.widget<Text>(net(-11840)).style?.color,
+      AppColors.dark.negative,
+    );
     for (final minor in [54020, 73710, 63565]) {
-      expect(tester.widget<Text>(net(minor)).style?.color, AppColors.positive);
+      expect(
+        tester.widget<Text>(net(minor)).style?.color,
+        AppColors.dark.positive,
+      );
     }
   });
 
@@ -747,8 +756,8 @@ void main() {
           closeTo(aprilIncome.bottom, 0.01),
           reason: 'month $month',
         );
-        expect(color('Income', month), AppColors.positive);
-        expect(color('Expense', month), AppColors.negative);
+        expect(color('Income', month), AppColors.dark.positive);
+        expect(color('Expense', month), AppColors.dark.negative);
       }
 
       // One scale across all months: heights are proportional to the amounts.
@@ -771,9 +780,9 @@ void main() {
         find.descendant(of: bars, matching: find.text(month)),
       );
 
-      expect(label('Mai').style?.color, AppColors.textPrimary);
+      expect(label('Mai').style?.color, AppColors.dark.text);
       for (final month in ['Févr.', 'Mars', 'Avr.']) {
-        expect(label(month).style?.color, AppColors.textSecondary);
+        expect(label(month).style?.color, AppColors.dark.textSecondary);
       }
     },
   );
@@ -1017,7 +1026,7 @@ void main() {
         for (var i = 0; i < 5; i++)
           tester.getSize(find.byType(SkeletonBlock).at(i)),
       ];
-      expect(blocks[0].height, 162);
+      expect(blocks[0].height, 153);
       expect(blocks[2].width / blocks[1].width, closeTo(1.35, 0.01));
       // Rows 2 and 3 are equal-height in the silhouette too, as they are once data lands.
       expect(blocks[1].height, blocks[3].height);
@@ -1039,7 +1048,7 @@ void main() {
         ],
         child: MaterialApp(
           locale: const Locale('fr'),
-          theme: appDarkTheme,
+          theme: AppTheme.dark,
           localizationsDelegates: AppLocalizations.localizationsDelegates,
           supportedLocales: AppLocalizations.supportedLocales,
           home: AppShell(

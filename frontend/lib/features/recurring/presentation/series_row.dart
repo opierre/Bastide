@@ -81,7 +81,7 @@ class SeriesTableHeader extends StatelessWidget {
       label.toUpperCase(),
       textAlign: align,
       overflow: TextOverflow.ellipsis,
-      style: AppTextStyles.sectionLabel,
+      style: context.textStyles.sectionLabel,
     );
 
     Widget sortable(
@@ -165,8 +165,10 @@ class _SortableHeaderCell extends StatelessWidget {
         label.toUpperCase(),
         overflow: TextOverflow.ellipsis,
         style: sort == null
-            ? AppTextStyles.sectionLabel
-            : AppTextStyles.sectionLabel.copyWith(color: AppColors.iris),
+            ? context.textStyles.sectionLabel
+            : context.textStyles.sectionLabel.copyWith(
+                color: context.colors.accent,
+              ),
       ),
     );
     final arrow = sort == null
@@ -179,7 +181,7 @@ class _SortableHeaderCell extends StatelessWidget {
               'seriesSortArrow-${sort.ascending ? 'ascending' : 'descending'}',
             ),
             size: 12,
-            color: AppColors.iris,
+            color: context.colors.accent,
           );
 
     return Tooltip(
@@ -269,7 +271,7 @@ class _SeriesRowState extends State<SeriesRow> {
       child: Container(
         key: Key('seriesRow-${series.id}'),
         height: SeriesColumns.rowHeight,
-        color: _hovered ? AppColors.surfaceRowHover : Colors.transparent,
+        color: _hovered ? context.colors.hover : Colors.transparent,
         child: Opacity(
           opacity: isSettled ? 0.55 : 1,
           child: seriesRowLayout(
@@ -301,7 +303,7 @@ class _SeriesRowState extends State<SeriesRow> {
               cadenceLabel(l10n, series.cadence),
               overflow: TextOverflow.ellipsis,
               style: textTheme.bodySmall?.copyWith(
-                color: AppColors.textSecondary,
+                color: context.colors.textSecondary,
               ),
             ),
             amount: Align(
@@ -389,7 +391,9 @@ class _NextChargeCell extends StatelessWidget {
       return Text(
         l10n.subscriptionsValueNone,
         textAlign: TextAlign.end,
-        style: textTheme.bodyMedium?.copyWith(color: AppColors.textDisabled),
+        style: textTheme.bodyMedium?.copyWith(
+          color: context.colors.textTertiary,
+        ),
       );
     }
 
@@ -401,7 +405,7 @@ class _NextChargeCell extends StatelessWidget {
         overflow: TextOverflow.ellipsis,
         style: tabularNumberStyle(
           textTheme.bodyMedium!,
-        ).copyWith(color: AppColors.warning),
+        ).copyWith(color: context.colors.warning),
       );
     }
 
@@ -410,7 +414,7 @@ class _NextChargeCell extends StatelessWidget {
       textAlign: TextAlign.end,
       style: tabularNumberStyle(
         textTheme.bodyMedium!,
-      ).copyWith(color: AppColors.textSecondary),
+      ).copyWith(color: context.colors.textSecondary),
     );
   }
 }
@@ -485,7 +489,7 @@ class _SeriesKebab extends StatelessWidget {
     return PopupMenuButton<SeriesAction>(
       key: Key('seriesMenu-${series.id}'),
       icon: const Icon(Icons.more_horiz_rounded, size: 18),
-      iconColor: AppColors.textSecondary,
+      iconColor: context.colors.textSecondary,
       tooltip: l10n.subscriptionActionsTooltip,
       position: PopupMenuPosition.under,
       padding: EdgeInsets.zero,
@@ -508,7 +512,7 @@ class _SeriesKebab extends StatelessWidget {
               child: _MenuRow(
                 icon: Icons.check_rounded,
                 label: l10n.subscriptionActionConfirm,
-                color: AppColors.positive,
+                color: context.colors.positive,
               ),
             ),
           if (allowed.contains(SeriesStatus.dismissed))
@@ -552,21 +556,19 @@ class _SeriesKebab extends StatelessWidget {
 }
 
 class _MenuRow extends StatelessWidget {
-  const _MenuRow({
-    required this.icon,
-    required this.label,
-    this.color = AppColors.textSecondary,
-  });
+  const _MenuRow({required this.icon, required this.label, this.color});
 
   final IconData icon;
   final String label;
-  final Color color;
+
+  /// `null` takes `textSecondary`.
+  final Color? color;
 
   @override
   Widget build(BuildContext context) {
     return Row(
       children: [
-        Icon(icon, size: 16, color: color),
+        Icon(icon, size: 16, color: color ?? context.colors.textSecondary),
         const SizedBox(width: AppSpacing.sm),
         Flexible(child: Text(label, overflow: TextOverflow.ellipsis)),
       ],

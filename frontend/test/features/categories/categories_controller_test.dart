@@ -22,7 +22,7 @@ Map<String, dynamic> _categoryJson({
   'name': name,
   'kind': kind,
   'icon': 'rice_bowl',
-  'color': '#5AA9FF',
+  'color': 'cat2',
   'is_system': isSystem,
 };
 
@@ -85,7 +85,7 @@ void main() {
           name: 'Épargne projet',
           kind: 'expense',
           icon: 'sell',
-          color: '#64748B',
+          color: 'cat0',
         );
 
     expect(created.id, 'c9');
@@ -204,7 +204,7 @@ void main() {
           name: 'Orpheline',
           kind: 'expense',
           icon: 'sell',
-          color: '#64748B',
+          color: 'cat0',
           isSystem: false,
         ),
       ]);

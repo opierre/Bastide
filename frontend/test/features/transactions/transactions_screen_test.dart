@@ -75,7 +75,7 @@ const _groceriesCategory = TransactionCategory(
   name: 'category.food.groceries',
   kind: 'expense',
   icon: 'shopping_cart',
-  color: '#10B981',
+  color: 'cat3',
 );
 
 Widget _wrap({
@@ -88,7 +88,7 @@ Widget _wrap({
       name: 'category.food.groceries',
       kind: 'expense',
       icon: 'shopping_cart',
-      color: '#10B981',
+      color: 'cat3',
       isSystem: true,
     ),
   ],
@@ -126,7 +126,7 @@ Widget _wrap({
     ],
     child: MaterialApp(
       locale: locale,
-      theme: appDarkTheme,
+      theme: AppTheme.dark,
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
       home: const Scaffold(body: TransactionsScreen()),
@@ -500,7 +500,7 @@ void main() {
               name: 'category.food.groceries',
               kind: 'expense',
               icon: 'shopping_cart',
-              color: '#10B981',
+              color: 'cat3',
               isSystem: true,
             ),
             AppCategory(
@@ -510,7 +510,7 @@ void main() {
               name: 'Marché bio',
               kind: 'expense',
               icon: 'shopping_cart',
-              color: '#10B981',
+              color: 'cat3',
               isSystem: false,
             ),
           ],
@@ -539,7 +539,7 @@ void main() {
         find.descendant(of: mainItem, matching: find.byType(Icon)),
       );
       expect(icon.icon, CategoryIcons.forSlug(slug));
-      expect(icon.color, CategoryHues.forSlug(slug));
+      expect(icon.color, CategoryColors.dark.forSlug(slug));
     },
   );
 

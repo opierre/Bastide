@@ -135,7 +135,7 @@ Widget _wrap(
     ],
     child: MaterialApp(
       locale: const Locale('fr'),
-      theme: appDarkTheme,
+      theme: AppTheme.dark,
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
       home: const Scaffold(body: CategoriesScreen()),

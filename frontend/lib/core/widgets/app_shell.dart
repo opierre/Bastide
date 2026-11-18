@@ -9,10 +9,8 @@ import '../../features/settings/application/settings_section_request.dart';
 import '../../l10n/app_localizations.dart';
 import '../navigation/sidebar_controller.dart';
 import '../session/current_user_provider.dart';
-import '../theme/app_theme.dart';
 import '../theme/tokens.dart';
 import 'brand_mark.dart';
-import 'frame_texture.dart';
 import 'user_avatar.dart';
 
 class NavDestinationSpec {
@@ -223,38 +221,33 @@ class AppShell extends ConsumerWidget {
         .firstOrNull;
 
     return Scaffold(
-      backgroundColor: AppColors.surfaceSunken,
-      body: FrameTexture(
-        child: Row(
-          children: [
-            _Sidebar(
-              key: const Key('appNavRail'),
-              sections: navSections,
-              currentPath: currentPath,
-              onNavigate: onNavigate,
+      backgroundColor: context.colors.rail,
+      body: Row(
+        children: [
+          _Sidebar(
+            key: const Key('appNavRail'),
+            sections: navSections,
+            currentPath: currentPath,
+            onNavigate: onNavigate,
+          ),
+          Expanded(
+            child: Column(
+              children: [
+                _TopBar(
+                  key: const Key('appTopBar'),
+                  title: active?.label ?? '',
+                  subtitle: active?.subtitle ?? '',
+                  titleOverride: titleBuilder?.call(context),
+                  actions: actionsBuilder?.call(context) ?? const [],
+                  onNavigate: onNavigate,
+                ),
+                Expanded(
+                  child: ColoredBox(color: context.colors.bg, child: child),
+                ),
+              ],
             ),
-            Expanded(
-              child: Column(
-                children: [
-                  _TopBar(
-                    key: const Key('appTopBar'),
-                    title: active?.label ?? '',
-                    subtitle: active?.subtitle ?? '',
-                    titleOverride: titleBuilder?.call(context),
-                    actions: actionsBuilder?.call(context) ?? const [],
-                    onNavigate: onNavigate,
-                  ),
-                  Expanded(
-                    child: ColoredBox(
-                      color: AppColors.surfaceBase,
-                      child: child,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
@@ -286,7 +279,7 @@ class _Sidebar extends ConsumerWidget {
       width: collapsed
           ? AppChrome.sidebarCollapsedWidth
           : AppChrome.sidebarWidth,
-      color: AppColors.surfaceSunken,
+      color: context.colors.rail,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -312,8 +305,8 @@ class _Sidebar extends ConsumerWidget {
           if (collapsed)
             const NavRailSeparator()
           else
-            const Divider(
-              color: AppColors.borderSubtle,
+            Divider(
+              color: context.colors.line,
               indent: AppSpacing.sidebarGutter,
               endIndent: AppSpacing.sidebarGutter,
             ),
@@ -347,7 +340,7 @@ class _Sidebar extends ConsumerWidget {
         ),
         child: Text(
           section.label!.toUpperCase(),
-          style: AppTextStyles.sectionLabel,
+          style: context.textStyles.sectionLabel,
         ),
       ),
     for (final destination in section.destinations)
@@ -386,7 +379,7 @@ class _SidebarHeader extends ConsumerWidget {
                   ? Icons.keyboard_double_arrow_right_rounded
                   : Icons.keyboard_double_arrow_left_rounded,
               size: 16,
-              color: AppColors.textDisabled,
+              color: context.colors.textTertiary,
             ),
           ),
         ),
@@ -439,8 +432,8 @@ class _NavItemState extends State<_NavItem> {
   Widget build(BuildContext context) {
     final selected = widget.selected;
     final foreground = selected
-        ? AppColors.iris
-        : (_hovered ? AppColors.textPrimary : AppColors.textSecondary);
+        ? context.colors.accent
+        : (_hovered ? context.colors.text : context.colors.textSecondary);
 
     final destination = widget.destination;
     final Widget icon = switch (destination.glyph) {
@@ -467,8 +460,8 @@ class _NavItemState extends State<_NavItem> {
       alignment: widget.collapsed ? Alignment.center : null,
       decoration: BoxDecoration(
         color: selected
-            ? AppColors.irisSoft
-            : (_hovered ? AppColors.sidebarHover : Colors.transparent),
+            ? context.colors.accentSoft
+            : (_hovered ? context.colors.hover : Colors.transparent),
         borderRadius: BorderRadius.circular(AppRadii.navPill),
       ),
       child: widget.collapsed
@@ -501,9 +494,9 @@ class _NavItemState extends State<_NavItem> {
             width: AppChrome.navRailWidth,
             height: AppChrome.navRailHeight,
             child: selected
-                ? const DecoratedBox(
+                ? DecoratedBox(
                     decoration: BoxDecoration(
-                      color: AppColors.iris,
+                      color: context.colors.accent,
                       borderRadius: BorderRadius.horizontal(
                         right: Radius.circular(AppRadii.pill),
                       ),
@@ -548,11 +541,11 @@ class NavRailSeparator extends StatelessWidget {
   Widget build(BuildContext context) {
     return SizedBox(
       height: DividerTheme.of(context).space ?? 16,
-      child: const Center(
+      child: Center(
         child: SizedBox(
           width: width,
           height: 1,
-          child: ColoredBox(color: AppColors.borderSubtle),
+          child: ColoredBox(color: context.colors.line),
         ),
       ),
     );
@@ -725,10 +718,10 @@ class _PrivacyBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const lock = Icon(
+    final lock = Icon(
       Icons.lock_outline_rounded,
       size: 10,
-      color: AppColors.textDisabled,
+      color: context.colors.textTertiary,
     );
 
     if (collapsed) {
@@ -736,7 +729,7 @@ class _PrivacyBadge extends StatelessWidget {
         padding: const EdgeInsets.only(top: AppSpacing.sm),
         child: Tooltip(
           message: label,
-          child: const Center(child: lock),
+          child: Center(child: lock),
         ),
       );
     }
@@ -757,9 +750,9 @@ class _PrivacyBadge extends StatelessWidget {
               label,
               key: const Key('sidebarPrivacyBadge'),
               overflow: TextOverflow.ellipsis,
-              style: Theme.of(
-                context,
-              ).textTheme.labelSmall?.copyWith(color: AppColors.textDisabled),
+              style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                color: context.colors.textTertiary,
+              ),
             ),
           ),
         ],
@@ -793,9 +786,9 @@ class _TopBar extends StatelessWidget {
     return Container(
       height: AppChrome.topBarHeight,
       padding: const EdgeInsets.symmetric(horizontal: AppSpacing.contentX),
-      decoration: const BoxDecoration(
-        color: AppColors.surfaceBase,
-        border: Border(bottom: BorderSide(color: AppColors.borderSubtle)),
+      decoration: BoxDecoration(
+        color: context.colors.bg,
+        border: Border(bottom: BorderSide(color: context.colors.line)),
       ),
       child: Row(
         children: [
@@ -816,7 +809,7 @@ class _TopBar extends StatelessWidget {
                       Text(
                         subtitle,
                         style: textTheme.bodySmall?.copyWith(
-                          color: AppColors.textSecondary,
+                          color: context.colors.textSecondary,
                         ),
                         overflow: TextOverflow.ellipsis,
                       ),
@@ -876,12 +869,14 @@ class _UserPill extends ConsumerWidget {
       },
       itemBuilder: (context) => [
         _menuItem(
+          context,
           key: const Key('userMenuEditProfileItem'),
           value: _UserMenuAction.editProfile,
           icon: Icons.person_outline_rounded,
           label: l10n.userMenuEditProfile,
         ),
         _menuItem(
+          context,
           key: const Key('userMenuLogoutItem'),
           value: _UserMenuAction.logout,
           icon: Icons.logout_rounded,
@@ -892,9 +887,9 @@ class _UserPill extends ConsumerWidget {
         height: AppChrome.userPillHeight,
         padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xs + 2),
         decoration: BoxDecoration(
-          color: AppColors.surfaceRaised,
+          color: context.colors.bg,
           borderRadius: BorderRadius.circular(AppRadii.md),
-          border: Border.all(color: AppColors.border),
+          border: Border.all(color: context.colors.line),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
@@ -915,10 +910,10 @@ class _UserPill extends ConsumerWidget {
               ),
             ),
             const SizedBox(width: AppSpacing.xs),
-            const Icon(
+            Icon(
               Icons.expand_more_rounded,
               size: 16,
-              color: AppColors.textSecondary,
+              color: context.colors.textSecondary,
             ),
           ],
         ),
@@ -926,7 +921,8 @@ class _UserPill extends ConsumerWidget {
     );
   }
 
-  PopupMenuItem<_UserMenuAction> _menuItem({
+  PopupMenuItem<_UserMenuAction> _menuItem(
+    BuildContext context, {
     required Key key,
     required _UserMenuAction value,
     required IconData icon,
@@ -937,7 +933,7 @@ class _UserPill extends ConsumerWidget {
       value: value,
       child: Row(
         children: [
-          Icon(icon, size: 16, color: AppColors.textSecondary),
+          Icon(icon, size: 16, color: context.colors.textSecondary),
           const SizedBox(width: AppSpacing.sm),
           Flexible(child: Text(label, overflow: TextOverflow.ellipsis)),
         ],

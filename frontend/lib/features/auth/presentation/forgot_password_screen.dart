@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/tokens.dart';
 import '../../../core/widgets/brand_mark.dart';
 import '../../../core/widgets/inline_banner.dart';
@@ -94,7 +93,7 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
                   AutofillHints.username,
                   AutofillHints.email,
                 ],
-                decoration: hasPairError ? errorFieldDecoration() : null,
+                decoration: hasPairError ? errorFieldDecoration(context) : null,
                 validator: (value) => (value == null || value.trim().isEmpty)
                     ? l10n.authIdentifierRequired
                     : null,
@@ -109,12 +108,12 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
                 autocorrect: false,
                 enableSuggestions: false,
                 textCapitalization: TextCapitalization.characters,
-                style: AppTextStyles.mono.copyWith(
+                style: context.textStyles.mono.copyWith(
                   fontSize: 14,
                   letterSpacing: 1,
-                  color: AppColors.textPrimary,
+                  color: context.colors.text,
                 ),
-                decoration: hasPairError ? errorFieldDecoration() : null,
+                decoration: hasPairError ? errorFieldDecoration(context) : null,
                 validator: (value) => (value == null || value.trim().isEmpty)
                     ? l10n.authRecoveryCodeRequired
                     : null,
@@ -158,8 +157,8 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
             Text(
               l10n.authResetNote,
               key: const Key('resetNote'),
-              style: AppTextStyles.helper.copyWith(
-                color: AppColors.textDisabled,
+              style: context.textStyles.helper.copyWith(
+                color: context.colors.textTertiary,
               ),
             ),
           ],

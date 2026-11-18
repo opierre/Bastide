@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../data/auth_repository.dart';
 import '../domain/avatar_choice.dart';
+import '../domain/theme_preference.dart';
 import 'auth_controller.dart';
 
 /// Renames the user from Settings › Profil. Separate from [AuthController] so
@@ -48,4 +49,36 @@ class AvatarChoiceController extends AsyncNotifier<void> {
 final avatarChoiceControllerProvider =
     AsyncNotifierProvider.autoDispose<AvatarChoiceController, void>(
       AvatarChoiceController.new,
+    );
+
+/// Sets the theme from Settings › Préférences. The session's user takes the
+/// new theme before the request goes out, so the whole app switches at once;
+/// a refusal puts the previous theme back and leaves the error in [state].
+class ThemePreferenceController extends AsyncNotifier<void> {
+  @override
+  Future<void> build() async {}
+
+  Future<void> choose(ThemePreference theme) async {
+    final auth = ref.read(authControllerProvider.notifier);
+    final previous = ref.read(authControllerProvider).value;
+    if (previous == null || previous.theme == theme) return;
+
+    auth.replaceUser(previous.withTheme(theme));
+    state = const AsyncValue.loading();
+    state = await AsyncValue.guard(() async {
+      try {
+        auth.replaceUser(
+          await ref.read(authRepositoryProvider).setTheme(theme),
+        );
+      } catch (_) {
+        auth.replaceUser(previous);
+        rethrow;
+      }
+    });
+  }
+}
+
+final themePreferenceControllerProvider =
+    AsyncNotifierProvider.autoDispose<ThemePreferenceController, void>(
+      ThemePreferenceController.new,
     );

@@ -16,16 +16,27 @@ class MonogramAvatar extends StatelessWidget {
   final String name;
   final double size;
 
-  /// Hue for [name], or `null` when the brand isn't one we have a pinned hue
-  /// for — the caller renders the neutral `?` plate in that case.
-  ///
-  /// Pinned rather than hashed: a hue derived from the name would change if a
-  /// brand were renamed, and an institution that shifts color between launches
-  /// reads as a bug.
-  static Color? hueFor(String name) {
+  /// Whether [name] is a brand the app recognises; any other name renders the
+  /// neutral `?` plate. Monograms are always neutral in v2
+  /// (`docs/design/00-design-system.md` §7), so this no longer picks a hue.
+  static bool isKnown(String name) {
     final key = name.trim().toLowerCase().replaceAll(RegExp(r'\s+'), ' ');
-    return MonogramHues.byBrand[key];
+    return _knownBrands.contains(key);
   }
+
+  /// Lowercased, whitespace-collapsed brand names.
+  static const _knownBrands = {
+    'bnp',
+    'bnp paribas',
+    'crédit agricole',
+    'credit agricole',
+    'revolut',
+    'caisse locale',
+    "caisse locale d'épargne",
+    'carrefour',
+    'novatech',
+    'novatech sarl',
+  };
 
   static String initialsFor(String name) {
     final words = name
@@ -43,20 +54,16 @@ class MonogramAvatar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final hue = hueFor(name);
-    final recognized = hue != null;
-    final foreground = hue ?? MonogramHues.unknownForeground;
+    final recognized = isKnown(name);
+    final foreground = context.colors.textSecondary;
 
     return Container(
       width: size,
       height: size,
       alignment: Alignment.center,
       decoration: BoxDecoration(
-        // A tinted plate reads as part of the dark surface stack; a fully
-        // saturated fill would shout louder than the account name next to it.
-        color: recognized
-            ? foreground.withValues(alpha: 0.16)
-            : MonogramHues.unknownBackground,
+        color: context.colors.hover,
+        border: Border.all(color: context.colors.line),
         borderRadius: BorderRadius.circular(size * 0.3),
       ),
       child: Text(
@@ -65,7 +72,7 @@ class MonogramAvatar extends StatelessWidget {
         recognized ? initialsFor(name) : '?',
         style: TextStyle(
           color: foreground,
-          fontWeight: FontWeight.w700,
+          fontWeight: FontWeight.w600,
           fontSize: size * 0.36,
           letterSpacing: 0.2,
           fontFamily: AppFonts.geist,
@@ -91,14 +98,14 @@ class UserMonogram extends StatelessWidget {
       height: size,
       alignment: Alignment.center,
       decoration: BoxDecoration(
-        color: AppColors.iris.withValues(alpha: 0.16),
+        color: context.colors.accent.withValues(alpha: 0.16),
         borderRadius: BorderRadius.circular(size * 0.3),
       ),
       child: Text(
         MonogramAvatar.initialsFor(name),
         style: TextStyle(
-          color: AppColors.iris,
-          fontWeight: FontWeight.w700,
+          color: context.colors.accent,
+          fontWeight: FontWeight.w600,
           fontSize: size * 0.36,
           letterSpacing: 0.2,
           fontFamily: AppFonts.geist,

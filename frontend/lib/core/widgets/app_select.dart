@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-import '../theme/app_theme.dart';
 import '../theme/tokens.dart';
 
 /// One choice offered by an [AppSelect].
@@ -89,10 +88,10 @@ class _AppSelectState<T> extends State<AppSelect<T>> {
       style: MenuStyle(
         // Lifted off the overlay surface and given a shadow, so the menu reads
         // as floating *above* the dialog it opened from rather than as a panel
-        // spliced into it — see [AppColors.surfacePopover].
-        backgroundColor: const WidgetStatePropertyAll(AppColors.surfacePopover),
+        // spliced into it — see [context.colors.surface].
+        backgroundColor: WidgetStatePropertyAll(context.colors.surface),
         surfaceTintColor: const WidgetStatePropertyAll(Colors.transparent),
-        shadowColor: const WidgetStatePropertyAll(AppShadows.popoverShadow),
+        shadowColor: WidgetStatePropertyAll(context.colors.shadow.first.color),
         elevation: const WidgetStatePropertyAll(AppShadows.popoverElevation),
         padding: const WidgetStatePropertyAll(
           EdgeInsets.symmetric(vertical: AppSpacing.xs + 2),
@@ -102,10 +101,10 @@ class _AppSelectState<T> extends State<AppSelect<T>> {
         // [UnconstrainedBox], which drops the minimum width a [MenuStyle]
         // asks for, so a style-level width would silently do nothing.
         maximumSize: const WidgetStatePropertyAll(Size(double.infinity, 320)),
-        shape: const WidgetStatePropertyAll(
+        shape: WidgetStatePropertyAll(
           RoundedRectangleBorder(
             borderRadius: BorderRadius.all(Radius.circular(AppRadii.inset)),
-            side: BorderSide(color: AppColors.border),
+            side: BorderSide(color: context.colors.line),
           ),
         ),
       ),
@@ -152,11 +151,11 @@ class _Anchor extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: AppColors.surfaceField,
+      color: context.colors.field,
       borderRadius: BorderRadius.circular(AppRadii.md),
       child: InkWell(
         borderRadius: BorderRadius.circular(AppRadii.md),
-        hoverColor: AppColors.overlayWash,
+        hoverColor: context.colors.hover,
         onTap: onTap,
         child: Container(
           height: height,
@@ -167,7 +166,7 @@ class _Anchor extends StatelessWidget {
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(AppRadii.md),
             border: Border.all(
-              color: isOpen ? AppColors.focusRing : AppColors.border,
+              color: isOpen ? context.colors.accent : context.colors.line,
             ),
           ),
           child: Row(
@@ -188,7 +187,7 @@ class _Anchor extends StatelessWidget {
                 width: 26,
                 height: 26,
                 decoration: BoxDecoration(
-                  color: AppColors.irisSoft,
+                  color: context.colors.accentSoft,
                   borderRadius: BorderRadius.circular(AppRadii.sm),
                 ),
                 child: Icon(
@@ -196,7 +195,7 @@ class _Anchor extends StatelessWidget {
                       ? Icons.expand_less_rounded
                       : Icons.expand_more_rounded,
                   size: 17,
-                  color: AppColors.iris,
+                  color: context.colors.accent,
                 ),
               ),
             ],
@@ -246,8 +245,8 @@ class _Option<T> extends StatelessWidget {
         ),
         // A neutral wash rather than a fixed fill: the popover now sits *on*
         // #1E2634, so hovering to that same color would highlight nothing.
-        overlayColor: const WidgetStatePropertyAll(AppColors.overlayWash),
-        foregroundColor: const WidgetStatePropertyAll(AppColors.textPrimary),
+        overlayColor: WidgetStatePropertyAll(context.colors.hover),
+        foregroundColor: WidgetStatePropertyAll(context.colors.text),
       ),
       child: Row(
         children: [
@@ -273,8 +272,8 @@ class _Option<T> extends StatelessWidget {
                     // as a summary and a smaller list beneath it.
                     style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                       color: isSelected
-                          ? AppColors.iris
-                          : AppColors.textPrimary,
+                          ? context.colors.accent
+                          : context.colors.text,
                     ),
                   ),
                   if (item.subtitle case final subtitle?)
@@ -282,7 +281,7 @@ class _Option<T> extends StatelessWidget {
                       subtitle,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: AppTextStyles.helper.copyWith(fontSize: 12),
+                      style: context.textStyles.helper.copyWith(fontSize: 12),
                     ),
                 ],
               ),
@@ -290,7 +289,7 @@ class _Option<T> extends StatelessWidget {
           ),
           if (isSelected) ...[
             const SizedBox(width: AppSpacing.sm),
-            const Icon(Icons.check_rounded, size: 15, color: AppColors.iris),
+            Icon(Icons.check_rounded, size: 15, color: context.colors.accent),
           ],
         ],
       ),

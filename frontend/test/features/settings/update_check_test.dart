@@ -121,7 +121,7 @@ void main() {
       overrides: [apiClientProvider.overrideWithValue(apiClient)],
       child: MaterialApp(
         locale: locale,
-        theme: appDarkTheme,
+        theme: AppTheme.dark,
         localizationsDelegates: AppLocalizations.localizationsDelegates,
         supportedLocales: AppLocalizations.supportedLocales,
         home: const Scaffold(body: UpdateCheckCard()),

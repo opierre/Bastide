@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/tokens.dart';
 
 /// The iris-tinted lock plate the Données cards carry: the AI card's privacy
@@ -21,24 +20,26 @@ class LockCallout extends StatelessWidget {
         vertical: AppSpacing.sm + AppSpacing.xs,
       ),
       decoration: BoxDecoration(
-        color: AppColors.iris.withValues(alpha: 0.08),
+        color: context.colors.accent.withValues(alpha: 0.08),
         borderRadius: BorderRadius.circular(AppRadii.md),
-        border: Border.all(color: AppColors.iris.withValues(alpha: 0.25)),
+        border: Border.all(
+          color: context.colors.accent.withValues(alpha: 0.25),
+        ),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Icon(
+          Icon(
             Icons.lock_outline_rounded,
             size: 15,
-            color: AppColors.iris,
+            color: context.colors.accent,
           ),
           const SizedBox(width: AppSpacing.sm),
           Expanded(
             child: Text(
               message,
-              style: AppTextStyles.helper.copyWith(
-                color: AppColors.textPrimary,
+              style: context.textStyles.helper.copyWith(
+                color: context.colors.text,
               ),
             ),
           ),

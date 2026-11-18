@@ -45,7 +45,7 @@ class RulesView extends ConsumerWidget {
           key: const Key('rulesFilterEmpty'),
           style: Theme.of(
             context,
-          ).textTheme.bodySmall?.copyWith(color: AppColors.textSecondary),
+          ).textTheme.bodySmall?.copyWith(color: context.colors.textSecondary),
         ),
       ),
       AsyncData(:final value) when value.isEmpty => const RulesEmptyState(
@@ -224,9 +224,9 @@ class _RulesViewHeaderActionsState
               l10n.rulesPriorityNote,
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
-              style: Theme.of(
-                context,
-              ).textTheme.bodySmall?.copyWith(color: AppColors.textSecondary),
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: context.colors.textSecondary,
+              ),
             ),
           ),
         ),
@@ -282,7 +282,7 @@ class _CategoryFilterChip extends ConsumerWidget {
             tooltip: l10n.rulesFilterClear,
             iconSize: 14,
             visualDensity: VisualDensity.compact,
-            color: AppColors.textSecondary,
+            color: context.colors.textSecondary,
             icon: const Icon(Icons.close_rounded),
           ),
         ],

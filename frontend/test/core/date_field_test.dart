@@ -12,7 +12,7 @@ Widget _wrap({
 }) {
   return MaterialApp(
     locale: locale,
-    theme: appDarkTheme,
+    theme: AppTheme.dark,
     localizationsDelegates: AppLocalizations.localizationsDelegates,
     supportedLocales: AppLocalizations.supportedLocales,
     home: Scaffold(

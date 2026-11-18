@@ -176,7 +176,7 @@ class _EmptyState extends StatelessWidget {
 }
 
 /// The KPI strip's measured height, so the skeleton's row 1 doesn't resize when data lands.
-const _statRowHeight = 162.0;
+const _statRowHeight = 153.0;
 
 class _DashboardSkeleton extends StatelessWidget {
   const _DashboardSkeleton({super.key});

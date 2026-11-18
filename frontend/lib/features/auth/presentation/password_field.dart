@@ -44,7 +44,7 @@ class _PasswordFieldState extends State<PasswordField> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final errorDecoration = errorFieldDecoration();
+    final errorDecoration = errorFieldDecoration(context);
 
     return TextFormField(
       key: widget.fieldKey,

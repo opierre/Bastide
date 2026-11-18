@@ -41,9 +41,8 @@ from PIL import Image
 ROOT = Path(__file__).resolve().parents[1]
 FRONTEND = ROOT / "frontend"
 BRAND = FRONTEND / "assets" / "brand"
-FONT = (
-    FRONTEND / "assets" / "fonts" / "Space_Grotesk" / "static" / "SpaceGrotesk-Bold.ttf"
-)
+# The wordmark is Geist 600 (docs/design/00-design-system.md §11); #202 redraws the lockup.
+FONT = FRONTEND / "assets" / "fonts" / "Geist" / "static" / "Geist-SemiBold.ttf"
 
 MARK = BRAND / "bastide-mark.svg"
 MARK_SMALL = BRAND / "bastide-mark-small.svg"
@@ -61,7 +60,7 @@ MACOS_TILE_FRACTION = 824 / 1024
 LINUX_SIZES = (256, 512)
 
 # Lockup geometry, in CSS px, from docs/design/bastide-logo.html §04:
-# 48 px tile, 16 px gap, Space Grotesk 700 at 28 px, tracking −1.5 %,
+# 48 px tile, 16 px gap, wordmark at 28 px, tracking −1.5 %,
 # line-height 1, text centred vertically on the tile.
 LOCKUP_TILE = 48
 LOCKUP_GAP = 16

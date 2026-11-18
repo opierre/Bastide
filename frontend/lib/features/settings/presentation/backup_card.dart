@@ -87,7 +87,7 @@ class BackupCard extends ConsumerWidget {
           Text(
             l10n.settingsBackupSubtitle,
             style: textTheme.bodyMedium?.copyWith(
-              color: AppColors.textSecondary,
+              color: context.colors.textSecondary,
             ),
           ),
           const SizedBox(height: AppSpacing.md),
@@ -111,9 +111,9 @@ class BackupCard extends ConsumerWidget {
                     ),
               key: const Key('settingsBackupLast'),
               style: tabularNumberStyle(
-                AppTextStyles.helper.copyWith(
+                context.textStyles.helper.copyWith(
                   fontSize: 11.5,
-                  color: AppColors.textDisabled,
+                  color: context.colors.textTertiary,
                 ),
               ),
             ),
@@ -134,7 +134,7 @@ class BackupCard extends ConsumerWidget {
               message: l10n.settingsBackupPrivacy,
             ),
           const SizedBox(height: AppSpacing.md),
-          const Divider(height: 1, color: AppColors.borderSubtle),
+          Divider(height: 1, color: context.colors.line),
           const SizedBox(height: AppSpacing.sm + AppSpacing.xs),
           _RestoreRow(
             isBusy: state.isPicking,
@@ -172,9 +172,9 @@ class _ExportPlate extends StatelessWidget {
         vertical: AppSpacing.sm + AppSpacing.xs,
       ),
       decoration: BoxDecoration(
-        color: AppColors.surfaceField,
+        color: context.colors.field,
         borderRadius: BorderRadius.circular(AppRadii.inset),
-        border: Border.all(color: AppColors.borderSubtle),
+        border: Border.all(color: context.colors.line),
       ),
       child: Row(
         children: [
@@ -182,13 +182,13 @@ class _ExportPlate extends StatelessWidget {
             width: 36,
             height: 36,
             decoration: BoxDecoration(
-              color: AppColors.irisSoft,
+              color: context.colors.accentSoft,
               borderRadius: BorderRadius.circular(AppRadii.md),
             ),
-            child: const Icon(
+            child: Icon(
               Icons.file_download_outlined,
               size: 18,
-              color: AppColors.iris,
+              color: context.colors.accent,
             ),
           ),
           const SizedBox(width: AppSpacing.sm + AppSpacing.xs),
@@ -200,7 +200,7 @@ class _ExportPlate extends StatelessWidget {
                   l10n.settingsBackupExportLabel,
                   style: textTheme.bodyMedium?.copyWith(
                     fontWeight: FontWeight.w700,
-                    color: AppColors.textPrimary,
+                    color: context.colors.text,
                   ),
                 ),
                 const SizedBox(height: 2),
@@ -209,8 +209,8 @@ class _ExportPlate extends StatelessWidget {
                       ? l10n.settingsBackupExportPreparing
                       : l10n.settingsBackupExportCaption,
                   key: const Key('settingsBackupExportCaption'),
-                  style: AppTextStyles.helper.copyWith(
-                    color: AppColors.textSecondary,
+                  style: context.textStyles.helper.copyWith(
+                    color: context.colors.textSecondary,
                   ),
                 ),
               ],
@@ -255,14 +255,14 @@ class _RestoreRow extends StatelessWidget {
                 l10n.settingsBackupRestoreTitle,
                 style: textTheme.bodyMedium?.copyWith(
                   fontWeight: FontWeight.w700,
-                  color: AppColors.textPrimary,
+                  color: context.colors.text,
                 ),
               ),
               const SizedBox(height: 2),
               Text(
                 l10n.settingsBackupRestoreSubtitle,
-                style: AppTextStyles.helper.copyWith(
-                  color: AppColors.textSecondary,
+                style: context.textStyles.helper.copyWith(
+                  color: context.colors.textSecondary,
                 ),
               ),
             ],

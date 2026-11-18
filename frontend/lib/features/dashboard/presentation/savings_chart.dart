@@ -59,10 +59,11 @@ class SavingsChart extends StatefulWidget {
 
   /// The average line's color: the secondary text tone, half-transparent, so it reads as a
   /// reference rather than a series and stays clear of iris (the line view's own stroke)
-  /// and of the green/red that carry money. [AppColors.borderDashed] would match the
+  /// and of the green/red that carry money. `lineStrong` would match the
   /// dashed zero baseline, so the token is the secondary text tone at 60 %, set as an 8-bit
   /// alpha (153 / 255) so it survives a [Paint] round trip unchanged.
-  static final averageColor = AppColors.textSecondary.withAlpha(153);
+  static Color averageColor(AppColors colors) =>
+      colors.textSecondary.withAlpha(153);
 
   /// The average line's dots: a round cap on a near-zero dash, every [averageDotGap] px.
   static const averageStroke = 1.5;
@@ -80,7 +81,7 @@ class _SavingsChartState extends State<SavingsChart> {
 
   @override
   Widget build(BuildContext context) {
-    final labelStyle = ChartPaints.labelStyle(Theme.of(context).textTheme);
+    final labelStyle = ChartPaints.labelStyle(context);
     final scale = _Scale.of(widget.values);
     final tooltips = widget.tooltips;
 
@@ -120,6 +121,7 @@ class _SavingsChartState extends State<SavingsChart> {
         child: CustomPaint(
           size: Size.infinite,
           painter: _SavingsChartPainter(
+            colors: context.colors,
             values: widget.values,
             view: widget.view,
             scale: scale,
@@ -259,7 +261,11 @@ class _Scale {
 }
 
 class _SavingsChartPainter extends CustomPainter {
+  /// The active theme's colours.
+  final AppColors colors;
+
   _SavingsChartPainter({
+    required this.colors,
     required this.values,
     required this.view,
     required this.scale,
@@ -310,11 +316,17 @@ class _SavingsChartPainter extends CustomPainter {
     final average = this.average;
     if (average == null) return;
     final y = scale.y(average.toDouble(), plot);
-    paintDottedLine(canvas, Offset(plot.left, y), Offset(size.width, y));
+    paintDottedLine(
+      canvas,
+      Offset(plot.left, y),
+      Offset(size.width, y),
+      SavingsChart.averageColor(colors),
+    );
   }
 
   /// The labelled gridlines both views stand on.
   void _paintGrid(Canvas canvas, Size size, Rect plot) => ChartPaints.grid(
+    colors,
     canvas,
     size,
     plot,
@@ -341,7 +353,7 @@ class _SavingsChartPainter extends CustomPainter {
         bottomLeft: up ? base : tip,
         bottomRight: up ? base : tip,
       );
-      final color = up ? AppColors.positive : AppColors.negative;
+      final color = up ? colors.positive : colors.negative;
       if (i == values.length - 1) {
         canvas.drawRRect(
           rect,
@@ -370,6 +382,7 @@ class _SavingsChartPainter extends CustomPainter {
     final zeroY = scale.y(0, plot);
     if (scale.bottom < 0) {
       ChartPaints.baseline(
+        colors,
         canvas,
         Offset(plot.left, zeroY),
         Offset(size.width, zeroY),
@@ -387,7 +400,7 @@ class _SavingsChartPainter extends CustomPainter {
           ..lineTo(points.last.dx, zeroY)
           ..lineTo(points.first.dx, zeroY)
           ..close(),
-        ChartPaints.area(AppColors.iris),
+        ChartPaints.area(colors.accent),
       );
     }
 
@@ -398,7 +411,7 @@ class _SavingsChartPainter extends CustomPainter {
         : points;
     canvas.drawPath(
       Path()..addPolygon(settled, false),
-      ChartPaints.stroke(AppColors.iris),
+      ChartPaints.stroke(colors.accent),
     );
     if (points.length > 1) {
       canvas.drawPath(
@@ -407,7 +420,7 @@ class _SavingsChartPainter extends CustomPainter {
             ..moveTo(points[points.length - 2].dx, points[points.length - 2].dy)
             ..lineTo(points.last.dx, points.last.dy),
         ),
-        ChartPaints.stroke(AppColors.iris)..strokeCap = StrokeCap.butt,
+        ChartPaints.stroke(colors.accent)..strokeCap = StrokeCap.butt,
       );
     }
 
@@ -415,9 +428,10 @@ class _SavingsChartPainter extends CustomPainter {
     // line's hue, since the sign is what each month says. The hovered month's dot is the
     // full-size one; the open month's is full-size and hollow.
     for (var i = 0; i < points.length; i++) {
-      final color = values[i] < 0 ? AppColors.negative : AppColors.positive;
+      final color = values[i] < 0 ? colors.negative : colors.positive;
       if (i == points.length - 1) {
         ChartPaints.hollowDot(
+          colors,
           canvas,
           points[i],
           AppChart.currentDotRadius,
@@ -425,6 +439,7 @@ class _SavingsChartPainter extends CustomPainter {
         );
       } else {
         ChartPaints.dot(
+          colors,
           canvas,
           points[i],
           hovered == i ? AppChart.currentDotRadius : AppChart.pointDotRadius,
@@ -436,6 +451,7 @@ class _SavingsChartPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(_SavingsChartPainter oldDelegate) =>
+      oldDelegate.colors != colors ||
       !listEquals(oldDelegate.values, values) ||
       oldDelegate.view != view ||
       oldDelegate.scale != scale ||
@@ -445,11 +461,11 @@ class _SavingsChartPainter extends CustomPainter {
       oldDelegate.labelStyle != labelStyle;
 }
 
-/// A dotted horizontal run from [from] to [to] in [SavingsChart.averageColor]: the chart's
+/// A dotted horizontal run from [from] to [to] in [color]: the chart's
 /// average line, and the legend swatch that names it.
-void paintDottedLine(Canvas canvas, Offset from, Offset to) {
+void paintDottedLine(Canvas canvas, Offset from, Offset to, Color color) {
   final paint = Paint()
-    ..color = SavingsChart.averageColor
+    ..color = color
     ..strokeWidth = SavingsChart.averageStroke
     ..strokeCap = StrokeCap.round;
   for (var x = from.dx; x <= to.dx; x += SavingsChart.averageDotGap) {
@@ -465,22 +481,29 @@ class SavingsAverageSwatch extends StatelessWidget {
   static const width = 16.0;
 
   @override
-  Widget build(BuildContext context) => const CustomPaint(
-    size: Size(width, SavingsChart.averageStroke * 2),
-    painter: _SwatchPainter(),
+  Widget build(BuildContext context) => CustomPaint(
+    size: const Size(width, SavingsChart.averageStroke * 2),
+    painter: _SwatchPainter(SavingsChart.averageColor(context.colors)),
   );
 }
 
 class _SwatchPainter extends CustomPainter {
-  const _SwatchPainter();
+  const _SwatchPainter(this.color);
+
+  final Color color;
 
   @override
   void paint(Canvas canvas, Size size) {
     final y = size.height / 2;
     final inset = SavingsChart.averageStroke / 2;
-    paintDottedLine(canvas, Offset(inset, y), Offset(size.width - inset, y));
+    paintDottedLine(
+      canvas,
+      Offset(inset, y),
+      Offset(size.width - inset, y),
+      color,
+    );
   }
 
   @override
-  bool shouldRepaint(_SwatchPainter oldDelegate) => false;
+  bool shouldRepaint(_SwatchPainter oldDelegate) => oldDelegate.color != color;
 }

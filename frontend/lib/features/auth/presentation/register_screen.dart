@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/api/api_client.dart';
-import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/tokens.dart';
 import '../../../core/widgets/app_segmented.dart';
 import '../../../core/widgets/app_select.dart';
@@ -126,7 +125,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                 controller: _displayNameController,
                 autofillHints: const [AutofillHints.newUsername],
                 decoration: displayNameError != null
-                    ? errorFieldDecoration()
+                    ? errorFieldDecoration(context)
                     : null,
                 onChanged: (value) => setState(() => _displayName = value),
                 validator: (value) => (value == null || value.trim().isEmpty)
@@ -143,7 +142,9 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                 controller: _emailController,
                 keyboardType: TextInputType.emailAddress,
                 autofillHints: const [AutofillHints.email],
-                decoration: emailError != null ? errorFieldDecoration() : null,
+                decoration: emailError != null
+                    ? errorFieldDecoration(context)
+                    : null,
                 onChanged: (value) => setState(() => _email = value),
                 validator: (value) => (value == null || value.trim().isEmpty)
                     ? l10n.authEmailRequired
@@ -229,9 +230,9 @@ class _PreferencesRow extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(AppSpacing.md - 2),
       decoration: BoxDecoration(
-        color: AppColors.surfaceField,
+        color: context.colors.field,
         borderRadius: BorderRadius.circular(AppRadii.inset),
-        border: Border.all(color: AppColors.border),
+        border: Border.all(color: context.colors.line),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -275,7 +276,9 @@ class _PreferencesRow extends StatelessWidget {
           Text(
             l10n.authPreferencesNote,
             key: const Key('registerPreferencesNote'),
-            style: AppTextStyles.helper.copyWith(color: AppColors.textDisabled),
+            style: context.textStyles.helper.copyWith(
+              color: context.colors.textTertiary,
+            ),
           ),
         ],
       ),

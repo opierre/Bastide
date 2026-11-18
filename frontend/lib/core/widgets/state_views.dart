@@ -12,14 +12,14 @@ class EmptyStateView extends StatelessWidget {
     required this.title,
     required this.message,
     this.action,
-    this.accent = AppColors.iris,
+    this.accent,
   });
 
   final IconData icon;
   final String title;
   final String message;
   final Widget? action;
-  final Color accent;
+  final Color? accent;
 
   @override
   Widget build(BuildContext context) {
@@ -40,7 +40,7 @@ class EmptyStateView extends StatelessWidget {
           Text(
             message,
             style: textTheme.bodyLarge?.copyWith(
-              color: AppColors.textSecondary,
+              color: context.colors.textSecondary,
             ),
             textAlign: TextAlign.center,
           ),
@@ -120,16 +120,16 @@ class ErrorStateView extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const GlyphPlate(
+          GlyphPlate(
             icon: Icons.warning_amber_rounded,
-            accent: AppColors.warning,
+            accent: context.colors.warning,
           ),
           const SizedBox(height: AppSpacing.lg),
           Text(
             message,
             key: messageKey,
             style: textTheme.bodyLarge?.copyWith(
-              color: AppColors.textSecondary,
+              color: context.colors.textSecondary,
             ),
             textAlign: TextAlign.center,
           ),
@@ -147,17 +147,16 @@ class ErrorStateView extends StatelessWidget {
 
 /// The 64px tinted plate that heads an empty or error state.
 class GlyphPlate extends StatelessWidget {
-  const GlyphPlate({
-    super.key,
-    required this.icon,
-    this.accent = AppColors.iris,
-  });
+  const GlyphPlate({super.key, required this.icon, this.accent});
 
   final IconData icon;
-  final Color accent;
+
+  /// `null` takes `accent`.
+  final Color? accent;
 
   @override
   Widget build(BuildContext context) {
+    final accent = this.accent ?? context.colors.accent;
     return Container(
       width: 64,
       height: 64,
@@ -261,9 +260,9 @@ class SkeletonBlock extends StatelessWidget {
       height: height,
       width: width,
       decoration: BoxDecoration(
-        color: AppColors.surfaceHover,
+        color: context.colors.hover,
         borderRadius: BorderRadius.circular(radius),
-        border: Border.all(color: AppColors.borderSubtle),
+        border: Border.all(color: context.colors.line),
       ),
     );
   }

@@ -16,7 +16,7 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
 # In Windows, build-name is used as the major, minor, and patch parts
 # of the product and file versions while build-number is used as the build suffix.
-version: 0.2.0-dev.0+5
+version: 0.2.0-dev.1+5
 
 environment:
   sdk: ^3.12.0
@@ -89,25 +89,26 @@ flutter:
   assets:
     - assets/licenses/lucide/LICENSE
 
-  # Geist carries the UI (400 body, 600 emphasis/labels, 700 headings) and
-  # Space Grotesk 700 the display role — wordmark, panel titles, headline
-  # amounts. Only the weights the type scale actually uses are bundled.
-  # See docs/design/00-shared-design-block.md §Typography.
+  # Geist carries the whole UI at 400, 500 and 600; Geist Mono 400 sets raw bank
+  # labels, rule patterns, file names and URLs. Space Grotesk is gone.
+  # See docs/design/00-design-system.md §3.
   #
-  # Geist ships from Google Fonts as a `wght` variable font only; the three
-  # statics beside it were instanced from it at 400/600/700 so the weights the
-  # scale asks for resolve through `fontWeight` alone, without every call site
-  # having to carry a matching `fontVariations`.
+  # Both ship from Google Fonts as `wght` variable fonts only; the statics here
+  # were instanced from them so the weights the scale asks for resolve through
+  # `fontWeight` alone, without every call site carrying `fontVariations`.
+  # Bold 700 stays for the few widgets still asking for it until #200.
   fonts:
     - family: Geist
       fonts:
         - asset: assets/fonts/Geist/static/Geist-Regular.ttf
           weight: 400
+        - asset: assets/fonts/Geist/static/Geist-Medium.ttf
+          weight: 500
         - asset: assets/fonts/Geist/static/Geist-SemiBold.ttf
           weight: 600
         - asset: assets/fonts/Geist/static/Geist-Bold.ttf
           weight: 700
-    - family: Space Grotesk
+    - family: Geist Mono
       fonts:
-        - asset: assets/fonts/Space_Grotesk/static/SpaceGrotesk-Bold.ttf
-          weight: 700
+        - asset: assets/fonts/GeistMono/static/GeistMono-Regular.ttf
+          weight: 400

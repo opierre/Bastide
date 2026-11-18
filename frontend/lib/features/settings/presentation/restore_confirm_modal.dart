@@ -64,12 +64,16 @@ class _RestoreConfirmModalState extends ConsumerState<RestoreConfirmModal> {
             TextSpan(text: '${l10n.settingsBackupConfirmFile} '),
             TextSpan(
               text: widget.pending.fileName,
-              style: AppTextStyles.mono.copyWith(color: AppColors.textPrimary),
+              style: context.textStyles.mono.copyWith(
+                color: context.colors.text,
+              ),
             ),
           ],
         ),
         key: const Key('backupConfirmFile'),
-        style: textTheme.bodyMedium?.copyWith(color: AppColors.textSecondary),
+        style: textTheme.bodyMedium?.copyWith(
+          color: context.colors.textSecondary,
+        ),
       ),
       actions: [
         OutlinedButton(
@@ -80,21 +84,23 @@ class _RestoreConfirmModalState extends ConsumerState<RestoreConfirmModal> {
           key: const Key('backupConfirmReplace'),
           onPressed: _isRestoring ? null : _confirm,
           style: FilledButton.styleFrom(
-            backgroundColor: AppColors.negative,
-            foregroundColor: AppColors.negativeInk,
-            disabledBackgroundColor: AppColors.negative.withValues(alpha: 0.55),
-            disabledForegroundColor: AppColors.negativeInk,
+            backgroundColor: context.colors.negative,
+            foregroundColor: context.colors.onPrimary,
+            disabledBackgroundColor: context.colors.negative.withValues(
+              alpha: 0.55,
+            ),
+            disabledForegroundColor: context.colors.onPrimary,
           ),
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
               if (_isRestoring) ...[
-                const SizedBox(
+                SizedBox(
                   width: 13,
                   height: 13,
                   child: CircularProgressIndicator(
                     strokeWidth: 2,
-                    color: AppColors.negativeInk,
+                    color: context.colors.onPrimary,
                   ),
                 ),
                 const SizedBox(width: AppSpacing.sm),
@@ -142,7 +148,7 @@ class _SummaryPlate extends StatelessWidget {
     final valueStyle = tabularNumberStyle(
       Theme.of(
         context,
-      ).textTheme.bodyMedium!.copyWith(color: AppColors.textPrimary),
+      ).textTheme.bodyMedium!.copyWith(color: context.colors.text),
     );
 
     final rows = <(String, Widget)>[
@@ -157,7 +163,7 @@ class _SummaryPlate extends StatelessWidget {
         l10n.settingsBackupConfirmVersion,
         Text(
           summary.appVersion,
-          style: AppTextStyles.mono.copyWith(color: AppColors.textPrimary),
+          style: context.textStyles.mono.copyWith(color: context.colors.text),
         ),
       ),
       for (final (label, count) in [
@@ -181,9 +187,9 @@ class _SummaryPlate extends StatelessWidget {
         vertical: AppSpacing.xs,
       ),
       decoration: BoxDecoration(
-        color: AppColors.surfaceField,
+        color: context.colors.field,
         borderRadius: BorderRadius.circular(AppRadii.inset),
-        border: Border.all(color: AppColors.borderSubtle),
+        border: Border.all(color: context.colors.line),
       ),
       child: Column(
         children: [
@@ -199,7 +205,7 @@ class _SummaryPlate extends StatelessWidget {
                       label,
                       overflow: TextOverflow.ellipsis,
                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: AppColors.textSecondary,
+                        color: context.colors.textSecondary,
                       ),
                     ),
                   ),

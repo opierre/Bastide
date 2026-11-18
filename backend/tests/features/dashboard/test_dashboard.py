@@ -40,7 +40,7 @@ def _create_category(
 ) -> str:
     response = client.post(
         "/api/v1/categories",
-        json={"name": name, "kind": kind, "icon": "category", "color": "#10B981"},
+        json={"name": name, "kind": kind, "icon": "category", "color": "cat3"},
         headers=headers,
     )
     return response.json()["id"]

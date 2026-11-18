@@ -94,8 +94,7 @@ class _HistoryTable extends StatelessWidget {
           child: ListView.separated(
             key: const Key('importHistoryList'),
             itemCount: batches.length,
-            separatorBuilder: (_, _) =>
-                const Divider(color: AppColors.borderSubtle),
+            separatorBuilder: (_, _) => Divider(color: context.colors.line),
             itemBuilder: (context, index) => _HistoryRow(
               batch: batches[index],
               currency: _currencyFor(accounts, batches[index].accountId),
@@ -175,7 +174,7 @@ class _HeaderRow extends StatelessWidget {
     Widget cell(String label, {TextAlign align = TextAlign.center}) => Text(
       label.toUpperCase(),
       textAlign: align,
-      style: AppTextStyles.sectionLabel,
+      style: context.textStyles.sectionLabel,
     );
 
     return Padding(
@@ -231,7 +230,9 @@ class _HistoryRow extends StatelessWidget {
               Text(
                 l10n.importFailedNote,
                 key: Key('importBatchFailureNote-${batch.id}'),
-                style: AppTextStyles.helper.copyWith(color: AppColors.negative),
+                style: context.textStyles.helper.copyWith(
+                  color: context.colors.negative,
+                ),
               ),
               if (batch.errorMessage case final message?
                   when message.trim().isNotEmpty) ...[
@@ -239,8 +240,8 @@ class _HistoryRow extends StatelessWidget {
                 Text(
                   message,
                   overflow: TextOverflow.ellipsis,
-                  style: AppTextStyles.mono.copyWith(
-                    color: AppColors.textDisabled,
+                  style: context.textStyles.mono.copyWith(
+                    color: context.colors.textTertiary,
                   ),
                 ),
               ],
@@ -249,7 +250,9 @@ class _HistoryRow extends StatelessWidget {
               Text(
                 l10n.importDuplicatesNote(batch.duplicateCount),
                 key: Key('importBatchDuplicateNote-${batch.id}'),
-                style: AppTextStyles.helper.copyWith(color: AppColors.warning),
+                style: context.textStyles.helper.copyWith(
+                  color: context.colors.warning,
+                ),
               ),
             ],
             // Independent of the notes above: a statement can both skip
@@ -267,7 +270,9 @@ class _HistoryRow extends StatelessWidget {
                   batch.balanceMismatchAsOf!,
                 ),
                 key: Key('importBatchMismatchNote-${batch.id}'),
-                style: AppTextStyles.helper.copyWith(color: AppColors.warning),
+                style: context.textStyles.helper.copyWith(
+                  color: context.colors.warning,
+                ),
               ),
             ],
           ],
@@ -283,14 +288,14 @@ class _HistoryRow extends StatelessWidget {
           textAlign: TextAlign.center,
           style: tabularNumberStyle(
             textTheme.bodyMedium!,
-          ).copyWith(color: AppColors.textSecondary),
+          ).copyWith(color: context.colors.textSecondary),
         ),
         period: Text(
           l10n.importPeriodRange(batch.periodStart, batch.periodEnd),
           textAlign: TextAlign.center,
           style: tabularNumberStyle(
             textTheme.bodyMedium!,
-          ).copyWith(color: AppColors.textSecondary),
+          ).copyWith(color: context.colors.textSecondary),
         ),
         newCount: Text(
           numberFormat.format(batch.newCount),
@@ -302,7 +307,7 @@ class _HistoryRow extends StatelessWidget {
           textAlign: TextAlign.center,
           style: tabularNumberStyle(
             textTheme.bodyMedium!,
-          ).copyWith(color: AppColors.textSecondary),
+          ).copyWith(color: context.colors.textSecondary),
         ),
         status: ImportStatusPill(
           status: batch.status,
@@ -331,8 +336,8 @@ class ImportFormatBadge extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final color = switch (format) {
-      ImportFormat.ofx => AppColors.info,
-      ImportFormat.qfx => AppColors.iris,
+      ImportFormat.ofx => context.colors.textSecondary,
+      ImportFormat.qfx => context.colors.accent,
     };
 
     return Align(
@@ -362,17 +367,17 @@ class ImportStatusPill extends StatelessWidget {
 
     final (color, icon, label) = switch (status) {
       ImportStatus.success => (
-        AppColors.positive,
+        context.colors.positive,
         Icons.check_rounded,
         l10n.importStatusSuccess,
       ),
       ImportStatus.partial => (
-        AppColors.warning,
+        context.colors.warning,
         Icons.warning_amber_rounded,
         l10n.importStatusPartial,
       ),
       ImportStatus.failed => (
-        AppColors.negative,
+        context.colors.negative,
         Icons.close_rounded,
         l10n.importStatusFailed,
       ),

@@ -1,3 +1,4 @@
+import 'package:bastide/core/theme/tokens.dart';
 import 'package:bastide/core/theme/app_theme.dart';
 import 'package:bastide/core/widgets/amount_text.dart';
 import 'package:bastide/features/mortgages/application/mortgages_controller.dart';
@@ -40,7 +41,7 @@ Widget _wrap({List<int>? requestedYears}) {
     ],
     child: MaterialApp(
       locale: const Locale('fr'),
-      theme: appDarkTheme,
+      theme: AppTheme.dark,
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
       home: const Scaffold(body: MortgagesScreen()),
@@ -128,7 +129,7 @@ void main() {
     },
   );
 
-  testWidgets('the current instalment row carries the iris wash', (
+  testWidgets('the current instalment row carries the accentSoft wash', (
     tester,
   ) async {
     _useDesktopSurface(tester);
@@ -150,7 +151,7 @@ void main() {
     }
 
     // Today is 14/05/2026 and the next instalment 01/06/2026: May is current.
-    expect(washOf(5), const Color(0x0F8B8CF9));
+    expect(washOf(5), AppColors.dark.accentSoft);
     expect(washOf(4), isNull);
     expect(washOf(6), isNull);
   });

@@ -305,7 +305,7 @@ def _seed(db_session: Session) -> tuple[str, str, str]:
         cached_balance_minor=100_000,
     )
     category = Category(
-        user_id=user.id, name="Courses", kind="expense", icon="shopping_cart", color="#10B981"
+        user_id=user.id, name="Courses", kind="expense", icon="shopping_cart", color="cat3"
     )
     db_session.add_all([account, category])
     db_session.flush()

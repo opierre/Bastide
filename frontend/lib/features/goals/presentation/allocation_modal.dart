@@ -151,9 +151,9 @@ class _AllocationModalState extends ConsumerState<AllocationModal> {
             Text(
               widget.goal.name,
               key: const Key('allocationGoalName'),
-              style: Theme.of(
-                context,
-              ).textTheme.bodySmall?.copyWith(color: AppColors.textSecondary),
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: context.colors.textSecondary,
+              ),
             ),
             const SizedBox(height: AppSpacing.md),
             if (_errorText != null) ...[

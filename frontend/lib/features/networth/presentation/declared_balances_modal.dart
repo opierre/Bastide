@@ -168,7 +168,7 @@ class _DeclaredBalancesModalState extends ConsumerState<DeclaredBalancesModal> {
         l10n.networthDeclaredSubtitle,
         style: Theme.of(
           context,
-        ).textTheme.bodySmall?.copyWith(color: AppColors.textSecondary),
+        ).textTheme.bodySmall?.copyWith(color: context.colors.textSecondary),
       ),
       width: 560,
       actions: [
@@ -263,7 +263,7 @@ class _DeclaredBalancesModalState extends ConsumerState<DeclaredBalancesModal> {
             ),
           ),
           const SizedBox(height: AppSpacing.md),
-          const Divider(height: 1, color: AppColors.borderSubtle),
+          Divider(height: 1, color: context.colors.line),
           ConstrainedBox(
             constraints: const BoxConstraints(maxHeight: 320),
             // The list stays on screen while a write re-reads it.
@@ -279,7 +279,7 @@ class _DeclaredBalancesModalState extends ConsumerState<DeclaredBalancesModal> {
                         key: const Key('declaredEmpty'),
                         textAlign: TextAlign.center,
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: AppColors.textSecondary,
+                          color: context.colors.textSecondary,
                         ),
                       ),
                     )
@@ -354,8 +354,8 @@ class _DeclaredRow extends StatelessWidget {
     return Container(
       key: Key('declaredRow-$key'),
       height: 48,
-      decoration: const BoxDecoration(
-        border: Border(bottom: BorderSide(color: AppColors.borderSubtle)),
+      decoration: BoxDecoration(
+        border: Border(bottom: BorderSide(color: context.colors.line)),
       ),
       child: Row(
         children: [
@@ -390,9 +390,9 @@ class _DeclaredRow extends StatelessWidget {
             iconSize: 16,
             visualDensity: VisualDensity.compact,
             tooltip: l10n.networthDeclaredEdit,
-            icon: const Icon(
+            icon: Icon(
               Icons.edit_outlined,
-              color: AppColors.textSecondary,
+              color: context.colors.textSecondary,
             ),
           ),
           IconButton(
@@ -401,10 +401,7 @@ class _DeclaredRow extends StatelessWidget {
             iconSize: 16,
             visualDensity: VisualDensity.compact,
             tooltip: l10n.networthDeclaredDelete,
-            icon: const Icon(
-              Icons.close_rounded,
-              color: AppColors.textDisabled,
-            ),
+            icon: Icon(Icons.close_rounded, color: context.colors.textTertiary),
           ),
         ],
       ),

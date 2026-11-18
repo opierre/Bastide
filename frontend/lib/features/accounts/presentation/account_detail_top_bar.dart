@@ -24,7 +24,7 @@ class AccountDetailTitle extends ConsumerWidget {
     final account = ref.watch(accountByIdProvider(accountId));
     final secondary = textTheme.bodySmall?.copyWith(
       fontSize: 12,
-      color: AppColors.textSecondary,
+      color: context.colors.textSecondary,
     );
 
     return Column(
@@ -47,7 +47,7 @@ class AccountDetailTitle extends ConsumerWidget {
                 l10n.navAccounts,
                 style: secondary?.copyWith(
                   decoration: TextDecoration.underline,
-                  decorationColor: AppColors.borderDashed,
+                  decorationColor: context.colors.lineStrong,
                 ),
               ),
             ),
@@ -56,7 +56,9 @@ class AccountDetailTitle extends ConsumerWidget {
                 padding: const EdgeInsets.symmetric(horizontal: 6),
                 child: Text(
                   '›',
-                  style: secondary?.copyWith(color: AppColors.textDisabled),
+                  style: secondary?.copyWith(
+                    color: context.colors.textTertiary,
+                  ),
                 ),
               ),
               Flexible(
@@ -91,7 +93,7 @@ class AccountDetailTopBarActions extends ConsumerWidget {
     if (account == null) return const SizedBox.shrink();
 
     final pillStyle = TextButton.styleFrom(
-      foregroundColor: AppColors.textSecondary,
+      foregroundColor: context.colors.textSecondary,
       minimumSize: const Size(0, AppChrome.controlPillHeight),
       padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
       shape: const StadiumBorder(),
@@ -143,12 +145,12 @@ class AccountDetailTopBarActions extends ConsumerWidget {
               height: AppChrome.controlPillHeight,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                border: Border.all(color: AppColors.border),
+                border: Border.all(color: context.colors.line),
               ),
-              child: const Icon(
+              child: Icon(
                 Icons.more_horiz_rounded,
                 size: 18,
-                color: AppColors.textSecondary,
+                color: context.colors.textSecondary,
               ),
             ),
           ),

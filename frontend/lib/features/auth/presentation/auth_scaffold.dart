@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 
-import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/tokens.dart';
 import '../../../core/widgets/brand_mark.dart';
-import '../../../core/widgets/frame_texture.dart';
 import '../../../l10n/app_localizations.dart';
 
 /// Shared chrome for the signed-out screens: an ink page lit by two soft iris
@@ -59,64 +57,52 @@ class AuthScaffold extends StatelessWidget {
     final textTheme = Theme.of(context).textTheme;
 
     return Scaffold(
-      backgroundColor: AppColors.surfaceSunken,
-      body: FrameTexture(
-        child: Stack(
-          children: [
-            const Positioned(
-              top: -180,
-              left: -140,
-              child: _Glow(color: AppColors.iris),
-            ),
-            const Positioned(
-              bottom: -220,
-              right: -160,
-              child: _Glow(color: AppColors.irisDeep),
-            ),
-            Center(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.all(AppSpacing.xl),
-                child: SizedBox(
-                  width: cardWidth,
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      Center(child: lockup),
-                      if (tagline != null) ...[
-                        const SizedBox(height: AppSpacing.sm + AppSpacing.xs),
-                        Text(
-                          tagline!,
-                          textAlign: TextAlign.center,
-                          style: textTheme.bodyLarge?.copyWith(
-                            color: AppColors.textSecondary,
-                          ),
-                        ),
-                      ],
+      backgroundColor: context.colors.bg,
+      body: Stack(
+        children: [
+          Center(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.all(AppSpacing.xl),
+              child: SizedBox(
+                width: cardWidth,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Center(child: lockup),
+                    if (tagline != null) ...[
                       const SizedBox(height: AppSpacing.sm + AppSpacing.xs),
-                      _PrivacyLine(text: l10n.authPrivacyLine),
-                      const SizedBox(height: AppSpacing.lg + AppSpacing.xs),
-                      Container(
-                        padding: const EdgeInsets.all(30),
-                        decoration: BoxDecoration(
-                          color: AppColors.surfaceRaised,
-                          borderRadius: BorderRadius.circular(AppRadii.xl),
-                          border: Border.all(color: AppColors.borderCard),
-                          boxShadow: AppShadows.modal,
+                      Text(
+                        tagline!,
+                        textAlign: TextAlign.center,
+                        style: textTheme.bodyLarge?.copyWith(
+                          color: context.colors.textSecondary,
                         ),
-                        child: form,
                       ),
-                      if (footer case final footer?) ...[
-                        const SizedBox(height: AppSpacing.md + AppSpacing.xs),
-                        Center(child: footer),
-                      ],
                     ],
-                  ),
+                    const SizedBox(height: AppSpacing.sm + AppSpacing.xs),
+                    _PrivacyLine(text: l10n.authPrivacyLine),
+                    const SizedBox(height: AppSpacing.lg + AppSpacing.xs),
+                    Container(
+                      padding: const EdgeInsets.all(30),
+                      decoration: BoxDecoration(
+                        color: context.colors.bg,
+                        borderRadius: BorderRadius.circular(AppRadii.xl),
+                        border: Border.all(color: context.colors.line),
+                        boxShadow: context.colors.shadow,
+                      ),
+                      child: form,
+                    ),
+                    if (footer case final footer?) ...[
+                      const SizedBox(height: AppSpacing.md + AppSpacing.xs),
+                      Center(child: footer),
+                    ],
+                  ],
                 ),
               ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
@@ -134,10 +120,10 @@ class _PrivacyLine extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        const Icon(
+        Icon(
           Icons.lock_outline_rounded,
           size: 12,
-          color: AppColors.textDisabled,
+          color: context.colors.textTertiary,
         ),
         const SizedBox(width: AppSpacing.xs + 2),
         Flexible(
@@ -145,37 +131,12 @@ class _PrivacyLine extends StatelessWidget {
             text,
             key: const Key('authPrivacyLine'),
             textAlign: TextAlign.center,
-            style: AppTextStyles.helper.copyWith(color: AppColors.textDisabled),
+            style: context.textStyles.helper.copyWith(
+              color: context.colors.textTertiary,
+            ),
           ),
         ),
       ],
-    );
-  }
-}
-
-/// A large, very low-opacity radial wash. Gives the ink background depth
-/// without becoming a decorative element competing with the form.
-class _Glow extends StatelessWidget {
-  const _Glow({required this.color});
-
-  final Color color;
-
-  @override
-  Widget build(BuildContext context) {
-    return IgnorePointer(
-      child: Container(
-        width: 520,
-        height: 520,
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          gradient: RadialGradient(
-            colors: [
-              color.withValues(alpha: 0.07),
-              color.withValues(alpha: 0.0),
-            ],
-          ),
-        ),
-      ),
     );
   }
 }

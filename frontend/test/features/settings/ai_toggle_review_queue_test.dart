@@ -40,7 +40,7 @@ const _catalog = [
     name: 'category.shopping.electronics',
     kind: 'expense',
     icon: 'devices',
-    color: '#64748B',
+    color: 'cat0',
     isSystem: true,
   ),
 ];
@@ -50,7 +50,7 @@ const _electronics = TransactionCategory(
   name: 'category.shopping.electronics',
   kind: 'expense',
   icon: 'devices',
-  color: '#64748B',
+  color: 'cat0',
 );
 
 final _row = Transaction(
@@ -140,7 +140,7 @@ void main() {
           ],
           child: MaterialApp(
             locale: const Locale('fr'),
-            theme: appDarkTheme,
+            theme: AppTheme.dark,
             localizationsDelegates: AppLocalizations.localizationsDelegates,
             supportedLocales: AppLocalizations.supportedLocales,
             home: const Scaffold(

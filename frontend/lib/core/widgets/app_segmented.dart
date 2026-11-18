@@ -32,9 +32,9 @@ class AppSegmented<T> extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(3),
       decoration: BoxDecoration(
-        color: AppColors.surfaceField,
+        color: context.colors.field,
         borderRadius: BorderRadius.circular(AppRadii.md),
-        border: Border.all(color: AppColors.border),
+        border: Border.all(color: context.colors.line),
       ),
       child: Row(
         children: [
@@ -81,14 +81,16 @@ class _Segment extends StatelessWidget {
           decoration: BoxDecoration(
             // Fill only: a border on the active segment reads as a second
             // control nested inside the track.
-            color: selected ? const Color(0x248B8CF9) : Colors.transparent,
+            color: selected ? context.colors.hover : Colors.transparent,
             borderRadius: BorderRadius.circular(AppRadii.sm + 1),
           ),
           child: Text(
             label,
             overflow: TextOverflow.ellipsis,
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: selected ? AppColors.iris : AppColors.textSecondary,
+              color: selected
+                  ? context.colors.accent
+                  : context.colors.textSecondary,
               fontWeight: selected ? FontWeight.w600 : FontWeight.w400,
             ),
           ),

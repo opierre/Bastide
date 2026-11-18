@@ -12,7 +12,7 @@ USER_CATEGORY_PAYLOAD = {
     "name": "Vacances",
     "kind": "expense",
     "icon": "flight",
-    "color": "#8B5CF6",
+    "color": "cat3",
 }
 
 
@@ -25,7 +25,7 @@ def _insert_system_category(tmp_path: Path, name: str = "category.housing") -> s
         name=name,
         kind="expense",
         icon="home",
-        color="#F59E0B",
+        color="cat3",
         is_system=True,
     )
     session.add(category)
@@ -147,3 +147,27 @@ def test_categories_require_auth(client: TestClient) -> None:
     response = client.get("/api/v1/categories")
 
     assert response.status_code == 401
+
+
+def test_create_category_rejects_a_hex_colour(client: TestClient) -> None:
+    headers = _register(client)
+
+    response = client.post(
+        "/api/v1/categories",
+        json={**USER_CATEGORY_PAYLOAD, "color": "#8B5CF6"},
+        headers=headers,
+    )
+
+    assert response.status_code == 422
+
+
+def test_update_category_changes_its_slot(client: TestClient) -> None:
+    headers = _register(client)
+    created = client.post("/api/v1/categories", json=USER_CATEGORY_PAYLOAD, headers=headers)
+
+    response = client.patch(
+        f"/api/v1/categories/{created.json()['id']}", json={"color": "cat5"}, headers=headers
+    )
+
+    assert response.status_code == 200
+    assert response.json()["color"] == "cat5"

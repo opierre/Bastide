@@ -2,12 +2,8 @@ import 'package:flutter/material.dart';
 
 import '../theme/tokens.dart';
 
-/// The iris-gradient primary button.
-///
-/// This is a widget rather than a [ButtonStyle] because Material's button
-/// styling takes a flat `backgroundColor` and cannot paint a gradient or the
-/// spec's outer glow. Everything else — secondary, danger, ghost — is expressible
-/// as a theme style and stays on [OutlinedButton] / [TextButton].
+/// The primary button: `primary` ground, `onPrimary` label
+/// (`docs/design/00-design-system.md` §6). #200 rebuilds its geometry.
 class PrimaryButton extends StatefulWidget {
   const PrimaryButton({
     super.key,
@@ -33,8 +29,8 @@ class PrimaryButton extends StatefulWidget {
 
   final String label;
 
-  /// `null` disables the button — it drops to the flat `#1E2634` / disabled-text
-  /// treatment and loses the glow.
+  /// `null` disables the button — it drops to the `hover` / tertiary-text
+  /// treatment.
   final VoidCallback? onPressed;
 
   final IconData? icon;
@@ -56,22 +52,33 @@ class _PrimaryButtonState extends State<PrimaryButton> {
   @override
   Widget build(BuildContext context) {
     // A loading button is not pressable, but it is not *disabled* either — it
-    // keeps the gradient so the submit still reads as in-flight.
+    // keeps its fill so the submit still reads as in-flight.
     final enabled = widget.onPressed != null && !widget.isLoading;
     final muted = widget.onPressed == null;
     final label = widget.isLoading
         ? (widget.loadingLabel ?? widget.label)
         : widget.label;
-    final foreground = muted ? AppColors.textDisabled : AppColors.irisInk;
+    final foreground = muted
+        ? context.colors.textTertiary
+        : context.colors.onPrimary;
 
     final button = Container(
       height: widget.height,
       padding: EdgeInsets.symmetric(horizontal: widget.height * 0.42),
       decoration: BoxDecoration(
-        gradient: muted ? null : AppColors.irisGradient,
-        color: muted ? AppColors.surfaceHover : null,
+        color: muted
+            ? context.colors.hover
+            // Hover moves the ink 8 % further from the ground: lighter in
+            // dark, darker in light. Extrapolating away from `onPrimary`
+            // (the ground) does both.
+            : (_hovered
+                  ? Color.lerp(
+                      context.colors.primary,
+                      context.colors.onPrimary,
+                      -0.08,
+                    )
+                  : context.colors.primary),
         borderRadius: BorderRadius.circular(AppRadii.md),
-        boxShadow: muted || !_hovered ? null : AppColors.irisGlow,
       ),
       child: Row(
         mainAxisSize: widget.expand ? MainAxisSize.max : MainAxisSize.min,

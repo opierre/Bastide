@@ -248,6 +248,42 @@ abstract class AppLocalizations {
   /// **'À propos'**
   String get settingsSectionAbout;
 
+  /// Title of the theme row in settings preferences.
+  ///
+  /// In fr, this message translates to:
+  /// **'Thème'**
+  String get settingsThemeTitle;
+
+  /// Note under the theme segmented control.
+  ///
+  /// In fr, this message translates to:
+  /// **'Sombre, clair, ou celui de votre système.'**
+  String get settingsThemeNote;
+
+  /// Theme option that follows the operating system.
+  ///
+  /// In fr, this message translates to:
+  /// **'Système'**
+  String get settingsThemeSystem;
+
+  /// Theme option for the dark theme.
+  ///
+  /// In fr, this message translates to:
+  /// **'Sombre'**
+  String get settingsThemeDark;
+
+  /// Theme option for the light theme.
+  ///
+  /// In fr, this message translates to:
+  /// **'Clair'**
+  String get settingsThemeLight;
+
+  /// Toast shown when saving the theme preference fails; the previous theme is restored.
+  ///
+  /// In fr, this message translates to:
+  /// **'Le thème n\'a pas pu être enregistré. Rien n\'a été modifié. Réessayez.'**
+  String get settingsThemeSaveFailed;
+
   /// Title of the language card in settings preferences.
   ///
   /// In fr, this message translates to:

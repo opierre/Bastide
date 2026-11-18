@@ -37,7 +37,7 @@ Widget _wrap({required List<Goal> goals, Locale locale = const Locale('fr')}) {
     ],
     child: MaterialApp(
       locale: locale,
-      theme: appDarkTheme,
+      theme: AppTheme.dark,
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
       home: const Scaffold(body: DashboardScreen()),

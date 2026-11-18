@@ -46,7 +46,7 @@ List<Map<String, dynamic>> _categoryCatalog() => [
     'name': 'category.housing',
     'kind': 'expense',
     'icon': 'home',
-    'color': '#4FD1E8',
+    'color': 'cat1',
     'is_system': true,
   },
   {
@@ -56,7 +56,7 @@ List<Map<String, dynamic>> _categoryCatalog() => [
     'name': 'category.housing.home_insurance',
     'kind': 'expense',
     'icon': 'home',
-    'color': '#4FD1E8',
+    'color': 'cat1',
     'is_system': true,
   },
 ];
@@ -117,7 +117,7 @@ void main() {
     ],
     child: MaterialApp(
       locale: locale,
-      theme: appDarkTheme,
+      theme: AppTheme.dark,
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
       home: Scaffold(body: AlwaysCategorizeModal(transaction: _transaction)),

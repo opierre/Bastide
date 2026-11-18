@@ -62,10 +62,10 @@ class _CategoryFormModalState extends ConsumerState<CategoryFormModal> {
   late String _icon =
       CategoryIcons.resolveKey(widget.initial?.icon) ??
       CategoryIcons.slugKeys['autres']!;
-  late Color _color = switch ((widget.initial, widget.parent)) {
-    (final AppCategory initial, _) => categoryColor(initial),
-    (null, final AppCategory parent) => categoryColor(parent),
-    _ => categoryPalette.last,
+  late CategorySlot _slot = switch ((widget.initial, widget.parent)) {
+    (final AppCategory initial, _) => categorySlot(initial),
+    (null, final AppCategory parent) => categorySlot(parent),
+    _ => CategorySlot.cat0,
   };
 
   bool _isSubmitting = false;
@@ -111,7 +111,7 @@ class _CategoryFormModalState extends ConsumerState<CategoryFormModal> {
     final parent = _selectedParent(categories);
     final kind = parent?.kind ?? _kind;
     final icon = parent == null ? _icon : categoryIconKey(parent);
-    final color = hexOf(parent == null ? _color : categoryColor(parent));
+    final color = (parent == null ? _slot : categorySlot(parent)).wire;
     final controller = ref.read(categoriesControllerProvider.notifier);
     try {
       final saved = _isEditing
@@ -287,7 +287,7 @@ class _CategoryFormModalState extends ConsumerState<CategoryFormModal> {
                         leading: Icon(
                           CategoryIcons.forKey(key),
                           size: 15,
-                          color: AppColors.textSecondary,
+                          color: context.colors.textSecondary,
                         ),
                       ),
                   ],
@@ -298,8 +298,8 @@ class _CategoryFormModalState extends ConsumerState<CategoryFormModal> {
                 label: l10n.categoryFormColorLabel,
                 helper: l10n.categoryFormColorHelper,
                 child: _ColorPicker(
-                  selected: _color,
-                  onSelected: (color) => setState(() => _color = color),
+                  selected: _slot,
+                  onSelected: (slot) => setState(() => _slot = slot),
                 ),
               ),
             ],
@@ -324,15 +324,19 @@ class _ParentLine extends StatelessWidget {
     return Row(
       key: const Key('categoryFormParentLine'),
       children: [
-        Icon(categoryIcon(parent), size: 15, color: categoryColor(parent)),
+        Icon(
+          categoryIcon(parent),
+          size: 15,
+          color: categoryColor(context, parent),
+        ),
         const SizedBox(width: AppSpacing.sm),
         Flexible(
           child: Text(
             localizedCategoryName(l10n, parent.name),
             overflow: TextOverflow.ellipsis,
-            style: Theme.of(
-              context,
-            ).textTheme.bodyMedium?.copyWith(color: AppColors.textSecondary),
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              color: context.colors.textSecondary,
+            ),
           ),
         ),
       ],
@@ -340,14 +344,14 @@ class _ParentLine extends StatelessWidget {
   }
 }
 
-/// The pinned palette as a row of 28 px swatches. A picker rather than a colour
+/// The category slots as a row of 28 px swatches. A picker rather than a colour
 /// wheel: the hues are fixed by the design system so a category means the same
-/// colour in the donut, the legend and its chip.
+/// colour in every chart, legend and label (`00` §2.4).
 class _ColorPicker extends StatelessWidget {
   const _ColorPicker({required this.selected, required this.onSelected});
 
-  final Color selected;
-  final ValueChanged<Color> onSelected;
+  final CategorySlot selected;
+  final ValueChanged<CategorySlot> onSelected;
 
   @override
   Widget build(BuildContext context) {
@@ -355,15 +359,15 @@ class _ColorPicker extends StatelessWidget {
       spacing: AppSpacing.sm,
       runSpacing: AppSpacing.sm,
       children: [
-        for (final color in categoryPalette)
+        for (final slot in CategorySlot.pickable)
           GestureDetector(
-            key: Key('categoryFormColor-${hexOf(color)}'),
-            onTap: () => onSelected(color),
+            key: Key('categoryFormColor-${slot.wire}'),
+            onTap: () => onSelected(slot),
             child: MouseRegion(
               cursor: SystemMouseCursors.click,
               child: _Swatch(
-                color: color,
-                isSelected: color.toARGB32() == selected.toARGB32(),
+                color: context.categoryColors.forSlot(slot),
+                isSelected: slot == selected,
               ),
             ),
           ),
@@ -389,7 +393,7 @@ class _Swatch extends StatelessWidget {
         color: color.withValues(alpha: 0.2),
         borderRadius: BorderRadius.circular(AppRadii.sm),
         border: Border.all(
-          color: isSelected ? color : AppColors.border,
+          color: isSelected ? color : context.colors.line,
           width: isSelected ? 2 : 1,
         ),
       ),
