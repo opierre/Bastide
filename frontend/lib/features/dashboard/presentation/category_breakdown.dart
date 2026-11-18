@@ -54,7 +54,9 @@ class CategoryBreakdownChart extends StatelessWidget {
       for (final category in sorted)
         categorySlugFor(name: category.name, kind: 'expense'),
     ];
-    final colors = [for (final slug in slugs) CategoryHues.forSlug(slug)];
+    final colors = [
+      for (final slug in slugs) context.categoryColors.forSlug(slug),
+    ];
 
     return ChartContainer(
       title: l10n.dashboardCategoryBreakdownTitle,
@@ -150,7 +152,7 @@ class _DonutCenter extends StatelessWidget {
           l10n.dashboardDonutCenterCaption,
           style: textTheme.labelSmall?.copyWith(
             fontWeight: FontWeight.w400,
-            color: AppColors.textSecondary,
+            color: context.colors.textSecondary,
           ),
         ),
       ],
@@ -268,7 +270,7 @@ class _LegendRow extends StatelessWidget {
               textAlign: TextAlign.end,
               style: tabularNumberStyle(
                 textTheme.bodySmall!,
-              ).copyWith(color: AppColors.textSecondary),
+              ).copyWith(color: context.colors.textSecondary),
             ),
           ),
         ],

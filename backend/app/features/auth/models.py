@@ -11,6 +11,8 @@ from app.core.db import Base, UtcDateTime
 AVATAR_MONOGRAM = "monogram"
 AVATAR_IMAGE = "image"
 AVATAR_PRESET_PREFIX = "preset:"
+#: The theme a new user gets: dark is the reference theme (docs/design/00-design-system.md).
+THEME_DEFAULT = "dark"
 
 
 class User(Base):
@@ -29,6 +31,8 @@ class User(Base):
     currency: Mapped[str] = mapped_column(String(3))
     # `monogram`, `preset:<key>` (see `schemas.AVATAR_PRESETS`) or `image` (a `UserAvatar` row).
     avatar: Mapped[str] = mapped_column(String(40), default=AVATAR_MONOGRAM)
+    # `system`, `dark` or `light` (see `schemas.ThemePreference`); `system` follows the OS.
+    theme: Mapped[str] = mapped_column(String(6), default=THEME_DEFAULT)
     created_at: Mapped[datetime] = mapped_column(UtcDateTime(), default=lambda: datetime.now(UTC))
     updated_at: Mapped[datetime] = mapped_column(
         UtcDateTime(),

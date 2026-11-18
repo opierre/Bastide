@@ -257,9 +257,9 @@ class _TermSlider extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context)!;
     final textTheme = Theme.of(context).textTheme;
-    final bounds = AppTextStyles.helper.copyWith(
+    final bounds = context.textStyles.helper.copyWith(
       fontSize: 11,
-      color: AppColors.textDisabled,
+      color: context.colors.textTertiary,
     );
     String value(int months) => l10n.simulatorTermValue(months, months ~/ 12);
 
@@ -273,7 +273,7 @@ class _TermSlider extends ConsumerWidget {
               child: Text(
                 l10n.simulatorTerm,
                 style: textTheme.labelMedium?.copyWith(
-                  color: AppColors.textSecondary,
+                  color: context.colors.textSecondary,
                 ),
               ),
             ),
@@ -282,7 +282,7 @@ class _TermSlider extends ConsumerWidget {
               key: const Key('simulatorTermValue'),
               style: tabularNumberStyle(
                 textTheme.bodyMedium!,
-              ).copyWith(fontWeight: FontWeight.w700),
+              ).copyWith(fontWeight: FontWeight.w600),
             ),
           ],
         ),
@@ -350,7 +350,7 @@ class _ExistingLoansSwitch extends ConsumerWidget {
                       )
                     : l10n.simulatorIncludeExistingNone,
                 key: const Key('simulatorIncludeExistingSub'),
-                style: AppTextStyles.helper,
+                style: context.textStyles.helper,
               ),
             ],
           ),

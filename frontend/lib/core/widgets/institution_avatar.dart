@@ -18,7 +18,7 @@ class InstitutionAvatar extends ConsumerWidget {
   const InstitutionAvatar({
     super.key,
     required this.name,
-    this.size = 40,
+    this.size = MonogramAvatar.small,
     this.logo,
     this.zoomable = false,
   });
@@ -42,7 +42,7 @@ class InstitutionAvatar extends ConsumerWidget {
     if (bytes == null) return monogram;
     final picture = ClipRRect(
       key: const Key('institutionAvatarLogo'),
-      borderRadius: BorderRadius.circular(size * 0.3),
+      borderRadius: BorderRadius.circular(MonogramAvatar.radiusFor(size)),
       child: Image.memory(
         bytes,
         width: size,

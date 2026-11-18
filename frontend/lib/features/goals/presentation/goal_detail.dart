@@ -7,6 +7,7 @@ import '../../../core/widgets/amount_text.dart';
 import '../../../core/widgets/app_card.dart';
 import '../../../core/widgets/date_field.dart';
 import '../../../core/widgets/primary_button.dart';
+import '../../../core/widgets/repere_meter.dart';
 import '../../../core/widgets/state_views.dart';
 import '../../../l10n/app_localizations.dart';
 import '../application/goals_controller.dart';
@@ -47,16 +48,16 @@ class GoalDetailView extends ConsumerWidget {
           child: TextButton.icon(
             key: const Key('goalDetailBack'),
             onPressed: () => ref.read(selectedGoalProvider.notifier).close(),
-            icon: const Icon(
+            icon: Icon(
               Icons.arrow_back_rounded,
               size: 16,
-              color: AppColors.iris,
+              color: context.colors.accent,
             ),
             label: Text(
               l10n.goalDetailBack,
               style: Theme.of(
                 context,
-              ).textTheme.labelMedium?.copyWith(color: AppColors.iris),
+              ).textTheme.labelMedium?.copyWith(color: context.colors.accent),
             ),
           ),
         ),
@@ -126,7 +127,9 @@ class _DetailBody extends ConsumerWidget {
         Text(
           l10n.goalDetailFootnote,
           key: const Key('goalDetailFootnote'),
-          style: AppTextStyles.helper.copyWith(color: AppColors.textDisabled),
+          style: context.textStyles.helper.copyWith(
+            color: context.colors.textTertiary,
+          ),
         ),
       ],
     );
@@ -150,7 +153,7 @@ class _HeaderCard extends ConsumerWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          GoalProgressRing(goal: goal),
+          GoalProgressReading(goal: goal),
           const SizedBox(width: AppSpacing.lg),
           Expanded(
             child: Column(
@@ -176,7 +179,7 @@ class _HeaderCard extends ConsumerWidget {
                         ),
                   key: const Key('goalDetailSubline'),
                   style: textTheme.bodySmall?.copyWith(
-                    color: AppColors.textSecondary,
+                    color: context.colors.textSecondary,
                   ),
                 ),
                 const SizedBox(height: AppSpacing.sm + AppSpacing.xs),
@@ -198,7 +201,7 @@ class _HeaderCard extends ConsumerWidget {
                         key: const Key('goalDetailTarget'),
                         style: tabularNumberStyle(
                           textTheme.bodyMedium!,
-                        ).copyWith(color: AppColors.textSecondary),
+                        ).copyWith(color: context.colors.textSecondary),
                       ),
                     ),
                   ],
@@ -235,51 +238,40 @@ class _HeaderCard extends ConsumerWidget {
   }
 }
 
-/// The 96 px progress ring: r 40, stroke 10, drawn from 12 o'clock clockwise,
-/// with the percentage set in its middle.
-///
-/// Same recipe as the dashboard's savings-rate ring — the indicator is sized to
-/// 90 inside the 96 slot because Flutter measures the arc's radius from the box
-/// edge inwards by half the stroke, so `(90 − 10) / 2` is the spec's r 40. The
-/// arc clamps at full while the label reports the real figure, exactly as the
-/// grid card's bar and percentage do.
-class GoalProgressRing extends StatelessWidget {
-  const GoalProgressRing({super.key, required this.goal});
+/// The goal's progress in the detail header: its percentage over a repère
+/// (`docs/design/00-design-system.md` §8; rings are removed). The track's end
+/// is the target, so it carries no mark. The fill clamps at full while the
+/// percentage reports the real figure.
+class GoalProgressReading extends StatelessWidget {
+  const GoalProgressReading({super.key, required this.goal});
 
   final Goal goal;
 
-  static const _size = 96.0;
-  static const _stroke = 10.0;
-  static const _radius = 40.0;
+  static const _width = 96.0;
 
   @override
   Widget build(BuildContext context) {
     final locale = Localizations.localeOf(context).toString();
-    final accent = goal.isReached ? AppColors.positive : AppColors.iris;
+    final percent = goalPercentLabel(goal.progressPct, locale);
 
     return SizedBox(
-      width: _size,
-      height: _size,
-      child: Stack(
-        alignment: Alignment.center,
+      width: _width,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        mainAxisSize: MainAxisSize.min,
         children: [
-          SizedBox(
-            width: _radius * 2 + _stroke,
-            height: _radius * 2 + _stroke,
-            child: CircularProgressIndicator(
-              value: goal.barFraction,
-              strokeWidth: _stroke,
-              strokeCap: StrokeCap.round,
-              backgroundColor: AppColors.surfaceHover,
-              valueColor: AlwaysStoppedAnimation(accent),
+          Text(
+            percent,
+            key: Key('goalProgressPercent-${goal.id}'),
+            style: tabularNumberStyle(
+              Theme.of(context).textTheme.displaySmall!,
             ),
           ),
-          Text(
-            goalPercentLabel(goal.progressPct, locale),
-            key: Key('goalRingPercent-${goal.id}'),
-            style: tabularNumberStyle(
-              Theme.of(context).textTheme.displayMedium!,
-            ).copyWith(fontSize: 20, color: accent),
+          const SizedBox(height: AppSpacing.sm),
+          RepereMeter(
+            fraction: goal.barFraction,
+            tone: goal.isReached ? RepereTone.done : RepereTone.normal,
+            semanticLabel: percent,
           ),
         ],
       ),
@@ -303,16 +295,18 @@ class GoalReassuranceLine extends StatelessWidget {
       key: const Key('goalReassuranceLine'),
       mainAxisSize: MainAxisSize.min,
       children: [
-        const Icon(
+        Icon(
           Icons.lock_outline_rounded,
           size: 13,
-          color: AppColors.textDisabled,
+          color: context.colors.textTertiary,
         ),
         const SizedBox(width: AppSpacing.sm - 2),
         Flexible(
           child: Text(
             l10n.goalsReassurance,
-            style: AppTextStyles.helper.copyWith(color: AppColors.textDisabled),
+            style: context.textStyles.helper.copyWith(
+              color: context.colors.textTertiary,
+            ),
           ),
         ),
       ],
@@ -343,7 +337,7 @@ class _HistoryCard extends ConsumerWidget {
             Text(
               l10n.goalHistoryEmpty,
               key: const Key('goalHistoryEmpty'),
-              style: AppTextStyles.helper,
+              style: context.textStyles.helper,
             )
           else ...[
             const _HistoryHeader(),
@@ -377,7 +371,7 @@ class _HistoryHeader extends StatelessWidget {
             width: 140,
             child: Text(
               l10n.goalHistoryDate.toUpperCase(),
-              style: AppTextStyles.sectionLabel,
+              style: context.textStyles.sectionLabel,
             ),
           ),
           SizedBox(
@@ -385,14 +379,14 @@ class _HistoryHeader extends StatelessWidget {
             child: Text(
               l10n.goalHistoryAmount.toUpperCase(),
               textAlign: TextAlign.end,
-              style: AppTextStyles.sectionLabel,
+              style: context.textStyles.sectionLabel,
             ),
           ),
           const SizedBox(width: AppSpacing.md),
           Expanded(
             child: Text(
               l10n.goalHistoryNote.toUpperCase(),
-              style: AppTextStyles.sectionLabel,
+              style: context.textStyles.sectionLabel,
             ),
           ),
         ],
@@ -429,7 +423,7 @@ class _HistoryRow extends StatelessWidget {
               appDateFormat(locale).format(allocation.allocatedOn),
               style: tabularNumberStyle(
                 textTheme.bodyMedium!,
-              ).copyWith(color: AppColors.textSecondary),
+              ).copyWith(color: context.colors.textSecondary),
             ),
           ),
           SizedBox(
@@ -455,7 +449,7 @@ class _HistoryRow extends StatelessWidget {
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               style: textTheme.bodyMedium?.copyWith(
-                color: AppColors.textSecondary,
+                color: context.colors.textSecondary,
               ),
             ),
           ),
@@ -465,10 +459,7 @@ class _HistoryRow extends StatelessWidget {
             iconSize: 16,
             visualDensity: VisualDensity.compact,
             tooltip: l10n.goalHistoryDelete,
-            icon: const Icon(
-              Icons.close_rounded,
-              color: AppColors.textDisabled,
-            ),
+            icon: Icon(Icons.close_rounded, color: context.colors.textTertiary),
           ),
         ],
       ),

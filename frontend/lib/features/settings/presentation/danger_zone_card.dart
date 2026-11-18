@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/tokens.dart';
 import '../../../core/widgets/app_card.dart';
 import '../../../l10n/app_localizations.dart';
@@ -28,7 +27,9 @@ class DangerZoneCard extends ConsumerWidget {
     return AppCard(
       key: const Key('settingsDangerZoneCard'),
       padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 13),
-      border: Border.all(color: AppColors.negative.withValues(alpha: 0.28)),
+      border: Border.all(
+        color: context.colors.negative.withValues(alpha: 0.28),
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -42,8 +43,8 @@ class DangerZoneCard extends ConsumerWidget {
                     const SizedBox(height: 2),
                     Text(
                       l10n.settingsResetSubtitle,
-                      style: AppTextStyles.helper.copyWith(
-                        color: AppColors.textSecondary,
+                      style: context.textStyles.helper.copyWith(
+                        color: context.colors.textSecondary,
                       ),
                     ),
                   ],
@@ -104,26 +105,28 @@ class _ResetButtonState extends State<_ResetButton> {
             horizontal: AppSpacing.sm + AppSpacing.xs,
           ),
           decoration: BoxDecoration(
-            color: _hovered ? AppColors.negative.withValues(alpha: 0.10) : null,
+            color: _hovered
+                ? context.colors.negative.withValues(alpha: 0.10)
+                : null,
             borderRadius: BorderRadius.circular(11),
             border: Border.all(
-              color: AppColors.negative.withValues(alpha: 0.45),
+              color: context.colors.negative.withValues(alpha: 0.45),
             ),
           ),
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Icon(
+              Icon(
                 Icons.delete_outline_rounded,
                 size: 16,
-                color: AppColors.negative,
+                color: context.colors.negative,
               ),
               const SizedBox(width: AppSpacing.sm - 1),
               Text(
                 AppLocalizations.of(context)!.settingsResetButton,
-                style: Theme.of(
-                  context,
-                ).textTheme.labelLarge?.copyWith(color: AppColors.negative),
+                style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                  color: context.colors.negative,
+                ),
               ),
             ],
           ),

@@ -78,7 +78,7 @@ class _PackActionButton extends StatelessWidget {
       style: IconButton.styleFrom(
         tapTargetSize: MaterialTapTargetSize.shrinkWrap,
       ),
-      color: AppColors.textSecondary,
+      color: context.colors.textSecondary,
       icon: Icon(icon),
     );
   }
@@ -126,7 +126,7 @@ class BuiltinPackOffer extends ConsumerWidget {
           textAlign: TextAlign.center,
           style: Theme.of(
             context,
-          ).textTheme.bodySmall?.copyWith(color: AppColors.textDisabled),
+          ).textTheme.bodySmall?.copyWith(color: context.colors.textTertiary),
         ),
       ],
     );

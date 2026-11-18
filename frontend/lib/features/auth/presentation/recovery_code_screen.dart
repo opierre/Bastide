@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/tokens.dart';
 import '../../../core/widgets/brand_mark.dart';
 import '../../../core/widgets/primary_button.dart';
@@ -45,7 +44,7 @@ class _RecoveryCodeScreenState extends ConsumerState<RecoveryCodeScreen> {
           Text(
             l10n.authRecoveryCodeIntro,
             style: textTheme.bodyMedium?.copyWith(
-              color: AppColors.textSecondary,
+              color: context.colors.textSecondary,
             ),
           ),
           const SizedBox(height: AppSpacing.md),
@@ -54,7 +53,9 @@ class _RecoveryCodeScreenState extends ConsumerState<RecoveryCodeScreen> {
           const SizedBox(height: AppSpacing.sm),
           Text(
             l10n.authRecoveryCodeShownOnce,
-            style: AppTextStyles.helper.copyWith(color: AppColors.textDisabled),
+            style: context.textStyles.helper.copyWith(
+              color: context.colors.textTertiary,
+            ),
           ),
           const SizedBox(height: AppSpacing.md + AppSpacing.xs),
           _AcknowledgeCheckbox(
@@ -109,18 +110,17 @@ class _AcknowledgeCheckbox extends StatelessWidget {
                 height: 18,
                 alignment: Alignment.center,
                 decoration: BoxDecoration(
-                  gradient: value ? AppColors.irisGradient : null,
-                  color: value ? null : AppColors.surfaceField,
+                  color: value ? context.colors.accent : context.colors.field,
                   borderRadius: BorderRadius.circular(AppRadii.xs + 1),
                   border: Border.all(
-                    color: value ? Colors.transparent : AppColors.border,
+                    color: value ? Colors.transparent : context.colors.line,
                   ),
                 ),
                 child: value
-                    ? const Icon(
+                    ? Icon(
                         Icons.check_rounded,
                         size: 13,
-                        color: AppColors.irisInk,
+                        color: context.colors.onAccent,
                       )
                     : null,
               ),

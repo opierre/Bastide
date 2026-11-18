@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/session/current_user_provider.dart';
-import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/tokens.dart';
 import '../../../core/widgets/app_card.dart';
 import '../../../core/widgets/inline_banner.dart';
@@ -85,8 +84,8 @@ class AvatarCard extends ConsumerWidget {
                     const SizedBox(height: 2),
                     Text(
                       l10n.settingsAvatarSubtitle,
-                      style: AppTextStyles.helper.copyWith(
-                        color: AppColors.textSecondary,
+                      style: context.textStyles.helper.copyWith(
+                        color: context.colors.textSecondary,
                       ),
                     ),
                   ],
@@ -197,7 +196,7 @@ class _AvatarOption extends StatelessWidget {
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(AppRadii.inset),
               border: Border.all(
-                color: selected ? AppColors.focusRing : Colors.transparent,
+                color: selected ? context.colors.accent : Colors.transparent,
                 width: 1.5,
               ),
             ),

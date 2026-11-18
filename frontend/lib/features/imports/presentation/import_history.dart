@@ -6,8 +6,8 @@ import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/tokens.dart';
 import '../../../core/widgets/amount_text.dart';
 import '../../../core/widgets/app_card.dart';
-import '../../../core/widgets/app_chip.dart';
 import '../../../core/widgets/state_views.dart';
+import '../../../core/widgets/status_text.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../accounts/application/accounts_controller.dart';
 import '../../accounts/domain/account.dart';
@@ -47,7 +47,6 @@ class ImportHistory extends ConsumerWidget {
             child: switch (batches) {
               AsyncData(:final value) when value.isEmpty => EmptyStateView(
                 key: const Key('importHistoryEmpty'),
-                icon: Icons.download_outlined,
                 title: l10n.importHistoryEmptyTitle,
                 message: l10n.importHistoryEmptyBody,
               ),
@@ -94,8 +93,7 @@ class _HistoryTable extends StatelessWidget {
           child: ListView.separated(
             key: const Key('importHistoryList'),
             itemCount: batches.length,
-            separatorBuilder: (_, _) =>
-                const Divider(color: AppColors.borderSubtle),
+            separatorBuilder: (_, _) => Divider(color: context.colors.line),
             itemBuilder: (context, index) => _HistoryRow(
               batch: batches[index],
               currency: _currencyFor(accounts, batches[index].accountId),
@@ -175,7 +173,7 @@ class _HeaderRow extends StatelessWidget {
     Widget cell(String label, {TextAlign align = TextAlign.center}) => Text(
       label.toUpperCase(),
       textAlign: align,
-      style: AppTextStyles.sectionLabel,
+      style: context.textStyles.sectionLabel,
     );
 
     return Padding(
@@ -231,7 +229,9 @@ class _HistoryRow extends StatelessWidget {
               Text(
                 l10n.importFailedNote,
                 key: Key('importBatchFailureNote-${batch.id}'),
-                style: AppTextStyles.helper.copyWith(color: AppColors.negative),
+                style: context.textStyles.helper.copyWith(
+                  color: context.colors.negative,
+                ),
               ),
               if (batch.errorMessage case final message?
                   when message.trim().isNotEmpty) ...[
@@ -239,8 +239,8 @@ class _HistoryRow extends StatelessWidget {
                 Text(
                   message,
                   overflow: TextOverflow.ellipsis,
-                  style: AppTextStyles.mono.copyWith(
-                    color: AppColors.textDisabled,
+                  style: context.textStyles.mono.copyWith(
+                    color: context.colors.textTertiary,
                   ),
                 ),
               ],
@@ -249,7 +249,9 @@ class _HistoryRow extends StatelessWidget {
               Text(
                 l10n.importDuplicatesNote(batch.duplicateCount),
                 key: Key('importBatchDuplicateNote-${batch.id}'),
-                style: AppTextStyles.helper.copyWith(color: AppColors.warning),
+                style: context.textStyles.helper.copyWith(
+                  color: context.colors.warning,
+                ),
               ),
             ],
             // Independent of the notes above: a statement can both skip
@@ -267,7 +269,9 @@ class _HistoryRow extends StatelessWidget {
                   batch.balanceMismatchAsOf!,
                 ),
                 key: Key('importBatchMismatchNote-${batch.id}'),
-                style: AppTextStyles.helper.copyWith(color: AppColors.warning),
+                style: context.textStyles.helper.copyWith(
+                  color: context.colors.warning,
+                ),
               ),
             ],
           ],
@@ -283,14 +287,14 @@ class _HistoryRow extends StatelessWidget {
           textAlign: TextAlign.center,
           style: tabularNumberStyle(
             textTheme.bodyMedium!,
-          ).copyWith(color: AppColors.textSecondary),
+          ).copyWith(color: context.colors.textSecondary),
         ),
         period: Text(
           l10n.importPeriodRange(batch.periodStart, batch.periodEnd),
           textAlign: TextAlign.center,
           style: tabularNumberStyle(
             textTheme.bodyMedium!,
-          ).copyWith(color: AppColors.textSecondary),
+          ).copyWith(color: context.colors.textSecondary),
         ),
         newCount: Text(
           numberFormat.format(batch.newCount),
@@ -302,7 +306,7 @@ class _HistoryRow extends StatelessWidget {
           textAlign: TextAlign.center,
           style: tabularNumberStyle(
             textTheme.bodyMedium!,
-          ).copyWith(color: AppColors.textSecondary),
+          ).copyWith(color: context.colors.textSecondary),
         ),
         status: ImportStatusPill(
           status: batch.status,
@@ -330,14 +334,9 @@ class ImportFormatBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final color = switch (format) {
-      ImportFormat.ofx => AppColors.info,
-      ImportFormat.qfx => AppColors.iris,
-    };
-
     return Align(
       alignment: alignment,
-      child: AppChip(label: format.name.toUpperCase(), color: color),
+      child: StatusText(label: format.name.toUpperCase()),
     );
   }
 }
@@ -360,27 +359,15 @@ class ImportStatusPill extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
 
-    final (color, icon, label) = switch (status) {
-      ImportStatus.success => (
-        AppColors.positive,
-        Icons.check_rounded,
-        l10n.importStatusSuccess,
-      ),
-      ImportStatus.partial => (
-        AppColors.warning,
-        Icons.warning_amber_rounded,
-        l10n.importStatusPartial,
-      ),
-      ImportStatus.failed => (
-        AppColors.negative,
-        Icons.close_rounded,
-        l10n.importStatusFailed,
-      ),
+    final (tone, label) = switch (status) {
+      ImportStatus.success => (StatusTone.positive, l10n.importStatusSuccess),
+      ImportStatus.partial => (StatusTone.warning, l10n.importStatusPartial),
+      ImportStatus.failed => (StatusTone.negative, l10n.importStatusFailed),
     };
 
     return Align(
       alignment: alignment,
-      child: AppChip(label: label, color: color, icon: icon),
+      child: StatusText(label: label, tone: tone),
     );
   }
 }

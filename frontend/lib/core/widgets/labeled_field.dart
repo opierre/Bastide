@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 
-import '../theme/app_theme.dart';
-import '../theme/tokens.dart';
-import 'dashed_border.dart';
+import 'package:lucide_icons_flutter/lucide_icons_300.dart';
 
-/// A form control with its label set *above* it rather than floating inside.
+import '../theme/tokens.dart';
+
+/// A form control with its label set *above* it rather than floating inside
+/// (`docs/design/00-design-system.md` §6): label 12 `textSecondary`, 5 px
+/// gap, helper 11 `textTertiary` below, or the error in `negative`.
 ///
 /// Material's floating label has to shrink into the field's border notch, which
 /// truncates badly once French labels run 15–20% longer than their English
@@ -43,15 +45,15 @@ class LabeledField extends StatelessWidget {
             Expanded(
               child: Text(
                 label,
-                style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                  color: AppColors.textSecondary,
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: context.colors.textSecondary,
                 ),
               ),
             ),
             ?trailing,
           ],
         ),
-        const SizedBox(height: AppSpacing.sm - 2),
+        const SizedBox(height: _labelGap),
         child,
         if (errorText != null)
           FieldHelper(text: errorText!, isError: true)
@@ -62,10 +64,13 @@ class LabeledField extends StatelessWidget {
   }
 }
 
-/// The 11.5px line beneath a field. Validation failures get a leading red dot
-/// as well as red text, so the failure isn't carried by color alone — and they
-/// stay inline rather than becoming a toast, which would vanish before the user
-/// has finished reading the form.
+/// The gap between a field's label and its control (`00` §6).
+const _labelGap = 5.0;
+
+/// The 11 px line beneath a field: `textTertiary`, or `negative` for a
+/// validation failure, which the field's `negative` border repeats. Failures
+/// stay inline rather than becoming a toast, which would vanish before the
+/// user has finished reading the form.
 class FieldHelper extends StatelessWidget {
   const FieldHelper({super.key, required this.text, this.isError = false});
 
@@ -75,31 +80,14 @@ class FieldHelper extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(top: AppSpacing.xs + 2),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          if (isError) ...[
-            Container(
-              margin: const EdgeInsets.only(top: 5),
-              width: 5,
-              height: 5,
-              decoration: const BoxDecoration(
-                color: AppColors.negative,
-                shape: BoxShape.circle,
-              ),
-            ),
-            const SizedBox(width: AppSpacing.sm - 2),
-          ],
-          Expanded(
-            child: Text(
-              text,
-              style: AppTextStyles.helper.copyWith(
-                color: isError ? AppColors.negative : AppColors.textSecondary,
-              ),
-            ),
-          ),
-        ],
+      padding: const EdgeInsets.only(top: _labelGap),
+      child: Text(
+        text,
+        style: context.textStyles.helper.copyWith(
+          color: isError
+              ? context.colors.negative
+              : context.colors.textTertiary,
+        ),
       ),
     );
   }
@@ -110,10 +98,10 @@ class FieldHelper extends StatelessWidget {
 /// For failures that belong to the form as a whole rather than to one field —
 /// a rejected credential pair, say — where the reason is already stated once in
 /// a banner and repeating it under each input would bury the fix.
-InputDecoration errorFieldDecoration() {
+InputDecoration errorFieldDecoration(BuildContext context) {
   final border = OutlineInputBorder(
-    borderRadius: BorderRadius.circular(AppRadii.md),
-    borderSide: const BorderSide(color: Color(0x8CFF5C6C)),
+    borderRadius: BorderRadius.circular(AppRadii.control),
+    borderSide: BorderSide(color: context.colors.negative),
   );
   return InputDecoration(enabledBorder: border, focusedBorder: border);
 }
@@ -126,74 +114,69 @@ InputDecoration errorFieldDecoration() {
 /// so an amount reads the same whether or not the user can change it.
 TextStyle fieldSuffixStyle(BuildContext context) => Theme.of(
   context,
-).textTheme.bodyLarge!.copyWith(color: AppColors.textSecondary);
+).textTheme.bodyMedium!.copyWith(color: context.colors.textSecondary);
 
-/// A value the user is shown but cannot change.
-///
-/// Rendered as a dashed plate with a lock glyph rather than a disabled input:
-/// a greyed-out field reads as "not available yet", whereas this reads as
-/// "settled, and deliberately so". The permanence itself is carried by the
-/// caller's [LabeledField.helper] copy.
+/// A value the user is shown but cannot change (`00` §6): no border, the
+/// value in `textSecondary` after a 14 px `lock`. The permanence itself is
+/// carried by the caller's [LabeledField.helper] copy.
 class ReadOnlyField extends StatelessWidget {
   const ReadOnlyField({
     super.key,
     required this.value,
     this.suffix,
-    this.height = 44,
+    this.height = AppSizes.formField,
   });
 
   final String value;
 
-  /// Unit the value is expressed in — a currency code, chiefly. Set in the
-  /// secondary tone at the field's end so it reads as a label on the figure
-  /// rather than as part of it.
+  /// Unit the value is expressed in, a currency code chiefly, set at the
+  /// field's end in the secondary tone.
   final String? suffix;
 
   final double height;
 
   @override
   Widget build(BuildContext context) {
-    return DashedBorder(
-      child: Container(
-        height: height,
-        padding: const EdgeInsets.symmetric(
-          horizontal: AppSpacing.sm + AppSpacing.xs,
-        ),
-        decoration: BoxDecoration(
-          color: AppColors.surfaceField,
-          borderRadius: BorderRadius.circular(AppRadii.md),
-        ),
-        child: Row(
-          children: [
-            Expanded(
-              child: Text(
-                value,
-                overflow: TextOverflow.ellipsis,
-                style: Theme.of(context).textTheme.bodyLarge,
-              ),
+    final colors = context.colors;
+    return SizedBox(
+      height: height,
+      child: Row(
+        children: [
+          Icon(
+            LucideIcons300.lock,
+            size: AppSizes.iconSmall,
+            color: colors.textTertiary,
+          ),
+          const SizedBox(width: AppSpacing.xsPlus),
+          Expanded(
+            child: Text(
+              value,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: Theme.of(
+                context,
+              ).textTheme.bodyMedium?.copyWith(color: colors.textSecondary),
             ),
-            if (suffix != null) ...[
-              const SizedBox(width: AppSpacing.sm),
-              Text(suffix!, style: fieldSuffixStyle(context)),
-            ],
+          ),
+          if (suffix != null) ...[
             const SizedBox(width: AppSpacing.sm),
-            const Icon(
-              Icons.lock_outline_rounded,
-              size: 15,
-              color: AppColors.textDisabled,
-            ),
+            Text(suffix!, style: fieldSuffixStyle(context)),
           ],
-        ),
+        ],
       ),
     );
   }
 }
 
-/// Paints the spec's focus ring: the 1px iris border comes from the input
-/// theme, and this adds the `0 0 0 3px rgba(139,140,249,.15)` halo around it,
-/// which [InputBorder] cannot draw.
+/// Paints a text field's focus ring (`00` §6): the `accent` border comes from
+/// the input theme, and this adds the 3 px `accentSoft` ring around it, which
+/// [InputBorder] cannot draw.
 class FocusGlow extends StatefulWidget {
-  const FocusGlow({super.key, required this.child, this.radius = AppRadii.md});
+  const FocusGlow({
+    super.key,
+    required this.child,
+    this.radius = AppRadii.control,
+  });
 
   final Widget child;
   final double radius;
@@ -215,9 +198,9 @@ class _FocusGlowState extends State<FocusGlow> {
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(widget.radius),
           boxShadow: _focused
-              ? const [
+              ? [
                   BoxShadow(
-                    color: Color(0x268B8CF9),
+                    color: context.colors.accentSoft,
                     spreadRadius: 3,
                     blurRadius: 0,
                   ),

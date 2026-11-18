@@ -1,19 +1,15 @@
 import 'package:flutter/material.dart';
 
 import '../theme/tokens.dart';
+import 'focus_ring.dart';
 
-/// The spec's switch: a 34×20 track with an explicit 16 px knob, iris when on
-/// (`docs/design/00` §Components).
+/// The toggle of `docs/design/00-design-system.md` §6: 28 × 16, radius 8,
+/// `lineStrong` off and `accent` on, with a 12 px knob in `bg`.
 ///
 /// A widget rather than a themed [Switch]: Material's switch draws a 52×32
-/// track with a knob that grows on press, and neither dimension can be styled
-/// down to the drawn control.
-///
-/// The knob takes the near-black ink the spec pins only while the track is
-/// iris; on the neutral off-track it lifts to the secondary tone instead. A
-/// #0E1030 knob on a #1E2634 track is two darks a point apart — the off state
-/// would read as a rendering fault rather than as "off".
-class AppToggle extends StatelessWidget {
+/// track with a knob that grows on press, and neither can be styled down to
+/// the drawn control.
+class AppToggle extends StatefulWidget {
   const AppToggle({
     super.key,
     required this.value,
@@ -23,41 +19,74 @@ class AppToggle extends StatelessWidget {
 
   final bool value;
 
-  /// `null` renders the control non-interactive — used while a toggle's patch
-  /// is in flight, so a second tap can't race the first.
+  /// `null` disables the toggle, used while its patch is in flight so a
+  /// second tap can't race the first.
   final ValueChanged<bool>? onChanged;
 
   final String? semanticLabel;
 
+  static const width = 28.0;
+  static const height = 16.0;
+  static const knob = 12.0;
+
+  @override
+  State<AppToggle> createState() => _AppToggleState();
+}
+
+class _AppToggleState extends State<AppToggle> {
+  bool _focused = false;
+
+  void _toggle() => widget.onChanged?.call(!widget.value);
+
   @override
   Widget build(BuildContext context) {
-    final enabled = onChanged != null;
+    final enabled = widget.onChanged != null;
+    final colors = context.colors;
 
     return Semantics(
-      toggled: value,
+      toggled: widget.value,
       enabled: enabled,
-      label: semanticLabel,
-      child: MouseRegion(
-        cursor: enabled ? SystemMouseCursors.click : SystemMouseCursors.basic,
-        child: GestureDetector(
-          onTap: enabled ? () => onChanged!(!value) : null,
-          child: Opacity(
-            opacity: enabled ? 1 : 0.5,
-            child: Container(
-              width: 34,
-              height: 20,
-              padding: const EdgeInsets.all(2),
-              alignment: value ? Alignment.centerRight : Alignment.centerLeft,
-              decoration: BoxDecoration(
-                color: value ? AppColors.iris : AppColors.surfaceHover,
-                borderRadius: BorderRadius.circular(AppRadii.pill),
-              ),
+      label: widget.semanticLabel,
+      child: Opacity(
+        opacity: enabled ? 1 : 0.45,
+        child: FocusableActionDetector(
+          enabled: enabled,
+          mouseCursor: enabled
+              ? SystemMouseCursors.click
+              : SystemMouseCursors.basic,
+          onShowFocusHighlight: (value) => setState(() => _focused = value),
+          actions: {
+            ActivateIntent: CallbackAction<ActivateIntent>(
+              onInvoke: (_) {
+                _toggle();
+                return null;
+              },
+            ),
+          },
+          child: GestureDetector(
+            onTap: enabled ? _toggle : null,
+            child: FocusRing(
+              focused: _focused,
+              radius: AppRadii.full,
               child: Container(
-                width: 16,
-                height: 16,
+                key: const Key('appToggleTrack'),
+                width: AppToggle.width,
+                height: AppToggle.height,
+                padding: const EdgeInsets.all(AppSpacing.xxs),
+                alignment: widget.value
+                    ? Alignment.centerRight
+                    : Alignment.centerLeft,
                 decoration: BoxDecoration(
-                  color: value ? AppColors.irisInk : AppColors.textSecondary,
-                  shape: BoxShape.circle,
+                  color: widget.value ? colors.accent : colors.lineStrong,
+                  borderRadius: BorderRadius.circular(AppToggle.height / 2),
+                ),
+                child: Container(
+                  width: AppToggle.knob,
+                  height: AppToggle.knob,
+                  decoration: BoxDecoration(
+                    color: colors.bg,
+                    shape: BoxShape.circle,
+                  ),
                 ),
               ),
             ),

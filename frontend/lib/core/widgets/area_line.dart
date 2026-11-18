@@ -31,7 +31,7 @@ class AreaLine extends StatefulWidget {
     this.tooltips,
     this.valueLabel,
     this.gridlines = 4,
-    this.color = AppColors.iris,
+    this.color,
     this.markZero = false,
     this.minStep = 1,
   });
@@ -57,7 +57,8 @@ class AreaLine extends StatefulWidget {
   /// The line, its fill and its dots. Iris on the dashboard's savings chart, where the
   /// figure is the app's hero metric; an account's balance takes the leading chart hue
   /// instead, since iris is the accent role and never data (`docs/design/16` §Row 2).
-  final Color color;
+  /// `null` draws the series in `accent`.
+  final Color? color;
 
   /// Whether a series that crosses zero shows where: a dashed zero baseline, the fill above
   /// it in [color] and below it in the expense red. An account balance can dip under zero
@@ -87,7 +88,7 @@ class _AreaLineState extends State<AreaLine> {
     final values = widget.values;
     final labels = widget.labels;
     final tooltips = widget.tooltips;
-    final labelStyle = ChartPaints.labelStyle(Theme.of(context).textTheme);
+    final labelStyle = ChartPaints.labelStyle(context);
     final valueLabel = widget.valueLabel;
     final gutter = valueLabel == null ? 0.0 : AppChart.valueGutter;
     final scale = ChartScale.of(
@@ -119,10 +120,11 @@ class _AreaLineState extends State<AreaLine> {
                     child: CustomPaint(
                       size: Size.infinite,
                       painter: _AreaLinePainter(
+                        colors: context.colors,
                         values: values,
                         scale: scale,
                         gridlines: widget.gridlines,
-                        color: widget.color,
+                        color: widget.color ?? context.colors.accent,
                         markZero: widget.markZero,
                         hovered: _hovered,
                         gutter: gutter,
@@ -229,7 +231,11 @@ List<Offset> _points(List<num> values, Rect plot, ChartScale scale) => [
 ];
 
 class _AreaLinePainter extends CustomPainter {
+  /// The active theme's colours.
+  final AppColors colors;
+
   _AreaLinePainter({
+    required this.colors,
     required this.values,
     required this.scale,
     required this.gridlines,
@@ -244,6 +250,7 @@ class _AreaLinePainter extends CustomPainter {
   final List<num> values;
   final ChartScale scale;
   final int gridlines;
+
   final Color color;
   final bool markZero;
   final int? hovered;
@@ -262,6 +269,7 @@ class _AreaLinePainter extends CustomPainter {
     if (plot.width <= 0) return;
 
     ChartPaints.grid(
+      colors,
       canvas,
       size,
       plot,
@@ -293,9 +301,10 @@ class _AreaLinePainter extends CustomPainter {
         ..restore()
         ..save()
         ..clipRect(Rect.fromLTRB(plot.left, zeroY, size.width, size.height))
-        ..drawPath(area, ChartPaints.negativeArea())
+        ..drawPath(area, ChartPaints.negativeArea(colors))
         ..restore();
-      ChartPaints.baseline(
+      ChartPaints.zeroLine(
+        colors,
         canvas,
         Offset(plot.left, zeroY),
         Offset(size.width, zeroY),
@@ -318,16 +327,29 @@ class _AreaLinePainter extends CustomPainter {
     if (points.length <= AppChart.dotCeiling) {
       for (var i = 0; i < points.length; i++) {
         if (large.contains(i)) continue;
-        ChartPaints.dot(canvas, points[i], AppChart.pointDotRadius, color);
+        ChartPaints.dot(
+          colors,
+          canvas,
+          points[i],
+          AppChart.pointDotRadius,
+          color,
+        );
       }
     }
     for (final index in large) {
-      ChartPaints.dot(canvas, points[index], AppChart.currentDotRadius, color);
+      ChartPaints.dot(
+        colors,
+        canvas,
+        points[index],
+        AppChart.currentDotRadius,
+        color,
+      );
     }
   }
 
   @override
   bool shouldRepaint(_AreaLinePainter oldDelegate) =>
+      oldDelegate.colors != colors ||
       !listEquals(oldDelegate.values, values) ||
       oldDelegate.scale != scale ||
       oldDelegate.gridlines != gridlines ||

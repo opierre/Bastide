@@ -66,6 +66,25 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingsSectionAbout => 'About';
 
   @override
+  String get settingsThemeTitle => 'Theme';
+
+  @override
+  String get settingsThemeNote => 'Dark, light, or your system\'s.';
+
+  @override
+  String get settingsThemeSystem => 'System';
+
+  @override
+  String get settingsThemeDark => 'Dark';
+
+  @override
+  String get settingsThemeLight => 'Light';
+
+  @override
+  String get settingsThemeSaveFailed =>
+      'The theme could not be saved. Nothing was changed. Try again.';
+
+  @override
   String get settingsLanguageTitle => 'Language';
 
   @override
@@ -749,6 +768,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get transactionsSearchHint => 'Search a description or a merchant…';
+
+  @override
+  String get searchShortcutHint => 'Ctrl K';
 
   @override
   String get transactionsSearchEmpty => 'No transaction matches your search.';
@@ -4519,7 +4541,16 @@ class AppLocalizationsEn extends AppLocalizations {
   String get startupLoading => 'Starting Bastide…';
 
   @override
+  String get startupPrivacy => 'Your data stays on this computer.';
+
+  @override
+  String get startupEngineStarting => 'Starting the local engine…';
+
+  @override
   String get startupRetry => 'Try again';
+
+  @override
+  String get startupRelaunch => 'Restart';
 
   @override
   String get startupOpenLogs => 'Open logs folder';

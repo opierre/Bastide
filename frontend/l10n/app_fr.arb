@@ -76,6 +76,30 @@
   "@settingsSectionAbout": {
     "description": "Settings section nav item for the version and privacy statement."
   },
+  "settingsThemeTitle": "Thème",
+  "@settingsThemeTitle": {
+    "description": "Title of the theme row in settings preferences."
+  },
+  "settingsThemeNote": "Sombre, clair, ou celui de votre système.",
+  "@settingsThemeNote": {
+    "description": "Note under the theme segmented control."
+  },
+  "settingsThemeSystem": "Système",
+  "@settingsThemeSystem": {
+    "description": "Theme option that follows the operating system."
+  },
+  "settingsThemeDark": "Sombre",
+  "@settingsThemeDark": {
+    "description": "Theme option for the dark theme."
+  },
+  "settingsThemeLight": "Clair",
+  "@settingsThemeLight": {
+    "description": "Theme option for the light theme."
+  },
+  "settingsThemeSaveFailed": "Le thème n'a pas pu être enregistré. Rien n'a été modifié. Réessayez.",
+  "@settingsThemeSaveFailed": {
+    "description": "Toast shown when saving the theme preference fails; the previous theme is restored."
+  },
   "settingsLanguageTitle": "Langue",
   "@settingsLanguageTitle": {
     "description": "Title of the language card in settings preferences."
@@ -942,6 +966,10 @@
   "transactionsSearchHint": "Rechercher une description ou un marchand…",
   "@transactionsSearchHint": {
     "description": "Placeholder in the transactions search pill in the top bar."
+  },
+  "searchShortcutHint": "Ctrl K",
+  "@searchShortcutHint": {
+    "description": "Keyboard shortcut shown at the end of a search field; pressing it focuses the field."
   },
   "transactionsSearchEmpty": "Aucune transaction ne correspond à votre recherche.",
   "@transactionsSearchEmpty": {
@@ -5910,9 +5938,21 @@
   "@startupLoading": {
     "description": "Shown under the logo while the app starts its local engine."
   },
+  "startupPrivacy": "Vos données restent sur cet ordinateur.",
+  "@startupPrivacy": {
+    "description": "The privacy promise under the product name on the startup screen."
+  },
+  "startupEngineStarting": "Démarrage du moteur local…",
+  "@startupEngineStarting": {
+    "description": "Status line under the privacy promise while the app starts its local engine."
+  },
   "startupRetry": "Réessayer",
   "@startupRetry": {
     "description": "Button on the startup error screen that starts the local engine again."
+  },
+  "startupRelaunch": "Relancer",
+  "@startupRelaunch": {
+    "description": "Button on the developer version warning that restarts the local engine."
   },
   "startupOpenLogs": "Ouvrir le dossier des journaux",
   "@startupOpenLogs": {

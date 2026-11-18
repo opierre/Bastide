@@ -2,6 +2,7 @@ import 'package:desktop_drop/desktop_drop.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+import 'package:lucide_icons_flutter/lucide_icons_300.dart';
 
 import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/tokens.dart';
@@ -13,13 +14,12 @@ import '../../../core/widgets/inline_banner.dart';
 import '../../../core/widgets/institution_avatar.dart';
 import '../../../core/widgets/labeled_field.dart';
 import '../../../core/widgets/primary_button.dart';
-import '../../../core/widgets/state_views.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../accounts/application/accounts_controller.dart';
 import '../../accounts/domain/account.dart';
 import '../../accounts/presentation/account_form.dart';
-import '../../accounts/presentation/card_settlement_warnings.dart';
 import '../../accounts/presentation/account_type_label.dart';
+import '../../accounts/presentation/card_settlement_warnings.dart';
 import '../application/imports_controller.dart';
 import '../application/ofx_account_detection.dart';
 import '../domain/import_batch.dart';
@@ -633,20 +633,28 @@ class _DropZoneState extends State<_DropZone> {
           key: const Key('importDropZone'),
           onTap: widget.onPickFile,
           child: DashedBorder(
-            color: _dragging ? AppColors.iris : AppColors.borderDashed,
+            color: _dragging
+                ? context.colors.accent
+                : context.colors.lineStrong,
             radius: AppRadii.inset,
             strokeWidth: 1.5,
             child: Container(
               height: 168,
               alignment: Alignment.center,
               decoration: BoxDecoration(
-                color: _dragging ? const Color(0x128B8CF9) : Colors.transparent,
+                color: _dragging
+                    ? context.colors.accentSoft
+                    : Colors.transparent,
                 borderRadius: BorderRadius.circular(AppRadii.inset),
               ),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const GlyphPlate(icon: Icons.download_outlined),
+                  Icon(
+                    LucideIcons300.download,
+                    size: AppSizes.icon,
+                    color: context.colors.textTertiary,
+                  ),
                   const SizedBox(height: AppSpacing.md),
                   Text(
                     l10n.importDropZoneTitle,
@@ -657,7 +665,7 @@ class _DropZoneState extends State<_DropZone> {
                   Text(
                     l10n.importDropZoneHint,
                     textAlign: TextAlign.center,
-                    style: AppTextStyles.helper,
+                    style: context.textStyles.helper,
                   ),
                 ],
               ),
@@ -700,13 +708,13 @@ class _StagedFile extends ConsumerWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         DashedBorder(
-          color: AppColors.iris,
+          color: context.colors.accent,
           radius: AppRadii.inset,
           strokeWidth: 1.5,
           child: Container(
             padding: const EdgeInsets.all(AppSpacing.md),
             decoration: BoxDecoration(
-              color: const Color(0x148B8CF9),
+              color: context.colors.accentSoft,
               borderRadius: BorderRadius.circular(AppRadii.inset),
             ),
             child: Row(
@@ -728,7 +736,7 @@ class _StagedFile extends ConsumerWidget {
                         l10n.importFileSize(
                           _formatKilobytes(file.bytes.length, locale),
                         ),
-                        style: AppTextStyles.helper,
+                        style: context.textStyles.helper,
                       ),
                     ],
                   ),
@@ -827,7 +835,7 @@ class _ResultCard extends ConsumerWidget {
                     valueKey: const Key('importResultNewCount'),
                     value: newCount,
                     label: l10n.importResultNewLabel(newCount),
-                    color: AppColors.positive,
+                    color: context.colors.positive,
                   ),
                 ),
                 const SizedBox(width: AppSpacing.sm + AppSpacing.xs),
@@ -836,7 +844,7 @@ class _ResultCard extends ConsumerWidget {
                     valueKey: const Key('importResultDuplicateCount'),
                     value: duplicateCount,
                     label: l10n.importResultDuplicateLabel(duplicateCount),
-                    color: AppColors.warning,
+                    color: context.colors.warning,
                   ),
                 ),
               ],
@@ -874,7 +882,7 @@ class _BatchOutcome extends StatelessWidget {
           if (batch.errorMessage case final message?
               when message.trim().isNotEmpty) ...[
             const SizedBox(height: AppSpacing.sm),
-            Text(message, style: AppTextStyles.mono),
+            Text(message, style: context.textStyles.mono),
           ],
         if (batch.balanceMismatchMinor case final mismatch?) ...[
           const SizedBox(height: AppSpacing.md),
@@ -898,7 +906,7 @@ class _BatchOutcome extends StatelessWidget {
           key: Key('importResultPeriod-${batch.id}'),
           style: tabularNumberStyle(
             textTheme.bodySmall!,
-          ).copyWith(color: AppColors.textSecondary),
+          ).copyWith(color: context.colors.textSecondary),
         ),
         const SizedBox(height: AppSpacing.xs),
         Text(
@@ -906,7 +914,7 @@ class _BatchOutcome extends StatelessWidget {
               ? batch.fileName
               : l10n.importResultTarget(batch.fileName, accountName),
           overflow: TextOverflow.ellipsis,
-          style: AppTextStyles.helper,
+          style: context.textStyles.helper,
         ),
       ],
     );
@@ -937,7 +945,7 @@ class _CountPlate extends StatelessWidget {
         vertical: AppSpacing.sm + AppSpacing.xs,
       ),
       decoration: BoxDecoration(
-        color: AppColors.surfaceHover,
+        color: context.colors.hover,
         borderRadius: BorderRadius.circular(AppRadii.inset),
       ),
       child: Column(
@@ -951,7 +959,7 @@ class _CountPlate extends StatelessWidget {
             ).copyWith(color: color),
           ),
           const SizedBox(height: 2),
-          Text(label, style: AppTextStyles.helper),
+          Text(label, style: context.textStyles.helper),
         ],
       ),
     );

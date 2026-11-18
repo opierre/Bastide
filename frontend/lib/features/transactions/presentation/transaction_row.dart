@@ -5,7 +5,7 @@ import 'package:intl/intl.dart';
 import '../../../core/l10n/category_display.dart';
 import '../../../core/theme/tokens.dart';
 import '../../../core/widgets/amount_text.dart';
-import '../../../core/widgets/category_chip.dart';
+import '../../../core/widgets/category_label.dart';
 import '../../../core/widgets/institution_avatar.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../recurring/presentation/mark_recurring_dialog.dart';
@@ -88,7 +88,7 @@ class TransactionRow extends ConsumerWidget {
                                 accountIcon,
                                 key: const Key('transactionRowAccountIcon'),
                                 size: 12,
-                                color: AppColors.textSecondary,
+                                color: context.colors.textSecondary,
                               ),
                               const SizedBox(width: AppSpacing.xs),
                             ],
@@ -96,7 +96,7 @@ class TransactionRow extends ConsumerWidget {
                               child: Text(
                                 subtitle,
                                 style: textTheme.bodySmall?.copyWith(
-                                  color: AppColors.textSecondary,
+                                  color: context.colors.textSecondary,
                                 ),
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
@@ -113,7 +113,7 @@ class TransactionRow extends ConsumerWidget {
                 const SizedBox(width: AppSpacing.xl),
                 Builder(
                   builder: (chipContext) => transaction.category == null
-                      ? CategoryChip.uncategorized(
+                      ? CategoryLabel.uncategorized(
                           key: const Key('transactionRowCategoryChip'),
                           label: l10n.categoryUncategorized,
                           onTap: () => showCategoryPicker(
@@ -122,7 +122,7 @@ class TransactionRow extends ConsumerWidget {
                             transaction: transaction,
                           ),
                         )
-                      : CategoryChip(
+                      : CategoryLabel(
                           key: const Key('transactionRowCategoryChip'),
                           label: localizedCategoryName(
                             l10n,
@@ -163,7 +163,7 @@ class TransactionRow extends ConsumerWidget {
             child: Text(
               DateFormat.yMd(locale).format(transaction.bookedDate),
               style: textTheme.bodySmall?.copyWith(
-                color: AppColors.textSecondary,
+                color: context.colors.textSecondary,
               ),
               overflow: TextOverflow.ellipsis,
             ),
@@ -222,10 +222,10 @@ class _RecurringButton extends ConsumerWidget {
             ),
       icon: const Icon(Icons.repeat_rounded),
       iconSize: 16,
-      color: inSeries ? AppColors.iris : AppColors.textDisabled,
-      hoverColor: AppColors.irisSoft,
+      color: inSeries ? context.colors.accent : context.colors.textTertiary,
+      hoverColor: context.colors.accentSoft,
       style: inSeries
-          ? IconButton.styleFrom(backgroundColor: AppColors.irisSoft)
+          ? IconButton.styleFrom(backgroundColor: context.colors.accentSoft)
           : null,
       padding: EdgeInsets.zero,
       constraints: const BoxConstraints.tightFor(width: 28, height: 28),
@@ -256,7 +256,7 @@ class _HoverableRowState extends State<_HoverableRow> {
       child: Container(
         height: 52,
         padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
-        color: _hovered ? AppColors.surfaceRowHover : Colors.transparent,
+        color: _hovered ? context.colors.hover : Colors.transparent,
         child: widget.child,
       ),
     );

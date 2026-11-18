@@ -252,6 +252,16 @@ class AvatarChoiceUpdate(BaseModel):
     avatar: AvatarDefault
 
 
+#: The app's theme: follow the OS, or force dark or light.
+ThemePreference = Literal["system", "dark", "light"]
+
+
+class ThemeUpdate(BaseModel):
+    """Choose the app's theme."""
+
+    theme: ThemePreference
+
+
 class UserRead(BaseModel):
     """A user's public profile, as returned by the API."""
 
@@ -264,6 +274,8 @@ class UserRead(BaseModel):
     currency: str
     #: `monogram`, `preset:<key>`, or `image` (fetched from `GET /auth/me/avatar`).
     avatar: str
+    #: `system`, `dark` or `light`.
+    theme: str
     created_at: datetime
 
 

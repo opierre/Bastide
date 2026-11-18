@@ -1,501 +1,737 @@
-import 'dart:math' as math;
-
 import 'package:flutter/material.dart';
 
-/// Dark-first palette. Binding values come from `docs/design/00-shared-design-block.md`;
-/// that file is the source of truth and this one transcribes it.
+/// The v2 design tokens. Binding values come from
+/// `docs/design/00-design-system.md`; that file is the source of truth and
+/// this one transcribes it. A value that is not written there does not exist:
+/// add it to the design system first, then here.
 ///
-/// The scale is built on an ink base with a slight blue cast rather than a
-/// neutral grey, so raised surfaces read as *lifted* without needing heavy
-/// borders. Never hardcode a hex in a widget — add a token here instead.
-abstract final class AppColors {
-  /// App chrome background (sidebar, auth page) — the deepest layer.
-  static const surfaceSunken = Color(0xFF070910);
+/// Colours are theme-dependent, so they are never read as constants: a widget
+/// reads them from the active theme through [AppThemeContext] —
+/// `context.colors.text`, `context.categoryColors.forSlot(…)`,
+/// `context.textStyles.helper`. Switching the theme then rebuilds every widget
+/// that read one, with no restart. Never write a hex in a widget; the colour
+/// literal test fails on one.
 
-  /// Content region background.
-  static const surfaceBase = Color(0xFF0A0D12);
+/// Surfaces, lines, text, accent and meaning (`00` §2.1, §2.2), one set per
+/// theme. Read with `context.colors`.
+@immutable
+class AppColors extends ThemeExtension<AppColors> {
+  const AppColors({
+    required this.bg,
+    required this.rail,
+    required this.surface,
+    required this.field,
+    required this.hover,
+    required this.line,
+    required this.lineStrong,
+    required this.text,
+    required this.textSecondary,
+    required this.textTertiary,
+    required this.scrim,
+    required this.shadow,
+    required this.accent,
+    required this.onAccent,
+    required this.accentSoft,
+    required this.primary,
+    required this.onPrimary,
+    required this.positive,
+    required this.negative,
+    required this.warning,
+    required this.tomette,
+  });
 
-  /// Cards and panels lifted off [surfaceBase].
-  static const surfaceRaised = Color(0xFF111620);
+  /// Window and content ground.
+  final Color bg;
 
-  /// Dialogs, popovers, toasts — anything floating above the page.
-  static const surfaceOverlay = Color(0xFF19202B);
+  /// Sidebar, inspector panes, group rows. The auth ground stays [bg].
+  final Color rail;
 
-  /// Pointer-hover wash; also inset plates and toggle tracks.
-  static const surfaceHover = Color(0xFF1E2634);
+  /// Popover, modal, toast, banner, button ground.
+  final Color surface;
 
-  /// Menu/select popovers. The *same* fill as [surfaceField], because a select
-  /// is a field the user opened: a popover in a lighter tone than the anchor it
-  /// dropped from reads as a second material spliced into the form, where one
-  /// tone reads as the field having grown. Separation from the modal behind it
-  /// is carried by the hairline and the near-black [AppShadows.popoverShadow],
-  /// not by the fill — a well sunk *below* the dialog surface is as legible a
-  /// plane as one raised above it.
-  static const surfacePopover = surfaceField;
+  /// Input and select wells.
+  final Color field;
 
-  /// Row hover *inside* a raised card — sits between raised and hover, so a
-  /// hovered row lifts without jumping to the full overlay tone.
-  static const surfaceRowHover = Color(0xFF151B26);
+  /// Row and item hover, active nav item, segmented "on", monogram ground.
+  final Color hover;
 
-  /// Inset wells: text fields, selects, search, read-only value slots.
-  ///
-  /// One tone for every well, editable or not — read-only is carried by the
-  /// dashed border and lock glyph, not by the fill (amended twice; see
-  /// `docs/design/00` §Palette).
-  static const surfaceField = Color(0xFF0A0F15);
+  /// Hairline between sections and rows.
+  final Color line;
 
-  /// Sidebar nav hover — quieter than [surfaceHover] because the sidebar sits
-  /// on the sunken surface, where a lighter wash would read as selection.
-  static const sidebarHover = Color(0xFF12161F);
+  /// Control borders, meter and slider track, dashed outlines.
+  final Color lineStrong;
 
-  static const textPrimary = Color(0xFFEDF1F7);
-  static const textSecondary = Color(0xFF97A3B6);
-  static const textDisabled = Color(0xFF5A6579);
+  /// Primary text and figures.
+  final Color text;
 
-  /// Brand accent — iris violet. Reserved for the accent role: primary buttons,
-  /// active nav, focus, links, the logomark. Deliberately *never* used for a
-  /// category hue or for money, so an iris element is always chrome.
-  static const iris = Color(0xFF8B8CF9);
+  /// Labels, captions, secondary cells.
+  final Color textSecondary;
 
-  /// Deep end of the iris ramp — gradient terminus and pressed states.
-  static const irisDeep = Color(0xFF6C6AF0);
+  /// Column headers, notes, axis labels, placeholders, disabled.
+  final Color textTertiary;
 
-  /// Iris at 12% — active nav pills, tinted chips, glyph plates.
-  static const irisSoft = Color(0x1F8B8CF9);
+  /// Behind a modal.
+  final Color scrim;
 
-  /// Iris at 35% — the savings-rate hero card's outline (`docs/design/00` §Components). The
-  /// card's own ramp (#8B8CF9 → #6C6AF0) is only a few percent of lightness wide, so it is
-  /// this border, not the fill, that separates the hero from the neutral cards beside it.
-  static const irisBorderStrong = Color(0x598B8CF9);
+  /// Popover, modal and toast only (`00` §4, Elevation).
+  final List<BoxShadow> shadow;
 
-  /// Foreground on an iris-gradient fill.
-  static const irisInk = Color(0xFF0E1030);
+  /// Selection, links, focus, meter and slider fill, toggle on, checkbox on,
+  /// chart line.
+  final Color accent;
 
-  /// Leading chart/category hue.
-  static const cyan = Color(0xFF4FD1E8);
+  /// Glyph on an [accent] fill.
+  final Color onAccent;
 
-  /// Money sign colors. Income green is deliberately yellower than [iris] so a
-  /// balance never reads as a brand element.
-  static const positive = Color(0xFF4ADE80);
-  static const negative = Color(0xFFFF5C6C);
+  /// [accent] at 14 %: selected row, focus ring halo.
+  final Color accentSoft;
 
-  /// Label ink on a solid [negative] fill — the destructive confirm button
-  /// (`docs/design/09-settings.md` §Sauvegarde, state ⑧).
-  static const negativeInk = Color(0xFF2A0A0F);
-  static const warning = Color(0xFFFFB84D);
+  /// Primary button fill: the ink, equal to [text].
+  final Color primary;
 
-  /// Warning at 35% — the over-reference card border (`docs/design/00`
-  /// §Patrimoine additions): the one edge a reading may tint, never red.
-  static const warningBorder = Color(0x59FFB84D);
-  static const info = Color(0xFF5AA9FF);
+  /// Primary button label, equal to [bg].
+  final Color onPrimary;
 
-  /// Hairline between structural regions.
-  static const border = Color(0xFF232B38);
+  /// Money in, goal reached, success.
+  final Color positive;
 
-  /// Quieter hairline, for separators *inside* a card.
-  static const borderSubtle = Color(0xFF1A212C);
+  /// Money out, failure, destructive.
+  final Color negative;
 
-  /// Card outline — a touch lighter than [border] so a card edge reads against
-  /// the base surface without the weight of a structural divider.
-  static const borderCard = Color(0xFF242E3E);
+  /// Worth a look: price rise, missed charge, above a reference, stale value.
+  final Color warning;
 
-  /// Dashed outline on read-only / uncategorized slots.
-  static const borderDashed = Color(0xFF3A4556);
+  /// Stroke of the tomettes texture (`00` §12): white at 7 % in dark, black
+  /// at 7 % in light.
+  final Color tomette;
 
-  static const focusRing = iris;
-
-  /// Neutral wash used for hover/press overlays on dark surfaces.
-  static const overlayWash = Color(0x0FFFFFFF);
-
-  /// Modal scrim.
-  static const scrim = Color(0x9E04060B);
-
-  /// The iris gradient used by primary buttons, the logomark, and the
-  /// savings-rate hero card — the spec's
-  /// `linear-gradient(135deg, #8B8CF9, #6C6AF0)`.
-  ///
-  /// A true 45° axis, not `topLeft → bottomRight`. Flutter's corner alignments
-  /// follow the box's aspect ratio, so on a wide, short card (the savings hero)
-  /// that vector flattens to roughly 20° and the ramp reads as a horizontal
-  /// wash instead of the drawn diagonal. Rotating a horizontal gradient by π/4
-  /// pins the angle whatever box it paints.
-  static const irisGradient = LinearGradient(
-    begin: Alignment.centerLeft,
-    end: Alignment.centerRight,
-    colors: [iris, irisDeep],
-    transform: GradientRotation(math.pi / 4),
+  /// The reference theme and the default (`00` §1.7).
+  static const dark = AppColors(
+    bg: Color(0xFF111214),
+    rail: Color(0xFF0C0D0F),
+    surface: Color(0xFF191A1D),
+    field: Color(0xFF17181B),
+    hover: Color(0xFF1F2125),
+    line: Color(0xFF25272B),
+    lineStrong: Color(0xFF35383E),
+    text: Color(0xFFECEDEF),
+    textSecondary: Color(0xFFA3A7AE),
+    textTertiary: Color(0xFF8A8E96),
+    scrim: Color(0x8C000000),
+    shadow: [
+      BoxShadow(
+        color: Color(0x80000000),
+        blurRadius: 32,
+        offset: Offset(0, 12),
+      ),
+      BoxShadow(color: Color(0x66000000), blurRadius: 6, offset: Offset(0, 2)),
+    ],
+    accent: Color(0xFF7FA6FF),
+    onAccent: Color(0xFF111214),
+    accentSoft: Color(0x247FA6FF),
+    primary: Color(0xFFECEDEF),
+    onPrimary: Color(0xFF111214),
+    positive: Color(0xFF4CC38A),
+    negative: Color(0xFFF2777A),
+    warning: Color(0xFFE0A44A),
+    tomette: Color(0x12FFFFFF),
   );
 
-  /// The savings-rate hero's fill — the spec's
-  /// `linear-gradient(160deg, rgba(139,140,249,.14), rgba(108,106,240,.05) 55%)` layered over
-  /// the [surfaceRaised] card base.
-  ///
-  /// The two translucent stops are composited against that base here rather than stacked as a
-  /// separate translucent layer, so the card paints one gradient and the hero stays a *tint* of
-  /// the neutral cards beside it instead of a second, fully saturated material.
-  ///
-  /// CSS 160° points down and slightly right; Flutter measures a rotation from the left→right
-  /// axis, which is CSS 90°, so the axis is turned the remaining 70°.
-  static const irisTintGradient = LinearGradient(
-    begin: Alignment.centerLeft,
-    end: Alignment.centerRight,
-    colors: [Color(0xFF22273E), Color(0xFF161A2A)],
-    stops: [0.0, 0.55],
-    transform: GradientRotation(70 * math.pi / 180),
+  /// Complete in its own right, not derived by inversion (`00` §1.7).
+  static const light = AppColors(
+    bg: Color(0xFFFFFFFF),
+    rail: Color(0xFFF6F6F7),
+    surface: Color(0xFFFFFFFF),
+    field: Color(0xFFFFFFFF),
+    hover: Color(0xFFF0F1F2),
+    line: Color(0xFFE6E7E9),
+    lineStrong: Color(0xFFD0D2D6),
+    text: Color(0xFF17181A),
+    textSecondary: Color(0xFF5A5E65),
+    textTertiary: Color(0xFF666A71),
+    scrim: Color(0x5217181A),
+    shadow: [
+      BoxShadow(
+        color: Color(0x2414161A),
+        blurRadius: 32,
+        offset: Offset(0, 12),
+      ),
+      BoxShadow(color: Color(0x1414161A), blurRadius: 6, offset: Offset(0, 2)),
+    ],
+    accent: Color(0xFF2B5CD0),
+    onAccent: Color(0xFFFFFFFF),
+    accentSoft: Color(0x242B5CD0),
+    primary: Color(0xFF17181A),
+    onPrimary: Color(0xFFFFFFFF),
+    positive: Color(0xFF18794E),
+    negative: Color(0xFFC4292E),
+    warning: Color(0xFF8F5F00),
+    tomette: Color(0x12000000),
   );
 
-  /// Iris at 30% — the dashboard's Objectifs card outline (`docs/design/04` §Row 3). A notch
-  /// lighter than [irisBorderStrong] because that card's own tint is lighter too: the pair are
-  /// drawn to keep the same border-to-fill relationship as the savings hero.
-  static const irisBorder = Color(0x4D8B8CF9);
+  /// The active theme's colours. Prefer `context.colors`.
+  static AppColors of(BuildContext context) =>
+      Theme.of(context).extension<AppColors>() ?? dark;
 
-  /// The goal progress bar's fill — the spec's `linear-gradient(90deg,#6C6AF0,#8B8CF9)`
-  /// (`docs/design/00` §Gestion & AI additions).
-  ///
-  /// Deep end *first*, unlike [irisGradient]: a progress bar fills from the left, and starting
-  /// on the darker stop is what makes a part-filled bar read as one that has been travelling
-  /// rather than one that has been cropped.
-  static const goalProgressGradient = LinearGradient(
-    begin: Alignment.centerLeft,
-    end: Alignment.centerRight,
-    colors: [irisDeep, iris],
+  @override
+  AppColors copyWith({
+    Color? bg,
+    Color? rail,
+    Color? surface,
+    Color? field,
+    Color? hover,
+    Color? line,
+    Color? lineStrong,
+    Color? text,
+    Color? textSecondary,
+    Color? textTertiary,
+    Color? scrim,
+    List<BoxShadow>? shadow,
+    Color? accent,
+    Color? onAccent,
+    Color? accentSoft,
+    Color? primary,
+    Color? onPrimary,
+    Color? positive,
+    Color? negative,
+    Color? warning,
+    Color? tomette,
+  }) => AppColors(
+    bg: bg ?? this.bg,
+    rail: rail ?? this.rail,
+    surface: surface ?? this.surface,
+    field: field ?? this.field,
+    hover: hover ?? this.hover,
+    line: line ?? this.line,
+    lineStrong: lineStrong ?? this.lineStrong,
+    text: text ?? this.text,
+    textSecondary: textSecondary ?? this.textSecondary,
+    textTertiary: textTertiary ?? this.textTertiary,
+    scrim: scrim ?? this.scrim,
+    shadow: shadow ?? this.shadow,
+    accent: accent ?? this.accent,
+    onAccent: onAccent ?? this.onAccent,
+    accentSoft: accentSoft ?? this.accentSoft,
+    primary: primary ?? this.primary,
+    onPrimary: onPrimary ?? this.onPrimary,
+    positive: positive ?? this.positive,
+    negative: negative ?? this.negative,
+    warning: warning ?? this.warning,
+    tomette: tomette ?? this.tomette,
   );
 
-  /// The dashboard Objectifs card's fill — the spec's
-  /// `linear-gradient(160deg,rgba(139,140,249,.10),rgba(108,106,240,.03) 55%)` over
-  /// [surfaceRaised], composited here for the same reason [irisTintGradient] is: one gradient,
-  /// so the card stays a tint of the neutral cards beside it rather than a second material.
-  static const irisTintGradientSoft = LinearGradient(
-    begin: Alignment.centerLeft,
-    end: Alignment.centerRight,
-    colors: [Color(0xFF1D2236), Color(0xFF141926)],
-    stops: [0.0, 0.55],
-    transform: GradientRotation(70 * math.pi / 180),
+  /// Switching themes is instant (`00` §13), so there is nothing to
+  /// interpolate: the target theme's colours apply at once.
+  @override
+  AppColors lerp(AppColors? other, double t) =>
+      other == null || t < 0.5 ? this : other;
+}
+
+/// The category slots of `00` §2.4. A category stores its slot, never a hex;
+/// the theme resolves it to a colour. A custom category picks one of
+/// [cat1]–[cat6] or [cat0]. [income] is Revenus, drawn in `positive`.
+enum CategorySlot {
+  cat0,
+  cat1,
+  cat2,
+  cat3,
+  cat4,
+  cat5,
+  cat6,
+  income;
+
+  /// The slot a stored value names, [cat0] for anything else.
+  static CategorySlot fromWire(String? value) => switch (value) {
+    'cat1' => cat1,
+    'cat2' => cat2,
+    'cat3' => cat3,
+    'cat4' => cat4,
+    'cat5' => cat5,
+    'cat6' => cat6,
+    'income' => income,
+    _ => cat0,
+  };
+
+  /// What the API stores.
+  String get wire => name;
+
+  /// The slots a custom category may pick, in the design system's order.
+  static const pickable = [cat1, cat2, cat3, cat4, cat5, cat6, cat0];
+}
+
+/// The category palette of `00` §2.4, one set per theme. Read with
+/// `context.categoryColors`. Category hues are marks (dots, bars), never text
+/// colour; the net-worth composition reuses the slots in order.
+@immutable
+class CategoryColors extends ThemeExtension<CategoryColors> {
+  const CategoryColors({
+    required this.cat0,
+    required this.cat1,
+    required this.cat2,
+    required this.cat3,
+    required this.cat4,
+    required this.cat5,
+    required this.cat6,
+    required this.income,
+  });
+
+  /// Autres, Épargne, any custom category without a hue.
+  final Color cat0;
+
+  /// Logement.
+  final Color cat1;
+
+  /// Alimentation.
+  final Color cat2;
+
+  /// Transport.
+  final Color cat3;
+
+  /// Abonnements.
+  final Color cat4;
+
+  /// Loisirs.
+  final Color cat5;
+
+  /// Santé.
+  final Color cat6;
+
+  /// Revenus, equal to the theme's `positive`.
+  final Color income;
+
+  static final dark = CategoryColors(
+    cat0: const Color(0xFF6B7078),
+    cat1: const Color(0xFF3987E5),
+    cat2: const Color(0xFFD95926),
+    cat3: const Color(0xFF199E70),
+    cat4: const Color(0xFFC98500),
+    cat5: const Color(0xFFD55181),
+    cat6: const Color(0xFF9085E9),
+    income: AppColors.dark.positive,
   );
 
-  /// The reached goal card's outline — the spec's `rgba(74,222,128,.35)`. Green rather than
-  /// iris because reaching a target is the one state on this panel the design lets a card
-  /// announce by its edge (`docs/design/11-goals.md` §Grid state).
-  static const positiveBorder = Color(0x594ADE80);
+  static final light = CategoryColors(
+    cat0: const Color(0xFF9A9EA6),
+    cat1: const Color(0xFF2A78D6),
+    cat2: const Color(0xFFEB6834),
+    cat3: const Color(0xFF1BAF7A),
+    cat4: const Color(0xFFEDA100),
+    cat5: const Color(0xFFE87BA4),
+    cat6: const Color(0xFF6250D6),
+    income: AppColors.light.positive,
+  );
 
-  /// Glow beneath a primary button.
-  static const irisGlow = [
-    BoxShadow(color: Color(0x4D6C6AF0), blurRadius: 22, offset: Offset(0, 8)),
-  ];
-}
+  /// The active theme's category colours. Prefer `context.categoryColors`.
+  static CategoryColors of(BuildContext context) =>
+      Theme.of(context).extension<CategoryColors>() ?? dark;
 
-/// Category hues. Fixed per category so a hue means the same thing in the
-/// donut, the legend, and every chip — the spec pins these rather than deriving
-/// them, so charts and chips can never drift apart.
-///
-/// Iris is absent by design: it is the accent role, not a data hue.
-abstract final class CategoryHues {
-  static const logement = AppColors.cyan;
-  static const alimentation = Color(0xFF5AA9FF);
-  static const transport = Color(0xFF2DD4BF);
-  static const loisirs = Color(0xFFF472B6);
-  static const abonnements = AppColors.warning;
-  static const sante = Color(0xFFA3E635);
-
-  /// Shared by "Autres" and "Épargne" — both are catch-alls rather than
-  /// spending categories, so they take the neutral slate.
-  static const autres = Color(0xFF64748B);
-  static const revenus = AppColors.positive;
-
-  /// Fallback for a category with no pinned hue (user-created categories).
-  static const fallback = autres;
-
-  /// Keyed by the backend category slug.
-  static const bySlug = <String, Color>{
-    'logement': logement,
-    'alimentation': alimentation,
-    'transport': transport,
-    'loisirs': loisirs,
-    'abonnements': abonnements,
-    'sante': sante,
-    'autres': autres,
-    'epargne': autres,
-    'revenus': revenus,
+  Color forSlot(CategorySlot slot) => switch (slot) {
+    CategorySlot.cat0 => cat0,
+    CategorySlot.cat1 => cat1,
+    CategorySlot.cat2 => cat2,
+    CategorySlot.cat3 => cat3,
+    CategorySlot.cat4 => cat4,
+    CategorySlot.cat5 => cat5,
+    CategorySlot.cat6 => cat6,
+    CategorySlot.income => income,
   };
 
-  static Color forSlug(String? slug) => bySlug[slug] ?? fallback;
-}
-
-/// Hues of the Synthèse asset composition and the property nature pills
-/// (`docs/design/15-synthese.md` §Row 2, §Biens view).
-///
-/// The frame pins four; every other account type and property kind takes the
-/// neutral slate, the same catch-all hue as « Autres » (decided in review).
-abstract final class AssetHues {
-  static const checking = Color(0xFF5AA9FF);
-  static const savings = Color(0xFF2DD4BF);
-  static const primaryResidence = AppColors.cyan;
-  static const rental = Color(0xFFA3E635);
-  static const unpinned = CategoryHues.autres;
-
-  /// Keyed by the backend account `type`.
-  static const byAccountType = <String, Color>{
-    'checking': checking,
-    'savings': savings,
+  /// The slot of a system category bucket, keyed by its slug
+  /// (`core/l10n/category_display.dart`). Every other slug is [cat0].
+  static CategorySlot slotForSlug(String? slug) => switch (slug) {
+    'logement' => CategorySlot.cat1,
+    'alimentation' => CategorySlot.cat2,
+    'transport' => CategorySlot.cat3,
+    'abonnements' => CategorySlot.cat4,
+    'loisirs' => CategorySlot.cat5,
+    'sante' => CategorySlot.cat6,
+    'revenus' => CategorySlot.income,
+    _ => CategorySlot.cat0,
   };
 
-  /// Keyed by the backend property `kind`.
-  static const byPropertyKind = <String, Color>{
-    'primary_residence': primaryResidence,
-    'rental': rental,
+  Color forSlug(String? slug) => forSlot(slotForSlug(slug));
+
+  /// The colour of the [index]-th segment of a composition bar: [cat1]
+  /// onward in rank order, [cat0] once the six hues run out (`00` §9).
+  Color forRank(int index) =>
+      index < 6 ? forSlot(CategorySlot.values[index + 1]) : cat0;
+
+  /// The hue of an asset in the Synthèse composition and the property nature
+  /// pills, keyed by the backend account `type` or property `kind`. Reuses the
+  /// slots (`00` §2.4); every other type or kind takes [cat0].
+  Color forAccountType(String type) => switch (type) {
+    'checking' => cat1,
+    'savings' => cat3,
+    _ => cat0,
   };
 
-  static Color forAccountType(String type) => byAccountType[type] ?? unpinned;
-
-  static Color forPropertyKind(String kind) => byPropertyKind[kind] ?? unpinned;
-}
-
-/// Brand-ish hues for institution/merchant monogram chips.
-///
-/// Pinned per brand rather than hashed: an institution that changes color
-/// between launches looks like a bug, and these specific hues are drawn in the
-/// mockup. Unknown names fall back to a neutral plate with a `?` glyph.
-abstract final class MonogramHues {
-  static const unknownBackground = AppColors.surfaceHover;
-  static const unknownForeground = AppColors.textSecondary;
-
-  /// Lowercased, whitespace-collapsed brand name → hue.
-  static const byBrand = <String, Color>{
-    'bnp': Color(0xFF2FB574),
-    'bnp paribas': Color(0xFF2FB574),
-    'crédit agricole': Color(0xFF0AA396),
-    'credit agricole': Color(0xFF0AA396),
-    'revolut': Color(0xFF5AA9FF),
-    'caisse locale': AppColors.cyan,
-    "caisse locale d'épargne": AppColors.cyan,
-    'carrefour': Color(0xFF3B82F6),
-    'novatech': AppColors.irisDeep,
-    'novatech sarl': AppColors.irisDeep,
+  Color forPropertyKind(String kind) => switch (kind) {
+    'primary_residence' => cat2,
+    'rental' => cat6,
+    _ => cat0,
   };
-}
 
-/// Plates of the preset user avatars, keyed by the backend preset key.
-///
-/// Drawn from hues the palette already carries rather than new ones; an avatar
-/// is never next to a category chip in the same role, so the reuse can't be
-/// misread as a category.
-abstract final class AvatarHues {
-  static const byPreset = <String, Color>{
-    'cyan': AppColors.cyan,
-    'blue': AppColors.info,
-    'teal': CategoryHues.transport,
-    'pink': CategoryHues.loisirs,
-    'amber': AppColors.warning,
-    'lime': CategoryHues.sante,
-    'green': AppColors.positive,
-    'iris': AppColors.iris,
+  /// The plate of a preset user avatar, keyed by the backend preset key.
+  Color forAvatarPreset(String preset, AppColors colors) => switch (preset) {
+    'cyan' => cat1,
+    'blue' => cat6,
+    'teal' => cat3,
+    'pink' => cat5,
+    'amber' => cat4,
+    'lime' => cat2,
+    'green' => income,
+    _ => colors.accent,
   };
+
+  @override
+  CategoryColors copyWith({
+    Color? cat0,
+    Color? cat1,
+    Color? cat2,
+    Color? cat3,
+    Color? cat4,
+    Color? cat5,
+    Color? cat6,
+    Color? income,
+  }) => CategoryColors(
+    cat0: cat0 ?? this.cat0,
+    cat1: cat1 ?? this.cat1,
+    cat2: cat2 ?? this.cat2,
+    cat3: cat3 ?? this.cat3,
+    cat4: cat4 ?? this.cat4,
+    cat5: cat5 ?? this.cat5,
+    cat6: cat6 ?? this.cat6,
+    income: income ?? this.income,
+  );
+
+  @override
+  CategoryColors lerp(CategoryColors? other, double t) =>
+      other == null || t < 0.5 ? this : other;
 }
 
+/// Spacing (`00` §4). The v2 ramp is 2, 4, 6, 8, 12, 16, 24, 32, 40.
 abstract final class AppSpacing {
+  static const xxs = 2.0;
   static const xs = 4.0;
+  static const xsPlus = 6.0;
   static const sm = 8.0;
+  static const smPlus = 12.0;
   static const md = 16.0;
   static const lg = 24.0;
   static const xl = 32.0;
-  static const xxl = 48.0;
+  static const xxl = 40.0;
 
-  // Values measured off the mockup (docs/design/00 §Layout invariant). They sit
-  // beside the ramp above rather than replacing it: the drawn design uses a few
-  // deliberate odd gaps that a 4pt ramp can't express without rounding the
-  // layout away from the spec.
+  /// Between sections of a page.
+  static const section = lg;
 
-  /// Gap between a nav item's icon and its label.
+  /// Page margin: 32 horizontal, 24 vertical.
+  static const pageX = xl;
+  static const pageY = lg;
+
+  /// Two-column gutter.
+  static const gutter = xxl;
+
+  // v1 layout values, kept only so the panels compile until the shell (#201),
+  // the shared widgets (#200) and each panel's v2 ticket replace them. Nothing
+  // new reads these.
+
+  /// v1: gap between a nav item's icon and its label.
   static const navGap = 11.0;
 
-  /// Horizontal padding inside a nav pill.
+  /// v1: horizontal padding inside a nav pill.
   static const navInset = 13.0;
 
-  /// Sidebar inner gutter.
+  /// v1: sidebar inner gutter.
   static const sidebarGutter = 12.0;
 
-  /// Gap between cards in a grid (stat row, account grid).
+  /// v1: gap between cards in a grid.
   static const gridGap = 18.0;
 
-  /// Card padding — the wide variant is for cards that carry a headline figure.
+  /// v1: card padding.
   static const cardPadding = 20.0;
   static const cardPaddingWide = 24.0;
 
-  /// Content region padding: 24 vertical × 28 horizontal.
+  /// v1: content region padding, 24 × 28.
   static const contentX = 28.0;
   static const contentY = 24.0;
 
-  /// Panels that open with a filter bar sit 20 from the top instead of 24.
+  /// v1: panels that open with a filter bar.
   static const contentTopFiltered = 20.0;
 }
 
+/// Corner radii (`00` §4).
 abstract final class AppRadii {
-  /// Category swatch, stacked-bar cap (`docs/design/00` §Components).
+  /// Meter and bar ends.
+  static const bar = 2.0;
+
+  /// Items inside a control or popover, checkboxes.
   static const xs = 4.0;
+  static const item = xs;
 
+  /// Monogram, 22 px and 32 px.
+  static const monogramSmall = 5.0;
+  static const monogramLarge = 7.0;
+
+  /// Controls: buttons, fields, nav items, segmented, tabs' focus.
+  static const control = 6.0;
+
+  /// Containers: banner, popover, toast, drop target, account-type header.
   static const sm = 8.0;
-  static const monogram = 9.0;
-  static const md = 12.0;
+  static const container = sm;
 
-  /// Toasts and inset configuration plates.
+  /// Modals.
+  static const md = 12.0;
+  static const modal = md;
+
+  /// Avatars and toggles.
+  static const pill = 999.0;
+  static const full = pill;
+
+  // v1 radii, kept only until #200 and the panels' v2 tickets replace them.
+
+  /// v1: monogram.
+  static const monogram = 9.0;
+
+  /// v1: toasts and inset plates.
   static const inset = 14.0;
 
-  /// Card.
+  /// v1: card.
   static const lg = 16.0;
 
-  /// Modal, glyph plate.
+  /// v1: modal, glyph plate.
   static const xl = 20.0;
 
-  /// Nav pill.
+  /// v1: nav pill.
   static const navPill = 20.0;
-
-  /// Fully rounded — status dots, round pager buttons.
-  static const pill = 999.0;
 }
 
-/// Soft, wide shadows. On a dark UI these read as depth rather than as a
-/// visible drop shadow, so they stay subtle and are reserved for surfaces
-/// that genuinely float.
+/// Heights and widths of `00` §4 and §5. The shell (#201) and the shared
+/// widgets (#200) build on these.
+abstract final class AppSizes {
+  static const titleBar = 48.0;
+  static const navItem = 30.0;
+  static const button = 28.0;
+  static const buttonLarge = 36.0;
+  static const toolbarSelect = 28.0;
+  static const formField = 32.0;
+  static const tableRow = 36.0;
+  static const tableRowTwoLines = 48.0;
+  static const groupRow = 30.0;
+  static const tab = 40.0;
+  static const popoverItem = 28.0;
+  static const sidebar = 224.0;
+  static const sidebarCollapsed = 56.0;
+  static const inspector = 440.0;
+  static const searchField = 240.0;
+
+  /// Icons: 16 by default, 14 inside buttons, selects and notes, 13 in status
+  /// text (`00` §10).
+  static const icon = 16.0;
+  static const iconSmall = 14.0;
+  static const iconStatus = 13.0;
+}
+
+/// The legacy elevation of Material menus. A [MenuStyle] takes an elevation,
+/// not a [BoxShadow]; the v2 `shadow` token is painted wherever a widget can
+/// draw its own box.
 abstract final class AppShadows {
-  static const card = [
-    BoxShadow(color: Color(0x33000000), blurRadius: 16, offset: Offset(0, 4)),
-  ];
-
-  static const modal = [
-    BoxShadow(color: Color(0x66000000), blurRadius: 60, offset: Offset(0, 24)),
-  ];
-
-  /// The popover shadow, expressed as an elevation rather than a [BoxShadow]
-  /// because [MenuStyle] accepts only that.
-  ///
-  /// Heavy enough to separate a popover from the modal it usually opens over
-  /// (amended from elevation 12; see `docs/design/00` §Components).
-  static const popoverElevation = 24.0;
-  static const popoverShadow = Color(0xCC000000);
+  static const popoverElevation = 12.0;
 }
 
-/// Animation timings. Everything not listed here (hover fills, border changes,
-/// selection) is an instant swap, so there is no `base`/`slow` duration to
-/// reach for.
-///
-/// The spec's other keyframe, the button spinner, takes no duration here: it is
-/// Flutter's own indeterminate progress arc, which runs on its built-in period
-/// (amended; see `docs/design/00` §Motion).
+/// Timings (`00` §13). Hover and pressed states change at once, so there is no
+/// duration for them.
 abstract final class AppMotion {
-  /// Skeleton opacity pulse.
+  /// Popover, menu, modal, toast and inspector content, ease-out.
+  static const overlay = Duration(milliseconds: 120);
+
+  /// A meter's fill when its value changes, ease-out, once.
+  static const meter = Duration(milliseconds: 240);
+
+  /// Loading silhouette pulse.
   static const shimmer = Duration(milliseconds: 1600);
 }
 
 abstract final class AppFonts {
-  /// UI family: 400 body, 600 emphasis/labels, 700 headings.
-  ///
-  /// Narrow enough for French labels at 11.5–14px, and its flat-sided figures
-  /// hold an amount column under `tnum` (amended from Manrope; see
-  /// `docs/design/00` §Typography).
+  /// The one UI family, at 400, 500 and 600.
   static const geist = 'Geist';
 
-  /// Display family, 700 only: wordmark, panel titles, headline amounts.
-  static const spaceGrotesk = 'Space Grotesk';
-
-  /// Raw bank labels in the review queue, where character alignment matters.
-  static const mono = 'monospace';
+  /// Raw bank labels, rule patterns, file names, file paths and URLs only.
+  static const mono = 'Geist Mono';
 }
 
-/// Fixed-chrome dimensions. The shell is the only place these are consumed;
-/// they live here so the design docs and the app can't drift.
+/// v1 fixed-chrome dimensions, kept until the shell is rebuilt (#201); the v2
+/// values are in [AppSizes].
 abstract final class AppChrome {
   static const sidebarWidth = 252.0;
-
-  /// Icon-only rail when the sidebar is collapsed.
   static const sidebarCollapsedWidth = 76.0;
-
   static const topBarHeight = 72.0;
-
-  /// Nav pill, top-bar control pill.
   static const navItemHeight = 40.0;
   static const controlPillHeight = 38.0;
   static const userPillHeight = 44.0;
-
-  /// Every button in a footer or action row — primary, secondary, ghost — is
-  /// this tall, so a « Annuler » sits exactly level with the « Appliquer »
-  /// beside it. The spec's 38–46 range is a range for standalone CTAs; paired
-  /// buttons have to agree on one number, and 38 is the low end the footers use.
   static const buttonHeight = 38.0;
-
-  /// Flush-left active rail on a nav item.
   static const navRailWidth = 3.0;
   static const navRailHeight = 22.0;
-
   static const navIconSize = 18.0;
 }
 
-/// The luminous hairline across the top edge of every frame, and the film-grain
-/// overlay tile size. Both are frame-level texture rather than component style,
-/// so they live here and are applied once by the shell.
-abstract final class AppTexture {
-  /// Edge length of the repeating grain tile, in pixels.
-  static const grainTile = 140;
-  static const grainOpacity = 0.05;
-
-  static const topHairline = LinearGradient(
-    colors: [Color(0x008B8CF9), Color(0x8C8B8CF9), Color(0x008B8CF9)],
-  );
-}
-
-/// The one curve style every chart draws with (`docs/design/00` §Components →
-/// « Shared curve style »): the dashboard's savings line, an account's balance,
-/// the Synthèse's net worth, a subscription's price history, a deferred card's
-/// cycles, the credits trajectory and the simulator's projection. A chart keeps
-/// a value of its own only where its panel spec says why; `ChartPaints` in
-/// `core/widgets/chart_style.dart` applies these.
+/// The one chart frame (`00` §9). Colours come from the theme: gridlines in
+/// `line`, the zero line in `lineStrong`, the series in `accent`.
 abstract final class AppChart {
   /// Width left of the plot for the value axis.
   static const valueGutter = 56.0;
 
-  /// Height beneath the plot for the x axis.
+  /// Height beneath the plot for the category axis.
   static const axisHeight = 22.0;
 
   /// Clear space between a value label and the plot it names.
   static const labelGap = AppSpacing.sm;
 
-  /// Gridlines: 1 px hairlines, from the plot's left edge to the chart's right
-  /// edge.
-  static const gridColor = AppColors.borderSubtle;
   static const gridStroke = 1.0;
 
-  /// The series line, round-joined and round-capped.
-  static const lineStroke = 2.5;
+  /// The series line, round-joined.
+  static const lineStroke = 2.0;
 
   /// The area under a line, in the line's own hue.
-  static const areaAlpha = 0.16;
+  static const areaAlpha = 0.10;
 
-  /// The area under zero when a series crosses it, in expense red.
+  /// The area under zero when a series crosses it.
   static const negativeAreaAlpha = 0.10;
 
   /// A dot on every point while there are at most [dotCeiling] of them.
   static const pointDotRadius = 3.0;
 
-  /// The current (last) point's dot, and the hovered one's.
-  static const currentDotRadius = 5.0;
+  /// The dot on the last point and on the hovered one.
+  static const currentDotRadius = 4.0;
 
-  /// The card-surface ring around every dot, so it reads as sitting *on* the
-  /// line rather than as a bead threaded onto it.
-  static const dotRing = 1.5;
+  /// The `bg` ring around a dot.
+  static const dotRing = 2.0;
 
   /// How far the largest dot reaches past its point: the plot's inset, so an
   /// extreme point isn't clipped, and what a hover card keeps clear of.
   static const dotReach = currentDotRadius + dotRing;
 
-  /// Above this many points the dots turn the line into a bead string; the
-  /// stroke alone carries the shape from there.
   static const dotCeiling = 24;
 
-  /// Every dashed chart line — zero baseline, open segment, declared months,
-  /// annotations — on the `DashedBorder` rhythm, 5 on / 4 off.
+  /// Dashed annotation lines, 5 on / 4 off.
   static const dash = 5.0;
   static const dashGap = 4.0;
 
-  /// The dashed zero baseline and annotation verticals.
-  static const baselineColor = AppColors.borderDashed;
   static const baselineStroke = 1.0;
+
+  /// Hatching, for what is not yet a fact: 45° lines of [hatchStroke] on a
+  /// [hatchPitch] pitch, inside a [hatchOutline] outline.
+  static const hatchStroke = 1.5;
+  static const hatchPitch = 5.0;
+  static const hatchOutline = 1.0;
+
+  /// Bars by sign: at most this wide, radius [barRadius] on the outer end.
+  static const barMaxWidth = 18.0;
+  static const barRadius = 3.0;
+
+  /// Stacked bars: the gap between two segments, radius [stackRadius] on top.
+  static const stackGap = 2.0;
+  static const stackRadius = 2.0;
+
+  /// The second series under a line: a thinner step line, no area.
+  static const secondLineStroke = 1.5;
+
+  /// The guide under a step line's change of value: `warning` at this alpha.
+  static const changeGuideAlpha = 0.35;
+}
+
+/// Theme lookups for widgets: `context.colors`, `context.categoryColors`,
+/// `context.textStyles`.
+extension AppThemeContext on BuildContext {
+  AppColors get colors => AppColors.of(this);
+  CategoryColors get categoryColors => CategoryColors.of(this);
+  AppTextStyles get textStyles => AppTextStyles.of(this);
+}
+
+/// Styles the [TextTheme] slots can't carry, coloured for the active theme.
+/// Read with `context.textStyles`.
+@immutable
+class AppTextStyles extends ThemeExtension<AppTextStyles> {
+  const AppTextStyles({
+    required this.sectionLabel,
+    required this.statLabel,
+    required this.helper,
+    required this.mono,
+    required this.reviewNoProposal,
+  });
+
+  factory AppTextStyles.from(AppColors colors) => AppTextStyles(
+    sectionLabel: TextStyle(
+      fontFamily: AppFonts.geist,
+      fontSize: 12,
+      fontWeight: FontWeight.w400,
+      height: 1.45,
+      color: colors.textTertiary,
+    ),
+    statLabel: TextStyle(
+      fontFamily: AppFonts.geist,
+      fontSize: 12,
+      fontWeight: FontWeight.w400,
+      height: 1.45,
+      color: colors.textSecondary,
+    ),
+    helper: TextStyle(
+      fontFamily: AppFonts.geist,
+      fontSize: 11,
+      fontWeight: FontWeight.w400,
+      height: 1.45,
+      color: colors.textTertiary,
+    ),
+    mono: TextStyle(
+      fontFamily: AppFonts.mono,
+      fontSize: 12,
+      fontWeight: FontWeight.w400,
+      height: 1.45,
+      color: colors.textSecondary,
+    ),
+    reviewNoProposal: TextStyle(
+      fontFamily: AppFonts.geist,
+      fontSize: 12,
+      fontWeight: FontWeight.w400,
+      height: 1.45,
+      color: colors.textTertiary,
+    ),
+  );
+
+  /// Group label: 12/400 `textTertiary`, sentence case (`00` §5).
+  final TextStyle sectionLabel;
+
+  /// The label above a figure of a summary line: 12 `textSecondary`.
+  final TextStyle statLabel;
+
+  /// Field helper and notes: 11 `textTertiary`.
+  final TextStyle helper;
+
+  /// Geist Mono 12, for raw bank labels, rule patterns and file names.
+  final TextStyle mono;
+
+  /// A review row the model had nothing for.
+  final TextStyle reviewNoProposal;
+
+  static AppTextStyles of(BuildContext context) =>
+      Theme.of(context).extension<AppTextStyles>() ??
+      AppTextStyles.from(AppColors.dark);
+
+  @override
+  AppTextStyles copyWith({
+    TextStyle? sectionLabel,
+    TextStyle? statLabel,
+    TextStyle? helper,
+    TextStyle? mono,
+    TextStyle? reviewNoProposal,
+  }) => AppTextStyles(
+    sectionLabel: sectionLabel ?? this.sectionLabel,
+    statLabel: statLabel ?? this.statLabel,
+    helper: helper ?? this.helper,
+    mono: mono ?? this.mono,
+    reviewNoProposal: reviewNoProposal ?? this.reviewNoProposal,
+  );
+
+  @override
+  AppTextStyles lerp(AppTextStyles? other, double t) =>
+      other == null || t < 0.5 ? this : other;
 }

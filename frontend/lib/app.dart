@@ -6,6 +6,7 @@ import 'core/l10n/locale_provider.dart';
 import 'core/router/app_router.dart';
 import 'core/startup/startup_screen.dart';
 import 'core/theme/app_theme.dart';
+import 'core/theme/theme_mode_provider.dart';
 import 'l10n/app_localizations.dart';
 
 class BastideApp extends ConsumerWidget {
@@ -15,6 +16,7 @@ class BastideApp extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final locale = ref.watch(localeProvider);
     final backend = ref.watch(backendControllerProvider);
+    final themeMode = ref.watch(themeModeProvider);
 
     // Everything behind the router calls the API, so none of it is built
     // until the backend answers — and all of it goes away if the backend dies.
@@ -27,8 +29,9 @@ class BastideApp extends ConsumerWidget {
         unconfirmedMismatch) {
       return MaterialApp(
         onGenerateTitle: (context) => AppLocalizations.of(context)!.appTitle,
-        theme: appDarkTheme,
-        darkTheme: appDarkTheme,
+        // The startup screen is always dark, like the installer splash it
+        // continues, whatever the signed-in user's preference.
+        theme: AppTheme.dark,
         themeMode: ThemeMode.dark,
         locale: locale,
         supportedLocales: AppLocalizations.supportedLocales,
@@ -39,9 +42,9 @@ class BastideApp extends ConsumerWidget {
 
     return MaterialApp.router(
       onGenerateTitle: (context) => AppLocalizations.of(context)!.appTitle,
-      theme: appDarkTheme,
-      darkTheme: appDarkTheme,
-      themeMode: ThemeMode.dark,
+      theme: AppTheme.light,
+      darkTheme: AppTheme.dark,
+      themeMode: themeMode,
       locale: locale,
       supportedLocales: AppLocalizations.supportedLocales,
       localizationsDelegates: AppLocalizations.localizationsDelegates,

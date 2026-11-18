@@ -79,7 +79,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   AutofillHints.username,
                   AutofillHints.email,
                 ],
-                decoration: hasCredentialError ? errorFieldDecoration() : null,
+                decoration: hasCredentialError
+                    ? errorFieldDecoration(context)
+                    : null,
                 validator: (value) => (value == null || value.trim().isEmpty)
                     ? l10n.authIdentifierRequired
                     : null,

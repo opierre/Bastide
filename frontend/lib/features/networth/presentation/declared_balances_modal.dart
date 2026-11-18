@@ -7,12 +7,12 @@ import '../../../core/api/api_client.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/tokens.dart';
 import '../../../core/widgets/amount_text.dart';
-import '../../../core/widgets/app_chip.dart';
 import '../../../core/widgets/app_modal.dart';
 import '../../../core/widgets/inline_banner.dart';
 import '../../../core/widgets/labeled_field.dart';
 import '../../../core/widgets/money_field.dart';
 import '../../../core/widgets/primary_button.dart';
+import '../../../core/widgets/status_text.dart';
 import '../../../l10n/app_localizations.dart';
 import '../application/networth_controller.dart';
 import '../domain/networth_summary.dart';
@@ -168,7 +168,7 @@ class _DeclaredBalancesModalState extends ConsumerState<DeclaredBalancesModal> {
         l10n.networthDeclaredSubtitle,
         style: Theme.of(
           context,
-        ).textTheme.bodySmall?.copyWith(color: AppColors.textSecondary),
+        ).textTheme.bodySmall?.copyWith(color: context.colors.textSecondary),
       ),
       width: 560,
       actions: [
@@ -254,7 +254,6 @@ class _DeclaredBalancesModalState extends ConsumerState<DeclaredBalancesModal> {
                   child: PrimaryButton(
                     key: const Key('declaredSave'),
                     label: l10n.networthDeclaredSave,
-                    height: 44,
                     isLoading: _isSubmitting,
                     onPressed: _isSubmitting ? null : _submit,
                   ),
@@ -263,7 +262,7 @@ class _DeclaredBalancesModalState extends ConsumerState<DeclaredBalancesModal> {
             ),
           ),
           const SizedBox(height: AppSpacing.md),
-          const Divider(height: 1, color: AppColors.borderSubtle),
+          Divider(height: 1, color: context.colors.line),
           ConstrainedBox(
             constraints: const BoxConstraints(maxHeight: 320),
             // The list stays on screen while a write re-reads it.
@@ -279,7 +278,7 @@ class _DeclaredBalancesModalState extends ConsumerState<DeclaredBalancesModal> {
                         key: const Key('declaredEmpty'),
                         textAlign: TextAlign.center,
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: AppColors.textSecondary,
+                          color: context.colors.textSecondary,
                         ),
                       ),
                     )
@@ -354,8 +353,8 @@ class _DeclaredRow extends StatelessWidget {
     return Container(
       key: Key('declaredRow-$key'),
       height: 48,
-      decoration: const BoxDecoration(
-        border: Border(bottom: BorderSide(color: AppColors.borderSubtle)),
+      decoration: BoxDecoration(
+        border: Border(bottom: BorderSide(color: context.colors.line)),
       ),
       child: Row(
         children: [
@@ -369,7 +368,7 @@ class _DeclaredRow extends StatelessWidget {
                 if (entry.superseded) ...[
                   const SizedBox(width: AppSpacing.sm),
                   Flexible(
-                    child: AppChip(
+                    child: StatusText(
                       key: Key('declaredSuperseded-$key'),
                       label: l10n.networthDeclaredSuperseded,
                     ),
@@ -390,9 +389,9 @@ class _DeclaredRow extends StatelessWidget {
             iconSize: 16,
             visualDensity: VisualDensity.compact,
             tooltip: l10n.networthDeclaredEdit,
-            icon: const Icon(
+            icon: Icon(
               Icons.edit_outlined,
-              color: AppColors.textSecondary,
+              color: context.colors.textSecondary,
             ),
           ),
           IconButton(
@@ -401,10 +400,7 @@ class _DeclaredRow extends StatelessWidget {
             iconSize: 16,
             visualDensity: VisualDensity.compact,
             tooltip: l10n.networthDeclaredDelete,
-            icon: const Icon(
-              Icons.close_rounded,
-              color: AppColors.textDisabled,
-            ),
+            icon: Icon(Icons.close_rounded, color: context.colors.textTertiary),
           ),
         ],
       ),

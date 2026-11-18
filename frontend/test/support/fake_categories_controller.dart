@@ -37,7 +37,7 @@ AppCategory testCategory({
   String name = 'category.food',
   String kind = 'expense',
   String icon = 'alimentation',
-  String color = '#5AA9FF',
+  String color = 'cat2',
   bool isSystem = true,
 }) => AppCategory(
   id: id,

@@ -3,6 +3,7 @@ import 'package:bastide/core/theme/tokens.dart';
 import 'package:bastide/core/widgets/amount_text.dart';
 import 'package:bastide/core/widgets/app_card.dart';
 import 'package:bastide/core/widgets/inline_banner.dart';
+import 'package:bastide/core/widgets/repere_meter.dart';
 import 'package:bastide/features/goals/application/goals_controller.dart';
 import 'package:bastide/features/goals/domain/goal.dart';
 import 'package:bastide/features/goals/presentation/goal_card.dart';
@@ -27,7 +28,7 @@ Widget _wrap({
     overrides: [goalsControllerProvider.overrideWith(() => controller)],
     child: MaterialApp(
       locale: locale,
-      theme: appDarkTheme,
+      theme: AppTheme.dark,
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
       home: const Scaffold(body: GoalsScreen()),
@@ -58,10 +59,10 @@ void main() {
     expect(find.text('/ ${_money(1000000)}'), findsOneWidget);
     expect(find.text('64 %'), findsOneWidget);
 
-    final bar = tester.widget<GoalProgressBar>(
+    final bar = tester.widget<RepereMeter>(
       find.descendant(
         of: find.byKey(const Key('goalCard-g1')),
-        matching: find.byType(GoalProgressBar),
+        matching: find.byType(RepereMeter),
       ),
     );
     expect(bar.fraction, closeTo(0.64, 1e-9));
@@ -110,7 +111,7 @@ void main() {
 
       // A bar past its own track reads as a rendering bug; a percentage rounded
       // down to 100 would be a lie about the user's money.
-      final bar = tester.widget<GoalProgressBar>(find.byType(GoalProgressBar));
+      final bar = tester.widget<RepereMeter>(find.byType(RepereMeter));
       expect(bar.fraction, 1.0);
       expect(find.text('118 %'), findsOneWidget);
     },
@@ -130,11 +131,11 @@ void main() {
     final percent = tester.widget<Text>(
       find.byKey(const Key('goalPercent-g3')),
     );
-    expect(percent.style?.color, AppColors.positive);
+    expect(percent.style?.color, AppColors.dark.positive);
 
     // The reached card is outlined in green rather than the card hairline.
     final card = tester.widget<AppCard>(find.byKey(const Key('goalCard-g3')));
-    expect((card.border! as Border).top.color, AppColors.positiveBorder);
+    expect((card.border! as Border).top.color, AppColors.dark.lineStrong);
   });
 
   testWidgets('the archived link states the count and reveals dimmed cards', (

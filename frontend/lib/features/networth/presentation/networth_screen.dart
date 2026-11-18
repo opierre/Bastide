@@ -235,16 +235,16 @@ class _EmptyState extends StatelessWidget {
             height: 64,
             alignment: Alignment.center,
             decoration: BoxDecoration(
-              color: AppColors.irisSoft,
+              color: context.colors.accentSoft,
               borderRadius: BorderRadius.circular(AppRadii.xl),
             ),
-            child: const SizedBox.square(
+            child: SizedBox.square(
               dimension: 27,
               child: FittedBox(
                 child: NavGlyphIcon(
                   glyph: NavGlyph.pie,
                   filled: false,
-                  color: AppColors.iris,
+                  color: context.colors.accent,
                 ),
               ),
             ),
@@ -259,7 +259,7 @@ class _EmptyState extends StatelessWidget {
           Text(
             l10n.networthEmptyBody,
             style: textTheme.bodyLarge?.copyWith(
-              color: AppColors.textSecondary,
+              color: context.colors.textSecondary,
             ),
             textAlign: TextAlign.center,
           ),
@@ -281,7 +281,6 @@ class _EmptyState extends StatelessWidget {
                 key: const Key('networthEmptyAddProperty'),
                 label: l10n.networthAddProperty,
                 icon: Icons.add_rounded,
-                height: 44,
                 onPressed: () => showPropertyForm(context, currency: currency),
               ),
             ],

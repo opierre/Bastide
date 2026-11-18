@@ -5,8 +5,8 @@ import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/tokens.dart';
 import '../../../core/widgets/amount_text.dart';
 import '../../../core/widgets/app_card.dart';
+import '../../../core/widgets/repere_meter.dart';
 import '../../../l10n/app_localizations.dart';
-import '../../goals/presentation/goal_card.dart';
 import '../domain/dashboard_summary.dart';
 
 /// The dashboard's row 1: one card split by vertical dividers into four columns, in reading
@@ -96,10 +96,8 @@ class _Divider extends StatelessWidget {
   const _Divider();
 
   @override
-  Widget build(BuildContext context) => const SizedBox(
-    width: 1,
-    child: ColoredBox(color: AppColors.borderSubtle),
-  );
+  Widget build(BuildContext context) =>
+      SizedBox(width: 1, child: ColoredBox(color: context.colors.line));
 }
 
 /// The leading column: label, the rate, a bar toward the goal, then the goal state and the
@@ -119,7 +117,7 @@ class _SavingsColumn extends StatelessWidget {
     final delta = summary.savingsRateDeltaPct;
     final captionStyle = textTheme.labelSmall!.copyWith(
       fontWeight: FontWeight.w400,
-      color: AppColors.textSecondary,
+      color: context.colors.textSecondary,
     );
 
     return Padding(
@@ -136,7 +134,9 @@ class _SavingsColumn extends StatelessWidget {
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
             // Iris rather than the neutral secondary: it marks the column that leads the strip.
-            style: AppTextStyles.statLabel.copyWith(color: AppColors.iris),
+            style: context.textStyles.statLabel.copyWith(
+              color: context.colors.accent,
+            ),
           ),
           const SizedBox(height: AppSpacing.sm),
           Text(
@@ -146,10 +146,10 @@ class _SavingsColumn extends StatelessWidget {
             style: tabularNumberStyle(textTheme.displayMedium!),
           ),
           const SizedBox(height: AppSpacing.sm),
-          GoalProgressBar(
+          RepereMeter(
             key: const Key('dashboardSavingsGoalBar'),
             fraction: summary.savingsGoalProgress,
-            height: 6,
+            tone: reached ? RepereTone.done : RepereTone.normal,
           ),
           const SizedBox(height: AppSpacing.sm),
           Row(
@@ -158,11 +158,11 @@ class _SavingsColumn extends StatelessWidget {
               // The check doubles the « atteint » the text already says, so the goal state
               // never rests on the green alone.
               if (reached) ...[
-                const Icon(
+                Icon(
                   Icons.check_rounded,
                   key: Key('dashboardSavingsGoalReachedIcon'),
                   size: 13,
-                  color: AppColors.positive,
+                  color: context.colors.positive,
                 ),
                 const SizedBox(width: AppSpacing.xs),
               ],
@@ -176,8 +176,8 @@ class _SavingsColumn extends StatelessWidget {
                   overflow: TextOverflow.ellipsis,
                   style: captionStyle.copyWith(
                     color: reached
-                        ? AppColors.positive
-                        : AppColors.textSecondary,
+                        ? context.colors.positive
+                        : context.colors.textSecondary,
                   ),
                 ),
               ),
@@ -189,7 +189,7 @@ class _SavingsColumn extends StatelessWidget {
                 key: const Key('dashboardSavingsDelta'),
                 style: tabularNumberStyle(
                   captionStyle,
-                ).copyWith(color: trendColor(delta)),
+                ).copyWith(color: trendColor(context, delta)),
               ),
             ],
           ),
@@ -226,7 +226,7 @@ class _FigureColumn extends StatelessWidget {
   Widget build(BuildContext context) {
     final locale = Localizations.localeOf(context).toString();
     final textTheme = Theme.of(context).textTheme;
-    final color = trendColor(deltaPct, invert: invertTrendColor);
+    final color = trendColor(context, deltaPct, invert: invertTrendColor);
     final trendStyle = tabularNumberStyle(textTheme.labelSmall!);
 
     return Padding(
@@ -242,7 +242,7 @@ class _FigureColumn extends StatelessWidget {
             label.toUpperCase(),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
-            style: AppTextStyles.statLabel,
+            style: context.textStyles.statLabel,
           ),
           const SizedBox(height: AppSpacing.sm),
           FittedBox(
@@ -286,7 +286,7 @@ class _FigureColumn extends StatelessWidget {
                   overflow: TextOverflow.ellipsis,
                   style: textTheme.labelSmall?.copyWith(
                     fontWeight: FontWeight.w400,
-                    color: AppColors.textSecondary,
+                    color: context.colors.textSecondary,
                   ),
                 ),
               ),
@@ -300,11 +300,12 @@ class _FigureColumn extends StatelessWidget {
 
 /// The hue of a month-over-month movement: green when it is good news, red when it is bad,
 /// secondary when flat. [invert] is for a metric where a rise is the bad outcome (expenses).
-Color trendColor(double delta, {bool invert = false}) => switch (delta) {
-  > 0 => invert ? AppColors.negative : AppColors.positive,
-  < 0 => invert ? AppColors.positive : AppColors.negative,
-  _ => AppColors.textSecondary,
-};
+Color trendColor(BuildContext context, double delta, {bool invert = false}) =>
+    switch (delta) {
+      > 0 => invert ? context.colors.negative : context.colors.positive,
+      < 0 => invert ? context.colors.positive : context.colors.negative,
+      _ => context.colors.textSecondary,
+    };
 
 /// U+2212 minus sign, matching [AmountText]'s convention rather than the ASCII hyphen `intl`
 /// emits.

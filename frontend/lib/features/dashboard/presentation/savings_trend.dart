@@ -97,8 +97,8 @@ class SavingsTrendChart extends ConsumerWidget {
                   ),
                   style: tabularNumberStyle(textTheme.bodySmall!).copyWith(
                     color: point.savedMinor < 0
-                        ? AppColors.negative
-                        : AppColors.positive,
+                        ? context.colors.negative
+                        : context.colors.positive,
                   ),
                 ),
               ],
@@ -146,7 +146,7 @@ class _Header extends StatelessWidget {
               l10n.dashboardSavingsTrendAverage,
               style: textTheme.labelSmall?.copyWith(
                 fontWeight: FontWeight.w400,
-                color: AppColors.textSecondary,
+                color: context.colors.textSecondary,
               ),
             ),
           ],

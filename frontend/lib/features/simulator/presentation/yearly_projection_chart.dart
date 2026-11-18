@@ -59,12 +59,12 @@ class YearlyProjectionCard extends StatelessWidget {
               const SizedBox(width: AppSpacing.md),
               _LegendItem(
                 label: l10n.simulatorChartCapital,
-                color: AppColors.iris,
+                color: context.colors.accent,
               ),
               const SizedBox(width: AppSpacing.md),
               _LegendItem(
                 label: l10n.simulatorChartInterest,
-                color: AppColors.cyan,
+                color: context.colors.textTertiary,
               ),
             ],
           ),
@@ -77,7 +77,7 @@ class YearlyProjectionCard extends StatelessWidget {
                       key: const Key('projectionEmpty'),
                       textAlign: TextAlign.center,
                       style: textTheme.bodySmall?.copyWith(
-                        color: AppColors.textDisabled,
+                        color: context.colors.textTertiary,
                       ),
                     ),
                   )
@@ -95,7 +95,7 @@ class YearlyProjectionCard extends StatelessWidget {
                       name: result.currency,
                       decimalDigits: 0,
                     ).format(minor / 100),
-                    labelStyle: ChartPaints.labelStyle(textTheme),
+                    labelStyle: ChartPaints.labelStyle(context),
                     // The year, then its two API figures — neutral, like every
                     // amount on this panel.
                     tooltips: [
@@ -143,7 +143,7 @@ class _LegendItem extends StatelessWidget {
           ),
         ),
         const SizedBox(width: AppSpacing.xs + 2),
-        Text(label, style: AppTextStyles.helper),
+        Text(label, style: context.textStyles.helper),
       ],
     );
   }
@@ -192,6 +192,7 @@ class _YearlyProjectionPlotState extends State<YearlyProjectionPlot> {
           child: CustomPaint(
             size: Size.infinite,
             painter: _StackedBarsPainter(
+              colors: context.colors,
               years: years,
               capital: widget.capital,
               interest: widget.interest,
@@ -289,7 +290,11 @@ Rect _barRect(Size size, List<int> capital, List<int> interest, int index) {
 }
 
 class _StackedBarsPainter extends CustomPainter {
+  /// The active theme's colours.
+  final AppColors colors;
+
   _StackedBarsPainter({
+    required this.colors,
     required this.years,
     required this.capital,
     required this.interest,
@@ -327,6 +332,7 @@ class _StackedBarsPainter extends CustomPainter {
     double heightOf(int value) => plot.bottom - scale.y(value, plot);
 
     ChartPaints.grid(
+      colors,
       canvas,
       size,
       plot,
@@ -361,7 +367,7 @@ class _StackedBarsPainter extends CustomPainter {
             bottomLeft: baseRadius,
             bottomRight: baseRadius,
           ),
-          Paint()..color = AppColors.iris,
+          Paint()..color = colors.accent,
         );
       }
       if (interestHeight > 0) {
@@ -374,7 +380,7 @@ class _StackedBarsPainter extends CustomPainter {
             bottomLeft: baseRadius,
             bottomRight: baseRadius,
           ),
-          Paint()..color = AppColors.cyan,
+          Paint()..color = colors.textTertiary,
         );
       }
 
@@ -392,6 +398,7 @@ class _StackedBarsPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(_StackedBarsPainter oldDelegate) =>
+      oldDelegate.colors != colors ||
       !listEquals(oldDelegate.years, years) ||
       !listEquals(oldDelegate.capital, capital) ||
       !listEquals(oldDelegate.interest, interest) ||

@@ -2,16 +2,16 @@ import 'package:bastide/core/l10n/category_display.dart';
 import 'package:bastide/core/theme/app_theme.dart';
 import 'package:bastide/core/theme/tokens.dart';
 import 'package:bastide/core/widgets/amount_text.dart';
-import 'package:bastide/core/widgets/category_chip.dart';
+import 'package:bastide/core/widgets/category_label.dart';
 import 'package:bastide/features/accounts/application/account_detail_controller.dart';
 import 'package:bastide/features/accounts/application/accounts_controller.dart';
 import 'package:bastide/features/accounts/domain/account.dart';
+import 'package:bastide/features/categories/domain/category.dart';
 import 'package:bastide/features/categorization/application/run_controller.dart';
 import 'package:bastide/features/categorization/domain/categorization_run.dart';
 import 'package:bastide/features/rules/application/rule_preview_controller.dart';
 import 'package:bastide/features/rules/domain/rule.dart';
 import 'package:bastide/features/transactions/application/transactions_controller.dart';
-import 'package:bastide/features/categories/domain/category.dart';
 import 'package:bastide/features/transactions/domain/transaction.dart';
 import 'package:bastide/features/transactions/presentation/always_categorize_modal.dart';
 import 'package:bastide/features/transactions/presentation/transactions_screen.dart';
@@ -75,7 +75,7 @@ const _groceriesCategory = TransactionCategory(
   name: 'category.food.groceries',
   kind: 'expense',
   icon: 'shopping_cart',
-  color: '#10B981',
+  color: 'cat3',
 );
 
 Widget _wrap({
@@ -88,7 +88,7 @@ Widget _wrap({
       name: 'category.food.groceries',
       kind: 'expense',
       icon: 'shopping_cart',
-      color: '#10B981',
+      color: 'cat3',
       isSystem: true,
     ),
   ],
@@ -126,7 +126,7 @@ Widget _wrap({
     ],
     child: MaterialApp(
       locale: locale,
-      theme: appDarkTheme,
+      theme: AppTheme.dark,
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
       home: const Scaffold(body: TransactionsScreen()),
@@ -500,7 +500,7 @@ void main() {
               name: 'category.food.groceries',
               kind: 'expense',
               icon: 'shopping_cart',
-              color: '#10B981',
+              color: 'cat3',
               isSystem: true,
             ),
             AppCategory(
@@ -510,7 +510,7 @@ void main() {
               name: 'Marché bio',
               kind: 'expense',
               icon: 'shopping_cart',
-              color: '#10B981',
+              color: 'cat3',
               isSystem: false,
             ),
           ],
@@ -539,7 +539,7 @@ void main() {
         find.descendant(of: mainItem, matching: find.byType(Icon)),
       );
       expect(icon.icon, CategoryIcons.forSlug(slug));
-      expect(icon.color, CategoryHues.forSlug(slug));
+      expect(icon.color, CategoryColors.dark.forSlug(slug));
     },
   );
 

@@ -3,10 +3,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/l10n/category_display.dart';
 import '../../../core/theme/tokens.dart';
-import '../../../core/widgets/category_chip.dart';
+import '../../../core/widgets/category_label.dart';
 import '../../../l10n/app_localizations.dart';
-import '../application/transactions_controller.dart';
 import '../../categories/domain/category.dart' show AppCategory;
+import '../application/transactions_controller.dart';
 import '../domain/transaction.dart';
 import 'transaction_error_localizer.dart';
 
@@ -44,10 +44,10 @@ Future<void> showCategoryPicker(
   await showMenu<void>(
     context: anchorContext,
     position: position,
-    color: AppColors.surfaceOverlay,
+    color: anchorContext.colors.surface,
     shape: RoundedRectangleBorder(
       borderRadius: BorderRadius.circular(AppRadii.md),
-      side: const BorderSide(color: AppColors.border),
+      side: BorderSide(color: anchorContext.colors.line),
     ),
     constraints: const BoxConstraints(minWidth: 250, maxWidth: 250),
     items: [
@@ -122,10 +122,10 @@ class _CategoryPickerBodyState extends ConsumerState<_CategoryPickerBody> {
                   minHeight: 30,
                 ),
                 filled: true,
-                fillColor: AppColors.surfaceField,
+                fillColor: context.colors.field,
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(AppRadii.sm),
-                  borderSide: const BorderSide(color: AppColors.border),
+                  borderSide: BorderSide(color: context.colors.line),
                 ),
               ),
             ),
@@ -144,7 +144,7 @@ class _CategoryPickerBodyState extends ConsumerState<_CategoryPickerBody> {
                 child: Text(
                   l10n.categoryPickerLoadError,
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: AppColors.textSecondary,
+                    color: context.colors.textSecondary,
                   ),
                 ),
               ),
@@ -205,7 +205,7 @@ class _CategoryList extends StatelessWidget {
           l10n.categoryPickerEmpty,
           style: Theme.of(
             context,
-          ).textTheme.bodySmall?.copyWith(color: AppColors.textSecondary),
+          ).textTheme.bodySmall?.copyWith(color: context.colors.textSecondary),
         ),
       );
     }
@@ -232,7 +232,7 @@ class _CategoryList extends StatelessWidget {
                 Icon(
                   CategoryIcons.forSlug(slug),
                   size: 14,
-                  color: CategoryHues.forSlug(slug),
+                  color: context.categoryColors.forSlug(slug),
                 ),
                 const SizedBox(width: AppSpacing.sm),
                 Expanded(
@@ -243,10 +243,10 @@ class _CategoryList extends StatelessWidget {
                   ),
                 ),
                 if (selected)
-                  const Icon(
+                  Icon(
                     Icons.check_rounded,
                     size: 16,
-                    color: AppColors.iris,
+                    color: context.colors.accent,
                   ),
               ],
             ),

@@ -85,7 +85,7 @@ def test_resolution_never_binds_another_users_category(client: TestClient) -> No
             "name": "category.food.groceries",
             "kind": "expense",
             "icon": "x",
-            "color": "#111111",
+            "color": "cat3",
         },
         headers=headers_b,
     ).json()
@@ -104,7 +104,7 @@ def test_a_user_defined_category_name_is_not_a_resolvable_key(client: TestClient
     headers, _ = _register(client)
     client.post(
         "/api/v1/categories",
-        json={"name": "category.my.custom", "kind": "expense", "icon": "x", "color": "#111111"},
+        json={"name": "category.my.custom", "kind": "expense", "icon": "x", "color": "cat3"},
         headers=headers,
     )
 

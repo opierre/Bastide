@@ -242,7 +242,7 @@ def test_seed_does_not_touch_user_created_categories(db_session: Session) -> Non
         name="My custom category",
         kind="expense",
         icon="star",
-        color="#000000",
+        color="cat3",
         is_system=False,
     )
     db_session.add(user_category)

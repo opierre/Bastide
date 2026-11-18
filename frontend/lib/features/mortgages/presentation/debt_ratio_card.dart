@@ -10,7 +10,8 @@ import '../../../core/widgets/inline_banner.dart';
 import '../../../core/widgets/labeled_field.dart';
 import '../../../core/widgets/money_field.dart';
 import '../../../core/widgets/primary_button.dart';
-import '../../../core/widgets/status_pill.dart';
+import '../../../core/widgets/repere_meter.dart';
+import '../../../core/widgets/status_text.dart';
 import '../../../l10n/app_localizations.dart';
 import '../application/mortgages_controller.dart';
 import '../domain/mortgage.dart';
@@ -65,14 +66,14 @@ class DebtRatioCard extends StatelessWidget {
               Expanded(
                 child: Text(
                   l10n.mortgagesRatioLabel.toUpperCase(),
-                  style: AppTextStyles.statLabel,
+                  style: context.textStyles.statLabel,
                 ),
               ),
               if (known && summary.overLimit)
-                StatusPill(
+                StatusText(
                   key: const Key('ratioOverLimitPill'),
                   label: l10n.mortgagesRatioOverLimit,
-                  tone: StatusPillTone.warning,
+                  tone: StatusTone.warning,
                 ),
             ],
           ),
@@ -85,7 +86,9 @@ class DebtRatioCard extends StatelessWidget {
                 known ? formatBps(ratio, locale) : '—',
                 key: const Key('ratioValue'),
                 style: tabularNumberStyle(textTheme.displayMedium!).copyWith(
-                  color: known ? AppColors.textPrimary : AppColors.textDisabled,
+                  color: known
+                      ? context.colors.text
+                      : context.colors.textTertiary,
                 ),
               ),
               const SizedBox(width: AppSpacing.sm + 2),
@@ -96,7 +99,7 @@ class DebtRatioCard extends StatelessWidget {
                   ),
                   style: textTheme.bodySmall?.copyWith(
                     fontSize: 12,
-                    color: AppColors.textSecondary,
+                    color: context.colors.textSecondary,
                   ),
                 ),
               ),
@@ -104,10 +107,14 @@ class DebtRatioCard extends StatelessWidget {
           ),
           const SizedBox(height: AppSpacing.sm + AppSpacing.xs),
           if (known) ...[
-            RatioGauge(
-              ratioBps: ratio,
-              referenceBps: summary.hcsfLimitBps,
-              overLimit: summary.overLimit,
+            // The tone follows the API's `over_limit` rather than a
+            // comparison made here; the scale is the fixed 0–60 % of `00` §8.
+            RepereMeter(
+              key: const Key('ratioGauge'),
+              fraction: ratio / ratioGaugeScaleBps,
+              tone: summary.overLimit ? RepereTone.over : RepereTone.normal,
+              markFraction: summary.hcsfLimitBps / ratioGaugeScaleBps,
+              markLabel: formatBps(summary.hcsfLimitBps, locale, digits: 0),
             ),
             const SizedBox(height: AppSpacing.sm + AppSpacing.xs),
             Text(
@@ -121,7 +128,7 @@ class DebtRatioCard extends StatelessWidget {
                       money(income),
                     ),
               key: const Key('ratioCaption'),
-              style: AppTextStyles.helper.copyWith(fontSize: 12),
+              style: context.textStyles.helper.copyWith(fontSize: 12),
             ),
             if (summary.incomeSource == IncomeSource.ledger) ...[
               const SizedBox(height: AppSpacing.xs + 2),
@@ -135,7 +142,7 @@ class DebtRatioCard extends StatelessWidget {
                     style: textTheme.bodySmall?.copyWith(
                       fontSize: 12,
                       fontWeight: FontWeight.w600,
-                      color: AppColors.iris,
+                      color: context.colors.accent,
                     ),
                   ),
                 ),
@@ -147,7 +154,7 @@ class DebtRatioCard extends StatelessWidget {
               key: const Key('ratioUnknownText'),
               style: textTheme.bodySmall?.copyWith(
                 fontSize: 12,
-                color: AppColors.textSecondary,
+                color: context.colors.textSecondary,
               ),
             ),
             const SizedBox(height: AppSpacing.sm + 2),
@@ -159,8 +166,8 @@ class DebtRatioCard extends StatelessWidget {
                   key: const Key('ratioDeclareIncomeButton'),
                   onPressed: () => showDeclareIncomeModal(context),
                   style: OutlinedButton.styleFrom(
-                    foregroundColor: AppColors.iris,
-                    side: const BorderSide(color: AppColors.irisBorderStrong),
+                    foregroundColor: context.colors.accent,
+                    side: BorderSide(color: context.colors.line),
                     padding: const EdgeInsets.symmetric(
                       horizontal: AppSpacing.sm + AppSpacing.xs,
                     ),
@@ -177,12 +184,12 @@ class DebtRatioCard extends StatelessWidget {
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Padding(
+              Padding(
                 padding: EdgeInsets.only(top: 1),
                 child: Icon(
                   Icons.info_outline_rounded,
                   size: 12,
-                  color: AppColors.textDisabled,
+                  color: context.colors.textTertiary,
                 ),
               ),
               const SizedBox(width: AppSpacing.xs + 1),
@@ -190,9 +197,9 @@ class DebtRatioCard extends StatelessWidget {
                 child: Text(
                   l10n.mortgagesRatioCaveat,
                   key: const Key('ratioCaveat'),
-                  style: AppTextStyles.helper.copyWith(
+                  style: context.textStyles.helper.copyWith(
                     fontSize: 11,
-                    color: AppColors.textDisabled,
+                    color: context.colors.textTertiary,
                   ),
                 ),
               ),
@@ -200,98 +207,6 @@ class DebtRatioCard extends StatelessWidget {
           ),
         ],
       ),
-    );
-  }
-}
-
-/// The 8 px ratio gauge on a fixed 0–60 % scale, with the reference tick.
-///
-/// Iris under the reference, amber above it — the tone follows the API's
-/// `over_limit` rather than a comparison made here. A ratio past the scale
-/// clamps the fill; the card still prints the exact percent beside it.
-class RatioGauge extends StatelessWidget {
-  const RatioGauge({
-    super.key,
-    required this.ratioBps,
-    required this.referenceBps,
-    required this.overLimit,
-  });
-
-  final int ratioBps;
-  final int referenceBps;
-  final bool overLimit;
-
-  @override
-  Widget build(BuildContext context) {
-    final locale = Localizations.localeOf(context).toString();
-    final fill = (ratioBps / ratioGaugeScaleBps).clamp(0.0, 1.0);
-    final tick = (referenceBps / ratioGaugeScaleBps).clamp(0.0, 1.0);
-
-    return Column(
-      key: const Key('ratioGauge'),
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        SizedBox(
-          height: 16,
-          child: FractionallySizedBox(
-            alignment: Alignment.centerLeft,
-            widthFactor: tick,
-            child: Align(
-              alignment: Alignment.centerRight,
-              child: FractionalTranslation(
-                translation: const Offset(0.5, 0),
-                child: Text(
-                  formatBps(referenceBps, locale, digits: 0),
-                  style: AppTextStyles.helper.copyWith(
-                    fontSize: 10.5,
-                    color: AppColors.textSecondary,
-                  ),
-                ),
-              ),
-            ),
-          ),
-        ),
-        const SizedBox(height: 2),
-        SizedBox(
-          height: 12,
-          child: Stack(
-            alignment: Alignment.centerLeft,
-            children: [
-              ClipRRect(
-                borderRadius: BorderRadius.circular(AppRadii.xs),
-                child: Container(
-                  height: 8,
-                  color: AppColors.surfaceHover,
-                  child: FractionallySizedBox(
-                    key: const Key('ratioGaugeFill'),
-                    alignment: Alignment.centerLeft,
-                    widthFactor: fill,
-                    child: ColoredBox(
-                      color: overLimit ? AppColors.warning : AppColors.iris,
-                    ),
-                  ),
-                ),
-              ),
-              FractionallySizedBox(
-                alignment: Alignment.centerLeft,
-                widthFactor: tick,
-                child: Align(
-                  alignment: Alignment.centerRight,
-                  child: FractionalTranslation(
-                    translation: const Offset(0.5, 0),
-                    child: Container(
-                      key: const Key('ratioGaugeTick'),
-                      width: 2,
-                      height: 12,
-                      color: AppColors.textPrimary,
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ],
     );
   }
 }
@@ -377,9 +292,9 @@ class _DeclareIncomeModalState extends ConsumerState<DeclareIncomeModal> {
           children: [
             Text(
               l10n.mortgagesIncomeBody,
-              style: Theme.of(
-                context,
-              ).textTheme.bodySmall?.copyWith(color: AppColors.textSecondary),
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: context.colors.textSecondary,
+              ),
             ),
             const SizedBox(height: AppSpacing.md),
             if (_errorText != null) ...[

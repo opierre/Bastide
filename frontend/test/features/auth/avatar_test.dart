@@ -48,7 +48,7 @@ final _png = Uint8List.fromList([
 ]);
 
 Widget _bare(Widget child) => MaterialApp(
-  theme: appDarkTheme,
+  theme: AppTheme.dark,
   home: Scaffold(body: Center(child: child)),
 );
 
@@ -157,7 +157,7 @@ void main() {
           ],
           child: MaterialApp(
             locale: locale,
-            theme: appDarkTheme,
+            theme: AppTheme.dark,
             localizationsDelegates: AppLocalizations.localizationsDelegates,
             supportedLocales: AppLocalizations.supportedLocales,
             home: const Scaffold(body: AvatarCard()),

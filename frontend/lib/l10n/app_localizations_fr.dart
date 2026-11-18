@@ -66,6 +66,25 @@ class AppLocalizationsFr extends AppLocalizations {
   String get settingsSectionAbout => 'À propos';
 
   @override
+  String get settingsThemeTitle => 'Thème';
+
+  @override
+  String get settingsThemeNote => 'Sombre, clair, ou celui de votre système.';
+
+  @override
+  String get settingsThemeSystem => 'Système';
+
+  @override
+  String get settingsThemeDark => 'Sombre';
+
+  @override
+  String get settingsThemeLight => 'Clair';
+
+  @override
+  String get settingsThemeSaveFailed =>
+      'Le thème n\'a pas pu être enregistré. Rien n\'a été modifié. Réessayez.';
+
+  @override
   String get settingsLanguageTitle => 'Langue';
 
   @override
@@ -756,6 +775,9 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get transactionsSearchHint =>
       'Rechercher une description ou un marchand…';
+
+  @override
+  String get searchShortcutHint => 'Ctrl K';
 
   @override
   String get transactionsSearchEmpty =>
@@ -4552,7 +4574,16 @@ class AppLocalizationsFr extends AppLocalizations {
   String get startupLoading => 'Démarrage de Bastide…';
 
   @override
+  String get startupPrivacy => 'Vos données restent sur cet ordinateur.';
+
+  @override
+  String get startupEngineStarting => 'Démarrage du moteur local…';
+
+  @override
   String get startupRetry => 'Réessayer';
+
+  @override
+  String get startupRelaunch => 'Relancer';
 
   @override
   String get startupOpenLogs => 'Ouvrir le dossier des journaux';

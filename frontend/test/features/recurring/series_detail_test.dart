@@ -48,7 +48,7 @@ Widget _wrap(SeriesDetail detail, {FakeSubscriptionsController? controller}) {
     ],
     child: MaterialApp(
       locale: const Locale('fr'),
-      theme: appDarkTheme,
+      theme: AppTheme.dark,
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
       home: const Scaffold(body: SeriesDetailView(seriesId: 's1')),

@@ -212,6 +212,42 @@ abstract class AppLocalizations {
   /// **'À propos'**
   String get settingsSectionAbout;
 
+  /// Title of the theme row in settings preferences.
+  ///
+  /// In fr, this message translates to:
+  /// **'Thème'**
+  String get settingsThemeTitle;
+
+  /// Note under the theme segmented control.
+  ///
+  /// In fr, this message translates to:
+  /// **'Sombre, clair, ou celui de votre système.'**
+  String get settingsThemeNote;
+
+  /// Theme option that follows the operating system.
+  ///
+  /// In fr, this message translates to:
+  /// **'Système'**
+  String get settingsThemeSystem;
+
+  /// Theme option for the dark theme.
+  ///
+  /// In fr, this message translates to:
+  /// **'Sombre'**
+  String get settingsThemeDark;
+
+  /// Theme option for the light theme.
+  ///
+  /// In fr, this message translates to:
+  /// **'Clair'**
+  String get settingsThemeLight;
+
+  /// Toast shown when saving the theme preference fails; the previous theme is restored.
+  ///
+  /// In fr, this message translates to:
+  /// **'Le thème n\'a pas pu être enregistré. Rien n\'a été modifié. Réessayez.'**
+  String get settingsThemeSaveFailed;
+
   /// Title of the language card in settings preferences.
   ///
   /// In fr, this message translates to:
@@ -1266,6 +1302,12 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Rechercher une description ou un marchand…'**
   String get transactionsSearchHint;
+
+  /// Keyboard shortcut shown at the end of a search field; pressing it focuses the field.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ctrl K'**
+  String get searchShortcutHint;
 
   /// Shown in place of the transaction list when the filters/search match nothing.
   ///
@@ -7181,11 +7223,29 @@ abstract class AppLocalizations {
   /// **'Démarrage de Bastide…'**
   String get startupLoading;
 
+  /// The privacy promise under the product name on the startup screen.
+  ///
+  /// In fr, this message translates to:
+  /// **'Vos données restent sur cet ordinateur.'**
+  String get startupPrivacy;
+
+  /// Status line under the privacy promise while the app starts its local engine.
+  ///
+  /// In fr, this message translates to:
+  /// **'Démarrage du moteur local…'**
+  String get startupEngineStarting;
+
   /// Button on the startup error screen that starts the local engine again.
   ///
   /// In fr, this message translates to:
   /// **'Réessayer'**
   String get startupRetry;
+
+  /// Button on the developer version warning that restarts the local engine.
+  ///
+  /// In fr, this message translates to:
+  /// **'Relancer'**
+  String get startupRelaunch;
 
   /// Button on the startup error screen that opens the folder holding the app's log files.
   ///

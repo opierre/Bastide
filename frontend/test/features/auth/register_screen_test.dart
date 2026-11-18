@@ -18,7 +18,7 @@ Widget _wrap({
     overrides: [authControllerProvider.overrideWith(() => controller)],
     child: MaterialApp(
       locale: locale,
-      theme: appDarkTheme,
+      theme: AppTheme.dark,
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
       home: const RegisterScreen(),

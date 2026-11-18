@@ -83,7 +83,7 @@ class NetworthSeriesCard extends ConsumerWidget {
                           monthFormat.format(series.last.month),
                         ),
                         key: const Key('networthSeriesRange'),
-                        style: AppTextStyles.helper,
+                        style: context.textStyles.helper,
                       ),
                     ),
                   SizedBox(
@@ -125,7 +125,7 @@ class NetworthSeriesCard extends ConsumerWidget {
                       key: const Key('networthSeriesEmpty'),
                       textAlign: TextAlign.center,
                       style: textTheme.bodySmall?.copyWith(
-                        color: AppColors.textSecondary,
+                        color: context.colors.textSecondary,
                       ),
                     ),
                   )
@@ -193,25 +193,27 @@ class _CaveatBanner extends StatelessWidget {
         vertical: AppSpacing.sm + 2,
       ),
       decoration: BoxDecoration(
-        color: AppColors.info.withValues(alpha: 0.09),
+        color: context.colors.textSecondary.withValues(alpha: 0.09),
         borderRadius: BorderRadius.circular(AppRadii.md),
-        border: Border.all(color: AppColors.info.withValues(alpha: 0.30)),
+        border: Border.all(
+          color: context.colors.textSecondary.withValues(alpha: 0.30),
+        ),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Icon(
+          Icon(
             Icons.info_outline_rounded,
             size: 15,
-            color: AppColors.info,
+            color: context.colors.textSecondary,
           ),
           const SizedBox(width: AppSpacing.sm),
           Expanded(
             child: Text(
               message,
               key: const Key('networthSeriesCaveatText'),
-              style: AppTextStyles.helper.copyWith(
-                color: AppColors.textPrimary,
+              style: context.textStyles.helper.copyWith(
+                color: context.colors.text,
               ),
             ),
           ),
@@ -235,37 +237,44 @@ class _LegendEntry extends StatelessWidget {
       children: [
         CustomPaint(
           size: const Size(18, 2),
-          painter: _StrokeSwatchPainter(dashed: dashed),
+          painter: _StrokeSwatchPainter(
+            dashed: dashed,
+            color: context.colors.accent,
+          ),
         ),
         const SizedBox(width: AppSpacing.xs + 2),
-        Text(label, style: AppTextStyles.helper),
+        Text(label, style: context.textStyles.helper),
       ],
     );
   }
 }
 
 class _StrokeSwatchPainter extends CustomPainter {
-  _StrokeSwatchPainter({required this.dashed});
+  _StrokeSwatchPainter({required this.dashed, required this.color});
 
   final bool dashed;
+  final Color color;
 
   @override
   void paint(Canvas canvas, Size size) {
     final path = Path()
       ..moveTo(0, size.height / 2)
       ..lineTo(size.width, size.height / 2);
-    canvas.drawPath(dashed ? ChartPaints.dashed(path) : path, _seriesStroke());
+    canvas.drawPath(
+      dashed ? ChartPaints.dashed(path) : path,
+      _seriesStroke(color),
+    );
   }
 
   @override
   bool shouldRepaint(_StrokeSwatchPainter oldDelegate) =>
-      oldDelegate.dashed != dashed;
+      oldDelegate.dashed != dashed || oldDelegate.color != color;
 }
 
 /// The series line's stroke, shared by the chart and its legend: the shared
 /// curve stroke, butt-capped so a dash ends where the rhythm says.
-Paint _seriesStroke() =>
-    ChartPaints.stroke(AppColors.iris)..strokeCap = StrokeCap.butt;
+Paint _seriesStroke(Color color) =>
+    ChartPaints.stroke(color)..strokeCap = StrokeCap.butt;
 
 /// The AreaLine itself, in the shared curve style ([AppChart]): an iris 2.5 px
 /// line over a 16 % iris area, a small dot on each month (up to
@@ -315,7 +324,7 @@ class _NetworthSeriesPlotState extends State<NetworthSeriesPlot> {
     final l10n = AppLocalizations.of(context)!;
     final locale = Localizations.localeOf(context).toString();
     final textTheme = Theme.of(context).textTheme;
-    final labelStyle = ChartPaints.labelStyle(textTheme);
+    final labelStyle = ChartPaints.labelStyle(context);
     final months = widget.months;
     final values = widget.values;
 
@@ -323,6 +332,7 @@ class _NetworthSeriesPlotState extends State<NetworthSeriesPlot> {
       child: CustomPaint(
         size: Size.infinite,
         painter: _SeriesPainter(
+          colors: context.colors,
           months: months,
           values: values,
           declared: widget.declared,
@@ -486,7 +496,11 @@ String _capitalize(String value) =>
     value.isEmpty ? value : value[0].toUpperCase() + value.substring(1);
 
 class _SeriesPainter extends CustomPainter {
+  /// The active theme's colours.
+  final AppColors colors;
+
   _SeriesPainter({
+    required this.colors,
     required this.months,
     required this.values,
     required this.declared,
@@ -527,6 +541,7 @@ class _SeriesPainter extends CustomPainter {
 
     // Gridlines at floor / mid / ceiling, labelled in the gutter.
     ChartPaints.grid(
+      colors,
       canvas,
       size,
       plot,
@@ -554,7 +569,7 @@ class _SeriesPainter extends CustomPainter {
       }
     }
 
-    final area = ChartPaints.area(AppColors.iris);
+    final area = ChartPaints.area(colors.accent);
     for (final run in runs.where((run) => run.length > 1)) {
       final path = Path()..addPolygon(run, false);
       canvas.drawPath(
@@ -579,8 +594,8 @@ class _SeriesPainter extends CustomPainter {
         solid.addPath(segment, Offset.zero);
       }
     }
-    canvas.drawPath(solid, ChartPaints.stroke(AppColors.iris));
-    canvas.drawPath(dashed, _seriesStroke());
+    canvas.drawPath(solid, ChartPaints.stroke(colors.accent));
+    canvas.drawPath(dashed, _seriesStroke(colors.accent));
 
     // A small dot on every month while they stay few — a lone month between
     // two gaps has no segment, so its dot is all that draws it — and the last
@@ -590,10 +605,11 @@ class _SeriesPainter extends CustomPainter {
       final large = i == last || i == hovered;
       if (!large && points.length > AppChart.dotCeiling) continue;
       ChartPaints.dot(
+        colors,
         canvas,
         points[i],
         large ? AppChart.currentDotRadius : AppChart.pointDotRadius,
-        AppColors.iris,
+        colors.accent,
       );
     }
 
@@ -622,6 +638,7 @@ class _SeriesPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(_SeriesPainter oldDelegate) =>
+      oldDelegate.colors != colors ||
       !listEquals(oldDelegate.months, months) ||
       !listEquals(oldDelegate.values, values) ||
       !listEquals(oldDelegate.declared, declared) ||

@@ -124,7 +124,6 @@ class _SubscriptionsList extends ConsumerWidget {
               value.statusFilter == null =>
         EmptyStateView(
           key: const Key('subscriptionsEmptyState'),
-          icon: Icons.autorenew_rounded,
           title: l10n.subscriptionsEmptyTitle,
           message: l10n.subscriptionsEmptyBody,
           action: PrimaryButton(
@@ -132,7 +131,6 @@ class _SubscriptionsList extends ConsumerWidget {
             label: l10n.subscriptionsDetect,
             loadingLabel: l10n.subscriptionsDetectRunning,
             isLoading: detecting,
-            height: 44,
             // The transactions may already be imported: running detection
             // over them is the step that fills this panel.
             onPressed: () => runRecurringDetection(context, ref),
@@ -257,15 +255,16 @@ class _BurdenCard extends StatelessWidget {
 
     return AppCard(
       padding: const EdgeInsets.all(AppSpacing.cardPaddingWide),
-      gradient: AppColors.irisTintGradient,
-      border: Border.all(color: AppColors.irisBorderStrong),
+      border: Border.all(color: context.colors.line),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
         children: [
           Text(
             l10n.subscriptionsBurdenLabel.toUpperCase(),
-            style: AppTextStyles.statLabel.copyWith(color: AppColors.iris),
+            style: context.textStyles.statLabel.copyWith(
+              color: context.colors.accent,
+            ),
           ),
           const SizedBox(height: AppSpacing.sm),
           // Unsigned and neutral: this is what the subscriptions cost per
@@ -282,7 +281,7 @@ class _BurdenCard extends StatelessWidget {
           Text(
             caption,
             key: const Key('subscriptionsBurdenCaption'),
-            style: AppTextStyles.helper,
+            style: context.textStyles.helper,
           ),
         ],
       ),
@@ -352,7 +351,7 @@ class _NextChargeCard extends StatelessWidget {
           key: const Key('subscriptionsNextCharge'),
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
-          style: valueStyle.copyWith(color: AppColors.textSecondary),
+          style: valueStyle.copyWith(color: context.colors.textSecondary),
         ),
       );
     }
@@ -400,11 +399,11 @@ class _StatCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
         children: [
-          Text(label.toUpperCase(), style: AppTextStyles.statLabel),
+          Text(label.toUpperCase(), style: context.textStyles.statLabel),
           const SizedBox(height: AppSpacing.sm),
           value,
           const SizedBox(height: AppSpacing.sm),
-          Text(caption, style: AppTextStyles.helper),
+          Text(caption, style: context.textStyles.helper),
         ],
       ),
     );
@@ -475,7 +474,7 @@ class _TableCard extends ConsumerWidget {
           ),
           child: Text(
             l10n.subscriptionsArchivedSection.toUpperCase(),
-            style: AppTextStyles.sectionLabel,
+            style: context.textStyles.sectionLabel,
           ),
         ),
         for (final row in archivedRows) seriesRow(row),
@@ -498,11 +497,8 @@ class _TableCard extends ConsumerWidget {
             child: ListView.separated(
               key: const Key('subscriptionsList'),
               itemCount: entries.length,
-              separatorBuilder: (_, _) => const Divider(
-                height: 1,
-                thickness: 1,
-                color: AppColors.borderSubtle,
-              ),
+              separatorBuilder: (_, _) =>
+                  Divider(height: 1, thickness: 1, color: context.colors.line),
               itemBuilder: (context, index) => entries[index],
             ),
           ),

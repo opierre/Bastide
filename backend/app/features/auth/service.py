@@ -221,6 +221,11 @@ class AuthService:
         """Make the monogram or a preset the user's avatar, dropping any uploaded picture."""
         return self._repository.set_avatar_choice(user, choice)
 
+    def set_theme(self, user: User, theme: str) -> User:
+        """Make ``theme`` (``system``, ``dark`` or ``light``) the user's theme."""
+        user.theme = theme
+        return self._repository.save_user(user)
+
     def logout(self, token: str) -> None:
         """Invalidate a session token and close what it opened. A no-op if it is already gone."""
         record = self._repository.get_token(token)

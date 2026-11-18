@@ -4,14 +4,13 @@
 it to a localized string via its own ARB entries.  The fr/en names below are the catalog's
 source of truth for those translations, not persisted columns.
 
-``color`` is pinned to the eight category hues in ``docs/design/00-shared-design-block.md``
-(Logement/Alimentation/Transport/Loisirs/Abonnements/Santé/Autres·Épargne/Revenus) rather than
-invented per category — the design spec is the source of truth for color, this catalog follows
-it. Every child inherits its top-level bucket's hue. Categories with no dedicated pinned hue
-(Achats, Finances, Enfants, Animaux) take the shared "Autres/Épargne" catch-all (#64748B), which
-is also why Épargne needs no color of its own — it's the same hue as Autres, just a different
-bucket. Abonnements is a top-level bucket, not a child of Loisirs, because the design spec pins
-it as its own hue distinct from Loisirs. It also stays childless: the categorisation prompt only
+``color`` holds the category's hue slot from ``docs/design/00-design-system.md`` §2.4
+(Logement/Alimentation/Transport/Abonnements/Loisirs/Santé/Autres·Épargne/Revenus), which the
+app's theme resolves to a colour. Every child inherits its top-level bucket's slot. Categories
+with no dedicated slot (Achats, Finances, Enfants, Animaux) take the "Autres/Épargne" catch-all
+``cat0``, which is also why Épargne needs no slot of its own. Abonnements is a top-level
+bucket, not a child of Loisirs, because the design spec gives it its own slot distinct from
+Loisirs. It also stays childless: the categorisation prompt only
 offers leaves, and the built-in rule pack files every streaming and telecom merchant under it.
 
 Keys are permanent: rules and rule packs reference categories by key, so an entry is only ever
@@ -31,15 +30,15 @@ from app.features.categories.models import Category
 
 logger = logging.getLogger(__name__)
 
-# The eight pinned design-system category hues (docs/design/00-shared-design-block.md).
-_LOGEMENT = "#4FD1E8"
-_ALIMENTATION = "#5AA9FF"
-_TRANSPORT = "#2DD4BF"
-_LOISIRS = "#F472B6"
-_ABONNEMENTS = "#FFB84D"
-_SANTE = "#A3E635"
-_AUTRES_EPARGNE = "#64748B"
-_REVENUS = "#4ADE80"
+# The category hue slots (docs/design/00-design-system.md §2.4).
+_LOGEMENT = "cat1"
+_ALIMENTATION = "cat2"
+_TRANSPORT = "cat3"
+_ABONNEMENTS = "cat4"
+_LOISIRS = "cat5"
+_SANTE = "cat6"
+_AUTRES_EPARGNE = "cat0"
+_REVENUS = "income"
 
 
 @dataclass(frozen=True)

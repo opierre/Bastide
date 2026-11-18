@@ -48,7 +48,7 @@ class FakeTransactionsController extends TransactionsController {
                   name: 'category.food.groceries',
                   kind: 'expense',
                   icon: 'shopping_cart',
-                  color: '#10B981',
+                  color: 'cat3',
                 ),
                 categorizationSource: CategorizationSource.user,
                 needsReview: false,

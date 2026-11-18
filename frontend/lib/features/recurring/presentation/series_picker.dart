@@ -32,7 +32,9 @@ class SeriesPickerBody extends ConsumerWidget {
       children: [
         Text(
           l10n.seriesPickerIntro,
-          style: textTheme.bodySmall?.copyWith(color: AppColors.textSecondary),
+          style: textTheme.bodySmall?.copyWith(
+            color: context.colors.textSecondary,
+          ),
         ),
         const SizedBox(height: AppSpacing.md),
         PickerSearchField(
@@ -105,11 +107,11 @@ class _SeriesPickRow extends ConsumerWidget {
     return Semantics(
       selected: selected,
       child: Material(
-        color: selected ? AppColors.irisSoft : Colors.transparent,
+        color: selected ? context.colors.accentSoft : Colors.transparent,
         child: InkWell(
           key: Key('seriesPickerRow-${series.id}'),
           onTap: onTap,
-          hoverColor: AppColors.surfaceRowHover,
+          hoverColor: context.colors.hover,
           child: Padding(
             padding: const EdgeInsets.symmetric(
               horizontal: AppSpacing.sm + AppSpacing.xs,
@@ -145,7 +147,7 @@ class _SeriesPickRow extends ConsumerWidget {
                           ),
                         ),
                         style: textTheme.bodySmall?.copyWith(
-                          color: AppColors.textSecondary,
+                          color: context.colors.textSecondary,
                         ),
                         overflow: TextOverflow.ellipsis,
                       ),
@@ -155,11 +157,11 @@ class _SeriesPickRow extends ConsumerWidget {
                 // The tick repeats the tint, so the choice never rests on color.
                 if (selected) ...[
                   const SizedBox(width: AppSpacing.sm),
-                  const Icon(
+                  Icon(
                     Icons.check_rounded,
                     key: Key('seriesPickerSelected'),
                     size: 18,
-                    color: AppColors.iris,
+                    color: context.colors.accent,
                   ),
                 ],
               ],
@@ -200,10 +202,10 @@ class PickerSearchField extends StatelessWidget {
           minHeight: 30,
         ),
         filled: true,
-        fillColor: AppColors.surfaceField,
+        fillColor: context.colors.field,
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(AppRadii.sm),
-          borderSide: const BorderSide(color: AppColors.border),
+          borderSide: BorderSide(color: context.colors.line),
         ),
       ),
     );
@@ -223,9 +225,9 @@ class PickerListFrame extends StatelessWidget {
       constraints: const BoxConstraints(maxHeight: 300),
       child: Container(
         decoration: BoxDecoration(
-          color: AppColors.surfaceField,
+          color: context.colors.field,
           borderRadius: BorderRadius.circular(AppRadii.md),
-          border: Border.all(color: AppColors.border),
+          border: Border.all(color: context.colors.line),
         ),
         child: child,
       ),
@@ -238,7 +240,7 @@ class PickerLoading extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const SizedBox(
+    return SizedBox(
       height: 120,
       child: Center(
         child: SizedBox(
@@ -246,7 +248,7 @@ class PickerLoading extends StatelessWidget {
           height: 22,
           child: CircularProgressIndicator(
             strokeWidth: 2.5,
-            color: AppColors.iris,
+            color: context.colors.accent,
           ),
         ),
       ),
@@ -268,7 +270,7 @@ class PickerMessage extends StatelessWidget {
         textAlign: TextAlign.center,
         style: Theme.of(
           context,
-        ).textTheme.bodySmall?.copyWith(color: AppColors.textSecondary),
+        ).textTheme.bodySmall?.copyWith(color: context.colors.textSecondary),
       ),
     );
   }

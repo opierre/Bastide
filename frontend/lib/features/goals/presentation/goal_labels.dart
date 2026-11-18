@@ -63,12 +63,13 @@ IconData goalIconData(String key) => switch (key) {
 
 /// The hue a goal's stored [Goal.color] key stands for, resolved against the
 /// palette's tokens so a goal can never introduce a color the design system
-/// does not own. Unknown keys fall back to the accent.
-Color goalColorValue(String key) => switch (key) {
-  '#4FD1E8' => AppColors.cyan,
-  '#4ADE80' => AppColors.positive,
-  '#FFB84D' => AppColors.warning,
-  '#F472B6' => CategoryHues.loisirs,
-  '#5AA9FF' => AppColors.info,
-  _ => AppColors.iris,
+/// does not own. Unknown keys fall back to the accent. The keys are v1 hex
+/// values kept as opaque identifiers; each maps onto a v2 slot.
+Color goalColorValue(BuildContext context, String key) => switch (key) {
+  '#4FD1E8' => context.categoryColors.cat1,
+  '#4ADE80' => context.colors.positive,
+  '#FFB84D' => context.categoryColors.cat4,
+  '#F472B6' => context.categoryColors.cat5,
+  '#5AA9FF' => context.categoryColors.cat6,
+  _ => context.colors.accent,
 };

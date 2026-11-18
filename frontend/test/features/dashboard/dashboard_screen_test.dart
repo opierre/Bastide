@@ -4,8 +4,9 @@ import 'package:bastide/core/theme/tokens.dart';
 import 'package:bastide/core/widgets/amount_text.dart';
 import 'package:bastide/core/widgets/app_card.dart';
 import 'package:bastide/core/widgets/app_shell.dart';
-import 'package:bastide/core/widgets/category_chip.dart';
+import 'package:bastide/core/widgets/category_label.dart';
 import 'package:bastide/core/widgets/primary_button.dart';
+import 'package:bastide/core/widgets/repere_meter.dart';
 import 'package:bastide/core/widgets/state_views.dart';
 import 'package:bastide/features/dashboard/application/dashboard_controller.dart';
 import 'package:bastide/features/dashboard/domain/dashboard_summary.dart';
@@ -13,11 +14,10 @@ import 'package:bastide/features/dashboard/domain/dashboard_trends.dart';
 import 'package:bastide/features/dashboard/presentation/category_breakdown.dart';
 import 'package:bastide/features/dashboard/presentation/dashboard_screen.dart';
 import 'package:bastide/features/dashboard/presentation/income_vs_expense.dart';
+import 'package:bastide/features/dashboard/presentation/kpi_strip.dart';
 import 'package:bastide/features/dashboard/presentation/recent_activity.dart';
 import 'package:bastide/features/dashboard/presentation/savings_chart.dart';
 import 'package:bastide/features/dashboard/presentation/savings_trend.dart';
-import 'package:bastide/features/goals/presentation/goal_card.dart';
-import 'package:bastide/features/dashboard/presentation/kpi_strip.dart';
 import 'package:bastide/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -48,7 +48,7 @@ Widget _wrap({
     ],
     child: MaterialApp(
       locale: locale,
-      theme: appDarkTheme,
+      theme: AppTheme.dark,
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
       home: const Scaffold(body: DashboardScreen()),
@@ -89,7 +89,7 @@ void main() {
 
       expect(find.byType(KpiStrip), findsOneWidget);
       // The skeleton's row 1 is drawn at this measured height.
-      expect(tester.getSize(find.byType(KpiStrip)).height, 162);
+      expect(tester.getSize(find.byType(KpiStrip)).height, 153);
       // One plate, not four.
       expect(
         find.descendant(
@@ -147,7 +147,7 @@ void main() {
       );
       expect(net, findsOneWidget);
       // Net is the strip's one colorized figure.
-      expect(tester.widget<Text>(net).style?.color, AppColors.positive);
+      expect(tester.widget<Text>(net).style?.color, AppColors.dark.positive);
 
       expect(find.text('REVENUS'), findsOneWidget);
       expect(find.text('DÉPENSES'), findsOneWidget);
@@ -170,16 +170,19 @@ void main() {
 
       // Income up: green, up.
       expect(trendIcon(tester, 'income').icon, Icons.arrow_upward_rounded);
-      expect(trendIcon(tester, 'income').color, AppColors.positive);
-      expect(deltaText(tester, 'income').style?.color, AppColors.positive);
+      expect(trendIcon(tester, 'income').color, AppColors.dark.positive);
+      expect(deltaText(tester, 'income').style?.color, AppColors.dark.positive);
       // Net down: red, down.
       expect(trendIcon(tester, 'net').icon, Icons.arrow_downward_rounded);
-      expect(trendIcon(tester, 'net').color, AppColors.negative);
-      expect(deltaText(tester, 'net').style?.color, AppColors.negative);
+      expect(trendIcon(tester, 'net').color, AppColors.dark.negative);
+      expect(deltaText(tester, 'net').style?.color, AppColors.dark.negative);
       // Expenses up: inverted, so a rise is red.
       expect(trendIcon(tester, 'expense').icon, Icons.arrow_upward_rounded);
-      expect(trendIcon(tester, 'expense').color, AppColors.negative);
-      expect(deltaText(tester, 'expense').style?.color, AppColors.negative);
+      expect(trendIcon(tester, 'expense').color, AppColors.dark.negative);
+      expect(
+        deltaText(tester, 'expense').style?.color,
+        AppColors.dark.negative,
+      );
     },
   );
 
@@ -201,12 +204,12 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(trendIcon(tester, 'expense').icon, Icons.arrow_downward_rounded);
-    expect(deltaText(tester, 'expense').style?.color, AppColors.positive);
+    expect(deltaText(tester, 'expense').style?.color, AppColors.dark.positive);
     expect(trendIcon(tester, 'income').icon, Icons.arrow_downward_rounded);
-    expect(deltaText(tester, 'income').style?.color, AppColors.negative);
+    expect(deltaText(tester, 'income').style?.color, AppColors.dark.negative);
     // A flat month is neither good nor bad news.
     expect(trendIcon(tester, 'net').icon, Icons.remove_rounded);
-    expect(deltaText(tester, 'net').style?.color, AppColors.textSecondary);
+    expect(deltaText(tester, 'net').style?.color, AppColors.dark.textSecondary);
   });
 
   testWidgets(
@@ -223,9 +226,7 @@ void main() {
       );
       // The ring is gone; a bar toward the goal replaces it, full once the goal is met.
       expect(find.byType(CircularProgressIndicator), findsNothing);
-      final bar = tester.widget<GoalProgressBar>(
-        byKey('dashboardSavingsGoalBar'),
-      );
+      final bar = tester.widget<RepereMeter>(byKey('dashboardSavingsGoalBar'));
       expect(bar.fraction, 1.0);
 
       // « ✓ Objectif 20 % atteint · +1,9 pt »
@@ -233,10 +234,10 @@ void main() {
       expect(byKey('dashboardSavingsGoalReachedIcon'), findsOneWidget);
       final goalText = tester.widget<Text>(byKey('dashboardSavingsGoalText'));
       expect(goalText.data, 'Objectif $goal atteint');
-      expect(goalText.style?.color, AppColors.positive);
+      expect(goalText.style?.color, AppColors.dark.positive);
       final delta = tester.widget<Text>(byKey('dashboardSavingsDelta'));
       expect(delta.data, '+1,9 pt');
-      expect(delta.style?.color, AppColors.positive);
+      expect(delta.style?.color, AppColors.dark.positive);
 
       // The check leads the line, the delta closes it.
       final checkX = tester
@@ -262,18 +263,16 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      final bar = tester.widget<GoalProgressBar>(
-        byKey('dashboardSavingsGoalBar'),
-      );
+      final bar = tester.widget<RepereMeter>(byKey('dashboardSavingsGoalBar'));
       expect(bar.fraction, closeTo(0.59, 0.0001));
       expect(byKey('dashboardSavingsGoalReachedIcon'), findsNothing);
       final goal = formatRatioPct(0.20, 'fr', decimalDigits: 0);
       final goalText = tester.widget<Text>(byKey('dashboardSavingsGoalText'));
       expect(goalText.data, 'Objectif $goal en cours');
-      expect(goalText.style?.color, AppColors.textSecondary);
+      expect(goalText.style?.color, AppColors.dark.textSecondary);
       final delta = tester.widget<Text>(byKey('dashboardSavingsDelta'));
       expect(delta.data, '−0,4 pt');
-      expect(delta.style?.color, AppColors.negative);
+      expect(delta.style?.color, AppColors.dark.negative);
     },
   );
 
@@ -562,7 +561,7 @@ void main() {
       container: container,
       child: MaterialApp(
         locale: const Locale('fr'),
-        theme: appDarkTheme,
+        theme: AppTheme.dark,
         localizationsDelegates: AppLocalizations.localizationsDelegates,
         supportedLocales: AppLocalizations.supportedLocales,
         home: Scaffold(body: home),
@@ -615,12 +614,13 @@ void main() {
   testWidgets('the donut shrinks with the window instead of crowding its card', (
     tester,
   ) async {
-    tester.view.physicalSize = const Size(1280, 800);
+    tester.view.physicalSize = const Size(1280, 720);
     tester.view.devicePixelRatio = 1.0;
     addTearDown(tester.view.reset);
     await tester.pumpWidget(_wrap(state: _state()));
     await tester.pumpAndSettle();
 
+    // The chart section has no card padding since v2, so the window is shorter here.
     // A fixed 212 ring in a card this short would either overflow it or squeeze the legend
     // out; the donut is the part that gives way.
     final donut = tester.getSize(find.byType(CategoryDonut));
@@ -703,9 +703,15 @@ void main() {
         ),
       ),
     );
-    expect(tester.widget<Text>(net(-11840)).style?.color, AppColors.negative);
+    expect(
+      tester.widget<Text>(net(-11840)).style?.color,
+      AppColors.dark.negative,
+    );
     for (final minor in [54020, 73710, 63565]) {
-      expect(tester.widget<Text>(net(minor)).style?.color, AppColors.positive);
+      expect(
+        tester.widget<Text>(net(minor)).style?.color,
+        AppColors.dark.positive,
+      );
     }
   });
 
@@ -747,8 +753,8 @@ void main() {
           closeTo(aprilIncome.bottom, 0.01),
           reason: 'month $month',
         );
-        expect(color('Income', month), AppColors.positive);
-        expect(color('Expense', month), AppColors.negative);
+        expect(color('Income', month), AppColors.dark.positive);
+        expect(color('Expense', month), AppColors.dark.negative);
       }
 
       // One scale across all months: heights are proportional to the amounts.
@@ -771,9 +777,9 @@ void main() {
         find.descendant(of: bars, matching: find.text(month)),
       );
 
-      expect(label('Mai').style?.color, AppColors.textPrimary);
+      expect(label('Mai').style?.color, AppColors.dark.text);
       for (final month in ['Févr.', 'Mars', 'Avr.']) {
-        expect(label(month).style?.color, AppColors.textSecondary);
+        expect(label(month).style?.color, AppColors.dark.textSecondary);
       }
     },
   );
@@ -822,7 +828,7 @@ void main() {
       expect(find.text('Activité récente'), findsOneWidget);
       expect(find.byType(CompactTransactionRow), findsNWidgets(4));
       // The compact variant deliberately drops the category chip the 52px row carries.
-      expect(find.byType(CategoryChip), findsNothing);
+      expect(find.byType(CategoryLabel), findsNothing);
 
       for (final row in [
         'Carrefour',
@@ -874,7 +880,7 @@ void main() {
     // Level with the title, on the far side of the card, and above the list rather than
     // under it — a link pinned below a variable number of rows has no fixed line to sit on.
     expect(link.center.dy, closeTo(title.center.dy, 4));
-    expect(link.right, closeTo(card.right - AppSpacing.cardPadding, 1));
+    expect(link.right, closeTo(card.right - AppSpacing.md, 1));
     expect(link.left, greaterThan(title.right));
     expect(link.bottom, lessThanOrEqualTo(firstRow.top));
   });
@@ -914,24 +920,23 @@ void main() {
       first.height,
       lessThanOrEqualTo(CompactTransactionRow.rowHeight * 1.25),
     );
-    expect(last.bottom, closeTo(card.bottom - AppSpacing.cardPadding, 1));
+    expect(last.bottom, closeTo(card.bottom - AppSpacing.md, 1));
   });
 
-  testWidgets('a monogram with no pinned hue falls back to the neutral plate', (
-    tester,
-  ) async {
+  testWidgets('every named counterparty gets its initials on the neutral '
+      'monogram', (tester) async {
     _useDesktopSurface(tester);
     await tester.pumpWidget(_wrap(state: _state()));
     await tester.pumpAndSettle();
 
-    // Carrefour and Novatech carry pinned hues (#3B82F6 and #6C6AF0, both as the spec's
-    // table has them). Their *initials* come from `MonogramAvatar.initialsFor`, which takes
-    // one letter per word — so « Novatech SARL » reads NS where the table draws NV.
+    // Monograms are always neutral (`00` §7), so no brand list decides
+    // between initials and « ? »: a named row shows its initials, one letter
+    // per word, so « Novatech SARL » reads NS.
     expect(find.text('CA'), findsOneWidget);
     expect(find.text('NS'), findsOneWidget);
-    // SNCF Connect and Free Mobile have no pinned hue, so they keep the neutral "?" plate
-    // rather than the table's SC / FM.
-    expect(find.text('?'), findsNWidgets(2));
+    expect(find.text('SC'), findsOneWidget);
+    expect(find.text('FM'), findsOneWidget);
+    expect(find.text('?'), findsNothing);
   });
 
   // --- states ------------------------------------------------------------------------------
@@ -1013,7 +1018,7 @@ void main() {
         for (var i = 0; i < 5; i++)
           tester.getSize(find.byType(SkeletonBlock).at(i)),
       ];
-      expect(blocks[0].height, 162);
+      expect(blocks[0].height, 153);
       expect(blocks[2].width / blocks[1].width, closeTo(1.35, 0.01));
       // Rows 2 and 3 are equal-height in the silhouette too, as they are once data lands.
       expect(blocks[1].height, blocks[3].height);
@@ -1035,7 +1040,7 @@ void main() {
         ],
         child: MaterialApp(
           locale: const Locale('fr'),
-          theme: appDarkTheme,
+          theme: AppTheme.dark,
           localizationsDelegates: AppLocalizations.localizationsDelegates,
           supportedLocales: AppLocalizations.supportedLocales,
           home: AppShell(

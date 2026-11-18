@@ -92,7 +92,7 @@ Future<ProviderContainer> _open(
       child: MaterialApp.router(
         routerConfig: router,
         locale: locale,
-        theme: appDarkTheme,
+        theme: AppTheme.dark,
         localizationsDelegates: AppLocalizations.localizationsDelegates,
         supportedLocales: AppLocalizations.supportedLocales,
       ),

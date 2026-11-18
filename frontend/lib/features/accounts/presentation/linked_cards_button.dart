@@ -37,10 +37,10 @@ class LinkedCardsButton extends ConsumerWidget {
         for (final card in cards)
           SubmenuButton(
             key: Key('linkedCard-${card.id}'),
-            leadingIcon: const Icon(
+            leadingIcon: Icon(
               Icons.credit_card_rounded,
               size: 16,
-              color: AppColors.textSecondary,
+              color: context.colors.textSecondary,
             ),
             menuChildren: [
               _CardAction(
@@ -76,7 +76,7 @@ class LinkedCardsButton extends ConsumerWidget {
           child: InkWell(
             key: Key('accountLinkedCards-${account.id}'),
             borderRadius: BorderRadius.circular(AppRadii.pill),
-            hoverColor: AppColors.overlayWash,
+            hoverColor: context.colors.hover,
             onTap: () =>
                 controller.isOpen ? controller.close() : controller.open(),
             child: Padding(
@@ -91,13 +91,13 @@ class LinkedCardsButton extends ConsumerWidget {
                     '${cards.length}',
                     style: tabularNumberStyle(
                       Theme.of(context).textTheme.bodySmall!,
-                    ).copyWith(color: AppColors.textSecondary),
+                    ).copyWith(color: context.colors.textSecondary),
                   ),
                   const SizedBox(width: AppSpacing.xs),
-                  const Icon(
+                  Icon(
                     Icons.credit_card_rounded,
                     size: 18,
-                    color: AppColors.textSecondary,
+                    color: context.colors.textSecondary,
                   ),
                 ],
               ),
@@ -124,7 +124,7 @@ class _CardAction extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MenuItemButton(
-      leadingIcon: Icon(icon, size: 16, color: AppColors.textSecondary),
+      leadingIcon: Icon(icon, size: 16, color: context.colors.textSecondary),
       onPressed: onPressed,
       child: Text(label),
     );
