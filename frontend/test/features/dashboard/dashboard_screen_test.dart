@@ -880,7 +880,7 @@ void main() {
     // Level with the title, on the far side of the card, and above the list rather than
     // under it — a link pinned below a variable number of rows has no fixed line to sit on.
     expect(link.center.dy, closeTo(title.center.dy, 4));
-    expect(link.right, closeTo(card.right - AppSpacing.cardPadding, 1));
+    expect(link.right, closeTo(card.right - AppSpacing.md, 1));
     expect(link.left, greaterThan(title.right));
     expect(link.bottom, lessThanOrEqualTo(firstRow.top));
   });
@@ -920,7 +920,7 @@ void main() {
       first.height,
       lessThanOrEqualTo(CompactTransactionRow.rowHeight * 1.25),
     );
-    expect(last.bottom, closeTo(card.bottom - AppSpacing.cardPadding, 1));
+    expect(last.bottom, closeTo(card.bottom - AppSpacing.md, 1));
   });
 
   testWidgets('every named counterparty gets its initials on the neutral '
