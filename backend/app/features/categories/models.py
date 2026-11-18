@@ -23,5 +23,6 @@ class Category(Base):
     name: Mapped[str] = mapped_column(String(255))
     kind: Mapped[str] = mapped_column(String(10))
     icon: Mapped[str] = mapped_column(String(50))
+    # A hue slot (`hues.CategoryHue`), resolved to a colour by the app's theme.
     color: Mapped[str] = mapped_column(String(7))
     is_system: Mapped[bool] = mapped_column(Boolean, default=False)

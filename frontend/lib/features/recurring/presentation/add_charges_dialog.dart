@@ -123,7 +123,7 @@ class _AddChargesDialogState extends ConsumerState<AddChargesDialog> {
           Text(
             l10n.chargePickerIntro,
             style: textTheme.bodySmall?.copyWith(
-              color: AppColors.textSecondary,
+              color: context.colors.textSecondary,
             ),
           ),
           const SizedBox(height: AppSpacing.md),
@@ -210,14 +210,14 @@ class _CandidateList extends ConsumerWidget {
           if (state.hasMore)
             Center(
               child: state.isLoadingMore
-                  ? const Padding(
+                  ? Padding(
                       padding: EdgeInsets.all(AppSpacing.sm),
                       child: SizedBox(
                         width: 16,
                         height: 16,
                         child: CircularProgressIndicator(
                           strokeWidth: 2,
-                          color: AppColors.iris,
+                          color: context.colors.accent,
                         ),
                       ),
                     )

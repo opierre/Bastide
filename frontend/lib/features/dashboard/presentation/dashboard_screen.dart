@@ -161,7 +161,6 @@ class _EmptyState extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     return EmptyStateView(
-      icon: Icons.bar_chart_rounded,
       title: l10n.dashboardEmptyTitle,
       message: l10n.dashboardEmptyBody,
       // A *primary* CTA, per the EmptyState in `docs/design/00` §Components — this is the one
@@ -176,7 +175,7 @@ class _EmptyState extends StatelessWidget {
 }
 
 /// The KPI strip's measured height, so the skeleton's row 1 doesn't resize when data lands.
-const _statRowHeight = 162.0;
+const _statRowHeight = 153.0;
 
 class _DashboardSkeleton extends StatelessWidget {
   const _DashboardSkeleton({super.key});

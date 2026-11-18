@@ -84,7 +84,7 @@ class _PriceHistoryChartState extends State<PriceHistoryChart> {
       for (final point in points) point.bookedDate,
     ]);
     final ticks = [for (final point in points) format.format(point.bookedDate)];
-    final labelStyle = ChartPaints.labelStyle(textTheme);
+    final labelStyle = ChartPaints.labelStyle(context);
     final tooltips = [
       for (var i = 0; i < points.length; i++)
         _tooltip(l10n, locale, textTheme, points[i], isStep: i == stepIndex),
@@ -123,6 +123,7 @@ class _PriceHistoryChartState extends State<PriceHistoryChart> {
                 child: CustomPaint(
                   size: Size.infinite,
                   painter: _PriceLinePainter(
+                    colors: context.colors,
                     plot: plot,
                     stepIndex: stepIndex,
                     hovered: _hovered,
@@ -337,8 +338,8 @@ class _PriceHistoryChartState extends State<PriceHistoryChart> {
         ),
         style: tabularNumberStyle(textTheme.bodySmall!).copyWith(
           color: occurrence.amountMinor < 0
-              ? AppColors.negative
-              : AppColors.positive,
+              ? context.colors.negative
+              : context.colors.positive,
         ),
       ),
       if (isStep && series.previousAmountMinor != null)
@@ -347,7 +348,7 @@ class _PriceHistoryChartState extends State<PriceHistoryChart> {
               '\n${l10n.subscriptionDetailChange(_money(series.previousAmountMinor!, locale), _money(series.expectedAmountMinor, locale))}',
           style: tabularNumberStyle(
             textTheme.bodySmall!,
-          ).copyWith(color: AppColors.warning),
+          ).copyWith(color: context.colors.warning),
         ),
     ],
   );
@@ -573,7 +574,11 @@ class _PlotGeometry {
 /// Deliberately not animated, like every other chart here — the spec allows
 /// only the spinner and skeleton keyframes.
 class _PriceLinePainter extends CustomPainter {
+  /// The active theme's colours.
+  final AppColors colors;
+
   _PriceLinePainter({
+    required this.colors,
     required this.plot,
     required this.stepIndex,
     required this.hovered,
@@ -591,7 +596,7 @@ class _PriceLinePainter extends CustomPainter {
 
     // Unlabelled: the axis names the prices paid, not round levels (see
     // [_PriceHistoryChartState._valueLabels]).
-    ChartPaints.grid(canvas, size, rect, [
+    ChartPaints.grid(colors, canvas, size, rect, [
       for (var i = 0; i <= _gridlines; i++)
         rect.top + rect.height * (i / _gridlines),
     ]);
@@ -618,8 +623,8 @@ class _PriceLinePainter extends CustomPainter {
         ..lineTo(points.first.dx, rect.bottom)
         ..close();
 
-      canvas.drawPath(area, ChartPaints.area(AppColors.iris));
-      canvas.drawPath(line, ChartPaints.stroke(AppColors.iris));
+      canvas.drawPath(area, ChartPaints.area(colors.accent));
+      canvas.drawPath(line, ChartPaints.stroke(colors.accent));
     }
 
     final last = points.length - 1;
@@ -635,7 +640,7 @@ class _PriceLinePainter extends CustomPainter {
         Offset(points[step].dx, rect.top),
         Offset(points[step].dx, rect.bottom),
         Paint()
-          ..color = AppColors.warning.withValues(alpha: 0.35)
+          ..color = colors.warning.withValues(alpha: 0.35)
           ..strokeWidth = 1,
       );
     }
@@ -644,16 +649,18 @@ class _PriceLinePainter extends CustomPainter {
       final large = i == last || i == step || i == hovered;
       if (!large && points.length > AppChart.dotCeiling) continue;
       ChartPaints.dot(
+        colors,
         canvas,
         points[i],
         large ? AppChart.currentDotRadius : AppChart.pointDotRadius,
-        i == step ? AppColors.warning : AppColors.iris,
+        i == step ? colors.warning : colors.accent,
       );
     }
   }
 
   @override
   bool shouldRepaint(_PriceLinePainter oldDelegate) =>
+      oldDelegate.colors != colors ||
       oldDelegate.plot != plot ||
       oldDelegate.stepIndex != stepIndex ||
       oldDelegate.hovered != hovered;

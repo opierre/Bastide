@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../theme/tokens.dart';
+import 'focus_ring.dart';
 
 class AppSegment<T> {
   const AppSegment({required this.value, required this.label, this.key});
@@ -10,50 +11,75 @@ class AppSegment<T> {
   final Key? key;
 }
 
-/// An inset segmented control for short, mutually exclusive choices.
+/// The segmented control of `docs/design/00-design-system.md` §6: a `field`
+/// well with a 1 px `lineStrong` border, radius 6, padding 2, gap 2; each
+/// segment padding 2 10, radius 4, 13 `textSecondary`; the selected one on
+/// `hover`, in `text` 500.
 ///
-/// Preferred over [ChoiceChip] for two or three fixed options: chips read as a
-/// filter you can clear, whereas a segment track makes it obvious one option is
-/// always selected.
+/// For two or three fixed options where one is always selected; a chip would
+/// read as a filter the user can clear.
 class AppSegmented<T> extends StatelessWidget {
   const AppSegmented({
     super.key,
     required this.segments,
     required this.value,
     required this.onChanged,
+    this.expand = false,
   });
 
   final List<AppSegment<T>> segments;
   final T value;
-  final ValueChanged<T> onChanged;
+
+  /// `null` disables the control.
+  final ValueChanged<T>? onChanged;
+
+  /// Shares the width it is given between the segments instead of sizing
+  /// each to its label.
+  final bool expand;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(3),
-      decoration: BoxDecoration(
-        color: AppColors.surfaceField,
-        borderRadius: BorderRadius.circular(AppRadii.md),
-        border: Border.all(color: AppColors.border),
-      ),
-      child: Row(
-        children: [
-          for (final segment in segments)
-            Expanded(
-              child: _Segment(
-                key: segment.key,
-                label: segment.label,
-                selected: segment.value == value,
-                onTap: () => onChanged(segment.value),
-              ),
-            ),
-        ],
+    final onChanged = this.onChanged;
+    final children = <Widget>[
+      for (var i = 0; i < segments.length; i++) ...[
+        if (i > 0) const SizedBox(width: AppSpacing.xxs),
+        _wrap(
+          _Segment(
+            key: segments[i].key,
+            label: segments[i].label,
+            selected: segments[i].value == value,
+            onTap: onChanged == null
+                ? null
+                : () => onChanged(segments[i].value),
+          ),
+        ),
+      ],
+    ];
+
+    return Opacity(
+      opacity: onChanged == null ? 0.45 : 1,
+      child: Container(
+        padding: const EdgeInsets.all(AppSpacing.xxs),
+        decoration: BoxDecoration(
+          color: context.colors.field,
+          borderRadius: BorderRadius.circular(AppRadii.control),
+          border: Border.all(color: context.colors.lineStrong),
+        ),
+        child: Row(
+          mainAxisSize: expand ? MainAxisSize.max : MainAxisSize.min,
+          children: children,
+        ),
       ),
     );
   }
+
+  /// Sized to its label, but shrinking (and ellipsizing) when the control is
+  /// given less room than its labels ask for.
+  Widget _wrap(Widget segment) =>
+      expand ? Expanded(child: segment) : Flexible(child: segment);
 }
 
-class _Segment extends StatelessWidget {
+class _Segment extends StatefulWidget {
   const _Segment({
     super.key,
     required this.label,
@@ -63,33 +89,65 @@ class _Segment extends StatelessWidget {
 
   final String label;
   final bool selected;
-  final VoidCallback onTap;
+  final VoidCallback? onTap;
+
+  @override
+  State<_Segment> createState() => _SegmentState();
+}
+
+class _SegmentState extends State<_Segment> {
+  bool _focused = false;
 
   @override
   Widget build(BuildContext context) {
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(AppRadii.sm + 1),
-        // Selection is an instant fill swap — the spec permits no transition
-        // here, and a 120ms slide would draw the eye to the control rather than
-        // to what it changed.
-        child: Container(
-          height: 34,
-          alignment: Alignment.center,
-          decoration: BoxDecoration(
-            // Fill only: a border on the active segment reads as a second
-            // control nested inside the track.
-            color: selected ? const Color(0x248B8CF9) : Colors.transparent,
-            borderRadius: BorderRadius.circular(AppRadii.sm + 1),
+    final colors = context.colors;
+    final enabled = widget.onTap != null;
+
+    return Semantics(
+      button: true,
+      selected: widget.selected,
+      child: FocusableActionDetector(
+        enabled: enabled,
+        mouseCursor: enabled
+            ? SystemMouseCursors.click
+            : SystemMouseCursors.basic,
+        onShowFocusHighlight: (value) => setState(() => _focused = value),
+        actions: {
+          ActivateIntent: CallbackAction<ActivateIntent>(
+            onInvoke: (_) {
+              widget.onTap?.call();
+              return null;
+            },
           ),
-          child: Text(
-            label,
-            overflow: TextOverflow.ellipsis,
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: selected ? AppColors.iris : AppColors.textSecondary,
-              fontWeight: selected ? FontWeight.w600 : FontWeight.w400,
+        },
+        child: GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onTap: widget.onTap,
+          // Selection is an instant fill swap (`00` §13).
+          child: FocusRing(
+            focused: _focused,
+            radius: AppRadii.item,
+            child: Container(
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppSpacing.sm + AppSpacing.xxs,
+                vertical: AppSpacing.xxs,
+              ),
+              alignment: Alignment.center,
+              decoration: BoxDecoration(
+                color: widget.selected ? colors.hover : Colors.transparent,
+                borderRadius: BorderRadius.circular(AppRadii.item),
+              ),
+              child: Text(
+                widget.label,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: widget.selected ? colors.text : colors.textSecondary,
+                  fontWeight: widget.selected
+                      ? FontWeight.w500
+                      : FontWeight.w400,
+                ),
+              ),
             ),
           ),
         ),

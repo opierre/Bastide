@@ -58,10 +58,10 @@ class CompositionBreakdownCard extends StatelessWidget {
     return partlyOwned ? l10n.networthCompositionHeldShare(label) : label;
   }
 
-  static Color _hue(CompositionEntry entry) =>
+  static Color _hue(BuildContext context, CompositionEntry entry) =>
       entry.group == CompositionGroup.account
-      ? AssetHues.forAccountType(entry.key)
-      : AssetHues.forPropertyKind(entry.key);
+      ? context.categoryColors.forAccountType(entry.key)
+      : context.categoryColors.forPropertyKind(entry.key);
 
   @override
   Widget build(BuildContext context) {
@@ -82,20 +82,16 @@ class CompositionBreakdownCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Text(l10n.networthCompositionTitle, style: textTheme.titleMedium),
-          const SizedBox(height: 2),
-          Text(
-            l10n.networthCompositionSubtitle,
-            style: textTheme.bodySmall?.copyWith(
-              color: AppColors.textSecondary,
-            ),
-          ),
           const SizedBox(height: AppSpacing.md),
-          _Strip(entries: summary.composition, hue: _hue),
+          _Strip(
+            entries: summary.composition,
+            hue: (entry) => _hue(context, entry),
+          ),
           const SizedBox(height: AppSpacing.sm),
           for (final entry in summary.composition)
             _LegendRow(
               key: Key('compositionRow-${entry.group.wireValue}-${entry.key}'),
-              hue: _hue(entry),
+              hue: _hue(context, entry),
               label: _label(l10n, entry),
               share: formatCompositionShare(entry.shareBps, locale),
               amount: formatAmount(
@@ -111,8 +107,8 @@ class CompositionBreakdownCard extends StatelessWidget {
               _foot(l10n, locale),
               key: const Key('compositionFoot'),
               style: tabularNumberStyle(
-                AppTextStyles.helper,
-              ).copyWith(fontSize: 11, color: AppColors.textDisabled),
+                context.textStyles.helper,
+              ).copyWith(fontSize: 11, color: context.colors.textTertiary),
             )
           else
             _InvitePlate(onNewProperty: onNewProperty),
@@ -170,7 +166,7 @@ class _Strip extends StatelessWidget {
       child: SizedBox(
         height: 10,
         child: drawn.isEmpty
-            ? const ColoredBox(color: AppColors.surfaceHover)
+            ? ColoredBox(color: context.colors.hover)
             : Row(
                 children: [
                   for (var index = 0; index < drawn.length; index++) ...[
@@ -230,7 +226,7 @@ class _LegendRow extends StatelessWidget {
             share,
             style: tabularNumberStyle(
               style,
-            ).copyWith(color: AppColors.textDisabled),
+            ).copyWith(color: context.colors.textTertiary),
           ),
           const SizedBox(width: AppSpacing.md),
           Text(
@@ -269,7 +265,7 @@ class _InvitePlate extends StatelessWidget {
             Text(
               l10n.networthCompositionInvite,
               style: textTheme.bodySmall?.copyWith(
-                color: AppColors.textSecondary,
+                color: context.colors.textSecondary,
               ),
             ),
             InkWell(
@@ -278,7 +274,7 @@ class _InvitePlate extends StatelessWidget {
               child: Text(
                 l10n.networthCompositionInviteAction,
                 style: textTheme.bodySmall?.copyWith(
-                  color: AppColors.iris,
+                  color: context.colors.accent,
                   fontWeight: FontWeight.w600,
                 ),
               ),

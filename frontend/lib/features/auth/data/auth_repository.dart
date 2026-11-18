@@ -7,6 +7,7 @@ import '../../../core/api/api_client_provider.dart';
 import '../domain/auth_user.dart';
 import '../domain/avatar_choice.dart';
 import '../domain/avatar_picture.dart';
+import '../domain/theme_preference.dart';
 
 /// The session a successful register/login/reset call returns: a bearer token
 /// plus the user it belongs to.
@@ -117,6 +118,14 @@ class AuthRepository {
     return _parseUser(json['user'] as Map<String, dynamic>);
   }
 
+  /// Makes [theme] the signed-in user's theme.
+  Future<AuthUser> setTheme(ThemePreference theme) async {
+    final json =
+        await _apiClient.put('/auth/me/theme', body: {'theme': theme.wire})
+            as Map<String, dynamic>;
+    return _parseUser(json['user'] as Map<String, dynamic>);
+  }
+
   /// Makes [bytes] the signed-in user's avatar picture. The backend re-encodes
   /// it and refuses a file too large or of the wrong type.
   Future<AuthUser> uploadAvatar(Uint8List bytes) async {
@@ -171,6 +180,7 @@ class AuthRepository {
     locale: json['locale'] as String,
     currency: json['currency'] as String,
     avatar: AvatarChoice.fromWire(json['avatar'] as String?),
+    theme: ThemePreference.fromWire(json['theme'] as String?),
   );
 }
 

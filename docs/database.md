@@ -323,6 +323,7 @@ erDiagram
         datetime updated_at
         text recovery_code_hash "nullable"
         text avatar
+        text theme
     }
     accounts ||--o{ account_balance_snapshots : "account_id"
     accounts |o--o{ accounts : "settlement_account_id"

@@ -46,12 +46,17 @@ class RulePackReport extends StatelessWidget {
           Text(
             l10n.rulePackUnresolvedDetail(preview.unresolved.join(', ')),
             key: const Key('rulePackUnresolvedDetail'),
-            style: AppTextStyles.helper.copyWith(color: AppColors.warning),
+            style: context.textStyles.helper.copyWith(
+              color: context.colors.warning,
+            ),
           ),
         ],
         if (preview.samples.isNotEmpty) ...[
           const SizedBox(height: AppSpacing.md),
-          Text(l10n.rulePackSamplesLabel, style: AppTextStyles.sectionLabel),
+          Text(
+            l10n.rulePackSamplesLabel,
+            style: context.textStyles.sectionLabel,
+          ),
           const SizedBox(height: AppSpacing.sm - 2),
           for (final sample in preview.samples)
             Padding(
@@ -59,7 +64,7 @@ class RulePackReport extends StatelessWidget {
               child: Text(
                 '${DateFormat.yMd(Localizations.localeOf(context).toString()).format(sample.bookedDate)}  ${sample.descriptionClean}',
                 overflow: TextOverflow.ellipsis,
-                style: AppTextStyles.mono,
+                style: context.textStyles.mono,
               ),
             ),
         ],
@@ -86,7 +91,7 @@ class _ReportLine extends StatelessWidget {
             child: Text(
               label,
               style: textTheme.bodyMedium?.copyWith(
-                color: AppColors.textSecondary,
+                color: context.colors.textSecondary,
               ),
             ),
           ),

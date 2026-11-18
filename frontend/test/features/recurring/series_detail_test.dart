@@ -48,7 +48,7 @@ Widget _wrap(SeriesDetail detail, {FakeSubscriptionsController? controller}) {
     ],
     child: MaterialApp(
       locale: const Locale('fr'),
-      theme: appDarkTheme,
+      theme: AppTheme.dark,
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
       home: const Scaffold(body: SeriesDetailView(seriesId: 's1')),
@@ -288,8 +288,8 @@ void main() {
     expect(find.byKey(const Key('seriesIncreaseBanner')), findsOneWidget);
     expect(
       find.text(
-        'Augmentation : ${_money(1349)} → ${_money(1549)} le 15/04/2026 '
-        '— soit +${_money(2400)} par an.',
+        'Hausse : ${_money(1349)} → ${_money(1549)} le 15/04/2026, '
+        'soit +${_money(2400)} par an.',
       ),
       findsOneWidget,
     );

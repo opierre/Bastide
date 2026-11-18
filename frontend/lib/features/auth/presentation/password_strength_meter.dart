@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/tokens.dart';
 import '../../../l10n/app_localizations.dart';
 import '../domain/password_strength.dart';
@@ -18,18 +17,18 @@ class PasswordStrengthMeter extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final (label, color) = switch (strength) {
-      PasswordStrength.empty => (null, AppColors.surfaceHover),
+      PasswordStrength.empty => (null, context.colors.hover),
       PasswordStrength.weak => (
         l10n.authPasswordStrengthWeak,
-        AppColors.negative,
+        context.colors.negative,
       ),
       PasswordStrength.fair => (
         l10n.authPasswordStrengthFair,
-        AppColors.warning,
+        context.colors.warning,
       ),
       PasswordStrength.strong || PasswordStrength.excellent => (
         l10n.authPasswordStrengthStrong,
-        AppColors.iris,
+        context.colors.accent,
       ),
     };
 
@@ -46,7 +45,7 @@ class PasswordStrengthMeter extends StatelessWidget {
                 decoration: BoxDecoration(
                   color: segment < strength.filledSegments
                       ? color
-                      : AppColors.surfaceHover,
+                      : context.colors.hover,
                   borderRadius: BorderRadius.circular(AppRadii.pill),
                 ),
               ),
@@ -60,7 +59,7 @@ class PasswordStrengthMeter extends StatelessWidget {
               key: const Key('passwordStrengthVerdict'),
               textAlign: TextAlign.right,
               overflow: TextOverflow.ellipsis,
-              style: AppTextStyles.helper.copyWith(color: color),
+              style: context.textStyles.helper.copyWith(color: color),
             ),
           ),
         ],

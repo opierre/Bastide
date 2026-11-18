@@ -53,18 +53,19 @@ class TransactionCheckRow extends StatelessWidget {
                   height: 18,
                   alignment: Alignment.center,
                   decoration: BoxDecoration(
-                    gradient: ticked ? AppColors.irisGradient : null,
-                    color: ticked ? null : AppColors.surfaceField,
+                    color: ticked
+                        ? context.colors.accent
+                        : context.colors.field,
                     borderRadius: BorderRadius.circular(AppRadii.xs + 1),
                     border: Border.all(
-                      color: ticked ? Colors.transparent : AppColors.border,
+                      color: ticked ? Colors.transparent : context.colors.line,
                     ),
                   ),
                   child: ticked
-                      ? const Icon(
+                      ? Icon(
                           Icons.check_rounded,
                           size: 13,
-                          color: AppColors.irisInk,
+                          color: context.colors.onAccent,
                         )
                       : null,
                 ),
@@ -75,7 +76,7 @@ class TransactionCheckRow extends StatelessWidget {
                 child: Text(
                   date,
                   style: textTheme.bodySmall?.copyWith(
-                    color: AppColors.textSecondary,
+                    color: context.colors.textSecondary,
                   ),
                 ),
               ),
@@ -92,7 +93,7 @@ class TransactionCheckRow extends StatelessWidget {
                       Text(
                         caption,
                         style: textTheme.bodySmall?.copyWith(
-                          color: AppColors.textSecondary,
+                          color: context.colors.textSecondary,
                         ),
                         overflow: TextOverflow.ellipsis,
                       ),

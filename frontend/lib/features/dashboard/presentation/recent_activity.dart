@@ -11,7 +11,7 @@ import '../../../l10n/app_localizations.dart';
 import '../domain/dashboard_trends.dart';
 
 /// « Activité récente » — the compact TransactionRow variant: a 28px monogram, the merchant
-/// over its account, and the amount over its date. No CategoryChip: this list is a glance at
+/// over its account, and the amount over its date. No CategoryLabel: this list is a glance at
 /// what moved, and the panel that categorises is one link away (`docs/design/04-dashboard.md`
 /// §Row 3).
 class RecentActivityCard extends StatelessWidget {
@@ -50,7 +50,7 @@ class RecentActivityCard extends StatelessWidget {
                 onPressed: onViewAll,
                 style: TextButton.styleFrom(
                   padding: EdgeInsets.zero,
-                  foregroundColor: AppColors.iris,
+                  foregroundColor: context.colors.accent,
                   minimumSize: Size.zero,
                   tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                 ),
@@ -65,7 +65,7 @@ class RecentActivityCard extends StatelessWidget {
                     child: Text(
                       l10n.dashboardRecentActivityEmpty,
                       style: textTheme.bodySmall?.copyWith(
-                        color: AppColors.textSecondary,
+                        color: context.colors.textSecondary,
                       ),
                     ),
                   )
@@ -177,7 +177,7 @@ class CompactTransactionRow extends StatelessWidget {
                   transaction.accountLabel,
                   style: textTheme.labelSmall?.copyWith(
                     fontWeight: FontWeight.w400,
-                    color: AppColors.textDisabled,
+                    color: context.colors.textTertiary,
                   ),
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -209,7 +209,7 @@ class CompactTransactionRow extends StatelessWidget {
                   overflow: TextOverflow.ellipsis,
                   style: textTheme.labelSmall?.copyWith(
                     fontWeight: FontWeight.w400,
-                    color: AppColors.textDisabled,
+                    color: context.colors.textTertiary,
                   ),
                 ),
               ],

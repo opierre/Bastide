@@ -12,7 +12,7 @@ Widget _wrap({
   List<InlineSpan>? tooltips,
   String Function(num)? valueLabel,
 }) => MaterialApp(
-  theme: appDarkTheme,
+  theme: AppTheme.dark,
   home: Scaffold(
     body: Center(
       child: SizedBox(
@@ -318,7 +318,7 @@ void main() {
     ]) {
       await tester.pumpWidget(
         MaterialApp(
-          theme: appDarkTheme,
+          theme: AppTheme.dark,
           home: Scaffold(
             body: Center(
               child: SizedBox(
@@ -368,7 +368,7 @@ void main() {
   });
 
   group('zero baseline', () {
-    final overdraft = AppColors.negative.withValues(alpha: 0.10);
+    final overdraft = AppColors.dark.negative.withValues(alpha: 0.10);
 
     Future<RenderObject> pumpSeries(
       WidgetTester tester,
@@ -377,7 +377,7 @@ void main() {
     }) async {
       await tester.pumpWidget(
         MaterialApp(
-          theme: appDarkTheme,
+          theme: AppTheme.dark,
           home: Scaffold(
             body: Center(
               child: SizedBox(
@@ -451,7 +451,7 @@ void main() {
     Future<List<double>> dotRadii(WidgetTester tester, int count) async {
       await tester.pumpWidget(
         MaterialApp(
-          theme: appDarkTheme,
+          theme: AppTheme.dark,
           home: Scaffold(
             body: Center(
               child: SizedBox(
@@ -477,7 +477,7 @@ void main() {
         paints..everything((method, arguments) {
           if (method == #drawCircle &&
               (arguments[2] as Paint).color.toARGB32() ==
-                  AppColors.iris.toARGB32()) {
+                  AppColors.dark.accent.toARGB32()) {
             radii.add(arguments[1] as double);
           }
           return true;
@@ -517,9 +517,11 @@ void main() {
           ),
         ),
         paints
-          ..path(color: AppColors.iris.withValues(alpha: AppChart.areaAlpha))
           ..path(
-            color: AppColors.iris,
+            color: AppColors.dark.accent.withValues(alpha: AppChart.areaAlpha),
+          )
+          ..path(
+            color: AppColors.dark.accent,
             strokeWidth: AppChart.lineStroke,
             style: PaintingStyle.stroke,
           ),

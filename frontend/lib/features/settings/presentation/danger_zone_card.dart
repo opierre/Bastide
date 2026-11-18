@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/tokens.dart';
 import '../../../core/widgets/app_card.dart';
 import '../../../l10n/app_localizations.dart';
@@ -28,7 +27,9 @@ class DangerZoneCard extends ConsumerWidget {
     return AppCard(
       key: const Key('settingsDangerZoneCard'),
       padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 13),
-      border: Border.all(color: AppColors.negative.withValues(alpha: 0.28)),
+      border: Border.all(
+        color: context.colors.negative.withValues(alpha: 0.28),
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -38,27 +39,12 @@ class DangerZoneCard extends ConsumerWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // A [Wrap]: the French title runs longer than the English
-                    // one and the pill beside it is fixed width, so on a narrow
-                    // column the pill drops to its own line instead of pushing
-                    // the title out of the card.
-                    Wrap(
-                      crossAxisAlignment: WrapCrossAlignment.center,
-                      spacing: AppSpacing.sm,
-                      runSpacing: AppSpacing.xs,
-                      children: [
-                        Text(
-                          l10n.settingsResetTitle,
-                          style: textTheme.titleMedium,
-                        ),
-                        const _IrreversibleBadge(),
-                      ],
-                    ),
+                    Text(l10n.settingsResetTitle, style: textTheme.titleMedium),
                     const SizedBox(height: 2),
                     Text(
                       l10n.settingsResetSubtitle,
-                      style: AppTextStyles.helper.copyWith(
-                        color: AppColors.textSecondary,
+                      style: context.textStyles.helper.copyWith(
+                        color: context.colors.textSecondary,
                       ),
                     ),
                   ],
@@ -84,36 +70,6 @@ class DangerZoneCard extends ConsumerWidget {
             ),
           ],
         ],
-      ),
-    );
-  }
-}
-
-/// The « IRRÉVERSIBLE » pill beside the title. States the stake in a word, so
-/// the card does not rely on its border colour to carry it.
-class _IrreversibleBadge extends StatelessWidget {
-  const _IrreversibleBadge();
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppSpacing.sm - 2,
-        vertical: 3,
-      ),
-      decoration: BoxDecoration(
-        color: AppColors.negative.withValues(alpha: 0.12),
-        borderRadius: BorderRadius.circular(5),
-      ),
-      child: Text(
-        AppLocalizations.of(context)!.settingsResetBadge,
-        style: const TextStyle(
-          fontFamily: AppFonts.geist,
-          fontSize: 10,
-          fontWeight: FontWeight.w700,
-          letterSpacing: 1,
-          color: AppColors.negative,
-        ),
       ),
     );
   }
@@ -149,26 +105,28 @@ class _ResetButtonState extends State<_ResetButton> {
             horizontal: AppSpacing.sm + AppSpacing.xs,
           ),
           decoration: BoxDecoration(
-            color: _hovered ? AppColors.negative.withValues(alpha: 0.10) : null,
+            color: _hovered
+                ? context.colors.negative.withValues(alpha: 0.10)
+                : null,
             borderRadius: BorderRadius.circular(11),
             border: Border.all(
-              color: AppColors.negative.withValues(alpha: 0.45),
+              color: context.colors.negative.withValues(alpha: 0.45),
             ),
           ),
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Icon(
+              Icon(
                 Icons.delete_outline_rounded,
                 size: 16,
-                color: AppColors.negative,
+                color: context.colors.negative,
               ),
               const SizedBox(width: AppSpacing.sm - 1),
               Text(
                 AppLocalizations.of(context)!.settingsResetButton,
-                style: Theme.of(
-                  context,
-                ).textTheme.labelLarge?.copyWith(color: AppColors.negative),
+                style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                  color: context.colors.negative,
+                ),
               ),
             ],
           ),

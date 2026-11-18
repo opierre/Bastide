@@ -523,7 +523,7 @@ void main() {
     expect(
       find.text(
         "Corriger cette valeur décale le solde du compte et son historique "
-        "enregistré du même montant — aucune transaction n'est modifiée.",
+        "enregistré du même montant. Aucune transaction n'est modifiée.",
       ),
       findsOneWidget,
     );

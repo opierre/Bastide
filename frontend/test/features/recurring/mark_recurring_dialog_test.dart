@@ -92,7 +92,7 @@ Future<ProviderContainer> _open(
       child: MaterialApp.router(
         routerConfig: router,
         locale: locale,
-        theme: appDarkTheme,
+        theme: AppTheme.dark,
         localizationsDelegates: AppLocalizations.localizationsDelegates,
         supportedLocales: AppLocalizations.supportedLocales,
       ),
@@ -496,7 +496,7 @@ void main() {
       await _open(tester, repository: repository, locale: const Locale('en'));
       await openPicker(tester);
 
-      expect(find.text("You don't track any series yet."), findsOneWidget);
+      expect(find.text("You don't track any series."), findsOneWidget);
     });
 
     testWidgets('a failed load offers a retry', (tester) async {

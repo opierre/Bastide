@@ -5,6 +5,7 @@ import '../../../core/theme/tokens.dart';
 import '../../../core/widgets/amount_text.dart';
 import '../../../core/widgets/app_card.dart';
 import '../../../core/widgets/institution_avatar.dart';
+import '../../../core/widgets/repere_meter.dart';
 import '../../../l10n/app_localizations.dart';
 import '../domain/mortgage.dart';
 import 'mortgage_labels.dart';
@@ -64,7 +65,7 @@ class MortgageCard extends StatelessWidget {
                       overflow: TextOverflow.ellipsis,
                       style: textTheme.bodySmall?.copyWith(
                         fontSize: 12,
-                        color: AppColors.textSecondary,
+                        color: context.colors.textSecondary,
                       ),
                     ),
                   ],
@@ -83,9 +84,9 @@ class MortgageCard extends StatelessWidget {
                   ),
                   Text(
                     l10n.mortgageCardPerMonth,
-                    style: AppTextStyles.helper.copyWith(
+                    style: context.textStyles.helper.copyWith(
                       fontSize: 11,
-                      color: AppColors.textDisabled,
+                      color: context.colors.textTertiary,
                     ),
                   ),
                 ],
@@ -101,7 +102,7 @@ class MortgageCard extends StatelessWidget {
                   l10n.mortgageCardOutstandingLabel,
                   style: textTheme.bodySmall?.copyWith(
                     fontSize: 12,
-                    color: AppColors.textSecondary,
+                    color: context.colors.textSecondary,
                   ),
                 ),
               ),
@@ -122,28 +123,29 @@ class MortgageCard extends StatelessWidget {
                   ),
                 ),
                 style: tabularNumberStyle(
-                  AppTextStyles.helper,
-                ).copyWith(color: AppColors.textDisabled),
+                  context.textStyles.helper,
+                ).copyWith(color: context.colors.textTertiary),
               ),
             ],
           ),
           const SizedBox(height: AppSpacing.sm),
-          LoanProgressBar(bps: mortgage.paidPrincipalBps),
+          RepereMeter(fraction: mortgage.paidPrincipalBps / 10000),
           const SizedBox(height: AppSpacing.sm),
           Row(
             children: [
               Text(
                 formatBps(mortgage.paidPrincipalBps, locale),
                 key: Key('mortgageCardRepaid-$id'),
-                style: tabularNumberStyle(
-                  textTheme.bodySmall!,
-                ).copyWith(color: AppColors.iris, fontWeight: FontWeight.w600),
+                style: tabularNumberStyle(textTheme.bodySmall!).copyWith(
+                  color: context.colors.accent,
+                  fontWeight: FontWeight.w600,
+                ),
               ),
               const SizedBox(width: AppSpacing.xs),
               Text(
                 l10n.mortgageCardRepaid,
                 style: textTheme.bodySmall?.copyWith(
-                  color: AppColors.textSecondary,
+                  color: context.colors.textSecondary,
                 ),
               ),
               const Spacer(),
@@ -151,13 +153,13 @@ class MortgageCard extends StatelessWidget {
                 l10n.mortgageCardRemaining(mortgage.remainingMonths),
                 key: Key('mortgageCardRemaining-$id'),
                 style: textTheme.bodySmall?.copyWith(
-                  color: AppColors.textSecondary,
+                  color: context.colors.textSecondary,
                 ),
               ),
             ],
           ),
           const SizedBox(height: AppSpacing.md - 2),
-          const Divider(height: 1, thickness: 1, color: AppColors.borderSubtle),
+          Divider(height: 1, thickness: 1, color: context.colors.line),
           const SizedBox(height: AppSpacing.sm + AppSpacing.xs),
           Row(
             children: [
@@ -193,10 +195,10 @@ class MortgageCard extends StatelessWidget {
                   valueKey: Key('mortgageCardNext-$id'),
                 ),
               ),
-              const Icon(
+              Icon(
                 Icons.chevron_right_rounded,
                 size: 18,
-                color: AppColors.textDisabled,
+                color: context.colors.textTertiary,
               ),
             ],
           ),
@@ -226,7 +228,7 @@ class _FooterStat extends StatelessWidget {
           label.toUpperCase(),
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
-          style: AppTextStyles.sectionLabel.copyWith(
+          style: context.textStyles.sectionLabel.copyWith(
             fontSize: 10.5,
             letterSpacing: 1,
           ),
@@ -242,34 +244,6 @@ class _FooterStat extends StatelessWidget {
           ).copyWith(fontWeight: FontWeight.w600),
         ),
       ],
-    );
-  }
-}
-
-/// The 8 px repaid-share bar: an inset track with the iris gradient fill.
-///
-/// Takes the API's basis points as they are; the fraction is only the bar's
-/// width, clamped so a rounding edge can never draw past the track.
-class LoanProgressBar extends StatelessWidget {
-  const LoanProgressBar({super.key, required this.bps});
-
-  final int bps;
-
-  @override
-  Widget build(BuildContext context) {
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(AppRadii.xs),
-      child: Container(
-        height: 8,
-        color: AppColors.surfaceHover,
-        child: FractionallySizedBox(
-          alignment: Alignment.centerLeft,
-          widthFactor: (bps / 10000).clamp(0.0, 1.0),
-          child: const DecoratedBox(
-            decoration: BoxDecoration(gradient: AppColors.goalProgressGradient),
-          ),
-        ),
-      ),
     );
   }
 }

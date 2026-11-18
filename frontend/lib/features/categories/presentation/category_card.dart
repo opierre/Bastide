@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
 
 import '../../../core/l10n/category_display.dart';
-import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/tokens.dart';
 import '../../../core/widgets/app_card.dart';
-import '../../../core/widgets/app_chip.dart';
 import '../../../core/widgets/dashed_border.dart';
+import '../../../core/widgets/status_text.dart';
 import '../../../l10n/app_localizations.dart';
 import '../domain/category.dart';
 import 'category_color.dart';
@@ -62,7 +61,7 @@ class CategoryCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final category = node.category;
-    final hue = categoryColor(category);
+    final hue = categoryColor(context, category);
 
     return ConstrainedBox(
       constraints: const BoxConstraints(minHeight: categoryCardMinHeight),
@@ -163,14 +162,13 @@ class _Header extends StatelessWidget {
                 children: [
                   Flexible(
                     child: category.isSystem
-                        ? AppChip(
+                        ? StatusText(
                             key: Key('categoryBadgeSystem-${category.id}'),
                             label: l10n.categoryBadgeSystem,
                           )
-                        : AppChip(
+                        : StatusText(
                             key: Key('categoryBadgeCustom-${category.id}'),
                             label: l10n.categoryBadgeCustom,
-                            color: AppColors.iris,
                           ),
                   ),
                   const SizedBox(width: AppSpacing.sm),
@@ -180,9 +178,9 @@ class _Header extends StatelessWidget {
                       key: Key('categoryKind-${category.id}'),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: AppTextStyles.helper.copyWith(
+                      style: context.textStyles.helper.copyWith(
                         fontSize: 11,
-                        color: AppColors.textDisabled,
+                        color: context.colors.textTertiary,
                       ),
                     ),
                   ),
@@ -202,7 +200,7 @@ class _Header extends StatelessWidget {
                 Icons.lock_outline_rounded,
                 key: Key('categoryLock-${category.id}'),
                 size: 16,
-                color: AppColors.textDisabled,
+                color: context.colors.textTertiary,
               ),
             ),
           )
@@ -240,9 +238,9 @@ class _ActionsMenu extends StatelessWidget {
         tooltip: l10n.categoryActionsTooltip,
         padding: EdgeInsets.zero,
         iconSize: 18,
-        icon: const Icon(
+        icon: Icon(
           Icons.more_horiz_rounded,
-          color: AppColors.textSecondary,
+          color: context.colors.textSecondary,
         ),
         position: PopupMenuPosition.under,
         onSelected: (action) => switch (action) {
@@ -282,7 +280,7 @@ class _MenuRow extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        Icon(icon, size: 16, color: AppColors.textSecondary),
+        Icon(icon, size: 16, color: context.colors.textSecondary),
         const SizedBox(width: AppSpacing.sm),
         Text(label),
       ],
@@ -293,7 +291,7 @@ class _MenuRow extends StatelessWidget {
 /// A subcategory as a 26 px chip: a swatch in the *parent's* hue, so the
 /// family reads at a glance, and the name in the secondary ink.
 ///
-/// A deliberately quieter shape than [CategoryChip] — neutral fill, no glyph —
+/// A deliberately quieter shape than [CategoryLabel] — neutral fill, no glyph —
 /// because it is an entry in its parent's list, not a label on a transaction.
 class SubcategoryChip extends StatelessWidget {
   const SubcategoryChip({
@@ -318,9 +316,9 @@ class SubcategoryChip extends StatelessWidget {
       height: 26,
       padding: const EdgeInsets.symmetric(horizontal: 10),
       decoration: BoxDecoration(
-        color: AppColors.borderSubtle,
+        color: context.colors.line,
         borderRadius: BorderRadius.circular(13),
-        border: Border.all(color: AppColors.border),
+        border: Border.all(color: context.colors.line),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -335,9 +333,9 @@ class SubcategoryChip extends StatelessWidget {
             child: Text(
               localizedCategoryName(l10n, category.name),
               overflow: TextOverflow.ellipsis,
-              style: Theme.of(
-                context,
-              ).textTheme.labelSmall?.copyWith(color: AppColors.textSecondary),
+              style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                color: context.colors.textSecondary,
+              ),
             ),
           ),
         ],
@@ -371,7 +369,9 @@ class _AddSubcategoryChipState extends State<_AddSubcategoryChip> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final foreground = _hovered ? AppColors.iris : AppColors.textDisabled;
+    final foreground = _hovered
+        ? context.colors.accent
+        : context.colors.textTertiary;
 
     return MouseRegion(
       cursor: SystemMouseCursors.click,
@@ -381,7 +381,7 @@ class _AddSubcategoryChipState extends State<_AddSubcategoryChip> {
         onTap: widget.onTap,
         child: DashedBorder(
           radius: 13,
-          color: _hovered ? AppColors.iris : AppColors.borderDashed,
+          color: _hovered ? context.colors.accent : context.colors.lineStrong,
           child: SizedBox(
             height: 26,
             child: Padding(
@@ -430,7 +430,9 @@ class _Footer extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final count = ruleCount;
-    final color = count == 0 ? AppColors.warning : AppColors.textDisabled;
+    final color = count == 0
+        ? context.colors.warning
+        : context.colors.textTertiary;
 
     final line = Row(
       children: [
@@ -442,7 +444,7 @@ class _Footer extends StatelessWidget {
             // doesn't grow a row when they arrive.
             count == null ? '' : l10n.categoryRuleCount(count),
             overflow: TextOverflow.ellipsis,
-            style: AppTextStyles.helper.copyWith(color: color),
+            style: context.textStyles.helper.copyWith(color: color),
           ),
         ),
       ],
@@ -451,7 +453,7 @@ class _Footer extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        const Divider(height: 1, thickness: 1, color: AppColors.borderSubtle),
+        Divider(height: 1, thickness: 1, color: context.colors.line),
         const SizedBox(height: AppSpacing.sm + AppSpacing.xs),
         if (count == null || count == 0)
           KeyedSubtree(key: Key('categoryRules-$categoryId'), child: line)

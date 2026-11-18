@@ -214,7 +214,7 @@ void main() {
       ],
       child: MaterialApp(
         locale: locale,
-        theme: appDarkTheme,
+        theme: AppTheme.dark,
         localizationsDelegates: AppLocalizations.localizationsDelegates,
         supportedLocales: AppLocalizations.supportedLocales,
         home: const Scaffold(
@@ -246,7 +246,7 @@ void main() {
       await tester.pumpWidget(wrap());
       await tester.pumpAndSettle();
 
-      expect(find.text("Aucune sauvegarde pour l'instant."), findsOneWidget);
+      expect(find.text('Aucune sauvegarde.'), findsOneWidget);
     });
 
     testWidgets('⑥ then ⑦: preparing caption, then the toast with counts', (
@@ -272,7 +272,7 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      expect(find.textContaining('Sauvegarde enregistrée — 1'), findsOneWidget);
+      expect(find.textContaining('Sauvegarde enregistrée : 1'), findsOneWidget);
       expect(find.textContaining('transactions, 4 comptes.'), findsOneWidget);
       expect(find.textContaining('Dernière sauvegarde :'), findsOneWidget);
       // Let the toast's timer run out so no timer outlives the test.
@@ -360,7 +360,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('Backup & restore'), findsOneWidget);
-      expect(find.text('No backup yet.'), findsOneWidget);
+      expect(find.text('No backup.'), findsOneWidget);
       expect(find.text('Import a file…'), findsOneWidget);
     });
   });

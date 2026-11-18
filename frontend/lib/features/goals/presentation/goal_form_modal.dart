@@ -171,9 +171,9 @@ class _GoalFormModalState extends ConsumerState<GoalFormModal> {
           children: [
             Text(
               l10n.goalFormIntro,
-              style: Theme.of(
-                context,
-              ).textTheme.bodySmall?.copyWith(color: AppColors.textSecondary),
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: context.colors.textSecondary,
+              ),
             ),
             const SizedBox(height: AppSpacing.md),
             if (_errorText != null) ...[
@@ -279,7 +279,9 @@ class _IconPicker extends StatelessWidget {
             child: Icon(
               goalIconData(key),
               size: 18,
-              color: key == selected ? AppColors.iris : AppColors.textSecondary,
+              color: key == selected
+                  ? context.colors.accent
+                  : context.colors.textSecondary,
             ),
           ),
       ],
@@ -309,7 +311,7 @@ class _ColorPicker extends StatelessWidget {
               width: 16,
               height: 16,
               decoration: BoxDecoration(
-                color: goalColorValue(key),
+                color: goalColorValue(context, key),
                 borderRadius: BorderRadius.circular(AppRadii.xs),
               ),
             ),
@@ -345,10 +347,10 @@ class _PickerTile extends StatelessWidget {
           height: 38,
           alignment: Alignment.center,
           decoration: BoxDecoration(
-            color: selected ? AppColors.irisSoft : AppColors.surfaceField,
+            color: selected ? context.colors.accentSoft : context.colors.field,
             borderRadius: BorderRadius.circular(AppRadii.md),
             border: Border.all(
-              color: selected ? AppColors.iris : AppColors.border,
+              color: selected ? context.colors.accent : context.colors.line,
             ),
           ),
           child: child,

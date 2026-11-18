@@ -18,7 +18,7 @@ Widget _wrap({
     overrides: [authControllerProvider.overrideWith(() => controller)],
     child: MaterialApp(
       locale: locale,
-      theme: appDarkTheme,
+      theme: AppTheme.dark,
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
       home: const RegisterScreen(),
@@ -131,7 +131,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(
-      find.text('Cet e-mail est déjà utilisé — connectez-vous plutôt.'),
+      find.text('Cet e-mail a déjà un compte. Connectez-vous.'),
       findsOneWidget,
     );
   });

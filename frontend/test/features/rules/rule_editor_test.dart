@@ -51,7 +51,7 @@ Widget _wrap(MockApiClient apiClient, {FakeRulesController? rules}) {
     ],
     child: MaterialApp(
       locale: const Locale('fr'),
-      theme: appDarkTheme,
+      theme: AppTheme.dark,
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
       home: Scaffold(

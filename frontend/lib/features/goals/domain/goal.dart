@@ -93,7 +93,8 @@ const goalIconKeys = <String>['flag', 'home', 'travel', 'car', 'study', 'gift'];
 
 /// The hues a goal may carry — the palette's accent and data colors, so a goal
 /// can never be given a tone the design system doesn't own
-/// (`docs/design/00-shared-design-block.md` §Palette).
+/// (`docs/design/00-design-system.md` §2). Each key maps onto a v2 slot in
+/// `goalColorValue`.
 const goalColorKeys = <String>[
   '#8B8CF9',
   '#4FD1E8',

@@ -61,7 +61,7 @@ void main() {
       container: container,
       child: MaterialApp(
         locale: locale,
-        theme: appDarkTheme,
+        theme: AppTheme.dark,
         localizationsDelegates: AppLocalizations.localizationsDelegates,
         supportedLocales: AppLocalizations.supportedLocales,
         home: Scaffold(body: child),
@@ -254,7 +254,7 @@ void main() {
           container: container,
           child: MaterialApp.router(
             locale: const Locale('fr'),
-            theme: appDarkTheme,
+            theme: AppTheme.dark,
             localizationsDelegates: AppLocalizations.localizationsDelegates,
             supportedLocales: AppLocalizations.supportedLocales,
             routerConfig: router,

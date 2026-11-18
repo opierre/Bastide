@@ -1,11 +1,12 @@
 import 'package:bastide/core/theme/app_theme.dart';
+import 'package:bastide/core/theme/tokens.dart';
 import 'package:bastide/core/widgets/app_select.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 Widget _wrap({double width = 420}) {
   return MaterialApp(
-    theme: appDarkTheme,
+    theme: AppTheme.dark,
     home: Scaffold(
       body: Center(
         child: SizedBox(
@@ -39,11 +40,13 @@ void main() {
       await tester.tap(find.byKey(const Key('select')));
       await tester.pumpAndSettle();
 
+      // Each row is inset by the popover's 4 px padding, so the popover's
+      // outer edge lines up with the field.
       final anchor = tester.getRect(find.byKey(const Key('select')));
       for (final row in find.byType(MenuItemButton).evaluate()) {
         final rect = tester.getRect(find.byWidget(row.widget));
-        expect(rect.left, anchor.left);
-        expect(rect.width, anchor.width);
+        expect(rect.left, anchor.left + AppSpacing.xs);
+        expect(rect.width, anchor.width - AppSpacing.xs * 2);
       }
     },
   );

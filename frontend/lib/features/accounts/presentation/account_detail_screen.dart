@@ -8,12 +8,12 @@ import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/tokens.dart';
 import '../../../core/widgets/amount_text.dart';
 import '../../../core/widgets/app_card.dart';
-import '../../../core/widgets/app_chip.dart';
 import '../../../core/widgets/app_segmented.dart';
 import '../../../core/widgets/area_line.dart';
 import '../../../core/widgets/dashed_border.dart';
 import '../../../core/widgets/institution_avatar.dart';
 import '../../../core/widgets/state_views.dart';
+import '../../../core/widgets/status_text.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../imports/presentation/imports_screen.dart';
 import '../../transactions/application/transactions_controller.dart';
@@ -133,7 +133,7 @@ class _BackLink extends StatelessWidget {
       key: const Key('accountDetailBack'),
       onPressed: () => context.go('/accounts'),
       style: TextButton.styleFrom(
-        foregroundColor: AppColors.textSecondary,
+        foregroundColor: context.colors.textSecondary,
         padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xs),
         minimumSize: Size.zero,
         tapTargetSize: MaterialTapTargetSize.shrinkWrap,
@@ -192,10 +192,10 @@ class _IdentityCard extends StatelessWidget {
                         Text(
                           account.institution,
                           style: textTheme.bodySmall?.copyWith(
-                            color: AppColors.textSecondary,
+                            color: context.colors.textSecondary,
                           ),
                         ),
-                        AppChip(label: accountTypeLabel(l10n, account.type)),
+                        StatusText(label: accountTypeLabel(l10n, account.type)),
                       ],
                     ),
                   ],
@@ -210,7 +210,7 @@ class _IdentityCard extends StatelessWidget {
                             ? l10n.accountDetailBalanceLabel
                             : l10n.accountDetailCycleLabel)
                         .toUpperCase(),
-                    style: AppTextStyles.sectionLabel,
+                    style: context.textStyles.sectionLabel,
                   ),
                   const SizedBox(height: AppSpacing.xs),
                   // The headline is this panel's data point, so it carries the
@@ -232,7 +232,7 @@ class _IdentityCard extends StatelessWidget {
                             DateFormat.MMMd(locale).format(debit),
                           ),
                     style: textTheme.bodySmall?.copyWith(
-                      color: AppColors.textSecondary,
+                      color: context.colors.textSecondary,
                     ),
                   ),
                 ],
@@ -240,7 +240,7 @@ class _IdentityCard extends StatelessWidget {
             ],
           ),
           const SizedBox(height: AppSpacing.gridGap),
-          const Divider(height: 1, color: AppColors.borderSubtle),
+          Divider(height: 1, color: context.colors.line),
           const SizedBox(height: 14),
           _MetaStrip(overview: overview),
         ],
@@ -310,14 +310,14 @@ class _MetaFact extends StatelessWidget {
   Widget build(BuildContext context) {
     final style = Theme.of(context).textTheme.bodySmall?.copyWith(
       fontSize: 12,
-      color: AppColors.textSecondary,
+      color: context.colors.textSecondary,
       decoration: onTap == null ? null : TextDecoration.underline,
-      decorationColor: AppColors.borderDashed,
+      decorationColor: context.colors.lineStrong,
     );
     final fact = Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Icon(icon, size: 11, color: AppColors.textSecondary),
+        Icon(icon, size: 11, color: context.colors.textSecondary),
         const SizedBox(width: 7),
         Text(text, style: tabularNumberStyle(style!)),
       ],
@@ -460,7 +460,7 @@ class _BalanceChart extends ConsumerWidget {
 
     return AreaLine(
       key: const Key('accountDetailBalanceChart'),
-      color: AppColors.cyan,
+      color: context.colors.textTertiary,
       markZero: true,
       gridlines: 2,
       // Minor units: no gridline on cents.
@@ -505,15 +505,17 @@ class _BalanceChart extends ConsumerWidget {
   }) {
     final textTheme = Theme.of(context).textTheme;
     final deltaColor = switch (delta) {
-      null || 0 => AppColors.textSecondary,
-      > 0 => AppColors.positive,
-      _ => AppColors.negative,
+      null || 0 => context.colors.textSecondary,
+      > 0 => context.colors.positive,
+      _ => context.colors.negative,
     };
     return TextSpan(
       children: [
         TextSpan(
           text: '$title\n',
-          style: textTheme.labelSmall?.copyWith(color: AppColors.textSecondary),
+          style: textTheme.labelSmall?.copyWith(
+            color: context.colors.textSecondary,
+          ),
         ),
         TextSpan(
           text: '$value\n',
@@ -590,7 +592,7 @@ class _CycleChart extends ConsumerWidget {
                     '${formatAmount(amountMinor: cycle.amountMinor, currency: currency, locale: locale)}\n',
                 style: tabularNumberStyle(
                   textTheme.titleSmall!,
-                ).copyWith(color: AppColors.negative),
+                ).copyWith(color: context.colors.negative),
               ),
               TextSpan(
                 text: cycle.settledOn == null
@@ -599,7 +601,7 @@ class _CycleChart extends ConsumerWidget {
                         day.format(cycle.settledOn!),
                       ),
                 style: textTheme.labelSmall?.copyWith(
-                  color: AppColors.textSecondary,
+                  color: context.colors.textSecondary,
                 ),
               ),
             ],
@@ -624,8 +626,6 @@ class _ChartEmpty extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const GlyphPlate(icon: Icons.show_chart_rounded),
-            const SizedBox(height: 14),
             ConstrainedBox(
               constraints: const BoxConstraints(maxWidth: 360),
               child: Text(
@@ -640,7 +640,9 @@ class _ChartEmpty extends StatelessWidget {
             TextButton.icon(
               key: const Key('accountDetailImportCta'),
               onPressed: () => context.go(ImportsScreen.path),
-              style: TextButton.styleFrom(foregroundColor: AppColors.iris),
+              style: TextButton.styleFrom(
+                foregroundColor: context.colors.accent,
+              ),
               icon: const Icon(Icons.download_rounded, size: 16),
               label: Text(l10n.accountDetailImportCta),
             ),
@@ -698,12 +700,12 @@ class _StatsCard extends StatelessWidget {
               alignment: Alignment.centerLeft,
               child: Text(
                 title.toUpperCase(),
-                style: AppTextStyles.sectionLabel,
+                style: context.textStyles.sectionLabel,
               ),
             ),
           ),
           for (var i = 0; i < rows.length; i++) ...[
-            if (i > 0) const Divider(height: 1, color: AppColors.borderSubtle),
+            if (i > 0) Divider(height: 1, color: context.colors.line),
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 6),
               child: Column(
@@ -713,7 +715,7 @@ class _StatsCard extends StatelessWidget {
                     rows[i].label,
                     style: textTheme.bodySmall?.copyWith(
                       fontSize: 12,
-                      color: AppColors.textSecondary,
+                      color: context.colors.textSecondary,
                     ),
                     overflow: TextOverflow.ellipsis,
                   ),
@@ -721,10 +723,10 @@ class _StatsCard extends StatelessWidget {
                   Row(
                     children: [
                       if (rows[i].rising) ...[
-                        const Icon(
+                        Icon(
                           Icons.arrow_upward_rounded,
                           size: 16,
-                          color: AppColors.positive,
+                          color: context.colors.positive,
                         ),
                         const SizedBox(width: 6),
                       ],
@@ -733,7 +735,7 @@ class _StatsCard extends StatelessWidget {
                             ? Text(
                                 l10n.accountDetailNoStats,
                                 style: valueStyle.copyWith(
-                                  color: AppColors.textDisabled,
+                                  color: context.colors.textTertiary,
                                 ),
                               )
                             : AmountText(
@@ -756,12 +758,12 @@ class _StatsCard extends StatelessWidget {
               key: const Key('accountDetailStreak'),
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Padding(
+                Padding(
                   padding: EdgeInsets.only(top: 2),
                   child: Icon(
                     Icons.trending_up_rounded,
                     size: 14,
-                    color: AppColors.iris,
+                    color: context.colors.accent,
                   ),
                 ),
                 const SizedBox(width: AppSpacing.sm),
@@ -769,7 +771,7 @@ class _StatsCard extends StatelessWidget {
                   child: Text(
                     note,
                     style: textTheme.bodySmall?.copyWith(
-                      color: AppColors.textSecondary,
+                      color: context.colors.textSecondary,
                     ),
                   ),
                 ),
@@ -896,7 +898,7 @@ class _SectionCard extends StatelessWidget {
                 caption,
                 style: textTheme.bodySmall?.copyWith(
                   fontSize: 12,
-                  color: AppColors.textSecondary,
+                  color: context.colors.textSecondary,
                 ),
               ),
             ],
@@ -937,7 +939,7 @@ class _LinkedCardsSection extends ConsumerWidget {
           )
         else
           for (var i = 0; i < cards.length; i++) ...[
-            if (i > 0) const Divider(height: 1, color: AppColors.borderSubtle),
+            if (i > 0) Divider(height: 1, color: context.colors.line),
             _LinkedCardRow(
               card: cards[i],
               currency: overview.account.currency,
@@ -945,8 +947,7 @@ class _LinkedCardsSection extends ConsumerWidget {
             ),
           ],
         if (canLink) ...[
-          if (cards.isNotEmpty)
-            const Divider(height: 1, color: AppColors.borderSubtle),
+          if (cards.isNotEmpty) Divider(height: 1, color: context.colors.line),
           Align(
             alignment: Alignment.centerRight,
             child: Padding(
@@ -954,7 +955,9 @@ class _LinkedCardsSection extends ConsumerWidget {
               child: TextButton.icon(
                 key: const Key('accountDetailLinkCard'),
                 onPressed: () => showLinkCardDialog(context, overview.account),
-                style: TextButton.styleFrom(foregroundColor: AppColors.iris),
+                style: TextButton.styleFrom(
+                  foregroundColor: context.colors.accent,
+                ),
                 icon: const Icon(Icons.add_card_rounded, size: 16),
                 label: Text(l10n.accountDetailLinkCard),
               ),
@@ -1008,9 +1011,9 @@ class _LinkedCardRow extends ConsumerWidget {
                     l10n.accountDetailMaskedNumber(digits),
                     style: tabularNumberStyle(
                       textTheme.bodyMedium!,
-                    ).copyWith(color: AppColors.textSecondary),
+                    ).copyWith(color: context.colors.textSecondary),
                   ),
-                AppChip(
+                StatusText(
                   label: accountTypeLabel(l10n, AccountType.deferredCard),
                 ),
                 if (!card.hasRule && cardAccount != null)
@@ -1018,10 +1021,9 @@ class _LinkedCardRow extends ConsumerWidget {
                     key: Key('accountDetailRuleMissing-${card.accountId}'),
                     borderRadius: BorderRadius.circular(AppRadii.pill),
                     onTap: () => _openRule(context, ref, cardAccount),
-                    child: AppChip(
+                    child: StatusText(
                       label: l10n.accountDetailRuleMissing,
-                      color: AppColors.warning,
-                      icon: Icons.warning_amber_rounded,
+                      tone: StatusTone.warning,
                     ),
                   ),
               ],
@@ -1041,7 +1043,7 @@ class _LinkedCardRow extends ConsumerWidget {
                     l10n.accountDetailThisCycle,
                     style: textTheme.labelSmall?.copyWith(
                       fontWeight: FontWeight.w400,
-                      color: AppColors.textSecondary,
+                      color: context.colors.textSecondary,
                     ),
                   ),
                   const SizedBox(width: AppSpacing.sm),
@@ -1064,7 +1066,7 @@ class _LinkedCardRow extends ConsumerWidget {
                       ),
                 style: textTheme.bodySmall?.copyWith(
                   fontSize: 12,
-                  color: AppColors.textSecondary,
+                  color: context.colors.textSecondary,
                 ),
               ),
             ],
@@ -1073,7 +1075,7 @@ class _LinkedCardRow extends ConsumerWidget {
           Icon(
             Icons.chevron_right_rounded,
             size: 18,
-            color: AppColors.textSecondary,
+            color: context.colors.textSecondary,
             semanticLabel: l10n.accountDetailOpenAccount(card.name),
           ),
         ],
@@ -1141,7 +1143,7 @@ class _SettlementSection extends ConsumerWidget {
                     crossAxisAlignment: WrapCrossAlignment.center,
                     children: [
                       Text(paying.name, style: textTheme.titleSmall),
-                      AppChip(label: accountTypeLabel(l10n, paying.type)),
+                      StatusText(label: accountTypeLabel(l10n, paying.type)),
                     ],
                   ),
                 ),
@@ -1163,7 +1165,7 @@ class _SettlementSection extends ConsumerWidget {
                       l10n.accountDetailBalanceLabel,
                       style: textTheme.bodySmall?.copyWith(
                         fontSize: 12,
-                        color: AppColors.textSecondary,
+                        color: context.colors.textSecondary,
                       ),
                     ),
                   ],
@@ -1172,21 +1174,21 @@ class _SettlementSection extends ConsumerWidget {
                 Icon(
                   Icons.chevron_right_rounded,
                   size: 18,
-                  color: AppColors.textSecondary,
+                  color: context.colors.textSecondary,
                   semanticLabel: l10n.accountDetailOpenAccount(paying.name),
                 ),
               ],
             ),
           ),
-        const Divider(height: 1, color: AppColors.borderSubtle),
+        Divider(height: 1, color: context.colors.line),
         Padding(
           padding: const EdgeInsets.only(top: 6),
           child: Row(
             children: [
-              const Icon(
+              Icon(
                 Icons.sell_outlined,
                 size: 14,
-                color: AppColors.textSecondary,
+                color: context.colors.textSecondary,
               ),
               const SizedBox(width: 10),
               Expanded(
@@ -1194,7 +1196,7 @@ class _SettlementSection extends ConsumerWidget {
                   ruleText,
                   key: const Key('accountDetailRuleSummary'),
                   style: textTheme.bodySmall?.copyWith(
-                    color: AppColors.textSecondary,
+                    color: context.colors.textSecondary,
                   ),
                 ),
               ),
@@ -1204,7 +1206,9 @@ class _SettlementSection extends ConsumerWidget {
                   final saved = await showSettlementRuleDialog(context, card);
                   if (saved) ref.invalidate(accountOverviewProvider(card.id));
                 },
-                style: TextButton.styleFrom(foregroundColor: AppColors.iris),
+                style: TextButton.styleFrom(
+                  foregroundColor: context.colors.accent,
+                ),
                 child: Text(
                   rule == null
                       ? l10n.accountDetailSetUpRule
@@ -1262,7 +1266,7 @@ class _RecentTransactionsCard extends ConsumerWidget {
                     context.go(TransactionsScreen.path);
                   },
                   style: TextButton.styleFrom(
-                    foregroundColor: AppColors.iris,
+                    foregroundColor: context.colors.accent,
                     padding: EdgeInsets.zero,
                     minimumSize: Size.zero,
                     tapTargetSize: MaterialTapTargetSize.shrinkWrap,
@@ -1293,7 +1297,7 @@ class _RecentTransactionsCard extends ConsumerWidget {
             AsyncValue(:final value?) => Column(
               children: [
                 for (final transaction in value) ...[
-                  const Divider(height: 1, color: AppColors.borderSubtle),
+                  Divider(height: 1, color: context.colors.line),
                   // The account is the one on screen, so its own rows' second
                   // line keeps only the bank's memo; a linked card's rows name
                   // their card, behind a card glyph.
@@ -1320,7 +1324,7 @@ class _RecentTransactionsCard extends ConsumerWidget {
               child: Text(
                 localizeAccountError(l10n, error),
                 style: textTheme.bodySmall?.copyWith(
-                  color: AppColors.textSecondary,
+                  color: context.colors.textSecondary,
                 ),
               ),
             ),
@@ -1371,7 +1375,7 @@ class _HoverRowState extends State<_HoverRow> {
           height: 64,
           padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
           decoration: BoxDecoration(
-            color: _hovered ? AppColors.surfaceRowHover : Colors.transparent,
+            color: _hovered ? context.colors.hover : Colors.transparent,
             borderRadius: BorderRadius.circular(AppRadii.md),
           ),
           child: widget.child,
@@ -1400,13 +1404,13 @@ class _DashedRow extends StatelessWidget {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(icon, size: 16, color: AppColors.textDisabled),
+              Icon(icon, size: 16, color: context.colors.textTertiary),
               const SizedBox(width: AppSpacing.sm),
               Flexible(
                 child: Text(
                   text,
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: AppColors.textDisabled,
+                    color: context.colors.textTertiary,
                   ),
                 ),
               ),

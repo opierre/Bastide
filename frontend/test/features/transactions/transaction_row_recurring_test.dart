@@ -107,7 +107,7 @@ Future<ProviderContainer> _pump(
       child: MaterialApp.router(
         routerConfig: router,
         locale: locale,
-        theme: appDarkTheme,
+        theme: AppTheme.dark,
         localizationsDelegates: AppLocalizations.localizationsDelegates,
         supportedLocales: AppLocalizations.supportedLocales,
       ),
@@ -131,7 +131,7 @@ void main() {
       findsNothing,
     );
     final button = _button(tester, 'transactionRowMarkRecurring');
-    expect(button.color, AppColors.textDisabled);
+    expect(button.color, AppColors.dark.textTertiary);
     expect(button.style, isNull);
     expect(button.tooltip, 'Marquer comme récurrent');
   });
@@ -158,12 +158,12 @@ void main() {
 
     expect(find.byKey(const Key('transactionRowMarkRecurring')), findsNothing);
     final button = _button(tester, 'transactionRowOpenRecurringSeries');
-    expect(button.color, AppColors.iris);
+    expect(button.color, AppColors.dark.accent);
     expect(
       button.style?.backgroundColor?.resolve(<WidgetState>{}),
-      AppColors.irisSoft,
+      AppColors.dark.accentSoft,
     );
-    expect(button.tooltip, 'Déjà récurrent — voir la série');
+    expect(button.tooltip, 'Déjà récurrent : voir la série');
   });
 
   testWidgets('the marked state reads in English too', (tester) async {
@@ -175,7 +175,7 @@ void main() {
 
     expect(
       _button(tester, 'transactionRowOpenRecurringSeries').tooltip,
-      'Already recurring — view the series',
+      'Already recurring: view the series',
     );
   });
 

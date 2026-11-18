@@ -142,13 +142,6 @@ class _SimulatorFormState extends ConsumerState<SimulatorForm> {
         mainAxisSize: MainAxisSize.min,
         children: [
           Text(l10n.simulatorFormTitle, style: textTheme.titleMedium),
-          const SizedBox(height: 2),
-          Text(
-            l10n.simulatorFormSubtitle,
-            style: textTheme.bodySmall?.copyWith(
-              color: AppColors.textSecondary,
-            ),
-          ),
           const SizedBox(height: 14),
           _pair(
             LabeledField(
@@ -190,14 +183,10 @@ class _SimulatorFormState extends ConsumerState<SimulatorForm> {
             ),
             LabeledField(
               label: l10n.simulatorPrincipal,
-              // A convenience, not a constraint: the pill says the figure was
-              // filled in, and editing it takes it over.
-              trailing: state.principalDerived && inputs.principalMinor != null
-                  ? SimulatorMarkerPill(
-                      key: const Key('simulatorDerivedPill'),
-                      label: l10n.simulatorDerivedPill,
-                      neutral: true,
-                    )
+              // A convenience, not a constraint: the helper says the figure
+              // was filled in, and editing it takes it over.
+              helper: state.principalDerived && inputs.principalMinor != null
+                  ? l10n.simulatorPrincipalDerivedHelper
                   : null,
               child: MoneyField(
                 key: const Key('simulatorPrincipal'),
@@ -268,9 +257,9 @@ class _TermSlider extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context)!;
     final textTheme = Theme.of(context).textTheme;
-    final bounds = AppTextStyles.helper.copyWith(
+    final bounds = context.textStyles.helper.copyWith(
       fontSize: 11,
-      color: AppColors.textDisabled,
+      color: context.colors.textTertiary,
     );
     String value(int months) => l10n.simulatorTermValue(months, months ~/ 12);
 
@@ -284,7 +273,7 @@ class _TermSlider extends ConsumerWidget {
               child: Text(
                 l10n.simulatorTerm,
                 style: textTheme.labelMedium?.copyWith(
-                  color: AppColors.textSecondary,
+                  color: context.colors.textSecondary,
                 ),
               ),
             ),
@@ -293,7 +282,7 @@ class _TermSlider extends ConsumerWidget {
               key: const Key('simulatorTermValue'),
               style: tabularNumberStyle(
                 textTheme.bodyMedium!,
-              ).copyWith(fontWeight: FontWeight.w700),
+              ).copyWith(fontWeight: FontWeight.w600),
             ),
           ],
         ),
@@ -361,7 +350,7 @@ class _ExistingLoansSwitch extends ConsumerWidget {
                       )
                     : l10n.simulatorIncludeExistingNone,
                 key: const Key('simulatorIncludeExistingSub'),
-                style: AppTextStyles.helper,
+                style: context.textStyles.helper,
               ),
             ],
           ),

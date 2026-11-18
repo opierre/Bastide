@@ -6,6 +6,7 @@ import 'package:bastide/features/goals/domain/goal.dart';
 import 'package:bastide/features/goals/presentation/goal_form_modal.dart';
 import 'package:bastide/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
+import 'package:lucide_icons_flutter/lucide_icons_300.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -49,7 +50,7 @@ Widget _wrap({
     ],
     child: MaterialApp(
       locale: locale,
-      theme: appDarkTheme,
+      theme: AppTheme.dark,
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
       home: const Scaffold(body: GoalFormModal()),
@@ -116,7 +117,7 @@ void main() {
     );
     await tester.enterText(find.byKey(const Key('goalFormTarget')), '4000');
 
-    await tester.tap(find.byIcon(Icons.calendar_today_outlined));
+    await tester.tap(find.byIcon(LucideIcons300.calendar));
     await tester.pumpAndSettle();
     await tester.tap(find.text('22'));
     await tester.tap(find.text('OK'));

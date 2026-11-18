@@ -2,31 +2,37 @@ import 'package:flutter/material.dart';
 
 import '../theme/tokens.dart';
 
-/// A monogram chip: initials on a tinted, rounded-square plate.
+/// The monogram of `docs/design/00-design-system.md` §7: 22 px (32 px
+/// "large"), radius 5 (7), `hover` ground, 1 px `line`, initials 10/600
+/// (12/600) in `textSecondary`. Always neutral: an institution or a merchant
+/// is never told apart by colour.
 ///
-/// This is the fallback every avatar slot degrades to — an institution with no
-/// brand logo, a merchant we don't recognize, a user with no picture — so the
-/// UI never renders a broken or empty image. The app never ships brand logos
-/// or looks one up on its own; the only picture a merchant chip may show
-/// instead is one the user supplied on a rule (see [InstitutionAvatar] and
-/// `docs/design/00` §Iconography).
+/// « ? » stands for a counterparty the app knows nothing about: a row with
+/// no name to draw initials from. Any named row shows its initials.
+///
+/// It is the fallback every avatar slot degrades to, so the UI never renders
+/// a broken or empty image. The app never ships brand logos or looks one up
+/// on its own; the only picture a merchant may show instead is one the user
+/// supplied on a rule (see [InstitutionAvatar]).
 class MonogramAvatar extends StatelessWidget {
-  const MonogramAvatar({super.key, required this.name, this.size = 40});
+  const MonogramAvatar({super.key, required this.name, this.size = small});
 
   final String name;
   final double size;
 
-  /// Hue for [name], or `null` when the brand isn't one we have a pinned hue
-  /// for — the caller renders the neutral `?` plate in that case.
-  ///
-  /// Pinned rather than hashed: a hue derived from the name would change if a
-  /// brand were renamed, and an institution that shifts color between launches
-  /// reads as a bug.
-  static Color? hueFor(String name) {
-    final key = name.trim().toLowerCase().replaceAll(RegExp(r'\s+'), ' ');
-    return MonogramHues.byBrand[key];
-  }
+  /// The two sizes of `00` §7.
+  static const small = 22.0;
+  static const large = 32.0;
 
+  /// Whether [size] takes the large monogram's radius and type.
+  static bool _isLarge(double size) => size >= large;
+
+  /// The corner radius of a monogram, or of a logo in its place, at [size].
+  static double radiusFor(double size) =>
+      _isLarge(size) ? AppRadii.monogramLarge : AppRadii.monogramSmall;
+
+  /// One letter per word for the first two words, or the first two letters
+  /// of a single word; « ? » when [name] holds no word at all.
   static String initialsFor(String name) {
     final words = name
         .trim()
@@ -43,31 +49,24 @@ class MonogramAvatar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final hue = hueFor(name);
-    final recognized = hue != null;
-    final foreground = hue ?? MonogramHues.unknownForeground;
-
+    final colors = context.colors;
     return Container(
       width: size,
       height: size,
       alignment: Alignment.center,
       decoration: BoxDecoration(
-        // A tinted plate reads as part of the dark surface stack; a fully
-        // saturated fill would shout louder than the account name next to it.
-        color: recognized
-            ? foreground.withValues(alpha: 0.16)
-            : MonogramHues.unknownBackground,
-        borderRadius: BorderRadius.circular(size * 0.3),
+        color: colors.hover,
+        border: Border.all(color: colors.line),
+        borderRadius: BorderRadius.circular(radiusFor(size)),
       ),
       child: Text(
-        // An unrecognised institution gets "?" rather than its initials, so the
-        // row reads as "we don't know this one" instead of implying a match.
-        recognized ? initialsFor(name) : '?',
+        initialsFor(name),
+        maxLines: 1,
         style: TextStyle(
-          color: foreground,
-          fontWeight: FontWeight.w700,
-          fontSize: size * 0.36,
-          letterSpacing: 0.2,
+          color: colors.textSecondary,
+          fontWeight: FontWeight.w600,
+          fontSize: _isLarge(size) ? 12 : 10,
+          height: 1,
           fontFamily: AppFonts.geist,
         ),
       ),
@@ -75,9 +74,9 @@ class MonogramAvatar extends StatelessWidget {
   }
 }
 
-/// The user's own monogram, as shown in the top-bar user pill. Always the iris
-/// tint — it identifies the session, not a brand, so the pinned brand hues
-/// don't apply.
+/// The user's own monogram, where no preset or picture is chosen: the
+/// neutral monogram's ground, border and type on a disc, since avatars are
+/// round (`00` §4).
 class UserMonogram extends StatelessWidget {
   const UserMonogram({super.key, required this.name, this.size = 32});
 
@@ -86,21 +85,24 @@ class UserMonogram extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     return Container(
       width: size,
       height: size,
       alignment: Alignment.center,
       decoration: BoxDecoration(
-        color: AppColors.iris.withValues(alpha: 0.16),
-        borderRadius: BorderRadius.circular(size * 0.3),
+        color: colors.hover,
+        border: Border.all(color: colors.line),
+        shape: BoxShape.circle,
       ),
       child: Text(
         MonogramAvatar.initialsFor(name),
+        maxLines: 1,
         style: TextStyle(
-          color: AppColors.iris,
-          fontWeight: FontWeight.w700,
+          color: colors.textSecondary,
+          fontWeight: FontWeight.w600,
           fontSize: size * 0.36,
-          letterSpacing: 0.2,
+          height: 1,
           fontFamily: AppFonts.geist,
         ),
       ),

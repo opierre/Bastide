@@ -22,7 +22,7 @@ class RefusalBanner extends StatelessWidget {
   Widget build(BuildContext context) {
     final style = Theme.of(
       context,
-    ).textTheme.bodySmall?.copyWith(color: AppColors.textPrimary);
+    ).textTheme.bodySmall?.copyWith(color: context.colors.text);
 
     return Container(
       padding: const EdgeInsets.symmetric(
@@ -30,17 +30,19 @@ class RefusalBanner extends StatelessWidget {
         vertical: AppSpacing.sm + 2,
       ),
       decoration: BoxDecoration(
-        color: AppColors.negative.withValues(alpha: 0.08),
+        color: context.colors.negative.withValues(alpha: 0.08),
         borderRadius: BorderRadius.circular(AppRadii.md),
-        border: Border.all(color: AppColors.negative.withValues(alpha: 0.32)),
+        border: Border.all(
+          color: context.colors.negative.withValues(alpha: 0.32),
+        ),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Icon(
+          Icon(
             Icons.info_outline_rounded,
             size: 15,
-            color: AppColors.negative,
+            color: context.colors.negative,
           ),
           const SizedBox(width: AppSpacing.sm),
           Expanded(
@@ -49,9 +51,9 @@ class RefusalBanner extends StatelessWidget {
                 children: [
                   TextSpan(
                     text: lead,
-                    style: const TextStyle(
-                      fontWeight: FontWeight.w700,
-                      color: AppColors.negative,
+                    style: TextStyle(
+                      fontWeight: FontWeight.w600,
+                      color: context.colors.negative,
                     ),
                   ),
                   const TextSpan(text: ' '),

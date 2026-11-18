@@ -2,16 +2,14 @@ import 'package:flutter/material.dart';
 
 import '../theme/tokens.dart';
 
-/// The spec's slider (`docs/design/00` §Gestion & AI additions): a 5px `#1E2634`
-/// track, an iris-gradient fill up to the value, and a 16px `#EDF1F7` thumb
-/// carrying `0 2px 8px rgba(0,0,0,.5)`.
+/// The slider of `docs/design/00-design-system.md` §6: a 4 px `lineStrong`
+/// track, an `accent` fill up to the value, and a 14 px `text` thumb with a
+/// 2 px `bg` ring.
 ///
 /// Built on Material's [Slider] with replaced shapes rather than from scratch:
 /// drag, keyboard arrows, focus and the semantics a screen reader announces all
 /// come from it, and none of that is worth reimplementing to change how three
-/// shapes are painted. What [SliderThemeData] alone cannot express is the
-/// gradient — its `activeTrackColor` is one flat color — so the track paints
-/// itself here.
+/// shapes are painted.
 class AppSlider extends StatelessWidget {
   const AppSlider({
     super.key,
@@ -46,39 +44,54 @@ class AppSlider extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      width: width,
-      child: SliderTheme(
-        data: SliderTheme.of(context).copyWith(
-          trackHeight: _trackHeight,
-          trackShape: const _GradientTrackShape(),
-          thumbShape: const _ShadowedThumbShape(),
-          overlayShape: const RoundSliderOverlayShape(overlayRadius: 16),
-          overlayColor: AppColors.irisSoft,
-          // The value indicator would cover the live percentage in the label
-          // above with the same number.
-          showValueIndicator: ShowValueIndicator.never,
-        ),
-        child: Slider(
-          value: value.clamp(min, max),
-          min: min,
-          max: max,
-          divisions: divisions,
-          onChanged: onChanged,
-          semanticFormatterCallback: semanticFormatter,
+    // Disabled is 45 % opacity (`00` §6) rather than Material's own greyed
+    // colours, like every other control.
+    return Opacity(
+      opacity: onChanged == null ? 0.45 : 1,
+      child: SizedBox(
+        width: width,
+        child: SliderTheme(
+          data: SliderTheme.of(context).copyWith(
+            trackHeight: _trackHeight,
+            trackShape: const _FilledTrackShape(),
+            thumbShape: const _RingedThumbShape(),
+            overlayShape: const RoundSliderOverlayShape(overlayRadius: 16),
+            overlayColor: context.colors.accentSoft,
+            activeTrackColor: context.colors.accent,
+            inactiveTrackColor: context.colors.lineStrong,
+            thumbColor: context.colors.text,
+            disabledActiveTrackColor: context.colors.accent,
+            disabledInactiveTrackColor: context.colors.lineStrong,
+            disabledThumbColor: context.colors.text,
+            overlappingShapeStrokeColor: context.colors.bg,
+            // The value indicator would cover the live percentage in the label
+            // above with the same number.
+            showValueIndicator: ShowValueIndicator.never,
+          ),
+          child: Slider(
+            value: value.clamp(min, max),
+            min: min,
+            max: max,
+            divisions: divisions,
+            onChanged: onChanged,
+            semanticFormatterCallback: semanticFormatter,
+          ),
         ),
       ),
     );
   }
 }
 
-const _trackHeight = 5.0;
-const _thumbRadius = 8.0;
+const _trackHeight = 4.0;
 
-/// The track: a full-width `#1E2634` rail with the iris gradient painted over
-/// the portion left of the thumb.
-class _GradientTrackShape extends SliderTrackShape with BaseSliderTrackShape {
-  const _GradientTrackShape();
+/// The 14 px thumb plus its 2 px ring.
+const _thumbRadius = 9.0;
+const _ringWidth = 2.0;
+
+/// The track: a full-width rail with the fill painted over the portion left of
+/// the thumb.
+class _FilledTrackShape extends SliderTrackShape with BaseSliderTrackShape {
+  const _FilledTrackShape();
 
   @override
   void paint(
@@ -107,7 +120,7 @@ class _GradientTrackShape extends SliderTrackShape with BaseSliderTrackShape {
 
     canvas.drawRRect(
       RRect.fromRectAndRadius(rect, radius),
-      Paint()..color = AppColors.surfaceHover,
+      Paint()..color = sliderTheme.inactiveTrackColor!,
     );
 
     final filled = Rect.fromLTRB(
@@ -119,19 +132,15 @@ class _GradientTrackShape extends SliderTrackShape with BaseSliderTrackShape {
     if (filled.width <= 0) return;
     canvas.drawRRect(
       RRect.fromRectAndRadius(filled, radius),
-      Paint()
-        // Shaded over the whole track, not over the filled part alone, so the
-        // ramp stays anchored as the value moves — a gradient rescaled to the
-        // fill would shift hue under a stationary thumb.
-        ..shader = AppColors.irisGradient.createShader(rect),
+      Paint()..color = sliderTheme.activeTrackColor!,
     );
   }
 }
 
-/// The thumb: a 16px light disc with the spec's drop shadow, which
-/// [RoundSliderThumbShape] has no elevation for on a flat dark surface.
-class _ShadowedThumbShape extends SliderComponentShape {
-  const _ShadowedThumbShape();
+/// The thumb: a disc ringed in the ground colour, which
+/// [RoundSliderThumbShape] cannot draw.
+class _RingedThumbShape extends SliderComponentShape {
+  const _RingedThumbShape();
 
   @override
   Size getPreferredSize(bool isEnabled, bool isDiscrete) =>
@@ -154,16 +163,14 @@ class _ShadowedThumbShape extends SliderComponentShape {
   }) {
     final canvas = context.canvas;
     canvas.drawCircle(
-      center.translate(0, 2),
+      center,
       _thumbRadius,
-      Paint()
-        ..color = const Color(0x80000000)
-        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 4),
+      Paint()..color = sliderTheme.overlappingShapeStrokeColor!,
     );
     canvas.drawCircle(
       center,
-      _thumbRadius,
-      Paint()..color = AppColors.textPrimary,
+      _thumbRadius - _ringWidth,
+      Paint()..color = sliderTheme.thumbColor!,
     );
   }
 }

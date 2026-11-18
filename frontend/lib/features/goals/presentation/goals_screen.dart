@@ -72,13 +72,11 @@ class _GoalsGrid extends ConsumerWidget {
           when value.goals.isEmpty && value.archived.isEmpty =>
         EmptyStateView(
           key: const Key('goalsEmptyState'),
-          icon: Icons.flag_rounded,
           title: l10n.goalsEmptyTitle,
           message: l10n.goalsEmptyBody,
           action: PrimaryButton(
             key: const Key('goalsEmptyAddButton'),
             label: l10n.goalsAdd,
-            height: 44,
             onPressed: () => showGoalForm(context),
           ),
         ),

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/tokens.dart';
 import '../../../core/widgets/app_modal.dart';
 import '../../../core/widgets/date_field.dart';
@@ -174,7 +173,10 @@ class _DateRangeModalState extends State<DateRangeModal> {
             const SizedBox(height: AppSpacing.sm),
             // Clearing both fields is how the filter is lifted, so the modal
             // says so rather than leaving the user hunting for a reset.
-            Text(l10n.transactionsDateRangeHelp, style: AppTextStyles.helper),
+            Text(
+              l10n.transactionsDateRangeHelp,
+              style: context.textStyles.helper,
+            ),
           ],
         ),
       ),

@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 
 import 'avatar_choice.dart';
+import 'theme_preference.dart';
 
 /// The authenticated user's profile. Locale and currency are account-wide
 /// (one currency per user, chosen at registration — see
@@ -14,6 +15,7 @@ class AuthUser {
     required this.locale,
     required this.currency,
     this.avatar = const MonogramChoice(),
+    this.theme = ThemePreference.dark,
   });
 
   final String id;
@@ -22,6 +24,18 @@ class AuthUser {
   final String locale;
   final String currency;
   final AvatarChoice avatar;
+  final ThemePreference theme;
+
+  /// This user with [theme] in place of their current one.
+  AuthUser withTheme(ThemePreference theme) => AuthUser(
+    id: id,
+    email: email,
+    displayName: displayName,
+    locale: locale,
+    currency: currency,
+    avatar: avatar,
+    theme: theme,
+  );
 
   @override
   bool operator ==(Object other) =>
@@ -32,9 +46,10 @@ class AuthUser {
           other.displayName == displayName &&
           other.locale == locale &&
           other.currency == currency &&
-          other.avatar == avatar);
+          other.avatar == avatar &&
+          other.theme == theme);
 
   @override
   int get hashCode =>
-      Object.hash(id, email, displayName, locale, currency, avatar);
+      Object.hash(id, email, displayName, locale, currency, avatar, theme);
 }

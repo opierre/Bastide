@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/tokens.dart';
 import '../../../core/widgets/app_card.dart';
 import '../../../core/widgets/app_slider.dart';
@@ -157,12 +156,12 @@ class _CardState extends ConsumerState<_Card> {
                     child: TextField(
                       key: const Key('settingsAiBaseUrlField'),
                       controller: _baseUrl,
-                      style: AppTextStyles.mono.copyWith(
-                        color: AppColors.textPrimary,
+                      style: context.textStyles.mono.copyWith(
+                        color: context.colors.text,
                       ),
                       decoration: state.baseUrlError == null
                           ? null
-                          : errorFieldDecoration(),
+                          : errorFieldDecoration(context),
                       onChanged: _controller.setBaseUrl,
                     ),
                   ),
@@ -200,7 +199,7 @@ class _CardState extends ConsumerState<_Card> {
             ),
           ),
           const SizedBox(height: AppSpacing.md),
-          const Divider(height: 1, color: AppColors.borderSubtle),
+          Divider(height: 1, color: context.colors.line),
           const SizedBox(height: AppSpacing.sm + AppSpacing.xs),
           _StatusRow(
             connection: state.connection,
@@ -238,7 +237,7 @@ class _Header extends StatelessWidget {
               Text(
                 l10n.settingsAiSubtitle,
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: AppColors.textSecondary,
+                  color: context.colors.textSecondary,
                 ),
               ),
             ],
@@ -329,7 +328,7 @@ class _ModelField extends StatelessWidget {
         child: TextField(
           key: const Key('settingsAiModelField'),
           controller: controller,
-          style: AppTextStyles.mono.copyWith(color: AppColors.textPrimary),
+          style: context.textStyles.mono.copyWith(color: context.colors.text),
           onChanged: onTyped,
           decoration: InputDecoration(
             suffixIconConstraints: const BoxConstraints(minWidth: 40),
@@ -355,15 +354,15 @@ class _ModelMenu extends StatelessWidget {
 
     return MenuAnchor(
       alignmentOffset: const Offset(0, AppSpacing.xs),
-      style: const MenuStyle(
-        backgroundColor: WidgetStatePropertyAll(AppColors.surfacePopover),
+      style: MenuStyle(
+        backgroundColor: WidgetStatePropertyAll(context.colors.surface),
         surfaceTintColor: WidgetStatePropertyAll(Colors.transparent),
-        shadowColor: WidgetStatePropertyAll(AppShadows.popoverShadow),
+        shadowColor: WidgetStatePropertyAll(context.colors.shadow.first.color),
         elevation: WidgetStatePropertyAll(AppShadows.popoverElevation),
         shape: WidgetStatePropertyAll(
           RoundedRectangleBorder(
             borderRadius: BorderRadius.all(Radius.circular(AppRadii.inset)),
-            side: BorderSide(color: AppColors.border),
+            side: BorderSide(color: context.colors.line),
           ),
         ),
       ),
@@ -372,13 +371,15 @@ class _ModelMenu extends StatelessWidget {
           MenuItemButton(
             key: Key('settingsAiModelOption-$tag'),
             onPressed: () => onPicked(tag),
-            style: const ButtonStyle(
+            style: ButtonStyle(
               minimumSize: WidgetStatePropertyAll(Size(0, 32)),
-              overlayColor: WidgetStatePropertyAll(AppColors.overlayWash),
+              overlayColor: WidgetStatePropertyAll(context.colors.hover),
             ),
             child: Text(
               tag,
-              style: AppTextStyles.mono.copyWith(color: AppColors.textPrimary),
+              style: context.textStyles.mono.copyWith(
+                color: context.colors.text,
+              ),
             ),
           ),
       ],
@@ -386,10 +387,10 @@ class _ModelMenu extends StatelessWidget {
         key: const Key('settingsAiModelMenu'),
         tooltip: l10n.settingsAiModelChoose,
         onPressed: () => menu.isOpen ? menu.close() : menu.open(),
-        icon: const Icon(
+        icon: Icon(
           Icons.expand_more_rounded,
           size: 17,
-          color: AppColors.iris,
+          color: context.colors.accent,
         ),
       ),
     );
@@ -411,10 +412,10 @@ class _StatusRow extends StatelessWidget {
   final bool isProbing;
   final VoidCallback onTest;
 
-  Color get _dotColor => switch (connection) {
-    InferenceConnection.reachable => AppColors.positive,
-    InferenceConnection.unreachable => AppColors.warning,
-    InferenceConnection.disabled => AppColors.textDisabled,
+  Color _dotColor(BuildContext context) => switch (connection) {
+    InferenceConnection.reachable => context.colors.positive,
+    InferenceConnection.unreachable => context.colors.warning,
+    InferenceConnection.disabled => context.colors.textTertiary,
   };
 
   String _label(AppLocalizations l10n) => switch (connection) {
@@ -433,14 +434,19 @@ class _StatusRow extends StatelessWidget {
           key: const Key('settingsAiStatusDot'),
           width: 8,
           height: 8,
-          decoration: BoxDecoration(color: _dotColor, shape: BoxShape.circle),
+          decoration: BoxDecoration(
+            color: _dotColor(context),
+            shape: BoxShape.circle,
+          ),
         ),
         const SizedBox(width: AppSpacing.sm),
         Flexible(
           child: Text(
             _label(l10n),
             key: const Key('settingsAiStatusLabel'),
-            style: AppTextStyles.helper.copyWith(color: _dotColor),
+            style: context.textStyles.helper.copyWith(
+              color: _dotColor(context),
+            ),
           ),
         ),
         if (connection.isUnreachable) ...[
@@ -463,12 +469,12 @@ class _StatusRow extends StatelessWidget {
                 ? Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      const SizedBox(
+                      SizedBox(
                         width: 13,
                         height: 13,
                         child: CircularProgressIndicator(
                           strokeWidth: 2,
-                          color: AppColors.textSecondary,
+                          color: context.colors.textSecondary,
                         ),
                       ),
                       const SizedBox(width: AppSpacing.sm),
@@ -501,10 +507,10 @@ class _LearnMoreLink extends StatelessWidget {
             launchUrl(_runtimeHelpUrl, mode: LaunchMode.externalApplication),
         child: Text(
           label,
-          style: AppTextStyles.helper.copyWith(
-            color: AppColors.iris,
+          style: context.textStyles.helper.copyWith(
+            color: context.colors.accent,
             decoration: TextDecoration.underline,
-            decorationColor: AppColors.iris,
+            decorationColor: context.colors.accent,
           ),
         ),
       ),

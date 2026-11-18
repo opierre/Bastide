@@ -93,7 +93,7 @@ Widget _wrap({
     ],
     child: MaterialApp(
       locale: locale,
-      theme: appDarkTheme,
+      theme: AppTheme.dark,
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
       home: Scaffold(body: AccountDetailScreen(accountId: accountId)),
@@ -408,8 +408,9 @@ void main() {
 
     expect(find.byKey(const Key('accountDetailChartEmpty')), findsOneWidget);
     expect(find.text('Importer un relevé'), findsOneWidget);
-    expect(find.text('Pas encore d’opérations'), findsOneWidget);
-    expect(find.text('Aucun import pour l’instant'), findsOneWidget);
+    // The meta strip and the recent-transactions row both state it.
+    expect(find.text('Aucune opération'), findsNWidgets(2));
+    expect(find.text('Aucun import'), findsOneWidget);
     expect(find.byKey(const Key('accountDetailNoCards')), findsOneWidget);
     expect(
       find.byKey(const Key('accountDetailNoTransactions')),

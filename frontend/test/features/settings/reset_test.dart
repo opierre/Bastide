@@ -63,7 +63,7 @@ void main() {
     ],
     child: MaterialApp(
       locale: locale,
-      theme: appDarkTheme,
+      theme: AppTheme.dark,
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
       home: const Scaffold(
@@ -142,7 +142,6 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('Zone de danger'), findsOneWidget);
-      expect(find.text('IRRÉVERSIBLE'), findsOneWidget);
       expect(find.byKey(const Key('settingsResetError')), findsNothing);
 
       await tester.tap(find.byKey(const Key('settingsResetButton')));

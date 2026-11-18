@@ -4,6 +4,8 @@ from typing import Literal
 
 from pydantic import BaseModel, Field
 
+from app.features.categories.hues import CategoryHue
+
 CategoryKind = Literal["income", "expense", "transfer"]
 
 
@@ -14,7 +16,8 @@ class CategoryCreate(BaseModel):
     kind: CategoryKind
     parent_id: str | None = None
     icon: str = Field(min_length=1, max_length=50)
-    color: str = Field(min_length=1, max_length=7)
+    #: The hue slot, resolved to a colour by the app's theme.
+    color: CategoryHue
 
 
 class CategoryUpdate(BaseModel):
@@ -24,7 +27,7 @@ class CategoryUpdate(BaseModel):
     kind: CategoryKind | None = None
     parent_id: str | None = None
     icon: str | None = Field(default=None, min_length=1, max_length=50)
-    color: str | None = Field(default=None, min_length=1, max_length=7)
+    color: CategoryHue | None = None
 
 
 class CategoryRead(BaseModel):

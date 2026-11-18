@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:lucide_icons_flutter/lucide_icons_300.dart';
 
 import '../../../core/l10n/category_display.dart';
 import '../../../core/theme/app_theme.dart';
@@ -7,11 +8,11 @@ import '../../../core/theme/tokens.dart';
 import '../../../core/widgets/amount_text.dart';
 import '../../../core/widgets/app_card.dart';
 import '../../../core/widgets/app_toast.dart';
-import '../../../core/widgets/category_chip.dart';
+import '../../../core/widgets/category_label.dart';
 import '../../../core/widgets/inline_banner.dart';
 import '../../../core/widgets/institution_avatar.dart';
 import '../../../core/widgets/state_views.dart';
-import '../../../core/widgets/status_pill.dart';
+import '../../../core/widgets/status_text.dart';
 import '../../../l10n/app_localizations.dart';
 import '../application/subscriptions_controller.dart';
 import '../domain/recurring_series.dart';
@@ -50,16 +51,16 @@ class SeriesDetailView extends ConsumerWidget {
               key: const Key('seriesDetailBack'),
               onPressed: () =>
                   ref.read(selectedSeriesProvider.notifier).close(),
-              icon: const Icon(
+              icon: Icon(
                 Icons.arrow_back_rounded,
                 size: 16,
-                color: AppColors.iris,
+                color: context.colors.accent,
               ),
               label: Text(
                 l10n.subscriptionDetailBack,
                 style: Theme.of(
                   context,
-                ).textTheme.labelMedium?.copyWith(color: AppColors.iris),
+                ).textTheme.labelMedium?.copyWith(color: context.colors.accent),
               ),
             ),
             const SizedBox(width: AppSpacing.sm),
@@ -222,7 +223,9 @@ class _DetailBody extends ConsumerWidget {
         Text(
           l10n.subscriptionDetailFootnote,
           key: const Key('seriesDetailFootnote'),
-          style: AppTextStyles.helper.copyWith(color: AppColors.textDisabled),
+          style: context.textStyles.helper.copyWith(
+            color: context.colors.textTertiary,
+          ),
         ),
       ],
     );
@@ -267,7 +270,7 @@ class _HeaderCard extends ConsumerWidget {
                     ),
                     if (category != null) ...[
                       const SizedBox(width: AppSpacing.sm + AppSpacing.xs),
-                      CategoryChip(
+                      CategoryLabel(
                         label: localizedCategoryName(l10n, category.name),
                         slug: categorySlugFor(
                           name: category.name,
@@ -291,7 +294,7 @@ class _HeaderCard extends ConsumerWidget {
                   key: const Key('seriesDetailSubline'),
                   overflow: TextOverflow.ellipsis,
                   style: textTheme.bodySmall?.copyWith(
-                    color: AppColors.textSecondary,
+                    color: context.colors.textSecondary,
                   ),
                 ),
               ],
@@ -344,7 +347,7 @@ class _Stat extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.end,
       mainAxisSize: MainAxisSize.min,
       children: [
-        Text(label.toUpperCase(), style: AppTextStyles.sectionLabel),
+        Text(label.toUpperCase(), style: context.textStyles.sectionLabel),
         const SizedBox(height: AppSpacing.xs + 2),
         child,
       ],
@@ -391,7 +394,7 @@ class _HistoryCard extends StatelessWidget {
           Text(
             l10n.subscriptionDetailHistorySubtitle(accountName),
             style: textTheme.bodySmall?.copyWith(
-              color: AppColors.textSecondary,
+              color: context.colors.textSecondary,
             ),
           ),
           const SizedBox(height: AppSpacing.md),
@@ -410,9 +413,10 @@ class _HistoryCard extends StatelessWidget {
             // the list row uses for the same fact.
             Align(
               alignment: Alignment.centerLeft,
-              child: StatusPill(
+              child: StatusText(
                 key: Key('seriesOccurrenceChange-${stepped.id}'),
-                tone: StatusPillTone.warning,
+                tone: StatusTone.warning,
+                icon: LucideIcons300.trendingUp,
                 label: l10n.subscriptionDetailChange(
                   _money(series.previousAmountMinor!, series.currency, locale),
                   _money(series.expectedAmountMinor, series.currency, locale),

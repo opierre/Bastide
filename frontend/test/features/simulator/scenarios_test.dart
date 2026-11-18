@@ -24,7 +24,7 @@ Widget _wrap(
     overrides: [simulationsRepositoryProvider.overrideWithValue(repository)],
     child: MaterialApp(
       locale: locale,
-      theme: appDarkTheme,
+      theme: AppTheme.dark,
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
       home: const Scaffold(
@@ -129,7 +129,7 @@ void main() {
     expect(find.byKey(const Key('scenarioCompareButton')), findsNothing);
   });
 
-  testWidgets('saving names the inputs on the place — price pattern, even '
+  testWidgets('saving names the inputs on the place, price pattern, even '
       'over the reference', (tester) async {
     _useDesktopSurface(tester);
     when(() => repository.list()).thenAnswer((_) async => []);
@@ -164,19 +164,19 @@ void main() {
         matching: find.byType(EditableText),
       ),
     );
-    expect(nameField.controller.text, ' — 320 k€');
+    expect(nameField.controller.text, ', 320 k€');
     expect(nameField.controller.selection.baseOffset, 0);
 
     await tester.enterText(
       find.byKey(const Key('saveScenarioName')),
-      'Lyon 3e — 320 k€',
+      'Lyon 3e, 320 k€',
     );
     await tester.tap(find.byKey(const Key('saveScenarioSubmit')));
     await _settle(tester);
 
-    verify(() => repository.create('Lyon 3e — 320 k€', testTerms)).called(1);
+    verify(() => repository.create('Lyon 3e, 320 k€', testTerms)).called(1);
     expect(find.byKey(const Key('saveScenarioName')), findsNothing);
-    expect(_text(tester, 'scenarioName-s9'), 'Lyon 3e — 320 k€');
+    expect(_text(tester, 'scenarioName-s9'), 'Lyon 3e, 320 k€');
   });
 
   testWidgets('the live row comes first, marked EN COURS', (tester) async {
@@ -250,6 +250,17 @@ void main() {
 
     expect(find.text('Comparer (3/3)'), findsOneWidget);
     expect(compare().onPressed, isNotNull);
+    // The list builds lazily, and the fourth row sits below the fold.
+    await tester.scrollUntilVisible(
+      find.byKey(const Key('scenarioRow-s3')),
+      46,
+      scrollable: find
+          .ancestor(
+            of: find.byKey(const Key('scenarioRow-s2')),
+            matching: find.byType(Scrollable),
+          )
+          .first,
+    );
     final dimmed = tester.widget<Opacity>(
       find
           .ancestor(
@@ -308,7 +319,10 @@ void main() {
     );
     expect(_text(tester, 'compare-ratio-s1'), startsWith('30,8'));
     expect(_text(tester, 'compare-taeg-s1'), startsWith('3,67'));
-    expect(_text(tester, 'compareFoot'), contains('ne lie aucun prêteur'));
+    expect(
+      _text(tester, 'compareFoot'),
+      contains('qui n’engage aucun prêteur'),
+    );
     // Every column carries every row.
     for (final id in ['live', 's1', 's2']) {
       expect(find.byKey(Key('compare-ratioWithExisting-$id')), findsOneWidget);
@@ -348,8 +362,8 @@ void main() {
     expect(_text(tester, 'compare-ratio-s1'), '—');
     expect(
       _text(tester, 'compareFoot'),
-      'No known income, so no debt ratio · HCSF reference 35% · an '
-      'informative reading that binds no lender.',
+      'No known income, so no debt ratio · HCSF reference 35%. An '
+      'indicative reading that binds no lender.',
     );
   });
 }

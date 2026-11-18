@@ -2,196 +2,198 @@ import 'package:flutter/material.dart';
 
 import 'tokens.dart';
 
-final ThemeData appDarkTheme = _buildDarkTheme();
-
-ThemeData _buildDarkTheme() {
-  const colorScheme = ColorScheme.dark(
-    surface: AppColors.surfaceBase,
-    onSurface: AppColors.textPrimary,
-    onSurfaceVariant: AppColors.textSecondary,
-    surfaceContainerLowest: AppColors.surfaceSunken,
-    surfaceContainerLow: AppColors.surfaceBase,
-    surfaceContainer: AppColors.surfaceRaised,
-    surfaceContainerHigh: AppColors.surfaceOverlay,
-    surfaceContainerHighest: AppColors.surfaceHover,
-    primary: AppColors.iris,
-    onPrimary: AppColors.irisInk,
-    primaryContainer: AppColors.irisDeep,
-    onPrimaryContainer: AppColors.irisInk,
-    secondary: AppColors.cyan,
-    onSecondary: AppColors.surfaceSunken,
-    tertiary: AppColors.info,
-    onTertiary: AppColors.surfaceSunken,
-    error: AppColors.negative,
-    onError: AppColors.surfaceSunken,
-    outline: AppColors.border,
-    outlineVariant: AppColors.borderSubtle,
+/// The two themes of `docs/design/00-design-system.md`, at parity. Each
+/// carries the [AppColors], [CategoryColors] and [AppTextStyles] extensions
+/// widgets read through `context.colors`, `context.categoryColors` and
+/// `context.textStyles`.
+abstract final class AppTheme {
+  /// The reference theme and the default.
+  static final ThemeData dark = _build(
+    AppColors.dark,
+    CategoryColors.dark,
+    Brightness.dark,
   );
 
-  final textTheme = _appTextTheme();
+  static final ThemeData light = _build(
+    AppColors.light,
+    CategoryColors.light,
+    Brightness.light,
+  );
+}
+
+ThemeData _build(
+  AppColors c,
+  CategoryColors categories,
+  Brightness brightness,
+) {
+  final colorScheme = ColorScheme(
+    brightness: brightness,
+    surface: c.bg,
+    onSurface: c.text,
+    onSurfaceVariant: c.textSecondary,
+    surfaceContainerLowest: c.rail,
+    surfaceContainerLow: c.bg,
+    surfaceContainer: c.surface,
+    surfaceContainerHigh: c.surface,
+    surfaceContainerHighest: c.hover,
+    primary: c.accent,
+    onPrimary: c.onAccent,
+    primaryContainer: c.accentSoft,
+    onPrimaryContainer: c.text,
+    secondary: c.accent,
+    onSecondary: c.onAccent,
+    tertiary: c.accent,
+    onTertiary: c.onAccent,
+    error: c.negative,
+    onError: c.onPrimary,
+    outline: c.lineStrong,
+    outlineVariant: c.line,
+    shadow: Colors.black,
+    scrim: c.scrim,
+  );
+
+  final textTheme = _appTextTheme(c);
+  final textStyles = AppTextStyles.from(c);
+
+  OutlinedBorder controlShape() => const RoundedRectangleBorder(
+    borderRadius: BorderRadius.all(Radius.circular(AppRadii.control)),
+  );
+  RoundedRectangleBorder containerShape() => RoundedRectangleBorder(
+    borderRadius: const BorderRadius.all(Radius.circular(AppRadii.container)),
+    side: BorderSide(color: c.lineStrong),
+  );
 
   return ThemeData(
     useMaterial3: true,
-    brightness: Brightness.dark,
+    brightness: brightness,
     colorScheme: colorScheme,
-    scaffoldBackgroundColor: AppColors.surfaceBase,
-    canvasColor: AppColors.surfaceOverlay,
+    extensions: [c, categories, textStyles],
+    scaffoldBackgroundColor: c.bg,
+    canvasColor: c.surface,
     fontFamily: AppFonts.geist,
     textTheme: textTheme,
-    // Desktop-first: tighter than Material's touch defaults. The spec allows no
-    // data-view animation, so the ripple is suppressed in favour of the instant
-    // hover fills each component defines itself.
+    // Desktop-first: tighter than Material's touch defaults. Hover and pressed
+    // states change at once (`00` §13), so the ripple is suppressed in favour
+    // of the fills each component defines itself.
     visualDensity: VisualDensity.compact,
     splashFactory: NoSplash.splashFactory,
-    focusColor: AppColors.focusRing,
-    hoverColor: AppColors.overlayWash,
-    dividerColor: AppColors.border,
+    focusColor: c.accentSoft,
+    hoverColor: c.hover,
+    dividerColor: c.line,
 
-    cardTheme: const CardThemeData(
-      color: AppColors.surfaceRaised,
+    cardTheme: CardThemeData(
+      color: c.bg,
       elevation: 0,
       margin: EdgeInsets.zero,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.all(Radius.circular(AppRadii.lg)),
-        side: BorderSide(color: AppColors.borderCard),
-      ),
+      shape: containerShape().copyWith(side: BorderSide(color: c.line)),
     ),
 
-    dividerTheme: const DividerThemeData(
-      color: AppColors.borderSubtle,
-      thickness: 1,
-      space: 1,
-    ),
+    dividerTheme: DividerThemeData(color: c.line, thickness: 1, space: 1),
 
-    inputDecorationTheme: _inputDecorationTheme(textTheme),
+    inputDecorationTheme: _inputDecorationTheme(c, textTheme, textStyles),
     filledButtonTheme: FilledButtonThemeData(
-      style: _rowAligned(_filledButtonStyle(textTheme)),
+      style: _rowAligned(_filledButtonStyle(c, textTheme, controlShape())),
     ),
     outlinedButtonTheme: OutlinedButtonThemeData(
-      style: _rowAligned(_outlinedButtonStyle(textTheme)),
+      style: _rowAligned(_outlinedButtonStyle(c, textTheme, controlShape())),
     ),
     textButtonTheme: TextButtonThemeData(
-      style: _rowAligned(_textButtonStyle(textTheme)),
+      style: _rowAligned(_textButtonStyle(c, textTheme, controlShape())),
     ),
 
     iconButtonTheme: IconButtonThemeData(
       style: ButtonStyle(
-        foregroundColor: const WidgetStatePropertyAll(AppColors.textSecondary),
-        overlayColor: const WidgetStatePropertyAll(AppColors.overlayWash),
-        shape: const WidgetStatePropertyAll(
-          RoundedRectangleBorder(
-            borderRadius: BorderRadius.all(Radius.circular(AppRadii.sm)),
-          ),
-        ),
+        foregroundColor: WidgetStatePropertyAll(c.textSecondary),
+        overlayColor: WidgetStatePropertyAll(c.hover),
+        shape: WidgetStatePropertyAll(controlShape()),
       ),
     ),
 
     dialogTheme: DialogThemeData(
-      backgroundColor: AppColors.surfaceOverlay,
+      backgroundColor: c.surface,
       surfaceTintColor: Colors.transparent,
       elevation: 0,
-      titleTextStyle: textTheme.headlineMedium,
-      contentTextStyle: textTheme.bodyMedium?.copyWith(
-        color: AppColors.textSecondary,
-      ),
+      titleTextStyle: textTheme.headlineSmall,
+      contentTextStyle: textTheme.bodyMedium?.copyWith(color: c.textSecondary),
       shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.all(Radius.circular(AppRadii.xl)),
-        side: BorderSide(color: AppColors.border),
+        borderRadius: BorderRadius.all(Radius.circular(AppRadii.modal)),
       ),
-      barrierColor: AppColors.scrim,
+      barrierColor: c.scrim,
     ),
 
-    // The calendar behind every [DateField]. Material's own surfaces are a
-    // shade of the seed color rather than this palette, so the picker's slots
-    // are mapped onto the app's tokens here — one place, so a date picker in a
-    // later panel cannot drift from this one.
+    // The calendar behind every date field. Material's own surfaces are a
+    // shade of the seed colour rather than this palette, so the picker's slots
+    // are mapped onto the tokens here.
     datePickerTheme: DatePickerThemeData(
-      backgroundColor: AppColors.surfaceOverlay,
+      backgroundColor: c.surface,
       surfaceTintColor: Colors.transparent,
       elevation: 0,
       shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.all(Radius.circular(AppRadii.xl)),
-        side: BorderSide(color: AppColors.border),
+        borderRadius: BorderRadius.all(Radius.circular(AppRadii.modal)),
       ),
-      headerBackgroundColor: AppColors.surfaceOverlay,
-      headerForegroundColor: AppColors.textSecondary,
-      weekdayStyle: AppTextStyles.sectionLabel,
+      headerBackgroundColor: c.surface,
+      headerForegroundColor: c.textSecondary,
+      weekdayStyle: textStyles.sectionLabel,
       dayForegroundColor: WidgetStateProperty.resolveWith((states) {
-        return states.contains(WidgetState.selected)
-            ? AppColors.irisInk
-            : AppColors.textPrimary;
+        return states.contains(WidgetState.selected) ? c.onAccent : c.text;
       }),
       dayBackgroundColor: WidgetStateProperty.resolveWith((states) {
-        if (states.contains(WidgetState.selected)) return AppColors.iris;
-        if (states.contains(WidgetState.hovered)) return AppColors.surfaceHover;
+        if (states.contains(WidgetState.selected)) return c.accent;
+        if (states.contains(WidgetState.hovered)) return c.hover;
         return Colors.transparent;
       }),
-      // The selected day sits on an iris fill, so its label takes the ink that
-      // reads on one — the same pair a primary button uses.
       todayForegroundColor: WidgetStateProperty.resolveWith((states) {
-        return states.contains(WidgetState.selected)
-            ? AppColors.irisInk
-            : AppColors.iris;
+        return states.contains(WidgetState.selected) ? c.onAccent : c.accent;
       }),
-      todayBorder: const BorderSide(color: AppColors.iris),
-      yearForegroundColor: const WidgetStatePropertyAll(AppColors.textPrimary),
-      dividerColor: AppColors.borderSubtle,
+      todayBorder: BorderSide(color: c.accent),
+      yearForegroundColor: WidgetStatePropertyAll(c.text),
+      dividerColor: c.line,
     ),
 
     popupMenuTheme: PopupMenuThemeData(
-      color: AppColors.surfaceOverlay,
+      color: c.surface,
       surfaceTintColor: Colors.transparent,
       elevation: 0,
       textStyle: textTheme.bodyMedium,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.all(Radius.circular(AppRadii.md)),
-        side: BorderSide(color: AppColors.border),
-      ),
+      shape: containerShape(),
     ),
 
-    menuTheme: const MenuThemeData(
+    menuTheme: MenuThemeData(
       style: MenuStyle(
-        backgroundColor: WidgetStatePropertyAll(AppColors.surfaceOverlay),
-        surfaceTintColor: WidgetStatePropertyAll(Colors.transparent),
-        elevation: WidgetStatePropertyAll(0),
-        shape: WidgetStatePropertyAll(
-          RoundedRectangleBorder(
-            borderRadius: BorderRadius.all(Radius.circular(AppRadii.md)),
-            side: BorderSide(color: AppColors.border),
-          ),
-        ),
+        backgroundColor: WidgetStatePropertyAll(c.surface),
+        surfaceTintColor: const WidgetStatePropertyAll(Colors.transparent),
+        elevation: const WidgetStatePropertyAll(0),
+        shape: WidgetStatePropertyAll(containerShape()),
       ),
     ),
 
     snackBarTheme: SnackBarThemeData(
       behavior: SnackBarBehavior.floating,
-      backgroundColor: AppColors.surfaceOverlay,
+      backgroundColor: c.surface,
       contentTextStyle: textTheme.bodyMedium,
       elevation: 0,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.all(Radius.circular(AppRadii.inset)),
-        side: BorderSide(color: AppColors.border),
-      ),
+      shape: containerShape(),
       insetPadding: const EdgeInsets.all(AppSpacing.lg),
     ),
 
     tooltipTheme: TooltipThemeData(
       decoration: BoxDecoration(
-        color: AppColors.surfaceOverlay,
-        borderRadius: BorderRadius.circular(AppRadii.md),
-        border: Border.all(color: AppColors.border),
+        color: c.surface,
+        borderRadius: BorderRadius.circular(AppRadii.container),
+        border: Border.all(color: c.lineStrong),
+        boxShadow: c.shadow,
       ),
-      textStyle: textTheme.bodySmall,
+      textStyle: textTheme.bodySmall?.copyWith(color: c.text),
       padding: const EdgeInsets.symmetric(
-        horizontal: AppSpacing.sm + AppSpacing.xs,
-        vertical: AppSpacing.sm,
+        horizontal: AppSpacing.smPlus,
+        vertical: AppSpacing.xsPlus,
       ),
       waitDuration: const Duration(milliseconds: 500),
     ),
 
     chipTheme: ChipThemeData(
-      backgroundColor: AppColors.surfaceOverlay,
-      side: const BorderSide(color: AppColors.border),
+      backgroundColor: c.surface,
+      side: BorderSide(color: c.lineStrong),
       labelStyle: textTheme.labelSmall,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.all(Radius.circular(AppRadii.pill)),
@@ -199,15 +201,15 @@ ThemeData _buildDarkTheme() {
       padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
     ),
 
-    progressIndicatorTheme: const ProgressIndicatorThemeData(
-      color: AppColors.iris,
-      linearTrackColor: AppColors.surfaceHover,
+    progressIndicatorTheme: ProgressIndicatorThemeData(
+      color: c.accent,
+      linearTrackColor: c.lineStrong,
       circularTrackColor: Colors.transparent,
       strokeCap: StrokeCap.round,
     ),
 
     scrollbarTheme: ScrollbarThemeData(
-      thumbColor: const WidgetStatePropertyAll(AppColors.border),
+      thumbColor: WidgetStatePropertyAll(c.lineStrong),
       thickness: const WidgetStatePropertyAll(6),
       radius: const Radius.circular(AppRadii.pill),
       crossAxisMargin: 2,
@@ -215,250 +217,194 @@ ThemeData _buildDarkTheme() {
   );
 }
 
-InputDecorationTheme _inputDecorationTheme(TextTheme textTheme) {
+/// Lands a dense 13 px text field on [AppSizes.formField].
+const _fieldPaddingY = 10.5;
+
+InputDecorationTheme _inputDecorationTheme(
+  AppColors c,
+  TextTheme textTheme,
+  AppTextStyles textStyles,
+) {
   OutlineInputBorder border(Color color) => OutlineInputBorder(
-    borderRadius: BorderRadius.circular(AppRadii.md),
+    borderRadius: BorderRadius.circular(AppRadii.control),
     borderSide: BorderSide(color: color),
   );
 
   return InputDecorationTheme(
     filled: true,
-    fillColor: AppColors.surfaceField,
+    fillColor: c.field,
     isDense: true,
-    // A dense decorator lays the text out on its font metrics rather than on the
-    // 1.5 line height, so 12px of padding left the field at 36 — three-quarters
-    // of an inch shorter than the 44px [AppSelect] and [ReadOnlyField] standing
-    // beside it in the same form. Padded to land on 44 instead, measured rather
-    // than derived, so a field and a select read as one row of controls.
+    // 32 px with the 13 px value (`00` §4), padded 0 10. The dense decorator
+    // lays the text out on the font's own metrics rather than the 1.45 line
+    // height, hence the uneven vertical padding.
     contentPadding: const EdgeInsets.symmetric(
-      horizontal: AppSpacing.sm + AppSpacing.xs,
-      vertical: AppSpacing.md,
+      horizontal: AppSpacing.sm + AppSpacing.xxs,
+      vertical: _fieldPaddingY,
     ),
     // Labels sit above the field rather than floating inside it: French labels
-    // run 15–20% longer than English and clip badly when squeezed into a notch.
+    // run longer than English and clip when squeezed into a notch.
     floatingLabelBehavior: FloatingLabelBehavior.never,
-    labelStyle: textTheme.bodyLarge?.copyWith(color: AppColors.textSecondary),
-    hintStyle: textTheme.bodyLarge?.copyWith(color: AppColors.textDisabled),
-    errorStyle: AppTextStyles.helper.copyWith(color: AppColors.negative),
-    prefixIconColor: AppColors.textSecondary,
-    suffixIconColor: AppColors.textSecondary,
-    border: border(AppColors.border),
-    enabledBorder: border(AppColors.border),
-    disabledBorder: border(AppColors.borderSubtle),
-    // The spec pairs the 1px iris border with a 3px outer glow; the glow is
-    // painted by FocusGlow, since InputBorder can only draw the border itself.
-    focusedBorder: border(AppColors.focusRing),
-    errorBorder: border(const Color(0x8CFF5C6C)),
-    focusedErrorBorder: border(AppColors.negative),
+    labelStyle: textTheme.bodyMedium?.copyWith(color: c.textSecondary),
+    hintStyle: textTheme.bodyMedium?.copyWith(color: c.textTertiary),
+    errorStyle: textStyles.helper.copyWith(color: c.negative),
+    prefixIconColor: c.textTertiary,
+    suffixIconColor: c.textTertiary,
+    border: border(c.lineStrong),
+    enabledBorder: border(c.lineStrong),
+    disabledBorder: border(c.lineStrong.withValues(alpha: 0.45)),
+    // The 3 px `accentSoft` ring around a focused field is painted by
+    // FocusGlow, since InputBorder can only draw the border itself.
+    focusedBorder: border(c.accent),
+    errorBorder: border(c.negative),
+    focusedErrorBorder: border(c.negative),
   );
 }
 
-/// Pins a button to [AppChrome.buttonHeight] whatever its label.
-///
-/// Sizing a button from its label's line height let a « Annuler » and the
-/// « Appliquer » beside it land a pixel or two apart, and Material's padded tap
-/// target then wrapped each of them in a box of yet another height — which is
-/// what threw the footer rows out of alignment. So the styles carry no vertical
-/// padding: the height is pinned here, and the global [VisualDensity.compact]
-/// (which would shave that minimum back down) opted out of, so every button in
-/// a row measures the same. A button under a tight parent constraint — the 30px
-/// inline pills — still takes its parent's height.
+/// Pins a button to [AppSizes.button] whatever its label, so the buttons of
+/// one row measure the same. A button under a tight parent constraint still
+/// takes its parent's height.
 ButtonStyle _rowAligned(ButtonStyle style) => style.copyWith(
-  minimumSize: const WidgetStatePropertyAll(Size(0, AppChrome.buttonHeight)),
+  minimumSize: const WidgetStatePropertyAll(Size(0, AppSizes.button)),
   visualDensity: VisualDensity.standard,
   tapTargetSize: MaterialTapTargetSize.shrinkWrap,
 );
 
-/// Fallback solid-iris style. The spec's primary button is an iris *gradient*
-/// with a glow, which [ButtonStyle] cannot express — [PrimaryButton] paints it.
-/// This keeps any stray [FilledButton] on-palette rather than on Material's.
-ButtonStyle _filledButtonStyle(TextTheme textTheme) => ButtonStyle(
+/// Buttons are padded 0 10 (`00` §6).
+const _buttonPaddingX = AppSpacing.sm + AppSpacing.xxs;
+
+/// The focus outline of `00` §6, as a button side: 2 px `accent`.
+BorderSide? _focusSide(AppColors c, Set<WidgetState> states) =>
+    states.contains(WidgetState.focused)
+    ? BorderSide(color: c.accent, width: 2)
+    : null;
+
+/// The primary button (`00` §6): `primary` ground, `onPrimary` label, no
+/// border.
+ButtonStyle _filledButtonStyle(
+  AppColors c,
+  TextTheme textTheme,
+  OutlinedBorder shape,
+) => ButtonStyle(
   backgroundColor: WidgetStateProperty.resolveWith((states) {
-    if (states.contains(WidgetState.disabled)) return AppColors.surfaceHover;
-    if (states.contains(WidgetState.pressed)) return AppColors.irisDeep;
-    return AppColors.iris;
+    if (states.contains(WidgetState.disabled)) {
+      return c.primary.withValues(alpha: 0.45);
+    }
+    return c.primary;
   }),
   foregroundColor: WidgetStateProperty.resolveWith((states) {
-    if (states.contains(WidgetState.disabled)) return AppColors.textDisabled;
-    return AppColors.irisInk;
+    if (states.contains(WidgetState.disabled)) {
+      return c.onPrimary.withValues(alpha: 0.45);
+    }
+    return c.onPrimary;
   }),
-  overlayColor: const WidgetStatePropertyAll(Color(0x14000000)),
+  overlayColor: WidgetStatePropertyAll(c.onPrimary.withValues(alpha: 0.08)),
+  side: WidgetStateProperty.resolveWith((states) => _focusSide(c, states)),
   textStyle: WidgetStatePropertyAll(textTheme.labelLarge),
   elevation: const WidgetStatePropertyAll(0),
   padding: const WidgetStatePropertyAll(
-    EdgeInsets.symmetric(horizontal: AppSpacing.md + AppSpacing.xs),
+    EdgeInsets.symmetric(horizontal: _buttonPaddingX),
   ),
-  shape: const WidgetStatePropertyAll(
-    RoundedRectangleBorder(
-      borderRadius: BorderRadius.all(Radius.circular(AppRadii.md)),
-    ),
-  ),
-  iconSize: const WidgetStatePropertyAll(AppChrome.navIconSize),
+  shape: WidgetStatePropertyAll(shape),
+  iconSize: const WidgetStatePropertyAll(AppSizes.iconSmall),
 );
 
-ButtonStyle _outlinedButtonStyle(TextTheme textTheme) => ButtonStyle(
+/// The secondary button (`00` §6): `surface` ground, 1 px `lineStrong`.
+ButtonStyle _outlinedButtonStyle(
+  AppColors c,
+  TextTheme textTheme,
+  OutlinedBorder shape,
+) => ButtonStyle(
   foregroundColor: WidgetStateProperty.resolveWith((states) {
-    if (states.contains(WidgetState.disabled)) return AppColors.textDisabled;
-    return AppColors.textPrimary;
+    if (states.contains(WidgetState.disabled)) return c.textTertiary;
+    return c.text;
   }),
   backgroundColor: WidgetStateProperty.resolveWith((states) {
-    if (states.contains(WidgetState.hovered)) return AppColors.surfaceHover;
-    return Colors.transparent;
+    if (states.contains(WidgetState.hovered)) return c.hover;
+    return c.surface;
   }),
   side: WidgetStateProperty.resolveWith((states) {
+    if (_focusSide(c, states) case final focus?) return focus;
     if (states.contains(WidgetState.disabled)) {
-      return const BorderSide(color: AppColors.borderSubtle);
+      return BorderSide(color: c.lineStrong.withValues(alpha: 0.45));
     }
-    return const BorderSide(color: AppColors.border);
+    return BorderSide(color: c.lineStrong);
   }),
   textStyle: WidgetStatePropertyAll(textTheme.labelLarge),
   padding: const WidgetStatePropertyAll(
-    EdgeInsets.symmetric(horizontal: AppSpacing.md + AppSpacing.xs),
+    EdgeInsets.symmetric(horizontal: _buttonPaddingX),
   ),
-  shape: const WidgetStatePropertyAll(
-    RoundedRectangleBorder(
-      borderRadius: BorderRadius.all(Radius.circular(AppRadii.md)),
-    ),
-  ),
-  iconSize: const WidgetStatePropertyAll(AppChrome.navIconSize),
+  shape: WidgetStatePropertyAll(shape),
+  iconSize: const WidgetStatePropertyAll(AppSizes.iconSmall),
 );
 
-ButtonStyle _textButtonStyle(TextTheme textTheme) => ButtonStyle(
+/// The ghost button (`00` §6): no border, no ground, `textSecondary`.
+ButtonStyle _textButtonStyle(
+  AppColors c,
+  TextTheme textTheme,
+  OutlinedBorder shape,
+) => ButtonStyle(
   foregroundColor: WidgetStateProperty.resolveWith((states) {
-    if (states.contains(WidgetState.disabled)) return AppColors.textDisabled;
-    if (states.contains(WidgetState.hovered)) return AppColors.iris;
-    return AppColors.textSecondary;
+    if (states.contains(WidgetState.disabled)) return c.textTertiary;
+    if (states.contains(WidgetState.hovered)) return c.text;
+    return c.textSecondary;
   }),
-  overlayColor: const WidgetStatePropertyAll(AppColors.overlayWash),
+  overlayColor: WidgetStatePropertyAll(c.hover),
+  side: WidgetStateProperty.resolveWith((states) => _focusSide(c, states)),
   textStyle: WidgetStatePropertyAll(textTheme.labelLarge),
   padding: const WidgetStatePropertyAll(
-    EdgeInsets.symmetric(horizontal: AppSpacing.sm + AppSpacing.xs),
+    EdgeInsets.symmetric(horizontal: _buttonPaddingX),
   ),
-  shape: const WidgetStatePropertyAll(
-    RoundedRectangleBorder(
-      borderRadius: BorderRadius.all(Radius.circular(AppRadii.sm)),
-    ),
-  ),
+  shape: WidgetStatePropertyAll(shape),
+  iconSize: const WidgetStatePropertyAll(AppSizes.iconSmall),
 );
 
-/// The type scale from `docs/design/00` §Typography.
+/// The type scale of `00` §3, mapped onto the [TextTheme] slots.
 ///
-/// Space Grotesk 700 carries the display role — wordmark, panel titles, headline
-/// amounts, ring values — and Geist everything else. The split is by *role*,
-/// not by size, so a 14px card title stays Geist while an 18px panel title is
-/// Space Grotesk.
-TextTheme _appTextTheme() {
-  const base = TextTheme();
-  return base
-      .copyWith(
-        // Headline stat values (29–32).
-        displayLarge: _display(32, tracking: -0.8),
-        displayMedium: _display(29, tracking: -0.6),
-        // Account-card balance.
-        headlineLarge: _display(21, tracking: -0.4),
-        // Modal and empty-state titles (16–19).
-        headlineMedium: _display(19, tracking: -0.3),
-        headlineSmall: _display(16, tracking: -0.2),
-        // Top-bar panel title.
-        titleLarge: _display(18, tracking: -0.3),
-        // Card title.
-        titleMedium: _ui(14, FontWeight.w700, height: 1.35),
-        // Row primary line (merchant, account name).
-        titleSmall: _ui(13.5, FontWeight.w700, height: 1.35),
-        bodyLarge: _ui(13.5, FontWeight.w400, height: 1.5),
-        bodyMedium: _ui(13, FontWeight.w400, height: 1.5),
-        // Secondary text.
-        bodySmall: _ui(12.5, FontWeight.w400, height: 1.45),
-        // Button label.
-        labelLarge: _ui(13, FontWeight.w600, tracking: 0.1),
-        // Form label.
-        labelMedium: _ui(12.5, FontWeight.w600, tracking: 0.1),
-        // Captions and badges.
-        labelSmall: _ui(11.5, FontWeight.w600, tracking: 0.1),
-      )
-      .apply(
-        bodyColor: AppColors.textPrimary,
-        displayColor: AppColors.textPrimary,
-      );
-}
-
-/// Styles the [TextTheme] slots can't carry — an uppercase section label sits
-/// below `labelSmall`, and the review queue needs a monospace face.
-abstract final class AppTextStyles {
-  /// 10px uppercase section label. Uppercase at the usage site, not here, so
-  /// the localized string stays intact for screen readers.
-  static const sectionLabel = TextStyle(
+/// One family, Geist at 400, 500 and 600. Figures take line height 1.1, text
+/// 1.45. Nothing is smaller than 11.
+TextTheme _appTextTheme(AppColors c) {
+  TextStyle style(
+    double size,
+    FontWeight weight, {
+    double trackingEm = 0,
+    double height = 1.45,
+  }) => TextStyle(
     fontFamily: AppFonts.geist,
-    fontSize: 10,
-    fontWeight: FontWeight.w600,
-    letterSpacing: 1.3,
-    color: AppColors.textDisabled,
+    fontSize: size,
+    fontWeight: weight,
+    letterSpacing: trackingEm * size,
+    height: height,
+    color: c.text,
   );
 
-  /// 11px uppercase label heading a stat card's value (`docs/design/00` §Components).
-  /// A notch larger than [sectionLabel] and in the secondary tone rather than the disabled
-  /// one — it titles the card's headline figure, where a section label only groups a list.
-  /// Uppercase is applied at the usage site so the localized string stays intact for
-  /// screen readers.
-  static const statLabel = TextStyle(
-    fontFamily: AppFonts.geist,
-    fontSize: 11,
-    fontWeight: FontWeight.w600,
-    letterSpacing: 1.3,
-    color: AppColors.textSecondary,
-  );
-
-  /// Field helper / validation line.
-  static const helper = TextStyle(
-    fontFamily: AppFonts.geist,
-    fontSize: 11.5,
-    fontWeight: FontWeight.w400,
-    height: 1.4,
-    color: AppColors.textSecondary,
-  );
-
-  /// Raw bank labels in the review queue.
-  static const mono = TextStyle(
-    fontFamily: AppFonts.mono,
-    fontSize: 12.5,
-    fontWeight: FontWeight.w400,
-    color: AppColors.textSecondary,
-  );
-
-  /// « — aucune proposition » on a review row the model had nothing for.
-  /// Italic and in the disabled tone so it reads as an absence rather than as
-  /// a category the row was given (`docs/design/07` §Amendment — AI proposals).
-  static const reviewNoProposal = TextStyle(
-    fontFamily: AppFonts.geist,
-    fontSize: 11.5,
-    fontWeight: FontWeight.w400,
-    fontStyle: FontStyle.italic,
-    color: AppColors.textDisabled,
+  return TextTheme(
+    // The panel's lead figure.
+    displayLarge: style(40, FontWeight.w600, trackingEm: -0.03, height: 1.1),
+    // Supporting figures of a summary line; an inspector's lead figure.
+    displayMedium: style(28, FontWeight.w600, trackingEm: -0.02, height: 1.1),
+    // Minor figures of a summary line.
+    displaySmall: style(20, FontWeight.w600, trackingEm: -0.01, height: 1.1),
+    headlineLarge: style(28, FontWeight.w600, trackingEm: -0.02, height: 1.1),
+    headlineMedium: style(20, FontWeight.w600, trackingEm: -0.01, height: 1.1),
+    // Inspector title, settings section title, modal title.
+    headlineSmall: style(16, FontWeight.w600),
+    titleLarge: style(16, FontWeight.w600),
+    // Title-bar title, brand name.
+    titleMedium: style(14, FontWeight.w600),
+    // Section heading inside a panel.
+    titleSmall: style(13, FontWeight.w600),
+    // Body, table cells, nav items, field values.
+    bodyLarge: style(13, FontWeight.w400),
+    bodyMedium: style(13, FontWeight.w400),
+    // Field labels, column headers, captions.
+    bodySmall: style(12, FontWeight.w400),
+    // Button label, emphasised cell, active tab.
+    labelLarge: style(13, FontWeight.w500),
+    labelMedium: style(12, FontWeight.w500),
+    // Notes, chart axis labels, meter labels.
+    labelSmall: style(11, FontWeight.w400),
   );
 }
-
-TextStyle _display(double size, {double tracking = 0}) => TextStyle(
-  fontFamily: AppFonts.spaceGrotesk,
-  fontSize: size,
-  fontWeight: FontWeight.w700,
-  letterSpacing: tracking,
-  height: 1.2,
-  color: AppColors.textPrimary,
-);
-
-TextStyle _ui(
-  double size,
-  FontWeight weight, {
-  double tracking = 0,
-  double? height,
-}) => TextStyle(
-  fontFamily: AppFonts.geist,
-  fontSize: size,
-  fontWeight: weight,
-  letterSpacing: tracking,
-  height: height,
-  color: AppColors.textPrimary,
-);
 
 /// Tabular-figure variant of [base] so stacked amounts/balances align by column.
 TextStyle tabularNumberStyle(TextStyle base) =>

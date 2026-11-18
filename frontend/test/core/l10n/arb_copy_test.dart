@@ -1,0 +1,91 @@
+import 'dart:convert';
+import 'dart:io';
+
+import 'package:flutter_test/flutter_test.dart';
+
+/// The voice rules of `docs/design/00-design-system.md` §14 that a string
+/// can break on its own, checked over every value of both ARB files.
+void main() {
+  final locales = {
+    for (final locale in const ['fr', 'en']) locale: _messages(locale),
+  };
+
+  test('fr and en declare the same keys', () {
+    final fr = locales['fr']!.keys.toSet();
+    final en = locales['en']!.keys.toSet();
+    expect(fr.difference(en), isEmpty, reason: 'missing from app_en.arb');
+    expect(en.difference(fr), isEmpty, reason: 'missing from app_fr.arb');
+  });
+
+  for (final MapEntry(key: locale, value: messages) in locales.entries) {
+    group('app_$locale.arb', () {
+      test('uses the em dash only as the bare empty-value placeholder', () {
+        final offenders = [
+          for (final MapEntry(:key, :value) in messages.entries)
+            if (value.contains('—') && value.trim() != '—') key,
+        ];
+        expect(offenders, isEmpty);
+      });
+
+      test('types no arrow or check glyph outside {a} → {b} notation', () {
+        final offenders = [
+          for (final MapEntry(:key, :value) in messages.entries)
+            if (_glyph.hasMatch(value.replaceAll(_dataArrow, ''))) key,
+        ];
+        expect(offenders, isEmpty);
+      });
+
+      test('carries no exclamation mark', () {
+        final offenders = [
+          for (final MapEntry(:key, :value) in messages.entries)
+            if (value.contains('!')) key,
+        ];
+        expect(offenders, isEmpty);
+      });
+
+      test('never says « pour l’instant »', () {
+        final offenders = [
+          for (final MapEntry(:key, :value) in messages.entries)
+            if (_forNow.hasMatch(value)) key,
+        ];
+        expect(offenders, isEmpty);
+      });
+    });
+  }
+
+  test('the checks catch what they are meant to catch', () {
+    expect(
+      _glyph.hasMatch('Nouveau bien →'.replaceAll(_dataArrow, '')),
+      isTrue,
+    );
+    expect(
+      _glyph.hasMatch('{from} → {to}'.replaceAll(_dataArrow, '')),
+      isFalse,
+    );
+    expect(
+      _glyph.hasMatch(
+        'Hausse : {from} → {to} le {date}'.replaceAll(_dataArrow, ''),
+      ),
+      isFalse,
+    );
+    expect(_forNow.hasMatch("Aucun import pour l'instant"), isTrue);
+  });
+}
+
+/// `{from} → {to}` is data notation, not a typed link arrow.
+final _dataArrow = RegExp(r'\{\w+\} → \{\w+\}');
+
+final _glyph = RegExp('[→←↑↓↗↘⟶➔➜✓✔✗✘]');
+
+final _forNow = RegExp('pour l[\'’]instant', caseSensitive: false);
+
+/// Every message of one ARB file, without its `@` metadata.
+Map<String, String> _messages(String locale) {
+  final decoded =
+      jsonDecode(File('l10n/app_$locale.arb').readAsStringSync())
+          as Map<String, dynamic>;
+  return {
+    for (final MapEntry(:key, :value) in decoded.entries)
+      if (!key.startsWith('@')) key: value as String,
+  };
+}

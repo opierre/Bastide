@@ -47,17 +47,17 @@ class MortgageDetailPanel extends ConsumerWidget {
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Icon(
+                  Icon(
                     Icons.arrow_back_rounded,
                     size: 16,
-                    color: AppColors.iris,
+                    color: context.colors.accent,
                   ),
                   const SizedBox(width: AppSpacing.xs + 2),
                   Text(
                     l10n.mortgageDetailBack,
-                    style: Theme.of(
-                      context,
-                    ).textTheme.labelMedium?.copyWith(color: AppColors.iris),
+                    style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                      color: context.colors.accent,
+                    ),
                   ),
                 ],
               ),
@@ -176,7 +176,7 @@ class _HeaderCard extends StatelessWidget {
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                   style: textTheme.bodySmall?.copyWith(
-                    color: AppColors.textSecondary,
+                    color: context.colors.textSecondary,
                   ),
                 ),
               ],
@@ -262,7 +262,7 @@ class _HeaderStat extends StatelessWidget {
           label.toUpperCase(),
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
-          style: AppTextStyles.sectionLabel.copyWith(
+          style: context.textStyles.sectionLabel.copyWith(
             fontSize: 10.5,
             letterSpacing: 1,
           ),
@@ -282,7 +282,7 @@ class _HeaderStat extends StatelessWidget {
           caption,
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
-          style: AppTextStyles.helper.copyWith(fontSize: 11),
+          style: context.textStyles.helper.copyWith(fontSize: 11),
         ),
       ],
     );
@@ -317,7 +317,7 @@ class _CostRow extends StatelessWidget {
             child: _CostCard(
               label: Text(
                 l10n.mortgageRateLabel.toUpperCase(),
-                style: AppTextStyles.statLabel,
+                style: context.textStyles.statLabel,
               ),
               value: formatBps(mortgage.annualRateBps, locale, digits: 2),
               valueKey: const Key('mortgageCostRate'),
@@ -327,39 +327,9 @@ class _CostRow extends StatelessWidget {
           const SizedBox(width: AppSpacing.gridGap),
           Expanded(
             child: _CostCard(
-              label: Row(
-                children: [
-                  Text(
-                    l10n.mortgageCostTaegLabel.toUpperCase(),
-                    style: AppTextStyles.statLabel,
-                  ),
-                  const SizedBox(width: AppSpacing.xs + 2),
-                  Semantics(
-                    label: l10n.mortgageCostTaegDisclaimer,
-                    child: Container(
-                      key: const Key('mortgageTaegIndicative'),
-                      height: 18,
-                      padding: const EdgeInsets.symmetric(horizontal: 6),
-                      alignment: Alignment.center,
-                      decoration: BoxDecoration(
-                        color: const Color(0x248B8CF9),
-                        borderRadius: BorderRadius.circular(9),
-                      ),
-                      child: ExcludeSemantics(
-                        child: Text(
-                          l10n.mortgageCostIndicative.toUpperCase(),
-                          style: const TextStyle(
-                            fontFamily: AppFonts.geist,
-                            fontSize: 9.5,
-                            fontWeight: FontWeight.w700,
-                            letterSpacing: 0.6,
-                            color: AppColors.iris,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
+              label: Text(
+                l10n.mortgageCostTaegLabel.toUpperCase(),
+                style: context.textStyles.statLabel,
               ),
               value: formatBps(detail.taegBps, locale, digits: 2),
               valueKey: const Key('mortgageCostTaeg'),
@@ -371,7 +341,7 @@ class _CostRow extends StatelessWidget {
             child: _CostCard(
               label: Text(
                 l10n.mortgageCostInterestLabel.toUpperCase(),
-                style: AppTextStyles.statLabel,
+                style: context.textStyles.statLabel,
               ),
               value: money(detail.totalInterestMinor),
               valueKey: const Key('mortgageCostInterest'),
@@ -385,7 +355,7 @@ class _CostRow extends StatelessWidget {
             child: _CostCard(
               label: Text(
                 l10n.mortgageCostTotalLabel.toUpperCase(),
-                style: AppTextStyles.statLabel,
+                style: context.textStyles.statLabel,
               ),
               value: money(detail.totalCostMinor),
               valueKey: const Key('mortgageCostTotal'),
@@ -442,7 +412,7 @@ class _CostCard extends StatelessWidget {
             caption,
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
-            style: AppTextStyles.helper,
+            style: context.textStyles.helper,
           ),
         ],
       ),

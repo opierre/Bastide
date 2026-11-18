@@ -20,7 +20,7 @@ Widget _shell({
     ],
     child: MaterialApp(
       locale: locale,
-      theme: appDarkTheme,
+      theme: AppTheme.dark,
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
       home: AppShell(
@@ -69,7 +69,7 @@ void main() {
         'Simulateur',
         'Synthèse',
         'Paramètres',
-        'Données 100 % locales',
+        'Données locales',
       ];
       for (var i = 1; i < order.length; i++) {
         expect(top(order[i]), greaterThan(top(order[i - 1])), reason: order[i]);
@@ -97,7 +97,7 @@ void main() {
   }
 
   testWidgets(
-    'each route puts its title and descriptor in the top bar, in fr',
+    'each route puts its title, and no tagline, in the top bar, in fr',
     (tester) async {
       _useFrame(tester);
       const expected = {
@@ -105,13 +105,13 @@ void main() {
         '/simulations': ('Simulateur', "Ce qu'un nouveau crédit changerait"),
         '/networth': ('Synthèse', 'Ce que vous possédez, ce que vous devez'),
       };
-      for (final MapEntry(key: path, value: (title, subtitle))
+      for (final MapEntry(key: path, value: (title, tagline))
           in expected.entries) {
         await tester.pumpWidget(_shell(path: path));
         await tester.pumpAndSettle();
 
         expect(_inTopBar(find.text(title)), findsOneWidget, reason: path);
-        expect(_inTopBar(find.text(subtitle)), findsOneWidget, reason: path);
+        expect(find.text(tagline), findsNothing, reason: path);
       }
     },
   );
@@ -129,10 +129,7 @@ void main() {
         expect(_inSidebar(find.text(label)), findsOneWidget, reason: label);
       }
       expect(_inTopBar(find.text('Net worth')), findsOneWidget);
-      expect(
-        _inTopBar(find.text('What you own, what you owe')),
-        findsOneWidget,
-      );
+      expect(find.text('What you own, what you owe'), findsNothing);
       // "Overview" stays the group label of the first section only.
       expect(find.text('OVERVIEW'), findsOneWidget);
     },

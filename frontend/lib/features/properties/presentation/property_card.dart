@@ -107,7 +107,7 @@ class PropertyCard extends StatelessWidget {
               key: Key('propertyAddress-$id'),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
-              style: AppTextStyles.helper.copyWith(fontSize: 12),
+              style: context.textStyles.helper.copyWith(fontSize: 12),
             ),
           const SizedBox(height: AppSpacing.xs),
           Align(
@@ -139,11 +139,11 @@ class PropertyCard extends StatelessWidget {
                 : l10n.propertyCardCaptionWhole(valuedOn),
             key: Key('propertyCaption-$id'),
             style: tabularNumberStyle(
-              AppTextStyles.helper,
+              context.textStyles.helper,
             ).copyWith(fontSize: 12),
           ),
           const SizedBox(height: AppSpacing.sm + AppSpacing.xs),
-          const Divider(height: 1, thickness: 1, color: AppColors.borderSubtle),
+          Divider(height: 1, thickness: 1, color: context.colors.line),
           const SizedBox(height: AppSpacing.sm + 2),
           _KeyValue(
             label: l10n.propertyCardOwnership,
@@ -198,6 +198,7 @@ class _PropertyMenu extends StatelessWidget {
   final ValueChanged<_PropertyAction> onSelected;
 
   PopupMenuItem<_PropertyAction> _item(
+    BuildContext context,
     _PropertyAction action,
     IconData icon,
     String label,
@@ -206,7 +207,7 @@ class _PropertyMenu extends StatelessWidget {
     value: action,
     child: Row(
       children: [
-        Icon(icon, size: 16, color: AppColors.textSecondary),
+        Icon(icon, size: 16, color: context.colors.textSecondary),
         const SizedBox(width: AppSpacing.sm + 2),
         // French labels run long, and a menu is capped in width.
         Flexible(child: Text(label, overflow: TextOverflow.ellipsis)),
@@ -224,6 +225,7 @@ class _PropertyMenu extends StatelessWidget {
       itemBuilder: (context) => archived
           ? [
               _item(
+                context,
                 _PropertyAction.unarchive,
                 Icons.unarchive_outlined,
                 l10n.propertyMenuUnarchive,
@@ -231,11 +233,13 @@ class _PropertyMenu extends StatelessWidget {
             ]
           : [
               _item(
+                context,
                 _PropertyAction.edit,
                 Icons.edit_outlined,
                 l10n.propertyMenuEdit,
               ),
               _item(
+                context,
                 _PropertyAction.revalue,
                 Icons.sell_outlined,
                 l10n.propertyMenuRevalue,
@@ -243,6 +247,7 @@ class _PropertyMenu extends StatelessWidget {
               // Archive, never delete: the loans linked to a property keep
               // their link, and the property can come back.
               _item(
+                context,
                 _PropertyAction.archive,
                 Icons.archive_outlined,
                 l10n.propertyMenuArchive,
@@ -252,7 +257,7 @@ class _PropertyMenu extends StatelessWidget {
   }
 }
 
-/// The CategoryChip-style nature pill: hue at 14 % with full-hue text and an
+/// The CategoryLabel-style nature pill: hue at 14 % with full-hue text and an
 /// 11 px leading glyph.
 class _KindPill extends StatelessWidget {
   const _KindPill({super.key, required this.label, required this.kind});
@@ -262,7 +267,7 @@ class _KindPill extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final hue = AssetHues.forPropertyKind(kind.wireValue);
+    final hue = context.categoryColors.forPropertyKind(kind.wireValue);
     return Container(
       height: 22,
       padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm + 2),
@@ -307,7 +312,7 @@ class _KeyValue extends StatelessWidget {
           Expanded(
             child: Text(
               label,
-              style: style.copyWith(color: AppColors.textSecondary),
+              style: style.copyWith(color: context.colors.textSecondary),
             ),
           ),
           const SizedBox(width: AppSpacing.sm),

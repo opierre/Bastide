@@ -59,7 +59,7 @@ def _seed(db: Session, email: str) -> dict[str, str]:
         name="Vélo",
         kind="expense",
         icon="bike",
-        color="#4FD1E8",
+        color="cat1",
     )
     account = Account(
         user_id=user.id,
@@ -464,6 +464,23 @@ def test_restore_accepts_settings_archived_before_a_column_existed(client: TestC
     settings = client.get("/api/v1/settings", headers=headers).json()
     assert settings["model_tag"] == "gemma4:e4b"
     assert settings["update_check_enabled"] is False
+
+
+def test_restore_maps_a_v1_category_colour_to_its_slot(client: TestClient, tmp_path: Path) -> None:
+    """An archive from before hue slots holds the v1 hex colour of each category."""
+    headers = _register(client, "amelie@example.com")
+    with _session(tmp_path) as db:
+        _seed(db, "amelie@example.com")
+    content = _export(client, headers)
+    line = json.loads(zipfile.ZipFile(io.BytesIO(content)).read("categories.jsonl"))
+    line["color"] = "#F472B6"
+    older = _rewrite(content, categories_jsonl=json.dumps(line).encode())
+
+    assert _upload(client, "restore", headers, older).status_code == 200
+
+    with _session(tmp_path) as db:
+        category = db.scalars(select(Category).where(Category.name == "Vélo")).one()
+        assert category.color == "cat5"
 
 
 def test_restore_leaves_other_users_untouched(client: TestClient, tmp_path: Path) -> None:

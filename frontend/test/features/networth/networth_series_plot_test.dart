@@ -11,7 +11,7 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           locale: const Locale('fr'),
-          theme: appDarkTheme,
+          theme: AppTheme.dark,
           localizationsDelegates: AppLocalizations.localizationsDelegates,
           supportedLocales: AppLocalizations.supportedLocales,
           home: Scaffold(
@@ -63,7 +63,7 @@ void main() {
         paints..everything((method, arguments) {
           if (method == #drawCircle &&
               (arguments[2] as Paint).color.toARGB32() ==
-                  AppColors.iris.toARGB32()) {
+                  AppColors.dark.accent.toARGB32()) {
             radii.add(arguments[1] as double);
           }
           return true;
@@ -77,9 +77,11 @@ void main() {
       expect(
         painter,
         paints
-          ..path(color: AppColors.iris.withValues(alpha: AppChart.areaAlpha))
           ..path(
-            color: AppColors.iris,
+            color: AppColors.dark.accent.withValues(alpha: AppChart.areaAlpha),
+          )
+          ..path(
+            color: AppColors.dark.accent,
             strokeWidth: AppChart.lineStroke,
             style: PaintingStyle.stroke,
           ),

@@ -7,10 +7,10 @@ import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/tokens.dart';
 import '../../../core/widgets/amount_text.dart';
 import '../../../core/widgets/app_card.dart';
-import '../../../core/widgets/app_chip.dart';
 import '../../../core/widgets/institution_avatar.dart';
 import '../../../core/widgets/primary_button.dart';
 import '../../../core/widgets/state_views.dart';
+import '../../../core/widgets/status_text.dart';
 import '../../../l10n/app_localizations.dart';
 import '../application/accounts_controller.dart';
 import '../application/linked_cards.dart';
@@ -123,7 +123,7 @@ class _SummaryCard extends ConsumerWidget {
               children: [
                 Text(
                   l10n.accountsTotalBalanceLabel.toUpperCase(),
-                  style: AppTextStyles.sectionLabel,
+                  style: context.textStyles.sectionLabel,
                 ),
                 const SizedBox(height: AppSpacing.sm + 2),
                 AmountText(
@@ -145,14 +145,14 @@ class _SummaryCard extends ConsumerWidget {
               Text(
                 '${l10n.accountsActiveCount(accounts.length)} · $currency',
                 style: textTheme.bodySmall?.copyWith(
-                  color: AppColors.textSecondary,
+                  color: context.colors.textSecondary,
                 ),
               ),
               const SizedBox(height: AppSpacing.xs),
               Text(
                 l10n.accountsBalancesAsOf(asOf.toLocal()),
-                style: AppTextStyles.helper.copyWith(
-                  color: AppColors.textDisabled,
+                style: context.textStyles.helper.copyWith(
+                  color: context.colors.textTertiary,
                 ),
               ),
             ],
@@ -255,7 +255,7 @@ class _AccountCard extends StatelessWidget {
                     Text(
                       account.institution,
                       style: textTheme.bodySmall?.copyWith(
-                        color: AppColors.textSecondary,
+                        color: context.colors.textSecondary,
                       ),
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -274,7 +274,7 @@ class _AccountCard extends StatelessWidget {
           const Spacer(),
           Row(
             children: [
-              AppChip(label: accountTypeLabel(l10n, account.type)),
+              StatusText(label: accountTypeLabel(l10n, account.type)),
               const SizedBox(width: AppSpacing.sm),
               // The balance is this card's one data point, so it carries the
               // sign colors — unlike the summary total, which stays neutral.
@@ -320,7 +320,7 @@ class _LastTransaction extends StatelessWidget {
       key: Key('accountLastTransaction-${account.id}'),
       style: Theme.of(
         context,
-      ).textTheme.bodySmall?.copyWith(color: AppColors.textDisabled),
+      ).textTheme.bodySmall?.copyWith(color: context.colors.textTertiary),
       overflow: TextOverflow.ellipsis,
     );
   }
@@ -335,14 +335,12 @@ class _EmptyState extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     return EmptyStateView(
-      icon: Icons.account_balance_wallet_outlined,
       title: l10n.accountsEmptyTitle,
       message: l10n.accountsEmptyBody,
       action: PrimaryButton(
         key: const Key('emptyStateAddAccountButton'),
         label: l10n.accountsAddButton,
         icon: Icons.add_rounded,
-        height: 44,
         onPressed: onAdd,
       ),
     );

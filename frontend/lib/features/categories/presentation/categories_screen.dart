@@ -97,14 +97,12 @@ class _CategoriesView extends ConsumerWidget {
     return switch (tree) {
       AsyncData(:final value) when value.isEmpty => EmptyStateView(
         key: const Key('categoriesEmptyState'),
-        icon: Icons.donut_small_outlined,
         title: l10n.categoriesEmptyTitle,
         message: l10n.categoriesEmptyBody,
         action: PrimaryButton(
           key: const Key('emptyStateAddCategoryButton'),
           label: l10n.categoriesAddButton,
           icon: Icons.add_rounded,
-          height: 44,
           onPressed: () => showCategoryForm(context),
         ),
       ),

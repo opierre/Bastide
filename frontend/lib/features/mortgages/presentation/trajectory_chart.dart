@@ -113,13 +113,6 @@ class TrajectoryChartCard extends StatelessWidget {
                       l10n.mortgagesChartTitle,
                       style: textTheme.titleMedium,
                     ),
-                    const SizedBox(height: 2),
-                    Text(
-                      l10n.mortgagesChartSubtitle(summary.activeCount),
-                      style: textTheme.bodySmall?.copyWith(
-                        color: AppColors.textSecondary,
-                      ),
-                    ),
                   ],
                 ),
               ),
@@ -141,7 +134,7 @@ class TrajectoryChartCard extends StatelessWidget {
                 name: summary.currency,
                 decimalDigits: 0,
               ).format(minor / 100),
-              labelStyle: ChartPaints.labelStyle(textTheme),
+              labelStyle: ChartPaints.labelStyle(context),
               // The month and what is still owed then — a neutral figure, like
               // every amount on this panel.
               tooltips: [
@@ -189,10 +182,15 @@ class _LegendItem extends StatelessWidget {
         SizedBox(
           width: 16,
           height: 10,
-          child: CustomPaint(painter: _LegendSwatchPainter(dashed: dashed)),
+          child: CustomPaint(
+            painter: _LegendSwatchPainter(
+              colors: context.colors,
+              dashed: dashed,
+            ),
+          ),
         ),
         const SizedBox(width: AppSpacing.xs + 2),
-        Text(label, style: AppTextStyles.helper),
+        Text(label, style: context.textStyles.helper),
       ],
     );
   }
@@ -201,7 +199,10 @@ class _LegendItem extends StatelessWidget {
 /// A legend mark drawn exactly as the plot draws what it names: the shared
 /// curve stroke, or today's dashed vertical laid on its side.
 class _LegendSwatchPainter extends CustomPainter {
-  const _LegendSwatchPainter({required this.dashed});
+  /// The active theme's colours.
+  final AppColors colors;
+
+  const _LegendSwatchPainter({required this.colors, required this.dashed});
 
   final bool dashed;
 
@@ -212,21 +213,22 @@ class _LegendSwatchPainter extends CustomPainter {
       canvas.drawLine(
         Offset(0, y),
         Offset(size.width, y),
-        ChartPaints.stroke(AppColors.iris),
+        ChartPaints.stroke(colors.accent),
       );
       return;
     }
     ChartPaints.baseline(
+      colors,
       canvas,
       Offset(0, y),
       Offset(size.width, y),
-      color: TrajectoryPlot.todayColor,
+      color: TrajectoryPlot.todayColor(colors),
     );
   }
 
   @override
   bool shouldRepaint(_LegendSwatchPainter oldDelegate) =>
-      oldDelegate.dashed != dashed;
+      oldDelegate.colors != colors || oldDelegate.dashed != dashed;
 }
 
 /// The plot itself, in the shared curve style ([AppChart]): labelled y
@@ -263,10 +265,10 @@ class TrajectoryPlot extends StatefulWidget {
   final List<InlineSpan>? tooltips;
 
   /// Today's dashed vertical, a step brighter than the end markers.
-  static const todayColor = AppColors.textSecondary;
+  static Color todayColor(AppColors colors) => colors.textSecondary;
 
   /// A loan end's dashed vertical and label.
-  static const endColor = AppColors.textDisabled;
+  static Color endColor(AppColors colors) => colors.textTertiary;
 
   @override
   State<TrajectoryPlot> createState() => _TrajectoryPlotState();
@@ -312,6 +314,7 @@ class _TrajectoryPlotState extends State<TrajectoryPlot> {
           child: CustomPaint(
             size: Size.infinite,
             painter: _TrajectoryPainter(
+              colors: context.colors,
               months: widget.months,
               values: widget.values,
               annotations: widget.annotations,
@@ -391,7 +394,11 @@ List<Offset> _trajectoryPoints(
 }
 
 class _TrajectoryPainter extends CustomPainter {
+  /// The active theme's colours.
+  final AppColors colors;
+
   _TrajectoryPainter({
+    required this.colors,
     required this.months,
     required this.values,
     required this.annotations,
@@ -435,6 +442,7 @@ class _TrajectoryPainter extends CustomPainter {
         plot.left + plot.width * (_monthOffset(months, month) / span);
 
     ChartPaints.grid(
+      colors,
       canvas,
       size,
       plot,
@@ -460,8 +468,8 @@ class _TrajectoryPainter extends CustomPainter {
       ..lineTo(points.last.dx, plot.bottom)
       ..lineTo(points.first.dx, plot.bottom)
       ..close();
-    canvas.drawPath(area, ChartPaints.area(AppColors.iris));
-    canvas.drawPath(line, ChartPaints.stroke(AppColors.iris));
+    canvas.drawPath(area, ChartPaints.area(colors.accent));
+    canvas.drawPath(line, ChartPaints.stroke(colors.accent));
 
     for (final annotation in annotations) {
       final index = months.indexWhere(
@@ -472,10 +480,11 @@ class _TrajectoryPainter extends CustomPainter {
       if (index < 0) continue;
       final point = points[index];
       final color = annotation.isToday
-          ? TrajectoryPlot.todayColor
-          : TrajectoryPlot.endColor;
+          ? TrajectoryPlot.todayColor(colors)
+          : TrajectoryPlot.endColor(colors);
 
       ChartPaints.baseline(
+        colors,
         canvas,
         Offset(point.dx, plot.top),
         Offset(point.dx, plot.bottom),
@@ -483,20 +492,21 @@ class _TrajectoryPainter extends CustomPainter {
       );
       // Today is this chart's current point; a loan end is an ordinary one.
       ChartPaints.dot(
+        colors,
         canvas,
         point,
         annotation.isToday
             ? AppChart.currentDotRadius
             : AppChart.pointDotRadius,
-        AppColors.iris,
+        colors.accent,
       );
 
       final label = _text(
         annotation.label,
         labelStyle.copyWith(
           color: annotation.isToday
-              ? AppColors.textPrimary
-              : TrajectoryPlot.endColor,
+              ? colors.text
+              : TrajectoryPlot.endColor(colors),
         ),
       );
       // Set right of its line, or left of it when that would run off the plot.
@@ -508,16 +518,18 @@ class _TrajectoryPainter extends CustomPainter {
 
     if (hovered case final hovered? when hovered < points.length) {
       ChartPaints.dot(
+        colors,
         canvas,
         points[hovered],
         AppChart.currentDotRadius,
-        AppColors.iris,
+        colors.accent,
       );
     }
   }
 
   @override
   bool shouldRepaint(_TrajectoryPainter oldDelegate) =>
+      oldDelegate.colors != colors ||
       !listEquals(oldDelegate.months, months) ||
       !listEquals(oldDelegate.values, values) ||
       !listEquals(oldDelegate.annotations, annotations) ||

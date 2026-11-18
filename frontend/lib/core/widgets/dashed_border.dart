@@ -14,15 +14,17 @@ class DashedBorder extends StatelessWidget {
   const DashedBorder({
     super.key,
     required this.child,
-    this.color = AppColors.borderDashed,
-    this.radius = AppRadii.md,
+    this.color,
+    this.radius = AppRadii.container,
     this.strokeWidth = 1,
     this.dashLength = 5,
     this.gapLength = 4,
   });
 
   final Widget child;
-  final Color color;
+
+  /// `null` draws the dashes in `lineStrong`.
+  final Color? color;
   final double radius;
   final double strokeWidth;
   final double dashLength;
@@ -32,7 +34,7 @@ class DashedBorder extends StatelessWidget {
   Widget build(BuildContext context) {
     return CustomPaint(
       foregroundPainter: _DashedBorderPainter(
-        color: color,
+        color: color ?? context.colors.lineStrong,
         radius: radius,
         strokeWidth: strokeWidth,
         dashLength: dashLength,

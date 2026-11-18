@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/tokens.dart';
 import '../../../core/widgets/app_modal.dart';
 import '../../../core/widgets/app_toast.dart';
@@ -184,13 +183,13 @@ class _RulePackExportSheetState extends ConsumerState<RulePackExportSheet> {
               Text(
                 l10n.rulePackExportLogoCount(_export.logoCount),
                 key: const Key('rulePackExportLogoCount'),
-                style: AppTextStyles.helper,
+                style: context.textStyles.helper,
               ),
           ],
           const SizedBox(height: AppSpacing.md),
           Text(
             l10n.rulePackExportContents(pack.rules.length),
-            style: AppTextStyles.sectionLabel,
+            style: context.textStyles.sectionLabel,
           ),
           const SizedBox(height: AppSpacing.sm - 2),
           // The file itself, not a summary of it: the point of the step is that
@@ -200,9 +199,9 @@ class _RulePackExportSheetState extends ConsumerState<RulePackExportSheet> {
             constraints: const BoxConstraints(maxHeight: 220),
             padding: const EdgeInsets.all(AppSpacing.sm + AppSpacing.xs),
             decoration: BoxDecoration(
-              color: AppColors.surfaceField,
+              color: context.colors.field,
               borderRadius: BorderRadius.circular(AppRadii.md),
-              border: Border.all(color: AppColors.border),
+              border: Border.all(color: context.colors.line),
             ),
             child: SingleChildScrollView(
               child: SelectableText(
@@ -214,7 +213,7 @@ class _RulePackExportSheetState extends ConsumerState<RulePackExportSheet> {
                   elideLogo: (bytes) =>
                       l10n.rulePackExportLogoElided((bytes / 1024).ceil()),
                 ),
-                style: AppTextStyles.mono,
+                style: context.textStyles.mono,
               ),
             ),
           ),
@@ -222,7 +221,7 @@ class _RulePackExportSheetState extends ConsumerState<RulePackExportSheet> {
             const SizedBox(height: AppSpacing.md),
             Text(
               l10n.rulePackOmittedLabel(omitted.length),
-              style: AppTextStyles.sectionLabel,
+              style: context.textStyles.sectionLabel,
             ),
             const SizedBox(height: AppSpacing.sm - 2),
             for (final rule in omitted)
@@ -235,7 +234,7 @@ class _RulePackExportSheetState extends ConsumerState<RulePackExportSheet> {
                   ),
                   RuleOmissionReason.userCategory =>
                     l10n.rulePackOmittedUserCategory(rule.pattern),
-                }, style: AppTextStyles.helper),
+                }, style: context.textStyles.helper),
               ),
           ],
           const SizedBox(height: AppSpacing.sm),

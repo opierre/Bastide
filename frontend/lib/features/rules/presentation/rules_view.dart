@@ -4,8 +4,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/l10n/category_display.dart';
 import '../../../core/theme/tokens.dart';
 import '../../../core/widgets/app_card.dart';
-import '../../../core/widgets/category_chip.dart';
 import '../../../core/widgets/app_toast.dart';
+import '../../../core/widgets/category_label.dart';
 import '../../../core/widgets/inline_banner.dart';
 import '../../../core/widgets/primary_button.dart';
 import '../../../core/widgets/state_views.dart';
@@ -45,7 +45,7 @@ class RulesView extends ConsumerWidget {
           key: const Key('rulesFilterEmpty'),
           style: Theme.of(
             context,
-          ).textTheme.bodySmall?.copyWith(color: AppColors.textSecondary),
+          ).textTheme.bodySmall?.copyWith(color: context.colors.textSecondary),
         ),
       ),
       AsyncData(:final value) when value.isEmpty => const RulesEmptyState(
@@ -224,9 +224,9 @@ class _RulesViewHeaderActionsState
               l10n.rulesPriorityNote,
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
-              style: Theme.of(
-                context,
-              ).textTheme.bodySmall?.copyWith(color: AppColors.textSecondary),
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: context.colors.textSecondary,
+              ),
             ),
           ),
         ),
@@ -269,9 +269,9 @@ class _CategoryFilterChip extends ConsumerWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           if (category == null)
-            CategoryChip.uncategorized(label: l10n.ruleTargetMissing)
+            CategoryLabel.uncategorized(label: l10n.ruleTargetMissing)
           else
-            CategoryChip(
+            CategoryLabel(
               label: localizedCategoryName(l10n, category.name),
               slug: categorySlugFor(name: category.name, kind: category.kind),
             ),
@@ -282,7 +282,7 @@ class _CategoryFilterChip extends ConsumerWidget {
             tooltip: l10n.rulesFilterClear,
             iconSize: 14,
             visualDensity: VisualDensity.compact,
-            color: AppColors.textSecondary,
+            color: context.colors.textSecondary,
             icon: const Icon(Icons.close_rounded),
           ),
         ],
@@ -304,7 +304,6 @@ class RulesEmptyState extends StatelessWidget {
 
     return EmptyStateView(
       key: const Key('rulesEmptyState'),
-      icon: Icons.rule_rounded,
       title: l10n.rulesEmptyTitle,
       message: l10n.rulesEmptyBody,
       action: Column(
@@ -314,7 +313,6 @@ class RulesEmptyState extends StatelessWidget {
             key: const Key('emptyStateAddRuleButton'),
             label: l10n.rulesAddButton,
             icon: Icons.add_rounded,
-            height: 44,
             onPressed: () => showRuleEditor(context),
           ),
           if (extraAction != null) ...[

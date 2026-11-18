@@ -1,23 +1,35 @@
 import 'package:flutter/material.dart';
+import 'package:lucide_icons_flutter/lucide_icons_300.dart';
 
 import '../theme/tokens.dart';
 
-/// What an [InlineBanner] is telling the user. Drives hue and glyph together,
-/// so the message never rests on color alone.
+/// What an [InlineBanner] or a toast reports. Drives the icon and its colour
+/// together, so the message never rests on colour alone.
 enum BannerTone {
-  error(AppColors.negative, Icons.error_outline_rounded),
-  warning(AppColors.warning, Icons.warning_amber_rounded),
-  info(AppColors.info, Icons.info_outline_rounded),
-  success(AppColors.positive, Icons.check_circle_outline_rounded);
+  error(LucideIcons300.circleX),
+  warning(LucideIcons300.triangleAlert),
+  info(LucideIcons300.info),
+  success(LucideIcons300.circleCheck);
 
-  const BannerTone(this.color, this.icon);
+  const BannerTone(this.icon);
 
-  final Color color;
   final IconData icon;
+
+  /// The icon's colour. Informational banners are neutral
+  /// (`docs/design/00-design-system.md` §2.2).
+  Color color(AppColors colors) => switch (this) {
+    error => colors.negative,
+    warning => colors.warning,
+    info => colors.textSecondary,
+    success => colors.positive,
+  };
 }
 
-/// Inline message for a form or a panel section: a tinted plate at 10% with a
-/// 30–35% border and a leading glyph.
+/// The banner of `docs/design/00-design-system.md` §7, for something the
+/// user can act on: `surface`, 1 px `lineStrong`, radius 8, padding 8 12; a
+/// leading 14 px icon, 13 px text, [actions] on the right and an optional
+/// ghost close. The banner itself stays neutral; only the icon takes the
+/// tone's colour. Something to know rather than act on is a `NoteLine`.
 class InlineBanner extends StatelessWidget {
   const InlineBanner({
     super.key,
@@ -26,61 +38,71 @@ class InlineBanner extends StatelessWidget {
     this.onDismiss,
     this.dismissTooltip,
     this.icon,
+    this.actions = const [],
   });
 
   final String message;
   final BannerTone tone;
 
-  /// Overrides the tone's glyph while keeping its hue. Set where a spec draws a
-  /// different pairing — the reset confirmation's red triangle
-  /// (`docs/design/09-settings.md` state ⑩), which warns rather than reports.
+  /// Overrides the tone's icon while keeping its colour.
   final IconData? icon;
 
-  /// Adds the spec's dismiss ×. Set only where the banner reports something the
-  /// user may reasonably decide to live with — an over-allocation, say. A
-  /// failure the user still has to fix keeps no × , because dismissing it would
-  /// hide the reason the form won't go through.
+  /// Adds the ghost close. Set only where the banner reports something the
+  /// user may decide to live with; a failure the user still has to fix keeps
+  /// no close, since dismissing it would hide why the form won't go through.
   final VoidCallback? onDismiss;
 
-  /// Names the dismiss control for assistive tech. Required by callers that set
-  /// [onDismiss]; localized text can't be defaulted here.
+  /// Names the close control for assistive tech. Required by callers that
+  /// set [onDismiss]; localized text can't be defaulted here.
   final String? dismissTooltip;
+
+  /// Buttons on the right, 8 px apart.
+  final List<Widget> actions;
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     return Container(
       padding: const EdgeInsets.symmetric(
-        horizontal: AppSpacing.sm + AppSpacing.xs,
-        vertical: AppSpacing.sm + 2,
+        horizontal: AppSpacing.smPlus,
+        vertical: AppSpacing.sm,
       ),
       decoration: BoxDecoration(
-        color: tone.color.withValues(alpha: 0.10),
-        borderRadius: BorderRadius.circular(AppRadii.md),
-        border: Border.all(color: tone.color.withValues(alpha: 0.32)),
+        color: colors.surface,
+        borderRadius: BorderRadius.circular(AppRadii.container),
+        border: Border.all(color: colors.lineStrong),
       ),
       child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(icon ?? tone.icon, size: 15, color: tone.color),
+          Icon(
+            icon ?? tone.icon,
+            size: AppSizes.iconSmall,
+            color: tone.color(colors),
+          ),
           const SizedBox(width: AppSpacing.sm),
           Expanded(
-            child: Text(
-              message,
-              style: Theme.of(
-                context,
-              ).textTheme.bodySmall?.copyWith(color: tone.color),
-            ),
+            child: Text(message, style: Theme.of(context).textTheme.bodyMedium),
           ),
-          if (onDismiss != null)
+          for (final action in actions) ...[
+            const SizedBox(width: AppSpacing.sm),
+            action,
+          ],
+          if (onDismiss != null) ...[
+            const SizedBox(width: AppSpacing.xs),
             IconButton(
+              key: const Key('inlineBannerDismiss'),
               onPressed: onDismiss,
-              iconSize: 15,
+              iconSize: AppSizes.iconSmall,
               visualDensity: VisualDensity.compact,
-              constraints: const BoxConstraints(),
+              constraints: const BoxConstraints.tightFor(
+                width: AppSizes.button,
+                height: AppSizes.button,
+              ),
               padding: EdgeInsets.zero,
               tooltip: dismissTooltip,
-              icon: Icon(Icons.close_rounded, color: tone.color),
+              icon: Icon(LucideIcons300.x, color: colors.textSecondary),
             ),
+          ],
         ],
       ),
     );

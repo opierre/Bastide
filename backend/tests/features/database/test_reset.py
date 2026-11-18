@@ -44,7 +44,7 @@ def _seed(db: Session, email: str) -> dict[str, str]:
         name="Vélo",
         kind="expense",
         icon="bike",
-        color="#4FD1E8",
+        color="cat1",
     )
     account = Account(
         user_id=user.id,

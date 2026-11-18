@@ -7,17 +7,17 @@ import '../../../core/l10n/card_display.dart';
 import '../../../core/l10n/category_display.dart';
 import '../../../core/theme/tokens.dart';
 import '../../../core/widgets/app_card.dart';
-import '../../../core/widgets/category_chip.dart';
-import '../../../core/widgets/search_pill.dart';
+import '../../../core/widgets/category_label.dart';
+import '../../../core/widgets/search_field.dart';
 import '../../../core/widgets/state_views.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../accounts/application/account_detail_controller.dart';
 import '../../accounts/application/accounts_controller.dart';
 import '../../accounts/domain/account.dart';
 import '../../accounts/domain/account_overview.dart';
+import '../../categories/domain/category.dart';
 import '../../imports/presentation/imports_screen.dart';
 import '../application/transactions_controller.dart';
-import '../../categories/domain/category.dart';
 import '../domain/transaction.dart';
 import 'date_range_modal.dart';
 import 'review_queue.dart';
@@ -65,7 +65,7 @@ class TransactionsScreen extends ConsumerWidget {
                         l10n.transactionsSearchEmpty,
                         key: const Key('transactionsSearchEmpty'),
                         style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                          color: AppColors.textSecondary,
+                          color: context.colors.textSecondary,
                         ),
                       ),
                     )
@@ -102,10 +102,9 @@ class TransactionsTopBarActions extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context)!;
 
-    return SearchPill(
+    return AppSearchField(
       key: const Key('transactionsSearchField'),
       hint: l10n.transactionsSearchHint,
-      width: 300,
       initialValue: ref.read(transactionFiltersProvider).q,
       onChanged: (value) =>
           ref.read(transactionFiltersProvider.notifier).setQuery(value),
@@ -122,7 +121,6 @@ class _EmptyState extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     return EmptyStateView(
-      icon: Icons.receipt_long_outlined,
       title: l10n.transactionsEmptyTitle,
       message: l10n.transactionsEmptyBody,
       action: OutlinedButton(
@@ -202,15 +200,15 @@ class _FilterPillButton extends StatelessWidget {
           horizontal: AppSpacing.sm + AppSpacing.xs,
         ),
         decoration: BoxDecoration(
-          color: AppColors.surfaceRaised,
+          color: context.colors.bg,
           borderRadius: BorderRadius.circular(AppRadii.md),
-          border: Border.all(color: AppColors.border),
+          border: Border.all(color: context.colors.line),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
             if (icon != null) ...[
-              Icon(icon, size: 14, color: AppColors.textSecondary),
+              Icon(icon, size: 14, color: context.colors.textSecondary),
               const SizedBox(width: AppSpacing.xs + 1),
             ],
             Flexible(
@@ -221,10 +219,10 @@ class _FilterPillButton extends StatelessWidget {
               ),
             ),
             const SizedBox(width: AppSpacing.xs),
-            const Icon(
+            Icon(
               Icons.expand_more_rounded,
               size: 14,
-              color: AppColors.textSecondary,
+              color: context.colors.textSecondary,
             ),
           ],
         ),
@@ -338,7 +336,7 @@ class _CategoryFilterItem extends StatelessWidget {
         Icon(
           CategoryIcons.forSlug(slug),
           size: 14,
-          color: CategoryHues.forSlug(slug),
+          color: context.categoryColors.forSlug(slug),
         ),
         const SizedBox(width: AppSpacing.sm),
         Flexible(
@@ -407,15 +405,15 @@ class _NeedsReviewToggle extends StatelessWidget {
         height: 20,
         padding: const EdgeInsets.all(2),
         decoration: BoxDecoration(
-          color: value ? AppColors.iris : AppColors.surfaceHover,
+          color: value ? context.colors.accent : context.colors.hover,
           borderRadius: BorderRadius.circular(AppRadii.pill),
         ),
         alignment: value ? Alignment.centerRight : Alignment.centerLeft,
         child: Container(
           width: 16,
           height: 16,
-          decoration: const BoxDecoration(
-            color: Colors.white,
+          decoration: BoxDecoration(
+            color: context.colors.bg,
             shape: BoxShape.circle,
           ),
         ),
@@ -456,7 +454,7 @@ class _TransactionsListCard extends ConsumerWidget {
               key: const Key('transactionsList'),
               itemCount: page.items.length,
               separatorBuilder: (_, _) =>
-                  const Divider(height: 1, color: AppColors.borderSubtle),
+                  Divider(height: 1, color: context.colors.line),
               itemBuilder: (context, index) {
                 final transaction = page.items[index];
                 return switch (cards[transaction.accountId]) {
@@ -480,8 +478,8 @@ class _TransactionsListCard extends ConsumerWidget {
           Container(
             height: 52,
             padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
-            decoration: const BoxDecoration(
-              border: Border(top: BorderSide(color: AppColors.borderSubtle)),
+            decoration: BoxDecoration(
+              border: Border(top: BorderSide(color: context.colors.line)),
             ),
             child: Row(
               children: [
@@ -489,7 +487,7 @@ class _TransactionsListCard extends ConsumerWidget {
                   l10n.transactionsPager(from, to, page.total),
                   key: const Key('transactionsPagerLabel'),
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: AppColors.textSecondary,
+                    color: context.colors.textSecondary,
                   ),
                 ),
                 const Spacer(),

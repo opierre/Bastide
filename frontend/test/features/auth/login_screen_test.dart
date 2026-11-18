@@ -17,7 +17,7 @@ Widget _wrap({
     overrides: [authControllerProvider.overrideWith(() => controller)],
     child: MaterialApp(
       locale: locale,
-      theme: appDarkTheme,
+      theme: AppTheme.dark,
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
       home: const LoginScreen(),
@@ -32,7 +32,7 @@ void main() {
     await tester.pumpWidget(_wrap(controller: FakeAuthController()));
     await tester.pumpAndSettle();
 
-    expect(find.text('Votre argent, en clair.'), findsOneWidget);
+    expect(find.text('Votre argent, en clair.'), findsNothing);
     expect(find.byKey(const Key('authPrivacyLine')), findsOneWidget);
     expect(find.byKey(const Key('loginIdentifierField')), findsOneWidget);
     expect(find.byKey(const Key('loginPasswordField')), findsOneWidget);
@@ -145,7 +145,7 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(find.text('Your money, clearly.'), findsOneWidget);
+    expect(find.text('Your data stays on this computer.'), findsOneWidget);
     expect(find.text('Log in'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });

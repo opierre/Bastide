@@ -3,9 +3,9 @@ import 'package:flutter/material.dart';
 import '../../../core/l10n/category_display.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/tokens.dart';
-import '../../../core/widgets/app_chip.dart';
-import '../../../core/widgets/category_chip.dart';
 import '../../../core/widgets/app_toggle.dart';
+import '../../../core/widgets/category_label.dart';
+import '../../../core/widgets/status_text.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../categories/domain/category.dart';
 import '../domain/rule.dart';
@@ -67,10 +67,10 @@ class RuleRow extends StatelessWidget {
                 child: MouseRegion(
                   key: Key('ruleHandle-${rule.id}'),
                   cursor: SystemMouseCursors.click,
-                  child: const Icon(
+                  child: Icon(
                     Icons.drag_indicator_rounded,
                     size: 18,
-                    color: AppColors.textDisabled,
+                    color: context.colors.textTertiary,
                   ),
                 ),
               )
@@ -79,7 +79,7 @@ class RuleRow extends StatelessWidget {
                 Icons.drag_indicator_rounded,
                 key: Key('ruleHandleDisabled-${rule.id}'),
                 size: 18,
-                color: AppColors.textDisabled.withValues(alpha: 0.4),
+                color: context.colors.textTertiary.withValues(alpha: 0.4),
               ),
             const SizedBox(width: AppSpacing.sm),
             _PriorityPlate(priority: rule.priority),
@@ -99,11 +99,11 @@ class RuleRow extends StatelessWidget {
                           ruleFieldLabel(l10n, rule.matchField),
                           overflow: TextOverflow.ellipsis,
                           style: textTheme.bodySmall?.copyWith(
-                            color: AppColors.textSecondary,
+                            color: context.colors.textSecondary,
                           ),
                         ),
                       ),
-                      AppChip(
+                      StatusText(
                         key: Key('ruleCondition-${rule.id}'),
                         label: ruleConditionLabel(l10n, rule.matchType),
                       ),
@@ -112,8 +112,8 @@ class RuleRow extends StatelessWidget {
                         child: Text(
                           rule.pattern,
                           overflow: TextOverflow.ellipsis,
-                          style: AppTextStyles.mono.copyWith(
-                            color: AppColors.textPrimary,
+                          style: context.textStyles.mono.copyWith(
+                            color: context.colors.text,
                           ),
                         ),
                       ),
@@ -128,16 +128,16 @@ class RuleRow extends StatelessWidget {
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                             style: textTheme.bodySmall?.copyWith(
-                              color: AppColors.textSecondary,
+                              color: context.colors.textSecondary,
                             ),
                           ),
                         ),
                       ],
                       const SizedBox(width: AppSpacing.sm),
-                      const Icon(
+                      Icon(
                         Icons.arrow_forward_rounded,
                         size: 14,
-                        color: AppColors.textDisabled,
+                        color: context.colors.textTertiary,
                       ),
                       const SizedBox(width: AppSpacing.sm),
                       _TargetChip(category: category),
@@ -175,14 +175,14 @@ class _PriorityPlate extends StatelessWidget {
       height: 24,
       alignment: Alignment.center,
       decoration: BoxDecoration(
-        color: AppColors.surfaceHover,
+        color: context.colors.hover,
         borderRadius: BorderRadius.circular(AppRadii.sm),
       ),
       child: Text(
         '$priority',
         style: tabularNumberStyle(
           Theme.of(context).textTheme.labelSmall!,
-        ).copyWith(color: AppColors.textSecondary),
+        ).copyWith(color: context.colors.textSecondary),
       ),
     );
   }
@@ -198,9 +198,9 @@ class _TargetChip extends StatelessWidget {
     final l10n = AppLocalizations.of(context)!;
     final target = category;
     if (target == null) {
-      return CategoryChip.uncategorized(label: l10n.ruleTargetMissing);
+      return CategoryLabel.uncategorized(label: l10n.ruleTargetMissing);
     }
-    return CategoryChip(
+    return CategoryLabel(
       label: localizedCategoryName(l10n, target.name),
       slug: categorySlugFor(name: target.name, kind: target.kind),
     );

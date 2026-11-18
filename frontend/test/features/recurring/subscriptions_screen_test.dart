@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:bastide/core/api/api_client.dart';
 import 'package:bastide/core/theme/app_theme.dart';
 import 'package:bastide/core/widgets/amount_text.dart';
-import 'package:bastide/core/widgets/status_pill.dart';
+import 'package:bastide/core/widgets/status_text.dart';
 import 'package:bastide/features/categories/domain/category.dart';
 import 'package:bastide/features/recurring/application/subscriptions_controller.dart';
 import 'package:bastide/features/recurring/domain/recurring_series.dart';
@@ -37,7 +37,7 @@ Widget _wrap({
     ],
     child: MaterialApp(
       locale: locale,
-      theme: appDarkTheme,
+      theme: AppTheme.dark,
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
       home: Scaffold(
@@ -86,7 +86,7 @@ void main() {
       expect(find.text(_money(1549)), findsOneWidget);
 
       // Nothing is wrong with this subscription, so the Statut cell is empty.
-      expect(find.byType(StatusPill), findsNothing);
+      expect(find.byType(StatusText), findsNothing);
     },
   );
 
@@ -128,12 +128,12 @@ void main() {
     await tester.pumpAndSettle();
 
     final pills = tester
-        .widgetList<StatusPill>(find.byType(StatusPill))
+        .widgetList<StatusText>(find.byType(StatusText))
         .toList();
     expect(pills, hasLength(2));
-    expect(pills.every((pill) => pill.tone == StatusPillTone.warning), isTrue);
+    expect(pills.every((pill) => pill.tone == StatusTone.warning), isTrue);
     expect(
-      find.text('Augmentation · ${_money(1349)} → ${_money(1549)}'),
+      find.text('Hausse · ${_money(1349)} → ${_money(1549)}'),
       findsOneWidget,
     );
     expect(
@@ -172,8 +172,8 @@ void main() {
       expect(opacity.opacity, 0.55);
 
       expect(
-        tester.widget<StatusPill>(find.byType(StatusPill)).tone,
-        StatusPillTone.neutral,
+        tester.widget<StatusText>(find.byType(StatusText)).tone,
+        StatusTone.neutral,
       );
       expect(
         find.text('Terminé · dernier prélèvement 15/04/2026'),
@@ -432,7 +432,7 @@ void main() {
       find.text('6 mensuels · 1 trimestriel · 1 annuel — 1 terminé'),
       findsOneWidget,
     );
-    expect(find.text('Netflix — demain'), findsOneWidget);
+    expect(find.text('Netflix · demain'), findsOneWidget);
     expect(
       find.textContaining(
         'Charges trimestrielles et annuelles ramenées au mois.',
@@ -450,10 +450,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.byKey(const Key('subscriptionsEmptyState')), findsOneWidget);
-      expect(
-        find.text('Aucun paiement récurrent détecté pour l\'instant'),
-        findsOneWidget,
-      );
+      expect(find.text('Aucun paiement récurrent détecté'), findsOneWidget);
       expect(
         find.textContaining("un prélèvement s'est répété trois fois"),
         findsOneWidget,
