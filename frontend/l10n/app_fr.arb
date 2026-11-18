@@ -5934,10 +5934,6 @@
   "@settingsProfileNameModalCancel": {
     "description": "Button closing the change-username modal without saving."
   },
-  "startupLoading": "Démarrage de Bastide…",
-  "@startupLoading": {
-    "description": "Shown under the logo while the app starts its local engine."
-  },
   "startupPrivacy": "Vos données restent sur cet ordinateur.",
   "@startupPrivacy": {
     "description": "The privacy promise under the product name on the startup screen."

@@ -7217,12 +7217,6 @@ abstract class AppLocalizations {
   /// **'Annuler'**
   String get settingsProfileNameModalCancel;
 
-  /// Shown under the logo while the app starts its local engine.
-  ///
-  /// In fr, this message translates to:
-  /// **'Démarrage de Bastide…'**
-  String get startupLoading;
-
   /// The privacy promise under the product name on the startup screen.
   ///
   /// In fr, this message translates to:

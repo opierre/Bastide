@@ -4571,9 +4571,6 @@ class AppLocalizationsFr extends AppLocalizations {
   String get settingsProfileNameModalCancel => 'Annuler';
 
   @override
-  String get startupLoading => 'Démarrage de Bastide…';
-
-  @override
   String get startupPrivacy => 'Vos données restent sur cet ordinateur.';
 
   @override

@@ -1284,7 +1284,6 @@
   "settingsProfileNameModalLead": "The new name replaces the old one for signing in.",
   "settingsProfileNameModalSave": "Save",
   "settingsProfileNameModalCancel": "Cancel",
-  "startupLoading": "Starting Bastide…",
   "startupPrivacy": "Your data stays on this computer.",
   "startupEngineStarting": "Starting the local engine…",
   "startupRetry": "Try again",
