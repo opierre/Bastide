@@ -198,7 +198,7 @@ class _ExportPlate extends StatelessWidget {
                 Text(
                   l10n.settingsBackupExportLabel,
                   style: textTheme.bodyMedium?.copyWith(
-                    fontWeight: FontWeight.w700,
+                    fontWeight: FontWeight.w600,
                     color: context.colors.text,
                   ),
                 ),
@@ -253,7 +253,7 @@ class _RestoreRow extends StatelessWidget {
               Text(
                 l10n.settingsBackupRestoreTitle,
                 style: textTheme.bodyMedium?.copyWith(
-                  fontWeight: FontWeight.w700,
+                  fontWeight: FontWeight.w600,
                   color: context.colors.text,
                 ),
               ),

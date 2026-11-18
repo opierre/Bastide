@@ -128,7 +128,7 @@ class GoalPill extends StatelessWidget {
             style: TextStyle(
               fontFamily: AppFonts.geist,
               fontSize: 11,
-              fontWeight: FontWeight.w700,
+              fontWeight: FontWeight.w600,
               color: reached
                   ? context.colors.positive
                   : context.colors.textSecondary,

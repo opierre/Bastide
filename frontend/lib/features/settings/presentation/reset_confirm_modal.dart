@@ -190,7 +190,7 @@ List<TextSpan> _leadSpans(
     TextSpan(text: sentence.substring(0, at)),
     TextSpan(
       text: name,
-      style: TextStyle(fontWeight: FontWeight.w700, color: context.colors.text),
+      style: TextStyle(fontWeight: FontWeight.w600, color: context.colors.text),
     ),
     TextSpan(text: sentence.substring(at + name.length)),
   ];

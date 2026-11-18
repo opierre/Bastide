@@ -332,7 +332,7 @@ class _CompareTable extends StatelessWidget {
                     overflow: TextOverflow.ellipsis,
                     style: textTheme.bodySmall?.copyWith(
                       color: context.colors.textSecondary,
-                      fontWeight: row.emphasised ? FontWeight.w700 : null,
+                      fontWeight: row.emphasised ? FontWeight.w600 : null,
                     ),
                   ),
                 ),
@@ -348,7 +348,7 @@ class _CompareTable extends StatelessWidget {
                           overflow: TextOverflow.ellipsis,
                           textAlign: TextAlign.right,
                           style: valueStyle.copyWith(
-                            fontWeight: row.emphasised ? FontWeight.w700 : null,
+                            fontWeight: row.emphasised ? FontWeight.w600 : null,
                             color: value == null
                                 ? context.colors.textTertiary
                                 : context.colors.text,
