@@ -24,7 +24,7 @@ Widget _wrap(
     overrides: [simulationsRepositoryProvider.overrideWithValue(repository)],
     child: MaterialApp(
       locale: locale,
-      theme: appDarkTheme,
+      theme: AppTheme.dark,
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
       home: const Scaffold(
@@ -250,6 +250,17 @@ void main() {
 
     expect(find.text('Comparer (3/3)'), findsOneWidget);
     expect(compare().onPressed, isNotNull);
+    // The list builds lazily, and the fourth row sits below the fold.
+    await tester.scrollUntilVisible(
+      find.byKey(const Key('scenarioRow-s3')),
+      46,
+      scrollable: find
+          .ancestor(
+            of: find.byKey(const Key('scenarioRow-s2')),
+            matching: find.byType(Scrollable),
+          )
+          .first,
+    );
     final dimmed = tester.widget<Opacity>(
       find
           .ancestor(
