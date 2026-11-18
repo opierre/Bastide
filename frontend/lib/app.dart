@@ -29,9 +29,10 @@ class BastideApp extends ConsumerWidget {
         unconfirmedMismatch) {
       return MaterialApp(
         onGenerateTitle: (context) => AppLocalizations.of(context)!.appTitle,
-        theme: AppTheme.light,
-        darkTheme: AppTheme.dark,
-        themeMode: themeMode,
+        // The startup screen is always dark, like the installer splash it
+        // continues, whatever the signed-in user's preference.
+        theme: AppTheme.dark,
+        themeMode: ThemeMode.dark,
         locale: locale,
         supportedLocales: AppLocalizations.supportedLocales,
         localizationsDelegates: AppLocalizations.localizationsDelegates,
