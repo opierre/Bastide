@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../core/l10n/category_display.dart';
 import '../../../core/theme/tokens.dart';
-import '../../../core/widgets/category_chip.dart';
+import '../../../core/widgets/category_label.dart';
 import '../domain/category.dart';
 
 /// The slot a category is drawn in (`docs/design/00-design-system.md` §2.4).

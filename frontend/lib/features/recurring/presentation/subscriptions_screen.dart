@@ -124,7 +124,6 @@ class _SubscriptionsList extends ConsumerWidget {
               value.statusFilter == null =>
         EmptyStateView(
           key: const Key('subscriptionsEmptyState'),
-          icon: Icons.autorenew_rounded,
           title: l10n.subscriptionsEmptyTitle,
           message: l10n.subscriptionsEmptyBody,
           action: PrimaryButton(
@@ -132,7 +131,6 @@ class _SubscriptionsList extends ConsumerWidget {
             label: l10n.subscriptionsDetect,
             loadingLabel: l10n.subscriptionsDetectRunning,
             isLoading: detecting,
-            height: 44,
             // The transactions may already be imported: running detection
             // over them is the step that fills this panel.
             onPressed: () => runRecurringDetection(context, ref),

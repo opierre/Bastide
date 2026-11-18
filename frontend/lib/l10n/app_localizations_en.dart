@@ -796,6 +796,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get transactionsSearchHint => 'Search a description or a merchant…';
 
   @override
+  String get searchShortcutHint => 'Ctrl K';
+
+  @override
   String get transactionsSearchEmpty => 'No transaction matches your search.';
 
   @override

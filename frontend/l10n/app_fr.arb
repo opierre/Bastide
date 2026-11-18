@@ -995,6 +995,10 @@
   "@transactionsSearchHint": {
     "description": "Placeholder in the transactions search pill in the top bar."
   },
+  "searchShortcutHint": "Ctrl K",
+  "@searchShortcutHint": {
+    "description": "Keyboard shortcut shown at the end of a search field; pressing it focuses the field."
+  },
   "transactionsSearchEmpty": "Aucune transaction ne correspond à votre recherche.",
   "@transactionsSearchEmpty": {
     "description": "Shown in place of the transaction list when the filters/search match nothing."

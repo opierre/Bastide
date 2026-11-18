@@ -7,17 +7,17 @@ import '../../../core/l10n/card_display.dart';
 import '../../../core/l10n/category_display.dart';
 import '../../../core/theme/tokens.dart';
 import '../../../core/widgets/app_card.dart';
-import '../../../core/widgets/category_chip.dart';
-import '../../../core/widgets/search_pill.dart';
+import '../../../core/widgets/category_label.dart';
+import '../../../core/widgets/search_field.dart';
 import '../../../core/widgets/state_views.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../accounts/application/account_detail_controller.dart';
 import '../../accounts/application/accounts_controller.dart';
 import '../../accounts/domain/account.dart';
 import '../../accounts/domain/account_overview.dart';
+import '../../categories/domain/category.dart';
 import '../../imports/presentation/imports_screen.dart';
 import '../application/transactions_controller.dart';
-import '../../categories/domain/category.dart';
 import '../domain/transaction.dart';
 import 'date_range_modal.dart';
 import 'review_queue.dart';
@@ -102,10 +102,9 @@ class TransactionsTopBarActions extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context)!;
 
-    return SearchPill(
+    return AppSearchField(
       key: const Key('transactionsSearchField'),
       hint: l10n.transactionsSearchHint,
-      width: 300,
       initialValue: ref.read(transactionFiltersProvider).q,
       onChanged: (value) =>
           ref.read(transactionFiltersProvider.notifier).setQuery(value),
@@ -122,7 +121,6 @@ class _EmptyState extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     return EmptyStateView(
-      icon: Icons.receipt_long_outlined,
       title: l10n.transactionsEmptyTitle,
       message: l10n.transactionsEmptyBody,
       action: OutlinedButton(

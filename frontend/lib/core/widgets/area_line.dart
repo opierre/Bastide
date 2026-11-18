@@ -303,7 +303,7 @@ class _AreaLinePainter extends CustomPainter {
         ..clipRect(Rect.fromLTRB(plot.left, zeroY, size.width, size.height))
         ..drawPath(area, ChartPaints.negativeArea(colors))
         ..restore();
-      ChartPaints.baseline(
+      ChartPaints.zeroLine(
         colors,
         canvas,
         Offset(plot.left, zeroY),

@@ -258,6 +258,7 @@
   "importDuplicateDestination": "Two statements in this file go to the same account — choose a different destination for each.",
   "importErrorGeneric": "Something went wrong. Please try again.",
   "transactionsSearchHint": "Search a description or a merchant…",
+  "searchShortcutHint": "Ctrl K",
   "transactionsSearchEmpty": "No transaction matches your search.",
   "transactionsRetry": "Retry",
   "transactionsEmptyTitle": "No transactions yet",

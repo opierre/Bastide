@@ -293,7 +293,7 @@ class _TermSlider extends ConsumerWidget {
               key: const Key('simulatorTermValue'),
               style: tabularNumberStyle(
                 textTheme.bodyMedium!,
-              ).copyWith(fontWeight: FontWeight.w700),
+              ).copyWith(fontWeight: FontWeight.w600),
             ),
           ],
         ),

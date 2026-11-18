@@ -98,7 +98,7 @@ class SimulatorMarkerPill extends StatelessWidget {
         style: TextStyle(
           fontFamily: AppFonts.geist,
           fontSize: 9.5,
-          fontWeight: FontWeight.w700,
+          fontWeight: FontWeight.w600,
           letterSpacing: 0.6,
           height: 1,
           color: neutral ? context.colors.textSecondary : context.colors.accent,

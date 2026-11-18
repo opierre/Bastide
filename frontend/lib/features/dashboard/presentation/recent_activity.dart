@@ -11,7 +11,7 @@ import '../../../l10n/app_localizations.dart';
 import '../domain/dashboard_trends.dart';
 
 /// « Activité récente » — the compact TransactionRow variant: a 28px monogram, the merchant
-/// over its account, and the amount over its date. No CategoryChip: this list is a glance at
+/// over its account, and the amount over its date. No CategoryLabel: this list is a glance at
 /// what moved, and the panel that categorises is one link away (`docs/design/04-dashboard.md`
 /// §Row 3).
 class RecentActivityCard extends StatelessWidget {

@@ -103,7 +103,6 @@ class _MergeSuggestionBannerState extends ConsumerState<MergeSuggestionBanner> {
           PrimaryButton(
             key: const Key('subscriptionsMergeAction'),
             label: l10n.subscriptionsMergeAction,
-            height: 30,
             isLoading: _busy,
             onPressed: _busy ? null : _merge,
           ),

@@ -117,6 +117,59 @@ abstract final class ChartPaints {
       );
   }
 
+  /// The zero line, 1 px `lineStrong`, solid, for a series that crosses zero
+  /// (`00` §9). Dashes are for annotations only.
+  static void zeroLine(
+    AppColors colors,
+    Canvas canvas,
+    Offset from,
+    Offset to,
+  ) {
+    canvas.drawLine(
+      from,
+      to,
+      Paint()
+        ..color = colors.lineStrong
+        ..strokeWidth = AppChart.baselineStroke,
+    );
+  }
+
+  /// Hatches [region]: what is not yet a fact (the month in progress, a
+  /// projected value, a value held flat between two declarations). 45°
+  /// lines, 1.5 px on a 5 px pitch, in the mark's own [color], inside a 1 px
+  /// outline in that colour (`00` §9). It replaces dashed outlines.
+  static void hatch(Canvas canvas, Path region, Color color) {
+    final bounds = region.getBounds();
+    if (bounds.isEmpty) return;
+    final lines = Paint()
+      ..color = color
+      ..strokeWidth = AppChart.hatchStroke;
+    canvas
+      ..save()
+      ..clipPath(region);
+    // Lines rising left to right at 45°, spaced [AppChart.hatchPitch] apart
+    // along the horizontal, sweeping the whole bounds.
+    for (
+      var x = bounds.left - bounds.height;
+      x < bounds.right;
+      x += AppChart.hatchPitch
+    ) {
+      canvas.drawLine(
+        Offset(x, bounds.bottom),
+        Offset(x + bounds.height, bounds.top),
+        lines,
+      );
+    }
+    canvas.restore();
+    canvas.drawPath(
+      region,
+      Paint()
+        ..color = color
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = AppChart.hatchOutline,
+    );
+  }
+
   /// [source] cut into [AppChart.dash] dashes with [AppChart.dashGap] gaps.
   static Path dashed(Path source) {
     final dashed = Path();

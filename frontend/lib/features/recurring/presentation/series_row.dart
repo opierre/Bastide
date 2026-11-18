@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:lucide_icons_flutter/lucide_icons_300.dart';
 
 import '../../../core/l10n/category_display.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/tokens.dart';
 import '../../../core/widgets/amount_text.dart';
-import '../../../core/widgets/category_chip.dart';
+import '../../../core/widgets/category_label.dart';
 import '../../../core/widgets/institution_avatar.dart';
-import '../../../core/widgets/status_pill.dart';
+import '../../../core/widgets/status_text.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../categories/domain/category.dart';
 import '../application/series_sort.dart';
@@ -354,11 +355,11 @@ class _CategoryCell extends StatelessWidget {
     final l10n = AppLocalizations.of(context)!;
     final target = category;
     if (target == null) {
-      return CategoryChip.uncategorized(
+      return CategoryLabel.uncategorized(
         label: l10n.subscriptionFormCategoryNone,
       );
     }
-    return CategoryChip(
+    return CategoryLabel(
       label: localizedCategoryName(l10n, target.name),
       slug: categorySlugFor(name: target.name, kind: target.kind),
     );
@@ -442,19 +443,20 @@ class _StatusCell extends StatelessWidget {
         :final previousAmountMinor,
         :final currentAmountMinor,
       ) =>
-        StatusPill(
-          tone: StatusPillTone.warning,
+        StatusText(
+          tone: StatusTone.warning,
+          icon: LucideIcons300.trendingUp,
           label: l10n.subscriptionSignalIncrease(
             _money(previousAmountMinor),
             _money(currentAmountMinor),
           ),
         ),
-      MissedChargeSignal(:final daysLate) => StatusPill(
-        tone: StatusPillTone.warning,
+      MissedChargeSignal(:final daysLate) => StatusText(
+        tone: StatusTone.warning,
+        icon: LucideIcons300.clockAlert,
         label: l10n.subscriptionSignalMissed(daysLate),
       ),
-      CancelledSignal(:final lastChargeOn) => StatusPill(
-        tone: StatusPillTone.neutral,
+      CancelledSignal(:final lastChargeOn) => StatusText(
         label: l10n.subscriptionSignalCancelled(
           seriesDateFormat(locale).format(lastChargeOn),
         ),

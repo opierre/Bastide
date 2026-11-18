@@ -257,7 +257,7 @@ class _PropertyMenu extends StatelessWidget {
   }
 }
 
-/// The CategoryChip-style nature pill: hue at 14 % with full-hue text and an
+/// The CategoryLabel-style nature pill: hue at 14 % with full-hue text and an
 /// 11 px leading glyph.
 class _KindPill extends StatelessWidget {
   const _KindPill({super.key, required this.label, required this.kind});

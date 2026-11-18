@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 
 import '../theme/tokens.dart';
 
-/// The surface every panel builds on: a hairline-bordered plate.
+/// A bordered box, for an object the user can open or move
+/// (`docs/design/00-design-system.md` §1.2): `line` border, radius 8. A
+/// section is not a card; the panel tickets move sections off it.
 ///
 /// Replaces Material's [Card] so the whole app shares one radius, one border,
 /// and one hover treatment. When [onTap] is set the border strengthens on
@@ -12,7 +14,7 @@ class AppCard extends StatefulWidget {
   const AppCard({
     super.key,
     required this.child,
-    this.padding = const EdgeInsets.all(AppSpacing.cardPadding),
+    this.padding = const EdgeInsets.all(AppSpacing.md),
     this.onTap,
     this.color,
     this.border,
@@ -23,7 +25,7 @@ class AppCard extends StatefulWidget {
   final EdgeInsetsGeometry padding;
   final VoidCallback? onTap;
 
-  /// Overrides the raised surface — used by the tinted hero cards (savings
+  /// Overrides the ground, for the few cards a panel still tints (savings
   /// rate, review-queue progress) that the panel specs call for.
   final Color? color;
   final BoxBorder? border;
@@ -53,7 +55,7 @@ class _AppCardState extends State<AppCard> {
     final card = Container(
       decoration: BoxDecoration(
         color: widget.color ?? context.colors.bg,
-        borderRadius: BorderRadius.circular(AppRadii.lg),
+        borderRadius: BorderRadius.circular(AppRadii.container),
         border:
             widget.border ??
             Border.all(
@@ -63,7 +65,7 @@ class _AppCardState extends State<AppCard> {
             ),
       ),
       child: ClipRRect(
-        borderRadius: BorderRadius.circular(AppRadii.lg),
+        borderRadius: BorderRadius.circular(AppRadii.container),
         child: Stack(
           alignment: widget.alignment,
           children: [Padding(padding: widget.padding, child: widget.child)],

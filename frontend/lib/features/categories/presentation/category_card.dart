@@ -3,8 +3,8 @@ import 'package:flutter/material.dart';
 import '../../../core/l10n/category_display.dart';
 import '../../../core/theme/tokens.dart';
 import '../../../core/widgets/app_card.dart';
-import '../../../core/widgets/app_chip.dart';
 import '../../../core/widgets/dashed_border.dart';
+import '../../../core/widgets/status_text.dart';
 import '../../../l10n/app_localizations.dart';
 import '../domain/category.dart';
 import 'category_color.dart';
@@ -162,14 +162,13 @@ class _Header extends StatelessWidget {
                 children: [
                   Flexible(
                     child: category.isSystem
-                        ? AppChip(
+                        ? StatusText(
                             key: Key('categoryBadgeSystem-${category.id}'),
                             label: l10n.categoryBadgeSystem,
                           )
-                        : AppChip(
+                        : StatusText(
                             key: Key('categoryBadgeCustom-${category.id}'),
                             label: l10n.categoryBadgeCustom,
-                            color: context.colors.accent,
                           ),
                   ),
                   const SizedBox(width: AppSpacing.sm),
@@ -292,7 +291,7 @@ class _MenuRow extends StatelessWidget {
 /// A subcategory as a 26 px chip: a swatch in the *parent's* hue, so the
 /// family reads at a glance, and the name in the secondary ink.
 ///
-/// A deliberately quieter shape than [CategoryChip] — neutral fill, no glyph —
+/// A deliberately quieter shape than [CategoryLabel] — neutral fill, no glyph —
 /// because it is an entry in its parent's list, not a label on a transaction.
 class SubcategoryChip extends StatelessWidget {
   const SubcategoryChip({

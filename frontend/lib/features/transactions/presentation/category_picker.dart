@@ -3,10 +3,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/l10n/category_display.dart';
 import '../../../core/theme/tokens.dart';
-import '../../../core/widgets/category_chip.dart';
+import '../../../core/widgets/category_label.dart';
 import '../../../l10n/app_localizations.dart';
-import '../application/transactions_controller.dart';
 import '../../categories/domain/category.dart' show AppCategory;
+import '../application/transactions_controller.dart';
 import '../domain/transaction.dart';
 import 'transaction_error_localizer.dart';
 

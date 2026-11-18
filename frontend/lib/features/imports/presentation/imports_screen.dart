@@ -2,6 +2,7 @@ import 'package:desktop_drop/desktop_drop.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+import 'package:lucide_icons_flutter/lucide_icons_300.dart';
 
 import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/tokens.dart';
@@ -13,13 +14,12 @@ import '../../../core/widgets/inline_banner.dart';
 import '../../../core/widgets/institution_avatar.dart';
 import '../../../core/widgets/labeled_field.dart';
 import '../../../core/widgets/primary_button.dart';
-import '../../../core/widgets/state_views.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../accounts/application/accounts_controller.dart';
 import '../../accounts/domain/account.dart';
 import '../../accounts/presentation/account_form.dart';
-import '../../accounts/presentation/card_settlement_warnings.dart';
 import '../../accounts/presentation/account_type_label.dart';
+import '../../accounts/presentation/card_settlement_warnings.dart';
 import '../application/imports_controller.dart';
 import '../application/ofx_account_detection.dart';
 import '../domain/import_batch.dart';
@@ -650,7 +650,11 @@ class _DropZoneState extends State<_DropZone> {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const GlyphPlate(icon: Icons.download_outlined),
+                  Icon(
+                    LucideIcons300.download,
+                    size: AppSizes.icon,
+                    color: context.colors.textTertiary,
+                  ),
                   const SizedBox(height: AppSpacing.md),
                   Text(
                     l10n.importDropZoneTitle,

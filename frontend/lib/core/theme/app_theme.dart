@@ -217,6 +217,9 @@ ThemeData _build(
   );
 }
 
+/// Lands a dense 13 px text field on [AppSizes.formField].
+const _fieldPaddingY = 10.5;
+
 InputDecorationTheme _inputDecorationTheme(
   AppColors c,
   TextTheme textTheme,
@@ -231,12 +234,12 @@ InputDecorationTheme _inputDecorationTheme(
     filled: true,
     fillColor: c.field,
     isDense: true,
-    // Padded so a field lands level with the select beside it (v1 geometry,
-    // until #200 rebuilds the fields at 32 px).
-    // The extra half pixel makes up for the 13 px body size (v1 was 13.5).
+    // 32 px with the 13 px value (`00` §4), padded 0 10. The dense decorator
+    // lays the text out on the font's own metrics rather than the 1.45 line
+    // height, hence the uneven vertical padding.
     contentPadding: const EdgeInsets.symmetric(
-      horizontal: AppSpacing.sm + AppSpacing.xs,
-      vertical: AppSpacing.md + 0.5,
+      horizontal: AppSpacing.sm + AppSpacing.xxs,
+      vertical: _fieldPaddingY,
     ),
     // Labels sit above the field rather than floating inside it: French labels
     // run longer than English and clip when squeezed into a notch.
@@ -248,7 +251,7 @@ InputDecorationTheme _inputDecorationTheme(
     suffixIconColor: c.textTertiary,
     border: border(c.lineStrong),
     enabledBorder: border(c.lineStrong),
-    disabledBorder: border(c.line),
+    disabledBorder: border(c.lineStrong.withValues(alpha: 0.45)),
     // The 3 px `accentSoft` ring around a focused field is painted by
     // FocusGlow, since InputBorder can only draw the border itself.
     focusedBorder: border(c.accent),
@@ -257,14 +260,23 @@ InputDecorationTheme _inputDecorationTheme(
   );
 }
 
-/// Pins a button to [AppChrome.buttonHeight] whatever its label, so the
-/// buttons of one row measure the same. A button under a tight parent
-/// constraint still takes its parent's height.
+/// Pins a button to [AppSizes.button] whatever its label, so the buttons of
+/// one row measure the same. A button under a tight parent constraint still
+/// takes its parent's height.
 ButtonStyle _rowAligned(ButtonStyle style) => style.copyWith(
-  minimumSize: const WidgetStatePropertyAll(Size(0, AppChrome.buttonHeight)),
+  minimumSize: const WidgetStatePropertyAll(Size(0, AppSizes.button)),
   visualDensity: VisualDensity.standard,
   tapTargetSize: MaterialTapTargetSize.shrinkWrap,
 );
+
+/// Buttons are padded 0 10 (`00` §6).
+const _buttonPaddingX = AppSpacing.sm + AppSpacing.xxs;
+
+/// The focus outline of `00` §6, as a button side: 2 px `accent`.
+BorderSide? _focusSide(AppColors c, Set<WidgetState> states) =>
+    states.contains(WidgetState.focused)
+    ? BorderSide(color: c.accent, width: 2)
+    : null;
 
 /// The primary button (`00` §6): `primary` ground, `onPrimary` label, no
 /// border.
@@ -279,12 +291,18 @@ ButtonStyle _filledButtonStyle(
     }
     return c.primary;
   }),
-  foregroundColor: WidgetStatePropertyAll(c.onPrimary),
+  foregroundColor: WidgetStateProperty.resolveWith((states) {
+    if (states.contains(WidgetState.disabled)) {
+      return c.onPrimary.withValues(alpha: 0.45);
+    }
+    return c.onPrimary;
+  }),
   overlayColor: WidgetStatePropertyAll(c.onPrimary.withValues(alpha: 0.08)),
+  side: WidgetStateProperty.resolveWith((states) => _focusSide(c, states)),
   textStyle: WidgetStatePropertyAll(textTheme.labelLarge),
   elevation: const WidgetStatePropertyAll(0),
   padding: const WidgetStatePropertyAll(
-    EdgeInsets.symmetric(horizontal: AppSpacing.md),
+    EdgeInsets.symmetric(horizontal: _buttonPaddingX),
   ),
   shape: WidgetStatePropertyAll(shape),
   iconSize: const WidgetStatePropertyAll(AppSizes.iconSmall),
@@ -305,14 +323,15 @@ ButtonStyle _outlinedButtonStyle(
     return c.surface;
   }),
   side: WidgetStateProperty.resolveWith((states) {
+    if (_focusSide(c, states) case final focus?) return focus;
     if (states.contains(WidgetState.disabled)) {
-      return BorderSide(color: c.line);
+      return BorderSide(color: c.lineStrong.withValues(alpha: 0.45));
     }
     return BorderSide(color: c.lineStrong);
   }),
   textStyle: WidgetStatePropertyAll(textTheme.labelLarge),
   padding: const WidgetStatePropertyAll(
-    EdgeInsets.symmetric(horizontal: AppSpacing.md),
+    EdgeInsets.symmetric(horizontal: _buttonPaddingX),
   ),
   shape: WidgetStatePropertyAll(shape),
   iconSize: const WidgetStatePropertyAll(AppSizes.iconSmall),
@@ -330,11 +349,13 @@ ButtonStyle _textButtonStyle(
     return c.textSecondary;
   }),
   overlayColor: WidgetStatePropertyAll(c.hover),
+  side: WidgetStateProperty.resolveWith((states) => _focusSide(c, states)),
   textStyle: WidgetStatePropertyAll(textTheme.labelLarge),
   padding: const WidgetStatePropertyAll(
-    EdgeInsets.symmetric(horizontal: AppSpacing.smPlus),
+    EdgeInsets.symmetric(horizontal: _buttonPaddingX),
   ),
   shape: WidgetStatePropertyAll(shape),
+  iconSize: const WidgetStatePropertyAll(AppSizes.iconSmall),
 );
 
 /// The type scale of `00` §3, mapped onto the [TextTheme] slots.

@@ -804,6 +804,9 @@ class AppLocalizationsFr extends AppLocalizations {
       'Rechercher une description ou un marchand…';
 
   @override
+  String get searchShortcutHint => 'Ctrl K';
+
+  @override
   String get transactionsSearchEmpty =>
       'Aucune transaction ne correspond à votre recherche.';
 

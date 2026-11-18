@@ -52,7 +52,7 @@ class RefusalBanner extends StatelessWidget {
                   TextSpan(
                     text: lead,
                     style: TextStyle(
-                      fontWeight: FontWeight.w700,
+                      fontWeight: FontWeight.w600,
                       color: context.colors.negative,
                     ),
                   ),

@@ -15,7 +15,7 @@ class DashedBorder extends StatelessWidget {
     super.key,
     required this.child,
     this.color,
-    this.radius = AppRadii.md,
+    this.radius = AppRadii.container,
     this.strokeWidth = 1,
     this.dashLength = 5,
     this.gapLength = 4,
