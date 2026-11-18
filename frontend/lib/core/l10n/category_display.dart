@@ -2,7 +2,7 @@ import '../../l10n/app_localizations.dart';
 
 /// Resolves an embedded/picker category to one of the eight pinned
 /// design-system hues (`CategoryHues`/`CategoryIcons` in `core/theme/tokens.dart`
-/// and `core/widgets/category_chip.dart`).
+/// and `core/widgets/category_label.dart`).
 ///
 /// The backend's system catalog (`backend/app/core/seed.py`) seeds ~70
 /// categories and subcategories — more than the eight hues `docs/design/00`

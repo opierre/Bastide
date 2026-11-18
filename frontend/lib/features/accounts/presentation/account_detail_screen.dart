@@ -8,12 +8,12 @@ import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/tokens.dart';
 import '../../../core/widgets/amount_text.dart';
 import '../../../core/widgets/app_card.dart';
-import '../../../core/widgets/app_chip.dart';
 import '../../../core/widgets/app_segmented.dart';
 import '../../../core/widgets/area_line.dart';
 import '../../../core/widgets/dashed_border.dart';
 import '../../../core/widgets/institution_avatar.dart';
 import '../../../core/widgets/state_views.dart';
+import '../../../core/widgets/status_text.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../imports/presentation/imports_screen.dart';
 import '../../transactions/application/transactions_controller.dart';
@@ -195,7 +195,7 @@ class _IdentityCard extends StatelessWidget {
                             color: context.colors.textSecondary,
                           ),
                         ),
-                        AppChip(label: accountTypeLabel(l10n, account.type)),
+                        StatusText(label: accountTypeLabel(l10n, account.type)),
                       ],
                     ),
                   ],
@@ -626,8 +626,6 @@ class _ChartEmpty extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const GlyphPlate(icon: Icons.show_chart_rounded),
-            const SizedBox(height: 14),
             ConstrainedBox(
               constraints: const BoxConstraints(maxWidth: 360),
               child: Text(
@@ -1015,7 +1013,7 @@ class _LinkedCardRow extends ConsumerWidget {
                       textTheme.bodyMedium!,
                     ).copyWith(color: context.colors.textSecondary),
                   ),
-                AppChip(
+                StatusText(
                   label: accountTypeLabel(l10n, AccountType.deferredCard),
                 ),
                 if (!card.hasRule && cardAccount != null)
@@ -1023,10 +1021,9 @@ class _LinkedCardRow extends ConsumerWidget {
                     key: Key('accountDetailRuleMissing-${card.accountId}'),
                     borderRadius: BorderRadius.circular(AppRadii.pill),
                     onTap: () => _openRule(context, ref, cardAccount),
-                    child: AppChip(
+                    child: StatusText(
                       label: l10n.accountDetailRuleMissing,
-                      color: context.colors.warning,
-                      icon: Icons.warning_amber_rounded,
+                      tone: StatusTone.warning,
                     ),
                   ),
               ],
@@ -1146,7 +1143,7 @@ class _SettlementSection extends ConsumerWidget {
                     crossAxisAlignment: WrapCrossAlignment.center,
                     children: [
                       Text(paying.name, style: textTheme.titleSmall),
-                      AppChip(label: accountTypeLabel(l10n, paying.type)),
+                      StatusText(label: accountTypeLabel(l10n, paying.type)),
                     ],
                   ),
                 ),

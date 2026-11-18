@@ -5,7 +5,7 @@ import 'package:intl/intl.dart';
 import '../../../core/l10n/category_display.dart';
 import '../../../core/theme/tokens.dart';
 import '../../../core/widgets/amount_text.dart';
-import '../../../core/widgets/category_chip.dart';
+import '../../../core/widgets/category_label.dart';
 import '../../../core/widgets/institution_avatar.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../recurring/presentation/mark_recurring_dialog.dart';
@@ -113,7 +113,7 @@ class TransactionRow extends ConsumerWidget {
                 const SizedBox(width: AppSpacing.xl),
                 Builder(
                   builder: (chipContext) => transaction.category == null
-                      ? CategoryChip.uncategorized(
+                      ? CategoryLabel.uncategorized(
                           key: const Key('transactionRowCategoryChip'),
                           label: l10n.categoryUncategorized,
                           onTap: () => showCategoryPicker(
@@ -122,7 +122,7 @@ class TransactionRow extends ConsumerWidget {
                             transaction: transaction,
                           ),
                         )
-                      : CategoryChip(
+                      : CategoryLabel(
                           key: const Key('transactionRowCategoryChip'),
                           label: localizedCategoryName(
                             l10n,

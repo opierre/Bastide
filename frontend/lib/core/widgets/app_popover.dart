@@ -56,8 +56,8 @@ class AppPopover extends StatelessWidget {
   );
 }
 
-/// One 28 px row of a popover or menu. Works inside a [MenuAnchor] (it is a
-/// [MenuItemButton]) and inside an [AppPopover].
+/// One 28 px row of a [MenuAnchor] menu dressed by [AppPopover.menuStyle].
+/// It is a [MenuItemButton], so the menu's keyboard navigation reaches it.
 class AppMenuItem extends StatelessWidget {
   const AppMenuItem({
     super.key,
@@ -105,6 +105,9 @@ class AppMenuItem extends StatelessWidget {
           minimumSize: const WidgetStatePropertyAll(
             Size(0, AppSizes.popoverItem),
           ),
+          // Desktop rows: no padded touch target, no density adjustment.
+          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+          visualDensity: VisualDensity.standard,
           padding: const WidgetStatePropertyAll(
             EdgeInsets.symmetric(horizontal: AppSpacing.sm),
           ),
@@ -131,7 +134,10 @@ class AppMenuItem extends StatelessWidget {
               leading!,
               const SizedBox(width: AppSpacing.sm),
             ],
-            Expanded(
+            // A menu button lays its child out at unbounded width, so the
+            // label only fills the row when the row has a width to fill.
+            Flexible(
+              fit: width == null ? FlexFit.loose : FlexFit.tight,
               child: Padding(
                 padding: EdgeInsets.symmetric(
                   vertical: subtitle == null ? 0 : AppSpacing.xs,

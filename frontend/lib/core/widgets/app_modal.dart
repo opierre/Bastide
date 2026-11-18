@@ -2,13 +2,19 @@ import 'package:flutter/material.dart';
 
 import '../theme/tokens.dart';
 
-/// The shared modal shell: an overlay-surface panel of a fixed width with a
-/// title, a scrollable body, and a right-aligned action footer.
+/// The modal of `docs/design/00-design-system.md` §7: `surface`, radius 12,
+/// `shadow`, on `scrim`; padding 24; title 16/600 with an optional lead
+/// below it; a scrollable body; the footer right-aligned, secondary then
+/// primary, 8 px apart. Only for a task that needs protected focus (a form,
+/// a confirmation).
 ///
 /// Replaces [AlertDialog], whose padding, title style and action layout all
-/// drift from the spec. Each panel spec names its own width (480 for the account
-/// form, 520 for the rule editor), so that is the one
-/// required dimension.
+/// drift from the spec. Each panel spec names its own width, so that is the
+/// one required dimension.
+/// Fields sit 14 px apart in a modal (`00` §7), and the body 14 px below the
+/// title.
+const _fieldGap = 14.0;
+
 class AppModal extends StatelessWidget {
   const AppModal({
     super.key,
@@ -27,8 +33,8 @@ class AppModal extends StatelessWidget {
   /// weight before the copy is read.
   final Widget? leading;
 
-  /// Optional context line under the title — the parent a new subcategory will
-  /// sit under, say.
+  /// Optional lead under the title, 13 `textSecondary` when it is a [Text]
+  /// without a colour of its own.
   final Widget? subtitle;
   final double width;
   final Widget child;
@@ -47,8 +53,7 @@ class AppModal extends StatelessWidget {
         width: width,
         decoration: BoxDecoration(
           color: context.colors.surface,
-          borderRadius: BorderRadius.circular(AppRadii.xl),
-          border: Border.all(color: context.colors.line),
+          borderRadius: BorderRadius.circular(AppRadii.modal),
           boxShadow: context.colors.shadow,
         ),
         child: Column(
@@ -60,7 +65,7 @@ class AppModal extends StatelessWidget {
                 AppSpacing.lg,
                 AppSpacing.lg,
                 AppSpacing.lg,
-                AppSpacing.md,
+                _fieldGap,
               ),
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -75,11 +80,15 @@ class AppModal extends StatelessWidget {
                       children: [
                         Text(
                           title,
-                          style: Theme.of(context).textTheme.headlineMedium,
+                          style: Theme.of(context).textTheme.headlineSmall,
                         ),
                         if (subtitle != null) ...[
                           const SizedBox(height: AppSpacing.xs),
-                          subtitle!,
+                          DefaultTextStyle.merge(
+                            style: Theme.of(context).textTheme.bodyMedium
+                                ?.copyWith(color: context.colors.textSecondary),
+                            child: subtitle!,
+                          ),
                         ],
                       ],
                     ),
@@ -108,7 +117,7 @@ class AppModal extends StatelessWidget {
               child: Wrap(
                 alignment: WrapAlignment.end,
                 crossAxisAlignment: WrapCrossAlignment.center,
-                spacing: AppSpacing.sm + AppSpacing.xs,
+                spacing: AppSpacing.sm,
                 runSpacing: AppSpacing.sm,
                 children: actions,
               ),

@@ -1,6 +1,4 @@
 import 'package:bastide/core/theme/app_theme.dart';
-import 'package:bastide/core/widgets/confidence_gauge.dart';
-import 'package:bastide/core/widgets/proposed_category_chip.dart';
 import 'package:bastide/features/accounts/application/accounts_controller.dart';
 import 'package:bastide/features/accounts/domain/account.dart';
 import 'package:bastide/features/categories/domain/category.dart';
@@ -177,8 +175,8 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      expect(find.byType(ProposedCategoryChip), findsOneWidget);
-      expect(find.byType(ConfidenceGauge), findsOneWidget);
+      expect(find.byKey(const Key('reviewRowProposedChip')), findsOneWidget);
+      expect(find.byKey(const Key('categoryLabelConfidence')), findsOneWidget);
       // A percentage, never the raw 0.71 the API returns.
       expect(find.textContaining('71'), findsWidgets);
       expect(find.textContaining('0.71'), findsNothing);
@@ -195,8 +193,8 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(find.byType(ProposedCategoryChip), findsNothing);
-    expect(find.byType(ConfidenceGauge), findsNothing);
+    expect(find.byKey(const Key('reviewRowProposedChip')), findsNothing);
+    expect(find.byKey(const Key('categoryLabelConfidence')), findsNothing);
     expect(find.byKey(const Key('reviewRowConfirmButton')), findsNothing);
   });
 
@@ -213,7 +211,7 @@ void main() {
     expect(find.byKey(const Key('reviewRowNoProposal')), findsOneWidget);
     expect(find.byKey(const Key('reviewRowChooseCategory')), findsOneWidget);
     expect(find.byKey(const Key('reviewRowCategoryChip')), findsOneWidget);
-    expect(find.byType(ProposedCategoryChip), findsNothing);
+    expect(find.byKey(const Key('reviewRowProposedChip')), findsNothing);
   });
 
   testWidgets('Confirmer assigns the proposed category', (tester) async {
@@ -303,8 +301,8 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      expect(find.byType(ProposedCategoryChip), findsNothing);
-      expect(find.byType(ConfidenceGauge), findsNothing);
+      expect(find.byKey(const Key('reviewRowProposedChip')), findsNothing);
+      expect(find.byKey(const Key('categoryLabelConfidence')), findsNothing);
       expect(find.byKey(const Key('reviewRowConfirmButton')), findsNothing);
       expect(find.byKey(const Key('reviewRowCorrectButton')), findsNothing);
       expect(find.byKey(const Key('reviewRowNoProposal')), findsNothing);
@@ -330,7 +328,7 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(find.byType(ProposedCategoryChip), findsNothing);
+    expect(find.byKey(const Key('reviewRowProposedChip')), findsNothing);
     expect(find.byKey(const Key('reviewAiInvitation')), findsOneWidget);
   });
 

@@ -7,10 +7,10 @@ import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/tokens.dart';
 import '../../../core/widgets/amount_text.dart';
 import '../../../core/widgets/app_card.dart';
-import '../../../core/widgets/app_chip.dart';
 import '../../../core/widgets/institution_avatar.dart';
 import '../../../core/widgets/primary_button.dart';
 import '../../../core/widgets/state_views.dart';
+import '../../../core/widgets/status_text.dart';
 import '../../../l10n/app_localizations.dart';
 import '../application/accounts_controller.dart';
 import '../application/linked_cards.dart';
@@ -274,7 +274,7 @@ class _AccountCard extends StatelessWidget {
           const Spacer(),
           Row(
             children: [
-              AppChip(label: accountTypeLabel(l10n, account.type)),
+              StatusText(label: accountTypeLabel(l10n, account.type)),
               const SizedBox(width: AppSpacing.sm),
               // The balance is this card's one data point, so it carries the
               // sign colors — unlike the summary total, which stays neutral.

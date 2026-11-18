@@ -4,7 +4,7 @@ import 'package:bastide/core/theme/app_theme.dart';
 import 'package:bastide/core/theme/tokens.dart';
 import 'package:bastide/core/widgets/amount_text.dart';
 import 'package:bastide/core/widgets/repere_meter.dart';
-import 'package:bastide/core/widgets/status_pill.dart';
+import 'package:bastide/core/widgets/status_text.dart';
 import 'package:bastide/features/mortgages/application/mortgages_controller.dart';
 import 'package:bastide/features/mortgages/domain/mortgage.dart';
 import 'package:bastide/features/mortgages/presentation/mortgages_screen.dart';
@@ -205,10 +205,10 @@ void main() {
         );
         await tester.pumpAndSettle();
 
-        final pill = tester.widget<StatusPill>(
+        final pill = tester.widget<StatusText>(
           find.byKey(const Key('ratioOverLimitPill')),
         );
-        expect(pill.tone, StatusPillTone.warning);
+        expect(pill.tone, StatusTone.warning);
         expect(pill.label, 'Au-dessus du repère');
         final meter = tester.widget<RepereMeter>(
           find.byKey(const Key('ratioGauge')),

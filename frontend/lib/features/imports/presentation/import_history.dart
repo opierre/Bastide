@@ -6,8 +6,8 @@ import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/tokens.dart';
 import '../../../core/widgets/amount_text.dart';
 import '../../../core/widgets/app_card.dart';
-import '../../../core/widgets/app_chip.dart';
 import '../../../core/widgets/state_views.dart';
+import '../../../core/widgets/status_text.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../accounts/application/accounts_controller.dart';
 import '../../accounts/domain/account.dart';
@@ -335,14 +335,9 @@ class ImportFormatBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final color = switch (format) {
-      ImportFormat.ofx => context.colors.textSecondary,
-      ImportFormat.qfx => context.colors.accent,
-    };
-
     return Align(
       alignment: alignment,
-      child: AppChip(label: format.name.toUpperCase(), color: color),
+      child: StatusText(label: format.name.toUpperCase()),
     );
   }
 }
@@ -365,27 +360,15 @@ class ImportStatusPill extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
 
-    final (color, icon, label) = switch (status) {
-      ImportStatus.success => (
-        context.colors.positive,
-        Icons.check_rounded,
-        l10n.importStatusSuccess,
-      ),
-      ImportStatus.partial => (
-        context.colors.warning,
-        Icons.warning_amber_rounded,
-        l10n.importStatusPartial,
-      ),
-      ImportStatus.failed => (
-        context.colors.negative,
-        Icons.close_rounded,
-        l10n.importStatusFailed,
-      ),
+    final (tone, label) = switch (status) {
+      ImportStatus.success => (StatusTone.positive, l10n.importStatusSuccess),
+      ImportStatus.partial => (StatusTone.warning, l10n.importStatusPartial),
+      ImportStatus.failed => (StatusTone.negative, l10n.importStatusFailed),
     };
 
     return Align(
       alignment: alignment,
-      child: AppChip(label: label, color: color, icon: icon),
+      child: StatusText(label: label, tone: tone),
     );
   }
 }

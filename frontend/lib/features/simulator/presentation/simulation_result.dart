@@ -11,7 +11,7 @@ import '../../../core/widgets/labeled_field.dart';
 import '../../../core/widgets/money_field.dart';
 import '../../../core/widgets/primary_button.dart';
 import '../../../core/widgets/repere_meter.dart';
-import '../../../core/widgets/status_pill.dart';
+import '../../../core/widgets/status_text.dart';
 import '../../../l10n/app_localizations.dart';
 import '../application/simulator_controller.dart';
 import '../domain/simulation.dart';
@@ -286,10 +286,10 @@ class HcsfReadingCard extends StatelessWidget {
               Text(l10n.simulatorHcsfTitle, style: textTheme.titleMedium),
               if (over) ...[
                 const SizedBox(width: AppSpacing.sm + 2),
-                StatusPill(
+                StatusText(
                   key: const Key('hcsfOverPill'),
                   label: l10n.simulatorHcsfOver,
-                  tone: StatusPillTone.warning,
+                  tone: StatusTone.warning,
                 ),
               ],
               const Spacer(),

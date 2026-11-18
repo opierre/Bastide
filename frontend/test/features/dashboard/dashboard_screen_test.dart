@@ -4,7 +4,7 @@ import 'package:bastide/core/theme/tokens.dart';
 import 'package:bastide/core/widgets/amount_text.dart';
 import 'package:bastide/core/widgets/app_card.dart';
 import 'package:bastide/core/widgets/app_shell.dart';
-import 'package:bastide/core/widgets/category_chip.dart';
+import 'package:bastide/core/widgets/category_label.dart';
 import 'package:bastide/core/widgets/primary_button.dart';
 import 'package:bastide/core/widgets/repere_meter.dart';
 import 'package:bastide/core/widgets/state_views.dart';
@@ -827,7 +827,7 @@ void main() {
       expect(find.text('Activité récente'), findsOneWidget);
       expect(find.byType(CompactTransactionRow), findsNWidgets(4));
       // The compact variant deliberately drops the category chip the 52px row carries.
-      expect(find.byType(CategoryChip), findsNothing);
+      expect(find.byType(CategoryLabel), findsNothing);
 
       for (final row in [
         'Carrefour',
@@ -922,21 +922,20 @@ void main() {
     expect(last.bottom, closeTo(card.bottom - AppSpacing.cardPadding, 1));
   });
 
-  testWidgets('a monogram with no pinned hue falls back to the neutral plate', (
-    tester,
-  ) async {
+  testWidgets('every named counterparty gets its initials on the neutral '
+      'monogram', (tester) async {
     _useDesktopSurface(tester);
     await tester.pumpWidget(_wrap(state: _state()));
     await tester.pumpAndSettle();
 
-    // Carrefour and Novatech carry pinned hues (#3B82F6 and #6C6AF0, both as the spec's
-    // table has them). Their *initials* come from `MonogramAvatar.initialsFor`, which takes
-    // one letter per word — so « Novatech SARL » reads NS where the table draws NV.
+    // Monograms are always neutral (`00` §7), so no brand list decides
+    // between initials and « ? »: a named row shows its initials, one letter
+    // per word, so « Novatech SARL » reads NS.
     expect(find.text('CA'), findsOneWidget);
     expect(find.text('NS'), findsOneWidget);
-    // SNCF Connect and Free Mobile have no pinned hue, so they keep the neutral "?" plate
-    // rather than the table's SC / FM.
-    expect(find.text('?'), findsNWidgets(2));
+    expect(find.text('SC'), findsOneWidget);
+    expect(find.text('FM'), findsOneWidget);
+    expect(find.text('?'), findsNothing);
   });
 
   // --- states ------------------------------------------------------------------------------

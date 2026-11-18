@@ -11,7 +11,7 @@ import '../../../core/widgets/labeled_field.dart';
 import '../../../core/widgets/money_field.dart';
 import '../../../core/widgets/primary_button.dart';
 import '../../../core/widgets/repere_meter.dart';
-import '../../../core/widgets/status_pill.dart';
+import '../../../core/widgets/status_text.dart';
 import '../../../l10n/app_localizations.dart';
 import '../application/mortgages_controller.dart';
 import '../domain/mortgage.dart';
@@ -70,10 +70,10 @@ class DebtRatioCard extends StatelessWidget {
                 ),
               ),
               if (known && summary.overLimit)
-                StatusPill(
+                StatusText(
                   key: const Key('ratioOverLimitPill'),
                   label: l10n.mortgagesRatioOverLimit,
-                  tone: StatusPillTone.warning,
+                  tone: StatusTone.warning,
                 ),
             ],
           ),
