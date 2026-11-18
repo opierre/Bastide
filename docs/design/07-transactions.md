@@ -1,32 +1,120 @@
 # 07 — Transactions
 
-## Top bar (this panel)
-Title « Transactions » + descriptor « Toutes vos opérations, en un seul fil ». Right: wide search (300 px, « Rechercher une description ou un marchand… »), user pill.
+Mockup: `#panel=transactions&variant=A` (tab « Toutes »), `&variant=B` (tab « À vérifier »).
+Ticket #208. Read `00-design-system.md` first.
 
-## Content layout
-Filter bar (36 px pills, raised surface): Tous les comptes · 01/05/2026 – 31/05/2026 (opens the 420 px « Période » Modal — two DateFields, Du/Au, on the app's own calendar picker; both left empty lifts the filter) · Toutes les catégories · right-aligned « À vérifier » label + Toggle (amber count badge 12 when on). List Card: 52 px TransactionRows (30 px monogram · 290 px two-line merchant + account block · CategoryChip with category icon · date · 120 px signed tabular amount), #1A212C separators only, hover #151B26; footer pager « 1–12 sur 128 » + round ‹ › buttons. Twelve May-2026 rows from Carrefour to Salaire — Novatech SARL (+2 850,00 € green). Category picker: clicking a chip opens a 250 px overlay popover anchored under it — search field « Changer de catégorie… » + category rows (swatch + name) with iris check on the current one. Review queue: iris-tinted progress Card « 12 transactions à vérifier » / « 4 catégorisées aujourd'hui — vous y êtes presque, continuez ! » + 4/16 and a 25 % iris progress bar; then 64 px rows: "?" monogram, raw bank label in monospace (PRLV SEPA CAISSE LOC EPARGNE…), dashed « Non catégorisé » chip, suggested CategoryChips (with their category icons), iris « Toujours catégoriser ainsi » rule affordance, signed amount.
+## Title bar
+Title « Transactions ». Right: the search field (« Rechercher », searches description and
+merchant; `Ctrl K` focuses it).
 
-## States to show
-① populated (fr). ② populated (en) — same geometry, May 14 2026 / −€86.42 formatting. ③ category picker open (fr) — on the Carrefour row. ④ review queue (fr) — toggle on. ⑤ empty (fr) — EmptyState « Aucune transaction pour l'instant » + CTA « Aller aux imports », filter bar hidden.
+## Layout
+Flush panel. Top to bottom:
 
-## Amendment — AI proposals in the review queue
-Normative reference: frames `07-Transactions — *` in the Gestion & AI mockup canvas. The review queue gains local-AI proposals; everything else in this file stands.
+1. **Tabs:** « Toutes » · « À vérifier {n} ». Padding 0 32. The count is hidden at 0.
+2. The selected tab's body, filling the rest.
 
-**Row anatomy with proposal** (66 px min): "?" monogram (32 px, #1E2634/#97A3B6) · 280 px block: raw bank label monospace 12.5 + date 11.5 `#5A6579` · **ProposedCategoryChip** (dashed, category hue — see 00 §Gestion & AI additions) · **ConfidenceGauge** + « Confiance NN % » · spacer · gradient button « Confirmer » (30 px, check icon) · secondary « Corriger » (30 px, border #232B38) · 110 px signed amount. Row without proposal: dashed neutral « Non catégorisé » chip + italic « — aucune proposition » 11.5 `#5A6579`, iris link « Choisir une catégorie » on the right. Exact demo rows: CB NOVATECH SAS 12/05 · 12/05/2026 · −49,90 € · proposé « Achats › Électronique » 71 % — PRLV SEPA ASSUR MAIF · 11/05/2026 · −187,44 € · « Logement › Assurance habitation » 78 % — VIR RECU M. DUBOIS · 09/05/2026 · +420,00 € green · no proposal — CB SNCF CONNECT · 07/05/2026 · −86,40 € · « Transport › Transports en commun » 74 %.
+## Tab « Toutes »
+Two panes: list (flexible) · inspector (440 px, `00` §7).
 
-**Header Card** (iris-tint, same recipe as review Card): « 12 transactions à vérifier » + « L'IA locale propose une catégorie pour 3 d'entre elles — confirmez ou corrigez, rien n'est classé sans vous. » + 4/16 + 25 % progress bar. Amber count badge in the filter bar follows the queue size.
+### List pane
+- **Filter row,** padding 12 32, 8 px apart: select « Tous les comptes » · select-look with
+  `calendar` « 1 – 31 mai 2026 » (opens the period modal) · select « Toutes les catégories »
+  (top-level categories, each with its icon) · spacer · 12 `textTertiary`: « 38 opérations ·
+  net » + the net, signed and coloured.
+- **Table,** edge to edge (first and last cells padded 32):
 
-**Running state** (replaces the header Card while classifying): iris-tint banner with 18 px spinner (2.5 px ring, border-top iris, spin .9 s) · « Catégorisation en cours — 84 sur 213 transactions » · sub « 61 classées · 23 à vérifier · le panneau reste utilisable » · secondary « Annuler » · 6 px progress bar at 39 %, fill linear-gradient(90deg,#6C6AF0,#8B8CF9). Non-blocking: the list stays interactive beneath.
+| Column | Content |
+|---|---|
+| Opération | Monogram + label. A raw bank label that no rule has named is set in Geist Mono with the « ? » monogram. |
+| Catégorie | Category label (top level only in this pane). Clicking it opens the category picker under it. |
+| Montant | Right-aligned, signed and coloured. |
 
-**Finished-with-failures banner** (amber, dismissible ×): « Catégorisation terminée — 12 transactions n'ont pas pu être analysées. » + underlined « Voir ».
+  Rows are grouped by day under a group row (« 14 mai 2026 »), newest first. The selected row
+  takes `accentSoft`. Keyboard: `↑` `↓` move the selection, `C` opens the category picker.
+- **Pager,** padding 10 32, top hairline: « 1 – 50 sur 128 » 12 `textTertiary` · spacer ·
+  two secondary icon buttons `chevron-left`, `chevron-right`.
 
-**Rule modal « Toujours catégoriser ainsi »** (520 px, overlay surface): sub « Une règle classe ces transactions sans IA, à chaque import — pré-remplie depuis “PRLV SEPA ASSUR MAIF”. » Fields: Champ = Description · Condition = contient · Motif (focused, monospace) = ASSUR MAIF · Catégorie cible = Logement › Assurance habitation (cyan swatch). Checked gradient checkbox « Appliquer aux transactions existantes » + blue info banner « Correspond à 7 transactions existantes. » Footer: Annuler · Créer la règle. On create: success Toast bottom-right « Règle créée · 7 transactions recatégorisées » (green check plate).
+### Inspector pane (selected operation)
+1. Header row: large monogram + name 13/600 over the raw bank label in Geist Mono
+   `textTertiary`.
+2. Amount at 28 px, signed and coloured.
+3. Key/value list: Date · Compte · Catégorie (a 28 px select showing the full category label;
+   changing it clears the review flag) · Classée par (« règle « {pattern} » », « IA locale,
+   confiance 78 % », « vous », or « non classée ») · Import (file name, link to Imports).
+4. Hairline. Recurring row, when the operation belongs to a series: `repeat` 14 px · « Paiement
+   récurrent » over « {cadence} · prochain le {date} » 12 `textTertiary` · link « Voir la
+   série ». Otherwise a ghost button « Marquer comme récurrent » (opens the existing dialog).
+5. Hairline. « Même marchand » heading + up to 5 previous operations: date `textSecondary` ·
+   signed amount.
+6. Bottom of the pane: secondary « Créer une règle » (or « Modifier la règle » when one
+   classed it) · secondary « Exclure des totaux ».
 
-**AI-not-configured state**: queue rows render rules-only style (no chips proposal, no gauges, no buttons) + calm blue invitation banner at the Card foot: « Activez l'IA locale pour classer automatiquement les transactions que vos règles n'ont pas reconnues. » + iris link « Paramètres ». Never nags anywhere else.
+Nothing selected: the pane shows the note « Sélectionnez une opération pour voir son détail. »
 
-**AI states**: ⑥ file avec propositions IA + toast (fr) ⑦ catégorisation en cours (fr) ⑧ modal règle + bannière terminée (fr) ⑨ IA non configurée (fr).
+### Category picker (popover, 230 px)
+A 28 px search field « Changer de catégorie », then categories and subcategories as items
+(category label), a `check` on the current one. Choosing closes it and applies.
 
-**Rules**: proposals never auto-apply — below the confidence threshold (see 09) a transaction enters this queue; at/above it, it is classified and does NOT appear here. « Confirmer » assigns the proposed category and clears the review flag; « Corriger » opens the standard category picker. Deterministic rules (08) always win over AI proposals.
+### Period modal (420 px)
+Title « Période ». Two date fields « Du » · « Au » on the app's calendar picker. Both empty
+lifts the filter. Footer « Annuler » · « Appliquer ».
 
-## Notes
-Choosing a category in the picker or a suggestion chip clears the review flag; « Toujours catégoriser ainsi » creates a rule (see 08). Review copy is framed as progress, never as a backlog of failures.
+## Tab « À vérifier »
+Single pane.
+
+- **Progress row,** padding 16 32: left, 260 px: « {done} sur {total} » 13/600 + « classées
+  aujourd’hui » `textSecondary`, over a repère without mark. Right, a Note (`cpu` icon):
+  « L’IA locale propose une catégorie pour {n} opérations. Rien n’est classé sans votre
+  accord. »
+- **Table,** edge to edge:
+
+| Column | Content |
+|---|---|
+| Libellé du relevé | Raw bank label, Geist Mono |
+| Date | right, `textSecondary` |
+| Proposition | Category label + « confiance 78 % » 12 `textTertiary`; or « Aucune proposition » `textTertiary` |
+| (actions) | With a proposal: primary « Confirmer » (`check`) · secondary « Corriger » · ghost « Créer une règle » (`wand-sparkles`). Without: secondary « Choisir une catégorie » · ghost « Créer une règle ». Only the row under the pointer or with focus shows a primary button; the others show « Confirmer » as secondary, so one screen never carries six primaries. |
+| Montant | right, signed and coloured |
+
+| State of the tab | What shows |
+|---|---|
+| Classification running | The progress row is replaced by a Banner: 14 px spinner · « Catégorisation en cours : 84 sur 213 opérations » · « 61 classées · 23 à vérifier » `textSecondary` · secondary « Annuler » · a repère under the text. The table stays usable. |
+| Finished with failures | Banner, `warning` icon, dismissible: « Catégorisation terminée. 12 opérations n’ont pas pu être analysées. » + link « Voir ». |
+| AI not configured | Rows show « Aucune proposition »; under the table a Note: « Activez l’IA locale pour classer les opérations que vos règles n’ont pas reconnues. » + link « Paramètres ». Shown nowhere else. |
+| Queue empty | Empty state: « Rien à vérifier » · « Toutes vos opérations ont une catégorie. » No button. |
+
+### Rule modal « Toujours catégoriser ainsi » (520 px)
+Lead: « Une règle classe ces opérations à chaque import, sans IA. » Fields: Champ (select,
+« Description ») · Condition (select, « contient ») · Motif (Geist Mono, focused, prefilled
+from the label) · Catégorie cible (select with the category label). Checkbox « Appliquer aux
+opérations existantes ». Note: « Correspond à 7 opérations existantes. » Footer « Annuler » ·
+« Créer la règle ». On success, toast « Règle créée · 7 opérations recatégorisées ».
+
+## States of the panel
+Populated · empty (no transaction: empty state « Aucune transaction » · « Importez un relevé
+pour voir vos opérations ici. » · primary « Aller aux imports »; tabs and filters hidden) ·
+no result for the filters (in the table area: « Aucune opération pour ces filtres. » + link
+« Effacer les filtres ») · loading (silhouette of rows) · English.
+
+## Behaviour (kept)
+- Proposals never apply on their own. Below the confidence threshold (Paramètres → Données)
+  an operation enters the queue; at or above it, it is classed and does not appear.
+- « Confirmer » assigns the proposal and clears the review flag. « Corriger » opens the
+  category picker. Deterministic rules always win over AI proposals.
+- Choosing a category by hand is never overwritten by a rule or by the AI.
+- The classification run is asynchronous and cancellable; the panel stays usable.
+- The filters, the tab and the page survive leaving and returning to the panel in a session.
+- An operation excluded from totals stays listed, dimmed, with « exclue des totaux » after its
+  label.
+
+## Copy
+Delete `navTransactionsSubtitle`, `reviewQueueEncouragement`. `transactionsEmptyTitle` per
+`00` §14. Replace « — aucune proposition » with « Aucune proposition ». New: « Classée par »,
+« Même marchand », « Exclure des totaux », « Sélectionnez une opération pour voir son
+détail. », « Rien à vérifier ».
+
+## Removed from v1
+Pill filter bar, the « À vérifier » toggle with its amber badge (now a tab), 52 px two-line
+rows with the account under the merchant (the account is in the inspector and in the filter),
+tinted review header card, ConfidenceGauge, dashed ProposedCategoryChip, gradient « Confirmer »
+buttons, coloured monograms, list card frame.

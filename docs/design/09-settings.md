@@ -1,47 +1,115 @@
-# 09 — Settings
+# 09 — Paramètres
 
-## Top bar (this panel)
-Title « Paramètres » / "Settings" + descriptor « Profil, préférences et vos données locales ». Right: user pill only.
+Mockup: `#panel=settings&variant=A` (Profil), `B` (Préférences), `C` (Données), `D` (À propos).
+Ticket #216. Read `00-design-system.md` first.
 
-## Content layout
-Left section nav, 210 px, 38 px radius-12 items: Profil · Préférences (active, iris tint) · Données · À propos. Right column (max 640 px) of grouped Cards for the Préférences panel: (1) Langue — SegmentedControl Français/English + note « S'applique immédiatement à toute l'interface. » (2) Devise — read-only dashed field « EUR — € — Euro » with lock glyph + note « Choisie à l'inscription et appliquée à tous vos comptes. Elle ne peut pas être modifiée dans cette version. » (3) Aperçu des formats — two inset plates previewing Dates (14/05/2026) and Montants (1 234,56 €) in the active locale.
+## Title bar
+Title « Paramètres ». No control.
 
-## States to show
-① preferences (fr). ② preferences, English (en) — identical geometry re-rendered: English segment active, previews flip to May 14, 2026 / €1,234.56, all chrome strings switch (incl. the sidebar privacy badge "All data stays on this device").
+## Layout
+Flush panel, two panes:
+- **Section nav** (200 px, right hairline, padding 16 8): four nav items with an icon:
+  « Profil » (`user`), « Préférences » (`sliders-horizontal`), « Données » (`database`),
+  « À propos » (`info`). Selected item per the nav recipe.
+- **Section body** (padding 24 40, max width 900, scrolls on its own).
 
-## Notes
-Profil (name/email/password), Données (database location, « Recalculer les soldes » with last-run timestamp — surfaced meanwhile on 05's summary —, export, danger zone) and À propos (version + local-privacy statement) reuse the same grouped-Card pattern; only Préférences was drawn in the original frames.
+### Setting row (the only building block)
+A row with a top hairline, padding 14 0, 24 px gap:
+- left, 300 px: name 13/500 over a description 12 `textTertiary`;
+- right, flexible: the control(s), stacked 8 px apart, left-aligned.
 
-## Amendment — IA locale (tab Données)
-Normative reference: frames `09-Paramètres — IA locale, *` in the Gestion & AI mockup canvas. The local-AI configuration lives in the **Données** tab (active in these frames — NOT Préférences), as a grouped Card « IA locale » alongside the tab's other content (database location, recalcul, export, danger zone — these frames draw only the IA card).
+Rows are grouped under a **section title** 16/600 (12 px below it, 28 px above when not
+first). No card, no tinted callout, no coloured border.
 
-**Card anatomy, top to bottom:**
-1. Header row: title « IA locale » 14/700 + sub « Activer la catégorisation par IA » 12 `#97A3B6`; right: 34×20 Toggle (on = iris).
-2. Privacy callout (iris tint `rgba(139,140,249,.08)`, border `rgba(139,140,249,.25)`, lock glyph): « Les descriptions de vos transactions sont envoyées à un modèle qui s'exécute sur cet ordinateur. **Rien ne quitte votre machine.** » This callout is the card's centerpiece — always visible when the card is.
-3. Field row (flex 1.3 / 1): **Adresse du moteur** — monospace field `http://127.0.0.1:11434/v1`, help « Adresse locale uniquement — 127.0.0.1 ou localhost. » (non-local addresses are rejected) · **Modèle** — select, monospace value `gemma3n:e4b`, help « Liste fournie par le moteur — saisie manuelle possible. » When no engine: dashed read-only field « — », help « Aucun modèle — moteur injoignable. »
-4. **Seuil de confiance — 80 %** — Slider (see 00 §Gestion & AI additions): 300 px, track #1E2634, iris gradient fill to 80 %, 16 px thumb. Help: « En dessous de ce seuil, la transaction vous est proposée pour vérification plutôt que classée automatiquement. »
-5. Status row behind a #1A212C divider: connected = 8 px green dot + « Connecté — 3 modèles disponibles » `#4ADE80`; no engine = amber dot + « Aucun moteur détecté à cette adresse. » + underlined iris « En savoir plus ». Right: secondary button « Tester la connexion » (34 px).
+## Profil
+| Group | Row | Right side |
+|---|---|---|
+| Profil | Avatar · « Un monogramme, une pastille de couleur ou une photo. La photo reste sur cet ordinateur. » | The current avatar at 48 px with a 2 px `accent` ring, then the six colour presets as 32 px discs (category slots), then secondary « Choisir une photo » (`image`); with a photo set, ghost « Retirer la photo ». |
+| | Nom d’utilisateur · « Vous pouvez vous connecter avec ce nom ou avec votre e-mail. » | The name + secondary « Modifier » (modal 420 px). |
+| | Adresse e-mail · « Sert uniquement à vous connecter. Bastide n’envoie aucun message. » | The address, `textSecondary`. |
+| Sécurité | Mot de passe · « Modifié le {date}. » | Secondary « Changer le mot de passe » (modal: current, new, confirm). |
+| | Code de récupération · « Permet de réinitialiser votre mot de passe si vous l’oubliez. En générer un nouveau invalide l’ancien. » | Secondary « Générer un nouveau code » (modal asks the password, then shows the code once) + « Dernier code généré le {date} » 12 `textTertiary`. |
+| Session | Se déconnecter · « Vos données restent sur cet ordinateur, protégées par votre mot de passe. » | Secondary « Se déconnecter » (`log-out`). |
 
-**IA locale states**: ③ IA locale, connecté (fr) ④ IA locale, aucun moteur détecté (fr).
+Avatar picking opens the existing square crop modal.
 
-**Rules**: engine address accepts loopback only; the threshold drives the 07 review-queue behavior; disabling the toggle returns 07 to its rules-only rendering with the calm invitation banner. Language/Devise/Formats stay in Préférences, unchanged.
+## Préférences
+| Group | Row | Right side |
+|---|---|---|
+| Affichage | Thème · « Sombre, clair, ou celui de votre système. » | Segmented « Système · Sombre · Clair ». Default « Sombre ». Applies at once. |
+| | Langue · « S’applique immédiatement à toute l’interface. » | Segmented « Français · English ». |
+| | Formats · « Dates et montants suivent la langue choisie. » | Key/value list: Date « 14 mai 2026 · 14/05/2026 »; Montant « −1 234,56 € ». |
+| | Barre latérale · « Réduite, elle ne garde que les icônes. » | Segmented « Étendue · Réduite ». |
+| Argent | Devise · « Choisie à l’inscription et appliquée à tous vos comptes. Elle ne peut pas être modifiée dans cette version. » | Read-only value: `lock` + « EUR, euro (€) ». |
+| | Objectif de taux d’épargne · « Le repère affiché sur le tableau de bord. » | Slider 0–50 %, step 1, value printed (« 20 % »). |
+| | Revenu déclaré · « Sert au taux d’endettement des panneaux Crédits et Simulateur. Sans lui, Bastide prend le revenu médian constaté. » | Amount field 140 px + « par mois »; empty means "not declared". |
 
-## Amendment — Sauvegarde et restauration (tab Données)
-Normative reference: frames `09-Paramètres — Sauvegarde, *` in the Gestion & AI mockup canvas. A second grouped Card in the **Données** tab, directly under « IA locale », same Card pattern (radius 16, `#111620` on `#242E3E`, padding 16/22, title 14/700 + sub 12 `#97A3B6`, right column max 640 px, section nav with « Données » active).
+Two rows change what exists today and need more than a restyle:
+- « Objectif de taux d’épargne » is new. The goal is a fixed 20 % in the frontend today
+  (`savingsRateGoal`). Making it a preference needs a stored per-user value; until that exists
+  the row is left out and the Dashboard keeps 20 %.
+- « Revenu déclaré » exists: it is edited today from the « Déclarer un revenu » dialog of
+  Crédits. This row edits the same value, and the Crédits and Simulateur links open this row.
 
-**Card anatomy, top to bottom:**
-1. Header: « Sauvegarde et restauration » + sub « Exportez toutes vos données dans un fichier que vous pourrez réimporter. »
-2. Export row — inset plate on the field surface `#0A0F15`, border `#1A212C`, radius 14, padding 12/14: 36 px iris-tint tile with the download-to-tray line icon · label « Exporter toutes les données » 13/700 · caption 12 `#97A3B6` « Fichier .bastide — comptes, transactions, catégories, règles, objectifs, crédits, biens, paramètres. » · right: PrimaryButton « Exporter » (34 px, radius 11, iris gradient, ink `#0E1030`). Below the plate, 11.5 `#5A6579` tabular: « Dernière sauvegarde : 11/09/2026 à 14:32 » or « Aucune sauvegarde pour l'instant. »
-3. Privacy callout (iris tint `rgba(139,140,249,.08)` / border `.25`, lock glyph): « Le fichier n'est pas chiffré. Conservez-le en lieu sûr — il contient tout votre historique financier. »
-4. Restore row behind a `#1A212C` divider: « Restaurer une sauvegarde » 13/700 + sub « Remplace toutes les données actuelles. » · right: SecondaryButton « Importer un fichier… » (34 px, upload-from-tray line icon).
+## Données
+| Group | Row | Right side |
+|---|---|---|
+| IA locale | Catégorisation par IA · « Les libellés de vos opérations sont envoyés à un modèle qui s’exécute sur cet ordinateur. Rien ne quitte votre machine. » | Toggle. The rows below are disabled when it is off. |
+| | Moteur · « Adresse locale uniquement : 127.0.0.1 ou localhost. » | One line: address field (Geist Mono, flex 1.3) · model select (Geist Mono, flex 1) · secondary « Tester ». Under it, status text: `check` `positive` « Connecté » + « · 3 modèles disponibles »; or `triangle-alert` `warning` « Aucun moteur détecté à cette adresse. » + link « En savoir plus ». Without an engine the model select is disabled with « Moteur injoignable : aucun modèle à proposer. » |
+| | Seuil de confiance · « En dessous, l’opération vous est proposée pour vérification au lieu d’être classée. » | Slider 320 px, value printed (« 80 % »). |
+| Sauvegarde | Exporter toutes les données · « Un fichier .bastide, non chiffré, avec tout votre historique. Conservez-le en lieu sûr. » | Primary « Exporter » (`download`) + « Dernière sauvegarde le {date} à {heure} » or « Aucune sauvegarde. » |
+| | Restaurer une sauvegarde · « Remplace toutes les données actuelles, après confirmation. » | Secondary « Importer un fichier » (`upload`). |
+| Réinitialisation | Réinitialiser la base de données · « Supprime opérations, comptes, règles, catégories personnalisées, objectifs, abonnements, crédits, biens, placements et simulations de ce profil. Les sauvegardes exportées ne sont pas touchées. » | Danger button « Réinitialiser… » (`trash-2`). |
 
-**States**: ⑤ idle — last-backup line shown. ⑥ export en cours — « Exporter » at 55 % opacity, `cursor:not-allowed`, 13 px spinner (2 px ring, ink-coloured arc) before the label; caption becomes « Préparation de l'archive… ». ⑦ export terminé — bottom-right Toast (green check disc) « Sauvegarde enregistrée — 1 284 transactions, 4 comptes. »; last-backup line updates to the new timestamp. ⑧ confirmation de restauration — Modal 500 px, radius 20, `#19202B`: title « Restaurer cette sauvegarde ? » (Space Grotesk 17/700) · subtitle « Fichier sélectionné : » + file name in monospace · inset summary plate (`#0A0F15`, radius 14, 36 px rows, tabular figures): Exporté le · Version de l'application (monospace) · Comptes · Transactions · Catégories · Règles · Abonnements · Objectifs · Crédits · Biens · Simulations · warning callout (`rgba(255,184,77,.08)` / border `.35`, triangle icon) « Toutes vos données actuelles seront remplacées. Exportez-les d'abord si besoin. » · buttons « Annuler » (secondary) + « Remplacer mes données » (solid `#FF5C6C`, ink `#2A0A0F`, destructive). ⑨ restauration refusée — InlineErrorBanner inside the card, replacing the privacy callout while shown (`rgba(255,92,108,.08)` / border `.32`, circle-i icon): bold red lead « Restauration impossible. » + « Ce fichier provient d'une version plus récente de Bastide. Mettez l'application à jour pour le restaurer. »
+Modals (all 500 px):
+- **Restore confirmation:** title « Restaurer cette sauvegarde ? », the file name in Geist
+  Mono, a key/value list (Exporté le, Version de l’application, then one count per kind of
+  data), a Banner with a `warning` icon « Toutes vos données actuelles seront remplacées.
+  Exportez-les d’abord si besoin. », footer « Annuler » · solid `negative` button « Remplacer
+  mes données ».
+- **Restore refused:** a Banner with a `negative` icon inside the Sauvegarde group, under the
+  restore row: « Restauration impossible. Ce fichier provient d’une version plus récente de
+  Bastide. Mettez l’application à jour pour le restaurer. »
+- **Reset confirmation:** title « Réinitialiser la base de données ? », lead naming the
+  profile, key/value list of live counts, note « Les catégories fournies, vos préférences et le
+  réglage IA sont conservés. », field « Saisissez SUPPRIMER pour confirmer » (Geist Mono),
+  footer « Annuler » · solid `negative` « Tout supprimer », disabled until the field matches.
+- Toasts: « Sauvegarde enregistrée · 1 284 opérations, 4 comptes. » · « Base de données
+  réinitialisée. »
 
-**Rules**: the export button is disabled while an archive is being prepared; a restore always goes through the confirmation modal, and the destructive solid red appears only there — never on the card. The archive schema carries the app version; a file from a newer version is rejected (⑨) before any data is touched. No emoji, line icons only.
+## À propos
+- **Header row** on tomettes (`00` §12, place 5): 1 px `line`, radius 8, padding 20; Plan mark
+  44 px · « Bastide » 16/600 over « Version {version} · {OS} » `textSecondary`.
+- Rows:
 
-## Amendment — Zone de danger / Réinitialiser la base de données (tab Données)
-Normative reference: frames `09-Paramètres — Données, *` in the Gestion & AI mockup canvas (the card is also visible in every Sauvegarde frame). Third and last Card in the **Données** tab, directly under « Sauvegarde et restauration ». Same Card surface `#111620`, radius 16, padding 13/22, but border `rgba(255,92,108,.28)` — the only red-bordered card in the app. Single row: left, title « Zone de danger » 14/700 + pill « IRRÉVERSIBLE » (10/700, letter-spacing 1, red on `rgba(255,92,108,.12)`, radius 5) + sub 12 `#97A3B6` « Réinitialiser la base de données supprime transactions, comptes, règles, catégories personnalisées, objectifs, abonnements, crédits, biens et simulations de ce profil. Les sauvegardes exportées ne sont pas touchées. » · right: outline DangerButton « Réinitialiser… » (34 px, radius 11, border `rgba(255,92,108,.45)`, text `#FF5C6C`, trash line icon; hover fill `rgba(255,92,108,.1)`). No solid red on the card.
+| Row | Right side |
+|---|---|
+| Mises à jour · « Une fois par jour au plus, Bastide demande à GitHub le numéro de la dernière version publiée. Rien d’autre n’est envoyé, et rien n’est installé sans vous. » | Toggle + « Me prévenir d’une nouvelle version »; status text (« Vous utilisez la dernière version. » / `warning` « Bastide {version} est disponible » + secondary « Télécharger » / « GitHub n’a pas pu être joint. »); secondary « Vérifier maintenant ». |
+| Confidentialité · « Ce que Bastide fait de vos données. » | The `settingsAboutPrivacy` sentence, 13 `text`. |
+| Emplacement des données · « Le fichier qui contient tout votre historique. » | The path in Geist Mono `textSecondary` + secondary « Ouvrir le dossier » (`folder-open`). |
+| Licence · « Bastide est un logiciel libre. Son nom et son logo ne sont pas couverts par la licence. » | « GNU Affero General Public License v3.0 » + secondary « Code source » (`external-link`), secondary « Guide d’installation ». |
+| Crédits · « Les composants tiers fournis avec l’application. » | Key/value: Icônes « Lucide, licence ISC »; Police « Geist, licence SIL OFL ». Link « Toutes les licences » (Flutter's licence page). |
 
-**States**: ⑩ confirmation de réinitialisation — Modal 500 px, radius 20, `#19202B`: 38 px red-tint trash tile + title « Réinitialiser la base de données ? » (Space Grotesk 17/700) · lead « Tout le contenu du profil **Camille Dubois** sera supprimé définitivement : » · inset plate (`#0A0F15`, radius 14, 34 px rows, tabular) Comptes · Transactions · Catégories personnalisées · Règles · Abonnements · Objectifs · Crédits · Biens · Simulations, counts live from the DB · note 11.5 `#5A6579` « Les catégories système, vos préférences et le réglage IA sont conservés. Les fichiers de sauvegarde déjà exportés restent intacts. » · red callout (`rgba(255,92,108,.08)` / border `.32`, triangle) « Cette action est irréversible. Exportez une sauvegarde avant de continuer. » · typed confirmation: label « Saisissez SUPPRIMER pour confirmer » + 38 px monospace Input · buttons « Annuler » (secondary) + « Tout supprimer » (solid `#FF5C6C`, ink `#2A0A0F`) **disabled at 45 % opacity until the field equals SUPPRIMER exactly** (frame shows the partially typed state). ⑪ réinitialisation terminée — modal closed, bottom-right Toast (green check disc) « Base de données réinitialisée. Les catégories système ont été restaurées. »; the Données tab stays in place, with the last-backup line unchanged.
+## States
+Each section: populated · loading (row silhouettes). Données: AI on/connected, AI on/no engine,
+AI off, export in progress (button spinner, « Préparation de l’archive… »), restore refused.
+À propos: up to date, update available, offline, check disabled. English for all four.
 
-**Rules**: scope is the current user only (transactions, accounts, rules, custom categories, goals, subscriptions, loans, properties, simulations, plus their derived data — occurrences, allocations, AI suggestions). System categories are re-seeded; profile, preferences and IA-locale settings persist. The action runs in a single transaction; on failure nothing is deleted and an InlineErrorBanner (same pattern as ⑨) appears inside the danger card. Exported `.bastide` files are never touched.
+## Behaviour (kept)
+- The engine address accepts loopback only; anything else is rejected with the helper in
+  `negative`.
+- Export is disabled while an archive is being prepared. Restore always goes through its
+  confirmation. A file from a newer version is refused before anything is touched.
+- Reset covers the current profile only, runs in one transaction, re-seeds the system
+  categories and keeps profile, preferences and AI settings.
+- The update check is opt-in and sends nothing but the version request.
+- The solid `negative` button appears only inside the two destructive confirmations.
+
+## Copy
+Delete `navSettingsSubtitle`. `settingsAiSubtitle`, `settingsAiModelUnavailable`,
+`settingsBackupPrivacy`, `settingsBackupNone` per `00` §14. Remove « IRRÉVERSIBLE » and « Zone
+de danger ». New: theme, sidebar, session, licence and data-location strings above.
+
+## Removed from v1
+Grouped cards per setting, tinted privacy callouts, inset export plate with a tinted tile, the
+red-bordered danger card and its pill, format preview plates, dashed read-only field.

@@ -1,45 +1,102 @@
 # 11 — Objectifs
 
-Everything below is exactly what the mockup frames `11-Objectifs — *` in the Gestion & AI mockup canvas show. Colors, amounts, order, and positions are normative — do not invent. Tokens per `00-shared-design-block.md`.
+Mockup: `#panel=goals`. Ticket #212. Read `00-design-system.md` first.
 
 ## Concept (binding)
-Goals are **virtual envelopes** — on-paper allocations that never modify accounts and never create transactions. A goal is NOT linked to any specific account: no account is shown anywhere on a goal card, in the detail header, or in the allocation modal. The only account-level fact used is the aggregate savings total for the over-allocation banner.
+An objective is a virtual envelope: an on-paper allocation that never modifies an account and
+never creates a transaction. It is linked to no account, and no account is shown on it.
 
-## Nav
-Sidebar entry « Objectifs » / "Goals", last of the Gestion group. Icon: flag/fanion (pole + pennant), 1.5 px stroke (2 px active).
+## Title bar
+Title « Objectifs ». Right: primary « Nouvel objectif » (`plus`).
 
-## Top bar (this panel)
-Title « Objectifs » / "Goals" + descriptor « Mettez de côté, virtuellement, pour ce qui compte » / "Set money aside, virtually, for what matters". Right: primary gradient button « Nouvel objectif » / "New goal", user pill.
+## Layout
+Flush panel, two panes: **list** (flexible, padding 24 32) · **inspector** (440 px, `00` §7).
 
-## Grid state (frames ① fr / ⑤ en)
-Top to bottom:
-1. Reassurance line (12 px `#5A6579`, lock glyph): « Répartition sur le papier : vos comptes ne sont pas modifiés. » / "On-paper allocation: your accounts are not modified."
-2. Info banner (blue `#5AA9FF` on `rgba(90,169,255,.09)`, border `rgba(90,169,255,.3)`, dismiss ×): « Vous avez réparti 24 450,00 € alors que vos comptes d'épargne totalisent 22 100,00 €. » Shown only when over-allocated.
-3. **GoalCard grid** — 2 columns, gap 18. GoalCard: raised Card, radius 16, padding 20/24, hover border `#3A4556`; name (Space Grotesk 16/700) + right pill; value line `saved` (Space Grotesk 24, tabular) « / target » (13 `#97A3B6`) + right percent (14/700); 8 px progress bar, track `#1E2634`, fill `linear-gradient(90deg,#6C6AF0,#8B8CF9)`. **No account line.** Exact cards, this order:
+## Content
 
-| Objectif | Épargné / Cible | % | Pill |
-|---|---|---|---|
-| Fonds d'urgence | 6 400,00 € / 10 000,00 € | 64 % iris | « Sans échéance » gray (`#1E2634`/`#97A3B6`) |
-| Apport immobilier | 12 800,00 € / 30 000,00 € | 43 % iris | « Juin 2028 » gray |
-| Voyage Japon | 4 000,00 € / 4 000,00 € | 100 % **green `#4ADE80`** | green check pill « Objectif atteint · Juin 2026 » (`#4ADE80` on `rgba(74,222,128,.12)`); card gets iris-tint bg + border `rgba(74,222,128,.35)` |
-| Nouvelle cuisine | 1 250,00 € / 8 000,00 € | 16 % iris | « Décembre 2026 » gray |
+### List pane, top to bottom, 16 px apart
+1. **Summary line:** lead « Réservé sur {n} objectifs » 40 px, neutral · « Épargne
+   disponible » 20 px (the total of savings accounts).
+2. **Over-allocation Banner** (only when reserved > available savings): `info` icon · « Vous
+   avez réservé {delta} de plus que le total de vos comptes d’épargne. » · ghost close.
+   Neutral, not a warning.
+3. **Table**, rows 48 px:
 
-4. **Archived-goals link** below the grid (12.5 px 600 `#97A3B6`, hover `#EDF1F7`, archive-box icon): « Afficher les objectifs archivés (2) » / "Show archived goals (2)". Clicking reveals archived goals (dimmed GoalCards) in place; count reflects reality.
+| Column | Content |
+|---|---|
+| Objectif | A 36 × 24 px thumbnail of the banner image (radius 4) when the goal has one, then the name 13/500 |
+| Échéance | « Sans échéance », « Juin 2028 » `textSecondary`; when reached, `check` `positive` « Atteint en avril 2026 » |
+| Avancement | Repère, 30 % of the width; `done` when reached |
+| Réservé | right: saved, then « / target » in `textTertiary` |
+| (percent) | right, 13 `text` |
 
-## Detail state (frame ②, Fonds d'urgence)
-Iris back link « Retour aux objectifs ». Header Card: 96 px progress ring (same recipe as SavingsRateCard: viewBox 0 0 100 100, r 40, stroke 10, track `#1E2634`, iris arc rotate(-90), center text « 64 % » iris Space Grotesk 20) · name + sub « Sans échéance » (no account) · value `6 400,00 €` / `10 000,00 €` · right buttons: secondary **« Archiver »** (archive-box icon, border `#232B38`) then gradient « Nouvelle allocation ». Below: the reassurance lock line, then allocation Card « Historique des allocations », sub « Une seule liste, montants signés — un retrait est une ligne négative. » Table Date 140 / Montant 120 right / Note: 01/05/2026 +300,00 € green « Virement mensuel » · 01/04/2026 +300,00 € green « Virement mensuel » · 12/03/2026 −150,00 € red « Réparation voiture » · 01/03/2026 +300,00 € green « Virement mensuel ». Foot note: « Aucune transaction n'est créée : ces lignes n'existent que sur le papier de l'objectif. »
+   The selected row takes `accentSoft` and fills the inspector. The first goal is selected on
+   arrival.
+4. Link row: `archive` 14 px + « {n} objectifs archivés » 12 `textSecondary`. Clicking lists
+   the archived goals under the table, dimmed, with a `muted` repère.
+5. At the bottom of the pane, a Note: `lock` + « Un objectif réserve une somme sur le papier.
+   Vos comptes ne sont pas modifiés. Les images restent sur cet ordinateur. »
 
-## Allocation modal (frame ③, over detail)
-440 px modal, scrim `rgba(4,6,11,.62)`. Title « Nouvelle allocation », sub « Fonds d'urgence » (goal name only — no account). Fields: Montant (focused) = 300,00 €, help « Un montant négatif retire de l'objectif. » · Date 140 px = 14/05/2026 · Note (optionnelle), placeholder « Ex. Virement mensuel ». Footer: Annuler · Ajouter (gradient). One signed amount field — no separate deposit/withdraw modes.
+### Inspector pane
+1. **Banner**, edge to edge at the top of the pane (it ignores the pane's padding), 190 px
+   tall:
+   - **With an image:** the picture, cover-cropped. A bottom fade from transparent to
+     `rgba(12,14,24,.82)` covers the lower 100 px. Over the fade, bottom-left at 24 px: the
+     goal name 16/600 in `#FFFFFF` over the deadline line 12 `#D9DCE6`; bottom-right: the
+     percent 16/600 `#FFFFFF`. Top-right at 12 px: secondary « Changer » (`image`). These two
+     whites are fixed in both themes because they sit on the image's fade.
+   - **Without an image:** 120 px tall, tomettes on `rail` with a bottom hairline; the name
+     16/600 `text` and deadline 12 `textSecondary` bottom-left; top-right secondary « Ajouter
+     une image » (`image-plus`).
+2. Padded content (18 24 24), 16 px apart:
+   - A row: saved at 28 px · « sur {target} » `textSecondary` · spacer · secondary
+     « Archiver » (`archive`).
+   - Repère (`done` when reached).
+   - Without an image, or when not reached: one 12 `textTertiary` line « {deadline} · reste
+     {remaining} ».
+   - Hairline.
+   - « Allocations » heading; right: secondary « Allouer » (`plus`).
+   - Table without header: date `textSecondary` · note · signed amount (coloured). Newest
+     first; scrolls inside the pane.
 
-## Empty state (frame ④)
-Centered: 64 px iris plate with flag glyph; « Donnez un nom à ce qui compte »; « Un objectif est une enveloppe virtuelle : vous y mettez de côté à votre rythme, sans toucher à vos comptes. »; gradient CTA « Nouvel objectif ».
+### Banner image
+- Picked with the same file picker and square-free crop modal as the avatar, cropped to 44:19.
+- PNG, JPEG or WebP, same size limit and error messages as the avatar.
+- Stored locally with the goal, included in the `.bastide` backup, deleted with the goal or
+  with « Retirer l’image » (in the « Changer » menu).
+- While it loads or if it fails, the no-image banner shows. Never a broken image.
 
-## Archiving (behavior)
-« Archiver » (detail header) archives the goal: it leaves the active grid and the dashboard Objectifs card, keeps its history, and is listed via the archived-goals link. Archived goals can be unarchived from the same view. Reached goals are NOT auto-archived — the user decides.
+### Modals
+- **New / edit goal** (440 px): Nom · Montant cible · Échéance (optional month) · Image
+  (optional, same picker). Footer « Annuler » · « Enregistrer ».
+- **Allocation** (440 px): title « Nouvelle allocation », lead = the goal's name. Montant
+  (helper « Un montant négatif retire de l’objectif. ») · Date · Note (optional). Footer
+  « Annuler » · « Ajouter ». One signed amount field; no deposit/withdraw modes.
 
-## States to show
-① grille (fr) ② détail + allocations (fr) ③ modal nouvelle allocation (fr) ④ vide (fr) ⑤ grille (en).
+## States
+| State | What shows |
+|---|---|
+| Populated, goal with image | As above. |
+| Populated, goal without image | The tomettes banner. |
+| Goal reached | `done` repère, « Atteint en {mois} » in the list and on the banner. Reached goals are not archived automatically. |
+| Over-allocated | The Banner in the list pane. |
+| Archived list open | Archived rows under the table; selecting one shows it in the inspector with « Désarchiver » in place of « Archiver » and no « Allouer ». |
+| Empty | Single pane, empty state: « Aucun objectif » · « Un objectif réserve une somme sur le papier. Vos comptes ne sont pas modifiés. » · primary « Nouvel objectif ». |
+| Loading | Silhouettes of both panes. |
+| English | « Reserved across 4 goals », « Reached in April 2026 ». |
 
-## Notes
-Percent color: iris `#8B8CF9` in progress, green `#4ADE80` at 100 %. Progress > 100 % caps the bar at 100 % but shows the real percent. Allocation amounts follow the money rule (green +, red −, U+2212).
+## Behaviour (kept)
+- Progress above 100 % clamps the repère and prints the real percent.
+- Allocation amounts follow the money rule; a withdrawal is a negative line in the same list.
+- Archiving removes the goal from the active list and from the Dashboard, keeps its history,
+  and can be undone.
+- Objectives are not counted in the net worth.
+
+## Copy
+Delete `navGoalsSubtitle`, `goalHistorySubtitle`. `goalsEmptyTitle`, `goalsEmptyBody` per `00`
+§14. New: « Réservé sur {n} objectifs », « Épargne disponible », « Allouer », « Changer »,
+« Ajouter une image », « Retirer l’image », « reste {remaining} ».
+
+## Removed from v1
+GoalCard grid, the separate detail view with its 96 px ring and back link (the inspector
+replaces it), the tinted reached card, date pills, the blue tinted banner, gradient bars.

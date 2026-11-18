@@ -1,66 +1,117 @@
 # 15 — Synthèse
 
-Everything below is exactly what the mockup frames `15-Synthèse — *` in the Patrimoine mockup canvas show. Colors, amounts, order and positions are normative — do not invent. Tokens per `00-shared-design-block.md`.
+Mockup: `#panel=networth`. Ticket #215 (placements are added by #218). Read
+`00-design-system.md` first.
 
 ## Concept (binding)
-Net worth = accounts + held share of declared properties − outstanding loan principal. It is a **neutral figure even when positive or negative** (exactly like dashboard « Net »), displayed with a leading `−` (U+2212) when negative. Property values are **held flat at their declared value**: the 12-month series only moves through accounts and loans, and the panel says so inline. What is deliberately **not counted** — objectifs, abonnements — is stated in the panel, one quiet line each. The property list lives here.
+Net worth = accounts + declared value of investments + held share of declared properties −
+outstanding loan principal. It is a neutral figure, positive or negative, with a leading `−`
+(U+2212) when negative. Property values are held flat at their declared value; investments
+count for their last declared value. What is deliberately not counted (objectives,
+subscriptions) is said on the panel.
 
-## Nav
-« Synthèse » / **"Net worth"** (`/networth`), last of « Patrimoine ». (EN: the existing « Aperçu » group is already "Overview"; the brief's "Overview" for this item collided, "Net worth" was chosen in review.) Icon: pie — full disc with one separated 90° sector, 1.5 px stroke, 2 px active.
+## Title bar
+Title « Synthèse » (English: « Net worth »). Right: secondary « Nouveau bien » (`plus`).
 
-## Top bar (this panel)
-Title « Synthèse » / "Net worth" + descriptor « Ce que vous possédez, ce que vous devez » / "What you own, what you owe". Right: secondary « Nouveau bien » / "New property", user pill.
+## Layout
+Standard padding. Five blocks, 24 px apart:
+1. **Equation line.** 2. Hairline. 3. Two columns (440 px · flexible, gutter 48):
+« Composition de l’actif » · « Patrimoine net ». 4. Hairline. 5. Two columns (1fr 1fr, gutter
+40): « Biens » · « À savoir ».
 
-## Panel head
-SegmentedControl **Synthèse | Biens (2)** (same recipe as 08 rules), margin-bottom 16; the count follows reality (« Biens (0) » in ④). Absent in ⑤ (nothing to switch between).
+There is no Synthèse | Biens switch: properties are block 5 of the same page.
 
-## Synthèse view (frames ① fr · ⑥ en)
-**Row 1** — grid `1.5fr 1fr 1fr`, gap 18:
-- **Patrimoine net** hero (iris tint): label iris; value **282 670,79 €** Space Grotesk 32 neutral; delta pill 22 px **iris 14 % / iris** (not green: a net-worth move is not income) with up-triangle « +1 477,78 € »; caption « vs avril 2026 · comptes en hausse, capital remboursé — valeur des biens inchangée ».
-- **Actif** 516 800,00 € (Space Grotesk 26) « Comptes 24 300,00 € · Biens 492 500,00 € ».
-- **Passif** 234 129,21 € « 2 crédits · capital restant dû ».
+## Content
 
-**Row 2** — grid `minmax(0,1fr) minmax(0,2fr)` (amended from `1.5fr`: the series needs the width more than the composition's rows), gap 18, fills the middle:
-- **Composition de l'actif** Card: sub « Comptes par type, biens par nature »; HorizontalBars as one 10 px stacked strip (gap 2, radius 5) + legend rows 38 px (10 px hue square · label · percent `#5A6579` · value 600 right): Comptes courants `#5AA9FF` 2,3 % 11 800,00 € · Livret A `#2DD4BF` 2,4 % 12 500,00 € · Résidence principale `#4FD1E8` 81,3 % 420 000,00 € · Locatif (part détenue) `#A3E635` 14,0 % 72 500,00 €. Foot 11 `#5A6579` « Les biens comptent pour la part détenue seulement (Studio Villeurbanne : 72 500,00 € sur 145 000,00 €). » (Amended — a property with an address is named with it in parentheses after its label: « Studio Villeurbanne (8 allée des Tilleuls, 69100 Villeurbanne) : 72 500,00 € sur 145 000,00 € »; without one, the label stands alone.) The 11 800 / 12 500 split of the 24 300,00 € is *mock, à fournir*.
-- **Patrimoine net** Card: sub « Comptes et crédits, mois après mois », range right « juin 2025 → mai 2026 », vertically centred on a 216 px AppSegmented « Tout · 3 ans · 12 mois » (amended — widest range first, so the segments read largest to smallest; default 12 mois; counted back from the series' last month). AreaLine (iris 2 px line, iris 10 % area, 2.5 px ring dots, 4 px on the last month), y grid at the scale's floor / mid / max (amended — the floor sits 12 % of the series' range below its lowest month, so the lowest point never lies on the plot's bottom edge), x labels juin … mai. Months without data are absent (no zero). (Amended — hovering a month rings its point and shows an overlay tooltip with the month, its net worth, and « Montants déclarés » when the month was declared, as on the dashboard's « Évolution de l'épargne ».) (Amended — issue #188: the line takes the shared curve style of `00` §Components — 2.5 px over a 16 % area, a 3 px point dot on each month and the 5 px dot on the last and the hovered one, filled on the shared ring rather than hollow rings; the plot inset 6.5 px. Kept as its own: points on the calendar with gaps left empty, and the dashed declared segments.) Under the chart an **info InlineBanner** (blue `#5AA9FF` 9 % / 30 % border, info glyph, 11.5 `#EDF1F7`): « Les biens sont maintenus à leur valeur déclarée (estimation la plus ancienne : 12/01/2026) : seuls les comptes et les crédits bougent d'un mois à l'autre. Les mois sans donnée sont simplement absents. » The 12 account balances behind the series are *mock, à fournir*; loan balances follow the schedules of 12.
+### 1. Equation line
+A row, bottom-aligned, 28 px apart, read as a sum:
+« Actif » 28 px with « Comptes {x} · Placements {y} · Biens {z} » · the operator `−` 28 px
+`textTertiary` · « Passif » 28 px with « {n} crédits, capital restant dû » · the operator `=` ·
+« Patrimoine net » 40 px with a neutral status text: `trending-up` or `trending-down` +
+« +1 977,78 € depuis avril » (never `positive` or `negative`: a net-worth move is not income).
+Parts that are zero are left out of the Actif caption.
 
-**Row 3** — « VOLONTAIREMENT NON COMPTÉ » Card (padding 16/22), 3 columns, label 12.5/600 + why 11.5 `#97A3B6`:
-Objectifs « Une allocation étiquette de l'argent déjà présent sur un compte — le compter reviendrait à le compter deux fois. » · Abonnements « Un prélèvement récurrent est une dépense à venir, pas une dette due aujourd'hui. »
+### 3a. Composition de l’actif
+Composition bar (`00` §9), then a table without header: category-style label (dot in the
+segment's hue + name, in `text`) · share right `textTertiary` · amount right. Rows by
+descending amount: one per property nature (« Résidence principale », « Locatif, part
+détenue »…), « Placements », and one per account type (« Livret A », « Comptes courants »…).
+Under the table, when a property is held in part, 12 `textTertiary`: « Un bien compte pour la
+part détenue : {label}, {held} sur {full}. »
 
-## ④ aucun bien — synthèse sur les seuls comptes
-Segmented « Biens (0) ». Hero **−209 829,21 €** (neutral, U+2212), same delta pill; Actif 24 300,00 € « Comptes 24 300,00 € · aucun bien déclaré »; composition strip with the two account rows only, plus a dashed plate « Aucun bien déclaré : l'actif ne compte que vos comptes. **Nouveau bien →** »; series recomputed on accounts − loans (same caveat banner); row 3 unchanged.
+### 3b. Patrimoine net
+Heading; after it the shown range 12 `textTertiary` (« juin 2025 – mai 2026 »); right:
+segmented « Tout · 3 ans · 12 mois » (default 12 mois). Line/area chart, one point per month.
+The y scale's floor sits 12 % of the range below the lowest month. A segment that touches a
+declared month is dashed; when the range holds one, a legend under the chart reads « Comptes
+importés » (solid) · « Montants déclarés » (dashed). Hover card: month, net worth, and
+« Montants déclarés » when the month was declared. Bottom-right of the block: link
+« Historique déclaré ».
 
-## Biens view (frame ②)
-Grid 3 columns, gap 18: two **PropertyCards** + a dashed « + Nouveau bien » tile (« Résidence, locatif, terrain ou autre »).
-PropertyCard (padding 18/22, hover iris border): name Space Grotesk 16 · (amended) the address, when there is one, on one line under the name, 12 `#97A3B6`, ellipsized — no line at all without one · nature CategoryChip-style pill (Résidence principale cyan `#4FD1E8` with house glyph · Locatif `#A3E635` with two-building glyph) · ⋯ overflow; **held value** Space Grotesk 24 + caption; then a 12 px key/value list: Quote-part · Prix d'acquisition · Depuis l'acquisition. (The frame's locatif « Loyer annuel · Régime » rows were dropped with the tax feature.)
+### 5a. Biens
+Heading with the count. Table: Bien (name; the address under it in 12 `textTertiary` when
+there is one, row 48 px) · Nature `textSecondary` · Quote-part right `textSecondary` · Valeur
+détenue right. Row menu `ellipsis`: Modifier · Nouvelle estimation · Archiver. Under the
+table: `archive` + « {n} biens archivés » when any. A row opens the property form.
 
-| | Appartement Lyon 3e | Studio Villeurbanne |
-|---|---|---|
-| Held value / caption | 420 000,00 € / « valeur déclarée · estimée le 12/01/2026 » | **72 500,00 €** / « part détenue · sur 145 000,00 € estimés le 05/03/2026 » |
-| Quote-part | 100 % | 50 % (indivision) |
-| Prix d'acquisition | 385 000,00 € · 01/09/2023 | 132 000,00 € · 14/06/2021 |
-| Depuis l'acquisition | 35 000,00 € au-dessus | 6 500,00 € au-dessus (part) |
+### 5b. À savoir
+Heading, then Notes:
+- `chart-line` « Les placements comptent pour leur dernière valeur saisie. Entre deux
+  saisies, la courbe reste plate. »
+- `flag` « Les objectifs réservent de l’argent déjà présent sur un compte. Ils ne sont pas
+  comptés une seconde fois. »
+- `repeat` « Un abonnement est une dépense à venir, pas une dette due aujourd’hui. »
+- `info` « Les biens sont maintenus à leur valeur déclarée (estimation la plus ancienne :
+  {date}) et ne comptent qu’à partir de leur date d’acquisition, les crédits qu’à partir de
+  leur déblocage. Les mois sans donnée sont absents. »
 
-Overflow menu (drawn open on the studio): Modifier · Nouvelle estimation · **Archiver**. (The frame's amber sub-line about the IFI base and the « Ces biens dans votre estimation d'impôt » card below the grid were dropped with the tax feature.)
-Below the grid: foot link (archive-box icon) « Afficher les biens archivés (0) ».
-(Amended — the address also follows a property into the loan form of 12: in the « Bien financé » select's open menu, each option carries its address as a second line, 12 `#97A3B6`, only when it has one; the closed field states the label alone.)
+## Modals
+- **Property form** (620 px): « Nouveau bien » / « Modifier le bien ». Two columns: Libellé ·
+  Nature (select) · Adresse (optional, full width, ≤ 255 characters) · Valeur déclarée · Date
+  d’estimation · Quote-part détenue (the label carries « part : {amount} » live) · Prix
+  d’acquisition · Date d’acquisition. Footer « Annuler » · « Enregistrer ».
+- **Nouvelle estimation** (420 px): lead « {label} : {value} estimés le {date}. La nouvelle
+  estimation remplace celle-ci. » Valeur · Date.
+- **Historique déclaré** (560 px): lead « Le total de tous vos comptes à la fin d’un mois,
+  pour la période avant vos imports. Un mois couvert par vos imports garde le chiffre
+  importé. » One row: Mois (« MM/AAAA ») · Total des comptes · primary « Enregistrer ». Then
+  the list, newest first, rows 48 px: month · neutral text « Couvert par vos imports » when the
+  ledger has it · amount · icon buttons edit and delete. Footer « Fermer ».
 
-## Modal nouveau bien (frame ③, over the list)
-620 px Modal: « Nouveau bien », sub « La valeur déclarée entre dans la synthèse. » Grid 2 columns: Libellé « Studio Villeurbanne » · Nature (Select « Locatif ») · Valeur déclarée 145 000,00 € · Date d'estimation 05/03/2026 · Quote-part détenue 50 % (label carries « part : 72 500,00 € » live) · Prix d'acquisition · date (132 000,00 € | 14/06/2021, paired fields). (Amended — an optional « Adresse » / "Address" text field spans both columns between the Libellé · Nature row and the Valeur déclarée · Date row, empty by default (« 8 allée des Tilleuls, 69100 Villeurbanne » in the example); trimmed on save, at most 255 characters, and emptying it on « Modifier » removes the address.) Footer « Annuler » · gradient « Ajouter le bien ». (The frame's « Location » block — rent, régime, deductible charges — was dropped with the tax feature.)
+## States
+| State | What shows |
+|---|---|
+| Populated | As above. |
+| No property | Actif caption without « Biens »; composition without property rows; block 5a shows the note « Aucun bien déclaré : l’actif ne compte que vos comptes et vos placements. » + link « Nouveau bien ». Net worth may be negative: `−209 829,21 €`, neutral. |
+| No investment | « Placements » absent from caption, composition and notes. |
+| Empty (no account, property, loan or investment) | Empty state: « Aucun compte, bien ou crédit » · « Importez un compte ou déclarez un bien. La synthèse additionne vos avoirs et soustrait vos crédits. » · primary « Nouveau bien », secondary « Aller aux imports ». |
+| Loading | Silhouette of the blocks. |
+| English | « Assets », « Liabilities », « Net worth ». |
 
-## Empty state (frame ⑤)
-No segmented control. Centered EmptyState: 64 px iris plate with pie glyph; « Rien à additionner pour l'instant »; « Importez un compte ou déclarez un bien : la synthèse additionne ce que vous possédez et soustrait vos crédits, sans rien inventer entre les deux. »; secondary « Importer un fichier » + gradient « Nouveau bien ».
+## Behaviour (kept)
+- Delta = this month's net worth minus last month's.
+- A month's point = account balances at month end + investments at their last declared value
+  on that date + held property shares − loan balances after that month's instalments. A month
+  with no account snapshot is skipped, not zeroed.
+- Declared history stands in for account balances before the first import; the ledger always
+  wins on a month it covers, and the two are never added. Only an ended month can be declared.
+- A property counts from its acquisition month (all along when it has no date); a loan from
+  the month before its first instalment.
+- Over 12 months the x labels thin to at most 12, labelled « janv. 24 ».
+- Archiving a property keeps its history and removes it from the assets from that date;
+  archived properties can be restored.
+- « Nouvelle estimation » appends a dated value; the latest is shown; the note names the
+  oldest current estimate.
+- No donut for the composition.
 
-## States to show
-① synthèse (fr) ② liste des biens (fr) ③ modal nouveau bien (fr) ④ aucun bien — synthèse sur les seuls comptes (fr) ⑤ vide (fr) ⑥ synthèse (en).
+## Copy
+Delete `navNetworthSubtitle`, `networthCompositionSubtitle`, `networthSeriesSubtitle`.
+`networthEmptyTitle`, `networthEmptyBody`, `networthExclusionGoalsBody`,
+`networthCompositionInviteAction` per `00` §14. « VOLONTAIREMENT NON COMPTÉ » → « À savoir ».
+`networthDeltaCaption` → « {delta} depuis {month} ». `networthSeriesCaveat`: drop
+« simplement ».
 
-## Notes
-- Delta = this month's net minus last month's; pill is iris in both directions (triangle rotated 180° when negative), never green/red.
-- Series point for a month = account balances at month end + flat property held shares − loan balances after that month's instalments; a month with no account snapshot is skipped, not zeroed.
-- **Declared history** (amendment, 2026-10): for months before the first import, the user can declare the month-end total of all accounts; it stands in for the account balances in that month's point. The ledger always wins on a month it covers, and the two are never added. A segment touching a declared month is drawn **dashed** (5 on / 4 off, the `DashedBorder` rhythm, same iris line — 2.5 px since #188); when the shown range holds one, a legend under the chart reads « — Comptes importés · - - Montants déclarés ». An iris text link « Historique déclaré » sits bottom-right of the card on every state, empty series included.
-- **« Historique déclaré » modal** (560 px): sub « Le total de tous vos comptes à la fin d'un mois, pour la période avant vos imports. Un mois couvert par vos imports garde le chiffre importé. »; one row Mois (130 px, « MM/AAAA ») · Total des comptes (MoneyField, negative allowed) · gradient « Enregistrer » (adds or replaces the month); then the list newest first, 48 px rows: month « mars 2025 », neutral chip « Couvert par vos imports » when the ledger has that month, neutral amount, edit and delete icon buttons. Only an ended month can be declared. Footer: « Fermer ».
-- **What existed that month** (amendment, 2026-10): a property counts in a series point only from its acquisition month (`acquired_on`; one without that date counts all along), and a loan only from the month before its first instalment, when it is paid out. Otherwise the down payment is counted twice before the purchase: as cash still in the accounts and inside property − loan. The caveat banner now reads « Les biens sont maintenus à leur valeur déclarée (estimation la plus ancienne : {date}) et ne comptent qu'à partir de leur date d'acquisition, les crédits qu'à partir de leur déblocage. Les mois sans donnée sont simplement absents. »
-- Over 12 months, x labels stop sitting under each point: up to 12 evenly spaced months, labelled « janv. 24 ».
-- Archiving keeps the property's history and removes it from actif as of the archive date. Archived properties are listed via the foot link and can be unarchived.
-- « Nouvelle estimation » appends a dated value; « estimée le … » always shows the latest; the caveat banner names the **oldest** current estimate across properties.
-- Rejected: a Donut for composition (four slices where two are ~2 % reads as an error), and any back-dated property valuation in the series.
+## Removed from v1
+The Synthèse | Biens segmented control and the PropertyCard grid, tinted « Patrimoine net »
+hero, iris delta pill, Actif and Passif cards, the uppercase « non compté » card, the dashed
+« Nouveau bien » tile, the caveat banner (now a note).

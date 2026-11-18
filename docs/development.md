@@ -172,7 +172,7 @@ safe:
 
 ## 6. Design references
 
-The binding visual spec is [`docs/design/00-shared-design-block.md`](design/00-shared-design-block.md)
-plus one file per panel. Once a panel ships, **the Flutter code is the source of truth for its
-tokens and behaviour**, and the amendment paragraphs in those files record why the build
-diverged from what was drawn (`docs/design/01-tool-wrappers.md`).
+The binding visual spec is [`docs/design/00-design-system.md`](design/00-design-system.md)
+plus one file per panel, listed in [`docs/design/01-index.md`](design/01-index.md). The specs
+are followed to the letter: a value or a layout changes in the spec first, then in the code.
+The mockup they describe is `docs/design/proposal_v5/index.html`.

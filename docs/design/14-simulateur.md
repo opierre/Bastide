@@ -1,80 +1,103 @@
 # 14 — Simulateur
 
-Everything below is exactly what the mockup frames `14-Simulateur — *` in the Patrimoine mockup canvas show. Colors, amounts, order and positions are normative — do not invent. Tokens per `00-shared-design-block.md`.
+Mockup: `#panel=simulator`. Ticket #214. Read `00-design-system.md` first.
 
 ## Concept (binding)
-Inputs and result stay **on screen together** and the result recomputes on every keystroke. The HCSF block is a **reading**: ratio against 35 %, duration against 25 ans, and the borrowing capacity at the reference — stated with their reference points, in the warning tone when above, **never a refusal and never a lecture**. A small capacity is explained by its cause (the existing loans), calmly. All money and rates are neutral figures.
+Inputs and result stay on screen together and the result recomputes on every keystroke. The
+HCSF block is a reading (ratio against 35 %, duration against 25 years, borrowing capacity at
+the reference), stated with its reference points, in the `warning` tone when above: never a
+refusal and never a lecture. A small capacity is explained by its cause. All money and rates
+are neutral figures.
 
-## Nav
-« Simulateur » / "Simulator" (`/simulations`), third in « Patrimoine ». Icon: calculator — rounded rect, display bar, 3×2 key dots, 1.5 px stroke, 2 px active.
+## Title bar
+Title « Simulateur ». Right: secondary « Enregistrer le scénario » (`bookmark`).
 
-## Top bar (this panel)
-Title « Simulateur » / "Simulator" + descriptor « Ce qu'un nouveau crédit changerait » / "What a new loan would change". Right: secondary « Enregistrer le scénario » / "Save scenario", user pill.
+## Layout
+Flush panel, two panes: **inputs** (380 px, right hairline, padding 24) · **reading**
+(flexible, padding 24 32). The comparison replaces the reading pane.
 
-## Layout (all states)
-Grid `400px minmax(0,1fr)`, gap 18, row capped to content height. Left column: form Card then scenarios Card (fills the rest). Right column: result row, HCSF card, projection chart — or the comparison table (③). Chosen over form-above/result-below: at 900 px a stacked layout pushes either the chart or the scenarios out of view while typing.
+## Inputs pane, top to bottom, 14 px apart
+1. « Nouveau crédit » 13/600.
+2. Two-column field grid (gap 12), amounts right-aligned: Prix du bien · Apport · Frais ·
+   Montant emprunté (helper « calculé : prix − apport + frais »; still editable, and editing it
+   stops the calculation until price or down payment change) · Taux nominal · Assurance par
+   mois.
+3. « Durée » with its value on the same line (« 25 ans · 300 mois »), a slider 60–360 months,
+   step 12, and the end labels « 5 ans » · « 30 ans » 11 `textTertiary`.
+4. Toggle row: « Inclure mes crédits actuels » over « Ajoute {charge} par mois à la lecture »
+   12 `textTertiary`.
+5. Hairline.
+6. « Scénarios enregistrés » 13/600; right: secondary « Comparer ({n}/3) », disabled at 0.
+7. Scenario rows: checkbox · name over « taux · durée » 12 `textTertiary` · spacer · instalment
+   `textSecondary` · `ellipsis` on hover (Renommer, Supprimer). The live, unsaved simulation is
+   always first, with « en cours · » before its sub-line.
 
-### Form Card (padding 18/20)
-Title « Nouveau crédit », sub « Le résultat se recalcule à chaque saisie ». FormField grid 2 columns (gap 12/14), amounts right-aligned tabular: Prix du bien **320 000,00 €** (focused) · Apport 40 000,00 € · Frais 4 500,00 € · Montant emprunté 284 500,00 € with a 16 px gray pill « DÉRIVÉ » (= prix − apport + frais, still editable; editing it stops the derivation until prix/apport change again) · Taux nominal 3,25 % · Assurance / mois 32,00 €.
-**Durée Slider**: label « Durée » ⟷ value « 300 mois · 25 ans » 13/700; 5 px track `#1E2634`, iris gradient fill, 16 px `#EDF1F7` thumb (shared Slider); range 60–360 mois (labels « 5 ans » / « 30 ans »), step 12.
-**Toggle** « Inclure mes crédits actuels » + sub « Ajoute 1 506,25 € / mois à la lecture » — off in ①, on in ② (iris gradient track, knob `#EDF1F7` right).
+## Reading pane, top to bottom, 22 px apart
+1. **Summary line:** lead « Échéance mensuelle » 40 px with « {payment} de mensualité +
+   {insurance} d’assurance · {n} échéances » · « Coût total » 20 px with « intérêts {x} ·
+   assurance {y} · frais {z} » · « TAEG indicatif » 20 px with « taux, assurance et frais ».
+2. Hairline.
+3. **Lecture HCSF:** heading row: « Lecture HCSF » 13/600 · when above the reference, a
+   `warning` status text « Au-dessus du repère » · spacer · 12 `textTertiary` « Lecture
+   indicative, qui n’engage aucun prêteur. » Then three equal columns (gap 40):
+   - « Taux d’endettement » with the ratio at 20 px on the right; repère 0–70 %, mark at 35 %
+     « repère 35 % », `over` above it; caption « {instalment} sur un revenu {déclaré | médian
+     constaté} de {income} ». With current loans included the caption reads « {total}
+     ({instalment} + crédits actuels {charge}) sur… ».
+   - « Durée » with « 25 ans » at 20 px; repère 0–30 years, mark at 25 years « repère 25 ans »;
+     caption « Au repère, pas au-delà » or « Sous le repère » or, above, « Au-delà du repère ».
+   - « Capacité d’emprunt au repère » over the amount at 20 px; caption « {available}
+     d’échéance disponibles sous 35 %, à ces conditions ». When current loans shrink it: « Vos
+     crédits actuels laissent {available} d’échéance sous 35 %. C’est ce qui limite la
+     capacité, pas le bien visé. »
+4. Hairline.
+5. **Projection annuelle:** heading; legend « Capital » (`accent`) · « Intérêts »
+   (`textTertiary`) on the heading line. Stacked bars, one per year, labels every 4 years and
+   on the last. Hover card: the year, « Capital : {x} », « Intérêts : {y} ».
 
-### Scenarios Card
-Title « Scénarios enregistrés » ⟷ outline button « Comparer (n/3) » (gray `#232B38`/`#97A3B6` at 0, iris 45 % border/iris text once ≥ 1 checked). Rows 46 px (`#1A212C` dividers): 18 px checkbox (radius 5; checked = iris fill + `#0E1030` check) · name 13/600 (+ iris pill « EN COURS » on the live, unsaved simulation) · sub 11 `#5A6579` « taux · durée · échéance » · ⋯ overflow. Rows drawn: **Lyon 3e — 320 k€** (en cours) « 3,25 % · 25 ans · 1 418,41 € » · Villeurbanne — 265 k€ « 3,25 % · 25 ans · 1 115,45 € » · Lyon 7e — 350 k€ « 3,40 % · 20 ans · 1 845,70 € » · Lyon 8e — 290 k€ « 3,30 % · 25 ans · 1 274,40 € ». The three saved scenarios' inputs are *mock, à fournir*.
+## Comparison (replaces the reading pane)
+Heading « Comparaison de {n} scénarios »; right: ghost « Fermer la comparaison » (`x`).
+Table: first column the row label (190 px, `textSecondary`), then one right-aligned column per
+scenario, headed by its name (« en cours » in `textTertiary` under the live one). Rows, in
+order: Prix du bien · Apport · Frais · Montant emprunté · Taux nominal · Durée · Assurance par
+mois · **Échéance mensuelle** · Intérêts totaux · Assurance totale · **Coût total** · Coût /
+prix · TAEG indicatif · Taux d’endettement · Avec crédits actuels. The two bold rows are
+13/600; a `lineStrong` hairline precedes « Échéance mensuelle » and « Taux d’endettement ». A
+dash where a value does not apply. Under the table, a Note: « Taux d’endettement sur un revenu
+{source} de {income} · repère HCSF 35 %. Lecture indicative, qui n’engage aucun prêteur. »
 
-### Result row — grid `1.25fr 1fr 1fr`, gap 14
-- **Échéance mensuelle** (iris-tint hero): **1 418,41 €** Space Grotesk 32; caption « 1 386,41 € de mensualité + 32,00 € d'assurance · 300 échéances » — payment and insurance are named separately.
-- **Coût total**: 145 523,00 € (Space Grotesk 24); « intérêts 131 423,00 € + assurance 9 600,00 € + frais 4 500,00 € · 45,5 % du prix ».
-- **TAEG** + iris pill « INDICATIF »: 3,67 %; « taux, assurance et frais inclus ».
+In the inputs pane, a fourth scenario's checkbox is disabled, with the note « Trois scénarios
+au plus. Décochez-en un pour ajouter {name}. »
 
-### HCSF Card (padding 16/22)
-Header: « Lecture HCSF » 14/700 · (StatusPill amber « Au-dessus du repère » when over) · right 11 `#5A6579` info glyph « Informative — ne lie aucun prêteur ». Three columns `1.3fr 1fr 1.3fr`, gap 22:
-- **Taux d'endettement**: value Space Grotesk 22 + « repère 35 % »; 6 px gauge scale 0–70 %, `#EDF1F7` tick at 50 % (= 35 %); caption « 1 418,41 € sur un revenu déclaré de 4 600,00 € ». ①: **30,8 %**, iris fill 44 %.
-- **Durée**: « 25 ans » + « repère 25 ans »; gauge scale 0–30 ans, tick at 83,3 % (= 25 ans), iris fill; caption « au repère, pas au-delà ».
-- **Capacité d'emprunt au repère**: Space Grotesk 22 + caption. ①: **322 928,49 €** « 1 610,00 € d'échéance disponibles sous 35 %, à ces conditions ».
-Capacity rule (decided in review): capacity = available instalment under 35 % × (montant emprunté / échéance totale of the current simulation) — i.e. at the simulation's own rate, duration and insurance ratio. The engine formalises this; the drawn values follow from it.
+## States
+| State | What shows |
+|---|---|
+| Simulation in progress | As above, `accent` repères. |
+| Above the reference, current loans included | Toggle on; ratio repère `over`; status text; capacity caption names the cause. Nothing else turns `warning`. |
+| Comparison of up to 3 | The comparison pane. |
+| Income unknown | Ratio and capacity columns merge into one block: « — » `textTertiary`, « Aucun revenu connu. Sans revenu, ni taux ni capacité ne peuvent être lus. », secondary « Déclarer un revenu ». Duration column unchanged. |
+| Empty, no scenario | Fields show placeholders (« 0,00 € », « — % »), price focused. Summary figures « — » with the caption « Renseignez un prix et un taux pour voir l’échéance. » The chart block shows the note « Renseignez un prix et un taux : la répartition par année s’affiche ici. » The scenarios block shows the note « Aucun scénario enregistré. » and no compare button. |
+| Save dialog | Modal 420 px: Nom, prefilled « {lieu}, {prix} k€ ». « Annuler » · « Enregistrer ». |
+| English | Same geometry. |
 
-### Projection ChartContainer (fills the rest)
-Title « Projection annuelle », sub « Capital remboursé et intérêts versés, année par année », legend « Capital » iris `#8B8CF9` · « Intérêts » cyan `#4FD1E8`. StackedBars: 25 bars (2026 → 2050), capital bottom, interest top, y grid 0 / 8 k€ / 16 k€, x labels every 4 years + last. Yearly, never 300 months. (Amended — issue #188: framed in the shared curve style of `00` §Components — clean ticks from zero on two intervals, the shared 56 px gutter (was 52), gridlines to the card's edge, y labels in the shared 11.5 px `#97A3B6` (were `#5A6579`); hovering a year's slot shows the shared chart card: the year, « Capital : 8 000,00 € », « Intérêts : 3 000,00 € », neutral figures.)
+## Behaviour (kept)
+- Capacity = available instalment under 35 % × (amount borrowed / total instalment of the
+  current simulation), that is at the simulation's own rate, duration and insurance ratio.
+- The ratio repère is 0–70 % (wider than Crédits' 0–60 %) so a reading in the sixties stays
+  inside; above 70 % the fill clamps and the number stays exact.
+- The toggle recomputes the HCSF block only; the summary line never depends on it.
+- « indicatif » is always attached to the TAEG label.
+- The live simulation counts toward the three compared scenarios when checked.
+- Yearly projection only: never 300 monthly bars. Above the reference is never red.
 
-## ② lecture au-dessus du repère, crédits actuels inclus
-Toggle on. HCSF card border `rgba(255,184,77,.35)`, pill « Au-dessus du repère »; ratio **63,6 %** amber fill 90,9 % of the 0–70 % scale, caption « 2 924,66 € (1 418,41 € + crédits actuels 1 506,25 €) sur un revenu déclaré de 4 600,00 € »; capacity **20 809,83 €** with caption « il ne reste que 103,75 € d'échéance sous le repère une fois vos crédits actuels comptés — c'est ce qui rend la capacité si faible, pas le bien visé ». Nothing else turns amber or red; the result row is unchanged.
+## Copy
+Delete `navSimulatorSubtitle`, `simulatorFormSubtitle`, `simulatorCompareSubtitle`,
+`simulatorChartSubtitle`. `simulatorHcsfCaveat` per `00` §14. « DÉRIVÉ » pill → the helper
+« calculé : prix − apport + frais ». « EN COURS » pill → « en cours ». « INDICATIF » pill →
+« TAEG indicatif ». `simulatorCapacityCaptionExisting` → the two-sentence form above.
+`simulatorSaveNamePrefill` separator « — » → « , ».
 
-## ③ comparaison de 3 scénarios
-Scenarios card: Lyon 3e (en cours), Villeurbanne, Lyon 7e checked; Lyon 8e at 50 % opacity with disabled checkbox; button « Comparer (3/3) » iris; note under the list « Trois scénarios au plus, pour rester lisibles côte à côte. Décochez-en un pour ajouter Lyon 8e. » Right column replaced by a **comparison Card**: title « Comparaison de 3 scénarios », sub « Mêmes lignes pour chaque colonne · un tiret quand la donnée ne s'applique pas », secondary « × Fermer la comparaison ». DataTable header 44 px `#151B26` with the three names (« EN COURS » pill on the first); rows 36 px, label 190 px `#97A3B6`, three right-aligned columns; emphasised rows (Échéance mensuelle, Coût total) 700 on an iris 5 % wash; section breaks (`#232B38`) before Échéance and before Taux d'endettement:
-
-| | Lyon 3e — 320 k€ | Villeurbanne — 265 k€ | Lyon 7e — 350 k€ |
-|---|---|---|---|
-| Prix du bien | 320 000,00 € | 265 000,00 € | 350 000,00 € |
-| Apport | 40 000,00 € | 40 000,00 € | 40 000,00 € |
-| Frais | 4 500,00 € | 3 900,00 € | 5 000,00 € |
-| Montant emprunté | 284 500,00 € | 228 900,00 € | 315 000,00 € |
-| Taux nominal | 3,25 % | 3,25 % | 3,40 % |
-| Durée | 300 mois | 300 mois | 240 mois |
-| Assurance / mois | 32,00 € | — | 35,00 € |
-| **Échéance mensuelle** | 1 418,41 € | 1 115,45 € | 1 845,70 € |
-| Intérêts totaux | 131 423,00 € | 105 735,00 € | 119 568,00 € |
-| Assurance totale | 9 600,00 € | — | 8 400,00 € |
-| **Coût total** | 145 523,00 € | 109 635,00 € | 132 968,00 € |
-| Coût / prix | 45,5 % | 41,4 % | 38,0 % |
-| TAEG indicatif | 3,67 % | 3,39 % | 3,86 % |
-| Taux d'endettement | 30,8 % | 24,2 % | 40,1 % |
-| Avec crédits actuels | 63,6 % | 57,0 % | 72,9 % |
-
-Foot 11 `#5A6579`: « Taux d'endettement sur un revenu déclaré de 4 600,00 € · repère HCSF 35 % · lecture informative, ne lie aucun prêteur. » Columns 2–3 are *mock, à fournir*; column 1 is the brief's simulation.
-
-## ④ revenu inconnu — pas de ratio
-HCSF card: ratio and capacity collapse into one 2/3-width block: « — » `#5A6579` + « repère 35 % », text « Aucun revenu connu : le grand livre n'a pas de revenus réguliers et aucun revenu n'est déclaré. Sans revenu, ni taux ni capacité ne peuvent être lus. », outline iris « + Déclarer un revenu ». Durée column unchanged. No gauge is drawn for the ratio.
-
-## ⑤ vide, aucun scénario
-Form with placeholder values (0,00 € / — % in `#5A6579`, prix focused). Result cards show « — » in `#5A6579` with their captions (« Renseignez un prix et un taux pour voir l'échéance et sa part d'assurance. »). HCSF: ratio « — », durée at default 25 ans, capacity 322 928,49 € « — la seule lecture possible avant saisie ». Chart card: centered 12.5 `#5A6579` « Renseignez un prix et un taux : la répartition capital / intérêts par année s'affiche ici. » Scenarios card: mini EmptyState (44 px iris plate, « Aucun scénario enregistré », « Enregistrez une simulation pour la retrouver ici et la comparer à deux autres. »), no compare button.
-
-## States to show
-① simulation en cours (fr) ② lecture au-dessus du repère, crédits actuels inclus (fr) ③ comparaison de 3 scénarios (fr) ④ revenu inconnu — pas de ratio (fr) ⑤ vide, aucun scénario (fr) ⑥ simulation (en).
-
-## Notes
-- « Enregistrer le scénario » names the current inputs (small Modal: Nom, prefilled « Lyon 3e — 320 k€ » pattern « lieu — prix k€ ») and appends a row; the live simulation row « EN COURS » is always first and counts toward the 3-of-3 limit when checked.
-- Ratio gauge scale 0–70 % (wider than Crédits' 0–60 % because 63,6 % must sit inside it); the 35 % tick is therefore at 50 %. Above 70 % the fill clamps, the number stays exact.
-- Toggle on/off recomputes only the HCSF block; the result row never depends on it.
-- The 12 monthly TAEG components (frais amortised over the duration, insurance included) are the engine's; « indicatif » is always attached to the TAEG label.
-- Rejected: a monthly projection (300 bars is noise at 700 px), and a red state for the over-reference reading (a reading is not a verdict).
+## Removed from v1
+Form card and scenarios card, tinted « Échéance mensuelle » hero, result cards, HCSF card with
+the amber border, marker pills, cyan interest bars (interest is `textTertiary` now), comparison
+card with washed rows.
