@@ -1,71 +1,61 @@
-import 'dart:math' as math;
-
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:lucide_icons_flutter/lucide_icons_300.dart';
 
 import '../../features/auth/application/auth_controller.dart';
 import '../../features/auth/application/avatar_picture_controllers.dart';
-import '../../features/settings/application/settings_section_request.dart';
+import '../../features/transactions/application/review_count_provider.dart';
 import '../../l10n/app_localizations.dart';
 import '../navigation/sidebar_controller.dart';
 import '../session/current_user_provider.dart';
 import '../theme/tokens.dart';
+import 'app_popover.dart';
 import 'brand_mark.dart';
+import 'focus_ring.dart';
+import 'tomettes.dart';
 import 'user_avatar.dart';
 
 class NavDestinationSpec {
   const NavDestinationSpec({
     required this.path,
-    required IconData this.icon,
-    required IconData this.selectedIcon,
+    required this.icon,
     required this.label,
-  }) : glyph = null;
-
-  /// A destination whose icon is drawn from the frames' paths rather than
-  /// taken from the icon font — the Patrimoine glyphs have no Material equivalent
-  /// that stays distinct from the existing eight at 18 px.
-  const NavDestinationSpec.drawn({
-    required this.path,
-    required NavGlyph this.glyph,
-    required this.label,
-  }) : icon = null,
-       selectedIcon = null;
+    this.showsReviewCount = false,
+  });
 
   final String path;
-  final IconData? icon;
 
-  /// Filled counterpart of [icon], shown when the destination is active — the
-  /// outline/filled swap carries the selection alongside color, so the active
-  /// item isn't signalled by color alone.
-  final IconData? selectedIcon;
-
-  /// Set instead of [icon]/[selectedIcon] on drawn destinations; it gets the
-  /// same outline/filled swap.
-  final NavGlyph? glyph;
+  /// A Lucide glyph. Selection is carried by the item's ground and weight,
+  /// never by a filled variant (`00` §5).
+  final IconData icon;
   final String label;
+
+  /// Whether the review-queue count sits at the item's right edge.
+  final bool showsReviewCount;
 }
 
 class NavSectionSpec {
   const NavSectionSpec({required this.label, required this.destinations});
 
-  /// `null` renders an unlabelled group (used for the pinned Settings group).
-  final String? label;
+  final String label;
   final List<NavDestinationSpec> destinations;
 }
 
-/// Right-aligned controls a panel contributes to the top bar — a month
-/// selector, a search pill, a primary action.
+/// Right-aligned controls a panel contributes to the title bar — a month
+/// selector, a search field, a primary action.
 ///
 /// The shell resolves these from the current route rather than letting a screen
-/// push into the bar during build: the top bar sits *above* the content in the
-/// tree, so a child cannot fill a parent's slot in the same frame. Each panel's
-/// controls are their own widget and watch whatever providers they need.
+/// push into the bar during build: the title bar sits *above* the content in
+/// the tree, so a child cannot fill a parent's slot in the same frame. Each
+/// panel's controls are their own widget and watch whatever providers they
+/// need.
 typedef TopBarActionsBuilder = List<Widget> Function(BuildContext context);
 
-/// The top bar's title block for a panel that names something more specific
-/// than its section — an account's detail names the account, with a link back
-/// to the list. Resolved from the route, like [TopBarActionsBuilder]; panels
-/// without one show their section's label and descriptor.
+/// The title-bar title of a panel that names something more specific than its
+/// section — an account's detail names the account, with a crumb back to the
+/// list. Resolved from the route, like [TopBarActionsBuilder]; it returns a
+/// [TitleBarTitle]. Panels without one show their section's label.
 typedef TopBarTitleBuilder = Widget Function(BuildContext context);
 
 /// Whether [path] is [destinationPath] or a page beneath it: an account's
@@ -74,9 +64,12 @@ typedef TopBarTitleBuilder = Widget Function(BuildContext context);
 bool isWithinDestination(String path, String destinationPath) =>
     path == destinationPath || path.startsWith('$destinationPath/');
 
-/// The fixed sidebar / top bar shell. Position and behaviour of the chrome are
-/// identical on every panel — feature screens render only into [child] and
-/// reach the bar through [actionsBuilder]. See `docs/design/00` §Layout invariant.
+/// The fixed sidebar and title bar (`docs/design/00-design-system.md` §5).
+///
+/// Position and behaviour of the chrome are identical on every panel: feature
+/// screens render only into [child] and reach the bar through
+/// [actionsBuilder] and [titleBuilder]. `Ctrl+B` collapses and expands the
+/// sidebar from anywhere in the window.
 class AppShell extends ConsumerWidget {
   const AppShell({
     super.key,
@@ -91,10 +84,10 @@ class AppShell extends ConsumerWidget {
   final ValueChanged<String> onNavigate;
   final Widget child;
 
-  /// Contextual controls for the current panel, placed left of the user pill.
+  /// Contextual controls for the current panel, at the title bar's right.
   final TopBarActionsBuilder? actionsBuilder;
 
-  /// Replaces the section's label and descriptor in the top bar.
+  /// Replaces the section's label in the title bar.
   final TopBarTitleBuilder? titleBuilder;
 
   static List<NavSectionSpec> sections(AppLocalizations l10n) => [
@@ -103,21 +96,19 @@ class AppShell extends ConsumerWidget {
       destinations: [
         NavDestinationSpec(
           path: '/dashboard',
-          icon: Icons.space_dashboard_outlined,
-          selectedIcon: Icons.space_dashboard_rounded,
+          icon: LucideIcons300.layoutDashboard,
           label: l10n.navDashboard,
         ),
         NavDestinationSpec(
           path: '/accounts',
-          icon: Icons.account_balance_wallet_outlined,
-          selectedIcon: Icons.account_balance_wallet_rounded,
+          icon: LucideIcons300.wallet,
           label: l10n.navAccounts,
         ),
         NavDestinationSpec(
           path: '/transactions',
-          icon: Icons.swap_vert_outlined,
-          selectedIcon: Icons.swap_vert_rounded,
+          icon: LucideIcons300.arrowLeftRight,
           label: l10n.navTransactions,
+          showsReviewCount: true,
         ),
       ],
     ),
@@ -126,111 +117,110 @@ class AppShell extends ConsumerWidget {
       destinations: [
         NavDestinationSpec(
           path: '/imports',
-          icon: Icons.download_outlined,
-          selectedIcon: Icons.download_rounded,
+          icon: LucideIcons300.download,
           label: l10n.navImports,
         ),
         NavDestinationSpec(
           path: '/categories',
-          icon: Icons.sell_outlined,
-          selectedIcon: Icons.sell_rounded,
+          icon: LucideIcons300.tags,
           label: l10n.navCategories,
         ),
-        // The circular-arrow cycle glyph the nav spec names
-        // (`docs/design/00`). The spec thickens its stroke when active, which
-        // Flutter's icon font cannot do — the iris fill, the filled-icon swap
-        // and the rail carry the selection, exactly as on every other item.
         NavDestinationSpec(
           path: '/subscriptions',
-          icon: Icons.autorenew_outlined,
-          selectedIcon: Icons.autorenew_rounded,
+          icon: LucideIcons300.repeat,
           label: l10n.navSubscriptions,
         ),
-        // Last of the Gestion group, per the nav spec
-        // (`docs/design/00`). The flag glyph the spec names, with the same
-        // outline/filled swap every other item uses to carry selection.
         NavDestinationSpec(
           path: '/goals',
-          icon: Icons.flag_outlined,
-          selectedIcon: Icons.flag_rounded,
+          icon: LucideIcons300.flag,
           label: l10n.navGoals,
         ),
       ],
     ),
-    // « Patrimoine », after Gestion and before the pinned Paramètres
-    // (`docs/design/00` §Patrimoine additions). The 3 + 4 + 3 + 1 stack fits
-    // 900 px at the 40 px pill rhythm, so no token changes with it.
     NavSectionSpec(
       label: l10n.navSectionWealth,
       destinations: [
-        NavDestinationSpec.drawn(
+        NavDestinationSpec(
           path: '/mortgages',
-          glyph: NavGlyph.house,
+          icon: LucideIcons300.house,
           label: l10n.navMortgages,
         ),
-        NavDestinationSpec.drawn(
+        NavDestinationSpec(
+          path: '/investments',
+          icon: LucideIcons300.chartLine,
+          label: l10n.navPlacements,
+        ),
+        NavDestinationSpec(
           path: '/simulations',
-          glyph: NavGlyph.calculator,
+          icon: LucideIcons300.calculator,
           label: l10n.navSimulator,
         ),
-        NavDestinationSpec.drawn(
-          path: '/networth',
-          glyph: NavGlyph.pie,
-          label: l10n.navNetworth,
-        ),
-      ],
-    ),
-    NavSectionSpec(
-      label: null,
-      destinations: [
         NavDestinationSpec(
-          path: '/settings',
-          icon: Icons.tune_outlined,
-          selectedIcon: Icons.tune_rounded,
-          label: l10n.navSettings,
+          path: '/networth',
+          icon: LucideIcons300.chartPie,
+          label: l10n.navNetworth,
         ),
       ],
     ),
   ];
 
+  /// « Paramètres », below the sidebar's empty stretch so the primary items
+  /// keep their vertical position as the app grows.
+  static NavDestinationSpec settings(AppLocalizations l10n) =>
+      NavDestinationSpec(
+        path: '/settings',
+        icon: LucideIcons300.settings,
+        label: l10n.navSettings,
+      );
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context)!;
     final navSections = sections(l10n);
-    final active = navSections
-        .expand((section) => section.destinations)
-        .where(
-          (destination) => isWithinDestination(currentPath, destination.path),
-        )
-        .firstOrNull;
+    final active = [
+      ...navSections.expand((section) => section.destinations),
+      settings(l10n),
+    ].where((d) => isWithinDestination(currentPath, d.path)).firstOrNull;
 
-    return Scaffold(
-      backgroundColor: context.colors.rail,
-      body: Row(
-        children: [
-          _Sidebar(
-            key: const Key('appNavRail'),
-            sections: navSections,
-            currentPath: currentPath,
-            onNavigate: onNavigate,
-          ),
-          Expanded(
-            child: Column(
-              children: [
-                _TopBar(
-                  key: const Key('appTopBar'),
-                  title: active?.label ?? '',
-                  titleOverride: titleBuilder?.call(context),
-                  actions: actionsBuilder?.call(context) ?? const [],
-                  onNavigate: onNavigate,
+    return CallbackShortcuts(
+      bindings: {
+        const SingleActivator(LogicalKeyboardKey.keyB, control: true): () =>
+            ref.read(sidebarCollapsedProvider.notifier).toggle(),
+      },
+      // Holds the window's focus when no control has it, so the shortcut
+      // works before anything was clicked.
+      child: Focus(
+        autofocus: true,
+        child: Scaffold(
+          backgroundColor: context.colors.bg,
+          body: Row(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              _Sidebar(
+                key: const Key('appNavRail'),
+                sections: navSections,
+                settings: settings(l10n),
+                currentPath: currentPath,
+                onNavigate: onNavigate,
+              ),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    _TitleBar(
+                      key: const Key('appTopBar'),
+                      title:
+                          titleBuilder?.call(context) ??
+                          TitleBarTitle(title: active?.label ?? ''),
+                      actions: actionsBuilder?.call(context) ?? const [],
+                    ),
+                    Expanded(child: child),
+                  ],
                 ),
-                Expanded(
-                  child: ColoredBox(color: context.colors.bg, child: child),
-                ),
-              ],
-            ),
+              ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }
@@ -240,159 +230,211 @@ class _Sidebar extends ConsumerWidget {
   const _Sidebar({
     super.key,
     required this.sections,
+    required this.settings,
     required this.currentPath,
     required this.onNavigate,
   });
 
   final List<NavSectionSpec> sections;
+  final NavDestinationSpec settings;
   final String currentPath;
   final ValueChanged<String> onNavigate;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final l10n = AppLocalizations.of(context)!;
     final collapsed = ref.watch(sidebarCollapsedProvider);
+    final colors = context.colors;
 
-    // The last section (Settings) is pinned to the bottom so the primary
-    // destinations keep the same vertical position as the app grows.
-    final primarySections = sections.take(sections.length - 1);
-    final pinnedSection = sections.last;
+    Widget item(NavDestinationSpec destination) => _NavItem(
+      key: Key('nav${destination.path}'),
+      destination: destination,
+      selected: isWithinDestination(currentPath, destination.path),
+      collapsed: collapsed,
+      onTap: () => onNavigate(destination.path),
+    );
 
     return Container(
-      width: collapsed
-          ? AppChrome.sidebarCollapsedWidth
-          : AppChrome.sidebarWidth,
-      color: context.colors.rail,
+      width: collapsed ? AppSizes.sidebarCollapsed : AppSizes.sidebar,
+      padding: const EdgeInsets.fromLTRB(
+        AppSpacing.sm,
+        AppSpacing.smPlus,
+        AppSpacing.sm,
+        AppSpacing.sm,
+      ),
+      decoration: BoxDecoration(
+        color: colors.rail,
+        border: Border(right: BorderSide(color: colors.line)),
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          const SizedBox(height: AppSpacing.lg),
-          _SidebarHeader(collapsed: collapsed),
-          const SizedBox(height: AppSpacing.lg + AppSpacing.xs),
+          _BrandRow(collapsed: collapsed),
           Expanded(
-            child: SingleChildScrollView(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  for (final (index, section) in primarySections.indexed)
-                    ..._sectionChildren(
-                      context,
-                      section,
-                      collapsed,
-                      leadingSeparator: index > 0,
-                    ),
-                ],
-              ),
+            // The groups scroll only when the window is shorter than the
+            // stack; otherwise the empty stretch takes what is left.
+            child: CustomScrollView(
+              slivers: [
+                SliverList.list(
+                  children: [
+                    for (final section in sections) ...[
+                      if (collapsed)
+                        // The group labels become a gap: no width reads
+                        // « Vue d'ensemble » usefully at 56 px.
+                        const SizedBox(height: AppSpacing.sm)
+                      else
+                        _GroupLabel(section.label),
+                      for (final destination in section.destinations)
+                        item(destination),
+                    ],
+                  ],
+                ),
+                const SliverFillRemaining(
+                  hasScrollBody: false,
+                  child: Tomettes(fade: TomettesFade.vertical),
+                ),
+              ],
             ),
           ),
-          if (collapsed)
-            const NavRailSeparator()
-          else
-            Divider(
-              color: context.colors.line,
-              indent: AppSpacing.sidebarGutter,
-              endIndent: AppSpacing.sidebarGutter,
-            ),
-          const SizedBox(height: AppSpacing.sm),
-          ..._sectionChildren(context, pinnedSection, collapsed),
-          _PrivacyBadge(collapsed: collapsed, label: l10n.sidebarPrivacyBadge),
-          const SizedBox(height: AppSpacing.md),
+          item(settings),
+          _SidebarFoot(collapsed: collapsed, onNavigate: onNavigate),
         ],
       ),
     );
   }
-
-  List<Widget> _sectionChildren(
-    BuildContext context,
-    NavSectionSpec section,
-    bool collapsed, {
-    bool leadingSeparator = false,
-  }) => [
-    // With the labels gone, a short hairline is what tells three icon groups
-    // apart on the collapsed rail (`docs/design/00` §Layout invariant).
-    if (collapsed && leadingSeparator) const NavRailSeparator(),
-    // The collapsed rail drops section labels rather than truncating them —
-    // there is no width at which "Vue d'ensemble" reads as anything useful.
-    if (section.label != null && !collapsed)
-      Padding(
-        padding: const EdgeInsets.fromLTRB(
-          AppSpacing.sidebarGutter + AppSpacing.navInset,
-          AppSpacing.sm,
-          AppSpacing.sidebarGutter,
-          AppSpacing.sm,
-        ),
-        child: Text(
-          section.label!.toUpperCase(),
-          style: context.textStyles.sectionLabel,
-        ),
-      ),
-    for (final destination in section.destinations)
-      _NavItem(
-        destination: destination,
-        selected: isWithinDestination(currentPath, destination.path),
-        collapsed: collapsed,
-        onTap: () => onNavigate(destination.path),
-      ),
-    const SizedBox(height: AppSpacing.sm + AppSpacing.xs),
-  ];
 }
 
-class _SidebarHeader extends ConsumerWidget {
-  const _SidebarHeader({required this.collapsed});
+class _BrandRow extends StatelessWidget {
+  const _BrandRow({required this.collapsed});
 
   final bool collapsed;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final l10n = AppLocalizations.of(context)!;
-
-    final toggle = Tooltip(
-      message: collapsed ? l10n.sidebarExpand : l10n.sidebarCollapse,
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          key: const Key('sidebarToggleButton'),
-          onTap: () => ref.read(sidebarCollapsedProvider.notifier).toggle(),
-          borderRadius: BorderRadius.circular(AppRadii.sm),
-          child: SizedBox(
-            width: 26,
-            height: 26,
-            child: Icon(
-              collapsed
-                  ? Icons.keyboard_double_arrow_right_rounded
-                  : Icons.keyboard_double_arrow_left_rounded,
-              size: 16,
-              color: context.colors.textTertiary,
-            ),
-          ),
-        ),
-      ),
-    );
-
-    if (collapsed) {
-      return Column(
-        children: [
-          const BrandMark(size: 30),
-          const SizedBox(height: AppSpacing.sm + AppSpacing.xs),
-          toggle,
-        ],
-      );
-    }
-
+  Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sidebarGutter),
-      child: Row(
-        children: [
-          const Expanded(child: BrandLockup.sidebar()),
-          toggle,
-        ],
+      padding: EdgeInsets.fromLTRB(
+        collapsed ? 0 : AppSpacing.sm,
+        AppSpacing.xs,
+        collapsed ? 0 : AppSpacing.sm,
+        AppSpacing.sidebarBrandBottom,
+      ),
+      child: collapsed
+          ? const Center(child: BrandMark())
+          : const Align(
+              alignment: AlignmentDirectional.centerStart,
+              child: BrandLockup(),
+            ),
+    );
+  }
+}
+
+class _GroupLabel extends StatelessWidget {
+  const _GroupLabel(this.label);
+
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(
+        AppSpacing.sm,
+        AppSpacing.sidebarLabelTop,
+        AppSpacing.sm,
+        AppSpacing.xs,
+      ),
+      child: Text(
+        label,
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+        style: Theme.of(
+          context,
+        ).textTheme.bodySmall?.copyWith(color: context.colors.textTertiary),
       ),
     );
   }
 }
 
-class _NavItem extends StatefulWidget {
+/// A 30 px sidebar row: the shape of a nav item, shared by the destinations
+/// and the user row. Hover and focus change at once (`00` §13); the focus
+/// outline follows the row's radius.
+class _SidebarRow extends StatefulWidget {
+  const _SidebarRow({
+    required this.onTap,
+    required this.selected,
+    required this.collapsed,
+    required this.tooltip,
+    required this.builder,
+    super.key,
+    this.height = AppSizes.navItem,
+  });
+
+  final VoidCallback onTap;
+  final bool selected;
+  final bool collapsed;
+
+  /// Shown on the collapsed sidebar, where the label is gone.
+  final String tooltip;
+  final double height;
+  final Widget Function(BuildContext context, bool hovered) builder;
+
+  @override
+  State<_SidebarRow> createState() => _SidebarRowState();
+}
+
+class _SidebarRowState extends State<_SidebarRow> {
+  bool _hovered = false;
+  bool _focused = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    final highlighted = widget.selected || _hovered;
+
+    Widget row = FocusableActionDetector(
+      mouseCursor: SystemMouseCursors.click,
+      onShowHoverHighlight: (value) => setState(() => _hovered = value),
+      onShowFocusHighlight: (value) => setState(() => _focused = value),
+      actions: {
+        ActivateIntent: CallbackAction<ActivateIntent>(
+          onInvoke: (_) {
+            widget.onTap();
+            return null;
+          },
+        ),
+      },
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: widget.onTap,
+        child: FocusRing(
+          focused: _focused,
+          radius: AppRadii.control,
+          child: Container(
+            height: widget.height,
+            padding: widget.collapsed
+                ? EdgeInsets.zero
+                : const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
+            alignment: widget.collapsed
+                ? Alignment.center
+                : AlignmentDirectional.centerStart,
+            decoration: BoxDecoration(
+              color: highlighted ? colors.hover : Colors.transparent,
+              borderRadius: BorderRadius.circular(AppRadii.control),
+            ),
+            child: widget.builder(context, _hovered),
+          ),
+        ),
+      ),
+    );
+
+    row = Semantics(button: true, selected: widget.selected, child: row);
+    return widget.collapsed
+        ? Tooltip(message: widget.tooltip, child: row)
+        : row;
+  }
+}
+
+class _NavItem extends ConsumerWidget {
   const _NavItem({
+    super.key,
     required this.destination,
     required this.selected,
     required this.collapsed,
@@ -405,508 +447,352 @@ class _NavItem extends StatefulWidget {
   final VoidCallback onTap;
 
   @override
-  State<_NavItem> createState() => _NavItemState();
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
+    final colors = context.colors;
+    final textTheme = Theme.of(context).textTheme;
+    final reviewCount = destination.showsReviewCount
+        ? (ref.watch(reviewCountProvider).value ?? 0)
+        : 0;
+
+    return _SidebarRow(
+      onTap: onTap,
+      selected: selected,
+      collapsed: collapsed,
+      tooltip: destination.label,
+      builder: (context, hovered) {
+        final foreground = selected || hovered
+            ? colors.text
+            : colors.textSecondary;
+        final icon = Icon(
+          destination.icon,
+          size: AppSizes.icon,
+          color: foreground,
+        );
+        if (collapsed) return icon;
+        return Row(
+          children: [
+            icon,
+            const SizedBox(width: AppSpacing.navIconGap),
+            Expanded(
+              child: Text(
+                destination.label,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: (selected ? textTheme.labelLarge : textTheme.bodyMedium)
+                    ?.copyWith(color: foreground),
+              ),
+            ),
+            // Hidden at zero: an empty queue is not news.
+            if (reviewCount > 0)
+              Text(
+                '$reviewCount',
+                key: const Key('sidebarReviewCount'),
+                semanticsLabel: l10n.sidebarReviewCount(reviewCount),
+                style: textTheme.labelSmall?.copyWith(
+                  color: colors.textTertiary,
+                  fontFeatures: const [FontFeature.tabularFigures()],
+                ),
+              ),
+          ],
+        );
+      },
+    );
+  }
 }
 
-class _NavItemState extends State<_NavItem> {
-  bool _hovered = false;
+/// The sidebar foot, above a hairline: the user row that opens the user menu,
+/// then the privacy line (`00` §5).
+class _SidebarFoot extends StatelessWidget {
+  const _SidebarFoot({required this.collapsed, required this.onNavigate});
+
+  final bool collapsed;
+  final ValueChanged<String> onNavigate;
 
   @override
   Widget build(BuildContext context) {
-    final selected = widget.selected;
-    final foreground = selected
-        ? context.colors.accent
-        : (_hovered ? context.colors.text : context.colors.textSecondary);
-
-    final destination = widget.destination;
-    final Widget icon = switch (destination.glyph) {
-      final glyph? => NavGlyphIcon(
-        glyph: glyph,
-        filled: selected,
-        color: foreground,
-      ),
-      null => Icon(
-        selected ? destination.selectedIcon : destination.icon,
-        size: AppChrome.navIconSize,
-        color: foreground,
-      ),
-    };
-
-    // Hover and selection are instant fills — the spec allows no transition on
-    // chrome, and an animated pill pulls the eye to the nav rather than to the
-    // panel that just changed.
-    final pill = Container(
-      height: AppChrome.navItemHeight,
-      padding: widget.collapsed
-          ? EdgeInsets.zero
-          : const EdgeInsets.symmetric(horizontal: AppSpacing.navInset),
-      alignment: widget.collapsed ? Alignment.center : null,
+    return Container(
+      margin: const EdgeInsets.only(top: AppSpacing.sm),
+      padding: const EdgeInsets.only(top: AppSpacing.sm),
       decoration: BoxDecoration(
-        color: selected
-            ? context.colors.accentSoft
-            : (_hovered ? context.colors.hover : Colors.transparent),
-        borderRadius: BorderRadius.circular(AppRadii.navPill),
+        border: Border(top: BorderSide(color: context.colors.line)),
       ),
-      child: widget.collapsed
-          ? icon
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          _UserRow(collapsed: collapsed, onNavigate: onNavigate),
+          _PrivacyLine(collapsed: collapsed),
+        ],
+      ),
+    );
+  }
+}
+
+enum _UserMenuAction { settings, logout }
+
+class _UserRow extends ConsumerStatefulWidget {
+  const _UserRow({required this.collapsed, required this.onNavigate});
+
+  final bool collapsed;
+  final ValueChanged<String> onNavigate;
+
+  @override
+  ConsumerState<_UserRow> createState() => _UserRowState();
+}
+
+class _UserRowState extends ConsumerState<_UserRow> {
+  final _menu = MenuController();
+
+  void _choose(_UserMenuAction action) {
+    switch (action) {
+      case _UserMenuAction.settings:
+        widget.onNavigate('/settings');
+      case _UserMenuAction.logout:
+        // Signing out flips the session to null; the router's auth redirect
+        // then takes the user back to the login screen.
+        ref.read(authControllerProvider.notifier).logout();
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final user = ref.watch(currentUserProvider);
+    if (user == null) return const SizedBox.shrink();
+
+    final colors = context.colors;
+    final avatar = UserAvatar(
+      name: user.displayName,
+      avatar: user.avatar,
+      image: ref.watch(avatarPictureProvider).value?.bytes,
+      size: AppSizes.avatarSmall,
+    );
+
+    return MenuAnchor(
+      controller: _menu,
+      style: AppPopover.menuStyle(context),
+      menuChildren: [
+        AppMenuItem(
+          key: const Key('userMenuSettingsItem'),
+          label: l10n.navSettings,
+          leading: const Icon(LucideIcons300.settings),
+          onPressed: () => _choose(_UserMenuAction.settings),
+        ),
+        AppMenuItem(
+          key: const Key('userMenuLogoutItem'),
+          label: l10n.userMenuLogout,
+          leading: const Icon(LucideIcons300.logOut),
+          onPressed: () => _choose(_UserMenuAction.logout),
+        ),
+      ],
+      child: _SidebarRow(
+        key: const Key('userMenuButton'),
+        onTap: () => _menu.isOpen ? _menu.close() : _menu.open(),
+        selected: false,
+        collapsed: widget.collapsed,
+        tooltip: user.displayName,
+        height: AppSizes.navItem + AppSpacing.xs,
+        builder: (context, hovered) {
+          if (widget.collapsed) return avatar;
+          return Row(
+            children: [
+              avatar,
+              const SizedBox(width: AppSpacing.sm),
+              Expanded(
+                child: Text(
+                  user.displayName,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: Theme.of(
+                    context,
+                  ).textTheme.bodyMedium?.copyWith(color: colors.text),
+                ),
+              ),
+              Icon(
+                LucideIcons300.chevronsUpDown,
+                size: AppSizes.iconSmall,
+                color: colors.textTertiary,
+              ),
+            ],
+          );
+        },
+      ),
+    );
+  }
+}
+
+/// The always-visible promise about where the data lives. It replaced the v1
+/// bottom bar and belongs beside the user, whose data it describes.
+class _PrivacyLine extends StatelessWidget {
+  const _PrivacyLine({required this.collapsed});
+
+  final bool collapsed;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final colors = context.colors;
+    final lock = Icon(
+      LucideIcons300.lock,
+      size: AppSizes.iconSmall,
+      color: colors.textTertiary,
+    );
+
+    return Padding(
+      padding: EdgeInsets.symmetric(
+        horizontal: collapsed ? 0 : AppSpacing.sm,
+        vertical: AppSpacing.xsPlus,
+      ),
+      child: collapsed
+          ? Tooltip(
+              message: l10n.sidebarPrivacyBadge,
+              child: Center(child: lock),
+            )
           : Row(
               children: [
-                icon,
-                const SizedBox(width: AppSpacing.navGap),
-                Expanded(
+                lock,
+                const SizedBox(width: AppSpacing.sm),
+                Flexible(
                   child: Text(
-                    widget.destination.label,
+                    l10n.sidebarPrivacyBadge,
+                    key: const Key('sidebarPrivacyBadge'),
+                    maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                      color: foreground,
-                      fontWeight: selected ? FontWeight.w600 : FontWeight.w400,
-                    ),
+                    style: Theme.of(
+                      context,
+                    ).textTheme.bodySmall?.copyWith(color: colors.textTertiary),
                   ),
                 ),
               ],
             ),
     );
-
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 1),
-      child: Row(
-        children: [
-          // Flush-left accent rail: reads as "you are here" even at a glance
-          // across the whole sidebar height, and survives the collapse.
-          SizedBox(
-            width: AppChrome.navRailWidth,
-            height: AppChrome.navRailHeight,
-            child: selected
-                ? DecoratedBox(
-                    decoration: BoxDecoration(
-                      color: context.colors.accent,
-                      borderRadius: BorderRadius.horizontal(
-                        right: Radius.circular(AppRadii.pill),
-                      ),
-                    ),
-                  )
-                : null,
-          ),
-          Expanded(
-            child: Padding(
-              padding: const EdgeInsets.only(
-                left: AppSpacing.sidebarGutter - AppChrome.navRailWidth,
-                right: AppSpacing.sidebarGutter,
-              ),
-              child: Material(
-                color: Colors.transparent,
-                child: InkWell(
-                  onTap: widget.onTap,
-                  onHover: (hovered) => setState(() => _hovered = hovered),
-                  borderRadius: BorderRadius.circular(AppRadii.navPill),
-                  child: widget.collapsed
-                      ? Tooltip(message: widget.destination.label, child: pill)
-                      : pill,
-                ),
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
   }
 }
 
-/// The 28 px `#1A212C` hairline that separates icon groups on the collapsed
-/// rail, and sits before the pinned Paramètres there. It takes the expanded
-/// divider's height so collapsing never shifts an item vertically.
-class NavRailSeparator extends StatelessWidget {
-  const NavRailSeparator({super.key});
+/// A link back to the parent of the page a title names: « Comptes / ».
+class TitleBarCrumb {
+  const TitleBarCrumb({required this.label, required this.onTap});
 
-  static const width = 28.0;
-
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      height: DividerTheme.of(context).space ?? 16,
-      child: Center(
-        child: SizedBox(
-          width: width,
-          height: 1,
-          child: ColoredBox(color: context.colors.line),
-        ),
-      ),
-    );
-  }
-}
-
-/// The drawn nav glyphs of the « Patrimoine » group.
-enum NavGlyph { house, calculator, pie }
-
-/// An 18 px line glyph on the frames' 18-unit grid: 1.5 px stroke with round
-/// caps, and a filled silhouette of the same glyph when [filled] — the same
-/// outline/filled swap the icon-font items make when active.
-class NavGlyphIcon extends StatelessWidget {
-  const NavGlyphIcon({
-    super.key,
-    required this.glyph,
-    required this.filled,
-    required this.color,
-  });
-
-  final NavGlyph glyph;
-  final bool filled;
-  final Color color;
-
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox.square(
-      dimension: AppChrome.navIconSize,
-      child: CustomPaint(
-        painter: _NavGlyphPainter(glyph: glyph, filled: filled, color: color),
-      ),
-    );
-  }
-}
-
-class _NavGlyphPainter extends CustomPainter {
-  const _NavGlyphPainter({
-    required this.glyph,
-    required this.filled,
-    required this.color,
-  });
-
-  final NavGlyph glyph;
-  final bool filled;
-  final Color color;
-
-  static const _viewBox = 18.0;
-  static const _strokeWidth = 1.5;
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    canvas.scale(size.width / _viewBox);
-
-    final stroke = Paint()
-      ..color = color
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = _strokeWidth
-      ..strokeCap = StrokeCap.round
-      ..strokeJoin = StrokeJoin.round;
-    final fill = Paint()
-      ..color = color
-      ..style = PaintingStyle.fill;
-
-    // A filled glyph is its outline stroked *and* filled, so the silhouette
-    // keeps the outline's extent; details (door, display, keys) are then
-    // punched back out so the shape still reads as the same object.
-    void shape(Path path) {
-      if (filled) canvas.drawPath(path, fill);
-      canvas.drawPath(path, stroke);
-    }
-
-    final clear = Paint()..blendMode = BlendMode.clear;
-    canvas.saveLayer(Offset.zero & const Size.square(_viewBox), Paint());
-
-    switch (glyph) {
-      case NavGlyph.house:
-        // `M3 8.2L9 3l6 5.2V15H3zM7.2 15v-4.2h3.6V15` (`12-credits.md` §Nav).
-        shape(
-          Path()
-            ..moveTo(3, 8.2)
-            ..lineTo(9, 3)
-            ..lineTo(15, 8.2)
-            ..lineTo(15, 15)
-            ..lineTo(3, 15)
-            ..close(),
-        );
-        final door = Path()
-          ..moveTo(7.2, 15)
-          ..lineTo(7.2, 10.8)
-          ..lineTo(10.8, 10.8)
-          ..lineTo(10.8, 15);
-        if (filled) {
-          canvas.drawRect(const Rect.fromLTRB(7.2, 10.8, 10.8, 16), clear);
-        } else {
-          canvas.drawPath(door, stroke);
-        }
-      case NavGlyph.calculator:
-        // Rounded rect, display bar, 3 × 2 key dots (`14-simulateur.md` §Nav).
-        shape(
-          Path()..addRRect(
-            RRect.fromLTRBR(3.5, 2.25, 14.5, 15.75, const Radius.circular(2)),
-          ),
-        );
-        final keyPaint = filled ? clear : fill;
-        final displayPaint = filled
-            ? (Paint()
-                ..blendMode = BlendMode.clear
-                ..style = PaintingStyle.stroke
-                ..strokeWidth = _strokeWidth
-                ..strokeCap = StrokeCap.round)
-            : stroke;
-        canvas.drawLine(
-          const Offset(6.25, 5.5),
-          const Offset(11.75, 5.5),
-          displayPaint,
-        );
-        for (final y in const [9.25, 12.75]) {
-          for (final x in const [6.25, 9.0, 11.75]) {
-            canvas.drawCircle(Offset(x, y), 0.9, keyPaint);
-          }
-        }
-      case NavGlyph.pie:
-        // A full disc with one 90° sector pulled out along its bisector
-        // (`15-synthese.md` §Nav).
-        const radius = 5.8;
-        const body = Offset(8.2, 9.8);
-        const sector = Offset(9.8, 8.2);
-        shape(
-          Path()
-            ..moveTo(body.dx, body.dy)
-            ..arcTo(
-              Rect.fromCircle(center: body, radius: radius),
-              0,
-              1.5 * math.pi,
-              false,
-            )
-            ..close(),
-        );
-        shape(
-          Path()
-            ..moveTo(sector.dx, sector.dy)
-            ..arcTo(
-              Rect.fromCircle(center: sector, radius: radius),
-              -math.pi / 2,
-              math.pi / 2,
-              false,
-            )
-            ..close(),
-        );
-    }
-
-    canvas.restore();
-  }
-
-  @override
-  bool shouldRepaint(_NavGlyphPainter oldDelegate) =>
-      oldDelegate.glyph != glyph ||
-      oldDelegate.filled != filled ||
-      oldDelegate.color != color;
-}
-
-/// The always-visible reassurance at the sidebar foot. It replaces the old
-/// bottom bar: the promise is about where the data lives, so it belongs beside
-/// the app's identity rather than in a status strip.
-class _PrivacyBadge extends StatelessWidget {
-  const _PrivacyBadge({required this.collapsed, required this.label});
-
-  final bool collapsed;
   final String label;
-
-  @override
-  Widget build(BuildContext context) {
-    final lock = Icon(
-      Icons.lock_outline_rounded,
-      size: 10,
-      color: context.colors.textTertiary,
-    );
-
-    if (collapsed) {
-      return Padding(
-        padding: const EdgeInsets.only(top: AppSpacing.sm),
-        child: Tooltip(
-          message: label,
-          child: Center(child: lock),
-        ),
-      );
-    }
-
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(
-        AppSpacing.sidebarGutter + AppSpacing.navInset,
-        AppSpacing.sm,
-        AppSpacing.sidebarGutter,
-        0,
-      ),
-      child: Row(
-        children: [
-          lock,
-          const SizedBox(width: AppSpacing.xs + 2),
-          Flexible(
-            child: Text(
-              label,
-              key: const Key('sidebarPrivacyBadge'),
-              overflow: TextOverflow.ellipsis,
-              style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                color: context.colors.textTertiary,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
+  final VoidCallback onTap;
 }
 
-class _TopBar extends StatelessWidget {
-  const _TopBar({
-    super.key,
-    required this.title,
-    this.titleOverride,
-    required this.actions,
-    required this.onNavigate,
-  });
+/// The title bar's title: an optional parent [crumb], then the title at
+/// 14/600 (`00` §5). No subtitle and no descriptor, ever.
+class TitleBarTitle extends StatelessWidget {
+  const TitleBarTitle({super.key, required this.title, this.crumb});
 
   final String title;
-
-  /// A panel's own title block, in place of [title].
-  final Widget? titleOverride;
-  final List<Widget> actions;
-  final ValueChanged<String> onNavigate;
+  final TitleBarCrumb? crumb;
 
   @override
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
+    return Row(
+      children: [
+        if (crumb case final crumb?) ...[
+          _CrumbLink(crumb: crumb),
+          const SizedBox(width: AppSpacing.xsPlus),
+        ],
+        Flexible(
+          child: Text(
+            title,
+            key: const Key('titleBarTitle'),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: textTheme.titleMedium,
+          ),
+        ),
+      ],
+    );
+  }
+}
 
+class _CrumbLink extends StatefulWidget {
+  const _CrumbLink({required this.crumb});
+
+  final TitleBarCrumb crumb;
+
+  @override
+  State<_CrumbLink> createState() => _CrumbLinkState();
+}
+
+class _CrumbLinkState extends State<_CrumbLink> {
+  bool _hovered = false;
+  bool _focused = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    final style = Theme.of(
+      context,
+    ).textTheme.bodyMedium?.copyWith(color: colors.textTertiary);
+
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        FocusableActionDetector(
+          mouseCursor: SystemMouseCursors.click,
+          onShowHoverHighlight: (value) => setState(() => _hovered = value),
+          onShowFocusHighlight: (value) => setState(() => _focused = value),
+          actions: {
+            ActivateIntent: CallbackAction<ActivateIntent>(
+              onInvoke: (_) {
+                widget.crumb.onTap();
+                return null;
+              },
+            ),
+          },
+          child: GestureDetector(
+            onTap: widget.crumb.onTap,
+            child: FocusRing(
+              focused: _focused,
+              radius: AppRadii.item,
+              child: Semantics(
+                link: true,
+                child: Text(
+                  widget.crumb.label,
+                  key: const Key('titleBarCrumb'),
+                  style: style?.copyWith(
+                    decoration: _hovered ? TextDecoration.underline : null,
+                    decorationColor: colors.textTertiary,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+        const SizedBox(width: AppSpacing.xsPlus),
+        ExcludeSemantics(child: Text('/', style: style)),
+      ],
+    );
+  }
+}
+
+class _TitleBar extends StatelessWidget {
+  const _TitleBar({super.key, required this.title, required this.actions});
+
+  final Widget title;
+  final List<Widget> actions;
+
+  @override
+  Widget build(BuildContext context) {
     return Container(
-      height: AppChrome.topBarHeight,
-      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.contentX),
+      height: AppSizes.titleBar,
+      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
       decoration: BoxDecoration(
         color: context.colors.bg,
         border: Border(bottom: BorderSide(color: context.colors.line)),
       ),
       child: Row(
         children: [
-          Expanded(
-            child:
-                titleOverride ??
-                Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      title,
-                      style: textTheme.titleLarge,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ],
-                ),
-          ),
-          // Actions size naturally and the title takes what's left: making them
-          // flexible too would have the two split the bar evenly, squeezing
-          // fixed-width controls that have a designed size.
-          for (final action in actions) ...[
-            const SizedBox(width: AppSpacing.sm + AppSpacing.xs),
+          // The controls keep their designed size and the title takes what is
+          // left, ellipsizing first.
+          Expanded(child: title),
+          for (final (index, action) in actions.indexed) ...[
+            SizedBox(width: index == 0 ? AppSpacing.smPlus : AppSpacing.sm),
             action,
           ],
-          const SizedBox(width: AppSpacing.sm + AppSpacing.xs),
-          _UserPill(onNavigate: onNavigate),
-        ],
-      ),
-    );
-  }
-}
-
-enum _UserMenuAction { editProfile, logout }
-
-class _UserPill extends ConsumerWidget {
-  const _UserPill({required this.onNavigate});
-
-  final ValueChanged<String> onNavigate;
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final l10n = AppLocalizations.of(context)!;
-    final user = ref.watch(currentUserProvider);
-    if (user == null) return const SizedBox.shrink();
-
-    final textTheme = Theme.of(context).textTheme;
-
-    // Items carry a non-null value: PopupMenuButton reports a null selection
-    // as a cancel and never calls onSelected.
-    return PopupMenuButton<_UserMenuAction>(
-      key: const Key('userMenuButton'),
-      tooltip: '',
-      position: PopupMenuPosition.under,
-      offset: const Offset(0, AppSpacing.sm),
-      onSelected: (action) {
-        switch (action) {
-          case _UserMenuAction.editProfile:
-            ref
-                .read(settingsSectionRequestProvider.notifier)
-                .request(SettingsSection.profile);
-            onNavigate('/settings');
-          case _UserMenuAction.logout:
-            // Signing out flips the session to null; the router's auth
-            // redirect then takes the user back to the login screen.
-            ref.read(authControllerProvider.notifier).logout();
-        }
-      },
-      itemBuilder: (context) => [
-        _menuItem(
-          context,
-          key: const Key('userMenuEditProfileItem'),
-          value: _UserMenuAction.editProfile,
-          icon: Icons.person_outline_rounded,
-          label: l10n.userMenuEditProfile,
-        ),
-        _menuItem(
-          context,
-          key: const Key('userMenuLogoutItem'),
-          value: _UserMenuAction.logout,
-          icon: Icons.logout_rounded,
-          label: l10n.userMenuLogout,
-        ),
-      ],
-      child: Container(
-        height: AppChrome.userPillHeight,
-        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xs + 2),
-        decoration: BoxDecoration(
-          color: context.colors.bg,
-          borderRadius: BorderRadius.circular(AppRadii.md),
-          border: Border.all(color: context.colors.line),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            UserAvatar(
-              name: user.displayName,
-              avatar: user.avatar,
-              image: ref.watch(avatarPictureProvider).value?.bytes,
-              size: 32,
-            ),
-            const SizedBox(width: AppSpacing.sm),
-            ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 160),
-              child: Text(
-                user.displayName,
-                style: textTheme.labelMedium,
-                overflow: TextOverflow.ellipsis,
-              ),
-            ),
-            const SizedBox(width: AppSpacing.xs),
-            Icon(
-              Icons.expand_more_rounded,
-              size: 16,
-              color: context.colors.textSecondary,
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  PopupMenuItem<_UserMenuAction> _menuItem(
-    BuildContext context, {
-    required Key key,
-    required _UserMenuAction value,
-    required IconData icon,
-    required String label,
-  }) {
-    return PopupMenuItem<_UserMenuAction>(
-      key: key,
-      value: value,
-      child: Row(
-        children: [
-          Icon(icon, size: 16, color: context.colors.textSecondary),
-          const SizedBox(width: AppSpacing.sm),
-          Flexible(child: Text(label, overflow: TextOverflow.ellipsis)),
         ],
       ),
     );

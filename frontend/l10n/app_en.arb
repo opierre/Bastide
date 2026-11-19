@@ -13,15 +13,7 @@
   "@sidebarPrivacyBadge": {
     "description": "Reassurance badge pinned at the foot of the sidebar, beside a lock glyph."
   },
-  "sidebarCollapse": "Collapse menu",
-  "@sidebarCollapse": {
-    "description": "Tooltip on the control that collapses the sidebar to an icon-only rail."
-  },
-  "sidebarExpand": "Expand menu",
-  "@sidebarExpand": {
-    "description": "Tooltip on the control that expands the collapsed sidebar back to full width."
-  },
-  "userMenuEditProfile": "Edit profile",
+  "sidebarReviewCount": "{count, plural, =1{1 transaction to review} other{{count} transactions to review}}",
   "userMenuLogout": "Log out",
   "comingSoonTitle": "Coming soon",
   "comingSoonBody": "This screen arrives in a later step. In the meantime, add your accounts to get set up.",
@@ -37,6 +29,10 @@
   "settingsThemeSaveFailed": "The theme could not be saved. Nothing was changed. Try again.",
   "settingsLanguageTitle": "Language",
   "settingsLanguageNote": "Applies immediately across the whole interface.",
+  "settingsSidebarTitle": "Sidebar",
+  "settingsSidebarNote": "Collapsed, it keeps only the icons.",
+  "settingsSidebarExpanded": "Expanded",
+  "settingsSidebarCollapsed": "Collapsed",
   "settingsCurrencyTitle": "Currency",
   "settingsCurrencyNote": "Chosen when you registered and applied to all your accounts. It cannot be changed in this version.",
   "settingsFormatsTitle": "Format preview",
@@ -847,8 +843,11 @@
   "settingsResetErrorUnknown": "The reset failed. Your data hasn't been changed.",
   "navSectionWealth": "Wealth",
   "navMortgages": "Loans",
+  "navPlacements": "Investments",
   "navSimulator": "Simulator",
   "navNetworth": "Net worth",
+  "placementsEmptyTitle": "No investments",
+  "placementsEmptyMessage": "Follow a PEA, a life insurance policy or another investment from the values on your statements.",
   "mortgagesAdd": "New loan",
   "mortgagesLoadFailed": "Couldn't load your loans.",
   "mortgagesRetry": "Retry",

@@ -16,7 +16,7 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
 # In Windows, build-name is used as the major, minor, and patch parts
 # of the product and file versions while build-number is used as the build suffix.
-version: 0.2.0-dev.5+5
+version: 0.2.0-dev.6+5
 
 environment:
   sdk: ^3.12.0
@@ -56,6 +56,9 @@ dependencies:
   # app (core/backend/windows_job.dart).
   ffi: ^2.2.0
   lucide_icons_flutter: ^4.0.3
+  # Device-local UI preferences that are not the user's data and so do not
+  # belong in the backend: the collapsed sidebar (core/storage/ui_preferences).
+  shared_preferences: ^2.5.6
 
 dev_dependencies:
   flutter_test:

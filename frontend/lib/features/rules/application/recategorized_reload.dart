@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../dashboard/application/dashboard_controller.dart';
+import '../../transactions/application/review_count_provider.dart';
 import '../../transactions/application/transactions_controller.dart';
 
 /// Re-reads every view that shows a category the rules have just rewritten.
@@ -20,6 +21,7 @@ Future<void> reloadRecategorizedViews(Ref ref) async {
   // is reading into a skeleton to restate a category is worse than the stale
   // chip it replaces.
   await ref.read(transactionsControllerProvider.notifier).refreshQuietly();
+  ref.invalidate(reviewCountProvider);
 
   // Invalidated rather than refreshed: the rules live in the categories panel,
   // so the dashboard is usually unmounted here — this costs a request only if

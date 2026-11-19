@@ -8,6 +8,7 @@ import 'package:bastide/core/widgets/category_label.dart';
 import 'package:bastide/core/widgets/primary_button.dart';
 import 'package:bastide/core/widgets/repere_meter.dart';
 import 'package:bastide/core/widgets/state_views.dart';
+import 'package:bastide/features/transactions/application/review_count_provider.dart';
 import 'package:bastide/features/dashboard/application/dashboard_controller.dart';
 import 'package:bastide/features/dashboard/domain/dashboard_summary.dart';
 import 'package:bastide/features/dashboard/domain/dashboard_trends.dart';
@@ -1026,7 +1027,7 @@ void main() {
     },
   );
 
-  testWidgets('the panel renders unchanged under the collapsed 76px nav rail', (
+  testWidgets('the panel renders unchanged under the collapsed 56px sidebar', (
     tester,
   ) async {
     _useDesktopSurface(tester);
@@ -1037,6 +1038,7 @@ void main() {
             () => FakeDashboardController(initialState: _state()),
           ),
           sidebarCollapsedProvider.overrideWith(FakeCollapsedSidebar.new),
+          reviewCountProvider.overrideWith((ref) async => 0),
         ],
         child: MaterialApp(
           locale: const Locale('fr'),
@@ -1054,7 +1056,7 @@ void main() {
     await tester.pumpAndSettle();
 
     // Collapsing the nav is chrome state, not panel state — the same data is drawn, just in
-    // the wider content region the 76px rail leaves behind.
+    // the wider content region the 56px rail leaves behind.
     expect(find.byType(KpiStrip), findsOneWidget);
     expect(find.byType(CategoryDonut), findsOneWidget);
     expect(find.byType(IncomeVsExpenseChart), findsOneWidget);

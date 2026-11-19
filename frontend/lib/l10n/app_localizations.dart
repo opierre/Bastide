@@ -140,43 +140,31 @@ abstract class AppLocalizations {
   /// **'Paramètres'**
   String get navSettings;
 
-  /// Left nav section heading grouping the dashboard, accounts and transactions destinations. Rendered uppercase.
+  /// Sidebar group label, sentence case, over the dashboard, accounts and transactions destinations.
   ///
   /// In fr, this message translates to:
   /// **'Vue d\'ensemble'**
   String get navSectionOverview;
 
-  /// Left nav section heading grouping the imports and categories destinations. Rendered uppercase.
+  /// Sidebar group label, sentence case, over the imports, categories, recurring and goals destinations.
   ///
   /// In fr, this message translates to:
   /// **'Gestion'**
   String get navSectionManage;
 
-  /// Privacy badge pinned at the foot of the sidebar, beside a lock glyph.
+  /// Privacy line at the foot of the sidebar, beside a lock glyph. On the collapsed sidebar it becomes the lock's tooltip.
   ///
   /// In fr, this message translates to:
   /// **'Données locales'**
   String get sidebarPrivacyBadge;
 
-  /// Tooltip on the control that collapses the sidebar to an icon-only rail.
+  /// Accessible label of the review count beside « Transactions » in the sidebar.
   ///
   /// In fr, this message translates to:
-  /// **'Réduire le menu'**
-  String get sidebarCollapse;
+  /// **'{count, plural, =1{1 opération à vérifier} other{{count} opérations à vérifier}}'**
+  String sidebarReviewCount(int count);
 
-  /// Tooltip on the control that expands the collapsed sidebar back to full width.
-  ///
-  /// In fr, this message translates to:
-  /// **'Déployer le menu'**
-  String get sidebarExpand;
-
-  /// Item in the top-bar user menu that opens Settings on the Profile section.
-  ///
-  /// In fr, this message translates to:
-  /// **'Modifier le profil'**
-  String get userMenuEditProfile;
-
-  /// Item in the top-bar user menu that ends the session.
+  /// Item in the sidebar user menu that ends the session.
   ///
   /// In fr, this message translates to:
   /// **'Se déconnecter'**
@@ -259,6 +247,30 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'S\'applique immédiatement à toute l\'interface.'**
   String get settingsLanguageNote;
+
+  /// Title of the sidebar row in settings preferences.
+  ///
+  /// In fr, this message translates to:
+  /// **'Barre latérale'**
+  String get settingsSidebarTitle;
+
+  /// Note under the sidebar segmented control.
+  ///
+  /// In fr, this message translates to:
+  /// **'Réduite, elle ne garde que les icônes.'**
+  String get settingsSidebarNote;
+
+  /// Segment: the sidebar shows icons and labels.
+  ///
+  /// In fr, this message translates to:
+  /// **'Étendue'**
+  String get settingsSidebarExpanded;
+
+  /// Segment: the sidebar keeps only the icons.
+  ///
+  /// In fr, this message translates to:
+  /// **'Réduite'**
+  String get settingsSidebarCollapsed;
 
   /// Title of the currency card in settings preferences.
   ///
@@ -4889,6 +4901,12 @@ abstract class AppLocalizations {
   /// **'Crédits'**
   String get navMortgages;
 
+  /// Sidebar label for the investments panel, in the Patrimoine group after Crédits.
+  ///
+  /// In fr, this message translates to:
+  /// **'Placements'**
+  String get navPlacements;
+
   /// Left nav label for the new-loan simulator screen.
   ///
   /// In fr, this message translates to:
@@ -4900,6 +4918,18 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Synthèse'**
   String get navNetworth;
+
+  /// Title of the investments panel empty state.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucun placement'**
+  String get placementsEmptyTitle;
+
+  /// Sentence of the investments panel empty state.
+  ///
+  /// In fr, this message translates to:
+  /// **'Suivez un PEA, une assurance vie ou un autre placement à partir des valeurs de vos relevés.'**
+  String get placementsEmptyMessage;
 
   /// Top-bar primary CTA of the loans panel.
   ///

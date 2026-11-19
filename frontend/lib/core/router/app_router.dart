@@ -19,6 +19,7 @@ import '../../features/goals/presentation/goals_screen.dart';
 import '../../features/imports/presentation/imports_screen.dart';
 import '../../features/mortgages/presentation/mortgages_screen.dart';
 import '../../features/networth/presentation/networth_screen.dart';
+import '../../features/placements/presentation/placements_screen.dart';
 import '../../features/recurring/presentation/subscriptions_screen.dart';
 import '../../features/settings/presentation/settings_screen.dart';
 import '../../features/simulator/presentation/simulator_screen.dart';
@@ -67,7 +68,7 @@ TopBarActionsBuilder? _topBarActions(String path) => switch (path) {
 };
 
 /// The top-bar title of the panels that name something more specific than
-/// their section; `null` keeps the section's own label and descriptor.
+/// their section; `null` keeps the section's own label.
 TopBarTitleBuilder? _topBarTitle(String path) =>
     switch (AccountDetailScreen.idFromPath(path)) {
       final id? => (context) => AccountDetailTitle(accountId: id),
@@ -165,6 +166,10 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           GoRoute(
             path: MortgagesScreen.path,
             builder: (context, state) => const MortgagesScreen(),
+          ),
+          GoRoute(
+            path: PlacementsScreen.path,
+            builder: (context, state) => const PlacementsScreen(),
           ),
           GoRoute(
             path: SimulatorScreen.path,

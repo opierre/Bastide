@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'app.dart';
 import 'core/backend/backend_providers.dart';
 import 'core/backend/instance_lock.dart';
+import 'core/navigation/sidebar_controller.dart';
 import 'core/third_party_licenses.dart';
 
 void main() {
@@ -18,6 +19,11 @@ void main() {
   if (container.read(externalBackendProvider) == null && dataDir != null) {
     if (InstanceLock.acquire(dataDir) == null) exit(0);
   }
+
+  // Starts reading the saved sidebar state while the startup and login
+  // screens show, so the shell opens at its saved width instead of flashing
+  // the default first.
+  container.read(sidebarCollapsedProvider);
 
   runApp(
     UncontrolledProviderScope(container: container, child: const BastideApp()),

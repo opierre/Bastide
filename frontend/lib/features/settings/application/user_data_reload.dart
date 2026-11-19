@@ -11,6 +11,7 @@ import '../../networth/application/networth_controller.dart';
 import '../../properties/application/properties_controller.dart';
 import '../../recurring/application/subscriptions_controller.dart';
 import '../../rules/application/rules_controller.dart';
+import '../../transactions/application/review_count_provider.dart';
 import '../../transactions/application/transactions_controller.dart';
 
 /// Drops every cached view of the user's data, so each reloads on next read.
@@ -23,6 +24,7 @@ void reloadUserData(Ref ref) {
   ref
     ..invalidate(accountsControllerProvider)
     ..invalidate(transactionsControllerProvider)
+    ..invalidate(reviewCountProvider)
     ..invalidate(dashboardControllerProvider)
     ..invalidate(categoriesControllerProvider)
     ..invalidate(rulesControllerProvider)

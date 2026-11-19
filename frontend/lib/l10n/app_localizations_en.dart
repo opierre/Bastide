@@ -39,13 +39,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get sidebarPrivacyBadge => 'Local data';
 
   @override
-  String get sidebarCollapse => 'Collapse menu';
-
-  @override
-  String get sidebarExpand => 'Expand menu';
-
-  @override
-  String get userMenuEditProfile => 'Edit profile';
+  String sidebarReviewCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count transactions to review',
+      one: '1 transaction to review',
+    );
+    return '$_temp0';
+  }
 
   @override
   String get userMenuLogout => 'Log out';
@@ -90,6 +92,18 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get settingsLanguageNote =>
       'Applies immediately across the whole interface.';
+
+  @override
+  String get settingsSidebarTitle => 'Sidebar';
+
+  @override
+  String get settingsSidebarNote => 'Collapsed, it keeps only the icons.';
+
+  @override
+  String get settingsSidebarExpanded => 'Expanded';
+
+  @override
+  String get settingsSidebarCollapsed => 'Collapsed';
 
   @override
   String get settingsCurrencyTitle => 'Currency';
@@ -3051,10 +3065,20 @@ class AppLocalizationsEn extends AppLocalizations {
   String get navMortgages => 'Loans';
 
   @override
+  String get navPlacements => 'Investments';
+
+  @override
   String get navSimulator => 'Simulator';
 
   @override
   String get navNetworth => 'Net worth';
+
+  @override
+  String get placementsEmptyTitle => 'No investments';
+
+  @override
+  String get placementsEmptyMessage =>
+      'Follow a PEA, a life insurance policy or another investment from the values on your statements.';
 
   @override
   String get mortgagesAdd => 'New loan';

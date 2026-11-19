@@ -1,23 +1,26 @@
-import 'dart:typed_data';
-
 import 'package:bastide/app.dart';
 import 'package:bastide/core/api/api_client.dart';
 import 'package:bastide/core/api/api_client_provider.dart';
 import 'package:bastide/core/backend/backend_providers.dart';
 import 'package:bastide/core/l10n/locale_provider.dart';
+import 'package:bastide/core/storage/ui_preferences.dart';
+import 'package:bastide/core/theme/tokens.dart';
 import 'package:bastide/features/accounts/application/accounts_controller.dart';
 import 'package:bastide/features/auth/application/auth_controller.dart';
 import 'package:bastide/features/auth/domain/auth_user.dart';
 import 'package:bastide/features/auth/domain/avatar_choice.dart';
 import 'package:bastide/features/auth/presentation/login_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:lucide_icons_flutter/lucide_icons_300.dart';
 import 'package:mocktail/mocktail.dart';
 
 import 'support/fake_accounts_controller.dart';
 import 'support/fake_auth_controller.dart';
 import 'support/fake_backend.dart';
+import 'support/fake_ui_preferences.dart';
 
 const _signedInUser = AuthUser(
   id: 'u1',
@@ -45,9 +48,9 @@ void _useDesignViewport(WidgetTester tester) {
   addTearDown(tester.view.reset);
 }
 
-/// The user pill carries the avatar, the display name and the chevron only:
-/// the email adds nothing in a local, single-user app. The name sits on the
-/// pill's vertical centre now that it is the only line.
+/// The sidebar's user row carries the avatar, the display name and the
+/// chevron only: the email adds nothing in a local, single-user app. The name
+/// sits on the row's vertical centre.
 void _expectUserPillShowsNameOnly(WidgetTester tester) {
   final pill = find.byKey(const Key('userMenuButton'));
   final name = find.descendant(
@@ -60,7 +63,10 @@ void _expectUserPillShowsNameOnly(WidgetTester tester) {
     findsNothing,
   );
   expect(
-    find.descendant(of: pill, matching: find.byIcon(Icons.expand_more_rounded)),
+    find.descendant(
+      of: pill,
+      matching: find.byIcon(LucideIcons300.chevronsUpDown),
+    ),
     findsOneWidget,
   );
   expect(
@@ -95,6 +101,9 @@ void main() {
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
+          uiPreferencesStoreProvider.overrideWithValue(
+            FakeUiPreferencesStore(),
+          ),
           backendControllerProvider.overrideWith(ReadyBackendController.new),
           authControllerProvider.overrideWith(
             () => FakeAuthController(
@@ -132,7 +141,12 @@ void main() {
     _useDesignViewport(tester);
     await tester.pumpWidget(
       ProviderScope(
-        overrides: _authenticatedOverrides,
+        overrides: [
+          ..._authenticatedOverrides,
+          uiPreferencesStoreProvider.overrideWithValue(
+            FakeUiPreferencesStore(),
+          ),
+        ],
         child: const BastideApp(),
       ),
     );
@@ -160,13 +174,17 @@ void main() {
     },
   );
 
-  testWidgets('collapsing the sidebar keeps the destinations and the lock', (
+  testWidgets('Ctrl+B collapses the sidebar and the choice is saved', (
     tester,
   ) async {
     _useDesignViewport(tester);
+    final store = FakeUiPreferencesStore();
     await tester.pumpWidget(
       ProviderScope(
-        overrides: _authenticatedOverrides,
+        overrides: [
+          ..._authenticatedOverrides,
+          uiPreferencesStoreProvider.overrideWithValue(store),
+        ],
         child: const BastideApp(),
       ),
     );
@@ -174,17 +192,77 @@ void main() {
 
     double railWidth() =>
         tester.getSize(find.byKey(const Key('appNavRail'))).width;
-    expect(railWidth(), 252);
+    expect(railWidth(), AppSizes.sidebar);
 
-    await tester.tap(find.byKey(const Key('sidebarToggleButton')));
+    await tester.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);
+    await tester.sendKeyEvent(LogicalKeyboardKey.keyB);
+    await tester.sendKeyUpEvent(LogicalKeyboardKey.controlLeft);
     await tester.pumpAndSettle();
 
-    expect(railWidth(), 76);
+    expect(railWidth(), AppSizes.sidebarCollapsed);
     // The label is gone but the destination itself is not — the collapsed rail
     // is icon-only, never a shorter menu.
     expect(find.text('Comptes'), findsNothing);
-    expect(find.byIcon(Icons.account_balance_wallet_outlined), findsOneWidget);
-    expect(find.byIcon(Icons.lock_outline_rounded), findsOneWidget);
+    expect(find.byIcon(LucideIcons300.wallet), findsOneWidget);
+    expect(find.byIcon(LucideIcons300.lock), findsOneWidget);
+    expect(store.writes, [true]);
+  });
+
+  testWidgets('a collapsed sidebar saved on this device comes back', (
+    tester,
+  ) async {
+    _useDesignViewport(tester);
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          ..._authenticatedOverrides,
+          uiPreferencesStoreProvider.overrideWithValue(
+            FakeUiPreferencesStore(sidebarCollapsed: true),
+          ),
+        ],
+        child: const BastideApp(),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(
+      tester.getSize(find.byKey(const Key('appNavRail'))).width,
+      AppSizes.sidebarCollapsed,
+    );
+  });
+
+  testWidgets('Paramètres › Barre latérale switches the sidebar', (
+    tester,
+  ) async {
+    _useDesignViewport(tester);
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          ..._authenticatedOverrides,
+          uiPreferencesStoreProvider.overrideWithValue(
+            FakeUiPreferencesStore(),
+          ),
+        ],
+        child: const BastideApp(),
+      ),
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Paramètres'));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byKey(const Key('settingsSidebarCollapsedOption')));
+    await tester.pumpAndSettle();
+    expect(
+      tester.getSize(find.byKey(const Key('appNavRail'))).width,
+      AppSizes.sidebarCollapsed,
+    );
+
+    await tester.tap(find.byKey(const Key('settingsSidebarExpandedOption')));
+    await tester.pumpAndSettle();
+    expect(
+      tester.getSize(find.byKey(const Key('appNavRail'))).width,
+      AppSizes.sidebar,
+    );
   });
 
   testWidgets('tapping a nav item swaps the content region, not the chrome', (
@@ -193,7 +271,12 @@ void main() {
     _useDesignViewport(tester);
     await tester.pumpWidget(
       ProviderScope(
-        overrides: _authenticatedOverrides,
+        overrides: [
+          ..._authenticatedOverrides,
+          uiPreferencesStoreProvider.overrideWithValue(
+            FakeUiPreferencesStore(),
+          ),
+        ],
         child: const BastideApp(),
       ),
     );
@@ -214,7 +297,12 @@ void main() {
     _useDesignViewport(tester);
     await tester.pumpWidget(
       ProviderScope(
-        overrides: _authenticatedOverrides,
+        overrides: [
+          ..._authenticatedOverrides,
+          uiPreferencesStoreProvider.overrideWithValue(
+            FakeUiPreferencesStore(),
+          ),
+        ],
         child: const BastideApp(),
       ),
     );
@@ -234,6 +322,9 @@ void main() {
       ProviderScope(
         overrides: [
           ..._authenticatedOverrides,
+          uiPreferencesStoreProvider.overrideWithValue(
+            FakeUiPreferencesStore(),
+          ),
           localeProvider.overrideWith(() => _EnLocaleController()),
         ],
         child: const BastideApp(),
@@ -256,6 +347,9 @@ void main() {
       await tester.pumpWidget(
         ProviderScope(
           overrides: [
+            uiPreferencesStoreProvider.overrideWithValue(
+              FakeUiPreferencesStore(),
+            ),
             backendControllerProvider.overrideWith(ReadyBackendController.new),
             authControllerProvider.overrideWith(() => auth),
             accountsControllerProvider.overrideWith(
@@ -310,43 +404,12 @@ void main() {
       expect(find.byKey(const Key('appTopBar')), findsNothing);
     });
 
-    testWidgets('edit profile opens Paramètres on the Profil section', (
-      tester,
-    ) async {
+    testWidgets('Paramètres opens the settings panel', (tester) async {
       await pumpApp(tester);
 
-      await choose(tester, 'userMenuEditProfileItem');
+      await choose(tester, 'userMenuSettingsItem');
 
       expect(find.byKey(const Key('screen-settings')), findsOneWidget);
-      expect(find.byKey(const Key('settingsRecoveryCard')), findsOneWidget);
-    });
-
-    testWidgets('edit profile switches section when already in Paramètres', (
-      tester,
-    ) async {
-      await pumpApp(tester);
-      await tester.tap(find.text('Paramètres'));
-      await tester.pumpAndSettle();
-      expect(find.byKey(const Key('settingsRecoveryCard')), findsNothing);
-
-      await choose(tester, 'userMenuEditProfileItem');
-
-      expect(find.byKey(const Key('settingsRecoveryCard')), findsOneWidget);
-    });
-
-    testWidgets('the request is spent: a later visit opens on the default', (
-      tester,
-    ) async {
-      await pumpApp(tester);
-      await choose(tester, 'userMenuEditProfileItem');
-
-      await tester.tap(find.text('Comptes'));
-      await tester.pumpAndSettle();
-      await tester.tap(find.text('Paramètres'));
-      await tester.pumpAndSettle();
-
-      expect(find.byKey(const Key('settingsRecoveryCard')), findsNothing);
-      expect(find.byKey(const Key('settingsCurrencyField')), findsOneWidget);
     });
   });
 }
