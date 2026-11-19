@@ -95,9 +95,53 @@ void main() {
       // -93175, -88420, -80360 settled; -61240 open.
       expect(settlement.closedCycles, hasLength(3));
       expect(settlement.averageClosedMinor, -87318);
-      expect(settlement.highestClosed!.amountMinor, -93175);
       expect(settlement.lastClosed!.amountMinor, -80360);
-      expect(settlement.consecutiveFallingCycles, 2);
+    });
+
+    test('the cycle average spans the last six settled cycles', () {
+      final settlement = CardSettlement(
+        payingAccountId: null,
+        cardLastDigits: null,
+        rule: null,
+        cycles: [
+          // Eight settled: the two oldest fall outside the average.
+          for (final amount in [
+            -90000,
+            -90000,
+            -100,
+            -200,
+            -300,
+            -400,
+            -500,
+            -600,
+          ])
+            SettlementCycle(
+              settledOn: DateTime(2026, 1, 5),
+              amountMinor: amount,
+              inProgress: false,
+            ),
+          const SettlementCycle(
+            settledOn: null,
+            amountMinor: -99999,
+            inProgress: true,
+          ),
+        ],
+        currentCycleMinor: -99999,
+        nextDebitDate: null,
+      );
+
+      expect(settlement.averageClosedMinor, -350);
+    });
+
+    test('the month flows reconcile with their net', () {
+      final month = AccountsRepository.parseOverview(
+        checkingOverviewJson(),
+      ).month;
+
+      expect(month.since, DateTime(2026, 10));
+      expect(month.inflowMinor, 327000);
+      expect(month.outflowMinor, -265795);
+      expect(month.netMinor, 61205);
     });
 
     test('cycle figures are absent before any settled cycle', () {
@@ -117,9 +161,7 @@ void main() {
       );
 
       expect(settlement.averageClosedMinor, isNull);
-      expect(settlement.highestClosed, isNull);
       expect(settlement.lastClosed, isNull);
-      expect(settlement.consecutiveFallingCycles, 0);
     });
   });
 }

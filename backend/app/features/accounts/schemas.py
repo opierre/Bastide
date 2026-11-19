@@ -189,6 +189,18 @@ class PeriodStats(BaseModel):
     )
 
 
+class MonthFlows(BaseModel):
+    """What came in and went out of an account since the first of the current month.
+
+    Every row booked on or after `since` counts, transfers included, like `PeriodStats`; the
+    net is `inflow_minor + outflow_minor`.
+    """
+
+    since: date = Field(description="The first day of the current month.")
+    inflow_minor: int
+    outflow_minor: int
+
+
 class LinkedCard(BaseModel):
     """A deferred card settled from the account, and what its current cycle holds so far."""
 
@@ -240,5 +252,6 @@ class AccountOverview(BaseModel):
         )
     )
     period: PeriodStats
+    month: MonthFlows
     linked_cards: list[LinkedCard]
     card_settlement: CardSettlement | None = Field(description="Deferred cards only.")
