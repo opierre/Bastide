@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:lucide_icons_flutter/lucide_icons_300.dart';
 
 import '../theme/tokens.dart';
+import 'tomettes.dart';
 
 /// The empty state of a panel (`docs/design/00-design-system.md` §7, States
 /// of a panel): centred in the content region, a title that states the fact
@@ -9,9 +10,8 @@ import '../theme/tokens.dart';
 /// and one button. No icon plate.
 ///
 /// The spec puts the tomettes texture behind it, faded toward the edges
-/// (`00` §12). [background] is that slot: it fills the state's whole area
-/// behind the sentence. Nothing fills it yet; the texture lands with the
-/// brand work.
+/// (`00` §12). [background] fills the state's whole area behind the
+/// sentence and defaults to [Tomettes] with the radial fade.
 class EmptyStateView extends StatelessWidget {
   const EmptyStateView({
     super.key,
@@ -27,7 +27,8 @@ class EmptyStateView extends StatelessWidget {
   /// The one button.
   final Widget? action;
 
-  /// Painted behind the state, filling its area: the faded tomettes.
+  /// Painted behind the state, filling its area. `null` takes the faded
+  /// tomettes.
   final Widget? background;
 
   @override
@@ -55,8 +56,7 @@ class EmptyStateView extends StatelessWidget {
       ),
     );
 
-    final background = this.background;
-    if (background == null) return state;
+    final background = this.background ?? const Tomettes();
     return Stack(
       fit: StackFit.passthrough,
       children: [
@@ -188,34 +188,6 @@ class ErrorStateView extends StatelessWidget {
           ),
         ],
       ),
-    );
-  }
-}
-
-/// The 64 px tinted plate the startup screen still heads its states with.
-///
-/// v2 has no icon plate (`00` §7); this stays only until the startup screen
-/// is rebuilt with the brand work (#202). No panel uses it.
-class GlyphPlate extends StatelessWidget {
-  const GlyphPlate({super.key, required this.icon, this.accent});
-
-  final IconData icon;
-
-  /// `null` takes `accent`.
-  final Color? accent;
-
-  @override
-  Widget build(BuildContext context) {
-    final accent = this.accent ?? context.colors.accent;
-    return Container(
-      width: 64,
-      height: 64,
-      alignment: Alignment.center,
-      decoration: BoxDecoration(
-        color: accent.withValues(alpha: 0.12),
-        borderRadius: BorderRadius.circular(AppRadii.modal),
-      ),
-      child: Icon(icon, size: 27, color: accent),
     );
   }
 }

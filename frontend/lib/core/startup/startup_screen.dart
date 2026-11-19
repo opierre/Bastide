@@ -6,60 +6,87 @@ import '../backend/backend_connection.dart';
 import '../backend/backend_providers.dart';
 import '../theme/tokens.dart';
 import '../widgets/brand_mark.dart';
-import '../widgets/primary_button.dart';
 import '../widgets/state_views.dart';
+import '../widgets/tomettes.dart';
 
-/// What the user sees until the backend is ready, and if it fails.
+/// What the user sees until the backend is ready, and if it fails
+/// (`docs/design/18-brand.md` §4).
 ///
-/// Sits on the same ink page as the signed-out screens, under the login
-/// lockup, so a normal launch reads as one continuous screen: the lockup stays
-/// where it is and the login card appears beneath it.
+/// The installer splash's composition, in the window: on tomettes faded
+/// behind the column, the Plan mark, the name, the privacy promise, then a
+/// status line that can say what is happening, since here text translates.
 class StartupScreen extends ConsumerWidget {
   const StartupScreen({super.key});
 
+  /// Mark and name sizes shared with the installer splash.
+  static const markSize = 64.0;
+  static const nameSize = 26.0;
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
     final backend = ref.watch(backendControllerProvider);
     final failure = backend.isLoading ? null : backend.error;
     final mismatch = backend.isLoading ? null : backend.value;
 
     return Scaffold(
       backgroundColor: context.colors.bg,
-      body: CenteredStatePane(
-        maxWidth: 440,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const BrandLockup.login(),
-            const SizedBox(height: AppSpacing.xl),
-            if (failure != null)
-              _Failed(
-                failure: failure is BackendFailure
-                    ? failure
-                    : const BackendFailure(BackendFailureKind.crashed),
-                onRetry: () =>
-                    ref.read(backendControllerProvider.notifier).retry(),
-                onOpenLogs: () => ref.read(openLogsFolderProvider)(),
-              )
-            else if (mismatch?.mismatchedAppVersion case final appVersion?)
-              _VersionWarning(
-                appVersion: appVersion,
-                backendVersion: mismatch!.version,
-                onRetry: () =>
-                    ref.read(backendControllerProvider.notifier).retry(),
-                onContinue: () =>
-                    ref.read(versionWarningDismissedProvider.notifier).state =
-                        true,
-              )
-            else
-              const _Starting(),
-          ],
-        ),
+      body: Stack(
+        children: [
+          const Positioned.fill(child: Tomettes()),
+          CenteredStatePane(
+            maxWidth: 440,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const BrandMark(size: markSize),
+                const SizedBox(height: AppSpacing.md),
+                const BrandName(size: nameSize),
+                const SizedBox(height: AppSpacing.xs),
+                Text(
+                  l10n.startupPrivacy,
+                  key: const Key('startupPrivacy'),
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontFamily: AppFonts.geist,
+                    fontSize: 13,
+                    color: context.colors.textSecondary,
+                  ),
+                ),
+                const SizedBox(height: AppSpacing.lg),
+                if (failure != null)
+                  _Failed(
+                    failure: failure is BackendFailure
+                        ? failure
+                        : const BackendFailure(BackendFailureKind.crashed),
+                    onRetry: () =>
+                        ref.read(backendControllerProvider.notifier).retry(),
+                    onOpenLogs: () => ref.read(openLogsFolderProvider)(),
+                  )
+                else if (mismatch?.mismatchedAppVersion case final appVersion?)
+                  _VersionWarning(
+                    appVersion: appVersion,
+                    backendVersion: mismatch!.version,
+                    onRetry: () =>
+                        ref.read(backendControllerProvider.notifier).retry(),
+                    onContinue: () =>
+                        ref
+                                .read(versionWarningDismissedProvider.notifier)
+                                .state =
+                            true,
+                  )
+                else
+                  const _Starting(),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }
 }
 
+/// The status line: a 14 px spinner, then « Démarrage du moteur local… ».
 class _Starting extends StatelessWidget {
   const _Starting();
 
@@ -71,25 +98,28 @@ class _Starting extends StatelessWidget {
       key: const Key('startupLoading'),
       mainAxisSize: MainAxisSize.min,
       children: [
-        SizedBox(
-          width: 15,
-          height: 15,
+        SizedBox.square(
+          dimension: 14,
           child: CircularProgressIndicator(
-            strokeWidth: 2,
-            color: context.colors.accent,
+            strokeWidth: 1.5,
+            color: context.colors.textTertiary,
           ),
         ),
-        const SizedBox(width: AppSpacing.sm + 2),
-        Text(
-          l10n.startupLoading,
-          style: Theme.of(
-            context,
-          ).textTheme.bodyLarge?.copyWith(color: context.colors.textSecondary),
+        const SizedBox(width: AppSpacing.sm),
+        Flexible(
+          child: Text(
+            l10n.startupEngineStarting,
+            style: _statusStyle(context.colors.textTertiary),
+          ),
         ),
       ],
     );
   }
 }
+
+/// The status line's type: 12 px Geist.
+TextStyle _statusStyle(Color color) =>
+    TextStyle(fontFamily: AppFonts.geist, fontSize: 12, color: color);
 
 class _Failed extends StatelessWidget {
   const _Failed({
@@ -111,12 +141,12 @@ class _Failed extends StatelessWidget {
       title: title,
       message: message,
       actions: [
-        PrimaryButton(
-          key: const Key('startupRetry'),
-          label: l10n.startupRetry,
-          onPressed: onRetry,
-        ),
         OutlinedButton(
+          key: const Key('startupRetry'),
+          onPressed: onRetry,
+          child: Text(l10n.startupRetry),
+        ),
+        TextButton(
           key: const Key('startupOpenLogs'),
           onPressed: onOpenLogs,
           child: Text(l10n.startupOpenLogs),
@@ -152,12 +182,12 @@ class _VersionWarning extends StatelessWidget {
         backendVersion,
       ),
       actions: [
-        PrimaryButton(
-          key: const Key('startupRetry'),
-          label: l10n.startupRetry,
-          onPressed: onRetry,
-        ),
         OutlinedButton(
+          key: const Key('startupRetry'),
+          onPressed: onRetry,
+          child: Text(l10n.startupRelaunch),
+        ),
+        TextButton(
           key: const Key('startupContinueAnyway'),
           onPressed: onContinue,
           child: Text(l10n.startupContinueAnyway),
@@ -167,8 +197,8 @@ class _VersionWarning extends StatelessWidget {
   }
 }
 
-/// The warning plate, title, message and actions shared by the failure and
-/// the version warning — the silhouette of [ErrorStateView].
+/// The status line turned into a failure: what failed in `negative`, the
+/// reason under it, then the actions.
 class _Notice extends StatelessWidget {
   const _Notice({
     required this.title,
@@ -182,36 +212,29 @@ class _Notice extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final textTheme = Theme.of(context).textTheme;
-
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        GlyphPlate(
-          icon: Icons.warning_amber_rounded,
-          accent: context.colors.warning,
-        ),
-        const SizedBox(height: AppSpacing.lg),
         Text(
           title,
           key: const Key('startupFailureTitle'),
-          style: textTheme.headlineMedium,
+          style: _statusStyle(
+            context.colors.negative,
+          ).copyWith(fontWeight: FontWeight.w500),
           textAlign: TextAlign.center,
         ),
-        const SizedBox(height: AppSpacing.sm + 2),
+        const SizedBox(height: AppSpacing.xs),
         Text(
           message,
           key: const Key('startupFailureMessage'),
-          style: textTheme.bodyLarge?.copyWith(
-            color: context.colors.textSecondary,
-          ),
+          style: _statusStyle(context.colors.textSecondary),
           textAlign: TextAlign.center,
         ),
-        const SizedBox(height: AppSpacing.lg + AppSpacing.xs),
+        const SizedBox(height: AppSpacing.md),
         Wrap(
           alignment: WrapAlignment.center,
-          spacing: AppSpacing.sm + 2,
-          runSpacing: AppSpacing.sm + 2,
+          spacing: AppSpacing.sm,
+          runSpacing: AppSpacing.sm,
           children: actions,
         ),
       ],
