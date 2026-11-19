@@ -87,6 +87,27 @@ void main() {
       expect(danger.top.color, dark.negative.withValues(alpha: 0.45));
     });
 
+    testWidgets('an icon-only button is a 28 px square named by its label', (
+      tester,
+    ) async {
+      await pumpHost(
+        tester,
+        AppButton(
+          key: key,
+          label: 'Plus d’actions',
+          icon: Icons.more_horiz,
+          iconOnly: true,
+          onPressed: () {},
+        ),
+      );
+      expect(
+        tester.getSize(find.byKey(key)),
+        const Size.square(AppSizes.button),
+      );
+      expect(find.text('Plus d’actions'), findsNothing);
+      expect(find.bySemanticsLabel('Plus d’actions'), findsOneWidget);
+    });
+
     testWidgets('hover takes the hover ground at once', (tester) async {
       await pumpHost(tester, button(onPressed: () {}));
       await hover(tester, find.byKey(key));
