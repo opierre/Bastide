@@ -225,6 +225,28 @@ details?}}`. Model names refer to the Pydantic schemas in `backend/app/features/
 | `PUT` | `/networth/declared/{month}` |  | `DeclaredBalanceWrite` | 200 `DeclaredBalanceRead` |
 | `DELETE` | `/networth/declared/{month}` |  |  | 204 |
 
+## investments
+
+| Method | Path | Query | Body | Response |
+|--------|------|-------|------|----------|
+| `GET` | `/investments/envelopes` |  |  | 200 [`EnvelopeRead`] |
+| `GET` | `/investments/summary` |  |  | 200 `InvestmentSummary` |
+| `GET` | `/investments/series` |  |  | 200 `InvestmentSeries` |
+| `GET` | `/investments` |  |  | 200 [`InvestmentRead`] |
+| `POST` | `/investments` |  | `InvestmentCreate` | 201 `InvestmentDetail` |
+| `GET` | `/investments/{investment_id}` |  |  | 200 `InvestmentDetail` |
+| `PATCH` | `/investments/{investment_id}` |  | `InvestmentUpdate` | 200 `InvestmentDetail` |
+| `DELETE` | `/investments/{investment_id}` |  |  | 204 |
+| `POST` | `/investments/{investment_id}/close` |  | `InvestmentClose` | 200 `InvestmentDetail` |
+| `POST` | `/investments/{investment_id}/reopen` |  |  | 200 `InvestmentDetail` |
+| `GET` | `/investments/{investment_id}/link-candidates` | `amount_minor`, `on`, `movement_id` |  | 200 [`LinkCandidate`] |
+| `POST` | `/investments/{investment_id}/movements` |  | `MovementCreate` | 201 `MovementRead` |
+| `PATCH` | `/investments/{investment_id}/movements/{movement_id}` |  | `MovementUpdate` | 200 `MovementRead` |
+| `DELETE` | `/investments/{investment_id}/movements/{movement_id}` |  |  | 204 |
+| `POST` | `/investments/{investment_id}/valuations` |  | `ValuationCreate` | 201 `ValuationRead` |
+| `PATCH` | `/investments/{investment_id}/valuations/{valuation_id}` |  | `ValuationUpdate` | 200 `ValuationRead` |
+| `DELETE` | `/investments/{investment_id}/valuations/{valuation_id}` |  |  | 204 |
+
 ## websockets
 
 Authenticated on connect with the same headers as the REST API. A socket without a

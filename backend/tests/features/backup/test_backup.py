@@ -19,11 +19,22 @@ from app.features.categorization.models import CategorizationRun
 from app.features.goals.models import Goal, GoalAllocation
 from app.features.imports.models import ImportBatch
 from app.features.mortgages.models import Mortgage, MortgageSimulation
+from app.features.placements.models import (
+    Investment,
+    InvestmentMovement,
+    InvestmentValuation,
+)
 from app.features.properties.models import Property
 from app.features.rules.models import CategorizationRule
 from app.features.transactions.models import Transaction
 from tests.api import register as _register
 from tests.db import open_session
+
+PLACEMENT_MEMBERS = (
+    "investments.jsonl",
+    "investment_movements.jsonl",
+    "investment_valuations.jsonl",
+)
 
 PATRIMOINE_MEMBERS = (
     "properties.jsonl",
@@ -230,11 +241,12 @@ def test_export_writes_a_manifest_and_one_jsonl_per_table(
         "mortgages": 0,
         "properties": 0,
         "simulations": 0,
+        "investments": 0,
     }
     archive = zipfile.ZipFile(io.BytesIO(response.content))
     manifest = json.loads(archive.read("manifest.json"))
     assert manifest["format"] == "bastide-backup"
-    assert manifest["format_version"] == 6
+    assert manifest["format_version"] == 7
     assert manifest["currency"] == "EUR"
     assert "users.jsonl" not in archive.namelist()
     assert "auth_tokens.jsonl" not in archive.namelist()
@@ -281,7 +293,7 @@ def test_inspect_summarises_without_touching_data(client: TestClient, tmp_path: 
     assert response.status_code == 200
     body = response.json()
     assert body["counts"]["transactions"] == 1
-    assert body["format_version"] == 6
+    assert body["format_version"] == 7
     assert body["currency"] == "EUR"
 
 
@@ -628,3 +640,119 @@ def test_backup_round_trips_a_card_settled_from_a_later_account(
         restored = db.get(Account, card)
         assert restored is not None
         assert restored.settlement_account_id == later
+
+
+def _seed_placement(db: Session, user_id: str, transaction_id: str) -> dict[str, str]:
+    """A placement with a payment linked to an imported transfer, and a declared value."""
+    pea = Investment(
+        user_id=user_id,
+        name="PEA Bourse",
+        institution="Banque Exemple",
+        envelope="pea",
+        opened_on=date(2023, 3, 10),
+        currency="EUR",
+    )
+    db.add(pea)
+    db.flush()
+    payment = InvestmentMovement(
+        investment_id=pea.id,
+        occurred_on=date(2026, 8, 14),
+        amount_minor=4_234,
+        currency="EUR",
+        note="Versement",
+        transaction_id=transaction_id,
+    )
+    withdrawal = InvestmentMovement(
+        investment_id=pea.id, occurred_on=date(2026, 8, 20), amount_minor=-1_000, currency="EUR"
+    )
+    value = InvestmentValuation(
+        investment_id=pea.id, valued_on=date(2026, 8, 31), value_minor=3_500, currency="EUR"
+    )
+    db.add_all([payment, withdrawal, value])
+    db.commit()
+    return {"investment": pea.id, "payment": payment.id, "withdrawal": withdrawal.id}
+
+
+def test_backup_round_trips_placements_with_their_link(client: TestClient, tmp_path: Path) -> None:
+    headers = _register(client, "amelie@example.com")
+    with _session(tmp_path) as db:
+        ids = _seed(db, "amelie@example.com")
+        placement = _seed_placement(db, ids["user"], ids["transaction"])
+    content = _export(client, headers)
+
+    archive = zipfile.ZipFile(io.BytesIO(content))
+    manifest = json.loads(archive.read("manifest.json"))
+    assert {
+        name: manifest["tables"][name.removesuffix(".jsonl")] for name in PLACEMENT_MEMBERS
+    } == {
+        "investments.jsonl": 1,
+        "investment_movements.jsonl": 2,
+        "investment_valuations.jsonl": 1,
+    }
+    movements = [
+        json.loads(line) for line in archive.read("investment_movements.jsonl").splitlines()
+    ]
+    assert sorted(m["amount_minor"] for m in movements) == [-1_000, 4_234]
+    assert all(isinstance(m["amount_minor"], int) for m in movements)
+
+    response = _upload(client, "restore", headers, content)
+
+    assert response.status_code == 200, response.json()
+    assert response.json()["counts"]["investments"] == 1
+    with _session(tmp_path) as db:
+        assert db.get(Investment, placement["investment"]) is not None
+        payment = db.get(InvestmentMovement, placement["payment"])
+        assert payment is not None
+        assert payment.transaction_id == ids["transaction"]
+        withdrawal = db.get(InvestmentMovement, placement["withdrawal"])
+        assert withdrawal is not None
+        assert withdrawal.amount_minor == -1_000
+        assert len(db.scalars(select(InvestmentValuation)).all()) == 1
+
+
+def test_restore_of_a_version_6_archive_empties_the_placements(
+    client: TestClient, tmp_path: Path
+) -> None:
+    headers = _register(client, "amelie@example.com")
+    with _session(tmp_path) as db:
+        ids = _seed(db, "amelie@example.com")
+    older = _drop_members(_export(client, headers), *PLACEMENT_MEMBERS, format_version=6)
+    with _session(tmp_path) as db:
+        _seed_placement(db, ids["user"], ids["transaction"])
+
+    response = _upload(client, "restore", headers, older)
+
+    assert response.status_code == 200, response.json()
+    assert response.json()["counts"]["investments"] == 0
+    with _session(tmp_path) as db:
+        assert db.get(Transaction, ids["transaction"]) is not None
+        for model in (Investment, InvestmentMovement, InvestmentValuation):
+            assert db.scalars(select(model)).all() == []
+
+
+def test_restore_rejects_a_movement_linked_to_a_missing_transaction(
+    client: TestClient, tmp_path: Path
+) -> None:
+    headers = _register(client, "amelie@example.com")
+    with _session(tmp_path) as db:
+        ids = _seed(db, "amelie@example.com")
+        _seed_placement(db, ids["user"], ids["transaction"])
+    content = _export(client, headers)
+    archive = zipfile.ZipFile(io.BytesIO(content))
+    movements = [
+        json.loads(line) for line in archive.read("investment_movements.jsonl").splitlines()
+    ]
+    for movement in movements:
+        if movement["transaction_id"] is not None:
+            movement["transaction_id"] = "00000000-0000-0000-0000-000000000000"
+    crafted = _rewrite(
+        content,
+        investment_movements_jsonl="\n".join(json.dumps(m) for m in movements).encode(),
+    )
+
+    response = _upload(client, "restore", headers, crafted)
+
+    assert response.status_code == 422
+    assert response.json()["error"]["code"] == "BACKUP_INVALID"
+    with _session(tmp_path) as db:
+        assert len(db.scalars(select(InvestmentMovement)).all()) == 2

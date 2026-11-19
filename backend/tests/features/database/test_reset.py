@@ -14,6 +14,11 @@ from app.features.categorization.models import CategorizationRun
 from app.features.goals.models import Goal, GoalAllocation
 from app.features.imports.models import ImportBatch
 from app.features.mortgages.models import Mortgage, MortgageSimulation
+from app.features.placements.models import (
+    Investment,
+    InvestmentMovement,
+    InvestmentValuation,
+)
 from app.features.properties.models import Property
 from app.features.recurring.models import RecurringSeries
 from app.features.rules.models import CategorizationRule, RulePackImport
@@ -184,6 +189,7 @@ def test_summary_counts_the_callers_own_rows(client: TestClient, tmp_path: Path)
         "mortgages": 1,
         "properties": 1,
         "simulations": 1,
+        "investments": 0,
     }
 
 
@@ -291,3 +297,47 @@ def test_reset_is_refused_while_a_run_is_in_flight(client: TestClient, tmp_path:
 def test_database_endpoints_require_auth(client: TestClient) -> None:
     assert client.get("/api/v1/database/summary").status_code == 401
     assert client.post("/api/v1/database/reset").status_code == 401
+
+
+def test_reset_deletes_the_placements_and_their_history(client: TestClient, tmp_path: Path) -> None:
+    headers = _register(client, "amelie@example.com")
+    with _session(tmp_path) as db:
+        ids = _seed(db, "amelie@example.com")
+        pea = Investment(
+            user_id=ids["user"],
+            name="PEA Bourse",
+            institution="Banque Exemple",
+            envelope="pea",
+            opened_on=date(2023, 3, 10),
+            currency="EUR",
+        )
+        db.add(pea)
+        db.flush()
+        db.add_all(
+            [
+                InvestmentMovement(
+                    investment_id=pea.id,
+                    occurred_on=date(2026, 8, 14),
+                    amount_minor=4_234,
+                    currency="EUR",
+                    transaction_id=ids["transaction"],
+                ),
+                InvestmentValuation(
+                    investment_id=pea.id,
+                    valued_on=date(2026, 8, 31),
+                    value_minor=4_500,
+                    currency="EUR",
+                ),
+            ]
+        )
+        db.commit()
+    assert (
+        client.get("/api/v1/database/summary", headers=headers).json()["counts"]["investments"] == 1
+    )
+
+    response = client.post("/api/v1/database/reset", headers=headers)
+
+    assert response.status_code == 200, response.json()
+    with _session(tmp_path) as db:
+        for model in (Investment, InvestmentMovement, InvestmentValuation):
+            assert db.scalars(select(model)).all() == []

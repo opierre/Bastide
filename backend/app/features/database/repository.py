@@ -25,6 +25,7 @@ COUNTED_TABLES: dict[str, tuple[str, ...]] = {
     "mortgages": ("mortgages",),
     "properties": ("properties",),
     "simulations": ("mortgage_simulations",),
+    "investments": ("investments",),
 }
 
 

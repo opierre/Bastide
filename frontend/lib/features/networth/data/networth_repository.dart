@@ -34,12 +34,14 @@ class NetworthRepository {
         for (final entry
             in (json['composition'] as List<dynamic>)
                 .cast<Map<String, dynamic>>())
-          CompositionEntry(
-            group: CompositionGroup.fromWire(entry['group'] as String),
-            key: entry['key'] as String,
-            amountMinor: entry['amount_minor'] as int,
-            shareBps: entry['share_bps'] as int,
-          ),
+          if (CompositionGroup.tryFromWire(entry['group'] as String)
+              case final group?)
+            CompositionEntry(
+              group: group,
+              key: entry['key'] as String,
+              amountMinor: entry['amount_minor'] as int,
+              shareBps: entry['share_bps'] as int,
+            ),
       ],
       monthDeltaMinor: json['month_delta_minor'] as int?,
       series: [
