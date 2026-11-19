@@ -96,7 +96,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(dotColor(tester), AppColors.dark.positive);
-      expect(find.text('Connecté — 3 modèles disponibles'), findsOneWidget);
+      expect(find.text('Connecté · 3 modèles disponibles'), findsOneWidget);
     });
 
     testWidgets(
@@ -180,7 +180,10 @@ void main() {
           findsOneWidget,
         );
         expect(find.byKey(const Key('settingsAiModelField')), findsNothing);
-        expect(find.text('Aucun modèle — moteur injoignable.'), findsOneWidget);
+        expect(
+          find.text('Moteur injoignable : aucun modèle à proposer.'),
+          findsOneWidget,
+        );
       },
     );
 
@@ -322,7 +325,7 @@ void main() {
 
       await tester.pumpAndSettle();
       expect(dotColor(tester), AppColors.dark.positive);
-      expect(find.text('Connecté — 3 modèles disponibles'), findsOneWidget);
+      expect(find.text('Connecté · 3 modèles disponibles'), findsOneWidget);
     });
   });
 
@@ -355,7 +358,7 @@ void main() {
       // The helper it replaces is gone, so the fix is the only line under the
       // field.
       expect(
-        find.text('Adresse locale uniquement — 127.0.0.1 ou localhost.'),
+        find.text('Adresse locale uniquement : 127.0.0.1 ou localhost.'),
         findsNothing,
       );
     });
@@ -370,7 +373,7 @@ void main() {
       await tester.pumpWidget(wrap());
       await tester.pumpAndSettle();
 
-      expect(find.text('Seuil de confiance — 65 %'), findsOneWidget);
+      expect(find.text('Seuil de confiance : 65 %'), findsOneWidget);
       expect(
         tester
             .widget<AppSlider>(
@@ -422,10 +425,10 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('Local AI'), findsOneWidget);
-      expect(find.text('Enable AI categorization'), findsOneWidget);
-      expect(find.text('Connected — 3 models available'), findsOneWidget);
+      expect(find.text('AI categorization'), findsOneWidget);
+      expect(find.text('Connected · 3 models available'), findsOneWidget);
       expect(find.text('Test connection'), findsOneWidget);
-      expect(find.text('Confidence threshold — 80%'), findsOneWidget);
+      expect(find.text('Confidence threshold: 80%'), findsOneWidget);
       expect(
         find.textContaining('Nothing leaves your machine.'),
         findsOneWidget,
@@ -439,9 +442,9 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('IA locale'), findsOneWidget);
-      expect(find.text('Activer la catégorisation par IA'), findsOneWidget);
+      expect(find.text('Catégorisation par IA'), findsOneWidget);
       expect(find.text('Tester la connexion'), findsOneWidget);
-      expect(find.text('Seuil de confiance — 80 %'), findsOneWidget);
+      expect(find.text('Seuil de confiance : 80 %'), findsOneWidget);
     });
   });
 

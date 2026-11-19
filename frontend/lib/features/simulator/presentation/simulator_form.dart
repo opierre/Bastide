@@ -142,13 +142,6 @@ class _SimulatorFormState extends ConsumerState<SimulatorForm> {
         mainAxisSize: MainAxisSize.min,
         children: [
           Text(l10n.simulatorFormTitle, style: textTheme.titleMedium),
-          const SizedBox(height: 2),
-          Text(
-            l10n.simulatorFormSubtitle,
-            style: textTheme.bodySmall?.copyWith(
-              color: context.colors.textSecondary,
-            ),
-          ),
           const SizedBox(height: 14),
           _pair(
             LabeledField(
@@ -190,14 +183,10 @@ class _SimulatorFormState extends ConsumerState<SimulatorForm> {
             ),
             LabeledField(
               label: l10n.simulatorPrincipal,
-              // A convenience, not a constraint: the pill says the figure was
-              // filled in, and editing it takes it over.
-              trailing: state.principalDerived && inputs.principalMinor != null
-                  ? SimulatorMarkerPill(
-                      key: const Key('simulatorDerivedPill'),
-                      label: l10n.simulatorDerivedPill,
-                      neutral: true,
-                    )
+              // A convenience, not a constraint: the helper says the figure
+              // was filled in, and editing it takes it over.
+              helper: state.principalDerived && inputs.principalMinor != null
+                  ? l10n.simulatorPrincipalDerivedHelper
                   : null,
               child: MoneyField(
                 key: const Key('simulatorPrincipal'),

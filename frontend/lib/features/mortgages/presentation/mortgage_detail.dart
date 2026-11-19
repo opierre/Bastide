@@ -327,39 +327,9 @@ class _CostRow extends StatelessWidget {
           const SizedBox(width: AppSpacing.gridGap),
           Expanded(
             child: _CostCard(
-              label: Row(
-                children: [
-                  Text(
-                    l10n.mortgageCostTaegLabel.toUpperCase(),
-                    style: context.textStyles.statLabel,
-                  ),
-                  const SizedBox(width: AppSpacing.xs + 2),
-                  Semantics(
-                    label: l10n.mortgageCostTaegDisclaimer,
-                    child: Container(
-                      key: const Key('mortgageTaegIndicative'),
-                      height: 18,
-                      padding: const EdgeInsets.symmetric(horizontal: 6),
-                      alignment: Alignment.center,
-                      decoration: BoxDecoration(
-                        color: context.colors.accentSoft,
-                        borderRadius: BorderRadius.circular(9),
-                      ),
-                      child: ExcludeSemantics(
-                        child: Text(
-                          l10n.mortgageCostIndicative.toUpperCase(),
-                          style: TextStyle(
-                            fontFamily: AppFonts.geist,
-                            fontSize: 9.5,
-                            fontWeight: FontWeight.w600,
-                            letterSpacing: 0.6,
-                            color: context.colors.accent,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
+              label: Text(
+                l10n.mortgageCostTaegLabel.toUpperCase(),
+                style: context.textStyles.statLabel,
               ),
               value: formatBps(detail.taegBps, locale, digits: 2),
               valueKey: const Key('mortgageCostTaeg'),

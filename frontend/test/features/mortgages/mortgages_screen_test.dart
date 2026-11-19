@@ -154,7 +154,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.byKey(const Key('mortgageDetail')), findsOneWidget);
-      expect(find.byKey(const Key('mortgageTaegIndicative')), findsOneWidget);
+      expect(find.text('TAEG INDICATIF'), findsOneWidget);
     });
   });
 
@@ -182,7 +182,7 @@ void main() {
       // Body content, not a tooltip.
       expect(
         _text(tester, 'ratioCaveat'),
-        'Lecture informative : ce repère ne lie aucun prêteur.',
+        'Lecture indicative, qui n’engage aucun prêteur.',
       );
       expect(find.byType(Tooltip), findsNothing);
     });

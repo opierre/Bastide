@@ -64,13 +64,6 @@ class NetworthSeriesCard extends ConsumerWidget {
                       l10n.networthSeriesTitle,
                       style: textTheme.titleMedium,
                     ),
-                    const SizedBox(height: 2),
-                    Text(
-                      l10n.networthSeriesSubtitle,
-                      style: textTheme.bodySmall?.copyWith(
-                        color: context.colors.textSecondary,
-                      ),
-                    ),
                   ],
                 ),
               ),

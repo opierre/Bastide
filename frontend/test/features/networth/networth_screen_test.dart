@@ -139,10 +139,7 @@ void main() {
         '2 loans · outstanding principal',
       );
       expect(_segmentLabel(tester), 'Properties (2)');
-      expect(
-        find.text('Deliberately not counted'.toUpperCase()),
-        findsOneWidget,
-      );
+      expect(find.text('Good to know'.toUpperCase()), findsOneWidget);
     });
 
     for (final locale in const ['fr', 'en']) {
@@ -210,7 +207,7 @@ void main() {
         expect(amount.style!.color, AppColors.dark.accent);
         expect(
           _text(tester, 'networthDeltaCaption'),
-          'vs avril 2026 — valeur des biens inchangée',
+          'vs avril 2026 · valeur des biens inchangée',
         );
       });
     }
@@ -320,7 +317,7 @@ void main() {
     await tester.pumpWidget(_wrap());
     await tester.pumpAndSettle();
 
-    expect(find.text('VOLONTAIREMENT NON COMPTÉ'), findsOneWidget);
+    expect(find.text('À SAVOIR'), findsOneWidget);
     expect(
       find.descendant(
         of: find.byKey(const Key('exclusionGoals')),
@@ -384,7 +381,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.byKey(const Key('networthEmptyState')), findsOneWidget);
-    expect(find.text('Rien à additionner pour l\'instant'), findsOneWidget);
+    expect(find.text('Aucun compte, bien ou crédit'), findsOneWidget);
     expect(find.byKey(const Key('networthEmptyImport')), findsOneWidget);
     expect(find.byKey(const Key('networthEmptyAddProperty')), findsOneWidget);
     expect(find.byKey(const Key('networthViewSwitch')), findsNothing);

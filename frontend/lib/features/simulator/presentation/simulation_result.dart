@@ -105,12 +105,8 @@ class SimulationResultRow extends StatelessWidget {
             flex: 100,
             child: _ResultCard(
               key: const Key('resultTaegCard'),
+              // « indicatif » is part of the TAEG label itself.
               label: l10n.simulatorTaegLabel,
-              // « indicatif » is always attached to the TAEG label.
-              labelTrailing: SimulatorMarkerPill(
-                key: const Key('resultTaegIndicative'),
-                label: l10n.simulatorIndicativePill,
-              ),
               valueKey: const Key('resultTaeg'),
               value: result == null ? null : formatRate(result.taegBps, locale),
               valueStyle: valueStyle,
@@ -132,7 +128,6 @@ class _ResultCard extends StatelessWidget {
     required this.valueStyle,
     required this.caption,
     this.hero = false,
-    this.labelTrailing,
     this.valueKey,
     this.captionKey,
   });
@@ -144,7 +139,6 @@ class _ResultCard extends StatelessWidget {
   final TextStyle valueStyle;
   final String caption;
   final bool hero;
-  final Widget? labelTrailing;
   final Key? valueKey;
   final Key? captionKey;
 
@@ -170,10 +164,6 @@ class _ResultCard extends StatelessWidget {
                   ),
                 ),
               ),
-              if (labelTrailing != null) ...[
-                const SizedBox(width: AppSpacing.sm),
-                labelTrailing!,
-              ],
             ],
           ),
           const SizedBox(height: AppSpacing.sm),
@@ -292,21 +282,32 @@ class HcsfReadingCard extends StatelessWidget {
                   tone: StatusTone.warning,
                 ),
               ],
-              const Spacer(),
+              const SizedBox(width: AppSpacing.md),
               // Body content, never a tooltip: the app makes no lending
-              // decisions and says so where the reading is shown.
-              Icon(
-                Icons.info_outline_rounded,
-                size: 12,
-                color: context.colors.textTertiary,
-              ),
-              const SizedBox(width: AppSpacing.xs + 1),
-              Text(
-                l10n.simulatorHcsfCaveat,
-                key: const Key('hcsfCaveat'),
-                style: context.textStyles.helper.copyWith(
-                  fontSize: 11,
-                  color: context.colors.textTertiary,
+              // decisions and says so where the reading is shown. It takes
+              // the room left of the title and wraps rather than overflow.
+              Expanded(
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    Icon(
+                      Icons.info_outline_rounded,
+                      size: 12,
+                      color: context.colors.textTertiary,
+                    ),
+                    const SizedBox(width: AppSpacing.xs + 1),
+                    Flexible(
+                      child: Text(
+                        l10n.simulatorHcsfCaveat,
+                        key: const Key('hcsfCaveat'),
+                        textAlign: TextAlign.end,
+                        style: context.textStyles.helper.copyWith(
+                          fontSize: 11,
+                          color: context.colors.textTertiary,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ],

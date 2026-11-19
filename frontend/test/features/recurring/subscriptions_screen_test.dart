@@ -133,7 +133,7 @@ void main() {
     expect(pills, hasLength(2));
     expect(pills.every((pill) => pill.tone == StatusTone.warning), isTrue);
     expect(
-      find.text('Augmentation · ${_money(1349)} → ${_money(1549)}'),
+      find.text('Hausse · ${_money(1349)} → ${_money(1549)}'),
       findsOneWidget,
     );
     expect(
@@ -432,7 +432,7 @@ void main() {
       find.text('6 mensuels · 1 trimestriel · 1 annuel — 1 terminé'),
       findsOneWidget,
     );
-    expect(find.text('Netflix — demain'), findsOneWidget);
+    expect(find.text('Netflix · demain'), findsOneWidget);
     expect(
       find.textContaining(
         'Charges trimestrielles et annuelles ramenées au mois.',
@@ -450,10 +450,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.byKey(const Key('subscriptionsEmptyState')), findsOneWidget);
-      expect(
-        find.text('Aucun paiement récurrent détecté pour l\'instant'),
-        findsOneWidget,
-      );
+      expect(find.text('Aucun paiement récurrent détecté'), findsOneWidget);
       expect(
         find.textContaining("un prélèvement s'est répété trois fois"),
         findsOneWidget,

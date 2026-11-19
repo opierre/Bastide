@@ -962,15 +962,11 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      expect(
-        find.text('Importez un relevé pour donner vie à votre argent'),
-        findsOneWidget,
-      );
-      // The reassurance answers the doubt the CTA creates — the user has just been asked to
-      // hand over a bank statement.
+      expect(find.text('Aucune donnée pour ce mois'), findsOneWidget);
       expect(
         find.text(
-          'Tout reste sur cet ordinateur — rien n\'est envoyé en ligne.',
+          'Importez un relevé OFX ou QFX pour voir vos revenus, vos dépenses '
+          'et votre taux d’épargne.',
         ),
         findsOneWidget,
       );

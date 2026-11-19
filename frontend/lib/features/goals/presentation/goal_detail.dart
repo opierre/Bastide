@@ -332,13 +332,6 @@ class _HistoryCard extends ConsumerWidget {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Text(l10n.goalHistoryTitle, style: textTheme.titleMedium),
-          const SizedBox(height: 3),
-          Text(
-            l10n.goalHistorySubtitle,
-            style: textTheme.bodySmall?.copyWith(
-              color: context.colors.textSecondary,
-            ),
-          ),
           const SizedBox(height: AppSpacing.md),
           if (allocations.isEmpty)
             Text(

@@ -348,7 +348,7 @@ void main() {
     expect(find.text('2 transactions to review'), findsOneWidget);
     expect(find.text('Confirm'), findsOneWidget);
     expect(find.text('Correct'), findsOneWidget);
-    expect(find.text('— no proposal'), findsOneWidget);
+    expect(find.text('No proposal'), findsOneWidget);
     expect(find.textContaining('Confidence'), findsOneWidget);
     expect(find.textContaining('Confiance'), findsNothing);
   });

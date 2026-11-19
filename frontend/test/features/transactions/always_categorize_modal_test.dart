@@ -148,8 +148,8 @@ void main() {
 
     expect(
       find.text(
-        'Une règle classe ces transactions sans IA, à chaque import — '
-        'pré-remplie depuis « PRLV SEPA ASSUR MAIF ».',
+        'Une règle classe ces transactions sans IA, à chaque import. '
+        'Elle est pré-remplie depuis « PRLV SEPA ASSUR MAIF ».',
       ),
       findsOneWidget,
     );

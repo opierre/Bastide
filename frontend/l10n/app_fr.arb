@@ -36,33 +36,9 @@
   "@navSectionManage": {
     "description": "Left nav section heading grouping the imports and categories destinations. Rendered uppercase."
   },
-  "navDashboardSubtitle": "Votre mois en un coup d'œil",
-  "@navDashboardSubtitle": {
-    "description": "One-line descriptor shown under the panel title in the top bar, on the dashboard."
-  },
-  "navAccountsSubtitle": "Tous vos comptes, une seule devise",
-  "@navAccountsSubtitle": {
-    "description": "One-line descriptor shown under the panel title in the top bar, on the accounts screen."
-  },
-  "navTransactionsSubtitle": "Toutes vos opérations, en un seul fil",
-  "@navTransactionsSubtitle": {
-    "description": "One-line descriptor shown under the panel title in the top bar, on the transactions screen."
-  },
-  "navImportsSubtitle": "Relevés OFX et QFX — traités sur cet ordinateur",
-  "@navImportsSubtitle": {
-    "description": "One-line descriptor shown under the panel title in the top bar, on the imports screen."
-  },
-  "navCategoriesSubtitle": "Organisez vos dépenses, automatisez avec des règles",
-  "@navCategoriesSubtitle": {
-    "description": "One-line descriptor shown under the panel title in the top bar, on the categories screen."
-  },
-  "navSettingsSubtitle": "Profil, préférences et vos données locales",
-  "@navSettingsSubtitle": {
-    "description": "One-line descriptor shown under the panel title in the top bar, on the settings screen."
-  },
-  "sidebarPrivacyBadge": "Données 100 % locales",
+  "sidebarPrivacyBadge": "Données locales",
   "@sidebarPrivacyBadge": {
-    "description": "Reassurance badge pinned at the foot of the sidebar, beside a lock glyph."
+    "description": "Privacy badge pinned at the foot of the sidebar, beside a lock glyph."
   },
   "sidebarCollapse": "Réduire le menu",
   "@sidebarCollapse": {
@@ -238,13 +214,9 @@
   "@comingSoonBody": {
     "description": "Encouraging placeholder body on panels whose feature isn't built yet."
   },
-  "authTagline": "Votre argent, en clair.",
-  "@authTagline": {
-    "description": "Reassuring subheading under the brand lockup on the login and register screens."
-  },
-  "authPrivacyLine": "Local et privé — vos données ne quittent jamais cet ordinateur.",
+  "authPrivacyLine": "Vos données restent sur cet ordinateur.",
   "@authPrivacyLine": {
-    "description": "Reassurance line shown under the tagline on the signed-out screens, beside a lock glyph."
+    "description": "Privacy line on the signed-out screens, beside a lock glyph. One of the three places the privacy promise appears."
   },
   "authLoginSubmitting": "Connexion…",
   "@authLoginSubmitting": {
@@ -290,7 +262,7 @@
   "@authPreferencesNote": {
     "description": "Microcopy under the language and currency row at registration, stating which choice is permanent."
   },
-  "authEmailTaken": "Cet e-mail est déjà utilisé — connectez-vous plutôt.",
+  "authEmailTaken": "Cet e-mail a déjà un compte. Connectez-vous.",
   "@authEmailTaken": {
     "description": "Validation helper shown when the chosen email already has an account."
   },
@@ -389,7 +361,7 @@
   "@accountsEmptyTitle": {
     "description": "Heading shown when the user has no accounts yet."
   },
-  "accountsEmptyBody": "Suivez vos soldes et vos mouvements en un seul endroit.",
+  "accountsEmptyBody": "Créez un compte, ou importez un relevé : Bastide crée le compte qu’il décrit.",
   "@accountsEmptyBody": {
     "description": "Encouraging subtext under the empty-state heading on the accounts screen."
   },
@@ -695,7 +667,7 @@
   "@accountBalanceFromStatementNote": {
     "description": "Helper under the read-only balance field when the account is being created from a statement that declares its closing balance: the figure is the statement's, not something to type."
   },
-  "accountOpeningBalanceEditNote": "Corriger cette valeur décale le solde du compte et son historique enregistré du même montant — aucune transaction n'est modifiée.",
+  "accountOpeningBalanceEditNote": "Corriger cette valeur décale le solde du compte et son historique enregistré du même montant. Aucune transaction n'est modifiée.",
   "@accountOpeningBalanceEditNote": {
     "description": "Helper under the balance field when editing an existing account: explains that a manual correction shifts the cached balance and every saved snapshot by the same delta rather than rewriting the ledger."
   },
@@ -747,7 +719,7 @@
   "@importDropZoneTitle": {
     "description": "Headline inside the imports drop zone."
   },
-  "importDropZoneHint": "ou cliquez pour parcourir — le relevé indique lui-même son compte",
+  "importDropZoneHint": "Le relevé indique son compte. Rien n’est importé avant votre confirmation.",
   "@importDropZoneHint": {
     "description": "Sub-line inside the imports drop zone, stating that the file itself names the destination account."
   },
@@ -781,7 +753,7 @@
       }
     }
   },
-  "importDetectedAccountAmbiguous": "Ce relevé vient de {account}, mais plusieurs comptes y correspondent — choisissez la destination.",
+  "importDetectedAccountAmbiguous": "Ce relevé vient de {account}, mais plusieurs comptes y correspondent. Choisissez la destination.",
   "@importDetectedAccountAmbiguous": {
     "description": "Banner shown when the statement's bank matches several accounts and nothing in the file separates them; the user picks the destination.",
     "placeholders": {
@@ -811,7 +783,7 @@
   "@importChooseAccount": {
     "description": "Placeholder option in the account picker shown when a statement could not name its own destination — the unanswered state."
   },
-  "importUnreadableAccount": "Ce fichier n'indique aucun compte — choisissez la destination.",
+  "importUnreadableAccount": "Ce fichier n’indique aucun compte. Choisissez la destination.",
   "@importUnreadableAccount": {
     "description": "Warning shown when the staged file declares no account block at all, so the user has to pick the destination from every account."
   },
@@ -876,7 +848,7 @@
       }
     }
   },
-  "importFailedNote": "Le fichier n'a pas pu être lu — rien n'a été modifié.",
+  "importFailedNote": "Fichier illisible. Rien n’a été modifié.",
   "@importFailedNote": {
     "description": "Calm explanation shown on a failed import, stating that nothing was written."
   },
@@ -918,7 +890,7 @@
   "@importHistoryTitle": {
     "description": "Title of the card listing every past import."
   },
-  "importHistoryEmptyTitle": "Aucun import pour l'instant",
+  "importHistoryEmptyTitle": "Aucun import",
   "@importHistoryEmptyTitle": {
     "description": "Heading shown when the import history is empty."
   },
@@ -983,7 +955,7 @@
       "error": {"type": "String"}
     }
   },
-  "importDuplicateDestination": "Deux relevés de ce fichier vont vers le même compte — choisissez une destination différente pour chacun.",
+  "importDuplicateDestination": "Deux relevés de ce fichier vont vers le même compte. Choisissez une destination différente pour chacun.",
   "@importDuplicateDestination": {
     "description": "Warning shown when two statements of a multi-account file resolve to the same account; the import stays disabled until each has its own."
   },
@@ -1007,7 +979,7 @@
   "@transactionsRetry": {
     "description": "Retry button label shown when the transaction list fails to load."
   },
-  "transactionsEmptyTitle": "Aucune transaction pour l'instant",
+  "transactionsEmptyTitle": "Aucune transaction",
   "@transactionsEmptyTitle": {
     "description": "Heading shown when the user has no transactions at all yet."
   },
@@ -1118,10 +1090,6 @@
         "type": "int"
       }
     }
-  },
-  "reviewQueueEncouragement": "Vous y êtes presque, continuez !",
-  "@reviewQueueEncouragement": {
-    "description": "Encouraging subtext under the review queue's progress headline — framed as progress, not a backlog."
   },
   "reviewAlwaysCategorize": "Toujours catégoriser ainsi",
   "@reviewAlwaysCategorize": {
@@ -1570,13 +1538,13 @@
   "@dashboardRecentActivityEmpty": {
     "description": "Shown in the recent-activity card when the user has no transactions yet."
   },
-  "dashboardEmptyTitle": "Importez un relevé pour donner vie à votre argent",
+  "dashboardEmptyTitle": "Aucune donnée pour ce mois",
   "@dashboardEmptyTitle": {
-    "description": "Encouraging heading shown when the user has no transactions yet for any month."
+    "description": "Heading shown when the dashboard has no transactions to show."
   },
-  "dashboardEmptyBody": "Tout reste sur cet ordinateur — rien n'est envoyé en ligne.",
+  "dashboardEmptyBody": "Importez un relevé OFX ou QFX pour voir vos revenus, vos dépenses et votre taux d’épargne.",
   "@dashboardEmptyBody": {
-    "description": "Reassurance under the dashboard empty-state heading. Leads with privacy rather than with what the panel will contain: the user has just been asked to hand over a bank statement, and that is the doubt worth answering first."
+    "description": "Body under the dashboard empty-state heading, saying what to do."
   },
   "dashboardGoToImports": "Aller aux imports",
   "@dashboardGoToImports": {
@@ -1610,7 +1578,7 @@
   "@categoriesAddButton": {
     "description": "Top-bar primary button on the categories panel, opening the create-category modal."
   },
-  "categoriesEmptyTitle": "Aucune catégorie pour l'instant",
+  "categoriesEmptyTitle": "Aucune catégorie",
   "@categoriesEmptyTitle": {
     "description": "Heading of the categories empty state."
   },
@@ -1917,7 +1885,7 @@
   "@rulesAddButton": {
     "description": "Top-bar primary button while the rules view is showing."
   },
-  "rulesPriorityNote": "Évaluées dans l'ordre de priorité — une règle ne remplace jamais une catégorie choisie manuellement.",
+  "rulesPriorityNote": "Appliquées dans cet ordre. Une catégorie choisie à la main n’est jamais remplacée.",
   "@rulesPriorityNote": {
     "description": "Note beside the view switch on the rules view, stating both how rules are ordered and what they will never overwrite."
   },
@@ -1966,11 +1934,11 @@
   "@rulesRetry": {
     "description": "Retry button shown when the rules list fails to load."
   },
-  "rulesEmptyTitle": "Automatisez votre classement",
+  "rulesEmptyTitle": "Aucune règle",
   "@rulesEmptyTitle": {
     "description": "Heading of the rules empty state."
   },
-  "rulesEmptyBody": "Une règle reconnaît un libellé — « CARREFOUR » — et attribue sa catégorie à chaque transaction correspondante, aujourd'hui et aux prochains imports.",
+  "rulesEmptyBody": "Une règle reconnaît un libellé, comme « CARREFOUR », et attribue sa catégorie à chaque transaction correspondante, aujourd'hui et aux prochains imports.",
   "@rulesEmptyBody": {
     "description": "Body of the rules empty state, explaining what a rule does before asking the user to write one."
   },
@@ -2221,7 +2189,7 @@
       }
     }
   },
-  "rulePreviewCountWithSample": "{count, plural, one{Correspond à {count} transaction existante — « {sample} » du {date}.} other{Correspond à {count} transactions existantes — dont « {sample} » du {date}.}}",
+  "rulePreviewCountWithSample": "{count, plural, one{Correspond à {count} transaction existante : « {sample} » du {date}.} other{Correspond à {count} transactions existantes, dont « {sample} » du {date}.}}",
   "@rulePreviewCountWithSample": {
     "description": "Match-preview banner naming one of the matched transactions, so the user can tell whether the rule caught what they meant.",
     "placeholders": {
@@ -2378,11 +2346,11 @@
   "@rulePackExportTitle": {
     "description": "Title of the export review sheet."
   },
-  "rulePackExportPrivacyNotice": "Relisez avant d'enregistrer : un motif peut contenir des informations personnelles — le nom de votre propriétaire, « VIR SALAIRE DUPONT ».",
+  "rulePackExportPrivacyNotice": "Relisez avant d'enregistrer. Un motif peut contenir des informations personnelles, comme le nom de votre propriétaire : « VIR SALAIRE DUPONT ».",
   "@rulePackExportPrivacyNotice": {
     "description": "Warning at the top of the export sheet. Names a concrete example, because the abstract warning is the one nobody reads."
   },
-  "rulePackExportContents": "{count, plural, =0{Contenu du fichier — aucune règle} one{Contenu du fichier — {count} règle} other{Contenu du fichier — {count} règles}}",
+  "rulePackExportContents": "{count, plural, =0{Contenu du fichier : aucune règle} one{Contenu du fichier : {count} règle} other{Contenu du fichier : {count} règles}}",
   "@rulePackExportContents": {
     "description": "Section label above the verbatim pack contents in the export sheet.",
     "placeholders": {
@@ -2400,7 +2368,7 @@
       }
     }
   },
-  "rulePackOmittedRegex": "« {pattern} » — les règles regex ne peuvent pas figurer dans un pack.",
+  "rulePackOmittedRegex": "« {pattern} » : les règles regex ne peuvent pas figurer dans un pack.",
   "@rulePackOmittedRegex": {
     "description": "Explains one omitted rule: it uses a regex, which no importer accepts.",
     "placeholders": {
@@ -2410,7 +2378,7 @@
       }
     }
   },
-  "rulePackOmittedUserCategory": "« {pattern} » — vise une catégorie personnalisée, qui n'a pas d'identifiant partageable.",
+  "rulePackOmittedUserCategory": "« {pattern} » : vise une catégorie personnalisée, qui n'a pas d'identifiant partageable.",
   "@rulePackOmittedUserCategory": {
     "description": "Explains one omitted rule: it targets a user-defined category, which has no portable key.",
     "placeholders": {
@@ -2483,7 +2451,7 @@
   "@rulePackLogoFailuresNotice": {
     "description": "Reassurance at the top of the logo failures dialog: the import itself succeeded."
   },
-  "rulePackLogoFailureInvalidImage": "« {pattern} » — le fichier n'est pas une image PNG, JPEG ou WebP.",
+  "rulePackLogoFailureInvalidImage": "« {pattern} » : le fichier n'est pas une image PNG, JPEG ou WebP.",
   "@rulePackLogoFailureInvalidImage": {
     "description": "A logo that failed because it is not a supported picture, named by its rule's pattern.",
     "placeholders": {
@@ -2493,7 +2461,7 @@
       }
     }
   },
-  "rulePackLogoFailureTooLarge": "« {pattern} » — l'image dépasse la taille autorisée.",
+  "rulePackLogoFailureTooLarge": "« {pattern} » : l'image dépasse la taille autorisée.",
   "@rulePackLogoFailureTooLarge": {
     "description": "A logo that failed because it is too large, named by its rule's pattern.",
     "placeholders": {
@@ -2503,7 +2471,7 @@
       }
     }
   },
-  "rulePackLogoFailureDownloadFailed": "« {pattern} » — le téléchargement a échoué.",
+  "rulePackLogoFailureDownloadFailed": "« {pattern} » : le téléchargement a échoué.",
   "@rulePackLogoFailureDownloadFailed": {
     "description": "A linked logo that could not be downloaded, named by its rule's pattern.",
     "placeholders": {
@@ -2539,7 +2507,7 @@
       }
     }
   },
-  "reviewQueueAiSubtitle": "{count, plural, =0{Aucune de ces transactions n'a reçu de proposition de l'IA locale — confirmez ou corrigez, rien n'est classé sans vous.} one{L'IA locale propose une catégorie pour l'une d'entre elles — confirmez ou corrigez, rien n'est classé sans vous.} other{L'IA locale propose une catégorie pour {count} d'entre elles — confirmez ou corrigez, rien n'est classé sans vous.}}",
+  "reviewQueueAiSubtitle": "{count, plural, =0{Aucune de ces transactions n'a reçu de proposition de l'IA locale. Confirmez ou corrigez : rien n'est classé sans vous.} one{L'IA locale propose une catégorie pour l'une d'entre elles. Confirmez ou corrigez : rien n'est classé sans vous.} other{L'IA locale propose une catégorie pour {count} d'entre elles. Confirmez ou corrigez : rien n'est classé sans vous.}}",
   "@reviewQueueAiSubtitle": {
     "description": "Subtext on the review queue's header card when local AI is active, counting the rows it proposed a category for.",
     "placeholders": {
@@ -2596,7 +2564,7 @@
   "@reviewCorrect": {
     "description": "Row action opening the category picker to replace the model's proposal."
   },
-  "reviewNoProposal": "— aucune proposition",
+  "reviewNoProposal": "Aucune proposition",
   "@reviewNoProposal": {
     "description": "Italic note on a review row the model made no proposal for."
   },
@@ -2604,7 +2572,7 @@
   "@reviewChooseCategory": {
     "description": "Link on a review row with no proposal, opening the category picker."
   },
-  "alwaysRuleSubtitle": "Une règle classe ces transactions sans IA, à chaque import — pré-remplie depuis « {label} ».",
+  "alwaysRuleSubtitle": "Une règle classe ces transactions sans IA, à chaque import. Elle est pré-remplie depuis « {label} ».",
   "@alwaysRuleSubtitle": {
     "description": "Subtext under the always-categorize modal's title, naming the transaction the rule was derived from.",
     "placeholders": {
@@ -2647,7 +2615,7 @@
   "@reviewQueueRunAction": {
     "description": "Action on the review queue's header card that starts a local-AI categorization run over the pending rows."
   },
-  "runBannerRunning": "{total, plural, one{Catégorisation en cours — {processed} sur {total} transaction} other{Catégorisation en cours — {processed} sur {total} transactions}}",
+  "runBannerRunning": "{total, plural, one{Catégorisation en cours : {processed} sur {total} transaction} other{Catégorisation en cours : {processed} sur {total} transactions}}",
   "@runBannerRunning": {
     "description": "Headline of the banner that replaces the review queue's header card while a run is classifying.",
     "placeholders": {
@@ -2675,7 +2643,7 @@
   "@runBannerCancel": {
     "description": "Cancels the categorization run in flight. The executor stops after the batch it is on."
   },
-  "runBannerPartial": "{count, plural, one{Catégorisation terminée — {count} transaction n'a pas pu être analysée.} other{Catégorisation terminée — {count} transactions n'ont pas pu être analysées.}}",
+  "runBannerPartial": "{count, plural, one{Catégorisation terminée. {count} transaction n'a pas pu être analysée.} other{Catégorisation terminée. {count} transactions n'ont pas pu être analysées.}}",
   "@runBannerPartial": {
     "description": "Dismissible amber banner after a run that ended `partial`. A report, not an error wall.",
     "placeholders": {
@@ -2704,9 +2672,9 @@
   "@settingsAiTitle": {
     "description": "Title of the local-AI card in the settings Données tab."
   },
-  "settingsAiSubtitle": "Activer la catégorisation par IA",
+  "settingsAiSubtitle": "Catégorisation par IA",
   "@settingsAiSubtitle": {
-    "description": "Sub-line under the card title, naming what the toggle beside it does."
+    "description": "Label of the AI card's opt-in toggle, shown beside it."
   },
   "settingsAiToggleLabel": "Catégorisation par IA",
   "@settingsAiToggleLabel": {
@@ -2720,7 +2688,7 @@
   "@settingsAiBaseUrlLabel": {
     "description": "Label of the inference base URL field."
   },
-  "settingsAiBaseUrlHelp": "Adresse locale uniquement — 127.0.0.1 ou localhost.",
+  "settingsAiBaseUrlHelp": "Adresse locale uniquement : 127.0.0.1 ou localhost.",
   "@settingsAiBaseUrlHelp": {
     "description": "Helper under the engine address field, stating the loopback-only rule."
   },
@@ -2732,11 +2700,11 @@
   "@settingsAiModelLabel": {
     "description": "Label of the model tag field."
   },
-  "settingsAiModelHelp": "Liste fournie par le moteur — saisie manuelle possible.",
+  "settingsAiModelHelp": "Liste fournie par le moteur. Saisie manuelle possible.",
   "@settingsAiModelHelp": {
     "description": "Helper under the model field: the list comes from the engine, but any tag can be typed."
   },
-  "settingsAiModelUnavailable": "Aucun modèle — moteur injoignable.",
+  "settingsAiModelUnavailable": "Moteur injoignable : aucun modèle à proposer.",
   "@settingsAiModelUnavailable": {
     "description": "Helper under the model field when no engine answered, where the field degrades to a dashed read-only dash."
   },
@@ -2744,7 +2712,7 @@
   "@settingsAiModelChoose": {
     "description": "Accessible label of the control opening the list of models the engine reported."
   },
-  "settingsAiThresholdLabel": "Seuil de confiance — {threshold}",
+  "settingsAiThresholdLabel": "Seuil de confiance : {threshold}",
   "@settingsAiThresholdLabel": {
     "description": "Label above the threshold slider, carrying its live percentage. Only this label is a percentage — the stored value is the [0,1] real the API defines.",
     "placeholders": {
@@ -2761,7 +2729,7 @@
   "@settingsAiThresholdHelp": {
     "description": "Helper under the threshold slider, stating what the threshold decides."
   },
-  "settingsAiStatusConnected": "{count, plural, =0{Connecté — aucun modèle disponible} =1{Connecté — 1 modèle disponible} other{Connecté — {count} modèles disponibles}}",
+  "settingsAiStatusConnected": "{count, plural, =0{Connecté · aucun modèle disponible} =1{Connecté · 1 modèle disponible} other{Connecté · {count} modèles disponibles}}",
   "@settingsAiStatusConnected": {
     "description": "Status row when the runtime answered, with the number of models it reported.",
     "placeholders": {
@@ -2810,7 +2778,7 @@
   "@settingsBackupExportLabel": {
     "description": "Label of the export row on the backup card."
   },
-  "settingsBackupExportCaption": "Fichier .bastide — comptes, transactions, catégories, règles, objectifs, crédits, biens, paramètres.",
+  "settingsBackupExportCaption": "Fichier .bastide : comptes, transactions, catégories, règles, objectifs, crédits, biens, paramètres.",
   "@settingsBackupExportCaption": {
     "description": "Caption under the export row's label: what the file contains."
   },
@@ -2832,7 +2800,7 @@
       }
     }
   },
-  "settingsBackupNone": "Aucune sauvegarde pour l'instant.",
+  "settingsBackupNone": "Aucune sauvegarde.",
   "@settingsBackupNone": {
     "description": "Shown under the export row when the user has never exported a backup."
   },
@@ -2850,7 +2818,7 @@
       }
     }
   },
-  "settingsBackupPrivacy": "Le fichier n'est pas chiffré. Conservez-le en lieu sûr — il contient tout votre historique financier.",
+  "settingsBackupPrivacy": "Ce fichier n’est pas chiffré et contient tout votre historique. Conservez-le en lieu sûr.",
   "@settingsBackupPrivacy": {
     "description": "Lock callout on the backup card warning that the archive is unencrypted."
   },
@@ -2894,7 +2862,7 @@
   "@settingsBackupErrorUnknown": {
     "description": "Restore failed for any other reason; nothing was changed."
   },
-  "settingsBackupExported": "Sauvegarde enregistrée — {transactionCount, plural, one{{transactions} transaction} other{{transactions} transactions}}, {accountCount, plural, one{{accounts} compte} other{{accounts} comptes}}.",
+  "settingsBackupExported": "Sauvegarde enregistrée : {transactionCount, plural, one{{transactions} transaction} other{{transactions} transactions}}, {accountCount, plural, one{{accounts} compte} other{{accounts} comptes}}.",
   "@settingsBackupExported": {
     "description": "Toast after a backup was written. The String placeholders are the locale-formatted counts.",
     "placeholders": {
@@ -2989,10 +2957,6 @@
   "navSubscriptions": "Récurrents",
   "@navSubscriptions": {
     "description": "Sidebar entry for the recurring payments panel, third in the Gestion group."
-  },
-  "navSubscriptionsSubtitle": "Vos paiements récurrents, détectés automatiquement",
-  "@navSubscriptionsSubtitle": {
-    "description": "Top-bar descriptor under the recurring payments panel title."
   },
   "subscriptionsDetect": "Détecter",
   "@subscriptionsDetect": {
@@ -3103,7 +3067,7 @@
   "@subscriptionsNextLabel": {
     "description": "Label of the card naming the soonest charge ahead."
   },
-  "subscriptionsNextValue": "{label} — {when}",
+  "subscriptionsNextValue": "{label} · {when}",
   "@subscriptionsNextValue": {
     "description": "Value line of the next-charge card: the payment and how far off it is.",
     "placeholders": {
@@ -3184,11 +3148,11 @@
   "@subscriptionsSortByNext": {
     "description": "Tooltip on the subscriptions table's next-charge header while it is not the sort column."
   },
-  "subscriptionsSortedAscending": "Tri croissant — cliquer pour inverser",
+  "subscriptionsSortedAscending": "Tri croissant. Cliquez pour inverser.",
   "@subscriptionsSortedAscending": {
     "description": "Tooltip on the header the subscriptions table is sorted on, ascending."
   },
-  "subscriptionsSortedDescending": "Tri décroissant — cliquer pour inverser",
+  "subscriptionsSortedDescending": "Tri décroissant. Cliquez pour inverser.",
   "@subscriptionsSortedDescending": {
     "description": "Tooltip on the header the subscriptions table is sorted on, descending."
   },
@@ -3216,7 +3180,7 @@
   "@cadenceIrregular": {
     "description": "Cadence name for a user-declared series with no rhythm. Detection never produces it."
   },
-  "subscriptionSignalIncrease": "Augmentation · {from} → {to}",
+  "subscriptionSignalIncrease": "Hausse · {from} → {to}",
   "@subscriptionSignalIncrease": {
     "description": "Amber status pill on a row whose charge recently grew.",
     "placeholders": {
@@ -3399,7 +3363,7 @@
   "@subscriptionsRetry": {
     "description": "Retry action on the recurring payments error state."
   },
-  "subscriptionsEmptyTitle": "Aucun paiement récurrent détecté pour l'instant",
+  "subscriptionsEmptyTitle": "Aucun paiement récurrent détecté",
   "@subscriptionsEmptyTitle": {
     "description": "Empty-state title on the recurring payments panel."
   },
@@ -3447,7 +3411,7 @@
   "@subscriptionDetailNextCharge": {
     "description": "Label of the next-charge stat in the detail header."
   },
-  "subscriptionDetailIncrease": "Augmentation : {from} → {to} le {date} — soit {annual} par an.",
+  "subscriptionDetailIncrease": "Hausse : {from} → {to} le {date}, soit {annual} par an.",
   "@subscriptionDetailIncrease": {
     "description": "Amber banner on the detail. The annualised figure is stated rather than left as a multiplication for the reader.",
     "placeholders": {
@@ -3469,7 +3433,7 @@
   "@subscriptionDetailHistoryTitle": {
     "description": "Title of the occurrence-history card on the detail."
   },
-  "subscriptionDetailHistorySubtitle": "Les transactions dont cette série est déduite · {account}",
+  "subscriptionDetailHistorySubtitle": "{account}",
   "@subscriptionDetailHistorySubtitle": {
     "description": "Sub-line of the history card, naming the evidence and the account it comes from.",
     "placeholders": {
@@ -3490,7 +3454,7 @@
       }
     }
   },
-  "subscriptionDetailFootnote": "Bastide déduit la série de ces occurrences — vérifiez-les avant de confirmer un changement.",
+  "subscriptionDetailFootnote": "La série est déduite de ces prélèvements. Vérifiez-les avant de confirmer un changement.",
   "@subscriptionDetailFootnote": {
     "description": "Foot note under the history: the user is being asked to trust a deduction, so the evidence is part of the screen."
   },
@@ -3550,10 +3514,6 @@
   "@navGoals": {
     "description": "Sidebar label of the goals panel, last of the Gestion group."
   },
-  "navGoalsSubtitle": "Mettez de côté, virtuellement, pour ce qui compte",
-  "@navGoalsSubtitle": {
-    "description": "Top-bar descriptor of the goals panel."
-  },
   "goalsAdd": "Nouvel objectif",
   "@goalsAdd": {
     "description": "Primary top-bar action opening the goal form."
@@ -3596,11 +3556,11 @@
       }
     }
   },
-  "goalsEmptyTitle": "Donnez un nom à ce qui compte",
+  "goalsEmptyTitle": "Aucun objectif",
   "@goalsEmptyTitle": {
     "description": "Empty-state title of the goals panel."
   },
-  "goalsEmptyBody": "Un objectif est une enveloppe virtuelle : vous y mettez de côté à votre rythme, sans toucher à vos comptes.",
+  "goalsEmptyBody": "Un objectif réserve une somme sur le papier. Vos comptes ne sont pas modifiés.",
   "@goalsEmptyBody": {
     "description": "Empty-state body explaining what a virtual envelope is."
   },
@@ -3670,10 +3630,6 @@
   "@goalHistoryTitle": {
     "description": "Title of the allocation history card."
   },
-  "goalHistorySubtitle": "Une seule liste, montants signés — un retrait est une ligne négative.",
-  "@goalHistorySubtitle": {
-    "description": "Sub-line stating that the ledger is one signed list."
-  },
   "goalHistoryDate": "Date",
   "@goalHistoryDate": {
     "description": "Date column of the allocation history."
@@ -3690,7 +3646,7 @@
   "@goalHistoryDelete": {
     "description": "Tooltip on the control removing one allocation line."
   },
-  "goalHistoryEmpty": "Aucune allocation pour l'instant.",
+  "goalHistoryEmpty": "Aucune allocation.",
   "@goalHistoryEmpty": {
     "description": "Shown when a goal has no allocations yet."
   },
@@ -3846,10 +3802,6 @@
   "@settingsResetTitle": {
     "description": "Title of the danger zone card in Settings › Données."
   },
-  "settingsResetBadge": "IRRÉVERSIBLE",
-  "@settingsResetBadge": {
-    "description": "Pill beside the danger zone title, stating the stake in a word."
-  },
   "settingsResetSubtitle": "Réinitialiser la base de données supprime transactions, comptes, règles, catégories personnalisées, objectifs, abonnements, crédits, biens et simulations de ce profil. Les sauvegardes exportées ne sont pas touchées.",
   "@settingsResetSubtitle": {
     "description": "What a database reset deletes, and what it leaves alone."
@@ -3920,25 +3872,13 @@
   "@navMortgages": {
     "description": "Left nav label for the loans screen."
   },
-  "navMortgagesSubtitle": "Vos emprunts, leur coût et votre capacité",
-  "@navMortgagesSubtitle": {
-    "description": "Top-bar descriptor under the loans panel title."
-  },
   "navSimulator": "Simulateur",
   "@navSimulator": {
     "description": "Left nav label for the new-loan simulator screen."
   },
-  "navSimulatorSubtitle": "Ce qu'un nouveau crédit changerait",
-  "@navSimulatorSubtitle": {
-    "description": "Top-bar descriptor under the simulator panel title."
-  },
   "navNetworth": "Synthèse",
   "@navNetworth": {
     "description": "Left nav label for the net-worth screen. The EN label is 'Net worth', not 'Overview': the Overview group already owns that word."
-  },
-  "navNetworthSubtitle": "Ce que vous possédez, ce que vous devez",
-  "@navNetworthSubtitle": {
-    "description": "Top-bar descriptor under the net-worth panel title."
   },
   "mortgagesAdd": "Nouveau crédit",
   "@mortgagesAdd": {
@@ -3956,7 +3896,7 @@
   "@mortgagesEmptyTitle": {
     "description": "Empty state title of the loans panel."
   },
-  "mortgagesEmptyBody": "Ajoutez vos emprunts pour suivre leur coût réel, leur trajectoire et votre capacité — sans jamais relier Bastide à une banque.",
+  "mortgagesEmptyBody": "Ajoutez un emprunt pour suivre son coût, son échéancier et votre taux d’endettement.",
   "@mortgagesEmptyBody": {
     "description": "Empty state reassurance line of the loans panel."
   },
@@ -4053,7 +3993,7 @@
   "@mortgagesRatioUnknown": {
     "description": "Ratio card body when no income is known and no ratio can be computed."
   },
-  "mortgagesRatioDeclareLink": "Déclarer un revenu →",
+  "mortgagesRatioDeclareLink": "Déclarer un revenu",
   "@mortgagesRatioDeclareLink": {
     "description": "Iris link on the ledger-income ratio card."
   },
@@ -4061,7 +4001,7 @@
   "@mortgagesRatioDeclareButton": {
     "description": "Outline button on the unknown-income ratio card."
   },
-  "mortgagesRatioCaveat": "Lecture informative : ce repère ne lie aucun prêteur.",
+  "mortgagesRatioCaveat": "Lecture indicative, qui n’engage aucun prêteur.",
   "@mortgagesRatioCaveat": {
     "description": "HCSF caveat, always shown as body content on the ratio card, never as a tooltip."
   },
@@ -4182,15 +4122,6 @@
   "mortgagesChartTitle": "Trajectoire du capital restant dû",
   "@mortgagesChartTitle": {
     "description": "Title of the trajectory chart."
-  },
-  "mortgagesChartSubtitle": "{count, plural, =1{Le crédit, échéance après échéance, jusqu'au dernier remboursement} =2{Les deux crédits, échéance après échéance, jusqu'au dernier remboursement} other{Les {count} crédits, échéance après échéance, jusqu'au dernier remboursement}}",
-  "@mortgagesChartSubtitle": {
-    "description": "Subtitle of the trajectory chart, by active loan count.",
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
   },
   "mortgagesChartLegendTotal": "Capital restant dû total",
   "@mortgagesChartLegendTotal": {
@@ -4317,17 +4248,9 @@
   "@mortgageCostRateCaption": {
     "description": "Cost row: caption under the nominal rate."
   },
-  "mortgageCostTaegLabel": "TAEG",
+  "mortgageCostTaegLabel": "TAEG indicatif",
   "@mortgageCostTaegLabel": {
     "description": "Cost row: TAEG label."
-  },
-  "mortgageCostIndicative": "Indicatif",
-  "@mortgageCostIndicative": {
-    "description": "Iris marker pill beside the TAEG label. Rendered uppercase."
-  },
-  "mortgageCostTaegDisclaimer": "Indicatif : un TAEG réel inclut des frais que Bastide ne voit pas.",
-  "@mortgageCostTaegDisclaimer": {
-    "description": "TAEG disclaimer read by assistive tech on the INDICATIF pill."
   },
   "mortgageCostTaegCaption": "taux, assurance et frais inclus",
   "@mortgageCostTaegCaption": {
@@ -4462,7 +4385,7 @@
   "@mortgageFormPlateLabel": {
     "description": "Read-only computed instalment plate label."
   },
-  "mortgageFormPlateDetail": "échéance totale {instalment} — intérêts totaux {interest}",
+  "mortgageFormPlateDetail": "échéance totale {instalment} · intérêts totaux {interest}",
   "@mortgageFormPlateDetail": {
     "description": "Computed instalment plate: total instalment and total interest.",
     "placeholders": {
@@ -4634,10 +4557,6 @@
   "@simulatorFormTitle": {
     "description": "Title of the simulator input card."
   },
-  "simulatorFormSubtitle": "Le résultat se recalcule à chaque saisie",
-  "@simulatorFormSubtitle": {
-    "description": "Subtitle of the simulator input card: results are live, nothing is saved."
-  },
   "simulatorPrice": "Prix du bien",
   "@simulatorPrice": {
     "description": "Simulator field: property price."
@@ -4654,9 +4573,9 @@
   "@simulatorPrincipal": {
     "description": "Simulator field: borrowed amount, derived from price + fees − down payment until edited."
   },
-  "simulatorDerivedPill": "Dérivé",
-  "@simulatorDerivedPill": {
-    "description": "Gray marker pill beside the borrowed amount while it is still derived. Rendered uppercase."
+  "simulatorPrincipalDerivedHelper": "calculé : prix − apport + frais",
+  "@simulatorPrincipalDerivedHelper": {
+    "description": "Helper under the borrowed amount while it is still computed from the price, the down payment and the fees. Editing the field takes it over."
   },
   "simulatorRate": "Taux nominal",
   "@simulatorRate": {
@@ -4787,13 +4706,9 @@
   "@simulatorCostEmpty": {
     "description": "Total cost caption before anything can be computed."
   },
-  "simulatorTaegLabel": "TAEG",
+  "simulatorTaegLabel": "TAEG indicatif",
   "@simulatorTaegLabel": {
     "description": "Annual percentage rate result card label."
-  },
-  "simulatorIndicativePill": "Indicatif",
-  "@simulatorIndicativePill": {
-    "description": "Iris marker pill always attached to the TAEG. Rendered uppercase."
   },
   "simulatorTaegCaption": "taux, assurance et frais inclus",
   "@simulatorTaegCaption": {
@@ -4807,7 +4722,7 @@
   "@simulatorHcsfOver": {
     "description": "Amber status pill when the reading is above an HCSF reference. Information, never a refusal."
   },
-  "simulatorHcsfCaveat": "Informative — ne lie aucun prêteur",
+  "simulatorHcsfCaveat": "Lecture indicative, qui n’engage aucun prêteur.",
   "@simulatorHcsfCaveat": {
     "description": "HCSF caveat, always shown as body content on the card: no lender is bound by this reading."
   },
@@ -4897,7 +4812,7 @@
       }
     }
   },
-  "simulatorCapacityCaptionExisting": "il ne reste que {available} d'échéance sous le repère une fois vos crédits actuels comptés — c'est ce qui rend la capacité si faible, pas le bien visé",
+  "simulatorCapacityCaptionExisting": "Vos crédits actuels laissent {available} d’échéance sous le repère. C’est ce qui limite la capacité, pas le bien visé.",
   "@simulatorCapacityCaptionExisting": {
     "description": "Capacity caption when the current loans use up the room under the reference: explains the cause calmly.",
     "placeholders": {
@@ -4913,10 +4828,6 @@
   "simulatorChartTitle": "Projection annuelle",
   "@simulatorChartTitle": {
     "description": "Title of the yearly projection chart."
-  },
-  "simulatorChartSubtitle": "Capital remboursé et intérêts versés, année par année",
-  "@simulatorChartSubtitle": {
-    "description": "Subtitle of the yearly projection chart."
   },
   "simulatorChartCapital": "Capital",
   "@simulatorChartCapital": {
@@ -5008,9 +4919,9 @@
   "@simulatorSaveName": {
     "description": "Save-scenario modal name field label."
   },
-  "simulatorSaveNamePrefill": " — {price}",
+  "simulatorSaveNamePrefill": ", {price}",
   "@simulatorSaveNamePrefill": {
-    "description": "Prefill of the scenario name on the « lieu — prix k€ » pattern, with an empty place slot before the dash for the user to type into. Keep the leading space.",
+    "description": "Prefill of the scenario name on the « lieu, prix k€ » pattern, with an empty place slot before the comma for the user to type into.",
     "placeholders": {
       "price": {
         "type": "String"
@@ -5144,10 +5055,6 @@
       }
     }
   },
-  "simulatorCompareSubtitle": "Mêmes lignes pour chaque colonne · un tiret quand la donnée ne s'applique pas",
-  "@simulatorCompareSubtitle": {
-    "description": "Subtitle of the comparison card."
-  },
   "simulatorCompareClose": "Fermer la comparaison",
   "@simulatorCompareClose": {
     "description": "Secondary button closing the comparison."
@@ -5176,7 +5083,7 @@
   "@simulatorCompareWithExisting": {
     "description": "Comparison row: debt ratio with the current loans counted."
   },
-  "simulatorCompareFoot": "Taux d'endettement sur un revenu {source, select, declared{déclaré} other{médian constaté}} de {income} · repère HCSF {limit} · lecture informative, ne lie aucun prêteur.",
+  "simulatorCompareFoot": "Taux d'endettement sur un revenu {source, select, declared{déclaré} other{médian constaté}} de {income} · repère HCSF {limit}. Lecture indicative, qui n’engage aucun prêteur.",
   "@simulatorCompareFoot": {
     "description": "Comparison foot: the income the ratios are read against, the reference, and the no-lender-is-bound statement.",
     "placeholders": {
@@ -5191,7 +5098,7 @@
       }
     }
   },
-  "simulatorCompareFootUnknown": "Aucun revenu connu, donc aucun taux d'endettement · repère HCSF {limit} · lecture informative, ne lie aucun prêteur.",
+  "simulatorCompareFootUnknown": "Aucun revenu connu, donc aucun taux d'endettement · repère HCSF {limit}. Lecture indicative, qui n’engage aucun prêteur.",
   "@simulatorCompareFootUnknown": {
     "description": "Comparison foot when no income is known.",
     "placeholders": {
@@ -5281,7 +5188,7 @@
   "@propertyFormAmountInvalid": {
     "description": "Validation message when a required amount is missing or not positive."
   },
-  "propertyFormAmountOptionalInvalid": "Montant illisible — laissez vide s'il est inconnu.",
+  "propertyFormAmountOptionalInvalid": "Montant illisible. Laissez vide s'il est inconnu.",
   "@propertyFormAmountOptionalInvalid": {
     "description": "Validation message when an optional amount cannot be read."
   },
@@ -5493,7 +5400,7 @@
       }
     }
   },
-  "networthDeltaCaptionFlat": "vs {month} — valeur des biens inchangée",
+  "networthDeltaCaptionFlat": "vs {month} · valeur des biens inchangée",
   "@networthDeltaCaptionFlat": {
     "description": "Caption beside the month delta pill when property values are held flat.",
     "placeholders": {
@@ -5543,10 +5450,6 @@
   "networthCompositionTitle": "Composition de l'actif",
   "@networthCompositionTitle": {
     "description": "Title of the asset composition card."
-  },
-  "networthCompositionSubtitle": "Comptes par type, biens par nature",
-  "@networthCompositionSubtitle": {
-    "description": "Subtitle of the asset composition card."
   },
   "networthCompositionChecking": "Comptes courants",
   "@networthCompositionChecking": {
@@ -5631,19 +5534,19 @@
   "@networthCompositionInvite": {
     "description": "Dashed plate under the composition when no property is declared."
   },
-  "networthCompositionInviteAction": "Nouveau bien →",
+  "networthCompositionInviteAction": "Nouveau bien",
   "@networthCompositionInviteAction": {
     "description": "Link in the no-property plate that opens the new-property form."
   },
-  "networthExclusionsLabel": "Volontairement non compté",
+  "networthExclusionsLabel": "À savoir",
   "@networthExclusionsLabel": {
-    "description": "Section label of the card listing what net worth deliberately leaves out."
+    "description": "Label above the list of things the net worth leaves out on purpose."
   },
   "networthExclusionGoalsTitle": "Objectifs",
   "@networthExclusionGoalsTitle": {
     "description": "Exclusion: savings goals."
   },
-  "networthExclusionGoalsBody": "Une allocation étiquette de l'argent déjà présent sur un compte — le compter reviendrait à le compter deux fois.",
+  "networthExclusionGoalsBody": "Les objectifs réservent de l’argent déjà présent sur un compte. Ils ne sont pas comptés une seconde fois.",
   "@networthExclusionGoalsBody": {
     "description": "Why goals are not counted in net worth."
   },
@@ -5655,11 +5558,11 @@
   "@networthExclusionSubscriptionsBody": {
     "description": "Why subscriptions are not counted as liabilities."
   },
-  "networthEmptyTitle": "Rien à additionner pour l'instant",
+  "networthEmptyTitle": "Aucun compte, bien ou crédit",
   "@networthEmptyTitle": {
     "description": "Empty-state title when there are no accounts, properties or loans."
   },
-  "networthEmptyBody": "Importez un compte ou déclarez un bien : la synthèse additionne ce que vous possédez et soustrait vos crédits, sans rien inventer entre les deux.",
+  "networthEmptyBody": "Importez un compte ou déclarez un bien. La synthèse additionne vos avoirs et soustrait vos crédits.",
   "@networthEmptyBody": {
     "description": "Empty-state body of the net-worth panel."
   },
@@ -5679,10 +5582,6 @@
   "@networthSeriesTitle": {
     "description": "Title of the net-worth series card."
   },
-  "networthSeriesSubtitle": "Comptes et crédits, mois après mois",
-  "@networthSeriesSubtitle": {
-    "description": "Subtitle of the net-worth series card."
-  },
   "networthSeriesRange": "{from} → {to}",
   "@networthSeriesRange": {
     "description": "First and last month the series covers.",
@@ -5695,11 +5594,11 @@
       }
     }
   },
-  "networthSeriesEmpty": "Pas encore d'historique : la série commence au premier mois clos d'un compte importé, ou au premier montant que vous déclarez.",
+  "networthSeriesEmpty": "Aucun historique : la série commence au premier mois clos d'un compte importé, ou au premier montant que vous déclarez.",
   "@networthSeriesEmpty": {
     "description": "Shown in place of the chart when the series has no closed month yet."
   },
-  "networthSeriesCaveat": "Les biens sont maintenus à leur valeur déclarée (estimation la plus ancienne : {date}) et ne comptent qu'à partir de leur date d'acquisition, les crédits qu'à partir de leur déblocage. Les mois sans donnée sont simplement absents.",
+  "networthSeriesCaveat": "Les biens sont maintenus à leur valeur déclarée (estimation la plus ancienne : {date}) et ne comptent qu'à partir de leur date d'acquisition, les crédits qu'à partir de leur déblocage. Les mois sans donnée sont absents.",
   "@networthSeriesCaveat": {
     "description": "Info banner under the series when property values are held flat, naming the oldest current valuation date.",
     "placeholders": {
@@ -5772,7 +5671,7 @@
   "@networthDeclaredClose": {
     "description": "Closes the declared-history modal."
   },
-  "networthDeclaredEmpty": "Aucun montant déclaré pour l'instant.",
+  "networthDeclaredEmpty": "Aucun montant déclaré.",
   "@networthDeclaredEmpty": {
     "description": "Shown in the modal when nothing is declared."
   },
@@ -6035,10 +5934,6 @@
   "@settingsProfileNameModalCancel": {
     "description": "Button closing the change-username modal without saving."
   },
-  "startupLoading": "Démarrage de Bastide…",
-  "@startupLoading": {
-    "description": "Shown under the logo while the app starts its local engine."
-  },
   "startupPrivacy": "Vos données restent sur cet ordinateur.",
   "@startupPrivacy": {
     "description": "The privacy promise under the product name on the startup screen."
@@ -6131,7 +6026,7 @@
   "@settingsAiOllamaFound": {
     "description": "Title of the plate offering an Ollama install found on its default loopback address."
   },
-  "settingsAiOllamaModels": "{count, plural, =0{Aucun modèle installé pour l'instant} =1{1 modèle installé} other{{count} modèles installés}}",
+  "settingsAiOllamaModels": "{count, plural, =0{Aucun modèle installé} =1{1 modèle installé} other{{count} modèles installés}}",
   "@settingsAiOllamaModels": {
     "description": "Caption under settingsAiOllamaFound: how many models that Ollama lists.",
     "placeholders": {
@@ -6194,7 +6089,7 @@
       }
     }
   },
-  "accountDetailNoHistory": "Pas encore d’opérations",
+  "accountDetailNoHistory": "Aucune opération",
   "@accountDetailNoHistory": {
     "description": "Meta strip fact on an account with no transaction yet."
   },
@@ -6208,7 +6103,7 @@
       }
     }
   },
-  "accountDetailNoImport": "Aucun import pour l’instant",
+  "accountDetailNoImport": "Aucun import",
   "@accountDetailNoImport": {
     "description": "Meta strip fact on an account no statement was imported into."
   },
@@ -6508,7 +6403,7 @@
   "@accountDetailSeeAll": {
     "description": "Link opening the transactions panel filtered on this account."
   },
-  "accountDetailNoTransactions": "Aucune opération pour l’instant",
+  "accountDetailNoTransactions": "Aucune opération",
   "@accountDetailNoTransactions": {
     "description": "Dashed row in the recent transactions card of an account with none."
   },
@@ -6516,7 +6411,7 @@
   "@markRecurringAction": {
     "description": "Tooltip of the row action opening the « Marquer comme récurrent » dialog on an outflow."
   },
-  "markRecurringOpenSeriesAction": "Déjà récurrent — voir la série",
+  "markRecurringOpenSeriesAction": "Déjà récurrent : voir la série",
   "@markRecurringOpenSeriesAction": {
     "description": "Tooltip of the same row action on an outflow that already belongs to a recurring series: it opens that series in Abonnements."
   },
@@ -6691,7 +6586,7 @@
   "@seriesPickerSearchHint": {
     "description": "Placeholder of the series picker's search field."
   },
-  "seriesPickerEmpty": "Vous ne suivez encore aucune série.",
+  "seriesPickerEmpty": "Vous ne suivez aucune série.",
   "@seriesPickerEmpty": {
     "description": "Series picker: the user has no series to offer."
   },

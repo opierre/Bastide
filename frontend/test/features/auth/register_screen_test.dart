@@ -131,7 +131,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(
-      find.text('Cet e-mail est déjà utilisé — connectez-vous plutôt.'),
+      find.text('Cet e-mail a déjà un compte. Connectez-vous.'),
       findsOneWidget,
     );
   });

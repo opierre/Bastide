@@ -57,7 +57,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     final hasCredentialError = authState.hasError;
 
     return AuthScaffold.login(
-      tagline: l10n.authTagline,
       form: Form(
         key: _formKey,
         child: Column(

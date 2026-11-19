@@ -22,13 +22,13 @@ class AuthScaffold extends StatelessWidget {
     this.tagline,
   });
 
-  /// Login's variant: the wider lockup and the tagline.
+  /// Login's variant: the wider lockup.
   const AuthScaffold.login({
     super.key,
     required this.form,
     required this.footer,
-    required String this.tagline,
   }) : cardWidth = 416,
+       tagline = null,
        lockup = const BrandLockup.login();
 
   /// Register's variant: a smaller lockup and a wider card, with no tagline —
