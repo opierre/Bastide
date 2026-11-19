@@ -39,9 +39,8 @@ class UserAvatar extends StatelessWidget {
         ),
         size: size,
       ),
-      PictureChoice() when image != null => ClipRRect(
+      PictureChoice() when image != null => ClipOval(
         key: const Key('userAvatarPicture'),
-        borderRadius: BorderRadius.circular(size * 0.3),
         child: Image.memory(
           image!,
           width: size,
@@ -77,13 +76,13 @@ class _InitialsPlate extends StatelessWidget {
       alignment: Alignment.center,
       decoration: BoxDecoration(
         color: hue.withValues(alpha: 0.16),
-        borderRadius: BorderRadius.circular(size * 0.3),
+        shape: BoxShape.circle,
       ),
       child: Text(
         MonogramAvatar.initialsFor(name),
         style: TextStyle(
           color: hue,
-          fontWeight: FontWeight.w700,
+          fontWeight: FontWeight.w600,
           fontSize: size * 0.36,
           letterSpacing: 0.2,
           fontFamily: AppFonts.geist,

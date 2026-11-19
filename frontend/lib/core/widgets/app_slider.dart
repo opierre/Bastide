@@ -44,30 +44,38 @@ class AppSlider extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      width: width,
-      child: SliderTheme(
-        data: SliderTheme.of(context).copyWith(
-          trackHeight: _trackHeight,
-          trackShape: const _FilledTrackShape(),
-          thumbShape: const _RingedThumbShape(),
-          overlayShape: const RoundSliderOverlayShape(overlayRadius: 16),
-          overlayColor: context.colors.accentSoft,
-          activeTrackColor: context.colors.accent,
-          inactiveTrackColor: context.colors.lineStrong,
-          thumbColor: context.colors.text,
-          overlappingShapeStrokeColor: context.colors.bg,
-          // The value indicator would cover the live percentage in the label
-          // above with the same number.
-          showValueIndicator: ShowValueIndicator.never,
-        ),
-        child: Slider(
-          value: value.clamp(min, max),
-          min: min,
-          max: max,
-          divisions: divisions,
-          onChanged: onChanged,
-          semanticFormatterCallback: semanticFormatter,
+    // Disabled is 45 % opacity (`00` §6) rather than Material's own greyed
+    // colours, like every other control.
+    return Opacity(
+      opacity: onChanged == null ? 0.45 : 1,
+      child: SizedBox(
+        width: width,
+        child: SliderTheme(
+          data: SliderTheme.of(context).copyWith(
+            trackHeight: _trackHeight,
+            trackShape: const _FilledTrackShape(),
+            thumbShape: const _RingedThumbShape(),
+            overlayShape: const RoundSliderOverlayShape(overlayRadius: 16),
+            overlayColor: context.colors.accentSoft,
+            activeTrackColor: context.colors.accent,
+            inactiveTrackColor: context.colors.lineStrong,
+            thumbColor: context.colors.text,
+            disabledActiveTrackColor: context.colors.accent,
+            disabledInactiveTrackColor: context.colors.lineStrong,
+            disabledThumbColor: context.colors.text,
+            overlappingShapeStrokeColor: context.colors.bg,
+            // The value indicator would cover the live percentage in the label
+            // above with the same number.
+            showValueIndicator: ShowValueIndicator.never,
+          ),
+          child: Slider(
+            value: value.clamp(min, max),
+            min: min,
+            max: max,
+            divisions: divisions,
+            onChanged: onChanged,
+            semanticFormatterCallback: semanticFormatter,
+          ),
         ),
       ),
     );

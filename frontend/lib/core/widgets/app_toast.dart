@@ -5,20 +5,17 @@ import 'package:flutter/material.dart';
 import '../theme/tokens.dart';
 import 'inline_banner.dart';
 
-/// How long a toast stays before it withdraws. Long enough to read two lines
-/// in French, which run some 15–20 % past their English counterparts.
-const _toastDuration = Duration(seconds: 6);
+/// How long a toast stays before it leaves (`docs/design/00-design-system.md`
+/// §7).
+const toastDuration = Duration(seconds: 4);
 
-/// Shows a bottom-right toast: an overlay-surface card, radius 14, with a
-/// semantic leading disc (`docs/design/00` §Components).
+/// Shows a toast in the bottom-right corner, 24 px from the edges: `surface`,
+/// 1 px `lineStrong`, radius 8, `shadow`, padding 10 14; the status icon and
+/// a 13 px [title], with an optional second line 12 `textSecondary`. It comes
+/// in over 120 ms (opacity and 4 px of travel) and leaves after 4 s.
 ///
 /// An [OverlayEntry] rather than a [SnackBar], for the position: Material pins
-/// a snack bar to the bottom centre and gives no honest way to park a
-/// fixed-width card in the corner the design draws it in.
-///
-/// [message] is the second line — the reassurance beneath the headline. The
-/// « Exécuter les règles » toast needs both: the count alone leaves the user
-/// wondering whether the run also overwrote the categories they chose by hand.
+/// a snack bar to the bottom centre.
 void showAppToast(
   BuildContext context, {
   required String title,
@@ -73,76 +70,106 @@ class _Toast extends StatefulWidget {
   State<_Toast> createState() => _ToastState();
 }
 
-class _ToastState extends State<_Toast> {
+class _ToastState extends State<_Toast> with SingleTickerProviderStateMixin {
   Timer? _timer;
+  late final AnimationController _entrance = AnimationController(
+    vsync: this,
+    duration: AppMotion.overlay,
+  );
+
+  /// How far the toast travels as it comes in.
+  static const _travel = 4.0;
 
   @override
   void initState() {
     super.initState();
-    _timer = Timer(_toastDuration, widget.onDismiss);
+    _timer = Timer(toastDuration, widget.onDismiss);
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_entrance.isDismissed) {
+      // Reduced motion: every duration is 0 (`00` §13).
+      if (MediaQuery.maybeDisableAnimationsOf(context) ?? false) {
+        _entrance.value = 1;
+      } else {
+        _entrance.forward();
+      }
+    }
   }
 
   @override
   void dispose() {
     _timer?.cancel();
+    _entrance.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
+    final colors = context.colors;
+    final curve = CurvedAnimation(parent: _entrance, curve: Curves.easeOut);
 
     return Positioned(
       right: AppSpacing.lg,
       bottom: AppSpacing.lg,
-      child: Material(
-        color: Colors.transparent,
-        child: Container(
-          key: const Key('appToast'),
-          constraints: const BoxConstraints(maxWidth: 360),
-          padding: const EdgeInsets.symmetric(
-            horizontal: AppSpacing.md,
-            vertical: AppSpacing.sm + AppSpacing.xs,
+      child: AnimatedBuilder(
+        animation: curve,
+        builder: (context, child) => Opacity(
+          opacity: curve.value,
+          child: Transform.translate(
+            offset: Offset(0, _travel * (1 - curve.value)),
+            child: child,
           ),
-          decoration: BoxDecoration(
-            color: context.colors.surface,
-            borderRadius: BorderRadius.circular(AppRadii.inset),
-            border: Border.all(color: context.colors.line),
-            boxShadow: context.colors.shadow,
-          ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Container(
-                margin: const EdgeInsets.only(top: 5),
-                width: 8,
-                height: 8,
-                decoration: BoxDecoration(
-                  color: widget.tone.color(context.colors),
-                  shape: BoxShape.circle,
+        ),
+        child: Material(
+          color: Colors.transparent,
+          child: Container(
+            key: const Key('appToast'),
+            constraints: const BoxConstraints(maxWidth: 360),
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+            decoration: BoxDecoration(
+              color: colors.surface,
+              borderRadius: BorderRadius.circular(AppRadii.container),
+              border: Border.all(color: colors.lineStrong),
+              boxShadow: colors.shadow,
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.only(top: AppSpacing.xxs),
+                  child: Icon(
+                    widget.tone.icon,
+                    key: const Key('appToastIcon'),
+                    size: AppSizes.iconSmall,
+                    color: widget.tone.color(colors),
+                  ),
                 ),
-              ),
-              const SizedBox(width: AppSpacing.sm + AppSpacing.xs),
-              Flexible(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(widget.title, style: textTheme.titleSmall),
-                    if (widget.message != null) ...[
-                      const SizedBox(height: 2),
-                      Text(
-                        widget.message!,
-                        style: textTheme.bodySmall?.copyWith(
-                          color: context.colors.textSecondary,
+                const SizedBox(width: AppSpacing.sm),
+                Flexible(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(widget.title, style: textTheme.bodyMedium),
+                      if (widget.message != null) ...[
+                        const SizedBox(height: AppSpacing.xxs),
+                        Text(
+                          widget.message!,
+                          style: textTheme.bodySmall?.copyWith(
+                            color: colors.textSecondary,
+                          ),
                         ),
-                      ),
+                      ],
                     ],
-                  ],
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),

@@ -306,7 +306,7 @@ void main() {
           .widget<AppSelect<String?>>(
             find.byKey(const Key('categoryFormParent')),
           )
-          .onChanged(null);
+          .onChanged!(null);
       await tester.pumpAndSettle();
 
       expect(header, findsNothing);

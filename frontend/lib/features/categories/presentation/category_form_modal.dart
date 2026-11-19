@@ -5,7 +5,7 @@ import '../../../core/l10n/category_display.dart';
 import '../../../core/theme/tokens.dart';
 import '../../../core/widgets/app_modal.dart';
 import '../../../core/widgets/app_select.dart';
-import '../../../core/widgets/category_chip.dart';
+import '../../../core/widgets/category_label.dart';
 import '../../../core/widgets/inline_banner.dart';
 import '../../../core/widgets/labeled_field.dart';
 import '../../../core/widgets/primary_button.dart';

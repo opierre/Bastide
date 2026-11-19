@@ -3,9 +3,9 @@ import 'package:flutter/material.dart';
 import '../../../core/l10n/category_display.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/tokens.dart';
-import '../../../core/widgets/app_chip.dart';
-import '../../../core/widgets/category_chip.dart';
 import '../../../core/widgets/app_toggle.dart';
+import '../../../core/widgets/category_label.dart';
+import '../../../core/widgets/status_text.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../categories/domain/category.dart';
 import '../domain/rule.dart';
@@ -103,7 +103,7 @@ class RuleRow extends StatelessWidget {
                           ),
                         ),
                       ),
-                      AppChip(
+                      StatusText(
                         key: Key('ruleCondition-${rule.id}'),
                         label: ruleConditionLabel(l10n, rule.matchType),
                       ),
@@ -198,9 +198,9 @@ class _TargetChip extends StatelessWidget {
     final l10n = AppLocalizations.of(context)!;
     final target = category;
     if (target == null) {
-      return CategoryChip.uncategorized(label: l10n.ruleTargetMissing);
+      return CategoryLabel.uncategorized(label: l10n.ruleTargetMissing);
     }
-    return CategoryChip(
+    return CategoryLabel(
       label: localizedCategoryName(l10n, target.name),
       slug: categorySlugFor(name: target.name, kind: target.kind),
     );

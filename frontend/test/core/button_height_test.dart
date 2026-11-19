@@ -17,8 +17,8 @@ void main() {
     final cancelBox = tester.getRect(find.byKey(cancel));
     final confirmBox = tester.getRect(find.byKey(confirm));
 
-    expect(cancelBox.height, AppChrome.buttonHeight);
-    expect(confirmBox.height, AppChrome.buttonHeight);
+    expect(cancelBox.height, AppSizes.button);
+    expect(confirmBox.height, AppSizes.button);
     expect(cancelBox.center.dy, confirmBox.center.dy);
   }
 

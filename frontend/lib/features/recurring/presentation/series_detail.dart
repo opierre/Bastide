@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:lucide_icons_flutter/lucide_icons_300.dart';
 
 import '../../../core/l10n/category_display.dart';
 import '../../../core/theme/app_theme.dart';
@@ -7,11 +8,11 @@ import '../../../core/theme/tokens.dart';
 import '../../../core/widgets/amount_text.dart';
 import '../../../core/widgets/app_card.dart';
 import '../../../core/widgets/app_toast.dart';
-import '../../../core/widgets/category_chip.dart';
+import '../../../core/widgets/category_label.dart';
 import '../../../core/widgets/inline_banner.dart';
 import '../../../core/widgets/institution_avatar.dart';
 import '../../../core/widgets/state_views.dart';
-import '../../../core/widgets/status_pill.dart';
+import '../../../core/widgets/status_text.dart';
 import '../../../l10n/app_localizations.dart';
 import '../application/subscriptions_controller.dart';
 import '../domain/recurring_series.dart';
@@ -269,7 +270,7 @@ class _HeaderCard extends ConsumerWidget {
                     ),
                     if (category != null) ...[
                       const SizedBox(width: AppSpacing.sm + AppSpacing.xs),
-                      CategoryChip(
+                      CategoryLabel(
                         label: localizedCategoryName(l10n, category.name),
                         slug: categorySlugFor(
                           name: category.name,
@@ -412,9 +413,10 @@ class _HistoryCard extends StatelessWidget {
             // the list row uses for the same fact.
             Align(
               alignment: Alignment.centerLeft,
-              child: StatusPill(
+              child: StatusText(
                 key: Key('seriesOccurrenceChange-${stepped.id}'),
-                tone: StatusPillTone.warning,
+                tone: StatusTone.warning,
+                icon: LucideIcons300.trendingUp,
                 label: l10n.subscriptionDetailChange(
                   _money(series.previousAmountMinor!, series.currency, locale),
                   _money(series.expectedAmountMinor, series.currency, locale),

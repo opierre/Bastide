@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 
 import '../theme/tokens.dart';
-import 'app_card.dart';
+import 'section_heading.dart';
 
-/// The shared shell every chart card builds on: an [AppCard] with a title row and a body slot.
-/// Panels supply their own chart drawing (donut, bars, sparkline, …) as [child] — this widget
-/// only owns the title/spacing so every chart card reads as one family across the app.
+/// A chart's section (`docs/design/00-design-system.md` §1.2, §9): a
+/// [SectionHeading] with the legend or a control on its right, then the
+/// chart filling the rest. Sections, not cards: there is no box around it.
 class ChartContainer extends StatelessWidget {
   const ChartContainer({
     super.key,
@@ -18,49 +18,32 @@ class ChartContainer extends StatelessWidget {
   final String title;
   final Widget child;
 
-  /// The 12.5px secondary line under the title, naming the window the chart covers —
-  /// « Mai 2026 · 7 catégories », « 4 derniers mois ».
+  /// The window the chart covers, as a 12 `textTertiary` caption under the
+  /// heading. The copy rules drop chart subtitles (`00` §14); until the panel
+  /// tickets remove them, they render quietly here.
   final String? subtitle;
 
-  /// Optional header content aligned to the trailing edge (a legend toggle, a header metric).
+  /// The legend (category labels, required for two series or more) or a
+  /// control, on the heading's line.
   final Widget? trailing;
 
   @override
   Widget build(BuildContext context) {
-    final textTheme = Theme.of(context).textTheme;
-
-    return AppCard(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(title, style: textTheme.titleMedium),
-                    if (subtitle case final subtitle?) ...[
-                      const SizedBox(height: 2),
-                      Text(
-                        subtitle,
-                        style: textTheme.bodySmall?.copyWith(
-                          color: context.colors.textSecondary,
-                        ),
-                      ),
-                    ],
-                  ],
-                ),
-              ),
-              ?trailing,
-            ],
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        SectionHeading(title: title, trailing: trailing),
+        if (subtitle case final subtitle?) ...[
+          Text(
+            subtitle,
+            style: Theme.of(
+              context,
+            ).textTheme.bodySmall?.copyWith(color: context.colors.textTertiary),
           ),
-          const SizedBox(height: AppSpacing.md),
-          Expanded(child: child),
+          const SizedBox(height: AppSpacing.sm),
         ],
-      ),
+        Expanded(child: child),
+      ],
     );
   }
 }

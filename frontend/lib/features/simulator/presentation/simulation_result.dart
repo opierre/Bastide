@@ -10,7 +10,8 @@ import '../../../core/widgets/inline_banner.dart';
 import '../../../core/widgets/labeled_field.dart';
 import '../../../core/widgets/money_field.dart';
 import '../../../core/widgets/primary_button.dart';
-import '../../../core/widgets/status_pill.dart';
+import '../../../core/widgets/repere_meter.dart';
+import '../../../core/widgets/status_text.dart';
 import '../../../l10n/app_localizations.dart';
 import '../application/simulator_controller.dart';
 import '../domain/simulation.dart';
@@ -285,10 +286,10 @@ class HcsfReadingCard extends StatelessWidget {
               Text(l10n.simulatorHcsfTitle, style: textTheme.titleMedium),
               if (over) ...[
                 const SizedBox(width: AppSpacing.sm + 2),
-                StatusPill(
+                StatusText(
                   key: const Key('hcsfOverPill'),
                   label: l10n.simulatorHcsfOver,
-                  tone: StatusPillTone.warning,
+                  tone: StatusTone.warning,
                 ),
               ],
               const Spacer(),
@@ -351,11 +352,15 @@ class _RatioColumn extends StatelessWidget {
       reference: l10n.simulatorReference(
         formatBps(result.hcsf.limitBps, locale, digits: 0),
       ),
-      gauge: _ReadingGauge(
+      // The tone follows the API's `within_*` flags, not a comparison made
+      // here.
+      gauge: RepereMeter(
         key: const Key('hcsfRatioGauge'),
-        fill: ratio / simulatorRatioScaleBps,
-        tick: result.hcsf.limitBps / simulatorRatioScaleBps,
-        warning: result.hcsf.withinRatio == false,
+        fraction: ratio / simulatorRatioScaleBps,
+        markFraction: result.hcsf.limitBps / simulatorRatioScaleBps,
+        tone: result.hcsf.withinRatio == false
+            ? RepereTone.over
+            : RepereTone.normal,
       ),
       caption: income == null
           ? null
@@ -396,11 +401,11 @@ class _TermColumn extends StatelessWidget {
           : l10n.simulatorReference(termLabel(l10n, hcsf.maxTermMonths)),
       gauge: hcsf == null
           ? null
-          : _ReadingGauge(
+          : RepereMeter(
               key: const Key('hcsfTermGauge'),
-              fill: term / SimulatorInputs.maxTermMonths,
-              tick: hcsf.maxTermMonths / SimulatorInputs.maxTermMonths,
-              warning: !hcsf.withinTerm,
+              fraction: term / SimulatorInputs.maxTermMonths,
+              markFraction: hcsf.maxTermMonths / SimulatorInputs.maxTermMonths,
+              tone: hcsf.withinTerm ? RepereTone.normal : RepereTone.over,
             ),
       caption: hcsf == null
           ? null
@@ -529,66 +534,6 @@ class _ReadingColumn extends StatelessWidget {
           ),
         ],
       ],
-    );
-  }
-}
-
-/// A 6 px gauge on a fixed scale with its reference tick. Iris under the
-/// reference, amber over it — the tone follows the API's `within_*` flags, not
-/// a comparison made here. Past the scale the fill clamps; the printed figure
-/// beside it stays exact.
-class _ReadingGauge extends StatelessWidget {
-  const _ReadingGauge({
-    super.key,
-    required this.fill,
-    required this.tick,
-    required this.warning,
-  });
-
-  final double fill;
-  final double tick;
-  final bool warning;
-
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      height: 12,
-      child: Stack(
-        alignment: Alignment.centerLeft,
-        children: [
-          ClipRRect(
-            borderRadius: BorderRadius.circular(3),
-            child: Container(
-              height: 6,
-              color: context.colors.hover,
-              child: FractionallySizedBox(
-                alignment: Alignment.centerLeft,
-                widthFactor: fill.clamp(0.0, 1.0),
-                child: ColoredBox(
-                  color: warning
-                      ? context.colors.warning
-                      : context.colors.accent,
-                ),
-              ),
-            ),
-          ),
-          FractionallySizedBox(
-            alignment: Alignment.centerLeft,
-            widthFactor: tick.clamp(0.0, 1.0),
-            child: Align(
-              alignment: Alignment.centerRight,
-              child: FractionalTranslation(
-                translation: const Offset(0.5, 0),
-                child: Container(
-                  width: 2,
-                  height: 12,
-                  color: context.colors.text,
-                ),
-              ),
-            ),
-          ),
-        ],
-      ),
     );
   }
 }

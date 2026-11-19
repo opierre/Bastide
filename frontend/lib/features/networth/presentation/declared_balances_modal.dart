@@ -7,12 +7,12 @@ import '../../../core/api/api_client.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/tokens.dart';
 import '../../../core/widgets/amount_text.dart';
-import '../../../core/widgets/app_chip.dart';
 import '../../../core/widgets/app_modal.dart';
 import '../../../core/widgets/inline_banner.dart';
 import '../../../core/widgets/labeled_field.dart';
 import '../../../core/widgets/money_field.dart';
 import '../../../core/widgets/primary_button.dart';
+import '../../../core/widgets/status_text.dart';
 import '../../../l10n/app_localizations.dart';
 import '../application/networth_controller.dart';
 import '../domain/networth_summary.dart';
@@ -254,7 +254,6 @@ class _DeclaredBalancesModalState extends ConsumerState<DeclaredBalancesModal> {
                   child: PrimaryButton(
                     key: const Key('declaredSave'),
                     label: l10n.networthDeclaredSave,
-                    height: 44,
                     isLoading: _isSubmitting,
                     onPressed: _isSubmitting ? null : _submit,
                   ),
@@ -369,7 +368,7 @@ class _DeclaredRow extends StatelessWidget {
                 if (entry.superseded) ...[
                   const SizedBox(width: AppSpacing.sm),
                   Flexible(
-                    child: AppChip(
+                    child: StatusText(
                       key: Key('declaredSuperseded-$key'),
                       label: l10n.networthDeclaredSuperseded,
                     ),

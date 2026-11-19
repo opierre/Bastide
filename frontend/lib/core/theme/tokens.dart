@@ -617,6 +617,26 @@ abstract final class AppChart {
   static const dashGap = 4.0;
 
   static const baselineStroke = 1.0;
+
+  /// Hatching, for what is not yet a fact: 45° lines of [hatchStroke] on a
+  /// [hatchPitch] pitch, inside a [hatchOutline] outline.
+  static const hatchStroke = 1.5;
+  static const hatchPitch = 5.0;
+  static const hatchOutline = 1.0;
+
+  /// Bars by sign: at most this wide, radius [barRadius] on the outer end.
+  static const barMaxWidth = 18.0;
+  static const barRadius = 3.0;
+
+  /// Stacked bars: the gap between two segments, radius [stackRadius] on top.
+  static const stackGap = 2.0;
+  static const stackRadius = 2.0;
+
+  /// The second series under a line: a thinner step line, no area.
+  static const secondLineStroke = 1.5;
+
+  /// The guide under a step line's change of value: `warning` at this alpha.
+  static const changeGuideAlpha = 0.35;
 }
 
 /// Theme lookups for widgets: `context.colors`, `context.categoryColors`,

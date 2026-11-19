@@ -161,7 +161,6 @@ class _EmptyState extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     return EmptyStateView(
-      icon: Icons.bar_chart_rounded,
       title: l10n.dashboardEmptyTitle,
       message: l10n.dashboardEmptyBody,
       // A *primary* CTA, per the EmptyState in `docs/design/00` §Components — this is the one

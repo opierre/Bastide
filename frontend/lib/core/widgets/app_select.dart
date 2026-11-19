@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:lucide_icons_flutter/lucide_icons_300.dart';
 
 import '../theme/tokens.dart';
+import 'app_popover.dart';
+import 'focus_ring.dart';
 
 /// One choice offered by an [AppSelect].
 @immutable
@@ -23,26 +26,37 @@ class AppSelectItem<T> {
   final Widget? leading;
 }
 
-/// The spec's select: a field-shaped anchor with an iris chevron plate, and an
-/// overlay popover of 32px rows with an iris check on the selected one.
+/// The select of `docs/design/00-design-system.md` §6: the field look with a
+/// trailing 14 px `chevron-down` in `textTertiary`, 32 px in a form and 28 px
+/// in a toolbar ([AppSelect.toolbar]). It opens an [AppPopover] menu as wide
+/// as the field, with a `check` on the current choice.
 ///
-/// Built on [MenuAnchor] rather than [DropdownButtonFormField] for one reason
-/// that matters to the user: Material's dropdown lays its menu *over* the
-/// button, hiding the field the moment it opens, so the choice being changed
-/// disappears. A menu anchor keeps the field visible and drops the options
-/// beneath it, which is also what the design mockup draws.
+/// Built on [MenuAnchor] rather than [DropdownButtonFormField]: Material's
+/// dropdown lays its menu over the button and hides the choice being
+/// changed; a menu anchor keeps the field visible and drops the options
+/// beneath it.
 class AppSelect<T> extends StatefulWidget {
   const AppSelect({
     super.key,
     required this.value,
     required this.items,
     required this.onChanged,
-    this.height = 44,
+    this.height = AppSizes.formField,
   });
+
+  /// The 28 px select of a toolbar or the title bar.
+  const AppSelect.toolbar({
+    super.key,
+    required this.value,
+    required this.items,
+    required this.onChanged,
+  }) : height = AppSizes.toolbarSelect;
 
   final T value;
   final List<AppSelectItem<T>> items;
-  final ValueChanged<T> onChanged;
+
+  /// `null` disables the select.
+  final ValueChanged<T>? onChanged;
   final double height;
 
   @override
@@ -58,7 +72,7 @@ class _AppSelectState<T> extends State<AppSelect<T>> {
   /// [IntrinsicHeight], and a layout builder cannot answer an intrinsic query.
   double? _menuWidth;
 
-  /// Measures before opening so the popover can line up with the field it came
+  /// Measures before opening so the popover lines up with the field it came
   /// from. Both the resize and the open land in the same frame, so the menu is
   /// never built against a stale width.
   void _toggle(MenuController controller) {
@@ -80,41 +94,27 @@ class _AppSelectState<T> extends State<AppSelect<T>> {
     for (final item in widget.items) {
       if (item.value == widget.value) selected = item;
     }
+    final onChanged = widget.onChanged;
+    // A row is the field's width less the popover's padding on either side,
+    // so the popover's outer edge lines up with the field's.
+    final rowWidth = _menuWidth == null
+        ? null
+        : _menuWidth! - AppSpacing.xs * 2;
 
     return MenuAnchor(
       onOpen: () => setState(() => _isOpen = true),
       onClose: () => setState(() => _isOpen = false),
       alignmentOffset: const Offset(0, AppSpacing.xs),
-      style: MenuStyle(
-        // Lifted off the overlay surface and given a shadow, so the menu reads
-        // as floating *above* the dialog it opened from rather than as a panel
-        // spliced into it — see [context.colors.surface].
-        backgroundColor: WidgetStatePropertyAll(context.colors.surface),
-        surfaceTintColor: const WidgetStatePropertyAll(Colors.transparent),
-        shadowColor: WidgetStatePropertyAll(context.colors.shadow.first.color),
-        elevation: const WidgetStatePropertyAll(AppShadows.popoverElevation),
-        padding: const WidgetStatePropertyAll(
-          EdgeInsets.symmetric(vertical: AppSpacing.xs + 2),
-        ),
-        // Height only. The width is carried by the options themselves (see
-        // [_Option]): a vertical menu panel wraps itself in an
-        // [UnconstrainedBox], which drops the minimum width a [MenuStyle]
-        // asks for, so a style-level width would silently do nothing.
-        maximumSize: const WidgetStatePropertyAll(Size(double.infinity, 320)),
-        shape: WidgetStatePropertyAll(
-          RoundedRectangleBorder(
-            borderRadius: BorderRadius.all(Radius.circular(AppRadii.inset)),
-            side: BorderSide(color: context.colors.line),
-          ),
-        ),
-      ),
+      style: AppPopover.menuStyle(context),
       menuChildren: [
         for (final item in widget.items)
-          _Option<T>(
-            item: item,
-            width: _menuWidth,
-            isSelected: item.value == widget.value,
-            onSelected: () => widget.onChanged(item.value),
+          AppMenuItem(
+            label: item.label,
+            subtitle: item.subtitle,
+            leading: item.leading,
+            width: rowWidth,
+            selected: item.value == widget.value,
+            onPressed: onChanged == null ? null : () => onChanged(item.value),
           ),
       ],
       builder: (context, controller, _) => _Anchor(
@@ -123,16 +123,14 @@ class _AppSelectState<T> extends State<AppSelect<T>> {
         leading: selected?.leading,
         height: widget.height,
         isOpen: _isOpen,
-        onTap: () => _toggle(controller),
+        onTap: onChanged == null ? null : () => _toggle(controller),
       ),
     );
   }
 }
 
-/// The closed state: a field well whose chevron sits on an iris plate, so the
-/// control reads as *openable* rather than as a text input that happens to have
-/// an arrow at its end.
-class _Anchor extends StatelessWidget {
+/// The closed select: a field well with the chevron at its end.
+class _Anchor extends StatefulWidget {
   const _Anchor({
     super.key,
     required this.label,
@@ -146,152 +144,87 @@ class _Anchor extends StatelessWidget {
   final Widget? leading;
   final double height;
   final bool isOpen;
-  final VoidCallback onTap;
+  final VoidCallback? onTap;
 
   @override
-  Widget build(BuildContext context) {
-    return Material(
-      color: context.colors.field,
-      borderRadius: BorderRadius.circular(AppRadii.md),
-      child: InkWell(
-        borderRadius: BorderRadius.circular(AppRadii.md),
-        hoverColor: context.colors.hover,
-        onTap: onTap,
-        child: Container(
-          height: height,
-          padding: const EdgeInsets.only(
-            left: AppSpacing.sm + AppSpacing.xs,
-            right: AppSpacing.sm - 2,
-          ),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(AppRadii.md),
-            border: Border.all(
-              color: isOpen ? context.colors.accent : context.colors.line,
-            ),
-          ),
-          child: Row(
-            children: [
-              if (leading != null) ...[
-                leading!,
-                const SizedBox(width: AppSpacing.sm),
-              ],
-              Expanded(
-                child: Text(
-                  label,
-                  overflow: TextOverflow.ellipsis,
-                  style: Theme.of(context).textTheme.bodyLarge,
-                ),
-              ),
-              const SizedBox(width: AppSpacing.sm),
-              Container(
-                width: 26,
-                height: 26,
-                decoration: BoxDecoration(
-                  color: context.colors.accentSoft,
-                  borderRadius: BorderRadius.circular(AppRadii.sm),
-                ),
-                child: Icon(
-                  isOpen
-                      ? Icons.expand_less_rounded
-                      : Icons.expand_more_rounded,
-                  size: 17,
-                  color: context.colors.accent,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
+  State<_Anchor> createState() => _AnchorState();
 }
 
-/// A 32px option row. The selected one is marked by an iris check rather than
-/// by a filled row: the popover sits on the overlay surface, where a full-width
-/// fill would compete with hover.
-///
-/// [width] is the anchor's measured width, and it is the row — not the panel —
-/// that carries it: the panel sizes itself to its widest child, so widening
-/// every row is what makes the popover line up edge-to-edge with the field it
-/// dropped from. Null before the first open, where the rows fall back to their
-/// intrinsic width.
-class _Option<T> extends StatelessWidget {
-  const _Option({
-    required this.item,
-    required this.width,
-    required this.isSelected,
-    required this.onSelected,
-  });
-
-  final AppSelectItem<T> item;
-  final double? width;
-  final bool isSelected;
-  final VoidCallback onSelected;
+class _AnchorState extends State<_Anchor> {
+  bool _hovered = false;
+  bool _focused = false;
 
   @override
   Widget build(BuildContext context) {
-    // Sized from the outside rather than through the button's own minimum
-    // width, which desktop's compact [VisualDensity] would shave 8px off.
-    return SizedBox(width: width, child: _button(context));
-  }
+    final colors = context.colors;
+    final enabled = widget.onTap != null;
 
-  Widget _button(BuildContext context) {
-    return MenuItemButton(
-      onPressed: onSelected,
-      style: ButtonStyle(
-        minimumSize: const WidgetStatePropertyAll(Size(0, 32)),
-        padding: const WidgetStatePropertyAll(
-          EdgeInsets.symmetric(horizontal: AppSpacing.sm + AppSpacing.xs),
+    final field = Container(
+      height: widget.height,
+      padding: const EdgeInsets.only(
+        left: AppSpacing.sm + AppSpacing.xxs,
+        right: AppSpacing.sm,
+      ),
+      decoration: BoxDecoration(
+        color: _hovered && enabled ? colors.hover : colors.field,
+        borderRadius: BorderRadius.circular(AppRadii.control),
+        border: Border.all(
+          color: widget.isOpen ? colors.accent : colors.lineStrong,
         ),
-        // A neutral wash rather than a fixed fill: the popover now sits *on*
-        // #1E2634, so hovering to that same color would highlight nothing.
-        overlayColor: WidgetStatePropertyAll(context.colors.hover),
-        foregroundColor: WidgetStatePropertyAll(context.colors.text),
       ),
       child: Row(
         children: [
-          if (item.leading != null) ...[
-            item.leading!,
+          if (widget.leading != null) ...[
+            widget.leading!,
             const SizedBox(width: AppSpacing.sm),
           ],
           Expanded(
-            child: Padding(
-              // A two-line row keeps the single-line row's breathing room.
-              padding: EdgeInsets.symmetric(
-                vertical: item.subtitle == null ? 0 : AppSpacing.xs,
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    item.label,
-                    overflow: TextOverflow.ellipsis,
-                    // The same style the anchor states the current choice in,
-                    // so a row and the closed field read as the same text, not
-                    // as a summary and a smaller list beneath it.
-                    style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                      color: isSelected
-                          ? context.colors.accent
-                          : context.colors.text,
-                    ),
-                  ),
-                  if (item.subtitle case final subtitle?)
-                    Text(
-                      subtitle,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: context.textStyles.helper.copyWith(fontSize: 12),
-                    ),
-                ],
-              ),
+            child: Text(
+              widget.label,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: Theme.of(context).textTheme.bodyMedium,
             ),
           ),
-          if (isSelected) ...[
-            const SizedBox(width: AppSpacing.sm),
-            Icon(Icons.check_rounded, size: 15, color: context.colors.accent),
-          ],
+          const SizedBox(width: AppSpacing.xsPlus),
+          Icon(
+            LucideIcons300.chevronDown,
+            size: AppSizes.iconSmall,
+            color: colors.textTertiary,
+          ),
         ],
+      ),
+    );
+
+    return Opacity(
+      opacity: enabled ? 1 : 0.45,
+      child: FocusableActionDetector(
+        enabled: enabled,
+        mouseCursor: enabled
+            ? SystemMouseCursors.click
+            : SystemMouseCursors.basic,
+        onShowFocusHighlight: (value) => setState(() => _focused = value),
+        actions: {
+          ActivateIntent: CallbackAction<ActivateIntent>(
+            onInvoke: (_) {
+              widget.onTap?.call();
+              return null;
+            },
+          ),
+        },
+        child: MouseRegion(
+          onEnter: (_) => setState(() => _hovered = true),
+          onExit: (_) => setState(() => _hovered = false),
+          child: GestureDetector(
+            behavior: HitTestBehavior.opaque,
+            onTap: widget.onTap,
+            child: FocusRing(
+              focused: _focused,
+              radius: AppRadii.control,
+              child: field,
+            ),
+          ),
+        ),
       ),
     );
   }

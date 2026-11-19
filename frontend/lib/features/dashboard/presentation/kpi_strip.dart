@@ -5,8 +5,8 @@ import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/tokens.dart';
 import '../../../core/widgets/amount_text.dart';
 import '../../../core/widgets/app_card.dart';
+import '../../../core/widgets/repere_meter.dart';
 import '../../../l10n/app_localizations.dart';
-import '../../goals/presentation/goal_card.dart';
 import '../domain/dashboard_summary.dart';
 
 /// The dashboard's row 1: one card split by vertical dividers into four columns, in reading
@@ -146,10 +146,10 @@ class _SavingsColumn extends StatelessWidget {
             style: tabularNumberStyle(textTheme.displayMedium!),
           ),
           const SizedBox(height: AppSpacing.sm),
-          GoalProgressBar(
+          RepereMeter(
             key: const Key('dashboardSavingsGoalBar'),
             fraction: summary.savingsGoalProgress,
-            height: 6,
+            tone: reached ? RepereTone.done : RepereTone.normal,
           ),
           const SizedBox(height: AppSpacing.sm),
           Row(

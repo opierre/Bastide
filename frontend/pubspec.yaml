@@ -16,7 +16,7 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
 # In Windows, build-name is used as the major, minor, and patch parts
 # of the product and file versions while build-number is used as the build suffix.
-version: 0.2.0-dev.1+5
+version: 0.2.0-dev.2+5
 
 environment:
   sdk: ^3.12.0
@@ -96,7 +96,8 @@ flutter:
   # Both ship from Google Fonts as `wght` variable fonts only; the statics here
   # were instanced from them so the weights the scale asks for resolve through
   # `fontWeight` alone, without every call site carrying `fontVariations`.
-  # Bold 700 stays for the few widgets still asking for it until #200.
+  # Bold 700 stays only for the v1 wordmark in brand_mark.dart; drop it once
+  # the Plan mark (#202) replaces that.
   fonts:
     - family: Geist
       fonts:

@@ -309,7 +309,7 @@ class ScheduleTable extends StatelessWidget {
     final locale = Localizations.localeOf(context).toString();
     final textTheme = Theme.of(context).textTheme;
     final cellStyle = tabularNumberStyle(textTheme.bodySmall!);
-    final footStyle = cellStyle.copyWith(fontWeight: FontWeight.w700);
+    final footStyle = cellStyle.copyWith(fontWeight: FontWeight.w600);
     final headerStyle = context.textStyles.sectionLabel.copyWith(
       fontSize: 10.5,
       letterSpacing: 1,
@@ -404,7 +404,7 @@ class ScheduleTable extends StatelessWidget {
   ) {
     final id = row.ordinal;
     final emphasis = isCurrent
-        ? style.copyWith(fontWeight: FontWeight.w700)
+        ? style.copyWith(fontWeight: FontWeight.w600)
         : style;
     return _Line(
       key: Key('scheduleRow-$id'),
@@ -417,7 +417,7 @@ class ScheduleTable extends StatelessWidget {
           style: isCurrent
               ? style.copyWith(
                   color: context.colors.accent,
-                  fontWeight: FontWeight.w700,
+                  fontWeight: FontWeight.w600,
                 )
               : style,
         ),

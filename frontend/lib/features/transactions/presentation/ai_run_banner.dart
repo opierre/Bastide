@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/theme/tokens.dart';
 import '../../../core/widgets/app_card.dart';
+import '../../../core/widgets/repere_meter.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../categorization/application/run_controller.dart';
 import '../../categorization/domain/categorization_run.dart';
@@ -79,38 +80,8 @@ class AiRunBanner extends ConsumerWidget {
             ],
           ),
           const SizedBox(height: AppSpacing.sm + AppSpacing.xs),
-          RunProgressBar(fraction: run.progress),
+          RepereMeter(fraction: run.progress),
         ],
-      ),
-    );
-  }
-}
-
-/// The 6px iris-gradient bar shared by the running banner and the queue's
-/// header card, so a run finishing doesn't change the shape of the progress
-/// the user was watching.
-class RunProgressBar extends StatelessWidget {
-  const RunProgressBar({super.key, required this.fraction});
-
-  final double fraction;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      height: 6,
-      decoration: BoxDecoration(
-        color: context.colors.hover,
-        borderRadius: BorderRadius.circular(AppRadii.xs),
-      ),
-      child: FractionallySizedBox(
-        alignment: Alignment.centerLeft,
-        widthFactor: fraction.clamp(0.0, 1.0),
-        child: Container(
-          decoration: BoxDecoration(
-            color: context.colors.accent,
-            borderRadius: BorderRadius.circular(AppRadii.xs),
-          ),
-        ),
       ),
     );
   }

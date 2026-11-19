@@ -4,12 +4,12 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/theme/tokens.dart';
 import '../../../core/widgets/amount_text.dart';
-import '../../../core/widgets/app_chip.dart';
 import '../../../core/widgets/app_modal.dart';
 import '../../../core/widgets/app_toast.dart';
 import '../../../core/widgets/inline_banner.dart';
 import '../../../core/widgets/primary_button.dart';
 import '../../../core/widgets/state_views.dart';
+import '../../../core/widgets/status_text.dart';
 import '../../../l10n/app_localizations.dart';
 import '../application/add_to_series_controller.dart';
 import '../application/mark_recurring_controller.dart';
@@ -605,28 +605,24 @@ class _ConfidenceChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final (label, color, icon) = switch (confidence) {
+    final (label, tone) = switch (confidence) {
       PreviewConfidence.high => (
         l10n.markRecurringConfidenceHigh,
-        context.colors.positive,
-        Icons.check_circle_outline_rounded,
+        StatusTone.positive,
       ),
       PreviewConfidence.medium => (
         l10n.markRecurringConfidenceMedium,
-        context.colors.textSecondary,
-        Icons.adjust_rounded,
+        StatusTone.neutral,
       ),
       PreviewConfidence.low => (
         l10n.markRecurringConfidenceLow,
-        context.colors.warning,
-        Icons.warning_amber_rounded,
+        StatusTone.warning,
       ),
     };
-    return AppChip(
+    return StatusText(
       key: const Key('markRecurringConfidence'),
       label: label,
-      color: color,
-      icon: icon,
+      tone: tone,
     );
   }
 }

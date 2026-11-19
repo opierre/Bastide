@@ -4,9 +4,9 @@ import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/tokens.dart';
 import '../../../core/widgets/amount_text.dart';
 import '../../../core/widgets/app_card.dart';
+import '../../../core/widgets/repere_meter.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../goals/domain/goal.dart';
-import '../../goals/presentation/goal_card.dart';
 
 /// The dashboard's Objectifs card (`docs/design/04` §Row 3): the top
 /// three active goals as compact rows, under an iris tint.
@@ -150,7 +150,10 @@ class _GoalRow extends StatelessWidget {
           ],
         ),
         const SizedBox(height: AppSpacing.sm - 2),
-        GoalProgressBar(fraction: goal.barFraction, height: 6),
+        RepereMeter(
+          fraction: goal.barFraction,
+          tone: goal.isReached ? RepereTone.done : RepereTone.normal,
+        ),
       ],
     );
   }

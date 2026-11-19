@@ -111,7 +111,7 @@ class _IrreversibleBadge extends StatelessWidget {
         style: TextStyle(
           fontFamily: AppFonts.geist,
           fontSize: 10,
-          fontWeight: FontWeight.w700,
+          fontWeight: FontWeight.w600,
           letterSpacing: 1,
           color: context.colors.negative,
         ),

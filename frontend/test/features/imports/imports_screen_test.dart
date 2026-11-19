@@ -3,14 +3,14 @@ import 'dart:convert';
 import 'package:bastide/core/session/current_user_provider.dart';
 import 'package:bastide/core/theme/app_theme.dart';
 import 'package:bastide/core/widgets/amount_text.dart';
-import 'package:bastide/core/widgets/app_chip.dart';
 import 'package:bastide/core/widgets/primary_button.dart';
-import 'package:bastide/features/auth/domain/auth_user.dart';
+import 'package:bastide/core/widgets/status_text.dart';
 import 'package:bastide/features/accounts/application/accounts_controller.dart';
-import 'package:bastide/features/accounts/domain/account.dart';
-import 'package:bastide/features/imports/application/imports_controller.dart';
 import 'package:bastide/features/accounts/application/settlement_rule_controller.dart';
+import 'package:bastide/features/accounts/domain/account.dart';
 import 'package:bastide/features/accounts/domain/card_settlement_status.dart';
+import 'package:bastide/features/auth/domain/auth_user.dart';
+import 'package:bastide/features/imports/application/imports_controller.dart';
 import 'package:bastide/features/imports/domain/import_batch.dart';
 import 'package:bastide/features/imports/presentation/imports_screen.dart';
 import 'package:bastide/l10n/app_localizations.dart';
@@ -677,7 +677,7 @@ void main() {
       'Statut',
       find.ancestor(
         of: inRow(find.text('Réussi')),
-        matching: find.byType(AppChip),
+        matching: find.byType(StatusText),
       ),
     );
 

@@ -7,6 +7,7 @@ import '../../../core/widgets/amount_text.dart';
 import '../../../core/widgets/app_card.dart';
 import '../../../core/widgets/date_field.dart';
 import '../../../core/widgets/primary_button.dart';
+import '../../../core/widgets/repere_meter.dart';
 import '../../../core/widgets/state_views.dart';
 import '../../../l10n/app_localizations.dart';
 import '../application/goals_controller.dart';
@@ -152,7 +153,7 @@ class _HeaderCard extends ConsumerWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          GoalProgressRing(goal: goal),
+          GoalProgressReading(goal: goal),
           const SizedBox(width: AppSpacing.lg),
           Expanded(
             child: Column(
@@ -237,53 +238,40 @@ class _HeaderCard extends ConsumerWidget {
   }
 }
 
-/// The 96 px progress ring: r 40, stroke 10, drawn from 12 o'clock clockwise,
-/// with the percentage set in its middle.
-///
-/// Same recipe as the dashboard's savings-rate ring — the indicator is sized to
-/// 90 inside the 96 slot because Flutter measures the arc's radius from the box
-/// edge inwards by half the stroke, so `(90 − 10) / 2` is the spec's r 40. The
-/// arc clamps at full while the label reports the real figure, exactly as the
-/// grid card's bar and percentage do.
-class GoalProgressRing extends StatelessWidget {
-  const GoalProgressRing({super.key, required this.goal});
+/// The goal's progress in the detail header: its percentage over a repère
+/// (`docs/design/00-design-system.md` §8; rings are removed). The track's end
+/// is the target, so it carries no mark. The fill clamps at full while the
+/// percentage reports the real figure.
+class GoalProgressReading extends StatelessWidget {
+  const GoalProgressReading({super.key, required this.goal});
 
   final Goal goal;
 
-  static const _size = 96.0;
-  static const _stroke = 10.0;
-  static const _radius = 40.0;
+  static const _width = 96.0;
 
   @override
   Widget build(BuildContext context) {
     final locale = Localizations.localeOf(context).toString();
-    final accent = goal.isReached
-        ? context.colors.positive
-        : context.colors.accent;
+    final percent = goalPercentLabel(goal.progressPct, locale);
 
     return SizedBox(
-      width: _size,
-      height: _size,
-      child: Stack(
-        alignment: Alignment.center,
+      width: _width,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        mainAxisSize: MainAxisSize.min,
         children: [
-          SizedBox(
-            width: _radius * 2 + _stroke,
-            height: _radius * 2 + _stroke,
-            child: CircularProgressIndicator(
-              value: goal.barFraction,
-              strokeWidth: _stroke,
-              strokeCap: StrokeCap.round,
-              backgroundColor: context.colors.hover,
-              valueColor: AlwaysStoppedAnimation(accent),
+          Text(
+            percent,
+            key: Key('goalProgressPercent-${goal.id}'),
+            style: tabularNumberStyle(
+              Theme.of(context).textTheme.displaySmall!,
             ),
           ),
-          Text(
-            goalPercentLabel(goal.progressPct, locale),
-            key: Key('goalRingPercent-${goal.id}'),
-            style: tabularNumberStyle(
-              Theme.of(context).textTheme.displayMedium!,
-            ).copyWith(fontSize: 20, color: accent),
+          const SizedBox(height: AppSpacing.sm),
+          RepereMeter(
+            fraction: goal.barFraction,
+            tone: goal.isReached ? RepereTone.done : RepereTone.normal,
+            semanticLabel: percent,
           ),
         ],
       ),

@@ -281,7 +281,6 @@ class _EmptyState extends StatelessWidget {
                 key: const Key('networthEmptyAddProperty'),
                 label: l10n.networthAddProperty,
                 icon: Icons.add_rounded,
-                height: 44,
                 onPressed: () => showPropertyForm(context, currency: currency),
               ),
             ],

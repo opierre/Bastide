@@ -69,7 +69,7 @@ class EnginePlate extends StatelessWidget {
                     Text(
                       title,
                       style: textTheme.bodyMedium?.copyWith(
-                        fontWeight: FontWeight.w700,
+                        fontWeight: FontWeight.w600,
                         color: context.colors.text,
                       ),
                     ),
