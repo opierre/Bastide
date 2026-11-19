@@ -6,6 +6,7 @@ import '../../accounts/application/accounts_controller.dart';
 import '../../dashboard/application/dashboard_controller.dart';
 import '../../networth/application/networth_controller.dart';
 import '../../transactions/application/transactions_controller.dart';
+import '../../transactions/application/review_count_provider.dart';
 import '../data/imports_repository.dart';
 import '../../accounts/application/settlement_rule_controller.dart';
 import '../domain/import_batch.dart';
@@ -105,6 +106,7 @@ class ImportsController extends AsyncNotifier<List<ImportBatch>> {
     // A `failed` batch wrote nothing, so it leaves them alone.
     if (batch.status != ImportStatus.failed) {
       ref.invalidate(transactionsControllerProvider);
+      ref.invalidate(reviewCountProvider);
       ref.invalidate(accountsControllerProvider);
       ref.invalidate(dashboardControllerProvider);
       // Synthèse sums the same balances; left cached, it kept the empty state it read

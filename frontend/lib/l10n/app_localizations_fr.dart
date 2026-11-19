@@ -39,13 +39,15 @@ class AppLocalizationsFr extends AppLocalizations {
   String get sidebarPrivacyBadge => 'Données locales';
 
   @override
-  String get sidebarCollapse => 'Réduire le menu';
-
-  @override
-  String get sidebarExpand => 'Déployer le menu';
-
-  @override
-  String get userMenuEditProfile => 'Modifier le profil';
+  String sidebarReviewCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count opérations à vérifier',
+      one: '1 opération à vérifier',
+    );
+    return '$_temp0';
+  }
 
   @override
   String get userMenuLogout => 'Se déconnecter';
@@ -90,6 +92,18 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get settingsLanguageNote =>
       'S\'applique immédiatement à toute l\'interface.';
+
+  @override
+  String get settingsSidebarTitle => 'Barre latérale';
+
+  @override
+  String get settingsSidebarNote => 'Réduite, elle ne garde que les icônes.';
+
+  @override
+  String get settingsSidebarExpanded => 'Étendue';
+
+  @override
+  String get settingsSidebarCollapsed => 'Réduite';
 
   @override
   String get settingsCurrencyTitle => 'Devise';
@@ -3073,10 +3087,20 @@ class AppLocalizationsFr extends AppLocalizations {
   String get navMortgages => 'Crédits';
 
   @override
+  String get navPlacements => 'Placements';
+
+  @override
   String get navSimulator => 'Simulateur';
 
   @override
   String get navNetworth => 'Synthèse';
+
+  @override
+  String get placementsEmptyTitle => 'Aucun placement';
+
+  @override
+  String get placementsEmptyMessage =>
+      'Suivez un PEA, une assurance vie ou un autre placement à partir des valeurs de vos relevés.';
 
   @override
   String get mortgagesAdd => 'Nouveau crédit';

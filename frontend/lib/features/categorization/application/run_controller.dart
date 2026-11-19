@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/runs/run_event.dart';
 import '../../../core/runs/run_progress_provider.dart';
 import '../../transactions/application/transactions_controller.dart';
+import '../../transactions/application/review_count_provider.dart';
 import '../data/categorization_repository.dart';
 import '../domain/categorization_run.dart';
 
@@ -187,6 +188,7 @@ class RunController extends Notifier<RunState> {
       unawaited(
         ref.read(transactionsControllerProvider.notifier).refreshQuietly(),
       );
+      ref.invalidate(reviewCountProvider);
     }
   }
 

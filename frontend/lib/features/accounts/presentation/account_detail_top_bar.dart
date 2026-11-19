@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/theme/tokens.dart';
+import '../../../core/widgets/app_shell.dart';
 import '../../../l10n/app_localizations.dart';
 import '../application/account_detail_controller.dart';
 import '../domain/account.dart';
@@ -10,8 +11,8 @@ import 'account_archive.dart';
 import 'account_form.dart';
 import 'settlement_rule_dialog.dart';
 
-/// The account detail's top-bar title: the account's name, over « Comptes ›
-/// `institution` » where « Comptes » leads back to the list.
+/// The account detail's title-bar title: « Comptes / » leading back to the
+/// list, then the account's name (`docs/design/16-account-detail.md`).
 class AccountDetailTitle extends ConsumerWidget {
   const AccountDetailTitle({super.key, required this.accountId});
 
@@ -20,58 +21,15 @@ class AccountDetailTitle extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context)!;
-    final textTheme = Theme.of(context).textTheme;
     final account = ref.watch(accountByIdProvider(accountId));
-    final secondary = textTheme.bodySmall?.copyWith(
-      fontSize: 12,
-      color: context.colors.textSecondary,
-    );
 
-    return Column(
+    return TitleBarTitle(
       key: const Key('accountDetailTitle'),
-      mainAxisAlignment: MainAxisAlignment.center,
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          account?.name ?? '',
-          style: textTheme.titleLarge,
-          overflow: TextOverflow.ellipsis,
-        ),
-        const SizedBox(height: 3),
-        Row(
-          children: [
-            InkWell(
-              key: const Key('accountDetailBreadcrumb'),
-              onTap: () => context.go('/accounts'),
-              child: Text(
-                l10n.navAccounts,
-                style: secondary?.copyWith(
-                  decoration: TextDecoration.underline,
-                  decorationColor: context.colors.lineStrong,
-                ),
-              ),
-            ),
-            if (account != null) ...[
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 6),
-                child: Text(
-                  '›',
-                  style: secondary?.copyWith(
-                    color: context.colors.textTertiary,
-                  ),
-                ),
-              ),
-              Flexible(
-                child: Text(
-                  account.institution,
-                  style: secondary,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ),
-            ],
-          ],
-        ),
-      ],
+      crumb: TitleBarCrumb(
+        label: l10n.navAccounts,
+        onTap: () => context.go('/accounts'),
+      ),
+      title: account?.name ?? '',
     );
   }
 }

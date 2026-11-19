@@ -78,7 +78,13 @@ void main() {
       findsOneWidget,
     );
     // …and the sidebar keeps « Comptes » selected.
-    expect(find.byIcon(Icons.account_balance_wallet_rounded), findsOneWidget);
+    final comptes = tester.widget<Text>(
+      find.descendant(
+        of: find.byKey(const Key('nav/accounts')),
+        matching: find.text('Comptes'),
+      ),
+    );
+    expect(comptes.style!.fontWeight, FontWeight.w500);
 
     await tester.tap(find.byKey(const Key('accountDetailBack')));
     await tester.pumpAndSettle();

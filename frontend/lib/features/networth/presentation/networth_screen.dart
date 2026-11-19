@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:lucide_icons_flutter/lucide_icons_300.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/theme/tokens.dart';
 import '../../../core/widgets/app_segmented.dart';
-import '../../../core/widgets/app_shell.dart';
 import '../../../core/widgets/primary_button.dart';
 import '../../../core/widgets/state_views.dart';
 import '../../../l10n/app_localizations.dart';
@@ -238,15 +238,12 @@ class _EmptyState extends StatelessWidget {
               color: context.colors.accentSoft,
               borderRadius: BorderRadius.circular(AppRadii.xl),
             ),
-            child: SizedBox.square(
-              dimension: 27,
-              child: FittedBox(
-                child: NavGlyphIcon(
-                  glyph: NavGlyph.pie,
-                  filled: false,
-                  color: context.colors.accent,
-                ),
-              ),
+            // v1 empty state, kept until the panel's v2 ticket; the glyph is
+            // the panel's nav icon.
+            child: Icon(
+              LucideIcons300.chartPie,
+              size: 27,
+              color: context.colors.accent,
             ),
           ),
           const SizedBox(height: AppSpacing.lg),

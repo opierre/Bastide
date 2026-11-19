@@ -431,18 +431,15 @@ abstract final class AppSpacing {
   /// Two-column gutter.
   static const gutter = xxl;
 
-  // v1 layout values, kept only so the panels compile until the shell (#201),
-  // the shared widgets (#200) and each panel's v2 ticket replace them. Nothing
-  // new reads these.
+  /// Shell (`00` §5): gap between a nav item's icon and its label.
+  static const navIconGap = 9.0;
 
-  /// v1: gap between a nav item's icon and its label.
-  static const navGap = 11.0;
+  /// Shell (`00` §5): space under the brand row and above a group label.
+  static const sidebarBrandBottom = 14.0;
+  static const sidebarLabelTop = 14.0;
 
-  /// v1: horizontal padding inside a nav pill.
-  static const navInset = 13.0;
-
-  /// v1: sidebar inner gutter.
-  static const sidebarGutter = 12.0;
+  // v1 layout values, kept only so the panels compile until each panel's v2
+  // ticket replaces them. Nothing new reads these.
 
   /// v1: gap between cards in a grid.
   static const gridGap = 18.0;
@@ -500,9 +497,6 @@ abstract final class AppRadii {
 
   /// v1: modal, glyph plate.
   static const xl = 20.0;
-
-  /// v1: nav pill.
-  static const navPill = 20.0;
 }
 
 /// Heights and widths of `00` §4 and §5. The shell (#201) and the shared
@@ -529,6 +523,9 @@ abstract final class AppSizes {
   static const icon = 16.0;
   static const iconSmall = 14.0;
   static const iconStatus = 13.0;
+
+  /// The user's avatar in the sidebar foot (`00` §5).
+  static const avatarSmall = 22.0;
 }
 
 /// The legacy elevation of Material menus. A [MenuStyle] takes an elevation,
@@ -559,19 +556,10 @@ abstract final class AppFonts {
   static const mono = 'Geist Mono';
 }
 
-/// v1 fixed-chrome dimensions, kept until the shell is rebuilt (#201); the v2
-/// values are in [AppSizes].
+/// v1: the 38 px control pill some panels still put in the title bar, kept
+/// until each panel's v2 ticket moves it to the 28 px controls of [AppSizes].
 abstract final class AppChrome {
-  static const sidebarWidth = 252.0;
-  static const sidebarCollapsedWidth = 76.0;
-  static const topBarHeight = 72.0;
-  static const navItemHeight = 40.0;
   static const controlPillHeight = 38.0;
-  static const userPillHeight = 44.0;
-  static const buttonHeight = 38.0;
-  static const navRailWidth = 3.0;
-  static const navRailHeight = 22.0;
-  static const navIconSize = 18.0;
 }
 
 /// The one chart frame (`00` §9). Colours come from the theme: gridlines in

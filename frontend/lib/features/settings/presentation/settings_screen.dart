@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 
 import '../../../core/app_info.dart';
 import '../../../core/l10n/locale_provider.dart';
+import '../../../core/navigation/sidebar_controller.dart';
 import '../../../core/session/current_user_provider.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/tokens.dart';
@@ -20,13 +21,13 @@ import '../../auth/presentation/avatar_card.dart';
 import '../../auth/presentation/currency_label.dart';
 import '../../auth/presentation/display_name_card.dart';
 import '../../auth/presentation/recovery_code_card.dart';
-import '../application/settings_section_request.dart';
 import 'ai_settings_card.dart';
 import 'backup_card.dart';
 import 'danger_zone_card.dart';
 import 'update_check_card.dart';
 
-export '../application/settings_section_request.dart' show SettingsSection;
+/// Which group of settings the right-hand column is showing.
+enum SettingsSection { profile, preferences, data, about }
 
 class SettingsScreen extends ConsumerStatefulWidget {
   const SettingsScreen({super.key});
@@ -43,35 +44,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   SettingsSection _section = SettingsSection.preferences;
 
   @override
-  void initState() {
-    super.initState();
-    // Arriving from the user menu's "Edit profile": open on the requested
-    // section instead of the default.
-    final requested = ref.read(settingsSectionRequestProvider);
-    if (requested != null) {
-      _section = requested;
-      _consumeRequest();
-    }
-  }
-
-  /// Clears the request after this frame — a provider can't be modified while
-  /// the tree is building.
-  void _consumeRequest() {
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) ref.read(settingsSectionRequestProvider.notifier).consume();
-    });
-  }
-
-  @override
   Widget build(BuildContext context) {
-    // Already on this screen when the request comes in: no remount, so pick it
-    // up here.
-    ref.listen(settingsSectionRequestProvider, (_, requested) {
-      if (requested == null) return;
-      setState(() => _section = requested);
-      _consumeRequest();
-    });
-
     return Padding(
       key: const Key('screen-settings'),
       padding: const EdgeInsets.symmetric(
@@ -271,6 +244,29 @@ class _PreferencesPanel extends ConsumerWidget {
                 key: const Key('settingsLocaleEnglishOption'),
                 value: 'en',
                 label: l10n.authLocaleEnglish,
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: AppSpacing.gridGap),
+        _SettingsCard(
+          title: l10n.settingsSidebarTitle,
+          note: l10n.settingsSidebarNote,
+          child: AppSegmented<bool>(
+            value: ref.watch(sidebarCollapsedProvider),
+            // The same switch as Ctrl+B, so the two never disagree.
+            onChanged: (collapsed) =>
+                ref.read(sidebarCollapsedProvider.notifier).set(collapsed),
+            segments: [
+              AppSegment(
+                key: const Key('settingsSidebarExpandedOption'),
+                value: false,
+                label: l10n.settingsSidebarExpanded,
+              ),
+              AppSegment(
+                key: const Key('settingsSidebarCollapsedOption'),
+                value: true,
+                label: l10n.settingsSidebarCollapsed,
               ),
             ],
           ),
