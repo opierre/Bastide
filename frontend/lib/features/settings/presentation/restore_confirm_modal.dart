@@ -2,18 +2,23 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
-import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/tokens.dart';
+import '../../../core/widgets/app_button.dart';
 import '../../../core/widgets/app_modal.dart';
 import '../../../core/widgets/app_toast.dart';
 import '../../../core/widgets/inline_banner.dart';
+import '../../../core/widgets/key_value_list.dart';
 import '../../../l10n/app_localizations.dart';
 import '../application/backup_controller.dart';
 import '../domain/backup.dart';
 import 'backup_format.dart';
 
-/// State ⑧: what the chosen file holds, and the one place the destructive red
-/// appears. Nothing is replaced until « Remplacer mes données ».
+/// Width of both destructive confirmations (`09-settings.md` §Données).
+const _modalWidth = 500.0;
+
+/// « Restaurer cette sauvegarde ? »: what the chosen file holds, and one of
+/// the two places the solid destructive red appears. Nothing is replaced
+/// until « Remplacer mes données ».
 class RestoreConfirmModal extends ConsumerStatefulWidget {
   const RestoreConfirmModal({super.key, required this.pending});
 
@@ -53,61 +58,29 @@ class _RestoreConfirmModalState extends ConsumerState<RestoreConfirmModal> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final textTheme = Theme.of(context).textTheme;
 
     return AppModal(
       title: l10n.settingsBackupConfirmTitle,
-      width: 500,
-      subtitle: Text.rich(
-        TextSpan(
-          children: [
-            TextSpan(text: '${l10n.settingsBackupConfirmFile} '),
-            TextSpan(
-              text: widget.pending.fileName,
-              style: context.textStyles.mono.copyWith(
-                color: context.colors.text,
-              ),
-            ),
-          ],
-        ),
+      width: _modalWidth,
+      subtitle: Text(
+        widget.pending.fileName,
         key: const Key('backupConfirmFile'),
-        style: textTheme.bodyMedium?.copyWith(
-          color: context.colors.textSecondary,
+        style: context.textStyles.mono.copyWith(
+          fontSize: Theme.of(context).textTheme.bodyMedium?.fontSize,
+          color: context.colors.text,
         ),
       ),
       actions: [
-        OutlinedButton(
+        AppButton(
+          label: l10n.settingsBackupCancel,
           onPressed: _isRestoring ? null : () => Navigator.of(context).pop(),
-          child: Text(l10n.settingsBackupCancel),
         ),
-        FilledButton(
+        AppButton(
           key: const Key('backupConfirmReplace'),
-          onPressed: _isRestoring ? null : _confirm,
-          style: FilledButton.styleFrom(
-            backgroundColor: context.colors.negative,
-            foregroundColor: context.colors.onPrimary,
-            disabledBackgroundColor: context.colors.negative.withValues(
-              alpha: 0.55,
-            ),
-            disabledForegroundColor: context.colors.onPrimary,
-          ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              if (_isRestoring) ...[
-                SizedBox(
-                  width: 13,
-                  height: 13,
-                  child: CircularProgressIndicator(
-                    strokeWidth: 2,
-                    color: context.colors.onPrimary,
-                  ),
-                ),
-                const SizedBox(width: AppSpacing.sm),
-              ],
-              Text(l10n.settingsBackupReplace),
-            ],
-          ),
+          label: l10n.settingsBackupReplace,
+          variant: AppButtonVariant.destructive,
+          isLoading: _isRestoring,
+          onPressed: _confirm,
         ),
       ],
       child: Column(
@@ -118,24 +91,24 @@ class _RestoreConfirmModalState extends ConsumerState<RestoreConfirmModal> {
               key: const Key('backupConfirmError'),
               message: backupFailureMessage(l10n, _failure!),
             ),
-            const SizedBox(height: AppSpacing.md),
+            const SizedBox(height: AppSpacing.fieldGap),
           ],
-          _SummaryPlate(summary: widget.pending.summary),
-          const SizedBox(height: AppSpacing.md),
+          _Summary(summary: widget.pending.summary),
+          const SizedBox(height: AppSpacing.fieldGap),
           InlineBanner(
             key: const Key('backupConfirmWarning'),
             tone: BannerTone.warning,
             message: l10n.settingsBackupConfirmWarning,
           ),
-          const SizedBox(height: AppSpacing.sm),
         ],
       ),
     );
   }
 }
 
-class _SummaryPlate extends StatelessWidget {
-  const _SummaryPlate({required this.summary});
+/// What the file holds, as the key/value list of `00` §7.
+class _Summary extends StatelessWidget {
+  const _Summary({required this.summary});
 
   final BackupSummary summary;
 
@@ -145,77 +118,28 @@ class _SummaryPlate extends StatelessWidget {
     final locale = Localizations.localeOf(context).toString();
     final number = NumberFormat.decimalPattern(locale);
     final counts = summary.counts;
-    final valueStyle = tabularNumberStyle(
-      Theme.of(
-        context,
-      ).textTheme.bodyMedium!.copyWith(color: context.colors.text),
-    );
 
-    final rows = <(String, Widget)>[
-      (
-        l10n.settingsBackupConfirmExportedAt,
-        Text(
-          formatBackupInstant(l10n, locale, summary.exportedAt),
-          style: valueStyle,
-        ),
-      ),
-      (
-        l10n.settingsBackupConfirmVersion,
-        Text(
-          summary.appVersion,
-          style: context.textStyles.mono.copyWith(color: context.colors.text),
-        ),
-      ),
-      for (final (label, count) in [
-        (l10n.settingsBackupConfirmAccounts, counts.accounts),
-        (l10n.settingsBackupConfirmTransactions, counts.transactions),
-        (l10n.settingsBackupConfirmCategories, counts.categories),
-        (l10n.settingsBackupConfirmRules, counts.rules),
-        (l10n.settingsBackupConfirmSubscriptions, counts.recurring),
-        (l10n.settingsBackupConfirmGoals, counts.goals),
-        (l10n.settingsBackupConfirmMortgages, counts.mortgages),
-        (l10n.settingsBackupConfirmProperties, counts.properties),
-        (l10n.settingsBackupConfirmSimulations, counts.simulations),
-      ])
-        (label, Text(number.format(count), style: valueStyle)),
-    ];
-
-    return Container(
+    return KeyValueList(
       key: const Key('backupConfirmSummary'),
-      padding: const EdgeInsets.symmetric(
-        horizontal: 14,
-        vertical: AppSpacing.xs,
-      ),
-      decoration: BoxDecoration(
-        color: context.colors.field,
-        borderRadius: BorderRadius.circular(AppRadii.inset),
-        border: Border.all(color: context.colors.line),
-      ),
-      child: Column(
-        children: [
-          for (final (label, value) in rows)
-            SizedBox(
-              height: 36,
-              child: Row(
-                children: [
-                  // Expanded, not a Spacer: a long label must shrink on a
-                  // narrow modal, never overflow.
-                  Expanded(
-                    child: Text(
-                      label,
-                      overflow: TextOverflow.ellipsis,
-                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: context.colors.textSecondary,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: AppSpacing.sm),
-                  value,
-                ],
-              ),
-            ),
-        ],
-      ),
+      entries: [
+        KeyValue(
+          l10n.settingsBackupConfirmExportedAt,
+          formatBackupInstant(l10n, locale, summary.exportedAt),
+        ),
+        KeyValue(l10n.settingsBackupConfirmVersion, summary.appVersion),
+        for (final (label, count) in [
+          (l10n.settingsBackupConfirmAccounts, counts.accounts),
+          (l10n.settingsBackupConfirmTransactions, counts.transactions),
+          (l10n.settingsBackupConfirmCategories, counts.categories),
+          (l10n.settingsBackupConfirmRules, counts.rules),
+          (l10n.settingsBackupConfirmSubscriptions, counts.recurring),
+          (l10n.settingsBackupConfirmGoals, counts.goals),
+          (l10n.settingsBackupConfirmMortgages, counts.mortgages),
+          (l10n.settingsBackupConfirmProperties, counts.properties),
+          (l10n.settingsBackupConfirmSimulations, counts.simulations),
+        ])
+          KeyValue(label, number.format(count)),
+      ],
     );
   }
 }

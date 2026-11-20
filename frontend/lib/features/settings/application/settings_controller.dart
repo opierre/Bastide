@@ -4,6 +4,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../categorization/application/run_controller.dart';
+import '../../mortgages/application/mortgages_controller.dart';
+import '../../simulator/application/simulator_controller.dart';
 import '../data/settings_repository.dart';
 import '../domain/user_settings.dart';
 
@@ -191,6 +193,40 @@ class SettingsController extends AsyncNotifier<SettingsState> {
     final threshold = UserSettings.thresholdFromPercent(percent);
     _pendingThreshold = threshold;
     _edit((settings) => settings.copyWith(confidenceThreshold: threshold));
+  }
+
+  /// Declares the monthly income the debt ratio runs on, or clears it with
+  /// `null`. Not debounced: the field commits on submit or when it loses
+  /// focus. Returns whether the backend accepted it; on a refusal the stored
+  /// value is left as it was.
+  ///
+  /// Crédits and Simulateur read the same value, so both are told to re-read.
+  Future<bool> declareIncome(int? monthlyIncomeMinor) async {
+    final current = state.value;
+    if (current == null) return false;
+    if (current.settings.declaredMonthlyIncomeMinor == monthlyIncomeMinor) {
+      return true;
+    }
+    try {
+      final saved = await ref
+          .read(settingsRepositoryProvider)
+          .declareIncome(monthlyIncomeMinor);
+      final latest = state.value;
+      if (latest == null) return false;
+      state = AsyncData(
+        latest.copyWith(
+          settings: latest.settings.withDeclaredIncome(
+            saved.declaredMonthlyIncomeMinor,
+          ),
+        ),
+      );
+      ref
+        ..invalidate(mortgagesControllerProvider)
+        ..invalidate(simulatorControllerProvider);
+      return true;
+    } catch (_) {
+      return false;
+    }
   }
 
   /// Shows a backup the user just exported. Applied locally rather than by a

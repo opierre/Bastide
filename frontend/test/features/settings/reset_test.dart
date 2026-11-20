@@ -2,16 +2,19 @@ import 'package:bastide/core/api/api_client.dart';
 import 'package:bastide/core/api/api_client_provider.dart';
 import 'package:bastide/core/session/current_user_provider.dart';
 import 'package:bastide/core/theme/app_theme.dart';
+import 'package:bastide/core/widgets/app_button.dart';
 import 'package:bastide/features/auth/domain/auth_user.dart';
 import 'package:bastide/features/settings/application/reset_controller.dart';
 import 'package:bastide/features/settings/domain/database_reset.dart';
-import 'package:bastide/features/settings/presentation/danger_zone_card.dart';
+import 'package:bastide/features/settings/presentation/reset_group.dart';
 import 'package:bastide/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:intl/intl.dart';
 import 'package:mocktail/mocktail.dart';
+
+import '../../support/desktop_surface.dart';
 
 class MockApiClient extends Mock implements ApiClient {}
 
@@ -68,7 +71,7 @@ void main() {
       supportedLocales: AppLocalizations.supportedLocales,
       home: const Scaffold(
         body: SingleChildScrollView(
-          child: SizedBox(width: 640, child: DangerZoneCard()),
+          child: SizedBox(width: 900, child: ResetGroup()),
         ),
       ),
     ),
@@ -138,10 +141,12 @@ void main() {
     testWidgets('⑩ states the stake and opens the confirmation', (
       tester,
     ) async {
+      useDesktopSurface(tester);
       await tester.pumpWidget(wrap());
       await tester.pumpAndSettle();
 
-      expect(find.text('Zone de danger'), findsOneWidget);
+      expect(find.text('Réinitialisation'), findsOneWidget);
+      expect(find.text('Réinitialiser la base de données'), findsOneWidget);
       expect(find.byKey(const Key('settingsResetError')), findsNothing);
 
       await tester.tap(find.byKey(const Key('settingsResetButton')));
@@ -160,6 +165,7 @@ void main() {
     });
 
     testWidgets('the delete waits for the word, typed exactly', (tester) async {
+      useDesktopSurface(tester);
       stubReset();
       await openModal(tester);
 
@@ -171,19 +177,20 @@ void main() {
         await tester.pumpAndSettle();
       }
 
-      expect(tester.widget<FilledButton>(_submit).onPressed, isNull);
+      expect(tester.widget<AppButton>(_submit).onPressed, isNull);
 
       await type('supprimer');
-      expect(tester.widget<FilledButton>(_submit).onPressed, isNull);
+      expect(tester.widget<AppButton>(_submit).onPressed, isNull);
       verifyNever(() => apiClient.post('/database/reset'));
 
       await type('SUPPRIMER');
-      expect(tester.widget<FilledButton>(_submit).onPressed, isNotNull);
+      expect(tester.widget<AppButton>(_submit).onPressed, isNotNull);
     });
 
     testWidgets('⑪ confirming deletes, closes and says the catalog is back', (
       tester,
     ) async {
+      useDesktopSurface(tester);
       stubReset();
       await openModal(tester);
       await tester.enterText(
@@ -197,19 +204,15 @@ void main() {
 
       verify(() => apiClient.post('/database/reset')).called(1);
       expect(find.byKey(const Key('resetConfirmCounts')), findsNothing);
-      expect(
-        find.text(
-          'Base de données réinitialisée. Les catégories système ont été restaurées.',
-        ),
-        findsOneWidget,
-      );
+      expect(find.text('Base de données réinitialisée.'), findsOneWidget);
       // Let the toast's timer run out so no timer outlives the test.
       await tester.pump(const Duration(seconds: 7));
     });
 
-    testWidgets('a refused reset closes the modal and reports it on the card', (
+    testWidgets('a refused reset closes the modal and reports it on the row', (
       tester,
     ) async {
+      useDesktopSurface(tester);
       stubReset(
         throws: const ApiFailure(code: 'RESET_RUN_ACTIVE', message: 'busy'),
       );
@@ -238,10 +241,11 @@ void main() {
     testWidgets('renders in English, with its own confirmation word', (
       tester,
     ) async {
+      useDesktopSurface(tester);
       await tester.pumpWidget(wrap(locale: const Locale('en')));
       await tester.pumpAndSettle();
 
-      expect(find.text('Danger zone'), findsOneWidget);
+      expect(find.text('Reset the database'), findsOneWidget);
 
       await tester.tap(find.byKey(const Key('settingsResetButton')));
       await tester.pumpAndSettle();

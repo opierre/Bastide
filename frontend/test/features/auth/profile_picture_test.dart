@@ -9,7 +9,7 @@ import 'package:bastide/features/auth/application/auth_controller.dart';
 import 'package:bastide/features/auth/application/avatar_picture_controllers.dart';
 import 'package:bastide/features/auth/domain/auth_user.dart';
 import 'package:bastide/features/auth/domain/avatar_choice.dart';
-import 'package:bastide/features/auth/presentation/avatar_card.dart';
+import 'package:bastide/features/auth/presentation/avatar_picker.dart';
 import 'package:bastide/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -280,7 +280,7 @@ void main() {
     });
   });
 
-  group('AvatarCard with a picture', () {
+  group('AvatarPicker with a picture', () {
     Widget wrap(AuthUser user, {Locale locale = const Locale('fr')}) =>
         ProviderScope(
           overrides: overrides(user),
@@ -289,7 +289,7 @@ void main() {
             theme: AppTheme.dark,
             localizationsDelegates: AppLocalizations.localizationsDelegates,
             supportedLocales: AppLocalizations.supportedLocales,
-            home: const Scaffold(body: AvatarCard()),
+            home: const Scaffold(body: AvatarPicker()),
           ),
         );
 
@@ -442,7 +442,10 @@ void main() {
         ),
         findsOneWidget,
       );
-      expect(find.byKey(const Key('settingsAvatarReset')), findsOneWidget);
+      expect(
+        find.byKey(const Key('settingsAvatarRemovePicture')),
+        findsNothing,
+      );
     });
   });
 }

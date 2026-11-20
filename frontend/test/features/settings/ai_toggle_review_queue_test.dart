@@ -4,7 +4,7 @@ import 'package:bastide/core/theme/app_theme.dart';
 import 'package:bastide/features/accounts/application/accounts_controller.dart';
 import 'package:bastide/features/accounts/domain/account.dart';
 import 'package:bastide/features/categories/domain/category.dart';
-import 'package:bastide/features/settings/presentation/ai_settings_card.dart';
+import 'package:bastide/features/settings/presentation/ai_settings_group.dart';
 import 'package:bastide/features/transactions/application/transactions_controller.dart';
 import 'package:bastide/features/transactions/domain/transaction.dart';
 import 'package:bastide/features/transactions/presentation/review_queue.dart';
@@ -14,6 +14,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 
+import '../../support/desktop_surface.dart';
 import '../../support/fake_accounts_controller.dart';
 import '../../support/fake_transactions_controller.dart';
 
@@ -92,6 +93,7 @@ void main() {
   testWidgets(
     'turning AI off returns the review queue to its rules-only rendering',
     (tester) async {
+      useDesktopSurface(tester);
       tester.view.physicalSize = const Size(1440, 1400);
       tester.view.devicePixelRatio = 1.0;
       addTearDown(tester.view.reset);
@@ -146,7 +148,7 @@ void main() {
             home: const Scaffold(
               body: Column(
                 children: [
-                  SizedBox(width: 640, child: AiSettingsCard()),
+                  SizedBox(width: 900, child: AiSettingsGroup()),
                   Expanded(child: _Queue()),
                 ],
               ),

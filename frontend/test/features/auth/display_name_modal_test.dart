@@ -4,13 +4,14 @@ import 'package:bastide/core/theme/app_theme.dart';
 import 'package:bastide/core/widgets/primary_button.dart';
 import 'package:bastide/features/auth/application/auth_controller.dart';
 import 'package:bastide/features/auth/domain/auth_user.dart';
-import 'package:bastide/features/auth/presentation/display_name_card.dart';
+import 'package:bastide/features/settings/presentation/profile_section.dart';
 import 'package:bastide/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 
+import '../../support/desktop_surface.dart';
 import '../../support/fake_auth_controller.dart';
 
 class _MockApiClient extends Mock implements ApiClient {}
@@ -49,7 +50,10 @@ void main() {
       theme: AppTheme.dark,
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
-      home: const Scaffold(body: DisplayNameCard()),
+      // The username row of Settings › Profil, which opens the modal.
+      home: const Scaffold(
+        body: SingleChildScrollView(child: ProfileSection()),
+      ),
     ),
   );
 
@@ -69,21 +73,28 @@ void main() {
           .onPressed !=
       null;
 
-  testWidgets('the card says the name signs in, alongside the email', (
+  testWidgets('the row says the name signs in, alongside the email', (
     tester,
   ) async {
+    useDesktopSurface(tester);
     await tester.pumpWidget(wrap());
     await tester.pumpAndSettle();
 
     expect(
-      find.text('Vous pouvez vous connecter avec ada ou avec votre e-mail.'),
+      find.text('Vous pouvez vous connecter avec ce nom ou avec votre e-mail.'),
       findsOneWidget,
     );
+    expect(
+      tester.widget<Text>(find.byKey(const Key('settingsDisplayName'))).data,
+      'ada',
+    );
+    expect(find.text('ada@example.com'), findsOneWidget);
   });
 
   testWidgets('saving a new name updates the session and closes the modal', (
     tester,
   ) async {
+    useDesktopSurface(tester);
     when(
       () => apiClient.patch('/auth/me', body: any(named: 'body')),
     ).thenAnswer((_) async => {'user': _userJson('ada.lovelace')});
@@ -99,16 +110,15 @@ void main() {
     ).called(1);
     expect(find.byKey(const Key('displayNameModalField')), findsNothing);
     expect(
-      find.text(
-        'Vous pouvez vous connecter avec ada.lovelace ou avec votre e-mail.',
-      ),
-      findsOneWidget,
+      tester.widget<Text>(find.byKey(const Key('settingsDisplayName'))).data,
+      'ada.lovelace',
     );
   });
 
   testWidgets('a taken name keeps the modal open with the reason', (
     tester,
   ) async {
+    useDesktopSurface(tester);
     when(
       () => apiClient.patch('/auth/me', body: any(named: 'body')),
     ).thenThrow(const ApiFailure(code: 'DISPLAY_NAME_TAKEN', message: 'taken'));
@@ -124,6 +134,7 @@ void main() {
   });
 
   testWidgets('a malformed or unchanged name cannot be saved', (tester) async {
+    useDesktopSurface(tester);
     await tester.pumpWidget(wrap());
     await tester.pumpAndSettle();
 
@@ -148,11 +159,13 @@ void main() {
   testWidgets('renders under en without missing localized keys', (
     tester,
   ) async {
+    useDesktopSurface(tester);
     await tester.pumpWidget(wrap(locale: const Locale('en')));
     await tester.pumpAndSettle();
 
     expect(find.text('Username'), findsOneWidget);
-    expect(find.text('Change…'), findsOneWidget);
+    expect(find.text('Change'), findsOneWidget);
+    expect(find.text('Log out'), findsNWidgets(2));
     expect(tester.takeException(), isNull);
   });
 }

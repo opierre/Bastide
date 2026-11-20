@@ -8,13 +8,15 @@ import 'package:bastide/core/theme/app_theme.dart';
 import 'package:bastide/features/settings/application/backup_controller.dart';
 import 'package:bastide/features/settings/application/settings_controller.dart';
 import 'package:bastide/features/settings/domain/backup.dart';
-import 'package:bastide/features/settings/presentation/backup_card.dart';
+import 'package:bastide/features/settings/presentation/backup_group.dart';
 import 'package:bastide/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:intl/intl.dart';
 import 'package:mocktail/mocktail.dart';
+
+import '../../support/desktop_surface.dart';
 
 class MockApiClient extends Mock implements ApiClient {}
 
@@ -219,13 +221,14 @@ void main() {
         supportedLocales: AppLocalizations.supportedLocales,
         home: const Scaffold(
           body: SingleChildScrollView(
-            child: SizedBox(width: 640, child: BackupCard()),
+            child: SizedBox(width: 900, child: BackupGroup()),
           ),
         ),
       ),
     );
 
     testWidgets('⑤ idle shows the last backup in local time', (tester) async {
+      useDesktopSurface(tester);
       when(() => apiClient.get('/settings')).thenAnswer(
         (_) async => _settingsJson(lastBackupAt: '2026-09-11T12:32:00Z'),
       );
@@ -235,14 +238,14 @@ void main() {
 
       final local = _exportedAt.toLocal();
       final expected =
-          'Dernière sauvegarde : ${DateFormat.yMd('fr').format(local)} '
+          'Dernière sauvegarde le ${DateFormat.yMd('fr').format(local)} '
           'à ${DateFormat.Hm('fr').format(local)}';
       expect(find.text(expected), findsOneWidget);
-      expect(find.byKey(const Key('settingsBackupPrivacy')), findsOneWidget);
       expect(find.byKey(const Key('settingsBackupRestoreError')), findsNothing);
     });
 
     testWidgets('says so when there has never been a backup', (tester) async {
+      useDesktopSurface(tester);
       await tester.pumpWidget(wrap());
       await tester.pumpAndSettle();
 
@@ -252,6 +255,7 @@ void main() {
     testWidgets('⑥ then ⑦: preparing caption, then the toast with counts', (
       tester,
     ) async {
+      useDesktopSurface(tester);
       final pending = Completer<ApiBytesResponse>();
       when(
         () => apiClient.postForBytes('/backup/export'),
@@ -272,9 +276,9 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      expect(find.textContaining('Sauvegarde enregistrée : 1'), findsOneWidget);
-      expect(find.textContaining('transactions, 4 comptes.'), findsOneWidget);
-      expect(find.textContaining('Dernière sauvegarde :'), findsOneWidget);
+      expect(find.textContaining('Sauvegarde enregistrée · 1'), findsOneWidget);
+      expect(find.textContaining('opérations, 4 comptes.'), findsOneWidget);
+      expect(find.textContaining('Dernière sauvegarde le'), findsOneWidget);
       // Let the toast's timer run out so no timer outlives the test.
       await tester.pump(const Duration(seconds: 7));
     });
@@ -282,6 +286,7 @@ void main() {
     testWidgets('⑨ a newer-version file shows the refusal in the card', (
       tester,
     ) async {
+      useDesktopSurface(tester);
       files.picked = (name: 'future.bastide', bytes: _archive);
       stubUpload('/backup/inspect', throws: failure('BACKUP_TOO_NEW'));
 
@@ -302,6 +307,7 @@ void main() {
     testWidgets('⑧ confirms with the file summary, then restores', (
       tester,
     ) async {
+      useDesktopSurface(tester);
       files.picked = (name: 'bastide-2026-09-11.bastide', bytes: _archive);
       stubUpload('/backup/inspect');
       stubUpload('/backup/restore');
@@ -337,6 +343,7 @@ void main() {
     testWidgets('a refused restore keeps the modal open with the reason', (
       tester,
     ) async {
+      useDesktopSurface(tester);
       files.picked = (name: 'x.bastide', bytes: _archive);
       stubUpload('/backup/inspect');
       stubUpload('/backup/restore', throws: failure('BACKUP_RUN_ACTIVE'));
@@ -356,12 +363,13 @@ void main() {
     });
 
     testWidgets('renders in English', (tester) async {
+      useDesktopSurface(tester);
       await tester.pumpWidget(wrap(locale: const Locale('en')));
       await tester.pumpAndSettle();
 
-      expect(find.text('Backup & restore'), findsOneWidget);
+      expect(find.text('Backup'), findsOneWidget);
       expect(find.text('No backup.'), findsOneWidget);
-      expect(find.text('Import a file…'), findsOneWidget);
+      expect(find.text('Import a file'), findsOneWidget);
     });
   });
 }

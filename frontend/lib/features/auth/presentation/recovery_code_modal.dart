@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/api/api_client.dart';
 import '../../../core/theme/tokens.dart';
-import '../../../core/widgets/app_card.dart';
 import '../../../core/widgets/app_modal.dart';
 import '../../../core/widgets/inline_banner.dart';
 import '../../../core/widgets/labeled_field.dart';
@@ -13,57 +12,9 @@ import '../application/recovery_controllers.dart';
 import 'password_field.dart';
 import 'recovery_code_plate.dart';
 
-/// The « Code de récupération » card in Settings › Profil: replaces a lost
-/// code, and gives users registered before codes existed their first one.
-class RecoveryCodeCard extends StatelessWidget {
-  const RecoveryCodeCard({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
-
-    return AppCard(
-      key: const Key('settingsRecoveryCard'),
-      padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 16),
-      child: Row(
-        children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  l10n.settingsRecoveryTitle,
-                  style: Theme.of(context).textTheme.titleMedium,
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  l10n.settingsRecoverySubtitle,
-                  style: context.textStyles.helper.copyWith(
-                    color: context.colors.textSecondary,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(width: AppSpacing.md),
-          OutlinedButton(
-            key: const Key('settingsRecoveryButton'),
-            onPressed: () => showDialog<void>(
-              context: context,
-              // The code is shown once; a stray click outside must not close
-              // the modal before it has been noted.
-              barrierDismissible: false,
-              builder: (_) => const RegenerateRecoveryCodeModal(),
-            ),
-            child: Text(l10n.settingsRecoveryButton),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-/// Two steps in one modal: confirm the password, then show the new code.
+/// « Nouveau code de récupération », opened from the recovery code row of
+/// Settings › Profil. Two steps in one modal: confirm the password, then show
+/// the new code, once.
 class RegenerateRecoveryCodeModal extends ConsumerStatefulWidget {
   const RegenerateRecoveryCodeModal({super.key});
 
@@ -101,7 +52,6 @@ class _RegenerateRecoveryCodeModalState
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final textTheme = Theme.of(context).textTheme;
     final state = ref.watch(recoveryCodeRegenerateControllerProvider);
     final code = state.value;
     final isGenerating = state.isLoading;
@@ -118,11 +68,11 @@ class _RegenerateRecoveryCodeModalState
               ),
             ]
           : [
-              OutlinedButton(
+              AppButton(
+                label: l10n.settingsRecoveryModalCancel,
                 onPressed: isGenerating
                     ? null
                     : () => Navigator.of(context).pop(),
-                child: Text(l10n.settingsRecoveryModalCancel),
               ),
               PrimaryButton(
                 key: const Key('recoveryModalGenerate'),
@@ -131,18 +81,14 @@ class _RegenerateRecoveryCodeModalState
                 onPressed: _passwordController.text.isEmpty ? null : _generate,
               ),
             ],
+      subtitle: Text(
+        code != null
+            ? l10n.settingsRecoveryModalGenerated
+            : l10n.settingsRecoveryModalLead,
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Text(
-            code != null
-                ? l10n.settingsRecoveryModalGenerated
-                : l10n.settingsRecoveryModalLead,
-            style: textTheme.bodyMedium?.copyWith(
-              color: context.colors.textSecondary,
-            ),
-          ),
-          const SizedBox(height: AppSpacing.md),
           if (code != null)
             RecoveryCodePlate(code: code)
           else ...[
@@ -151,7 +97,7 @@ class _RegenerateRecoveryCodeModalState
                 key: const Key('recoveryModalError'),
                 message: _errorMessage(l10n, state.error),
               ),
-              const SizedBox(height: AppSpacing.md),
+              const SizedBox(height: AppSpacing.fieldGap),
             ],
             LabeledField(
               label: l10n.authPasswordLabel,

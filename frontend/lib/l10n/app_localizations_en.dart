@@ -68,6 +68,173 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingsSectionAbout => 'About';
 
   @override
+  String get settingsGroupDisplay => 'Display';
+
+  @override
+  String get settingsGroupMoney => 'Money';
+
+  @override
+  String get settingsFormatsNote =>
+      'Dates and amounts follow the chosen language.';
+
+  @override
+  String settingsFormatsDatePair(String long, String short) {
+    return '$long · $short';
+  }
+
+  @override
+  String settingsCurrencyValue(String code, String name, String symbol) {
+    return '$code, $name ($symbol)';
+  }
+
+  @override
+  String get settingsIncomeTitle => 'Declared income';
+
+  @override
+  String get settingsIncomeNote =>
+      'Used for the debt ratio in the Loans and Simulator panels. Without it, Bastide uses the median income it observed.';
+
+  @override
+  String get settingsIncomePerMonth => 'per month';
+
+  @override
+  String get settingsIncomeInvalid =>
+      'Enter a positive amount, or leave it empty.';
+
+  @override
+  String get settingsIncomeSaveFailed =>
+      'The income couldn\'t be saved. Nothing was changed. Try again.';
+
+  @override
+  String get settingsGroupSecurity => 'Security';
+
+  @override
+  String get settingsGroupSession => 'Session';
+
+  @override
+  String get settingsEmailTitle => 'Email address';
+
+  @override
+  String get settingsEmailNote =>
+      'Used only to sign in. Bastide sends no messages.';
+
+  @override
+  String get settingsProfileNameNote =>
+      'You can sign in with this name or with your email.';
+
+  @override
+  String get settingsLogoutTitle => 'Log out';
+
+  @override
+  String get settingsLogoutNote =>
+      'Your data stays on this computer, protected by your password.';
+
+  @override
+  String get settingsAiEngineTitle => 'Engine';
+
+  @override
+  String get settingsAiConnected => 'Connected';
+
+  @override
+  String settingsAiModelCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count models available',
+      one: '1 model available',
+      zero: 'no model available',
+    );
+    return '· $_temp0';
+  }
+
+  @override
+  String get settingsAiThresholdTitle => 'Confidence threshold';
+
+  @override
+  String settingsBackupRestoreRefused(String reason) {
+    return 'Restore not possible. $reason';
+  }
+
+  @override
+  String get settingsResetRowTitle => 'Reset the database';
+
+  @override
+  String settingsResetRefused(String reason) {
+    return 'Reset not possible. $reason';
+  }
+
+  @override
+  String settingsAboutVersionLine(String version, String os) {
+    return 'Version $version · $os';
+  }
+
+  @override
+  String settingsAboutOs(String os) {
+    String _temp0 = intl.Intl.selectLogic(os, {
+      'windows': 'Windows',
+      'macos': 'macOS',
+      'linux': 'Linux',
+      'other': '$os',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String get settingsUpdatesLatest => 'You are on the latest version.';
+
+  @override
+  String get settingsUpdatesCheckNow => 'Check now';
+
+  @override
+  String get settingsAboutPrivacyTitle => 'Privacy';
+
+  @override
+  String get settingsAboutPrivacyNote => 'What Bastide does with your data.';
+
+  @override
+  String get settingsAboutDataTitle => 'Data location';
+
+  @override
+  String get settingsAboutDataNote =>
+      'The file that holds your entire history.';
+
+  @override
+  String get settingsAboutDataOpen => 'Open folder';
+
+  @override
+  String get settingsAboutLicenseTitle => 'License';
+
+  @override
+  String get settingsAboutLicenseNote =>
+      'Bastide is free software. Its name and logo are not covered by the license.';
+
+  @override
+  String get settingsAboutLicenseName =>
+      'GNU Affero General Public License v3.0';
+
+  @override
+  String get settingsAboutSourceCode => 'Source code';
+
+  @override
+  String get settingsAboutInstallGuide => 'Installation guide';
+
+  @override
+  String get settingsAboutCreditsNote =>
+      'The third-party components shipped with the app.';
+
+  @override
+  String get settingsAboutCreditsIconsLabel => 'Icons';
+
+  @override
+  String get settingsAboutCreditsFontLabel => 'Typeface';
+
+  @override
+  String get settingsAboutCreditsFont => 'Geist, SIL OFL license';
+
+  @override
+  String get settingsAboutAllLicenses => 'All licenses';
+
+  @override
   String get settingsThemeTitle => 'Theme';
 
   @override
@@ -113,16 +280,13 @@ class AppLocalizationsEn extends AppLocalizations {
       'Chosen when you registered and applied to all your accounts. It cannot be changed in this version.';
 
   @override
-  String get settingsFormatsTitle => 'Format preview';
+  String get settingsFormatsTitle => 'Formats';
 
   @override
-  String get settingsFormatsDates => 'Dates';
+  String get settingsFormatsDates => 'Date';
 
   @override
-  String get settingsFormatsAmounts => 'Amounts';
-
-  @override
-  String get settingsAboutVersion => 'Version';
+  String get settingsFormatsAmounts => 'Amount';
 
   @override
   String get settingsAboutVersionUnavailable => 'Unavailable';
@@ -131,15 +295,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingsAboutCreditsTitle => 'Credits';
 
   @override
-  String get settingsAboutCreditsIcons =>
-      'Icons: Lucide (lucide.dev), ISC license.';
+  String get settingsAboutCreditsIcons => 'Lucide, ISC license';
 
   @override
   String get settingsUpdatesTitle => 'Updates';
 
   @override
-  String get settingsUpdatesSubtitle =>
-      'Tell me when a new version is released';
+  String get settingsUpdatesSubtitle => 'Tell me about a new version';
 
   @override
   String get settingsUpdatesToggleLabel => 'Check for updates';
@@ -157,21 +319,10 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String settingsUpdatesCurrent(String version) {
-    return 'You are on version $version.';
-  }
-
-  @override
   String get settingsUpdatesDownload => 'Download';
 
   @override
-  String settingsUpdatesUpToDate(String version) {
-    return 'You are on the latest version ($version).';
-  }
-
-  @override
-  String get settingsUpdatesOffline =>
-      'GitHub could not be reached. Bastide will try again next time you open this screen.';
+  String get settingsUpdatesOffline => 'GitHub could not be reached.';
 
   @override
   String get settingsUpdatesUnavailable => 'Update status unavailable.';
@@ -2166,7 +2317,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get settingsAiPrivacy =>
-      'Your transaction descriptions are sent to a model running on this computer. Nothing leaves your machine.';
+      'Your transactions\' labels are sent to a model that runs on this computer. Nothing leaves your machine.';
 
   @override
   String get settingsAiBaseUrlLabel => 'Engine address';
@@ -2183,10 +2334,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingsAiModelLabel => 'Model';
 
   @override
-  String get settingsAiModelHelp =>
-      'List provided by the engine. Manual entry allowed.';
-
-  @override
   String get settingsAiModelUnavailable =>
       'Engine unreachable: no model to offer.';
 
@@ -2194,42 +2341,18 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingsAiModelChoose => 'Choose a model';
 
   @override
-  String settingsAiThresholdLabel(double threshold) {
-    final intl.NumberFormat thresholdNumberFormat =
-        intl.NumberFormat.percentPattern(localeName);
-    final String thresholdString = thresholdNumberFormat.format(threshold);
-
-    return 'Confidence threshold: $thresholdString';
-  }
-
-  @override
   String get settingsAiThresholdHelp =>
-      'Below this threshold, a transaction is offered to you for review rather than categorized automatically.';
-
-  @override
-  String settingsAiStatusConnected(int count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: 'Connected · $count models available',
-      one: 'Connected · 1 model available',
-      zero: 'Connected · no model available',
-    );
-    return '$_temp0';
-  }
+      'Below it, the transaction is offered to you for review instead of being filed.';
 
   @override
   String get settingsAiStatusUnreachable =>
       'No engine detected at this address.';
 
   @override
-  String get settingsAiStatusDisabled => 'AI categorization is off.';
-
-  @override
   String get settingsAiLearnMore => 'Learn more';
 
   @override
-  String get settingsAiTest => 'Test connection';
+  String get settingsAiTest => 'Test';
 
   @override
   String get settingsAiTesting => 'Testing…';
@@ -2242,18 +2365,14 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingsAiRetry => 'Try again';
 
   @override
-  String get settingsBackupTitle => 'Backup & restore';
-
-  @override
-  String get settingsBackupSubtitle =>
-      'Export all your data to a file you can import again.';
+  String get settingsBackupTitle => 'Backup';
 
   @override
   String get settingsBackupExportLabel => 'Export all data';
 
   @override
   String get settingsBackupExportCaption =>
-      '.bastide file: accounts, transactions, categories, rules, goals, loans, properties, settings.';
+      'A .bastide file, unencrypted, with your entire history. Keep it somewhere safe.';
 
   @override
   String get settingsBackupExportPreparing => 'Preparing the archive…';
@@ -2263,7 +2382,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String settingsBackupLast(String when) {
-    return 'Last backup: $when';
+    return 'Last backup on $when';
   }
 
   @override
@@ -2275,20 +2394,14 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get settingsBackupPrivacy =>
-      'This file isn\'t encrypted and holds your entire history. Keep it somewhere safe.';
-
-  @override
   String get settingsBackupRestoreTitle => 'Restore a backup';
 
   @override
-  String get settingsBackupRestoreSubtitle => 'Replaces all current data.';
+  String get settingsBackupRestoreSubtitle =>
+      'Replaces all current data, after confirmation.';
 
   @override
-  String get settingsBackupRestoreButton => 'Import a file…';
-
-  @override
-  String get settingsBackupRestoreFailedLead => 'Restore not possible.';
+  String get settingsBackupRestoreButton => 'Import a file';
 
   @override
   String get settingsBackupErrorTooNew =>
@@ -2333,7 +2446,7 @@ class AppLocalizationsEn extends AppLocalizations {
       other: '$accounts accounts',
       one: '$accounts account',
     );
-    return 'Backup saved: $_temp0, $_temp1.';
+    return 'Backup saved · $_temp0, $_temp1.';
   }
 
   @override
@@ -2341,9 +2454,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get settingsBackupConfirmTitle => 'Restore this backup?';
-
-  @override
-  String get settingsBackupConfirmFile => 'Selected file:';
 
   @override
   String get settingsBackupConfirmExportedAt => 'Exported on';
@@ -3086,11 +3196,11 @@ class AppLocalizationsEn extends AppLocalizations {
   String get allocationDatePick => 'Pick a date';
 
   @override
-  String get settingsResetTitle => 'Danger zone';
+  String get settingsResetTitle => 'Reset';
 
   @override
   String get settingsResetSubtitle =>
-      'Resetting the database deletes this profile\'s transactions, accounts, rules, custom categories, goals, subscriptions, loans, properties and simulations. Exported backups aren\'t touched.';
+      'Deletes this profile\'s transactions, accounts, rules, custom categories, goals, subscriptions, loans, properties, investments and simulations. Exported backups are not touched.';
 
   @override
   String get settingsResetButton => 'Reset…';
@@ -3108,11 +3218,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get settingsResetConfirmNote =>
-      'System categories, your preferences and the AI settings are kept. Backup files you\'ve already exported stay intact.';
-
-  @override
-  String get settingsResetConfirmWarning =>
-      'This can\'t be undone. Export a backup before you continue.';
+      'The built-in categories, your preferences and the AI settings are kept.';
 
   @override
   String get settingsResetConfirmWord => 'DELETE';
@@ -3126,11 +3232,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingsResetConfirmSubmit => 'Delete everything';
 
   @override
-  String get settingsResetDone =>
-      'Database reset. The system categories have been restored.';
-
-  @override
-  String get settingsResetFailedLead => 'Reset not possible.';
+  String get settingsResetDone => 'Database reset.';
 
   @override
   String get settingsResetErrorUnknown =>
@@ -4477,7 +4579,7 @@ class AppLocalizationsEn extends AppLocalizations {
       'Lets you reset your password if you forget it. Generating a new one invalidates the previous code.';
 
   @override
-  String get settingsRecoveryButton => 'Generate a new code…';
+  String get settingsRecoveryButton => 'Generate a new code';
 
   @override
   String get settingsRecoveryModalTitle => 'New recovery code';
@@ -4523,21 +4625,14 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingsProfileNameTitle => 'Username';
 
   @override
-  String settingsProfileNameSubtitle(String name) {
-    return 'You can sign in with $name or with your email.';
-  }
-
-  @override
-  String get settingsProfileNameButton => 'Change…';
+  String get settingsProfileNameButton => 'Change';
 
   @override
   String get settingsAvatarTitle => 'Avatar';
 
   @override
-  String get settingsAvatarSubtitle => 'Choose how you appear across the app.';
-
-  @override
-  String get settingsAvatarReset => 'Back to the monogram';
+  String get settingsAvatarSubtitle =>
+      'A monogram, a colour plate or a picture. The picture stays on this computer.';
 
   @override
   String get settingsAvatarMonogram => 'Monogram';
@@ -4562,7 +4657,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingsAvatarError => 'The avatar couldn\'t be saved. Try again.';
 
   @override
-  String get settingsAvatarChoosePicture => 'Choose a picture…';
+  String get settingsAvatarChoosePicture => 'Choose a picture';
 
   @override
   String get settingsAvatarRemovePicture => 'Remove picture';
@@ -4666,18 +4761,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get startupContinueAnyway => 'Continue anyway';
 
   @override
-  String get settingsAiOllamaFound => 'Ollama found on this computer';
-
-  @override
-  String settingsAiOllamaModels(int count) {
+  String settingsAiOllamaFound(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
       other: '$count models installed',
       one: '1 model installed',
-      zero: 'No models installed',
+      zero: 'no model installed',
     );
-    return '$_temp0';
+    return 'Ollama found on this computer · $_temp0';
   }
 
   @override

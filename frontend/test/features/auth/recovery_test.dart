@@ -5,7 +5,7 @@ import 'package:bastide/core/storage/token_store.dart';
 import 'package:bastide/core/theme/app_theme.dart';
 import 'package:bastide/features/auth/application/auth_controller.dart';
 import 'package:bastide/features/auth/presentation/forgot_password_screen.dart';
-import 'package:bastide/features/auth/presentation/recovery_code_card.dart';
+import 'package:bastide/features/auth/presentation/recovery_code_modal.dart';
 import 'package:bastide/features/auth/presentation/recovery_code_screen.dart';
 import 'package:bastide/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
@@ -351,7 +351,22 @@ void main() {
 
   group('settings regeneration modal', () {
     Future<void> openAndSubmit(WidgetTester tester, String password) async {
-      await tester.pumpWidget(wrap(const RecoveryCodeCard()));
+      await tester.pumpWidget(
+        wrap(
+          // The modal as the recovery code row opens it.
+          Builder(
+            builder: (context) => TextButton(
+              key: const Key('settingsRecoveryButton'),
+              onPressed: () => showDialog<void>(
+                context: context,
+                barrierDismissible: false,
+                builder: (_) => const RegenerateRecoveryCodeModal(),
+              ),
+              child: const Text('open'),
+            ),
+          ),
+        ),
+      );
       await tester.tap(find.byKey(const Key('settingsRecoveryButton')));
       await tester.pumpAndSettle();
       await tester.enterText(

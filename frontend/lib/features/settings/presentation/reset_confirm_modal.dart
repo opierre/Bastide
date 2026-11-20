@@ -3,19 +3,24 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
 import '../../../core/session/current_user_provider.dart';
-import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/tokens.dart';
+import '../../../core/widgets/app_button.dart';
 import '../../../core/widgets/app_modal.dart';
 import '../../../core/widgets/app_toast.dart';
-import '../../../core/widgets/inline_banner.dart';
+import '../../../core/widgets/key_value_list.dart';
 import '../../../core/widgets/labeled_field.dart';
+import '../../../core/widgets/note_line.dart';
 import '../../../l10n/app_localizations.dart';
 import '../application/reset_controller.dart';
 import '../domain/database_reset.dart';
 
-/// State ⑩: what the reset would delete, and the one place its solid red
-/// appears. Nothing is deleted until the confirmation word has been typed
-/// exactly — a click alone cannot reach the delete.
+/// Width of both destructive confirmations (`09-settings.md` §Données).
+const _modalWidth = 500.0;
+
+/// « Réinitialiser la base de données ? »: what the reset would delete, and
+/// one of the two places the solid destructive red appears. Nothing is
+/// deleted until the confirmation word has been typed exactly: a click alone
+/// cannot reach the delete.
 class ResetConfirmModal extends ConsumerStatefulWidget {
   const ResetConfirmModal({super.key});
 
@@ -58,7 +63,6 @@ class _ResetConfirmModalState extends ConsumerState<ResetConfirmModal> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final textTheme = Theme.of(context).textTheme;
     final counts = ref.watch(databaseSummaryProvider);
     final isResetting = ref.watch(resetControllerProvider).isResetting;
     final word = l10n.settingsResetConfirmWord;
@@ -66,95 +70,41 @@ class _ResetConfirmModalState extends ConsumerState<ResetConfirmModal> {
 
     return AppModal(
       title: l10n.settingsResetConfirmTitle,
-      width: 500,
-      leading: Container(
-        width: 38,
-        height: 38,
-        decoration: BoxDecoration(
-          color: context.colors.negative.withValues(alpha: 0.12),
-          borderRadius: BorderRadius.circular(AppRadii.md),
+      width: _modalWidth,
+      subtitle: Text.rich(
+        TextSpan(
+          children: _leadSpans(
+            context,
+            l10n.settingsResetConfirmLead,
+            ref.watch(currentUserProvider)?.displayName ?? '',
+          ),
         ),
-        child: Icon(
-          Icons.delete_outline_rounded,
-          size: 19,
-          color: context.colors.negative,
-        ),
+        key: const Key('resetConfirmLead'),
       ),
       actions: [
-        OutlinedButton(
+        AppButton(
+          label: l10n.settingsBackupCancel,
           onPressed: isResetting ? null : () => Navigator.of(context).pop(),
-          child: Text(l10n.settingsBackupCancel),
         ),
-        FilledButton(
+        AppButton(
           key: const Key('resetConfirmSubmit'),
-          // Disabled until the word matches exactly, and while the delete runs.
-          onPressed: confirmed && !isResetting ? _confirm : null,
-          style: FilledButton.styleFrom(
-            backgroundColor: context.colors.negative,
-            foregroundColor: context.colors.onPrimary,
-            disabledBackgroundColor: context.colors.negative.withValues(
-              alpha: 0.45,
-            ),
-            disabledForegroundColor: context.colors.onPrimary.withValues(
-              alpha: 0.45,
-            ),
-          ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              if (isResetting) ...[
-                SizedBox(
-                  width: 13,
-                  height: 13,
-                  child: CircularProgressIndicator(
-                    strokeWidth: 2,
-                    color: context.colors.onPrimary,
-                  ),
-                ),
-                const SizedBox(width: AppSpacing.sm),
-              ],
-              Text(l10n.settingsResetConfirmSubmit),
-            ],
-          ),
+          label: l10n.settingsResetConfirmSubmit,
+          variant: AppButtonVariant.destructive,
+          isLoading: isResetting,
+          // Disabled until the word matches exactly.
+          onPressed: confirmed ? _confirm : null,
         ),
       ],
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Text.rich(
-            TextSpan(
-              children: _leadSpans(
-                context,
-                l10n.settingsResetConfirmLead,
-                ref.watch(currentUserProvider)?.displayName ?? '',
-              ),
-            ),
-            key: const Key('resetConfirmLead'),
-            style: textTheme.bodyMedium?.copyWith(
-              color: context.colors.textSecondary,
-            ),
-          ),
-          const SizedBox(height: AppSpacing.md),
-          _CountsPlate(counts: counts.value),
-          const SizedBox(height: AppSpacing.sm + AppSpacing.xs),
-          Text(
-            l10n.settingsResetConfirmNote,
-            style: context.textStyles.helper.copyWith(
-              fontSize: 11.5,
-              color: context.colors.textTertiary,
-            ),
-          ),
-          const SizedBox(height: AppSpacing.md),
-          InlineBanner(
-            key: const Key('resetConfirmWarning'),
-            icon: Icons.warning_amber_rounded,
-            message: l10n.settingsResetConfirmWarning,
-          ),
-          const SizedBox(height: AppSpacing.md),
+          _Counts(counts: counts.value),
+          const SizedBox(height: AppSpacing.fieldGap),
+          NoteLine(text: l10n.settingsResetConfirmNote),
+          const SizedBox(height: AppSpacing.fieldGap),
           LabeledField(
             label: l10n.settingsResetConfirmLabel(word),
-            child: SizedBox(
-              height: 38,
+            child: FocusGlow(
               child: TextField(
                 key: const Key('resetConfirmInput'),
                 controller: _typed,
@@ -166,7 +116,6 @@ class _ResetConfirmModalState extends ConsumerState<ResetConfirmModal> {
               ),
             ),
           ),
-          const SizedBox(height: AppSpacing.sm),
         ],
       ),
     );
@@ -196,10 +145,10 @@ List<TextSpan> _leadSpans(
   ];
 }
 
-/// The inset plate listing what goes. Rows keep their labels while the counts
+/// The key/value list of what goes. Rows keep their labels while the counts
 /// load, so the modal never reflows under the pointer as the figures arrive.
-class _CountsPlate extends StatelessWidget {
-  const _CountsPlate({required this.counts});
+class _Counts extends StatelessWidget {
+  const _Counts({required this.counts});
 
   final DatabaseCounts? counts;
 
@@ -208,10 +157,6 @@ class _CountsPlate extends StatelessWidget {
     final l10n = AppLocalizations.of(context)!;
     final number = NumberFormat.decimalPattern(
       Localizations.localeOf(context).toString(),
-    );
-    final textTheme = Theme.of(context).textTheme;
-    final valueStyle = tabularNumberStyle(
-      textTheme.bodyMedium!.copyWith(color: context.colors.text),
     );
 
     final rows = <(String, int?)>[
@@ -226,45 +171,13 @@ class _CountsPlate extends StatelessWidget {
       (l10n.settingsBackupConfirmSimulations, counts?.simulations),
     ];
 
-    return Container(
+    return KeyValueList(
       key: const Key('resetConfirmCounts'),
-      padding: const EdgeInsets.symmetric(
-        horizontal: 14,
-        vertical: AppSpacing.xs,
-      ),
-      decoration: BoxDecoration(
-        color: context.colors.field,
-        borderRadius: BorderRadius.circular(AppRadii.inset),
-        border: Border.all(color: context.colors.line),
-      ),
-      child: Column(
-        children: [
-          for (final (label, count) in rows)
-            SizedBox(
-              height: 34,
-              child: Row(
-                children: [
-                  // Expanded, not a Spacer: the longest label (« Paramètres fiscaux
-                  // personnalisés ») must shrink on a narrow modal, never overflow.
-                  Expanded(
-                    child: Text(
-                      label,
-                      overflow: TextOverflow.ellipsis,
-                      style: textTheme.bodyMedium?.copyWith(
-                        color: context.colors.textSecondary,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: AppSpacing.sm),
-                  Text(
-                    count == null ? '—' : number.format(count),
-                    style: valueStyle,
-                  ),
-                ],
-              ),
-            ),
-        ],
-      ),
+      entries: [
+        for (final (label, count) in rows)
+          // The dash is the empty-value placeholder (`00` §14).
+          KeyValue(label, count == null ? '—' : number.format(count)),
+      ],
     );
   }
 }
