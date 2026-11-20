@@ -135,12 +135,15 @@ class _HistoryRow extends ConsumerWidget {
 
   bool get _failed => batch.status == ImportStatus.failed;
 
-  /// Opens Transactions on what this import covered: its account over its
-  /// period. A failed import wrote nothing, so it opens nothing.
+  /// Opens Transactions on exactly the operations this import added. A
+  /// failed import wrote nothing, so it opens nothing.
   void _open(BuildContext context, WidgetRef ref) {
-    ref.read(transactionFiltersProvider.notifier)
-      ..setAccount(batch.accountId)
-      ..setDateRange(batch.periodStart, batch.periodEnd);
+    ref
+        .read(transactionFiltersProvider.notifier)
+        .showImport(
+          ImportBatchFilter(id: batch.id, fileName: batch.fileName),
+          accountId: batch.accountId,
+        );
     context.go(TransactionsScreen.path);
   }
 

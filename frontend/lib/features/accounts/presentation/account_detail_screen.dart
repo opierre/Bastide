@@ -931,9 +931,9 @@ class _OperationsBlock extends ConsumerWidget {
             label: l10n.accountDetailSeeAll,
             small: true,
             onTap: () {
-              ref
-                  .read(transactionFiltersProvider.notifier)
-                  .setAccount(accountId);
+              ref.read(transactionFiltersProvider.notifier)
+                ..setAccount(accountId)
+                ..clearImport();
               context.go(TransactionsScreen.path);
             },
           ),

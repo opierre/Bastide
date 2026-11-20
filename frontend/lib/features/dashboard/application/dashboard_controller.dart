@@ -132,6 +132,7 @@ void focusTransactionsOnCategory(
   required DateTime month,
 }) {
   filters
+    ..clearImport()
     ..setCategory(categoryId)
     ..setDateRange(
       DateTime(month.year, month.month),

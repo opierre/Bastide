@@ -116,6 +116,68 @@ void main() {
     expect(lastQuery['page'], '1');
   });
 
+  test('an import filter asks for that import\'s rows only', () async {
+    when(
+      () => apiClient.get('/transactions', query: any(named: 'query')),
+    ).thenAnswer((_) async => _pageJson([_transactionJson()]));
+
+    await container.read(transactionsControllerProvider.future);
+    container.read(transactionFiltersProvider.notifier)
+      ..setCategory('c1')
+      ..setQuery('loyer')
+      ..showImport(
+        const ImportBatchFilter(id: 'b1', fileName: 'releve.ofx'),
+        accountId: 'a1',
+      );
+    await container.read(transactionsControllerProvider.future);
+
+    final captured = verify(
+      () => apiClient.get('/transactions', query: captureAny(named: 'query')),
+    ).captured;
+    final lastQuery = captured.last as Map<String, String>;
+    expect(lastQuery['import_batch_id'], 'b1');
+    expect(lastQuery['account_id'], 'a1');
+    // Leftover filters would hide some of the import's rows.
+    expect(lastQuery.containsKey('category_id'), isFalse);
+    expect(lastQuery.containsKey('q'), isFalse);
+  });
+
+  test('clearing the import filter drops it from the query', () async {
+    when(
+      () => apiClient.get('/transactions', query: any(named: 'query')),
+    ).thenAnswer((_) async => _pageJson([_transactionJson()]));
+
+    await container.read(transactionsControllerProvider.future);
+    container.read(transactionFiltersProvider.notifier)
+      ..showImport(
+        const ImportBatchFilter(id: 'b1', fileName: 'releve.ofx'),
+        accountId: 'a1',
+      )
+      ..clearImport();
+    await container.read(transactionsControllerProvider.future);
+
+    final captured = verify(
+      () => apiClient.get('/transactions', query: captureAny(named: 'query')),
+    ).captured;
+    final lastQuery = captured.last as Map<String, String>;
+    expect(lastQuery.containsKey('import_batch_id'), isFalse);
+    expect(lastQuery['account_id'], 'a1');
+  });
+
+  test('picking another account drops the import filter', () {
+    final notifier = container.read(transactionFiltersProvider.notifier)
+      ..showImport(
+        const ImportBatchFilter(id: 'b1', fileName: 'releve.ofx'),
+        accountId: 'a1',
+      );
+
+    notifier.setAccount('a1');
+    expect(container.read(transactionFiltersProvider).importBatch, isNotNull);
+
+    notifier.setAccount('a2');
+    expect(container.read(transactionFiltersProvider).importBatch, isNull);
+  });
+
   test('an account filter takes in the account\'s linked cards', () async {
     when(
       () => apiClient.get('/transactions', query: any(named: 'query')),

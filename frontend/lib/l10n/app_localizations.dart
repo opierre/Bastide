@@ -1639,6 +1639,18 @@ abstract class AppLocalizations {
   /// **'Toutes les dates'**
   String get transactionsFilterAllDates;
 
+  /// Chip in the transactions filter row naming the import the list is narrowed to (opened from an import history row).
+  ///
+  /// In fr, this message translates to:
+  /// **'Import : {fileName}'**
+  String transactionsFilterImport(String fileName);
+
+  /// Tooltip and accessible label of the button that lifts the import filter.
+  ///
+  /// In fr, this message translates to:
+  /// **'Retirer le filtre d’import'**
+  String get transactionsFilterImportRemove;
+
   /// Title of the transactions date range filter modal.
   ///
   /// In fr, this message translates to:

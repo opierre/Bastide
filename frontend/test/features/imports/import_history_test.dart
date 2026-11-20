@@ -323,7 +323,7 @@ void main() {
     expect(row.onTap, isNull);
   });
 
-  testWidgets('a row opens Transactions on its account and period', (
+  testWidgets('a row opens Transactions on exactly what its import added', (
     tester,
   ) async {
     _useDesktopSurface(tester);
@@ -374,9 +374,12 @@ void main() {
 
     expect(find.text('transactions'), findsOneWidget);
     final filters = container.read(transactionFiltersProvider);
+    expect(filters.importBatch?.id, 'b1');
+    expect(filters.importBatch?.fileName, _batch().fileName);
     expect(filters.accountId, 'a1');
-    expect(filters.dateFrom, DateTime(2026, 5, 1));
-    expect(filters.dateTo, DateTime(2026, 5, 31));
+    // The import alone decides the rows: no period narrows them further.
+    expect(filters.dateFrom, isNull);
+    expect(filters.dateTo, isNull);
   });
 
   testWidgets('loads as the table silhouette', (tester) async {

@@ -1024,6 +1024,14 @@ class AppLocalizationsFr extends AppLocalizations {
   String get transactionsFilterAllDates => 'Toutes les dates';
 
   @override
+  String transactionsFilterImport(String fileName) {
+    return 'Import : $fileName';
+  }
+
+  @override
+  String get transactionsFilterImportRemove => 'Retirer le filtre d’import';
+
+  @override
   String get transactionsDateRangeTitle => 'Période';
 
   @override
