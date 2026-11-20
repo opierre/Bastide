@@ -7,6 +7,7 @@ import 'package:bastide/core/widgets/amount_text.dart';
 import 'package:bastide/core/widgets/app_button.dart';
 import 'package:bastide/core/widgets/app_table.dart';
 import 'package:bastide/core/widgets/inline_banner.dart';
+import 'package:bastide/core/widgets/state_views.dart';
 import 'package:bastide/core/widgets/status_text.dart';
 import 'package:bastide/features/categories/domain/category.dart';
 import 'package:bastide/features/recurring/application/subscriptions_controller.dart';
@@ -33,6 +34,7 @@ Widget _wrap({
   List<AppCategory> categories = const [],
   List<SeriesAccount> accounts = const [],
   bool withTopBar = false,
+  ThemeData? theme,
 }) {
   return ProviderScope(
     overrides: [
@@ -42,7 +44,7 @@ Widget _wrap({
     ],
     child: MaterialApp(
       locale: locale,
-      theme: AppTheme.dark,
+      theme: theme ?? AppTheme.dark,
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
       home: Scaffold(
@@ -697,6 +699,114 @@ void main() {
     expect(find.byKey(const Key('seriesRow-s1')), findsOneWidget);
   });
 
+  group('layout', () {
+    FakeSubscriptionsController populated() => FakeSubscriptionsController(
+      initialSeries: [
+        testSeries(),
+        testSeries(
+          id: 's2',
+          label: 'Salle de sport du quartier',
+          expectedAmountMinor: -2999,
+        ),
+        testSeries(
+          id: 's3',
+          label: 'Presse en ligne',
+          cadence: Cadence.yearly,
+          expectedAmountMinor: -18744,
+        ),
+        testSeries(id: 's4', label: 'Canal TV', status: SeriesStatus.cancelled),
+      ],
+      summary: testSummary(
+        activeCount: 3,
+        cancelledCount: 1,
+        nextCharge: NextCharge(
+          seriesId: 's1',
+          label: 'Netflix',
+          amountMinor: -1549,
+          dueOn: DateTime(2026, 5, 15),
+        ),
+        priceIncreases: [
+          PriceIncrease(
+            seriesId: 's1',
+            deltaMinor: -200,
+            changedAt: DateTime(2026, 4, 15),
+          ),
+        ],
+        missed: [
+          MissedCharge(
+            seriesId: 's2',
+            expectedOn: DateTime(2026, 5, 5),
+            daysLate: 9,
+          ),
+        ],
+      ),
+      mergeSuggestions: [
+        MergeSuggestion(
+          target: testSeries(id: 's5', label: 'STREAMCO - STREAMCO TV'),
+          source: testSeries(id: 's6', label: 'STREAMCO'),
+        ),
+      ],
+    );
+
+    // The content region at 1440 × 900: beside the 224 px sidebar, and
+    // beside the 56 px collapsed one.
+    for (final (name, width) in [
+      ('sidebar expanded', 1440.0 - 224),
+      ('sidebar collapsed', 1440.0 - 56),
+    ]) {
+      for (final (themeName, theme) in [
+        ('dark', AppTheme.dark),
+        ('light', AppTheme.light),
+      ]) {
+        for (final locale in const [Locale('fr'), Locale('en')]) {
+          testWidgets('renders without overflow, $name, $themeName, '
+              '${locale.languageCode}', (tester) async {
+            tester.view.physicalSize = Size(width, 900 - 48);
+            tester.view.devicePixelRatio = 1.0;
+            addTearDown(tester.view.reset);
+
+            await tester.pumpWidget(
+              _wrap(controller: populated(), theme: theme, locale: locale),
+            );
+            await tester.pumpAndSettle();
+
+            expect(tester.takeException(), isNull);
+            expect(
+              find.byKey(const Key('subscriptionsSummaryLine')),
+              findsOneWidget,
+            );
+            expect(
+              find.byKey(const Key('subscriptionsMergeBanner')),
+              findsOneWidget,
+            );
+            expect(find.byKey(const Key('seriesRow-s4')), findsOneWidget);
+          });
+        }
+      }
+    }
+
+    testWidgets('loading draws the summary and row silhouettes', (
+      tester,
+    ) async {
+      _useDesktopSurface(tester);
+      final gate = Completer<void>();
+      await tester.pumpWidget(
+        _wrap(controller: _SlowSubscriptionsController(gate.future)),
+      );
+      await tester.pump();
+
+      expect(
+        find.byKey(const Key('subscriptionsLoadingIndicator')),
+        findsOneWidget,
+      );
+      expect(find.byType(SkeletonBlock), findsNWidgets(9));
+      expect(find.byType(CircularProgressIndicator), findsNothing);
+
+      gate.complete();
+      await tester.pumpAndSettle();
+    });
+  });
+
   group('merge suggestion', () {
     MergeSuggestion suggestion() => MergeSuggestion(
       target: testSeries(id: 's2', label: 'STREAMCO - STREAMCO TV'),
@@ -1021,4 +1131,17 @@ void main() {
       expect(drawnOrder(tester), ['s3', 's1', 's2']);
     });
   });
+}
+
+/// Holds the first load until [gate] completes, so the loading state shows.
+class _SlowSubscriptionsController extends FakeSubscriptionsController {
+  _SlowSubscriptionsController(this.gate);
+
+  final Future<void> gate;
+
+  @override
+  Future<SubscriptionsState> build() async {
+    await gate;
+    return super.build();
+  }
 }

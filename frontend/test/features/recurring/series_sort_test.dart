@@ -31,6 +31,32 @@ List<String> _ids(List<SubscriptionRow> rows) => [
 
 void main() {
   group('sortSeriesRows', () {
+    test('a cancelled row stays last whatever the column and direction', () {
+      final rows = [
+        _row(
+          'c',
+          'Assurance',
+          amountMinor: -9000,
+          status: SeriesStatus.cancelled,
+        ),
+        _row('b', 'Musique', amountMinor: -1000),
+        _row('a', 'Gym', amountMinor: -3000),
+      ];
+
+      for (final sort in [
+        for (final field in SeriesSortField.values) ...[
+          SeriesSort(field, ascending: true),
+          SeriesSort(field, ascending: false),
+        ],
+      ]) {
+        expect(
+          _ids(sortSeriesRows(rows, sort)).last,
+          'c',
+          reason: '${sort.field.name} ${sort.ascending}',
+        );
+      }
+    });
+
     test('no sort keeps the order the rows came in', () {
       final rows = [_row('b', 'Zeta'), _row('a', 'Alpha')];
 

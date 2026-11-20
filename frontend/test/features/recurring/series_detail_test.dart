@@ -30,7 +30,12 @@ SeriesOccurrence _occurrence({
   currency: 'EUR',
 );
 
-Widget _wrap(SeriesDetail detail, {FakeSubscriptionsController? controller}) {
+Widget _wrap(
+  SeriesDetail detail, {
+  FakeSubscriptionsController? controller,
+  ThemeData? theme,
+  Locale locale = const Locale('fr'),
+}) {
   return ProviderScope(
     overrides: [
       if (controller != null)
@@ -49,8 +54,8 @@ Widget _wrap(SeriesDetail detail, {FakeSubscriptionsController? controller}) {
       subscriptionCategoriesProvider.overrideWith((ref) => []),
     ],
     child: MaterialApp(
-      locale: const Locale('fr'),
-      theme: AppTheme.dark,
+      locale: locale,
+      theme: theme ?? AppTheme.dark,
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
       home: Scaffold(
@@ -549,6 +554,44 @@ void main() {
     );
     expect(find.byKey(const Key('seriesDetailRetryButton')), findsOneWidget);
   });
+
+  for (final (name, width) in [
+    ('sidebar expanded', 1440.0 - 224),
+    ('sidebar collapsed', 1440.0 - 56),
+  ]) {
+    for (final (themeName, theme) in [
+      ('dark', AppTheme.dark),
+      ('light', AppTheme.light),
+    ]) {
+      for (final locale in const [Locale('fr'), Locale('en')]) {
+        testWidgets('renders without overflow, $name, $themeName, '
+            '${locale.languageCode}', (tester) async {
+          tester.view.physicalSize = Size(width, 900 - 48);
+          tester.view.devicePixelRatio = 1.0;
+          addTearDown(tester.view.reset);
+
+          await tester.pumpWidget(
+            _wrap(
+              SeriesDetail(
+                series: testSeries(
+                  priceChangeMinor: -200,
+                  priceChangedAt: DateTime(2026, 4, 15),
+                ),
+                occurrences: _charges(12, const Duration(days: 30)),
+              ),
+              theme: theme,
+              locale: locale,
+            ),
+          );
+          await tester.pumpAndSettle();
+
+          expect(tester.takeException(), isNull);
+          expect(find.byKey(const Key('seriesIncreaseBanner')), findsOneWidget);
+          expect(find.byType(PriceHistoryChart), findsOneWidget);
+        });
+      }
+    }
+  }
 
   // The window widths the app is drawn and launched at: the 1440 frame, the
   // runner's 1280 default, and a narrow 1000.
