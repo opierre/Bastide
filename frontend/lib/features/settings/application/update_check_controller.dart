@@ -66,6 +66,21 @@ class UpdateCheckController extends AsyncNotifier<UpdateCheckState> {
     }
     state = AsyncData(UpdateCheckState(status: status));
   }
+
+  /// « Vérifier maintenant »: reads the status again. The backend keeps its
+  /// once-a-day limit, so this reaches GitHub only when a check is due.
+  Future<void> checkNow() async {
+    final current = state.value;
+    if (current == null || current.isBusy) return;
+    state = AsyncData(UpdateCheckState(status: current.status, isBusy: true));
+    try {
+      final status = await ref.read(settingsRepositoryProvider).updateStatus();
+      state = AsyncData(UpdateCheckState(status: status));
+    } catch (_) {
+      // Nothing new could be read: keep what was shown.
+      state = AsyncData(UpdateCheckState(status: current.status));
+    }
+  }
 }
 
 final updateCheckControllerProvider =
