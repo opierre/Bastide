@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:bastide/core/theme/app_theme.dart';
+import 'package:bastide/core/theme/tokens.dart';
 import 'package:bastide/features/accounts/application/account_detail_controller.dart';
 import 'package:bastide/features/accounts/application/accounts_controller.dart';
 import 'package:bastide/features/accounts/application/settlement_rule_controller.dart';
@@ -8,7 +9,8 @@ import 'package:bastide/features/accounts/domain/account.dart';
 import 'package:bastide/features/accounts/domain/account_overview.dart';
 import 'package:bastide/features/accounts/domain/settlement_rule.dart';
 import 'package:bastide/features/accounts/presentation/account_detail_screen.dart';
-import 'package:bastide/features/accounts/presentation/cycle_bars.dart';
+import 'package:bastide/core/widgets/amount_text.dart';
+import 'package:bastide/core/widgets/bar_charts.dart';
 import 'package:bastide/features/accounts/presentation/link_card_dialog.dart';
 import 'package:bastide/features/accounts/presentation/settlement_rule_dialog.dart';
 import 'package:bastide/features/transactions/domain/transaction.dart';
@@ -19,6 +21,15 @@ import 'package:flutter_test/flutter_test.dart';
 
 import '../../support/fake_accounts_controller.dart';
 import 'account_overview_fixtures.dart';
+
+/// A euro amount as the panel formats it.
+String _eur(int minor, {bool plus = false, String locale = 'fr'}) =>
+    formatAmount(
+      amountMinor: minor,
+      currency: 'EUR',
+      locale: locale,
+      showPositiveSign: plus,
+    );
 
 Transaction _transaction(
   String id,
@@ -68,6 +79,7 @@ Widget _wrap({
   FutureOr<AccountOverview> Function()? overview,
   List<Transaction> transactions = const [],
   Locale locale = const Locale('fr'),
+  ThemeData? theme,
   List<Account> extraAccounts = const [],
   FakeAccountsController? accounts,
 }) {
@@ -93,7 +105,7 @@ Widget _wrap({
     ],
     child: MaterialApp(
       locale: locale,
-      theme: AppTheme.dark,
+      theme: theme ?? AppTheme.dark,
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
       home: Scaffold(body: AccountDetailScreen(accountId: accountId)),
@@ -124,17 +136,30 @@ void main() {
       ),
     );
 
-    expect(find.text('Solde actuel'.toUpperCase()), findsOneWidget);
+    // The summary line: the balance on the last history day, then the
+    // month's figures, neutral and signed.
+    expect(find.text('Solde au 30 octobre 2026'), findsOneWidget);
+    expect(find.text(_eur(348612, plus: true)), findsOneWidget);
+    expect(find.text('Entrées en octobre'), findsOneWidget);
+    expect(find.text(_eur(327000, plus: true)), findsOneWidget);
+    expect(find.text('Sorties en octobre'), findsOneWidget);
+    expect(find.text(_eur(-265795)), findsOneWidget);
+    expect(find.text('Net'), findsOneWidget);
+    expect(find.text(_eur(61205, plus: true)), findsOneWidget);
+    expect(find.text('BNP Paribas · Courant'), findsOneWidget);
+    expect(find.text('Historique depuis le 3 janv. 2025'), findsOneWidget);
+    expect(find.text('dernier import le 28 oct.'), findsOneWidget);
+    expect(find.text('Solde en fin de mois'), findsOneWidget);
     expect(find.byKey(const Key('accountDetailBalanceChart')), findsOneWidget);
-    expect(find.text('Variation sur 12 mois'), findsOneWidget);
     // Four month-ends rising in a row: said, because it is true.
-    expect(
-      find.text('Votre solde progresse depuis 4 mois consécutifs.'),
-      findsOneWidget,
-    );
+    expect(find.text('Votre solde progresse depuis 4 mois.'), findsOneWidget);
     expect(find.text('Cartes rattachées'), findsOneWidget);
     expect(find.text('Visa Premier'), findsOneWidget);
     expect(find.text('•••• 4821'), findsOneWidget);
+    expect(find.text('Débit différé'), findsNWidgets(2));
+    expect(find.text('Prélevé le 5 nov.'), findsOneWidget);
+    expect(find.text('Opérations'), findsOneWidget);
+    expect(find.text('Ouvrir dans Transactions'), findsOneWidget);
     // The second card has no rule: the chip offers the fix; the first does not.
     expect(
       find.byKey(const Key('accountDetailRuleMissing-card-2')),
@@ -338,21 +363,107 @@ void main() {
       ),
     );
 
-    expect(find.text('Encours du cycle'.toUpperCase()), findsOneWidget);
+    expect(find.text('Encours du cycle'), findsOneWidget);
+    expect(find.text(_eur(-61240)), findsOneWidget);
+    expect(find.text('Cycle précédent'), findsOneWidget);
+    expect(find.text(_eur(-80360)), findsOneWidget);
+    expect(find.text('Moyenne sur 6 cycles'), findsOneWidget);
+    expect(find.text(_eur(-87318)), findsOneWidget);
+    expect(find.text('Prélevé le'), findsOneWidget);
+    expect(find.text('5 nov.'), findsOneWidget);
+    expect(find.text('Dépenses par cycle'), findsOneWidget);
     expect(find.byKey(const Key('accountDetailCycleChart')), findsOneWidget);
     expect(find.byKey(const Key('accountDetailBalanceChart')), findsNothing);
+    // The open cycle is not yet a fact: hatched.
+    expect(
+      tester.widget<SignedBarChart>(find.byType(SignedBarChart)).provisional,
+      {3},
+    );
     expect(find.text('Compte de règlement'), findsOneWidget);
     expect(
       find.byKey(const Key('accountDetailPayingAccount-acc-1')),
       findsOneWidget,
     );
-    expect(find.textContaining('CARTE X4821'), findsOneWidget);
-    expect(find.text('Moyenne par cycle'), findsOneWidget);
     expect(
-      find.text('Vos dépenses par carte baissent depuis 2 cycles.'),
+      find.text('Libellé : CARTE X4821 · appliquée depuis le 5 févr. 2025'),
       findsOneWidget,
     );
+    expect(find.text('Modifier la règle'), findsOneWidget);
     expect(find.text('Cartes rattachées'), findsNothing);
+  });
+
+  testWidgets('a card without a rule says so and offers to set it up', (
+    tester,
+  ) async {
+    final json = cardOverviewJson();
+    json['card_settlement'] = {
+      ...json['card_settlement'] as Map<String, dynamic>,
+      'rule': null,
+    };
+
+    await _pump(
+      tester,
+      _wrap(accountId: 'card-1', overview: () => overviewFrom(json)),
+    );
+
+    expect(find.text('Règle de règlement à configurer'), findsOneWidget);
+    expect(find.text('Configurer la règle'), findsOneWidget);
+  });
+
+  testWidgets('the card\'s rule button opens the settlement rule dialog', (
+    tester,
+  ) async {
+    await _pump(
+      tester,
+      _wrap(
+        accountId: 'card-1',
+        overview: () => overviewFrom(cardOverviewJson()),
+        extraAccounts: [
+          accountFrom(cardOverviewJson()['account'] as Map<String, dynamic>),
+        ],
+      ),
+    );
+
+    await tester.tap(find.byKey(const Key('accountDetailEditRule')));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(SettlementRuleDialog), findsOneWidget);
+  });
+
+  testWidgets('a current account without cards draws no card block', (
+    tester,
+  ) async {
+    final json = checkingOverviewJson()..['linked_cards'] = <dynamic>[];
+
+    await _pump(
+      tester,
+      _wrap(accountId: 'acc-1', overview: () => overviewFrom(json)),
+    );
+
+    expect(find.byKey(const Key('accountDetailLinkedCards')), findsNothing);
+    expect(find.text('Cartes rattachées'), findsNothing);
+  });
+
+  testWidgets('the operations table lists the latest rows with their columns', (
+    tester,
+  ) async {
+    await _pump(
+      tester,
+      _wrap(
+        accountId: 'acc-1',
+        overview: () => overviewFrom(checkingOverviewJson()),
+        transactions: [_transaction('t1', -2999), _transaction('t2', 150000)],
+      ),
+    );
+
+    for (final header in ['Opération', 'Catégorie', 'Date', 'Montant']) {
+      expect(find.text(header), findsOneWidget);
+    }
+    expect(find.text('Box Internet'), findsNWidgets(2));
+    expect(find.text('Non catégorisé'), findsNWidgets(2));
+    expect(find.text('29 oct.'), findsNWidgets(2));
+    expect(find.text(_eur(-2999)), findsOneWidget);
+    expect(find.text(_eur(150000, plus: true)), findsOneWidget);
   });
 
   testWidgets('a card cycle chart follows the 6/12/all switch', (tester) async {
@@ -381,8 +492,10 @@ void main() {
         }),
       ),
     );
-    int bars() =>
-        tester.widget<CycleBars>(find.byType(CycleBars)).values.length;
+    int bars() => tester
+        .widget<SignedBarChart>(find.byType(SignedBarChart))
+        .values
+        .length;
 
     expect(bars(), 12);
 
@@ -395,9 +508,7 @@ void main() {
     expect(bars(), 20);
   });
 
-  testWidgets('a fresh account says what comes next, never hides a section', (
-    tester,
-  ) async {
+  testWidgets('a fresh account says when the chart appears', (tester) async {
     await _pump(
       tester,
       _wrap(
@@ -407,24 +518,45 @@ void main() {
     );
 
     expect(find.byKey(const Key('accountDetailChartEmpty')), findsOneWidget);
+    expect(
+      find.text('Le graphique apparaîtra après le deuxième mois d’historique.'),
+      findsOneWidget,
+    );
     expect(find.text('Importer un relevé'), findsOneWidget);
-    // The meta strip and the recent-transactions row both state it.
+    // No range switch for a chart that is not drawn.
+    expect(find.byKey(const Key('accountDetailRange-six')), findsNothing);
+    // The right-hand line and the operations block both state it.
     expect(find.text('Aucune opération'), findsNWidgets(2));
-    expect(find.text('Aucun import'), findsOneWidget);
-    expect(find.byKey(const Key('accountDetailNoCards')), findsOneWidget);
+    expect(find.byKey(const Key('accountDetailLastImport')), findsNothing);
+    expect(find.byKey(const Key('accountDetailLinkedCards')), findsNothing);
     expect(
       find.byKey(const Key('accountDetailNoTransactions')),
       findsOneWidget,
     );
-    expect(find.text('—'), findsNWidgets(3));
     expect(find.byKey(const Key('accountDetailStreak')), findsNothing);
   });
 
-  testWidgets('loading shows the skeleton', (tester) async {
+  testWidgets('loading shows the silhouette', (tester) async {
     await _pump(tester, _wrap(accountId: 'acc-1'));
 
     expect(find.byKey(const Key('accountDetailLoading')), findsOneWidget);
-    expect(find.byKey(const Key('accountDetailIdentity')), findsNothing);
+    expect(find.byKey(const Key('accountDetailHeadline')), findsNothing);
+  });
+
+  testWidgets('in English the dates run month-first', (tester) async {
+    await _pump(
+      tester,
+      _wrap(
+        accountId: 'acc-1',
+        locale: const Locale('en'),
+        overview: () => overviewFrom(checkingOverviewJson()),
+      ),
+    );
+
+    expect(find.text('Balance on October 30, 2026'), findsOneWidget);
+    expect(find.text(_eur(348612, plus: true, locale: 'en')), findsOneWidget);
+    expect(find.text('Money in, October'), findsOneWidget);
+    expect(find.text('Month-end balance'), findsOneWidget);
   });
 
   testWidgets('a failed read offers a retry', (tester) async {
@@ -454,7 +586,33 @@ void main() {
       );
 
       expect(tester.takeException(), isNull);
-      expect(find.byKey(const Key('accountDetailIdentity')), findsOneWidget);
+      expect(find.byKey(const Key('accountDetailHeadline')), findsOneWidget);
+    });
+  }
+
+  for (final (name, theme, colors) in [
+    ('dark', AppTheme.dark, AppColors.dark),
+    ('light', AppTheme.light, AppColors.light),
+  ]) {
+    testWidgets('the headline takes positive in the $name theme, the month '
+        'figures stay neutral', (tester) async {
+      await _pump(
+        tester,
+        _wrap(
+          accountId: 'acc-1',
+          theme: theme,
+          overview: () => overviewFrom(checkingOverviewJson()),
+          transactions: [_transaction('t1', -2999)],
+        ),
+      );
+
+      expect(tester.takeException(), isNull);
+      Color? colorOf(String text) =>
+          tester.widget<Text>(find.text(text)).style?.color;
+      expect(colorOf(_eur(348612, plus: true)), colors.positive);
+      expect(colorOf(_eur(327000, plus: true)), colors.text);
+      expect(colorOf(_eur(-265795)), colors.text);
+      expect(colorOf(_eur(-2999)), colors.negative);
     });
   }
 

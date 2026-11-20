@@ -204,24 +204,41 @@ class AppLocalizationsFr extends AppLocalizations {
   String get authPasswordLabel => 'Mot de passe';
 
   @override
+  String authPasswordMinimum(int minimum) {
+    return '$minimum caractères minimum.';
+  }
+
+  @override
+  String authPasswordLengthOk(int count, int minimum) {
+    return '$count caractères. Le minimum est de $minimum.';
+  }
+
+  @override
+  String authPasswordTooShort(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Encore $count caractères.',
+      one: 'Encore 1 caractère.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get authConfirmPasswordLabel => 'Confirmer le mot de passe';
+
+  @override
+  String get authPasswordMismatch => 'Les mots de passe ne correspondent pas.';
+
+  @override
   String get authDisplayNameLabel => 'Nom d\'utilisateur';
 
   @override
-  String get authPasswordStrengthWeak => 'Trop faible';
-
-  @override
-  String get authPasswordStrengthFair => 'Moyen';
-
-  @override
-  String get authPasswordStrengthStrong => 'Robuste';
-
-  @override
-  String get authPasswordStrengthHint =>
-      'Ajoutez quelques caractères, un chiffre et une majuscule.';
+  String get authRegisterDisplayNameLabel => 'Nom affiché';
 
   @override
   String get authPreferencesNote =>
-      'Vous pourrez changer la langue plus tard ; la devise s\'applique à tous vos comptes et ne pourra plus être modifiée dans cette version.';
+      'La langue se change dans les paramètres. La devise est définitive et s’applique à tous vos comptes.';
 
   @override
   String get authEmailTaken => 'Cet e-mail a déjà un compte. Connectez-vous.';
@@ -242,16 +259,65 @@ class AppLocalizationsFr extends AppLocalizations {
   String get authCurrencyLabel => 'Devise';
 
   @override
+  String authCurrencyOption(String code, String name) {
+    return '$code, $name';
+  }
+
+  @override
+  String authCurrencyName(String code) {
+    String _temp0 = intl.Intl.selectLogic(code, {
+      'EUR': 'euro',
+      'USD': 'dollar américain',
+      'GBP': 'livre sterling',
+      'CHF': 'franc suisse',
+      'CAD': 'dollar canadien',
+      'JPY': 'yen',
+      'AUD': 'dollar australien',
+      'CNY': 'yuan',
+      'INR': 'roupie indienne',
+      'BRL': 'réal brésilien',
+      'MXN': 'peso mexicain',
+      'SEK': 'couronne suédoise',
+      'NOK': 'couronne norvégienne',
+      'DKK': 'couronne danoise',
+      'PLN': 'zloty',
+      'CZK': 'couronne tchèque',
+      'HUF': 'forint',
+      'RON': 'leu roumain',
+      'ZAR': 'rand',
+      'AED': 'dirham des Émirats',
+      'SGD': 'dollar de Singapour',
+      'HKD': 'dollar de Hong Kong',
+      'NZD': 'dollar néo-zélandais',
+      'TRY': 'livre turque',
+      'ILS': 'shekel',
+      'KRW': 'won',
+      'THB': 'baht',
+      'MAD': 'dirham marocain',
+      'XOF': 'franc CFA d’Afrique de l’Ouest',
+      'XAF': 'franc CFA d’Afrique centrale',
+      'other': '$code',
+    });
+    return '$_temp0';
+  }
+
+  @override
   String get authLoginSubmit => 'Se connecter';
 
   @override
   String get authRegisterSubmit => 'Créer mon compte';
 
   @override
-  String get authGoToRegister => 'Pas encore de compte ? Créer un compte';
+  String get authRegisterSubmitting => 'Création…';
 
   @override
-  String get authGoToLogin => 'Déjà un compte ? Se connecter';
+  String get authGoToRegister => 'Créer un compte';
+
+  @override
+  String get authGoToLogin => 'Déjà un compte ?';
+
+  @override
+  String get authGoToLoginLink => 'Se connecter';
 
   @override
   String get authEmailRequired => 'L\'e-mail est requis.';
@@ -260,11 +326,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get authPasswordRequired => 'Le mot de passe est requis.';
 
   @override
-  String get authDisplayNameRequired => 'Le nom d\'utilisateur est requis.';
-
-  @override
-  String get authErrorInvalidCredentials =>
-      'Identifiant ou mot de passe incorrect. Vérifiez vos identifiants et réessayez.';
+  String get authErrorInvalidCredentials => 'E-mail ou mot de passe incorrect.';
 
   @override
   String get authErrorEmailTaken => 'Un compte existe déjà avec cet e-mail.';
@@ -586,17 +648,11 @@ class AppLocalizationsFr extends AppLocalizations {
       'Une erreur est survenue. Veuillez réessayer.';
 
   @override
-  String get importNewTitle => 'Nouvel import';
-
-  @override
-  String get importAccountLabel => 'Compte de destination';
-
-  @override
   String get importAccountsUnavailable =>
       'Impossible de charger vos comptes. Réessayez dans un instant.';
 
   @override
-  String get importDropZoneTitle => 'Déposez un fichier OFX ou QFX';
+  String get importDropZoneTitle => 'Déposez un relevé OFX ou QFX';
 
   @override
   String get importDropZoneHint =>
@@ -604,22 +660,17 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String importFileSize(String size) {
-    return '$size ko';
+    return '$size Ko';
   }
 
   @override
-  String get importRemoveFile => 'Retirer le fichier';
+  String get importRemoveFile => 'Retirer';
 
   @override
   String get importSubmit => 'Importer';
 
   @override
-  String get importSubmitting => 'Import en cours…';
-
-  @override
-  String importDetectedAccount(String account) {
-    return 'Compte reconnu dans le fichier : $account.';
-  }
+  String get importSubmitting => 'Import…';
 
   @override
   String importDetectedAccountAmbiguous(String account) {
@@ -628,7 +679,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String importDetectedAccountUnknown(String account) {
-    return 'Aucun compte ne correspond au compte $account de ce relevé.';
+    return 'Compte inconnu : $account';
   }
 
   @override
@@ -645,53 +696,8 @@ class AppLocalizationsFr extends AppLocalizations {
       'Ce fichier n’indique aucun compte. Choisissez la destination.';
 
   @override
-  String get importResultTitle => 'Dernier import';
-
-  @override
-  String importResultNewLabel(int count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: 'nouvelles opérations',
-      one: 'nouvelle opération',
-      zero: 'aucune nouvelle opération',
-    );
-    return '$_temp0';
-  }
-
-  @override
-  String importResultDuplicateLabel(int count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: 'doublons ignorés',
-      one: 'doublon ignoré',
-      zero: 'aucun doublon',
-    );
-    return '$_temp0';
-  }
-
-  @override
-  String importResultTarget(String file, String account) {
-    return '$file → $account';
-  }
-
-  @override
-  String importResultBalanceMismatchBody(String amount, DateTime date) {
-    final intl.DateFormat dateDateFormat = intl.DateFormat.yMd(localeName);
-    final String dateString = dateDateFormat.format(date);
-
-    return 'Le relevé indique un solde à $amount de votre suivi au $dateString. Vérifiez un import manquant, ou corrigez le solde d\'ouverture du compte si l\'écart persiste.';
-  }
-
-  @override
-  String importPeriodRange(DateTime start, DateTime end) {
-    final intl.DateFormat startDateFormat = intl.DateFormat.yMd(localeName);
-    final String startString = startDateFormat.format(start);
-    final intl.DateFormat endDateFormat = intl.DateFormat.yMd(localeName);
-    final String endString = endDateFormat.format(end);
-
-    return '$startString – $endString';
+  String importPeriodRange(String start, String end) {
+    return '$start – $end';
   }
 
   @override
@@ -702,8 +708,8 @@ class AppLocalizationsFr extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '$count opérations déjà présentes, ignorées',
-      one: '1 opération déjà présente, ignorée',
+      other: '$count opérations déjà présentes ont été ignorées.',
+      one: '1 opération déjà présente a été ignorée.',
     );
     return '$_temp0';
   }
@@ -726,7 +732,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get importStatusFailed => 'Échec';
 
   @override
-  String get importHistoryTitle => 'Historique des imports';
+  String get importHistoryTitle => 'Historique';
 
   @override
   String get importHistoryEmptyTitle => 'Aucun import';
@@ -739,9 +745,6 @@ class AppLocalizationsFr extends AppLocalizations {
   String get importHistoryFileHeader => 'Fichier';
 
   @override
-  String get importHistoryFormatHeader => 'Format';
-
-  @override
   String get importHistoryImportedHeader => 'Importé le';
 
   @override
@@ -752,9 +755,6 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get importHistoryDuplicatesHeader => 'Doublons';
-
-  @override
-  String get importHistoryStatusHeader => 'Statut';
 
   @override
   String get importRetry => 'Réessayer';
@@ -774,17 +774,67 @@ class AppLocalizationsFr extends AppLocalizations {
       'Ce compte est introuvable dans le fichier.';
 
   @override
-  String importErrorPartial(int done, int total, String error) {
-    return 'Import interrompu ($done relevés sur $total) : $error';
-  }
-
-  @override
   String get importDuplicateDestination =>
-      'Deux relevés de ce fichier vont vers le même compte. Choisissez une destination différente pour chacun.';
+      'Deux relevés vont vers le même compte. Choisissez une destination différente.';
 
   @override
   String get importErrorGeneric =>
       'Une erreur est survenue. Veuillez réessayer.';
+
+  @override
+  String get importBrowse => 'Parcourir';
+
+  @override
+  String get importDetectionRecognised => 'Compte reconnu';
+
+  @override
+  String get importDetectionAmbiguous => 'Plusieurs comptes correspondent';
+
+  @override
+  String get importDetectionNoAccount => 'Aucun compte indiqué';
+
+  @override
+  String get importUnsupportedFormat => 'Format non pris en charge.';
+
+  @override
+  String importToastSummary(int newCount, int duplicateCount) {
+    final intl.NumberFormat newCountNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String newCountString = newCountNumberFormat.format(newCount);
+    final intl.NumberFormat duplicateCountNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String duplicateCountString = duplicateCountNumberFormat.format(
+      duplicateCount,
+    );
+
+    String _temp0 = intl.Intl.pluralLogic(
+      newCount,
+      locale: localeName,
+      other: '$newCountString nouvelles opérations',
+      one: '1 nouvelle opération',
+      zero: 'Aucune nouvelle opération',
+    );
+    String _temp1 = intl.Intl.pluralLogic(
+      duplicateCount,
+      locale: localeName,
+      other: '$duplicateCountString doublons ignorés',
+      one: '1 doublon ignoré',
+      zero: 'aucun doublon',
+    );
+    return '$_temp0 · $_temp1';
+  }
+
+  @override
+  String get importHistoryAccountHeader => 'Compte';
+
+  @override
+  String get importHistoryResultHeader => 'Résultat';
+
+  @override
+  String get importBalanceMismatchStatus => 'Écart de solde';
+
+  @override
+  String get importHistoryNoValue => '—';
 
   @override
   String get transactionsSearchHint =>
@@ -4380,11 +4430,7 @@ class AppLocalizationsFr extends AppLocalizations {
       'L\'enregistrement a échoué. Réessayez.';
 
   @override
-  String get authForgotPasswordLink => 'Mot de passe oublié ?';
-
-  @override
-  String get authForgotPasswordTagline =>
-      'Réinitialisez votre mot de passe avec votre code de récupération.';
+  String get authForgotPasswordLink => 'Mot de passe oublié';
 
   @override
   String get authRecoveryCodeLabel => 'Code de récupération';
@@ -4413,27 +4459,17 @@ class AppLocalizationsFr extends AppLocalizations {
       'Identifiant ou code de récupération incorrect. Vérifiez le code et réessayez.';
 
   @override
-  String get authRecoveryCodeTagline => 'Conservez votre code de récupération';
-
-  @override
-  String get authRecoveryCodeIntro =>
-      'Si vous oubliez votre mot de passe, ce code est le seul moyen de le réinitialiser. Notez-le ou imprimez-le, et gardez-le en lieu sûr hors de cet ordinateur.';
-
-  @override
-  String get authRecoveryCodeShownOnce =>
-      'Il ne sera plus affiché. Vous pourrez en générer un nouveau dans Paramètres › Profil.';
-
-  @override
   String get authRecoveryCodeCopy => 'Copier';
 
   @override
   String get authRecoveryCodeCopied => 'Copié';
 
   @override
-  String get authRecoveryCodeConfirm => 'J\'ai conservé ce code en lieu sûr';
+  String get authRecoveryCodeKeep =>
+      'Notez ce code et gardez-le en lieu sûr : il ne sera plus affiché.';
 
   @override
-  String get authRecoveryCodeContinue => 'Continuer';
+  String get authRecoveryCodeAcknowledge => 'J’ai noté ce code';
 
   @override
   String get settingsRecoveryTitle => 'Code de récupération';
@@ -4655,26 +4691,42 @@ class AppLocalizationsFr extends AppLocalizations {
   String get settingsAiOllamaUse => 'Utiliser Ollama';
 
   @override
-  String get accountDetailBack => 'Tous les comptes';
-
-  @override
   String get accountDetailMoreActions => 'Plus d’actions';
-
-  @override
-  String get accountDetailBalanceLabel => 'Solde actuel';
 
   @override
   String get accountDetailCycleLabel => 'Encours du cycle';
 
   @override
-  String accountDetailAsOf(String date) {
-    return 'Au $date';
+  String accountDetailBalanceOn(String date) {
+    return 'Solde au $date';
   }
 
   @override
-  String accountDetailCycleAsOf(String date, String debit) {
-    return 'Au $date · prélevé le $debit';
+  String accountDetailMonthInflow(String month) {
+    return 'Entrées en $month';
   }
+
+  @override
+  String accountDetailMonthOutflow(String month) {
+    return 'Sorties en $month';
+  }
+
+  @override
+  String get accountDetailNet => 'Net';
+
+  @override
+  String get accountDetailPreviousCycle => 'Cycle précédent';
+
+  @override
+  String get accountDetailDebitDateLabel => 'Prélevé le';
+
+  @override
+  String accountDetailIdentity(String institution, String type) {
+    return '$institution · $type';
+  }
+
+  @override
+  String get accountDetailMetaSeparator => ' · ';
 
   @override
   String accountDetailHistorySince(String date) {
@@ -4686,11 +4738,8 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String accountDetailLastImport(String date) {
-    return 'Dernier import : $date';
+    return 'dernier import le $date';
   }
-
-  @override
-  String get accountDetailNoImport => 'Aucun import';
 
   @override
   String accountDetailMaskedNumber(String digits) {
@@ -4703,10 +4752,10 @@ class AppLocalizationsFr extends AppLocalizations {
   }
 
   @override
-  String get accountDetailBalanceChartTitle => 'Évolution du solde';
+  String get accountDetailBalanceChartTitle => 'Solde en fin de mois';
 
   @override
-  String get accountDetailCyclesChartTitle => 'Montant réglé par cycle';
+  String get accountDetailCyclesChartTitle => 'Dépenses par cycle';
 
   @override
   String get accountDetailRangeSixMonths => '6 mois';
@@ -4719,7 +4768,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get accountDetailChartEmpty =>
-      'Le graphique apparaîtra après votre deuxième mois d’historique';
+      'Le graphique apparaîtra après le deuxième mois d’historique.';
 
   @override
   String get accountDetailImportCta => 'Importer un relevé';
@@ -4741,41 +4790,13 @@ class AppLocalizationsFr extends AppLocalizations {
   String get accountDetailCycleOpen => 'En cours';
 
   @override
-  String get accountDetailPeriodLabel => '12 derniers mois';
-
-  @override
-  String get accountDetailChange => 'Variation sur 12 mois';
-
-  @override
-  String get accountDetailInflow => 'Entrées';
-
-  @override
-  String get accountDetailOutflow => 'Sorties';
-
-  @override
   String accountDetailRisingStreak(int count) {
-    return 'Votre solde progresse depuis $count mois consécutifs.';
+    return 'Votre solde progresse depuis $count mois.';
   }
 
   @override
-  String get accountDetailCyclesPeriod => 'Cycles réglés';
-
-  @override
-  String get accountDetailCycleAverage => 'Moyenne par cycle';
-
-  @override
-  String accountDetailCycleHighest(String month) {
-    return 'Cycle le plus élevé · $month';
-  }
-
-  @override
-  String accountDetailCycleLast(String month) {
-    return 'Dernier cycle réglé · $month';
-  }
-
-  @override
-  String accountDetailFallingStreak(int count) {
-    return 'Vos dépenses par carte baissent depuis $count cycles.';
+  String accountDetailCycleAverage(int count) {
+    return 'Moyenne sur $count cycles';
   }
 
   @override
@@ -4785,11 +4806,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get accountDetailLinkedTitle => 'Cartes rattachées';
 
   @override
-  String get accountDetailLinkedCaption =>
-      'Cartes à débit différé réglées sur ce compte';
-
-  @override
-  String get accountDetailThisCycle => 'En cours ce mois';
+  String get accountDetailDeferredDebit => 'Débit différé';
 
   @override
   String accountDetailDebitOn(String date) {
@@ -4803,9 +4820,6 @@ class AppLocalizationsFr extends AppLocalizations {
   String get accountDetailRuleMissing => 'Règle de règlement à configurer';
 
   @override
-  String get accountDetailNoCards => 'Aucune carte rattachée';
-
-  @override
   String accountDetailOpenAccount(String name) {
     return 'Ouvrir $name';
   }
@@ -4814,25 +4828,17 @@ class AppLocalizationsFr extends AppLocalizations {
   String get accountDetailSettleTitle => 'Compte de règlement';
 
   @override
-  String get accountDetailSettleCaption =>
-      'Le compte débité à chaque fin de cycle';
-
-  @override
   String get accountDetailNoPayingAccount => 'Aucun compte de règlement';
 
   @override
   String accountDetailRuleSummary(String pattern, String date) {
-    return 'Libellé : $pattern · Appliquée depuis le $date';
+    return 'Libellé : $pattern · appliquée depuis le $date';
   }
 
   @override
   String accountDetailRuleSummaryUndated(String pattern) {
     return 'Libellé : $pattern';
   }
-
-  @override
-  String get accountDetailNoRule =>
-      'Aucune règle de règlement : le prélèvement compte encore comme une dépense';
 
   @override
   String get accountDetailEditRule => 'Modifier la règle';
@@ -4872,10 +4878,22 @@ class AppLocalizationsFr extends AppLocalizations {
   }
 
   @override
-  String get accountDetailRecentTitle => 'Dernières opérations';
+  String get accountDetailRecentTitle => 'Opérations';
 
   @override
-  String get accountDetailSeeAll => 'Tout voir';
+  String get accountDetailColumnOperation => 'Opération';
+
+  @override
+  String get accountDetailColumnCategory => 'Catégorie';
+
+  @override
+  String get accountDetailColumnDate => 'Date';
+
+  @override
+  String get accountDetailColumnAmount => 'Montant';
+
+  @override
+  String get accountDetailSeeAll => 'Ouvrir dans Transactions';
 
   @override
   String get accountDetailNoTransactions => 'Aucune opération';

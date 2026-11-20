@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:file_selector/file_selector.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -164,20 +166,57 @@ final selectedImportFileProvider =
       SelectedImportFile.new,
     );
 
-/// The batches from the import run in this session — one per statement of the
-/// file — shown in the result card.
+/// The batches imported in this session, newest first.
 ///
 /// Separate from the history list because it answers a different question —
-/// "what just happened" rather than "what have I imported" — and it stays
-/// empty until the user actually imports something.
+/// "did the user just import something" — which is what the card-settlement
+/// warnings wait for: they qualify an import's result and stay hidden until
+/// one has run.
 class LastImportResult extends Notifier<List<ImportBatch>?> {
   @override
   List<ImportBatch>? build() => null;
 
   void set(List<ImportBatch>? batches) => state = batches;
+
+  void add(ImportBatch batch) => state = [batch, ...?state];
 }
 
 final lastImportResultProvider =
     NotifierProvider<LastImportResult, List<ImportBatch>?>(
       LastImportResult.new,
+    );
+
+/// How long a freshly imported batch stays highlighted at the top of the
+/// history (`docs/design/06-imports.md`).
+const importHighlightDuration = Duration(seconds: 4);
+
+/// The history rows to highlight: batches imported in the last few seconds,
+/// so the user sees where the file they just imported went.
+class RecentImportHighlights extends Notifier<Set<String>> {
+  final _timers = <String, Timer>{};
+
+  @override
+  Set<String> build() {
+    ref.onDispose(() {
+      for (final timer in _timers.values) {
+        timer.cancel();
+      }
+      _timers.clear();
+    });
+    return const {};
+  }
+
+  void mark(String batchId) {
+    _timers.remove(batchId)?.cancel();
+    state = {...state, batchId};
+    _timers[batchId] = Timer(importHighlightDuration, () {
+      _timers.remove(batchId);
+      state = {...state}..remove(batchId);
+    });
+  }
+}
+
+final recentImportHighlightsProvider =
+    NotifierProvider<RecentImportHighlights, Set<String>>(
+      RecentImportHighlights.new,
     );

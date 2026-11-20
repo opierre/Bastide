@@ -203,24 +203,41 @@ class AppLocalizationsEn extends AppLocalizations {
   String get authPasswordLabel => 'Password';
 
   @override
+  String authPasswordMinimum(int minimum) {
+    return '$minimum characters minimum.';
+  }
+
+  @override
+  String authPasswordLengthOk(int count, int minimum) {
+    return '$count characters. The minimum is $minimum.';
+  }
+
+  @override
+  String authPasswordTooShort(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count more characters.',
+      one: '1 more character.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get authConfirmPasswordLabel => 'Confirm password';
+
+  @override
+  String get authPasswordMismatch => 'The passwords do not match.';
+
+  @override
   String get authDisplayNameLabel => 'Username';
 
   @override
-  String get authPasswordStrengthWeak => 'Too weak';
-
-  @override
-  String get authPasswordStrengthFair => 'Fair';
-
-  @override
-  String get authPasswordStrengthStrong => 'Strong';
-
-  @override
-  String get authPasswordStrengthHint =>
-      'Add a few more characters, a digit and a capital letter.';
+  String get authRegisterDisplayNameLabel => 'Display name';
 
   @override
   String get authPreferencesNote =>
-      'You can change the language later; the currency applies to all your accounts and cannot be changed in this version.';
+      'You can change the language in Settings. The currency is permanent and applies to all your accounts.';
 
   @override
   String get authEmailTaken => 'This email already has an account. Sign in.';
@@ -241,16 +258,65 @@ class AppLocalizationsEn extends AppLocalizations {
   String get authCurrencyLabel => 'Currency';
 
   @override
+  String authCurrencyOption(String code, String name) {
+    return '$code, $name';
+  }
+
+  @override
+  String authCurrencyName(String code) {
+    String _temp0 = intl.Intl.selectLogic(code, {
+      'EUR': 'euro',
+      'USD': 'US dollar',
+      'GBP': 'pound sterling',
+      'CHF': 'Swiss franc',
+      'CAD': 'Canadian dollar',
+      'JPY': 'Japanese yen',
+      'AUD': 'Australian dollar',
+      'CNY': 'Chinese yuan',
+      'INR': 'Indian rupee',
+      'BRL': 'Brazilian real',
+      'MXN': 'Mexican peso',
+      'SEK': 'Swedish krona',
+      'NOK': 'Norwegian krone',
+      'DKK': 'Danish krone',
+      'PLN': 'Polish zloty',
+      'CZK': 'Czech koruna',
+      'HUF': 'Hungarian forint',
+      'RON': 'Romanian leu',
+      'ZAR': 'South African rand',
+      'AED': 'UAE dirham',
+      'SGD': 'Singapore dollar',
+      'HKD': 'Hong Kong dollar',
+      'NZD': 'New Zealand dollar',
+      'TRY': 'Turkish lira',
+      'ILS': 'Israeli shekel',
+      'KRW': 'South Korean won',
+      'THB': 'Thai baht',
+      'MAD': 'Moroccan dirham',
+      'XOF': 'West African CFA franc',
+      'XAF': 'Central African CFA franc',
+      'other': '$code',
+    });
+    return '$_temp0';
+  }
+
+  @override
   String get authLoginSubmit => 'Log in';
 
   @override
   String get authRegisterSubmit => 'Create account';
 
   @override
-  String get authGoToRegister => 'Don\'t have an account? Register';
+  String get authRegisterSubmitting => 'Creating…';
 
   @override
-  String get authGoToLogin => 'Already have an account? Log in';
+  String get authGoToRegister => 'Create an account';
+
+  @override
+  String get authGoToLogin => 'Already have an account?';
+
+  @override
+  String get authGoToLoginLink => 'Log in';
 
   @override
   String get authEmailRequired => 'Email is required.';
@@ -259,11 +325,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get authPasswordRequired => 'Password is required.';
 
   @override
-  String get authDisplayNameRequired => 'Username is required.';
-
-  @override
-  String get authErrorInvalidCredentials =>
-      'Incorrect username, email or password. Check your details and try again.';
+  String get authErrorInvalidCredentials => 'Incorrect email or password.';
 
   @override
   String get authErrorEmailTaken =>
@@ -582,17 +644,11 @@ class AppLocalizationsEn extends AppLocalizations {
   String get accountErrorGeneric => 'Something went wrong. Please try again.';
 
   @override
-  String get importNewTitle => 'New import';
-
-  @override
-  String get importAccountLabel => 'Destination account';
-
-  @override
   String get importAccountsUnavailable =>
       'Couldn\'t load your accounts. Try again in a moment.';
 
   @override
-  String get importDropZoneTitle => 'Drop an OFX or QFX file';
+  String get importDropZoneTitle => 'Drop an OFX or QFX statement';
 
   @override
   String get importDropZoneHint =>
@@ -604,7 +660,7 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get importRemoveFile => 'Remove file';
+  String get importRemoveFile => 'Remove';
 
   @override
   String get importSubmit => 'Import';
@@ -613,18 +669,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get importSubmitting => 'Importing…';
 
   @override
-  String importDetectedAccount(String account) {
-    return 'Account recognized in the file: $account.';
-  }
-
-  @override
   String importDetectedAccountAmbiguous(String account) {
     return 'This statement is from $account, but several accounts match it. Choose the destination.';
   }
 
   @override
   String importDetectedAccountUnknown(String account) {
-    return 'No account matches this statement\'s account $account.';
+    return 'Unknown account: $account';
   }
 
   @override
@@ -641,53 +692,8 @@ class AppLocalizationsEn extends AppLocalizations {
       'This file names no account. Choose the destination.';
 
   @override
-  String get importResultTitle => 'Last import';
-
-  @override
-  String importResultNewLabel(int count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: 'new transactions',
-      one: 'new transaction',
-      zero: 'no new transactions',
-    );
-    return '$_temp0';
-  }
-
-  @override
-  String importResultDuplicateLabel(int count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: 'duplicates skipped',
-      one: 'duplicate skipped',
-      zero: 'no duplicates',
-    );
-    return '$_temp0';
-  }
-
-  @override
-  String importResultTarget(String file, String account) {
-    return '$file → $account';
-  }
-
-  @override
-  String importResultBalanceMismatchBody(String amount, DateTime date) {
-    final intl.DateFormat dateDateFormat = intl.DateFormat.yMd(localeName);
-    final String dateString = dateDateFormat.format(date);
-
-    return 'The statement declares a balance $amount from your ledger as of $dateString. Check for a missed import, or correct the account\'s opening balance if this keeps happening.';
-  }
-
-  @override
-  String importPeriodRange(DateTime start, DateTime end) {
-    final intl.DateFormat startDateFormat = intl.DateFormat.yMd(localeName);
-    final String startString = startDateFormat.format(start);
-    final intl.DateFormat endDateFormat = intl.DateFormat.yMd(localeName);
-    final String endString = endDateFormat.format(end);
-
-    return '$startString – $endString';
+  String importPeriodRange(String start, String end) {
+    return '$start – $end';
   }
 
   @override
@@ -698,8 +704,8 @@ class AppLocalizationsEn extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '$count transactions already present, skipped',
-      one: '1 transaction already present, skipped',
+      other: '$count transactions already present were skipped.',
+      one: '1 transaction already present was skipped.',
     );
     return '$_temp0';
   }
@@ -722,7 +728,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get importStatusFailed => 'Failed';
 
   @override
-  String get importHistoryTitle => 'Import history';
+  String get importHistoryTitle => 'History';
 
   @override
   String get importHistoryEmptyTitle => 'No imports';
@@ -735,9 +741,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get importHistoryFileHeader => 'File';
 
   @override
-  String get importHistoryFormatHeader => 'Format';
-
-  @override
   String get importHistoryImportedHeader => 'Imported on';
 
   @override
@@ -748,9 +751,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get importHistoryDuplicatesHeader => 'Duplicates';
-
-  @override
-  String get importHistoryStatusHeader => 'Status';
 
   @override
   String get importRetry => 'Try again';
@@ -769,16 +769,66 @@ class AppLocalizationsEn extends AppLocalizations {
   String get importErrorStatementNotFound => 'That account isn\'t in the file.';
 
   @override
-  String importErrorPartial(int done, int total, String error) {
-    return 'Import stopped ($done of $total statements): $error';
-  }
-
-  @override
   String get importDuplicateDestination =>
-      'Two statements in this file go to the same account. Choose a different destination for each.';
+      'Two statements go to the same account. Choose a different destination.';
 
   @override
   String get importErrorGeneric => 'Something went wrong. Please try again.';
+
+  @override
+  String get importBrowse => 'Browse';
+
+  @override
+  String get importDetectionRecognised => 'Account recognized';
+
+  @override
+  String get importDetectionAmbiguous => 'Several accounts match';
+
+  @override
+  String get importDetectionNoAccount => 'No account named';
+
+  @override
+  String get importUnsupportedFormat => 'Format not supported.';
+
+  @override
+  String importToastSummary(int newCount, int duplicateCount) {
+    final intl.NumberFormat newCountNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String newCountString = newCountNumberFormat.format(newCount);
+    final intl.NumberFormat duplicateCountNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String duplicateCountString = duplicateCountNumberFormat.format(
+      duplicateCount,
+    );
+
+    String _temp0 = intl.Intl.pluralLogic(
+      newCount,
+      locale: localeName,
+      other: '$newCountString new transactions',
+      one: '1 new transaction',
+      zero: 'No new transactions',
+    );
+    String _temp1 = intl.Intl.pluralLogic(
+      duplicateCount,
+      locale: localeName,
+      other: '$duplicateCountString duplicates skipped',
+      one: '1 duplicate skipped',
+      zero: 'no duplicates',
+    );
+    return '$_temp0 · $_temp1';
+  }
+
+  @override
+  String get importHistoryAccountHeader => 'Account';
+
+  @override
+  String get importHistoryResultHeader => 'Result';
+
+  @override
+  String get importBalanceMismatchStatus => 'Balance gap';
+
+  @override
+  String get importHistoryNoValue => '—';
 
   @override
   String get transactionsSearchHint => 'Search a description or a merchant…';
@@ -4352,11 +4402,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get networthDeclaredErrorGeneric => 'Saving failed. Try again.';
 
   @override
-  String get authForgotPasswordLink => 'Forgot your password?';
-
-  @override
-  String get authForgotPasswordTagline =>
-      'Reset your password with your recovery code.';
+  String get authForgotPasswordLink => 'Forgot password';
 
   @override
   String get authRecoveryCodeLabel => 'Recovery code';
@@ -4385,27 +4431,17 @@ class AppLocalizationsEn extends AppLocalizations {
       'Incorrect username, email or recovery code. Check the code and try again.';
 
   @override
-  String get authRecoveryCodeTagline => 'Keep your recovery code';
-
-  @override
-  String get authRecoveryCodeIntro =>
-      'If you forget your password, this code is the only way to reset it. Write it down or print it, and keep it somewhere safe away from this computer.';
-
-  @override
-  String get authRecoveryCodeShownOnce =>
-      'It won\'t be shown again. You can generate a new one in Settings › Profile.';
-
-  @override
   String get authRecoveryCodeCopy => 'Copy';
 
   @override
   String get authRecoveryCodeCopied => 'Copied';
 
   @override
-  String get authRecoveryCodeConfirm => 'I\'ve kept this code somewhere safe';
+  String get authRecoveryCodeKeep =>
+      'Write this code down and keep it somewhere safe: it will not be shown again.';
 
   @override
-  String get authRecoveryCodeContinue => 'Continue';
+  String get authRecoveryCodeAcknowledge => 'I have written this code down';
 
   @override
   String get settingsRecoveryTitle => 'Recovery code';
@@ -4622,26 +4658,42 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingsAiOllamaUse => 'Use Ollama';
 
   @override
-  String get accountDetailBack => 'All accounts';
-
-  @override
   String get accountDetailMoreActions => 'More actions';
-
-  @override
-  String get accountDetailBalanceLabel => 'Current balance';
 
   @override
   String get accountDetailCycleLabel => 'Current cycle';
 
   @override
-  String accountDetailAsOf(String date) {
-    return 'As of $date';
+  String accountDetailBalanceOn(String date) {
+    return 'Balance on $date';
   }
 
   @override
-  String accountDetailCycleAsOf(String date, String debit) {
-    return 'As of $date · debited on $debit';
+  String accountDetailMonthInflow(String month) {
+    return 'Money in, $month';
   }
+
+  @override
+  String accountDetailMonthOutflow(String month) {
+    return 'Money out, $month';
+  }
+
+  @override
+  String get accountDetailNet => 'Net';
+
+  @override
+  String get accountDetailPreviousCycle => 'Previous cycle';
+
+  @override
+  String get accountDetailDebitDateLabel => 'Debited on';
+
+  @override
+  String accountDetailIdentity(String institution, String type) {
+    return '$institution · $type';
+  }
+
+  @override
+  String get accountDetailMetaSeparator => ' · ';
 
   @override
   String accountDetailHistorySince(String date) {
@@ -4653,11 +4705,8 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String accountDetailLastImport(String date) {
-    return 'Last import: $date';
+    return 'last import on $date';
   }
-
-  @override
-  String get accountDetailNoImport => 'No import';
 
   @override
   String accountDetailMaskedNumber(String digits) {
@@ -4670,10 +4719,10 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get accountDetailBalanceChartTitle => 'Balance over time';
+  String get accountDetailBalanceChartTitle => 'Month-end balance';
 
   @override
-  String get accountDetailCyclesChartTitle => 'Amount settled per cycle';
+  String get accountDetailCyclesChartTitle => 'Spending per cycle';
 
   @override
   String get accountDetailRangeSixMonths => '6 months';
@@ -4686,7 +4735,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get accountDetailChartEmpty =>
-      'The chart will appear after your second month of history';
+      'The chart will appear after the second month of history.';
 
   @override
   String get accountDetailImportCta => 'Import a statement';
@@ -4708,41 +4757,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get accountDetailCycleOpen => 'In progress';
 
   @override
-  String get accountDetailPeriodLabel => 'Last 12 months';
-
-  @override
-  String get accountDetailChange => 'Change over 12 months';
-
-  @override
-  String get accountDetailInflow => 'Money in';
-
-  @override
-  String get accountDetailOutflow => 'Money out';
-
-  @override
   String accountDetailRisingStreak(int count) {
-    return 'Your balance has grown for $count months in a row.';
+    return 'Your balance has been rising for $count months.';
   }
 
   @override
-  String get accountDetailCyclesPeriod => 'Settled cycles';
-
-  @override
-  String get accountDetailCycleAverage => 'Average per cycle';
-
-  @override
-  String accountDetailCycleHighest(String month) {
-    return 'Highest cycle · $month';
-  }
-
-  @override
-  String accountDetailCycleLast(String month) {
-    return 'Last settled cycle · $month';
-  }
-
-  @override
-  String accountDetailFallingStreak(int count) {
-    return 'Your card spending has fallen for $count cycles in a row.';
+  String accountDetailCycleAverage(int count) {
+    return 'Average over $count cycles';
   }
 
   @override
@@ -4752,11 +4773,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get accountDetailLinkedTitle => 'Linked cards';
 
   @override
-  String get accountDetailLinkedCaption =>
-      'Deferred-debit cards settled from this account';
-
-  @override
-  String get accountDetailThisCycle => 'This month so far';
+  String get accountDetailDeferredDebit => 'Deferred debit';
 
   @override
   String accountDetailDebitOn(String date) {
@@ -4770,9 +4787,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get accountDetailRuleMissing => 'Settlement rule to set up';
 
   @override
-  String get accountDetailNoCards => 'No linked card';
-
-  @override
   String accountDetailOpenAccount(String name) {
     return 'Open $name';
   }
@@ -4781,25 +4795,17 @@ class AppLocalizationsEn extends AppLocalizations {
   String get accountDetailSettleTitle => 'Settlement account';
 
   @override
-  String get accountDetailSettleCaption =>
-      'The account debited at the end of each cycle';
-
-  @override
   String get accountDetailNoPayingAccount => 'No settlement account';
 
   @override
   String accountDetailRuleSummary(String pattern, String date) {
-    return 'Label: $pattern · Applied since $date';
+    return 'Label: $pattern · applied since $date';
   }
 
   @override
   String accountDetailRuleSummaryUndated(String pattern) {
     return 'Label: $pattern';
   }
-
-  @override
-  String get accountDetailNoRule =>
-      'No settlement rule: the debit still counts as spending';
 
   @override
   String get accountDetailEditRule => 'Edit the rule';
@@ -4839,10 +4845,22 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get accountDetailRecentTitle => 'Recent transactions';
+  String get accountDetailRecentTitle => 'Transactions';
 
   @override
-  String get accountDetailSeeAll => 'See all';
+  String get accountDetailColumnOperation => 'Transaction';
+
+  @override
+  String get accountDetailColumnCategory => 'Category';
+
+  @override
+  String get accountDetailColumnDate => 'Date';
+
+  @override
+  String get accountDetailColumnAmount => 'Amount';
+
+  @override
+  String get accountDetailSeeAll => 'Open in Transactions';
 
   @override
   String get accountDetailNoTransactions => 'No transactions';

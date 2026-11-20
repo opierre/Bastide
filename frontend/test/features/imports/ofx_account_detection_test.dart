@@ -392,7 +392,10 @@ void main() {
         final [match] = await container
             .read(ofxAccountDetectionProvider.notifier)
             .detect(
-              const PickedImportFile(name: 'releve.ofx', bytes: [1, 2, 3]),
+              PickedImportFile(
+                name: 'releve.ofx',
+                bytes: utf8.encode('<OFX>\n<STMTRS>\n</STMTRS>\n</OFX>\n'),
+              ),
               [_account()],
             );
 
@@ -403,6 +406,70 @@ void main() {
         );
       },
     );
+
+    test('a file that is not OFX at all is unreadable', () async {
+      final container = ProviderContainer(
+        overrides: [
+          banksRepositoryProvider.overrideWithValue(
+            _FakeBanksRepository(const {}),
+          ),
+        ],
+      );
+      addTearDown(container.dispose);
+
+      final [match] = await container
+          .read(ofxAccountDetectionProvider.notifier)
+          .detect(
+            const PickedImportFile(name: 'releve.ofx', bytes: [1, 2, 3]),
+            [_account()],
+          );
+
+      expect(match, isA<OfxFileUnreadable>());
+      expect((match as OfxFileUnreadable).unsupportedFormat, isFalse);
+    });
+
+    test('a CSV is an unsupported format, whatever it holds', () async {
+      final container = ProviderContainer(
+        overrides: [
+          banksRepositoryProvider.overrideWithValue(
+            _FakeBanksRepository(const {}),
+          ),
+        ],
+      );
+      addTearDown(container.dispose);
+
+      final [match] = await container
+          .read(ofxAccountDetectionProvider.notifier)
+          .detect(
+            PickedImportFile(name: 'export.csv', bytes: utf8.encode(_sgml)),
+            [_account()],
+          );
+
+      expect((match as OfxFileUnreadable).unsupportedFormat, isTrue);
+    });
+
+    test('removing a statement keeps the others staged', () async {
+      final container = ProviderContainer(
+        overrides: [
+          banksRepositoryProvider.overrideWithValue(
+            _FakeBanksRepository(const {}),
+          ),
+        ],
+      );
+      addTearDown(container.dispose);
+      final notifier = container.read(ofxAccountDetectionProvider.notifier);
+      await notifier.detect(
+        PickedImportFile(name: 'releve.ofx', bytes: utf8.encode(_sgml)),
+        const [],
+      );
+      final key = statementKey(
+        container.read(ofxAccountDetectionProvider)!.first,
+      );
+
+      notifier.remove(key);
+
+      expect(container.read(ofxAccountDetectionProvider), isEmpty);
+    });
 
     test('a file that names its bank is not looked up at all', () async {
       final banks = _FakeBanksRepository({'40618': 'Boursorama'});

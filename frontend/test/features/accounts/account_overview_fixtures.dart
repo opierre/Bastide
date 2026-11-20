@@ -43,6 +43,11 @@ Map<String, dynamic> checkingOverviewJson() => {
     'outflow_minor': -2716950,
     'consecutive_rising_months': 4,
   },
+  'month': {
+    'since': '2026-10-01',
+    'inflow_minor': 327000,
+    'outflow_minor': -265795,
+  },
   'linked_cards': [
     {
       'id': 'card-1',
@@ -88,6 +93,7 @@ Map<String, dynamic> cardOverviewJson() => {
     'outflow_minor': 0,
     'consecutive_rising_months': 0,
   },
+  'month': {'since': '2026-10-01', 'inflow_minor': 0, 'outflow_minor': -61240},
   'linked_cards': <dynamic>[],
   'card_last_digits': '4821',
   'card_settlement': {
@@ -126,6 +132,7 @@ Map<String, dynamic> freshOverviewJson() => {
     'outflow_minor': 0,
     'consecutive_rising_months': 0,
   },
+  'month': {'since': '2026-10-01', 'inflow_minor': 0, 'outflow_minor': 0},
   'linked_cards': <dynamic>[],
   'card_last_digits': null,
   'card_settlement': null,
