@@ -148,6 +148,7 @@
   "authErrorInvalidCredentials": "Incorrect email or password.",
   "authErrorEmailTaken": "An account with this email already exists.",
   "authErrorValidation": "Some information is invalid.",
+  "authErrorPasswordTooShort": "The password must be at least {minimum} characters long.",
   "authErrorGeneric": "Something went wrong. Please try again.",
   "accountsAddButton": "Add account",
   "accountsBalancesAsOf": "Balances as of {date}",
