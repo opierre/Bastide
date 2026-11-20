@@ -226,10 +226,10 @@ class BackupService:
         if name == "categorization_runs" and row["status"] in ("pending", "running"):
             # Its executor is gone; left in flight it would block every future run.
             row["status"] = "failed"
-        if name == "rule_logos" and row["content_type"] != "image/png":
+        if name in ("rule_logos", "goal_images") and row["content_type"] != "image/png":
             # Served back as-is: only what an upload produces is accepted.
-            raise BackupInvalidError("A rule_logos row has an invalid content_type.")
-        if "id" in row:  # a logo is keyed by its rule, and nothing references it
+            raise BackupInvalidError(f"A {name} row has an invalid content_type.")
+        if "id" in row:  # a logo or banner is keyed by its owner, and nothing references it
             known.setdefault(name, set()).add(row["id"])
         return row
 

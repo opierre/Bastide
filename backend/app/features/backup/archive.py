@@ -22,7 +22,8 @@ FORMAT_MARKER = "bastide-backup"
 # 5: the logos users gave their rules.
 # 6: the built-in rule packs a user has imported.
 # 7: placements, their movements and declared values.
-FORMAT_VERSION = 7
+# 8: the banner images users gave their goals.
+FORMAT_VERSION = 8
 MANIFEST_NAME = "manifest.json"
 
 #: The format version that first archived each table; tables absent here date from version 1.
@@ -41,6 +42,7 @@ TABLE_SINCE_VERSION: dict[str, int] = {
     "investments": 7,
     "investment_movements": 7,
     "investment_valuations": 7,
+    "goal_images": 8,
 }
 
 
