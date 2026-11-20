@@ -6,9 +6,17 @@ this feature never touches the ledger, and never compares an allocation against 
 the backend has no basis for deciding which money is "savings".
 """
 
+from collections.abc import Callable
+from datetime import UTC, datetime
+
 from app.core.errors import NotFoundError
 from app.features.auth.models import User
-from app.features.goals.models import Goal, GoalAllocation
+from app.features.goals.images import (
+    BANNER_CONTENT_TYPE,
+    GoalImageNotFoundError,
+    normalize_banner,
+)
+from app.features.goals.models import Goal, GoalAllocation, GoalImage
 from app.features.goals.repository import GoalRepository
 from app.features.goals.schemas import AllocationCreate, GoalCreate, GoalStatus, GoalUpdate
 
@@ -49,11 +57,18 @@ def _settled_status(goal: Goal, progress_minor: int) -> GoalStatus:
     return REACHED if progress_minor >= goal.target_minor else ACTIVE
 
 
-class GoalService:
-    """Goal CRUD and the allocation ledger, scoped to a user."""
+def _utc_now() -> datetime:
+    return datetime.now(UTC)
 
-    def __init__(self, repository: GoalRepository) -> None:
+
+class GoalService:
+    """Goal CRUD, the allocation ledger and the banner image, scoped to a user."""
+
+    def __init__(
+        self, repository: GoalRepository, clock: Callable[[], datetime] = _utc_now
+    ) -> None:
         self._repository = repository
+        self._clock = clock
 
     def list_for_user(
         self, user_id: str, status: GoalStatus | None = None
@@ -128,6 +143,51 @@ class GoalService:
         goal, _ = self.get(user_id, goal_id)
         goal.status = ARCHIVED
         self._repository.save(goal)
+
+    def get_image(self, user_id: str, goal_id: str) -> GoalImage:
+        """The banner picture the user gave one of their goals, with its bytes.
+
+        Raises:
+            GoalNotFoundError: no such goal, or it belongs to another user.
+            GoalImageNotFoundError: the goal has no banner image.
+        """
+        goal, _ = self.get(user_id, goal_id)
+        image = self._repository.get_image(goal)
+        if image is None:
+            raise GoalImageNotFoundError("This goal has no image.")
+        return image
+
+    def upload_image(self, user_id: str, goal_id: str, data: bytes) -> tuple[Goal, int]:
+        """Make an uploaded picture the goal's banner, re-encoded without its metadata.
+
+        Raises:
+            GoalNotFoundError: no such goal, or it belongs to another user.
+            GoalImageTooLargeError: the file or its pixel count is over the limit.
+            GoalImageInvalidError: the bytes aren't a PNG, JPEG or WebP picture.
+        """
+        goal, progress_minor = self.get(user_id, goal_id)
+        image = normalize_banner(data)
+        saved = self._repository.save_image(
+            goal,
+            GoalImage(
+                goal_id=goal.id,
+                image=image,
+                content_type=BANNER_CONTENT_TYPE,
+                updated_at=self._clock(),
+            ),
+        )
+        return saved, progress_minor
+
+    def remove_image(self, user_id: str, goal_id: str) -> tuple[Goal, int]:
+        """Drop the goal's banner, so it shows the tomettes again. A no-op without one.
+
+        Raises:
+            GoalNotFoundError: no such goal, or it belongs to another user.
+        """
+        goal, progress_minor = self.get(user_id, goal_id)
+        if goal.image is None:
+            return goal, progress_minor
+        return self._repository.delete_image(goal), progress_minor
 
     def list_allocations(self, user_id: str, goal_id: str) -> list[GoalAllocation]:
         """A goal's allocation history, newest first.

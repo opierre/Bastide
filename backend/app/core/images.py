@@ -1,4 +1,4 @@
-"""Turn an uploaded picture into the square PNG the app stores (avatars, rule logos).
+"""Turn an uploaded picture into the PNG the app stores (avatars, rule logos, goal banners).
 
 Decoding and re-encoding the pixels, rather than keeping the uploaded bytes, is what drops
 every piece of metadata a photo carries (EXIF, GPS position, camera serial, ICC comments):
@@ -47,6 +47,35 @@ def square_png(
         The `too_large()` error: the file or its pixel count is over the limit.
         The `invalid()` error: the bytes aren't a PNG, JPEG or WebP picture.
     """
+    return fitted_png(
+        data,
+        (size, size),
+        too_large=too_large,
+        invalid=invalid,
+        max_bytes=max_bytes,
+        max_pixels=max_pixels,
+        fit=fit,
+    )
+
+
+def fitted_png(
+    data: bytes,
+    size: tuple[int, int],
+    *,
+    too_large: Callable[[], DomainError],
+    invalid: Callable[[], DomainError],
+    max_bytes: int = MAX_UPLOAD_BYTES,
+    max_pixels: int = MAX_PIXELS,
+    fit: Fit = "crop",
+) -> bytes:
+    """Decode an uploaded picture, bring it to `size` (width, height) and re-encode it as a PNG.
+
+    `fit` works as in `square_png`, against the target's own aspect ratio rather than a square.
+
+    Raises:
+        The `too_large()` error: the file or its pixel count is over the limit.
+        The `invalid()` error: the bytes aren't a PNG, JPEG or WebP picture.
+    """
     if len(data) > max_bytes:
         raise too_large()
     try:
@@ -65,17 +94,17 @@ def square_png(
                 if fit == "pad":
                     # Transparent padding, whatever the input: a JPEG has no alpha of its own,
                     # but the output is a PNG.
-                    square = ImageOps.pad(
+                    fitted = ImageOps.pad(
                         rgba,
-                        (size, size),
+                        size,
                         method=Image.Resampling.LANCZOS,
                         color=(0, 0, 0, 0),
                     )
                 else:
-                    square = ImageOps.fit(rgba, (size, size), method=Image.Resampling.LANCZOS)
+                    fitted = ImageOps.fit(rgba, size, method=Image.Resampling.LANCZOS)
     except (UnidentifiedImageError, Image.DecompressionBombError, OSError, ValueError) as exc:
         raise invalid() from exc
 
     output = io.BytesIO()
-    square.save(output, format="PNG", optimize=True)
+    fitted.save(output, format="PNG", optimize=True)
     return output.getvalue()

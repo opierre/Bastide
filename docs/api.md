@@ -180,6 +180,9 @@ details?}}`. Model names refer to the Pydantic schemas in `backend/app/features/
 | `POST` | `/goals` |  | `GoalCreate` | 201 `GoalRead` |
 | `PATCH` | `/goals/{goal_id}` |  | `GoalUpdate` | 200 `GoalRead` |
 | `DELETE` | `/goals/{goal_id}` |  |  | 204 |
+| `GET` | `/goals/{goal_id}/image` |  |  | 200 |
+| `PUT` | `/goals/{goal_id}/image` |  | multipart | 200 `GoalRead` |
+| `DELETE` | `/goals/{goal_id}/image` |  |  | 200 `GoalRead` |
 | `GET` | `/goals/{goal_id}/allocations` |  |  | 200 [`AllocationRead`] |
 | `POST` | `/goals/{goal_id}/allocations` |  | `AllocationCreate` | 201 `AllocationRead` |
 | `DELETE` | `/goals/{goal_id}/allocations/{allocation_id}` |  |  | 204 |
