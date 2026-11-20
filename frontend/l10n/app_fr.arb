@@ -3495,10 +3495,6 @@
   "@subscriptionFormCadenceLabel": {
     "description": "Label of the cadence select in the recurring payment form."
   },
-  "subscriptionFormCadenceHelp": "Hebdomadaire · Mensuel · Trimestriel · Annuel · Irrégulier",
-  "@subscriptionFormCadenceHelp": {
-    "description": "Helper under the cadence select, listing what it offers. Irregular is offered here and nowhere else — detection never concludes it."
-  },
   "subscriptionFormCategoryLabel": "Catégorie",
   "@subscriptionFormCategoryLabel": {
     "description": "Label of the category select in the recurring payment form."

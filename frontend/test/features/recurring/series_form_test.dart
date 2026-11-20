@@ -130,4 +130,23 @@ void main() {
     expect(find.text('15,49'), findsOneWidget);
     expect(find.text('Enregistrer'), findsOneWidget);
   });
+
+  testWidgets('the fields read Nom, Compte, Montant, Cadence, Catégorie', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(1440, 900);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.reset);
+    await tester.pumpWidget(_wrap(controller: FakeSubscriptionsController()));
+    await tester.pumpAndSettle();
+
+    final labels = ['Nom', 'Compte', 'Montant', 'Cadence', 'Catégorie'];
+    final tops = [
+      for (final label in labels) tester.getTopLeft(find.text(label)).dy,
+    ];
+    for (var i = 1; i < tops.length; i++) {
+      expect(tops[i], greaterThan(tops[i - 1]), reason: labels[i]);
+    }
+    expect(find.text('Annuler'), findsOneWidget);
+  });
 }

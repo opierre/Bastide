@@ -4403,12 +4403,6 @@ abstract class AppLocalizations {
   /// **'Cadence'**
   String get subscriptionFormCadenceLabel;
 
-  /// Helper under the cadence select, listing what it offers. Irregular is offered here and nowhere else — detection never concludes it.
-  ///
-  /// In fr, this message translates to:
-  /// **'Hebdomadaire · Mensuel · Trimestriel · Annuel · Irrégulier'**
-  String get subscriptionFormCadenceHelp;
-
   /// Label of the category select in the recurring payment form.
   ///
   /// In fr, this message translates to:

@@ -2836,10 +2836,6 @@ class AppLocalizationsFr extends AppLocalizations {
   String get subscriptionFormCadenceLabel => 'Cadence';
 
   @override
-  String get subscriptionFormCadenceHelp =>
-      'Hebdomadaire · Mensuel · Trimestriel · Annuel · Irrégulier';
-
-  @override
   String get subscriptionFormCategoryLabel => 'Catégorie';
 
   @override

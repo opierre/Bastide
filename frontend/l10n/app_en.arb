@@ -748,7 +748,6 @@
   "subscriptionFormAmountLabel": "Amount",
   "subscriptionFormAmountInvalid": "Enter an amount greater than zero.",
   "subscriptionFormCadenceLabel": "Frequency",
-  "subscriptionFormCadenceHelp": "Weekly · Monthly · Quarterly · Yearly · Irregular",
   "subscriptionFormCategoryLabel": "Category",
   "subscriptionFormCategoryNone": "None",
   "subscriptionFormCancel": "Cancel",
