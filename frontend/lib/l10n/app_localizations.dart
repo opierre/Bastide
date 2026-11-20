@@ -7407,6 +7407,66 @@ abstract class AppLocalizations {
   /// **'Mot de passe incorrect.'**
   String get settingsRecoveryWrongPassword;
 
+  /// Name of the password row in Settings › Profil › Sécurité.
+  ///
+  /// In fr, this message translates to:
+  /// **'Mot de passe'**
+  String get settingsPasswordTitle;
+
+  /// Description of the password row in Settings › Profil › Sécurité. No date: nothing records when the password last changed.
+  ///
+  /// In fr, this message translates to:
+  /// **'Au moins {minimum} caractères. Il protège l\'accès à vos données sur cet ordinateur.'**
+  String settingsPasswordSubtitle(int minimum);
+
+  /// Button on the password row opening the password change modal.
+  ///
+  /// In fr, this message translates to:
+  /// **'Changer le mot de passe'**
+  String get settingsPasswordButton;
+
+  /// Title of the password change modal.
+  ///
+  /// In fr, this message translates to:
+  /// **'Changer le mot de passe'**
+  String get settingsPasswordModalTitle;
+
+  /// Lead of the password change modal.
+  ///
+  /// In fr, this message translates to:
+  /// **'Votre code de récupération reste valable.'**
+  String get settingsPasswordModalLead;
+
+  /// Label of the current password field in the password change modal.
+  ///
+  /// In fr, this message translates to:
+  /// **'Mot de passe actuel'**
+  String get settingsPasswordCurrentLabel;
+
+  /// Cancel button of the password change modal.
+  ///
+  /// In fr, this message translates to:
+  /// **'Annuler'**
+  String get settingsPasswordModalCancel;
+
+  /// Confirm button of the password change modal.
+  ///
+  /// In fr, this message translates to:
+  /// **'Changer le mot de passe'**
+  String get settingsPasswordModalSave;
+
+  /// Error under the current password field when it is wrong.
+  ///
+  /// In fr, this message translates to:
+  /// **'Mot de passe incorrect.'**
+  String get settingsPasswordWrongPassword;
+
+  /// Toast once the password has been changed.
+  ///
+  /// In fr, this message translates to:
+  /// **'Mot de passe modifié.'**
+  String get settingsPasswordChanged;
+
   /// Label for the field on the login and password-reset forms that accepts either the email or the username.
   ///
   /// In fr, this message translates to:

@@ -4703,6 +4703,38 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingsRecoveryWrongPassword => 'Incorrect password.';
 
   @override
+  String get settingsPasswordTitle => 'Password';
+
+  @override
+  String settingsPasswordSubtitle(int minimum) {
+    return 'At least $minimum characters. It protects access to your data on this computer.';
+  }
+
+  @override
+  String get settingsPasswordButton => 'Change password';
+
+  @override
+  String get settingsPasswordModalTitle => 'Change password';
+
+  @override
+  String get settingsPasswordModalLead => 'Your recovery code stays valid.';
+
+  @override
+  String get settingsPasswordCurrentLabel => 'Current password';
+
+  @override
+  String get settingsPasswordModalCancel => 'Cancel';
+
+  @override
+  String get settingsPasswordModalSave => 'Change password';
+
+  @override
+  String get settingsPasswordWrongPassword => 'Incorrect password.';
+
+  @override
+  String get settingsPasswordChanged => 'Password changed.';
+
+  @override
   String get authIdentifierLabel => 'Email or username';
 
   @override

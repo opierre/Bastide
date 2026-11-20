@@ -304,8 +304,8 @@ P.settings = {
     ${SROW('Nom d’utilisateur', 'Vous pouvez vous connecter avec ce nom ou avec votre e-mail.', `<div class="row"><span>Camille Dubois</span><span class="btn">Modifier</span></div>`)}
     ${SROW('Adresse e-mail', 'Sert uniquement à vous connecter. Bastide n’envoie aucun message.', `<span class="t2">camille.dubois@proton.me</span>`)}
     ${SH('Sécurité')}
-    ${SROW('Mot de passe', 'Modifié le 3 janv. 2025.', `<span class="btn">Changer le mot de passe</span>`)}
-    ${SROW('Code de récupération', 'Permet de réinitialiser votre mot de passe si vous l’oubliez. En générer un nouveau invalide l’ancien.', `<span class="btn">Générer un nouveau code</span><span class="t3 sm">Dernier code généré le 3 janv. 2025</span>`)}
+    ${SROW('Mot de passe', 'Au moins 12 caractères. Il protège l’accès à vos données sur cet ordinateur.', `<span class="btn">Changer le mot de passe</span>`)}
+    ${SROW('Code de récupération', 'Permet de réinitialiser votre mot de passe si vous l’oubliez. En générer un nouveau invalide l’ancien.', `<span class="btn">Générer un nouveau code</span>`)}
     ${SH('Session')}
     ${SROW('Se déconnecter', 'Vos données restent sur cet ordinateur, protégées par votre mot de passe.', `<span class="btn">${I('log-out', 's14')}Se déconnecter</span>`)}`)],
   B: ['Préférences', () => setPanel(1, `${SH('Affichage', 1)}

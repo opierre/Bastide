@@ -254,23 +254,34 @@ void main() {
     expect(find.textContaining('IRRÉVERSIBLE'), findsNothing);
   });
 
-  testWidgets('Profil: avatar, name, email, recovery code and sign-out', (
-    tester,
-  ) async {
-    useDesktopSurface(tester);
-    await tester.pumpWidget(_wrap());
-    await tester.pumpAndSettle();
-    await _open(tester, SettingsSection.profile);
+  testWidgets(
+    'Profil: avatar, name, email, password, recovery code, sign-out',
+    (tester) async {
+      useDesktopSurface(tester);
+      await tester.pumpWidget(_wrap());
+      await tester.pumpAndSettle();
+      await _open(tester, SettingsSection.profile);
 
-    expect(find.text('Sécurité'), findsOneWidget);
-    expect(find.text('Session'), findsOneWidget);
-    expect(find.byKey(const Key('settingsAvatarRow')), findsOneWidget);
-    expect(find.text('Camille Dubois'), findsOneWidget);
-    expect(find.text('camille.dubois@example.com'), findsOneWidget);
-    expect(find.byKey(const Key('settingsRecoveryButton')), findsOneWidget);
-    expect(find.byKey(const Key('settingsLogoutButton')), findsOneWidget);
-    expect(tester.takeException(), isNull);
-  });
+      expect(find.text('Sécurité'), findsOneWidget);
+      expect(find.text('Session'), findsOneWidget);
+      expect(find.byKey(const Key('settingsAvatarRow')), findsOneWidget);
+      expect(find.text('Camille Dubois'), findsOneWidget);
+      expect(find.text('camille.dubois@example.com'), findsOneWidget);
+      expect(find.byKey(const Key('settingsPasswordButton')), findsOneWidget);
+      expect(find.byKey(const Key('settingsRecoveryButton')), findsOneWidget);
+      expect(find.byKey(const Key('settingsLogoutButton')), findsOneWidget);
+      // Password above the recovery code, and neither shows a date.
+      expect(
+        tester.getTopLeft(find.byKey(const Key('settingsPasswordRow'))).dy,
+        lessThan(
+          tester.getTopLeft(find.byKey(const Key('settingsRecoveryRow'))).dy,
+        ),
+      );
+      expect(find.textContaining('Modifié le'), findsNothing);
+      expect(find.textContaining('Dernier code généré'), findsNothing);
+      expect(tester.takeException(), isNull);
+    },
+  );
 
   testWidgets('À propos: header, privacy, data location, licence, credits', (
     tester,

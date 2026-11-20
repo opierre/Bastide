@@ -6106,6 +6106,51 @@
   "@settingsRecoveryWrongPassword": {
     "description": "Error in the regeneration modal when the confirmation password is wrong."
   },
+  "settingsPasswordTitle": "Mot de passe",
+  "@settingsPasswordTitle": {
+    "description": "Name of the password row in Settings › Profil › Sécurité."
+  },
+  "settingsPasswordSubtitle": "Au moins {minimum} caractères. Il protège l'accès à vos données sur cet ordinateur.",
+  "@settingsPasswordSubtitle": {
+    "description": "Description of the password row in Settings › Profil › Sécurité. No date: nothing records when the password last changed.",
+    "placeholders": {
+      "minimum": {
+        "type": "int"
+      }
+    }
+  },
+  "settingsPasswordButton": "Changer le mot de passe",
+  "@settingsPasswordButton": {
+    "description": "Button on the password row opening the password change modal."
+  },
+  "settingsPasswordModalTitle": "Changer le mot de passe",
+  "@settingsPasswordModalTitle": {
+    "description": "Title of the password change modal."
+  },
+  "settingsPasswordModalLead": "Votre code de récupération reste valable.",
+  "@settingsPasswordModalLead": {
+    "description": "Lead of the password change modal."
+  },
+  "settingsPasswordCurrentLabel": "Mot de passe actuel",
+  "@settingsPasswordCurrentLabel": {
+    "description": "Label of the current password field in the password change modal."
+  },
+  "settingsPasswordModalCancel": "Annuler",
+  "@settingsPasswordModalCancel": {
+    "description": "Cancel button of the password change modal."
+  },
+  "settingsPasswordModalSave": "Changer le mot de passe",
+  "@settingsPasswordModalSave": {
+    "description": "Confirm button of the password change modal."
+  },
+  "settingsPasswordWrongPassword": "Mot de passe incorrect.",
+  "@settingsPasswordWrongPassword": {
+    "description": "Error under the current password field when it is wrong."
+  },
+  "settingsPasswordChanged": "Mot de passe modifié.",
+  "@settingsPasswordChanged": {
+    "description": "Toast once the password has been changed."
+  },
   "authIdentifierLabel": "E-mail ou nom d'utilisateur",
   "@authIdentifierLabel": {
     "description": "Label for the field on the login and password-reset forms that accepts either the email or the username."

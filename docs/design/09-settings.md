@@ -27,11 +27,21 @@ first). No card, no tinted callout, no coloured border.
 | Profil | Avatar · « Un monogramme, une pastille de couleur ou une photo. La photo reste sur cet ordinateur. » | The current avatar at 48 px with a 2 px `accent` ring, then the six colour presets as 32 px discs (category slots), then secondary « Choisir une photo » (`image`); with a photo set, ghost « Retirer la photo ». |
 | | Nom d’utilisateur · « Vous pouvez vous connecter avec ce nom ou avec votre e-mail. » | The name + secondary « Modifier » (modal 420 px). |
 | | Adresse e-mail · « Sert uniquement à vous connecter. Bastide n’envoie aucun message. » | The address, `textSecondary`. |
-| Sécurité | Mot de passe · « Modifié le {date}. » | Secondary « Changer le mot de passe » (modal: current, new, confirm). |
-| | Code de récupération · « Permet de réinitialiser votre mot de passe si vous l’oubliez. En générer un nouveau invalide l’ancien. » | Secondary « Générer un nouveau code » (modal asks the password, then shows the code once) + « Dernier code généré le {date} » 12 `textTertiary`. |
+| Sécurité | Mot de passe · « Au moins 12 caractères. Il protège l’accès à vos données sur cet ordinateur. » | Secondary « Changer le mot de passe » (modal 420 px: current, new, confirm). |
+| | Code de récupération · « Permet de réinitialiser votre mot de passe si vous l’oubliez. En générer un nouveau invalide l’ancien. » | Secondary « Générer un nouveau code » (modal asks the password, then shows the code once). |
 | Session | Se déconnecter · « Vos données restent sur cet ordinateur, protégées par votre mot de passe. » | Secondary « Se déconnecter » (`log-out`). |
 
 Avatar picking opens the existing square crop modal.
+
+Neither row shows a date: nothing records when the password or the code last changed.
+
+**Password modal** (420 px): title « Changer le mot de passe », lead « Votre code de récupération
+reste valable. »; fields « Mot de passe actuel », « Nouveau mot de passe » (with the new-password
+helper of `03-register.md`) and « Confirmer le mot de passe »; footer « Annuler » · primary
+« Changer le mot de passe », enabled once the current password is filled in, the new one meets the
+12-character rule and the confirmation matches. A wrong current password gives « Mot de passe
+incorrect. » under its field. Success closes the modal and toasts « Mot de passe modifié. »; the
+session stays open and every other session of the user is signed out.
 
 ## Préférences
 | Group | Row | Right side |
