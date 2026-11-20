@@ -582,17 +582,11 @@ class AppLocalizationsEn extends AppLocalizations {
   String get accountErrorGeneric => 'Something went wrong. Please try again.';
 
   @override
-  String get importNewTitle => 'New import';
-
-  @override
-  String get importAccountLabel => 'Destination account';
-
-  @override
   String get importAccountsUnavailable =>
       'Couldn\'t load your accounts. Try again in a moment.';
 
   @override
-  String get importDropZoneTitle => 'Drop an OFX or QFX file';
+  String get importDropZoneTitle => 'Drop an OFX or QFX statement';
 
   @override
   String get importDropZoneHint =>
@@ -604,7 +598,7 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get importRemoveFile => 'Remove file';
+  String get importRemoveFile => 'Remove';
 
   @override
   String get importSubmit => 'Import';
@@ -613,18 +607,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get importSubmitting => 'Importing…';
 
   @override
-  String importDetectedAccount(String account) {
-    return 'Account recognized in the file: $account.';
-  }
-
-  @override
   String importDetectedAccountAmbiguous(String account) {
     return 'This statement is from $account, but several accounts match it. Choose the destination.';
   }
 
   @override
   String importDetectedAccountUnknown(String account) {
-    return 'No account matches this statement\'s account $account.';
+    return 'Unknown account: $account';
   }
 
   @override
@@ -641,53 +630,8 @@ class AppLocalizationsEn extends AppLocalizations {
       'This file names no account. Choose the destination.';
 
   @override
-  String get importResultTitle => 'Last import';
-
-  @override
-  String importResultNewLabel(int count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: 'new transactions',
-      one: 'new transaction',
-      zero: 'no new transactions',
-    );
-    return '$_temp0';
-  }
-
-  @override
-  String importResultDuplicateLabel(int count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: 'duplicates skipped',
-      one: 'duplicate skipped',
-      zero: 'no duplicates',
-    );
-    return '$_temp0';
-  }
-
-  @override
-  String importResultTarget(String file, String account) {
-    return '$file → $account';
-  }
-
-  @override
-  String importResultBalanceMismatchBody(String amount, DateTime date) {
-    final intl.DateFormat dateDateFormat = intl.DateFormat.yMd(localeName);
-    final String dateString = dateDateFormat.format(date);
-
-    return 'The statement declares a balance $amount from your ledger as of $dateString. Check for a missed import, or correct the account\'s opening balance if this keeps happening.';
-  }
-
-  @override
-  String importPeriodRange(DateTime start, DateTime end) {
-    final intl.DateFormat startDateFormat = intl.DateFormat.yMd(localeName);
-    final String startString = startDateFormat.format(start);
-    final intl.DateFormat endDateFormat = intl.DateFormat.yMd(localeName);
-    final String endString = endDateFormat.format(end);
-
-    return '$startString – $endString';
+  String importPeriodRange(String start, String end) {
+    return '$start – $end';
   }
 
   @override
@@ -698,8 +642,8 @@ class AppLocalizationsEn extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '$count transactions already present, skipped',
-      one: '1 transaction already present, skipped',
+      other: '$count transactions already present were skipped.',
+      one: '1 transaction already present was skipped.',
     );
     return '$_temp0';
   }
@@ -722,7 +666,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get importStatusFailed => 'Failed';
 
   @override
-  String get importHistoryTitle => 'Import history';
+  String get importHistoryTitle => 'History';
 
   @override
   String get importHistoryEmptyTitle => 'No imports';
@@ -735,9 +679,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get importHistoryFileHeader => 'File';
 
   @override
-  String get importHistoryFormatHeader => 'Format';
-
-  @override
   String get importHistoryImportedHeader => 'Imported on';
 
   @override
@@ -748,9 +689,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get importHistoryDuplicatesHeader => 'Duplicates';
-
-  @override
-  String get importHistoryStatusHeader => 'Status';
 
   @override
   String get importRetry => 'Try again';
@@ -769,16 +707,66 @@ class AppLocalizationsEn extends AppLocalizations {
   String get importErrorStatementNotFound => 'That account isn\'t in the file.';
 
   @override
-  String importErrorPartial(int done, int total, String error) {
-    return 'Import stopped ($done of $total statements): $error';
-  }
-
-  @override
   String get importDuplicateDestination =>
-      'Two statements in this file go to the same account. Choose a different destination for each.';
+      'Two statements go to the same account. Choose a different destination.';
 
   @override
   String get importErrorGeneric => 'Something went wrong. Please try again.';
+
+  @override
+  String get importBrowse => 'Browse';
+
+  @override
+  String get importDetectionRecognised => 'Account recognized';
+
+  @override
+  String get importDetectionAmbiguous => 'Several accounts match';
+
+  @override
+  String get importDetectionNoAccount => 'No account named';
+
+  @override
+  String get importUnsupportedFormat => 'Format not supported.';
+
+  @override
+  String importToastSummary(int newCount, int duplicateCount) {
+    final intl.NumberFormat newCountNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String newCountString = newCountNumberFormat.format(newCount);
+    final intl.NumberFormat duplicateCountNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String duplicateCountString = duplicateCountNumberFormat.format(
+      duplicateCount,
+    );
+
+    String _temp0 = intl.Intl.pluralLogic(
+      newCount,
+      locale: localeName,
+      other: '$newCountString new transactions',
+      one: '1 new transaction',
+      zero: 'No new transactions',
+    );
+    String _temp1 = intl.Intl.pluralLogic(
+      duplicateCount,
+      locale: localeName,
+      other: '$duplicateCountString duplicates skipped',
+      one: '1 duplicate skipped',
+      zero: 'no duplicates',
+    );
+    return '$_temp0 · $_temp1';
+  }
+
+  @override
+  String get importHistoryAccountHeader => 'Account';
+
+  @override
+  String get importHistoryResultHeader => 'Result';
+
+  @override
+  String get importBalanceMismatchStatus => 'Balance gap';
+
+  @override
+  String get importHistoryNoValue => '—';
 
   @override
   String get transactionsSearchHint => 'Search a description or a merchant…';

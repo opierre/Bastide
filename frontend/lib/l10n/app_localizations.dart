@@ -1033,28 +1033,16 @@ abstract class AppLocalizations {
   /// **'Une erreur est survenue. Veuillez réessayer.'**
   String get accountErrorGeneric;
 
-  /// Title of the card where a file is staged and imported, on the imports panel.
-  ///
-  /// In fr, this message translates to:
-  /// **'Nouvel import'**
-  String get importNewTitle;
-
-  /// Label for the account picker shown only when a statement could not name its own destination.
-  ///
-  /// In fr, this message translates to:
-  /// **'Compte de destination'**
-  String get importAccountLabel;
-
   /// Shown when the accounts list failed to load, so the statement cannot be matched against anything.
   ///
   /// In fr, this message translates to:
   /// **'Impossible de charger vos comptes. Réessayez dans un instant.'**
   String get importAccountsUnavailable;
 
-  /// Headline inside the imports drop zone.
+  /// First line of the imports drop target.
   ///
   /// In fr, this message translates to:
-  /// **'Déposez un fichier OFX ou QFX'**
+  /// **'Déposez un relevé OFX ou QFX'**
   String get importDropZoneTitle;
 
   /// Sub-line inside the imports drop zone, stating that the file itself names the destination account.
@@ -1066,13 +1054,13 @@ abstract class AppLocalizations {
   /// Size of the staged file, shown under its name. The number is already formatted for the locale.
   ///
   /// In fr, this message translates to:
-  /// **'{size} ko'**
+  /// **'{size} Ko'**
   String importFileSize(String size);
 
-  /// Tooltip on the control that unstages the selected file.
+  /// Ghost button removing one statement line of the selected file.
   ///
   /// In fr, this message translates to:
-  /// **'Retirer le fichier'**
+  /// **'Retirer'**
   String get importRemoveFile;
 
   /// Primary action that imports the staged file.
@@ -1084,14 +1072,8 @@ abstract class AppLocalizations {
   /// Label replacing the import button text while the upload is in flight.
   ///
   /// In fr, this message translates to:
-  /// **'Import en cours…'**
+  /// **'Import…'**
   String get importSubmitting;
-
-  /// Banner confirming the statement's account block matched an existing account, which has been selected as the destination.
-  ///
-  /// In fr, this message translates to:
-  /// **'Compte reconnu dans le fichier : {account}.'**
-  String importDetectedAccount(String account);
 
   /// Banner shown when the statement's bank matches several accounts and nothing in the file separates them; the user picks the destination.
   ///
@@ -1099,10 +1081,10 @@ abstract class AppLocalizations {
   /// **'Ce relevé vient de {account}, mais plusieurs comptes y correspondent. Choisissez la destination.'**
   String importDetectedAccountAmbiguous(String account);
 
-  /// Banner shown when the account declared by the statement matches none of the user's accounts.
+  /// Detection result on a selected-file line when the account the statement names matches none of the user's accounts.
   ///
   /// In fr, this message translates to:
-  /// **'Aucun compte ne correspond au compte {account} de ce relevé.'**
+  /// **'Compte inconnu : {account}'**
   String importDetectedAccountUnknown(String account);
 
   /// Action opening the account form pre-filled with the account read from the statement.
@@ -1129,41 +1111,11 @@ abstract class AppLocalizations {
   /// **'Ce fichier n’indique aucun compte. Choisissez la destination.'**
   String get importUnreadableAccount;
 
-  /// Title of the card summarising the import that just ran.
-  ///
-  /// In fr, this message translates to:
-  /// **'Dernier import'**
-  String get importResultTitle;
-
-  /// Caption under the count of newly inserted transactions on the import result card.
-  ///
-  /// In fr, this message translates to:
-  /// **'{count, plural, =0{aucune nouvelle opération} =1{nouvelle opération} other{nouvelles opérations}}'**
-  String importResultNewLabel(int count);
-
-  /// Caption under the count of skipped duplicate transactions on the import result card.
-  ///
-  /// In fr, this message translates to:
-  /// **'{count, plural, =0{aucun doublon} =1{doublon ignoré} other{doublons ignorés}}'**
-  String importResultDuplicateLabel(int count);
-
-  /// Line on the result card naming the imported file and the account it landed in.
-  ///
-  /// In fr, this message translates to:
-  /// **'{file} → {account}'**
-  String importResultTarget(String file, String account);
-
-  /// Warning banner on the result card when the statement's declared balance disagrees with what the ledger implies. `amount` is pre-formatted with a sign (see formatAmount).
-  ///
-  /// In fr, this message translates to:
-  /// **'Le relevé indique un solde à {amount} de votre suivi au {date}. Vérifiez un import manquant, ou corrigez le solde d\'ouverture du compte si l\'écart persiste.'**
-  String importResultBalanceMismatchBody(String amount, DateTime date);
-
-  /// The coverage window of an import batch, derived from the file's contents.
+  /// The coverage window of an import batch. Both ends are already formatted for the locale, the start shortened when it shares the end's month or year.
   ///
   /// In fr, this message translates to:
   /// **'{start} – {end}'**
-  String importPeriodRange(DateTime start, DateTime end);
+  String importPeriodRange(String start, String end);
 
   /// Calm explanation shown on a failed import, stating that nothing was written.
   ///
@@ -1174,7 +1126,7 @@ abstract class AppLocalizations {
   /// Note under a history row's filename when the run skipped duplicates.
   ///
   /// In fr, this message translates to:
-  /// **'{count, plural, =1{1 opération déjà présente, ignorée} other{{count} opérations déjà présentes, ignorées}}'**
+  /// **'{count, plural, =1{1 opération déjà présente a été ignorée.} other{{count} opérations déjà présentes ont été ignorées.}}'**
   String importDuplicatesNote(int count);
 
   /// Note under a history row's filename when the statement's declared balance disagrees with what the ledger implies — only ever set from an account's second import onward. `amount` is pre-formatted with a sign (see formatAmount).
@@ -1183,28 +1135,28 @@ abstract class AppLocalizations {
   /// **'Écart de {amount} avec le solde de la banque au {date}.'**
   String importBalanceMismatchNote(String amount, DateTime date);
 
-  /// Status pill for an import that completed.
+  /// Result of an import that completed.
   ///
   /// In fr, this message translates to:
   /// **'Réussi'**
   String get importStatusSuccess;
 
-  /// Status pill for an import where only some rows landed.
+  /// Result of an import where only some rows landed.
   ///
   /// In fr, this message translates to:
   /// **'Partiel'**
   String get importStatusPartial;
 
-  /// Status pill for an import that could not be parsed at all.
+  /// Result of an import that could not be parsed at all.
   ///
   /// In fr, this message translates to:
   /// **'Échec'**
   String get importStatusFailed;
 
-  /// Title of the card listing every past import.
+  /// Heading of the import history section.
   ///
   /// In fr, this message translates to:
-  /// **'Historique des imports'**
+  /// **'Historique'**
   String get importHistoryTitle;
 
   /// Heading shown when the import history is empty.
@@ -1224,12 +1176,6 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Fichier'**
   String get importHistoryFileHeader;
-
-  /// Import history column header for the source format badge.
-  ///
-  /// In fr, this message translates to:
-  /// **'Format'**
-  String get importHistoryFormatHeader;
 
   /// Import history column header for the date the file was imported.
   ///
@@ -1254,12 +1200,6 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Doublons'**
   String get importHistoryDuplicatesHeader;
-
-  /// Import history column header for the outcome pill.
-  ///
-  /// In fr, this message translates to:
-  /// **'Statut'**
-  String get importHistoryStatusHeader;
 
   /// Retry button label shown when the import history fails to load.
   ///
@@ -1291,16 +1231,10 @@ abstract class AppLocalizations {
   /// **'Ce compte est introuvable dans le fichier.'**
   String get importErrorStatementNotFound;
 
-  /// Shown when a multi-account file failed part-way: some statements were imported (listed in the result card), the rest were not. {error} is the localized error.
+  /// Detection result on each selected-file line whose statement resolves to the same account as another statement of the file; their import stays disabled.
   ///
   /// In fr, this message translates to:
-  /// **'Import interrompu ({done} relevés sur {total}) : {error}'**
-  String importErrorPartial(int done, int total, String error);
-
-  /// Warning shown when two statements of a multi-account file resolve to the same account; the import stays disabled until each has its own.
-  ///
-  /// In fr, this message translates to:
-  /// **'Deux relevés de ce fichier vont vers le même compte. Choisissez une destination différente pour chacun.'**
+  /// **'Deux relevés vont vers le même compte. Choisissez une destination différente.'**
   String get importDuplicateDestination;
 
   /// Fallback localized message for unrecognized or network errors on the imports panel.
@@ -1308,6 +1242,66 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Une erreur est survenue. Veuillez réessayer.'**
   String get importErrorGeneric;
+
+  /// Secondary button in the imports drop target, opening the file dialog.
+  ///
+  /// In fr, this message translates to:
+  /// **'Parcourir'**
+  String get importBrowse;
+
+  /// Detection result on a selected-file line when the statement matched one of the user's accounts, shown before that account.
+  ///
+  /// In fr, this message translates to:
+  /// **'Compte reconnu'**
+  String get importDetectionRecognised;
+
+  /// Detection result on a selected-file line when several accounts match the statement, shown before a select of the candidates.
+  ///
+  /// In fr, this message translates to:
+  /// **'Plusieurs comptes correspondent'**
+  String get importDetectionAmbiguous;
+
+  /// Detection result on a selected-file line when the file names no account, shown before a select of every account.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucun compte indiqué'**
+  String get importDetectionNoAccount;
+
+  /// Shown on a selected-file line for a file that is not OFX or QFX by its name (a CSV, say). Only removing it is offered.
+  ///
+  /// In fr, this message translates to:
+  /// **'Format non pris en charge.'**
+  String get importUnsupportedFormat;
+
+  /// Toast confirming an import: new transactions, then skipped duplicates.
+  ///
+  /// In fr, this message translates to:
+  /// **'{newCount, plural, =0{Aucune nouvelle opération} =1{1 nouvelle opération} other{{newCount} nouvelles opérations}} · {duplicateCount, plural, =0{aucun doublon} =1{1 doublon ignoré} other{{duplicateCount} doublons ignorés}}'**
+  String importToastSummary(int newCount, int duplicateCount);
+
+  /// Import history column header for the destination account.
+  ///
+  /// In fr, this message translates to:
+  /// **'Compte'**
+  String get importHistoryAccountHeader;
+
+  /// Import history column header for the outcome.
+  ///
+  /// In fr, this message translates to:
+  /// **'Résultat'**
+  String get importHistoryResultHeader;
+
+  /// Added to an import's result when the statement's declared balance disagrees with the ledger; the detail shows on hover.
+  ///
+  /// In fr, this message translates to:
+  /// **'Écart de solde'**
+  String get importBalanceMismatchStatus;
+
+  /// Empty-value placeholder in the import history (the account or period of a failed import).
+  ///
+  /// In fr, this message translates to:
+  /// **'—'**
+  String get importHistoryNoValue;
 
   /// Placeholder in the transactions search pill in the top bar.
   ///

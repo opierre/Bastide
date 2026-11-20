@@ -586,17 +586,11 @@ class AppLocalizationsFr extends AppLocalizations {
       'Une erreur est survenue. Veuillez réessayer.';
 
   @override
-  String get importNewTitle => 'Nouvel import';
-
-  @override
-  String get importAccountLabel => 'Compte de destination';
-
-  @override
   String get importAccountsUnavailable =>
       'Impossible de charger vos comptes. Réessayez dans un instant.';
 
   @override
-  String get importDropZoneTitle => 'Déposez un fichier OFX ou QFX';
+  String get importDropZoneTitle => 'Déposez un relevé OFX ou QFX';
 
   @override
   String get importDropZoneHint =>
@@ -604,22 +598,17 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String importFileSize(String size) {
-    return '$size ko';
+    return '$size Ko';
   }
 
   @override
-  String get importRemoveFile => 'Retirer le fichier';
+  String get importRemoveFile => 'Retirer';
 
   @override
   String get importSubmit => 'Importer';
 
   @override
-  String get importSubmitting => 'Import en cours…';
-
-  @override
-  String importDetectedAccount(String account) {
-    return 'Compte reconnu dans le fichier : $account.';
-  }
+  String get importSubmitting => 'Import…';
 
   @override
   String importDetectedAccountAmbiguous(String account) {
@@ -628,7 +617,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String importDetectedAccountUnknown(String account) {
-    return 'Aucun compte ne correspond au compte $account de ce relevé.';
+    return 'Compte inconnu : $account';
   }
 
   @override
@@ -645,53 +634,8 @@ class AppLocalizationsFr extends AppLocalizations {
       'Ce fichier n’indique aucun compte. Choisissez la destination.';
 
   @override
-  String get importResultTitle => 'Dernier import';
-
-  @override
-  String importResultNewLabel(int count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: 'nouvelles opérations',
-      one: 'nouvelle opération',
-      zero: 'aucune nouvelle opération',
-    );
-    return '$_temp0';
-  }
-
-  @override
-  String importResultDuplicateLabel(int count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: 'doublons ignorés',
-      one: 'doublon ignoré',
-      zero: 'aucun doublon',
-    );
-    return '$_temp0';
-  }
-
-  @override
-  String importResultTarget(String file, String account) {
-    return '$file → $account';
-  }
-
-  @override
-  String importResultBalanceMismatchBody(String amount, DateTime date) {
-    final intl.DateFormat dateDateFormat = intl.DateFormat.yMd(localeName);
-    final String dateString = dateDateFormat.format(date);
-
-    return 'Le relevé indique un solde à $amount de votre suivi au $dateString. Vérifiez un import manquant, ou corrigez le solde d\'ouverture du compte si l\'écart persiste.';
-  }
-
-  @override
-  String importPeriodRange(DateTime start, DateTime end) {
-    final intl.DateFormat startDateFormat = intl.DateFormat.yMd(localeName);
-    final String startString = startDateFormat.format(start);
-    final intl.DateFormat endDateFormat = intl.DateFormat.yMd(localeName);
-    final String endString = endDateFormat.format(end);
-
-    return '$startString – $endString';
+  String importPeriodRange(String start, String end) {
+    return '$start – $end';
   }
 
   @override
@@ -702,8 +646,8 @@ class AppLocalizationsFr extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '$count opérations déjà présentes, ignorées',
-      one: '1 opération déjà présente, ignorée',
+      other: '$count opérations déjà présentes ont été ignorées.',
+      one: '1 opération déjà présente a été ignorée.',
     );
     return '$_temp0';
   }
@@ -726,7 +670,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get importStatusFailed => 'Échec';
 
   @override
-  String get importHistoryTitle => 'Historique des imports';
+  String get importHistoryTitle => 'Historique';
 
   @override
   String get importHistoryEmptyTitle => 'Aucun import';
@@ -739,9 +683,6 @@ class AppLocalizationsFr extends AppLocalizations {
   String get importHistoryFileHeader => 'Fichier';
 
   @override
-  String get importHistoryFormatHeader => 'Format';
-
-  @override
   String get importHistoryImportedHeader => 'Importé le';
 
   @override
@@ -752,9 +693,6 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get importHistoryDuplicatesHeader => 'Doublons';
-
-  @override
-  String get importHistoryStatusHeader => 'Statut';
 
   @override
   String get importRetry => 'Réessayer';
@@ -774,17 +712,67 @@ class AppLocalizationsFr extends AppLocalizations {
       'Ce compte est introuvable dans le fichier.';
 
   @override
-  String importErrorPartial(int done, int total, String error) {
-    return 'Import interrompu ($done relevés sur $total) : $error';
-  }
-
-  @override
   String get importDuplicateDestination =>
-      'Deux relevés de ce fichier vont vers le même compte. Choisissez une destination différente pour chacun.';
+      'Deux relevés vont vers le même compte. Choisissez une destination différente.';
 
   @override
   String get importErrorGeneric =>
       'Une erreur est survenue. Veuillez réessayer.';
+
+  @override
+  String get importBrowse => 'Parcourir';
+
+  @override
+  String get importDetectionRecognised => 'Compte reconnu';
+
+  @override
+  String get importDetectionAmbiguous => 'Plusieurs comptes correspondent';
+
+  @override
+  String get importDetectionNoAccount => 'Aucun compte indiqué';
+
+  @override
+  String get importUnsupportedFormat => 'Format non pris en charge.';
+
+  @override
+  String importToastSummary(int newCount, int duplicateCount) {
+    final intl.NumberFormat newCountNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String newCountString = newCountNumberFormat.format(newCount);
+    final intl.NumberFormat duplicateCountNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String duplicateCountString = duplicateCountNumberFormat.format(
+      duplicateCount,
+    );
+
+    String _temp0 = intl.Intl.pluralLogic(
+      newCount,
+      locale: localeName,
+      other: '$newCountString nouvelles opérations',
+      one: '1 nouvelle opération',
+      zero: 'Aucune nouvelle opération',
+    );
+    String _temp1 = intl.Intl.pluralLogic(
+      duplicateCount,
+      locale: localeName,
+      other: '$duplicateCountString doublons ignorés',
+      one: '1 doublon ignoré',
+      zero: 'aucun doublon',
+    );
+    return '$_temp0 · $_temp1';
+  }
+
+  @override
+  String get importHistoryAccountHeader => 'Compte';
+
+  @override
+  String get importHistoryResultHeader => 'Résultat';
+
+  @override
+  String get importBalanceMismatchStatus => 'Écart de solde';
+
+  @override
+  String get importHistoryNoValue => '—';
 
   @override
   String get transactionsSearchHint =>

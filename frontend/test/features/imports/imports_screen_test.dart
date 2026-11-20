@@ -1,10 +1,11 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:bastide/core/session/current_user_provider.dart';
 import 'package:bastide/core/theme/app_theme.dart';
 import 'package:bastide/core/widgets/amount_text.dart';
+import 'package:bastide/core/widgets/app_table.dart';
 import 'package:bastide/core/widgets/primary_button.dart';
-import 'package:bastide/core/widgets/status_text.dart';
 import 'package:bastide/features/accounts/application/accounts_controller.dart';
 import 'package:bastide/features/accounts/application/settlement_rule_controller.dart';
 import 'package:bastide/features/accounts/domain/account.dart';
@@ -124,6 +125,7 @@ Widget _wrap({
   required PickedImportFile file,
   FakeAccountsController? accounts,
   Locale locale = const Locale('fr'),
+  ThemeData? theme,
   List<CardSettlementIssue> settlements = const [],
 }) {
   return ProviderScope(
@@ -138,7 +140,7 @@ Widget _wrap({
     ],
     child: MaterialApp(
       locale: locale,
-      theme: AppTheme.dark,
+      theme: theme ?? AppTheme.dark,
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
       home: const Scaffold(body: ImportsScreen()),
@@ -153,13 +155,40 @@ void _useDesktopSurface(WidgetTester tester) {
   addTearDown(tester.view.reset);
 }
 
+/// The line of the single checking statement in [_ofxBytes].
+const _statement = '0001234567';
+const _submit = Key('importSubmitButton-$_statement');
+
+/// An OFX document whose statement declares no account number.
+final _noAccountOfxBytes = utf8.encode('''
+<OFX>
+<BANKMSGSRSV1><STMTTRNRS><STMTRS>
+<CURDEF>EUR
+</STMTRS></STMTTRNRS></BANKMSGSRSV1>
+</OFX>
+''');
+
+VoidCallback? _onPressed(WidgetTester tester, Key key) => switch (tester.widget(
+  find.byKey(key),
+)) {
+  PrimaryButton(:final onPressed) || AppButton(:final onPressed) => onPressed,
+  final other => throw StateError('not a button: $other'),
+};
+
+/// Lets the toast and the history highlight run out, so no timer outlives
+/// the test.
+Future<void> _settleTimers(WidgetTester tester) async {
+  await tester.pump(const Duration(seconds: 5));
+  await tester.pumpAndSettle();
+}
+
 Future<void> _stageFile(WidgetTester tester) async {
   await tester.tap(find.byKey(const Key('importDropZone')));
   await tester.pumpAndSettle();
 }
 
 void main() {
-  testWidgets('an OFX file imports in one step and reports its counts', (
+  testWidgets('an OFX file imports in one step and confirms with a toast', (
     tester,
   ) async {
     _useDesktopSurface(tester);
@@ -173,73 +202,135 @@ void main() {
     await tester.pumpAndSettle();
 
     await _stageFile(tester);
-    expect(find.byKey(const Key('importStagedFileName')), findsOneWidget);
-    expect(find.text('Importer'), findsOneWidget);
+    expect(
+      find.byKey(const Key('importStagedFileName-$_statement')),
+      findsOneWidget,
+    );
+    // The drop target stays, ready for the next statement.
+    expect(find.byKey(const Key('importDropZone')), findsOneWidget);
 
-    await tester.tap(find.byKey(const Key('importSubmitButton')));
-    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(_submit));
+    await tester.pump();
+    await tester.pump();
 
     expect(imports.importCalls, hasLength(1));
+    expect(find.byKey(const Key('appToast')), findsOneWidget);
+    expect(
+      find.text('42 nouvelles opérations · 3 doublons ignorés'),
+      findsOneWidget,
+    );
+    // The line leaves and the batch tops the history, highlighted.
+    expect(
+      find.byKey(const Key('importStagedFileName-$_statement')),
+      findsNothing,
+    );
+    final row = find.byKey(const Key('importBatchRow-b1'));
+    expect(tester.widget<AppTableRow>(row).selected, isTrue);
 
-    expect(find.byKey(const Key('importResultCard')), findsOneWidget);
-    expect(
-      tester.widget<Text>(find.byKey(const Key('importResultNewCount'))).data,
-      '42',
-    );
-    expect(
-      tester
-          .widget<Text>(find.byKey(const Key('importResultDuplicateCount')))
-          .data,
-      '3',
-    );
-    // The drop zone resets, ready for the next statement.
-    expect(find.byKey(const Key('importStagedFileName')), findsNothing);
+    await _settleTimers(tester);
+    expect(tester.widget<AppTableRow>(row).selected, isFalse);
+    expect(find.byKey(const Key('appToast')), findsNothing);
   });
 
-  testWidgets('a result that disagrees with the bank shows a warning banner', (
+  testWidgets('a failed import is confirmed as changing nothing', (
     tester,
   ) async {
     _useDesktopSurface(tester);
-    final imports = FakeImportsController(
-      importResult: _batch(
-        balanceMismatchMinor: 5925,
-        balanceMismatchAsOf: DateTime(2024, 2, 29),
-      ),
+    final failed = ImportBatch(
+      id: 'b9',
+      accountId: 'a1',
+      sourceFormat: ImportFormat.ofx,
+      fileName: 'releve.ofx',
+      fileHash: 'hash-9',
+      periodStart: DateTime(2026, 5, 1),
+      periodEnd: DateTime(2026, 5, 31),
+      transactionCount: 0,
+      newCount: 0,
+      duplicateCount: 0,
+      status: ImportStatus.failed,
+      errorMessage: 'bad header',
+      balanceMismatchMinor: null,
+      balanceMismatchAsOf: null,
+      importedAt: DateTime(2026, 6, 1, 9, 30),
     );
     await tester.pumpWidget(
       _wrap(
-        imports: imports,
+        imports: FakeImportsController(importResult: failed),
         file: PickedImportFile(name: 'releve.ofx', bytes: _ofxBytes),
       ),
     );
     await tester.pumpAndSettle();
-
     await _stageFile(tester);
-    await tester.tap(find.byKey(const Key('importSubmitButton')));
-    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(_submit));
+    await tester.pump();
+    await tester.pump();
 
+    final toast = find.byKey(const Key('appToast'));
     expect(
-      find.byKey(const Key('importResultBalanceMismatch-b1')),
+      find.descendant(
+        of: toast,
+        matching: find.text('Fichier illisible. Rien n’a été modifié.'),
+      ),
       findsOneWidget,
     );
-    final amount = formatAmount(
-      amountMinor: 5925,
-      currency: 'EUR',
-      locale: 'fr',
-      showPositiveSign: true,
-    );
-    final date = DateFormat.yMd('fr').format(DateTime(2024, 2, 29));
-    expect(
-      find.text(
-        "Le relevé indique un solde à $amount de votre suivi au $date. "
-        "Vérifiez un import manquant, ou corrigez le solde d'ouverture du "
-        "compte si l'écart persiste.",
+    await _settleTimers(tester);
+  });
+
+  testWidgets('while importing, the line shows the spinner and stays', (
+    tester,
+  ) async {
+    _useDesktopSurface(tester);
+    final gate = Completer<void>();
+    await tester.pumpWidget(
+      _wrap(
+        imports: FakeImportsController(
+          importResult: _batch(),
+          gate: gate.future,
+        ),
+        file: PickedImportFile(name: 'releve.ofx', bytes: _ofxBytes),
       ),
+    );
+    await tester.pumpAndSettle();
+    await _stageFile(tester);
+    await tester.tap(find.byKey(_submit));
+    await tester.pump();
+
+    expect(find.byKey(const Key('appButtonSpinner')), findsOneWidget);
+    expect(find.text('Import…'), findsOneWidget);
+    expect(
+      _onPressed(tester, const Key('importRemoveFileButton-$_statement')),
+      isNull,
+    );
+
+    gate.complete();
+    await tester.pump();
+    await tester.pump();
+    await _settleTimers(tester);
+  });
+
+  testWidgets('an import that throws keeps the line and says why', (
+    tester,
+  ) async {
+    _useDesktopSurface(tester);
+    await tester.pumpWidget(
+      _wrap(
+        imports: FakeImportsController(errorOnImport: Exception('offline')),
+        file: PickedImportFile(name: 'releve.ofx', bytes: _ofxBytes),
+      ),
+    );
+    await tester.pumpAndSettle();
+    await _stageFile(tester);
+    await tester.tap(find.byKey(_submit));
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(const Key('importErrorBanner')), findsOneWidget);
+    expect(
+      find.byKey(const Key('importStatementLine-$_statement')),
       findsOneWidget,
     );
   });
 
-  testWidgets('an OFX file selects the account it declares', (tester) async {
+  testWidgets('a recognised account is named on its line', (tester) async {
     _useDesktopSurface(tester);
     final imports = FakeImportsController(importResult: _batch());
     final other = Account(
@@ -257,8 +348,8 @@ void main() {
     await tester.pumpWidget(
       _wrap(
         imports: imports,
-        // The BNP account comes first, so the panel's default selection is the
-        // wrong one until the file says otherwise.
+        // The BNP account comes first, so a "first account" default would be
+        // the wrong one until the file says otherwise.
         accounts: FakeAccountsController(initialAccounts: [other, _account]),
         file: PickedImportFile(name: 'releve.ofx', bytes: _ofxBytes),
       ),
@@ -267,15 +358,26 @@ void main() {
 
     await _stageFile(tester);
 
+    final line = find.byKey(const Key('importStatementLine-$_statement'));
     expect(
-      find.byKey(const Key('importDetectedAccountBanner-0001234567')),
+      find.byKey(const Key('importDetectedAccountBanner-$_statement')),
+      findsOneWidget,
+    );
+    expect(
+      find.descendant(of: line, matching: find.text('Compte reconnu')),
+      findsOneWidget,
+    );
+    expect(
+      find.descendant(of: line, matching: find.text('Compte courant')),
       findsOneWidget,
     );
 
-    await tester.tap(find.byKey(const Key('importSubmitButton')));
-    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(_submit));
+    await tester.pump();
+    await tester.pump();
 
     expect(imports.importCalls.single.accountId, 'a1');
+    await _settleTimers(tester);
   });
 
   testWidgets('an ambiguous statement asks, and imports into what was picked', (
@@ -309,28 +411,26 @@ void main() {
     await _stageFile(tester);
 
     expect(
-      find.byKey(const Key('importAmbiguousAccountBanner-0001234567')),
+      find.byKey(const Key('importAmbiguousAccountBanner-$_statement')),
       findsOneWidget,
     );
+    expect(find.text('Plusieurs comptes correspondent'), findsOneWidget);
     // Nothing has named a destination, so there is nothing to import yet.
-    expect(
-      tester
-          .widget<PrimaryButton>(find.byKey(const Key('importSubmitButton')))
-          .onPressed,
-      isNull,
-    );
+    expect(_onPressed(tester, _submit), isNull);
 
     await tester.tap(
-      find.byKey(const Key('importAmbiguousAccountField-0001234567')),
+      find.byKey(const Key('importAmbiguousAccountField-$_statement')),
     );
     await tester.pumpAndSettle();
     await tester.tap(find.text('Compte joint').last);
     await tester.pumpAndSettle();
 
-    await tester.tap(find.byKey(const Key('importSubmitButton')));
-    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(_submit));
+    await tester.pump();
+    await tester.pump();
 
     expect(imports.importCalls.single.accountId, 'a2');
+    await _settleTimers(tester);
   });
 
   testWidgets('the ambiguity picker offers only the accounts the file allows', (
@@ -374,7 +474,7 @@ void main() {
 
     await _stageFile(tester);
     await tester.tap(
-      find.byKey(const Key('importAmbiguousAccountField-0001234567')),
+      find.byKey(const Key('importAmbiguousAccountField-$_statement')),
     );
     await tester.pumpAndSettle();
 
@@ -393,9 +493,7 @@ void main() {
       _wrap(
         imports: imports,
         accounts: FakeAccountsController(initialAccounts: [_account]),
-        // Not a statement at all: nothing can be read out of it, so the panel
-        // has to ask rather than leave the user stuck.
-        file: const PickedImportFile(name: 'releve.ofx', bytes: [1, 2, 3]),
+        file: PickedImportFile(name: 'releve.ofx', bytes: _noAccountOfxBytes),
       ),
     );
     await tester.pumpAndSettle();
@@ -406,12 +504,8 @@ void main() {
       find.byKey(const Key('importUnreadableAccountBanner')),
       findsOneWidget,
     );
-    expect(
-      tester
-          .widget<PrimaryButton>(find.byKey(const Key('importSubmitButton')))
-          .onPressed,
-      isNull,
-    );
+    expect(find.text('Aucun compte indiqué'), findsOneWidget);
+    expect(_onPressed(tester, const Key('importSubmitButton')), isNull);
 
     await tester.tap(find.byKey(const Key('importUnreadableAccountField')));
     await tester.pumpAndSettle();
@@ -419,9 +513,56 @@ void main() {
     await tester.pumpAndSettle();
 
     await tester.tap(find.byKey(const Key('importSubmitButton')));
-    await tester.pumpAndSettle();
+    await tester.pump();
+    await tester.pump();
 
     expect(imports.importCalls.single.accountId, 'a1');
+    await _settleTimers(tester);
+  });
+
+  testWidgets('a file that is not a statement can only be removed', (
+    tester,
+  ) async {
+    _useDesktopSurface(tester);
+    await tester.pumpWidget(
+      _wrap(
+        imports: FakeImportsController(),
+        file: const PickedImportFile(name: 'releve.ofx', bytes: [1, 2, 3]),
+      ),
+    );
+    await tester.pumpAndSettle();
+    await _stageFile(tester);
+
+    expect(find.byKey(const Key('importUnreadableFileBanner')), findsOneWidget);
+    expect(
+      find.text('Fichier illisible. Rien n’a été modifié.'),
+      findsOneWidget,
+    );
+    expect(find.byKey(const Key('importSubmitButton')), findsNothing);
+
+    await tester.tap(find.byKey(const Key('importRemoveFileButton')));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const Key('importStatementLine')), findsNothing);
+  });
+
+  testWidgets('a CSV is reported as a format the panel does not take', (
+    tester,
+  ) async {
+    _useDesktopSurface(tester);
+    await tester.pumpWidget(
+      _wrap(
+        imports: FakeImportsController(),
+        file: PickedImportFile(
+          name: 'export.csv',
+          bytes: utf8.encode('date;montant\n2026-05-01;-12.40\n'),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    await _stageFile(tester);
+
+    expect(find.text('Format non pris en charge.'), findsOneWidget);
+    expect(find.byKey(const Key('importSubmitButton')), findsNothing);
   });
 
   testWidgets('a choice made for one statement does not carry to the next', (
@@ -433,7 +574,7 @@ void main() {
       _wrap(
         imports: imports,
         accounts: FakeAccountsController(initialAccounts: [_account]),
-        file: const PickedImportFile(name: 'releve.ofx', bytes: [1, 2, 3]),
+        file: PickedImportFile(name: 'releve.ofx', bytes: _noAccountOfxBytes),
       ),
     );
     await tester.pumpAndSettle();
@@ -444,18 +585,13 @@ void main() {
     await tester.tap(find.text('Compte courant').last);
     await tester.pumpAndSettle();
 
-    // Drop a second unreadable file without importing the first.
+    // Remove it and select the same kind of file again without importing.
     await tester.tap(find.byKey(const Key('importRemoveFileButton')));
     await tester.pumpAndSettle();
     await _stageFile(tester);
 
     // The answer to the previous statement says nothing about this one.
-    expect(
-      tester
-          .widget<PrimaryButton>(find.byKey(const Key('importSubmitButton')))
-          .onPressed,
-      isNull,
-    );
+    expect(_onPressed(tester, const Key('importSubmitButton')), isNull);
   });
 
   testWidgets('an OFX file for an unknown account opens the prefilled form', (
@@ -506,17 +642,19 @@ void main() {
     expect(accounts.createCalls.single.openingBalanceMinor, 123456);
     // The statement's own id is bound to the account, so the next import from
     // it matches on identity rather than on the bank's name.
-    expect(accounts.createCalls.single.ofxAccountId, '0001234567');
+    expect(accounts.createCalls.single.ofxAccountId, _statement);
 
     // The new account becomes the destination, and the file imports into it.
     expect(
-      find.byKey(const Key('importDetectedAccountBanner-0001234567')),
+      find.byKey(const Key('importDetectedAccountBanner-$_statement')),
       findsOneWidget,
     );
-    await tester.tap(find.byKey(const Key('importSubmitButton')));
-    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(_submit));
+    await tester.pump();
+    await tester.pump();
 
     expect(imports.importCalls.single.accountId, 'a1');
+    await _settleTimers(tester);
   });
 
   testWidgets('a card statement proposes a deferred-debit card', (
@@ -566,7 +704,7 @@ void main() {
     expect(accounts.createCalls.single.settlementAccountId, 'lcl');
   });
 
-  testWidgets('cancelling the offered account leaves it on the banner', (
+  testWidgets('cancelling the offered account leaves it on the line', (
     tester,
   ) async {
     _useDesktopSurface(tester);
@@ -584,13 +722,18 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(
-      find.byKey(const Key('importUnknownAccountBanner-0001234567')),
+      find.byKey(const Key('importUnknownAccountBanner-$_statement')),
       findsOneWidget,
     );
+    expect(
+      find.text('Compte inconnu : BOURSORAMA BANQUE ••4567'),
+      findsOneWidget,
+    );
+    expect(_onPressed(tester, _submit), isNull);
 
     // The offer stays available rather than being lost with the dialog.
     await tester.tap(
-      find.byKey(const Key('importCreateDetectedAccountButton-0001234567')),
+      find.byKey(const Key('importCreateDetectedAccountButton-$_statement')),
     );
     await tester.pumpAndSettle();
 
@@ -610,17 +753,15 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    // Dropping a statement is now how an account gets created, so having none
+    // Dropping a statement is how an account gets created, so having none
     // yet is not a prerequisite the panel has to nag about.
     expect(find.byKey(const Key('importNoAccountsBanner')), findsNothing);
     expect(find.byKey(const Key('importDropZone')), findsOneWidget);
+    expect(find.text('Déposez un relevé OFX ou QFX'), findsOneWidget);
+    expect(find.text('Parcourir'), findsOneWidget);
   });
 
-  testWidgets('the detected-account notice fits a short window', (
-    tester,
-  ) async {
-    // The notice grows the import card, squeezing the history beneath it. On a
-    // window this short that used to overflow the empty state's column.
+  testWidgets('the detected-account line fits a short window', (tester) async {
     tester.view.physicalSize = const Size(1280, 640);
     tester.view.devicePixelRatio = 1.0;
     addTearDown(tester.view.reset);
@@ -643,51 +784,66 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('every history value column is centred under its own header', (
-    tester,
-  ) async {
-    _useDesktopSurface(tester);
-    await tester.pumpWidget(
-      _wrap(
-        imports: FakeImportsController(initialBatches: [_batch()]),
-        file: PickedImportFile(name: 'releve.ofx', bytes: _ofxBytes),
-      ),
-    );
-    await tester.pumpAndSettle();
+  for (final (name, theme) in [
+    ('dark', AppTheme.dark),
+    ('light', AppTheme.light),
+  ]) {
+    for (final width in [1440.0 - 224, 1440.0 - 56]) {
+      testWidgets(
+        'lays out in the $name theme in a ${width.toInt()} px panel',
+        (tester) async {
+          // The content region at 1440 × 900, beside the expanded and the
+          // collapsed sidebar, under the 48 px title bar.
+          tester.view.physicalSize = Size(width, 900 - 48);
+          tester.view.devicePixelRatio = 1.0;
+          addTearDown(tester.view.reset);
+          final joint = Account(
+            id: 'a2',
+            name: 'Compte joint',
+            type: AccountType.checking,
+            institution: 'Boursorama',
+            currency: 'EUR',
+            openingBalanceMinor: 0,
+            balanceMinor: 0,
+            archived: false,
+            createdAt: DateTime.utc(2026, 1, 1),
+            updatedAt: DateTime.utc(2026, 1, 1),
+          );
+          await tester.pumpWidget(
+            _wrap(
+              imports: FakeImportsController(
+                initialBatches: [
+                  _batch(),
+                  _batch(
+                    id: 'b2',
+                    balanceMismatchMinor: -1250,
+                    balanceMismatchAsOf: DateTime(2026, 5, 31),
+                  ),
+                ],
+              ),
+              theme: theme,
+              accounts: FakeAccountsController(
+                initialAccounts: [_account, joint],
+              ),
+              file: PickedImportFile(
+                name: 'releve-mai-2026.ofx',
+                bytes: _ofxBytes,
+              ),
+            ),
+          );
+          await tester.pumpAndSettle();
+          await _stageFile(tester);
 
-    void centredUnder(String header, Finder value) {
-      expect(
-        tester.getRect(value).center.dx,
-        closeTo(tester.getRect(find.text(header.toUpperCase())).center.dx, 1),
-        reason: '$header column',
+          expect(
+            find.byKey(const Key('importAmbiguousAccountField-$_statement')),
+            findsOneWidget,
+          );
+          expect(find.byKey(const Key('importBatchRow-b2')), findsOneWidget);
+          expect(tester.takeException(), isNull);
+        },
       );
     }
-
-    final row = find.byKey(const Key('importBatchRow-b1'));
-    Finder inRow(Finder matching) =>
-        find.descendant(of: row, matching: matching);
-
-    centredUnder('Format', inRow(find.text('OFX')));
-    centredUnder('Importé le', inRow(find.text('01/06/2026')));
-    centredUnder('Nouvelles', inRow(find.text('42')));
-    centredUnder('Doublons', inRow(find.text('3')));
-    // The pill, not its label — the status chip carries a leading glyph, so its text sits
-    // right of its own centre by design.
-    centredUnder(
-      'Statut',
-      find.ancestor(
-        of: inRow(find.text('Réussi')),
-        matching: find.byType(StatusText),
-      ),
-    );
-
-    // The file column keeps its leading edge: it carries a wrapped name and its notes, which
-    // centred would read as misaligned rather than as a value under a header.
-    expect(
-      tester.getRect(inRow(find.text('releve.ofx'))).left,
-      closeTo(tester.getRect(find.text('FICHIER')).left, 1),
-    );
-  });
+  }
 
   testWidgets('renders under en without missing localized keys', (
     tester,
@@ -702,13 +858,14 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(find.text('New import'), findsOneWidget);
-    expect(find.text('Drop an OFX or QFX file'), findsOneWidget);
+    expect(find.text('Drop an OFX or QFX statement'), findsOneWidget);
+    expect(find.text('Browse'), findsOneWidget);
+    expect(find.text('History'), findsOneWidget);
     expect(find.text('No imports'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('a multi-account file imports each statement into its account', (
+  testWidgets('a multi-account file shows and imports one line per statement', (
     tester,
   ) async {
     _useDesktopSurface(tester);
@@ -723,7 +880,7 @@ void main() {
         imports: imports,
         accounts: FakeAccountsController(
           initialAccounts: [
-            _bound(_account, '0001234567'),
+            _bound(_account, _statement),
             _bound(_savings, '0007654321'),
           ],
         ),
@@ -734,7 +891,7 @@ void main() {
 
     await _stageFile(tester);
     expect(
-      find.byKey(const Key('importDetectedAccountBanner-0001234567')),
+      find.byKey(const Key('importDetectedAccountBanner-$_statement')),
       findsOneWidget,
     );
     expect(
@@ -742,20 +899,27 @@ void main() {
       findsOneWidget,
     );
 
-    await tester.tap(find.byKey(const Key('importSubmitButton')));
-    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(_submit));
+    await tester.pump();
+    await tester.pump();
+    // The other statement stays staged until it is imported in turn.
+    expect(
+      find.byKey(const Key('importStatementLine-0007654321')),
+      findsOneWidget,
+    );
+    await tester.tap(find.byKey(const Key('importSubmitButton-0007654321')));
+    await tester.pump();
+    await tester.pump();
 
     expect(
       imports.importCalls.map((call) => (call.accountId, call.statement)),
-      [('a1', '0001234567'), ('a2', '0007654321')],
+      [('a1', _statement), ('a2', '0007654321')],
     );
-    // The card sums the statements, then names each one's destination.
     expect(
-      tester.widget<Text>(find.byKey(const Key('importResultNewCount'))).data,
-      '3',
+      find.byKey(const Key('importStatementLine-0007654321')),
+      findsNothing,
     );
-    expect(find.byKey(const Key('importResultPeriod-b1')), findsOneWidget);
-    expect(find.byKey(const Key('importResultPeriod-b2')), findsOneWidget);
+    await _settleTimers(tester);
   });
 
   testWidgets('two statements may not be sent to the same account', (
@@ -787,7 +951,7 @@ void main() {
     await tester.pumpAndSettle();
     await _stageFile(tester);
 
-    for (final statement in ['0001234567', '0007654321']) {
+    for (final statement in [_statement, '0007654321']) {
       await tester.tap(
         find.byKey(Key('importAmbiguousAccountField-$statement')),
       );
@@ -796,15 +960,19 @@ void main() {
       await tester.pumpAndSettle();
     }
 
+    for (final statement in [_statement, '0007654321']) {
+      expect(
+        find.byKey(Key('importSharedDestinationBanner-$statement')),
+        findsOneWidget,
+      );
+      expect(_onPressed(tester, Key('importSubmitButton-$statement')), isNull);
+    }
     expect(
-      find.byKey(const Key('importSharedDestinationBanner')),
-      findsOneWidget,
-    );
-    expect(
-      tester
-          .widget<PrimaryButton>(find.byKey(const Key('importSubmitButton')))
-          .onPressed,
-      isNull,
+      find.text(
+        'Deux relevés vont vers le même compte. Choisissez une destination '
+        'différente.',
+      ),
+      findsNWidgets(2),
     );
   });
 
@@ -840,8 +1008,9 @@ void main() {
     );
     await tester.pumpAndSettle();
     await _stageFile(tester);
-    await tester.tap(find.byKey(const Key('importSubmitButton')));
-    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(_submit));
+    await tester.pump();
+    await tester.pump();
 
     expect(
       find.text(
@@ -851,6 +1020,7 @@ void main() {
       findsOneWidget,
     );
     expect(find.text('Créer la règle'), findsOneWidget);
+    await _settleTimers(tester);
   });
 
   testWidgets('card purchases no debit matched are flagged', (tester) async {
@@ -885,8 +1055,9 @@ void main() {
     );
     await tester.pumpAndSettle();
     await _stageFile(tester);
-    await tester.tap(find.byKey(const Key('importSubmitButton')));
-    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(_submit));
+    await tester.pump();
+    await tester.pump();
 
     final amount = formatAmount(
       amountMinor: 49210,
@@ -903,6 +1074,7 @@ void main() {
       findsOneWidget,
     );
     expect(find.text('Vérifier la règle'), findsOneWidget);
+    await _settleTimers(tester);
   });
 }
 

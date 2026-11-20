@@ -102,6 +102,13 @@ DateTime? _parseDate(String? value) {
   return (amountMinor: amountMinor, asOf: _parseDate(_tag(block, 'DTASOF')));
 }
 
+/// Whether [bytes] read as an OFX document at all, whatever accounts it names.
+///
+/// Tells a file that is simply not a statement (unreadable) apart from a
+/// statement that names no account (the user picks the destination).
+bool isOfxDocument(List<int> bytes) =>
+    _ofxRootRe.firstMatch(decodeOfx(bytes)) != null;
+
 /// The account block of every statement in [bytes], in file order — empty when
 /// the file isn't OFX or no statement declares an account number.
 ///

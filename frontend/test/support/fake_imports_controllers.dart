@@ -10,6 +10,7 @@ class FakeImportsController extends ImportsController {
     this.importResult,
     this.importResults = const [],
     this.errorOnImport,
+    this.gate,
   });
 
   final List<ImportBatch> initialBatches;
@@ -21,6 +22,10 @@ class FakeImportsController extends ImportsController {
   /// accounts, which the panel imports one statement at a time.
   final List<ImportBatch> importResults;
   final Object? errorOnImport;
+
+  /// Holds every import until it completes, so a test can look at the panel
+  /// while the request is in flight.
+  final Future<void>? gate;
 
   /// What the panel asked to import, so a test can assert *which account* a
   /// statement was filed against — the whole point of reading the destination
@@ -42,6 +47,7 @@ class FakeImportsController extends ImportsController {
       fileName: file.name,
       statement: statement,
     ));
+    await gate;
     if (errorOnImport != null) throw errorOnImport!;
     final batch = importResult ?? importResults[importCalls.length - 1];
     state = AsyncValue.data([batch, ...?state.value]);
