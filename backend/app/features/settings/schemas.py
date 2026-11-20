@@ -74,3 +74,10 @@ class SettingsRead(BaseModel):
     last_backup_at: datetime | None
     declared_monthly_income_minor: int | None
     update_check_enabled: bool
+
+
+class DataLocationRead(BaseModel):
+    """Where this backend keeps its data: the datastore file and the folder around it."""
+
+    db_path: str
+    data_dir: str
