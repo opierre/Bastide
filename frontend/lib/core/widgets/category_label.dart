@@ -25,7 +25,19 @@ class CategoryLabel extends StatelessWidget {
     required String this.slug,
     this.subcategory,
     this.onTap,
-  }) : confidence = null;
+  }) : slot = null,
+       confidence = null;
+
+  /// A category whose hue is its stored [slot] rather than the one its system
+  /// [slug] maps to, so a custom category shows the hue it picked.
+  const CategoryLabel.slotted({
+    super.key,
+    required this.label,
+    required CategorySlot this.slot,
+    this.subcategory,
+    this.onTap,
+  }) : slug = null,
+       confidence = null;
 
   /// [label] is the localized « Non catégorisé »; this widget never invents
   /// copy.
@@ -34,6 +46,7 @@ class CategoryLabel extends StatelessWidget {
     required this.label,
     this.onTap,
   }) : slug = null,
+       slot = null,
        subcategory = null,
        confidence = null;
 
@@ -46,13 +59,16 @@ class CategoryLabel extends StatelessWidget {
     required String this.confidence,
     this.subcategory,
     this.onTap,
-  });
+  }) : slot = null;
 
   final String label;
 
-  /// Backend category slug; drives the hue. `null` is the uncategorized
-  /// state.
+  /// Backend category slug; drives the hue unless [slot] is set. Both `null`
+  /// is the uncategorized state.
   final String? slug;
+
+  /// The stored hue slot; wins over [slug] when set.
+  final CategorySlot? slot;
 
   /// The subcategory's localized name, shown after « › ».
   final String? subcategory;
@@ -66,7 +82,7 @@ class CategoryLabel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final label = slug == null
+    final label = slug == null && slot == null
         ? _uncategorized(context)
         : _categorized(context);
     if (onTap == null) return label;
@@ -97,7 +113,9 @@ class CategoryLabel extends StatelessWidget {
           width: dotSize,
           height: dotSize,
           decoration: BoxDecoration(
-            color: context.categoryColors.forSlug(slug),
+            color: context.categoryColors.forSlot(
+              slot ?? CategoryColors.slotForSlug(slug),
+            ),
             borderRadius: BorderRadius.circular(AppRadii.bar),
           ),
         ),
