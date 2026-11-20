@@ -87,14 +87,14 @@ BREAKING CHANGE: accounts now require a currency; existing rows need migration <
 
 - Title in the same `type(scope): subject` form; body from `.github/pull_request_template.md`,
   passed with `--body-file`, linking the ticket (`Closes #N`).
-- **Always set a label, the milestone and the project** when opening the PR — the ticket's
-  type label and milestone, and the board's project (title in `.github/board.json`):
+- **Always set a label and the milestone** when opening the PR — the ticket's type label and
+  milestone:
   ```
   gh pr create --title "feat(accounts): ..." --body-file <file> \
-    --label enhancement --milestone v0.2.0 --project "Bastide Roadmap"
+    --label enhancement --milestone v0.2.0
   ```
-  The **github-project-board** skill covers the fallbacks (no ticket, missing `project` scope,
-  PR already open).
+  Never pass `--project`: the board tracks tickets, and the PR already shows on its ticket's
+  card. The **github-project-board** skill covers the fallbacks (no ticket, PR already open).
 
 ## What not to commit
 
