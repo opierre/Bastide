@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:bastide/core/session/current_user_provider.dart';
 import 'package:bastide/core/theme/app_theme.dart';
 import 'package:bastide/features/auth/domain/auth_user.dart';
@@ -16,17 +18,16 @@ import '../../support/goals_fixtures.dart';
 class _RecordingGoalsController extends FakeGoalsController {
   _RecordingGoalsController() : super(initialGoals: const []);
 
-  final createCalls = <(String, int, DateTime?, String, String)>[];
+  final createCalls = <(String, int, DateTime?)>[];
 
   @override
   Future<Goal> create({
     required String name,
     required int targetMinor,
-    required String icon,
-    required String color,
     DateTime? targetDate,
+    Uint8List? image,
   }) async {
-    createCalls.add((name, targetMinor, targetDate, icon, color));
+    createCalls.add((name, targetMinor, targetDate));
     return testGoal(name: name, targetMinor: targetMinor, progressMinor: 0);
   }
 }
@@ -130,7 +131,7 @@ void main() {
     expect(controller.createCalls.single.$3?.day, 22);
   });
 
-  testWidgets('creating sends the name, the target, the date and the picks', (
+  testWidgets('creating sends the name, the target and the date', (
     tester,
   ) async {
     final controller = _RecordingGoalsController();
@@ -146,15 +147,13 @@ void main() {
     );
     await tester.enterText(find.byKey(const Key('goalFormTarget')), '4000');
     await tester.enterText(find.byKey(const Key('goalFormDate')), '30/06/2026');
-    await tester.tap(find.byKey(const Key('goalFormIcon-travel')));
-    await tester.tap(find.byKey(const Key('goalFormColor-#4FD1E8')));
     await tester.pumpAndSettle();
 
     await tester.tap(find.byKey(const Key('goalFormSubmit')));
     await tester.pumpAndSettle();
 
     expect(controller.createCalls, [
-      ('Voyage Japon', 400000, DateTime(2026, 6, 30), 'travel', '#4FD1E8'),
+      ('Voyage Japon', 400000, DateTime(2026, 6, 30)),
     ]);
   });
 
@@ -182,9 +181,7 @@ void main() {
     await tester.pumpAndSettle();
 
     // No date is a goal with no deadline, not a validation failure.
-    expect(controller.createCalls, [
-      ("Fonds d'urgence", 1000000, null, 'flag', '#8B8CF9'),
-    ]);
+    expect(controller.createCalls, [("Fonds d'urgence", 1000000, null)]);
   });
 
   testWidgets('the form reads its amount in the active locale', (tester) async {

@@ -2835,26 +2835,151 @@ class AppLocalizationsEn extends AppLocalizations {
   String get goalsAdd => 'New goal';
 
   @override
-  String get goalsReassurance =>
-      'On-paper allocation: your accounts are not modified.';
+  String goalsSummaryReserved(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count goals',
+      one: '1 goal',
+    );
+    return 'Reserved across $_temp0';
+  }
 
   @override
-  String goalsOverAllocated(String allocated, String savings) {
-    return 'You\'ve allocated $allocated while your savings accounts total $savings.';
+  String get goalsSummarySavings => 'Available savings';
+
+  @override
+  String get goalsNoValue => '—';
+
+  @override
+  String get goalsColumnGoal => 'Goal';
+
+  @override
+  String get goalsColumnDeadline => 'Deadline';
+
+  @override
+  String get goalsColumnProgress => 'Progress';
+
+  @override
+  String get goalsColumnReserved => 'Reserved';
+
+  @override
+  String goalsTargetSuffix(String target) {
+    return '/ $target';
+  }
+
+  @override
+  String get goalNoDeadline => 'No deadline';
+
+  @override
+  String goalReachedIn(String month) {
+    return 'Reached in $month';
+  }
+
+  @override
+  String goalsArchivedLink(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count archived goals',
+      one: '1 archived goal',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get goalsNote =>
+      'A goal reserves an amount on paper. Your accounts are not changed. Images stay on this computer.';
+
+  @override
+  String goalOfTarget(String target) {
+    return 'of $target';
+  }
+
+  @override
+  String goalDeadlineRemaining(String deadline, String remaining) {
+    return '$deadline · $remaining left';
+  }
+
+  @override
+  String get goalArchive => 'Archive';
+
+  @override
+  String get goalUnarchive => 'Unarchive';
+
+  @override
+  String get goalEdit => 'Edit';
+
+  @override
+  String get goalAllocationsTitle => 'Allocations';
+
+  @override
+  String get goalAllocate => 'Allocate';
+
+  @override
+  String get goalAllocationsEmpty => 'No allocations.';
+
+  @override
+  String get goalAllocationsFailed =>
+      'The allocations couldn\'t be loaded. Nothing was changed.';
+
+  @override
+  String get goalImageChange => 'Change';
+
+  @override
+  String get goalImageReplace => 'Choose another image';
+
+  @override
+  String get goalImageRemove => 'Remove image';
+
+  @override
+  String get goalImageAdd => 'Add an image';
+
+  @override
+  String get goalImageCropTitle => 'Crop the image';
+
+  @override
+  String get goalImageCropLead => 'Drag and zoom to frame the banner.';
+
+  @override
+  String get goalImageCropSave => 'Use this image';
+
+  @override
+  String goalImageTooLarge(int megabytes) {
+    return 'This picture is too large: choose a file under $megabytes MB.';
+  }
+
+  @override
+  String get goalImageInvalid =>
+      'This file isn\'t a PNG, JPEG or WebP picture.';
+
+  @override
+  String get goalImageError => 'The image couldn\'t be saved. Try again.';
+
+  @override
+  String goalImageAlt(String name) {
+    return 'Image of the goal $name';
+  }
+
+  @override
+  String get goalFormImageLabel => 'Image';
+
+  @override
+  String get goalFormImageHelp => 'Optional';
+
+  @override
+  String get goalFormImagePick => 'Choose an image';
+
+  @override
+  String get goalFormImageRemove => 'Remove';
+
+  @override
+  String goalsOverAllocated(String delta) {
+    return 'You have reserved $delta more than the total of your savings accounts.';
   }
 
   @override
   String get goalsDismissBanner => 'Hide this warning';
-
-  @override
-  String goalsShowArchived(int count) {
-    return 'Show archived goals ($count)';
-  }
-
-  @override
-  String goalsHideArchived(int count) {
-    return 'Hide archived goals ($count)';
-  }
 
   @override
   String get goalsEmptyTitle => 'No goals';
@@ -2864,77 +2989,17 @@ class AppLocalizationsEn extends AppLocalizations {
       'A goal sets an amount aside on paper. Your accounts are not changed.';
 
   @override
-  String get goalsLoadFailed => 'We couldn\'t load your goals right now.';
+  String get goalsLoadFailed =>
+      'Your goals couldn\'t be loaded. Nothing was changed.';
 
   @override
   String get goalsRetry => 'Try again';
-
-  @override
-  String get goalPillNoDeadline => 'No deadline';
-
-  @override
-  String get goalPillReached => 'Goal reached';
-
-  @override
-  String goalPillReachedOn(String month) {
-    return 'Goal reached · $month';
-  }
-
-  @override
-  String get goalDetailBack => 'Back to goals';
-
-  @override
-  String goalDetailTargetDate(String month) {
-    return 'Target $month';
-  }
-
-  @override
-  String get goalDetailArchive => 'Archive';
-
-  @override
-  String get goalDetailRestore => 'Restore';
-
-  @override
-  String get goalDetailNewAllocation => 'New allocation';
-
-  @override
-  String get goalDetailMissing => 'This goal is no longer available.';
-
-  @override
-  String get goalDetailFootnote =>
-      'No transaction is created: these lines exist only on the goal\'s paper.';
-
-  @override
-  String get goalDetailHistoryFailed =>
-      'We couldn\'t load the allocation history.';
-
-  @override
-  String get goalHistoryTitle => 'Allocation history';
-
-  @override
-  String get goalHistoryDate => 'Date';
-
-  @override
-  String get goalHistoryAmount => 'Amount';
-
-  @override
-  String get goalHistoryNote => 'Note';
-
-  @override
-  String get goalHistoryDelete => 'Delete this allocation';
-
-  @override
-  String get goalHistoryEmpty => 'No allocations.';
 
   @override
   String get goalFormCreateTitle => 'New goal';
 
   @override
   String get goalFormEditTitle => 'Edit goal';
-
-  @override
-  String get goalFormIntro =>
-      'A virtual envelope: you set money aside on paper, without touching your accounts.';
 
   @override
   String get goalFormNameLabel => 'Name';
@@ -2949,7 +3014,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get goalFormTargetInvalid => 'Enter an amount greater than zero.';
 
   @override
-  String get goalFormDateLabel => 'Target date';
+  String get goalFormDateLabel => 'Deadline';
 
   @override
   String get goalFormDateHelp => 'Optional';
@@ -2958,16 +3023,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get goalFormDateInvalid => 'Invalid date.';
 
   @override
-  String get goalFormIconLabel => 'Icon';
-
-  @override
-  String get goalFormColorLabel => 'Color';
-
-  @override
   String get goalFormCancel => 'Cancel';
-
-  @override
-  String get goalFormSubmit => 'Create goal';
 
   @override
   String get goalFormSave => 'Save';
@@ -3025,9 +3081,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String dashboardGoalsTarget(String target) {
     return '/ $target';
   }
-
-  @override
-  String get goalFormDatePick => 'Pick a target date';
 
   @override
   String get allocationDatePick => 'Pick a date';

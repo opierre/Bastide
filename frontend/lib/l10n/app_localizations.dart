@@ -4439,35 +4439,233 @@ abstract class AppLocalizations {
   /// **'Nouvel objectif'**
   String get goalsAdd;
 
-  /// Lock line stating that allocating changes no account. Shown on the grid and on the detail.
+  /// Label of the summary line's lead figure: the total reserved across the active goals.
   ///
   /// In fr, this message translates to:
-  /// **'Répartition sur le papier : vos comptes ne sont pas modifiés.'**
-  String get goalsReassurance;
+  /// **'Réservé sur {count, plural, =1{1 objectif} other{{count} objectifs}}'**
+  String goalsSummaryReserved(int count);
 
-  /// The over-allocation banner. Informative and dismissible, never blocking.
+  /// Label of the summary line's second figure: the total of the savings accounts.
   ///
   /// In fr, this message translates to:
-  /// **'Vous avez réparti {allocated} alors que vos comptes d\'épargne totalisent {savings}.'**
-  String goalsOverAllocated(String allocated, String savings);
+  /// **'Épargne disponible'**
+  String get goalsSummarySavings;
+
+  /// Empty-value placeholder of « Épargne disponible » when the user has no savings account.
+  ///
+  /// In fr, this message translates to:
+  /// **'—'**
+  String get goalsNoValue;
+
+  /// Goals table header: the goal's name.
+  ///
+  /// In fr, this message translates to:
+  /// **'Objectif'**
+  String get goalsColumnGoal;
+
+  /// Goals table header: the deadline.
+  ///
+  /// In fr, this message translates to:
+  /// **'Échéance'**
+  String get goalsColumnDeadline;
+
+  /// Goals table header: the repère.
+  ///
+  /// In fr, this message translates to:
+  /// **'Avancement'**
+  String get goalsColumnProgress;
+
+  /// Goals table header: saved / target.
+  ///
+  /// In fr, this message translates to:
+  /// **'Réservé'**
+  String get goalsColumnReserved;
+
+  /// After the saved amount in the table, in textTertiary.
+  ///
+  /// In fr, this message translates to:
+  /// **'/ {target}'**
+  String goalsTargetSuffix(String target);
+
+  /// Deadline of a goal without one.
+  ///
+  /// In fr, this message translates to:
+  /// **'Sans échéance'**
+  String get goalNoDeadline;
+
+  /// Deadline cell and banner line of a reached goal. month is « avril 2026 » / « April 2026 ».
+  ///
+  /// In fr, this message translates to:
+  /// **'Atteint en {month}'**
+  String goalReachedIn(String month);
+
+  /// Link under the table that shows or hides the archived goals.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, =1{1 objectif archivé} other{{count} objectifs archivés}}'**
+  String goalsArchivedLink(int count);
+
+  /// Note at the bottom of the list pane.
+  ///
+  /// In fr, this message translates to:
+  /// **'Un objectif réserve une somme sur le papier. Vos comptes ne sont pas modifiés. Les images restent sur cet ordinateur.'**
+  String get goalsNote;
+
+  /// After the saved figure in the inspector.
+  ///
+  /// In fr, this message translates to:
+  /// **'sur {target}'**
+  String goalOfTarget(String target);
+
+  /// Inspector line under the repère of a goal not yet reached.
+  ///
+  /// In fr, this message translates to:
+  /// **'{deadline} · reste {remaining}'**
+  String goalDeadlineRemaining(String deadline, String remaining);
+
+  /// Inspector action archiving the goal.
+  ///
+  /// In fr, this message translates to:
+  /// **'Archiver'**
+  String get goalArchive;
+
+  /// Inspector action restoring an archived goal.
+  ///
+  /// In fr, this message translates to:
+  /// **'Désarchiver'**
+  String get goalUnarchive;
+
+  /// Inspector action opening the goal form.
+  ///
+  /// In fr, this message translates to:
+  /// **'Modifier'**
+  String get goalEdit;
+
+  /// Inspector section heading.
+  ///
+  /// In fr, this message translates to:
+  /// **'Allocations'**
+  String get goalAllocationsTitle;
+
+  /// Inspector action opening the allocation modal.
+  ///
+  /// In fr, this message translates to:
+  /// **'Allouer'**
+  String get goalAllocate;
+
+  /// Inspector table without rows.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucune allocation.'**
+  String get goalAllocationsEmpty;
+
+  /// Inspector table when the allocations fail to load.
+  ///
+  /// In fr, this message translates to:
+  /// **'Impossible de charger les allocations. Rien n’a été modifié.'**
+  String get goalAllocationsFailed;
+
+  /// Button on the banner image; opens a menu.
+  ///
+  /// In fr, this message translates to:
+  /// **'Changer'**
+  String get goalImageChange;
+
+  /// Item of the « Changer » menu: picks a new banner image.
+  ///
+  /// In fr, this message translates to:
+  /// **'Choisir une autre image'**
+  String get goalImageReplace;
+
+  /// Item of the « Changer » menu.
+  ///
+  /// In fr, this message translates to:
+  /// **'Retirer l’image'**
+  String get goalImageRemove;
+
+  /// Button on a banner without an image.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ajouter une image'**
+  String get goalImageAdd;
+
+  /// Title of the banner crop modal.
+  ///
+  /// In fr, this message translates to:
+  /// **'Recadrer l’image'**
+  String get goalImageCropTitle;
+
+  /// Lead of the banner crop modal.
+  ///
+  /// In fr, this message translates to:
+  /// **'Faites glisser et zoomez pour cadrer la bannière.'**
+  String get goalImageCropLead;
+
+  /// Confirm action of the crop modal.
+  ///
+  /// In fr, this message translates to:
+  /// **'Utiliser cette image'**
+  String get goalImageCropSave;
+
+  /// Refused banner image: over the size limit. Same wording as the avatar.
+  ///
+  /// In fr, this message translates to:
+  /// **'Cette image est trop lourde : choisissez un fichier de moins de {megabytes} Mo.'**
+  String goalImageTooLarge(int megabytes);
+
+  /// Refused banner image: wrong type. Same wording as the avatar.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ce fichier n’est pas une image PNG, JPEG ou WebP.'**
+  String get goalImageInvalid;
+
+  /// Banner image upload or removal failed.
+  ///
+  /// In fr, this message translates to:
+  /// **'L’image n’a pas pu être enregistrée. Réessayez.'**
+  String get goalImageError;
+
+  /// Screen-reader label of a goal's banner image.
+  ///
+  /// In fr, this message translates to:
+  /// **'Image de l’objectif {name}'**
+  String goalImageAlt(String name);
+
+  /// Goal form field: the banner image.
+  ///
+  /// In fr, this message translates to:
+  /// **'Image'**
+  String get goalFormImageLabel;
+
+  /// Helper under the optional image field.
+  ///
+  /// In fr, this message translates to:
+  /// **'Facultative'**
+  String get goalFormImageHelp;
+
+  /// Goal form button picking an image.
+  ///
+  /// In fr, this message translates to:
+  /// **'Choisir une image'**
+  String get goalFormImagePick;
+
+  /// Goal form button dropping the chosen image.
+  ///
+  /// In fr, this message translates to:
+  /// **'Retirer'**
+  String get goalFormImageRemove;
+
+  /// The over-allocation banner. Neutral, dismissible, never blocking.
+  ///
+  /// In fr, this message translates to:
+  /// **'Vous avez réservé {delta} de plus que le total de vos comptes d’épargne.'**
+  String goalsOverAllocated(String delta);
 
   /// Tooltip on the over-allocation banner's dismiss control.
   ///
   /// In fr, this message translates to:
   /// **'Masquer cet avertissement'**
   String get goalsDismissBanner;
-
-  /// Link below the grid that reveals archived goals in place; the count is the real number.
-  ///
-  /// In fr, this message translates to:
-  /// **'Afficher les objectifs archivés ({count})'**
-  String goalsShowArchived(int count);
-
-  /// The same link once the archived goals are showing.
-  ///
-  /// In fr, this message translates to:
-  /// **'Masquer les objectifs archivés ({count})'**
-  String goalsHideArchived(int count);
 
   /// Empty-state title of the goals panel.
   ///
@@ -4484,7 +4682,7 @@ abstract class AppLocalizations {
   /// Error state when the goals list fails to load.
   ///
   /// In fr, this message translates to:
-  /// **'Impossible de charger vos objectifs pour le moment.'**
+  /// **'Impossible de charger vos objectifs. Rien n’a été modifié.'**
   String get goalsLoadFailed;
 
   /// Retry action on the goals error states.
@@ -4492,108 +4690,6 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Réessayer'**
   String get goalsRetry;
-
-  /// Card pill for a goal with no target date.
-  ///
-  /// In fr, this message translates to:
-  /// **'Sans échéance'**
-  String get goalPillNoDeadline;
-
-  /// Card pill for a reached goal with no target date.
-  ///
-  /// In fr, this message translates to:
-  /// **'Objectif atteint'**
-  String get goalPillReached;
-
-  /// The reached pill when the goal carried a target date.
-  ///
-  /// In fr, this message translates to:
-  /// **'Objectif atteint · {month}'**
-  String goalPillReachedOn(String month);
-
-  /// Iris back link from the goal detail to the grid.
-  ///
-  /// In fr, this message translates to:
-  /// **'Retour aux objectifs'**
-  String get goalDetailBack;
-
-  /// Sub-line of the detail header when the goal has a target date. No account is named here.
-  ///
-  /// In fr, this message translates to:
-  /// **'Échéance {month}'**
-  String goalDetailTargetDate(String month);
-
-  /// Secondary action archiving a goal from its detail header.
-  ///
-  /// In fr, this message translates to:
-  /// **'Archiver'**
-  String get goalDetailArchive;
-
-  /// The same button on an archived goal, which restores it.
-  ///
-  /// In fr, this message translates to:
-  /// **'Restaurer'**
-  String get goalDetailRestore;
-
-  /// Primary action opening the allocation modal.
-  ///
-  /// In fr, this message translates to:
-  /// **'Nouvelle allocation'**
-  String get goalDetailNewAllocation;
-
-  /// Shown when the open goal no longer exists.
-  ///
-  /// In fr, this message translates to:
-  /// **'Cet objectif n\'est plus disponible.'**
-  String get goalDetailMissing;
-
-  /// Foot note under the allocation history: no transaction is created.
-  ///
-  /// In fr, this message translates to:
-  /// **'Aucune transaction n\'est créée : ces lignes n\'existent que sur le papier de l\'objectif.'**
-  String get goalDetailFootnote;
-
-  /// Error state when the allocation history fails to load.
-  ///
-  /// In fr, this message translates to:
-  /// **'Impossible de charger l\'historique des allocations.'**
-  String get goalDetailHistoryFailed;
-
-  /// Title of the allocation history card.
-  ///
-  /// In fr, this message translates to:
-  /// **'Historique des allocations'**
-  String get goalHistoryTitle;
-
-  /// Date column of the allocation history.
-  ///
-  /// In fr, this message translates to:
-  /// **'Date'**
-  String get goalHistoryDate;
-
-  /// Amount column of the allocation history.
-  ///
-  /// In fr, this message translates to:
-  /// **'Montant'**
-  String get goalHistoryAmount;
-
-  /// Note column of the allocation history.
-  ///
-  /// In fr, this message translates to:
-  /// **'Note'**
-  String get goalHistoryNote;
-
-  /// Tooltip on the control removing one allocation line.
-  ///
-  /// In fr, this message translates to:
-  /// **'Supprimer cette allocation'**
-  String get goalHistoryDelete;
-
-  /// Shown when a goal has no allocations yet.
-  ///
-  /// In fr, this message translates to:
-  /// **'Aucune allocation.'**
-  String get goalHistoryEmpty;
 
   /// Title of the goal modal when creating.
   ///
@@ -4606,12 +4702,6 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Modifier l\'objectif'**
   String get goalFormEditTitle;
-
-  /// Sub-line under the goal modal's title.
-  ///
-  /// In fr, this message translates to:
-  /// **'Une enveloppe virtuelle : vous y mettez de côté sur le papier, sans toucher à vos comptes.'**
-  String get goalFormIntro;
 
   /// Label of the goal name field.
   ///
@@ -4637,10 +4727,10 @@ abstract class AppLocalizations {
   /// **'Saisissez un montant supérieur à zéro.'**
   String get goalFormTargetInvalid;
 
-  /// Label of the optional target date field.
+  /// Goal form field: the optional deadline.
   ///
   /// In fr, this message translates to:
-  /// **'Date cible'**
+  /// **'Échéance'**
   String get goalFormDateLabel;
 
   /// Helper marking the target date as optional.
@@ -4655,29 +4745,11 @@ abstract class AppLocalizations {
   /// **'Date invalide.'**
   String get goalFormDateInvalid;
 
-  /// Label of the goal icon picker.
-  ///
-  /// In fr, this message translates to:
-  /// **'Icône'**
-  String get goalFormIconLabel;
-
-  /// Label of the goal color picker.
-  ///
-  /// In fr, this message translates to:
-  /// **'Couleur'**
-  String get goalFormColorLabel;
-
   /// Cancel action in the goal modal footer.
   ///
   /// In fr, this message translates to:
   /// **'Annuler'**
   String get goalFormCancel;
-
-  /// Confirm action when creating a goal.
-  ///
-  /// In fr, this message translates to:
-  /// **'Créer l\'objectif'**
-  String get goalFormSubmit;
 
   /// Confirm action when editing a goal.
   ///
@@ -4786,12 +4858,6 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'/ {target}'**
   String dashboardGoalsTarget(String target);
-
-  /// Tooltip on the calendar button of the goal form's target date field.
-  ///
-  /// In fr, this message translates to:
-  /// **'Choisir une date cible'**
-  String get goalFormDatePick;
 
   /// Tooltip on the calendar button of the allocation modal's date field.
   ///

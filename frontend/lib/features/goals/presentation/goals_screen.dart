@@ -1,21 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:lucide_icons_flutter/lucide_icons_300.dart';
 
 import '../../../core/theme/tokens.dart';
-import '../../../core/widgets/amount_text.dart';
-import '../../../core/widgets/inline_banner.dart';
 import '../../../core/widgets/primary_button.dart';
 import '../../../core/widgets/state_views.dart';
 import '../../../l10n/app_localizations.dart';
 import '../application/goals_controller.dart';
-import '../domain/goal.dart';
-import 'goal_card.dart';
-import 'goal_detail.dart';
 import 'goal_form_modal.dart';
-import 'goal_labels.dart';
+import 'goal_inspector.dart';
+import 'goals_list_pane.dart';
 
-/// The Objectifs panel: the goal grid with its progress, the allocation flow
-/// behind each card, and the over-allocation warning (`docs/design/11-goals.md`).
+/// The Objectifs panel (`docs/design/11-goals.md`): a flush panel of two
+/// panes, the goals list and the inspector of the selected goal.
 class GoalsScreen extends ConsumerWidget {
   const GoalsScreen({super.key});
 
@@ -23,26 +20,67 @@ class GoalsScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final selected = ref.watch(selectedGoalProvider);
+    final l10n = AppLocalizations.of(context)!;
+    final state = ref.watch(goalsControllerProvider);
+    final selectedId = ref.watch(selectedGoalProvider);
 
-    return Padding(
+    final padded = EdgeInsets.symmetric(
+      horizontal: AppSpacing.pageX,
+      vertical: AppSpacing.pageY,
+    );
+
+    return KeyedSubtree(
       key: const Key('screen-goals'),
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppSpacing.contentX,
-        vertical: AppSpacing.contentY,
-      ),
-      child: selected == null
-          ? const _GoalsGrid()
-          : GoalDetailView(goalId: selected),
+      child: switch (state) {
+        AsyncData(:final value)
+            when value.goals.isEmpty && value.archived.isEmpty =>
+          Padding(
+            padding: padded,
+            child: EmptyStateView(
+              key: const Key('goalsEmptyState'),
+              title: l10n.goalsEmptyTitle,
+              message: l10n.goalsEmptyBody,
+              action: PrimaryButton(
+                key: const Key('goalsEmptyAddButton'),
+                label: l10n.goalsAdd,
+                icon: LucideIcons300.plus,
+                onPressed: () => showGoalForm(context),
+              ),
+            ),
+          ),
+        AsyncData(:final value) => Row(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Expanded(
+              child: GoalsListPane(
+                state: value,
+                selected: value.selectedIn(selectedId),
+              ),
+            ),
+            if (value.selectedIn(selectedId) case final goal?)
+              GoalInspector(goal: goal)
+            else
+              const _EmptyInspector(),
+          ],
+        ),
+        AsyncError() => Padding(
+          padding: padded,
+          child: ErrorStateView(
+            message: l10n.goalsLoadFailed,
+            messageKey: const Key('goalsErrorText'),
+            retryLabel: l10n.goalsRetry,
+            retryKey: const Key('goalsRetryButton'),
+            onRetry: () => ref.read(goalsControllerProvider.notifier).refresh(),
+          ),
+        ),
+        _ => const _GoalsSkeleton(),
+      },
     );
   }
 }
 
-/// The panel's contribution to the top bar: the primary « Nouvel objectif ».
-///
-/// It stays available on the detail view. The detail is a state of this panel,
-/// not a different one, and chrome that rearranged itself under the user would
-/// break the invariant the shell exists to hold (`docs/design/00` §Layout).
+/// The panel's contribution to the title bar: the primary « Nouvel objectif »
+/// (`plus`).
 class GoalsTopBarActions extends ConsumerWidget {
   const GoalsTopBarActions({super.key});
 
@@ -53,211 +91,90 @@ class GoalsTopBarActions extends ConsumerWidget {
     return PrimaryButton(
       key: const Key('addGoalButton'),
       label: l10n.goalsAdd,
-      icon: Icons.add_rounded,
+      icon: LucideIcons300.plus,
       onPressed: () => showGoalForm(context),
     );
   }
 }
 
-class _GoalsGrid extends ConsumerWidget {
-  const _GoalsGrid();
+/// The inspector's ground when only archived goals exist and their list is
+/// folded: nothing is selected.
+class _EmptyInspector extends StatelessWidget {
+  const _EmptyInspector();
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final l10n = AppLocalizations.of(context)!;
-    final state = ref.watch(goalsControllerProvider);
-
-    return switch (state) {
-      AsyncData(:final value)
-          when value.goals.isEmpty && value.archived.isEmpty =>
-        EmptyStateView(
-          key: const Key('goalsEmptyState'),
-          title: l10n.goalsEmptyTitle,
-          message: l10n.goalsEmptyBody,
-          action: PrimaryButton(
-            key: const Key('goalsEmptyAddButton'),
-            label: l10n.goalsAdd,
-            onPressed: () => showGoalForm(context),
-          ),
-        ),
-      AsyncData(:final value) => _LoadedPanel(state: value),
-      AsyncError() => ErrorStateView(
-        message: l10n.goalsLoadFailed,
-        messageKey: const Key('goalsErrorText'),
-        retryLabel: l10n.goalsRetry,
-        retryKey: const Key('goalsRetryButton'),
-        onRetry: () => ref.read(goalsControllerProvider.notifier).refresh(),
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    return Container(
+      width: AppSizes.inspector,
+      decoration: BoxDecoration(
+        color: colors.rail,
+        border: Border(left: BorderSide(color: colors.line)),
       ),
-      _ => const Padding(
-        key: Key('goalsLoadingIndicator'),
-        padding: EdgeInsets.only(top: AppSpacing.lg),
-        child: SkeletonList(itemHeight: 130, itemCount: 2),
-      ),
-    };
+    );
   }
 }
 
-/// Frame ①, top to bottom: the reassurance line, the over-allocation banner
-/// when it applies, the card grid, and the archived-goals link.
-class _LoadedPanel extends ConsumerWidget {
-  const _LoadedPanel({required this.state});
-
-  final GoalsState state;
+/// Loading: the silhouettes of both panes (`00` §7 States of a panel).
+class _GoalsSkeleton extends StatelessWidget {
+  const _GoalsSkeleton();
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final l10n = AppLocalizations.of(context)!;
-    final controller = ref.read(goalsControllerProvider.notifier);
-    final open = ref.read(selectedGoalProvider.notifier).open;
+  Widget build(BuildContext context) {
+    final colors = context.colors;
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        const GoalReassuranceLine(),
-        const SizedBox(height: AppSpacing.md),
-        if (state.actionError != null) ...[
-          InlineBanner(
-            key: const Key('goalsActionError'),
-            message: localizeGoalError(l10n, state.actionError),
+    return SkeletonPulse(
+      key: const Key('goalsLoadingIndicator'),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppSpacing.pageX,
+                vertical: AppSpacing.pageY,
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const SkeletonBlock(height: 12, width: 160),
+                  const SizedBox(height: AppSpacing.xs),
+                  const SkeletonBlock(height: 40, width: 240),
+                  const SizedBox(height: AppSpacing.lg),
+                  for (var i = 0; i < 4; i++) ...[
+                    const SkeletonBlock(height: AppSizes.tableRowTwoLines - 8),
+                    const SizedBox(height: AppSpacing.sm),
+                  ],
+                ],
+              ),
+            ),
           ),
-          const SizedBox(height: AppSpacing.md),
-        ],
-        if (state.isOverAllocated && !state.bannerDismissed) ...[
-          _OverAllocationBanner(
-            state: state,
-            onDismiss: controller.dismissOverAllocationBanner,
-          ),
-          const SizedBox(height: AppSpacing.md),
-        ],
-        Expanded(
-          child: ListView(
-            key: const Key('goalsList'),
-            children: [
-              _CardGrid(goals: state.goals, onOpen: open),
-              if (state.archived.isNotEmpty) ...[
-                const SizedBox(height: AppSpacing.gridGap),
-                Align(
-                  alignment: Alignment.centerLeft,
-                  child: TextButton.icon(
-                    key: const Key('goalsArchivedToggle'),
-                    onPressed: controller.toggleArchived,
-                    icon: const Icon(Icons.archive_outlined, size: 15),
-                    label: Text(
-                      state.showArchived
-                          ? l10n.goalsHideArchived(state.archived.length)
-                          : l10n.goalsShowArchived(state.archived.length),
-                    ),
+          Container(
+            width: AppSizes.inspector,
+            decoration: BoxDecoration(
+              color: colors.rail,
+              border: Border(left: BorderSide(color: colors.line)),
+            ),
+            child: const Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                SkeletonBlock(height: AppGoalBanner.heightEmpty, radius: 0),
+                Padding(
+                  padding: EdgeInsets.all(AppSpacing.lg),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      SkeletonBlock(height: 28, width: 200),
+                      SizedBox(height: AppSpacing.md),
+                      SkeletonBlock(height: 4),
+                    ],
                   ),
                 ),
-                if (state.showArchived) ...[
-                  const SizedBox(height: AppSpacing.sm),
-                  // Revealed *in place* rather than on a screen of their own: an
-                  // archived goal is still one of the user's goals, and moving
-                  // it elsewhere would make restoring it feel like a recovery
-                  // rather than a change of mind.
-                  _CardGrid(goals: state.archived, onOpen: open, dimmed: true),
-                ],
               ],
-            ],
+            ),
           ),
-        ),
-      ],
-    );
-  }
-}
-
-/// The 2-column grid, gap 18.
-///
-/// Built as rows of two rather than a [GridView] because a goal card's height
-/// is its content's: a grid would need a fixed aspect ratio, and the one that
-/// fits « Fonds d'urgence » clips a longer name at another window width.
-class _CardGrid extends StatelessWidget {
-  const _CardGrid({
-    required this.goals,
-    required this.onOpen,
-    this.dimmed = false,
-  });
-
-  final List<Goal> goals;
-  final ValueChanged<String> onOpen;
-  final bool dimmed;
-
-  @override
-  Widget build(BuildContext context) {
-    final rows = <Widget>[];
-    for (var index = 0; index < goals.length; index += 2) {
-      final left = goals[index];
-      final right = index + 1 < goals.length ? goals[index + 1] : null;
-      if (rows.isNotEmpty) rows.add(const SizedBox(height: AppSpacing.gridGap));
-      rows.add(
-        IntrinsicHeight(
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Expanded(
-                child: GoalCard(
-                  goal: left,
-                  dimmed: dimmed,
-                  onOpen: () => onOpen(left.id),
-                ),
-              ),
-              const SizedBox(width: AppSpacing.gridGap),
-              Expanded(
-                child: right == null
-                    // An odd count leaves the slot empty rather than letting the
-                    // last card stretch to the full width: a card twice its
-                    // neighbours' size reads as a different kind of thing.
-                    ? const SizedBox()
-                    : GoalCard(
-                        goal: right,
-                        dimmed: dimmed,
-                        onOpen: () => onOpen(right.id),
-                      ),
-              ),
-            ],
-          ),
-        ),
-      );
-    }
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: rows,
-    );
-  }
-}
-
-/// « Vous avez réparti 24 450,00 € alors que vos comptes d'épargne totalisent
-/// 22 100,00 €. »
-///
-/// Informative and dismissible, never blocking. The app cannot be right
-/// about which of a user's money is "savings", so it states the arithmetic and
-/// leaves the judgment where it belongs.
-class _OverAllocationBanner extends StatelessWidget {
-  const _OverAllocationBanner({required this.state, required this.onDismiss});
-
-  final GoalsState state;
-  final VoidCallback onDismiss;
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
-    final locale = Localizations.localeOf(context).toString();
-
-    String money(int amountMinor) => formatAmount(
-      amountMinor: amountMinor,
-      currency: state.currency,
-      locale: locale,
-    );
-
-    return InlineBanner(
-      key: const Key('goalsOverAllocationBanner'),
-      tone: BannerTone.info,
-      message: l10n.goalsOverAllocated(
-        money(state.allocatedTotalMinor),
-        money(state.savingsTotalMinor),
+        ],
       ),
-      onDismiss: onDismiss,
-      dismissTooltip: l10n.goalsDismissBanner,
     );
   }
 }

@@ -1,5 +1,8 @@
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:lucide_icons_flutter/lucide_icons_300.dart';
 
 import '../../../core/session/current_user_provider.dart';
 import '../../../core/theme/tokens.dart';
@@ -10,8 +13,11 @@ import '../../../core/widgets/labeled_field.dart';
 import '../../../core/widgets/money_field.dart';
 import '../../../core/widgets/primary_button.dart';
 import '../../../l10n/app_localizations.dart';
+import '../application/goal_image_controller.dart';
 import '../application/goals_controller.dart';
+import '../data/goals_repository.dart';
 import '../domain/goal.dart';
+import 'goal_image_crop_modal.dart';
 import 'goal_labels.dart';
 
 /// Opens the create/edit goal modal. Resolves to the saved goal, or `null` when
@@ -23,11 +29,12 @@ Future<Goal?> showGoalForm(BuildContext context, {Goal? initial}) {
   );
 }
 
-/// The 480 px « Nouvel objectif » modal, reused for editing.
+/// The 440 px « Nouvel objectif » modal, reused for editing
+/// (`11-goals.md` §Modals): Nom · Montant cible · Échéance · Image.
 ///
-/// Deliberately short: a goal is a name, an amount, and — optionally — a date
-/// it is wanted by. Nothing here asks about an account, because a goal has
-/// none.
+/// Deliberately short: nothing here asks about an account, because a goal
+/// has none. The image is picked and cropped here but uploaded once the goal
+/// is saved.
 class GoalFormModal extends ConsumerStatefulWidget {
   const GoalFormModal({super.key, this.initial});
 
@@ -51,8 +58,11 @@ class _GoalFormModalState extends ConsumerState<GoalFormModal> {
   /// — unavailable before the widget is mounted.
   bool _filled = false;
 
-  late String _icon = widget.initial?.icon ?? goalIconKeys.first;
-  late String _color = widget.initial?.color ?? goalColorKeys.first;
+  /// The banner the user cropped in this form, not yet uploaded.
+  Uint8List? _image;
+
+  /// Whether the user dropped the goal's existing banner.
+  bool _removeImage = false;
 
   bool _isSubmitting = false;
   String? _errorText;
@@ -115,15 +125,14 @@ class _GoalFormModalState extends ConsumerState<GoalFormModal> {
               name: _nameController.text.trim(),
               targetMinor: target,
               targetDate: date,
-              icon: _icon,
-              color: _color,
+              image: _image,
+              removeImage: _removeImage,
             )
           : await controller.create(
               name: _nameController.text.trim(),
               targetMinor: target,
               targetDate: date,
-              icon: _icon,
-              color: _color,
+              image: _image,
             );
       if (!mounted) return;
       Navigator.of(context).pop(saved);
@@ -135,6 +144,29 @@ class _GoalFormModalState extends ConsumerState<GoalFormModal> {
       });
     }
   }
+
+  Future<void> _pickImage() async {
+    final png = await pickGoalImageBytes(context, ref);
+    if (!mounted) return;
+    final failure = ref.read(goalImageControllerProvider).failure;
+    setState(() {
+      if (png != null) {
+        _image = png;
+        _removeImage = false;
+        _errorText = null;
+      } else if (failure != null) {
+        _errorText = goalImageFailureText(
+          AppLocalizations.of(context)!,
+          failure,
+        );
+      }
+    });
+  }
+
+  void _dropImage() => setState(() {
+    _image = null;
+    _removeImage = widget.initial?.hasImage ?? false;
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -150,7 +182,7 @@ class _GoalFormModalState extends ConsumerState<GoalFormModal> {
 
     return AppModal(
       title: _isEditing ? l10n.goalFormEditTitle : l10n.goalFormCreateTitle,
-      width: 480,
+      width: AppSizes.inspector,
       actions: [
         OutlinedButton(
           key: const Key('goalFormCancel'),
@@ -159,7 +191,7 @@ class _GoalFormModalState extends ConsumerState<GoalFormModal> {
         ),
         PrimaryButton(
           key: const Key('goalFormSubmit'),
-          label: _isEditing ? l10n.goalFormSave : l10n.goalFormSubmit,
+          label: l10n.goalFormSave,
           isLoading: _isSubmitting,
           onPressed: _isSubmitting ? null : _submit,
         ),
@@ -169,13 +201,6 @@ class _GoalFormModalState extends ConsumerState<GoalFormModal> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Text(
-              l10n.goalFormIntro,
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: context.colors.textSecondary,
-              ),
-            ),
-            const SizedBox(height: AppSpacing.md),
             if (_errorText != null) ...[
               InlineBanner(
                 key: const Key('goalFormError'),
@@ -226,7 +251,7 @@ class _GoalFormModalState extends ConsumerState<GoalFormModal> {
                       // not force the user to move it.
                       firstDate: DateTime(2000),
                       lastDate: DateTime(2100),
-                      calendarTooltip: l10n.goalFormDatePick,
+                      calendarTooltip: l10n.goalFormDateLabel,
                       validator: (value) => _dateIsValid(value ?? '', locale)
                           ? null
                           : l10n.goalFormDateInvalid,
@@ -235,20 +260,15 @@ class _GoalFormModalState extends ConsumerState<GoalFormModal> {
                 ),
               ],
             ),
-            const SizedBox(height: AppSpacing.md),
+            const SizedBox(height: AppSpacing.fieldGap),
             LabeledField(
-              label: l10n.goalFormIconLabel,
-              child: _IconPicker(
-                selected: _icon,
-                onSelected: (icon) => setState(() => _icon = icon),
-              ),
-            ),
-            const SizedBox(height: AppSpacing.md),
-            LabeledField(
-              label: l10n.goalFormColorLabel,
-              child: _ColorPicker(
-                selected: _color,
-                onSelected: (color) => setState(() => _color = color),
+              label: l10n.goalFormImageLabel,
+              helper: l10n.goalFormImageHelp,
+              child: _ImageField(
+                image: _image,
+                existing: _removeImage ? null : widget.initial?.imageRef,
+                onPick: _isSubmitting ? null : _pickImage,
+                onRemove: _isSubmitting ? null : _dropImage,
               ),
             ),
           ],
@@ -258,104 +278,69 @@ class _GoalFormModalState extends ConsumerState<GoalFormModal> {
   }
 }
 
-/// The goal glyph, chosen from the fixed vocabulary the domain defines.
-class _IconPicker extends StatelessWidget {
-  const _IconPicker({required this.selected, required this.onSelected});
-
-  final String selected;
-  final ValueChanged<String> onSelected;
-
-  @override
-  Widget build(BuildContext context) {
-    return Wrap(
-      spacing: AppSpacing.sm,
-      runSpacing: AppSpacing.sm,
-      children: [
-        for (final key in goalIconKeys)
-          _PickerTile(
-            key: Key('goalFormIcon-$key'),
-            selected: key == selected,
-            onTap: () => onSelected(key),
-            child: Icon(
-              goalIconData(key),
-              size: 18,
-              color: key == selected
-                  ? context.colors.accent
-                  : context.colors.textSecondary,
-            ),
-          ),
-      ],
-    );
-  }
-}
-
-/// The goal hue, chosen from the palette's own accent and data colors.
-class _ColorPicker extends StatelessWidget {
-  const _ColorPicker({required this.selected, required this.onSelected});
-
-  final String selected;
-  final ValueChanged<String> onSelected;
-
-  @override
-  Widget build(BuildContext context) {
-    return Wrap(
-      spacing: AppSpacing.sm,
-      runSpacing: AppSpacing.sm,
-      children: [
-        for (final key in goalColorKeys)
-          _PickerTile(
-            key: Key('goalFormColor-$key'),
-            selected: key == selected,
-            onTap: () => onSelected(key),
-            child: Container(
-              width: 16,
-              height: 16,
-              decoration: BoxDecoration(
-                color: goalColorValue(context, key),
-                borderRadius: BorderRadius.circular(AppRadii.xs),
-              ),
-            ),
-          ),
-      ],
-    );
-  }
-}
-
-/// The 38 px square both pickers are built from: an inset well that takes the
-/// iris border when chosen — the same selected treatment the app's fields use
-/// on focus, so "picked" reads the same here as everywhere else.
-class _PickerTile extends StatelessWidget {
-  const _PickerTile({
-    super.key,
-    required this.selected,
-    required this.onTap,
-    required this.child,
+/// The optional banner: a thumbnail of the chosen (or current) picture, then
+/// « Choisir une image » and, when there is one, « Retirer ».
+class _ImageField extends ConsumerWidget {
+  const _ImageField({
+    required this.image,
+    required this.existing,
+    required this.onPick,
+    required this.onRemove,
   });
 
-  final bool selected;
-  final VoidCallback onTap;
-  final Widget child;
+  /// Cropped in this form, not yet uploaded.
+  final Uint8List? image;
+
+  /// The goal's current banner, unless the user dropped it.
+  final GoalImageRef? existing;
+
+  final VoidCallback? onPick;
+  final VoidCallback? onRemove;
 
   @override
-  Widget build(BuildContext context) {
-    return MouseRegion(
-      cursor: SystemMouseCursors.click,
-      child: GestureDetector(
-        onTap: onTap,
-        child: Container(
-          width: 38,
-          height: 38,
-          alignment: Alignment.center,
-          decoration: BoxDecoration(
-            color: selected ? context.colors.accentSoft : context.colors.field,
-            borderRadius: BorderRadius.circular(AppRadii.md),
-            border: Border.all(
-              color: selected ? context.colors.accent : context.colors.line,
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
+    final existing = this.existing;
+    final shown =
+        image ??
+        (existing == null
+            ? null
+            : ref.watch(goalImageProvider(existing)).value);
+    final hasImage = image != null || existing != null;
+
+    return Row(
+      children: [
+        if (shown != null) ...[
+          ClipRRect(
+            key: const Key('goalFormImagePreview'),
+            borderRadius: BorderRadius.circular(AppRadii.item),
+            child: Image.memory(
+              shown,
+              width: AppGoalBanner.thumbWidth,
+              height: AppGoalBanner.thumbHeight,
+              fit: BoxFit.cover,
+              excludeFromSemantics: true,
+              errorBuilder: (_, _, _) => const SizedBox.shrink(),
             ),
           ),
-          child: child,
+          const SizedBox(width: AppSpacing.sm),
+        ],
+        AppButton(
+          key: const Key('goalFormImagePick'),
+          label: l10n.goalFormImagePick,
+          icon: LucideIcons300.imagePlus,
+          onPressed: onPick,
         ),
-      ),
+        if (hasImage) ...[
+          const SizedBox(width: AppSpacing.sm),
+          AppButton(
+            key: const Key('goalFormImageRemove'),
+            label: l10n.goalFormImageRemove,
+            variant: AppButtonVariant.ghost,
+            onPressed: onRemove,
+          ),
+        ],
+      ],
     );
   }
 }

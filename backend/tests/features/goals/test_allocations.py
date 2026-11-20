@@ -263,5 +263,7 @@ def test_progress_comes_from_one_aggregate_not_from_loading_the_ledger(
         event.remove(db_session.bind, "before_cursor_execute", record)
 
     assert listed == [(goal, 600_000)]
-    assert len(statements) == 1
+    # The second statement is the one batched lookup of every listed goal's banner image.
+    assert len(statements) == 2
     assert "sum(" in statements[0].lower()
+    assert "goal_allocations" not in statements[1]

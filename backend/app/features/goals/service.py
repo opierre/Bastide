@@ -6,9 +6,18 @@ this feature never touches the ledger, and never compares an allocation against 
 the backend has no basis for deciding which money is "savings".
 """
 
+from collections.abc import Callable, Iterable
+from datetime import UTC, date, datetime
+from typing import NamedTuple
+
 from app.core.errors import NotFoundError
 from app.features.auth.models import User
-from app.features.goals.models import Goal, GoalAllocation
+from app.features.goals.images import (
+    BANNER_CONTENT_TYPE,
+    GoalImageNotFoundError,
+    normalize_banner,
+)
+from app.features.goals.models import Goal, GoalAllocation, GoalImage
 from app.features.goals.repository import GoalRepository
 from app.features.goals.schemas import AllocationCreate, GoalCreate, GoalStatus, GoalUpdate
 
@@ -49,22 +58,55 @@ def _settled_status(goal: Goal, progress_minor: int) -> GoalStatus:
     return REACHED if progress_minor >= goal.target_minor else ACTIVE
 
 
+def _utc_now() -> datetime:
+    return datetime.now(UTC)
+
+
+class GoalView(NamedTuple):
+    """A goal with the figures derived from its ledger, as the API returns it."""
+
+    goal: Goal
+    progress_minor: int
+    #: The date of the allocation that last carried the goal to its target, or `None` while
+    #: progress is under it.
+    reached_on: date | None
+
+
+def reached_on(target_minor: int, ledger: Iterable[tuple[date, int]]) -> date | None:
+    """When a goal last crossed its target, reading its ledger in order.
+
+    A withdrawal that drops the goal back under its target forgets the earlier crossing, so
+    the date is the one of the line that made the goal reached *now*.
+    """
+    total = 0
+    crossed: date | None = None
+    for allocated_on, amount_minor in ledger:
+        before = total
+        total += amount_minor
+        if before < target_minor <= total:
+            crossed = allocated_on
+        elif total < target_minor:
+            crossed = None
+    return crossed
+
+
 class GoalService:
-    """Goal CRUD and the allocation ledger, scoped to a user."""
+    """Goal CRUD, the allocation ledger and the banner image, scoped to a user."""
 
-    def __init__(self, repository: GoalRepository) -> None:
+    def __init__(
+        self, repository: GoalRepository, clock: Callable[[], datetime] = _utc_now
+    ) -> None:
         self._repository = repository
+        self._clock = clock
 
-    def list_for_user(
-        self, user_id: str, status: GoalStatus | None = None
-    ) -> list[tuple[Goal, int]]:
+    def list_for_user(self, user_id: str, status: GoalStatus | None = None) -> list[GoalView]:
         """The user's goals with their progress, oldest first.
 
         Archived goals are excluded unless asked for by name: they leave the grid, and
         `?status=archived` is what the panel's « Afficher les objectifs archivés » link calls.
         """
         statuses = (status,) if status is not None else DEFAULT_STATUSES
-        return self._repository.list_for_user(user_id, statuses)
+        return self._views(self._repository.list_for_user(user_id, statuses))
 
     def get(self, user_id: str, goal_id: str) -> tuple[Goal, int]:
         """One goal the user owns, with its progress.
@@ -77,7 +119,7 @@ class GoalService:
             raise GoalNotFoundError("Goal not found.")
         return found
 
-    def create(self, user: User, data: GoalCreate) -> tuple[Goal, int]:
+    def create(self, user: User, data: GoalCreate) -> GoalView:
         """Create a goal. Currency is copied from the user, per the one-currency rule."""
         goal = Goal(
             user_id=user.id,
@@ -89,9 +131,9 @@ class GoalService:
             color=data.color,
             status=ACTIVE,
         )
-        return self._repository.add(goal), 0
+        return GoalView(self._repository.add(goal), 0, None)
 
-    def update(self, user_id: str, goal_id: str, data: GoalUpdate) -> tuple[Goal, int]:
+    def update(self, user_id: str, goal_id: str, data: GoalUpdate) -> GoalView:
         """Patch a goal, including archiving and restoring it.
 
         Whatever the patch touched, the status is re-derived from the ledger afterwards, so
@@ -117,7 +159,7 @@ class GoalService:
         if data.status is not None:
             goal.status = data.status
         goal.status = _settled_status(goal, progress_minor)
-        return self._repository.save(goal), progress_minor
+        return self._view(self._repository.save(goal), progress_minor)
 
     def archive(self, user_id: str, goal_id: str) -> None:
         """Archive a goal. Never hard-deletes: the allocations are history and survive.
@@ -128,6 +170,51 @@ class GoalService:
         goal, _ = self.get(user_id, goal_id)
         goal.status = ARCHIVED
         self._repository.save(goal)
+
+    def get_image(self, user_id: str, goal_id: str) -> GoalImage:
+        """The banner picture the user gave one of their goals, with its bytes.
+
+        Raises:
+            GoalNotFoundError: no such goal, or it belongs to another user.
+            GoalImageNotFoundError: the goal has no banner image.
+        """
+        goal, _ = self.get(user_id, goal_id)
+        image = self._repository.get_image(goal)
+        if image is None:
+            raise GoalImageNotFoundError("This goal has no image.")
+        return image
+
+    def upload_image(self, user_id: str, goal_id: str, data: bytes) -> GoalView:
+        """Make an uploaded picture the goal's banner, re-encoded without its metadata.
+
+        Raises:
+            GoalNotFoundError: no such goal, or it belongs to another user.
+            GoalImageTooLargeError: the file or its pixel count is over the limit.
+            GoalImageInvalidError: the bytes aren't a PNG, JPEG or WebP picture.
+        """
+        goal, progress_minor = self.get(user_id, goal_id)
+        image = normalize_banner(data)
+        saved = self._repository.save_image(
+            goal,
+            GoalImage(
+                goal_id=goal.id,
+                image=image,
+                content_type=BANNER_CONTENT_TYPE,
+                updated_at=self._clock(),
+            ),
+        )
+        return self._view(saved, progress_minor)
+
+    def remove_image(self, user_id: str, goal_id: str) -> GoalView:
+        """Drop the goal's banner, so it shows the tomettes again. A no-op without one.
+
+        Raises:
+            GoalNotFoundError: no such goal, or it belongs to another user.
+        """
+        goal, progress_minor = self.get(user_id, goal_id)
+        if goal.image is not None:
+            goal = self._repository.delete_image(goal)
+        return self._view(goal, progress_minor)
 
     def list_allocations(self, user_id: str, goal_id: str) -> list[GoalAllocation]:
         """A goal's allocation history, newest first.
@@ -175,6 +262,24 @@ class GoalService:
             raise AllocationNotFoundError("Allocation not found.")
         self._repository.delete_allocation(allocation)
         self._settle(goal)
+
+    def _view(self, goal: Goal, progress_minor: int) -> GoalView:
+        return self._views([(goal, progress_minor)])[0]
+
+    def _views(self, rows: list[tuple[Goal, int]]) -> list[GoalView]:
+        """Attach each goal's reached date, reading the ledgers of reached goals in one query."""
+        reached = [goal.id for goal, progress in rows if progress >= goal.target_minor]
+        ledgers = self._repository.ledgers(reached) if reached else {}
+        return [
+            GoalView(
+                goal,
+                progress,
+                reached_on(goal.target_minor, ledgers.get(goal.id, ()))
+                if progress >= goal.target_minor
+                else None,
+            )
+            for goal, progress in rows
+        ]
 
     def _settle(self, goal: Goal) -> None:
         """Re-derive `reached` / `active` from the ledger after it changed."""

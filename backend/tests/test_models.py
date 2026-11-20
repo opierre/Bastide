@@ -33,6 +33,7 @@ EXPECTED_TABLES = {
     "recurring_merge_dismissals",
     "goals",
     "goal_allocations",
+    "goal_images",
     "mortgages",
     "properties",
     "mortgage_simulations",

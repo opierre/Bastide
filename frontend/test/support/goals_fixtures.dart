@@ -3,8 +3,9 @@ import 'package:bastide/features/goals/domain/goal.dart';
 import 'package:bastide/features/goals/domain/goal_allocation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-/// The four goals of `docs/design/11-goals.md` frame ①, in the drawn order —
-/// so a widget test asserting on amounts is asserting against the design.
+/// The four goals of the `docs/design/11-goals.md` mockup, in the drawn
+/// order, so a widget test asserting on amounts is asserting against the
+/// design.
 List<Goal> specGoals() => [
   testGoal(
     id: 'g1',
@@ -26,6 +27,7 @@ List<Goal> specGoals() => [
     progressMinor: 400000,
     targetDate: DateTime(2026, 6, 30),
     status: GoalStatus.reached,
+    reachedOn: DateTime(2026, 4, 12),
   ),
   testGoal(
     id: 'g4',
@@ -48,6 +50,8 @@ Goal testGoal({
   String icon = 'flag',
   String color = '#8B8CF9',
   GoalStatus status = GoalStatus.active,
+  DateTime? reachedOn,
+  DateTime? imageUpdatedAt,
 }) => Goal(
   id: id,
   name: name,
@@ -59,6 +63,8 @@ Goal testGoal({
   status: status,
   progressMinor: progressMinor,
   progressPct: progressMinor / targetMinor,
+  reachedOn: reachedOn,
+  imageUpdatedAt: imageUpdatedAt,
   createdAt: DateTime(2026, 1, 1),
   updatedAt: DateTime(2026, 5, 1),
 );
@@ -103,6 +109,7 @@ class FakeGoalsController extends GoalsController {
   final archiveCalls = <String>[];
   final restoreCalls = <String>[];
   final deleteAllocationCalls = <(String, String)>[];
+  final removeImageCalls = <String>[];
   Object? errorOnAllocate;
 
   @override
@@ -165,6 +172,11 @@ class FakeGoalsController extends GoalsController {
   @override
   Future<void> restore(String goalId) async {
     restoreCalls.add(goalId);
+  }
+
+  @override
+  Future<void> removeImage(String goalId) async {
+    removeImageCalls.add(goalId);
   }
 
   @override

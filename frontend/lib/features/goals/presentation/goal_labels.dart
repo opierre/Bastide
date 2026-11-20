@@ -1,19 +1,20 @@
-import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 import '../../../core/api/api_client.dart';
-import '../../../core/theme/tokens.dart';
+import '../../../core/pictures/pictures.dart';
 import '../../../l10n/app_localizations.dart';
+import '../application/goals_controller.dart';
 import '../domain/goal.dart';
 
 /// Maps the goals feature's stable error `code`s (see
 /// `backend/app/features/goals/service.py`) to a localized message.
 ///
 /// `GOAL_NOT_FOUND` is the one the panel is likeliest to meet even though it
-/// never offers an action on a goal it isn't showing: the grid may be a few
-/// seconds old, and a goal removed in another window is enough to make a
+/// never offers an action on a goal it isn't showing: the table may be a few
+/// seconds old, and a goal changed in another window is enough to make a
 /// legal-looking click land on nothing.
 String localizeGoalError(AppLocalizations l10n, Object? error) {
+  if (error is GoalImageError) return goalImageFailureText(l10n, error.failure);
   if (error is ApiFailure) {
     switch (error.code) {
       case 'GOAL_NOT_FOUND':
@@ -27,49 +28,51 @@ String localizeGoalError(AppLocalizations l10n, Object? error) {
   return l10n.goalErrorGeneric;
 }
 
-/// « Juin 2028 » — the month a goal is aimed at, as its pill states it.
+/// The localized reason a picture didn't become a goal's banner: the avatar's
+/// wording (`11-goals.md` §Banner image).
+String goalImageFailureText(
+  AppLocalizations l10n,
+  PictureUploadFailure failure,
+) => switch (failure) {
+  PictureUploadFailure.tooLarge => l10n.goalImageTooLarge(
+    maxPictureUploadBytes ~/ (1024 * 1024),
+  ),
+  PictureUploadFailure.invalidType => l10n.goalImageInvalid,
+  PictureUploadFailure.generic => l10n.goalImageError,
+};
+
+/// « Juin 2028 »: the month a goal is aimed at, set as a label.
 String goalMonthLabel(String locale, DateTime date) =>
     _capitalize(DateFormat.yMMMM(locale).format(date));
 
-/// French month names come out of `intl` lowercased; the pill sets them as a
-/// label, where a leading capital is what the design draws.
+/// French month names come out of `intl` lowercased; set alone, as a cell,
+/// the design draws a leading capital.
 String _capitalize(String value) =>
     value.isEmpty ? value : value[0].toUpperCase() + value.substring(1);
 
-/// « 64 % » — a goal's progress as the card and the ring state it.
+/// « Atteint en avril 2026 »: the month inside a sentence keeps the locale's
+/// own case. Falls back to the goal's last change if the backend sent no date.
+String goalReachedLabel(AppLocalizations l10n, String locale, Goal goal) =>
+    l10n.goalReachedIn(
+      DateFormat.yMMMM(locale).format(goal.reachedOn ?? goal.updatedAt),
+    );
+
+/// The deadline line of a goal, in the table and on the banner: reached,
+/// « Juin 2028 », or « Sans échéance ».
+String goalDeadlineLabel(AppLocalizations l10n, String locale, Goal goal) {
+  if (goal.isReached) return goalReachedLabel(l10n, locale, goal);
+  return switch (goal.targetDate) {
+    final date? => goalMonthLabel(locale, date),
+    null => l10n.goalNoDeadline,
+  };
+}
+
+/// « 64 % »: a goal's progress as a whole percent.
 ///
-/// Whole percent, and *unrounded past the point*: the figure sits beside an
-/// exact pair of amounts, and a goal at 99,6 % that claimed 100 % would be
-/// contradicted by the two numbers next to it. Reported unclamped, so an
-/// over-funded goal says 118 % while its bar stops at full
-/// (`docs/design/11-goals.md` §Notes).
+/// Unrounded past the point: the figure sits beside an exact pair of amounts,
+/// and a goal at 99,6 % that claimed 100 % would be contradicted by them.
+/// Reported unclamped, so an over-funded goal says 118 % while its repère
+/// stops at full (`11-goals.md` §Behaviour).
 String goalPercentLabel(double progressPct, String locale) =>
-    '${NumberFormat('0', locale).format(progressPct * 100)} %';
-
-/// The glyph a goal's stored [Goal.icon] key stands for.
-///
-/// The mapping lives in presentation rather than on the domain model: the wire
-/// carries a key, and which glyph draws it is a decision of this app's icon
-/// language, not a fact about the goal. An unknown key — a goal written by a
-/// later build — falls back to the flag rather than throwing.
-IconData goalIconData(String key) => switch (key) {
-  'home' => Icons.home_rounded,
-  'travel' => Icons.flight_rounded,
-  'car' => Icons.directions_car_rounded,
-  'study' => Icons.school_rounded,
-  'gift' => Icons.card_giftcard_rounded,
-  _ => Icons.flag_rounded,
-};
-
-/// The hue a goal's stored [Goal.color] key stands for, resolved against the
-/// palette's tokens so a goal can never introduce a color the design system
-/// does not own. Unknown keys fall back to the accent. The keys are v1 hex
-/// values kept as opaque identifiers; each maps onto a v2 slot.
-Color goalColorValue(BuildContext context, String key) => switch (key) {
-  '#4FD1E8' => context.categoryColors.cat1,
-  '#4ADE80' => context.colors.positive,
-  '#FFB84D' => context.categoryColors.cat4,
-  '#F472B6' => context.categoryColors.cat5,
-  '#5AA9FF' => context.categoryColors.cat6,
-  _ => context.colors.accent,
-};
+    '${NumberFormat('0', locale).format((progressPct * 100).truncate())} %'
+        .replaceAll('-', '−');

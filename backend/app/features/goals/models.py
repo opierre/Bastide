@@ -3,8 +3,8 @@
 from datetime import UTC, date, datetime
 from uuid import uuid4
 
-from sqlalchemy import Date, ForeignKey, Index, Integer, String
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy import Date, ForeignKey, Index, Integer, LargeBinary, String
+from sqlalchemy.orm import Mapped, deferred, mapped_column, relationship
 
 from app.core.db import Base, UtcDateTime
 
@@ -34,6 +34,30 @@ class Goal(Base):
         default=lambda: datetime.now(UTC),
         onupdate=lambda: datetime.now(UTC),
     )
+    # Loaded with the goal (without its pixels), so whether a goal has a banner never costs a
+    # query per goal. A goal is only ever archived, but were one deleted its image would go too.
+    image: Mapped[GoalImage | None] = relationship(
+        lazy="selectin", cascade="all, delete-orphan", passive_deletes=True
+    )
+
+
+class GoalImage(Base):
+    """The banner picture a user gave a goal, already re-encoded as a 44:19 PNG.
+
+    User data, like the goal itself: backups carry it and a reset deletes it.
+    """
+
+    __tablename__ = "goal_images"
+
+    goal_id: Mapped[str] = mapped_column(
+        String(36),
+        ForeignKey("goals.id", ondelete="CASCADE", name="fk_goal_images_goal_id"),
+        primary_key=True,
+    )
+    # Deferred: listing goals needs to know a banner exists and when it changed, not its bytes.
+    image: Mapped[bytes] = deferred(mapped_column(LargeBinary()))
+    content_type: Mapped[str] = mapped_column(String(50))
+    updated_at: Mapped[datetime] = mapped_column(UtcDateTime())
 
 
 class GoalAllocation(Base):

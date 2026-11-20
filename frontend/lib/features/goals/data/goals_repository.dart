@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
@@ -26,8 +27,8 @@ class GoalsRepository {
   final ApiClient _apiClient;
 
   /// Lists goals. Omitting [status] returns the active *and* reached ones —
-  /// the grid's contents — and archived goals only come back when asked for
-  /// by name, which is what the « Afficher les objectifs archivés » link does.
+  /// the table's contents — and archived goals only come back when asked for
+  /// by name, for the « N objectifs archivés » link.
   Future<List<Goal>> list({GoalStatus? status}) async {
     final json =
         await _apiClient.get(
@@ -43,8 +44,6 @@ class GoalsRepository {
   Future<Goal> create({
     required String name,
     required int targetMinor,
-    required String icon,
-    required String color,
     DateTime? targetDate,
   }) async {
     final json =
@@ -54,8 +53,8 @@ class GoalsRepository {
                 'name': name,
                 'target_minor': targetMinor,
                 'target_date': ?_isoOrNull(targetDate),
-                'icon': icon,
-                'color': color,
+                'icon': defaultGoalIcon,
+                'color': defaultGoalColor,
               },
             )
             as Map<String, dynamic>;
@@ -72,8 +71,6 @@ class GoalsRepository {
     String? name,
     int? targetMinor,
     DateTime? targetDate,
-    String? icon,
-    String? color,
     GoalStatus? status,
   }) async {
     final json =
@@ -83,14 +80,34 @@ class GoalsRepository {
                 'name': ?name,
                 'target_minor': ?targetMinor,
                 'target_date': ?_isoOrNull(targetDate),
-                'icon': ?icon,
-                'color': ?color,
                 if (status != null) 'status': status.wireValue,
               },
             )
             as Map<String, dynamic>;
     return _parseGoal(json);
   }
+
+  /// Makes [png] the goal's banner image, replacing any earlier one. The
+  /// backend re-encodes it to 44:19 without its metadata.
+  Future<Goal> uploadImage(String goalId, Uint8List png) async {
+    final json = await _apiClient.putMultipart(
+      '/goals/$goalId/image',
+      fileField: 'file',
+      fileName: 'banner.png',
+      fileBytes: png,
+    );
+    return _parseGoal(json as Map<String, dynamic>);
+  }
+
+  /// Drops the goal's banner image; the inspector shows its tomettes again.
+  Future<Goal> removeImage(String goalId) async {
+    final json = await _apiClient.delete('/goals/$goalId/image');
+    return _parseGoal(json as Map<String, dynamic>);
+  }
+
+  /// The bytes of a goal's banner image.
+  Future<Uint8List> imageBytes(String goalId) async =>
+      (await _apiClient.getBytes('/goals/$goalId/image')).bytes;
 
   /// One goal's allocation history, newest first.
   Future<List<GoalAllocation>> listAllocations(String goalId) async {
@@ -143,6 +160,9 @@ class GoalsRepository {
     ];
   }
 
+  DateTime? _dateOrNull(Object? value) =>
+      value == null ? null : DateTime.parse(value as String);
+
   String? _isoOrNull(DateTime? date) =>
       date == null ? null : _isoDate.format(date);
 
@@ -159,6 +179,8 @@ class GoalsRepository {
     status: GoalStatus.fromWire(json['status'] as String),
     progressMinor: json['progress_minor'] as int,
     progressPct: (json['progress_pct'] as num).toDouble(),
+    reachedOn: _dateOrNull(json['reached_on']),
+    imageUpdatedAt: _dateOrNull(json['image_updated_at']),
     createdAt: DateTime.parse(json['created_at'] as String),
     updatedAt: DateTime.parse(json['updated_at'] as String),
   );
@@ -176,3 +198,18 @@ class GoalsRepository {
 final goalsRepositoryProvider = Provider<GoalsRepository>((ref) {
   return GoalsRepository(ref.watch(apiClientProvider));
 });
+
+/// The bytes of one version of a goal's banner image.
+///
+/// Keyed by the whole [GoalImageRef], version included, so a replaced image
+/// is fetched at once instead of served from the old entry. Kept once
+/// fetched; a failure is not retried, and the banner falls back to its
+/// tomettes until the next version asks again.
+final goalImageProvider = FutureProvider.autoDispose
+    .family<Uint8List, GoalImageRef>((ref, image) async {
+      final bytes = await ref
+          .watch(goalsRepositoryProvider)
+          .imageBytes(image.goalId);
+      ref.keepAlive();
+      return bytes;
+    }, retry: (_, _) => null);

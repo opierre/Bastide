@@ -1,11 +1,12 @@
-"""Data access for `Goal` and `GoalAllocation` rows. The only place either table is queried."""
+"""Data access for goals, their allocations and banner images. The only place querying them."""
 
 from collections.abc import Sequence
+from datetime import date
 
 from sqlalchemy import Select, func, select
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, undefer
 
-from app.features.goals.models import Goal, GoalAllocation
+from app.features.goals.models import Goal, GoalAllocation, GoalImage
 
 #: `sum()` over no rows is NULL, and a goal with no allocations has progress 0, not "unknown".
 _PROGRESS = func.coalesce(func.sum(GoalAllocation.amount_minor), 0)
@@ -55,6 +56,38 @@ class GoalRepository:
         self._db.commit()
         self._db.refresh(goal)
         return goal
+
+    def get_image(self, goal: Goal) -> GoalImage | None:
+        """The goal's banner with its bytes, which listing goals leaves unloaded."""
+        return self._db.scalar(
+            select(GoalImage).where(GoalImage.goal_id == goal.id).options(undefer(GoalImage.image))
+        )
+
+    def save_image(self, goal: Goal, image: GoalImage) -> Goal:
+        """Give the goal this banner, replacing any earlier one."""
+        if goal.image is None:
+            goal.image = image
+        else:
+            goal.image.image = image.image
+            goal.image.content_type = image.content_type
+            goal.image.updated_at = image.updated_at
+        return self.save(goal)
+
+    def delete_image(self, goal: Goal) -> Goal:
+        goal.image = None
+        return self.save(goal)
+
+    def ledgers(self, goal_ids: Sequence[str]) -> dict[str, list[tuple[date, int]]]:
+        """Each of these goals' allocations as `(allocated_on, amount_minor)`, oldest first."""
+        rows = self._db.execute(
+            select(GoalAllocation.goal_id, GoalAllocation.allocated_on, GoalAllocation.amount_minor)
+            .where(GoalAllocation.goal_id.in_(goal_ids))
+            .order_by(GoalAllocation.allocated_on, GoalAllocation.created_at)
+        )
+        ledgers: dict[str, list[tuple[date, int]]] = {}
+        for goal_id, allocated_on, amount_minor in rows:
+            ledgers.setdefault(goal_id, []).append((allocated_on, amount_minor))
+        return ledgers
 
     def list_allocations(self, goal_id: str) -> list[GoalAllocation]:
         """A goal's allocations, newest first — the order the history table reads in."""

@@ -3519,18 +3519,198 @@
   "@goalsAdd": {
     "description": "Primary top-bar action opening the goal form."
   },
-  "goalsReassurance": "Répartition sur le papier : vos comptes ne sont pas modifiés.",
-  "@goalsReassurance": {
-    "description": "Lock line stating that allocating changes no account. Shown on the grid and on the detail."
-  },
-  "goalsOverAllocated": "Vous avez réparti {allocated} alors que vos comptes d'épargne totalisent {savings}.",
-  "@goalsOverAllocated": {
-    "description": "The over-allocation banner. Informative and dismissible, never blocking.",
+  "goalsSummaryReserved": "Réservé sur {count, plural, =1{1 objectif} other{{count} objectifs}}",
+  "@goalsSummaryReserved": {
+    "description": "Label of the summary line's lead figure: the total reserved across the active goals.",
     "placeholders": {
-      "allocated": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "goalsSummarySavings": "Épargne disponible",
+  "@goalsSummarySavings": {
+    "description": "Label of the summary line's second figure: the total of the savings accounts."
+  },
+  "goalsNoValue": "—",
+  "@goalsNoValue": {
+    "description": "Empty-value placeholder of « Épargne disponible » when the user has no savings account."
+  },
+  "goalsColumnGoal": "Objectif",
+  "@goalsColumnGoal": {
+    "description": "Goals table header: the goal's name."
+  },
+  "goalsColumnDeadline": "Échéance",
+  "@goalsColumnDeadline": {
+    "description": "Goals table header: the deadline."
+  },
+  "goalsColumnProgress": "Avancement",
+  "@goalsColumnProgress": {
+    "description": "Goals table header: the repère."
+  },
+  "goalsColumnReserved": "Réservé",
+  "@goalsColumnReserved": {
+    "description": "Goals table header: saved / target."
+  },
+  "goalsTargetSuffix": "/ {target}",
+  "@goalsTargetSuffix": {
+    "description": "After the saved amount in the table, in textTertiary.",
+    "placeholders": {
+      "target": {
+        "type": "String"
+      }
+    }
+  },
+  "goalNoDeadline": "Sans échéance",
+  "@goalNoDeadline": {
+    "description": "Deadline of a goal without one."
+  },
+  "goalReachedIn": "Atteint en {month}",
+  "@goalReachedIn": {
+    "description": "Deadline cell and banner line of a reached goal. month is « avril 2026 » / « April 2026 ».",
+    "placeholders": {
+      "month": {
+        "type": "String"
+      }
+    }
+  },
+  "goalsArchivedLink": "{count, plural, =1{1 objectif archivé} other{{count} objectifs archivés}}",
+  "@goalsArchivedLink": {
+    "description": "Link under the table that shows or hides the archived goals.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "goalsNote": "Un objectif réserve une somme sur le papier. Vos comptes ne sont pas modifiés. Les images restent sur cet ordinateur.",
+  "@goalsNote": {
+    "description": "Note at the bottom of the list pane."
+  },
+  "goalOfTarget": "sur {target}",
+  "@goalOfTarget": {
+    "description": "After the saved figure in the inspector.",
+    "placeholders": {
+      "target": {
+        "type": "String"
+      }
+    }
+  },
+  "goalDeadlineRemaining": "{deadline} · reste {remaining}",
+  "@goalDeadlineRemaining": {
+    "description": "Inspector line under the repère of a goal not yet reached.",
+    "placeholders": {
+      "deadline": {
         "type": "String"
       },
-      "savings": {
+      "remaining": {
+        "type": "String"
+      }
+    }
+  },
+  "goalArchive": "Archiver",
+  "@goalArchive": {
+    "description": "Inspector action archiving the goal."
+  },
+  "goalUnarchive": "Désarchiver",
+  "@goalUnarchive": {
+    "description": "Inspector action restoring an archived goal."
+  },
+  "goalEdit": "Modifier",
+  "@goalEdit": {
+    "description": "Inspector action opening the goal form."
+  },
+  "goalAllocationsTitle": "Allocations",
+  "@goalAllocationsTitle": {
+    "description": "Inspector section heading."
+  },
+  "goalAllocate": "Allouer",
+  "@goalAllocate": {
+    "description": "Inspector action opening the allocation modal."
+  },
+  "goalAllocationsEmpty": "Aucune allocation.",
+  "@goalAllocationsEmpty": {
+    "description": "Inspector table without rows."
+  },
+  "goalAllocationsFailed": "Impossible de charger les allocations. Rien n’a été modifié.",
+  "@goalAllocationsFailed": {
+    "description": "Inspector table when the allocations fail to load."
+  },
+  "goalImageChange": "Changer",
+  "@goalImageChange": {
+    "description": "Button on the banner image; opens a menu."
+  },
+  "goalImageReplace": "Choisir une autre image",
+  "@goalImageReplace": {
+    "description": "Item of the « Changer » menu: picks a new banner image."
+  },
+  "goalImageRemove": "Retirer l’image",
+  "@goalImageRemove": {
+    "description": "Item of the « Changer » menu."
+  },
+  "goalImageAdd": "Ajouter une image",
+  "@goalImageAdd": {
+    "description": "Button on a banner without an image."
+  },
+  "goalImageCropTitle": "Recadrer l’image",
+  "@goalImageCropTitle": {
+    "description": "Title of the banner crop modal."
+  },
+  "goalImageCropLead": "Faites glisser et zoomez pour cadrer la bannière.",
+  "@goalImageCropLead": {
+    "description": "Lead of the banner crop modal."
+  },
+  "goalImageCropSave": "Utiliser cette image",
+  "@goalImageCropSave": {
+    "description": "Confirm action of the crop modal."
+  },
+  "goalImageTooLarge": "Cette image est trop lourde : choisissez un fichier de moins de {megabytes} Mo.",
+  "@goalImageTooLarge": {
+    "description": "Refused banner image: over the size limit. Same wording as the avatar.",
+    "placeholders": {
+      "megabytes": {
+        "type": "int"
+      }
+    }
+  },
+  "goalImageInvalid": "Ce fichier n’est pas une image PNG, JPEG ou WebP.",
+  "@goalImageInvalid": {
+    "description": "Refused banner image: wrong type. Same wording as the avatar."
+  },
+  "goalImageError": "L’image n’a pas pu être enregistrée. Réessayez.",
+  "@goalImageError": {
+    "description": "Banner image upload or removal failed."
+  },
+  "goalImageAlt": "Image de l’objectif {name}",
+  "@goalImageAlt": {
+    "description": "Screen-reader label of a goal's banner image.",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "goalFormImageLabel": "Image",
+  "@goalFormImageLabel": {
+    "description": "Goal form field: the banner image."
+  },
+  "goalFormImageHelp": "Facultative",
+  "@goalFormImageHelp": {
+    "description": "Helper under the optional image field."
+  },
+  "goalFormImagePick": "Choisir une image",
+  "@goalFormImagePick": {
+    "description": "Goal form button picking an image."
+  },
+  "goalFormImageRemove": "Retirer",
+  "@goalFormImageRemove": {
+    "description": "Goal form button dropping the chosen image."
+  },
+  "goalsOverAllocated": "Vous avez réservé {delta} de plus que le total de vos comptes d’épargne.",
+  "@goalsOverAllocated": {
+    "description": "The over-allocation banner. Neutral, dismissible, never blocking.",
+    "placeholders": {
+      "delta": {
         "type": "String"
       }
     }
@@ -3538,24 +3718,6 @@
   "goalsDismissBanner": "Masquer cet avertissement",
   "@goalsDismissBanner": {
     "description": "Tooltip on the over-allocation banner's dismiss control."
-  },
-  "goalsShowArchived": "Afficher les objectifs archivés ({count})",
-  "@goalsShowArchived": {
-    "description": "Link below the grid that reveals archived goals in place; the count is the real number.",
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "goalsHideArchived": "Masquer les objectifs archivés ({count})",
-  "@goalsHideArchived": {
-    "description": "The same link once the archived goals are showing.",
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
   },
   "goalsEmptyTitle": "Aucun objectif",
   "@goalsEmptyTitle": {
@@ -3565,91 +3727,13 @@
   "@goalsEmptyBody": {
     "description": "Empty-state body explaining what a virtual envelope is."
   },
-  "goalsLoadFailed": "Impossible de charger vos objectifs pour le moment.",
+  "goalsLoadFailed": "Impossible de charger vos objectifs. Rien n’a été modifié.",
   "@goalsLoadFailed": {
     "description": "Error state when the goals list fails to load."
   },
   "goalsRetry": "Réessayer",
   "@goalsRetry": {
     "description": "Retry action on the goals error states."
-  },
-  "goalPillNoDeadline": "Sans échéance",
-  "@goalPillNoDeadline": {
-    "description": "Card pill for a goal with no target date."
-  },
-  "goalPillReached": "Objectif atteint",
-  "@goalPillReached": {
-    "description": "Card pill for a reached goal with no target date."
-  },
-  "goalPillReachedOn": "Objectif atteint · {month}",
-  "@goalPillReachedOn": {
-    "description": "The reached pill when the goal carried a target date.",
-    "placeholders": {
-      "month": {
-        "type": "String"
-      }
-    }
-  },
-  "goalDetailBack": "Retour aux objectifs",
-  "@goalDetailBack": {
-    "description": "Iris back link from the goal detail to the grid."
-  },
-  "goalDetailTargetDate": "Échéance {month}",
-  "@goalDetailTargetDate": {
-    "description": "Sub-line of the detail header when the goal has a target date. No account is named here.",
-    "placeholders": {
-      "month": {
-        "type": "String"
-      }
-    }
-  },
-  "goalDetailArchive": "Archiver",
-  "@goalDetailArchive": {
-    "description": "Secondary action archiving a goal from its detail header."
-  },
-  "goalDetailRestore": "Restaurer",
-  "@goalDetailRestore": {
-    "description": "The same button on an archived goal, which restores it."
-  },
-  "goalDetailNewAllocation": "Nouvelle allocation",
-  "@goalDetailNewAllocation": {
-    "description": "Primary action opening the allocation modal."
-  },
-  "goalDetailMissing": "Cet objectif n'est plus disponible.",
-  "@goalDetailMissing": {
-    "description": "Shown when the open goal no longer exists."
-  },
-  "goalDetailFootnote": "Aucune transaction n'est créée : ces lignes n'existent que sur le papier de l'objectif.",
-  "@goalDetailFootnote": {
-    "description": "Foot note under the allocation history: no transaction is created."
-  },
-  "goalDetailHistoryFailed": "Impossible de charger l'historique des allocations.",
-  "@goalDetailHistoryFailed": {
-    "description": "Error state when the allocation history fails to load."
-  },
-  "goalHistoryTitle": "Historique des allocations",
-  "@goalHistoryTitle": {
-    "description": "Title of the allocation history card."
-  },
-  "goalHistoryDate": "Date",
-  "@goalHistoryDate": {
-    "description": "Date column of the allocation history."
-  },
-  "goalHistoryAmount": "Montant",
-  "@goalHistoryAmount": {
-    "description": "Amount column of the allocation history."
-  },
-  "goalHistoryNote": "Note",
-  "@goalHistoryNote": {
-    "description": "Note column of the allocation history."
-  },
-  "goalHistoryDelete": "Supprimer cette allocation",
-  "@goalHistoryDelete": {
-    "description": "Tooltip on the control removing one allocation line."
-  },
-  "goalHistoryEmpty": "Aucune allocation.",
-  "@goalHistoryEmpty": {
-    "description": "Shown when a goal has no allocations yet."
   },
   "goalFormCreateTitle": "Nouvel objectif",
   "@goalFormCreateTitle": {
@@ -3658,10 +3742,6 @@
   "goalFormEditTitle": "Modifier l'objectif",
   "@goalFormEditTitle": {
     "description": "Title of the goal modal when editing."
-  },
-  "goalFormIntro": "Une enveloppe virtuelle : vous y mettez de côté sur le papier, sans toucher à vos comptes.",
-  "@goalFormIntro": {
-    "description": "Sub-line under the goal modal's title."
   },
   "goalFormNameLabel": "Nom",
   "@goalFormNameLabel": {
@@ -3679,9 +3759,9 @@
   "@goalFormTargetInvalid": {
     "description": "Validation message when the target is missing, unparseable, or not positive."
   },
-  "goalFormDateLabel": "Date cible",
+  "goalFormDateLabel": "Échéance",
   "@goalFormDateLabel": {
-    "description": "Label of the optional target date field."
+    "description": "Goal form field: the optional deadline."
   },
   "goalFormDateHelp": "Facultative",
   "@goalFormDateHelp": {
@@ -3691,21 +3771,9 @@
   "@goalFormDateInvalid": {
     "description": "Validation message when the target date cannot be read in the current locale."
   },
-  "goalFormIconLabel": "Icône",
-  "@goalFormIconLabel": {
-    "description": "Label of the goal icon picker."
-  },
-  "goalFormColorLabel": "Couleur",
-  "@goalFormColorLabel": {
-    "description": "Label of the goal color picker."
-  },
   "goalFormCancel": "Annuler",
   "@goalFormCancel": {
     "description": "Cancel action in the goal modal footer."
-  },
-  "goalFormSubmit": "Créer l'objectif",
-  "@goalFormSubmit": {
-    "description": "Confirm action when creating a goal."
   },
   "goalFormSave": "Enregistrer",
   "@goalFormSave": {
@@ -3783,10 +3851,6 @@
         "type": "String"
       }
     }
-  },
-  "goalFormDatePick": "Choisir une date cible",
-  "@goalFormDatePick": {
-    "description": "Tooltip on the calendar button of the goal form's target date field."
   },
   "allocationDatePick": "Choisir une date",
   "@allocationDatePick": {
