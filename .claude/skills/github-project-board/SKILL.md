@@ -171,9 +171,24 @@ searching open issues in the current milestone; if it's still ambiguous, ask.
 | Event | Board | Also |
 |---|---|---|
 | Branch started for #N | `board.py move N --to in_progress` | assign the user if unassigned: `gh issue edit N --add-assignee @me` |
-| PR opened for #N | `board.py move N --to in_review` | PR body links the issue: `Closes #N`, or `Refs #N` if the PR is partial work |
+| PR opened for #N | `board.py move N --to in_review` | PR body links the issue: `Closes #N`, or `Refs #N` if the PR is partial work; PR carries label, milestone and project (below) |
 | PR merged | `board.py move N --to done` | check the issue closed; if it was `Refs`, leave it open and ask about the remaining work |
 
+- **Every PR gets a label, a milestone and the project**, set when it is created:
+  ```bash
+  gh pr create ... --label <type> --milestone <version> --project "<project.title>"
+  ```
+  - label: the ticket's type label (`gh issue view N --json labels`); with no ticket, the
+    repo type label that fits the change (bug / enhancement / documentation ...).
+  - milestone: the ticket's milestone; with no ticket, the open version milestone the
+    work belongs to (ask if there are several).
+  - project: `project.title` from the config.
+
+  If `--project` fails (missing `project` scope), add it with
+  `gh project item-add <project.number> --owner <project.owner> --url <PR URL>`; if that
+  fails too, tell the user to run `gh auth refresh -s project`. On a PR that is already
+  open, add whatever is missing with `gh pr edit <pr> --add-label ... --milestone ...
+  --add-project ...`.
 - Move to done **explicitly** even when `Closes #N` and the board's built-in workflows
   may already have done it - the call is idempotent and those workflows are often off.
 - If the repo has its own branching, versioning, commit or PR conventions (a skill,
