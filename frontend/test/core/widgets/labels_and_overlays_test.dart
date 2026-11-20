@@ -89,6 +89,16 @@ void main() {
       expect(name.style?.color, dark.textSecondary);
     });
 
+    testWidgets('a stored slot draws the dot in that hue', (tester) async {
+      await pumpHost(
+        tester,
+        const CategoryLabel.slotted(label: 'Jardin', slot: CategorySlot.cat6),
+      );
+      final dot = find.byKey(const Key('categoryLabelDot'));
+      expect(decorationOf(tester, dot).color, CategoryColors.dark.cat6);
+      expect(find.byKey(const Key('categoryLabelUnderline')), findsNothing);
+    });
+
     testWidgets('a subcategory follows after « › » in textTertiary', (
       tester,
     ) async {

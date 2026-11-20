@@ -10,6 +10,7 @@ CategoryBreakdown _category(String id, int amountMinor, double pct) =>
     CategoryBreakdown(
       categoryId: id,
       name: 'category.other',
+      hue: 'cat0',
       amountMinor: amountMinor,
       pct: pct,
     );

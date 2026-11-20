@@ -2,9 +2,11 @@
 
 from pydantic import BaseModel
 
+from app.features.categories.hues import CategoryHue
+
 
 class CategoryBreakdown(BaseModel):
-    """One category's slice of the month's expense total.
+    """One top-level category's slice of the month's expense total, its subcategories included.
 
     `name` is an i18n key for system categories and free text for user categories, same as
     `CategoryRead.name` — the frontend resolves system keys via its own ARB entries.
@@ -12,6 +14,10 @@ class CategoryBreakdown(BaseModel):
 
     category_id: str | None
     name: str
+
+    #: The category's hue slot, resolved to a colour by the app's theme; `cat0` for the
+    #: uncategorized bucket.
+    hue: CategoryHue
     amount_minor: int
     pct: float
 

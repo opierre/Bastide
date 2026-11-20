@@ -142,6 +142,7 @@ class DashboardRepository {
       CategoryBreakdown(
         categoryId: json['category_id'] as String?,
         name: json['name'] as String,
+        hue: json['hue'] as String,
         amountMinor: json['amount_minor'] as int,
         pct: (json['pct'] as num).toDouble(),
       );
