@@ -29,6 +29,36 @@ final displayNameControllerProvider =
       DisplayNameController.new,
     );
 
+/// Changes the password from Settings › Profil. Separate from
+/// [AuthController] so a wrong current password errors the modal alone, not
+/// the whole session.
+class PasswordChangeController extends AsyncNotifier<void> {
+  @override
+  Future<void> build() async {}
+
+  Future<void> change({
+    required String currentPassword,
+    required String newPassword,
+  }) async {
+    state = const AsyncValue.loading();
+    state = await AsyncValue.guard(
+      () => ref
+          .read(authRepositoryProvider)
+          .changePassword(
+            currentPassword: currentPassword,
+            newPassword: newPassword,
+          ),
+    );
+  }
+}
+
+/// Auto-disposed with the modal, so a stale error doesn't greet its next
+/// opening.
+final passwordChangeControllerProvider =
+    AsyncNotifierProvider.autoDispose<PasswordChangeController, void>(
+      PasswordChangeController.new,
+    );
+
 /// Sets the default avatar from Settings › Profil. The session's user is
 /// replaced with the answer, so the card and the top bar follow at once.
 class AvatarChoiceController extends AsyncNotifier<void> {

@@ -4731,6 +4731,39 @@ class AppLocalizationsFr extends AppLocalizations {
   String get settingsRecoveryWrongPassword => 'Mot de passe incorrect.';
 
   @override
+  String get settingsPasswordTitle => 'Mot de passe';
+
+  @override
+  String settingsPasswordSubtitle(int minimum) {
+    return 'Au moins $minimum caractères. Il protège l\'accès à vos données sur cet ordinateur.';
+  }
+
+  @override
+  String get settingsPasswordButton => 'Changer le mot de passe';
+
+  @override
+  String get settingsPasswordModalTitle => 'Changer le mot de passe';
+
+  @override
+  String get settingsPasswordModalLead =>
+      'Votre code de récupération reste valable.';
+
+  @override
+  String get settingsPasswordCurrentLabel => 'Mot de passe actuel';
+
+  @override
+  String get settingsPasswordModalCancel => 'Annuler';
+
+  @override
+  String get settingsPasswordModalSave => 'Changer le mot de passe';
+
+  @override
+  String get settingsPasswordWrongPassword => 'Mot de passe incorrect.';
+
+  @override
+  String get settingsPasswordChanged => 'Mot de passe modifié.';
+
+  @override
   String get authIdentifierLabel => 'E-mail ou nom d\'utilisateur';
 
   @override
