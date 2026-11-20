@@ -73,6 +73,225 @@
   "@settingsSectionAbout": {
     "description": "Settings section nav item for the version and privacy statement."
   },
+  "settingsGroupDisplay": "Affichage",
+  "@settingsGroupDisplay": {
+    "description": "Settings › Préférences: title of the group holding theme, language, formats and sidebar."
+  },
+  "settingsGroupMoney": "Argent",
+  "@settingsGroupMoney": {
+    "description": "Settings › Préférences: title of the group holding currency and declared income."
+  },
+  "settingsFormatsNote": "Dates et montants suivent la langue choisie.",
+  "@settingsFormatsNote": {
+    "description": "Settings › Préférences: description of the formats row."
+  },
+  "settingsFormatsDatePair": "{long} · {short}",
+  "@settingsFormatsDatePair": {
+    "description": "Settings › Préférences: one sample date in its long and short forms.",
+    "placeholders": {
+      "long": {
+        "type": "String"
+      },
+      "short": {
+        "type": "String"
+      }
+    }
+  },
+  "settingsCurrencyValue": "{code}, {name} ({symbol})",
+  "@settingsCurrencyValue": {
+    "description": "Settings › Préférences: the user's currency, read-only: ISO code, name (authCurrencyName), symbol.",
+    "placeholders": {
+      "code": {
+        "type": "String"
+      },
+      "name": {
+        "type": "String"
+      },
+      "symbol": {
+        "type": "String"
+      }
+    }
+  },
+  "settingsIncomeTitle": "Revenu déclaré",
+  "@settingsIncomeTitle": {
+    "description": "Settings › Préférences: name of the declared monthly income row."
+  },
+  "settingsIncomeNote": "Sert au taux d’endettement des panneaux Crédits et Simulateur. Sans lui, Bastide prend le revenu médian constaté.",
+  "@settingsIncomeNote": {
+    "description": "Settings › Préférences: description of the declared income row."
+  },
+  "settingsIncomePerMonth": "par mois",
+  "@settingsIncomePerMonth": {
+    "description": "Settings › Préférences: unit after the declared income field."
+  },
+  "settingsIncomeInvalid": "Saisissez un montant positif, ou laissez vide.",
+  "@settingsIncomeInvalid": {
+    "description": "Settings › Préférences: helper when the declared income cannot be read."
+  },
+  "settingsIncomeSaveFailed": "Le revenu n’a pas pu être enregistré. Rien n’a été modifié. Réessayez.",
+  "@settingsIncomeSaveFailed": {
+    "description": "Settings › Préférences: toast when saving the declared income fails."
+  },
+  "settingsGroupSecurity": "Sécurité",
+  "@settingsGroupSecurity": {
+    "description": "Settings › Profil: title of the group holding the recovery code."
+  },
+  "settingsGroupSession": "Session",
+  "@settingsGroupSession": {
+    "description": "Settings › Profil: title of the group holding sign-out."
+  },
+  "settingsEmailTitle": "Adresse e-mail",
+  "@settingsEmailTitle": {
+    "description": "Settings › Profil: name of the email row."
+  },
+  "settingsEmailNote": "Sert uniquement à vous connecter. Bastide n’envoie aucun message.",
+  "@settingsEmailNote": {
+    "description": "Settings › Profil: description of the email row."
+  },
+  "settingsProfileNameNote": "Vous pouvez vous connecter avec ce nom ou avec votre e-mail.",
+  "@settingsProfileNameNote": {
+    "description": "Settings › Profil: description of the username row."
+  },
+  "settingsLogoutTitle": "Se déconnecter",
+  "@settingsLogoutTitle": {
+    "description": "Settings › Profil: name of the sign-out row."
+  },
+  "settingsLogoutNote": "Vos données restent sur cet ordinateur, protégées par votre mot de passe.",
+  "@settingsLogoutNote": {
+    "description": "Settings › Profil: description of the sign-out row."
+  },
+  "settingsAiEngineTitle": "Moteur",
+  "@settingsAiEngineTitle": {
+    "description": "Settings › Données: name of the row holding the engine address, the model and the test button."
+  },
+  "settingsAiConnected": "Connecté",
+  "@settingsAiConnected": {
+    "description": "Settings › Données: status text when the local engine answered."
+  },
+  "settingsAiModelCount": "· {count, plural, =0{aucun modèle disponible} =1{1 modèle disponible} other{{count} modèles disponibles}}",
+  "@settingsAiModelCount": {
+    "description": "Settings › Données: follows « Connecté », the number of models the engine lists.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "settingsAiThresholdTitle": "Seuil de confiance",
+  "@settingsAiThresholdTitle": {
+    "description": "Settings › Données: name of the confidence threshold row."
+  },
+  "settingsBackupRestoreRefused": "Restauration impossible. {reason}",
+  "@settingsBackupRestoreRefused": {
+    "description": "Settings › Données: banner under the restore row when a file was refused; reason is one of the settingsBackupError messages.",
+    "placeholders": {
+      "reason": {
+        "type": "String"
+      }
+    }
+  },
+  "settingsResetRowTitle": "Réinitialiser la base de données",
+  "@settingsResetRowTitle": {
+    "description": "Settings › Données: name of the reset row."
+  },
+  "settingsResetRefused": "Réinitialisation impossible. {reason}",
+  "@settingsResetRefused": {
+    "description": "Settings › Données: banner under the reset row when the reset was refused.",
+    "placeholders": {
+      "reason": {
+        "type": "String"
+      }
+    }
+  },
+  "settingsAboutVersionLine": "Version {version} · {os}",
+  "@settingsAboutVersionLine": {
+    "description": "Settings › À propos: under « Bastide » in the header, the app version and the operating system.",
+    "placeholders": {
+      "version": {
+        "type": "String"
+      },
+      "os": {
+        "type": "String"
+      }
+    }
+  },
+  "settingsAboutOs": "{os, select, windows{Windows} macos{macOS} linux{Linux} other{{os}}}",
+  "@settingsAboutOs": {
+    "description": "Settings › À propos: the operating system's name, by Flutter's Platform.operatingSystem.",
+    "placeholders": {
+      "os": {
+        "type": "String"
+      }
+    }
+  },
+  "settingsUpdatesLatest": "Vous utilisez la dernière version.",
+  "@settingsUpdatesLatest": {
+    "description": "Settings › À propos: status text when no newer release exists."
+  },
+  "settingsUpdatesCheckNow": "Vérifier maintenant",
+  "@settingsUpdatesCheckNow": {
+    "description": "Settings › À propos: secondary button that asks for the latest release again."
+  },
+  "settingsAboutPrivacyTitle": "Confidentialité",
+  "@settingsAboutPrivacyTitle": {
+    "description": "Settings › À propos: name of the privacy row."
+  },
+  "settingsAboutPrivacyNote": "Ce que Bastide fait de vos données.",
+  "@settingsAboutPrivacyNote": {
+    "description": "Settings › À propos: description of the privacy row."
+  },
+  "settingsAboutDataTitle": "Emplacement des données",
+  "@settingsAboutDataTitle": {
+    "description": "Settings › À propos: name of the row showing the database file path."
+  },
+  "settingsAboutDataNote": "Le fichier qui contient tout votre historique.",
+  "@settingsAboutDataNote": {
+    "description": "Settings › À propos: description of the data location row."
+  },
+  "settingsAboutDataOpen": "Ouvrir le dossier",
+  "@settingsAboutDataOpen": {
+    "description": "Settings › À propos: secondary button that opens the data folder."
+  },
+  "settingsAboutLicenseTitle": "Licence",
+  "@settingsAboutLicenseTitle": {
+    "description": "Settings › À propos: name of the licence row."
+  },
+  "settingsAboutLicenseNote": "Bastide est un logiciel libre. Son nom et son logo ne sont pas couverts par la licence.",
+  "@settingsAboutLicenseNote": {
+    "description": "Settings › À propos: description of the licence row."
+  },
+  "settingsAboutLicenseName": "GNU Affero General Public License v3.0",
+  "@settingsAboutLicenseName": {
+    "description": "Settings › À propos: the licence's official name, untranslated."
+  },
+  "settingsAboutSourceCode": "Code source",
+  "@settingsAboutSourceCode": {
+    "description": "Settings › À propos: secondary button opening the source repository."
+  },
+  "settingsAboutInstallGuide": "Guide d’installation",
+  "@settingsAboutInstallGuide": {
+    "description": "Settings › À propos: secondary button opening the installation guide."
+  },
+  "settingsAboutCreditsNote": "Les composants tiers fournis avec l’application.",
+  "@settingsAboutCreditsNote": {
+    "description": "Settings › À propos: description of the credits row."
+  },
+  "settingsAboutCreditsIconsLabel": "Icônes",
+  "@settingsAboutCreditsIconsLabel": {
+    "description": "Settings › À propos: credits key for the icon set."
+  },
+  "settingsAboutCreditsFontLabel": "Police",
+  "@settingsAboutCreditsFontLabel": {
+    "description": "Settings › À propos: credits key for the typeface."
+  },
+  "settingsAboutCreditsFont": "Geist, licence SIL OFL",
+  "@settingsAboutCreditsFont": {
+    "description": "Settings › À propos: the typeface and its licence."
+  },
+  "settingsAboutAllLicenses": "Toutes les licences",
+  "@settingsAboutAllLicenses": {
+    "description": "Settings › À propos: link to Flutter's licence page."
+  },
   "settingsThemeTitle": "Thème",
   "@settingsThemeTitle": {
     "description": "Title of the theme row in settings preferences."
@@ -129,21 +348,17 @@
   "@settingsCurrencyNote": {
     "description": "Note under the read-only currency field in settings, stating that it is permanent."
   },
-  "settingsFormatsTitle": "Aperçu des formats",
+  "settingsFormatsTitle": "Formats",
   "@settingsFormatsTitle": {
-    "description": "Title of the card previewing how dates and amounts render in the active locale."
+    "description": "Settings › Préférences: name of the row showing how dates and amounts are formatted."
   },
-  "settingsFormatsDates": "Dates",
+  "settingsFormatsDates": "Date",
   "@settingsFormatsDates": {
-    "description": "Label on the date format preview plate."
+    "description": "Settings › Préférences: label of the sample date in the formats row."
   },
-  "settingsFormatsAmounts": "Montants",
+  "settingsFormatsAmounts": "Montant",
   "@settingsFormatsAmounts": {
-    "description": "Label on the amount format preview plate."
-  },
-  "settingsAboutVersion": "Version",
-  "@settingsAboutVersion": {
-    "description": "Label beside the application version number in the About section."
+    "description": "Settings › Préférences: label of the sample amount in the formats row."
   },
   "settingsAboutVersionUnavailable": "Indisponible",
   "@settingsAboutVersionUnavailable": {
@@ -153,7 +368,7 @@
   "@settingsAboutCreditsTitle": {
     "description": "Title of the third-party credits card in the About section."
   },
-  "settingsAboutCreditsIcons": "Icônes : Lucide (lucide.dev), sous licence ISC.",
+  "settingsAboutCreditsIcons": "Lucide, licence ISC",
   "@settingsAboutCreditsIcons": {
     "description": "Credit line for the Lucide icon set and its license, in the About section."
   },
@@ -161,7 +376,7 @@
   "@settingsUpdatesTitle": {
     "description": "Title of the update-check card in Settings › About."
   },
-  "settingsUpdatesSubtitle": "Me prévenir quand une nouvelle version est publiée",
+  "settingsUpdatesSubtitle": "Me prévenir d’une nouvelle version",
   "@settingsUpdatesSubtitle": {
     "description": "Subtitle beside the update-check toggle."
   },
@@ -187,31 +402,11 @@
       }
     }
   },
-  "settingsUpdatesCurrent": "Vous utilisez la version {version}.",
-  "@settingsUpdatesCurrent": {
-    "description": "Caption under the newer-release title: the installed version.",
-    "placeholders": {
-      "version": {
-        "type": "String",
-        "example": "0.2.0"
-      }
-    }
-  },
   "settingsUpdatesDownload": "Télécharger",
   "@settingsUpdatesDownload": {
     "description": "Opens the release page in the browser."
   },
-  "settingsUpdatesUpToDate": "Vous utilisez la dernière version ({version}).",
-  "@settingsUpdatesUpToDate": {
-    "description": "The installed version is the newest release.",
-    "placeholders": {
-      "version": {
-        "type": "String",
-        "example": "0.2.0"
-      }
-    }
-  },
-  "settingsUpdatesOffline": "GitHub n'a pas pu être joint. Nouvel essai à la prochaine ouverture de cet écran.",
+  "settingsUpdatesOffline": "GitHub n’a pas pu être joint.",
   "@settingsUpdatesOffline": {
     "description": "The update check could not reach GitHub."
   },
@@ -2689,7 +2884,7 @@
   "@settingsAiToggleLabel": {
     "description": "Accessible label of the card's opt-in toggle."
   },
-  "settingsAiPrivacy": "Les descriptions de vos transactions sont envoyées à un modèle qui s'exécute sur cet ordinateur. Rien ne quitte votre machine.",
+  "settingsAiPrivacy": "Les libellés de vos opérations sont envoyés à un modèle qui s’exécute sur cet ordinateur. Rien ne quitte votre machine.",
   "@settingsAiPrivacy": {
     "description": "The card's privacy callout — its centerpiece. Visible whenever the card is, whether or not AI is enabled."
   },
@@ -2709,10 +2904,6 @@
   "@settingsAiModelLabel": {
     "description": "Label of the model tag field."
   },
-  "settingsAiModelHelp": "Liste fournie par le moteur. Saisie manuelle possible.",
-  "@settingsAiModelHelp": {
-    "description": "Helper under the model field: the list comes from the engine, but any tag can be typed."
-  },
   "settingsAiModelUnavailable": "Moteur injoignable : aucun modèle à proposer.",
   "@settingsAiModelUnavailable": {
     "description": "Helper under the model field when no engine answered, where the field degrades to a dashed read-only dash."
@@ -2721,45 +2912,19 @@
   "@settingsAiModelChoose": {
     "description": "Accessible label of the control opening the list of models the engine reported."
   },
-  "settingsAiThresholdLabel": "Seuil de confiance : {threshold}",
-  "@settingsAiThresholdLabel": {
-    "description": "Label above the threshold slider, carrying its live percentage. Only this label is a percentage — the stored value is the [0,1] real the API defines.",
-    "placeholders": {
-      "threshold": {
-        "type": "double",
-        "format": "percentPattern",
-        "optionalParameters": {
-          "decimalDigits": 0
-        }
-      }
-    }
-  },
-  "settingsAiThresholdHelp": "En dessous de ce seuil, la transaction vous est proposée pour vérification plutôt que classée automatiquement.",
+  "settingsAiThresholdHelp": "En dessous, l’opération vous est proposée pour vérification au lieu d’être classée.",
   "@settingsAiThresholdHelp": {
     "description": "Helper under the threshold slider, stating what the threshold decides."
-  },
-  "settingsAiStatusConnected": "{count, plural, =0{Connecté · aucun modèle disponible} =1{Connecté · 1 modèle disponible} other{Connecté · {count} modèles disponibles}}",
-  "@settingsAiStatusConnected": {
-    "description": "Status row when the runtime answered, with the number of models it reported.",
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
   },
   "settingsAiStatusUnreachable": "Aucun moteur détecté à cette adresse.",
   "@settingsAiStatusUnreachable": {
     "description": "Status row when nothing answered at the configured address."
   },
-  "settingsAiStatusDisabled": "Catégorisation par IA désactivée.",
-  "@settingsAiStatusDisabled": {
-    "description": "Status row while the user has not opted in. The connection test stays available so an engine can be checked before opting in."
-  },
   "settingsAiLearnMore": "En savoir plus",
   "@settingsAiLearnMore": {
     "description": "Link beside the no-engine status, opening the local runtime's download page in the browser."
   },
-  "settingsAiTest": "Tester la connexion",
+  "settingsAiTest": "Tester",
   "@settingsAiTest": {
     "description": "Button that probes the configured runtime."
   },
@@ -2775,19 +2940,15 @@
   "@settingsAiRetry": {
     "description": "Retry action on the local-AI card's error state."
   },
-  "settingsBackupTitle": "Sauvegarde et restauration",
+  "settingsBackupTitle": "Sauvegarde",
   "@settingsBackupTitle": {
     "description": "Title of the backup card in Settings › Données."
-  },
-  "settingsBackupSubtitle": "Exportez toutes vos données dans un fichier que vous pourrez réimporter.",
-  "@settingsBackupSubtitle": {
-    "description": "Line under the backup card's title."
   },
   "settingsBackupExportLabel": "Exporter toutes les données",
   "@settingsBackupExportLabel": {
     "description": "Label of the export row on the backup card."
   },
-  "settingsBackupExportCaption": "Fichier .bastide : comptes, transactions, catégories, règles, objectifs, crédits, biens, paramètres.",
+  "settingsBackupExportCaption": "Un fichier .bastide, non chiffré, avec tout votre historique. Conservez-le en lieu sûr.",
   "@settingsBackupExportCaption": {
     "description": "Caption under the export row's label: what the file contains."
   },
@@ -2799,7 +2960,7 @@
   "@settingsBackupExport": {
     "description": "Primary button that exports a full backup."
   },
-  "settingsBackupLast": "Dernière sauvegarde : {when}",
+  "settingsBackupLast": "Dernière sauvegarde le {when}",
   "@settingsBackupLast": {
     "description": "Line under the export row with the time of the latest backup.",
     "placeholders": {
@@ -2827,25 +2988,17 @@
       }
     }
   },
-  "settingsBackupPrivacy": "Ce fichier n’est pas chiffré et contient tout votre historique. Conservez-le en lieu sûr.",
-  "@settingsBackupPrivacy": {
-    "description": "Lock callout on the backup card warning that the archive is unencrypted."
-  },
   "settingsBackupRestoreTitle": "Restaurer une sauvegarde",
   "@settingsBackupRestoreTitle": {
     "description": "Label of the restore row on the backup card."
   },
-  "settingsBackupRestoreSubtitle": "Remplace toutes les données actuelles.",
+  "settingsBackupRestoreSubtitle": "Remplace toutes les données actuelles, après confirmation.",
   "@settingsBackupRestoreSubtitle": {
     "description": "Line under the restore row's label."
   },
-  "settingsBackupRestoreButton": "Importer un fichier…",
+  "settingsBackupRestoreButton": "Importer un fichier",
   "@settingsBackupRestoreButton": {
     "description": "Secondary button that opens the file picker to restore a backup."
-  },
-  "settingsBackupRestoreFailedLead": "Restauration impossible.",
-  "@settingsBackupRestoreFailedLead": {
-    "description": "Bold lead of the error banner shown when a chosen backup cannot be restored."
   },
   "settingsBackupErrorTooNew": "Ce fichier provient d'une version plus récente de Bastide. Mettez l'application à jour pour le restaurer.",
   "@settingsBackupErrorTooNew": {
@@ -2871,7 +3024,7 @@
   "@settingsBackupErrorUnknown": {
     "description": "Restore failed for any other reason; nothing was changed."
   },
-  "settingsBackupExported": "Sauvegarde enregistrée : {transactionCount, plural, one{{transactions} transaction} other{{transactions} transactions}}, {accountCount, plural, one{{accounts} compte} other{{accounts} comptes}}.",
+  "settingsBackupExported": "Sauvegarde enregistrée · {transactionCount, plural, one{{transactions} opération} other{{transactions} opérations}}, {accountCount, plural, one{{accounts} compte} other{{accounts} comptes}}.",
   "@settingsBackupExported": {
     "description": "Toast after a backup was written. The String placeholders are the locale-formatted counts.",
     "placeholders": {
@@ -2898,10 +3051,6 @@
   "settingsBackupConfirmTitle": "Restaurer cette sauvegarde ?",
   "@settingsBackupConfirmTitle": {
     "description": "Title of the restore confirmation modal."
-  },
-  "settingsBackupConfirmFile": "Fichier sélectionné :",
-  "@settingsBackupConfirmFile": {
-    "description": "Subtitle lead of the restore modal, followed by the file name."
   },
   "settingsBackupConfirmExportedAt": "Exporté le",
   "@settingsBackupConfirmExportedAt": {
@@ -3800,11 +3949,11 @@
   "@allocationDatePick": {
     "description": "Tooltip on the calendar button of the allocation modal's date field."
   },
-  "settingsResetTitle": "Zone de danger",
+  "settingsResetTitle": "Réinitialisation",
   "@settingsResetTitle": {
     "description": "Title of the danger zone card in Settings › Données."
   },
-  "settingsResetSubtitle": "Réinitialiser la base de données supprime transactions, comptes, règles, catégories personnalisées, objectifs, abonnements, crédits, biens et simulations de ce profil. Les sauvegardes exportées ne sont pas touchées.",
+  "settingsResetSubtitle": "Supprime opérations, comptes, règles, catégories personnalisées, objectifs, abonnements, crédits, biens, placements et simulations de ce profil. Les sauvegardes exportées ne sont pas touchées.",
   "@settingsResetSubtitle": {
     "description": "What a database reset deletes, and what it leaves alone."
   },
@@ -3829,13 +3978,9 @@
   "@settingsResetConfirmCategories": {
     "description": "Counts row for the user's own categories — the system catalog is kept."
   },
-  "settingsResetConfirmNote": "Les catégories système, vos préférences et le réglage IA sont conservés. Les fichiers de sauvegarde déjà exportés restent intacts.",
+  "settingsResetConfirmNote": "Les catégories fournies, vos préférences et le réglage IA sont conservés.",
   "@settingsResetConfirmNote": {
     "description": "Note under the reset counts listing what survives the reset."
-  },
-  "settingsResetConfirmWarning": "Cette action est irréversible. Exportez une sauvegarde avant de continuer.",
-  "@settingsResetConfirmWarning": {
-    "description": "Red callout in the reset confirmation modal."
   },
   "settingsResetConfirmWord": "SUPPRIMER",
   "@settingsResetConfirmWord": {
@@ -3854,13 +3999,9 @@
   "@settingsResetConfirmSubmit": {
     "description": "Destructive confirm action of the reset modal."
   },
-  "settingsResetDone": "Base de données réinitialisée. Les catégories système ont été restaurées.",
+  "settingsResetDone": "Base de données réinitialisée.",
   "@settingsResetDone": {
     "description": "Toast shown once the reset has completed."
-  },
-  "settingsResetFailedLead": "Réinitialisation impossible.",
-  "@settingsResetFailedLead": {
-    "description": "Bold red lead of the refusal banner in the danger zone card."
   },
   "settingsResetErrorUnknown": "La réinitialisation a échoué. Vos données n'ont pas été modifiées.",
   "@settingsResetErrorUnknown": {
@@ -5777,7 +5918,7 @@
   "@settingsRecoverySubtitle": {
     "description": "Subtitle of the recovery code card in Settings › Profile."
   },
-  "settingsRecoveryButton": "Générer un nouveau code…",
+  "settingsRecoveryButton": "Générer un nouveau code",
   "@settingsRecoveryButton": {
     "description": "Button on the recovery code card opening the regeneration modal."
   },
@@ -5833,16 +5974,7 @@
   "@settingsProfileNameTitle": {
     "description": "Title of the Settings › Profile card showing the username."
   },
-  "settingsProfileNameSubtitle": "Vous pouvez vous connecter avec {name} ou avec votre e-mail.",
-  "@settingsProfileNameSubtitle": {
-    "description": "Subtitle of the username card; {name} is the current username.",
-    "placeholders": {
-      "name": {
-        "type": "String"
-      }
-    }
-  },
-  "settingsProfileNameButton": "Modifier…",
+  "settingsProfileNameButton": "Modifier",
   "@settingsProfileNameButton": {
     "description": "Button opening the modal that changes the username."
   },
@@ -5850,13 +5982,9 @@
   "@settingsAvatarTitle": {
     "description": "Title of the Settings › Profile card that sets the user's avatar."
   },
-  "settingsAvatarSubtitle": "Choisissez comment vous apparaissez dans l'application.",
+  "settingsAvatarSubtitle": "Un monogramme, une pastille de couleur ou une photo. La photo reste sur cet ordinateur.",
   "@settingsAvatarSubtitle": {
     "description": "Subtitle of the avatar card."
-  },
-  "settingsAvatarReset": "Revenir au monogramme",
-  "@settingsAvatarReset": {
-    "description": "Button of the avatar card going back to the initials monogram."
   },
   "settingsAvatarMonogram": "Monogramme",
   "@settingsAvatarMonogram": {
@@ -5875,7 +6003,7 @@
   "@settingsAvatarError": {
     "description": "Banner in the avatar card when the choice could not be saved."
   },
-  "settingsAvatarChoosePicture": "Choisir une photo…",
+  "settingsAvatarChoosePicture": "Choisir une photo",
   "@settingsAvatarChoosePicture": {
     "description": "Button of the avatar card opening the file picker for a picture of the user's own."
   },
@@ -6020,13 +6148,9 @@
   "@startupContinueAnyway": {
     "description": "Button on the developer version warning that opens the app anyway."
   },
-  "settingsAiOllamaFound": "Ollama détecté sur cet ordinateur",
+  "settingsAiOllamaFound": "Ollama détecté sur cet ordinateur · {count, plural, =0{aucun modèle installé} =1{1 modèle installé} other{{count} modèles installés}}",
   "@settingsAiOllamaFound": {
-    "description": "Title of the plate offering an Ollama install found on its default loopback address."
-  },
-  "settingsAiOllamaModels": "{count, plural, =0{Aucun modèle installé} =1{1 modèle installé} other{{count} modèles installés}}",
-  "@settingsAiOllamaModels": {
-    "description": "Caption under settingsAiOllamaFound: how many models that Ollama lists.",
+    "description": "Settings › Données: banner offered when Ollama answers on its default address and the engine address points elsewhere; count is the number of installed models.",
     "placeholders": {
       "count": {
         "type": "int"

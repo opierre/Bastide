@@ -1,79 +1,73 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:intl/intl.dart';
+import 'package:lucide_icons_flutter/lucide_icons_300.dart';
 
-import '../../../core/app_info.dart';
-import '../../../core/l10n/locale_provider.dart';
-import '../../../core/navigation/sidebar_controller.dart';
-import '../../../core/session/current_user_provider.dart';
-import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/tokens.dart';
-import '../../../core/widgets/amount_text.dart';
-import '../../../core/widgets/app_card.dart';
-import '../../../core/widgets/app_segmented.dart';
-import '../../../core/widgets/app_toast.dart';
-import '../../../core/widgets/inline_banner.dart';
-import '../../../core/widgets/labeled_field.dart';
+import '../../../core/widgets/focus_ring.dart';
 import '../../../l10n/app_localizations.dart';
-import '../../auth/application/profile_controllers.dart';
-import '../../auth/domain/theme_preference.dart';
-import '../../auth/presentation/avatar_card.dart';
-import '../../auth/presentation/currency_label.dart';
-import '../../auth/presentation/display_name_card.dart';
-import '../../auth/presentation/recovery_code_card.dart';
-import 'ai_settings_card.dart';
-import 'backup_card.dart';
-import 'danger_zone_card.dart';
-import 'update_check_card.dart';
+import 'about_section.dart';
+import 'data_section.dart';
+import 'preferences_section.dart';
+import 'profile_section.dart';
 
-/// Which group of settings the right-hand column is showing.
+/// Which section the body is showing.
 enum SettingsSection { profile, preferences, data, about }
 
-class SettingsScreen extends ConsumerStatefulWidget {
+/// Width of the section nav (`09-settings.md` §Layout).
+const _navWidth = 200.0;
+
+/// The body stops growing past this width, so a row's description and its
+/// controls stay close on a wide window.
+const _bodyMaxWidth = 900.0;
+
+/// Paramètres (`docs/design/09-settings.md`): a flush panel with the section
+/// nav on the left and the section body, grouped rows separated by hairlines,
+/// scrolling on its own on the right.
+class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
 
   static const path = '/settings';
 
   @override
-  ConsumerState<SettingsScreen> createState() => _SettingsScreenState();
+  State<SettingsScreen> createState() => _SettingsScreenState();
 }
 
-class _SettingsScreenState extends ConsumerState<SettingsScreen> {
-  // Purely local UI state — which tab is open is not worth a provider, and
-  // nothing outside this screen needs to read it.
+class _SettingsScreenState extends State<SettingsScreen> {
+  // Purely local UI state: which section is open is not worth a provider,
+  // and nothing outside this screen needs to read it.
   SettingsSection _section = SettingsSection.preferences;
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
+    return Row(
       key: const Key('screen-settings'),
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppSpacing.contentX,
-        vertical: AppSpacing.contentY,
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          _SectionNav(
-            active: _section,
-            onSelect: (section) => setState(() => _section = section),
-          ),
-          const SizedBox(width: AppSpacing.lg + AppSpacing.xs),
-          Expanded(
-            child: SingleChildScrollView(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        _SectionNav(
+          active: _section,
+          onSelect: (section) => setState(() => _section = section),
+        ),
+        Expanded(
+          child: SingleChildScrollView(
+            key: const Key('settingsBody'),
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppSpacing.xxl,
+              vertical: AppSpacing.lg,
+            ),
+            child: Align(
+              alignment: Alignment.topLeft,
               child: ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 640),
+                constraints: const BoxConstraints(maxWidth: _bodyMaxWidth),
                 child: switch (_section) {
-                  SettingsSection.profile => const _ProfilePanel(),
-                  SettingsSection.preferences => const _PreferencesPanel(),
-                  SettingsSection.data => const _DataPanel(),
-                  SettingsSection.about => const _AboutPanel(),
+                  SettingsSection.profile => const ProfileSection(),
+                  SettingsSection.preferences => const PreferencesSection(),
+                  SettingsSection.data => const DataSection(),
+                  SettingsSection.about => const AboutSection(),
                 },
               ),
             ),
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }
@@ -87,24 +81,43 @@ class _SectionNav extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final labels = {
-      SettingsSection.profile: l10n.settingsSectionProfile,
-      SettingsSection.preferences: l10n.settingsSectionPreferences,
-      SettingsSection.data: l10n.settingsSectionData,
-      SettingsSection.about: l10n.settingsSectionAbout,
-    };
+    final items = [
+      (
+        SettingsSection.profile,
+        LucideIcons300.user,
+        l10n.settingsSectionProfile,
+      ),
+      (
+        SettingsSection.preferences,
+        LucideIcons300.slidersHorizontal,
+        l10n.settingsSectionPreferences,
+      ),
+      (SettingsSection.data, LucideIcons300.database, l10n.settingsSectionData),
+      (SettingsSection.about, LucideIcons300.info, l10n.settingsSectionAbout),
+    ];
 
-    return SizedBox(
-      width: 210,
+    return Container(
+      width: _navWidth,
+      padding: const EdgeInsets.symmetric(
+        vertical: AppSpacing.md,
+        horizontal: AppSpacing.sm,
+      ),
+      decoration: BoxDecoration(
+        border: Border(right: BorderSide(color: context.colors.line)),
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          for (final entry in labels.entries)
-            _SectionNavItem(
-              key: Key('settingsSection-${entry.key.name}'),
-              label: entry.value,
-              selected: entry.key == active,
-              onTap: () => onSelect(entry.key),
+          for (final (section, icon, label) in items)
+            Padding(
+              padding: const EdgeInsets.only(bottom: AppSpacing.xxs),
+              child: _SectionNavItem(
+                key: Key('settingsSection-${section.name}'),
+                icon: icon,
+                label: label,
+                selected: section == active,
+                onTap: () => onSelect(section),
+              ),
             ),
         ],
       ),
@@ -112,14 +125,18 @@ class _SectionNav extends StatelessWidget {
   }
 }
 
+/// A nav item per `00` §5: 30 px, radius 6, icon 16 + 9 px gap + label
+/// 13/400 `textSecondary`; hover and active on `hover`, active in `text` 500.
 class _SectionNavItem extends StatefulWidget {
   const _SectionNavItem({
     super.key,
+    required this.icon,
     required this.label,
     required this.selected,
     required this.onTap,
   });
 
+  final IconData icon;
   final String label;
   final bool selected;
   final VoidCallback onTap;
@@ -130,346 +147,64 @@ class _SectionNavItem extends StatefulWidget {
 
 class _SectionNavItemState extends State<_SectionNavItem> {
   bool _hovered = false;
+  bool _focused = false;
 
   @override
   Widget build(BuildContext context) {
-    final foreground = widget.selected
-        ? context.colors.accent
-        : (_hovered ? context.colors.text : context.colors.textSecondary);
+    final colors = context.colors;
+    final textTheme = Theme.of(context).textTheme;
+    final foreground = widget.selected ? colors.text : colors.textSecondary;
 
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 2),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
+    return Semantics(
+      button: true,
+      selected: widget.selected,
+      child: FocusableActionDetector(
+        mouseCursor: SystemMouseCursors.click,
+        onShowFocusHighlight: (value) => setState(() => _focused = value),
+        onShowHoverHighlight: (value) => setState(() => _hovered = value),
+        actions: {
+          ActivateIntent: CallbackAction<ActivateIntent>(
+            onInvoke: (_) {
+              widget.onTap();
+              return null;
+            },
+          ),
+        },
+        child: GestureDetector(
+          behavior: HitTestBehavior.opaque,
           onTap: widget.onTap,
-          onHover: (hovered) => setState(() => _hovered = hovered),
-          borderRadius: BorderRadius.circular(AppRadii.md),
-          child: Container(
-            height: AppChrome.controlPillHeight,
-            padding: const EdgeInsets.symmetric(
-              horizontal: AppSpacing.sm + AppSpacing.xs,
-            ),
-            alignment: Alignment.centerLeft,
-            decoration: BoxDecoration(
-              color: widget.selected
-                  ? context.colors.accentSoft
-                  : (_hovered ? context.colors.hover : Colors.transparent),
-              borderRadius: BorderRadius.circular(AppRadii.md),
-            ),
-            child: Text(
-              widget.label,
-              overflow: TextOverflow.ellipsis,
-              style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                color: foreground,
-                fontWeight: widget.selected ? FontWeight.w600 : FontWeight.w400,
+          child: FocusRing(
+            focused: _focused,
+            radius: AppRadii.control,
+            child: Container(
+              height: AppSizes.navItem,
+              padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
+              decoration: BoxDecoration(
+                color: widget.selected || _hovered
+                    ? colors.hover
+                    : Colors.transparent,
+                borderRadius: BorderRadius.circular(AppRadii.control),
               ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _PreferencesPanel extends ConsumerWidget {
-  const _PreferencesPanel();
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final l10n = AppLocalizations.of(context)!;
-    final activeLocale = Localizations.localeOf(context);
-    final user = ref.watch(currentUserProvider);
-    final currency = user?.currency ?? '';
-    // The switch is applied before the save answers; a refusal has already
-    // put the previous theme back, so all that is left is to say so.
-    ref.listen(themePreferenceControllerProvider, (_, next) {
-      if (next.hasError) {
-        showAppToast(
-          context,
-          title: l10n.settingsThemeSaveFailed,
-          tone: BannerTone.error,
-        );
-      }
-    });
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        _SettingsCard(
-          title: l10n.settingsThemeTitle,
-          note: l10n.settingsThemeNote,
-          child: AppSegmented<ThemePreference>(
-            value: user?.theme ?? ThemePreference.dark,
-            // Applies at once, like the language below.
-            onChanged: (value) => ref
-                .read(themePreferenceControllerProvider.notifier)
-                .choose(value),
-            segments: [
-              AppSegment(
-                key: const Key('settingsThemeSystemOption'),
-                value: ThemePreference.system,
-                label: l10n.settingsThemeSystem,
-              ),
-              AppSegment(
-                key: const Key('settingsThemeDarkOption'),
-                value: ThemePreference.dark,
-                label: l10n.settingsThemeDark,
-              ),
-              AppSegment(
-                key: const Key('settingsThemeLightOption'),
-                value: ThemePreference.light,
-                label: l10n.settingsThemeLight,
-              ),
-            ],
-          ),
-        ),
-        const SizedBox(height: AppSpacing.gridGap),
-        _SettingsCard(
-          title: l10n.settingsLanguageTitle,
-          note: l10n.settingsLanguageNote,
-          child: AppSegmented<String>(
-            value: activeLocale.languageCode,
-            // Switching takes effect immediately, including the chrome — the
-            // note promises that, so it must not need a save or a restart.
-            onChanged: (value) =>
-                ref.read(localeProvider.notifier).setLocale(Locale(value)),
-            segments: [
-              AppSegment(
-                key: const Key('settingsLocaleFrenchOption'),
-                value: 'fr',
-                label: l10n.authLocaleFrench,
-              ),
-              AppSegment(
-                key: const Key('settingsLocaleEnglishOption'),
-                value: 'en',
-                label: l10n.authLocaleEnglish,
-              ),
-            ],
-          ),
-        ),
-        const SizedBox(height: AppSpacing.gridGap),
-        _SettingsCard(
-          title: l10n.settingsSidebarTitle,
-          note: l10n.settingsSidebarNote,
-          child: AppSegmented<bool>(
-            value: ref.watch(sidebarCollapsedProvider),
-            // The same switch as Ctrl+B, so the two never disagree.
-            onChanged: (collapsed) =>
-                ref.read(sidebarCollapsedProvider.notifier).set(collapsed),
-            segments: [
-              AppSegment(
-                key: const Key('settingsSidebarExpandedOption'),
-                value: false,
-                label: l10n.settingsSidebarExpanded,
-              ),
-              AppSegment(
-                key: const Key('settingsSidebarCollapsedOption'),
-                value: true,
-                label: l10n.settingsSidebarCollapsed,
-              ),
-            ],
-          ),
-        ),
-        const SizedBox(height: AppSpacing.gridGap),
-        _SettingsCard(
-          title: l10n.settingsCurrencyTitle,
-          note: l10n.settingsCurrencyNote,
-          child: ReadOnlyField(
-            key: const Key('settingsCurrencyField'),
-            value: currency.isEmpty
-                ? ''
-                : currencyLabel(currency, activeLocale.toString()),
-          ),
-        ),
-        const SizedBox(height: AppSpacing.gridGap),
-        _SettingsCard(
-          title: l10n.settingsFormatsTitle,
-          child: Row(
-            children: [
-              Expanded(
-                child: _FormatPlate(
-                  label: l10n.settingsFormatsDates,
-                  child: Text(
-                    DateFormat.yMd(
-                      activeLocale.toString(),
-                    ).format(DateTime(2026, 5, 14)),
-                    key: const Key('settingsDatePreview'),
-                    style: Theme.of(context).textTheme.bodyLarge,
+              child: Row(
+                children: [
+                  Icon(widget.icon, size: AppSizes.icon, color: foreground),
+                  const SizedBox(width: AppSpacing.navIconGap),
+                  Expanded(
+                    child: Text(
+                      widget.label,
+                      overflow: TextOverflow.ellipsis,
+                      style:
+                          (widget.selected
+                                  ? textTheme.labelLarge
+                                  : textTheme.bodyMedium)
+                              ?.copyWith(color: foreground),
+                    ),
                   ),
-                ),
-              ),
-              const SizedBox(width: AppSpacing.sm + AppSpacing.xs),
-              Expanded(
-                child: _FormatPlate(
-                  label: l10n.settingsFormatsAmounts,
-                  child: AmountText(
-                    key: const Key('settingsAmountPreview'),
-                    amountMinor: 123456,
-                    currency: currency,
-                    // A sample figure, not a movement.
-                    colorize: false,
-                    style: Theme.of(context).textTheme.bodyLarge!,
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-/// Données: the local-AI card, backup and restore under it, and the danger zone
-/// last (`docs/design/09-settings.md` amendments). Database location
-/// and recalculation still need endpoints the backend does not expose.
-///
-/// The order is the spec's and it is not arbitrary: the card that offers to
-/// export the data sits above the one that deletes it, so the way out is read
-/// before the way through.
-class _DataPanel extends StatelessWidget {
-  const _DataPanel();
-
-  @override
-  Widget build(BuildContext context) => const Column(
-    crossAxisAlignment: CrossAxisAlignment.stretch,
-    children: [
-      AiSettingsCard(),
-      SizedBox(height: AppSpacing.gridGap),
-      BackupCard(),
-      SizedBox(height: AppSpacing.gridGap),
-      DangerZoneCard(),
-    ],
-  );
-}
-
-class _AboutPanel extends ConsumerWidget {
-  const _AboutPanel();
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final l10n = AppLocalizations.of(context)!;
-    final style = Theme.of(context).textTheme.bodyLarge!;
-    // The read is local and near-instant, so loading shows an empty line of
-    // the same height rather than a spinner that would only flash.
-    final version = ref
-        .watch(appVersionProvider)
-        .when(
-          data: (version) => version,
-          loading: () => '',
-          error: (_, _) => l10n.settingsAboutVersionUnavailable,
-        );
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        _SettingsCard(
-          title: l10n.settingsAboutVersion,
-          note: l10n.settingsAboutPrivacy,
-          child: Text(
-            version,
-            key: const Key('settingsAppVersion'),
-            style: tabularNumberStyle(style),
-          ),
-        ),
-        const SizedBox(height: AppSpacing.gridGap),
-        const UpdateCheckCard(),
-        const SizedBox(height: AppSpacing.gridGap),
-        // Lucide's ISC licence asks for its notice in every copy: the full
-        // text ships as an asset (`core/third_party_licenses.dart`), and this
-        // line names it where a user looks for it.
-        _SettingsCard(
-          title: l10n.settingsAboutCreditsTitle,
-          child: Text(
-            l10n.settingsAboutCreditsIcons,
-            key: const Key('settingsAboutCredits'),
-            style: style.copyWith(color: context.colors.textSecondary),
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-/// The avatar, the username, then the recovery code. Email edits aren't exposed yet.
-class _ProfilePanel extends StatelessWidget {
-  const _ProfilePanel();
-
-  @override
-  Widget build(BuildContext context) => const Column(
-    crossAxisAlignment: CrossAxisAlignment.stretch,
-    children: [
-      AvatarCard(),
-      SizedBox(height: AppSpacing.gridGap),
-      DisplayNameCard(),
-      SizedBox(height: AppSpacing.gridGap),
-      RecoveryCodeCard(),
-    ],
-  );
-}
-
-/// One grouped card: a title, the control, and an optional note explaining the
-/// rule behind it. The note is what carries permanence and scope, so a control
-/// never has to look disabled to say "you can't change this".
-class _SettingsCard extends StatelessWidget {
-  const _SettingsCard({required this.title, required this.child, this.note});
-
-  final String title;
-  final Widget child;
-  final String? note;
-
-  @override
-  Widget build(BuildContext context) {
-    return AppCard(
-      padding: const EdgeInsets.all(AppSpacing.cardPadding),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Text(title, style: Theme.of(context).textTheme.titleMedium),
-          const SizedBox(height: AppSpacing.sm + AppSpacing.xs),
-          child,
-          if (note != null) ...[
-            const SizedBox(height: AppSpacing.sm + AppSpacing.xs),
-            Text(
-              note!,
-              style: context.textStyles.helper.copyWith(
-                color: context.colors.textTertiary,
+                ],
               ),
             ),
-          ],
-        ],
-      ),
-    );
-  }
-}
-
-/// An inset plate showing one worked example of the active locale's formatting.
-class _FormatPlate extends StatelessWidget {
-  const _FormatPlate({required this.label, required this.child});
-
-  final String label;
-  final Widget child;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppSpacing.sm + AppSpacing.xs,
-        vertical: AppSpacing.sm + AppSpacing.xs,
-      ),
-      decoration: BoxDecoration(
-        color: context.colors.field,
-        borderRadius: BorderRadius.circular(AppRadii.md),
-        border: Border.all(color: context.colors.line),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(label.toUpperCase(), style: context.textStyles.sectionLabel),
-          const SizedBox(height: AppSpacing.xs + 2),
-          child,
-        ],
+          ),
+        ),
       ),
     );
   }

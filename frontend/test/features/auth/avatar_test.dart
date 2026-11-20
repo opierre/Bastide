@@ -1,3 +1,5 @@
+import 'dart:ui' show Tristate;
+
 import 'dart:typed_data';
 
 import 'package:bastide/core/api/api_client.dart';
@@ -8,7 +10,7 @@ import 'package:bastide/core/widgets/user_avatar.dart';
 import 'package:bastide/features/auth/application/auth_controller.dart';
 import 'package:bastide/features/auth/domain/auth_user.dart';
 import 'package:bastide/features/auth/domain/avatar_choice.dart';
-import 'package:bastide/features/auth/presentation/avatar_card.dart';
+import 'package:bastide/features/auth/presentation/avatar_picker.dart';
 import 'package:bastide/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -142,7 +144,7 @@ void main() {
     });
   });
 
-  group('AvatarCard', () {
+  group('AvatarPicker', () {
     late _MockApiClient apiClient;
 
     setUp(() => apiClient = _MockApiClient());
@@ -160,7 +162,7 @@ void main() {
             theme: AppTheme.dark,
             localizationsDelegates: AppLocalizations.localizationsDelegates,
             supportedLocales: AppLocalizations.supportedLocales,
-            home: const Scaffold(body: AvatarCard()),
+            home: const Scaffold(body: AvatarPicker()),
           ),
         );
 
@@ -188,7 +190,7 @@ void main() {
         }
         expect(tester.takeException(), isNull);
       }
-      expect(find.text('Back to the monogram'), findsOneWidget);
+      expect(find.text('Choose a picture'), findsOneWidget);
     });
 
     testWidgets('picking a preset saves it and updates the preview', (
@@ -218,19 +220,19 @@ void main() {
       expect(preview(), findsOneWidget);
     });
 
-    testWidgets('« Revenir au monogramme » is off on the monogram', (
+    testWidgets('the current choice is marked, not only by its hue', (
       tester,
     ) async {
       await tester.pumpWidget(wrap());
       await tester.pumpAndSettle();
 
-      final reset = tester.widget<TextButton>(
-        find.byKey(const Key('settingsAvatarReset')),
+      final semantics = tester.getSemantics(
+        find.byKey(const Key('settingsAvatarOption-monogram')),
       );
-      expect(reset.onPressed, isNull);
+      expect(semantics.flagsCollection.isSelected, Tristate.isTrue);
     });
 
-    testWidgets('« Revenir au monogramme » goes back to the monogram', (
+    testWidgets('the monogram option goes back to the monogram', (
       tester,
     ) async {
       when(
@@ -254,7 +256,7 @@ void main() {
       await tester.pumpAndSettle();
       expect(preview(), findsOneWidget);
 
-      await tester.tap(find.byKey(const Key('settingsAvatarReset')));
+      await tester.tap(find.byKey(const Key('settingsAvatarOption-monogram')));
       await tester.pumpAndSettle();
 
       expect(preview(), findsNothing);

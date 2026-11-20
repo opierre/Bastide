@@ -200,6 +200,264 @@ abstract class AppLocalizations {
   /// **'À propos'**
   String get settingsSectionAbout;
 
+  /// Settings › Préférences: title of the group holding theme, language, formats and sidebar.
+  ///
+  /// In fr, this message translates to:
+  /// **'Affichage'**
+  String get settingsGroupDisplay;
+
+  /// Settings › Préférences: title of the group holding currency and declared income.
+  ///
+  /// In fr, this message translates to:
+  /// **'Argent'**
+  String get settingsGroupMoney;
+
+  /// Settings › Préférences: description of the formats row.
+  ///
+  /// In fr, this message translates to:
+  /// **'Dates et montants suivent la langue choisie.'**
+  String get settingsFormatsNote;
+
+  /// Settings › Préférences: one sample date in its long and short forms.
+  ///
+  /// In fr, this message translates to:
+  /// **'{long} · {short}'**
+  String settingsFormatsDatePair(String long, String short);
+
+  /// Settings › Préférences: the user's currency, read-only: ISO code, name (authCurrencyName), symbol.
+  ///
+  /// In fr, this message translates to:
+  /// **'{code}, {name} ({symbol})'**
+  String settingsCurrencyValue(String code, String name, String symbol);
+
+  /// Settings › Préférences: name of the declared monthly income row.
+  ///
+  /// In fr, this message translates to:
+  /// **'Revenu déclaré'**
+  String get settingsIncomeTitle;
+
+  /// Settings › Préférences: description of the declared income row.
+  ///
+  /// In fr, this message translates to:
+  /// **'Sert au taux d’endettement des panneaux Crédits et Simulateur. Sans lui, Bastide prend le revenu médian constaté.'**
+  String get settingsIncomeNote;
+
+  /// Settings › Préférences: unit after the declared income field.
+  ///
+  /// In fr, this message translates to:
+  /// **'par mois'**
+  String get settingsIncomePerMonth;
+
+  /// Settings › Préférences: helper when the declared income cannot be read.
+  ///
+  /// In fr, this message translates to:
+  /// **'Saisissez un montant positif, ou laissez vide.'**
+  String get settingsIncomeInvalid;
+
+  /// Settings › Préférences: toast when saving the declared income fails.
+  ///
+  /// In fr, this message translates to:
+  /// **'Le revenu n’a pas pu être enregistré. Rien n’a été modifié. Réessayez.'**
+  String get settingsIncomeSaveFailed;
+
+  /// Settings › Profil: title of the group holding the recovery code.
+  ///
+  /// In fr, this message translates to:
+  /// **'Sécurité'**
+  String get settingsGroupSecurity;
+
+  /// Settings › Profil: title of the group holding sign-out.
+  ///
+  /// In fr, this message translates to:
+  /// **'Session'**
+  String get settingsGroupSession;
+
+  /// Settings › Profil: name of the email row.
+  ///
+  /// In fr, this message translates to:
+  /// **'Adresse e-mail'**
+  String get settingsEmailTitle;
+
+  /// Settings › Profil: description of the email row.
+  ///
+  /// In fr, this message translates to:
+  /// **'Sert uniquement à vous connecter. Bastide n’envoie aucun message.'**
+  String get settingsEmailNote;
+
+  /// Settings › Profil: description of the username row.
+  ///
+  /// In fr, this message translates to:
+  /// **'Vous pouvez vous connecter avec ce nom ou avec votre e-mail.'**
+  String get settingsProfileNameNote;
+
+  /// Settings › Profil: name of the sign-out row.
+  ///
+  /// In fr, this message translates to:
+  /// **'Se déconnecter'**
+  String get settingsLogoutTitle;
+
+  /// Settings › Profil: description of the sign-out row.
+  ///
+  /// In fr, this message translates to:
+  /// **'Vos données restent sur cet ordinateur, protégées par votre mot de passe.'**
+  String get settingsLogoutNote;
+
+  /// Settings › Données: name of the row holding the engine address, the model and the test button.
+  ///
+  /// In fr, this message translates to:
+  /// **'Moteur'**
+  String get settingsAiEngineTitle;
+
+  /// Settings › Données: status text when the local engine answered.
+  ///
+  /// In fr, this message translates to:
+  /// **'Connecté'**
+  String get settingsAiConnected;
+
+  /// Settings › Données: follows « Connecté », the number of models the engine lists.
+  ///
+  /// In fr, this message translates to:
+  /// **'· {count, plural, =0{aucun modèle disponible} =1{1 modèle disponible} other{{count} modèles disponibles}}'**
+  String settingsAiModelCount(int count);
+
+  /// Settings › Données: name of the confidence threshold row.
+  ///
+  /// In fr, this message translates to:
+  /// **'Seuil de confiance'**
+  String get settingsAiThresholdTitle;
+
+  /// Settings › Données: banner under the restore row when a file was refused; reason is one of the settingsBackupError messages.
+  ///
+  /// In fr, this message translates to:
+  /// **'Restauration impossible. {reason}'**
+  String settingsBackupRestoreRefused(String reason);
+
+  /// Settings › Données: name of the reset row.
+  ///
+  /// In fr, this message translates to:
+  /// **'Réinitialiser la base de données'**
+  String get settingsResetRowTitle;
+
+  /// Settings › Données: banner under the reset row when the reset was refused.
+  ///
+  /// In fr, this message translates to:
+  /// **'Réinitialisation impossible. {reason}'**
+  String settingsResetRefused(String reason);
+
+  /// Settings › À propos: under « Bastide » in the header, the app version and the operating system.
+  ///
+  /// In fr, this message translates to:
+  /// **'Version {version} · {os}'**
+  String settingsAboutVersionLine(String version, String os);
+
+  /// Settings › À propos: the operating system's name, by Flutter's Platform.operatingSystem.
+  ///
+  /// In fr, this message translates to:
+  /// **'{os, select, windows{Windows} macos{macOS} linux{Linux} other{{os}}}'**
+  String settingsAboutOs(String os);
+
+  /// Settings › À propos: status text when no newer release exists.
+  ///
+  /// In fr, this message translates to:
+  /// **'Vous utilisez la dernière version.'**
+  String get settingsUpdatesLatest;
+
+  /// Settings › À propos: secondary button that asks for the latest release again.
+  ///
+  /// In fr, this message translates to:
+  /// **'Vérifier maintenant'**
+  String get settingsUpdatesCheckNow;
+
+  /// Settings › À propos: name of the privacy row.
+  ///
+  /// In fr, this message translates to:
+  /// **'Confidentialité'**
+  String get settingsAboutPrivacyTitle;
+
+  /// Settings › À propos: description of the privacy row.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ce que Bastide fait de vos données.'**
+  String get settingsAboutPrivacyNote;
+
+  /// Settings › À propos: name of the row showing the database file path.
+  ///
+  /// In fr, this message translates to:
+  /// **'Emplacement des données'**
+  String get settingsAboutDataTitle;
+
+  /// Settings › À propos: description of the data location row.
+  ///
+  /// In fr, this message translates to:
+  /// **'Le fichier qui contient tout votre historique.'**
+  String get settingsAboutDataNote;
+
+  /// Settings › À propos: secondary button that opens the data folder.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ouvrir le dossier'**
+  String get settingsAboutDataOpen;
+
+  /// Settings › À propos: name of the licence row.
+  ///
+  /// In fr, this message translates to:
+  /// **'Licence'**
+  String get settingsAboutLicenseTitle;
+
+  /// Settings › À propos: description of the licence row.
+  ///
+  /// In fr, this message translates to:
+  /// **'Bastide est un logiciel libre. Son nom et son logo ne sont pas couverts par la licence.'**
+  String get settingsAboutLicenseNote;
+
+  /// Settings › À propos: the licence's official name, untranslated.
+  ///
+  /// In fr, this message translates to:
+  /// **'GNU Affero General Public License v3.0'**
+  String get settingsAboutLicenseName;
+
+  /// Settings › À propos: secondary button opening the source repository.
+  ///
+  /// In fr, this message translates to:
+  /// **'Code source'**
+  String get settingsAboutSourceCode;
+
+  /// Settings › À propos: secondary button opening the installation guide.
+  ///
+  /// In fr, this message translates to:
+  /// **'Guide d’installation'**
+  String get settingsAboutInstallGuide;
+
+  /// Settings › À propos: description of the credits row.
+  ///
+  /// In fr, this message translates to:
+  /// **'Les composants tiers fournis avec l’application.'**
+  String get settingsAboutCreditsNote;
+
+  /// Settings › À propos: credits key for the icon set.
+  ///
+  /// In fr, this message translates to:
+  /// **'Icônes'**
+  String get settingsAboutCreditsIconsLabel;
+
+  /// Settings › À propos: credits key for the typeface.
+  ///
+  /// In fr, this message translates to:
+  /// **'Police'**
+  String get settingsAboutCreditsFontLabel;
+
+  /// Settings › À propos: the typeface and its licence.
+  ///
+  /// In fr, this message translates to:
+  /// **'Geist, licence SIL OFL'**
+  String get settingsAboutCreditsFont;
+
+  /// Settings › À propos: link to Flutter's licence page.
+  ///
+  /// In fr, this message translates to:
+  /// **'Toutes les licences'**
+  String get settingsAboutAllLicenses;
+
   /// Title of the theme row in settings preferences.
   ///
   /// In fr, this message translates to:
@@ -284,29 +542,23 @@ abstract class AppLocalizations {
   /// **'Choisie à l\'inscription et appliquée à tous vos comptes. Elle ne peut pas être modifiée dans cette version.'**
   String get settingsCurrencyNote;
 
-  /// Title of the card previewing how dates and amounts render in the active locale.
+  /// Settings › Préférences: name of the row showing how dates and amounts are formatted.
   ///
   /// In fr, this message translates to:
-  /// **'Aperçu des formats'**
+  /// **'Formats'**
   String get settingsFormatsTitle;
 
-  /// Label on the date format preview plate.
+  /// Settings › Préférences: label of the sample date in the formats row.
   ///
   /// In fr, this message translates to:
-  /// **'Dates'**
+  /// **'Date'**
   String get settingsFormatsDates;
 
-  /// Label on the amount format preview plate.
+  /// Settings › Préférences: label of the sample amount in the formats row.
   ///
   /// In fr, this message translates to:
-  /// **'Montants'**
+  /// **'Montant'**
   String get settingsFormatsAmounts;
-
-  /// Label beside the application version number in the About section.
-  ///
-  /// In fr, this message translates to:
-  /// **'Version'**
-  String get settingsAboutVersion;
 
   /// Shown in place of the version number when the app could not read it.
   ///
@@ -323,7 +575,7 @@ abstract class AppLocalizations {
   /// Credit line for the Lucide icon set and its license, in the About section.
   ///
   /// In fr, this message translates to:
-  /// **'Icônes : Lucide (lucide.dev), sous licence ISC.'**
+  /// **'Lucide, licence ISC'**
   String get settingsAboutCreditsIcons;
 
   /// Title of the update-check card in Settings › About.
@@ -335,7 +587,7 @@ abstract class AppLocalizations {
   /// Subtitle beside the update-check toggle.
   ///
   /// In fr, this message translates to:
-  /// **'Me prévenir quand une nouvelle version est publiée'**
+  /// **'Me prévenir d’une nouvelle version'**
   String get settingsUpdatesSubtitle;
 
   /// Accessibility label of the update-check toggle.
@@ -362,28 +614,16 @@ abstract class AppLocalizations {
   /// **'Bastide {version} est disponible'**
   String settingsUpdatesAvailable(String version);
 
-  /// Caption under the newer-release title: the installed version.
-  ///
-  /// In fr, this message translates to:
-  /// **'Vous utilisez la version {version}.'**
-  String settingsUpdatesCurrent(String version);
-
   /// Opens the release page in the browser.
   ///
   /// In fr, this message translates to:
   /// **'Télécharger'**
   String get settingsUpdatesDownload;
 
-  /// The installed version is the newest release.
-  ///
-  /// In fr, this message translates to:
-  /// **'Vous utilisez la dernière version ({version}).'**
-  String settingsUpdatesUpToDate(String version);
-
   /// The update check could not reach GitHub.
   ///
   /// In fr, this message translates to:
-  /// **'GitHub n\'a pas pu être joint. Nouvel essai à la prochaine ouverture de cet écran.'**
+  /// **'GitHub n’a pas pu être joint.'**
   String get settingsUpdatesOffline;
 
   /// The app could not read the update status from its backend.
@@ -3496,7 +3736,7 @@ abstract class AppLocalizations {
   /// The card's privacy callout — its centerpiece. Visible whenever the card is, whether or not AI is enabled.
   ///
   /// In fr, this message translates to:
-  /// **'Les descriptions de vos transactions sont envoyées à un modèle qui s\'exécute sur cet ordinateur. Rien ne quitte votre machine.'**
+  /// **'Les libellés de vos opérations sont envoyés à un modèle qui s’exécute sur cet ordinateur. Rien ne quitte votre machine.'**
   String get settingsAiPrivacy;
 
   /// Label of the inference base URL field.
@@ -3523,12 +3763,6 @@ abstract class AppLocalizations {
   /// **'Modèle'**
   String get settingsAiModelLabel;
 
-  /// Helper under the model field: the list comes from the engine, but any tag can be typed.
-  ///
-  /// In fr, this message translates to:
-  /// **'Liste fournie par le moteur. Saisie manuelle possible.'**
-  String get settingsAiModelHelp;
-
   /// Helper under the model field when no engine answered, where the field degrades to a dashed read-only dash.
   ///
   /// In fr, this message translates to:
@@ -3541,35 +3775,17 @@ abstract class AppLocalizations {
   /// **'Choisir un modèle'**
   String get settingsAiModelChoose;
 
-  /// Label above the threshold slider, carrying its live percentage. Only this label is a percentage — the stored value is the [0,1] real the API defines.
-  ///
-  /// In fr, this message translates to:
-  /// **'Seuil de confiance : {threshold}'**
-  String settingsAiThresholdLabel(double threshold);
-
   /// Helper under the threshold slider, stating what the threshold decides.
   ///
   /// In fr, this message translates to:
-  /// **'En dessous de ce seuil, la transaction vous est proposée pour vérification plutôt que classée automatiquement.'**
+  /// **'En dessous, l’opération vous est proposée pour vérification au lieu d’être classée.'**
   String get settingsAiThresholdHelp;
-
-  /// Status row when the runtime answered, with the number of models it reported.
-  ///
-  /// In fr, this message translates to:
-  /// **'{count, plural, =0{Connecté · aucun modèle disponible} =1{Connecté · 1 modèle disponible} other{Connecté · {count} modèles disponibles}}'**
-  String settingsAiStatusConnected(int count);
 
   /// Status row when nothing answered at the configured address.
   ///
   /// In fr, this message translates to:
   /// **'Aucun moteur détecté à cette adresse.'**
   String get settingsAiStatusUnreachable;
-
-  /// Status row while the user has not opted in. The connection test stays available so an engine can be checked before opting in.
-  ///
-  /// In fr, this message translates to:
-  /// **'Catégorisation par IA désactivée.'**
-  String get settingsAiStatusDisabled;
 
   /// Link beside the no-engine status, opening the local runtime's download page in the browser.
   ///
@@ -3580,7 +3796,7 @@ abstract class AppLocalizations {
   /// Button that probes the configured runtime.
   ///
   /// In fr, this message translates to:
-  /// **'Tester la connexion'**
+  /// **'Tester'**
   String get settingsAiTest;
 
   /// Label the connection-test button takes while its probe is in flight.
@@ -3604,14 +3820,8 @@ abstract class AppLocalizations {
   /// Title of the backup card in Settings › Données.
   ///
   /// In fr, this message translates to:
-  /// **'Sauvegarde et restauration'**
+  /// **'Sauvegarde'**
   String get settingsBackupTitle;
-
-  /// Line under the backup card's title.
-  ///
-  /// In fr, this message translates to:
-  /// **'Exportez toutes vos données dans un fichier que vous pourrez réimporter.'**
-  String get settingsBackupSubtitle;
 
   /// Label of the export row on the backup card.
   ///
@@ -3622,7 +3832,7 @@ abstract class AppLocalizations {
   /// Caption under the export row's label: what the file contains.
   ///
   /// In fr, this message translates to:
-  /// **'Fichier .bastide : comptes, transactions, catégories, règles, objectifs, crédits, biens, paramètres.'**
+  /// **'Un fichier .bastide, non chiffré, avec tout votre historique. Conservez-le en lieu sûr.'**
   String get settingsBackupExportCaption;
 
   /// Replaces the export caption while the archive is being built.
@@ -3640,7 +3850,7 @@ abstract class AppLocalizations {
   /// Line under the export row with the time of the latest backup.
   ///
   /// In fr, this message translates to:
-  /// **'Dernière sauvegarde : {when}'**
+  /// **'Dernière sauvegarde le {when}'**
   String settingsBackupLast(String when);
 
   /// Shown under the export row when the user has never exported a backup.
@@ -3655,12 +3865,6 @@ abstract class AppLocalizations {
   /// **'{date} à {time}'**
   String settingsBackupDateTime(String date, String time);
 
-  /// Lock callout on the backup card warning that the archive is unencrypted.
-  ///
-  /// In fr, this message translates to:
-  /// **'Ce fichier n’est pas chiffré et contient tout votre historique. Conservez-le en lieu sûr.'**
-  String get settingsBackupPrivacy;
-
   /// Label of the restore row on the backup card.
   ///
   /// In fr, this message translates to:
@@ -3670,20 +3874,14 @@ abstract class AppLocalizations {
   /// Line under the restore row's label.
   ///
   /// In fr, this message translates to:
-  /// **'Remplace toutes les données actuelles.'**
+  /// **'Remplace toutes les données actuelles, après confirmation.'**
   String get settingsBackupRestoreSubtitle;
 
   /// Secondary button that opens the file picker to restore a backup.
   ///
   /// In fr, this message translates to:
-  /// **'Importer un fichier…'**
+  /// **'Importer un fichier'**
   String get settingsBackupRestoreButton;
-
-  /// Bold lead of the error banner shown when a chosen backup cannot be restored.
-  ///
-  /// In fr, this message translates to:
-  /// **'Restauration impossible.'**
-  String get settingsBackupRestoreFailedLead;
 
   /// Restore refused: the archive was written by a newer app version (BACKUP_TOO_NEW).
   ///
@@ -3724,7 +3922,7 @@ abstract class AppLocalizations {
   /// Toast after a backup was written. The String placeholders are the locale-formatted counts.
   ///
   /// In fr, this message translates to:
-  /// **'Sauvegarde enregistrée : {transactionCount, plural, one{{transactions} transaction} other{{transactions} transactions}}, {accountCount, plural, one{{accounts} compte} other{{accounts} comptes}}.'**
+  /// **'Sauvegarde enregistrée · {transactionCount, plural, one{{transactions} opération} other{{transactions} opérations}}, {accountCount, plural, one{{accounts} compte} other{{accounts} comptes}}.'**
   String settingsBackupExported(
     int transactionCount,
     String transactions,
@@ -3743,12 +3941,6 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Restaurer cette sauvegarde ?'**
   String get settingsBackupConfirmTitle;
-
-  /// Subtitle lead of the restore modal, followed by the file name.
-  ///
-  /// In fr, this message translates to:
-  /// **'Fichier sélectionné :'**
-  String get settingsBackupConfirmFile;
 
   /// Summary row: when the backup was exported.
   ///
@@ -4814,13 +5006,13 @@ abstract class AppLocalizations {
   /// Title of the danger zone card in Settings › Données.
   ///
   /// In fr, this message translates to:
-  /// **'Zone de danger'**
+  /// **'Réinitialisation'**
   String get settingsResetTitle;
 
   /// What a database reset deletes, and what it leaves alone.
   ///
   /// In fr, this message translates to:
-  /// **'Réinitialiser la base de données supprime transactions, comptes, règles, catégories personnalisées, objectifs, abonnements, crédits, biens et simulations de ce profil. Les sauvegardes exportées ne sont pas touchées.'**
+  /// **'Supprime opérations, comptes, règles, catégories personnalisées, objectifs, abonnements, crédits, biens, placements et simulations de ce profil. Les sauvegardes exportées ne sont pas touchées.'**
   String get settingsResetSubtitle;
 
   /// Outline danger button opening the reset confirmation.
@@ -4850,14 +5042,8 @@ abstract class AppLocalizations {
   /// Note under the reset counts listing what survives the reset.
   ///
   /// In fr, this message translates to:
-  /// **'Les catégories système, vos préférences et le réglage IA sont conservés. Les fichiers de sauvegarde déjà exportés restent intacts.'**
+  /// **'Les catégories fournies, vos préférences et le réglage IA sont conservés.'**
   String get settingsResetConfirmNote;
-
-  /// Red callout in the reset confirmation modal.
-  ///
-  /// In fr, this message translates to:
-  /// **'Cette action est irréversible. Exportez une sauvegarde avant de continuer.'**
-  String get settingsResetConfirmWarning;
 
   /// The word that must be typed exactly to enable the reset. Uppercase.
   ///
@@ -4880,14 +5066,8 @@ abstract class AppLocalizations {
   /// Toast shown once the reset has completed.
   ///
   /// In fr, this message translates to:
-  /// **'Base de données réinitialisée. Les catégories système ont été restaurées.'**
+  /// **'Base de données réinitialisée.'**
   String get settingsResetDone;
-
-  /// Bold red lead of the refusal banner in the danger zone card.
-  ///
-  /// In fr, this message translates to:
-  /// **'Réinitialisation impossible.'**
-  String get settingsResetFailedLead;
 
   /// Fallback message for any other reset failure.
   ///
@@ -7022,7 +7202,7 @@ abstract class AppLocalizations {
   /// Button on the recovery code card opening the regeneration modal.
   ///
   /// In fr, this message translates to:
-  /// **'Générer un nouveau code…'**
+  /// **'Générer un nouveau code'**
   String get settingsRecoveryButton;
 
   /// Title of the modal generating a new recovery code.
@@ -7103,16 +7283,10 @@ abstract class AppLocalizations {
   /// **'Nom d\'utilisateur'**
   String get settingsProfileNameTitle;
 
-  /// Subtitle of the username card; {name} is the current username.
-  ///
-  /// In fr, this message translates to:
-  /// **'Vous pouvez vous connecter avec {name} ou avec votre e-mail.'**
-  String settingsProfileNameSubtitle(String name);
-
   /// Button opening the modal that changes the username.
   ///
   /// In fr, this message translates to:
-  /// **'Modifier…'**
+  /// **'Modifier'**
   String get settingsProfileNameButton;
 
   /// Title of the Settings › Profile card that sets the user's avatar.
@@ -7124,14 +7298,8 @@ abstract class AppLocalizations {
   /// Subtitle of the avatar card.
   ///
   /// In fr, this message translates to:
-  /// **'Choisissez comment vous apparaissez dans l\'application.'**
+  /// **'Un monogramme, une pastille de couleur ou une photo. La photo reste sur cet ordinateur.'**
   String get settingsAvatarSubtitle;
-
-  /// Button of the avatar card going back to the initials monogram.
-  ///
-  /// In fr, this message translates to:
-  /// **'Revenir au monogramme'**
-  String get settingsAvatarReset;
 
   /// Tooltip and accessible name of the initials monogram option.
   ///
@@ -7154,7 +7322,7 @@ abstract class AppLocalizations {
   /// Button of the avatar card opening the file picker for a picture of the user's own.
   ///
   /// In fr, this message translates to:
-  /// **'Choisir une photo…'**
+  /// **'Choisir une photo'**
   String get settingsAvatarChoosePicture;
 
   /// Button of the avatar card dropping the uploaded picture and going back to the previous default avatar.
@@ -7331,17 +7499,11 @@ abstract class AppLocalizations {
   /// **'Continuer quand même'**
   String get startupContinueAnyway;
 
-  /// Title of the plate offering an Ollama install found on its default loopback address.
+  /// Settings › Données: banner offered when Ollama answers on its default address and the engine address points elsewhere; count is the number of installed models.
   ///
   /// In fr, this message translates to:
-  /// **'Ollama détecté sur cet ordinateur'**
-  String get settingsAiOllamaFound;
-
-  /// Caption under settingsAiOllamaFound: how many models that Ollama lists.
-  ///
-  /// In fr, this message translates to:
-  /// **'{count, plural, =0{Aucun modèle installé} =1{1 modèle installé} other{{count} modèles installés}}'**
-  String settingsAiOllamaModels(int count);
+  /// **'Ollama détecté sur cet ordinateur · {count, plural, =0{aucun modèle installé} =1{1 modèle installé} other{{count} modèles installés}}'**
+  String settingsAiOllamaFound(int count);
 
   /// Button pointing the engine address at the detected Ollama.
   ///

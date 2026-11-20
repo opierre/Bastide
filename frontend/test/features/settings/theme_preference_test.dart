@@ -14,6 +14,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 
+import '../../support/desktop_surface.dart';
 import '../../support/fake_auth_controller.dart';
 
 class _MockApiClient extends Mock implements ApiClient {}
@@ -136,6 +137,7 @@ void main() {
     testWidgets('offers system, dark and light, dark selected by default', (
       tester,
     ) async {
+      useDesktopSurface(tester);
       await tester.pumpWidget(wrap());
       await tester.pumpAndSettle();
 
@@ -150,6 +152,7 @@ void main() {
     testWidgets('picking light saves it and re-renders the app at once', (
       tester,
     ) async {
+      useDesktopSurface(tester);
       when(
         () => apiClient.put('/auth/me/theme', body: {'theme': 'light'}),
       ).thenAnswer((_) async => {'user': _userJson('light')});
@@ -168,6 +171,7 @@ void main() {
     testWidgets('a refused save puts the previous theme back and says so', (
       tester,
     ) async {
+      useDesktopSurface(tester);
       when(
         () => apiClient.put('/auth/me/theme', body: {'theme': 'light'}),
       ).thenThrow(Exception('offline'));

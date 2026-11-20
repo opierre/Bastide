@@ -2,12 +2,14 @@ import 'package:bastide/core/api/api_client.dart';
 import 'package:bastide/core/api/api_client_provider.dart';
 import 'package:bastide/core/theme/app_theme.dart';
 import 'package:bastide/features/settings/application/update_check_controller.dart';
-import 'package:bastide/features/settings/presentation/update_check_card.dart';
+import 'package:bastide/features/settings/presentation/update_check_row.dart';
 import 'package:bastide/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
+
+import '../../support/desktop_surface.dart';
 
 class _MockApiClient extends Mock implements ApiClient {}
 
@@ -124,68 +126,69 @@ void main() {
         theme: AppTheme.dark,
         localizationsDelegates: AppLocalizations.localizationsDelegates,
         supportedLocales: AppLocalizations.supportedLocales,
-        home: const Scaffold(body: UpdateCheckCard()),
+        home: const Scaffold(body: UpdateCheckRow()),
       ),
     );
 
-    testWidgets('off: no status, only what turning it on would send', (
-      tester,
-    ) async {
-      stubStatus(_status(enabled: false));
+    testWidgets(
+      'off: no status, no check button, only what turning it on would send',
+      (tester) async {
+        useDesktopSurface(tester);
+        stubStatus(_status(enabled: false));
 
-      await tester.pumpWidget(wrap());
-      await tester.pumpAndSettle();
+        await tester.pumpWidget(wrap());
+        await tester.pumpAndSettle();
 
-      expect(find.text('Mises à jour'), findsOneWidget);
-      expect(find.byKey(const Key('settingsUpdateStatus')), findsNothing);
-      expect(find.byKey(const Key('settingsUpdateAvailable')), findsNothing);
-      expect(
-        find.textContaining('Rien d\'autre n\'est envoyé'),
-        findsOneWidget,
-      );
-    });
+        expect(find.text('Mises à jour'), findsOneWidget);
+        expect(find.byKey(const Key('settingsUpdateStatus')), findsNothing);
+        expect(find.byKey(const Key('settingsUpdateAvailable')), findsNothing);
+        expect(find.byKey(const Key('settingsUpdateCheckNow')), findsNothing);
+        expect(
+          find.textContaining('Rien d\'autre n\'est envoyé'),
+          findsOneWidget,
+        );
+      },
+    );
 
     testWidgets('a newer release is offered with a download link', (
       tester,
     ) async {
+      useDesktopSurface(tester);
       stubStatus(_status(latest: '0.2.0', available: true));
 
       await tester.pumpWidget(wrap());
       await tester.pumpAndSettle();
 
       expect(find.text('Bastide 0.2.0 est disponible'), findsOneWidget);
-      expect(find.text('Vous utilisez la version 0.1.0.'), findsOneWidget);
+      expect(find.byKey(const Key('settingsUpdateCheckNow')), findsOneWidget);
       expect(find.byKey(const Key('settingsUpdateDownload')), findsOneWidget);
     });
 
     testWidgets('the same version reads as up to date', (tester) async {
+      useDesktopSurface(tester);
       stubStatus(_status(latest: '0.1.0'));
 
       await tester.pumpWidget(wrap(locale: const Locale('en')));
       await tester.pumpAndSettle();
 
-      expect(
-        find.text('You are on the latest version (0.1.0).'),
-        findsOneWidget,
-      );
+      expect(find.text('You are on the latest version.'), findsOneWidget);
       expect(find.byKey(const Key('settingsUpdateDownload')), findsNothing);
     });
 
     testWidgets('offline says GitHub could not be reached', (tester) async {
+      useDesktopSurface(tester);
       stubStatus(_status(reachable: false));
 
       await tester.pumpWidget(wrap());
       await tester.pumpAndSettle();
 
-      expect(
-        find.textContaining('GitHub n\'a pas pu être joint'),
-        findsOneWidget,
-      );
+      expect(find.text('GitHub n’a pas pu être joint.'), findsOneWidget);
     });
 
     testWidgets('offline still shows a newer release found earlier', (
       tester,
     ) async {
+      useDesktopSurface(tester);
       stubStatus(_status(latest: '0.2.0', available: true, reachable: false));
 
       await tester.pumpWidget(wrap());
@@ -195,6 +198,7 @@ void main() {
     });
 
     testWidgets('tapping the toggle opts in', (tester) async {
+      useDesktopSurface(tester);
       stubStatus(_status(enabled: false));
       stubPatch();
 
@@ -211,7 +215,26 @@ void main() {
       expect(find.byKey(const Key('settingsUpdateAvailable')), findsOneWidget);
     });
 
+    testWidgets('« Vérifier maintenant » reads the status again', (
+      tester,
+    ) async {
+      useDesktopSurface(tester);
+      stubStatus(_status(latest: '0.1.0'));
+
+      await tester.pumpWidget(wrap());
+      await tester.pumpAndSettle();
+      expect(find.text('Vous utilisez la dernière version.'), findsOneWidget);
+
+      stubStatus(_status(latest: '0.2.0', available: true));
+      await tester.tap(find.byKey(const Key('settingsUpdateCheckNow')));
+      await tester.pumpAndSettle();
+
+      verify(() => apiClient.get('/settings/updates')).called(2);
+      expect(find.text('Bastide 0.2.0 est disponible'), findsOneWidget);
+    });
+
     testWidgets('a sidecar that cannot be asked says so', (tester) async {
+      useDesktopSurface(tester);
       when(
         () => apiClient.get('/settings/updates'),
       ).thenThrow(Exception('sidecar down'));

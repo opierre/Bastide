@@ -2,9 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/api/api_client.dart';
-import '../../../core/session/current_user_provider.dart';
-import '../../../core/theme/tokens.dart';
-import '../../../core/widgets/app_card.dart';
 import '../../../core/widgets/app_modal.dart';
 import '../../../core/widgets/labeled_field.dart';
 import '../../../core/widgets/primary_button.dart';
@@ -12,55 +9,9 @@ import '../../../l10n/app_localizations.dart';
 import '../application/profile_controllers.dart';
 import '../domain/display_name.dart';
 
-/// The « Nom d'utilisateur » card in Settings › Profil. The display name is
-/// also a login name, so the card says so rather than presenting it as a mere
-/// label.
-class DisplayNameCard extends ConsumerWidget {
-  const DisplayNameCard({super.key});
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final l10n = AppLocalizations.of(context)!;
-    final name = ref.watch(currentUserProvider)?.displayName ?? '';
-
-    return AppCard(
-      key: const Key('settingsDisplayNameCard'),
-      padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 16),
-      child: Row(
-        children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  l10n.settingsProfileNameTitle,
-                  style: Theme.of(context).textTheme.titleMedium,
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  l10n.settingsProfileNameSubtitle(name),
-                  style: context.textStyles.helper.copyWith(
-                    color: context.colors.textSecondary,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(width: AppSpacing.md),
-          OutlinedButton(
-            key: const Key('settingsDisplayNameButton'),
-            onPressed: () => showDialog<void>(
-              context: context,
-              builder: (_) => DisplayNameModal(initialName: name),
-            ),
-            child: Text(l10n.settingsProfileNameButton),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
+/// « Changer de nom d'utilisateur », opened from the username row of
+/// Settings › Profil. The display name is also a login name, so the lead says
+/// the new one replaces the old for signing in.
 class DisplayNameModal extends ConsumerStatefulWidget {
   const DisplayNameModal({super.key, required this.initialName});
 
@@ -121,11 +72,11 @@ class _DisplayNameModalState extends ConsumerState<DisplayNameModal> {
 
     return AppModal(
       title: l10n.settingsProfileNameModalTitle,
-      width: 480,
+      width: 420,
       actions: [
-        OutlinedButton(
+        AppButton(
+          label: l10n.settingsProfileNameModalCancel,
           onPressed: isSaving ? null : () => Navigator.of(context).pop(),
-          child: Text(l10n.settingsProfileNameModalCancel),
         ),
         PrimaryButton(
           key: const Key('displayNameModalSave'),
@@ -134,16 +85,10 @@ class _DisplayNameModalState extends ConsumerState<DisplayNameModal> {
           onPressed: _canSave ? _save : null,
         ),
       ],
+      subtitle: Text(l10n.settingsProfileNameModalLead),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Text(
-            l10n.settingsProfileNameModalLead,
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: context.colors.textSecondary,
-            ),
-          ),
-          const SizedBox(height: AppSpacing.md),
           LabeledField(
             label: l10n.authDisplayNameLabel,
             helper: l10n.authDisplayNameHelper,

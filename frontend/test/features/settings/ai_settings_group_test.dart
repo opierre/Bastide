@@ -7,12 +7,14 @@ import 'package:bastide/core/theme/tokens.dart';
 import 'package:bastide/core/widgets/app_slider.dart';
 import 'package:bastide/core/widgets/app_toggle.dart';
 import 'package:bastide/features/settings/application/settings_controller.dart';
-import 'package:bastide/features/settings/presentation/ai_settings_card.dart';
+import 'package:bastide/features/settings/presentation/ai_settings_group.dart';
 import 'package:bastide/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
+
+import '../../support/desktop_surface.dart';
 
 class MockApiClient extends Mock implements ApiClient {}
 
@@ -73,35 +75,49 @@ void main() {
       // than the test viewport lays out as it does in the app.
       home: const Scaffold(
         body: SingleChildScrollView(
-          child: SizedBox(width: 640, child: AiSettingsCard()),
+          child: SizedBox(width: 900, child: AiSettingsGroup()),
         ),
       ),
     ),
   );
 
-  Color dotColor(WidgetTester tester) {
-    final box = tester.widget<Container>(
-      find.byKey(const Key('settingsAiStatusDot')),
-    );
-    return (box.decoration! as BoxDecoration).color!;
-  }
+  /// The colour of the status text's icon, which doubles its words.
+  Color? statusColor(WidgetTester tester) => tester
+      .widget<Icon>(
+        find.descendant(
+          of: find.byKey(const Key('settingsAiStatusLabel')),
+          matching: find.byType(Icon),
+        ),
+      )
+      .color;
+
+  /// The printed threshold, with the locale's no-break spaces made plain.
+  String thresholdText(WidgetTester tester) => tester
+      .widget<Text>(find.byKey(const Key('settingsAiThresholdValue')))
+      .data!
+      .replaceAll('\u00A0', ' ')
+      .replaceAll('\u202F', ' ');
 
   group('connected', () {
-    testWidgets('shows a green dot and the model count the probe returned', (
-      tester,
-    ) async {
-      stub();
+    testWidgets(
+      'says « Connecté » in green and the model count the probe returned',
+      (tester) async {
+        useDesktopSurface(tester);
+        stub();
 
-      await tester.pumpWidget(wrap());
-      await tester.pumpAndSettle();
+        await tester.pumpWidget(wrap());
+        await tester.pumpAndSettle();
 
-      expect(dotColor(tester), AppColors.dark.positive);
-      expect(find.text('Connecté · 3 modèles disponibles'), findsOneWidget);
-    });
+        expect(statusColor(tester), AppColors.dark.positive);
+        expect(find.text('Connecté'), findsOneWidget);
+        expect(find.text('· 3 modèles disponibles'), findsOneWidget);
+      },
+    );
 
     testWidgets(
       'the model field stays editable and lists what the engine offers',
       (tester) async {
+        useDesktopSurface(tester);
         stub();
 
         await tester.pumpWidget(wrap());
@@ -122,6 +138,7 @@ void main() {
     testWidgets('picking a model from the list puts it in the field', (
       tester,
     ) async {
+      useDesktopSurface(tester);
       stub();
 
       await tester.pumpWidget(wrap());
@@ -139,6 +156,7 @@ void main() {
     });
 
     testWidgets('a tag can still be typed by hand', (tester) async {
+      useDesktopSurface(tester);
       stub();
 
       await tester.pumpWidget(wrap());
@@ -160,14 +178,15 @@ void main() {
 
   group('no engine', () {
     testWidgets(
-      'shows an amber dot, the learn-more link, and a dashed model field',
+      'says no engine in amber, with the learn-more link and a disabled model field',
       (tester) async {
+        useDesktopSurface(tester);
         stub(health: _healthJson(reachable: false, models: []));
 
         await tester.pumpWidget(wrap());
         await tester.pumpAndSettle();
 
-        expect(dotColor(tester), AppColors.dark.warning);
+        expect(statusColor(tester), AppColors.dark.warning);
         expect(
           find.text('Aucun moteur détecté à cette adresse.'),
           findsOneWidget,
@@ -190,6 +209,7 @@ void main() {
     testWidgets('the connected state offers no learn-more link', (
       tester,
     ) async {
+      useDesktopSurface(tester);
       stub();
 
       await tester.pumpWidget(wrap());
@@ -199,8 +219,9 @@ void main() {
     });
   });
 
-  group('privacy callout', () {
+  group('privacy promise', () {
     testWidgets('is present with AI on', (tester) async {
+      useDesktopSurface(tester);
       stub();
 
       await tester.pumpWidget(wrap());
@@ -214,6 +235,7 @@ void main() {
     });
 
     testWidgets('is still present with AI off', (tester) async {
+      useDesktopSurface(tester);
       stub(settings: _settingsJson(aiEnabled: false));
 
       await tester.pumpWidget(wrap());
@@ -226,7 +248,14 @@ void main() {
             .value,
         isFalse,
       );
-      expect(find.text('Catégorisation par IA désactivée.'), findsOneWidget);
+      // Off, the engine rows are drawn at 45 % and out of reach, with no
+      // status claiming anything about an engine nothing is using.
+      expect(find.byKey(const Key('settingsAiStatus')), findsNothing);
+      final engine = find.byKey(const Key('settingsAiEngineRow'));
+      expect(
+        find.ancestor(of: engine, matching: find.byType(IgnorePointer)),
+        findsWidgets,
+      );
     });
   });
 
@@ -244,6 +273,7 @@ void main() {
     testWidgets('a detected Ollama is offered when the address differs', (
       tester,
     ) async {
+      useDesktopSurface(tester);
       stub(
         settings: _settingsJson(baseUrl: 'http://127.0.0.1:8080/v1'),
         health: _healthJson(reachable: false, models: []),
@@ -253,11 +283,14 @@ void main() {
       await tester.pumpWidget(wrap());
       await tester.pumpAndSettle();
 
-      expect(find.text('Ollama détecté sur cet ordinateur'), findsOneWidget);
-      expect(find.text('2 modèles installés'), findsOneWidget);
+      expect(
+        find.text('Ollama détecté sur cet ordinateur · 2 modèles installés'),
+        findsOneWidget,
+      );
     });
 
     testWidgets('using it rewrites the address field', (tester) async {
+      useDesktopSurface(tester);
       stub(
         settings: _settingsJson(baseUrl: 'http://127.0.0.1:8080/v1'),
         health: _healthJson(reachable: false, models: []),
@@ -284,6 +317,7 @@ void main() {
     });
 
     testWidgets('nothing is offered when no Ollama answers', (tester) async {
+      useDesktopSurface(tester);
       stub(
         settings: _settingsJson(baseUrl: 'http://127.0.0.1:8080/v1'),
         health: _healthJson(reachable: false, models: []),
@@ -301,11 +335,12 @@ void main() {
     testWidgets('the button triggers a probe and reports its progress', (
       tester,
     ) async {
+      useDesktopSurface(tester);
       stub(health: _healthJson(reachable: false, models: []));
 
       await tester.pumpWidget(wrap());
       await tester.pumpAndSettle();
-      expect(dotColor(tester), AppColors.dark.warning);
+      expect(statusColor(tester), AppColors.dark.warning);
 
       // The engine came up between the mount probe and the explicit test.
       when(() => apiClient.get('/settings/inference/health')).thenAnswer((
@@ -320,12 +355,13 @@ void main() {
 
       // Progress on the button itself, not a blocking overlay: the card is
       // still there behind it.
-      expect(find.byType(CircularProgressIndicator), findsOneWidget);
+      expect(find.byKey(const Key('appButtonSpinner')), findsOneWidget);
+      expect(find.text('Test en cours…'), findsOneWidget);
       expect(find.byKey(const Key('settingsAiCard')), findsOneWidget);
 
       await tester.pumpAndSettle();
-      expect(dotColor(tester), AppColors.dark.positive);
-      expect(find.text('Connecté · 3 modèles disponibles'), findsOneWidget);
+      expect(statusColor(tester), AppColors.dark.positive);
+      expect(find.text('· 3 modèles disponibles'), findsOneWidget);
     });
   });
 
@@ -333,6 +369,7 @@ void main() {
     testWidgets('a refused address explains why, on the field itself', (
       tester,
     ) async {
+      useDesktopSurface(tester);
       stub(
         patchThrows: const ApiFailure(
           code: 'VALIDATION_ERROR',
@@ -355,12 +392,14 @@ void main() {
         find.textContaining("le moteur doit s'exécuter sur cet ordinateur"),
         findsOneWidget,
       );
-      // The helper it replaces is gone, so the fix is the only line under the
-      // field.
-      expect(
-        find.text('Adresse locale uniquement : 127.0.0.1 ou localhost.'),
-        findsNothing,
+      // Said in `negative`, under the engine line.
+      final helper = tester.widget<Text>(
+        find.descendant(
+          of: find.byKey(const Key('settingsAiBaseUrlRejected')),
+          matching: find.byType(Text),
+        ),
       );
+      expect(helper.style?.color, AppColors.dark.negative);
     });
   });
 
@@ -368,12 +407,13 @@ void main() {
     testWidgets('is labelled as the percentage of the stored [0,1] value', (
       tester,
     ) async {
+      useDesktopSurface(tester);
       stub(settings: _settingsJson(threshold: 0.65));
 
       await tester.pumpWidget(wrap());
       await tester.pumpAndSettle();
 
-      expect(find.text('Seuil de confiance : 65 %'), findsOneWidget);
+      expect(thresholdText(tester), '65 %');
       expect(
         tester
             .widget<AppSlider>(
@@ -387,6 +427,7 @@ void main() {
     testWidgets('dragging it stores the [0,1] real, not the percentage', (
       tester,
     ) async {
+      useDesktopSurface(tester);
       stub();
 
       await tester.pumpWidget(wrap());
@@ -419,6 +460,7 @@ void main() {
     testWidgets('renders in English with no French left behind', (
       tester,
     ) async {
+      useDesktopSurface(tester);
       stub();
 
       await tester.pumpWidget(wrap(locale: const Locale('en')));
@@ -426,9 +468,11 @@ void main() {
 
       expect(find.text('Local AI'), findsOneWidget);
       expect(find.text('AI categorization'), findsOneWidget);
-      expect(find.text('Connected · 3 models available'), findsOneWidget);
-      expect(find.text('Test connection'), findsOneWidget);
-      expect(find.text('Confidence threshold: 80%'), findsOneWidget);
+      expect(find.text('Connected'), findsOneWidget);
+      expect(find.text('· 3 models available'), findsOneWidget);
+      expect(find.text('Test'), findsOneWidget);
+      expect(find.text('Confidence threshold'), findsOneWidget);
+      expect(thresholdText(tester), '80%');
       expect(
         find.textContaining('Nothing leaves your machine.'),
         findsOneWidget,
@@ -436,6 +480,7 @@ void main() {
     });
 
     testWidgets('renders in French', (tester) async {
+      useDesktopSurface(tester);
       stub();
 
       await tester.pumpWidget(wrap());
@@ -443,8 +488,9 @@ void main() {
 
       expect(find.text('IA locale'), findsOneWidget);
       expect(find.text('Catégorisation par IA'), findsOneWidget);
-      expect(find.text('Tester la connexion'), findsOneWidget);
-      expect(find.text('Seuil de confiance : 80 %'), findsOneWidget);
+      expect(find.text('Tester'), findsOneWidget);
+      expect(find.text('Seuil de confiance'), findsOneWidget);
+      expect(thresholdText(tester), '80 %');
     });
   });
 
@@ -452,6 +498,7 @@ void main() {
     testWidgets('a failed load offers a retry instead of an empty card', (
       tester,
     ) async {
+      useDesktopSurface(tester);
       when(
         () => apiClient.get('/settings'),
       ).thenThrow(const ApiFailure(code: 'UNKNOWN_ERROR', message: 'down'));
@@ -464,6 +511,7 @@ void main() {
     });
 
     testWidgets('the card renders a skeleton while it loads', (tester) async {
+      useDesktopSurface(tester);
       final settings = Completer<Map<String, dynamic>>();
       when(() => apiClient.get('/settings')).thenAnswer((_) => settings.future);
       when(
