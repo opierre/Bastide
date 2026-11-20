@@ -3575,6 +3575,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get simulatorRetry => 'Try again';
 
   @override
+  String get simulatorNoValue => '—';
+
+  @override
   String get simulatorFormTitle => 'New loan';
 
   @override
@@ -3600,7 +3603,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get simulatorRateInvalid => 'Enter a rate, for example 3.25.';
 
   @override
-  String get simulatorInsurance => 'Insurance / month';
+  String get simulatorInsurance => 'Insurance per month';
 
   @override
   String get simulatorTerm => 'Term';
@@ -3618,7 +3621,7 @@ class AppLocalizationsEn extends AppLocalizations {
       other: '$yearsString years',
       one: '1 year',
     );
-    return '$months months · $_temp0';
+    return '$_temp0 · $months months';
   }
 
   @override
@@ -3647,7 +3650,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String simulatorIncludeExistingAdds(String amount) {
-    return 'Adds $amount / month to the reading';
+    return 'Adds $amount per month to the reading';
   }
 
   @override
@@ -3673,39 +3676,21 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get simulatorInstalmentEmpty =>
-      'Enter a price and a rate to see the instalment and its insurance share.';
+      'Enter a price and a rate to see the instalment.';
 
   @override
   String get simulatorCostLabel => 'Total cost';
 
   @override
-  String simulatorCostCaption(
-    String interest,
-    String insurance,
-    String fees,
-    String share,
-  ) {
-    return 'interest $interest + insurance $insurance + fees $fees · $share of the price';
+  String simulatorCostCaption(String interest, String insurance, String fees) {
+    return 'interest $interest · insurance $insurance · fees $fees';
   }
-
-  @override
-  String simulatorCostCaptionNoPrice(
-    String interest,
-    String insurance,
-    String fees,
-  ) {
-    return 'interest $interest + insurance $insurance + fees $fees';
-  }
-
-  @override
-  String get simulatorCostEmpty =>
-      'Enter a price and a rate to see the total cost and its share of the price.';
 
   @override
   String get simulatorTaegLabel => 'Indicative APR';
 
   @override
-  String get simulatorTaegCaption => 'rate, insurance and fees included';
+  String get simulatorTaegCaption => 'rate, insurance and fees';
 
   @override
   String get simulatorHcsfTitle => 'HCSF reading';
@@ -3740,6 +3725,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String simulatorRatioCaptionWithExisting(
+    String total,
     String instalment,
     String existing,
     String source,
@@ -3749,7 +3735,7 @@ class AppLocalizationsEn extends AppLocalizations {
       'declared': 'declared',
       'other': 'median observed',
     });
-    return '$instalment + current loans $existing against a $_temp0 income of $income';
+    return '$total ($instalment + current loans $existing) against a $_temp0 income of $income';
   }
 
   @override
@@ -3758,19 +3744,19 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get simulatorRatioUnknown =>
-      'No known income: the ledger has no regular income and none is declared. Without an income, neither a ratio nor a capacity can be read.';
+      'No known income. Without an income, neither a ratio nor a capacity can be read.';
 
   @override
   String get simulatorDeclareIncome => 'Declare an income';
 
   @override
-  String get simulatorTermAtReference => 'at the reference, not beyond';
+  String get simulatorTermAtReference => 'At the reference, not beyond';
 
   @override
-  String get simulatorTermUnderReference => 'under the reference';
+  String get simulatorTermUnderReference => 'Under the reference';
 
   @override
-  String get simulatorTermOverReference => 'beyond the reference';
+  String get simulatorTermOverReference => 'Beyond the reference';
 
   @override
   String get simulatorCapacityLabel => 'Borrowing capacity at the reference';
@@ -3781,8 +3767,8 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String simulatorCapacityCaptionExisting(String available) {
-    return 'Your current loans leave $available of instalment under the reference. That is what limits the capacity, not the property.';
+  String simulatorCapacityCaptionExisting(String available, String limit) {
+    return 'Your current loans leave $available of instalment under $limit. That is what limits the capacity, not the property.';
   }
 
   @override
@@ -3810,7 +3796,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get simulatorChartEmpty =>
-      'Enter a price and a rate: the yearly split between principal and interest shows here.';
+      'Enter a price and a rate: the split by year shows here.';
 
   @override
   String get simulatorComputeFailed =>
@@ -3856,10 +3842,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get simulatorSaveScenario => 'Save scenario';
 
   @override
-  String get simulatorSaveBody =>
-      'Only the inputs are saved: the result is recomputed every time.';
-
-  @override
   String get simulatorSaveName => 'Name';
 
   @override
@@ -3894,36 +3876,38 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get simulatorCompareNeedsTwo =>
-      'Check at least two scenarios to compare them.';
-
-  @override
   String simulatorCompareCapNamed(String name) {
-    return 'Three scenarios at most, so they stay readable side by side. Uncheck one to add $name.';
+    return 'Three scenarios at most. Uncheck one to add $name.';
   }
 
   @override
   String get simulatorCompareCap =>
-      'Three scenarios at most, so they stay readable side by side. Uncheck one to add another.';
-
-  @override
-  String get simulatorLivePill => 'Current';
+      'Three scenarios at most. Uncheck one to add another.';
 
   @override
   String get simulatorLiveName => 'Current simulation';
 
   @override
-  String simulatorScenarioSub(String rate, String term, String instalment) {
-    return '$rate · $term · $instalment';
-  }
+  String get simulatorLiveMarker => 'current';
 
   @override
-  String simulatorScenarioSubNoInstalment(String rate, String term) {
+  String simulatorScenarioSub(String rate, String term) {
     return '$rate · $term';
   }
 
   @override
+  String simulatorScenarioSubLive(String rate, String term) {
+    return 'current · $rate · $term';
+  }
+
+  @override
   String get simulatorScenarioActions => 'Scenario actions';
+
+  @override
+  String get simulatorScenarioRename => 'Rename';
+
+  @override
+  String get simulatorRenameTitle => 'Rename scenario';
 
   @override
   String get simulatorScenarioDelete => 'Delete';
@@ -3934,11 +3918,7 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get simulatorScenariosEmptyTitle => 'No saved scenario';
-
-  @override
-  String get simulatorScenariosEmptyBody =>
-      'Save a simulation to find it here and compare it with two others.';
+  String get simulatorScenariosEmpty => 'No saved scenario.';
 
   @override
   String simulatorCompareTitle(int count) {

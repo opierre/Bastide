@@ -95,6 +95,20 @@ class SimulatorState {
   /// The ratio can only be read with a known income.
   bool get incomeKnown => result?.debtRatioBps != null;
 
+  /// Whether the HCSF reading counts the current loans: the switch is on and
+  /// there is a charge to add.
+  bool get countsExistingLoans =>
+      inputs.includeExistingLoans && household.existingChargeMinor > 0;
+
+  /// The monthly charge the ratio is read on with the current loans counted:
+  /// the live instalment plus the existing charge, both the API's. Printed in
+  /// the ratio caption; the ratio itself is never derived from it here.
+  int? get chargeWithExistingMinor => switch (result) {
+    final result? when countsExistingLoans =>
+      result.totalInstalmentMinor + household.existingChargeMinor,
+    _ => null,
+  };
+
   bool isSelected(String id) => selection.contains(id);
 
   bool get selectionFull => selection.length >= maxCompared;

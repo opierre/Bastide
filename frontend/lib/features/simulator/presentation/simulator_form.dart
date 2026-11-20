@@ -6,7 +6,6 @@ import 'package:intl/intl.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/tokens.dart';
 import '../../../core/widgets/amount_text.dart';
-import '../../../core/widgets/app_card.dart';
 import '../../../core/widgets/app_slider.dart';
 import '../../../core/widgets/app_toggle.dart';
 import '../../../core/widgets/labeled_field.dart';
@@ -16,8 +15,9 @@ import '../application/simulator_controller.dart';
 import '../domain/simulation.dart';
 import 'simulator_labels.dart';
 
-/// « Nouveau crédit » (`14-simulateur.md` §Form Card): the inputs, the term
-/// slider and the existing-loans switch.
+/// The top of the inputs pane (`14-simulateur.md` §Inputs pane): « Nouveau
+/// crédit », the two-column field grid, the term slider and the existing-loans
+/// toggle, 14 px apart.
 ///
 /// Each edit goes straight to the controller, which debounces the compute; the
 /// text controllers here only hold what is being typed. The one figure written
@@ -101,7 +101,7 @@ class _SimulatorFormState extends ConsumerState<SimulatorForm> {
     crossAxisAlignment: CrossAxisAlignment.start,
     children: [
       Expanded(child: first),
-      const SizedBox(width: 14),
+      const SizedBox(width: AppSpacing.smPlus),
       Expanded(child: second),
     ],
   );
@@ -132,17 +132,17 @@ class _SimulatorFormState extends ConsumerState<SimulatorForm> {
 
     final errorField = simulatorErrorField(state.computeError);
     final errorMessage = localizeSimulatorError(l10n, state.computeError);
-    const rowGap = SizedBox(height: 12);
+    const rowGap = SizedBox(height: AppSpacing.smPlus);
+    const blockGap = SizedBox(height: AppSpacing.fieldGap);
 
-    return AppCard(
+    return KeyedSubtree(
       key: const Key('simulatorForm'),
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         mainAxisSize: MainAxisSize.min,
         children: [
-          Text(l10n.simulatorFormTitle, style: textTheme.titleMedium),
-          const SizedBox(height: 14),
+          Text(l10n.simulatorFormTitle, style: textTheme.titleSmall),
+          blockGap,
           _pair(
             LabeledField(
               label: l10n.simulatorPrice,
@@ -152,6 +152,7 @@ class _SimulatorFormState extends ConsumerState<SimulatorForm> {
                 currency: currency,
                 autofocus: true,
                 hintText: hint,
+                textAlign: TextAlign.end,
                 onChanged: (text) => _controller.setPropertyPrice(_money(text)),
               ),
             ),
@@ -162,6 +163,7 @@ class _SimulatorFormState extends ConsumerState<SimulatorForm> {
                 controller: _downPayment,
                 currency: currency,
                 hintText: hint,
+                textAlign: TextAlign.end,
                 onChanged: (text) => _controller.setDownPayment(_money(text)),
               ),
             ),
@@ -178,6 +180,7 @@ class _SimulatorFormState extends ConsumerState<SimulatorForm> {
                 controller: _fees,
                 currency: currency,
                 hintText: hint,
+                textAlign: TextAlign.end,
                 onChanged: (text) => _controller.setFees(_money(text)),
               ),
             ),
@@ -193,6 +196,7 @@ class _SimulatorFormState extends ConsumerState<SimulatorForm> {
                 controller: _principal,
                 currency: currency,
                 hintText: hint,
+                textAlign: TextAlign.end,
                 onChanged: (text) => _controller.setPrincipal(_money(text)),
               ),
             ),
@@ -232,13 +236,14 @@ class _SimulatorFormState extends ConsumerState<SimulatorForm> {
                 controller: _insurance,
                 currency: currency,
                 hintText: hint,
+                textAlign: TextAlign.end,
                 onChanged: (text) => _controller.setInsurance(_money(text)),
               ),
             ),
           ),
-          const SizedBox(height: AppSpacing.md),
+          blockGap,
           _TermSlider(termMonths: inputs.termMonths),
-          const SizedBox(height: AppSpacing.md),
+          blockGap,
           _ExistingLoansSwitch(state: state),
         ],
       ),
@@ -246,8 +251,8 @@ class _SimulatorFormState extends ConsumerState<SimulatorForm> {
   }
 }
 
-/// The shared slider over 5–30 years, a year at a time, labelled in both
-/// units so neither has to be converted in the head.
+/// « Durée » with its value on the same line, the slider over 5–30 years a
+/// year at a time, and the end labels 11 `textTertiary`.
 class _TermSlider extends ConsumerWidget {
   const _TermSlider({required this.termMonths});
 
@@ -257,8 +262,7 @@ class _TermSlider extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context)!;
     final textTheme = Theme.of(context).textTheme;
-    final bounds = context.textStyles.helper.copyWith(
-      fontSize: 11,
+    final bounds = textTheme.labelSmall!.copyWith(
       color: context.colors.textTertiary,
     );
     String value(int months) => l10n.simulatorTermValue(months, months ~/ 12);
@@ -272,7 +276,7 @@ class _TermSlider extends ConsumerWidget {
             Expanded(
               child: Text(
                 l10n.simulatorTerm,
-                style: textTheme.labelMedium?.copyWith(
+                style: textTheme.bodySmall?.copyWith(
                   color: context.colors.textSecondary,
                 ),
               ),
@@ -281,8 +285,8 @@ class _TermSlider extends ConsumerWidget {
               value(termMonths),
               key: const Key('simulatorTermValue'),
               style: tabularNumberStyle(
-                textTheme.bodyMedium!,
-              ).copyWith(fontWeight: FontWeight.w600),
+                textTheme.bodySmall!,
+              ).copyWith(color: context.colors.text),
             ),
           ],
         ),
@@ -312,8 +316,8 @@ class _TermSlider extends ConsumerWidget {
   }
 }
 
-/// « Inclure mes crédits actuels », with a sub-line naming exactly what turning
-/// it on adds to the reading.
+/// The toggle row: « Inclure mes crédits actuels » over the sub-line naming
+/// what turning it on adds to the reading, 12 `textTertiary`.
 class _ExistingLoansSwitch extends ConsumerWidget {
   const _ExistingLoansSwitch({required this.state});
 
@@ -328,6 +332,15 @@ class _ExistingLoansSwitch extends ConsumerWidget {
 
     return Row(
       children: [
+        AppToggle(
+          key: const Key('simulatorIncludeExisting'),
+          value: state.inputs.includeExistingLoans,
+          semanticLabel: l10n.simulatorIncludeExisting,
+          onChanged: ref
+              .read(simulatorControllerProvider.notifier)
+              .setIncludeExistingLoans,
+        ),
+        const SizedBox(width: AppSpacing.smPlus),
         Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -335,9 +348,7 @@ class _ExistingLoansSwitch extends ConsumerWidget {
             children: [
               Text(
                 l10n.simulatorIncludeExisting,
-                style: Theme.of(
-                  context,
-                ).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w600),
+                style: Theme.of(context).textTheme.bodyMedium,
               ),
               Text(
                 charge > 0
@@ -350,19 +361,12 @@ class _ExistingLoansSwitch extends ConsumerWidget {
                       )
                     : l10n.simulatorIncludeExistingNone,
                 key: const Key('simulatorIncludeExistingSub'),
-                style: context.textStyles.helper,
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: context.colors.textTertiary,
+                ),
               ),
             ],
           ),
-        ),
-        const SizedBox(width: AppSpacing.sm),
-        AppToggle(
-          key: const Key('simulatorIncludeExisting'),
-          value: state.inputs.includeExistingLoans,
-          semanticLabel: l10n.simulatorIncludeExisting,
-          onChanged: ref
-              .read(simulatorControllerProvider.notifier)
-              .setIncludeExistingLoans,
         ),
       ],
     );

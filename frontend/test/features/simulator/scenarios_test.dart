@@ -1,5 +1,8 @@
 import 'package:bastide/core/theme/app_theme.dart';
 import 'package:bastide/core/widgets/amount_text.dart';
+import 'package:bastide/core/widgets/app_button.dart';
+import 'package:bastide/core/widgets/app_checkbox.dart';
+import 'package:bastide/core/widgets/note_line.dart';
 import 'package:bastide/features/simulator/application/simulator_controller.dart';
 import 'package:bastide/features/simulator/data/simulations_repository.dart';
 import 'package:bastide/features/simulator/domain/simulation.dart';
@@ -75,8 +78,8 @@ Future<void> _typeFrame(WidgetTester tester) async {
   await _settle(tester);
 }
 
-/// Scrolls a scenario row into the list's viewport, then taps it — at 900 px
-/// the list shows only its first rows, as a user would find it.
+/// Scrolls a scenario row into the inputs pane's viewport, then taps it: at
+/// 900 px the pane shows only its first rows, as a user would find it.
 Future<void> _tapRow(
   WidgetTester tester,
   String id, {
@@ -90,8 +93,8 @@ Future<void> _tapRow(
 
 final _threeScenarios = [
   testScenario(),
-  testScenario(id: 's2', label: 'Lyon 7e — 350 k€'),
-  testScenario(id: 's3', label: 'Lyon 8e — 290 k€'),
+  testScenario(id: 's2', label: 'Lyon 7e, 350 k€'),
+  testScenario(id: 's3', label: 'Lyon 8e, 290 k€'),
 ];
 
 void main() {
@@ -117,15 +120,16 @@ void main() {
     });
   });
 
-  testWidgets('with nothing saved the card is a mini empty state with no '
-      'compare control', (tester) async {
+  testWidgets('with nothing saved the block is a note with no compare '
+      'control', (tester) async {
     _useDesktopSurface(tester);
     when(() => repository.list()).thenAnswer((_) async => []);
     await tester.pumpWidget(_wrap(repository));
     await _load(tester);
 
     expect(find.byKey(const Key('scenariosEmpty')), findsOneWidget);
-    expect(find.text('Aucun scénario enregistré'), findsOneWidget);
+    expect(find.text('Aucun scénario enregistré.'), findsOneWidget);
+    expect(find.byKey(const Key('scenarioRow-live')), findsNothing);
     expect(find.byKey(const Key('scenarioCompareButton')), findsNothing);
   });
 
@@ -150,10 +154,10 @@ void main() {
     await _load(tester);
 
     final saveButton = find.byKey(const Key('simulatorSaveButton'));
-    expect(tester.widget<OutlinedButton>(saveButton).onPressed, isNull);
+    expect(tester.widget<AppButton>(saveButton).onPressed, isNull);
 
     await _typeFrame(tester);
-    expect(tester.widget<OutlinedButton>(saveButton).onPressed, isNotNull);
+    expect(tester.widget<AppButton>(saveButton).onPressed, isNotNull);
 
     await tester.tap(saveButton);
     await _settle(tester);
@@ -179,7 +183,9 @@ void main() {
     expect(_text(tester, 'scenarioName-s9'), 'Lyon 3e, 320 k€');
   });
 
-  testWidgets('the live row comes first, marked EN COURS', (tester) async {
+  testWidgets('the live row comes first, its sub-line led by « en cours »', (
+    tester,
+  ) async {
     _useDesktopSurface(tester);
     await tester.pumpWidget(_wrap(repository));
     await _load(tester);
@@ -190,21 +196,52 @@ void main() {
     expect(live.dy, lessThan(saved.dy));
     expect(_text(tester, 'scenarioName-live'), '320 k€');
     expect(
-      tester
-          .widget<Text>(
-            find.descendant(
-              of: find.byKey(const Key('scenarioLivePill')),
-              matching: find.byType(Text),
-            ),
-          )
-          .data,
-      'EN COURS',
+      _text(tester, 'scenarioSub-live'),
+      'en cours · ${formatRate(325, 'fr')} · 25 ans',
     );
     expect(
       _text(tester, 'scenarioSub-s1'),
-      '${formatRate(325, 'fr')} · 25 ans · '
-      '${formatAmount(amountMinor: 141841, currency: 'EUR', locale: 'fr')}',
+      '${formatRate(325, 'fr')} · 25 ans',
     );
+    expect(
+      _text(tester, 'scenarioInstalment-s1'),
+      formatAmount(amountMinor: 141841, currency: 'EUR', locale: 'fr'),
+    );
+  });
+
+  testWidgets('rename opens the name dialog on the current name and patches '
+      'it', (tester) async {
+    _useDesktopSurface(tester);
+    when(() => repository.rename(any(), any())).thenAnswer(
+      (invocation) async =>
+          testScenario(label: invocation.positionalArguments[1] as String),
+    );
+    await tester.pumpWidget(_wrap(repository));
+    await _load(tester);
+
+    await tester.tap(find.byKey(const Key('scenarioMenu-s1')));
+    await _settle(tester);
+    await tester.tap(find.byKey(const Key('scenarioRename-s1')));
+    await _settle(tester);
+
+    expect(find.text('Renommer le scénario'), findsOneWidget);
+    final nameField = tester.widget<EditableText>(
+      find.descendant(
+        of: find.byKey(const Key('saveScenarioName')),
+        matching: find.byType(EditableText),
+      ),
+    );
+    expect(nameField.controller.text, testScenario().label);
+
+    await tester.enterText(
+      find.byKey(const Key('saveScenarioName')),
+      'Villeurbanne, 270 k€',
+    );
+    await tester.tap(find.byKey(const Key('saveScenarioSubmit')));
+    await _settle(tester);
+
+    verify(() => repository.rename('s1', 'Villeurbanne, 270 k€')).called(1);
+    expect(_text(tester, 'scenarioName-s1'), 'Villeurbanne, 270 k€');
   });
 
   testWidgets('delete removes a saved row at once, with no confirmation', (
@@ -225,14 +262,14 @@ void main() {
     expect(find.byType(Dialog), findsNothing);
   });
 
-  testWidgets('compare takes three with the live row, then dims the rest and '
-      'says how to free a slot', (tester) async {
+  testWidgets('compare takes three with the live row, then disables the rest '
+      'and says how to free a slot', (tester) async {
     _useDesktopSurface(tester);
     await tester.pumpWidget(_wrap(repository));
     await _load(tester);
     await _typeFrame(tester);
 
-    OutlinedButton compare() => tester.widget<OutlinedButton>(
+    AppButton compare() => tester.widget<AppButton>(
       find.byKey(const Key('scenarioCompareButton')),
     );
 
@@ -247,30 +284,17 @@ void main() {
 
     expect(find.text('Comparer (3/3)'), findsOneWidget);
     expect(compare().onPressed, isNotNull);
-    // The list builds lazily, and the fourth row sits below the fold.
-    await tester.scrollUntilVisible(
-      find.byKey(const Key('scenarioRow-s3')),
-      46,
-      scrollable: find
-          .ancestor(
-            of: find.byKey(const Key('scenarioRow-s2')),
-            matching: find.byType(Scrollable),
-          )
-          .first,
-    );
-    final dimmed = tester.widget<Opacity>(
-      find
-          .ancestor(
-            of: find.byKey(const Key('scenarioRow-s3')),
-            matching: find.byType(Opacity),
-          )
-          .first,
-    );
-    expect(dimmed.opacity, 0.5);
+    await tester.ensureVisible(find.byKey(const Key('scenarioRow-s3')));
+    await tester.pump();
     expect(
-      _text(tester, 'scenarioNote'),
-      'Trois scénarios au plus, pour rester lisibles côte à côte. '
-      'Décochez-en un pour ajouter Lyon 8e — 290 k€.',
+      tester
+          .widget<AppCheckbox>(find.byKey(const Key('scenarioCheck-s3')))
+          .onChanged,
+      isNull,
+    );
+    expect(
+      tester.widget<NoteLine>(find.byKey(const Key('scenarioNote'))).text,
+      'Trois scénarios au plus. Décochez-en un pour ajouter Lyon 8e, 290 k€.',
     );
 
     // A fourth check is ignored rather than swapped in.
@@ -300,11 +324,13 @@ void main() {
     await tester.tap(find.byKey(const Key('scenarioCompareButton')));
     await _settle(tester);
 
-    expect(find.byKey(const Key('compareCard')), findsOneWidget);
-    expect(find.byKey(const Key('hcsfCard')), findsNothing);
+    expect(find.byKey(const Key('comparison')), findsOneWidget);
+    expect(find.byKey(const Key('hcsfReading')), findsNothing);
     expect(_text(tester, 'compareTitle'), 'Comparaison de 3 scénarios');
     expect(_text(tester, 'compareHeader-live'), 'Simulation en cours');
-    expect(_text(tester, 'compareHeader-s1'), 'Villeurbanne — 265 k€');
+    expect(_text(tester, 'compareLiveMarker'), 'en cours');
+    expect(_text(tester, 'compareHeader-s1'), 'Villeurbanne, 265 k€');
+    expect(_text(tester, 'compare-term-s1'), '25 ans');
 
     expect(_text(tester, 'compare-price-live'), '—');
     expect(_text(tester, 'compare-costShare-live'), '—');
@@ -317,8 +343,11 @@ void main() {
     expect(_text(tester, 'compare-ratio-s1'), startsWith('30,8'));
     expect(_text(tester, 'compare-taeg-s1'), startsWith('3,67'));
     expect(
-      _text(tester, 'compareFoot'),
-      contains('qui n’engage aucun prêteur'),
+      find.descendant(
+        of: find.byKey(const Key('compareFoot')),
+        matching: find.textContaining('qui n’engage aucun prêteur'),
+      ),
+      findsOneWidget,
     );
     // Every column carries every row.
     for (final id in ['live', 's1', 's2']) {
@@ -327,8 +356,8 @@ void main() {
 
     await tester.tap(find.byKey(const Key('compareClose')));
     await _settle(tester);
-    expect(find.byKey(const Key('compareCard')), findsNothing);
-    expect(find.byKey(const Key('hcsfCard')), findsOneWidget);
+    expect(find.byKey(const Key('comparison')), findsNothing);
+    expect(find.byKey(const Key('hcsfReading')), findsOneWidget);
   });
 
   testWidgets('prints the scenarios and the comparison in English', (
@@ -358,9 +387,14 @@ void main() {
     expect(find.text('With current loans'), findsOneWidget);
     expect(_text(tester, 'compare-ratio-s1'), '—');
     expect(
-      _text(tester, 'compareFoot'),
-      'No known income, so no debt ratio · HCSF reference 35%. An '
-      'indicative reading that binds no lender.',
+      find.descendant(
+        of: find.byKey(const Key('compareFoot')),
+        matching: find.text(
+          'No known income, so no debt ratio · HCSF reference 35%. An '
+          'indicative reading that binds no lender.',
+        ),
+      ),
+      findsOneWidget,
     );
   });
 }

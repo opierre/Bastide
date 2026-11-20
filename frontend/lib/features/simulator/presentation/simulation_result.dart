@@ -4,12 +4,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/tokens.dart';
 import '../../../core/widgets/amount_text.dart';
-import '../../../core/widgets/app_card.dart';
+import '../../../core/widgets/app_button.dart';
 import '../../../core/widgets/app_modal.dart';
 import '../../../core/widgets/inline_banner.dart';
 import '../../../core/widgets/labeled_field.dart';
 import '../../../core/widgets/money_field.dart';
-import '../../../core/widgets/primary_button.dart';
 import '../../../core/widgets/repere_meter.dart';
 import '../../../core/widgets/status_text.dart';
 import '../../../l10n/app_localizations.dart';
@@ -17,18 +16,21 @@ import '../application/simulator_controller.dart';
 import '../domain/simulation.dart';
 import 'simulator_labels.dart';
 
-/// The ratio gauge's fixed scale on this panel, in bps: 0–70 % — wider than
-/// Crédits' 0–60 %, so an over-reference reading with the existing loans
-/// counted still sits inside it (`14-simulateur.md` §Notes).
+/// The ratio repère's fixed scale on this panel, in bps: 0–70 %, wider than
+/// Crédits' 0–60 %, so a reading in the sixties stays inside it (`00` §8).
 const simulatorRatioScaleBps = 7000;
 
-/// The result row (`14-simulateur.md` §Result row): the monthly instalment, the
-/// total cost and the indicative TAEG, `1.25fr 1fr 1fr`.
+/// The term repère's scale: 0–30 years (`00` §8).
+const simulatorTermScaleMonths = 360;
+
+/// The summary line (`14-simulateur.md` §Reading pane, 1): « Échéance
+/// mensuelle » leads at 40 px, then « Coût total » and « TAEG indicatif » at
+/// 20 px, bottom-aligned and split by vertical hairlines.
 ///
-/// Every figure is the API's. The row never changes tone: an over-reference
-/// reading tints the HCSF card alone.
-class SimulationResultRow extends StatelessWidget {
-  const SimulationResultRow({super.key, required this.state});
+/// Every figure is the API's, neutral, and none depends on the existing-loans
+/// toggle. Before anything computes the figures are « — » `textTertiary`.
+class SimulationSummaryLine extends StatelessWidget {
+  const SimulationSummaryLine({super.key, required this.state});
 
   final SimulatorState state;
 
@@ -46,23 +48,19 @@ class SimulationResultRow extends StatelessWidget {
       locale: locale,
     );
 
-    final valueStyle = tabularNumberStyle(
-      textTheme.displayMedium!.copyWith(fontSize: 24),
-    );
-
     return IntrinsicHeight(
+      key: const Key('simulatorSummaryLine'),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Expanded(
-            flex: 125,
-            child: _ResultCard(
-              key: const Key('resultInstalmentCard'),
+          Flexible(
+            flex: 5,
+            child: _SummaryItem(
+              id: 'Instalment',
               label: l10n.simulatorInstalmentLabel,
-              hero: true,
-              valueKey: const Key('resultInstalment'),
+              labelGap: AppSpacing.xs,
               value: result == null ? null : money(result.totalInstalmentMinor),
-              valueStyle: tabularNumberStyle(textTheme.displayLarge!),
+              valueStyle: textTheme.displayLarge!,
               caption: result == null || terms == null
                   ? l10n.simulatorInstalmentEmpty
                   : l10n.simulatorInstalmentCaption(
@@ -70,48 +68,35 @@ class SimulationResultRow extends StatelessWidget {
                       money(terms.insuranceMonthlyMinor),
                       terms.termMonths,
                     ),
-              captionKey: const Key('resultInstalmentCaption'),
             ),
           ),
-          const SizedBox(width: 14),
-          Expanded(
-            flex: 100,
-            child: _ResultCard(
-              key: const Key('resultCostCard'),
+          const _VerticalHairline(),
+          Flexible(
+            flex: 4,
+            child: _SummaryItem(
+              id: 'Cost',
               label: l10n.simulatorCostLabel,
-              valueKey: const Key('resultCost'),
               value: result == null ? null : money(result.totalCostMinor),
-              valueStyle: valueStyle,
+              valueStyle: textTheme.displaySmall!,
               caption: result == null || terms == null
-                  ? l10n.simulatorCostEmpty
-                  : switch (result.costOverPriceBps) {
-                      final share? => l10n.simulatorCostCaption(
-                        money(result.totalInterestMinor),
-                        money(result.totalInsuranceMinor),
-                        money(terms.upfrontFeesMinor),
-                        formatBps(share, locale),
-                      ),
-                      null => l10n.simulatorCostCaptionNoPrice(
-                        money(result.totalInterestMinor),
-                        money(result.totalInsuranceMinor),
-                        money(terms.upfrontFeesMinor),
-                      ),
-                    },
-              captionKey: const Key('resultCostCaption'),
+                  ? null
+                  : l10n.simulatorCostCaption(
+                      money(result.totalInterestMinor),
+                      money(result.totalInsuranceMinor),
+                      money(terms.upfrontFeesMinor),
+                    ),
             ),
           ),
-          const SizedBox(width: 14),
-          Expanded(
-            flex: 100,
-            child: _ResultCard(
-              key: const Key('resultTaegCard'),
+          const _VerticalHairline(),
+          Flexible(
+            flex: 3,
+            child: _SummaryItem(
+              id: 'Taeg',
               // « indicatif » is part of the TAEG label itself.
               label: l10n.simulatorTaegLabel,
-              valueKey: const Key('resultTaeg'),
               value: result == null ? null : formatRate(result.taegBps, locale),
-              valueStyle: valueStyle,
+              valueStyle: textTheme.displaySmall!,
               caption: l10n.simulatorTaegCaption,
-              captionKey: const Key('resultTaegCaption'),
             ),
           ),
         ],
@@ -120,87 +105,98 @@ class SimulationResultRow extends StatelessWidget {
   }
 }
 
-class _ResultCard extends StatelessWidget {
-  const _ResultCard({
-    super.key,
+/// A vertical `line` hairline with the summary line's 40 px either side.
+class _VerticalHairline extends StatelessWidget {
+  const _VerticalHairline();
+
+  @override
+  Widget build(BuildContext context) => Padding(
+    padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xxl),
+    child: SizedBox(width: 1, child: ColoredBox(color: context.colors.line)),
+  );
+}
+
+/// One item of the summary line: label 12 `textSecondary`, the figure, then
+/// an optional caption 12 `textTertiary`.
+class _SummaryItem extends StatelessWidget {
+  const _SummaryItem({
+    required this.id,
     required this.label,
     required this.value,
     required this.valueStyle,
     required this.caption,
-    this.hero = false,
-    this.valueKey,
-    this.captionKey,
+    this.labelGap = AppSpacing.xsPlus,
   });
 
+  /// Suffix of the item's keys: `result<id>`, `result<id>Caption`.
+  final String id;
   final String label;
 
-  /// `null` draws the dash: the card keeps its place before anything computes.
+  /// `null` draws the dash.
   final String? value;
   final TextStyle valueStyle;
-  final String caption;
-  final bool hero;
-  final Key? valueKey;
-  final Key? captionKey;
+  final String? caption;
+  final double labelGap;
 
   @override
   Widget build(BuildContext context) {
-    return AppCard(
-      padding: const EdgeInsets.symmetric(
-        horizontal: 22,
-        vertical: AppSpacing.cardPadding,
-      ),
-      border: hero ? Border.all(color: context.colors.line) : null,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Row(
-            children: [
-              Flexible(
-                child: Text(
-                  label.toUpperCase(),
-                  style: context.textStyles.statLabel.copyWith(
-                    color: hero ? context.colors.accent : null,
-                  ),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: AppSpacing.sm),
-          Text(
-            value ?? '—',
-            key: valueKey,
+    final l10n = AppLocalizations.of(context)!;
+    final textTheme = Theme.of(context).textTheme;
+    final colors = context.colors;
+    final caption = this.caption;
+
+    return Column(
+      key: Key('result${id}Item'),
+      mainAxisAlignment: MainAxisAlignment.end,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          key: Key('result${id}Label'),
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: context.textStyles.statLabel,
+        ),
+        SizedBox(height: labelGap),
+        FittedBox(
+          fit: BoxFit.scaleDown,
+          alignment: AlignmentDirectional.centerStart,
+          child: Text(
+            value ?? l10n.simulatorNoValue,
+            key: Key('result$id'),
             maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: valueStyle.copyWith(
-              color: value == null
-                  ? context.colors.textTertiary
-                  : context.colors.text,
+            style: tabularNumberStyle(valueStyle).copyWith(
+              color: value == null ? colors.textTertiary : colors.text,
             ),
           ),
-          const SizedBox(height: AppSpacing.xs + 2),
+        ),
+        if (caption != null) ...[
+          SizedBox(height: labelGap),
           Text(
             caption,
-            key: captionKey,
+            key: Key('result${id}Caption'),
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
             style: tabularNumberStyle(
-              context.textStyles.helper,
-            ).copyWith(fontSize: 12),
+              textTheme.bodySmall!,
+            ).copyWith(color: colors.textTertiary),
           ),
         ],
-      ),
+      ],
     );
   }
 }
 
-/// « Lecture HCSF » (`14-simulateur.md` §HCSF Card): the debt ratio against its
-/// limit, the term against its maximum and the borrowing capacity at the
-/// reference — each with its reference point, as a reading.
+/// « Lecture HCSF » (`14-simulateur.md` §Reading pane, 3): the debt ratio
+/// against 35 %, the term against 25 years and the borrowing capacity at the
+/// reference, each on its repère, as a reading.
 ///
-/// Over a reference only this card changes: an amber border and pill. Nothing
-/// on the panel is blocked by it. With no income there is no ratio and no
-/// capacity, so no gauge is drawn — the card says why and offers the way out.
-class HcsfReadingCard extends StatelessWidget {
-  const HcsfReadingCard({super.key, required this.state});
+/// Above a reference only the repère turns `over` and the heading gains a
+/// `warning` status text; nothing else changes tone and nothing is blocked.
+/// With no income there is no ratio and no capacity: the two columns merge
+/// into one block that says why and offers the way out.
+class HcsfReading extends StatelessWidget {
+  const HcsfReading({super.key, required this.state});
 
   final SimulatorState state;
 
@@ -212,110 +208,65 @@ class HcsfReadingCard extends StatelessWidget {
     final hcsf = result?.hcsf;
     final over =
         hcsf != null && (hcsf.withinRatio == false || !hcsf.withinTerm);
+    const gap = SizedBox(width: AppSpacing.xxl);
 
     final Widget columns;
-    if (result == null) {
+    if (result != null && !state.incomeKnown) {
       columns = Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Expanded(
-            flex: 130,
-            child: _ReadingColumn(
-              label: l10n.simulatorRatioLabel,
-              value: null,
-              valueKey: const Key('hcsfRatioValue'),
-              caption: l10n.simulatorRatioEmpty,
-            ),
-          ),
-          const SizedBox(width: 22),
-          Expanded(flex: 100, child: _TermColumn(state: state)),
-          const SizedBox(width: 22),
-          Expanded(
-            flex: 130,
-            child: _ReadingColumn(
-              label: l10n.simulatorCapacityLabel,
-              value: null,
-              valueKey: const Key('hcsfCapacityValue'),
-              caption: l10n.simulatorCapacityEmpty,
-            ),
-          ),
-        ],
-      );
-    } else if (!state.incomeKnown) {
-      columns = Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Expanded(flex: 260, child: _UnknownIncomeBlock()),
-          const SizedBox(width: 22),
-          Expanded(flex: 130, child: _TermColumn(state: state)),
+          const Expanded(flex: 2, child: _UnknownIncomeBlock()),
+          gap,
+          Expanded(child: _TermColumn(state: state)),
         ],
       );
     } else {
       columns = Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Expanded(flex: 130, child: _RatioColumn(state: state)),
-          const SizedBox(width: 22),
-          Expanded(flex: 100, child: _TermColumn(state: state)),
-          const SizedBox(width: 22),
-          Expanded(flex: 130, child: _CapacityColumn(state: state)),
+          Expanded(child: _RatioColumn(state: state)),
+          gap,
+          Expanded(child: _TermColumn(state: state)),
+          gap,
+          Expanded(child: _CapacityColumn(state: state)),
         ],
       );
     }
 
-    return AppCard(
-      key: const Key('hcsfCard'),
-      padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 16),
-      border: over ? Border.all(color: context.colors.lineStrong) : null,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Row(
-            children: [
-              Text(l10n.simulatorHcsfTitle, style: textTheme.titleMedium),
-              if (over) ...[
-                const SizedBox(width: AppSpacing.sm + 2),
-                StatusText(
-                  key: const Key('hcsfOverPill'),
-                  label: l10n.simulatorHcsfOver,
-                  tone: StatusTone.warning,
-                ),
-              ],
-              const SizedBox(width: AppSpacing.md),
-              // Body content, never a tooltip: the app makes no lending
-              // decisions and says so where the reading is shown. It takes
-              // the room left of the title and wraps rather than overflow.
-              Expanded(
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    Icon(
-                      Icons.info_outline_rounded,
-                      size: 12,
-                      color: context.colors.textTertiary,
-                    ),
-                    const SizedBox(width: AppSpacing.xs + 1),
-                    Flexible(
-                      child: Text(
-                        l10n.simulatorHcsfCaveat,
-                        key: const Key('hcsfCaveat'),
-                        textAlign: TextAlign.end,
-                        style: context.textStyles.helper.copyWith(
-                          fontSize: 11,
-                          color: context.colors.textTertiary,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
+    return Column(
+      key: const Key('hcsfReading'),
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Row(
+          children: [
+            Text(l10n.simulatorHcsfTitle, style: textTheme.titleSmall),
+            if (over) ...[
+              const SizedBox(width: AppSpacing.smPlus),
+              StatusText(
+                key: const Key('hcsfOverStatus'),
+                label: l10n.simulatorHcsfOver,
+                tone: StatusTone.warning,
               ),
             ],
-          ),
-          const SizedBox(height: 14),
-          columns,
-        ],
-      ),
+            const SizedBox(width: AppSpacing.md),
+            // Body text, never a tooltip: the app makes no lending decision
+            // and says so where the reading is shown (`00` §14, rule 10).
+            Expanded(
+              child: Text(
+                l10n.simulatorHcsfCaveat,
+                key: const Key('hcsfCaveat'),
+                textAlign: TextAlign.end,
+                style: textTheme.bodySmall?.copyWith(
+                  color: context.colors.textTertiary,
+                ),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: AppSpacing.fieldGap),
+        columns,
+      ],
     );
   }
 }
@@ -329,12 +280,20 @@ class _RatioColumn extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final locale = Localizations.localeOf(context).toString();
-    final result = state.result!;
+    final result = state.result;
+    final ratio = result?.debtRatioBps;
+    if (result == null || ratio == null) {
+      return _ReadingColumn(
+        label: l10n.simulatorRatioLabel,
+        value: null,
+        valueKey: const Key('hcsfRatioValue'),
+        caption: l10n.simulatorRatioEmpty,
+        captionKey: const Key('hcsfRatioCaption'),
+      );
+    }
     final household = state.household;
-    final ratio = result.debtRatioBps!;
     final income = household.monthlyIncomeMinor;
-    final withExisting =
-        state.inputs.includeExistingLoans && household.existingChargeMinor > 0;
+    final withExisting = state.chargeWithExistingMinor;
 
     String money(int minor) => formatAmount(
       amountMinor: minor,
@@ -345,28 +304,29 @@ class _RatioColumn extends StatelessWidget {
     final source = household.incomeSource == IncomeSource.declared
         ? 'declared'
         : 'ledger';
+    final limit = formatBps(result.hcsf.limitBps, locale, digits: 0);
 
     return _ReadingColumn(
       label: l10n.simulatorRatioLabel,
       value: formatBps(ratio, locale),
       valueKey: const Key('hcsfRatioValue'),
-      reference: l10n.simulatorReference(
-        formatBps(result.hcsf.limitBps, locale, digits: 0),
-      ),
-      // The tone follows the API's `within_*` flags, not a comparison made
-      // here.
-      gauge: RepereMeter(
+      // The tone follows the API's `within_ratio` flag, not a comparison
+      // made here. Above 70 % the fill clamps; the number stays exact.
+      meter: RepereMeter(
         key: const Key('hcsfRatioGauge'),
         fraction: ratio / simulatorRatioScaleBps,
         markFraction: result.hcsf.limitBps / simulatorRatioScaleBps,
+        markLabel: l10n.simulatorReference(limit),
         tone: result.hcsf.withinRatio == false
             ? RepereTone.over
             : RepereTone.normal,
+        semanticLabel: formatBps(ratio, locale),
       ),
       caption: income == null
           ? null
-          : withExisting
+          : withExisting != null
           ? l10n.simulatorRatioCaptionWithExisting(
+              money(withExisting),
               money(result.totalInstalmentMinor),
               money(household.existingChargeMinor),
               source,
@@ -397,16 +357,17 @@ class _TermColumn extends StatelessWidget {
       label: l10n.simulatorTerm,
       value: termLabel(l10n, term),
       valueKey: const Key('hcsfTermValue'),
-      reference: hcsf == null
-          ? null
-          : l10n.simulatorReference(termLabel(l10n, hcsf.maxTermMonths)),
-      gauge: hcsf == null
+      meter: hcsf == null
           ? null
           : RepereMeter(
               key: const Key('hcsfTermGauge'),
-              fraction: term / SimulatorInputs.maxTermMonths,
-              markFraction: hcsf.maxTermMonths / SimulatorInputs.maxTermMonths,
+              fraction: term / simulatorTermScaleMonths,
+              markFraction: hcsf.maxTermMonths / simulatorTermScaleMonths,
+              markLabel: l10n.simulatorReference(
+                termLabel(l10n, hcsf.maxTermMonths),
+              ),
               tone: hcsf.withinTerm ? RepereTone.normal : RepereTone.over,
+              semanticLabel: termLabel(l10n, term),
             ),
       caption: hcsf == null
           ? null
@@ -429,22 +390,31 @@ class _CapacityColumn extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final locale = Localizations.localeOf(context).toString();
-    final result = state.result!;
-    final capacity = result.maxBorrowableMinor;
-    final available = result.availableInstalmentMinor;
+    final result = state.result;
+    final capacity = result?.maxBorrowableMinor;
+    final available = result?.availableInstalmentMinor;
+    if (result == null) {
+      return _ReadingColumn(
+        label: l10n.simulatorCapacityLabel,
+        value: null,
+        valueKey: const Key('hcsfCapacityValue'),
+        caption: l10n.simulatorCapacityEmpty,
+        captionKey: const Key('hcsfCapacityCaption'),
+        inline: false,
+      );
+    }
 
     String money(int minor) => formatAmount(
       amountMinor: minor,
       currency: result.currency,
       locale: locale,
     );
+    final limit = formatBps(result.hcsf.limitBps, locale, digits: 0);
 
     // A small capacity is explained by its cause: when the current loans are
     // what fill the room under the reference, the caption says so.
     final crowdedByExisting =
-        state.inputs.includeExistingLoans &&
-        state.household.existingChargeMinor > 0 &&
-        result.hcsf.withinRatio == false;
+        state.countsExistingLoans && result.hcsf.withinRatio == false;
 
     return _ReadingColumn(
       label: l10n.simulatorCapacityLabel,
@@ -453,25 +423,26 @@ class _CapacityColumn extends StatelessWidget {
       caption: available == null
           ? null
           : crowdedByExisting
-          ? l10n.simulatorCapacityCaptionExisting(money(available))
-          : l10n.simulatorCapacityCaption(
-              money(available),
-              formatBps(result.hcsf.limitBps, locale, digits: 0),
-            ),
+          ? l10n.simulatorCapacityCaptionExisting(money(available), limit)
+          : l10n.simulatorCapacityCaption(money(available), limit),
       captionKey: const Key('hcsfCapacityCaption'),
+      inline: false,
     );
   }
 }
 
+/// One reading: the label and its figure at 20 px (on one line, or the
+/// figure under the label when [inline] is off), the repère when there is
+/// one, then the caption 12 `textTertiary`, 6 px apart.
 class _ReadingColumn extends StatelessWidget {
   const _ReadingColumn({
     required this.label,
     required this.value,
     this.valueKey,
-    this.reference,
-    this.gauge,
+    this.meter,
     this.caption,
     this.captionKey,
+    this.inline = true,
   });
 
   final String label;
@@ -479,59 +450,63 @@ class _ReadingColumn extends StatelessWidget {
   /// `null` draws the dash.
   final String? value;
   final Key? valueKey;
-  final String? reference;
-  final Widget? gauge;
+  final Widget? meter;
   final String? caption;
   final Key? captionKey;
+  final bool inline;
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final textTheme = Theme.of(context).textTheme;
+    final colors = context.colors;
+    final labelText = Text(
+      label,
+      maxLines: 1,
+      overflow: TextOverflow.ellipsis,
+      style: context.textStyles.statLabel,
+    );
+    final valueText = Text(
+      value ?? l10n.simulatorNoValue,
+      key: valueKey,
+      maxLines: 1,
+      style: tabularNumberStyle(
+        textTheme.displaySmall!,
+      ).copyWith(color: value == null ? colors.textTertiary : colors.text),
+    );
+    const gap = SizedBox(height: AppSpacing.xsPlus);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       mainAxisSize: MainAxisSize.min,
       children: [
-        Text(label.toUpperCase(), style: context.textStyles.statLabel),
-        const SizedBox(height: AppSpacing.xs + 2),
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.baseline,
-          textBaseline: TextBaseline.alphabetic,
-          children: [
-            Flexible(
-              child: Text(
-                value ?? '—',
-                key: valueKey,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style:
-                    tabularNumberStyle(
-                      textTheme.displayMedium!.copyWith(fontSize: 22),
-                    ).copyWith(
-                      color: value == null
-                          ? context.colors.textTertiary
-                          : context.colors.text,
-                    ),
-              ),
-            ),
-            if (reference != null) ...[
+        if (inline)
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.baseline,
+            textBaseline: TextBaseline.alphabetic,
+            children: [
+              Expanded(child: labelText),
               const SizedBox(width: AppSpacing.sm),
-              Text(
-                reference!,
-                style: context.textStyles.helper.copyWith(fontSize: 12),
-              ),
+              valueText,
             ],
-          ],
-        ),
-        if (gauge != null) ...[const SizedBox(height: AppSpacing.sm), gauge!],
+          )
+        else ...[
+          labelText,
+          gap,
+          Align(
+            alignment: AlignmentDirectional.centerStart,
+            child: FittedBox(fit: BoxFit.scaleDown, child: valueText),
+          ),
+        ],
+        if (meter != null) ...[gap, meter!],
         if (caption != null) ...[
-          const SizedBox(height: AppSpacing.sm),
+          gap,
           Text(
             caption!,
             key: captionKey,
             style: tabularNumberStyle(
-              context.textStyles.helper,
-            ).copyWith(fontSize: 11.5),
+              textTheme.bodySmall!,
+            ).copyWith(color: colors.textTertiary),
           ),
         ],
       ],
@@ -539,8 +514,8 @@ class _ReadingColumn extends StatelessWidget {
   }
 }
 
-/// ④: ratio and capacity collapse into one block — the dash, why, and the way
-/// out.
+/// Income unknown: the ratio and capacity columns merge into one block, the
+/// dash, why, and the way out.
 class _UnknownIncomeBlock extends StatelessWidget {
   const _UnknownIncomeBlock();
 
@@ -548,6 +523,7 @@ class _UnknownIncomeBlock extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final textTheme = Theme.of(context).textTheme;
+    final colors = context.colors;
 
     return Column(
       key: const Key('hcsfUnknownIncome'),
@@ -555,42 +531,23 @@ class _UnknownIncomeBlock extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       children: [
         Text(
-          l10n.simulatorRatioLabel.toUpperCase(),
-          style: context.textStyles.statLabel,
-        ),
-        const SizedBox(height: AppSpacing.xs + 2),
-        Text(
-          '—',
+          l10n.simulatorNoValue,
           key: const Key('hcsfRatioValue'),
-          style: textTheme.displayMedium!.copyWith(
-            fontSize: 22,
-            color: context.colors.textTertiary,
-          ),
+          style: textTheme.displaySmall!.copyWith(color: colors.textTertiary),
         ),
-        const SizedBox(height: AppSpacing.xs + 2),
+        const SizedBox(height: AppSpacing.xsPlus),
         Text(
           l10n.simulatorRatioUnknown,
           key: const Key('hcsfUnknownIncomeText'),
-          style: context.textStyles.helper.copyWith(fontSize: 12),
+          style: textTheme.bodySmall?.copyWith(color: colors.textSecondary),
         ),
-        const SizedBox(height: AppSpacing.sm + 2),
-        SizedBox(
-          height: 30,
-          child: OutlinedButton.icon(
-            key: const Key('hcsfDeclareIncome'),
-            onPressed: () => showDialog<void>(
-              context: context,
-              builder: (_) => const SimulatorIncomeModal(),
-            ),
-            style: OutlinedButton.styleFrom(
-              foregroundColor: context.colors.accent,
-              side: BorderSide(color: context.colors.line),
-              padding: const EdgeInsets.symmetric(
-                horizontal: AppSpacing.sm + AppSpacing.xs,
-              ),
-            ),
-            icon: const Icon(Icons.add_rounded, size: 15),
-            label: Text(l10n.simulatorDeclareIncome),
+        const SizedBox(height: AppSpacing.smPlus),
+        AppButton(
+          key: const Key('hcsfDeclareIncome'),
+          label: l10n.simulatorDeclareIncome,
+          onPressed: () => showDialog<void>(
+            context: context,
+            builder: (_) => const SimulatorIncomeModal(),
           ),
         ),
       ],
@@ -598,10 +555,13 @@ class _UnknownIncomeBlock extends StatelessWidget {
   }
 }
 
-/// « Déclarer un revenu », opened from the unknown-income reading. The income
+/// « Déclarer un revenu », opened from the unknown-income block. The income
 /// becomes the ratio's denominator, and the reading recomputes behind it.
 class SimulatorIncomeModal extends ConsumerStatefulWidget {
   const SimulatorIncomeModal({super.key});
+
+  /// The same width as the save dialog (`14` §States).
+  static const width = 420.0;
 
   @override
   ConsumerState<SimulatorIncomeModal> createState() =>
@@ -653,15 +613,17 @@ class _SimulatorIncomeModalState extends ConsumerState<SimulatorIncomeModal> {
 
     return AppModal(
       title: l10n.simulatorIncomeTitle,
-      width: 440,
+      subtitle: Text(l10n.simulatorIncomeBody),
+      width: SimulatorIncomeModal.width,
       actions: [
-        OutlinedButton(
+        AppButton(
+          label: l10n.simulatorCancel,
           onPressed: _isSubmitting ? null : () => Navigator.of(context).pop(),
-          child: Text(l10n.simulatorCancel),
         ),
-        PrimaryButton(
+        AppButton(
           key: const Key('simulatorIncomeSubmit'),
           label: l10n.simulatorIncomeSubmit,
+          variant: AppButtonVariant.primary,
           isLoading: _isSubmitting,
           onPressed: _isSubmitting ? null : _submit,
         ),
@@ -671,16 +633,9 @@ class _SimulatorIncomeModalState extends ConsumerState<SimulatorIncomeModal> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Text(
-              l10n.simulatorIncomeBody,
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: context.colors.textSecondary,
-              ),
-            ),
-            const SizedBox(height: AppSpacing.md),
             if (_errorText != null) ...[
               InlineBanner(message: _errorText!),
-              const SizedBox(height: AppSpacing.md),
+              const SizedBox(height: AppSpacing.fieldGap),
             ],
             LabeledField(
               label: l10n.simulatorIncomeLabel,
@@ -689,6 +644,7 @@ class _SimulatorIncomeModalState extends ConsumerState<SimulatorIncomeModal> {
                 controller: _amount,
                 currency: currency,
                 autofocus: true,
+                textAlign: TextAlign.end,
                 validator: (value) {
                   final locale = Localizations.localeOf(context).toString();
                   final amount = parseMoneyMinor(value ?? '', locale);

@@ -5670,6 +5670,12 @@ abstract class AppLocalizations {
   /// **'Réessayer'**
   String get simulatorRetry;
 
+  /// Placeholder for a figure that cannot be read yet or does not apply.
+  ///
+  /// In fr, this message translates to:
+  /// **'—'**
+  String get simulatorNoValue;
+
   /// Title of the simulator input card.
   ///
   /// In fr, this message translates to:
@@ -5721,7 +5727,7 @@ abstract class AppLocalizations {
   /// Simulator field: monthly insurance premium.
   ///
   /// In fr, this message translates to:
-  /// **'Assurance / mois'**
+  /// **'Assurance par mois'**
   String get simulatorInsurance;
 
   /// Simulator term slider label, and the HCSF term column label.
@@ -5733,7 +5739,7 @@ abstract class AppLocalizations {
   /// Term slider value in both units.
   ///
   /// In fr, this message translates to:
-  /// **'{months} mois · {years, plural, =1{1 an} other{{years} ans}}'**
+  /// **'{years, plural, =1{1 an} other{{years} ans}} · {months} mois'**
   String simulatorTermValue(int months, num years);
 
   /// A duration in whole years.
@@ -5757,7 +5763,7 @@ abstract class AppLocalizations {
   /// Sub-line of the existing-loans switch naming what it adds.
   ///
   /// In fr, this message translates to:
-  /// **'Ajoute {amount} / mois à la lecture'**
+  /// **'Ajoute {amount} par mois à la lecture'**
   String simulatorIncludeExistingAdds(String amount);
 
   /// Sub-line of the existing-loans switch when the user has no active loan.
@@ -5766,62 +5772,41 @@ abstract class AppLocalizations {
   /// **'Aucun crédit en cours à ajouter'**
   String get simulatorIncludeExistingNone;
 
-  /// Hero result card label. Rendered uppercase.
+  /// Lead label of the summary line.
   ///
   /// In fr, this message translates to:
   /// **'Échéance mensuelle'**
   String get simulatorInstalmentLabel;
 
-  /// Hero caption: the instalment is the payment plus the insurance, named separately.
+  /// Caption under the lead figure: the instalment is the payment plus the insurance, named separately.
   ///
   /// In fr, this message translates to:
-  /// **'{payment} de mensualité + {insurance} d\'assurance · {count, plural, =1{1 échéance} other{{count} échéances}}'**
+  /// **'{payment} de mensualité + {insurance} d’assurance · {count, plural, =1{1 échéance} other{{count} échéances}}'**
   String simulatorInstalmentCaption(
     String payment,
     String insurance,
     int count,
   );
 
-  /// Hero caption before anything can be computed.
+  /// Caption under the lead figure before anything can be computed.
   ///
   /// In fr, this message translates to:
-  /// **'Renseignez un prix et un taux pour voir l\'échéance et sa part d\'assurance.'**
+  /// **'Renseignez un prix et un taux pour voir l’échéance.'**
   String get simulatorInstalmentEmpty;
 
-  /// Total cost result card label. Rendered uppercase.
+  /// Summary line label of the total cost.
   ///
   /// In fr, this message translates to:
   /// **'Coût total'**
   String get simulatorCostLabel;
 
-  /// Total cost caption with its parts and its share of the property price.
+  /// Total cost caption naming its parts.
   ///
   /// In fr, this message translates to:
-  /// **'intérêts {interest} + assurance {insurance} + frais {fees} · {share} du prix'**
-  String simulatorCostCaption(
-    String interest,
-    String insurance,
-    String fees,
-    String share,
-  );
+  /// **'intérêts {interest} · assurance {insurance} · frais {fees}'**
+  String simulatorCostCaption(String interest, String insurance, String fees);
 
-  /// Total cost caption when no price was entered, so there is no share of the price.
-  ///
-  /// In fr, this message translates to:
-  /// **'intérêts {interest} + assurance {insurance} + frais {fees}'**
-  String simulatorCostCaptionNoPrice(
-    String interest,
-    String insurance,
-    String fees,
-  );
-
-  /// Total cost caption before anything can be computed.
-  ///
-  /// In fr, this message translates to:
-  /// **'Renseignez un prix et un taux pour voir le coût total et sa part du prix.'**
-  String get simulatorCostEmpty;
-
-  /// Annual percentage rate result card label.
+  /// Summary line label of the APR; « indicatif » is part of it.
   ///
   /// In fr, this message translates to:
   /// **'TAEG indicatif'**
@@ -5830,7 +5815,7 @@ abstract class AppLocalizations {
   /// TAEG caption.
   ///
   /// In fr, this message translates to:
-  /// **'taux, assurance et frais inclus'**
+  /// **'taux, assurance et frais'**
   String get simulatorTaegCaption;
 
   /// Title of the HCSF reading card.
@@ -5860,7 +5845,7 @@ abstract class AppLocalizations {
   /// HCSF card: debt ratio column label.
   ///
   /// In fr, this message translates to:
-  /// **'Taux d\'endettement'**
+  /// **'Taux d’endettement'**
   String get simulatorRatioLabel;
 
   /// Debt ratio caption: the instalment against the income and where the income came from.
@@ -5869,11 +5854,12 @@ abstract class AppLocalizations {
   /// **'{instalment} sur un revenu {source, select, declared{déclaré} other{médian constaté}} de {income}'**
   String simulatorRatioCaption(String instalment, String source, String income);
 
-  /// Debt ratio caption with the current loans counted.
+  /// Debt ratio caption with the current loans counted: the total charge, then its two parts.
   ///
   /// In fr, this message translates to:
-  /// **'{instalment} + crédits actuels {existing} sur un revenu {source, select, declared{déclaré} other{médian constaté}} de {income}'**
+  /// **'{total} ({instalment} + crédits actuels {existing}) sur un revenu {source, select, declared{déclaré} other{médian constaté}} de {income}'**
   String simulatorRatioCaptionWithExisting(
+    String total,
     String instalment,
     String existing,
     String source,
@@ -5883,13 +5869,13 @@ abstract class AppLocalizations {
   /// Debt ratio caption before anything can be computed.
   ///
   /// In fr, this message translates to:
-  /// **'Renseignez un prix et un taux pour lire le taux d\'endettement.'**
+  /// **'Renseignez un prix et un taux pour lire le taux d’endettement.'**
   String get simulatorRatioEmpty;
 
   /// HCSF card when no income is known: no ratio and no capacity.
   ///
   /// In fr, this message translates to:
-  /// **'Aucun revenu connu : le grand livre n\'a pas de revenus réguliers et aucun revenu n\'est déclaré. Sans revenu, ni taux ni capacité ne peuvent être lus.'**
+  /// **'Aucun revenu connu. Sans revenu, ni taux ni capacité ne peuvent être lus.'**
   String get simulatorRatioUnknown;
 
   /// Outline button offering to declare an income when none is known.
@@ -5901,43 +5887,43 @@ abstract class AppLocalizations {
   /// HCSF term caption when the term equals the maximum.
   ///
   /// In fr, this message translates to:
-  /// **'au repère, pas au-delà'**
+  /// **'Au repère, pas au-delà'**
   String get simulatorTermAtReference;
 
   /// HCSF term caption when the term is shorter than the maximum.
   ///
   /// In fr, this message translates to:
-  /// **'sous le repère'**
+  /// **'Sous le repère'**
   String get simulatorTermUnderReference;
 
   /// HCSF term caption when the term is longer than the maximum. Information only.
   ///
   /// In fr, this message translates to:
-  /// **'au-delà du repère'**
+  /// **'Au-delà du repère'**
   String get simulatorTermOverReference;
 
   /// HCSF card: borrowing capacity column label.
   ///
   /// In fr, this message translates to:
-  /// **'Capacité d\'emprunt au repère'**
+  /// **'Capacité d’emprunt au repère'**
   String get simulatorCapacityLabel;
 
   /// Capacity caption: the instalment still available under the reference.
   ///
   /// In fr, this message translates to:
-  /// **'{available} d\'échéance disponibles sous {limit}, à ces conditions'**
+  /// **'{available} d’échéance disponibles sous {limit}, à ces conditions'**
   String simulatorCapacityCaption(String available, String limit);
 
-  /// Capacity caption when the current loans use up the room under the reference: explains the cause calmly.
+  /// Capacity caption when the current loans are what shrink it: names the cause.
   ///
   /// In fr, this message translates to:
-  /// **'Vos crédits actuels laissent {available} d’échéance sous le repère. C’est ce qui limite la capacité, pas le bien visé.'**
-  String simulatorCapacityCaptionExisting(String available);
+  /// **'Vos crédits actuels laissent {available} d’échéance sous {limit}. C’est ce qui limite la capacité, pas le bien visé.'**
+  String simulatorCapacityCaptionExisting(String available, String limit);
 
   /// Capacity caption before anything can be computed.
   ///
   /// In fr, this message translates to:
-  /// **'Renseignez un prix et un taux pour lire la capacité d\'emprunt.'**
+  /// **'Renseignez un prix et un taux pour lire la capacité d’emprunt.'**
   String get simulatorCapacityEmpty;
 
   /// Title of the yearly projection chart.
@@ -5973,7 +5959,7 @@ abstract class AppLocalizations {
   /// Projection chart invitation before anything can be computed.
   ///
   /// In fr, this message translates to:
-  /// **'Renseignez un prix et un taux : la répartition capital / intérêts par année s\'affiche ici.'**
+  /// **'Renseignez un prix et un taux : la répartition par année s’affiche ici.'**
   String get simulatorChartEmpty;
 
   /// Banner when a live compute fails for a reason no field explains.
@@ -6054,12 +6040,6 @@ abstract class AppLocalizations {
   /// **'Enregistrer le scénario'**
   String get simulatorSaveScenario;
 
-  /// Save-scenario modal body: a scenario stores inputs only.
-  ///
-  /// In fr, this message translates to:
-  /// **'Seules les valeurs saisies sont enregistrées : le résultat est recalculé à chaque fois.'**
-  String get simulatorSaveBody;
-
   /// Save-scenario modal name field label.
   ///
   /// In fr, this message translates to:
@@ -6114,29 +6094,17 @@ abstract class AppLocalizations {
   /// **'Comparer ({count}/{max})'**
   String simulatorCompareButton(int count, int max);
 
-  /// Why the compare button is disabled with fewer than two rows checked.
-  ///
-  /// In fr, this message translates to:
-  /// **'Cochez au moins deux scénarios pour les comparer.'**
-  String get simulatorCompareNeedsTwo;
-
   /// Note under the list at the cap, naming the one row left out.
   ///
   /// In fr, this message translates to:
-  /// **'Trois scénarios au plus, pour rester lisibles côte à côte. Décochez-en un pour ajouter {name}.'**
+  /// **'Trois scénarios au plus. Décochez-en un pour ajouter {name}.'**
   String simulatorCompareCapNamed(String name);
 
   /// Note under the list at the cap when several rows are left out.
   ///
   /// In fr, this message translates to:
-  /// **'Trois scénarios au plus, pour rester lisibles côte à côte. Décochez-en un pour en ajouter un autre.'**
+  /// **'Trois scénarios au plus. Décochez-en un pour en ajouter un autre.'**
   String get simulatorCompareCap;
-
-  /// Iris marker pill on the live, unsaved simulation row. Rendered uppercase.
-  ///
-  /// In fr, this message translates to:
-  /// **'En cours'**
-  String get simulatorLivePill;
 
   /// Name of the live row before a price gives it one.
   ///
@@ -6144,23 +6112,41 @@ abstract class AppLocalizations {
   /// **'Simulation en cours'**
   String get simulatorLiveName;
 
-  /// Scenario row sub-line: rate, term and instalment.
+  /// Marks the live, unsaved simulation in the scenario list and the comparison.
   ///
   /// In fr, this message translates to:
-  /// **'{rate} · {term} · {instalment}'**
-  String simulatorScenarioSub(String rate, String term, String instalment);
+  /// **'en cours'**
+  String get simulatorLiveMarker;
 
-  /// Scenario row sub-line before its instalment is known.
+  /// Sub-line of a saved scenario row: its rate and term.
   ///
   /// In fr, this message translates to:
   /// **'{rate} · {term}'**
-  String simulatorScenarioSubNoInstalment(String rate, String term);
+  String simulatorScenarioSub(String rate, String term);
+
+  /// Sub-line of the live simulation row.
+  ///
+  /// In fr, this message translates to:
+  /// **'en cours · {rate} · {term}'**
+  String simulatorScenarioSubLive(String rate, String term);
 
   /// Tooltip of a scenario row's overflow menu.
   ///
   /// In fr, this message translates to:
   /// **'Actions du scénario'**
   String get simulatorScenarioActions;
+
+  /// Scenario row menu item.
+  ///
+  /// In fr, this message translates to:
+  /// **'Renommer'**
+  String get simulatorScenarioRename;
+
+  /// Title of the rename dialog.
+  ///
+  /// In fr, this message translates to:
+  /// **'Renommer le scénario'**
+  String get simulatorRenameTitle;
 
   /// Scenario overflow action: hard delete, no confirmation.
   ///
@@ -6174,17 +6160,11 @@ abstract class AppLocalizations {
   /// **'Sélectionner {name} pour la comparaison'**
   String simulatorScenarioSelect(String name);
 
-  /// Mini empty state of the scenarios card.
+  /// Note in the scenarios block when nothing is saved.
   ///
   /// In fr, this message translates to:
-  /// **'Aucun scénario enregistré'**
-  String get simulatorScenariosEmptyTitle;
-
-  /// Mini empty state body of the scenarios card.
-  ///
-  /// In fr, this message translates to:
-  /// **'Enregistrez une simulation pour la retrouver ici et la comparer à deux autres.'**
-  String get simulatorScenariosEmptyBody;
+  /// **'Aucun scénario enregistré.'**
+  String get simulatorScenariosEmpty;
 
   /// Title of the comparison card.
   ///
@@ -6237,13 +6217,13 @@ abstract class AppLocalizations {
   /// Comparison foot: the income the ratios are read against, the reference, and the no-lender-is-bound statement.
   ///
   /// In fr, this message translates to:
-  /// **'Taux d\'endettement sur un revenu {source, select, declared{déclaré} other{médian constaté}} de {income} · repère HCSF {limit}. Lecture indicative, qui n’engage aucun prêteur.'**
+  /// **'Taux d’endettement sur un revenu {source, select, declared{déclaré} other{médian constaté}} de {income} · repère HCSF {limit}. Lecture indicative, qui n’engage aucun prêteur.'**
   String simulatorCompareFoot(String source, String income, String limit);
 
   /// Comparison foot when no income is known.
   ///
   /// In fr, this message translates to:
-  /// **'Aucun revenu connu, donc aucun taux d\'endettement · repère HCSF {limit}. Lecture indicative, qui n’engage aucun prêteur.'**
+  /// **'Aucun revenu connu, donc aucun taux d’endettement · repère HCSF {limit}. Lecture indicative, qui n’engage aucun prêteur.'**
   String simulatorCompareFootUnknown(String limit);
 
   /// Property nature: the household's main home (wire value primary_residence).

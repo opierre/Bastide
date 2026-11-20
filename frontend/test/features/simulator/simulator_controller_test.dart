@@ -70,7 +70,7 @@ void main() {
       final state = await container.read(simulatorControllerProvider.future);
 
       expect(state.household.existingChargeMinor, 150625);
-      expect(state.scenarios.single.label, 'Villeurbanne — 265 k€');
+      expect(state.scenarios.single.label, 'Villeurbanne, 265 k€');
       expect(state.result, isNull);
       expect(state.inputs.termMonths, 300);
       await _settle();
@@ -330,8 +330,8 @@ void main() {
         when(() => repository.list()).thenAnswer(
           (_) async => [
             testScenario(),
-            testScenario(id: 's2', label: 'Lyon 7e — 350 k€'),
-            testScenario(id: 's3', label: 'Lyon 8e — 290 k€'),
+            testScenario(id: 's2', label: 'Lyon 7e, 350 k€'),
+            testScenario(id: 's3', label: 'Lyon 8e, 290 k€'),
           ],
         );
       });
