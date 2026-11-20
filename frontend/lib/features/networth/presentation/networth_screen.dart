@@ -1,26 +1,26 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:lucide_icons_flutter/lucide_icons_300.dart';
 import 'package:go_router/go_router.dart';
+import 'package:lucide_icons_flutter/lucide_icons_300.dart';
 
 import '../../../core/theme/tokens.dart';
-import '../../../core/widgets/app_segmented.dart';
 import '../../../core/widgets/primary_button.dart';
 import '../../../core/widgets/state_views.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../imports/presentation/imports_screen.dart';
 import '../../properties/application/properties_controller.dart';
 import '../../properties/presentation/property_form_modal.dart';
-import '../../properties/presentation/property_list.dart';
 import '../application/networth_controller.dart';
 import '../domain/networth_summary.dart';
 import 'composition_breakdown.dart';
+import 'networth_equation.dart';
+import 'networth_notes.dart';
+import 'networth_properties.dart';
 import 'networth_series_chart.dart';
-import 'networth_summary_card.dart';
 
 /// The Synthèse panel (`docs/design/15-synthese.md`): what the user owns
-/// against what they owe, and the property list — declared here, because this
-/// is where a user thinks about what they own.
+/// against what they owe, on one page of five blocks 24 px apart: the
+/// equation line, composition and series, then properties and notes.
 ///
 /// Two controllers, one panel: the read-only net-worth summary and the
 /// properties CRUD. No figure on it is computed in Dart.
@@ -51,12 +51,12 @@ class NetworthScreen extends ConsumerWidget {
     } else if (summary.hasValue && properties.hasValue) {
       // `hasValue` rather than `AsyncData`: a property write invalidates the
       // summary, and the panel keeps the previous figures on screen while the
-      // new ones are read instead of flashing its skeleton.
+      // new ones are read instead of flashing its silhouette.
       final value = summary.requireValue;
       final list = properties.requireValue;
       body = value.isEmpty && list.properties.isEmpty && list.archived.isEmpty
           ? _EmptyState(currency: value.currency)
-          : _Panel(summary: value, properties: list);
+          : _Page(summary: value, properties: list);
     } else {
       body = const _LoadingView();
     }
@@ -64,15 +64,15 @@ class NetworthScreen extends ConsumerWidget {
     return Padding(
       key: const Key('screen-networth'),
       padding: const EdgeInsets.symmetric(
-        horizontal: AppSpacing.contentX,
-        vertical: AppSpacing.contentY,
+        horizontal: AppSpacing.pageX,
+        vertical: AppSpacing.pageY,
       ),
       child: body,
     );
   }
 }
 
-/// The panel's contribution to the top bar: the secondary « Nouveau bien ».
+/// The panel's contribution to the title bar: the secondary « Nouveau bien ».
 class NetworthTopBarActions extends ConsumerWidget {
   const NetworthTopBarActions({super.key});
 
@@ -82,204 +82,62 @@ class NetworthTopBarActions extends ConsumerWidget {
       networthControllerProvider.select((state) => state.value?.currency),
     );
 
-    return SizedBox(
-      height: AppChrome.controlPillHeight,
-      child: OutlinedButton(
-        key: const Key('addPropertyButton'),
-        onPressed: () => showPropertyForm(context, currency: currency ?? ''),
-        child: Text(AppLocalizations.of(context)!.networthAddProperty),
-      ),
+    return AppButton(
+      key: const Key('addPropertyButton'),
+      label: AppLocalizations.of(context)!.networthAddProperty,
+      icon: LucideIcons300.plus,
+      onPressed: () => showPropertyForm(context, currency: currency ?? ''),
     );
   }
 }
 
-class _Panel extends ConsumerWidget {
-  const _Panel({required this.summary, required this.properties});
-
-  final NetWorthSummary summary;
-  final PropertiesState properties;
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final l10n = AppLocalizations.of(context)!;
-    final view = ref.watch(networthViewProvider);
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        Row(
-          children: [
-            SizedBox(
-              width: 300,
-              child: AppSegmented<NetworthView>(
-                key: const Key('networthViewSwitch'),
-                value: view,
-                onChanged: ref.read(networthViewProvider.notifier).set,
-                segments: [
-                  AppSegment(
-                    key: const Key('networthSummarySegment'),
-                    value: NetworthView.summary,
-                    label: l10n.networthViewSummary,
-                  ),
-                  AppSegment(
-                    key: const Key('networthPropertiesSegment'),
-                    value: NetworthView.properties,
-                    // The count follows reality — « Biens (0) » included.
-                    label: l10n.networthViewProperties(
-                      properties.properties.length,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: AppSpacing.md),
-        Expanded(
-          child: switch (view) {
-            NetworthView.summary => _SummaryView(
-              summary: summary,
-              properties: properties,
-            ),
-            NetworthView.properties => PropertyList(
-              state: properties,
-              currency: summary.currency,
-            ),
-          },
-        ),
-      ],
-    );
-  }
-}
-
-class _SummaryView extends StatelessWidget {
-  const _SummaryView({required this.summary, required this.properties});
+class _Page extends StatelessWidget {
+  const _Page({required this.summary, required this.properties});
 
   final NetWorthSummary summary;
   final PropertiesState properties;
 
   @override
   Widget build(BuildContext context) {
-    const gap = SizedBox(height: AppSpacing.gridGap);
+    const section = SizedBox(height: AppSpacing.section);
 
-    return CustomScrollView(
-      key: const Key('networthSummaryView'),
-      slivers: [
-        SliverToBoxAdapter(child: NetworthSummaryRow(summary: summary)),
-        const SliverToBoxAdapter(child: gap),
-        // Row 2 fills the middle of the frame and keeps a readable minimum
-        // when the window is short.
-        SliverFillRemaining(
-          hasScrollBody: false,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Expanded(
-                child: ConstrainedBox(
-                  constraints: const BoxConstraints(minHeight: 280),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      // `minmax(0,1fr) minmax(0,2fr)`, gap 18: the series
-                      // needs the width more than the composition's rows do.
-                      Expanded(
-                        flex: 100,
-                        child: CompositionBreakdownCard(
-                          summary: summary,
-                          properties: properties.properties,
-                          onNewProperty: () => showPropertyForm(
-                            context,
-                            currency: summary.currency,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: AppSpacing.gridGap),
-                      Expanded(
-                        flex: 200,
-                        child: NetworthSeriesCard(summary: summary),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              gap,
-              const NetworthExclusionsCard(),
-            ],
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-/// Frame ⑤: nothing to add up. The one state that drops the segmented control —
-/// there is nothing to switch between.
-class _EmptyState extends StatelessWidget {
-  const _EmptyState({required this.currency});
-
-  final String currency;
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
-    final textTheme = Theme.of(context).textTheme;
-
-    return CenteredStatePane(
-      key: const Key('networthEmptyState'),
-      maxWidth: 460,
+    return SingleChildScrollView(
+      key: const Key('networthPage'),
       child: Column(
-        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Container(
-            width: 64,
-            height: 64,
-            alignment: Alignment.center,
-            decoration: BoxDecoration(
-              color: context.colors.accentSoft,
-              borderRadius: BorderRadius.circular(AppRadii.xl),
-            ),
-            // v1 empty state, kept until the panel's v2 ticket; the glyph is
-            // the panel's nav icon.
-            child: Icon(
-              LucideIcons300.chartPie,
-              size: 27,
-              color: context.colors.accent,
-            ),
-          ),
-          const SizedBox(height: AppSpacing.lg),
-          Text(
-            l10n.networthEmptyTitle,
-            style: textTheme.headlineMedium,
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: AppSpacing.sm + 2),
-          Text(
-            l10n.networthEmptyBody,
-            style: textTheme.bodyLarge?.copyWith(
-              color: context.colors.textSecondary,
-            ),
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: AppSpacing.lg + AppSpacing.xs),
-          Wrap(
-            alignment: WrapAlignment.center,
-            spacing: AppSpacing.sm + AppSpacing.xs,
-            runSpacing: AppSpacing.sm,
+          NetworthEquation(summary: summary),
+          section,
+          const _Hairline(),
+          section,
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               SizedBox(
-                height: 44,
-                child: OutlinedButton(
-                  key: const Key('networthEmptyImport'),
-                  onPressed: () => context.go(ImportsScreen.path),
-                  child: Text(l10n.networthEmptyImport),
+                width: AppNetworth.compositionWidth,
+                child: CompositionSection(
+                  summary: summary,
+                  properties: properties.properties,
                 ),
               ),
-              PrimaryButton(
-                key: const Key('networthEmptyAddProperty'),
-                label: l10n.networthAddProperty,
-                icon: Icons.add_rounded,
-                onPressed: () => showPropertyForm(context, currency: currency),
+              const SizedBox(width: AppNetworth.compositionGutter),
+              Expanded(child: NetworthSeriesSection(summary: summary)),
+            ],
+          ),
+          section,
+          const _Hairline(),
+          section,
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                child: NetworthProperties(
+                  state: properties,
+                  currency: summary.currency,
+                ),
               ),
+              const SizedBox(width: AppSpacing.gutter),
+              Expanded(child: NetworthNotes(summary: summary)),
             ],
           ),
         ],
@@ -288,49 +146,96 @@ class _EmptyState extends StatelessWidget {
   }
 }
 
-/// The panel's silhouettes: segmented control, the three figures, row 2, and
-/// the exclusions strip.
+/// The `line` hairline between two blocks (`00` §1.2).
+class _Hairline extends StatelessWidget {
+  const _Hairline();
+
+  @override
+  Widget build(BuildContext context) =>
+      Divider(height: 1, thickness: 1, color: context.colors.line);
+}
+
+/// Nothing to add up: no account, property, loan or investment.
+class _EmptyState extends StatelessWidget {
+  const _EmptyState({required this.currency});
+
+  final String currency;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
+    return EmptyStateView(
+      key: const Key('networthEmptyState'),
+      title: l10n.networthEmptyTitle,
+      message: l10n.networthEmptyBody,
+      action: Wrap(
+        alignment: WrapAlignment.center,
+        spacing: AppSpacing.sm,
+        runSpacing: AppSpacing.sm,
+        children: [
+          PrimaryButton(
+            key: const Key('networthEmptyAddProperty'),
+            label: l10n.networthAddProperty,
+            icon: LucideIcons300.plus,
+            onPressed: () => showPropertyForm(context, currency: currency),
+          ),
+          AppButton(
+            key: const Key('networthEmptyImport'),
+            label: l10n.networthEmptyImport,
+            onPressed: () => context.go(ImportsScreen.path),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// The page's silhouette (`00` §7): the equation line, the two columns of
+/// block 3, then the two of block 5, in `hover` blocks.
 class _LoadingView extends StatelessWidget {
   const _LoadingView();
 
   @override
   Widget build(BuildContext context) {
+    const section = SizedBox(height: AppSpacing.section * 2 + 1);
+
     return const SkeletonPulse(
       key: Key('networthLoading'),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Align(
-            alignment: Alignment.centerLeft,
-            child: SkeletonBlock(height: 40, width: 300, radius: AppRadii.md),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              SkeletonBlock(height: 72, width: 240),
+              SizedBox(width: AppNetworth.equationGap),
+              SkeletonBlock(height: 72, width: 200),
+              SizedBox(width: AppNetworth.equationGap),
+              SkeletonBlock(height: 84, width: 300),
+            ],
           ),
-          SizedBox(height: AppSpacing.md),
-          SizedBox(
-            height: 150,
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Expanded(
-                  flex: 150,
-                  child: SkeletonBlock(height: double.infinity),
-                ),
-                SizedBox(width: AppSpacing.gridGap),
-                Expanded(
-                  flex: 100,
-                  child: SkeletonBlock(height: double.infinity),
-                ),
-                SizedBox(width: AppSpacing.gridGap),
-                Expanded(
-                  flex: 100,
-                  child: SkeletonBlock(height: double.infinity),
-                ),
-              ],
-            ),
+          section,
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              SizedBox(
+                width: AppNetworth.compositionWidth,
+                child: SkeletonBlock(height: 200),
+              ),
+              SizedBox(width: AppNetworth.compositionGutter),
+              Expanded(child: SkeletonBlock(height: AppNetworth.chartHeight)),
+            ],
           ),
-          SizedBox(height: AppSpacing.gridGap),
-          Expanded(child: SkeletonBlock(height: double.infinity)),
-          SizedBox(height: AppSpacing.gridGap),
-          SkeletonBlock(height: 90),
+          section,
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(child: SkeletonBlock(height: 120)),
+              SizedBox(width: AppSpacing.gutter),
+              Expanded(child: SkeletonBlock(height: 120)),
+            ],
+          ),
         ],
       ),
     );

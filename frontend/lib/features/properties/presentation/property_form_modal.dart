@@ -63,6 +63,14 @@ String formatOwnershipInput(int bps, String locale) {
   return '$whole$separator${(bps % 100).toString().padLeft(2, '0')}';
 }
 
+/// An ownership share printed as the locale's percent — « 50 % », « 33,33 % ».
+String formatOwnershipShare(int bps, String locale) {
+  final format = NumberFormat.percentPattern(locale)
+    ..minimumFractionDigits = 0
+    ..maximumFractionDigits = 2;
+  return format.format(bps / fullOwnershipBps);
+}
+
 /// The ARB label of a property's nature — the backend stores the machine value.
 String propertyKindLabel(AppLocalizations l10n, PropertyKind kind) =>
     switch (kind) {

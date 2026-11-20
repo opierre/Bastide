@@ -8,28 +8,25 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/tokens.dart';
 import '../../../core/widgets/amount_text.dart';
-import '../../../core/widgets/app_card.dart';
 import '../../../core/widgets/app_segmented.dart';
 import '../../../core/widgets/chart_scale.dart';
 import '../../../core/widgets/chart_style.dart';
 import '../../../core/widgets/chart_tooltip.dart';
-import '../../../core/widgets/date_field.dart';
 import '../../../l10n/app_localizations.dart';
 import '../application/networth_controller.dart';
 import '../domain/networth_summary.dart';
 import 'declared_balances_modal.dart';
-import 'networth_summary_card.dart';
+import 'networth_link.dart';
 
-/// « Patrimoine net » (`15-synthese.md` §Row 2): the closed-month series as an
-/// AreaLine over the range picked in its header, carrying its caveat inline.
+/// « Patrimoine net » (`15-synthese.md` §3b): the closed-month series as a
+/// line / area over the range picked on its heading line.
 ///
-/// The chart must not look like it knows something it doesn't: a property has
-/// one declared value, so the banner says values are held flat and names the
-/// oldest estimate; a month the API omitted is simply not drawn; and a month
-/// whose accounts total the user declared is drawn dashed, never passed off as
-/// an imported figure.
-class NetworthSeriesCard extends ConsumerWidget {
-  const NetworthSeriesCard({super.key, required this.summary});
+/// The chart must not look like it knows something it doesn't: a month the
+/// API omitted is simply not drawn, and a month whose accounts total the user
+/// declared is drawn dashed, never passed off as an imported figure. What is
+/// held flat is said in « À savoir », not here.
+class NetworthSeriesSection extends ConsumerWidget {
+  const NetworthSeriesSection({super.key, required this.summary});
 
   final NetWorthSummary summary;
 
@@ -38,197 +35,132 @@ class NetworthSeriesCard extends ConsumerWidget {
     final l10n = AppLocalizations.of(context)!;
     final locale = Localizations.localeOf(context).toString();
     final textTheme = Theme.of(context).textTheme;
+    final colors = context.colors;
     final range = ref.watch(networthRangeProvider);
     final series = pointsInRange(summary.series, range);
     final hasDeclared = series.any((point) => point.declared);
-    final monthFormat = networthMonthFormat(locale);
-    final oldest = summary.valuedOnOldest;
+    final monthFormat = DateFormat.yMMMM(locale);
 
-    return AppCard(
-      key: const Key('networthSeriesCard'),
-      padding: const EdgeInsets.symmetric(
-        horizontal: 22,
-        vertical: AppSpacing.cardPadding,
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
+    return Column(
+      key: const Key('networthSeriesSection'),
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        // The heading line (`00` §7): the title, the range it shows, and the
+        // segmented control on the right.
+        Padding(
+          padding: const EdgeInsets.only(bottom: AppSpacing.sm),
+          child: Row(
             children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      l10n.networthSeriesTitle,
-                      style: textTheme.titleMedium,
+              Text(l10n.networthSeriesTitle, style: textTheme.titleSmall),
+              if (series.isNotEmpty) ...[
+                const SizedBox(width: AppSpacing.sm),
+                Flexible(
+                  child: Text(
+                    l10n.networthSeriesRange(
+                      monthFormat.format(series.first.month),
+                      monthFormat.format(series.last.month),
                     ),
-                  ],
+                    key: const Key('networthSeriesRange'),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: textTheme.bodySmall?.copyWith(
+                      color: colors.textTertiary,
+                    ),
+                  ),
                 ),
-              ),
-              // The range caption is centred on the switch it describes,
-              // not top-aligned with the title column beside them.
-              Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  if (series.isNotEmpty)
-                    Padding(
-                      padding: const EdgeInsets.only(
-                        right: AppSpacing.sm + AppSpacing.xs,
-                      ),
-                      child: Text(
-                        l10n.networthSeriesRange(
-                          monthFormat.format(series.first.month),
-                          monthFormat.format(series.last.month),
-                        ),
-                        key: const Key('networthSeriesRange'),
-                        style: context.textStyles.helper,
-                      ),
-                    ),
-                  SizedBox(
-                    width: 216,
-                    child: AppSegmented<NetworthRange>(
-                      key: const Key('networthRangeSwitch'),
-                      value: range,
-                      onChanged: ref.read(networthRangeProvider.notifier).set,
-                      // Widest first, so the segments read largest to smallest.
-                      segments: [
-                        AppSegment(
-                          key: const Key('networthRangeAll'),
-                          value: NetworthRange.all,
-                          label: l10n.networthRangeAll,
-                        ),
-                        AppSegment(
-                          key: const Key('networthRangeThreeYears'),
-                          value: NetworthRange.threeYears,
-                          label: l10n.networthRangeThreeYears,
-                        ),
-                        AppSegment(
-                          key: const Key('networthRangeYear'),
-                          value: NetworthRange.year,
-                          label: l10n.networthRangeYear,
-                        ),
-                      ],
-                    ),
+              ],
+              const Spacer(),
+              AppSegmented<NetworthRange>(
+                key: const Key('networthRangeSwitch'),
+                value: range,
+                onChanged: ref.read(networthRangeProvider.notifier).set,
+                // Widest first, so the segments read largest to smallest.
+                segments: [
+                  AppSegment(
+                    key: const Key('networthRangeAll'),
+                    value: NetworthRange.all,
+                    label: l10n.networthRangeAll,
+                  ),
+                  AppSegment(
+                    key: const Key('networthRangeThreeYears'),
+                    value: NetworthRange.threeYears,
+                    label: l10n.networthRangeThreeYears,
+                  ),
+                  AppSegment(
+                    key: const Key('networthRangeYear'),
+                    value: NetworthRange.year,
+                    label: l10n.networthRangeYear,
                   ),
                 ],
               ),
             ],
           ),
-          const SizedBox(height: AppSpacing.md),
-          Expanded(
-            child: series.isEmpty
-                ? Center(
-                    child: Text(
-                      l10n.networthSeriesEmpty,
-                      key: const Key('networthSeriesEmpty'),
-                      textAlign: TextAlign.center,
-                      style: textTheme.bodySmall?.copyWith(
-                        color: context.colors.textSecondary,
-                      ),
+        ),
+        const SizedBox(height: AppSpacing.xs),
+        SizedBox(
+          height: AppNetworth.chartHeight,
+          child: series.isEmpty
+              ? Center(
+                  child: Text(
+                    l10n.networthSeriesEmpty,
+                    key: const Key('networthSeriesEmpty'),
+                    textAlign: TextAlign.center,
+                    style: textTheme.bodySmall?.copyWith(
+                      color: colors.textSecondary,
                     ),
-                  )
-                : NetworthSeriesPlot(
-                    key: const Key('networthSeriesPlot'),
-                    months: [for (final point in series) point.month],
-                    values: [for (final point in series) point.netWorthMinor],
-                    declared: [for (final point in series) point.declared],
-                    currency: summary.currency,
                   ),
-          ),
-          const SizedBox(height: AppSpacing.sm),
-          Row(
-            children: [
-              if (hasDeclared) ...[
-                _LegendEntry(
-                  key: const Key('networthLegendLedger'),
-                  label: l10n.networthLegendLedger,
-                  dashed: false,
+                )
+              : NetworthSeriesPlot(
+                  key: const Key('networthSeriesPlot'),
+                  months: [for (final point in series) point.month],
+                  values: [for (final point in series) point.netWorthMinor],
+                  declared: [for (final point in series) point.declared],
+                  currency: summary.currency,
                 ),
-                const SizedBox(width: AppSpacing.md),
-                _LegendEntry(
-                  key: const Key('networthLegendDeclared'),
-                  label: l10n.networthLegendDeclared,
-                  dashed: true,
-                ),
-              ],
-              const Spacer(),
-              TextButton(
-                key: const Key('networthDeclaredOpen'),
-                onPressed: () =>
-                    showDeclaredBalances(context, currency: summary.currency),
-                child: Text(l10n.networthDeclaredOpen),
+        ),
+        const SizedBox(height: AppSpacing.sm),
+        Row(
+          children: [
+            if (hasDeclared) ...[
+              _LegendEntry(
+                key: const Key('networthLegendLedger'),
+                label: l10n.networthLegendLedger,
+                dashed: false,
+              ),
+              const SizedBox(width: AppSpacing.md),
+              _LegendEntry(
+                key: const Key('networthLegendDeclared'),
+                label: l10n.networthLegendDeclared,
+                dashed: true,
               ),
             ],
-          ),
-          if (summary.propertyValuesHeldFlat && oldest != null) ...[
-            const SizedBox(height: AppSpacing.sm + AppSpacing.xs),
-            _CaveatBanner(
-              message: l10n.networthSeriesCaveat(
-                appDateFormat(locale).format(oldest),
-              ),
+            const Spacer(),
+            NetworthLink(
+              key: const Key('networthDeclaredOpen'),
+              label: l10n.networthDeclaredOpen,
+              onTap: () =>
+                  showDeclaredBalances(context, currency: summary.currency),
             ),
           ],
-        ],
-      ),
-    );
-  }
-}
-
-/// The info InlineBanner under the chart: blue at 9 % with a 30 % border and
-/// the info glyph, its text in the primary ink (`15-synthese.md` §Row 2) — a
-/// statement about the data, not an alert.
-class _CaveatBanner extends StatelessWidget {
-  const _CaveatBanner({required this.message});
-
-  final String message;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      key: const Key('networthSeriesCaveat'),
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppSpacing.sm + AppSpacing.xs,
-        vertical: AppSpacing.sm + 2,
-      ),
-      decoration: BoxDecoration(
-        color: context.colors.textSecondary.withValues(alpha: 0.09),
-        borderRadius: BorderRadius.circular(AppRadii.md),
-        border: Border.all(
-          color: context.colors.textSecondary.withValues(alpha: 0.30),
         ),
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Icon(
-            Icons.info_outline_rounded,
-            size: 15,
-            color: context.colors.textSecondary,
-          ),
-          const SizedBox(width: AppSpacing.sm),
-          Expanded(
-            child: Text(
-              message,
-              key: const Key('networthSeriesCaveatText'),
-              style: context.textStyles.helper.copyWith(
-                color: context.colors.text,
-              ),
-            ),
-          ),
-        ],
-      ),
+      ],
     );
   }
 }
 
-/// One legend item: a short iris stroke, solid or dashed, and its label.
+/// One legend item: a short `accent` stroke, solid or dashed, and its label
+/// in 12 `textSecondary`.
 class _LegendEntry extends StatelessWidget {
   const _LegendEntry({super.key, required this.label, required this.dashed});
 
   final String label;
   final bool dashed;
+
+  /// The swatch: as long as a dash and a gap twice over, as thick as the line.
+  static const _swatch = Size(
+    (AppChart.dash + AppChart.dashGap) * 2,
+    AppChart.lineStroke,
+  );
 
   @override
   Widget build(BuildContext context) {
@@ -236,14 +168,19 @@ class _LegendEntry extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       children: [
         CustomPaint(
-          size: const Size(18, 2),
+          size: _swatch,
           painter: _StrokeSwatchPainter(
             dashed: dashed,
             color: context.colors.accent,
           ),
         ),
-        const SizedBox(width: AppSpacing.xs + 2),
-        Text(label, style: context.textStyles.helper),
+        const SizedBox(width: AppSpacing.xsPlus),
+        Text(
+          label,
+          style: Theme.of(
+            context,
+          ).textTheme.bodySmall?.copyWith(color: context.colors.textSecondary),
+        ),
       ],
     );
   }
@@ -276,8 +213,8 @@ class _StrokeSwatchPainter extends CustomPainter {
 Paint _seriesStroke(Color color) =>
     ChartPaints.stroke(color)..strokeCap = StrokeCap.butt;
 
-/// The AreaLine itself, in the shared curve style ([AppChart]): an iris 2.5 px
-/// line over a 16 % iris area, a small dot on each month (up to
+/// The line / area itself (`00` §9, [AppChart]): a 2 px `accent` line over an
+/// `accent` 10 % area, a small dot on each month (up to
 /// [AppChart.dotCeiling]) and a full-size one on the last, y gridlines on clean
 /// ticks around the series (see [ChartScale]), and month labels under the
 /// points.

@@ -4,8 +4,9 @@ import 'package:intl/intl.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/tokens.dart';
 import '../../../core/widgets/amount_text.dart';
-import '../../../core/widgets/app_card.dart';
-import '../../../core/widgets/dashed_border.dart';
+import '../../../core/widgets/app_table.dart';
+import '../../../core/widgets/category_label.dart';
+import '../../../core/widgets/section_heading.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../properties/domain/property.dart';
 import '../../properties/presentation/property_form_modal.dart';
@@ -19,25 +20,30 @@ String formatCompositionShare(int bps, String locale) {
   return format.format(bps / 10000);
 }
 
-/// « Composition de l'actif » (`15-synthese.md` §Row 2): where the value sits,
-/// as the HorizontalBars recipe — one stacked 10 px strip over legend rows.
+/// « Composition de l’actif » (`15-synthese.md` §3a): the composition bar of
+/// `00` §9, then a table without header (label, share, amount), rows by
+/// descending amount.
 ///
-/// A Donut was rejected in the frame: four slices where two sit near 2 % read
-/// as an error. Every amount and share is the server's; the strip only turns
-/// the amounts into widths.
-class CompositionBreakdownCard extends StatelessWidget {
-  const CompositionBreakdownCard({
+/// Hues follow rank: `cat1` for the largest slice onward, the same hue on the
+/// bar and on the row's dot. Every amount and share is the server's; the bar
+/// only turns the amounts into widths. No donut.
+class CompositionSection extends StatelessWidget {
+  const CompositionSection({
     super.key,
     required this.summary,
     required this.properties,
-    required this.onNewProperty,
   });
 
   final NetWorthSummary summary;
 
-  /// The live properties, for the « part détenue » labels and the foot note.
+  /// The live properties, for the « part détenue » labels and notes.
   final List<Property> properties;
-  final VoidCallback onNewProperty;
+
+  static const _columns = [
+    AppTableColumn(label: ''),
+    AppTableColumn(label: '', width: AppNetworth.shareColumn, numeric: true),
+    AppTableColumn(label: '', width: AppNetworth.amountColumn, numeric: true),
+  ];
 
   String _label(AppLocalizations l10n, CompositionEntry entry) {
     if (entry.group == CompositionGroup.account) {
@@ -58,230 +64,143 @@ class CompositionBreakdownCard extends StatelessWidget {
     return partlyOwned ? l10n.networthCompositionHeldShare(label) : label;
   }
 
-  static Color _hue(BuildContext context, CompositionEntry entry) =>
-      entry.group == CompositionGroup.account
-      ? context.categoryColors.forAccountType(entry.key)
-      : context.categoryColors.forPropertyKind(entry.key);
-
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final locale = Localizations.localeOf(context).toString();
-    final textTheme = Theme.of(context).textTheme;
-    final hasProperties = summary.composition.any(
-      (entry) => entry.group == CompositionGroup.property,
-    );
-
-    return AppCard(
-      key: const Key('compositionCard'),
-      padding: const EdgeInsets.symmetric(
-        horizontal: 22,
-        vertical: AppSpacing.cardPadding,
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Text(l10n.networthCompositionTitle, style: textTheme.titleMedium),
-          const SizedBox(height: AppSpacing.md),
-          _Strip(
-            entries: summary.composition,
-            hue: (entry) => _hue(context, entry),
-          ),
-          const SizedBox(height: AppSpacing.sm),
-          for (final entry in summary.composition)
-            _LegendRow(
-              key: Key('compositionRow-${entry.group.wireValue}-${entry.key}'),
-              hue: _hue(context, entry),
-              label: _label(l10n, entry),
-              share: formatCompositionShare(entry.shareBps, locale),
-              amount: formatAmount(
-                amountMinor: entry.amountMinor,
-                currency: summary.currency,
-                locale: locale,
-              ),
-            ),
-          const Spacer(),
-          const SizedBox(height: AppSpacing.sm),
-          if (hasProperties)
-            Text(
-              _foot(l10n, locale),
-              key: const Key('compositionFoot'),
-              style: tabularNumberStyle(
-                context.textStyles.helper,
-              ).copyWith(fontSize: 11, color: context.colors.textTertiary),
-            )
-          else
-            _InvitePlate(onNewProperty: onNewProperty),
-        ],
-      ),
-    );
-  }
-
-  /// Names each partly owned property with both figures — the held share and
-  /// the declared value it is a share of.
-  String _foot(AppLocalizations l10n, String locale) {
-    final partlyOwned = properties.where((property) => property.isPartlyOwned);
-    if (partlyOwned.isEmpty) return l10n.networthCompositionFootWhole;
+    final entries = summary.compositionByAmount;
+    final hues = context.categoryColors;
     String money(int minor) => formatAmount(
       amountMinor: minor,
       currency: summary.currency,
       locale: locale,
     );
-    final items = [
-      for (final property in partlyOwned)
-        if (property.address case final address?)
-          l10n.networthCompositionFootItemWithAddress(
-            property.label,
-            address,
-            money(property.userShareValueMinor),
-            money(property.marketValueMinor),
-          )
-        else
-          l10n.networthCompositionFootItem(
-            property.label,
-            money(property.userShareValueMinor),
-            money(property.marketValueMinor),
-          ),
+    final partlyOwned = [
+      for (final property in properties)
+        if (property.isPartlyOwned) property,
     ];
-    return l10n.networthCompositionFoot(items.join(' · '));
-  }
-}
 
-/// The 10 px stacked strip, gap 2, radius 5.
-///
-/// Only positive slices are drawn: a credit account's negative balance has no
-/// width to take, so it stays in the legend alone (decided in review).
-class _Strip extends StatelessWidget {
-  const _Strip({required this.entries, required this.hue});
-
-  final List<CompositionEntry> entries;
-  final Color Function(CompositionEntry) hue;
-
-  @override
-  Widget build(BuildContext context) {
-    final drawn = entries.where((entry) => entry.amountMinor > 0).toList();
-    return ClipRRect(
-      key: const Key('compositionStrip'),
-      borderRadius: BorderRadius.circular(5),
-      child: SizedBox(
-        height: 10,
-        child: drawn.isEmpty
-            ? ColoredBox(color: context.colors.hover)
-            : Row(
-                children: [
-                  for (var index = 0; index < drawn.length; index++) ...[
-                    if (index > 0) const SizedBox(width: 2),
-                    Expanded(
-                      key: Key(
-                        'compositionSegment-${drawn[index].group.wireValue}-'
-                        '${drawn[index].key}',
-                      ),
-                      flex: drawn[index].amountMinor,
-                      child: ColoredBox(color: hue(drawn[index])),
-                    ),
-                  ],
-                ],
+    return Column(
+      key: const Key('compositionSection'),
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        SectionHeading(title: l10n.networthCompositionTitle),
+        const SizedBox(height: AppSpacing.xs),
+        _Bar(entries: entries, hue: hues.forRank),
+        const SizedBox(height: AppSpacing.smPlus),
+        for (final (index, entry) in entries.indexed)
+          AppTableRow(
+            key: Key('compositionRow-${entry.group.wireValue}-${entry.key}'),
+            columns: _columns,
+            cells: [
+              _CompositionLabel(
+                hue: hues.forRank(index),
+                label: _label(l10n, entry),
               ),
-      ),
+              Text(
+                formatCompositionShare(entry.shareBps, locale),
+                style: TextStyle(color: context.colors.textTertiary),
+              ),
+              Text(money(entry.amountMinor)),
+            ],
+          ),
+        for (final property in partlyOwned) ...[
+          const SizedBox(height: AppSpacing.sm),
+          Text(
+            l10n.networthCompositionPartNote(
+              property.label,
+              money(property.userShareValueMinor),
+              money(property.marketValueMinor),
+            ),
+            key: Key('compositionPartNote-${property.id}'),
+            style: tabularNumberStyle(
+              Theme.of(context).textTheme.bodySmall!,
+            ).copyWith(color: context.colors.textTertiary),
+          ),
+        ],
+      ],
     );
   }
 }
 
-/// A 38 px legend row: hue square · label · percent · value.
-class _LegendRow extends StatelessWidget {
-  const _LegendRow({
-    super.key,
-    required this.hue,
-    required this.label,
-    required this.share,
-    required this.amount,
-  });
+/// The composition bar (`00` §9): 8 px, segments 2 px apart, radius 2.
+///
+/// Only positive slices are drawn: a credit account's negative balance has no
+/// width to take, so it stays in the table alone.
+class _Bar extends StatelessWidget {
+  const _Bar({required this.entries, required this.hue});
+
+  final List<CompositionEntry> entries;
+  final Color Function(int rank) hue;
+
+  @override
+  Widget build(BuildContext context) {
+    final drawn = [
+      for (final (rank, entry) in entries.indexed)
+        if (entry.amountMinor > 0) (rank, entry),
+    ];
+    const radius = BorderRadius.all(Radius.circular(AppRadii.bar));
+
+    return SizedBox(
+      key: const Key('compositionBar'),
+      height: AppChart.compositionBarHeight,
+      child: drawn.isEmpty
+          ? DecoratedBox(
+              decoration: BoxDecoration(
+                color: context.colors.lineStrong,
+                borderRadius: radius,
+              ),
+            )
+          : Row(
+              children: [
+                for (final (i, (rank, entry)) in drawn.indexed) ...[
+                  if (i > 0) const SizedBox(width: AppChart.compositionBarGap),
+                  Expanded(
+                    key: Key(
+                      'compositionSegment-${entry.group.wireValue}-${entry.key}',
+                    ),
+                    flex: entry.amountMinor,
+                    child: DecoratedBox(
+                      decoration: BoxDecoration(
+                        color: hue(rank),
+                        borderRadius: radius,
+                      ),
+                    ),
+                  ),
+                ],
+              ],
+            ),
+    );
+  }
+}
+
+/// A category-style label (`00` §7): the 8 px dot in the segment's hue, then
+/// the name, here in `text`.
+class _CompositionLabel extends StatelessWidget {
+  const _CompositionLabel({required this.hue, required this.label});
 
   final Color hue;
   final String label;
-  final String share;
-  final String amount;
 
   @override
   Widget build(BuildContext context) {
-    final style = Theme.of(context).textTheme.bodyMedium!;
-    return SizedBox(
-      height: 38,
-      child: Row(
-        children: [
-          Container(
-            width: 10,
-            height: 10,
-            decoration: BoxDecoration(
-              color: hue,
-              borderRadius: BorderRadius.circular(3),
-            ),
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Container(
+          key: const Key('compositionDot'),
+          width: CategoryLabel.dotSize,
+          height: CategoryLabel.dotSize,
+          decoration: BoxDecoration(
+            color: hue,
+            borderRadius: BorderRadius.circular(AppRadii.bar),
           ),
-          const SizedBox(width: 10),
-          Expanded(
-            child: Text(label, maxLines: 1, overflow: TextOverflow.ellipsis),
-          ),
-          const SizedBox(width: AppSpacing.sm),
-          Text(
-            share,
-            style: tabularNumberStyle(
-              style,
-            ).copyWith(color: context.colors.textTertiary),
-          ),
-          const SizedBox(width: AppSpacing.md),
-          Text(
-            amount,
-            textAlign: TextAlign.right,
-            style: tabularNumberStyle(
-              style,
-            ).copyWith(fontWeight: FontWeight.w600),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-/// Frame ④: with no property, the strip holds the accounts alone and this
-/// plate says why, with the way to declare one.
-class _InvitePlate extends StatelessWidget {
-  const _InvitePlate({required this.onNewProperty});
-
-  final VoidCallback onNewProperty;
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
-    final textTheme = Theme.of(context).textTheme;
-
-    return DashedBorder(
-      key: const Key('compositionInvite'),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-        child: Wrap(
-          crossAxisAlignment: WrapCrossAlignment.center,
-          spacing: AppSpacing.xs,
-          children: [
-            Text(
-              l10n.networthCompositionInvite,
-              style: textTheme.bodySmall?.copyWith(
-                color: context.colors.textSecondary,
-              ),
-            ),
-            InkWell(
-              key: const Key('compositionInviteAction'),
-              onTap: onNewProperty,
-              child: Text(
-                l10n.networthCompositionInviteAction,
-                style: textTheme.bodySmall?.copyWith(
-                  color: context.colors.accent,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ),
-          ],
         ),
-      ),
+        const SizedBox(width: AppSpacing.xsPlus),
+        Flexible(
+          child: Text(label, maxLines: 1, overflow: TextOverflow.ellipsis),
+        ),
+      ],
     );
   }
 }
