@@ -492,27 +492,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get accountsAddButton => 'Ajouter un compte';
 
   @override
-  String accountsBalancesAsOf(DateTime date) {
-    final intl.DateFormat dateDateFormat = intl.DateFormat.yMd(localeName);
-    final String dateString = dateDateFormat.format(date);
-
-    return 'Soldes au $dateString';
-  }
-
-  @override
   String get accountsTotalBalanceLabel => 'Solde total';
-
-  @override
-  String accountsActiveCount(int count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: '$count comptes actifs',
-      one: '1 compte actif',
-      zero: 'Aucun compte actif',
-    );
-    return '$_temp0';
-  }
 
   @override
   String get accountsEmptyTitle => 'Ajoutez votre premier compte';
@@ -523,6 +503,115 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get accountsRetry => 'Réessayer';
+
+  @override
+  String get accountsGroupByType => 'Par type';
+
+  @override
+  String get accountsGroupByInstitution => 'Par établissement';
+
+  @override
+  String get accountsGroupChecking => 'Comptes courants';
+
+  @override
+  String get accountsGroupSavings => 'Épargne';
+
+  @override
+  String get accountsGroupDeferredCards => 'Cartes à débit différé';
+
+  @override
+  String get accountsGroupCredits => 'Crédits';
+
+  @override
+  String get accountsGroupOther => 'Autres';
+
+  @override
+  String get accountsNoInstitution => 'Sans établissement';
+
+  @override
+  String accountsGroupShare(double share) {
+    final intl.NumberFormat shareNumberFormat =
+        intl.NumberFormat.decimalPatternDigits(
+          locale: localeName,
+          decimalDigits: 1,
+        );
+    final String shareString = shareNumberFormat.format(share);
+
+    return '$shareString % du total';
+  }
+
+  @override
+  String accountsCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count comptes',
+      one: '1 compte',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String accountsSummaryCaption(String accounts, String ago) {
+    return '$accounts · soldes recalculés $ago';
+  }
+
+  @override
+  String accountsAgoMinutes(int minutes) {
+    String _temp0 = intl.Intl.pluralLogic(
+      minutes,
+      locale: localeName,
+      other: 'il y a $minutes min',
+      one: 'il y a 1 min',
+      zero: 'à l’instant',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String accountsAgoHours(int hours) {
+    String _temp0 = intl.Intl.pluralLogic(
+      hours,
+      locale: localeName,
+      other: 'il y a $hours h',
+      one: 'il y a 1 h',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get accountsColumnAccount => 'Compte';
+
+  @override
+  String get accountsColumnInstitution => 'Établissement';
+
+  @override
+  String get accountsColumnLastImport => 'Dernier import';
+
+  @override
+  String accountsColumnMonthChange(String month) {
+    return 'Variation en $month';
+  }
+
+  @override
+  String get accountsColumnBalance => 'Solde';
+
+  @override
+  String get accountsNoImport => '—';
+
+  @override
+  String accountsCardCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count cartes',
+      one: '1 carte',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get accountsGoToImports => 'Aller aux imports';
 
   @override
   String get accountCurrencyLabel => 'Devise';
@@ -546,29 +635,10 @@ class AppLocalizationsFr extends AppLocalizations {
   String get accountEdit => 'Modifier';
 
   @override
-  String accountLastTransaction(String date) {
-    return 'Dernière opération le $date';
-  }
-
-  @override
-  String get accountNoTransactions => 'Aucune opération';
-
-  @override
   String get accountArchive => 'Archiver';
 
   @override
   String get accountSettlementRule => 'Règle de prélèvement';
-
-  @override
-  String accountLinkedCards(int count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: '$count cartes liées',
-      one: '1 carte liée',
-    );
-    return '$_temp0';
-  }
 
   @override
   String cardSettlementNoAccount(String card) {

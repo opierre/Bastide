@@ -854,23 +854,11 @@ abstract class AppLocalizations {
   /// **'Ajouter un compte'**
   String get accountsAddButton;
 
-  /// Timestamp under the summary meta saying when the balances were last recalculated.
-  ///
-  /// In fr, this message translates to:
-  /// **'Soldes au {date}'**
-  String accountsBalancesAsOf(DateTime date);
-
   /// Label on the summary card above the accounts list, over the sum of all account balances.
   ///
   /// In fr, this message translates to:
   /// **'Solde total'**
   String get accountsTotalBalanceLabel;
-
-  /// Caption under the total balance, counting the accounts included in the sum.
-  ///
-  /// In fr, this message translates to:
-  /// **'{count, plural, =0{Aucun compte actif} =1{1 compte actif} other{{count} comptes actifs}}'**
-  String accountsActiveCount(int count);
 
   /// Heading shown when the user has no accounts yet.
   ///
@@ -889,6 +877,132 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Réessayer'**
   String get accountsRetry;
+
+  /// Segment of the accounts title bar: one section per account type.
+  ///
+  /// In fr, this message translates to:
+  /// **'Par type'**
+  String get accountsGroupByType;
+
+  /// Segment of the accounts title bar: one section per institution.
+  ///
+  /// In fr, this message translates to:
+  /// **'Par établissement'**
+  String get accountsGroupByInstitution;
+
+  /// Accounts section holding the checking accounts.
+  ///
+  /// In fr, this message translates to:
+  /// **'Comptes courants'**
+  String get accountsGroupChecking;
+
+  /// Accounts section holding the savings accounts.
+  ///
+  /// In fr, this message translates to:
+  /// **'Épargne'**
+  String get accountsGroupSavings;
+
+  /// Accounts section holding the deferred-debit cards that have a row of their own.
+  ///
+  /// In fr, this message translates to:
+  /// **'Cartes à débit différé'**
+  String get accountsGroupDeferredCards;
+
+  /// Accounts section holding the credit-type accounts.
+  ///
+  /// In fr, this message translates to:
+  /// **'Crédits'**
+  String get accountsGroupCredits;
+
+  /// Accounts section holding cash and other accounts.
+  ///
+  /// In fr, this message translates to:
+  /// **'Autres'**
+  String get accountsGroupOther;
+
+  /// Accounts section, by institution, for the accounts that name none.
+  ///
+  /// In fr, this message translates to:
+  /// **'Sans établissement'**
+  String get accountsNoInstitution;
+
+  /// Section header: the group's share of the total, one decimal.
+  ///
+  /// In fr, this message translates to:
+  /// **'{share} % du total'**
+  String accountsGroupShare(double share);
+
+  /// Number of accounts on the total line.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, =1{1 compte} other{{count} comptes}}'**
+  String accountsCount(int count);
+
+  /// Caption right of the total: the account count, then when the balances were recalculated.
+  ///
+  /// In fr, this message translates to:
+  /// **'{accounts} · soldes recalculés {ago}'**
+  String accountsSummaryCaption(String accounts, String ago);
+
+  /// How long ago the balances were recalculated, under an hour.
+  ///
+  /// In fr, this message translates to:
+  /// **'{minutes, plural, =0{à l’instant} =1{il y a 1 min} other{il y a {minutes} min}}'**
+  String accountsAgoMinutes(int minutes);
+
+  /// How long ago the balances were recalculated, an hour or more.
+  ///
+  /// In fr, this message translates to:
+  /// **'{hours, plural, =1{il y a 1 h} other{il y a {hours} h}}'**
+  String accountsAgoHours(int hours);
+
+  /// Accounts table column header.
+  ///
+  /// In fr, this message translates to:
+  /// **'Compte'**
+  String get accountsColumnAccount;
+
+  /// Accounts table column header.
+  ///
+  /// In fr, this message translates to:
+  /// **'Établissement'**
+  String get accountsColumnInstitution;
+
+  /// Accounts table column header.
+  ///
+  /// In fr, this message translates to:
+  /// **'Dernier import'**
+  String get accountsColumnLastImport;
+
+  /// Accounts table column header: the balance change over the current month, named.
+  ///
+  /// In fr, this message translates to:
+  /// **'Variation en {month}'**
+  String accountsColumnMonthChange(String month);
+
+  /// Accounts table column header.
+  ///
+  /// In fr, this message translates to:
+  /// **'Solde'**
+  String get accountsColumnBalance;
+
+  /// Accounts table cell when no statement was ever imported into the account.
+  ///
+  /// In fr, this message translates to:
+  /// **'—'**
+  String get accountsNoImport;
+
+  /// Status after an account's name counting the cards settled on it; opens their menu.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, =1{1 carte} other{{count} cartes}}'**
+  String accountsCardCount(int count);
+
+  /// Secondary action of the accounts empty state.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aller aux imports'**
+  String get accountsGoToImports;
 
   /// Read-only currency field label in the account form.
   ///
@@ -914,18 +1028,6 @@ abstract class AppLocalizations {
   /// **'Modifier'**
   String get accountEdit;
 
-  /// Account card line giving the booking date of the account's latest transaction.
-  ///
-  /// In fr, this message translates to:
-  /// **'Dernière opération le {date}'**
-  String accountLastTransaction(String date);
-
-  /// Account card line for an account with no transaction yet.
-  ///
-  /// In fr, this message translates to:
-  /// **'Aucune opération'**
-  String get accountNoTransactions;
-
   /// Menu item and confirm-dialog action to archive an account.
   ///
   /// In fr, this message translates to:
@@ -937,12 +1039,6 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Règle de prélèvement'**
   String get accountSettlementRule;
-
-  /// Tooltip and accessible label of the account card's linked-cards button, which shows a card icon and the count; opens the list of cards settled from the account.
-  ///
-  /// In fr, this message translates to:
-  /// **'{count, plural, =1{1 carte liée} other{{count} cartes liées}}'**
-  String accountLinkedCards(int count);
 
   /// Warning for a deferred-debit card with no settlement account.
   ///

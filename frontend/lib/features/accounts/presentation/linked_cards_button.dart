@@ -1,17 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:lucide_icons_flutter/lucide_icons_300.dart';
 
-import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/tokens.dart';
+import '../../../core/widgets/status_text.dart';
 import '../../../l10n/app_localizations.dart';
 import '../application/linked_cards.dart';
 import '../domain/account.dart';
 import 'settlement_rule_dialog.dart';
 
-/// The account card's corner control: how many cards are settled from the
-/// account, then a card icon, opening the list of them. Each card keeps its own
-/// actions there — the account's own edit and archive live in its detail's
-/// top bar. Renders nothing when no card hangs off the account.
+/// The status after an account's name in the accounts table
+/// (`docs/design/05-accounts.md` §Section): `credit-card` and « 1 carte »,
+/// opening the linked-cards menu. Each card keeps its own actions there; the
+/// account's own edit and archive live in its detail's title bar. Renders
+/// nothing when no card is settled on the account.
 class LinkedCardsButton extends ConsumerWidget {
   const LinkedCardsButton({
     super.key,
@@ -29,7 +31,8 @@ class LinkedCardsButton extends ConsumerWidget {
     final l10n = AppLocalizations.of(context)!;
     final cards = ref.watch(linkedCardsProvider(account.id));
     if (cards.isEmpty) return const SizedBox.shrink();
-    final label = l10n.accountLinkedCards(cards.length);
+    final label = l10n.accountsCardCount(cards.length);
+    final iconColor = context.colors.textSecondary;
 
     return MenuAnchor(
       alignmentOffset: const Offset(0, AppSpacing.xs),
@@ -38,28 +41,28 @@ class LinkedCardsButton extends ConsumerWidget {
           SubmenuButton(
             key: Key('linkedCard-${card.id}'),
             leadingIcon: Icon(
-              Icons.credit_card_rounded,
-              size: 16,
-              color: context.colors.textSecondary,
+              LucideIcons300.creditCard,
+              size: AppSizes.iconSmall,
+              color: iconColor,
             ),
             menuChildren: [
               _CardAction(
                 key: Key('linkedCardEdit-${card.id}'),
-                icon: Icons.edit_outlined,
+                icon: LucideIcons300.pencil,
                 label: l10n.accountEdit,
                 onPressed: () => onEditCard(card),
               ),
               if (card.type == AccountType.deferredCard)
                 _CardAction(
                   key: Key('linkedCardSettlementRule-${card.id}'),
-                  icon: Icons.rule_rounded,
+                  icon: LucideIcons300.listChecks,
                   label: l10n.accountSettlementRule,
                   onPressed: () => showSettlementRuleDialog(context, card),
                 ),
               // Archive, never delete: a card's transactions are history.
               _CardAction(
                 key: Key('linkedCardArchive-${card.id}'),
-                icon: Icons.inventory_2_outlined,
+                icon: LucideIcons300.archive,
                 label: l10n.accountArchive,
                 onPressed: () => onArchiveCard(card),
               ),
@@ -67,41 +70,19 @@ class LinkedCardsButton extends ConsumerWidget {
             child: Text(card.name),
           ),
       ],
-      builder: (context, controller, _) => Tooltip(
-        message: label,
-        child: Semantics(
-          button: true,
-          label: label,
-          excludeSemantics: true,
-          child: InkWell(
+      builder: (context, controller, _) => Semantics(
+        button: true,
+        label: label,
+        excludeSemantics: true,
+        child: MouseRegion(
+          cursor: SystemMouseCursors.click,
+          child: GestureDetector(
             key: Key('accountLinkedCards-${account.id}'),
-            borderRadius: BorderRadius.circular(AppRadii.pill),
-            hoverColor: context.colors.hover,
+            behavior: HitTestBehavior.opaque,
+            // The row under it opens the account; this opens the cards only.
             onTap: () =>
                 controller.isOpen ? controller.close() : controller.open(),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: AppSpacing.sm,
-                vertical: AppSpacing.xs,
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    '${cards.length}',
-                    style: tabularNumberStyle(
-                      Theme.of(context).textTheme.bodySmall!,
-                    ).copyWith(color: context.colors.textSecondary),
-                  ),
-                  const SizedBox(width: AppSpacing.xs),
-                  Icon(
-                    Icons.credit_card_rounded,
-                    size: 18,
-                    color: context.colors.textSecondary,
-                  ),
-                ],
-              ),
-            ),
+            child: StatusText(label: label, icon: LucideIcons300.creditCard),
           ),
         ),
       ),
@@ -124,7 +105,11 @@ class _CardAction extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MenuItemButton(
-      leadingIcon: Icon(icon, size: 16, color: context.colors.textSecondary),
+      leadingIcon: Icon(
+        icon,
+        size: AppSizes.iconSmall,
+        color: context.colors.textSecondary,
+      ),
       onPressed: onPressed,
       child: Text(label),
     );
