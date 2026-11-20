@@ -24,6 +24,7 @@ class MoneyField extends StatelessWidget {
     this.onFieldSubmitted,
     this.onChanged,
     this.hintText,
+    this.textAlign = TextAlign.start,
   });
 
   final TextEditingController controller;
@@ -48,6 +49,9 @@ class MoneyField extends StatelessWidget {
   /// opens blank rather than on a value.
   final String? hintText;
 
+  /// [TextAlign.end] in a form whose amounts are right-aligned (`00` §6).
+  final TextAlign textAlign;
+
   @override
   Widget build(BuildContext context) {
     final locale = Localizations.localeOf(context).toString();
@@ -67,6 +71,7 @@ class MoneyField extends StatelessWidget {
           allowNegative: allowNegative,
         ),
       ],
+      textAlign: textAlign,
       // A form value is a neutral figure, not a movement, so it keeps the
       // primary ink rather than a sign color.
       style: tabularNumberStyle(Theme.of(context).textTheme.bodyLarge!),
