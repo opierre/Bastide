@@ -6,6 +6,7 @@ import 'package:bastide/core/theme/tokens.dart';
 import 'package:bastide/core/widgets/amount_text.dart';
 import 'package:bastide/core/widgets/app_button.dart';
 import 'package:bastide/core/widgets/app_table.dart';
+import 'package:bastide/core/widgets/inline_banner.dart';
 import 'package:bastide/core/widgets/status_text.dart';
 import 'package:bastide/features/categories/domain/category.dart';
 import 'package:bastide/features/recurring/application/subscriptions_controller.dart';
@@ -659,6 +660,12 @@ void main() {
         '« STREAMCO » et « STREAMCO - STREAMCO TV » semblent être le même '
         'abonnement, renommé par la banque.',
       );
+      // Informational, never a warning: the neutral banner with `merge`.
+      final banner = tester.widget<InlineBanner>(
+        find.byKey(const Key('subscriptionsMergeBanner')),
+      );
+      expect(banner.icon, LucideIcons300.merge);
+      expect(banner.tone, BannerTone.info);
 
       await tester.tap(find.byKey(const Key('subscriptionsMergeAction')));
       await tester.pumpAndSettle();

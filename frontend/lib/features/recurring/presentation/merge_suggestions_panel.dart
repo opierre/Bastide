@@ -1,28 +1,28 @@
 import 'package:flutter/material.dart';
+import 'package:lucide_icons_flutter/lucide_icons_300.dart';
 
 import '../../../core/theme/tokens.dart';
+import '../../../core/widgets/app_button.dart';
 import '../../../l10n/app_localizations.dart';
 import '../domain/recurring_series.dart';
 import 'merge_suggestion_banner.dart';
 
-/// Every pair the server proposes to merge, each with its own « Fusionner »
-/// and « Ce sont deux abonnements ».
+/// Every pair the server proposes to merge, one Banner each, 8 px apart
+/// (`docs/design/10` §2).
 ///
-/// A single suggestion is the plain banner of `docs/design/10`. Several are
-/// stacked under a count header, so none hides behind another; the stack is
-/// capped at three banners' height and scrolls past that, so a long list
-/// never pushes the series table off the panel. The header's chevron folds
-/// the stack away for the session — the suggestions stay pending server-side,
-/// only an answer removes one.
+/// A single suggestion is the plain banner. With more than one, a header row
+/// sits above: `merge`, « 3 suggestions de fusion » 12 `textSecondary`, and a
+/// ghost chevron that folds them for the session. The suggestions stay
+/// pending server-side; only an answer removes one. Past three banners the
+/// stack scrolls, so a long list never pushes the table off the panel.
 class MergeSuggestionsPanel extends StatefulWidget {
   const MergeSuggestionsPanel({super.key, required this.suggestions});
 
   final List<MergeSuggestion> suggestions;
 
-  /// Three banners and the two gaps between them: a banner is a 30 px button
-  /// inside 8 px of vertical padding.
+  /// Three banners and the two gaps between them.
   static const _maxListHeight =
-      3 * (30 + 2 * AppSpacing.sm) + 2 * AppSpacing.sm;
+      3 * MergeSuggestionBanner.height + 2 * AppSpacing.sm;
 
   @override
   State<MergeSuggestionsPanel> createState() => _MergeSuggestionsPanelState();
@@ -35,12 +35,10 @@ class _MergeSuggestionsPanelState extends State<MergeSuggestionsPanel> {
   @override
   Widget build(BuildContext context) {
     final suggestions = widget.suggestions;
-    if (suggestions.length == 1) {
-      return _banner(suggestions.single);
-    }
+    if (suggestions.length == 1) return _banner(suggestions.single);
 
     final l10n = AppLocalizations.of(context)!;
-    final textTheme = Theme.of(context).textTheme;
+    final colors = context.colors;
 
     return Column(
       key: const Key('subscriptionsMergePanel'),
@@ -50,40 +48,36 @@ class _MergeSuggestionsPanelState extends State<MergeSuggestionsPanel> {
         Row(
           children: [
             Icon(
-              Icons.merge_type_rounded,
-              size: 15,
-              color: context.colors.textSecondary,
+              LucideIcons300.merge,
+              size: AppSizes.iconSmall,
+              color: colors.textSecondary,
             ),
-            const SizedBox(width: AppSpacing.sm),
+            const SizedBox(width: AppSpacing.xsPlus),
             Expanded(
               child: Text(
                 l10n.subscriptionsMergeSuggestionsCount(suggestions.length),
                 key: const Key('subscriptionsMergeCount'),
-                style: textTheme.bodySmall?.copyWith(
-                  color: context.colors.textSecondary,
-                  fontWeight: FontWeight.w600,
-                ),
+                style: Theme.of(
+                  context,
+                ).textTheme.bodySmall?.copyWith(color: colors.textSecondary),
               ),
             ),
-            IconButton(
+            AppButton(
               key: const Key('subscriptionsMergeToggle'),
-              tooltip: _collapsed
+              label: _collapsed
                   ? l10n.subscriptionsMergeSuggestionsShow
                   : l10n.subscriptionsMergeSuggestionsHide,
-              visualDensity: VisualDensity.compact,
-              iconSize: 18,
-              color: context.colors.textSecondary,
-              icon: Icon(
-                _collapsed
-                    ? Icons.expand_more_rounded
-                    : Icons.expand_less_rounded,
-              ),
+              icon: _collapsed
+                  ? LucideIcons300.chevronDown
+                  : LucideIcons300.chevronUp,
+              iconOnly: true,
+              variant: AppButtonVariant.ghost,
               onPressed: () => setState(() => _collapsed = !_collapsed),
             ),
           ],
         ),
         if (!_collapsed) ...[
-          const SizedBox(height: AppSpacing.xs),
+          const SizedBox(height: AppSpacing.sm),
           ConstrainedBox(
             constraints: const BoxConstraints(
               maxHeight: MergeSuggestionsPanel._maxListHeight,
