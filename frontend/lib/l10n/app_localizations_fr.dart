@@ -2761,9 +2761,6 @@ class AppLocalizationsFr extends AppLocalizations {
       'Bastide repère un paiement récurrent lorsqu’un prélèvement s’est répété trois fois. Importer davantage d’historique accélère la détection.';
 
   @override
-  String get subscriptionDetailBack => 'Retour aux récurrents';
-
-  @override
   String subscriptionDetailDetectedSince(String account, String month) {
     return '$account · détecté depuis $month';
   }
@@ -2811,7 +2808,10 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get subscriptionDetailLoadFailed =>
-      'Impossible de charger ce paiement récurrent pour le moment.';
+      'Ce paiement récurrent n’a pas pu être chargé. Rien n’a été modifié.';
+
+  @override
+  String get subscriptionDetailMoreActions => 'Plus d’actions';
 
   @override
   String get subscriptionFormEditTitle => 'Modifier le paiement récurrent';

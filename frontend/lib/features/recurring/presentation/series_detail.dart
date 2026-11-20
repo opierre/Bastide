@@ -1,18 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
 import 'package:lucide_icons_flutter/lucide_icons_300.dart';
 
 import '../../../core/l10n/category_display.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/tokens.dart';
 import '../../../core/widgets/amount_text.dart';
-import '../../../core/widgets/app_card.dart';
+import '../../../core/widgets/app_button.dart';
+import '../../../core/widgets/app_popover.dart';
 import '../../../core/widgets/app_toast.dart';
 import '../../../core/widgets/category_label.dart';
 import '../../../core/widgets/inline_banner.dart';
-import '../../../core/widgets/institution_avatar.dart';
+import '../../../core/widgets/note_line.dart';
+import '../../../core/widgets/section_heading.dart';
 import '../../../core/widgets/state_views.dart';
-import '../../../core/widgets/status_text.dart';
 import '../../../l10n/app_localizations.dart';
 import '../application/subscriptions_controller.dart';
 import '../domain/recurring_series.dart';
@@ -20,17 +22,19 @@ import 'add_charges_dialog.dart';
 import 'price_history_chart.dart';
 import 'recurring_error_localizer.dart';
 import 'recurring_labels.dart';
+import 'series_form_modal.dart';
+import 'summary_item.dart';
 
-/// One series in full (`docs/design/10` frame ②): the stats, the price-increase
-/// banner with its annualised impact, and the occurrence history the series was
-/// deduced from.
+/// One series in full (`docs/design/10` § Series detail): the summary line,
+/// the price-rise banner with its yearly cost, the charge history drawn as a
+/// step line, and the note that the series is deduced from those charges.
 ///
-/// A panel state rather than a route — same chrome, same top-bar controls, an
-/// iris back link rather than a browser step.
+/// A state of the panel rather than a route: the title bar's crumb
+/// « Abonnements / » leads back to the list.
 ///
-/// The history is not decoration. The user is being asked to trust a deduction
-/// ("these five charges are one subscription, and it got more expensive"), so
-/// the evidence for it is on the screen that asks.
+/// The history is not decoration. The user is asked to trust a deduction
+/// ("these charges are one subscription, and it got more expensive"), so the
+/// evidence for it is on the screen that asks.
 class SeriesDetailView extends ConsumerWidget {
   const SeriesDetailView({super.key, required this.seriesId});
 
@@ -41,135 +45,120 @@ class SeriesDetailView extends ConsumerWidget {
     final l10n = AppLocalizations.of(context)!;
     final detail = ref.watch(seriesDetailProvider(seriesId));
 
-    return Column(
+    return KeyedSubtree(
       key: const Key('seriesDetail'),
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        Row(
-          children: [
-            TextButton.icon(
-              key: const Key('seriesDetailBack'),
-              onPressed: () =>
-                  ref.read(selectedSeriesProvider.notifier).close(),
-              icon: Icon(
-                Icons.arrow_back_rounded,
-                size: 16,
-                color: context.colors.accent,
-              ),
-              label: Text(
-                l10n.subscriptionDetailBack,
-                style: Theme.of(
-                  context,
-                ).textTheme.labelMedium?.copyWith(color: context.colors.accent),
-              ),
-            ),
-            const SizedBox(width: AppSpacing.sm),
-            // Wraps rather than overflows on a narrow window: the French
-            // labels of the two actions run long.
-            Expanded(
-              child: Wrap(
-                alignment: WrapAlignment.end,
-                spacing: AppSpacing.sm,
-                runSpacing: AppSpacing.sm,
-                children: [
-                  if (detail.value?.series case final series?) ...[
-                    // A dismissed series is the user's "no", an archived one
-                    // is put away: nothing is added to either.
-                    if (series.status != SeriesStatus.dismissed &&
-                        !series.isArchived)
-                      OutlinedButton.icon(
-                        key: const Key('seriesDetailAddCharge'),
-                        onPressed: () => showAddChargesDialog(context, series),
-                        icon: const Icon(Icons.add_rounded, size: 16),
-                        label: Text(l10n.chargePickerAction),
-                      ),
-                    _ArchiveButton(series: series),
-                  ],
-                ],
-              ),
-            ),
-          ],
+      child: switch (detail) {
+        AsyncData(:final value) => _DetailBody(detail: value),
+        AsyncError() => ErrorStateView(
+          message: l10n.subscriptionDetailLoadFailed,
+          messageKey: const Key('seriesDetailErrorText'),
+          retryLabel: l10n.subscriptionsRetry,
+          retryKey: const Key('seriesDetailRetryButton'),
+          onRetry: () => ref.invalidate(seriesDetailProvider(seriesId)),
         ),
-        const SizedBox(height: AppSpacing.sm),
-        Expanded(
-          child: switch (detail) {
-            AsyncData(:final value) => _DetailBody(detail: value),
-            AsyncError() => ErrorStateView(
-              message: l10n.subscriptionDetailLoadFailed,
-              messageKey: const Key('seriesDetailErrorText'),
-              retryLabel: l10n.subscriptionsRetry,
-              retryKey: const Key('seriesDetailRetryButton'),
-              onRetry: () => ref.invalidate(seriesDetailProvider(seriesId)),
-            ),
-            _ => const SkeletonList(
-              key: Key('seriesDetailLoading'),
-              itemCount: 3,
-              itemHeight: 92,
-            ),
-          },
-        ),
-      ],
+        _ => const _DetailSkeleton(key: Key('seriesDetailLoading')),
+      },
     );
   }
 }
 
-/// « Archiver » on a live series, « Désarchiver » on an archived one.
-///
-/// The view stays open either way and re-reads the series, so the button turns
-/// into its opposite: the user sees the change land and can undo it in place.
-/// A refusal is said in a toast, since the list's banner is out of sight here.
-class _ArchiveButton extends ConsumerStatefulWidget {
-  const _ArchiveButton({required this.series});
+/// The open series' title-bar controls: a secondary « Modifier » opening the
+/// edit modal, then an `ellipsis` menu holding « Ajouter une opération » and
+/// « Archiver » (or « Désarchiver »).
+class SeriesDetailTopBarActions extends ConsumerStatefulWidget {
+  const SeriesDetailTopBarActions({super.key, required this.seriesId});
 
-  final RecurringSeries series;
+  final String seriesId;
 
   @override
-  ConsumerState<_ArchiveButton> createState() => _ArchiveButtonState();
+  ConsumerState<SeriesDetailTopBarActions> createState() =>
+      _SeriesDetailTopBarActionsState();
 }
 
-class _ArchiveButtonState extends ConsumerState<_ArchiveButton> {
-  bool _busy = false;
-
-  Future<void> _toggle() async {
-    final l10n = AppLocalizations.of(context)!;
-    final controller = ref.read(subscriptionsControllerProvider.notifier);
-    final series = widget.series;
-    setState(() => _busy = true);
-    final done = series.isArchived
-        ? await controller.unarchive(series.id)
-        : await controller.archive(series.id);
-    if (!mounted) return;
-    setState(() => _busy = false);
-    if (!done) {
-      showAppToast(
-        context,
-        title: l10n.subscriptionArchiveFailed,
-        message: localizeRecurringError(
-          l10n,
-          ref.read(subscriptionsControllerProvider).value?.actionError,
-        ),
-        tone: BannerTone.error,
-      );
-    }
-  }
+class _SeriesDetailTopBarActionsState
+    extends ConsumerState<SeriesDetailTopBarActions> {
+  final _menu = MenuController();
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final archived = widget.series.isArchived;
+    final series = ref
+        .watch(seriesDetailProvider(widget.seriesId))
+        .value
+        ?.series;
+    if (series == null) return const SizedBox.shrink();
 
-    return OutlinedButton.icon(
-      key: const Key('seriesDetailArchive'),
-      onPressed: _busy ? null : _toggle,
-      icon: Icon(
-        archived ? Icons.unarchive_outlined : Icons.archive_outlined,
-        size: 16,
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        AppButton(
+          key: const Key('seriesDetailEdit'),
+          label: l10n.subscriptionActionEdit,
+          onPressed: series.isArchived ? null : () => _edit(series),
+        ),
+        const SizedBox(width: AppSpacing.sm),
+        MenuAnchor(
+          controller: _menu,
+          style: AppPopover.menuStyle(context),
+          alignmentOffset: const Offset(0, AppSpacing.xs),
+          menuChildren: [
+            // A dismissed series is the user's "no", an archived one is put
+            // away: nothing is added to either.
+            if (series.status != SeriesStatus.dismissed && !series.isArchived)
+              AppMenuItem(
+                key: const Key('seriesDetailAddCharge'),
+                label: l10n.chargePickerAction,
+                leading: const Icon(LucideIcons300.plus),
+                onPressed: () => showAddChargesDialog(context, series),
+              ),
+            AppMenuItem(
+              key: const Key('seriesDetailArchive'),
+              label: series.isArchived
+                  ? l10n.subscriptionActionUnarchive
+                  : l10n.subscriptionActionArchive,
+              leading: Icon(
+                series.isArchived
+                    ? LucideIcons300.archiveRestore
+                    : LucideIcons300.archive,
+              ),
+              onPressed: () => _toggleArchive(series),
+            ),
+          ],
+          child: AppButton(
+            key: const Key('seriesDetailMore'),
+            label: l10n.subscriptionDetailMoreActions,
+            icon: LucideIcons300.ellipsis,
+            iconOnly: true,
+            onPressed: () => _menu.isOpen ? _menu.close() : _menu.open(),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Future<void> _edit(RecurringSeries series) async {
+    final saved = await showSeriesForm(context, series: series);
+    if (saved != null) ref.invalidate(seriesDetailProvider(series.id));
+  }
+
+  /// The view stays open and re-reads the series, so the item turns into its
+  /// opposite: the user sees the change land and can undo it in place. A
+  /// refusal is said in a toast, since the list's banner is out of sight.
+  Future<void> _toggleArchive(RecurringSeries series) async {
+    final l10n = AppLocalizations.of(context)!;
+    final controller = ref.read(subscriptionsControllerProvider.notifier);
+    final done = series.isArchived
+        ? await controller.unarchive(series.id)
+        : await controller.archive(series.id);
+    if (done || !mounted) return;
+    showAppToast(
+      context,
+      title: l10n.subscriptionArchiveFailed,
+      message: localizeRecurringError(
+        l10n,
+        ref.read(subscriptionsControllerProvider).value?.actionError,
       ),
-      label: Text(
-        archived
-            ? l10n.subscriptionActionUnarchive
-            : l10n.subscriptionActionArchive,
-      ),
+      tone: BannerTone.error,
     );
   }
 }
@@ -185,29 +174,32 @@ class _DetailBody extends ConsumerWidget {
     final locale = Localizations.localeOf(context).toString();
     final series = detail.series;
     final accounts = ref.watch(subscriptionAccountsProvider).value ?? const [];
-    final account = accounts
-        .where((candidate) => candidate.id == series.accountId)
-        .firstOrNull;
-    final accountName = account?.displayName ?? '';
+    final accountName =
+        accounts
+            .where((candidate) => candidate.id == series.accountId)
+            .firstOrNull
+            ?.displayName ??
+        '';
     final annual = series.annualPriceImpactMinor;
 
     return ListView(
       key: const Key('seriesDetailContent'),
       children: [
-        _HeaderCard(series: series, accountName: accountName),
+        _DetailSummaryLine(series: series, accountName: accountName),
         if (series.priceChangedAt case final changedAt?
             when annual != null) ...[
-          const SizedBox(height: AppSpacing.gridGap),
+          const SizedBox(height: AppSpacing.section),
           InlineBanner(
             key: const Key('seriesIncreaseBanner'),
             tone: BannerTone.warning,
+            icon: LucideIcons300.trendingUp,
             message: l10n.subscriptionDetailIncrease(
               _money(series.previousAmountMinor!, series.currency, locale),
               _money(series.expectedAmountMinor, series.currency, locale),
-              seriesDateFormat(locale).format(changedAt),
-              // The annualised figure is stated with an explicit sign: it is
-              // the direction of the change, not a balance, and « 24,00 € par
-              // an » alone would not say whether that is more or less.
+              DateFormat.yMMMd(locale).format(changedAt),
+              // Stated with its sign: the direction of the change, not a
+              // balance. « 24,00 € par an » alone would not say whether that
+              // is more or less.
               formatAmount(
                 amountMinor: annual.abs(),
                 currency: series.currency,
@@ -217,23 +209,43 @@ class _DetailBody extends ConsumerWidget {
             ),
           ),
         ],
-        const SizedBox(height: AppSpacing.gridGap),
-        _HistoryCard(detail: detail, accountName: accountName),
-        const SizedBox(height: AppSpacing.sm + AppSpacing.xs),
-        Text(
-          l10n.subscriptionDetailFootnote,
-          key: const Key('seriesDetailFootnote'),
-          style: context.textStyles.helper.copyWith(
-            color: context.colors.textTertiary,
+        const SizedBox(height: AppSpacing.section),
+        SectionHeading(
+          title: l10n.subscriptionDetailHistoryTitle,
+          trailing: Text(
+            l10n.subscriptionDetailHistorySubtitle(accountName),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+              color: context.colors.textSecondary,
+            ),
           ),
+        ),
+        // Every series has charges: it is detected from them, or created from
+        // the ones the user ticked.
+        SizedBox(
+          height: PriceHistoryChart.height,
+          child: PriceHistoryChart(
+            series: series,
+            occurrences: detail.occurrences,
+          ),
+        ),
+        const SizedBox(height: AppSpacing.section),
+        NoteLine(
+          key: const Key('seriesDetailFootnote'),
+          text: l10n.subscriptionDetailFootnote,
         ),
       ],
     );
   }
 }
 
-class _HeaderCard extends ConsumerWidget {
-  const _HeaderCard({required this.series, required this.accountName});
+/// The detail's summary line: « Montant attendu » leads at 40 px, then
+/// « Cadence » and « Prochain prélèvement » at 20 px; on the right, 12
+/// `textSecondary`, the category label over « {account} · détecté depuis
+/// {mois} ».
+class _DetailSummaryLine extends ConsumerWidget {
+  const _DetailSummaryLine({required this.series, required this.accountName});
 
   final RecurringSeries series;
   final String accountName;
@@ -242,49 +254,89 @@ class _HeaderCard extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context)!;
     final locale = Localizations.localeOf(context).toString();
+    final colors = context.colors;
     final textTheme = Theme.of(context).textTheme;
+    final minor = tabularNumberStyle(textTheme.displaySmall!);
     final category = series.categoryId == null
         ? null
         : ref.watch(subscriptionCategoriesByIdProvider)[series.categoryId];
     final since = seriesMonthLabel(locale, series.firstSeenDate);
+    // A cancelled or archived series expects no charge.
+    final settled =
+        series.status == SeriesStatus.cancelled || series.isArchived;
 
-    return AppCard(
-      padding: const EdgeInsets.all(AppSpacing.cardPaddingWide),
+    return IntrinsicHeight(
+      key: const Key('seriesDetailSummaryLine'),
       child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          InstitutionAvatar(name: series.label, size: 48, logo: series.logo),
-          const SizedBox(width: AppSpacing.md),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Flexible(
-                      child: Text(
-                        series.label,
-                        overflow: TextOverflow.ellipsis,
-                        style: textTheme.titleLarge?.copyWith(fontSize: 20),
-                      ),
-                    ),
-                    if (category != null) ...[
-                      const SizedBox(width: AppSpacing.sm + AppSpacing.xs),
-                      CategoryLabel(
-                        label: localizedCategoryName(l10n, category.name),
-                        slug: categorySlugFor(
-                          name: category.name,
-                          kind: category.kind,
-                        ),
-                      ),
-                    ],
-                  ],
+          SummaryItem(
+            label: l10n.subscriptionDetailExpectedAmount,
+            labelGap: AppSpacing.xs,
+            // Neutral and unsigned like the list's column: what the
+            // subscription costs, not a movement.
+            figure: AmountText(
+              key: const Key('seriesDetailExpectedAmount'),
+              amountMinor: series.expectedAmountMinor.abs(),
+              currency: series.currency,
+              colorize: false,
+              maxLines: 1,
+              style: textTheme.displayLarge!.copyWith(color: colors.text),
+            ),
+          ),
+          const SummaryHairline(),
+          Flexible(
+            child: SummaryItem(
+              label: l10n.subscriptionDetailCadence,
+              figure: Text(
+                cadenceLabel(l10n, series.cadence),
+                key: const Key('seriesDetailCadence'),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: minor.copyWith(color: colors.text),
+              ),
+            ),
+          ),
+          const SizedBox(width: AppSpacing.xxl),
+          Flexible(
+            child: SummaryItem(
+              label: l10n.subscriptionDetailNextCharge,
+              figure: Text(
+                settled
+                    ? l10n.subscriptionsValueNone
+                    : seriesLongDateFormat(
+                        locale,
+                      ).format(series.nextExpectedDate),
+                key: const Key('seriesDetailNextCharge'),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: minor.copyWith(
+                  color: settled ? colors.textTertiary : colors.text,
                 ),
-                const SizedBox(height: AppSpacing.xs + 2),
+              ),
+            ),
+          ),
+          const SizedBox(width: AppSpacing.xxl),
+          Expanded(
+            flex: 2,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.end,
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                if (category == null)
+                  CategoryLabel.uncategorized(label: l10n.categoryUncategorized)
+                else
+                  CategoryLabel(
+                    label: localizedCategoryName(l10n, category.name),
+                    slug: categorySlugFor(
+                      name: category.name,
+                      kind: category.kind,
+                    ),
+                  ),
+                const SizedBox(height: AppSpacing.xs),
                 Text(
                   // A series the user created from its charges was never
-                  // detected, so saying it was would misdescribe where it came
-                  // from.
+                  // detected, so saying it was would misdescribe it.
                   series.isManual
                       ? l10n.subscriptionDetailTrackedSince(accountName, since)
                       : l10n.subscriptionDetailDetectedSince(
@@ -292,157 +344,45 @@ class _HeaderCard extends ConsumerWidget {
                           since,
                         ),
                   key: const Key('seriesDetailSubline'),
+                  maxLines: 1,
                   overflow: TextOverflow.ellipsis,
+                  textAlign: TextAlign.end,
                   style: textTheme.bodySmall?.copyWith(
-                    color: context.colors.textSecondary,
+                    color: colors.textSecondary,
                   ),
                 ),
               ],
             ),
           ),
-          const SizedBox(width: AppSpacing.md),
-          _Stat(
-            label: l10n.subscriptionDetailCadence,
-            child: Text(
-              cadenceLabel(l10n, series.cadence),
-              style: textTheme.titleSmall,
-            ),
-          ),
-          const SizedBox(width: AppSpacing.lg),
-          _Stat(
-            label: l10n.subscriptionDetailExpectedAmount,
-            // Neutral and unsigned like the list column, and for the same
-            // reason: it is what the subscription costs, not a movement.
-            child: AmountText(
-              key: const Key('seriesDetailExpectedAmount'),
-              amountMinor: series.expectedAmountMinor.abs(),
-              currency: series.currency,
-              colorize: false,
-              style: textTheme.titleSmall,
-            ),
-          ),
-          const SizedBox(width: AppSpacing.lg),
-          _Stat(
-            label: l10n.subscriptionDetailNextCharge,
-            child: Text(
-              seriesDateFormat(locale).format(series.nextExpectedDate),
-              style: tabularNumberStyle(textTheme.titleSmall!),
-            ),
-          ),
         ],
       ),
     );
   }
 }
 
-class _Stat extends StatelessWidget {
-  const _Stat({required this.label, required this.child});
+/// The summary line's silhouette: label, 40 px figure.
+const _summarySilhouette = 66.0;
 
-  final String label;
-  final Widget child;
+/// The heading over the chart and its gap.
+const _headingSilhouette = 28.0;
 
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.end,
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Text(label.toUpperCase(), style: context.textStyles.sectionLabel),
-        const SizedBox(height: AppSpacing.xs + 2),
-        child,
-      ],
-    );
-  }
-}
-
-/// The price the series has been charged at over time, drawn as a step curve,
-/// with the charge it stepped at marked.
-///
-/// A curve rather than the column of amounts this card used to hold: five
-/// near-identical prices make the reader do the comparison, where a line has
-/// already done it. The amounts themselves stay one hover away, so the
-/// evidence the footnote asks the user to check is still on the screen that
-/// asks.
-class _HistoryCard extends StatelessWidget {
-  const _HistoryCard({required this.detail, required this.accountName});
-
-  final SeriesDetail detail;
-  final String accountName;
-
-  /// Plot height. Tall enough that a single-cent step is still a visible tread,
-  /// short enough that the card doesn't push the footnote off a laptop screen.
-  static const _chartHeight = 184.0;
+/// The detail's silhouette: the summary line, then the history block.
+class _DetailSkeleton extends StatelessWidget {
+  const _DetailSkeleton({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
-    final locale = Localizations.localeOf(context).toString();
-    final textTheme = Theme.of(context).textTheme;
-    final series = detail.series;
-    final stepped = _steppedUpOccurrence();
-
-    return AppCard(
-      padding: const EdgeInsets.all(AppSpacing.cardPadding),
+    return const SkeletonPulse(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Text(
-            l10n.subscriptionDetailHistoryTitle,
-            style: textTheme.titleMedium,
-          ),
-          const SizedBox(height: 3),
-          Text(
-            l10n.subscriptionDetailHistorySubtitle(accountName),
-            style: textTheme.bodySmall?.copyWith(
-              color: context.colors.textSecondary,
-            ),
-          ),
-          const SizedBox(height: AppSpacing.md),
-          // Every series has charges: it is detected from them, or created
-          // from the ones the user ticked.
-          SizedBox(
-            height: _chartHeight,
-            child: PriceHistoryChart(
-              series: series,
-              occurrences: detail.occurrences,
-            ),
-          ),
-          if (stepped != null) ...[
-            const SizedBox(height: AppSpacing.sm + AppSpacing.xs),
-            // The legend for the amber point on the curve, in the same pill
-            // the list row uses for the same fact.
-            Align(
-              alignment: Alignment.centerLeft,
-              child: StatusText(
-                key: Key('seriesOccurrenceChange-${stepped.id}'),
-                tone: StatusTone.warning,
-                icon: LucideIcons300.trendingUp,
-                label: l10n.subscriptionDetailChange(
-                  _money(series.previousAmountMinor!, series.currency, locale),
-                  _money(series.expectedAmountMinor, series.currency, locale),
-                ),
-              ),
-            ),
-          ],
+          SkeletonBlock(height: _summarySilhouette),
+          SizedBox(height: AppSpacing.section),
+          SkeletonBlock(height: _headingSilhouette + PriceHistoryChart.height),
         ],
       ),
     );
   }
-
-  /// The charge the recorded price change landed on, or `null` when the series
-  /// never stepped — or when the change predates the occurrences on hand.
-  SeriesOccurrence? _steppedUpOccurrence() {
-    final changedAt = detail.series.priceChangedAt;
-    if (changedAt == null || detail.series.previousAmountMinor == null) {
-      return null;
-    }
-    return detail.occurrences
-        .where((occurrence) => _sameDay(occurrence.bookedDate, changedAt))
-        .firstOrNull;
-  }
-
-  static bool _sameDay(DateTime a, DateTime b) =>
-      a.year == b.year && a.month == b.month && a.day == b.day;
 }
 
 /// A price as the panel states one: unsigned, because it is what the

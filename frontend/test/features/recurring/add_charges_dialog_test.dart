@@ -84,7 +84,12 @@ Future<void> _pumpDetail(
         theme: AppTheme.dark,
         localizationsDelegates: AppLocalizations.localizationsDelegates,
         supportedLocales: AppLocalizations.supportedLocales,
-        home: const Scaffold(body: SeriesDetailView(seriesId: 's1')),
+        home: Scaffold(
+          appBar: AppBar(
+            actions: const [SeriesDetailTopBarActions(seriesId: 's1')],
+          ),
+          body: const SeriesDetailView(seriesId: 's1'),
+        ),
       ),
     ),
   );
@@ -92,6 +97,8 @@ Future<void> _pumpDetail(
 }
 
 Future<void> _openPicker(WidgetTester tester) async {
+  await tester.tap(find.byKey(const Key('seriesDetailMore')));
+  await tester.pumpAndSettle();
   await tester.tap(find.byKey(const Key('seriesDetailAddCharge')));
   await tester.pumpAndSettle();
 }
@@ -261,6 +268,8 @@ void main() {
       series: testSeries(id: 's1', status: SeriesStatus.dismissed),
     );
 
+    await tester.tap(find.byKey(const Key('seriesDetailMore')));
+    await tester.pumpAndSettle();
     expect(find.byKey(const Key('seriesDetailAddCharge')), findsNothing);
   });
 }

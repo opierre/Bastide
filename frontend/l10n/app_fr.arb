@@ -3376,10 +3376,6 @@
   "@subscriptionsEmptyBody": {
     "description": "Empty-state body, stating the three-repeat rule so the absence reads as a threshold rather than a failure."
   },
-  "subscriptionDetailBack": "Retour aux récurrents",
-  "@subscriptionDetailBack": {
-    "description": "Iris back link at the top of the series detail."
-  },
   "subscriptionDetailDetectedSince": "{account} · détecté depuis {month}",
   "@subscriptionDetailDetectedSince": {
     "description": "Sub-line of the detail header for a detected series.",
@@ -3463,9 +3459,13 @@
   "@subscriptionDetailFootnote": {
     "description": "Foot note under the history: the user is being asked to trust a deduction, so the evidence is part of the screen."
   },
-  "subscriptionDetailLoadFailed": "Impossible de charger ce paiement récurrent pour le moment.",
+  "subscriptionDetailLoadFailed": "Ce paiement récurrent n’a pas pu être chargé. Rien n’a été modifié.",
   "@subscriptionDetailLoadFailed": {
     "description": "Error state replacing the detail when it failed to load."
+  },
+  "subscriptionDetailMoreActions": "Plus d’actions",
+  "@subscriptionDetailMoreActions": {
+    "description": "Accessible name of the series detail's ellipsis button in the title bar."
   },
   "subscriptionFormEditTitle": "Modifier le paiement récurrent",
   "@subscriptionFormEditTitle": {

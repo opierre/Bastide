@@ -39,6 +39,10 @@ class PriceHistoryChart extends StatefulWidget {
   /// curve reads left to right in time.
   final List<SeriesOccurrence> occurrences;
 
+  /// The chart's height in the series detail (`docs/design/10` §3): tall
+  /// enough that a one-cent step is still a visible tread.
+  static const height = 184.0;
+
   /// Width reserved left of the plot for the value axis: the app-wide chart
   /// gutter, so this plot starts where every other chart's does. Its labels end
   /// [AppChart.labelGap] short of the plot, as theirs do.
@@ -588,20 +592,22 @@ class _PriceLinePainter extends CustomPainter {
   final int? stepIndex;
   final int? hovered;
 
-  static const _gridlines = 4;
-
   @override
   void paint(Canvas canvas, Size size) {
     final rect = plot.rect;
 
-    // Unlabelled: the axis names the prices paid, not round levels (see
-    // [_PriceHistoryChartState._valueLabels]).
-    ChartPaints.grid(colors, canvas, size, rect, [
-      for (var i = 0; i <= _gridlines; i++)
-        rect.top + rect.height * (i / _gridlines),
-    ]);
-
     if (plot.values.isEmpty) return;
+
+    // One gridline per value tick: the cheapest and the dearest charge, or the
+    // single price when it never moved (see
+    // [_PriceHistoryChartState._valueLabels]).
+    ChartPaints.grid(
+      colors,
+      canvas,
+      size,
+      rect,
+      {plot.yAt(plot.maxValue), plot.yAt(plot.minValue)}.toList(),
+    );
 
     final points = [
       for (var i = 0; i < plot.values.length; i++)
@@ -640,8 +646,8 @@ class _PriceLinePainter extends CustomPainter {
         Offset(points[step].dx, rect.top),
         Offset(points[step].dx, rect.bottom),
         Paint()
-          ..color = colors.warning.withValues(alpha: 0.35)
-          ..strokeWidth = 1,
+          ..color = colors.warning.withValues(alpha: AppChart.changeGuideAlpha)
+          ..strokeWidth = AppChart.gridStroke,
       );
     }
 

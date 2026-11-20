@@ -5,6 +5,7 @@ import 'package:lucide_icons_flutter/lucide_icons_300.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/tokens.dart';
 import '../../../core/widgets/amount_text.dart';
+import '../../../core/widgets/app_shell.dart';
 import '../../../core/widgets/app_table.dart';
 import '../../../core/widgets/app_toast.dart';
 import '../../../core/widgets/inline_banner.dart';
@@ -21,6 +22,7 @@ import 'recurring_labels.dart';
 import 'series_detail.dart';
 import 'series_form_modal.dart';
 import 'series_row.dart';
+import 'summary_item.dart';
 
 /// « Abonnements » (`docs/design/10-subscriptions.md`): the summary line, the
 /// merge suggestions when there are any, then the table sorted by next
@@ -47,23 +49,49 @@ class SubscriptionsScreen extends ConsumerWidget {
   }
 }
 
-/// The list's contribution to the title bar: the secondary « Détecter »
-/// (`10` § Title bar). There is no « Nouvel abonnement »: a series is created
-/// from its charges in Transactions.
+/// The panel's contribution to the title bar. The list shows the secondary
+/// « Détecter » (`10` § Title bar); there is no « Nouvel abonnement », since a
+/// series is created from its charges in Transactions. An open series shows
+/// its own « Modifier » and `ellipsis` menu instead (`10` § Series detail).
 class SubscriptionsTopBarActions extends ConsumerWidget {
   const SubscriptionsTopBarActions({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context)!;
-    final detecting = ref.watch(recurringDetectionProvider);
+    final selected = ref.watch(selectedSeriesProvider);
+    if (selected != null) return SeriesDetailTopBarActions(seriesId: selected);
 
+    final detecting = ref.watch(recurringDetectionProvider);
     return AppButton(
       key: const Key('subscriptionsDetectButton'),
       label: l10n.subscriptionsDetect,
       icon: LucideIcons300.scanSearch,
       isLoading: detecting,
       onPressed: () => runRecurringDetection(context, ref),
+    );
+  }
+}
+
+/// The panel's title: « Abonnements », or, on an open series,
+/// « Abonnements / » leading back to the list, then the series' name.
+class SubscriptionsTitle extends ConsumerWidget {
+  const SubscriptionsTitle({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
+    final selected = ref.watch(selectedSeriesProvider);
+    if (selected == null) return TitleBarTitle(title: l10n.navSubscriptions);
+
+    final label = ref.watch(seriesDetailProvider(selected)).value?.series.label;
+    return TitleBarTitle(
+      key: const Key('subscriptionsDetailTitle'),
+      crumb: TitleBarCrumb(
+        label: l10n.navSubscriptions,
+        onTap: () => ref.read(selectedSeriesProvider.notifier).close(),
+      ),
+      title: label ?? '',
     );
   }
 }
@@ -205,7 +233,7 @@ class SubscriptionsSummaryLine extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          _SummaryItem(
+          SummaryItem(
             label: l10n.subscriptionsBurdenLabel,
             labelGap: AppSpacing.xs,
             caption: l10n.subscriptionsBurdenCaption,
@@ -220,12 +248,9 @@ class SubscriptionsSummaryLine extends StatelessWidget {
               style: textTheme.displayLarge!.copyWith(color: colors.text),
             ),
           ),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xxl),
-            child: SizedBox(width: 1, child: ColoredBox(color: colors.line)),
-          ),
+          const SummaryHairline(),
           Flexible(
-            child: _SummaryItem(
+            child: SummaryItem(
               label: l10n.subscriptionsActiveLabel,
               caption: breakdown,
               figure: Text(
@@ -238,7 +263,7 @@ class SubscriptionsSummaryLine extends StatelessWidget {
           const SizedBox(width: AppSpacing.xxl),
           Flexible(
             flex: 2,
-            child: _SummaryItem(
+            child: SummaryItem(
               label: l10n.subscriptionsNextLabel,
               caption: next == null
                   ? null
@@ -269,7 +294,7 @@ class SubscriptionsSummaryLine extends StatelessWidget {
           if (watch > 0) ...[
             const SizedBox(width: AppSpacing.xxl),
             Flexible(
-              child: _SummaryItem(
+              child: SummaryItem(
                 key: const Key('subscriptionsWatch'),
                 label: l10n.subscriptionsWatchLabel,
                 caption: [
@@ -290,55 +315,6 @@ class SubscriptionsSummaryLine extends StatelessWidget {
           ],
         ],
       ),
-    );
-  }
-}
-
-/// One item of the summary line: label 12 `textSecondary`, the figure, then
-/// an optional caption 12 `textTertiary`, bottom-aligned with its neighbours.
-class _SummaryItem extends StatelessWidget {
-  const _SummaryItem({
-    super.key,
-    required this.label,
-    required this.figure,
-    this.caption,
-    this.labelGap = AppSpacing.xsPlus,
-  });
-
-  final String label;
-  final Widget figure;
-  final String? caption;
-  final double labelGap;
-
-  @override
-  Widget build(BuildContext context) {
-    final captionStyle = Theme.of(
-      context,
-    ).textTheme.bodySmall!.copyWith(color: context.colors.textTertiary);
-    final caption = this.caption;
-
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.end,
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          label,
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-          style: context.textStyles.statLabel,
-        ),
-        SizedBox(height: labelGap),
-        figure,
-        if (caption != null && caption.isNotEmpty) ...[
-          SizedBox(height: labelGap),
-          Text(
-            caption,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: tabularNumberStyle(captionStyle),
-          ),
-        ],
-      ],
     );
   }
 }

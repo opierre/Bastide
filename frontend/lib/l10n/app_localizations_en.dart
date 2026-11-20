@@ -2742,9 +2742,6 @@ class AppLocalizationsEn extends AppLocalizations {
       'Bastide spots a recurring payment once a charge has repeated three times. Importing more history speeds detection up.';
 
   @override
-  String get subscriptionDetailBack => 'Back to recurring payments';
-
-  @override
   String subscriptionDetailDetectedSince(String account, String month) {
     return '$account · detected since $month';
   }
@@ -2792,7 +2789,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get subscriptionDetailLoadFailed =>
-      'We couldn\'t load this recurring payment right now.';
+      'This recurring payment couldn\'t be loaded. Nothing was changed.';
+
+  @override
+  String get subscriptionDetailMoreActions => 'More actions';
 
   @override
   String get subscriptionFormEditTitle => 'Edit recurring payment';

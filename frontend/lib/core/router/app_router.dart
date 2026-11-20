@@ -69,11 +69,15 @@ TopBarActionsBuilder? _topBarActions(String path) => switch (path) {
 
 /// The top-bar title of the panels that name something more specific than
 /// their section; `null` keeps the section's own label.
-TopBarTitleBuilder? _topBarTitle(String path) =>
-    switch (AccountDetailScreen.idFromPath(path)) {
-      final id? => (context) => AccountDetailTitle(accountId: id),
-      null => null,
-    };
+TopBarTitleBuilder? _topBarTitle(String path) => switch (path) {
+  // An open series is a state of the panel, so its crumb and name come from
+  // the panel's own title widget rather than from a route.
+  '/subscriptions' => (context) => const SubscriptionsTitle(),
+  _ => switch (AccountDetailScreen.idFromPath(path)) {
+    final id? => (context) => AccountDetailTitle(accountId: id),
+    null => null,
+  },
+};
 
 final appRouterProvider = Provider<GoRouter>((ref) {
   final authRefresh = _AuthRefreshListenable(ref);

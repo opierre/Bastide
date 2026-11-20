@@ -4284,12 +4284,6 @@ abstract class AppLocalizations {
   /// **'Bastide repère un paiement récurrent lorsqu’un prélèvement s’est répété trois fois. Importer davantage d’historique accélère la détection.'**
   String get subscriptionsEmptyBody;
 
-  /// Iris back link at the top of the series detail.
-  ///
-  /// In fr, this message translates to:
-  /// **'Retour aux récurrents'**
-  String get subscriptionDetailBack;
-
   /// Sub-line of the detail header for a detected series.
   ///
   /// In fr, this message translates to:
@@ -4358,8 +4352,14 @@ abstract class AppLocalizations {
   /// Error state replacing the detail when it failed to load.
   ///
   /// In fr, this message translates to:
-  /// **'Impossible de charger ce paiement récurrent pour le moment.'**
+  /// **'Ce paiement récurrent n’a pas pu être chargé. Rien n’a été modifié.'**
   String get subscriptionDetailLoadFailed;
+
+  /// Accessible name of the series detail's ellipsis button in the title bar.
+  ///
+  /// In fr, this message translates to:
+  /// **'Plus d’actions'**
+  String get subscriptionDetailMoreActions;
 
   /// Title of the modal when editing an existing series.
   ///

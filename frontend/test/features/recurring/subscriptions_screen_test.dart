@@ -634,6 +634,69 @@ void main() {
     expect(find.text('Loisirs'), findsOneWidget);
   });
 
+  testWidgets('a row opens its series under the « Abonnements » crumb', (
+    tester,
+  ) async {
+    _useDesktopSurface(tester);
+    final series = testSeries();
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          subscriptionsControllerProvider.overrideWith(
+            () => FakeSubscriptionsController(
+              initialSeries: [series],
+              summary: testSummary(),
+            ),
+          ),
+          subscriptionCategoriesProvider.overrideWith((ref) => []),
+          subscriptionAccountsProvider.overrideWith((ref) => []),
+          seriesDetailProvider.overrideWith(
+            (ref, id) => SeriesDetail(series: series, occurrences: const []),
+          ),
+        ],
+        child: MaterialApp(
+          locale: const Locale('fr'),
+          theme: AppTheme.dark,
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: Scaffold(
+            appBar: AppBar(
+              title: const SubscriptionsTitle(),
+              actions: const [SubscriptionsTopBarActions()],
+            ),
+            body: const SubscriptionsScreen(),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(const Key('titleBarCrumb')), findsNothing);
+    expect(find.byKey(const Key('subscriptionsDetectButton')), findsOneWidget);
+
+    await tester.tap(find.byKey(const Key('seriesRow-s1')));
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(const Key('seriesDetail')), findsOneWidget);
+    expect(
+      tester.widget<Text>(find.byKey(const Key('titleBarCrumb'))).data,
+      'Abonnements',
+    );
+    expect(
+      tester.widget<Text>(find.byKey(const Key('titleBarTitle'))).data,
+      'Netflix',
+    );
+    // The detail's own controls replace « Détecter ».
+    expect(find.byKey(const Key('subscriptionsDetectButton')), findsNothing);
+    expect(find.byKey(const Key('seriesDetailEdit')), findsOneWidget);
+    expect(find.byKey(const Key('seriesDetailMore')), findsOneWidget);
+
+    await tester.tap(find.byKey(const Key('titleBarCrumb')));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const Key('seriesDetail')), findsNothing);
+    expect(find.byKey(const Key('seriesRow-s1')), findsOneWidget);
+  });
+
   group('merge suggestion', () {
     MergeSuggestion suggestion() => MergeSuggestion(
       target: testSeries(id: 's2', label: 'STREAMCO - STREAMCO TV'),

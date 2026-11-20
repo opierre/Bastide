@@ -1,6 +1,7 @@
 import 'package:bastide/core/theme/app_theme.dart';
 import 'package:bastide/core/theme/tokens.dart';
 import 'package:bastide/core/widgets/amount_text.dart';
+import 'package:bastide/core/widgets/inline_banner.dart';
 import 'package:bastide/features/recurring/application/subscriptions_controller.dart';
 import 'package:bastide/features/recurring/domain/recurring_series.dart';
 import 'package:bastide/features/recurring/presentation/price_history_chart.dart';
@@ -10,6 +11,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:lucide_icons_flutter/lucide_icons_300.dart';
 
 import '../../support/recurring_fixtures.dart';
 
@@ -51,7 +53,12 @@ Widget _wrap(SeriesDetail detail, {FakeSubscriptionsController? controller}) {
       theme: AppTheme.dark,
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
-      home: const Scaffold(body: SeriesDetailView(seriesId: 's1')),
+      home: Scaffold(
+        appBar: AppBar(
+          actions: const [SeriesDetailTopBarActions(seriesId: 's1')],
+        ),
+        body: const SeriesDetailView(seriesId: 's1'),
+      ),
     ),
   );
 }
@@ -212,6 +219,9 @@ void main() {
       );
       await tester.pumpAndSettle();
 
+      await tester.tap(find.byKey(const Key('seriesDetailMore')));
+      await tester.pumpAndSettle();
+
       expect(find.byKey(const Key('seriesDetailAddCharge')), findsOneWidget);
       final button = find.byKey(const Key('seriesDetailArchive'));
       expect(
@@ -242,6 +252,9 @@ void main() {
           controller: controller,
         ),
       );
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byKey(const Key('seriesDetailMore')));
       await tester.pumpAndSettle();
 
       expect(find.byKey(const Key('seriesDetailAddCharge')), findsNothing);
@@ -288,19 +301,23 @@ void main() {
     expect(find.byKey(const Key('seriesIncreaseBanner')), findsOneWidget);
     expect(
       find.text(
-        'Hausse : ${_money(1349)} → ${_money(1549)} le 15/04/2026, '
+        'Hausse : ${_money(1349)} → ${_money(1549)} le 15 avr. 2026, '
         'soit +${_money(2400)} par an.',
       ),
       findsOneWidget,
     );
 
-    // The evidence is on the screen that asks the user to trust the deduction —
-    // drawn as a curve, one hoverable point per charge, with the charge that
-    // stepped up named by the amber legend.
+    // The banner's icon is the warning `trending-up`; the banner stays neutral.
+    final banner = tester.widget<InlineBanner>(
+      find.byKey(const Key('seriesIncreaseBanner')),
+    );
+    expect(banner.icon, LucideIcons300.trendingUp);
+    expect(banner.tone, BannerTone.warning);
+
+    // The evidence is on the screen that asks the user to trust the
+    // deduction: drawn as a curve, one hoverable point per charge.
     expect(find.byKey(const Key('seriesOccurrence-o1')), findsOneWidget);
     expect(find.byKey(const Key('seriesOccurrence-o2')), findsOneWidget);
-    expect(find.byKey(const Key('seriesOccurrenceChange-o1')), findsOneWidget);
-    expect(find.byKey(const Key('seriesOccurrenceChange-o2')), findsNothing);
 
     // The literal prices are not lost with the column: the curve's extremes
     // are labelled, unsigned, on the value axis.
@@ -452,7 +469,85 @@ void main() {
     expect(_axisLabel(tester, 'seriesPriceAxisMax'), _money(1549));
     expect(find.byKey(const Key('seriesPriceAxisMin')), findsNothing);
     expect(find.byKey(const Key('seriesOccurrence-o3')), findsOneWidget);
-    expect(find.byKey(const Key('seriesOccurrenceChange-o1')), findsNothing);
+  });
+
+  testWidgets('the summary line leads on the expected amount', (tester) async {
+    _useDesktopSurface(tester);
+    await tester.pumpWidget(
+      _wrap(SeriesDetail(series: testSeries(), occurrences: const [])),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('Montant attendu'), findsOneWidget);
+    expect(
+      tester
+          .widget<AmountText>(
+            find.byKey(const Key('seriesDetailExpectedAmount')),
+          )
+          .colorize,
+      isFalse,
+    );
+    expect(find.text(_money(1549)), findsOneWidget);
+    expect(find.text('Cadence'), findsOneWidget);
+    expect(find.text('Mensuel'), findsOneWidget);
+    expect(find.text('Prochain prélèvement'), findsOneWidget);
+    expect(find.text('15 mai 2026'), findsOneWidget);
+    expect(find.text('Non catégorisé'), findsOneWidget);
+    expect(find.text('Historique des prélèvements'), findsOneWidget);
+    expect(
+      find.text(
+        'La série est déduite de ces prélèvements. Vérifiez-les avant de '
+        'confirmer un changement.',
+      ),
+      findsOneWidget,
+    );
+  });
+
+  testWidgets('« Modifier » opens the edit modal', (tester) async {
+    _useDesktopSurface(tester);
+    await tester.pumpWidget(
+      _wrap(
+        SeriesDetail(series: testSeries(), occurrences: const []),
+        controller: FakeSubscriptionsController(initialSeries: [testSeries()]),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byKey(const Key('seriesDetailEdit')));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Modifier le paiement récurrent'), findsOneWidget);
+  });
+
+  testWidgets('a failed load says nothing was changed and offers a retry', (
+    tester,
+  ) async {
+    _useDesktopSurface(tester);
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          seriesDetailProvider.overrideWith(
+            (ref, id) => Future<SeriesDetail>.error(StateError('boom')),
+          ),
+        ],
+        child: MaterialApp(
+          locale: const Locale('fr'),
+          theme: AppTheme.dark,
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: const Scaffold(body: SeriesDetailView(seriesId: 's1')),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(
+      find.text(
+        'Ce paiement récurrent n’a pas pu être chargé. Rien n’a été modifié.',
+      ),
+      findsOneWidget,
+    );
+    expect(find.byKey(const Key('seriesDetailRetryButton')), findsOneWidget);
   });
 
   // The window widths the app is drawn and launched at: the 1440 frame, the
