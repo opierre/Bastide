@@ -85,6 +85,12 @@ class AccountRead(BaseModel):
     last_transaction_date: date | None = Field(
         description="Booking date of the account's latest transaction; null when it has none."
     )
+    last_import_at: datetime | None = Field(
+        description="When a statement last landed in the account; null before any import."
+    )
+    month_change_minor: int = Field(
+        description="Net movement booked since the first of the current month, signed."
+    )
     archived: bool
     created_at: datetime
     updated_at: datetime

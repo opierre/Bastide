@@ -1,6 +1,6 @@
 """Business logic for account creation, updates, and archive-on-delete."""
 
-from datetime import date
+from datetime import date, datetime
 
 from sqlalchemy.orm import Session
 
@@ -64,6 +64,16 @@ class AccountService:
     def last_transaction_dates(self, accounts: list[Account]) -> dict[str, date]:
         """When each account last moved — what tells a dormant account from a live one."""
         return self._repository.last_booked_dates([account.id for account in accounts])
+
+    def last_import_times(self, accounts: list[Account]) -> dict[str, datetime]:
+        """When a statement last landed in each account; absent for one never imported into."""
+        return self._repository.last_import_times([account.id for account in accounts])
+
+    def month_changes(self, accounts: list[Account], today: date) -> dict[str, int]:
+        """Each account's net movement since the first of ``today``'s month; absent when none."""
+        return self._repository.net_flows_since(
+            [account.id for account in accounts], today.replace(day=1)
+        )
 
     def get(self, user_id: str, account_id: str) -> Account:
         """Fetch a single account the user owns.

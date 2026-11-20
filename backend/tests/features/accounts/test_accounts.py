@@ -1,7 +1,11 @@
 """Tests for account CRUD, archive-on-delete, and user-scoping."""
 
+from datetime import date
+
+from fastapi import FastAPI
 from fastapi.testclient import TestClient
 
+from app.features.accounts.router import today
 from tests.api import register as _register
 
 ACCOUNT_PAYLOAD = {
@@ -307,3 +311,35 @@ def test_accounts_report_the_date_of_their_latest_transaction(client: TestClient
     assert listed[active_id]["last_transaction_date"] == "2026-02-03"
     assert listed[dormant_id]["last_transaction_date"] is None
     assert single["last_transaction_date"] == "2026-02-03"
+
+
+def test_accounts_report_their_last_import_and_this_months_change(
+    app: FastAPI, client: TestClient
+) -> None:
+    app.dependency_overrides[today] = lambda: date(2026, 2, 10)
+    headers = _register(client, "amelie@example.com")
+    active_id = client.post("/api/v1/accounts", json=ACCOUNT_PAYLOAD, headers=headers).json()["id"]
+    quiet_id = client.post(
+        "/api/v1/accounts", json={**ACCOUNT_PAYLOAD, "name": "Livret"}, headers=headers
+    ).json()["id"]
+    ofx = b"""<OFX><BANKMSGSRSV1><STMTTRNRS><STMTRS><CURDEF>EUR
+<BANKACCTFROM><BANKID>30004<ACCTID>0001234567<ACCTTYPE>CHECKING</BANKACCTFROM>
+<BANKTRANLIST>
+<STMTTRN><TRNAMT>-12.40<DTPOSTED>20260131<FITID>P1<NAME>CB BOULANGERIE</STMTTRN>
+<STMTTRN><TRNAMT>-8.00<DTPOSTED>20260201<FITID>P2<NAME>CB PRESSE</STMTTRN>
+<STMTTRN><TRNAMT>30.00<DTPOSTED>20260205<FITID>P3<NAME>VIREMENT RECU</STMTTRN>
+</BANKTRANLIST></STMTRS></STMTTRNRS></BANKMSGSRSV1></OFX>"""
+    imported = client.post(
+        "/api/v1/imports",
+        headers=headers,
+        data={"account_id": active_id},
+        files={"file": ("releve.ofx", ofx, "application/octet-stream")},
+    )
+    assert imported.status_code == 201, imported.json()
+
+    listed = {a["id"]: a for a in client.get("/api/v1/accounts", headers=headers).json()}
+
+    assert listed[active_id]["month_change_minor"] == 2200
+    assert listed[active_id]["last_import_at"] is not None
+    assert listed[quiet_id]["month_change_minor"] == 0
+    assert listed[quiet_id]["last_import_at"] is None

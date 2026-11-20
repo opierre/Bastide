@@ -1,6 +1,6 @@
 """Account endpoints: user-scoped CRUD with archive-on-delete."""
 
-from datetime import date
+from datetime import date, datetime
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, Query, status
@@ -38,16 +38,31 @@ def today() -> date:
     return date.today()
 
 
-def _to_read(account: Account, service: AccountService) -> AccountRead:
-    return _to_reads([account], service)[0]
+def _to_read(account: Account, service: AccountService, as_of: date) -> AccountRead:
+    return _to_reads([account], service, as_of)[0]
 
 
-def _to_reads(accounts: list[Account], service: AccountService) -> list[AccountRead]:
+def _to_reads(accounts: list[Account], service: AccountService, as_of: date) -> list[AccountRead]:
     last_dates = service.last_transaction_dates(accounts)
-    return [_read(account, last_dates.get(account.id)) for account in accounts]
+    last_imports = service.last_import_times(accounts)
+    month_changes = service.month_changes(accounts, as_of)
+    return [
+        _read(
+            account,
+            last_dates.get(account.id),
+            last_imports.get(account.id),
+            month_changes.get(account.id, 0),
+        )
+        for account in accounts
+    ]
 
 
-def _read(account: Account, last_transaction_date: date | None) -> AccountRead:
+def _read(
+    account: Account,
+    last_transaction_date: date | None,
+    last_import_at: datetime | None,
+    month_change_minor: int,
+) -> AccountRead:
     return AccountRead(
         id=account.id,
         name=account.name,
@@ -59,6 +74,8 @@ def _read(account: Account, last_transaction_date: date | None) -> AccountRead:
         opening_balance_minor=account.opening_balance_minor,
         balance_minor=balance.current_balance(account),
         last_transaction_date=last_transaction_date,
+        last_import_at=last_import_at,
+        month_change_minor=month_change_minor,
         archived=account.archived,
         created_at=account.created_at,
         updated_at=account.updated_at,
@@ -69,6 +86,7 @@ def _read(account: Account, last_transaction_date: date | None) -> AccountRead:
 async def list_accounts(
     service: Annotated[AccountService, Depends(_service)],
     user: Annotated[User, Depends(get_current_user)],
+    as_of: Annotated[date, Depends(today)],
     ofx_account_id: Annotated[
         str | None,
         Query(description="Return only the account carrying this bank account id (OFX ACCTID)."),
@@ -83,8 +101,8 @@ async def list_accounts(
     """
     if ofx_account_id is not None:
         match = service.find_by_ofx_account_id(user.id, ofx_account_id)
-        return [_to_read(match, service)] if match is not None else []
-    return _to_reads(service.list_for_user(user.id), service)
+        return [_to_read(match, service, as_of)] if match is not None else []
+    return _to_reads(service.list_for_user(user.id), service, as_of)
 
 
 # Before `/{account_id}`, which would otherwise take `settlement-status` for an account id.
@@ -102,9 +120,10 @@ async def create_account(
     payload: AccountCreate,
     service: Annotated[AccountService, Depends(_service)],
     user: Annotated[User, Depends(get_current_user)],
+    as_of: Annotated[date, Depends(today)],
 ) -> AccountRead:
     """Open a new account; currency defaults to the caller's unless the payload declares one."""
-    return _to_read(service.create(user, payload), service)
+    return _to_read(service.create(user, payload), service, as_of)
 
 
 @router.get("/{account_id}", response_model=AccountRead)
@@ -112,9 +131,10 @@ async def get_account(
     account_id: str,
     service: Annotated[AccountService, Depends(_service)],
     user: Annotated[User, Depends(get_current_user)],
+    as_of: Annotated[date, Depends(today)],
 ) -> AccountRead:
     """Fetch a single account, including its derived current balance."""
-    return _to_read(service.get(user.id, account_id), service)
+    return _to_read(service.get(user.id, account_id), service, as_of)
 
 
 @router.get("/{account_id}/overview", response_model=AccountOverview)
@@ -127,7 +147,7 @@ async def get_account_overview(
 ) -> AccountOverview:
     """The account detail page's figures: balance history, 12-month stats, card settlement."""
     account = service.get(user.id, account_id)
-    return AccountOverviewService(db).overview(account, _to_read(account, service), as_of)
+    return AccountOverviewService(db).overview(account, _to_read(account, service, as_of), as_of)
 
 
 @router.patch("/{account_id}", response_model=AccountRead)
@@ -136,9 +156,10 @@ async def update_account(
     payload: AccountUpdate,
     service: Annotated[AccountService, Depends(_service)],
     user: Annotated[User, Depends(get_current_user)],
+    as_of: Annotated[date, Depends(today)],
 ) -> AccountRead:
     """Patch mutable account fields."""
-    return _to_read(service.update(user.id, account_id, payload), service)
+    return _to_read(service.update(user.id, account_id, payload), service, as_of)
 
 
 @router.delete("/{account_id}", status_code=status.HTTP_204_NO_CONTENT)

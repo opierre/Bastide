@@ -22,6 +22,8 @@ Map<String, dynamic> accountJson({
   'opening_balance_minor': 120000,
   'balance_minor': balanceMinor,
   'last_transaction_date': '2026-10-29',
+  'last_import_at': '2026-10-28T09:30:00Z',
+  'month_change_minor': -4210,
   'archived': false,
   'created_at': '2025-01-01T00:00:00Z',
   'updated_at': '2026-10-30T00:00:00Z',

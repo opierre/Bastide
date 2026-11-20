@@ -262,6 +262,11 @@ class AccountsRepository {
       final String date => DateTime.parse(date),
       _ => null,
     },
+    lastImportAt: switch (json['last_import_at']) {
+      final String at => DateTime.parse(at),
+      _ => null,
+    },
+    monthChangeMinor: json['month_change_minor'] as int? ?? 0,
     archived: json['archived'] as bool,
     createdAt: DateTime.parse(json['created_at'] as String),
     updatedAt: DateTime.parse(json['updated_at'] as String),

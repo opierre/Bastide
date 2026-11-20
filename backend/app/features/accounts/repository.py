@@ -1,11 +1,12 @@
 """Data access for `Account` rows. The only place that queries this table."""
 
-from datetime import date
+from datetime import date, datetime
 
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 from app.features.accounts.models import Account
+from app.features.imports.models import ImportBatch
 from app.features.transactions.models import Transaction
 
 
@@ -52,6 +53,30 @@ class AccountRepository:
             .group_by(Transaction.account_id)
         ).all()
         return {account_id: booked for account_id, booked in rows}
+
+    def last_import_times(self, account_ids: list[str]) -> dict[str, datetime]:
+        """`account_id` → when a statement last landed in it; failed imports and accounts
+        never imported into are absent."""
+        if not account_ids:
+            return {}
+        rows = self._db.execute(
+            select(ImportBatch.account_id, func.max(ImportBatch.imported_at))
+            .where(ImportBatch.account_id.in_(account_ids), ImportBatch.status != "failed")
+            .group_by(ImportBatch.account_id)
+        ).all()
+        return {account_id: imported for account_id, imported in rows}
+
+    def net_flows_since(self, account_ids: list[str], since: date) -> dict[str, int]:
+        """`account_id` → sum of its rows booked on or after ``since``; accounts with none
+        are absent."""
+        if not account_ids:
+            return {}
+        rows = self._db.execute(
+            select(Transaction.account_id, func.sum(Transaction.amount_minor))
+            .where(Transaction.account_id.in_(account_ids), Transaction.booked_date >= since)
+            .group_by(Transaction.account_id)
+        ).all()
+        return {account_id: int(total) for account_id, total in rows}
 
     def add(self, account: Account) -> Account:
         self._db.add(account)

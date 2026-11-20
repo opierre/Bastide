@@ -99,6 +99,8 @@ class Account {
     required this.openingBalanceMinor,
     required this.balanceMinor,
     this.lastTransactionDate,
+    this.lastImportAt,
+    this.monthChangeMinor = 0,
     required this.archived,
     required this.createdAt,
     required this.updatedAt,
@@ -124,6 +126,12 @@ class Account {
   /// Booking date of the account's latest transaction, or `null` when it has
   /// none — what shows an account gone dormant, ready to be archived.
   final DateTime? lastTransactionDate;
+
+  /// When a statement last landed in the account; `null` before any import.
+  final DateTime? lastImportAt;
+
+  /// Net movement booked since the first of the current month, signed.
+  final int monthChangeMinor;
   final bool archived;
   final DateTime createdAt;
   final DateTime updatedAt;
@@ -142,6 +150,8 @@ class Account {
           other.openingBalanceMinor == openingBalanceMinor &&
           other.balanceMinor == balanceMinor &&
           other.lastTransactionDate == lastTransactionDate &&
+          other.lastImportAt == lastImportAt &&
+          other.monthChangeMinor == monthChangeMinor &&
           other.archived == archived &&
           other.createdAt == createdAt &&
           other.updatedAt == updatedAt);
@@ -158,6 +168,8 @@ class Account {
     openingBalanceMinor,
     balanceMinor,
     lastTransactionDate,
+    lastImportAt,
+    monthChangeMinor,
     archived,
     createdAt,
     updatedAt,
