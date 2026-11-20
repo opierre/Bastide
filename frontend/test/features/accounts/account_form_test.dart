@@ -1,5 +1,6 @@
 import 'package:bastide/core/session/current_user_provider.dart';
 import 'package:bastide/core/widgets/institution_avatar.dart';
+import 'package:bastide/core/widgets/labeled_field.dart';
 import 'package:bastide/features/accounts/application/accounts_controller.dart';
 import 'package:bastide/features/accounts/domain/account.dart';
 import 'package:bastide/features/accounts/presentation/account_form.dart';
@@ -543,16 +544,22 @@ void main() {
     expect(controller.updateCalls.single.openingBalanceMinor, 8000);
   });
 
-  testWidgets('the currency labels the balance rather than occupying a field', (
+  testWidgets('the currency is shown read-only and labels the balance', (
     tester,
   ) async {
     await tester.pumpWidget(_wrap(controller: FakeAccountsController()));
     await tester.pumpAndSettle();
 
-    // It is a unit, not a value the form asks for: no field of its own, and
-    // nothing to type into — it sits at the end of the amount it denominates.
-    expect(find.byKey(const Key('accountCurrencyField')), findsNothing);
-    expect(find.text('Devise'), findsNothing);
+    // One currency per user: stated, never asked for (`05-accounts.md`).
+    final currency = find.byKey(const Key('accountCurrencyField'));
+    expect(currency, findsOneWidget);
+    expect(find.byType(ReadOnlyField), findsOneWidget);
+    expect(
+      find.descendant(of: currency, matching: find.text('EUR, euro')),
+      findsOneWidget,
+    );
+    expect(find.text('Devise'), findsOneWidget);
+    expect(find.text('La devise est celle de votre profil.'), findsOneWidget);
     expect(
       find.descendant(
         of: find.byKey(const Key('accountOpeningBalanceField')),

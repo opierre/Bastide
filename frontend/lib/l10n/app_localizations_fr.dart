@@ -525,6 +525,24 @@ class AppLocalizationsFr extends AppLocalizations {
   String get accountsRetry => 'Réessayer';
 
   @override
+  String get accountCurrencyLabel => 'Devise';
+
+  @override
+  String accountCurrencyValue(String currency) {
+    String _temp0 = intl.Intl.selectLogic(currency, {
+      'EUR': 'EUR, euro',
+      'USD': 'USD, dollar américain',
+      'GBP': 'GBP, livre sterling',
+      'CHF': 'CHF, franc suisse',
+      'other': '$currency',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String get accountCurrencyHelper => 'La devise est celle de votre profil.';
+
+  @override
   String get accountEdit => 'Modifier';
 
   @override
@@ -777,9 +795,6 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get accountOpeningBalanceInvalid => 'Entrez un montant valide.';
-
-  @override
-  String get accountFormSubmitCreate => 'Créer le compte';
 
   @override
   String get accountFormSubmitEdit => 'Enregistrer';

@@ -275,16 +275,14 @@ class _AccountFormState extends ConsumerState<AccountForm> {
           ? l10n.accountFormEditTitle
           : l10n.accountFormCreateTitle,
       actions: [
-        TextButton(
+        AppButton(
           key: const Key('accountFormCancelButton'),
+          label: l10n.accountFormCancel,
           onPressed: _isSubmitting ? null : () => Navigator.of(context).pop(),
-          child: Text(l10n.accountFormCancel),
         ),
         PrimaryButton(
           key: const Key('accountFormSubmitButton'),
-          label: _isEditing
-              ? l10n.accountFormSubmitEdit
-              : l10n.accountFormSubmitCreate,
+          label: l10n.accountFormSubmitEdit,
           isLoading: _isSubmitting,
           onPressed: _submit,
         ),
@@ -301,7 +299,7 @@ class _AccountFormState extends ConsumerState<AccountForm> {
                 message: l10n.accountFormPrefilledNote,
                 tone: BannerTone.info,
               ),
-              const SizedBox(height: AppSpacing.md),
+              const SizedBox(height: AppSpacing.fieldGap),
             ],
             LabeledField(
               label: l10n.accountNameLabel,
@@ -313,7 +311,7 @@ class _AccountFormState extends ConsumerState<AccountForm> {
                     : null,
               ),
             ),
-            const SizedBox(height: AppSpacing.md),
+            const SizedBox(height: AppSpacing.fieldGap),
             if (_asksCardDebit)
               LabeledField(
                 label: l10n.accountCardDebitLabel,
@@ -353,7 +351,7 @@ class _AccountFormState extends ConsumerState<AccountForm> {
                 ),
               ),
             if (_type == AccountType.deferredCard) ...[
-              const SizedBox(height: AppSpacing.md),
+              const SizedBox(height: AppSpacing.fieldGap),
               _SettlementAccountField(
                 candidates: settlementCandidates(
                   ref.watch(accountsControllerProvider).value ?? const [],
@@ -368,7 +366,52 @@ class _AccountFormState extends ConsumerState<AccountForm> {
                 }),
               ),
             ],
-            const SizedBox(height: AppSpacing.md),
+            const SizedBox(height: AppSpacing.fieldGap),
+            LabeledField(
+              label: l10n.accountInstitutionLabel,
+              helper: _institutionFromStatement
+                  ? l10n.accountInstitutionFromStatementNote
+                  : null,
+              // The monogram sits inside the field (`05-accounts.md` §States):
+              // live for a typed name, confirmation for a declared one, either
+              // way the chip the account will carry.
+              child: _institutionFromStatement
+                  ? Row(
+                      children: [
+                        Expanded(
+                          child: ReadOnlyField(
+                            key: const Key('accountInstitutionField'),
+                            value: _institution,
+                          ),
+                        ),
+                        InstitutionAvatar(name: _institution),
+                      ],
+                    )
+                  : TextFormField(
+                      key: const Key('accountInstitutionField'),
+                      controller: _institutionController,
+                      onChanged: (value) =>
+                          setState(() => _institution = value),
+                      decoration: InputDecoration(
+                        prefixIcon: Padding(
+                          padding: const EdgeInsetsDirectional.only(
+                            start: AppSpacing.xsPlus,
+                            end: AppSpacing.sm,
+                          ),
+                          child: InstitutionAvatar(
+                            key: const Key('accountInstitutionMonogram'),
+                            name: _institution,
+                          ),
+                        ),
+                        prefixIconConstraints: const BoxConstraints(),
+                      ),
+                      validator: (value) =>
+                          (value == null || value.trim().isEmpty)
+                          ? l10n.accountInstitutionRequired
+                          : null,
+                    ),
+            ),
+            const SizedBox(height: AppSpacing.fieldGap),
             LabeledField(
               // The same stored figure, named for what it means at each end of
               // the account's life: on creation there is no history behind it,
@@ -433,40 +476,19 @@ class _AccountFormState extends ConsumerState<AccountForm> {
                           _validateOpeningBalance(value, l10n),
                     ),
             ),
-            const SizedBox(height: AppSpacing.md),
+            const SizedBox(height: AppSpacing.fieldGap),
+            // One currency per user (see the multi-currency skill): shown, never
+            // asked for.
             LabeledField(
-              label: l10n.accountInstitutionLabel,
-              helper: _institutionFromStatement
-                  ? l10n.accountInstitutionFromStatementNote
-                  : null,
-              child: Row(
-                children: [
-                  Expanded(
-                    child: _institutionFromStatement
-                        ? ReadOnlyField(
-                            key: const Key('accountInstitutionField'),
-                            value: _institution,
-                          )
-                        : TextFormField(
-                            key: const Key('accountInstitutionField'),
-                            controller: _institutionController,
-                            onChanged: (value) =>
-                                setState(() => _institution = value),
-                            validator: (value) =>
-                                (value == null || value.trim().isEmpty)
-                                ? l10n.accountInstitutionRequired
-                                : null,
-                          ),
-                  ),
-                  const SizedBox(width: AppSpacing.sm + AppSpacing.xs),
-                  // Live for a typed name, confirmation for a declared one:
-                  // either way the user sees the chip the account will carry.
-                  InstitutionAvatar(name: _institution, size: 40),
-                ],
+              label: l10n.accountCurrencyLabel,
+              helper: l10n.accountCurrencyHelper,
+              child: ReadOnlyField(
+                key: const Key('accountCurrencyField'),
+                value: l10n.accountCurrencyValue(currency),
               ),
             ),
             if (_errorText != null) ...[
-              const SizedBox(height: AppSpacing.md),
+              const SizedBox(height: AppSpacing.fieldGap),
               InlineBanner(
                 key: const Key('accountFormErrorText'),
                 message: _errorText!,

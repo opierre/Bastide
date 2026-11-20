@@ -890,6 +890,24 @@ abstract class AppLocalizations {
   /// **'Réessayer'**
   String get accountsRetry;
 
+  /// Read-only currency field label in the account form.
+  ///
+  /// In fr, this message translates to:
+  /// **'Devise'**
+  String get accountCurrencyLabel;
+
+  /// Read-only currency value in the account form: the code, then the currency's name when known.
+  ///
+  /// In fr, this message translates to:
+  /// **'{currency, select, EUR{EUR, euro} USD{USD, dollar américain} GBP{GBP, livre sterling} CHF{CHF, franc suisse} other{{currency}}}'**
+  String accountCurrencyValue(String currency);
+
+  /// Helper under the read-only currency field of the account form.
+  ///
+  /// In fr, this message translates to:
+  /// **'La devise est celle de votre profil.'**
+  String get accountCurrencyHelper;
+
   /// Menu item to edit an account.
   ///
   /// In fr, this message translates to:
@@ -1266,12 +1284,6 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Entrez un montant valide.'**
   String get accountOpeningBalanceInvalid;
-
-  /// Submit button label on the account form when creating an account.
-  ///
-  /// In fr, this message translates to:
-  /// **'Créer le compte'**
-  String get accountFormSubmitCreate;
 
   /// Submit button label on the account form when editing an account.
   ///

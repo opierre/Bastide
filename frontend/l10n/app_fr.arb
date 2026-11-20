@@ -628,6 +628,23 @@
   "@accountsRetry": {
     "description": "Retry button label shown when the accounts list fails to load."
   },
+  "accountCurrencyLabel": "Devise",
+  "@accountCurrencyLabel": {
+    "description": "Read-only currency field label in the account form."
+  },
+  "accountCurrencyValue": "{currency, select, EUR{EUR, euro} USD{USD, dollar américain} GBP{GBP, livre sterling} CHF{CHF, franc suisse} other{{currency}}}",
+  "@accountCurrencyValue": {
+    "description": "Read-only currency value in the account form: the code, then the currency's name when known.",
+    "placeholders": {
+      "currency": {
+        "type": "String"
+      }
+    }
+  },
+  "accountCurrencyHelper": "La devise est celle de votre profil.",
+  "@accountCurrencyHelper": {
+    "description": "Helper under the read-only currency field of the account form."
+  },
   "accountEdit": "Modifier",
   "@accountEdit": {
     "description": "Menu item to edit an account."
@@ -937,10 +954,6 @@
   "accountOpeningBalanceInvalid": "Entrez un montant valide.",
   "@accountOpeningBalanceInvalid": {
     "description": "Validation message when the opening balance can't be parsed as a number."
-  },
-  "accountFormSubmitCreate": "Créer le compte",
-  "@accountFormSubmitCreate": {
-    "description": "Submit button label on the account form when creating an account."
   },
   "accountFormSubmitEdit": "Enregistrer",
   "@accountFormSubmitEdit": {
