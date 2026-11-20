@@ -442,6 +442,10 @@ abstract final class AppSpacing {
   static const dropTargetY = 18.0;
   static const dropTargetX = 20.0;
 
+  /// Fields 14 px apart: in a modal (`00` §7) and down the auth column
+  /// (`02-login.md`, `03-register.md`).
+  static const fieldGap = 14.0;
+
   // v1 layout values, kept only so the panels compile until each panel's v2
   // ticket replaces them. Nothing new reads these.
 
@@ -521,6 +525,9 @@ abstract final class AppSizes {
   static const sidebarCollapsed = 56.0;
   static const inspector = 440.0;
   static const searchField = 240.0;
+
+  /// The single form column of the auth screens (`02-login.md`).
+  static const authColumn = 320.0;
 
   /// Icons: 16 by default, 14 inside buttons, selects and notes, 13 in status
   /// text (`00` §10).

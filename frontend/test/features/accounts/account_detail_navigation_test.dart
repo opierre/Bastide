@@ -4,6 +4,7 @@ import 'package:bastide/core/widgets/app_shell.dart';
 import 'package:bastide/features/accounts/application/account_detail_controller.dart';
 import 'package:bastide/features/accounts/application/accounts_controller.dart';
 import 'package:bastide/features/accounts/application/settlement_rule_controller.dart';
+import 'package:bastide/features/accounts/presentation/settlement_rule_dialog.dart';
 import 'package:bastide/features/auth/application/auth_controller.dart';
 import 'package:bastide/features/auth/domain/auth_user.dart';
 import 'package:flutter/material.dart';
@@ -86,7 +87,13 @@ void main() {
     );
     expect(comptes.style!.fontWeight, FontWeight.w500);
 
-    await tester.tap(find.byKey(const Key('accountDetailBack')));
+    // The « Comptes / » crumb leads back.
+    await tester.tap(
+      find.descendant(
+        of: find.byKey(const Key('accountDetailTitle')),
+        matching: find.textContaining('Comptes'),
+      ),
+    );
     await tester.pumpAndSettle();
 
     expect(find.byKey(const Key('screen-accounts')), findsOneWidget);
@@ -146,19 +153,33 @@ void main() {
       return accounts;
     }
 
-    testWidgets('« Archiver » sits next to « Modifier », with no overflow', (
+    Future<void> openMenu(WidgetTester tester) async {
+      await tester.tap(find.byKey(const Key('accountDetailMore')));
+      await tester.pumpAndSettle();
+    }
+
+    testWidgets('« Modifier », then an overflow holding « Archiver »', (
       tester,
     ) async {
       await openDetail(tester, accountId: 'acc-1');
 
-      final archive = find.byKey(const Key('accountDetailArchive'));
-      expect(find.byKey(const Key('accountDetailEdit')), findsOneWidget);
       expect(
-        find.descendant(of: archive, matching: find.text('Archiver')),
+        find.descendant(
+          of: find.byKey(const Key('accountDetailEdit')),
+          matching: find.text('Modifier'),
+        ),
         findsOneWidget,
       );
-      // Nothing is left for an overflow to hold on a checking account.
-      expect(find.byKey(const Key('accountDetailMore')), findsNothing);
+      expect(find.byKey(const Key('accountDetailArchive')), findsNothing);
+
+      await openMenu(tester);
+      expect(
+        find.descendant(
+          of: find.byKey(const Key('accountDetailArchive')),
+          matching: find.text('Archiver'),
+        ),
+        findsOneWidget,
+      );
     });
 
     testWidgets('archiving asks first, then leaves for the list', (
@@ -166,6 +187,7 @@ void main() {
     ) async {
       final accounts = await openDetail(tester, accountId: 'acc-1');
 
+      await openMenu(tester);
       await tester.tap(find.byKey(const Key('accountDetailArchive')));
       await tester.pumpAndSettle();
 
@@ -182,6 +204,7 @@ void main() {
     testWidgets('cancelling the question keeps the account', (tester) async {
       final accounts = await openDetail(tester, accountId: 'acc-1');
 
+      await openMenu(tester);
       await tester.tap(find.byKey(const Key('accountDetailArchive')));
       await tester.pumpAndSettle();
       await tester.tap(find.text('Annuler'));
@@ -191,21 +214,15 @@ void main() {
       expect(find.byKey(const Key('screen-account-detail')), findsOneWidget);
     });
 
-    testWidgets('a card keeps its settlement rule in the overflow', (
+    testWidgets('a card edits its settlement rule from the page', (
       tester,
     ) async {
       await openDetail(tester, accountId: 'card-1');
 
-      expect(find.byKey(const Key('accountDetailArchive')), findsOneWidget);
-      await tester.tap(find.byKey(const Key('accountDetailMore')));
+      await tester.tap(find.byKey(const Key('accountDetailEditRule')));
       await tester.pumpAndSettle();
 
-      expect(
-        find.byKey(const Key('accountDetailSettlementRule')),
-        findsOneWidget,
-      );
-      // Archive is in the top bar now, not repeated in the menu.
-      expect(find.text('Archiver'), findsOneWidget);
+      expect(find.byType(SettlementRuleDialog), findsOneWidget);
     });
   });
 }

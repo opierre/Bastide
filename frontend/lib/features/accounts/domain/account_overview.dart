@@ -4,8 +4,8 @@ import 'account.dart';
 
 /// Everything the account detail panel shows about one account, in one read
 /// (`GET /accounts/{id}/overview`): the account itself, how far back its
-/// history goes, its month-end balances, the last twelve months' flows, and
-/// the deferred-card links on either side of it.
+/// history goes, its month-end balances, the last twelve months' and the
+/// current month's flows, and the deferred-card links on either side of it.
 @immutable
 class AccountOverview {
   const AccountOverview({
@@ -14,6 +14,7 @@ class AccountOverview {
     required this.lastImportAt,
     required this.balanceHistory,
     required this.period,
+    required this.month,
     required this.linkedCards,
     required this.settlement,
   });
@@ -32,6 +33,9 @@ class AccountOverview {
 
   final PeriodStats period;
 
+  /// The current month's flows, for the summary line.
+  final MonthFlows month;
+
   /// The deferred cards settled on this account. Empty for a card itself.
   final List<LinkedCard> linkedCards;
 
@@ -41,6 +45,11 @@ class AccountOverview {
   /// The chart needs two months to draw a line; before that it says when it
   /// will appear instead.
   bool get hasChartHistory => balanceHistory.length >= 2;
+
+  /// The day the balance is recalculated at: the last history point's, which
+  /// the backend sets to today. `null` for an account without a transaction.
+  DateTime? get balanceDate =>
+      balanceHistory.isEmpty ? null : balanceHistory.last.monthEnd;
 }
 
 @immutable
@@ -92,6 +101,28 @@ class PeriodStats {
   /// The encouraging line is only said when it is true, and one rise is not
   /// yet a streak worth naming.
   bool get isOnStreak => consecutiveRisingMonths >= 2;
+}
+
+/// What came in and went out of the account since the first of the current
+/// month. [netMinor] is their sum, so the three figures reconcile on screen.
+@immutable
+class MonthFlows {
+  const MonthFlows({
+    required this.since,
+    required this.inflowMinor,
+    required this.outflowMinor,
+  });
+
+  /// The first day of the current month.
+  final DateTime since;
+
+  /// Signed: zero or positive.
+  final int inflowMinor;
+
+  /// Signed: zero or negative.
+  final int outflowMinor;
+
+  int get netMinor => inflowMinor + outflowMinor;
 }
 
 /// A deferred card settled on the account being viewed.
@@ -158,42 +189,27 @@ class CardSettlement {
   List<SettlementCycle> get closedCycles =>
       cycles.where((cycle) => !cycle.inProgress).toList();
 
-  /// The mean settled cycle, rounded to the cent; `null` before any settled.
+  /// The mean of the last [averagedCycles] settled cycles, rounded to the
+  /// cent; `null` before any settled.
   int? get averageClosedMinor {
     final closed = closedCycles;
     if (closed.isEmpty) return null;
-    final total = closed.fold<int>(0, (sum, cycle) => sum + cycle.amountMinor);
-    return (total / closed.length).round();
+    final recent = closed.length <= averagedCycles
+        ? closed
+        : closed.sublist(closed.length - averagedCycles);
+    final total = recent.fold<int>(0, (sum, cycle) => sum + cycle.amountMinor);
+    return (total / recent.length).round();
   }
 
-  /// The settled cycle that charged the most (the most negative amount).
-  SettlementCycle? get highestClosed {
-    final closed = closedCycles;
-    if (closed.isEmpty) return null;
-    return closed.reduce((a, b) => b.amountMinor < a.amountMinor ? b : a);
-  }
-
+  /// The settled cycle before the open one; `null` before any settled.
   SettlementCycle? get lastClosed {
     final closed = closedCycles;
     return closed.isEmpty ? null : closed.last;
   }
-
-  /// How many settled cycles in a row, counting back from the latest, charged
-  /// less than the one before — the card's own encouraging streak.
-  int get consecutiveFallingCycles {
-    final closed = closedCycles;
-    var streak = 0;
-    for (var i = closed.length - 1; i > 0; i--) {
-      // Amounts are negative: charging less means a value closer to zero.
-      if (closed[i].amountMinor > closed[i - 1].amountMinor) {
-        streak++;
-      } else {
-        break;
-      }
-    }
-    return streak;
-  }
 }
+
+/// How many settled cycles the card's average spans.
+const averagedCycles = 6;
 
 @immutable
 class SettlementRuleSummary {

@@ -251,27 +251,53 @@
   "@authPasswordLabel": {
     "description": "Label for the password field on login/register forms."
   },
+  "authPasswordMinimum": "{minimum} caractères minimum.",
+  "@authPasswordMinimum": {
+    "description": "Helper under a new password field while it is not yet long enough.",
+    "placeholders": {
+      "minimum": {
+        "type": "int"
+      }
+    }
+  },
+  "authPasswordLengthOk": "{count} caractères. Le minimum est de {minimum}.",
+  "@authPasswordLengthOk": {
+    "description": "Helper under a new password field once it is long enough, after a check icon. {count} is never below {minimum}.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "minimum": {
+        "type": "int"
+      }
+    }
+  },
+  "authPasswordTooShort": "{count, plural, =1{Encore 1 caractère.} other{Encore {count} caractères.}}",
+  "@authPasswordTooShort": {
+    "description": "Error under a new password field that was left too short. {count} is how many characters are missing.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "authConfirmPasswordLabel": "Confirmer le mot de passe",
+  "@authConfirmPasswordLabel": {
+    "description": "Label of the field repeating the new password on the reset screen."
+  },
+  "authPasswordMismatch": "Les mots de passe ne correspondent pas.",
+  "@authPasswordMismatch": {
+    "description": "Error under the confirm field when it differs from the new password."
+  },
   "authDisplayNameLabel": "Nom d'utilisateur",
   "@authDisplayNameLabel": {
-    "description": "Label for the display name field on the register form."
+    "description": "Label of the user name field in Settings › Profil."
   },
-  "authPasswordStrengthWeak": "Trop faible",
-  "@authPasswordStrengthWeak": {
-    "description": "Verdict beside the password strength meter at its lowest levels."
+  "authRegisterDisplayNameLabel": "Nom affiché",
+  "@authRegisterDisplayNameLabel": {
+    "description": "Label of the name field on the register screen (03-register.md)."
   },
-  "authPasswordStrengthFair": "Moyen",
-  "@authPasswordStrengthFair": {
-    "description": "Verdict beside the password strength meter at its middle level."
-  },
-  "authPasswordStrengthStrong": "Robuste",
-  "@authPasswordStrengthStrong": {
-    "description": "Verdict beside the password strength meter once it is acceptable."
-  },
-  "authPasswordStrengthHint": "Ajoutez quelques caractères, un chiffre et une majuscule.",
-  "@authPasswordStrengthHint": {
-    "description": "Guidance shown under a password that is still too weak to submit."
-  },
-  "authPreferencesNote": "Vous pourrez changer la langue plus tard ; la devise s'applique à tous vos comptes et ne pourra plus être modifiée dans cette version.",
+  "authPreferencesNote": "La langue se change dans les paramètres. La devise est définitive et s’applique à tous vos comptes.",
   "@authPreferencesNote": {
     "description": "Microcopy under the language and currency row at registration, stating which choice is permanent."
   },
@@ -299,6 +325,27 @@
   "@authCurrencyLabel": {
     "description": "Label for the base-currency selector on the register form."
   },
+  "authCurrencyOption": "{code}, {name}",
+  "@authCurrencyOption": {
+    "description": "A currency in the register currency select: ISO code then its name (authCurrencyName).",
+    "placeholders": {
+      "code": {
+        "type": "String"
+      },
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "authCurrencyName": "{code, select, EUR{euro} USD{dollar américain} GBP{livre sterling} CHF{franc suisse} CAD{dollar canadien} JPY{yen} AUD{dollar australien} CNY{yuan} INR{roupie indienne} BRL{réal brésilien} MXN{peso mexicain} SEK{couronne suédoise} NOK{couronne norvégienne} DKK{couronne danoise} PLN{zloty} CZK{couronne tchèque} HUF{forint} RON{leu roumain} ZAR{rand} AED{dirham des Émirats} SGD{dollar de Singapour} HKD{dollar de Hong Kong} NZD{dollar néo-zélandais} TRY{livre turque} ILS{shekel} KRW{won} THB{baht} MAD{dirham marocain} XOF{franc CFA d’Afrique de l’Ouest} XAF{franc CFA d’Afrique centrale} other{{code}}}",
+  "@authCurrencyName": {
+    "description": "Name of a currency offered at registration, by ISO 4217 code. Falls back to the code.",
+    "placeholders": {
+      "code": {
+        "type": "String"
+      }
+    }
+  },
   "authLoginSubmit": "Se connecter",
   "@authLoginSubmit": {
     "description": "Submit button label on the login form."
@@ -307,13 +354,21 @@
   "@authRegisterSubmit": {
     "description": "Submit button label on the register form."
   },
-  "authGoToRegister": "Pas encore de compte ? Créer un compte",
-  "@authGoToRegister": {
-    "description": "Link on the login screen navigating to registration."
+  "authRegisterSubmitting": "Création…",
+  "@authRegisterSubmitting": {
+    "description": "Label replacing the register button text while the request is in flight."
   },
-  "authGoToLogin": "Déjà un compte ? Se connecter",
+  "authGoToRegister": "Créer un compte",
+  "@authGoToRegister": {
+    "description": "Link on the login screen, left of the link row, navigating to registration."
+  },
+  "authGoToLogin": "Déjà un compte ?",
   "@authGoToLogin": {
-    "description": "Link on the register screen navigating to login."
+    "description": "Lead-in on the register screen, followed by the authGoToLoginLink link."
+  },
+  "authGoToLoginLink": "Se connecter",
+  "@authGoToLoginLink": {
+    "description": "Link after authGoToLogin on the register screen, navigating to login."
   },
   "authEmailRequired": "L'e-mail est requis.",
   "@authEmailRequired": {
@@ -323,11 +378,7 @@
   "@authPasswordRequired": {
     "description": "Validation message when the password field is left empty."
   },
-  "authDisplayNameRequired": "Le nom d'utilisateur est requis.",
-  "@authDisplayNameRequired": {
-    "description": "Validation message when the display name field is left empty."
-  },
-  "authErrorInvalidCredentials": "Identifiant ou mot de passe incorrect. Vérifiez vos identifiants et réessayez.",
+  "authErrorInvalidCredentials": "E-mail ou mot de passe incorrect.",
   "@authErrorInvalidCredentials": {
     "description": "Localized message for the backend's INVALID_CREDENTIALS error code."
   },
@@ -5695,13 +5746,9 @@
   "@networthDeclaredErrorGeneric": {
     "description": "Any other failure writing a declared total."
   },
-  "authForgotPasswordLink": "Mot de passe oublié ?",
+  "authForgotPasswordLink": "Mot de passe oublié",
   "@authForgotPasswordLink": {
-    "description": "Link under the login form's password field, opening the password reset screen."
-  },
-  "authForgotPasswordTagline": "Réinitialisez votre mot de passe avec votre code de récupération.",
-  "@authForgotPasswordTagline": {
-    "description": "Line under the brand lockup on the password reset screen, saying what the screen is for."
+    "description": "Link on the login screen, right of the link row, opening the password reset screen."
   },
   "authRecoveryCodeLabel": "Code de récupération",
   "@authRecoveryCodeLabel": {
@@ -5735,18 +5782,6 @@
   "@authErrorInvalidRecoveryCode": {
     "description": "Banner when a password reset's email and recovery code don't match."
   },
-  "authRecoveryCodeTagline": "Conservez votre code de récupération",
-  "@authRecoveryCodeTagline": {
-    "description": "Line under the brand lockup on the screen showing a newly issued recovery code."
-  },
-  "authRecoveryCodeIntro": "Si vous oubliez votre mot de passe, ce code est le seul moyen de le réinitialiser. Notez-le ou imprimez-le, et gardez-le en lieu sûr hors de cet ordinateur.",
-  "@authRecoveryCodeIntro": {
-    "description": "Explanation above a newly issued recovery code."
-  },
-  "authRecoveryCodeShownOnce": "Il ne sera plus affiché. Vous pourrez en générer un nouveau dans Paramètres › Profil.",
-  "@authRecoveryCodeShownOnce": {
-    "description": "Note under a newly issued recovery code: it is shown once, and where to replace it."
-  },
   "authRecoveryCodeCopy": "Copier",
   "@authRecoveryCodeCopy": {
     "description": "Button copying the recovery code to the clipboard."
@@ -5755,13 +5790,13 @@
   "@authRecoveryCodeCopied": {
     "description": "Label the copy button takes once the recovery code has been copied."
   },
-  "authRecoveryCodeConfirm": "J'ai conservé ce code en lieu sûr",
-  "@authRecoveryCodeConfirm": {
-    "description": "Checkbox the user ticks before leaving the recovery code screen."
+  "authRecoveryCodeKeep": "Notez ce code et gardez-le en lieu sûr : il ne sera plus affiché.",
+  "@authRecoveryCodeKeep": {
+    "description": "Sentence under a newly issued recovery code on the signed-out column."
   },
-  "authRecoveryCodeContinue": "Continuer",
-  "@authRecoveryCodeContinue": {
-    "description": "Button leaving the recovery code screen for the app, enabled once the checkbox is ticked."
+  "authRecoveryCodeAcknowledge": "J’ai noté ce code",
+  "@authRecoveryCodeAcknowledge": {
+    "description": "Primary button releasing the user from the recovery code screen."
   },
   "settingsRecoveryTitle": "Code de récupération",
   "@settingsRecoveryTitle": {
@@ -6031,45 +6066,73 @@
   "@settingsAiOllamaUse": {
     "description": "Button pointing the engine address at the detected Ollama."
   },
-  "accountDetailBack": "Tous les comptes",
-  "@accountDetailBack": {
-    "description": "Back link above the account detail panel, returning to the accounts list."
-  },
   "accountDetailMoreActions": "Plus d’actions",
   "@accountDetailMoreActions": {
     "description": "Tooltip of the account detail top bar's overflow button."
-  },
-  "accountDetailBalanceLabel": "Solde actuel",
-  "@accountDetailBalanceLabel": {
-    "description": "Section label above an account's headline balance."
   },
   "accountDetailCycleLabel": "Encours du cycle",
   "@accountDetailCycleLabel": {
     "description": "Section label above a deferred card's headline: what its open cycle has charged so far."
   },
-  "accountDetailAsOf": "Au {date}",
-  "@accountDetailAsOf": {
-    "description": "Caption under an account's headline balance.",
+  "accountDetailBalanceOn": "Solde au {date}",
+  "@accountDetailBalanceOn": {
+    "description": "Label of the account detail's lead figure: the balance today.",
     "placeholders": {
       "date": {
         "type": "String",
-        "example": "30 oct. 2026"
+        "example": "14 mai 2026"
       }
     }
   },
-  "accountDetailCycleAsOf": "Au {date} · prélevé le {debit}",
-  "@accountDetailCycleAsOf": {
-    "description": "Caption under a deferred card's headline: today, and when the open cycle is expected to be debited.",
+  "accountDetailMonthInflow": "Entrées en {month}",
+  "@accountDetailMonthInflow": {
+    "description": "Summary line label: what came into the account this month.",
     "placeholders": {
-      "date": {
+      "month": {
         "type": "String",
-        "example": "30 oct. 2026"
-      },
-      "debit": {
-        "type": "String",
-        "example": "5 nov."
+        "example": "mai"
       }
     }
+  },
+  "accountDetailMonthOutflow": "Sorties en {month}",
+  "@accountDetailMonthOutflow": {
+    "description": "Summary line label: what left the account this month.",
+    "placeholders": {
+      "month": {
+        "type": "String",
+        "example": "mai"
+      }
+    }
+  },
+  "accountDetailNet": "Net",
+  "@accountDetailNet": {
+    "description": "Summary line label: this month's money in plus money out."
+  },
+  "accountDetailPreviousCycle": "Cycle précédent",
+  "@accountDetailPreviousCycle": {
+    "description": "Summary line label of a deferred card: what its last settled cycle came to."
+  },
+  "accountDetailDebitDateLabel": "Prélevé le",
+  "@accountDetailDebitDateLabel": {
+    "description": "Summary line label of a deferred card, above the date its open cycle will be debited."
+  },
+  "accountDetailIdentity": "{institution} · {type}",
+  "@accountDetailIdentity": {
+    "description": "First line at the right of the summary line: the bank and the account type.",
+    "placeholders": {
+      "institution": {
+        "type": "String",
+        "example": "BNP Paribas"
+      },
+      "type": {
+        "type": "String",
+        "example": "Courant"
+      }
+    }
+  },
+  "accountDetailMetaSeparator": " · ",
+  "@accountDetailMetaSeparator": {
+    "description": "Separator between the history fact and the last-import link on the summary line."
   },
   "accountDetailHistorySince": "Historique depuis le {date}",
   "@accountDetailHistorySince": {
@@ -6085,19 +6148,15 @@
   "@accountDetailNoHistory": {
     "description": "Meta strip fact on an account with no transaction yet."
   },
-  "accountDetailLastImport": "Dernier import : {date}",
+  "accountDetailLastImport": "dernier import le {date}",
   "@accountDetailLastImport": {
-    "description": "Meta strip link to the imports panel: when a statement was last imported into this account.",
+    "description": "Link to the imports panel at the end of the summary line: when a statement was last imported into this account.",
     "placeholders": {
       "date": {
         "type": "String",
-        "example": "28 oct. 2026"
+        "example": "14 mai"
       }
     }
-  },
-  "accountDetailNoImport": "Aucun import",
-  "@accountDetailNoImport": {
-    "description": "Meta strip fact on an account no statement was imported into."
   },
   "accountDetailMaskedNumber": "•••• {digits}",
   "@accountDetailMaskedNumber": {
@@ -6123,11 +6182,11 @@
       }
     }
   },
-  "accountDetailBalanceChartTitle": "Évolution du solde",
+  "accountDetailBalanceChartTitle": "Solde en fin de mois",
   "@accountDetailBalanceChartTitle": {
     "description": "Title of the account detail's month-end balance chart."
   },
-  "accountDetailCyclesChartTitle": "Montant réglé par cycle",
+  "accountDetailCyclesChartTitle": "Dépenses par cycle",
   "@accountDetailCyclesChartTitle": {
     "description": "Title of a deferred card's chart: one bar per settlement cycle."
   },
@@ -6143,7 +6202,7 @@
   "@accountDetailRangeAll": {
     "description": "Balance chart range segment: the whole history."
   },
-  "accountDetailChartEmpty": "Le graphique apparaîtra après votre deuxième mois d’historique",
+  "accountDetailChartEmpty": "Le graphique apparaîtra après le deuxième mois d’historique.",
   "@accountDetailChartEmpty": {
     "description": "Shown in place of the balance chart while the account has under two months of history."
   },
@@ -6179,25 +6238,9 @@
   "@accountDetailCycleOpen": {
     "description": "Cycle chart tooltip line for the open cycle."
   },
-  "accountDetailPeriodLabel": "12 derniers mois",
-  "@accountDetailPeriodLabel": {
-    "description": "Section label of the account detail's stats card."
-  },
-  "accountDetailChange": "Variation sur 12 mois",
-  "@accountDetailChange": {
-    "description": "Stats card row: balance change over the last twelve months."
-  },
-  "accountDetailInflow": "Entrées",
-  "@accountDetailInflow": {
-    "description": "Stats card row: everything credited over the last twelve months."
-  },
-  "accountDetailOutflow": "Sorties",
-  "@accountDetailOutflow": {
-    "description": "Stats card row: everything debited over the last twelve months."
-  },
-  "accountDetailRisingStreak": "Votre solde progresse depuis {count} mois consécutifs.",
+  "accountDetailRisingStreak": "Votre solde progresse depuis {count} mois.",
   "@accountDetailRisingStreak": {
-    "description": "Encouraging line under the stats, shown only when the balance rose at least two month-ends running.",
+    "description": "Sentence under the balance chart, shown only when the balance rose at least two month-ends running.",
     "placeholders": {
       "count": {
         "type": "int",
@@ -6205,41 +6248,13 @@
       }
     }
   },
-  "accountDetailCyclesPeriod": "Cycles réglés",
-  "@accountDetailCyclesPeriod": {
-    "description": "Section label of a deferred card's stats card."
-  },
-  "accountDetailCycleAverage": "Moyenne par cycle",
+  "accountDetailCycleAverage": "Moyenne sur {count} cycles",
   "@accountDetailCycleAverage": {
-    "description": "Deferred card stats row: the mean settled cycle."
-  },
-  "accountDetailCycleHighest": "Cycle le plus élevé · {month}",
-  "@accountDetailCycleHighest": {
-    "description": "Deferred card stats row: the settled cycle that charged the most, and its month.",
-    "placeholders": {
-      "month": {
-        "type": "String",
-        "example": "déc. 2025"
-      }
-    }
-  },
-  "accountDetailCycleLast": "Dernier cycle réglé · {month}",
-  "@accountDetailCycleLast": {
-    "description": "Deferred card stats row: the latest settled cycle, and its month.",
-    "placeholders": {
-      "month": {
-        "type": "String",
-        "example": "oct. 2026"
-      }
-    }
-  },
-  "accountDetailFallingStreak": "Vos dépenses par carte baissent depuis {count} cycles.",
-  "@accountDetailFallingStreak": {
-    "description": "Encouraging line on a deferred card, shown only when its settled cycles fell at least twice running.",
+    "description": "Summary line label of a deferred card: the mean of its last settled cycles.",
     "placeholders": {
       "count": {
         "type": "int",
-        "example": "3"
+        "example": "6"
       }
     }
   },
@@ -6251,13 +6266,9 @@
   "@accountDetailLinkedTitle": {
     "description": "Title of the section listing the deferred cards settled on this account."
   },
-  "accountDetailLinkedCaption": "Cartes à débit différé réglées sur ce compte",
-  "@accountDetailLinkedCaption": {
-    "description": "Caption beside the linked cards title."
-  },
-  "accountDetailThisCycle": "En cours ce mois",
-  "@accountDetailThisCycle": {
-    "description": "Label beside a linked card's open-cycle total."
+  "accountDetailDeferredDebit": "Débit différé",
+  "@accountDetailDeferredDebit": {
+    "description": "Neutral text on a linked card's row: the card is debited once a cycle."
   },
   "accountDetailDebitOn": "Prélevé le {date}",
   "@accountDetailDebitOn": {
@@ -6277,10 +6288,6 @@
   "@accountDetailRuleMissing": {
     "description": "Warning chip on a linked card without a settlement rule; opens the rule dialog."
   },
-  "accountDetailNoCards": "Aucune carte rattachée",
-  "@accountDetailNoCards": {
-    "description": "Dashed row shown when no deferred card is settled on this account."
-  },
   "accountDetailOpenAccount": "Ouvrir {name}",
   "@accountDetailOpenAccount": {
     "description": "Accessible label of the chevron opening another account's detail.",
@@ -6295,15 +6302,11 @@
   "@accountDetailSettleTitle": {
     "description": "Title of a deferred card's section naming the account it is paid from."
   },
-  "accountDetailSettleCaption": "Le compte débité à chaque fin de cycle",
-  "@accountDetailSettleCaption": {
-    "description": "Caption beside the settlement account title."
-  },
   "accountDetailNoPayingAccount": "Aucun compte de règlement",
   "@accountDetailNoPayingAccount": {
     "description": "Dashed row on a deferred card that names no paying account."
   },
-  "accountDetailRuleSummary": "Libellé : {pattern} · Appliquée depuis le {date}",
+  "accountDetailRuleSummary": "Libellé : {pattern} · appliquée depuis le {date}",
   "@accountDetailRuleSummary": {
     "description": "A deferred card's settlement rule: the label fragment it matches and its start date.",
     "placeholders": {
@@ -6326,10 +6329,6 @@
         "example": "CARTE X4821"
       }
     }
-  },
-  "accountDetailNoRule": "Aucune règle de règlement : le prélèvement compte encore comme une dépense",
-  "@accountDetailNoRule": {
-    "description": "Shown on a deferred card without a settlement rule."
   },
   "accountDetailEditRule": "Modifier la règle",
   "@accountDetailEditRule": {
@@ -6387,13 +6386,29 @@
       }
     }
   },
-  "accountDetailRecentTitle": "Dernières opérations",
+  "accountDetailRecentTitle": "Opérations",
   "@accountDetailRecentTitle": {
-    "description": "Title of the account detail's recent transactions card."
+    "description": "Heading of the account detail's latest transactions."
   },
-  "accountDetailSeeAll": "Tout voir",
+  "accountDetailColumnOperation": "Opération",
+  "@accountDetailColumnOperation": {
+    "description": "Column header of the account detail's transactions table."
+  },
+  "accountDetailColumnCategory": "Catégorie",
+  "@accountDetailColumnCategory": {
+    "description": "Column header of the account detail's transactions table."
+  },
+  "accountDetailColumnDate": "Date",
+  "@accountDetailColumnDate": {
+    "description": "Column header of the account detail's transactions table."
+  },
+  "accountDetailColumnAmount": "Montant",
+  "@accountDetailColumnAmount": {
+    "description": "Column header of the account detail's transactions table."
+  },
+  "accountDetailSeeAll": "Ouvrir dans Transactions",
   "@accountDetailSeeAll": {
-    "description": "Link opening the transactions panel filtered on this account."
+    "description": "Link beside the transactions heading: opens the Transactions panel filtered on this account."
   },
   "accountDetailNoTransactions": "Aucune opération",
   "@accountDetailNoTransactions": {

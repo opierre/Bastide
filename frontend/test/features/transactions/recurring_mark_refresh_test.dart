@@ -4,7 +4,6 @@ import 'package:bastide/features/accounts/application/account_detail_controller.
 import 'package:bastide/features/accounts/application/accounts_controller.dart';
 import 'package:bastide/features/accounts/application/settlement_rule_controller.dart';
 import 'package:bastide/features/accounts/domain/settlement_rule.dart';
-import 'package:bastide/features/accounts/presentation/account_detail_screen.dart';
 import 'package:bastide/features/categorization/application/run_controller.dart';
 import 'package:bastide/features/categorization/domain/categorization_run.dart';
 import 'package:bastide/features/recurring/application/subscriptions_controller.dart';
@@ -174,7 +173,6 @@ void _expectMarked(WidgetTester tester) {
 
 void main() {
   for (final (name, home) in [
-    ('account detail', const AccountDetailScreen(accountId: 'acc-1')),
     ('the Transactions panel', const TransactionsScreen()),
   ]) {
     testWidgets('marking a charge from $name turns its button violet', (

@@ -2,18 +2,19 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../core/theme/tokens.dart';
-import '../../../core/widgets/inline_banner.dart';
+import '../../../core/api/api_client.dart';
 import '../../../core/widgets/labeled_field.dart';
 import '../../../core/widgets/primary_button.dart';
 import '../../../l10n/app_localizations.dart';
 import '../application/auth_controller.dart';
 import 'auth_error_localizer.dart';
+import 'auth_link.dart';
 import 'auth_scaffold.dart';
 import 'forgot_password_screen.dart';
 import 'password_field.dart';
 import 'register_screen.dart';
 
+/// « Connexion » (`docs/design/02-login.md`).
 class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});
 
@@ -24,9 +25,12 @@ class LoginScreen extends ConsumerStatefulWidget {
 }
 
 class _LoginScreenState extends ConsumerState<LoginScreen> {
-  final _formKey = GlobalKey<FormState>();
   final _identifierController = TextEditingController();
   final _passwordController = TextEditingController();
+
+  /// Set by a submit with an empty field, so the required errors only show
+  /// once the user has asked to sign in, not on an untouched form.
+  bool _attempted = false;
 
   @override
   void dispose() {
@@ -35,8 +39,16 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     super.dispose();
   }
 
+  bool get _identifierEmpty => _identifierController.text.trim().isEmpty;
+  bool get _passwordEmpty => _passwordController.text.isEmpty;
+
   Future<void> _submit() async {
-    if (!_formKey.currentState!.validate()) return;
+    if (ref.read(authControllerProvider).isLoading) return;
+    if (_identifierEmpty || _passwordEmpty) {
+      setState(() => _attempted = true);
+      return;
+    }
+    setState(() => _attempted = false);
     await ref
         .read(authControllerProvider.notifier)
         .login(
@@ -51,79 +63,81 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     final authState = ref.watch(authControllerProvider);
     final isSubmitting = authState.isLoading;
 
-    // A rejected credential pair is a failure of the pair, not of one field —
-    // so both fields take the error border and the reason is stated once, in a
-    // banner, rather than being duplicated under each input.
-    final hasCredentialError = authState.hasError;
+    // A rejected pair is a failure of the pair, not of one field: both fields
+    // take the error border and the reason is said once, under the password.
+    final error = authState.hasError ? authState.error : null;
+    final credentialsRejected =
+        error is ApiFailure && error.code == 'INVALID_CREDENTIALS';
 
-    return AuthScaffold.login(
-      form: Form(
-        key: _formKey,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
+    final identifierError = _attempted && _identifierEmpty
+        ? l10n.authEmailRequired
+        : null;
+    final passwordError = _attempted && _passwordEmpty
+        ? l10n.authPasswordRequired
+        : error != null
+        ? localizeAuthError(l10n, error)
+        : null;
+
+    void onFieldChanged(String _) {
+      if (_attempted) setState(() {});
+    }
+
+    return AuthScaffold(
+      children: [
+        LabeledField(
+          label: l10n.authEmailLabel,
+          errorText: identifierError,
+          child: AuthTextField(
+            fieldKey: const Key('loginIdentifierField'),
+            controller: _identifierController,
+            keyboardType: TextInputType.emailAddress,
+            autofillHints: const [AutofillHints.email, AutofillHints.username],
+            autocorrect: false,
+            enabled: !isSubmitting,
+            hasError: identifierError != null || credentialsRejected,
+            onChanged: onFieldChanged,
+            onSubmitted: (_) => _submit(),
+          ),
+        ),
+        LabeledField(
+          label: l10n.authPasswordLabel,
+          errorText: passwordError,
+          child: PasswordField(
+            fieldKey: const Key('loginPasswordField'),
+            controller: _passwordController,
+            enabled: !isSubmitting,
+            hasError: (_attempted && _passwordEmpty) || credentialsRejected,
+            onChanged: onFieldChanged,
+            onSubmitted: (_) => _submit(),
+          ),
+        ),
+        PrimaryButton.submit(
+          key: const Key('loginSubmitButton'),
+          label: l10n.authLoginSubmit,
+          loadingLabel: l10n.authLoginSubmitting,
+          isLoading: isSubmitting,
+          onPressed: _submit,
+        ),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            if (hasCredentialError) ...[
-              InlineBanner(
-                key: const Key('loginErrorText'),
-                message: localizeAuthError(l10n, authState.error),
-              ),
-              const SizedBox(height: AppSpacing.md + AppSpacing.xs),
-            ],
-            LabeledField(
-              label: l10n.authIdentifierLabel,
-              child: TextFormField(
-                key: const Key('loginIdentifierField'),
-                controller: _identifierController,
-                autofillHints: const [
-                  AutofillHints.username,
-                  AutofillHints.email,
-                ],
-                decoration: hasCredentialError
-                    ? errorFieldDecoration(context)
-                    : null,
-                validator: (value) => (value == null || value.trim().isEmpty)
-                    ? l10n.authIdentifierRequired
-                    : null,
+            Flexible(
+              child: AuthLink(
+                key: const Key('goToRegisterButton'),
+                label: l10n.authGoToRegister,
+                onPressed: () => context.go(RegisterScreen.path),
               ),
             ),
-            const SizedBox(height: AppSpacing.md + AppSpacing.xs),
-            LabeledField(
-              label: l10n.authPasswordLabel,
-              child: PasswordField(
-                fieldKey: const Key('loginPasswordField'),
-                controller: _passwordController,
-                hasError: hasCredentialError,
-                onSubmitted: (_) => isSubmitting ? null : _submit(),
-                validator: (value) => (value == null || value.isEmpty)
-                    ? l10n.authPasswordRequired
-                    : null,
-              ),
-            ),
-            Align(
-              alignment: Alignment.centerRight,
-              child: TextButton(
+            Flexible(
+              child: AuthLink(
                 key: const Key('goToForgotPasswordButton'),
+                label: l10n.authForgotPasswordLink,
                 onPressed: () => context.go(ForgotPasswordScreen.path),
-                child: Text(l10n.authForgotPasswordLink),
               ),
-            ),
-            const SizedBox(height: AppSpacing.sm),
-            PrimaryButton.submit(
-              key: const Key('loginSubmitButton'),
-              label: l10n.authLoginSubmit,
-              loadingLabel: l10n.authLoginSubmitting,
-              isLoading: isSubmitting,
-              onPressed: _submit,
             ),
           ],
         ),
-      ),
-      footer: TextButton(
-        key: const Key('goToRegisterButton'),
-        onPressed: () => context.go(RegisterScreen.path),
-        child: Text(l10n.authGoToRegister),
-      ),
+      ],
     );
   }
 }

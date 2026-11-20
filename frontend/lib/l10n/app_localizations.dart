@@ -440,40 +440,52 @@ abstract class AppLocalizations {
   /// **'Mot de passe'**
   String get authPasswordLabel;
 
-  /// Label for the display name field on the register form.
+  /// Helper under a new password field while it is not yet long enough.
+  ///
+  /// In fr, this message translates to:
+  /// **'{minimum} caractères minimum.'**
+  String authPasswordMinimum(int minimum);
+
+  /// Helper under a new password field once it is long enough, after a check icon. {count} is never below {minimum}.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count} caractères. Le minimum est de {minimum}.'**
+  String authPasswordLengthOk(int count, int minimum);
+
+  /// Error under a new password field that was left too short. {count} is how many characters are missing.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, =1{Encore 1 caractère.} other{Encore {count} caractères.}}'**
+  String authPasswordTooShort(int count);
+
+  /// Label of the field repeating the new password on the reset screen.
+  ///
+  /// In fr, this message translates to:
+  /// **'Confirmer le mot de passe'**
+  String get authConfirmPasswordLabel;
+
+  /// Error under the confirm field when it differs from the new password.
+  ///
+  /// In fr, this message translates to:
+  /// **'Les mots de passe ne correspondent pas.'**
+  String get authPasswordMismatch;
+
+  /// Label of the user name field in Settings › Profil.
   ///
   /// In fr, this message translates to:
   /// **'Nom d\'utilisateur'**
   String get authDisplayNameLabel;
 
-  /// Verdict beside the password strength meter at its lowest levels.
+  /// Label of the name field on the register screen (03-register.md).
   ///
   /// In fr, this message translates to:
-  /// **'Trop faible'**
-  String get authPasswordStrengthWeak;
-
-  /// Verdict beside the password strength meter at its middle level.
-  ///
-  /// In fr, this message translates to:
-  /// **'Moyen'**
-  String get authPasswordStrengthFair;
-
-  /// Verdict beside the password strength meter once it is acceptable.
-  ///
-  /// In fr, this message translates to:
-  /// **'Robuste'**
-  String get authPasswordStrengthStrong;
-
-  /// Guidance shown under a password that is still too weak to submit.
-  ///
-  /// In fr, this message translates to:
-  /// **'Ajoutez quelques caractères, un chiffre et une majuscule.'**
-  String get authPasswordStrengthHint;
+  /// **'Nom affiché'**
+  String get authRegisterDisplayNameLabel;
 
   /// Microcopy under the language and currency row at registration, stating which choice is permanent.
   ///
   /// In fr, this message translates to:
-  /// **'Vous pourrez changer la langue plus tard ; la devise s\'applique à tous vos comptes et ne pourra plus être modifiée dans cette version.'**
+  /// **'La langue se change dans les paramètres. La devise est définitive et s’applique à tous vos comptes.'**
   String get authPreferencesNote;
 
   /// Validation helper shown when the chosen email already has an account.
@@ -512,6 +524,18 @@ abstract class AppLocalizations {
   /// **'Devise'**
   String get authCurrencyLabel;
 
+  /// A currency in the register currency select: ISO code then its name (authCurrencyName).
+  ///
+  /// In fr, this message translates to:
+  /// **'{code}, {name}'**
+  String authCurrencyOption(String code, String name);
+
+  /// Name of a currency offered at registration, by ISO 4217 code. Falls back to the code.
+  ///
+  /// In fr, this message translates to:
+  /// **'{code, select, EUR{euro} USD{dollar américain} GBP{livre sterling} CHF{franc suisse} CAD{dollar canadien} JPY{yen} AUD{dollar australien} CNY{yuan} INR{roupie indienne} BRL{réal brésilien} MXN{peso mexicain} SEK{couronne suédoise} NOK{couronne norvégienne} DKK{couronne danoise} PLN{zloty} CZK{couronne tchèque} HUF{forint} RON{leu roumain} ZAR{rand} AED{dirham des Émirats} SGD{dollar de Singapour} HKD{dollar de Hong Kong} NZD{dollar néo-zélandais} TRY{livre turque} ILS{shekel} KRW{won} THB{baht} MAD{dirham marocain} XOF{franc CFA d’Afrique de l’Ouest} XAF{franc CFA d’Afrique centrale} other{{code}}}'**
+  String authCurrencyName(String code);
+
   /// Submit button label on the login form.
   ///
   /// In fr, this message translates to:
@@ -524,17 +548,29 @@ abstract class AppLocalizations {
   /// **'Créer mon compte'**
   String get authRegisterSubmit;
 
-  /// Link on the login screen navigating to registration.
+  /// Label replacing the register button text while the request is in flight.
   ///
   /// In fr, this message translates to:
-  /// **'Pas encore de compte ? Créer un compte'**
+  /// **'Création…'**
+  String get authRegisterSubmitting;
+
+  /// Link on the login screen, left of the link row, navigating to registration.
+  ///
+  /// In fr, this message translates to:
+  /// **'Créer un compte'**
   String get authGoToRegister;
 
-  /// Link on the register screen navigating to login.
+  /// Lead-in on the register screen, followed by the authGoToLoginLink link.
   ///
   /// In fr, this message translates to:
-  /// **'Déjà un compte ? Se connecter'**
+  /// **'Déjà un compte ?'**
   String get authGoToLogin;
+
+  /// Link after authGoToLogin on the register screen, navigating to login.
+  ///
+  /// In fr, this message translates to:
+  /// **'Se connecter'**
+  String get authGoToLoginLink;
 
   /// Validation message when the email field is left empty.
   ///
@@ -548,16 +584,10 @@ abstract class AppLocalizations {
   /// **'Le mot de passe est requis.'**
   String get authPasswordRequired;
 
-  /// Validation message when the display name field is left empty.
-  ///
-  /// In fr, this message translates to:
-  /// **'Le nom d\'utilisateur est requis.'**
-  String get authDisplayNameRequired;
-
   /// Localized message for the backend's INVALID_CREDENTIALS error code.
   ///
   /// In fr, this message translates to:
-  /// **'Identifiant ou mot de passe incorrect. Vérifiez vos identifiants et réessayez.'**
+  /// **'E-mail ou mot de passe incorrect.'**
   String get authErrorInvalidCredentials;
 
   /// Localized message for the backend's EMAIL_TAKEN error code.
@@ -6917,17 +6947,11 @@ abstract class AppLocalizations {
   /// **'L\'enregistrement a échoué. Réessayez.'**
   String get networthDeclaredErrorGeneric;
 
-  /// Link under the login form's password field, opening the password reset screen.
+  /// Link on the login screen, right of the link row, opening the password reset screen.
   ///
   /// In fr, this message translates to:
-  /// **'Mot de passe oublié ?'**
+  /// **'Mot de passe oublié'**
   String get authForgotPasswordLink;
-
-  /// Line under the brand lockup on the password reset screen, saying what the screen is for.
-  ///
-  /// In fr, this message translates to:
-  /// **'Réinitialisez votre mot de passe avec votre code de récupération.'**
-  String get authForgotPasswordTagline;
 
   /// Label for the recovery code field on the password reset form.
   ///
@@ -6977,24 +7001,6 @@ abstract class AppLocalizations {
   /// **'Identifiant ou code de récupération incorrect. Vérifiez le code et réessayez.'**
   String get authErrorInvalidRecoveryCode;
 
-  /// Line under the brand lockup on the screen showing a newly issued recovery code.
-  ///
-  /// In fr, this message translates to:
-  /// **'Conservez votre code de récupération'**
-  String get authRecoveryCodeTagline;
-
-  /// Explanation above a newly issued recovery code.
-  ///
-  /// In fr, this message translates to:
-  /// **'Si vous oubliez votre mot de passe, ce code est le seul moyen de le réinitialiser. Notez-le ou imprimez-le, et gardez-le en lieu sûr hors de cet ordinateur.'**
-  String get authRecoveryCodeIntro;
-
-  /// Note under a newly issued recovery code: it is shown once, and where to replace it.
-  ///
-  /// In fr, this message translates to:
-  /// **'Il ne sera plus affiché. Vous pourrez en générer un nouveau dans Paramètres › Profil.'**
-  String get authRecoveryCodeShownOnce;
-
   /// Button copying the recovery code to the clipboard.
   ///
   /// In fr, this message translates to:
@@ -7007,17 +7013,17 @@ abstract class AppLocalizations {
   /// **'Copié'**
   String get authRecoveryCodeCopied;
 
-  /// Checkbox the user ticks before leaving the recovery code screen.
+  /// Sentence under a newly issued recovery code on the signed-out column.
   ///
   /// In fr, this message translates to:
-  /// **'J\'ai conservé ce code en lieu sûr'**
-  String get authRecoveryCodeConfirm;
+  /// **'Notez ce code et gardez-le en lieu sûr : il ne sera plus affiché.'**
+  String get authRecoveryCodeKeep;
 
-  /// Button leaving the recovery code screen for the app, enabled once the checkbox is ticked.
+  /// Primary button releasing the user from the recovery code screen.
   ///
   /// In fr, this message translates to:
-  /// **'Continuer'**
-  String get authRecoveryCodeContinue;
+  /// **'J’ai noté ce code'**
+  String get authRecoveryCodeAcknowledge;
 
   /// Title of the recovery code card in Settings › Profile.
   ///
@@ -7361,23 +7367,11 @@ abstract class AppLocalizations {
   /// **'Utiliser Ollama'**
   String get settingsAiOllamaUse;
 
-  /// Back link above the account detail panel, returning to the accounts list.
-  ///
-  /// In fr, this message translates to:
-  /// **'Tous les comptes'**
-  String get accountDetailBack;
-
   /// Tooltip of the account detail top bar's overflow button.
   ///
   /// In fr, this message translates to:
   /// **'Plus d’actions'**
   String get accountDetailMoreActions;
-
-  /// Section label above an account's headline balance.
-  ///
-  /// In fr, this message translates to:
-  /// **'Solde actuel'**
-  String get accountDetailBalanceLabel;
 
   /// Section label above a deferred card's headline: what its open cycle has charged so far.
   ///
@@ -7385,17 +7379,53 @@ abstract class AppLocalizations {
   /// **'Encours du cycle'**
   String get accountDetailCycleLabel;
 
-  /// Caption under an account's headline balance.
+  /// Label of the account detail's lead figure: the balance today.
   ///
   /// In fr, this message translates to:
-  /// **'Au {date}'**
-  String accountDetailAsOf(String date);
+  /// **'Solde au {date}'**
+  String accountDetailBalanceOn(String date);
 
-  /// Caption under a deferred card's headline: today, and when the open cycle is expected to be debited.
+  /// Summary line label: what came into the account this month.
   ///
   /// In fr, this message translates to:
-  /// **'Au {date} · prélevé le {debit}'**
-  String accountDetailCycleAsOf(String date, String debit);
+  /// **'Entrées en {month}'**
+  String accountDetailMonthInflow(String month);
+
+  /// Summary line label: what left the account this month.
+  ///
+  /// In fr, this message translates to:
+  /// **'Sorties en {month}'**
+  String accountDetailMonthOutflow(String month);
+
+  /// Summary line label: this month's money in plus money out.
+  ///
+  /// In fr, this message translates to:
+  /// **'Net'**
+  String get accountDetailNet;
+
+  /// Summary line label of a deferred card: what its last settled cycle came to.
+  ///
+  /// In fr, this message translates to:
+  /// **'Cycle précédent'**
+  String get accountDetailPreviousCycle;
+
+  /// Summary line label of a deferred card, above the date its open cycle will be debited.
+  ///
+  /// In fr, this message translates to:
+  /// **'Prélevé le'**
+  String get accountDetailDebitDateLabel;
+
+  /// First line at the right of the summary line: the bank and the account type.
+  ///
+  /// In fr, this message translates to:
+  /// **'{institution} · {type}'**
+  String accountDetailIdentity(String institution, String type);
+
+  /// Separator between the history fact and the last-import link on the summary line.
+  ///
+  /// In fr, this message translates to:
+  /// **' · '**
+  String get accountDetailMetaSeparator;
 
   /// Meta strip fact: booking date of the account's earliest transaction.
   ///
@@ -7409,17 +7439,11 @@ abstract class AppLocalizations {
   /// **'Aucune opération'**
   String get accountDetailNoHistory;
 
-  /// Meta strip link to the imports panel: when a statement was last imported into this account.
+  /// Link to the imports panel at the end of the summary line: when a statement was last imported into this account.
   ///
   /// In fr, this message translates to:
-  /// **'Dernier import : {date}'**
+  /// **'dernier import le {date}'**
   String accountDetailLastImport(String date);
-
-  /// Meta strip fact on an account no statement was imported into.
-  ///
-  /// In fr, this message translates to:
-  /// **'Aucun import'**
-  String get accountDetailNoImport;
 
   /// A card number masked to its last four digits.
   ///
@@ -7436,13 +7460,13 @@ abstract class AppLocalizations {
   /// Title of the account detail's month-end balance chart.
   ///
   /// In fr, this message translates to:
-  /// **'Évolution du solde'**
+  /// **'Solde en fin de mois'**
   String get accountDetailBalanceChartTitle;
 
   /// Title of a deferred card's chart: one bar per settlement cycle.
   ///
   /// In fr, this message translates to:
-  /// **'Montant réglé par cycle'**
+  /// **'Dépenses par cycle'**
   String get accountDetailCyclesChartTitle;
 
   /// Balance chart range segment.
@@ -7466,7 +7490,7 @@ abstract class AppLocalizations {
   /// Shown in place of the balance chart while the account has under two months of history.
   ///
   /// In fr, this message translates to:
-  /// **'Le graphique apparaîtra après votre deuxième mois d’historique'**
+  /// **'Le graphique apparaîtra après le deuxième mois d’historique.'**
   String get accountDetailChartEmpty;
 
   /// Ghost button opening the imports panel from the empty balance chart.
@@ -7499,65 +7523,17 @@ abstract class AppLocalizations {
   /// **'En cours'**
   String get accountDetailCycleOpen;
 
-  /// Section label of the account detail's stats card.
+  /// Sentence under the balance chart, shown only when the balance rose at least two month-ends running.
   ///
   /// In fr, this message translates to:
-  /// **'12 derniers mois'**
-  String get accountDetailPeriodLabel;
-
-  /// Stats card row: balance change over the last twelve months.
-  ///
-  /// In fr, this message translates to:
-  /// **'Variation sur 12 mois'**
-  String get accountDetailChange;
-
-  /// Stats card row: everything credited over the last twelve months.
-  ///
-  /// In fr, this message translates to:
-  /// **'Entrées'**
-  String get accountDetailInflow;
-
-  /// Stats card row: everything debited over the last twelve months.
-  ///
-  /// In fr, this message translates to:
-  /// **'Sorties'**
-  String get accountDetailOutflow;
-
-  /// Encouraging line under the stats, shown only when the balance rose at least two month-ends running.
-  ///
-  /// In fr, this message translates to:
-  /// **'Votre solde progresse depuis {count} mois consécutifs.'**
+  /// **'Votre solde progresse depuis {count} mois.'**
   String accountDetailRisingStreak(int count);
 
-  /// Section label of a deferred card's stats card.
+  /// Summary line label of a deferred card: the mean of its last settled cycles.
   ///
   /// In fr, this message translates to:
-  /// **'Cycles réglés'**
-  String get accountDetailCyclesPeriod;
-
-  /// Deferred card stats row: the mean settled cycle.
-  ///
-  /// In fr, this message translates to:
-  /// **'Moyenne par cycle'**
-  String get accountDetailCycleAverage;
-
-  /// Deferred card stats row: the settled cycle that charged the most, and its month.
-  ///
-  /// In fr, this message translates to:
-  /// **'Cycle le plus élevé · {month}'**
-  String accountDetailCycleHighest(String month);
-
-  /// Deferred card stats row: the latest settled cycle, and its month.
-  ///
-  /// In fr, this message translates to:
-  /// **'Dernier cycle réglé · {month}'**
-  String accountDetailCycleLast(String month);
-
-  /// Encouraging line on a deferred card, shown only when its settled cycles fell at least twice running.
-  ///
-  /// In fr, this message translates to:
-  /// **'Vos dépenses par carte baissent depuis {count} cycles.'**
-  String accountDetailFallingStreak(int count);
+  /// **'Moyenne sur {count} cycles'**
+  String accountDetailCycleAverage(int count);
 
   /// Stats card value while there is nothing to measure yet.
   ///
@@ -7571,17 +7547,11 @@ abstract class AppLocalizations {
   /// **'Cartes rattachées'**
   String get accountDetailLinkedTitle;
 
-  /// Caption beside the linked cards title.
+  /// Neutral text on a linked card's row: the card is debited once a cycle.
   ///
   /// In fr, this message translates to:
-  /// **'Cartes à débit différé réglées sur ce compte'**
-  String get accountDetailLinkedCaption;
-
-  /// Label beside a linked card's open-cycle total.
-  ///
-  /// In fr, this message translates to:
-  /// **'En cours ce mois'**
-  String get accountDetailThisCycle;
+  /// **'Débit différé'**
+  String get accountDetailDeferredDebit;
 
   /// Caption under a linked card's open-cycle total: its expected debit date.
   ///
@@ -7601,12 +7571,6 @@ abstract class AppLocalizations {
   /// **'Règle de règlement à configurer'**
   String get accountDetailRuleMissing;
 
-  /// Dashed row shown when no deferred card is settled on this account.
-  ///
-  /// In fr, this message translates to:
-  /// **'Aucune carte rattachée'**
-  String get accountDetailNoCards;
-
   /// Accessible label of the chevron opening another account's detail.
   ///
   /// In fr, this message translates to:
@@ -7619,12 +7583,6 @@ abstract class AppLocalizations {
   /// **'Compte de règlement'**
   String get accountDetailSettleTitle;
 
-  /// Caption beside the settlement account title.
-  ///
-  /// In fr, this message translates to:
-  /// **'Le compte débité à chaque fin de cycle'**
-  String get accountDetailSettleCaption;
-
   /// Dashed row on a deferred card that names no paying account.
   ///
   /// In fr, this message translates to:
@@ -7634,7 +7592,7 @@ abstract class AppLocalizations {
   /// A deferred card's settlement rule: the label fragment it matches and its start date.
   ///
   /// In fr, this message translates to:
-  /// **'Libellé : {pattern} · Appliquée depuis le {date}'**
+  /// **'Libellé : {pattern} · appliquée depuis le {date}'**
   String accountDetailRuleSummary(String pattern, String date);
 
   /// A deferred card's settlement rule, when it has no start date.
@@ -7642,12 +7600,6 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Libellé : {pattern}'**
   String accountDetailRuleSummaryUndated(String pattern);
-
-  /// Shown on a deferred card without a settlement rule.
-  ///
-  /// In fr, this message translates to:
-  /// **'Aucune règle de règlement : le prélèvement compte encore comme une dépense'**
-  String get accountDetailNoRule;
 
   /// Ghost button opening a deferred card's settlement rule dialog.
   ///
@@ -7715,16 +7667,40 @@ abstract class AppLocalizations {
   /// **'{card} est liée à ce compte'**
   String linkCardLinked(String card);
 
-  /// Title of the account detail's recent transactions card.
+  /// Heading of the account detail's latest transactions.
   ///
   /// In fr, this message translates to:
-  /// **'Dernières opérations'**
+  /// **'Opérations'**
   String get accountDetailRecentTitle;
 
-  /// Link opening the transactions panel filtered on this account.
+  /// Column header of the account detail's transactions table.
   ///
   /// In fr, this message translates to:
-  /// **'Tout voir'**
+  /// **'Opération'**
+  String get accountDetailColumnOperation;
+
+  /// Column header of the account detail's transactions table.
+  ///
+  /// In fr, this message translates to:
+  /// **'Catégorie'**
+  String get accountDetailColumnCategory;
+
+  /// Column header of the account detail's transactions table.
+  ///
+  /// In fr, this message translates to:
+  /// **'Date'**
+  String get accountDetailColumnDate;
+
+  /// Column header of the account detail's transactions table.
+  ///
+  /// In fr, this message translates to:
+  /// **'Montant'**
+  String get accountDetailColumnAmount;
+
+  /// Link beside the transactions heading: opens the Transactions panel filtered on this account.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ouvrir dans Transactions'**
   String get accountDetailSeeAll;
 
   /// Dashed row in the recent transactions card of an account with none.

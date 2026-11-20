@@ -49,6 +49,7 @@ class AppButton extends StatefulWidget {
     this.isLoading = false,
     this.loadingLabel,
     this.expand = false,
+    this.iconOnly = false,
   });
 
   final String label;
@@ -72,6 +73,10 @@ class AppButton extends StatefulWidget {
 
   /// Stretches to the width it is given, label centred.
   final bool expand;
+
+  /// A square button showing only its [icon] (an overflow `ellipsis`); the
+  /// [label] stays its accessible name.
+  final bool iconOnly;
 
   @override
   State<AppButton> createState() => _AppButtonState();
@@ -97,40 +102,47 @@ class _AppButtonState extends State<AppButton> {
         ? (widget.loadingLabel ?? widget.label)
         : widget.label;
 
-    final content = Row(
-      mainAxisSize: widget.expand ? MainAxisSize.max : MainAxisSize.min,
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        if (widget.isLoading) ...[
-          SizedBox.square(
-            key: const Key('appButtonSpinner'),
-            dimension: AppSizes.iconSmall,
-            child: CircularProgressIndicator(
-              strokeWidth: 1.5,
-              color: foreground,
-            ),
-          ),
-          const SizedBox(width: AppSpacing.xsPlus),
-        ] else if (widget.icon != null) ...[
-          Icon(widget.icon, size: AppSizes.iconSmall, color: foreground),
-          const SizedBox(width: AppSpacing.xsPlus),
-        ],
-        Flexible(
-          child: Text(
-            label,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: Theme.of(
-              context,
-            ).textTheme.labelLarge?.copyWith(color: foreground),
-          ),
-        ),
-      ],
-    );
+    final square = widget.iconOnly && widget.icon != null;
+    final content = square
+        ? Icon(widget.icon, size: AppSizes.iconSmall, color: foreground)
+        : Row(
+            mainAxisSize: widget.expand ? MainAxisSize.max : MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              if (widget.isLoading) ...[
+                SizedBox.square(
+                  key: const Key('appButtonSpinner'),
+                  dimension: AppSizes.iconSmall,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 1.5,
+                    color: foreground,
+                  ),
+                ),
+                const SizedBox(width: AppSpacing.xsPlus),
+              ] else if (widget.icon != null) ...[
+                Icon(widget.icon, size: AppSizes.iconSmall, color: foreground),
+                const SizedBox(width: AppSpacing.xsPlus),
+              ],
+              Flexible(
+                child: Text(
+                  label,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: Theme.of(
+                    context,
+                  ).textTheme.labelLarge?.copyWith(color: foreground),
+                ),
+              ),
+            ],
+          );
 
     final box = Container(
       height: widget.size.height,
-      padding: EdgeInsets.symmetric(horizontal: widget.size.paddingX),
+      width: square ? widget.size.height : null,
+      alignment: square ? Alignment.center : null,
+      padding: square
+          ? null
+          : EdgeInsets.symmetric(horizontal: widget.size.paddingX),
       decoration: BoxDecoration(
         color: ground,
         borderRadius: BorderRadius.circular(AppRadii.control),
