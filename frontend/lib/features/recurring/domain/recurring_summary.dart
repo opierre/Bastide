@@ -88,6 +88,10 @@ class RecurringSummary {
   final List<PriceIncrease> priceIncreases;
   final List<MissedCharge> missed;
   final String currency;
+
+  /// How many series the « À regarder » figure counts: every price rise and
+  /// every missed charge the summary reports.
+  int get watchCount => priceIncreases.length + missed.length;
 }
 
 /// What a row's Statut cell reports, if anything.

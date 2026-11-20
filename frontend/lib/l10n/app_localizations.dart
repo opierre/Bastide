@@ -3843,7 +3843,7 @@ abstract class AppLocalizations {
   /// Sidebar entry for the recurring payments panel, third in the Gestion group.
   ///
   /// In fr, this message translates to:
-  /// **'Récurrents'**
+  /// **'Abonnements'**
   String get navSubscriptions;
 
   /// Button re-running detection over the imported ledger: secondary in the top bar, primary on the empty state.
@@ -3851,12 +3851,6 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Détecter'**
   String get subscriptionsDetect;
-
-  /// Label the detect button takes while a pass is in flight.
-  ///
-  /// In fr, this message translates to:
-  /// **'Détection…'**
-  String get subscriptionsDetectRunning;
 
   /// Toast headline after a detection pass, counting what it created.
   ///
@@ -3876,28 +3870,22 @@ abstract class AppLocalizations {
   /// **'La détection n\'a pas pu s\'exécuter.'**
   String get subscriptionsDetectFailed;
 
-  /// Label of the iris-tinted hero card carrying the monthly burden.
+  /// Label of the lead figure of the summary line: every running series brought back to one month.
   ///
   /// In fr, this message translates to:
   /// **'Charge mensuelle'**
   String get subscriptionsBurdenLabel;
 
-  /// Caption under the monthly burden, naming the normalisation it applies.
+  /// Caption under the monthly charge, naming the normalisation it applies.
   ///
   /// In fr, this message translates to:
-  /// **'Charges trimestrielles et annuelles ramenées au mois.'**
+  /// **'Trimestriels et annuels ramenés au mois'**
   String get subscriptionsBurdenCaption;
 
-  /// Appended to the burden caption so the figure names its own exclusion rather than disagreeing silently with the count beside it.
+  /// Label of the summary-line figure counting the recurring payments still running.
   ///
   /// In fr, this message translates to:
-  /// **'{count, plural, =1{1 paiement terminé exclu.} other{{count} paiements terminés exclus.}}'**
-  String subscriptionsBurdenExcluded(int count);
-
-  /// Label of the card counting the recurring payments still running.
-  ///
-  /// In fr, this message translates to:
-  /// **'Paiements actifs'**
+  /// **'Actifs'**
   String get subscriptionsActiveLabel;
 
   /// Weekly share of the active count, in the cadence breakdown caption.
@@ -3930,12 +3918,6 @@ abstract class AppLocalizations {
   /// **'{count, plural, =1{1 irrégulier} other{{count} irréguliers}}'**
   String subscriptionsCadenceIrregularCount(int count);
 
-  /// Tail of the cadence breakdown caption, naming the cancelled rows the active count leaves out.
-  ///
-  /// In fr, this message translates to:
-  /// **'{count, plural, =1{1 terminé} other{{count} terminés}}'**
-  String subscriptionsCancelledCount(int count);
-
   /// Label of the card naming the soonest charge ahead.
   ///
   /// In fr, this message translates to:
@@ -3945,7 +3927,7 @@ abstract class AppLocalizations {
   /// Value line of the next-charge card: the payment and how far off it is.
   ///
   /// In fr, this message translates to:
-  /// **'{label} · {when}'**
+  /// **'{label}, {when}'**
   String subscriptionsNextValue(String label, String when);
 
   /// Caption of the next-charge card: the amount and the exact date.
@@ -3972,16 +3954,28 @@ abstract class AppLocalizations {
   /// **'{days, plural, =1{dans 1 jour} other{dans {days} jours}}'**
   String subscriptionsNextInDays(int days);
 
-  /// Value of the next-charge card when no running series expects one.
+  /// Label of the summary-line figure counting the series that carry a price rise or a missed charge. Hidden at 0.
   ///
   /// In fr, this message translates to:
-  /// **'Aucun prélèvement à venir'**
-  String get subscriptionsNextNone;
+  /// **'À regarder'**
+  String get subscriptionsWatchLabel;
+
+  /// Part of the caption under « À regarder »: how many series rose in price.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, =1{1 hausse} other{{count} hausses}}'**
+  String subscriptionsWatchIncreases(int count);
+
+  /// Part of the caption under « À regarder »: how many series missed a charge.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, =1{1 prélèvement manquant} other{{count} prélèvements manquants}}'**
+  String subscriptionsWatchMissed(int count);
 
   /// Table header over the payment name column.
   ///
   /// In fr, this message translates to:
-  /// **'Libellé'**
+  /// **'Abonnement'**
   String get subscriptionsColumnName;
 
   /// Table header over the category chip column.
@@ -4011,13 +4005,13 @@ abstract class AppLocalizations {
   /// Table header over the status-pill column, which is empty for a healthy row.
   ///
   /// In fr, this message translates to:
-  /// **'Statut'**
+  /// **'État'**
   String get subscriptionsColumnStatus;
 
   /// Tooltip on the subscriptions table's name header while it is not the sort column.
   ///
   /// In fr, this message translates to:
-  /// **'Trier par libellé'**
+  /// **'Trier par nom'**
   String get subscriptionsSortByName;
 
   /// Tooltip on the subscriptions table's amount header while it is not the sort column.
@@ -4083,19 +4077,19 @@ abstract class AppLocalizations {
   /// Amber status pill on a row whose charge recently grew.
   ///
   /// In fr, this message translates to:
-  /// **'Hausse · {from} → {to}'**
+  /// **'Hausse : {from} → {to}'**
   String subscriptionSignalIncrease(String from, String to);
 
   /// Amber status pill on a row whose charge has not landed past its tolerance.
   ///
   /// In fr, this message translates to:
-  /// **'{days, plural, =1{Prélèvement manquant · 1 jour de retard} other{Prélèvement manquant · {days} jours de retard}}'**
+  /// **'{days, plural, =1{Prélèvement manquant depuis 1 jour} other{Prélèvement manquant depuis {days} jours}}'**
   String subscriptionSignalMissed(int days);
 
   /// Gray status pill on a recurring payment the user ended. It stays listed, dimmed.
   ///
   /// In fr, this message translates to:
-  /// **'Terminé · dernier prélèvement {date}'**
+  /// **'Résilié, dernier prélèvement le {date}'**
   String subscriptionSignalCancelled(String date);
 
   /// Replaces the next-charge date on a row with a missed charge, in amber: the date is what was expected, not what is coming.
@@ -4125,7 +4119,7 @@ abstract class AppLocalizations {
   /// Kebab action recording that the recurring payment has ended.
   ///
   /// In fr, this message translates to:
-  /// **'Marquer comme terminé'**
+  /// **'Marquer comme résilié'**
   String get subscriptionActionCancel;
 
   /// Kebab action opening the series in the edit form.
@@ -4269,7 +4263,7 @@ abstract class AppLocalizations {
   /// Error state replacing the panel when the list or summary failed to load.
   ///
   /// In fr, this message translates to:
-  /// **'Impossible de charger vos paiements récurrents pour le moment.'**
+  /// **'Les abonnements n’ont pas pu être chargés. Rien n’a été modifié.'**
   String get subscriptionsLoadFailed;
 
   /// Retry action on the recurring payments error state.
@@ -4287,14 +4281,8 @@ abstract class AppLocalizations {
   /// Empty-state body, stating the three-repeat rule so the absence reads as a threshold rather than a failure.
   ///
   /// In fr, this message translates to:
-  /// **'Bastide repère un paiement récurrent lorsqu\'un prélèvement s\'est répété trois fois. Importer davantage d\'historique accélère la détection.'**
+  /// **'Bastide repère un paiement récurrent lorsqu’un prélèvement s’est répété trois fois. Importer davantage d’historique accélère la détection.'**
   String get subscriptionsEmptyBody;
-
-  /// Iris back link at the top of the series detail.
-  ///
-  /// In fr, this message translates to:
-  /// **'Retour aux récurrents'**
-  String get subscriptionDetailBack;
 
   /// Sub-line of the detail header for a detected series.
   ///
@@ -4364,8 +4352,14 @@ abstract class AppLocalizations {
   /// Error state replacing the detail when it failed to load.
   ///
   /// In fr, this message translates to:
-  /// **'Impossible de charger ce paiement récurrent pour le moment.'**
+  /// **'Ce paiement récurrent n’a pas pu être chargé. Rien n’a été modifié.'**
   String get subscriptionDetailLoadFailed;
+
+  /// Accessible name of the series detail's ellipsis button in the title bar.
+  ///
+  /// In fr, this message translates to:
+  /// **'Plus d’actions'**
+  String get subscriptionDetailMoreActions;
 
   /// Title of the modal when editing an existing series.
   ///
@@ -4408,12 +4402,6 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Cadence'**
   String get subscriptionFormCadenceLabel;
-
-  /// Helper under the cadence select, listing what it offers. Irregular is offered here and nowhere else — detection never concludes it.
-  ///
-  /// In fr, this message translates to:
-  /// **'Hebdomadaire · Mensuel · Trimestriel · Annuel · Irrégulier'**
-  String get subscriptionFormCadenceHelp;
 
   /// Label of the category select in the recurring payment form.
   ///

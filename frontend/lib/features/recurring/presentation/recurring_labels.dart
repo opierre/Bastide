@@ -28,6 +28,13 @@ String cadenceCountLabel(AppLocalizations l10n, Cadence cadence, int count) =>
 /// date means the same shape wherever the user meets it.
 DateFormat seriesDateFormat(String locale) => DateFormat.yMd(locale);
 
+/// An upcoming or recent charge in the table: « 15 mai », "May 15". The year
+/// is left out because these dates sit within a cadence of today.
+DateFormat seriesShortDateFormat(String locale) => DateFormat.MMMd(locale);
+
+/// A date stated in a sentence or a caption: « 15 mai 2026 », "May 15, 2026".
+DateFormat seriesLongDateFormat(String locale) => DateFormat.yMMMMd(locale);
+
 /// Axis ticks under the price curve, for the charges at [dates]. Day-and-month
 /// while the whole history fits inside a year, month-and-year beyond it: a
 /// weekly series would otherwise print « mai 2026 » under every tick, and a

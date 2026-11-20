@@ -2963,17 +2963,13 @@
   "@settingsBackupRestored": {
     "description": "Toast after a restore completed."
   },
-  "navSubscriptions": "Récurrents",
+  "navSubscriptions": "Abonnements",
   "@navSubscriptions": {
     "description": "Sidebar entry for the recurring payments panel, third in the Gestion group."
   },
   "subscriptionsDetect": "Détecter",
   "@subscriptionsDetect": {
     "description": "Button re-running detection over the imported ledger: secondary in the top bar, primary on the empty state."
-  },
-  "subscriptionsDetectRunning": "Détection…",
-  "@subscriptionsDetectRunning": {
-    "description": "Label the detect button takes while a pass is in flight."
   },
   "subscriptionsDetectResult": "{created, plural, =0{Aucun nouveau paiement récurrent détecté} =1{1 nouveau paiement récurrent détecté} other{{created} nouveaux paiements récurrents détectés}}",
   "@subscriptionsDetectResult": {
@@ -2999,24 +2995,15 @@
   },
   "subscriptionsBurdenLabel": "Charge mensuelle",
   "@subscriptionsBurdenLabel": {
-    "description": "Label of the iris-tinted hero card carrying the monthly burden."
+    "description": "Label of the lead figure of the summary line: every running series brought back to one month."
   },
-  "subscriptionsBurdenCaption": "Charges trimestrielles et annuelles ramenées au mois.",
+  "subscriptionsBurdenCaption": "Trimestriels et annuels ramenés au mois",
   "@subscriptionsBurdenCaption": {
-    "description": "Caption under the monthly burden, naming the normalisation it applies."
+    "description": "Caption under the monthly charge, naming the normalisation it applies."
   },
-  "subscriptionsBurdenExcluded": "{count, plural, =1{1 paiement terminé exclu.} other{{count} paiements terminés exclus.}}",
-  "@subscriptionsBurdenExcluded": {
-    "description": "Appended to the burden caption so the figure names its own exclusion rather than disagreeing silently with the count beside it.",
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "subscriptionsActiveLabel": "Paiements actifs",
+  "subscriptionsActiveLabel": "Actifs",
   "@subscriptionsActiveLabel": {
-    "description": "Label of the card counting the recurring payments still running."
+    "description": "Label of the summary-line figure counting the recurring payments still running."
   },
   "subscriptionsCadenceWeeklyCount": "{count, plural, =1{1 hebdomadaire} other{{count} hebdomadaires}}",
   "@subscriptionsCadenceWeeklyCount": {
@@ -3063,20 +3050,11 @@
       }
     }
   },
-  "subscriptionsCancelledCount": "{count, plural, =1{1 terminé} other{{count} terminés}}",
-  "@subscriptionsCancelledCount": {
-    "description": "Tail of the cadence breakdown caption, naming the cancelled rows the active count leaves out.",
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
   "subscriptionsNextLabel": "Prochain prélèvement",
   "@subscriptionsNextLabel": {
     "description": "Label of the card naming the soonest charge ahead."
   },
-  "subscriptionsNextValue": "{label} · {when}",
+  "subscriptionsNextValue": "{label}, {when}",
   "@subscriptionsNextValue": {
     "description": "Value line of the next-charge card: the payment and how far off it is.",
     "placeholders": {
@@ -3117,11 +3095,29 @@
       }
     }
   },
-  "subscriptionsNextNone": "Aucun prélèvement à venir",
-  "@subscriptionsNextNone": {
-    "description": "Value of the next-charge card when no running series expects one."
+  "subscriptionsWatchLabel": "À regarder",
+  "@subscriptionsWatchLabel": {
+    "description": "Label of the summary-line figure counting the series that carry a price rise or a missed charge. Hidden at 0."
   },
-  "subscriptionsColumnName": "Libellé",
+  "subscriptionsWatchIncreases": "{count, plural, =1{1 hausse} other{{count} hausses}}",
+  "@subscriptionsWatchIncreases": {
+    "description": "Part of the caption under « À regarder »: how many series rose in price.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "subscriptionsWatchMissed": "{count, plural, =1{1 prélèvement manquant} other{{count} prélèvements manquants}}",
+  "@subscriptionsWatchMissed": {
+    "description": "Part of the caption under « À regarder »: how many series missed a charge.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "subscriptionsColumnName": "Abonnement",
   "@subscriptionsColumnName": {
     "description": "Table header over the payment name column."
   },
@@ -3141,11 +3137,11 @@
   "@subscriptionsColumnNext": {
     "description": "Table header over the next-charge date column."
   },
-  "subscriptionsColumnStatus": "Statut",
+  "subscriptionsColumnStatus": "État",
   "@subscriptionsColumnStatus": {
     "description": "Table header over the status-pill column, which is empty for a healthy row."
   },
-  "subscriptionsSortByName": "Trier par libellé",
+  "subscriptionsSortByName": "Trier par nom",
   "@subscriptionsSortByName": {
     "description": "Tooltip on the subscriptions table's name header while it is not the sort column."
   },
@@ -3189,7 +3185,7 @@
   "@cadenceIrregular": {
     "description": "Cadence name for a user-declared series with no rhythm. Detection never produces it."
   },
-  "subscriptionSignalIncrease": "Hausse · {from} → {to}",
+  "subscriptionSignalIncrease": "Hausse : {from} → {to}",
   "@subscriptionSignalIncrease": {
     "description": "Amber status pill on a row whose charge recently grew.",
     "placeholders": {
@@ -3201,7 +3197,7 @@
       }
     }
   },
-  "subscriptionSignalMissed": "{days, plural, =1{Prélèvement manquant · 1 jour de retard} other{Prélèvement manquant · {days} jours de retard}}",
+  "subscriptionSignalMissed": "{days, plural, =1{Prélèvement manquant depuis 1 jour} other{Prélèvement manquant depuis {days} jours}}",
   "@subscriptionSignalMissed": {
     "description": "Amber status pill on a row whose charge has not landed past its tolerance.",
     "placeholders": {
@@ -3210,7 +3206,7 @@
       }
     }
   },
-  "subscriptionSignalCancelled": "Terminé · dernier prélèvement {date}",
+  "subscriptionSignalCancelled": "Résilié, dernier prélèvement le {date}",
   "@subscriptionSignalCancelled": {
     "description": "Gray status pill on a recurring payment the user ended. It stays listed, dimmed.",
     "placeholders": {
@@ -3240,7 +3236,7 @@
   "@subscriptionActionDismiss": {
     "description": "Kebab action dismissing a series. Final: detection never revives a dismissed one."
   },
-  "subscriptionActionCancel": "Marquer comme terminé",
+  "subscriptionActionCancel": "Marquer comme résilié",
   "@subscriptionActionCancel": {
     "description": "Kebab action recording that the recurring payment has ended."
   },
@@ -3364,7 +3360,7 @@
   "@subscriptionsMergeSuggestionsShow": {
     "description": "Tooltip on the chevron that expands the collapsed list of merge suggestions."
   },
-  "subscriptionsLoadFailed": "Impossible de charger vos paiements récurrents pour le moment.",
+  "subscriptionsLoadFailed": "Les abonnements n’ont pas pu être chargés. Rien n’a été modifié.",
   "@subscriptionsLoadFailed": {
     "description": "Error state replacing the panel when the list or summary failed to load."
   },
@@ -3376,13 +3372,9 @@
   "@subscriptionsEmptyTitle": {
     "description": "Empty-state title on the recurring payments panel."
   },
-  "subscriptionsEmptyBody": "Bastide repère un paiement récurrent lorsqu'un prélèvement s'est répété trois fois. Importer davantage d'historique accélère la détection.",
+  "subscriptionsEmptyBody": "Bastide repère un paiement récurrent lorsqu’un prélèvement s’est répété trois fois. Importer davantage d’historique accélère la détection.",
   "@subscriptionsEmptyBody": {
     "description": "Empty-state body, stating the three-repeat rule so the absence reads as a threshold rather than a failure."
-  },
-  "subscriptionDetailBack": "Retour aux récurrents",
-  "@subscriptionDetailBack": {
-    "description": "Iris back link at the top of the series detail."
   },
   "subscriptionDetailDetectedSince": "{account} · détecté depuis {month}",
   "@subscriptionDetailDetectedSince": {
@@ -3467,9 +3459,13 @@
   "@subscriptionDetailFootnote": {
     "description": "Foot note under the history: the user is being asked to trust a deduction, so the evidence is part of the screen."
   },
-  "subscriptionDetailLoadFailed": "Impossible de charger ce paiement récurrent pour le moment.",
+  "subscriptionDetailLoadFailed": "Ce paiement récurrent n’a pas pu être chargé. Rien n’a été modifié.",
   "@subscriptionDetailLoadFailed": {
     "description": "Error state replacing the detail when it failed to load."
+  },
+  "subscriptionDetailMoreActions": "Plus d’actions",
+  "@subscriptionDetailMoreActions": {
+    "description": "Accessible name of the series detail's ellipsis button in the title bar."
   },
   "subscriptionFormEditTitle": "Modifier le paiement récurrent",
   "@subscriptionFormEditTitle": {
@@ -3498,10 +3494,6 @@
   "subscriptionFormCadenceLabel": "Cadence",
   "@subscriptionFormCadenceLabel": {
     "description": "Label of the cadence select in the recurring payment form."
-  },
-  "subscriptionFormCadenceHelp": "Hebdomadaire · Mensuel · Trimestriel · Annuel · Irrégulier",
-  "@subscriptionFormCadenceHelp": {
-    "description": "Helper under the cadence select, listing what it offers. Irregular is offered here and nowhere else — detection never concludes it."
   },
   "subscriptionFormCategoryLabel": "Catégorie",
   "@subscriptionFormCategoryLabel": {

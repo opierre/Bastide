@@ -2392,13 +2392,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingsBackupRestored => 'Backup restored';
 
   @override
-  String get navSubscriptions => 'Recurring';
+  String get navSubscriptions => 'Subscriptions';
 
   @override
   String get subscriptionsDetect => 'Detect';
-
-  @override
-  String get subscriptionsDetectRunning => 'Detecting…';
 
   @override
   String subscriptionsDetectResult(int created) {
@@ -2428,25 +2425,14 @@ class AppLocalizationsEn extends AppLocalizations {
   String get subscriptionsDetectFailed => 'Detection could not run.';
 
   @override
-  String get subscriptionsBurdenLabel => 'Monthly burden';
+  String get subscriptionsBurdenLabel => 'Monthly charge';
 
   @override
   String get subscriptionsBurdenCaption =>
-      'Quarterly and yearly charges brought back to a monthly figure.';
+      'Quarterly and yearly brought back to a month';
 
   @override
-  String subscriptionsBurdenExcluded(int count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: '$count ended payments excluded.',
-      one: '1 ended payment excluded.',
-    );
-    return '$_temp0';
-  }
-
-  @override
-  String get subscriptionsActiveLabel => 'Active payments';
+  String get subscriptionsActiveLabel => 'Active';
 
   @override
   String subscriptionsCadenceWeeklyCount(int count) {
@@ -2504,22 +2490,11 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String subscriptionsCancelledCount(int count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: '$count ended',
-      one: '1 ended',
-    );
-    return '$_temp0';
-  }
-
-  @override
   String get subscriptionsNextLabel => 'Next charge';
 
   @override
   String subscriptionsNextValue(String label, String when) {
-    return '$label · $when';
+    return '$label, $when';
   }
 
   @override
@@ -2545,10 +2520,32 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get subscriptionsNextNone => 'No upcoming charge';
+  String get subscriptionsWatchLabel => 'Worth a look';
 
   @override
-  String get subscriptionsColumnName => 'Name';
+  String subscriptionsWatchIncreases(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count price rises',
+      one: '1 price rise',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String subscriptionsWatchMissed(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count missed charges',
+      one: '1 missed charge',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get subscriptionsColumnName => 'Subscription';
 
   @override
   String get subscriptionsColumnCategory => 'Category';
@@ -2602,7 +2599,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String subscriptionSignalIncrease(String from, String to) {
-    return 'Increase · $from → $to';
+    return 'Increase: $from → $to';
   }
 
   @override
@@ -2610,15 +2607,15 @@ class AppLocalizationsEn extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       days,
       locale: localeName,
-      other: 'Missed charge · $days days late',
-      one: 'Missed charge · 1 day late',
+      other: 'Missed charge for $days days',
+      one: 'Missed charge for 1 day',
     );
     return '$_temp0';
   }
 
   @override
   String subscriptionSignalCancelled(String date) {
-    return 'Ended · last charge $date';
+    return 'Cancelled, last charge on $date';
   }
 
   @override
@@ -2636,7 +2633,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get subscriptionActionDismiss => 'Ignore';
 
   @override
-  String get subscriptionActionCancel => 'Mark as ended';
+  String get subscriptionActionCancel => 'Mark as cancelled';
 
   @override
   String get subscriptionActionEdit => 'Edit';
@@ -2732,7 +2729,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get subscriptionsLoadFailed =>
-      'We couldn\'t load your recurring payments right now.';
+      'Subscriptions couldn\'t be loaded. Nothing was changed.';
 
   @override
   String get subscriptionsRetry => 'Try again';
@@ -2743,9 +2740,6 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get subscriptionsEmptyBody =>
       'Bastide spots a recurring payment once a charge has repeated three times. Importing more history speeds detection up.';
-
-  @override
-  String get subscriptionDetailBack => 'Back to recurring payments';
 
   @override
   String subscriptionDetailDetectedSince(String account, String month) {
@@ -2795,7 +2789,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get subscriptionDetailLoadFailed =>
-      'We couldn\'t load this recurring payment right now.';
+      'This recurring payment couldn\'t be loaded. Nothing was changed.';
+
+  @override
+  String get subscriptionDetailMoreActions => 'More actions';
 
   @override
   String get subscriptionFormEditTitle => 'Edit recurring payment';
@@ -2818,10 +2815,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get subscriptionFormCadenceLabel => 'Frequency';
-
-  @override
-  String get subscriptionFormCadenceHelp =>
-      'Weekly · Monthly · Quarterly · Yearly · Irregular';
 
   @override
   String get subscriptionFormCategoryLabel => 'Category';

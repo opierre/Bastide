@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:lucide_icons_flutter/lucide_icons_300.dart';
 
 import '../../../core/l10n/category_display.dart';
-import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/tokens.dart';
 import '../../../core/widgets/amount_text.dart';
+import '../../../core/widgets/app_button.dart';
+import '../../../core/widgets/app_popover.dart';
+import '../../../core/widgets/app_table.dart';
 import '../../../core/widgets/category_label.dart';
 import '../../../core/widgets/institution_avatar.dart';
 import '../../../core/widgets/status_text.dart';
@@ -15,60 +17,64 @@ import '../domain/recurring_series.dart';
 import '../domain/recurring_summary.dart';
 import 'recurring_labels.dart';
 
-/// Column geometry of the subscriptions table (`docs/design/10` §Table Card).
-/// Shared by the header and the rows so the two can never drift apart.
+/// The columns of the subscriptions table (`docs/design/10` §3), shared by the
+/// header and the rows so the two never drift apart.
+///
+/// Abonnement and État share the free width; the others keep a fixed one,
+/// sized on the French copy (« Prélèvement manquant depuis 9 jours » is the
+/// longest État, and it takes the flexible column).
 abstract final class SeriesColumns {
-  static const monogram = 36.0;
-  static const category = 150.0;
-  static const cadence = 90.0;
-  static const amount = 100.0;
-  static const next = 150.0;
-  static const status = 230.0;
-  static const kebab = 28.0;
-  static const gap = AppSpacing.sm + AppSpacing.xs;
-  static const rowHeight = 56.0;
-  static const headerHeight = 32.0;
+  static const _category = 160.0;
+  static const _cadence = 110.0;
+  static const _amount = 110.0;
+  static const _next = 140.0;
+
+  /// The `ellipsis` button and the cell gap after it.
+  static const _menu = AppSizes.button + AppSpacing.smPlus;
+
+  /// The sortable columns, by their index in [of].
+  static const sortFields = {
+    0: SeriesSortField.name,
+    3: SeriesSortField.amount,
+    4: SeriesSortField.nextCharge,
+  };
+
+  /// The header index of [field].
+  static int indexOf(SeriesSortField field) =>
+      sortFields.entries.firstWhere((entry) => entry.value == field).key;
+
+  static List<AppTableColumn> of(AppLocalizations l10n) => [
+    AppTableColumn(
+      label: l10n.subscriptionsColumnName,
+      flex: 3,
+      sortable: true,
+    ),
+    AppTableColumn(label: l10n.subscriptionsColumnCategory, width: _category),
+    AppTableColumn(label: l10n.subscriptionsColumnCadence, width: _cadence),
+    AppTableColumn(
+      label: l10n.subscriptionsColumnAmount,
+      width: _amount,
+      numeric: true,
+      sortable: true,
+    ),
+    AppTableColumn(
+      label: l10n.subscriptionsColumnNext,
+      width: _next,
+      numeric: true,
+      sortable: true,
+    ),
+    AppTableColumn(label: l10n.subscriptionsColumnStatus, flex: 3),
+    const AppTableColumn(label: '', width: _menu, numeric: true),
+  ];
 }
 
-/// One line of the table, header or data, laid out on [SeriesColumns].
-Widget seriesRowLayout({
-  required Widget monogram,
-  required Widget name,
-  required Widget category,
-  required Widget cadence,
-  required Widget amount,
-  required Widget next,
-  required Widget status,
-  required Widget trailing,
-}) => Row(
-  children: [
-    SizedBox(width: SeriesColumns.monogram, child: monogram),
-    const SizedBox(width: SeriesColumns.gap),
-    Expanded(child: name),
-    const SizedBox(width: SeriesColumns.gap),
-    SizedBox(width: SeriesColumns.category, child: category),
-    SizedBox(width: SeriesColumns.cadence, child: cadence),
-    SizedBox(width: SeriesColumns.amount, child: amount),
-    const SizedBox(width: SeriesColumns.gap),
-    SizedBox(width: SeriesColumns.next, child: next),
-    const SizedBox(width: SeriesColumns.gap),
-    SizedBox(width: SeriesColumns.status, child: status),
-    const SizedBox(width: SeriesColumns.gap),
-    SizedBox(width: SeriesColumns.kebab, child: trailing),
-  ],
-);
-
-/// The 32 px uppercase header over the table.
-///
-/// Libellé, Montant and Prochain double as the sort control: a click sorts on
-/// that column, a second click reverses it. The active column is drawn in iris
-/// with an arrow, so the order is not carried by color alone. The header only
-/// reports the click; the ordering itself is the controller's.
+/// The table header: Abonnement, Montant and Prochain sort, the sorted one
+/// showing its chevron. The header only reports the click; the ordering is
+/// the controller's.
 class SeriesTableHeader extends StatelessWidget {
-  const SeriesTableHeader({super.key, this.sort, this.onSort});
+  const SeriesTableHeader({super.key, required this.sort, this.onSort});
 
-  /// The sort the rows are drawn in, or `null` for the server's order.
-  final SeriesSort? sort;
+  final SeriesSort sort;
 
   /// Called with the column the user clicked; `null` makes the header inert.
   final ValueChanged<SeriesSortField>? onSort;
@@ -77,162 +83,29 @@ class SeriesTableHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final onSort = this.onSort;
-
-    Widget cell(String label, {TextAlign align = TextAlign.start}) => Text(
-      label.toUpperCase(),
-      textAlign: align,
-      overflow: TextOverflow.ellipsis,
-      style: context.textStyles.sectionLabel,
-    );
-
-    Widget sortable(
-      SeriesSortField field,
-      String label,
-      String tooltip, {
-      bool alignEnd = false,
-    }) => _SortableHeaderCell(
-      key: Key('seriesSortHeader-${field.name}'),
-      label: label,
-      tooltip: tooltip,
-      alignEnd: alignEnd,
-      active: sort?.field == field ? sort : null,
-      onTap: onSort == null ? null : () => onSort(field),
-    );
-
-    return SizedBox(
-      height: SeriesColumns.headerHeight,
-      child: Align(
-        alignment: Alignment.centerLeft,
-        child: seriesRowLayout(
-          monogram: const SizedBox.shrink(),
-          name: sortable(
-            SeriesSortField.name,
-            l10n.subscriptionsColumnName,
-            l10n.subscriptionsSortByName,
-          ),
-          category: cell(l10n.subscriptionsColumnCategory),
-          cadence: cell(l10n.subscriptionsColumnCadence),
-          amount: sortable(
-            SeriesSortField.amount,
-            l10n.subscriptionsColumnAmount,
-            l10n.subscriptionsSortByAmount,
-            alignEnd: true,
-          ),
-          next: sortable(
-            SeriesSortField.nextCharge,
-            l10n.subscriptionsColumnNext,
-            l10n.subscriptionsSortByNext,
-            alignEnd: true,
-          ),
-          status: cell(l10n.subscriptionsColumnStatus, align: TextAlign.end),
-          trailing: const SizedBox.shrink(),
-        ),
-      ),
+    return AppTableHeader(
+      key: const Key('seriesTableHeader'),
+      columns: SeriesColumns.of(l10n),
+      sortColumn: SeriesColumns.indexOf(sort.field),
+      ascending: sort.ascending,
+      onSort: onSort == null
+          ? null
+          : (index) => onSort(SeriesColumns.sortFields[index]!),
     );
   }
 }
 
-/// One clickable header label, with a direction arrow while it is the sort
-/// column.
-class _SortableHeaderCell extends StatelessWidget {
-  const _SortableHeaderCell({
-    super.key,
-    required this.label,
-    required this.tooltip,
-    required this.alignEnd,
-    required this.active,
-    required this.onTap,
-  });
-
-  final String label;
-
-  /// What a click does while this is not the sort column.
-  final String tooltip;
-
-  final bool alignEnd;
-
-  /// The sort, when it is on this column; `null` otherwise.
-  final SeriesSort? active;
-
-  final VoidCallback? onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
-    final sort = active;
-
-    final text = Flexible(
-      child: Text(
-        label.toUpperCase(),
-        overflow: TextOverflow.ellipsis,
-        style: sort == null
-            ? context.textStyles.sectionLabel
-            : context.textStyles.sectionLabel.copyWith(
-                color: context.colors.accent,
-              ),
-      ),
-    );
-    final arrow = sort == null
-        ? null
-        : Icon(
-            sort.ascending
-                ? Icons.arrow_upward_rounded
-                : Icons.arrow_downward_rounded,
-            key: Key(
-              'seriesSortArrow-${sort.ascending ? 'ascending' : 'descending'}',
-            ),
-            size: 12,
-            color: context.colors.accent,
-          );
-
-    return Tooltip(
-      message: switch (sort) {
-        null => tooltip,
-        SeriesSort(ascending: true) => l10n.subscriptionsSortedAscending,
-        _ => l10n.subscriptionsSortedDescending,
-      },
-      child: MouseRegion(
-        cursor: onTap == null ? MouseCursor.defer : SystemMouseCursors.click,
-        child: GestureDetector(
-          behavior: HitTestBehavior.opaque,
-          onTap: onTap,
-          child: Row(
-            mainAxisAlignment: alignEnd
-                ? MainAxisAlignment.end
-                : MainAxisAlignment.start,
-            children: [
-              // The arrow sits on the inner side, so the label stays aligned
-              // with the figures under it.
-              if (alignEnd && arrow != null) ...[
-                arrow,
-                const SizedBox(width: AppSpacing.xs),
-              ],
-              text,
-              if (!alignEnd && arrow != null) ...[
-                const SizedBox(width: AppSpacing.xs),
-                arrow,
-              ],
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-/// What the kebab can do to a row: move it along the lifecycle, open it in the
-/// form, or put it away and bring it back.
+/// What the row menu can do to a series: move it along the lifecycle, open it
+/// in the form, or put it away and bring it back.
 enum SeriesAction { confirm, dismiss, cancel, edit, archive, unarchive }
 
-/// A 56 px subscription row: monogram · label · category · cadence · amount ·
-/// next charge · status pill · kebab (`docs/design/10` frame ①).
+/// One 36 px row of the table: monogram and name · category · cadence ·
+/// amount · next charge · état · `ellipsis` (`docs/design/10` §3).
 ///
-/// A cancelled row renders at .55 opacity with no next date. It stays listed
-/// rather than disappearing because the subscription is part of the history the
-/// user is reading — and opacity does not affect hit testing, so its kebab
-/// stays reachable, which is the point of keeping it. An archived row, revealed
-/// under the live ones, is dimmed the same way for the same reason.
-class SeriesRow extends StatefulWidget {
+/// A cancelled or archived row is dimmed. It stays listed because the
+/// subscription is part of the history the user is reading, and its menu
+/// stays reachable, which is the point of keeping it.
+class SeriesRow extends StatelessWidget {
   const SeriesRow({
     super.key,
     required this.row,
@@ -243,104 +116,64 @@ class SeriesRow extends StatefulWidget {
 
   final SubscriptionRow row;
 
-  /// The series' category, or `null` when it has none — or when the catalog is
-  /// still loading, which renders the same dashed "uncategorized" chip.
+  /// The series' category, or `null` when it has none, or when the catalog
+  /// is still loading, which renders the same « Non catégorisé » label.
   final AppCategory? category;
 
   final VoidCallback onOpen;
   final ValueChanged<SeriesAction> onAction;
 
   @override
-  State<SeriesRow> createState() => _SeriesRowState();
-}
-
-class _SeriesRowState extends State<SeriesRow> {
-  bool _hovered = false;
-
-  @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final locale = Localizations.localeOf(context).toString();
-    final textTheme = Theme.of(context).textTheme;
-    final series = widget.row.series;
-    // A cancelled or archived series expects no charge, so shows no date.
-    final isSettled = widget.row.isSettled;
+    final series = row.series;
 
-    return MouseRegion(
-      onEnter: (_) => setState(() => _hovered = true),
-      onExit: (_) => setState(() => _hovered = false),
-      child: Container(
-        key: Key('seriesRow-${series.id}'),
-        height: SeriesColumns.rowHeight,
-        color: _hovered ? context.colors.hover : Colors.transparent,
-        child: Opacity(
-          opacity: isSettled ? 0.55 : 1,
-          child: seriesRowLayout(
-            monogram: Center(
-              child: InstitutionAvatar(
-                name: series.label,
-                size: SeriesColumns.monogram,
-                logo: series.logo,
+    return AppTableRow(
+      key: Key('seriesRow-${series.id}'),
+      columns: SeriesColumns.of(l10n),
+      dimmed: row.isSettled,
+      onTap: onOpen,
+      cells: [
+        Row(
+          children: [
+            InstitutionAvatar(name: series.label, logo: series.logo),
+            const SizedBox(width: AppSpacing.sm),
+            Flexible(
+              child: Text(
+                series.label,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
               ),
             ),
-            name: GestureDetector(
-              key: Key('seriesOpen-${series.id}'),
-              behavior: HitTestBehavior.opaque,
-              onTap: widget.onOpen,
-              child: MouseRegion(
-                cursor: SystemMouseCursors.click,
-                child: Text(
-                  series.label,
-                  overflow: TextOverflow.ellipsis,
-                  style: textTheme.titleSmall,
-                ),
-              ),
-            ),
-            category: Align(
-              alignment: Alignment.centerLeft,
-              child: _CategoryCell(category: widget.category),
-            ),
-            cadence: Text(
-              cadenceLabel(l10n, series.cadence),
-              overflow: TextOverflow.ellipsis,
-              style: textTheme.bodySmall?.copyWith(
-                color: context.colors.textSecondary,
-              ),
-            ),
-            amount: Align(
-              alignment: Alignment.centerRight,
-              // Neutral and unsigned, unlike every other amount in the app.
-              // These are expected charges, not ledger entries: the money
-              // rule's red would state that this money has left the account,
-              // which is exactly what has not happened yet.
-              child: AmountText(
-                key: Key('seriesAmount-${series.id}'),
-                amountMinor: series.expectedAmountMinor.abs(),
-                currency: series.currency,
-                colorize: false,
-                style: textTheme.bodyMedium,
-              ),
-            ),
-            next: Align(
-              alignment: Alignment.centerRight,
-              child: _NextChargeCell(
-                row: widget.row,
-                locale: locale,
-                isSettled: isSettled,
-              ),
-            ),
-            status: Align(
-              alignment: Alignment.centerRight,
-              child: _StatusCell(
-                signal: widget.row.signal,
-                currency: series.currency,
-                locale: locale,
-              ),
-            ),
-            trailing: _SeriesKebab(series: series, onAction: widget.onAction),
+          ],
+        ),
+        _CategoryCell(category: category),
+        Text(
+          cadenceLabel(l10n, series.cadence),
+          style: TextStyle(
+            color: row.isSettled
+                ? context.colors.textTertiary
+                : context.colors.textSecondary,
           ),
         ),
-      ),
+        // Neutral and unsigned: an expected charge, not a transaction. The
+        // money rule's red would state that this money has left the account,
+        // which is exactly what has not happened yet.
+        AmountText(
+          key: Key('seriesAmount-${series.id}'),
+          amountMinor: series.expectedAmountMinor.abs(),
+          currency: series.currency,
+          colorize: false,
+        ),
+        _NextChargeCell(row: row, locale: locale),
+        _StatusCell(
+          signal: row.signal,
+          currency: series.currency,
+          locale: locale,
+        ),
+        _SeriesMenu(series: series, onAction: onAction),
+      ],
     );
   }
 }
@@ -355,9 +188,7 @@ class _CategoryCell extends StatelessWidget {
     final l10n = AppLocalizations.of(context)!;
     final target = category;
     if (target == null) {
-      return CategoryLabel.uncategorized(
-        label: l10n.subscriptionFormCategoryNone,
-      );
+      return CategoryLabel.uncategorized(label: l10n.categoryUncategorized);
     }
     return CategoryLabel(
       label: localizedCategoryName(l10n, target.name),
@@ -366,61 +197,40 @@ class _CategoryCell extends StatelessWidget {
   }
 }
 
-/// The Prochain cell. A missed charge replaces the date with what *was*
-/// expected, in amber: printing an overdue date under a "next" header would
-/// state something the row's own pill contradicts.
+/// The Prochain cell. A missed charge replaces the date with what was
+/// expected, in `warning`: an overdue date under a "next" header would state
+/// something the row's own État contradicts. A settled series expects no
+/// charge, so shows « — ».
 class _NextChargeCell extends StatelessWidget {
-  const _NextChargeCell({
-    required this.row,
-    required this.locale,
-    required this.isSettled,
-  });
+  const _NextChargeCell({required this.row, required this.locale});
 
   final SubscriptionRow row;
   final String locale;
 
-  /// Cancelled or archived: no charge is expected, so no date is printed.
-  final bool isSettled;
-
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final textTheme = Theme.of(context).textTheme;
-    final dateFormat = seriesDateFormat(locale);
+    final colors = context.colors;
+    final format = seriesShortDateFormat(locale);
 
-    if (isSettled) {
-      return Text(
-        l10n.subscriptionsValueNone,
-        textAlign: TextAlign.end,
-        style: textTheme.bodyMedium?.copyWith(
-          color: context.colors.textTertiary,
-        ),
-      );
-    }
+    if (row.isSettled) return Text(l10n.subscriptionsValueNone);
 
     if (row.signal case MissedChargeSignal(:final expectedOn)) {
       return Text(
-        l10n.subscriptionNextExpected(dateFormat.format(expectedOn)),
+        l10n.subscriptionNextExpected(format.format(expectedOn)),
         key: Key('seriesNextExpected-${row.series.id}'),
-        textAlign: TextAlign.end,
-        overflow: TextOverflow.ellipsis,
-        style: tabularNumberStyle(
-          textTheme.bodyMedium!,
-        ).copyWith(color: context.colors.warning),
+        style: TextStyle(color: colors.warning),
       );
     }
 
     return Text(
-      dateFormat.format(row.series.nextExpectedDate),
-      textAlign: TextAlign.end,
-      style: tabularNumberStyle(
-        textTheme.bodyMedium!,
-      ).copyWith(color: context.colors.textSecondary),
+      format.format(row.series.nextExpectedDate),
+      style: TextStyle(color: colors.textSecondary),
     );
   }
 }
 
-/// The Statut cell — empty for a healthy subscription, by design.
+/// The État cell: empty for a healthy subscription, by design.
 class _StatusCell extends StatelessWidget {
   const _StatusCell({
     required this.signal,
@@ -435,15 +245,14 @@ class _StatusCell extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final currentSignal = signal;
-    if (currentSignal == null) return const SizedBox.shrink();
-
-    return switch (currentSignal) {
+    return switch (signal) {
+      null => const SizedBox.shrink(),
       PriceIncreaseSignal(
         :final previousAmountMinor,
         :final currentAmountMinor,
       ) =>
         StatusText(
+          key: const Key('seriesStatusIncrease'),
           tone: StatusTone.warning,
           icon: LucideIcons300.trendingUp,
           label: l10n.subscriptionSignalIncrease(
@@ -452,20 +261,27 @@ class _StatusCell extends StatelessWidget {
           ),
         ),
       MissedChargeSignal(:final daysLate) => StatusText(
+        key: const Key('seriesStatusMissed'),
         tone: StatusTone.warning,
         icon: LucideIcons300.clockAlert,
         label: l10n.subscriptionSignalMissed(daysLate),
       ),
-      CancelledSignal(:final lastChargeOn) => StatusText(
-        label: l10n.subscriptionSignalCancelled(
-          seriesDateFormat(locale).format(lastChargeOn),
+      // Neutral text with no icon, in the dimmed row's `textTertiary`: a
+      // cancelled subscription is settled, not something to look at.
+      CancelledSignal(:final lastChargeOn) => Text(
+        l10n.subscriptionSignalCancelled(
+          seriesLongDateFormat(locale).format(lastChargeOn),
         ),
+        key: const Key('seriesStatusCancelled'),
+        style: Theme.of(
+          context,
+        ).textTheme.bodySmall?.copyWith(color: context.colors.textTertiary),
       ),
     };
   }
 
-  /// The pill states both prices, so both are unsigned magnitudes for the same
-  /// reason the amount column is: they are what the subscription costs.
+  /// Both prices are unsigned for the reason the amount column is: they are
+  /// what the subscription costs.
   String _money(int amountMinor) => formatAmount(
     amountMinor: amountMinor.abs(),
     currency: currency,
@@ -473,107 +289,77 @@ class _StatusCell extends StatelessWidget {
   );
 }
 
-/// The row's kebab. It offers only the transitions the lifecycle allows out of
-/// the current status — a menu that can produce a 409 is a menu that lies about
-/// what the subscription can do. An archived series offers only « Désarchiver »,
-/// as an archived property does: it is put away until the user brings it back.
-class _SeriesKebab extends StatelessWidget {
-  const _SeriesKebab({required this.series, required this.onAction});
+/// The row's `ellipsis` menu: Confirmer · Ignorer · Marquer comme résilié ·
+/// Modifier, then Archiver.
+///
+/// It offers only the transitions the lifecycle allows out of the current
+/// status: a menu that can produce a 409 lies about what the subscription can
+/// do. An archived series offers only « Désarchiver »: it is put away until
+/// the user brings it back.
+class _SeriesMenu extends StatefulWidget {
+  const _SeriesMenu({required this.series, required this.onAction});
 
   final RecurringSeries series;
   final ValueChanged<SeriesAction> onAction;
 
   @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
-    final allowed = series.allowedTransitions;
-
-    return PopupMenuButton<SeriesAction>(
-      key: Key('seriesMenu-${series.id}'),
-      icon: const Icon(Icons.more_horiz_rounded, size: 18),
-      iconColor: context.colors.textSecondary,
-      tooltip: l10n.subscriptionActionsTooltip,
-      position: PopupMenuPosition.under,
-      padding: EdgeInsets.zero,
-      onSelected: onAction,
-      itemBuilder: (context) => [
-        if (series.isArchived)
-          PopupMenuItem(
-            key: Key('seriesActionUnarchive-${series.id}'),
-            value: SeriesAction.unarchive,
-            child: _MenuRow(
-              icon: Icons.unarchive_outlined,
-              label: l10n.subscriptionActionUnarchive,
-            ),
-          )
-        else ...[
-          if (allowed.contains(SeriesStatus.confirmed))
-            PopupMenuItem(
-              key: Key('seriesActionConfirm-${series.id}'),
-              value: SeriesAction.confirm,
-              child: _MenuRow(
-                icon: Icons.check_rounded,
-                label: l10n.subscriptionActionConfirm,
-                color: context.colors.positive,
-              ),
-            ),
-          if (allowed.contains(SeriesStatus.dismissed))
-            PopupMenuItem(
-              key: Key('seriesActionDismiss-${series.id}'),
-              value: SeriesAction.dismiss,
-              child: _MenuRow(
-                icon: Icons.visibility_off_outlined,
-                label: l10n.subscriptionActionDismiss,
-              ),
-            ),
-          if (allowed.contains(SeriesStatus.cancelled))
-            PopupMenuItem(
-              key: Key('seriesActionCancel-${series.id}'),
-              value: SeriesAction.cancel,
-              child: _MenuRow(
-                icon: Icons.block_outlined,
-                label: l10n.subscriptionActionCancel,
-              ),
-            ),
-          PopupMenuItem(
-            key: Key('seriesActionEdit-${series.id}'),
-            value: SeriesAction.edit,
-            child: _MenuRow(
-              icon: Icons.edit_outlined,
-              label: l10n.subscriptionActionEdit,
-            ),
-          ),
-          PopupMenuItem(
-            key: Key('seriesActionArchive-${series.id}'),
-            value: SeriesAction.archive,
-            child: _MenuRow(
-              icon: Icons.archive_outlined,
-              label: l10n.subscriptionActionArchive,
-            ),
-          ),
-        ],
-      ],
-    );
-  }
+  State<_SeriesMenu> createState() => _SeriesMenuState();
 }
 
-class _MenuRow extends StatelessWidget {
-  const _MenuRow({required this.icon, required this.label, this.color});
-
-  final IconData icon;
-  final String label;
-
-  /// `null` takes `textSecondary`.
-  final Color? color;
+class _SeriesMenuState extends State<_SeriesMenu> {
+  final _menu = MenuController();
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      children: [
-        Icon(icon, size: 16, color: color ?? context.colors.textSecondary),
-        const SizedBox(width: AppSpacing.sm),
-        Flexible(child: Text(label, overflow: TextOverflow.ellipsis)),
+    final l10n = AppLocalizations.of(context)!;
+    final series = widget.series;
+    final allowed = series.allowedTransitions;
+
+    AppMenuItem item(SeriesAction action, String key, String label) =>
+        AppMenuItem(
+          key: Key('seriesAction$key-${series.id}'),
+          label: label,
+          onPressed: () => widget.onAction(action),
+        );
+
+    return MenuAnchor(
+      controller: _menu,
+      style: AppPopover.menuStyle(context),
+      alignmentOffset: const Offset(0, AppSpacing.xs),
+      menuChildren: [
+        if (series.isArchived)
+          item(
+            SeriesAction.unarchive,
+            'Unarchive',
+            l10n.subscriptionActionUnarchive,
+          )
+        else ...[
+          if (allowed.contains(SeriesStatus.confirmed))
+            item(
+              SeriesAction.confirm,
+              'Confirm',
+              l10n.subscriptionActionConfirm,
+            ),
+          if (allowed.contains(SeriesStatus.dismissed))
+            item(
+              SeriesAction.dismiss,
+              'Dismiss',
+              l10n.subscriptionActionDismiss,
+            ),
+          if (allowed.contains(SeriesStatus.cancelled))
+            item(SeriesAction.cancel, 'Cancel', l10n.subscriptionActionCancel),
+          item(SeriesAction.edit, 'Edit', l10n.subscriptionActionEdit),
+          item(SeriesAction.archive, 'Archive', l10n.subscriptionActionArchive),
+        ],
       ],
+      child: AppButton(
+        key: Key('seriesMenu-${series.id}'),
+        label: l10n.subscriptionActionsTooltip,
+        icon: LucideIcons300.ellipsis,
+        iconOnly: true,
+        variant: AppButtonVariant.ghost,
+        onPressed: () => _menu.isOpen ? _menu.close() : _menu.open(),
+      ),
     );
   }
 }

@@ -113,7 +113,7 @@ void main() {
       'Gestion',
       'Imports',
       'Catégories',
-      'Récurrents',
+      'Abonnements',
       'Objectifs',
       'Patrimoine',
       'Crédits',

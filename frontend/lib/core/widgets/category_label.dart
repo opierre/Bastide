@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../theme/tokens.dart';
+import 'app_table.dart';
 
 export 'category_icons.dart';
 
@@ -115,7 +116,12 @@ class CategoryLabel extends StatelessWidget {
             ),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
-            style: textTheme.bodyMedium?.copyWith(color: colors.textSecondary),
+            // A dimmed table row sets every cell in `textTertiary` (`00` §7).
+            style: textTheme.bodyMedium?.copyWith(
+              color: AppTableRow.isDimmed(context)
+                  ? colors.textTertiary
+                  : colors.textSecondary,
+            ),
           ),
         ),
         if (confidence != null) ...[

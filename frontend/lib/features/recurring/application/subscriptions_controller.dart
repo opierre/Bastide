@@ -25,7 +25,7 @@ class SubscriptionsState {
     this.showArchived = false,
     this.mergeSuggestions = const [],
     this.statusFilter,
-    this.sort,
+    this.sort = SeriesSort.initial,
     this.actionError,
   }) : rows = sortSeriesRows(_joinSignals(series, summary), sort),
        archivedRows = sortSeriesRows(_joinSignals(archived, summary), sort);
@@ -57,9 +57,9 @@ class SubscriptionsState {
   /// is dimmed, not hidden.
   final SeriesStatus? statusFilter;
 
-  /// How [rows] and [archivedRows] are ordered; `null` keeps the server's
-  /// order. A view choice, kept across reloads for the session.
-  final SeriesSort? sort;
+  /// How [rows] and [archivedRows] are ordered: by next charge until the user
+  /// picks a column. A view choice, kept across reloads for the session.
+  final SeriesSort sort;
 
   /// The last write the panel attempted and the server refused, or `null`.
   final Object? actionError;
@@ -161,7 +161,7 @@ class SubscriptionsController extends AsyncNotifier<SubscriptionsState> {
   Future<SubscriptionsState> _load(
     SeriesStatus? status, {
     bool showArchived = false,
-    SeriesSort? sort,
+    SeriesSort sort = SeriesSort.initial,
   }) async {
     final (series, archived, summary, suggestions) = await (
       _repository.list(status: status),
@@ -190,9 +190,7 @@ class SubscriptionsController extends AsyncNotifier<SubscriptionsState> {
     final sort = current.sort;
     state = AsyncValue.data(
       current.copyWith(
-        sort: sort != null && sort.field == field
-            ? sort.flipped
-            : SeriesSort.byDefault(field),
+        sort: sort.field == field ? sort.flipped : SeriesSort.byDefault(field),
       ),
     );
   }
@@ -268,7 +266,7 @@ class SubscriptionsController extends AsyncNotifier<SubscriptionsState> {
   Future<void> refresh() async {
     final status = state.value?.statusFilter;
     final showArchived = state.value?.showArchived ?? false;
-    final sort = state.value?.sort;
+    final sort = state.value?.sort ?? SeriesSort.initial;
     state = const AsyncValue.loading();
     state = await AsyncValue.guard(
       () => _load(status, showArchived: showArchived, sort: sort),
@@ -297,7 +295,7 @@ class SubscriptionsController extends AsyncNotifier<SubscriptionsState> {
   /// Narrows the list to one lifecycle status, or back to all of them.
   Future<void> setStatusFilter(SeriesStatus? status) async {
     final showArchived = state.value?.showArchived ?? false;
-    final sort = state.value?.sort;
+    final sort = state.value?.sort ?? SeriesSort.initial;
     state = const AsyncValue.loading();
     state = await AsyncValue.guard(
       () => _load(status, showArchived: showArchived, sort: sort),
