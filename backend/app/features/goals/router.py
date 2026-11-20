@@ -1,5 +1,6 @@
 """Goal endpoints: virtual-envelope CRUD, the banner image and the allocation ledger."""
 
+from datetime import date
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, File, Header, Query, Response, UploadFile, status
@@ -28,7 +29,7 @@ def _service(db: Annotated[Session, Depends(get_db)]) -> GoalService:
     return GoalService(GoalRepository(db))
 
 
-def _to_read(goal: Goal, progress_minor: int) -> GoalRead:
+def _to_read(goal: Goal, progress_minor: int, reached_on: date | None) -> GoalRead:
     return GoalRead(
         id=goal.id,
         name=goal.name,
@@ -43,6 +44,7 @@ def _to_read(goal: Goal, progress_minor: int) -> GoalRead:
         progress_minor=progress_minor,
         # Target is constrained positive on the way in, so this ratio never divides by zero.
         progress_pct=progress_minor / goal.target_minor,
+        reached_on=reached_on,
         image_updated_at=goal.image.updated_at if goal.image is not None else None,
         created_at=goal.created_at,
         updated_at=goal.updated_at,
@@ -59,10 +61,7 @@ async def list_goals(
     ] = None,
 ) -> list[GoalRead]:
     """List the caller's goals with their progress; archived ones only when asked for."""
-    return [
-        _to_read(goal, progress)
-        for goal, progress in service.list_for_user(user.id, status=goal_status)
-    ]
+    return [_to_read(*view) for view in service.list_for_user(user.id, status=goal_status)]
 
 
 @router.post("", response_model=GoalRead, status_code=status.HTTP_201_CREATED)

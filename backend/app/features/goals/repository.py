@@ -1,6 +1,7 @@
 """Data access for goals, their allocations and banner images. The only place querying them."""
 
 from collections.abc import Sequence
+from datetime import date
 
 from sqlalchemy import Select, func, select
 from sqlalchemy.orm import Session, undefer
@@ -75,6 +76,18 @@ class GoalRepository:
     def delete_image(self, goal: Goal) -> Goal:
         goal.image = None
         return self.save(goal)
+
+    def ledgers(self, goal_ids: Sequence[str]) -> dict[str, list[tuple[date, int]]]:
+        """Each of these goals' allocations as `(allocated_on, amount_minor)`, oldest first."""
+        rows = self._db.execute(
+            select(GoalAllocation.goal_id, GoalAllocation.allocated_on, GoalAllocation.amount_minor)
+            .where(GoalAllocation.goal_id.in_(goal_ids))
+            .order_by(GoalAllocation.allocated_on, GoalAllocation.created_at)
+        )
+        ledgers: dict[str, list[tuple[date, int]]] = {}
+        for goal_id, allocated_on, amount_minor in rows:
+            ledgers.setdefault(goal_id, []).append((allocated_on, amount_minor))
+        return ledgers
 
     def list_allocations(self, goal_id: str) -> list[GoalAllocation]:
         """A goal's allocations, newest first — the order the history table reads in."""

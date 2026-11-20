@@ -68,6 +68,9 @@ class GoalRead(BaseModel):
     #: `progress_minor / target_minor`, **unclamped**: an over-funded goal reports past 1.0 and
     #: the UI decides what to draw. A ratio, never a money value.
     progress_pct: float
+    #: The date of the allocation that last carried progress to the target, or `None` while
+    #: the goal is under it. The panel prints its month (« Atteint en avril 2026 »).
+    reached_on: date | None
     #: When the banner image last changed, or `None` without one. The app fetches the picture
     #: from `GET /goals/{id}/image` and uses this to know when its copy is stale.
     image_updated_at: datetime | None
