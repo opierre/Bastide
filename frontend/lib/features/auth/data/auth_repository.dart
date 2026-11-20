@@ -98,6 +98,19 @@ class AuthRepository {
     return json['recovery_code'] as String;
   }
 
+  /// Changes the signed-in user's password after re-checking
+  /// [currentPassword]. This session stays open; the backend signs the user's
+  /// other sessions out. The recovery code is unchanged.
+  Future<void> changePassword({
+    required String currentPassword,
+    required String newPassword,
+  }) async {
+    await _apiClient.put(
+      '/auth/me/password',
+      body: {'current_password': currentPassword, 'new_password': newPassword},
+    );
+  }
+
   /// Changes the signed-in user's display name, which is also their username.
   Future<AuthUser> updateProfile({required String displayName}) async {
     final json =

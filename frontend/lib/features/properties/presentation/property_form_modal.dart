@@ -63,6 +63,14 @@ String formatOwnershipInput(int bps, String locale) {
   return '$whole$separator${(bps % 100).toString().padLeft(2, '0')}';
 }
 
+/// An ownership share printed as the locale's percent — « 50 % », « 33,33 % ».
+String formatOwnershipShare(int bps, String locale) {
+  final format = NumberFormat.percentPattern(locale)
+    ..minimumFractionDigits = 0
+    ..maximumFractionDigits = 2;
+  return format.format(bps / fullOwnershipBps);
+}
+
 /// The ARB label of a property's nature — the backend stores the machine value.
 String propertyKindLabel(AppLocalizations l10n, PropertyKind kind) =>
     switch (kind) {
@@ -93,8 +101,9 @@ String localizePropertyError(AppLocalizations l10n, Object? error) {
   return l10n.propertyErrorGeneric;
 }
 
-/// The 620 px « Nouveau bien » modal (`15-synthese.md` frame ③), reused
-/// prefilled for « Modifier ».
+/// The 620 px « Nouveau bien » modal (`15-synthese.md` §Modals), reused
+/// prefilled for « Modifier le bien ». Two columns, fields 14 px apart, the
+/// address full width.
 class PropertyFormModal extends ConsumerStatefulWidget {
   const PropertyFormModal({super.key, required this.currency, this.initial});
 
@@ -250,7 +259,7 @@ class _PropertyFormModalState extends ConsumerState<PropertyFormModal> {
     crossAxisAlignment: CrossAxisAlignment.start,
     children: [
       Expanded(child: first),
-      const SizedBox(width: 14),
+      const SizedBox(width: AppSpacing.fieldGap),
       Expanded(child: second),
     ],
   );
@@ -260,28 +269,22 @@ class _PropertyFormModalState extends ConsumerState<PropertyFormModal> {
     final l10n = AppLocalizations.of(context)!;
     final locale = _locale;
     final liveShare = _liveShareMinor;
-    const rowGap = SizedBox(height: 12);
+    const rowGap = SizedBox(height: AppSpacing.fieldGap);
 
     return AppModal(
       title: _isEditing
           ? l10n.propertyFormEditTitle
           : l10n.propertyFormCreateTitle,
-      subtitle: Text(
-        l10n.propertyFormSubtitle,
-        style: Theme.of(
-          context,
-        ).textTheme.bodySmall?.copyWith(color: context.colors.textSecondary),
-      ),
       width: 620,
       actions: [
-        OutlinedButton(
+        AppButton(
           key: const Key('propertyFormCancel'),
+          label: l10n.propertyFormCancel,
           onPressed: _isSubmitting ? null : () => Navigator.of(context).pop(),
-          child: Text(l10n.propertyFormCancel),
         ),
         PrimaryButton(
           key: const Key('propertyFormSubmit'),
-          label: _isEditing ? l10n.propertyFormSave : l10n.propertyFormSubmit,
+          label: l10n.propertyFormSave,
           isLoading: _isSubmitting,
           onPressed: _isSubmitting ? null : _submit,
         ),
@@ -296,7 +299,7 @@ class _PropertyFormModalState extends ConsumerState<PropertyFormModal> {
                 key: const Key('propertyFormError'),
                 message: _bannerError!,
               ),
-              const SizedBox(height: AppSpacing.md),
+              const SizedBox(height: AppSpacing.fieldGap),
             ],
             _pair(
               LabeledField(
@@ -380,7 +383,8 @@ class _PropertyFormModalState extends ConsumerState<PropertyFormModal> {
               LabeledField(
                 label: l10n.propertyFormOwnership,
                 // The label carries the held share live, so the user sees what
-                // enters the synthèse before saving (frame ③).
+                // enters the synthèse before saving (`15` §Modals). A
+                // reading, not an action: `textTertiary`, never the accent.
                 trailing: liveShare == null
                     ? null
                     : Text(
@@ -393,8 +397,8 @@ class _PropertyFormModalState extends ConsumerState<PropertyFormModal> {
                         ),
                         key: const Key('propertyFormOwnershipShare'),
                         style: tabularNumberStyle(
-                          Theme.of(context).textTheme.labelMedium!,
-                        ).copyWith(color: context.colors.accent),
+                          Theme.of(context).textTheme.bodySmall!,
+                        ).copyWith(color: context.colors.textTertiary),
                       ),
                 child: TextFormField(
                   key: const Key('propertyFormOwnership'),
@@ -465,7 +469,7 @@ class _PropertyFormModalState extends ConsumerState<PropertyFormModal> {
 /// « Nouvelle estimation »: a new declared value with the date it was given.
 ///
 /// The API keeps one declared value per property, so this replaces the
-/// previous one; the card then shows it with its « estimée le … » line.
+/// previous one. The 420 px modal of `15-synthese.md` §Modals.
 class PropertyRevalueModal extends ConsumerStatefulWidget {
   const PropertyRevalueModal({super.key, required this.property});
 
@@ -544,20 +548,17 @@ class _PropertyRevalueModalState extends ConsumerState<PropertyRevalueModal> {
           appDateFormat(locale).format(property.valuedOn),
         ),
         key: const Key('propertyRevalueSubtitle'),
-        style: Theme.of(
-          context,
-        ).textTheme.bodySmall?.copyWith(color: context.colors.textSecondary),
       ),
-      width: 480,
+      width: 420,
       actions: [
-        OutlinedButton(
+        AppButton(
           key: const Key('propertyRevalueCancel'),
+          label: l10n.propertyFormCancel,
           onPressed: _isSubmitting ? null : () => Navigator.of(context).pop(),
-          child: Text(l10n.propertyFormCancel),
         ),
         PrimaryButton(
           key: const Key('propertyRevalueSubmit'),
-          label: l10n.propertyRevalueSubmit,
+          label: l10n.propertyFormSave,
           isLoading: _isSubmitting,
           onPressed: _isSubmitting ? null : _submit,
         ),
@@ -572,7 +573,7 @@ class _PropertyRevalueModalState extends ConsumerState<PropertyRevalueModal> {
                 key: const Key('propertyRevalueError'),
                 message: _bannerError!,
               ),
-              const SizedBox(height: AppSpacing.md),
+              const SizedBox(height: AppSpacing.fieldGap),
             ],
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -594,7 +595,7 @@ class _PropertyRevalueModalState extends ConsumerState<PropertyRevalueModal> {
                     ),
                   ),
                 ),
-                const SizedBox(width: 14),
+                const SizedBox(width: AppSpacing.fieldGap),
                 Expanded(
                   child: LabeledField(
                     label: l10n.propertyFormValuedOn,

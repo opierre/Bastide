@@ -27,24 +27,7 @@ final networthControllerProvider =
       NetworthController.new,
     );
 
-/// The two views the panel's segmented control switches between.
-enum NetworthView { summary, properties }
-
-/// Which view the panel shows. Panel state rather than a route: both views
-/// share the chrome and the « Nouveau bien » control.
-class NetworthViewController extends Notifier<NetworthView> {
-  @override
-  NetworthView build() => NetworthView.summary;
-
-  void set(NetworthView view) => state = view;
-}
-
-final networthViewProvider =
-    NotifierProvider<NetworthViewController, NetworthView>(
-      NetworthViewController.new,
-    );
-
-/// The spans the « Patrimoine net » card can show, counted back from the
+/// The spans the « Patrimoine net » chart can show, counted back from the
 /// series' last month. `null` months: the whole history.
 enum NetworthRange {
   year(12),
@@ -56,7 +39,7 @@ enum NetworthRange {
   final int? months;
 }
 
-/// Which span the series card shows. Panel state: the API always returns the
+/// Which span the series chart shows. Panel state: the API always returns the
 /// whole history, so switching re-reads nothing.
 class NetworthRangeController extends Notifier<NetworthRange> {
   @override

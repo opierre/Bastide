@@ -13,8 +13,9 @@ import '../domain/dashboard_summary.dart';
 
 /// « Dépenses par catégorie » (`docs/design/04-dashboard.md` §3a): the
 /// month's total on the heading line, then ranked bars, one 30 px row per
-/// category, largest first. No row borders. A month without spending shows
-/// the note « Aucune dépense ce mois. ».
+/// top-level category, largest first, each in the hue slot the API returns
+/// for it. No row borders. A month without spending shows the note « Aucune
+/// dépense ce mois. ».
 class CategorySpending extends StatelessWidget {
   const CategorySpending({
     super.key,
@@ -101,17 +102,21 @@ class _SpendingRowViewState extends State<_SpendingRowView> {
     final colors = context.colors;
     final row = widget.row;
     final category = row.category;
-    final slug = category == null
-        ? 'autres'
-        : categorySlugFor(name: category.name, kind: 'expense');
+    // « Autres » folds several categories, so it takes the neutral slot.
+    final slot = category == null
+        ? CategorySlot.cat0
+        : CategorySlot.fromWire(category.hue);
     final label = switch (category) {
-      null => CategoryLabel(label: l10n.dashboardCategoryOthers, slug: slug),
+      null => CategoryLabel.slotted(
+        label: l10n.dashboardCategoryOthers,
+        slot: slot,
+      ),
       CategoryBreakdown(categoryId: null) => CategoryLabel.uncategorized(
         label: localizedCategoryName(l10n, category.name),
       ),
-      _ => CategoryLabel(
+      _ => CategoryLabel.slotted(
         label: localizedCategoryName(l10n, category.name),
-        slug: slug,
+        slot: slot,
       ),
     };
 
@@ -149,7 +154,7 @@ class _SpendingRowViewState extends State<_SpendingRowView> {
                         key: const Key('dashboardSpendingBar'),
                         height: _barHeight,
                         decoration: BoxDecoration(
-                          color: context.categoryColors.forSlug(slug),
+                          color: context.categoryColors.forSlot(slot),
                           borderRadius: BorderRadius.circular(
                             AppChart.barRadius,
                           ),

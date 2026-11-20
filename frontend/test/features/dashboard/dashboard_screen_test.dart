@@ -282,6 +282,66 @@ void main() {
       expect(tester.getSize(bars.at(0)).height, 6);
     });
 
+    for (final (themeName, theme, palette) in [
+      ('dark', AppTheme.dark, CategoryColors.dark),
+      ('light', AppTheme.light, CategoryColors.light),
+    ]) {
+      testWidgets('a custom category wears its own hue ($themeName)', (
+        tester,
+      ) async {
+        await _pump(
+          tester,
+          _state(
+            summary: specSummary(
+              expenseMinor: 10000,
+              byCategory: const [
+                CategoryBreakdown(
+                  categoryId: 'garden',
+                  name: 'Jardin',
+                  hue: 'cat6',
+                  amountMinor: 7000,
+                  pct: 70,
+                ),
+                CategoryBreakdown(
+                  categoryId: 'misc',
+                  name: 'Divers',
+                  hue: 'cat0',
+                  amountMinor: 3000,
+                  pct: 30,
+                ),
+              ],
+            ),
+          ),
+          theme: theme,
+        );
+
+        Color barColor(String id) {
+          final bar = tester.widget<Container>(
+            find.descendant(
+              of: _byKey('dashboardSpendingRow-$id'),
+              matching: find.byKey(const Key('dashboardSpendingBar')),
+            ),
+          );
+          return (bar.decoration! as BoxDecoration).color!;
+        }
+
+        Color dotColor(String id) {
+          final dot = tester.widget<Container>(
+            find.descendant(
+              of: _byKey('dashboardSpendingRow-$id'),
+              matching: find.byKey(const Key('categoryLabelDot')),
+            ),
+          );
+          return (dot.decoration! as BoxDecoration).color!;
+        }
+
+        expect(find.text('Jardin'), findsOneWidget);
+        expect(barColor('garden'), palette.cat6);
+        expect(dotColor('garden'), palette.cat6);
+        expect(barColor('misc'), palette.cat0);
+      });
+    }
+
     testWidgets('a month without spending shows the note', (tester) async {
       await _pump(
         tester,

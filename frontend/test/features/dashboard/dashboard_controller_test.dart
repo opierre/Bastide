@@ -120,7 +120,19 @@ void main() {
       );
       when(
         () => apiClient.get('/dashboard/summary', query: any(named: 'query')),
-      ).thenAnswer((_) async => _summaryJson());
+      ).thenAnswer(
+        (_) async => _summaryJson(
+          byCategory: [
+            {
+              'category_id': 'garden',
+              'name': 'Jardin',
+              'hue': 'cat6',
+              'amount_minor': 221435,
+              'pct': 100.0,
+            },
+          ],
+        ),
+      );
       when(
         () => apiClient.get('/dashboard/trends'),
       ).thenAnswer((_) async => _trendsJson());
@@ -132,6 +144,9 @@ void main() {
 
       expect(state.month, DateTime(2026, 5));
       expect(state.summary.incomeMinor, 285000);
+      final category = state.summary.byCategory.single;
+      expect(category.hue, 'cat6');
+      expect(category.amountMinor, 221435);
       verify(
         () => apiClient.get('/dashboard/summary', query: {'month': '2026-05'}),
       ).called(1);

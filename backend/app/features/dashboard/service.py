@@ -53,10 +53,11 @@ class DashboardService:
             CategoryBreakdown(
                 category_id=category_id,
                 name=name,
+                hue=hue,
                 amount_minor=amount_minor,
                 pct=(amount_minor / expense * 100) if expense > 0 else 0.0,
             )
-            for category_id, name, amount_minor in expense_rows
+            for category_id, name, hue, amount_minor in expense_rows
         ]
 
         return DashboardSummary(

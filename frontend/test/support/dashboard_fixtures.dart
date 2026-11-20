@@ -2,48 +2,54 @@ import 'package:bastide/features/dashboard/domain/dashboard_summary.dart';
 import 'package:bastide/features/dashboard/domain/dashboard_trends.dart';
 
 /// The seven categories exactly as `docs/design/04-dashboard.md` tabulates them, in the spec's
-/// descending order. The i18n keys are the ones `categorySlugFor` buckets into the pinned hues,
-/// so a test asserting a legend color is asserting the real mapping.
+/// descending order, each with the hue slot the seed gives its bucket.
 const specCategories = [
   CategoryBreakdown(
     categoryId: 'c1',
     name: 'category.housing',
+    hue: 'cat1',
     amountMinor: 95000,
     pct: 42.9,
   ),
   CategoryBreakdown(
     categoryId: 'c2',
     name: 'category.food',
+    hue: 'cat2',
     amountMinor: 48620,
     pct: 22.0,
   ),
   CategoryBreakdown(
     categoryId: 'c3',
     name: 'category.other',
+    hue: 'cat0',
     amountMinor: 23655,
     pct: 10.7,
   ),
   CategoryBreakdown(
     categoryId: 'c4',
     name: 'category.transport',
+    hue: 'cat3',
     amountMinor: 21490,
     pct: 9.7,
   ),
   CategoryBreakdown(
     categoryId: 'c5',
     name: 'category.leisure',
+    hue: 'cat5',
     amountMinor: 18945,
     pct: 8.6,
   ),
   CategoryBreakdown(
     categoryId: 'c6',
     name: 'category.subscriptions',
+    hue: 'cat4',
     amountMinor: 7495,
     pct: 3.4,
   ),
   CategoryBreakdown(
     categoryId: 'c7',
     name: 'category.health',
+    hue: 'cat6',
     amountMinor: 6230,
     pct: 2.8,
   ),

@@ -8,16 +8,17 @@ import '../../../core/widgets/app_button.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../auth/application/auth_controller.dart';
 import '../../auth/presentation/avatar_picker.dart';
+import '../../auth/domain/password_rule.dart';
 import '../../auth/presentation/display_name_modal.dart';
+import '../../auth/presentation/password_change_modal.dart';
 import '../../auth/presentation/recovery_code_modal.dart';
 import 'setting_row.dart';
 
-/// Profil: the avatar, the username and the email, then the recovery code,
-/// then signing out.
+/// Profil: the avatar, the username and the email, then the password and the
+/// recovery code, then signing out.
 ///
-/// The spec's « Mot de passe » row and the date under the recovery code need
-/// a password change endpoint and stored dates the backend does not have yet,
-/// so they are left out rather than drawn with nothing behind them.
+/// Neither security row shows a date: nothing records when the password or
+/// the code last changed (`09-settings.md`).
 class ProfileSection extends ConsumerWidget {
   const ProfileSection({super.key});
 
@@ -80,6 +81,21 @@ class ProfileSection extends ConsumerWidget {
           ],
         ),
         SettingsGroupTitle(title: l10n.settingsGroupSecurity),
+        SettingRow(
+          key: const Key('settingsPasswordRow'),
+          name: l10n.settingsPasswordTitle,
+          description: l10n.settingsPasswordSubtitle(minPasswordLength),
+          children: [
+            AppButton(
+              key: const Key('settingsPasswordButton'),
+              label: l10n.settingsPasswordButton,
+              onPressed: () => showDialog<void>(
+                context: context,
+                builder: (_) => const PasswordChangeModal(),
+              ),
+            ),
+          ],
+        ),
         SettingRow(
           key: const Key('settingsRecoveryRow'),
           name: l10n.settingsRecoveryTitle,

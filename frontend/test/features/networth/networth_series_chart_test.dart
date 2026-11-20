@@ -55,6 +55,13 @@ void _useDesktopSurface(WidgetTester tester) {
 String? _text(WidgetTester tester, String key) =>
     tester.widget<Text>(find.byKey(Key(key))).data;
 
+/// The text of a [NoteLine] found by its key.
+String? _noteText(WidgetTester tester, String key) => tester
+    .widget<Text>(
+      find.descendant(of: find.byKey(Key(key)), matching: find.byType(Text)),
+    )
+    .data;
+
 /// Whether [box] covers any point of [points] or any stretch of the line
 /// joining them, sampled every pixel or so.
 bool _touchesLine(Rect box, List<Offset> points) {
@@ -84,7 +91,7 @@ void main() {
     );
     expect(plot.months, hasLength(12));
     expect(plot.values.last, 28267079);
-    expect(_text(tester, 'networthSeriesRange'), 'juin 2025 → mai 2026');
+    expect(_text(tester, 'networthSeriesRange'), 'juin 2025 – mai 2026');
   });
 
   testWidgets(
@@ -215,40 +222,41 @@ void main() {
     expect(plot.values, isNot(contains(0)));
   });
 
-  testWidgets('the caveat names the oldest valuation when values are flat', (
-    tester,
-  ) async {
-    _useDesktopSurface(tester);
-    await tester.pumpWidget(_wrap(testNetworthSummary()));
-    await tester.pumpAndSettle();
+  testWidgets(
+    'the held-flat note names the oldest valuation when values are flat',
+    (tester) async {
+      _useDesktopSurface(tester);
+      await tester.pumpWidget(_wrap(testNetworthSummary()));
+      await tester.pumpAndSettle();
 
-    expect(
-      _text(tester, 'networthSeriesCaveatText'),
-      'Les biens sont maintenus à leur valeur déclarée (estimation la plus '
-      'ancienne : 12/01/2026) et ne comptent qu\'à partir de leur date '
-      'd\'acquisition, les crédits qu\'à partir de leur déblocage. Les mois '
-      'sans donnée sont absents.',
-    );
-  });
+      expect(
+        _noteText(tester, 'networthNoteHeldFlat'),
+        'Les biens sont maintenus à leur valeur déclarée (estimation la plus '
+        'ancienne : 12/01/2026) et ne comptent qu\'à partir de leur date '
+        'd\'acquisition, les crédits qu\'à partir de leur déblocage. Les mois '
+        'sans donnée sont absents.',
+      );
+    },
+  );
 
-  testWidgets('the caveat reads in English too', (tester) async {
+  testWidgets('the held-flat note reads in English too', (tester) async {
     _useDesktopSurface(tester);
     await tester.pumpWidget(
       _wrap(testNetworthSummary(), locale: const Locale('en')),
     );
     await tester.pumpAndSettle();
 
-    expect(_text(tester, 'networthSeriesCaveatText'), contains('1/12/2026'));
-    expect(_text(tester, 'networthSeriesRange'), 'June 2025 → May 2026');
+    expect(_noteText(tester, 'networthNoteHeldFlat'), contains('1/12/2026'));
+    expect(_text(tester, 'networthSeriesRange'), 'June 2025 – May 2026');
   });
 
-  testWidgets('no flat property values, no caveat', (tester) async {
+  testWidgets('no flat property values, no held-flat note', (tester) async {
     _useDesktopSurface(tester);
     await tester.pumpWidget(_wrap(testNoPropertySummary()));
     await tester.pumpAndSettle();
 
     expect(find.byKey(const Key('networthSeriesPlot')), findsOneWidget);
-    expect(find.byKey(const Key('networthSeriesCaveat')), findsNothing);
+    expect(find.byKey(const Key('networthNoteHeldFlat')), findsNothing);
   });
 
   testWidgets('an empty series says so instead of drawing a flat line', (
@@ -279,12 +287,12 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(plot(tester).months, hasLength(12));
-      expect(_text(tester, 'networthSeriesRange'), 'juin 2025 → mai 2026');
+      expect(_text(tester, 'networthSeriesRange'), 'juin 2025 – mai 2026');
 
       await tester.tap(find.byKey(const Key('networthRangeThreeYears')));
       await tester.pumpAndSettle();
       expect(plot(tester).months, hasLength(30));
-      expect(_text(tester, 'networthSeriesRange'), 'décembre 2023 → mai 2026');
+      expect(_text(tester, 'networthSeriesRange'), 'décembre 2023 – mai 2026');
 
       await tester.tap(find.byKey(const Key('networthRangeAll')));
       await tester.pumpAndSettle();

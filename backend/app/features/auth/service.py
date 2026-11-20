@@ -18,6 +18,7 @@ from app.features.auth.models import AVATAR_IMAGE, AVATAR_MONOGRAM, AuthToken, U
 from app.features.auth.repository import AuthRepository
 from app.features.auth.schemas import (
     PASSWORD_MIN_LENGTH,
+    PasswordChange,
     PasswordReset,
     ProfileUpdate,
     UserLogin,
@@ -190,6 +191,28 @@ class AuthService:
         user.recovery_code_hash = hash_recovery_code(recovery_code)
         self._repository.save_user(user)
         return recovery_code
+
+    def change_password(self, user: User, token: str, data: PasswordChange) -> None:
+        """Set a new password after re-checking the current one.
+
+        The session making the change stays open; every other session of the user is revoked,
+        so a device left signed in elsewhere has to sign in with the new password. The recovery
+        code is not touched.
+
+        Raises:
+            PasswordTooShortError: the new password is shorter than ``PASSWORD_MIN_LENGTH``.
+            InvalidCredentialsError: the current password is wrong.
+        """
+        # Checked first: it says nothing about the current password.
+        ensure_password_length(data.new_password)
+        if not verify_password(data.current_password, user.password_hash):
+            raise InvalidCredentialsError("Incorrect password.")
+
+        dropped = self._repository.change_password(
+            user, password_hash=hash_password(data.new_password), keep_token=token
+        )
+        for session_id in dropped:
+            self._live_sessions.revoke_session(session_id)
 
     def update_profile(self, user: User, data: ProfileUpdate) -> User:
         """Change the user's display name, which is also their username.

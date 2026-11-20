@@ -3,15 +3,19 @@
 from datetime import date
 
 from sqlalchemy import case, extract, func, or_, select
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, aliased
 
 from app.features.accounts.models import Account
+from app.features.categories.hues import CategoryHue, slot_for
 from app.features.categories.models import Category
 from app.features.transactions.models import Transaction
 
 # Bucket key for expense transactions with no category (`category_id IS NULL`). Mirrors the
 # system category's i18n key so the frontend resolves it exactly like a real category would.
 UNCATEGORIZED_KEY = "category.other.uncategorized"
+
+# Hue slot of that bucket: the neutral catch-all, like any category without a hue.
+UNCATEGORIZED_HUE: CategoryHue = "cat0"
 
 
 class DashboardRepository:
@@ -65,18 +69,27 @@ class DashboardRepository:
 
     def expense_breakdown(
         self, user_id: str, month_start: date, month_end: date
-    ) -> list[tuple[str | None, str, int]]:
-        """`(category_id, name, amount_minor)` rows for the month's expenses, excluding transfers.
+    ) -> list[tuple[str | None, str, CategoryHue, int]]:
+        """`(category_id, name, hue, amount_minor)` per top-level category for the month's expenses.
 
-        Expense transactions with no category are grouped into a single `None`/`UNCATEGORIZED_KEY`
-        bucket. `amount_minor` is the positive magnitude of the (negative) expense.
+        A subcategory's spending rolls up to its parent, so each row is a top-level category
+        (categories are two levels deep: a parent is always top-level). `hue` is that top-level
+        category's slot, so a custom category is drawn in the hue it picked. Transfers are
+        excluded by the transaction's own category. Expense transactions with no category are
+        grouped into a single `None`/`UNCATEGORIZED_KEY` bucket. `amount_minor` is the positive
+        magnitude of the (negative) expense.
         """
+        parent = aliased(Category)
+        top_id = func.coalesce(parent.id, Category.id)
+        top_name = func.coalesce(parent.name, Category.name)
+        top_color = func.coalesce(parent.color, Category.color)
         amount_expr = func.sum(-Transaction.amount_minor)
         rows = self._db.execute(
-            select(Transaction.category_id, Category.name, amount_expr)
+            select(top_id, top_name, top_color, amount_expr)
             .select_from(Transaction)
             .join(Account, Account.id == Transaction.account_id)
             .outerjoin(Category, Category.id == Transaction.category_id)
+            .outerjoin(parent, parent.id == Category.parent_id)
             .where(
                 Account.user_id == user_id,
                 Transaction.booked_date >= month_start,
@@ -84,9 +97,11 @@ class DashboardRepository:
                 Transaction.amount_minor < 0,
                 or_(Category.kind.is_(None), Category.kind != "transfer"),
             )
-            .group_by(Transaction.category_id, Category.name)
+            .group_by(top_id, top_name, top_color)
         ).all()
         return [
-            (category_id, name if category_id is not None else UNCATEGORIZED_KEY, amount)
-            for category_id, name, amount in rows
+            (category_id, name, slot_for(color), amount)
+            if category_id is not None
+            else (None, UNCATEGORIZED_KEY, UNCATEGORIZED_HUE, amount)
+            for category_id, name, color, amount in rows
         ]

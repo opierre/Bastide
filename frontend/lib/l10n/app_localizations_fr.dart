@@ -4209,10 +4209,6 @@ class AppLocalizationsFr extends AppLocalizations {
   String get propertyFormEditTitle => 'Modifier le bien';
 
   @override
-  String get propertyFormSubtitle =>
-      'La valeur déclarée entre dans la synthèse.';
-
-  @override
   String get propertyFormLabel => 'Libellé';
 
   @override
@@ -4266,9 +4262,6 @@ class AppLocalizationsFr extends AppLocalizations {
   String get propertyFormCancel => 'Annuler';
 
   @override
-  String get propertyFormSubmit => 'Ajouter le bien';
-
-  @override
   String get propertyFormSave => 'Enregistrer';
 
   @override
@@ -4278,9 +4271,6 @@ class AppLocalizationsFr extends AppLocalizations {
   String propertyRevalueSubtitle(String label, String value, String date) {
     return '$label : $value estimés le $date. La nouvelle estimation remplace celle-ci.';
   }
-
-  @override
-  String get propertyRevalueSubmit => 'Enregistrer l\'estimation';
 
   @override
   String get propertyErrorValuationInFuture =>
@@ -4298,48 +4288,6 @@ class AppLocalizationsFr extends AppLocalizations {
       'Impossible d\'enregistrer le bien. Réessayez.';
 
   @override
-  String propertyCardCaptionWhole(String date) {
-    return 'valeur déclarée · estimée le $date';
-  }
-
-  @override
-  String propertyCardCaptionPart(String value, String date) {
-    return 'part détenue · sur $value estimés le $date';
-  }
-
-  @override
-  String get propertyCardOwnership => 'Quote-part';
-
-  @override
-  String get propertyCardAcquisition => 'Prix d\'acquisition';
-
-  @override
-  String propertyCardAcquisitionValue(String price, String date) {
-    return '$price · $date';
-  }
-
-  @override
-  String get propertyCardSinceAcquisition => 'Depuis l\'acquisition';
-
-  @override
-  String propertyCardAbove(String amount, String partial) {
-    String _temp0 = intl.Intl.selectLogic(partial, {
-      'true': ' (part)',
-      'other': '',
-    });
-    return '$amount au-dessus$_temp0';
-  }
-
-  @override
-  String propertyCardBelow(String amount, String partial) {
-    String _temp0 = intl.Intl.selectLogic(partial, {
-      'true': ' (part)',
-      'other': '',
-    });
-    return '$amount en dessous$_temp0';
-  }
-
-  @override
   String get propertyMenuTooltip => 'Actions';
 
   @override
@@ -4355,60 +4303,75 @@ class AppLocalizationsFr extends AppLocalizations {
   String get propertyMenuUnarchive => 'Désarchiver';
 
   @override
-  String get propertiesNewTileTitle => '+ Nouveau bien';
-
-  @override
-  String get propertiesNewTileBody => 'Résidence, locatif, terrain ou autre';
-
-  @override
-  String propertiesShowArchived(int count) {
-    return 'Afficher les biens archivés ($count)';
-  }
-
-  @override
-  String propertiesHideArchived(int count) {
-    return 'Masquer les biens archivés ($count)';
-  }
-
-  @override
   String get propertiesDismiss => 'Fermer';
-
-  @override
-  String get networthViewSummary => 'Synthèse';
-
-  @override
-  String networthViewProperties(int count) {
-    return 'Biens ($count)';
-  }
 
   @override
   String get networthAddProperty => 'Nouveau bien';
 
   @override
-  String get networthHeroLabel => 'Patrimoine net';
+  String get networthNetWorthLabel => 'Patrimoine net';
 
   @override
-  String networthDeltaCaption(String month) {
-    return 'vs $month';
+  String get networthEquationMinus => '−';
+
+  @override
+  String get networthEquationEquals => '=';
+
+  @override
+  String networthAssetsPartAccounts(String amount) {
+    return 'Comptes $amount';
   }
 
   @override
-  String networthDeltaCaptionFlat(String month) {
-    return 'vs $month · valeur des biens inchangée';
+  String networthAssetsPartProperties(String amount) {
+    return 'Biens $amount';
+  }
+
+  @override
+  String networthCompositionPartNote(String label, String held, String full) {
+    return 'Un bien compte pour la part détenue : $label, $held sur $full.';
+  }
+
+  @override
+  String get networthNotesTitle => 'À savoir';
+
+  @override
+  String get networthNoPropertyNote =>
+      'Aucun bien déclaré : l’actif ne compte que vos comptes et vos placements.';
+
+  @override
+  String get propertiesTitle => 'Biens';
+
+  @override
+  String get propertiesColumnProperty => 'Bien';
+
+  @override
+  String get propertiesColumnKind => 'Nature';
+
+  @override
+  String get propertiesColumnShare => 'Quote-part';
+
+  @override
+  String get propertiesColumnHeldValue => 'Valeur détenue';
+
+  @override
+  String propertiesArchivedLink(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count biens archivés',
+      one: '1 bien archivé',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String networthDeltaCaption(String delta, String month) {
+    return '$delta depuis $month';
   }
 
   @override
   String get networthAssetsLabel => 'Actif';
-
-  @override
-  String networthAssetsCaption(String accounts, String properties) {
-    return 'Comptes $accounts · Biens $properties';
-  }
-
-  @override
-  String networthAssetsCaptionNoProperty(String accounts) {
-    return 'Comptes $accounts · aucun bien déclaré';
-  }
 
   @override
   String get networthLiabilitiesLabel => 'Passif';
@@ -4418,11 +4381,11 @@ class AppLocalizationsFr extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '$count crédits',
-      one: '1 crédit',
+      other: '$count crédits, capital restant dû',
+      one: '1 crédit, capital restant dû',
       zero: 'Aucun crédit',
     );
-    return '$_temp0 · capital restant dû';
+    return '$_temp0';
   }
 
   @override
@@ -4448,56 +4411,16 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String networthCompositionHeldShare(String label) {
-    return '$label (part détenue)';
+    return '$label, part détenue';
   }
-
-  @override
-  String get networthCompositionFootWhole =>
-      'Les biens comptent pour la part détenue seulement.';
-
-  @override
-  String networthCompositionFoot(String items) {
-    return 'Les biens comptent pour la part détenue seulement ($items).';
-  }
-
-  @override
-  String networthCompositionFootItem(String label, String share, String value) {
-    return '$label : $share sur $value';
-  }
-
-  @override
-  String networthCompositionFootItemWithAddress(
-    String label,
-    String address,
-    String share,
-    String value,
-  ) {
-    return '$label ($address) : $share sur $value';
-  }
-
-  @override
-  String get networthCompositionInvite =>
-      'Aucun bien déclaré : l\'actif ne compte que vos comptes.';
-
-  @override
-  String get networthCompositionInviteAction => 'Nouveau bien';
-
-  @override
-  String get networthExclusionsLabel => 'À savoir';
-
-  @override
-  String get networthExclusionGoalsTitle => 'Objectifs';
 
   @override
   String get networthExclusionGoalsBody =>
       'Les objectifs réservent de l’argent déjà présent sur un compte. Ils ne sont pas comptés une seconde fois.';
 
   @override
-  String get networthExclusionSubscriptionsTitle => 'Abonnements';
-
-  @override
   String get networthExclusionSubscriptionsBody =>
-      'Un prélèvement récurrent est une dépense à venir, pas une dette due aujourd\'hui.';
+      'Un abonnement est une dépense à venir, pas une dette due aujourd’hui.';
 
   @override
   String get networthEmptyTitle => 'Aucun compte, bien ou crédit';
@@ -4507,7 +4430,7 @@ class AppLocalizationsFr extends AppLocalizations {
       'Importez un compte ou déclarez un bien. La synthèse additionne vos avoirs et soustrait vos crédits.';
 
   @override
-  String get networthEmptyImport => 'Importer un fichier';
+  String get networthEmptyImport => 'Aller aux imports';
 
   @override
   String get networthLoadFailed => 'Impossible de charger la synthèse.';
@@ -4520,7 +4443,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String networthSeriesRange(String from, String to) {
-    return '$from → $to';
+    return '$from – $to';
   }
 
   @override
@@ -4683,6 +4606,39 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get settingsRecoveryWrongPassword => 'Mot de passe incorrect.';
+
+  @override
+  String get settingsPasswordTitle => 'Mot de passe';
+
+  @override
+  String settingsPasswordSubtitle(int minimum) {
+    return 'Au moins $minimum caractères. Il protège l\'accès à vos données sur cet ordinateur.';
+  }
+
+  @override
+  String get settingsPasswordButton => 'Changer le mot de passe';
+
+  @override
+  String get settingsPasswordModalTitle => 'Changer le mot de passe';
+
+  @override
+  String get settingsPasswordModalLead =>
+      'Votre code de récupération reste valable.';
+
+  @override
+  String get settingsPasswordCurrentLabel => 'Mot de passe actuel';
+
+  @override
+  String get settingsPasswordModalCancel => 'Annuler';
+
+  @override
+  String get settingsPasswordModalSave => 'Changer le mot de passe';
+
+  @override
+  String get settingsPasswordWrongPassword => 'Mot de passe incorrect.';
+
+  @override
+  String get settingsPasswordChanged => 'Mot de passe modifié.';
 
   @override
   String get authIdentifierLabel => 'E-mail ou nom d\'utilisateur';
