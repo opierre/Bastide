@@ -264,6 +264,38 @@ void main() {
         expect(() => notifier().saveScenario('x'), throwsStateError);
       });
 
+      test('rename patches the label and keeps the row in place', () async {
+        when(() => repository.list()).thenAnswer(
+          (_) async => [testScenario(), testScenario(id: 's2', label: 'B')],
+        );
+        when(
+          () => repository.rename(any(), any()),
+        ).thenAnswer((_) async => testScenario(label: 'Villeurbanne, 270 k€'));
+        await container.read(simulatorControllerProvider.future);
+
+        await notifier().renameScenario('s1', 'Villeurbanne, 270 k€');
+
+        verify(() => repository.rename('s1', 'Villeurbanne, 270 k€')).called(1);
+        expect(current().scenarios.map((s) => s.label), [
+          'Villeurbanne, 270 k€',
+          'B',
+        ]);
+      });
+
+      test('a refused rename is rethrown to the modal', () async {
+        when(() => repository.list()).thenAnswer((_) async => [testScenario()]);
+        when(() => repository.rename(any(), any())).thenThrow(
+          const ApiFailure(code: 'SIMULATION_NOT_FOUND', message: 'gone'),
+        );
+        await container.read(simulatorControllerProvider.future);
+
+        await expectLater(
+          notifier().renameScenario('s1', 'x'),
+          throwsA(isA<ApiFailure>()),
+        );
+        expect(current().scenarios.single.label, testScenario().label);
+      });
+
       test('delete removes the row and its selection', () async {
         when(() => repository.list()).thenAnswer(
           (_) async => [testScenario(), testScenario(id: 's2', label: 'B')],
@@ -494,6 +526,19 @@ void main() {
       expect(body['property_price_minor'], 32000000);
       expect(body.containsKey('include_existing_loans'), isFalse);
       verify(() => apiClient.delete('/simulations/s1')).called(1);
+    });
+
+    test('rename patches the label alone', () async {
+      when(
+        () => apiClient.patch('/simulations/s1', body: any(named: 'body')),
+      ).thenAnswer((_) async => scenarioJson(label: 'Lyon 3e'));
+
+      final renamed = await repository.rename('s1', 'Lyon 3e');
+
+      expect(renamed.label, 'Lyon 3e');
+      verify(
+        () => apiClient.patch('/simulations/s1', body: {'label': 'Lyon 3e'}),
+      ).called(1);
     });
 
     test(

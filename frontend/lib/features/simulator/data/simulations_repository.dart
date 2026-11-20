@@ -45,6 +45,17 @@ class SimulationsRepository {
     return _parseSaved(json);
   }
 
+  /// Renames a scenario; its inputs are left alone.
+  Future<SavedSimulation> rename(String simulationId, String label) async {
+    final json =
+        await _apiClient.patch(
+              '/simulations/$simulationId',
+              body: {'label': label},
+            )
+            as Map<String, dynamic>;
+    return _parseSaved(json);
+  }
+
   /// Hard-deletes a scenario — a scratchpad row, not history.
   Future<void> delete(String simulationId) =>
       _apiClient.delete('/simulations/$simulationId');

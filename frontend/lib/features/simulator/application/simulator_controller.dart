@@ -316,6 +316,23 @@ class SimulatorController extends AsyncNotifier<SimulatorState> {
     return saved;
   }
 
+  /// Renames a saved scenario. Rethrown: the naming modal is still open and
+  /// explains the refusal.
+  Future<void> renameScenario(String simulationId, String label) async {
+    final renamed = await _repository.rename(simulationId, label);
+    final current = state.value;
+    if (current == null || !ref.mounted) return;
+    state = AsyncValue.data(
+      current.copyWith(
+        scenarios: [
+          for (final scenario in current.scenarios)
+            scenario.id == simulationId ? renamed : scenario,
+        ],
+      ),
+    );
+    if (current.isSelected(simulationId)) await _refreshComparison();
+  }
+
   /// Hard-deletes a saved scenario — no confirmation for a scratchpad row.
   Future<void> deleteScenario(String simulationId) async {
     try {
