@@ -13,6 +13,7 @@ class UserSettings {
     required this.modelTag,
     required this.confidenceThreshold,
     this.lastBackupAt,
+    this.declaredMonthlyIncomeMinor,
   });
 
   factory UserSettings.fromJson(Map<String, dynamic> json) => UserSettings(
@@ -24,7 +25,12 @@ class UserSettings {
       final String value => DateTime.parse(value),
       _ => null,
     },
+    declaredMonthlyIncomeMinor: json['declared_monthly_income_minor'] as int?,
   );
+
+  /// The monthly income the debt ratio runs on, in minor units; `null` when
+  /// none is declared and the ratio falls back to the observed median.
+  final int? declaredMonthlyIncomeMinor;
 
   /// When the user last exported a full backup; `null` until the first one.
   final DateTime? lastBackupAt;
@@ -66,6 +72,18 @@ class UserSettings {
     modelTag: modelTag ?? this.modelTag,
     confidenceThreshold: confidenceThreshold ?? this.confidenceThreshold,
     lastBackupAt: lastBackupAt ?? this.lastBackupAt,
+    declaredMonthlyIncomeMinor: declaredMonthlyIncomeMinor,
+  );
+
+  /// These settings with [minor] as the declared income; `null` clears it,
+  /// which [copyWith] cannot express.
+  UserSettings withDeclaredIncome(int? minor) => UserSettings(
+    aiEnabled: aiEnabled,
+    inferenceBaseUrl: inferenceBaseUrl,
+    modelTag: modelTag,
+    confidenceThreshold: confidenceThreshold,
+    lastBackupAt: lastBackupAt,
+    declaredMonthlyIncomeMinor: minor,
   );
 
   @override
@@ -76,7 +94,8 @@ class UserSettings {
           other.inferenceBaseUrl == inferenceBaseUrl &&
           other.modelTag == modelTag &&
           other.confidenceThreshold == confidenceThreshold &&
-          other.lastBackupAt == lastBackupAt);
+          other.lastBackupAt == lastBackupAt &&
+          other.declaredMonthlyIncomeMinor == declaredMonthlyIncomeMinor);
 
   @override
   int get hashCode => Object.hash(
@@ -85,6 +104,7 @@ class UserSettings {
     modelTag,
     confidenceThreshold,
     lastBackupAt,
+    declaredMonthlyIncomeMinor,
   );
 }
 

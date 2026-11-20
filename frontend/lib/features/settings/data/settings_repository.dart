@@ -45,6 +45,20 @@ class SettingsRepository {
     return UserSettings.fromJson(json as Map<String, dynamic>);
   }
 
+  /// Declares the monthly income the debt ratio runs on; `null` clears it.
+  ///
+  /// Its own call because the field is always sent: a `null` here means
+  /// "not declared", where [update] reads `null` as "leave as is".
+  Future<UserSettings> declareIncome(int? monthlyIncomeMinor) async {
+    final json = await _apiClient.patch(
+      '/settings',
+      body: <String, Object?>{
+        'declared_monthly_income_minor': monthlyIncomeMinor,
+      },
+    );
+    return UserSettings.fromJson(json as Map<String, dynamic>);
+  }
+
   /// Asks whether the configured runtime answers, and what it offers.
   ///
   /// Never a 5xx by contract — an absent runtime comes back as

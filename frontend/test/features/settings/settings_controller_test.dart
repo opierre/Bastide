@@ -422,4 +422,77 @@ void main() {
       expect(state.offersOllama, isFalse);
     });
   });
+
+  group('declared income', () {
+    test('reads the stored value, in minor units', () async {
+      stubSettings({
+        ..._settingsJson(),
+        'declared_monthly_income_minor': 350000,
+      });
+
+      final state = await load();
+
+      expect(state.settings.declaredMonthlyIncomeMinor, 350000);
+    });
+
+    test('declaring sends the field, and null clears it', () async {
+      stubSettings(_settingsJson());
+      await load();
+      stubPatch({..._settingsJson(), 'declared_monthly_income_minor': 412345});
+
+      expect(await controller().declareIncome(412345), isTrue);
+      verify(
+        () => apiClient.patch(
+          '/settings',
+          body: {'declared_monthly_income_minor': 412345},
+        ),
+      ).called(1);
+      expect(
+        container
+            .read(settingsControllerProvider)
+            .value!
+            .settings
+            .declaredMonthlyIncomeMinor,
+        412345,
+      );
+
+      stubPatch({..._settingsJson(), 'declared_monthly_income_minor': null});
+      expect(await controller().declareIncome(null), isTrue);
+      verify(
+        () => apiClient.patch(
+          '/settings',
+          body: {'declared_monthly_income_minor': null},
+        ),
+      ).called(1);
+      expect(
+        container
+            .read(settingsControllerProvider)
+            .value!
+            .settings
+            .declaredMonthlyIncomeMinor,
+        isNull,
+      );
+    });
+
+    test('a refusal keeps the stored value and says so', () async {
+      stubSettings({
+        ..._settingsJson(),
+        'declared_monthly_income_minor': 350000,
+      });
+      await load();
+      when(
+        () => apiClient.patch('/settings', body: any(named: 'body')),
+      ).thenThrow(Exception('sidecar down'));
+
+      expect(await controller().declareIncome(1), isFalse);
+      expect(
+        container
+            .read(settingsControllerProvider)
+            .value!
+            .settings
+            .declaredMonthlyIncomeMinor,
+        350000,
+      );
+    });
+  });
 }
