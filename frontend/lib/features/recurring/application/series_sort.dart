@@ -22,6 +22,13 @@ class SeriesSort {
   /// [field] in the direction a first click picks.
   SeriesSort.byDefault(this.field) : ascending = field.ascendingByDefault;
 
+  /// The order the table opens in: the soonest charge first
+  /// (`docs/design/10` §3).
+  static const initial = SeriesSort(
+    SeriesSortField.nextCharge,
+    ascending: true,
+  );
+
   final SeriesSortField field;
   final bool ascending;
 
@@ -41,15 +48,17 @@ class SeriesSort {
 /// [rows] ordered by [sort], or as given when [sort] is `null` (the server's
 /// order).
 ///
+/// Whatever the column, a settled row (a cancelled or archived series) goes
+/// after every live one: it is dimmed at the bottom of the table
+/// (`docs/design/10` §3), and flipping a column should not bring it back up.
+///
 /// - **Name** compares case- and accent-insensitively, so « Électricité » files
 ///   under E rather than after Z.
 /// - **Amount** compares magnitudes. Every amount in the table is drawn
 ///   unsigned (`expectedAmountMinor.abs()`), and an outflow's signed value runs
 ///   the wrong way for "biggest charge" — −50,00 € sorts below −5,00 €.
 /// - **Next charge** uses the date the row shows: the missed date when a charge
-///   is overdue, otherwise the expected one. A row with no next charge (a
-///   cancelled or archived series) goes last in both directions: it has no
-///   place on a timeline, and flipping the order should not bring it to the top.
+///   is overdue, otherwise the expected one.
 ///
 /// Ties fall back to the name, then the id, so the order is stable across
 /// reloads.
@@ -68,6 +77,7 @@ List<SubscriptionRow> sortSeriesRows(
   }
 
   int compare(SubscriptionRow a, SubscriptionRow b) {
+    if (a.isSettled != b.isSettled) return a.isSettled ? 1 : -1;
     switch (sort.field) {
       case SeriesSortField.name:
         return sign * byName(a, b);

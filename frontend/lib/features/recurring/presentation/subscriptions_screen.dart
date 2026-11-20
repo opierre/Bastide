@@ -1,29 +1,30 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:lucide_icons_flutter/lucide_icons_300.dart';
 
 import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/tokens.dart';
 import '../../../core/widgets/amount_text.dart';
-import '../../../core/widgets/app_card.dart';
+import '../../../core/widgets/app_table.dart';
 import '../../../core/widgets/app_toast.dart';
 import '../../../core/widgets/inline_banner.dart';
 import '../../../core/widgets/primary_button.dart';
 import '../../../core/widgets/state_views.dart';
 import '../../../l10n/app_localizations.dart';
 import '../application/recurring_detection.dart';
-import '../application/series_sort.dart';
 import '../application/subscriptions_controller.dart';
 import '../domain/recurring_series.dart';
 import '../domain/recurring_summary.dart';
-import 'recurring_error_localizer.dart';
 import 'merge_suggestions_panel.dart';
+import 'recurring_error_localizer.dart';
 import 'recurring_labels.dart';
 import 'series_detail.dart';
 import 'series_form_modal.dart';
 import 'series_row.dart';
 
-/// The Abonnements panel: the monthly burden, the detected series with their
-/// signals, and the lifecycle actions over them (`docs/design/10`).
+/// « Abonnements » (`docs/design/10-subscriptions.md`): the summary line, the
+/// merge suggestions when there are any, then the table sorted by next
+/// charge. Sections, not cards: nothing here is framed.
 class SubscriptionsScreen extends ConsumerWidget {
   const SubscriptionsScreen({super.key});
 
@@ -36,8 +37,8 @@ class SubscriptionsScreen extends ConsumerWidget {
     return Padding(
       key: const Key('screen-subscriptions'),
       padding: const EdgeInsets.symmetric(
-        horizontal: AppSpacing.contentX,
-        vertical: AppSpacing.contentY,
+        horizontal: AppSpacing.pageX,
+        vertical: AppSpacing.pageY,
       ),
       child: selected == null
           ? const _SubscriptionsList()
@@ -46,12 +47,9 @@ class SubscriptionsScreen extends ConsumerWidget {
   }
 }
 
-/// The subscriptions panel's contribution to the top bar: « Détecter » beside
-/// the primary « Nouveau paiement récurrent ».
-///
-/// Both stay available on the detail view. The detail is a state of this panel,
-/// not a different one, and chrome that rearranged itself under the user would
-/// break the invariant the shell exists to hold (`docs/design/00` §Layout).
+/// The list's contribution to the title bar: the secondary « Détecter »
+/// (`10` § Title bar). There is no « Nouvel abonnement »: a series is created
+/// from its charges in Transactions.
 class SubscriptionsTopBarActions extends ConsumerWidget {
   const SubscriptionsTopBarActions({super.key});
 
@@ -60,21 +58,12 @@ class SubscriptionsTopBarActions extends ConsumerWidget {
     final l10n = AppLocalizations.of(context)!;
     final detecting = ref.watch(recurringDetectionProvider);
 
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        OutlinedButton(
-          key: const Key('subscriptionsDetectButton'),
-          onPressed: detecting
-              ? null
-              : () => runRecurringDetection(context, ref),
-          child: Text(
-            detecting
-                ? l10n.subscriptionsDetectRunning
-                : l10n.subscriptionsDetect,
-          ),
-        ),
-      ],
+    return AppButton(
+      key: const Key('subscriptionsDetectButton'),
+      label: l10n.subscriptionsDetect,
+      icon: LucideIcons300.scanSearch,
+      isLoading: detecting,
+      onPressed: () => runRecurringDetection(context, ref),
     );
   }
 }
@@ -129,7 +118,6 @@ class _SubscriptionsList extends ConsumerWidget {
           action: PrimaryButton(
             key: const Key('subscriptionsEmptyDetectButton'),
             label: l10n.subscriptionsDetect,
-            loadingLabel: l10n.subscriptionsDetectRunning,
             isLoading: detecting,
             // The transactions may already be imported: running detection
             // over them is the step that fills this panel.
@@ -145,11 +133,7 @@ class _SubscriptionsList extends ConsumerWidget {
         onRetry: () =>
             ref.read(subscriptionsControllerProvider.notifier).refresh(),
       ),
-      _ => const Padding(
-        key: Key('subscriptionsLoadingIndicator'),
-        padding: EdgeInsets.only(top: AppSpacing.lg),
-        child: SkeletonList(itemHeight: 56),
-      ),
+      _ => const _ListSkeleton(key: Key('subscriptionsLoadingIndicator')),
     };
   }
 }
@@ -171,163 +155,29 @@ class _LoadedPanel extends ConsumerWidget {
             key: const Key('subscriptionsActionError'),
             message: localizeRecurringError(l10n, state.actionError),
           ),
-          const SizedBox(height: AppSpacing.gridGap),
+          const SizedBox(height: AppSpacing.section),
         ],
+        SubscriptionsSummaryLine(summary: state.summary),
+        const SizedBox(height: AppSpacing.section),
         if (state.mergeSuggestions.isNotEmpty) ...[
           MergeSuggestionsPanel(suggestions: state.mergeSuggestions),
-          const SizedBox(height: AppSpacing.gridGap),
+          const SizedBox(height: AppSpacing.section),
         ],
-        _SummaryRow(summary: state.summary),
-        const SizedBox(height: AppSpacing.gridGap),
-        Expanded(
-          child: _TableCard(
-            sort: state.sort,
-            rows: state.rows,
-            archivedRows: state.showArchived ? state.archivedRows : const [],
-          ),
-        ),
-        if (state.archived.isNotEmpty) ...[
-          const SizedBox(height: AppSpacing.sm),
-          Align(
-            alignment: Alignment.centerLeft,
-            child: TextButton.icon(
-              key: const Key('subscriptionsArchivedToggle'),
-              onPressed: ref
-                  .read(subscriptionsControllerProvider.notifier)
-                  .toggleArchived,
-              icon: const Icon(Icons.archive_outlined, size: 15),
-              label: Text(
-                state.showArchived
-                    ? l10n.subscriptionsHideArchived(state.archived.length)
-                    : l10n.subscriptionsShowArchived(state.archived.length),
-              ),
-            ),
-          ),
-        ],
+        Expanded(child: _SeriesTable(state: state)),
       ],
     );
   }
 }
 
-/// The three cards of frame ①, read straight from `/recurring/summary`.
+/// The panel's summary line (`10` §1, `00` §7): « Charge mensuelle » leads at
+/// 40 px, then « Actifs », « Prochain prélèvement » and « À regarder » at
+/// 20 px. A vertical hairline separates the lead from the rest only.
 ///
-/// Nothing here is recomputed from the rows below. The burden normalises
-/// cadences, excludes cancelled series, and skips the ones with no period —
-/// three rules the server owns, and a second implementation
-/// in Dart would be a second answer.
-class _SummaryRow extends StatelessWidget {
-  const _SummaryRow({required this.summary});
-
-  final RecurringSummary summary;
-
-  @override
-  Widget build(BuildContext context) {
-    return IntrinsicHeight(
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Expanded(flex: 125, child: _BurdenCard(summary: summary)),
-          const SizedBox(width: AppSpacing.gridGap),
-          Expanded(flex: 100, child: _ActiveCard(summary: summary)),
-          const SizedBox(width: AppSpacing.gridGap),
-          Expanded(flex: 120, child: _NextChargeCard(summary: summary)),
-        ],
-      ),
-    );
-  }
-}
-
-/// The panel's only tinted card. The burden is the figure the whole screen
-/// exists to produce, so it is the one that gets the hero treatment.
-class _BurdenCard extends StatelessWidget {
-  const _BurdenCard({required this.summary});
-
-  final RecurringSummary summary;
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
-    final textTheme = Theme.of(context).textTheme;
-    final caption = summary.cancelledCount > 0
-        ? '${l10n.subscriptionsBurdenCaption} '
-              '${l10n.subscriptionsBurdenExcluded(summary.cancelledCount)}'
-        : l10n.subscriptionsBurdenCaption;
-
-    return AppCard(
-      padding: const EdgeInsets.all(AppSpacing.cardPaddingWide),
-      border: Border.all(color: context.colors.line),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text(
-            l10n.subscriptionsBurdenLabel.toUpperCase(),
-            style: context.textStyles.statLabel.copyWith(
-              color: context.colors.accent,
-            ),
-          ),
-          const SizedBox(height: AppSpacing.sm),
-          // Unsigned and neutral: this is what the subscriptions cost per
-          // month, a quantity rather than a movement. The red the money rule
-          // would give it belongs to charges that have actually landed.
-          AmountText(
-            key: const Key('subscriptionsMonthlyBurden'),
-            amountMinor: summary.monthlyTotalMinor.abs(),
-            currency: summary.currency,
-            colorize: false,
-            style: textTheme.displayMedium,
-          ),
-          const SizedBox(height: AppSpacing.sm),
-          Text(
-            caption,
-            key: const Key('subscriptionsBurdenCaption'),
-            style: context.textStyles.helper,
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _ActiveCard extends StatelessWidget {
-  const _ActiveCard({required this.summary});
-
-  final RecurringSummary summary;
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
-    final textTheme = Theme.of(context).textTheme;
-
-    // The breakdown names only the cadences actually in play: printing
-    // « 0 hebdomadaire » would spend a line on a fact about nothing.
-    final parts = [
-      for (final cadence in Cadence.values)
-        if ((summary.cadenceCounts[cadence] ?? 0) > 0)
-          cadenceCountLabel(l10n, cadence, summary.cadenceCounts[cadence]!),
-    ];
-    final breakdown = parts.join(' · ');
-    final caption = summary.cancelledCount > 0
-        ? [
-            if (breakdown.isNotEmpty) breakdown,
-            l10n.subscriptionsCancelledCount(summary.cancelledCount),
-          ].join(' — ')
-        : breakdown;
-
-    return _StatCard(
-      label: l10n.subscriptionsActiveLabel,
-      caption: caption,
-      value: Text(
-        '${summary.activeCount}',
-        key: const Key('subscriptionsActiveCount'),
-        style: tabularNumberStyle(textTheme.displayMedium!),
-      ),
-    );
-  }
-}
-
-class _NextChargeCard extends StatelessWidget {
-  const _NextChargeCard({required this.summary});
+/// Every figure is read straight from `/recurring/summary`, never recomputed
+/// from the rows: the burden normalises cadences and excludes cancelled
+/// series, rules the server owns.
+class SubscriptionsSummaryLine extends StatelessWidget {
+  const SubscriptionsSummaryLine({super.key, required this.summary});
 
   final RecurringSummary summary;
 
@@ -335,97 +185,170 @@ class _NextChargeCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final locale = Localizations.localeOf(context).toString();
+    final colors = context.colors;
     final textTheme = Theme.of(context).textTheme;
+    final minor = tabularNumberStyle(textTheme.displaySmall!);
+
+    // The breakdown names only the cadences in play: « 0 hebdomadaire » would
+    // spend a line on a fact about nothing.
+    final breakdown = [
+      for (final cadence in Cadence.values)
+        if ((summary.cadenceCounts[cadence] ?? 0) > 0)
+          cadenceCountLabel(l10n, cadence, summary.cadenceCounts[cadence]!),
+    ].join(' · ');
+
     final next = summary.nextCharge;
+    final watch = summary.watchCount;
 
-    // A notch under the neutral cards' 29: this value is a name and a phrase
-    // rather than a figure, and it needs the room the extra characters take.
-    final valueStyle = textTheme.displayMedium!.copyWith(fontSize: 24);
-
-    if (next == null) {
-      return _StatCard(
-        label: l10n.subscriptionsNextLabel,
-        caption: '',
-        value: Text(
-          l10n.subscriptionsNextNone,
-          key: const Key('subscriptionsNextCharge'),
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-          style: valueStyle.copyWith(color: context.colors.textSecondary),
-        ),
-      );
-    }
-
-    return _StatCard(
-      label: l10n.subscriptionsNextLabel,
-      caption: l10n.subscriptionsNextCaption(
-        formatAmount(
-          amountMinor: next.amountMinor.abs(),
-          currency: summary.currency,
-          locale: locale,
-        ),
-        seriesDateFormat(locale).format(next.dueOn),
-      ),
-      value: Text(
-        l10n.subscriptionsNextValue(
-          next.label,
-          nextChargeWhen(l10n, next.dueOn, DateTime.now()),
-        ),
-        key: const Key('subscriptionsNextCharge'),
-        maxLines: 1,
-        overflow: TextOverflow.ellipsis,
-        style: valueStyle,
-      ),
-    );
-  }
-}
-
-class _StatCard extends StatelessWidget {
-  const _StatCard({
-    required this.label,
-    required this.value,
-    required this.caption,
-  });
-
-  final String label;
-  final Widget value;
-  final String caption;
-
-  @override
-  Widget build(BuildContext context) {
-    return AppCard(
-      padding: const EdgeInsets.all(AppSpacing.cardPaddingWide),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisSize: MainAxisSize.min,
+    return IntrinsicHeight(
+      key: const Key('subscriptionsSummaryLine'),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Text(label.toUpperCase(), style: context.textStyles.statLabel),
-          const SizedBox(height: AppSpacing.sm),
-          value,
-          const SizedBox(height: AppSpacing.sm),
-          Text(caption, style: context.textStyles.helper),
+          _SummaryItem(
+            label: l10n.subscriptionsBurdenLabel,
+            labelGap: AppSpacing.xs,
+            caption: l10n.subscriptionsBurdenCaption,
+            // Unsigned and neutral: what the subscriptions cost per month, a
+            // quantity rather than a movement.
+            figure: AmountText(
+              key: const Key('subscriptionsMonthlyBurden'),
+              amountMinor: summary.monthlyTotalMinor.abs(),
+              currency: summary.currency,
+              colorize: false,
+              maxLines: 1,
+              style: textTheme.displayLarge!.copyWith(color: colors.text),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xxl),
+            child: SizedBox(width: 1, child: ColoredBox(color: colors.line)),
+          ),
+          Flexible(
+            child: _SummaryItem(
+              label: l10n.subscriptionsActiveLabel,
+              caption: breakdown,
+              figure: Text(
+                '${summary.activeCount}',
+                key: const Key('subscriptionsActiveCount'),
+                style: minor.copyWith(color: colors.text),
+              ),
+            ),
+          ),
+          const SizedBox(width: AppSpacing.xxl),
+          Flexible(
+            flex: 2,
+            child: _SummaryItem(
+              label: l10n.subscriptionsNextLabel,
+              caption: next == null
+                  ? null
+                  : l10n.subscriptionsNextCaption(
+                      formatAmount(
+                        amountMinor: next.amountMinor.abs(),
+                        currency: summary.currency,
+                        locale: locale,
+                      ),
+                      seriesLongDateFormat(locale).format(next.dueOn),
+                    ),
+              figure: Text(
+                next == null
+                    ? l10n.subscriptionsValueNone
+                    : l10n.subscriptionsNextValue(
+                        next.label,
+                        nextChargeWhen(l10n, next.dueOn, DateTime.now()),
+                      ),
+                key: const Key('subscriptionsNextCharge'),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: minor.copyWith(
+                  color: next == null ? colors.textTertiary : colors.text,
+                ),
+              ),
+            ),
+          ),
+          if (watch > 0) ...[
+            const SizedBox(width: AppSpacing.xxl),
+            Flexible(
+              child: _SummaryItem(
+                key: const Key('subscriptionsWatch'),
+                label: l10n.subscriptionsWatchLabel,
+                caption: [
+                  if (summary.priceIncreases.isNotEmpty)
+                    l10n.subscriptionsWatchIncreases(
+                      summary.priceIncreases.length,
+                    ),
+                  if (summary.missed.isNotEmpty)
+                    l10n.subscriptionsWatchMissed(summary.missed.length),
+                ].join(' · '),
+                figure: Text(
+                  '$watch',
+                  key: const Key('subscriptionsWatchCount'),
+                  style: minor.copyWith(color: colors.warning),
+                ),
+              ),
+            ),
+          ],
         ],
       ),
     );
   }
 }
 
-class _TableCard extends ConsumerWidget {
-  const _TableCard({
-    required this.sort,
-    required this.rows,
-    required this.archivedRows,
+/// One item of the summary line: label 12 `textSecondary`, the figure, then
+/// an optional caption 12 `textTertiary`, bottom-aligned with its neighbours.
+class _SummaryItem extends StatelessWidget {
+  const _SummaryItem({
+    super.key,
+    required this.label,
+    required this.figure,
+    this.caption,
+    this.labelGap = AppSpacing.xsPlus,
   });
 
-  /// The order [rows] arrive in, for the header to show; already applied.
-  final SeriesSort? sort;
+  final String label;
+  final Widget figure;
+  final String? caption;
+  final double labelGap;
 
-  final List<SubscriptionRow> rows;
+  @override
+  Widget build(BuildContext context) {
+    final captionStyle = Theme.of(
+      context,
+    ).textTheme.bodySmall!.copyWith(color: context.colors.textTertiary);
+    final caption = this.caption;
 
-  /// The archived series, revealed *in place* under the live ones rather than
-  /// on a screen of their own, as archived goals and properties are: restoring
-  /// one should feel like a change of mind, not a recovery. Empty while folded.
-  final List<SubscriptionRow> archivedRows;
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.end,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: context.textStyles.statLabel,
+        ),
+        SizedBox(height: labelGap),
+        figure,
+        if (caption != null && caption.isNotEmpty) ...[
+          SizedBox(height: labelGap),
+          Text(
+            caption,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: tabularNumberStyle(captionStyle),
+          ),
+        ],
+      ],
+    );
+  }
+}
+
+/// The table: header, the live rows, and under them the archived rows when
+/// revealed, behind their group row. The link that reveals them sits below.
+class _SeriesTable extends ConsumerWidget {
+  const _SeriesTable({required this.state});
+
+  final SubscriptionsState state;
 
   Future<void> _handle(
     BuildContext context,
@@ -454,6 +377,10 @@ class _TableCard extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context)!;
     final categories = ref.watch(subscriptionCategoriesByIdProvider);
+    final controller = ref.read(subscriptionsControllerProvider.notifier);
+    final archivedRows = state.showArchived
+        ? state.archivedRows
+        : const <SubscriptionRow>[];
 
     Widget seriesRow(SubscriptionRow row) => SeriesRow(
       row: row,
@@ -464,42 +391,82 @@ class _TableCard extends ConsumerWidget {
     );
 
     final entries = [
-      for (final row in rows) seriesRow(row),
+      for (final row in state.rows) seriesRow(row),
       if (archivedRows.isNotEmpty) ...[
-        Padding(
+        AppTableGroupRow(
           key: const Key('subscriptionsArchivedSection'),
-          padding: const EdgeInsets.only(
-            top: AppSpacing.md,
-            bottom: AppSpacing.sm,
-          ),
-          child: Text(
-            l10n.subscriptionsArchivedSection.toUpperCase(),
-            style: context.textStyles.sectionLabel,
-          ),
+          label: l10n.subscriptionsArchivedSection,
         ),
         for (final row in archivedRows) seriesRow(row),
       ],
     ];
 
-    return AppCard(
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppSpacing.cardPadding,
-        vertical: AppSpacing.sm,
-      ),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        SeriesTableHeader(sort: state.sort, onSort: controller.sortBy),
+        Expanded(
+          child: ListView(
+            key: const Key('subscriptionsList'),
+            children: entries,
+          ),
+        ),
+        if (state.archived.isNotEmpty) ...[
+          const SizedBox(height: AppSpacing.sm),
+          Align(
+            alignment: Alignment.centerLeft,
+            child: AppButton(
+              key: const Key('subscriptionsArchivedToggle'),
+              variant: AppButtonVariant.ghost,
+              icon: LucideIcons300.archive,
+              onPressed: controller.toggleArchived,
+              label: state.showArchived
+                  ? l10n.subscriptionsHideArchived(state.archived.length)
+                  : l10n.subscriptionsShowArchived(state.archived.length),
+            ),
+          ),
+        ],
+      ],
+    );
+  }
+}
+
+/// The summary line's silhouette: label, 40 px figure, caption.
+const _summarySilhouette = 86.0;
+
+/// How many row silhouettes the loading state draws.
+const _rowSilhouettes = 8;
+
+/// The list's silhouette: the summary line, then table rows, in `hover`
+/// blocks pulsing together, so nothing moves when the data lands (`00` §7).
+class _ListSkeleton extends StatelessWidget {
+  const _ListSkeleton({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return SkeletonPulse(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          SeriesTableHeader(
-            sort: sort,
-            onSort: ref.read(subscriptionsControllerProvider.notifier).sortBy,
-          ),
+          const SkeletonBlock(height: _summarySilhouette),
+          const SizedBox(height: AppSpacing.section),
           Expanded(
-            child: ListView.separated(
-              key: const Key('subscriptionsList'),
-              itemCount: entries.length,
-              separatorBuilder: (_, _) =>
-                  Divider(height: 1, thickness: 1, color: context.colors.line),
-              itemBuilder: (context, index) => entries[index],
+            child: ClipRect(
+              child: SingleChildScrollView(
+                physics: const NeverScrollableScrollPhysics(),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    for (var i = 0; i < _rowSilhouettes; i++)
+                      const Padding(
+                        padding: EdgeInsets.only(bottom: AppSpacing.sm),
+                        child: SkeletonBlock(
+                          height: AppSizes.tableRow - AppSpacing.sm,
+                        ),
+                      ),
+                  ],
+                ),
+              ),
             ),
           ),
         ],

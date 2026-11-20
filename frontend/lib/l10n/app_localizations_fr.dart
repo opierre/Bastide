@@ -2410,13 +2410,10 @@ class AppLocalizationsFr extends AppLocalizations {
   String get settingsBackupRestored => 'Sauvegarde restaurée';
 
   @override
-  String get navSubscriptions => 'Récurrents';
+  String get navSubscriptions => 'Abonnements';
 
   @override
   String get subscriptionsDetect => 'Détecter';
-
-  @override
-  String get subscriptionsDetectRunning => 'Détection…';
 
   @override
   String subscriptionsDetectResult(int created) {
@@ -2451,21 +2448,10 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get subscriptionsBurdenCaption =>
-      'Charges trimestrielles et annuelles ramenées au mois.';
+      'Trimestriels et annuels ramenés au mois';
 
   @override
-  String subscriptionsBurdenExcluded(int count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: '$count paiements terminés exclus.',
-      one: '1 paiement terminé exclu.',
-    );
-    return '$_temp0';
-  }
-
-  @override
-  String get subscriptionsActiveLabel => 'Paiements actifs';
+  String get subscriptionsActiveLabel => 'Actifs';
 
   @override
   String subscriptionsCadenceWeeklyCount(int count) {
@@ -2523,22 +2509,11 @@ class AppLocalizationsFr extends AppLocalizations {
   }
 
   @override
-  String subscriptionsCancelledCount(int count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: '$count terminés',
-      one: '1 terminé',
-    );
-    return '$_temp0';
-  }
-
-  @override
   String get subscriptionsNextLabel => 'Prochain prélèvement';
 
   @override
   String subscriptionsNextValue(String label, String when) {
-    return '$label · $when';
+    return '$label, $when';
   }
 
   @override
@@ -2564,10 +2539,32 @@ class AppLocalizationsFr extends AppLocalizations {
   }
 
   @override
-  String get subscriptionsNextNone => 'Aucun prélèvement à venir';
+  String get subscriptionsWatchLabel => 'À regarder';
 
   @override
-  String get subscriptionsColumnName => 'Libellé';
+  String subscriptionsWatchIncreases(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count hausses',
+      one: '1 hausse',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String subscriptionsWatchMissed(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count prélèvements manquants',
+      one: '1 prélèvement manquant',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get subscriptionsColumnName => 'Abonnement';
 
   @override
   String get subscriptionsColumnCategory => 'Catégorie';
@@ -2582,10 +2579,10 @@ class AppLocalizationsFr extends AppLocalizations {
   String get subscriptionsColumnNext => 'Prochain';
 
   @override
-  String get subscriptionsColumnStatus => 'Statut';
+  String get subscriptionsColumnStatus => 'État';
 
   @override
-  String get subscriptionsSortByName => 'Trier par libellé';
+  String get subscriptionsSortByName => 'Trier par nom';
 
   @override
   String get subscriptionsSortByAmount => 'Trier par montant';
@@ -2621,7 +2618,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String subscriptionSignalIncrease(String from, String to) {
-    return 'Hausse · $from → $to';
+    return 'Hausse : $from → $to';
   }
 
   @override
@@ -2629,15 +2626,15 @@ class AppLocalizationsFr extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       days,
       locale: localeName,
-      other: 'Prélèvement manquant · $days jours de retard',
-      one: 'Prélèvement manquant · 1 jour de retard',
+      other: 'Prélèvement manquant depuis $days jours',
+      one: 'Prélèvement manquant depuis 1 jour',
     );
     return '$_temp0';
   }
 
   @override
   String subscriptionSignalCancelled(String date) {
-    return 'Terminé · dernier prélèvement $date';
+    return 'Résilié, dernier prélèvement le $date';
   }
 
   @override
@@ -2655,7 +2652,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get subscriptionActionDismiss => 'Ignorer';
 
   @override
-  String get subscriptionActionCancel => 'Marquer comme terminé';
+  String get subscriptionActionCancel => 'Marquer comme résilié';
 
   @override
   String get subscriptionActionEdit => 'Modifier';
@@ -2751,7 +2748,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get subscriptionsLoadFailed =>
-      'Impossible de charger vos paiements récurrents pour le moment.';
+      'Les abonnements n’ont pas pu être chargés. Rien n’a été modifié.';
 
   @override
   String get subscriptionsRetry => 'Réessayer';
@@ -2761,7 +2758,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get subscriptionsEmptyBody =>
-      'Bastide repère un paiement récurrent lorsqu\'un prélèvement s\'est répété trois fois. Importer davantage d\'historique accélère la détection.';
+      'Bastide repère un paiement récurrent lorsqu’un prélèvement s’est répété trois fois. Importer davantage d’historique accélère la détection.';
 
   @override
   String get subscriptionDetailBack => 'Retour aux récurrents';

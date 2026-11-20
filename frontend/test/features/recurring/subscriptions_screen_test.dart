@@ -2,7 +2,10 @@ import 'dart:async';
 
 import 'package:bastide/core/api/api_client.dart';
 import 'package:bastide/core/theme/app_theme.dart';
+import 'package:bastide/core/theme/tokens.dart';
 import 'package:bastide/core/widgets/amount_text.dart';
+import 'package:bastide/core/widgets/app_button.dart';
+import 'package:bastide/core/widgets/app_table.dart';
 import 'package:bastide/core/widgets/status_text.dart';
 import 'package:bastide/features/categories/domain/category.dart';
 import 'package:bastide/features/recurring/application/subscriptions_controller.dart';
@@ -13,6 +16,7 @@ import 'package:bastide/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:lucide_icons_flutter/lucide_icons_300.dart';
 
 import '../../support/fake_categories_controller.dart';
 import '../../support/recurring_fixtures.dart';
@@ -74,7 +78,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('Mensuel'), findsOneWidget);
-      expect(find.text('15/05/2026'), findsOneWidget);
+      expect(find.text('15 mai'), findsOneWidget);
 
       // Unsigned and in the primary ink: an expected charge is not a ledger
       // entry, so the money rule's red would state something false about it.
@@ -85,12 +89,12 @@ void main() {
       expect(amount.colorize, isFalse);
       expect(find.text(_money(1549)), findsOneWidget);
 
-      // Nothing is wrong with this subscription, so the Statut cell is empty.
+      // Nothing is wrong with this subscription, so the État cell is empty.
       expect(find.byType(StatusText), findsNothing);
     },
   );
 
-  testWidgets('a price increase and a missed charge render as amber pills', (
+  testWidgets('a price increase and a missed charge read as warning status', (
     tester,
   ) async {
     _useDesktopSurface(tester);
@@ -133,22 +137,26 @@ void main() {
     expect(pills, hasLength(2));
     expect(pills.every((pill) => pill.tone == StatusTone.warning), isTrue);
     expect(
-      find.text('Hausse · ${_money(1349)} → ${_money(1549)}'),
+      find.text('Hausse : ${_money(1349)} → ${_money(1549)}'),
       findsOneWidget,
     );
-    expect(
-      find.text('Prélèvement manquant · 9 jours de retard'),
-      findsOneWidget,
-    );
+    expect(find.text('Prélèvement manquant depuis 9 jours'), findsOneWidget);
 
     // The overdue row states what was expected instead of printing a past date
     // under a "next charge" header.
     expect(find.byKey(const Key('seriesNextExpected-s2')), findsOneWidget);
-    expect(find.text('attendu le 05/05/2026'), findsOneWidget);
+    expect(find.text('attendu le 5 mai'), findsOneWidget);
+    expect(
+      tester
+          .widget<Text>(find.byKey(const Key('seriesNextExpected-s2')))
+          .style
+          ?.color,
+      AppTheme.dark.extension<AppColors>()!.warning,
+    );
   });
 
   testWidgets(
-    'a cancelled row dims, drops its next date, and takes a gray pill',
+    'a cancelled row dims, drops its next date, and says when it ended',
     (tester) async {
       _useDesktopSurface(tester);
       await tester.pumpWidget(
@@ -163,23 +171,26 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      final opacity = tester.widget<Opacity>(
-        find.descendant(
-          of: find.byKey(const Key('seriesRow-s1')),
-          matching: find.byType(Opacity),
-        ),
-      );
-      expect(opacity.opacity, 0.55);
-
       expect(
-        tester.widget<StatusText>(find.byType(StatusText)).tone,
-        StatusTone.neutral,
+        tester
+            .widget<AppTableRow>(find.byKey(const Key('seriesRow-s1')))
+            .dimmed,
+        isTrue,
       );
+      // Settled, not something to look at: no status icon.
+      expect(find.byType(StatusText), findsNothing);
       expect(
-        find.text('Terminé · dernier prélèvement 15/04/2026'),
+        find.text('Résilié, dernier prélèvement le 15 avril 2026'),
         findsOneWidget,
       );
-      expect(find.text('15/05/2026'), findsNothing);
+      expect(find.text('15 mai'), findsNothing);
+      expect(
+        find.descendant(
+          of: find.byKey(const Key('seriesRow-s1')),
+          matching: find.text('—'),
+        ),
+        findsOneWidget,
+      );
     },
   );
 
@@ -352,7 +363,7 @@ void main() {
       await tester.tap(find.byKey(const Key('subscriptionsArchivedToggle')));
       await tester.pumpAndSettle();
       expect(find.text('Hide archived payments (1)'), findsOneWidget);
-      expect(find.text('ARCHIVED'), findsOneWidget);
+      expect(find.text('Archived'), findsOneWidget);
 
       await tester.tap(find.byKey(const Key('seriesMenu-s1')));
       await tester.pumpAndSettle();
@@ -395,7 +406,7 @@ void main() {
     expect(find.byKey(const Key('seriesRow-s1')), findsOneWidget);
   });
 
-  testWidgets('the summary cards read straight from the summary payload', (
+  testWidgets('the summary line reads straight from the summary payload', (
     tester,
   ) async {
     _useDesktopSurface(tester);
@@ -405,11 +416,11 @@ void main() {
           initialSeries: [testSeries()],
           summary: testSummary(
             monthlyTotalMinor: -21208,
-            activeCount: 8,
+            activeCount: 7,
             cancelledCount: 1,
             cadenceCounts: {
               Cadence.weekly: 0,
-              Cadence.monthly: 6,
+              Cadence.monthly: 5,
               Cadence.quarterly: 1,
               Cadence.yearly: 1,
               Cadence.irregular: 0,
@@ -426,20 +437,62 @@ void main() {
     );
     await tester.pumpAndSettle();
 
+    expect(find.text('Charge mensuelle'), findsOneWidget);
     expect(find.text(_money(21208)), findsOneWidget);
-    expect(find.text('8'), findsOneWidget);
     expect(
-      find.text('6 mensuels · 1 trimestriel · 1 annuel — 1 terminé'),
+      find.text('Trimestriels et annuels ramenés au mois'),
       findsOneWidget,
     );
-    expect(find.text('Netflix · demain'), findsOneWidget);
-    expect(
-      find.textContaining(
-        'Charges trimestrielles et annuelles ramenées au mois.',
+    expect(find.text('Actifs'), findsOneWidget);
+    expect(find.text('7'), findsOneWidget);
+    expect(find.text('5 mensuels · 1 trimestriel · 1 annuel'), findsOneWidget);
+    expect(find.text('Prochain prélèvement'), findsOneWidget);
+    expect(find.text('Netflix, demain'), findsOneWidget);
+    // Nothing to look at, so « À regarder » is hidden.
+    expect(find.byKey(const Key('subscriptionsWatch')), findsNothing);
+    expect(find.text('À regarder'), findsNothing);
+  });
+
+  testWidgets('« À regarder » counts the rises and the missed charges', (
+    tester,
+  ) async {
+    _useDesktopSurface(tester);
+    await tester.pumpWidget(
+      _wrap(
+        controller: FakeSubscriptionsController(
+          initialSeries: [
+            testSeries(),
+            testSeries(id: 's2', label: 'Basic-Fit'),
+          ],
+          summary: testSummary(
+            activeCount: 2,
+            priceIncreases: [
+              PriceIncrease(
+                seriesId: 's1',
+                deltaMinor: -200,
+                changedAt: DateTime(2026, 4, 15),
+              ),
+            ],
+            missed: [
+              MissedCharge(
+                seriesId: 's2',
+                expectedOn: DateTime(2026, 5, 5),
+                daysLate: 9,
+              ),
+            ],
+          ),
+        ),
       ),
-      findsOneWidget,
     );
-    expect(find.textContaining('1 paiement terminé exclu.'), findsOneWidget);
+    await tester.pumpAndSettle();
+
+    expect(find.text('À regarder'), findsOneWidget);
+    final count = tester.widget<Text>(
+      find.byKey(const Key('subscriptionsWatchCount')),
+    );
+    expect(count.data, '2');
+    expect(count.style?.color, AppTheme.dark.extension<AppColors>()!.warning);
+    expect(find.text('1 hausse · 1 prélèvement manquant'), findsOneWidget);
   });
 
   testWidgets(
@@ -452,7 +505,7 @@ void main() {
       expect(find.byKey(const Key('subscriptionsEmptyState')), findsOneWidget);
       expect(find.text('Aucun paiement récurrent détecté'), findsOneWidget);
       expect(
-        find.textContaining("un prélèvement s'est répété trois fois"),
+        find.textContaining('un prélèvement s’est répété trois fois'),
         findsOneWidget,
       );
       expect(
@@ -477,12 +530,12 @@ void main() {
       await tester.pump();
 
       expect(controller.detectCalls, 1);
-      // One running state for both buttons: the top bar's stands down too.
-      expect(find.text('Détection…'), findsNWidgets(2));
-      final topBar = tester.widget<OutlinedButton>(
+      // One running state for both buttons: the top bar's spins too.
+      expect(find.byKey(const Key('appButtonSpinner')), findsNWidgets(2));
+      final topBar = tester.widget<AppButton>(
         find.byKey(const Key('subscriptionsDetectButton')),
       );
-      expect(topBar.onPressed, isNull);
+      expect(topBar.isLoading, isTrue);
 
       controller.detectGate!.complete();
       await tester.pump();
@@ -493,7 +546,7 @@ void main() {
         findsOneWidget,
       );
       expect(find.text('1 série existante mise à jour'), findsOneWidget);
-      expect(find.text('Détection…'), findsNothing);
+      expect(find.byKey(const Key('appButtonSpinner')), findsNothing);
 
       // Let the toast withdraw so no timer outlives the test.
       await tester.pump(const Duration(seconds: 7));
@@ -555,14 +608,16 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Monthly'), findsNWidgets(3));
-    expect(find.text('Missed charge · 9 days late'), findsOneWidget);
-    expect(find.textContaining('Ended · last charge'), findsOneWidget);
+    expect(find.text('Missed charge for 9 days'), findsOneWidget);
+    expect(find.textContaining('Cancelled, last charge on'), findsOneWidget);
     // Netflix and the cancelled Canal+ share a price in this fixture.
     expect(find.text(_money(1549, locale: 'en')), findsNWidgets(2));
-    expect(find.text('Monthly burden'.toUpperCase()), findsOneWidget);
+    expect(find.text('Monthly charge'), findsOneWidget);
+    expect(find.text('Worth a look'), findsOneWidget);
+    expect(find.text('1 missed charge'), findsOneWidget);
   });
 
-  testWidgets('a row wears its category chip', (tester) async {
+  testWidgets('a row wears its category label', (tester) async {
     _useDesktopSurface(tester);
     await tester.pumpWidget(
       _wrap(
@@ -839,6 +894,14 @@ void main() {
       summary: testSummary(activeCount: 2),
     );
 
+    Finder header(String label) => find.descendant(
+      of: find.byKey(const Key('seriesTableHeader')),
+      matching: find.text(label),
+    );
+
+    IconData? sortIcon(WidgetTester tester) =>
+        tester.widget<Icon>(find.byKey(const Key('appTableSortIcon'))).icon;
+
     /// The row ids top to bottom, as drawn.
     List<String> drawnOrder(WidgetTester tester) {
       double top(String id) =>
@@ -853,72 +916,39 @@ void main() {
       await tester.pumpWidget(_wrap(controller: controller()));
       await tester.pumpAndSettle();
 
-      expect(drawnOrder(tester), ['s1', 's2', 's3']);
-      expect(find.byKey(const Key('seriesSortArrow-ascending')), findsNothing);
-      expect(find.byKey(const Key('seriesSortArrow-descending')), findsNothing);
+      // Opens on the soonest charge, the cancelled series last.
+      expect(drawnOrder(tester), ['s3', 's1', 's2']);
+      expect(sortIcon(tester), LucideIcons300.chevronUp);
 
-      await tester.tap(find.byKey(const Key('seriesSortHeader-amount')));
+      await tester.tap(header('Montant'));
       await tester.pumpAndSettle();
-      expect(drawnOrder(tester), ['s2', 's1', 's3']);
-      expect(
-        find.byKey(const Key('seriesSortArrow-descending')),
-        findsOneWidget,
-      );
+      expect(drawnOrder(tester), ['s1', 's3', 's2']);
+      expect(sortIcon(tester), LucideIcons300.chevronDown);
 
-      await tester.tap(find.byKey(const Key('seriesSortHeader-amount')));
+      await tester.tap(header('Montant'));
       await tester.pumpAndSettle();
       expect(drawnOrder(tester), ['s3', 's1', 's2']);
-      expect(
-        find.byKey(const Key('seriesSortArrow-ascending')),
-        findsOneWidget,
-      );
+      expect(sortIcon(tester), LucideIcons300.chevronUp);
 
-      await tester.tap(find.byKey(const Key('seriesSortHeader-name')));
+      await tester.tap(header('Abonnement'));
       await tester.pumpAndSettle();
-      expect(drawnOrder(tester), ['s2', 's1', 's3']);
+      expect(drawnOrder(tester), ['s1', 's3', 's2']);
     });
 
-    testWidgets('next charge puts the soonest first and the cancelled last', (
+    testWidgets('next charge flips, and the cancelled stays last', (
       tester,
     ) async {
       _useDesktopSurface(tester);
       await tester.pumpWidget(_wrap(controller: controller()));
       await tester.pumpAndSettle();
 
-      await tester.tap(find.byKey(const Key('seriesSortHeader-nextCharge')));
-      await tester.pumpAndSettle();
-      expect(drawnOrder(tester), ['s3', 's1', 's2']);
-
-      await tester.tap(find.byKey(const Key('seriesSortHeader-nextCharge')));
+      await tester.tap(header('Prochain'));
       await tester.pumpAndSettle();
       expect(drawnOrder(tester), ['s1', 's3', 's2']);
+
+      await tester.tap(header('Prochain'));
+      await tester.pumpAndSettle();
+      expect(drawnOrder(tester), ['s3', 's1', 's2']);
     });
-
-    for (final (locale, idle, active) in [
-      (const Locale('fr'), 'Trier par montant', 'Tri décroissant'),
-      (const Locale('en'), 'Sort by amount', 'Sorted descending'),
-    ]) {
-      testWidgets('the header tooltips read in ${locale.languageCode}', (
-        tester,
-      ) async {
-        _useDesktopSurface(tester);
-        await tester.pumpWidget(
-          _wrap(controller: controller(), locale: locale),
-        );
-        await tester.pumpAndSettle();
-
-        Tooltip amountTooltip() => tester.widget<Tooltip>(
-          find.descendant(
-            of: find.byKey(const Key('seriesSortHeader-amount')),
-            matching: find.byType(Tooltip),
-          ),
-        );
-
-        expect(amountTooltip().message, idle);
-        await tester.tap(find.byKey(const Key('seriesSortHeader-amount')));
-        await tester.pumpAndSettle();
-        expect(amountTooltip().message, startsWith(active));
-      });
-    }
   });
 }

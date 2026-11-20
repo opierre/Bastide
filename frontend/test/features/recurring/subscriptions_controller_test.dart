@@ -140,18 +140,21 @@ void main() {
 
     final state = await container.read(subscriptionsControllerProvider.future);
 
-    final increase = state.rows.first.signal;
+    SeriesSignal? signalOf(String id) =>
+        state.rows.firstWhere((row) => row.series.id == id).signal;
+
+    final increase = signalOf('s1');
     expect(increase, isA<PriceIncreaseSignal>());
     increase as PriceIncreaseSignal;
     expect(increase.previousAmountMinor, -1349);
     expect(increase.currentAmountMinor, -1549);
 
-    expect(state.rows[1].signal, isA<MissedChargeSignal>());
-    expect((state.rows[1].signal! as MissedChargeSignal).daysLate, 9);
+    expect(signalOf('s2'), isA<MissedChargeSignal>());
+    expect((signalOf('s2')! as MissedChargeSignal).daysLate, 9);
 
-    // A healthy subscription carries no signal at all — the Statut cell it
+    // A healthy subscription carries no signal at all: the État cell it
     // renders is empty, not an "OK".
-    expect(state.rows[2].signal, isNull);
+    expect(signalOf('s3'), isNull);
   });
 
   test(
@@ -566,15 +569,16 @@ void main() {
       summary: _summaryJson(activeCount: 3),
     );
 
-    test('the rows keep the server order until a sort is chosen', () async {
+    test('the rows open sorted by next charge, soonest first', () async {
       stubThree();
 
       final state = await container.read(
         subscriptionsControllerProvider.future,
       );
 
-      expect(state.sort, isNull);
-      expect(labels(state), ['Gym', 'Assurance', 'Musique']);
+      expect(state.sort, SeriesSort.initial);
+      // The three share a next charge, so the name breaks the tie.
+      expect(labels(state), ['Assurance', 'Gym', 'Musique']);
     });
 
     test('a new column starts in its default direction, the same one flips '
@@ -595,7 +599,7 @@ void main() {
 
       controller.sortBy(SeriesSortField.amount);
       state = container.read(subscriptionsControllerProvider).value!;
-      expect(state.sort!.ascending, isTrue);
+      expect(state.sort.ascending, isTrue);
       expect(labels(state), ['Musique', 'Gym', 'Assurance']);
 
       controller.sortBy(SeriesSortField.name);
@@ -617,12 +621,12 @@ void main() {
 
       await controller.refresh();
       var state = container.read(subscriptionsControllerProvider).value!;
-      expect(state.sort?.field, SeriesSortField.name);
+      expect(state.sort.field, SeriesSortField.name);
       expect(labels(state), ['Assurance', 'Gym', 'Musique']);
 
       await controller.setStatusFilter(SeriesStatus.detected);
       state = container.read(subscriptionsControllerProvider).value!;
-      expect(state.sort?.field, SeriesSortField.name);
+      expect(state.sort.field, SeriesSortField.name);
       expect(labels(state), ['Assurance', 'Gym', 'Musique']);
     });
 
