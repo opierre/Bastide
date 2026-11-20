@@ -115,6 +115,10 @@ void main() {
         find.byKey(const Key('resetPasswordField')),
         _strongPassword,
       );
+      await tester.enterText(
+        find.byKey(const Key('resetConfirmField')),
+        _strongPassword,
+      );
       await tester.pump();
       await tester.ensureVisible(find.byKey(const Key('resetSubmitButton')));
       await tester.tap(find.byKey(const Key('resetSubmitButton')));
@@ -147,7 +151,7 @@ void main() {
       verify(() => tokenStore.write('tok-1')).called(1);
     });
 
-    testWidgets('a wrong code banners on the form, not the session', (
+    testWidgets('a wrong code is said under the code field, not on the session', (
       tester,
     ) async {
       when(
@@ -160,7 +164,7 @@ void main() {
 
       await fillAndSubmit(tester);
 
-      expect(find.byKey(const Key('resetErrorText')), findsOneWidget);
+      // Said once, under the code field: no banner.
       expect(
         find.text(
           'Identifiant ou code de récupération incorrect. Vérifiez le code et réessayez.',
@@ -171,7 +175,7 @@ void main() {
       expect(container.read(pendingRecoveryCodeProvider), isNull);
     });
 
-    testWidgets('a weak new password keeps the submit disabled', (
+    testWidgets('a short new password keeps the submit disabled', (
       tester,
     ) async {
       await tester.pumpWidget(wrap(const ForgotPasswordScreen()));
@@ -195,16 +199,47 @@ void main() {
       );
       await tester.pumpAndSettle();
 
+      expect(find.text('Confirm password'), findsOneWidget);
+      expect(find.text('Back to sign in'), findsOneWidget);
+      expect(find.text('Your data stays on this computer.'), findsOneWidget);
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('a confirmation that differs keeps the submit disabled', (
+      tester,
+    ) async {
+      await tester.pumpWidget(wrap(const ForgotPasswordScreen()));
+      await tester.pumpAndSettle();
+
+      await tester.enterText(
+        find.byKey(const Key('resetIdentifierField')),
+        'ada@example.com',
+      );
+      await tester.enterText(find.byKey(const Key('resetCodeField')), _code);
+      await tester.enterText(
+        find.byKey(const Key('resetPasswordField')),
+        _strongPassword,
+      );
+      await tester.enterText(
+        find.byKey(const Key('resetConfirmField')),
+        '${_strongPassword}x',
+      );
+      await tester.pump();
+
       expect(
-        find.text('Reset your password with your recovery code.'),
+        find.text('Les mots de passe ne correspondent pas.'),
         findsOneWidget,
       );
-      expect(find.text('Back to sign in'), findsOneWidget);
+      await tester.ensureVisible(find.byKey(const Key('resetSubmitButton')));
+      await tester.tap(find.byKey(const Key('resetSubmitButton')));
+      await tester.pumpAndSettle();
+
+      verifyNever(() => apiClient.post(any(), body: any(named: 'body')));
     });
   });
 
   group('recovery code screen', () {
-    testWidgets('continue stays disabled until the code is acknowledged', (
+    testWidgets('« J’ai noté ce code » releases the pending code', (
       tester,
     ) async {
       container.read(pendingRecoveryCodeProvider.notifier).show(_code);
@@ -212,19 +247,14 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text(_code), findsOneWidget);
-
-      await tester.ensureVisible(
-        find.byKey(const Key('recoveryCodeContinueButton')),
+      expect(
+        find.text(
+          'Notez ce code et gardez-le en lieu sûr : il ne sera plus affiché.',
+        ),
+        findsOneWidget,
       );
-      await tester.tap(find.byKey(const Key('recoveryCodeContinueButton')));
-      await tester.pump();
       expect(container.read(pendingRecoveryCodeProvider), _code);
 
-      await tester.ensureVisible(
-        find.byKey(const Key('recoveryCodeAcknowledge')),
-      );
-      await tester.tap(find.byKey(const Key('recoveryCodeAcknowledge')));
-      await tester.pump();
       await tester.ensureVisible(
         find.byKey(const Key('recoveryCodeContinueButton')),
       );
@@ -241,8 +271,9 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      expect(find.text('Keep your recovery code'), findsOneWidget);
-      expect(find.text("I've kept this code somewhere safe"), findsOneWidget);
+      expect(find.text('I have written this code down'), findsOneWidget);
+      expect(find.text('Copy'), findsOneWidget);
+      expect(tester.takeException(), isNull);
     });
   });
 
@@ -297,6 +328,10 @@ void main() {
       await tester.enterText(find.byKey(const Key('resetCodeField')), _code);
       await tester.enterText(
         find.byKey(const Key('resetPasswordField')),
+        _strongPassword,
+      );
+      await tester.enterText(
+        find.byKey(const Key('resetConfirmField')),
         _strongPassword,
       );
       await tester.pump();

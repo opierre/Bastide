@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:bastide/features/auth/application/auth_controller.dart';
 import 'package:bastide/features/auth/domain/auth_user.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -6,7 +8,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 /// fixed session state and/or to record which methods were called — without
 /// touching the real API client or secure storage platform channels.
 class FakeAuthController extends AuthController {
-  FakeAuthController({this.initialUser, this.loginError, this.registerError});
+  FakeAuthController({
+    this.initialUser,
+    this.loginError,
+    this.registerError,
+    this.hold,
+  });
 
   final AuthUser? initialUser;
 
@@ -14,6 +21,10 @@ class FakeAuthController extends AuthController {
   /// the seam screens' error states are asserted through.
   final Object? loginError;
   final Object? registerError;
+
+  /// When set, login and register stay in flight (`AsyncLoading`) until it
+  /// completes: the seam the screens' loading states are asserted through.
+  final Completer<void>? hold;
 
   final loginCalls = <({String identifier, String password})>[];
   final registerCalls =
@@ -37,6 +48,11 @@ class FakeAuthController extends AuthController {
     required String password,
   }) async {
     loginCalls.add((identifier: identifier, password: password));
+    if (hold case final hold?) {
+      state = const AsyncValue.loading();
+      await hold.future;
+      state = AsyncValue.data(initialUser);
+    }
     if (loginError case final error?) {
       state = AsyncValue.error(error, StackTrace.current);
     }
@@ -57,6 +73,11 @@ class FakeAuthController extends AuthController {
       locale: locale,
       currency: currency,
     ));
+    if (hold case final hold?) {
+      state = const AsyncValue.loading();
+      await hold.future;
+      state = AsyncValue.data(initialUser);
+    }
     if (registerError case final error?) {
       state = AsyncValue.error(error, StackTrace.current);
     }

@@ -203,24 +203,41 @@ class AppLocalizationsEn extends AppLocalizations {
   String get authPasswordLabel => 'Password';
 
   @override
+  String authPasswordMinimum(int minimum) {
+    return '$minimum characters minimum.';
+  }
+
+  @override
+  String authPasswordLengthOk(int count, int minimum) {
+    return '$count characters. The minimum is $minimum.';
+  }
+
+  @override
+  String authPasswordTooShort(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count more characters.',
+      one: '1 more character.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get authConfirmPasswordLabel => 'Confirm password';
+
+  @override
+  String get authPasswordMismatch => 'The passwords do not match.';
+
+  @override
   String get authDisplayNameLabel => 'Username';
 
   @override
-  String get authPasswordStrengthWeak => 'Too weak';
-
-  @override
-  String get authPasswordStrengthFair => 'Fair';
-
-  @override
-  String get authPasswordStrengthStrong => 'Strong';
-
-  @override
-  String get authPasswordStrengthHint =>
-      'Add a few more characters, a digit and a capital letter.';
+  String get authRegisterDisplayNameLabel => 'Display name';
 
   @override
   String get authPreferencesNote =>
-      'You can change the language later; the currency applies to all your accounts and cannot be changed in this version.';
+      'You can change the language in Settings. The currency is permanent and applies to all your accounts.';
 
   @override
   String get authEmailTaken => 'This email already has an account. Sign in.';
@@ -241,16 +258,65 @@ class AppLocalizationsEn extends AppLocalizations {
   String get authCurrencyLabel => 'Currency';
 
   @override
+  String authCurrencyOption(String code, String name) {
+    return '$code, $name';
+  }
+
+  @override
+  String authCurrencyName(String code) {
+    String _temp0 = intl.Intl.selectLogic(code, {
+      'EUR': 'euro',
+      'USD': 'US dollar',
+      'GBP': 'pound sterling',
+      'CHF': 'Swiss franc',
+      'CAD': 'Canadian dollar',
+      'JPY': 'Japanese yen',
+      'AUD': 'Australian dollar',
+      'CNY': 'Chinese yuan',
+      'INR': 'Indian rupee',
+      'BRL': 'Brazilian real',
+      'MXN': 'Mexican peso',
+      'SEK': 'Swedish krona',
+      'NOK': 'Norwegian krone',
+      'DKK': 'Danish krone',
+      'PLN': 'Polish zloty',
+      'CZK': 'Czech koruna',
+      'HUF': 'Hungarian forint',
+      'RON': 'Romanian leu',
+      'ZAR': 'South African rand',
+      'AED': 'UAE dirham',
+      'SGD': 'Singapore dollar',
+      'HKD': 'Hong Kong dollar',
+      'NZD': 'New Zealand dollar',
+      'TRY': 'Turkish lira',
+      'ILS': 'Israeli shekel',
+      'KRW': 'South Korean won',
+      'THB': 'Thai baht',
+      'MAD': 'Moroccan dirham',
+      'XOF': 'West African CFA franc',
+      'XAF': 'Central African CFA franc',
+      'other': '$code',
+    });
+    return '$_temp0';
+  }
+
+  @override
   String get authLoginSubmit => 'Log in';
 
   @override
   String get authRegisterSubmit => 'Create account';
 
   @override
-  String get authGoToRegister => 'Don\'t have an account? Register';
+  String get authRegisterSubmitting => 'Creating…';
 
   @override
-  String get authGoToLogin => 'Already have an account? Log in';
+  String get authGoToRegister => 'Create an account';
+
+  @override
+  String get authGoToLogin => 'Already have an account?';
+
+  @override
+  String get authGoToLoginLink => 'Log in';
 
   @override
   String get authEmailRequired => 'Email is required.';
@@ -259,11 +325,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get authPasswordRequired => 'Password is required.';
 
   @override
-  String get authDisplayNameRequired => 'Username is required.';
-
-  @override
-  String get authErrorInvalidCredentials =>
-      'Incorrect username, email or password. Check your details and try again.';
+  String get authErrorInvalidCredentials => 'Incorrect email or password.';
 
   @override
   String get authErrorEmailTaken =>
@@ -4370,11 +4432,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get networthDeclaredErrorGeneric => 'Saving failed. Try again.';
 
   @override
-  String get authForgotPasswordLink => 'Forgot your password?';
-
-  @override
-  String get authForgotPasswordTagline =>
-      'Reset your password with your recovery code.';
+  String get authForgotPasswordLink => 'Forgot password';
 
   @override
   String get authRecoveryCodeLabel => 'Recovery code';
@@ -4403,27 +4461,17 @@ class AppLocalizationsEn extends AppLocalizations {
       'Incorrect username, email or recovery code. Check the code and try again.';
 
   @override
-  String get authRecoveryCodeTagline => 'Keep your recovery code';
-
-  @override
-  String get authRecoveryCodeIntro =>
-      'If you forget your password, this code is the only way to reset it. Write it down or print it, and keep it somewhere safe away from this computer.';
-
-  @override
-  String get authRecoveryCodeShownOnce =>
-      'It won\'t be shown again. You can generate a new one in Settings › Profile.';
-
-  @override
   String get authRecoveryCodeCopy => 'Copy';
 
   @override
   String get authRecoveryCodeCopied => 'Copied';
 
   @override
-  String get authRecoveryCodeConfirm => 'I\'ve kept this code somewhere safe';
+  String get authRecoveryCodeKeep =>
+      'Write this code down and keep it somewhere safe: it will not be shown again.';
 
   @override
-  String get authRecoveryCodeContinue => 'Continue';
+  String get authRecoveryCodeAcknowledge => 'I have written this code down';
 
   @override
   String get settingsRecoveryTitle => 'Recovery code';
