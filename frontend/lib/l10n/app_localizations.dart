@@ -842,6 +842,12 @@ abstract class AppLocalizations {
   /// **'Certaines informations sont invalides.'**
   String get authErrorValidation;
 
+  /// Localized message for the backend's PASSWORD_TOO_SHORT error code.
+  ///
+  /// In fr, this message translates to:
+  /// **'Le mot de passe doit contenir au moins {minimum} caractères.'**
+  String authErrorPasswordTooShort(int minimum);
+
   /// Fallback localized message for unrecognized or network errors.
   ///
   /// In fr, this message translates to:

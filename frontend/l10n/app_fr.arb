@@ -585,6 +585,15 @@
   "@authErrorValidation": {
     "description": "Localized message for the backend's VALIDATION_ERROR error code."
   },
+  "authErrorPasswordTooShort": "Le mot de passe doit contenir au moins {minimum} caractères.",
+  "@authErrorPasswordTooShort": {
+    "description": "Localized message for the backend's PASSWORD_TOO_SHORT error code.",
+    "placeholders": {
+      "minimum": {
+        "type": "int"
+      }
+    }
+  },
   "authErrorGeneric": "Une erreur est survenue. Veuillez réessayer.",
   "@authErrorGeneric": {
     "description": "Fallback localized message for unrecognized or network errors."

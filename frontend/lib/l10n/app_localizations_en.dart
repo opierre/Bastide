@@ -486,6 +486,11 @@ class AppLocalizationsEn extends AppLocalizations {
   String get authErrorValidation => 'Some information is invalid.';
 
   @override
+  String authErrorPasswordTooShort(int minimum) {
+    return 'The password must be at least $minimum characters long.';
+  }
+
+  @override
   String get authErrorGeneric => 'Something went wrong. Please try again.';
 
   @override
