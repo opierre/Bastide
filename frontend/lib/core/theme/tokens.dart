@@ -601,6 +601,20 @@ abstract final class AppGoalBanner {
   static const aspectRatio = 44 / 19;
 }
 
+/// The account-type section of `docs/design/05-accounts.md` §Section: a
+/// header bar (radius `AppRadii.container`, `rail` ground) over its table.
+abstract final class AppAccountSection {
+  /// The header bar's padding: 10 vertical, 12 horizontal.
+  static const headerPaddingY = 10.0;
+  static const headerPaddingX = AppSpacing.smPlus;
+
+  /// Between the header bar and its table.
+  static const tableGap = 10.0;
+
+  /// The right-aligned slot the subtotal sits in.
+  static const subtotalWidth = 120.0;
+}
+
 /// v1: the 38 px control pill some panels still put in the title bar, kept
 /// until each panel's v2 ticket moves it to the 28 px controls of [AppSizes].
 abstract final class AppChrome {

@@ -12,6 +12,8 @@ void main() {
 
       expect(overview.account.id, 'acc-1');
       expect(overview.account.type, AccountType.checking);
+      expect(overview.account.lastImportAt, DateTime.utc(2026, 10, 28, 9, 30));
+      expect(overview.account.monthChangeMinor, -4210);
       expect(overview.firstTransactionDate, DateTime(2025, 1, 3));
       expect(overview.lastImportAt, DateTime.utc(2026, 10, 28, 9, 30));
       expect(overview.balanceHistory, hasLength(3));

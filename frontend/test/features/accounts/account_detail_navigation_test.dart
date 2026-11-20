@@ -66,7 +66,7 @@ void main() {
     await tester.tap(find.text('Comptes'));
     await tester.pumpAndSettle();
 
-    await tester.tap(find.byKey(const Key('accountCard-acc-1')));
+    await tester.tap(find.byKey(const Key('accountRow-acc-1')));
     await tester.pumpAndSettle();
 
     expect(find.byKey(const Key('screen-account-detail')), findsOneWidget);
@@ -141,13 +141,13 @@ void main() {
       // A linked card has no tile of its own: it opens from the account it is
       // settled from.
       if (accountId == 'card-1') {
-        await tester.tap(find.byKey(const Key('accountCard-acc-1')));
+        await tester.tap(find.byKey(const Key('accountRow-acc-1')));
         await tester.pumpAndSettle();
         await tester.tap(
           find.byKey(const Key('accountDetailLinkedCard-card-1')),
         );
       } else {
-        await tester.tap(find.byKey(Key('accountCard-$accountId')));
+        await tester.tap(find.byKey(Key('accountRow-$accountId')));
       }
       await tester.pumpAndSettle();
       return accounts;

@@ -602,28 +602,9 @@
   "@accountsAddButton": {
     "description": "Button label to open the create-account form."
   },
-  "accountsBalancesAsOf": "Soldes au {date}",
-  "@accountsBalancesAsOf": {
-    "description": "Timestamp under the summary meta saying when the balances were last recalculated.",
-    "placeholders": {
-      "date": {
-        "type": "DateTime",
-        "format": "yMd"
-      }
-    }
-  },
   "accountsTotalBalanceLabel": "Solde total",
   "@accountsTotalBalanceLabel": {
     "description": "Label on the summary card above the accounts list, over the sum of all account balances."
-  },
-  "accountsActiveCount": "{count, plural, =0{Aucun compte actif} =1{1 compte actif} other{{count} comptes actifs}}",
-  "@accountsActiveCount": {
-    "description": "Caption under the total balance, counting the accounts included in the sum.",
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
   },
   "accountsEmptyTitle": "Ajoutez votre premier compte",
   "@accountsEmptyTitle": {
@@ -637,23 +618,152 @@
   "@accountsRetry": {
     "description": "Retry button label shown when the accounts list fails to load."
   },
-  "accountEdit": "Modifier",
-  "@accountEdit": {
-    "description": "Menu item to edit an account."
+  "accountsGroupByType": "Par type",
+  "@accountsGroupByType": {
+    "description": "Segment of the accounts title bar: one section per account type."
   },
-  "accountLastTransaction": "Dernière opération le {date}",
-  "@accountLastTransaction": {
-    "description": "Account card line giving the booking date of the account's latest transaction.",
+  "accountsGroupByInstitution": "Par établissement",
+  "@accountsGroupByInstitution": {
+    "description": "Segment of the accounts title bar: one section per institution."
+  },
+  "accountsGroupChecking": "Comptes courants",
+  "@accountsGroupChecking": {
+    "description": "Accounts section holding the checking accounts."
+  },
+  "accountsGroupSavings": "Épargne",
+  "@accountsGroupSavings": {
+    "description": "Accounts section holding the savings accounts."
+  },
+  "accountsGroupDeferredCards": "Cartes à débit différé",
+  "@accountsGroupDeferredCards": {
+    "description": "Accounts section holding the deferred-debit cards that have a row of their own."
+  },
+  "accountsGroupCredits": "Crédits",
+  "@accountsGroupCredits": {
+    "description": "Accounts section holding the credit-type accounts."
+  },
+  "accountsGroupOther": "Autres",
+  "@accountsGroupOther": {
+    "description": "Accounts section holding cash and other accounts."
+  },
+  "accountsNoInstitution": "Sans établissement",
+  "@accountsNoInstitution": {
+    "description": "Accounts section, by institution, for the accounts that name none."
+  },
+  "accountsGroupShare": "{share} % du total",
+  "@accountsGroupShare": {
+    "description": "Section header: the group's share of the total, one decimal.",
     "placeholders": {
-      "date": {
-        "type": "String",
-        "example": "29 sept. 2026"
+      "share": {
+        "type": "double",
+        "format": "decimalPatternDigits",
+        "optionalParameters": {
+          "decimalDigits": 1
+        }
       }
     }
   },
-  "accountNoTransactions": "Aucune opération",
-  "@accountNoTransactions": {
-    "description": "Account card line for an account with no transaction yet."
+  "accountsCount": "{count, plural, =1{1 compte} other{{count} comptes}}",
+  "@accountsCount": {
+    "description": "Number of accounts on the total line.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "accountsSummaryCaption": "{accounts} · soldes recalculés {ago}",
+  "@accountsSummaryCaption": {
+    "description": "Caption right of the total: the account count, then when the balances were recalculated.",
+    "placeholders": {
+      "accounts": {
+        "type": "String"
+      },
+      "ago": {
+        "type": "String"
+      }
+    }
+  },
+  "accountsAgoMinutes": "{minutes, plural, =0{à l’instant} =1{il y a 1 min} other{il y a {minutes} min}}",
+  "@accountsAgoMinutes": {
+    "description": "How long ago the balances were recalculated, under an hour.",
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "accountsAgoHours": "{hours, plural, =1{il y a 1 h} other{il y a {hours} h}}",
+  "@accountsAgoHours": {
+    "description": "How long ago the balances were recalculated, an hour or more.",
+    "placeholders": {
+      "hours": {
+        "type": "int"
+      }
+    }
+  },
+  "accountsColumnAccount": "Compte",
+  "@accountsColumnAccount": {
+    "description": "Accounts table column header."
+  },
+  "accountsColumnInstitution": "Établissement",
+  "@accountsColumnInstitution": {
+    "description": "Accounts table column header."
+  },
+  "accountsColumnLastImport": "Dernier import",
+  "@accountsColumnLastImport": {
+    "description": "Accounts table column header."
+  },
+  "accountsColumnMonthChange": "Variation en {month}",
+  "@accountsColumnMonthChange": {
+    "description": "Accounts table column header: the balance change over the current month, named.",
+    "placeholders": {
+      "month": {
+        "type": "String"
+      }
+    }
+  },
+  "accountsColumnBalance": "Solde",
+  "@accountsColumnBalance": {
+    "description": "Accounts table column header."
+  },
+  "accountsNoImport": "—",
+  "@accountsNoImport": {
+    "description": "Accounts table cell when no statement was ever imported into the account."
+  },
+  "accountsCardCount": "{count, plural, =1{1 carte} other{{count} cartes}}",
+  "@accountsCardCount": {
+    "description": "Status after an account's name counting the cards settled on it; opens their menu.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "accountsGoToImports": "Aller aux imports",
+  "@accountsGoToImports": {
+    "description": "Secondary action of the accounts empty state."
+  },
+  "accountCurrencyLabel": "Devise",
+  "@accountCurrencyLabel": {
+    "description": "Read-only currency field label in the account form."
+  },
+  "accountCurrencyValue": "{currency, select, EUR{EUR, euro} USD{USD, dollar américain} GBP{GBP, livre sterling} CHF{CHF, franc suisse} other{{currency}}}",
+  "@accountCurrencyValue": {
+    "description": "Read-only currency value in the account form: the code, then the currency's name when known.",
+    "placeholders": {
+      "currency": {
+        "type": "String"
+      }
+    }
+  },
+  "accountCurrencyHelper": "La devise est celle de votre profil.",
+  "@accountCurrencyHelper": {
+    "description": "Helper under the read-only currency field of the account form."
+  },
+  "accountEdit": "Modifier",
+  "@accountEdit": {
+    "description": "Menu item to edit an account."
   },
   "accountArchive": "Archiver",
   "@accountArchive": {
@@ -662,15 +772,6 @@
   "accountSettlementRule": "Règle de prélèvement",
   "@accountSettlementRule": {
     "description": "Linked-card menu item, deferred-debit cards only: opens the rule filing the card's monthly debit as a transfer."
-  },
-  "accountLinkedCards": "{count, plural, =1{1 carte liée} other{{count} cartes liées}}",
-  "@accountLinkedCards": {
-    "description": "Tooltip and accessible label of the account card's linked-cards button, which shows a card icon and the count; opens the list of cards settled from the account.",
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
   },
   "cardSettlementNoAccount": "{card} : choisissez le compte sur lequel la carte est prélevée, pour que ses achats ne comptent qu'une fois.",
   "@cardSettlementNoAccount": {
@@ -946,10 +1047,6 @@
   "accountOpeningBalanceInvalid": "Entrez un montant valide.",
   "@accountOpeningBalanceInvalid": {
     "description": "Validation message when the opening balance can't be parsed as a number."
-  },
-  "accountFormSubmitCreate": "Créer le compte",
-  "@accountFormSubmitCreate": {
-    "description": "Submit button label on the account form when creating an account."
   },
   "accountFormSubmitEdit": "Enregistrer",
   "@accountFormSubmitEdit": {
