@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart' show DateFormat;
+import 'package:lucide_icons_flutter/lucide_icons_300.dart';
 
 import '../../../core/api/api_client.dart';
 import '../../../core/theme/app_theme.dart';
@@ -12,6 +13,7 @@ import '../../../core/widgets/inline_banner.dart';
 import '../../../core/widgets/labeled_field.dart';
 import '../../../core/widgets/money_field.dart';
 import '../../../core/widgets/primary_button.dart';
+import '../../../core/widgets/state_views.dart';
 import '../../../core/widgets/status_text.dart';
 import '../../../l10n/app_localizations.dart';
 import '../application/networth_controller.dart';
@@ -164,18 +166,13 @@ class _DeclaredBalancesModalState extends ConsumerState<DeclaredBalancesModal> {
 
     return AppModal(
       title: l10n.networthDeclaredTitle,
-      subtitle: Text(
-        l10n.networthDeclaredSubtitle,
-        style: Theme.of(
-          context,
-        ).textTheme.bodySmall?.copyWith(color: context.colors.textSecondary),
-      ),
+      subtitle: Text(l10n.networthDeclaredSubtitle),
       width: 560,
       actions: [
-        OutlinedButton(
+        AppButton(
           key: const Key('declaredClose'),
+          label: l10n.networthDeclaredClose,
           onPressed: () => Navigator.of(context).pop(),
-          child: Text(l10n.networthDeclaredClose),
         ),
       ],
       child: Column(
@@ -186,7 +183,7 @@ class _DeclaredBalancesModalState extends ConsumerState<DeclaredBalancesModal> {
               key: const Key('declaredError'),
               message: _bannerError!,
             ),
-            const SizedBox(height: AppSpacing.md),
+            const SizedBox(height: AppSpacing.fieldGap),
           ],
           Form(
             key: _formKey,
@@ -225,7 +222,7 @@ class _DeclaredBalancesModalState extends ConsumerState<DeclaredBalancesModal> {
                     ),
                   ),
                 ),
-                const SizedBox(width: 14),
+                const SizedBox(width: AppSpacing.fieldGap),
                 Expanded(
                   child: LabeledField(
                     label: l10n.networthDeclaredAmount,
@@ -247,7 +244,7 @@ class _DeclaredBalancesModalState extends ConsumerState<DeclaredBalancesModal> {
                     ),
                   ),
                 ),
-                const SizedBox(width: 14),
+                const SizedBox(width: AppSpacing.fieldGap),
                 Padding(
                   // Level with the fields, under their labels.
                   padding: const EdgeInsets.only(top: 22),
@@ -304,21 +301,27 @@ class _DeclaredBalancesModalState extends ConsumerState<DeclaredBalancesModal> {
                       key: const Key('declaredLoadFailed'),
                       style: Theme.of(context).textTheme.bodySmall,
                     ),
-                    TextButton(
+                    const SizedBox(height: AppSpacing.sm),
+                    AppButton(
                       key: const Key('declaredRetry'),
+                      label: l10n.networthDeclaredRetry,
                       onPressed: () =>
                           ref.invalidate(declaredBalancesControllerProvider),
-                      child: Text(l10n.networthDeclaredRetry),
                     ),
                   ],
                 ),
               ),
+              // The rows' own silhouette (`00` §7), not a spinner.
               loading: () => const Padding(
-                padding: EdgeInsets.all(AppSpacing.lg),
-                child: Center(
-                  child: SizedBox.square(
-                    dimension: 18,
-                    child: CircularProgressIndicator(strokeWidth: 2),
+                key: Key('declaredLoading'),
+                padding: EdgeInsets.symmetric(vertical: AppSpacing.sm),
+                child: SkeletonPulse(
+                  child: Column(
+                    children: [
+                      SkeletonBlock(height: AppSizes.tableRow),
+                      SizedBox(height: AppSpacing.smPlus),
+                      SkeletonBlock(height: AppSizes.tableRow),
+                    ],
                   ),
                 ),
               ),
@@ -352,7 +355,7 @@ class _DeclaredRow extends StatelessWidget {
 
     return Container(
       key: Key('declaredRow-$key'),
-      height: 48,
+      height: AppSizes.tableRowTwoLines,
       decoration: BoxDecoration(
         border: Border(bottom: BorderSide(color: context.colors.line)),
       ),
@@ -382,25 +385,23 @@ class _DeclaredRow extends StatelessWidget {
             currency: entry.currency,
             colorize: false,
           ),
-          const SizedBox(width: AppSpacing.sm),
-          IconButton(
+          const SizedBox(width: AppSpacing.smPlus),
+          AppButton(
             key: Key('declaredEdit-$key'),
+            label: l10n.networthDeclaredEdit,
+            icon: LucideIcons300.pencil,
+            iconOnly: true,
+            variant: AppButtonVariant.ghost,
             onPressed: onEdit,
-            iconSize: 16,
-            visualDensity: VisualDensity.compact,
-            tooltip: l10n.networthDeclaredEdit,
-            icon: Icon(
-              Icons.edit_outlined,
-              color: context.colors.textSecondary,
-            ),
           ),
-          IconButton(
+          const SizedBox(width: AppSpacing.xs),
+          AppButton(
             key: Key('declaredDelete-$key'),
+            label: l10n.networthDeclaredDelete,
+            icon: LucideIcons300.trash2,
+            iconOnly: true,
+            variant: AppButtonVariant.ghost,
             onPressed: onDelete,
-            iconSize: 16,
-            visualDensity: VisualDensity.compact,
-            tooltip: l10n.networthDeclaredDelete,
-            icon: Icon(Icons.close_rounded, color: context.colors.textTertiary),
           ),
         ],
       ),

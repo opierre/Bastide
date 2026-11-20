@@ -207,4 +207,36 @@ void main() {
       verify(() => apiClient.get('/networth/summary')).called(2);
     });
   });
+
+  test('the composition reads by descending amount, ties in API order', () {
+    CompositionEntry entry(String key, int amount) => CompositionEntry(
+      group: CompositionGroup.account,
+      key: key,
+      amountMinor: amount,
+      shareBps: 0,
+    );
+    final summary = NetWorthSummary(
+      accountsMinor: 0,
+      propertiesMinor: 0,
+      mortgagesMinor: 0,
+      netWorthMinor: 0,
+      composition: [
+        entry('cash', 500),
+        entry('checking', 900),
+        entry('credit', -200),
+        entry('savings', 500),
+      ],
+      monthDeltaMinor: null,
+      series: const [],
+      propertyValuesHeldFlat: false,
+      valuedOnOldest: null,
+      activeLoanCount: 0,
+      currency: 'EUR',
+    );
+
+    expect(
+      [for (final e in summary.compositionByAmount) e.key],
+      ['checking', 'cash', 'savings', 'credit'],
+    );
+  });
 }

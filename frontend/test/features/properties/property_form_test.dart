@@ -1,6 +1,8 @@
 import 'package:bastide/core/api/api_client.dart';
 import 'package:bastide/core/theme/app_theme.dart';
 import 'package:bastide/core/widgets/amount_text.dart';
+import 'package:bastide/core/widgets/app_button.dart';
+import 'package:bastide/core/widgets/app_modal.dart';
 import 'package:bastide/features/properties/application/properties_controller.dart';
 import 'package:bastide/features/properties/domain/property.dart';
 import 'package:bastide/features/properties/presentation/property_form_modal.dart';
@@ -38,6 +40,11 @@ Finder _dateInput(String key) => find.descendant(
   of: find.byKey(Key(key)),
   matching: find.byType(EditableText),
 );
+
+/// The modal's own box, the one that carries its width.
+Finder _modalBox() => find
+    .descendant(of: find.byType(AppModal), matching: find.byType(Container))
+    .first;
 
 String? _text(WidgetTester tester, String key) =>
     tester.widget<Text>(find.byKey(Key(key))).data;
@@ -80,6 +87,61 @@ void main() {
       expect(formatOwnershipInput(3333, 'fr'), '33,33');
       expect(formatOwnershipInput(3350, 'en'), '33.50');
     });
+  });
+
+  testWidgets(
+    'the form is 620 px with « Annuler » · « Enregistrer », no lead',
+    (tester) async {
+      _useDesktopSurface(tester);
+      await tester.pumpWidget(
+        _wrap(
+          controller: FakePropertiesController(),
+          modal: const PropertyFormModal(currency: 'EUR'),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('Nouveau bien'), findsOneWidget);
+      expect(
+        find.descendant(
+          of: find.byKey(const Key('propertyFormSubmit')),
+          matching: find.text('Enregistrer'),
+        ),
+        findsOneWidget,
+      );
+      final cancel = tester.widget<AppButton>(
+        find.byKey(const Key('propertyFormCancel')),
+      );
+      expect(cancel.variant, AppButtonVariant.secondary);
+      expect(cancel.label, 'Annuler');
+      expect(tester.getSize(_modalBox()).width, 620);
+      expect(
+        find.text('La valeur déclarée entre dans la synthèse.'),
+        findsNothing,
+      );
+    },
+  );
+
+  testWidgets('the new valuation is 420 px and leads with the current one', (
+    tester,
+  ) async {
+    _useDesktopSurface(tester);
+    await tester.pumpWidget(
+      _wrap(
+        controller: FakePropertiesController(),
+        modal: PropertyRevalueModal(property: testStudio()),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(tester.getSize(_modalBox()).width, 420);
+    expect(
+      find.descendant(
+        of: find.byKey(const Key('propertyRevalueSubmit')),
+        matching: find.text('Enregistrer'),
+      ),
+      findsOneWidget,
+    );
   });
 
   testWidgets('an empty submit explains each missing field and saves nothing', (

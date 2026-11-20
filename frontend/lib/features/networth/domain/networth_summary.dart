@@ -76,7 +76,8 @@ class DeclaredBalance {
   final bool superseded;
 }
 
-/// `GET /networth/summary`, plus the active loan count the Passif card names.
+/// `GET /networth/summary`, plus the active loan count the Passif caption
+/// names.
 ///
 /// Every figure is derived server-side. The panel formats
 /// them and adds nothing: not a percentage, not a delta, not a zero-filled month.
@@ -110,6 +111,18 @@ class NetWorthSummary {
   final int netWorthMinor;
   final List<CompositionEntry> composition;
 
+  /// [composition] by descending amount, the order the panel lists and
+  /// colours it in (`15-synthese.md` §3a). Stable, so two equal slices keep
+  /// the server's order.
+  List<CompositionEntry> get compositionByAmount {
+    final indexed = composition.indexed.toList()
+      ..sort((a, b) {
+        final byAmount = b.$2.amountMinor.compareTo(a.$2.amountMinor);
+        return byAmount != 0 ? byAmount : a.$1.compareTo(b.$1);
+      });
+    return [for (final (_, entry) in indexed) entry];
+  }
+
   /// The last two series points' difference; `null` with fewer than two.
   final int? monthDeltaMinor;
 
@@ -124,7 +137,7 @@ class NetWorthSummary {
   final String currency;
 
   /// Nothing to add up: no account, no property, no loan, no history. The one
-  /// case the panel drops its segmented control for a full empty state.
+  /// case the panel shows its empty state instead of the page.
   bool get isEmpty =>
       composition.isEmpty && activeLoanCount == 0 && series.isEmpty;
 }

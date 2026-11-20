@@ -3,16 +3,19 @@ import 'dart:async';
 import 'package:bastide/core/theme/app_theme.dart';
 import 'package:bastide/core/theme/tokens.dart';
 import 'package:bastide/core/widgets/amount_text.dart';
+import 'package:bastide/core/widgets/app_button.dart';
+import 'package:bastide/core/widgets/app_card.dart';
+import 'package:bastide/core/widgets/status_text.dart';
 import 'package:bastide/features/networth/application/networth_controller.dart';
 import 'package:bastide/features/networth/domain/networth_summary.dart';
 import 'package:bastide/features/networth/presentation/composition_breakdown.dart';
 import 'package:bastide/features/networth/presentation/networth_screen.dart';
-import 'package:bastide/features/networth/presentation/networth_summary_card.dart';
 import 'package:bastide/features/properties/application/properties_controller.dart';
 import 'package:bastide/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:lucide_icons_flutter/lucide_icons_300.dart';
 
 import '../../support/networth_fixtures.dart';
 import '../../support/properties_fixtures.dart';
@@ -29,6 +32,7 @@ Widget _wrap({
   FakeNetworthController? networth,
   FakePropertiesController? properties,
   Locale locale = const Locale('fr'),
+  ThemeData? theme,
 }) {
   return ProviderScope(
     overrides: [
@@ -45,7 +49,7 @@ Widget _wrap({
     ],
     child: MaterialApp(
       locale: locale,
-      theme: AppTheme.dark,
+      theme: theme ?? AppTheme.dark,
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
       home: const Scaffold(
@@ -70,19 +74,11 @@ void _useDesktopSurface(WidgetTester tester) {
 String? _text(WidgetTester tester, String key) =>
     tester.widget<Text>(find.byKey(Key(key))).data;
 
-/// The rendered text of an [AmountText], with the style it was painted in.
-Text _amount(WidgetTester tester, String key) => tester.widget<Text>(
+/// The text inside the widget at [key]: an [AmountText], a [StatusText], a
+/// note.
+Text _inner(WidgetTester tester, String key) => tester.widget<Text>(
   find.descendant(of: find.byKey(Key(key)), matching: find.byType(Text)),
 );
-
-String _segmentLabel(WidgetTester tester) => tester
-    .widget<Text>(
-      find.descendant(
-        of: find.byKey(const Key('networthPropertiesSegment')),
-        matching: find.byType(Text),
-      ),
-    )
-    .data!;
 
 class _PendingNetworth extends FakeNetworthController {
   @override
@@ -90,45 +86,51 @@ class _PendingNetworth extends FakeNetworthController {
 }
 
 void main() {
-  group('summary figures', () {
-    testWidgets('render as returned, neutral, formatted in French', (
+  group('equation line', () {
+    testWidgets('reads assets minus liabilities equals net worth, neutral', (
       tester,
     ) async {
       _useDesktopSurface(tester);
       await tester.pumpWidget(_wrap());
       await tester.pumpAndSettle();
 
-      final value = tester.widget<AmountText>(
-        find.byKey(const Key('networthValue')),
-      );
-      expect(value.amountMinor, 28267079);
-      expect(value.colorize, isFalse);
-      final painted = _amount(tester, 'networthValue');
-      expect(painted.data, _money(28267079));
-      expect(painted.style!.color, AppColors.dark.text);
+      final value = _inner(tester, 'networthValue');
+      expect(value.data, _money(28267079));
+      expect(value.style!.color, AppColors.dark.text);
+      expect(value.style!.fontSize, 40);
 
-      expect(_amount(tester, 'networthAssets').data, _money(51680000));
+      final assets = _inner(tester, 'networthAssets');
+      expect(assets.data, _money(51680000));
+      expect(assets.style!.fontSize, 28);
       expect(
         _text(tester, 'networthAssetsCaption'),
         'Comptes ${_money(2430000)} · Biens ${_money(49250000)}',
       );
-      expect(_amount(tester, 'networthLiabilities').data, _money(23412921));
+      expect(_inner(tester, 'networthLiabilities').data, _money(23412921));
       expect(
         _text(tester, 'networthLiabilitiesCaption'),
-        '2 crédits · capital restant dû',
+        '2 crédits, capital restant dû',
       );
-      expect(_segmentLabel(tester), 'Biens (2)');
+      for (final operator in const ['−', '=']) {
+        final glyph = tester.widget<Text>(find.text(operator));
+        expect(glyph.style!.color, AppColors.dark.textTertiary);
+      }
+      expect(find.text('Patrimoine net'), findsNWidgets(2));
+
+      // Read left to right: Actif, then Passif. (The test font draws every
+      // glyph a full em wide, so the net worth may wrap here.)
+      double left(String key) => tester.getTopLeft(find.byKey(Key(key))).dx;
+      expect(left('networthAssets'), lessThan(left('networthLiabilities')));
     });
 
-    testWidgets('render the same figures in English', (tester) async {
+    testWidgets('reads the same in English', (tester) async {
       _useDesktopSurface(tester);
       await tester.pumpWidget(_wrap(locale: const Locale('en')));
       await tester.pumpAndSettle();
 
-      expect(
-        _amount(tester, 'networthValue').data,
-        _money(28267079, locale: 'en'),
-      );
+      expect(find.text('Assets'), findsOneWidget);
+      expect(find.text('Liabilities'), findsOneWidget);
+      expect(find.text('Net worth'), findsNWidgets(2));
       expect(
         _text(tester, 'networthAssetsCaption'),
         'Accounts ${_money(2430000, locale: 'en')} · '
@@ -136,10 +138,12 @@ void main() {
       );
       expect(
         _text(tester, 'networthLiabilitiesCaption'),
-        '2 loans · outstanding principal',
+        '2 loans, outstanding principal',
       );
-      expect(_segmentLabel(tester), 'Properties (2)');
-      expect(find.text('Good to know'.toUpperCase()), findsOneWidget);
+      expect(
+        _inner(tester, 'networthDelta').data,
+        '${_money(147778, locale: 'en', sign: true)} since April',
+      );
     });
 
     for (final locale in const ['fr', 'en']) {
@@ -156,18 +160,39 @@ void main() {
         );
         await tester.pumpAndSettle();
 
-        final painted = _amount(tester, 'networthValue');
+        final painted = _inner(tester, 'networthValue');
         expect(painted.data, contains('−'));
         expect(painted.data, isNot(contains('-')));
         expect(painted.data, _money(-20982921, locale: locale));
         expect(painted.style!.color, AppColors.dark.text);
       });
     }
-  });
 
-  group('month delta pill', () {
-    for (final (delta, turns) in const [(147778, 0), (-147778, 2)]) {
-      testWidgets('is iris for a delta of $delta', (tester) async {
+    testWidgets('a part that is zero is left out of the assets caption', (
+      tester,
+    ) async {
+      _useDesktopSurface(tester);
+      await tester.pumpWidget(
+        _wrap(
+          networth: FakeNetworthController(summary: testNoPropertySummary()),
+          properties: FakePropertiesController(),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(
+        _text(tester, 'networthAssetsCaption'),
+        'Comptes ${_money(2430000)}',
+      );
+    });
+
+    for (final (delta, icon) in const [
+      (147778, LucideIcons300.trendingUp),
+      (-147778, LucideIcons300.trendingDown),
+    ]) {
+      testWidgets('the month change is a neutral status ($delta)', (
+        tester,
+      ) async {
         _useDesktopSurface(tester);
         await tester.pumpWidget(
           _wrap(
@@ -178,41 +203,18 @@ void main() {
         );
         await tester.pumpAndSettle();
 
-        final pill = tester.widget<Container>(
-          find.byKey(const Key('networthDeltaPill')),
+        final status = tester.widget<StatusText>(
+          find.byKey(const Key('networthDelta')),
         );
-        expect(
-          (pill.decoration! as BoxDecoration).color,
-          NetworthDeltaPill.fill(AppColors.dark),
-        );
-        expect(
-          tester
-              .widget<RotatedBox>(
-                find.byKey(const Key('networthDeltaTriangle')),
-              )
-              .quarterTurns,
-          turns,
-        );
-        final icon = tester.widget<Icon>(
-          find.descendant(
-            of: find.byKey(const Key('networthDeltaTriangle')),
-            matching: find.byType(Icon),
-          ),
-        );
-        expect(icon.color, AppColors.dark.accent);
-        final amount = tester.widget<Text>(
-          find.byKey(const Key('networthDeltaAmount')),
-        );
-        expect(amount.data, _money(delta, sign: true));
-        expect(amount.style!.color, AppColors.dark.accent);
-        expect(
-          _text(tester, 'networthDeltaCaption'),
-          'vs avril 2026 · valeur des biens inchangée',
-        );
+        expect(status.tone, StatusTone.neutral);
+        expect(status.icon, icon);
+        final label = _inner(tester, 'networthDelta');
+        expect(label.data, '${_money(delta, sign: true)} depuis avril');
+        expect(label.style!.color, AppColors.dark.textSecondary);
       });
     }
 
-    testWidgets('is absent without a previous month', (tester) async {
+    testWidgets('no month change without a previous month', (tester) async {
       _useDesktopSurface(tester);
       await tester.pumpWidget(
         _wrap(
@@ -223,122 +225,86 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      expect(find.byKey(const Key('networthDeltaPill')), findsNothing);
+      expect(find.byKey(const Key('networthDelta')), findsNothing);
     });
   });
 
-  testWidgets('the composition is a stacked strip with its held-share foot', (
-    tester,
-  ) async {
-    _useDesktopSurface(tester);
-    await tester.pumpWidget(_wrap());
-    await tester.pumpAndSettle();
+  group('composition', () {
+    testWidgets('lists the slices by descending amount, hues by rank', (
+      tester,
+    ) async {
+      _useDesktopSurface(tester);
+      await tester.pumpWidget(_wrap());
+      await tester.pumpAndSettle();
 
-    expect(find.byKey(const Key('compositionStrip')), findsOneWidget);
-    for (final key in const [
-      'account-checking',
-      'account-savings',
-      'property-primary_residence',
-      'property-rental',
-    ]) {
-      expect(find.byKey(Key('compositionSegment-$key')), findsOneWidget);
-      expect(find.byKey(Key('compositionRow-$key')), findsOneWidget);
-    }
-    expect(
-      find.descendant(
-        of: find.byKey(const Key('compositionRow-property-rental')),
-        matching: find.text('Locatif (part détenue)'),
-      ),
-      findsOneWidget,
-    );
-    expect(
-      find.descendant(
-        of: find.byKey(const Key('compositionRow-property-primary_residence')),
-        matching: find.text(formatCompositionShare(8130, 'fr')),
-      ),
-      findsOneWidget,
-    );
-    expect(
-      _text(tester, 'compositionFoot'),
-      'Les biens comptent pour la part détenue seulement '
-      '(Studio Villeurbanne : ${_money(7250000)} sur ${_money(14500000)}).',
-    );
-    expect(find.byKey(const Key('compositionInvite')), findsNothing);
-  });
+      const order = [
+        'property-primary_residence',
+        'property-rental',
+        'account-savings',
+        'account-checking',
+      ];
+      final tops = [
+        for (final key in order)
+          tester.getTopLeft(find.byKey(Key('compositionRow-$key'))).dy,
+      ];
+      expect(tops, orderedEquals([...tops]..sort()));
 
-  testWidgets('the held-share foot names a property with its address', (
-    tester,
-  ) async {
-    _useDesktopSurface(tester);
-    await tester.pumpWidget(
-      _wrap(
-        properties: FakePropertiesController(
-          initialProperties: [
-            testProperty(address: '3 rue des Glycines, 69003 Lyon'),
-            testStudio(address: '8 allée des Tilleuls, 69100 Villeurbanne'),
-          ],
+      for (final (rank, key) in order.indexed) {
+        final segment = tester.widget<DecoratedBox>(
+          find.descendant(
+            of: find.byKey(Key('compositionSegment-$key')),
+            matching: find.byType(DecoratedBox),
+          ),
+        );
+        expect(
+          (segment.decoration as BoxDecoration).color,
+          CategoryColors.dark.forRank(rank),
+        );
+      }
+      expect(
+        tester.getSize(find.byKey(const Key('compositionBar'))).height,
+        AppChart.compositionBarHeight,
+      );
+      expect(
+        find.descendant(
+          of: find.byKey(const Key('compositionRow-property-rental')),
+          matching: find.text('Locatif, part détenue'),
         ),
-      ),
-    );
-    await tester.pumpAndSettle();
-
-    expect(
-      _text(tester, 'compositionFoot'),
-      'Les biens comptent pour la part détenue seulement '
-      '(Studio Villeurbanne (8 allée des Tilleuls, 69100 Villeurbanne) : '
-      '${_money(7250000)} sur ${_money(14500000)}).',
-    );
-  });
-
-  testWidgets('the same foot in English', (tester) async {
-    _useDesktopSurface(tester);
-    await tester.pumpWidget(
-      _wrap(
-        locale: const Locale('en'),
-        properties: FakePropertiesController(
-          initialProperties: [
-            testStudio(address: '8 allée des Tilleuls, 69100 Villeurbanne'),
-          ],
+        findsOneWidget,
+      );
+      expect(
+        find.descendant(
+          of: find.byKey(
+            const Key('compositionRow-property-primary_residence'),
+          ),
+          matching: find.text(formatCompositionShare(8130, 'fr')),
         ),
-      ),
-    );
-    await tester.pumpAndSettle();
+        findsOneWidget,
+      );
+      expect(
+        _text(tester, 'compositionPartNote-p2'),
+        'Un bien compte pour la part détenue : Studio Villeurbanne, '
+        '${_money(7250000)} sur ${_money(14500000)}.',
+      );
+      expect(find.byKey(const Key('compositionPartNote-p1')), findsNothing);
+    });
 
-    expect(
-      _text(tester, 'compositionFoot'),
-      'Properties count for the held share only '
-      '(Studio Villeurbanne (8 allée des Tilleuls, 69100 Villeurbanne): '
-      '${_money(7250000, locale: 'en')} of ${_money(14500000, locale: 'en')}).',
-    );
-  });
+    testWidgets('the part note reads in English', (tester) async {
+      _useDesktopSurface(tester);
+      await tester.pumpWidget(_wrap(locale: const Locale('en')));
+      await tester.pumpAndSettle();
 
-  testWidgets('the exclusions are stated in the panel', (tester) async {
-    _useDesktopSurface(tester);
-    await tester.pumpWidget(_wrap());
-    await tester.pumpAndSettle();
+      expect(
+        _text(tester, 'compositionPartNote-p2'),
+        'A property counts for the held share: Studio Villeurbanne, '
+        '${_money(7250000, locale: 'en')} of '
+        '${_money(14500000, locale: 'en')}.',
+      );
+    });
 
-    expect(find.text('À SAVOIR'), findsOneWidget);
-    expect(
-      find.descendant(
-        of: find.byKey(const Key('exclusionGoals')),
-        matching: find.text('Objectifs'),
-      ),
-      findsOneWidget,
-    );
-    expect(
-      find.descendant(
-        of: find.byKey(const Key('exclusionSubscriptions')),
-        matching: find.text(
-          'Un prélèvement récurrent est une dépense à venir, pas une dette due aujourd\'hui.',
-        ),
-      ),
-      findsOneWidget,
-    );
-  });
-
-  testWidgets(
-    'no property: the summary runs on accounts and loans with an invite plate',
-    (tester) async {
+    testWidgets('no property: no property row in the composition', (
+      tester,
+    ) async {
       _useDesktopSurface(tester);
       await tester.pumpWidget(
         _wrap(
@@ -348,29 +314,99 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      expect(find.byKey(const Key('networthViewSwitch')), findsOneWidget);
-      expect(_segmentLabel(tester), 'Biens (0)');
-      expect(
-        _text(tester, 'networthAssetsCaption'),
-        'Comptes ${_money(2430000)} · aucun bien déclaré',
-      );
-      expect(find.byKey(const Key('compositionInvite')), findsOneWidget);
-      expect(find.byKey(const Key('compositionFoot')), findsNothing);
       expect(
         find.byKey(const Key('compositionSegment-account-checking')),
         findsOneWidget,
       );
       expect(
-        find.byKey(const Key('compositionSegment-property-rental')),
+        find.byKey(const Key('compositionRow-property-rental')),
         findsNothing,
       );
-      expect(find.byKey(const Key('networthExclusions')), findsOneWidget);
-    },
-  );
+    });
+  });
 
-  testWidgets('nothing at all shows the empty state without the switch', (
+  group('notes', () {
+    testWidgets('say what is not counted, under « À savoir »', (tester) async {
+      _useDesktopSurface(tester);
+      await tester.pumpWidget(_wrap());
+      await tester.pumpAndSettle();
+
+      expect(find.text('À savoir'), findsOneWidget);
+      expect(find.text('À SAVOIR'), findsNothing);
+      expect(
+        _inner(tester, 'networthNoteGoals').data,
+        'Les objectifs réservent de l’argent déjà présent sur un compte. '
+        'Ils ne sont pas comptés une seconde fois.',
+      );
+      expect(
+        _inner(tester, 'networthNoteSubscriptions').data,
+        'Un abonnement est une dépense à venir, pas une dette due '
+        'aujourd’hui.',
+      );
+      expect(find.byKey(const Key('networthNoteHeldFlat')), findsOneWidget);
+    });
+
+    testWidgets('read in English', (tester) async {
+      _useDesktopSurface(tester);
+      await tester.pumpWidget(_wrap(locale: const Locale('en')));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Good to know'), findsOneWidget);
+    });
+  });
+
+  testWidgets('sections, not cards: nothing on the page is framed', (
     tester,
   ) async {
+    _useDesktopSurface(tester);
+    await tester.pumpWidget(_wrap());
+    await tester.pumpAndSettle();
+
+    expect(find.byType(AppCard), findsNothing);
+    expect(find.byKey(const Key('networthViewSwitch')), findsNothing);
+  });
+
+  testWidgets('renders in the light theme with its tokens', (tester) async {
+    _useDesktopSurface(tester);
+    await tester.pumpWidget(_wrap(theme: AppTheme.light));
+    await tester.pumpAndSettle();
+
+    expect(_inner(tester, 'networthValue').style!.color, AppColors.light.text);
+    expect(
+      _inner(tester, 'networthDelta').style!.color,
+      AppColors.light.textSecondary,
+    );
+  });
+
+  testWidgets('renders with the sidebar expanded, at 1440 − 224 px', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(1440 - AppSizes.sidebar, 852);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.reset);
+    await tester.pumpWidget(_wrap());
+    await tester.pumpAndSettle();
+
+    expect(tester.takeException(), isNull);
+    expect(find.byKey(const Key('networthPage')), findsOneWidget);
+  });
+
+  testWidgets('the title-bar control is the secondary « Nouveau bien »', (
+    tester,
+  ) async {
+    _useDesktopSurface(tester);
+    await tester.pumpWidget(_wrap());
+    await tester.pumpAndSettle();
+
+    final button = tester.widget<AppButton>(
+      find.byKey(const Key('addPropertyButton')),
+    );
+    expect(button.variant, AppButtonVariant.secondary);
+    expect(button.icon, LucideIcons300.plus);
+    expect(button.label, 'Nouveau bien');
+  });
+
+  testWidgets('nothing at all shows the empty state', (tester) async {
     _useDesktopSurface(tester);
     await tester.pumpWidget(
       _wrap(
@@ -382,13 +418,13 @@ void main() {
 
     expect(find.byKey(const Key('networthEmptyState')), findsOneWidget);
     expect(find.text('Aucun compte, bien ou crédit'), findsOneWidget);
-    expect(find.byKey(const Key('networthEmptyImport')), findsOneWidget);
+    expect(find.text('Aller aux imports'), findsOneWidget);
     expect(find.byKey(const Key('networthEmptyAddProperty')), findsOneWidget);
-    expect(find.byKey(const Key('networthViewSwitch')), findsNothing);
+    expect(find.byKey(const Key('networthPage')), findsNothing);
     expect(find.byKey(const Key('networthErrorText')), findsNothing);
   });
 
-  testWidgets('loading shows the skeleton', (tester) async {
+  testWidgets('loading shows the silhouette', (tester) async {
     _useDesktopSurface(tester);
     await tester.pumpWidget(_wrap(networth: _PendingNetworth()));
     await tester.pump();

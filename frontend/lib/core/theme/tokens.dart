@@ -356,21 +356,6 @@ class CategoryColors extends ThemeExtension<CategoryColors> {
   Color forRank(int index) =>
       index < 6 ? forSlot(CategorySlot.values[index + 1]) : cat0;
 
-  /// The hue of an asset in the Synthèse composition and the property nature
-  /// pills, keyed by the backend account `type` or property `kind`. Reuses the
-  /// slots (`00` §2.4); every other type or kind takes [cat0].
-  Color forAccountType(String type) => switch (type) {
-    'checking' => cat1,
-    'savings' => cat3,
-    _ => cat0,
-  };
-
-  Color forPropertyKind(String kind) => switch (kind) {
-    'primary_residence' => cat2,
-    'rental' => cat6,
-    _ => cat0,
-  };
-
   /// The plate of a preset user avatar, keyed by the backend preset key.
   Color forAvatarPreset(String preset, AppColors colors) => switch (preset) {
     'cyan' => cat1,
@@ -615,6 +600,30 @@ abstract final class AppAccountSection {
   static const subtotalWidth = 120.0;
 }
 
+/// The Synthèse panel of `docs/design/15-synthese.md` §Layout.
+abstract final class AppNetworth {
+  /// The equation line: its items and operators sit 28 px apart.
+  static const equationGap = 28.0;
+
+  /// Block 3: « Composition de l’actif » is 440 px wide, then a 48 px
+  /// gutter before « Patrimoine net ».
+  static const compositionWidth = 440.0;
+  static const compositionGutter = 48.0;
+
+  /// The series chart's height, axis included (mockup `#panel=networth`).
+  static const chartHeight = 230.0;
+
+  /// Column widths of the composition table: the share and the amount.
+  static const shareColumn = 72.0;
+  static const amountColumn = 140.0;
+
+  /// Column widths of the properties table: the share, the held value and
+  /// the row menu.
+  static const propertyShareColumn = 96.0;
+  static const propertyValueColumn = 140.0;
+  static const menuColumn = AppSizes.button + AppSpacing.smPlus;
+}
+
 /// v1: the 38 px control pill some panels still put in the title bar, kept
 /// until each panel's v2 ticket moves it to the 28 px controls of [AppSizes].
 abstract final class AppChrome {
@@ -678,6 +687,11 @@ abstract final class AppChart {
   /// Stacked bars: the gap between two segments, radius [stackRadius] on top.
   static const stackGap = 2.0;
   static const stackRadius = 2.0;
+
+  /// Composition bar: 8 px high, segments 2 px apart, radius
+  /// [AppRadii.bar].
+  static const compositionBarHeight = 8.0;
+  static const compositionBarGap = 2.0;
 
   /// The second series under a line: a thinner step line, no area.
   static const secondLineStroke = 1.5;
