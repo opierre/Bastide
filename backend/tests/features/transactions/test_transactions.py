@@ -106,6 +106,16 @@ def _insert_transaction(
     return transaction_id
 
 
+def _batch_id(tmp_path: Path, transaction_id: str) -> str:
+    """The import batch that added a transaction."""
+    session = open_session(tmp_path / "test.db")
+    transaction = session.get(Transaction, transaction_id)
+    assert transaction is not None
+    batch_id = transaction.import_batch_id
+    session.close()
+    return batch_id
+
+
 def _account_user_id(session: Session, account_id: str) -> str:
     account = session.get(Account, account_id)
     assert account is not None
@@ -285,6 +295,42 @@ def test_list_pagination_is_stable_and_bounded(client: TestClient, tmp_path: Pat
     ids_page_1 = {item["id"] for item in page_1["items"]}
     ids_page_2 = {item["id"] for item in page_2["items"]}
     assert ids_page_1.isdisjoint(ids_page_2)
+
+
+def test_list_filters_by_import_batch(client: TestClient, tmp_path: Path) -> None:
+    headers, _ = _register(client)
+    account_id = _create_account(client, headers)
+    wanted = _insert_transaction(tmp_path, account_id, description_clean="LOYER")
+    _insert_transaction(tmp_path, account_id, description_clean="BOULANGERIE")
+
+    response = client.get(
+        "/api/v1/transactions",
+        params={"import_batch_id": _batch_id(tmp_path, wanted)},
+        headers=headers,
+    )
+
+    body = response.json()
+    assert body["total"] == 1
+    assert [item["id"] for item in body["items"]] == [wanted]
+
+
+def test_list_import_batch_filter_ignores_another_users_batch(
+    client: TestClient, tmp_path: Path
+) -> None:
+    headers_a, _ = _register(client, "amelie@example.com")
+    _create_account(client, headers_a)
+    headers_b, _ = _register(client, "bruno@example.com")
+    account_id_b = _create_account(client, headers_b)
+    foreign = _insert_transaction(tmp_path, account_id_b)
+
+    response = client.get(
+        "/api/v1/transactions",
+        params={"import_batch_id": _batch_id(tmp_path, foreign)},
+        headers=headers_a,
+    )
+
+    assert response.status_code == 200
+    assert response.json()["total"] == 0
 
 
 def test_list_requires_auth(client: TestClient) -> None:

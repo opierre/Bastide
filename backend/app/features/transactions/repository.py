@@ -42,6 +42,7 @@ class TransactionRepository:
         page: int,
         page_size: int,
         include_linked_cards: bool = False,
+        import_batch_id: str | None = None,
     ) -> tuple[list[Transaction], int]:
         """Filtered, paginated transactions for a user, newest first.
 
@@ -51,6 +52,9 @@ class TransactionRepository:
 
         A `category_id` filter also takes in the rows filed under that category's
         sub-categories, so picking a main category shows everything beneath it.
+
+        An `import_batch_id` filter keeps the rows that import added. A batch of another
+        user matches nothing, since the account join already scopes rows to `user_id`.
 
         Eager-loads `category` (`selectinload`) so rendering a page never triggers one query
         per row.
@@ -78,6 +82,8 @@ class TransactionRepository:
             )
         if needs_review is not None:
             query = query.where(Transaction.needs_review == needs_review)
+        if import_batch_id is not None:
+            query = query.where(Transaction.import_batch_id == import_batch_id)
         if q:
             pattern = f"%{q}%"
             query = query.where(

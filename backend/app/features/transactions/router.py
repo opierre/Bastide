@@ -73,6 +73,7 @@ async def list_transactions(
     category_id: str | None = None,
     needs_review: bool | None = None,
     q: str | None = None,
+    import_batch_id: str | None = None,
     page: Annotated[int, Query(ge=1)] = 1,
     include_linked_cards: bool = False,
 ) -> TransactionPage:
@@ -81,6 +82,7 @@ async def list_transactions(
     `include_linked_cards` widens an `account_id` filter to the deferred cards settled on that
     account. Each row keeps its own `account_id`, so a client can tell the card's apart.
     `category_id` matches that category and its sub-categories.
+    `import_batch_id` keeps only the rows that import added.
     """
     items, total = service.list_for_user(
         user.id,
@@ -90,6 +92,7 @@ async def list_transactions(
         category_id=category_id,
         needs_review=needs_review,
         q=q,
+        import_batch_id=import_batch_id,
         page=page,
         include_linked_cards=include_linked_cards,
     )
