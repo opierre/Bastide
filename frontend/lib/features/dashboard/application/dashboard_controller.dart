@@ -1,15 +1,16 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../transactions/application/transactions_controller.dart';
 import '../data/dashboard_repository.dart';
 import '../domain/dashboard_summary.dart';
 import '../domain/dashboard_trends.dart';
 
-/// The selected month alongside the summary loaded for it, plus the trend series.
+/// The selected month alongside the summary loaded for it, plus the savings series.
 ///
-/// The month is always the first of that month. [trends] is *not* keyed to it: both its windows
-/// end at the current calendar month, so paging the picker back leaves the bars and the savings
-/// line where they are.
+/// The month is always the first of that month. [trends] is *not* keyed to it: its window
+/// ends at the current calendar month, so paging the picker back leaves the savings
+/// chart where it is.
 @immutable
 class DashboardState {
   const DashboardState({
@@ -22,6 +23,10 @@ class DashboardState {
   final DateTime month;
   final DashboardSummary summary;
   final DashboardTrends trends;
+
+  /// Whether the user has any transaction at all. Without one the panel shows
+  /// its empty state; a month without data still draws the panel with « — ».
+  bool get hasTransactions => recent.isNotEmpty;
 
   /// The newest transactions, for « Activité récente ». Like [trends], not keyed to [month] —
   /// "recent" means recent, not "recent within the month you happen to be looking at".
@@ -99,7 +104,7 @@ final dashboardControllerProvider =
       DashboardController.new,
     );
 
-/// How « Évolution de l'épargne » draws its months: one bar each, or joined as a line.
+/// How « Épargne mensuelle » draws its months: one bar each, or joined as a line.
 enum SavingsChartView { bars, line }
 
 /// The savings chart's chosen view. Panel state held for the session: the provider lives as
@@ -117,3 +122,19 @@ final savingsChartViewProvider =
     NotifierProvider<SavingsChartViewController, SavingsChartView>(
       SavingsChartViewController.new,
     );
+
+/// Points the transactions list at what a « Dépenses par catégorie » row
+/// stands for: [categoryId] over the whole of [month]. The « Autres » fold has
+/// no single category, so it clears the category and keeps the month.
+void focusTransactionsOnCategory(
+  TransactionFiltersNotifier filters, {
+  required String? categoryId,
+  required DateTime month,
+}) {
+  filters
+    ..setCategory(categoryId)
+    ..setDateRange(
+      DateTime(month.year, month.month),
+      DateTime(month.year, month.month + 1, 0),
+    );
+}

@@ -2,25 +2,6 @@ import 'package:flutter/foundation.dart';
 
 import '../../../core/logos/logo_ref.dart';
 
-/// One month's income and expense, for the income-vs-expense bars.
-@immutable
-class MonthlyTotals {
-  const MonthlyTotals({
-    required this.month,
-    required this.incomeMinor,
-    required this.expenseMinor,
-    required this.netMinor,
-  });
-
-  /// First of the month.
-  final DateTime month;
-  final int incomeMinor;
-
-  /// Positive magnitude, matching [DashboardSummary.expenseMinor].
-  final int expenseMinor;
-  final int netMinor;
-}
-
 /// One month on the savings chart.
 @immutable
 class SavingsPoint {
@@ -34,24 +15,18 @@ class SavingsPoint {
   final int savedMinor;
 }
 
-/// The dashboard's two trend series.
+/// The dashboard's savings series.
 ///
-/// Both windows end at the *current* month rather than the selected one — they answer "how am
+/// The window ends at the *current* month rather than the selected one — they answer "how am
 /// I trending lately", which doesn't change when the user pages the month picker back. That is
 /// why they arrive from their own endpoint and are fetched once per session rather than per
 /// month.
 @immutable
 class DashboardTrends {
-  const DashboardTrends({
-    required this.monthlySeries,
-    required this.savingsSeries,
-    required this.currency,
-  });
+  const DashboardTrends({required this.savingsSeries, required this.currency});
 
-  /// The last 4 months ending with the current one, oldest first.
-  final List<MonthlyTotals> monthlySeries;
-
-  /// The last 12 months ending with the current one, oldest first.
+  /// The last 12 months ending with the current one, oldest first. The last
+  /// point is therefore always the month in progress, hatched on the chart.
   final List<SavingsPoint> savingsSeries;
   final String currency;
 
@@ -99,6 +74,7 @@ class RecentTransaction {
     required this.amountMinor,
     required this.currency,
     this.logo,
+    this.isRawLabel = false,
   });
 
   final String id;
@@ -106,7 +82,7 @@ class RecentTransaction {
   /// The merchant if there is one, else the cleaned description.
   final String label;
 
-  /// « BNP — Compte courant »: the institution and the account it holds.
+  /// « BNP Compte courant »: the institution and the account it holds.
   final String accountLabel;
   final DateTime bookedDate;
   final int amountMinor;
@@ -114,4 +90,8 @@ class RecentTransaction {
 
   /// The rule logo the chip shows instead of the monogram; `null` for none.
   final LogoRef? logo;
+
+  /// Whether [label] is the bank's raw description rather than a recognised
+  /// merchant: set in Geist Mono, behind the « ? » monogram (`00` §7).
+  final bool isRawLabel;
 }

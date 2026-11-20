@@ -1,8 +1,9 @@
 import 'package:bastide/core/theme/app_theme.dart';
 import 'package:bastide/core/widgets/amount_text.dart';
+import 'package:bastide/core/widgets/repere_meter.dart';
 import 'package:bastide/features/dashboard/application/dashboard_controller.dart';
 import 'package:bastide/features/dashboard/presentation/dashboard_screen.dart';
-import 'package:bastide/features/dashboard/presentation/income_vs_expense.dart';
+import 'package:bastide/features/dashboard/presentation/goals_section.dart';
 import 'package:bastide/features/dashboard/presentation/recent_activity.dart';
 import 'package:bastide/features/goals/application/goals_controller.dart';
 import 'package:bastide/features/goals/domain/goal.dart';
@@ -51,77 +52,70 @@ void _useDesktopSurface(WidgetTester tester) {
   addTearDown(tester.view.reset);
 }
 
+String _richText(WidgetTester tester, Key key) =>
+    tester.widget<Text>(find.byKey(key)).textSpan!.toPlainText();
+
 void main() {
-  testWidgets('row 3 gains the Objectifs card with the top three goals', (
+  testWidgets('Objectifs lists four goals beside the recent activity', (
     tester,
   ) async {
     _useDesktopSurface(tester);
     await tester.pumpWidget(_wrap(goals: specGoals()));
     await tester.pumpAndSettle();
 
-    expect(find.byKey(const Key('dashboardGoalsCard')), findsOneWidget);
-    expect(find.byKey(const Key('dashboardGoalRow-g1')), findsOneWidget);
-    expect(find.byKey(const Key('dashboardGoalRow-g2')), findsOneWidget);
-    expect(find.byKey(const Key('dashboardGoalRow-g3')), findsOneWidget);
-    // Only three — the fourth goal of the grid stays on the panel.
-    expect(find.byKey(const Key('dashboardGoalRow-g4')), findsNothing);
+    expect(find.byType(GoalsSection), findsOneWidget);
+    for (final id in ['g1', 'g2', 'g3', 'g4']) {
+      expect(find.byKey(Key('dashboardGoalRow-$id')), findsOneWidget);
+    }
+    expect(find.text('Tous les objectifs'), findsOneWidget);
 
-    expect(find.text('${_money(640000)} / ${_money(1000000)}'), findsOneWidget);
-    // A reached goal shows the badge in place of the amounts.
-    expect(find.byKey(const Key('dashboardGoalReached-g3')), findsOneWidget);
-    expect(find.byKey(const Key('dashboardGoalAmounts-g3')), findsNothing);
+    expect(
+      _richText(tester, const Key('dashboardGoalAmounts-g1')),
+      '${_money(640000)} / ${_money(1000000)}',
+    );
+    expect(find.byKey(const Key('dashboardGoalPercent-g1')), findsOneWidget);
+    expect(
+      tester
+          .widget<Text>(find.byKey(const Key('dashboardGoalPercent-g1')))
+          .data,
+      contains('64'),
+    );
 
-    // The two original cards keep their content beside it.
-    expect(find.byType(IncomeVsExpenseChart), findsOneWidget);
-    expect(find.byType(RecentActivityCard), findsOneWidget);
+    // The two sections share the row evenly.
+    final recent = tester.getSize(find.byType(RecentActivity)).width;
+    final goals = tester.getSize(find.byType(GoalsSection)).width;
+    expect(recent / goals, closeTo(1.0, 0.02));
   });
 
-  testWidgets('row 3 keeps the drawn 1fr .95fr .85fr split', (tester) async {
+  testWidgets('a reached goal fills its repère in done', (tester) async {
     _useDesktopSurface(tester);
     await tester.pumpWidget(_wrap(goals: specGoals()));
     await tester.pumpAndSettle();
 
-    final income = tester.getSize(find.byType(IncomeVsExpenseChart)).width;
-    final recent = tester.getSize(find.byType(RecentActivityCard)).width;
-    final goals = tester
-        .getSize(find.byKey(const Key('dashboardGoalsCard')))
-        .width;
-
-    // Widths, not presence: an `Expanded` that fell back to its default flex
-    // leaves the card in the tree at a couple of pixels wide, which is what a
-    // findsOneWidget assertion cannot tell apart from the drawn column.
-    expect(income / recent, closeTo(100 / 95, 0.02));
-    expect(income / goals, closeTo(100 / 85, 0.02));
+    RepereMeter meter(String id) =>
+        tester.widget<RepereMeter>(find.byKey(Key('dashboardGoalMeter-$id')));
+    expect(meter('g3').tone, RepereTone.done);
+    expect(meter('g1').tone, RepereTone.normal);
+    expect(meter('g1').fraction, closeTo(0.64, 0.001));
+    // No mark: the end of the track is the target (`00` §8).
+    expect(meter('g1').markFraction, isNull);
   });
 
-  testWidgets('the two other cards share the row evenly without goals', (
-    tester,
-  ) async {
+  testWidgets('without goals the section is absent and activity takes the '
+      'full width', (tester) async {
     _useDesktopSurface(tester);
     await tester.pumpWidget(_wrap(goals: const []));
     await tester.pumpAndSettle();
 
-    final income = tester.getSize(find.byType(IncomeVsExpenseChart)).width;
-    final recent = tester.getSize(find.byType(RecentActivityCard)).width;
-
-    expect(income / recent, closeTo(1.0, 0.02));
+    expect(find.byType(GoalsSection), findsNothing);
+    // No shell in this harness: the content is the window less its margins.
+    expect(
+      tester.getSize(find.byType(RecentActivity)).width,
+      closeTo(1440 - 64, 1),
+    );
   });
 
-  testWidgets('the card is absent entirely when there are no goals', (
-    tester,
-  ) async {
-    _useDesktopSurface(tester);
-    await tester.pumpWidget(_wrap(goals: const []));
-    await tester.pumpAndSettle();
-
-    expect(find.byKey(const Key('dashboardGoalsCard')), findsNothing);
-    // Row 3 falls back to its two other cards rather than holding a column
-    // open for something the user hasn't created.
-    expect(find.byType(IncomeVsExpenseChart), findsOneWidget);
-    expect(find.byType(RecentActivityCard), findsOneWidget);
-  });
-
-  testWidgets('an archived goal leaves the dashboard card', (tester) async {
+  testWidgets('an archived goal leaves the dashboard', (tester) async {
     _useDesktopSurface(tester);
     await tester.pumpWidget(
       _wrap(
@@ -144,7 +138,7 @@ void main() {
     expect(find.byKey(const Key('dashboardGoalRow-g2')), findsOneWidget);
   });
 
-  testWidgets('the card formats its amounts for en', (tester) async {
+  testWidgets('the section formats its amounts for en', (tester) async {
     _useDesktopSurface(tester);
     await tester.pumpWidget(
       _wrap(goals: [testGoal()], locale: const Locale('en')),
@@ -152,12 +146,10 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Goals'), findsWidgets);
-    expect(find.text('View all'), findsOneWidget);
+    expect(find.text('All goals'), findsOneWidget);
     expect(
-      find.text(
-        '${_money(640000, locale: 'en')} / ${_money(1000000, locale: 'en')}',
-      ),
-      findsOneWidget,
+      _richText(tester, const Key('dashboardGoalAmounts-g1')),
+      '${_money(640000, locale: 'en')} / ${_money(1000000, locale: 'en')}',
     );
   });
 }

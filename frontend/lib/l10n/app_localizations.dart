@@ -1960,7 +1960,7 @@ abstract class AppLocalizations {
   /// Label on the savings rate column, the first and widest of the dashboard's KPI strip.
   ///
   /// In fr, this message translates to:
-  /// **'Taux d\'épargne'**
+  /// **'Taux d’épargne'**
   String get dashboardStatSavingsRate;
 
   /// Trend line under the net, income and expense figures, after the arrow and percentage: names the month compared against. French renders the month lowercase (« vs avril »), English capitalized ("vs April").
@@ -1969,17 +1969,11 @@ abstract class AppLocalizations {
   /// **'vs {month}'**
   String dashboardStatVsPreviousMonth(DateTime month);
 
-  /// The savings rate's month-over-month change, closing its goal line. A change in a rate is measured in percentage *points*, not percent, so the unit differs from the other three columns.
+  /// Status under the savings rate repère when the month met its goal; a check icon precedes it.
   ///
   /// In fr, this message translates to:
-  /// **'{delta} pt'**
-  String dashboardSavingsDeltaPoints(String delta);
-
-  /// Goal line under the savings rate's progress bar when the rate meets or beats the goal; a check glyph precedes it and the point delta follows it.
-  ///
-  /// In fr, this message translates to:
-  /// **'Objectif {goal} atteint'**
-  String dashboardSavingsGoalReached(String goal);
+  /// **'Objectif atteint'**
+  String get dashboardSavingsGoalReached;
 
   /// Goal line under the savings rate's progress bar when the rate is still below the goal; the point delta follows it. Phrased as progress rather than shortfall — the panel leads with encouragement.
   ///
@@ -1987,40 +1981,52 @@ abstract class AppLocalizations {
   /// **'Objectif {goal} en cours'**
   String dashboardSavingsGoalPending(String goal);
 
+  /// The savings rate's change in percentage points since the previous month, after the goal status (« +1,9 pt depuis avril »).
+  ///
+  /// In fr, this message translates to:
+  /// **'{delta} pt depuis {month}'**
+  String dashboardSavingsDeltaSince(String delta, DateTime month);
+
+  /// Label of the goal mark on the savings rate repère (« objectif 20 % »). Lowercase: it sits on the meter.
+  ///
+  /// In fr, this message translates to:
+  /// **'objectif {goal}'**
+  String dashboardSavingsGoalMark(String goal);
+
+  /// Placeholder for a reading-line figure the month has no value for.
+  ///
+  /// In fr, this message translates to:
+  /// **'—'**
+  String get dashboardNoValue;
+
   /// Title of the by-category expense breakdown chart card.
   ///
   /// In fr, this message translates to:
   /// **'Dépenses par catégorie'**
   String get dashboardCategoryBreakdownTitle;
 
-  /// Subtitle under the breakdown chart's title: the month it covers and how many categories it splits into.
+  /// The row the smallest categories fold into past eight rows of « Dépenses par catégorie ».
   ///
   /// In fr, this message translates to:
-  /// **'{month} · {count, plural, =1{1 catégorie} other{{count} catégories}}'**
-  String dashboardCategoryBreakdownSubtitle(String month, int count);
+  /// **'Autres'**
+  String get dashboardCategoryOthers;
 
-  /// Caption under the total in the middle of the category donut.
+  /// Note in « Dépenses par catégorie » for a month without any expense.
   ///
   /// In fr, this message translates to:
-  /// **'dépensés'**
-  String get dashboardDonutCenterCaption;
+  /// **'Aucune dépense ce mois.'**
+  String get dashboardCategoryNoSpending;
 
   /// Title of the monthly savings chart (bar or line view).
   ///
   /// In fr, this message translates to:
-  /// **'Évolution de l\'épargne'**
+  /// **'Épargne mensuelle'**
   String get dashboardSavingsTrendTitle;
 
-  /// Subtitle of the monthly savings chart, naming the window it covers.
+  /// Follows the signed 12-month average on the right of the « Épargne mensuelle » heading.
   ///
   /// In fr, this message translates to:
-  /// **'Épargne mensuelle · {count} mois'**
-  String dashboardSavingsTrendSubtitle(int count);
-
-  /// Caption under the savings chart's headline: the average a month put aside over the window.
-  ///
-  /// In fr, this message translates to:
-  /// **'en moyenne par mois'**
+  /// **'en moyenne sur 12 mois'**
   String get dashboardSavingsTrendAverage;
 
   /// Savings chart view switch: one bar per month.
@@ -2035,47 +2041,17 @@ abstract class AppLocalizations {
   /// **'Courbe'**
   String get dashboardSavingsViewLine;
 
-  /// Title of the stacked income-vs-expense bar chart.
-  ///
-  /// In fr, this message translates to:
-  /// **'Revenus vs dépenses'**
-  String get dashboardIncomeVsExpenseTitle;
-
-  /// Subtitle of the income-vs-expense chart, naming the window it covers.
-  ///
-  /// In fr, this message translates to:
-  /// **'{count} derniers mois'**
-  String dashboardIncomeVsExpenseSubtitle(int count);
-
-  /// Green dot legend in the income-vs-expense chart header.
-  ///
-  /// In fr, this message translates to:
-  /// **'Revenus'**
-  String get dashboardLegendIncome;
-
-  /// Red dot legend in the income-vs-expense chart header.
-  ///
-  /// In fr, this message translates to:
-  /// **'Dépenses'**
-  String get dashboardLegendExpense;
-
   /// Title of the recent-transactions card.
   ///
   /// In fr, this message translates to:
   /// **'Activité récente'**
   String get dashboardRecentActivityTitle;
 
-  /// Iris link under the recent-activity list, navigating to the transactions panel.
+  /// Link on the right of the « Activité récente » heading, opening Transactions.
   ///
   /// In fr, this message translates to:
-  /// **'Voir toutes les transactions'**
+  /// **'Toutes les transactions'**
   String get dashboardViewAllTransactions;
-
-  /// Shown in the recent-activity card when the user has no transactions yet.
-  ///
-  /// In fr, this message translates to:
-  /// **'Vos transactions apparaîtront ici.'**
-  String get dashboardRecentActivityEmpty;
 
   /// Heading shown when the dashboard has no transactions to show.
   ///
@@ -2110,7 +2086,7 @@ abstract class AppLocalizations {
   /// Fallback localized message for unrecognized or network errors on the dashboard.
   ///
   /// In fr, this message translates to:
-  /// **'Une erreur est survenue. Veuillez réessayer.'**
+  /// **'Le tableau de bord n’a pas pu être chargé. Rien n’a été modifié.'**
   String get dashboardErrorGeneric;
 
   /// Tooltip on the top bar's month label, which opens a month-and-year picker.
@@ -2118,6 +2094,18 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Choisir un mois'**
   String get dashboardChooseMonth;
+
+  /// Tooltip on the month selector's left chevron.
+  ///
+  /// In fr, this message translates to:
+  /// **'Mois précédent'**
+  String get dashboardPreviousMonth;
+
+  /// Tooltip on the month selector's right chevron.
+  ///
+  /// In fr, this message translates to:
+  /// **'Mois suivant'**
+  String get dashboardNextMonth;
 
   /// Tooltip on the picker's back-a-year step button.
   ///
@@ -4775,23 +4763,17 @@ abstract class AppLocalizations {
   /// **'Objectifs'**
   String get dashboardGoalsTitle;
 
-  /// Iris link from the dashboard goals card to the goals panel.
+  /// Link on the right of the « Objectifs » heading, opening the goals panel.
   ///
   /// In fr, this message translates to:
-  /// **'Voir tout'**
+  /// **'Tous les objectifs'**
   String get dashboardGoalsViewAll;
 
-  /// Compact saved/target pair on a dashboard goal row.
+  /// The target half of a dashboard goal row's « saved / target », set after the saved amount in a lighter tone.
   ///
   /// In fr, this message translates to:
-  /// **'{saved} / {target}'**
-  String dashboardGoalsProgress(String saved, String target);
-
-  /// Badge replacing the amounts on a reached goal's dashboard row.
-  ///
-  /// In fr, this message translates to:
-  /// **'Atteint'**
-  String get dashboardGoalsReached;
+  /// **'/ {target}'**
+  String dashboardGoalsTarget(String target);
 
   /// Tooltip on the calendar button of the goal form's target date field.
   ///

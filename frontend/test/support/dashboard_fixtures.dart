@@ -80,32 +80,6 @@ DashboardSummary specSummary({
 /// checking the app rather than the fixture. Février's net is negative, which is what puts the
 /// one dip in an otherwise rising line.
 DashboardTrends specTrends() => DashboardTrends(
-  monthlySeries: [
-    MonthlyTotals(
-      month: DateTime(2026, 2),
-      incomeMinor: 285000,
-      expenseMinor: 296840,
-      netMinor: -11840,
-    ),
-    MonthlyTotals(
-      month: DateTime(2026, 3),
-      incomeMinor: 285000,
-      expenseMinor: 230980,
-      netMinor: 54020,
-    ),
-    MonthlyTotals(
-      month: DateTime(2026, 4),
-      incomeMinor: 285000,
-      expenseMinor: 211290,
-      netMinor: 73710,
-    ),
-    MonthlyTotals(
-      month: DateTime(2026, 5),
-      incomeMinor: 285000,
-      expenseMinor: 221435,
-      netMinor: 63565,
-    ),
-  ],
   savingsSeries: [
     SavingsPoint(month: DateTime(2025, 6), savedMinor: 41200),
     SavingsPoint(month: DateTime(2025, 7), savedMinor: 18050),
@@ -128,7 +102,7 @@ List<RecentTransaction> specRecent() => [
   RecentTransaction(
     id: 't1',
     label: 'Carrefour',
-    accountLabel: 'BNP — Compte courant',
+    accountLabel: 'BNP Compte courant',
     bookedDate: DateTime(2026, 5, 14),
     amountMinor: -8642,
     currency: 'EUR',
@@ -136,7 +110,7 @@ List<RecentTransaction> specRecent() => [
   RecentTransaction(
     id: 't2',
     label: 'Novatech SARL',
-    accountLabel: 'BNP — Compte courant',
+    accountLabel: 'BNP Compte courant',
     bookedDate: DateTime(2026, 5, 2),
     amountMinor: 285000,
     currency: 'EUR',
@@ -152,7 +126,7 @@ List<RecentTransaction> specRecent() => [
   RecentTransaction(
     id: 't4',
     label: 'Free Mobile',
-    accountLabel: 'BNP — Compte courant',
+    accountLabel: 'BNP Compte courant',
     bookedDate: DateTime(2026, 5, 9),
     amountMinor: -1599,
     currency: 'EUR',
@@ -160,8 +134,5 @@ List<RecentTransaction> specRecent() => [
 ];
 
 /// A user with no history at all — every series empty.
-DashboardTrends emptyTrends() => const DashboardTrends(
-  monthlySeries: [],
-  savingsSeries: [],
-  currency: 'EUR',
-);
+DashboardTrends emptyTrends() =>
+    const DashboardTrends(savingsSeries: [], currency: 'EUR');

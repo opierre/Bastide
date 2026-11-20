@@ -15,6 +15,7 @@ Map<String, dynamic> _goalJson({
   int progressMinor = 640000,
   String status = 'active',
   String? targetDate,
+  String createdAt = '2026-01-01T00:00:00',
 }) => {
   'id': id,
   'name': name,
@@ -26,7 +27,7 @@ Map<String, dynamic> _goalJson({
   'status': status,
   'progress_minor': progressMinor,
   'progress_pct': progressMinor / targetMinor,
-  'created_at': '2026-01-01T00:00:00',
+  'created_at': createdAt,
   'updated_at': '2026-05-01T00:00:00',
 };
 
@@ -392,18 +393,19 @@ void main() {
     },
   );
 
-  test('the panel reports only the top three goals to the dashboard', () async {
+  test('the dashboard gets up to four goals, oldest first', () async {
     stubLoad(
       goals: [
+        _goalJson(id: 'g5', createdAt: '2026-03-01T00:00:00'),
         _goalJson(id: 'g1'),
         _goalJson(id: 'g2'),
-        _goalJson(id: 'g3'),
-        _goalJson(id: 'g4'),
+        _goalJson(id: 'g3', createdAt: '2026-02-01T00:00:00'),
+        _goalJson(id: 'g4', createdAt: '2026-04-01T00:00:00'),
       ],
     );
 
     final state = await container.read(goalsControllerProvider.future);
 
-    expect(state.topGoals.map((goal) => goal.id), ['g1', 'g2', 'g3']);
+    expect(state.topGoals.map((goal) => goal.id), ['g1', 'g2', 'g3', 'g5']);
   });
 }

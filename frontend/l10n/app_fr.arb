@@ -1432,7 +1432,7 @@
   "@dashboardStatNet": {
     "description": "Label on the net (income minus expense) column of the dashboard's KPI strip."
   },
-  "dashboardStatSavingsRate": "Taux d'épargne",
+  "dashboardStatSavingsRate": "Taux d’épargne",
   "@dashboardStatSavingsRate": {
     "description": "Label on the savings rate column, the first and widest of the dashboard's KPI strip."
   },
@@ -1446,23 +1446,9 @@
       }
     }
   },
-  "dashboardSavingsDeltaPoints": "{delta} pt",
-  "@dashboardSavingsDeltaPoints": {
-    "description": "The savings rate's month-over-month change, closing its goal line. A change in a rate is measured in percentage *points*, not percent, so the unit differs from the other three columns.",
-    "placeholders": {
-      "delta": {
-        "type": "String"
-      }
-    }
-  },
-  "dashboardSavingsGoalReached": "Objectif {goal} atteint",
+  "dashboardSavingsGoalReached": "Objectif atteint",
   "@dashboardSavingsGoalReached": {
-    "description": "Goal line under the savings rate's progress bar when the rate meets or beats the goal; a check glyph precedes it and the point delta follows it.",
-    "placeholders": {
-      "goal": {
-        "type": "String"
-      }
-    }
+    "description": "Status under the savings rate repère when the month met its goal; a check icon precedes it."
   },
   "dashboardSavingsGoalPending": "Objectif {goal} en cours",
   "@dashboardSavingsGoalPending": {
@@ -1473,42 +1459,51 @@
       }
     }
   },
+  "dashboardSavingsDeltaSince": "{delta} pt depuis {month}",
+  "@dashboardSavingsDeltaSince": {
+    "description": "The savings rate's change in percentage points since the previous month, after the goal status (« +1,9 pt depuis avril »).",
+    "placeholders": {
+      "delta": {
+        "type": "String"
+      },
+      "month": {
+        "type": "DateTime",
+        "format": "MMMM"
+      }
+    }
+  },
+  "dashboardSavingsGoalMark": "objectif {goal}",
+  "@dashboardSavingsGoalMark": {
+    "description": "Label of the goal mark on the savings rate repère (« objectif 20 % »). Lowercase: it sits on the meter.",
+    "placeholders": {
+      "goal": {
+        "type": "String"
+      }
+    }
+  },
+  "dashboardNoValue": "—",
+  "@dashboardNoValue": {
+    "description": "Placeholder for a reading-line figure the month has no value for."
+  },
   "dashboardCategoryBreakdownTitle": "Dépenses par catégorie",
   "@dashboardCategoryBreakdownTitle": {
     "description": "Title of the by-category expense breakdown chart card."
   },
-  "dashboardCategoryBreakdownSubtitle": "{month} · {count, plural, =1{1 catégorie} other{{count} catégories}}",
-  "@dashboardCategoryBreakdownSubtitle": {
-    "description": "Subtitle under the breakdown chart's title: the month it covers and how many categories it splits into.",
-    "placeholders": {
-      "month": {
-        "type": "String"
-      },
-      "count": {
-        "type": "int"
-      }
-    }
+  "dashboardCategoryOthers": "Autres",
+  "@dashboardCategoryOthers": {
+    "description": "The row the smallest categories fold into past eight rows of « Dépenses par catégorie »."
   },
-  "dashboardDonutCenterCaption": "dépensés",
-  "@dashboardDonutCenterCaption": {
-    "description": "Caption under the total in the middle of the category donut."
+  "dashboardCategoryNoSpending": "Aucune dépense ce mois.",
+  "@dashboardCategoryNoSpending": {
+    "description": "Note in « Dépenses par catégorie » for a month without any expense."
   },
-  "dashboardSavingsTrendTitle": "Évolution de l'épargne",
+  "dashboardSavingsTrendTitle": "Épargne mensuelle",
   "@dashboardSavingsTrendTitle": {
     "description": "Title of the monthly savings chart (bar or line view)."
   },
-  "dashboardSavingsTrendSubtitle": "Épargne mensuelle · {count} mois",
-  "@dashboardSavingsTrendSubtitle": {
-    "description": "Subtitle of the monthly savings chart, naming the window it covers.",
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "dashboardSavingsTrendAverage": "en moyenne par mois",
+  "dashboardSavingsTrendAverage": "en moyenne sur 12 mois",
   "@dashboardSavingsTrendAverage": {
-    "description": "Caption under the savings chart's headline: the average a month put aside over the window."
+    "description": "Follows the signed 12-month average on the right of the « Épargne mensuelle » heading."
   },
   "dashboardSavingsViewBars": "Barres",
   "@dashboardSavingsViewBars": {
@@ -1518,38 +1513,13 @@
   "@dashboardSavingsViewLine": {
     "description": "Savings chart view switch: the same months joined as a line."
   },
-  "dashboardIncomeVsExpenseTitle": "Revenus vs dépenses",
-  "@dashboardIncomeVsExpenseTitle": {
-    "description": "Title of the stacked income-vs-expense bar chart."
-  },
-  "dashboardIncomeVsExpenseSubtitle": "{count} derniers mois",
-  "@dashboardIncomeVsExpenseSubtitle": {
-    "description": "Subtitle of the income-vs-expense chart, naming the window it covers.",
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "dashboardLegendIncome": "Revenus",
-  "@dashboardLegendIncome": {
-    "description": "Green dot legend in the income-vs-expense chart header."
-  },
-  "dashboardLegendExpense": "Dépenses",
-  "@dashboardLegendExpense": {
-    "description": "Red dot legend in the income-vs-expense chart header."
-  },
   "dashboardRecentActivityTitle": "Activité récente",
   "@dashboardRecentActivityTitle": {
     "description": "Title of the recent-transactions card."
   },
-  "dashboardViewAllTransactions": "Voir toutes les transactions",
+  "dashboardViewAllTransactions": "Toutes les transactions",
   "@dashboardViewAllTransactions": {
-    "description": "Iris link under the recent-activity list, navigating to the transactions panel."
-  },
-  "dashboardRecentActivityEmpty": "Vos transactions apparaîtront ici.",
-  "@dashboardRecentActivityEmpty": {
-    "description": "Shown in the recent-activity card when the user has no transactions yet."
+    "description": "Link on the right of the « Activité récente » heading, opening Transactions."
   },
   "dashboardEmptyTitle": "Aucune donnée pour ce mois",
   "@dashboardEmptyTitle": {
@@ -1571,13 +1541,21 @@
   "@dashboardErrorInvalidMonth": {
     "description": "Localized message for the backend's DASHBOARD_MONTH_INVALID error code."
   },
-  "dashboardErrorGeneric": "Une erreur est survenue. Veuillez réessayer.",
+  "dashboardErrorGeneric": "Le tableau de bord n’a pas pu être chargé. Rien n’a été modifié.",
   "@dashboardErrorGeneric": {
     "description": "Fallback localized message for unrecognized or network errors on the dashboard."
   },
   "dashboardChooseMonth": "Choisir un mois",
   "@dashboardChooseMonth": {
     "description": "Tooltip on the top bar's month label, which opens a month-and-year picker."
+  },
+  "dashboardPreviousMonth": "Mois précédent",
+  "@dashboardPreviousMonth": {
+    "description": "Tooltip on the month selector's left chevron."
+  },
+  "dashboardNextMonth": "Mois suivant",
+  "@dashboardNextMonth": {
+    "description": "Tooltip on the month selector's right chevron."
   },
   "dashboardPreviousYear": "Année précédente",
   "@dashboardPreviousYear": {
@@ -3783,25 +3761,18 @@
   "@dashboardGoalsTitle": {
     "description": "Title of the dashboard's Objectifs card."
   },
-  "dashboardGoalsViewAll": "Voir tout",
+  "dashboardGoalsViewAll": "Tous les objectifs",
   "@dashboardGoalsViewAll": {
-    "description": "Iris link from the dashboard goals card to the goals panel."
+    "description": "Link on the right of the « Objectifs » heading, opening the goals panel."
   },
-  "dashboardGoalsProgress": "{saved} / {target}",
-  "@dashboardGoalsProgress": {
-    "description": "Compact saved/target pair on a dashboard goal row.",
+  "dashboardGoalsTarget": "/ {target}",
+  "@dashboardGoalsTarget": {
+    "description": "The target half of a dashboard goal row's « saved / target », set after the saved amount in a lighter tone.",
     "placeholders": {
-      "saved": {
-        "type": "String"
-      },
       "target": {
         "type": "String"
       }
     }
-  },
-  "dashboardGoalsReached": "Atteint",
-  "@dashboardGoalsReached": {
-    "description": "Badge replacing the amounts on a reached goal's dashboard row."
   },
   "goalFormDatePick": "Choisir une date cible",
   "@goalFormDatePick": {

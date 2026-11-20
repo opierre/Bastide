@@ -3,7 +3,6 @@ import 'package:flutter_test/flutter_test.dart';
 
 /// A trends value whose savings series is [saved], one invented month each, oldest first.
 DashboardTrends _trends(List<int> saved) => DashboardTrends(
-  monthlySeries: const [],
   savingsSeries: [
     for (var i = 0; i < saved.length; i++)
       SavingsPoint(month: DateTime(2025, 1 + i), savedMinor: saved[i]),
