@@ -107,8 +107,8 @@ class SimulatorState {
     return id != liveId || canCompute;
   }
 
-  /// One column is not a comparison.
-  bool get canOpenComparison => selection.length >= 2;
+  /// « Comparer » is off only with nothing checked (`14-simulateur.md`).
+  bool get canOpenComparison => selection.isNotEmpty;
 
   static const _unset = Object();
 
@@ -358,11 +358,11 @@ class SimulatorController extends AsyncNotifier<SimulatorState> {
         scenarioInstalments: {...current.scenarioInstalments}
           ..remove(simulationId),
         selection: selection,
-        comparison: selection.length < 2 ? null : current.comparison,
+        comparison: selection.isEmpty ? null : current.comparison,
         actionError: null,
       ),
     );
-    if (selection.length >= 2) await _refreshComparison();
+    if (selection.isNotEmpty) await _refreshComparison();
   }
 
   /// Checks or unchecks a row. A fourth check is ignored rather than
@@ -378,7 +378,7 @@ class SimulatorController extends AsyncNotifier<SimulatorState> {
       state = AsyncValue.data(
         current.copyWith(
           selection: selection,
-          comparison: selection.length < 2 ? null : current.comparison,
+          comparison: selection.isEmpty ? null : current.comparison,
         ),
       );
     } else {

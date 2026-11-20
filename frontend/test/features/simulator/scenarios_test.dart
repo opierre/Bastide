@@ -236,13 +236,10 @@ void main() {
       find.byKey(const Key('scenarioCompareButton')),
     );
 
+    expect(compare().onPressed, isNull);
     await _tapRow(tester, 'live');
     await _settle(tester);
-    expect(compare().onPressed, isNull);
-    expect(
-      _text(tester, 'scenarioNote'),
-      'Cochez au moins deux scénarios pour les comparer.',
-    );
+    expect(compare().onPressed, isNotNull);
 
     await _tapRow(tester, 's1');
     await _tapRow(tester, 's2');

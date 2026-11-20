@@ -365,18 +365,19 @@ void main() {
       });
 
       test(
-        'comparison needs two columns and reads the ratio both ways',
+        'comparison opens from one checked row and reads the ratio both ways',
         () async {
           when(
             () => repository.compute(any(), includeExistingLoans: true),
           ).thenAnswer((_) async => testOverLimitResult());
           await container.read(simulatorControllerProvider.future);
 
-          await notifier().toggleSelection('s1');
           expect(current().canOpenComparison, isFalse);
           await notifier().openComparison();
           expect(current().comparison, isNull);
 
+          await notifier().toggleSelection('s1');
+          expect(current().canOpenComparison, isTrue);
           await notifier().toggleSelection('s2');
           await notifier().openComparison();
 
@@ -386,6 +387,8 @@ void main() {
           expect(columns.first.ratioWithExistingBps, 6358);
 
           await notifier().toggleSelection('s2');
+          expect(current().comparison!.value!.map((c) => c.id), ['s1']);
+          await notifier().toggleSelection('s1');
           expect(current().comparison, isNull);
         },
       );
