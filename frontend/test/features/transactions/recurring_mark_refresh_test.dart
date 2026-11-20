@@ -41,6 +41,7 @@ class _FakeTransactionsRepository extends Fake
     DateTime? dateTo,
     String? categoryId,
     bool? needsReview,
+    String? importBatchId,
     String? q,
     int page = 1,
     bool includeLinkedCards = false,

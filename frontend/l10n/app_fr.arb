@@ -1242,6 +1242,19 @@
   "@transactionsFilterAllDates": {
     "description": "Default label on the date range filter pill when no range is chosen."
   },
+  "transactionsFilterImport": "Import : {fileName}",
+  "@transactionsFilterImport": {
+    "description": "Chip in the transactions filter row naming the import the list is narrowed to (opened from an import history row).",
+    "placeholders": {
+      "fileName": {
+        "type": "String"
+      }
+    }
+  },
+  "transactionsFilterImportRemove": "Retirer le filtre d’import",
+  "@transactionsFilterImportRemove": {
+    "description": "Tooltip and accessible label of the button that lifts the import filter."
+  },
   "transactionsDateRangeTitle": "Période",
   "@transactionsDateRangeTitle": {
     "description": "Title of the transactions date range filter modal."

@@ -632,6 +632,101 @@ void main() {
     );
   });
 
+  group('import filter', () {
+    TransactionsPage onePage() => TransactionsPage(
+      items: [_transaction()],
+      page: 1,
+      pageSize: 50,
+      total: 1,
+    );
+
+    const batch = ImportBatchFilter(id: 'b1', fileName: 'releve-mai.ofx');
+
+    testWidgets('shows no chip without an import filter', (tester) async {
+      _useDesktopSurface(tester);
+      await tester.pumpWidget(
+        _wrap(controller: FakeTransactionsController(initialPage: onePage())),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.byKey(const Key('transactionsImportFilter')), findsNothing);
+    });
+
+    testWidgets('names the import in fr, on toolbar select tokens', (
+      tester,
+    ) async {
+      _useDesktopSurface(tester);
+      await tester.pumpWidget(
+        _wrap(controller: FakeTransactionsController(initialPage: onePage())),
+      );
+      await tester.pumpAndSettle();
+      _container(tester)
+          .read(transactionFiltersProvider.notifier)
+          .showImport(batch, accountId: 'a1');
+      await tester.pumpAndSettle();
+
+      final chip = find.byKey(const Key('transactionsImportFilter'));
+      expect(chip, findsOneWidget);
+      expect(
+        find.descendant(
+          of: chip,
+          matching: find.text('Import : releve-mai.ofx'),
+        ),
+        findsOneWidget,
+      );
+      final box = tester.widget<Container>(chip);
+      final decoration = box.decoration! as BoxDecoration;
+      expect(decoration.color, AppColors.dark.field);
+      expect(decoration.borderRadius, BorderRadius.circular(AppRadii.control));
+      expect(
+        (decoration.border! as Border).top.color,
+        AppColors.dark.lineStrong,
+      );
+      expect(tester.getSize(chip).height, AppSizes.toolbarSelect);
+    });
+
+    testWidgets('names the import in en', (tester) async {
+      _useDesktopSurface(tester);
+      await tester.pumpWidget(
+        _wrap(
+          controller: FakeTransactionsController(initialPage: onePage()),
+          locale: const Locale('en'),
+        ),
+      );
+      await tester.pumpAndSettle();
+      _container(tester)
+          .read(transactionFiltersProvider.notifier)
+          .showImport(batch, accountId: 'a1');
+      await tester.pumpAndSettle();
+
+      expect(find.text('Import: releve-mai.ofx'), findsOneWidget);
+      expect(find.byTooltip('Remove the import filter'), findsOneWidget);
+    });
+
+    testWidgets('its remove button lifts the filter and keeps the account', (
+      tester,
+    ) async {
+      _useDesktopSurface(tester);
+      await tester.pumpWidget(
+        _wrap(controller: FakeTransactionsController(initialPage: onePage())),
+      );
+      await tester.pumpAndSettle();
+      _container(tester)
+          .read(transactionFiltersProvider.notifier)
+          .showImport(batch, accountId: 'a1');
+      await tester.pumpAndSettle();
+      expect(find.byTooltip('Retirer le filtre d’import'), findsOneWidget);
+
+      await tester.tap(find.byKey(const Key('transactionsImportFilterRemove')));
+      await tester.pumpAndSettle();
+
+      final filters = _container(tester).read(transactionFiltersProvider);
+      expect(filters.importBatch, isNull);
+      expect(filters.accountId, 'a1');
+      expect(find.byKey(const Key('transactionsImportFilter')), findsNothing);
+    });
+  });
+
   testWidgets('renders the row amount, sign and category for the en locale', (
     tester,
   ) async {

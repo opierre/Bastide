@@ -41,11 +41,12 @@ class TransactionService:
         q: str | None,
         page: int,
         include_linked_cards: bool = False,
+        import_batch_id: str | None = None,
     ) -> tuple[list[Transaction], int]:
         """A filtered, paginated page of the user's transactions. Page size is fixed.
 
         `include_linked_cards` adds, to an account filter, the rows of the deferred cards
-        settled on that account.
+        settled on that account. `import_batch_id` keeps only the rows that import added.
         """
         return self._repository.list_for_user(
             user_id,
@@ -58,6 +59,7 @@ class TransactionService:
             page=max(page, 1),
             page_size=PAGE_SIZE,
             include_linked_cards=include_linked_cards,
+            import_batch_id=import_batch_id,
         )
 
     def get(self, user_id: str, transaction_id: str) -> Transaction:

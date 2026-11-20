@@ -44,6 +44,27 @@ void refreshTransactionRows(Ref ref) {
 bool takesInLinkedCards(TransactionFilters filters) =>
     filters.accountId != null;
 
+/// An import narrowing the list to the operations it added. Carries the
+/// import's file name so the filter row can name it without loading the
+/// import history.
+@immutable
+class ImportBatchFilter {
+  const ImportBatchFilter({required this.id, required this.fileName});
+
+  final String id;
+  final String fileName;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is ImportBatchFilter &&
+          other.id == id &&
+          other.fileName == fileName);
+
+  @override
+  int get hashCode => Object.hash(id, fileName);
+}
+
 /// The active list filters, held separately from the loaded page so a filter
 /// change is a single state transition the controller can watch and react to
 /// — see [TransactionsController.build].
@@ -55,6 +76,7 @@ class TransactionFilters {
     this.dateTo,
     this.categoryId,
     this.needsReview,
+    this.importBatch,
     this.q = '',
     this.page = 1,
   });
@@ -66,6 +88,9 @@ class TransactionFilters {
 
   /// `true` narrows to the review queue; `null`/`false` is the normal list.
   final bool? needsReview;
+
+  /// Set from an import history row; shown as a removable chip.
+  final ImportBatchFilter? importBatch;
   final String q;
   final int page;
 
@@ -79,6 +104,8 @@ class TransactionFilters {
     bool clearCategoryId = false,
     bool? needsReview,
     bool clearNeedsReview = false,
+    ImportBatchFilter? importBatch,
+    bool clearImportBatch = false,
     String? q,
     int? page,
   }) {
@@ -88,6 +115,7 @@ class TransactionFilters {
       dateTo: clearDateRange ? null : (dateTo ?? this.dateTo),
       categoryId: clearCategoryId ? null : (categoryId ?? this.categoryId),
       needsReview: clearNeedsReview ? null : (needsReview ?? this.needsReview),
+      importBatch: clearImportBatch ? null : (importBatch ?? this.importBatch),
       q: q ?? this.q,
       page: page ?? this.page,
     );
@@ -102,6 +130,7 @@ class TransactionFilters {
           other.dateTo == dateTo &&
           other.categoryId == categoryId &&
           other.needsReview == needsReview &&
+          other.importBatch == importBatch &&
           other.q == q &&
           other.page == page);
 
@@ -112,6 +141,7 @@ class TransactionFilters {
     dateTo,
     categoryId,
     needsReview,
+    importBatch,
     q,
     page,
   );
@@ -121,9 +151,12 @@ class TransactionFiltersNotifier extends Notifier<TransactionFilters> {
   @override
   TransactionFilters build() => const TransactionFilters();
 
+  /// An import belongs to one account, so moving to another account drops
+  /// the import filter rather than leaving a list that can only be empty.
   void setAccount(String? accountId) => state = state.copyWith(
     accountId: accountId,
     clearAccountId: accountId == null,
+    clearImportBatch: accountId != state.accountId,
     page: 1,
   );
 
@@ -145,6 +178,14 @@ class TransactionFiltersNotifier extends Notifier<TransactionFilters> {
     clearNeedsReview: value == null,
     page: 1,
   );
+
+  /// Narrows the list to exactly what [batch] added, in [accountId]. Every
+  /// other filter is dropped: a leftover period, category or search would
+  /// hide some of the import's operations.
+  void showImport(ImportBatchFilter batch, {required String accountId}) =>
+      state = TransactionFilters(accountId: accountId, importBatch: batch);
+
+  void clearImport() => state = state.copyWith(clearImportBatch: true, page: 1);
 
   void setQuery(String q) => state = state.copyWith(q: q, page: 1);
 
@@ -176,6 +217,7 @@ class TransactionsController extends AsyncNotifier<TransactionsPage> {
           dateTo: filters.dateTo,
           categoryId: filters.categoryId,
           needsReview: filters.needsReview,
+          importBatchId: filters.importBatch?.id,
           q: filters.q,
           page: filters.page,
         );

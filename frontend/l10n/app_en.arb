@@ -290,6 +290,8 @@
   "transactionsFilterAllAccounts": "All accounts",
   "transactionsFilterAllCategories": "All categories",
   "transactionsFilterAllDates": "All dates",
+  "transactionsFilterImport": "Import: {fileName}",
+  "transactionsFilterImportRemove": "Remove the import filter",
   "transactionsDateRangeTitle": "Date range",
   "transactionsDateRangeFromLabel": "From",
   "transactionsDateRangeToLabel": "To",

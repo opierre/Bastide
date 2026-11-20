@@ -28,6 +28,7 @@ class TransactionsRepository {
     DateTime? dateTo,
     String? categoryId,
     bool? needsReview,
+    String? importBatchId,
     String? q,
     int page = 1,
     bool includeLinkedCards = false,
@@ -41,6 +42,7 @@ class TransactionsRepository {
       if (dateTo != null) 'to': _isoDate.format(dateTo),
       'category_id': ?categoryId,
       if (needsReview != null) 'needs_review': '$needsReview',
+      'import_batch_id': ?importBatchId,
       if (q != null && q.trim().isNotEmpty) 'q': q.trim(),
     };
     final json =
