@@ -10,15 +10,21 @@ import '../../../l10n/app_localizations.dart';
 import '../../goals/application/goals_controller.dart';
 import '../../goals/presentation/goals_screen.dart';
 import '../../imports/presentation/imports_screen.dart';
+import '../../transactions/application/transactions_controller.dart';
 import '../../transactions/presentation/transactions_screen.dart';
 import '../application/dashboard_controller.dart';
-import 'category_breakdown.dart';
-import 'goals_progress_card.dart';
-import 'income_vs_expense.dart';
-import 'kpi_strip.dart';
+import '../domain/dashboard_summary.dart';
+import 'category_spending.dart';
+import 'goals_section.dart';
+import 'monthly_savings.dart';
+import 'reading_line.dart';
 import 'recent_activity.dart';
-import 'savings_trend.dart';
 
+/// « Tableau de bord », the « Lecture du mois » (`docs/design/04-dashboard.md`):
+/// five blocks 24 px apart in the content region. The reading line, a
+/// hairline, « Dépenses par catégorie » beside « Épargne mensuelle », a
+/// hairline, then « Activité récente » beside « Objectifs ». Sections, not
+/// cards: nothing here is framed.
 class DashboardScreen extends ConsumerWidget {
   const DashboardScreen({super.key});
 
@@ -32,11 +38,11 @@ class DashboardScreen extends ConsumerWidget {
     return Padding(
       key: const Key('screen-dashboard'),
       padding: const EdgeInsets.symmetric(
-        horizontal: AppSpacing.contentX,
-        vertical: AppSpacing.contentY,
+        horizontal: AppSpacing.pageX,
+        vertical: AppSpacing.pageY,
       ),
       child: switch (stateAsync) {
-        AsyncData(:final value) when value.summary.isEmpty => _EmptyState(
+        AsyncData(:final value) when !value.hasTransactions => _EmptyState(
           onGoToImports: () => context.go(ImportsScreen.path),
         ),
         AsyncData(:final value) => _DashboardContent(state: value),
@@ -61,6 +67,23 @@ String _localizeError(AppLocalizations l10n, Object? error) {
   return l10n.dashboardErrorGeneric;
 }
 
+/// The height of the two chart sections: a heading, then up to eight 30 px
+/// category rows, which the savings chart beside them matches.
+const _chartsBlockHeight =
+    _headingBand +
+    DashboardSummary.maxSpendingRows * CategorySpending.rowHeight;
+
+/// A section heading with its gap to the content (the segmented control on
+/// « Épargne mensuelle » sets its height).
+const _headingBand = AppSpacing.xxl;
+
+/// Below this height the bottom sections no longer fit with a useful number
+/// of rows, so the panel scrolls instead of squeezing them.
+const _minFillHeight = 640.0;
+
+/// The bottom sections' height when the panel scrolls: a heading and six rows.
+const _scrolledBottomHeight = _headingBand + 6 * AppSizes.tableRow;
+
 class _DashboardContent extends ConsumerWidget {
   const _DashboardContent({required this.state});
 
@@ -68,88 +91,105 @@ class _DashboardContent extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // The top three active goals, or nothing at all — a goals load that hasn't
-    // landed or has failed simply leaves row 3 with its two cards, rather
-    // than putting an error about a side card on the dashboard.
+    // Up to four active goals, or nothing: a goals load that has not landed or
+    // has failed leaves « Activité récente » on the full width rather than
+    // putting an error about a side section on the dashboard.
     final goals =
         ref.watch(goalsControllerProvider).value?.topGoals ?? const [];
     final summary = state.summary;
 
-    return Column(
+    final charts = SizedBox(
+      height: _chartsBlockHeight,
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Expanded(
+            child: CategorySpending(
+              summary: summary,
+              onCategoryTap: (categoryId) {
+                focusTransactionsOnCategory(
+                  ref.read(transactionFiltersProvider.notifier),
+                  categoryId: categoryId,
+                  month: state.month,
+                );
+                context.go(TransactionsScreen.path);
+              },
+            ),
+          ),
+          const SizedBox(width: AppSpacing.gutter),
+          Expanded(child: MonthlySavings(trends: state.trends)),
+        ],
+      ),
+    );
+
+    final bottom = Row(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        KpiStrip(summary: summary, month: state.month),
-        const SizedBox(height: AppSpacing.gridGap),
-        // Rows 2 and 3 split whatever is left below the stat grid, equally. The spec pins
-        // row 2 at 322 px against its 1440×900 frame, but two 322 px rows overrun the content
-        // region there — so the *relationship* is what's held: the two chart rows are always
-        // the same height as each other, and together they fill the panel without scrolling.
         Expanded(
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              // `1fr / 1.35fr`: the savings chart takes the wider share, since its twelve
-              // bars need the width more than the donut does (`docs/design/04` §Row 2).
-              Expanded(
-                flex: 100,
-                child: CategoryBreakdownChart(
-                  categories: summary.byCategory,
-                  currency: summary.currency,
-                  month: state.month,
-                ),
-              ),
-              const SizedBox(width: AppSpacing.gridGap),
-              Expanded(
-                flex: 135,
-                child: SavingsTrendChart(trends: state.trends),
-              ),
-            ],
+          child: RecentActivity(
+            transactions: state.recent,
+            onViewAll: () => context.go(TransactionsScreen.path),
+            onOpen: (_) => context.go(TransactionsScreen.path),
           ),
         ),
-        const SizedBox(height: AppSpacing.gridGap),
-        // Row 3's three-card split, `1fr .95fr .85fr`, expressed as integer flex the
-        // same way row 1's is. The Objectifs card is *dropped* rather than
-        // collapsed when there are no goals, and the other two cards go back to
-        // sharing the row equally — a third column held open for something the
-        // user hasn't created reads as a rendering fault.
-        Expanded(
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Expanded(
-                // The `1fr` the other two are measured against. Stated even
-                // though it is the widest share: `Expanded` defaults to flex 1,
-                // which against a sibling's 95 is not a wide column but an
-                // invisible one.
-                flex: 100,
-                child: IncomeVsExpenseChart(trends: state.trends),
+        if (goals.isNotEmpty) ...[
+          const SizedBox(width: AppSpacing.gutter),
+          Expanded(
+            child: Align(
+              alignment: Alignment.topCenter,
+              child: GoalsSection(
+                goals: goals,
+                onViewAll: () => context.go(GoalsScreen.path),
               ),
-              const SizedBox(width: AppSpacing.gridGap),
-              Expanded(
-                // `.95fr` beside the left card's `1fr`, and back to an even
-                // share when the Objectifs card is absent.
-                flex: goals.isEmpty ? 100 : 95,
-                child: RecentActivityCard(
-                  transactions: state.recent,
-                  onViewAll: () => context.go(TransactionsScreen.path),
-                ),
-              ),
-              if (goals.isNotEmpty) ...[
-                const SizedBox(width: AppSpacing.gridGap),
-                Expanded(
-                  flex: 85,
-                  child: GoalsProgressCard(
-                    goals: goals,
-                    onViewAll: () => context.go(GoalsScreen.path),
-                  ),
-                ),
-              ],
-            ],
+            ),
           ),
-        ),
+        ],
       ],
     );
+
+    List<Widget> top() => [
+      ReadingLine(summary: summary, month: state.month),
+      const SizedBox(height: AppSpacing.section),
+      const _Hairline(),
+      const SizedBox(height: AppSpacing.section),
+      charts,
+      const SizedBox(height: AppSpacing.section),
+      const _Hairline(),
+      const SizedBox(height: AppSpacing.section),
+    ];
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        if (constraints.maxHeight >= _minFillHeight) {
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              ...top(),
+              Expanded(child: bottom),
+            ],
+          );
+        }
+        return SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              ...top(),
+              SizedBox(height: _scrolledBottomHeight, child: bottom),
+            ],
+          ),
+        );
+      },
+    );
   }
+}
+
+/// The 1 px `line` between two blocks of the panel.
+class _Hairline extends StatelessWidget {
+  const _Hairline();
+
+  @override
+  Widget build(BuildContext context) =>
+      SizedBox(height: 1, child: ColoredBox(color: context.colors.line));
 }
 
 class _EmptyState extends StatelessWidget {
@@ -163,8 +203,6 @@ class _EmptyState extends StatelessWidget {
     return EmptyStateView(
       title: l10n.dashboardEmptyTitle,
       message: l10n.dashboardEmptyBody,
-      // A *primary* CTA, per the EmptyState in `docs/design/00` §Components — this is the one
-      // action the panel wants, not an alternative to something else on screen.
       action: PrimaryButton(
         key: const Key('dashboardGoToImportsButton'),
         onPressed: onGoToImports,
@@ -174,44 +212,43 @@ class _EmptyState extends StatelessWidget {
   }
 }
 
-/// The KPI strip's measured height, so the skeleton's row 1 doesn't resize when data lands.
-const _statRowHeight = 153.0;
+/// The reading line's silhouette height: label, 40 px figure, the repère
+/// with its mark, the status line.
+const _readingLineSilhouette = 132.0;
 
+/// The silhouette of the five blocks, in `hover` blocks pulsing together, so
+/// nothing moves when the data lands (`00` §7).
 class _DashboardSkeleton extends StatelessWidget {
   const _DashboardSkeleton({super.key});
 
   @override
   Widget build(BuildContext context) {
-    // The silhouette mirrors the populated panel's three rows and their exact ratios, so the
-    // cards don't jump sideways or resize when the data lands — which is the whole reason a
-    // skeleton beats a centred spinner.
     return const SkeletonPulse(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          SkeletonBlock(height: _statRowHeight),
-          SizedBox(height: AppSpacing.gridGap),
-          Expanded(
+          SkeletonBlock(height: _readingLineSilhouette),
+          SizedBox(height: AppSpacing.section),
+          _Hairline(),
+          SizedBox(height: AppSpacing.section),
+          SizedBox(
+            height: _chartsBlockHeight,
             child: Row(
               children: [
-                Expanded(
-                  flex: 100,
-                  child: SkeletonBlock(height: double.infinity),
-                ),
-                SizedBox(width: AppSpacing.gridGap),
-                Expanded(
-                  flex: 135,
-                  child: SkeletonBlock(height: double.infinity),
-                ),
+                Expanded(child: SkeletonBlock(height: double.infinity)),
+                SizedBox(width: AppSpacing.gutter),
+                Expanded(child: SkeletonBlock(height: double.infinity)),
               ],
             ),
           ),
-          SizedBox(height: AppSpacing.gridGap),
+          SizedBox(height: AppSpacing.section),
+          _Hairline(),
+          SizedBox(height: AppSpacing.section),
           Expanded(
             child: Row(
               children: [
                 Expanded(child: SkeletonBlock(height: double.infinity)),
-                SizedBox(width: AppSpacing.gridGap),
+                SizedBox(width: AppSpacing.gutter),
                 Expanded(child: SkeletonBlock(height: double.infinity)),
               ],
             ),

@@ -19,6 +19,33 @@ class CategoryBreakdown {
   final double pct;
 }
 
+/// One row of « Dépenses par catégorie »: a category, or the fold of the
+/// smallest ones into « Autres » when there are more than
+/// [DashboardSummary.maxSpendingRows].
+@immutable
+class SpendingRow {
+  const SpendingRow({
+    required this.category,
+    required this.amountMinor,
+    required this.pct,
+    required this.barFraction,
+  });
+
+  /// The category this row stands for; `null` for the « Autres » fold.
+  final CategoryBreakdown? category;
+
+  /// Positive magnitude of what the row spent.
+  final int amountMinor;
+
+  /// Share of the month's spending, in percent.
+  final double pct;
+
+  /// The bar's length against the largest row, `0..1`.
+  final double barFraction;
+
+  bool get isOthers => category == null;
+}
+
 /// The monthly dashboard summary: totals, MoM deltas, and the expense breakdown.
 ///
 /// `savingsRate` and the two `*DeltaPct` fields are fractions/percentages as returned by the
@@ -52,23 +79,73 @@ class DashboardSummary {
   final List<CategoryBreakdown> byCategory;
   final String currency;
 
+  /// At most this many rows in « Dépenses par catégorie »; past it the smallest
+  /// categories fold into « Autres » (`docs/design/04-dashboard.md` §3a).
+  static const maxSpendingRows = 8;
+
+  /// A month with nothing in it: the reading line shows « — » figures.
   bool get isEmpty =>
       incomeMinor == 0 && expenseMinor == 0 && byCategory.isEmpty;
 
-  /// Whether the month met the savings goal — decides which of the two goal captions the
-  /// savings card shows. Lives here rather than in the widget so the threshold comparison
-  /// isn't business logic sitting in presentation.
-  bool get savingsGoalReached => savingsRate >= savingsRateGoal;
+  /// Whether the month has a savings rate at all. With no income there is
+  /// nothing to divide by: the figure is « — » and the repère is not drawn.
+  bool get hasSavingsRate => incomeMinor > 0;
 
-  /// How far the month has come toward the savings goal, `0..1` — the fill of the KPI strip's
-  /// progress bar. Full once the goal is met: the bar measures the way to the goal, not the rate
-  /// itself, and a negative rate (spent more than earned) shows an empty bar.
-  double get savingsGoalProgress =>
-      (savingsRate / savingsRateGoal).clamp(0.0, 1.0);
+  /// Whether the month met the savings goal.
+  bool get savingsGoalReached =>
+      hasSavingsRate && savingsRate >= savingsRateGoal;
+
+  /// The rate's position on the repère, whose scale runs from 0 to twice the
+  /// goal (`00` §8). The meter clamps the fill; a negative rate draws none.
+  double get savingsRateMeterFraction =>
+      (savingsRate / (savingsRateGoal * 2)).clamp(0.0, 1.0);
+
+  /// Where the goal's mark stands on that scale: always halfway.
+  static const savingsGoalMarkFraction = 0.5;
+
+  /// The ranked rows: largest first, bars measured against the largest, and
+  /// beyond [maxSpendingRows] the smallest folded into one « Autres » row so
+  /// the block never runs past eight rows.
+  List<SpendingRow> get rankedSpending {
+    final sorted = [
+      for (final category in byCategory)
+        if (category.amountMinor > 0) category,
+    ]..sort((a, b) => b.amountMinor.compareTo(a.amountMinor));
+    if (sorted.isEmpty) return const [];
+
+    final kept = sorted.length > maxSpendingRows
+        ? sorted.sublist(0, maxSpendingRows - 1)
+        : sorted;
+    final folded = sorted.length > maxSpendingRows
+        ? sorted.sublist(maxSpendingRows - 1)
+        : const <CategoryBreakdown>[];
+    final foldedMinor = folded.fold<int>(0, (sum, c) => sum + c.amountMinor);
+    final foldedPct = folded.fold<double>(0, (sum, c) => sum + c.pct);
+    final largest = sorted.first.amountMinor > foldedMinor
+        ? sorted.first.amountMinor
+        : foldedMinor;
+
+    return [
+      for (final category in kept)
+        SpendingRow(
+          category: category,
+          amountMinor: category.amountMinor,
+          pct: category.pct,
+          barFraction: category.amountMinor / largest,
+        ),
+      if (folded.isNotEmpty)
+        SpendingRow(
+          category: null,
+          amountMinor: foldedMinor,
+          pct: foldedPct,
+          barFraction: foldedMinor / largest,
+        ),
+    ];
+  }
 }
 
 /// The savings-rate goal the dashboard measures against, as a `0..1` ratio.
 ///
-/// A fixed 20 % (see `docs/design/04-dashboard.md` — « Objectif : 20 % »), not a
-/// per-user setting.
+/// The spec reads it from Paramètres → Préférences, which has no such setting
+/// yet; until it does, the goal is the spec's own 20 %.
 const savingsRateGoal = 0.20;

@@ -1185,14 +1185,7 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String dashboardSavingsDeltaPoints(String delta) {
-    return '$delta pt';
-  }
-
-  @override
-  String dashboardSavingsGoalReached(String goal) {
-    return 'Goal $goal reached';
-  }
+  String get dashboardSavingsGoalReached => 'Goal reached';
 
   @override
   String dashboardSavingsGoalPending(String goal) {
@@ -1200,32 +1193,35 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String dashboardSavingsDeltaSince(String delta, DateTime month) {
+    final intl.DateFormat monthDateFormat = intl.DateFormat.MMMM(localeName);
+    final String monthString = monthDateFormat.format(month);
+
+    return '$delta pt since $monthString';
+  }
+
+  @override
+  String dashboardSavingsGoalMark(String goal) {
+    return 'goal $goal';
+  }
+
+  @override
+  String get dashboardNoValue => '—';
+
+  @override
   String get dashboardCategoryBreakdownTitle => 'Spending by category';
 
   @override
-  String dashboardCategoryBreakdownSubtitle(String month, int count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: '$count categories',
-      one: '1 category',
-    );
-    return '$month · $_temp0';
-  }
+  String get dashboardCategoryOthers => 'Other';
 
   @override
-  String get dashboardDonutCenterCaption => 'spent';
+  String get dashboardCategoryNoSpending => 'No spending this month.';
 
   @override
-  String get dashboardSavingsTrendTitle => 'Savings over time';
+  String get dashboardSavingsTrendTitle => 'Monthly savings';
 
   @override
-  String dashboardSavingsTrendSubtitle(int count) {
-    return 'Saved per month · $count months';
-  }
-
-  @override
-  String get dashboardSavingsTrendAverage => 'on average per month';
+  String get dashboardSavingsTrendAverage => 'on average over 12 months';
 
   @override
   String get dashboardSavingsViewBars => 'Bars';
@@ -1234,28 +1230,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get dashboardSavingsViewLine => 'Line';
 
   @override
-  String get dashboardIncomeVsExpenseTitle => 'Income vs expenses';
-
-  @override
-  String dashboardIncomeVsExpenseSubtitle(int count) {
-    return 'Last $count months';
-  }
-
-  @override
-  String get dashboardLegendIncome => 'Income';
-
-  @override
-  String get dashboardLegendExpense => 'Expenses';
-
-  @override
   String get dashboardRecentActivityTitle => 'Recent activity';
 
   @override
-  String get dashboardViewAllTransactions => 'View all transactions';
-
-  @override
-  String get dashboardRecentActivityEmpty =>
-      'Your transactions will show up here.';
+  String get dashboardViewAllTransactions => 'All transactions';
 
   @override
   String get dashboardEmptyTitle => 'No data for this month';
@@ -1274,10 +1252,17 @@ class AppLocalizationsEn extends AppLocalizations {
   String get dashboardErrorInvalidMonth => 'The requested month isn\'t valid.';
 
   @override
-  String get dashboardErrorGeneric => 'Something went wrong. Please try again.';
+  String get dashboardErrorGeneric =>
+      'The dashboard could not be loaded. Nothing was changed.';
 
   @override
   String get dashboardChooseMonth => 'Choose a month';
+
+  @override
+  String get dashboardPreviousMonth => 'Previous month';
+
+  @override
+  String get dashboardNextMonth => 'Next month';
 
   @override
   String get dashboardPreviousYear => 'Previous year';
@@ -3041,15 +3026,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get dashboardGoalsTitle => 'Goals';
 
   @override
-  String get dashboardGoalsViewAll => 'View all';
+  String get dashboardGoalsViewAll => 'All goals';
 
   @override
-  String dashboardGoalsProgress(String saved, String target) {
-    return '$saved / $target';
+  String dashboardGoalsTarget(String target) {
+    return '/ $target';
   }
-
-  @override
-  String get dashboardGoalsReached => 'Reached';
 
   @override
   String get goalFormDatePick => 'Pick a target date';

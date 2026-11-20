@@ -74,9 +74,17 @@ class GoalsState {
       savingsAccounts.firstOrNull?.currency ??
       '';
 
-  /// The dashboard card's rows: the first three goals of the grid, in the order
-  /// the API returns them.
-  List<Goal> get topGoals => goals.take(3).toList();
+  /// The dashboard's « Objectifs » rows: up to four active goals, by creation
+  /// order (`docs/design/04-dashboard.md` §5b).
+  /// Ties keep the API's order (`List.sort` is not stable on its own).
+  List<Goal> get topGoals {
+    final indexed = goals.indexed.toList()
+      ..sort((a, b) {
+        final byDate = a.$2.createdAt.compareTo(b.$2.createdAt);
+        return byDate != 0 ? byDate : a.$1.compareTo(b.$1);
+      });
+    return [for (final (_, goal) in indexed.take(4)) goal];
+  }
 
   GoalsState copyWith({
     List<Goal>? goals,

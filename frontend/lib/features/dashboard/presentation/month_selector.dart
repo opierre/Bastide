@@ -1,14 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+import 'package:lucide_icons_flutter/lucide_icons_300.dart';
 
 import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/tokens.dart';
+import '../../../core/widgets/app_popover.dart';
 import '../../../l10n/app_localizations.dart';
 import '../application/dashboard_controller.dart';
 
-/// The dashboard's top-bar contextual control: a « ‹ Mai 2026 › » pill stepping one month at a
-/// time (see `docs/design/04-dashboard.md` §Top bar).
+/// The dashboard's title-bar control (`docs/design/04-dashboard.md` §Title bar): a 28 px
+/// select-look « ‹ Mai 2026 › » (`00` §6, Select) stepping one month at a time.
 ///
 /// The label between the chevrons opens a month-and-year picker. Stepping is
 /// the fast path for "last month"; reaching a month a year back through it
@@ -18,24 +20,26 @@ class DashboardTopBarActions extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
     final month = ref.watch(dashboardControllerProvider).value?.month;
     final locale = Localizations.localeOf(context).toString();
     final controller = ref.read(dashboardControllerProvider.notifier);
 
     return Container(
-      height: AppChrome.controlPillHeight,
-      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xs),
+      height: AppSizes.toolbarSelect,
+      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xxs),
       decoration: BoxDecoration(
-        color: context.colors.bg,
-        borderRadius: BorderRadius.circular(AppRadii.md),
-        border: Border.all(color: context.colors.line),
+        color: context.colors.field,
+        borderRadius: BorderRadius.circular(AppRadii.control),
+        border: Border.all(color: context.colors.lineStrong),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
           _StepButton(
             key: const Key('dashboardMonthPrev'),
-            icon: Icons.chevron_left_rounded,
+            icon: LucideIcons300.chevronLeft,
+            tooltip: l10n.dashboardPreviousMonth,
             onPressed: month == null
                 ? null
                 : () => controller.changeMonth(_shift(month, -1)),
@@ -47,7 +51,8 @@ class DashboardTopBarActions extends ConsumerWidget {
           ),
           _StepButton(
             key: const Key('dashboardMonthNext'),
-            icon: Icons.chevron_right_rounded,
+            icon: LucideIcons300.chevronRight,
+            tooltip: l10n.dashboardNextMonth,
             onPressed: month == null
                 ? null
                 : () => controller.changeMonth(_shift(month, 1)),
@@ -109,21 +114,7 @@ class _MonthPickerAnchorState extends State<MonthPickerAnchor> {
     return MenuAnchor(
       controller: _menuController,
       alignmentOffset: const Offset(0, AppSpacing.sm),
-      style: MenuStyle(
-        // The same floating treatment as [AppSelect]'s popover, so every
-        // overlay in the app reads as the same material.
-        backgroundColor: WidgetStatePropertyAll(context.colors.surface),
-        surfaceTintColor: const WidgetStatePropertyAll(Colors.transparent),
-        shadowColor: WidgetStatePropertyAll(context.colors.shadow.first.color),
-        elevation: const WidgetStatePropertyAll(AppShadows.popoverElevation),
-        padding: const WidgetStatePropertyAll(EdgeInsets.zero),
-        shape: WidgetStatePropertyAll(
-          RoundedRectangleBorder(
-            borderRadius: BorderRadius.all(Radius.circular(AppRadii.inset)),
-            side: BorderSide(color: context.colors.line),
-          ),
-        ),
-      ),
+      style: AppPopover.menuStyle(context, maxHeight: double.infinity),
       menuChildren: [
         if (_browsedYear case final year?)
           _PickerPanel(
@@ -138,17 +129,14 @@ class _MonthPickerAnchorState extends State<MonthPickerAnchor> {
         message: l10n.dashboardChooseMonth,
         child: InkWell(
           key: const Key('dashboardMonthPickerButton'),
-          borderRadius: BorderRadius.circular(AppRadii.sm),
+          borderRadius: BorderRadius.circular(AppRadii.item),
           hoverColor: context.colors.hover,
           // Disabled while the month is unknown: the picker would have nothing
           // to open on, and the label beside it is empty anyway.
           onTap: widget.month == null ? null : _open,
           child: Container(
-            constraints: const BoxConstraints(minWidth: 96),
-            padding: const EdgeInsets.symmetric(
-              horizontal: AppSpacing.sm,
-              vertical: AppSpacing.xs,
-            ),
+            constraints: const BoxConstraints(minWidth: _labelMinWidth),
+            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xsPlus),
             // Sized to the year's widest month rather than to the one shown: « Mai 2026 » and
             // « Septembre 2026 » differ by a third, and a pill that resized on every step
             // moved the chevron out from under the pointer clicking it.
@@ -202,7 +190,7 @@ class _PickerPanel extends StatelessWidget {
     return SizedBox(
       width: 236,
       child: Padding(
-        padding: const EdgeInsets.all(AppSpacing.sm + AppSpacing.xs),
+        padding: const EdgeInsets.all(AppSpacing.xs),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -210,7 +198,7 @@ class _PickerPanel extends StatelessWidget {
               children: [
                 _StepButton(
                   key: const Key('dashboardYearPrev'),
-                  icon: Icons.chevron_left_rounded,
+                  icon: LucideIcons300.chevronLeft,
                   tooltip: l10n.dashboardPreviousYear,
                   onPressed: () => onYearChanged(year - 1),
                 ),
@@ -226,7 +214,7 @@ class _PickerPanel extends StatelessWidget {
                 ),
                 _StepButton(
                   key: const Key('dashboardYearNext'),
-                  icon: Icons.chevron_right_rounded,
+                  icon: LucideIcons300.chevronRight,
                   tooltip: l10n.dashboardNextYear,
                   onPressed: () => onYearChanged(year + 1),
                 ),
@@ -234,11 +222,11 @@ class _PickerPanel extends StatelessWidget {
             ),
             const SizedBox(height: AppSpacing.sm),
             for (var row = 0; row < 4; row++) ...[
-              if (row > 0) const SizedBox(height: AppSpacing.xs + 2),
+              if (row > 0) const SizedBox(height: AppSpacing.xs),
               Row(
                 children: [
                   for (var column = 0; column < 3; column++) ...[
-                    if (column > 0) const SizedBox(width: AppSpacing.xs + 2),
+                    if (column > 0) const SizedBox(width: AppSpacing.xs),
                     Expanded(
                       child: _MonthCell(
                         month: row * 3 + column + 1,
@@ -265,8 +253,8 @@ class _PickerPanel extends StatelessWidget {
   }
 }
 
-/// One month in the grid. The selection is carried by weight as well as by the
-/// iris fill, so it never rests on color alone.
+/// One month in the grid, a 28 px popover item. The selection is carried by weight as well as
+/// by the `accentSoft` ground, so it never rests on colour alone.
 class _MonthCell extends StatelessWidget {
   const _MonthCell({
     required this.month,
@@ -284,20 +272,20 @@ class _MonthCell extends StatelessWidget {
   Widget build(BuildContext context) {
     return Material(
       color: isSelected ? context.colors.accentSoft : Colors.transparent,
-      borderRadius: BorderRadius.circular(AppRadii.sm),
+      borderRadius: BorderRadius.circular(AppRadii.item),
       child: InkWell(
         key: Key('dashboardPickerMonth-$month'),
-        borderRadius: BorderRadius.circular(AppRadii.sm),
+        borderRadius: BorderRadius.circular(AppRadii.item),
         hoverColor: context.colors.hover,
         onTap: () => onTap(month),
         child: Container(
-          height: 32,
+          height: AppSizes.popoverItem,
           alignment: Alignment.center,
           child: Text(
             label,
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
               color: isSelected ? context.colors.accent : context.colors.text,
-              fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
+              fontWeight: isSelected ? FontWeight.w500 : FontWeight.w400,
             ),
           ),
         ),
@@ -321,15 +309,21 @@ class _StepButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return IconButton(
-      icon: Icon(icon, size: 18),
+      icon: Icon(icon, size: AppSizes.iconSmall),
       onPressed: onPressed,
       tooltip: tooltip,
       visualDensity: VisualDensity.compact,
       padding: EdgeInsets.zero,
-      constraints: const BoxConstraints(minWidth: 28, minHeight: 28),
+      constraints: const BoxConstraints(
+        minWidth: AppSizes.button - AppSpacing.sm,
+        minHeight: AppSizes.button - AppSpacing.sm,
+      ),
     );
   }
 }
+
+/// Room for the widest month label of a year, so the control does not resize as it steps.
+const _labelMinWidth = 96.0;
 
 DateTime _shift(DateTime month, int months) =>
     DateTime(month.year, month.month + months);

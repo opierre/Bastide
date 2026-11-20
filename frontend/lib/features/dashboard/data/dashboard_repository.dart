@@ -29,17 +29,14 @@ class DashboardRepository {
     return _parse(json);
   }
 
-  /// The two trend series behind row 2's savings line and row 3's bars.
+  /// The savings series behind « Épargne mensuelle ».
   ///
-  /// Takes no month: both windows end at the current one, so this is fetched once and survives
+  /// Takes no month: the window ends at the current one, so this is fetched once and survives
   /// the month picker.
   Future<DashboardTrends> trends() async {
     final json =
         await _apiClient.get('/dashboard/trends') as Map<String, dynamic>;
     return DashboardTrends(
-      monthlySeries: (json['monthly_series'] as List<dynamic>)
-          .map((entry) => _parseMonthlyTotals(entry as Map<String, dynamic>))
-          .toList(),
       savingsSeries: (json['savings_series'] as List<dynamic>)
           .map((entry) => _parseSavingsPoint(entry as Map<String, dynamic>))
           .toList(),
@@ -53,9 +50,9 @@ class DashboardRepository {
   /// internals — a feature owns everything it needs (see the architecture skill), the same way
   /// the transactions repository calls `/categories` itself.
   /// The default is a ceiling, not a target: « Activité récente » draws as many of these as fit
-  /// in the height row 3 gives it, so the list is fetched deep enough to fill a tall window
-  /// rather than to the four rows the spec's own frame happens to show.
-  Future<List<RecentTransaction>> recentTransactions({int limit = 8}) async {
+  /// in the height the panel gives it, so the list is fetched deep enough to fill a tall window
+  /// rather than to the six rows the spec's 900 px frame shows.
+  Future<List<RecentTransaction>> recentTransactions({int limit = 12}) async {
     final (page, accounts) = await (
       _apiClient.get('/transactions', query: {'page': '1'}),
       _apiClient.get('/accounts'),
@@ -80,21 +77,25 @@ class DashboardRepository {
           amountMinor: entry['amount_minor'] as int,
           currency: entry['currency'] as String,
           logo: LogoRef.fromJson(entry),
+          isRawLabel: _merchant(entry).isEmpty,
         ),
     ];
   }
 
-  /// « BNP — Compte courant ». The em dash matches the spec's activity rows; an account with
-  /// no institution recorded falls back to its name alone rather than a dangling dash.
+  /// « BNP Compte courant », as the spec's activity rows write it; an account with no
+  /// institution recorded falls back to its name alone.
   String _accountLabel(Map<String, dynamic> json) {
     final institution = (json['institution'] as String?)?.trim() ?? '';
     final name = json['name'] as String;
-    return institution.isEmpty ? name : '$institution — $name';
+    return institution.isEmpty ? name : '$institution $name';
   }
+
+  String _merchant(Map<String, dynamic> json) =>
+      (json['merchant'] as String?)?.trim() ?? '';
 
   /// The merchant when the import recognised one, else the cleaned description.
   String _transactionLabel(Map<String, dynamic> json) {
-    final merchant = (json['merchant'] as String?)?.trim() ?? '';
+    final merchant = _merchant(json);
     return merchant.isEmpty ? json['description_clean'] as String : merchant;
   }
 
@@ -126,13 +127,6 @@ class DashboardRepository {
         .map((entry) => _parseCategory(entry as Map<String, dynamic>))
         .toList(),
     currency: json['currency'] as String,
-  );
-
-  MonthlyTotals _parseMonthlyTotals(Map<String, dynamic> json) => MonthlyTotals(
-    month: _parseMonth(json['month'] as String),
-    incomeMinor: json['income_minor'] as int,
-    expenseMinor: json['expense_minor'] as int,
-    netMinor: json['net_minor'] as int,
   );
 
   SavingsPoint _parseSavingsPoint(Map<String, dynamic> json) => SavingsPoint(

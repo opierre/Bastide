@@ -1183,7 +1183,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get dashboardStatNet => 'Net';
 
   @override
-  String get dashboardStatSavingsRate => 'Taux d\'épargne';
+  String get dashboardStatSavingsRate => 'Taux d’épargne';
 
   @override
   String dashboardStatVsPreviousMonth(DateTime month) {
@@ -1194,14 +1194,7 @@ class AppLocalizationsFr extends AppLocalizations {
   }
 
   @override
-  String dashboardSavingsDeltaPoints(String delta) {
-    return '$delta pt';
-  }
-
-  @override
-  String dashboardSavingsGoalReached(String goal) {
-    return 'Objectif $goal atteint';
-  }
+  String get dashboardSavingsGoalReached => 'Objectif atteint';
 
   @override
   String dashboardSavingsGoalPending(String goal) {
@@ -1209,32 +1202,35 @@ class AppLocalizationsFr extends AppLocalizations {
   }
 
   @override
+  String dashboardSavingsDeltaSince(String delta, DateTime month) {
+    final intl.DateFormat monthDateFormat = intl.DateFormat.MMMM(localeName);
+    final String monthString = monthDateFormat.format(month);
+
+    return '$delta pt depuis $monthString';
+  }
+
+  @override
+  String dashboardSavingsGoalMark(String goal) {
+    return 'objectif $goal';
+  }
+
+  @override
+  String get dashboardNoValue => '—';
+
+  @override
   String get dashboardCategoryBreakdownTitle => 'Dépenses par catégorie';
 
   @override
-  String dashboardCategoryBreakdownSubtitle(String month, int count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: '$count catégories',
-      one: '1 catégorie',
-    );
-    return '$month · $_temp0';
-  }
+  String get dashboardCategoryOthers => 'Autres';
 
   @override
-  String get dashboardDonutCenterCaption => 'dépensés';
+  String get dashboardCategoryNoSpending => 'Aucune dépense ce mois.';
 
   @override
-  String get dashboardSavingsTrendTitle => 'Évolution de l\'épargne';
+  String get dashboardSavingsTrendTitle => 'Épargne mensuelle';
 
   @override
-  String dashboardSavingsTrendSubtitle(int count) {
-    return 'Épargne mensuelle · $count mois';
-  }
-
-  @override
-  String get dashboardSavingsTrendAverage => 'en moyenne par mois';
+  String get dashboardSavingsTrendAverage => 'en moyenne sur 12 mois';
 
   @override
   String get dashboardSavingsViewBars => 'Barres';
@@ -1243,28 +1239,10 @@ class AppLocalizationsFr extends AppLocalizations {
   String get dashboardSavingsViewLine => 'Courbe';
 
   @override
-  String get dashboardIncomeVsExpenseTitle => 'Revenus vs dépenses';
-
-  @override
-  String dashboardIncomeVsExpenseSubtitle(int count) {
-    return '$count derniers mois';
-  }
-
-  @override
-  String get dashboardLegendIncome => 'Revenus';
-
-  @override
-  String get dashboardLegendExpense => 'Dépenses';
-
-  @override
   String get dashboardRecentActivityTitle => 'Activité récente';
 
   @override
-  String get dashboardViewAllTransactions => 'Voir toutes les transactions';
-
-  @override
-  String get dashboardRecentActivityEmpty =>
-      'Vos transactions apparaîtront ici.';
+  String get dashboardViewAllTransactions => 'Toutes les transactions';
 
   @override
   String get dashboardEmptyTitle => 'Aucune donnée pour ce mois';
@@ -1284,10 +1262,16 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get dashboardErrorGeneric =>
-      'Une erreur est survenue. Veuillez réessayer.';
+      'Le tableau de bord n’a pas pu être chargé. Rien n’a été modifié.';
 
   @override
   String get dashboardChooseMonth => 'Choisir un mois';
+
+  @override
+  String get dashboardPreviousMonth => 'Mois précédent';
+
+  @override
+  String get dashboardNextMonth => 'Mois suivant';
 
   @override
   String get dashboardPreviousYear => 'Année précédente';
@@ -3063,15 +3047,12 @@ class AppLocalizationsFr extends AppLocalizations {
   String get dashboardGoalsTitle => 'Objectifs';
 
   @override
-  String get dashboardGoalsViewAll => 'Voir tout';
+  String get dashboardGoalsViewAll => 'Tous les objectifs';
 
   @override
-  String dashboardGoalsProgress(String saved, String target) {
-    return '$saved / $target';
+  String dashboardGoalsTarget(String target) {
+    return '/ $target';
   }
-
-  @override
-  String get dashboardGoalsReached => 'Atteint';
 
   @override
   String get goalFormDatePick => 'Choisir une date cible';
