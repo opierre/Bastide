@@ -1,21 +1,24 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+import 'package:lucide_icons_flutter/lucide_icons_300.dart';
 
 import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/tokens.dart';
 import '../../../core/widgets/amount_text.dart';
-import '../../../core/widgets/app_card.dart';
+import '../../../core/widgets/app_button.dart';
+import '../../../core/widgets/app_checkbox.dart';
 import '../../../core/widgets/app_modal.dart';
+import '../../../core/widgets/app_popover.dart';
 import '../../../core/widgets/inline_banner.dart';
 import '../../../core/widgets/labeled_field.dart';
-import '../../../core/widgets/primary_button.dart';
+import '../../../core/widgets/note_line.dart';
 import '../../../l10n/app_localizations.dart';
 import '../application/simulator_controller.dart';
 import '../domain/simulation.dart';
 import 'simulator_labels.dart';
 
-/// A property price in thousands, as scenario names read it — « 320 k€ ».
+/// A property price in thousands, as scenario names read it: « 320 k€ ».
 String scenarioPriceLabel(AppLocalizations l10n, String locale, int minor) =>
     l10n.simulatorPriceThousands(
       NumberFormat.decimalPattern(locale).format(minor / 100000),
@@ -31,15 +34,15 @@ String liveScenarioName(
   _ => l10n.simulatorLiveName,
 };
 
-/// « Scénarios enregistrés » (`14-simulateur.md` §Scenarios Card): the live
-/// simulation first, marked « EN COURS », then the saved scenarios, each with a
-/// checkbox toward the side-by-side comparison.
+/// « Scénarios enregistrés » (`14-simulateur.md` §Inputs pane, 6–7): the live
+/// simulation first, its sub-line led by « en cours », then the saved
+/// scenarios, each with a checkbox toward the comparison.
 ///
-/// The live row counts toward the three like any other. At three the rest dim
-/// and the list says how to free a slot; below two the compare control says
-/// why it is off. Deleting a saved row is immediate — it is a scratchpad.
-class ScenarioListCard extends ConsumerWidget {
-  const ScenarioListCard({super.key, required this.state});
+/// The live row counts toward the three like any other. At three the other
+/// checkboxes are disabled and a note says how to free a slot. Deleting a
+/// saved row is immediate: it is a scratchpad.
+class ScenarioList extends ConsumerWidget {
+  const ScenarioList({super.key, required this.state});
 
   final SimulatorState state;
 
@@ -51,280 +54,279 @@ class ScenarioListCard extends ConsumerWidget {
     final controller = ref.read(simulatorControllerProvider.notifier);
     final scenarios = state.scenarios;
 
-    if (scenarios.isEmpty) {
-      return AppCard(
-        key: const Key('scenarioCard'),
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Text(l10n.simulatorScenariosTitle, style: textTheme.titleMedium),
-            const Expanded(child: _MiniEmptyState()),
-          ],
+    final heading = Row(
+      children: [
+        Expanded(
+          child: Text(
+            l10n.simulatorScenariosTitle,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: textTheme.titleSmall,
+          ),
         ),
+        if (scenarios.isNotEmpty) ...[
+          const SizedBox(width: AppSpacing.smPlus),
+          AppButton(
+            key: const Key('scenarioCompareButton'),
+            label: l10n.simulatorCompareButton(
+              state.selection.length,
+              SimulatorState.maxCompared,
+            ),
+            onPressed: state.canOpenComparison
+                ? controller.openComparison
+                : null,
+          ),
+        ],
+      ],
+    );
+
+    if (scenarios.isEmpty) {
+      return Column(
+        key: const Key('scenarioList'),
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          heading,
+          const SizedBox(height: AppSpacing.fieldGap),
+          NoteLine(
+            key: const Key('scenariosEmpty'),
+            text: l10n.simulatorScenariosEmpty,
+          ),
+        ],
       );
     }
 
-    final count = state.selection.length;
     final unchecked = [
       if (!state.isSelected(SimulatorState.liveId) && state.canCompute)
         liveScenarioName(l10n, locale, state.inputs),
       for (final scenario in scenarios)
         if (!state.isSelected(scenario.id)) scenario.label,
     ];
-    final String? note;
-    if (state.selectionFull && unchecked.isNotEmpty) {
-      note = unchecked.length == 1
-          ? l10n.simulatorCompareCapNamed(unchecked.single)
-          : l10n.simulatorCompareCap;
-    } else if (!state.canOpenComparison) {
-      note = l10n.simulatorCompareNeedsTwo;
-    } else {
-      note = null;
-    }
+    final note = !state.selectionFull || unchecked.isEmpty
+        ? null
+        : unchecked.length == 1
+        ? l10n.simulatorCompareCapNamed(unchecked.single)
+        : l10n.simulatorCompareCap;
 
-    return AppCard(
-      key: const Key('scenarioCard'),
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Row(
-            children: [
-              Expanded(
-                child: Text(
-                  l10n.simulatorScenariosTitle,
-                  style: textTheme.titleMedium,
-                ),
-              ),
-              SizedBox(
-                height: 30,
-                child: OutlinedButton(
-                  key: const Key('scenarioCompareButton'),
-                  onPressed: state.canOpenComparison
-                      ? controller.openComparison
-                      : null,
-                  style: count == 0
-                      ? null
-                      : OutlinedButton.styleFrom(
-                          foregroundColor: context.colors.accent,
-                          side: BorderSide(
-                            color: context.colors.accent.withValues(
-                              alpha: 0.45,
-                            ),
-                          ),
-                        ),
-                  child: Text(
-                    l10n.simulatorCompareButton(
-                      count,
-                      SimulatorState.maxCompared,
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
-          if (state.actionError != null) ...[
-            const SizedBox(height: AppSpacing.sm),
-            InlineBanner(
-              key: const Key('scenarioActionError'),
-              message: localizeSimulatorError(l10n, state.actionError),
-              onDismiss: controller.clearActionError,
-              dismissTooltip: l10n.simulatorCancel,
-            ),
-          ],
-          const SizedBox(height: AppSpacing.sm),
-          Expanded(
-            child: ListView(
-              key: const Key('scenarioList'),
-              padding: EdgeInsets.zero,
-              children: [
-                _ScenarioRow(
-                  id: SimulatorState.liveId,
-                  name: liveScenarioName(l10n, locale, state.inputs),
-                  live: true,
-                  subline: _subline(
-                    l10n,
-                    locale,
-                    state.inputs.annualRateBps,
-                    state.inputs.termMonths,
-                    state.result?.totalInstalmentMinor,
-                    state.household.currency,
-                  ),
-                  state: state,
-                ),
-                for (final scenario in scenarios)
-                  _ScenarioRow(
-                    id: scenario.id,
-                    name: scenario.label,
-                    subline: _subline(
-                      l10n,
-                      locale,
-                      scenario.terms.annualRateBps,
-                      scenario.terms.termMonths,
-                      state.scenarioInstalments[scenario.id],
-                      scenario.currency,
-                    ),
-                    state: state,
-                    onDelete: () => controller.deleteScenario(scenario.id),
-                  ),
-              ],
-            ),
-          ),
-          if (note != null) ...[
-            const SizedBox(height: AppSpacing.sm),
-            Text(
-              note,
-              key: const Key('scenarioNote'),
-              style: context.textStyles.helper.copyWith(
-                fontSize: 11,
-                color: context.colors.textTertiary,
-              ),
-            ),
-          ],
-        ],
-      ),
+    String sub(int? rateBps, int termMonths) => l10n.simulatorScenarioSub(
+      rateBps == null ? l10n.simulatorNoValue : formatRate(rateBps, locale),
+      termLabel(l10n, termMonths),
     );
-  }
 
-  static String _subline(
-    AppLocalizations l10n,
-    String locale,
-    int? rateBps,
-    int termMonths,
-    int? instalmentMinor,
-    String currency,
-  ) {
-    final rate = rateBps == null ? '—' : formatRate(rateBps, locale);
-    final term = termLabel(l10n, termMonths);
-    if (instalmentMinor == null) {
-      return l10n.simulatorScenarioSubNoInstalment(rate, term);
-    }
-    return l10n.simulatorScenarioSub(
-      rate,
-      term,
-      formatAmount(
-        amountMinor: instalmentMinor,
-        currency: currency,
-        locale: locale,
-      ),
+    return Column(
+      key: const Key('scenarioList'),
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        heading,
+        if (state.actionError != null) ...[
+          const SizedBox(height: AppSpacing.sm),
+          InlineBanner(
+            key: const Key('scenarioActionError'),
+            message: localizeSimulatorError(l10n, state.actionError),
+            onDismiss: controller.clearActionError,
+            dismissTooltip: l10n.simulatorCancel,
+          ),
+        ],
+        const SizedBox(height: AppSpacing.sm),
+        _ScenarioRow(
+          id: SimulatorState.liveId,
+          name: liveScenarioName(l10n, locale, state.inputs),
+          subline: l10n.simulatorScenarioSubLive(
+            switch (state.inputs.annualRateBps) {
+              final bps? => formatRate(bps, locale),
+              null => l10n.simulatorNoValue,
+            },
+            termLabel(l10n, state.inputs.termMonths),
+          ),
+          instalmentMinor: state.result?.totalInstalmentMinor,
+          currency: state.household.currency,
+          state: state,
+        ),
+        for (final scenario in scenarios)
+          _ScenarioRow(
+            id: scenario.id,
+            name: scenario.label,
+            subline: sub(
+              scenario.terms.annualRateBps,
+              scenario.terms.termMonths,
+            ),
+            instalmentMinor: state.scenarioInstalments[scenario.id],
+            currency: scenario.currency,
+            state: state,
+            onRename: () => showRenameScenarioModal(context, scenario),
+            onDelete: () => controller.deleteScenario(scenario.id),
+          ),
+        if (note != null) ...[
+          const SizedBox(height: AppSpacing.sm),
+          NoteLine(key: const Key('scenarioNote'), text: note),
+        ],
+      ],
     );
   }
 }
 
-class _ScenarioRow extends ConsumerWidget {
+/// One scenario: checkbox · name over « taux · durée » · spacer · instalment
+/// `textSecondary` · the `ellipsis` menu, shown on hover or focus.
+class _ScenarioRow extends ConsumerStatefulWidget {
   const _ScenarioRow({
     required this.id,
     required this.name,
     required this.subline,
+    required this.instalmentMinor,
+    required this.currency,
     required this.state,
-    this.live = false,
+    this.onRename,
     this.onDelete,
   });
 
   final String id;
   final String name;
   final String subline;
+  final int? instalmentMinor;
+  final String currency;
   final SimulatorState state;
-  final bool live;
 
-  /// `null` for the live row, which has nothing saved to delete.
+  /// `null` for the live row, which has nothing saved to rename or delete.
+  final VoidCallback? onRename;
   final VoidCallback? onDelete;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<_ScenarioRow> createState() => _ScenarioRowState();
+}
+
+class _ScenarioRowState extends ConsumerState<_ScenarioRow> {
+  final _menu = MenuController();
+
+  /// Hover and focus are row ephemera: they only reveal the menu.
+  bool _hovered = false;
+  bool _focused = false;
+
+  @override
+  Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    final locale = Localizations.localeOf(context).toString();
+    final textTheme = Theme.of(context).textTheme;
+    final colors = context.colors;
+    final id = widget.id;
+    final state = widget.state;
     final selected = state.isSelected(id);
     final selectable = state.isSelectable(id);
+    final instalment = widget.instalmentMinor;
     void toggle() =>
         ref.read(simulatorControllerProvider.notifier).toggleSelection(id);
 
-    return Opacity(
-      opacity: selectable ? 1 : 0.5,
-      child: Container(
-        key: Key('scenarioRow-$id'),
-        height: 46,
-        decoration: BoxDecoration(
-          border: Border(bottom: BorderSide(color: context.colors.line)),
-        ),
-        child: InkWell(
+    final hasMenu = widget.onRename != null || widget.onDelete != null;
+    final showMenu = _hovered || _focused || _menu.isOpen;
+
+    return MouseRegion(
+      onEnter: (_) => setState(() => _hovered = true),
+      onExit: (_) => setState(() => _hovered = false),
+      child: Focus(
+        canRequestFocus: false,
+        skipTraversal: true,
+        onFocusChange: (focused) => setState(() => _focused = focused),
+        child: GestureDetector(
+          behavior: HitTestBehavior.opaque,
           onTap: selectable ? toggle : null,
-          child: Row(
-            children: [
-              _Checkbox(
-                key: Key('scenarioCheck-$id'),
-                value: selected,
-                enabled: selectable,
-                semanticLabel: l10n.simulatorScenarioSelect(name),
-              ),
-              const SizedBox(width: AppSpacing.sm + 4),
-              Expanded(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Flexible(
-                          child: Text(
-                            name,
-                            key: Key('scenarioName-$id'),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: Theme.of(context).textTheme.bodyMedium
-                                ?.copyWith(fontWeight: FontWeight.w600),
-                          ),
-                        ),
-                        if (live) ...[
-                          const SizedBox(width: AppSpacing.sm - 2),
-                          SimulatorMarkerPill(
-                            key: const Key('scenarioLivePill'),
-                            label: l10n.simulatorLivePill,
-                          ),
-                        ],
-                      ],
-                    ),
-                    Text(
-                      subline,
-                      key: Key('scenarioSub-$id'),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: tabularNumberStyle(context.textStyles.helper)
-                          .copyWith(
-                            fontSize: 11,
-                            color: context.colors.textTertiary,
-                          ),
-                    ),
-                  ],
+          child: SizedBox(
+            key: Key('scenarioRow-$id'),
+            height: AppSizes.tableRowTwoLines,
+            child: Row(
+              children: [
+                AppCheckbox(
+                  key: Key('scenarioCheck-$id'),
+                  value: selected,
+                  onChanged: selectable ? (_) => toggle() : null,
+                  semanticLabel: l10n.simulatorScenarioSelect(widget.name),
                 ),
-              ),
-              if (onDelete != null)
-                PopupMenuButton<void>(
-                  key: Key('scenarioMenu-$id'),
-                  icon: const Icon(Icons.more_horiz_rounded, size: 18),
-                  iconColor: context.colors.textSecondary,
-                  tooltip: l10n.simulatorScenarioActions,
-                  position: PopupMenuPosition.under,
-                  padding: EdgeInsets.zero,
-                  itemBuilder: (context) => [
-                    PopupMenuItem<void>(
-                      key: Key('scenarioDelete-$id'),
-                      onTap: onDelete,
-                      child: Row(
-                        children: [
-                          Icon(
-                            Icons.delete_outline_rounded,
-                            size: 16,
-                            color: context.colors.textSecondary,
-                          ),
-                          const SizedBox(width: AppSpacing.sm),
-                          Text(l10n.simulatorScenarioDelete),
-                        ],
+                const SizedBox(width: AppSpacing.smPlus),
+                Expanded(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        widget.name,
+                        key: Key('scenarioName-$id'),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: textTheme.bodyMedium,
                       ),
-                    ),
-                  ],
+                      Text(
+                        widget.subline,
+                        key: Key('scenarioSub-$id'),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: tabularNumberStyle(
+                          textTheme.bodySmall!,
+                        ).copyWith(color: colors.textTertiary),
+                      ),
+                    ],
+                  ),
                 ),
-            ],
+                if (instalment != null) ...[
+                  const SizedBox(width: AppSpacing.sm),
+                  Text(
+                    formatAmount(
+                      amountMinor: instalment,
+                      currency: widget.currency,
+                      locale: locale,
+                    ),
+                    key: Key('scenarioInstalment-$id'),
+                    style: tabularNumberStyle(
+                      textTheme.bodyMedium!,
+                    ).copyWith(color: colors.textSecondary),
+                  ),
+                ],
+                const SizedBox(width: AppSpacing.xs),
+                // The menu keeps its place when hidden, so the instalments
+                // stay aligned whether a row is hovered or not.
+                SizedBox(
+                  width: AppSizes.button,
+                  child: hasMenu
+                      ? Visibility(
+                          visible: showMenu,
+                          maintainSize: true,
+                          maintainAnimation: true,
+                          maintainState: true,
+                          maintainInteractivity: true,
+                          child: MenuAnchor(
+                            controller: _menu,
+                            style: AppPopover.menuStyle(context),
+                            alignmentOffset: const Offset(0, AppSpacing.xs),
+                            onOpen: () => setState(() {}),
+                            onClose: () => setState(() {}),
+                            menuChildren: [
+                              if (widget.onRename case final rename?)
+                                AppMenuItem(
+                                  key: Key('scenarioRename-$id'),
+                                  label: l10n.simulatorScenarioRename,
+                                  leading: const Icon(LucideIcons300.pencil),
+                                  onPressed: rename,
+                                ),
+                              if (widget.onDelete case final delete?)
+                                AppMenuItem(
+                                  key: Key('scenarioDelete-$id'),
+                                  label: l10n.simulatorScenarioDelete,
+                                  leading: const Icon(LucideIcons300.trash2),
+                                  destructive: true,
+                                  onPressed: delete,
+                                ),
+                            ],
+                            child: AppButton(
+                              key: Key('scenarioMenu-$id'),
+                              label: l10n.simulatorScenarioActions,
+                              icon: LucideIcons300.ellipsis,
+                              iconOnly: true,
+                              variant: AppButtonVariant.ghost,
+                              onPressed: () =>
+                                  _menu.isOpen ? _menu.close() : _menu.open(),
+                            ),
+                          ),
+                        )
+                      : null,
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -332,96 +334,8 @@ class _ScenarioRow extends ConsumerWidget {
   }
 }
 
-/// The 18 px checkbox (radius 5): iris fill and an ink check when checked.
-/// Material's [Checkbox] carries touch-sized padding the row has no room for.
-class _Checkbox extends StatelessWidget {
-  const _Checkbox({
-    super.key,
-    required this.value,
-    required this.enabled,
-    required this.semanticLabel,
-  });
-
-  final bool value;
-  final bool enabled;
-  final String semanticLabel;
-
-  @override
-  Widget build(BuildContext context) {
-    return Semantics(
-      checked: value,
-      enabled: enabled,
-      label: semanticLabel,
-      child: Container(
-        width: 18,
-        height: 18,
-        decoration: BoxDecoration(
-          color: value ? context.colors.accent : context.colors.field,
-          borderRadius: BorderRadius.circular(5),
-          border: value ? null : Border.all(color: context.colors.lineStrong),
-        ),
-        child: value
-            ? Icon(
-                Icons.check_rounded,
-                size: 14,
-                color: context.colors.onAccent,
-              )
-            : null,
-      ),
-    );
-  }
-}
-
-/// ⑤: the scenarios card with nothing saved — no compare control, one line on
-/// what the card is for.
-class _MiniEmptyState extends StatelessWidget {
-  const _MiniEmptyState();
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
-    final textTheme = Theme.of(context).textTheme;
-
-    return Center(
-      key: const Key('scenariosEmpty'),
-      child: SingleChildScrollView(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              width: 44,
-              height: 44,
-              alignment: Alignment.center,
-              decoration: BoxDecoration(
-                color: context.colors.accentSoft,
-                borderRadius: BorderRadius.circular(AppRadii.inset),
-              ),
-              child: Icon(
-                Icons.bookmark_border_rounded,
-                size: 20,
-                color: context.colors.accent,
-              ),
-            ),
-            const SizedBox(height: AppSpacing.sm + 4),
-            Text(
-              l10n.simulatorScenariosEmptyTitle,
-              style: textTheme.titleSmall,
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: AppSpacing.xs),
-            Text(
-              l10n.simulatorScenariosEmptyBody,
-              style: textTheme.bodySmall?.copyWith(
-                color: context.colors.textSecondary,
-              ),
-              textAlign: TextAlign.center,
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
+/// The save dialog's and the rename dialog's width (`14` §States).
+const _nameModalWidth = 420.0;
 
 Future<void> showSaveScenarioModal(BuildContext context) {
   return showDialog<void>(
@@ -430,11 +344,24 @@ Future<void> showSaveScenarioModal(BuildContext context) {
   );
 }
 
-/// The small « Enregistrer le scénario » modal: one name, prefilled on the
-/// « lieu — prix k€ » pattern with the place left for the user to type in
-/// front of the dash.
+Future<void> showRenameScenarioModal(
+  BuildContext context,
+  SavedSimulation scenario,
+) {
+  return showDialog<void>(
+    context: context,
+    builder: (_) => SaveScenarioModal(renaming: scenario),
+  );
+}
+
+/// « Enregistrer le scénario », modal 420 px: one name, prefilled on the
+/// « lieu, prix k€ » pattern with the caret waiting in front of the comma
+/// for the place. With [renaming] the same modal renames a saved scenario,
+/// prefilled with its current name.
 class SaveScenarioModal extends ConsumerStatefulWidget {
-  const SaveScenarioModal({super.key});
+  const SaveScenarioModal({super.key, this.renaming});
+
+  final SavedSimulation? renaming;
 
   @override
   ConsumerState<SaveScenarioModal> createState() => _SaveScenarioModalState();
@@ -452,6 +379,16 @@ class _SaveScenarioModalState extends ConsumerState<SaveScenarioModal> {
     super.didChangeDependencies();
     if (_filled) return;
     _filled = true;
+    if (widget.renaming case final scenario?) {
+      _name.value = TextEditingValue(
+        text: scenario.label,
+        selection: TextSelection(
+          baseOffset: 0,
+          extentOffset: scenario.label.length,
+        ),
+      );
+      return;
+    }
     final price = ref
         .read(simulatorControllerProvider)
         .value
@@ -464,7 +401,7 @@ class _SaveScenarioModalState extends ConsumerState<SaveScenarioModal> {
       text: l10n.simulatorSaveNamePrefill(
         scenarioPriceLabel(l10n, locale, price),
       ),
-      // The place goes first: the caret waits in front of the dash.
+      // The place goes first: the caret waits in front of the comma.
       selection: const TextSelection.collapsed(offset: 0),
     );
   }
@@ -481,10 +418,14 @@ class _SaveScenarioModalState extends ConsumerState<SaveScenarioModal> {
       _isSubmitting = true;
       _errorText = null;
     });
+    final controller = ref.read(simulatorControllerProvider.notifier);
+    final name = _name.text.trim();
     try {
-      await ref
-          .read(simulatorControllerProvider.notifier)
-          .saveScenario(_name.text.trim());
+      if (widget.renaming case final scenario?) {
+        await controller.renameScenario(scenario.id, name);
+      } else {
+        await controller.saveScenario(name);
+      }
       if (!mounted) return;
       Navigator.of(context).pop();
     } catch (error) {
@@ -504,16 +445,21 @@ class _SaveScenarioModalState extends ConsumerState<SaveScenarioModal> {
     final l10n = AppLocalizations.of(context)!;
 
     return AppModal(
-      title: l10n.simulatorSaveScenario,
-      width: 440,
+      key: const Key('saveScenarioModal'),
+      title: widget.renaming == null
+          ? l10n.simulatorSaveScenario
+          : l10n.simulatorRenameTitle,
+      width: _nameModalWidth,
       actions: [
-        OutlinedButton(
+        AppButton(
+          key: const Key('saveScenarioCancel'),
+          label: l10n.simulatorCancel,
           onPressed: _isSubmitting ? null : () => Navigator.of(context).pop(),
-          child: Text(l10n.simulatorCancel),
         ),
-        PrimaryButton(
+        AppButton(
           key: const Key('saveScenarioSubmit'),
           label: l10n.simulatorSaveSubmit,
+          variant: AppButtonVariant.primary,
           isLoading: _isSubmitting,
           onPressed: _isSubmitting ? null : _submit,
         ),
@@ -523,19 +469,12 @@ class _SaveScenarioModalState extends ConsumerState<SaveScenarioModal> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Text(
-              l10n.simulatorSaveBody,
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: context.colors.textSecondary,
-              ),
-            ),
-            const SizedBox(height: AppSpacing.md),
             if (_errorText != null) ...[
               InlineBanner(
                 key: const Key('saveScenarioError'),
                 message: _errorText!,
               ),
-              const SizedBox(height: AppSpacing.md),
+              const SizedBox(height: AppSpacing.fieldGap),
             ],
             LabeledField(
               label: l10n.simulatorSaveName,

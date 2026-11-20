@@ -1,8 +1,7 @@
 import 'package:bastide/core/api/api_client.dart';
 import 'package:bastide/core/theme/app_theme.dart';
-import 'package:bastide/core/theme/tokens.dart';
 import 'package:bastide/core/widgets/amount_text.dart';
-import 'package:bastide/core/widgets/app_card.dart';
+import 'package:bastide/core/widgets/repere_meter.dart';
 import 'package:bastide/features/simulator/application/simulator_controller.dart';
 import 'package:bastide/features/simulator/data/simulations_repository.dart';
 import 'package:bastide/features/simulator/domain/simulation.dart';
@@ -25,12 +24,13 @@ String _money(int amountMinor, {String locale = 'fr'}) =>
 Widget _wrap(
   MockSimulationsRepository repository, {
   Locale locale = const Locale('fr'),
+  ThemeData? theme,
 }) {
   return ProviderScope(
     overrides: [simulationsRepositoryProvider.overrideWithValue(repository)],
     child: MaterialApp(
       locale: locale,
-      theme: AppTheme.dark,
+      theme: theme ?? AppTheme.dark,
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
       home: const Scaffold(
@@ -83,17 +83,8 @@ Future<void> _typeFrame(WidgetTester tester, {String rate = '3,25'}) async {
   await _settleCompute(tester);
 }
 
-Color? _borderColor(WidgetTester tester, String key) {
-  final card = find
-      .descendant(
-        of: find.byKey(Key(key)),
-        matching: find.byType(AppCard),
-        matchRoot: true,
-      )
-      .first;
-  final border = tester.widget<AppCard>(card).border;
-  return (border as Border?)?.top.color;
-}
+RepereTone _tone(WidgetTester tester, String key) =>
+    tester.widget<RepereMeter>(find.byKey(Key(key))).tone;
 
 void main() {
   late MockSimulationsRepository repository;
@@ -126,7 +117,7 @@ void main() {
     });
   }
 
-  testWidgets('the empty form keeps every card, drawn with a dash and its '
+  testWidgets('the empty form keeps every block, drawn with a dash and its '
       'caption', (tester) async {
     _useDesktopSurface(tester);
     await tester.pumpWidget(_wrap(repository));
@@ -135,9 +126,9 @@ void main() {
     expect(_text(tester, 'resultInstalment'), '—');
     expect(
       _text(tester, 'resultInstalmentCaption'),
-      "Renseignez un prix et un taux pour voir l'échéance et sa part "
-      "d'assurance.",
+      'Renseignez un prix et un taux pour voir l’échéance.',
     );
+    expect(find.byKey(const Key('resultCostCaption')), findsNothing);
     expect(_text(tester, 'resultCost'), '—');
     expect(_text(tester, 'resultTaeg'), '—');
     expect(_text(tester, 'hcsfRatioValue'), '—');
@@ -146,11 +137,12 @@ void main() {
     expect(find.byKey(const Key('hcsfRatioGauge')), findsNothing);
     expect(find.byKey(const Key('projectionEmpty')), findsOneWidget);
     expect(find.byKey(const Key('projectionPlot')), findsNothing);
-    expect(_text(tester, 'simulatorTermValue'), '300 mois · 25 ans');
+    expect(_text(tester, 'simulatorTermValue'), '25 ans · 300 mois');
     expect(
       _text(tester, 'simulatorIncludeExistingSub'),
-      'Ajoute ${_money(150625)} / mois à la lecture',
+      'Ajoute ${_money(150625)} par mois à la lecture',
     );
+    expect(find.byKey(const Key('hcsfOverStatus')), findsNothing);
     verifyNever(
       () => repository.compute(
         any(),
@@ -189,18 +181,16 @@ void main() {
 
     expect(
       _text(tester, 'resultInstalmentCaption'),
-      '${_money(138641)} de mensualité + ${_money(3200)} d\'assurance · '
+      '${_money(138641)} de mensualité + ${_money(3200)} d’assurance · '
       '300 échéances',
     );
-    expect(
-      find.descendant(
-        of: find.byKey(const Key('resultTaegCard')),
-        matching: find.text('TAEG INDICATIF'),
-      ),
-      findsOneWidget,
-    );
+    expect(_text(tester, 'resultTaegLabel'), 'TAEG indicatif');
     expect(_text(tester, 'resultTaeg'), startsWith('3,67'));
-    expect(_text(tester, 'resultCostCaption'), contains('45,5'));
+    expect(
+      _text(tester, 'resultCostCaption'),
+      'intérêts ${_money(13142300)} · assurance ${_money(960000)} · '
+      'frais ${_money(450000)}',
+    );
   });
 
   testWidgets('the projection stacks the API yearly split, one bar a year', (
@@ -269,33 +259,41 @@ void main() {
     );
   }
 
-  testWidgets('over the reference only the HCSF card changes, and nothing is '
-      'blocked', (tester) async {
+  testWidgets('over the reference only the ratio repère and the status text '
+      'change, and nothing is blocked', (tester) async {
     _useDesktopSurface(tester);
     stubCompute((include) => include ? testOverLimitResult() : testResult());
     await tester.pumpWidget(_wrap(repository));
     await _load(tester);
     await _typeFrame(tester);
 
-    expect(find.byKey(const Key('hcsfOverPill')), findsNothing);
-    final instalmentBorder = _borderColor(tester, 'resultInstalmentCard');
-    final costBorder = _borderColor(tester, 'resultCostCard');
+    expect(find.byKey(const Key('hcsfOverStatus')), findsNothing);
+    expect(_tone(tester, 'hcsfRatioGauge'), RepereTone.normal);
+    final instalmentCaption = _text(tester, 'resultInstalmentCaption');
 
     await tester.tap(find.byKey(const Key('simulatorIncludeExisting')));
     await _settleCompute(tester);
 
-    expect(find.byKey(const Key('hcsfOverPill')), findsOneWidget);
-    expect(_borderColor(tester, 'hcsfCard'), AppColors.dark.lineStrong);
-    expect(_borderColor(tester, 'resultInstalmentCard'), instalmentBorder);
-    expect(_borderColor(tester, 'resultCostCard'), costBorder);
+    expect(find.byKey(const Key('hcsfOverStatus')), findsOneWidget);
+    expect(_tone(tester, 'hcsfRatioGauge'), RepereTone.over);
+    expect(_tone(tester, 'hcsfTermGauge'), RepereTone.normal);
+    // The summary line never depends on the toggle.
     expect(_text(tester, 'resultInstalment'), _money(141841));
+    expect(_text(tester, 'resultInstalmentCaption'), instalmentCaption);
     expect(_text(tester, 'hcsfRatioValue'), startsWith('63,6'));
     expect(
       _text(tester, 'hcsfRatioCaption'),
-      '${_money(141841)} + crédits actuels ${_money(150625)} sur un revenu '
-      'déclaré de ${_money(460000)}',
+      '${_money(292466)} (${_money(141841)} + crédits actuels '
+      '${_money(150625)}) sur un revenu déclaré de ${_money(460000)}',
     );
-    expect(_text(tester, 'hcsfCapacityCaption'), contains('crédits actuels'));
+    expect(
+      _text(tester, 'hcsfCapacityCaption'),
+      startsWith('Vos crédits actuels laissent '),
+    );
+    expect(
+      _text(tester, 'hcsfCapacityCaption'),
+      endsWith('C’est ce qui limite la capacité, pas le bien visé.'),
+    );
     expect(find.byKey(const Key('hcsfCaveat')), findsOneWidget);
 
     // Still a reading: the form keeps taking input.
@@ -425,12 +423,46 @@ void main() {
     expect(_text(tester, 'resultInstalment'), _money(141841, locale: 'en'));
     expect(_text(tester, 'resultInstalment'), '€1,418.41');
     expect(_text(tester, 'resultTaeg'), '3.67%');
-    expect(find.text('MONTHLY INSTALMENT'), findsOneWidget);
-    expect(find.text('INDICATIVE APR'), findsOneWidget);
-    expect(_text(tester, 'simulatorTermValue'), '300 months · 25 years');
+    expect(_text(tester, 'resultInstalmentLabel'), 'Monthly instalment');
+    expect(_text(tester, 'resultTaegLabel'), 'Indicative APR');
+    expect(_text(tester, 'simulatorTermValue'), '25 years · 300 months');
     expect(
       _text(tester, 'hcsfRatioCaption'),
       '€1,418.41 against a declared income of €4,600.00',
     );
   });
+
+  for (final (name, theme) in [
+    ('dark', AppTheme.dark),
+    ('light', AppTheme.light),
+  ]) {
+    for (final (sidebar, width) in const [
+      ('expanded', 1216.0),
+      ('collapsed', 1384.0),
+    ]) {
+      testWidgets('$name theme, sidebar $sidebar: the two panes lay out '
+          'without overflow', (tester) async {
+        // The content region beside the sidebar, under the 48 px title bar.
+        tester.view.physicalSize = Size(width, 900);
+        tester.view.devicePixelRatio = 1.0;
+        addTearDown(tester.view.reset);
+        stubCompute(
+          (include) => include ? testOverLimitResult() : testResult(),
+        );
+        await tester.pumpWidget(_wrap(repository, theme: theme));
+        await _load(tester);
+        await _typeFrame(tester);
+        await tester.tap(find.byKey(const Key('simulatorIncludeExisting')));
+        await _settleCompute(tester);
+
+        expect(tester.takeException(), isNull);
+        expect(
+          tester.getSize(find.byKey(const Key('simulatorInputsPane'))).width,
+          SimulatorScreen.inputsWidth,
+        );
+        expect(find.byKey(const Key('hcsfOverStatus')), findsOneWidget);
+        expect(find.byKey(const Key('projectionPlot')), findsOneWidget);
+      });
+    }
+  }
 }

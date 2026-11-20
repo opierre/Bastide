@@ -7,22 +7,24 @@ import 'package:intl/intl.dart' show NumberFormat;
 import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/tokens.dart';
 import '../../../core/widgets/amount_text.dart';
-import '../../../core/widgets/app_card.dart';
 import '../../../core/widgets/area_line.dart';
 import '../../../core/widgets/chart_scale.dart';
 import '../../../core/widgets/chart_style.dart';
 import '../../../core/widgets/chart_tooltip.dart';
+import '../../../core/widgets/note_line.dart';
+import '../../../core/widgets/section_heading.dart';
 import '../../../l10n/app_localizations.dart';
 import '../domain/simulation_result.dart';
 
-/// « Projection annuelle » (`14-simulateur.md` §Projection): one stacked bar per
-/// year, capital in iris at the bottom and interest in cyan above it.
+/// « Projection annuelle » (`14-simulateur.md` §Reading pane, 5): one stacked
+/// bar per year, capital in `accent` at the base and interest in
+/// `textTertiary` above it, with the legend on the heading line.
 ///
-/// Yearly, never monthly — 300 bars at this width is noise. The split is the
-/// API's yearly rows; nothing is summed out of a schedule here. Before anything
-/// can be computed the card keeps its place and carries the invitation instead.
-class YearlyProjectionCard extends StatelessWidget {
-  const YearlyProjectionCard({super.key, required this.result});
+/// Yearly, never monthly: 300 bars at this width is noise. The split is the
+/// API's yearly rows; nothing is summed out of a schedule here. Before
+/// anything can be computed the block keeps its place and carries a note.
+class YearlyProjection extends StatelessWidget {
+  const YearlyProjection({super.key, required this.result});
 
   final SimulationResult? result;
 
@@ -33,101 +35,87 @@ class YearlyProjectionCard extends StatelessWidget {
     final textTheme = Theme.of(context).textTheme;
     final result = this.result;
 
-    return AppCard(
-      key: const Key('projectionCard'),
-      padding: const EdgeInsets.symmetric(
-        horizontal: 22,
-        vertical: AppSpacing.cardPadding,
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
+    return Column(
+      key: const Key('projection'),
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        SectionHeading(
+          title: l10n.simulatorChartTitle,
+          trailing: Row(
+            mainAxisSize: MainAxisSize.min,
             children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      l10n.simulatorChartTitle,
-                      style: textTheme.titleMedium,
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(width: AppSpacing.md),
               _LegendItem(
                 label: l10n.simulatorChartCapital,
                 color: context.colors.accent,
               ),
-              const SizedBox(width: AppSpacing.md),
+              const SizedBox(width: AppSpacing.smPlus),
               _LegendItem(
                 label: l10n.simulatorChartInterest,
                 color: context.colors.textTertiary,
               ),
             ],
           ),
-          const SizedBox(height: AppSpacing.md),
-          Expanded(
-            child: result == null || result.yearly.isEmpty
-                ? Center(
-                    child: Text(
-                      l10n.simulatorChartEmpty,
-                      key: const Key('projectionEmpty'),
-                      textAlign: TextAlign.center,
-                      style: textTheme.bodySmall?.copyWith(
-                        color: context.colors.textTertiary,
-                      ),
-                    ),
-                  )
-                : YearlyProjectionPlot(
-                    key: const Key('projectionPlot'),
-                    years: [for (final row in result.yearly) row.year],
-                    capital: [
-                      for (final row in result.yearly) row.principalMinor,
-                    ],
-                    interest: [
-                      for (final row in result.yearly) row.interestMinor,
-                    ],
-                    yLabel: (minor) => NumberFormat.compactSimpleCurrency(
-                      locale: locale,
-                      name: result.currency,
-                      decimalDigits: 0,
-                    ).format(minor / 100),
-                    labelStyle: ChartPaints.labelStyle(context),
-                    // The year, then its two API figures — neutral, like every
-                    // amount on this panel.
-                    tooltips: [
-                      for (final row in result.yearly)
-                        TextSpan(
-                          children: [
-                            TextSpan(
-                              text: '${row.year}\n',
-                              style: tabularNumberStyle(textTheme.labelSmall!),
-                            ),
-                            TextSpan(
-                              text:
-                                  '${l10n.simulatorChartTooltipCapital(formatAmount(amountMinor: row.principalMinor, currency: result.currency, locale: locale))}\n'
-                                  '${l10n.simulatorChartTooltipInterest(formatAmount(amountMinor: row.interestMinor, currency: result.currency, locale: locale))}',
-                              style: tabularNumberStyle(textTheme.bodySmall!),
-                            ),
-                          ],
-                        ),
-                    ],
+        ),
+        const SizedBox(height: AppSpacing.xs),
+        Expanded(
+          child: result == null || result.yearly.isEmpty
+              ? Align(
+                  alignment: AlignmentDirectional.topStart,
+                  child: NoteLine(
+                    key: const Key('projectionEmpty'),
+                    text: l10n.simulatorChartEmpty,
                   ),
-          ),
-        ],
-      ),
+                )
+              : YearlyProjectionPlot(
+                  key: const Key('projectionPlot'),
+                  years: [for (final row in result.yearly) row.year],
+                  capital: [
+                    for (final row in result.yearly) row.principalMinor,
+                  ],
+                  interest: [
+                    for (final row in result.yearly) row.interestMinor,
+                  ],
+                  yLabel: (minor) => NumberFormat.compactSimpleCurrency(
+                    locale: locale,
+                    name: result.currency,
+                    decimalDigits: 0,
+                  ).format(minor / 100),
+                  labelStyle: ChartPaints.labelStyle(context),
+                  // The year, then its two API figures: neutral, like every
+                  // amount on this panel.
+                  tooltips: [
+                    for (final row in result.yearly)
+                      TextSpan(
+                        children: [
+                          TextSpan(
+                            text: '${row.year}\n',
+                            style: tabularNumberStyle(textTheme.labelSmall!),
+                          ),
+                          TextSpan(
+                            text:
+                                '${l10n.simulatorChartTooltipCapital(formatAmount(amountMinor: row.principalMinor, currency: result.currency, locale: locale))}\n'
+                                '${l10n.simulatorChartTooltipInterest(formatAmount(amountMinor: row.interestMinor, currency: result.currency, locale: locale))}',
+                            style: tabularNumberStyle(textTheme.bodySmall!),
+                          ),
+                        ],
+                      ),
+                  ],
+                ),
+        ),
+      ],
     );
   }
 }
 
+/// A legend entry as a category label (`00` §9): an 8 px square dot, radius
+/// 2, in the series colour, and the name 12 `textSecondary`.
 class _LegendItem extends StatelessWidget {
   const _LegendItem({required this.label, required this.color});
 
   final String label;
   final Color color;
+
+  static const _dot = 8.0;
 
   @override
   Widget build(BuildContext context) {
@@ -135,15 +123,20 @@ class _LegendItem extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       children: [
         Container(
-          width: 9,
-          height: 9,
+          width: _dot,
+          height: _dot,
           decoration: BoxDecoration(
             color: color,
-            borderRadius: BorderRadius.circular(3),
+            borderRadius: BorderRadius.circular(AppRadii.bar),
           ),
         ),
-        const SizedBox(width: AppSpacing.xs + 2),
-        Text(label, style: context.textStyles.helper),
+        const SizedBox(width: AppSpacing.xsPlus),
+        Text(
+          label,
+          style: Theme.of(
+            context,
+          ).textTheme.bodySmall?.copyWith(color: context.colors.textSecondary),
+        ),
       ],
     );
   }
@@ -311,7 +304,7 @@ class _StackedBarsPainter extends CustomPainter {
   final TextDirection textDirection;
 
   static const _topPad = 8.0;
-  static const _stackGap = 2.0;
+  static const _stackGap = AppChart.stackGap;
   static const _maxBarWidth = 44.0;
 
   /// Gap between the plot's floor and a year label.
@@ -342,8 +335,8 @@ class _StackedBarsPainter extends CustomPainter {
     );
 
     final width = math.min(_maxBarWidth, plot.width / years.length * 0.62);
-    final capRadius = math.min(6.0, width / 2);
-    const baseRadius = Radius.circular(2);
+    const capRadius = Radius.circular(AppChart.stackRadius);
+    const baseRadius = Radius.circular(AppChart.stackRadius);
     final last = years.length - 1;
 
     for (var index = 0; index < years.length; index++) {
@@ -375,8 +368,8 @@ class _StackedBarsPainter extends CustomPainter {
         canvas.drawRRect(
           RRect.fromRectAndCorners(
             Rect.fromLTWH(left, bottom - interestHeight, width, interestHeight),
-            topLeft: Radius.circular(capRadius),
-            topRight: Radius.circular(capRadius),
+            topLeft: capRadius,
+            topRight: capRadius,
             bottomLeft: baseRadius,
             bottomRight: baseRadius,
           ),

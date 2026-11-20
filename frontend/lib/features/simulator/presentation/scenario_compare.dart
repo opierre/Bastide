@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:lucide_icons_flutter/lucide_icons_300.dart';
 
 import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/tokens.dart';
 import '../../../core/widgets/amount_text.dart';
-import '../../../core/widgets/app_card.dart';
+import '../../../core/widgets/app_button.dart';
+import '../../../core/widgets/note_line.dart';
 import '../../../core/widgets/state_views.dart';
 import '../../../l10n/app_localizations.dart';
 import '../application/simulator_controller.dart';
@@ -13,7 +15,7 @@ import 'scenario_list.dart';
 import 'simulator_labels.dart';
 
 /// One row of the comparison: a label and how each column fills it. `null`
-/// is a figure that does not apply to that scenario — printed as a dash,
+/// is a figure that does not apply to that scenario: printed as a dash,
 /// never as a zero.
 typedef _CompareRow = ({
   String id,
@@ -23,13 +25,14 @@ typedef _CompareRow = ({
   String? Function(ComparisonColumn column) value,
 });
 
-/// The comparison card (`14-simulateur.md` ③): up to three scenarios side by
-/// side with the same rows in every column, so each line reads across.
+/// The comparison (`14-simulateur.md` §Comparison): it replaces the reading
+/// pane, padding 24 32, and sets up to three scenarios side by side with the
+/// same rows in every column, so each line reads across.
 ///
-/// Replaces the right column while open. Every figure is recomputed by the
-/// engine for this view — a saved scenario never carries its results.
-class ScenarioCompareCard extends ConsumerWidget {
-  const ScenarioCompareCard({super.key, required this.state});
+/// Every figure is recomputed by the engine for this view: a saved scenario
+/// never carries its results.
+class ScenarioComparison extends ConsumerWidget {
+  const ScenarioComparison({super.key, required this.state});
 
   final SimulatorState state;
 
@@ -39,38 +42,35 @@ class ScenarioCompareCard extends ConsumerWidget {
     final textTheme = Theme.of(context).textTheme;
     final comparison = state.comparison;
 
-    return AppCard(
-      key: const Key('compareCard'),
+    return Padding(
+      key: const Key('comparison'),
       padding: const EdgeInsets.symmetric(
-        horizontal: 22,
-        vertical: AppSpacing.cardPadding,
+        horizontal: AppSpacing.xl,
+        vertical: AppSpacing.lg,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      l10n.simulatorCompareTitle(state.selection.length),
-                      key: const Key('compareTitle'),
-                      style: textTheme.titleMedium,
-                    ),
-                  ],
+                child: Text(
+                  l10n.simulatorCompareTitle(state.selection.length),
+                  key: const Key('compareTitle'),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: textTheme.titleSmall,
                 ),
               ),
               const SizedBox(width: AppSpacing.md),
-              OutlinedButton.icon(
+              AppButton(
                 key: const Key('compareClose'),
+                label: l10n.simulatorCompareClose,
+                icon: LucideIcons300.x,
+                variant: AppButtonVariant.ghost,
                 onPressed: ref
                     .read(simulatorControllerProvider.notifier)
                     .closeComparison,
-                icon: const Icon(Icons.close_rounded, size: 16),
-                label: Text(l10n.simulatorCompareClose),
               ),
             ],
           ),
@@ -80,13 +80,12 @@ class ScenarioCompareCard extends ConsumerWidget {
               AsyncData(:final value) => SingleChildScrollView(
                 child: _CompareTable(state: state, columns: value),
               ),
-              AsyncError() => Center(
-                child: Text(
-                  l10n.simulatorCompareFailed,
+              AsyncError() => Align(
+                alignment: AlignmentDirectional.topStart,
+                child: NoteLine(
                   key: const Key('compareFailed'),
-                  style: textTheme.bodySmall?.copyWith(
-                    color: context.colors.textSecondary,
-                  ),
+                  icon: LucideIcons300.triangleAlert,
+                  text: l10n.simulatorCompareFailed,
                 ),
               ),
               _ => const SkeletonPulse(
@@ -107,6 +106,7 @@ class _CompareTable extends StatelessWidget {
   final SimulatorState state;
   final List<ComparisonColumn> columns;
 
+  /// The row-label column (`14` §Comparison).
   static const _labelWidth = 190.0;
 
   @override
@@ -114,6 +114,7 @@ class _CompareTable extends StatelessWidget {
     final l10n = AppLocalizations.of(context)!;
     final locale = Localizations.localeOf(context).toString();
     final textTheme = Theme.of(context).textTheme;
+    final colors = context.colors;
     final household = state.household;
 
     String money(int minor) => formatAmount(
@@ -172,7 +173,7 @@ class _CompareTable extends StatelessWidget {
         label: l10n.simulatorTerm,
         emphasised: false,
         sectionBreak: false,
-        value: (c) => l10n.simulatorMonths(c.terms.termMonths),
+        value: (c) => termLabel(l10n, c.terms.termMonths),
       ),
       (
         id: 'insurance',
@@ -256,44 +257,45 @@ class _CompareTable extends StatelessWidget {
         income != null &&
         columns.any((column) => column.result.debtRatioBps != null);
 
-    final valueStyle = tabularNumberStyle(textTheme.bodyMedium!);
+    final cellStyle = tabularNumberStyle(textTheme.bodyMedium!);
+    const cellPadding = EdgeInsetsDirectional.only(end: AppSpacing.smPlus);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Container(
-          height: 44,
-          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm + 4),
-          decoration: BoxDecoration(
-            color: context.colors.hover,
-            borderRadius: BorderRadius.circular(AppRadii.sm),
-          ),
+        // The header: each scenario's name, « en cours » under the live one.
+        Padding(
+          padding: const EdgeInsets.only(bottom: AppSpacing.sm),
           child: Row(
+            crossAxisAlignment: CrossAxisAlignment.end,
             children: [
               const SizedBox(width: _labelWidth),
               for (final column in columns)
                 Expanded(
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      Flexible(
-                        child: Text(
+                  child: Padding(
+                    padding: cellPadding,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        Text(
                           column.label ??
                               liveScenarioName(l10n, locale, state.inputs),
                           key: Key('compareHeader-${column.id}'),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           textAlign: TextAlign.right,
-                          style: textTheme.bodyMedium?.copyWith(
-                            fontWeight: FontWeight.w600,
-                          ),
+                          style: textTheme.labelLarge,
                         ),
-                      ),
-                      if (column.isLive) ...[
-                        const SizedBox(width: AppSpacing.sm - 2),
-                        SimulatorMarkerPill(label: l10n.simulatorLivePill),
+                        if (column.isLive)
+                          Text(
+                            l10n.simulatorLiveMarker,
+                            key: const Key('compareLiveMarker'),
+                            style: textTheme.bodySmall?.copyWith(
+                              color: colors.textTertiary,
+                            ),
+                          ),
                       ],
-                    ],
+                    ),
                   ),
                 ),
             ],
@@ -302,61 +304,67 @@ class _CompareTable extends StatelessWidget {
         for (final row in rows)
           Container(
             key: Key('compareRow-${row.id}'),
-            height: 36,
-            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm + 4),
+            height: AppSizes.tableRow,
             decoration: BoxDecoration(
-              color: row.emphasised
-                  ? context.colors.accent.withValues(alpha: 0.05)
-                  : null,
               border: Border(
-                top: row.sectionBreak
-                    ? BorderSide(color: context.colors.line)
-                    : BorderSide.none,
-                bottom: BorderSide(color: context.colors.line),
+                top: BorderSide(
+                  color: row.sectionBreak ? colors.lineStrong : colors.line,
+                ),
               ),
             ),
             child: Row(
               children: [
                 SizedBox(
                   width: _labelWidth,
-                  child: Text(
-                    row.label,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: textTheme.bodySmall?.copyWith(
-                      color: context.colors.textSecondary,
-                      fontWeight: row.emphasised ? FontWeight.w600 : null,
+                  child: Padding(
+                    padding: cellPadding,
+                    child: Text(
+                      row.label,
+                      key: Key('compareLabel-${row.id}'),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style:
+                          (row.emphasised
+                                  ? textTheme.titleSmall!
+                                  : textTheme.bodyMedium!)
+                              .copyWith(color: colors.textSecondary),
                     ),
                   ),
                 ),
                 for (final column in columns)
                   Expanded(
-                    child: Builder(
-                      builder: (context) {
-                        final value = row.value(column);
-                        return Text(
-                          value ?? '—',
-                          key: Key('compare-${row.id}-${column.id}'),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          textAlign: TextAlign.right,
-                          style: valueStyle.copyWith(
-                            fontWeight: row.emphasised ? FontWeight.w600 : null,
-                            color: value == null
-                                ? context.colors.textTertiary
-                                : context.colors.text,
-                          ),
-                        );
-                      },
+                    child: Padding(
+                      padding: cellPadding,
+                      child: Builder(
+                        builder: (context) {
+                          final value = row.value(column);
+                          return Text(
+                            value ?? l10n.simulatorNoValue,
+                            key: Key('compare-${row.id}-${column.id}'),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            textAlign: TextAlign.right,
+                            style: cellStyle.copyWith(
+                              fontWeight: row.emphasised
+                                  ? textTheme.titleSmall!.fontWeight
+                                  : null,
+                              color: value == null
+                                  ? colors.textTertiary
+                                  : colors.text,
+                            ),
+                          );
+                        },
+                      ),
                     ),
                   ),
               ],
             ),
           ),
         if (limit != null) ...[
-          const SizedBox(height: AppSpacing.sm + 4),
-          Text(
-            incomeKnown
+          const SizedBox(height: AppSpacing.md),
+          NoteLine(
+            key: const Key('compareFoot'),
+            text: incomeKnown
                 ? l10n.simulatorCompareFoot(
                     household.incomeSource == IncomeSource.declared
                         ? 'declared'
@@ -365,11 +373,6 @@ class _CompareTable extends StatelessWidget {
                     limit,
                   )
                 : l10n.simulatorCompareFootUnknown(limit),
-            key: const Key('compareFoot'),
-            style: context.textStyles.helper.copyWith(
-              fontSize: 11,
-              color: context.colors.textTertiary,
-            ),
           ),
         ],
       ],

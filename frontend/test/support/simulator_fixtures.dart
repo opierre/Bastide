@@ -83,7 +83,7 @@ SimulationResult testUnknownIncomeResult() => testResult(
 
 SavedSimulation testScenario({
   String id = 's1',
-  String label = 'Villeurbanne — 265 k€',
+  String label = 'Villeurbanne, 265 k€',
   SimulationTerms terms = const SimulationTerms(
     principalMinor: 22890000,
     annualRateBps: 325,
@@ -134,7 +134,7 @@ Map<String, dynamic> resultJson({
 
 Map<String, dynamic> scenarioJson({
   String id = 's1',
-  String label = 'Villeurbanne — 265 k€',
+  String label = 'Villeurbanne, 265 k€',
 }) => {
   'id': id,
   'label': label,

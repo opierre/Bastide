@@ -95,6 +95,20 @@ class SimulatorState {
   /// The ratio can only be read with a known income.
   bool get incomeKnown => result?.debtRatioBps != null;
 
+  /// Whether the HCSF reading counts the current loans: the switch is on and
+  /// there is a charge to add.
+  bool get countsExistingLoans =>
+      inputs.includeExistingLoans && household.existingChargeMinor > 0;
+
+  /// The monthly charge the ratio is read on with the current loans counted:
+  /// the live instalment plus the existing charge, both the API's. Printed in
+  /// the ratio caption; the ratio itself is never derived from it here.
+  int? get chargeWithExistingMinor => switch (result) {
+    final result? when countsExistingLoans =>
+      result.totalInstalmentMinor + household.existingChargeMinor,
+    _ => null,
+  };
+
   bool isSelected(String id) => selection.contains(id);
 
   bool get selectionFull => selection.length >= maxCompared;
@@ -107,8 +121,8 @@ class SimulatorState {
     return id != liveId || canCompute;
   }
 
-  /// One column is not a comparison.
-  bool get canOpenComparison => selection.length >= 2;
+  /// « Comparer » is off only with nothing checked (`14-simulateur.md`).
+  bool get canOpenComparison => selection.isNotEmpty;
 
   static const _unset = Object();
 
@@ -316,6 +330,23 @@ class SimulatorController extends AsyncNotifier<SimulatorState> {
     return saved;
   }
 
+  /// Renames a saved scenario. Rethrown: the naming modal is still open and
+  /// explains the refusal.
+  Future<void> renameScenario(String simulationId, String label) async {
+    final renamed = await _repository.rename(simulationId, label);
+    final current = state.value;
+    if (current == null || !ref.mounted) return;
+    state = AsyncValue.data(
+      current.copyWith(
+        scenarios: [
+          for (final scenario in current.scenarios)
+            scenario.id == simulationId ? renamed : scenario,
+        ],
+      ),
+    );
+    if (current.isSelected(simulationId)) await _refreshComparison();
+  }
+
   /// Hard-deletes a saved scenario — no confirmation for a scratchpad row.
   Future<void> deleteScenario(String simulationId) async {
     try {
@@ -341,11 +372,11 @@ class SimulatorController extends AsyncNotifier<SimulatorState> {
         scenarioInstalments: {...current.scenarioInstalments}
           ..remove(simulationId),
         selection: selection,
-        comparison: selection.length < 2 ? null : current.comparison,
+        comparison: selection.isEmpty ? null : current.comparison,
         actionError: null,
       ),
     );
-    if (selection.length >= 2) await _refreshComparison();
+    if (selection.isNotEmpty) await _refreshComparison();
   }
 
   /// Checks or unchecks a row. A fourth check is ignored rather than
@@ -361,7 +392,7 @@ class SimulatorController extends AsyncNotifier<SimulatorState> {
       state = AsyncValue.data(
         current.copyWith(
           selection: selection,
-          comparison: selection.length < 2 ? null : current.comparison,
+          comparison: selection.isEmpty ? null : current.comparison,
         ),
       );
     } else {

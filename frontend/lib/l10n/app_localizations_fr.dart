@@ -3597,6 +3597,9 @@ class AppLocalizationsFr extends AppLocalizations {
   String get simulatorRetry => 'Réessayer';
 
   @override
+  String get simulatorNoValue => '—';
+
+  @override
   String get simulatorFormTitle => 'Nouveau crédit';
 
   @override
@@ -3622,7 +3625,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get simulatorRateInvalid => 'Saisissez un taux, par exemple 3,25.';
 
   @override
-  String get simulatorInsurance => 'Assurance / mois';
+  String get simulatorInsurance => 'Assurance par mois';
 
   @override
   String get simulatorTerm => 'Durée';
@@ -3640,7 +3643,7 @@ class AppLocalizationsFr extends AppLocalizations {
       other: '$yearsString ans',
       one: '1 an',
     );
-    return '$months mois · $_temp0';
+    return '$_temp0 · $months mois';
   }
 
   @override
@@ -3669,7 +3672,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String simulatorIncludeExistingAdds(String amount) {
-    return 'Ajoute $amount / mois à la lecture';
+    return 'Ajoute $amount par mois à la lecture';
   }
 
   @override
@@ -3690,44 +3693,26 @@ class AppLocalizationsFr extends AppLocalizations {
       other: '$count échéances',
       one: '1 échéance',
     );
-    return '$payment de mensualité + $insurance d\'assurance · $_temp0';
+    return '$payment de mensualité + $insurance d’assurance · $_temp0';
   }
 
   @override
   String get simulatorInstalmentEmpty =>
-      'Renseignez un prix et un taux pour voir l\'échéance et sa part d\'assurance.';
+      'Renseignez un prix et un taux pour voir l’échéance.';
 
   @override
   String get simulatorCostLabel => 'Coût total';
 
   @override
-  String simulatorCostCaption(
-    String interest,
-    String insurance,
-    String fees,
-    String share,
-  ) {
-    return 'intérêts $interest + assurance $insurance + frais $fees · $share du prix';
+  String simulatorCostCaption(String interest, String insurance, String fees) {
+    return 'intérêts $interest · assurance $insurance · frais $fees';
   }
-
-  @override
-  String simulatorCostCaptionNoPrice(
-    String interest,
-    String insurance,
-    String fees,
-  ) {
-    return 'intérêts $interest + assurance $insurance + frais $fees';
-  }
-
-  @override
-  String get simulatorCostEmpty =>
-      'Renseignez un prix et un taux pour voir le coût total et sa part du prix.';
 
   @override
   String get simulatorTaegLabel => 'TAEG indicatif';
 
   @override
-  String get simulatorTaegCaption => 'taux, assurance et frais inclus';
+  String get simulatorTaegCaption => 'taux, assurance et frais';
 
   @override
   String get simulatorHcsfTitle => 'Lecture HCSF';
@@ -3745,7 +3730,7 @@ class AppLocalizationsFr extends AppLocalizations {
   }
 
   @override
-  String get simulatorRatioLabel => 'Taux d\'endettement';
+  String get simulatorRatioLabel => 'Taux d’endettement';
 
   @override
   String simulatorRatioCaption(
@@ -3762,6 +3747,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String simulatorRatioCaptionWithExisting(
+    String total,
     String instalment,
     String existing,
     String source,
@@ -3771,45 +3757,45 @@ class AppLocalizationsFr extends AppLocalizations {
       'declared': 'déclaré',
       'other': 'médian constaté',
     });
-    return '$instalment + crédits actuels $existing sur un revenu $_temp0 de $income';
+    return '$total ($instalment + crédits actuels $existing) sur un revenu $_temp0 de $income';
   }
 
   @override
   String get simulatorRatioEmpty =>
-      'Renseignez un prix et un taux pour lire le taux d\'endettement.';
+      'Renseignez un prix et un taux pour lire le taux d’endettement.';
 
   @override
   String get simulatorRatioUnknown =>
-      'Aucun revenu connu : le grand livre n\'a pas de revenus réguliers et aucun revenu n\'est déclaré. Sans revenu, ni taux ni capacité ne peuvent être lus.';
+      'Aucun revenu connu. Sans revenu, ni taux ni capacité ne peuvent être lus.';
 
   @override
   String get simulatorDeclareIncome => 'Déclarer un revenu';
 
   @override
-  String get simulatorTermAtReference => 'au repère, pas au-delà';
+  String get simulatorTermAtReference => 'Au repère, pas au-delà';
 
   @override
-  String get simulatorTermUnderReference => 'sous le repère';
+  String get simulatorTermUnderReference => 'Sous le repère';
 
   @override
-  String get simulatorTermOverReference => 'au-delà du repère';
+  String get simulatorTermOverReference => 'Au-delà du repère';
 
   @override
-  String get simulatorCapacityLabel => 'Capacité d\'emprunt au repère';
+  String get simulatorCapacityLabel => 'Capacité d’emprunt au repère';
 
   @override
   String simulatorCapacityCaption(String available, String limit) {
-    return '$available d\'échéance disponibles sous $limit, à ces conditions';
+    return '$available d’échéance disponibles sous $limit, à ces conditions';
   }
 
   @override
-  String simulatorCapacityCaptionExisting(String available) {
-    return 'Vos crédits actuels laissent $available d’échéance sous le repère. C’est ce qui limite la capacité, pas le bien visé.';
+  String simulatorCapacityCaptionExisting(String available, String limit) {
+    return 'Vos crédits actuels laissent $available d’échéance sous $limit. C’est ce qui limite la capacité, pas le bien visé.';
   }
 
   @override
   String get simulatorCapacityEmpty =>
-      'Renseignez un prix et un taux pour lire la capacité d\'emprunt.';
+      'Renseignez un prix et un taux pour lire la capacité d’emprunt.';
 
   @override
   String get simulatorChartTitle => 'Projection annuelle';
@@ -3832,7 +3818,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get simulatorChartEmpty =>
-      'Renseignez un prix et un taux : la répartition capital / intérêts par année s\'affiche ici.';
+      'Renseignez un prix et un taux : la répartition par année s’affiche ici.';
 
   @override
   String get simulatorComputeFailed =>
@@ -3880,10 +3866,6 @@ class AppLocalizationsFr extends AppLocalizations {
   String get simulatorSaveScenario => 'Enregistrer le scénario';
 
   @override
-  String get simulatorSaveBody =>
-      'Seules les valeurs saisies sont enregistrées : le résultat est recalculé à chaque fois.';
-
-  @override
   String get simulatorSaveName => 'Nom';
 
   @override
@@ -3918,36 +3900,38 @@ class AppLocalizationsFr extends AppLocalizations {
   }
 
   @override
-  String get simulatorCompareNeedsTwo =>
-      'Cochez au moins deux scénarios pour les comparer.';
-
-  @override
   String simulatorCompareCapNamed(String name) {
-    return 'Trois scénarios au plus, pour rester lisibles côte à côte. Décochez-en un pour ajouter $name.';
+    return 'Trois scénarios au plus. Décochez-en un pour ajouter $name.';
   }
 
   @override
   String get simulatorCompareCap =>
-      'Trois scénarios au plus, pour rester lisibles côte à côte. Décochez-en un pour en ajouter un autre.';
-
-  @override
-  String get simulatorLivePill => 'En cours';
+      'Trois scénarios au plus. Décochez-en un pour en ajouter un autre.';
 
   @override
   String get simulatorLiveName => 'Simulation en cours';
 
   @override
-  String simulatorScenarioSub(String rate, String term, String instalment) {
-    return '$rate · $term · $instalment';
-  }
+  String get simulatorLiveMarker => 'en cours';
 
   @override
-  String simulatorScenarioSubNoInstalment(String rate, String term) {
+  String simulatorScenarioSub(String rate, String term) {
     return '$rate · $term';
   }
 
   @override
+  String simulatorScenarioSubLive(String rate, String term) {
+    return 'en cours · $rate · $term';
+  }
+
+  @override
   String get simulatorScenarioActions => 'Actions du scénario';
+
+  @override
+  String get simulatorScenarioRename => 'Renommer';
+
+  @override
+  String get simulatorRenameTitle => 'Renommer le scénario';
 
   @override
   String get simulatorScenarioDelete => 'Supprimer';
@@ -3958,11 +3942,7 @@ class AppLocalizationsFr extends AppLocalizations {
   }
 
   @override
-  String get simulatorScenariosEmptyTitle => 'Aucun scénario enregistré';
-
-  @override
-  String get simulatorScenariosEmptyBody =>
-      'Enregistrez une simulation pour la retrouver ici et la comparer à deux autres.';
+  String get simulatorScenariosEmpty => 'Aucun scénario enregistré.';
 
   @override
   String simulatorCompareTitle(int count) {
@@ -4002,12 +3982,12 @@ class AppLocalizationsFr extends AppLocalizations {
       'declared': 'déclaré',
       'other': 'médian constaté',
     });
-    return 'Taux d\'endettement sur un revenu $_temp0 de $income · repère HCSF $limit. Lecture indicative, qui n’engage aucun prêteur.';
+    return 'Taux d’endettement sur un revenu $_temp0 de $income · repère HCSF $limit. Lecture indicative, qui n’engage aucun prêteur.';
   }
 
   @override
   String simulatorCompareFootUnknown(String limit) {
-    return 'Aucun revenu connu, donc aucun taux d\'endettement · repère HCSF $limit. Lecture indicative, qui n’engage aucun prêteur.';
+    return 'Aucun revenu connu, donc aucun taux d’endettement · repère HCSF $limit. Lecture indicative, qui n’engage aucun prêteur.';
   }
 
   @override

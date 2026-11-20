@@ -1,8 +1,6 @@
-import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 import '../../../core/api/api_client.dart';
-import '../../../core/theme/tokens.dart';
 import '../../../l10n/app_localizations.dart';
 
 /// A basis-point figure printed as the locale's percent — « 30,8 % », « 3.25% ».
@@ -69,41 +67,4 @@ String localizeSimulatorError(AppLocalizations l10n, Object? error) {
     }
   }
   return l10n.simulatorErrorGeneric;
-}
-
-/// The 16 px uppercase marker pill (`00` §Patrimoine additions), left only on
-/// « EN COURS » until the simulator gets its v2 layout.
-class SimulatorMarkerPill extends StatelessWidget {
-  const SimulatorMarkerPill({
-    super.key,
-    required this.label,
-    this.neutral = false,
-  });
-
-  final String label;
-  final bool neutral;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      height: 16,
-      padding: const EdgeInsets.symmetric(horizontal: 6),
-      alignment: Alignment.center,
-      decoration: BoxDecoration(
-        color: neutral ? context.colors.hover : context.colors.accentSoft,
-        borderRadius: BorderRadius.circular(AppRadii.pill),
-      ),
-      child: Text(
-        label.toUpperCase(),
-        style: TextStyle(
-          fontFamily: AppFonts.geist,
-          fontSize: 9.5,
-          fontWeight: FontWeight.w600,
-          letterSpacing: 0.6,
-          height: 1,
-          color: neutral ? context.colors.textSecondary : context.colors.accent,
-        ),
-      ),
-    );
-  }
 }

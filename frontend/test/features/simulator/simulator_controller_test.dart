@@ -70,7 +70,7 @@ void main() {
       final state = await container.read(simulatorControllerProvider.future);
 
       expect(state.household.existingChargeMinor, 150625);
-      expect(state.scenarios.single.label, 'Villeurbanne — 265 k€');
+      expect(state.scenarios.single.label, 'Villeurbanne, 265 k€');
       expect(state.result, isNull);
       expect(state.inputs.termMonths, 300);
       await _settle();
@@ -264,6 +264,38 @@ void main() {
         expect(() => notifier().saveScenario('x'), throwsStateError);
       });
 
+      test('rename patches the label and keeps the row in place', () async {
+        when(() => repository.list()).thenAnswer(
+          (_) async => [testScenario(), testScenario(id: 's2', label: 'B')],
+        );
+        when(
+          () => repository.rename(any(), any()),
+        ).thenAnswer((_) async => testScenario(label: 'Villeurbanne, 270 k€'));
+        await container.read(simulatorControllerProvider.future);
+
+        await notifier().renameScenario('s1', 'Villeurbanne, 270 k€');
+
+        verify(() => repository.rename('s1', 'Villeurbanne, 270 k€')).called(1);
+        expect(current().scenarios.map((s) => s.label), [
+          'Villeurbanne, 270 k€',
+          'B',
+        ]);
+      });
+
+      test('a refused rename is rethrown to the modal', () async {
+        when(() => repository.list()).thenAnswer((_) async => [testScenario()]);
+        when(() => repository.rename(any(), any())).thenThrow(
+          const ApiFailure(code: 'SIMULATION_NOT_FOUND', message: 'gone'),
+        );
+        await container.read(simulatorControllerProvider.future);
+
+        await expectLater(
+          notifier().renameScenario('s1', 'x'),
+          throwsA(isA<ApiFailure>()),
+        );
+        expect(current().scenarios.single.label, testScenario().label);
+      });
+
       test('delete removes the row and its selection', () async {
         when(() => repository.list()).thenAnswer(
           (_) async => [testScenario(), testScenario(id: 's2', label: 'B')],
@@ -298,8 +330,8 @@ void main() {
         when(() => repository.list()).thenAnswer(
           (_) async => [
             testScenario(),
-            testScenario(id: 's2', label: 'Lyon 7e — 350 k€'),
-            testScenario(id: 's3', label: 'Lyon 8e — 290 k€'),
+            testScenario(id: 's2', label: 'Lyon 7e, 350 k€'),
+            testScenario(id: 's3', label: 'Lyon 8e, 290 k€'),
           ],
         );
       });
@@ -333,18 +365,19 @@ void main() {
       });
 
       test(
-        'comparison needs two columns and reads the ratio both ways',
+        'comparison opens from one checked row and reads the ratio both ways',
         () async {
           when(
             () => repository.compute(any(), includeExistingLoans: true),
           ).thenAnswer((_) async => testOverLimitResult());
           await container.read(simulatorControllerProvider.future);
 
-          await notifier().toggleSelection('s1');
           expect(current().canOpenComparison, isFalse);
           await notifier().openComparison();
           expect(current().comparison, isNull);
 
+          await notifier().toggleSelection('s1');
+          expect(current().canOpenComparison, isTrue);
           await notifier().toggleSelection('s2');
           await notifier().openComparison();
 
@@ -354,6 +387,8 @@ void main() {
           expect(columns.first.ratioWithExistingBps, 6358);
 
           await notifier().toggleSelection('s2');
+          expect(current().comparison!.value!.map((c) => c.id), ['s1']);
+          await notifier().toggleSelection('s1');
           expect(current().comparison, isNull);
         },
       );
@@ -494,6 +529,19 @@ void main() {
       expect(body['property_price_minor'], 32000000);
       expect(body.containsKey('include_existing_loans'), isFalse);
       verify(() => apiClient.delete('/simulations/s1')).called(1);
+    });
+
+    test('rename patches the label alone', () async {
+      when(
+        () => apiClient.patch('/simulations/s1', body: any(named: 'body')),
+      ).thenAnswer((_) async => scenarioJson(label: 'Lyon 3e'));
+
+      final renamed = await repository.rename('s1', 'Lyon 3e');
+
+      expect(renamed.label, 'Lyon 3e');
+      verify(
+        () => apiClient.patch('/simulations/s1', body: {'label': 'Lyon 3e'}),
+      ).called(1);
     });
 
     test(
