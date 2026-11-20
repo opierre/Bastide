@@ -52,6 +52,22 @@ class AuthRepository:
         self._db.execute(delete(AuthToken).where(AuthToken.user_id == user.id))
         self._db.commit()
 
+    def change_password(self, user: User, password_hash: str, keep_token: str) -> list[str]:
+        """Replace the password and drop every other session of the user, in one transaction.
+
+        Returns:
+            The ids of the sessions dropped, so the connections they opened can be closed.
+        """
+        user.password_hash = password_hash
+        others = self._db.scalars(
+            select(AuthToken).where(AuthToken.user_id == user.id, AuthToken.token != keep_token)
+        ).all()
+        dropped = [record.id for record in others]
+        for record in others:
+            self._db.delete(record)
+        self._db.commit()
+        return dropped
+
     def get_avatar(self, user_id: str) -> UserAvatar | None:
         return self._db.get(UserAvatar, user_id)
 

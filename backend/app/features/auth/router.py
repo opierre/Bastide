@@ -1,4 +1,4 @@
-"""Auth endpoints: register, login, logout, me, profile, avatar, and password recovery."""
+"""Auth endpoints: register, login, logout, me, profile, avatar, password change and recovery."""
 
 from typing import Annotated
 
@@ -14,6 +14,7 @@ from app.features.auth.repository import AuthRepository
 from app.features.auth.schemas import (
     AvatarChoiceUpdate,
     MeResponse,
+    PasswordChange,
     PasswordReset,
     PasswordResetResponse,
     ProfileUpdate,
@@ -104,6 +105,17 @@ async def update_me(
 ) -> MeResponse:
     """Change the authenticated user's profile."""
     return MeResponse(user=UserRead.model_validate(service.update_profile(user, payload)))
+
+
+@router.put("/me/password", status_code=status.HTTP_204_NO_CONTENT)
+async def change_password(
+    payload: PasswordChange,
+    service: Annotated[AuthService, Depends(_service)],
+    token: Annotated[str, Depends(bearer_token)],
+    user: Annotated[User, Depends(get_current_user)],
+) -> None:
+    """Change the caller's password after re-checking it; signs their other sessions out."""
+    service.change_password(user, token, payload)
 
 
 @router.get(

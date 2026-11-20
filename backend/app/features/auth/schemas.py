@@ -324,6 +324,13 @@ class RecoveryCodeRegenerate(BaseModel):
     password: str
 
 
+class PasswordChange(BaseModel):
+    """Change the password of a signed-in user, who confirms the current one first."""
+
+    current_password: str
+    new_password: str = Field(min_length=1, json_schema_extra=_PASSWORD_SCHEMA_EXTRA)
+
+
 class RecoveryCodeResponse(BaseModel):
     """A newly generated recovery code, shown to the user once."""
 

@@ -18,7 +18,7 @@ from app.core.security import (
 )
 from app.features.auth.models import User
 from app.features.auth.repository import AuthRepository
-from app.features.auth.schemas import PASSWORD_MIN_LENGTH, PasswordReset
+from app.features.auth.schemas import PASSWORD_MIN_LENGTH, PasswordChange, PasswordReset
 from app.features.auth.service import (
     AuthService,
     InvalidRecoveryCodeError,
@@ -442,7 +442,12 @@ def test_password_minimum_is_twelve() -> None:
 
 
 @pytest.mark.parametrize(
-    ("schema", "field"), [("UserRegister", "password"), ("PasswordReset", "new_password")]
+    ("schema", "field"),
+    [
+        ("UserRegister", "password"),
+        ("PasswordReset", "new_password"),
+        ("PasswordChange", "new_password"),
+    ],
 )
 def test_openapi_publishes_the_password_minimum(app: FastAPI, schema: str, field: str) -> None:
     properties = app.openapi()["components"]["schemas"][schema]["properties"]
@@ -539,3 +544,137 @@ def test_login_with_a_short_legacy_password_still_works(app: FastAPI, client: Te
     )
 
     assert response.status_code == 200
+
+
+NEW_PASSWORD = "another-long-passphrase"
+
+
+def _change_password(client: TestClient, token: str, current: str, new: str = NEW_PASSWORD):
+    return client.put(
+        "/api/v1/auth/me/password",
+        json={"current_password": current, "new_password": new},
+        headers={"Authorization": f"Bearer {token}"},
+    )
+
+
+def _login(client: TestClient, password: str):
+    return client.post(
+        "/api/v1/auth/login",
+        json={"identifier": REGISTER_PAYLOAD["email"], "password": password},
+    )
+
+
+def test_change_password_replaces_the_password(client: TestClient) -> None:
+    body = _register(client)
+
+    response = _change_password(client, body["token"], REGISTER_PAYLOAD["password"])
+
+    assert response.status_code == 204
+    assert _login(client, REGISTER_PAYLOAD["password"]).status_code == 401
+    assert _login(client, NEW_PASSWORD).status_code == 200
+
+
+def test_change_password_keeps_this_session_and_signs_out_the_others(client: TestClient) -> None:
+    body = _register(client)
+    other_token = _login(client, REGISTER_PAYLOAD["password"]).json()["token"]
+
+    _change_password(client, body["token"], REGISTER_PAYLOAD["password"])
+
+    def me(token: str) -> int:
+        return client.get(
+            "/api/v1/auth/me", headers={"Authorization": f"Bearer {token}"}
+        ).status_code
+
+    assert me(body["token"]) == 200
+    assert me(other_token) == 401
+
+
+def test_change_password_keeps_the_recovery_code(client: TestClient) -> None:
+    body = _register(client)
+
+    _change_password(client, body["token"], REGISTER_PAYLOAD["password"])
+
+    assert _reset(client, body["recovery_code"]).status_code == 200
+
+
+def test_change_password_wrong_current_password_returns_401(client: TestClient) -> None:
+    body = _register(client)
+
+    response = _change_password(client, body["token"], "not-the-password")
+
+    assert response.status_code == 401
+    assert response.json()["error"]["code"] == "INVALID_CREDENTIALS"
+    assert _login(client, REGISTER_PAYLOAD["password"]).status_code == 200
+
+
+def test_change_password_too_short_returns_422(client: TestClient) -> None:
+    body = _register(client)
+
+    response = _change_password(client, body["token"], REGISTER_PAYLOAD["password"], SHORT_PASSWORD)
+
+    assert response.status_code == 422
+    assert response.json()["error"]["code"] == "PASSWORD_TOO_SHORT"
+    assert response.json()["error"]["details"]["min_length"] == PASSWORD_MIN_LENGTH
+    assert _login(client, REGISTER_PAYLOAD["password"]).status_code == 200
+
+
+def test_change_password_with_12_characters_succeeds(client: TestClient) -> None:
+    body = _register(client)
+
+    response = _change_password(
+        client, body["token"], REGISTER_PAYLOAD["password"], MINIMUM_PASSWORD
+    )
+
+    assert response.status_code == 204
+    assert _login(client, MINIMUM_PASSWORD).status_code == 200
+
+
+def test_change_password_requires_auth(client: TestClient) -> None:
+    response = client.put(
+        "/api/v1/auth/me/password",
+        json={"current_password": "whatever", "new_password": NEW_PASSWORD},
+    )
+
+    assert response.status_code == 401
+
+
+def test_change_password_too_short_is_checked_before_the_current_password() -> None:
+    user = User(
+        email=REGISTER_PAYLOAD["email"],
+        password_hash=hash_password(REGISTER_PAYLOAD["password"]),
+    )
+    repository = Mock(spec=AuthRepository)
+    service = AuthService(repository)
+
+    with pytest.raises(PasswordTooShortError):
+        service.change_password(
+            user,
+            "session-token",
+            PasswordChange(current_password="not-the-password", new_password=SHORT_PASSWORD),
+        )
+    repository.change_password.assert_not_called()
+
+
+def test_change_password_closes_the_connections_of_the_dropped_sessions() -> None:
+    user = User(
+        email=REGISTER_PAYLOAD["email"],
+        password_hash=hash_password(REGISTER_PAYLOAD["password"]),
+    )
+    repository = Mock(spec=AuthRepository)
+    repository.change_password.return_value = ["session-a", "session-b"]
+    live_sessions = Mock()
+    service = AuthService(repository, live_sessions=live_sessions)
+
+    service.change_password(
+        user,
+        "session-token",
+        PasswordChange(current_password=REGISTER_PAYLOAD["password"], new_password=NEW_PASSWORD),
+    )
+
+    _, kwargs = repository.change_password.call_args
+    assert kwargs["keep_token"] == "session-token"
+    assert verify_password(NEW_PASSWORD, kwargs["password_hash"])
+    assert [c.args[0] for c in live_sessions.revoke_session.call_args_list] == [
+        "session-a",
+        "session-b",
+    ]
