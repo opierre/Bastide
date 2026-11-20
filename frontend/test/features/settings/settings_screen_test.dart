@@ -1,7 +1,6 @@
 import 'package:bastide/core/api/api_client.dart';
 import 'package:bastide/core/api/api_client_provider.dart';
 import 'package:bastide/core/app_info.dart';
-import 'package:bastide/core/backend/backend_providers.dart';
 import 'package:bastide/core/l10n/locale_provider.dart';
 import 'package:bastide/core/session/current_user_provider.dart';
 import 'package:bastide/core/theme/app_theme.dart';
@@ -26,8 +25,9 @@ const _user = AuthUser(
   currency: 'EUR',
 );
 
-/// An invented data folder.
-const _dataDir = '/home/camille/.local/share/Bastide';
+/// An invented data folder, away from the default one as `--data-dir` would
+/// put it: the row must show what the backend reports, not a derived path.
+const _dataDir = '/srv/camille/bastide-data';
 
 Map<String, dynamic> _settingsJson({int? income}) => {
   'ai_enabled': false,
@@ -62,6 +62,8 @@ Widget _wrap({
   Future<String> Function()? readVersion,
   ThemeData? theme,
   int? income,
+  bool dataLocationFails = false,
+  List<String>? openedFolders,
 }) {
   _api = _MockApiClient();
   when(
@@ -70,6 +72,11 @@ Widget _wrap({
   when(
     () => _api.get('/settings/updates'),
   ).thenAnswer((_) async => {'enabled': false, 'current_version': '0.1.0'});
+  when(() => _api.get('/settings/data-location')).thenAnswer(
+    (_) async => dataLocationFails
+        ? throw StateError('backend unreachable')
+        : {'db_path': '$_dataDir/bastide.db', 'data_dir': _dataDir},
+  );
   return ProviderScope(
     overrides: [
       currentUserProvider.overrideWithValue(_user),
@@ -78,7 +85,9 @@ Widget _wrap({
         (ref) => (readVersion ?? () async => '0.1.0')(),
       ),
       operatingSystemProvider.overrideWithValue('linux'),
-      dataDirProvider.overrideWithValue(_dataDir),
+      openFolderProvider.overrideWithValue(
+        (dir) async => openedFolders?.add(dir),
+      ),
     ],
     child: _Harness(theme: theme),
   );
@@ -292,6 +301,50 @@ void main() {
     );
     expect(find.byKey(const Key('settingsAboutAllLicenses')), findsOneWidget);
   });
+
+  testWidgets('À propos opens the data folder the backend reports', (
+    tester,
+  ) async {
+    useDesktopSurface(tester);
+    final opened = <String>[];
+    await tester.pumpWidget(_wrap(openedFolders: opened));
+    await tester.pumpAndSettle();
+    await _open(tester, SettingsSection.about);
+
+    await tester.ensureVisible(find.byKey(const Key('settingsAboutDataOpen')));
+    await tester.tap(find.byKey(const Key('settingsAboutDataOpen')));
+    await tester.pump();
+
+    expect(opened, [_dataDir]);
+  });
+
+  testWidgets(
+    'À propos shows a placeholder and no open button when the location fails',
+    (tester) async {
+      useDesktopSurface(tester);
+      final opened = <String>[];
+      await tester.pumpWidget(
+        _wrap(dataLocationFails: true, openedFolders: opened),
+      );
+      await tester.pumpAndSettle();
+      await _open(tester, SettingsSection.about);
+
+      expect(
+        tester
+            .widget<SelectableText>(
+              find.byKey(const Key('settingsAboutDataPath')),
+            )
+            .data,
+        '—',
+      );
+      await tester.ensureVisible(
+        find.byKey(const Key('settingsAboutDataOpen')),
+      );
+      await tester.tap(find.byKey(const Key('settingsAboutDataOpen')));
+      await tester.pump();
+      expect(opened, isEmpty);
+    },
+  );
 
   testWidgets(
     'À propos says the version is unavailable when it cannot be read',

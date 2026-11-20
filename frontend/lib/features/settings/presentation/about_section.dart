@@ -135,7 +135,10 @@ class _DataLocationRow extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context)!;
-    final file = ref.watch(databaseFileProvider);
+    // Loading and failure both show the empty-value placeholder and keep the
+    // button off: there is no folder to open until the backend names it.
+    final location = ref.watch(dataLocationProvider).value;
+    final open = ref.read(openFolderProvider);
 
     return SettingRow(
       key: const Key('settingsAboutDataRow'),
@@ -144,7 +147,7 @@ class _DataLocationRow extends ConsumerWidget {
       children: [
         SelectableText(
           // The dash is the empty-value placeholder (`00` §14).
-          file ?? '—',
+          location?.dbPath ?? '—',
           key: const Key('settingsAboutDataPath'),
           style: context.textStyles.mono.copyWith(
             fontSize: Theme.of(context).textTheme.bodyMedium?.fontSize,
@@ -154,7 +157,7 @@ class _DataLocationRow extends ConsumerWidget {
           key: const Key('settingsAboutDataOpen'),
           label: l10n.settingsAboutDataOpen,
           icon: LucideIcons300.folderOpen,
-          onPressed: file == null ? null : ref.read(openDataFolderProvider),
+          onPressed: location == null ? null : () => open(location.dataDir),
         ),
       ],
     );

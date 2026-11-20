@@ -2,12 +2,14 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/api/api_client.dart';
 import '../../../core/api/api_client_provider.dart';
+import '../domain/data_location.dart';
 import '../domain/update_status.dart';
 import '../domain/user_settings.dart';
 
 /// Calls `/settings`, the runtime probe at `/settings/inference/health`, the
-/// Ollama detection at `/settings/inference/ollama` and the update check at
-/// `/settings/updates`. The only place that knows those wire shapes.
+/// Ollama detection at `/settings/inference/ollama`, the update check at
+/// `/settings/updates` and the data location at `/settings/data-location`.
+/// The only place that knows those wire shapes.
 class SettingsRepository {
   SettingsRepository(this._apiClient);
 
@@ -74,6 +76,12 @@ class SettingsRepository {
   Future<UpdateStatus> updateStatus() async {
     final json = await _apiClient.get('/settings/updates');
     return UpdateStatus.fromJson(json as Map<String, dynamic>);
+  }
+
+  /// Where the running backend keeps its data.
+  Future<DataLocation> dataLocation() async {
+    final json = await _apiClient.get('/settings/data-location');
+    return DataLocation.fromJson(json as Map<String, dynamic>);
   }
 
   /// Asks whether Ollama answers on its default loopback address.
