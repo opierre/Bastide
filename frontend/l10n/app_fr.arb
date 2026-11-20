@@ -6064,45 +6064,73 @@
   "@settingsAiOllamaUse": {
     "description": "Button pointing the engine address at the detected Ollama."
   },
-  "accountDetailBack": "Tous les comptes",
-  "@accountDetailBack": {
-    "description": "Back link above the account detail panel, returning to the accounts list."
-  },
   "accountDetailMoreActions": "Plus d’actions",
   "@accountDetailMoreActions": {
     "description": "Tooltip of the account detail top bar's overflow button."
-  },
-  "accountDetailBalanceLabel": "Solde actuel",
-  "@accountDetailBalanceLabel": {
-    "description": "Section label above an account's headline balance."
   },
   "accountDetailCycleLabel": "Encours du cycle",
   "@accountDetailCycleLabel": {
     "description": "Section label above a deferred card's headline: what its open cycle has charged so far."
   },
-  "accountDetailAsOf": "Au {date}",
-  "@accountDetailAsOf": {
-    "description": "Caption under an account's headline balance.",
+  "accountDetailBalanceOn": "Solde au {date}",
+  "@accountDetailBalanceOn": {
+    "description": "Label of the account detail's lead figure: the balance today.",
     "placeholders": {
       "date": {
         "type": "String",
-        "example": "30 oct. 2026"
+        "example": "14 mai 2026"
       }
     }
   },
-  "accountDetailCycleAsOf": "Au {date} · prélevé le {debit}",
-  "@accountDetailCycleAsOf": {
-    "description": "Caption under a deferred card's headline: today, and when the open cycle is expected to be debited.",
+  "accountDetailMonthInflow": "Entrées en {month}",
+  "@accountDetailMonthInflow": {
+    "description": "Summary line label: what came into the account this month.",
     "placeholders": {
-      "date": {
+      "month": {
         "type": "String",
-        "example": "30 oct. 2026"
-      },
-      "debit": {
-        "type": "String",
-        "example": "5 nov."
+        "example": "mai"
       }
     }
+  },
+  "accountDetailMonthOutflow": "Sorties en {month}",
+  "@accountDetailMonthOutflow": {
+    "description": "Summary line label: what left the account this month.",
+    "placeholders": {
+      "month": {
+        "type": "String",
+        "example": "mai"
+      }
+    }
+  },
+  "accountDetailNet": "Net",
+  "@accountDetailNet": {
+    "description": "Summary line label: this month's money in plus money out."
+  },
+  "accountDetailPreviousCycle": "Cycle précédent",
+  "@accountDetailPreviousCycle": {
+    "description": "Summary line label of a deferred card: what its last settled cycle came to."
+  },
+  "accountDetailDebitDateLabel": "Prélevé le",
+  "@accountDetailDebitDateLabel": {
+    "description": "Summary line label of a deferred card, above the date its open cycle will be debited."
+  },
+  "accountDetailIdentity": "{institution} · {type}",
+  "@accountDetailIdentity": {
+    "description": "First line at the right of the summary line: the bank and the account type.",
+    "placeholders": {
+      "institution": {
+        "type": "String",
+        "example": "BNP Paribas"
+      },
+      "type": {
+        "type": "String",
+        "example": "Courant"
+      }
+    }
+  },
+  "accountDetailMetaSeparator": " · ",
+  "@accountDetailMetaSeparator": {
+    "description": "Separator between the history fact and the last-import link on the summary line."
   },
   "accountDetailHistorySince": "Historique depuis le {date}",
   "@accountDetailHistorySince": {
@@ -6118,19 +6146,15 @@
   "@accountDetailNoHistory": {
     "description": "Meta strip fact on an account with no transaction yet."
   },
-  "accountDetailLastImport": "Dernier import : {date}",
+  "accountDetailLastImport": "dernier import le {date}",
   "@accountDetailLastImport": {
-    "description": "Meta strip link to the imports panel: when a statement was last imported into this account.",
+    "description": "Link to the imports panel at the end of the summary line: when a statement was last imported into this account.",
     "placeholders": {
       "date": {
         "type": "String",
-        "example": "28 oct. 2026"
+        "example": "14 mai"
       }
     }
-  },
-  "accountDetailNoImport": "Aucun import",
-  "@accountDetailNoImport": {
-    "description": "Meta strip fact on an account no statement was imported into."
   },
   "accountDetailMaskedNumber": "•••• {digits}",
   "@accountDetailMaskedNumber": {
@@ -6156,11 +6180,11 @@
       }
     }
   },
-  "accountDetailBalanceChartTitle": "Évolution du solde",
+  "accountDetailBalanceChartTitle": "Solde en fin de mois",
   "@accountDetailBalanceChartTitle": {
     "description": "Title of the account detail's month-end balance chart."
   },
-  "accountDetailCyclesChartTitle": "Montant réglé par cycle",
+  "accountDetailCyclesChartTitle": "Dépenses par cycle",
   "@accountDetailCyclesChartTitle": {
     "description": "Title of a deferred card's chart: one bar per settlement cycle."
   },
@@ -6176,7 +6200,7 @@
   "@accountDetailRangeAll": {
     "description": "Balance chart range segment: the whole history."
   },
-  "accountDetailChartEmpty": "Le graphique apparaîtra après votre deuxième mois d’historique",
+  "accountDetailChartEmpty": "Le graphique apparaîtra après le deuxième mois d’historique.",
   "@accountDetailChartEmpty": {
     "description": "Shown in place of the balance chart while the account has under two months of history."
   },
@@ -6212,25 +6236,9 @@
   "@accountDetailCycleOpen": {
     "description": "Cycle chart tooltip line for the open cycle."
   },
-  "accountDetailPeriodLabel": "12 derniers mois",
-  "@accountDetailPeriodLabel": {
-    "description": "Section label of the account detail's stats card."
-  },
-  "accountDetailChange": "Variation sur 12 mois",
-  "@accountDetailChange": {
-    "description": "Stats card row: balance change over the last twelve months."
-  },
-  "accountDetailInflow": "Entrées",
-  "@accountDetailInflow": {
-    "description": "Stats card row: everything credited over the last twelve months."
-  },
-  "accountDetailOutflow": "Sorties",
-  "@accountDetailOutflow": {
-    "description": "Stats card row: everything debited over the last twelve months."
-  },
-  "accountDetailRisingStreak": "Votre solde progresse depuis {count} mois consécutifs.",
+  "accountDetailRisingStreak": "Votre solde progresse depuis {count} mois.",
   "@accountDetailRisingStreak": {
-    "description": "Encouraging line under the stats, shown only when the balance rose at least two month-ends running.",
+    "description": "Sentence under the balance chart, shown only when the balance rose at least two month-ends running.",
     "placeholders": {
       "count": {
         "type": "int",
@@ -6238,41 +6246,13 @@
       }
     }
   },
-  "accountDetailCyclesPeriod": "Cycles réglés",
-  "@accountDetailCyclesPeriod": {
-    "description": "Section label of a deferred card's stats card."
-  },
-  "accountDetailCycleAverage": "Moyenne par cycle",
+  "accountDetailCycleAverage": "Moyenne sur {count} cycles",
   "@accountDetailCycleAverage": {
-    "description": "Deferred card stats row: the mean settled cycle."
-  },
-  "accountDetailCycleHighest": "Cycle le plus élevé · {month}",
-  "@accountDetailCycleHighest": {
-    "description": "Deferred card stats row: the settled cycle that charged the most, and its month.",
-    "placeholders": {
-      "month": {
-        "type": "String",
-        "example": "déc. 2025"
-      }
-    }
-  },
-  "accountDetailCycleLast": "Dernier cycle réglé · {month}",
-  "@accountDetailCycleLast": {
-    "description": "Deferred card stats row: the latest settled cycle, and its month.",
-    "placeholders": {
-      "month": {
-        "type": "String",
-        "example": "oct. 2026"
-      }
-    }
-  },
-  "accountDetailFallingStreak": "Vos dépenses par carte baissent depuis {count} cycles.",
-  "@accountDetailFallingStreak": {
-    "description": "Encouraging line on a deferred card, shown only when its settled cycles fell at least twice running.",
+    "description": "Summary line label of a deferred card: the mean of its last settled cycles.",
     "placeholders": {
       "count": {
         "type": "int",
-        "example": "3"
+        "example": "6"
       }
     }
   },
@@ -6284,13 +6264,9 @@
   "@accountDetailLinkedTitle": {
     "description": "Title of the section listing the deferred cards settled on this account."
   },
-  "accountDetailLinkedCaption": "Cartes à débit différé réglées sur ce compte",
-  "@accountDetailLinkedCaption": {
-    "description": "Caption beside the linked cards title."
-  },
-  "accountDetailThisCycle": "En cours ce mois",
-  "@accountDetailThisCycle": {
-    "description": "Label beside a linked card's open-cycle total."
+  "accountDetailDeferredDebit": "Débit différé",
+  "@accountDetailDeferredDebit": {
+    "description": "Neutral text on a linked card's row: the card is debited once a cycle."
   },
   "accountDetailDebitOn": "Prélevé le {date}",
   "@accountDetailDebitOn": {
@@ -6310,10 +6286,6 @@
   "@accountDetailRuleMissing": {
     "description": "Warning chip on a linked card without a settlement rule; opens the rule dialog."
   },
-  "accountDetailNoCards": "Aucune carte rattachée",
-  "@accountDetailNoCards": {
-    "description": "Dashed row shown when no deferred card is settled on this account."
-  },
   "accountDetailOpenAccount": "Ouvrir {name}",
   "@accountDetailOpenAccount": {
     "description": "Accessible label of the chevron opening another account's detail.",
@@ -6328,15 +6300,11 @@
   "@accountDetailSettleTitle": {
     "description": "Title of a deferred card's section naming the account it is paid from."
   },
-  "accountDetailSettleCaption": "Le compte débité à chaque fin de cycle",
-  "@accountDetailSettleCaption": {
-    "description": "Caption beside the settlement account title."
-  },
   "accountDetailNoPayingAccount": "Aucun compte de règlement",
   "@accountDetailNoPayingAccount": {
     "description": "Dashed row on a deferred card that names no paying account."
   },
-  "accountDetailRuleSummary": "Libellé : {pattern} · Appliquée depuis le {date}",
+  "accountDetailRuleSummary": "Libellé : {pattern} · appliquée depuis le {date}",
   "@accountDetailRuleSummary": {
     "description": "A deferred card's settlement rule: the label fragment it matches and its start date.",
     "placeholders": {
@@ -6359,10 +6327,6 @@
         "example": "CARTE X4821"
       }
     }
-  },
-  "accountDetailNoRule": "Aucune règle de règlement : le prélèvement compte encore comme une dépense",
-  "@accountDetailNoRule": {
-    "description": "Shown on a deferred card without a settlement rule."
   },
   "accountDetailEditRule": "Modifier la règle",
   "@accountDetailEditRule": {
@@ -6420,13 +6384,29 @@
       }
     }
   },
-  "accountDetailRecentTitle": "Dernières opérations",
+  "accountDetailRecentTitle": "Opérations",
   "@accountDetailRecentTitle": {
-    "description": "Title of the account detail's recent transactions card."
+    "description": "Heading of the account detail's latest transactions."
   },
-  "accountDetailSeeAll": "Tout voir",
+  "accountDetailColumnOperation": "Opération",
+  "@accountDetailColumnOperation": {
+    "description": "Column header of the account detail's transactions table."
+  },
+  "accountDetailColumnCategory": "Catégorie",
+  "@accountDetailColumnCategory": {
+    "description": "Column header of the account detail's transactions table."
+  },
+  "accountDetailColumnDate": "Date",
+  "@accountDetailColumnDate": {
+    "description": "Column header of the account detail's transactions table."
+  },
+  "accountDetailColumnAmount": "Montant",
+  "@accountDetailColumnAmount": {
+    "description": "Column header of the account detail's transactions table."
+  },
+  "accountDetailSeeAll": "Ouvrir dans Transactions",
   "@accountDetailSeeAll": {
-    "description": "Link opening the transactions panel filtered on this account."
+    "description": "Link beside the transactions heading: opens the Transactions panel filtered on this account."
   },
   "accountDetailNoTransactions": "Aucune opération",
   "@accountDetailNoTransactions": {

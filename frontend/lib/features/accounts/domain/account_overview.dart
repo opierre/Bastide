@@ -45,6 +45,11 @@ class AccountOverview {
   /// The chart needs two months to draw a line; before that it says when it
   /// will appear instead.
   bool get hasChartHistory => balanceHistory.length >= 2;
+
+  /// The day the balance is recalculated at: the last history point's, which
+  /// the backend sets to today. `null` for an account without a transaction.
+  DateTime? get balanceDate =>
+      balanceHistory.isEmpty ? null : balanceHistory.last.monthEnd;
 }
 
 @immutable
@@ -200,28 +205,6 @@ class CardSettlement {
   SettlementCycle? get lastClosed {
     final closed = closedCycles;
     return closed.isEmpty ? null : closed.last;
-  }
-
-  /// The settled cycle that charged the most (the most negative amount).
-  SettlementCycle? get highestClosed {
-    final closed = closedCycles;
-    if (closed.isEmpty) return null;
-    return closed.reduce((a, b) => b.amountMinor < a.amountMinor ? b : a);
-  }
-
-  /// How many settled cycles in a row, counting back from the latest, charged
-  /// less than the one before.
-  int get consecutiveFallingCycles {
-    final closed = closedCycles;
-    var streak = 0;
-    for (var i = closed.length - 1; i > 0; i--) {
-      if (closed[i].amountMinor > closed[i - 1].amountMinor) {
-        streak++;
-      } else {
-        break;
-      }
-    }
-    return streak;
   }
 }
 
