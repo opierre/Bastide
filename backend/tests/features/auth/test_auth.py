@@ -18,9 +18,8 @@ from app.core.security import (
 )
 from app.features.auth.models import User
 from app.features.auth.repository import AuthRepository
-from app.features.auth.schemas import PasswordReset
+from app.features.auth.schemas import PASSWORD_MIN_LENGTH, PasswordReset
 from app.features.auth.service import (
-    PASSWORD_MIN_LENGTH,
     AuthService,
     InvalidRecoveryCodeError,
     PasswordTooShortError,
@@ -440,6 +439,15 @@ MINIMUM_PASSWORD = "a" * PASSWORD_MIN_LENGTH
 
 def test_password_minimum_is_twelve() -> None:
     assert PASSWORD_MIN_LENGTH == 12
+
+
+@pytest.mark.parametrize(
+    ("schema", "field"), [("UserRegister", "password"), ("PasswordReset", "new_password")]
+)
+def test_openapi_publishes_the_password_minimum(app: FastAPI, schema: str, field: str) -> None:
+    properties = app.openapi()["components"]["schemas"][schema]["properties"]
+
+    assert properties[field]["minLength"] == 12
 
 
 def test_register_with_11_characters_returns_password_too_short(client: TestClient) -> None:

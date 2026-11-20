@@ -16,11 +16,13 @@ from app.core.security import (
 from app.features.auth.avatar import AVATAR_CONTENT_TYPE, normalize_avatar
 from app.features.auth.models import AVATAR_IMAGE, AVATAR_MONOGRAM, AuthToken, User, UserAvatar
 from app.features.auth.repository import AuthRepository
-from app.features.auth.schemas import PasswordReset, ProfileUpdate, UserLogin, UserRegister
-
-#: The shortest password accepted when one is set: at registration, at reset, and by any later
-#: password change. Login doesn't check it, so a password set before the rule still signs in.
-PASSWORD_MIN_LENGTH = 12
+from app.features.auth.schemas import (
+    PASSWORD_MIN_LENGTH,
+    PasswordReset,
+    ProfileUpdate,
+    UserLogin,
+    UserRegister,
+)
 
 
 class PasswordTooShortError(ValidationError):

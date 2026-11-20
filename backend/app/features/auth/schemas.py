@@ -22,6 +22,15 @@ def _normalize_display_name(value: str) -> str:
     return name
 
 
+#: The shortest password accepted when one is set: at registration, at reset, and by any later
+#: password change. Login doesn't check it, so a password set before the rule still signs in.
+PASSWORD_MIN_LENGTH = 12
+
+#: Publishes the minimum in the OpenAPI schema while validation keeps ``min_length=1``: the
+#: service enforces it, so a short password gets ``PASSWORD_TOO_SHORT`` in the error envelope
+#: rather than FastAPI's default request-validation 422.
+_PASSWORD_SCHEMA_EXTRA = {"minLength": PASSWORD_MIN_LENGTH}
+
 # Stored lowercased, so lookups are case-insensitive by construction.
 DisplayName = Annotated[str, AfterValidator(_normalize_display_name)]
 
@@ -193,7 +202,7 @@ class UserRegister(BaseModel):
     """Registration payload: credentials plus the locale and currency chosen at signup."""
 
     email: str = Field(min_length=1, max_length=255)
-    password: str = Field(min_length=1)
+    password: str = Field(min_length=1, json_schema_extra=_PASSWORD_SCHEMA_EXTRA)
     display_name: DisplayName
     locale: Literal["fr", "en"]
     currency: str
@@ -300,7 +309,7 @@ class PasswordReset(BaseModel):
 
     identifier: str = Field(min_length=1)
     recovery_code: str = Field(min_length=1)
-    new_password: str = Field(min_length=1)
+    new_password: str = Field(min_length=1, json_schema_extra=_PASSWORD_SCHEMA_EXTRA)
 
 
 class PasswordResetResponse(TokenResponse):
