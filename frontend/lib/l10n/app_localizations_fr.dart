@@ -204,24 +204,41 @@ class AppLocalizationsFr extends AppLocalizations {
   String get authPasswordLabel => 'Mot de passe';
 
   @override
+  String authPasswordMinimum(int minimum) {
+    return '$minimum caractères minimum.';
+  }
+
+  @override
+  String authPasswordLengthOk(int count, int minimum) {
+    return '$count caractères. Le minimum est de $minimum.';
+  }
+
+  @override
+  String authPasswordTooShort(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Encore $count caractères.',
+      one: 'Encore 1 caractère.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get authConfirmPasswordLabel => 'Confirmer le mot de passe';
+
+  @override
+  String get authPasswordMismatch => 'Les mots de passe ne correspondent pas.';
+
+  @override
   String get authDisplayNameLabel => 'Nom d\'utilisateur';
 
   @override
-  String get authPasswordStrengthWeak => 'Trop faible';
-
-  @override
-  String get authPasswordStrengthFair => 'Moyen';
-
-  @override
-  String get authPasswordStrengthStrong => 'Robuste';
-
-  @override
-  String get authPasswordStrengthHint =>
-      'Ajoutez quelques caractères, un chiffre et une majuscule.';
+  String get authRegisterDisplayNameLabel => 'Nom affiché';
 
   @override
   String get authPreferencesNote =>
-      'Vous pourrez changer la langue plus tard ; la devise s\'applique à tous vos comptes et ne pourra plus être modifiée dans cette version.';
+      'La langue se change dans les paramètres. La devise est définitive et s’applique à tous vos comptes.';
 
   @override
   String get authEmailTaken => 'Cet e-mail a déjà un compte. Connectez-vous.';
@@ -242,16 +259,65 @@ class AppLocalizationsFr extends AppLocalizations {
   String get authCurrencyLabel => 'Devise';
 
   @override
+  String authCurrencyOption(String code, String name) {
+    return '$code, $name';
+  }
+
+  @override
+  String authCurrencyName(String code) {
+    String _temp0 = intl.Intl.selectLogic(code, {
+      'EUR': 'euro',
+      'USD': 'dollar américain',
+      'GBP': 'livre sterling',
+      'CHF': 'franc suisse',
+      'CAD': 'dollar canadien',
+      'JPY': 'yen',
+      'AUD': 'dollar australien',
+      'CNY': 'yuan',
+      'INR': 'roupie indienne',
+      'BRL': 'réal brésilien',
+      'MXN': 'peso mexicain',
+      'SEK': 'couronne suédoise',
+      'NOK': 'couronne norvégienne',
+      'DKK': 'couronne danoise',
+      'PLN': 'zloty',
+      'CZK': 'couronne tchèque',
+      'HUF': 'forint',
+      'RON': 'leu roumain',
+      'ZAR': 'rand',
+      'AED': 'dirham des Émirats',
+      'SGD': 'dollar de Singapour',
+      'HKD': 'dollar de Hong Kong',
+      'NZD': 'dollar néo-zélandais',
+      'TRY': 'livre turque',
+      'ILS': 'shekel',
+      'KRW': 'won',
+      'THB': 'baht',
+      'MAD': 'dirham marocain',
+      'XOF': 'franc CFA d’Afrique de l’Ouest',
+      'XAF': 'franc CFA d’Afrique centrale',
+      'other': '$code',
+    });
+    return '$_temp0';
+  }
+
+  @override
   String get authLoginSubmit => 'Se connecter';
 
   @override
   String get authRegisterSubmit => 'Créer mon compte';
 
   @override
-  String get authGoToRegister => 'Pas encore de compte ? Créer un compte';
+  String get authRegisterSubmitting => 'Création…';
 
   @override
-  String get authGoToLogin => 'Déjà un compte ? Se connecter';
+  String get authGoToRegister => 'Créer un compte';
+
+  @override
+  String get authGoToLogin => 'Déjà un compte ?';
+
+  @override
+  String get authGoToLoginLink => 'Se connecter';
 
   @override
   String get authEmailRequired => 'L\'e-mail est requis.';
@@ -260,11 +326,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get authPasswordRequired => 'Le mot de passe est requis.';
 
   @override
-  String get authDisplayNameRequired => 'Le nom d\'utilisateur est requis.';
-
-  @override
-  String get authErrorInvalidCredentials =>
-      'Identifiant ou mot de passe incorrect. Vérifiez vos identifiants et réessayez.';
+  String get authErrorInvalidCredentials => 'E-mail ou mot de passe incorrect.';
 
   @override
   String get authErrorEmailTaken => 'Un compte existe déjà avec cet e-mail.';
@@ -4399,11 +4461,7 @@ class AppLocalizationsFr extends AppLocalizations {
       'L\'enregistrement a échoué. Réessayez.';
 
   @override
-  String get authForgotPasswordLink => 'Mot de passe oublié ?';
-
-  @override
-  String get authForgotPasswordTagline =>
-      'Réinitialisez votre mot de passe avec votre code de récupération.';
+  String get authForgotPasswordLink => 'Mot de passe oublié';
 
   @override
   String get authRecoveryCodeLabel => 'Code de récupération';
@@ -4432,27 +4490,17 @@ class AppLocalizationsFr extends AppLocalizations {
       'Identifiant ou code de récupération incorrect. Vérifiez le code et réessayez.';
 
   @override
-  String get authRecoveryCodeTagline => 'Conservez votre code de récupération';
-
-  @override
-  String get authRecoveryCodeIntro =>
-      'Si vous oubliez votre mot de passe, ce code est le seul moyen de le réinitialiser. Notez-le ou imprimez-le, et gardez-le en lieu sûr hors de cet ordinateur.';
-
-  @override
-  String get authRecoveryCodeShownOnce =>
-      'Il ne sera plus affiché. Vous pourrez en générer un nouveau dans Paramètres › Profil.';
-
-  @override
   String get authRecoveryCodeCopy => 'Copier';
 
   @override
   String get authRecoveryCodeCopied => 'Copié';
 
   @override
-  String get authRecoveryCodeConfirm => 'J\'ai conservé ce code en lieu sûr';
+  String get authRecoveryCodeKeep =>
+      'Notez ce code et gardez-le en lieu sûr : il ne sera plus affiché.';
 
   @override
-  String get authRecoveryCodeContinue => 'Continuer';
+  String get authRecoveryCodeAcknowledge => 'J’ai noté ce code';
 
   @override
   String get settingsRecoveryTitle => 'Code de récupération';

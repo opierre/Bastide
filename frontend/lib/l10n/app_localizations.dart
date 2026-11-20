@@ -440,40 +440,52 @@ abstract class AppLocalizations {
   /// **'Mot de passe'**
   String get authPasswordLabel;
 
-  /// Label for the display name field on the register form.
+  /// Helper under a new password field while it is not yet long enough.
+  ///
+  /// In fr, this message translates to:
+  /// **'{minimum} caractères minimum.'**
+  String authPasswordMinimum(int minimum);
+
+  /// Helper under a new password field once it is long enough, after a check icon. {count} is never below {minimum}.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count} caractères. Le minimum est de {minimum}.'**
+  String authPasswordLengthOk(int count, int minimum);
+
+  /// Error under a new password field that was left too short. {count} is how many characters are missing.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, =1{Encore 1 caractère.} other{Encore {count} caractères.}}'**
+  String authPasswordTooShort(int count);
+
+  /// Label of the field repeating the new password on the reset screen.
+  ///
+  /// In fr, this message translates to:
+  /// **'Confirmer le mot de passe'**
+  String get authConfirmPasswordLabel;
+
+  /// Error under the confirm field when it differs from the new password.
+  ///
+  /// In fr, this message translates to:
+  /// **'Les mots de passe ne correspondent pas.'**
+  String get authPasswordMismatch;
+
+  /// Label of the user name field in Settings › Profil.
   ///
   /// In fr, this message translates to:
   /// **'Nom d\'utilisateur'**
   String get authDisplayNameLabel;
 
-  /// Verdict beside the password strength meter at its lowest levels.
+  /// Label of the name field on the register screen (03-register.md).
   ///
   /// In fr, this message translates to:
-  /// **'Trop faible'**
-  String get authPasswordStrengthWeak;
-
-  /// Verdict beside the password strength meter at its middle level.
-  ///
-  /// In fr, this message translates to:
-  /// **'Moyen'**
-  String get authPasswordStrengthFair;
-
-  /// Verdict beside the password strength meter once it is acceptable.
-  ///
-  /// In fr, this message translates to:
-  /// **'Robuste'**
-  String get authPasswordStrengthStrong;
-
-  /// Guidance shown under a password that is still too weak to submit.
-  ///
-  /// In fr, this message translates to:
-  /// **'Ajoutez quelques caractères, un chiffre et une majuscule.'**
-  String get authPasswordStrengthHint;
+  /// **'Nom affiché'**
+  String get authRegisterDisplayNameLabel;
 
   /// Microcopy under the language and currency row at registration, stating which choice is permanent.
   ///
   /// In fr, this message translates to:
-  /// **'Vous pourrez changer la langue plus tard ; la devise s\'applique à tous vos comptes et ne pourra plus être modifiée dans cette version.'**
+  /// **'La langue se change dans les paramètres. La devise est définitive et s’applique à tous vos comptes.'**
   String get authPreferencesNote;
 
   /// Validation helper shown when the chosen email already has an account.
@@ -512,6 +524,18 @@ abstract class AppLocalizations {
   /// **'Devise'**
   String get authCurrencyLabel;
 
+  /// A currency in the register currency select: ISO code then its name (authCurrencyName).
+  ///
+  /// In fr, this message translates to:
+  /// **'{code}, {name}'**
+  String authCurrencyOption(String code, String name);
+
+  /// Name of a currency offered at registration, by ISO 4217 code. Falls back to the code.
+  ///
+  /// In fr, this message translates to:
+  /// **'{code, select, EUR{euro} USD{dollar américain} GBP{livre sterling} CHF{franc suisse} CAD{dollar canadien} JPY{yen} AUD{dollar australien} CNY{yuan} INR{roupie indienne} BRL{réal brésilien} MXN{peso mexicain} SEK{couronne suédoise} NOK{couronne norvégienne} DKK{couronne danoise} PLN{zloty} CZK{couronne tchèque} HUF{forint} RON{leu roumain} ZAR{rand} AED{dirham des Émirats} SGD{dollar de Singapour} HKD{dollar de Hong Kong} NZD{dollar néo-zélandais} TRY{livre turque} ILS{shekel} KRW{won} THB{baht} MAD{dirham marocain} XOF{franc CFA d’Afrique de l’Ouest} XAF{franc CFA d’Afrique centrale} other{{code}}}'**
+  String authCurrencyName(String code);
+
   /// Submit button label on the login form.
   ///
   /// In fr, this message translates to:
@@ -524,17 +548,29 @@ abstract class AppLocalizations {
   /// **'Créer mon compte'**
   String get authRegisterSubmit;
 
-  /// Link on the login screen navigating to registration.
+  /// Label replacing the register button text while the request is in flight.
   ///
   /// In fr, this message translates to:
-  /// **'Pas encore de compte ? Créer un compte'**
+  /// **'Création…'**
+  String get authRegisterSubmitting;
+
+  /// Link on the login screen, left of the link row, navigating to registration.
+  ///
+  /// In fr, this message translates to:
+  /// **'Créer un compte'**
   String get authGoToRegister;
 
-  /// Link on the register screen navigating to login.
+  /// Lead-in on the register screen, followed by the authGoToLoginLink link.
   ///
   /// In fr, this message translates to:
-  /// **'Déjà un compte ? Se connecter'**
+  /// **'Déjà un compte ?'**
   String get authGoToLogin;
+
+  /// Link after authGoToLogin on the register screen, navigating to login.
+  ///
+  /// In fr, this message translates to:
+  /// **'Se connecter'**
+  String get authGoToLoginLink;
 
   /// Validation message when the email field is left empty.
   ///
@@ -548,16 +584,10 @@ abstract class AppLocalizations {
   /// **'Le mot de passe est requis.'**
   String get authPasswordRequired;
 
-  /// Validation message when the display name field is left empty.
-  ///
-  /// In fr, this message translates to:
-  /// **'Le nom d\'utilisateur est requis.'**
-  String get authDisplayNameRequired;
-
   /// Localized message for the backend's INVALID_CREDENTIALS error code.
   ///
   /// In fr, this message translates to:
-  /// **'Identifiant ou mot de passe incorrect. Vérifiez vos identifiants et réessayez.'**
+  /// **'E-mail ou mot de passe incorrect.'**
   String get authErrorInvalidCredentials;
 
   /// Localized message for the backend's EMAIL_TAKEN error code.
@@ -6923,17 +6953,11 @@ abstract class AppLocalizations {
   /// **'L\'enregistrement a échoué. Réessayez.'**
   String get networthDeclaredErrorGeneric;
 
-  /// Link under the login form's password field, opening the password reset screen.
+  /// Link on the login screen, right of the link row, opening the password reset screen.
   ///
   /// In fr, this message translates to:
-  /// **'Mot de passe oublié ?'**
+  /// **'Mot de passe oublié'**
   String get authForgotPasswordLink;
-
-  /// Line under the brand lockup on the password reset screen, saying what the screen is for.
-  ///
-  /// In fr, this message translates to:
-  /// **'Réinitialisez votre mot de passe avec votre code de récupération.'**
-  String get authForgotPasswordTagline;
 
   /// Label for the recovery code field on the password reset form.
   ///
@@ -6983,24 +7007,6 @@ abstract class AppLocalizations {
   /// **'Identifiant ou code de récupération incorrect. Vérifiez le code et réessayez.'**
   String get authErrorInvalidRecoveryCode;
 
-  /// Line under the brand lockup on the screen showing a newly issued recovery code.
-  ///
-  /// In fr, this message translates to:
-  /// **'Conservez votre code de récupération'**
-  String get authRecoveryCodeTagline;
-
-  /// Explanation above a newly issued recovery code.
-  ///
-  /// In fr, this message translates to:
-  /// **'Si vous oubliez votre mot de passe, ce code est le seul moyen de le réinitialiser. Notez-le ou imprimez-le, et gardez-le en lieu sûr hors de cet ordinateur.'**
-  String get authRecoveryCodeIntro;
-
-  /// Note under a newly issued recovery code: it is shown once, and where to replace it.
-  ///
-  /// In fr, this message translates to:
-  /// **'Il ne sera plus affiché. Vous pourrez en générer un nouveau dans Paramètres › Profil.'**
-  String get authRecoveryCodeShownOnce;
-
   /// Button copying the recovery code to the clipboard.
   ///
   /// In fr, this message translates to:
@@ -7013,17 +7019,17 @@ abstract class AppLocalizations {
   /// **'Copié'**
   String get authRecoveryCodeCopied;
 
-  /// Checkbox the user ticks before leaving the recovery code screen.
+  /// Sentence under a newly issued recovery code on the signed-out column.
   ///
   /// In fr, this message translates to:
-  /// **'J\'ai conservé ce code en lieu sûr'**
-  String get authRecoveryCodeConfirm;
+  /// **'Notez ce code et gardez-le en lieu sûr : il ne sera plus affiché.'**
+  String get authRecoveryCodeKeep;
 
-  /// Button leaving the recovery code screen for the app, enabled once the checkbox is ticked.
+  /// Primary button releasing the user from the recovery code screen.
   ///
   /// In fr, this message translates to:
-  /// **'Continuer'**
-  String get authRecoveryCodeContinue;
+  /// **'J’ai noté ce code'**
+  String get authRecoveryCodeAcknowledge;
 
   /// Title of the recovery code card in Settings › Profile.
   ///

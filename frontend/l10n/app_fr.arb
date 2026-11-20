@@ -251,27 +251,53 @@
   "@authPasswordLabel": {
     "description": "Label for the password field on login/register forms."
   },
+  "authPasswordMinimum": "{minimum} caractères minimum.",
+  "@authPasswordMinimum": {
+    "description": "Helper under a new password field while it is not yet long enough.",
+    "placeholders": {
+      "minimum": {
+        "type": "int"
+      }
+    }
+  },
+  "authPasswordLengthOk": "{count} caractères. Le minimum est de {minimum}.",
+  "@authPasswordLengthOk": {
+    "description": "Helper under a new password field once it is long enough, after a check icon. {count} is never below {minimum}.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "minimum": {
+        "type": "int"
+      }
+    }
+  },
+  "authPasswordTooShort": "{count, plural, =1{Encore 1 caractère.} other{Encore {count} caractères.}}",
+  "@authPasswordTooShort": {
+    "description": "Error under a new password field that was left too short. {count} is how many characters are missing.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "authConfirmPasswordLabel": "Confirmer le mot de passe",
+  "@authConfirmPasswordLabel": {
+    "description": "Label of the field repeating the new password on the reset screen."
+  },
+  "authPasswordMismatch": "Les mots de passe ne correspondent pas.",
+  "@authPasswordMismatch": {
+    "description": "Error under the confirm field when it differs from the new password."
+  },
   "authDisplayNameLabel": "Nom d'utilisateur",
   "@authDisplayNameLabel": {
-    "description": "Label for the display name field on the register form."
+    "description": "Label of the user name field in Settings › Profil."
   },
-  "authPasswordStrengthWeak": "Trop faible",
-  "@authPasswordStrengthWeak": {
-    "description": "Verdict beside the password strength meter at its lowest levels."
+  "authRegisterDisplayNameLabel": "Nom affiché",
+  "@authRegisterDisplayNameLabel": {
+    "description": "Label of the name field on the register screen (03-register.md)."
   },
-  "authPasswordStrengthFair": "Moyen",
-  "@authPasswordStrengthFair": {
-    "description": "Verdict beside the password strength meter at its middle level."
-  },
-  "authPasswordStrengthStrong": "Robuste",
-  "@authPasswordStrengthStrong": {
-    "description": "Verdict beside the password strength meter once it is acceptable."
-  },
-  "authPasswordStrengthHint": "Ajoutez quelques caractères, un chiffre et une majuscule.",
-  "@authPasswordStrengthHint": {
-    "description": "Guidance shown under a password that is still too weak to submit."
-  },
-  "authPreferencesNote": "Vous pourrez changer la langue plus tard ; la devise s'applique à tous vos comptes et ne pourra plus être modifiée dans cette version.",
+  "authPreferencesNote": "La langue se change dans les paramètres. La devise est définitive et s’applique à tous vos comptes.",
   "@authPreferencesNote": {
     "description": "Microcopy under the language and currency row at registration, stating which choice is permanent."
   },
@@ -299,6 +325,27 @@
   "@authCurrencyLabel": {
     "description": "Label for the base-currency selector on the register form."
   },
+  "authCurrencyOption": "{code}, {name}",
+  "@authCurrencyOption": {
+    "description": "A currency in the register currency select: ISO code then its name (authCurrencyName).",
+    "placeholders": {
+      "code": {
+        "type": "String"
+      },
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "authCurrencyName": "{code, select, EUR{euro} USD{dollar américain} GBP{livre sterling} CHF{franc suisse} CAD{dollar canadien} JPY{yen} AUD{dollar australien} CNY{yuan} INR{roupie indienne} BRL{réal brésilien} MXN{peso mexicain} SEK{couronne suédoise} NOK{couronne norvégienne} DKK{couronne danoise} PLN{zloty} CZK{couronne tchèque} HUF{forint} RON{leu roumain} ZAR{rand} AED{dirham des Émirats} SGD{dollar de Singapour} HKD{dollar de Hong Kong} NZD{dollar néo-zélandais} TRY{livre turque} ILS{shekel} KRW{won} THB{baht} MAD{dirham marocain} XOF{franc CFA d’Afrique de l’Ouest} XAF{franc CFA d’Afrique centrale} other{{code}}}",
+  "@authCurrencyName": {
+    "description": "Name of a currency offered at registration, by ISO 4217 code. Falls back to the code.",
+    "placeholders": {
+      "code": {
+        "type": "String"
+      }
+    }
+  },
   "authLoginSubmit": "Se connecter",
   "@authLoginSubmit": {
     "description": "Submit button label on the login form."
@@ -307,13 +354,21 @@
   "@authRegisterSubmit": {
     "description": "Submit button label on the register form."
   },
-  "authGoToRegister": "Pas encore de compte ? Créer un compte",
-  "@authGoToRegister": {
-    "description": "Link on the login screen navigating to registration."
+  "authRegisterSubmitting": "Création…",
+  "@authRegisterSubmitting": {
+    "description": "Label replacing the register button text while the request is in flight."
   },
-  "authGoToLogin": "Déjà un compte ? Se connecter",
+  "authGoToRegister": "Créer un compte",
+  "@authGoToRegister": {
+    "description": "Link on the login screen, left of the link row, navigating to registration."
+  },
+  "authGoToLogin": "Déjà un compte ?",
   "@authGoToLogin": {
-    "description": "Link on the register screen navigating to login."
+    "description": "Lead-in on the register screen, followed by the authGoToLoginLink link."
+  },
+  "authGoToLoginLink": "Se connecter",
+  "@authGoToLoginLink": {
+    "description": "Link after authGoToLogin on the register screen, navigating to login."
   },
   "authEmailRequired": "L'e-mail est requis.",
   "@authEmailRequired": {
@@ -323,11 +378,7 @@
   "@authPasswordRequired": {
     "description": "Validation message when the password field is left empty."
   },
-  "authDisplayNameRequired": "Le nom d'utilisateur est requis.",
-  "@authDisplayNameRequired": {
-    "description": "Validation message when the display name field is left empty."
-  },
-  "authErrorInvalidCredentials": "Identifiant ou mot de passe incorrect. Vérifiez vos identifiants et réessayez.",
+  "authErrorInvalidCredentials": "E-mail ou mot de passe incorrect.",
   "@authErrorInvalidCredentials": {
     "description": "Localized message for the backend's INVALID_CREDENTIALS error code."
   },
@@ -5728,13 +5779,9 @@
   "@networthDeclaredErrorGeneric": {
     "description": "Any other failure writing a declared total."
   },
-  "authForgotPasswordLink": "Mot de passe oublié ?",
+  "authForgotPasswordLink": "Mot de passe oublié",
   "@authForgotPasswordLink": {
-    "description": "Link under the login form's password field, opening the password reset screen."
-  },
-  "authForgotPasswordTagline": "Réinitialisez votre mot de passe avec votre code de récupération.",
-  "@authForgotPasswordTagline": {
-    "description": "Line under the brand lockup on the password reset screen, saying what the screen is for."
+    "description": "Link on the login screen, right of the link row, opening the password reset screen."
   },
   "authRecoveryCodeLabel": "Code de récupération",
   "@authRecoveryCodeLabel": {
@@ -5768,18 +5815,6 @@
   "@authErrorInvalidRecoveryCode": {
     "description": "Banner when a password reset's email and recovery code don't match."
   },
-  "authRecoveryCodeTagline": "Conservez votre code de récupération",
-  "@authRecoveryCodeTagline": {
-    "description": "Line under the brand lockup on the screen showing a newly issued recovery code."
-  },
-  "authRecoveryCodeIntro": "Si vous oubliez votre mot de passe, ce code est le seul moyen de le réinitialiser. Notez-le ou imprimez-le, et gardez-le en lieu sûr hors de cet ordinateur.",
-  "@authRecoveryCodeIntro": {
-    "description": "Explanation above a newly issued recovery code."
-  },
-  "authRecoveryCodeShownOnce": "Il ne sera plus affiché. Vous pourrez en générer un nouveau dans Paramètres › Profil.",
-  "@authRecoveryCodeShownOnce": {
-    "description": "Note under a newly issued recovery code: it is shown once, and where to replace it."
-  },
   "authRecoveryCodeCopy": "Copier",
   "@authRecoveryCodeCopy": {
     "description": "Button copying the recovery code to the clipboard."
@@ -5788,13 +5823,13 @@
   "@authRecoveryCodeCopied": {
     "description": "Label the copy button takes once the recovery code has been copied."
   },
-  "authRecoveryCodeConfirm": "J'ai conservé ce code en lieu sûr",
-  "@authRecoveryCodeConfirm": {
-    "description": "Checkbox the user ticks before leaving the recovery code screen."
+  "authRecoveryCodeKeep": "Notez ce code et gardez-le en lieu sûr : il ne sera plus affiché.",
+  "@authRecoveryCodeKeep": {
+    "description": "Sentence under a newly issued recovery code on the signed-out column."
   },
-  "authRecoveryCodeContinue": "Continuer",
-  "@authRecoveryCodeContinue": {
-    "description": "Button leaving the recovery code screen for the app, enabled once the checkbox is ticked."
+  "authRecoveryCodeAcknowledge": "J’ai noté ce code",
+  "@authRecoveryCodeAcknowledge": {
+    "description": "Primary button releasing the user from the recovery code screen."
   },
   "settingsRecoveryTitle": "Code de récupération",
   "@settingsRecoveryTitle": {

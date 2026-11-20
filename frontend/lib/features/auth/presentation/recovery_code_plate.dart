@@ -1,14 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:lucide_icons_flutter/lucide_icons_300.dart';
 
 import '../../../core/theme/tokens.dart';
+import '../../../core/widgets/app_button.dart';
 import '../../../l10n/app_localizations.dart';
 
-/// A freshly issued recovery code on an inset plate, with a copy button.
+/// A freshly issued recovery code (`02-login.md`, Behaviour): the code in
+/// Geist Mono 16 on a `field` well, and a « Copier » secondary button.
 ///
-/// Shared by the post-registration screen and the Settings regeneration modal
-/// so the code reads the same wherever the user first meets it. Monospace and
-/// tracked out: it is copied by hand, character by character, onto paper.
+/// Shared by the signed-out recovery code screen and the Settings
+/// regeneration modal, so the code reads the same wherever the user first
+/// meets it.
 class RecoveryCodePlate extends StatefulWidget {
   const RecoveryCodePlate({super.key, required this.code});
 
@@ -30,47 +33,44 @@ class _RecoveryCodePlateState extends State<RecoveryCodePlate> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    final colors = context.colors;
 
-    return Container(
-      padding: const EdgeInsets.fromLTRB(
-        AppSpacing.md,
-        AppSpacing.sm + AppSpacing.xs,
-        AppSpacing.sm,
-        AppSpacing.sm + AppSpacing.xs,
-      ),
-      decoration: BoxDecoration(
-        color: context.colors.field,
-        borderRadius: BorderRadius.circular(AppRadii.inset),
-        border: Border.all(color: context.colors.line),
-      ),
-      child: Row(
-        children: [
-          Expanded(
+    return Row(
+      children: [
+        Expanded(
+          child: Container(
+            constraints: const BoxConstraints(minHeight: AppSizes.formField),
+            alignment: AlignmentDirectional.centerStart,
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppSpacing.sm + AppSpacing.xxs,
+              vertical: AppSpacing.xs,
+            ),
+            decoration: BoxDecoration(
+              color: colors.field,
+              borderRadius: BorderRadius.circular(AppRadii.control),
+              border: Border.all(color: colors.lineStrong),
+            ),
             child: SelectableText(
               widget.code,
               key: const Key('recoveryCodeText'),
               style: context.textStyles.mono.copyWith(
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-                letterSpacing: 1.5,
-                color: context.colors.text,
+                fontSize: Theme.of(context).textTheme.headlineSmall?.fontSize,
+                fontWeight: FontWeight.w400,
+                color: colors.text,
               ),
             ),
           ),
-          const SizedBox(width: AppSpacing.sm),
-          TextButton.icon(
-            key: const Key('recoveryCodeCopyButton'),
-            onPressed: _copy,
-            icon: Icon(
-              _copied ? Icons.check_rounded : Icons.copy_rounded,
-              size: 16,
-            ),
-            label: Text(
-              _copied ? l10n.authRecoveryCodeCopied : l10n.authRecoveryCodeCopy,
-            ),
-          ),
-        ],
-      ),
+        ),
+        const SizedBox(width: AppSpacing.sm),
+        AppButton(
+          key: const Key('recoveryCodeCopyButton'),
+          label: _copied
+              ? l10n.authRecoveryCodeCopied
+              : l10n.authRecoveryCodeCopy,
+          icon: _copied ? LucideIcons300.check : LucideIcons300.copy,
+          onPressed: _copy,
+        ),
+      ],
     );
   }
 }
