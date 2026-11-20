@@ -438,6 +438,10 @@ abstract final class AppSpacing {
   static const sidebarBrandBottom = 14.0;
   static const sidebarLabelTop = 14.0;
 
+  /// Drop target (`00` §7): padding 18 vertical, 20 horizontal.
+  static const dropTargetY = 18.0;
+  static const dropTargetX = 20.0;
+
   // v1 layout values, kept only so the panels compile until each panel's v2
   // ticket replaces them. Nothing new reads these.
 
