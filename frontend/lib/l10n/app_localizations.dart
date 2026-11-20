@@ -6622,12 +6622,6 @@ abstract class AppLocalizations {
   /// **'Modifier le bien'**
   String get propertyFormEditTitle;
 
-  /// Subtitle under the property form title.
-  ///
-  /// In fr, this message translates to:
-  /// **'La valeur déclarée entre dans la synthèse.'**
-  String get propertyFormSubtitle;
-
   /// Property form field: the property's name.
   ///
   /// In fr, this message translates to:
@@ -6724,12 +6718,6 @@ abstract class AppLocalizations {
   /// **'Annuler'**
   String get propertyFormCancel;
 
-  /// Primary action of the new-property form.
-  ///
-  /// In fr, this message translates to:
-  /// **'Ajouter le bien'**
-  String get propertyFormSubmit;
-
   /// Primary action of the edit-property form.
   ///
   /// In fr, this message translates to:
@@ -6747,12 +6735,6 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'{label} : {value} estimés le {date}. La nouvelle estimation remplace celle-ci.'**
   String propertyRevalueSubtitle(String label, String value, String date);
-
-  /// Primary action of the new-valuation modal.
-  ///
-  /// In fr, this message translates to:
-  /// **'Enregistrer l\'estimation'**
-  String get propertyRevalueSubmit;
 
   /// Error when the valuation date is after today (PROPERTY_VALUATION_IN_FUTURE).
   ///

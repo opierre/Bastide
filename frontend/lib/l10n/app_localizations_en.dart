@@ -4231,10 +4231,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get propertyFormEditTitle => 'Edit property';
 
   @override
-  String get propertyFormSubtitle =>
-      'The declared value counts in your net worth.';
-
-  @override
   String get propertyFormLabel => 'Label';
 
   @override
@@ -4287,9 +4283,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get propertyFormCancel => 'Cancel';
 
   @override
-  String get propertyFormSubmit => 'Add property';
-
-  @override
   String get propertyFormSave => 'Save';
 
   @override
@@ -4299,9 +4292,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String propertyRevalueSubtitle(String label, String value, String date) {
     return '$label: $value as valued on $date. The new valuation replaces it.';
   }
-
-  @override
-  String get propertyRevalueSubmit => 'Save valuation';
 
   @override
   String get propertyErrorValuationInFuture =>

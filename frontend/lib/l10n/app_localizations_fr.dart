@@ -4255,10 +4255,6 @@ class AppLocalizationsFr extends AppLocalizations {
   String get propertyFormEditTitle => 'Modifier le bien';
 
   @override
-  String get propertyFormSubtitle =>
-      'La valeur déclarée entre dans la synthèse.';
-
-  @override
   String get propertyFormLabel => 'Libellé';
 
   @override
@@ -4312,9 +4308,6 @@ class AppLocalizationsFr extends AppLocalizations {
   String get propertyFormCancel => 'Annuler';
 
   @override
-  String get propertyFormSubmit => 'Ajouter le bien';
-
-  @override
   String get propertyFormSave => 'Enregistrer';
 
   @override
@@ -4324,9 +4317,6 @@ class AppLocalizationsFr extends AppLocalizations {
   String propertyRevalueSubtitle(String label, String value, String date) {
     return '$label : $value estimés le $date. La nouvelle estimation remplace celle-ci.';
   }
-
-  @override
-  String get propertyRevalueSubmit => 'Enregistrer l\'estimation';
 
   @override
   String get propertyErrorValuationInFuture =>

@@ -5442,10 +5442,6 @@
   "@propertyFormEditTitle": {
     "description": "Title of the property form when editing an existing property."
   },
-  "propertyFormSubtitle": "La valeur déclarée entre dans la synthèse.",
-  "@propertyFormSubtitle": {
-    "description": "Subtitle under the property form title."
-  },
   "propertyFormLabel": "Libellé",
   "@propertyFormLabel": {
     "description": "Property form field: the property's name."
@@ -5515,10 +5511,6 @@
   "@propertyFormCancel": {
     "description": "Cancel action on the property modals."
   },
-  "propertyFormSubmit": "Ajouter le bien",
-  "@propertyFormSubmit": {
-    "description": "Primary action of the new-property form."
-  },
   "propertyFormSave": "Enregistrer",
   "@propertyFormSave": {
     "description": "Primary action of the edit-property form."
@@ -5541,10 +5533,6 @@
         "type": "String"
       }
     }
-  },
-  "propertyRevalueSubmit": "Enregistrer l'estimation",
-  "@propertyRevalueSubmit": {
-    "description": "Primary action of the new-valuation modal."
   },
   "propertyErrorValuationInFuture": "Une date d'estimation ne peut pas être dans le futur.",
   "@propertyErrorValuationInFuture": {
