@@ -117,6 +117,11 @@ class Mortgage {
 
   /// `null` once the last instalment has passed.
   final DateTime? nextPaymentOn;
+
+  /// First day of the month the last instalment falls in: the first
+  /// instalment's month plus the term. Date bookkeeping only, never an amount.
+  DateTime get lastPaymentMonth =>
+      DateTime(firstPaymentDate.year, firstPaymentDate.month + termMonths - 1);
 }
 
 /// One loan with its cost totals and indicative TAEG on top of the list figures.

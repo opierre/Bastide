@@ -403,47 +403,6 @@ void main() {
         expect(state.mortgages, hasLength(1));
       },
     );
-
-    test(
-      'declaring an income patches settings and re-reads the summary',
-      () async {
-        var declared = false;
-        stubLoad();
-        when(() => apiClient.get('/mortgages/summary')).thenAnswer(
-          (_) async => declared
-              ? _summaryJson(incomeSource: 'declared', debtRatioBps: 3274)
-              : _summaryJson(
-                  incomeSource: 'unknown',
-                  debtRatioBps: null,
-                  monthlyIncomeMinor: null,
-                ),
-        );
-        when(
-          () => apiClient.patch('/settings', body: any(named: 'body')),
-        ).thenAnswer((_) async {
-          declared = true;
-          return <String, dynamic>{};
-        });
-        await container.read(mortgagesControllerProvider.future);
-
-        await container
-            .read(mortgagesControllerProvider.notifier)
-            .declareIncome(460000);
-
-        verify(
-          () => apiClient.patch(
-            '/settings',
-            body: {'declared_monthly_income_minor': 460000},
-          ),
-        ).called(1);
-        final summary = container
-            .read(mortgagesControllerProvider)
-            .value!
-            .summary;
-        expect(summary.incomeSource, IncomeSource.declared);
-        expect(summary.debtRatioBps, 3274);
-      },
-    );
   });
 
   group('schedule window', () {

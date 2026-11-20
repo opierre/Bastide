@@ -1,24 +1,27 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:lucide_icons_flutter/lucide_icons_300.dart';
 
 import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/tokens.dart';
 import '../../../core/widgets/amount_text.dart';
-import '../../../core/widgets/app_card.dart';
+import '../../../core/widgets/app_button.dart';
+import '../../../core/widgets/app_select.dart';
 import '../../../core/widgets/state_views.dart';
 import '../../../l10n/app_localizations.dart';
 import '../application/mortgages_controller.dart';
 import '../domain/schedule_row.dart';
 import 'mortgage_labels.dart';
 
-/// « Tableau d'amortissement » (`12-credits.md` frame ②): one calendar year of
-/// the schedule at a time, paged by the YearSwitcher.
+/// « Tableau d’amortissement » (`12-credits.md` § Loan detail, block 3): the
+/// heading and its line on the left, the year switcher on the right, then one
+/// calendar year of the schedule.
 ///
-/// 300 rows never appear at once. Every figure — each row, and the foot's
-/// totals — is the API's; insurance keeps its own column, because folding it
+/// 300 rows never appear at once. Every figure, each row and the foot's
+/// totals, is the API's; insurance keeps its own column, because folding it
 /// into interest or principal would misstate both.
-class ScheduleTableCard extends ConsumerWidget {
-  const ScheduleTableCard({super.key, required this.years});
+class ScheduleSection extends ConsumerWidget {
+  const ScheduleSection({super.key, required this.years});
 
   final ScheduleYears years;
 
@@ -32,88 +35,83 @@ class ScheduleTableCard extends ConsumerWidget {
     final window = ref.watch(scheduleWindowProvider(windowKey));
     final position = years.positionOf(year);
 
-    return AppCard(
-      key: const Key('scheduleTableCard'),
-      padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Row(
-            children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      l10n.mortgageScheduleTitle,
-                      style: textTheme.titleMedium,
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      switch (window) {
-                        AsyncData(:final value) =>
-                          l10n.mortgageScheduleSubtitle(
-                            position,
-                            years.yearCount,
-                            value.rows.length,
-                          ),
-                        _ => l10n.mortgageScheduleSubtitleLoading(
-                          position,
-                          years.yearCount,
-                        ),
-                      },
-                      key: const Key('scheduleSubtitle'),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: textTheme.bodySmall?.copyWith(
-                        color: context.colors.textSecondary,
+    return Column(
+      key: const Key('scheduleSection'),
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.end,
+          children: [
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    l10n.mortgageScheduleTitle,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: textTheme.titleSmall,
+                  ),
+                  const SizedBox(height: AppSpacing.xxs),
+                  Text(
+                    switch (window) {
+                      AsyncData(:final value) => l10n.mortgageScheduleSubtitle(
+                        position,
+                        years.yearCount,
+                        value.rows.length,
                       ),
+                      _ => l10n.mortgageScheduleSubtitleLoading(
+                        position,
+                        years.yearCount,
+                      ),
+                    },
+                    key: const Key('scheduleSubtitle'),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: textTheme.bodySmall?.copyWith(
+                      color: context.colors.textTertiary,
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
-              const SizedBox(width: AppSpacing.md),
-              YearSwitcher(
-                years: years,
-                selected: year,
-                onStep: ref.read(yearProvider.notifier).step,
-                onSelect: ref.read(yearProvider.notifier).select,
-              ),
-            ],
-          ),
-          const SizedBox(height: 10),
-          Expanded(
-            child: switch (window) {
-              AsyncData(:final value) => ScheduleTable(
-                window: value,
-                years: years,
-              ),
-              AsyncError() => ErrorStateView(
-                message: l10n.mortgageScheduleLoadFailed,
-                messageKey: const Key('scheduleErrorText'),
-                retryLabel: l10n.mortgagesRetry,
-                retryKey: const Key('scheduleRetryButton'),
-                onRetry: () =>
-                    ref.invalidate(scheduleWindowProvider(windowKey)),
-              ),
-              _ => const SkeletonList(
-                key: Key('scheduleLoading'),
-                itemCount: 6,
-                itemHeight: ScheduleTable.rowHeight,
-              ),
-            },
-          ),
-        ],
-      ),
+            ),
+            const SizedBox(width: AppSpacing.md),
+            YearSwitcher(
+              years: years,
+              selected: year,
+              onStep: ref.read(yearProvider.notifier).step,
+              onSelect: ref.read(yearProvider.notifier).select,
+            ),
+          ],
+        ),
+        const SizedBox(height: AppSpacing.smPlus),
+        Expanded(
+          child: switch (window) {
+            AsyncData(:final value) => SingleChildScrollView(
+              child: ScheduleTable(window: value, years: years),
+            ),
+            AsyncError() => ErrorStateView(
+              message: l10n.mortgageScheduleLoadFailed,
+              messageKey: const Key('scheduleErrorText'),
+              retryLabel: l10n.mortgagesRetry,
+              retryKey: const Key('scheduleRetryButton'),
+              onRetry: () => ref.invalidate(scheduleWindowProvider(windowKey)),
+            ),
+            _ => const SkeletonList(
+              key: Key('scheduleLoading'),
+              itemCount: 6,
+              itemHeight: AppLoans.scheduleRow,
+            ),
+          },
+        ),
+      ],
     );
   }
 }
 
-/// The ‹ 2026 › pill beside a segmented strip of the loan's years.
-///
-/// The chevrons step one year; the strip jumps. The strip shows a five-year
-/// window around the selection and a disabled « … 2048 » tail naming the last
-/// year, so a 25-year loan never becomes a 25-segment control.
+/// Secondary icon buttons `chevron-left` and `chevron-right` around the year,
+/// then a select listing every year of the loan. The chevrons step one year;
+/// the select jumps.
 class YearSwitcher extends StatelessWidget {
   const YearSwitcher({
     super.key,
@@ -128,94 +126,51 @@ class YearSwitcher extends StatelessWidget {
   final ValueChanged<int> onStep;
   final ValueChanged<int> onSelect;
 
-  static const _stripLength = 5;
-
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final textTheme = Theme.of(context).textTheme;
-    final lastStart = years.lastYear - _stripLength + 1;
-    final start = (selected - 3).clamp(
-      years.firstYear,
-      lastStart < years.firstYear ? years.firstYear : lastStart,
-    );
-    final end = (start + _stripLength - 1).clamp(
-      years.firstYear,
-      years.lastYear,
-    );
 
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Container(
-          height: 34,
-          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xs),
-          decoration: BoxDecoration(
-            color: context.colors.bg,
-            borderRadius: BorderRadius.circular(AppRadii.md),
-            border: Border.all(color: context.colors.line),
-          ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              _StepButton(
-                key: const Key('yearSwitcherPrevious'),
-                icon: Icons.chevron_left_rounded,
-                tooltip: l10n.mortgageScheduleYearPrevious,
-                onPressed: selected > years.firstYear ? () => onStep(-1) : null,
-              ),
-              SizedBox(
-                width: 44,
-                child: Text(
-                  '$selected',
-                  key: const Key('yearSwitcherLabel'),
-                  textAlign: TextAlign.center,
-                  style: tabularNumberStyle(textTheme.bodyMedium!),
-                ),
-              ),
-              _StepButton(
-                key: const Key('yearSwitcherNext'),
-                icon: Icons.chevron_right_rounded,
-                tooltip: l10n.mortgageScheduleYearNext,
-                onPressed: selected < years.lastYear ? () => onStep(1) : null,
-              ),
-            ],
+        AppButton(
+          key: const Key('yearSwitcherPrevious'),
+          label: l10n.mortgageScheduleYearPrevious,
+          icon: LucideIcons300.chevronLeft,
+          iconOnly: true,
+          onPressed: selected > years.firstYear ? () => onStep(-1) : null,
+        ),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
+          child: Text(
+            '$selected',
+            key: const Key('yearSwitcherLabel'),
+            style: tabularNumberStyle(textTheme.labelLarge!),
           ),
         ),
-        const SizedBox(width: 10),
-        Container(
-          height: 34,
-          padding: const EdgeInsets.all(3),
-          decoration: BoxDecoration(
-            color: context.colors.field,
-            borderRadius: BorderRadius.circular(AppRadii.md),
-            border: Border.all(color: context.colors.line),
-          ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              for (var year = start; year <= end; year++)
-                _YearCell(
-                  year: year,
-                  selected: year == selected,
-                  onTap: () => onSelect(year),
-                ),
-              if (end < years.lastYear)
-                Padding(
-                  key: const Key('yearSwitcherTail'),
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: AppSpacing.sm,
-                  ),
-                  child: Center(
-                    child: Text(
-                      '… ${years.lastYear}',
-                      style: tabularNumberStyle(
-                        textTheme.bodySmall!,
-                      ).copyWith(color: context.colors.textTertiary),
-                    ),
-                  ),
-                ),
-            ],
+        AppButton(
+          key: const Key('yearSwitcherNext'),
+          label: l10n.mortgageScheduleYearNext,
+          icon: LucideIcons300.chevronRight,
+          iconOnly: true,
+          onPressed: selected < years.lastYear ? () => onStep(1) : null,
+        ),
+        const SizedBox(width: AppSpacing.sm),
+        SizedBox(
+          width: AppLoans.yearSelectWidth,
+          child: Semantics(
+            label: l10n.mortgageScheduleYearSelect,
+            child: AppSelect<int>(
+              key: const Key('yearSwitcherSelect'),
+              value: selected,
+              height: AppSizes.toolbarSelect,
+              onChanged: onSelect,
+              items: [
+                for (var year = years.firstYear; year <= years.lastYear; year++)
+                  AppSelectItem(value: year, label: '$year'),
+              ],
+            ),
           ),
         ),
       ],
@@ -223,96 +178,27 @@ class YearSwitcher extends StatelessWidget {
   }
 }
 
-class _StepButton extends StatelessWidget {
-  const _StepButton({
-    super.key,
-    required this.icon,
-    required this.tooltip,
-    required this.onPressed,
-  });
-
-  final IconData icon;
-  final String tooltip;
-  final VoidCallback? onPressed;
-
-  @override
-  Widget build(BuildContext context) {
-    return IconButton(
-      icon: Icon(icon, size: 18),
-      tooltip: tooltip,
-      onPressed: onPressed,
-      visualDensity: VisualDensity.compact,
-      padding: EdgeInsets.zero,
-      constraints: const BoxConstraints(minWidth: 26, minHeight: 26),
-    );
-  }
-}
-
-class _YearCell extends StatelessWidget {
-  const _YearCell({
-    required this.year,
-    required this.selected,
-    required this.onTap,
-  });
-
-  final int year;
-  final bool selected;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return Material(
-      color: selected ? context.colors.accentSoft : Colors.transparent,
-      borderRadius: BorderRadius.circular(AppRadii.sm),
-      child: InkWell(
-        key: Key('yearSwitcherYear-$year'),
-        borderRadius: BorderRadius.circular(AppRadii.sm),
-        hoverColor: context.colors.hover,
-        onTap: onTap,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm + 2),
-          child: Center(
-            child: Text(
-              '$year',
-              style: tabularNumberStyle(Theme.of(context).textTheme.bodySmall!)
-                  .copyWith(
-                    color: selected
-                        ? context.colors.accent
-                        : context.colors.textSecondary,
-                    fontWeight: selected ? FontWeight.w600 : FontWeight.w400,
-                  ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-/// The year's rows on the dense 28 px variant, under a 30 px header and over a
-/// 34 px foot — twelve rows and the foot fit a 900 px frame without scrolling.
+/// The year's rows on dense 28 px rows under the table header of `00` §7, all
+/// columns right-aligned, and the foot row at 13/600 over a `lineStrong`
+/// hairline. The current instalment's row takes `accentSoft`.
 class ScheduleTable extends StatelessWidget {
   const ScheduleTable({super.key, required this.window, required this.years});
 
   final ScheduleYear window;
   final ScheduleYears years;
 
-  static const headerHeight = 30.0;
-  static const rowHeight = 28.0;
-  static const footHeight = 34.0;
-
-  /// The current instalment's wash — iris at 6 %.
-
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final locale = Localizations.localeOf(context).toString();
+    final colors = context.colors;
     final textTheme = Theme.of(context).textTheme;
-    final cellStyle = tabularNumberStyle(textTheme.bodySmall!);
+    final cellStyle = tabularNumberStyle(
+      textTheme.bodyMedium!,
+    ).copyWith(color: colors.text);
     final footStyle = cellStyle.copyWith(fontWeight: FontWeight.w600);
-    final headerStyle = context.textStyles.sectionLabel.copyWith(
-      fontSize: 10.5,
-      letterSpacing: 1,
+    final headerStyle = textTheme.bodySmall!.copyWith(
+      color: colors.textTertiary,
     );
 
     String money(int minor) => formatAmount(
@@ -321,64 +207,94 @@ class ScheduleTable extends StatelessWidget {
       locale: locale,
     );
 
+    Text cell(String text, {Key? key, TextStyle? style}) => Text(
+      text,
+      key: key,
+      maxLines: 1,
+      overflow: TextOverflow.ellipsis,
+      style: style ?? cellStyle,
+    );
+
     return Column(
       key: const Key('scheduleTable'),
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        _Line(
-          height: headerHeight,
-          color: context.colors.hover,
-          cells: [
-            for (final label in [
-              l10n.mortgageScheduleDue,
-              l10n.mortgageScheduleInterest,
-              l10n.mortgageSchedulePrincipal,
-              l10n.mortgageScheduleInsurance,
-              l10n.mortgageScheduleTotalPaid,
-              l10n.mortgageScheduleOutstanding,
-            ])
-              Text(label.toUpperCase(), style: headerStyle),
-          ],
+        Padding(
+          padding: const EdgeInsets.only(bottom: AppSpacing.sm),
+          child: _Line(
+            cells: [
+              for (final label in [
+                l10n.mortgageScheduleDue,
+                l10n.mortgageScheduleInterest,
+                l10n.mortgageSchedulePrincipal,
+                l10n.mortgageScheduleInsurance,
+                l10n.mortgageScheduleTotalPaid,
+                l10n.mortgageScheduleOutstanding,
+              ])
+                cell(label, style: headerStyle),
+            ],
+          ),
         ),
         for (final row in window.rows)
-          _row(
-            context,
-            row,
-            years.isCurrentInstalment(row),
-            cellStyle,
-            money,
-            locale,
+          _Line(
+            key: Key('scheduleRow-${row.ordinal}'),
+            height: AppLoans.scheduleRow,
+            border: colors.line,
+            color: years.isCurrentInstalment(row) ? colors.accentSoft : null,
+            cells: [
+              cell(mortgageDateFormat(locale).format(row.dueOn)),
+              cell(
+                money(row.interestMinor),
+                key: Key('scheduleInterest-${row.ordinal}'),
+              ),
+              cell(
+                money(row.principalMinor),
+                key: Key('schedulePrincipal-${row.ordinal}'),
+              ),
+              cell(
+                money(row.insuranceMinor),
+                key: Key('scheduleInsurance-${row.ordinal}'),
+              ),
+              cell(
+                money(row.instalmentMinor),
+                key: Key('scheduleTotal-${row.ordinal}'),
+              ),
+              cell(
+                money(row.outstandingAfterMinor),
+                key: Key('scheduleOutstanding-${row.ordinal}'),
+              ),
+            ],
           ),
         _Line(
           key: const Key('scheduleFoot'),
-          height: footHeight,
-          color: context.colors.hover,
+          height: AppLoans.scheduleRow,
+          border: colors.lineStrong,
           cells: [
-            Text(
+            cell(
               l10n.mortgageScheduleFootTotal('${window.year}'),
               style: footStyle,
             ),
-            Text(
+            cell(
               money(window.interestMinor),
               key: const Key('scheduleFootInterest'),
               style: footStyle,
             ),
-            Text(
+            cell(
               money(window.principalMinor),
               key: const Key('scheduleFootPrincipal'),
               style: footStyle,
             ),
-            Text(
+            cell(
               money(window.insuranceMinor),
               key: const Key('scheduleFootInsurance'),
               style: footStyle,
             ),
-            Text(
+            cell(
               money(window.instalmentMinor),
               key: const Key('scheduleFootTotal'),
               style: footStyle,
             ),
-            Text(
+            cell(
               l10n.mortgageScheduleFootOutstanding(
                 mortgageDateFormat(
                   locale,
@@ -386,116 +302,51 @@ class ScheduleTable extends StatelessWidget {
                 money(window.outstandingAtYearEndMinor),
               ),
               key: const Key('scheduleFootOutstanding'),
-              style: cellStyle.copyWith(color: context.colors.textSecondary),
+              style: cellStyle.copyWith(color: colors.textSecondary),
             ),
           ],
         ),
       ],
     );
   }
-
-  Widget _row(
-    BuildContext context,
-    ScheduleRow row,
-    bool isCurrent,
-    TextStyle style,
-    String Function(int) money,
-    String locale,
-  ) {
-    final id = row.ordinal;
-    final emphasis = isCurrent
-        ? style.copyWith(fontWeight: FontWeight.w600)
-        : style;
-    return _Line(
-      key: Key('scheduleRow-$id'),
-      height: rowHeight,
-      color: isCurrent ? context.colors.accentSoft : null,
-      divider: true,
-      cells: [
-        Text(
-          mortgageDateFormat(locale).format(row.dueOn),
-          style: isCurrent
-              ? style.copyWith(
-                  color: context.colors.accent,
-                  fontWeight: FontWeight.w600,
-                )
-              : style,
-        ),
-        Text(
-          money(row.interestMinor),
-          key: Key('scheduleInterest-$id'),
-          style: style,
-        ),
-        Text(
-          money(row.principalMinor),
-          key: Key('schedulePrincipal-$id'),
-          style: style,
-        ),
-        Text(
-          money(row.insuranceMinor),
-          key: Key('scheduleInsurance-$id'),
-          style: style,
-        ),
-        Text(
-          money(row.instalmentMinor),
-          key: Key('scheduleTotal-$id'),
-          style: style,
-        ),
-        Text(
-          money(row.outstandingAfterMinor),
-          key: Key('scheduleOutstanding-$id'),
-          style: emphasis,
-        ),
-      ],
-    );
-  }
 }
 
-/// One table line: the 150 px date column, four equal amount columns and the
-/// 1.3fr outstanding column, amounts right-aligned.
+/// One line of the schedule: six equal columns, right-aligned, the cell
+/// padding-right of `00` §7, an optional top hairline and ground.
 class _Line extends StatelessWidget {
   const _Line({
     super.key,
-    required this.height,
     required this.cells,
+    this.height,
+    this.border,
     this.color,
-    this.divider = false,
   });
 
-  final double height;
   final List<Widget> cells;
+  final double? height;
+  final Color? border;
   final Color? color;
-  final bool divider;
-
-  static const _flexes = [10, 10, 10, 10, 13];
 
   @override
   Widget build(BuildContext context) {
-    Widget cell(Widget child, {required bool alignEnd}) => Align(
-      alignment: alignEnd ? Alignment.centerRight : Alignment.centerLeft,
-      child: FittedBox(fit: BoxFit.scaleDown, child: child),
-    );
-
     return Container(
       height: height,
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppSpacing.sm + AppSpacing.xs,
-      ),
       decoration: BoxDecoration(
         color: color,
-        border: divider
-            ? Border(bottom: BorderSide(color: context.colors.line))
-            : null,
+        border: border == null ? null : Border(top: BorderSide(color: border!)),
       ),
       child: Row(
         children: [
-          SizedBox(width: 150, child: cell(cells.first, alignEnd: false)),
-          for (var index = 1; index < cells.length; index++)
+          for (final cell in cells)
             Expanded(
-              flex: _flexes[index - 1],
               child: Padding(
-                padding: const EdgeInsets.only(left: AppSpacing.sm),
-                child: cell(cells[index], alignEnd: true),
+                padding: const EdgeInsetsDirectional.only(
+                  end: AppSpacing.smPlus,
+                ),
+                child: Align(
+                  alignment: AlignmentDirectional.centerEnd,
+                  child: cell,
+                ),
               ),
             ),
         ],

@@ -126,21 +126,6 @@ class MortgagesController extends AsyncNotifier<MortgagesState> {
     }
   }
 
-  /// Declares the monthly income the ratio runs on, then re-reads the summary —
-  /// the ratio, its source and `over_limit` all move with it.
-  Future<void> declareIncome(int monthlyIncomeMinor) async {
-    await _repository.declareIncome(monthlyIncomeMinor);
-    final current = state.value;
-    if (current == null) {
-      await refresh();
-      return;
-    }
-    final summary = await _repository.summary();
-    state = AsyncValue.data(
-      current.copyWith(summary: summary, clearActionError: true),
-    );
-  }
-
   void clearActionError() {
     final current = state.value;
     if (current == null) return;

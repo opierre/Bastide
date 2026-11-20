@@ -184,12 +184,6 @@ class MortgagesRepository {
     ];
   }
 
-  /// Declares the monthly income the debt ratio runs on.
-  Future<void> declareIncome(int monthlyIncomeMinor) => _apiClient.patch(
-    '/settings',
-    body: {'declared_monthly_income_minor': monthlyIncomeMinor},
-  );
-
   Map<String, dynamic> _draftJson(LoanDraft draft) => {
     'label': draft.label,
     'lender': draft.lender,

@@ -2,28 +2,27 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons_flutter/lucide_icons_300.dart';
 
-import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/tokens.dart';
 import '../../../core/widgets/amount_text.dart';
-import '../../../core/widgets/app_card.dart';
+import '../../../core/widgets/app_shell.dart';
 import '../../../core/widgets/inline_banner.dart';
 import '../../../core/widgets/primary_button.dart';
-import '../../../core/widgets/repere_meter.dart';
 import '../../../core/widgets/state_views.dart';
 import '../../../l10n/app_localizations.dart';
 import '../application/mortgages_controller.dart';
 import '../domain/mortgage.dart';
-import 'debt_ratio_card.dart';
-import 'mortgage_card.dart';
+import 'debt_ratio_item.dart';
+import 'loan_summary_item.dart';
+import 'loans_table.dart';
 import 'mortgage_detail.dart';
 import 'mortgage_form_modal.dart';
 import 'mortgage_labels.dart';
 import 'trajectory_chart.dart';
 
-/// The Crédits panel (`docs/design/12-credits.md`): the summary row with the
-/// debt ratio, the loan cards, the trajectory chart, and the loan detail.
+/// The Crédits panel (`docs/design/12-credits.md`): the summary line with the
+/// debt ratio, the loans table and the trajectory chart; or one loan's detail.
 ///
-/// No figure on it is computed in Dart — every amount, share and ratio is the
+/// No figure on it is computed in Dart: every amount, share and ratio is the
 /// backend engine's.
 class MortgagesScreen extends ConsumerWidget {
   const MortgagesScreen({super.key});
@@ -37,8 +36,8 @@ class MortgagesScreen extends ConsumerWidget {
     return Padding(
       key: const Key('screen-mortgages'),
       padding: const EdgeInsets.symmetric(
-        horizontal: AppSpacing.contentX,
-        vertical: AppSpacing.contentY,
+        horizontal: AppSpacing.pageX,
+        vertical: AppSpacing.pageY,
       ),
       child: selected == null
           ? const _MortgagesList()
@@ -47,18 +46,61 @@ class MortgagesScreen extends ConsumerWidget {
   }
 }
 
-/// The panel's contribution to the top bar: the primary « Nouveau crédit ».
-/// It stays on the detail view — the detail is a state of this panel, and the
-/// chrome does not rearrange itself under the user.
-class MortgagesTopBarActions extends StatelessWidget {
+/// The panel's title: « Crédits », or, on an open loan, « Crédits / »
+/// leading back to the list, then the loan's name.
+class MortgagesTitle extends ConsumerWidget {
+  const MortgagesTitle({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
+    final selected = ref.watch(selectedMortgageProvider);
+    if (selected == null) return TitleBarTitle(title: l10n.navMortgages);
+
+    final label = ref
+        .watch(mortgageDetailProvider(selected))
+        .value
+        ?.detail
+        .mortgage
+        .label;
+    return TitleBarTitle(
+      key: const Key('mortgageDetailTitle'),
+      crumb: TitleBarCrumb(
+        label: l10n.navMortgages,
+        onTap: () => ref.read(selectedMortgageProvider.notifier).close(),
+      ),
+      title: label ?? '',
+    );
+  }
+}
+
+/// The panel's contribution to the title bar: the primary « Nouveau crédit »
+/// on the list, the secondary « Modifier » on an open loan.
+class MortgagesTopBarActions extends ConsumerWidget {
   const MortgagesTopBarActions({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
+    final selected = ref.watch(selectedMortgageProvider);
+    if (selected != null) {
+      final mortgage = ref
+          .watch(mortgageDetailProvider(selected))
+          .value
+          ?.detail
+          .mortgage;
+      return AppButton(
+        key: const Key('mortgageDetailEdit'),
+        label: l10n.mortgageDetailEdit,
+        onPressed: mortgage == null
+            ? null
+            : () => showMortgageForm(context, initial: mortgage),
+      );
+    }
     return PrimaryButton(
       key: const Key('addMortgageButton'),
-      label: AppLocalizations.of(context)!.mortgagesAdd,
-      icon: Icons.add_rounded,
+      label: l10n.mortgagesAdd,
+      icon: LucideIcons300.plus,
       onPressed: () => showMortgageForm(context),
     );
   }
@@ -75,7 +117,18 @@ class _MortgagesList extends ConsumerWidget {
     return switch (state) {
       AsyncData(:final value)
           when value.mortgages.isEmpty && value.statusFilter == null =>
-        const _EmptyState(),
+        // No summary and no chart: there is nothing to sum or to draw.
+        EmptyStateView(
+          key: const Key('mortgagesEmptyState'),
+          title: l10n.mortgagesEmptyTitle,
+          message: l10n.mortgagesEmptyBody,
+          action: PrimaryButton(
+            key: const Key('mortgagesEmptyCta'),
+            label: l10n.mortgagesAdd,
+            icon: LucideIcons300.plus,
+            onPressed: () => showMortgageForm(context),
+          ),
+        ),
       AsyncData(:final value) => _LoadedPanel(state: value),
       AsyncError() => ErrorStateView(
         message: l10n.mortgagesLoadFailed,
@@ -89,65 +142,7 @@ class _MortgagesList extends ConsumerWidget {
   }
 }
 
-/// Frame ⑥: the summary row and the chart are not drawn — there is nothing to
-/// sum and no trajectory to draw — only the offer to declare a first loan.
-class _EmptyState extends StatelessWidget {
-  const _EmptyState();
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
-    final textTheme = Theme.of(context).textTheme;
-
-    return CenteredStatePane(
-      key: const Key('mortgagesEmptyState'),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Container(
-            width: 64,
-            height: 64,
-            alignment: Alignment.center,
-            decoration: BoxDecoration(
-              color: context.colors.accentSoft,
-              borderRadius: BorderRadius.circular(AppRadii.xl),
-            ),
-            // v1 empty state, kept until the panel's v2 ticket; the glyph is
-            // the panel's nav icon.
-            child: Icon(
-              LucideIcons300.house,
-              size: 27,
-              color: context.colors.accent,
-            ),
-          ),
-          const SizedBox(height: AppSpacing.lg),
-          Text(
-            l10n.mortgagesEmptyTitle,
-            style: textTheme.headlineMedium,
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: AppSpacing.sm + 2),
-          Text(
-            l10n.mortgagesEmptyBody,
-            style: textTheme.bodyLarge?.copyWith(
-              color: context.colors.textSecondary,
-            ),
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: AppSpacing.lg + AppSpacing.xs),
-          PrimaryButton(
-            key: const Key('mortgagesEmptyCta'),
-            label: l10n.mortgagesAdd,
-            icon: Icons.add_rounded,
-            onPressed: () => showMortgageForm(context),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-/// The list's silhouettes: three summary cards, two loan cards, the chart.
+/// The list's own silhouette: the summary line, two table rows, the chart.
 class _LoadingView extends StatelessWidget {
   const _LoadingView();
 
@@ -158,41 +153,24 @@ class _LoadingView extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          SizedBox(
-            height: 150,
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Expanded(
-                  flex: 100,
-                  child: SkeletonBlock(height: double.infinity),
-                ),
-                SizedBox(width: AppSpacing.gridGap),
-                Expanded(
-                  flex: 100,
-                  child: SkeletonBlock(height: double.infinity),
-                ),
-                SizedBox(width: AppSpacing.gridGap),
-                Expanded(
-                  flex: 150,
-                  child: SkeletonBlock(height: double.infinity),
-                ),
-              ],
-            ),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              SkeletonBlock(height: AppSpacing.xxl * 2, width: 240),
+              SizedBox(width: AppSpacing.xxl),
+              SkeletonBlock(height: AppSpacing.xxl * 1.5, width: 200),
+              SizedBox(width: AppSpacing.xxl),
+              SkeletonBlock(
+                height: AppSpacing.xxl * 2,
+                width: AppLoans.ratioWidth,
+              ),
+            ],
           ),
-          SizedBox(height: AppSpacing.gridGap),
-          SizedBox(
-            height: 170,
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Expanded(child: SkeletonBlock(height: double.infinity)),
-                SizedBox(width: AppSpacing.gridGap),
-                Expanded(child: SkeletonBlock(height: double.infinity)),
-              ],
-            ),
-          ),
-          SizedBox(height: AppSpacing.gridGap),
+          SizedBox(height: AppSpacing.section),
+          SkeletonBlock(height: AppSizes.tableRowTwoLines),
+          SizedBox(height: AppSpacing.xs),
+          SkeletonBlock(height: AppSizes.tableRowTwoLines),
+          SizedBox(height: AppSpacing.section),
           Expanded(child: SkeletonBlock(height: double.infinity)),
         ],
       ),
@@ -205,11 +183,14 @@ class _LoadedPanel extends ConsumerWidget {
 
   final MortgagesState state;
 
+  /// Below this the chart stops shrinking and the panel scrolls instead.
+  static const _chartMinHeight = 240.0;
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context)!;
     final today = ref.watch(mortgagesTodayProvider)();
-    const gap = SliverToBoxAdapter(child: SizedBox(height: AppSpacing.gridGap));
+    const gap = SliverToBoxAdapter(child: SizedBox(height: AppSpacing.section));
 
     return CustomScrollView(
       key: const Key('mortgagesList'),
@@ -227,18 +208,24 @@ class _LoadedPanel extends ConsumerWidget {
           ),
           gap,
         ],
-        SliverToBoxAdapter(child: _SummaryRow(summary: state.summary)),
+        SliverToBoxAdapter(child: LoansSummaryLine(summary: state.summary)),
         gap,
-        SliverToBoxAdapter(child: _LoanGrid(mortgages: state.mortgages)),
+        SliverToBoxAdapter(
+          child: LoansTable(
+            mortgages: state.mortgages,
+            onOpen: (mortgage) =>
+                ref.read(selectedMortgageProvider.notifier).open(mortgage.id),
+          ),
+        ),
         if (state.summary.outstandingSeries.length >= 2) ...[
           gap,
-          // Fills what the cards leave of the frame, and keeps a readable
-          // minimum when a third loan pushes the grid taller.
+          // Takes the height the table leaves, and keeps a readable minimum
+          // when more loans push the table taller.
           SliverFillRemaining(
             hasScrollBody: false,
             child: ConstrainedBox(
-              constraints: const BoxConstraints(minHeight: 280),
-              child: TrajectoryChartCard(state: state, today: today),
+              constraints: const BoxConstraints(minHeight: _chartMinHeight),
+              child: TrajectorySection(state: state, today: today),
             ),
           ),
         ],
@@ -247,34 +234,12 @@ class _LoadedPanel extends ConsumerWidget {
   }
 }
 
-/// Frame ①'s three summary cards, `1fr 1fr 1.5fr`, read straight from
+/// The panel's summary line (`12-credits.md` §1): « Charge mensuelle » leads
+/// at 40 px, then « Capital restant dû » at 20 px and the debt ratio, with a
+/// vertical hairline between the three. Read straight from
 /// `/mortgages/summary`.
-class _SummaryRow extends StatelessWidget {
-  const _SummaryRow({required this.summary});
-
-  final MortgageSummary summary;
-
-  @override
-  Widget build(BuildContext context) {
-    return IntrinsicHeight(
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Expanded(flex: 100, child: _ChargeCard(summary: summary)),
-          const SizedBox(width: AppSpacing.gridGap),
-          Expanded(flex: 100, child: _OutstandingCard(summary: summary)),
-          const SizedBox(width: AppSpacing.gridGap),
-          Expanded(flex: 150, child: DebtRatioCard(summary: summary)),
-        ],
-      ),
-    );
-  }
-}
-
-/// The panel's one iris-tinted card: the monthly charge is the figure a
-/// household plans around.
-class _ChargeCard extends StatelessWidget {
-  const _ChargeCard({required this.summary});
+class LoansSummaryLine extends StatelessWidget {
+  const LoansSummaryLine({super.key, required this.summary});
 
   final MortgageSummary summary;
 
@@ -284,189 +249,49 @@ class _ChargeCard extends StatelessWidget {
     final locale = Localizations.localeOf(context).toString();
     final next = summary.nextPaymentOn;
 
-    return AppCard(
-      padding: const EdgeInsets.symmetric(
-        horizontal: 22,
-        vertical: AppSpacing.cardPadding,
-      ),
-      border: Border.all(color: context.colors.line),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text(
-            l10n.mortgagesChargeLabel.toUpperCase(),
-            style: context.textStyles.statLabel.copyWith(
-              color: context.colors.accent,
-            ),
-          ),
-          const SizedBox(height: AppSpacing.sm),
-          AmountText(
-            key: const Key('mortgagesMonthlyCharge'),
-            amountMinor: summary.monthlyChargeMinor,
-            currency: summary.currency,
-            colorize: false,
-            maxLines: 1,
-            style: Theme.of(context).textTheme.displayMedium,
-          ),
-          const SizedBox(height: AppSpacing.xs + 2),
-          Text(
-            next == null
-                ? l10n.mortgagesChargeCaptionNoNext
-                : l10n.mortgagesChargeCaption(
-                    summary.nextPaymentCount,
-                    mortgageDateFormat(locale).format(next),
-                  ),
-            key: const Key('mortgagesChargeCaption'),
-            style: context.textStyles.helper.copyWith(fontSize: 12),
-          ),
-          const SizedBox(height: AppSpacing.sm + AppSpacing.xs),
-          Wrap(
-            spacing: AppSpacing.md,
-            runSpacing: AppSpacing.xs,
-            children: [
-              for (final charge in summary.byLender)
-                Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Container(
-                      width: 8,
-                      height: 8,
-                      decoration: BoxDecoration(
-                        color: context.colors.textTertiary,
-                        borderRadius: BorderRadius.circular(2),
-                      ),
-                    ),
-                    const SizedBox(width: AppSpacing.xs + 2),
-                    Flexible(
-                      child: Text(
-                        charge.lender,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: context.textStyles.helper.copyWith(fontSize: 11),
-                      ),
-                    ),
-                    const SizedBox(width: AppSpacing.xs),
-                    Text(
-                      formatAmount(
-                        amountMinor: charge.monthlyChargeMinor,
-                        currency: summary.currency,
-                        locale: locale,
-                      ),
-                      style: tabularNumberStyle(
-                        context.textStyles.helper,
-                      ).copyWith(fontSize: 11, color: context.colors.text),
-                    ),
-                  ],
-                ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _OutstandingCard extends StatelessWidget {
-  const _OutstandingCard({required this.summary});
-
-  final MortgageSummary summary;
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
-    final locale = Localizations.localeOf(context).toString();
-
     String money(int minor) => formatAmount(
       amountMinor: minor,
       currency: summary.currency,
       locale: locale,
     );
 
-    return AppCard(
-      padding: const EdgeInsets.symmetric(
-        horizontal: 22,
-        vertical: AppSpacing.cardPadding,
-      ),
-      child: Column(
+    return IntrinsicHeight(
+      key: const Key('mortgagesSummaryLine'),
+      child: Row(
         crossAxisAlignment: CrossAxisAlignment.stretch,
-        mainAxisSize: MainAxisSize.min,
         children: [
-          Text(
-            l10n.mortgagesOutstandingLabel.toUpperCase(),
-            style: context.textStyles.statLabel,
-          ),
-          const SizedBox(height: AppSpacing.sm),
-          AmountText(
-            key: const Key('mortgagesTotalOutstanding'),
-            amountMinor: summary.totalOutstandingMinor,
-            currency: summary.currency,
-            colorize: false,
-            maxLines: 1,
-            style: Theme.of(context).textTheme.displayMedium,
-          ),
-          const SizedBox(height: AppSpacing.xs + 2),
-          Text(
-            l10n.mortgagesOutstandingCaption(
-              money(summary.totalPrincipalMinor),
-              summary.activeCount,
+          Flexible(
+            child: LoanSummaryItem(
+              lead: true,
+              label: l10n.mortgagesChargeLabel,
+              figure: money(summary.monthlyChargeMinor),
+              figureKey: const Key('mortgagesMonthlyCharge'),
+              caption: next == null
+                  ? l10n.mortgagesChargeCaptionNoNext
+                  : l10n.mortgagesChargeCaption(
+                      summary.nextPaymentCount,
+                      mortgageLongDateFormat(locale).format(next),
+                    ),
+              captionKey: const Key('mortgagesChargeCaption'),
             ),
-            style: context.textStyles.helper.copyWith(fontSize: 12),
           ),
-          const SizedBox(height: AppSpacing.sm + AppSpacing.xs),
-          RepereMeter(fraction: summary.repaidBps / 10000),
-          const SizedBox(height: AppSpacing.xs + 2),
-          Text(
-            l10n.mortgagesRepaidLine(
-              money(summary.repaidPrincipalMinor),
-              formatBps(summary.repaidBps, locale),
+          const LoanSummaryHairline(),
+          Flexible(
+            child: LoanSummaryItem(
+              label: l10n.mortgagesOutstandingLabel,
+              figure: money(summary.totalOutstandingMinor),
+              figureKey: const Key('mortgagesTotalOutstanding'),
+              caption: l10n.mortgagesOutstandingCaption(
+                money(summary.totalPrincipalMinor),
+                formatBps(summary.repaidBps, locale),
+              ),
+              captionKey: const Key('mortgagesOutstandingCaption'),
             ),
-            key: const Key('mortgagesRepaidLine'),
-            style: tabularNumberStyle(
-              context.textStyles.helper,
-            ).copyWith(fontSize: 11),
           ),
+          const LoanSummaryHairline(),
+          DebtRatioItem(summary: summary),
         ],
       ),
-    );
-  }
-}
-
-/// The loan cards, two to a row, each row as tall as its taller card.
-class _LoanGrid extends ConsumerWidget {
-  const _LoanGrid({required this.mortgages});
-
-  final List<Mortgage> mortgages;
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    Widget card(Mortgage mortgage) => MortgageCard(
-      mortgage: mortgage,
-      onOpen: () =>
-          ref.read(selectedMortgageProvider.notifier).open(mortgage.id),
-    );
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        for (var index = 0; index < mortgages.length; index += 2) ...[
-          if (index > 0) const SizedBox(height: AppSpacing.gridGap),
-          IntrinsicHeight(
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Expanded(child: card(mortgages[index])),
-                const SizedBox(width: AppSpacing.gridGap),
-                Expanded(
-                  child: index + 1 < mortgages.length
-                      ? card(mortgages[index + 1])
-                      : const SizedBox.shrink(),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ],
     );
   }
 }

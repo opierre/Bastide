@@ -615,6 +615,27 @@ abstract final class AppAccountSection {
   static const subtotalWidth = 120.0;
 }
 
+/// The Crédits panel of `docs/design/12-credits.md`.
+abstract final class AppLoans {
+  /// The debt ratio item of the summary line.
+  static const ratioWidth = 360.0;
+
+  /// The repère's fixed scale, in basis points: 0–60 % (`00` §8), so the
+  /// 35 % mark sits at the same x in every state.
+  static const ratioScaleBps = 6000;
+
+  /// The amortisation table's dense rows.
+  static const scheduleRow = 28.0;
+
+  /// The select listing every year of the schedule: a four-digit year and
+  /// its chevron.
+  static const yearSelectWidth = 96.0;
+
+  /// The « Remboursé » column takes 22 % of the loans table's width: its
+  /// flex against the other columns' 78 shares.
+  static const repaidFlex = 22;
+}
+
 /// v1: the 38 px control pill some panels still put in the title bar, kept
 /// until each panel's v2 ticket moves it to the 28 px controls of [AppSizes].
 abstract final class AppChrome {

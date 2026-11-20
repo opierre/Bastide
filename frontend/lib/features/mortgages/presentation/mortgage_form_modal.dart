@@ -9,7 +9,6 @@ import '../../../core/widgets/amount_text.dart';
 import '../../../core/widgets/app_modal.dart';
 import '../../../core/widgets/app_segmented.dart';
 import '../../../core/widgets/app_select.dart';
-import '../../../core/widgets/dashed_border.dart';
 import '../../../core/widgets/date_field.dart';
 import '../../../core/widgets/inline_banner.dart';
 import '../../../core/widgets/labeled_field.dart';
@@ -255,18 +254,15 @@ class _MortgageFormModalState extends ConsumerState<MortgageFormModal> {
         title: l10n.mortgageDeleteTitle,
         width: 440,
         actions: [
-          OutlinedButton(
+          AppButton(
+            label: l10n.mortgageFormCancel,
             onPressed: () => Navigator.of(dialogContext).pop(false),
-            child: Text(l10n.mortgageFormCancel),
           ),
-          FilledButton(
+          AppButton(
             key: const Key('mortgageDeleteConfirm'),
-            style: FilledButton.styleFrom(
-              backgroundColor: context.colors.negative,
-              foregroundColor: context.colors.onPrimary,
-            ),
+            label: l10n.mortgageDeleteConfirm,
+            variant: AppButtonVariant.destructive,
             onPressed: () => Navigator.of(dialogContext).pop(true),
-            child: Text(l10n.mortgageDeleteConfirm),
           ),
         ],
         // Both consequences, named: the loan leaves Synthèse's passif, and the
@@ -306,7 +302,7 @@ class _MortgageFormModalState extends ConsumerState<MortgageFormModal> {
     crossAxisAlignment: CrossAxisAlignment.start,
     children: [
       Expanded(child: first),
-      const SizedBox(width: 14),
+      const SizedBox(width: AppSpacing.fieldGap),
       Expanded(child: second),
     ],
   );
@@ -324,34 +320,30 @@ class _MortgageFormModalState extends ConsumerState<MortgageFormModal> {
     final properties =
         ref.watch(loanPropertiesProvider).value ?? const <LoanProperty>[];
     final preview = ref.watch(loanInstalmentPreviewProvider);
-    const rowGap = SizedBox(height: 12);
+    const rowGap = SizedBox(height: AppSpacing.fieldGap);
 
     return AppModal(
       title: _isEditing
           ? l10n.mortgageFormEditTitle
           : l10n.mortgageFormCreateTitle,
-      subtitle: Text(
-        l10n.mortgageFormSubtitle,
-        style: Theme.of(
-          context,
-        ).textTheme.bodySmall?.copyWith(color: context.colors.textSecondary),
-      ),
       width: 600,
+      leadingAction: _isEditing
+          ? AppButton(
+              key: const Key('mortgageFormDelete'),
+              label: l10n.mortgageFormDelete,
+              variant: AppButtonVariant.ghost,
+              onPressed: _isSubmitting ? null : _delete,
+            )
+          : null,
       actions: [
-        if (_isEditing)
-          TextButton(
-            key: const Key('mortgageFormDelete'),
-            onPressed: _isSubmitting ? null : _delete,
-            child: Text(l10n.mortgageFormDelete),
-          ),
-        OutlinedButton(
+        AppButton(
           key: const Key('mortgageFormCancel'),
+          label: l10n.mortgageFormCancel,
           onPressed: _isSubmitting ? null : () => Navigator.of(context).pop(),
-          child: Text(l10n.mortgageFormCancel),
         ),
         PrimaryButton(
           key: const Key('mortgageFormSubmit'),
-          label: _isEditing ? l10n.mortgageFormSave : l10n.mortgageFormSubmit,
+          label: l10n.mortgageFormSave,
           isLoading: _isSubmitting,
           onPressed: _isSubmitting ? null : _submit,
         ),
@@ -366,7 +358,7 @@ class _MortgageFormModalState extends ConsumerState<MortgageFormModal> {
                 key: const Key('mortgageFormError'),
                 message: _bannerError!,
               ),
-              const SizedBox(height: AppSpacing.md),
+              const SizedBox(height: AppSpacing.fieldGap),
             ],
             LabeledField(
               label: l10n.mortgageFormLabel,
@@ -390,11 +382,11 @@ class _MortgageFormModalState extends ConsumerState<MortgageFormModal> {
                   onChanged: (_) => setState(() {}),
                   decoration: InputDecoration(
                     prefixIcon: Padding(
-                      padding: const EdgeInsets.only(left: 10, right: 8),
-                      child: MonogramAvatar(
-                        name: _lenderController.text,
-                        size: 24,
+                      padding: const EdgeInsetsDirectional.only(
+                        start: AppSpacing.xsPlus,
+                        end: AppSpacing.sm,
                       ),
+                      child: MonogramAvatar(name: _lenderController.text),
                     ),
                     prefixIconConstraints: const BoxConstraints(),
                   ),
@@ -572,7 +564,7 @@ class _MortgageFormModalState extends ConsumerState<MortgageFormModal> {
               ),
             ],
             const SizedBox(height: AppSpacing.md),
-            _InstalmentPlate(
+            _InstalmentLine(
               interestOnly: _repayment == RepaymentType.interestOnly,
               preview: preview,
             ),
@@ -583,10 +575,11 @@ class _MortgageFormModalState extends ConsumerState<MortgageFormModal> {
   }
 }
 
-/// The read-only « Mensualité calculée » plate — dashed, on the field tone, with
-/// the lock glyph — following the fields live.
-class _InstalmentPlate extends StatelessWidget {
-  const _InstalmentPlate({required this.interestOnly, required this.preview});
+/// The read-only « Mensualité calculée » line under the grid, following the
+/// fields live: the label and the instalment at 13/600, then « échéance
+/// totale {x} · intérêts totaux {y} » in `textSecondary`. No box, no plate.
+class _InstalmentLine extends StatelessWidget {
+  const _InstalmentLine({required this.interestOnly, required this.preview});
 
   final bool interestOnly;
   final AsyncValue<ComputedInstalment>? preview;
@@ -595,10 +588,17 @@ class _InstalmentPlate extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final locale = Localizations.localeOf(context).toString();
+    final colors = context.colors;
     final textTheme = Theme.of(context).textTheme;
-    final secondary = textTheme.bodySmall?.copyWith(
-      color: context.colors.textSecondary,
-    );
+    final strong = tabularNumberStyle(
+      textTheme.titleSmall!,
+    ).copyWith(color: colors.text);
+    final secondary = tabularNumberStyle(
+      textTheme.bodyMedium!,
+    ).copyWith(color: colors.textSecondary);
+
+    String money(int minor, String currency) =>
+        formatAmount(amountMinor: minor, currency: currency, locale: locale);
 
     final Widget content;
     if (interestOnly) {
@@ -613,25 +613,28 @@ class _InstalmentPlate extends StatelessWidget {
           crossAxisAlignment: WrapCrossAlignment.center,
           spacing: AppSpacing.sm,
           children: [
-            Text(l10n.mortgageFormPlateLabel, style: secondary),
+            Text(l10n.mortgageFormPlateLabel, style: strong),
             AmountText(
               key: const Key('mortgageFormPlateAmount'),
               amountMinor: value.monthlyPaymentMinor,
               currency: value.currency,
               colorize: false,
-              style: textTheme.titleSmall,
+              style: strong,
             ),
             Text(
-              '· ${l10n.mortgageFormPlateDetail(formatAmount(amountMinor: value.totalInstalmentMinor, currency: value.currency, locale: locale), formatAmount(amountMinor: value.totalInterestMinor, currency: value.currency, locale: locale))}',
+              l10n.mortgageFormPlateDetail(
+                money(value.totalInstalmentMinor, value.currency),
+                money(value.totalInterestMinor, value.currency),
+              ),
               key: const Key('mortgageFormPlateDetail'),
-              style: tabularNumberStyle(secondary!),
+              style: secondary,
             ),
           ],
         ),
         AsyncError(:final error) => Text(
           localizeMortgageError(l10n, error),
           key: const Key('mortgageFormPlateError'),
-          style: textTheme.bodySmall?.copyWith(color: context.colors.negative),
+          style: secondary.copyWith(color: colors.negative),
         ),
         _ => Text(
           l10n.mortgageFormPlatePending,
@@ -641,26 +644,6 @@ class _InstalmentPlate extends StatelessWidget {
       };
     }
 
-    return DashedBorder(
-      child: Container(
-        key: const Key('mortgageFormPlate'),
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-        decoration: BoxDecoration(
-          color: context.colors.field,
-          borderRadius: BorderRadius.circular(AppRadii.md),
-        ),
-        child: Row(
-          children: [
-            Icon(
-              Icons.lock_outline_rounded,
-              size: 15,
-              color: context.colors.textTertiary,
-            ),
-            const SizedBox(width: 10),
-            Expanded(child: content),
-          ],
-        ),
-      ),
-    );
+    return KeyedSubtree(key: const Key('mortgageFormPlate'), child: content);
   }
 }

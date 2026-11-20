@@ -3385,29 +3385,18 @@ class AppLocalizationsEn extends AppLocalizations {
       other: '$count instalments on $date',
       one: '1 instalment on $date',
     );
-    return '$_temp0 · insurance included';
+    return '$_temp0, insurance included';
   }
 
   @override
-  String get mortgagesChargeCaptionNoNext => 'insurance included';
+  String get mortgagesChargeCaptionNoNext => 'Insurance included';
 
   @override
   String get mortgagesOutstandingLabel => 'Outstanding principal';
 
   @override
-  String mortgagesOutstandingCaption(String principal, int count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: '$count loans',
-      one: '1 loan',
-    );
-    return 'of $principal borrowed · $_temp0';
-  }
-
-  @override
-  String mortgagesRepaidLine(String amount, String percent) {
-    return '$amount repaid · $percent';
+  String mortgagesOutstandingCaption(String principal, String percent) {
+    return 'of $principal · $percent repaid';
   }
 
   @override
@@ -3423,46 +3412,24 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String mortgagesRatioCaptionDeclared(String charge, String income) {
-    return 'Charge $charge against a declared income of $income';
+    return '$charge against a declared income of $income.';
   }
 
   @override
   String mortgagesRatioCaptionLedger(String charge, String income) {
-    return 'Charge $charge against a median observed income of $income (12 months of the ledger). The household may receive income outside the app: a declared income replaces this reading.';
+    return '$charge against a median observed income of $income (12 months). A declared income replaces this reading.';
   }
 
   @override
   String get mortgagesRatioUnknown =>
-      'No known income: the ledger holds no regular income and none is declared. Without an income there is no ratio to compute.';
+      'No known income. Without an income there is no ratio to compute.';
 
   @override
   String get mortgagesRatioDeclareLink => 'Declare an income';
 
   @override
-  String get mortgagesRatioDeclareButton => 'Declare an income';
-
-  @override
   String get mortgagesRatioCaveat =>
       'An indicative reading that binds no lender.';
-
-  @override
-  String get mortgagesIncomeTitle => 'Declare an income';
-
-  @override
-  String get mortgagesIncomeBody =>
-      'The household\'s net monthly income the debt ratio is read against. It replaces the ledger\'s median income.';
-
-  @override
-  String get mortgagesIncomeLabel => 'Monthly income';
-
-  @override
-  String get mortgagesIncomeInvalid => 'Enter an amount above zero.';
-
-  @override
-  String get mortgagesIncomeSubmit => 'Save';
-
-  @override
-  String get mortgagesIncomeFailed => 'The income couldn\'t be saved.';
 
   @override
   String get mortgageKindMortgage => 'Home loan';
@@ -3483,37 +3450,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get mortgageRepaymentInterestOnly => 'Interest-only';
 
   @override
-  String mortgageCardSubline(String kind, String lender, int months) {
-    return '$kind · $lender · $months months';
-  }
-
-  @override
-  String get mortgageCardPerMonth => '/ month';
-
-  @override
-  String get mortgageCardOutstandingLabel => 'Outstanding principal';
-
-  @override
-  String mortgageCardOutstandingOf(String principal) {
-    return 'of $principal';
-  }
-
-  @override
-  String get mortgageCardRepaid => 'repaid';
-
-  @override
-  String mortgageCardRemaining(int count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: '$count instalments left',
-      one: '1 instalment left',
-      zero: 'no instalments left',
-    );
-    return '$_temp0';
-  }
-
-  @override
   String get mortgageRateLabel => 'Nominal rate';
 
   @override
@@ -3523,18 +3459,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get mortgageNextLabel => 'Next instalment';
 
   @override
-  String mortgageInsurancePerMonth(String amount) {
-    return '$amount / month';
-  }
-
-  @override
-  String get mortgagesChartTitle => 'Outstanding principal trajectory';
-
-  @override
-  String get mortgagesChartLegendTotal => 'Total outstanding principal';
-
-  @override
-  String get mortgagesChartLegendToday => 'today';
+  String get mortgagesChartTitle =>
+      'Outstanding principal until the last repayment';
 
   @override
   String mortgagesChartToday(String month, String amount) {
@@ -3542,38 +3468,12 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String mortgagesChartLoanEnd(String kind, String month) {
-    return 'end of $kind · $month';
+  String mortgagesChartLoanEnd(String kind) {
+    return 'end of the $kind';
   }
-
-  @override
-  String get mortgageDetailBack => 'Back to loans';
 
   @override
   String get mortgageDetailLoadFailed => 'Couldn\'t load this loan.';
-
-  @override
-  String mortgageDetailSubline(
-    String kind,
-    String lender,
-    String principal,
-    int months,
-    String date,
-  ) {
-    return '$kind · $lender · $principal over $months months · first instalment on $date';
-  }
-
-  @override
-  String mortgageDetailSublineFees(
-    String kind,
-    String lender,
-    String principal,
-    int months,
-    String date,
-    String fees,
-  ) {
-    return '$kind · $lender · $principal over $months months · first instalment on $date · upfront fees $fees';
-  }
 
   @override
   String get mortgageDetailInstalmentLabel => 'Total instalment';
@@ -3607,7 +3507,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get mortgageCostTaegLabel => 'Indicative APR';
 
   @override
-  String get mortgageCostTaegCaption => 'rate, insurance and fees included';
+  String get mortgageCostTaegCaption => 'rate, insurance and fees';
 
   @override
   String get mortgageCostInterestLabel => 'Total interest';
@@ -3630,10 +3530,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get mortgageFormEditTitle => 'Edit loan';
-
-  @override
-  String get mortgageFormSubtitle =>
-      'The instalment is computed from the principal, the rate and the term.';
 
   @override
   String get mortgageFormLabel => 'Label';
@@ -3684,7 +3580,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get mortgageFormCalendar => 'Pick a date';
 
   @override
-  String get mortgageFormInsurance => 'Insurance / month';
+  String get mortgageFormInsurance => 'Insurance per month';
 
   @override
   String get mortgageFormAmountOptionalInvalid =>
@@ -3719,13 +3615,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get mortgageFormCancel => 'Cancel';
 
   @override
-  String get mortgageFormSubmit => 'Add loan';
-
-  @override
   String get mortgageFormSave => 'Save';
 
   @override
-  String get mortgageFormDelete => 'Delete loan';
+  String get mortgageFormDelete => 'Delete';
 
   @override
   String get mortgageDeleteTitle => 'Delete this loan?';
@@ -3813,6 +3706,67 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get mortgageScheduleLoadFailed =>
       'Couldn\'t load the amortisation schedule.';
+
+  @override
+  String get mortgagesTableLoan => 'Loan';
+
+  @override
+  String get mortgagesTableLender => 'Lender';
+
+  @override
+  String get mortgagesTableRate => 'Rate';
+
+  @override
+  String get mortgagesTableInsurance => 'Insurance';
+
+  @override
+  String get mortgagesTableRepaid => 'Repaid';
+
+  @override
+  String get mortgagesTableEnd => 'End';
+
+  @override
+  String get mortgagesTableInstalment => 'Instalment';
+
+  @override
+  String mortgagesTableLenderTerm(String lender, int months) {
+    return '$lender · $months months';
+  }
+
+  @override
+  String mortgagesTableRepaidCaption(String percent, int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count instalments left',
+      one: '1 instalment left',
+      zero: 'no instalments left',
+    );
+    return '$percent · $_temp0';
+  }
+
+  @override
+  String mortgageDetailFacts(
+    String kind,
+    String lender,
+    String principal,
+    int months,
+  ) {
+    return '$kind · $lender · $principal over $months months';
+  }
+
+  @override
+  String mortgageDetailFirstPayment(String date) {
+    return 'First instalment on $date';
+  }
+
+  @override
+  String mortgageDetailFirstPaymentFees(String date, String fees) {
+    return 'First instalment on $date · upfront fees $fees';
+  }
+
+  @override
+  String get mortgageScheduleYearSelect => 'Year';
 
   @override
   String get simulatorLoadFailed => 'Couldn\'t load the simulator.';
