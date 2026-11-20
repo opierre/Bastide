@@ -2,12 +2,33 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/api/api_client.dart';
+import '../../../core/pictures/pictures.dart';
 import '../data/goals_repository.dart';
 import '../domain/goal.dart';
 import '../domain/goal_allocation.dart';
 
-/// Everything the Objectifs panel renders in one value: the grid's goals, the
-/// archived ones behind the reveal link, the savings balances the
+/// Why a goal's banner image did not change, after the goal itself was saved.
+///
+/// Raised into [GoalsState.actionError] rather than to the form: the goal is
+/// already written, so the form has nothing left to retry.
+@immutable
+class GoalImageError {
+  const GoalImageError(this.failure);
+
+  final PictureUploadFailure failure;
+}
+
+/// Maps a refused banner upload's error `code` to the shared failure kinds,
+/// so it reads with the avatar's own wording.
+PictureUploadFailure goalImageFailureOf(Object error) => switch (error) {
+  ApiFailure(code: 'GOAL_IMAGE_TOO_LARGE') => PictureUploadFailure.tooLarge,
+  ApiFailure(code: 'GOAL_IMAGE_INVALID_IMAGE') =>
+    PictureUploadFailure.invalidType,
+  _ => PictureUploadFailure.generic,
+};
+
+/// Everything the Objectifs panel renders in one value: the table's goals,
+/// the archived ones behind the « N objectifs archivés » link, the savings balances the
 /// over-allocation banner is derived from, and the last action that failed.
 ///
 /// [actionError] lives *inside* the data rather than turning the whole
@@ -25,7 +46,7 @@ class GoalsState {
     this.actionError,
   });
 
-  /// The grid's goals — active and reached, never archived.
+  /// The table's goals — active and reached, never archived.
   final List<Goal> goals;
 
   /// The archived ones, loaded up front so the reveal link can state how many
@@ -65,6 +86,20 @@ class GoalsState {
   /// to let this block anything.
   bool get isOverAllocated =>
       savingsAccounts.isNotEmpty && allocatedTotalMinor > savingsTotalMinor;
+
+  /// How much more is reserved than the savings accounts hold; what the
+  /// over-allocation banner states.
+  int get overAllocationMinor => allocatedTotalMinor - savingsTotalMinor;
+
+  /// The goal the inspector shows for a selection of [goalId]: that goal when
+  /// it is on screen, else the first of the table (`11-goals.md` §Table: the
+  /// first goal is selected on arrival). An archived goal counts only while
+  /// the archived list is open.
+  Goal? selectedIn(String? goalId) {
+    final visible = [...goals, if (showArchived) ...archived];
+    return visible.where((goal) => goal.id == goalId).firstOrNull ??
+        visible.firstOrNull;
+  }
 
   /// The currency every figure on this panel is in. The app is one currency per
   /// user, so the first thing carrying one answers for all of them.
@@ -146,49 +181,90 @@ class GoalsController extends AsyncNotifier<GoalsState> {
 
   /// Creates a goal. Failures are rethrown: the form is still open and shows
   /// them inline, where the user can fix them.
+  ///
+  /// [image] is the cropped banner PNG, uploaded once the goal exists. Its
+  /// failure doesn't undo the goal: it lands in [GoalsState.actionError].
+  /// The new goal becomes the selection.
   Future<Goal> create({
     required String name,
     required int targetMinor,
-    required String icon,
-    required String color,
     DateTime? targetDate,
+    Uint8List? image,
   }) async {
     final created = await _repository.create(
       name: name,
       targetMinor: targetMinor,
-      icon: icon,
-      color: color,
       targetDate: targetDate,
     );
-    await refresh();
+    ref.read(selectedGoalProvider.notifier).select(created.id);
+    final imageError = image == null
+        ? null
+        : await _imageChange(() => _repository.uploadImage(created.id, image));
+    await _refreshReporting(imageError);
     return created;
   }
 
   /// Edits a goal's user-owned fields. Like [create], failures reach the form.
   ///
   /// Editing a target can move the goal across the reached boundary either way,
-  /// which is settled server-side and arrives with the reload.
+  /// which is settled server-side and arrives with the reload. [image]
+  /// replaces the banner and [removeImage] drops it, as in [create].
   Future<Goal> updateGoal(
     String goalId, {
     String? name,
     int? targetMinor,
     DateTime? targetDate,
-    String? icon,
-    String? color,
+    Uint8List? image,
+    bool removeImage = false,
   }) async {
     final updated = await _repository.update(
       goalId,
       name: name,
       targetMinor: targetMinor,
       targetDate: targetDate,
-      icon: icon,
-      color: color,
     );
-    await refresh();
+    final imageError = image != null
+        ? await _imageChange(() => _repository.uploadImage(goalId, image))
+        : removeImage
+        ? await _imageChange(() => _repository.removeImage(goalId))
+        : null;
+    await _refreshReporting(imageError);
     return updated;
   }
 
-  /// Archives a goal: it leaves the grid and the dashboard card, keeps its
+  /// Makes [png] the goal's banner image. Failures are rethrown: the crop
+  /// modal is still open and shows them.
+  Future<void> uploadImage(String goalId, Uint8List png) async {
+    await _repository.uploadImage(goalId, png);
+    await refresh();
+  }
+
+  /// Drops the goal's banner image; a failure lands in the panel's banner.
+  Future<void> removeImage(String goalId) async {
+    final error = await _imageChange(() => _repository.removeImage(goalId));
+    await _refreshReporting(error);
+  }
+
+  /// Runs one image write, returning why it failed instead of throwing.
+  Future<GoalImageError?> _imageChange(Future<void> Function() write) async {
+    try {
+      await write();
+      return null;
+    } catch (error) {
+      return GoalImageError(goalImageFailureOf(error));
+    }
+  }
+
+  /// Reloads, then reports [error] (if any) without blanking the panel.
+  Future<void> _refreshReporting(Object? error) async {
+    await refresh();
+    final current = state.value;
+    if (error != null && current != null) {
+      state = AsyncValue.data(current.copyWith(actionError: error));
+    }
+  }
+
+  /// Archives a goal: it leaves the table and the dashboard, keeps its
   /// allocation history, and can be restored from the archived list.
   Future<void> archive(String goalId) =>
       _write(() => _repository.update(goalId, status: GoalStatus.archived));
@@ -224,7 +300,7 @@ class GoalsController extends AsyncNotifier<GoalsState> {
     ref.invalidate(goalAllocationsProvider(goalId));
   }
 
-  /// Folds the archived goals into the grid, or back away.
+  /// Lists the archived goals under the table, or folds them away.
   void toggleArchived() {
     final current = state.value;
     if (current == null) return;
@@ -239,13 +315,21 @@ class GoalsController extends AsyncNotifier<GoalsState> {
     state = AsyncValue.data(current.copyWith(bannerDismissed: true));
   }
 
+  /// Shows [error] in the panel's banner, for a failure raised outside a
+  /// write (a picture file the picker refused).
+  void reportError(Object error) {
+    final current = state.value;
+    if (current == null) return;
+    state = AsyncValue.data(current.copyWith(actionError: error));
+  }
+
   void clearActionError() {
     final current = state.value;
     if (current == null) return;
     state = AsyncValue.data(current.copyWith(clearActionError: true));
   }
 
-  /// Runs a write the panel — rather than a form — issued, keeping the grid
+  /// Runs a write the panel — rather than a form — issued, keeping the table
   /// standing when the server refuses it.
   Future<void> _write(Future<void> Function() write) async {
     final current = state.value;
@@ -269,18 +353,15 @@ final goalAllocationsProvider =
       return ref.watch(goalsRepositoryProvider).listAllocations(goalId);
     });
 
-/// Which goal the panel is showing in detail, or `null` for the grid.
+/// The goal the user picked in the table, or `null` before they pick one.
 ///
-/// Panel state rather than a route: the detail is a *state of this panel* —
-/// same chrome, same top-bar controls, an iris back link instead of a browser
-/// step (`docs/design/11-goals.md` frame ②).
+/// Read through [GoalsState.selectedIn], which falls back to the first goal:
+/// the inspector always shows something (`docs/design/11-goals.md`).
 class SelectedGoal extends Notifier<String?> {
   @override
   String? build() => null;
 
-  void open(String goalId) => state = goalId;
-
-  void close() => state = null;
+  void select(String goalId) => state = goalId;
 }
 
 final selectedGoalProvider = NotifierProvider<SelectedGoal, String?>(

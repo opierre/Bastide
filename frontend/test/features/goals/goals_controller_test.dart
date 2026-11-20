@@ -133,8 +133,6 @@ void main() {
         .create(
           name: 'Voyage Japon',
           targetMinor: 400000,
-          icon: 'travel',
-          color: '#4FD1E8',
           targetDate: DateTime(2026, 6, 30),
         );
 
@@ -146,8 +144,8 @@ void main() {
           'name': 'Voyage Japon',
           'target_minor': 400000,
           'target_date': '2026-06-30',
-          'icon': 'travel',
-          'color': '#4FD1E8',
+          'icon': 'flag',
+          'color': '#8B8CF9',
         },
       ),
     ).called(1);
