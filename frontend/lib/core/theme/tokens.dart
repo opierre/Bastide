@@ -567,6 +567,40 @@ abstract final class AppFonts {
   static const mono = 'Geist Mono';
 }
 
+/// The goal banner of `docs/design/11-goals.md` §Inspector pane: the
+/// picture (or tomettes) edge to edge at the top of the inspector, and the
+/// thumbnail the table shows of it.
+abstract final class AppGoalBanner {
+  /// With an image.
+  static const height = 190.0;
+
+  /// Without an image: tomettes on `rail`.
+  static const heightEmpty = 120.0;
+
+  /// The bottom fade under the title, over the picture.
+  static const fadeHeight = 100.0;
+
+  /// The fade's bottom colour, `rgba(12,14,24,.82)`. Fixed in both themes
+  /// because it sits on the picture, as do the two text colours below.
+  static const fade = Color(0xD10C0E18);
+
+  /// The name and the percent over the fade.
+  static const title = Color(0xFFFFFFFF);
+
+  /// The deadline line over the fade.
+  static const caption = Color(0xFFD9DCE6);
+
+  /// Top padding of the inspector content under the banner (18 24 24).
+  static const contentTop = 18.0;
+
+  /// The table thumbnail, radius `AppRadii.item`.
+  static const thumbWidth = 36.0;
+  static const thumbHeight = 24.0;
+
+  /// The picture's proportions, also the crop step's (44:19).
+  static const aspectRatio = 44 / 19;
+}
+
 /// v1: the 38 px control pill some panels still put in the title bar, kept
 /// until each panel's v2 ticket moves it to the 28 px controls of [AppSizes].
 abstract final class AppChrome {

@@ -8,16 +8,18 @@ import 'app_modal.dart';
 import 'inline_banner.dart';
 import 'primary_button.dart';
 
-const _viewport = 320.0;
+/// The square window's side.
+const _squareViewport = 320.0;
 const _maxZoom = 5.0;
 
 // Scroll distance per e-fold of zoom. Flutter's default (200) zooms ~1.6× per
 // wheel notch; 1000 gives ~1.1× steps, fine enough to frame a face precisely.
 const _wheelZoomFactor = 1000.0;
 
-/// The square crop step between picking a picture and uploading it: the user
-/// drags and zooms the picture under a square window, and what shows through
-/// the window is what [onSave] receives, in image pixels.
+/// The crop step between picking a picture and uploading it: the user drags
+/// and zooms the picture under a window, square unless [viewport] says
+/// otherwise, and what shows through the window is what [onSave] receives,
+/// in image pixels.
 ///
 /// The caller owns the upload: it passes the labels, whether the upload is
 /// [busy], the [failureMessage] of the last attempt, and closes nothing —
@@ -33,6 +35,8 @@ class PictureCropModal extends StatefulWidget {
     required this.busy,
     required this.onSave,
     this.failureMessage,
+    this.viewport = const Size.square(_squareViewport),
+    this.width = 420,
   });
 
   final ui.Image image;
@@ -44,6 +48,12 @@ class PictureCropModal extends StatefulWidget {
   final Future<bool> Function(ui.Image image, Rect crop) onSave;
   final String? failureMessage;
 
+  /// The window the picture shows through; its proportions are the crop's.
+  final Size viewport;
+
+  /// The modal's width, given per panel (`00` §7).
+  final double width;
+
   @override
   State<PictureCropModal> createState() => _PictureCropModalState();
 }
@@ -53,13 +63,13 @@ class _PictureCropModalState extends State<PictureCropModal> {
     widget.image.width.toDouble(),
     widget.image.height.toDouble(),
   );
-  late final double _scale = coverScale(_imageSize, _viewport);
+  late final double _scale = coverScaleIn(_imageSize, widget.viewport);
 
-  // Opens centred, so the default crop is the picture's middle square.
+  // Opens centred, so the default crop is the picture's middle.
   late final _transform = TransformationController(
     Matrix4.translationValues(
-      -(_imageSize.width * _scale - _viewport) / 2,
-      -(_imageSize.height * _scale - _viewport) / 2,
+      -(_imageSize.width * _scale - widget.viewport.width) / 2,
+      -(_imageSize.height * _scale - widget.viewport.height) / 2,
       0,
     ),
   );
@@ -72,9 +82,9 @@ class _PictureCropModalState extends State<PictureCropModal> {
   }
 
   Future<void> _save() async {
-    final crop = cropRectFor(
+    final crop = cropRectIn(
       imageSize: _imageSize,
-      viewport: _viewport,
+      viewport: widget.viewport,
       transform: _transform.value,
     );
     final saved = await widget.onSave(widget.image, crop);
@@ -86,7 +96,7 @@ class _PictureCropModalState extends State<PictureCropModal> {
     final busy = widget.busy;
     return AppModal(
       title: widget.title,
-      width: 420,
+      width: widget.width,
       actions: [
         OutlinedButton(
           onPressed: busy ? null : () => Navigator.of(context).pop(),
@@ -112,8 +122,8 @@ class _PictureCropModalState extends State<PictureCropModal> {
           Center(
             child: Container(
               key: const Key('pictureCropViewport'),
-              width: _viewport,
-              height: _viewport,
+              width: widget.viewport.width,
+              height: widget.viewport.height,
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(AppRadii.container),
                 border: Border.all(color: context.colors.line),

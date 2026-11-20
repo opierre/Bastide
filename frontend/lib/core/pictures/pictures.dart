@@ -1,3 +1,4 @@
+import 'dart:math' as math;
 import 'dart:ui' as ui;
 
 import 'package:file_selector/file_selector.dart';
@@ -5,9 +6,9 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-/// Picking a picture file and cropping it to a square, shared by every
-/// upload the backend re-encodes as a square PNG: the user's avatar and a
-/// rule's logo.
+/// Picking a picture file and cropping it, shared by every upload the
+/// backend re-encodes as a PNG: the user's avatar and a rule's logo (square),
+/// and a goal's banner (44:19).
 
 /// The largest picture file the backend accepts (`MAX_UPLOAD_BYTES` in
 /// `app/core/images.py`). Checked before the file is read, so an oversized
@@ -65,27 +66,31 @@ class PictureImaging {
     }
   }
 
-  /// The [crop] of [image], in image pixels, scaled to a square PNG.
-  Future<Uint8List> cropToPng(ui.Image image, Rect crop) async {
+  /// The [crop] of [image], in image pixels, scaled to an [output]-sized
+  /// PNG: a [croppedPictureSize] square unless told otherwise.
+  Future<Uint8List> cropToPng(
+    ui.Image image,
+    Rect crop, {
+    Size output = const Size.square(croppedPictureSize * 1.0),
+  }) async {
     final recorder = ui.PictureRecorder();
-    const side = croppedPictureSize * 1.0;
     Canvas(recorder).drawImageRect(
       image,
       crop,
-      const Rect.fromLTWH(0, 0, side, side),
+      Offset.zero & output,
       Paint()..filterQuality = FilterQuality.high,
     );
     final picture = recorder.endRecording();
-    final square = await picture.toImage(
-      croppedPictureSize,
-      croppedPictureSize,
+    final cropped = await picture.toImage(
+      output.width.round(),
+      output.height.round(),
     );
     picture.dispose();
     try {
-      final data = await square.toByteData(format: ui.ImageByteFormat.png);
+      final data = await cropped.toByteData(format: ui.ImageByteFormat.png);
       return data!.buffer.asUint8List();
     } finally {
-      square.dispose();
+      cropped.dispose();
     }
   }
 }
@@ -114,7 +119,14 @@ Future<ui.Image?> pickPicture(Ref ref) async {
 /// The cover scale that makes an image of [imageSize] fill a square
 /// [viewport] along its shorter side.
 double coverScale(Size imageSize, double viewport) =>
-    viewport / imageSize.shortestSide;
+    coverScaleIn(imageSize, Size.square(viewport));
+
+/// The cover scale that makes an image of [imageSize] fill a [viewport] of
+/// any shape: no gap on either axis.
+double coverScaleIn(Size imageSize, Size viewport) => math.max(
+  viewport.width / imageSize.width,
+  viewport.height / imageSize.height,
+);
 
 /// The square of the image, in image pixels, that shows through a square
 /// [viewport] of the crop step.
@@ -126,12 +138,26 @@ Rect cropRectFor({
   required Size imageSize,
   required double viewport,
   required Matrix4 transform,
+}) => cropRectIn(
+  imageSize: imageSize,
+  viewport: Size.square(viewport),
+  transform: transform,
+);
+
+/// The part of the image, in image pixels, that shows through a [viewport]
+/// of any shape: the same reading as [cropRectFor], keeping the viewport's
+/// proportions.
+Rect cropRectIn({
+  required Size imageSize,
+  required Size viewport,
+  required Matrix4 transform,
 }) {
   final zoom = transform.getMaxScaleOnAxis();
   final translation = transform.getTranslation();
-  final scale = coverScale(imageSize, viewport) * zoom;
-  final side = (viewport / scale).clamp(1.0, imageSize.shortestSide);
-  final left = (-translation.x / scale).clamp(0.0, imageSize.width - side);
-  final top = (-translation.y / scale).clamp(0.0, imageSize.height - side);
-  return Rect.fromLTWH(left, top, side, side);
+  final scale = coverScaleIn(imageSize, viewport) * zoom;
+  final width = (viewport.width / scale).clamp(1.0, imageSize.width);
+  final height = (viewport.height / scale).clamp(1.0, imageSize.height);
+  final left = (-translation.x / scale).clamp(0.0, imageSize.width - width);
+  final top = (-translation.y / scale).clamp(0.0, imageSize.height - height);
+  return Rect.fromLTWH(left, top, width, height);
 }

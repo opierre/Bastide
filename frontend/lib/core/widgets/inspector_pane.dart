@@ -15,12 +15,21 @@ class InspectorPane extends StatelessWidget {
     super.key,
     required this.selection,
     required this.blocks,
+    this.header,
+    this.padding = const EdgeInsets.all(AppSpacing.lg),
   });
 
   /// Identifies what the pane shows: the selected row's id.
   final Object selection;
 
   final List<Widget> blocks;
+
+  /// Drawn edge to edge above the padded blocks, ignoring the padding: the
+  /// goal banner (`11-goals.md`).
+  final Widget? header;
+
+  /// Around the blocks; 24 on every side unless a panel spec says otherwise.
+  final EdgeInsetsGeometry padding;
 
   /// Between two blocks, on either side of their hairline.
   static const blockGap = AppSpacing.md;
@@ -49,18 +58,32 @@ class InspectorPane extends StatelessWidget {
         ),
         child: SingleChildScrollView(
           key: ValueKey(selection),
-          padding: const EdgeInsets.all(AppSpacing.lg),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              for (var i = 0; i < blocks.length; i++) ...[
-                if (i > 0)
-                  Padding(
-                    padding: const EdgeInsets.symmetric(vertical: blockGap),
-                    child: Divider(height: 1, thickness: 1, color: colors.line),
-                  ),
-                blocks[i],
-              ],
+              ?header,
+              Padding(
+                padding: padding,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    for (var i = 0; i < blocks.length; i++) ...[
+                      if (i > 0)
+                        Padding(
+                          padding: const EdgeInsets.symmetric(
+                            vertical: blockGap,
+                          ),
+                          child: Divider(
+                            height: 1,
+                            thickness: 1,
+                            color: colors.line,
+                          ),
+                        ),
+                      blocks[i],
+                    ],
+                  ],
+                ),
+              ),
             ],
           ),
         ),
