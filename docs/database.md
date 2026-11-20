@@ -100,6 +100,12 @@ erDiagram
         text note "nullable"
         datetime created_at
     }
+    goal_images {
+        text goal_id PK, FK
+        blob image
+        text content_type
+        datetime updated_at
+    }
     goals {
         text id PK
         text user_id FK
@@ -339,6 +345,7 @@ erDiagram
     users ||--o{ categorization_runs : "user_id"
     users ||--o{ declared_balances : "user_id"
     goals ||--o{ goal_allocations : "goal_id"
+    goals ||--o{ goal_images : "goal_id"
     users ||--o{ goals : "user_id"
     accounts ||--o{ import_batches : "account_id"
     users ||--o{ import_batches : "user_id"
@@ -390,6 +397,10 @@ erDiagram
 - unique `(user_id, period_end)`
 
 ### `goal_allocations`
+
+- `goal_id` → `goals` on delete cascade
+
+### `goal_images`
 
 - `goal_id` → `goals` on delete cascade
 
