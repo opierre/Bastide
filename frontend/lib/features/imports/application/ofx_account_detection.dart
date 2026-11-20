@@ -60,6 +60,16 @@ class OfxAccountUnreadable extends OfxAccountMatch {
   const OfxAccountUnreadable();
 }
 
+/// The file is not a statement at all: not OFX, or not even an OFX or QFX file
+/// by its name (a CSV, say). Nothing can be imported from it, so the panel
+/// only offers to remove it.
+class OfxFileUnreadable extends OfxAccountMatch {
+  const OfxFileUnreadable({this.unsupportedFormat = false});
+
+  /// The file's extension is not one the panel accepts (`.csv`, `.pdf`).
+  final bool unsupportedFormat;
+}
+
 /// Casefolded, punctuation-free form used to compare bank names typed by hand
 /// against bank names emitted by a bank ("BNP Paribas" vs "BNP PARIBAS.").
 @visibleForTesting
@@ -261,6 +271,10 @@ class OfxAccountDetection extends Notifier<List<OfxAccountMatch>?> {
     PickedImportFile file,
     List<Account> accounts,
   ) async {
+    if (!importFileExtensions.contains(file.extension)) {
+      return state = const [OfxFileUnreadable(unsupportedFormat: true)];
+    }
+    if (!isOfxDocument(file.bytes)) return state = const [OfxFileUnreadable()];
     final statements = parseOfxStatements(file.bytes);
     if (statements.isEmpty) return state = const [OfxAccountUnreadable()];
 
@@ -292,6 +306,17 @@ class OfxAccountDetection extends Notifier<List<OfxAccountMatch>?> {
     ];
   }
 
+  /// Drops the verdict for [statement] once it has been imported or removed,
+  /// leaving the file's other statements staged.
+  void remove(String? statement) {
+    final current = state;
+    if (current == null) return;
+    state = [
+      for (final match in current)
+        if (statementKey(match) != statement) match,
+    ];
+  }
+
   void clear() => state = null;
 }
 
@@ -301,7 +326,7 @@ String? statementKey(OfxAccountMatch match) => switch (match) {
   OfxAccountMatched(:final info) ||
   OfxAccountAmbiguous(:final info) ||
   OfxAccountUnmatched(:final info) => info.accountNumber,
-  OfxAccountUnreadable() => null,
+  OfxAccountUnreadable() || OfxFileUnreadable() => null,
 };
 
 final ofxAccountDetectionProvider =

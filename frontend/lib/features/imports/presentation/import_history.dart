@@ -1,21 +1,27 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
+import 'package:lucide_icons_flutter/lucide_icons_300.dart';
 
-import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/tokens.dart';
 import '../../../core/widgets/amount_text.dart';
-import '../../../core/widgets/app_card.dart';
+import '../../../core/widgets/app_table.dart';
+import '../../../core/widgets/monogram_avatar.dart';
+import '../../../core/widgets/section_heading.dart';
 import '../../../core/widgets/state_views.dart';
 import '../../../core/widgets/status_text.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../accounts/application/accounts_controller.dart';
 import '../../accounts/domain/account.dart';
+import '../../transactions/application/transactions_controller.dart';
+import '../../transactions/presentation/transactions_screen.dart';
 import '../application/imports_controller.dart';
 import '../domain/import_batch.dart';
 import 'import_error_localizer.dart';
 
-/// Region C — every import run, most recent first.
+/// « Historique » (`docs/design/06-imports.md` §2): every import run, newest
+/// first, in a table that takes the remaining height and scrolls inside it.
 ///
 /// The history is the panel's audit trail: it is what tells the user a file was
 /// already imported (and therefore why a re-import added nothing), and what a
@@ -27,77 +33,86 @@ class ImportHistory extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context)!;
     final batches = ref.watch(importsControllerProvider);
-    // Needed only to format a mismatch amount in the account's own currency;
-    // the account list is already loaded for the panel's selector, so this is
-    // never a first fetch of its own.
-    final accounts =
-        ref.watch(accountsControllerProvider).value ?? const <Account>[];
-
-    return AppCard(
-      padding: const EdgeInsets.all(AppSpacing.cardPaddingWide),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Text(
-            l10n.importHistoryTitle,
-            style: Theme.of(context).textTheme.titleMedium,
-          ),
-          const SizedBox(height: AppSpacing.md),
-          Expanded(
-            child: switch (batches) {
-              AsyncData(:final value) when value.isEmpty => EmptyStateView(
-                key: const Key('importHistoryEmpty'),
-                title: l10n.importHistoryEmptyTitle,
-                message: l10n.importHistoryEmptyBody,
-              ),
-              AsyncData(:final value) => _HistoryTable(
-                batches: value,
-                accounts: accounts,
-              ),
-              AsyncError(:final error) => ErrorStateView(
-                message: localizeImportError(l10n, error),
-                messageKey: const Key('importHistoryErrorText'),
-                retryLabel: l10n.importRetry,
-                retryKey: const Key('importHistoryRetryButton'),
-                onRetry: () =>
-                    ref.read(importsControllerProvider.notifier).refresh(),
-              ),
-              _ => const SkeletonList(
-                key: Key('importHistoryLoading'),
-                itemCount: 4,
-                itemHeight: 46,
-              ),
-            },
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _HistoryTable extends StatelessWidget {
-  const _HistoryTable({required this.batches, required this.accounts});
-
-  final List<ImportBatch> batches;
-  final List<Account> accounts;
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
+    final columns = _columns(l10n);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        _HeaderRow(l10n: l10n),
+        SectionHeading(title: l10n.importHistoryTitle),
         Expanded(
-          child: ListView.separated(
+          child: switch (batches) {
+            AsyncData(:final value) when value.isEmpty => EmptyStateView(
+              key: const Key('importHistoryEmpty'),
+              title: l10n.importHistoryEmptyTitle,
+              message: l10n.importHistoryEmptyBody,
+            ),
+            AsyncData(:final value) => _HistoryTable(
+              columns: columns,
+              batches: value,
+            ),
+            AsyncError(:final error) => ErrorStateView(
+              message: localizeImportError(l10n, error),
+              messageKey: const Key('importHistoryErrorText'),
+              retryLabel: l10n.importRetry,
+              retryKey: const Key('importHistoryRetryButton'),
+              onRetry: () =>
+                  ref.read(importsControllerProvider.notifier).refresh(),
+            ),
+            _ => _HistorySilhouette(columns: columns),
+          },
+        ),
+      ],
+    );
+  }
+}
+
+/// The seven columns of the history, shared by the header, the rows and the
+/// loading silhouette so they can't drift apart.
+List<AppTableColumn> _columns(AppLocalizations l10n) => [
+  AppTableColumn(label: l10n.importHistoryFileHeader, flex: 5),
+  AppTableColumn(label: l10n.importHistoryAccountHeader, flex: 4),
+  AppTableColumn(label: l10n.importHistoryImportedHeader, flex: 3),
+  AppTableColumn(label: l10n.importHistoryPeriodHeader, flex: 4),
+  AppTableColumn(label: l10n.importHistoryNewHeader, flex: 2, numeric: true),
+  AppTableColumn(
+    label: l10n.importHistoryDuplicatesHeader,
+    flex: 2,
+    numeric: true,
+  ),
+  AppTableColumn(label: l10n.importHistoryResultHeader, flex: 4, numeric: true),
+];
+
+class _HistoryTable extends ConsumerWidget {
+  const _HistoryTable({required this.columns, required this.batches});
+
+  final List<AppTableColumn> columns;
+  final List<ImportBatch> batches;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final accounts =
+        ref.watch(accountsControllerProvider).value ?? const <Account>[];
+    final highlighted = ref.watch(recentImportHighlightsProvider);
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        AppTableHeader(columns: columns),
+        Expanded(
+          child: ListView.builder(
             key: const Key('importHistoryList'),
             itemCount: batches.length,
-            separatorBuilder: (_, _) => Divider(color: context.colors.line),
-            itemBuilder: (context, index) => _HistoryRow(
-              batch: batches[index],
-              currency: _currencyFor(accounts, batches[index].accountId),
-            ),
+            itemBuilder: (context, index) {
+              final batch = batches[index];
+              return _HistoryRow(
+                columns: columns,
+                batch: batch,
+                account: accounts
+                    .where((a) => a.id == batch.accountId)
+                    .firstOrNull,
+                highlighted: highlighted.contains(batch.id),
+              );
+            },
           ),
         ),
       ],
@@ -105,269 +120,226 @@ class _HistoryTable extends StatelessWidget {
   }
 }
 
-/// The currency of the account a batch belongs to, when that account is
-/// still loaded — falling back to an empty string, which `NumberFormat`
-/// resolves from the ambient locale rather than throwing.
-String _currencyFor(List<Account> accounts, String accountId) {
-  for (final account in accounts) {
-    if (account.id == accountId) return account.currency;
+class _HistoryRow extends ConsumerWidget {
+  const _HistoryRow({
+    required this.columns,
+    required this.batch,
+    required this.account,
+    required this.highlighted,
+  });
+
+  final List<AppTableColumn> columns;
+  final ImportBatch batch;
+  final Account? account;
+  final bool highlighted;
+
+  bool get _failed => batch.status == ImportStatus.failed;
+
+  /// Opens Transactions on what this import covered: its account over its
+  /// period. A failed import wrote nothing, so it opens nothing.
+  void _open(BuildContext context, WidgetRef ref) {
+    ref.read(transactionFiltersProvider.notifier)
+      ..setAccount(batch.accountId)
+      ..setDateRange(batch.periodStart, batch.periodEnd);
+    context.go(TransactionsScreen.path);
   }
-  return '';
-}
-
-/// Column proportions shared by the header and every row, so the two can't
-/// drift, plus the gutter between two columns.
-///
-/// Shares rather than pixel widths: the panel is as wide as the window, and
-/// pinning six columns to fixed widths spent every extra pixel on the file
-/// name while a date range or a status pill stayed clipped at the width it was
-/// born with. Proportions let each column grow with the table.
-const _fileFlex = 30;
-const _formatFlex = 10;
-const _importedFlex = 14;
-const _periodFlex = 20;
-const _countFlex = 10;
-const _statusFlex = 14;
-const _columnGap = AppSpacing.sm + AppSpacing.xs;
-
-/// Lays seven cells out on the shared column grid. Both the header and every
-/// row build through this, so a column can't be widened in one and not the
-/// other.
-Widget _columnRow({
-  required Widget file,
-  required Widget format,
-  required Widget imported,
-  required Widget period,
-  required Widget newCount,
-  required Widget duplicates,
-  required Widget status,
-  CrossAxisAlignment crossAxisAlignment = CrossAxisAlignment.center,
-}) {
-  return Row(
-    crossAxisAlignment: crossAxisAlignment,
-    children: [
-      Expanded(flex: _fileFlex, child: file),
-      const SizedBox(width: _columnGap),
-      Expanded(flex: _formatFlex, child: format),
-      const SizedBox(width: _columnGap),
-      Expanded(flex: _importedFlex, child: imported),
-      const SizedBox(width: _columnGap),
-      Expanded(flex: _periodFlex, child: period),
-      const SizedBox(width: _columnGap),
-      Expanded(flex: _countFlex, child: newCount),
-      const SizedBox(width: _columnGap),
-      Expanded(flex: _countFlex, child: duplicates),
-      const SizedBox(width: _columnGap),
-      Expanded(flex: _statusFlex, child: status),
-    ],
-  );
-}
-
-class _HeaderRow extends StatelessWidget {
-  const _HeaderRow({required this.l10n});
-
-  final AppLocalizations l10n;
 
   @override
-  Widget build(BuildContext context) {
-    Widget cell(String label, {TextAlign align = TextAlign.center}) => Text(
-      label.toUpperCase(),
-      textAlign: align,
-      style: context.textStyles.sectionLabel,
-    );
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
+    final colors = context.colors;
+    final locale = Localizations.localeOf(context).toString();
+    final numberFormat = NumberFormat.decimalPattern(locale);
+    final secondary = TextStyle(color: colors.textSecondary);
+    final note = _note(l10n, colors, Theme.of(context).textTheme.bodySmall);
+    final account = this.account;
 
-    return Padding(
-      padding: const EdgeInsets.only(bottom: AppSpacing.sm),
-      child: _columnRow(
-        crossAxisAlignment: CrossAxisAlignment.end,
-        // The file column is the only one that stays left: it carries a wrapped name and
-        // up to three explanatory notes under it, and a centred block of ragged text reads
-        // as misaligned rather than as a value under its header.
-        file: cell(l10n.importHistoryFileHeader, align: TextAlign.left),
-        format: cell(l10n.importHistoryFormatHeader),
-        imported: cell(l10n.importHistoryImportedHeader),
-        period: cell(l10n.importHistoryPeriodHeader),
-        newCount: cell(l10n.importHistoryNewHeader),
-        duplicates: cell(l10n.importHistoryDuplicatesHeader),
-        status: cell(l10n.importHistoryStatusHeader),
-      ),
+    return AppTableRow(
+      key: Key('importBatchRow-${batch.id}'),
+      columns: columns,
+      selected: highlighted,
+      twoLines: note != null,
+      onTap: _failed ? null : () => _open(context, ref),
+      cells: [
+        Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              batch.fileName,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(fontFamily: AppFonts.mono),
+            ),
+            ?note,
+          ],
+        ),
+        if (_failed || account == null)
+          Text(l10n.importHistoryNoValue, style: secondary)
+        else
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              MonogramAvatar(name: account.institution),
+              const SizedBox(width: AppSpacing.xsPlus),
+              Flexible(child: Text(account.name)),
+            ],
+          ),
+        Text(
+          DateFormat.yMMMd(locale).format(batch.importedAt.toLocal()),
+          style: secondary,
+        ),
+        Text(
+          _failed
+              ? l10n.importHistoryNoValue
+              : l10n.importPeriodRange(
+                  formatPeriodStart(batch.periodStart, batch.periodEnd, locale),
+                  DateFormat.yMMMd(locale).format(batch.periodEnd),
+                ),
+          key: Key('importBatchPeriod-${batch.id}'),
+          style: secondary,
+        ),
+        Text(numberFormat.format(batch.newCount)),
+        Text(numberFormat.format(batch.duplicateCount), style: secondary),
+        _Result(batch: batch, currency: account?.currency ?? ''),
+      ],
     );
+  }
+
+  /// The 12 px second line under the file name, where a run explains itself:
+  /// why a re-import added little, or that a failure changed nothing.
+  Widget? _note(AppLocalizations l10n, AppColors colors, TextStyle? small) {
+    if (_failed) {
+      final note = Text(
+        l10n.importFailedNote,
+        key: Key('importBatchFailureNote-${batch.id}'),
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+        style: small?.copyWith(color: colors.negative),
+      );
+      // The parser's own words are the only thing that says *why* the file
+      // was rejected; they stay a hover away rather than a third line.
+      final reason = batch.errorMessage?.trim();
+      if (reason == null || reason.isEmpty) return note;
+      return Tooltip(message: reason, child: note);
+    }
+    if (batch.duplicateCount > 0) {
+      return Text(
+        l10n.importDuplicatesNote(batch.duplicateCount),
+        key: Key('importBatchDuplicateNote-${batch.id}'),
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+        style: small?.copyWith(color: colors.warning),
+      );
+    }
+    return null;
   }
 }
 
-class _HistoryRow extends StatelessWidget {
-  const _HistoryRow({required this.batch, required this.currency});
+/// The run's outcome as status text: « Réussi » neutral with `check`,
+/// « Partiel » `warning`, « Échec » `negative`, led by « Écart de solde » in
+/// `warning` when the statement disagrees with the ledger's balance.
+class _Result extends StatelessWidget {
+  const _Result({required this.batch, required this.currency});
 
   final ImportBatch batch;
+
+  /// The account's currency, for the balance gap shown on hover.
   final String currency;
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final locale = Localizations.localeOf(context).toString();
-    final textTheme = Theme.of(context).textTheme;
-    final dateFormat = DateFormat.yMd(locale);
-    final numberFormat = NumberFormat.decimalPattern(locale);
 
-    return Padding(
-      key: Key('importBatchRow-${batch.id}'),
-      padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm + 2),
-      child: _columnRow(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        file: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              batch.fileName,
-              overflow: TextOverflow.ellipsis,
-              style: textTheme.titleSmall,
-            ),
-            // The note under the filename is where a run explains itself:
-            // why a re-import added nothing, or what a failure left alone.
-            if (batch.status == ImportStatus.failed) ...[
-              const SizedBox(height: 2),
-              Text(
-                l10n.importFailedNote,
-                key: Key('importBatchFailureNote-${batch.id}'),
-                style: context.textStyles.helper.copyWith(
-                  color: context.colors.negative,
-                ),
-              ),
-              if (batch.errorMessage case final message?
-                  when message.trim().isNotEmpty) ...[
-                const SizedBox(height: 1),
-                Text(
-                  message,
-                  overflow: TextOverflow.ellipsis,
-                  style: context.textStyles.mono.copyWith(
-                    color: context.colors.textTertiary,
-                  ),
-                ),
-              ],
-            ] else if (batch.duplicateCount > 0) ...[
-              const SizedBox(height: 2),
-              Text(
-                l10n.importDuplicatesNote(batch.duplicateCount),
-                key: Key('importBatchDuplicateNote-${batch.id}'),
-                style: context.textStyles.helper.copyWith(
-                  color: context.colors.warning,
-                ),
-              ),
-            ],
-            // Independent of the notes above: a statement can both skip
-            // duplicates and disagree with the ledger's balance.
-            if (batch.balanceMismatchMinor case final mismatch?) ...[
-              const SizedBox(height: 2),
-              Text(
-                l10n.importBalanceMismatchNote(
-                  formatAmount(
-                    amountMinor: mismatch,
-                    currency: currency,
-                    locale: locale,
-                    showPositiveSign: true,
-                  ),
-                  batch.balanceMismatchAsOf!,
-                ),
-                key: Key('importBatchMismatchNote-${batch.id}'),
-                style: context.textStyles.helper.copyWith(
-                  color: context.colors.warning,
-                ),
-              ),
-            ],
-          ],
-        ),
-        // Every value column is centred so it sits under its own header rather than beside
-        // it — the chips included, which is why both pills take an alignment.
-        format: ImportFormatBadge(
-          format: batch.sourceFormat,
-          alignment: Alignment.topCenter,
-        ),
-        imported: Text(
-          dateFormat.format(batch.importedAt.toLocal()),
-          textAlign: TextAlign.center,
-          style: tabularNumberStyle(
-            textTheme.bodyMedium!,
-          ).copyWith(color: context.colors.textSecondary),
-        ),
-        period: Text(
-          l10n.importPeriodRange(batch.periodStart, batch.periodEnd),
-          textAlign: TextAlign.center,
-          style: tabularNumberStyle(
-            textTheme.bodyMedium!,
-          ).copyWith(color: context.colors.textSecondary),
-        ),
-        newCount: Text(
-          numberFormat.format(batch.newCount),
-          textAlign: TextAlign.center,
-          style: tabularNumberStyle(textTheme.bodyMedium!),
-        ),
-        duplicates: Text(
-          numberFormat.format(batch.duplicateCount),
-          textAlign: TextAlign.center,
-          style: tabularNumberStyle(
-            textTheme.bodyMedium!,
-          ).copyWith(color: context.colors.textSecondary),
-        ),
-        status: ImportStatusPill(
-          status: batch.status,
-          alignment: Alignment.topCenter,
-        ),
+    final outcome = switch (batch.status) {
+      ImportStatus.success => StatusText(
+        label: l10n.importStatusSuccess,
+        icon: LucideIcons300.check,
       ),
-    );
-  }
-}
-
-/// Source-format badge. The hue per format is pinned by
-/// `docs/design/06-imports.md`: OFX blue, QFX violet.
-class ImportFormatBadge extends StatelessWidget {
-  const ImportFormatBadge({
-    super.key,
-    required this.format,
-    this.alignment = Alignment.centerLeft,
-  });
-
-  final ImportFormat format;
-
-  /// Where the pill sits in the space it is given — the history table centres it under its
-  /// column header; elsewhere it hugs the leading edge.
-  final AlignmentGeometry alignment;
-
-  @override
-  Widget build(BuildContext context) {
-    return Align(
-      alignment: alignment,
-      child: StatusText(label: format.name.toUpperCase()),
-    );
-  }
-}
-
-/// Outcome pill. The glyph doubles the hue so the status never rests on color
-/// alone (see the shared design block's accessibility rule).
-class ImportStatusPill extends StatelessWidget {
-  const ImportStatusPill({
-    super.key,
-    required this.status,
-    this.alignment = Alignment.centerLeft,
-  });
-
-  final ImportStatus status;
-
-  /// See [ImportFormatBadge.alignment].
-  final AlignmentGeometry alignment;
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
-
-    final (tone, label) = switch (status) {
-      ImportStatus.success => (StatusTone.positive, l10n.importStatusSuccess),
-      ImportStatus.partial => (StatusTone.warning, l10n.importStatusPartial),
-      ImportStatus.failed => (StatusTone.negative, l10n.importStatusFailed),
+      ImportStatus.partial => StatusText(
+        label: l10n.importStatusPartial,
+        tone: StatusTone.warning,
+      ),
+      ImportStatus.failed => StatusText(
+        label: l10n.importStatusFailed,
+        tone: StatusTone.negative,
+      ),
     };
 
-    return Align(
-      alignment: alignment,
-      child: StatusText(label: label, tone: tone),
+    final mismatch = batch.balanceMismatchMinor;
+    if (mismatch == null) return outcome;
+
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Flexible(
+          child: Tooltip(
+            message: l10n.importBalanceMismatchNote(
+              formatAmount(
+                amountMinor: mismatch,
+                currency: currency,
+                locale: locale,
+                showPositiveSign: true,
+              ),
+              batch.balanceMismatchAsOf ?? batch.periodEnd,
+            ),
+            child: StatusText(
+              key: Key('importBatchMismatch-${batch.id}'),
+              label: l10n.importBalanceMismatchStatus,
+              tone: StatusTone.warning,
+            ),
+          ),
+        ),
+        const SizedBox(width: AppSpacing.smPlus),
+        Flexible(child: outcome),
+      ],
+    );
+  }
+}
+
+/// The start of a period, shortened by what it shares with the end: « 1 » in
+/// « 1 – 30 avr. 2026 », « 1 janv. » in « 1 janv. – 31 mars 2026 ».
+String formatPeriodStart(DateTime start, DateTime end, String locale) {
+  if (start.year != end.year) return DateFormat.yMMMd(locale).format(start);
+  if (start.month != end.month) return DateFormat.MMMd(locale).format(start);
+  return DateFormat.d(locale).format(start);
+}
+
+/// The table's silhouette while the history loads (`00` §7): the header, then
+/// rows of `hover` blocks, pulsing together.
+class _HistorySilhouette extends StatelessWidget {
+  const _HistorySilhouette({required this.columns});
+
+  final List<AppTableColumn> columns;
+
+  static const _rows = 5;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      key: const Key('importHistoryLoading'),
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        AppTableHeader(columns: columns),
+        Expanded(
+          child: SkeletonPulse(
+            child: ListView(
+              physics: const NeverScrollableScrollPhysics(),
+              children: [
+                for (var i = 0; i < _rows; i++)
+                  AppTableRow(
+                    columns: columns,
+                    cells: [
+                      for (final _ in columns)
+                        const SkeletonBlock(height: AppSpacing.smPlus),
+                    ],
+                  ),
+              ],
+            ),
+          ),
+        ),
+      ],
     );
   }
 }

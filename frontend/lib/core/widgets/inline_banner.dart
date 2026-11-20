@@ -33,15 +33,33 @@ enum BannerTone {
 class InlineBanner extends StatelessWidget {
   const InlineBanner({
     super.key,
-    required this.message,
+    required String this.message,
     this.tone = BannerTone.error,
     this.onDismiss,
     this.dismissTooltip,
     this.icon,
     this.actions = const [],
-  });
+  }) : content = null;
 
-  final String message;
+  /// A banner whose body is richer than one sentence (a file name, a status
+  /// and a select, say), laid out by the caller between the icon and the
+  /// [actions]. Same box, icon and actions as the default banner.
+  const InlineBanner.custom({
+    super.key,
+    required Widget this.content,
+    this.tone = BannerTone.info,
+    this.onDismiss,
+    this.dismissTooltip,
+    this.icon,
+    this.actions = const [],
+  }) : message = null;
+
+  /// The sentence, or `null` for a [InlineBanner.custom] banner.
+  final String? message;
+
+  /// The body of a [InlineBanner.custom] banner.
+  final Widget? content;
+
   final BannerTone tone;
 
   /// Overrides the tone's icon while keeping its colour.
@@ -81,7 +99,9 @@ class InlineBanner extends StatelessWidget {
           ),
           const SizedBox(width: AppSpacing.sm),
           Expanded(
-            child: Text(message, style: Theme.of(context).textTheme.bodyMedium),
+            child:
+                content ??
+                Text(message!, style: Theme.of(context).textTheme.bodyMedium),
           ),
           for (final action in actions) ...[
             const SizedBox(width: AppSpacing.sm),

@@ -438,6 +438,10 @@ abstract final class AppSpacing {
   static const sidebarBrandBottom = 14.0;
   static const sidebarLabelTop = 14.0;
 
+  /// Drop target (`00` §7): padding 18 vertical, 20 horizontal.
+  static const dropTargetY = 18.0;
+  static const dropTargetX = 20.0;
+
   /// Fields 14 px apart: in a modal (`00` §7) and down the auth column
   /// (`02-login.md`, `03-register.md`).
   static const fieldGap = 14.0;
