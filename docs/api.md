@@ -114,6 +114,7 @@ details?}}`. Model names refer to the Pydantic schemas in `backend/app/features/
 |--------|------|-------|------|----------|
 | `GET` | `/settings` |  |  | 200 `SettingsRead` |
 | `PATCH` | `/settings` |  | `SettingsUpdate` | 200 `SettingsRead` |
+| `GET` | `/settings/data-location` |  |  | 200 `DataLocationRead` |
 
 ## backup
 

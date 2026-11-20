@@ -1,10 +1,10 @@
 import 'dart:io';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:path/path.dart' as p;
 import 'package:url_launcher/url_launcher.dart';
 
-import '../../../core/backend/backend_providers.dart';
+import '../data/settings_repository.dart';
+import '../domain/data_location.dart';
 
 /// The public repository, opened by « Code source ».
 final sourceCodeUrl = Uri.parse('https://github.com/opierre/Bastide');
@@ -23,22 +23,18 @@ final operatingSystemProvider = Provider<String>(
   (ref) => Platform.operatingSystem,
 );
 
-/// The database file the backend keeps everything in, under its data folder
-/// (`backend/app/core/config.py` owns the name). `null` when the environment
-/// does not say where home is.
-final databaseFileProvider = Provider<String?>((ref) {
-  final dir = ref.watch(dataDirProvider);
-  if (dir == null) return null;
-  // Joined in the folder's own style, which is the OS's.
-  final style = dir.contains(r'\') ? p.Style.windows : p.Style.posix;
-  return p.Context(style: style).join(dir, 'bastide.db');
-});
+/// Where the running backend keeps its data, as the backend resolved it.
+///
+/// Asked rather than derived from the default folder: a backend started with
+/// `--data-dir` or `BASTIDE_DB_PATH` keeps it elsewhere. Auto-disposed so
+/// reopening À propos asks again after a failure.
+final dataLocationProvider = FutureProvider.autoDispose<DataLocation>(
+  (ref) => ref.watch(settingsRepositoryProvider).dataLocation(),
+);
 
-/// Opens the data folder in the OS file manager.
-final openDataFolderProvider = Provider<Future<void> Function()>((ref) {
-  return () async {
-    final dir = ref.read(dataDirProvider);
-    if (dir == null) return;
+/// Opens a folder in the OS file manager.
+final openFolderProvider = Provider<Future<void> Function(String)>((ref) {
+  return (dir) async {
     await launchUrl(Uri.directory(dir));
   };
 });

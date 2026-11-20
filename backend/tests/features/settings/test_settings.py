@@ -3,9 +3,11 @@
 from pathlib import Path
 
 import pytest
+from fastapi import FastAPI
 from fastapi.testclient import TestClient
 from sqlalchemy import func, select
 
+from app.core.config import Settings, get_settings
 from app.features.settings.models import UserSettings
 from tests.api import register as _register
 from tests.db import open_session
@@ -183,3 +185,38 @@ def test_settings_are_user_scoped(client: TestClient) -> None:
 
 def test_settings_require_authentication(client: TestClient) -> None:
     assert client.get("/api/v1/settings").status_code == 401
+
+
+def test_data_location_reports_the_overridden_datastore(
+    app: FastAPI, client: TestClient, tmp_path: Path
+) -> None:
+    # A backend started with `--data-dir` resolves a non-default path; the endpoint must hand
+    # back that one, not the platform default the app used to rebuild.
+    custom = tmp_path / "custom-data" / "bastide.db"
+    app.dependency_overrides[get_settings] = lambda: Settings(db_path=custom.as_posix())
+    headers = _register(client)
+
+    response = client.get("/api/v1/settings/data-location", headers=headers)
+
+    assert response.status_code == 200
+    assert response.json() == {"db_path": custom.as_posix(), "data_dir": str(custom.parent)}
+
+
+def test_data_location_follows_the_env_variable(
+    client: TestClient, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    custom = tmp_path / "from-env" / "bastide.db"
+    monkeypatch.setenv("BASTIDE_DB_PATH", str(custom))
+    get_settings.cache_clear()
+    try:
+        headers = _register(client)
+        body = client.get("/api/v1/settings/data-location", headers=headers).json()
+    finally:
+        monkeypatch.delenv("BASTIDE_DB_PATH")
+        get_settings.cache_clear()
+
+    assert body == {"db_path": str(custom), "data_dir": str(custom.parent)}
+
+
+def test_data_location_requires_authentication(client: TestClient) -> None:
+    assert client.get("/api/v1/settings/data-location").status_code == 401

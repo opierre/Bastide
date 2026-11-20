@@ -1,16 +1,17 @@
-"""User settings endpoints: read (lazily created) and partial patch."""
+"""User settings endpoints: read (lazily created), partial patch, and the data location."""
 
 from typing import Annotated
 
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
+from app.core.config import Settings, get_settings
 from app.core.db import get_db
 from app.features.auth.deps import get_current_user
 from app.features.auth.models import User
 from app.features.settings.models import UserSettings
 from app.features.settings.repository import SettingsRepository
-from app.features.settings.schemas import SettingsRead, SettingsUpdate
+from app.features.settings.schemas import DataLocationRead, SettingsRead, SettingsUpdate
 from app.features.settings.service import SettingsService
 
 router = APIRouter(prefix="/api/v1/settings", tags=["settings"])
@@ -49,3 +50,16 @@ async def update_settings(
 ) -> SettingsRead:
     """Patch the supplied settings fields, leaving omitted ones untouched."""
     return _to_read(service.update(user.id, payload))
+
+
+@router.get("/data-location", response_model=DataLocationRead)
+async def read_data_location(
+    settings: Annotated[Settings, Depends(get_settings)],
+    _user: Annotated[User, Depends(get_current_user)],
+) -> DataLocationRead:
+    """Return the datastore path and its folder as this backend resolved them.
+
+    The app shows these rather than rebuilding them, since `--data-dir` or `BASTIDE_DB_PATH`
+    can move the datastore away from the default folder.
+    """
+    return DataLocationRead(db_path=settings.db_path, data_dir=str(settings.data_dir))
