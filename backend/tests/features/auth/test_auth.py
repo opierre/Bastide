@@ -4,8 +4,11 @@ import re
 from unittest.mock import Mock
 
 import pytest
+from fastapi import FastAPI
 from fastapi.testclient import TestClient
+from sqlalchemy import select
 
+from app.core.db import get_db
 from app.core.security import (
     generate_recovery_code,
     hash_password,
@@ -16,7 +19,12 @@ from app.core.security import (
 from app.features.auth.models import User
 from app.features.auth.repository import AuthRepository
 from app.features.auth.schemas import PasswordReset
-from app.features.auth.service import AuthService, InvalidRecoveryCodeError
+from app.features.auth.service import (
+    PASSWORD_MIN_LENGTH,
+    AuthService,
+    InvalidRecoveryCodeError,
+    PasswordTooShortError,
+)
 
 REGISTER_PAYLOAD = {
     "email": "amelie@example.com",
@@ -422,3 +430,104 @@ def test_update_profile_requires_auth(client: TestClient) -> None:
     response = client.patch("/api/v1/auth/me", json={"display_name": "amelie"})
 
     assert response.status_code == 401
+
+
+# Password minimum length: enforced where a password is set, never at login.
+
+SHORT_PASSWORD = "a" * (PASSWORD_MIN_LENGTH - 1)
+MINIMUM_PASSWORD = "a" * PASSWORD_MIN_LENGTH
+
+
+def test_password_minimum_is_twelve() -> None:
+    assert PASSWORD_MIN_LENGTH == 12
+
+
+def test_register_with_11_characters_returns_password_too_short(client: TestClient) -> None:
+    response = client.post(
+        "/api/v1/auth/register", json={**REGISTER_PAYLOAD, "password": SHORT_PASSWORD}
+    )
+
+    assert response.status_code == 422
+    error = response.json()["error"]
+    assert error["code"] == "PASSWORD_TOO_SHORT"
+    assert error["details"] == {"min_length": PASSWORD_MIN_LENGTH}
+    login = client.post(
+        "/api/v1/auth/login",
+        json={"identifier": REGISTER_PAYLOAD["email"], "password": SHORT_PASSWORD},
+    )
+    assert login.status_code == 401
+
+
+def test_register_with_12_characters_succeeds(client: TestClient) -> None:
+    response = client.post(
+        "/api/v1/auth/register", json={**REGISTER_PAYLOAD, "password": MINIMUM_PASSWORD}
+    )
+
+    assert response.status_code == 201
+
+
+def test_password_reset_with_11_characters_returns_password_too_short(
+    client: TestClient,
+) -> None:
+    body = _register(client)
+
+    response = _reset(client, body["recovery_code"], new_password=SHORT_PASSWORD)
+
+    assert response.status_code == 422
+    assert response.json()["error"]["code"] == "PASSWORD_TOO_SHORT"
+    # Nothing changed: the old password still works and the recovery code isn't spent.
+    old_login = client.post(
+        "/api/v1/auth/login",
+        json={"identifier": REGISTER_PAYLOAD["email"], "password": REGISTER_PAYLOAD["password"]},
+    )
+    assert old_login.status_code == 200
+    assert _reset(client, body["recovery_code"]).status_code == 200
+
+
+def test_password_reset_with_12_characters_succeeds(client: TestClient) -> None:
+    body = _register(client)
+
+    response = _reset(client, body["recovery_code"], new_password=MINIMUM_PASSWORD)
+
+    assert response.status_code == 200
+    login = client.post(
+        "/api/v1/auth/login",
+        json={"identifier": REGISTER_PAYLOAD["email"], "password": MINIMUM_PASSWORD},
+    )
+    assert login.status_code == 200
+
+
+def test_password_reset_too_short_is_checked_before_the_recovery_code() -> None:
+    repository = Mock(spec=AuthRepository)
+    service = AuthService(repository)
+
+    with pytest.raises(PasswordTooShortError):
+        service.reset_password(
+            PasswordReset(
+                identifier=REGISTER_PAYLOAD["email"],
+                recovery_code="0000-0000-0000-0000-0000",
+                new_password=SHORT_PASSWORD,
+            )
+        )
+    repository.get_user_by_email.assert_not_called()
+    repository.reset_credentials.assert_not_called()
+
+
+def test_login_with_a_short_legacy_password_still_works(app: FastAPI, client: TestClient) -> None:
+    _register(client)
+    legacy_password = "old-pw"
+    # A password set before the minimum existed: write its hash straight into the database.
+    session = next(app.dependency_overrides[get_db]())
+    try:
+        user = session.scalars(select(User).where(User.email == REGISTER_PAYLOAD["email"])).one()
+        user.password_hash = hash_password(legacy_password)
+        session.commit()
+    finally:
+        session.close()
+
+    response = client.post(
+        "/api/v1/auth/login",
+        json={"identifier": REGISTER_PAYLOAD["email"], "password": legacy_password},
+    )
+
+    assert response.status_code == 200

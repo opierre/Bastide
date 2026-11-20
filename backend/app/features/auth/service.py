@@ -3,7 +3,7 @@
 from collections.abc import Callable
 from datetime import UTC, datetime
 
-from app.core.errors import AuthError, ConflictError, NotFoundError
+from app.core.errors import AuthError, ConflictError, NotFoundError, ValidationError
 from app.core.live_sessions import LiveSessions, get_live_sessions
 from app.core.security import (
     generate_recovery_code,
@@ -17,6 +17,29 @@ from app.features.auth.avatar import AVATAR_CONTENT_TYPE, normalize_avatar
 from app.features.auth.models import AVATAR_IMAGE, AVATAR_MONOGRAM, AuthToken, User, UserAvatar
 from app.features.auth.repository import AuthRepository
 from app.features.auth.schemas import PasswordReset, ProfileUpdate, UserLogin, UserRegister
+
+#: The shortest password accepted when one is set: at registration, at reset, and by any later
+#: password change. Login doesn't check it, so a password set before the rule still signs in.
+PASSWORD_MIN_LENGTH = 12
+
+
+class PasswordTooShortError(ValidationError):
+    """Raised when a new password is shorter than ``PASSWORD_MIN_LENGTH``."""
+
+    code = "PASSWORD_TOO_SHORT"
+
+
+def ensure_password_length(password: str) -> None:
+    """Check a password being set against the minimum length.
+
+    Raises:
+        PasswordTooShortError: the password is shorter than ``PASSWORD_MIN_LENGTH``.
+    """
+    if len(password) < PASSWORD_MIN_LENGTH:
+        raise PasswordTooShortError(
+            f"Password must be at least {PASSWORD_MIN_LENGTH} characters.",
+            details={"min_length": PASSWORD_MIN_LENGTH},
+        )
 
 
 class EmailTakenError(ConflictError):
@@ -78,9 +101,11 @@ class AuthService:
             exists unhashed, so the caller must show it to the user now.
 
         Raises:
+            PasswordTooShortError: the password is shorter than ``PASSWORD_MIN_LENGTH``.
             EmailTakenError: the email is already registered.
             DisplayNameTakenError: the display name is already registered.
         """
+        ensure_password_length(data.password)
         if self._repository.get_user_by_email(data.email) is not None:
             raise EmailTakenError("A user with this email already exists.")
         if self._repository.get_user_by_display_name(data.display_name) is not None:
@@ -121,9 +146,12 @@ class AuthService:
             The user, a new session token, and the replacement plaintext recovery code.
 
         Raises:
+            PasswordTooShortError: the new password is shorter than ``PASSWORD_MIN_LENGTH``.
             InvalidRecoveryCodeError: the identifier is unknown, its user has no recovery code,
                 or the code doesn't match.
         """
+        # Checked first: it says nothing about the user, and spends no recovery code.
+        ensure_password_length(data.new_password)
         user = self._find_user(data.identifier)
         if (
             user is None
