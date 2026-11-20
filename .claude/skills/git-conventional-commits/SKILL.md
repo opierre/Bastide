@@ -83,6 +83,19 @@ BREAKING CHANGE: accounts now require a currency; existing rows need migration <
    rollback possible.
 5. Never amend or force-push shared history; fix forward with a new commit.
 
+## Pull requests
+
+- Title in the same `type(scope): subject` form; body from `.github/pull_request_template.md`,
+  passed with `--body-file`, linking the ticket (`Closes #N`).
+- **Always set a label, the milestone and the project** when opening the PR — the ticket's
+  type label and milestone, and the board's project (title in `.github/board.json`):
+  ```
+  gh pr create --title "feat(accounts): ..." --body-file <file> \
+    --label enhancement --milestone v0.2.0 --project "Bastide Roadmap"
+  ```
+  The **github-project-board** skill covers the fallbacks (no ticket, missing `project` scope,
+  PR already open).
+
 ## What not to commit
 
 - Secrets, local `.env`, the SQLite db file, build artifacts, `__pycache__`, `.dart_tool`,
