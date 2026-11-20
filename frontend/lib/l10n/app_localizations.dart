@@ -7367,23 +7367,11 @@ abstract class AppLocalizations {
   /// **'Utiliser Ollama'**
   String get settingsAiOllamaUse;
 
-  /// Back link above the account detail panel, returning to the accounts list.
-  ///
-  /// In fr, this message translates to:
-  /// **'Tous les comptes'**
-  String get accountDetailBack;
-
   /// Tooltip of the account detail top bar's overflow button.
   ///
   /// In fr, this message translates to:
   /// **'Plus d’actions'**
   String get accountDetailMoreActions;
-
-  /// Section label above an account's headline balance.
-  ///
-  /// In fr, this message translates to:
-  /// **'Solde actuel'**
-  String get accountDetailBalanceLabel;
 
   /// Section label above a deferred card's headline: what its open cycle has charged so far.
   ///
@@ -7391,17 +7379,53 @@ abstract class AppLocalizations {
   /// **'Encours du cycle'**
   String get accountDetailCycleLabel;
 
-  /// Caption under an account's headline balance.
+  /// Label of the account detail's lead figure: the balance today.
   ///
   /// In fr, this message translates to:
-  /// **'Au {date}'**
-  String accountDetailAsOf(String date);
+  /// **'Solde au {date}'**
+  String accountDetailBalanceOn(String date);
 
-  /// Caption under a deferred card's headline: today, and when the open cycle is expected to be debited.
+  /// Summary line label: what came into the account this month.
   ///
   /// In fr, this message translates to:
-  /// **'Au {date} · prélevé le {debit}'**
-  String accountDetailCycleAsOf(String date, String debit);
+  /// **'Entrées en {month}'**
+  String accountDetailMonthInflow(String month);
+
+  /// Summary line label: what left the account this month.
+  ///
+  /// In fr, this message translates to:
+  /// **'Sorties en {month}'**
+  String accountDetailMonthOutflow(String month);
+
+  /// Summary line label: this month's money in plus money out.
+  ///
+  /// In fr, this message translates to:
+  /// **'Net'**
+  String get accountDetailNet;
+
+  /// Summary line label of a deferred card: what its last settled cycle came to.
+  ///
+  /// In fr, this message translates to:
+  /// **'Cycle précédent'**
+  String get accountDetailPreviousCycle;
+
+  /// Summary line label of a deferred card, above the date its open cycle will be debited.
+  ///
+  /// In fr, this message translates to:
+  /// **'Prélevé le'**
+  String get accountDetailDebitDateLabel;
+
+  /// First line at the right of the summary line: the bank and the account type.
+  ///
+  /// In fr, this message translates to:
+  /// **'{institution} · {type}'**
+  String accountDetailIdentity(String institution, String type);
+
+  /// Separator between the history fact and the last-import link on the summary line.
+  ///
+  /// In fr, this message translates to:
+  /// **' · '**
+  String get accountDetailMetaSeparator;
 
   /// Meta strip fact: booking date of the account's earliest transaction.
   ///
@@ -7415,17 +7439,11 @@ abstract class AppLocalizations {
   /// **'Aucune opération'**
   String get accountDetailNoHistory;
 
-  /// Meta strip link to the imports panel: when a statement was last imported into this account.
+  /// Link to the imports panel at the end of the summary line: when a statement was last imported into this account.
   ///
   /// In fr, this message translates to:
-  /// **'Dernier import : {date}'**
+  /// **'dernier import le {date}'**
   String accountDetailLastImport(String date);
-
-  /// Meta strip fact on an account no statement was imported into.
-  ///
-  /// In fr, this message translates to:
-  /// **'Aucun import'**
-  String get accountDetailNoImport;
 
   /// A card number masked to its last four digits.
   ///
@@ -7442,13 +7460,13 @@ abstract class AppLocalizations {
   /// Title of the account detail's month-end balance chart.
   ///
   /// In fr, this message translates to:
-  /// **'Évolution du solde'**
+  /// **'Solde en fin de mois'**
   String get accountDetailBalanceChartTitle;
 
   /// Title of a deferred card's chart: one bar per settlement cycle.
   ///
   /// In fr, this message translates to:
-  /// **'Montant réglé par cycle'**
+  /// **'Dépenses par cycle'**
   String get accountDetailCyclesChartTitle;
 
   /// Balance chart range segment.
@@ -7472,7 +7490,7 @@ abstract class AppLocalizations {
   /// Shown in place of the balance chart while the account has under two months of history.
   ///
   /// In fr, this message translates to:
-  /// **'Le graphique apparaîtra après votre deuxième mois d’historique'**
+  /// **'Le graphique apparaîtra après le deuxième mois d’historique.'**
   String get accountDetailChartEmpty;
 
   /// Ghost button opening the imports panel from the empty balance chart.
@@ -7505,65 +7523,17 @@ abstract class AppLocalizations {
   /// **'En cours'**
   String get accountDetailCycleOpen;
 
-  /// Section label of the account detail's stats card.
+  /// Sentence under the balance chart, shown only when the balance rose at least two month-ends running.
   ///
   /// In fr, this message translates to:
-  /// **'12 derniers mois'**
-  String get accountDetailPeriodLabel;
-
-  /// Stats card row: balance change over the last twelve months.
-  ///
-  /// In fr, this message translates to:
-  /// **'Variation sur 12 mois'**
-  String get accountDetailChange;
-
-  /// Stats card row: everything credited over the last twelve months.
-  ///
-  /// In fr, this message translates to:
-  /// **'Entrées'**
-  String get accountDetailInflow;
-
-  /// Stats card row: everything debited over the last twelve months.
-  ///
-  /// In fr, this message translates to:
-  /// **'Sorties'**
-  String get accountDetailOutflow;
-
-  /// Encouraging line under the stats, shown only when the balance rose at least two month-ends running.
-  ///
-  /// In fr, this message translates to:
-  /// **'Votre solde progresse depuis {count} mois consécutifs.'**
+  /// **'Votre solde progresse depuis {count} mois.'**
   String accountDetailRisingStreak(int count);
 
-  /// Section label of a deferred card's stats card.
+  /// Summary line label of a deferred card: the mean of its last settled cycles.
   ///
   /// In fr, this message translates to:
-  /// **'Cycles réglés'**
-  String get accountDetailCyclesPeriod;
-
-  /// Deferred card stats row: the mean settled cycle.
-  ///
-  /// In fr, this message translates to:
-  /// **'Moyenne par cycle'**
-  String get accountDetailCycleAverage;
-
-  /// Deferred card stats row: the settled cycle that charged the most, and its month.
-  ///
-  /// In fr, this message translates to:
-  /// **'Cycle le plus élevé · {month}'**
-  String accountDetailCycleHighest(String month);
-
-  /// Deferred card stats row: the latest settled cycle, and its month.
-  ///
-  /// In fr, this message translates to:
-  /// **'Dernier cycle réglé · {month}'**
-  String accountDetailCycleLast(String month);
-
-  /// Encouraging line on a deferred card, shown only when its settled cycles fell at least twice running.
-  ///
-  /// In fr, this message translates to:
-  /// **'Vos dépenses par carte baissent depuis {count} cycles.'**
-  String accountDetailFallingStreak(int count);
+  /// **'Moyenne sur {count} cycles'**
+  String accountDetailCycleAverage(int count);
 
   /// Stats card value while there is nothing to measure yet.
   ///
@@ -7577,17 +7547,11 @@ abstract class AppLocalizations {
   /// **'Cartes rattachées'**
   String get accountDetailLinkedTitle;
 
-  /// Caption beside the linked cards title.
+  /// Neutral text on a linked card's row: the card is debited once a cycle.
   ///
   /// In fr, this message translates to:
-  /// **'Cartes à débit différé réglées sur ce compte'**
-  String get accountDetailLinkedCaption;
-
-  /// Label beside a linked card's open-cycle total.
-  ///
-  /// In fr, this message translates to:
-  /// **'En cours ce mois'**
-  String get accountDetailThisCycle;
+  /// **'Débit différé'**
+  String get accountDetailDeferredDebit;
 
   /// Caption under a linked card's open-cycle total: its expected debit date.
   ///
@@ -7607,12 +7571,6 @@ abstract class AppLocalizations {
   /// **'Règle de règlement à configurer'**
   String get accountDetailRuleMissing;
 
-  /// Dashed row shown when no deferred card is settled on this account.
-  ///
-  /// In fr, this message translates to:
-  /// **'Aucune carte rattachée'**
-  String get accountDetailNoCards;
-
   /// Accessible label of the chevron opening another account's detail.
   ///
   /// In fr, this message translates to:
@@ -7625,12 +7583,6 @@ abstract class AppLocalizations {
   /// **'Compte de règlement'**
   String get accountDetailSettleTitle;
 
-  /// Caption beside the settlement account title.
-  ///
-  /// In fr, this message translates to:
-  /// **'Le compte débité à chaque fin de cycle'**
-  String get accountDetailSettleCaption;
-
   /// Dashed row on a deferred card that names no paying account.
   ///
   /// In fr, this message translates to:
@@ -7640,7 +7592,7 @@ abstract class AppLocalizations {
   /// A deferred card's settlement rule: the label fragment it matches and its start date.
   ///
   /// In fr, this message translates to:
-  /// **'Libellé : {pattern} · Appliquée depuis le {date}'**
+  /// **'Libellé : {pattern} · appliquée depuis le {date}'**
   String accountDetailRuleSummary(String pattern, String date);
 
   /// A deferred card's settlement rule, when it has no start date.
@@ -7648,12 +7600,6 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Libellé : {pattern}'**
   String accountDetailRuleSummaryUndated(String pattern);
-
-  /// Shown on a deferred card without a settlement rule.
-  ///
-  /// In fr, this message translates to:
-  /// **'Aucune règle de règlement : le prélèvement compte encore comme une dépense'**
-  String get accountDetailNoRule;
 
   /// Ghost button opening a deferred card's settlement rule dialog.
   ///
@@ -7721,16 +7667,40 @@ abstract class AppLocalizations {
   /// **'{card} est liée à ce compte'**
   String linkCardLinked(String card);
 
-  /// Title of the account detail's recent transactions card.
+  /// Heading of the account detail's latest transactions.
   ///
   /// In fr, this message translates to:
-  /// **'Dernières opérations'**
+  /// **'Opérations'**
   String get accountDetailRecentTitle;
 
-  /// Link opening the transactions panel filtered on this account.
+  /// Column header of the account detail's transactions table.
   ///
   /// In fr, this message translates to:
-  /// **'Tout voir'**
+  /// **'Opération'**
+  String get accountDetailColumnOperation;
+
+  /// Column header of the account detail's transactions table.
+  ///
+  /// In fr, this message translates to:
+  /// **'Catégorie'**
+  String get accountDetailColumnCategory;
+
+  /// Column header of the account detail's transactions table.
+  ///
+  /// In fr, this message translates to:
+  /// **'Date'**
+  String get accountDetailColumnDate;
+
+  /// Column header of the account detail's transactions table.
+  ///
+  /// In fr, this message translates to:
+  /// **'Montant'**
+  String get accountDetailColumnAmount;
+
+  /// Link beside the transactions heading: opens the Transactions panel filtered on this account.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ouvrir dans Transactions'**
   String get accountDetailSeeAll;
 
   /// Dashed row in the recent transactions card of an account with none.

@@ -5,6 +5,7 @@ import 'package:bastide/core/widgets/chart_container.dart';
 import 'package:bastide/core/widgets/chart_frame.dart';
 import 'package:bastide/core/widgets/chart_scale.dart';
 import 'package:bastide/core/widgets/chart_style.dart';
+import 'package:bastide/core/widgets/line_area_chart.dart';
 import 'package:bastide/core/widgets/step_line_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -207,6 +208,79 @@ void main() {
         paints..path(
           color: dark.textTertiary,
           strokeWidth: AppChart.secondLineStroke,
+        ),
+      );
+    });
+  });
+
+  group('LineAreaChart', () {
+    testWidgets('an accent line over its 10 % area, a dot per point and a '
+        'larger one on the last', (tester) async {
+      await pumpHost(
+        tester,
+        sized(
+          const LineAreaChart(values: [100, 120, 110, 150], labels: months),
+        ),
+      );
+      expect(
+        plotOf(LineAreaChart),
+        gridlines()
+          ..path(color: dark.accent.withValues(alpha: AppChart.areaAlpha))
+          ..path(color: dark.accent, strokeWidth: AppChart.lineStroke)
+          ..circle(color: dark.bg)
+          ..circle(color: dark.accent, radius: AppChart.pointDotRadius)
+          ..circle(color: dark.bg)
+          ..circle(color: dark.accent, radius: AppChart.pointDotRadius)
+          ..circle(color: dark.bg)
+          ..circle(color: dark.accent, radius: AppChart.pointDotRadius)
+          ..circle(color: dark.bg)
+          ..circle(color: dark.accent, radius: AppChart.currentDotRadius),
+      );
+      expect(
+        plotOf(LineAreaChart),
+        isNot(paints..line(color: dark.lineStrong)),
+      );
+    });
+
+    testWidgets('a series crossing zero draws the zero line and a negative '
+        'area under it', (tester) async {
+      await pumpHost(
+        tester,
+        sized(
+          const LineAreaChart(
+            values: [12000, -4000, 8000, 3000],
+            labels: months,
+          ),
+        ),
+      );
+      expect(LineAreaChart.crossesZero(const [1, -1]), isTrue);
+      expect(LineAreaChart.crossesZero(const [1, 2]), isFalse);
+      expect(
+        plotOf(LineAreaChart),
+        gridlines()
+          ..line(color: dark.lineStrong, strokeWidth: 1)
+          ..path(color: dark.accent.withValues(alpha: AppChart.areaAlpha))
+          ..path(
+            color: dark.negative.withValues(alpha: AppChart.negativeAreaAlpha),
+          )
+          ..path(color: dark.accent, strokeWidth: AppChart.lineStroke),
+      );
+    });
+
+    testWidgets('past 24 points only the last keeps its dot', (tester) async {
+      await pumpHost(
+        tester,
+        sized(
+          LineAreaChart(
+            values: [for (var i = 0; i < 30; i++) i * 10],
+            labels: [for (var i = 0; i < 30; i++) ''],
+          ),
+        ),
+      );
+      expect(
+        plotOf(LineAreaChart),
+        isNot(
+          paints..circle(color: dark.accent, radius: AppChart.pointDotRadius),
         ),
       );
     });

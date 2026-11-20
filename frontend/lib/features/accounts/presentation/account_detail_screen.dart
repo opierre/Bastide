@@ -2,38 +2,45 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
+import 'package:lucide_icons_flutter/lucide_icons_300.dart';
 
 import '../../../core/l10n/card_display.dart';
+import '../../../core/l10n/category_display.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/tokens.dart';
 import '../../../core/widgets/amount_text.dart';
-import '../../../core/widgets/app_card.dart';
+import '../../../core/widgets/app_button.dart';
 import '../../../core/widgets/app_segmented.dart';
-import '../../../core/widgets/area_line.dart';
-import '../../../core/widgets/dashed_border.dart';
+import '../../../core/widgets/app_table.dart';
+import '../../../core/widgets/bar_charts.dart';
+import '../../../core/widgets/category_label.dart';
 import '../../../core/widgets/institution_avatar.dart';
+import '../../../core/widgets/line_area_chart.dart';
+import '../../../core/widgets/monogram_avatar.dart';
+import '../../../core/widgets/note_line.dart';
+import '../../../core/widgets/section_heading.dart';
 import '../../../core/widgets/state_views.dart';
 import '../../../core/widgets/status_text.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../imports/presentation/imports_screen.dart';
 import '../../transactions/application/transactions_controller.dart';
-import '../../transactions/presentation/transaction_row.dart';
+import '../../transactions/domain/transaction.dart';
 import '../../transactions/presentation/transactions_screen.dart';
 import '../application/account_detail_controller.dart';
 import '../domain/account.dart';
 import '../domain/account_overview.dart';
 import 'account_error_localizer.dart';
 import 'account_type_label.dart';
-import 'cycle_bars.dart';
 import 'link_card_dialog.dart';
 import 'settlement_rule_dialog.dart';
 
-/// One account, in depth: its balance and how it moved, the deferred cards on
-/// either side of it, and its latest transactions
-/// (`docs/design/16-account-detail.md`).
+/// One account, in depth (`docs/design/16-account-detail.md`): a summary
+/// line, the month-end balance chart, the deferred cards on either side of
+/// it, and its latest operations. Sections separated by space and a
+/// hairline, no card around any of them (`00` §1).
 ///
 /// A view *within* « Comptes »: the sidebar keeps that section selected and
-/// the top bar names the account, with a link back to the list.
+/// the title bar names the account under a « Comptes / » crumb.
 class AccountDetailScreen extends ConsumerWidget {
   const AccountDetailScreen({super.key, required this.accountId});
 
@@ -60,95 +67,92 @@ class AccountDetailScreen extends ConsumerWidget {
     return ListView(
       key: const Key('screen-account-detail'),
       padding: const EdgeInsets.symmetric(
-        horizontal: AppSpacing.contentX,
-        vertical: AppSpacing.contentY,
+        horizontal: AppSpacing.pageX,
+        vertical: AppSpacing.pageY,
       ),
-      children: [
-        const Align(alignment: Alignment.centerLeft, child: _BackLink()),
-        const SizedBox(height: AppSpacing.md),
-        ...switch (overview) {
-          AsyncData(:final value) => [
-            _IdentityCard(overview: value),
-            const SizedBox(height: AppSpacing.gridGap),
-            SizedBox(
-              height: _chartRowHeight,
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Expanded(flex: 2, child: _ChartCard(overview: value)),
-                  const SizedBox(width: AppSpacing.gridGap),
-                  Expanded(
-                    child: value.settlement == null
-                        ? _PeriodStatsCard(overview: value)
-                        : _CycleStatsCard(
-                            settlement: value.settlement!,
-                            currency: value.account.currency,
-                          ),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: AppSpacing.gridGap),
-            if (value.settlement case final settlement?)
-              _SettlementSection(card: value.account, settlement: settlement)
-            else
-              _LinkedCardsSection(overview: value),
-            const SizedBox(height: AppSpacing.gridGap),
-            _RecentTransactionsCard(accountId: accountId),
+      children: switch (overview) {
+        AsyncData(:final value) => [
+          _SummaryLine(overview: value),
+          const _SectionBreak(),
+          _ChartBlock(overview: value),
+          if (value.settlement case final settlement?) ...[
+            const _SectionBreak(),
+            _SettlementBlock(card: value.account, settlement: settlement),
+          ] else if (value.linkedCards.isNotEmpty) ...[
+            const _SectionBreak(),
+            _LinkedCardsBlock(overview: value),
           ],
-          AsyncError(:final error) => [
-            SizedBox(
-              height: 420,
-              child: ErrorStateView(
-                message: localizeAccountError(l10n, error),
-                messageKey: const Key('accountDetailErrorText'),
-                retryLabel: l10n.accountsRetry,
-                retryKey: const Key('accountDetailRetryButton'),
-                onRetry: () =>
-                    ref.invalidate(accountOverviewProvider(accountId)),
-              ),
+          const _SectionBreak(),
+          _OperationsBlock(accountId: accountId),
+        ],
+        AsyncError(:final error) => [
+          SizedBox(
+            height: 420,
+            child: ErrorStateView(
+              message: localizeAccountError(l10n, error),
+              messageKey: const Key('accountDetailErrorText'),
+              retryLabel: l10n.accountsRetry,
+              retryKey: const Key('accountDetailRetryButton'),
+              onRetry: () => ref.invalidate(accountOverviewProvider(accountId)),
             ),
-          ],
-          _ => const [_DetailSkeleton()],
-        },
-      ],
+          ),
+        ],
+        _ => const [_DetailSkeleton()],
+      },
     );
   }
 }
-
-/// The balance chart and the stats card beside it share one fixed height, so
-/// the row reads as one band whatever each holds.
-const _chartRowHeight = 300.0;
 
 String _locale(BuildContext context) =>
     Localizations.localeOf(context).toString();
 
-class _BackLink extends StatelessWidget {
-  const _BackLink();
+/// The chart's height, its 22 px category axis included.
+const _chartHeight = 220.0;
+
+/// The room the summary line keeps for its two right-hand lines, which wrap
+/// within it.
+const _factsMinWidth = 240.0;
+
+/// The fixed widths of the tables' right-hand columns.
+const _dateColumn = 96.0;
+const _amountColumn = 136.0;
+const _chevronColumn = AppSizes.icon + AppSpacing.smPlus;
+
+/// 24 px, a hairline, 24 px: the gap between two sections (`00` §1.2).
+class _SectionBreak extends StatelessWidget {
+  const _SectionBreak();
 
   @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
-    return TextButton.icon(
-      key: const Key('accountDetailBack'),
-      onPressed: () => context.go('/accounts'),
-      style: TextButton.styleFrom(
-        foregroundColor: context.colors.textSecondary,
-        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xs),
-        minimumSize: Size.zero,
-        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-        textStyle: Theme.of(context).textTheme.bodyMedium,
-      ),
-      icon: const Icon(Icons.chevron_left_rounded, size: 16),
-      label: Text(l10n.accountDetailBack),
-    );
-  }
+  Widget build(BuildContext context) => Padding(
+    padding: const EdgeInsets.symmetric(vertical: AppSpacing.section),
+    child: Divider(height: 1, thickness: 1, color: context.colors.line),
+  );
 }
 
-// ── Row 1: identity and headline ────────────────────────────────────────────
+// ── 1. Summary line ─────────────────────────────────────────────────────────
 
-class _IdentityCard extends StatelessWidget {
-  const _IdentityCard({required this.overview});
+/// One item of the summary line (`00` §7): a 12 `textSecondary` label over
+/// its figure.
+class _SummaryItem extends StatelessWidget {
+  const _SummaryItem({super.key, required this.label, required this.figure});
+
+  final String label;
+  final Widget figure;
+
+  @override
+  Widget build(BuildContext context) => Column(
+    mainAxisAlignment: MainAxisAlignment.end,
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      Text(label, style: context.textStyles.statLabel),
+      const SizedBox(height: AppSpacing.xs),
+      figure,
+    ],
+  );
+}
+
+class _SummaryLine extends StatelessWidget {
+  const _SummaryLine({required this.overview});
 
   final AccountOverview overview;
 
@@ -156,274 +160,270 @@ class _IdentityCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final textTheme = Theme.of(context).textTheme;
-    final account = overview.account;
-    final settlement = overview.settlement;
     final locale = _locale(context);
-    final today = DateFormat.yMMMd(locale).format(DateTime.now());
-    final debit = settlement?.nextDebitDate;
+    final account = overview.account;
+    final currency = account.currency;
+    final settlement = overview.settlement;
+    final minor = tabularNumberStyle(textTheme.headlineMedium!);
 
-    return AppCard(
-      key: const Key('accountDetailIdentity'),
-      padding: const EdgeInsets.all(AppSpacing.cardPaddingWide),
-      child: Column(
+    Widget amount(int? value) => value == null
+        ? Text(l10n.accountDetailNoStats, style: minor)
+        : AmountText(
+            amountMinor: value,
+            currency: currency,
+            showPositiveSign: true,
+            colorize: false,
+            maxLines: 1,
+            style: minor,
+          );
+
+    // The headline is the one place a positive balance takes `positive`
+    // (`00` §2.3); a card's open cycle is spending, so it reads `negative`.
+    final lead = _SummaryItem(
+      key: const Key('accountDetailHeadline'),
+      label: settlement == null
+          ? l10n.accountDetailBalanceOn(
+              DateFormat.yMMMMd(
+                locale,
+              ).format(overview.balanceDate ?? DateTime.now()),
+            )
+          : l10n.accountDetailCycleLabel,
+      figure: AmountText(
+        amountMinor: settlement?.currentCycleMinor ?? account.balanceMinor,
+        currency: currency,
+        showPositiveSign: true,
+        maxLines: 1,
+        style: tabularNumberStyle(textTheme.displayLarge!),
+      ),
+    );
+
+    final List<Widget> items;
+    if (settlement == null) {
+      final month = DateFormat.MMMM(locale).format(overview.month.since);
+      items = [
+        _SummaryItem(
+          key: const Key('accountDetailMonthInflow'),
+          label: l10n.accountDetailMonthInflow(month),
+          figure: amount(overview.month.inflowMinor),
+        ),
+        _SummaryItem(
+          key: const Key('accountDetailMonthOutflow'),
+          label: l10n.accountDetailMonthOutflow(month),
+          figure: amount(overview.month.outflowMinor),
+        ),
+        _SummaryItem(
+          key: const Key('accountDetailMonthNet'),
+          label: l10n.accountDetailNet,
+          figure: amount(overview.month.netMinor),
+        ),
+      ];
+    } else {
+      final debit = settlement.nextDebitDate;
+      items = [
+        _SummaryItem(
+          key: const Key('accountDetailPreviousCycle'),
+          label: l10n.accountDetailPreviousCycle,
+          figure: amount(settlement.lastClosed?.amountMinor),
+        ),
+        _SummaryItem(
+          key: const Key('accountDetailCycleAverage'),
+          label: l10n.accountDetailCycleAverage(averagedCycles),
+          figure: amount(settlement.averageClosedMinor),
+        ),
+        _SummaryItem(
+          key: const Key('accountDetailDebitDate'),
+          label: l10n.accountDetailDebitDateLabel,
+          figure: Text(
+            debit == null
+                ? l10n.accountDetailNoStats
+                : DateFormat.MMMd(locale).format(debit),
+            style: minor,
+          ),
+        ),
+      ];
+    }
+
+    // The figures share one height, so the hairlines between them run from
+    // the top of the lead label to the foot of the figures.
+    final figures = IntrinsicHeight(
+      child: Row(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Row(
-            children: [
-              InstitutionAvatar(name: account.institution, size: 48),
-              const SizedBox(width: AppSpacing.md),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      account.name,
-                      style: textTheme.headlineMedium?.copyWith(
-                        fontFamily: AppFonts.geist,
-                      ),
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    const SizedBox(height: 6),
-                    Wrap(
-                      spacing: AppSpacing.sm + 2,
-                      runSpacing: AppSpacing.xs,
-                      crossAxisAlignment: WrapCrossAlignment.center,
-                      children: [
-                        Text(
-                          account.institution,
-                          style: textTheme.bodySmall?.copyWith(
-                            color: context.colors.textSecondary,
-                          ),
-                        ),
-                        StatusText(label: accountTypeLabel(l10n, account.type)),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(width: AppSpacing.lg),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  Text(
-                    (settlement == null
-                            ? l10n.accountDetailBalanceLabel
-                            : l10n.accountDetailCycleLabel)
-                        .toUpperCase(),
-                    style: context.textStyles.sectionLabel,
-                  ),
-                  const SizedBox(height: AppSpacing.xs),
-                  // The headline is this panel's data point, so it carries the
-                  // sign colors; a card's open cycle is spending, so it reads red.
-                  AmountText(
-                    key: const Key('accountDetailHeadline'),
-                    amountMinor:
-                        settlement?.currentCycleMinor ?? account.balanceMinor,
-                    currency: account.currency,
-                    showPositiveSign: true,
-                    style: textTheme.displayLarge!,
-                  ),
-                  const SizedBox(height: AppSpacing.xs),
-                  Text(
-                    debit == null
-                        ? l10n.accountDetailAsOf(today)
-                        : l10n.accountDetailCycleAsOf(
-                            today,
-                            DateFormat.MMMd(locale).format(debit),
-                          ),
-                    style: textTheme.bodySmall?.copyWith(
-                      color: context.colors.textSecondary,
-                    ),
-                  ),
-                ],
-              ),
-            ],
+          lead,
+          for (final item in items) ...[
+            const SizedBox(width: AppSpacing.xxl / 2),
+            VerticalDivider(width: 1, thickness: 1, color: context.colors.line),
+            const SizedBox(width: AppSpacing.xxl / 2),
+            item,
+          ],
+        ],
+      ),
+    );
+
+    return LayoutBuilder(
+      builder: (context, constraints) => Row(
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: [
+          // At 1440 px the figures fit at their size; a narrower window
+          // shrinks them rather than truncating a figure.
+          ConstrainedBox(
+            constraints: BoxConstraints(
+              maxWidth: constraints.maxWidth - _factsMinWidth - AppSpacing.xxl,
+            ),
+            child: FittedBox(
+              fit: BoxFit.scaleDown,
+              alignment: Alignment.bottomLeft,
+              child: figures,
+            ),
           ),
-          const SizedBox(height: AppSpacing.gridGap),
-          Divider(height: 1, color: context.colors.line),
-          const SizedBox(height: 14),
-          _MetaStrip(overview: overview),
+          const SizedBox(width: AppSpacing.xxl),
+          Expanded(child: _AccountFacts(overview: overview)),
         ],
       ),
     );
   }
 }
 
-/// Two or three inline facts along the identity card's foot. Wraps to a second
-/// line rather than truncating: French labels run long.
-class _MetaStrip extends StatelessWidget {
-  const _MetaStrip({required this.overview});
+/// The two right-aligned lines closing the summary line: the bank and type,
+/// then how far the history goes and when it was last imported. French runs
+/// long: they wrap, never truncate.
+class _AccountFacts extends StatelessWidget {
+  const _AccountFacts({required this.overview});
 
   final AccountOverview overview;
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final locale = _locale(context);
-    final date = DateFormat.yMMMd(locale);
-    final digits = overview.settlement?.cardLastDigits;
+    final style = context.textStyles.statLabel;
+    final date = DateFormat.yMMMd(_locale(context));
+    final account = overview.account;
     final first = overview.firstTransactionDate;
     final imported = overview.lastImportAt;
 
-    return Wrap(
-      spacing: 28,
-      runSpacing: AppSpacing.sm,
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.end,
+      crossAxisAlignment: CrossAxisAlignment.end,
       children: [
-        if (digits != null)
-          _MetaFact(
-            icon: Icons.credit_card_rounded,
-            text: l10n.accountDetailMaskedNumber(digits),
+        Text(
+          l10n.accountDetailIdentity(
+            account.institution,
+            accountTypeLabel(l10n, account.type),
           ),
-        _MetaFact(
+          textAlign: TextAlign.end,
+          style: style,
+        ),
+        const SizedBox(height: AppSpacing.xs),
+        Wrap(
           key: const Key('accountDetailHistory'),
-          icon: Icons.calendar_today_outlined,
-          text: first == null
-              ? l10n.accountDetailNoHistory
-              : l10n.accountDetailHistorySince(date.format(first)),
-        ),
-        _MetaFact(
-          key: const Key('accountDetailLastImport'),
-          icon: Icons.download_rounded,
-          text: imported == null
-              ? l10n.accountDetailNoImport
-              : l10n.accountDetailLastImport(date.format(imported.toLocal())),
-          onTap: imported == null ? null : () => context.go(ImportsScreen.path),
+          alignment: WrapAlignment.end,
+          crossAxisAlignment: WrapCrossAlignment.center,
+          children: [
+            Text(
+              first == null
+                  ? l10n.accountDetailNoHistory
+                  : l10n.accountDetailHistorySince(date.format(first)),
+              style: tabularNumberStyle(style),
+            ),
+            if (first != null && imported != null) ...[
+              Text(l10n.accountDetailMetaSeparator, style: style),
+              _Link(
+                key: const Key('accountDetailLastImport'),
+                label: l10n.accountDetailLastImport(
+                  DateFormat.MMMd(_locale(context)).format(imported.toLocal()),
+                ),
+                small: true,
+                onTap: () => context.go(ImportsScreen.path),
+              ),
+            ],
+          ],
         ),
       ],
     );
   }
 }
 
-class _MetaFact extends StatelessWidget {
-  const _MetaFact({
-    super.key,
-    required this.icon,
-    required this.text,
-    this.onTap,
-  });
+// ── 2. Balance chart, or a card's cycles ────────────────────────────────────
 
-  final IconData icon;
-  final String text;
-  final VoidCallback? onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final style = Theme.of(context).textTheme.bodySmall?.copyWith(
-      fontSize: 12,
-      color: context.colors.textSecondary,
-      decoration: onTap == null ? null : TextDecoration.underline,
-      decorationColor: context.colors.lineStrong,
-    );
-    final fact = Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Icon(icon, size: 11, color: context.colors.textSecondary),
-        const SizedBox(width: 7),
-        Text(text, style: tabularNumberStyle(style!)),
-      ],
-    );
-    if (onTap == null) return fact;
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(AppRadii.xs),
-      child: fact,
-    );
-  }
-}
-
-// ── Row 2: chart and stats ──────────────────────────────────────────────────
-
-class _ChartCard extends ConsumerWidget {
-  const _ChartCard({required this.overview});
+class _ChartBlock extends ConsumerWidget {
+  const _ChartBlock({required this.overview});
 
   final AccountOverview overview;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context)!;
-    final textTheme = Theme.of(context).textTheme;
     final accountId = overview.account.id;
     final settlement = overview.settlement;
+    final hasData = settlement == null
+        ? overview.hasChartHistory
+        : settlement.cycles.isNotEmpty;
 
-    final Widget body;
-    if (settlement != null) {
-      body = settlement.cycles.isEmpty
-          ? const _ChartEmpty()
-          : _CycleChart(
-              accountId: accountId,
-              settlement: settlement,
-              currency: overview.account.currency,
-            );
-    } else if (!overview.hasChartHistory) {
-      body = const _ChartEmpty();
-    } else {
-      body = _BalanceChart(
-        accountId: accountId,
-        currency: overview.account.currency,
-        history: overview.balanceHistory,
-      );
-    }
-
-    return AppCard(
+    return Column(
       key: const Key('accountDetailChart'),
-      padding: const EdgeInsets.fromLTRB(22, 20, 22, AppSpacing.md),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        SectionHeading(
+          title: settlement == null
+              ? l10n.accountDetailBalanceChartTitle
+              : l10n.accountDetailCyclesChartTitle,
+          trailing: hasData
+              ? AppSegmented<BalanceRange>(
+                  segments: [
+                    AppSegment(
+                      key: const Key('accountDetailRange-six'),
+                      value: BalanceRange.sixMonths,
+                      label: l10n.accountDetailRangeSixMonths,
+                    ),
+                    AppSegment(
+                      key: const Key('accountDetailRange-twelve'),
+                      value: BalanceRange.twelveMonths,
+                      label: l10n.accountDetailRangeTwelveMonths,
+                    ),
+                    AppSegment(
+                      key: const Key('accountDetailRange-all'),
+                      value: BalanceRange.all,
+                      label: l10n.accountDetailRangeAll,
+                    ),
+                  ],
+                  value: ref.watch(balanceRangeControllerProvider(accountId)),
+                  onChanged: ref
+                      .read(balanceRangeControllerProvider(accountId).notifier)
+                      .select,
+                )
+              : null,
+        ),
+        const SizedBox(height: AppSpacing.xs),
+        if (!hasData)
+          const _ChartEmpty()
+        else ...[
           SizedBox(
-            height: 34,
-            child: Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    settlement == null
-                        ? l10n.accountDetailBalanceChartTitle
-                        : l10n.accountDetailCyclesChartTitle,
-                    style: textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.w600,
-                    ),
+            height: _chartHeight,
+            child: settlement == null
+                ? _BalanceChart(
+                    accountId: accountId,
+                    currency: overview.account.currency,
+                    history: overview.balanceHistory,
+                  )
+                : _CycleChart(
+                    accountId: accountId,
+                    settlement: settlement,
+                    currency: overview.account.currency,
                   ),
-                ),
-                if (settlement == null
-                    ? overview.hasChartHistory
-                    : settlement.cycles.isNotEmpty)
-                  SizedBox(
-                    width: 240,
-                    child: AppSegmented<BalanceRange>(
-                      segments: [
-                        AppSegment(
-                          key: const Key('accountDetailRange-six'),
-                          value: BalanceRange.sixMonths,
-                          label: l10n.accountDetailRangeSixMonths,
-                        ),
-                        AppSegment(
-                          key: const Key('accountDetailRange-twelve'),
-                          value: BalanceRange.twelveMonths,
-                          label: l10n.accountDetailRangeTwelveMonths,
-                        ),
-                        AppSegment(
-                          key: const Key('accountDetailRange-all'),
-                          value: BalanceRange.all,
-                          label: l10n.accountDetailRangeAll,
-                        ),
-                      ],
-                      value: ref.watch(
-                        balanceRangeControllerProvider(accountId),
-                      ),
-                      onChanged: ref
-                          .read(
-                            balanceRangeControllerProvider(accountId).notifier,
-                          )
-                          .select,
-                    ),
-                  ),
-              ],
-            ),
           ),
-          const SizedBox(height: AppSpacing.md),
-          Expanded(child: body),
+          // Said only when true; never a sentence about a decline.
+          if (settlement == null && overview.period.isOnStreak) ...[
+            const SizedBox(height: AppSpacing.sm),
+            Text(
+              l10n.accountDetailRisingStreak(
+                overview.period.consecutiveRisingMonths,
+              ),
+              key: const Key('accountDetailStreak'),
+              style: context.textStyles.statLabel,
+            ),
+          ],
         ],
-      ),
+      ],
     );
   }
 }
@@ -435,6 +435,11 @@ String Function(num) _compactMoney(BuildContext context, String currency) {
   );
   return (minor) => format.format(minor / 100);
 }
+
+/// Past a year the axis labels every other period, anchored on the latest,
+/// so it never crowds.
+String _axisLabel(int index, int count, String label) =>
+    count > 12 && (count - 1 - index).isOdd ? '' : label;
 
 class _BalanceChart extends ConsumerWidget {
   const _BalanceChart({
@@ -450,6 +455,8 @@ class _BalanceChart extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context)!;
+    final textTheme = Theme.of(context).textTheme;
+    final colors = context.colors;
     final locale = _locale(context);
     final points = ref.watch(visibleBalanceHistoryProvider(accountId));
     // The first visible point's predecessor sits outside the range, but its
@@ -458,85 +465,55 @@ class _BalanceChart extends ConsumerWidget {
     final month = DateFormat.MMM(locale);
     final title = DateFormat.yMMMM(locale);
 
-    return AreaLine(
+    InlineSpan tooltip(int i) {
+      final delta = offset + i == 0
+          ? null
+          : points[i].balanceMinor - history[offset + i - 1].balanceMinor;
+      return TextSpan(
+        children: [
+          TextSpan(
+            text: '${title.format(points[i].monthEnd)}\n',
+            style: textTheme.labelSmall?.copyWith(color: colors.textSecondary),
+          ),
+          TextSpan(
+            text:
+                '${formatAmount(amountMinor: points[i].balanceMinor, currency: currency, locale: locale)}\n',
+            style: tabularNumberStyle(textTheme.titleSmall!),
+          ),
+          TextSpan(
+            text: delta == null
+                ? l10n.accountDetailTooltipFirstMonth
+                : l10n.accountDetailTooltipDelta(
+                    formatAmount(
+                      amountMinor: delta,
+                      currency: currency,
+                      locale: locale,
+                      showPositiveSign: true,
+                    ),
+                  ),
+            style: tabularNumberStyle(textTheme.labelSmall!).copyWith(
+              color: switch (delta) {
+                null || 0 => colors.textSecondary,
+                > 0 => colors.positive,
+                _ => colors.negative,
+              },
+            ),
+          ),
+        ],
+      );
+    }
+
+    return LineAreaChart(
       key: const Key('accountDetailBalanceChart'),
-      color: context.colors.textTertiary,
-      markZero: true,
-      gridlines: 2,
       // Minor units: no gridline on cents.
       minStep: 100,
       values: [for (final point in points) point.balanceMinor],
       labels: [
         for (var i = 0; i < points.length; i++)
-          // An all-history chart labels every other month, anchored on the
-          // latest, so the axis never crowds.
-          points.length > 12 && (points.length - 1 - i).isOdd
-              ? ''
-              : month.format(points[i].monthEnd),
+          _axisLabel(i, points.length, month.format(points[i].monthEnd)),
       ],
       valueLabel: _compactMoney(context, currency),
-      tooltips: [
-        for (var i = 0; i < points.length; i++)
-          _tooltip(
-            context,
-            title: title.format(points[i].monthEnd),
-            value: formatAmount(
-              amountMinor: points[i].balanceMinor,
-              currency: currency,
-              locale: locale,
-            ),
-            delta: offset + i == 0
-                ? null
-                : points[i].balanceMinor - history[offset + i - 1].balanceMinor,
-            currency: currency,
-            l10n: l10n,
-          ),
-      ],
-    );
-  }
-
-  InlineSpan _tooltip(
-    BuildContext context, {
-    required String title,
-    required String value,
-    required int? delta,
-    required String currency,
-    required AppLocalizations l10n,
-  }) {
-    final textTheme = Theme.of(context).textTheme;
-    final deltaColor = switch (delta) {
-      null || 0 => context.colors.textSecondary,
-      > 0 => context.colors.positive,
-      _ => context.colors.negative,
-    };
-    return TextSpan(
-      children: [
-        TextSpan(
-          text: '$title\n',
-          style: textTheme.labelSmall?.copyWith(
-            color: context.colors.textSecondary,
-          ),
-        ),
-        TextSpan(
-          text: '$value\n',
-          style: tabularNumberStyle(textTheme.titleSmall!),
-        ),
-        TextSpan(
-          text: delta == null
-              ? l10n.accountDetailTooltipFirstMonth
-              : l10n.accountDetailTooltipDelta(
-                  formatAmount(
-                    amountMinor: delta,
-                    currency: currency,
-                    locale: _locale(context),
-                    showPositiveSign: true,
-                  ),
-                ),
-          style: tabularNumberStyle(
-            textTheme.labelSmall!,
-          ).copyWith(color: deltaColor),
-        ),
-      ],
+      tooltips: [for (var i = 0; i < points.length; i++) tooltip(i)],
     );
   }
 }
@@ -556,6 +533,7 @@ class _CycleChart extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context)!;
     final textTheme = Theme.of(context).textTheme;
+    final colors = context.colors;
     final locale = _locale(context);
     final cycles = ref
         .watch(balanceRangeControllerProvider(accountId))
@@ -564,45 +542,45 @@ class _CycleChart extends ConsumerWidget {
     final day = DateFormat.yMMMd(locale);
     // The open cycle is labelled by the month it will be debited in, else
     // the month after the last settlement.
-    String label(SettlementCycle cycle) {
-      final date =
-          cycle.settledOn ?? settlement.nextDebitDate ?? DateTime.now();
-      return month.format(date);
-    }
+    String label(SettlementCycle cycle) => month.format(
+      cycle.settledOn ?? settlement.nextDebitDate ?? DateTime.now(),
+    );
 
-    return CycleBars(
+    return SignedBarChart(
       key: const Key('accountDetailCycleChart'),
-      values: [for (final cycle in cycles) -cycle.amountMinor],
+      minStep: 100,
+      values: [for (final cycle in cycles) cycle.amountMinor],
       labels: [
         for (var i = 0; i < cycles.length; i++)
-          // As on the balance chart: past a year, every other cycle, anchored
-          // on the open one.
-          cycles.length > 12 && (cycles.length - 1 - i).isOdd
-              ? ''
-              : label(cycles[i]),
+          _axisLabel(i, cycles.length, label(cycles[i])),
       ],
-      lastInProgress: cycles.isNotEmpty && cycles.last.inProgress,
+      // The cycle still open is not yet a fact: hatched.
+      provisional: {
+        for (var i = 0; i < cycles.length; i++)
+          if (cycles[i].inProgress) i,
+      },
       valueLabel: _compactMoney(context, currency),
       tooltips: [
         for (final cycle in cycles)
           TextSpan(
             children: [
               TextSpan(
-                text:
-                    '${formatAmount(amountMinor: cycle.amountMinor, currency: currency, locale: locale)}\n',
-                style: tabularNumberStyle(
-                  textTheme.titleSmall!,
-                ).copyWith(color: context.colors.negative),
+                text: cycle.settledOn == null
+                    ? '${l10n.accountDetailCycleOpen}\n'
+                    : '${l10n.accountDetailCycleSettledOn(day.format(cycle.settledOn!))}\n',
+                style: textTheme.labelSmall?.copyWith(
+                  color: colors.textSecondary,
+                ),
               ),
               TextSpan(
-                text: cycle.settledOn == null
-                    ? l10n.accountDetailCycleOpen
-                    : l10n.accountDetailCycleSettledOn(
-                        day.format(cycle.settledOn!),
-                      ),
-                style: textTheme.labelSmall?.copyWith(
-                  color: context.colors.textSecondary,
+                text: formatAmount(
+                  amountMinor: cycle.amountMinor,
+                  currency: currency,
+                  locale: locale,
                 ),
+                style: tabularNumberStyle(
+                  textTheme.titleSmall!,
+                ).copyWith(color: colors.negative),
               ),
             ],
           ),
@@ -611,359 +589,74 @@ class _CycleChart extends ConsumerWidget {
   }
 }
 
-/// The chart's own empty state, inside the card's silhouette, so the page
-/// doesn't restructure when the second month arrives.
+/// Less than two months of history: a note saying when the chart appears,
+/// and the way to get there.
 class _ChartEmpty extends StatelessWidget {
   const _ChartEmpty();
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final textTheme = Theme.of(context).textTheme;
-    return Center(
+    return Column(
       key: const Key('accountDetailChartEmpty'),
-      child: SingleChildScrollView(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 360),
-              child: Text(
-                l10n.accountDetailChartEmpty,
-                textAlign: TextAlign.center,
-                style: textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ),
-            const SizedBox(height: AppSpacing.sm + 2),
-            TextButton.icon(
-              key: const Key('accountDetailImportCta'),
-              onPressed: () => context.go(ImportsScreen.path),
-              style: TextButton.styleFrom(
-                foregroundColor: context.colors.accent,
-              ),
-              icon: const Icon(Icons.download_rounded, size: 16),
-              label: Text(l10n.accountDetailImportCta),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _StatRow {
-  const _StatRow({
-    required this.label,
-    required this.amountMinor,
-    this.rising = false,
-  });
-
-  final String label;
-
-  /// `null` when there is nothing to measure yet.
-  final int? amountMinor;
-  final bool rising;
-}
-
-class _StatsCard extends StatelessWidget {
-  const _StatsCard({
-    required this.title,
-    required this.rows,
-    required this.currency,
-    this.note,
-  });
-
-  final String title;
-  final List<_StatRow> rows;
-  final String currency;
-
-  /// An encouraging line, said only when it is true.
-  final String? note;
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
-    final textTheme = Theme.of(context).textTheme;
-    final valueStyle = textTheme.headlineMedium!.copyWith(fontSize: 20);
-
-    return AppCard(
-      key: const Key('accountDetailStats'),
-      padding: const EdgeInsets.fromLTRB(22, 20, 22, 20),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          SizedBox(
-            height: 24,
-            child: Align(
-              alignment: Alignment.centerLeft,
-              child: Text(
-                title.toUpperCase(),
-                style: context.textStyles.sectionLabel,
-              ),
-            ),
-          ),
-          for (var i = 0; i < rows.length; i++) ...[
-            if (i > 0) Divider(height: 1, color: context.colors.line),
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 6),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    rows[i].label,
-                    style: textTheme.bodySmall?.copyWith(
-                      fontSize: 12,
-                      color: context.colors.textSecondary,
-                    ),
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  const SizedBox(height: 3),
-                  Row(
-                    children: [
-                      if (rows[i].rising) ...[
-                        Icon(
-                          Icons.arrow_upward_rounded,
-                          size: 16,
-                          color: context.colors.positive,
-                        ),
-                        const SizedBox(width: 6),
-                      ],
-                      Flexible(
-                        child: rows[i].amountMinor == null
-                            ? Text(
-                                l10n.accountDetailNoStats,
-                                style: valueStyle.copyWith(
-                                  color: context.colors.textTertiary,
-                                ),
-                              )
-                            : AmountText(
-                                amountMinor: rows[i].amountMinor!,
-                                currency: currency,
-                                showPositiveSign: true,
-                                maxLines: 1,
-                                style: valueStyle,
-                              ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-          ],
-          const Spacer(),
-          if (note case final note?)
-            Row(
-              key: const Key('accountDetailStreak'),
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Padding(
-                  padding: EdgeInsets.only(top: 2),
-                  child: Icon(
-                    Icons.trending_up_rounded,
-                    size: 14,
-                    color: context.colors.accent,
-                  ),
-                ),
-                const SizedBox(width: AppSpacing.sm),
-                Expanded(
-                  child: Text(
-                    note,
-                    style: textTheme.bodySmall?.copyWith(
-                      color: context.colors.textSecondary,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-        ],
-      ),
-    );
-  }
-}
-
-class _PeriodStatsCard extends StatelessWidget {
-  const _PeriodStatsCard({required this.overview});
-
-  final AccountOverview overview;
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
-    final period = overview.period;
-    // An account with no history yet has nothing to measure: dashes, not zeros
-    // that would read as a year of standing still.
-    final measured = overview.firstTransactionDate != null;
-
-    return _StatsCard(
-      title: l10n.accountDetailPeriodLabel,
-      currency: overview.account.currency,
-      rows: [
-        _StatRow(
-          label: l10n.accountDetailChange,
-          amountMinor: measured ? period.changeMinor : null,
-          rising: measured && period.changeMinor > 0,
-        ),
-        _StatRow(
-          label: l10n.accountDetailInflow,
-          amountMinor: measured ? period.inflowMinor : null,
-        ),
-        _StatRow(
-          label: l10n.accountDetailOutflow,
-          amountMinor: measured ? period.outflowMinor : null,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        NoteLine(text: l10n.accountDetailChartEmpty),
+        const SizedBox(height: AppSpacing.smPlus),
+        AppButton(
+          key: const Key('accountDetailImportCta'),
+          label: l10n.accountDetailImportCta,
+          icon: LucideIcons300.download,
+          onPressed: () => context.go(ImportsScreen.path),
         ),
       ],
-      note: period.isOnStreak
-          ? l10n.accountDetailRisingStreak(period.consecutiveRisingMonths)
-          : null,
     );
   }
 }
 
-class _CycleStatsCard extends StatelessWidget {
-  const _CycleStatsCard({required this.settlement, required this.currency});
+// ── 3. Linked cards, or a card's settlement account ─────────────────────────
 
-  final CardSettlement settlement;
-  final String currency;
+const _cardColumns = [
+  AppTableColumn(label: '', flex: 3),
+  AppTableColumn(label: '', flex: 2),
+  AppTableColumn(label: '', width: 168, numeric: true),
+  AppTableColumn(label: '', width: _chevronColumn, numeric: true),
+];
 
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
-    final month = DateFormat.yMMM(_locale(context));
-    final highest = settlement.highestClosed;
-    final last = settlement.lastClosed;
-    final falling = settlement.consecutiveFallingCycles;
-
-    String monthOf(SettlementCycle? cycle) =>
-        cycle?.settledOn == null ? '—' : month.format(cycle!.settledOn!);
-
-    return _StatsCard(
-      title: l10n.accountDetailCyclesPeriod,
-      currency: currency,
-      rows: [
-        _StatRow(
-          label: l10n.accountDetailCycleAverage,
-          amountMinor: settlement.averageClosedMinor,
-        ),
-        _StatRow(
-          label: l10n.accountDetailCycleHighest(monthOf(highest)),
-          amountMinor: highest?.amountMinor,
-        ),
-        _StatRow(
-          label: l10n.accountDetailCycleLast(monthOf(last)),
-          amountMinor: last?.amountMinor,
-        ),
-      ],
-      note: falling >= 2 ? l10n.accountDetailFallingStreak(falling) : null,
-    );
-  }
-}
-
-// ── Row 3: linked cards, or a card's settlement account ─────────────────────
-
-class _SectionCard extends StatelessWidget {
-  const _SectionCard({
-    super.key,
-    required this.title,
-    required this.caption,
-    required this.children,
-  });
-
-  final String title;
-  final String caption;
-  final List<Widget> children;
-
-  @override
-  Widget build(BuildContext context) {
-    final textTheme = Theme.of(context).textTheme;
-    return AppCard(
-      key: key,
-      padding: const EdgeInsets.fromLTRB(22, 20, 22, 10),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Wrap(
-            spacing: AppSpacing.md - 4,
-            runSpacing: AppSpacing.xs,
-            crossAxisAlignment: WrapCrossAlignment.end,
-            children: [
-              Text(
-                title,
-                style: textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-              Text(
-                caption,
-                style: textTheme.bodySmall?.copyWith(
-                  fontSize: 12,
-                  color: context.colors.textSecondary,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 10),
-          ...children,
-        ],
-      ),
-    );
-  }
-}
-
-class _LinkedCardsSection extends ConsumerWidget {
-  const _LinkedCardsSection({required this.overview});
+class _LinkedCardsBlock extends ConsumerWidget {
+  const _LinkedCardsBlock({required this.overview});
 
   final AccountOverview overview;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context)!;
-    final cards = overview.linkedCards;
     // Offered only when there is a card to link, and never on an archived
     // account, which can no longer settle one.
     final canLink =
         !overview.account.archived &&
         ref.watch(linkableCardsProvider).isNotEmpty;
 
-    return _SectionCard(
+    return Column(
       key: const Key('accountDetailLinkedCards'),
-      title: l10n.accountDetailLinkedTitle,
-      caption: l10n.accountDetailLinkedCaption,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        if (cards.isEmpty)
-          _DashedRow(
-            key: const Key('accountDetailNoCards'),
-            icon: Icons.credit_card_rounded,
-            text: l10n.accountDetailNoCards,
-          )
-        else
-          for (var i = 0; i < cards.length; i++) ...[
-            if (i > 0) Divider(height: 1, color: context.colors.line),
-            _LinkedCardRow(
-              card: cards[i],
-              currency: overview.account.currency,
-              accountId: overview.account.id,
-            ),
-          ],
-        if (canLink) ...[
-          if (cards.isNotEmpty) Divider(height: 1, color: context.colors.line),
-          Align(
-            alignment: Alignment.centerRight,
-            child: Padding(
-              padding: const EdgeInsets.only(top: 6),
-              child: TextButton.icon(
-                key: const Key('accountDetailLinkCard'),
-                onPressed: () => showLinkCardDialog(context, overview.account),
-                style: TextButton.styleFrom(
-                  foregroundColor: context.colors.accent,
-                ),
-                icon: const Icon(Icons.add_card_rounded, size: 16),
-                label: Text(l10n.accountDetailLinkCard),
-              ),
-            ),
+        SectionHeading(
+          title: l10n.accountDetailLinkedTitle,
+          trailing: canLink
+              ? _Link(
+                  key: const Key('accountDetailLinkCard'),
+                  label: l10n.accountDetailLinkCard,
+                  onTap: () => showLinkCardDialog(context, overview.account),
+                )
+              : null,
+        ),
+        for (final card in overview.linkedCards)
+          _LinkedCardRow(
+            card: card,
+            currency: overview.account.currency,
+            accountId: overview.account.id,
           ),
-        ],
       ],
     );
   }
@@ -979,107 +672,104 @@ class _LinkedCardRow extends ConsumerWidget {
   final LinkedCard card;
   final String currency;
 
-  /// The account being viewed — refreshed once a rule is saved for the card.
+  /// The account being viewed, refreshed once a rule is saved for the card.
   final String accountId;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context)!;
     final textTheme = Theme.of(context).textTheme;
+    final colors = context.colors;
     final digits = card.cardLastDigits;
     final debit = card.nextDebitDate;
     // Watched rather than read on tap, so the card's account is loaded by
     // the time the rule dialog needs it.
     final cardAccount = ref.watch(accountByIdProvider(card.accountId));
 
-    return _HoverRow(
+    return AppTableRow(
       key: Key('accountDetailLinkedCard-${card.accountId}'),
+      columns: _cardColumns,
+      twoLines: true,
       onTap: () => context.go(AccountDetailScreen.location(card.accountId)),
-      child: Row(
-        children: [
-          InstitutionAvatar(name: card.institution, size: 36),
-          const SizedBox(width: 14),
-          Expanded(
-            child: Wrap(
-              spacing: AppSpacing.sm + 2,
-              runSpacing: AppSpacing.xs,
-              crossAxisAlignment: WrapCrossAlignment.center,
-              children: [
-                Text(card.name, style: textTheme.titleSmall),
-                if (digits != null)
-                  Text(
-                    l10n.accountDetailMaskedNumber(digits),
-                    style: tabularNumberStyle(
-                      textTheme.bodyMedium!,
-                    ).copyWith(color: context.colors.textSecondary),
-                  ),
-                StatusText(
-                  label: accountTypeLabel(l10n, AccountType.deferredCard),
-                ),
-                if (!card.hasRule && cardAccount != null)
-                  InkWell(
+      cells: [
+        Row(
+          children: [
+            MonogramAvatar(name: card.name),
+            const SizedBox(width: AppSpacing.sm),
+            Flexible(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(card.name, maxLines: 1),
+                  if (digits != null)
+                    Text(
+                      l10n.accountDetailMaskedNumber(digits),
+                      maxLines: 1,
+                      style: tabularNumberStyle(
+                        textTheme.bodySmall!,
+                      ).copyWith(color: colors.textTertiary),
+                    ),
+                ],
+              ),
+            ),
+          ],
+        ),
+        Row(
+          children: [
+            Text(
+              l10n.accountDetailDeferredDebit,
+              style: textTheme.bodyMedium?.copyWith(
+                color: colors.textSecondary,
+              ),
+            ),
+            if (!card.hasRule && cardAccount != null) ...[
+              const SizedBox(width: AppSpacing.smPlus),
+              Flexible(
+                child: MouseRegion(
+                  cursor: SystemMouseCursors.click,
+                  child: GestureDetector(
                     key: Key('accountDetailRuleMissing-${card.accountId}'),
-                    borderRadius: BorderRadius.circular(AppRadii.pill),
+                    behavior: HitTestBehavior.opaque,
                     onTap: () => _openRule(context, ref, cardAccount),
                     child: StatusText(
                       label: l10n.accountDetailRuleMissing,
                       tone: StatusTone.warning,
                     ),
                   ),
-              ],
-            ),
-          ),
-          const SizedBox(width: AppSpacing.md),
-          Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              Row(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.baseline,
-                textBaseline: TextBaseline.alphabetic,
-                children: [
-                  Text(
-                    l10n.accountDetailThisCycle,
-                    style: textTheme.labelSmall?.copyWith(
-                      fontWeight: FontWeight.w400,
-                      color: context.colors.textSecondary,
-                    ),
-                  ),
-                  const SizedBox(width: AppSpacing.sm),
-                  AmountText(
-                    amountMinor: card.cycleMinor,
-                    currency: currency,
-                    style: textTheme.titleMedium!.copyWith(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 2),
-              Text(
-                debit == null
-                    ? l10n.accountDetailNoDebitScheduled
-                    : l10n.accountDetailDebitOn(
-                        DateFormat.MMMd(_locale(context)).format(debit),
-                      ),
-                style: textTheme.bodySmall?.copyWith(
-                  fontSize: 12,
-                  color: context.colors.textSecondary,
                 ),
               ),
             ],
-          ),
-          const SizedBox(width: AppSpacing.sm),
-          Icon(
-            Icons.chevron_right_rounded,
-            size: 18,
-            color: context.colors.textSecondary,
-            semanticLabel: l10n.accountDetailOpenAccount(card.name),
-          ),
-        ],
-      ),
+          ],
+        ),
+        Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.end,
+          children: [
+            AmountText(
+              amountMinor: card.cycleMinor,
+              currency: currency,
+              maxLines: 1,
+              style: tabularNumberStyle(textTheme.bodyMedium!),
+            ),
+            Text(
+              debit == null
+                  ? l10n.accountDetailNoDebitScheduled
+                  : l10n.accountDetailDebitOn(
+                      DateFormat.MMMd(_locale(context)).format(debit),
+                    ),
+              maxLines: 1,
+              style: context.textStyles.helper,
+            ),
+          ],
+        ),
+        Icon(
+          LucideIcons300.chevronRight,
+          size: AppSizes.icon,
+          color: colors.textTertiary,
+          semanticLabel: l10n.accountDetailOpenAccount(card.name),
+        ),
+      ],
     );
   }
 
@@ -1093,8 +783,14 @@ class _LinkedCardRow extends ConsumerWidget {
   }
 }
 
-class _SettlementSection extends ConsumerWidget {
-  const _SettlementSection({required this.card, required this.settlement});
+const _payingColumns = [
+  AppTableColumn(label: ''),
+  AppTableColumn(label: '', width: _amountColumn, numeric: true),
+  AppTableColumn(label: '', width: _chevronColumn, numeric: true),
+];
+
+class _SettlementBlock extends ConsumerWidget {
+  const _SettlementBlock({required this.card, required this.settlement});
 
   final Account card;
   final CardSettlement settlement;
@@ -1103,318 +799,321 @@ class _SettlementSection extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context)!;
     final textTheme = Theme.of(context).textTheme;
+    final colors = context.colors;
     final paying = ref.watch(accountByIdProvider(settlement.payingAccountId));
     final rule = settlement.rule;
-    final locale = _locale(context);
+    final ruleActive = rule != null && rule.enabled;
 
-    final String ruleText;
-    if (rule == null || !rule.enabled) {
-      ruleText = l10n.accountDetailNoRule;
+    final String? ruleText;
+    if (!ruleActive) {
+      ruleText = null;
     } else if (rule.appliesFrom case final from?) {
       ruleText = l10n.accountDetailRuleSummary(
         rule.pattern,
-        DateFormat.yMMMd(locale).format(from),
+        DateFormat.yMMMd(_locale(context)).format(from),
       );
     } else {
       ruleText = l10n.accountDetailRuleSummaryUndated(rule.pattern);
     }
 
-    return _SectionCard(
+    return Column(
       key: const Key('accountDetailSettlement'),
-      title: l10n.accountDetailSettleTitle,
-      caption: l10n.accountDetailSettleCaption,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
+        SectionHeading(title: l10n.accountDetailSettleTitle),
         if (paying == null)
-          _DashedRow(
-            icon: Icons.account_balance_outlined,
-            text: l10n.accountDetailNoPayingAccount,
-          )
+          NoteLine(text: l10n.accountDetailNoPayingAccount)
         else
-          _HoverRow(
+          AppTableRow(
             key: Key('accountDetailPayingAccount-${paying.id}'),
+            columns: _payingColumns,
             onTap: () => context.go(AccountDetailScreen.location(paying.id)),
-            child: Row(
-              children: [
-                InstitutionAvatar(name: paying.institution, size: 36),
-                const SizedBox(width: 14),
-                Expanded(
-                  child: Wrap(
-                    spacing: AppSpacing.sm + 2,
-                    crossAxisAlignment: WrapCrossAlignment.center,
-                    children: [
-                      Text(paying.name, style: textTheme.titleSmall),
-                      StatusText(label: accountTypeLabel(l10n, paying.type)),
-                    ],
-                  ),
-                ),
-                Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: [
-                    AmountText(
-                      amountMinor: paying.balanceMinor,
-                      currency: paying.currency,
-                      showPositiveSign: true,
-                      style: textTheme.titleMedium!.copyWith(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      l10n.accountDetailBalanceLabel,
-                      style: textTheme.bodySmall?.copyWith(
-                        fontSize: 12,
-                        color: context.colors.textSecondary,
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(width: AppSpacing.sm),
-                Icon(
-                  Icons.chevron_right_rounded,
-                  size: 18,
-                  color: context.colors.textSecondary,
-                  semanticLabel: l10n.accountDetailOpenAccount(paying.name),
-                ),
-              ],
-            ),
-          ),
-        Divider(height: 1, color: context.colors.line),
-        Padding(
-          padding: const EdgeInsets.only(top: 6),
-          child: Row(
-            children: [
+            cells: [
+              Row(
+                children: [
+                  MonogramAvatar(name: paying.name),
+                  const SizedBox(width: AppSpacing.sm),
+                  Flexible(child: Text(paying.name)),
+                ],
+              ),
+              // A balance in a row is neutral unless negative (`00` §2.3).
+              AmountText(
+                amountMinor: paying.balanceMinor,
+                currency: paying.currency,
+                colorize: paying.balanceMinor < 0,
+                maxLines: 1,
+                style: tabularNumberStyle(
+                  textTheme.bodyMedium!,
+                ).copyWith(color: paying.balanceMinor < 0 ? null : colors.text),
+              ),
               Icon(
-                Icons.sell_outlined,
-                size: 14,
-                color: context.colors.textSecondary,
-              ),
-              const SizedBox(width: 10),
-              Expanded(
-                child: Text(
-                  ruleText,
-                  key: const Key('accountDetailRuleSummary'),
-                  style: textTheme.bodySmall?.copyWith(
-                    color: context.colors.textSecondary,
-                  ),
-                ),
-              ),
-              TextButton(
-                key: const Key('accountDetailEditRule'),
-                onPressed: () async {
-                  final saved = await showSettlementRuleDialog(context, card);
-                  if (saved) ref.invalidate(accountOverviewProvider(card.id));
-                },
-                style: TextButton.styleFrom(
-                  foregroundColor: context.colors.accent,
-                ),
-                child: Text(
-                  rule == null
-                      ? l10n.accountDetailSetUpRule
-                      : l10n.accountDetailEditRule,
-                ),
+                LucideIcons300.chevronRight,
+                size: AppSizes.icon,
+                color: colors.textTertiary,
+                semanticLabel: l10n.accountDetailOpenAccount(paying.name),
               ),
             ],
           ),
+        const SizedBox(height: AppSpacing.smPlus),
+        Row(
+          children: [
+            Expanded(
+              child: ruleText == null
+                  ? Align(
+                      alignment: Alignment.centerLeft,
+                      child: StatusText(
+                        key: const Key('accountDetailRuleSummary'),
+                        label: l10n.accountDetailRuleMissing,
+                        tone: StatusTone.warning,
+                      ),
+                    )
+                  : Text(
+                      ruleText,
+                      key: const Key('accountDetailRuleSummary'),
+                      style: context.textStyles.statLabel,
+                    ),
+            ),
+            const SizedBox(width: AppSpacing.md),
+            AppButton(
+              key: const Key('accountDetailEditRule'),
+              label: rule == null
+                  ? l10n.accountDetailSetUpRule
+                  : l10n.accountDetailEditRule,
+              onPressed: () async {
+                final saved = await showSettlementRuleDialog(context, card);
+                if (saved) ref.invalidate(accountOverviewProvider(card.id));
+              },
+            ),
+          ],
         ),
       ],
     );
   }
 }
 
-// ── Row 4: recent transactions ──────────────────────────────────────────────
+// ── 4. Operations ───────────────────────────────────────────────────────────
 
-class _RecentTransactionsCard extends ConsumerWidget {
-  const _RecentTransactionsCard({required this.accountId});
+class _OperationsBlock extends ConsumerWidget {
+  const _OperationsBlock({required this.accountId});
 
   final String accountId;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context)!;
-    final textTheme = Theme.of(context).textTheme;
     final transactions = ref.watch(
       recentAccountTransactionsProvider(accountId),
     );
     final cards = ref.watch(linkedCardsByIdProvider(accountId));
+    final columns = [
+      AppTableColumn(label: l10n.accountDetailColumnOperation, flex: 3),
+      AppTableColumn(label: l10n.accountDetailColumnCategory, flex: 2),
+      AppTableColumn(
+        label: l10n.accountDetailColumnDate,
+        width: _dateColumn,
+        numeric: true,
+      ),
+      AppTableColumn(
+        label: l10n.accountDetailColumnAmount,
+        width: _amountColumn,
+        numeric: true,
+      ),
+    ];
 
-    return AppCard(
+    return Column(
       key: const Key('accountDetailRecent'),
-      padding: const EdgeInsets.fromLTRB(22, 18, 22, AppSpacing.sm),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          SizedBox(
-            height: 28,
-            child: Row(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        SectionHeading(
+          title: l10n.accountDetailRecentTitle,
+          trailing: _Link(
+            key: const Key('accountDetailSeeAll'),
+            label: l10n.accountDetailSeeAll,
+            small: true,
+            onTap: () {
+              ref
+                  .read(transactionFiltersProvider.notifier)
+                  .setAccount(accountId);
+              context.go(TransactionsScreen.path);
+            },
+          ),
+        ),
+        // Matched on the value, not the state: a re-read after a category
+        // edit elsewhere keeps the rows on screen instead of a skeleton.
+        switch (transactions) {
+          AsyncValue(:final value?) when value.isEmpty => NoteLine(
+            key: const Key('accountDetailNoTransactions'),
+            text: l10n.accountDetailNoTransactions,
+          ),
+          AsyncValue(:final value?) => Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              AppTableHeader(columns: columns),
+              for (final transaction in value)
+                _OperationRow(
+                  transaction: transaction,
+                  columns: columns,
+                  card: cards[transaction.accountId],
+                ),
+            ],
+          ),
+          AsyncError(:final error) => NoteLine(
+            icon: LucideIcons300.triangleAlert,
+            text: localizeAccountError(l10n, error),
+          ),
+          _ => SkeletonPulse(
+            child: Column(
               children: [
-                Expanded(
-                  child: Text(
-                    l10n.accountDetailRecentTitle,
-                    style: textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.w600,
-                    ),
+                for (var i = 0; i < 4; i++)
+                  const Padding(
+                    padding: EdgeInsets.symmetric(vertical: AppSpacing.sm),
+                    child: SkeletonBlock(height: AppSizes.tableRow / 2),
                   ),
-                ),
-                TextButton(
-                  key: const Key('accountDetailSeeAll'),
-                  onPressed: () {
-                    ref
-                        .read(transactionFiltersProvider.notifier)
-                        .setAccount(accountId);
-                    context.go(TransactionsScreen.path);
-                  },
-                  style: TextButton.styleFrom(
-                    foregroundColor: context.colors.accent,
-                    padding: EdgeInsets.zero,
-                    minimumSize: Size.zero,
-                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(l10n.accountDetailSeeAll),
-                      const Icon(Icons.chevron_right_rounded, size: 14),
-                    ],
-                  ),
-                ),
               ],
             ),
           ),
-          const SizedBox(height: 6),
-          // Matched on the value, not the state: a re-read after a category
-          // edit keeps the rows on screen instead of a skeleton.
-          switch (transactions) {
-            AsyncValue(:final value?) when value.isEmpty => Padding(
-              padding: const EdgeInsets.only(bottom: AppSpacing.sm),
-              child: _DashedRow(
-                key: const Key('accountDetailNoTransactions'),
-                icon: Icons.swap_vert_rounded,
-                text: l10n.accountDetailNoTransactions,
-              ),
-            ),
-            AsyncValue(:final value?) => Column(
-              children: [
-                for (final transaction in value) ...[
-                  Divider(height: 1, color: context.colors.line),
-                  // The account is the one on screen, so its own rows' second
-                  // line keeps only the bank's memo; a linked card's rows name
-                  // their card, behind a card glyph.
-                  switch (cards[transaction.accountId]) {
-                    final card? => TransactionRow(
-                      transaction: transaction,
-                      accountName: cardRowLabel(
-                        l10n,
-                        card.name,
-                        card.cardLastDigits,
-                      ),
-                      accountIcon: cardRowIcon,
-                    ),
-                    null => TransactionRow(
-                      transaction: transaction,
-                      accountName: '',
-                    ),
-                  },
-                ],
-              ],
-            ),
-            AsyncError(:final error) => Padding(
-              padding: const EdgeInsets.symmetric(vertical: AppSpacing.md),
-              child: Text(
-                localizeAccountError(l10n, error),
-                style: textTheme.bodySmall?.copyWith(
-                  color: context.colors.textSecondary,
-                ),
-              ),
-            ),
-            _ => SkeletonPulse(
+        },
+      ],
+    );
+  }
+}
+
+class _OperationRow extends StatelessWidget {
+  const _OperationRow({
+    required this.transaction,
+    required this.columns,
+    required this.card,
+  });
+
+  final Transaction transaction;
+  final List<AppTableColumn> columns;
+
+  /// The linked card the row was paid with; `null` for the account's own.
+  final LinkedCard? card;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final textTheme = Theme.of(context).textTheme;
+    final colors = context.colors;
+    final label = transaction.merchant?.trim().isNotEmpty ?? false
+        ? transaction.merchant!
+        : transaction.descriptionClean;
+    final category = transaction.category;
+    final card = this.card;
+
+    return AppTableRow(
+      key: Key('transactionRow-${transaction.id}'),
+      columns: columns,
+      // A linked card's purchase names its card under the label.
+      twoLines: card != null,
+      cells: [
+        Row(
+          children: [
+            InstitutionAvatar(name: label, logo: transaction.logo),
+            const SizedBox(width: AppSpacing.sm),
+            Flexible(
               child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  for (var i = 0; i < 3; i++)
-                    Padding(
-                      padding: EdgeInsets.symmetric(vertical: 10),
-                      child: SkeletonBlock(height: 32, radius: AppRadii.sm),
+                  Text(label, maxLines: 1),
+                  if (card != null)
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          cardRowIcon,
+                          key: const Key('transactionRowAccountIcon'),
+                          size: AppSizes.iconStatus,
+                          color: colors.textTertiary,
+                        ),
+                        const SizedBox(width: AppSpacing.xs),
+                        Flexible(
+                          child: Text(
+                            cardRowLabel(l10n, card.name, card.cardLastDigits),
+                            maxLines: 1,
+                            style: textTheme.bodySmall?.copyWith(
+                              color: colors.textTertiary,
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                 ],
               ),
             ),
-          },
-        ],
-      ),
+          ],
+        ),
+        if (category == null)
+          CategoryLabel.uncategorized(label: l10n.categoryUncategorized)
+        else
+          CategoryLabel(
+            label: localizedCategoryName(l10n, category.name),
+            slug: categorySlugFor(name: category.name, kind: category.kind),
+          ),
+        Text(
+          DateFormat.MMMd(_locale(context)).format(transaction.bookedDate),
+          style: tabularNumberStyle(
+            textTheme.bodyMedium!,
+          ).copyWith(color: colors.textSecondary),
+        ),
+        AmountText(
+          amountMinor: transaction.amountMinor,
+          currency: transaction.currency,
+          showPositiveSign: true,
+          maxLines: 1,
+          style: tabularNumberStyle(textTheme.bodyMedium!),
+        ),
+      ],
     );
   }
 }
 
 // ── Shared bits ─────────────────────────────────────────────────────────────
 
-/// A 64px tappable row with the in-card hover wash.
-class _HoverRow extends StatefulWidget {
-  const _HoverRow({super.key, required this.child, required this.onTap});
+/// A link (`00` §6): `accent`, 13 or 12 px, underlined on hover.
+class _Link extends StatefulWidget {
+  const _Link({
+    super.key,
+    required this.label,
+    required this.onTap,
+    this.small = false,
+  });
 
-  final Widget child;
+  final String label;
   final VoidCallback onTap;
+  final bool small;
 
   @override
-  State<_HoverRow> createState() => _HoverRowState();
+  State<_Link> createState() => _LinkState();
 }
 
-class _HoverRowState extends State<_HoverRow> {
+class _LinkState extends State<_Link> {
   bool _hovered = false;
 
   @override
   Widget build(BuildContext context) {
-    return MouseRegion(
-      cursor: SystemMouseCursors.click,
-      onEnter: (_) => setState(() => _hovered = true),
-      onExit: (_) => setState(() => _hovered = false),
-      child: GestureDetector(
-        behavior: HitTestBehavior.opaque,
-        onTap: widget.onTap,
-        child: Container(
-          height: 64,
-          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
-          decoration: BoxDecoration(
-            color: _hovered ? context.colors.hover : Colors.transparent,
-            borderRadius: BorderRadius.circular(AppRadii.md),
-          ),
-          child: widget.child,
-        ),
-      ),
-    );
-  }
-}
+    final textTheme = Theme.of(context).textTheme;
+    final base = widget.small ? textTheme.bodySmall! : textTheme.bodyMedium!;
+    final color = context.colors.accent;
 
-/// A dashed, disabled-tone row: the section is there, it is just empty — never
-/// hidden, never an alarm.
-class _DashedRow extends StatelessWidget {
-  const _DashedRow({super.key, required this.icon, required this.text});
-
-  final IconData icon;
-  final String text;
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: AppSpacing.md - 4),
-      child: DashedBorder(
-        strokeWidth: 1.5,
-        child: SizedBox(
-          height: 56,
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(icon, size: 16, color: context.colors.textTertiary),
-              const SizedBox(width: AppSpacing.sm),
-              Flexible(
-                child: Text(
-                  text,
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: context.colors.textTertiary,
-                  ),
-                ),
-              ),
-            ],
+    return Semantics(
+      link: true,
+      child: MouseRegion(
+        cursor: SystemMouseCursors.click,
+        onEnter: (_) => setState(() => _hovered = true),
+        onExit: (_) => setState(() => _hovered = false),
+        child: GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onTap: widget.onTap,
+          child: Text(
+            widget.label,
+            style: tabularNumberStyle(base).copyWith(
+              color: color,
+              decoration: _hovered ? TextDecoration.underline : null,
+              decorationColor: color,
+            ),
           ),
         ),
       ),
@@ -1422,38 +1121,41 @@ class _DashedRow extends StatelessWidget {
   }
 }
 
-/// Shimmer blocks on the silhouette of the populated panel, so nothing moves
-/// when the data lands.
+/// The populated panel's silhouette in `hover` blocks, pulsing as one, so
+/// nothing moves when the data lands (`00` §7).
 class _DetailSkeleton extends StatelessWidget {
   const _DetailSkeleton();
 
   @override
   Widget build(BuildContext context) {
-    return const SkeletonPulse(
-      key: Key('accountDetailLoading'),
+    return SkeletonPulse(
+      key: const Key('accountDetailLoading'),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          SkeletonBlock(height: 172),
-          SizedBox(height: AppSpacing.gridGap),
-          SizedBox(
-            height: _chartRowHeight,
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Expanded(
-                  flex: 2,
-                  child: SkeletonBlock(height: _chartRowHeight),
-                ),
-                SizedBox(width: AppSpacing.gridGap),
-                Expanded(child: SkeletonBlock(height: _chartRowHeight)),
-              ],
-            ),
+          const Row(
+            children: [
+              SkeletonBlock(width: 240, height: 64),
+              SizedBox(width: AppSpacing.xxl),
+              SkeletonBlock(width: 120, height: 48),
+              SizedBox(width: AppSpacing.xxl),
+              SkeletonBlock(width: 120, height: 48),
+              SizedBox(width: AppSpacing.xxl),
+              SkeletonBlock(width: 120, height: 48),
+            ],
           ),
-          SizedBox(height: AppSpacing.gridGap),
-          SkeletonBlock(height: 190),
-          SizedBox(height: AppSpacing.gridGap),
-          SkeletonBlock(height: 478),
+          const _SectionBreak(),
+          const SkeletonBlock(width: 160, height: 16),
+          const SizedBox(height: AppSpacing.smPlus),
+          const SkeletonBlock(height: _chartHeight),
+          const _SectionBreak(),
+          const SkeletonBlock(width: 160, height: 16),
+          const SizedBox(height: AppSpacing.smPlus),
+          for (var i = 0; i < 6; i++)
+            const Padding(
+              padding: EdgeInsets.symmetric(vertical: AppSpacing.sm),
+              child: SkeletonBlock(height: AppSizes.tableRow / 2),
+            ),
         ],
       ),
     );

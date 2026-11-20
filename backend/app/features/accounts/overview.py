@@ -1,4 +1,4 @@
-"""The account detail page's figures: balance history, period stats, and card settlement.
+"""The account detail page's figures: balance history, period and month flows, card settlement.
 
 Each is derived from the ledger on request. The history is one point per month — the page
 draws month-ends, not daily wiggle — summed in one grouped query rather than a balance lookup
@@ -20,6 +20,7 @@ from app.features.accounts.schemas import (
     BalancePoint,
     CardSettlement,
     LinkedCard,
+    MonthFlows,
     PeriodStats,
     SettlementCycle,
     SettlementRuleRead,
@@ -108,6 +109,7 @@ class AccountOverviewService:
             last_import_at=self._last_import_at(account),
             balance_history=history,
             period=self._period(account, history, today),
+            month=self._month(account, today),
             linked_cards=[] if is_card else self._linked_cards(account, today),
             card_settlement=self._card_settlement(account, today) if is_card else None,
         )
@@ -130,8 +132,8 @@ class AccountOverviewService:
             )
         )
 
-    def _period(self, account: Account, history: list[BalancePoint], today: date) -> PeriodStats:
-        since = month_end(add_months(today, -PERIOD_MONTHS))
+    def _flows(self, account: Account, after: date) -> tuple[int, int]:
+        """The account's inflow and outflow over the rows booked after ``after``."""
         inflow, outflow = self._db.execute(
             select(
                 func.coalesce(
@@ -140,8 +142,13 @@ class AccountOverviewService:
                 func.coalesce(
                     func.sum(Transaction.amount_minor).filter(Transaction.amount_minor < 0), 0
                 ),
-            ).where(Transaction.account_id == account.id, Transaction.booked_date > since)
+            ).where(Transaction.account_id == account.id, Transaction.booked_date > after)
         ).one()
+        return inflow, outflow
+
+    def _period(self, account: Account, history: list[BalancePoint], today: date) -> PeriodStats:
+        since = month_end(add_months(today, -PERIOD_MONTHS))
+        inflow, outflow = self._flows(account, since)
         return PeriodStats(
             since=since,
             change_minor=inflow + outflow,
@@ -149,6 +156,11 @@ class AccountOverviewService:
             outflow_minor=outflow,
             consecutive_rising_months=consecutive_rises(history),
         )
+
+    def _month(self, account: Account, today: date) -> MonthFlows:
+        since = today.replace(day=1)
+        inflow, outflow = self._flows(account, since - timedelta(days=1))
+        return MonthFlows(since=since, inflow_minor=inflow, outflow_minor=outflow)
 
     def _linked_cards(self, account: Account, today: date) -> list[LinkedCard]:
         cards = self._db.scalars(linked_cards(account.user_id, account.id))

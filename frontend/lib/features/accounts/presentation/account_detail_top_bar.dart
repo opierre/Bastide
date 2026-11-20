@@ -1,15 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:lucide_icons_flutter/lucide_icons_300.dart';
 
 import '../../../core/theme/tokens.dart';
+import '../../../core/widgets/app_button.dart';
+import '../../../core/widgets/app_popover.dart';
 import '../../../core/widgets/app_shell.dart';
 import '../../../l10n/app_localizations.dart';
 import '../application/account_detail_controller.dart';
 import '../domain/account.dart';
 import 'account_archive.dart';
 import 'account_form.dart';
-import 'settlement_rule_dialog.dart';
 
 /// The account detail's title-bar title: « Comptes / » leading back to the
 /// list, then the account's name (`docs/design/16-account-detail.md`).
@@ -34,105 +36,68 @@ class AccountDetailTitle extends ConsumerWidget {
   }
 }
 
-enum _DetailAction { settlementRule }
-
-/// The account detail's contextual controls: edit the account in the existing
-/// modal and archive it (never delete), both one click away. A card adds an
-/// overflow holding its settlement rule.
-class AccountDetailTopBarActions extends ConsumerWidget {
+/// The account detail's contextual controls (`16` § Title bar): a secondary
+/// « Modifier » opening the account form, then an `ellipsis` button whose
+/// menu holds « Archiver ». No delete.
+class AccountDetailTopBarActions extends ConsumerStatefulWidget {
   const AccountDetailTopBarActions({super.key, required this.accountId});
 
   final String accountId;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final l10n = AppLocalizations.of(context)!;
-    final account = ref.watch(accountByIdProvider(accountId));
-    if (account == null) return const SizedBox.shrink();
+  ConsumerState<AccountDetailTopBarActions> createState() =>
+      _AccountDetailTopBarActionsState();
+}
 
-    final pillStyle = TextButton.styleFrom(
-      foregroundColor: context.colors.textSecondary,
-      minimumSize: const Size(0, AppChrome.controlPillHeight),
-      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
-      shape: const StadiumBorder(),
-    );
+class _AccountDetailTopBarActionsState
+    extends ConsumerState<AccountDetailTopBarActions> {
+  final _menu = MenuController();
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final account = ref.watch(accountByIdProvider(widget.accountId));
+    if (account == null) return const SizedBox.shrink();
 
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        TextButton.icon(
+        AppButton(
           key: const Key('accountDetailEdit'),
+          label: l10n.accountEdit,
           onPressed: () async {
             await showAccountForm(context, initial: account);
             ref.invalidate(accountOverviewProvider(account.id));
           },
-          style: pillStyle,
-          icon: const Icon(Icons.edit_outlined, size: 16),
-          label: Text(l10n.accountEdit),
         ),
         const SizedBox(width: AppSpacing.sm),
-        TextButton.icon(
-          key: const Key('accountDetailArchive'),
-          onPressed: () => _archive(context, ref, account),
-          style: pillStyle,
-          icon: const Icon(Icons.inventory_2_outlined, size: 16),
-          label: Text(l10n.accountArchive),
-        ),
-        if (account.type == AccountType.deferredCard) ...[
-          const SizedBox(width: AppSpacing.sm),
-          PopupMenuButton<_DetailAction>(
-            key: const Key('accountDetailMore'),
-            tooltip: l10n.accountDetailMoreActions,
-            position: PopupMenuPosition.under,
-            onSelected: (action) => switch (action) {
-              _DetailAction.settlementRule => _editSettlementRule(
-                context,
-                ref,
-                account,
-              ),
-            },
-            itemBuilder: (_) => [
-              PopupMenuItem(
-                key: const Key('accountDetailSettlementRule'),
-                value: _DetailAction.settlementRule,
-                child: Text(l10n.accountSettlementRule),
-              ),
-            ],
-            child: Container(
-              width: AppChrome.controlPillHeight,
-              height: AppChrome.controlPillHeight,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                border: Border.all(color: context.colors.line),
-              ),
-              child: Icon(
-                Icons.more_horiz_rounded,
-                size: 18,
-                color: context.colors.textSecondary,
-              ),
+        MenuAnchor(
+          controller: _menu,
+          style: AppPopover.menuStyle(context),
+          alignmentOffset: const Offset(0, AppSpacing.xs),
+          menuChildren: [
+            AppMenuItem(
+              key: const Key('accountDetailArchive'),
+              label: l10n.accountArchive,
+              leading: const Icon(LucideIcons300.archive),
+              onPressed: () => _archive(account),
             ),
+          ],
+          child: AppButton(
+            key: const Key('accountDetailMore'),
+            label: l10n.accountDetailMoreActions,
+            icon: LucideIcons300.ellipsis,
+            iconOnly: true,
+            onPressed: () => _menu.isOpen ? _menu.close() : _menu.open(),
           ),
-        ],
+        ),
       ],
     );
   }
 
-  Future<void> _editSettlementRule(
-    BuildContext context,
-    WidgetRef ref,
-    Account account,
-  ) async {
-    final saved = await showSettlementRuleDialog(context, account);
-    if (saved) ref.invalidate(accountOverviewProvider(account.id));
-  }
-
-  Future<void> _archive(
-    BuildContext context,
-    WidgetRef ref,
-    Account account,
-  ) async {
+  Future<void> _archive(Account account) async {
     final archived = await confirmArchiveAccount(context, ref, account);
     // An archived account has no detail to stay on.
-    if (archived && context.mounted) context.go('/accounts');
+    if (archived && mounted) context.go('/accounts');
   }
 }

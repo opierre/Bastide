@@ -101,6 +101,7 @@ class AccountsRepository {
   /// against fixed JSON without a client.
   static AccountOverview parseOverview(Map<String, dynamic> json) {
     final period = json['period'] as Map<String, dynamic>;
+    final month = json['month'] as Map<String, dynamic>;
     final settlement = json['card_settlement'] as Map<String, dynamic>?;
     return AccountOverview(
       account: parseAccount(json['account'] as Map<String, dynamic>),
@@ -124,6 +125,11 @@ class AccountsRepository {
         inflowMinor: period['inflow_minor'] as int,
         outflowMinor: period['outflow_minor'] as int,
         consecutiveRisingMonths: period['consecutive_rising_months'] as int,
+      ),
+      month: MonthFlows(
+        since: DateTime.parse(month['since'] as String),
+        inflowMinor: month['inflow_minor'] as int,
+        outflowMinor: month['outflow_minor'] as int,
       ),
       linkedCards: [
         for (final card

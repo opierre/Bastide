@@ -156,7 +156,28 @@ def test_a_checking_accounts_history_and_period(pinned: TestClient) -> None:
         "outflow_minor": -115000,
         "consecutive_rising_months": 0,
     }
+    # Nothing booked yet in February.
+    assert body["month"] == {"since": "2026-02-01", "inflow_minor": 0, "outflow_minor": 0}
     assert body["card_settlement"] is None
+
+
+_FEBRUARY_OFX = b"""<OFX><BANKMSGSRSV1><STMTTRNRS><STMTRS><CURDEF>EUR
+<BANKACCTFROM><BANKID>13306<ACCTID>0009876543<ACCTTYPE>CHECKING</BANKACCTFROM>
+<BANKTRANLIST>
+<STMTTRN><TRNAMT>-80.00<DTPOSTED>20260131<FITID>K5<NAME>PRLV BOX</STMTTRN>
+<STMTTRN><TRNAMT>1200.00<DTPOSTED>20260201<FITID>K6<NAME>VIREMENT RECU</STMTTRN>
+<STMTTRN><TRNAMT>-45.50<DTPOSTED>20260209<FITID>K7<NAME>PHARMACIE</STMTTRN>
+</BANKTRANLIST></STMTRS></STMTTRNRS></BANKMSGSRSV1></OFX>"""
+
+
+def test_the_month_flows_start_on_the_first(pinned: TestClient) -> None:
+    headers, checking, _ = _setup(pinned)
+    _import(pinned, headers, checking, _FEBRUARY_OFX)
+
+    body = _overview(pinned, headers, checking)
+
+    # The row on January 31 stays out; the first of the month counts.
+    assert body["month"] == {"since": "2026-02-01", "inflow_minor": 120000, "outflow_minor": -4550}
 
 
 def test_a_card_without_a_rule_is_listed_with_its_issue(pinned: TestClient) -> None:
@@ -250,6 +271,7 @@ def test_a_fresh_account_has_empty_figures(pinned: TestClient) -> None:
     assert body["last_import_at"] is None
     assert body["balance_history"] == []
     assert body["period"]["change_minor"] == 0
+    assert body["month"]["inflow_minor"] == 0
     assert body["linked_cards"] == []
 
 
