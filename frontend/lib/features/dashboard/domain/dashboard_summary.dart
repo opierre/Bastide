@@ -1,11 +1,13 @@
 import 'package:flutter/foundation.dart';
 
-/// One category's slice of the month's expense total.
+/// One top-level category's slice of the month's expense total, its
+/// subcategories included.
 @immutable
 class CategoryBreakdown {
   const CategoryBreakdown({
     required this.categoryId,
     required this.name,
+    required this.hue,
     required this.amountMinor,
     required this.pct,
   });
@@ -15,6 +17,10 @@ class CategoryBreakdown {
   /// An i18n key for system categories, free text for user categories — see
   /// `localizedCategoryName` in the transactions feature.
   final String name;
+
+  /// The category's hue slot as the API stores it (`cat0`–`cat6`, `income`),
+  /// resolved to a colour by the theme; `cat0` for the uncategorized bucket.
+  final String hue;
   final int amountMinor;
   final double pct;
 }

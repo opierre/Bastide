@@ -36,14 +36,32 @@ def _create_account(client: TestClient, headers: dict[str, str]) -> str:
 
 
 def _create_category(
-    client: TestClient, headers: dict[str, str], *, kind: str, name: str = "Category"
+    client: TestClient,
+    headers: dict[str, str],
+    *,
+    kind: str,
+    name: str = "Category",
+    color: str = "cat3",
+    parent_id: str | None = None,
 ) -> str:
     response = client.post(
         "/api/v1/categories",
-        json={"name": name, "kind": kind, "icon": "category", "color": "cat3"},
+        json={
+            "name": name,
+            "kind": kind,
+            "icon": "category",
+            "color": color,
+            "parent_id": parent_id,
+        },
         headers=headers,
     )
+    assert response.status_code == 201, response.text
     return response.json()["id"]
+
+
+def _system_category_id(client: TestClient, headers: dict[str, str], key: str) -> str:
+    response = client.get("/api/v1/categories", headers=headers)
+    return next(row["id"] for row in response.json() if row["name"] == key)
 
 
 def _insert_transaction(
@@ -423,6 +441,92 @@ def test_uncategorized_expenses_are_bucketed_and_counted(
     assert uncategorized["amount_minor"] == 4_000
     assert uncategorized["name"] == "category.other.uncategorized"
     assert sum(row["amount_minor"] for row in body["by_category"]) == body["expense_minor"]
+
+
+def test_subcategory_spending_rolls_up_to_its_top_level_category(
+    client: TestClient, tmp_path: Path
+) -> None:
+    headers = _register(client)
+    account_id = _create_account(client, headers)
+    hobbies = _create_category(client, headers, kind="expense", name="Atelier", color="cat5")
+    paint = _create_category(
+        client, headers, kind="expense", name="Peinture", color="cat5", parent_id=hobbies
+    )
+    wood = _create_category(
+        client, headers, kind="expense", name="Bois", color="cat5", parent_id=hobbies
+    )
+
+    for amount, category in ((-1_250, hobbies), (-2_500, paint), (-3_750, wood)):
+        _insert_transaction(
+            tmp_path,
+            account_id,
+            amount_minor=amount,
+            booked_date=date(2026, 3, 5),
+            category_id=category,
+        )
+
+    body = _summary(client, headers, "2026-03")
+
+    assert body["by_category"] == [
+        {
+            "category_id": hobbies,
+            "name": "Atelier",
+            "hue": "cat5",
+            "amount_minor": 7_500,
+            "pct": 100.0,
+        }
+    ]
+
+
+def test_system_subcategories_roll_up_to_their_bucket_with_its_hue(
+    client: TestClient, tmp_path: Path
+) -> None:
+    headers = _register(client)
+    account_id = _create_account(client, headers)
+    housing = _system_category_id(client, headers, "category.housing")
+    rent = _system_category_id(client, headers, "category.housing.rent")
+    utilities = _system_category_id(client, headers, "category.housing.utilities")
+
+    _insert_transaction(
+        tmp_path, account_id, amount_minor=-50_000, booked_date=date(2026, 3, 1), category_id=rent
+    )
+    _insert_transaction(
+        tmp_path,
+        account_id,
+        amount_minor=-8_000,
+        booked_date=date(2026, 3, 9),
+        category_id=utilities,
+    )
+
+    body = _summary(client, headers, "2026-03")
+
+    [row] = body["by_category"]
+    assert row["category_id"] == housing
+    assert row["name"] == "category.housing"
+    assert row["hue"] == "cat1"
+    assert row["amount_minor"] == 58_000
+
+
+def test_custom_top_level_category_carries_its_own_hue(client: TestClient, tmp_path: Path) -> None:
+    headers = _register(client)
+    account_id = _create_account(client, headers)
+    garden = _create_category(client, headers, kind="expense", name="Jardin", color="cat6")
+    plain = _create_category(client, headers, kind="expense", name="Divers", color="cat0")
+
+    _insert_transaction(
+        tmp_path, account_id, amount_minor=-3_000, booked_date=date(2026, 3, 2), category_id=garden
+    )
+    _insert_transaction(
+        tmp_path, account_id, amount_minor=-1_000, booked_date=date(2026, 3, 3), category_id=plain
+    )
+    _insert_transaction(
+        tmp_path, account_id, amount_minor=-500, booked_date=date(2026, 3, 4), category_id=None
+    )
+
+    body = _summary(client, headers, "2026-03")
+
+    hues = {row["category_id"]: row["hue"] for row in body["by_category"]}
+    assert hues == {garden: "cat6", plain: "cat0", None: "cat0"}
 
 
 # --- scoping & validation ------------------------------------------------------------------------
