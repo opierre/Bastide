@@ -33,6 +33,14 @@ class AppTableColumn {
 /// The cell padding-right of `docs/design/00-design-system.md` §7.
 const _cellGap = AppSpacing.smPlus;
 
+/// The inset of a table drawn edge to edge in a flush panel: its first and
+/// last cells padded 32 (`07-transactions.md`), the last one's 12 px cell
+/// gap included, while the hairlines and grounds still run the full width.
+const edgeTableInset = EdgeInsetsDirectional.only(
+  start: AppSpacing.pageX,
+  end: AppSpacing.pageX - _cellGap,
+);
+
 /// Lays [cells] out under [columns]: fixed widths first, the rest shared by
 /// flex, numeric columns right-aligned.
 class _Cells extends StatelessWidget {
@@ -77,7 +85,11 @@ class AppTableHeader extends StatelessWidget {
     this.sortColumn,
     this.ascending = true,
     this.onSort,
+    this.inset = EdgeInsetsDirectional.zero,
   });
+
+  /// Around the cells; [edgeTableInset] for an edge-to-edge table.
+  final EdgeInsetsDirectional inset;
 
   final List<AppTableColumn> columns;
 
@@ -95,7 +107,7 @@ class AppTableHeader extends StatelessWidget {
     ).textTheme.bodySmall?.copyWith(color: context.colors.textTertiary);
 
     return Padding(
-      padding: const EdgeInsets.only(bottom: AppSpacing.sm),
+      padding: inset.add(const EdgeInsets.only(bottom: AppSpacing.sm)),
       child: _Cells(
         columns: columns,
         cells: [
@@ -181,6 +193,7 @@ class AppTableRow extends StatefulWidget {
     this.selected = false,
     this.dimmed = false,
     this.twoLines = false,
+    this.inset = EdgeInsetsDirectional.zero,
   });
 
   final List<AppTableColumn> columns;
@@ -188,6 +201,9 @@ class AppTableRow extends StatefulWidget {
   final VoidCallback? onTap;
   final bool selected;
   final bool dimmed;
+
+  /// Around the cells; [edgeTableInset] for an edge-to-edge table.
+  final EdgeInsetsDirectional inset;
 
   /// The 48 px row, for a first cell of two lines.
   final bool twoLines;
@@ -214,6 +230,7 @@ class _AppTableRowState extends State<AppTableRow> {
 
     final row = Container(
       height: widget.twoLines ? AppSizes.tableRowTwoLines : AppSizes.tableRow,
+      padding: widget.inset,
       decoration: BoxDecoration(
         color: ground,
         border: Border(top: BorderSide(color: colors.line)),
@@ -269,10 +286,19 @@ class _RowScope extends InheritedWidget {
 /// an account type. 30 px, `rail` ground, 12 `textTertiary`, with an
 /// optional right-aligned [trailing] (the group's total).
 class AppTableGroupRow extends StatelessWidget {
-  const AppTableGroupRow({super.key, required this.label, this.trailing});
+  const AppTableGroupRow({
+    super.key,
+    required this.label,
+    this.trailing,
+    this.inset = EdgeInsetsDirectional.zero,
+  });
 
   final String label;
   final Widget? trailing;
+
+  /// Around the label and [trailing]; [edgeTableInset] for an edge-to-edge
+  /// table.
+  final EdgeInsetsDirectional inset;
 
   @override
   Widget build(BuildContext context) {
@@ -283,7 +309,7 @@ class AppTableGroupRow extends StatelessWidget {
 
     return Container(
       height: AppSizes.groupRow,
-      padding: const EdgeInsetsDirectional.only(end: _cellGap),
+      padding: inset.add(const EdgeInsetsDirectional.only(end: _cellGap)),
       decoration: BoxDecoration(
         color: colors.rail,
         border: Border(top: BorderSide(color: colors.line)),
