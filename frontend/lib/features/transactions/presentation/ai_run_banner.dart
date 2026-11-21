@@ -1,21 +1,24 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/tokens.dart';
-import '../../../core/widgets/app_card.dart';
+import '../../../core/widgets/app_button.dart';
+import '../../../core/widgets/inline_banner.dart';
 import '../../../core/widgets/repere_meter.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../categorization/application/run_controller.dart';
 import '../../categorization/domain/categorization_run.dart';
-import '../application/transactions_controller.dart';
+import 'transactions_link.dart';
 
-/// The banner that stands in for the review queue's header card while a run is
-/// classifying (`docs/design/07` frame ⑦).
+/// The banner that replaces the review tab's progress row while a run is
+/// classifying (`07-transactions.md` §Tab « À vérifier »): the banner recipe
+/// of `00` §7 with a 14 px spinner, « Catégorisation en cours : 84 sur 213
+/// opérations », the counts in `textSecondary`, a secondary « Annuler », and
+/// a repère under the text.
 ///
-/// Non-blocking by construction: it is a card in the column above the list, not
-/// a modal or an overlay. The list beneath stays interactive, and rows leave it
-/// as the run commits batches — which is the whole point of running stage 2
-/// outside the request that triggered it.
+/// Non-blocking by construction: it sits in the column above the table, which
+/// stays usable while rows leave it as the run commits batches.
 class AiRunBanner extends ConsumerWidget {
   const AiRunBanner({super.key, required this.run});
 
@@ -24,63 +27,70 @@ class AiRunBanner extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context)!;
+    final colors = context.colors;
+    final textTheme = Theme.of(context).textTheme;
 
-    return AppCard(
+    return Container(
       key: const Key('aiRunBanner'),
-      padding: const EdgeInsets.all(AppSpacing.cardPadding),
-      border: Border.all(color: context.colors.line),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.smPlus,
+        vertical: AppSpacing.sm,
+      ),
+      decoration: BoxDecoration(
+        color: colors.surface,
+        borderRadius: BorderRadius.circular(AppRadii.container),
+        border: Border.all(color: colors.lineStrong),
+      ),
+      child: Row(
         children: [
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              SizedBox(
-                width: 18,
-                height: 18,
-                child: CircularProgressIndicator(
-                  strokeWidth: 2.5,
-                  color: context.colors.accent,
-                ),
-              ),
-              const SizedBox(width: AppSpacing.sm + AppSpacing.xs),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      l10n.runBannerRunning(run.processedCount, run.totalCount),
-                      key: const Key('aiRunBannerHeadline'),
-                      style: Theme.of(context).textTheme.titleMedium,
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      l10n.runBannerRunningDetail(
-                        run.assignedCount,
-                        run.deferredCount,
-                      ),
-                      key: const Key('aiRunBannerDetail'),
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: context.colors.textSecondary,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(width: AppSpacing.sm),
-              SizedBox(
-                height: 30,
-                child: OutlinedButton(
-                  key: const Key('aiRunBannerCancel'),
-                  onPressed: () =>
-                      ref.read(runControllerProvider.notifier).cancel(),
-                  child: Text(l10n.runBannerCancel),
-                ),
-              ),
-            ],
+          SizedBox.square(
+            dimension: AppSizes.iconSmall,
+            child: CircularProgressIndicator(
+              strokeWidth: 1.5,
+              color: colors.accent,
+            ),
           ),
-          const SizedBox(height: AppSpacing.sm + AppSpacing.xs),
-          RepereMeter(fraction: run.progress),
+          const SizedBox(width: AppSpacing.sm),
+          Expanded(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Text.rich(
+                  TextSpan(
+                    children: [
+                      TextSpan(
+                        text: l10n.runBannerRunning(
+                          run.processedCount,
+                          run.totalCount,
+                        ),
+                      ),
+                      const TextSpan(text: '  '),
+                      TextSpan(
+                        text: l10n.runBannerRunningDetail(
+                          run.assignedCount,
+                          run.deferredCount,
+                        ),
+                        style: TextStyle(color: colors.textSecondary),
+                      ),
+                    ],
+                  ),
+                  key: const Key('aiRunBannerHeadline'),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: tabularNumberStyle(textTheme.bodyMedium!),
+                ),
+                const SizedBox(height: AppSpacing.xsPlus),
+                RepereMeter(fraction: run.progress),
+              ],
+            ),
+          ),
+          const SizedBox(width: AppSpacing.smPlus),
+          AppButton(
+            key: const Key('aiRunBannerCancel'),
+            label: l10n.runBannerCancel,
+            onPressed: () => ref.read(runControllerProvider.notifier).cancel(),
+          ),
         ],
       ),
     );
@@ -89,120 +99,51 @@ class AiRunBanner extends ConsumerWidget {
 
 /// What a finished run has to say, when it has anything to say at all.
 ///
-/// Renders nothing for `success` and `cancelled`: a run that did what it was
-/// asked, or that the user stopped themselves, needs no announcement — the
-/// header card coming back is the report. `partial` and `failed` are surfaced
-/// on a tint with a dismiss, never as an error wall over the queue.
+/// Nothing for `success` and `cancelled`: a run that did what it was asked,
+/// or that the user stopped themselves, needs no announcement; the progress
+/// row coming back is the report. `partial` and `failed` show a dismissible
+/// banner whose `warning` icon alone carries the tone.
 class RunOutcomeBanner extends ConsumerWidget {
-  const RunOutcomeBanner({super.key, required this.run});
+  const RunOutcomeBanner({super.key, required this.run, this.onView});
 
   final CategorizationRun run;
 
+  /// « Voir »: the rows the run could not analyse are the rows still in the
+  /// queue, which the review tab already lists.
+  final VoidCallback? onView;
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context)!;
+    final controller = ref.read(runControllerProvider.notifier);
 
     return switch (run.status) {
-      RunStatus.partial => _OutcomeCard(
-        cardKey: const Key('aiRunPartialBanner'),
-        tone: context.colors.warning,
-        icon: Icons.warning_amber_rounded,
+      RunStatus.partial => InlineBanner(
+        key: const Key('aiRunPartialBanner'),
+        tone: BannerTone.warning,
         message: l10n.runBannerPartial(run.failedCount),
-        actionLabel: l10n.runBannerPartialAction,
-        // The rows a run couldn't analyse are exactly the rows still needing
-        // review, so « Voir » is the review filter.
-        onAction: () {
-          ref.read(transactionFiltersProvider.notifier).setNeedsReview(true);
-          ref.read(runControllerProvider.notifier).dismissBanner();
-        },
-      ),
-      RunStatus.failed => _OutcomeCard(
-        cardKey: const Key('aiRunFailedBanner'),
-        tone: context.colors.warning,
-        icon: Icons.info_outline_rounded,
-        message: l10n.runBannerFailed,
-      ),
-      _ => const SizedBox.shrink(),
-    };
-  }
-}
-
-class _OutcomeCard extends ConsumerWidget {
-  const _OutcomeCard({
-    required this.cardKey,
-    required this.tone,
-    required this.icon,
-    required this.message,
-    this.actionLabel,
-    this.onAction,
-  });
-
-  final Key cardKey;
-  final Color tone;
-  final IconData icon;
-  final String message;
-  final String? actionLabel;
-  final VoidCallback? onAction;
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final l10n = AppLocalizations.of(context)!;
-
-    return Container(
-      key: cardKey,
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppSpacing.sm + AppSpacing.xs,
-        vertical: AppSpacing.sm + 2,
-      ),
-      decoration: BoxDecoration(
-        color: tone.withValues(alpha: 0.10),
-        borderRadius: BorderRadius.circular(AppRadii.md),
-        border: Border.all(color: tone.withValues(alpha: 0.32)),
-      ),
-      child: Row(
-        children: [
-          Icon(icon, size: 15, color: tone),
-          const SizedBox(width: AppSpacing.sm),
-          Expanded(
-            child: Text(
-              message,
-              style: Theme.of(
-                context,
-              ).textTheme.bodySmall?.copyWith(color: tone),
-            ),
-          ),
-          if (actionLabel != null) ...[
-            const SizedBox(width: AppSpacing.sm),
-            MouseRegion(
-              cursor: SystemMouseCursors.click,
-              child: GestureDetector(
-                key: const Key('aiRunBannerAction'),
-                onTap: onAction,
-                child: Text(
-                  actionLabel!,
-                  style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                    color: tone,
-                    decoration: TextDecoration.underline,
-                    decorationColor: tone,
-                  ),
-                ),
-              ),
-            ),
-          ],
-          const SizedBox(width: AppSpacing.sm),
-          IconButton(
-            key: const Key('aiRunBannerDismiss'),
-            iconSize: 14,
-            visualDensity: VisualDensity.compact,
-            constraints: const BoxConstraints(minWidth: 24, minHeight: 24),
-            padding: EdgeInsets.zero,
-            tooltip: l10n.runBannerDismiss,
-            icon: Icon(Icons.close_rounded, color: tone),
-            onPressed: () =>
-                ref.read(runControllerProvider.notifier).dismissBanner(),
+        onDismiss: controller.dismissBanner,
+        dismissTooltip: l10n.runBannerDismiss,
+        actions: [
+          TransactionsLink(
+            key: const Key('aiRunBannerAction'),
+            label: l10n.runBannerPartialAction,
+            small: false,
+            onTap: () {
+              onView?.call();
+              controller.dismissBanner();
+            },
           ),
         ],
       ),
-    );
+      RunStatus.failed => InlineBanner(
+        key: const Key('aiRunFailedBanner'),
+        tone: BannerTone.warning,
+        message: l10n.runBannerFailed,
+        onDismiss: controller.dismissBanner,
+        dismissTooltip: l10n.runBannerDismiss,
+      ),
+      _ => const SizedBox.shrink(),
+    };
   }
 }

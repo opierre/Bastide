@@ -1678,7 +1678,7 @@ abstract class AppLocalizations {
   /// Placeholder in the transactions search pill in the top bar.
   ///
   /// In fr, this message translates to:
-  /// **'Rechercher une description ou un marchand…'**
+  /// **'Rechercher'**
   String get transactionsSearchHint;
 
   /// Keyboard shortcut shown at the end of a search field; pressing it focuses the field.
@@ -1686,12 +1686,6 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Ctrl K'**
   String get searchShortcutHint;
-
-  /// Shown in place of the transaction list when the filters/search match nothing.
-  ///
-  /// In fr, this message translates to:
-  /// **'Aucune transaction ne correspond à votre recherche.'**
-  String get transactionsSearchEmpty;
 
   /// Retry button label shown when the transaction list fails to load.
   ///
@@ -1708,7 +1702,7 @@ abstract class AppLocalizations {
   /// Encouraging subtext under the empty-state heading on the transactions screen.
   ///
   /// In fr, this message translates to:
-  /// **'Importez un relevé pour voir vos opérations apparaître ici.'**
+  /// **'Importez un relevé pour voir vos opérations ici.'**
   String get transactionsEmptyBody;
 
   /// CTA on the transactions empty state, navigating to the imports panel.
@@ -1717,7 +1711,7 @@ abstract class AppLocalizations {
   /// **'Aller aux imports'**
   String get transactionsGoToImports;
 
-  /// Label beside the filter bar's needs-review toggle.
+  /// The « À vérifier » tab of the Transactions panel; its count follows it.
   ///
   /// In fr, this message translates to:
   /// **'À vérifier'**
@@ -1771,12 +1765,6 @@ abstract class AppLocalizations {
   /// **'Au'**
   String get transactionsDateRangeToLabel;
 
-  /// Helper under the range fields explaining how to lift the date filter.
-  ///
-  /// In fr, this message translates to:
-  /// **'Laissez les deux dates vides pour voir toutes les dates.'**
-  String get transactionsDateRangeHelp;
-
   /// Tooltip on the calendar button of the range's start date field.
   ///
   /// In fr, this message translates to:
@@ -1822,26 +1810,236 @@ abstract class AppLocalizations {
   /// Pager label under the transaction list, showing the current page's row range and the total count.
   ///
   /// In fr, this message translates to:
-  /// **'{from}–{to} sur {total}'**
+  /// **'{from} – {to} sur {total}'**
   String transactionsPager(int from, int to, int total);
 
-  /// Secondary line of a transaction row when the bank shipped a memo: the memo first, then the account it belongs to.
+  /// The « Toutes » tab of the Transactions panel.
   ///
   /// In fr, this message translates to:
-  /// **'{memo} · {account}'**
-  String transactionRowMemoAndAccount(String memo, String account);
+  /// **'Toutes'**
+  String get transactionsTabAll;
 
-  /// Shown in place of the review queue list when it is empty.
+  /// The period select's label once a range is set; both dates are already formatted.
   ///
   /// In fr, this message translates to:
-  /// **'Aucune transaction à vérifier.'**
-  String get reviewQueueEmpty;
+  /// **'{from} – {to}'**
+  String transactionsPeriodRange(String from, String to);
 
-  /// Headline on the review queue's progress card, counting the transactions still needing review.
+  /// End of the filter row: how many operations the filters match, before their signed net.
   ///
   /// In fr, this message translates to:
-  /// **'{count, plural, =0{Aucune transaction à vérifier} =1{1 transaction à vérifier} other{{count} transactions à vérifier}}'**
-  String reviewQueueCount(int count);
+  /// **'{count, plural, =1{1 opération · net} other{{count} opérations · net}}'**
+  String transactionsCountNet(int count);
+
+  /// Column header.
+  ///
+  /// In fr, this message translates to:
+  /// **'Opération'**
+  String get transactionsColumnOperation;
+
+  /// Column header.
+  ///
+  /// In fr, this message translates to:
+  /// **'Catégorie'**
+  String get transactionsColumnCategory;
+
+  /// Column header.
+  ///
+  /// In fr, this message translates to:
+  /// **'Montant'**
+  String get transactionsColumnAmount;
+
+  /// Pager button tooltip.
+  ///
+  /// In fr, this message translates to:
+  /// **'Page précédente'**
+  String get transactionsPagerPrevious;
+
+  /// Pager button tooltip.
+  ///
+  /// In fr, this message translates to:
+  /// **'Page suivante'**
+  String get transactionsPagerNext;
+
+  /// Shown in the table area when the filters or the search match nothing.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucune opération pour ces filtres.'**
+  String get transactionsNoResult;
+
+  /// Link after the no-result line; lifts every filter and the search.
+  ///
+  /// In fr, this message translates to:
+  /// **'Effacer les filtres'**
+  String get transactionsClearFilters;
+
+  /// The inspector pane's note while no operation is selected.
+  ///
+  /// In fr, this message translates to:
+  /// **'Sélectionnez une opération pour voir son détail.'**
+  String get transactionInspectorEmpty;
+
+  /// Inspector key/value label.
+  ///
+  /// In fr, this message translates to:
+  /// **'Date'**
+  String get transactionInspectorDate;
+
+  /// Inspector key/value label.
+  ///
+  /// In fr, this message translates to:
+  /// **'Compte'**
+  String get transactionInspectorAccount;
+
+  /// Inspector key/value label.
+  ///
+  /// In fr, this message translates to:
+  /// **'Catégorie'**
+  String get transactionInspectorCategory;
+
+  /// Inspector key/value label: what gave the operation its category.
+  ///
+  /// In fr, this message translates to:
+  /// **'Classée par'**
+  String get transactionInspectorClassifiedBy;
+
+  /// Inspector key/value label.
+  ///
+  /// In fr, this message translates to:
+  /// **'Import'**
+  String get transactionInspectorImport;
+
+  /// « Classée par » value when a rule filed the operation.
+  ///
+  /// In fr, this message translates to:
+  /// **'règle « {pattern} »'**
+  String transactionClassifiedByRule(String pattern);
+
+  /// « Classée par » value when the local AI filed or proposed the category.
+  ///
+  /// In fr, this message translates to:
+  /// **'IA locale, confiance {confidence}'**
+  String transactionClassifiedByModel(double confidence);
+
+  /// « Classée par » value when the user chose the category.
+  ///
+  /// In fr, this message translates to:
+  /// **'vous'**
+  String get transactionClassifiedByUser;
+
+  /// « Classée par » value when nothing filed the operation.
+  ///
+  /// In fr, this message translates to:
+  /// **'non classée'**
+  String get transactionClassifiedByNone;
+
+  /// Shown in the inspector when the operation's import, rule, series and history fail to load.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ce détail n’a pas pu être chargé. Rien n’a été modifié.'**
+  String get transactionInspectorLoadError;
+
+  /// Inspector: the operation belongs to a series.
+  ///
+  /// In fr, this message translates to:
+  /// **'Paiement récurrent'**
+  String get transactionRecurringTitle;
+
+  /// Under « Paiement récurrent »: the series' cadence, then its next expected date, formatted.
+  ///
+  /// In fr, this message translates to:
+  /// **'{cadence} · prochain le {date}'**
+  String transactionRecurringNext(String cadence, String date);
+
+  /// Inspector link opening the series in Abonnements.
+  ///
+  /// In fr, this message translates to:
+  /// **'Voir la série'**
+  String get transactionRecurringView;
+
+  /// Inspector heading over the merchant's earlier operations.
+  ///
+  /// In fr, this message translates to:
+  /// **'Même marchand'**
+  String get transactionSameMerchant;
+
+  /// Under « Même marchand » when the merchant has no earlier operation.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucune opération antérieure.'**
+  String get transactionSameMerchantNone;
+
+  /// Opens « Toujours catégoriser ainsi ».
+  ///
+  /// In fr, this message translates to:
+  /// **'Créer une règle'**
+  String get transactionCreateRule;
+
+  /// Opens the rule that filed the operation.
+  ///
+  /// In fr, this message translates to:
+  /// **'Modifier la règle'**
+  String get transactionEditRule;
+
+  /// Review progress: operations filed out of the queue's size this session.
+  ///
+  /// In fr, this message translates to:
+  /// **'{done} sur {total}'**
+  String reviewProgressCount(int done, int total);
+
+  /// Follows the review progress count.
+  ///
+  /// In fr, this message translates to:
+  /// **'classées'**
+  String get reviewProgressCaption;
+
+  /// Note on the review progress row while local AI is on.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, =0{L’IA locale n’a proposé aucune catégorie. Rien n’est classé sans votre accord.} =1{L’IA locale propose une catégorie pour 1 opération. Rien n’est classé sans votre accord.} other{L’IA locale propose une catégorie pour {count} opérations. Rien n’est classé sans votre accord.}}'**
+  String reviewAiNote(int count);
+
+  /// Column header.
+  ///
+  /// In fr, this message translates to:
+  /// **'Libellé du relevé'**
+  String get reviewColumnLabel;
+
+  /// Column header.
+  ///
+  /// In fr, this message translates to:
+  /// **'Date'**
+  String get reviewColumnDate;
+
+  /// Column header.
+  ///
+  /// In fr, this message translates to:
+  /// **'Proposition'**
+  String get reviewColumnProposal;
+
+  /// Empty state of the « À vérifier » tab.
+  ///
+  /// In fr, this message translates to:
+  /// **'Rien à vérifier'**
+  String get reviewEmptyTitle;
+
+  /// Empty state of the « À vérifier » tab.
+  ///
+  /// In fr, this message translates to:
+  /// **'Toutes vos opérations ont une catégorie.'**
+  String get reviewEmptyBody;
+
+  /// Lead of the « Toujours catégoriser ainsi » modal.
+  ///
+  /// In fr, this message translates to:
+  /// **'Une règle classe ces opérations à chaque import, sans IA.'**
+  String get alwaysRuleLead;
+
+  /// Toast after the rule is created, with how many existing operations it refiled.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, =0{Règle créée} =1{Règle créée · 1 opération recatégorisée} other{Règle créée · {count} opérations recatégorisées}}'**
+  String alwaysRuleCreatedToast(int count);
 
   /// Affordance on a review queue row that, alongside picking a category, creates a matching categorization rule.
   ///
@@ -1852,7 +2050,7 @@ abstract class AppLocalizations {
   /// Placeholder in the category picker popover's search field.
   ///
   /// In fr, this message translates to:
-  /// **'Changer de catégorie…'**
+  /// **'Changer de catégorie'**
   String get categoryPickerSearchHint;
 
   /// Shown inside the category picker popover when the category list fails to load.
@@ -3679,22 +3877,10 @@ abstract class AppLocalizations {
   /// **'‹ image de {kilobytes} Ko ›'**
   String rulePackExportLogoElided(int kilobytes);
 
-  /// Subtext on the review queue's header card when local AI is active, counting the rows it proposed a category for.
-  ///
-  /// In fr, this message translates to:
-  /// **'{count, plural, =0{Aucune de ces transactions n\'a reçu de proposition de l\'IA locale. Confirmez ou corrigez : rien n\'est classé sans vous.} one{L\'IA locale propose une catégorie pour l\'une d\'entre elles. Confirmez ou corrigez : rien n\'est classé sans vous.} other{L\'IA locale propose une catégorie pour {count} d\'entre elles. Confirmez ou corrigez : rien n\'est classé sans vous.}}'**
-  String reviewQueueAiSubtitle(int count);
-
-  /// Resolved-progress label on the review queue's header card: rows already dealt with, out of the queue's size this session.
-  ///
-  /// In fr, this message translates to:
-  /// **'{resolved}/{total} · {percent}'**
-  String reviewQueueProgress(int resolved, int total, double percent);
-
   /// Calm invitation at the foot of the review queue's header card when AI is off or the runtime is unreachable. The only place in the app that mentions it.
   ///
   /// In fr, this message translates to:
-  /// **'Activez l\'IA locale pour classer automatiquement les transactions que vos règles n\'ont pas reconnues.'**
+  /// **'Activez l’IA locale pour classer les opérations que vos règles n’ont pas reconnues.'**
   String get reviewAiInvitation;
 
   /// Link at the end of the AI invitation, opening the settings panel.
@@ -3703,10 +3889,10 @@ abstract class AppLocalizations {
   /// **'Paramètres'**
   String get reviewAiInvitationLink;
 
-  /// Caption beside a proposal's confidence gauge. Always a percentage, never the raw [0,1] value the API returns.
+  /// Caption after a proposed category. Always a percentage, never the raw [0,1] value the API returns.
   ///
   /// In fr, this message translates to:
-  /// **'Confiance {confidence}'**
+  /// **'confiance {confidence}'**
   String reviewConfidence(double confidence);
 
   /// Row action accepting the model's proposed category as-is.
@@ -3733,12 +3919,6 @@ abstract class AppLocalizations {
   /// **'Choisir une catégorie'**
   String get reviewChooseCategory;
 
-  /// Subtext under the always-categorize modal's title, naming the transaction the rule was derived from.
-  ///
-  /// In fr, this message translates to:
-  /// **'Une règle classe ces transactions sans IA, à chaque import. Elle est pré-remplie depuis « {label} ».'**
-  String alwaysRuleSubtitle(String label);
-
   /// Label of the always-categorize modal's target-category select.
   ///
   /// In fr, this message translates to:
@@ -3748,7 +3928,7 @@ abstract class AppLocalizations {
   /// Checkbox in the always-categorize modal: re-run the new rule over transactions already imported.
   ///
   /// In fr, this message translates to:
-  /// **'Appliquer aux transactions existantes'**
+  /// **'Appliquer aux opérations existantes'**
   String get alwaysRuleApplyExisting;
 
   /// Confirm button of the always-categorize modal.
@@ -3756,18 +3936,6 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Créer la règle'**
   String get alwaysRuleSubmit;
-
-  /// Success toast headline after a rule was created from a correction.
-  ///
-  /// In fr, this message translates to:
-  /// **'Règle créée'**
-  String get alwaysRuleCreatedTitle;
-
-  /// Success toast subtext after a rule was created from a correction, counting the other rows it moved.
-  ///
-  /// In fr, this message translates to:
-  /// **'{count, plural, =0{Aucune autre transaction n\'a changé de catégorie.} one{{count} transaction recatégorisée.} other{{count} transactions recatégorisées.}}'**
-  String alwaysRuleCreatedBody(int count);
 
   /// Shown in the always-categorize modal when the server-side pre-fill could not be fetched — the form stays usable.
   ///
@@ -3784,13 +3952,13 @@ abstract class AppLocalizations {
   /// Headline of the banner that replaces the review queue's header card while a run is classifying.
   ///
   /// In fr, this message translates to:
-  /// **'{total, plural, one{Catégorisation en cours : {processed} sur {total} transaction} other{Catégorisation en cours : {processed} sur {total} transactions}}'**
+  /// **'{total, plural, one{Catégorisation en cours : {processed} sur {total} opération} other{Catégorisation en cours : {processed} sur {total} opérations}}'**
   String runBannerRunning(int processed, int total);
 
   /// Sub-line under the running banner: what the run has settled, what it has left for the user, and the reassurance that nothing is blocked.
   ///
   /// In fr, this message translates to:
-  /// **'{assigned, plural, one{{assigned} classée · {deferred} à vérifier · le panneau reste utilisable} other{{assigned} classées · {deferred} à vérifier · le panneau reste utilisable}}'**
+  /// **'{assigned, plural, one{{assigned} classée · {deferred} à vérifier} other{{assigned} classées · {deferred} à vérifier}}'**
   String runBannerRunningDetail(int assigned, int deferred);
 
   /// Cancels the categorization run in flight. The executor stops after the batch it is on.
@@ -3802,7 +3970,7 @@ abstract class AppLocalizations {
   /// Dismissible amber banner after a run that ended `partial`. A report, not an error wall.
   ///
   /// In fr, this message translates to:
-  /// **'{count, plural, one{Catégorisation terminée. {count} transaction n\'a pas pu être analysée.} other{Catégorisation terminée. {count} transactions n\'ont pas pu être analysées.}}'**
+  /// **'{count, plural, one{Catégorisation terminée. {count} opération n’a pas pu être analysée.} other{Catégorisation terminée. {count} opérations n’ont pas pu être analysées.}}'**
   String runBannerPartial(int count);
 
   /// Link on the partial-run banner, showing the transactions the run could not analyse.

@@ -1067,13 +1067,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get importHistoryNoValue => '—';
 
   @override
-  String get transactionsSearchHint => 'Search a description or a merchant…';
+  String get transactionsSearchHint => 'Search';
 
   @override
   String get searchShortcutHint => 'Ctrl K';
-
-  @override
-  String get transactionsSearchEmpty => 'No transaction matches your search.';
 
   @override
   String get transactionsRetry => 'Retry';
@@ -1083,13 +1080,13 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get transactionsEmptyBody =>
-      'Import a statement to see your transactions appear here.';
+      'Import a statement to see your operations here.';
 
   @override
   String get transactionsGoToImports => 'Go to imports';
 
   @override
-  String get transactionsNeedsReviewLabel => 'Needs review';
+  String get transactionsNeedsReviewLabel => 'To review';
 
   @override
   String get transactionsFilterAllAccounts => 'All accounts';
@@ -1118,10 +1115,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get transactionsDateRangeToLabel => 'To';
 
   @override
-  String get transactionsDateRangeHelp =>
-      'Leave both dates empty to see every date.';
-
-  @override
   String get transactionsDateRangePickFrom => 'Pick the start date';
 
   @override
@@ -1146,25 +1139,165 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String transactionsPager(int from, int to, int total) {
-    return '$from–$to of $total';
+    return '$from – $to of $total';
   }
 
   @override
-  String transactionRowMemoAndAccount(String memo, String account) {
-    return '$memo · $account';
+  String get transactionsTabAll => 'All';
+
+  @override
+  String transactionsPeriodRange(String from, String to) {
+    return '$from – $to';
   }
 
   @override
-  String get reviewQueueEmpty => 'No transactions to review.';
-
-  @override
-  String reviewQueueCount(int count) {
+  String transactionsCountNet(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '$count transactions to review',
-      one: '1 transaction to review',
-      zero: 'No transactions to review',
+      other: '$count operations · net',
+      one: '1 operation · net',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get transactionsColumnOperation => 'Operation';
+
+  @override
+  String get transactionsColumnCategory => 'Category';
+
+  @override
+  String get transactionsColumnAmount => 'Amount';
+
+  @override
+  String get transactionsPagerPrevious => 'Previous page';
+
+  @override
+  String get transactionsPagerNext => 'Next page';
+
+  @override
+  String get transactionsNoResult => 'No operation for these filters.';
+
+  @override
+  String get transactionsClearFilters => 'Clear the filters';
+
+  @override
+  String get transactionInspectorEmpty =>
+      'Select an operation to see its details.';
+
+  @override
+  String get transactionInspectorDate => 'Date';
+
+  @override
+  String get transactionInspectorAccount => 'Account';
+
+  @override
+  String get transactionInspectorCategory => 'Category';
+
+  @override
+  String get transactionInspectorClassifiedBy => 'Filed by';
+
+  @override
+  String get transactionInspectorImport => 'Import';
+
+  @override
+  String transactionClassifiedByRule(String pattern) {
+    return 'rule “$pattern”';
+  }
+
+  @override
+  String transactionClassifiedByModel(double confidence) {
+    final intl.NumberFormat confidenceNumberFormat =
+        intl.NumberFormat.percentPattern(localeName);
+    final String confidenceString = confidenceNumberFormat.format(confidence);
+
+    return 'local AI, confidence $confidenceString';
+  }
+
+  @override
+  String get transactionClassifiedByUser => 'you';
+
+  @override
+  String get transactionClassifiedByNone => 'not filed';
+
+  @override
+  String get transactionInspectorLoadError =>
+      'These details could not be loaded. Nothing was changed.';
+
+  @override
+  String get transactionRecurringTitle => 'Recurring payment';
+
+  @override
+  String transactionRecurringNext(String cadence, String date) {
+    return '$cadence · next on $date';
+  }
+
+  @override
+  String get transactionRecurringView => 'View the series';
+
+  @override
+  String get transactionSameMerchant => 'Same merchant';
+
+  @override
+  String get transactionSameMerchantNone => 'No earlier operation.';
+
+  @override
+  String get transactionCreateRule => 'Create a rule';
+
+  @override
+  String get transactionEditRule => 'Edit the rule';
+
+  @override
+  String reviewProgressCount(int done, int total) {
+    return '$done of $total';
+  }
+
+  @override
+  String get reviewProgressCaption => 'filed';
+
+  @override
+  String reviewAiNote(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          'Local AI proposes a category for $count operations. Nothing is filed without your consent.',
+      one:
+          'Local AI proposes a category for 1 operation. Nothing is filed without your consent.',
+      zero:
+          'Local AI proposed no category. Nothing is filed without your consent.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get reviewColumnLabel => 'Statement label';
+
+  @override
+  String get reviewColumnDate => 'Date';
+
+  @override
+  String get reviewColumnProposal => 'Proposal';
+
+  @override
+  String get reviewEmptyTitle => 'Nothing to review';
+
+  @override
+  String get reviewEmptyBody => 'All your operations have a category.';
+
+  @override
+  String get alwaysRuleLead =>
+      'A rule files these operations at every import, without AI.';
+
+  @override
+  String alwaysRuleCreatedToast(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Rule created · $count operations recategorized',
+      one: 'Rule created · 1 operation recategorized',
+      zero: 'Rule created',
     );
     return '$_temp0';
   }
@@ -1173,7 +1306,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get reviewAlwaysCategorize => 'Always categorize like this';
 
   @override
-  String get categoryPickerSearchHint => 'Change category…';
+  String get categoryPickerSearchHint => 'Change category';
 
   @override
   String get categoryPickerLoadError => 'Couldn\'t load categories.';
@@ -2263,32 +2396,8 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String reviewQueueAiSubtitle(int count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other:
-          'Local AI proposes a category for $count of them. Confirm or correct: nothing is filed without you.',
-      one:
-          'Local AI proposes a category for one of them. Confirm or correct: nothing is filed without you.',
-      zero:
-          'Local AI hasn\'t proposed a category for any of these. Confirm or correct: nothing is filed without you.',
-    );
-    return '$_temp0';
-  }
-
-  @override
-  String reviewQueueProgress(int resolved, int total, double percent) {
-    final intl.NumberFormat percentNumberFormat =
-        intl.NumberFormat.percentPattern(localeName);
-    final String percentString = percentNumberFormat.format(percent);
-
-    return '$resolved/$total · $percentString';
-  }
-
-  @override
   String get reviewAiInvitation =>
-      'Turn on local AI to automatically categorize the transactions your rules didn\'t recognize.';
+      'Turn on local AI to file the operations your rules did not recognise.';
 
   @override
   String get reviewAiInvitationLink => 'Settings';
@@ -2299,7 +2408,7 @@ class AppLocalizationsEn extends AppLocalizations {
         intl.NumberFormat.percentPattern(localeName);
     final String confidenceString = confidenceNumberFormat.format(confidence);
 
-    return 'Confidence $confidenceString';
+    return 'confidence $confidenceString';
   }
 
   @override
@@ -2315,33 +2424,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get reviewChooseCategory => 'Choose a category';
 
   @override
-  String alwaysRuleSubtitle(String label) {
-    return 'A rule files these transactions without AI, on every import. It is pre-filled from “$label”.';
-  }
-
-  @override
   String get alwaysRuleCategoryLabel => 'Target category';
 
   @override
-  String get alwaysRuleApplyExisting => 'Apply to existing transactions';
+  String get alwaysRuleApplyExisting => 'Apply to existing operations';
 
   @override
   String get alwaysRuleSubmit => 'Create the rule';
-
-  @override
-  String get alwaysRuleCreatedTitle => 'Rule created';
-
-  @override
-  String alwaysRuleCreatedBody(int count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: '$count transactions recategorized.',
-      one: '$count transaction recategorized.',
-      zero: 'No other transaction changed category.',
-    );
-    return '$_temp0';
-  }
 
   @override
   String get alwaysRuleSuggestionFailed =>
@@ -2355,8 +2444,8 @@ class AppLocalizationsEn extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       total,
       locale: localeName,
-      other: 'Categorizing: $processed of $total transactions',
-      one: 'Categorizing: $processed of $total transaction',
+      other: 'Categorizing: $processed of $total operations',
+      one: 'Categorizing: $processed of $total operation',
     );
     return '$_temp0';
   }
@@ -2366,8 +2455,8 @@ class AppLocalizationsEn extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       assigned,
       locale: localeName,
-      other: '$assigned filed · $deferred to review · the panel stays usable',
-      one: '$assigned filed · $deferred to review · the panel stays usable',
+      other: '$assigned filed · $deferred to review',
+      one: '$assigned filed · $deferred to review',
     );
     return '$_temp0';
   }
@@ -2381,8 +2470,8 @@ class AppLocalizationsEn extends AppLocalizations {
       count,
       locale: localeName,
       other:
-          'Categorization finished. $count transactions couldn\'t be analysed.',
-      one: 'Categorization finished. $count transaction couldn\'t be analysed.',
+          'Categorization finished. $count operations couldn\'t be analysed.',
+      one: 'Categorization finished. $count operation couldn\'t be analysed.',
     );
     return '$_temp0';
   }

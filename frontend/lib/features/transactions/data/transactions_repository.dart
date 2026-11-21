@@ -55,6 +55,7 @@ class TransactionsRepository {
       page: json['page'] as int,
       pageSize: json['page_size'] as int,
       total: json['total'] as int,
+      netMinor: json['net_minor'] as int?,
     );
   }
 
@@ -73,6 +74,46 @@ class TransactionsRepository {
       },
     );
     return _parse(json as Map<String, dynamic>);
+  }
+
+  /// What the inspector shows around transaction [id]: its import, the rule
+  /// that filed it, its series and the merchant's earlier operations.
+  Future<TransactionContext> context(String id) async {
+    final json =
+        await _apiClient.get('/transactions/$id/context')
+            as Map<String, dynamic>;
+    final rule = json['rule'] as Map<String, dynamic>?;
+    final series = json['series'] as Map<String, dynamic>?;
+    return TransactionContext(
+      importBatchId: json['import_batch_id'] as String,
+      importFileName: json['import_file_name'] as String?,
+      rule: rule == null
+          ? null
+          : TransactionRuleRef(
+              id: rule['id'] as String,
+              pattern: rule['pattern'] as String,
+            ),
+      series: series == null
+          ? null
+          : TransactionSeriesRef(
+              id: series['id'] as String,
+              cadence: series['cadence'] as String,
+              nextExpectedDate: DateTime.parse(
+                series['next_expected_date'] as String,
+              ),
+            ),
+      sameMerchant: [
+        for (final entry
+            in (json['same_merchant'] as List<dynamic>)
+                .cast<Map<String, dynamic>>())
+          SameMerchantOperation(
+            id: entry['id'] as String,
+            bookedDate: DateTime.parse(entry['booked_date'] as String),
+            amountMinor: entry['amount_minor'] as int,
+            currency: entry['currency'] as String,
+          ),
+      ],
+    );
   }
 
   Future<List<AppCategory>> listCategories() async {

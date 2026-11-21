@@ -147,10 +147,7 @@ void main() {
     await settlePreview(tester);
 
     expect(
-      find.text(
-        'Une règle classe ces transactions sans IA, à chaque import. '
-        'Elle est pré-remplie depuis « PRLV SEPA ASSUR MAIF ».',
-      ),
+      find.text('Une règle classe ces opérations à chaque import, sans IA.'),
       findsOneWidget,
     );
     expect(
@@ -276,9 +273,13 @@ void main() {
     await settlePreview(tester);
 
     expect(find.text('Always categorize like this'), findsOneWidget);
-    expect(find.text('Apply to existing transactions'), findsOneWidget);
+    expect(find.text('Apply to existing operations'), findsOneWidget);
+    expect(
+      find.text('A rule files these operations at every import, without AI.'),
+      findsOneWidget,
+    );
     expect(find.text('Create the rule'), findsOneWidget);
     expect(find.text('Target category'), findsOneWidget);
-    expect(find.textContaining('pré-remplie'), findsNothing);
+    expect(find.textContaining('opérations'), findsNothing);
   });
 }

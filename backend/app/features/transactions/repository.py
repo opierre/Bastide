@@ -2,13 +2,14 @@
 
 from datetime import date
 
-from sqlalchemy import func, or_, select
+from sqlalchemy import Select, func, or_, select
 from sqlalchemy.orm import Session, selectinload, with_expression
 
 from app.features.accounts.linked_cards import in_account
 from app.features.accounts.models import Account
 from app.features.categories.models import Category
-from app.features.recurring.models import RecurringOccurrence
+from app.features.imports.models import ImportBatch
+from app.features.recurring.models import RecurringOccurrence, RecurringSeries
 from app.features.transactions.models import Transaction
 
 # The series each row belongs to, read alongside it: a transaction is an occurrence of at most
@@ -43,8 +44,8 @@ class TransactionRepository:
         page_size: int,
         include_linked_cards: bool = False,
         import_batch_id: str | None = None,
-    ) -> tuple[list[Transaction], int]:
-        """Filtered, paginated transactions for a user, newest first.
+    ) -> tuple[list[Transaction], int, int]:
+        """Filtered, paginated transactions for a user, newest first, with the count and the net.
 
         With `include_linked_cards`, an `account_id` filter also takes in the rows of the
         deferred cards settled on that account (not archived), so the account reads with the
@@ -56,9 +57,51 @@ class TransactionRepository:
         An `import_batch_id` filter keeps the rows that import added. A batch of another
         user matches nothing, since the account join already scopes rows to `user_id`.
 
+        The net is the signed sum of every row the filters match, across all pages.
+
         Eager-loads `category` (`selectinload`) so rendering a page never triggers one query
         per row.
         """
+        query = self._filtered(
+            user_id,
+            account_id=account_id,
+            date_from=date_from,
+            date_to=date_to,
+            category_id=category_id,
+            needs_review=needs_review,
+            q=q,
+            include_linked_cards=include_linked_cards,
+            import_batch_id=import_batch_id,
+        )
+
+        total = self._db.scalar(select(func.count()).select_from(query.subquery())) or 0
+        matched = query.subquery()
+        net = self._db.scalar(select(func.coalesce(func.sum(matched.c.amount_minor), 0))) or 0
+
+        rows = list(
+            self._db.scalars(
+                query.options(selectinload(Transaction.category), _SERIES_ID)
+                .order_by(Transaction.booked_date.desc(), Transaction.id.desc())
+                .offset((page - 1) * page_size)
+                .limit(page_size)
+            )
+        )
+        return rows, total, net
+
+    def _filtered(
+        self,
+        user_id: str,
+        *,
+        account_id: str | None,
+        date_from: date | None,
+        date_to: date | None,
+        category_id: str | None,
+        needs_review: bool | None,
+        q: str | None,
+        include_linked_cards: bool,
+        import_batch_id: str | None,
+    ) -> Select[tuple[Transaction]]:
+        """The user's transactions narrowed by the list's filters, unordered and unpaged."""
         query = (
             select(Transaction)
             .join(Account, Account.id == Transaction.account_id)
@@ -92,18 +135,45 @@ class TransactionRepository:
                     Transaction.merchant.ilike(pattern),
                 )
             )
+        return query
 
-        total = self._db.scalar(select(func.count()).select_from(query.subquery())) or 0
+    def list_same_merchant_for_user(
+        self, user_id: str, transaction: Transaction, *, limit: int
+    ) -> list[Transaction]:
+        """Up to `limit` earlier operations of the same merchant as `transaction`, newest first.
 
-        rows = list(
+        The same merchant is the same `merchant`, case aside; a row without one is matched on
+        its cleaned label instead. Any of the user's accounts; `transaction` itself is left out,
+        and so is anything booked after it.
+        """
+        if transaction.merchant:
+            same = func.lower(Transaction.merchant) == transaction.merchant.lower()
+        else:
+            same = Transaction.description_clean == transaction.description_clean
+        return list(
             self._db.scalars(
-                query.options(selectinload(Transaction.category), _SERIES_ID)
+                select(Transaction)
+                .join(Account, Account.id == Transaction.account_id)
+                .where(
+                    Account.user_id == user_id,
+                    Transaction.id != transaction.id,
+                    Transaction.booked_date <= transaction.booked_date,
+                    same,
+                )
                 .order_by(Transaction.booked_date.desc(), Transaction.id.desc())
-                .offset((page - 1) * page_size)
-                .limit(page_size)
+                .limit(limit)
             )
         )
-        return rows, total
+
+    def import_file_name(self, import_batch_id: str) -> str | None:
+        """The file name of the import that added a row."""
+        return self._db.scalar(
+            select(ImportBatch.file_name).where(ImportBatch.id == import_batch_id)
+        )
+
+    def get_series(self, series_id: str) -> RecurringSeries | None:
+        """The recurring series a row is an occurrence of."""
+        return self._db.get(RecurringSeries, series_id)
 
     def list_uncategorized_for_user(self, user_id: str) -> list[Transaction]:
         """The user's transactions carrying no category, newest first.

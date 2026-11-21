@@ -69,7 +69,7 @@ goal; « Activité récente » then takes the full width.
   Préférences. No rate when income is 0: the figure is « — » and the repère is not drawn.
 - « Net » is the only sign-coloured figure of the line; income and expenses stay neutral.
 - Trend percent is unsigned; the icon carries the direction. Flat = `minus`, `textSecondary`.
-- Transfers and operations excluded from totals do not count.
+- Transfers do not count.
 - The income-versus-expense comparison of v1 (« Revenus vs dépenses », grouped bars) is no
   longer on the dashboard: the reading line states both figures and the savings chart shows
   their difference over time.

@@ -1,5 +1,4 @@
 import 'package:bastide/core/theme/app_theme.dart';
-import 'package:bastide/core/theme/tokens.dart';
 import 'package:bastide/features/accounts/application/account_detail_controller.dart';
 import 'package:bastide/features/accounts/application/accounts_controller.dart';
 import 'package:bastide/features/accounts/application/settlement_rule_controller.dart';
@@ -56,6 +55,21 @@ class _FakeTransactionsRepository extends Fake
     page: 1,
     pageSize: 50,
     total: 1,
+  );
+
+  @override
+  Future<TransactionContext> context(String id) async => TransactionContext(
+    importBatchId: 'b1',
+    importFileName: 'releve.ofx',
+    rule: null,
+    series: _subscriptions.createCalls.isEmpty
+        ? null
+        : TransactionSeriesRef(
+            id: _subscriptions.createCalls.last.id,
+            cadence: 'monthly',
+            nextExpectedDate: DateTime(2026, 11, 29),
+          ),
+    sameMerchant: const [],
   );
 }
 
@@ -158,39 +172,50 @@ Future<void> _pump(WidgetTester tester, Widget home) async {
 
 /// Marks the charge through the dialog, as a user would.
 Future<void> _mark(WidgetTester tester) async {
-  await tester.tap(find.byKey(const Key('transactionRowMarkRecurring')));
+  await tester.tap(find.byKey(const Key('transactionInspectorMarkRecurring')));
   await tester.pumpAndSettle();
   await tester.tap(find.byKey(const Key('markRecurringSave')));
   await tester.pumpAndSettle();
 }
 
 void _expectMarked(WidgetTester tester) {
-  expect(find.byKey(const Key('transactionRowMarkRecurring')), findsNothing);
-  final button = tester.widget<IconButton>(
-    find.byKey(const Key('transactionRowOpenRecurringSeries')),
+  expect(
+    find.byKey(const Key('transactionInspectorMarkRecurring')),
+    findsNothing,
   );
-  expect(button.color, AppColors.dark.accent);
+  expect(
+    find.byKey(const Key('transactionInspectorRecurring')),
+    findsOneWidget,
+  );
+  expect(find.text('Paiement récurrent'), findsOneWidget);
+  expect(
+    find.byKey(const Key('transactionInspectorViewSeries')),
+    findsOneWidget,
+  );
 }
 
 void main() {
   for (final (name, home) in [
     ('the Transactions panel', const TransactionsScreen()),
   ]) {
-    testWidgets('marking a charge from $name turns its button violet', (
-      tester,
-    ) async {
-      await _pump(tester, home);
-      expect(
-        find.byKey(const Key('transactionRowMarkRecurring')),
-        findsOneWidget,
-      );
+    testWidgets(
+      'marking a charge from $name shows its series in the inspector',
+      (tester) async {
+        await _pump(tester, home);
+        await tester.tap(find.byKey(const Key('transactionRow-t1')));
+        await tester.pumpAndSettle();
+        expect(
+          find.byKey(const Key('transactionInspectorMarkRecurring')),
+          findsOneWidget,
+        );
 
-      await _mark(tester);
+        await _mark(tester);
 
-      _expectMarked(tester);
-      // The toast confirming the save withdraws on its own timer.
-      await tester.pump(const Duration(seconds: 7));
-      await tester.pumpAndSettle();
-    });
+        _expectMarked(tester);
+        // The toast confirming the save withdraws on its own timer.
+        await tester.pump(const Duration(seconds: 7));
+        await tester.pumpAndSettle();
+      },
+    );
   }
 }
