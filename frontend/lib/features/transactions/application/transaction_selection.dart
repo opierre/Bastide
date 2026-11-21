@@ -35,6 +35,51 @@ class SelectedTransaction extends Notifier<String?> {
 final selectedTransactionProvider =
     NotifierProvider<SelectedTransaction, String?>(SelectedTransaction.new);
 
+/// Opens Transactions on one operation, from a deep link (a dashboard
+/// « Activité récente » row, an account's « Opérations » row): selects it so
+/// the inspector shows it, and holds its id until the list has scrolled it
+/// into view (`null` once revealed).
+///
+/// When the current filters, tab or page hide the operation they are all
+/// lifted; when it is not found even then, the id is unknown and the panel is
+/// put back as it was.
+class TransactionReveal extends Notifier<String?> {
+  @override
+  String? build() => null;
+
+  Future<void> open(String id) async {
+    if (await _onPage(id)) return _show(id);
+    final filters = ref.read(transactionFiltersProvider.notifier);
+    final before = ref.read(transactionFiltersProvider);
+    const all = TransactionFilters();
+    if (before == all) return;
+    filters.replace(all);
+    if (await _onPage(id)) return _show(id);
+    filters.replace(before);
+  }
+
+  /// The list has scrolled the operation into view.
+  void revealed() => state = null;
+
+  Future<bool> _onPage(String id) async {
+    try {
+      final page = await ref.read(transactionsControllerProvider.future);
+      return page.items.any((item) => item.id == id);
+    } on Object {
+      return false;
+    }
+  }
+
+  void _show(String id) {
+    ref.read(selectedTransactionProvider.notifier).select(id);
+    state = id;
+  }
+}
+
+final transactionRevealProvider = NotifierProvider<TransactionReveal, String?>(
+  TransactionReveal.new,
+);
+
 /// The selected operation on the page shown, or `null` when none is selected
 /// or the selected one is not on this page.
 final selectedTransactionOnPageProvider = Provider<Transaction?>((ref) {

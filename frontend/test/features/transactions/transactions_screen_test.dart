@@ -137,10 +137,14 @@ Widget _wrap({
   TransactionContext? details,
   Locale locale = const Locale('fr'),
   ThemeData? theme,
+  String? operationId,
+  TransactionFilters? filters,
 }) {
   return ProviderScope(
     overrides: [
       transactionsControllerProvider.overrideWith(() => controller),
+      if (filters != null)
+        transactionFiltersProvider.overrideWith(() => _PresetFilters(filters)),
       transactionCategoriesProvider.overrideWith((ref) async => _catalog),
       accountsControllerProvider.overrideWith(
         () => FakeAccountsController(initialAccounts: [_account]),
@@ -165,7 +169,7 @@ Widget _wrap({
       theme: theme ?? AppTheme.dark,
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
-      home: const Scaffold(body: TransactionsScreen()),
+      home: Scaffold(body: TransactionsScreen(operationId: operationId)),
     ),
   );
 }
@@ -189,6 +193,8 @@ Future<void> _pump(
   Locale locale = const Locale('fr'),
   ThemeData? theme,
   FakeTransactionsController? controller,
+  String? operationId,
+  TransactionFilters? filters,
 }) async {
   _useDesktopSurface(tester);
   await tester.pumpWidget(
@@ -202,6 +208,8 @@ Future<void> _pump(
       details: details,
       locale: locale,
       theme: theme,
+      operationId: operationId,
+      filters: filters,
     ),
   );
   await tester.pumpAndSettle();
@@ -730,6 +738,62 @@ void main() {
     });
   });
 
+  group('deep link', () {
+    testWidgets('selects the operation and opens the inspector', (
+      tester,
+    ) async {
+      await _pump(
+        tester,
+        items: [
+          _transaction(),
+          _transaction(id: 't2', merchant: 'Cafe du Port'),
+        ],
+        operationId: 't2',
+      );
+
+      expect(_container(tester).read(selectedTransactionProvider), 't2');
+      expect(find.byKey(const Key('transactionInspector')), findsOneWidget);
+    });
+
+    testWidgets('scrolls the operation into view', (tester) async {
+      final items = [
+        for (var i = 0; i < 40; i++)
+          _transaction(id: 't$i', bookedDate: DateTime(2026, 5, 40 - i)),
+      ];
+      await _pump(tester, items: items, operationId: 't39');
+
+      final row = tester.getRect(find.byKey(const Key('transactionRow-t39')));
+      expect(row.top, greaterThanOrEqualTo(0));
+      expect(row.bottom, lessThanOrEqualTo(852));
+      expect(_container(tester).read(transactionRevealProvider), isNull);
+    });
+
+    testWidgets('ignores an unknown id and keeps the filters', (tester) async {
+      const filters = TransactionFilters(categoryId: 'c-insurance');
+      await _pump(tester, operationId: 'missing', filters: filters);
+
+      expect(_container(tester).read(selectedTransactionProvider), isNull);
+      expect(_container(tester).read(transactionFiltersProvider), filters);
+      expect(find.byKey(const Key('transactionInspector')), findsNothing);
+    });
+
+    testWidgets('lifts the filters that hide the operation', (tester) async {
+      await _pump(
+        tester,
+        controller: _FilteredController(),
+        operationId: 't2',
+        filters: const TransactionFilters(needsReview: true, q: 'loyer'),
+      );
+
+      expect(
+        _container(tester).read(transactionFiltersProvider),
+        const TransactionFilters(),
+      );
+      expect(_container(tester).read(selectedTransactionProvider), 't2');
+      expect(find.byKey(const Key('transactionInspector')), findsOneWidget);
+    });
+  });
+
   group('states', () {
     testWidgets('no transaction at all: the empty state, no tabs', (
       tester,
@@ -801,4 +865,26 @@ class _NeverLoadingController extends FakeTransactionsController {
 
   @override
   Future<TransactionsPage> build() => Completer<TransactionsPage>().future;
+}
+
+/// Filters already set when the panel opens.
+class _PresetFilters extends TransactionFiltersNotifier {
+  _PresetFilters(this.initial);
+
+  final TransactionFilters initial;
+
+  @override
+  TransactionFilters build() => initial;
+}
+
+/// A controller whose page holds `t2` only when nothing filters it.
+class _FilteredController extends FakeTransactionsController {
+  _FilteredController() : super(initialPage: _page(const []));
+
+  @override
+  Future<TransactionsPage> build() async {
+    final filters = ref.watch(transactionFiltersProvider);
+    final hidden = filters.hasListFilter || filters.isReviewTab;
+    return _page([_transaction(), if (!hidden) _transaction(id: 't2')]);
+  }
 }

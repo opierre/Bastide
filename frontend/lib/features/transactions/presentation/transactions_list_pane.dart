@@ -395,6 +395,9 @@ class _TransactionsTableState extends ConsumerState<_TransactionsTable> {
   /// The selected row's category cell, the anchor `C` opens the picker under.
   final _selectedCategoryKey = GlobalKey();
 
+  /// The selected row, scrolled into view when a deep link opened it.
+  final _selectedRowKey = GlobalKey();
+
   @override
   void dispose() {
     _focusNode.dispose();
@@ -443,42 +446,64 @@ class _TransactionsTableState extends ConsumerState<_TransactionsTable> {
     final l10n = AppLocalizations.of(context)!;
     final locale = Localizations.localeOf(context).toString();
     final selectedId = ref.watch(selectedTransactionProvider);
+    final revealId = ref.watch(transactionRevealProvider);
     final columns = _columns(l10n);
     final days = groupByDay(widget.page.items);
+    if (revealId != null && revealId == selectedId) _reveal();
 
+    // A column rather than a lazy list: a page is short, and every row must
+    // be laid out for a deep link to scroll its operation into view.
     return Focus(
       focusNode: _focusNode,
       onKeyEvent: _onKey,
-      child: ListView(
+      child: SingleChildScrollView(
         key: const Key('transactionsList'),
-        children: [
-          AppTableHeader(columns: columns, inset: edgeTableInset),
-          for (final day in days) ...[
-            AppTableGroupRow(
-              key: Key('transactionsDay-${day.date.toIso8601String()}'),
-              label: dayLabel(locale, day.date),
-              inset: edgeTableInset,
-            ),
-            for (final transaction in day.items)
-              _TransactionRow(
-                key: Key('transactionRow-${transaction.id}'),
-                transaction: transaction,
-                columns: columns,
-                selected: transaction.id == selectedId,
-                categoryKey: transaction.id == selectedId
-                    ? _selectedCategoryKey
-                    : null,
-                onTap: () {
-                  ref
-                      .read(selectedTransactionProvider.notifier)
-                      .select(transaction.id);
-                  _focusNode.requestFocus();
-                },
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            AppTableHeader(columns: columns, inset: edgeTableInset),
+            for (final day in days) ...[
+              AppTableGroupRow(
+                key: Key('transactionsDay-${day.date.toIso8601String()}'),
+                label: dayLabel(locale, day.date),
+                inset: edgeTableInset,
               ),
+              for (final transaction in day.items)
+                KeyedSubtree(
+                  key: transaction.id == selectedId ? _selectedRowKey : null,
+                  child: _TransactionRow(
+                    key: Key('transactionRow-${transaction.id}'),
+                    transaction: transaction,
+                    columns: columns,
+                    selected: transaction.id == selectedId,
+                    categoryKey: transaction.id == selectedId
+                        ? _selectedCategoryKey
+                        : null,
+                    onTap: () {
+                      ref
+                          .read(selectedTransactionProvider.notifier)
+                          .select(transaction.id);
+                      _focusNode.requestFocus();
+                    },
+                  ),
+                ),
+            ],
           ],
-        ],
+        ),
       ),
     );
+  }
+
+  void _reveal() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      final row = _selectedRowKey.currentContext;
+      if (row != null) {
+        Scrollable.ensureVisible(row, alignment: 0.5);
+        _focusNode.requestFocus();
+      }
+      ref.read(transactionRevealProvider.notifier).revealed();
+    });
   }
 }
 
