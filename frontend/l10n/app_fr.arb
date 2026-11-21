@@ -6985,5 +6985,623 @@
   "ruleErrorPackImportRunNotFound": "Le suivi de cet import a été perdu. Vérifiez vos règles.",
   "@ruleErrorPackImportRunNotFound": {
     "description": "Error when the background pack import can no longer be read (RULE_PACK_IMPORT_RUN_NOT_FOUND)."
+  },
+  "placementsAdd": "Nouveau placement",
+  "@placementsAdd": {
+    "description": "Title-bar primary button and empty-state button of the investments panel."
+  },
+  "placementsSummaryValue": "Valeur déclarée",
+  "@placementsSummaryValue": {
+    "description": "Label of the summary line's lead figure: the sum of the latest declared values."
+  },
+  "placementsSummaryCount": "{count, plural, =1{1 placement} other{{count} placements}}",
+  "@placementsSummaryCount": {
+    "description": "Caption under the declared value when no value has been entered yet.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "placementsSummaryCaption": "{count, plural, =1{1 placement} other{{count} placements}} · dernière valeur saisie le {date}",
+  "@placementsSummaryCaption": {
+    "description": "Caption under the declared value: open investments and the most recent value date.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "placementsSummaryNetPayments": "Versements nets",
+  "@placementsSummaryNetPayments": {
+    "description": "Label of the summary line's net payments figure."
+  },
+  "placementsSummaryNetPaymentsCaption": "versé − retiré",
+  "@placementsSummaryNetPaymentsCaption": {
+    "description": "Caption under the net payments figure, explaining the calculation."
+  },
+  "placementsSummaryGain": "Plus-value latente",
+  "@placementsSummaryGain": {
+    "description": "Label of the summary line's unrealised gain figure."
+  },
+  "placementsSummaryGainShare": "{percent} des versements",
+  "@placementsSummaryGainShare": {
+    "description": "Trend line under the unrealised gain: the gain as a share of net payments.",
+    "placeholders": {
+      "percent": {
+        "type": "String"
+      }
+    }
+  },
+  "placementsColumnPlacement": "Placement",
+  "@placementsColumnPlacement": {
+    "description": "Investments table column header."
+  },
+  "placementsColumnNetPayments": "Versements nets",
+  "@placementsColumnNetPayments": {
+    "description": "Investments table column header."
+  },
+  "placementsColumnValue": "Valeur déclarée",
+  "@placementsColumnValue": {
+    "description": "Investments table column header."
+  },
+  "placementsColumnGain": "Plus-value",
+  "@placementsColumnGain": {
+    "description": "Investments table column header."
+  },
+  "placementsColumnValuedOn": "Valeur au",
+  "@placementsColumnValuedOn": {
+    "description": "Investments table column header: the date of the latest declared value."
+  },
+  "placementsRowSubtitle": "{envelope} · {institution} · ouvert en {month}",
+  "@placementsRowSubtitle": {
+    "description": "Second line of an investment row.",
+    "placeholders": {
+      "envelope": {
+        "type": "String"
+      },
+      "institution": {
+        "type": "String"
+      },
+      "month": {
+        "type": "String"
+      }
+    }
+  },
+  "placementsStaleBanner": "{name} : la valeur date de plus de quatre mois.",
+  "@placementsStaleBanner": {
+    "description": "Banner for an investment whose latest declared value is stale.",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "placementsStaleAction": "Mettre à jour la valeur",
+  "@placementsStaleAction": {
+    "description": "Action of the stale-value banner."
+  },
+  "placementsStaleMore": "et {count, plural, =1{1 autre} other{{count} autres}}",
+  "@placementsStaleMore": {
+    "description": "Under the stale-value banners when more than three investments are stale.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "placementsNote": "Bastide ne se connecte à aucun courtier et ne télécharge aucun cours. La valeur est celle que vous recopiez depuis votre relevé. La plus-value est calculée, jamais enregistrée.",
+  "@placementsNote": {
+    "description": "Note at the bottom of the investments list."
+  },
+  "placementsNoValue": "—",
+  "@placementsNoValue": {
+    "description": "Placeholder for a missing value or gain."
+  },
+  "placementsDismissBanner": "Fermer",
+  "@placementsDismissBanner": {
+    "description": "Tooltip of the close button of an investments banner."
+  },
+  "placementsLoadFailed": "Les placements n’ont pas pu être chargés. Rien n’a été modifié.",
+  "@placementsLoadFailed": {
+    "description": "Error state of the investments panel."
+  },
+  "placementsRetry": "Réessayer",
+  "@placementsRetry": {
+    "description": "Retry button of the investments error state."
+  },
+  "placementOpenedOn": "{institution} · ouvert le {date}",
+  "@placementOpenedOn": {
+    "description": "Inspector subtitle: the institution and the opening date.",
+    "placeholders": {
+      "institution": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "placementClosedOn": "{institution} · clôturé le {date}",
+  "@placementClosedOn": {
+    "description": "Inspector subtitle of a closed investment.",
+    "placeholders": {
+      "institution": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "placementMenuTooltip": "Actions du placement",
+  "@placementMenuTooltip": {
+    "description": "Tooltip of the inspector's overflow menu button."
+  },
+  "placementMenuEdit": "Modifier",
+  "@placementMenuEdit": {
+    "description": "Overflow menu item."
+  },
+  "placementMenuClose": "Clôturer",
+  "@placementMenuClose": {
+    "description": "Overflow menu item: close the investment."
+  },
+  "placementMenuReopen": "Rouvrir",
+  "@placementMenuReopen": {
+    "description": "Overflow menu item of a closed investment."
+  },
+  "placementMenuDelete": "Supprimer",
+  "@placementMenuDelete": {
+    "description": "Overflow menu item: delete the investment."
+  },
+  "placementValueAt": "au {date}",
+  "@placementValueAt": {
+    "description": "Beside the inspector's value: the date it was declared.",
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "placementEnterValue": "Saisir la valeur",
+  "@placementEnterValue": {
+    "description": "Inspector primary button and title of the value modal."
+  },
+  "placementAddMovement": "Versement ou retrait",
+  "@placementAddMovement": {
+    "description": "Inspector secondary button and title of the movement modal."
+  },
+  "placementLegendValue": "Valeur déclarée",
+  "@placementLegendValue": {
+    "description": "Chart legend: the declared value series."
+  },
+  "placementLegendNetPayments": "Versements nets",
+  "@placementLegendNetPayments": {
+    "description": "Chart legend: the net payments series."
+  },
+  "placementNoValueNote": "Saisissez une valeur pour voir la plus-value.",
+  "@placementNoValueNote": {
+    "description": "Note under the chart of an investment without a declared value."
+  },
+  "placementChartValue": "Valeur {amount}",
+  "@placementChartValue": {
+    "description": "Chart hover card line: the declared value.",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "placementChartNetPayments": "Versements nets {amount}",
+  "@placementChartNetPayments": {
+    "description": "Chart hover card line: the net payments.",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "placementChartLabel": "Valeur déclarée et versements nets de {name}",
+  "@placementChartLabel": {
+    "description": "Semantic label of the investment chart.",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "placementCeilingLabel": "Plafond de versement",
+  "@placementCeilingLabel": {
+    "description": "Repère label: net payments against the envelope's ceiling."
+  },
+  "placementCeilingOf": "sur {ceiling}",
+  "@placementCeilingOf": {
+    "description": "After the net payments on the ceiling repère.",
+    "placeholders": {
+      "ceiling": {
+        "type": "String"
+      }
+    }
+  },
+  "placementCeilingReached": "Plafond de versement atteint.",
+  "@placementCeilingReached": {
+    "description": "Caption when the net payments reach the ceiling."
+  },
+  "placementAgeLabel": "Ancienneté",
+  "@placementAgeLabel": {
+    "description": "Repère label: time since the opening."
+  },
+  "placementAgeYears": "{count, plural, =1{1 an} other{{count} ans}}",
+  "@placementAgeYears": {
+    "description": "Age of an investment, whole years.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "placementAgeMonths": "{count, plural, =1{1 mois} other{{count} mois}}",
+  "@placementAgeMonths": {
+    "description": "Age of an investment, months.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "placementAgeBoth": "{years} {months}",
+  "@placementAgeBoth": {
+    "description": "Age of an investment: years then months.",
+    "placeholders": {
+      "years": {
+        "type": "String"
+      },
+      "months": {
+        "type": "String"
+      }
+    }
+  },
+  "placementMilestoneMark": "repère {years} ans · {month}",
+  "@placementMilestoneMark": {
+    "description": "Label of the age repère's mark: the milestone and the month it falls in.",
+    "placeholders": {
+      "years": {
+        "type": "int"
+      },
+      "month": {
+        "type": "String"
+      }
+    }
+  },
+  "placementMilestonePea": "Avant 5 ans, un retrait clôt en principe le plan. Lecture indicative, qui ne vaut pas conseil fiscal.",
+  "@placementMilestonePea": {
+    "description": "Caption under the age repère of a PEA."
+  },
+  "placementMilestoneLifeInsurance": "Après 8 ans, la fiscalité des retraits s’allège. Lecture indicative, qui ne vaut pas conseil fiscal.",
+  "@placementMilestoneLifeInsurance": {
+    "description": "Caption under the age repère of a life insurance policy."
+  },
+  "placementMovementsTitle": "Mouvements",
+  "@placementMovementsTitle": {
+    "description": "Inspector section heading: payments, withdrawals and declared values."
+  },
+  "placementMovementsLinked": "{count, plural, =1{1 rapproché avec vos transactions} other{{count} rapprochés avec vos transactions}}",
+  "@placementMovementsLinked": {
+    "description": "Right of the movements heading: movements linked to an imported transaction.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "placementMovementsEmpty": "Aucun mouvement.",
+  "@placementMovementsEmpty": {
+    "description": "Movements section without any entry."
+  },
+  "placementMovementsFailed": "L’historique n’a pas pu être chargé.",
+  "@placementMovementsFailed": {
+    "description": "Movements section when the history failed to load."
+  },
+  "placementEntryPayment": "Versement",
+  "@placementEntryPayment": {
+    "description": "Movements row: a payment in."
+  },
+  "placementEntryWithdrawal": "Retrait",
+  "@placementEntryWithdrawal": {
+    "description": "Movements row: a withdrawal."
+  },
+  "placementEntryValuation": "Valeur saisie",
+  "@placementEntryValuation": {
+    "description": "Movements row: a declared value."
+  },
+  "placementEntryWithNote": "{label} · {note}",
+  "@placementEntryWithNote": {
+    "description": "Movements row label followed by its note.",
+    "placeholders": {
+      "label": {
+        "type": "String"
+      },
+      "note": {
+        "type": "String"
+      }
+    }
+  },
+  "placementEnvelopePea": "PEA",
+  "@placementEnvelopePea": {
+    "description": "Envelope: plan d’épargne en actions."
+  },
+  "placementEnvelopePeaPme": "PEA-PME",
+  "@placementEnvelopePeaPme": {
+    "description": "Envelope: PEA for small and medium businesses."
+  },
+  "placementEnvelopeLifeInsurance": "Assurance vie",
+  "@placementEnvelopeLifeInsurance": {
+    "description": "Envelope: assurance vie."
+  },
+  "placementEnvelopePer": "PER",
+  "@placementEnvelopePer": {
+    "description": "Envelope: plan d’épargne retraite."
+  },
+  "placementEnvelopePee": "PEE",
+  "@placementEnvelopePee": {
+    "description": "Envelope: plan d’épargne entreprise."
+  },
+  "placementEnvelopeSecuritiesAccount": "Compte-titres",
+  "@placementEnvelopeSecuritiesAccount": {
+    "description": "Envelope: compte-titres ordinaire."
+  },
+  "placementEnvelopeOther": "Autre",
+  "@placementEnvelopeOther": {
+    "description": "Envelope: anything else."
+  },
+  "placementFormCreateTitle": "Nouveau placement",
+  "@placementFormCreateTitle": {
+    "description": "Title of the new investment modal."
+  },
+  "placementFormEditTitle": "Modifier le placement",
+  "@placementFormEditTitle": {
+    "description": "Title of the edit investment modal."
+  },
+  "placementFormName": "Nom",
+  "@placementFormName": {
+    "description": "Investment form field label."
+  },
+  "placementFormNameRequired": "Saisissez un nom.",
+  "@placementFormNameRequired": {
+    "description": "Investment form error: empty name."
+  },
+  "placementFormEnvelope": "Enveloppe",
+  "@placementFormEnvelope": {
+    "description": "Investment form field label."
+  },
+  "placementFormInstitution": "Établissement",
+  "@placementFormInstitution": {
+    "description": "Investment form field label."
+  },
+  "placementFormInstitutionRequired": "Saisissez l’établissement.",
+  "@placementFormInstitutionRequired": {
+    "description": "Investment form error: empty institution."
+  },
+  "placementFormOpenedOn": "Date d’ouverture",
+  "@placementFormOpenedOn": {
+    "description": "Investment form field label."
+  },
+  "placementFormCurrentValue": "Valeur actuelle",
+  "@placementFormCurrentValue": {
+    "description": "Investment form field label (optional)."
+  },
+  "placementFormCurrentValueHelp": "Facultatif. Saisie à la date du jour.",
+  "@placementFormCurrentValueHelp": {
+    "description": "Helper of the current value field."
+  },
+  "placementFormInitialPayments": "Versements déjà effectués",
+  "@placementFormInitialPayments": {
+    "description": "Investment form field label (optional)."
+  },
+  "placementFormInitialPaymentsHelp": "Facultatif. Un versement à la date d’ouverture.",
+  "@placementFormInitialPaymentsHelp": {
+    "description": "Helper of the initial payments field."
+  },
+  "placementFormDateInvalid": "Saisissez une date passée ou celle du jour.",
+  "@placementFormDateInvalid": {
+    "description": "Form error: unreadable or future date."
+  },
+  "placementFormAmountInvalid": "Saisissez un montant positif.",
+  "@placementFormAmountInvalid": {
+    "description": "Form error: amount not positive."
+  },
+  "placementFormDatePick": "Choisir une date",
+  "@placementFormDatePick": {
+    "description": "Tooltip of a date field's calendar button."
+  },
+  "placementFormCancel": "Annuler",
+  "@placementFormCancel": {
+    "description": "Modal cancel button."
+  },
+  "placementFormSave": "Enregistrer",
+  "@placementFormSave": {
+    "description": "Modal save button."
+  },
+  "placementFormDelete": "Supprimer",
+  "@placementFormDelete": {
+    "description": "Ghost delete button on the footer of an edit modal."
+  },
+  "placementValuationEditTitle": "Modifier la valeur",
+  "@placementValuationEditTitle": {
+    "description": "Title of the value modal when editing a declared value."
+  },
+  "placementValuationValue": "Valeur",
+  "@placementValuationValue": {
+    "description": "Value modal field label."
+  },
+  "placementValuationHelp": "Recopiez la valeur totale indiquée sur votre relevé.",
+  "@placementValuationHelp": {
+    "description": "Helper of the value field."
+  },
+  "placementValuationValueInvalid": "Saisissez une valeur.",
+  "@placementValuationValueInvalid": {
+    "description": "Value modal error: empty or unreadable value."
+  },
+  "placementFieldDate": "Date",
+  "@placementFieldDate": {
+    "description": "Date field label of the value and movement modals."
+  },
+  "placementFieldNote": "Note",
+  "@placementFieldNote": {
+    "description": "Note field label of the value and movement modals."
+  },
+  "placementMovementEditTitle": "Modifier le mouvement",
+  "@placementMovementEditTitle": {
+    "description": "Title of the movement modal when editing."
+  },
+  "placementMovementAmount": "Montant",
+  "@placementMovementAmount": {
+    "description": "Movement modal field label."
+  },
+  "placementMovementAmountHelp": "Un montant négatif est un retrait.",
+  "@placementMovementAmountHelp": {
+    "description": "Helper of the movement amount field."
+  },
+  "placementMovementAmountInvalid": "Saisissez un montant différent de zéro.",
+  "@placementMovementAmountInvalid": {
+    "description": "Movement modal error: zero or unreadable amount."
+  },
+  "placementMovementLink": "Transaction liée",
+  "@placementMovementLink": {
+    "description": "Movement modal field label (optional)."
+  },
+  "placementMovementLinkNone": "Aucune",
+  "@placementMovementLinkNone": {
+    "description": "Linked transaction select: no link."
+  },
+  "placementMovementLinkItem": "{date} · {description}",
+  "@placementMovementLinkItem": {
+    "description": "Linked transaction select item: the transaction's date and label.",
+    "placeholders": {
+      "date": {
+        "type": "String"
+      },
+      "description": {
+        "type": "String"
+      }
+    }
+  },
+  "placementCloseTitle": "Clôturer le placement",
+  "@placementCloseTitle": {
+    "description": "Title of the close modal."
+  },
+  "placementCloseLead": "{name} quitte la synthèse à cette date et reste listé.",
+  "@placementCloseLead": {
+    "description": "Lead of the close modal.",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "placementCloseDate": "Date de clôture",
+  "@placementCloseDate": {
+    "description": "Close modal field label."
+  },
+  "placementCloseAmount": "Montant final reçu",
+  "@placementCloseAmount": {
+    "description": "Close modal field label."
+  },
+  "placementCloseAmountInvalid": "Saisissez un montant, zéro si rien n’a été reçu.",
+  "@placementCloseAmountInvalid": {
+    "description": "Close modal error: unreadable amount."
+  },
+  "placementCloseSubmit": "Clôturer",
+  "@placementCloseSubmit": {
+    "description": "Close modal confirm button."
+  },
+  "placementDeleteTitle": "Supprimer le placement",
+  "@placementDeleteTitle": {
+    "description": "Title of the delete confirmation."
+  },
+  "placementDeleteLead": "{name} et tout son historique seront supprimés. Pour le garder, clôturez-le.",
+  "@placementDeleteLead": {
+    "description": "Lead of the delete confirmation.",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "placementDeleteSubmit": "Supprimer",
+  "@placementDeleteSubmit": {
+    "description": "Delete confirmation button."
+  },
+  "placementErrorNotFound": "Ce placement n’existe plus. Rien n’a été modifié.",
+  "@placementErrorNotFound": {
+    "description": "Error INVESTMENT_NOT_FOUND."
+  },
+  "placementErrorMovementNotFound": "Ce mouvement n’existe plus. Rien n’a été modifié.",
+  "@placementErrorMovementNotFound": {
+    "description": "Error INVESTMENT_MOVEMENT_NOT_FOUND."
+  },
+  "placementErrorValuationNotFound": "Cette valeur n’existe plus. Rien n’a été modifié.",
+  "@placementErrorValuationNotFound": {
+    "description": "Error INVESTMENT_VALUATION_NOT_FOUND."
+  },
+  "placementErrorDateInFuture": "La date est dans le futur. Rien n’a été modifié.",
+  "@placementErrorDateInFuture": {
+    "description": "Error INVESTMENT_DATE_IN_FUTURE."
+  },
+  "placementErrorDateBeforeOpening": "La date précède l’ouverture du placement. Rien n’a été modifié.",
+  "@placementErrorDateBeforeOpening": {
+    "description": "Error INVESTMENT_DATE_BEFORE_OPENING."
+  },
+  "placementErrorDateAfterClosing": "La date suit la clôture du placement. Rien n’a été modifié.",
+  "@placementErrorDateAfterClosing": {
+    "description": "Error INVESTMENT_DATE_AFTER_CLOSING."
+  },
+  "placementErrorAlreadyClosed": "Ce placement est déjà clôturé. Rien n’a été modifié.",
+  "@placementErrorAlreadyClosed": {
+    "description": "Error INVESTMENT_ALREADY_CLOSED."
+  },
+  "placementErrorNotClosed": "Ce placement n’est pas clôturé. Rien n’a été modifié.",
+  "@placementErrorNotClosed": {
+    "description": "Error INVESTMENT_NOT_CLOSED."
+  },
+  "placementErrorValuationExists": "Une valeur est déjà saisie à cette date. Modifiez-la depuis les mouvements.",
+  "@placementErrorValuationExists": {
+    "description": "Error INVESTMENT_VALUATION_EXISTS."
+  },
+  "placementErrorLinkNotFound": "Cette transaction n’existe plus. Rien n’a été modifié.",
+  "@placementErrorLinkNotFound": {
+    "description": "Error INVESTMENT_LINKED_TRANSACTION_NOT_FOUND."
+  },
+  "placementErrorAlreadyLinked": "Cette transaction est déjà liée à un autre mouvement. Rien n’a été modifié.",
+  "@placementErrorAlreadyLinked": {
+    "description": "Error INVESTMENT_TRANSACTION_ALREADY_LINKED."
+  },
+  "placementErrorValidation": "Un champ n’est pas valide. Rien n’a été modifié.",
+  "@placementErrorValidation": {
+    "description": "Error VALIDATION_ERROR on an investment write."
+  },
+  "placementErrorGeneric": "L’opération a échoué. Rien n’a été modifié. Réessayez.",
+  "@placementErrorGeneric": {
+    "description": "Fallback error of an investment write."
+  },
+  "networthAssetsPartInvestments": "Placements {amount}",
+  "@networthAssetsPartInvestments": {
+    "description": "Part of the assets caption: the investments at their declared value.",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "networthCompositionInvestments": "Placements",
+  "@networthCompositionInvestments": {
+    "description": "Composition row: every investment together."
+  },
+  "networthNoteInvestments": "Les placements comptent pour leur dernière valeur saisie. Entre deux saisies, la courbe reste plate.",
+  "@networthNoteInvestments": {
+    "description": "Net worth note on how investments are counted."
   }
 }

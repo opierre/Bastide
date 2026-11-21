@@ -325,6 +325,60 @@ void main() {
     });
   });
 
+  group('placements', () {
+    testWidgets('count in the Actif caption, the composition and the notes', (
+      tester,
+    ) async {
+      _useDesktopSurface(tester);
+      await tester.pumpWidget(
+        _wrap(
+          networth: FakeNetworthController(
+            summary: testNetworthSummary(
+              investmentsMinor: 5423500,
+              composition: [
+                ...frameComposition,
+                const CompositionEntry(
+                  group: CompositionGroup.investment,
+                  key: CompositionEntry.investmentsKey,
+                  amountMinor: 5423500,
+                  shareBps: 950,
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(
+        _text(tester, 'networthAssetsCaption'),
+        'Comptes ${_money(2430000)} · Placements ${_money(5423500)} · '
+        'Biens ${_money(49250000)}',
+      );
+      expect(
+        find.descendant(
+          of: find.byKey(const Key('compositionRow-investment-investments')),
+          matching: find.text('Placements'),
+        ),
+        findsOneWidget,
+      );
+      expect(
+        _inner(tester, 'networthNoteInvestments').data,
+        'Les placements comptent pour leur dernière valeur saisie. Entre deux '
+        'saisies, la courbe reste plate.',
+      );
+    });
+
+    testWidgets('without one, « Placements » appears nowhere', (tester) async {
+      _useDesktopSurface(tester);
+      await tester.pumpWidget(_wrap());
+      await tester.pumpAndSettle();
+
+      expect(find.textContaining('Placements'), findsNothing);
+      expect(find.byKey(const Key('networthNoteInvestments')), findsNothing);
+    });
+  });
+
   group('notes', () {
     testWidgets('say what is not counted, under « À savoir »', (tester) async {
       _useDesktopSurface(tester);

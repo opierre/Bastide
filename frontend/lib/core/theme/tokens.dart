@@ -633,6 +633,25 @@ abstract final class AppNetworth {
   static const menuColumn = AppSizes.button + AppSpacing.smPlus;
 }
 
+/// The Placements panel of `docs/design/17-placements.md`.
+abstract final class AppPlacements {
+  /// The list pane's blocks sit 20 px apart (§List pane).
+  static const listGap = 20.0;
+
+  /// The inspector chart's height, axis included (§Inspector pane 5).
+  static const chartHeight = 170.0;
+
+  /// Column widths of the investments table; « Placement » takes the rest.
+  static const netPaymentsColumn = 112.0;
+  static const valueColumn = 112.0;
+  static const gainColumn = 160.0;
+  static const valuedOnColumn = 108.0;
+
+  /// Column widths of the movements table; the label takes the rest.
+  static const historyDateColumn = 96.0;
+  static const historyAmountColumn = 116.0;
+}
+
 /// The Catégories et règles panel of `docs/design/08-categories-rules.md`.
 abstract final class AppCategoriesPanel {
   /// The category tree on the left, with its right hairline.

@@ -28,21 +28,12 @@ class NetworthRepository {
     return NetWorthSummary(
       accountsMinor: assets['accounts_minor'] as int,
       propertiesMinor: assets['properties_minor'] as int,
+      investmentsMinor: assets['investments_minor'] as int,
       mortgagesMinor: liabilities['mortgages_minor'] as int,
       netWorthMinor: json['net_worth_minor'] as int,
-      composition: [
-        for (final entry
-            in (json['composition'] as List<dynamic>)
-                .cast<Map<String, dynamic>>())
-          if (CompositionGroup.tryFromWire(entry['group'] as String)
-              case final group?)
-            CompositionEntry(
-              group: group,
-              key: entry['key'] as String,
-              amountMinor: entry['amount_minor'] as int,
-              shareBps: entry['share_bps'] as int,
-            ),
-      ],
+      composition: _composition(
+        (json['composition'] as List<dynamic>).cast<Map<String, dynamic>>(),
+      ),
       monthDeltaMinor: json['month_delta_minor'] as int?,
       series: [
         for (final point
@@ -60,6 +51,48 @@ class NetworthRepository {
       activeLoanCount: loans['active_count'] as int,
       currency: json['currency'] as String,
     );
+  }
+
+  /// The composition slices, the placements' per-envelope slices folded
+  /// into one « Placements » row (`15-synthese.md` §3a), placed where the
+  /// first of them was.
+  static List<CompositionEntry> _composition(List<Map<String, dynamic>> json) {
+    final entries = <CompositionEntry>[];
+    int? investmentsAt;
+    var investmentsMinor = 0;
+    var investmentsBps = 0;
+    for (final entry in json) {
+      final group = CompositionGroup.tryFromWire(entry['group'] as String);
+      if (group == null) continue;
+      final amountMinor = entry['amount_minor'] as int;
+      final shareBps = entry['share_bps'] as int;
+      if (group == CompositionGroup.investment) {
+        investmentsAt ??= entries.length;
+        investmentsMinor += amountMinor;
+        investmentsBps += shareBps;
+        continue;
+      }
+      entries.add(
+        CompositionEntry(
+          group: group,
+          key: entry['key'] as String,
+          amountMinor: amountMinor,
+          shareBps: shareBps,
+        ),
+      );
+    }
+    if (investmentsAt != null) {
+      entries.insert(
+        investmentsAt,
+        CompositionEntry(
+          group: CompositionGroup.investment,
+          key: CompositionEntry.investmentsKey,
+          amountMinor: investmentsMinor,
+          shareBps: investmentsBps,
+        ),
+      );
+    }
+    return entries;
   }
 
   /// The month-end totals the user declared, oldest first.
