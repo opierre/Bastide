@@ -1,30 +1,27 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:intl/intl.dart';
-import 'package:lucide_icons_flutter/lucide_icons_300.dart';
 
-import '../../../core/l10n/card_display.dart';
-import '../../../core/l10n/category_display.dart';
 import '../../../core/theme/tokens.dart';
-import '../../../core/widgets/app_card.dart';
-import '../../../core/widgets/category_label.dart';
+import '../../../core/widgets/app_tabs.dart';
+import '../../../core/widgets/primary_button.dart';
 import '../../../core/widgets/search_field.dart';
 import '../../../core/widgets/state_views.dart';
 import '../../../l10n/app_localizations.dart';
-import '../../accounts/application/account_detail_controller.dart';
-import '../../accounts/application/accounts_controller.dart';
-import '../../accounts/domain/account.dart';
-import '../../accounts/domain/account_overview.dart';
-import '../../categories/domain/category.dart';
 import '../../imports/presentation/imports_screen.dart';
+import '../application/review_count_provider.dart';
+import '../application/transaction_selection.dart';
 import '../application/transactions_controller.dart';
 import '../domain/transaction.dart';
-import 'date_range_modal.dart';
 import 'review_queue.dart';
 import 'transaction_error_localizer.dart';
-import 'transaction_row.dart';
+import 'transaction_inspector.dart';
+import 'transactions_list_pane.dart';
 
+/// The Transactions panel (`docs/design/07-transactions.md`), flush: the tabs
+/// « Toutes » and « À vérifier », then the selected tab's body. « Toutes » is
+/// the list pane and the inspector of the selected operation; « À vérifier »
+/// is the review queue.
 class TransactionsScreen extends ConsumerWidget {
   const TransactionsScreen({super.key});
 
@@ -35,68 +32,90 @@ class TransactionsScreen extends ConsumerWidget {
     final l10n = AppLocalizations.of(context)!;
     final pageAsync = ref.watch(transactionsControllerProvider);
     final filters = ref.watch(transactionFiltersProvider);
-    final hasActiveFilter =
-        filters.accountId != null ||
-        filters.dateFrom != null ||
-        filters.dateTo != null ||
-        filters.categoryId != null ||
-        filters.needsReview != null ||
-        filters.importBatch != null ||
-        filters.q.trim().isNotEmpty;
+    final reviewCount = ref.watch(reviewCountProvider).value ?? 0;
 
-    return Padding(
+    // No transaction at all: the empty state alone, without tabs or filters.
+    final isEmpty = switch (pageAsync) {
+      AsyncData(:final value) =>
+        value.total == 0 &&
+            !filters.isReviewTab &&
+            !filters.hasListFilter &&
+            reviewCount == 0,
+      _ => false,
+    };
+    if (isEmpty) {
+      return Padding(
+        key: const Key('screen-transactions'),
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.pageX,
+          vertical: AppSpacing.pageY,
+        ),
+        child: EmptyStateView(
+          key: const Key('transactionsEmptyState'),
+          title: l10n.transactionsEmptyTitle,
+          message: l10n.transactionsEmptyBody,
+          action: PrimaryButton(
+            key: const Key('transactionsGoToImportsButton'),
+            label: l10n.transactionsGoToImports,
+            onPressed: () => context.go(ImportsScreen.path),
+          ),
+        ),
+      );
+    }
+
+    return Column(
       key: const Key('screen-transactions'),
-      padding: const EdgeInsets.fromLTRB(
-        AppSpacing.contentX,
-        AppSpacing.contentTopFiltered,
-        AppSpacing.contentX,
-        AppSpacing.contentY,
-      ),
-      child: switch (pageAsync) {
-        AsyncData(:final value) when value.total == 0 && !hasActiveFilter =>
-          _EmptyState(onGoToImports: () => context.go(ImportsScreen.path)),
-        AsyncData(:final value) => Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            const _FilterBar(),
-            const SizedBox(height: AppSpacing.md),
-            Expanded(
-              child: value.items.isEmpty
-                  ? Center(
-                      child: Text(
-                        l10n.transactionsSearchEmpty,
-                        key: const Key('transactionsSearchEmpty'),
-                        style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                          color: context.colors.textSecondary,
-                        ),
-                      ),
-                    )
-                  : filters.needsReview == true
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.pageX),
+          child: AppTabs<bool>(
+            key: const Key('transactionsTabs'),
+            value: filters.isReviewTab,
+            onChanged: (review) => ref
+                .read(transactionFiltersProvider.notifier)
+                .setNeedsReview(review ? true : null),
+            tabs: [
+              AppTab(value: false, label: l10n.transactionsTabAll),
+              AppTab(
+                value: true,
+                label: l10n.transactionsNeedsReviewLabel,
+                // Hidden at 0 (`07` §Layout).
+                count: reviewCount == 0 ? null : '$reviewCount',
+              ),
+            ],
+          ),
+        ),
+        Expanded(
+          child: switch (pageAsync) {
+            AsyncData(:final value) =>
+              filters.isReviewTab
                   ? ReviewQueue(items: value.items, total: value.total)
-                  : _TransactionsListCard(page: value, filters: filters),
+                  : _AllTab(page: value),
+            AsyncError(:final error) => Padding(
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppSpacing.pageX,
+                vertical: AppSpacing.pageY,
+              ),
+              child: ErrorStateView(
+                message: localizeTransactionError(l10n, error),
+                messageKey: const Key('transactionsErrorText'),
+                retryLabel: l10n.transactionsRetry,
+                retryKey: const Key('transactionsRetryButton'),
+                onRetry: () =>
+                    ref.read(transactionsControllerProvider.notifier).refresh(),
+              ),
             ),
-          ],
+            _ => _TransactionsSkeleton(withInspector: !filters.isReviewTab),
+          },
         ),
-        AsyncError(:final error) => ErrorStateView(
-          message: localizeTransactionError(l10n, error),
-          messageKey: const Key('transactionsErrorText'),
-          retryLabel: l10n.transactionsRetry,
-          retryKey: const Key('transactionsRetryButton'),
-          onRetry: () =>
-              ref.read(transactionsControllerProvider.notifier).refresh(),
-        ),
-        _ => const Padding(
-          key: Key('transactionsLoadingIndicator'),
-          padding: EdgeInsets.only(top: 32),
-          child: SkeletonList(),
-        ),
-      },
+      ],
     );
   }
 }
 
-/// The transactions panel's contribution to the top bar: the 300px search
-/// pill named in `docs/design/07-transactions.md`.
+/// The panel's contribution to the title bar: the search field (« Rechercher »,
+/// description and merchant; `Ctrl K` focuses it).
 class TransactionsTopBarActions extends ConsumerWidget {
   const TransactionsTopBarActions({super.key});
 
@@ -114,478 +133,75 @@ class TransactionsTopBarActions extends ConsumerWidget {
   }
 }
 
-class _EmptyState extends StatelessWidget {
-  const _EmptyState({required this.onGoToImports});
-
-  final VoidCallback onGoToImports;
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
-    return EmptyStateView(
-      title: l10n.transactionsEmptyTitle,
-      message: l10n.transactionsEmptyBody,
-      action: OutlinedButton(
-        key: const Key('transactionsGoToImportsButton'),
-        onPressed: onGoToImports,
-        child: Text(l10n.transactionsGoToImports),
-      ),
-    );
-  }
-}
-
-class _FilterBar extends ConsumerWidget {
-  const _FilterBar();
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final l10n = AppLocalizations.of(context)!;
-    final filters = ref.watch(transactionFiltersProvider);
-    final accounts =
-        ref.watch(accountsControllerProvider).value ?? const <Account>[];
-    final categories = ref.watch(transactionFilterCategoriesProvider);
-    final notifier = ref.read(transactionFiltersProvider.notifier);
-
-    return Row(
-      children: [
-        _AccountFilterPill(
-          accounts: accounts,
-          selectedId: filters.accountId,
-          onChanged: notifier.setAccount,
-        ),
-        const SizedBox(width: AppSpacing.sm),
-        _DateRangeFilterPill(
-          from: filters.dateFrom,
-          to: filters.dateTo,
-          onChanged: notifier.setDateRange,
-        ),
-        const SizedBox(width: AppSpacing.sm),
-        _CategoryFilterPill(
-          categories: categories,
-          selectedId: filters.categoryId,
-          onChanged: notifier.setCategory,
-        ),
-        if (filters.importBatch case final batch?) ...[
-          const SizedBox(width: AppSpacing.sm),
-          Flexible(
-            child: _ImportFilterChip(
-              fileName: batch.fileName,
-              onRemove: notifier.clearImport,
-            ),
-          ),
-        ],
-        const Spacer(),
-        Text(
-          l10n.transactionsNeedsReviewLabel,
-          style: Theme.of(context).textTheme.labelMedium,
-        ),
-        const SizedBox(width: AppSpacing.sm),
-        _NeedsReviewToggle(
-          value: filters.needsReview == true,
-          onChanged: (value) => notifier.setNeedsReview(value ? true : null),
-        ),
-      ],
-    );
-  }
-}
-
-class _FilterPillButton extends StatelessWidget {
-  const _FilterPillButton({required this.label, this.onTap, this.icon});
-
-  final String label;
-
-  /// Null when the pill is the child of a [PopupMenuButton]: an inner tap
-  /// handler would win the gesture arena and the menu would never open.
-  final VoidCallback? onTap;
-  final IconData? icon;
-
-  @override
-  Widget build(BuildContext context) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(AppRadii.md),
-      child: Container(
-        height: AppChrome.controlPillHeight,
-        constraints: const BoxConstraints(maxWidth: 220),
-        padding: const EdgeInsets.symmetric(
-          horizontal: AppSpacing.sm + AppSpacing.xs,
-        ),
-        decoration: BoxDecoration(
-          color: context.colors.bg,
-          borderRadius: BorderRadius.circular(AppRadii.md),
-          border: Border.all(color: context.colors.line),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            if (icon != null) ...[
-              Icon(icon, size: 14, color: context.colors.textSecondary),
-              const SizedBox(width: AppSpacing.xs + 1),
-            ],
-            Flexible(
-              child: Text(
-                label,
-                overflow: TextOverflow.ellipsis,
-                style: Theme.of(context).textTheme.bodySmall,
-              ),
-            ),
-            const SizedBox(width: AppSpacing.xs),
-            Icon(
-              Icons.expand_more_rounded,
-              size: 14,
-              color: context.colors.textSecondary,
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-/// The import an import history row narrowed the list to, with the means to
-/// lift that filter. Toolbar select geometry (`00` §6) so it sits in line with
-/// the other filters, with the Imports icon and a ghost `x` in place of the
-/// chevron: it opens nothing, it only names the filter and removes it.
-class _ImportFilterChip extends StatelessWidget {
-  const _ImportFilterChip({required this.fileName, required this.onRemove});
-
-  final String fileName;
-  final VoidCallback onRemove;
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
-    final colors = context.colors;
-
-    return Container(
-      key: const Key('transactionsImportFilter'),
-      height: AppSizes.toolbarSelect,
-      padding: const EdgeInsets.only(
-        left: AppSpacing.sm + AppSpacing.xxs,
-        right: AppSpacing.xxs,
-      ),
-      decoration: BoxDecoration(
-        color: colors.field,
-        borderRadius: BorderRadius.circular(AppRadii.control),
-        border: Border.all(color: colors.lineStrong),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(
-            LucideIcons300.download,
-            size: AppSizes.iconSmall,
-            color: colors.textTertiary,
-          ),
-          const SizedBox(width: AppSpacing.xsPlus),
-          Flexible(
-            child: Text(
-              l10n.transactionsFilterImport(fileName),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: Theme.of(context).textTheme.bodyMedium,
-            ),
-          ),
-          const SizedBox(width: AppSpacing.xxs),
-          IconButton(
-            key: const Key('transactionsImportFilterRemove'),
-            onPressed: onRemove,
-            tooltip: l10n.transactionsFilterImportRemove,
-            iconSize: AppSizes.iconSmall,
-            padding: EdgeInsets.zero,
-            constraints: const BoxConstraints.tightFor(
-              width: AppSizes.iconSmall + AppSpacing.sm,
-              height: AppSizes.iconSmall + AppSpacing.sm,
-            ),
-            icon: Icon(LucideIcons300.x, color: colors.textSecondary),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-/// Menu value of the « all » entries. [PopupMenuButton] reads a null result
-/// as a dismissal and never calls `onSelected`, so « all » needs a non-null
-/// value, mapped back to a null filter on selection (ids are never empty).
-const _allFilterValue = '';
-
-String? _filterIdFromMenu(String value) =>
-    value == _allFilterValue ? null : value;
-
-class _AccountFilterPill extends StatelessWidget {
-  const _AccountFilterPill({
-    required this.accounts,
-    required this.selectedId,
-    required this.onChanged,
-  });
-
-  final List<Account> accounts;
-  final String? selectedId;
-  final ValueChanged<String?> onChanged;
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
-    final selected = accounts
-        .where((account) => account.id == selectedId)
-        .firstOrNull;
-
-    return PopupMenuButton<String>(
-      key: const Key('transactionsAccountFilter'),
-      position: PopupMenuPosition.under,
-      onSelected: (value) => onChanged(_filterIdFromMenu(value)),
-      itemBuilder: (context) => [
-        PopupMenuItem<String>(
-          value: _allFilterValue,
-          child: Text(l10n.transactionsFilterAllAccounts),
-        ),
-        for (final account in accounts)
-          PopupMenuItem<String>(value: account.id, child: Text(account.name)),
-      ],
-      child: _FilterPillButton(
-        label: selected?.name ?? l10n.transactionsFilterAllAccounts,
-      ),
-    );
-  }
-}
-
-class _CategoryFilterPill extends StatelessWidget {
-  const _CategoryFilterPill({
-    required this.categories,
-    required this.selectedId,
-    required this.onChanged,
-  });
-
-  final List<AppCategory> categories;
-  final String? selectedId;
-  final ValueChanged<String?> onChanged;
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
-    final selected = categories
-        .where((category) => category.id == selectedId)
-        .firstOrNull;
-
-    return PopupMenuButton<String>(
-      key: const Key('transactionsCategoryFilter'),
-      position: PopupMenuPosition.under,
-      onSelected: (value) => onChanged(_filterIdFromMenu(value)),
-      itemBuilder: (context) => [
-        PopupMenuItem<String>(
-          value: _allFilterValue,
-          child: Text(l10n.transactionsFilterAllCategories),
-        ),
-        for (final category in categories)
-          PopupMenuItem<String>(
-            value: category.id,
-            child: _CategoryFilterItem(category: category),
-          ),
-      ],
-      child: _FilterPillButton(
-        label: selected == null
-            ? l10n.transactionsFilterAllCategories
-            : localizedCategoryName(l10n, selected.name),
-      ),
-    );
-  }
-}
-
-/// One entry of the category filter menu: the category's glyph in its hue,
-/// then its name — the same glyph and hue as the category picker and chips.
-class _CategoryFilterItem extends StatelessWidget {
-  const _CategoryFilterItem({required this.category});
-
-  final AppCategory category;
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
-    final slug = categorySlugFor(name: category.name, kind: category.kind);
-
-    return Row(
-      key: Key('transactionsCategoryFilterItem-${category.id}'),
-      children: [
-        Icon(
-          CategoryIcons.forSlug(slug),
-          size: 14,
-          color: context.categoryColors.forSlug(slug),
-        ),
-        const SizedBox(width: AppSpacing.sm),
-        Flexible(
-          child: Text(
-            localizedCategoryName(l10n, category.name),
-            overflow: TextOverflow.ellipsis,
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class _DateRangeFilterPill extends StatelessWidget {
-  const _DateRangeFilterPill({
-    required this.from,
-    required this.to,
-    required this.onChanged,
-  });
-
-  final DateTime? from;
-  final DateTime? to;
-  final void Function(DateTime? from, DateTime? to) onChanged;
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
-    final locale = Localizations.localeOf(context).toString();
-    final label = (from == null || to == null)
-        ? l10n.transactionsFilterAllDates
-        : '${DateFormat.yMd(locale).format(from!)} – ${DateFormat.yMd(locale).format(to!)}';
-
-    return _FilterPillButton(
-      icon: Icons.calendar_today_outlined,
-      label: label,
-      onTap: () async {
-        final range = await showTransactionDateRange(
-          context,
-          from: from,
-          to: to,
-        );
-        if (range != null) onChanged(range.$1, range.$2);
-      },
-    );
-  }
-}
-
-/// Inset 34×20 toggle track with an explicit knob, per the design-system's
-/// (still-to-build) `Toggle` component — kept local to this panel rather than
-/// promoted to `core/widgets/` since no other feature needs it yet.
-class _NeedsReviewToggle extends StatelessWidget {
-  const _NeedsReviewToggle({required this.value, required this.onChanged});
-
-  final bool value;
-  final ValueChanged<bool> onChanged;
-
-  @override
-  Widget build(BuildContext context) {
-    return InkWell(
-      key: const Key('transactionsNeedsReviewToggle'),
-      onTap: () => onChanged(!value),
-      borderRadius: BorderRadius.circular(AppRadii.pill),
-      child: AnimatedContainer(
-        duration: Duration.zero,
-        width: 34,
-        height: 20,
-        padding: const EdgeInsets.all(2),
-        decoration: BoxDecoration(
-          color: value ? context.colors.accent : context.colors.hover,
-          borderRadius: BorderRadius.circular(AppRadii.pill),
-        ),
-        alignment: value ? Alignment.centerRight : Alignment.centerLeft,
-        child: Container(
-          width: 16,
-          height: 16,
-          decoration: BoxDecoration(
-            color: context.colors.bg,
-            shape: BoxShape.circle,
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _TransactionsListCard extends ConsumerWidget {
-  const _TransactionsListCard({required this.page, required this.filters});
+/// « Toutes »: the list pane, flexible, and the 440 px inspector.
+class _AllTab extends ConsumerWidget {
+  const _AllTab({required this.page});
 
   final TransactionsPage page;
-  final TransactionFilters filters;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final l10n = AppLocalizations.of(context)!;
-    final accounts =
-        ref.watch(accountsControllerProvider).value ?? const <Account>[];
-    final accountNames = {
-      for (final account in accounts) account.id: account.name,
-    };
-    // Filtered to an account, its linked cards' rows come along; they are
-    // marked with their card as on the account detail.
-    final accountId = filters.accountId;
-    final cards = accountId == null
-        ? const <String, LinkedCard>{}
-        : ref.watch(linkedCardsByIdProvider(accountId));
-    final from = page.total == 0 ? 0 : ((page.page - 1) * page.pageSize) + 1;
-    final to = ((page.page - 1) * page.pageSize) + page.items.length;
+    final selected = ref.watch(selectedTransactionOnPageProvider);
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Expanded(child: TransactionsListPane(page: page)),
+        if (selected != null)
+          TransactionInspector(transaction: selected)
+        else
+          const EmptyTransactionInspector(),
+      ],
+    );
+  }
+}
 
-    return AppCard(
-      padding: EdgeInsets.zero,
-      child: Column(
+/// Loading: the silhouette of the filter row, the rows and, on « Toutes », the
+/// inspector's ground (`00` §7 States of a panel).
+class _TransactionsSkeleton extends StatelessWidget {
+  const _TransactionsSkeleton({required this.withInspector});
+
+  final bool withInspector;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    return SkeletonPulse(
+      key: const Key('transactionsLoadingIndicator'),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Expanded(
-            child: ListView.separated(
-              key: const Key('transactionsList'),
-              itemCount: page.items.length,
-              separatorBuilder: (_, _) =>
-                  Divider(height: 1, color: context.colors.line),
-              itemBuilder: (context, index) {
-                final transaction = page.items[index];
-                return switch (cards[transaction.accountId]) {
-                  final card? => TransactionRow(
-                    transaction: transaction,
-                    accountName: cardRowLabel(
-                      l10n,
-                      card.name,
-                      card.cardLastDigits,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppSpacing.pageX,
+                vertical: AppTransactions.filterRowY,
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const SkeletonBlock(
+                    height: AppSizes.toolbarSelect,
+                    width: AppTransactions.filterMaxWidth * 2,
+                  ),
+                  const SizedBox(height: AppSpacing.md),
+                  for (var i = 0; i < 8; i++) ...[
+                    const SkeletonBlock(
+                      height: AppSizes.tableRow - AppSpacing.sm,
                     ),
-                    accountIcon: cardRowIcon,
-                  ),
-                  null => TransactionRow(
-                    transaction: transaction,
-                    accountName: accountNames[transaction.accountId] ?? '',
-                  ),
-                };
-              },
+                    const SizedBox(height: AppSpacing.sm),
+                  ],
+                ],
+              ),
             ),
           ),
-          Container(
-            height: 52,
-            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
-            decoration: BoxDecoration(
-              border: Border(top: BorderSide(color: context.colors.line)),
+          if (withInspector)
+            Container(
+              width: AppSizes.inspector,
+              decoration: BoxDecoration(
+                color: colors.rail,
+                border: Border(left: BorderSide(color: colors.line)),
+              ),
             ),
-            child: Row(
-              children: [
-                Text(
-                  l10n.transactionsPager(from, to, page.total),
-                  key: const Key('transactionsPagerLabel'),
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: context.colors.textSecondary,
-                  ),
-                ),
-                const Spacer(),
-                IconButton(
-                  key: const Key('transactionsPagerPrev'),
-                  icon: const Icon(Icons.chevron_left_rounded, size: 18),
-                  onPressed: page.page > 1
-                      ? () => ref
-                            .read(transactionFiltersProvider.notifier)
-                            .setPage(page.page - 1)
-                      : null,
-                ),
-                IconButton(
-                  key: const Key('transactionsPagerNext'),
-                  icon: const Icon(Icons.chevron_right_rounded, size: 18),
-                  onPressed: page.page < page.totalPages
-                      ? () => ref
-                            .read(transactionFiltersProvider.notifier)
-                            .setPage(page.page + 1)
-                      : null,
-                ),
-              ],
-            ),
-          ),
         ],
       ),
     );

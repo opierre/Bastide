@@ -440,7 +440,7 @@
   },
   "authEmailLabel": "Adresse e-mail",
   "@authEmailLabel": {
-    "description": "Label for the email field on login/register forms."
+    "description": "Label for the email field on the register form."
   },
   "authPasswordLabel": "Mot de passe",
   "@authPasswordLabel": {
@@ -486,11 +486,7 @@
   },
   "authDisplayNameLabel": "Nom d'utilisateur",
   "@authDisplayNameLabel": {
-    "description": "Label of the user name field in Settings › Profil."
-  },
-  "authRegisterDisplayNameLabel": "Nom affiché",
-  "@authRegisterDisplayNameLabel": {
-    "description": "Label of the name field on the register screen (03-register.md)."
+    "description": "Label of the user name field, on the register screen and in Settings › Profil."
   },
   "authPreferencesNote": "La langue se change dans les paramètres. La devise est définitive et s’applique à tous vos comptes.",
   "@authPreferencesNote": {
@@ -565,17 +561,13 @@
   "@authGoToLoginLink": {
     "description": "Link after authGoToLogin on the register screen, navigating to login."
   },
-  "authEmailRequired": "L'e-mail est requis.",
-  "@authEmailRequired": {
-    "description": "Validation message when the email field is left empty."
-  },
   "authPasswordRequired": "Le mot de passe est requis.",
   "@authPasswordRequired": {
     "description": "Validation message when the password field is left empty."
   },
-  "authErrorInvalidCredentials": "E-mail ou mot de passe incorrect.",
+  "authErrorInvalidCredentials": "Identifiant ou mot de passe incorrect.",
   "@authErrorInvalidCredentials": {
-    "description": "Localized message for the backend's INVALID_CREDENTIALS error code."
+    "description": "Localized message for the backend's INVALID_CREDENTIALS error code on login, where the identifier is the e-mail or the username."
   },
   "authErrorEmailTaken": "Un compte existe déjà avec cet e-mail.",
   "@authErrorEmailTaken": {
@@ -1295,17 +1287,13 @@
   "@importHistoryNoValue": {
     "description": "Empty-value placeholder in the import history (the account or period of a failed import)."
   },
-  "transactionsSearchHint": "Rechercher une description ou un marchand…",
+  "transactionsSearchHint": "Rechercher",
   "@transactionsSearchHint": {
     "description": "Placeholder in the transactions search pill in the top bar."
   },
   "searchShortcutHint": "Ctrl K",
   "@searchShortcutHint": {
     "description": "Keyboard shortcut shown at the end of a search field; pressing it focuses the field."
-  },
-  "transactionsSearchEmpty": "Aucune transaction ne correspond à votre recherche.",
-  "@transactionsSearchEmpty": {
-    "description": "Shown in place of the transaction list when the filters/search match nothing."
   },
   "transactionsRetry": "Réessayer",
   "@transactionsRetry": {
@@ -1315,7 +1303,7 @@
   "@transactionsEmptyTitle": {
     "description": "Heading shown when the user has no transactions at all yet."
   },
-  "transactionsEmptyBody": "Importez un relevé pour voir vos opérations apparaître ici.",
+  "transactionsEmptyBody": "Importez un relevé pour voir vos opérations ici.",
   "@transactionsEmptyBody": {
     "description": "Encouraging subtext under the empty-state heading on the transactions screen."
   },
@@ -1325,7 +1313,7 @@
   },
   "transactionsNeedsReviewLabel": "À vérifier",
   "@transactionsNeedsReviewLabel": {
-    "description": "Label beside the filter bar's needs-review toggle."
+    "description": "The « À vérifier » tab of the Transactions panel; its count follows it."
   },
   "transactionsFilterAllAccounts": "Tous les comptes",
   "@transactionsFilterAllAccounts": {
@@ -1364,10 +1352,6 @@
   "@transactionsDateRangeToLabel": {
     "description": "Label of the range's end date field."
   },
-  "transactionsDateRangeHelp": "Laissez les deux dates vides pour voir toutes les dates.",
-  "@transactionsDateRangeHelp": {
-    "description": "Helper under the range fields explaining how to lift the date filter."
-  },
   "transactionsDateRangePickFrom": "Choisir la date de début",
   "@transactionsDateRangePickFrom": {
     "description": "Tooltip on the calendar button of the range's start date field."
@@ -1396,7 +1380,7 @@
   "@transactionsDateRangeApply": {
     "description": "Confirm button of the date range modal, applying the chosen range."
   },
-  "transactionsPager": "{from}–{to} sur {total}",
+  "transactionsPager": "{from} – {to} sur {total}",
   "@transactionsPager": {
     "description": "Pager label under the transaction list, showing the current page's row range and the total count.",
     "placeholders": {
@@ -1411,25 +1395,205 @@
       }
     }
   },
-  "transactionRowMemoAndAccount": "{memo} · {account}",
-  "@transactionRowMemoAndAccount": {
-    "description": "Secondary line of a transaction row when the bank shipped a memo: the memo first, then the account it belongs to.",
+  "transactionsTabAll": "Toutes",
+  "@transactionsTabAll": {
+    "description": "The « Toutes » tab of the Transactions panel."
+  },
+  "transactionsPeriodRange": "{from} – {to}",
+  "@transactionsPeriodRange": {
+    "description": "The period select's label once a range is set; both dates are already formatted.",
     "placeholders": {
-      "memo": {
+      "from": {
         "type": "String"
       },
-      "account": {
+      "to": {
         "type": "String"
       }
     }
   },
-  "reviewQueueEmpty": "Aucune transaction à vérifier.",
-  "@reviewQueueEmpty": {
-    "description": "Shown in place of the review queue list when it is empty."
+  "transactionsCountNet": "{count, plural, =1{1 opération · net} other{{count} opérations · net}}",
+  "@transactionsCountNet": {
+    "description": "End of the filter row: how many operations the filters match, before their signed net.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   },
-  "reviewQueueCount": "{count, plural, =0{Aucune transaction à vérifier} =1{1 transaction à vérifier} other{{count} transactions à vérifier}}",
-  "@reviewQueueCount": {
-    "description": "Headline on the review queue's progress card, counting the transactions still needing review.",
+  "transactionsColumnOperation": "Opération",
+  "@transactionsColumnOperation": {
+    "description": "Column header."
+  },
+  "transactionsColumnCategory": "Catégorie",
+  "@transactionsColumnCategory": {
+    "description": "Column header."
+  },
+  "transactionsColumnAmount": "Montant",
+  "@transactionsColumnAmount": {
+    "description": "Column header."
+  },
+  "transactionsPagerPrevious": "Page précédente",
+  "@transactionsPagerPrevious": {
+    "description": "Pager button tooltip."
+  },
+  "transactionsPagerNext": "Page suivante",
+  "@transactionsPagerNext": {
+    "description": "Pager button tooltip."
+  },
+  "transactionsNoResult": "Aucune opération pour ces filtres.",
+  "@transactionsNoResult": {
+    "description": "Shown in the table area when the filters or the search match nothing."
+  },
+  "transactionsClearFilters": "Effacer les filtres",
+  "@transactionsClearFilters": {
+    "description": "Link after the no-result line; lifts every filter and the search."
+  },
+  "transactionInspectorEmpty": "Sélectionnez une opération pour voir son détail.",
+  "@transactionInspectorEmpty": {
+    "description": "The inspector pane's note while no operation is selected."
+  },
+  "transactionInspectorDate": "Date",
+  "@transactionInspectorDate": {
+    "description": "Inspector key/value label."
+  },
+  "transactionInspectorAccount": "Compte",
+  "@transactionInspectorAccount": {
+    "description": "Inspector key/value label."
+  },
+  "transactionInspectorCategory": "Catégorie",
+  "@transactionInspectorCategory": {
+    "description": "Inspector key/value label."
+  },
+  "transactionInspectorClassifiedBy": "Classée par",
+  "@transactionInspectorClassifiedBy": {
+    "description": "Inspector key/value label: what gave the operation its category."
+  },
+  "transactionInspectorImport": "Import",
+  "@transactionInspectorImport": {
+    "description": "Inspector key/value label."
+  },
+  "transactionClassifiedByRule": "règle « {pattern} »",
+  "@transactionClassifiedByRule": {
+    "description": "« Classée par » value when a rule filed the operation.",
+    "placeholders": {
+      "pattern": {
+        "type": "String"
+      }
+    }
+  },
+  "transactionClassifiedByModel": "IA locale, confiance {confidence}",
+  "@transactionClassifiedByModel": {
+    "description": "« Classée par » value when the local AI filed or proposed the category.",
+    "placeholders": {
+      "confidence": {
+        "type": "double",
+        "format": "percentPattern",
+        "optionalParameters": {
+          "decimalDigits": 0
+        }
+      }
+    }
+  },
+  "transactionClassifiedByUser": "vous",
+  "@transactionClassifiedByUser": {
+    "description": "« Classée par » value when the user chose the category."
+  },
+  "transactionClassifiedByNone": "non classée",
+  "@transactionClassifiedByNone": {
+    "description": "« Classée par » value when nothing filed the operation."
+  },
+  "transactionInspectorLoadError": "Ce détail n’a pas pu être chargé. Rien n’a été modifié.",
+  "@transactionInspectorLoadError": {
+    "description": "Shown in the inspector when the operation's import, rule, series and history fail to load."
+  },
+  "transactionRecurringTitle": "Paiement récurrent",
+  "@transactionRecurringTitle": {
+    "description": "Inspector: the operation belongs to a series."
+  },
+  "transactionRecurringNext": "{cadence} · prochain le {date}",
+  "@transactionRecurringNext": {
+    "description": "Under « Paiement récurrent »: the series' cadence, then its next expected date, formatted.",
+    "placeholders": {
+      "cadence": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "transactionRecurringView": "Voir la série",
+  "@transactionRecurringView": {
+    "description": "Inspector link opening the series in Abonnements."
+  },
+  "transactionSameMerchant": "Même marchand",
+  "@transactionSameMerchant": {
+    "description": "Inspector heading over the merchant's earlier operations."
+  },
+  "transactionSameMerchantNone": "Aucune opération antérieure.",
+  "@transactionSameMerchantNone": {
+    "description": "Under « Même marchand » when the merchant has no earlier operation."
+  },
+  "transactionCreateRule": "Créer une règle",
+  "@transactionCreateRule": {
+    "description": "Opens « Toujours catégoriser ainsi »."
+  },
+  "transactionEditRule": "Modifier la règle",
+  "@transactionEditRule": {
+    "description": "Opens the rule that filed the operation."
+  },
+  "reviewProgressCount": "{done} sur {total}",
+  "@reviewProgressCount": {
+    "description": "Review progress: operations filed out of the queue's size this session.",
+    "placeholders": {
+      "done": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "reviewProgressCaption": "classées",
+  "@reviewProgressCaption": {
+    "description": "Follows the review progress count."
+  },
+  "reviewAiNote": "{count, plural, =0{L’IA locale n’a proposé aucune catégorie. Rien n’est classé sans votre accord.} =1{L’IA locale propose une catégorie pour 1 opération. Rien n’est classé sans votre accord.} other{L’IA locale propose une catégorie pour {count} opérations. Rien n’est classé sans votre accord.}}",
+  "@reviewAiNote": {
+    "description": "Note on the review progress row while local AI is on.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "reviewColumnLabel": "Libellé du relevé",
+  "@reviewColumnLabel": {
+    "description": "Column header."
+  },
+  "reviewColumnDate": "Date",
+  "@reviewColumnDate": {
+    "description": "Column header."
+  },
+  "reviewColumnProposal": "Proposition",
+  "@reviewColumnProposal": {
+    "description": "Column header."
+  },
+  "reviewEmptyTitle": "Rien à vérifier",
+  "@reviewEmptyTitle": {
+    "description": "Empty state of the « À vérifier » tab."
+  },
+  "reviewEmptyBody": "Toutes vos opérations ont une catégorie.",
+  "@reviewEmptyBody": {
+    "description": "Empty state of the « À vérifier » tab."
+  },
+  "alwaysRuleLead": "Une règle classe ces opérations à chaque import, sans IA.",
+  "@alwaysRuleLead": {
+    "description": "Lead of the « Toujours catégoriser ainsi » modal."
+  },
+  "alwaysRuleCreatedToast": "{count, plural, =0{Règle créée} =1{Règle créée · 1 opération recatégorisée} other{Règle créée · {count} opérations recatégorisées}}",
+  "@alwaysRuleCreatedToast": {
+    "description": "Toast after the rule is created, with how many existing operations it refiled.",
     "placeholders": {
       "count": {
         "type": "int"
@@ -1440,7 +1604,7 @@
   "@reviewAlwaysCategorize": {
     "description": "Affordance on a review queue row that, alongside picking a category, creates a matching categorization rule."
   },
-  "categoryPickerSearchHint": "Changer de catégorie…",
+  "categoryPickerSearchHint": "Changer de catégorie",
   "@categoryPickerSearchHint": {
     "description": "Placeholder in the category picker popover's search field."
   },
@@ -2870,35 +3034,7 @@
       }
     }
   },
-  "reviewQueueAiSubtitle": "{count, plural, =0{Aucune de ces transactions n'a reçu de proposition de l'IA locale. Confirmez ou corrigez : rien n'est classé sans vous.} one{L'IA locale propose une catégorie pour l'une d'entre elles. Confirmez ou corrigez : rien n'est classé sans vous.} other{L'IA locale propose une catégorie pour {count} d'entre elles. Confirmez ou corrigez : rien n'est classé sans vous.}}",
-  "@reviewQueueAiSubtitle": {
-    "description": "Subtext on the review queue's header card when local AI is active, counting the rows it proposed a category for.",
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "reviewQueueProgress": "{resolved}/{total} · {percent}",
-  "@reviewQueueProgress": {
-    "description": "Resolved-progress label on the review queue's header card: rows already dealt with, out of the queue's size this session.",
-    "placeholders": {
-      "resolved": {
-        "type": "int"
-      },
-      "total": {
-        "type": "int"
-      },
-      "percent": {
-        "type": "double",
-        "format": "percentPattern",
-        "optionalParameters": {
-          "decimalDigits": 0
-        }
-      }
-    }
-  },
-  "reviewAiInvitation": "Activez l'IA locale pour classer automatiquement les transactions que vos règles n'ont pas reconnues.",
+  "reviewAiInvitation": "Activez l’IA locale pour classer les opérations que vos règles n’ont pas reconnues.",
   "@reviewAiInvitation": {
     "description": "Calm invitation at the foot of the review queue's header card when AI is off or the runtime is unreachable. The only place in the app that mentions it."
   },
@@ -2906,9 +3042,9 @@
   "@reviewAiInvitationLink": {
     "description": "Link at the end of the AI invitation, opening the settings panel."
   },
-  "reviewConfidence": "Confiance {confidence}",
+  "reviewConfidence": "confiance {confidence}",
   "@reviewConfidence": {
-    "description": "Caption beside a proposal's confidence gauge. Always a percentage, never the raw [0,1] value the API returns.",
+    "description": "Caption after a proposed category. Always a percentage, never the raw [0,1] value the API returns.",
     "placeholders": {
       "confidence": {
         "type": "double",
@@ -2935,40 +3071,17 @@
   "@reviewChooseCategory": {
     "description": "Link on a review row with no proposal, opening the category picker."
   },
-  "alwaysRuleSubtitle": "Une règle classe ces transactions sans IA, à chaque import. Elle est pré-remplie depuis « {label} ».",
-  "@alwaysRuleSubtitle": {
-    "description": "Subtext under the always-categorize modal's title, naming the transaction the rule was derived from.",
-    "placeholders": {
-      "label": {
-        "type": "String",
-        "example": "PRLV SEPA ASSUR MAIF"
-      }
-    }
-  },
   "alwaysRuleCategoryLabel": "Catégorie cible",
   "@alwaysRuleCategoryLabel": {
     "description": "Label of the always-categorize modal's target-category select."
   },
-  "alwaysRuleApplyExisting": "Appliquer aux transactions existantes",
+  "alwaysRuleApplyExisting": "Appliquer aux opérations existantes",
   "@alwaysRuleApplyExisting": {
     "description": "Checkbox in the always-categorize modal: re-run the new rule over transactions already imported."
   },
   "alwaysRuleSubmit": "Créer la règle",
   "@alwaysRuleSubmit": {
     "description": "Confirm button of the always-categorize modal."
-  },
-  "alwaysRuleCreatedTitle": "Règle créée",
-  "@alwaysRuleCreatedTitle": {
-    "description": "Success toast headline after a rule was created from a correction."
-  },
-  "alwaysRuleCreatedBody": "{count, plural, =0{Aucune autre transaction n'a changé de catégorie.} one{{count} transaction recatégorisée.} other{{count} transactions recatégorisées.}}",
-  "@alwaysRuleCreatedBody": {
-    "description": "Success toast subtext after a rule was created from a correction, counting the other rows it moved.",
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
   },
   "alwaysRuleSuggestionFailed": "Impossible de pré-remplir la règle. Renseignez le motif vous-même.",
   "@alwaysRuleSuggestionFailed": {
@@ -2978,7 +3091,7 @@
   "@reviewQueueRunAction": {
     "description": "Action on the review queue's header card that starts a local-AI categorization run over the pending rows."
   },
-  "runBannerRunning": "{total, plural, one{Catégorisation en cours : {processed} sur {total} transaction} other{Catégorisation en cours : {processed} sur {total} transactions}}",
+  "runBannerRunning": "{total, plural, one{Catégorisation en cours : {processed} sur {total} opération} other{Catégorisation en cours : {processed} sur {total} opérations}}",
   "@runBannerRunning": {
     "description": "Headline of the banner that replaces the review queue's header card while a run is classifying.",
     "placeholders": {
@@ -2990,7 +3103,7 @@
       }
     }
   },
-  "runBannerRunningDetail": "{assigned, plural, one{{assigned} classée · {deferred} à vérifier · le panneau reste utilisable} other{{assigned} classées · {deferred} à vérifier · le panneau reste utilisable}}",
+  "runBannerRunningDetail": "{assigned, plural, one{{assigned} classée · {deferred} à vérifier} other{{assigned} classées · {deferred} à vérifier}}",
   "@runBannerRunningDetail": {
     "description": "Sub-line under the running banner: what the run has settled, what it has left for the user, and the reassurance that nothing is blocked.",
     "placeholders": {
@@ -3006,7 +3119,7 @@
   "@runBannerCancel": {
     "description": "Cancels the categorization run in flight. The executor stops after the batch it is on."
   },
-  "runBannerPartial": "{count, plural, one{Catégorisation terminée. {count} transaction n'a pas pu être analysée.} other{Catégorisation terminée. {count} transactions n'ont pas pu être analysées.}}",
+  "runBannerPartial": "{count, plural, one{Catégorisation terminée. {count} opération n’a pas pu être analysée.} other{Catégorisation terminée. {count} opérations n’ont pas pu être analysées.}}",
   "@runBannerPartial": {
     "description": "Dismissible amber banner after a run that ended `partial`. A report, not an error wall.",
     "placeholders": {

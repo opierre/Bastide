@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/theme/tokens.dart';
+import '../../../core/widgets/app_checkbox.dart';
 import '../../../core/widgets/app_modal.dart';
 import '../../../core/widgets/app_select.dart';
 import '../../../core/widgets/inline_banner.dart';
@@ -149,12 +150,19 @@ class _AlwaysCategorizeModalState extends ConsumerState<AlwaysCategorizeModal> {
 
     return AppModal(
       title: l10n.reviewAlwaysCategorize,
-      width: 520,
+      subtitle: Text(
+        l10n.alwaysRuleLead,
+        key: const Key('alwaysRuleLead'),
+        style: Theme.of(
+          context,
+        ).textTheme.bodyMedium?.copyWith(color: context.colors.textSecondary),
+      ),
+      width: AppTransactions.ruleModalWidth,
       actions: [
-        OutlinedButton(
+        AppButton(
           key: const Key('alwaysRuleCancel'),
+          label: l10n.ruleFormCancel,
           onPressed: _isSubmitting ? null : () => Navigator.of(context).pop(),
-          child: Text(l10n.ruleFormCancel),
         ),
         PrimaryButton(
           key: const Key('alwaysRuleSubmit'),
@@ -168,20 +176,12 @@ class _AlwaysCategorizeModalState extends ConsumerState<AlwaysCategorizeModal> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Text(
-              l10n.alwaysRuleSubtitle(widget.transaction.descriptionRaw),
-              key: const Key('alwaysRuleSubtitle'),
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: context.colors.textSecondary,
-              ),
-            ),
-            const SizedBox(height: AppSpacing.md),
             if (_errorText != null) ...[
               InlineBanner(
                 key: const Key('alwaysRuleError'),
                 message: _errorText!,
               ),
-              const SizedBox(height: AppSpacing.md),
+              const SizedBox(height: AppSpacing.fieldGap),
             ],
             // A pre-fill that didn't arrive is not a broken form: every field
             // it would have filled is editable, so the modal says so and stays
@@ -192,7 +192,7 @@ class _AlwaysCategorizeModalState extends ConsumerState<AlwaysCategorizeModal> {
                 tone: BannerTone.warning,
                 message: l10n.alwaysRuleSuggestionFailed,
               ),
-              const SizedBox(height: AppSpacing.md),
+              const SizedBox(height: AppSpacing.fieldGap),
             ],
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -217,7 +217,7 @@ class _AlwaysCategorizeModalState extends ConsumerState<AlwaysCategorizeModal> {
                     ),
                   ),
                 ),
-                const SizedBox(width: AppSpacing.sm + AppSpacing.xs),
+                const SizedBox(width: AppSpacing.smPlus),
                 Expanded(
                   child: LabeledField(
                     label: l10n.ruleFormConditionLabel,
@@ -240,7 +240,7 @@ class _AlwaysCategorizeModalState extends ConsumerState<AlwaysCategorizeModal> {
                 ),
               ],
             ),
-            const SizedBox(height: AppSpacing.md),
+            const SizedBox(height: AppSpacing.fieldGap),
             LabeledField(
               label: l10n.ruleFormPatternLabel,
               helper: rulePatternHelper(l10n, _matchType),
@@ -261,7 +261,7 @@ class _AlwaysCategorizeModalState extends ConsumerState<AlwaysCategorizeModal> {
                     : null,
               ),
             ),
-            const SizedBox(height: AppSpacing.md),
+            const SizedBox(height: AppSpacing.fieldGap),
             LabeledField(
               label: l10n.alwaysRuleCategoryLabel,
               child: AppSelect<String?>(
@@ -278,15 +278,14 @@ class _AlwaysCategorizeModalState extends ConsumerState<AlwaysCategorizeModal> {
                 ],
               ),
             ),
-            const SizedBox(height: AppSpacing.md),
+            const SizedBox(height: AppSpacing.fieldGap),
             _ApplyNowCheckbox(
               value: _applyNow,
               label: l10n.alwaysRuleApplyExisting,
               onChanged: (value) => setState(() => _applyNow = value),
             ),
-            const SizedBox(height: AppSpacing.sm + AppSpacing.xs),
+            const SizedBox(height: AppSpacing.fieldGap),
             RuleMatchPreviewBanner(state: previewState),
-            const SizedBox(height: AppSpacing.sm),
           ],
         ),
       ),
@@ -294,8 +293,8 @@ class _AlwaysCategorizeModalState extends ConsumerState<AlwaysCategorizeModal> {
   }
 }
 
-/// The gradient checkbox frame ⑧ draws. Material's [Checkbox] paints a flat
-/// fill and carries touch-sized padding, neither of which matches the spec.
+/// « Appliquer aux opérations existantes »: the design system's checkbox
+/// (`00` §6) with its label, both of which toggle it.
 class _ApplyNowCheckbox extends StatelessWidget {
   const _ApplyNowCheckbox({
     required this.value,
@@ -317,30 +316,12 @@ class _ApplyNowCheckbox extends StatelessWidget {
         behavior: HitTestBehavior.opaque,
         child: Row(
           children: [
-            Semantics(
-              checked: value,
-              label: label,
-              child: Container(
-                width: 18,
-                height: 18,
-                alignment: Alignment.center,
-                decoration: BoxDecoration(
-                  color: value ? context.colors.accent : context.colors.field,
-                  borderRadius: BorderRadius.circular(AppRadii.xs + 1),
-                  border: Border.all(
-                    color: value ? Colors.transparent : context.colors.line,
-                  ),
-                ),
-                child: value
-                    ? Icon(
-                        Icons.check_rounded,
-                        size: 13,
-                        color: context.colors.onAccent,
-                      )
-                    : null,
-              ),
+            AppCheckbox(
+              value: value,
+              onChanged: onChanged,
+              semanticLabel: label,
             ),
-            const SizedBox(width: AppSpacing.sm + AppSpacing.xs),
+            const SizedBox(width: AppSpacing.sm),
             Flexible(
               child: Text(label, style: Theme.of(context).textTheme.bodyMedium),
             ),

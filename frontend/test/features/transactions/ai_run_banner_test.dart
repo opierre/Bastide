@@ -156,7 +156,7 @@ void _useDesktopSurface(WidgetTester tester) {
 }
 
 void main() {
-  testWidgets('the running banner replaces the header card', (tester) async {
+  testWidgets('the running banner replaces the progress row', (tester) async {
     _useDesktopSurface(tester);
     await tester.pumpWidget(
       _wrap(
@@ -166,20 +166,27 @@ void main() {
     await tester.pump();
 
     expect(find.byKey(const Key('aiRunBanner')), findsOneWidget);
-    expect(find.byKey(const Key('reviewQueueHeaderCard')), findsNothing);
+    expect(find.byKey(const Key('reviewProgressRow')), findsNothing);
     expect(
-      find.text('Catégorisation en cours : 84 sur 213 transactions'),
+      find.textContaining(
+        'Catégorisation en cours : 84 sur 213 opérations',
+        findRichText: true,
+      ),
       findsOneWidget,
     );
     expect(
-      find.text('61 classées · 23 à vérifier · le panneau reste utilisable'),
+      find.textContaining('61 classées · 23 à vérifier', findRichText: true),
       findsOneWidget,
+    );
+    expect(
+      find.textContaining('le panneau reste utilisable', findRichText: true),
+      findsNothing,
     );
 
     // Nothing blocks: the list is still there, and a row still opens its
     // picker while the run is in flight.
     expect(find.byKey(const Key('reviewQueueList')), findsOneWidget);
-    await tester.tap(find.byKey(const Key('reviewRowCategoryChip')).first);
+    await tester.tap(find.byKey(const Key('reviewRowChooseCategory')).first);
     // Pumped rather than settled: the banner's spinner never stops, so
     // `pumpAndSettle` has nothing to settle to while a run is in flight.
     await tester.pump();
@@ -187,7 +194,7 @@ void main() {
     expect(find.byKey(const Key('categoryPickerSearchField')), findsOneWidget);
   });
 
-  testWidgets('the header card is restored once the run ends', (tester) async {
+  testWidgets('the progress row is restored once the run ends', (tester) async {
     _useDesktopSurface(tester);
     final run = FakeRunController(
       RunState(run: _run(status: RunStatus.running)),
@@ -200,10 +207,10 @@ void main() {
 
     expect(run.cancelCalls, 1);
     expect(find.byKey(const Key('aiRunBanner')), findsNothing);
-    expect(find.byKey(const Key('reviewQueueHeaderCard')), findsOneWidget);
+    expect(find.byKey(const Key('reviewProgressRow')), findsOneWidget);
   });
 
-  testWidgets('the start action asks for a run over the filtered account', (
+  testWidgets('the start action asks for a run over the whole queue', (
     tester,
   ) async {
     _useDesktopSurface(tester);
@@ -234,7 +241,7 @@ void main() {
 
     expect(
       find.text(
-        "Catégorisation terminée. 12 transactions n'ont pas pu être analysées.",
+        'Catégorisation terminée. 12 opérations n’ont pas pu être analysées.',
       ),
       findsOneWidget,
     );
@@ -242,7 +249,7 @@ void main() {
     // A report, not a wall: the queue is right there underneath it.
     expect(find.byKey(const Key('reviewQueueList')), findsOneWidget);
 
-    await tester.tap(find.byKey(const Key('aiRunBannerDismiss')));
+    await tester.tap(find.byKey(const Key('inlineBannerDismiss')));
     await tester.pumpAndSettle();
 
     expect(find.byKey(const Key('aiRunPartialBanner')), findsNothing);
@@ -278,7 +285,7 @@ void main() {
 
     expect(find.byKey(const Key('aiRunPartialBanner')), findsNothing);
     expect(find.byKey(const Key('aiRunFailedBanner')), findsNothing);
-    expect(find.byKey(const Key('reviewQueueHeaderCard')), findsOneWidget);
+    expect(find.byKey(const Key('reviewProgressRow')), findsOneWidget);
   });
 
   testWidgets('a start that failed is reported without touching the queue', (
@@ -290,7 +297,7 @@ void main() {
     await tester.pump();
 
     expect(find.byKey(const Key('reviewRunError')), findsOneWidget);
-    expect(find.byKey(const Key('reviewQueueHeaderCard')), findsOneWidget);
+    expect(find.byKey(const Key('reviewProgressRow')), findsOneWidget);
     expect(find.byKey(const Key('reviewQueueList')), findsOneWidget);
   });
 
@@ -317,8 +324,17 @@ void main() {
     );
     await tester.pump();
 
-    expect(find.text('Categorizing: 84 of 213 transactions'), findsOneWidget);
+    expect(
+      find.textContaining(
+        'Categorizing: 84 of 213 operations',
+        findRichText: true,
+      ),
+      findsOneWidget,
+    );
     expect(find.text('Cancel'), findsOneWidget);
-    expect(find.textContaining('Catégorisation'), findsNothing);
+    expect(
+      find.textContaining('Catégorisation', findRichText: true),
+      findsNothing,
+    );
   });
 }

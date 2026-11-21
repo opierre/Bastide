@@ -70,7 +70,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         error is ApiFailure && error.code == 'INVALID_CREDENTIALS';
 
     final identifierError = _attempted && _identifierEmpty
-        ? l10n.authEmailRequired
+        ? l10n.authIdentifierRequired
         : null;
     final passwordError = _attempted && _passwordEmpty
         ? l10n.authPasswordRequired
@@ -85,7 +85,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     return AuthScaffold(
       children: [
         LabeledField(
-          label: l10n.authEmailLabel,
+          label: l10n.authIdentifierLabel,
           errorText: identifierError,
           child: AuthTextField(
             fieldKey: const Key('loginIdentifierField'),

@@ -120,12 +120,12 @@ class _DateRangeModalState extends State<DateRangeModal> {
 
     return AppModal(
       title: l10n.transactionsDateRangeTitle,
-      width: 420,
+      width: AppTransactions.periodModalWidth,
       actions: [
-        OutlinedButton(
+        AppButton(
           key: const Key('transactionsDateRangeCancel'),
+          label: l10n.transactionsDateRangeCancel,
           onPressed: () => Navigator.of(context).pop(),
-          child: Text(l10n.transactionsDateRangeCancel),
         ),
         PrimaryButton(
           key: const Key('transactionsDateRangeApply'),
@@ -154,7 +154,7 @@ class _DateRangeModalState extends State<DateRangeModal> {
                     ),
                   ),
                 ),
-                const SizedBox(width: AppSpacing.sm + AppSpacing.xs),
+                const SizedBox(width: AppSpacing.smPlus),
                 Expanded(
                   child: LabeledField(
                     label: l10n.transactionsDateRangeToLabel,
@@ -169,13 +169,6 @@ class _DateRangeModalState extends State<DateRangeModal> {
                   ),
                 ),
               ],
-            ),
-            const SizedBox(height: AppSpacing.sm),
-            // Clearing both fields is how the filter is lifted, so the modal
-            // says so rather than leaving the user hunting for a reset.
-            Text(
-              l10n.transactionsDateRangeHelp,
-              style: context.textStyles.helper,
             ),
           ],
         ),

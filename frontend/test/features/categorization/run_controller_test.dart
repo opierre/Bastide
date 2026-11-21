@@ -166,10 +166,8 @@ void main() {
     final filters = container.read(transactionFiltersProvider.notifier)
       ..setNeedsReview(true);
 
-    // No account picked: every account, nothing to widen.
-    await container.read(runControllerProvider.notifier).startFromQueue();
-    // An account picked: it and the deferred cards it settles, exactly as the
-    // queue lists them.
+    // An account picked on « Toutes » narrows neither the review tab nor the
+    // run started from it: both are the whole queue.
     filters.setAccount('a1');
     await container.read(runControllerProvider.notifier).startFromQueue();
 
@@ -181,11 +179,10 @@ void main() {
     ).captured;
     expect(bodies, [
       {'account_id': null, 'scope': 'pending'},
-      {'account_id': 'a1', 'scope': 'pending', 'include_linked_cards': true},
     ]);
     expect(
       takesInLinkedCards(container.read(transactionFiltersProvider)),
-      isTrue,
+      isFalse,
     );
   });
 

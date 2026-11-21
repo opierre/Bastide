@@ -671,6 +671,38 @@ abstract final class AppCategoriesPanel {
   static const colorSquare = 20.0;
 }
 
+/// The Transactions panel of `docs/design/07-transactions.md`.
+abstract final class AppTransactions {
+  /// The filter row: padding 12 32, controls 8 px apart.
+  static const filterRowY = AppSpacing.smPlus;
+
+  /// The pager: padding 10 32.
+  static const pagerY = 10.0;
+
+  /// The width a toolbar select of the filter row may grow to.
+  static const filterMaxWidth = 220.0;
+
+  /// The table's « Catégorie » and « Montant » columns.
+  static const categoryColumn = 240.0;
+  static const amountColumn = 128.0;
+
+  /// The category picker popover, its list's height, and the inspector's
+  /// 28 px category select.
+  static const pickerWidth = 230.0;
+  static const pickerListHeight = 280.0;
+
+  /// The period modal and the rule modal.
+  static const periodModalWidth = 420.0;
+  static const ruleModalWidth = 520.0;
+
+  /// The review tab: the progress block of its first row, the Note beside
+  /// it, and the table's columns (date, proposal, actions, amount).
+  static const progressWidth = 260.0;
+  static const noteMaxWidth = 420.0;
+  static const reviewDateColumn = 88.0;
+  static const reviewActionsColumn = 380.0;
+}
+
 /// v1: the 38 px control pill some panels still put in the title bar, kept
 /// until each panel's v2 ticket moves it to the 28 px controls of [AppSizes].
 abstract final class AppChrome {

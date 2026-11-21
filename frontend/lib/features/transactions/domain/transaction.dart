@@ -210,6 +210,7 @@ class TransactionsPage {
     required this.page,
     required this.pageSize,
     required this.total,
+    this.netMinor,
   });
 
   final List<Transaction> items;
@@ -217,5 +218,77 @@ class TransactionsPage {
   final int pageSize;
   final int total;
 
+  /// The signed sum of every row the filters match, across all pages. `null`
+  /// when the API did not report it.
+  final int? netMinor;
+
   int get totalPages => total == 0 ? 1 : ((total - 1) ~/ pageSize) + 1;
+
+  /// The 1-based positions of the first and last rows on this page.
+  int get firstIndex => total == 0 ? 0 : ((page - 1) * pageSize) + 1;
+  int get lastIndex => ((page - 1) * pageSize) + items.length;
+}
+
+/// The rule that files a transaction, as its inspector names it.
+@immutable
+class TransactionRuleRef {
+  const TransactionRuleRef({required this.id, required this.pattern});
+
+  final String id;
+  final String pattern;
+}
+
+/// The recurring series a transaction belongs to, as its inspector shows it.
+/// [cadence] is the wire value (`monthly`, `yearly`…), read by the recurring
+/// feature's own labels.
+@immutable
+class TransactionSeriesRef {
+  const TransactionSeriesRef({
+    required this.id,
+    required this.cadence,
+    required this.nextExpectedDate,
+  });
+
+  final String id;
+  final String cadence;
+  final DateTime nextExpectedDate;
+}
+
+/// An earlier operation of the same merchant.
+@immutable
+class SameMerchantOperation {
+  const SameMerchantOperation({
+    required this.id,
+    required this.bookedDate,
+    required this.amountMinor,
+    required this.currency,
+  });
+
+  final String id;
+  final DateTime bookedDate;
+  final int amountMinor;
+  final String currency;
+}
+
+/// What the inspector shows around a transaction, beyond the row itself
+/// (`GET /transactions/{id}/context`).
+@immutable
+class TransactionContext {
+  const TransactionContext({
+    required this.importBatchId,
+    required this.importFileName,
+    required this.rule,
+    required this.series,
+    required this.sameMerchant,
+  });
+
+  final String importBatchId;
+  final String? importFileName;
+
+  /// Set only when a rule filed the row.
+  final TransactionRuleRef? rule;
+  final TransactionSeriesRef? series;
+
+  /// Up to five earlier operations, newest first.
+  final List<SameMerchantOperation> sameMerchant;
 }

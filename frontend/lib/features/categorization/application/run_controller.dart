@@ -113,17 +113,11 @@ class RunController extends Notifier<RunState> {
     }
   }
 
-  /// Starts a `pending` run over exactly the rows the review queue lists: the
-  /// picked account, widened to its linked cards by the same rule as the list
-  /// ([takesInLinkedCards]). A run never revisits a row a rule or the user has
-  /// settled, so the queue is exactly its input.
-  Future<void> startFromQueue() {
-    final filters = ref.read(transactionFiltersProvider);
-    return start(
-      accountId: filters.accountId,
-      includeLinkedCards: takesInLinkedCards(filters),
-    );
-  }
+  /// Starts a `pending` run over exactly the rows the « À vérifier » tab
+  /// lists: the whole queue, every account, since the tab reads none of the
+  /// list's filters ([TransactionFilters.isReviewTab]). A run never revisits a
+  /// row a rule or the user has settled, so the queue is exactly its input.
+  Future<void> startFromQueue() => start();
 
   /// Cancels the run in flight. The executor stops after the batch it is on;
   /// the response already carries the cancelled run.

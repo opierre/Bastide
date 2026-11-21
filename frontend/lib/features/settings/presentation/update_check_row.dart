@@ -71,7 +71,12 @@ class UpdateCheckRow extends ConsumerWidget {
           AppButton(
             key: const Key('settingsUpdateCheckNow'),
             label: l10n.settingsUpdatesCheckNow,
-            onPressed: state.isBusy ? null : controller.checkNow,
+            isLoading: state.isChecking,
+            // Disabled while the toggle saves; while it checks it spins
+            // instead, in full colour.
+            onPressed: state.isBusy && !state.isChecking
+                ? null
+                : controller.checkNow,
           ),
         ],
       ],

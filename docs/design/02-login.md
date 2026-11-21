@@ -10,7 +10,7 @@ None. Auth screens have no sidebar and no title bar.
 - One column, 320 px wide, centred horizontally and vertically. No card, no border, no shadow.
 - Children 14 px apart, top to bottom:
   1. Brand row: Plan mark 20 px + « Bastide » 16/600, 8 px below.
-  2. Field « Adresse e-mail ».
+  2. Field « E-mail ou nom d’utilisateur » (en: "Email or username").
   3. Field « Mot de passe », with a trailing `eye` / `eye-off` 14 px button that shows or hides it.
   4. Primary button, large, full width: « Se connecter ».
   5. A row, space-between, 12 px links: « Créer un compte » · « Mot de passe oublié ».
@@ -22,16 +22,16 @@ None. Auth screens have no sidebar and no title bar.
 |---|---|
 | Empty | Placeholders in `textTertiary`. Button enabled; submitting empty fields shows the field errors. |
 | Focus | The focused field takes the accent border and ring. |
-| Wrong credentials | Both fields take the error border; under the password field, helper in `negative`: « E-mail ou mot de passe incorrect. » No banner. |
+| Wrong credentials | Both fields take the error border; under the password field, helper in `negative`: « Identifiant ou mot de passe incorrect. » No banner. |
 | Loading | Button shows the spinner and « Connexion… »; fields disabled. |
 | Engine not ready | The startup screen (`18-brand.md`) shows instead of this one. |
 | English | Same geometry. |
 
 ## Behaviour (kept)
-- Login accepts the e-mail or the user name.
+- Login accepts the e-mail or the username, and its field label says so.
 - `Enter` in either field submits. The button never changes width.
-- « Mot de passe oublié » opens the recovery-code flow (same column layout: recovery code, new
-  password, confirm; primary « Réinitialiser le mot de passe »).
+- « Mot de passe oublié » opens the recovery-code flow (same column layout: « E-mail ou nom
+  d’utilisateur », recovery code, new password, confirm; primary « Réinitialiser le mot de passe »).
 - After the first registration, the recovery code is shown once in this same column layout:
   the code in Geist Mono 16 on a `field` well, a « Copier » secondary button, the sentence
   « Notez ce code et gardez-le en lieu sûr : il ne sera plus affiché. », and a primary
@@ -39,7 +39,10 @@ None. Auth screens have no sidebar and no title bar.
 
 ## Copy
 - Delete `authTagline`. `authPrivacyLine` → « Vos données restent sur cet ordinateur. »
-- Credential error → « E-mail ou mot de passe incorrect. »
+- Identifier label → « E-mail ou nom d’utilisateur » / "Email or username", on login and on
+  « Mot de passe oublié ».
+- Credential error → « Identifiant ou mot de passe incorrect. » / "Wrong email, username or
+  password."
 
 ## Removed from v1
 Radial glows, sunken ground, 416 px raised card, lockup + tagline stack above the card, error

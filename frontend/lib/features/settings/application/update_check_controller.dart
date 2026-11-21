@@ -7,7 +7,11 @@ import '../domain/update_status.dart';
 /// Everything the « Mises à jour » card renders.
 @immutable
 class UpdateCheckState {
-  const UpdateCheckState({required this.status, this.isBusy = false});
+  const UpdateCheckState({
+    required this.status,
+    this.isBusy = false,
+    this.isChecking = false,
+  });
 
   final UpdateStatus status;
 
@@ -15,22 +19,27 @@ class UpdateCheckState {
   /// keeps the toggle still meanwhile, so a second tap can't race the first.
   final bool isBusy;
 
+  /// The busy work is « Vérifier maintenant »: its button shows the spinner.
+  final bool isChecking;
+
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       (other is UpdateCheckState &&
           other.status == status &&
-          other.isBusy == isBusy);
+          other.isBusy == isBusy &&
+          other.isChecking == isChecking);
 
   @override
-  int get hashCode => Object.hash(status, isBusy);
+  int get hashCode => Object.hash(status, isBusy, isChecking);
 }
 
 /// Loads the update status when Settings › À propos opens, and turns the
 /// opt-in check on or off.
 ///
 /// The backend owns the once-a-day limit, so reading the status here is
-/// always cheap: it reaches GitHub only when a check is due.
+/// always cheap: it reaches GitHub only when a check is due. « Vérifier
+/// maintenant » is the one explicit check that skips it.
 class UpdateCheckController extends AsyncNotifier<UpdateCheckState> {
   @override
   Future<UpdateCheckState> build() async => UpdateCheckState(
@@ -67,14 +76,18 @@ class UpdateCheckController extends AsyncNotifier<UpdateCheckState> {
     state = AsyncData(UpdateCheckState(status: status));
   }
 
-  /// « Vérifier maintenant »: reads the status again. The backend keeps its
-  /// once-a-day limit, so this reaches GitHub only when a check is due.
+  /// « Vérifier maintenant »: asks GitHub now, whatever the daily limit. The
+  /// backend reuses a check under a minute old, so repeated taps stay local.
   Future<void> checkNow() async {
     final current = state.value;
     if (current == null || current.isBusy) return;
-    state = AsyncData(UpdateCheckState(status: current.status, isBusy: true));
+    state = AsyncData(
+      UpdateCheckState(status: current.status, isBusy: true, isChecking: true),
+    );
     try {
-      final status = await ref.read(settingsRepositoryProvider).updateStatus();
+      final status = await ref
+          .read(settingsRepositoryProvider)
+          .checkForUpdates();
       state = AsyncData(UpdateCheckState(status: status));
     } catch (_) {
       // Nothing new could be read: keep what was shown.

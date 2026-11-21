@@ -1,9 +1,9 @@
-import 'package:bastide/core/l10n/category_display.dart';
+import 'dart:async';
+
 import 'package:bastide/core/theme/app_theme.dart';
 import 'package:bastide/core/theme/tokens.dart';
 import 'package:bastide/core/widgets/amount_text.dart';
-import 'package:bastide/core/widgets/category_label.dart';
-import 'package:bastide/features/accounts/application/account_detail_controller.dart';
+import 'package:bastide/core/widgets/app_table.dart';
 import 'package:bastide/features/accounts/application/accounts_controller.dart';
 import 'package:bastide/features/accounts/domain/account.dart';
 import 'package:bastide/features/categories/domain/category.dart';
@@ -11,26 +11,28 @@ import 'package:bastide/features/categorization/application/run_controller.dart'
 import 'package:bastide/features/categorization/domain/categorization_run.dart';
 import 'package:bastide/features/rules/application/rule_preview_controller.dart';
 import 'package:bastide/features/rules/domain/rule.dart';
+import 'package:bastide/features/transactions/application/review_count_provider.dart';
+import 'package:bastide/features/transactions/application/transaction_selection.dart';
 import 'package:bastide/features/transactions/application/transactions_controller.dart';
 import 'package:bastide/features/transactions/domain/transaction.dart';
-import 'package:bastide/features/transactions/presentation/always_categorize_modal.dart';
+import 'package:bastide/features/transactions/presentation/review_queue.dart';
 import 'package:bastide/features/transactions/presentation/transactions_screen.dart';
 import 'package:bastide/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../../support/fake_accounts_controller.dart';
-import '../accounts/account_overview_fixtures.dart';
-import 'package:bastide/features/transactions/presentation/transaction_row.dart';
-
 import '../../support/fake_transactions_controller.dart';
+
+// Every name, amount and date below is invented.
 
 final _account = Account(
   id: 'a1',
   name: 'Compte courant',
   type: AccountType.checking,
-  institution: 'BNP Paribas',
+  institution: 'Banque Exemple',
   currency: 'EUR',
   openingBalanceMinor: 0,
   balanceMinor: 0,
@@ -39,94 +41,128 @@ final _account = Account(
   updatedAt: DateTime.utc(2026, 1, 1),
 );
 
+const _insurance = TransactionCategory(
+  id: 'c-insurance',
+  name: 'Assurance habitation',
+  kind: 'expense',
+  icon: 'home',
+  color: 'cat1',
+);
+
+const _catalog = [
+  AppCategory(
+    id: 'c-home',
+    userId: null,
+    parentId: null,
+    name: 'category.housing',
+    kind: 'expense',
+    icon: 'home',
+    color: 'cat1',
+    isSystem: true,
+  ),
+  AppCategory(
+    id: 'c-insurance',
+    userId: 'u1',
+    parentId: 'c-home',
+    name: 'Assurance habitation',
+    kind: 'expense',
+    icon: 'home',
+    color: 'cat1',
+    isSystem: false,
+  ),
+];
+
 Transaction _transaction({
   String id = 't1',
-  String accountId = 'a1',
-  int amountMinor = -1250,
+  DateTime? bookedDate,
+  int amountMinor = -18_744,
+  String? merchant = 'Mutuelle Exemple',
+  String descriptionRaw = 'PRLV SEPA ASSUR EXEMPLE',
+  TransactionCategory? category = _insurance,
+  CategorizationSource source = CategorizationSource.rule,
+  double? confidence,
   bool needsReview = false,
-  TransactionCategory? category,
-  String? merchant = 'Carrefour',
-  String? memo,
 }) => Transaction(
   id: id,
-  accountId: accountId,
-  bookedDate: DateTime(2026, 5, 14),
+  accountId: 'a1',
+  bookedDate: bookedDate ?? DateTime(2026, 5, 11),
   valueDate: null,
   amountMinor: amountMinor,
   currency: 'EUR',
-  descriptionRaw: 'CB CARREFOUR MARKET 14/05',
-  descriptionClean: 'Carrefour Market',
-  memo: memo,
+  descriptionRaw: descriptionRaw,
+  descriptionClean: descriptionRaw,
+  memo: null,
   merchant: merchant,
   category: category,
-  categorizationSource: category == null
-      ? CategorizationSource.uncategorized
-      : CategorizationSource.rule,
-  categorizationConfidence: null,
+  categorizationSource: source,
+  categorizationConfidence: confidence,
   needsReview: needsReview,
   fitid: null,
-  dedupHash: 'hash-1',
-  createdAt: DateTime.utc(2026, 5, 14),
-  updatedAt: DateTime.utc(2026, 5, 14),
+  dedupHash: 'hash-$id',
+  createdAt: DateTime.utc(2026, 5, 11),
+  updatedAt: DateTime.utc(2026, 5, 11),
 );
 
-const _groceriesCategory = TransactionCategory(
-  id: 'c1',
-  name: 'category.food.groceries',
-  kind: 'expense',
-  icon: 'shopping_cart',
-  color: 'cat3',
+TransactionsPage _page(List<Transaction> items, {int? net, int? total}) =>
+    TransactionsPage(
+      items: items,
+      page: 1,
+      pageSize: 50,
+      total: total ?? items.length,
+      netMinor: net,
+    );
+
+final _details = TransactionContext(
+  importBatchId: 'b1',
+  importFileName: 'releve-mai.ofx',
+  rule: const TransactionRuleRef(id: 'r1', pattern: 'ASSUR EXEMPLE'),
+  series: TransactionSeriesRef(
+    id: 's1',
+    cadence: 'yearly',
+    nextExpectedDate: DateTime(2026, 11, 21),
+  ),
+  sameMerchant: [
+    SameMerchantOperation(
+      id: 't-old',
+      bookedDate: DateTime(2025, 11, 21),
+      amountMinor: -17_990,
+      currency: 'EUR',
+    ),
+  ],
 );
 
 Widget _wrap({
   required FakeTransactionsController controller,
-  List<AppCategory> categories = const [
-    AppCategory(
-      id: 'c1',
-      userId: null,
-      parentId: null,
-      name: 'category.food.groceries',
-      kind: 'expense',
-      icon: 'shopping_cart',
-      color: 'cat3',
-      isSystem: true,
-    ),
-  ],
-  List<Account>? accounts,
+  int reviewCount = 0,
+  TransactionContext? details,
   Locale locale = const Locale('fr'),
+  ThemeData? theme,
 }) {
   return ProviderScope(
     overrides: [
-      // Filtered to an account, the panel names its linked cards from the
-      // account's overview: the checking account settles « Visa Premier »
-      // (card-1, •••• 4821) and « Carte Business » (card-2); a card has none.
-      accountOverviewProvider.overrideWith(
-        (ref, accountId) async => overviewFrom(
-          accountId == 'card-1' ? cardOverviewJson() : checkingOverviewJson(),
-        ),
-      ),
       transactionsControllerProvider.overrideWith(() => controller),
-      transactionCategoriesProvider.overrideWith((ref) async => categories),
+      transactionCategoriesProvider.overrideWith((ref) async => _catalog),
       accountsControllerProvider.overrideWith(
-        () => FakeAccountsController(initialAccounts: accounts ?? [_account]),
+        () => FakeAccountsController(initialAccounts: [_account]),
       ),
-      // Rules-only expectations: no opted-in AI, so no stage-2 chrome anywhere —
-      // and no health probe leaving the test either.
+      reviewCountProvider.overrideWith((ref) async => reviewCount),
+      transactionContextProvider.overrideWith(
+        (ref, id) async => details ?? _details,
+      ),
       aiAvailabilityProvider.overrideWith(
         (ref) async => AiAvailability.unavailable,
       ),
-      // The rule modal pre-fills from the sidecar; no widget test reaches one.
       ruleSuggestionProvider.overrideWith(
         (ref, transactionId) async => const RuleSuggestion(
-          matchField: RuleMatchField.merchant,
+          matchField: RuleMatchField.descriptionClean,
           matchType: RuleMatchType.contains,
-          pattern: 'CARREFOUR',
+          pattern: 'ASSUR',
         ),
       ),
     ],
     child: MaterialApp(
       locale: locale,
-      theme: AppTheme.dark,
+      theme: theme ?? AppTheme.dark,
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
       home: const Scaffold(body: TransactionsScreen()),
@@ -137,750 +173,632 @@ Widget _wrap({
 ProviderContainer _container(WidgetTester tester) =>
     ProviderScope.containerOf(tester.element(find.byType(TransactionsScreen)));
 
-/// The panel is drawn for the 1440×900 desktop frame the design targets —
-/// the default test surface is narrower than the filter bar + row layout.
+/// The 1440 × 900 frame the design targets, less the 224 px sidebar.
 void _useDesktopSurface(WidgetTester tester) {
-  tester.view.physicalSize = const Size(1440, 900);
+  tester.view.physicalSize = const Size(1216, 852);
   tester.view.devicePixelRatio = 1.0;
   addTearDown(tester.view.reset);
 }
 
-void main() {
-  testWidgets('renders the row amount, sign and category for the fr locale', (
-    tester,
-  ) async {
-    _useDesktopSurface(tester);
-    await tester.pumpWidget(
-      _wrap(
-        controller: FakeTransactionsController(
-          initialPage: TransactionsPage(
-            items: [
-              _transaction(amountMinor: -1250, category: _groceriesCategory),
-            ],
-            page: 1,
-            pageSize: 50,
-            total: 1,
+Future<void> _pump(
+  WidgetTester tester, {
+  List<Transaction>? items,
+  int? net,
+  int reviewCount = 0,
+  TransactionContext? details,
+  Locale locale = const Locale('fr'),
+  ThemeData? theme,
+  FakeTransactionsController? controller,
+}) async {
+  _useDesktopSurface(tester);
+  await tester.pumpWidget(
+    _wrap(
+      controller:
+          controller ??
+          FakeTransactionsController(
+            initialPage: _page(items ?? [_transaction()], net: net),
           ),
-        ),
-      ),
-    );
-    await tester.pumpAndSettle();
-
-    final expectedAmount = formatAmount(
-      amountMinor: -1250,
-      currency: 'EUR',
-      locale: 'fr',
-      showPositiveSign: true,
-    );
-    expect(find.text(expectedAmount), findsOneWidget);
-    expect(find.text('Courses'), findsOneWidget);
-  });
-
-  testWidgets('only an outflow offers « Marquer comme récurrent »', (
-    tester,
-  ) async {
-    _useDesktopSurface(tester);
-    await tester.pumpWidget(
-      _wrap(
-        controller: FakeTransactionsController(
-          initialPage: TransactionsPage(
-            items: [
-              _transaction(id: 'out', amountMinor: -1250),
-              _transaction(id: 'in', amountMinor: 250000, merchant: 'Salaire'),
-            ],
-            page: 1,
-            pageSize: 50,
-            total: 2,
-          ),
-        ),
-      ),
-    );
-    await tester.pumpAndSettle();
-
-    Finder action(String id) => find.descendant(
-      of: find.byKey(Key('transactionRow-$id')),
-      matching: find.byKey(const Key('transactionRowMarkRecurring')),
-    );
-    expect(action('out'), findsOneWidget);
-    expect(action('in'), findsNothing);
-    expect(find.byTooltip('Marquer comme récurrent'), findsOneWidget);
-  });
-
-  testWidgets('a row with a memo shows it before the account name', (
-    tester,
-  ) async {
-    _useDesktopSurface(tester);
-    await tester.pumpWidget(
-      _wrap(
-        controller: FakeTransactionsController(
-          initialPage: TransactionsPage(
-            items: [_transaction(memo: 'Abonnement mensuel')],
-            page: 1,
-            pageSize: 50,
-            total: 1,
-          ),
-        ),
-      ),
-    );
-    await tester.pumpAndSettle();
-
-    expect(find.text('Abonnement mensuel · Compte courant'), findsOneWidget);
-  });
-
-  testWidgets('a row without a memo keeps the account name alone', (
-    tester,
-  ) async {
-    _useDesktopSurface(tester);
-    await tester.pumpWidget(
-      _wrap(
-        controller: FakeTransactionsController(
-          initialPage: TransactionsPage(
-            items: [_transaction()],
-            page: 1,
-            pageSize: 50,
-            total: 1,
-          ),
-        ),
-      ),
-    );
-    await tester.pumpAndSettle();
-
-    expect(find.text('Compte courant'), findsOneWidget);
-  });
-
-  testWidgets(
-    'the category pill holds one column however long the merchant name is',
-    (tester) async {
-      _useDesktopSurface(tester);
-      await tester.pumpWidget(
-        _wrap(
-          controller: FakeTransactionsController(
-            initialPage: TransactionsPage(
-              items: [
-                _transaction(
-                  id: 't1',
-                  merchant: 'Carrefour',
-                  category: _groceriesCategory,
-                ),
-                _transaction(
-                  id: 't2',
-                  merchant: 'Prélèvement mensuel Assurance Habitation Matmut',
-                  category: _groceriesCategory,
-                ),
-              ],
-              page: 1,
-              pageSize: 50,
-              total: 2,
-            ),
-          ),
-        ),
-      );
-      await tester.pumpAndSettle();
-
-      double pillLeft(String merchant) => tester
-          .getRect(
-            find.descendant(
-              of: find.ancestor(
-                of: find.text(merchant),
-                matching: find.byType(TransactionRow),
-              ),
-              matching: find.byKey(const Key('transactionRowCategoryChip')),
-            ),
-          )
-          .left;
-
-      // The label block is tight, so a short merchant no longer pulls its pill left:
-      // every row starts its pill at the same x and they read as one column.
-      expect(
-        pillLeft('Carrefour'),
-        pillLeft('Prélèvement mensuel Assurance Habitation Matmut'),
-      );
-      // …and the long name still gets room to run well past the old 290px cap
-      // before it ellipsizes.
-      expect(
-        tester
-            .getSize(
-              find.text('Prélèvement mensuel Assurance Habitation Matmut'),
-            )
-            .width,
-        greaterThan(290),
-      );
-    },
+      reviewCount: reviewCount,
+      details: details,
+      locale: locale,
+      theme: theme,
+    ),
   );
+  await tester.pumpAndSettle();
+}
 
-  for (final (locale, cardLabel) in [
-    (const Locale('fr'), 'Visa Premier · •••• 4821'),
-    (const Locale('en'), 'Visa Premier · •••• 4821'),
-  ]) {
-    testWidgets(
-      'filtered to an account, its linked cards\' rows are marked with their '
-      'card (${locale.languageCode})',
-      (tester) async {
-        _useDesktopSurface(tester);
-        await tester.pumpWidget(
-          _wrap(
-            locale: locale,
-            controller: FakeTransactionsController(
-              initialPage: TransactionsPage(
-                items: [
-                  _transaction(id: 't1'),
-                  _transaction(id: 't2', accountId: 'card-1'),
-                  _transaction(id: 't3', accountId: 'card-2'),
-                ],
-                page: 1,
-                pageSize: 50,
-                total: 3,
-              ),
-            ),
-          ),
-        );
-        _container(
-          tester,
-        ).read(transactionFiltersProvider.notifier).setAccount('a1');
-        await tester.pumpAndSettle();
+/// Taps the row's name, clear of the category label (which opens the picker).
+Future<void> _select(WidgetTester tester, String id) async {
+  await tester.tapAt(
+    tester.getTopLeft(find.byKey(Key('transactionRow-$id'))) +
+        const Offset(AppSpacing.pageX + AppSpacing.xl, AppSizes.tableRow / 2),
+  );
+  await tester.pumpAndSettle();
+}
 
-        Finder inRow(String id, Finder finder) => find.descendant(
-          of: find.byKey(Key('transactionRow-$id')),
-          matching: finder,
-        );
-        final icon = find.byKey(const Key('transactionRowAccountIcon'));
-        // The account's own row keeps its account name, unmarked.
-        expect(inRow('t1', icon), findsNothing);
-        expect(inRow('t1', find.text('Compte courant')), findsOneWidget);
-        // A card's row names its card, with its masked number when known.
-        expect(inRow('t2', icon), findsOneWidget);
-        expect(inRow('t2', find.text(cardLabel)), findsOneWidget);
-        expect(inRow('t3', icon), findsOneWidget);
-        expect(inRow('t3', find.text('Carte Business')), findsOneWidget);
-      },
-    );
-  }
+void main() {
+  group('tabs', () {
+    testWidgets('« Toutes » and « À vérifier » with its count', (tester) async {
+      await _pump(tester, reviewCount: 12);
 
-  testWidgets('unfiltered, a card\'s rows keep the card\'s account name', (
-    tester,
-  ) async {
-    _useDesktopSurface(tester);
-    await tester.pumpWidget(
-      _wrap(
-        accounts: [_account, accountFrom(cardOverviewJson()['account'])],
-        controller: FakeTransactionsController(
-          initialPage: TransactionsPage(
-            items: [_transaction(id: 't2', accountId: 'card-1')],
-            page: 1,
-            pageSize: 50,
-            total: 1,
-          ),
-        ),
-      ),
-    );
-    await tester.pumpAndSettle();
+      expect(find.text('Toutes'), findsOneWidget);
+      expect(
+        find.textContaining('À vérifier 12', findRichText: true),
+        findsOneWidget,
+      );
+    });
 
-    expect(find.byKey(const Key('transactionRowAccountIcon')), findsNothing);
-    expect(find.text('Visa Premier'), findsOneWidget);
+    testWidgets('the count is hidden at 0', (tester) async {
+      await _pump(tester);
+
+      expect(
+        find.textContaining('À vérifier', findRichText: true),
+        findsOneWidget,
+      );
+      expect(
+        find.textContaining('À vérifier 0', findRichText: true),
+        findsNothing,
+      );
+    });
+
+    testWidgets('« À vérifier » opens the review queue', (tester) async {
+      await _pump(tester, reviewCount: 1);
+
+      await tester.tap(find.byKey(const Key('appTab-1')));
+      await tester.pumpAndSettle();
+
+      expect(
+        _container(tester).read(transactionFiltersProvider).isReviewTab,
+        true,
+      );
+      expect(find.byType(ReviewQueue), findsOneWidget);
+      expect(find.byKey(const Key('transactionsListPane')), findsNothing);
+    });
   });
 
-  testWidgets('filtered to a card, its rows read as the card\'s own', (
-    tester,
-  ) async {
-    _useDesktopSurface(tester);
-    await tester.pumpWidget(
-      _wrap(
-        accounts: [_account, accountFrom(cardOverviewJson()['account'])],
-        controller: FakeTransactionsController(
-          initialPage: TransactionsPage(
-            items: [_transaction(id: 't2', accountId: 'card-1')],
-            page: 1,
-            pageSize: 50,
-            total: 1,
-          ),
-        ),
-      ),
-    );
-    _container(
-      tester,
-    ).read(transactionFiltersProvider.notifier).setAccount('card-1');
-    await tester.pumpAndSettle();
+  group('list pane', () {
+    testWidgets('groups rows by day, newest first', (tester) async {
+      await _pump(
+        tester,
+        items: [
+          _transaction(id: 't1', bookedDate: DateTime(2026, 5, 14)),
+          _transaction(id: 't2', bookedDate: DateTime(2026, 5, 14)),
+          _transaction(id: 't3', bookedDate: DateTime(2026, 5, 9)),
+        ],
+      );
 
-    // A card settles no card of its own: no mark, just the card's name.
-    expect(find.byKey(const Key('transactionRowAccountIcon')), findsNothing);
-    expect(
-      find.descendant(
-        of: find.byKey(const Key('transactionRow-t2')),
-        matching: find.text('Visa Premier'),
-      ),
-      findsOneWidget,
-    );
-  });
-
-  testWidgets(
-    'the account pill opens its menu and filters to the picked account',
-    (tester) async {
-      _useDesktopSurface(tester);
-      await tester.pumpWidget(
-        _wrap(
-          controller: FakeTransactionsController(
-            initialPage: TransactionsPage(
-              items: [_transaction()],
-              page: 1,
-              pageSize: 50,
-              total: 1,
-            ),
-          ),
+      final groups = tester
+          .widgetList<AppTableGroupRow>(find.byType(AppTableGroupRow))
+          .map((row) => row.label)
+          .toList();
+      expect(groups, ['14 mai 2026', '9 mai 2026']);
+      expect(
+        tester.getTopLeft(find.byKey(const Key('transactionRow-t2'))).dy,
+        lessThan(
+          tester.getTopLeft(find.byKey(const Key('transactionRow-t3'))).dy,
         ),
       );
-      await tester.pumpAndSettle();
+    });
 
-      await tester.tap(find.byKey(const Key('transactionsAccountFilter')));
-      await tester.pumpAndSettle();
-      final item = find.widgetWithText(PopupMenuItem<String>, 'Compte courant');
-      expect(item, findsOneWidget);
+    testWidgets('a row shows the name, the top-level category and the amount', (
+      tester,
+    ) async {
+      await _pump(tester);
 
-      await tester.tap(item);
-      await tester.pumpAndSettle();
+      expect(find.text('Mutuelle Exemple'), findsOneWidget);
+      // Top level only in the list: the subcategory waits for the inspector.
+      final row = find.byKey(const Key('transactionRow-t1'));
+      expect(
+        find.descendant(of: row, matching: find.text('Logement')),
+        findsOneWidget,
+      );
+      expect(
+        find.descendant(
+          of: row,
+          matching: find.textContaining('Assurance', findRichText: true),
+        ),
+        findsNothing,
+      );
+      final amount = tester.widget<Text>(
+        find.descendant(of: row, matching: find.byType(Text)).last,
+      );
+      expect(amount.data, '−187,44 €');
+      expect(amount.style?.color, AppColors.dark.negative);
+    });
 
+    testWidgets('a label no rule named is mono beside the « ? » monogram', (
+      tester,
+    ) async {
+      await _pump(
+        tester,
+        items: [_transaction(merchant: null, descriptionRaw: 'CB XYZ 0512')],
+      );
+
+      final name = tester.widget<Text>(
+        find.byKey(const Key('transactionRowName')),
+      );
+      expect(name.data, 'CB XYZ 0512');
+      expect(name.style?.fontFamily, AppFonts.mono);
+      expect(
+        find.descendant(
+          of: find.byKey(const Key('transactionRow-t1')),
+          matching: find.text('?'),
+        ),
+        findsOneWidget,
+      );
+    });
+
+    testWidgets('the filter row ends on the count and the signed net', (
+      tester,
+    ) async {
+      await _pump(
+        tester,
+        items: [
+          _transaction(id: 't1'),
+          _transaction(id: 't2', amountMinor: 250_000),
+        ],
+        net: 231_256,
+      );
+
+      expect(find.text('2 opérations · net '), findsOneWidget);
+      final net = tester.widget<AmountText>(
+        find.byKey(const Key('transactionsNet')),
+      );
+      expect(net.amountMinor, 231_256);
+      expect(net.showPositiveSign, isTrue);
+      expect(find.text('+2 312,56 €'), findsOneWidget);
+    });
+
+    testWidgets('the pager reads « 1 – 2 sur 2 » and cannot move', (
+      tester,
+    ) async {
+      await _pump(
+        tester,
+        items: [
+          _transaction(id: 't1'),
+          _transaction(id: 't2'),
+        ],
+      );
+
+      expect(find.text('1 – 2 sur 2'), findsOneWidget);
+      expect(find.byTooltip('Page précédente'), findsNothing);
+      expect(find.bySemanticsLabel('Page précédente'), findsOneWidget);
+    });
+
+    testWidgets('« Tous les comptes » lifts a picked account', (tester) async {
+      await _pump(tester);
+      final select = find.byKey(const Key('transactionsAccountFilter'));
+
+      await tester.tap(select);
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Compte courant').last);
+      await tester.pumpAndSettle();
       expect(
         _container(tester).read(transactionFiltersProvider).accountId,
         'a1',
       );
-    },
-  );
 
-  testWidgets(
-    'the category pill opens its menu and filters to the picked category',
-    (tester) async {
-      _useDesktopSurface(tester);
-      await tester.pumpWidget(
-        _wrap(
-          controller: FakeTransactionsController(
-            initialPage: TransactionsPage(
-              items: [_transaction()],
-              page: 1,
-              pageSize: 50,
-              total: 1,
-            ),
-          ),
-        ),
-      );
+      await tester.tap(select);
       await tester.pumpAndSettle();
-
-      await tester.tap(find.byKey(const Key('transactionsCategoryFilter')));
+      await tester.tap(find.text('Tous les comptes').last);
       await tester.pumpAndSettle();
-      final item = find.widgetWithText(PopupMenuItem<String>, 'Courses');
-      expect(item, findsOneWidget);
-
-      await tester.tap(item);
-      await tester.pumpAndSettle();
-
       expect(
-        _container(tester).read(transactionFiltersProvider).categoryId,
-        'c1',
+        _container(tester).read(transactionFiltersProvider).accountId,
+        isNull,
       );
-    },
-  );
+    });
 
-  testWidgets(
-    'the category filter lists main categories only, each with its glyph',
-    (tester) async {
-      _useDesktopSurface(tester);
-      await tester.pumpWidget(
-        _wrap(
-          controller: FakeTransactionsController(
-            initialPage: TransactionsPage(
-              items: [_transaction()],
-              page: 1,
-              pageSize: 50,
-              total: 1,
-            ),
-          ),
-          categories: const [
-            AppCategory(
-              id: 'c1',
-              userId: null,
-              parentId: null,
-              name: 'category.food.groceries',
-              kind: 'expense',
-              icon: 'shopping_cart',
-              color: 'cat3',
-              isSystem: true,
-            ),
-            AppCategory(
-              id: 'c2',
-              userId: 'u1',
-              parentId: 'c1',
-              name: 'Marché bio',
-              kind: 'expense',
-              icon: 'shopping_cart',
-              color: 'cat3',
-              isSystem: false,
-            ),
-          ],
-        ),
-      );
-      await tester.pumpAndSettle();
+    testWidgets('the category filter lists main categories only', (
+      tester,
+    ) async {
+      await _pump(tester);
 
       await tester.tap(find.byKey(const Key('transactionsCategoryFilter')));
       await tester.pumpAndSettle();
 
-      final mainItem = find.byKey(
-        const Key('transactionsCategoryFilterItem-c1'),
-      );
-      expect(mainItem, findsOneWidget);
-      expect(
-        find.byKey(const Key('transactionsCategoryFilterItem-c2')),
-        findsNothing,
-      );
-      expect(find.text('Marché bio'), findsNothing);
-
-      final slug = categorySlugFor(
-        name: 'category.food.groceries',
-        kind: 'expense',
-      );
-      final icon = tester.widget<Icon>(
-        find.descendant(of: mainItem, matching: find.byType(Icon)),
-      );
-      expect(icon.icon, CategoryIcons.forSlug(slug));
-      expect(icon.color, CategoryColors.dark.forSlug(slug));
-    },
-  );
-
-  testWidgets('« Tous les comptes » clears a picked account filter', (
-    tester,
-  ) async {
-    _useDesktopSurface(tester);
-    await tester.pumpWidget(
-      _wrap(
-        controller: FakeTransactionsController(
-          initialPage: TransactionsPage(
-            items: [_transaction()],
-            page: 1,
-            pageSize: 50,
-            total: 1,
-          ),
-        ),
-      ),
-    );
-    await tester.pumpAndSettle();
-    final pill = find.byKey(const Key('transactionsAccountFilter'));
-
-    await tester.tap(pill);
-    await tester.pumpAndSettle();
-    await tester.tap(
-      find.widgetWithText(PopupMenuItem<String>, 'Compte courant'),
-    );
-    await tester.pumpAndSettle();
-    expect(_container(tester).read(transactionFiltersProvider).accountId, 'a1');
-
-    await tester.tap(pill);
-    await tester.pumpAndSettle();
-    await tester.tap(
-      find.widgetWithText(PopupMenuItem<String>, 'Tous les comptes'),
-    );
-    await tester.pumpAndSettle();
-
-    expect(
-      _container(tester).read(transactionFiltersProvider).accountId,
-      isNull,
-    );
-    expect(
-      find.descendant(of: pill, matching: find.text('Tous les comptes')),
-      findsOneWidget,
-    );
-  });
-
-  testWidgets('« Toutes les catégories » clears a picked category filter', (
-    tester,
-  ) async {
-    _useDesktopSurface(tester);
-    await tester.pumpWidget(
-      _wrap(
-        controller: FakeTransactionsController(
-          initialPage: TransactionsPage(
-            items: [_transaction()],
-            page: 1,
-            pageSize: 50,
-            total: 1,
-          ),
-        ),
-      ),
-    );
-    await tester.pumpAndSettle();
-    final pill = find.byKey(const Key('transactionsCategoryFilter'));
-
-    await tester.tap(pill);
-    await tester.pumpAndSettle();
-    await tester.tap(find.widgetWithText(PopupMenuItem<String>, 'Courses'));
-    await tester.pumpAndSettle();
-    expect(
-      _container(tester).read(transactionFiltersProvider).categoryId,
-      'c1',
-    );
-
-    await tester.tap(pill);
-    await tester.pumpAndSettle();
-    await tester.tap(
-      find.widgetWithText(PopupMenuItem<String>, 'Toutes les catégories'),
-    );
-    await tester.pumpAndSettle();
-
-    expect(
-      _container(tester).read(transactionFiltersProvider).categoryId,
-      isNull,
-    );
-    expect(
-      find.descendant(of: pill, matching: find.text('Toutes les catégories')),
-      findsOneWidget,
-    );
-  });
-
-  group('import filter', () {
-    TransactionsPage onePage() => TransactionsPage(
-      items: [_transaction()],
-      page: 1,
-      pageSize: 50,
-      total: 1,
-    );
-
-    const batch = ImportBatchFilter(id: 'b1', fileName: 'releve-mai.ofx');
-
-    testWidgets('shows no chip without an import filter', (tester) async {
-      _useDesktopSurface(tester);
-      await tester.pumpWidget(
-        _wrap(controller: FakeTransactionsController(initialPage: onePage())),
-      );
-      await tester.pumpAndSettle();
-
-      expect(find.byKey(const Key('transactionsImportFilter')), findsNothing);
+      expect(find.text('Toutes les catégories'), findsWidgets);
+      expect(find.text('Logement'), findsWidgets);
+      expect(find.text('Assurance habitation'), findsNothing);
     });
 
-    testWidgets('names the import in fr, on toolbar select tokens', (
+    testWidgets('the period select names a range compactly', (tester) async {
+      await _pump(tester);
+      _container(tester)
+          .read(transactionFiltersProvider.notifier)
+          .setDateRange(DateTime(2026, 5, 1), DateTime(2026, 5, 31));
+      await tester.pumpAndSettle();
+
+      expect(find.text('1 – 31 mai 2026'), findsOneWidget);
+    });
+
+    testWidgets('no row for the filters offers to clear them', (tester) async {
+      await _pump(tester, items: []);
+      // A filter is what tells « none of these » from « none at all ».
+      _container(
+        tester,
+      ).read(transactionFiltersProvider.notifier).setQuery('x');
+      await tester.pumpAndSettle();
+
+      expect(find.text('Aucune opération pour ces filtres.'), findsOneWidget);
+      await tester.tap(find.byKey(const Key('transactionsClearFilters')));
+      await tester.pumpAndSettle();
+
+      expect(
+        _container(tester).read(transactionFiltersProvider).hasListFilter,
+        isFalse,
+      );
+    });
+
+    testWidgets('the import filter names its file and lifts on « x »', (
       tester,
     ) async {
-      _useDesktopSurface(tester);
-      await tester.pumpWidget(
-        _wrap(controller: FakeTransactionsController(initialPage: onePage())),
-      );
-      await tester.pumpAndSettle();
+      await _pump(tester);
       _container(tester)
           .read(transactionFiltersProvider.notifier)
-          .showImport(batch, accountId: 'a1');
+          .showImport(
+            const ImportBatchFilter(id: 'b1', fileName: 'releve-mai.ofx'),
+            accountId: 'a1',
+          );
       await tester.pumpAndSettle();
 
-      final chip = find.byKey(const Key('transactionsImportFilter'));
-      expect(chip, findsOneWidget);
-      expect(
-        find.descendant(
-          of: chip,
-          matching: find.text('Import : releve-mai.ofx'),
-        ),
-        findsOneWidget,
-      );
-      final box = tester.widget<Container>(chip);
-      final decoration = box.decoration! as BoxDecoration;
-      expect(decoration.color, AppColors.dark.field);
-      expect(decoration.borderRadius, BorderRadius.circular(AppRadii.control));
-      expect(
-        (decoration.border! as Border).top.color,
-        AppColors.dark.lineStrong,
-      );
-      expect(tester.getSize(chip).height, AppSizes.toolbarSelect);
-    });
-
-    testWidgets('names the import in en', (tester) async {
-      _useDesktopSurface(tester);
-      await tester.pumpWidget(
-        _wrap(
-          controller: FakeTransactionsController(initialPage: onePage()),
-          locale: const Locale('en'),
-        ),
-      );
-      await tester.pumpAndSettle();
-      _container(tester)
-          .read(transactionFiltersProvider.notifier)
-          .showImport(batch, accountId: 'a1');
-      await tester.pumpAndSettle();
-
-      expect(find.text('Import: releve-mai.ofx'), findsOneWidget);
-      expect(find.byTooltip('Remove the import filter'), findsOneWidget);
-    });
-
-    testWidgets('its remove button lifts the filter and keeps the account', (
-      tester,
-    ) async {
-      _useDesktopSurface(tester);
-      await tester.pumpWidget(
-        _wrap(controller: FakeTransactionsController(initialPage: onePage())),
-      );
-      await tester.pumpAndSettle();
-      _container(tester)
-          .read(transactionFiltersProvider.notifier)
-          .showImport(batch, accountId: 'a1');
-      await tester.pumpAndSettle();
-      expect(find.byTooltip('Retirer le filtre d’import'), findsOneWidget);
-
+      expect(find.text('Import : releve-mai.ofx'), findsOneWidget);
       await tester.tap(find.byKey(const Key('transactionsImportFilterRemove')));
       await tester.pumpAndSettle();
 
       final filters = _container(tester).read(transactionFiltersProvider);
       expect(filters.importBatch, isNull);
       expect(filters.accountId, 'a1');
-      expect(find.byKey(const Key('transactionsImportFilter')), findsNothing);
     });
-  });
 
-  testWidgets('renders the row amount, sign and category for the en locale', (
-    tester,
-  ) async {
-    _useDesktopSurface(tester);
-    await tester.pumpWidget(
-      _wrap(
-        controller: FakeTransactionsController(
-          initialPage: TransactionsPage(
-            items: [
-              _transaction(amountMinor: 285000, category: _groceriesCategory),
-            ],
-            page: 1,
-            pageSize: 50,
-            total: 1,
-          ),
-        ),
-        locale: const Locale('en'),
-      ),
-    );
-    await tester.pumpAndSettle();
-
-    final expectedAmount = formatAmount(
-      amountMinor: 285000,
-      currency: 'EUR',
-      locale: 'en',
-      showPositiveSign: true,
-    );
-    expect(find.text(expectedAmount), findsOneWidget);
-    expect(find.text('Groceries'), findsOneWidget);
-  });
-
-  testWidgets('an uncategorized row shows the dashed uncategorized chip', (
-    tester,
-  ) async {
-    _useDesktopSurface(tester);
-    await tester.pumpWidget(
-      _wrap(
-        controller: FakeTransactionsController(
-          initialPage: TransactionsPage(
-            items: [_transaction(category: null)],
-            page: 1,
-            pageSize: 50,
-            total: 1,
-          ),
-        ),
-      ),
-    );
-    await tester.pumpAndSettle();
-
-    expect(find.text('Non catégorisé'), findsOneWidget);
-  });
-
-  testWidgets(
-    'the review queue lets the user resolve an item via the category picker',
-    (tester) async {
-      _useDesktopSurface(tester);
+    testWidgets('tapping the category opens the picker, which applies', (
+      tester,
+    ) async {
       final controller = FakeTransactionsController(
-        initialPage: TransactionsPage(
-          items: [_transaction(id: 't1', category: null, needsReview: true)],
-          page: 1,
-          pageSize: 50,
-          total: 1,
-        ),
+        initialPage: _page([_transaction(category: null)]),
       );
+      await _pump(tester, controller: controller);
 
-      await tester.pumpWidget(_wrap(controller: controller));
-      await tester.pumpAndSettle();
-      _container(
-        tester,
-      ).read(transactionFiltersProvider.notifier).setNeedsReview(true);
+      await tester.tap(find.byKey(const Key('transactionRowCategory')));
       await tester.pumpAndSettle();
 
-      expect(find.byKey(const Key('reviewQueueList')), findsOneWidget);
-      expect(find.byKey(const Key('reviewRowCategoryChip')), findsOneWidget);
-
-      await tester.tap(find.byKey(const Key('reviewRowCategoryChip')));
-      await tester.pumpAndSettle();
-      await tester.tap(find.byKey(const Key('categoryPickerItem-c1')));
+      expect(
+        find.byKey(const Key('categoryPickerSearchField')),
+        findsOneWidget,
+      );
+      expect(find.text('Changer de catégorie'), findsOneWidget);
+      // Categories and their subcategories, each a category label.
+      expect(
+        find.byKey(const Key('categoryPickerItem-c-insurance')),
+        findsOneWidget,
+      );
+      await tester.tap(find.byKey(const Key('categoryPickerItem-c-insurance')));
       await tester.pumpAndSettle();
 
       expect(controller.updateCategoryCalls, [
-        (transactionId: 't1', categoryId: 'c1'),
+        (transactionId: 't1', categoryId: 'c-insurance'),
       ]);
-    },
-  );
+      expect(find.byKey(const Key('categoryPickerSearchField')), findsNothing);
+    });
+  });
 
-  testWidgets(
-    'the review queue "always categorize" affordance opens the rule modal',
-    (tester) async {
-      _useDesktopSurface(tester);
-      final controller = FakeTransactionsController(
-        initialPage: TransactionsPage(
-          items: [_transaction(id: 't1', category: null, needsReview: true)],
-          page: 1,
-          pageSize: 50,
-          total: 1,
+  group('selection and keyboard', () {
+    testWidgets('nothing selected: the inspector shows its note', (
+      tester,
+    ) async {
+      await _pump(tester);
+
+      expect(
+        find.text('Sélectionnez une opération pour voir son détail.'),
+        findsOneWidget,
+      );
+      expect(find.byKey(const Key('transactionInspector')), findsNothing);
+    });
+
+    testWidgets('the selected row takes accentSoft', (tester) async {
+      await _pump(tester);
+
+      await _select(tester, 't1');
+
+      final row = tester.widget<AppTableRow>(
+        find.descendant(
+          of: find.byKey(const Key('transactionRow-t1')),
+          matching: find.byType(AppTableRow),
         ),
       );
+      expect(row.selected, isTrue);
+      expect(find.byKey(const Key('transactionInspector')), findsOneWidget);
+    });
 
-      await tester.pumpWidget(_wrap(controller: controller));
-      await tester.pumpAndSettle();
-      _container(
+    testWidgets('↑ ↓ move the selection and C opens the picker', (
+      tester,
+    ) async {
+      await _pump(
         tester,
-      ).read(transactionFiltersProvider.notifier).setNeedsReview(true);
+        items: [
+          _transaction(id: 't1'),
+          _transaction(id: 't2'),
+          _transaction(id: 't3'),
+        ],
+      );
+      await _select(tester, 't1');
+
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
       await tester.pumpAndSettle();
+      expect(_container(tester).read(selectedTransactionProvider), 't2');
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
+      await tester.pumpAndSettle();
+      expect(_container(tester).read(selectedTransactionProvider), 't1');
 
-      await tester.tap(find.byKey(const Key('reviewRowAlwaysButton')));
-      await tester.pump();
+      await tester.sendKeyEvent(LogicalKeyboardKey.keyC);
+      await tester.pumpAndSettle();
+      expect(
+        find.byKey(const Key('categoryPickerSearchField')),
+        findsOneWidget,
+      );
+    });
+  });
 
-      expect(find.byType(AlwaysCategorizeModal), findsOneWidget);
-    },
-  );
+  group('inspector', () {
+    testWidgets('the header, the amount and the key/value list', (
+      tester,
+    ) async {
+      await _pump(tester);
+      await _select(tester, 't1');
 
-  testWidgets(
-    'renders the empty state with no transactions and no active filter',
-    (tester) async {
+      final inspector = find.byKey(const Key('transactionInspector'));
+      Finder inside(Finder finder) =>
+          find.descendant(of: inspector, matching: finder);
+      expect(inside(find.text('Mutuelle Exemple')), findsOneWidget);
+      expect(inside(find.text('PRLV SEPA ASSUR EXEMPLE')), findsOneWidget);
+      final amount = tester.widget<AmountText>(
+        find.byKey(const Key('transactionInspectorAmount')),
+      );
+      expect(amount.amountMinor, -18_744);
+      expect(amount.style?.fontSize, 28);
+      expect(inside(find.text('11 mai 2026')), findsOneWidget);
+      expect(inside(find.text('Compte courant')), findsOneWidget);
+      // The full category label: the subcategory after « › ».
+      expect(
+        inside(find.textContaining('Assurance habitation', findRichText: true)),
+        findsOneWidget,
+      );
+      expect(inside(find.text('règle « ASSUR EXEMPLE »')), findsOneWidget);
+      expect(inside(find.text('releve-mai.ofx')), findsOneWidget);
+    });
+
+    testWidgets('classed by the AI: the confidence as text', (tester) async {
+      await _pump(
+        tester,
+        items: [
+          _transaction(source: CategorizationSource.model, confidence: 0.78),
+        ],
+      );
+      await _select(tester, 't1');
+
+      expect(find.text('IA locale, confiance 78 %'), findsOneWidget);
+    });
+
+    testWidgets('classed by the user, or not at all', (tester) async {
+      await _pump(
+        tester,
+        items: [
+          _transaction(id: 't1', source: CategorizationSource.user),
+          _transaction(
+            id: 't2',
+            category: null,
+            source: CategorizationSource.uncategorized,
+          ),
+        ],
+      );
+
+      await _select(tester, 't1');
+      expect(find.text('vous'), findsOneWidget);
+      await _select(tester, 't2');
+      expect(find.text('non classée'), findsOneWidget);
+    });
+
+    testWidgets('a recurring charge shows its series', (tester) async {
+      await _pump(tester);
+      await _select(tester, 't1');
+
+      expect(find.text('Paiement récurrent'), findsOneWidget);
+      expect(find.text('Annuel · prochain le 21 nov. 2026'), findsOneWidget);
+      expect(
+        find.byKey(const Key('transactionInspectorViewSeries')),
+        findsOneWidget,
+      );
+      expect(
+        find.byKey(const Key('transactionInspectorMarkRecurring')),
+        findsNothing,
+      );
+    });
+
+    testWidgets('a charge in no series offers « Marquer comme récurrent »', (
+      tester,
+    ) async {
+      await _pump(
+        tester,
+        details: const TransactionContext(
+          importBatchId: 'b1',
+          importFileName: 'releve-mai.ofx',
+          rule: null,
+          series: null,
+          sameMerchant: [],
+        ),
+      );
+      await _select(tester, 't1');
+
+      expect(
+        find.byKey(const Key('transactionInspectorMarkRecurring')),
+        findsOneWidget,
+      );
+      expect(find.text('Aucune opération antérieure.'), findsOneWidget);
+      // No rule filed it: the action creates one.
+      expect(
+        find.byKey(const Key('transactionInspectorCreateRule')),
+        findsOneWidget,
+      );
+      expect(find.text('Créer une règle'), findsOneWidget);
+    });
+
+    testWidgets('an inflow has no recurring action', (tester) async {
+      await _pump(
+        tester,
+        items: [_transaction(amountMinor: 250_000)],
+        details: const TransactionContext(
+          importBatchId: 'b1',
+          importFileName: null,
+          rule: null,
+          series: null,
+          sameMerchant: [],
+        ),
+      );
+      await _select(tester, 't1');
+
+      expect(
+        find.byKey(const Key('transactionInspectorMarkRecurring')),
+        findsNothing,
+      );
+    });
+
+    testWidgets('« Même marchand » lists earlier operations', (tester) async {
+      await _pump(tester);
+      await _select(tester, 't1');
+
+      expect(find.text('Même marchand'), findsOneWidget);
+      final row = find.byKey(
+        const Key('transactionInspectorSameMerchant-t-old'),
+      );
+      expect(
+        find.descendant(of: row, matching: find.text('21 nov. 2025')),
+        findsOneWidget,
+      );
+      expect(
+        find.descendant(of: row, matching: find.text('−179,90 €')),
+        findsOneWidget,
+      );
+    });
+
+    testWidgets('a rule-filed row offers « Modifier la règle »', (
+      tester,
+    ) async {
+      await _pump(tester);
+      await _select(tester, 't1');
+
+      expect(find.text('Modifier la règle'), findsOneWidget);
+      expect(
+        find.byKey(const Key('transactionInspectorCreateRule')),
+        findsNothing,
+      );
+    });
+
+    testWidgets('a context that fails to load says so', (tester) async {
+      _useDesktopSurface(tester);
       await tester.pumpWidget(
-        _wrap(
-          controller: FakeTransactionsController(
-            initialPage: const TransactionsPage(
-              items: [],
-              page: 1,
-              pageSize: 50,
-              total: 0,
+        ProviderScope(
+          overrides: [
+            transactionsControllerProvider.overrideWith(
+              () => FakeTransactionsController(
+                initialPage: _page([_transaction()]),
+              ),
             ),
+            transactionCategoriesProvider.overrideWith((ref) async => _catalog),
+            accountsControllerProvider.overrideWith(
+              () => FakeAccountsController(initialAccounts: [_account]),
+            ),
+            reviewCountProvider.overrideWith((ref) async => 0),
+            transactionContextProvider.overrideWith(
+              (ref, id) async => throw StateError('offline'),
+            ),
+          ],
+          child: MaterialApp(
+            locale: const Locale('fr'),
+            theme: AppTheme.dark,
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+            home: const Scaffold(body: TransactionsScreen()),
           ),
         ),
       );
       await tester.pumpAndSettle();
+      await _select(tester, 't1');
+
+      expect(
+        find.text('Ce détail n’a pas pu être chargé. Rien n’a été modifié.'),
+        findsOneWidget,
+      );
+    });
+  });
+
+  group('states', () {
+    testWidgets('no transaction at all: the empty state, no tabs', (
+      tester,
+    ) async {
+      await _pump(tester, items: []);
 
       expect(find.text('Aucune transaction'), findsOneWidget);
-      expect(find.byKey(const Key('transactionsList')), findsNothing);
-    },
-  );
+      expect(
+        find.text('Importez un relevé pour voir vos opérations ici.'),
+        findsOneWidget,
+      );
+      expect(
+        find.byKey(const Key('transactionsGoToImportsButton')),
+        findsOneWidget,
+      );
+      expect(find.byKey(const Key('transactionsTabs')), findsNothing);
+    });
 
-  testWidgets('renders under en without missing localized keys', (
-    tester,
-  ) async {
-    await tester.pumpWidget(
-      _wrap(
-        controller: FakeTransactionsController(
-          initialPage: const TransactionsPage(
-            items: [],
-            page: 1,
-            pageSize: 50,
-            total: 0,
-          ),
-        ),
-        locale: const Locale('en'),
-      ),
-    );
-    await tester.pumpAndSettle();
+    testWidgets('loading draws the silhouette', (tester) async {
+      _useDesktopSurface(tester);
+      await tester.pumpWidget(_wrap(controller: _NeverLoadingController()));
+      await tester.pump();
 
-    expect(find.text('No transactions'), findsOneWidget);
-    expect(tester.takeException(), isNull);
+      expect(
+        find.byKey(const Key('transactionsLoadingIndicator')),
+        findsOneWidget,
+      );
+    });
+
+    testWidgets('both themes render the list and the inspector', (
+      tester,
+    ) async {
+      await _pump(tester, theme: AppTheme.light);
+      await _select(tester, 't1');
+
+      final amount = tester.widget<Text>(
+        find
+            .descendant(
+              of: find.byKey(const Key('transactionRow-t1')),
+              matching: find.byType(Text),
+            )
+            .last,
+      );
+      expect(amount.style?.color, AppColors.light.negative);
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('renders in English', (tester) async {
+      await _pump(tester, locale: const Locale('en'), reviewCount: 3);
+      await _select(tester, 't1');
+
+      expect(find.text('All'), findsOneWidget);
+      expect(
+        find.textContaining('To review 3', findRichText: true),
+        findsOneWidget,
+      );
+      expect(find.text('Operation'), findsOneWidget);
+      expect(find.text('Filed by'), findsOneWidget);
+      expect(find.text('Same merchant'), findsOneWidget);
+      expect(find.text('rule “ASSUR EXEMPLE”'), findsOneWidget);
+      expect(find.textContaining('opération'), findsNothing);
+    });
   });
+}
+
+/// A controller whose page never arrives, to hold the loading state.
+class _NeverLoadingController extends FakeTransactionsController {
+  _NeverLoadingController() : super(initialPage: _page(const []));
+
+  @override
+  Future<TransactionsPage> build() => Completer<TransactionsPage>().future;
 }

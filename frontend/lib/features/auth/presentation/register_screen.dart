@@ -140,7 +140,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     return AuthScaffold(
       children: [
         LabeledField(
-          label: l10n.authRegisterDisplayNameLabel,
+          label: l10n.authDisplayNameLabel,
           errorText: displayNameError,
           child: AuthTextField(
             fieldKey: const Key('registerDisplayNameField'),

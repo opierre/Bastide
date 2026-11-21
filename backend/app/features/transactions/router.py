@@ -12,12 +12,17 @@ from app.features.auth.models import User
 from app.features.categories.repository import CategoryRepository
 from app.features.rules.deps import get_logo_resolver
 from app.features.rules.logos import RuleLogoResolver
+from app.features.rules.repository import RuleRepository
 from app.features.transactions.models import Transaction
 from app.features.transactions.repository import TransactionRepository
 from app.features.transactions.schemas import (
+    SameMerchantRead,
     TransactionCategory,
+    TransactionContextRead,
     TransactionPage,
     TransactionRead,
+    TransactionRuleRef,
+    TransactionSeriesRef,
     TransactionUpdate,
 )
 from app.features.transactions.service import PAGE_SIZE, TransactionService
@@ -29,6 +34,7 @@ def _service(db: Annotated[Session, Depends(get_db)]) -> TransactionService:
     return TransactionService(
         TransactionRepository(db),
         CategoryRepository(db),
+        RuleRepository(db),
     )
 
 
@@ -83,8 +89,9 @@ async def list_transactions(
     account. Each row keeps its own `account_id`, so a client can tell the card's apart.
     `category_id` matches that category and its sub-categories.
     `import_batch_id` keeps only the rows that import added.
+    `net_minor` sums every matching row across all pages.
     """
-    items, total = service.list_for_user(
+    items, total, net = service.list_for_user(
         user.id,
         account_id=account_id,
         date_from=from_,
@@ -101,6 +108,7 @@ async def list_transactions(
         page=page,
         page_size=PAGE_SIZE,
         total=total,
+        net_minor=net,
     )
 
 
@@ -125,3 +133,47 @@ async def update_transaction(
 ) -> TransactionRead:
     """Patch category/description/merchant. A category edit sets `source=user`."""
     return _to_read(service.update(user.id, transaction_id, payload), logos)
+
+
+@router.get("/{transaction_id}/context", response_model=TransactionContextRead)
+async def get_transaction_context(
+    transaction_id: str,
+    service: Annotated[TransactionService, Depends(_service)],
+    user: Annotated[User, Depends(get_current_user)],
+) -> TransactionContextRead:
+    """What the inspector shows around a transaction: its import's file name, the rule that
+    filed it (rule-filed rows only), its recurring series, and up to five earlier operations of
+    the same merchant (same `merchant`, or same label when it has none), newest first."""
+    context = service.context(user.id, transaction_id)
+    rule = context.rule
+    series = context.series
+    return TransactionContextRead(
+        import_batch_id=context.import_batch_id,
+        import_file_name=context.import_file_name,
+        rule=(
+            TransactionRuleRef(
+                id=rule.id,
+                match_field=rule.match_field,
+                match_type=rule.match_type,
+                pattern=rule.pattern,
+            )
+            if rule is not None
+            else None
+        ),
+        series=(
+            TransactionSeriesRef(
+                id=series.id, cadence=series.cadence, next_expected_date=series.next_expected_date
+            )
+            if series is not None
+            else None
+        ),
+        same_merchant=[
+            SameMerchantRead(
+                id=row.id,
+                booked_date=row.booked_date,
+                amount_minor=row.amount_minor,
+                currency=row.currency,
+            )
+            for row in context.same_merchant
+        ],
+    )
