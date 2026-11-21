@@ -197,6 +197,19 @@ tr.dim td{color:var(--tx3)}
 .app:not([data-tex=off]) .rail .grow{background-image:var(--tex);-webkit-mask-image:linear-gradient(transparent,#000 35%,#000 75%,transparent);mask-image:linear-gradient(transparent,#000 35%,#000 75%,transparent)}
 .app:not([data-tex=off]).auth::before,.app:not([data-tex=off]) .tex-fade::before{content:"";position:absolute;inset:0;background-image:var(--tex);-webkit-mask-image:radial-gradient(ellipse at center,transparent 22%,#000 75%);mask-image:radial-gradient(ellipse at center,transparent 22%,#000 75%)}
 
+/* ───────── v6: window controls in the title bar ───────── */
+.top.win{padding-right:0}
+.wc{display:flex;align-self:stretch;margin-left:8px}
+.wc span{width:46px;display:grid;place-items:center;color:var(--tx2)}
+.wc span.h-on{background:var(--hover);color:var(--tx)}
+.wc span.p-on{background:var(--line);color:var(--tx)}
+.wc span.x.h-on{background:var(--neg);color:var(--bg)}
+.wc span.x.p-on{background:color-mix(in srgb,var(--neg) 85%,var(--bg));color:var(--bg)}
+.top.idle h1,.top.idle .wc span{color:var(--tx3)}
+.drag{background-image:repeating-linear-gradient(45deg,color-mix(in srgb,var(--ac) 22%,transparent) 0 1.5px,transparent 1.5px 5px);outline:1px dashed var(--ac);outline-offset:-1px}
+.mac{display:flex;gap:8px;align-items:center}
+.mac i{width:12px;height:12px;border-radius:50%;display:block}
+
 /* ───────── System page ───────── */
 .sys{width:1440px;padding:48px 56px;display:block;height:auto}
 .sys h2{font:600 20px var(--f);margin:40px 0 6px;letter-spacing:-.01em}

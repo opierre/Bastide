@@ -1,4 +1,4 @@
-/* Bastide redesign proposal — panel renderers. All figures are invented (persona of docs/design, May 2026). */
+/* Bastide redesign proposal v6 — panel renderers; v6 adds the modals and the window controls. All figures are invented (persona of docs/design, May 2026). */
 const I = (n, c = '') => `<i data-lucide="${n}" class="${c}"></i>`;
 let MARK = '';
 const CATS = { Logement: ['c1', 'house'], Alimentation: ['c2', 'soup'], Transport: ['c3', 'car'], Abonnements: ['c4', 'refresh-cw'], Loisirs: ['c5', 'star'], Santé: ['c6', 'cross'], Autres: ['c0', 'coins'], Revenus: ['pos', 'arrow-up'] };
@@ -19,7 +19,7 @@ function shell(active, title, actions, body, o = {}) {
     <div class="nav ${active === 'settings' ? 'on' : ''}">${I('settings')}Paramètres</div>
     <div class="foot"><div class="me"><span class="av">CD</span>Camille Dubois<span class="sp"></span>${I('chevrons-up-down', 's14 t3')}</div>
     <div class="local">${I('lock', 's14')}Données locales</div></div></aside>
-  <div class="main"><header class="top">${o.crumb ? `<span class="crumb">${o.crumb} /</span>` : ''}<h1>${title}</h1><span class="sp"></span>${actions || ''}</header>
+  <div class="main"><header class="top win">${o.crumb ? `<span class="crumb">${o.crumb} /</span>` : ''}<h1>${title}</h1><span class="sp"></span>${actions || ''}${WC(o.wc || {})}</header>
   <div class="body ${o.flush ? 'flush' : ''}">${body}</div></div>`;
 }
 const MONTH = `<span class="sel">${I('chevron-left', 's14')}Mai 2026${I('chevron-right', 's14')}</span>`;
@@ -473,14 +473,45 @@ P.system = (theme, accent) => {
   </div>`;
 };
 
+/* ════════ v6: the title bar and its window controls ════════ */
+const WC = (st = {}) => `<div class="wc" role="group" aria-label="Fenêtre">${[['min', 'minus', 'Réduire'], ['max', st.max ? 'copy' : 'square', st.max ? 'Restaurer' : 'Agrandir'], ['x', 'x', 'Fermer']].map(([k, ic, l]) => `<span class="${k === 'x' ? 'x' : ''} ${st.hover === k ? 'h-on' : ''} ${st.press === k ? 'p-on' : ''}" title="${l}" aria-label="${l}">${I(ic)}</span>`).join('')}</div>`;
+const barStrip = (t, st = {}, o = {}) => `<div class="app strip" data-theme="${t}" data-accent="encre" data-tex="off"><header class="top win ${st.idle ? 'idle' : ''}">${o.crumb ? `<span class="crumb">${o.crumb} /</span>` : ''}<h1>${o.title || 'Tableau de bord'}</h1><span class="sp ${o.drag ? 'drag' : ''}" style="align-self:stretch"></span>${o.actions ?? MONTH}${WC(st)}</header></div>`;
+const STATES = [['Repos', {}], ['Survol de « Réduire »', { hover: 'min' }], ['Survol de « Agrandir »', { hover: 'max' }], ['Appui sur « Agrandir »', { press: 'max' }], ['Survol de « Fermer »', { hover: 'x' }], ['Appui sur « Fermer »', { press: 'x' }], ['Fenêtre agrandie : « Restaurer »', { max: 1 }], ['Fenêtre inactive', { idle: 1 }]];
+const macStrip = t => `<div class="app strip" data-theme="${t}" data-accent="encre" data-tex="off" style="display:grid!important;grid-template-columns:224px 1fr"><div style="background:var(--rail);border-right:1px solid var(--line);height:48px;display:flex;align-items:center;gap:14px;padding:0 16px"><span class="mac drag" style="padding:4px"><i style="background:#ff5f57"></i><i style="background:#febc2e"></i><i style="background:#28c840"></i></span><span class="brand" style="padding:0">${MARK}Bastide</span></div><header class="top"><h1>Tableau de bord</h1><span class="sp drag" style="align-self:stretch"></span>${MONTH}</header></div>`;
+const winStrip = t => `<div class="app strip" data-theme="${t}" data-accent="encre" data-tex="off" style="display:grid!important;grid-template-columns:224px 1fr"><div class="drag" style="background:var(--rail);border-right:1px solid var(--line);height:48px;display:flex;align-items:center;padding:0 16px"><span class="brand" style="padding:0">${MARK}Bastide</span></div><header class="top win"><h1>Tableau de bord</h1><span class="sp drag" style="align-self:stretch"></span>${MONTH}${SEARCH}${WC()}</header></div>`;
+const authStrip = t => `<div class="app strip" data-theme="${t}" data-accent="encre" data-tex="off" style="position:relative;height:120px!important"><div class="drag" style="position:absolute;inset:0 138px auto 0;height:48px"></div><div style="position:absolute;top:0;right:0;height:48px;display:flex">${WC()}</div><div class="col t3 sm" style="position:absolute;inset:60px 0 0;align-items:center">Écran de connexion, sans barre de titre</div></div>`;
+P.window = theme => `<div class="app mg-page" data-theme="${theme}" data-accent="encre" data-tex="off">
+  <h2>Barre de titre et contrôles de la fenêtre</h2>
+  <p>La barre de titre native disparaît : la barre de 48 px de l’application porte réduire, agrandir ou restaurer, et fermer, collés à son bord droit après les contrôles du panneau. Tous les panneaux de cette proposition les montrent. Règles écrites : 00-design-system.md §5 « Contrôles de la fenêtre ».</p>
+  <dl class="spec" style="margin-top:16px">
+    <dt>Bouton</dt><dd>46 × 48, sans bordure ni rayon, icône Lucide 16 px textSecondary : minus, square (agrandir), copy (restaurer), x.</dd>
+    <dt>Place</dt><dd>À 8 px du dernier contrôle du panneau ; la barre perd son padding droit, le bouton « Fermer » touche le coin de la fenêtre.</dd>
+    <dt>Survol, appui</dt><dd>Survol : fond hover, icône text. Appui : fond line. « Fermer » : fond negative, icône bg ; à l’appui, negative à 85 % sur bg. Changement immédiat.</dd>
+    <dt>Fenêtre inactive</dt><dd>Le titre et les icônes passent en textTertiary ; les survols restent les mêmes.</dd>
+    <dt>Zone de déplacement</dt><dd>Toute la partie vide de la barre de titre et la ligne de marque de la barre latérale (hachurées ci-dessous). Un double-clic agrandit ou restaure. Les contrôles, le fil d’Ariane et le titre ne déplacent pas la fenêtre.</dd>
+    <dt>Infobulles</dt><dd>« Réduire », « Agrandir » / « Restaurer », « Fermer » ; mêmes libellés pour l’accessibilité.</dd>
+    <dt>macOS</dt><dd>Les trois pastilles du système, dessinées par macOS, à 16 px du bord gauche dans la ligne de marque ; la marque les suit à 14 px ; pas de contrôles à droite.</dd>
+    <dt>Écrans d’accès</dt><dd>Sans barre de titre : les trois contrôles flottent dans le coin haut droit, et la bande des 48 px du haut déplace la fenêtre.</dd></dl>
+  <h2>États</h2>
+  ${STATES.map(([l, st]) => `<div class="mg-item"><div class="cap"><b>${l}</b></div><div class="mg-row">${['dark', 'light'].map(t => barStrip(t, st)).join('')}</div></div>`).join('')}
+  <h2>Zone de déplacement</h2>
+  <p>Hachures : ce qui déplace la fenêtre. Windows et Linux.</p>
+  ${['dark', 'light'].map(t => `<div class="mg-item">${winStrip(t)}</div>`).join('')}
+  <h2>macOS</h2>
+  ${['dark', 'light'].map(t => `<div class="mg-item">${macStrip(t)}</div>`).join('')}
+  <h2>Écrans d’accès</h2>
+  <div class="mg-row" style="margin-top:16px">${['dark', 'light'].map(authStrip).join('')}</div>
+</div>`;
+
 /* ════════ Viewer ════════ */
 const LIST = [['Système', [['system', 'Système de design'], ['logos', 'Logo'], ['textures', 'Texture'], ['splash', 'Écran d’installation']]], ['Accès', [['login', 'Connexion'], ['register', 'Inscription']]],
   ['Vue d’ensemble', [['dashboard', 'Tableau de bord'], ['accounts', 'Comptes'], ['account', 'Détail d’un compte'], ['transactions', 'Transactions']]],
   ['Gestion', [['imports', 'Imports'], ['categories', 'Catégories et règles'], ['subscriptions', 'Abonnements'], ['goals', 'Objectifs']]],
-  ['Patrimoine', [['loans', 'Crédits'], ['investments', 'Placements'], ['simulator', 'Simulateur'], ['networth', 'Synthèse']]], ['Réglages', [['settings', 'Paramètres']]]];
+  ['Patrimoine', [['loans', 'Crédits'], ['investments', 'Placements'], ['simulator', 'Simulateur'], ['networth', 'Synthèse']]], ['Réglages', [['settings', 'Paramètres']]],
+  ['Fenêtre', [['window', 'Barre de titre']]]];
 const S = Object.assign({ panel: 'dashboard', variant: 'A', theme: 'dark', accent: 'encre', bare: '' }, Object.fromEntries(new URLSearchParams(location.hash.slice(1))));
 S.accent = 'encre';
-const DOCS = ['system', 'logos', 'textures', 'splash'];
+const DOCS = ['system', 'logos', 'textures', 'splash', 'window'];
 S.logo = 'plan'; S.tex = 'tomettes';
 const $ = s => document.querySelector(s);
 function render() {
