@@ -8,6 +8,8 @@ exist: add it here first, then to `frontend/lib/core/theme/tokens.dart`.
   listed in §15.
 - **Mockup:** `docs/design/proposal_v5/index.html`, opened in a browser. Each spec names its
   screen as `#panel=<id>`. Every figure, name and date in the mockup is invented.
+  `docs/design/proposal_v6/index.html` repeats v5 and adds every modal (`#panel=m-frame` and
+  one page per feature) and the window controls (`#panel=window`).
 - **Reference frame:** 1440 × 900. French copy sizes every box; English uses the same geometry.
 - This file replaces `00-shared-design-block.md` (v1: iris gradient, navy ground, grain). The v1
   text is in the git history and no longer applies.
@@ -162,6 +164,21 @@ Mockup: any panel.
 - **Title bar**, 48 px, `bg`, bottom hairline, padding 0 24: optional parent crumb
   (13 `textTertiary`, « Comptes / », a link), title 14/600, spacer, contextual controls (28 px,
   8 px apart). **No subtitle, no descriptor.**
+- **Window controls** (Windows and Linux): the app draws its own; there is no native title
+  bar. Réduire, Agrandir / Restaurer, Fermer sit at the right end of the title bar, 8 px after
+  the last contextual control; the bar then has no right padding, so Fermer meets the window
+  corner. Each control is 46 × 48, no border, no radius, a 16 px Lucide icon in
+  `textSecondary` (`minus`, `square`, `copy` for restore, `x`). Hover: `hover` ground, icon
+  `text`. Pressed: `line` ground. Fermer on hover: `negative` ground, icon `bg`; pressed:
+  `negative` at 85 % over `bg`. While the window is inactive the title and the icons take
+  `textTertiary`. Tooltips and accessible labels « Réduire », « Agrandir », « Restaurer »,
+  « Fermer ».
+- **Drag area:** the empty stretch of the title bar and the sidebar's brand row. Double-click
+  maximizes or restores. Controls, crumb and title do not drag.
+- **macOS:** the system's three window buttons, drawn by macOS, 16 px from the left edge in
+  the sidebar's brand row; the brand row starts 14 px after them; no controls on the right.
+- **Auth screens** (no title bar): the three controls float in the top-right corner and the
+  top 48 px band drags the window.
 - **Content region:** padding 24 32, sections 24 apart. A panel marked "flush" has no padding
   and draws its own (tables and panes that run edge to edge).
 - No bottom bar. No texture or decoration on the window frame.
@@ -181,6 +198,7 @@ Disabled is 45 % opacity and not focusable.
 | **Button, primary** | Same geometry, `primary` ground, `onPrimary` label, no border. Hover: 8 % lighter in dark, 8 % darker in light. One per view. Loading: 14 px spinner replaces the icon, label stays, width does not change. |
 | **Button, ghost** | No border, no ground, `textSecondary`. Hover `hover`. For dismiss and tertiary actions. |
 | **Button, danger** | Secondary with `negative` label and a `negative` 45 % border. The solid `negative` fill exists only inside a destructive confirmation modal. |
+| **Button, destructive** | Primary geometry, `negative` ground, `bg` label, no border. Hover as primary. Only as the confirm action of a destructive confirmation modal. |
 | **Button, large** | 36 px, padding 0 14, centred label. Auth screens and modal-wide actions. |
 | **Text field** | 32 px, padding 0 10, radius 6, `field`, 1 px `lineStrong`. Label above, 12 `textSecondary`, 5 px gap. Helper below, 11 `textTertiary`. Error: `negative` border, helper in `negative`. Amounts right-aligned. Read-only: no border, value in `textSecondary` with a leading `lock` 14 px. A unit (€, %) sits inside the field. |
 | **Select** | Field look with a trailing `chevron-down` 14 px `textTertiary`. 28 px in a toolbar, 32 px in a form. Opens a popover as wide as the field. |
@@ -207,10 +225,47 @@ Disabled is 45 % opacity and not focusable.
 | **Banner** | For something the user can act on. 1 px `lineStrong`, radius 8, padding 8 12, `surface`; leading 14 px icon, 13 px text, actions on the right, optional ghost close. Neutral by default; the icon alone takes `warning` or `negative`. |
 | **Note** | For something to know. 14 px `textTertiary` icon + 12 `textSecondary` text, no box. |
 | **Popover / menu** | `surface`, 1 px `lineStrong`, radius 8, `shadow`, padding 4; items 28 px, radius 4, hover `hover`; a `check` 14 px on the selected item. |
-| **Modal** | `surface`, radius 12, `shadow`, on `scrim`; padding 24; title 16/600, optional lead 13 `textSecondary`; fields 14 px apart; footer right-aligned, secondary then primary, 8 px apart. Widths are given per panel. Only for a task that needs protected focus (a form, a confirmation). |
+| **Modal** | `surface`, radius 12, `shadow`, on `scrim`; padding 24; title 16/600, optional lead 13 `textSecondary`; fields 14 px apart; footer right-aligned, secondary then primary, 8 px apart. Widths are given per panel. Only for a task that needs protected focus (a form, a confirmation). Full recipe under « Modal » below. |
 | **Toast** | Bottom-right, 24 px from the edges; `surface`, 1 px `lineStrong`, radius 8, `shadow`, padding 10 14; status icon + 13 px text, optional second line 12 `textSecondary`; leaves after 4 s. |
 | **Inspector pane** | Right pane, 440 px, `rail`, left hairline, padding 24, blocks 16 apart separated by hairlines. Shows the row selected in the list on its left. Used by Transactions, Objectifs, Placements. |
 | **Drop target** | 1 px dashed `lineStrong`, radius 8, padding 18 20; icon, one line of text, one line of help, a secondary button. Drag-over: `accent` dashed border and `accentSoft` ground. |
+
+### Modal
+
+Mockup: `proposal_v6/index.html#panel=m-frame`, then one page per feature.
+
+- **Frame:** `surface`, radius 12, `shadow`, no border, centred on `scrim`; at most the window
+  height minus 24 px above and below.
+- **Header:** padding 24 24 14; title 16/600; optional lead 13 `textSecondary` 4 px under it.
+  No icon or glyph plate before the title, no close button.
+- **Body:** padding 0 24, fields 14 px apart, two-column grids with a 16 px gutter. Only the
+  body scrolls; while it does, a `line` hairline separates it from the header and the footer.
+- **Footer:** padding 24; actions right-aligned, secondary then primary, 8 px apart, wrapping
+  to a second line rather than overflowing. A tertiary ghost action (« Supprimer » in an edit
+  form) sits alone on the left. A modal without a body (a confirmation) keeps the footer 24 px
+  under the lead.
+- **Widths:** 420, 440, 480, 500, 520, 560, 600, 620; each panel spec names its modal's width.
+  A modal never widens for a label.
+- **Closing:** Escape and a click on the scrim act as the secondary action, except while a save
+  is running and on a modal with a single way out.
+- **Variants:**
+  - Confirmation: the title asks the question, the lead says what changes, the primary action
+    repeats the title's verb (« Archiver »). Reversible actions keep the ink primary.
+  - Destructive confirmation: the same, with the destructive button (§6) as the confirm
+    action. When the action needs typing a word, the button stays disabled until it matches.
+  - Single way out: something shown once (a recovery code); one primary action, Escape and
+    the scrim do nothing.
+  - Crop: lead, then the window the picture shows through, centred, radius 8, 1 px `line`:
+    320 × 320 for a square crop, the body's full width at the target ratio otherwise (44:19 for
+    a goal banner). Drag moves, wheel or pinch zooms from 1 to 5 ×. The avatar crop draws the
+    round avatar's circle and veils the corners.
+  - Zoom: the picture alone, 240 × 240, radius 12, `shadow`, on `scrim`; any click or Escape
+    closes it.
+- **States:** a refused field takes the field error of §6; a failed save shows a Banner with
+  a `negative` icon at the top of the body and keeps the input; a running save shows the
+  spinner in the primary button and disables the rest; a loading body shows its silhouette
+  (as §7 « Loading »); a body that cannot load shows a Banner with a `warning` icon and a
+  secondary « Réessayer ».
 
 ### States of a panel
 
@@ -402,7 +457,9 @@ The written values win.
 - Inspector panes are 380, 440 and 460 px wide in the mockup; the token is 440.
 - The mockup's charts use a 52 px gutter and basic hover titles; the frame here is 56 px with
   the hover card of §9.
-- Modals, toasts, popover menus other than the category picker, loading and error states are
-  specified here and not drawn.
+- Toasts, popover menus other than the category picker, and the loading and error states of
+  panels are specified here and not drawn. Modals and the window controls are drawn in
+  proposal v6, which also takes the tertiary text token and the 13, 12, 11 scale for its
+  controls.
 - The mockup's « Logos » and « Textures » pages keep the eight-mark and three-texture
   comparison code; only Plan and tomettes are retained.
