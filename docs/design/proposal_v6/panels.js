@@ -612,7 +612,7 @@ MD.ruleLogoCrop = () => modal(420, 'Recadrer le logo', '', cropBody('Faites glis
 MD.ruleLogoUrl = (err = false) => modal(420, 'Logo depuis une adresse', 'Collez l’adresse d’une image. Bastide la télécharge depuis cet ordinateur, puis vous la recadrez.', `
   ${F('Adresse de l’image', inp(err ? 'https://exemple.org/logo' : 'https://…', `mono ${err ? 'err' : 'ph focus'}`), err ? 'Cette adresse ne mène pas à une image.' : '', { err })}`, CANCEL + B('Télécharger', 'pri'));
 MD.packExport = () => modal(560, 'Exporter mes règles', '', `
-  ${note('triangle-alert', 'Relisez avant d’enregistrer. Un motif peut contenir des informations personnelles, comme le nom de votre propriétaire : « VIR SALAIRE DUPONT ».')}
+  ${note('triangle-alert', 'Relisez avant d’enregistrer. Un motif peut contenir des informations personnelles, comme le nom de votre propriétaire : « VIR LOYER DUPONT ».')}
   ${chk(true, 'Inclure les logos')}
   ${note('image', '3 logos inclus.')}
   <span class="sm t2">Contenu du fichier : 12 règles</span>
@@ -663,25 +663,25 @@ MD.seriesEdit = () => modal(480, 'Modifier le paiement récurrent', '', `
 const CHARGES = [[1, '12 mai 2026', 'PRLV SEPA STREAMCO', 'BNP Compte courant', '−15,49 €'], [1, '28 avr. 2026', 'CB STREAMCO PARIS', 'Revolut', '−15,49 €'], [0, '25 avr. 2026', 'CB LE PETIT BOUCHON LYON', 'Revolut', '−42,50 €'], [0, '19 avr. 2026', 'CB SNCF CONNECT', 'Revolut', '−86,40 €'], [0, '14 avr. 2026', 'CB CARREFOUR LYON 3', 'BNP Compte courant', '−63,18 €']];
 const chargeRows = rows => `<table class="mtable">${rows.map(r => `<tr><td style="width:24px"><span class="chk ${r[0] ? 'on' : ''}">${r[0] ? I('check') : ''}</span></td><td class="t2" style="width:96px">${r[1]}</td><td><div class="col" style="padding:4px 0"><span class="mono">${r[2]}</span>${r[3] ? `<span class="xs t3">${r[3]}</span>` : ''}</div></td><td class="n">${amt(r[4])}</td></tr>`).join('')}</table>`;
 MD.addCharges = () => modal(560, 'Ajouter à « Netflix »', 'Les opérations qui ne font partie d’aucune série, les plus proches en premier.', `
-  <span class="inp" style="height:28px;color:var(--tx3)">${I('search', 's14')}Rechercher un libellé</span>
+  <span class="inp ph">${I('search', 's14')}Rechercher un libellé</span>
   ${chargeRows(CHARGES)}
   <span class="ac sm">Afficher plus</span>`, CANCEL + B('Ajouter 2 opérations', 'pri'));
 const PREVIEW = [[1, '12 mai 2026', 'PRLV SEPA BASIC FIT', '', '−29,99 €'], [1, '12 avr. 2026', 'PRLV SEPA BASIC FIT', '', '−29,99 €'], [1, '12 mars 2026', 'PRLV SEPA BASIC FIT', '', '−29,99 €'], [0, '3 mars 2026', 'CB BASIC FIT LYON', '', '−9,90 €']];
-const markBody = (low = false) => `<span class="t2">Voici les opérations que Bastide regrouperait. Décochez celles qui n’en font pas partie.</span>
-  <div class="col" style="gap:4px"><div class="row"><span style="font-weight:600">Basic-Fit</span><span class="sp"></span><span class="st ${low ? 'warn' : 't2'}">${I(low ? 'triangle-alert' : 'check')}${low ? 'Confiance faible' : 'Confiance élevée'}</span></div>
+const MARK_LEAD = 'Voici les opérations que Bastide regrouperait. Décochez celles qui n’en font pas partie.';
+const markBody = (low = false) => `<div class="col" style="gap:4px"><div class="row"><span style="font-weight:600">Basic-Fit</span><span class="sp"></span><span class="st ${low ? 'warn' : 't2'}">${I(low ? 'triangle-alert' : 'check')}${low ? 'Confiance faible' : 'Confiance élevée'}</span></div>
   <span class="sm t2">${low ? '2 opérations trouvées · Moins de trois prélèvements · Aucun rythme régulier' : '3 opérations trouvées · Rythme mensuel reconnu · Montant stable'}</span></div>
   ${low ? bnr('triangle-alert', 'warn', 'Aucun rythme régulier n’a été trouvé. Vous pouvez tout de même enregistrer la série : elle sera irrégulière.') : ''}
   <div class="g2m"><div class="col" style="gap:4px"><span class="sm t2">Rythme proposé</span><span>${low ? 'Irrégulier' : 'Mensuel'}</span></div><div class="col" style="gap:4px"><span class="sm t2">Montant attendu</span><span>29,99 €</span></div></div>
   <div class="col" style="gap:4px">${chargeRows(low ? PREVIEW.slice(0, 2) : PREVIEW)}<span class="xs t3">${low ? '2 opérations cochées · du 12 avr. 2026 au 12 mai 2026' : '3 opérations cochées · du 12 mars 2026 au 12 mai 2026'}</span></div>
   <span class="row ac sm">${I('list-plus', 's14')}Ajouter à une série existante…</span>`;
-MD.markRecurring = () => modal(520, 'Marquer comme récurrent', '', markBody(), CANCEL + B('Enregistrer la série', 'pri'));
-MD.markRecurringLow = () => modal(520, 'Marquer comme récurrent', '', markBody(true), CANCEL + B('Enregistrer la série', 'pri'));
-MD.markRecurringExisting = () => modal(520, 'Marquer comme récurrent', '', `
-  <span class="t2">Cette dépense correspond à « Basic-Fit », déjà suivi dans vos abonnements. Cochez les opérations à y ajouter.</span>
-  ${chargeRows([[1, '3 mars 2026', 'CB BASIC FIT LYON', '', '−9,90 €']])}`, CANCEL + B('Voir la série') + B('Ajouter à cette série', 'pri'));
+MD.markRecurring = () => modal(520, 'Marquer comme récurrent', MARK_LEAD, markBody(), CANCEL + B('Enregistrer la série', 'pri'));
+MD.markRecurringLow = () => modal(520, 'Marquer comme récurrent', MARK_LEAD, markBody(true), CANCEL + B('Enregistrer la série', 'pri'));
+MD.markRecurringExisting = () => modal(520, 'Marquer comme récurrent', 'Cette dépense correspond à « Basic-Fit », déjà suivi dans vos abonnements. Cochez les opérations à y ajouter.', `
+  ${chargeRows([[1, '3 mars 2026', 'CB BASIC FIT LYON', '', '−9,90 €']])}
+  <span class="row ac sm">${I('arrow-up-right', 's14')}Voir la série « Basic-Fit »</span>`, CANCEL + B('Ajouter à cette série', 'pri'));
 MD.seriesPicker = () => modal(520, 'Marquer comme récurrent', 'Choisissez la série dont fait partie cette opération. Bastide retiendra son libellé pour les prochaines.', `
-  <span class="inp" style="height:28px;color:var(--tx3)">${I('search', 's14')}Rechercher une série</span>
-  <div class="col" style="gap:2px">${[['NF', 'Netflix', 'BNP Compte courant · Mensuel · 15,49 €', 0], ['BF', 'Basic-Fit', 'BNP Compte courant · Mensuel · 29,99 €', 1], ['ED', 'EDF', 'BNP Compte courant · Mensuel · 89,00 €', 0], ['AD', 'Adobe Creative Cloud', 'Revolut · Trimestriel · 71,99 €', 0]].map(r => `<div class="row" style="height:44px;padding:0 8px;border-radius:6px;${r[3] ? 'background:var(--ac-soft)' : ''}">${mg(r[0])}<div class="col"><span>${r[1]}</span><span class="xs t3">${r[2]}</span></div><span class="sp"></span>${r[3] ? I('check', 's14 ac') : ''}</div>`).join('')}</div>`, B('Retour à l’aperçu') + CANCEL + B('Confirmer', 'pri'));
+  <span class="inp ph">${I('search', 's14')}Rechercher une série</span>
+  <div class="col" style="gap:2px">${[['NF', 'Netflix', 'BNP Compte courant · Mensuel · 15,49 €', 0], ['BF', 'Basic-Fit', 'BNP Compte courant · Mensuel · 29,99 €', 1], ['ED', 'EDF', 'BNP Compte courant · Mensuel · 89,00 €', 0], ['AD', 'Adobe Creative Cloud', 'Revolut · Trimestriel · 71,99 €', 0]].map(r => `<div class="row" style="height:48px;padding:0 8px;border-radius:4px;${r[3] ? 'background:var(--ac-soft)' : ''}">${mg(r[0])}<div class="col"><span>${r[1]}</span><span class="xs ${r[3] ? 't2' : 't3'}">${r[2]}</span></div><span class="sp"></span>${r[3] ? I('check', 's14 ac') : ''}</div>`).join('')}</div>`, `<span class="lead-act">${B('Retour à l’aperçu', 'ghost', 'arrow-left')}</span>` + CANCEL + B('Confirmer', 'pri'));
 
 /* ── goals ── */
 MD.goalForm = () => modal(440, 'Nouvel objectif', '', `
@@ -711,16 +711,36 @@ MD.loanDelete = () => modal(440, 'Supprimer ce crédit ?', 'Il quittera le passi
 /* ── net worth ── */
 MD.property = () => modal(620, 'Nouveau bien', '', `
   <div class="g2m">
-  ${F('Libellé', inp('Studio Villeurbanne', 'focus'))}${F('Nature', selF('Locatif'))}
+  ${F('Libellé', inp('Studio Villeurbanne', 'focus'), '', { cls: 'span2' })}
   ${F('Adresse', inp('12 rue des Tilleuls, 69100 Villeurbanne'), '', { cls: 'span2' })}
+  ${F('Nature', selF('Locatif'))}${F('<span class="row">Quote-part détenue<span class="sp"></span><span class="t3">part : 72 500,00 €</span></span>', inp('50 %', 'r'))}
   ${F('Valeur déclarée', inp('145 000,00 €', 'r'))}${F('Date d’estimation', dateF('15/03/2026'))}
-  ${F('<span class="row">Quote-part détenue<span class="sp"></span><span class="t3">part : 72 500,00 €</span></span>', inp('50 %', 'r'))}<span></span>
   ${F('Prix d’acquisition', inp('128 000,00 €', 'r'))}${F('Date d’acquisition', dateF('01/09/2019'))}</div>`, CANCEL + B('Enregistrer', 'pri'));
 MD.revalue = () => modal(420, 'Nouvelle estimation', 'Studio Villeurbanne : 145 000,00 € estimés le 15 mars 2026. La nouvelle estimation remplace celle-ci.', `
   <div class="g2m">${F('Valeur déclarée', inp('150 000,00 €', 'r focus'))}${F('Date d’estimation', dateF('14/05/2026'))}</div>`, CANCEL + B('Enregistrer', 'pri'));
 MD.declared = () => modal(560, 'Historique déclaré', 'Le total de tous vos comptes à la fin d’un mois, pour la période avant vos imports. Un mois couvert par vos imports garde le chiffre importé.', `
   <div class="row" style="gap:16px;align-items:flex-end">${F('Mois', inp('MM/AAAA', 'ph'), '', { cls: 'm130' })}<label class="f" style="flex:1">Total des comptes${inp('0,00 €', 'r ph')}</label>${B('Enregistrer', 'pri')}</div>
-  <table class="mtable">${[['déc. 2024', '', '11 240,00 €'], ['nov. 2024', '', '10 980,00 €'], ['oct. 2024', 'Couvert par vos imports', '10 615,00 €'], ['sept. 2024', '', '10 402,00 €']].map(r => `<tr><td style="height:48px;width:100px">${r[0]}</td><td class="t2 sm">${r[1]}</td><td class="c">${r[2]}</td><td class="n" style="width:72px"><span class="row" style="gap:2px;justify-content:flex-end">${IB('pencil', 'Modifier')}${IB('trash-2', 'Supprimer')}</span></td></tr>`).join('')}</table>`, B('Fermer'));
+  <table class="mtable">${[['déc. 2024', '', '11 240,00 €'], ['nov. 2024', '', '10 980,00 €'], ['oct. 2024', 'Couvert par vos imports', '10 615,00 €'], ['sept. 2024', '', '10 402,00 €']].map(r => `<tr><td style="width:100px">${r[0]}</td><td class="t2 sm">${r[1]}</td><td class="c">${r[2]}</td><td class="n" style="width:72px"><span class="row" style="gap:2px;justify-content:flex-end">${IB('pencil', 'Modifier')}${IB('trash-2', 'Supprimer')}</span></td></tr>`).join('')}</table>`, B('Fermer'));
+
+/* ── investments ── */
+MD.investmentForm = (edit = false) => modal(440, edit ? 'Modifier le placement' : 'Nouveau placement', '', `
+  ${F('Nom', inp('PEA', edit ? '' : 'focus'))}
+  ${F('Enveloppe', selF('Plan d’épargne en actions (PEA)'))}
+  <div class="g2m">${F('Établissement', inp(`${mg('BD')}Boursorama`))}${F('Date d’ouverture', dateF('14/03/2023'))}</div>
+  ${edit ? '' : `<div class="g2m">${F('Valeur actuelle', inp('0,00 €', 'r ph'), 'Facultative')}${F('Versements déjà effectués', inp('0,00 €', 'r ph'), 'Facultatifs. Comptés comme un versement à l’ouverture.')}</div>`}`,
+  `${edit ? `<span class="lead-act">${B('Supprimer', 'ghost')}</span>` : ''}${CANCEL}${B('Enregistrer', 'pri')}`);
+MD.investmentValue = () => modal(440, 'Saisir la valeur', 'PEA', `
+  ${F('Valeur', inp('31 840,00 €', 'r focus'), 'Recopiez la valeur totale indiquée sur votre relevé.')}
+  ${F('Date', dateF('30/04/2026'))}
+  ${F('Note (optionnelle)', inp('Ex. Relevé trimestriel', 'ph'))}`, CANCEL + B('Enregistrer', 'pri'));
+MD.investmentMove = () => modal(440, 'Versement ou retrait', 'PEA', `
+  ${F('Montant', inp('500,00 €', 'r focus'), 'Un montant négatif est un retrait.')}
+  ${F('Date', dateF('05/04/2026'))}
+  ${F('Note (optionnelle)', inp('Ex. Versement mensuel', 'ph'))}
+  ${F('Transaction liée', selF('<span class="mono">VIR PEA BOURSORAMA</span><span class="t3" style="margin-left:6px">5 avr. 2026 · −500,00 €</span>'), 'Facultative. Les virements récents du même montant.')}`, CANCEL + B('Enregistrer', 'pri'));
+MD.investmentClose = () => modal(440, 'Clôturer ce placement ?', 'Il quitte la synthèse à la date de clôture et reste dans la liste, grisé. Son historique est conservé.', `
+  <div class="g2m">${F('Date de clôture', dateF('31/05/2026', 'focus'))}${F('Montant final reçu', inp('32 010,00 €', 'r'))}</div>`, CANCEL + B('Clôturer', 'pri'));
+MD.investmentDelete = () => modal(440, 'Supprimer « PEA » ?', 'Ses valeurs saisies et ses versements seront supprimés. Vos comptes ne sont pas modifiés.', '', CANCEL + B('Supprimer', 'dsolid'), { cls: 'nobody' });
 
 /* ── simulator ── */
 MD.saveScenario = () => modal(420, 'Enregistrer le scénario', '', `${F('Nom', inp('Lyon 3e, 320 k€', 'focus'))}`, CANCEL + B('Enregistrer', 'pri'));
@@ -736,15 +756,15 @@ P['m-frame'] = galleryM('Cadre commun des modales', 'Toutes les modales de l’a
   `<h2>Anatomie</h2><dl class="spec">
     <dt>Cadre</dt><dd>surface, rayon 12, ombre, sans bordure ; sur le voile (scrim), centré ; hauteur au plus celle de la fenêtre moins 24 px en haut et en bas.</dd>
     <dt>En-tête</dt><dd>padding 24 24 14 ; titre 16/600 ; chapeau facultatif 13 textSecondary, 4 px sous le titre. Pas d’icône devant le titre, pas de croix de fermeture.</dd>
-    <dt>Corps</dt><dd>padding 0 24 ; champs à 14 px les uns des autres ; seul le corps défile. Quand il défile, un filet line sépare l’en-tête et le pied.</dd>
-    <dt>Pied</dt><dd>padding 24 ; actions à droite, secondaire puis principale, 8 px d’écart ; une action tertiaire fantôme (« Supprimer ») se place seule à gauche.</dd>
+    <dt>Corps</dt><dd>padding 0 24 ; champs à 14 px les uns des autres ; deux champs côte à côte s’alignent sur leur saisie, une aide sous l’un ne décale pas l’autre. Seul le corps défile ; quand il défile, un filet line le sépare de l’en-tête et du pied, à 14 px de son contenu.</dd>
+    <dt>Pied</dt><dd>padding 24 ; actions à droite, secondaire puis principale, 8 px d’écart, passant à la ligne plutôt que de déborder ; une action tertiaire fantôme (« Supprimer », « Retour à l’aperçu ») se place seule à gauche. Une navigation n’est pas une action du pied : elle devient un lien dans le corps.</dd>
     <dt>Fermeture</dt><dd>Échap et un clic sur le voile valent « Annuler », sauf pendant un enregistrement et sur une modale sans issue (code de récupération affiché).</dd>
     <dt>Apparition</dt><dd>opacité, 120 ms ease-out ; aucune avec « réduire les animations ».</dd></dl>`,
   `<h2>Largeurs</h2><p class="t2" style="margin-bottom:12px">Huit largeurs, fixées par le contenu. La modale ne s’élargit jamais pour un libellé.</p>
-  <div class="col" style="gap:4px">${[[420, 'nom d’utilisateur, mot de passe, période, logo (recadrage, adresse), photo, scénario, nouvelle estimation, archivage d’un compte'], [440, 'objectif, allocation, suppression d’allocation, bannière, suppression d’un crédit'], [480, 'compte, carte, règle de prélèvement, code de récupération, catégorie et sa suppression, suppression d’une règle, paiement récurrent, refus et logos d’un pack'], [500, 'restauration, réinitialisation'], [520, 'règle, « Toujours catégoriser ainsi », marquer comme récurrent'], [560, 'packs de règles, ajout d’opérations à une série, historique déclaré'], [600, 'crédit'], [620, 'bien']].map(([w, u]) => `<div class="wbar"><span class="mono" style="width:44px">${w}</span><i style="width:${w / 2}px"></i><span class="sm t2">${u}</span></div>`).join('')}</div>`,
+  <div class="col" style="gap:4px">${[[420, 'nom d’utilisateur, mot de passe, période, logo (recadrage, adresse), photo, scénario, nouvelle estimation, archivage d’un compte'], [440, 'objectif, allocation, suppression d’allocation, bannière, suppression d’un crédit, placements (toutes leurs modales)'], [480, 'compte, carte, règle de prélèvement, code de récupération, catégorie et sa suppression, suppression d’une règle, paiement récurrent, refus et logos d’un pack'], [500, 'restauration, réinitialisation'], [520, 'règle, « Toujours catégoriser ainsi », marquer comme récurrent'], [560, 'packs de règles, ajout d’opérations à une série, historique déclaré'], [600, 'crédit'], [620, 'bien']].map(([w, u]) => `<div class="wbar"><span class="mono" style="width:44px">${w}</span><i style="width:${w / 2}px"></i><span class="sm t2">${u}</span></div>`).join('')}</div>`,
   `<h2>Variantes</h2>`,
   itemM('Formulaire', '480 · action tertiaire à gauche', MD.form(), 'Un formulaire d’édition porte « Supprimer » en bouton fantôme à gauche du pied ; sa confirmation est une modale destructive.'),
-  itemM('Confirmation', '420 · sans corps', MD.confirm(), 'Le titre pose la question, le chapeau dit ce qui change. L’action principale reprend le verbe du titre. Sans champ, le corps est vide et le pied suit le chapeau.'),
+  itemM('Confirmation', '420 · sans corps', MD.confirm(), 'Le titre pose la question, le chapeau dit ce qui change. L’action principale reprend le verbe du titre ou nomme son effet (« Remplacer mes données »). Sans champ, le corps est vide et le pied suit le chapeau à 24 px.'),
   itemM('Confirmation destructive', '480 · bouton plein negative', MD.destructive(), 'Seule place du bouton plein negative (libellé bg). Ni icône ni pastille devant le titre : le verbe et la couleur du bouton suffisent.'),
   itemM('Sans issue', '480 · une seule action', MD.recoveryShown(), 'Ce qui ne sera plus jamais affiché : un seul bouton, Échap et le voile ne ferment pas.'),
   itemM('Recadrage carré', '420 · fenêtre 320 × 320', MD.ruleLogoCrop(), 'Glisser pour déplacer, molette ou pincement pour zoomer (1 à 5 ×). Fenêtre rayon 8, filet line, centrée sous le chapeau.'),
@@ -794,7 +814,7 @@ P['m-rules'] = galleryM('Règles', 'Ticket #271 · spécification 08-categories-
   itemM('Logo depuis une adresse', '420', MD.ruleLogoUrl()),
   itemM('Logo depuis une adresse, refusé', '420', MD.ruleLogoUrl(true)),
   itemM('Agrandir le logo', `240 · frontend/lib/core/widgets/logo_zoom.dart`, MD.logoZoom()),
-  itemM('Exporter mes règles', `560 · ${SRC}rules/presentation/rule_pack_export_sheet.dart`, MD.packExport(), 'Le fichier lui-même, en Geist Mono dans un puits field qui défile (220 px au plus) : ce qui quitte la machine se lit avant d’être enregistré.'),
+  itemM('Exporter mes règles', `560 · ${SRC}rules/presentation/rule_pack_export_sheet.dart`, MD.packExport(), 'Le fichier lui-même, en Geist Mono dans un puits field de 168 px qui défile : ce qui quitte la machine se lit avant d’être enregistré.'),
   itemM('Importer un pack, aperçu', `560 · ${SRC}rules/presentation/rule_pack_import_sheet.dart`, MD.packImport(), 'Titre : le nom du pack. Les règles en table standard sans en-tête : logo ou monogramme, motif, catégorie.'),
   itemM('Importer un pack, logos en cours', '560', MD.packProgress()),
   itemM('Ce fichier n’a pas été accepté', '480', MD.packRefused()),
@@ -811,7 +831,7 @@ P['m-subscriptions'] = galleryM('Abonnements', 'Ticket #273 · spécifications 1
   itemM('Marquer comme récurrent, aperçu', `520 · ${SRC}recurring/presentation/mark_recurring_dialog.dart`, MD.markRecurring(), 'La confiance est un texte d’état, sans pastille ; les raisons suivent sur une ligne 12 textSecondary.'),
   itemM('Marquer comme récurrent, confiance faible', '520', MD.markRecurringLow()),
   itemM('Marquer comme récurrent, série existante', '520', MD.markRecurringExisting()),
-  itemM('Marquer comme récurrent, choisir une série', `520 · ${SRC}recurring/presentation/series_picker.dart`, MD.seriesPicker(), 'Trois actions : « Retour à l’aperçu » et « Annuler » en secondaire, « Confirmer » en principal. La série choisie prend accentSoft et une coche.'),
+  itemM('Marquer comme récurrent, choisir une série', `520 · ${SRC}recurring/presentation/series_picker.dart`, MD.seriesPicker(), '« Retour à l’aperçu » en action fantôme à gauche, puis « Annuler » et « Confirmer ». Lignes de 48 px, rayon 4 ; la série choisie prend accentSoft et une coche, sa ligne de détail passe en textSecondary.'),
 ]);
 P['m-goals'] = galleryM('Objectifs', 'Ticket #274 · spécification 11-goals.md.', () => [
   itemM('Nouvel objectif', `440 · ${SRC}goals/presentation/goal_form_modal.dart`, MD.goalForm()),
@@ -825,9 +845,17 @@ P['m-loans'] = galleryM('Crédits', 'Ticket #275 · spécification 12-credits.md
   itemM('Supprimer ce crédit ?', '440', MD.loanDelete()),
 ]);
 P['m-networth'] = galleryM('Synthèse', 'Ticket #276 · spécification 15-synthese.md.', () => [
-  itemM('Nouveau bien', `620 · ${SRC}properties/presentation/property_form_modal.dart`, MD.property(), 'La quote-part porte « part : {montant} » à droite de son libellé, mis à jour à la saisie.'),
+  itemM('Nouveau bien', `620 · ${SRC}properties/presentation/property_form_modal.dart`, MD.property(), 'Libellé et adresse sur toute la largeur, puis nature et quote-part, estimation, acquisition : aucune case vide. La quote-part porte « part : {montant} » à droite de son libellé, mis à jour à la saisie.'),
   itemM('Nouvelle estimation', '420', MD.revalue()),
-  itemM('Historique déclaré', `560 · ${SRC}networth/presentation/declared_balances_modal.dart`, MD.declared(), 'Une ligne de saisie, puis la liste en lignes de 48 px. Les boutons icône (modifier, supprimer) sont fantômes.'),
+  itemM('Historique déclaré', `560 · ${SRC}networth/presentation/declared_balances_modal.dart`, MD.declared(), 'Une modale qui édite une liste : la ligne de saisie porte l’action principale, la liste suit en lignes de 36 px, le pied n’a que « Fermer ». Les boutons icône (modifier, supprimer) sont fantômes.'),
+]);
+P['m-investments'] = galleryM('Placements', 'Spécification 17-placements.md : toutes les modales à 440 px.', () => [
+  itemM('Nouveau placement', '440', MD.investmentForm(), 'Les deux montants facultatifs n’existent qu’à la création ; « Versements déjà effectués » crée un seul versement à la date d’ouverture.'),
+  itemM('Modifier le placement', '440 · action tertiaire à gauche', MD.investmentForm(true)),
+  itemM('Saisir la valeur', '440', MD.investmentValue(), 'Le chapeau nomme le placement. La date vaut aujourd’hui par défaut et ne peut pas être dans le futur.'),
+  itemM('Versement ou retrait', '440', MD.investmentMove(), 'Transaction liée : les virements récents du même montant, libellé en Geist Mono.'),
+  itemM('Clôturer ce placement ?', '440 · principal encre', MD.investmentClose(), 'Sans perte : l’historique reste et le placement reste listé, donc le principal reste encre.'),
+  itemM('Supprimer « PEA » ?', '440 · bouton plein negative', MD.investmentDelete()),
 ]);
 P['m-simulator'] = galleryM('Simulateur', 'Ticket #277 · spécification 14-simulateur.md. « Déclarer un revenu » ouvre Paramètres › Préférences, pas une modale (09-settings.md).', () => [
   itemM('Enregistrer le scénario', `420 · ${SRC}simulator/presentation/scenario_list.dart`, MD.saveScenario()),
@@ -873,10 +901,10 @@ const LIST = [['Système', [['system', 'Système de design'], ['logos', 'Logo'],
   ['Gestion', [['imports', 'Imports'], ['categories', 'Catégories et règles'], ['subscriptions', 'Abonnements'], ['goals', 'Objectifs']]],
   ['Patrimoine', [['loans', 'Crédits'], ['investments', 'Placements'], ['simulator', 'Simulateur'], ['networth', 'Synthèse']]], ['Réglages', [['settings', 'Paramètres']]],
   ['Fenêtre', [['window', 'Barre de titre']]],
-  ['Modales', [['m-frame', 'Cadre commun'], ['m-context', 'En situation'], ['m-accounts', 'Comptes'], ['m-profile', 'Profil'], ['m-data', 'Paramètres, données'], ['m-categories', 'Catégories'], ['m-rules', 'Règles'], ['m-transactions', 'Transactions'], ['m-subscriptions', 'Abonnements'], ['m-goals', 'Objectifs'], ['m-loans', 'Crédits'], ['m-networth', 'Synthèse'], ['m-simulator', 'Simulateur']]]];
+  ['Modales', [['m-frame', 'Cadre commun'], ['m-context', 'En situation'], ['m-accounts', 'Comptes'], ['m-profile', 'Profil'], ['m-data', 'Paramètres, données'], ['m-categories', 'Catégories'], ['m-rules', 'Règles'], ['m-transactions', 'Transactions'], ['m-subscriptions', 'Abonnements'], ['m-goals', 'Objectifs'], ['m-loans', 'Crédits'], ['m-investments', 'Placements'], ['m-networth', 'Synthèse'], ['m-simulator', 'Simulateur']]]];
 const S = Object.assign({ panel: 'dashboard', variant: 'A', theme: 'dark', accent: 'encre', bare: '' }, Object.fromEntries(new URLSearchParams(location.hash.slice(1))));
 S.accent = 'encre';
-const DOCS = ['system', 'logos', 'textures', 'splash', 'window', 'm-frame', 'm-accounts', 'm-profile', 'm-data', 'm-categories', 'm-rules', 'm-transactions', 'm-subscriptions', 'm-goals', 'm-loans', 'm-networth', 'm-simulator'];
+const DOCS = ['system', 'logos', 'textures', 'splash', 'window', 'm-frame', 'm-accounts', 'm-profile', 'm-data', 'm-categories', 'm-rules', 'm-transactions', 'm-subscriptions', 'm-goals', 'm-loans', 'm-investments', 'm-networth', 'm-simulator'];
 S.logo = 'plan'; S.tex = 'tomettes';
 const $ = s => document.querySelector(s);
 function render() {

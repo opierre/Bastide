@@ -53,7 +53,7 @@ Flush panel, two panes: **category tree** (340 px, right hairline, padding 16 12
 Title « Nouvelle règle » / « Modifier la règle ». One row: Champ · Condition · Priorité. Then
 Motif (Geist Mono) · Catégorie cible (select) · a Note « Correspond à 7 opérations existantes,
 dont « CB CARREFOUR PARIS 15 » du 14 mai 2026. » · Logo (22 px preview, secondary « Choisir une
-image », ghost « Retirer »; on a new rule only the helper « Enregistrez la règle pour lui
+image » (« Remplacer… » once a logo is set) and « Depuis une adresse… », ghost « Retirer »; on a new rule only the helper « Enregistrez la règle pour lui
 ajouter un logo. ») · toggle « Active ». Footer: ghost « Supprimer » on the left (edit only,
 confirmed) · « Annuler » · « Enregistrer ».
 
@@ -67,6 +67,18 @@ modal's lead repeats the parent's category label.
 The import and export sheets keep their content and become modals (560 px) built from the
 standard table, checkbox and note components. The built-in pack button hides once that pack is
 imported.
+
+### Other modals (`00` §7)
+- **Delete a rule** (480 px), destructive confirmation: lead « Les opérations qu’elle a déjà
+  classées gardent leur catégorie. »
+- **Delete a category** (480 px), destructive confirmation; the lead names the category and
+  says its transactions become uncategorised.
+- **Logo crop** (420 px), square crop 320 × 320; footer « Annuler » · « Utiliser ce logo ».
+- **Logo from an address** (420 px): lead « Collez l’adresse d’une image. Bastide la
+  télécharge depuis cet ordinateur, puis vous la recadrez. »; Adresse de l’image (Geist Mono);
+  footer « Annuler » · « Télécharger ».
+- **Logo zoom** (240 px), the zoom variant.
+- **Pack refused** and **logos not added** (480 px), acknowledgements with a single « Fermer ».
 
 ## States
 | State | What shows |

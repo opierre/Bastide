@@ -109,7 +109,7 @@ never text colour. The net-worth composition bar reuses the slots in order for i
 ## 3. Typography
 
 One family: **Geist** (400, 500, 600). **Geist Mono** (400) only for raw bank labels, rule
-patterns, file names, file paths and URLs. Space Grotesk is removed.
+patterns, file names, file paths, URLs and codes to copy (a recovery code). Space Grotesk is removed.
 
 | Size / weight | Tracking | Use |
 |---|---|---|
@@ -122,7 +122,7 @@ patterns, file names, file paths and URLs. Space Grotesk is removed.
 | 13 / 500 | 0 | Emphasised cell, button label, active nav item, active tab |
 | 13 / 600 | 0 | Section heading inside a panel |
 | 12 / 400 | 0 | Field labels, column headers, captions, group labels |
-| 11 / 400 | 0 | Notes, chart axis labels, meter labels. Nothing smaller. |
+| 11 / 400 | 0 | Notes, chart axis labels, meter labels. Nothing smaller, except a monogram's initials (10/600, §6). |
 
 Line height 1.45 for text, 1.1 for figures. No uppercase labels, no letter-spaced labels.
 All numerals tabular.
@@ -202,7 +202,7 @@ Disabled is 45 % opacity and not focusable.
 | **Button, large** | 36 px, padding 0 14, centred label. Auth screens and modal-wide actions. |
 | **Text field** | 32 px, padding 0 10, radius 6, `field`, 1 px `lineStrong`. Label above, 12 `textSecondary`, 5 px gap. Helper below, 11 `textTertiary`. Error: `negative` border, helper in `negative`. Amounts right-aligned. Read-only: no border, value in `textSecondary` with a leading `lock` 14 px. A unit (€, %) sits inside the field. |
 | **Select** | Field look with a trailing `chevron-down` 14 px `textTertiary`. 28 px in a toolbar, 32 px in a form. Opens a popover as wide as the field. |
-| **Search field** | 240 px × 28 px, `search` icon, placeholder « Rechercher », `Ctrl K` hint in a 1 px `lineStrong` box, radius 4, 11 px. |
+| **Search field** | 240 px × 28 px, `search` icon, placeholder « Rechercher », `Ctrl K` hint in a 1 px `lineStrong` box, radius 4, 11 px. Inside a modal: a full-width 32 px form field with the leading `search` icon and no hint. |
 | **Segmented** | 1 px `lineStrong`, radius 6, padding 2, gap 2, `field` ground; segment padding 2 10, radius 4, 13 `textSecondary`; selected: `hover` ground, `text`, 500. |
 | **Tabs** | Row on a `line` hairline; tab padding 10 0, 20 px apart, 13 `textSecondary`; selected: `text` 500 and a 2 px `text` underline. A count follows the label in `textTertiary`. |
 | **Toggle** | 28 × 16, radius 8, `lineStrong` off, `accent` on; 12 px knob in `bg`. |
@@ -238,23 +238,34 @@ Mockup: `proposal_v6/index.html#panel=m-frame`, then one page per feature.
   height minus 24 px above and below.
 - **Header:** padding 24 24 14; title 16/600; optional lead 13 `textSecondary` 4 px under it.
   No icon or glyph plate before the title, no close button.
-- **Body:** padding 0 24, fields 14 px apart, two-column grids with a 16 px gutter. Only the
-  body scrolls; while it does, a `line` hairline separates it from the header and the footer.
+- **Body:** padding 0 24, fields 14 px apart, two-column grids with a 16 px gutter. Fields in
+  a row align by their input: a helper under one does not push its neighbour down. A grid
+  leaves no empty cell before its last row. Only the body scrolls; while it does, a `line`
+  hairline separates it from the header and the footer, 14 px from the body's content. An
+  introductory sentence is the header's lead, not the body's first line. List rows inside a
+  body follow §4: 36 px, 48 px when they have two lines, radius 4 when selectable.
 - **Footer:** padding 24; actions right-aligned, secondary then primary, 8 px apart, wrapping
   to a second line rather than overflowing. A tertiary ghost action (« Supprimer » in an edit
-  form) sits alone on the left. A modal without a body (a confirmation) keeps the footer 24 px
-  under the lead.
+  form, « Retour à l’aperçu » in a second step) sits alone on the left. Navigation to another
+  place is not a footer action: it is a link in the body. The secondary reads « Annuler »,
+  or « Plus tard » when Bastide proposed the task itself (the settlement rule). A modal
+  without a body (a confirmation) keeps the footer 24 px under the lead.
 - **Widths:** 420, 440, 480, 500, 520, 560, 600, 620; each panel spec names its modal's width.
   A modal never widens for a label.
 - **Closing:** Escape and a click on the scrim act as the secondary action, except while a save
   is running and on a modal with a single way out.
 - **Variants:**
   - Confirmation: the title asks the question, the lead says what changes, the primary action
-    repeats the title's verb (« Archiver »). Reversible actions keep the ink primary.
+    repeats the title's verb (« Archiver ») or names its effect when the verb alone would be
+    vague (« Remplacer mes données » for a restore). Reversible actions keep the ink primary.
   - Destructive confirmation: the same, with the destructive button (§6) as the confirm
     action. When the action needs typing a word, the button stays disabled until it matches.
   - Single way out: something shown once (a recovery code); one primary action, Escape and
     the scrim do nothing.
+  - Acknowledgement: a result to read (a refused pack, logos not added); body only, one
+    primary « Fermer »; Escape and the scrim close it.
+  - List editor: a modal that edits a list in place (Historique déclaré); the entry row in the
+    body carries the primary action, the footer has a single secondary « Fermer ».
   - Crop: lead, then the window the picture shows through, centred, radius 8, 1 px `line`:
     320 × 320 for a square crop, the body's full width at the target ratio otherwise (44:19 for
     a goal banner). Drag moves, wheel or pinch zooms from 1 to 5 ×. The avatar crop draws the

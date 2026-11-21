@@ -28,10 +28,10 @@ first). No card, no tinted callout, no coloured border.
 | | Nom d’utilisateur · « Vous pouvez vous connecter avec ce nom ou avec votre e-mail. » | The name + secondary « Modifier » (modal 420 px). |
 | | Adresse e-mail · « Sert uniquement à vous connecter. Bastide n’envoie aucun message. » | The address, `textSecondary`. |
 | Sécurité | Mot de passe · « Au moins 12 caractères. Il protège l’accès à vos données sur cet ordinateur. » | Secondary « Changer le mot de passe » (modal 420 px: current, new, confirm). |
-| | Code de récupération · « Permet de réinitialiser votre mot de passe si vous l’oubliez. En générer un nouveau invalide l’ancien. » | Secondary « Générer un nouveau code » (modal asks the password, then shows the code once). |
+| | Code de récupération · « Permet de réinitialiser votre mot de passe si vous l’oubliez. En générer un nouveau invalide l’ancien. » | Secondary « Générer un nouveau code » (modal 480 px: asks the password, then shows the code once, `00` §7 single way out). |
 | Session | Se déconnecter · « Vos données restent sur cet ordinateur, protégées par votre mot de passe. » | Secondary « Se déconnecter » (`log-out`). |
 
-Avatar picking opens the existing square crop modal.
+Avatar picking opens the crop modal (420 px): the square crop with the avatar's circle drawn and the corners veiled (`00` §7).
 
 Neither row shows a date: nothing records when the password or the code last changed.
 
@@ -114,7 +114,7 @@ AI off, export in progress (button spinner, « Préparation de l’archive… »
 - Reset covers the current profile only, runs in one transaction, re-seeds the system
   categories and keeps profile, preferences and AI settings.
 - The update check is opt-in and sends nothing but the version request.
-- The solid `negative` button appears only inside the two destructive confirmations.
+- In this panel the solid `negative` button appears only inside the two destructive confirmations (`00` §6 « Button, destructive »).
 
 ## Copy
 Delete `navSettingsSubtitle`. `settingsAiSubtitle`, `settingsAiModelUnavailable`,
