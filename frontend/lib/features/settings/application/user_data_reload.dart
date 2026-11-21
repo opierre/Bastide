@@ -8,6 +8,7 @@ import '../../goals/application/goals_controller.dart';
 import '../../imports/application/imports_controller.dart';
 import '../../mortgages/application/mortgages_controller.dart';
 import '../../networth/application/networth_controller.dart';
+import '../../placements/application/placements_controller.dart';
 import '../../properties/application/properties_controller.dart';
 import '../../recurring/application/subscriptions_controller.dart';
 import '../../rules/application/rules_controller.dart';
@@ -32,6 +33,8 @@ void reloadUserData(Ref ref) {
     ..invalidate(seriesDetailProvider)
     ..invalidate(goalsControllerProvider)
     ..invalidate(goalAllocationsProvider)
+    ..invalidate(placementsControllerProvider)
+    ..invalidate(placementDetailProvider)
     ..invalidate(importsControllerProvider)
     ..invalidate(networthControllerProvider)
     ..invalidate(declaredBalancesControllerProvider)

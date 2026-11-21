@@ -5380,4 +5380,461 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get ruleErrorPackImportRunNotFound =>
       'Le suivi de cet import a été perdu. Vérifiez vos règles.';
+
+  @override
+  String get placementsAdd => 'Nouveau placement';
+
+  @override
+  String get placementsSummaryValue => 'Valeur déclarée';
+
+  @override
+  String placementsSummaryCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count placements',
+      one: '1 placement',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String placementsSummaryCaption(int count, String date) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count placements',
+      one: '1 placement',
+    );
+    return '$_temp0 · dernière valeur saisie le $date';
+  }
+
+  @override
+  String get placementsSummaryNetPayments => 'Versements nets';
+
+  @override
+  String get placementsSummaryNetPaymentsCaption => 'versé − retiré';
+
+  @override
+  String get placementsSummaryGain => 'Plus-value latente';
+
+  @override
+  String placementsSummaryGainShare(String percent) {
+    return '$percent des versements';
+  }
+
+  @override
+  String get placementsColumnPlacement => 'Placement';
+
+  @override
+  String get placementsColumnNetPayments => 'Versements nets';
+
+  @override
+  String get placementsColumnValue => 'Valeur déclarée';
+
+  @override
+  String get placementsColumnGain => 'Plus-value';
+
+  @override
+  String get placementsColumnValuedOn => 'Valeur au';
+
+  @override
+  String placementsRowSubtitle(
+    String envelope,
+    String institution,
+    String month,
+  ) {
+    return '$envelope · $institution · ouvert en $month';
+  }
+
+  @override
+  String placementsStaleBanner(String name) {
+    return 'La valeur du $name date de plus de quatre mois.';
+  }
+
+  @override
+  String get placementsStaleAction => 'Mettre à jour la valeur';
+
+  @override
+  String placementsStaleMore(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count autres',
+      one: '1 autre',
+    );
+    return 'et $_temp0';
+  }
+
+  @override
+  String get placementsNote =>
+      'Bastide ne se connecte à aucun courtier et ne télécharge aucun cours. La valeur est celle que vous recopiez depuis votre relevé. La plus-value est calculée, jamais enregistrée.';
+
+  @override
+  String get placementsNoValue => '—';
+
+  @override
+  String get placementsDismissBanner => 'Fermer';
+
+  @override
+  String get placementsLoadFailed =>
+      'Les placements n’ont pas pu être chargés. Rien n’a été modifié.';
+
+  @override
+  String get placementsRetry => 'Réessayer';
+
+  @override
+  String placementOpenedOn(String institution, String date) {
+    return '$institution · ouvert le $date';
+  }
+
+  @override
+  String placementClosedOn(String institution, String date) {
+    return '$institution · clôturé le $date';
+  }
+
+  @override
+  String get placementMenuTooltip => 'Actions du placement';
+
+  @override
+  String get placementMenuEdit => 'Modifier';
+
+  @override
+  String get placementMenuClose => 'Clôturer';
+
+  @override
+  String get placementMenuReopen => 'Rouvrir';
+
+  @override
+  String get placementMenuDelete => 'Supprimer';
+
+  @override
+  String placementValueAt(String date) {
+    return 'au $date';
+  }
+
+  @override
+  String get placementEnterValue => 'Saisir la valeur';
+
+  @override
+  String get placementAddMovement => 'Versement ou retrait';
+
+  @override
+  String get placementLegendValue => 'Valeur déclarée';
+
+  @override
+  String get placementLegendNetPayments => 'Versements nets';
+
+  @override
+  String get placementNoValueNote =>
+      'Saisissez une valeur pour voir la plus-value.';
+
+  @override
+  String placementChartValue(String amount) {
+    return 'Valeur $amount';
+  }
+
+  @override
+  String placementChartNetPayments(String amount) {
+    return 'Versements nets $amount';
+  }
+
+  @override
+  String placementChartLabel(String name) {
+    return 'Valeur déclarée et versements nets de $name';
+  }
+
+  @override
+  String get placementCeilingLabel => 'Plafond de versement';
+
+  @override
+  String placementCeilingOf(String ceiling) {
+    return 'sur $ceiling';
+  }
+
+  @override
+  String get placementCeilingReached => 'Plafond de versement atteint.';
+
+  @override
+  String get placementAgeLabel => 'Ancienneté';
+
+  @override
+  String placementAgeYears(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count ans',
+      one: '1 an',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String placementAgeMonths(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count mois',
+      one: '1 mois',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String placementAgeBoth(String years, String months) {
+    return '$years $months';
+  }
+
+  @override
+  String placementMilestoneMark(int years, String month) {
+    return 'repère $years ans · $month';
+  }
+
+  @override
+  String get placementMilestonePea =>
+      'Avant 5 ans, un retrait clôt en principe le plan. Lecture indicative, qui ne vaut pas conseil fiscal.';
+
+  @override
+  String get placementMilestoneLifeInsurance =>
+      'Après 8 ans, la fiscalité des retraits s’allège. Lecture indicative, qui ne vaut pas conseil fiscal.';
+
+  @override
+  String get placementMovementsTitle => 'Mouvements';
+
+  @override
+  String placementMovementsLinked(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count rapprochés avec vos transactions',
+      one: '1 rapproché avec vos transactions',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get placementMovementsEmpty => 'Aucun mouvement.';
+
+  @override
+  String get placementMovementsFailed => 'L’historique n’a pas pu être chargé.';
+
+  @override
+  String get placementEntryPayment => 'Versement';
+
+  @override
+  String get placementEntryWithdrawal => 'Retrait';
+
+  @override
+  String get placementEntryValuation => 'Valeur saisie';
+
+  @override
+  String placementEntryWithNote(String label, String note) {
+    return '$label · $note';
+  }
+
+  @override
+  String get placementEnvelopePea => 'PEA';
+
+  @override
+  String get placementEnvelopePeaPme => 'PEA-PME';
+
+  @override
+  String get placementEnvelopeLifeInsurance => 'Assurance vie';
+
+  @override
+  String get placementEnvelopePer => 'PER';
+
+  @override
+  String get placementEnvelopePee => 'PEE';
+
+  @override
+  String get placementEnvelopeSecuritiesAccount => 'Compte-titres';
+
+  @override
+  String get placementEnvelopeOther => 'Autre';
+
+  @override
+  String get placementFormCreateTitle => 'Nouveau placement';
+
+  @override
+  String get placementFormEditTitle => 'Modifier le placement';
+
+  @override
+  String get placementFormName => 'Nom';
+
+  @override
+  String get placementFormNameRequired => 'Saisissez un nom.';
+
+  @override
+  String get placementFormEnvelope => 'Enveloppe';
+
+  @override
+  String get placementFormInstitution => 'Établissement';
+
+  @override
+  String get placementFormInstitutionRequired => 'Saisissez l’établissement.';
+
+  @override
+  String get placementFormOpenedOn => 'Date d’ouverture';
+
+  @override
+  String get placementFormCurrentValue => 'Valeur actuelle';
+
+  @override
+  String get placementFormCurrentValueHelp =>
+      'Facultatif. Saisie à la date du jour.';
+
+  @override
+  String get placementFormInitialPayments => 'Versements déjà effectués';
+
+  @override
+  String get placementFormInitialPaymentsHelp =>
+      'Facultatif. Un versement à la date d’ouverture.';
+
+  @override
+  String get placementFormDateInvalid =>
+      'Saisissez une date passée ou celle du jour.';
+
+  @override
+  String get placementFormAmountInvalid => 'Saisissez un montant positif.';
+
+  @override
+  String get placementFormDatePick => 'Choisir une date';
+
+  @override
+  String get placementFormCancel => 'Annuler';
+
+  @override
+  String get placementFormSave => 'Enregistrer';
+
+  @override
+  String get placementFormDelete => 'Supprimer';
+
+  @override
+  String get placementValuationEditTitle => 'Modifier la valeur';
+
+  @override
+  String get placementValuationValue => 'Valeur';
+
+  @override
+  String get placementValuationHelp =>
+      'Recopiez la valeur totale indiquée sur votre relevé.';
+
+  @override
+  String get placementValuationValueInvalid => 'Saisissez une valeur.';
+
+  @override
+  String get placementFieldDate => 'Date';
+
+  @override
+  String get placementFieldNote => 'Note';
+
+  @override
+  String get placementMovementEditTitle => 'Modifier le mouvement';
+
+  @override
+  String get placementMovementAmount => 'Montant';
+
+  @override
+  String get placementMovementAmountHelp =>
+      'Un montant négatif est un retrait.';
+
+  @override
+  String get placementMovementAmountInvalid =>
+      'Saisissez un montant différent de zéro.';
+
+  @override
+  String get placementMovementLink => 'Transaction liée';
+
+  @override
+  String get placementMovementLinkNone => 'Aucune';
+
+  @override
+  String placementMovementLinkItem(String date, String description) {
+    return '$date · $description';
+  }
+
+  @override
+  String get placementCloseTitle => 'Clôturer le placement';
+
+  @override
+  String placementCloseLead(String name) {
+    return '$name quitte la synthèse à cette date et reste listé.';
+  }
+
+  @override
+  String get placementCloseDate => 'Date de clôture';
+
+  @override
+  String get placementCloseAmount => 'Montant final reçu';
+
+  @override
+  String get placementCloseAmountInvalid =>
+      'Saisissez un montant, zéro si rien n’a été reçu.';
+
+  @override
+  String get placementCloseSubmit => 'Clôturer';
+
+  @override
+  String get placementDeleteTitle => 'Supprimer le placement';
+
+  @override
+  String placementDeleteLead(String name) {
+    return '$name et tout son historique seront supprimés. Pour le garder, clôturez-le.';
+  }
+
+  @override
+  String get placementDeleteSubmit => 'Supprimer';
+
+  @override
+  String get placementErrorNotFound =>
+      'Ce placement n’existe plus. Rien n’a été modifié.';
+
+  @override
+  String get placementErrorMovementNotFound =>
+      'Ce mouvement n’existe plus. Rien n’a été modifié.';
+
+  @override
+  String get placementErrorValuationNotFound =>
+      'Cette valeur n’existe plus. Rien n’a été modifié.';
+
+  @override
+  String get placementErrorDateInFuture =>
+      'La date est dans le futur. Rien n’a été modifié.';
+
+  @override
+  String get placementErrorDateBeforeOpening =>
+      'La date précède l’ouverture du placement. Rien n’a été modifié.';
+
+  @override
+  String get placementErrorDateAfterClosing =>
+      'La date suit la clôture du placement. Rien n’a été modifié.';
+
+  @override
+  String get placementErrorAlreadyClosed =>
+      'Ce placement est déjà clôturé. Rien n’a été modifié.';
+
+  @override
+  String get placementErrorNotClosed =>
+      'Ce placement n’est pas clôturé. Rien n’a été modifié.';
+
+  @override
+  String get placementErrorValuationExists =>
+      'Une valeur est déjà saisie à cette date. Modifiez-la depuis les mouvements.';
+
+  @override
+  String get placementErrorLinkNotFound =>
+      'Cette transaction n’existe plus. Rien n’a été modifié.';
+
+  @override
+  String get placementErrorAlreadyLinked =>
+      'Cette transaction est déjà liée à un autre mouvement. Rien n’a été modifié.';
+
+  @override
+  String get placementErrorValidation =>
+      'Un champ n’est pas valide. Rien n’a été modifié.';
+
+  @override
+  String get placementErrorGeneric =>
+      'L’opération a échoué. Rien n’a été modifié. Réessayez.';
 }

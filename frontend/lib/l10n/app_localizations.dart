@@ -8497,6 +8497,706 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Le suivi de cet import a été perdu. Vérifiez vos règles.'**
   String get ruleErrorPackImportRunNotFound;
+
+  /// Title-bar primary button and empty-state button of the investments panel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Nouveau placement'**
+  String get placementsAdd;
+
+  /// Label of the summary line's lead figure: the sum of the latest declared values.
+  ///
+  /// In fr, this message translates to:
+  /// **'Valeur déclarée'**
+  String get placementsSummaryValue;
+
+  /// Caption under the declared value when no value has been entered yet.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, =1{1 placement} other{{count} placements}}'**
+  String placementsSummaryCount(int count);
+
+  /// Caption under the declared value: open investments and the most recent value date.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, =1{1 placement} other{{count} placements}} · dernière valeur saisie le {date}'**
+  String placementsSummaryCaption(int count, String date);
+
+  /// Label of the summary line's net payments figure.
+  ///
+  /// In fr, this message translates to:
+  /// **'Versements nets'**
+  String get placementsSummaryNetPayments;
+
+  /// Caption under the net payments figure, explaining the calculation.
+  ///
+  /// In fr, this message translates to:
+  /// **'versé − retiré'**
+  String get placementsSummaryNetPaymentsCaption;
+
+  /// Label of the summary line's unrealised gain figure.
+  ///
+  /// In fr, this message translates to:
+  /// **'Plus-value latente'**
+  String get placementsSummaryGain;
+
+  /// Trend line under the unrealised gain: the gain as a share of net payments.
+  ///
+  /// In fr, this message translates to:
+  /// **'{percent} des versements'**
+  String placementsSummaryGainShare(String percent);
+
+  /// Investments table column header.
+  ///
+  /// In fr, this message translates to:
+  /// **'Placement'**
+  String get placementsColumnPlacement;
+
+  /// Investments table column header.
+  ///
+  /// In fr, this message translates to:
+  /// **'Versements nets'**
+  String get placementsColumnNetPayments;
+
+  /// Investments table column header.
+  ///
+  /// In fr, this message translates to:
+  /// **'Valeur déclarée'**
+  String get placementsColumnValue;
+
+  /// Investments table column header.
+  ///
+  /// In fr, this message translates to:
+  /// **'Plus-value'**
+  String get placementsColumnGain;
+
+  /// Investments table column header: the date of the latest declared value.
+  ///
+  /// In fr, this message translates to:
+  /// **'Valeur au'**
+  String get placementsColumnValuedOn;
+
+  /// Second line of an investment row.
+  ///
+  /// In fr, this message translates to:
+  /// **'{envelope} · {institution} · ouvert en {month}'**
+  String placementsRowSubtitle(
+    String envelope,
+    String institution,
+    String month,
+  );
+
+  /// Banner for an investment whose latest declared value is stale.
+  ///
+  /// In fr, this message translates to:
+  /// **'La valeur du {name} date de plus de quatre mois.'**
+  String placementsStaleBanner(String name);
+
+  /// Action of the stale-value banner.
+  ///
+  /// In fr, this message translates to:
+  /// **'Mettre à jour la valeur'**
+  String get placementsStaleAction;
+
+  /// Under the stale-value banners when more than three investments are stale.
+  ///
+  /// In fr, this message translates to:
+  /// **'et {count, plural, =1{1 autre} other{{count} autres}}'**
+  String placementsStaleMore(int count);
+
+  /// Note at the bottom of the investments list.
+  ///
+  /// In fr, this message translates to:
+  /// **'Bastide ne se connecte à aucun courtier et ne télécharge aucun cours. La valeur est celle que vous recopiez depuis votre relevé. La plus-value est calculée, jamais enregistrée.'**
+  String get placementsNote;
+
+  /// Placeholder for a missing value or gain.
+  ///
+  /// In fr, this message translates to:
+  /// **'—'**
+  String get placementsNoValue;
+
+  /// Tooltip of the close button of an investments banner.
+  ///
+  /// In fr, this message translates to:
+  /// **'Fermer'**
+  String get placementsDismissBanner;
+
+  /// Error state of the investments panel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Les placements n’ont pas pu être chargés. Rien n’a été modifié.'**
+  String get placementsLoadFailed;
+
+  /// Retry button of the investments error state.
+  ///
+  /// In fr, this message translates to:
+  /// **'Réessayer'**
+  String get placementsRetry;
+
+  /// Inspector subtitle: the institution and the opening date.
+  ///
+  /// In fr, this message translates to:
+  /// **'{institution} · ouvert le {date}'**
+  String placementOpenedOn(String institution, String date);
+
+  /// Inspector subtitle of a closed investment.
+  ///
+  /// In fr, this message translates to:
+  /// **'{institution} · clôturé le {date}'**
+  String placementClosedOn(String institution, String date);
+
+  /// Tooltip of the inspector's overflow menu button.
+  ///
+  /// In fr, this message translates to:
+  /// **'Actions du placement'**
+  String get placementMenuTooltip;
+
+  /// Overflow menu item.
+  ///
+  /// In fr, this message translates to:
+  /// **'Modifier'**
+  String get placementMenuEdit;
+
+  /// Overflow menu item: close the investment.
+  ///
+  /// In fr, this message translates to:
+  /// **'Clôturer'**
+  String get placementMenuClose;
+
+  /// Overflow menu item of a closed investment.
+  ///
+  /// In fr, this message translates to:
+  /// **'Rouvrir'**
+  String get placementMenuReopen;
+
+  /// Overflow menu item: delete the investment.
+  ///
+  /// In fr, this message translates to:
+  /// **'Supprimer'**
+  String get placementMenuDelete;
+
+  /// Beside the inspector's value: the date it was declared.
+  ///
+  /// In fr, this message translates to:
+  /// **'au {date}'**
+  String placementValueAt(String date);
+
+  /// Inspector primary button and title of the value modal.
+  ///
+  /// In fr, this message translates to:
+  /// **'Saisir la valeur'**
+  String get placementEnterValue;
+
+  /// Inspector secondary button and title of the movement modal.
+  ///
+  /// In fr, this message translates to:
+  /// **'Versement ou retrait'**
+  String get placementAddMovement;
+
+  /// Chart legend: the declared value series.
+  ///
+  /// In fr, this message translates to:
+  /// **'Valeur déclarée'**
+  String get placementLegendValue;
+
+  /// Chart legend: the net payments series.
+  ///
+  /// In fr, this message translates to:
+  /// **'Versements nets'**
+  String get placementLegendNetPayments;
+
+  /// Note under the chart of an investment without a declared value.
+  ///
+  /// In fr, this message translates to:
+  /// **'Saisissez une valeur pour voir la plus-value.'**
+  String get placementNoValueNote;
+
+  /// Chart hover card line: the declared value.
+  ///
+  /// In fr, this message translates to:
+  /// **'Valeur {amount}'**
+  String placementChartValue(String amount);
+
+  /// Chart hover card line: the net payments.
+  ///
+  /// In fr, this message translates to:
+  /// **'Versements nets {amount}'**
+  String placementChartNetPayments(String amount);
+
+  /// Semantic label of the investment chart.
+  ///
+  /// In fr, this message translates to:
+  /// **'Valeur déclarée et versements nets de {name}'**
+  String placementChartLabel(String name);
+
+  /// Repère label: net payments against the envelope's ceiling.
+  ///
+  /// In fr, this message translates to:
+  /// **'Plafond de versement'**
+  String get placementCeilingLabel;
+
+  /// After the net payments on the ceiling repère.
+  ///
+  /// In fr, this message translates to:
+  /// **'sur {ceiling}'**
+  String placementCeilingOf(String ceiling);
+
+  /// Caption when the net payments reach the ceiling.
+  ///
+  /// In fr, this message translates to:
+  /// **'Plafond de versement atteint.'**
+  String get placementCeilingReached;
+
+  /// Repère label: time since the opening.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ancienneté'**
+  String get placementAgeLabel;
+
+  /// Age of an investment, whole years.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, =1{1 an} other{{count} ans}}'**
+  String placementAgeYears(int count);
+
+  /// Age of an investment, months.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, =1{1 mois} other{{count} mois}}'**
+  String placementAgeMonths(int count);
+
+  /// Age of an investment: years then months.
+  ///
+  /// In fr, this message translates to:
+  /// **'{years} {months}'**
+  String placementAgeBoth(String years, String months);
+
+  /// Label of the age repère's mark: the milestone and the month it falls in.
+  ///
+  /// In fr, this message translates to:
+  /// **'repère {years} ans · {month}'**
+  String placementMilestoneMark(int years, String month);
+
+  /// Caption under the age repère of a PEA.
+  ///
+  /// In fr, this message translates to:
+  /// **'Avant 5 ans, un retrait clôt en principe le plan. Lecture indicative, qui ne vaut pas conseil fiscal.'**
+  String get placementMilestonePea;
+
+  /// Caption under the age repère of a life insurance policy.
+  ///
+  /// In fr, this message translates to:
+  /// **'Après 8 ans, la fiscalité des retraits s’allège. Lecture indicative, qui ne vaut pas conseil fiscal.'**
+  String get placementMilestoneLifeInsurance;
+
+  /// Inspector section heading: payments, withdrawals and declared values.
+  ///
+  /// In fr, this message translates to:
+  /// **'Mouvements'**
+  String get placementMovementsTitle;
+
+  /// Right of the movements heading: movements linked to an imported transaction.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, =1{1 rapproché avec vos transactions} other{{count} rapprochés avec vos transactions}}'**
+  String placementMovementsLinked(int count);
+
+  /// Movements section without any entry.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucun mouvement.'**
+  String get placementMovementsEmpty;
+
+  /// Movements section when the history failed to load.
+  ///
+  /// In fr, this message translates to:
+  /// **'L’historique n’a pas pu être chargé.'**
+  String get placementMovementsFailed;
+
+  /// Movements row: a payment in.
+  ///
+  /// In fr, this message translates to:
+  /// **'Versement'**
+  String get placementEntryPayment;
+
+  /// Movements row: a withdrawal.
+  ///
+  /// In fr, this message translates to:
+  /// **'Retrait'**
+  String get placementEntryWithdrawal;
+
+  /// Movements row: a declared value.
+  ///
+  /// In fr, this message translates to:
+  /// **'Valeur saisie'**
+  String get placementEntryValuation;
+
+  /// Movements row label followed by its note.
+  ///
+  /// In fr, this message translates to:
+  /// **'{label} · {note}'**
+  String placementEntryWithNote(String label, String note);
+
+  /// Envelope: plan d’épargne en actions.
+  ///
+  /// In fr, this message translates to:
+  /// **'PEA'**
+  String get placementEnvelopePea;
+
+  /// Envelope: PEA for small and medium businesses.
+  ///
+  /// In fr, this message translates to:
+  /// **'PEA-PME'**
+  String get placementEnvelopePeaPme;
+
+  /// Envelope: assurance vie.
+  ///
+  /// In fr, this message translates to:
+  /// **'Assurance vie'**
+  String get placementEnvelopeLifeInsurance;
+
+  /// Envelope: plan d’épargne retraite.
+  ///
+  /// In fr, this message translates to:
+  /// **'PER'**
+  String get placementEnvelopePer;
+
+  /// Envelope: plan d’épargne entreprise.
+  ///
+  /// In fr, this message translates to:
+  /// **'PEE'**
+  String get placementEnvelopePee;
+
+  /// Envelope: compte-titres ordinaire.
+  ///
+  /// In fr, this message translates to:
+  /// **'Compte-titres'**
+  String get placementEnvelopeSecuritiesAccount;
+
+  /// Envelope: anything else.
+  ///
+  /// In fr, this message translates to:
+  /// **'Autre'**
+  String get placementEnvelopeOther;
+
+  /// Title of the new investment modal.
+  ///
+  /// In fr, this message translates to:
+  /// **'Nouveau placement'**
+  String get placementFormCreateTitle;
+
+  /// Title of the edit investment modal.
+  ///
+  /// In fr, this message translates to:
+  /// **'Modifier le placement'**
+  String get placementFormEditTitle;
+
+  /// Investment form field label.
+  ///
+  /// In fr, this message translates to:
+  /// **'Nom'**
+  String get placementFormName;
+
+  /// Investment form error: empty name.
+  ///
+  /// In fr, this message translates to:
+  /// **'Saisissez un nom.'**
+  String get placementFormNameRequired;
+
+  /// Investment form field label.
+  ///
+  /// In fr, this message translates to:
+  /// **'Enveloppe'**
+  String get placementFormEnvelope;
+
+  /// Investment form field label.
+  ///
+  /// In fr, this message translates to:
+  /// **'Établissement'**
+  String get placementFormInstitution;
+
+  /// Investment form error: empty institution.
+  ///
+  /// In fr, this message translates to:
+  /// **'Saisissez l’établissement.'**
+  String get placementFormInstitutionRequired;
+
+  /// Investment form field label.
+  ///
+  /// In fr, this message translates to:
+  /// **'Date d’ouverture'**
+  String get placementFormOpenedOn;
+
+  /// Investment form field label (optional).
+  ///
+  /// In fr, this message translates to:
+  /// **'Valeur actuelle'**
+  String get placementFormCurrentValue;
+
+  /// Helper of the current value field.
+  ///
+  /// In fr, this message translates to:
+  /// **'Facultatif. Saisie à la date du jour.'**
+  String get placementFormCurrentValueHelp;
+
+  /// Investment form field label (optional).
+  ///
+  /// In fr, this message translates to:
+  /// **'Versements déjà effectués'**
+  String get placementFormInitialPayments;
+
+  /// Helper of the initial payments field.
+  ///
+  /// In fr, this message translates to:
+  /// **'Facultatif. Un versement à la date d’ouverture.'**
+  String get placementFormInitialPaymentsHelp;
+
+  /// Form error: unreadable or future date.
+  ///
+  /// In fr, this message translates to:
+  /// **'Saisissez une date passée ou celle du jour.'**
+  String get placementFormDateInvalid;
+
+  /// Form error: amount not positive.
+  ///
+  /// In fr, this message translates to:
+  /// **'Saisissez un montant positif.'**
+  String get placementFormAmountInvalid;
+
+  /// Tooltip of a date field's calendar button.
+  ///
+  /// In fr, this message translates to:
+  /// **'Choisir une date'**
+  String get placementFormDatePick;
+
+  /// Modal cancel button.
+  ///
+  /// In fr, this message translates to:
+  /// **'Annuler'**
+  String get placementFormCancel;
+
+  /// Modal save button.
+  ///
+  /// In fr, this message translates to:
+  /// **'Enregistrer'**
+  String get placementFormSave;
+
+  /// Ghost delete button on the footer of an edit modal.
+  ///
+  /// In fr, this message translates to:
+  /// **'Supprimer'**
+  String get placementFormDelete;
+
+  /// Title of the value modal when editing a declared value.
+  ///
+  /// In fr, this message translates to:
+  /// **'Modifier la valeur'**
+  String get placementValuationEditTitle;
+
+  /// Value modal field label.
+  ///
+  /// In fr, this message translates to:
+  /// **'Valeur'**
+  String get placementValuationValue;
+
+  /// Helper of the value field.
+  ///
+  /// In fr, this message translates to:
+  /// **'Recopiez la valeur totale indiquée sur votre relevé.'**
+  String get placementValuationHelp;
+
+  /// Value modal error: empty or unreadable value.
+  ///
+  /// In fr, this message translates to:
+  /// **'Saisissez une valeur.'**
+  String get placementValuationValueInvalid;
+
+  /// Date field label of the value and movement modals.
+  ///
+  /// In fr, this message translates to:
+  /// **'Date'**
+  String get placementFieldDate;
+
+  /// Note field label of the value and movement modals.
+  ///
+  /// In fr, this message translates to:
+  /// **'Note'**
+  String get placementFieldNote;
+
+  /// Title of the movement modal when editing.
+  ///
+  /// In fr, this message translates to:
+  /// **'Modifier le mouvement'**
+  String get placementMovementEditTitle;
+
+  /// Movement modal field label.
+  ///
+  /// In fr, this message translates to:
+  /// **'Montant'**
+  String get placementMovementAmount;
+
+  /// Helper of the movement amount field.
+  ///
+  /// In fr, this message translates to:
+  /// **'Un montant négatif est un retrait.'**
+  String get placementMovementAmountHelp;
+
+  /// Movement modal error: zero or unreadable amount.
+  ///
+  /// In fr, this message translates to:
+  /// **'Saisissez un montant différent de zéro.'**
+  String get placementMovementAmountInvalid;
+
+  /// Movement modal field label (optional).
+  ///
+  /// In fr, this message translates to:
+  /// **'Transaction liée'**
+  String get placementMovementLink;
+
+  /// Linked transaction select: no link.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucune'**
+  String get placementMovementLinkNone;
+
+  /// Linked transaction select item: the transaction's date and label.
+  ///
+  /// In fr, this message translates to:
+  /// **'{date} · {description}'**
+  String placementMovementLinkItem(String date, String description);
+
+  /// Title of the close modal.
+  ///
+  /// In fr, this message translates to:
+  /// **'Clôturer le placement'**
+  String get placementCloseTitle;
+
+  /// Lead of the close modal.
+  ///
+  /// In fr, this message translates to:
+  /// **'{name} quitte la synthèse à cette date et reste listé.'**
+  String placementCloseLead(String name);
+
+  /// Close modal field label.
+  ///
+  /// In fr, this message translates to:
+  /// **'Date de clôture'**
+  String get placementCloseDate;
+
+  /// Close modal field label.
+  ///
+  /// In fr, this message translates to:
+  /// **'Montant final reçu'**
+  String get placementCloseAmount;
+
+  /// Close modal error: unreadable amount.
+  ///
+  /// In fr, this message translates to:
+  /// **'Saisissez un montant, zéro si rien n’a été reçu.'**
+  String get placementCloseAmountInvalid;
+
+  /// Close modal confirm button.
+  ///
+  /// In fr, this message translates to:
+  /// **'Clôturer'**
+  String get placementCloseSubmit;
+
+  /// Title of the delete confirmation.
+  ///
+  /// In fr, this message translates to:
+  /// **'Supprimer le placement'**
+  String get placementDeleteTitle;
+
+  /// Lead of the delete confirmation.
+  ///
+  /// In fr, this message translates to:
+  /// **'{name} et tout son historique seront supprimés. Pour le garder, clôturez-le.'**
+  String placementDeleteLead(String name);
+
+  /// Delete confirmation button.
+  ///
+  /// In fr, this message translates to:
+  /// **'Supprimer'**
+  String get placementDeleteSubmit;
+
+  /// Error INVESTMENT_NOT_FOUND.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ce placement n’existe plus. Rien n’a été modifié.'**
+  String get placementErrorNotFound;
+
+  /// Error INVESTMENT_MOVEMENT_NOT_FOUND.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ce mouvement n’existe plus. Rien n’a été modifié.'**
+  String get placementErrorMovementNotFound;
+
+  /// Error INVESTMENT_VALUATION_NOT_FOUND.
+  ///
+  /// In fr, this message translates to:
+  /// **'Cette valeur n’existe plus. Rien n’a été modifié.'**
+  String get placementErrorValuationNotFound;
+
+  /// Error INVESTMENT_DATE_IN_FUTURE.
+  ///
+  /// In fr, this message translates to:
+  /// **'La date est dans le futur. Rien n’a été modifié.'**
+  String get placementErrorDateInFuture;
+
+  /// Error INVESTMENT_DATE_BEFORE_OPENING.
+  ///
+  /// In fr, this message translates to:
+  /// **'La date précède l’ouverture du placement. Rien n’a été modifié.'**
+  String get placementErrorDateBeforeOpening;
+
+  /// Error INVESTMENT_DATE_AFTER_CLOSING.
+  ///
+  /// In fr, this message translates to:
+  /// **'La date suit la clôture du placement. Rien n’a été modifié.'**
+  String get placementErrorDateAfterClosing;
+
+  /// Error INVESTMENT_ALREADY_CLOSED.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ce placement est déjà clôturé. Rien n’a été modifié.'**
+  String get placementErrorAlreadyClosed;
+
+  /// Error INVESTMENT_NOT_CLOSED.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ce placement n’est pas clôturé. Rien n’a été modifié.'**
+  String get placementErrorNotClosed;
+
+  /// Error INVESTMENT_VALUATION_EXISTS.
+  ///
+  /// In fr, this message translates to:
+  /// **'Une valeur est déjà saisie à cette date. Modifiez-la depuis les mouvements.'**
+  String get placementErrorValuationExists;
+
+  /// Error INVESTMENT_LINKED_TRANSACTION_NOT_FOUND.
+  ///
+  /// In fr, this message translates to:
+  /// **'Cette transaction n’existe plus. Rien n’a été modifié.'**
+  String get placementErrorLinkNotFound;
+
+  /// Error INVESTMENT_TRANSACTION_ALREADY_LINKED.
+  ///
+  /// In fr, this message translates to:
+  /// **'Cette transaction est déjà liée à un autre mouvement. Rien n’a été modifié.'**
+  String get placementErrorAlreadyLinked;
+
+  /// Error VALIDATION_ERROR on an investment write.
+  ///
+  /// In fr, this message translates to:
+  /// **'Un champ n’est pas valide. Rien n’a été modifié.'**
+  String get placementErrorValidation;
+
+  /// Fallback error of an investment write.
+  ///
+  /// In fr, this message translates to:
+  /// **'L’opération a échoué. Rien n’a été modifié. Réessayez.'**
+  String get placementErrorGeneric;
 }
 
 class _AppLocalizationsDelegate
