@@ -64,6 +64,13 @@ class RuleApplyResult(BaseModel):
     recategorized_count: int
 
 
+class RuleMatchCountRead(BaseModel):
+    """How many of the caller's transactions one rule currently classes."""
+
+    rule_id: str
+    match_count: int
+
+
 class RuleSuggestionRead(BaseModel):
     """The pre-fill for a rule form, derived from the transaction being corrected."""
 

@@ -227,6 +227,32 @@ class RuleService:
         self._db.commit()
         return recategorized_count
 
+    def match_counts(self, user_id: str) -> dict[str, int]:
+        """Count, per rule, the caller's transactions it currently classes.
+
+        A transaction does not record which rule set its category, so the attribution replays
+        the engine: a row carrying `source=rule` is credited to the first enabled rule, in
+        priority order, that matches it, provided that rule targets the row's category. A row a
+        reordered or edited rule no longer reaches is credited to nobody until the next apply.
+        Every rule is in the result, disabled ones included at zero. Writes nothing.
+        """
+        rules = self._repository.list_by_user(user_id)
+        counts = {rule.id: 0 for rule in rules}
+        enabled = sorted((rule for rule in rules if rule.enabled), key=lambda r: r.priority)
+        if not enabled:
+            return counts
+
+        query = self._transactions_query(user_id, None).where(
+            Transaction.categorization_source == "rule"
+        )
+        for transaction in self._db.scalars(query):
+            for rule in enabled:
+                if matches(transaction, rule):
+                    if rule.category_id == transaction.category_id:
+                        counts[rule.id] += 1
+                    break
+        return counts
+
     def preview(self, user_id: str, data: RulePreviewRequest) -> tuple[int, list[Transaction]]:
         """Count the caller's transactions an unsaved rule would match, with a few examples.
 
