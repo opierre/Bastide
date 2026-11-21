@@ -35,7 +35,11 @@ const _incomeFieldWidth = 140.0;
 /// Préférences: Affichage (theme, language, formats, sidebar), then Argent
 /// (currency, savings-rate goal, declared income).
 class PreferencesSection extends ConsumerWidget {
-  const PreferencesSection({super.key});
+  const PreferencesSection({super.key, this.focusIncome = false});
+
+  /// Opened from a « Déclarer un revenu » action: the income field scrolls
+  /// into view and takes focus.
+  final bool focusIncome;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -189,7 +193,9 @@ class PreferencesSection extends ConsumerWidget {
           key: const Key('settingsIncomeRow'),
           name: l10n.settingsIncomeTitle,
           description: l10n.settingsIncomeNote,
-          children: [_DeclaredIncome(currency: currency)],
+          children: [
+            _DeclaredIncome(currency: currency, focusOnOpen: focusIncome),
+          ],
         ),
       ],
     );
@@ -336,9 +342,10 @@ class _SavingsGoal extends ConsumerWidget {
 /// The declared income: an amount field and « par mois ». Empty means "not
 /// declared". Commits on submit or when the field loses focus.
 class _DeclaredIncome extends ConsumerWidget {
-  const _DeclaredIncome({required this.currency});
+  const _DeclaredIncome({required this.currency, required this.focusOnOpen});
 
   final String currency;
+  final bool focusOnOpen;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -359,16 +366,25 @@ class _DeclaredIncome extends ConsumerWidget {
         ),
       ),
       error: (_, _) => NoteLine(text: l10n.settingsAiLoadFailed),
-      data: (minor) => _IncomeField(initialMinor: minor, currency: currency),
+      data: (minor) => _IncomeField(
+        initialMinor: minor,
+        currency: currency,
+        focusOnOpen: focusOnOpen,
+      ),
     );
   }
 }
 
 class _IncomeField extends ConsumerStatefulWidget {
-  const _IncomeField({required this.initialMinor, required this.currency});
+  const _IncomeField({
+    required this.initialMinor,
+    required this.currency,
+    required this.focusOnOpen,
+  });
 
   final int? initialMinor;
   final String currency;
+  final bool focusOnOpen;
 
   @override
   ConsumerState<_IncomeField> createState() => _IncomeFieldState();
@@ -404,6 +420,14 @@ class _IncomeFieldState extends ConsumerState<_IncomeField> {
     _focus.addListener(() {
       if (!_focus.hasFocus) _commit();
     });
+    // Arrived from « Déclarer un revenu »: the row may sit below the fold on
+    // a short window, so it is scrolled into view; the field autofocuses.
+    if (widget.focusOnOpen) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        Scrollable.ensureVisible(context, alignment: 0.5);
+      });
+    }
   }
 
   @override
@@ -458,6 +482,7 @@ class _IncomeFieldState extends ConsumerState<_IncomeField> {
                     key: const Key('settingsIncomeField'),
                     controller: _controller,
                     currency: widget.currency,
+                    autofocus: widget.focusOnOpen,
                     onFieldSubmitted: (_) => _commit(),
                   ),
                 ),

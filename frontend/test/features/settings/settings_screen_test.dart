@@ -44,9 +44,10 @@ Map<String, dynamic> _settingsJson({int? income, int savingsGoal = 20}) => {
 /// Mounts the screen under the real [localeProvider] so switching the language
 /// re-renders it exactly as it would in the app.
 class _Harness extends ConsumerWidget {
-  const _Harness({this.theme});
+  const _Harness({this.theme, this.focusIncome = false});
 
   final ThemeData? theme;
+  final bool focusIncome;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -55,7 +56,7 @@ class _Harness extends ConsumerWidget {
       theme: theme ?? AppTheme.dark,
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
-      home: const Scaffold(body: SettingsScreen()),
+      home: Scaffold(body: SettingsScreen(focusIncome: focusIncome)),
     );
   }
 }
@@ -69,6 +70,7 @@ Widget _wrap({
   int savingsGoal = 20,
   bool dataLocationFails = false,
   List<String>? openedFolders,
+  bool focusIncome = false,
 }) {
   _api = _MockApiClient();
   when(() => _api.get('/settings')).thenAnswer(
@@ -94,7 +96,7 @@ Widget _wrap({
         (dir) async => openedFolders?.add(dir),
       ),
     ],
-    child: _Harness(theme: theme),
+    child: _Harness(theme: theme, focusIncome: focusIncome),
   );
 }
 
@@ -270,6 +272,39 @@ void main() {
         body: {'declared_monthly_income_minor': 410050},
       ),
     ).called(1);
+  });
+
+  testWidgets(
+    'opened from « Déclarer un revenu », the income field is shown and focused',
+    (tester) async {
+      // A short window: Revenu déclaré, the last row, starts below the fold.
+      tester.view.physicalSize = const Size(1200, 420);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.reset);
+      await tester.pumpWidget(_wrap(income: 320000, focusIncome: true));
+      await tester.pumpAndSettle();
+
+      final field = find.descendant(
+        of: find.byKey(const Key('settingsIncomeField')),
+        matching: find.byType(EditableText),
+      );
+      expect(tester.widget<EditableText>(field).focusNode.hasFocus, isTrue);
+      final rect = tester.getRect(field);
+      expect(rect.top, greaterThanOrEqualTo(0));
+      expect(rect.bottom, lessThanOrEqualTo(420));
+    },
+  );
+
+  testWidgets('a plain visit leaves the income field alone', (tester) async {
+    useDesktopSurface(tester);
+    await tester.pumpWidget(_wrap(income: 320000));
+    await tester.pumpAndSettle();
+
+    final field = find.descendant(
+      of: find.byKey(const Key('settingsIncomeField')),
+      matching: find.byType(EditableText),
+    );
+    expect(tester.widget<EditableText>(field).focusNode.hasFocus, isFalse);
   });
 
   testWidgets('an emptied income field clears the declaration', (tester) async {
