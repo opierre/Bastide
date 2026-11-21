@@ -61,8 +61,9 @@ class DebtRatioItem extends StatelessWidget {
           );
 
     // A declared income ends the ledger reading; Paramètres → Préférences
-    // holds the one field that edits it (`09-settings.md` §Préférences).
-    void declare() => context.go(SettingsScreen.path);
+    // holds the one field that edits it, focused on arrival
+    // (`09-settings.md` §Préférences).
+    void declare() => context.go(SettingsScreen.incomePath);
 
     return SizedBox(
       key: const Key('debtRatioItem'),

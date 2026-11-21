@@ -5317,30 +5317,6 @@
   "@simulatorErrorGeneric": {
     "description": "Fallback simulator error."
   },
-  "simulatorIncomeTitle": "Déclarer un revenu",
-  "@simulatorIncomeTitle": {
-    "description": "Title of the declare-income modal opened from the simulator."
-  },
-  "simulatorIncomeBody": "Le revenu mensuel déclaré sert de base au taux d’endettement et à la capacité d’emprunt.",
-  "@simulatorIncomeBody": {
-    "description": "Body of the declare-income modal."
-  },
-  "simulatorIncomeLabel": "Revenu mensuel net",
-  "@simulatorIncomeLabel": {
-    "description": "Declare-income modal field label."
-  },
-  "simulatorIncomeInvalid": "Saisissez un montant supérieur à zéro.",
-  "@simulatorIncomeInvalid": {
-    "description": "Declare-income modal validation error."
-  },
-  "simulatorIncomeSubmit": "Déclarer",
-  "@simulatorIncomeSubmit": {
-    "description": "Declare-income modal submit button."
-  },
-  "simulatorIncomeFailed": "Impossible d’enregistrer ce revenu. Réessayez.",
-  "@simulatorIncomeFailed": {
-    "description": "Declare-income modal banner when the save fails."
-  },
   "simulatorCancel": "Annuler",
   "@simulatorCancel": {
     "description": "Cancel button of the simulator modals."

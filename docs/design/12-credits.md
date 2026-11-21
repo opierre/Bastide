@@ -33,7 +33,7 @@ Ratio states of item 3:
 |---|---|
 | Declared income, under 35 % | As above, `accent` fill. |
 | Ledger income, above 35 % | A `warning` status text « Au-dessus du repère » after the label; repère `over`; caption « … sur un revenu médian constaté de 2 850,00 € (12 mois). Un revenu déclaré remplace cette lecture. » + link « Déclarer un revenu » (opens Paramètres → Préférences → Revenu déclaré). |
-| No income known | Figure « — » in `textTertiary`; no repère; caption « Aucun revenu connu. Sans revenu, il n’y a pas de taux à calculer. » + secondary « Déclarer un revenu ». The HCSF sentence stays. |
+| No income known | Figure « — » in `textTertiary`; no repère; caption « Aucun revenu connu. Sans revenu, il n’y a pas de taux à calculer. » + secondary « Déclarer un revenu » (same destination). The HCSF sentence stays. |
 
 ### 2. Loans table (rows 48 px)
 | Column | Content |

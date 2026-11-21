@@ -6542,42 +6542,6 @@ abstract class AppLocalizations {
   /// **'Une erreur est survenue. Réessayez.'**
   String get simulatorErrorGeneric;
 
-  /// Title of the declare-income modal opened from the simulator.
-  ///
-  /// In fr, this message translates to:
-  /// **'Déclarer un revenu'**
-  String get simulatorIncomeTitle;
-
-  /// Body of the declare-income modal.
-  ///
-  /// In fr, this message translates to:
-  /// **'Le revenu mensuel déclaré sert de base au taux d’endettement et à la capacité d’emprunt.'**
-  String get simulatorIncomeBody;
-
-  /// Declare-income modal field label.
-  ///
-  /// In fr, this message translates to:
-  /// **'Revenu mensuel net'**
-  String get simulatorIncomeLabel;
-
-  /// Declare-income modal validation error.
-  ///
-  /// In fr, this message translates to:
-  /// **'Saisissez un montant supérieur à zéro.'**
-  String get simulatorIncomeInvalid;
-
-  /// Declare-income modal submit button.
-  ///
-  /// In fr, this message translates to:
-  /// **'Déclarer'**
-  String get simulatorIncomeSubmit;
-
-  /// Declare-income modal banner when the save fails.
-  ///
-  /// In fr, this message translates to:
-  /// **'Impossible d’enregistrer ce revenu. Réessayez.'**
-  String get simulatorIncomeFailed;
-
   /// Cancel button of the simulator modals.
   ///
   /// In fr, this message translates to:

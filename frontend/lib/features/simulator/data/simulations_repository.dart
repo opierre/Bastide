@@ -96,12 +96,6 @@ class SimulationsRepository {
     );
   }
 
-  /// Declares the monthly income the debt ratio runs on.
-  Future<void> declareIncome(int monthlyIncomeMinor) => _apiClient.patch(
-    '/settings',
-    body: {'declared_monthly_income_minor': monthlyIncomeMinor},
-  );
-
   SavedSimulation _parseSaved(Map<String, dynamic> json) => SavedSimulation(
     id: json['id'] as String,
     label: json['label'] as String,

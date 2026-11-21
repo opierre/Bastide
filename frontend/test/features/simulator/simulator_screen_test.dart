@@ -2,6 +2,7 @@ import 'package:bastide/core/api/api_client.dart';
 import 'package:bastide/core/theme/app_theme.dart';
 import 'package:bastide/core/widgets/amount_text.dart';
 import 'package:bastide/core/widgets/repere_meter.dart';
+import 'package:bastide/features/settings/presentation/settings_screen.dart';
 import 'package:bastide/features/simulator/application/simulator_controller.dart';
 import 'package:bastide/features/simulator/data/simulations_repository.dart';
 import 'package:bastide/features/simulator/domain/simulation.dart';
@@ -12,6 +13,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:go_router/go_router.dart';
 import 'package:mocktail/mocktail.dart';
 
 import '../../support/simulator_fixtures.dart';
@@ -28,19 +30,35 @@ Widget _wrap(
 }) {
   return ProviderScope(
     overrides: [simulationsRepositoryProvider.overrideWithValue(repository)],
-    child: MaterialApp(
+    child: MaterialApp.router(
       locale: locale,
       theme: theme ?? AppTheme.dark,
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
-      home: const Scaffold(
-        body: Column(
-          crossAxisAlignment: CrossAxisAlignment.end,
-          children: [
-            SimulatorTopBarActions(),
-            Expanded(child: SimulatorScreen()),
-          ],
-        ),
+      routerConfig: GoRouter(
+        initialLocation: SimulatorScreen.path,
+        routes: [
+          GoRoute(
+            path: SimulatorScreen.path,
+            builder: (context, state) => const Scaffold(
+              body: Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  SimulatorTopBarActions(),
+                  Expanded(child: SimulatorScreen()),
+                ],
+              ),
+            ),
+          ),
+          // Prints the location it was opened at, so a test can tell the
+          // Revenu déclaré deep link from a plain visit.
+          GoRoute(
+            path: SettingsScreen.path,
+            builder: (context, state) => Scaffold(
+              body: Text(state.uri.toString(), key: const Key('settingsRoute')),
+            ),
+          ),
+        ],
       ),
     ),
   );
@@ -333,6 +351,11 @@ void main() {
     expect(find.byKey(const Key('hcsfRatioGauge')), findsNothing);
     expect(find.byKey(const Key('hcsfCapacityValue')), findsNothing);
     expect(find.byKey(const Key('hcsfTermGauge')), findsOneWidget);
+
+    // « Déclarer un revenu » opens Paramètres on the Revenu déclaré field.
+    await tester.tap(find.byKey(const Key('hcsfDeclareIncome')));
+    await tester.pumpAndSettle();
+    expect(_text(tester, 'settingsRoute'), SettingsScreen.incomePath);
   });
 
   testWidgets('a degenerate loan is explained under the rate', (tester) async {
