@@ -17,6 +17,7 @@ Map<String, dynamic> _summaryJson({
   double netDeltaPct = -6.1,
   double savingsRateDeltaPct = 1.9,
   List<Map<String, dynamic>> byCategory = const [],
+  int savingsRateGoalPercent = 20,
 }) => {
   'income_minor': incomeMinor,
   'expense_minor': expenseMinor,
@@ -26,6 +27,7 @@ Map<String, dynamic> _summaryJson({
   'expense_delta_pct': expenseDeltaPct,
   'net_delta_pct': netDeltaPct,
   'savings_rate_delta_pct': savingsRateDeltaPct,
+  'savings_rate_goal_percent': savingsRateGoalPercent,
   'by_category': byCategory,
   'currency': 'EUR',
 };
@@ -152,6 +154,45 @@ void main() {
       ).called(1);
     },
   );
+
+  test('reloadSummary re-reads the shown month and its goal', () async {
+    when(
+      () => apiClient.get('/transactions', query: any(named: 'query')),
+    ).thenAnswer((_) async => _transactionsPageJson(['2026-03-14']));
+    when(
+      () => apiClient.get('/dashboard/summary', query: any(named: 'query')),
+    ).thenAnswer((_) async => _summaryJson());
+    when(
+      () => apiClient.get('/dashboard/trends'),
+    ).thenAnswer((_) async => _trendsJson());
+    when(
+      () => apiClient.get('/accounts'),
+    ).thenAnswer((_) async => _accountsJson());
+    final controller = container.read(dashboardControllerProvider.notifier);
+    await container.read(dashboardControllerProvider.future);
+    await controller.changeMonth(DateTime(2026, 2));
+    expect(
+      container
+          .read(dashboardControllerProvider)
+          .value!
+          .summary
+          .savingsRateGoal,
+      closeTo(0.20, 1e-9),
+    );
+
+    when(
+      () => apiClient.get('/dashboard/summary', query: any(named: 'query')),
+    ).thenAnswer((_) async => _summaryJson(savingsRateGoalPercent: 35));
+    await controller.reloadSummary();
+
+    final state = container.read(dashboardControllerProvider).value!;
+    // The month the user paged to stays; only the goal moved.
+    expect(state.month, DateTime(2026, 2));
+    expect(state.summary.savingsRateGoal, closeTo(0.35, 1e-9));
+    verify(
+      () => apiClient.get('/dashboard/summary', query: {'month': '2026-02'}),
+    ).called(2);
+  });
 
   test(
     'build falls back to the current month when there are no transactions',

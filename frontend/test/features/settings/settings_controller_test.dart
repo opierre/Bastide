@@ -1,5 +1,6 @@
 import 'package:bastide/core/api/api_client.dart';
 import 'package:bastide/core/api/api_client_provider.dart';
+import 'package:bastide/features/dashboard/application/dashboard_controller.dart';
 import 'package:bastide/features/settings/application/settings_controller.dart';
 import 'package:bastide/features/settings/domain/user_settings.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -13,11 +14,13 @@ Map<String, dynamic> _settingsJson({
   String baseUrl = 'http://127.0.0.1:11434/v1',
   String? modelTag,
   double threshold = 0.8,
+  int savingsGoal = 20,
 }) => {
   'ai_enabled': aiEnabled,
   'inference_base_url': baseUrl,
   'model_tag': modelTag,
   'confidence_threshold': threshold,
+  'savings_rate_goal_percent': savingsGoal,
 };
 
 Map<String, dynamic> _healthJson({
@@ -420,6 +423,142 @@ void main() {
       expect(state.settings.inferenceBaseUrl, 'http://127.0.0.1:11434/v1');
       expect(state.connection, InferenceConnection.reachable);
       expect(state.offersOllama, isFalse);
+    });
+  });
+
+  group('savings-rate goal', () {
+    test('reads the stored goal, in whole percent', () async {
+      stubSettings(_settingsJson(savingsGoal: 35));
+
+      expect((await load()).settings.savingsRateGoalPercent, 35);
+    });
+
+    test(
+      'a drag shows at once and sends one patch with the last value',
+      () async {
+        stubSettings(_settingsJson());
+        stubPatch(_settingsJson(savingsGoal: 28));
+        await load();
+
+        controller().setSavingsRateGoalPercent(25);
+        controller().setSavingsRateGoalPercent(28);
+
+        expect(
+          container
+              .read(settingsControllerProvider)
+              .value!
+              .settings
+              .savingsRateGoalPercent,
+          28,
+        );
+        await Future<void>.delayed(settingsPatchDebounce * 2);
+
+        final body = verify(
+          () => apiClient.patch('/settings', body: captureAny(named: 'body')),
+        ).captured.single;
+        expect(body, {'savings_rate_goal_percent': 28});
+      },
+    );
+
+    test('never sends a goal below the slider\'s 1 %', () async {
+      stubSettings(_settingsJson());
+      stubPatch(_settingsJson(savingsGoal: 1));
+      await load();
+
+      controller().setSavingsRateGoalPercent(0);
+      await Future<void>.delayed(settingsPatchDebounce * 2);
+
+      final body = verify(
+        () => apiClient.patch('/settings', body: captureAny(named: 'body')),
+      ).captured.single;
+      expect(body, {'savings_rate_goal_percent': 1});
+    });
+
+    test('keeps the goal within the slider\'s 1–50 %', () async {
+      stubSettings(_settingsJson());
+      stubPatch(_settingsJson(savingsGoal: 50));
+      await load();
+
+      controller().setSavingsRateGoalPercent(80);
+      await Future<void>.delayed(settingsPatchDebounce * 2);
+
+      final body = verify(
+        () => apiClient.patch('/settings', body: captureAny(named: 'body')),
+      ).captured.single;
+      expect(body, {'savings_rate_goal_percent': 50});
+    });
+
+    test('a saved goal makes a loaded dashboard re-read its summary', () async {
+      stubSettings(_settingsJson());
+      stubPatch(_settingsJson(savingsGoal: 30));
+      when(
+        () => apiClient.get('/transactions', query: any(named: 'query')),
+      ).thenAnswer(
+        (_) async => {
+          'items': <Object>[],
+          'page': 1,
+          'page_size': 50,
+          'total': 0,
+        },
+      );
+      when(() => apiClient.get('/dashboard/trends')).thenAnswer(
+        (_) async => {
+          'monthly_series': <Object>[],
+          'savings_series': <Object>[],
+          'currency': 'EUR',
+        },
+      );
+      when(
+        () => apiClient.get('/dashboard/summary', query: any(named: 'query')),
+      ).thenAnswer(
+        (_) async => {
+          'income_minor': 0,
+          'expense_minor': 0,
+          'net_minor': 0,
+          'savings_rate': 0.0,
+          'income_delta_pct': 0.0,
+          'expense_delta_pct': 0.0,
+          'net_delta_pct': 0.0,
+          'savings_rate_delta_pct': 0.0,
+          'savings_rate_goal_percent': 30,
+          'by_category': <Object>[],
+          'currency': 'EUR',
+        },
+      );
+      when(
+        () => apiClient.get('/accounts'),
+      ).thenAnswer((_) async => <Object>[]);
+      await container.read(dashboardControllerProvider.future);
+      await load();
+
+      controller().setSavingsRateGoalPercent(30);
+      await Future<void>.delayed(settingsPatchDebounce * 2);
+
+      verify(
+        () => apiClient.get('/dashboard/summary', query: any(named: 'query')),
+      ).called(2);
+      expect(
+        container
+            .read(dashboardControllerProvider)
+            .value!
+            .summary
+            .savingsRateGoal,
+        closeTo(0.30, 1e-9),
+      );
+    });
+
+    test('a saved goal does not build a dashboard nobody opened', () async {
+      stubSettings(_settingsJson());
+      stubPatch(_settingsJson(savingsGoal: 30));
+      await load();
+
+      controller().setSavingsRateGoalPercent(30);
+      await Future<void>.delayed(settingsPatchDebounce * 2);
+
+      expect(container.exists(dashboardControllerProvider), isFalse);
+      verifyNever(
+        () => apiClient.get('/dashboard/summary', query: any(named: 'query')),
+      );
     });
   });
 

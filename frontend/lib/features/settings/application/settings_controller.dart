@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../categorization/application/run_controller.dart';
+import '../../dashboard/application/dashboard_controller.dart';
 import '../../mortgages/application/mortgages_controller.dart';
 import '../../simulator/application/simulator_controller.dart';
 import '../data/settings_repository.dart';
@@ -113,18 +114,20 @@ class SettingsController extends AsyncNotifier<SettingsState> {
   Timer? _debounce;
 
   // Edits made since the last flush; `null` means "untouched", which is also
-  // what the repository reads as "do not send this field". Four typed slots
+  // what the repository reads as "do not send this field". Typed slots
   // rather than a map of wire names keeps the JSON vocabulary in `data/`.
   bool? _pendingAiEnabled;
   String? _pendingBaseUrl;
   String? _pendingModelTag;
   double? _pendingThreshold;
+  int? _pendingSavingsGoal;
 
   bool get _hasPendingEdits =>
       _pendingAiEnabled != null ||
       _pendingBaseUrl != null ||
       _pendingModelTag != null ||
-      _pendingThreshold != null;
+      _pendingThreshold != null ||
+      _pendingSavingsGoal != null;
 
   /// Drops replies from a probe the user has already superseded — changing the
   /// address twice quickly would otherwise let the first answer land last.
@@ -193,6 +196,17 @@ class SettingsController extends AsyncNotifier<SettingsState> {
     final threshold = UserSettings.thresholdFromPercent(percent);
     _pendingThreshold = threshold;
     _edit((settings) => settings.copyWith(confidenceThreshold: threshold));
+  }
+
+  /// The dashboard's savings-rate goal, a whole percent off the Préférences
+  /// slider. Debounced like the threshold, so a drag sends one patch.
+  void setSavingsRateGoalPercent(int percent) {
+    final goal = percent.clamp(
+      UserSettings.minSavingsRateGoalPercent,
+      UserSettings.maxSavingsRateGoalPercent,
+    );
+    _pendingSavingsGoal = goal;
+    _edit((settings) => settings.copyWith(savingsRateGoalPercent: goal));
   }
 
   /// Declares the monthly income the debt ratio runs on, or clears it with
@@ -322,10 +336,12 @@ class SettingsController extends AsyncNotifier<SettingsState> {
     final baseUrl = _pendingBaseUrl;
     final modelTag = _pendingModelTag;
     final threshold = _pendingThreshold;
+    final savingsGoal = _pendingSavingsGoal;
     _pendingAiEnabled = null;
     _pendingBaseUrl = null;
     _pendingModelTag = null;
     _pendingThreshold = null;
+    _pendingSavingsGoal = null;
 
     if (state.value == null) return false;
 
@@ -337,6 +353,7 @@ class SettingsController extends AsyncNotifier<SettingsState> {
             inferenceBaseUrl: baseUrl,
             modelTag: modelTag,
             confidenceThreshold: threshold,
+            savingsRateGoalPercent: savingsGoal,
           );
       final latest = state.value;
       if (latest == null) return false;
@@ -344,6 +361,7 @@ class SettingsController extends AsyncNotifier<SettingsState> {
         latest.copyWith(settings: saved, clearBaseUrlError: true),
       );
       if (aiEnabled != null) _syncReviewQueue();
+      if (savingsGoal != null) _syncDashboard();
       return true;
     } catch (error) {
       final latest = state.value;
@@ -397,6 +415,16 @@ class SettingsController extends AsyncNotifier<SettingsState> {
   /// and that queue reads its answer from [aiAvailabilityProvider], which
   /// caches until something invalidates it.
   void _syncReviewQueue() => ref.invalidate(aiAvailabilityProvider);
+
+  /// Makes the dashboard re-read its summary, which carries the goal its
+  /// repère and status measure against. Reloaded on the month it shows rather
+  /// than invalidated, which would page it back to the latest month; and only
+  /// if it was ever built, since a first build reads the goal anyway.
+  void _syncDashboard() {
+    if (ref.exists(dashboardControllerProvider)) {
+      unawaited(ref.read(dashboardControllerProvider.notifier).reloadSummary());
+    }
+  }
 }
 
 final settingsControllerProvider =

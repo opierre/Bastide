@@ -112,6 +112,14 @@
       }
     }
   },
+  "settingsSavingsGoalTitle": "Objectif de taux d’épargne",
+  "@settingsSavingsGoalTitle": {
+    "description": "Settings › Préférences: name of the savings-rate goal row."
+  },
+  "settingsSavingsGoalNote": "Le repère affiché sur le tableau de bord.",
+  "@settingsSavingsGoalNote": {
+    "description": "Settings › Préférences: description of the savings-rate goal row; the goal is the mark on the dashboard's savings-rate meter."
+  },
   "settingsIncomeTitle": "Revenu déclaré",
   "@settingsIncomeTitle": {
     "description": "Settings › Préférences: name of the declared monthly income row."
