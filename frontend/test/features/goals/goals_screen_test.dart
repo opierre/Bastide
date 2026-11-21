@@ -317,6 +317,100 @@ void main() {
     expect(controller.restoreCalls, ['g8']);
   });
 
+  testWidgets('an allocation row deletes after a confirmation', (tester) async {
+    _useDesktopSurface(tester);
+    final controller = FakeGoalsController(initialGoals: specGoals());
+    await tester.pumpWidget(
+      _wrap(
+        controller: controller,
+        allocations: [testAllocation(amountMinor: 30000)],
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    final delete = find.byKey(const Key('goalAllocationDelete-al1'));
+    expect(delete, findsOneWidget);
+    await tester.tap(delete);
+    await tester.pumpAndSettle();
+
+    expect(find.text('Supprimer cette allocation ?'), findsOneWidget);
+    expect(
+      tester
+          .widget<Text>(find.byKey(const Key('goalAllocationDeleteLead')))
+          .data,
+      'Le montant mis de côté baisse de ${_money(30000)}. '
+      'Vos comptes ne sont pas modifiés.',
+    );
+
+    await tester.tap(find.byKey(const Key('goalAllocationDeleteSubmit')));
+    await tester.pumpAndSettle();
+
+    expect(controller.deleteAllocationCalls, [('g1', 'al1')]);
+    expect(find.byKey(const Key('goalAllocationDeleteModal')), findsNothing);
+  });
+
+  testWidgets('deleting a withdrawal says the saved amount goes back up', (
+    tester,
+  ) async {
+    _useDesktopSurface(tester);
+    await tester.pumpWidget(
+      _wrap(
+        controller: FakeGoalsController(initialGoals: specGoals()),
+        locale: const Locale('en'),
+        allocations: [testAllocation(amountMinor: -10000, note: null)],
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byKey(const Key('goalAllocationDelete-al1')));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Delete this allocation?'), findsOneWidget);
+    expect(
+      tester
+          .widget<Text>(find.byKey(const Key('goalAllocationDeleteLead')))
+          .data,
+      'The saved amount goes back up by ${_money(10000, locale: 'en')}. '
+      'Your accounts are not changed.',
+    );
+  });
+
+  testWidgets('cancelling the confirmation deletes nothing', (tester) async {
+    _useDesktopSurface(tester);
+    final controller = FakeGoalsController(initialGoals: specGoals());
+    await tester.pumpWidget(
+      _wrap(controller: controller, allocations: [testAllocation()]),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byKey(const Key('goalAllocationDelete-al1')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('goalAllocationDeleteCancel')));
+    await tester.pumpAndSettle();
+
+    expect(controller.deleteAllocationCalls, isEmpty);
+    expect(find.byKey(const Key('goalAllocationDeleteModal')), findsNothing);
+    expect(find.byKey(const Key('goalAllocationRow-al1')), findsOneWidget);
+  });
+
+  testWidgets('an archived goal offers no delete on its allocations', (
+    tester,
+  ) async {
+    _useDesktopSurface(tester);
+    await tester.pumpWidget(
+      _wrap(
+        controller: FakeGoalsController(
+          initialGoals: [testGoal(status: GoalStatus.archived)],
+        ),
+        allocations: [testAllocation()],
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(const Key('goalAllocationRow-al1')), findsOneWidget);
+    expect(find.byKey(const Key('goalAllocationDelete-al1')), findsNothing);
+  });
+
   testWidgets('archiving goes through the inspector', (tester) async {
     _useDesktopSurface(tester);
     final controller = FakeGoalsController(initialGoals: specGoals());

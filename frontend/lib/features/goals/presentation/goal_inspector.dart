@@ -16,6 +16,7 @@ import '../application/goals_controller.dart';
 import '../domain/goal.dart';
 import '../domain/goal_allocation.dart';
 import 'allocation_modal.dart';
+import 'delete_allocation_modal.dart';
 import 'goal_banner.dart';
 import 'goal_form_modal.dart';
 import 'goal_labels.dart';
@@ -31,8 +32,8 @@ RepereTone goalRepereTone(Goal goal) => goal.isArchived
 /// the banner edge to edge, then the figures with « Archiver », the repère,
 /// and the allocations with « Allouer ».
 ///
-/// An archived goal shows « Désarchiver » in place of « Archiver », and no
-/// « Allouer ».
+/// An archived goal shows « Désarchiver » in place of « Archiver », no
+/// « Allouer », and no delete action on its allocation rows.
 class GoalInspector extends ConsumerWidget {
   const GoalInspector({super.key, required this.goal});
 
@@ -175,6 +176,12 @@ class _Allocations extends ConsumerWidget {
     AppTableColumn(label: '', width: 112, numeric: true),
   ];
 
+  /// The same table with a trailing column for the row's delete action.
+  static const _columnsWithAction = [
+    ..._columns,
+    AppTableColumn(label: '', width: AppSizes.button + AppSpacing.smPlus),
+  ];
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context)!;
@@ -214,7 +221,14 @@ class _Allocations extends ConsumerWidget {
                 _AllocationRow(
                   allocation: allocation,
                   currency: goal.currency,
-                  columns: _columns,
+                  columns: goal.isArchived ? _columns : _columnsWithAction,
+                  onDelete: goal.isArchived
+                      ? null
+                      : () => showDeleteAllocationModal(
+                          context,
+                          goal: goal,
+                          allocation: allocation,
+                        ),
                 ),
             ],
           ),
@@ -233,26 +247,43 @@ class _Allocations extends ConsumerWidget {
   }
 }
 
-class _AllocationRow extends StatelessWidget {
+/// One ledger line. The delete action shows on hover or keyboard focus only,
+/// so the history reads as a plain list until the user reaches for a row.
+class _AllocationRow extends StatefulWidget {
   const _AllocationRow({
     required this.allocation,
     required this.currency,
     required this.columns,
+    this.onDelete,
   });
 
   final GoalAllocation allocation;
   final String currency;
   final List<AppTableColumn> columns;
 
+  /// `null` for an archived goal: its history is read-only.
+  final VoidCallback? onDelete;
+
+  @override
+  State<_AllocationRow> createState() => _AllocationRowState();
+}
+
+class _AllocationRowState extends State<_AllocationRow> {
+  bool _hovered = false;
+  bool _focused = false;
+
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final locale = Localizations.localeOf(context).toString();
     final textTheme = Theme.of(context).textTheme;
     final colors = context.colors;
+    final allocation = widget.allocation;
+    final onDelete = widget.onDelete;
 
-    return AppTableRow(
+    final row = AppTableRow(
       key: Key('goalAllocationRow-${allocation.id}'),
-      columns: columns,
+      columns: widget.columns,
       cells: [
         Text(
           appDateFormat(locale).format(allocation.allocatedOn),
@@ -268,12 +299,36 @@ class _AllocationRow extends StatelessWidget {
         ),
         AmountText(
           amountMinor: allocation.amountMinor,
-          currency: currency,
+          currency: widget.currency,
           showPositiveSign: true,
           maxLines: 1,
           style: tabularNumberStyle(textTheme.bodyMedium!),
         ),
+        if (onDelete != null)
+          Focus(
+            canRequestFocus: false,
+            skipTraversal: true,
+            onFocusChange: (focused) => setState(() => _focused = focused),
+            // Kept in the tree while hidden so Tab still reaches it.
+            child: Opacity(
+              opacity: _hovered || _focused ? 1 : 0,
+              child: AppButton(
+                key: Key('goalAllocationDelete-${allocation.id}'),
+                label: l10n.goalAllocationDelete,
+                icon: LucideIcons300.trash2,
+                iconOnly: true,
+                variant: AppButtonVariant.ghost,
+                onPressed: onDelete,
+              ),
+            ),
+          ),
       ],
+    );
+    if (onDelete == null) return row;
+    return MouseRegion(
+      onEnter: (_) => setState(() => _hovered = true),
+      onExit: (_) => setState(() => _hovered = false),
+      child: row,
     );
   }
 }

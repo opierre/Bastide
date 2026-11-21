@@ -5099,6 +5099,42 @@ abstract class AppLocalizations {
   /// **'Impossible de charger les allocations. Rien n’a été modifié.'**
   String get goalAllocationsFailed;
 
+  /// Trailing action of an allocation row in the inspector; opens the confirmation.
+  ///
+  /// In fr, this message translates to:
+  /// **'Supprimer l’allocation'**
+  String get goalAllocationDelete;
+
+  /// Title of the confirmation before deleting an allocation line.
+  ///
+  /// In fr, this message translates to:
+  /// **'Supprimer cette allocation ?'**
+  String get goalAllocationDeleteTitle;
+
+  /// Lead of the confirmation when the deleted line put money aside.
+  ///
+  /// In fr, this message translates to:
+  /// **'Le montant mis de côté baisse de {amount}. Vos comptes ne sont pas modifiés.'**
+  String goalAllocationDeleteLeadDown(String amount);
+
+  /// Lead of the confirmation when the deleted line was a withdrawal (negative).
+  ///
+  /// In fr, this message translates to:
+  /// **'Le montant mis de côté remonte de {amount}. Vos comptes ne sont pas modifiés.'**
+  String goalAllocationDeleteLeadUp(String amount);
+
+  /// Dismisses the delete confirmation.
+  ///
+  /// In fr, this message translates to:
+  /// **'Annuler'**
+  String get goalAllocationDeleteCancel;
+
+  /// Destructive button of the delete confirmation.
+  ///
+  /// In fr, this message translates to:
+  /// **'Supprimer'**
+  String get goalAllocationDeleteSubmit;
+
   /// Button on the banner image; opens a menu.
   ///
   /// In fr, this message translates to:

@@ -3262,6 +3262,28 @@ class AppLocalizationsFr extends AppLocalizations {
       'Impossible de charger les allocations. Rien n’a été modifié.';
 
   @override
+  String get goalAllocationDelete => 'Supprimer l’allocation';
+
+  @override
+  String get goalAllocationDeleteTitle => 'Supprimer cette allocation ?';
+
+  @override
+  String goalAllocationDeleteLeadDown(String amount) {
+    return 'Le montant mis de côté baisse de $amount. Vos comptes ne sont pas modifiés.';
+  }
+
+  @override
+  String goalAllocationDeleteLeadUp(String amount) {
+    return 'Le montant mis de côté remonte de $amount. Vos comptes ne sont pas modifiés.';
+  }
+
+  @override
+  String get goalAllocationDeleteCancel => 'Annuler';
+
+  @override
+  String get goalAllocationDeleteSubmit => 'Supprimer';
+
+  @override
   String get goalImageChange => 'Changer';
 
   @override

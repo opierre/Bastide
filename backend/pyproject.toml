@@ -1,6 +1,6 @@
 [project]
 name = "bastide-backend"
-version = "0.2.0-dev.19"
+version = "0.2.0-dev.20"
 description = "Add your description here"
 requires-python = ">=3.14"
 dependencies = [
