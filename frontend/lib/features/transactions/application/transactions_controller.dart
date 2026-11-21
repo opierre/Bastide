@@ -209,6 +209,10 @@ class TransactionFiltersNotifier extends Notifier<TransactionFilters> {
   void clearFilters() =>
       state = TransactionFilters(needsReview: state.needsReview);
 
+  /// Sets every filter at once: a deep link narrowing the list to its
+  /// operation's account and day.
+  void replace(TransactionFilters filters) => state = filters;
+
   void setQuery(String q) => state = state.copyWith(q: q, page: 1);
 
   void setPage(int page) => state = state.copyWith(page: page);

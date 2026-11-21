@@ -22,13 +22,54 @@ import 'transactions_list_pane.dart';
 /// « Toutes » and « À vérifier », then the selected tab's body. « Toutes » is
 /// the list pane and the inspector of the selected operation; « À vérifier »
 /// is the review queue.
-class TransactionsScreen extends ConsumerWidget {
-  const TransactionsScreen({super.key});
+///
+/// [operationId] opens the panel on that operation (`?operation=<id>`): the
+/// list narrowed to its account and day, the operation in the inspector. An
+/// unknown id is ignored.
+class TransactionsScreen extends ConsumerStatefulWidget {
+  const TransactionsScreen({super.key, this.operationId});
 
   static const path = '/transactions';
 
+  /// The query parameter carrying [operationId].
+  static const operationParam = 'operation';
+
+  /// The panel opened on operation [operationId].
+  static String location({required String operationId}) => Uri(
+    path: path,
+    queryParameters: {operationParam: operationId},
+  ).toString();
+
+  final String? operationId;
+
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<TransactionsScreen> createState() => _TransactionsScreenState();
+}
+
+class _TransactionsScreenState extends ConsumerState<TransactionsScreen> {
+  @override
+  void initState() {
+    super.initState();
+    _open();
+  }
+
+  @override
+  void didUpdateWidget(TransactionsScreen oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.operationId != oldWidget.operationId) _open();
+  }
+
+  /// After the frame: providers cannot change while the tree builds.
+  void _open() {
+    final id = widget.operationId;
+    if (id == null) return;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) ref.read(transactionDeepLinkProvider.notifier).open(id);
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final pageAsync = ref.watch(transactionsControllerProvider);
     final filters = ref.watch(transactionFiltersProvider);
@@ -115,7 +156,7 @@ class TransactionsScreen extends ConsumerWidget {
 }
 
 /// The panel's contribution to the title bar: the search field (« Rechercher »,
-/// description and merchant; `Ctrl K` focuses it).
+/// description and merchant; `Ctrl K` focuses it), showing the search filter.
 class TransactionsTopBarActions extends ConsumerWidget {
   const TransactionsTopBarActions({super.key});
 
@@ -126,7 +167,8 @@ class TransactionsTopBarActions extends ConsumerWidget {
     return AppSearchField(
       key: const Key('transactionsSearchField'),
       hint: l10n.transactionsSearchHint,
-      initialValue: ref.read(transactionFiltersProvider).q,
+      // Follows the filter, so a deep link or « Effacer les filtres » clears it.
+      value: ref.watch(transactionFiltersProvider.select((f) => f.q)),
       onChanged: (value) =>
           ref.read(transactionFiltersProvider.notifier).setQuery(value),
     );

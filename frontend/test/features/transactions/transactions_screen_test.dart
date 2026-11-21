@@ -1,5 +1,7 @@
 import 'dart:async';
+import 'dart:io';
 
+import 'package:bastide/core/api/api_client.dart';
 import 'package:bastide/core/theme/app_theme.dart';
 import 'package:bastide/core/theme/tokens.dart';
 import 'package:bastide/core/widgets/amount_text.dart';
@@ -14,6 +16,7 @@ import 'package:bastide/features/rules/domain/rule.dart';
 import 'package:bastide/features/transactions/application/review_count_provider.dart';
 import 'package:bastide/features/transactions/application/transaction_selection.dart';
 import 'package:bastide/features/transactions/application/transactions_controller.dart';
+import 'package:bastide/features/transactions/data/transactions_repository.dart';
 import 'package:bastide/features/transactions/domain/transaction.dart';
 import 'package:bastide/features/transactions/presentation/review_queue.dart';
 import 'package:bastide/features/transactions/presentation/transactions_screen.dart';
@@ -22,6 +25,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mocktail/mocktail.dart';
 
 import '../../support/fake_accounts_controller.dart';
 import '../../support/fake_transactions_controller.dart';
@@ -137,10 +141,16 @@ Widget _wrap({
   TransactionContext? details,
   Locale locale = const Locale('fr'),
   ThemeData? theme,
+  String? operationId,
+  TransactionFilters? filters,
+  bool withSearch = false,
 }) {
   return ProviderScope(
     overrides: [
       transactionsControllerProvider.overrideWith(() => controller),
+      transactionsRepositoryProvider.overrideWithValue(_Repository()),
+      if (filters != null)
+        transactionFiltersProvider.overrideWith(() => _PresetFilters(filters)),
       transactionCategoriesProvider.overrideWith((ref) async => _catalog),
       accountsControllerProvider.overrideWith(
         () => FakeAccountsController(initialAccounts: [_account]),
@@ -165,7 +175,16 @@ Widget _wrap({
       theme: theme ?? AppTheme.dark,
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
-      home: const Scaffold(body: TransactionsScreen()),
+      home: Scaffold(
+        body: withSearch
+            ? Column(
+                children: [
+                  const TransactionsTopBarActions(),
+                  Expanded(child: TransactionsScreen(operationId: operationId)),
+                ],
+              )
+            : TransactionsScreen(operationId: operationId),
+      ),
     ),
   );
 }
@@ -189,6 +208,9 @@ Future<void> _pump(
   Locale locale = const Locale('fr'),
   ThemeData? theme,
   FakeTransactionsController? controller,
+  String? operationId,
+  TransactionFilters? filters,
+  bool withSearch = false,
 }) async {
   _useDesktopSurface(tester);
   await tester.pumpWidget(
@@ -202,6 +224,9 @@ Future<void> _pump(
       details: details,
       locale: locale,
       theme: theme,
+      operationId: operationId,
+      filters: filters,
+      withSearch: withSearch,
     ),
   );
   await tester.pumpAndSettle();
@@ -730,6 +755,109 @@ void main() {
     });
   });
 
+  group('deep link', () {
+    testWidgets('selects the operation and opens the inspector', (
+      tester,
+    ) async {
+      await _pump(
+        tester,
+        items: [
+          _transaction(),
+          _transaction(id: 't2', merchant: 'Cafe du Port'),
+        ],
+        operationId: 't2',
+      );
+
+      expect(_container(tester).read(selectedTransactionProvider), 't2');
+      expect(find.byKey(const Key('transactionInspector')), findsOneWidget);
+    });
+
+    testWidgets('narrows the list to its account and day', (tester) async {
+      await _pump(
+        tester,
+        items: [_transaction(id: 't2')],
+        operationId: 't2',
+        filters: const TransactionFilters(
+          needsReview: true,
+          categoryId: 'c-insurance',
+          q: 'loyer',
+          page: 3,
+        ),
+      );
+
+      expect(
+        _container(tester).read(transactionFiltersProvider),
+        TransactionFilters(
+          accountId: 'a1',
+          dateFrom: DateTime(2026, 5, 11),
+          dateTo: DateTime(2026, 5, 11),
+        ),
+      );
+    });
+
+    testWidgets('ignores an unknown id and keeps the filters', (tester) async {
+      const filters = TransactionFilters(categoryId: 'c-insurance');
+      await _pump(tester, operationId: 'missing', filters: filters);
+
+      expect(_container(tester).read(selectedTransactionProvider), isNull);
+      expect(_container(tester).read(transactionFiltersProvider), filters);
+      expect(find.byKey(const Key('transactionInspector')), findsNothing);
+    });
+
+    testWidgets('a failed read keeps the filters', (tester) async {
+      const filters = TransactionFilters(categoryId: 'c-insurance');
+      await _pump(tester, operationId: 'offline', filters: filters);
+
+      expect(_container(tester).read(selectedTransactionProvider), isNull);
+      expect(_container(tester).read(transactionFiltersProvider), filters);
+    });
+  });
+
+  group('search field', () {
+    Finder field() => find.descendant(
+      of: find.byKey(const Key('transactionsSearchField')),
+      matching: find.byType(TextField),
+    );
+    String text(WidgetTester tester) =>
+        tester.widget<TextField>(field()).controller!.text;
+
+    testWidgets('typing filters the list', (tester) async {
+      await _pump(tester, withSearch: true);
+      await tester.enterText(field(), 'loyer');
+      await tester.pump();
+
+      expect(_container(tester).read(transactionFiltersProvider).q, 'loyer');
+      expect(text(tester), 'loyer');
+    });
+
+    testWidgets('« Effacer les filtres » clears it', (tester) async {
+      await _pump(tester, withSearch: true);
+      await tester.enterText(field(), 'loyer');
+      await tester.pump();
+
+      _container(
+        tester,
+      ).read(transactionFiltersProvider.notifier).clearFilters();
+      await tester.pumpAndSettle();
+
+      expect(text(tester), isEmpty);
+    });
+
+    testWidgets('a deep link clears a typed search', (tester) async {
+      await _pump(tester, items: [_transaction(id: 't2')], withSearch: true);
+      await tester.enterText(field(), 'loyer');
+      await tester.pump();
+
+      await _container(
+        tester,
+      ).read(transactionDeepLinkProvider.notifier).open('t2');
+      await tester.pumpAndSettle();
+
+      expect(text(tester), isEmpty);
+      expect(_container(tester).read(selectedTransactionProvider), 't2');
+    });
+  });
+
   group('states', () {
     testWidgets('no transaction at all: the empty state, no tabs', (
       tester,
@@ -801,4 +929,28 @@ class _NeverLoadingController extends FakeTransactionsController {
 
   @override
   Future<TransactionsPage> build() => Completer<TransactionsPage>().future;
+}
+
+/// Filters already set when the panel opens.
+class _PresetFilters extends TransactionFiltersNotifier {
+  _PresetFilters(this.initial);
+
+  final TransactionFilters initial;
+
+  @override
+  TransactionFilters build() => initial;
+}
+
+/// The repository a deep link reads its operation from: `t2` exists, any
+/// other id is unknown, and `offline` fails as an unreachable sidecar would.
+class _Repository extends Mock implements TransactionsRepository {
+  @override
+  Future<Transaction> get(String id) async => switch (id) {
+    't2' => _transaction(id: 't2'),
+    'offline' => throw const SocketException('Connection refused'),
+    _ => throw const ApiFailure(
+      code: 'TRANSACTION_NOT_FOUND',
+      message: 'Transaction not found',
+    ),
+  };
 }

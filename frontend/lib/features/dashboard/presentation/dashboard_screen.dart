@@ -129,7 +129,9 @@ class _DashboardContent extends ConsumerWidget {
           child: RecentActivity(
             transactions: state.recent,
             onViewAll: () => context.go(TransactionsScreen.path),
-            onOpen: (_) => context.go(TransactionsScreen.path),
+            onOpen: (transaction) => context.go(
+              TransactionsScreen.location(operationId: transaction.id),
+            ),
           ),
         ),
         if (goals.isNotEmpty) ...[

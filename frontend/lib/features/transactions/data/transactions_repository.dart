@@ -59,6 +59,12 @@ class TransactionsRepository {
     );
   }
 
+  /// One transaction by [id]; an unknown id fails with `ApiFailure`.
+  Future<Transaction> get(String id) async {
+    final json = await _apiClient.get('/transactions/$id');
+    return _parse(json as Map<String, dynamic>);
+  }
+
   Future<Transaction> update(
     String id, {
     String? categoryId,
