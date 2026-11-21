@@ -13,7 +13,7 @@ from app.features.dashboard.schemas import (
     SavingsPoint,
 )
 
-#: How many months each trend series covers, ending with the current month.
+#: How many months each trend series covers, ending with the anchor month.
 BARS_MONTHS = 4
 SAVINGS_MONTHS = 12
 
@@ -75,14 +75,20 @@ class DashboardService:
             currency=currency,
         )
 
-    def trends(self, user_id: str, currency: str, today: date) -> DashboardTrends:
-        """Both trend series, over the months ending with `today`'s.
+    def trends(
+        self, user_id: str, currency: str, today: date, month: str | None = None
+    ) -> DashboardTrends:
+        """Both trend series, over the months ending with `month` (`YYYY-MM`).
 
-        Anchored on `today` rather than on a requested month: these answer "how am I trending
-        lately", a question the month picker doesn't change. `today` is a parameter rather than
-        a `date.today()` call so the series are testable without freezing the clock.
+        Without `month` the windows end with `today`'s month. The dashboard passes its selected
+        month, so paging the month picker back shows the year leading up to that month. `today`
+        is a parameter rather than a `date.today()` call so the series are testable without
+        freezing the clock.
+
+        Raises:
+            DashboardMonthInvalidError: `month` doesn't parse as `YYYY-MM`.
         """
-        current = month_index(today)
+        current = month_index(today) if month is None else _parse_month(month)
         months = range(current - SAVINGS_MONTHS + 1, current + 1)
         window_start = first_of_month(months[0])
 

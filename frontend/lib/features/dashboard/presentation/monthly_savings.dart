@@ -15,10 +15,11 @@ import '../application/dashboard_controller.dart';
 import '../domain/dashboard_trends.dart';
 
 /// « Épargne mensuelle » (`docs/design/04-dashboard.md` §3b): what each of the
-/// last twelve months put aside, as bars by sign (the default) or as a line.
-/// The heading carries the « Barres · Courbe » switch, then the 12-month
-/// average, signed and coloured, with « en moyenne sur 12 mois ». The month in
-/// progress is hatched on the bars and drawn hollow on the line.
+/// twelve months ending on the selected one put aside, as bars by sign (the
+/// default) or as a line. The heading carries the « Barres · Courbe » switch,
+/// then the 12-month average, signed and coloured, with « en moyenne sur 12
+/// mois ». The month in progress, when the window includes it, is hatched on
+/// the bars and drawn hollow on the line.
 class MonthlySavings extends ConsumerWidget {
   const MonthlySavings({super.key, required this.trends});
 
@@ -38,7 +39,7 @@ class MonthlySavings extends ConsumerWidget {
     final labels = [
       for (final point in series) monthFormat.format(point.month),
     ];
-    final provisional = series.isEmpty ? <int>{} : {series.length - 1};
+    final provisional = trends.inProgress;
     String valueLabel(num minor) => NumberFormat.compactSimpleCurrency(
       locale: locale,
       name: trends.currency,

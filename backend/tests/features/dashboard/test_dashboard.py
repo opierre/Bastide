@@ -575,7 +575,11 @@ def test_summary_rejects_invalid_month(client: TestClient) -> None:
 
 
 def _trends_service(
-    client: TestClient, headers: dict[str, str], tmp_path: Path, today: date
+    client: TestClient,
+    headers: dict[str, str],
+    tmp_path: Path,
+    today: date,
+    month: str | None = None,
 ) -> DashboardTrends:
     """Call the service directly so the series can be anchored on a fixed `today`.
 
@@ -587,7 +591,7 @@ def _trends_service(
     session = open_session(tmp_path / "test.db")
     try:
         service = DashboardService(DashboardRepository(session))
-        return service.trends(user["id"], user["currency"], today)
+        return service.trends(user["id"], user["currency"], today, month)
     finally:
         session.close()
 
@@ -632,10 +636,8 @@ def test_trends_returns_four_bar_months_and_twelve_savings_months(
     assert trends.currency == "EUR"
 
 
-def test_trends_windows_ignore_the_selected_month_and_end_at_today(
-    client: TestClient, tmp_path: Path
-) -> None:
-    """The series are anchored on the calendar, so they cross a year boundary correctly."""
+def test_trends_windows_end_at_today_without_a_month(client: TestClient, tmp_path: Path) -> None:
+    """Without a month the series end on the calendar's, crossing a year boundary correctly."""
     headers = _register(client)
     _create_account(client, headers)
 
@@ -781,15 +783,63 @@ def test_trends_requires_auth(client: TestClient) -> None:
     assert response.status_code == 401
 
 
-def test_trends_endpoint_takes_no_month_parameter(client: TestClient) -> None:
-    """A stray `?month=` is ignored rather than honoured — the window is the calendar's."""
+def test_trends_windows_end_on_the_requested_month(client: TestClient, tmp_path: Path) -> None:
+    """A selected month earlier than today moves both windows back to end on it."""
     headers = _register(client)
-
-    plain = client.get("/api/v1/dashboard/trends", headers=headers)
-    with_month = client.get(
-        "/api/v1/dashboard/trends", params={"month": "2020-01"}, headers=headers
+    account_id = _create_account(client, headers)
+    income_category = _create_category(client, headers, kind="income")
+    _insert_transaction(
+        tmp_path,
+        account_id,
+        amount_minor=42_000,
+        booked_date=date(2025, 11, 8),
+        category_id=income_category,
     )
 
-    assert plain.status_code == 200
-    assert with_month.status_code == 200
-    assert plain.json() == with_month.json()
+    trends = _trends_service(client, headers, tmp_path, date(2026, 5, 20), month="2025-11")
+
+    assert [row.month for row in trends.monthly_series] == [
+        "2025-08",
+        "2025-09",
+        "2025-10",
+        "2025-11",
+    ]
+    assert trends.savings_series[0].month == "2024-12"
+    assert trends.savings_series[-1].month == "2025-11"
+    assert len(trends.savings_series) == 12
+    assert trends.savings_series[-1].saved_minor == 42_000
+    assert trends.monthly_series[-1].income_minor == 42_000
+
+
+def test_trends_endpoint_honours_the_month_parameter(client: TestClient) -> None:
+    headers = _register(client)
+
+    response = client.get("/api/v1/dashboard/trends", params={"month": "2020-01"}, headers=headers)
+
+    assert response.status_code == 200
+    body = response.json()
+    assert body["savings_series"][0]["month"] == "2019-02"
+    assert body["savings_series"][-1]["month"] == "2020-01"
+    assert body["monthly_series"][-1]["month"] == "2020-01"
+
+
+def test_trends_endpoint_defaults_to_the_current_month(client: TestClient) -> None:
+    headers = _register(client)
+
+    response = client.get("/api/v1/dashboard/trends", headers=headers)
+
+    assert response.status_code == 200
+    assert response.json()["savings_series"][-1]["month"] == date.today().strftime("%Y-%m")
+
+
+def test_trends_rejects_invalid_month(client: TestClient) -> None:
+    headers = _register(client)
+
+    out_of_range = client.get(
+        "/api/v1/dashboard/trends", params={"month": "2026-13"}, headers=headers
+    )
+    malformed = client.get("/api/v1/dashboard/trends", params={"month": "May"}, headers=headers)
+
+    assert out_of_range.status_code == 422
+    assert out_of_range.json()["error"]["code"] == "DASHBOARD_MONTH_INVALID"
+    assert malformed.status_code == 422

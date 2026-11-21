@@ -377,6 +377,38 @@ void main() {
       expect(find.text('en moyenne sur 12 mois'), findsOneWidget);
     });
 
+    testWidgets('an earlier month hatches nothing on either view', (
+      tester,
+    ) async {
+      // The window ends on May 2026, but the calendar has moved on to July.
+      final trends = specTrends();
+      await _pump(
+        tester,
+        _state(
+          trends: DashboardTrends(
+            savingsSeries: trends.savingsSeries,
+            currency: trends.currency,
+            currentMonth: DateTime(2026, 7),
+          ),
+        ),
+      );
+
+      expect(
+        tester.widget<SignedBarChart>(find.byType(SignedBarChart)).provisional,
+        isEmpty,
+      );
+
+      await tester.tap(_byKey('savingsViewLine'));
+      await tester.pumpAndSettle();
+
+      expect(
+        tester
+            .widget<SavingsLineChart>(find.byType(SavingsLineChart))
+            .provisional,
+        isEmpty,
+      );
+    });
+
     testWidgets('the line view draws the same values', (tester) async {
       await _pump(tester, _state());
 
