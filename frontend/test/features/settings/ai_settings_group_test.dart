@@ -390,7 +390,7 @@ void main() {
 
       // Explains the rule, not just that the value was rejected.
       expect(
-        find.textContaining("le moteur doit s'exécuter sur cet ordinateur"),
+        find.textContaining("le moteur doit s’exécuter sur cet ordinateur"),
         findsOneWidget,
       );
       // Said in `negative`, under the engine line.

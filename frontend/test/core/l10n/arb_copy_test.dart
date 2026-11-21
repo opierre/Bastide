@@ -43,6 +43,14 @@ void main() {
         expect(offenders, isEmpty);
       });
 
+      test('types the curly apostrophe, never the straight one', () {
+        final offenders = [
+          for (final MapEntry(:key, :value) in messages.entries)
+            if (value.contains("'")) key,
+        ];
+        expect(offenders, isEmpty);
+      });
+
       test('never says « pour l’instant »', () {
         final offenders = [
           for (final MapEntry(:key, :value) in messages.entries)

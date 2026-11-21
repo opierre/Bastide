@@ -92,7 +92,7 @@ void main() {
     expect(find.byKey(const Key('settingsPasswordRow')), findsOneWidget);
     expect(
       find.text(
-        "Au moins 12 caractères. Il protège l'accès à vos données sur cet "
+        "Au moins 12 caractères. Il protège l’accès à vos données sur cet "
         'ordinateur.',
       ),
       findsOneWidget,

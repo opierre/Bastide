@@ -267,7 +267,7 @@ void main() {
 
     expect(find.byKey(const Key('aiRunFailedBanner')), findsOneWidget);
     expect(
-      find.text("La catégorisation n'a pas pu s'exécuter."),
+      find.text("La catégorisation n’a pas pu s’exécuter."),
       findsOneWidget,
     );
     expect(find.byKey(const Key('reviewQueueList')), findsOneWidget);

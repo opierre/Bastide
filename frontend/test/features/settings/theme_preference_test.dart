@@ -186,7 +186,7 @@ void main() {
       expect(ground(tester), AppColors.dark.bg);
       expect(
         find.text(
-          "Le thème n'a pas pu être enregistré. Rien n'a été modifié. "
+          "Le thème n’a pas pu être enregistré. Rien n’a été modifié. "
           'Réessayez.',
         ),
         findsOneWidget,

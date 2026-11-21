@@ -97,19 +97,19 @@ void main() {
 
   final cases = {
     BackendFailureKind.timeout: (
-      "Bastide n'a pas pu démarrer",
-      "Bastide couldn't start",
+      "Bastide n’a pas pu démarrer",
+      "Bastide couldn’t start",
     ),
     BackendFailureKind.notFound: (
-      "Bastide n'a pas pu démarrer",
-      "Bastide couldn't start",
+      "Bastide n’a pas pu démarrer",
+      "Bastide couldn’t start",
     ),
     BackendFailureKind.crashed: (
-      "Bastide s'est arrêté de façon inattendue",
+      "Bastide s’est arrêté de façon inattendue",
       'Bastide stopped unexpectedly',
     ),
     BackendFailureKind.schemaTooNew: (
-      "Ces données viennent d'une version plus récente",
+      "Ces données viennent d’une version plus récente",
       'This data comes from a newer version',
     ),
   };

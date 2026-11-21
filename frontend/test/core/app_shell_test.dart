@@ -106,7 +106,7 @@ void main() {
 
     const order = [
       'Bastide',
-      "Vue d'ensemble",
+      "Vue d’ensemble",
       'Tableau de bord',
       'Comptes',
       'Transactions',
@@ -186,7 +186,7 @@ void main() {
     _useFrame(tester);
     const expected = {
       '/mortgages': ('Crédits', 'Vos emprunts, leur coût et votre capacité'),
-      '/simulations': ('Simulateur', "Ce qu'un nouveau crédit changerait"),
+      '/simulations': ('Simulateur', "Ce qu’un nouveau crédit changerait"),
       '/networth': ('Synthèse', 'Ce que vous possédez, ce que vous devez'),
       '/investments': ('Placements', null),
       '/settings': ('Paramètres', null),
@@ -293,7 +293,7 @@ void main() {
     expect(find.byKey(const Key('userMenuButton')), findsOneWidget);
     expect(find.byTooltip('Ada'), findsOneWidget);
     expect(find.byTooltip('Données locales'), findsOneWidget);
-    expect(_inSidebar(find.text('Vue d\'ensemble')), findsNothing);
+    expect(_inSidebar(find.text('Vue d’ensemble')), findsNothing);
   });
 
   testWidgets('the user row opens Paramètres and Se déconnecter', (

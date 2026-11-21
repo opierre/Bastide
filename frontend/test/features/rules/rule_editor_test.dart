@@ -182,7 +182,7 @@ void main() {
       await _settlePreview(tester);
 
       expect(
-        find.text("Ce motif n'est pas une expression régulière valide."),
+        find.text("Ce motif n’est pas une expression régulière valide."),
         findsOneWidget,
       );
       expect(find.byKey(const Key('rulePreviewBanner')), findsNothing);

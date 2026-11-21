@@ -93,7 +93,7 @@ void main() {
     await tester.pumpWidget(_wrap(controller: FakeAuthController()));
     await tester.pumpAndSettle();
 
-    expect(find.text("Nom d'utilisateur"), findsOneWidget);
+    expect(find.text("Nom d’utilisateur"), findsOneWidget);
     expect(find.text('Nom affiché'), findsNothing);
     expect(find.text('Adresse e-mail'), findsOneWidget);
     expect(find.text('Mot de passe'), findsOneWidget);
@@ -240,7 +240,7 @@ void main() {
     await _fillValidForm(tester);
     await _tapSubmit(tester);
 
-    expect(find.text("Ce nom d'utilisateur est déjà pris."), findsOneWidget);
+    expect(find.text("Ce nom d’utilisateur est déjà pris."), findsOneWidget);
   });
 
   testWidgets('loading: « Création… » and the fields disabled', (tester) async {

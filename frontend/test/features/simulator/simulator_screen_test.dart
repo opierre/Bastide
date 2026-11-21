@@ -346,7 +346,7 @@ void main() {
 
     expect(
       find.text(
-        "À ce taux, l'échéance ne rembourse pas le capital : baissez le taux "
+        "À ce taux, l’échéance ne rembourse pas le capital : baissez le taux "
         'ou allongez la durée.',
       ),
       findsOneWidget,

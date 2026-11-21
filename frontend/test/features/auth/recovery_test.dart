@@ -181,7 +181,7 @@ void main() {
       await tester.pumpWidget(wrap(const ForgotPasswordScreen()));
       await tester.pumpAndSettle();
 
-      expect(find.text("E-mail ou nom d'utilisateur"), findsOneWidget);
+      expect(find.text("E-mail ou nom d’utilisateur"), findsOneWidget);
     });
 
     testWidgets('a short new password keeps the submit disabled', (

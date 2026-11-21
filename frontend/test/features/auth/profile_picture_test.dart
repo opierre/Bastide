@@ -371,7 +371,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(
-        find.text("This file isn't a PNG, JPEG or WebP picture."),
+        find.text("This file isn’t a PNG, JPEG or WebP picture."),
         findsOneWidget,
       );
     });

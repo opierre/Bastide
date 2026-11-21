@@ -239,9 +239,11 @@ void main() {
 
       final local = _exportedAt.toLocal();
       final expected =
-          'Dernière sauvegarde le ${DateFormat.yMd('fr').format(local)} '
+          'Dernière sauvegarde le ${DateFormat.yMMMMd('fr').format(local)} '
           'à ${DateFormat.Hm('fr').format(local)}';
       expect(find.text(expected), findsOneWidget);
+      // The month is spelled out, as in the mockup, not « 11/09/2026 ».
+      expect(find.textContaining('septembre 2026 à '), findsOneWidget);
       expect(find.byKey(const Key('settingsBackupRestoreError')), findsNothing);
     });
 
@@ -267,7 +269,7 @@ void main() {
       await tester.tap(find.byKey(const Key('settingsBackupExportButton')));
       await tester.pump();
 
-      expect(find.text("Préparation de l'archive…"), findsOneWidget);
+      expect(find.text("Préparation de l’archive…"), findsOneWidget);
 
       pending.complete(
         ApiBytesResponse(

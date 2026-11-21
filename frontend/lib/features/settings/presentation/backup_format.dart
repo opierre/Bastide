@@ -3,11 +3,12 @@ import 'package:intl/intl.dart';
 import '../../../l10n/app_localizations.dart';
 import '../domain/backup.dart';
 
-/// A backup instant as « 11/09/2026 à 14:32 », in local time and [locale].
+/// A backup instant with the long date, « 11 mai 2026 à 14:32 », in local
+/// time and [locale].
 String formatBackupInstant(AppLocalizations l10n, String locale, DateTime at) {
   final local = at.toLocal();
   return l10n.settingsBackupDateTime(
-    DateFormat.yMd(locale).format(local),
+    DateFormat.yMMMMd(locale).format(local),
     DateFormat.Hm(locale).format(local),
   );
 }

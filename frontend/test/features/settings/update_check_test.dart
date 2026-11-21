@@ -184,7 +184,7 @@ void main() {
         expect(find.byKey(const Key('settingsUpdateAvailable')), findsNothing);
         expect(find.byKey(const Key('settingsUpdateCheckNow')), findsNothing);
         expect(
-          find.textContaining('Rien d\'autre n\'est envoyé'),
+          find.textContaining('Rien d’autre n’est envoyé'),
           findsOneWidget,
         );
       },

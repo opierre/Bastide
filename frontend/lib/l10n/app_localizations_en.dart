@@ -109,7 +109,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get settingsIncomeSaveFailed =>
-      'The income couldn\'t be saved. Nothing was changed. Try again.';
+      'The income couldn’t be saved. Nothing was changed. Try again.';
 
   @override
   String get settingsGroupSecurity => 'Security';
@@ -244,7 +244,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingsThemeTitle => 'Theme';
 
   @override
-  String get settingsThemeNote => 'Dark, light, or your system\'s.';
+  String get settingsThemeNote => 'Dark, light, or your system’s.';
 
   @override
   String get settingsThemeSystem => 'System';
@@ -635,7 +635,7 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get accountCurrencyHelper => 'The currency is your profile\'s.';
+  String get accountCurrencyHelper => 'The currency is your profile’s.';
 
   @override
   String get accountEdit => 'Edit';
@@ -656,7 +656,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String cardSettlementNoRule(String card) {
-    return '$card\'s monthly debit counts as spending on top of the card\'s purchases: create its settlement rule.';
+    return '$card’s monthly debit counts as spending on top of the card’s purchases: create its settlement rule.';
   }
 
   @override
@@ -676,9 +676,9 @@ class AppLocalizationsEn extends AppLocalizations {
       count,
       locale: localeName,
       other:
-          '$count purchases on $card ($amount) have waited for their debit since $dateString: the card\'s rule may no longer match the bank\'s wording.',
+          '$count purchases on $card ($amount) have waited for their debit since $dateString: the card’s rule may no longer match the bank’s wording.',
       one:
-          'One purchase on $card ($amount) has waited for its debit since $dateString: the card\'s rule may no longer match the bank\'s wording.',
+          'One purchase on $card ($amount) has waited for its debit since $dateString: the card’s rule may no longer match the bank’s wording.',
     );
     return '$_temp0';
   }
@@ -691,11 +691,11 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String settlementRuleBody(String card) {
-    return 'Each month, the bank charges the total of $card to the account that pays it. That debit is a transfer, not spending: the card\'s purchases are already counted one by one.';
+    return 'Each month, the bank charges the total of $card to the account that pays it. That debit is a transfer, not spending: the card’s purchases are already counted one by one.';
   }
 
   @override
-  String get settlementRulePatternLabel => 'The debit\'s label contains';
+  String get settlementRulePatternLabel => 'The debit’s label contains';
 
   @override
   String get settlementRulePatternHelper =>
@@ -710,7 +710,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get settlementRuleFromHelper =>
-      'Earlier debits stay spending: the purchases they paid aren\'t in the app. Proposed from the card\'s imported history.';
+      'Earlier debits stay spending: the purchases they paid aren’t in the app. Proposed from the card’s imported history.';
 
   @override
   String get settlementRuleFromInvalid => 'Invalid date.';
@@ -742,10 +742,10 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get settlementRuleLoadFailed => 'Couldn\'t load the card\'s rule.';
+  String get settlementRuleLoadFailed => 'Couldn’t load the card’s rule.';
 
   @override
-  String get settlementRuleSaveFailed => 'Couldn\'t save the rule. Try again.';
+  String get settlementRuleSaveFailed => 'Couldn’t save the rule. Try again.';
 
   @override
   String get accountFormCancel => 'Cancel';
@@ -755,7 +755,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get accountArchiveConfirmBody =>
-      'You\'ll still be able to view its history, but it will no longer appear in your accounts list.';
+      'You’ll still be able to view its history, but it will no longer appear in your accounts list.';
 
   @override
   String get accountFormCreateTitle => 'New account';
@@ -807,7 +807,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get accountSettlementHelper =>
-      'The account charged the card\'s total each month: that debit is a transfer between the two, not spending.';
+      'The account charged the card’s total each month: that debit is a transfer between the two, not spending.';
 
   @override
   String get accountSettlementPlaceholder => 'Choose an account';
@@ -861,7 +861,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get accountOpeningBalanceEditNote =>
-      'Correcting this shifts the account\'s balance and any saved history by the same amount. It never touches a transaction.';
+      'Correcting this shifts the account’s balance and any saved history by the same amount. It never touches a transaction.';
 
   @override
   String get accountOpeningBalanceRequired => 'Balance is required.';
@@ -887,7 +887,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get importAccountsUnavailable =>
-      'Couldn\'t load your accounts. Try again in a moment.';
+      'Couldn’t load your accounts. Try again in a moment.';
 
   @override
   String get importDropZoneTitle => 'Drop an OFX or QFX statement';
@@ -957,7 +957,7 @@ class AppLocalizationsEn extends AppLocalizations {
     final intl.DateFormat dateDateFormat = intl.DateFormat.yMd(localeName);
     final String dateString = dateDateFormat.format(date);
 
-    return 'Off by $amount from the bank\'s balance as of $dateString.';
+    return 'Off by $amount from the bank’s balance as of $dateString.';
   }
 
   @override
@@ -1008,7 +1008,7 @@ class AppLocalizationsEn extends AppLocalizations {
       'This file holds several accounts and none was named.';
 
   @override
-  String get importErrorStatementNotFound => 'That account isn\'t in the file.';
+  String get importErrorStatementNotFound => 'That account isn’t in the file.';
 
   @override
   String get importDuplicateDestination =>
@@ -1315,7 +1315,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get categoryPickerSearchHint => 'Change category';
 
   @override
-  String get categoryPickerLoadError => 'Couldn\'t load categories.';
+  String get categoryPickerLoadError => 'Couldn’t load categories.';
 
   @override
   String get categoryPickerEmpty => 'No category matches.';
@@ -1536,7 +1536,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get categorySystemChildrenSchool => 'Schooling';
 
   @override
-  String get categorySystemChildrenActivities => 'Kids\' activities';
+  String get categorySystemChildrenActivities => 'Kids’ activities';
 
   @override
   String get categorySystemPets => 'Pets';
@@ -1626,7 +1626,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get dashboardRetry => 'Retry';
 
   @override
-  String get dashboardErrorInvalidMonth => 'The requested month isn\'t valid.';
+  String get dashboardErrorInvalidMonth => 'The requested month isn’t valid.';
 
   @override
   String get dashboardErrorGeneric =>
@@ -1882,7 +1882,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get categoryErrorValidation =>
-      'That information isn\'t valid. Check the name and the kind.';
+      'That information isn’t valid. Check the name and the kind.';
 
   @override
   String get categoryErrorGeneric => 'Something went wrong. Please try again.';
@@ -2076,10 +2076,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get logoZoomLabel => 'Enlarged logo';
 
   @override
-  String get ruleLogoInvalid => 'This file isn\'t a PNG, JPEG or WebP picture.';
+  String get ruleLogoInvalid => 'This file isn’t a PNG, JPEG or WebP picture.';
 
   @override
-  String get ruleLogoError => 'The logo couldn\'t be saved. Try again.';
+  String get ruleLogoError => 'The logo couldn’t be saved. Try again.';
 
   @override
   String get ruleLogoCropTitle => 'Crop the logo';
@@ -2106,7 +2106,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get ruleLogoUrlLead =>
-      'Paste a picture\'s address. Bastide downloads it from this computer, then you crop it.';
+      'Paste a picture’s address. Bastide downloads it from this computer, then you crop it.';
 
   @override
   String get ruleLogoUrlLabel => 'Picture address';
@@ -2126,7 +2126,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get ruleLogoUrlUnreachable =>
-      'The picture couldn\'t be downloaded. Check the address and your connection.';
+      'The picture couldn’t be downloaded. Check the address and your connection.';
 
   @override
   String ruleLogoUrlTooLarge(int megabytes) {
@@ -2135,7 +2135,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get ruleLogoUrlNotAPicture =>
-      'This address doesn\'t lead to a picture.';
+      'This address doesn’t lead to a picture.';
 
   @override
   String get ruleFormCancel => 'Cancel';
@@ -2182,7 +2182,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get ruleErrorPatternInvalid =>
-      'That pattern isn\'t a valid regular expression.';
+      'That pattern isn’t a valid regular expression.';
 
   @override
   String get ruleErrorNotFound => 'That rule no longer exists.';
@@ -2193,7 +2193,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get ruleErrorValidation =>
-      'That information isn\'t valid. Check the pattern and the priority.';
+      'That information isn’t valid. Check the pattern and the priority.';
 
   @override
   String get ruleErrorGeneric => 'Something went wrong. Please try again.';
@@ -2216,20 +2216,20 @@ class AppLocalizationsEn extends AppLocalizations {
   String get rulePackClose => 'Close';
 
   @override
-  String get rulePackRefusedTitle => 'This file wasn\'t accepted';
+  String get rulePackRefusedTitle => 'This file wasn’t accepted';
 
   @override
   String get rulePackRefusedMalformed =>
-      'This file isn\'t a Bastide rule pack. Expected a JSON file with a name, a format version and a list of rules.';
+      'This file isn’t a Bastide rule pack. Expected a JSON file with a name, a format version and a list of rules.';
 
   @override
   String rulePackRefusedVersion(int version) {
-    return 'This pack uses a format version this build of Bastide doesn\'t read. It reads version $version. A pack we only half understood would silently drop rules, so it is refused whole.';
+    return 'This pack uses a format version this build of Bastide doesn’t read. It reads version $version. A pack we only half understood would silently drop rules, so it is refused whole.';
   }
 
   @override
   String get rulePackRefusedRegex =>
-      'This pack contains a “regex” rule. Regular expressions aren\'t accepted in a shared pack: an expression from someone else\'s file can lock up your machine. Use “contains”, “equals” or “range”.';
+      'This pack contains a “regex” rule. Regular expressions aren’t accepted in a shared pack: an expression from someone else’s file can lock up your machine. Use “contains”, “equals” or “range”.';
 
   @override
   String rulePackWouldMatch(int count) {
@@ -2305,7 +2305,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get rulePackExportPrivacyNotice =>
-      'Read it before saving. A pattern can hold personal details, such as your landlord\'s name: “VIR SALAIRE DUPONT”.';
+      'Read it before saving. A pattern can hold personal details, such as your landlord’s name: “VIR SALAIRE DUPONT”.';
 
   @override
   String rulePackExportContents(int count) {
@@ -2324,8 +2324,8 @@ class AppLocalizationsEn extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '$count rules can\'t be exported',
-      one: '$count rule can\'t be exported',
+      other: '$count rules can’t be exported',
+      one: '$count rule can’t be exported',
     );
     return '$_temp0';
   }
@@ -2356,7 +2356,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get rulePackStartWithHelper =>
-      'You\'ll see what the pack would do before importing it.';
+      'You’ll see what the pack would do before importing it.';
 
   @override
   String get rulePackRulesLabel => 'Rules in the pack';
@@ -2378,8 +2378,8 @@ class AppLocalizationsEn extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '$count logos couldn\'t be added',
-      one: 'One logo couldn\'t be added',
+      other: '$count logos couldn’t be added',
+      one: 'One logo couldn’t be added',
     );
     return '$_temp0';
   }
@@ -2390,7 +2390,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String rulePackLogoFailureInvalidImage(String pattern) {
-    return '“$pattern”: the file isn\'t a PNG, JPEG or WebP picture.';
+    return '“$pattern”: the file isn’t a PNG, JPEG or WebP picture.';
   }
 
   @override
@@ -2466,7 +2466,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get alwaysRuleSuggestionFailed =>
-      'Couldn\'t pre-fill the rule. Enter the pattern yourself.';
+      'Couldn’t pre-fill the rule. Enter the pattern yourself.';
 
   @override
   String get reviewQueueRunAction => 'Categorize with AI';
@@ -2501,9 +2501,8 @@ class AppLocalizationsEn extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other:
-          'Categorization finished. $count operations couldn\'t be analysed.',
-      one: 'Categorization finished. $count operation couldn\'t be analysed.',
+      other: 'Categorization finished. $count operations couldn’t be analysed.',
+      one: 'Categorization finished. $count operation couldn’t be analysed.',
     );
     return '$_temp0';
   }
@@ -2512,13 +2511,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get runBannerPartialAction => 'View';
 
   @override
-  String get runBannerFailed => 'Categorization couldn\'t run.';
+  String get runBannerFailed => 'Categorization couldn’t run.';
 
   @override
   String get runBannerDismiss => 'Dismiss';
 
   @override
-  String get runStartFailed => 'Categorization can\'t be started right now.';
+  String get runStartFailed => 'Categorization can’t be started right now.';
 
   @override
   String get settingsAiTitle => 'Local AI';
@@ -2531,7 +2530,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get settingsAiPrivacy =>
-      'Your transactions\' labels are sent to a model that runs on this computer. Nothing leaves your machine.';
+      'Your transactions’ labels are sent to a model that runs on this computer. Nothing leaves your machine.';
 
   @override
   String get settingsAiBaseUrlLabel => 'Engine address';
@@ -2573,7 +2572,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get settingsAiLoadFailed =>
-      'Your settings couldn\'t be loaded right now.';
+      'Your settings couldn’t be loaded right now.';
 
   @override
   String get settingsAiRetry => 'Try again';
@@ -2623,7 +2622,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get settingsBackupErrorInvalid =>
-      'This file isn\'t a valid Bastide backup, or it\'s damaged.';
+      'This file isn’t a valid Bastide backup, or it’s damaged.';
 
   @override
   String get settingsBackupErrorCurrency =>
@@ -2639,7 +2638,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get settingsBackupErrorUnknown =>
-      'The restore failed. Your data hasn\'t been changed.';
+      'The restore failed. Your data hasn’t been changed.';
 
   @override
   String settingsBackupExported(
@@ -2749,7 +2748,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get subscriptionsDetectFailed => 'Detection could not run.';
 
   @override
-  String get subscriptionsBurdenLabel => 'Monthly charge';
+  String get subscriptionsBurdenLabel => 'Monthly cost';
 
   @override
   String get subscriptionsBurdenCaption =>
@@ -2923,7 +2922,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String subscriptionSignalIncrease(String from, String to) {
-    return 'Increase: $from → $to';
+    return 'Price rise: $from → $to';
   }
 
   @override
@@ -2970,7 +2969,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get subscriptionArchiveFailed =>
-      'Couldn\'t change whether this payment is archived.';
+      'Couldn’t change whether this payment is archived.';
 
   @override
   String subscriptionsShowArchived(int count) {
@@ -2987,7 +2986,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get subscriptionErrorInvalidTransition =>
-      'That status change isn\'t available for this payment.';
+      'That status change isn’t available for this payment.';
 
   @override
   String get subscriptionErrorExists =>
@@ -3013,7 +3012,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get subscriptionErrorMergeInvalid =>
-      'These two subscriptions can\'t be merged.';
+      'These two subscriptions can’t be merged.';
 
   @override
   String subscriptionsMergeSuggestion(String source, String target) {
@@ -3024,7 +3023,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get subscriptionsMergeAction => 'Merge';
 
   @override
-  String get subscriptionsMergeKeepApart => 'They\'re different';
+  String get subscriptionsMergeKeepApart => 'They’re different';
 
   @override
   String get subscriptionsMergeDone => 'Subscriptions merged';
@@ -3053,7 +3052,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get subscriptionsLoadFailed =>
-      'Subscriptions couldn\'t be loaded. Nothing was changed.';
+      'Subscriptions couldn’t be loaded. Nothing was changed.';
 
   @override
   String get subscriptionsRetry => 'Try again';
@@ -3091,7 +3090,7 @@ class AppLocalizationsEn extends AppLocalizations {
     String date,
     String annual,
   ) {
-    return 'Increase: $from → $to on $date, that\'s $annual a year.';
+    return 'Price rise: $from → $to on $date, that’s $annual a year.';
   }
 
   @override
@@ -3113,7 +3112,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get subscriptionDetailLoadFailed =>
-      'This recurring payment couldn\'t be loaded. Nothing was changed.';
+      'This recurring payment couldn’t be loaded. Nothing was changed.';
 
   @override
   String get subscriptionDetailMoreActions => 'More actions';
@@ -3245,7 +3244,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get goalAllocationsFailed =>
-      'The allocations couldn\'t be loaded. Nothing was changed.';
+      'The allocations couldn’t be loaded. Nothing was changed.';
 
   @override
   String get goalImageChange => 'Change';
@@ -3274,11 +3273,10 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get goalImageInvalid =>
-      'This file isn\'t a PNG, JPEG or WebP picture.';
+  String get goalImageInvalid => 'This file isn’t a PNG, JPEG or WebP picture.';
 
   @override
-  String get goalImageError => 'The image couldn\'t be saved. Try again.';
+  String get goalImageError => 'The image couldn’t be saved. Try again.';
 
   @override
   String goalImageAlt(String name) {
@@ -3314,7 +3312,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get goalsLoadFailed =>
-      'Your goals couldn\'t be loaded. Nothing was changed.';
+      'Your goals couldn’t be loaded. Nothing was changed.';
 
   @override
   String get goalsRetry => 'Try again';
@@ -3414,7 +3412,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get settingsResetSubtitle =>
-      'Deletes this profile\'s transactions, accounts, rules, custom categories, goals, subscriptions, loans, properties, investments and simulations. Exported backups are not touched.';
+      'Deletes this profile’s transactions, accounts, rules, custom categories, goals, subscriptions, loans, properties, investments and simulations. Exported backups are not touched.';
 
   @override
   String get settingsResetButton => 'Reset…';
@@ -3424,7 +3422,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String settingsResetConfirmLead(String name) {
-    return 'Everything in $name\'s profile will be permanently deleted:';
+    return 'Everything in $name’s profile will be permanently deleted:';
   }
 
   @override
@@ -3450,7 +3448,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get settingsResetErrorUnknown =>
-      'The reset failed. Your data hasn\'t been changed.';
+      'The reset failed. Your data hasn’t been changed.';
 
   @override
   String get navSectionWealth => 'Wealth';
@@ -3478,7 +3476,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get mortgagesAdd => 'New loan';
 
   @override
-  String get mortgagesLoadFailed => 'Couldn\'t load your loans.';
+  String get mortgagesLoadFailed => 'Couldn’t load your loans.';
 
   @override
   String get mortgagesRetry => 'Retry';
@@ -3589,7 +3587,7 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get mortgageDetailLoadFailed => 'Couldn\'t load this loan.';
+  String get mortgageDetailLoadFailed => 'Couldn’t load this loan.';
 
   @override
   String get mortgageDetailInstalmentLabel => 'Total instalment';
@@ -3725,7 +3723,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get mortgageFormPlateInterestOnly =>
-      'An interest-only loan\'s instalment shows once the loan is saved.';
+      'An interest-only loan’s instalment shows once the loan is saved.';
 
   @override
   String get mortgageFormCancel => 'Cancel';
@@ -3748,7 +3746,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get mortgageErrorNonAmortizing =>
-      'This loan never repays: the instalment doesn\'t cover the first month\'s interest. Change the rate, the amount borrowed or the term.';
+      'This loan never repays: the instalment doesn’t cover the first month’s interest. Change the rate, the amount borrowed or the term.';
 
   @override
   String get mortgageErrorFeesExceed =>
@@ -3821,7 +3819,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get mortgageScheduleLoadFailed =>
-      'Couldn\'t load the amortisation schedule.';
+      'Couldn’t load the amortisation schedule.';
 
   @override
   String get mortgagesTableLoan => 'Loan';
@@ -3885,7 +3883,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get mortgageScheduleYearSelect => 'Year';
 
   @override
-  String get simulatorLoadFailed => 'Couldn\'t load the simulator.';
+  String get simulatorLoadFailed => 'Couldn’t load the simulator.';
 
   @override
   String get simulatorRetry => 'Try again';
@@ -4116,18 +4114,18 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get simulatorComputeFailed =>
-      'The calculation didn\'t go through. Try again in a moment.';
+      'The calculation didn’t go through. Try again in a moment.';
 
   @override
   String get simulatorErrorNonAmortizing =>
-      'At this rate the instalment doesn\'t repay the principal: lower the rate or lengthen the term.';
+      'At this rate the instalment doesn’t repay the principal: lower the rate or lengthen the term.';
 
   @override
   String get simulatorErrorFeesExceed =>
       'Fees must stay below the amount borrowed.';
 
   @override
-  String get simulatorErrorValidation => 'Some values aren\'t accepted.';
+  String get simulatorErrorValidation => 'Some values aren’t accepted.';
 
   @override
   String get simulatorErrorGeneric => 'Something went wrong. Try again.';
@@ -4149,7 +4147,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get simulatorIncomeSubmit => 'Declare';
 
   @override
-  String get simulatorIncomeFailed => 'Couldn\'t save this income. Try again.';
+  String get simulatorIncomeFailed => 'Couldn’t save this income. Try again.';
 
   @override
   String get simulatorCancel => 'Cancel';
@@ -4178,7 +4176,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get simulatorErrorLimitReached =>
-      'You\'ve reached the maximum number of saved scenarios. Delete one to add another.';
+      'You’ve reached the maximum number of saved scenarios. Delete one to add another.';
 
   @override
   String get simulatorErrorNotFound => 'This scenario no longer exists.';
@@ -4251,7 +4249,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get simulatorCompareClose => 'Close comparison';
 
   @override
-  String get simulatorCompareFailed => 'Couldn\'t compute the comparison.';
+  String get simulatorCompareFailed => 'Couldn’t compute the comparison.';
 
   @override
   String get simulatorCompareTotalInterest => 'Total interest';
@@ -4365,7 +4363,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get propertyErrorValuationInFuture =>
-      'A valuation date can\'t be in the future.';
+      'A valuation date can’t be in the future.';
 
   @override
   String get propertyErrorNotFound => 'This property no longer exists.';
@@ -4375,7 +4373,7 @@ class AppLocalizationsEn extends AppLocalizations {
       'Some values were refused. Check the form.';
 
   @override
-  String get propertyErrorGeneric => 'Couldn\'t save the property. Try again.';
+  String get propertyErrorGeneric => 'Couldn’t save the property. Try again.';
 
   @override
   String get propertyMenuTooltip => 'Actions';
@@ -4523,7 +4521,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get networthEmptyImport => 'Go to imports';
 
   @override
-  String get networthLoadFailed => 'Couldn\'t load your net worth.';
+  String get networthLoadFailed => 'Couldn’t load your net worth.';
 
   @override
   String get networthRetry => 'Retry';
@@ -4609,7 +4607,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get networthDeclaredLoadFailed =>
-      'Couldn\'t load the declared history.';
+      'Couldn’t load the declared history.';
 
   @override
   String get networthDeclaredRetry => 'Retry';
@@ -4640,7 +4638,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get authResetNote =>
-      'You were given this code when you created your account. Without it the password can\'t be reset: your data never leaves this computer.';
+      'You were given this code when you created your account. Without it the password can’t be reset: your data never leaves this computer.';
 
   @override
   String get authBackToLogin => 'Back to sign in';
@@ -4681,7 +4679,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get settingsRecoveryModalGenerated =>
-      'Write this code down and keep it safe: it won\'t be shown again.';
+      'Write this code down and keep it safe: it won’t be shown again.';
 
   @override
   String get settingsRecoveryModalGenerate => 'Generate';
@@ -4735,11 +4733,11 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get authDisplayNameHelper =>
-      'Also used to sign in. 3 to 32 characters: letters, digits, \'.\', \'_\' or \'-\'.';
+      'Also used to sign in. 3 to 32 characters: letters, digits, ’.’, ’_’ or ’-’.';
 
   @override
   String get authDisplayNameInvalid =>
-      '3 to 32 characters: unaccented letters, digits, \'.\', \'_\' or \'-\'.';
+      '3 to 32 characters: unaccented letters, digits, ’.’, ’_’ or ’-’.';
 
   @override
   String get authDisplayNameTaken => 'This username is already taken.';
@@ -4777,7 +4775,7 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get settingsAvatarError => 'The avatar couldn\'t be saved. Try again.';
+  String get settingsAvatarError => 'The avatar couldn’t be saved. Try again.';
 
   @override
   String get settingsAvatarChoosePicture => 'Choose a picture';
@@ -4792,11 +4790,11 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get settingsAvatarPictureInvalid =>
-      'This file isn\'t a PNG, JPEG or WebP picture.';
+      'This file isn’t a PNG, JPEG or WebP picture.';
 
   @override
   String get settingsAvatarPictureError =>
-      'The picture couldn\'t be saved. Try again.';
+      'The picture couldn’t be saved. Try again.';
 
   @override
   String get settingsAvatarCropTitle => 'Crop the picture';
@@ -4839,15 +4837,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get startupOpenLogs => 'Open logs folder';
 
   @override
-  String get startupDidNotStartTitle => 'Bastide couldn\'t start';
+  String get startupDidNotStartTitle => 'Bastide couldn’t start';
 
   @override
   String get startupDidNotStartMessage =>
-      'The app\'s local engine didn\'t start. Try again; if it happens again, the logs say why.';
+      'The app’s local engine didn’t start. Try again; if it happens again, the logs say why.';
 
   @override
   String get startupNotFoundMessage =>
-      'Some of the app\'s files are missing. Reinstall Bastide: your data is kept separately and won\'t be touched.';
+      'Some of the app’s files are missing. Reinstall Bastide: your data is kept separately and won’t be touched.';
 
   @override
   String get startupUnreachableMessage =>
@@ -4872,12 +4870,12 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String startupVersionMismatchMessage(String app, String backend) {
-    return 'The app ($app) and its local engine ($backend) come from different versions. Reinstall Bastide to bring them back in line; your data isn\'t touched.';
+    return 'The app ($app) and its local engine ($backend) come from different versions. Reinstall Bastide to bring them back in line; your data isn’t touched.';
   }
 
   @override
   String startupVersionMismatchDebugMessage(String app, String backend) {
-    return 'The local engine ($backend) doesn\'t match the app ($app): it was probably left running from an earlier session. Restart it, or continue anyway.';
+    return 'The local engine ($backend) doesn’t match the app ($app): it was probably left running from an earlier session. Restart it, or continue anyway.';
   }
 
   @override
@@ -5078,7 +5076,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get linkCardConfirm => 'Link';
 
   @override
-  String get linkCardFailed => 'Couldn\'t link the card. Try again.';
+  String get linkCardFailed => 'Couldn’t link the card. Try again.';
 
   @override
   String linkCardLinked(String card) {
@@ -5126,7 +5124,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get markRecurringIntro =>
-      'These are the transactions Bastide would group together. Untick any that don\'t belong.';
+      'These are the transactions Bastide would group together. Untick any that don’t belong.';
 
   @override
   String get markRecurringConfidenceHigh => 'High confidence';
@@ -5258,7 +5256,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get seriesPickerSearchHint => 'Search a series';
 
   @override
-  String get seriesPickerEmpty => 'You don\'t track any series.';
+  String get seriesPickerEmpty => 'You don’t track any series.';
 
   @override
   String seriesPickerNoMatch(String query) {
