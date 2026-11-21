@@ -58,8 +58,9 @@ Two rows change what exists today and need more than a restyle:
 - « Objectif de taux d’épargne » is a stored per-user value (`savings_rate_goal_percent`,
   1–50 %, default 20). The Dashboard summary carries it, so the repère's mark and the goal status
   follow it.
-- « Revenu déclaré » exists: it is edited today from the « Déclarer un revenu » dialog of
-  Crédits. This row edits the same value, and the Crédits and Simulateur links open this row.
+- « Revenu déclaré » is edited only here. Every « Déclarer un revenu » action in Crédits and
+  Simulateur opens Préférences (`/settings?focus=income`), scrolls this row into view and focuses
+  its field; both panels re-read the value once it is saved.
 
 ## Données
 | Group | Row | Right side |
