@@ -159,7 +159,7 @@ class _ReviewQueueState extends ConsumerState<ReviewQueue> {
   }
 }
 
-/// Left, 260 px: « 4 sur 16 classées aujourd’hui » over a repère without
+/// Left, 260 px: « 4 sur 16 classées » over a repère without
 /// mark. Right, when local AI is on: the Note (`cpu`) and the run's start.
 class _ProgressRow extends ConsumerWidget {
   const _ProgressRow({

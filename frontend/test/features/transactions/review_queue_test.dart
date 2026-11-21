@@ -340,7 +340,7 @@ void main() {
     await tester.pumpWidget(build(2));
     await tester.pumpAndSettle();
 
-    expect(find.text('2 sur 4 classées aujourd’hui'), findsOneWidget);
+    expect(find.text('2 sur 4 classées'), findsOneWidget);
     final meter = tester.widget<RepereMeter>(find.byType(RepereMeter));
     expect(meter.fraction, 0.5);
     expect(meter.markFraction, isNull);
@@ -437,7 +437,7 @@ void main() {
     expect(find.text('Confirm'), findsOneWidget);
     expect(find.text('Correct'), findsOneWidget);
     expect(find.text('No proposal'), findsOneWidget);
-    expect(find.text('0 of 2 filed today'), findsOneWidget);
+    expect(find.text('0 of 2 filed'), findsOneWidget);
     expect(find.textContaining('confidence 71'), findsOneWidget);
     expect(find.textContaining('confiance'), findsNothing);
   });

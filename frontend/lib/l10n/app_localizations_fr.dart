@@ -1265,7 +1265,7 @@ class AppLocalizationsFr extends AppLocalizations {
   }
 
   @override
-  String get reviewProgressCaption => 'classées aujourd’hui';
+  String get reviewProgressCaption => 'classées';
 
   @override
   String reviewAiNote(int count) {

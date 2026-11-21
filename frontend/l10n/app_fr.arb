@@ -1562,7 +1562,7 @@
       }
     }
   },
-  "reviewProgressCaption": "classées aujourd’hui",
+  "reviewProgressCaption": "classées",
   "@reviewProgressCaption": {
     "description": "Follows the review progress count."
   },

@@ -62,8 +62,8 @@ lifts the filter. Footer « Annuler » · « Appliquer ».
 ## Tab « À vérifier »
 Single pane.
 
-- **Progress row,** padding 16 32: left, 260 px: « {done} sur {total} » 13/600 + « classées
-  aujourd’hui » `textSecondary`, over a repère without mark. Right, a Note (`cpu` icon):
+- **Progress row,** padding 16 32: left, 260 px: « {done} sur {total} » 13/600 + « classées »
+  `textSecondary`, over a repère without mark. Right, a Note (`cpu` icon):
   « L’IA locale propose une catégorie pour {n} opérations. Rien n’est classé sans votre
   accord. »
 - **Table,** edge to edge:

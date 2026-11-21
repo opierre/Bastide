@@ -349,7 +349,7 @@
   "transactionCreateRule": "Create a rule",
   "transactionEditRule": "Edit the rule",
   "reviewProgressCount": "{done} of {total}",
-  "reviewProgressCaption": "filed today",
+  "reviewProgressCaption": "filed",
   "reviewAiNote": "{count, plural, =0{Local AI proposed no category. Nothing is filed without your consent.} =1{Local AI proposes a category for 1 operation. Nothing is filed without your consent.} other{Local AI proposes a category for {count} operations. Nothing is filed without your consent.}}",
   "reviewColumnLabel": "Statement label",
   "reviewColumnDate": "Date",

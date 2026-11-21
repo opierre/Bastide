@@ -1259,7 +1259,7 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get reviewProgressCaption => 'filed today';
+  String get reviewProgressCaption => 'filed';
 
   @override
   String reviewAiNote(int count) {

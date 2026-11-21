@@ -334,7 +334,7 @@ French first, English at parity (same keys, same structure). The interface is ca
    colon when the second explains the first. The dash « — » is only the empty-value placeholder.
 3. Empty states: a title that states the fact (« Aucun objectif »), one sentence that says what
    to do, one button. No « pour l’instant », no metaphor.
-4. Encouragement is a fact with a number (« 4 sur 16 classées aujourd’hui », « Objectif
+4. Encouragement is a fact with a number (« 4 sur 16 classées », « Objectif
    atteint »), never an exclamation.
 5. The privacy promise appears in three places only: the sidebar (« Données locales »), the
    auth screens (« Vos données restent sur cet ordinateur. ») and the AI settings row. It also

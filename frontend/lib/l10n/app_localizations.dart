@@ -2002,7 +2002,7 @@ abstract class AppLocalizations {
   /// Follows the review progress count.
   ///
   /// In fr, this message translates to:
-  /// **'classées aujourd’hui'**
+  /// **'classées'**
   String get reviewProgressCaption;
 
   /// Note on the review progress row while local AI is on.
