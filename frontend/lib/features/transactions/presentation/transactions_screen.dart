@@ -23,8 +23,9 @@ import 'transactions_list_pane.dart';
 /// the list pane and the inspector of the selected operation; « À vérifier »
 /// is the review queue.
 ///
-/// [operationId] opens the panel on that operation (`?operation=<id>`):
-/// selected, scrolled into view, in the inspector. An unknown id is ignored.
+/// [operationId] opens the panel on that operation (`?operation=<id>`): the
+/// list narrowed to its account and day, the operation in the inspector. An
+/// unknown id is ignored.
 class TransactionsScreen extends ConsumerStatefulWidget {
   const TransactionsScreen({super.key, this.operationId});
 
@@ -63,7 +64,7 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen> {
     final id = widget.operationId;
     if (id == null) return;
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) ref.read(transactionRevealProvider.notifier).open(id);
+      if (mounted) ref.read(transactionDeepLinkProvider.notifier).open(id);
     });
   }
 

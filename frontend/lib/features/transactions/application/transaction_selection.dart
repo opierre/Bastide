@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/api/api_client.dart' show ApiFailure;
 import '../../categories/domain/category.dart' show AppCategory;
 import '../data/transactions_repository.dart';
 import '../domain/transaction.dart';
@@ -36,48 +37,38 @@ final selectedTransactionProvider =
     NotifierProvider<SelectedTransaction, String?>(SelectedTransaction.new);
 
 /// Opens Transactions on one operation, from a deep link (a dashboard
-/// « Activité récente » row, an account's « Opérations » row): selects it so
-/// the inspector shows it, and holds its id until the list has scrolled it
-/// into view (`null` once revealed).
+/// « Activité récente » row, an account's « Opérations » row).
 ///
-/// When the current filters, tab or page hide the operation they are all
-/// lifted; when it is not found even then, the id is unknown and the panel is
-/// put back as it was.
-class TransactionReveal extends Notifier<String?> {
+/// The list is narrowed to the operation's account and day, so its page holds
+/// it whatever the filters were, and the operation is selected for the
+/// inspector. An unknown id leaves the panel as it was.
+class TransactionDeepLink extends Notifier<void> {
   @override
-  String? build() => null;
+  void build() {}
 
   Future<void> open(String id) async {
-    if (await _onPage(id)) return _show(id);
-    final filters = ref.read(transactionFiltersProvider.notifier);
-    final before = ref.read(transactionFiltersProvider);
-    const all = TransactionFilters();
-    if (before == all) return;
-    filters.replace(all);
-    if (await _onPage(id)) return _show(id);
-    filters.replace(before);
-  }
-
-  /// The list has scrolled the operation into view.
-  void revealed() => state = null;
-
-  Future<bool> _onPage(String id) async {
+    final Transaction transaction;
     try {
-      final page = await ref.read(transactionsControllerProvider.future);
-      return page.items.any((item) => item.id == id);
-    } on Object {
-      return false;
+      transaction = await ref.read(transactionsRepositoryProvider).get(id);
+    } on ApiFailure {
+      return;
     }
-  }
-
-  void _show(String id) {
+    final day = transaction.bookedDate;
+    ref
+        .read(transactionFiltersProvider.notifier)
+        .replace(
+          TransactionFilters(
+            accountId: transaction.accountId,
+            dateFrom: day,
+            dateTo: day,
+          ),
+        );
     ref.read(selectedTransactionProvider.notifier).select(id);
-    state = id;
   }
 }
 
-final transactionRevealProvider = NotifierProvider<TransactionReveal, String?>(
-  TransactionReveal.new,
+final transactionDeepLinkProvider = NotifierProvider<TransactionDeepLink, void>(
+  TransactionDeepLink.new,
 );
 
 /// The selected operation on the page shown, or `null` when none is selected

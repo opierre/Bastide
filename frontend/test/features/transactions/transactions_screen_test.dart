@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:bastide/core/api/api_client.dart';
 import 'package:bastide/core/theme/app_theme.dart';
 import 'package:bastide/core/theme/tokens.dart';
 import 'package:bastide/core/widgets/amount_text.dart';
@@ -14,6 +15,7 @@ import 'package:bastide/features/rules/domain/rule.dart';
 import 'package:bastide/features/transactions/application/review_count_provider.dart';
 import 'package:bastide/features/transactions/application/transaction_selection.dart';
 import 'package:bastide/features/transactions/application/transactions_controller.dart';
+import 'package:bastide/features/transactions/data/transactions_repository.dart';
 import 'package:bastide/features/transactions/domain/transaction.dart';
 import 'package:bastide/features/transactions/presentation/review_queue.dart';
 import 'package:bastide/features/transactions/presentation/transactions_screen.dart';
@@ -22,6 +24,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mocktail/mocktail.dart';
 
 import '../../support/fake_accounts_controller.dart';
 import '../../support/fake_transactions_controller.dart';
@@ -143,6 +146,7 @@ Widget _wrap({
   return ProviderScope(
     overrides: [
       transactionsControllerProvider.overrideWith(() => controller),
+      transactionsRepositoryProvider.overrideWithValue(_Repository()),
       if (filters != null)
         transactionFiltersProvider.overrideWith(() => _PresetFilters(filters)),
       transactionCategoriesProvider.overrideWith((ref) async => _catalog),
@@ -755,17 +759,27 @@ void main() {
       expect(find.byKey(const Key('transactionInspector')), findsOneWidget);
     });
 
-    testWidgets('scrolls the operation into view', (tester) async {
-      final items = [
-        for (var i = 0; i < 40; i++)
-          _transaction(id: 't$i', bookedDate: DateTime(2026, 5, 40 - i)),
-      ];
-      await _pump(tester, items: items, operationId: 't39');
+    testWidgets('narrows the list to its account and day', (tester) async {
+      await _pump(
+        tester,
+        items: [_transaction(id: 't2')],
+        operationId: 't2',
+        filters: const TransactionFilters(
+          needsReview: true,
+          categoryId: 'c-insurance',
+          q: 'loyer',
+          page: 3,
+        ),
+      );
 
-      final row = tester.getRect(find.byKey(const Key('transactionRow-t39')));
-      expect(row.top, greaterThanOrEqualTo(0));
-      expect(row.bottom, lessThanOrEqualTo(852));
-      expect(_container(tester).read(transactionRevealProvider), isNull);
+      expect(
+        _container(tester).read(transactionFiltersProvider),
+        TransactionFilters(
+          accountId: 'a1',
+          dateFrom: DateTime(2026, 5, 11),
+          dateTo: DateTime(2026, 5, 11),
+        ),
+      );
     });
 
     testWidgets('ignores an unknown id and keeps the filters', (tester) async {
@@ -775,22 +789,6 @@ void main() {
       expect(_container(tester).read(selectedTransactionProvider), isNull);
       expect(_container(tester).read(transactionFiltersProvider), filters);
       expect(find.byKey(const Key('transactionInspector')), findsNothing);
-    });
-
-    testWidgets('lifts the filters that hide the operation', (tester) async {
-      await _pump(
-        tester,
-        controller: _FilteredController(),
-        operationId: 't2',
-        filters: const TransactionFilters(needsReview: true, q: 'loyer'),
-      );
-
-      expect(
-        _container(tester).read(transactionFiltersProvider),
-        const TransactionFilters(),
-      );
-      expect(_container(tester).read(selectedTransactionProvider), 't2');
-      expect(find.byKey(const Key('transactionInspector')), findsOneWidget);
     });
   });
 
@@ -877,14 +875,14 @@ class _PresetFilters extends TransactionFiltersNotifier {
   TransactionFilters build() => initial;
 }
 
-/// A controller whose page holds `t2` only when nothing filters it.
-class _FilteredController extends FakeTransactionsController {
-  _FilteredController() : super(initialPage: _page(const []));
-
+/// The repository a deep link reads its operation from: `t2` exists, any
+/// other id is unknown.
+class _Repository extends Mock implements TransactionsRepository {
   @override
-  Future<TransactionsPage> build() async {
-    final filters = ref.watch(transactionFiltersProvider);
-    final hidden = filters.hasListFilter || filters.isReviewTab;
-    return _page([_transaction(), if (!hidden) _transaction(id: 't2')]);
-  }
+  Future<Transaction> get(String id) async => id == 't2'
+      ? _transaction(id: 't2')
+      : throw const ApiFailure(
+          code: 'TRANSACTION_NOT_FOUND',
+          message: 'Transaction not found',
+        );
 }
