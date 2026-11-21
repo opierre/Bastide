@@ -260,7 +260,7 @@ P.investments = () => shell('investments', 'Placements', `<span class="btn pri">
       <div class="col" style="gap:6px"><span class="t2 sm">Plus-value latente</span><span class="fig md">+7 535,00 €</span><span class="st t2">${I('trending-up')}+16,1 % des versements</span></div></div>
     <table><tr><th>Placement</th><th class="c">Versements nets</th><th class="c">Valeur déclarée</th><th class="c">Plus-value</th><th class="n">Valeur au</th></tr>
     ${INV.map((r, i) => `<tr class="${i === 0 ? 'cur' : ''}"><td style="height:48px"><span class="row">${mg(r[0])}<div class="col"><span style="font-weight:500">${r[1]}</span><span class="t3 xs">${r[3]} · ${r[2]} · ouvert en ${r[4]}</span></div></span></td><td class="c">${r[5]}</td><td class="c" style="font-weight:500">${r[6]}</td><td class="c">${r[7]} <span class="t3">${r[8]}</span></td><td class="n ${r[10] ? '' : 't2'}">${r[10] ? `<span class="st warn">${I('clock-alert')}${r[9]}</span>` : r[9]}</td></tr>`).join('')}</table>
-    <div class="banner">${I('clock-alert', 's14 warn')}<span>La valeur du PEE Novatech date de plus de quatre mois.</span><span class="sp"></span><span class="btn">Mettre à jour la valeur</span></div>
+    <div class="banner">${I('clock-alert', 's14 warn')}<span>PEE Novatech : la valeur date de plus de quatre mois.</span><span class="sp"></span><span class="btn">Mettre à jour la valeur</span></div>
     <span class="sp"></span>
     <span class="note">${I('lock', 's14')}Bastide ne se connecte à aucun courtier et ne télécharge aucun cours. La valeur est celle que vous recopiez depuis votre relevé ; la plus-value est calculée, jamais enregistrée.</span></div>
   <div class="col" style="border-left:1px solid var(--line);padding:24px;gap:16px;background:var(--rail)">

@@ -8589,7 +8589,7 @@ abstract class AppLocalizations {
   /// Banner for an investment whose latest declared value is stale.
   ///
   /// In fr, this message translates to:
-  /// **'La valeur du {name} date de plus de quatre mois.'**
+  /// **'{name} : la valeur date de plus de quatre mois.'**
   String placementsStaleBanner(String name);
 
   /// Action of the stale-value banner.

@@ -160,7 +160,7 @@ void main() {
 
     expect(find.byKey(const Key('placementStaleBanner-i3')), findsOneWidget);
     expect(
-      find.text('La valeur du PEE Entreprise date de plus de quatre mois.'),
+      find.text('PEE Entreprise : la valeur date de plus de quatre mois.'),
       findsOneWidget,
     );
     expect(find.byKey(const Key('placementStaleBanner-i1')), findsNothing);

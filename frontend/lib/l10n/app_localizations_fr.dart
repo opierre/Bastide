@@ -5449,7 +5449,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String placementsStaleBanner(String name) {
-    return 'La valeur du $name date de plus de quatre mois.';
+    return '$name : la valeur date de plus de quatre mois.';
   }
 
   @override

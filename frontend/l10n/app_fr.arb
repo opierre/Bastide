@@ -7071,7 +7071,7 @@
       }
     }
   },
-  "placementsStaleBanner": "La valeur du {name} date de plus de quatre mois.",
+  "placementsStaleBanner": "{name} : la valeur date de plus de quatre mois.",
   "@placementsStaleBanner": {
     "description": "Banner for an investment whose latest declared value is stale.",
     "placeholders": {

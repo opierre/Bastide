@@ -65,7 +65,7 @@ Flush panel, two panes: **list** (flexible, padding 24 32) · **inspector** (440
    The selected row takes `accentSoft` and fills the inspector; the first is selected on
    arrival. Closed placements are listed last, dimmed.
 3. **Stale-value Banner**, one per stale placement (at most three, then « et {n} autres »):
-   `clock-alert` `warning` icon · « La valeur du {name} date de plus de quatre mois. » ·
+   `clock-alert` `warning` icon · « {name} : la valeur date de plus de quatre mois. » ·
    secondary « Mettre à jour la valeur ».
 4. At the bottom of the pane, a Note: `lock` + « Bastide ne se connecte à aucun courtier et ne
    télécharge aucun cours. La valeur est celle que vous recopiez depuis votre relevé. La
