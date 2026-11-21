@@ -3238,7 +3238,7 @@
     "placeholders": {
       "when": {
         "type": "String",
-        "example": "11/09/2026 à 14:32"
+        "example": "11 mai 2026 à 14:32"
       }
     }
   },
@@ -3252,7 +3252,7 @@
     "placeholders": {
       "date": {
         "type": "String",
-        "example": "11/09/2026"
+        "example": "11 mai 2026"
       },
       "time": {
         "type": "String",
