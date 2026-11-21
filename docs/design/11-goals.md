@@ -56,8 +56,10 @@ Flush panel, two panes: **list** (flexible, padding 24 32) · **inspector** (440
      {remaining} ».
    - Hairline.
    - « Allocations » heading; right: secondary « Allouer » (`plus`).
-   - Table without header: date `textSecondary` · note · signed amount (coloured). Newest
-     first; scrolls inside the pane.
+   - Table without header: date `textSecondary` · note · signed amount (coloured) · a
+     trailing ghost icon button « Supprimer l’allocation » (`trash-2`), shown on row hover or
+     keyboard focus. Newest first; scrolls inside the pane. An archived goal has no delete
+     action.
 
 ### Banner image
 - Picked with the same file picker and square-free crop modal as the avatar, cropped to 44:19.
@@ -72,6 +74,10 @@ Flush panel, two panes: **list** (flexible, padding 24 32) · **inspector** (440
 - **Allocation** (440 px): title « Nouvelle allocation », lead = the goal's name. Montant
   (helper « Un montant négatif retire de l’objectif. ») · Date · Note (optional). Footer
   « Annuler » · « Ajouter ». One signed amount field; no deposit/withdraw modes.
+- **Delete allocation** (440 px): title « Supprimer cette allocation ? », lead « Le montant
+  mis de côté baisse de {amount}. Vos comptes ne sont pas modifiés. » (« remonte de » for a
+  negative line). Footer « Annuler » · destructive « Supprimer ». After the delete, the saved
+  figure, the repère, the percent and « Atteint en … » are reloaded from the backend.
 
 ## States
 | State | What shows |

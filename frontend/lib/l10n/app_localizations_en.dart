@@ -3247,6 +3247,28 @@ class AppLocalizationsEn extends AppLocalizations {
       'The allocations couldn’t be loaded. Nothing was changed.';
 
   @override
+  String get goalAllocationDelete => 'Delete allocation';
+
+  @override
+  String get goalAllocationDeleteTitle => 'Delete this allocation?';
+
+  @override
+  String goalAllocationDeleteLeadDown(String amount) {
+    return 'The saved amount goes down by $amount. Your accounts are not changed.';
+  }
+
+  @override
+  String goalAllocationDeleteLeadUp(String amount) {
+    return 'The saved amount goes back up by $amount. Your accounts are not changed.';
+  }
+
+  @override
+  String get goalAllocationDeleteCancel => 'Cancel';
+
+  @override
+  String get goalAllocationDeleteSubmit => 'Delete';
+
+  @override
   String get goalImageChange => 'Change';
 
   @override
