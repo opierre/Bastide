@@ -412,6 +412,40 @@ def test_by_category_breakdown_sums_to_expense_total_and_pcts_sum_to_100(
     assert by_name[transport] == 40.0
 
 
+def test_rows_excluded_from_totals_leave_expense_and_breakdown(
+    client: TestClient, tmp_path: Path
+) -> None:
+    """A row the user excluded is still listed, but no total of the month counts it."""
+    headers = _register(client)
+    account_id = _create_account(client, headers)
+    groceries = _create_category(client, headers, kind="expense", name="Courses")
+    _insert_transaction(
+        tmp_path,
+        account_id,
+        amount_minor=-6_000,
+        booked_date=date(2026, 3, 5),
+        category_id=groceries,
+    )
+    excluded_id = _insert_transaction(
+        tmp_path,
+        account_id,
+        amount_minor=-4_000,
+        booked_date=date(2026, 3, 6),
+        category_id=groceries,
+    )
+    response = client.patch(
+        f"/api/v1/transactions/{excluded_id}",
+        json={"excluded_from_totals": True},
+        headers=headers,
+    )
+    assert response.status_code == 200
+
+    body = _summary(client, headers, "2026-03")
+
+    assert body["expense_minor"] == 6_000
+    assert [row["amount_minor"] for row in body["by_category"]] == [6_000]
+
+
 def test_uncategorized_expenses_are_bucketed_and_counted(
     client: TestClient, tmp_path: Path
 ) -> None:

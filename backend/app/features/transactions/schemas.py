@@ -36,6 +36,8 @@ class TransactionRead(BaseModel):
     categorization_source: str
     categorization_confidence: float | None
     needs_review: bool
+    #: Kept out of the income, expense and spending totals by the user; still listed.
+    excluded_from_totals: bool = False
     fitid: str | None
     dedup_hash: str
     #: The recurring series this transaction is an occurrence of, ``None`` when it is in none.
@@ -56,6 +58,9 @@ class TransactionPage(BaseModel):
     page: int
     page_size: int
     total: int
+    #: Signed sum of every row the filters match, across all pages, leaving out the rows
+    #: excluded from totals. ``None`` on a listing that does not compute it.
+    net_minor: int | None = None
 
 
 class TransactionUpdate(BaseModel):
@@ -64,3 +69,46 @@ class TransactionUpdate(BaseModel):
     category_id: str | None = None
     description_clean: str | None = Field(default=None, min_length=1)
     merchant: str | None = None
+    #: Keeps the row out of (``True``) or back in (``False``) the totals.
+    excluded_from_totals: bool | None = None
+
+
+class TransactionRuleRef(BaseModel):
+    """The rule that files a transaction: the first enabled rule, by priority, that matches it
+    and targets its category."""
+
+    id: str
+    match_field: str
+    match_type: str
+    pattern: str
+
+
+class TransactionSeriesRef(BaseModel):
+    """The recurring series a transaction belongs to, as far as its inspector shows it."""
+
+    id: str
+    #: The series' cadence (`weekly`, `monthly`, `quarterly`, `yearly`, `irregular`).
+    cadence: str
+    next_expected_date: date
+
+
+class SameMerchantRead(BaseModel):
+    """An earlier operation of the same merchant."""
+
+    id: str
+    booked_date: date
+    amount_minor: int
+    currency: str
+
+
+class TransactionContextRead(BaseModel):
+    """What the inspector shows around a transaction, beyond the row itself."""
+
+    import_batch_id: str
+    #: ``None`` only if the import row is gone.
+    import_file_name: str | None
+    #: Set only when a rule filed the row (`categorization_source = rule`).
+    rule: TransactionRuleRef | None
+    series: TransactionSeriesRef | None
+    #: Up to five earlier operations of the same merchant, newest first.
+    same_merchant: list[SameMerchantRead]

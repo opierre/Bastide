@@ -295,6 +295,7 @@ erDiagram
         datetime created_at
         datetime updated_at
         text memo "nullable"
+        bool excluded_from_totals
     }
     user_avatars {
         text user_id PK, FK

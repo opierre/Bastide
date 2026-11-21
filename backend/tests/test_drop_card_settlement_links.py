@@ -5,7 +5,7 @@ from datetime import date
 from pathlib import Path
 from uuid import uuid4
 
-from sqlalchemy import create_engine, inspect, text
+from sqlalchemy import create_engine, insert, inspect, text
 from sqlalchemy.orm import Session
 
 from app.features.accounts.models import Account
@@ -16,19 +16,25 @@ from tests.migrations import upgrade
 PRE_MIGRATION_REVISION = "b3f6e8a1c5d7"
 
 
-def _row(account: Account, batch: ImportBatch, amount_minor: int, label: str) -> Transaction:
-    return Transaction(
-        account_id=account.id,
-        import_batch_id=batch.id,
-        booked_date=date(2026, 1, 31),
-        amount_minor=amount_minor,
-        currency="EUR",
-        description_raw=label,
-        description_clean=label,
-        categorization_source="uncategorized",
-        needs_review=False,
-        dedup_hash=str(uuid4()),
-    )
+def _row(
+    account: Account, batch: ImportBatch, amount_minor: int, label: str, **overrides: object
+) -> dict[str, object]:
+    """A row's values, inserted through the table: the model maps columns added after this
+    revision, which an ORM insert would name."""
+    return {
+        "id": str(uuid4()),
+        "account_id": account.id,
+        "import_batch_id": batch.id,
+        "booked_date": date(2026, 1, 31),
+        "amount_minor": amount_minor,
+        "currency": "EUR",
+        "description_raw": label,
+        "description_clean": label,
+        "categorization_source": "uncategorized",
+        "needs_review": False,
+        "dedup_hash": str(uuid4()),
+        **overrides,
+    }
 
 
 def test_posted_credits_go_and_proposals_return_to_review(tmp_path: Path) -> None:
@@ -81,17 +87,27 @@ def test_posted_credits_go_and_proposals_return_to_review(tmp_path: Path) -> Non
         )
         db.add(batch)
         db.flush()
-        settlement = _row(checking, batch, -45_210, "FACTURE CARTE")
-        settlement.categorization_source = "detected"
-        settlement.needs_review = True
+        settlement = _row(
+            checking,
+            batch,
+            -45_210,
+            "FACTURE CARTE",
+            categorization_source="detected",
+            needs_review=True,
+        )
         purchase = _row(card, batch, -45_210, "FNAC")
-        db.add_all([settlement, purchase])
-        db.flush()
-        posted = _row(card, batch, 45_210, "FACTURE CARTE")
-        posted.dedup_hash = hashlib.sha256(f"card-settlement:{settlement.id}".encode()).hexdigest()
-        db.add(posted)
+        posted = _row(
+            card,
+            batch,
+            45_210,
+            "FACTURE CARTE",
+            dedup_hash=hashlib.sha256(f"card-settlement:{settlement['id']}".encode()).hexdigest(),
+        )
+        db.execute(
+            insert(Transaction.metadata.tables["transactions"]), [settlement, purchase, posted]
+        )
         db.commit()
-        ids = {"settlement": settlement.id, "purchase": purchase.id, "posted": posted.id}
+        ids = {"settlement": settlement["id"], "purchase": purchase["id"], "posted": posted["id"]}
         card_id = card.id
         with engine.begin() as connection:
             connection.execute(

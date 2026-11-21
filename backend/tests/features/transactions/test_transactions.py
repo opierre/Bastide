@@ -563,3 +563,254 @@ def test_patch_keeps_the_series_in_its_response(client: TestClient, tmp_path: Pa
 
     assert response.status_code == 200
     assert response.json()["recurring_series_id"] == series_id
+
+
+# --- net and exclusion from totals -------------------------------------------------------------
+
+
+def test_list_reports_the_net_of_every_matching_row(client: TestClient, tmp_path: Path) -> None:
+    headers, _ = _register(client)
+    account_id = _create_account(client, headers)
+    _insert_transaction(tmp_path, account_id, amount_minor=250_000)
+    _insert_transaction(tmp_path, account_id, amount_minor=-4_250)
+    _insert_transaction(tmp_path, account_id, amount_minor=-1_890)
+
+    body = client.get("/api/v1/transactions", headers=headers).json()
+
+    assert body["net_minor"] == 243_860
+    assert isinstance(body["net_minor"], int)
+
+
+def test_excluded_rows_stay_listed_but_leave_the_net(client: TestClient, tmp_path: Path) -> None:
+    headers, _ = _register(client)
+    account_id = _create_account(client, headers)
+    _insert_transaction(tmp_path, account_id, amount_minor=-2_000)
+    excluded_id = _insert_transaction(tmp_path, account_id, amount_minor=-50_000)
+
+    patched = client.patch(
+        f"/api/v1/transactions/{excluded_id}",
+        json={"excluded_from_totals": True},
+        headers=headers,
+    )
+    body = client.get("/api/v1/transactions", headers=headers).json()
+
+    assert patched.status_code == 200
+    assert patched.json()["excluded_from_totals"] is True
+    assert body["total"] == 2
+    assert body["net_minor"] == -2_000
+    flags = {item["id"]: item["excluded_from_totals"] for item in body["items"]}
+    assert flags[excluded_id] is True
+
+
+def test_excluding_a_row_keeps_its_category_and_review_flag(
+    client: TestClient, tmp_path: Path
+) -> None:
+    headers, _ = _register(client)
+    account_id = _create_account(client, headers)
+    transaction_id = _insert_transaction(tmp_path, account_id)
+
+    body = client.patch(
+        f"/api/v1/transactions/{transaction_id}",
+        json={"excluded_from_totals": True},
+        headers=headers,
+    ).json()
+
+    assert body["categorization_source"] == "uncategorized"
+    assert body["needs_review"] is True
+
+
+def test_a_row_can_be_put_back_in_the_totals(client: TestClient, tmp_path: Path) -> None:
+    headers, _ = _register(client)
+    account_id = _create_account(client, headers)
+    transaction_id = _insert_transaction(tmp_path, account_id, amount_minor=-3_000)
+    url = f"/api/v1/transactions/{transaction_id}"
+    client.patch(url, json={"excluded_from_totals": True}, headers=headers)
+
+    client.patch(url, json={"excluded_from_totals": False}, headers=headers)
+
+    assert client.get("/api/v1/transactions", headers=headers).json()["net_minor"] == -3_000
+
+
+# --- inspector context -------------------------------------------------------------------------
+
+
+def test_context_names_the_import_file(client: TestClient, tmp_path: Path) -> None:
+    headers, _ = _register(client)
+    account_id = _create_account(client, headers)
+    transaction_id = _insert_transaction(tmp_path, account_id)
+
+    response = client.get(f"/api/v1/transactions/{transaction_id}/context", headers=headers)
+
+    assert response.status_code == 200
+    body = response.json()
+    assert body["import_file_name"] == "test.ofx"
+    assert body["import_batch_id"] == _batch_id(tmp_path, transaction_id)
+    assert body["rule"] is None
+    assert body["series"] is None
+    assert body["same_merchant"] == []
+
+
+def test_context_lists_earlier_operations_of_the_same_merchant(
+    client: TestClient, tmp_path: Path
+) -> None:
+    headers, _ = _register(client)
+    account_id = _create_account(client, headers)
+    other_account_id = _create_account(client, headers, name="Livret A")
+    for day in range(1, 8):
+        _insert_transaction(
+            tmp_path,
+            account_id,
+            booked_date=date(2026, 1, day),
+            merchant="Cafe du Port",
+            description_clean=f"CB CAFE DU PORT {day:02d}/01",
+            amount_minor=-300 - day,
+        )
+    _insert_transaction(
+        tmp_path,
+        other_account_id,
+        booked_date=date(2026, 1, 8),
+        merchant="CAFE DU PORT",
+        amount_minor=-450,
+    )
+    later = _insert_transaction(
+        tmp_path, account_id, booked_date=date(2026, 3, 1), merchant="Cafe du Port"
+    )
+    _insert_transaction(tmp_path, account_id, booked_date=date(2026, 1, 9), merchant="Autre")
+    selected = _insert_transaction(
+        tmp_path, account_id, booked_date=date(2026, 1, 10), merchant="Cafe du Port"
+    )
+
+    body = client.get(f"/api/v1/transactions/{selected}/context", headers=headers).json()
+
+    rows = body["same_merchant"]
+    assert [row["booked_date"] for row in rows] == [
+        "2026-01-08",
+        "2026-01-07",
+        "2026-01-06",
+        "2026-01-05",
+        "2026-01-04",
+    ]
+    assert rows[0]["amount_minor"] == -450
+    assert all(row["id"] not in {selected, later} for row in rows)
+
+
+def test_context_matches_the_label_when_there_is_no_merchant(
+    client: TestClient, tmp_path: Path
+) -> None:
+    headers, _ = _register(client)
+    account_id = _create_account(client, headers)
+    earlier = _insert_transaction(
+        tmp_path, account_id, booked_date=date(2026, 1, 2), description_clean="PRLV SEPA XYZ"
+    )
+    _insert_transaction(
+        tmp_path, account_id, booked_date=date(2026, 1, 3), description_clean="PRLV SEPA ABC"
+    )
+    selected = _insert_transaction(
+        tmp_path, account_id, booked_date=date(2026, 1, 5), description_clean="PRLV SEPA XYZ"
+    )
+
+    body = client.get(f"/api/v1/transactions/{selected}/context", headers=headers).json()
+
+    assert [row["id"] for row in body["same_merchant"]] == [earlier]
+
+
+def _rule_payload(category_id: str, **overrides: object) -> dict[str, object]:
+    return {
+        "priority": 1,
+        "match_field": "description_clean",
+        "match_type": "contains",
+        "pattern": "CARREFOUR",
+        "category_id": category_id,
+        "enabled": True,
+        **overrides,
+    }
+
+
+def test_context_names_the_rule_that_filed_the_row(client: TestClient, tmp_path: Path) -> None:
+    headers, _ = _register(client)
+    account_id = _create_account(client, headers)
+    category_id = _create_category(client, headers)
+    other_category_id = _create_category(client, headers, name="Loisirs")
+    # Matches first by priority, but files another category: not the rule behind this row.
+    client.post(
+        "/api/v1/rules",
+        json=_rule_payload(other_category_id, pattern="MARKET"),
+        headers=headers,
+    )
+    rule = client.post(
+        "/api/v1/rules", json=_rule_payload(category_id, priority=2), headers=headers
+    ).json()
+    transaction_id = _insert_transaction(
+        tmp_path,
+        account_id,
+        description_clean="PAIEMENT CARREFOUR MARKET",
+        category_id=category_id,
+        categorization_source="rule",
+        needs_review=False,
+    )
+
+    body = client.get(f"/api/v1/transactions/{transaction_id}/context", headers=headers).json()
+
+    assert body["rule"] == {
+        "id": rule["id"],
+        "match_field": "description_clean",
+        "match_type": "contains",
+        "pattern": "CARREFOUR",
+    }
+
+
+def test_context_names_no_rule_for_a_row_the_user_filed(client: TestClient, tmp_path: Path) -> None:
+    headers, _ = _register(client)
+    account_id = _create_account(client, headers)
+    category_id = _create_category(client, headers)
+    client.post("/api/v1/rules", json=_rule_payload(category_id), headers=headers)
+    transaction_id = _insert_transaction(
+        tmp_path,
+        account_id,
+        category_id=category_id,
+        categorization_source="user",
+        needs_review=False,
+    )
+
+    body = client.get(f"/api/v1/transactions/{transaction_id}/context", headers=headers).json()
+
+    assert body["rule"] is None
+
+
+def test_context_carries_the_series_cadence_and_next_date(
+    client: TestClient, tmp_path: Path
+) -> None:
+    user = register_user(client, "amelie@example.com")
+    account_id = _create_account(client, user.headers)
+    transaction_id = _insert_transaction(tmp_path, account_id, description_clean="STREAMCO")
+    series_id = insert_series(
+        tmp_path,
+        user,
+        account_id,
+        label="STREAMCO",
+        cadence="yearly",
+        next_expected_date=date(2026, 11, 21),
+    )
+    link_occurrence(tmp_path, series_id, transaction_id)
+
+    body = client.get(f"/api/v1/transactions/{transaction_id}/context", headers=user.headers).json()
+
+    assert body["series"] == {
+        "id": series_id,
+        "cadence": "yearly",
+        "next_expected_date": "2026-11-21",
+    }
+
+
+def test_context_of_another_users_transaction_is_404(client: TestClient, tmp_path: Path) -> None:
+    owner_headers, _ = _register(client, "owner@example.com")
+    account_id = _create_account(client, owner_headers)
+    transaction_id = _insert_transaction(tmp_path, account_id)
+    intruder_headers, _ = _register(client, "intruder@example.com")
+
+    response = client.get(
+        f"/api/v1/transactions/{transaction_id}/context", headers=intruder_headers
+    )
+
+    assert response.status_code == 404
+    assert response.json()["error"]["code"] == "TRANSACTION_NOT_FOUND"

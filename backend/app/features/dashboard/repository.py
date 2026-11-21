@@ -34,9 +34,10 @@ class DashboardRepository:
         """`(year, month)` → `(income, expense)` for every month in `[start, end)` that has rows.
 
         Income sums the positive amounts and expense the magnitude of the negative ones, both in
-        minor units, excluding `kind=transfer` rows. Grouped per month so a summary and its
-        comparison month, or a whole trend series, cost one query. Months with no transactions
-        are simply absent from the mapping; the caller decides what a gap means (zero, so far).
+        minor units, excluding `kind=transfer` rows and the rows the user excluded from totals.
+        Grouped per month so a summary and its comparison month, or a whole trend series, cost
+        one query. Months with no transactions are simply absent from the mapping; the caller
+        decides what a gap means (zero, so far).
 
         Grouped with `extract()` rather than `strftime()` so the query keeps working on
         PostgreSQL — SQLAlchemy compiles it to each backend's own dialect.
@@ -58,6 +59,7 @@ class DashboardRepository:
                 Account.user_id == user_id,
                 Transaction.booked_date >= start,
                 Transaction.booked_date < end,
+                Transaction.excluded_from_totals.is_(False),
                 or_(Category.kind.is_(None), Category.kind != "transfer"),
             )
             .group_by(year, month)
@@ -75,9 +77,10 @@ class DashboardRepository:
         A subcategory's spending rolls up to its parent, so each row is a top-level category
         (categories are two levels deep: a parent is always top-level). `hue` is that top-level
         category's slot, so a custom category is drawn in the hue it picked. Transfers are
-        excluded by the transaction's own category. Expense transactions with no category are
-        grouped into a single `None`/`UNCATEGORIZED_KEY` bucket. `amount_minor` is the positive
-        magnitude of the (negative) expense.
+        excluded by the transaction's own category, and so are the rows excluded from totals.
+        Expense transactions with no category are grouped into a single
+        `None`/`UNCATEGORIZED_KEY` bucket. `amount_minor` is the positive magnitude of the
+        (negative) expense.
         """
         parent = aliased(Category)
         top_id = func.coalesce(parent.id, Category.id)
@@ -95,6 +98,7 @@ class DashboardRepository:
                 Transaction.booked_date >= month_start,
                 Transaction.booked_date < month_end,
                 Transaction.amount_minor < 0,
+                Transaction.excluded_from_totals.is_(False),
                 or_(Category.kind.is_(None), Category.kind != "transfer"),
             )
             .group_by(top_id, top_name, top_color)

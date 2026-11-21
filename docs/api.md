@@ -101,6 +101,7 @@ details?}}`. Model names refer to the Pydantic schemas in `backend/app/features/
 | `GET` | `/transactions` | `account_id`, `from`, `to`, `category_id`, `needs_review`, `q`, `import_batch_id`, `page`, `include_linked_cards` |  | 200 `TransactionPage` |
 | `GET` | `/transactions/{transaction_id}` |  |  | 200 `TransactionRead` |
 | `PATCH` | `/transactions/{transaction_id}` |  | `TransactionUpdate` | 200 `TransactionRead` |
+| `GET` | `/transactions/{transaction_id}/context` |  |  | 200 `TransactionContextRead` |
 
 ## dashboard
 
