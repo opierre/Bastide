@@ -384,7 +384,7 @@ void main() {
           displayName: 'Ada',
           locale: 'fr',
           currency: 'EUR',
-          avatar: PresetChoice(AvatarPreset.teal),
+          avatar: PresetChoice(AvatarPreset.cat3),
         ),
       );
       await tester.pumpAndSettle();

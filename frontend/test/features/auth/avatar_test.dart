@@ -5,6 +5,7 @@ import 'dart:typed_data';
 import 'package:bastide/core/api/api_client.dart';
 import 'package:bastide/core/api/api_client_provider.dart';
 import 'package:bastide/core/theme/app_theme.dart';
+import 'package:bastide/core/theme/tokens.dart';
 import 'package:bastide/core/widgets/monogram_avatar.dart';
 import 'package:bastide/core/widgets/user_avatar.dart';
 import 'package:bastide/features/auth/application/auth_controller.dart';
@@ -59,8 +60,8 @@ void main() {
     test('reads each kind', () {
       expect(AvatarChoice.fromWire('monogram'), const MonogramChoice());
       expect(
-        AvatarChoice.fromWire('preset:teal'),
-        const PresetChoice(AvatarPreset.teal),
+        AvatarChoice.fromWire('preset:cat3'),
+        const PresetChoice(AvatarPreset.cat3),
       );
       expect(AvatarChoice.fromWire('image'), const PictureChoice());
     });
@@ -68,6 +69,20 @@ void main() {
     test('falls back to the monogram on anything unknown', () {
       for (final wire in [null, '', 'preset:', 'preset:plaid', 'emoji']) {
         expect(AvatarChoice.fromWire(wire), const MonogramChoice());
+      }
+    });
+
+    test('the presets are the six category slots, the hues are gone', () {
+      expect(AvatarPreset.values.map((preset) => preset.name), [
+        'cat1',
+        'cat2',
+        'cat3',
+        'cat4',
+        'cat5',
+        'cat6',
+      ]);
+      for (final hue in ['cyan', 'blue', 'teal', 'pink', 'amber', 'iris']) {
+        expect(AvatarChoice.fromWire('preset:$hue'), const MonogramChoice());
       }
     });
 
@@ -94,7 +109,7 @@ void main() {
         _bare(
           const UserAvatar(
             name: 'ada',
-            avatar: PresetChoice(AvatarPreset.pink),
+            avatar: PresetChoice(AvatarPreset.cat5),
           ),
         ),
       );
@@ -102,6 +117,30 @@ void main() {
       expect(find.byKey(const Key('userAvatarPreset')), findsOneWidget);
       expect(find.byType(UserMonogram), findsNothing);
       expect(find.text('AD'), findsOneWidget);
+    });
+
+    testWidgets('a preset is drawn in its category slot, in either theme', (
+      tester,
+    ) async {
+      for (final (theme, colors) in [
+        (AppTheme.dark, CategoryColors.dark),
+        (AppTheme.light, CategoryColors.light),
+      ]) {
+        for (final preset in AvatarPreset.values) {
+          await tester.pumpWidget(
+            MaterialApp(
+              theme: theme,
+              home: Scaffold(
+                body: UserAvatar(name: 'ada', avatar: PresetChoice(preset)),
+              ),
+            ),
+          );
+          await tester.pumpAndSettle(); // past MaterialApp's theme animation
+
+          final hue = colors.forSlot(CategorySlot.fromWire(preset.name));
+          expect(tester.widget<Text>(find.text('AD')).style?.color, hue);
+        }
+      }
     });
 
     testWidgets('a picture renders its bytes', (tester) async {
@@ -188,6 +227,16 @@ void main() {
             findsOneWidget,
           );
         }
+        expect(
+          find.byWidgetPredicate(
+            (widget) =>
+                widget.key is ValueKey<String> &&
+                (widget.key! as ValueKey<String>).value.startsWith(
+                  'settingsAvatarOption-preset:',
+                ),
+          ),
+          findsNWidgets(6),
+        );
         expect(tester.takeException(), isNull);
       }
       expect(find.text('Choose a picture'), findsOneWidget);
@@ -199,22 +248,22 @@ void main() {
       when(
         () => apiClient.put(
           '/auth/me/avatar-choice',
-          body: {'avatar': 'preset:amber'},
+          body: {'avatar': 'preset:cat4'},
         ),
-      ).thenAnswer((_) async => {'user': _userJson('preset:amber')});
+      ).thenAnswer((_) async => {'user': _userJson('preset:cat4')});
       await tester.pumpWidget(wrap());
       await tester.pumpAndSettle();
       expect(preview(), findsNothing);
 
       await tester.tap(
-        find.byKey(const Key('settingsAvatarOption-preset:amber')),
+        find.byKey(const Key('settingsAvatarOption-preset:cat4')),
       );
       await tester.pumpAndSettle();
 
       verify(
         () => apiClient.put(
           '/auth/me/avatar-choice',
-          body: {'avatar': 'preset:amber'},
+          body: {'avatar': 'preset:cat4'},
         ),
       ).called(1);
       expect(preview(), findsOneWidget);
@@ -249,7 +298,7 @@ void main() {
             displayName: 'ada',
             locale: 'fr',
             currency: 'EUR',
-            avatar: PresetChoice(AvatarPreset.lime),
+            avatar: PresetChoice(AvatarPreset.cat2),
           ),
         ),
       );
@@ -279,7 +328,7 @@ void main() {
       await tester.pumpAndSettle();
 
       await tester.tap(
-        find.byKey(const Key('settingsAvatarOption-preset:iris')),
+        find.byKey(const Key('settingsAvatarOption-preset:cat6')),
       );
       await tester.pumpAndSettle();
 

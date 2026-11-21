@@ -125,10 +125,10 @@ def test_uploading_remembers_the_default_it_replaces() -> None:
     repository = Mock()
     service = AuthService(repository, clock=lambda: datetime(2026, 3, 1, tzinfo=UTC))
 
-    service.upload_avatar(_user("preset:blue"), _picture())
+    service.upload_avatar(_user("preset:cat6"), _picture())
 
     saved = repository.save_avatar.call_args.args[1]
-    assert saved.previous_choice == "preset:blue"
+    assert saved.previous_choice == "preset:cat6"
     assert saved.content_type == "image/png"
     assert saved.updated_at == datetime(2026, 3, 1, tzinfo=UTC)
 
@@ -144,7 +144,7 @@ def test_replacing_a_picture_keeps_the_monogram_as_fallback_not_image() -> None:
 def test_removing_without_a_picture_changes_nothing() -> None:
     repository = Mock()
     repository.get_avatar.return_value = None
-    user = _user("preset:lime")
+    user = _user("preset:cat2")
 
     assert AuthService(repository).remove_avatar(user) is user
     repository.set_avatar_choice.assert_not_called()
@@ -152,12 +152,12 @@ def test_removing_without_a_picture_changes_nothing() -> None:
 
 def test_removing_a_picture_brings_back_the_previous_default() -> None:
     repository = Mock()
-    repository.get_avatar.return_value = UserAvatar(previous_choice="preset:green")
+    repository.get_avatar.return_value = UserAvatar(previous_choice="preset:cat3")
     user = _user("image")
 
     AuthService(repository).remove_avatar(user)
 
-    repository.set_avatar_choice.assert_called_once_with(user, "preset:green")
+    repository.set_avatar_choice.assert_called_once_with(user, "preset:cat3")
 
 
 # --- API -----------------------------------------------------------------------------------
@@ -174,7 +174,7 @@ def test_a_new_user_has_the_monogram_and_no_picture(client: TestClient) -> None:
 
 def test_upload_fetch_and_delete_round_trip(client: TestClient) -> None:
     headers = register(client)
-    client.put(CHOICE_URL, headers=headers, json={"avatar": "preset:cyan"})
+    client.put(CHOICE_URL, headers=headers, json={"avatar": "preset:cat1"})
 
     uploaded = _upload(client, headers, _picture(exif=True))
     assert uploaded.status_code == 200
@@ -189,7 +189,7 @@ def test_upload_fetch_and_delete_round_trip(client: TestClient) -> None:
 
     removed = client.delete(AVATAR_URL, headers=headers)
     assert removed.status_code == 200
-    assert removed.json()["user"]["avatar"] == "preset:cyan"
+    assert removed.json()["user"]["avatar"] == "preset:cat1"
     assert client.get(AVATAR_URL, headers=headers).status_code == 404
 
 
@@ -210,19 +210,41 @@ def test_choosing_a_preset_drops_the_picture(client: TestClient) -> None:
     headers = register(client)
     _upload(client, headers, _picture())
 
-    response = client.put(CHOICE_URL, headers=headers, json={"avatar": "preset:pink"})
+    response = client.put(CHOICE_URL, headers=headers, json={"avatar": "preset:cat5"})
 
-    assert response.json()["user"]["avatar"] == "preset:pink"
+    assert response.json()["user"]["avatar"] == "preset:cat5"
     assert client.get(AVATAR_URL, headers=headers).status_code == 404
     # Nothing left to remove: the preset stays.
-    assert client.delete(AVATAR_URL, headers=headers).json()["user"]["avatar"] == "preset:pink"
+    assert client.delete(AVATAR_URL, headers=headers).json()["user"]["avatar"] == "preset:cat5"
 
 
-@pytest.mark.parametrize("choice", ["image", "preset:unknown", "preset:", "cyan", ""])
+@pytest.mark.parametrize(
+    "choice", ["image", "preset:unknown", "preset:", "preset:cat0", "cat1", ""]
+)
 def test_an_unknown_choice_is_refused(client: TestClient, choice: str) -> None:
     headers = register(client)
 
     assert client.put(CHOICE_URL, headers=headers, json={"avatar": choice}).status_code == 422
+
+
+@pytest.mark.parametrize("hue", ["cyan", "blue", "teal", "pink", "amber", "lime", "green", "iris"])
+def test_the_old_hue_presets_are_refused(client: TestClient, hue: str) -> None:
+    headers = register(client)
+
+    response = client.put(CHOICE_URL, headers=headers, json={"avatar": f"preset:{hue}"})
+
+    assert response.status_code == 422
+    assert client.get("/api/v1/auth/me", headers=headers).json()["user"]["avatar"] == "monogram"
+
+
+@pytest.mark.parametrize("slot", ["cat1", "cat2", "cat3", "cat4", "cat5", "cat6"])
+def test_each_category_slot_is_a_preset(client: TestClient, slot: str) -> None:
+    headers = register(client)
+
+    response = client.put(CHOICE_URL, headers=headers, json={"avatar": f"preset:{slot}"})
+
+    assert response.status_code == 200
+    assert response.json()["user"]["avatar"] == f"preset:{slot}"
 
 
 def test_a_wrong_type_upload_is_refused_and_keeps_the_avatar(client: TestClient) -> None:

@@ -356,18 +356,6 @@ class CategoryColors extends ThemeExtension<CategoryColors> {
   Color forRank(int index) =>
       index < 6 ? forSlot(CategorySlot.values[index + 1]) : cat0;
 
-  /// The plate of a preset user avatar, keyed by the backend preset key.
-  Color forAvatarPreset(String preset, AppColors colors) => switch (preset) {
-    'cyan' => cat1,
-    'blue' => cat6,
-    'teal' => cat3,
-    'pink' => cat5,
-    'amber' => cat4,
-    'lime' => cat2,
-    'green' => income,
-    _ => colors.accent,
-  };
-
   @override
   CategoryColors copyWith({
     Color? cat0,

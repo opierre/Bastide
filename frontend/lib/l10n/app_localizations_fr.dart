@@ -4788,16 +4788,14 @@ class AppLocalizationsFr extends AppLocalizations {
   String get settingsAvatarMonogram => 'Monogramme';
 
   @override
-  String settingsAvatarPreset(String hue) {
-    String _temp0 = intl.Intl.selectLogic(hue, {
-      'cyan': 'Pastille cyan',
-      'blue': 'Pastille bleue',
-      'teal': 'Pastille sarcelle',
-      'pink': 'Pastille rose',
-      'amber': 'Pastille ambre',
-      'lime': 'Pastille citron vert',
-      'green': 'Pastille verte',
-      'iris': 'Pastille iris',
+  String settingsAvatarPreset(String slot) {
+    String _temp0 = intl.Intl.selectLogic(slot, {
+      'cat1': 'Pastille bleue',
+      'cat2': 'Pastille orange',
+      'cat3': 'Pastille verte',
+      'cat4': 'Pastille ambre',
+      'cat5': 'Pastille rose',
+      'cat6': 'Pastille violette',
       'other': 'Pastille',
     });
     return '$_temp0';
