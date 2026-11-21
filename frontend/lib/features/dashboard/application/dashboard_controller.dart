@@ -57,6 +57,13 @@ class DashboardController extends AsyncNotifier<DashboardState> {
 
   Future<void> changeMonth(DateTime month) => _load(month);
 
+  /// Re-reads the summary of the month on display, after something it carries
+  /// changed elsewhere (the savings-rate goal, in Préférences).
+  Future<void> reloadSummary() {
+    final current = state.value;
+    return _load(current?.month ?? _currentMonth());
+  }
+
   Future<void> refresh() {
     final current = state.value;
     return _load(current?.month ?? _currentMonth(), reloadRecent: true);

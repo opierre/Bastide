@@ -88,6 +88,12 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get settingsSavingsGoalTitle => 'Savings-rate goal';
+
+  @override
+  String get settingsSavingsGoalNote => 'The mark shown on the dashboard.';
+
+  @override
   String get settingsIncomeTitle => 'Declared income';
 
   @override

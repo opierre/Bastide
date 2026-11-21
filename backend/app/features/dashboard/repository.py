@@ -8,6 +8,7 @@ from sqlalchemy.orm import Session, aliased
 from app.features.accounts.models import Account
 from app.features.categories.hues import CategoryHue, slot_for
 from app.features.categories.models import Category
+from app.features.settings.models import UserSettings
 from app.features.transactions.models import Transaction
 
 # Bucket key for expense transactions with no category (`category_id IS NULL`). Mirrors the
@@ -27,6 +28,12 @@ class DashboardRepository:
 
     def __init__(self, db: Session) -> None:
         self._db = db
+
+    def savings_rate_goal_percent(self, user_id: str) -> int | None:
+        """The user's savings-rate goal in whole percent; `None` with no settings row yet."""
+        return self._db.scalar(
+            select(UserSettings.savings_rate_goal_percent).where(UserSettings.user_id == user_id)
+        )
 
     def monthly_totals_by_month(
         self, user_id: str, start: date, end: date

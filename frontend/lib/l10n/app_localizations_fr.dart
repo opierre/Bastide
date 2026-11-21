@@ -88,6 +88,13 @@ class AppLocalizationsFr extends AppLocalizations {
   }
 
   @override
+  String get settingsSavingsGoalTitle => 'Objectif de taux d’épargne';
+
+  @override
+  String get settingsSavingsGoalNote =>
+      'Le repère affiché sur le tableau de bord.';
+
+  @override
   String get settingsIncomeTitle => 'Revenu déclaré';
 
   @override

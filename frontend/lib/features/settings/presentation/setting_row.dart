@@ -14,6 +14,13 @@ abstract final class SettingRowMetrics {
 
   /// Space above a section title that is not the first of its section.
   static const groupTop = AppSpacing.lg + AppSpacing.xs;
+
+  /// Width of a slider control (`09-settings.md` §Données, « Seuil de
+  /// confiance »).
+  static const sliderWidth = 320.0;
+
+  /// Room for the percent printed beside a slider, « 100 % » included.
+  static const sliderValueWidth = AppSpacing.xxl + AppSpacing.sm;
 }
 
 /// A section title, 16/600, 12 px above its first row and 28 px below the

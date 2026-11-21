@@ -166,6 +166,31 @@ void main() {
       );
     });
 
+    testWidgets('the mark and the status follow the user\'s goal', (
+      tester,
+    ) async {
+      await _pump(
+        tester,
+        _state(summary: specSummary(savingsRate: 0.223, savingsRateGoal: 0.30)),
+      );
+
+      final meter = tester.widget<RepereMeter>(
+        _byKey('dashboardSavingsGoalBar'),
+      );
+      expect(
+        meter.markLabel,
+        'objectif ${formatRatioPct(0.3, 'fr', decimalDigits: 0)}',
+      );
+      expect(meter.fraction, closeTo(0.223 / 0.6, 0.0001));
+      expect(meter.tone, RepereTone.normal);
+      expect(_byKey('dashboardSavingsGoalReached'), findsNothing);
+      expect(
+        tester.widget<Text>(_byKey('dashboardSavingsDelta')).data,
+        'Objectif ${formatRatioPct(0.3, 'fr', decimalDigits: 0)} en cours'
+        ' · +1,9 pt depuis avril',
+      );
+    });
+
     testWidgets('no income: the rate is « — » and the repère is not drawn', (
       tester,
     ) async {

@@ -12,6 +12,7 @@ from app.features.dashboard.schemas import (
     MonthlyTotals,
     SavingsPoint,
 )
+from app.features.settings.models import DEFAULT_SAVINGS_RATE_GOAL_PERCENT
 
 #: How many months each trend series covers: the bars end with the current month, the savings
 #: series with the selected one.
@@ -72,9 +73,15 @@ class DashboardService:
             savings_rate_delta_pct=_savings_rate_delta_pct(
                 savings_rate, prev_savings_rate, prev_income
             ),
+            savings_rate_goal_percent=self._savings_rate_goal_percent(user_id),
             by_category=by_category,
             currency=currency,
         )
+
+    def _savings_rate_goal_percent(self, user_id: str) -> int:
+        """The user's goal, or the default before their settings row exists."""
+        goal = self._repository.savings_rate_goal_percent(user_id)
+        return DEFAULT_SAVINGS_RATE_GOAL_PERCENT if goal is None else goal
 
     def trends(
         self, user_id: str, currency: str, today: date, month: str | None = None

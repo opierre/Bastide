@@ -70,6 +70,7 @@ class DashboardSummary {
     required this.savingsRateDeltaPct,
     required this.byCategory,
     required this.currency,
+    this.savingsRateGoal = defaultSavingsRateGoal,
   });
 
   final int incomeMinor;
@@ -84,6 +85,10 @@ class DashboardSummary {
   final double savingsRateDeltaPct;
   final List<CategoryBreakdown> byCategory;
   final String currency;
+
+  /// The user's savings-rate goal as a `0..1` ratio, chosen in Paramètres →
+  /// Préférences.
+  final double savingsRateGoal;
 
   /// At most this many rows in « Dépenses par catégorie »; past it the smallest
   /// categories fold into « Autres » (`docs/design/04-dashboard.md` §3a).
@@ -103,6 +108,7 @@ class DashboardSummary {
 
   /// The rate's position on the repère, whose scale runs from 0 to twice the
   /// goal (`00` §8). The meter clamps the fill; a negative rate draws none.
+  /// The goal is at least 1 %, so the scale is never empty.
   double get savingsRateMeterFraction =>
       (savingsRate / (savingsRateGoal * 2)).clamp(0.0, 1.0);
 
@@ -150,8 +156,6 @@ class DashboardSummary {
   }
 }
 
-/// The savings-rate goal the dashboard measures against, as a `0..1` ratio.
-///
-/// The spec reads it from Paramètres → Préférences, which has no such setting
-/// yet; until it does, the goal is the spec's own 20 %.
-const savingsRateGoal = 0.20;
+/// The savings-rate goal a user has before choosing one, as a `0..1` ratio:
+/// the backend's own default of 20 %.
+const defaultSavingsRateGoal = 0.20;

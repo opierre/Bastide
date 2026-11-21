@@ -389,6 +389,7 @@ void main() {
           'inference_base_url': 'http://127.0.0.1:11434/v1',
           'model_tag': null,
           'confidence_threshold': 0.8,
+          'savings_rate_goal_percent': 20,
         },
       );
 
@@ -406,6 +407,7 @@ void main() {
         'inference_base_url': 'http://127.0.0.1:11434/v1',
         'model_tag': null,
         'confidence_threshold': 0.8,
+        'savings_rate_goal_percent': 20,
       },
     );
     when(() => apiClient.get('/settings/inference/health')).thenAnswer(
