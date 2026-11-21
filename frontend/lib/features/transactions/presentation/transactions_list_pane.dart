@@ -13,6 +13,7 @@ import '../../../core/widgets/app_table.dart';
 import '../../../core/widgets/category_label.dart';
 import '../../../core/widgets/focus_ring.dart';
 import '../../../core/widgets/institution_avatar.dart';
+import '../../../core/widgets/removable_filter.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../accounts/application/accounts_controller.dart';
 import '../../accounts/domain/account.dart';
@@ -125,8 +126,12 @@ class _FilterRow extends ConsumerWidget {
           if (filters.importBatch case final batch?) ...[
             const SizedBox(width: AppSpacing.sm),
             _FilterSlot(
-              child: _ImportFilterChip(
-                fileName: batch.fileName,
+              child: RemovableFilter(
+                key: const Key('transactionsImportFilter'),
+                icon: LucideIcons300.download,
+                label: l10n.transactionsFilterImport(batch.fileName),
+                removeTooltip: l10n.transactionsFilterImportRemove,
+                removeKey: const Key('transactionsImportFilterRemove'),
                 onRemove: notifier.clearImport,
               ),
             ),
@@ -278,68 +283,6 @@ class _PeriodSelectState extends State<_PeriodSelect> {
             ),
           ),
         ),
-      ),
-    );
-  }
-}
-
-/// The import an import history row narrowed the list to, with the means to
-/// lift that filter: toolbar select geometry with the Imports icon and a
-/// ghost `x` in place of the chevron.
-class _ImportFilterChip extends StatelessWidget {
-  const _ImportFilterChip({required this.fileName, required this.onRemove});
-
-  final String fileName;
-  final VoidCallback onRemove;
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
-    final colors = context.colors;
-
-    return Container(
-      key: const Key('transactionsImportFilter'),
-      height: AppSizes.toolbarSelect,
-      padding: const EdgeInsetsDirectional.only(
-        start: AppSpacing.sm + AppSpacing.xxs,
-        end: AppSpacing.xxs,
-      ),
-      decoration: BoxDecoration(
-        color: colors.field,
-        borderRadius: BorderRadius.circular(AppRadii.control),
-        border: Border.all(color: colors.lineStrong),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(
-            LucideIcons300.download,
-            size: AppSizes.iconSmall,
-            color: colors.textTertiary,
-          ),
-          const SizedBox(width: AppSpacing.xsPlus),
-          Flexible(
-            child: Text(
-              l10n.transactionsFilterImport(fileName),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: Theme.of(context).textTheme.bodyMedium,
-            ),
-          ),
-          const SizedBox(width: AppSpacing.xxs),
-          IconButton(
-            key: const Key('transactionsImportFilterRemove'),
-            onPressed: onRemove,
-            tooltip: l10n.transactionsFilterImportRemove,
-            iconSize: AppSizes.iconSmall,
-            padding: EdgeInsets.zero,
-            constraints: const BoxConstraints.tightFor(
-              width: AppSizes.iconSmall + AppSpacing.sm,
-              height: AppSizes.iconSmall + AppSpacing.sm,
-            ),
-            icon: Icon(LucideIcons300.x, color: colors.textSecondary),
-          ),
-        ],
       ),
     );
   }
