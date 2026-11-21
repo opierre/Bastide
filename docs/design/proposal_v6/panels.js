@@ -473,6 +473,370 @@ P.system = (theme, accent) => {
   </div>`;
 };
 
+/* ════════ v6: modals ════════
+   Every modal of the app, built on one frame (00 §7 « Modal »). Each one is drawn twice, dark
+   beside light, on its scrim. Copy is the app's French copy; every figure and name is invented. */
+const B = (l, c = '', ic = '') => `<span class="btn ${c}">${ic ? I(ic, 's14') : ''}${l}</span>`;
+const IB = (ic, l, c = 'ghost') => `<span class="btn ${c}" style="padding:0 7px" title="${l}" aria-label="${l}">${I(ic, 's14')}</span>`;
+const F = (label, inner, small = '', o = {}) => `<label class="f ${o.cls || ''}">${label}${inner}${small ? `<small class="${o.err ? 'err' : ''}">${small}</small>` : ''}</label>`;
+const inp = (v, c = '') => `<span class="inp ${c}">${v}</span>`;
+const selF = v => `<span class="sel f">${v}<span class="sp"></span>${I('chevron-down', 's14')}</span>`;
+const dateF = (v, c = '') => `<span class="inp ${c}">${v}<span class="sp"></span>${I('calendar', 's14 t3')}</span>`;
+const pwF = (v, c = '') => `<span class="inp ${c}">${v}<span class="sp"></span>${I('eye', 's14 t3')}</span>`;
+const roF = v => `<span class="inp ro">${I('lock', 's14')}${v}</span>`;
+const chk = (on, label) => `<span class="row"><span class="chk ${on ? 'on' : ''}">${on ? I('check') : ''}</span><span>${label}</span></span>`;
+const note = (ic, t) => `<span class="note">${I(ic, 's14')}<span>${t}</span></span>`;
+const bnr = (ic, cls, t, acts = '') => `<div class="banner">${I(ic, 's14 ' + cls)}<span style="flex:1">${t}</span>${acts}</div>`;
+const CANCEL = B('Annuler');
+const modal = (w, title, lead, body, foot, o = {}) => `<div class="modal ${o.cls || ''}" style="width:${w}px" role="dialog" aria-modal="true" aria-label="${title}">
+  <header><h2>${title}</h2>${lead ? `<p>${lead}</p>` : ''}</header><div class="mb">${body}</div><footer>${foot}</footer></div>`;
+
+/* pictures for the crop and zoom variants: invented, drawn here */
+const PHOTO = `<svg viewBox="0 0 320 320" width="100%" height="100%" role="img" aria-label="Photo d’exemple"><rect width="320" height="320" fill="#c9d3c2"/><rect width="320" height="120" fill="#dde4d6"/><path d="M40 320c12-84 62-122 120-122s108 38 120 122z" fill="#41607a"/><circle cx="160" cy="138" r="56" fill="#9a7a63"/><path d="M104 128c4-40 30-58 56-58s54 18 58 58c-14-18-34-26-58-26s-42 8-56 26z" fill="#3a2b24"/></svg>`;
+const LOGO = `<svg viewBox="0 0 320 320" width="100%" height="100%" role="img" aria-label="Logo d’exemple"><rect width="320" height="320" fill="#f2efe8"/><rect x="70" y="70" width="180" height="180" rx="36" fill="#1f4e5f"/><path d="M122 206V114l76 92v-92" fill="none" stroke="#f2efe8" stroke-width="18" stroke-linejoin="round" stroke-linecap="round"/></svg>`;
+const LOGO22 = `<span class="mg" style="overflow:hidden;padding:0">${LOGO.replace('width="100%" height="100%"', 'width="22" height="22"')}</span>`;
+
+const MD = {};
+/* ── shared frame ── */
+MD.form = () => modal(480, 'Modifier la catégorie', '', `
+  ${F('Nom', inp('Épargne projet'))}
+  ${F('Type', `<span class="seg" style="justify-self:start"><span class="on">Dépense</span><span>Revenu</span><span>Transfert</span></span>`, 'Une dépense sort de vos comptes, un revenu y entre, un transfert circule entre eux.')}
+  ${F('Catégorie parente', selF('Aucune (catégorie principale)'))}`,
+  `<span class="lead-act">${B('Supprimer', 'ghost')}</span>${CANCEL}${B('Enregistrer', 'pri')}`);
+MD.confirm = () => modal(420, 'Archiver ce compte ?', 'Vous pourrez toujours consulter son historique, mais il n’apparaîtra plus dans votre liste de comptes.', '', CANCEL + B('Archiver', 'pri'), { cls: 'nobody' });
+MD.destructive = () => modal(480, 'Supprimer cette règle ?', 'Les opérations qu’elle a déjà classées gardent leur catégorie.', '', CANCEL + B('Supprimer', 'dsolid'), { cls: 'nobody' });
+MD.fieldError = () => modal(420, 'Changer de nom d’utilisateur', 'Le nouveau nom remplace l’ancien pour vous connecter.', `
+  ${F('Nom d’utilisateur', inp('camille', 'err focus'), 'Ce nom d’utilisateur est déjà pris.', { err: 1 })}`, CANCEL + B('Enregistrer', 'pri'));
+MD.failed = () => modal(480, 'Règle de prélèvement de la carte', '', `
+  ${bnr('circle-x', 'neg', 'Impossible d’enregistrer la règle. Réessayez.')}
+  ${F('Le libellé du prélèvement contient', inp('PRLV CARTE X4821', 'mono'))}`, B('Plus tard') + B('Enregistrer la règle', 'pri'));
+MD.busy = () => modal(420, 'Changer le mot de passe', 'Votre code de récupération reste valable.', `
+  ${F('Mot de passe actuel', pwF('••••••••••••'))}
+  ${F('Nouveau mot de passe', pwF('••••••••••••••'))}
+  ${F('Confirmer le mot de passe', pwF('••••••••••••••'))}`, `<span class="btn" style="opacity:.45">Annuler</span><span class="btn pri"><span class="spin"></span>Changer le mot de passe</span>`);
+MD.loading = () => modal(520, 'Marquer comme récurrent', '', `
+  <div class="col" style="gap:10px;padding:4px 0 8px"><div class="sk" style="width:80%"></div><div class="sk" style="width:55%"></div>
+  <div class="g2m" style="margin-top:6px"><div class="sk" style="height:32px"></div><div class="sk" style="height:32px"></div></div>
+  ${[1, 2, 3, 4].map(() => `<div class="sk" style="height:20px"></div>`).join('')}</div>`, CANCEL + `<span class="btn pri" style="opacity:.45">Enregistrer la série</span>`);
+MD.loadError = () => modal(520, 'Marquer comme récurrent', '', `
+  ${bnr('triangle-alert', 'warn', 'Impossible de préparer l’aperçu. Rien n’a été modifié.', B('Réessayer'))}`, CANCEL + `<span class="btn pri" style="opacity:.45">Enregistrer la série</span>`);
+MD.long = () => modal(480, 'Modifier le compte', '', `
+  ${F('Nom', inp('Revolut'))}${F('Type', selF('Carte à débit différé'))}
+  ${F('Établissement', inp(`${mg('RE')}Revolut`))}`, CANCEL + B('Enregistrer', 'pri'), { cls: 'scrolled' });
+
+/* ── accounts ── */
+MD.accountNew = () => modal(480, 'Nouveau compte', '', `
+  ${F('Nom', inp('Compte joint', 'focus'))}
+  ${F('Type', selF('Courant'))}
+  ${F('Établissement', inp(`${mg('BN')}BNP Paribas`))}
+  ${F('Solde initial', inp('1 250,00 €', 'r'))}
+  ${F('Devise', roF('EUR, euro'), 'La devise est celle de votre profil.')}`, CANCEL + B('Enregistrer', 'pri'));
+MD.accountFromStatement = () => modal(480, 'Nouveau compte', '', `
+  ${note('file-text', 'Champs pré-remplis depuis votre relevé.')}
+  ${F('Nom', inp('Livret A'))}
+  ${F('Type', selF('Épargne'))}
+  ${F('Établissement', inp(`${mg('CA')}Crédit Agricole`), 'Repris de l’établissement déclaré par votre relevé.')}
+  ${F('Solde au 30 avr. 2026', inp('8 240,00 €', 'r'), 'Repris du solde déclaré par votre relevé.')}
+  ${F('Devise', roF('EUR, euro'), 'La devise est celle de votre profil.')}`, CANCEL + B('Enregistrer', 'pri'));
+MD.accountEditCard = () => modal(480, 'Modifier le compte', '', `
+  ${F('Nom', inp('Revolut'))}
+  ${F('Type', selF('Carte à débit différé'))}
+  ${F('Débit de la carte', `<span class="seg" style="justify-self:start"><span class="on">Débit différé</span><span>Crédit</span></span>`, 'Une carte à débit différé est prélevée en une fois sur votre compte courant chaque mois.')}
+  ${F('Prélevée sur', selF(`${mg('BN')}BNP Compte courant`), 'Le compte débité chaque mois du total de la carte : ce prélèvement est un virement entre les deux, pas une dépense.')}
+  ${F('Solde actuel', inp('−312,40 €', 'r'), 'Corriger cette valeur décale le solde du compte et son historique enregistré du même montant. Aucune transaction n’est modifiée.')}`, CANCEL + B('Enregistrer', 'pri'));
+MD.accountArchive = MD.confirm;
+MD.linkCard = () => modal(480, 'Lier une carte', 'Choisissez la carte à débit différé dont le relevé mensuel est prélevé sur BNP Compte courant.', `
+  <label class="f" style="position:relative">Carte${selF(`${mg('RE')}Revolut`)}
+  </label>`, CANCEL + B('Lier', 'pri'));
+MD.settlement = () => modal(480, 'Règle de prélèvement de la carte', 'Chaque mois, la banque prélève le total de Revolut sur le compte qui la règle. Ce prélèvement est un virement, pas une dépense : les achats de la carte sont déjà comptés un par un.', `
+  ${F('Le libellé du prélèvement contient', inp('PRLV CARTE X4821', 'mono focus'), 'Proposé à partir des libellés qui reviennent chaque mois sur le compte qui paie la carte.')}
+  ${F('S’applique à partir du', dateF('01/03/2025'), 'Les prélèvements plus anciens restent des dépenses : les achats qu’ils ont payés ne sont pas dans l’application. Proposé à partir de l’historique importé de la carte.')}`, B('Plus tard') + B('Enregistrer la règle', 'pri'));
+
+/* ── profile ── */
+MD.displayName = () => modal(420, 'Changer de nom d’utilisateur', 'Le nouveau nom remplace l’ancien pour vous connecter.', `
+  ${F('Nom d’utilisateur', inp('camille.d', 'focus'), 'Sert aussi à vous connecter. 3 à 32 caractères : lettres, chiffres, « . », « _ » ou « - ».')}`, CANCEL + B('Enregistrer', 'pri'));
+MD.password = () => modal(420, 'Changer le mot de passe', 'Votre code de récupération reste valable.', `
+  ${F('Mot de passe actuel', pwF('••••••••••'))}
+  ${F('Nouveau mot de passe', pwF('••••••••••••••', 'focus'), `<span class="row">${I('check', 's14 pos')}14 caractères. Le minimum est de 12.</span>`)}
+  ${F('Confirmer le mot de passe', pwF('••••••••••••••'))}`, CANCEL + B('Changer le mot de passe', 'pri'));
+MD.passwordWrong = () => modal(420, 'Changer le mot de passe', 'Votre code de récupération reste valable.', `
+  ${F('Mot de passe actuel', pwF('••••••••••', 'err'), 'Mot de passe incorrect.', { err: 1 })}
+  ${F('Nouveau mot de passe', pwF('••••••••••••••'), `<span class="row">${I('check', 's14 pos')}14 caractères. Le minimum est de 12.</span>`)}
+  ${F('Confirmer le mot de passe', pwF('••••••••••••••'))}`, CANCEL + B('Changer le mot de passe', 'pri'));
+MD.recoveryAsk = () => modal(480, 'Nouveau code de récupération', 'Confirmez votre mot de passe pour générer un nouveau code. L’ancien cessera de fonctionner.', `
+  ${F('Mot de passe', pwF('••••••••••••', 'focus'))}`, CANCEL + B('Générer', 'pri'));
+MD.recoveryShown = () => modal(480, 'Nouveau code de récupération', 'Notez ce code et gardez-le en lieu sûr : il ne sera plus affiché.', `
+  <div class="code row"><span class="mono" style="font-size:16px;letter-spacing:0;flex:1">K7QM-2XRA-9DWT-F4HN</span>${B('Copier', 'ghost', 'copy')}</div>`, B('Terminé', 'pri'));
+const cropBody = (lead, w, h, pic, guide = false) => `<span class="t2">${lead}</span>
+  <div class="crop" style="width:${w}px;height:${h}px">${pic}${guide ? '<span class="guide"></span>' : ''}</div>`;
+MD.avatarCrop = () => modal(420, 'Recadrer la photo', '', cropBody('Faites glisser et zoomez pour cadrer votre avatar.', 320, 320, PHOTO, true), CANCEL + B('Utiliser cette photo', 'pri'));
+
+/* ── settings data ── */
+const COUNTS = [['Comptes', '4'], ['Transactions', '1 284'], ['Catégories', '31'], ['Règles', '22'], ['Abonnements', '8'], ['Objectifs', '6'], ['Crédits', '2'], ['Biens', '2'], ['Simulations', '4']];
+const kvList = rows => `<dl class="kv" style="gap:6px 24px">${rows.map(([k, v]) => `<dt>${k}</dt><dd>${v}</dd>`).join('')}</dl>`;
+MD.restore = () => modal(500, 'Restaurer cette sauvegarde ?', '', `
+  <span class="mono">bastide-2026-05-11.bastide</span>
+  ${kvList([['Exporté le', '11 mai 2026 à 14:32'], ['Version de l’application', '0.2.0'], ...COUNTS])}
+  ${bnr('triangle-alert', 'warn', 'Toutes vos données actuelles seront remplacées. Exportez-les d’abord si besoin.')}`, CANCEL + B('Remplacer mes données', 'dsolid'));
+MD.reset = (typed = 'SUPPR') => modal(500, 'Réinitialiser la base de données ?', 'Tout le contenu du profil Camille Dubois sera supprimé définitivement :', `
+  ${kvList([COUNTS[0], COUNTS[1], ['Catégories personnalisées', '3'], ...COUNTS.slice(3)])}
+  ${note('info', 'Les catégories fournies, vos préférences et le réglage IA sont conservés.')}
+  ${F('Saisissez SUPPRIMER pour confirmer', inp(typed, 'mono focus'))}`, CANCEL + `<span class="btn dsolid" ${typed === 'SUPPRIMER' ? '' : 'style="opacity:.45"'}>Tout supprimer</span>`);
+
+/* ── categories ── */
+const ICONS = ['house', 'key-round', 'zap', 'wrench', 'sofa', 'soup', 'shopping-cart', 'utensils', 'coffee', 'car', 'bus', 'fuel', 'plane', 'star', 'ticket', 'gamepad-2', 'book-open', 'dumbbell', 'refresh-cw', 'smartphone', 'wifi', 'cross', 'pill', 'coins', 'piggy-bank', 'credit-card', 'landmark', 'trending-up', 'receipt', 'arrow-up', 'briefcase', 'gift', 'shirt', 'shopping-bag', 'graduation-cap', 'baby', 'paw-print', 'hand-heart'];
+MD.categoryNew = () => modal(480, 'Nouvelle catégorie', '', `
+  ${F('Nom', inp('Épargne projet', 'focus'))}
+  ${F('Type', `<span class="seg" style="justify-self:start"><span class="on">Dépense</span><span>Revenu</span><span>Transfert</span></span>`, 'Une dépense sort de vos comptes, un revenu y entre, un transfert circule entre eux.')}
+  ${F('Catégorie parente', selF('Aucune (catégorie principale)'))}
+  ${F('Icône', `<div class="icg">${ICONS.map(n => `<span class="${n === 'piggy-bank' ? 'on' : ''}" title="${n}">${I(n)}</span>`).join('')}</div>`)}
+  ${F('Couleur', `<div class="sw20">${['c1', 'c2', 'c3', 'c4', 'c5', 'c6', 'c0'].map(c => `<span class="${c === 'c0' ? 'on' : ''}" style="--c:var(--${c})"></span>`).join('')}</div>`, 'La couleur suit la catégorie partout : graphiques, légendes et étiquettes.')}`, CANCEL + B('Enregistrer', 'pri'));
+MD.categorySub = () => modal(480, 'Nouvelle catégorie', cat('Logement'), `
+  ${F('Nom', inp('Travaux', 'focus'))}
+  ${F('Catégorie parente', selF(cat('Logement')))}`, CANCEL + B('Enregistrer', 'pri'));
+MD.categoryEdit = MD.form;
+MD.categoryDelete = () => modal(480, 'Supprimer cette catégorie ?', '« Épargne projet » et ses sous-catégories seront supprimées. Les transactions concernées redeviendront non catégorisées.', '', CANCEL + B('Supprimer', 'dsolid'), { cls: 'nobody' });
+
+/* ── rules ── */
+MD.ruleEdit = (o = {}) => modal(520, o.isNew ? 'Nouvelle règle' : 'Modifier la règle', '', `
+  <div class="g3m">${F('Champ', selF('Description'))}${F('Condition', selF('contient'))}${F('Priorité', inp('3', 'r'))}</div>
+  ${F('Motif', inp('CARREFOUR', 'mono focus'))}
+  ${F('Catégorie cible', selF(cat('Alimentation', 'Courses')))}
+  ${note('list-checks', 'Correspond à 48 opérations existantes, dont « CB CARREFOUR LYON 3 » du 14 mai 2026.')}
+  ${o.isNew ? F('Logo', '', 'Enregistrez la règle pour lui ajouter un logo.')
+    : F('Logo', `<span class="row">${LOGO22}${B('Remplacer…')}${B('Depuis une adresse…')}${B('Retirer', 'ghost')}</span>`, 'Affiché à la place du monogramme sur les transactions et les abonnements que cette règle reconnaît.')}
+  <span class="row"><span class="tog on"></span>Active</span>`,
+  `${o.isNew ? '' : `<span class="lead-act">${B('Supprimer', 'ghost')}</span>`}${CANCEL}${B('Enregistrer', 'pri')}`);
+MD.ruleDelete = MD.destructive;
+MD.ruleLogoCrop = () => modal(420, 'Recadrer le logo', '', cropBody('Faites glisser et zoomez pour cadrer le logo.', 320, 320, LOGO), CANCEL + B('Utiliser ce logo', 'pri'));
+MD.ruleLogoUrl = (err = false) => modal(420, 'Logo depuis une adresse', 'Collez l’adresse d’une image. Bastide la télécharge depuis cet ordinateur, puis vous la recadrez.', `
+  ${F('Adresse de l’image', inp(err ? 'https://exemple.org/logo' : 'https://…', `mono ${err ? 'err' : 'ph focus'}`), err ? 'Cette adresse ne mène pas à une image.' : '', { err })}`, CANCEL + B('Télécharger', 'pri'));
+MD.packExport = () => modal(560, 'Exporter mes règles', '', `
+  ${note('triangle-alert', 'Relisez avant d’enregistrer. Un motif peut contenir des informations personnelles, comme le nom de votre propriétaire : « VIR SALAIRE DUPONT ».')}
+  ${chk(true, 'Inclure les logos')}
+  ${note('image', '3 logos inclus.')}
+  <span class="sm t2">Contenu du fichier : 12 règles</span>
+  <div class="json">{
+  "name": "Mes règles",
+  "format_version": 1,
+  "rules": [
+    { "field": "description", "operator": "contains",
+      "pattern": "CARREFOUR", "category": "alimentation.courses",
+      "logo": "‹ image de 14 Ko ›" },
+    { "field": "description", "operator": "contains",
+      "pattern": "ASSUR MAIF", "category": "logement.assurance" },</div>
+  <span class="sm t2">2 règles non exportables</span>
+  <div class="col" style="gap:6px">${note('circle-minus', '« ^CB (SNCF|RATP|TCL) » : les règles regex ne peuvent pas figurer dans un pack.')}${note('circle-minus', '« CAISSE LOC EPARGNE » : vise une catégorie personnalisée, qui n’a pas d’identifiant partageable.')}</div>`, CANCEL + B('Enregistrer', 'pri'));
+const PACK = [['CA', 'CARREFOUR', 'Alimentation', 'Courses'], ['MO', 'MONOPRIX', 'Alimentation', 'Courses'], ['SN', 'SNCF', 'Transport', 'Train'], ['TO', 'TOTALENERGIES', 'Transport', 'Carburant'], ['FR', 'FREE MOBILE', 'Abonnements', null], ['PH', 'PHARMACIE', 'Santé', null]];
+MD.packImport = () => modal(560, 'Commerces courants', '', `
+  ${note('list-checks', 'Ce pack catégoriserait 37 de vos transactions non catégorisées.')}
+  <span class="sm t2">Règles du pack</span>
+  <table class="mtable">${PACK.map(r => `<tr><td style="width:34px">${mg(r[0])}</td><td class="mono">${r[1]}</td><td class="n">${cat(r[2], r[3])}</td></tr>`).join('')}</table>
+  <div class="col" style="gap:4px">${chk(false, 'Télécharger les logos (6)')}<span class="xs t3" style="padding-left:22px">Ces logos viennent de Wikimedia Commons et ne sont téléchargés que si vous cochez la case.</span></div>
+  ${chk(true, 'Appliquer les règles à mes transactions existantes après l’import')}`, CANCEL + B('Importer', 'pri'));
+MD.packProgress = () => modal(560, 'Commerces courants', '', `
+  <div class="col" style="gap:8px"><div class="row"><span>Téléchargement des logos… 4 / 6</span></div>${meter(66.7)}</div>
+  ${note('info', 'Les règles sont importées : il ne reste que leurs logos.')}`, `<span class="btn" style="opacity:.45">Fermer</span>`);
+MD.packRefused = () => modal(480, 'Ce fichier n’a pas été accepté', '', `
+  ${bnr('circle-x', 'neg', 'Ce pack contient une règle « regex ». Les expressions régulières ne sont pas acceptées dans un pack partagé : une expression venue d’un fichier tiers peut bloquer votre machine. Utilisez « contient », « égal à » ou « plage ».')}`, B('Fermer', 'pri'));
+MD.packLogoFailures = () => modal(480, '2 logos n’ont pas pu être ajoutés', '', `
+  ${bnr('triangle-alert', 'warn', 'Les règles ont bien été importées : seuls ces logos n’ont pas été ajoutés.')}
+  <div class="col" style="gap:6px">${note('circle-x', '« MONOPRIX » : le téléchargement a échoué.')}${note('circle-x', '« PHARMACIE » : le fichier n’est pas une image PNG, JPEG ou WebP.')}</div>`, B('Fermer', 'pri'));
+MD.logoZoom = () => `<div class="zoom" role="dialog" aria-label="Logo agrandi">${LOGO}</div>`;
+
+/* ── transactions ── */
+MD.always = () => modal(520, 'Toujours catégoriser ainsi', 'Une règle classe ces opérations à chaque import, sans IA.', `
+  <div class="g2m">${F('Champ', selF('Description'))}${F('Condition', selF('contient'))}</div>
+  ${F('Motif', inp('NOVATECH SAS', 'mono focus'))}
+  ${F('Catégorie cible', selF(cat('Loisirs', 'Électronique')))}
+  ${chk(true, 'Appliquer aux opérations existantes')}
+  ${note('list-checks', 'Correspond à 7 opérations existantes.')}`, CANCEL + B('Créer la règle', 'pri'));
+MD.period = (err = false) => modal(420, 'Période', '', `
+  <div class="g2m">${F('Du', dateF('01/05/2026', err ? '' : 'focus'))}${F('Au', dateF(err ? '30/04/2026' : '31/05/2026', err ? 'err' : ''), err ? 'La date de fin précède la date de début.' : '', { err })}</div>`, CANCEL + B('Appliquer', 'pri'));
+
+/* ── subscriptions ── */
+MD.seriesEdit = () => modal(480, 'Modifier le paiement récurrent', '', `
+  ${F('Nom', inp('Netflix', 'focus'))}
+  ${F('Compte', roF('BNP Compte courant'))}
+  <div class="g2m">${F('Montant', inp('15,49 €', 'r'))}${F('Cadence', selF('Mensuel'))}</div>
+  ${F('Catégorie', selF(cat('Loisirs')))}`, CANCEL + B('Enregistrer', 'pri'));
+const CHARGES = [[1, '12 mai 2026', 'PRLV SEPA STREAMCO', 'BNP Compte courant', '−15,49 €'], [1, '28 avr. 2026', 'CB STREAMCO PARIS', 'Revolut', '−15,49 €'], [0, '25 avr. 2026', 'CB LE PETIT BOUCHON LYON', 'Revolut', '−42,50 €'], [0, '19 avr. 2026', 'CB SNCF CONNECT', 'Revolut', '−86,40 €'], [0, '14 avr. 2026', 'CB CARREFOUR LYON 3', 'BNP Compte courant', '−63,18 €']];
+const chargeRows = rows => `<table class="mtable">${rows.map(r => `<tr><td style="width:24px"><span class="chk ${r[0] ? 'on' : ''}">${r[0] ? I('check') : ''}</span></td><td class="t2" style="width:96px">${r[1]}</td><td><div class="col" style="padding:4px 0"><span class="mono">${r[2]}</span>${r[3] ? `<span class="xs t3">${r[3]}</span>` : ''}</div></td><td class="n">${amt(r[4])}</td></tr>`).join('')}</table>`;
+MD.addCharges = () => modal(560, 'Ajouter à « Netflix »', 'Les opérations qui ne font partie d’aucune série, les plus proches en premier.', `
+  <span class="inp" style="height:28px;color:var(--tx3)">${I('search', 's14')}Rechercher un libellé</span>
+  ${chargeRows(CHARGES)}
+  <span class="ac sm">Afficher plus</span>`, CANCEL + B('Ajouter 2 opérations', 'pri'));
+const PREVIEW = [[1, '12 mai 2026', 'PRLV SEPA BASIC FIT', '', '−29,99 €'], [1, '12 avr. 2026', 'PRLV SEPA BASIC FIT', '', '−29,99 €'], [1, '12 mars 2026', 'PRLV SEPA BASIC FIT', '', '−29,99 €'], [0, '3 mars 2026', 'CB BASIC FIT LYON', '', '−9,90 €']];
+const markBody = (low = false) => `<span class="t2">Voici les opérations que Bastide regrouperait. Décochez celles qui n’en font pas partie.</span>
+  <div class="col" style="gap:4px"><div class="row"><span style="font-weight:600">Basic-Fit</span><span class="sp"></span><span class="st ${low ? 'warn' : 't2'}">${I(low ? 'triangle-alert' : 'check')}${low ? 'Confiance faible' : 'Confiance élevée'}</span></div>
+  <span class="sm t2">${low ? '2 opérations trouvées · Moins de trois prélèvements · Aucun rythme régulier' : '3 opérations trouvées · Rythme mensuel reconnu · Montant stable'}</span></div>
+  ${low ? bnr('triangle-alert', 'warn', 'Aucun rythme régulier n’a été trouvé. Vous pouvez tout de même enregistrer la série : elle sera irrégulière.') : ''}
+  <div class="g2m"><div class="col" style="gap:4px"><span class="sm t2">Rythme proposé</span><span>${low ? 'Irrégulier' : 'Mensuel'}</span></div><div class="col" style="gap:4px"><span class="sm t2">Montant attendu</span><span>29,99 €</span></div></div>
+  <div class="col" style="gap:4px">${chargeRows(low ? PREVIEW.slice(0, 2) : PREVIEW)}<span class="xs t3">${low ? '2 opérations cochées · du 12 avr. 2026 au 12 mai 2026' : '3 opérations cochées · du 12 mars 2026 au 12 mai 2026'}</span></div>
+  <span class="row ac sm">${I('list-plus', 's14')}Ajouter à une série existante…</span>`;
+MD.markRecurring = () => modal(520, 'Marquer comme récurrent', '', markBody(), CANCEL + B('Enregistrer la série', 'pri'));
+MD.markRecurringLow = () => modal(520, 'Marquer comme récurrent', '', markBody(true), CANCEL + B('Enregistrer la série', 'pri'));
+MD.markRecurringExisting = () => modal(520, 'Marquer comme récurrent', '', `
+  <span class="t2">Cette dépense correspond à « Basic-Fit », déjà suivi dans vos abonnements. Cochez les opérations à y ajouter.</span>
+  ${chargeRows([[1, '3 mars 2026', 'CB BASIC FIT LYON', '', '−9,90 €']])}`, CANCEL + B('Voir la série') + B('Ajouter à cette série', 'pri'));
+MD.seriesPicker = () => modal(520, 'Marquer comme récurrent', 'Choisissez la série dont fait partie cette opération. Bastide retiendra son libellé pour les prochaines.', `
+  <span class="inp" style="height:28px;color:var(--tx3)">${I('search', 's14')}Rechercher une série</span>
+  <div class="col" style="gap:2px">${[['NF', 'Netflix', 'BNP Compte courant · Mensuel · 15,49 €', 0], ['BF', 'Basic-Fit', 'BNP Compte courant · Mensuel · 29,99 €', 1], ['ED', 'EDF', 'BNP Compte courant · Mensuel · 89,00 €', 0], ['AD', 'Adobe Creative Cloud', 'Revolut · Trimestriel · 71,99 €', 0]].map(r => `<div class="row" style="height:44px;padding:0 8px;border-radius:6px;${r[3] ? 'background:var(--ac-soft)' : ''}">${mg(r[0])}<div class="col"><span>${r[1]}</span><span class="xs t3">${r[2]}</span></div><span class="sp"></span>${r[3] ? I('check', 's14 ac') : ''}</div>`).join('')}</div>`, B('Retour à l’aperçu') + CANCEL + B('Confirmer', 'pri'));
+
+/* ── goals ── */
+MD.goalForm = () => modal(440, 'Nouvel objectif', '', `
+  ${F('Nom', inp('Voyage Japon', 'focus'))}
+  <div class="g2m">${F('Montant cible', inp('4 000,00 €', 'r'))}${F('Échéance', dateF('06/2026'), 'Facultative')}</div>
+  ${F('Image', `<span class="row"><span style="width:36px;height:24px;border-radius:4px;overflow:hidden;flex:none">${FUJI}</span>${B('Choisir une image', '', 'image')}${B('Retirer', 'ghost')}</span>`, 'Facultative')}`, CANCEL + B('Enregistrer', 'pri'));
+MD.allocation = () => modal(440, 'Nouvelle allocation', 'Voyage Japon', `
+  ${F('Montant', inp('400,00 €', 'r focus'), 'Un montant négatif retire de l’objectif.')}
+  ${F('Date', dateF('01/05/2026'))}
+  ${F('Note (optionnelle)', inp('Ex. Virement mensuel', 'ph'))}`, CANCEL + B('Ajouter', 'pri'));
+MD.allocationDelete = () => modal(440, 'Supprimer cette allocation ?', 'Le montant mis de côté baisse de 400,00 €. Vos comptes ne sont pas modifiés.', '', CANCEL + B('Supprimer', 'dsolid'), { cls: 'nobody' });
+MD.goalCrop = () => modal(440, 'Recadrer l’image', '', cropBody('Faites glisser et zoomez pour cadrer la bannière.', 392, 169, FUJI), CANCEL + B('Utiliser cette image', 'pri'));
+
+/* ── loans ── */
+MD.loanForm = (edit = true) => modal(600, edit ? 'Modifier le crédit' : 'Nouveau crédit', '', `
+  <div class="g2m">
+  ${F('Libellé', inp('Travaux cuisine'), '', { cls: 'span2' })}
+  ${F('Prêteur', inp('Crédit Agricole'))}${F('Type', selF('Prêt travaux'))}
+  ${F('Remboursement', selF('Échéance constante'))}${F('Capital emprunté', inp('15 000,00 €', 'r'))}
+  ${F('Taux nominal', inp('4,90 %', 'r'))}${F('Durée', inp('60<span class="t3" style="margin-left:6px">mois</span>', 'r'))}
+  ${F('1re échéance', dateF('05/02/2025'))}${F('Assurance par mois', inp('0,00 €', 'r'))}
+  ${F('Frais de dossier', inp('150,00 €', 'r'))}${F('Bien financé', selF('Appartement Lyon 3e'))}</div>
+  <div class="row" style="align-items:baseline;gap:10px;padding-top:4px"><span class="h">Mensualité calculée</span><span class="t2">échéance totale 282,38 € · intérêts totaux 1 942,80 €</span></div>`,
+  `${edit ? `<span class="lead-act">${B('Supprimer', 'ghost')}</span>` : ''}${CANCEL}${B('Enregistrer', 'pri')}`);
+MD.loanDelete = () => modal(440, 'Supprimer ce crédit ?', 'Il quittera le passif de la Synthèse et, s’il est rattaché à un bien, la base de l’IFI.', '', CANCEL + B('Supprimer', 'dsolid'), { cls: 'nobody' });
+
+/* ── net worth ── */
+MD.property = () => modal(620, 'Nouveau bien', '', `
+  <div class="g2m">
+  ${F('Libellé', inp('Studio Villeurbanne', 'focus'))}${F('Nature', selF('Locatif'))}
+  ${F('Adresse', inp('12 rue des Tilleuls, 69100 Villeurbanne'), '', { cls: 'span2' })}
+  ${F('Valeur déclarée', inp('145 000,00 €', 'r'))}${F('Date d’estimation', dateF('15/03/2026'))}
+  ${F('<span class="row">Quote-part détenue<span class="sp"></span><span class="t3">part : 72 500,00 €</span></span>', inp('50 %', 'r'))}<span></span>
+  ${F('Prix d’acquisition', inp('128 000,00 €', 'r'))}${F('Date d’acquisition', dateF('01/09/2019'))}</div>`, CANCEL + B('Enregistrer', 'pri'));
+MD.revalue = () => modal(420, 'Nouvelle estimation', 'Studio Villeurbanne : 145 000,00 € estimés le 15 mars 2026. La nouvelle estimation remplace celle-ci.', `
+  <div class="g2m">${F('Valeur déclarée', inp('150 000,00 €', 'r focus'))}${F('Date d’estimation', dateF('14/05/2026'))}</div>`, CANCEL + B('Enregistrer', 'pri'));
+MD.declared = () => modal(560, 'Historique déclaré', 'Le total de tous vos comptes à la fin d’un mois, pour la période avant vos imports. Un mois couvert par vos imports garde le chiffre importé.', `
+  <div class="row" style="gap:16px;align-items:flex-end">${F('Mois', inp('MM/AAAA', 'ph'), '', { cls: 'm130' })}<label class="f" style="flex:1">Total des comptes${inp('0,00 €', 'r ph')}</label>${B('Enregistrer', 'pri')}</div>
+  <table class="mtable">${[['déc. 2024', '', '11 240,00 €'], ['nov. 2024', '', '10 980,00 €'], ['oct. 2024', 'Couvert par vos imports', '10 615,00 €'], ['sept. 2024', '', '10 402,00 €']].map(r => `<tr><td style="height:48px;width:100px">${r[0]}</td><td class="t2 sm">${r[1]}</td><td class="c">${r[2]}</td><td class="n" style="width:72px"><span class="row" style="gap:2px;justify-content:flex-end">${IB('pencil', 'Modifier')}${IB('trash-2', 'Supprimer')}</span></td></tr>`).join('')}</table>`, B('Fermer'));
+
+/* ── simulator ── */
+MD.saveScenario = () => modal(420, 'Enregistrer le scénario', '', `${F('Nom', inp('Lyon 3e, 320 k€', 'focus'))}`, CANCEL + B('Enregistrer', 'pri'));
+MD.renameScenario = () => modal(420, 'Renommer le scénario', '', `${F('Nom', inp('Villeurbanne, 265 k€', 'focus'))}`, CANCEL + B('Enregistrer', 'pri'));
+
+/* ── gallery pages ── */
+const pairM = html => `<div class="mg-row">${['dark', 'light'].map(t => `<div class="app stage" data-theme="${t}" data-accent="encre" data-tex="off">${html}</div>`).join('')}</div>`;
+const itemM = (name, meta, html, desc = '') => `<div class="mg-item"><div class="cap"><b>${name}</b><span class="t3 sm">${meta}</span></div>${desc ? `<p class="t2 sm" style="margin:-4px 0 10px;max-width:96ch">${desc}</p>` : ''}${pairM(html)}</div>`;
+const galleryM = (title, intro, items) => theme => `<div class="app mg-page" data-theme="${theme}" data-accent="encre" data-tex="off"><h2>${title}</h2><p>${intro}</p>${items().join('')}</div>`;
+const SRC = 'frontend/lib/features/';
+
+P['m-frame'] = galleryM('Cadre commun des modales', 'Toutes les modales de l’application partagent un seul cadre : surface, rayon 12, ombre, sur le voile. Les règles écrites sont dans 00-design-system.md §7 « Modal ». Chaque modale est montrée en sombre puis en clair.', () => [
+  `<h2>Anatomie</h2><dl class="spec">
+    <dt>Cadre</dt><dd>surface, rayon 12, ombre, sans bordure ; sur le voile (scrim), centré ; hauteur au plus celle de la fenêtre moins 24 px en haut et en bas.</dd>
+    <dt>En-tête</dt><dd>padding 24 24 14 ; titre 16/600 ; chapeau facultatif 13 textSecondary, 4 px sous le titre. Pas d’icône devant le titre, pas de croix de fermeture.</dd>
+    <dt>Corps</dt><dd>padding 0 24 ; champs à 14 px les uns des autres ; seul le corps défile. Quand il défile, un filet line sépare l’en-tête et le pied.</dd>
+    <dt>Pied</dt><dd>padding 24 ; actions à droite, secondaire puis principale, 8 px d’écart ; une action tertiaire fantôme (« Supprimer ») se place seule à gauche.</dd>
+    <dt>Fermeture</dt><dd>Échap et un clic sur le voile valent « Annuler », sauf pendant un enregistrement et sur une modale sans issue (code de récupération affiché).</dd>
+    <dt>Apparition</dt><dd>opacité, 120 ms ease-out ; aucune avec « réduire les animations ».</dd></dl>`,
+  `<h2>Largeurs</h2><p class="t2" style="margin-bottom:12px">Huit largeurs, fixées par le contenu. La modale ne s’élargit jamais pour un libellé.</p>
+  <div class="col" style="gap:4px">${[[420, 'nom d’utilisateur, mot de passe, période, logo (recadrage, adresse), photo, scénario, nouvelle estimation, archivage d’un compte'], [440, 'objectif, allocation, suppression d’allocation, bannière, suppression d’un crédit'], [480, 'compte, carte, règle de prélèvement, code de récupération, catégorie et sa suppression, suppression d’une règle, paiement récurrent, refus et logos d’un pack'], [500, 'restauration, réinitialisation'], [520, 'règle, « Toujours catégoriser ainsi », marquer comme récurrent'], [560, 'packs de règles, ajout d’opérations à une série, historique déclaré'], [600, 'crédit'], [620, 'bien']].map(([w, u]) => `<div class="wbar"><span class="mono" style="width:44px">${w}</span><i style="width:${w / 2}px"></i><span class="sm t2">${u}</span></div>`).join('')}</div>`,
+  `<h2>Variantes</h2>`,
+  itemM('Formulaire', '480 · action tertiaire à gauche', MD.form(), 'Un formulaire d’édition porte « Supprimer » en bouton fantôme à gauche du pied ; sa confirmation est une modale destructive.'),
+  itemM('Confirmation', '420 · sans corps', MD.confirm(), 'Le titre pose la question, le chapeau dit ce qui change. L’action principale reprend le verbe du titre. Sans champ, le corps est vide et le pied suit le chapeau.'),
+  itemM('Confirmation destructive', '480 · bouton plein negative', MD.destructive(), 'Seule place du bouton plein negative (libellé bg). Ni icône ni pastille devant le titre : le verbe et la couleur du bouton suffisent.'),
+  itemM('Sans issue', '480 · une seule action', MD.recoveryShown(), 'Ce qui ne sera plus jamais affiché : un seul bouton, Échap et le voile ne ferment pas.'),
+  itemM('Recadrage carré', '420 · fenêtre 320 × 320', MD.ruleLogoCrop(), 'Glisser pour déplacer, molette ou pincement pour zoomer (1 à 5 ×). Fenêtre rayon 8, filet line, centrée sous le chapeau.'),
+  itemM('Recadrage bannière', '440 · fenêtre 392 × 169 (44:19)', MD.goalCrop(), 'Même geste ; la fenêtre prend toute la largeur du corps.'),
+  itemM('Agrandissement', '240 × 240 · sans cadre', MD.logoZoom(), 'L’image seule, rayon 12, ombre, sur le voile. Un clic n’importe où ou Échap la ferme.'),
+  `<h2>États</h2>`,
+  itemM('Champ refusé', 'bordure et aide en negative', MD.fieldError()),
+  itemM('Échec de l’enregistrement', 'bannière en tête du corps', MD.failed(), 'La modale reste ouverte ; la bannière (icône negative) dit ce qui a échoué. Les champs gardent la saisie.'),
+  itemM('Enregistrement en cours', 'roue dans le bouton principal', MD.busy(), 'La roue remplace l’icône, le libellé reste, la largeur ne bouge pas. Les autres actions et les champs sont désactivés.'),
+  itemM('Chargement', 'silhouette du corps', MD.loading(), 'Pas de roue au centre : la silhouette du corps en blocs hover, qui pulse comme celle des panneaux.'),
+  itemM('Chargement impossible', 'bannière et « Réessayer »', MD.loadError()),
+  itemM('Corps qui défile', 'filets sous l’en-tête et sur le pied', MD.long()),
+]);
+
+P['m-accounts'] = galleryM('Comptes', 'Ticket #267 · spécifications 05-accounts.md et 16-account-detail.md.', () => [
+  itemM('Nouveau compte', `480 · ${SRC}accounts/presentation/account_form.dart`, MD.accountNew()),
+  itemM('Nouveau compte, depuis un relevé', '480 · champs repris du relevé', MD.accountFromStatement()),
+  itemM('Modifier le compte, carte à débit différé', '480', MD.accountEditCard(), 'Le type « Carte à débit différé » ajoute « Débit de la carte » et « Prélevée sur ». En modification, le solde porte la note qui dit ce qu’une correction décale.'),
+  itemM('Archiver ce compte ?', `420 · ${SRC}accounts/presentation/account_archive.dart`, MD.accountArchive(), 'Confirmation simple : l’archivage se défait, le bouton reste à l’encre.'),
+  itemM('Lier une carte', `480 · ${SRC}accounts/presentation/link_card_dialog.dart`, MD.linkCard()),
+  itemM('Règle de prélèvement de la carte', `480 · ${SRC}accounts/presentation/settlement_rule_dialog.dart`, MD.settlement()),
+]);
+P['m-profile'] = galleryM('Profil', 'Ticket #268 · spécification 09-settings.md, Profil.', () => [
+  itemM('Changer de nom d’utilisateur', `420 · ${SRC}auth/presentation/display_name_modal.dart`, MD.displayName()),
+  itemM('Changer le mot de passe', `420 · ${SRC}auth/presentation/password_change_modal.dart`, MD.password()),
+  itemM('Changer le mot de passe, mot de passe actuel refusé', '420', MD.passwordWrong()),
+  itemM('Nouveau code de récupération, mot de passe', `480 · ${SRC}auth/presentation/recovery_code_modal.dart`, MD.recoveryAsk()),
+  itemM('Nouveau code de récupération, code affiché', '480 · sans issue', MD.recoveryShown()),
+  itemM('Recadrer la photo', `420 · ${SRC}auth/presentation/avatar_crop_modal.dart`, MD.avatarCrop(), 'Recadrage carré. Le cercle montre ce que l’avatar rond gardera ; le reste est voilé.'),
+]);
+P['m-data'] = galleryM('Paramètres, données', 'Ticket #269 · spécification 09-settings.md, Données.', () => [
+  itemM('Restaurer cette sauvegarde ?', `500 · ${SRC}settings/presentation/restore_confirm_modal.dart`, MD.restore()),
+  itemM('Réinitialiser la base de données ?', `500 · ${SRC}settings/presentation/reset_confirm_modal.dart`, MD.reset(), '« Tout supprimer » reste désactivé tant que le champ ne vaut pas exactement SUPPRIMER.'),
+  itemM('Réinitialiser la base de données ?, mot saisi', '500', MD.reset('SUPPRIMER')),
+]);
+P['m-categories'] = galleryM('Catégories', 'Ticket #270 · spécification 08-categories-rules.md.', () => [
+  itemM('Nouvelle catégorie', `480 · ${SRC}categories/presentation/category_form_modal.dart`, MD.categoryNew(), 'Icône : le jeu Lucide retenu, cases de 32 px, la case choisie en hover avec un contour accent. Couleur : les sept emplacements en carrés de 20 px.'),
+  itemM('Nouvelle sous-catégorie', '480 · parent choisi', MD.categorySub(), 'Avec un parent, Type, Icône et Couleur disparaissent et le chapeau reprend l’étiquette du parent.'),
+  itemM('Modifier la catégorie', '480', MD.categoryEdit()),
+  itemM('Supprimer cette catégorie ?', `480 · ${SRC}categories/presentation/category_delete.dart`, MD.categoryDelete()),
+]);
+P['m-rules'] = galleryM('Règles', 'Ticket #271 · spécification 08-categories-rules.md.', () => [
+  itemM('Modifier la règle', `520 · ${SRC}rules/presentation/rule_editor_modal.dart`, MD.ruleEdit()),
+  itemM('Nouvelle règle', '520', MD.ruleEdit({ isNew: 1 })),
+  itemM('Supprimer cette règle ?', '480', MD.ruleDelete()),
+  itemM('Recadrer le logo', `420 · ${SRC}rules/presentation/rule_logo_field.dart`, MD.ruleLogoCrop()),
+  itemM('Logo depuis une adresse', '420', MD.ruleLogoUrl()),
+  itemM('Logo depuis une adresse, refusé', '420', MD.ruleLogoUrl(true)),
+  itemM('Agrandir le logo', `240 · frontend/lib/core/widgets/logo_zoom.dart`, MD.logoZoom()),
+  itemM('Exporter mes règles', `560 · ${SRC}rules/presentation/rule_pack_export_sheet.dart`, MD.packExport(), 'Le fichier lui-même, en Geist Mono dans un puits field qui défile (220 px au plus) : ce qui quitte la machine se lit avant d’être enregistré.'),
+  itemM('Importer un pack, aperçu', `560 · ${SRC}rules/presentation/rule_pack_import_sheet.dart`, MD.packImport(), 'Titre : le nom du pack. Les règles en table standard sans en-tête : logo ou monogramme, motif, catégorie.'),
+  itemM('Importer un pack, logos en cours', '560', MD.packProgress()),
+  itemM('Ce fichier n’a pas été accepté', '480', MD.packRefused()),
+  itemM('Logos non ajoutés', '480', MD.packLogoFailures()),
+]);
+P['m-transactions'] = galleryM('Transactions', 'Ticket #272 · spécification 07-transactions.md.', () => [
+  itemM('Toujours catégoriser ainsi', `520 · ${SRC}transactions/presentation/always_categorize_modal.dart`, MD.always()),
+  itemM('Période', `420 · ${SRC}transactions/presentation/date_range_modal.dart`, MD.period()),
+  itemM('Période, dates inversées', '420', MD.period(true)),
+]);
+P['m-subscriptions'] = galleryM('Abonnements', 'Ticket #273 · spécifications 10-subscriptions.md et 07-transactions.md.', () => [
+  itemM('Modifier le paiement récurrent', `480 · ${SRC}recurring/presentation/series_form_modal.dart`, MD.seriesEdit()),
+  itemM('Ajouter à une série', `560 · ${SRC}recurring/presentation/add_charges_dialog.dart`, MD.addCharges()),
+  itemM('Marquer comme récurrent, aperçu', `520 · ${SRC}recurring/presentation/mark_recurring_dialog.dart`, MD.markRecurring(), 'La confiance est un texte d’état, sans pastille ; les raisons suivent sur une ligne 12 textSecondary.'),
+  itemM('Marquer comme récurrent, confiance faible', '520', MD.markRecurringLow()),
+  itemM('Marquer comme récurrent, série existante', '520', MD.markRecurringExisting()),
+  itemM('Marquer comme récurrent, choisir une série', `520 · ${SRC}recurring/presentation/series_picker.dart`, MD.seriesPicker(), 'Trois actions : « Retour à l’aperçu » et « Annuler » en secondaire, « Confirmer » en principal. La série choisie prend accentSoft et une coche.'),
+]);
+P['m-goals'] = galleryM('Objectifs', 'Ticket #274 · spécification 11-goals.md.', () => [
+  itemM('Nouvel objectif', `440 · ${SRC}goals/presentation/goal_form_modal.dart`, MD.goalForm()),
+  itemM('Nouvelle allocation', `440 · ${SRC}goals/presentation/allocation_modal.dart`, MD.allocation()),
+  itemM('Supprimer cette allocation ?', `440 · ${SRC}goals/presentation/delete_allocation_modal.dart`, MD.allocationDelete()),
+  itemM('Recadrer l’image', `440 · ${SRC}goals/presentation/goal_image_crop_modal.dart`, MD.goalCrop()),
+]);
+P['m-loans'] = galleryM('Crédits', 'Ticket #275 · spécification 12-credits.md.', () => [
+  itemM('Modifier le crédit', `600 · ${SRC}mortgages/presentation/mortgage_form_modal.dart`, MD.loanForm(), 'Grille à deux colonnes, 16 px de gouttière. « Mensualité calculée » se met à jour à la saisie ; sans capital, taux ou durée : « Renseignez le capital, le taux et la durée. »'),
+  itemM('Nouveau crédit', '600', MD.loanForm(false)),
+  itemM('Supprimer ce crédit ?', '440', MD.loanDelete()),
+]);
+P['m-networth'] = galleryM('Synthèse', 'Ticket #276 · spécification 15-synthese.md.', () => [
+  itemM('Nouveau bien', `620 · ${SRC}properties/presentation/property_form_modal.dart`, MD.property(), 'La quote-part porte « part : {montant} » à droite de son libellé, mis à jour à la saisie.'),
+  itemM('Nouvelle estimation', '420', MD.revalue()),
+  itemM('Historique déclaré', `560 · ${SRC}networth/presentation/declared_balances_modal.dart`, MD.declared(), 'Une ligne de saisie, puis la liste en lignes de 48 px. Les boutons icône (modifier, supprimer) sont fantômes.'),
+]);
+P['m-simulator'] = galleryM('Simulateur', 'Ticket #277 · spécification 14-simulateur.md. « Déclarer un revenu » ouvre Paramètres › Préférences, pas une modale (09-settings.md).', () => [
+  itemM('Enregistrer le scénario', `420 · ${SRC}simulator/presentation/scenario_list.dart`, MD.saveScenario()),
+  itemM('Renommer le scénario', '420', MD.renameScenario()),
+]);
+
+/* the frame in context: the rule editor over Catégories et règles */
+P['m-context'] = () => P.categories() + `<div style="position:absolute;inset:0;background:var(--scrim);display:grid;place-items:center;z-index:10">${MD.ruleEdit()}</div>`;
+
 /* ════════ v6: the title bar and its window controls ════════ */
 const WC = (st = {}) => `<div class="wc" role="group" aria-label="Fenêtre">${[['min', 'minus', 'Réduire'], ['max', st.max ? 'copy' : 'square', st.max ? 'Restaurer' : 'Agrandir'], ['x', 'x', 'Fermer']].map(([k, ic, l]) => `<span class="${k === 'x' ? 'x' : ''} ${st.hover === k ? 'h-on' : ''} ${st.press === k ? 'p-on' : ''}" title="${l}" aria-label="${l}">${I(ic)}</span>`).join('')}</div>`;
 const barStrip = (t, st = {}, o = {}) => `<div class="app strip" data-theme="${t}" data-accent="encre" data-tex="off"><header class="top win ${st.idle ? 'idle' : ''}">${o.crumb ? `<span class="crumb">${o.crumb} /</span>` : ''}<h1>${o.title || 'Tableau de bord'}</h1><span class="sp ${o.drag ? 'drag' : ''}" style="align-self:stretch"></span>${o.actions ?? MONTH}${WC(st)}</header></div>`;
@@ -508,10 +872,11 @@ const LIST = [['Système', [['system', 'Système de design'], ['logos', 'Logo'],
   ['Vue d’ensemble', [['dashboard', 'Tableau de bord'], ['accounts', 'Comptes'], ['account', 'Détail d’un compte'], ['transactions', 'Transactions']]],
   ['Gestion', [['imports', 'Imports'], ['categories', 'Catégories et règles'], ['subscriptions', 'Abonnements'], ['goals', 'Objectifs']]],
   ['Patrimoine', [['loans', 'Crédits'], ['investments', 'Placements'], ['simulator', 'Simulateur'], ['networth', 'Synthèse']]], ['Réglages', [['settings', 'Paramètres']]],
-  ['Fenêtre', [['window', 'Barre de titre']]]];
+  ['Fenêtre', [['window', 'Barre de titre']]],
+  ['Modales', [['m-frame', 'Cadre commun'], ['m-context', 'En situation'], ['m-accounts', 'Comptes'], ['m-profile', 'Profil'], ['m-data', 'Paramètres, données'], ['m-categories', 'Catégories'], ['m-rules', 'Règles'], ['m-transactions', 'Transactions'], ['m-subscriptions', 'Abonnements'], ['m-goals', 'Objectifs'], ['m-loans', 'Crédits'], ['m-networth', 'Synthèse'], ['m-simulator', 'Simulateur']]]];
 const S = Object.assign({ panel: 'dashboard', variant: 'A', theme: 'dark', accent: 'encre', bare: '' }, Object.fromEntries(new URLSearchParams(location.hash.slice(1))));
 S.accent = 'encre';
-const DOCS = ['system', 'logos', 'textures', 'splash', 'window'];
+const DOCS = ['system', 'logos', 'textures', 'splash', 'window', 'm-frame', 'm-accounts', 'm-profile', 'm-data', 'm-categories', 'm-rules', 'm-transactions', 'm-subscriptions', 'm-goals', 'm-loans', 'm-networth', 'm-simulator'];
 S.logo = 'plan'; S.tex = 'tomettes';
 const $ = s => document.querySelector(s);
 function render() {
