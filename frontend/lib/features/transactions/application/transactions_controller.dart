@@ -38,11 +38,10 @@ void refreshTransactionRows(Ref ref) {
 /// transfer, so the card's monthly debit and the purchases it pays are never
 /// both counted as spending.
 ///
-/// The review queue is widened the same way, and so is a categorization run
-/// started from it (`RunController.startFromQueue`): the queue must be exactly
-/// the run's input, so both read this one rule.
+/// The « À vérifier » tab reads none of the list's filters (see
+/// [TransactionFilters.isReviewTab]), so it never widens anything.
 bool takesInLinkedCards(TransactionFilters filters) =>
-    filters.accountId != null;
+    !filters.isReviewTab && filters.accountId != null;
 
 /// An import narrowing the list to the operations it added. Carries the
 /// import's file name so the filter row can name it without loading the
@@ -86,13 +85,31 @@ class TransactionFilters {
   final DateTime? dateTo;
   final String? categoryId;
 
-  /// `true` narrows to the review queue; `null`/`false` is the normal list.
+  /// `true` is the « À vérifier » tab; `null`/`false` is « Toutes ».
   final bool? needsReview;
 
   /// Set from an import history row; shown as a removable chip.
   final ImportBatchFilter? importBatch;
   final String q;
   final int page;
+
+  /// The « À vérifier » tab: the whole review queue, searched by [q] only.
+  ///
+  /// Its count is the one on the tab and in the sidebar, so the account,
+  /// period and category picked on « Toutes » (whose filter row this tab does
+  /// not show) must not narrow it unseen. They are kept, and apply again on
+  /// the way back.
+  bool get isReviewTab => needsReview == true;
+
+  /// Whether « Toutes » is narrowed by anything the filter row or the search
+  /// field set: what tells « no transaction at all » from « none of these ».
+  bool get hasListFilter =>
+      accountId != null ||
+      dateFrom != null ||
+      dateTo != null ||
+      categoryId != null ||
+      importBatch != null ||
+      q.trim().isNotEmpty;
 
   TransactionFilters copyWith({
     String? accountId,
@@ -187,6 +204,11 @@ class TransactionFiltersNotifier extends Notifier<TransactionFilters> {
 
   void clearImport() => state = state.copyWith(clearImportBatch: true, page: 1);
 
+  /// « Effacer les filtres »: lifts every filter of « Toutes » and the search,
+  /// staying on the tab.
+  void clearFilters() =>
+      state = TransactionFilters(needsReview: state.needsReview);
+
   void setQuery(String q) => state = state.copyWith(q: q, page: 1);
 
   void setPage(int page) => state = state.copyWith(page: page);
@@ -208,6 +230,14 @@ class TransactionsController extends AsyncNotifier<TransactionsPage> {
   }
 
   Future<TransactionsPage> _fetch(TransactionFilters filters) {
+    final repository = ref.read(transactionsRepositoryProvider);
+    if (filters.isReviewTab) {
+      return repository.list(
+        needsReview: true,
+        q: filters.q,
+        page: filters.page,
+      );
+    }
     return ref
         .read(transactionsRepositoryProvider)
         .list(
@@ -271,6 +301,22 @@ class TransactionsController extends AsyncNotifier<TransactionsPage> {
     await updateCategory(transaction, proposed.id);
   }
 
+  /// Keeps [transaction] out of the totals, or puts it back.
+  ///
+  /// The row stays listed; the page is then re-read quietly, because the net
+  /// it reports covers every page and only the server can recount it.
+  Future<void> setExcludedFromTotals(
+    Transaction transaction, {
+    required bool excluded,
+  }) async {
+    final updated = await ref
+        .read(transactionsRepositoryProvider)
+        .update(transaction.id, excludedFromTotals: excluded);
+    _replace(updated);
+    ref.read(transactionEditsProvider.notifier).saved();
+    await refreshQuietly();
+  }
+
   void _replace(Transaction updated) {
     final current = state.value;
     if (current == null) return;
@@ -283,6 +329,7 @@ class TransactionsController extends AsyncNotifier<TransactionsPage> {
         page: current.page,
         pageSize: current.pageSize,
         total: current.total,
+        netMinor: current.netMinor,
       ),
     );
   }

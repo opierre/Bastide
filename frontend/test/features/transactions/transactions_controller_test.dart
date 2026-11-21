@@ -1,5 +1,7 @@
 import 'package:bastide/core/api/api_client.dart';
 import 'package:bastide/core/api/api_client_provider.dart';
+import 'package:bastide/features/categories/domain/category.dart';
+import 'package:bastide/features/transactions/application/transaction_selection.dart';
 import 'package:bastide/features/transactions/application/transactions_controller.dart';
 import 'package:bastide/features/transactions/domain/transaction.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -202,10 +204,11 @@ void main() {
     // Filtered: the account and the deferred cards it settles.
     expect(queries[1]['account_id'], 'a1');
     expect(queries[1]['include_linked_cards'], 'true');
-    // The review queue is widened too, as is a run started from it.
-    expect(queries[2]['account_id'], 'a1');
+    // The « À vérifier » tab is the whole queue: the account picked on
+    // « Toutes » does not narrow it unseen.
+    expect(queries[2].containsKey('account_id'), isFalse);
     expect(queries[2]['needs_review'], 'true');
-    expect(queries[2]['include_linked_cards'], 'true');
+    expect(queries[2].containsKey('include_linked_cards'), isFalse);
     // Back to all accounts: the flag goes with the filter.
     expect(queries[3].containsKey('account_id'), isFalse);
     expect(queries[3].containsKey('include_linked_cards'), isFalse);
@@ -277,4 +280,235 @@ void main() {
     const page = TransactionsPage(items: [], page: 1, pageSize: 50, total: 120);
     expect(page.totalPages, 3);
   });
+
+  test('the page carries the net and each row its exclusion', () async {
+    when(
+      () => apiClient.get('/transactions', query: any(named: 'query')),
+    ).thenAnswer(
+      (_) async => {
+        ..._pageJson([
+          {..._transactionJson(), 'excluded_from_totals': true},
+        ]),
+        'net_minor': -48_210,
+      },
+    );
+
+    final page = await container.read(transactionsControllerProvider.future);
+
+    expect(page.netMinor, -48_210);
+    expect(page.items.single.excludedFromTotals, isTrue);
+  });
+
+  test('the review tab reads the queue with the search only', () async {
+    when(
+      () => apiClient.get('/transactions', query: any(named: 'query')),
+    ).thenAnswer((_) async => _pageJson([_transactionJson()]));
+
+    container.read(transactionFiltersProvider.notifier)
+      ..setAccount('a1')
+      ..setCategory('c1')
+      ..setDateRange(DateTime(2026, 5, 1), DateTime(2026, 5, 31))
+      ..setQuery('cafe')
+      ..setNeedsReview(true);
+    await container.read(transactionsControllerProvider.future);
+
+    final query =
+        verify(
+              () => apiClient.get(
+                '/transactions',
+                query: captureAny(named: 'query'),
+              ),
+            ).captured.last
+            as Map<String, String>;
+    expect(query, {'page': '1', 'needs_review': 'true', 'q': 'cafe'});
+    // Kept for the way back to « Toutes ».
+    final filters = container.read(transactionFiltersProvider);
+    expect(filters.accountId, 'a1');
+    expect(filters.categoryId, 'c1');
+  });
+
+  test('clearFilters lifts every filter and stays on the tab', () {
+    final notifier = container.read(transactionFiltersProvider.notifier)
+      ..setAccount('a1')
+      ..setQuery('cafe')
+      ..setPage(3);
+
+    notifier.clearFilters();
+
+    expect(
+      container.read(transactionFiltersProvider),
+      const TransactionFilters(),
+    );
+    expect(container.read(transactionFiltersProvider).hasListFilter, isFalse);
+  });
+
+  test('excluding a row patches it and re-reads the net', () async {
+    var net = -3_000;
+    var excluded = false;
+    when(
+      () => apiClient.get('/transactions', query: any(named: 'query')),
+    ).thenAnswer(
+      (_) async => {
+        ..._pageJson([
+          {..._transactionJson(id: 't1'), 'excluded_from_totals': excluded},
+        ]),
+        'net_minor': net,
+      },
+    );
+    when(
+      () => apiClient.patch('/transactions/t1', body: any(named: 'body')),
+    ).thenAnswer(
+      (_) async => {
+        ..._transactionJson(id: 't1'),
+        'excluded_from_totals': true,
+      },
+    );
+
+    final page = await container.read(transactionsControllerProvider.future);
+    net = 0;
+    excluded = true;
+    await container
+        .read(transactionsControllerProvider.notifier)
+        .setExcludedFromTotals(page.items.single, excluded: true);
+
+    verify(
+      () => apiClient.patch(
+        '/transactions/t1',
+        body: {'excluded_from_totals': true},
+      ),
+    ).called(1);
+    final reloaded = container.read(transactionsControllerProvider).value!;
+    expect(reloaded.netMinor, 0);
+    expect(reloaded.items.single.excludedFromTotals, isTrue);
+  });
+
+  test('the context maps the import, rule, series and history', () async {
+    when(() => apiClient.get('/transactions/t1/context')).thenAnswer(
+      (_) async => {
+        'import_batch_id': 'b1',
+        'import_file_name': 'releve-mai.ofx',
+        'rule': {
+          'id': 'r1',
+          'match_field': 'description_clean',
+          'match_type': 'contains',
+          'pattern': 'ASSUR',
+        },
+        'series': {
+          'id': 's1',
+          'cadence': 'yearly',
+          'next_expected_date': '2026-11-21',
+        },
+        'same_merchant': [
+          {
+            'id': 't0',
+            'booked_date': '2025-11-21',
+            'amount_minor': -17_990,
+            'currency': 'EUR',
+          },
+        ],
+      },
+    );
+
+    final details = await container.read(
+      transactionContextProvider('t1').future,
+    );
+
+    expect(details.importFileName, 'releve-mai.ofx');
+    expect(details.rule?.pattern, 'ASSUR');
+    expect(details.series?.cadence, 'yearly');
+    expect(details.series?.nextExpectedDate, DateTime(2026, 11, 21));
+    expect(details.sameMerchant.single.amountMinor, -17_990);
+  });
+
+  group('selection', () {
+    final items = [
+      for (final id in ['t1', 't2', 't3']) _tx(id),
+    ];
+
+    test('↓ with nothing selected lands on the first row', () {
+      container.read(selectedTransactionProvider.notifier).move(items, 1);
+      expect(container.read(selectedTransactionProvider), 't1');
+    });
+
+    test('↑ with nothing selected lands on the last row', () {
+      container.read(selectedTransactionProvider.notifier).move(items, -1);
+      expect(container.read(selectedTransactionProvider), 't3');
+    });
+
+    test('moves stop at either end', () {
+      final selection = container.read(selectedTransactionProvider.notifier)
+        ..select('t2')
+        ..move(items, 1)
+        ..move(items, 1);
+      expect(container.read(selectedTransactionProvider), 't3');
+      selection
+        ..move(items, -1)
+        ..move(items, -1)
+        ..move(items, -1);
+      expect(container.read(selectedTransactionProvider), 't1');
+    });
+  });
+
+  test('groupByDay keeps the page order and splits it by day', () {
+    Transaction on(String id, DateTime date) => _tx(id, date);
+    final days = groupByDay([
+      on('a', DateTime(2026, 5, 14)),
+      on('b', DateTime(2026, 5, 14)),
+      on('c', DateTime(2026, 5, 12)),
+    ]);
+
+    expect(days.map((day) => day.date), [
+      DateTime(2026, 5, 14),
+      DateTime(2026, 5, 12),
+    ]);
+    expect(days.first.items.map((item) => item.id), ['a', 'b']);
+  });
+
+  test('pickerOrder lists each category followed by its subcategories', () {
+    AppCategory category(String id, {String? parent}) => AppCategory(
+      id: id,
+      userId: null,
+      parentId: parent,
+      name: id,
+      kind: 'expense',
+      icon: 'tag',
+      color: 'cat1',
+      isSystem: false,
+    );
+    final order = pickerOrder([
+      category('home'),
+      category('food'),
+      category('rent', parent: 'home'),
+      category('cafe', parent: 'food'),
+    ]);
+
+    expect(order.map((entry) => (entry.sub ?? entry.top).id), [
+      'home',
+      'rent',
+      'food',
+      'cafe',
+    ]);
+    expect(order[1].top.id, 'home');
+  });
 }
+
+Transaction _tx(String id, [DateTime? bookedDate]) => Transaction(
+  id: id,
+  accountId: 'a1',
+  bookedDate: bookedDate ?? DateTime(2026, 5, 14),
+  valueDate: null,
+  amountMinor: -1250,
+  currency: 'EUR',
+  descriptionRaw: 'CB CARREFOUR MARKET 14/05',
+  descriptionClean: 'Carrefour Market',
+  memo: null,
+  merchant: 'Carrefour',
+  category: null,
+  categorizationSource: CategorizationSource.rule,
+  categorizationConfidence: null,
+  needsReview: false,
+  fitid: null,
+  dedupHash: 'hash-$id',
+  createdAt: DateTime.utc(2026, 5, 14),
+  updatedAt: DateTime.utc(2026, 5, 14),
+);

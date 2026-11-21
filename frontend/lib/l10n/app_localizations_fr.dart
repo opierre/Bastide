@@ -1078,15 +1078,10 @@ class AppLocalizationsFr extends AppLocalizations {
   String get importHistoryNoValue => '—';
 
   @override
-  String get transactionsSearchHint =>
-      'Rechercher une description ou un marchand…';
+  String get transactionsSearchHint => 'Rechercher';
 
   @override
   String get searchShortcutHint => 'Ctrl K';
-
-  @override
-  String get transactionsSearchEmpty =>
-      'Aucune transaction ne correspond à votre recherche.';
 
   @override
   String get transactionsRetry => 'Réessayer';
@@ -1096,7 +1091,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get transactionsEmptyBody =>
-      'Importez un relevé pour voir vos opérations apparaître ici.';
+      'Importez un relevé pour voir vos opérations ici.';
 
   @override
   String get transactionsGoToImports => 'Aller aux imports';
@@ -1131,10 +1126,6 @@ class AppLocalizationsFr extends AppLocalizations {
   String get transactionsDateRangeToLabel => 'Au';
 
   @override
-  String get transactionsDateRangeHelp =>
-      'Laissez les deux dates vides pour voir toutes les dates.';
-
-  @override
   String get transactionsDateRangePickFrom => 'Choisir la date de début';
 
   @override
@@ -1159,25 +1150,174 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String transactionsPager(int from, int to, int total) {
-    return '$from–$to sur $total';
+    return '$from – $to sur $total';
   }
 
   @override
-  String transactionRowMemoAndAccount(String memo, String account) {
-    return '$memo · $account';
+  String get transactionsTabAll => 'Toutes';
+
+  @override
+  String transactionsPeriodRange(String from, String to) {
+    return '$from – $to';
   }
 
   @override
-  String get reviewQueueEmpty => 'Aucune transaction à vérifier.';
-
-  @override
-  String reviewQueueCount(int count) {
+  String transactionsCountNet(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '$count transactions à vérifier',
-      one: '1 transaction à vérifier',
-      zero: 'Aucune transaction à vérifier',
+      other: '$count opérations · net',
+      one: '1 opération · net',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get transactionsColumnOperation => 'Opération';
+
+  @override
+  String get transactionsColumnCategory => 'Catégorie';
+
+  @override
+  String get transactionsColumnAmount => 'Montant';
+
+  @override
+  String get transactionsExcludedSuffix => 'exclue des totaux';
+
+  @override
+  String get transactionsPagerPrevious => 'Page précédente';
+
+  @override
+  String get transactionsPagerNext => 'Page suivante';
+
+  @override
+  String get transactionsNoResult => 'Aucune opération pour ces filtres.';
+
+  @override
+  String get transactionsClearFilters => 'Effacer les filtres';
+
+  @override
+  String get transactionInspectorEmpty =>
+      'Sélectionnez une opération pour voir son détail.';
+
+  @override
+  String get transactionInspectorDate => 'Date';
+
+  @override
+  String get transactionInspectorAccount => 'Compte';
+
+  @override
+  String get transactionInspectorCategory => 'Catégorie';
+
+  @override
+  String get transactionInspectorClassifiedBy => 'Classée par';
+
+  @override
+  String get transactionInspectorImport => 'Import';
+
+  @override
+  String transactionClassifiedByRule(String pattern) {
+    return 'règle « $pattern »';
+  }
+
+  @override
+  String transactionClassifiedByModel(double confidence) {
+    final intl.NumberFormat confidenceNumberFormat =
+        intl.NumberFormat.percentPattern(localeName);
+    final String confidenceString = confidenceNumberFormat.format(confidence);
+
+    return 'IA locale, confiance $confidenceString';
+  }
+
+  @override
+  String get transactionClassifiedByUser => 'vous';
+
+  @override
+  String get transactionClassifiedByNone => 'non classée';
+
+  @override
+  String get transactionInspectorLoadError =>
+      'Ce détail n’a pas pu être chargé. Rien n’a été modifié.';
+
+  @override
+  String get transactionRecurringTitle => 'Paiement récurrent';
+
+  @override
+  String transactionRecurringNext(String cadence, String date) {
+    return '$cadence · prochain le $date';
+  }
+
+  @override
+  String get transactionRecurringView => 'Voir la série';
+
+  @override
+  String get transactionSameMerchant => 'Même marchand';
+
+  @override
+  String get transactionSameMerchantNone => 'Aucune opération antérieure.';
+
+  @override
+  String get transactionCreateRule => 'Créer une règle';
+
+  @override
+  String get transactionEditRule => 'Modifier la règle';
+
+  @override
+  String get transactionExclude => 'Exclure des totaux';
+
+  @override
+  String get transactionInclude => 'Inclure dans les totaux';
+
+  @override
+  String reviewProgressCount(int done, int total) {
+    return '$done sur $total';
+  }
+
+  @override
+  String get reviewProgressCaption => 'classées aujourd’hui';
+
+  @override
+  String reviewAiNote(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          'L’IA locale propose une catégorie pour $count opérations. Rien n’est classé sans votre accord.',
+      one:
+          'L’IA locale propose une catégorie pour 1 opération. Rien n’est classé sans votre accord.',
+      zero:
+          'L’IA locale n’a proposé aucune catégorie. Rien n’est classé sans votre accord.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get reviewColumnLabel => 'Libellé du relevé';
+
+  @override
+  String get reviewColumnDate => 'Date';
+
+  @override
+  String get reviewColumnProposal => 'Proposition';
+
+  @override
+  String get reviewEmptyTitle => 'Rien à vérifier';
+
+  @override
+  String get reviewEmptyBody => 'Toutes vos opérations ont une catégorie.';
+
+  @override
+  String get alwaysRuleLead =>
+      'Une règle classe ces opérations à chaque import, sans IA.';
+
+  @override
+  String alwaysRuleCreatedToast(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Règle créée · $count opérations recatégorisées',
+      one: 'Règle créée · 1 opération recatégorisée',
+      zero: 'Règle créée',
     );
     return '$_temp0';
   }
@@ -1186,7 +1326,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get reviewAlwaysCategorize => 'Toujours catégoriser ainsi';
 
   @override
-  String get categoryPickerSearchHint => 'Changer de catégorie…';
+  String get categoryPickerSearchHint => 'Changer de catégorie';
 
   @override
   String get categoryPickerLoadError => 'Impossible de charger les catégories.';
@@ -2281,32 +2421,8 @@ class AppLocalizationsFr extends AppLocalizations {
   }
 
   @override
-  String reviewQueueAiSubtitle(int count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other:
-          'L\'IA locale propose une catégorie pour $count d\'entre elles. Confirmez ou corrigez : rien n\'est classé sans vous.',
-      one:
-          'L\'IA locale propose une catégorie pour l\'une d\'entre elles. Confirmez ou corrigez : rien n\'est classé sans vous.',
-      zero:
-          'Aucune de ces transactions n\'a reçu de proposition de l\'IA locale. Confirmez ou corrigez : rien n\'est classé sans vous.',
-    );
-    return '$_temp0';
-  }
-
-  @override
-  String reviewQueueProgress(int resolved, int total, double percent) {
-    final intl.NumberFormat percentNumberFormat =
-        intl.NumberFormat.percentPattern(localeName);
-    final String percentString = percentNumberFormat.format(percent);
-
-    return '$resolved/$total · $percentString';
-  }
-
-  @override
   String get reviewAiInvitation =>
-      'Activez l\'IA locale pour classer automatiquement les transactions que vos règles n\'ont pas reconnues.';
+      'Activez l’IA locale pour classer les opérations que vos règles n’ont pas reconnues.';
 
   @override
   String get reviewAiInvitationLink => 'Paramètres';
@@ -2317,7 +2433,7 @@ class AppLocalizationsFr extends AppLocalizations {
         intl.NumberFormat.percentPattern(localeName);
     final String confidenceString = confidenceNumberFormat.format(confidence);
 
-    return 'Confiance $confidenceString';
+    return 'confiance $confidenceString';
   }
 
   @override
@@ -2333,33 +2449,13 @@ class AppLocalizationsFr extends AppLocalizations {
   String get reviewChooseCategory => 'Choisir une catégorie';
 
   @override
-  String alwaysRuleSubtitle(String label) {
-    return 'Une règle classe ces transactions sans IA, à chaque import. Elle est pré-remplie depuis « $label ».';
-  }
-
-  @override
   String get alwaysRuleCategoryLabel => 'Catégorie cible';
 
   @override
-  String get alwaysRuleApplyExisting => 'Appliquer aux transactions existantes';
+  String get alwaysRuleApplyExisting => 'Appliquer aux opérations existantes';
 
   @override
   String get alwaysRuleSubmit => 'Créer la règle';
-
-  @override
-  String get alwaysRuleCreatedTitle => 'Règle créée';
-
-  @override
-  String alwaysRuleCreatedBody(int count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: '$count transactions recatégorisées.',
-      one: '$count transaction recatégorisée.',
-      zero: 'Aucune autre transaction n\'a changé de catégorie.',
-    );
-    return '$_temp0';
-  }
 
   @override
   String get alwaysRuleSuggestionFailed =>
@@ -2373,8 +2469,8 @@ class AppLocalizationsFr extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       total,
       locale: localeName,
-      other: 'Catégorisation en cours : $processed sur $total transactions',
-      one: 'Catégorisation en cours : $processed sur $total transaction',
+      other: 'Catégorisation en cours : $processed sur $total opérations',
+      one: 'Catégorisation en cours : $processed sur $total opération',
     );
     return '$_temp0';
   }
@@ -2384,10 +2480,8 @@ class AppLocalizationsFr extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       assigned,
       locale: localeName,
-      other:
-          '$assigned classées · $deferred à vérifier · le panneau reste utilisable',
-      one:
-          '$assigned classée · $deferred à vérifier · le panneau reste utilisable',
+      other: '$assigned classées · $deferred à vérifier',
+      one: '$assigned classée · $deferred à vérifier',
     );
     return '$_temp0';
   }
@@ -2401,9 +2495,9 @@ class AppLocalizationsFr extends AppLocalizations {
       count,
       locale: localeName,
       other:
-          'Catégorisation terminée. $count transactions n\'ont pas pu être analysées.',
+          'Catégorisation terminée. $count opérations n’ont pas pu être analysées.',
       one:
-          'Catégorisation terminée. $count transaction n\'a pas pu être analysée.',
+          'Catégorisation terminée. $count opération n’a pas pu être analysée.',
     );
     return '$_temp0';
   }

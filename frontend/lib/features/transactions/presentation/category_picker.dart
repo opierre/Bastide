@@ -1,55 +1,62 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:lucide_icons_flutter/lucide_icons_300.dart';
 
 import '../../../core/l10n/category_display.dart';
 import '../../../core/theme/tokens.dart';
+import '../../../core/widgets/app_toast.dart';
 import '../../../core/widgets/category_label.dart';
+import '../../../core/widgets/focus_ring.dart';
+import '../../../core/widgets/inline_banner.dart';
 import '../../../l10n/app_localizations.dart';
-import '../../categories/domain/category.dart' show AppCategory;
+import '../application/transaction_selection.dart';
 import '../application/transactions_controller.dart';
 import '../domain/transaction.dart';
 import 'transaction_error_localizer.dart';
 
-/// Opens the category picker popover anchored under [anchorContext]'s widget
-/// — a 250px overlay with a search field and the category catalog, the
-/// current category checked (see `docs/design/07-transactions.md`).
+/// Opens the category picker under [anchorContext]'s widget
+/// (`docs/design/07-transactions.md` §Category picker): a 230 px popover with
+/// the 28 px « Changer de catégorie » search field, then every category and
+/// subcategory as a category label, a `check` on the current one. Choosing
+/// one closes it and applies it.
 ///
-/// Assigning only. "Toujours catégoriser ainsi" is a rule form of its own
+/// Assigning only. « Toujours catégoriser ainsi » is a rule form of its own
 /// (`always_categorize_modal.dart`), because a rule needs a field, a condition
-/// and a pattern the user can see and change — a category tap alone can't say
-/// what the rule would match.
+/// and a pattern the user can see and change.
 Future<void> showCategoryPicker(
   BuildContext anchorContext,
   WidgetRef ref, {
   required Transaction transaction,
 }) async {
-  final button = anchorContext.findRenderObject()! as RenderBox;
+  final anchor = anchorContext.findRenderObject()! as RenderBox;
   final overlay =
       Navigator.of(anchorContext).overlay!.context.findRenderObject()!
           as RenderBox;
+  final topLeft = anchor.localToGlobal(
+    Offset(0, anchor.size.height + AppSpacing.xs),
+    ancestor: overlay,
+  );
   final position = RelativeRect.fromRect(
-    Rect.fromPoints(
-      button.localToGlobal(
-        Offset(0, button.size.height + 4),
-        ancestor: overlay,
-      ),
-      button.localToGlobal(
-        button.size.bottomRight(const Offset(0, 4)),
-        ancestor: overlay,
-      ),
-    ),
+    topLeft & const Size(AppTransactions.pickerWidth, 0),
     Offset.zero & overlay.size,
   );
+  final colors = anchorContext.colors;
 
   await showMenu<void>(
     context: anchorContext,
     position: position,
-    color: anchorContext.colors.surface,
+    color: colors.surface,
+    surfaceTintColor: Colors.transparent,
+    shadowColor: colors.shadow.first.color,
+    elevation: AppShadows.popoverElevation,
+    menuPadding: const EdgeInsets.all(AppSpacing.xs),
     shape: RoundedRectangleBorder(
-      borderRadius: BorderRadius.circular(AppRadii.md),
-      side: BorderSide(color: anchorContext.colors.line),
+      borderRadius: BorderRadius.circular(AppRadii.container),
+      side: BorderSide(color: colors.lineStrong),
     ),
-    constraints: const BoxConstraints(minWidth: 250, maxWidth: 250),
+    constraints: const BoxConstraints.tightFor(
+      width: AppTransactions.pickerWidth,
+    ),
     items: [
       PopupMenuItem<void>(
         enabled: false,
@@ -85,8 +92,10 @@ class _CategoryPickerBodyState extends ConsumerState<_CategoryPickerBody> {
     } catch (error) {
       if (!mounted) return;
       setState(() => _isSaving = false);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(localizeTransactionError(l10n, error))),
+      showAppToast(
+        context,
+        title: localizeTransactionError(l10n, error),
+        tone: BannerTone.error,
       );
     }
   }
@@ -94,102 +103,99 @@ class _CategoryPickerBodyState extends ConsumerState<_CategoryPickerBody> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    final colors = context.colors;
+    final textTheme = Theme.of(context).textTheme;
     final categoriesAsync = ref.watch(transactionCategoriesProvider);
+    final note = textTheme.bodySmall?.copyWith(color: colors.textSecondary);
 
-    return SizedBox(
-      width: 250,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Padding(
-            padding: const EdgeInsets.fromLTRB(
-              AppSpacing.sm,
-              AppSpacing.sm,
-              AppSpacing.sm,
-              AppSpacing.xs,
+    OutlineInputBorder border(Color color) => OutlineInputBorder(
+      borderRadius: BorderRadius.circular(AppRadii.control),
+      borderSide: BorderSide(color: color),
+    );
+
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        TextField(
+          key: const Key('categoryPickerSearchField'),
+          autofocus: true,
+          onChanged: (value) => setState(() => _query = value),
+          style: textTheme.bodyMedium,
+          textAlignVertical: TextAlignVertical.center,
+          decoration: InputDecoration(
+            hintText: l10n.categoryPickerSearchHint,
+            isDense: true,
+            filled: true,
+            fillColor: colors.field,
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: AppSpacing.sm + AppSpacing.xxs,
             ),
-            child: TextField(
-              key: const Key('categoryPickerSearchField'),
-              autofocus: true,
-              onChanged: (value) => setState(() => _query = value),
-              style: Theme.of(context).textTheme.bodyMedium,
-              decoration: InputDecoration(
-                isDense: true,
-                hintText: l10n.categoryPickerSearchHint,
-                prefixIcon: const Icon(Icons.search_rounded, size: 16),
-                prefixIconConstraints: const BoxConstraints(
-                  minWidth: 30,
-                  minHeight: 30,
-                ),
-                filled: true,
-                fillColor: context.colors.field,
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(AppRadii.sm),
-                  borderSide: BorderSide(color: context.colors.line),
+            constraints: const BoxConstraints.tightFor(
+              height: AppSizes.toolbarSelect,
+            ),
+            border: border(colors.lineStrong),
+            enabledBorder: border(colors.lineStrong),
+            focusedBorder: border(colors.accent),
+          ),
+        ),
+        const SizedBox(height: AppSpacing.xs),
+        ConstrainedBox(
+          constraints: const BoxConstraints(
+            maxHeight: AppTransactions.pickerListHeight,
+          ),
+          child: switch (categoriesAsync) {
+            AsyncData(:final value) => _CategoryList(
+              entries: _filter(l10n, pickerOrder(value)),
+              currentCategoryId: widget.transaction.category?.id,
+              isSaving: _isSaving,
+              onSelect: _select,
+            ),
+            AsyncError() => Padding(
+              padding: const EdgeInsets.all(AppSpacing.sm),
+              child: Text(l10n.categoryPickerLoadError, style: note),
+            ),
+            _ => const Padding(
+              padding: EdgeInsets.all(AppSpacing.sm),
+              child: Center(
+                child: SizedBox.square(
+                  dimension: AppSizes.iconSmall,
+                  child: CircularProgressIndicator(strokeWidth: 1.5),
                 ),
               ),
             ),
-          ),
-          ConstrainedBox(
-            constraints: const BoxConstraints(maxHeight: 280),
-            child: switch (categoriesAsync) {
-              AsyncData(:final value) => _CategoryList(
-                categories: _filter(value, _query),
-                currentCategoryId: widget.transaction.category?.id,
-                isSaving: _isSaving,
-                onSelect: _select,
-              ),
-              AsyncError() => Padding(
-                padding: const EdgeInsets.all(AppSpacing.md),
-                child: Text(
-                  l10n.categoryPickerLoadError,
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: context.colors.textSecondary,
-                  ),
-                ),
-              ),
-              _ => const Padding(
-                padding: EdgeInsets.all(AppSpacing.md),
-                child: Center(
-                  child: SizedBox(
-                    width: 18,
-                    height: 18,
-                    child: CircularProgressIndicator(strokeWidth: 2),
-                  ),
-                ),
-              ),
-            },
-          ),
-          const SizedBox(height: AppSpacing.xs),
-        ],
-      ),
+          },
+        ),
+      ],
     );
   }
 
-  List<AppCategory> _filter(List<AppCategory> categories, String query) {
-    final needle = query.trim().toLowerCase();
-    if (needle.isEmpty) return categories;
-    final l10n = AppLocalizations.of(context)!;
-    return categories
-        .where(
-          (category) => localizedCategoryName(
-            l10n,
-            category.name,
-          ).toLowerCase().contains(needle),
-        )
-        .toList();
+  /// Keeps the entries whose category or subcategory name holds the query.
+  List<CategoryLineage> _filter(
+    AppLocalizations l10n,
+    List<CategoryLineage> entries,
+  ) {
+    final needle = _query.trim().toLowerCase();
+    if (needle.isEmpty) return entries;
+    bool hit(String name) =>
+        localizedCategoryName(l10n, name).toLowerCase().contains(needle);
+    return [
+      for (final entry in entries)
+        if (hit(entry.top.name) || (entry.sub != null && hit(entry.sub!.name)))
+          entry,
+    ];
   }
 }
 
 class _CategoryList extends StatelessWidget {
   const _CategoryList({
-    required this.categories,
+    required this.entries,
     required this.currentCategoryId,
     required this.isSaving,
     required this.onSelect,
   });
 
-  final List<AppCategory> categories;
+  final List<CategoryLineage> entries;
   final String? currentCategoryId;
   final bool isSaving;
   final ValueChanged<String> onSelect;
@@ -198,9 +204,9 @@ class _CategoryList extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
 
-    if (categories.isEmpty) {
+    if (entries.isEmpty) {
       return Padding(
-        padding: const EdgeInsets.all(AppSpacing.md),
+        padding: const EdgeInsets.all(AppSpacing.sm),
         child: Text(
           l10n.categoryPickerEmpty,
           style: Theme.of(
@@ -213,46 +219,101 @@ class _CategoryList extends StatelessWidget {
     return ListView.builder(
       key: const Key('categoryPickerList'),
       shrinkWrap: true,
-      itemCount: categories.length,
+      itemCount: entries.length,
       itemBuilder: (context, index) {
-        final category = categories[index];
-        final selected = category.id == currentCategoryId;
-        final slug = categorySlugFor(name: category.name, kind: category.kind);
-
-        return InkWell(
+        final entry = entries[index];
+        final category = entry.sub ?? entry.top;
+        return _PickerItem(
           key: Key('categoryPickerItem-${category.id}'),
+          lineage: entry,
+          selected: category.id == currentCategoryId,
           onTap: isSaving ? null : () => onSelect(category.id),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(
-              horizontal: AppSpacing.sm,
-              vertical: AppSpacing.sm - 2,
+        );
+      },
+    );
+  }
+}
+
+/// One 28 px item of the popover (`00` §7 Popover): radius 4, `hover` under
+/// the pointer, a 14 px `check` on the current category.
+class _PickerItem extends StatefulWidget {
+  const _PickerItem({
+    super.key,
+    required this.lineage,
+    required this.selected,
+    required this.onTap,
+  });
+
+  final CategoryLineage lineage;
+  final bool selected;
+  final VoidCallback? onTap;
+
+  @override
+  State<_PickerItem> createState() => _PickerItemState();
+}
+
+class _PickerItemState extends State<_PickerItem> {
+  bool _hovered = false;
+  bool _focused = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final colors = context.colors;
+    final top = widget.lineage.top;
+    final sub = widget.lineage.sub;
+
+    return FocusableActionDetector(
+      enabled: widget.onTap != null,
+      mouseCursor: SystemMouseCursors.click,
+      onShowHoverHighlight: (value) => setState(() => _hovered = value),
+      onShowFocusHighlight: (value) => setState(() => _focused = value),
+      actions: {
+        ActivateIntent: CallbackAction<ActivateIntent>(
+          onInvoke: (_) {
+            widget.onTap?.call();
+            return null;
+          },
+        ),
+      },
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: widget.onTap,
+        child: FocusRing(
+          focused: _focused,
+          radius: AppRadii.item,
+          child: Container(
+            height: AppSizes.popoverItem,
+            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
+            decoration: BoxDecoration(
+              color: _hovered ? colors.hover : null,
+              borderRadius: BorderRadius.circular(AppRadii.item),
             ),
             child: Row(
               children: [
-                Icon(
-                  CategoryIcons.forSlug(slug),
-                  size: 14,
-                  color: context.categoryColors.forSlug(slug),
-                ),
-                const SizedBox(width: AppSpacing.sm),
                 Expanded(
-                  child: Text(
-                    localizedCategoryName(l10n, category.name),
-                    overflow: TextOverflow.ellipsis,
-                    style: Theme.of(context).textTheme.bodyMedium,
+                  child: CategoryLabel.slotted(
+                    label: localizedCategoryName(l10n, top.name),
+                    slot: CategorySlot.fromWire(top.color),
+                    subcategory: sub == null
+                        ? null
+                        : localizedCategoryName(l10n, sub.name),
                   ),
                 ),
-                if (selected)
+                if (widget.selected) ...[
+                  const SizedBox(width: AppSpacing.sm),
                   Icon(
-                    Icons.check_rounded,
-                    size: 16,
-                    color: context.colors.accent,
+                    LucideIcons300.check,
+                    key: const Key('categoryPickerCheck'),
+                    size: AppSizes.iconSmall,
+                    color: colors.text,
                   ),
+                ],
               ],
             ),
           ),
-        );
-      },
+        ),
+      ),
     );
   }
 }

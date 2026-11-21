@@ -1,4 +1,7 @@
 import 'package:bastide/core/theme/app_theme.dart';
+import 'package:bastide/core/theme/tokens.dart';
+import 'package:bastide/core/widgets/app_button.dart';
+import 'package:bastide/core/widgets/repere_meter.dart';
 import 'package:bastide/features/accounts/application/accounts_controller.dart';
 import 'package:bastide/features/accounts/domain/account.dart';
 import 'package:bastide/features/categories/domain/category.dart';
@@ -8,6 +11,7 @@ import 'package:bastide/features/transactions/application/transactions_controlle
 import 'package:bastide/features/transactions/domain/transaction.dart';
 import 'package:bastide/features/transactions/presentation/review_queue.dart';
 import 'package:bastide/l10n/app_localizations.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -165,27 +169,43 @@ void _useDesktopSurface(WidgetTester tester) {
 const _aiOn = AiAvailability(enabled: true, reachable: true);
 
 void main() {
-  testWidgets(
-    'a proposed row shows the dashed chip, the gauge and a percentage',
-    (tester) async {
-      _useDesktopSurface(tester);
-      final controller = _controller([_proposed()]);
-      await tester.pumpWidget(
-        _wrap(controller: controller, availability: _aiOn, total: 1),
-      );
-      await tester.pumpAndSettle();
+  testWidgets('a proposed row shows the category label and its confidence', (
+    tester,
+  ) async {
+    _useDesktopSurface(tester);
+    final controller = _controller([_proposed()]);
+    await tester.pumpWidget(
+      _wrap(controller: controller, availability: _aiOn, total: 1),
+    );
+    await tester.pumpAndSettle();
 
-      expect(find.byKey(const Key('reviewRowProposedChip')), findsOneWidget);
-      expect(find.byKey(const Key('categoryLabelConfidence')), findsOneWidget);
-      // A percentage, never the raw 0.71 the API returns.
-      expect(find.textContaining('71'), findsWidgets);
-      expect(find.textContaining('0.71'), findsNothing);
-      expect(find.byKey(const Key('reviewRowConfirmButton')), findsOneWidget);
-      expect(find.byKey(const Key('reviewRowCorrectButton')), findsOneWidget);
-    },
-  );
+    expect(find.byKey(const Key('reviewRowProposal')), findsOneWidget);
+    expect(find.text('Électronique'), findsOneWidget);
+    // A percentage set as text, never the raw 0.71 nor a gauge.
+    expect(find.text('confiance 71 %'), findsOneWidget);
+    expect(find.textContaining('0.71'), findsNothing);
+    expect(find.byKey(const Key('reviewRowConfirmButton')), findsOneWidget);
+    expect(find.byKey(const Key('reviewRowCorrectButton')), findsOneWidget);
+    expect(find.byKey(const Key('reviewRowAlwaysButton')), findsOneWidget);
+    expect(find.text('CB NOVATECH SAS 12/05'), findsOneWidget);
+  });
 
-  testWidgets('a rule row is left alone', (tester) async {
+  testWidgets('the raw label is set in Geist Mono', (tester) async {
+    _useDesktopSurface(tester);
+    await tester.pumpWidget(
+      _wrap(
+        controller: _controller([_proposed()]),
+        availability: _aiOn,
+        total: 1,
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    final label = tester.widget<Text>(find.byKey(const Key('reviewRowLabel')));
+    expect(label.style?.fontFamily, AppFonts.mono);
+  });
+
+  testWidgets('a rule row carries no proposal', (tester) async {
     _useDesktopSurface(tester);
     final controller = _controller([_ruleRow()]);
     await tester.pumpWidget(
@@ -193,9 +213,10 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(find.byKey(const Key('reviewRowProposedChip')), findsNothing);
+    expect(find.byKey(const Key('reviewRowProposal')), findsNothing);
     expect(find.byKey(const Key('categoryLabelConfidence')), findsNothing);
     expect(find.byKey(const Key('reviewRowConfirmButton')), findsNothing);
+    expect(find.byKey(const Key('reviewRowNoProposal')), findsOneWidget);
   });
 
   testWidgets('a row with no proposal says so and offers the picker', (
@@ -208,10 +229,10 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(find.byKey(const Key('reviewRowNoProposal')), findsOneWidget);
+    expect(find.text('Aucune proposition'), findsOneWidget);
     expect(find.byKey(const Key('reviewRowChooseCategory')), findsOneWidget);
-    expect(find.byKey(const Key('reviewRowCategoryChip')), findsOneWidget);
-    expect(find.byKey(const Key('reviewRowProposedChip')), findsNothing);
+    expect(find.byKey(const Key('reviewRowAlwaysButton')), findsOneWidget);
+    expect(find.byKey(const Key('reviewRowConfirmButton')), findsNothing);
   });
 
   testWidgets('Confirmer assigns the proposed category', (tester) async {
@@ -230,6 +251,36 @@ void main() {
     ]);
   });
 
+  testWidgets('only the row under the pointer shows Confirmer as primary', (
+    tester,
+  ) async {
+    _useDesktopSurface(tester);
+    final controller = _controller([_proposed(), _proposed(id: 't-2')]);
+    await tester.pumpWidget(
+      _wrap(controller: controller, availability: _aiOn, total: 2),
+    );
+    await tester.pumpAndSettle();
+
+    List<AppButtonVariant> variants() => tester
+        .widgetList<AppButton>(find.byKey(const Key('reviewRowConfirmButton')))
+        .map((button) => button.variant)
+        .toList();
+    expect(variants(), [
+      AppButtonVariant.secondary,
+      AppButtonVariant.secondary,
+    ]);
+
+    final mouse = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    addTearDown(mouse.removePointer);
+    await mouse.addPointer(location: Offset.zero);
+    await mouse.moveTo(
+      tester.getCenter(find.byKey(const Key('reviewRow-t-2'))),
+    );
+    await tester.pumpAndSettle();
+
+    expect(variants(), [AppButtonVariant.secondary, AppButtonVariant.primary]);
+  });
+
   testWidgets('Corriger opens the category picker', (tester) async {
     _useDesktopSurface(tester);
     final controller = _controller([_proposed()]);
@@ -242,6 +293,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.byKey(const Key('categoryPickerList')), findsOneWidget);
+    expect(find.byKey(const Key('categoryPickerCheck')), findsOneWidget);
 
     await tester.tap(find.byKey(const Key('categoryPickerItem-c-electronics')));
     await tester.pumpAndSettle();
@@ -251,9 +303,7 @@ void main() {
     ]);
   });
 
-  testWidgets('the header card counts what the model proposed for', (
-    tester,
-  ) async {
+  testWidgets('the Note counts what the model proposed for', (tester) async {
     _useDesktopSurface(tester);
     final controller = _controller([
       _proposed(),
@@ -265,17 +315,24 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(find.text('3 transactions à vérifier'), findsOneWidget);
-    expect(find.textContaining('propose une catégorie pour 2'), findsOneWidget);
+    expect(
+      find.text(
+        'L’IA locale propose une catégorie pour 2 opérations. '
+        'Rien n’est classé sans votre accord.',
+      ),
+      findsOneWidget,
+    );
+    expect(find.byKey(const Key('reviewQueueRunButton')), findsOneWidget);
+    expect(find.byKey(const Key('reviewAiInvitation')), findsNothing);
   });
 
-  testWidgets('the progress label counts against the session baseline', (
+  testWidgets('the progress counts against the session baseline', (
     tester,
   ) async {
     _useDesktopSurface(tester);
     final controller = _controller([_proposed(), _unproposed()]);
 
-    // Four rows were queued when the panel opened; two have been resolved.
+    // Four rows were queued when the panel opened; two have been filed.
     Widget build(int total) =>
         _wrap(controller: controller, availability: _aiOn, total: total);
     await tester.pumpWidget(build(4));
@@ -283,12 +340,14 @@ void main() {
     await tester.pumpWidget(build(2));
     await tester.pumpAndSettle();
 
-    expect(find.textContaining('2/4'), findsOneWidget);
-    expect(find.textContaining('50'), findsOneWidget);
+    expect(find.text('2 sur 4 classées aujourd’hui'), findsOneWidget);
+    final meter = tester.widget<RepereMeter>(find.byType(RepereMeter));
+    expect(meter.fraction, 0.5);
+    expect(meter.markFraction, isNull);
   });
 
   testWidgets(
-    'with AI off the queue is the rules-only queue plus one invitation',
+    'with AI off rows say « Aucune proposition » and one Note invites',
     (tester) async {
       _useDesktopSurface(tester);
       final controller = _controller([_proposed(), _unproposed()]);
@@ -301,16 +360,23 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      expect(find.byKey(const Key('reviewRowProposedChip')), findsNothing);
-      expect(find.byKey(const Key('categoryLabelConfidence')), findsNothing);
+      expect(find.byKey(const Key('reviewRowProposal')), findsNothing);
       expect(find.byKey(const Key('reviewRowConfirmButton')), findsNothing);
-      expect(find.byKey(const Key('reviewRowCorrectButton')), findsNothing);
-      expect(find.byKey(const Key('reviewRowNoProposal')), findsNothing);
-
-      expect(find.byKey(const Key('reviewAiInvitation')), findsOneWidget);
+      expect(find.byKey(const Key('reviewRowNoProposal')), findsNWidgets(2));
+      expect(
+        find.byKey(const Key('reviewRowChooseCategory')),
+        findsNWidgets(2),
+      );
+      expect(find.byKey(const Key('reviewAiNote')), findsNothing);
+      expect(find.byKey(const Key('reviewQueueRunButton')), findsNothing);
+      expect(
+        find.text(
+          'Activez l’IA locale pour classer les opérations que vos règles '
+          'n’ont pas reconnues.',
+        ),
+        findsOneWidget,
+      );
       expect(find.byKey(const Key('reviewAiInvitationLink')), findsOneWidget);
-      // Still fully usable: every row keeps its rules-only chip and picker.
-      expect(find.byKey(const Key('reviewRowCategoryChip')), findsNWidgets(2));
     },
   );
 
@@ -328,8 +394,29 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(find.byKey(const Key('reviewRowProposedChip')), findsNothing);
+    expect(find.byKey(const Key('reviewRowProposal')), findsNothing);
     expect(find.byKey(const Key('reviewAiInvitation')), findsOneWidget);
+  });
+
+  testWidgets('an empty queue says so, with no button', (tester) async {
+    _useDesktopSurface(tester);
+    await tester.pumpWidget(
+      _wrap(controller: _controller([]), availability: _aiOn, total: 0),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('Rien à vérifier'), findsOneWidget);
+    expect(
+      find.text('Toutes vos opérations ont une catégorie.'),
+      findsOneWidget,
+    );
+    expect(
+      find.descendant(
+        of: find.byKey(const Key('reviewQueueEmpty')),
+        matching: find.byType(AppButton),
+      ),
+      findsNothing,
+    );
   });
 
   testWidgets('renders under en with no leftover French', (tester) async {
@@ -345,11 +432,13 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(find.text('2 transactions to review'), findsOneWidget);
+    expect(find.text('Statement label'), findsOneWidget);
+    expect(find.text('Proposal'), findsOneWidget);
     expect(find.text('Confirm'), findsOneWidget);
     expect(find.text('Correct'), findsOneWidget);
     expect(find.text('No proposal'), findsOneWidget);
-    expect(find.textContaining('Confidence'), findsOneWidget);
-    expect(find.textContaining('Confiance'), findsNothing);
+    expect(find.text('0 of 2 filed today'), findsOneWidget);
+    expect(find.textContaining('confidence 71'), findsOneWidget);
+    expect(find.textContaining('confiance'), findsNothing);
   });
 }
