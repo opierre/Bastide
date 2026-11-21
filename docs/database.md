@@ -295,6 +295,7 @@ erDiagram
         datetime created_at
         datetime updated_at
         text memo "nullable"
+        text rule_id FK "nullable"
     }
     user_avatars {
         text user_id PK, FK
@@ -373,6 +374,7 @@ erDiagram
     accounts ||--o{ transactions : "account_id"
     categories |o--o{ transactions : "category_id"
     import_batches ||--o{ transactions : "import_batch_id"
+    categorization_rules |o--o{ transactions : "rule_id"
     users ||--o{ user_avatars : "user_id"
     users ||--o| user_settings : "user_id"
 ```
@@ -451,3 +453,4 @@ erDiagram
 ### `transactions`
 
 - unique `(account_id, fitid)`
+- `rule_id` → `categorization_rules` on delete set null

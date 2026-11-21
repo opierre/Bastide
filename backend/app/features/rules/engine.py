@@ -27,9 +27,17 @@ def match_category(transaction: RuleSubject, rules: Sequence[CategorizationRule]
 
     Returns None if no enabled rule matches (the caller leaves the transaction uncategorized).
     """
+    rule = match_rule(transaction, rules)
+    return None if rule is None else rule.category_id
+
+
+def match_rule(
+    transaction: RuleSubject, rules: Sequence[CategorizationRule]
+) -> CategorizationRule | None:
+    """Return the first enabled rule (ascending priority) that matches, or None."""
     for rule in sorted((r for r in rules if r.enabled), key=lambda r: r.priority):
         if matches(transaction, rule):
-            return rule.category_id
+            return rule
     return None
 
 

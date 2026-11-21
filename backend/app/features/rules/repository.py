@@ -6,6 +6,7 @@ from sqlalchemy import func, select
 from sqlalchemy.orm import Session, undefer
 
 from app.features.rules.models import CategorizationRule, RuleLogo, RulePackImport
+from app.features.transactions.models import Transaction
 
 
 class RuleRepository:
@@ -35,6 +36,19 @@ class RuleRepository:
                 .order_by(CategorizationRule.priority)
             )
         )
+
+    def count_classed_transactions(self, user_id: str) -> dict[str, int]:
+        """Per rule of the user, how many transactions record it as the one that classed them.
+
+        Rules no transaction carries are absent.
+        """
+        rows = self._db.execute(
+            select(Transaction.rule_id, func.count())
+            .join(CategorizationRule, CategorizationRule.id == Transaction.rule_id)
+            .where(CategorizationRule.user_id == user_id)
+            .group_by(Transaction.rule_id)
+        )
+        return {rule_id: count for rule_id, count in rows}
 
     def get_by_id_for_user(self, rule_id: str, user_id: str) -> CategorizationRule | None:
         return self._db.scalar(

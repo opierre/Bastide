@@ -11,7 +11,7 @@ from app.core.errors import NotFoundError, ValidationError
 from app.features.accounts.models import Account
 from app.features.categories.repository import CategoryRepository
 from app.features.categories.service import CategoryInvalidError
-from app.features.rules.engine import match_category, matches
+from app.features.rules.engine import match_rule, matches
 from app.features.rules.logos import LOGO_CONTENT_TYPE, normalize_logo
 from app.features.rules.models import CategorizationRule, RuleLogo
 from app.features.rules.repository import RuleRepository
@@ -195,9 +195,10 @@ class RuleService:
     def apply(self, user_id: str, account_id: str | None = None) -> int:
         """Re-run the enabled rules over the user's transactions (optionally one account).
 
-        Sets `category_id` + `source=rule` + `needs_review=False` on rows an enabled rule
-        matches. Never touches rows with `source=user`, and leaves non-matching rows as-is.
-        Returns the number of transactions actually changed.
+        Sets `category_id` + `source=rule` + `rule_id` + `needs_review=False` on rows an enabled
+        rule matches. Never touches rows with `source=user`, and leaves non-matching rows as-is.
+        Returns the number of transactions whose category or review state changed; a row only
+        re-attributed to another rule with the same category is updated but not counted.
         """
         rules = self._repository.list_enabled_by_user(user_id)
         transactions = list(self._db.scalars(self._transactions_query(user_id, account_id)))
@@ -207,19 +208,20 @@ class RuleService:
             if transaction.categorization_source == "user":
                 continue
 
-            category_id = match_category(transaction, rules)
-            if category_id is None:
+            rule = match_rule(transaction, rules)
+            if rule is None:
                 continue
 
             already_applied = (
-                transaction.category_id == category_id
+                transaction.category_id == rule.category_id
                 and transaction.categorization_source == "rule"
                 and transaction.needs_review is False
             )
+            transaction.rule_id = rule.id
             if already_applied:
                 continue
 
-            transaction.category_id = category_id
+            transaction.category_id = rule.category_id
             transaction.categorization_source = "rule"
             transaction.needs_review = False
             recategorized_count += 1
@@ -228,29 +230,13 @@ class RuleService:
         return recategorized_count
 
     def match_counts(self, user_id: str) -> dict[str, int]:
-        """Count, per rule, the caller's transactions it currently classes.
+        """Count, per rule, the caller's transactions it classed, as recorded on each row.
 
-        A transaction does not record which rule set its category, so the attribution replays
-        the engine: a row carrying `source=rule` is credited to the first enabled rule, in
-        priority order, that matches it, provided that rule targets the row's category. A row a
-        reordered or edited rule no longer reaches is credited to nobody until the next apply.
-        Every rule is in the result, disabled ones included at zero. Writes nothing.
+        Every rule is in the result, at zero when no row carries it. A disabled rule keeps the
+        rows it classed before it was turned off. Writes nothing.
         """
-        rules = self._repository.list_by_user(user_id)
-        counts = {rule.id: 0 for rule in rules}
-        enabled = sorted((rule for rule in rules if rule.enabled), key=lambda r: r.priority)
-        if not enabled:
-            return counts
-
-        query = self._transactions_query(user_id, None).where(
-            Transaction.categorization_source == "rule"
-        )
-        for transaction in self._db.scalars(query):
-            for rule in enabled:
-                if matches(transaction, rule):
-                    if rule.category_id == transaction.category_id:
-                        counts[rule.id] += 1
-                    break
+        counts = {rule.id: 0 for rule in self._repository.list_by_user(user_id)}
+        counts.update(self._repository.count_classed_transactions(user_id))
         return counts
 
     def preview(self, user_id: str, data: RulePreviewRequest) -> tuple[int, list[Transaction]]:
@@ -335,6 +321,7 @@ class RuleService:
         self._repository.stage(rule)
         transaction.category_id = data.category_id
         transaction.categorization_source = "user"
+        transaction.rule_id = None
         transaction.needs_review = False
 
         try:

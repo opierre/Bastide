@@ -199,6 +199,8 @@ class SettlementRuleService:
         rule.category_id = category.id
         rule.enabled = True
         rule.applies_from = applies_from
+        # A new rule gets its id on flush, and the rows it files below record that id.
+        self._db.flush()
 
         moved = 0
         for transaction in self._db.scalars(
@@ -215,15 +217,18 @@ class SettlementRuleService:
             )
             if matches(transaction, rule):
                 if filed and not transaction.needs_review:
+                    transaction.rule_id = rule.id
                     continue
                 transaction.category_id = category.id
                 transaction.categorization_source = "rule"
+                transaction.rule_id = rule.id
                 transaction.needs_review = False
                 moved += 1
             elif filed and matches_condition(transaction, rule):
                 # Before the rule's start: a debit paying purchases the ledger doesn't hold.
                 transaction.category_id = None
                 transaction.categorization_source = "uncategorized"
+                transaction.rule_id = None
                 transaction.needs_review = True
                 moved += 1
 
