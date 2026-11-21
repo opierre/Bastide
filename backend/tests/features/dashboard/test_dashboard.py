@@ -783,8 +783,10 @@ def test_trends_requires_auth(client: TestClient) -> None:
     assert response.status_code == 401
 
 
-def test_trends_windows_end_on_the_requested_month(client: TestClient, tmp_path: Path) -> None:
-    """A selected month earlier than today moves both windows back to end on it."""
+def test_trends_savings_window_ends_on_the_requested_month(
+    client: TestClient, tmp_path: Path
+) -> None:
+    """An earlier month moves the savings window back; the monthly bars stay on the calendar."""
     headers = _register(client)
     account_id = _create_account(client, headers)
     income_category = _create_category(client, headers, kind="income")
@@ -795,20 +797,38 @@ def test_trends_windows_end_on_the_requested_month(client: TestClient, tmp_path:
         booked_date=date(2025, 11, 8),
         category_id=income_category,
     )
+    _insert_transaction(
+        tmp_path,
+        account_id,
+        amount_minor=31_000,
+        booked_date=date(2026, 5, 4),
+        category_id=income_category,
+    )
 
     trends = _trends_service(client, headers, tmp_path, date(2026, 5, 20), month="2025-11")
 
-    assert [row.month for row in trends.monthly_series] == [
-        "2025-08",
-        "2025-09",
-        "2025-10",
-        "2025-11",
-    ]
     assert trends.savings_series[0].month == "2024-12"
     assert trends.savings_series[-1].month == "2025-11"
     assert len(trends.savings_series) == 12
     assert trends.savings_series[-1].saved_minor == 42_000
-    assert trends.monthly_series[-1].income_minor == 42_000
+    assert [row.month for row in trends.monthly_series] == [
+        "2026-02",
+        "2026-03",
+        "2026-04",
+        "2026-05",
+    ]
+    assert trends.monthly_series[-1].income_minor == 31_000
+
+
+def test_trends_monthly_bars_ignore_a_later_month(client: TestClient, tmp_path: Path) -> None:
+    """Even a month past today leaves the bars ending on the current month."""
+    headers = _register(client)
+    _create_account(client, headers)
+
+    trends = _trends_service(client, headers, tmp_path, date(2026, 5, 20), month="2026-08")
+
+    assert trends.savings_series[-1].month == "2026-08"
+    assert trends.monthly_series[-1].month == "2026-05"
 
 
 def test_trends_endpoint_honours_the_month_parameter(client: TestClient) -> None:
@@ -820,7 +840,7 @@ def test_trends_endpoint_honours_the_month_parameter(client: TestClient) -> None
     body = response.json()
     assert body["savings_series"][0]["month"] == "2019-02"
     assert body["savings_series"][-1]["month"] == "2020-01"
-    assert body["monthly_series"][-1]["month"] == "2020-01"
+    assert body["monthly_series"][-1]["month"] == date.today().strftime("%Y-%m")
 
 
 def test_trends_endpoint_defaults_to_the_current_month(client: TestClient) -> None:

@@ -36,5 +36,9 @@ async def get_trends(
     user: Annotated[User, Depends(get_current_user)],
     month: Annotated[str | None, Query(pattern=r"^\d{4}-\d{2}$")] = None,
 ) -> DashboardTrends:
-    """The caller's trend series, over the months ending with `month` (default: the current one)."""
+    """The caller's trend series.
+
+    The savings series ends with `month` (default: the current one); the monthly bars always
+    end with the current month.
+    """
     return service.trends(user.id, user.currency, date.today(), month)
