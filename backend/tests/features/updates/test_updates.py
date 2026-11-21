@@ -1,4 +1,4 @@
-"""Tests for `GET /api/v1/settings/updates`, with GitHub and the clock mocked throughout."""
+"""Tests for the update check, `GET` and its forced `POST /check`, GitHub and clock mocked."""
 
 from dataclasses import dataclass
 from datetime import UTC, datetime, timedelta
@@ -18,6 +18,7 @@ from app.features.updates.service import UpdateService
 from tests.api import register as _register
 
 URL = "/api/v1/settings/updates"
+CHECK_URL = f"{URL}/check"
 CURRENT = "0.1.0"
 START = datetime(2026, 10, 11, 9, 0, tzinfo=UTC)
 
@@ -210,5 +211,72 @@ def test_turning_it_off_stops_the_checks(
     assert releases.calls == 1
 
 
+def test_a_forced_check_skips_the_daily_interval(
+    client: TestClient, headers: dict[str, str], releases: FakeReleases, clock: Clock
+) -> None:
+    _opt_in(client, headers)
+    client.get(URL, headers=headers)
+
+    clock.now = START + timedelta(hours=2)
+    releases.latest = "0.3.0"
+    response = client.post(CHECK_URL, headers=headers)
+
+    assert response.status_code == 200
+    body = response.json()
+    assert releases.calls == 2
+    assert body["latest_version"] == "0.3.0"
+    assert body["release_url"] == "https://github.com/opierre/Bastide/releases/tag/v0.3.0"
+    assert datetime.fromisoformat(body["checked_at"]) == clock.now
+
+
+def test_a_second_forced_check_within_a_minute_reuses_the_last_answer(
+    client: TestClient, headers: dict[str, str], releases: FakeReleases, clock: Clock
+) -> None:
+    _opt_in(client, headers)
+    client.post(CHECK_URL, headers=headers)
+
+    clock.now = START + timedelta(seconds=59)
+    releases.latest = "0.3.0"
+    cached = client.post(CHECK_URL, headers=headers).json()
+
+    assert releases.calls == 1
+    assert cached["latest_version"] == "0.2.0"
+    assert datetime.fromisoformat(cached["checked_at"]) == START
+
+    clock.now = START + timedelta(minutes=1)
+    fresh = client.post(CHECK_URL, headers=headers).json()
+
+    assert releases.calls == 2
+    assert fresh["latest_version"] == "0.3.0"
+
+
+def test_a_forced_check_never_asks_github_when_checks_are_off(
+    client: TestClient, headers: dict[str, str], releases: FakeReleases
+) -> None:
+    response = client.post(CHECK_URL, headers=headers)
+
+    assert response.status_code == 200
+    assert response.json()["enabled"] is False
+    assert releases.calls == 0
+
+
+def test_a_forced_check_offline_is_reported_not_raised(
+    client: TestClient, headers: dict[str, str], releases: FakeReleases, clock: Clock
+) -> None:
+    _opt_in(client, headers)
+    client.get(URL, headers=headers)
+
+    clock.now = START + timedelta(hours=2)
+    releases.offline = True
+    response = client.post(CHECK_URL, headers=headers)
+
+    assert response.status_code == 200
+    body = response.json()
+    assert body["reachable"] is False
+    assert body["latest_version"] == "0.2.0"
+    assert datetime.fromisoformat(body["checked_at"]) == START
+
+
 def test_the_update_check_requires_authentication(client: TestClient) -> None:
     assert client.get(URL).status_code == 401
+    assert client.post(CHECK_URL).status_code == 401

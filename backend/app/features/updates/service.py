@@ -15,6 +15,10 @@ from app.features.updates.schemas import UpdateStatus
 #: However often the app starts, GitHub is asked at most this often.
 CHECK_INTERVAL = timedelta(days=1)
 
+#: A forced check (« Vérifier maintenant ») skips the daily interval, but repeated clicks
+#: within this window reuse the last answer instead of asking GitHub again.
+FORCE_COOLDOWN = timedelta(minutes=1)
+
 
 def release_page(version: str) -> str:
     """The GitHub page of the release tagged `v<version>`.
@@ -40,8 +44,13 @@ class UpdateService:
         self._current_version = current_version
         self._now = now
 
-    async def status(self, user_id: str) -> UpdateStatus:
+    async def status(self, user_id: str, *, force: bool = False) -> UpdateStatus:
         """The update status for this user, checking GitHub if the last check is a day old.
+
+        Args:
+            user_id: The user whose settings hold the opt-in and the last check.
+            force: Check now, whatever the daily interval, unless the last check is under
+                `FORCE_COOLDOWN` old. Still nothing is asked when the check is off.
 
         Raises nothing: an unreachable GitHub comes back as `reachable=False`.
         """
@@ -54,8 +63,9 @@ class UpdateService:
         checked_at = settings.update_checked_at
 
         reachable = True
+        interval = FORCE_COOLDOWN if force else CHECK_INTERVAL
         # A check stamped in the future (the clock was set back) is treated as due.
-        if checked_at is None or not checked_at <= now < checked_at + CHECK_INTERVAL:
+        if checked_at is None or not checked_at <= now < checked_at + interval:
             try:
                 latest = await self._releases.latest_version()
             except ReleaseCheckFailed:
