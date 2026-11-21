@@ -55,9 +55,9 @@ session stays open and every other session of the user is signed out.
 | | Revenu déclaré · « Sert au taux d’endettement des panneaux Crédits et Simulateur. Sans lui, Bastide prend le revenu médian constaté. » | Amount field 140 px + « par mois »; empty means "not declared". |
 
 Two rows change what exists today and need more than a restyle:
-- « Objectif de taux d’épargne » is new. The goal is a fixed 20 % in the frontend today
-  (`savingsRateGoal`). Making it a preference needs a stored per-user value; until that exists
-  the row is left out and the Dashboard keeps 20 %.
+- « Objectif de taux d’épargne » is a stored per-user value (`savings_rate_goal_percent`,
+  default 20). The Dashboard summary carries it, so the repère's mark and the goal status
+  follow it.
 - « Revenu déclaré » exists: it is edited today from the « Déclarer un revenu » dialog of
   Crédits. This row edits the same value, and the Crédits and Simulateur links open this row.
 

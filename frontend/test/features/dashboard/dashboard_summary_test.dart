@@ -60,6 +60,41 @@ void main() {
       expect(specSummary(savingsRate: -0.2).savingsRateMeterFraction, 0);
     });
 
+    test('measures against the user\'s goal, not a fixed 20 %', () {
+      final summary = specSummary(savingsRate: 0.25, savingsRateGoal: 0.30);
+      // Scale 0 to 60 %: 25 % sits short of the middle mark.
+      expect(summary.savingsRateMeterFraction, closeTo(0.25 / 0.6, 1e-9));
+      expect(summary.savingsGoalReached, isFalse);
+      expect(
+        specSummary(
+          savingsRate: 0.25,
+          savingsRateGoal: 0.10,
+        ).savingsGoalReached,
+        isTrue,
+      );
+    });
+
+    test('a 0 % goal fills the bar with any saving and never divides by 0', () {
+      expect(
+        specSummary(
+          savingsRate: 0.05,
+          savingsRateGoal: 0,
+        ).savingsRateMeterFraction,
+        1,
+      );
+      expect(
+        specSummary(
+          savingsRate: -0.1,
+          savingsRateGoal: 0,
+        ).savingsRateMeterFraction,
+        0,
+      );
+      expect(
+        specSummary(savingsRate: 0, savingsRateGoal: 0).savingsGoalReached,
+        isTrue,
+      );
+    });
+
     test('has no value without income', () {
       final summary = specSummary(incomeMinor: 0, savingsRate: 0);
       expect(summary.hasSavingsRate, isFalse);

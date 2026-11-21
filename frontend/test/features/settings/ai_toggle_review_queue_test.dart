@@ -80,6 +80,7 @@ Map<String, dynamic> _settingsJson({required bool aiEnabled}) => {
   'inference_base_url': 'http://127.0.0.1:11434/v1',
   'model_tag': 'gemma3n:e4b',
   'confidence_threshold': 0.8,
+  'savings_rate_goal_percent': 20,
 };
 
 /// Turning the toggle off has to return the `07` review

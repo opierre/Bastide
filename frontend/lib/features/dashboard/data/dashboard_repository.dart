@@ -123,6 +123,8 @@ class DashboardRepository {
     expenseDeltaPct: (json['expense_delta_pct'] as num).toDouble(),
     netDeltaPct: (json['net_delta_pct'] as num).toDouble(),
     savingsRateDeltaPct: (json['savings_rate_delta_pct'] as num).toDouble(),
+    // A whole percent on the wire, a ratio like `savings_rate` in the domain.
+    savingsRateGoal: (json['savings_rate_goal_percent'] as int) / 100,
     byCategory: (json['by_category'] as List<dynamic>)
         .map((entry) => _parseCategory(entry as Map<String, dynamic>))
         .toList(),

@@ -4,13 +4,16 @@ import 'package:bastide/core/app_info.dart';
 import 'package:bastide/core/l10n/locale_provider.dart';
 import 'package:bastide/core/session/current_user_provider.dart';
 import 'package:bastide/core/theme/app_theme.dart';
+import 'package:bastide/core/widgets/app_slider.dart';
 import 'package:bastide/features/auth/domain/auth_user.dart';
 import 'package:bastide/features/settings/application/about_info.dart';
+import 'package:bastide/features/settings/application/settings_controller.dart';
 import 'package:bastide/features/settings/presentation/settings_screen.dart';
 import 'package:bastide/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:intl/intl.dart';
 import 'package:mocktail/mocktail.dart';
 
 import '../../support/desktop_surface.dart';
@@ -29,12 +32,13 @@ const _user = AuthUser(
 /// put it: the row must show what the backend reports, not a derived path.
 const _dataDir = '/srv/camille/bastide-data';
 
-Map<String, dynamic> _settingsJson({int? income}) => {
+Map<String, dynamic> _settingsJson({int? income, int savingsGoal = 20}) => {
   'ai_enabled': false,
   'inference_base_url': 'http://127.0.0.1:11434/v1',
   'model_tag': null,
   'confidence_threshold': 0.8,
   'declared_monthly_income_minor': income,
+  'savings_rate_goal_percent': savingsGoal,
 };
 
 /// Mounts the screen under the real [localeProvider] so switching the language
@@ -62,13 +66,14 @@ Widget _wrap({
   Future<String> Function()? readVersion,
   ThemeData? theme,
   int? income,
+  int savingsGoal = 20,
   bool dataLocationFails = false,
   List<String>? openedFolders,
 }) {
   _api = _MockApiClient();
-  when(
-    () => _api.get('/settings'),
-  ).thenAnswer((_) async => _settingsJson(income: income));
+  when(() => _api.get('/settings')).thenAnswer(
+    (_) async => _settingsJson(income: income, savingsGoal: savingsGoal),
+  );
   when(
     () => _api.get('/settings/updates'),
   ).thenAnswer((_) async => {'enabled': false, 'current_version': '0.1.0'});
@@ -122,6 +127,7 @@ void main() {
       'settingsFormatsRow',
       'settingsSidebarRow',
       'settingsCurrencyRow',
+      'settingsSavingsGoalRow',
       'settingsIncomeRow',
     ]) {
       expect(find.byKey(Key(row)), findsOneWidget);
@@ -179,6 +185,62 @@ void main() {
         matching: find.byType(EditableText),
       ),
       findsNothing,
+    );
+  });
+
+  testWidgets('the savings-rate goal is a 0–50 % slider with its value', (
+    tester,
+  ) async {
+    useDesktopSurface(tester);
+    await tester.pumpWidget(_wrap(savingsGoal: 35));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Objectif de taux d’épargne'), findsOneWidget);
+    expect(
+      find.text('Le repère affiché sur le tableau de bord.'),
+      findsOneWidget,
+    );
+    final slider = tester.widget<AppSlider>(
+      find.byKey(const Key('settingsSavingsGoalSlider')),
+    );
+    expect(slider.value, 35);
+    expect(slider.min, 0);
+    expect(slider.max, 50);
+    expect(slider.divisions, 50);
+    expect(
+      tester
+          .widget<Text>(find.byKey(const Key('settingsSavingsGoalValue')))
+          .data,
+      NumberFormat.percentPattern('fr').format(0.35),
+    );
+  });
+
+  testWidgets('dragging the goal saves it once, as a whole percent', (
+    tester,
+  ) async {
+    useDesktopSurface(tester);
+    await tester.pumpWidget(_wrap());
+    await tester.pumpAndSettle();
+    when(
+      () => _api.patch('/settings', body: any(named: 'body')),
+    ).thenAnswer((_) async => _settingsJson(savingsGoal: 50));
+
+    // Far past the end: the slider stops at its 50 % maximum.
+    await tester.drag(
+      find.byKey(const Key('settingsSavingsGoalSlider')),
+      const Offset(600, 0),
+    );
+    await tester.pump(settingsPatchDebounce * 2);
+    await tester.pumpAndSettle();
+
+    verify(
+      () => _api.patch('/settings', body: {'savings_rate_goal_percent': 50}),
+    ).called(1);
+    expect(
+      tester
+          .widget<Text>(find.byKey(const Key('settingsSavingsGoalValue')))
+          .data,
+      NumberFormat.percentPattern('fr').format(0.5),
     );
   });
 

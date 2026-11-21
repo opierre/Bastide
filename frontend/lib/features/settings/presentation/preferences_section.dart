@@ -9,6 +9,7 @@ import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/tokens.dart';
 import '../../../core/widgets/amount_text.dart';
 import '../../../core/widgets/app_segmented.dart';
+import '../../../core/widgets/app_slider.dart';
 import '../../../core/widgets/app_toast.dart';
 import '../../../core/widgets/inline_banner.dart';
 import '../../../core/widgets/labeled_field.dart';
@@ -19,6 +20,7 @@ import '../../../l10n/app_localizations.dart';
 import '../../auth/application/profile_controllers.dart';
 import '../../auth/domain/theme_preference.dart';
 import '../application/settings_controller.dart';
+import '../domain/user_settings.dart';
 import 'setting_row.dart';
 
 /// The sample date the formats row prints, the spec's own.
@@ -31,10 +33,7 @@ const _sampleAmountMinor = -123456;
 const _incomeFieldWidth = 140.0;
 
 /// Préférences: Affichage (theme, language, formats, sidebar), then Argent
-/// (currency, declared income).
-///
-/// « Objectif de taux d'épargne » is left out until the goal is a stored
-/// per-user value (`09-settings.md` §Préférences); the Dashboard keeps 20 %.
+/// (currency, savings-rate goal, declared income).
 class PreferencesSection extends ConsumerWidget {
   const PreferencesSection({super.key});
 
@@ -181,6 +180,12 @@ class PreferencesSection extends ConsumerWidget {
           ],
         ),
         SettingRow(
+          key: const Key('settingsSavingsGoalRow'),
+          name: l10n.settingsSavingsGoalTitle,
+          description: l10n.settingsSavingsGoalNote,
+          children: const [_SavingsGoal()],
+        ),
+        SettingRow(
           key: const Key('settingsIncomeRow'),
           name: l10n.settingsIncomeTitle,
           description: l10n.settingsIncomeNote,
@@ -264,6 +269,63 @@ class _FormatsList extends StatelessWidget {
           ],
         ),
       ],
+    );
+  }
+}
+
+/// The savings-rate goal: a slider from 0 to 50 %, step 1, its value printed
+/// beside it. Saved with the settings debounce, so a drag sends one patch.
+class _SavingsGoal extends ConsumerWidget {
+  const _SavingsGoal();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
+    final percent = NumberFormat.percentPattern(
+      Localizations.localeOf(context).toString(),
+    );
+    final async = ref.watch(
+      settingsControllerProvider.select(
+        (value) =>
+            value.whenData((state) => state.settings.savingsRateGoalPercent),
+      ),
+    );
+
+    return async.when(
+      loading: () => const SkeletonPulse(
+        child: SkeletonBlock(
+          height: AppSizes.formField,
+          width: SettingRowMetrics.sliderWidth,
+        ),
+      ),
+      error: (_, _) => NoteLine(text: l10n.settingsAiLoadFailed),
+      data: (goal) => Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          AppSlider(
+            key: const Key('settingsSavingsGoalSlider'),
+            value: goal.toDouble(),
+            max: UserSettings.maxSavingsRateGoalPercent.toDouble(),
+            divisions: UserSettings.maxSavingsRateGoalPercent,
+            width: SettingRowMetrics.sliderWidth,
+            onChanged: (value) => ref
+                .read(settingsControllerProvider.notifier)
+                .setSavingsRateGoalPercent(value.round()),
+            semanticFormatter: (value) => percent.format(value / 100),
+          ),
+          SizedBox(
+            width: SettingRowMetrics.sliderValueWidth,
+            child: Text(
+              percent.format(goal / 100),
+              key: const Key('settingsSavingsGoalValue'),
+              textAlign: TextAlign.end,
+              style: tabularNumberStyle(
+                Theme.of(context).textTheme.bodyMedium!,
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

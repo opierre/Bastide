@@ -28,12 +28,6 @@ final _runtimeHelpUrl = Uri.parse('https://ollama.com/download');
 const _addressFlex = 13;
 const _modelFlex = 10;
 
-/// Width of the threshold slider (`09-settings.md` §Données).
-const _sliderWidth = 320.0;
-
-/// Room for the printed percent beside the slider, « 100 % » included.
-const _percentWidth = AppSpacing.xxl + AppSpacing.sm;
-
 /// « IA locale » in Settings › Données: the opt-in toggle, the engine line and
 /// the confidence threshold, as setting rows.
 ///
@@ -246,13 +240,13 @@ class _RowsState extends ConsumerState<_Rows> {
                 AppSlider(
                   key: const Key('settingsAiThresholdSlider'),
                   value: state.thresholdPercent.toDouble(),
-                  width: _sliderWidth,
+                  width: SettingRowMetrics.sliderWidth,
                   onChanged: (value) =>
                       _controller.setThresholdPercent(value.round()),
                   semanticFormatter: (value) => percent.format(value / 100),
                 ),
                 SizedBox(
-                  width: _percentWidth,
+                  width: SettingRowMetrics.sliderValueWidth,
                   child: Text(
                     percent.format(state.thresholdPercent / 100),
                     key: const Key('settingsAiThresholdValue'),

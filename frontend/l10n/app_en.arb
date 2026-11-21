@@ -26,6 +26,8 @@
   "settingsFormatsNote": "Dates and amounts follow the chosen language.",
   "settingsFormatsDatePair": "{long} · {short}",
   "settingsCurrencyValue": "{code}, {name} ({symbol})",
+  "settingsSavingsGoalTitle": "Savings-rate goal",
+  "settingsSavingsGoalNote": "The mark shown on the dashboard.",
   "settingsIncomeTitle": "Declared income",
   "settingsIncomeNote": "Used for the debt ratio in the Loans and Simulator panels. Without it, Bastide uses the median income it observed.",
   "settingsIncomePerMonth": "per month",
