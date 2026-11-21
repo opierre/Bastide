@@ -38,3 +38,15 @@ async def read_update_status(
 ) -> UpdateStatus:
     """Whether a newer release is published; asks GitHub at most once a day, only if opted in."""
     return await service.status(user.id)
+
+
+@router.post("/check", response_model=UpdateStatus)
+async def check_for_updates(
+    service: Annotated[UpdateService, Depends(get_update_service)],
+    user: Annotated[User, Depends(get_current_user)],
+) -> UpdateStatus:
+    """Asks GitHub now, skipping the daily interval; a check under a minute old is reused.
+
+    Still a no-op when the user has not opted in.
+    """
+    return await service.status(user.id, force=True)

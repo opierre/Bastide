@@ -144,6 +144,7 @@ details?}}`. Model names refer to the Pydantic schemas in `backend/app/features/
 | Method | Path | Query | Body | Response |
 |--------|------|-------|------|----------|
 | `GET` | `/settings/updates` |  |  | 200 `UpdateStatus` |
+| `POST` | `/settings/updates/check` |  |  | 200 `UpdateStatus` |
 
 ## categorization
 
