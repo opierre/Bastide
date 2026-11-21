@@ -846,7 +846,7 @@ const winStrip = t => `<div class="app strip" data-theme="${t}" data-accent="enc
 const authStrip = t => `<div class="app strip" data-theme="${t}" data-accent="encre" data-tex="off" style="position:relative;height:120px!important"><div class="drag" style="position:absolute;inset:0 138px auto 0;height:48px"></div><div style="position:absolute;top:0;right:0;height:48px;display:flex">${WC()}</div><div class="col t3 sm" style="position:absolute;inset:60px 0 0;align-items:center">Écran de connexion, sans barre de titre</div></div>`;
 P.window = theme => `<div class="app mg-page" data-theme="${theme}" data-accent="encre" data-tex="off">
   <h2>Barre de titre et contrôles de la fenêtre</h2>
-  <p>La barre de titre native disparaît : la barre de 48 px de l’application porte réduire, agrandir ou restaurer, et fermer, collés à son bord droit après les contrôles du panneau. Tous les panneaux de cette proposition les montrent. Règles écrites : 00-design-system.md §5 « Contrôles de la fenêtre ».</p>
+  <p>La barre de titre native disparaît : la barre de 48 px de l’application porte réduire, agrandir ou restaurer, et fermer, collés à son bord droit après les contrôles du panneau. Tous les panneaux de cette proposition les montrent. Règles écrites : 00-design-system.md §5 « Window controls ».</p>
   <dl class="spec" style="margin-top:16px">
     <dt>Bouton</dt><dd>46 × 48, sans bordure ni rayon, icône Lucide 16 px textSecondary : minus, square (agrandir), copy (restaurer), x.</dd>
     <dt>Place</dt><dd>À 8 px du dernier contrôle du panneau ; la barre perd son padding droit, le bouton « Fermer » touche le coin de la fenêtre.</dd>
