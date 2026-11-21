@@ -143,6 +143,7 @@ Widget _wrap({
   ThemeData? theme,
   String? operationId,
   TransactionFilters? filters,
+  bool withSearch = false,
 }) {
   return ProviderScope(
     overrides: [
@@ -174,7 +175,16 @@ Widget _wrap({
       theme: theme ?? AppTheme.dark,
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
-      home: Scaffold(body: TransactionsScreen(operationId: operationId)),
+      home: Scaffold(
+        body: withSearch
+            ? Column(
+                children: [
+                  const TransactionsTopBarActions(),
+                  Expanded(child: TransactionsScreen(operationId: operationId)),
+                ],
+              )
+            : TransactionsScreen(operationId: operationId),
+      ),
     ),
   );
 }
@@ -200,6 +210,7 @@ Future<void> _pump(
   FakeTransactionsController? controller,
   String? operationId,
   TransactionFilters? filters,
+  bool withSearch = false,
 }) async {
   _useDesktopSurface(tester);
   await tester.pumpWidget(
@@ -215,6 +226,7 @@ Future<void> _pump(
       theme: theme,
       operationId: operationId,
       filters: filters,
+      withSearch: withSearch,
     ),
   );
   await tester.pumpAndSettle();
@@ -798,6 +810,51 @@ void main() {
 
       expect(_container(tester).read(selectedTransactionProvider), isNull);
       expect(_container(tester).read(transactionFiltersProvider), filters);
+    });
+  });
+
+  group('search field', () {
+    Finder field() => find.descendant(
+      of: find.byKey(const Key('transactionsSearchField')),
+      matching: find.byType(TextField),
+    );
+    String text(WidgetTester tester) =>
+        tester.widget<TextField>(field()).controller!.text;
+
+    testWidgets('typing filters the list', (tester) async {
+      await _pump(tester, withSearch: true);
+      await tester.enterText(field(), 'loyer');
+      await tester.pump();
+
+      expect(_container(tester).read(transactionFiltersProvider).q, 'loyer');
+      expect(text(tester), 'loyer');
+    });
+
+    testWidgets('« Effacer les filtres » clears it', (tester) async {
+      await _pump(tester, withSearch: true);
+      await tester.enterText(field(), 'loyer');
+      await tester.pump();
+
+      _container(
+        tester,
+      ).read(transactionFiltersProvider.notifier).clearFilters();
+      await tester.pumpAndSettle();
+
+      expect(text(tester), isEmpty);
+    });
+
+    testWidgets('a deep link clears a typed search', (tester) async {
+      await _pump(tester, items: [_transaction(id: 't2')], withSearch: true);
+      await tester.enterText(field(), 'loyer');
+      await tester.pump();
+
+      await _container(
+        tester,
+      ).read(transactionDeepLinkProvider.notifier).open('t2');
+      await tester.pumpAndSettle();
+
+      expect(text(tester), isEmpty);
+      expect(_container(tester).read(selectedTransactionProvider), 't2');
     });
   });
 

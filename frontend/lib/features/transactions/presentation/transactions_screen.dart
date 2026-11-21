@@ -156,7 +156,7 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen> {
 }
 
 /// The panel's contribution to the title bar: the search field (« Rechercher »,
-/// description and merchant; `Ctrl K` focuses it).
+/// description and merchant; `Ctrl K` focuses it), showing the search filter.
 class TransactionsTopBarActions extends ConsumerWidget {
   const TransactionsTopBarActions({super.key});
 
@@ -167,7 +167,8 @@ class TransactionsTopBarActions extends ConsumerWidget {
     return AppSearchField(
       key: const Key('transactionsSearchField'),
       hint: l10n.transactionsSearchHint,
-      initialValue: ref.read(transactionFiltersProvider).q,
+      // Follows the filter, so a deep link or « Effacer les filtres » clears it.
+      value: ref.watch(transactionFiltersProvider.select((f) => f.q)),
       onChanged: (value) =>
           ref.read(transactionFiltersProvider.notifier).setQuery(value),
     );
