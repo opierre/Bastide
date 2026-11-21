@@ -78,7 +78,7 @@ account) · Montant · Cadence (select) · Catégorie (select with the category 
 | Detection running | « Détecter » shows the spinner in both places; a toast gives the result. |
 | After a merge | Toast « Abonnements fusionnés » / « Les prochains prélèvements des deux libellés iront dans « {name} ». » |
 | Loading | Summary and row silhouettes. |
-| English | « Monthly », « Missed charge for 9 days », `€15.49`. |
+| English | « Monthly », « Missed charge for 9 days », « Monthly cost », `€15.49`. |
 
 ## Behaviour (kept)
 - Detection is deduced from imported transactions (three or more repeats); « Détecter »
@@ -95,6 +95,20 @@ account) · Montant · Cadence (select) · Catégorie (select with the category 
 Delete `navSubscriptionsSubtitle`. `subscriptionsEmptyTitle`, `subscriptionDetailFootnote`,
 `subscriptionDetailHistorySubtitle` per `00` §14. « Augmentation » becomes « Hausse ». New:
 « À regarder », « Prélèvement manquant depuis {n} jours ».
+
+**English.** « Charge » is one debit throughout the panel (« Next charge », « Missed charge »),
+so the monthly total is a cost, and « Hausse » is a price rise, as in the « À regarder »
+caption.
+
+| Key | French | English |
+|---|---|---|
+| `subscriptionsBurdenLabel` | « Charge mensuelle » | « Monthly cost » |
+| `subscriptionsActiveLabel` | « Actifs » | « Active » |
+| `subscriptionsWatchLabel` | « À regarder » | « Worth a look » |
+| `subscriptionSignalIncrease` | « Hausse : {from} → {to} » | « Price rise: {from} → {to} » |
+| `subscriptionDetailIncrease` | « Hausse : {from} → {to} le {date}, soit {annual} par an. » | « Price rise: {from} → {to} on {date}, that’s {annual} a year. » |
+| `subscriptionSignalCancelled` | « Résilié, dernier prélèvement le {date} » | « Cancelled, last charge on {date} » |
+| `subscriptionActionCancel` | « Marquer comme résilié » | « Mark as cancelled » |
 
 ## Removed from v1
 Three summary cards with the tinted hero, StatusPills, coloured 36 px monograms, table card

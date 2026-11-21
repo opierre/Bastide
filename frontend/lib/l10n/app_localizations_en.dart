@@ -2748,7 +2748,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get subscriptionsDetectFailed => 'Detection could not run.';
 
   @override
-  String get subscriptionsBurdenLabel => 'Monthly charge';
+  String get subscriptionsBurdenLabel => 'Monthly cost';
 
   @override
   String get subscriptionsBurdenCaption =>
@@ -2922,7 +2922,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String subscriptionSignalIncrease(String from, String to) {
-    return 'Increase: $from → $to';
+    return 'Price rise: $from → $to';
   }
 
   @override
@@ -3090,7 +3090,7 @@ class AppLocalizationsEn extends AppLocalizations {
     String date,
     String annual,
   ) {
-    return 'Increase: $from → $to on $date, that’s $annual a year.';
+    return 'Price rise: $from → $to on $date, that’s $annual a year.';
   }
 
   @override

@@ -403,7 +403,7 @@ void main() {
 
     expect(find.byKey(const Key('subscriptionsActionError')), findsOneWidget);
     expect(
-      find.text("Ce changement de statut n'est pas possible pour ce paiement."),
+      find.text("Ce changement de statut n’est pas possible pour ce paiement."),
       findsOneWidget,
     );
     expect(find.byKey(const Key('seriesRow-s1')), findsOneWidget);
@@ -615,7 +615,7 @@ void main() {
     expect(find.textContaining('Cancelled, last charge on'), findsOneWidget);
     // Netflix and the cancelled Canal+ share a price in this fixture.
     expect(find.text(_money(1549, locale: 'en')), findsNWidgets(2));
-    expect(find.text('Monthly charge'), findsOneWidget);
+    expect(find.text('Monthly cost'), findsOneWidget);
     expect(find.text('Worth a look'), findsOneWidget);
     expect(find.text('1 missed charge'), findsOneWidget);
   });
@@ -887,7 +887,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('Merge'), findsOneWidget);
-      expect(find.text("They're different"), findsOneWidget);
+      expect(find.text("They’re different"), findsOneWidget);
     });
 
     group('several suggestions', () {
