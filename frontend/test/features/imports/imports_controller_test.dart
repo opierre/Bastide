@@ -16,6 +16,7 @@ class MockApiClient extends Mock implements ApiClient {}
 
 Map<String, dynamic> _batchJson({
   String id = 'b1',
+  String accountId = 'a1',
   String sourceFormat = 'ofx',
   String fileName = 'releve.ofx',
   String fileHash = 'hash-1',
@@ -26,7 +27,7 @@ Map<String, dynamic> _batchJson({
   String? errorMessage,
 }) => {
   'id': id,
-  'account_id': 'a1',
+  'account_id': accountId,
   'source_format': sourceFormat,
   'file_name': fileName,
   'file_hash': fileHash,
@@ -377,5 +378,93 @@ void main() {
         expect(container.read(importsControllerProvider).value, hasLength(1));
       },
     );
+  });
+
+  group('ImportsController account filter', () {
+    const savings = ImportHistoryAccountFilter(id: 'a2', name: 'Livret A');
+
+    test('the history asks for one account once the filter is set', () async {
+      when(
+        () => apiClient.get('/imports'),
+      ).thenAnswer((_) async => [_batchJson(), _batchJson(id: 'b2')]);
+      when(
+        () => apiClient.get('/imports', query: {'account_id': 'a2'}),
+      ).thenAnswer((_) async => [_batchJson(id: 'b2', accountId: 'a2')]);
+
+      expect(
+        await container.read(importsControllerProvider.future),
+        hasLength(2),
+      );
+
+      container.read(importHistoryAccountProvider.notifier).show(savings);
+      final filtered = await container.read(importsControllerProvider.future);
+
+      expect(filtered.map((batch) => batch.id), ['b2']);
+      verify(
+        () => apiClient.get('/imports', query: {'account_id': 'a2'}),
+      ).called(1);
+    });
+
+    test('lifting the filter brings the whole history back', () async {
+      when(
+        () => apiClient.get('/imports'),
+      ).thenAnswer((_) async => [_batchJson(), _batchJson(id: 'b2')]);
+      when(
+        () => apiClient.get('/imports', query: {'account_id': 'a2'}),
+      ).thenAnswer((_) async => [_batchJson(id: 'b2', accountId: 'a2')]);
+      container.read(importHistoryAccountProvider.notifier).show(savings);
+      await container.read(importsControllerProvider.future);
+
+      container.read(importHistoryAccountProvider.notifier).clear();
+      final history = await container.read(importsControllerProvider.future);
+
+      expect(history, hasLength(2));
+    });
+
+    test('an import into the filtered account joins the history', () async {
+      when(
+        () => apiClient.get('/imports', query: {'account_id': 'a2'}),
+      ).thenAnswer((_) async => [_batchJson(id: 'b2', accountId: 'a2')]);
+      _stubMultipart(
+        apiClient,
+        '/imports',
+        _batchJson(id: 'b3', accountId: 'a2'),
+      );
+      container.read(importHistoryAccountProvider.notifier).show(savings);
+      await container.read(importsControllerProvider.future);
+
+      await container
+          .read(importsControllerProvider.notifier)
+          .importFile(accountId: 'a2', file: _file);
+
+      expect(container.read(importHistoryAccountProvider), savings);
+      expect(
+        container.read(importsControllerProvider).value!.map((b) => b.id),
+        ['b3', 'b2'],
+      );
+    });
+
+    test('an import into another account lifts the filter', () async {
+      when(
+        () => apiClient.get('/imports', query: {'account_id': 'a2'}),
+      ).thenAnswer((_) async => [_batchJson(id: 'b2', accountId: 'a2')]);
+      when(() => apiClient.get('/imports')).thenAnswer(
+        (_) async => [
+          _batchJson(id: 'b3'),
+          _batchJson(id: 'b2', accountId: 'a2'),
+        ],
+      );
+      _stubMultipart(apiClient, '/imports', _batchJson(id: 'b3'));
+      container.read(importHistoryAccountProvider.notifier).show(savings);
+      await container.read(importsControllerProvider.future);
+
+      await container
+          .read(importsControllerProvider.notifier)
+          .importFile(accountId: 'a1', file: _file);
+
+      expect(container.read(importHistoryAccountProvider), isNull);
+      final history = await container.read(importsControllerProvider.future);
+      expect(history.map((b) => b.id), ['b3', 'b2']);
+    });
   });
 }

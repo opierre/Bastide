@@ -978,6 +978,17 @@ class AppLocalizationsFr extends AppLocalizations {
       'Déposez un relevé ci-dessus : vos opérations apparaîtront ici.';
 
   @override
+  String importHistoryFilterAccount(String accountName) {
+    return 'Compte : $accountName';
+  }
+
+  @override
+  String get importHistoryFilterAccountRemove => 'Retirer le filtre de compte';
+
+  @override
+  String get importHistoryEmptyAccountTitle => 'Aucun import pour ce compte';
+
+  @override
   String get importHistoryFileHeader => 'Fichier';
 
   @override

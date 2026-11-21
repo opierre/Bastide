@@ -427,4 +427,74 @@ void main() {
     expect(find.text('No imports'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
+
+  group('account filter', () {
+    const filter = ImportHistoryAccountFilter(id: 'a1', name: 'Compte courant');
+
+    Future<ProviderContainer> pumpFiltered(
+      WidgetTester tester, {
+      List<ImportBatch> batches = const [],
+      Locale locale = const Locale('fr'),
+    }) async {
+      _useDesktopSurface(tester);
+      await tester.pumpWidget(
+        _wrap(
+          controller: FakeImportsController(initialBatches: batches),
+          locale: locale,
+        ),
+      );
+      final container = ProviderScope.containerOf(
+        tester.element(find.byType(ImportHistory)),
+      );
+      container.read(importHistoryAccountProvider.notifier).show(filter);
+      await tester.pumpAndSettle();
+      return container;
+    }
+
+    testWidgets('no filter shows beside the heading by default', (
+      tester,
+    ) async {
+      _useDesktopSurface(tester);
+      await tester.pumpWidget(
+        _wrap(controller: FakeImportsController(initialBatches: [_batch()])),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.byKey(const Key('importHistoryAccountFilter')), findsNothing);
+    });
+
+    testWidgets('names the account and lifts the filter on its x', (
+      tester,
+    ) async {
+      final container = await pumpFiltered(tester, batches: [_batch()]);
+
+      expect(find.text('Compte : Compte courant'), findsOneWidget);
+      expect(find.byTooltip('Retirer le filtre de compte'), findsOneWidget);
+
+      await tester.tap(
+        find.byKey(const Key('importHistoryAccountFilterRemove')),
+      );
+      await tester.pumpAndSettle();
+
+      expect(container.read(importHistoryAccountProvider), isNull);
+      expect(find.byKey(const Key('importHistoryAccountFilter')), findsNothing);
+    });
+
+    testWidgets('an empty filtered history says so for the account', (
+      tester,
+    ) async {
+      await pumpFiltered(tester);
+
+      expect(find.text('Aucun import pour ce compte'), findsOneWidget);
+      expect(find.text('Aucun import'), findsNothing);
+    });
+
+    testWidgets('reads in en', (tester) async {
+      await pumpFiltered(tester, locale: const Locale('en'));
+
+      expect(find.text('Account: Compte courant'), findsOneWidget);
+      expect(find.text('No imports for this account'), findsOneWidget);
+      expect(find.byTooltip('Remove the account filter'), findsOneWidget);
+    });
+  });
 }

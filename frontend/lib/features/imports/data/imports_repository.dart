@@ -13,8 +13,13 @@ class ImportsRepository {
 
   final ApiClient _apiClient;
 
-  Future<List<ImportBatch>> listBatches() async {
-    final json = await _apiClient.get('/imports') as List<dynamic>;
+  /// The import history, newest first; only [accountId]'s batches when set.
+  Future<List<ImportBatch>> listBatches({String? accountId}) async {
+    final json =
+        await (accountId == null
+                ? _apiClient.get('/imports')
+                : _apiClient.get('/imports', query: {'account_id': accountId}))
+            as List<dynamic>;
     return json
         .map((entry) => _parseBatch(entry as Map<String, dynamic>))
         .toList();

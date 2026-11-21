@@ -974,6 +974,17 @@ class AppLocalizationsEn extends AppLocalizations {
       'Drop a statement above and your transactions will appear here.';
 
   @override
+  String importHistoryFilterAccount(String accountName) {
+    return 'Account: $accountName';
+  }
+
+  @override
+  String get importHistoryFilterAccountRemove => 'Remove the account filter';
+
+  @override
+  String get importHistoryEmptyAccountTitle => 'No imports for this account';
+
+  @override
   String get importHistoryFileHeader => 'File';
 
   @override

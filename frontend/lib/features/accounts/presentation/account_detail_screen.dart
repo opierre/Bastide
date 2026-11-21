@@ -22,6 +22,7 @@ import '../../../core/widgets/section_heading.dart';
 import '../../../core/widgets/state_views.dart';
 import '../../../core/widgets/status_text.dart';
 import '../../../l10n/app_localizations.dart';
+import '../../imports/application/imports_controller.dart';
 import '../../imports/presentation/imports_screen.dart';
 import '../../transactions/application/transactions_controller.dart';
 import '../../transactions/domain/transaction.dart';
@@ -287,13 +288,22 @@ class _SummaryLine extends StatelessWidget {
 /// The two right-aligned lines closing the summary line: the bank and type,
 /// then how far the history goes and when it was last imported. French runs
 /// long: they wrap, never truncate.
-class _AccountFacts extends StatelessWidget {
+class _AccountFacts extends ConsumerWidget {
   const _AccountFacts({required this.overview});
 
   final AccountOverview overview;
 
+  /// Opens Imports on this account's history alone.
+  void _openImports(BuildContext context, WidgetRef ref) {
+    final account = overview.account;
+    ref
+        .read(importHistoryAccountProvider.notifier)
+        .show(ImportHistoryAccountFilter(id: account.id, name: account.name));
+    context.go(ImportsScreen.path);
+  }
+
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context)!;
     final style = context.textStyles.statLabel;
     final date = DateFormat.yMMMd(_locale(context));
@@ -333,7 +343,7 @@ class _AccountFacts extends StatelessWidget {
                   DateFormat.MMMd(_locale(context)).format(imported.toLocal()),
                 ),
                 small: true,
-                onTap: () => context.go(ImportsScreen.path),
+                onTap: () => _openImports(context, ref),
               ),
             ],
           ],

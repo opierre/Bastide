@@ -1543,6 +1543,24 @@ abstract class AppLocalizations {
   /// **'Déposez un relevé ci-dessus : vos opérations apparaîtront ici.'**
   String get importHistoryEmptyBody;
 
+  /// Filter beside the import history heading naming the account the history is narrowed to (opened from the account detail).
+  ///
+  /// In fr, this message translates to:
+  /// **'Compte : {accountName}'**
+  String importHistoryFilterAccount(String accountName);
+
+  /// Tooltip and accessible label of the button that lifts the import history's account filter.
+  ///
+  /// In fr, this message translates to:
+  /// **'Retirer le filtre de compte'**
+  String get importHistoryFilterAccountRemove;
+
+  /// Heading shown when the import history, narrowed to one account, is empty.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucun import pour ce compte'**
+  String get importHistoryEmptyAccountTitle;
+
   /// Import history column header for the file name.
   ///
   /// In fr, this message translates to:

@@ -1189,6 +1189,23 @@
   "@importHistoryEmptyBody": {
     "description": "Encouraging subtext under the empty import-history heading."
   },
+  "importHistoryFilterAccount": "Compte : {accountName}",
+  "@importHistoryFilterAccount": {
+    "description": "Filter beside the import history heading naming the account the history is narrowed to (opened from the account detail).",
+    "placeholders": {
+      "accountName": {
+        "type": "String"
+      }
+    }
+  },
+  "importHistoryFilterAccountRemove": "Retirer le filtre de compte",
+  "@importHistoryFilterAccountRemove": {
+    "description": "Tooltip and accessible label of the button that lifts the import history's account filter."
+  },
+  "importHistoryEmptyAccountTitle": "Aucun import pour ce compte",
+  "@importHistoryEmptyAccountTitle": {
+    "description": "Heading shown when the import history, narrowed to one account, is empty."
+  },
   "importHistoryFileHeader": "Fichier",
   "@importHistoryFileHeader": {
     "description": "Import history column header for the file name."

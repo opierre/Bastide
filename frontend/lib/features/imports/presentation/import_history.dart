@@ -8,6 +8,7 @@ import '../../../core/theme/tokens.dart';
 import '../../../core/widgets/amount_text.dart';
 import '../../../core/widgets/app_table.dart';
 import '../../../core/widgets/monogram_avatar.dart';
+import '../../../core/widgets/removable_filter.dart';
 import '../../../core/widgets/section_heading.dart';
 import '../../../core/widgets/state_views.dart';
 import '../../../core/widgets/status_text.dart';
@@ -33,17 +34,36 @@ class ImportHistory extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context)!;
     final batches = ref.watch(importsControllerProvider);
+    final account = ref.watch(importHistoryAccountProvider);
     final columns = _columns(l10n);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        SectionHeading(title: l10n.importHistoryTitle),
+        SectionHeading(
+          title: l10n.importHistoryTitle,
+          trailing: account == null
+              ? null
+              : Flexible(
+                  child: RemovableFilter(
+                    key: const Key('importHistoryAccountFilter'),
+                    icon: LucideIcons300.wallet,
+                    label: l10n.importHistoryFilterAccount(account.name),
+                    removeTooltip: l10n.importHistoryFilterAccountRemove,
+                    removeKey: const Key('importHistoryAccountFilterRemove'),
+                    onRemove: ref
+                        .read(importHistoryAccountProvider.notifier)
+                        .clear,
+                  ),
+                ),
+        ),
         Expanded(
           child: switch (batches) {
             AsyncData(:final value) when value.isEmpty => EmptyStateView(
               key: const Key('importHistoryEmpty'),
-              title: l10n.importHistoryEmptyTitle,
+              title: account == null
+                  ? l10n.importHistoryEmptyTitle
+                  : l10n.importHistoryEmptyAccountTitle,
               message: l10n.importHistoryEmptyBody,
             ),
             AsyncData(:final value) => _HistoryTable(
