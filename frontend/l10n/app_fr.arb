@@ -4057,6 +4057,40 @@
   "@goalAllocationsFailed": {
     "description": "Inspector table when the allocations fail to load."
   },
+  "goalAllocationDelete": "Supprimer l’allocation",
+  "@goalAllocationDelete": {
+    "description": "Trailing action of an allocation row in the inspector; opens the confirmation."
+  },
+  "goalAllocationDeleteTitle": "Supprimer cette allocation ?",
+  "@goalAllocationDeleteTitle": {
+    "description": "Title of the confirmation before deleting an allocation line."
+  },
+  "goalAllocationDeleteLeadDown": "Le montant mis de côté baisse de {amount}. Vos comptes ne sont pas modifiés.",
+  "@goalAllocationDeleteLeadDown": {
+    "description": "Lead of the confirmation when the deleted line put money aside.",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "goalAllocationDeleteLeadUp": "Le montant mis de côté remonte de {amount}. Vos comptes ne sont pas modifiés.",
+  "@goalAllocationDeleteLeadUp": {
+    "description": "Lead of the confirmation when the deleted line was a withdrawal (negative).",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "goalAllocationDeleteCancel": "Annuler",
+  "@goalAllocationDeleteCancel": {
+    "description": "Dismisses the delete confirmation."
+  },
+  "goalAllocationDeleteSubmit": "Supprimer",
+  "@goalAllocationDeleteSubmit": {
+    "description": "Destructive button of the delete confirmation."
+  },
   "goalImageChange": "Changer",
   "@goalImageChange": {
     "description": "Button on the banner image; opens a menu."
