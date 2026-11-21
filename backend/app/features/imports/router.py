@@ -2,7 +2,7 @@
 
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, File, Form, UploadFile, status
+from fastapi import APIRouter, Depends, File, Form, Query, UploadFile, status
 from sqlalchemy.orm import Session
 
 from app.core.db import SessionFactory, get_db, get_session_factory
@@ -100,9 +100,10 @@ async def create_import(
 async def list_imports(
     service: Annotated[ImportService, Depends(_import_service)],
     user: Annotated[User, Depends(get_current_user)],
+    account_id: Annotated[str | None, Query()] = None,
 ) -> list[ImportBatchRead]:
-    """The caller's import history, most recent first."""
-    return [_to_read(batch) for batch in service.list_for_user(user.id)]
+    """The caller's import history, most recent first; `account_id` keeps one account's."""
+    return [_to_read(batch) for batch in service.list_for_user(user.id, account_id)]
 
 
 @router.get("/imports/{batch_id}", response_model=ImportBatchRead)

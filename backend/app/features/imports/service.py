@@ -107,9 +107,13 @@ class ImportService:
         # one gets.
         self._run_enqueuer = run_enqueuer
 
-    def list_for_user(self, user_id: str) -> list[ImportBatch]:
-        """List a user's import batches, most recent first (the import history)."""
-        return self._repository.list_by_user(user_id)
+    def list_for_user(self, user_id: str, account_id: str | None = None) -> list[ImportBatch]:
+        """List a user's import batches, most recent first (the import history).
+
+        ``account_id`` narrows the history to that account's batches. The query stays scoped
+        to the user, so naming another user's account yields an empty list, not their rows.
+        """
+        return self._repository.list_by_user(user_id, account_id)
 
     def get(self, user_id: str, batch_id: str) -> ImportBatch:
         """Fetch a single import batch the user owns.

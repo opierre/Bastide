@@ -20,14 +20,11 @@ class ImportRepository:
             )
         )
 
-    def list_by_user(self, user_id: str) -> list[ImportBatch]:
-        return list(
-            self._db.scalars(
-                select(ImportBatch)
-                .where(ImportBatch.user_id == user_id)
-                .order_by(ImportBatch.imported_at.desc())
-            )
-        )
+    def list_by_user(self, user_id: str, account_id: str | None = None) -> list[ImportBatch]:
+        query = select(ImportBatch).where(ImportBatch.user_id == user_id)
+        if account_id is not None:
+            query = query.where(ImportBatch.account_id == account_id)
+        return list(self._db.scalars(query.order_by(ImportBatch.imported_at.desc())))
 
     def get_by_id_for_user(self, batch_id: str, user_id: str) -> ImportBatch | None:
         return self._db.scalar(

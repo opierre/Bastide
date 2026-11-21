@@ -527,3 +527,46 @@ def test_import_requires_auth(client: TestClient) -> None:
         )
 
     assert response.status_code == 401
+
+
+# --- import history: account filter -------------------------------------------------------
+
+
+def test_history_lists_every_account_without_a_filter(client: TestClient) -> None:
+    headers = _register(client)
+    checking_id = _create_account(client, headers)
+    savings_id = _create_account(client, headers)
+    _upload(client, headers, checking_id, MULTI_ACCOUNT, "all.ofx", "0001234567")
+    _upload(client, headers, savings_id, MULTI_ACCOUNT, "all.ofx", "0007654321")
+
+    response = client.get("/api/v1/imports", headers=headers)
+
+    assert response.status_code == 200
+    assert {batch["account_id"] for batch in response.json()} == {checking_id, savings_id}
+
+
+def test_history_filtered_by_account_keeps_only_its_batches(client: TestClient) -> None:
+    headers = _register(client)
+    checking_id = _create_account(client, headers)
+    savings_id = _create_account(client, headers)
+    _upload(client, headers, checking_id, MULTI_ACCOUNT, "all.ofx", "0001234567")
+    _upload(client, headers, savings_id, MULTI_ACCOUNT, "all.ofx", "0007654321")
+
+    response = client.get("/api/v1/imports", params={"account_id": savings_id}, headers=headers)
+
+    assert response.status_code == 200
+    body = response.json()
+    assert len(body) == 1
+    assert body[0]["account_id"] == savings_id
+
+
+def test_history_filter_never_reveals_another_users_batches(client: TestClient) -> None:
+    owner = _register(client)
+    account_id = _create_account(client, owner)
+    _upload(client, owner, account_id, FIXTURES / "sample_sgml.ofx", "sample.ofx")
+    stranger = _register(client, email="bruno@example.com")
+
+    response = client.get("/api/v1/imports", params={"account_id": account_id}, headers=stranger)
+
+    assert response.status_code == 200
+    assert response.json() == []
