@@ -5837,4 +5837,16 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get placementErrorGeneric =>
       'L’opération a échoué. Rien n’a été modifié. Réessayez.';
+
+  @override
+  String networthAssetsPartInvestments(String amount) {
+    return 'Placements $amount';
+  }
+
+  @override
+  String get networthCompositionInvestments => 'Placements';
+
+  @override
+  String get networthNoteInvestments =>
+      'Les placements comptent pour leur dernière valeur saisie. Entre deux saisies, la courbe reste plate.';
 }

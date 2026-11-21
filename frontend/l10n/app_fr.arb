@@ -7586,5 +7586,22 @@
   "placementErrorGeneric": "L’opération a échoué. Rien n’a été modifié. Réessayez.",
   "@placementErrorGeneric": {
     "description": "Fallback error of an investment write."
+  },
+  "networthAssetsPartInvestments": "Placements {amount}",
+  "@networthAssetsPartInvestments": {
+    "description": "Part of the assets caption: the investments at their declared value.",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "networthCompositionInvestments": "Placements",
+  "@networthCompositionInvestments": {
+    "description": "Composition row: every investment together."
+  },
+  "networthNoteInvestments": "Les placements comptent pour leur dernière valeur saisie. Entre deux saisies, la courbe reste plate.",
+  "@networthNoteInvestments": {
+    "description": "Net worth note on how investments are counted."
   }
 }

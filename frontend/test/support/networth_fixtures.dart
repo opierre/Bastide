@@ -44,6 +44,7 @@ List<NetWorthPoint> frameSeries() => [
 NetWorthSummary testNetworthSummary({
   int accountsMinor = 2430000,
   int propertiesMinor = 49250000,
+  int investmentsMinor = 0,
   int mortgagesMinor = 23412921,
   int netWorthMinor = 28267079,
   List<CompositionEntry> composition = frameComposition,
@@ -55,6 +56,7 @@ NetWorthSummary testNetworthSummary({
 }) => NetWorthSummary(
   accountsMinor: accountsMinor,
   propertiesMinor: propertiesMinor,
+  investmentsMinor: investmentsMinor,
   mortgagesMinor: mortgagesMinor,
   netWorthMinor: netWorthMinor,
   composition: composition,
@@ -176,7 +178,11 @@ class FakeDeclaredBalancesController extends DeclaredBalancesController {
 /// `GET /networth/summary` with nothing to add up — for tests that only count
 /// how often the summary is read.
 const emptyNetworthSummaryJson = {
-  'assets': {'accounts_minor': 0, 'properties_minor': 0},
+  'assets': {
+    'accounts_minor': 0,
+    'properties_minor': 0,
+    'investments_minor': 0,
+  },
   'liabilities': {'mortgages_minor': 0},
   'net_worth_minor': 0,
   'composition': <Map<String, dynamic>>[],

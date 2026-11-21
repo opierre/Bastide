@@ -5806,4 +5806,16 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get placementErrorGeneric =>
       'The operation failed. Nothing was changed. Try again.';
+
+  @override
+  String networthAssetsPartInvestments(String amount) {
+    return 'Investments $amount';
+  }
+
+  @override
+  String get networthCompositionInvestments => 'Investments';
+
+  @override
+  String get networthNoteInvestments =>
+      'Investments count at their last entered value. Between two entries, the curve stays flat.';
 }

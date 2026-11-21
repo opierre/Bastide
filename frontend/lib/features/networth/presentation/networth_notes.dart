@@ -11,8 +11,6 @@ import '../domain/networth_summary.dart';
 /// « À savoir » (`15-synthese.md` §5b): what the synthèse leaves out on
 /// purpose, and how it reads what it counts, as notes (`00` §7). Left
 /// unexplained, these choices would read as missing features.
-///
-/// The placements note arrives with the placements in the net worth (#218).
 class NetworthNotes extends StatelessWidget {
   const NetworthNotes({super.key, required this.summary});
 
@@ -30,6 +28,15 @@ class NetworthNotes extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         SectionHeading(title: l10n.networthNotesTitle),
+        // How placements count; absent without one (`15-synthese.md` States).
+        if (summary.investmentsMinor != 0) ...[
+          NoteLine(
+            key: const Key('networthNoteInvestments'),
+            icon: LucideIcons300.chartLine,
+            text: l10n.networthNoteInvestments,
+          ),
+          gap,
+        ],
         NoteLine(
           key: const Key('networthNoteGoals'),
           icon: LucideIcons300.flag,

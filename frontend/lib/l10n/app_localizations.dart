@@ -9197,6 +9197,24 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'L’opération a échoué. Rien n’a été modifié. Réessayez.'**
   String get placementErrorGeneric;
+
+  /// Part of the assets caption: the investments at their declared value.
+  ///
+  /// In fr, this message translates to:
+  /// **'Placements {amount}'**
+  String networthAssetsPartInvestments(String amount);
+
+  /// Composition row: every investment together.
+  ///
+  /// In fr, this message translates to:
+  /// **'Placements'**
+  String get networthCompositionInvestments;
+
+  /// Net worth note on how investments are counted.
+  ///
+  /// In fr, this message translates to:
+  /// **'Les placements comptent pour leur dernière valeur saisie. Entre deux saisies, la courbe reste plate.'**
+  String get networthNoteInvestments;
 }
 
 class _AppLocalizationsDelegate

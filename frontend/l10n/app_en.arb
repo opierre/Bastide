@@ -1595,5 +1595,8 @@
   "placementErrorLinkNotFound": "This transaction no longer exists. Nothing was changed.",
   "placementErrorAlreadyLinked": "This transaction is already linked to another movement. Nothing was changed.",
   "placementErrorValidation": "A field is not valid. Nothing was changed.",
-  "placementErrorGeneric": "The operation failed. Nothing was changed. Try again."
+  "placementErrorGeneric": "The operation failed. Nothing was changed. Try again.",
+  "networthAssetsPartInvestments": "Investments {amount}",
+  "networthCompositionInvestments": "Investments",
+  "networthNoteInvestments": "Investments count at their last entered value. Between two entries, the curve stays flat."
 }
