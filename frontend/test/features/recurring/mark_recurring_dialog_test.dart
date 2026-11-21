@@ -262,7 +262,7 @@ void main() {
     });
 
     await _open(tester, repository: repository);
-    expect(find.text("Impossible de préparer l'aperçu."), findsOneWidget);
+    expect(find.text("Impossible de préparer l’aperçu."), findsOneWidget);
 
     await tester.tap(find.byKey(const Key('markRecurringRetry')));
     await tester.pumpAndSettle();
@@ -496,7 +496,7 @@ void main() {
       await _open(tester, repository: repository, locale: const Locale('en'));
       await openPicker(tester);
 
-      expect(find.text("You don't track any series."), findsOneWidget);
+      expect(find.text("You don’t track any series."), findsOneWidget);
     });
 
     testWidgets('a failed load offers a retry', (tester) async {
@@ -536,7 +536,7 @@ void main() {
 
       expect(find.byType(MarkRecurringDialog), findsOneWidget);
       expect(find.byKey(const Key('appToast')), findsOneWidget);
-      expect(find.text("L'opération n'a pas pu être ajoutée"), findsOneWidget);
+      expect(find.text("L’opération n’a pas pu être ajoutée"), findsOneWidget);
       expect(
         find.text('Certaines opérations appartiennent déjà à une série.'),
         findsOneWidget,

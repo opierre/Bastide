@@ -28,7 +28,7 @@
   "@navSettings": {
     "description": "Left nav label for the settings screen."
   },
-  "navSectionOverview": "Vue d'ensemble",
+  "navSectionOverview": "Vue d’ensemble",
   "@navSectionOverview": {
     "description": "Sidebar group label, sentence case, over the dashboard, accounts and transactions destinations."
   },
@@ -312,7 +312,7 @@
   "@settingsThemeLight": {
     "description": "Theme option for the light theme."
   },
-  "settingsThemeSaveFailed": "Le thème n'a pas pu être enregistré. Rien n'a été modifié. Réessayez.",
+  "settingsThemeSaveFailed": "Le thème n’a pas pu être enregistré. Rien n’a été modifié. Réessayez.",
   "@settingsThemeSaveFailed": {
     "description": "Toast shown when saving the theme preference fails; the previous theme is restored."
   },
@@ -320,7 +320,7 @@
   "@settingsLanguageTitle": {
     "description": "Title of the language card in settings preferences."
   },
-  "settingsLanguageNote": "S'applique immédiatement à toute l'interface.",
+  "settingsLanguageNote": "S’applique immédiatement à toute l’interface.",
   "@settingsLanguageNote": {
     "description": "Note under the language segmented control."
   },
@@ -344,7 +344,7 @@
   "@settingsCurrencyTitle": {
     "description": "Title of the currency card in settings preferences."
   },
-  "settingsCurrencyNote": "Choisie à l'inscription et appliquée à tous vos comptes. Elle ne peut pas être modifiée dans cette version.",
+  "settingsCurrencyNote": "Choisie à l’inscription et appliquée à tous vos comptes. Elle ne peut pas être modifiée dans cette version.",
   "@settingsCurrencyNote": {
     "description": "Note under the read-only currency field in settings, stating that it is permanent."
   },
@@ -384,7 +384,7 @@
   "@settingsUpdatesToggleLabel": {
     "description": "Accessibility label of the update-check toggle."
   },
-  "settingsUpdatesNote": "Une fois par jour au plus, Bastide demande à GitHub le numéro de la dernière version publiée. Rien d'autre n'est envoyé, et rien n'est installé sans vous.",
+  "settingsUpdatesNote": "Une fois par jour au plus, Bastide demande à GitHub le numéro de la dernière version publiée. Rien d’autre n’est envoyé, et rien n’est installé sans vous.",
   "@settingsUpdatesNote": {
     "description": "Says exactly what the opt-in update check sends."
   },
@@ -414,7 +414,7 @@
   "@settingsUpdatesUnavailable": {
     "description": "The app could not read the update status from its backend."
   },
-  "settingsAboutPrivacy": "Toutes vos données restent sur cet ordinateur. Bastide ne se connecte à aucune banque et n'envoie rien sur Internet, hormis la vérification des mises à jour si vous l'activez.",
+  "settingsAboutPrivacy": "Toutes vos données restent sur cet ordinateur. Bastide ne se connecte à aucune banque et n’envoie rien sur Internet, hormis la vérification des mises à jour si vous l’activez.",
   "@settingsAboutPrivacy": {
     "description": "Local-privacy statement in the About section."
   },
@@ -484,7 +484,7 @@
   "@authPasswordMismatch": {
     "description": "Error under the confirm field when it differs from the new password."
   },
-  "authDisplayNameLabel": "Nom d'utilisateur",
+  "authDisplayNameLabel": "Nom d’utilisateur",
   "@authDisplayNameLabel": {
     "description": "Label of the user name field, on the register screen and in Settings › Profil."
   },
@@ -765,7 +765,7 @@
   "@accountSettlementRule": {
     "description": "Linked-card menu item, deferred-debit cards only: opens the rule filing the card's monthly debit as a transfer."
   },
-  "cardSettlementNoAccount": "{card} : choisissez le compte sur lequel la carte est prélevée, pour que ses achats ne comptent qu'une fois.",
+  "cardSettlementNoAccount": "{card} : choisissez le compte sur lequel la carte est prélevée, pour que ses achats ne comptent qu’une fois.",
   "@cardSettlementNoAccount": {
     "description": "Warning for a deferred-debit card with no settlement account.",
     "placeholders": {
@@ -842,11 +842,11 @@
   "@settlementRulePatternRequired": {
     "description": "Validation error when the settlement-rule pattern is empty."
   },
-  "settlementRuleFromLabel": "S'applique à partir du",
+  "settlementRuleFromLabel": "S’applique à partir du",
   "@settlementRuleFromLabel": {
     "description": "Label of the start-date field of the settlement-rule dialog."
   },
-  "settlementRuleFromHelper": "Les prélèvements plus anciens restent des dépenses : les achats qu'ils ont payés ne sont pas dans l'application. Proposé à partir de l'historique importé de la carte.",
+  "settlementRuleFromHelper": "Les prélèvements plus anciens restent des dépenses : les achats qu’ils ont payés ne sont pas dans l’application. Proposé à partir de l’historique importé de la carte.",
   "@settlementRuleFromHelper": {
     "description": "Helper under the start-date field of the settlement-rule dialog."
   },
@@ -886,7 +886,7 @@
   "@settlementRuleLoadFailed": {
     "description": "Shown in the settlement-rule dialog when its state fails to load."
   },
-  "settlementRuleSaveFailed": "Impossible d'enregistrer la règle. Réessayez.",
+  "settlementRuleSaveFailed": "Impossible d’enregistrer la règle. Réessayez.",
   "@settlementRuleSaveFailed": {
     "description": "Shown in the settlement-rule dialog when saving fails."
   },
@@ -898,7 +898,7 @@
   "@accountArchiveConfirmTitle": {
     "description": "Title of the archive confirmation dialog."
   },
-  "accountArchiveConfirmBody": "Vous pourrez toujours consulter son historique, mais il n'apparaîtra plus dans votre liste de comptes.",
+  "accountArchiveConfirmBody": "Vous pourrez toujours consulter son historique, mais il n’apparaîtra plus dans votre liste de comptes.",
   "@accountArchiveConfirmBody": {
     "description": "Body text of the archive confirmation dialog."
   },
@@ -994,11 +994,11 @@
   "@accountInstitutionLabel": {
     "description": "Label for the institution field on the account form."
   },
-  "accountInstitutionRequired": "L'établissement est requis.",
+  "accountInstitutionRequired": "L’établissement est requis.",
   "@accountInstitutionRequired": {
     "description": "Validation message when the institution field is left empty."
   },
-  "accountInstitutionFromStatementNote": "Repris de l'établissement déclaré par votre relevé.",
+  "accountInstitutionFromStatementNote": "Repris de l’établissement déclaré par votre relevé.",
   "@accountInstitutionFromStatementNote": {
     "description": "Helper under the read-only institution field when the account is being created from a statement that names its bank."
   },
@@ -1020,7 +1020,7 @@
       }
     }
   },
-  "accountBalanceStatementNote": "Ajusté automatiquement d'après le solde déclaré par votre relevé lors du premier import.",
+  "accountBalanceStatementNote": "Ajusté automatiquement d’après le solde déclaré par votre relevé lors du premier import.",
   "@accountBalanceStatementNote": {
     "description": "Helper under the balance field when the account is being created from a statement: the import derives the real figure from the statement's declared balance, so an approximate entry here is harmless."
   },
@@ -1028,7 +1028,7 @@
   "@accountBalanceFromStatementNote": {
     "description": "Helper under the read-only balance field when the account is being created from a statement that declares its closing balance: the figure is the statement's, not something to type."
   },
-  "accountOpeningBalanceEditNote": "Corriger cette valeur décale le solde du compte et son historique enregistré du même montant. Aucune transaction n'est modifiée.",
+  "accountOpeningBalanceEditNote": "Corriger cette valeur décale le solde du compte et son historique enregistré du même montant. Aucune transaction n’est modifiée.",
   "@accountOpeningBalanceEditNote": {
     "description": "Helper under the balance field when editing an existing account: explains that a manual correction shifts the cached balance and every saved snapshot by the same delta rather than rewriting the ledger."
   },
@@ -1221,7 +1221,7 @@
   "@importErrorBatchNotFound": {
     "description": "Localized message for the backend's IMPORT_BATCH_NOT_FOUND error code."
   },
-  "importErrorStatementRequired": "Ce fichier contient plusieurs comptes et aucun n'a été désigné.",
+  "importErrorStatementRequired": "Ce fichier contient plusieurs comptes et aucun n’a été désigné.",
   "@importErrorStatementRequired": {
     "description": "Localized message for the backend's IMPORT_STATEMENT_REQUIRED error code: a multi-account file was uploaded without naming the statement to import."
   },
@@ -1624,7 +1624,7 @@
   "@transactionErrorNotFound": {
     "description": "Localized message for the backend's TRANSACTION_NOT_FOUND error code."
   },
-  "transactionErrorCategoryInvalid": "Cette catégorie n'est plus disponible.",
+  "transactionErrorCategoryInvalid": "Cette catégorie n’est plus disponible.",
   "@transactionErrorCategoryInvalid": {
     "description": "Localized message for the backend's CATEGORY_INVALID error code, returned when a transaction is patched with a category the user cannot assign — usually one deleted in another window."
   },
@@ -1892,7 +1892,7 @@
   "@categorySystemChildren": {
     "description": "Display name for the system category with i18n key category.children."
   },
-  "categorySystemChildrenChildcare": "Garde d'enfants",
+  "categorySystemChildrenChildcare": "Garde d’enfants",
   "@categorySystemChildrenChildcare": {
     "description": "Display name for the system category with i18n key category.children.childcare."
   },
@@ -2033,7 +2033,7 @@
   "@dashboardRetry": {
     "description": "Retry button label shown when the dashboard summary fails to load."
   },
-  "dashboardErrorInvalidMonth": "Le mois demandé n'est pas valide.",
+  "dashboardErrorInvalidMonth": "Le mois demandé n’est pas valide.",
   "@dashboardErrorInvalidMonth": {
     "description": "Localized message for the backend's DASHBOARD_MONTH_INVALID error code."
   },
@@ -2397,15 +2397,15 @@
   "@rulesApplyToastBody": {
     "description": "Second line of the rule-run toast. Answers the question the count alone raises."
   },
-  "rulesApplyFailed": "L'exécution des règles a échoué",
+  "rulesApplyFailed": "L’exécution des règles a échoué",
   "@rulesApplyFailed": {
     "description": "Toast headline when the rule run itself failed."
   },
-  "rulesReorderFailed": "L'ordre n'a pas pu être enregistré",
+  "rulesReorderFailed": "L’ordre n’a pas pu être enregistré",
   "@rulesReorderFailed": {
     "description": "Toast headline when persisting a drag-reorder failed and the previous order was restored."
   },
-  "rulesToggleFailed": "La règle n'a pas pu être modifiée",
+  "rulesToggleFailed": "La règle n’a pas pu être modifiée",
   "@rulesToggleFailed": {
     "description": "Toast headline when enabling or disabling a rule failed and the switch was put back."
   },
@@ -2517,7 +2517,7 @@
   "@ruleFormPriorityLabel": {
     "description": "Label of the rule editor's priority field. Lower runs first."
   },
-  "ruleFormPriorityInvalid": "Indiquez une priorité d'au moins 1.",
+  "ruleFormPriorityInvalid": "Indiquez une priorité d’au moins 1.",
   "@ruleFormPriorityInvalid": {
     "description": "Validation message for a missing or non-positive priority."
   },
@@ -2601,11 +2601,11 @@
   "@logoZoomLabel": {
     "description": "Screen-reader label of the enlarged logo picture in its dialog."
   },
-  "ruleLogoInvalid": "Ce fichier n'est pas une image PNG, JPEG ou WebP.",
+  "ruleLogoInvalid": "Ce fichier n’est pas une image PNG, JPEG ou WebP.",
   "@ruleLogoInvalid": {
     "description": "Error when the picked logo file is not a supported picture."
   },
-  "ruleLogoError": "Le logo n'a pas pu être enregistré. Réessayez.",
+  "ruleLogoError": "Le logo n’a pas pu être enregistré. Réessayez.",
   "@ruleLogoError": {
     "description": "Error when the logo could not be saved or removed for another reason."
   },
@@ -2642,11 +2642,11 @@
   "@ruleLogoUrlTitle": {
     "description": "Title of the dialog where the user pastes the web address of a logo picture."
   },
-  "ruleLogoUrlLead": "Collez l'adresse d'une image. Bastide la télécharge depuis cet ordinateur, puis vous la recadrez.",
+  "ruleLogoUrlLead": "Collez l’adresse d’une image. Bastide la télécharge depuis cet ordinateur, puis vous la recadrez.",
   "@ruleLogoUrlLead": {
     "description": "Lead text of the logo-from-address dialog: the app downloads the picture itself, then the crop step follows."
   },
-  "ruleLogoUrlLabel": "Adresse de l'image",
+  "ruleLogoUrlLabel": "Adresse de l’image",
   "@ruleLogoUrlLabel": {
     "description": "Label of the web address field in the logo-from-address dialog."
   },
@@ -2666,7 +2666,7 @@
   "@ruleLogoUrlInvalidAddress": {
     "description": "Error when the pasted logo address is not an http or https address."
   },
-  "ruleLogoUrlUnreachable": "L'image n'a pas pu être téléchargée. Vérifiez l'adresse et votre connexion.",
+  "ruleLogoUrlUnreachable": "L’image n’a pas pu être téléchargée. Vérifiez l’adresse et votre connexion.",
   "@ruleLogoUrlUnreachable": {
     "description": "Error when the logo address could not be reached, answered an error or timed out."
   },
@@ -2733,15 +2733,15 @@
       }
     }
   },
-  "ruleErrorPatternInvalid": "Ce motif n'est pas une expression régulière valide.",
+  "ruleErrorPatternInvalid": "Ce motif n’est pas une expression régulière valide.",
   "@ruleErrorPatternInvalid": {
     "description": "Localized message for RULE_PATTERN_INVALID. Rendered on the pattern field, never as a match count of zero."
   },
-  "ruleErrorNotFound": "Cette règle n'existe plus.",
+  "ruleErrorNotFound": "Cette règle n’existe plus.",
   "@ruleErrorNotFound": {
     "description": "Localized message for the backend's RULE_NOT_FOUND code."
   },
-  "ruleErrorCategoryNotFound": "La catégorie visée n'existe plus.",
+  "ruleErrorCategoryNotFound": "La catégorie visée n’existe plus.",
   "@ruleErrorCategoryNotFound": {
     "description": "Localized message when a rule targets a category the backend can no longer resolve."
   },
@@ -2779,11 +2779,11 @@
   "@rulePackClose": {
     "description": "Button closing the refused-pack explanation."
   },
-  "rulePackRefusedTitle": "Ce fichier n'a pas été accepté",
+  "rulePackRefusedTitle": "Ce fichier n’a pas été accepté",
   "@rulePackRefusedTitle": {
     "description": "Title of the dialog explaining why a pack was refused."
   },
-  "rulePackRefusedMalformed": "Ce fichier n'est pas un pack de règles Bastide. Attendu : un fichier JSON avec un nom, une version de format et une liste de règles.",
+  "rulePackRefusedMalformed": "Ce fichier n’est pas un pack de règles Bastide. Attendu : un fichier JSON avec un nom, une version de format et une liste de règles.",
   "@rulePackRefusedMalformed": {
     "description": "Refusal reason: the file isn't a pack-shaped JSON document."
   },
@@ -2796,7 +2796,7 @@
       }
     }
   },
-  "rulePackRefusedRegex": "Ce pack contient une règle « regex ». Les expressions régulières ne sont pas acceptées dans un pack partagé : une expression venue d'un fichier tiers peut bloquer votre machine. Utilisez « contient », « égal à » ou « plage ».",
+  "rulePackRefusedRegex": "Ce pack contient une règle « regex ». Les expressions régulières ne sont pas acceptées dans un pack partagé : une expression venue d’un fichier tiers peut bloquer votre machine. Utilisez « contient », « égal à » ou « plage ».",
   "@rulePackRefusedRegex": {
     "description": "Refusal reason: the pack contains a regex rule. Names the risk, and the three types that are accepted."
   },
@@ -2839,7 +2839,7 @@
   "@rulePackSamplesLabel": {
     "description": "Section label above the sample transactions in the import report."
   },
-  "rulePackApplyNowLabel": "Appliquer les règles à mes transactions existantes après l'import",
+  "rulePackApplyNowLabel": "Appliquer les règles à mes transactions existantes après l’import",
   "@rulePackApplyNowLabel": {
     "description": "Label beside the apply-now switch on the import sheet."
   },
@@ -2856,7 +2856,7 @@
       }
     }
   },
-  "rulePackImportedBody": "{count, plural, =0{Aucune transaction n'a changé de catégorie.} one{{count} transaction recatégorisée.} other{{count} transactions recatégorisées.}}",
+  "rulePackImportedBody": "{count, plural, =0{Aucune transaction n’a changé de catégorie.} one{{count} transaction recatégorisée.} other{{count} transactions recatégorisées.}}",
   "@rulePackImportedBody": {
     "description": "Second line of the import toast when the rules were applied straight away.",
     "placeholders": {
@@ -2865,7 +2865,7 @@
       }
     }
   },
-  "rulePackImportFailed": "L'import a échoué",
+  "rulePackImportFailed": "L’import a échoué",
   "@rulePackImportFailed": {
     "description": "Toast headline when a pack import failed."
   },
@@ -2873,7 +2873,7 @@
   "@rulePackExportTitle": {
     "description": "Title of the export review sheet."
   },
-  "rulePackExportPrivacyNotice": "Relisez avant d'enregistrer. Un motif peut contenir des informations personnelles, comme le nom de votre propriétaire : « VIR SALAIRE DUPONT ».",
+  "rulePackExportPrivacyNotice": "Relisez avant d’enregistrer. Un motif peut contenir des informations personnelles, comme le nom de votre propriétaire : « VIR SALAIRE DUPONT ».",
   "@rulePackExportPrivacyNotice": {
     "description": "Warning at the top of the export sheet. Names a concrete example, because the abstract warning is the one nobody reads."
   },
@@ -2905,7 +2905,7 @@
       }
     }
   },
-  "rulePackOmittedUserCategory": "« {pattern} » : vise une catégorie personnalisée, qui n'a pas d'identifiant partageable.",
+  "rulePackOmittedUserCategory": "« {pattern} » : vise une catégorie personnalisée, qui n’a pas d’identifiant partageable.",
   "@rulePackOmittedUserCategory": {
     "description": "Explains one omitted rule: it targets a user-defined category, which has no portable key.",
     "placeholders": {
@@ -2923,7 +2923,7 @@
   "@rulePackExportedTitle": {
     "description": "First line of the toast after an export is written to disk."
   },
-  "rulePackExportFailed": "L'export a échoué",
+  "rulePackExportFailed": "L’export a échoué",
   "@rulePackExportFailed": {
     "description": "Toast headline when preparing or writing an export failed."
   },
@@ -2940,7 +2940,7 @@
       }
     }
   },
-  "rulePackStartWithHelper": "Vous verrez ce que le pack ferait avant de l'importer.",
+  "rulePackStartWithHelper": "Vous verrez ce que le pack ferait avant de l’importer.",
   "@rulePackStartWithHelper": {
     "description": "Reassurance under the bundled-pack CTA: the preview step always comes first."
   },
@@ -2965,7 +2965,7 @@
   "@rulePackLogoDownloadHelper": {
     "description": "Line under the logo download checkbox saying where linked logos come from."
   },
-  "rulePackLogoFailuresTitle": "{count, plural, one{Un logo n'a pas pu être ajouté} other{{count} logos n'ont pas pu être ajoutés}}",
+  "rulePackLogoFailuresTitle": "{count, plural, one{Un logo n’a pas pu être ajouté} other{{count} logos n’ont pas pu être ajoutés}}",
   "@rulePackLogoFailuresTitle": {
     "description": "Title of the dialog listing the pack logos an import could not attach.",
     "placeholders": {
@@ -2974,11 +2974,11 @@
       }
     }
   },
-  "rulePackLogoFailuresNotice": "Les règles ont bien été importées : seuls ces logos n'ont pas été ajoutés.",
+  "rulePackLogoFailuresNotice": "Les règles ont bien été importées : seuls ces logos n’ont pas été ajoutés.",
   "@rulePackLogoFailuresNotice": {
     "description": "Reassurance at the top of the logo failures dialog: the import itself succeeded."
   },
-  "rulePackLogoFailureInvalidImage": "« {pattern} » : le fichier n'est pas une image PNG, JPEG ou WebP.",
+  "rulePackLogoFailureInvalidImage": "« {pattern} » : le fichier n’est pas une image PNG, JPEG ou WebP.",
   "@rulePackLogoFailureInvalidImage": {
     "description": "A logo that failed because it is not a supported picture, named by its rule's pattern.",
     "placeholders": {
@@ -2988,7 +2988,7 @@
       }
     }
   },
-  "rulePackLogoFailureTooLarge": "« {pattern} » : l'image dépasse la taille autorisée.",
+  "rulePackLogoFailureTooLarge": "« {pattern} » : l’image dépasse la taille autorisée.",
   "@rulePackLogoFailureTooLarge": {
     "description": "A logo that failed because it is too large, named by its rule's pattern.",
     "placeholders": {
@@ -3012,7 +3012,7 @@
   "@rulePackExportIncludeLogos": {
     "description": "Toggle on the export sheet: embed each rule's logo in the pack."
   },
-  "rulePackExportLogoCount": "{count, plural, =0{Aucune règle n'a de logo à inclure.} one{{count} logo inclus.} other{{count} logos inclus.}}",
+  "rulePackExportLogoCount": "{count, plural, =0{Aucune règle n’a de logo à inclure.} one{{count} logo inclus.} other{{count} logos inclus.}}",
   "@rulePackExportLogoCount": {
     "description": "Under the include-logos toggle: how many logos the export embeds.",
     "placeholders": {
@@ -3021,7 +3021,7 @@
       }
     }
   },
-  "rulePackExportLogosTooLarge": "Les logos n'ont pas été inclus : le pack serait trop volumineux pour être importé. Toutes les règles sont exportées, sans leurs logos.",
+  "rulePackExportLogosTooLarge": "Les logos n’ont pas été inclus : le pack serait trop volumineux pour être importé. Toutes les règles sont exportées, sans leurs logos.",
   "@rulePackExportLogosTooLarge": {
     "description": "Warning on the export sheet when the logos would take the pack over the size an import accepts."
   },
@@ -3087,7 +3087,7 @@
   "@alwaysRuleSuggestionFailed": {
     "description": "Shown in the always-categorize modal when the server-side pre-fill could not be fetched — the form stays usable."
   },
-  "reviewQueueRunAction": "Catégoriser avec l'IA",
+  "reviewQueueRunAction": "Catégoriser avec l’IA",
   "@reviewQueueRunAction": {
     "description": "Action on the review queue's header card that starts a local-AI categorization run over the pending rows."
   },
@@ -3132,7 +3132,7 @@
   "@runBannerPartialAction": {
     "description": "Link on the partial-run banner, showing the transactions the run could not analyse."
   },
-  "runBannerFailed": "La catégorisation n'a pas pu s'exécuter.",
+  "runBannerFailed": "La catégorisation n’a pas pu s’exécuter.",
   "@runBannerFailed": {
     "description": "Banner after a run that ended `failed` — reported plainly; the queue stays fully usable."
   },
@@ -3168,7 +3168,7 @@
   "@settingsAiBaseUrlHelp": {
     "description": "Helper under the engine address field, stating the loopback-only rule."
   },
-  "settingsAiBaseUrlRejected": "Adresse refusée : le moteur doit s'exécuter sur cet ordinateur (127.0.0.1 ou localhost). Une adresse distante enverrait les descriptions de vos transactions hors de votre machine.",
+  "settingsAiBaseUrlRejected": "Adresse refusée : le moteur doit s’exécuter sur cet ordinateur (127.0.0.1 ou localhost). Une adresse distante enverrait les descriptions de vos transactions hors de votre machine.",
   "@settingsAiBaseUrlRejected": {
     "description": "Inline validation shown on the address field when the backend refuses a non-loopback URL (422). States why it was refused, not only that it was."
   },
@@ -3224,7 +3224,7 @@
   "@settingsBackupExportCaption": {
     "description": "Caption under the export row's label: what the file contains."
   },
-  "settingsBackupExportPreparing": "Préparation de l'archive…",
+  "settingsBackupExportPreparing": "Préparation de l’archive…",
   "@settingsBackupExportPreparing": {
     "description": "Replaces the export caption while the archive is being built."
   },
@@ -3272,11 +3272,11 @@
   "@settingsBackupRestoreButton": {
     "description": "Secondary button that opens the file picker to restore a backup."
   },
-  "settingsBackupErrorTooNew": "Ce fichier provient d'une version plus récente de Bastide. Mettez l'application à jour pour le restaurer.",
+  "settingsBackupErrorTooNew": "Ce fichier provient d’une version plus récente de Bastide. Mettez l’application à jour pour le restaurer.",
   "@settingsBackupErrorTooNew": {
     "description": "Restore refused: the archive was written by a newer app version (BACKUP_TOO_NEW)."
   },
-  "settingsBackupErrorInvalid": "Ce fichier n'est pas une sauvegarde Bastide valide, ou il est endommagé.",
+  "settingsBackupErrorInvalid": "Ce fichier n’est pas une sauvegarde Bastide valide, ou il est endommagé.",
   "@settingsBackupErrorInvalid": {
     "description": "Restore refused: not a Bastide archive or corrupted (BACKUP_INVALID)."
   },
@@ -3284,7 +3284,7 @@
   "@settingsBackupErrorCurrency": {
     "description": "Restore refused: the archive's currency differs from the user's (BACKUP_CURRENCY_MISMATCH)."
   },
-  "settingsBackupErrorRunActive": "Une catégorisation est en cours. Attendez qu'elle se termine, puis réessayez.",
+  "settingsBackupErrorRunActive": "Une catégorisation est en cours. Attendez qu’elle se termine, puis réessayez.",
   "@settingsBackupErrorRunActive": {
     "description": "Restore refused while a categorization run is in flight (BACKUP_RUN_ACTIVE)."
   },
@@ -3292,7 +3292,7 @@
   "@settingsBackupErrorConflict": {
     "description": "Restore refused: its rows belong to another account still in this database (BACKUP_CONFLICT)."
   },
-  "settingsBackupErrorUnknown": "La restauration a échoué. Vos données n'ont pas été modifiées.",
+  "settingsBackupErrorUnknown": "La restauration a échoué. Vos données n’ont pas été modifiées.",
   "@settingsBackupErrorUnknown": {
     "description": "Restore failed for any other reason; nothing was changed."
   },
@@ -3316,7 +3316,7 @@
       }
     }
   },
-  "settingsBackupExportFailed": "L'export a échoué. Réessayez.",
+  "settingsBackupExportFailed": "L’export a échoué. Réessayez.",
   "@settingsBackupExportFailed": {
     "description": "Error toast when building or writing the backup failed."
   },
@@ -3328,7 +3328,7 @@
   "@settingsBackupConfirmExportedAt": {
     "description": "Summary row: when the backup was exported."
   },
-  "settingsBackupConfirmVersion": "Version de l'application",
+  "settingsBackupConfirmVersion": "Version de l’application",
   "@settingsBackupConfirmVersion": {
     "description": "Summary row: the app version that wrote the backup."
   },
@@ -3368,7 +3368,7 @@
   "@settingsBackupConfirmSimulations": {
     "description": "Summary row: number of saved loan simulator scenarios."
   },
-  "settingsBackupConfirmWarning": "Toutes vos données actuelles seront remplacées. Exportez-les d'abord si besoin.",
+  "settingsBackupConfirmWarning": "Toutes vos données actuelles seront remplacées. Exportez-les d’abord si besoin.",
   "@settingsBackupConfirmWarning": {
     "description": "Warning callout in the restore modal."
   },
@@ -3410,7 +3410,7 @@
       }
     }
   },
-  "subscriptionsDetectFailed": "La détection n'a pas pu s'exécuter.",
+  "subscriptionsDetectFailed": "La détection n’a pas pu s’exécuter.",
   "@subscriptionsDetectFailed": {
     "description": "Toast headline when the detection call itself failed."
   },
@@ -3499,7 +3499,7 @@
       }
     }
   },
-  "subscriptionsNextToday": "aujourd'hui",
+  "subscriptionsNextToday": "aujourd’hui",
   "@subscriptionsNextToday": {
     "description": "Relative phrasing for a charge due today."
   },
@@ -3673,7 +3673,7 @@
   "@subscriptionActionUnarchive": {
     "description": "Kebab and detail action on an archived series: bring it back."
   },
-  "subscriptionArchiveFailed": "L'archivage de ce paiement n'a pas pu être modifié.",
+  "subscriptionArchiveFailed": "L’archivage de ce paiement n’a pas pu être modifié.",
   "@subscriptionArchiveFailed": {
     "description": "Toast title when archiving or unarchiving a series from its detail fails."
   },
@@ -3699,7 +3699,7 @@
   "@subscriptionsArchivedSection": {
     "description": "Section label in the table above the archived series, once revealed."
   },
-  "subscriptionErrorInvalidTransition": "Ce changement de statut n'est pas possible pour ce paiement.",
+  "subscriptionErrorInvalidTransition": "Ce changement de statut n’est pas possible pour ce paiement.",
   "@subscriptionErrorInvalidTransition": {
     "description": "Localized RECURRING_INVALID_TRANSITION."
   },
@@ -3707,15 +3707,15 @@
   "@subscriptionErrorExists": {
     "description": "Localized RECURRING_SERIES_EXISTS."
   },
-  "subscriptionErrorNotFound": "Ce paiement récurrent n'existe plus.",
+  "subscriptionErrorNotFound": "Ce paiement récurrent n’existe plus.",
   "@subscriptionErrorNotFound": {
     "description": "Localized RECURRING_SERIES_NOT_FOUND."
   },
-  "subscriptionErrorAccountNotFound": "Ce compte n'existe plus.",
+  "subscriptionErrorAccountNotFound": "Ce compte n’existe plus.",
   "@subscriptionErrorAccountNotFound": {
     "description": "Localized ACCOUNT_NOT_FOUND, reachable from the creation form's account select."
   },
-  "subscriptionErrorCategoryInvalid": "Cette catégorie n'est plus disponible.",
+  "subscriptionErrorCategoryInvalid": "Cette catégorie n’est plus disponible.",
   "@subscriptionErrorCategoryInvalid": {
     "description": "Localized CATEGORY_INVALID on the recurring payment form, returned when the chosen category is not one the user may assign."
   },
@@ -4160,7 +4160,7 @@
   "@goalFormCreateTitle": {
     "description": "Title of the goal modal when creating."
   },
-  "goalFormEditTitle": "Modifier l'objectif",
+  "goalFormEditTitle": "Modifier l’objectif",
   "@goalFormEditTitle": {
     "description": "Title of the goal modal when editing."
   },
@@ -4208,7 +4208,7 @@
   "@allocationAmountLabel": {
     "description": "Label of the signed amount field — the only amount control in the modal."
   },
-  "allocationAmountHelp": "Un montant négatif retire de l'objectif.",
+  "allocationAmountHelp": "Un montant négatif retire de l’objectif.",
   "@allocationAmountHelp": {
     "description": "Helper stating that a negative amount is a withdrawal. There are no deposit/withdraw modes."
   },
@@ -4240,11 +4240,11 @@
   "@allocationSubmit": {
     "description": "Confirm action appending the allocation."
   },
-  "goalErrorNotFound": "Cet objectif n'existe plus.",
+  "goalErrorNotFound": "Cet objectif n’existe plus.",
   "@goalErrorNotFound": {
     "description": "Message for the backend's GOAL_NOT_FOUND code."
   },
-  "goalErrorAllocationNotFound": "Cette allocation n'existe plus.",
+  "goalErrorAllocationNotFound": "Cette allocation n’existe plus.",
   "@goalErrorAllocationNotFound": {
     "description": "Message for the backend's GOAL_ALLOCATION_NOT_FOUND code."
   },
@@ -4331,7 +4331,7 @@
   "@settingsResetDone": {
     "description": "Toast shown once the reset has completed."
   },
-  "settingsResetErrorUnknown": "La réinitialisation a échoué. Vos données n'ont pas été modifiées.",
+  "settingsResetErrorUnknown": "La réinitialisation a échoué. Vos données n’ont pas été modifiées.",
   "@settingsResetErrorUnknown": {
     "description": "Fallback message for any other reset failure."
   },
@@ -4726,7 +4726,7 @@
   "@mortgageFormPlatePending": {
     "description": "Computed instalment plate before the inputs are complete."
   },
-  "mortgageFormPlateInterestOnly": "La mensualité d'un prêt in fine s'affiche une fois le crédit enregistré.",
+  "mortgageFormPlateInterestOnly": "La mensualité d’un prêt in fine s’affiche une fois le crédit enregistré.",
   "@mortgageFormPlateInterestOnly": {
     "description": "Computed instalment plate for an interest-only loan, which the simulator does not compute."
   },
@@ -4746,7 +4746,7 @@
   "@mortgageDeleteTitle": {
     "description": "Delete confirmation title."
   },
-  "mortgageDeleteBody": "Il quittera le passif de la Synthèse et, s'il est rattaché à un bien, la base de l'IFI.",
+  "mortgageDeleteBody": "Il quittera le passif de la Synthèse et, s’il est rattaché à un bien, la base de l’IFI.",
   "@mortgageDeleteBody": {
     "description": "Delete confirmation: both consequences."
   },
@@ -4754,7 +4754,7 @@
   "@mortgageDeleteConfirm": {
     "description": "Delete confirmation: confirm."
   },
-  "mortgageErrorNonAmortizing": "Ce crédit ne se rembourse pas : l'échéance ne couvre pas les intérêts du premier mois. Modifiez le taux, le capital ou la durée.",
+  "mortgageErrorNonAmortizing": "Ce crédit ne se rembourse pas : l’échéance ne couvre pas les intérêts du premier mois. Modifiez le taux, le capital ou la durée.",
   "@mortgageErrorNonAmortizing": {
     "description": "Inline error for a loan whose instalment does not cover its first interest (422)."
   },
@@ -4762,11 +4762,11 @@
   "@mortgageErrorFeesExceed": {
     "description": "Inline error when upfront fees reach the principal."
   },
-  "mortgageErrorPropertyInvalid": "Ce bien n'existe plus.",
+  "mortgageErrorPropertyInvalid": "Ce bien n’existe plus.",
   "@mortgageErrorPropertyInvalid": {
     "description": "Inline error when the linked property no longer exists."
   },
-  "mortgageErrorNotFound": "Ce crédit n'existe plus.",
+  "mortgageErrorNotFound": "Ce crédit n’existe plus.",
   "@mortgageErrorNotFound": {
     "description": "Error when the loan no longer exists."
   },
@@ -4862,7 +4862,7 @@
   "@mortgageScheduleYearNext": {
     "description": "Year switcher: next year button."
   },
-  "mortgageScheduleLoadFailed": "Impossible de charger le tableau d'amortissement.",
+  "mortgageScheduleLoadFailed": "Impossible de charger le tableau d’amortissement.",
   "@mortgageScheduleLoadFailed": {
     "description": "Error state when a schedule year cannot be loaded."
   },
@@ -5263,11 +5263,11 @@
   "@simulatorChartEmpty": {
     "description": "Projection chart invitation before anything can be computed."
   },
-  "simulatorComputeFailed": "Le calcul n'a pas abouti. Réessayez dans un instant.",
+  "simulatorComputeFailed": "Le calcul n’a pas abouti. Réessayez dans un instant.",
   "@simulatorComputeFailed": {
     "description": "Banner when a live compute fails for a reason no field explains."
   },
-  "simulatorErrorNonAmortizing": "À ce taux, l'échéance ne rembourse pas le capital : baissez le taux ou allongez la durée.",
+  "simulatorErrorNonAmortizing": "À ce taux, l’échéance ne rembourse pas le capital : baissez le taux ou allongez la durée.",
   "@simulatorErrorNonAmortizing": {
     "description": "Inline error under the rate when the engine refuses a loan that never amortises."
   },
@@ -5287,7 +5287,7 @@
   "@simulatorIncomeTitle": {
     "description": "Title of the declare-income modal opened from the simulator."
   },
-  "simulatorIncomeBody": "Le revenu mensuel déclaré sert de base au taux d'endettement et à la capacité d'emprunt.",
+  "simulatorIncomeBody": "Le revenu mensuel déclaré sert de base au taux d’endettement et à la capacité d’emprunt.",
   "@simulatorIncomeBody": {
     "description": "Body of the declare-income modal."
   },
@@ -5303,7 +5303,7 @@
   "@simulatorIncomeSubmit": {
     "description": "Declare-income modal submit button."
   },
-  "simulatorIncomeFailed": "Impossible d'enregistrer ce revenu. Réessayez.",
+  "simulatorIncomeFailed": "Impossible d’enregistrer ce revenu. Réessayez.",
   "@simulatorIncomeFailed": {
     "description": "Declare-income modal banner when the save fails."
   },
@@ -5349,7 +5349,7 @@
   "@simulatorErrorLimitReached": {
     "description": "Save refused because the per-user scenario cap is reached."
   },
-  "simulatorErrorNotFound": "Ce scénario n'existe plus.",
+  "simulatorErrorNotFound": "Ce scénario n’existe plus.",
   "@simulatorErrorNotFound": {
     "description": "A scenario was deleted elsewhere."
   },
@@ -5443,7 +5443,7 @@
   "@simulatorScenariosEmpty": {
     "description": "Note in the scenarios block when nothing is saved."
   },
-  "simulatorCompareTitle": "{count, plural, =1{Comparaison d'un scénario} other{Comparaison de {count} scénarios}}",
+  "simulatorCompareTitle": "{count, plural, =1{Comparaison d’un scénario} other{Comparaison de {count} scénarios}}",
   "@simulatorCompareTitle": {
     "description": "Title of the comparison card.",
     "placeholders": {
@@ -5548,7 +5548,7 @@
   "@propertyFormValue": {
     "description": "Property form field: the declared market value."
   },
-  "propertyFormValuedOn": "Date d'estimation",
+  "propertyFormValuedOn": "Date d’estimation",
   "@propertyFormValuedOn": {
     "description": "Property form field: the date the value was estimated."
   },
@@ -5569,11 +5569,11 @@
   "@propertyFormOwnershipInvalid": {
     "description": "Validation message when the ownership share is not between 0.01 and 100 percent."
   },
-  "propertyFormAcquisitionPrice": "Prix d'acquisition",
+  "propertyFormAcquisitionPrice": "Prix d’acquisition",
   "@propertyFormAcquisitionPrice": {
     "description": "Property form field: the optional purchase price."
   },
-  "propertyFormAcquiredOn": "Date d'acquisition",
+  "propertyFormAcquiredOn": "Date d’acquisition",
   "@propertyFormAcquiredOn": {
     "description": "Property form field: the optional purchase date."
   },
@@ -5581,7 +5581,7 @@
   "@propertyFormAmountInvalid": {
     "description": "Validation message when a required amount is missing or not positive."
   },
-  "propertyFormAmountOptionalInvalid": "Montant illisible. Laissez vide s'il est inconnu.",
+  "propertyFormAmountOptionalInvalid": "Montant illisible. Laissez vide s’il est inconnu.",
   "@propertyFormAmountOptionalInvalid": {
     "description": "Validation message when an optional amount cannot be read."
   },
@@ -5620,11 +5620,11 @@
       }
     }
   },
-  "propertyErrorValuationInFuture": "Une date d'estimation ne peut pas être dans le futur.",
+  "propertyErrorValuationInFuture": "Une date d’estimation ne peut pas être dans le futur.",
   "@propertyErrorValuationInFuture": {
     "description": "Error when the valuation date is after today (PROPERTY_VALUATION_IN_FUTURE)."
   },
-  "propertyErrorNotFound": "Ce bien n'existe plus.",
+  "propertyErrorNotFound": "Ce bien n’existe plus.",
   "@propertyErrorNotFound": {
     "description": "Error when the property was not found (PROPERTY_NOT_FOUND)."
   },
@@ -5632,7 +5632,7 @@
   "@propertyErrorValidation": {
     "description": "Error when the server rejected the payload (VALIDATION_ERROR)."
   },
-  "propertyErrorGeneric": "Impossible d'enregistrer le bien. Réessayez.",
+  "propertyErrorGeneric": "Impossible d’enregistrer le bien. Réessayez.",
   "@propertyErrorGeneric": {
     "description": "Fallback error for a failed property write."
   },
@@ -5775,7 +5775,7 @@
       }
     }
   },
-  "networthCompositionTitle": "Composition de l'actif",
+  "networthCompositionTitle": "Composition de l’actif",
   "@networthCompositionTitle": {
     "description": "Title of the asset composition card."
   },
@@ -5856,11 +5856,11 @@
       }
     }
   },
-  "networthSeriesEmpty": "Aucun historique : la série commence au premier mois clos d'un compte importé, ou au premier montant que vous déclarez.",
+  "networthSeriesEmpty": "Aucun historique : la série commence au premier mois clos d’un compte importé, ou au premier montant que vous déclarez.",
   "@networthSeriesEmpty": {
     "description": "Shown in place of the chart when the series has no closed month yet."
   },
-  "networthSeriesCaveat": "Les biens sont maintenus à leur valeur déclarée (estimation la plus ancienne : {date}) et ne comptent qu'à partir de leur date d'acquisition, les crédits qu'à partir de leur déblocage. Les mois sans donnée sont absents.",
+  "networthSeriesCaveat": "Les biens sont maintenus à leur valeur déclarée (estimation la plus ancienne : {date}) et ne comptent qu’à partir de leur date d’acquisition, les crédits qu’à partir de leur déblocage. Les mois sans donnée sont absents.",
   "@networthSeriesCaveat": {
     "description": "Info banner under the series when property values are held flat, naming the oldest current valuation date.",
     "placeholders": {
@@ -5897,7 +5897,7 @@
   "@networthDeclaredTitle": {
     "description": "Declared-history modal title."
   },
-  "networthDeclaredSubtitle": "Le total de tous vos comptes à la fin d'un mois, pour la période avant vos imports. Un mois couvert par vos imports garde le chiffre importé.",
+  "networthDeclaredSubtitle": "Le total de tous vos comptes à la fin d’un mois, pour la période avant vos imports. Un mois couvert par vos imports garde le chiffre importé.",
   "@networthDeclaredSubtitle": {
     "description": "Declared-history modal subtitle: what a declared total is, and that imports win."
   },
@@ -5949,7 +5949,7 @@
   "@networthDeclaredDelete": {
     "description": "Tooltip: delete this month's total."
   },
-  "networthDeclaredLoadFailed": "Impossible de charger l'historique déclaré.",
+  "networthDeclaredLoadFailed": "Impossible de charger l’historique déclaré.",
   "@networthDeclaredLoadFailed": {
     "description": "Error state of the declared-history list."
   },
@@ -5957,11 +5957,11 @@
   "@networthDeclaredRetry": {
     "description": "Retry action on the declared-history list."
   },
-  "networthDeclaredErrorNotFound": "Ce montant n'existe plus.",
+  "networthDeclaredErrorNotFound": "Ce montant n’existe plus.",
   "@networthDeclaredErrorNotFound": {
     "description": "DECLARED_BALANCE_NOT_FOUND."
   },
-  "networthDeclaredErrorGeneric": "L'enregistrement a échoué. Réessayez.",
+  "networthDeclaredErrorGeneric": "L’enregistrement a échoué. Réessayez.",
   "@networthDeclaredErrorGeneric": {
     "description": "Any other failure writing a declared total."
   },
@@ -6021,7 +6021,7 @@
   "@settingsRecoveryTitle": {
     "description": "Title of the recovery code card in Settings › Profile."
   },
-  "settingsRecoverySubtitle": "Permet de réinitialiser votre mot de passe si vous l'oubliez. En générer un nouveau invalide l'ancien.",
+  "settingsRecoverySubtitle": "Permet de réinitialiser votre mot de passe si vous l’oubliez. En générer un nouveau invalide l’ancien.",
   "@settingsRecoverySubtitle": {
     "description": "Subtitle of the recovery code card in Settings › Profile."
   },
@@ -6033,7 +6033,7 @@
   "@settingsRecoveryModalTitle": {
     "description": "Title of the modal generating a new recovery code."
   },
-  "settingsRecoveryModalLead": "Confirmez votre mot de passe pour générer un nouveau code. L'ancien cessera de fonctionner.",
+  "settingsRecoveryModalLead": "Confirmez votre mot de passe pour générer un nouveau code. L’ancien cessera de fonctionner.",
   "@settingsRecoveryModalLead": {
     "description": "Lead of the regeneration modal, before the password is entered."
   },
@@ -6061,7 +6061,7 @@
   "@settingsPasswordTitle": {
     "description": "Name of the password row in Settings › Profil › Sécurité."
   },
-  "settingsPasswordSubtitle": "Au moins {minimum} caractères. Il protège l'accès à vos données sur cet ordinateur.",
+  "settingsPasswordSubtitle": "Au moins {minimum} caractères. Il protège l’accès à vos données sur cet ordinateur.",
   "@settingsPasswordSubtitle": {
     "description": "Description of the password row in Settings › Profil › Sécurité. No date: nothing records when the password last changed.",
     "placeholders": {
@@ -6102,11 +6102,11 @@
   "@settingsPasswordChanged": {
     "description": "Toast once the password has been changed."
   },
-  "authIdentifierLabel": "E-mail ou nom d'utilisateur",
+  "authIdentifierLabel": "E-mail ou nom d’utilisateur",
   "@authIdentifierLabel": {
     "description": "Label for the field on the login and password-reset forms that accepts either the email or the username."
   },
-  "authIdentifierRequired": "L'e-mail ou le nom d'utilisateur est requis.",
+  "authIdentifierRequired": "L’e-mail ou le nom d’utilisateur est requis.",
   "@authIdentifierRequired": {
     "description": "Validation error when the login/reset identifier field is empty."
   },
@@ -6118,11 +6118,11 @@
   "@authDisplayNameInvalid": {
     "description": "Error when the typed username breaks the format."
   },
-  "authDisplayNameTaken": "Ce nom d'utilisateur est déjà pris.",
+  "authDisplayNameTaken": "Ce nom d’utilisateur est déjà pris.",
   "@authDisplayNameTaken": {
     "description": "Error when the username (display name) is already used by another account."
   },
-  "settingsProfileNameTitle": "Nom d'utilisateur",
+  "settingsProfileNameTitle": "Nom d’utilisateur",
   "@settingsProfileNameTitle": {
     "description": "Title of the Settings › Profile card showing the username."
   },
@@ -6151,7 +6151,7 @@
       }
     }
   },
-  "settingsAvatarError": "L'avatar n'a pas pu être enregistré. Réessayez.",
+  "settingsAvatarError": "L’avatar n’a pas pu être enregistré. Réessayez.",
   "@settingsAvatarError": {
     "description": "Banner in the avatar card when the choice could not be saved."
   },
@@ -6172,11 +6172,11 @@
       }
     }
   },
-  "settingsAvatarPictureInvalid": "Ce fichier n'est pas une image PNG, JPEG ou WebP.",
+  "settingsAvatarPictureInvalid": "Ce fichier n’est pas une image PNG, JPEG ou WebP.",
   "@settingsAvatarPictureInvalid": {
     "description": "Error when the picked file is not a supported picture."
   },
-  "settingsAvatarPictureError": "La photo n'a pas pu être enregistrée. Réessayez.",
+  "settingsAvatarPictureError": "La photo n’a pas pu être enregistrée. Réessayez.",
   "@settingsAvatarPictureError": {
     "description": "Error when the picture could not be saved for another reason."
   },
@@ -6196,11 +6196,11 @@
   "@settingsAvatarCropSave": {
     "description": "Confirm button of the crop modal, uploading the cropped picture."
   },
-  "settingsProfileNameModalTitle": "Changer de nom d'utilisateur",
+  "settingsProfileNameModalTitle": "Changer de nom d’utilisateur",
   "@settingsProfileNameModalTitle": {
     "description": "Title of the modal that changes the username."
   },
-  "settingsProfileNameModalLead": "Le nouveau nom remplace l'ancien pour vous connecter.",
+  "settingsProfileNameModalLead": "Le nouveau nom remplace l’ancien pour vous connecter.",
   "@settingsProfileNameModalLead": {
     "description": "Lead sentence in the change-username modal."
   },
@@ -6232,15 +6232,15 @@
   "@startupOpenLogs": {
     "description": "Button on the startup error screen that opens the folder holding the app's log files."
   },
-  "startupDidNotStartTitle": "Bastide n'a pas pu démarrer",
+  "startupDidNotStartTitle": "Bastide n’a pas pu démarrer",
   "@startupDidNotStartTitle": {
     "description": "Title when the local engine did not start."
   },
-  "startupDidNotStartMessage": "Le moteur local de l'application ne s'est pas lancé. Réessayez ; si cela se reproduit, les journaux indiquent pourquoi.",
+  "startupDidNotStartMessage": "Le moteur local de l’application ne s’est pas lancé. Réessayez ; si cela se reproduit, les journaux indiquent pourquoi.",
   "@startupDidNotStartMessage": {
     "description": "Message when the local engine did not start or did not answer in time."
   },
-  "startupNotFoundMessage": "Des fichiers de l'application manquent. Réinstallez Bastide : vos données sont conservées à part et ne seront pas touchées.",
+  "startupNotFoundMessage": "Des fichiers de l’application manquent. Réinstallez Bastide : vos données sont conservées à part et ne seront pas touchées.",
   "@startupNotFoundMessage": {
     "description": "Message when the local engine is missing from the installed app."
   },
@@ -6248,19 +6248,19 @@
   "@startupUnreachableMessage": {
     "description": "Message when the app was told to use an engine started separately (development) and none answers."
   },
-  "startupCrashedTitle": "Bastide s'est arrêté de façon inattendue",
+  "startupCrashedTitle": "Bastide s’est arrêté de façon inattendue",
   "@startupCrashedTitle": {
     "description": "Title when the local engine stopped while the app was running."
   },
-  "startupCrashedMessage": "Le moteur local s'est interrompu. Vos données sont enregistrées au fil de l'eau ; réessayez pour le relancer.",
+  "startupCrashedMessage": "Le moteur local s’est interrompu. Vos données sont enregistrées au fil de l’eau ; réessayez pour le relancer.",
   "@startupCrashedMessage": {
     "description": "Message when the local engine stopped while the app was running."
   },
-  "startupSchemaTooNewTitle": "Ces données viennent d'une version plus récente",
+  "startupSchemaTooNewTitle": "Ces données viennent d’une version plus récente",
   "@startupSchemaTooNewTitle": {
     "description": "Title when the database was written by a newer version of the app (the user downgraded)."
   },
-  "startupSchemaTooNewMessage": "Vos données ont été enregistrées par une version plus récente de Bastide. Réinstallez cette version pour les ouvrir ; rien n'a été modifié.",
+  "startupSchemaTooNewMessage": "Vos données ont été enregistrées par une version plus récente de Bastide. Réinstallez cette version pour les ouvrir ; rien n’a été modifié.",
   "@startupSchemaTooNewMessage": {
     "description": "Message when the database was written by a newer version of the app."
   },
@@ -6268,7 +6268,7 @@
   "@startupVersionMismatchTitle": {
     "description": "Title when the app and its local engine come from different versions."
   },
-  "startupVersionMismatchMessage": "L'application ({app}) et son moteur local ({backend}) ne viennent pas de la même version. Réinstallez Bastide pour les remettre d'accord ; vos données ne sont pas touchées.",
+  "startupVersionMismatchMessage": "L’application ({app}) et son moteur local ({backend}) ne viennent pas de la même version. Réinstallez Bastide pour les remettre d’accord ; vos données ne sont pas touchées.",
   "@startupVersionMismatchMessage": {
     "description": "Message when the app and its local engine come from different versions (release builds).",
     "placeholders": {
@@ -6282,7 +6282,7 @@
       }
     }
   },
-  "startupVersionMismatchDebugMessage": "Le moteur local ({backend}) ne correspond pas à l'application ({app}) : il est sans doute resté d'une session précédente. Relancez-le, ou continuez quand même.",
+  "startupVersionMismatchDebugMessage": "Le moteur local ({backend}) ne correspond pas à l’application ({app}) : il est sans doute resté d’une session précédente. Relancez-le, ou continuez quand même.",
   "@startupVersionMismatchDebugMessage": {
     "description": "Developer warning when a debug build reaches a local engine from another version.",
     "placeholders": {
@@ -6669,11 +6669,11 @@
   "@markRecurringOpenSeriesAction": {
     "description": "Tooltip of the same row action on an outflow that already belongs to a recurring series: it opens that series in Abonnements."
   },
-  "recurringSeriesGoneTitle": "Ce paiement récurrent n'existe plus",
+  "recurringSeriesGoneTitle": "Ce paiement récurrent n’existe plus",
   "@recurringSeriesGoneTitle": {
     "description": "Toast title when a row's series was deleted since the list loaded, instead of opening it."
   },
-  "recurringSeriesGoneMessage": "Il a été supprimé entre-temps : l'opération n'est plus marquée comme récurrente.",
+  "recurringSeriesGoneMessage": "Il a été supprimé entre-temps : l’opération n’est plus marquée comme récurrente.",
   "@recurringSeriesGoneMessage": {
     "description": "Toast body under recurringSeriesGoneTitle; the row reloads with the « Marquer comme récurrent » action."
   },
@@ -6681,7 +6681,7 @@
   "@markRecurringTitle": {
     "description": "Title of the dialog previewing the series a transaction would start."
   },
-  "markRecurringIntro": "Voici les opérations que Bastide regrouperait. Décochez celles qui n'en font pas partie.",
+  "markRecurringIntro": "Voici les opérations que Bastide regrouperait. Décochez celles qui n’en font pas partie.",
   "@markRecurringIntro": {
     "description": "Intro line of the mark-as-recurring dialog."
   },
@@ -6730,11 +6730,11 @@
   "@markRecurringReasonAmountChanged": {
     "description": "Reason: the newest charge is a price change."
   },
-  "markRecurringReasonAmountOutsideTolerance": "Un montant s'écarte des autres",
+  "markRecurringReasonAmountOutsideTolerance": "Un montant s’écarte des autres",
   "@markRecurringReasonAmountOutsideTolerance": {
     "description": "Reason: one amount is outside tolerance."
   },
-  "markRecurringReasonGapOutsideTolerance": "Un intervalle s'écarte du rythme",
+  "markRecurringReasonGapOutsideTolerance": "Un intervalle s’écarte du rythme",
   "@markRecurringReasonGapOutsideTolerance": {
     "description": "Reason: one gap between charges is outside tolerance."
   },
@@ -6746,7 +6746,7 @@
   "@markRecurringReasonNoRhythm": {
     "description": "Reason: no cadence could be recognised."
   },
-  "markRecurringLowWarning": "Aucun rythme régulier n'a été trouvé. Vous pouvez tout de même enregistrer la série : elle sera irrégulière.",
+  "markRecurringLowWarning": "Aucun rythme régulier n’a été trouvé. Vous pouvez tout de même enregistrer la série : elle sera irrégulière.",
   "@markRecurringLowWarning": {
     "description": "Warning banner shown when the preview's confidence is low."
   },
@@ -6791,7 +6791,7 @@
   "@markRecurringCancel": {
     "description": "Closes the dialog without saving."
   },
-  "markRecurringLoadError": "Impossible de préparer l'aperçu.",
+  "markRecurringLoadError": "Impossible de préparer l’aperçu.",
   "@markRecurringLoadError": {
     "description": "Shown when the preview request failed."
   },
@@ -6857,7 +6857,7 @@
   "@seriesPickerLoadError": {
     "description": "Series picker: the list request failed."
   },
-  "seriesPickerBack": "Retour à l'aperçu",
+  "seriesPickerBack": "Retour à l’aperçu",
   "@seriesPickerBack": {
     "description": "Leaves the series picker for the preview."
   },
@@ -6889,7 +6889,7 @@
       }
     }
   },
-  "seriesPickerAddFailed": "L'opération n'a pas pu être ajoutée",
+  "seriesPickerAddFailed": "L’opération n’a pas pu être ajoutée",
   "@seriesPickerAddFailed": {
     "description": "Toast headline when adding the transaction to the series picked failed; the reason follows beneath."
   },
@@ -6906,7 +6906,7 @@
       }
     }
   },
-  "chargePickerIntro": "Les opérations qui ne font partie d'aucune série, les plus proches en premier.",
+  "chargePickerIntro": "Les opérations qui ne font partie d’aucune série, les plus proches en premier.",
   "@chargePickerIntro": {
     "description": "Intro of the dialog adding transactions to a series."
   },
@@ -6914,7 +6914,7 @@
   "@chargePickerSearchHint": {
     "description": "Placeholder of the transaction picker's search field."
   },
-  "chargePickerEmpty": "Aucune opération à ajouter : toutes vos dépenses font déjà partie d'une série.",
+  "chargePickerEmpty": "Aucune opération à ajouter : toutes vos dépenses font déjà partie d’une série.",
   "@chargePickerEmpty": {
     "description": "Transaction picker: no candidate at all."
   },
@@ -6960,7 +6960,7 @@
   "@rulePackLogoProgressNotice": {
     "description": "Under the logo progress bar: the rules are already in, only the logos are left."
   },
-  "rulePackImportRunFailed": "L'import n'a pas pu aller jusqu'au bout. Vérifiez vos règles avant de réessayer.",
+  "rulePackImportRunFailed": "L’import n’a pas pu aller jusqu’au bout. Vérifiez vos règles avant de réessayer.",
   "@rulePackImportRunFailed": {
     "description": "Shown in the pack import sheet when the background import failed."
   },
@@ -6968,7 +6968,7 @@
   "@ruleErrorPackNotFound": {
     "description": "Error when the bundled pack to import no longer exists (RULE_PACK_NOT_FOUND)."
   },
-  "ruleErrorPackImportInProgress": "Un autre import de règles est déjà en cours. Attendez qu'il se termine.",
+  "ruleErrorPackImportInProgress": "Un autre import de règles est déjà en cours. Attendez qu’il se termine.",
   "@ruleErrorPackImportInProgress": {
     "description": "Error when another pack import of the user is still running (RULE_PACK_IMPORT_IN_PROGRESS)."
   },

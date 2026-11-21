@@ -278,7 +278,7 @@ void main() {
       (
         const Locale('en'),
         'From an address…',
-        "This address doesn't lead to a picture.",
+        "This address doesn’t lead to a picture.",
       ),
     ]) {
       testWidgets(

@@ -30,7 +30,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get navSettings => 'Paramètres';
 
   @override
-  String get navSectionOverview => 'Vue d\'ensemble';
+  String get navSectionOverview => 'Vue d’ensemble';
 
   @override
   String get navSectionManage => 'Gestion';
@@ -251,14 +251,14 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get settingsThemeSaveFailed =>
-      'Le thème n\'a pas pu être enregistré. Rien n\'a été modifié. Réessayez.';
+      'Le thème n’a pas pu être enregistré. Rien n’a été modifié. Réessayez.';
 
   @override
   String get settingsLanguageTitle => 'Langue';
 
   @override
   String get settingsLanguageNote =>
-      'S\'applique immédiatement à toute l\'interface.';
+      'S’applique immédiatement à toute l’interface.';
 
   @override
   String get settingsSidebarTitle => 'Barre latérale';
@@ -277,7 +277,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get settingsCurrencyNote =>
-      'Choisie à l\'inscription et appliquée à tous vos comptes. Elle ne peut pas être modifiée dans cette version.';
+      'Choisie à l’inscription et appliquée à tous vos comptes. Elle ne peut pas être modifiée dans cette version.';
 
   @override
   String get settingsFormatsTitle => 'Formats';
@@ -308,7 +308,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get settingsUpdatesNote =>
-      'Une fois par jour au plus, Bastide demande à GitHub le numéro de la dernière version publiée. Rien d\'autre n\'est envoyé, et rien n\'est installé sans vous.';
+      'Une fois par jour au plus, Bastide demande à GitHub le numéro de la dernière version publiée. Rien d’autre n’est envoyé, et rien n’est installé sans vous.';
 
   @override
   String get settingsUpdatesChecking => 'Vérification…';
@@ -330,7 +330,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get settingsAboutPrivacy =>
-      'Toutes vos données restent sur cet ordinateur. Bastide ne se connecte à aucune banque et n\'envoie rien sur Internet, hormis la vérification des mises à jour si vous l\'activez.';
+      'Toutes vos données restent sur cet ordinateur. Bastide ne se connecte à aucune banque et n’envoie rien sur Internet, hormis la vérification des mises à jour si vous l’activez.';
 
   @override
   String get comingSoonBody =>
@@ -382,7 +382,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get authPasswordMismatch => 'Les mots de passe ne correspondent pas.';
 
   @override
-  String get authDisplayNameLabel => 'Nom d\'utilisateur';
+  String get authDisplayNameLabel => 'Nom d’utilisateur';
 
   @override
   String get authPreferencesNote =>
@@ -642,7 +642,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String cardSettlementNoAccount(String card) {
-    return '$card : choisissez le compte sur lequel la carte est prélevée, pour que ses achats ne comptent qu\'une fois.';
+    return '$card : choisissez le compte sur lequel la carte est prélevée, pour que ses achats ne comptent qu’une fois.';
   }
 
   @override
@@ -700,11 +700,11 @@ class AppLocalizationsFr extends AppLocalizations {
       'Indiquez le texte qui désigne le prélèvement.';
 
   @override
-  String get settlementRuleFromLabel => 'S\'applique à partir du';
+  String get settlementRuleFromLabel => 'S’applique à partir du';
 
   @override
   String get settlementRuleFromHelper =>
-      'Les prélèvements plus anciens restent des dépenses : les achats qu\'ils ont payés ne sont pas dans l\'application. Proposé à partir de l\'historique importé de la carte.';
+      'Les prélèvements plus anciens restent des dépenses : les achats qu’ils ont payés ne sont pas dans l’application. Proposé à partir de l’historique importé de la carte.';
 
   @override
   String get settlementRuleFromInvalid => 'Date invalide.';
@@ -741,7 +741,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get settlementRuleSaveFailed =>
-      'Impossible d\'enregistrer la règle. Réessayez.';
+      'Impossible d’enregistrer la règle. Réessayez.';
 
   @override
   String get accountFormCancel => 'Annuler';
@@ -751,7 +751,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get accountArchiveConfirmBody =>
-      'Vous pourrez toujours consulter son historique, mais il n\'apparaîtra plus dans votre liste de comptes.';
+      'Vous pourrez toujours consulter son historique, mais il n’apparaîtra plus dans votre liste de comptes.';
 
   @override
   String get accountFormCreateTitle => 'Nouveau compte';
@@ -828,11 +828,11 @@ class AppLocalizationsFr extends AppLocalizations {
   String get accountInstitutionLabel => 'Établissement';
 
   @override
-  String get accountInstitutionRequired => 'L\'établissement est requis.';
+  String get accountInstitutionRequired => 'L’établissement est requis.';
 
   @override
   String get accountInstitutionFromStatementNote =>
-      'Repris de l\'établissement déclaré par votre relevé.';
+      'Repris de l’établissement déclaré par votre relevé.';
 
   @override
   String get accountOpeningBalanceLabel => 'Solde initial';
@@ -850,7 +850,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get accountBalanceStatementNote =>
-      'Ajusté automatiquement d\'après le solde déclaré par votre relevé lors du premier import.';
+      'Ajusté automatiquement d’après le solde déclaré par votre relevé lors du premier import.';
 
   @override
   String get accountBalanceFromStatementNote =>
@@ -858,7 +858,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get accountOpeningBalanceEditNote =>
-      'Corriger cette valeur décale le solde du compte et son historique enregistré du même montant. Aucune transaction n\'est modifiée.';
+      'Corriger cette valeur décale le solde du compte et son historique enregistré du même montant. Aucune transaction n’est modifiée.';
 
   @override
   String get accountOpeningBalanceRequired => 'Le solde est requis.';
@@ -1003,7 +1003,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get importErrorStatementRequired =>
-      'Ce fichier contient plusieurs comptes et aucun n\'a été désigné.';
+      'Ce fichier contient plusieurs comptes et aucun n’a été désigné.';
 
   @override
   String get importErrorStatementNotFound =>
@@ -1328,7 +1328,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get transactionErrorCategoryInvalid =>
-      'Cette catégorie n\'est plus disponible.';
+      'Cette catégorie n’est plus disponible.';
 
   @override
   String get transactionErrorValidation =>
@@ -1531,7 +1531,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get categorySystemChildren => 'Enfants';
 
   @override
-  String get categorySystemChildrenChildcare => 'Garde d\'enfants';
+  String get categorySystemChildrenChildcare => 'Garde d’enfants';
 
   @override
   String get categorySystemChildrenSchool => 'Scolarité';
@@ -1633,7 +1633,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get dashboardRetry => 'Réessayer';
 
   @override
-  String get dashboardErrorInvalidMonth => 'Le mois demandé n\'est pas valide.';
+  String get dashboardErrorInvalidMonth => 'Le mois demandé n’est pas valide.';
 
   @override
   String get dashboardErrorGeneric =>
@@ -1925,13 +1925,13 @@ class AppLocalizationsFr extends AppLocalizations {
       'Vos catégories choisies à la main n’ont pas été modifiées.';
 
   @override
-  String get rulesApplyFailed => 'L\'exécution des règles a échoué';
+  String get rulesApplyFailed => 'L’exécution des règles a échoué';
 
   @override
-  String get rulesReorderFailed => 'L\'ordre n\'a pas pu être enregistré';
+  String get rulesReorderFailed => 'L’ordre n’a pas pu être enregistré';
 
   @override
-  String get rulesToggleFailed => 'La règle n\'a pas pu être modifiée';
+  String get rulesToggleFailed => 'La règle n’a pas pu être modifiée';
 
   @override
   String get rulesFilterClear => 'Afficher toutes les règles';
@@ -2016,7 +2016,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get ruleFormPriorityLabel => 'Priorité';
 
   @override
-  String get ruleFormPriorityInvalid => 'Indiquez une priorité d\'au moins 1.';
+  String get ruleFormPriorityInvalid => 'Indiquez une priorité d’au moins 1.';
 
   @override
   String get ruleFormPatternLabel => 'Motif';
@@ -2087,10 +2087,10 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get ruleLogoInvalid =>
-      'Ce fichier n\'est pas une image PNG, JPEG ou WebP.';
+      'Ce fichier n’est pas une image PNG, JPEG ou WebP.';
 
   @override
-  String get ruleLogoError => 'Le logo n\'a pas pu être enregistré. Réessayez.';
+  String get ruleLogoError => 'Le logo n’a pas pu être enregistré. Réessayez.';
 
   @override
   String get ruleLogoCropTitle => 'Recadrer le logo';
@@ -2118,10 +2118,10 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get ruleLogoUrlLead =>
-      'Collez l\'adresse d\'une image. Bastide la télécharge depuis cet ordinateur, puis vous la recadrez.';
+      'Collez l’adresse d’une image. Bastide la télécharge depuis cet ordinateur, puis vous la recadrez.';
 
   @override
-  String get ruleLogoUrlLabel => 'Adresse de l\'image';
+  String get ruleLogoUrlLabel => 'Adresse de l’image';
 
   @override
   String get ruleLogoUrlHint => 'https://…';
@@ -2138,7 +2138,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get ruleLogoUrlUnreachable =>
-      'L\'image n\'a pas pu être téléchargée. Vérifiez l\'adresse et votre connexion.';
+      'L’image n’a pas pu être téléchargée. Vérifiez l’adresse et votre connexion.';
 
   @override
   String ruleLogoUrlTooLarge(int megabytes) {
@@ -2194,13 +2194,13 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get ruleErrorPatternInvalid =>
-      'Ce motif n\'est pas une expression régulière valide.';
+      'Ce motif n’est pas une expression régulière valide.';
 
   @override
-  String get ruleErrorNotFound => 'Cette règle n\'existe plus.';
+  String get ruleErrorNotFound => 'Cette règle n’existe plus.';
 
   @override
-  String get ruleErrorCategoryNotFound => 'La catégorie visée n\'existe plus.';
+  String get ruleErrorCategoryNotFound => 'La catégorie visée n’existe plus.';
 
   @override
   String get ruleErrorValidation =>
@@ -2227,11 +2227,11 @@ class AppLocalizationsFr extends AppLocalizations {
   String get rulePackClose => 'Fermer';
 
   @override
-  String get rulePackRefusedTitle => 'Ce fichier n\'a pas été accepté';
+  String get rulePackRefusedTitle => 'Ce fichier n’a pas été accepté';
 
   @override
   String get rulePackRefusedMalformed =>
-      'Ce fichier n\'est pas un pack de règles Bastide. Attendu : un fichier JSON avec un nom, une version de format et une liste de règles.';
+      'Ce fichier n’est pas un pack de règles Bastide. Attendu : un fichier JSON avec un nom, une version de format et une liste de règles.';
 
   @override
   String rulePackRefusedVersion(int version) {
@@ -2240,7 +2240,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get rulePackRefusedRegex =>
-      'Ce pack contient une règle « regex ». Les expressions régulières ne sont pas acceptées dans un pack partagé : une expression venue d\'un fichier tiers peut bloquer votre machine. Utilisez « contient », « égal à » ou « plage ».';
+      'Ce pack contient une règle « regex ». Les expressions régulières ne sont pas acceptées dans un pack partagé : une expression venue d’un fichier tiers peut bloquer votre machine. Utilisez « contient », « égal à » ou « plage ».';
 
   @override
   String rulePackWouldMatch(int count) {
@@ -2279,7 +2279,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get rulePackApplyNowLabel =>
-      'Appliquer les règles à mes transactions existantes après l\'import';
+      'Appliquer les règles à mes transactions existantes après l’import';
 
   @override
   String get rulePackImportConfirm => 'Importer';
@@ -2303,20 +2303,20 @@ class AppLocalizationsFr extends AppLocalizations {
       locale: localeName,
       other: '$count transactions recatégorisées.',
       one: '$count transaction recatégorisée.',
-      zero: 'Aucune transaction n\'a changé de catégorie.',
+      zero: 'Aucune transaction n’a changé de catégorie.',
     );
     return '$_temp0';
   }
 
   @override
-  String get rulePackImportFailed => 'L\'import a échoué';
+  String get rulePackImportFailed => 'L’import a échoué';
 
   @override
   String get rulePackExportTitle => 'Exporter mes règles';
 
   @override
   String get rulePackExportPrivacyNotice =>
-      'Relisez avant d\'enregistrer. Un motif peut contenir des informations personnelles, comme le nom de votre propriétaire : « VIR SALAIRE DUPONT ».';
+      'Relisez avant d’enregistrer. Un motif peut contenir des informations personnelles, comme le nom de votre propriétaire : « VIR SALAIRE DUPONT ».';
 
   @override
   String rulePackExportContents(int count) {
@@ -2348,7 +2348,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String rulePackOmittedUserCategory(String pattern) {
-    return '« $pattern » : vise une catégorie personnalisée, qui n\'a pas d\'identifiant partageable.';
+    return '« $pattern » : vise une catégorie personnalisée, qui n’a pas d’identifiant partageable.';
   }
 
   @override
@@ -2358,7 +2358,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get rulePackExportedTitle => 'Pack enregistré';
 
   @override
-  String get rulePackExportFailed => 'L\'export a échoué';
+  String get rulePackExportFailed => 'L’export a échoué';
 
   @override
   String rulePackStartWith(String name, int count) {
@@ -2367,7 +2367,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get rulePackStartWithHelper =>
-      'Vous verrez ce que le pack ferait avant de l\'importer.';
+      'Vous verrez ce que le pack ferait avant de l’importer.';
 
   @override
   String get rulePackRulesLabel => 'Règles du pack';
@@ -2389,24 +2389,24 @@ class AppLocalizationsFr extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '$count logos n\'ont pas pu être ajoutés',
-      one: 'Un logo n\'a pas pu être ajouté',
+      other: '$count logos n’ont pas pu être ajoutés',
+      one: 'Un logo n’a pas pu être ajouté',
     );
     return '$_temp0';
   }
 
   @override
   String get rulePackLogoFailuresNotice =>
-      'Les règles ont bien été importées : seuls ces logos n\'ont pas été ajoutés.';
+      'Les règles ont bien été importées : seuls ces logos n’ont pas été ajoutés.';
 
   @override
   String rulePackLogoFailureInvalidImage(String pattern) {
-    return '« $pattern » : le fichier n\'est pas une image PNG, JPEG ou WebP.';
+    return '« $pattern » : le fichier n’est pas une image PNG, JPEG ou WebP.';
   }
 
   @override
   String rulePackLogoFailureTooLarge(String pattern) {
-    return '« $pattern » : l\'image dépasse la taille autorisée.';
+    return '« $pattern » : l’image dépasse la taille autorisée.';
   }
 
   @override
@@ -2424,14 +2424,14 @@ class AppLocalizationsFr extends AppLocalizations {
       locale: localeName,
       other: '$count logos inclus.',
       one: '$count logo inclus.',
-      zero: 'Aucune règle n\'a de logo à inclure.',
+      zero: 'Aucune règle n’a de logo à inclure.',
     );
     return '$_temp0';
   }
 
   @override
   String get rulePackExportLogosTooLarge =>
-      'Les logos n\'ont pas été inclus : le pack serait trop volumineux pour être importé. Toutes les règles sont exportées, sans leurs logos.';
+      'Les logos n’ont pas été inclus : le pack serait trop volumineux pour être importé. Toutes les règles sont exportées, sans leurs logos.';
 
   @override
   String rulePackExportLogoElided(int kilobytes) {
@@ -2480,7 +2480,7 @@ class AppLocalizationsFr extends AppLocalizations {
       'Impossible de pré-remplir la règle. Renseignez le motif vous-même.';
 
   @override
-  String get reviewQueueRunAction => 'Catégoriser avec l\'IA';
+  String get reviewQueueRunAction => 'Catégoriser avec l’IA';
 
   @override
   String runBannerRunning(int processed, int total) {
@@ -2524,7 +2524,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get runBannerPartialAction => 'Voir';
 
   @override
-  String get runBannerFailed => 'La catégorisation n\'a pas pu s\'exécuter.';
+  String get runBannerFailed => 'La catégorisation n’a pas pu s’exécuter.';
 
   @override
   String get runBannerDismiss => 'Fermer';
@@ -2555,7 +2555,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get settingsAiBaseUrlRejected =>
-      'Adresse refusée : le moteur doit s\'exécuter sur cet ordinateur (127.0.0.1 ou localhost). Une adresse distante enverrait les descriptions de vos transactions hors de votre machine.';
+      'Adresse refusée : le moteur doit s’exécuter sur cet ordinateur (127.0.0.1 ou localhost). Une adresse distante enverrait les descriptions de vos transactions hors de votre machine.';
 
   @override
   String get settingsAiModelLabel => 'Modèle';
@@ -2602,7 +2602,7 @@ class AppLocalizationsFr extends AppLocalizations {
       'Un fichier .bastide, non chiffré, avec tout votre historique. Conservez-le en lieu sûr.';
 
   @override
-  String get settingsBackupExportPreparing => 'Préparation de l\'archive…';
+  String get settingsBackupExportPreparing => 'Préparation de l’archive…';
 
   @override
   String get settingsBackupExport => 'Exporter';
@@ -2632,11 +2632,11 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get settingsBackupErrorTooNew =>
-      'Ce fichier provient d\'une version plus récente de Bastide. Mettez l\'application à jour pour le restaurer.';
+      'Ce fichier provient d’une version plus récente de Bastide. Mettez l’application à jour pour le restaurer.';
 
   @override
   String get settingsBackupErrorInvalid =>
-      'Ce fichier n\'est pas une sauvegarde Bastide valide, ou il est endommagé.';
+      'Ce fichier n’est pas une sauvegarde Bastide valide, ou il est endommagé.';
 
   @override
   String get settingsBackupErrorCurrency =>
@@ -2644,7 +2644,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get settingsBackupErrorRunActive =>
-      'Une catégorisation est en cours. Attendez qu\'elle se termine, puis réessayez.';
+      'Une catégorisation est en cours. Attendez qu’elle se termine, puis réessayez.';
 
   @override
   String get settingsBackupErrorConflict =>
@@ -2652,7 +2652,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get settingsBackupErrorUnknown =>
-      'La restauration a échoué. Vos données n\'ont pas été modifiées.';
+      'La restauration a échoué. Vos données n’ont pas été modifiées.';
 
   @override
   String settingsBackupExported(
@@ -2677,7 +2677,7 @@ class AppLocalizationsFr extends AppLocalizations {
   }
 
   @override
-  String get settingsBackupExportFailed => 'L\'export a échoué. Réessayez.';
+  String get settingsBackupExportFailed => 'L’export a échoué. Réessayez.';
 
   @override
   String get settingsBackupConfirmTitle => 'Restaurer cette sauvegarde ?';
@@ -2686,7 +2686,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get settingsBackupConfirmExportedAt => 'Exporté le';
 
   @override
-  String get settingsBackupConfirmVersion => 'Version de l\'application';
+  String get settingsBackupConfirmVersion => 'Version de l’application';
 
   @override
   String get settingsBackupConfirmAccounts => 'Comptes';
@@ -2717,7 +2717,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get settingsBackupConfirmWarning =>
-      'Toutes vos données actuelles seront remplacées. Exportez-les d\'abord si besoin.';
+      'Toutes vos données actuelles seront remplacées. Exportez-les d’abord si besoin.';
 
   @override
   String get settingsBackupCancel => 'Annuler';
@@ -2759,8 +2759,7 @@ class AppLocalizationsFr extends AppLocalizations {
   }
 
   @override
-  String get subscriptionsDetectFailed =>
-      'La détection n\'a pas pu s\'exécuter.';
+  String get subscriptionsDetectFailed => 'La détection n’a pas pu s’exécuter.';
 
   @override
   String get subscriptionsBurdenLabel => 'Charge mensuelle';
@@ -2841,7 +2840,7 @@ class AppLocalizationsFr extends AppLocalizations {
   }
 
   @override
-  String get subscriptionsNextToday => 'aujourd\'hui';
+  String get subscriptionsNextToday => 'aujourd’hui';
 
   @override
   String get subscriptionsNextTomorrow => 'demain';
@@ -2984,7 +2983,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get subscriptionArchiveFailed =>
-      'L\'archivage de ce paiement n\'a pas pu être modifié.';
+      'L’archivage de ce paiement n’a pas pu être modifié.';
 
   @override
   String subscriptionsShowArchived(int count) {
@@ -3001,7 +3000,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get subscriptionErrorInvalidTransition =>
-      'Ce changement de statut n\'est pas possible pour ce paiement.';
+      'Ce changement de statut n’est pas possible pour ce paiement.';
 
   @override
   String get subscriptionErrorExists =>
@@ -3009,14 +3008,14 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get subscriptionErrorNotFound =>
-      'Ce paiement récurrent n\'existe plus.';
+      'Ce paiement récurrent n’existe plus.';
 
   @override
-  String get subscriptionErrorAccountNotFound => 'Ce compte n\'existe plus.';
+  String get subscriptionErrorAccountNotFound => 'Ce compte n’existe plus.';
 
   @override
   String get subscriptionErrorCategoryInvalid =>
-      'Cette catégorie n\'est plus disponible.';
+      'Cette catégorie n’est plus disponible.';
 
   @override
   String get subscriptionErrorValidation =>
@@ -3339,7 +3338,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get goalFormCreateTitle => 'Nouvel objectif';
 
   @override
-  String get goalFormEditTitle => 'Modifier l\'objectif';
+  String get goalFormEditTitle => 'Modifier l’objectif';
 
   @override
   String get goalFormNameLabel => 'Nom';
@@ -3375,8 +3374,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get allocationAmountLabel => 'Montant';
 
   @override
-  String get allocationAmountHelp =>
-      'Un montant négatif retire de l\'objectif.';
+  String get allocationAmountHelp => 'Un montant négatif retire de l’objectif.';
 
   @override
   String get allocationAmountInvalid =>
@@ -3401,10 +3399,10 @@ class AppLocalizationsFr extends AppLocalizations {
   String get allocationSubmit => 'Ajouter';
 
   @override
-  String get goalErrorNotFound => 'Cet objectif n\'existe plus.';
+  String get goalErrorNotFound => 'Cet objectif n’existe plus.';
 
   @override
-  String get goalErrorAllocationNotFound => 'Cette allocation n\'existe plus.';
+  String get goalErrorAllocationNotFound => 'Cette allocation n’existe plus.';
 
   @override
   String get goalErrorValidation => 'Vérifiez les informations saisies.';
@@ -3467,7 +3465,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get settingsResetErrorUnknown =>
-      'La réinitialisation a échoué. Vos données n\'ont pas été modifiées.';
+      'La réinitialisation a échoué. Vos données n’ont pas été modifiées.';
 
   @override
   String get navSectionWealth => 'Patrimoine';
@@ -3743,7 +3741,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get mortgageFormPlateInterestOnly =>
-      'La mensualité d\'un prêt in fine s\'affiche une fois le crédit enregistré.';
+      'La mensualité d’un prêt in fine s’affiche une fois le crédit enregistré.';
 
   @override
   String get mortgageFormCancel => 'Annuler';
@@ -3759,24 +3757,24 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get mortgageDeleteBody =>
-      'Il quittera le passif de la Synthèse et, s\'il est rattaché à un bien, la base de l\'IFI.';
+      'Il quittera le passif de la Synthèse et, s’il est rattaché à un bien, la base de l’IFI.';
 
   @override
   String get mortgageDeleteConfirm => 'Supprimer';
 
   @override
   String get mortgageErrorNonAmortizing =>
-      'Ce crédit ne se rembourse pas : l\'échéance ne couvre pas les intérêts du premier mois. Modifiez le taux, le capital ou la durée.';
+      'Ce crédit ne se rembourse pas : l’échéance ne couvre pas les intérêts du premier mois. Modifiez le taux, le capital ou la durée.';
 
   @override
   String get mortgageErrorFeesExceed =>
       'Les frais de dossier doivent rester inférieurs au capital emprunté.';
 
   @override
-  String get mortgageErrorPropertyInvalid => 'Ce bien n\'existe plus.';
+  String get mortgageErrorPropertyInvalid => 'Ce bien n’existe plus.';
 
   @override
-  String get mortgageErrorNotFound => 'Ce crédit n\'existe plus.';
+  String get mortgageErrorNotFound => 'Ce crédit n’existe plus.';
 
   @override
   String get mortgageErrorValidation => 'Certaines valeurs sont invalides.';
@@ -3839,7 +3837,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get mortgageScheduleLoadFailed =>
-      'Impossible de charger le tableau d\'amortissement.';
+      'Impossible de charger le tableau d’amortissement.';
 
   @override
   String get mortgagesTableLoan => 'Crédit';
@@ -4134,11 +4132,11 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get simulatorComputeFailed =>
-      'Le calcul n\'a pas abouti. Réessayez dans un instant.';
+      'Le calcul n’a pas abouti. Réessayez dans un instant.';
 
   @override
   String get simulatorErrorNonAmortizing =>
-      'À ce taux, l\'échéance ne rembourse pas le capital : baissez le taux ou allongez la durée.';
+      'À ce taux, l’échéance ne rembourse pas le capital : baissez le taux ou allongez la durée.';
 
   @override
   String get simulatorErrorFeesExceed =>
@@ -4156,7 +4154,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get simulatorIncomeBody =>
-      'Le revenu mensuel déclaré sert de base au taux d\'endettement et à la capacité d\'emprunt.';
+      'Le revenu mensuel déclaré sert de base au taux d’endettement et à la capacité d’emprunt.';
 
   @override
   String get simulatorIncomeLabel => 'Revenu mensuel net';
@@ -4169,7 +4167,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get simulatorIncomeFailed =>
-      'Impossible d\'enregistrer ce revenu. Réessayez.';
+      'Impossible d’enregistrer ce revenu. Réessayez.';
 
   @override
   String get simulatorCancel => 'Annuler';
@@ -4201,7 +4199,7 @@ class AppLocalizationsFr extends AppLocalizations {
       'Vous avez atteint le nombre maximal de scénarios enregistrés. Supprimez-en un pour en ajouter un autre.';
 
   @override
-  String get simulatorErrorNotFound => 'Ce scénario n\'existe plus.';
+  String get simulatorErrorNotFound => 'Ce scénario n’existe plus.';
 
   @override
   String get simulatorScenariosTitle => 'Scénarios enregistrés';
@@ -4262,7 +4260,7 @@ class AppLocalizationsFr extends AppLocalizations {
       count,
       locale: localeName,
       other: 'Comparaison de $count scénarios',
-      one: 'Comparaison d\'un scénario',
+      one: 'Comparaison d’un scénario',
     );
     return '$_temp0';
   }
@@ -4336,7 +4334,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get propertyFormValue => 'Valeur déclarée';
 
   @override
-  String get propertyFormValuedOn => 'Date d\'estimation';
+  String get propertyFormValuedOn => 'Date d’estimation';
 
   @override
   String get propertyFormOwnership => 'Quote-part détenue';
@@ -4351,10 +4349,10 @@ class AppLocalizationsFr extends AppLocalizations {
       'Indiquez une quote-part entre 0,01 et 100 %.';
 
   @override
-  String get propertyFormAcquisitionPrice => 'Prix d\'acquisition';
+  String get propertyFormAcquisitionPrice => 'Prix d’acquisition';
 
   @override
-  String get propertyFormAcquiredOn => 'Date d\'acquisition';
+  String get propertyFormAcquiredOn => 'Date d’acquisition';
 
   @override
   String get propertyFormAmountInvalid =>
@@ -4362,7 +4360,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get propertyFormAmountOptionalInvalid =>
-      'Montant illisible. Laissez vide s\'il est inconnu.';
+      'Montant illisible. Laissez vide s’il est inconnu.';
 
   @override
   String get propertyFormDateInvalid => 'Date invalide (JJ/MM/AAAA).';
@@ -4386,10 +4384,10 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get propertyErrorValuationInFuture =>
-      'Une date d\'estimation ne peut pas être dans le futur.';
+      'Une date d’estimation ne peut pas être dans le futur.';
 
   @override
-  String get propertyErrorNotFound => 'Ce bien n\'existe plus.';
+  String get propertyErrorNotFound => 'Ce bien n’existe plus.';
 
   @override
   String get propertyErrorValidation =>
@@ -4397,7 +4395,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get propertyErrorGeneric =>
-      'Impossible d\'enregistrer le bien. Réessayez.';
+      'Impossible d’enregistrer le bien. Réessayez.';
 
   @override
   String get propertyMenuTooltip => 'Actions';
@@ -4501,7 +4499,7 @@ class AppLocalizationsFr extends AppLocalizations {
   }
 
   @override
-  String get networthCompositionTitle => 'Composition de l\'actif';
+  String get networthCompositionTitle => 'Composition de l’actif';
 
   @override
   String get networthCompositionChecking => 'Comptes courants';
@@ -4560,11 +4558,11 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get networthSeriesEmpty =>
-      'Aucun historique : la série commence au premier mois clos d\'un compte importé, ou au premier montant que vous déclarez.';
+      'Aucun historique : la série commence au premier mois clos d’un compte importé, ou au premier montant que vous déclarez.';
 
   @override
   String networthSeriesCaveat(String date) {
-    return 'Les biens sont maintenus à leur valeur déclarée (estimation la plus ancienne : $date) et ne comptent qu\'à partir de leur date d\'acquisition, les crédits qu\'à partir de leur déblocage. Les mois sans donnée sont absents.';
+    return 'Les biens sont maintenus à leur valeur déclarée (estimation la plus ancienne : $date) et ne comptent qu’à partir de leur date d’acquisition, les crédits qu’à partir de leur déblocage. Les mois sans donnée sont absents.';
   }
 
   @override
@@ -4590,7 +4588,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get networthDeclaredSubtitle =>
-      'Le total de tous vos comptes à la fin d\'un mois, pour la période avant vos imports. Un mois couvert par vos imports garde le chiffre importé.';
+      'Le total de tous vos comptes à la fin d’un mois, pour la période avant vos imports. Un mois couvert par vos imports garde le chiffre importé.';
 
   @override
   String get networthDeclaredMonth => 'Mois';
@@ -4632,17 +4630,17 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get networthDeclaredLoadFailed =>
-      'Impossible de charger l\'historique déclaré.';
+      'Impossible de charger l’historique déclaré.';
 
   @override
   String get networthDeclaredRetry => 'Réessayer';
 
   @override
-  String get networthDeclaredErrorNotFound => 'Ce montant n\'existe plus.';
+  String get networthDeclaredErrorNotFound => 'Ce montant n’existe plus.';
 
   @override
   String get networthDeclaredErrorGeneric =>
-      'L\'enregistrement a échoué. Réessayez.';
+      'L’enregistrement a échoué. Réessayez.';
 
   @override
   String get authForgotPasswordLink => 'Mot de passe oublié';
@@ -4691,7 +4689,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get settingsRecoverySubtitle =>
-      'Permet de réinitialiser votre mot de passe si vous l\'oubliez. En générer un nouveau invalide l\'ancien.';
+      'Permet de réinitialiser votre mot de passe si vous l’oubliez. En générer un nouveau invalide l’ancien.';
 
   @override
   String get settingsRecoveryButton => 'Générer un nouveau code';
@@ -4701,7 +4699,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get settingsRecoveryModalLead =>
-      'Confirmez votre mot de passe pour générer un nouveau code. L\'ancien cessera de fonctionner.';
+      'Confirmez votre mot de passe pour générer un nouveau code. L’ancien cessera de fonctionner.';
 
   @override
   String get settingsRecoveryModalGenerated =>
@@ -4724,7 +4722,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String settingsPasswordSubtitle(int minimum) {
-    return 'Au moins $minimum caractères. Il protège l\'accès à vos données sur cet ordinateur.';
+    return 'Au moins $minimum caractères. Il protège l’accès à vos données sur cet ordinateur.';
   }
 
   @override
@@ -4753,11 +4751,11 @@ class AppLocalizationsFr extends AppLocalizations {
   String get settingsPasswordChanged => 'Mot de passe modifié.';
 
   @override
-  String get authIdentifierLabel => 'E-mail ou nom d\'utilisateur';
+  String get authIdentifierLabel => 'E-mail ou nom d’utilisateur';
 
   @override
   String get authIdentifierRequired =>
-      'L\'e-mail ou le nom d\'utilisateur est requis.';
+      'L’e-mail ou le nom d’utilisateur est requis.';
 
   @override
   String get authDisplayNameHelper =>
@@ -4768,10 +4766,10 @@ class AppLocalizationsFr extends AppLocalizations {
       '3 à 32 caractères : lettres sans accent, chiffres, « . », « _ » ou « - ».';
 
   @override
-  String get authDisplayNameTaken => 'Ce nom d\'utilisateur est déjà pris.';
+  String get authDisplayNameTaken => 'Ce nom d’utilisateur est déjà pris.';
 
   @override
-  String get settingsProfileNameTitle => 'Nom d\'utilisateur';
+  String get settingsProfileNameTitle => 'Nom d’utilisateur';
 
   @override
   String get settingsProfileNameButton => 'Modifier';
@@ -4804,7 +4802,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get settingsAvatarError =>
-      'L\'avatar n\'a pas pu être enregistré. Réessayez.';
+      'L’avatar n’a pas pu être enregistré. Réessayez.';
 
   @override
   String get settingsAvatarChoosePicture => 'Choisir une photo';
@@ -4819,11 +4817,11 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get settingsAvatarPictureInvalid =>
-      'Ce fichier n\'est pas une image PNG, JPEG ou WebP.';
+      'Ce fichier n’est pas une image PNG, JPEG ou WebP.';
 
   @override
   String get settingsAvatarPictureError =>
-      'La photo n\'a pas pu être enregistrée. Réessayez.';
+      'La photo n’a pas pu être enregistrée. Réessayez.';
 
   @override
   String get settingsAvatarCropTitle => 'Recadrer la photo';
@@ -4839,11 +4837,11 @@ class AppLocalizationsFr extends AppLocalizations {
   String get settingsAvatarCropSave => 'Utiliser cette photo';
 
   @override
-  String get settingsProfileNameModalTitle => 'Changer de nom d\'utilisateur';
+  String get settingsProfileNameModalTitle => 'Changer de nom d’utilisateur';
 
   @override
   String get settingsProfileNameModalLead =>
-      'Le nouveau nom remplace l\'ancien pour vous connecter.';
+      'Le nouveau nom remplace l’ancien pour vous connecter.';
 
   @override
   String get settingsProfileNameModalSave => 'Enregistrer';
@@ -4867,46 +4865,46 @@ class AppLocalizationsFr extends AppLocalizations {
   String get startupOpenLogs => 'Ouvrir le dossier des journaux';
 
   @override
-  String get startupDidNotStartTitle => 'Bastide n\'a pas pu démarrer';
+  String get startupDidNotStartTitle => 'Bastide n’a pas pu démarrer';
 
   @override
   String get startupDidNotStartMessage =>
-      'Le moteur local de l\'application ne s\'est pas lancé. Réessayez ; si cela se reproduit, les journaux indiquent pourquoi.';
+      'Le moteur local de l’application ne s’est pas lancé. Réessayez ; si cela se reproduit, les journaux indiquent pourquoi.';
 
   @override
   String get startupNotFoundMessage =>
-      'Des fichiers de l\'application manquent. Réinstallez Bastide : vos données sont conservées à part et ne seront pas touchées.';
+      'Des fichiers de l’application manquent. Réinstallez Bastide : vos données sont conservées à part et ne seront pas touchées.';
 
   @override
   String get startupUnreachableMessage =>
       'Aucun moteur local ne répond. Lancez-le, puis réessayez.';
 
   @override
-  String get startupCrashedTitle => 'Bastide s\'est arrêté de façon inattendue';
+  String get startupCrashedTitle => 'Bastide s’est arrêté de façon inattendue';
 
   @override
   String get startupCrashedMessage =>
-      'Le moteur local s\'est interrompu. Vos données sont enregistrées au fil de l\'eau ; réessayez pour le relancer.';
+      'Le moteur local s’est interrompu. Vos données sont enregistrées au fil de l’eau ; réessayez pour le relancer.';
 
   @override
   String get startupSchemaTooNewTitle =>
-      'Ces données viennent d\'une version plus récente';
+      'Ces données viennent d’une version plus récente';
 
   @override
   String get startupSchemaTooNewMessage =>
-      'Vos données ont été enregistrées par une version plus récente de Bastide. Réinstallez cette version pour les ouvrir ; rien n\'a été modifié.';
+      'Vos données ont été enregistrées par une version plus récente de Bastide. Réinstallez cette version pour les ouvrir ; rien n’a été modifié.';
 
   @override
   String get startupVersionMismatchTitle => 'Versions incompatibles';
 
   @override
   String startupVersionMismatchMessage(String app, String backend) {
-    return 'L\'application ($app) et son moteur local ($backend) ne viennent pas de la même version. Réinstallez Bastide pour les remettre d\'accord ; vos données ne sont pas touchées.';
+    return 'L’application ($app) et son moteur local ($backend) ne viennent pas de la même version. Réinstallez Bastide pour les remettre d’accord ; vos données ne sont pas touchées.';
   }
 
   @override
   String startupVersionMismatchDebugMessage(String app, String backend) {
-    return 'Le moteur local ($backend) ne correspond pas à l\'application ($app) : il est sans doute resté d\'une session précédente. Relancez-le, ou continuez quand même.';
+    return 'Le moteur local ($backend) ne correspond pas à l’application ($app) : il est sans doute resté d’une session précédente. Relancez-le, ou continuez quand même.';
   }
 
   @override
@@ -5142,18 +5140,18 @@ class AppLocalizationsFr extends AppLocalizations {
   String get markRecurringOpenSeriesAction => 'Déjà récurrent : voir la série';
 
   @override
-  String get recurringSeriesGoneTitle => 'Ce paiement récurrent n\'existe plus';
+  String get recurringSeriesGoneTitle => 'Ce paiement récurrent n’existe plus';
 
   @override
   String get recurringSeriesGoneMessage =>
-      'Il a été supprimé entre-temps : l\'opération n\'est plus marquée comme récurrente.';
+      'Il a été supprimé entre-temps : l’opération n’est plus marquée comme récurrente.';
 
   @override
   String get markRecurringTitle => 'Marquer comme récurrent';
 
   @override
   String get markRecurringIntro =>
-      'Voici les opérations que Bastide regrouperait. Décochez celles qui n\'en font pas partie.';
+      'Voici les opérations que Bastide regrouperait. Décochez celles qui n’en font pas partie.';
 
   @override
   String get markRecurringConfidenceHigh => 'Confiance élevée';
@@ -5197,11 +5195,11 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get markRecurringReasonAmountOutsideTolerance =>
-      'Un montant s\'écarte des autres';
+      'Un montant s’écarte des autres';
 
   @override
   String get markRecurringReasonGapOutsideTolerance =>
-      'Un intervalle s\'écarte du rythme';
+      'Un intervalle s’écarte du rythme';
 
   @override
   String get markRecurringReasonTooFewOccurrences =>
@@ -5212,7 +5210,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get markRecurringLowWarning =>
-      'Aucun rythme régulier n\'a été trouvé. Vous pouvez tout de même enregistrer la série : elle sera irrégulière.';
+      'Aucun rythme régulier n’a été trouvé. Vous pouvez tout de même enregistrer la série : elle sera irrégulière.';
 
   @override
   String get markRecurringCadenceLabel => 'Rythme proposé';
@@ -5248,7 +5246,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get markRecurringCancel => 'Annuler';
 
   @override
-  String get markRecurringLoadError => 'Impossible de préparer l\'aperçu.';
+  String get markRecurringLoadError => 'Impossible de préparer l’aperçu.';
 
   @override
   String get markRecurringRetry => 'Réessayer';
@@ -5298,7 +5296,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get seriesPickerLoadError => 'Impossible de charger vos séries.';
 
   @override
-  String get seriesPickerBack => 'Retour à l\'aperçu';
+  String get seriesPickerBack => 'Retour à l’aperçu';
 
   @override
   String seriesPickerRowDetail(String account, String cadence, String amount) {
@@ -5314,7 +5312,7 @@ class AppLocalizationsFr extends AppLocalizations {
   }
 
   @override
-  String get seriesPickerAddFailed => 'L\'opération n\'a pas pu être ajoutée';
+  String get seriesPickerAddFailed => 'L’opération n’a pas pu être ajoutée';
 
   @override
   String get chargePickerAction => 'Ajouter une opération';
@@ -5326,14 +5324,14 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get chargePickerIntro =>
-      'Les opérations qui ne font partie d\'aucune série, les plus proches en premier.';
+      'Les opérations qui ne font partie d’aucune série, les plus proches en premier.';
 
   @override
   String get chargePickerSearchHint => 'Rechercher un libellé';
 
   @override
   String get chargePickerEmpty =>
-      'Aucune opération à ajouter : toutes vos dépenses font déjà partie d\'une série.';
+      'Aucune opération à ajouter : toutes vos dépenses font déjà partie d’une série.';
 
   @override
   String chargePickerNoMatch(String query) {
@@ -5369,14 +5367,14 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get rulePackImportRunFailed =>
-      'L\'import n\'a pas pu aller jusqu\'au bout. Vérifiez vos règles avant de réessayer.';
+      'L’import n’a pas pu aller jusqu’au bout. Vérifiez vos règles avant de réessayer.';
 
   @override
   String get ruleErrorPackNotFound => 'Ce pack de règles est introuvable.';
 
   @override
   String get ruleErrorPackImportInProgress =>
-      'Un autre import de règles est déjà en cours. Attendez qu\'il se termine.';
+      'Un autre import de règles est déjà en cours. Attendez qu’il se termine.';
 
   @override
   String get ruleErrorPackImportRunNotFound =>

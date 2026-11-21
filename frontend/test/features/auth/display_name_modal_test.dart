@@ -130,7 +130,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.byKey(const Key('displayNameModalField')), findsOneWidget);
-    expect(find.text("Ce nom d'utilisateur est déjà pris."), findsOneWidget);
+    expect(find.text("Ce nom d’utilisateur est déjà pris."), findsOneWidget);
   });
 
   testWidgets('a malformed or unchanged name cannot be saved', (tester) async {

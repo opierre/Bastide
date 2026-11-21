@@ -73,7 +73,7 @@ void main() {
       tester.getSize(find.byKey(const Key('loginSubmitButton'))).height,
       AppSizes.buttonLarge,
     );
-    expect(find.text("E-mail ou nom d'utilisateur"), findsOneWidget);
+    expect(find.text("E-mail ou nom d’utilisateur"), findsOneWidget);
     expect(find.text('Mot de passe'), findsOneWidget);
     expect(find.text('Créer un compte'), findsOneWidget);
     expect(find.text('Mot de passe oublié'), findsOneWidget);
@@ -113,7 +113,7 @@ void main() {
 
     // Untouched, the form shows no error and the button is enabled.
     expect(
-      find.text("L'e-mail ou le nom d'utilisateur est requis."),
+      find.text("L’e-mail ou le nom d’utilisateur est requis."),
       findsNothing,
     );
     expect(
@@ -127,7 +127,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(
-      find.text("L'e-mail ou le nom d'utilisateur est requis."),
+      find.text("L’e-mail ou le nom d’utilisateur est requis."),
       findsOneWidget,
     );
     expect(find.text('Le mot de passe est requis.'), findsOneWidget);

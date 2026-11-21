@@ -143,7 +143,7 @@ abstract class AppLocalizations {
   /// Sidebar group label, sentence case, over the dashboard, accounts and transactions destinations.
   ///
   /// In fr, this message translates to:
-  /// **'Vue d\'ensemble'**
+  /// **'Vue d’ensemble'**
   String get navSectionOverview;
 
   /// Sidebar group label, sentence case, over the imports, categories, recurring and goals destinations.
@@ -491,7 +491,7 @@ abstract class AppLocalizations {
   /// Toast shown when saving the theme preference fails; the previous theme is restored.
   ///
   /// In fr, this message translates to:
-  /// **'Le thème n\'a pas pu être enregistré. Rien n\'a été modifié. Réessayez.'**
+  /// **'Le thème n’a pas pu être enregistré. Rien n’a été modifié. Réessayez.'**
   String get settingsThemeSaveFailed;
 
   /// Title of the language card in settings preferences.
@@ -503,7 +503,7 @@ abstract class AppLocalizations {
   /// Note under the language segmented control.
   ///
   /// In fr, this message translates to:
-  /// **'S\'applique immédiatement à toute l\'interface.'**
+  /// **'S’applique immédiatement à toute l’interface.'**
   String get settingsLanguageNote;
 
   /// Title of the sidebar row in settings preferences.
@@ -539,7 +539,7 @@ abstract class AppLocalizations {
   /// Note under the read-only currency field in settings, stating that it is permanent.
   ///
   /// In fr, this message translates to:
-  /// **'Choisie à l\'inscription et appliquée à tous vos comptes. Elle ne peut pas être modifiée dans cette version.'**
+  /// **'Choisie à l’inscription et appliquée à tous vos comptes. Elle ne peut pas être modifiée dans cette version.'**
   String get settingsCurrencyNote;
 
   /// Settings › Préférences: name of the row showing how dates and amounts are formatted.
@@ -599,7 +599,7 @@ abstract class AppLocalizations {
   /// Says exactly what the opt-in update check sends.
   ///
   /// In fr, this message translates to:
-  /// **'Une fois par jour au plus, Bastide demande à GitHub le numéro de la dernière version publiée. Rien d\'autre n\'est envoyé, et rien n\'est installé sans vous.'**
+  /// **'Une fois par jour au plus, Bastide demande à GitHub le numéro de la dernière version publiée. Rien d’autre n’est envoyé, et rien n’est installé sans vous.'**
   String get settingsUpdatesNote;
 
   /// Shown while the update check runs.
@@ -635,7 +635,7 @@ abstract class AppLocalizations {
   /// Local-privacy statement in the About section.
   ///
   /// In fr, this message translates to:
-  /// **'Toutes vos données restent sur cet ordinateur. Bastide ne se connecte à aucune banque et n\'envoie rien sur Internet, hormis la vérification des mises à jour si vous l\'activez.'**
+  /// **'Toutes vos données restent sur cet ordinateur. Bastide ne se connecte à aucune banque et n’envoie rien sur Internet, hormis la vérification des mises à jour si vous l’activez.'**
   String get settingsAboutPrivacy;
 
   /// Encouraging placeholder body on panels whose feature isn't built yet.
@@ -713,7 +713,7 @@ abstract class AppLocalizations {
   /// Label of the user name field, on the register screen and in Settings › Profil.
   ///
   /// In fr, this message translates to:
-  /// **'Nom d\'utilisateur'**
+  /// **'Nom d’utilisateur'**
   String get authDisplayNameLabel;
 
   /// Microcopy under the language and currency row at registration, stating which choice is permanent.
@@ -1037,7 +1037,7 @@ abstract class AppLocalizations {
   /// Warning for a deferred-debit card with no settlement account.
   ///
   /// In fr, this message translates to:
-  /// **'{card} : choisissez le compte sur lequel la carte est prélevée, pour que ses achats ne comptent qu\'une fois.'**
+  /// **'{card} : choisissez le compte sur lequel la carte est prélevée, pour que ses achats ne comptent qu’une fois.'**
   String cardSettlementNoAccount(String card);
 
   /// Action on the no-settlement-account warning: opens the card's account form.
@@ -1108,13 +1108,13 @@ abstract class AppLocalizations {
   /// Label of the start-date field of the settlement-rule dialog.
   ///
   /// In fr, this message translates to:
-  /// **'S\'applique à partir du'**
+  /// **'S’applique à partir du'**
   String get settlementRuleFromLabel;
 
   /// Helper under the start-date field of the settlement-rule dialog.
   ///
   /// In fr, this message translates to:
-  /// **'Les prélèvements plus anciens restent des dépenses : les achats qu\'ils ont payés ne sont pas dans l\'application. Proposé à partir de l\'historique importé de la carte.'**
+  /// **'Les prélèvements plus anciens restent des dépenses : les achats qu’ils ont payés ne sont pas dans l’application. Proposé à partir de l’historique importé de la carte.'**
   String get settlementRuleFromHelper;
 
   /// Validation error when the settlement-rule start date can't be read.
@@ -1156,7 +1156,7 @@ abstract class AppLocalizations {
   /// Shown in the settlement-rule dialog when saving fails.
   ///
   /// In fr, this message translates to:
-  /// **'Impossible d\'enregistrer la règle. Réessayez.'**
+  /// **'Impossible d’enregistrer la règle. Réessayez.'**
   String get settlementRuleSaveFailed;
 
   /// Cancel action on the account form and archive confirmation dialogs.
@@ -1174,7 +1174,7 @@ abstract class AppLocalizations {
   /// Body text of the archive confirmation dialog.
   ///
   /// In fr, this message translates to:
-  /// **'Vous pourrez toujours consulter son historique, mais il n\'apparaîtra plus dans votre liste de comptes.'**
+  /// **'Vous pourrez toujours consulter son historique, mais il n’apparaîtra plus dans votre liste de comptes.'**
   String get accountArchiveConfirmBody;
 
   /// Title of the account form dialog when creating an account.
@@ -1318,13 +1318,13 @@ abstract class AppLocalizations {
   /// Validation message when the institution field is left empty.
   ///
   /// In fr, this message translates to:
-  /// **'L\'établissement est requis.'**
+  /// **'L’établissement est requis.'**
   String get accountInstitutionRequired;
 
   /// Helper under the read-only institution field when the account is being created from a statement that names its bank.
   ///
   /// In fr, this message translates to:
-  /// **'Repris de l\'établissement déclaré par votre relevé.'**
+  /// **'Repris de l’établissement déclaré par votre relevé.'**
   String get accountInstitutionFromStatementNote;
 
   /// Label for the opening balance field on the account form, when editing an account: the figure the account started from.
@@ -1348,7 +1348,7 @@ abstract class AppLocalizations {
   /// Helper under the balance field when the account is being created from a statement: the import derives the real figure from the statement's declared balance, so an approximate entry here is harmless.
   ///
   /// In fr, this message translates to:
-  /// **'Ajusté automatiquement d\'après le solde déclaré par votre relevé lors du premier import.'**
+  /// **'Ajusté automatiquement d’après le solde déclaré par votre relevé lors du premier import.'**
   String get accountBalanceStatementNote;
 
   /// Helper under the read-only balance field when the account is being created from a statement that declares its closing balance: the figure is the statement's, not something to type.
@@ -1360,7 +1360,7 @@ abstract class AppLocalizations {
   /// Helper under the balance field when editing an existing account: explains that a manual correction shifts the cached balance and every saved snapshot by the same delta rather than rewriting the ledger.
   ///
   /// In fr, this message translates to:
-  /// **'Corriger cette valeur décale le solde du compte et son historique enregistré du même montant. Aucune transaction n\'est modifiée.'**
+  /// **'Corriger cette valeur décale le solde du compte et son historique enregistré du même montant. Aucune transaction n’est modifiée.'**
   String get accountOpeningBalanceEditNote;
 
   /// Validation message when the balance field is left empty, whether creating an account or correcting it while editing.
@@ -1594,7 +1594,7 @@ abstract class AppLocalizations {
   /// Localized message for the backend's IMPORT_STATEMENT_REQUIRED error code: a multi-account file was uploaded without naming the statement to import.
   ///
   /// In fr, this message translates to:
-  /// **'Ce fichier contient plusieurs comptes et aucun n\'a été désigné.'**
+  /// **'Ce fichier contient plusieurs comptes et aucun n’a été désigné.'**
   String get importErrorStatementRequired;
 
   /// Localized message for the backend's IMPORT_STATEMENT_NOT_FOUND error code: the named statement is not in the file.
@@ -2080,7 +2080,7 @@ abstract class AppLocalizations {
   /// Localized message for the backend's CATEGORY_INVALID error code, returned when a transaction is patched with a category the user cannot assign — usually one deleted in another window.
   ///
   /// In fr, this message translates to:
-  /// **'Cette catégorie n\'est plus disponible.'**
+  /// **'Cette catégorie n’est plus disponible.'**
   String get transactionErrorCategoryInvalid;
 
   /// Localized message for the backend's VALIDATION_ERROR error code on the transactions panel.
@@ -2482,7 +2482,7 @@ abstract class AppLocalizations {
   /// Display name for the system category with i18n key category.children.childcare.
   ///
   /// In fr, this message translates to:
-  /// **'Garde d\'enfants'**
+  /// **'Garde d’enfants'**
   String get categorySystemChildrenChildcare;
 
   /// Display name for the system category with i18n key category.children.school.
@@ -2656,7 +2656,7 @@ abstract class AppLocalizations {
   /// Localized message for the backend's DASHBOARD_MONTH_INVALID error code.
   ///
   /// In fr, this message translates to:
-  /// **'Le mois demandé n\'est pas valide.'**
+  /// **'Le mois demandé n’est pas valide.'**
   String get dashboardErrorInvalidMonth;
 
   /// Fallback localized message for unrecognized or network errors on the dashboard.
@@ -3178,19 +3178,19 @@ abstract class AppLocalizations {
   /// Toast headline when the rule run itself failed.
   ///
   /// In fr, this message translates to:
-  /// **'L\'exécution des règles a échoué'**
+  /// **'L’exécution des règles a échoué'**
   String get rulesApplyFailed;
 
   /// Toast headline when persisting a drag-reorder failed and the previous order was restored.
   ///
   /// In fr, this message translates to:
-  /// **'L\'ordre n\'a pas pu être enregistré'**
+  /// **'L’ordre n’a pas pu être enregistré'**
   String get rulesReorderFailed;
 
   /// Toast headline when enabling or disabling a rule failed and the switch was put back.
   ///
   /// In fr, this message translates to:
-  /// **'La règle n\'a pas pu être modifiée'**
+  /// **'La règle n’a pas pu être modifiée'**
   String get rulesToggleFailed;
 
   /// Tooltip on the ✕ beside the category filter chip in the rules view, opened from a category card's footer.
@@ -3358,7 +3358,7 @@ abstract class AppLocalizations {
   /// Validation message for a missing or non-positive priority.
   ///
   /// In fr, this message translates to:
-  /// **'Indiquez une priorité d\'au moins 1.'**
+  /// **'Indiquez une priorité d’au moins 1.'**
   String get ruleFormPriorityInvalid;
 
   /// Label of the rule editor's pattern field.
@@ -3484,13 +3484,13 @@ abstract class AppLocalizations {
   /// Error when the picked logo file is not a supported picture.
   ///
   /// In fr, this message translates to:
-  /// **'Ce fichier n\'est pas une image PNG, JPEG ou WebP.'**
+  /// **'Ce fichier n’est pas une image PNG, JPEG ou WebP.'**
   String get ruleLogoInvalid;
 
   /// Error when the logo could not be saved or removed for another reason.
   ///
   /// In fr, this message translates to:
-  /// **'Le logo n\'a pas pu être enregistré. Réessayez.'**
+  /// **'Le logo n’a pas pu être enregistré. Réessayez.'**
   String get ruleLogoError;
 
   /// Title of the modal where the user crops the picked logo to a square.
@@ -3538,13 +3538,13 @@ abstract class AppLocalizations {
   /// Lead text of the logo-from-address dialog: the app downloads the picture itself, then the crop step follows.
   ///
   /// In fr, this message translates to:
-  /// **'Collez l\'adresse d\'une image. Bastide la télécharge depuis cet ordinateur, puis vous la recadrez.'**
+  /// **'Collez l’adresse d’une image. Bastide la télécharge depuis cet ordinateur, puis vous la recadrez.'**
   String get ruleLogoUrlLead;
 
   /// Label of the web address field in the logo-from-address dialog.
   ///
   /// In fr, this message translates to:
-  /// **'Adresse de l\'image'**
+  /// **'Adresse de l’image'**
   String get ruleLogoUrlLabel;
 
   /// Placeholder of the web address field in the logo-from-address dialog.
@@ -3574,7 +3574,7 @@ abstract class AppLocalizations {
   /// Error when the logo address could not be reached, answered an error or timed out.
   ///
   /// In fr, this message translates to:
-  /// **'L\'image n\'a pas pu être téléchargée. Vérifiez l\'adresse et votre connexion.'**
+  /// **'L’image n’a pas pu être téléchargée. Vérifiez l’adresse et votre connexion.'**
   String get ruleLogoUrlUnreachable;
 
   /// Error when the downloaded logo is over the upload size limit; {megabytes} is that limit.
@@ -3640,19 +3640,19 @@ abstract class AppLocalizations {
   /// Localized message for RULE_PATTERN_INVALID. Rendered on the pattern field, never as a match count of zero.
   ///
   /// In fr, this message translates to:
-  /// **'Ce motif n\'est pas une expression régulière valide.'**
+  /// **'Ce motif n’est pas une expression régulière valide.'**
   String get ruleErrorPatternInvalid;
 
   /// Localized message for the backend's RULE_NOT_FOUND code.
   ///
   /// In fr, this message translates to:
-  /// **'Cette règle n\'existe plus.'**
+  /// **'Cette règle n’existe plus.'**
   String get ruleErrorNotFound;
 
   /// Localized message when a rule targets a category the backend can no longer resolve.
   ///
   /// In fr, this message translates to:
-  /// **'La catégorie visée n\'existe plus.'**
+  /// **'La catégorie visée n’existe plus.'**
   String get ruleErrorCategoryNotFound;
 
   /// Localized message for a VALIDATION_ERROR on a rule write.
@@ -3700,13 +3700,13 @@ abstract class AppLocalizations {
   /// Title of the dialog explaining why a pack was refused.
   ///
   /// In fr, this message translates to:
-  /// **'Ce fichier n\'a pas été accepté'**
+  /// **'Ce fichier n’a pas été accepté'**
   String get rulePackRefusedTitle;
 
   /// Refusal reason: the file isn't a pack-shaped JSON document.
   ///
   /// In fr, this message translates to:
-  /// **'Ce fichier n\'est pas un pack de règles Bastide. Attendu : un fichier JSON avec un nom, une version de format et une liste de règles.'**
+  /// **'Ce fichier n’est pas un pack de règles Bastide. Attendu : un fichier JSON avec un nom, une version de format et une liste de règles.'**
   String get rulePackRefusedMalformed;
 
   /// Refusal reason: unsupported format_version. Says why the pack is refused outright rather than read best-effort.
@@ -3718,7 +3718,7 @@ abstract class AppLocalizations {
   /// Refusal reason: the pack contains a regex rule. Names the risk, and the three types that are accepted.
   ///
   /// In fr, this message translates to:
-  /// **'Ce pack contient une règle « regex ». Les expressions régulières ne sont pas acceptées dans un pack partagé : une expression venue d\'un fichier tiers peut bloquer votre machine. Utilisez « contient », « égal à » ou « plage ».'**
+  /// **'Ce pack contient une règle « regex ». Les expressions régulières ne sont pas acceptées dans un pack partagé : une expression venue d’un fichier tiers peut bloquer votre machine. Utilisez « contient », « égal à » ou « plage ».'**
   String get rulePackRefusedRegex;
 
   /// Headline of the import confirmation. The figure the backend reports covers the user's currently-uncategorized transactions.
@@ -3766,7 +3766,7 @@ abstract class AppLocalizations {
   /// Label beside the apply-now switch on the import sheet.
   ///
   /// In fr, this message translates to:
-  /// **'Appliquer les règles à mes transactions existantes après l\'import'**
+  /// **'Appliquer les règles à mes transactions existantes après l’import'**
   String get rulePackApplyNowLabel;
 
   /// Confirm button on the import sheet.
@@ -3784,13 +3784,13 @@ abstract class AppLocalizations {
   /// Second line of the import toast when the rules were applied straight away.
   ///
   /// In fr, this message translates to:
-  /// **'{count, plural, =0{Aucune transaction n\'a changé de catégorie.} one{{count} transaction recatégorisée.} other{{count} transactions recatégorisées.}}'**
+  /// **'{count, plural, =0{Aucune transaction n’a changé de catégorie.} one{{count} transaction recatégorisée.} other{{count} transactions recatégorisées.}}'**
   String rulePackImportedBody(int count);
 
   /// Toast headline when a pack import failed.
   ///
   /// In fr, this message translates to:
-  /// **'L\'import a échoué'**
+  /// **'L’import a échoué'**
   String get rulePackImportFailed;
 
   /// Title of the export review sheet.
@@ -3802,7 +3802,7 @@ abstract class AppLocalizations {
   /// Warning at the top of the export sheet. Names a concrete example, because the abstract warning is the one nobody reads.
   ///
   /// In fr, this message translates to:
-  /// **'Relisez avant d\'enregistrer. Un motif peut contenir des informations personnelles, comme le nom de votre propriétaire : « VIR SALAIRE DUPONT ».'**
+  /// **'Relisez avant d’enregistrer. Un motif peut contenir des informations personnelles, comme le nom de votre propriétaire : « VIR SALAIRE DUPONT ».'**
   String get rulePackExportPrivacyNotice;
 
   /// Section label above the verbatim pack contents in the export sheet.
@@ -3826,7 +3826,7 @@ abstract class AppLocalizations {
   /// Explains one omitted rule: it targets a user-defined category, which has no portable key.
   ///
   /// In fr, this message translates to:
-  /// **'« {pattern} » : vise une catégorie personnalisée, qui n\'a pas d\'identifiant partageable.'**
+  /// **'« {pattern} » : vise une catégorie personnalisée, qui n’a pas d’identifiant partageable.'**
   String rulePackOmittedUserCategory(String pattern);
 
   /// Save button on the export sheet.
@@ -3844,7 +3844,7 @@ abstract class AppLocalizations {
   /// Toast headline when preparing or writing an export failed.
   ///
   /// In fr, this message translates to:
-  /// **'L\'export a échoué'**
+  /// **'L’export a échoué'**
   String get rulePackExportFailed;
 
   /// CTA on the rules empty state offering the bundled pack, named and sized.
@@ -3856,7 +3856,7 @@ abstract class AppLocalizations {
   /// Reassurance under the bundled-pack CTA: the preview step always comes first.
   ///
   /// In fr, this message translates to:
-  /// **'Vous verrez ce que le pack ferait avant de l\'importer.'**
+  /// **'Vous verrez ce que le pack ferait avant de l’importer.'**
   String get rulePackStartWithHelper;
 
   /// Section label over the list of a pack's rules on the import sheet, each with its logo or monogram.
@@ -3886,25 +3886,25 @@ abstract class AppLocalizations {
   /// Title of the dialog listing the pack logos an import could not attach.
   ///
   /// In fr, this message translates to:
-  /// **'{count, plural, one{Un logo n\'a pas pu être ajouté} other{{count} logos n\'ont pas pu être ajoutés}}'**
+  /// **'{count, plural, one{Un logo n’a pas pu être ajouté} other{{count} logos n’ont pas pu être ajoutés}}'**
   String rulePackLogoFailuresTitle(int count);
 
   /// Reassurance at the top of the logo failures dialog: the import itself succeeded.
   ///
   /// In fr, this message translates to:
-  /// **'Les règles ont bien été importées : seuls ces logos n\'ont pas été ajoutés.'**
+  /// **'Les règles ont bien été importées : seuls ces logos n’ont pas été ajoutés.'**
   String get rulePackLogoFailuresNotice;
 
   /// A logo that failed because it is not a supported picture, named by its rule's pattern.
   ///
   /// In fr, this message translates to:
-  /// **'« {pattern} » : le fichier n\'est pas une image PNG, JPEG ou WebP.'**
+  /// **'« {pattern} » : le fichier n’est pas une image PNG, JPEG ou WebP.'**
   String rulePackLogoFailureInvalidImage(String pattern);
 
   /// A logo that failed because it is too large, named by its rule's pattern.
   ///
   /// In fr, this message translates to:
-  /// **'« {pattern} » : l\'image dépasse la taille autorisée.'**
+  /// **'« {pattern} » : l’image dépasse la taille autorisée.'**
   String rulePackLogoFailureTooLarge(String pattern);
 
   /// A linked logo that could not be downloaded, named by its rule's pattern.
@@ -3922,13 +3922,13 @@ abstract class AppLocalizations {
   /// Under the include-logos toggle: how many logos the export embeds.
   ///
   /// In fr, this message translates to:
-  /// **'{count, plural, =0{Aucune règle n\'a de logo à inclure.} one{{count} logo inclus.} other{{count} logos inclus.}}'**
+  /// **'{count, plural, =0{Aucune règle n’a de logo à inclure.} one{{count} logo inclus.} other{{count} logos inclus.}}'**
   String rulePackExportLogoCount(int count);
 
   /// Warning on the export sheet when the logos would take the pack over the size an import accepts.
   ///
   /// In fr, this message translates to:
-  /// **'Les logos n\'ont pas été inclus : le pack serait trop volumineux pour être importé. Toutes les règles sont exportées, sans leurs logos.'**
+  /// **'Les logos n’ont pas été inclus : le pack serait trop volumineux pour être importé. Toutes les règles sont exportées, sans leurs logos.'**
   String get rulePackExportLogosTooLarge;
 
   /// Stand-in shown in the export preview instead of an embedded logo's base64; the saved file keeps the picture.
@@ -4006,7 +4006,7 @@ abstract class AppLocalizations {
   /// Action on the review queue's header card that starts a local-AI categorization run over the pending rows.
   ///
   /// In fr, this message translates to:
-  /// **'Catégoriser avec l\'IA'**
+  /// **'Catégoriser avec l’IA'**
   String get reviewQueueRunAction;
 
   /// Headline of the banner that replaces the review queue's header card while a run is classifying.
@@ -4042,7 +4042,7 @@ abstract class AppLocalizations {
   /// Banner after a run that ended `failed` — reported plainly; the queue stays fully usable.
   ///
   /// In fr, this message translates to:
-  /// **'La catégorisation n\'a pas pu s\'exécuter.'**
+  /// **'La catégorisation n’a pas pu s’exécuter.'**
   String get runBannerFailed;
 
   /// Accessible label of the × that dismisses a finished-run banner.
@@ -4096,7 +4096,7 @@ abstract class AppLocalizations {
   /// Inline validation shown on the address field when the backend refuses a non-loopback URL (422). States why it was refused, not only that it was.
   ///
   /// In fr, this message translates to:
-  /// **'Adresse refusée : le moteur doit s\'exécuter sur cet ordinateur (127.0.0.1 ou localhost). Une adresse distante enverrait les descriptions de vos transactions hors de votre machine.'**
+  /// **'Adresse refusée : le moteur doit s’exécuter sur cet ordinateur (127.0.0.1 ou localhost). Une adresse distante enverrait les descriptions de vos transactions hors de votre machine.'**
   String get settingsAiBaseUrlRejected;
 
   /// Label of the model tag field.
@@ -4180,7 +4180,7 @@ abstract class AppLocalizations {
   /// Replaces the export caption while the archive is being built.
   ///
   /// In fr, this message translates to:
-  /// **'Préparation de l\'archive…'**
+  /// **'Préparation de l’archive…'**
   String get settingsBackupExportPreparing;
 
   /// Primary button that exports a full backup.
@@ -4228,13 +4228,13 @@ abstract class AppLocalizations {
   /// Restore refused: the archive was written by a newer app version (BACKUP_TOO_NEW).
   ///
   /// In fr, this message translates to:
-  /// **'Ce fichier provient d\'une version plus récente de Bastide. Mettez l\'application à jour pour le restaurer.'**
+  /// **'Ce fichier provient d’une version plus récente de Bastide. Mettez l’application à jour pour le restaurer.'**
   String get settingsBackupErrorTooNew;
 
   /// Restore refused: not a Bastide archive or corrupted (BACKUP_INVALID).
   ///
   /// In fr, this message translates to:
-  /// **'Ce fichier n\'est pas une sauvegarde Bastide valide, ou il est endommagé.'**
+  /// **'Ce fichier n’est pas une sauvegarde Bastide valide, ou il est endommagé.'**
   String get settingsBackupErrorInvalid;
 
   /// Restore refused: the archive's currency differs from the user's (BACKUP_CURRENCY_MISMATCH).
@@ -4246,7 +4246,7 @@ abstract class AppLocalizations {
   /// Restore refused while a categorization run is in flight (BACKUP_RUN_ACTIVE).
   ///
   /// In fr, this message translates to:
-  /// **'Une catégorisation est en cours. Attendez qu\'elle se termine, puis réessayez.'**
+  /// **'Une catégorisation est en cours. Attendez qu’elle se termine, puis réessayez.'**
   String get settingsBackupErrorRunActive;
 
   /// Restore refused: its rows belong to another account still in this database (BACKUP_CONFLICT).
@@ -4258,7 +4258,7 @@ abstract class AppLocalizations {
   /// Restore failed for any other reason; nothing was changed.
   ///
   /// In fr, this message translates to:
-  /// **'La restauration a échoué. Vos données n\'ont pas été modifiées.'**
+  /// **'La restauration a échoué. Vos données n’ont pas été modifiées.'**
   String get settingsBackupErrorUnknown;
 
   /// Toast after a backup was written. The String placeholders are the locale-formatted counts.
@@ -4275,7 +4275,7 @@ abstract class AppLocalizations {
   /// Error toast when building or writing the backup failed.
   ///
   /// In fr, this message translates to:
-  /// **'L\'export a échoué. Réessayez.'**
+  /// **'L’export a échoué. Réessayez.'**
   String get settingsBackupExportFailed;
 
   /// Title of the restore confirmation modal.
@@ -4293,7 +4293,7 @@ abstract class AppLocalizations {
   /// Summary row: the app version that wrote the backup.
   ///
   /// In fr, this message translates to:
-  /// **'Version de l\'application'**
+  /// **'Version de l’application'**
   String get settingsBackupConfirmVersion;
 
   /// Summary row: number of accounts in the backup.
@@ -4353,7 +4353,7 @@ abstract class AppLocalizations {
   /// Warning callout in the restore modal.
   ///
   /// In fr, this message translates to:
-  /// **'Toutes vos données actuelles seront remplacées. Exportez-les d\'abord si besoin.'**
+  /// **'Toutes vos données actuelles seront remplacées. Exportez-les d’abord si besoin.'**
   String get settingsBackupConfirmWarning;
 
   /// Dismisses the restore modal without changing anything.
@@ -4401,7 +4401,7 @@ abstract class AppLocalizations {
   /// Toast headline when the detection call itself failed.
   ///
   /// In fr, this message translates to:
-  /// **'La détection n\'a pas pu s\'exécuter.'**
+  /// **'La détection n’a pas pu s’exécuter.'**
   String get subscriptionsDetectFailed;
 
   /// Label of the lead figure of the summary line: every running series brought back to one month.
@@ -4473,7 +4473,7 @@ abstract class AppLocalizations {
   /// Relative phrasing for a charge due today.
   ///
   /// In fr, this message translates to:
-  /// **'aujourd\'hui'**
+  /// **'aujourd’hui'**
   String get subscriptionsNextToday;
 
   /// Relative phrasing for a charge due tomorrow.
@@ -4677,7 +4677,7 @@ abstract class AppLocalizations {
   /// Toast title when archiving or unarchiving a series from its detail fails.
   ///
   /// In fr, this message translates to:
-  /// **'L\'archivage de ce paiement n\'a pas pu être modifié.'**
+  /// **'L’archivage de ce paiement n’a pas pu être modifié.'**
   String get subscriptionArchiveFailed;
 
   /// Link below the table that reveals archived series in place; the count is the real number.
@@ -4701,7 +4701,7 @@ abstract class AppLocalizations {
   /// Localized RECURRING_INVALID_TRANSITION.
   ///
   /// In fr, this message translates to:
-  /// **'Ce changement de statut n\'est pas possible pour ce paiement.'**
+  /// **'Ce changement de statut n’est pas possible pour ce paiement.'**
   String get subscriptionErrorInvalidTransition;
 
   /// Localized RECURRING_SERIES_EXISTS.
@@ -4713,19 +4713,19 @@ abstract class AppLocalizations {
   /// Localized RECURRING_SERIES_NOT_FOUND.
   ///
   /// In fr, this message translates to:
-  /// **'Ce paiement récurrent n\'existe plus.'**
+  /// **'Ce paiement récurrent n’existe plus.'**
   String get subscriptionErrorNotFound;
 
   /// Localized ACCOUNT_NOT_FOUND, reachable from the creation form's account select.
   ///
   /// In fr, this message translates to:
-  /// **'Ce compte n\'existe plus.'**
+  /// **'Ce compte n’existe plus.'**
   String get subscriptionErrorAccountNotFound;
 
   /// Localized CATEGORY_INVALID on the recurring payment form, returned when the chosen category is not one the user may assign.
   ///
   /// In fr, this message translates to:
-  /// **'Cette catégorie n\'est plus disponible.'**
+  /// **'Cette catégorie n’est plus disponible.'**
   String get subscriptionErrorCategoryInvalid;
 
   /// Localized VALIDATION_ERROR on the recurring payment form.
@@ -5234,7 +5234,7 @@ abstract class AppLocalizations {
   /// Title of the goal modal when editing.
   ///
   /// In fr, this message translates to:
-  /// **'Modifier l\'objectif'**
+  /// **'Modifier l’objectif'**
   String get goalFormEditTitle;
 
   /// Label of the goal name field.
@@ -5306,7 +5306,7 @@ abstract class AppLocalizations {
   /// Helper stating that a negative amount is a withdrawal. There are no deposit/withdraw modes.
   ///
   /// In fr, this message translates to:
-  /// **'Un montant négatif retire de l\'objectif.'**
+  /// **'Un montant négatif retire de l’objectif.'**
   String get allocationAmountHelp;
 
   /// Validation message when the allocation amount is missing, unparseable, or zero.
@@ -5354,13 +5354,13 @@ abstract class AppLocalizations {
   /// Message for the backend's GOAL_NOT_FOUND code.
   ///
   /// In fr, this message translates to:
-  /// **'Cet objectif n\'existe plus.'**
+  /// **'Cet objectif n’existe plus.'**
   String get goalErrorNotFound;
 
   /// Message for the backend's GOAL_ALLOCATION_NOT_FOUND code.
   ///
   /// In fr, this message translates to:
-  /// **'Cette allocation n\'existe plus.'**
+  /// **'Cette allocation n’existe plus.'**
   String get goalErrorAllocationNotFound;
 
   /// Message for a rejected goal or allocation payload.
@@ -5468,7 +5468,7 @@ abstract class AppLocalizations {
   /// Fallback message for any other reset failure.
   ///
   /// In fr, this message translates to:
-  /// **'La réinitialisation a échoué. Vos données n\'ont pas été modifiées.'**
+  /// **'La réinitialisation a échoué. Vos données n’ont pas été modifiées.'**
   String get settingsResetErrorUnknown;
 
   /// Left nav section heading grouping the loans, simulator and net-worth destinations. Rendered uppercase.
@@ -5930,7 +5930,7 @@ abstract class AppLocalizations {
   /// Computed instalment plate for an interest-only loan, which the simulator does not compute.
   ///
   /// In fr, this message translates to:
-  /// **'La mensualité d\'un prêt in fine s\'affiche une fois le crédit enregistré.'**
+  /// **'La mensualité d’un prêt in fine s’affiche une fois le crédit enregistré.'**
   String get mortgageFormPlateInterestOnly;
 
   /// Loan form: cancel.
@@ -5960,7 +5960,7 @@ abstract class AppLocalizations {
   /// Delete confirmation: both consequences.
   ///
   /// In fr, this message translates to:
-  /// **'Il quittera le passif de la Synthèse et, s\'il est rattaché à un bien, la base de l\'IFI.'**
+  /// **'Il quittera le passif de la Synthèse et, s’il est rattaché à un bien, la base de l’IFI.'**
   String get mortgageDeleteBody;
 
   /// Delete confirmation: confirm.
@@ -5972,7 +5972,7 @@ abstract class AppLocalizations {
   /// Inline error for a loan whose instalment does not cover its first interest (422).
   ///
   /// In fr, this message translates to:
-  /// **'Ce crédit ne se rembourse pas : l\'échéance ne couvre pas les intérêts du premier mois. Modifiez le taux, le capital ou la durée.'**
+  /// **'Ce crédit ne se rembourse pas : l’échéance ne couvre pas les intérêts du premier mois. Modifiez le taux, le capital ou la durée.'**
   String get mortgageErrorNonAmortizing;
 
   /// Inline error when upfront fees reach the principal.
@@ -5984,13 +5984,13 @@ abstract class AppLocalizations {
   /// Inline error when the linked property no longer exists.
   ///
   /// In fr, this message translates to:
-  /// **'Ce bien n\'existe plus.'**
+  /// **'Ce bien n’existe plus.'**
   String get mortgageErrorPropertyInvalid;
 
   /// Error when the loan no longer exists.
   ///
   /// In fr, this message translates to:
-  /// **'Ce crédit n\'existe plus.'**
+  /// **'Ce crédit n’existe plus.'**
   String get mortgageErrorNotFound;
 
   /// Error for any other rejected loan value.
@@ -6086,7 +6086,7 @@ abstract class AppLocalizations {
   /// Error state when a schedule year cannot be loaded.
   ///
   /// In fr, this message translates to:
-  /// **'Impossible de charger le tableau d\'amortissement.'**
+  /// **'Impossible de charger le tableau d’amortissement.'**
   String get mortgageScheduleLoadFailed;
 
   /// Loans table column header: the loan.
@@ -6479,13 +6479,13 @@ abstract class AppLocalizations {
   /// Banner when a live compute fails for a reason no field explains.
   ///
   /// In fr, this message translates to:
-  /// **'Le calcul n\'a pas abouti. Réessayez dans un instant.'**
+  /// **'Le calcul n’a pas abouti. Réessayez dans un instant.'**
   String get simulatorComputeFailed;
 
   /// Inline error under the rate when the engine refuses a loan that never amortises.
   ///
   /// In fr, this message translates to:
-  /// **'À ce taux, l\'échéance ne rembourse pas le capital : baissez le taux ou allongez la durée.'**
+  /// **'À ce taux, l’échéance ne rembourse pas le capital : baissez le taux ou allongez la durée.'**
   String get simulatorErrorNonAmortizing;
 
   /// Inline error under the fees when they are not smaller than the borrowed amount.
@@ -6515,7 +6515,7 @@ abstract class AppLocalizations {
   /// Body of the declare-income modal.
   ///
   /// In fr, this message translates to:
-  /// **'Le revenu mensuel déclaré sert de base au taux d\'endettement et à la capacité d\'emprunt.'**
+  /// **'Le revenu mensuel déclaré sert de base au taux d’endettement et à la capacité d’emprunt.'**
   String get simulatorIncomeBody;
 
   /// Declare-income modal field label.
@@ -6539,7 +6539,7 @@ abstract class AppLocalizations {
   /// Declare-income modal banner when the save fails.
   ///
   /// In fr, this message translates to:
-  /// **'Impossible d\'enregistrer ce revenu. Réessayez.'**
+  /// **'Impossible d’enregistrer ce revenu. Réessayez.'**
   String get simulatorIncomeFailed;
 
   /// Cancel button of the simulator modals.
@@ -6593,7 +6593,7 @@ abstract class AppLocalizations {
   /// A scenario was deleted elsewhere.
   ///
   /// In fr, this message translates to:
-  /// **'Ce scénario n\'existe plus.'**
+  /// **'Ce scénario n’existe plus.'**
   String get simulatorErrorNotFound;
 
   /// Title of the saved scenarios card.
@@ -6683,7 +6683,7 @@ abstract class AppLocalizations {
   /// Title of the comparison card.
   ///
   /// In fr, this message translates to:
-  /// **'{count, plural, =1{Comparaison d\'un scénario} other{Comparaison de {count} scénarios}}'**
+  /// **'{count, plural, =1{Comparaison d’un scénario} other{Comparaison de {count} scénarios}}'**
   String simulatorCompareTitle(int count);
 
   /// Secondary button closing the comparison.
@@ -6809,7 +6809,7 @@ abstract class AppLocalizations {
   /// Property form field: the date the value was estimated.
   ///
   /// In fr, this message translates to:
-  /// **'Date d\'estimation'**
+  /// **'Date d’estimation'**
   String get propertyFormValuedOn;
 
   /// Property form field: the user's ownership share, typed as a percent.
@@ -6833,13 +6833,13 @@ abstract class AppLocalizations {
   /// Property form field: the optional purchase price.
   ///
   /// In fr, this message translates to:
-  /// **'Prix d\'acquisition'**
+  /// **'Prix d’acquisition'**
   String get propertyFormAcquisitionPrice;
 
   /// Property form field: the optional purchase date.
   ///
   /// In fr, this message translates to:
-  /// **'Date d\'acquisition'**
+  /// **'Date d’acquisition'**
   String get propertyFormAcquiredOn;
 
   /// Validation message when a required amount is missing or not positive.
@@ -6851,7 +6851,7 @@ abstract class AppLocalizations {
   /// Validation message when an optional amount cannot be read.
   ///
   /// In fr, this message translates to:
-  /// **'Montant illisible. Laissez vide s\'il est inconnu.'**
+  /// **'Montant illisible. Laissez vide s’il est inconnu.'**
   String get propertyFormAmountOptionalInvalid;
 
   /// Validation message when a date cannot be read.
@@ -6893,13 +6893,13 @@ abstract class AppLocalizations {
   /// Error when the valuation date is after today (PROPERTY_VALUATION_IN_FUTURE).
   ///
   /// In fr, this message translates to:
-  /// **'Une date d\'estimation ne peut pas être dans le futur.'**
+  /// **'Une date d’estimation ne peut pas être dans le futur.'**
   String get propertyErrorValuationInFuture;
 
   /// Error when the property was not found (PROPERTY_NOT_FOUND).
   ///
   /// In fr, this message translates to:
-  /// **'Ce bien n\'existe plus.'**
+  /// **'Ce bien n’existe plus.'**
   String get propertyErrorNotFound;
 
   /// Error when the server rejected the payload (VALIDATION_ERROR).
@@ -6911,7 +6911,7 @@ abstract class AppLocalizations {
   /// Fallback error for a failed property write.
   ///
   /// In fr, this message translates to:
-  /// **'Impossible d\'enregistrer le bien. Réessayez.'**
+  /// **'Impossible d’enregistrer le bien. Réessayez.'**
   String get propertyErrorGeneric;
 
   /// Tooltip of a property card's overflow menu.
@@ -7067,7 +7067,7 @@ abstract class AppLocalizations {
   /// Title of the asset composition card.
   ///
   /// In fr, this message translates to:
-  /// **'Composition de l\'actif'**
+  /// **'Composition de l’actif'**
   String get networthCompositionTitle;
 
   /// Composition row: checking accounts.
@@ -7169,13 +7169,13 @@ abstract class AppLocalizations {
   /// Shown in place of the chart when the series has no closed month yet.
   ///
   /// In fr, this message translates to:
-  /// **'Aucun historique : la série commence au premier mois clos d\'un compte importé, ou au premier montant que vous déclarez.'**
+  /// **'Aucun historique : la série commence au premier mois clos d’un compte importé, ou au premier montant que vous déclarez.'**
   String get networthSeriesEmpty;
 
   /// Info banner under the series when property values are held flat, naming the oldest current valuation date.
   ///
   /// In fr, this message translates to:
-  /// **'Les biens sont maintenus à leur valeur déclarée (estimation la plus ancienne : {date}) et ne comptent qu\'à partir de leur date d\'acquisition, les crédits qu\'à partir de leur déblocage. Les mois sans donnée sont absents.'**
+  /// **'Les biens sont maintenus à leur valeur déclarée (estimation la plus ancienne : {date}) et ne comptent qu’à partir de leur date d’acquisition, les crédits qu’à partir de leur déblocage. Les mois sans donnée sont absents.'**
   String networthSeriesCaveat(String date);
 
   /// Series range segment: the last 12 months.
@@ -7223,7 +7223,7 @@ abstract class AppLocalizations {
   /// Declared-history modal subtitle: what a declared total is, and that imports win.
   ///
   /// In fr, this message translates to:
-  /// **'Le total de tous vos comptes à la fin d\'un mois, pour la période avant vos imports. Un mois couvert par vos imports garde le chiffre importé.'**
+  /// **'Le total de tous vos comptes à la fin d’un mois, pour la période avant vos imports. Un mois couvert par vos imports garde le chiffre importé.'**
   String get networthDeclaredSubtitle;
 
   /// Label of the month field.
@@ -7301,7 +7301,7 @@ abstract class AppLocalizations {
   /// Error state of the declared-history list.
   ///
   /// In fr, this message translates to:
-  /// **'Impossible de charger l\'historique déclaré.'**
+  /// **'Impossible de charger l’historique déclaré.'**
   String get networthDeclaredLoadFailed;
 
   /// Retry action on the declared-history list.
@@ -7313,13 +7313,13 @@ abstract class AppLocalizations {
   /// DECLARED_BALANCE_NOT_FOUND.
   ///
   /// In fr, this message translates to:
-  /// **'Ce montant n\'existe plus.'**
+  /// **'Ce montant n’existe plus.'**
   String get networthDeclaredErrorNotFound;
 
   /// Any other failure writing a declared total.
   ///
   /// In fr, this message translates to:
-  /// **'L\'enregistrement a échoué. Réessayez.'**
+  /// **'L’enregistrement a échoué. Réessayez.'**
   String get networthDeclaredErrorGeneric;
 
   /// Link on the login screen, right of the link row, opening the password reset screen.
@@ -7409,7 +7409,7 @@ abstract class AppLocalizations {
   /// Subtitle of the recovery code card in Settings › Profile.
   ///
   /// In fr, this message translates to:
-  /// **'Permet de réinitialiser votre mot de passe si vous l\'oubliez. En générer un nouveau invalide l\'ancien.'**
+  /// **'Permet de réinitialiser votre mot de passe si vous l’oubliez. En générer un nouveau invalide l’ancien.'**
   String get settingsRecoverySubtitle;
 
   /// Button on the recovery code card opening the regeneration modal.
@@ -7427,7 +7427,7 @@ abstract class AppLocalizations {
   /// Lead of the regeneration modal, before the password is entered.
   ///
   /// In fr, this message translates to:
-  /// **'Confirmez votre mot de passe pour générer un nouveau code. L\'ancien cessera de fonctionner.'**
+  /// **'Confirmez votre mot de passe pour générer un nouveau code. L’ancien cessera de fonctionner.'**
   String get settingsRecoveryModalLead;
 
   /// Lead of the regeneration modal once the new code is shown.
@@ -7469,7 +7469,7 @@ abstract class AppLocalizations {
   /// Description of the password row in Settings › Profil › Sécurité. No date: nothing records when the password last changed.
   ///
   /// In fr, this message translates to:
-  /// **'Au moins {minimum} caractères. Il protège l\'accès à vos données sur cet ordinateur.'**
+  /// **'Au moins {minimum} caractères. Il protège l’accès à vos données sur cet ordinateur.'**
   String settingsPasswordSubtitle(int minimum);
 
   /// Button on the password row opening the password change modal.
@@ -7523,13 +7523,13 @@ abstract class AppLocalizations {
   /// Label for the field on the login and password-reset forms that accepts either the email or the username.
   ///
   /// In fr, this message translates to:
-  /// **'E-mail ou nom d\'utilisateur'**
+  /// **'E-mail ou nom d’utilisateur'**
   String get authIdentifierLabel;
 
   /// Validation error when the login/reset identifier field is empty.
   ///
   /// In fr, this message translates to:
-  /// **'L\'e-mail ou le nom d\'utilisateur est requis.'**
+  /// **'L’e-mail ou le nom d’utilisateur est requis.'**
   String get authIdentifierRequired;
 
   /// Helper under the username field: what it's for and its format.
@@ -7547,13 +7547,13 @@ abstract class AppLocalizations {
   /// Error when the username (display name) is already used by another account.
   ///
   /// In fr, this message translates to:
-  /// **'Ce nom d\'utilisateur est déjà pris.'**
+  /// **'Ce nom d’utilisateur est déjà pris.'**
   String get authDisplayNameTaken;
 
   /// Title of the Settings › Profile card showing the username.
   ///
   /// In fr, this message translates to:
-  /// **'Nom d\'utilisateur'**
+  /// **'Nom d’utilisateur'**
   String get settingsProfileNameTitle;
 
   /// Button opening the modal that changes the username.
@@ -7589,7 +7589,7 @@ abstract class AppLocalizations {
   /// Banner in the avatar card when the choice could not be saved.
   ///
   /// In fr, this message translates to:
-  /// **'L\'avatar n\'a pas pu être enregistré. Réessayez.'**
+  /// **'L’avatar n’a pas pu être enregistré. Réessayez.'**
   String get settingsAvatarError;
 
   /// Button of the avatar card opening the file picker for a picture of the user's own.
@@ -7613,13 +7613,13 @@ abstract class AppLocalizations {
   /// Error when the picked file is not a supported picture.
   ///
   /// In fr, this message translates to:
-  /// **'Ce fichier n\'est pas une image PNG, JPEG ou WebP.'**
+  /// **'Ce fichier n’est pas une image PNG, JPEG ou WebP.'**
   String get settingsAvatarPictureInvalid;
 
   /// Error when the picture could not be saved for another reason.
   ///
   /// In fr, this message translates to:
-  /// **'La photo n\'a pas pu être enregistrée. Réessayez.'**
+  /// **'La photo n’a pas pu être enregistrée. Réessayez.'**
   String get settingsAvatarPictureError;
 
   /// Title of the modal where the user crops the picked picture to a square.
@@ -7649,13 +7649,13 @@ abstract class AppLocalizations {
   /// Title of the modal that changes the username.
   ///
   /// In fr, this message translates to:
-  /// **'Changer de nom d\'utilisateur'**
+  /// **'Changer de nom d’utilisateur'**
   String get settingsProfileNameModalTitle;
 
   /// Lead sentence in the change-username modal.
   ///
   /// In fr, this message translates to:
-  /// **'Le nouveau nom remplace l\'ancien pour vous connecter.'**
+  /// **'Le nouveau nom remplace l’ancien pour vous connecter.'**
   String get settingsProfileNameModalLead;
 
   /// Button saving the new username.
@@ -7703,19 +7703,19 @@ abstract class AppLocalizations {
   /// Title when the local engine did not start.
   ///
   /// In fr, this message translates to:
-  /// **'Bastide n\'a pas pu démarrer'**
+  /// **'Bastide n’a pas pu démarrer'**
   String get startupDidNotStartTitle;
 
   /// Message when the local engine did not start or did not answer in time.
   ///
   /// In fr, this message translates to:
-  /// **'Le moteur local de l\'application ne s\'est pas lancé. Réessayez ; si cela se reproduit, les journaux indiquent pourquoi.'**
+  /// **'Le moteur local de l’application ne s’est pas lancé. Réessayez ; si cela se reproduit, les journaux indiquent pourquoi.'**
   String get startupDidNotStartMessage;
 
   /// Message when the local engine is missing from the installed app.
   ///
   /// In fr, this message translates to:
-  /// **'Des fichiers de l\'application manquent. Réinstallez Bastide : vos données sont conservées à part et ne seront pas touchées.'**
+  /// **'Des fichiers de l’application manquent. Réinstallez Bastide : vos données sont conservées à part et ne seront pas touchées.'**
   String get startupNotFoundMessage;
 
   /// Message when the app was told to use an engine started separately (development) and none answers.
@@ -7727,25 +7727,25 @@ abstract class AppLocalizations {
   /// Title when the local engine stopped while the app was running.
   ///
   /// In fr, this message translates to:
-  /// **'Bastide s\'est arrêté de façon inattendue'**
+  /// **'Bastide s’est arrêté de façon inattendue'**
   String get startupCrashedTitle;
 
   /// Message when the local engine stopped while the app was running.
   ///
   /// In fr, this message translates to:
-  /// **'Le moteur local s\'est interrompu. Vos données sont enregistrées au fil de l\'eau ; réessayez pour le relancer.'**
+  /// **'Le moteur local s’est interrompu. Vos données sont enregistrées au fil de l’eau ; réessayez pour le relancer.'**
   String get startupCrashedMessage;
 
   /// Title when the database was written by a newer version of the app (the user downgraded).
   ///
   /// In fr, this message translates to:
-  /// **'Ces données viennent d\'une version plus récente'**
+  /// **'Ces données viennent d’une version plus récente'**
   String get startupSchemaTooNewTitle;
 
   /// Message when the database was written by a newer version of the app.
   ///
   /// In fr, this message translates to:
-  /// **'Vos données ont été enregistrées par une version plus récente de Bastide. Réinstallez cette version pour les ouvrir ; rien n\'a été modifié.'**
+  /// **'Vos données ont été enregistrées par une version plus récente de Bastide. Réinstallez cette version pour les ouvrir ; rien n’a été modifié.'**
   String get startupSchemaTooNewMessage;
 
   /// Title when the app and its local engine come from different versions.
@@ -7757,13 +7757,13 @@ abstract class AppLocalizations {
   /// Message when the app and its local engine come from different versions (release builds).
   ///
   /// In fr, this message translates to:
-  /// **'L\'application ({app}) et son moteur local ({backend}) ne viennent pas de la même version. Réinstallez Bastide pour les remettre d\'accord ; vos données ne sont pas touchées.'**
+  /// **'L’application ({app}) et son moteur local ({backend}) ne viennent pas de la même version. Réinstallez Bastide pour les remettre d’accord ; vos données ne sont pas touchées.'**
   String startupVersionMismatchMessage(String app, String backend);
 
   /// Developer warning when a debug build reaches a local engine from another version.
   ///
   /// In fr, this message translates to:
-  /// **'Le moteur local ({backend}) ne correspond pas à l\'application ({app}) : il est sans doute resté d\'une session précédente. Relancez-le, ou continuez quand même.'**
+  /// **'Le moteur local ({backend}) ne correspond pas à l’application ({app}) : il est sans doute resté d’une session précédente. Relancez-le, ou continuez quand même.'**
   String startupVersionMismatchDebugMessage(String app, String backend);
 
   /// Button on the developer version warning that opens the app anyway.
@@ -8141,13 +8141,13 @@ abstract class AppLocalizations {
   /// Toast title when a row's series was deleted since the list loaded, instead of opening it.
   ///
   /// In fr, this message translates to:
-  /// **'Ce paiement récurrent n\'existe plus'**
+  /// **'Ce paiement récurrent n’existe plus'**
   String get recurringSeriesGoneTitle;
 
   /// Toast body under recurringSeriesGoneTitle; the row reloads with the « Marquer comme récurrent » action.
   ///
   /// In fr, this message translates to:
-  /// **'Il a été supprimé entre-temps : l\'opération n\'est plus marquée comme récurrente.'**
+  /// **'Il a été supprimé entre-temps : l’opération n’est plus marquée comme récurrente.'**
   String get recurringSeriesGoneMessage;
 
   /// Title of the dialog previewing the series a transaction would start.
@@ -8159,7 +8159,7 @@ abstract class AppLocalizations {
   /// Intro line of the mark-as-recurring dialog.
   ///
   /// In fr, this message translates to:
-  /// **'Voici les opérations que Bastide regrouperait. Décochez celles qui n\'en font pas partie.'**
+  /// **'Voici les opérations que Bastide regrouperait. Décochez celles qui n’en font pas partie.'**
   String get markRecurringIntro;
 
   /// Confidence chip: the matches pass the detector as they are.
@@ -8225,13 +8225,13 @@ abstract class AppLocalizations {
   /// Reason: one amount is outside tolerance.
   ///
   /// In fr, this message translates to:
-  /// **'Un montant s\'écarte des autres'**
+  /// **'Un montant s’écarte des autres'**
   String get markRecurringReasonAmountOutsideTolerance;
 
   /// Reason: one gap between charges is outside tolerance.
   ///
   /// In fr, this message translates to:
-  /// **'Un intervalle s\'écarte du rythme'**
+  /// **'Un intervalle s’écarte du rythme'**
   String get markRecurringReasonGapOutsideTolerance;
 
   /// Reason: fewer charges than detection needs.
@@ -8249,7 +8249,7 @@ abstract class AppLocalizations {
   /// Warning banner shown when the preview's confidence is low.
   ///
   /// In fr, this message translates to:
-  /// **'Aucun rythme régulier n\'a été trouvé. Vous pouvez tout de même enregistrer la série : elle sera irrégulière.'**
+  /// **'Aucun rythme régulier n’a été trouvé. Vous pouvez tout de même enregistrer la série : elle sera irrégulière.'**
   String get markRecurringLowWarning;
 
   /// Label of the proposed cadence in the dialog summary.
@@ -8297,7 +8297,7 @@ abstract class AppLocalizations {
   /// Shown when the preview request failed.
   ///
   /// In fr, this message translates to:
-  /// **'Impossible de préparer l\'aperçu.'**
+  /// **'Impossible de préparer l’aperçu.'**
   String get markRecurringLoadError;
 
   /// Retries the preview request.
@@ -8381,7 +8381,7 @@ abstract class AppLocalizations {
   /// Leaves the series picker for the preview.
   ///
   /// In fr, this message translates to:
-  /// **'Retour à l\'aperçu'**
+  /// **'Retour à l’aperçu'**
   String get seriesPickerBack;
 
   /// Second line of a series in the picker: its account, cadence and expected amount.
@@ -8405,7 +8405,7 @@ abstract class AppLocalizations {
   /// Toast headline when adding the transaction to the series picked failed; the reason follows beneath.
   ///
   /// In fr, this message translates to:
-  /// **'L\'opération n\'a pas pu être ajoutée'**
+  /// **'L’opération n’a pas pu être ajoutée'**
   String get seriesPickerAddFailed;
 
   /// Series detail button opening the picker of transactions to add to the series.
@@ -8423,7 +8423,7 @@ abstract class AppLocalizations {
   /// Intro of the dialog adding transactions to a series.
   ///
   /// In fr, this message translates to:
-  /// **'Les opérations qui ne font partie d\'aucune série, les plus proches en premier.'**
+  /// **'Les opérations qui ne font partie d’aucune série, les plus proches en premier.'**
   String get chargePickerIntro;
 
   /// Placeholder of the transaction picker's search field.
@@ -8435,7 +8435,7 @@ abstract class AppLocalizations {
   /// Transaction picker: no candidate at all.
   ///
   /// In fr, this message translates to:
-  /// **'Aucune opération à ajouter : toutes vos dépenses font déjà partie d\'une série.'**
+  /// **'Aucune opération à ajouter : toutes vos dépenses font déjà partie d’une série.'**
   String get chargePickerEmpty;
 
   /// Transaction picker: the search matched nothing.
@@ -8477,7 +8477,7 @@ abstract class AppLocalizations {
   /// Shown in the pack import sheet when the background import failed.
   ///
   /// In fr, this message translates to:
-  /// **'L\'import n\'a pas pu aller jusqu\'au bout. Vérifiez vos règles avant de réessayer.'**
+  /// **'L’import n’a pas pu aller jusqu’au bout. Vérifiez vos règles avant de réessayer.'**
   String get rulePackImportRunFailed;
 
   /// Error when the bundled pack to import no longer exists (RULE_PACK_NOT_FOUND).
@@ -8489,7 +8489,7 @@ abstract class AppLocalizations {
   /// Error when another pack import of the user is still running (RULE_PACK_IMPORT_IN_PROGRESS).
   ///
   /// In fr, this message translates to:
-  /// **'Un autre import de règles est déjà en cours. Attendez qu\'il se termine.'**
+  /// **'Un autre import de règles est déjà en cours. Attendez qu’il se termine.'**
   String get ruleErrorPackImportInProgress;
 
   /// Error when the background pack import can no longer be read (RULE_PACK_IMPORT_RUN_NOT_FOUND).

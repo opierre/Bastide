@@ -354,7 +354,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(
-      find.text('Une date d\'estimation ne peut pas être dans le futur.'),
+      find.text('Une date d’estimation ne peut pas être dans le futur.'),
       findsOneWidget,
     );
     expect(find.byKey(const Key('propertyFormError')), findsNothing);

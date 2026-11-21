@@ -293,7 +293,7 @@ void main() {
 
       expect(
         find.text(
-          'Ce crédit ne se rembourse pas : l\'échéance ne couvre pas les intérêts du premier '
+          'Ce crédit ne se rembourse pas : l’échéance ne couvre pas les intérêts du premier '
           'mois. Modifiez le taux, le capital ou la durée.',
         ),
         findsOneWidget,

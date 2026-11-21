@@ -215,7 +215,7 @@ void main() {
     // Typed from scratch, nothing will correct it later, so no promise is made.
     expect(
       find.text(
-        "Ajusté automatiquement d'après le solde déclaré par votre relevé lors du premier import.",
+        "Ajusté automatiquement d’après le solde déclaré par votre relevé lors du premier import.",
       ),
       findsNothing,
     );
@@ -276,7 +276,7 @@ void main() {
 
       expect(
         find.text(
-          "Ajusté automatiquement d'après le solde déclaré par votre relevé lors du premier import.",
+          "Ajusté automatiquement d’après le solde déclaré par votre relevé lors du premier import.",
         ),
         findsOneWidget,
       );
@@ -351,7 +351,7 @@ void main() {
       findsNothing,
     );
     expect(
-      find.text("Repris de l'établissement déclaré par votre relevé."),
+      find.text("Repris de l’établissement déclaré par votre relevé."),
       findsOneWidget,
     );
 
@@ -524,7 +524,7 @@ void main() {
     expect(
       find.text(
         "Corriger cette valeur décale le solde du compte et son historique "
-        "enregistré du même montant. Aucune transaction n'est modifiée.",
+        "enregistré du même montant. Aucune transaction n’est modifiée.",
       ),
       findsOneWidget,
     );

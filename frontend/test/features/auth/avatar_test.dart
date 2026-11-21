@@ -284,7 +284,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(
-        find.text("L'avatar n'a pas pu être enregistré. Réessayez."),
+        find.text("L’avatar n’a pas pu être enregistré. Réessayez."),
         findsOneWidget,
       );
       expect(preview(), findsNothing);
