@@ -35,6 +35,42 @@ class SelectedTransaction extends Notifier<String?> {
 final selectedTransactionProvider =
     NotifierProvider<SelectedTransaction, String?>(SelectedTransaction.new);
 
+/// Opens Transactions on one operation, from a deep link (a dashboard
+/// « Activité récente » row, an account's « Opérations » row).
+///
+/// The list is narrowed to the operation's account and day, so its page holds
+/// it whatever the filters were, and the operation is selected for the
+/// inspector. An unknown id, or a failed read, leaves the panel as it was.
+class TransactionDeepLink extends Notifier<void> {
+  @override
+  void build() {}
+
+  Future<void> open(String id) async {
+    final Transaction transaction;
+    try {
+      transaction = await ref.read(transactionsRepositoryProvider).get(id);
+    } catch (_) {
+      // Unknown id or unreachable sidecar alike: leave the panel as it was.
+      return;
+    }
+    final day = transaction.bookedDate;
+    ref
+        .read(transactionFiltersProvider.notifier)
+        .replace(
+          TransactionFilters(
+            accountId: transaction.accountId,
+            dateFrom: day,
+            dateTo: day,
+          ),
+        );
+    ref.read(selectedTransactionProvider.notifier).select(id);
+  }
+}
+
+final transactionDeepLinkProvider = NotifierProvider<TransactionDeepLink, void>(
+  TransactionDeepLink.new,
+);
+
 /// The selected operation on the page shown, or `null` when none is selected
 /// or the selected one is not on this page.
 final selectedTransactionOnPageProvider = Provider<Transaction?>((ref) {

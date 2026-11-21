@@ -151,7 +151,10 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           ),
           GoRoute(
             path: TransactionsScreen.path,
-            builder: (context, state) => const TransactionsScreen(),
+            builder: (context, state) => TransactionsScreen(
+              operationId:
+                  state.uri.queryParameters[TransactionsScreen.operationParam],
+            ),
           ),
           GoRoute(
             path: ImportsScreen.path,

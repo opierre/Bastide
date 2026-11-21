@@ -19,6 +19,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../../support/route_probe.dart';
 import '../../support/fake_accounts_controller.dart';
 import 'account_overview_fixtures.dart';
 
@@ -82,6 +83,7 @@ Widget _wrap({
   ThemeData? theme,
   List<Account> extraAccounts = const [],
   FakeAccountsController? accounts,
+  bool routed = false,
 }) {
   return ProviderScope(
     // A failed read surfaces at once rather than after Riverpod's retries.
@@ -103,13 +105,23 @@ Widget _wrap({
         'card-2',
       ).overrideWith((ref) async => const SettlementRuleState()),
     ],
-    child: MaterialApp(
-      locale: locale,
-      theme: theme ?? AppTheme.dark,
-      localizationsDelegates: AppLocalizations.localizationsDelegates,
-      supportedLocales: AppLocalizations.supportedLocales,
-      home: Scaffold(body: AccountDetailScreen(accountId: accountId)),
-    ),
+    child: routed
+        ? MaterialApp.router(
+            locale: locale,
+            theme: theme ?? AppTheme.dark,
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+            routerConfig: probeRouter(
+              AccountDetailScreen(accountId: accountId),
+            ),
+          )
+        : MaterialApp(
+            locale: locale,
+            theme: theme ?? AppTheme.dark,
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+            home: Scaffold(body: AccountDetailScreen(accountId: accountId)),
+          ),
   );
 }
 
@@ -124,6 +136,26 @@ Future<void> _pump(WidgetTester tester, Widget widget) async {
 }
 
 void main() {
+  testWidgets('an operation row opens Transactions on it', (tester) async {
+    await _pump(
+      tester,
+      _wrap(
+        accountId: 'acc-1',
+        overview: () => overviewFrom(checkingOverviewJson()),
+        transactions: [_transaction('t1', -2999)],
+        routed: true,
+      ),
+    );
+
+    await tester.tap(find.byKey(const Key('transactionRow-t1')));
+    await tester.pumpAndSettle();
+
+    expect(
+      probedLocation(tester.widget(find.byKey(const Key('routeProbe')))),
+      '/transactions?operation=t1',
+    );
+  });
+
   testWidgets('a checking account shows its balance, stats and cards', (
     tester,
   ) async {

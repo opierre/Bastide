@@ -19,6 +19,7 @@ class AppSearchField extends StatefulWidget {
     required this.onChanged,
     this.width = AppSizes.searchField,
     this.initialValue = '',
+    this.value,
   });
 
   final String hint;
@@ -28,12 +29,19 @@ class AppSearchField extends StatefulWidget {
   final double width;
   final String initialValue;
 
+  /// The text the field shows, when it mirrors state held elsewhere (a
+  /// filter that a link or a reset can change): the field follows it whenever
+  /// it differs from what is typed. `null` leaves the field to its own text.
+  final String? value;
+
   @override
   State<AppSearchField> createState() => _AppSearchFieldState();
 }
 
 class _AppSearchFieldState extends State<AppSearchField> {
-  late final _controller = TextEditingController(text: widget.initialValue);
+  late final _controller = TextEditingController(
+    text: widget.value ?? widget.initialValue,
+  );
   final _focusNode = FocusNode();
   bool _hasText = false;
 
@@ -43,6 +51,19 @@ class _AppSearchFieldState extends State<AppSearchField> {
     _hasText = _controller.text.isNotEmpty;
     _controller.addListener(_handleTextChanged);
     HardwareKeyboard.instance.addHandler(_handleKey);
+  }
+
+  @override
+  void didUpdateWidget(AppSearchField oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    final value = widget.value;
+    // Typing echoes back the same text, so only an outside change lands here.
+    if (value != null && value != _controller.text) {
+      _controller.value = TextEditingValue(
+        text: value,
+        selection: TextSelection.collapsed(offset: value.length),
+      );
+    }
   }
 
   @override
