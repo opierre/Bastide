@@ -10,7 +10,8 @@ Same scaffold as `02-login.md`: `bg`, tomettes faded behind the form, one 320 px
 between children.
 
 1. Brand row (mark 20 px + « Bastide » 16/600).
-2. Field « Nom affiché ».
+2. Field « Nom d’utilisateur » (en: "Username"), the name Settings › Profil uses. It is
+   also a login identifier.
 3. Field « Adresse e-mail ».
 4. Field « Mot de passe » with the show/hide button. Helper line under it (11 px):
    - not yet valid: « 12 caractères minimum. » in `textTertiary`;
@@ -41,6 +42,8 @@ between children.
 - Validation messages sit under their field, never in a toast.
 
 ## Copy
+- The username field is « Nom d’utilisateur » / "Username", as in Settings; never « Nom
+  affiché ».
 - Drop the four-level strength verdicts (« Robuste », « Trop faible »).
 - Currency microcopy as in item 6.
 

@@ -668,7 +668,7 @@ abstract class AppLocalizations {
   /// **'Masquer le mot de passe'**
   String get authPasswordHide;
 
-  /// Label for the email field on login/register forms.
+  /// Label for the email field on the register form.
   ///
   /// In fr, this message translates to:
   /// **'Adresse e-mail'**
@@ -710,17 +710,11 @@ abstract class AppLocalizations {
   /// **'Les mots de passe ne correspondent pas.'**
   String get authPasswordMismatch;
 
-  /// Label of the user name field in Settings › Profil.
+  /// Label of the user name field, on the register screen and in Settings › Profil.
   ///
   /// In fr, this message translates to:
   /// **'Nom d\'utilisateur'**
   String get authDisplayNameLabel;
-
-  /// Label of the name field on the register screen (03-register.md).
-  ///
-  /// In fr, this message translates to:
-  /// **'Nom affiché'**
-  String get authRegisterDisplayNameLabel;
 
   /// Microcopy under the language and currency row at registration, stating which choice is permanent.
   ///
@@ -812,22 +806,16 @@ abstract class AppLocalizations {
   /// **'Se connecter'**
   String get authGoToLoginLink;
 
-  /// Validation message when the email field is left empty.
-  ///
-  /// In fr, this message translates to:
-  /// **'L\'e-mail est requis.'**
-  String get authEmailRequired;
-
   /// Validation message when the password field is left empty.
   ///
   /// In fr, this message translates to:
   /// **'Le mot de passe est requis.'**
   String get authPasswordRequired;
 
-  /// Localized message for the backend's INVALID_CREDENTIALS error code.
+  /// Localized message for the backend's INVALID_CREDENTIALS error code on login, where the identifier is the e-mail or the username.
   ///
   /// In fr, this message translates to:
-  /// **'E-mail ou mot de passe incorrect.'**
+  /// **'Identifiant ou mot de passe incorrect.'**
   String get authErrorInvalidCredentials;
 
   /// Localized message for the backend's EMAIL_TAKEN error code.

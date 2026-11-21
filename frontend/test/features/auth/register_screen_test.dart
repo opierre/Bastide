@@ -93,7 +93,8 @@ void main() {
     await tester.pumpWidget(_wrap(controller: FakeAuthController()));
     await tester.pumpAndSettle();
 
-    expect(find.text('Nom affiché'), findsOneWidget);
+    expect(find.text("Nom d'utilisateur"), findsOneWidget);
+    expect(find.text('Nom affiché'), findsNothing);
     expect(find.text('Adresse e-mail'), findsOneWidget);
     expect(find.text('Mot de passe'), findsOneWidget);
     expect(find.text('Langue'), findsOneWidget);
@@ -275,7 +276,8 @@ void main() {
     await tester.tap(find.byKey(const Key('registerLocaleEnglishOption')));
     await tester.pumpAndSettle();
 
-    expect(find.text('Display name'), findsOneWidget);
+    expect(find.text('Username'), findsOneWidget);
+    expect(find.text('Display name'), findsNothing);
     expect(find.text('EUR, euro'), findsOneWidget);
     expect(find.text('Create account'), findsOneWidget);
   });

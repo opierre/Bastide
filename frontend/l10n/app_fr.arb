@@ -440,7 +440,7 @@
   },
   "authEmailLabel": "Adresse e-mail",
   "@authEmailLabel": {
-    "description": "Label for the email field on login/register forms."
+    "description": "Label for the email field on the register form."
   },
   "authPasswordLabel": "Mot de passe",
   "@authPasswordLabel": {
@@ -486,11 +486,7 @@
   },
   "authDisplayNameLabel": "Nom d'utilisateur",
   "@authDisplayNameLabel": {
-    "description": "Label of the user name field in Settings › Profil."
-  },
-  "authRegisterDisplayNameLabel": "Nom affiché",
-  "@authRegisterDisplayNameLabel": {
-    "description": "Label of the name field on the register screen (03-register.md)."
+    "description": "Label of the user name field, on the register screen and in Settings › Profil."
   },
   "authPreferencesNote": "La langue se change dans les paramètres. La devise est définitive et s’applique à tous vos comptes.",
   "@authPreferencesNote": {
@@ -565,17 +561,13 @@
   "@authGoToLoginLink": {
     "description": "Link after authGoToLogin on the register screen, navigating to login."
   },
-  "authEmailRequired": "L'e-mail est requis.",
-  "@authEmailRequired": {
-    "description": "Validation message when the email field is left empty."
-  },
   "authPasswordRequired": "Le mot de passe est requis.",
   "@authPasswordRequired": {
     "description": "Validation message when the password field is left empty."
   },
-  "authErrorInvalidCredentials": "E-mail ou mot de passe incorrect.",
+  "authErrorInvalidCredentials": "Identifiant ou mot de passe incorrect.",
   "@authErrorInvalidCredentials": {
-    "description": "Localized message for the backend's INVALID_CREDENTIALS error code."
+    "description": "Localized message for the backend's INVALID_CREDENTIALS error code on login, where the identifier is the e-mail or the username."
   },
   "authErrorEmailTaken": "Un compte existe déjà avec cet e-mail.",
   "@authErrorEmailTaken": {

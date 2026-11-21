@@ -118,7 +118,6 @@
   "authConfirmPasswordLabel": "Confirm password",
   "authPasswordMismatch": "The passwords do not match.",
   "authDisplayNameLabel": "Username",
-  "authRegisterDisplayNameLabel": "Display name",
   "authPreferencesNote": "You can change the language in Settings. The currency is permanent and applies to all your accounts.",
   "@authPreferencesNote": {
     "description": "Microcopy under the language and currency row at registration, stating which choice is permanent."
@@ -143,9 +142,8 @@
   "authGoToRegister": "Create an account",
   "authGoToLogin": "Already have an account?",
   "authGoToLoginLink": "Log in",
-  "authEmailRequired": "Email is required.",
   "authPasswordRequired": "Password is required.",
-  "authErrorInvalidCredentials": "Incorrect email or password.",
+  "authErrorInvalidCredentials": "Wrong email, username or password.",
   "authErrorEmailTaken": "An account with this email already exists.",
   "authErrorValidation": "Some information is invalid.",
   "authErrorPasswordTooShort": "The password must be at least {minimum} characters long.",

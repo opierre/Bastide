@@ -385,9 +385,6 @@ class AppLocalizationsFr extends AppLocalizations {
   String get authDisplayNameLabel => 'Nom d\'utilisateur';
 
   @override
-  String get authRegisterDisplayNameLabel => 'Nom affiché';
-
-  @override
   String get authPreferencesNote =>
       'La langue se change dans les paramètres. La devise est définitive et s’applique à tous vos comptes.';
 
@@ -471,13 +468,11 @@ class AppLocalizationsFr extends AppLocalizations {
   String get authGoToLoginLink => 'Se connecter';
 
   @override
-  String get authEmailRequired => 'L\'e-mail est requis.';
-
-  @override
   String get authPasswordRequired => 'Le mot de passe est requis.';
 
   @override
-  String get authErrorInvalidCredentials => 'E-mail ou mot de passe incorrect.';
+  String get authErrorInvalidCredentials =>
+      'Identifiant ou mot de passe incorrect.';
 
   @override
   String get authErrorEmailTaken => 'Un compte existe déjà avec cet e-mail.';
