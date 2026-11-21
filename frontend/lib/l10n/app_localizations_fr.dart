@@ -1608,12 +1608,6 @@ class AppLocalizationsFr extends AppLocalizations {
   String get dashboardSavingsTrendAverage => 'en moyenne sur 12 mois';
 
   @override
-  String get dashboardSavingsViewBars => 'Barres';
-
-  @override
-  String get dashboardSavingsViewLine => 'Courbe';
-
-  @override
   String get dashboardRecentActivityTitle => 'Activité récente';
 
   @override

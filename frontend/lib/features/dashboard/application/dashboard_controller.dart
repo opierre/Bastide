@@ -113,25 +113,6 @@ final dashboardControllerProvider =
       DashboardController.new,
     );
 
-/// How « Épargne mensuelle » draws its months: one bar each, or joined as a line.
-enum SavingsChartView { bars, line }
-
-/// The savings chart's chosen view. Panel state held for the session: the provider lives as
-/// long as the app's `ProviderScope`, so leaving the dashboard and coming back keeps the
-/// choice, and a relaunch starts again on the bars. Both views draw the same series, so
-/// switching re-reads nothing.
-class SavingsChartViewController extends Notifier<SavingsChartView> {
-  @override
-  SavingsChartView build() => SavingsChartView.bars;
-
-  void set(SavingsChartView view) => state = view;
-}
-
-final savingsChartViewProvider =
-    NotifierProvider<SavingsChartViewController, SavingsChartView>(
-      SavingsChartViewController.new,
-    );
-
 /// Points the transactions list at what a « Dépenses par catégorie » row
 /// stands for: [categoryId] over the whole of [month]. The « Autres » fold has
 /// no single category, so it clears the category and keeps the month.
