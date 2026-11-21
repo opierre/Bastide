@@ -20,6 +20,7 @@ DEFAULTS = {
     "last_backup_at": None,
     "declared_monthly_income_minor": None,
     "update_check_enabled": False,
+    "savings_rate_goal_percent": 20,
 }
 
 
@@ -70,6 +71,7 @@ def test_patch_updates_only_supplied_fields(client: TestClient) -> None:
         "last_backup_at": None,
         "declared_monthly_income_minor": None,
         "update_check_enabled": False,
+        "savings_rate_goal_percent": 20,
     }
 
 
@@ -164,6 +166,49 @@ def test_patch_rejects_a_non_positive_declared_income(client: TestClient, income
 
     response = client.patch(
         "/api/v1/settings", json={"declared_monthly_income_minor": income}, headers=headers
+    )
+
+    assert response.status_code == 422
+
+
+def test_patch_sets_the_savings_rate_goal_and_keeps_it(client: TestClient) -> None:
+    headers = _register(client)
+
+    saved = client.patch(
+        "/api/v1/settings", json={"savings_rate_goal_percent": 35}, headers=headers
+    )
+    untouched = client.patch("/api/v1/settings", json={"ai_enabled": True}, headers=headers)
+    # An explicit null is not a goal: it leaves the stored one alone.
+    nulled = client.patch(
+        "/api/v1/settings", json={"savings_rate_goal_percent": None}, headers=headers
+    )
+
+    assert saved.status_code == 200
+    assert saved.json()["savings_rate_goal_percent"] == 35
+    assert untouched.json()["savings_rate_goal_percent"] == 35
+    assert nulled.json()["savings_rate_goal_percent"] == 35
+
+
+@pytest.mark.parametrize("goal", [0, 50])
+def test_patch_accepts_the_savings_rate_goal_bounds(client: TestClient, goal: int) -> None:
+    headers = _register(client)
+
+    response = client.patch(
+        "/api/v1/settings", json={"savings_rate_goal_percent": goal}, headers=headers
+    )
+
+    assert response.status_code == 200
+    assert response.json()["savings_rate_goal_percent"] == goal
+
+
+@pytest.mark.parametrize("goal", [-1, 51, 20.5])
+def test_patch_rejects_a_savings_rate_goal_outside_the_slider(
+    client: TestClient, goal: float
+) -> None:
+    headers = _register(client)
+
+    response = client.patch(
+        "/api/v1/settings", json={"savings_rate_goal_percent": goal}, headers=headers
     )
 
     assert response.status_code == 422

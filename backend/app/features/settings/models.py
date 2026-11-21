@@ -12,6 +12,8 @@ from app.core.db import Base, UtcDateTime
 # same OpenAI-compatible `/v1` surface, which is why the runtime is configuration, not code.
 DEFAULT_INFERENCE_BASE_URL = "http://127.0.0.1:11434/v1"
 DEFAULT_CONFIDENCE_THRESHOLD = 0.80
+# The savings rate the dashboard measures a month against, in whole percent.
+DEFAULT_SAVINGS_RATE_GOAL_PERCENT = 20
 
 
 class UserSettings(Base):
@@ -32,6 +34,10 @@ class UserSettings(Base):
     last_backup_at: Mapped[datetime | None] = mapped_column(UtcDateTime(), nullable=True)
     # Monthly income the debt ratio runs on. Null = derive it from the ledger.
     declared_monthly_income_minor: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    # The dashboard's savings-rate goal, a whole percent in [0, 50] (the Préférences slider).
+    savings_rate_goal_percent: Mapped[int] = mapped_column(
+        Integer, default=DEFAULT_SAVINGS_RATE_GOAL_PERCENT
+    )
     # Opt-in: off until the user turns it on, because the check is the one request that
     # leaves the machine (to GitHub's release API, see app/features/updates).
     update_check_enabled: Mapped[bool] = mapped_column(Boolean, default=False)

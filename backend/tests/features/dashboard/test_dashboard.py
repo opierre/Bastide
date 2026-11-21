@@ -179,6 +179,26 @@ def test_savings_rate_is_zero_when_no_income(client: TestClient, tmp_path: Path)
     assert body["savings_rate"] == 0.0
 
 
+def test_summary_carries_the_default_savings_goal_before_settings_exist(
+    client: TestClient,
+) -> None:
+    headers = _register(client)
+
+    body = _summary(client, headers, "2026-03")
+
+    assert body["savings_rate_goal_percent"] == 20
+
+
+def test_summary_carries_the_users_savings_goal(client: TestClient) -> None:
+    alice = _register(client, "alice@example.com")
+    bob = _register(client, "bob@example.com")
+    client.patch("/api/v1/settings", json={"savings_rate_goal_percent": 30}, headers=alice)
+
+    assert _summary(client, alice, "2026-03")["savings_rate_goal_percent"] == 30
+    # Another user's goal is not this one's.
+    assert _summary(client, bob, "2026-03")["savings_rate_goal_percent"] == 20
+
+
 def test_transfers_excluded_from_income_and_expense(client: TestClient, tmp_path: Path) -> None:
     headers = _register(client)
     account_id = _create_account(client, headers)

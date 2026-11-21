@@ -30,6 +30,7 @@ def _to_read(settings: UserSettings) -> SettingsRead:
         last_backup_at=settings.last_backup_at,
         declared_monthly_income_minor=settings.declared_monthly_income_minor,
         update_check_enabled=settings.update_check_enabled,
+        savings_rate_goal_percent=settings.savings_rate_goal_percent,
     )
 
 

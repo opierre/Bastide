@@ -36,6 +36,10 @@ class DashboardSummary(BaseModel):
     #: MoM change in savings rate, in percentage *points* (e.g. `0.223` → `0.204` is `-1.9`, not
     #: `-8.5`), so the frontend can show it directly beside the ratio without rescaling.
     savings_rate_delta_pct: float
+
+    #: The user's savings-rate goal in whole percent (`PATCH /settings`), what the rate's
+    #: repère measures against.
+    savings_rate_goal_percent: int
     by_category: list[CategoryBreakdown]
     currency: str
 

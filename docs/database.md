@@ -318,6 +318,7 @@ erDiagram
         bool update_check_enabled
         datetime update_checked_at "nullable"
         text update_latest_version "nullable"
+        int savings_rate_goal_percent
     }
     users {
         text id PK
