@@ -6,12 +6,12 @@ import '../../categories/domain/category.dart';
 import '../domain/rule.dart';
 import 'rules_controller.dart';
 
-/// The category the rules view is narrowed to, or `null` for every rule.
+/// The category the rules pane is narrowed to, or `null` for every rule.
 ///
-/// Set by a category card's footer (« 4 règles automatiques »), which opens the
-/// rules view on that category's rules (`docs/design/08`). A top-level
-/// category's filter takes in its subcategories too, so the list shows exactly
-/// the rules the card counted.
+/// It is the selection of the panel's category tree: « Toutes les règles » is
+/// `null`, a top-level category its id (`docs/design/08`). A top-level
+/// category's filter takes in its subcategories too, so the pane shows exactly
+/// the rules the tree counted.
 class RulesCategoryFilter extends Notifier<String?> {
   @override
   String? build() => null;
@@ -32,8 +32,8 @@ String rootCategoryIdOf(String categoryId, Map<String, AppCategory> byId) =>
 /// disabled rules included — a disabled rule is still one the user wrote for
 /// that category, and the filtered list it links to shows it.
 ///
-/// `null` while either list is loading or has failed: the card footer then
-/// states nothing rather than « Aucune règle », which would be a false claim.
+/// `null` while either list is loading or has failed: the tree then states
+/// nothing rather than « aucune règle », which would be a false claim.
 final ruleCountsByCategoryProvider = Provider<Map<String, int>?>((ref) {
   final rules = ref.watch(rulesControllerProvider).value;
   final categories = ref.watch(categoriesControllerProvider).value;
@@ -71,4 +71,13 @@ final visibleRulesProvider = Provider<AsyncValue<List<Rule>>>((ref) {
         if (rootCategoryIdOf(rule.categoryId, byId) == filter) rule,
     ],
   );
+});
+
+/// Each rule's place in the evaluation order, from 1, keyed by rule id.
+///
+/// Taken from the whole list, so a rule keeps its number while the pane is
+/// filtered: the order the engine applies is the whole list's.
+final rulePositionsProvider = Provider<Map<String, int>>((ref) {
+  final rules = ref.watch(rulesControllerProvider).value ?? const <Rule>[];
+  return {for (final (index, rule) in rules.indexed) rule.id: index + 1};
 });

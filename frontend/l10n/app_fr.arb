@@ -1913,13 +1913,21 @@
   "@categoriesRetry": {
     "description": "Retry button shown when the category catalog fails to load."
   },
-  "categoryBadgeSystem": "Système",
-  "@categoryBadgeSystem": {
-    "description": "Neutral badge on a seeded, read-only category card."
+  "categoriesPanelTitle": "Catégories et règles",
+  "@categoriesPanelTitle": {
+    "description": "Title-bar title of the categories and rules panel."
   },
-  "categoryBadgeCustom": "Personnalisée",
-  "@categoryBadgeCustom": {
-    "description": "Iris-tinted badge on a category the user created."
+  "categoriesTreeTitle": "Catégories",
+  "@categoriesTreeTitle": {
+    "description": "Heading of the category tree, left pane of the categories panel."
+  },
+  "categoriesAllRules": "Toutes les règles",
+  "@categoriesAllRules": {
+    "description": "First item of the category tree: shows every rule."
+  },
+  "categoriesSystemNote": "Les catégories fournies avec Bastide ne peuvent pas être supprimées.",
+  "@categoriesSystemNote": {
+    "description": "Note at the foot of the category tree."
   },
   "categorySystemLockedTooltip": "Catégorie du système : elle ne peut pas être modifiée ni supprimée.",
   "@categorySystemLockedTooltip": {
@@ -1941,7 +1949,7 @@
   "@categoryAddSubcategory": {
     "description": "Dashed ghost chip at the end of a category card's subcategories, drawn after a plus glyph. Opens the create modal with this category preset as the parent."
   },
-  "categoryRuleCount": "{count, plural, =0{Aucune règle} one{1 règle automatique} other{{count} règles automatiques}}",
+  "categoryRuleCount": "{count, plural, =0{aucune règle} one{1 règle} other{{count} règles}}",
   "@categoryRuleCount": {
     "description": "Footer of a category card: how many rules target this category or its subcategories, disabled ones included. The zero case is drawn in amber.",
     "placeholders": {
@@ -2196,14 +2204,6 @@
   "@categoryErrorGeneric": {
     "description": "Fallback message for unrecognized or network errors on the categories panel."
   },
-  "categoriesTabCategories": "Catégories",
-  "@categoriesTabCategories": {
-    "description": "Left segment of the panel's view switch."
-  },
-  "categoriesTabRules": "Règles",
-  "@categoriesTabRules": {
-    "description": "Right segment of the panel's view switch."
-  },
   "rulesAddButton": "Nouvelle règle",
   "@rulesAddButton": {
     "description": "Top-bar primary button while the rules view is showing."
@@ -2220,7 +2220,7 @@
   "@rulesApplyRunning": {
     "description": "Label of the run action while the run is in flight."
   },
-  "rulesApplyToastTitle": "{count, plural, =0{Aucune transaction recatégorisée} one{{count} transaction recatégorisée} other{{count} transactions recatégorisées}}",
+  "rulesApplyToastTitle": "{count, plural, =0{Aucune opération recatégorisée} one{{count} opération recatégorisée} other{{count} opérations recatégorisées}}",
   "@rulesApplyToastTitle": {
     "description": "First line of the toast after a rule run: how many transactions changed category.",
     "placeholders": {
@@ -2229,7 +2229,7 @@
       }
     }
   },
-  "rulesApplyToastBody": "Vos catégories choisies manuellement n'ont pas été modifiées.",
+  "rulesApplyToastBody": "Vos catégories choisies à la main n’ont pas été modifiées.",
   "@rulesApplyToastBody": {
     "description": "Second line of the rule-run toast. Answers the question the count alone raises."
   },
@@ -2249,7 +2249,7 @@
   "@rulesFilterClear": {
     "description": "Tooltip on the ✕ beside the category filter chip in the rules view, opened from a category card's footer."
   },
-  "rulesFilterEmpty": "Aucune règle ne cible cette catégorie.",
+  "rulesFilterEmpty": "Aucune règle pour cette catégorie.",
   "@rulesFilterEmpty": {
     "description": "Shown inside the rules card when the category filter leaves no rule."
   },
@@ -2257,11 +2257,43 @@
   "@rulesRetry": {
     "description": "Retry button shown when the rules list fails to load."
   },
+  "rulesPaneTitle": "Règles",
+  "@rulesPaneTitle": {
+    "description": "Heading of the rules pane, right of the category tree."
+  },
+  "rulesColumnOrder": "Ordre",
+  "@rulesColumnOrder": {
+    "description": "Rules table column: the rule's position in the evaluation order."
+  },
+  "rulesColumnField": "Champ",
+  "@rulesColumnField": {
+    "description": "Rules table column: the transaction field the rule reads."
+  },
+  "rulesColumnCondition": "Condition",
+  "@rulesColumnCondition": {
+    "description": "Rules table column: how the pattern is compared."
+  },
+  "rulesColumnPattern": "Motif",
+  "@rulesColumnPattern": {
+    "description": "Rules table column: the rule's pattern."
+  },
+  "rulesColumnCategory": "Catégorie",
+  "@rulesColumnCategory": {
+    "description": "Rules table column: the category the rule gives."
+  },
+  "rulesColumnMatches": "Correspondances",
+  "@rulesColumnMatches": {
+    "description": "Rules table column: how many transactions the rule classes."
+  },
+  "rulesColumnActive": "Active",
+  "@rulesColumnActive": {
+    "description": "Rules table column: the rule's on/off toggle."
+  },
   "rulesEmptyTitle": "Aucune règle",
   "@rulesEmptyTitle": {
     "description": "Heading of the rules empty state."
   },
-  "rulesEmptyBody": "Une règle reconnaît un libellé, comme « CARREFOUR », et attribue sa catégorie à chaque transaction correspondante, aujourd'hui et aux prochains imports.",
+  "rulesEmptyBody": "Une règle reconnaît un libellé, « CARREFOUR » par exemple, et attribue sa catégorie à chaque opération correspondante, aujourd’hui et aux prochains imports.",
   "@rulesEmptyBody": {
     "description": "Body of the rules empty state, explaining what a rule does before asking the user to write one."
   },
@@ -2273,7 +2305,7 @@
   "@ruleTargetMissing": {
     "description": "Chip shown when a rule points at a category that no longer exists."
   },
-  "ruleFieldDescription": "Libellé",
+  "ruleFieldDescription": "Description",
   "@ruleFieldDescription": {
     "description": "Rule match field: the cleaned transaction description."
   },
@@ -2357,7 +2389,7 @@
   "@rulePatternHintRange": {
     "description": "Placeholder example in the pattern field for a range condition."
   },
-  "ruleFormCategoryLabel": "Catégorie attribuée",
+  "ruleFormCategoryLabel": "Catégorie cible",
   "@ruleFormCategoryLabel": {
     "description": "Label of the rule editor's target-category select."
   },
@@ -2369,7 +2401,7 @@
   "@ruleFormCategoryRequired": {
     "description": "Error shown when saving a rule with no target category."
   },
-  "ruleFormEnabledLabel": "Règle active",
+  "ruleFormEnabledLabel": "Active",
   "@ruleFormEnabledLabel": {
     "description": "Label beside the rule editor's enable switch."
   },
@@ -2381,7 +2413,7 @@
   "@ruleFormLogoHelper": {
     "description": "Helper under the rule editor's logo section."
   },
-  "ruleFormLogoChoose": "Choisir une image…",
+  "ruleFormLogoChoose": "Choisir une image",
   "@ruleFormLogoChoose": {
     "description": "Button of the rule editor picking a logo picture."
   },
@@ -2393,7 +2425,7 @@
   "@ruleFormLogoRemove": {
     "description": "Tooltip and semantic label of the rule editor's bin icon button removing the rule's logo."
   },
-  "ruleFormLogoSaveFirst": "Enregistrez la règle pour pouvoir lui ajouter un logo.",
+  "ruleFormLogoSaveFirst": "Enregistrez la règle pour lui ajouter un logo.",
   "@ruleFormLogoSaveFirst": {
     "description": "Shown instead of the logo buttons while creating a rule: a logo is attached to a saved rule."
   },
@@ -2499,11 +2531,19 @@
   "@ruleFormDelete": {
     "description": "Delete action in the rule editor's footer, shown only when editing."
   },
+  "ruleDeleteConfirmTitle": "Supprimer cette règle ?",
+  "@ruleDeleteConfirmTitle": {
+    "description": "Title of the confirmation before a rule is deleted."
+  },
+  "ruleDeleteConfirmBody": "Les opérations qu’elle a déjà classées gardent leur catégorie.",
+  "@ruleDeleteConfirmBody": {
+    "description": "Body of the confirmation before a rule is deleted."
+  },
   "rulePreviewLoading": "Recherche des transactions correspondantes…",
   "@rulePreviewLoading": {
     "description": "Info banner shown while the match preview is in flight."
   },
-  "rulePreviewCount": "{count, plural, =0{Ne correspond à aucune transaction existante.} one{Correspond à {count} transaction existante.} other{Correspond à {count} transactions existantes.}}",
+  "rulePreviewCount": "{count, plural, =0{Ne correspond à aucune opération existante.} one{Correspond à {count} opération existante.} other{Correspond à {count} opérations existantes.}}",
   "@rulePreviewCount": {
     "description": "Match-preview banner when the backend returned no example to quote.",
     "placeholders": {
@@ -2512,7 +2552,7 @@
       }
     }
   },
-  "rulePreviewCountWithSample": "{count, plural, one{Correspond à {count} transaction existante : « {sample} » du {date}.} other{Correspond à {count} transactions existantes, dont « {sample} » du {date}.}}",
+  "rulePreviewCountWithSample": "{count, plural, one{Correspond à {count} opération existante : « {sample} » du {date}.} other{Correspond à {count} opérations existantes, dont « {sample} » du {date}.}}",
   "@rulePreviewCountWithSample": {
     "description": "Match-preview banner naming one of the matched transactions, so the user can tell whether the rule caught what they meant.",
     "placeholders": {

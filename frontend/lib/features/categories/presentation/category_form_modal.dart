@@ -5,6 +5,7 @@ import '../../../core/l10n/category_display.dart';
 import '../../../core/theme/tokens.dart';
 import '../../../core/widgets/app_modal.dart';
 import '../../../core/widgets/app_select.dart';
+import '../../../core/widgets/focus_ring.dart';
 import '../../../core/widgets/category_label.dart';
 import '../../../core/widgets/inline_banner.dart';
 import '../../../core/widgets/labeled_field.dart';
@@ -34,8 +35,10 @@ Future<AppCategory?> showCategoryForm(
   );
 }
 
-/// Create/edit modal for a user category — Nom, Kind, Parent, icône, couleur,
-/// following the 05 modal pattern at 480 px (`docs/design/08`).
+/// Create/edit modal for a user category, 480 px (`docs/design/08` §Category
+/// form): Nom · Type · Parent · Icône (a grid of the curated Lucide set) ·
+/// Couleur (the seven category slots). With a parent set, Type, Icône and
+/// Couleur are hidden and the lead repeats the parent's category label.
 ///
 /// System categories never reach it: they have no edit affordance, and the API
 /// would 404 the patch anyway. The form only ever writes the user's own rows.
@@ -186,18 +189,22 @@ class _CategoryFormModalState extends ConsumerState<CategoryFormModal> {
           ? l10n.categoryFormEditTitle
           : l10n.categoryFormCreateTitle,
       subtitle: parent == null ? null : _ParentLine(parent: parent),
-      width: 480,
+      width: AppCategoriesPanel.categoryFormWidth,
+      // On the footer's left, as in the rule editor: furthest from
+      // « Enregistrer ».
+      leadingAction: _isEditing
+          ? AppButton(
+              key: const Key('categoryFormDelete'),
+              label: l10n.categoryDelete,
+              variant: AppButtonVariant.ghost,
+              onPressed: _isSubmitting ? null : _delete,
+            )
+          : null,
       actions: [
-        // First in the footer, as in the rule editor: furthest from « Enregistrer ».
-        if (_isEditing)
-          TextButton(
-            key: const Key('categoryFormDelete'),
-            onPressed: _isSubmitting ? null : _delete,
-            child: Text(l10n.categoryDelete),
-          ),
-        OutlinedButton(
+        AppButton(
+          key: const Key('categoryFormCancel'),
+          label: l10n.categoryFormCancel,
           onPressed: _isSubmitting ? null : () => Navigator.of(context).pop(),
-          child: Text(l10n.categoryFormCancel),
         ),
         PrimaryButton(
           key: const Key('categoryFormSubmit'),
@@ -216,7 +223,7 @@ class _CategoryFormModalState extends ConsumerState<CategoryFormModal> {
                 key: const Key('categoryFormError'),
                 message: _errorText!,
               ),
-              const SizedBox(height: AppSpacing.md),
+              const SizedBox(height: AppSpacing.fieldGap),
             ],
             LabeledField(
               label: l10n.categoryFormNameLabel,
@@ -233,7 +240,7 @@ class _CategoryFormModalState extends ConsumerState<CategoryFormModal> {
               ),
             ),
             if (parent == null) ...[
-              const SizedBox(height: AppSpacing.md),
+              const SizedBox(height: AppSpacing.fieldGap),
               LabeledField(
                 label: l10n.categoryFormKindLabel,
                 helper: l10n.categoryFormKindHelper,
@@ -251,7 +258,7 @@ class _CategoryFormModalState extends ConsumerState<CategoryFormModal> {
                 ),
               ),
             ],
-            const SizedBox(height: AppSpacing.md),
+            const SizedBox(height: AppSpacing.fieldGap),
             LabeledField(
               label: l10n.categoryFormParentLabel,
               child: AppSelect<String?>(
@@ -272,28 +279,15 @@ class _CategoryFormModalState extends ConsumerState<CategoryFormModal> {
               ),
             ),
             if (parent == null) ...[
-              const SizedBox(height: AppSpacing.md),
+              const SizedBox(height: AppSpacing.fieldGap),
               LabeledField(
                 label: l10n.categoryFormIconLabel,
-                child: AppSelect<String>(
-                  key: const Key('categoryFormIcon'),
-                  value: _icon,
-                  onChanged: (value) => setState(() => _icon = value),
-                  items: [
-                    for (final key in CategoryIcons.glyphs.keys)
-                      AppSelectItem(
-                        value: key,
-                        label: categoryIconLabel(l10n, key),
-                        leading: Icon(
-                          CategoryIcons.forKey(key),
-                          size: 15,
-                          color: context.colors.textSecondary,
-                        ),
-                      ),
-                  ],
+                child: _IconGrid(
+                  selected: _icon,
+                  onSelected: (key) => setState(() => _icon = key),
                 ),
               ),
-              const SizedBox(height: AppSpacing.md),
+              const SizedBox(height: AppSpacing.fieldGap),
               LabeledField(
                 label: l10n.categoryFormColorLabel,
                 helper: l10n.categoryFormColorHelper,
@@ -311,8 +305,8 @@ class _CategoryFormModalState extends ConsumerState<CategoryFormModal> {
   }
 }
 
-/// The subtitle of a subcategory's modal: its parent's glyph, in the parent's
-/// hue, and name — standing in for the kind, icon and colour it inherits.
+/// The lead of a subcategory's modal: the parent's category label (`00`
+/// §7), standing in for the kind, icon and colour the subcategory inherits.
 class _ParentLine extends StatelessWidget {
   const _ParentLine({required this.parent});
 
@@ -321,32 +315,81 @@ class _ParentLine extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    return Row(
+    return Align(
       key: const Key('categoryFormParentLine'),
+      alignment: AlignmentDirectional.centerStart,
+      child: CategoryLabel.slotted(
+        label: localizedCategoryName(l10n, parent.name),
+        slot: categorySlot(parent),
+      ),
+    );
+  }
+}
+
+/// The curated Lucide set as a grid of 32 px cells; the selected cell takes
+/// the `hover` ground and an `accent` outline. Each cell names its glyph in a
+/// tooltip, which is also its semantic label.
+class _IconGrid extends StatelessWidget {
+  const _IconGrid({required this.selected, required this.onSelected});
+
+  final String selected;
+  final ValueChanged<String> onSelected;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final colors = context.colors;
+
+    return Wrap(
+      key: const Key('categoryFormIcon'),
+      spacing: AppSpacing.xs,
+      runSpacing: AppSpacing.xs,
       children: [
-        Icon(
-          categoryIcon(parent),
-          size: 15,
-          color: categoryColor(context, parent),
-        ),
-        const SizedBox(width: AppSpacing.sm),
-        Flexible(
-          child: Text(
-            localizedCategoryName(l10n, parent.name),
-            overflow: TextOverflow.ellipsis,
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: context.colors.textSecondary,
+        for (final key in CategoryIcons.glyphs.keys)
+          Tooltip(
+            message: categoryIconLabel(l10n, key),
+            child: Semantics(
+              button: true,
+              selected: key == selected,
+              label: categoryIconLabel(l10n, key),
+              child: MouseRegion(
+                cursor: SystemMouseCursors.click,
+                child: GestureDetector(
+                  key: Key('categoryFormIcon-$key'),
+                  onTap: () => onSelected(key),
+                  child: Container(
+                    width: AppCategoriesPanel.iconCell,
+                    height: AppCategoriesPanel.iconCell,
+                    alignment: Alignment.center,
+                    decoration: BoxDecoration(
+                      color: key == selected ? colors.hover : null,
+                      borderRadius: BorderRadius.circular(AppRadii.control),
+                      border: key == selected
+                          ? Border.all(color: colors.accent)
+                          : null,
+                    ),
+                    child: Icon(
+                      CategoryIcons.forKey(key),
+                      size: AppSizes.icon,
+                      color: key == selected
+                          ? colors.text
+                          : colors.textSecondary,
+                    ),
+                  ),
+                ),
+              ),
             ),
           ),
-        ),
       ],
     );
   }
 }
 
-/// The category slots as a row of 28 px swatches. A picker rather than a colour
+/// The seven category slots as 20 px squares. A picker rather than a colour
 /// wheel: the hues are fixed by the design system so a category means the same
-/// colour in every chart, legend and label (`00` §2.4).
+/// colour in every chart, legend and label (`00` §2.4). The selected square
+/// takes the 2 px `accent` outline, 1 px off, so the choice does not rest on
+/// colour alone.
 class _ColorPicker extends StatelessWidget {
   const _ColorPicker({required this.selected, required this.onSelected});
 
@@ -360,53 +403,30 @@ class _ColorPicker extends StatelessWidget {
       runSpacing: AppSpacing.sm,
       children: [
         for (final slot in CategorySlot.pickable)
-          GestureDetector(
-            key: Key('categoryFormColor-${slot.wire}'),
-            onTap: () => onSelected(slot),
+          Semantics(
+            button: true,
+            selected: slot == selected,
             child: MouseRegion(
               cursor: SystemMouseCursors.click,
-              child: _Swatch(
-                color: context.categoryColors.forSlot(slot),
-                isSelected: slot == selected,
+              child: GestureDetector(
+                key: Key('categoryFormColor-${slot.wire}'),
+                onTap: () => onSelected(slot),
+                child: FocusRing(
+                  focused: slot == selected,
+                  radius: AppRadii.item,
+                  child: Container(
+                    width: AppCategoriesPanel.colorSquare,
+                    height: AppCategoriesPanel.colorSquare,
+                    decoration: BoxDecoration(
+                      color: context.categoryColors.forSlot(slot),
+                      borderRadius: BorderRadius.circular(AppRadii.item),
+                    ),
+                  ),
+                ),
               ),
             ),
           ),
       ],
-    );
-  }
-}
-
-/// One 28 px swatch: the hue as a 12 px chip on a tinted plate, ringed in the
-/// hue itself when selected.
-class _Swatch extends StatelessWidget {
-  const _Swatch({required this.color, required this.isSelected});
-
-  final Color color;
-  final bool isSelected;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: 28,
-      height: 28,
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.2),
-        borderRadius: BorderRadius.circular(AppRadii.sm),
-        border: Border.all(
-          color: isSelected ? color : context.colors.line,
-          width: isSelected ? 2 : 1,
-        ),
-      ),
-      child: Center(
-        child: Container(
-          width: 12,
-          height: 12,
-          decoration: BoxDecoration(
-            color: color,
-            borderRadius: BorderRadius.circular(AppRadii.xs),
-          ),
-        ),
-      ),
     );
   }
 }

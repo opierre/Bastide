@@ -156,8 +156,6 @@ Widget _wrap(
 }
 
 Future<void> _tapPackAction(WidgetTester tester, String key) async {
-  await tester.tap(find.byKey(const Key('rulesViewSegment')));
-  await tester.pumpAndSettle();
   await tester.tap(find.byKey(Key(key)));
   await tester.pumpAndSettle();
 }

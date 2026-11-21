@@ -645,6 +645,32 @@ abstract final class AppNetworth {
   static const menuColumn = AppSizes.button + AppSpacing.smPlus;
 }
 
+/// The Catégories et règles panel of `docs/design/08-categories-rules.md`.
+abstract final class AppCategoriesPanel {
+  /// The category tree on the left, with its right hairline.
+  static const treeWidth = 340.0;
+
+  /// A subcategory's indent in the tree: past the chevron, the dot and the
+  /// icon of its parent.
+  static const subcategoryIndent = 52.0;
+
+  /// The rules table's « Ordre » column: the grip and the position.
+  static const orderColumn = 60.0;
+
+  /// The « Correspondances » and « Active » columns.
+  static const matchesColumn = 120.0;
+  static const activeColumn = 56.0;
+
+  /// The rule editor, the category form and the rule pack modals.
+  static const ruleEditorWidth = 520.0;
+  static const categoryFormWidth = 480.0;
+  static const packModalWidth = 560.0;
+
+  /// A cell of the category form's icon grid, and a colour square.
+  static const iconCell = 32.0;
+  static const colorSquare = 20.0;
+}
+
 /// v1: the 38 px control pill some panels still put in the title bar, kept
 /// until each panel's v2 ticket moves it to the 28 px controls of [AppSizes].
 abstract final class AppChrome {

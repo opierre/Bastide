@@ -4,8 +4,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/tokens.dart';
 import '../../../core/widgets/app_modal.dart';
 import '../../../core/widgets/app_toast.dart';
-import '../../../core/widgets/app_toggle.dart';
+import '../../../core/widgets/app_checkbox.dart';
+import '../../../core/widgets/app_table.dart';
 import '../../../core/widgets/inline_banner.dart';
+import '../../../core/widgets/monogram_avatar.dart';
+import '../../../core/widgets/note_line.dart';
+import '../../../core/widgets/repere_meter.dart';
 import '../../../core/widgets/primary_button.dart';
 import '../../../l10n/app_localizations.dart';
 import '../application/rule_pack_import_controller.dart';
@@ -174,7 +178,7 @@ class _RulePackImportSheetState extends ConsumerState<RulePackImportSheet> {
     if (state.result case final result? when state.hasLogoDownloads) {
       return AppModal(
         title: _preview.name,
-        width: 520,
+        width: AppCategoriesPanel.packModalWidth,
         actions: [
           PrimaryButton(
             key: const Key('rulePackImportDone'),
@@ -191,12 +195,12 @@ class _RulePackImportSheetState extends ConsumerState<RulePackImportSheet> {
       canPop: canClose,
       child: AppModal(
         title: _preview.name,
-        width: 520,
+        width: AppCategoriesPanel.packModalWidth,
         actions: [
-          OutlinedButton(
+          AppButton(
             key: const Key('rulePackImportCancel'),
+            label: l10n.rulePackCancel,
             onPressed: canClose ? () => Navigator.of(context).pop() : null,
-            child: Text(l10n.rulePackCancel),
           ),
           if (!state.isDownloading)
             PrimaryButton(
@@ -235,10 +239,9 @@ class _RulePackImportSheetState extends ConsumerState<RulePackImportSheet> {
   ) {
     return [
       // The headline the whole confirmation step exists for.
-      InlineBanner(
+      NoteLine(
         key: const Key('rulePackHeadline'),
-        tone: BannerTone.info,
-        message: l10n.rulePackWouldMatch(_preview.wouldMatchCount),
+        text: l10n.rulePackWouldMatch(_preview.wouldMatchCount),
       ),
       const SizedBox(height: AppSpacing.md),
       RulePackReport(preview: _preview),
@@ -258,8 +261,8 @@ class _RulePackImportSheetState extends ConsumerState<RulePackImportSheet> {
         const SizedBox(height: AppSpacing.xs),
         Padding(
           // Aligned with the label, past the box and its gap.
-          padding: const EdgeInsets.only(
-            left: 18 + AppSpacing.sm + AppSpacing.xs,
+          padding: const EdgeInsetsDirectional.only(
+            start: AppCheckbox.size + AppSpacing.sm,
           ),
           child: Text(
             l10n.rulePackLogoDownloadHelper,
@@ -271,7 +274,7 @@ class _RulePackImportSheetState extends ConsumerState<RulePackImportSheet> {
       ],
       Row(
         children: [
-          AppToggle(
+          AppCheckbox(
             key: const Key('rulePackApplyNow'),
             value: _applyNow,
             semanticLabel: l10n.rulePackApplyNowLabel,
@@ -279,7 +282,7 @@ class _RulePackImportSheetState extends ConsumerState<RulePackImportSheet> {
                 ? null
                 : (value) => setState(() => _applyNow = value),
           ),
-          const SizedBox(width: AppSpacing.sm + AppSpacing.xs),
+          const SizedBox(width: AppSpacing.sm),
           Expanded(
             child: Text(
               l10n.rulePackApplyNowLabel,
@@ -315,44 +318,14 @@ class _LogoDownloadProgress extends StatelessWidget {
           ),
         ),
         const SizedBox(height: AppSpacing.sm + AppSpacing.xs),
-        Semantics(
-          label: l10n.rulePackLogoProgress(run.logoDone, run.logoTotal),
-          child: _ProgressBar(fraction: run.logoProgress),
+        RepereMeter(
+          fraction: run.logoProgress,
+          semanticLabel: l10n.rulePackLogoProgress(run.logoDone, run.logoTotal),
         ),
         const SizedBox(height: AppSpacing.sm + AppSpacing.xs),
         Text(l10n.rulePackLogoProgressNotice, style: context.textStyles.helper),
         const SizedBox(height: AppSpacing.sm),
       ],
-    );
-  }
-}
-
-/// The 6px iris-gradient run bar, as the categorization banner draws it
-/// (`transactions/presentation/ai_run_banner.dart`); redrawn here rather than
-/// imported, since one feature does not reach into another's widgets.
-class _ProgressBar extends StatelessWidget {
-  const _ProgressBar({required this.fraction});
-
-  final double fraction;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      height: 6,
-      decoration: BoxDecoration(
-        color: context.colors.hover,
-        borderRadius: BorderRadius.circular(AppRadii.xs),
-      ),
-      child: FractionallySizedBox(
-        alignment: Alignment.centerLeft,
-        widthFactor: fraction.clamp(0.0, 1.0),
-        child: Container(
-          decoration: BoxDecoration(
-            color: context.colors.accent,
-            borderRadius: BorderRadius.circular(AppRadii.xs),
-          ),
-        ),
-      ),
     );
   }
 }
@@ -401,6 +374,12 @@ class _ImportResultView extends StatelessWidget {
   }
 }
 
+/// The logo and the pattern of a pack's rule, on the standard table.
+const _packRuleColumns = [
+  AppTableColumn(label: '', width: MonogramAvatar.small + AppSpacing.smPlus),
+  AppTableColumn(label: ''),
+];
+
 /// The pack's rules, each behind its logo or monogram, so the user sees what
 /// the pack brings rule by rule and not only as counts.
 class _PackRulesList extends StatelessWidget {
@@ -416,7 +395,7 @@ class _PackRulesList extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Text(l10n.rulePackRulesLabel, style: context.textStyles.sectionLabel),
-        const SizedBox(height: AppSpacing.sm - 2),
+        const SizedBox(height: AppSpacing.xsPlus),
         ConstrainedBox(
           // A pack can hold up to a thousand rules: the list scrolls inside a
           // bounded plate instead of stretching the sheet.
@@ -427,22 +406,17 @@ class _PackRulesList extends StatelessWidget {
             itemCount: rules.length,
             itemBuilder: (context, index) {
               final rule = rules[index];
-              return Padding(
+              return AppTableRow(
                 key: Key('rulePackRule-$index'),
-                padding: const EdgeInsets.symmetric(vertical: 3),
-                child: Row(
-                  children: [
-                    RulePackLogoChip(entry: rule),
-                    const SizedBox(width: AppSpacing.sm + AppSpacing.xs),
-                    Expanded(
-                      child: Text(
-                        rule.pattern,
-                        overflow: TextOverflow.ellipsis,
-                        style: context.textStyles.mono,
-                      ),
-                    ),
-                  ],
-                ),
+                columns: _packRuleColumns,
+                cells: [
+                  RulePackLogoChip(entry: rule),
+                  Text(
+                    rule.pattern,
+                    overflow: TextOverflow.ellipsis,
+                    style: context.textStyles.mono,
+                  ),
+                ],
               );
             },
           ),
@@ -452,9 +426,8 @@ class _PackRulesList extends StatelessWidget {
   }
 }
 
-/// The gradient checkbox the rules modals draw (see `always_categorize_modal`).
-/// Material's [Checkbox] paints a flat fill and carries touch-sized padding,
-/// neither of which matches the spec.
+/// « Télécharger les logos (N) »: the standard checkbox and its label, both
+/// toggling the choice.
 class _LogoDownloadCheckbox extends StatelessWidget {
   const _LogoDownloadCheckbox({
     required this.value,
@@ -480,30 +453,12 @@ class _LogoDownloadCheckbox extends StatelessWidget {
         behavior: HitTestBehavior.opaque,
         child: Row(
           children: [
-            Semantics(
-              checked: value,
-              label: label,
-              child: Container(
-                width: 18,
-                height: 18,
-                alignment: Alignment.center,
-                decoration: BoxDecoration(
-                  color: value ? context.colors.accent : context.colors.field,
-                  borderRadius: BorderRadius.circular(AppRadii.xs + 1),
-                  border: Border.all(
-                    color: value ? Colors.transparent : context.colors.line,
-                  ),
-                ),
-                child: value
-                    ? Icon(
-                        Icons.check_rounded,
-                        size: 13,
-                        color: context.colors.onAccent,
-                      )
-                    : null,
-              ),
+            AppCheckbox(
+              value: value,
+              semanticLabel: label,
+              onChanged: onChanged,
             ),
-            const SizedBox(width: AppSpacing.sm + AppSpacing.xs),
+            const SizedBox(width: AppSpacing.sm),
             Flexible(
               child: Text(label, style: Theme.of(context).textTheme.bodyMedium),
             ),

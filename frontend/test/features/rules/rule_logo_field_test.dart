@@ -103,13 +103,13 @@ void main() {
   for (final (locale, saveFirst, choose) in [
     (
       const Locale('fr'),
-      'Enregistrez la règle pour pouvoir lui ajouter un logo.',
-      'Choisir une image…',
+      'Enregistrez la règle pour lui ajouter un logo.',
+      'Choisir une image',
     ),
     (
       const Locale('en'),
       'Save the rule to add a logo to it.',
-      'Choose a picture…',
+      'Choose a picture',
     ),
   ]) {
     testWidgets('a new rule is told to save first (${locale.languageCode})', (
@@ -156,16 +156,14 @@ void main() {
 
       expect(find.byKey(const Key('institutionAvatarLogo')), findsOneWidget);
       expect(find.text('Remplacer…'), findsOneWidget);
-      // The remove action is a bin icon, its label only a tooltip.
-      expect(find.text('Retirer'), findsNothing);
+      // The remove action is the ghost « Retirer ».
       expect(
         find.descendant(
           of: find.byKey(const Key('ruleFormLogoRemove')),
-          matching: find.byIcon(Icons.delete_outline_rounded),
+          matching: find.text('Retirer'),
         ),
         findsOneWidget,
       );
-      expect(find.byTooltip('Retirer'), findsOneWidget);
 
       await tester.tap(find.byKey(const Key('ruleFormLogoRemove')));
       await tester.pumpAndSettle();

@@ -5,6 +5,7 @@ import 'package:bastide/core/api/api_client_provider.dart';
 import 'package:bastide/core/runs/run_event.dart';
 import 'package:bastide/core/runs/run_progress_provider.dart';
 import 'package:bastide/core/theme/app_theme.dart';
+import 'package:bastide/core/widgets/app_button.dart';
 import 'package:bastide/features/rules/application/rule_pack_import_controller.dart';
 import 'package:bastide/features/rules/application/rule_packs_controller.dart';
 import 'package:bastide/features/rules/application/rules_controller.dart';
@@ -338,7 +339,7 @@ void main() {
         // The form gives way to the bar, and the sheet can't be closed while
         // the run it would lose the result of is going.
         expect(find.byKey(const Key('rulePackImportConfirm')), findsNothing);
-        final cancel = tester.widget<OutlinedButton>(
+        final cancel = tester.widget<AppButton>(
           find.byKey(const Key('rulePackImportCancel')),
         );
         expect(cancel.onPressed, isNull);

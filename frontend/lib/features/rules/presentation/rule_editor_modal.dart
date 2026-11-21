@@ -21,19 +21,29 @@ import 'rule_match_preview_banner.dart';
 
 /// Opens the rule editor. Resolves to the saved rule, or `null` on cancel or
 /// delete.
-Future<Rule?> showRuleEditor(BuildContext context, {Rule? initial}) {
+///
+/// [initialCategoryId] presets a new rule's target: the category the rules
+/// pane is filtered on.
+Future<Rule?> showRuleEditor(
+  BuildContext context, {
+  Rule? initial,
+  String? initialCategoryId,
+}) {
   return showDialog<Rule>(
     context: context,
-    builder: (_) => RuleEditorModal(initial: initial),
+    builder: (_) =>
+        RuleEditorModal(initial: initial, initialCategoryId: initialCategoryId),
   );
 }
 
-/// The 520 px rule editor: Champ/Condition/Priorité row, pattern, target
-/// category, active toggle, and the live match preview (`docs/design/08` ③).
+/// The 520 px rule editor (`docs/design/08` §Rule editor): one row of
+/// Champ · Condition · Priorité, then Motif, Catégorie cible, the live match
+/// note, Logo and « Active »; « Supprimer » on the footer's left when editing.
 class RuleEditorModal extends ConsumerStatefulWidget {
-  const RuleEditorModal({super.key, this.initial});
+  const RuleEditorModal({super.key, this.initial, this.initialCategoryId});
 
   final Rule? initial;
+  final String? initialCategoryId;
 
   @override
   ConsumerState<RuleEditorModal> createState() => _RuleEditorModalState();
@@ -52,7 +62,8 @@ class _RuleEditorModalState extends ConsumerState<RuleEditorModal> {
       widget.initial?.matchField ?? RuleMatchField.descriptionClean;
   late RuleMatchType _matchType =
       widget.initial?.matchType ?? RuleMatchType.contains;
-  late String? _categoryId = widget.initial?.categoryId;
+  late String? _categoryId =
+      widget.initial?.categoryId ?? widget.initialCategoryId;
   late bool _enabled = widget.initial?.enabled ?? true;
 
   bool _isSubmitting = false;
@@ -141,6 +152,8 @@ class _RuleEditorModalState extends ConsumerState<RuleEditorModal> {
   }
 
   Future<void> _delete() async {
+    if (!await _confirmDelete()) return;
+    if (!mounted) return;
     setState(() {
       _isSubmitting = true;
       _errorText = null;
@@ -160,6 +173,37 @@ class _RuleEditorModalState extends ConsumerState<RuleEditorModal> {
     }
   }
 
+  /// Asks before the rule goes: deleting it cannot be undone.
+  Future<bool> _confirmDelete() async {
+    final l10n = AppLocalizations.of(context)!;
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AppModal(
+        title: l10n.ruleDeleteConfirmTitle,
+        width: AppCategoriesPanel.categoryFormWidth,
+        actions: [
+          AppButton(
+            label: l10n.ruleFormCancel,
+            onPressed: () => Navigator.of(dialogContext).pop(false),
+          ),
+          AppButton(
+            key: const Key('ruleDeleteConfirmButton'),
+            label: l10n.ruleFormDelete,
+            variant: AppButtonVariant.destructive,
+            onPressed: () => Navigator.of(dialogContext).pop(true),
+          ),
+        ],
+        child: Text(
+          l10n.ruleDeleteConfirmBody,
+          style: Theme.of(
+            dialogContext,
+          ).textTheme.bodyMedium?.copyWith(color: context.colors.textSecondary),
+        ),
+      ),
+    );
+    return confirmed ?? false;
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
@@ -170,17 +214,20 @@ class _RuleEditorModalState extends ConsumerState<RuleEditorModal> {
 
     return AppModal(
       title: _isEditing ? l10n.ruleFormEditTitle : l10n.ruleFormCreateTitle,
-      width: 520,
+      width: AppCategoriesPanel.ruleEditorWidth,
+      leadingAction: _isEditing
+          ? AppButton(
+              key: const Key('ruleFormDelete'),
+              label: l10n.ruleFormDelete,
+              variant: AppButtonVariant.ghost,
+              onPressed: _isSubmitting ? null : _delete,
+            )
+          : null,
       actions: [
-        if (_isEditing)
-          TextButton(
-            key: const Key('ruleFormDelete'),
-            onPressed: _isSubmitting ? null : _delete,
-            child: Text(l10n.ruleFormDelete),
-          ),
-        OutlinedButton(
+        AppButton(
+          key: const Key('ruleFormCancel'),
+          label: l10n.ruleFormCancel,
           onPressed: _isSubmitting ? null : () => Navigator.of(context).pop(),
-          child: Text(l10n.ruleFormCancel),
         ),
         PrimaryButton(
           key: const Key('ruleFormSubmit'),
@@ -199,7 +246,7 @@ class _RuleEditorModalState extends ConsumerState<RuleEditorModal> {
                 key: const Key('ruleFormError'),
                 message: _errorText!,
               ),
-              const SizedBox(height: AppSpacing.md),
+              const SizedBox(height: AppSpacing.fieldGap),
             ],
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -267,7 +314,7 @@ class _RuleEditorModalState extends ConsumerState<RuleEditorModal> {
                 ),
               ],
             ),
-            const SizedBox(height: AppSpacing.md),
+            const SizedBox(height: AppSpacing.fieldGap),
             LabeledField(
               label: l10n.ruleFormPatternLabel,
               helper: rulePatternHelper(l10n, _matchType),
@@ -290,9 +337,7 @@ class _RuleEditorModalState extends ConsumerState<RuleEditorModal> {
                     : null,
               ),
             ),
-            const SizedBox(height: AppSpacing.sm + AppSpacing.xs),
-            RuleMatchPreviewBanner(state: previewState),
-            const SizedBox(height: AppSpacing.md),
+            const SizedBox(height: AppSpacing.fieldGap),
             LabeledField(
               label: l10n.ruleFormCategoryLabel,
               child: AppSelect<String?>(
@@ -309,12 +354,14 @@ class _RuleEditorModalState extends ConsumerState<RuleEditorModal> {
                 ],
               ),
             ),
-            const SizedBox(height: AppSpacing.md),
+            const SizedBox(height: AppSpacing.fieldGap),
+            RuleMatchPreviewBanner(state: previewState),
+            const SizedBox(height: AppSpacing.fieldGap),
             RuleLogoField(
               ruleId: widget.initial?.id,
               name: widget.initial?.pattern ?? '',
             ),
-            const SizedBox(height: AppSpacing.md),
+            const SizedBox(height: AppSpacing.fieldGap),
             Row(
               children: [
                 AppToggle(

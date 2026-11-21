@@ -2533,17 +2533,29 @@ abstract class AppLocalizations {
   /// **'Réessayer'**
   String get categoriesRetry;
 
-  /// Neutral badge on a seeded, read-only category card.
+  /// Title-bar title of the categories and rules panel.
   ///
   /// In fr, this message translates to:
-  /// **'Système'**
-  String get categoryBadgeSystem;
+  /// **'Catégories et règles'**
+  String get categoriesPanelTitle;
 
-  /// Iris-tinted badge on a category the user created.
+  /// Heading of the category tree, left pane of the categories panel.
   ///
   /// In fr, this message translates to:
-  /// **'Personnalisée'**
-  String get categoryBadgeCustom;
+  /// **'Catégories'**
+  String get categoriesTreeTitle;
+
+  /// First item of the category tree: shows every rule.
+  ///
+  /// In fr, this message translates to:
+  /// **'Toutes les règles'**
+  String get categoriesAllRules;
+
+  /// Note at the foot of the category tree.
+  ///
+  /// In fr, this message translates to:
+  /// **'Les catégories fournies avec Bastide ne peuvent pas être supprimées.'**
+  String get categoriesSystemNote;
 
   /// Tooltip on the lock glyph of a system category card. States the refusal the API also enforces.
   ///
@@ -2578,7 +2590,7 @@ abstract class AppLocalizations {
   /// Footer of a category card: how many rules target this category or its subcategories, disabled ones included. The zero case is drawn in amber.
   ///
   /// In fr, this message translates to:
-  /// **'{count, plural, =0{Aucune règle} one{1 règle automatique} other{{count} règles automatiques}}'**
+  /// **'{count, plural, =0{aucune règle} one{1 règle} other{{count} règles}}'**
   String categoryRuleCount(int count);
 
   /// Title of the delete-category confirmation dialog.
@@ -2941,18 +2953,6 @@ abstract class AppLocalizations {
   /// **'Une erreur est survenue. Veuillez réessayer.'**
   String get categoryErrorGeneric;
 
-  /// Left segment of the panel's view switch.
-  ///
-  /// In fr, this message translates to:
-  /// **'Catégories'**
-  String get categoriesTabCategories;
-
-  /// Right segment of the panel's view switch.
-  ///
-  /// In fr, this message translates to:
-  /// **'Règles'**
-  String get categoriesTabRules;
-
   /// Top-bar primary button while the rules view is showing.
   ///
   /// In fr, this message translates to:
@@ -2980,13 +2980,13 @@ abstract class AppLocalizations {
   /// First line of the toast after a rule run: how many transactions changed category.
   ///
   /// In fr, this message translates to:
-  /// **'{count, plural, =0{Aucune transaction recatégorisée} one{{count} transaction recatégorisée} other{{count} transactions recatégorisées}}'**
+  /// **'{count, plural, =0{Aucune opération recatégorisée} one{{count} opération recatégorisée} other{{count} opérations recatégorisées}}'**
   String rulesApplyToastTitle(int count);
 
   /// Second line of the rule-run toast. Answers the question the count alone raises.
   ///
   /// In fr, this message translates to:
-  /// **'Vos catégories choisies manuellement n\'ont pas été modifiées.'**
+  /// **'Vos catégories choisies à la main n’ont pas été modifiées.'**
   String get rulesApplyToastBody;
 
   /// Toast headline when the rule run itself failed.
@@ -3016,7 +3016,7 @@ abstract class AppLocalizations {
   /// Shown inside the rules card when the category filter leaves no rule.
   ///
   /// In fr, this message translates to:
-  /// **'Aucune règle ne cible cette catégorie.'**
+  /// **'Aucune règle pour cette catégorie.'**
   String get rulesFilterEmpty;
 
   /// Retry button shown when the rules list fails to load.
@@ -3024,6 +3024,54 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Réessayer'**
   String get rulesRetry;
+
+  /// Heading of the rules pane, right of the category tree.
+  ///
+  /// In fr, this message translates to:
+  /// **'Règles'**
+  String get rulesPaneTitle;
+
+  /// Rules table column: the rule's position in the evaluation order.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ordre'**
+  String get rulesColumnOrder;
+
+  /// Rules table column: the transaction field the rule reads.
+  ///
+  /// In fr, this message translates to:
+  /// **'Champ'**
+  String get rulesColumnField;
+
+  /// Rules table column: how the pattern is compared.
+  ///
+  /// In fr, this message translates to:
+  /// **'Condition'**
+  String get rulesColumnCondition;
+
+  /// Rules table column: the rule's pattern.
+  ///
+  /// In fr, this message translates to:
+  /// **'Motif'**
+  String get rulesColumnPattern;
+
+  /// Rules table column: the category the rule gives.
+  ///
+  /// In fr, this message translates to:
+  /// **'Catégorie'**
+  String get rulesColumnCategory;
+
+  /// Rules table column: how many transactions the rule classes.
+  ///
+  /// In fr, this message translates to:
+  /// **'Correspondances'**
+  String get rulesColumnMatches;
+
+  /// Rules table column: the rule's on/off toggle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Active'**
+  String get rulesColumnActive;
 
   /// Heading of the rules empty state.
   ///
@@ -3034,7 +3082,7 @@ abstract class AppLocalizations {
   /// Body of the rules empty state, explaining what a rule does before asking the user to write one.
   ///
   /// In fr, this message translates to:
-  /// **'Une règle reconnaît un libellé, comme « CARREFOUR », et attribue sa catégorie à chaque transaction correspondante, aujourd\'hui et aux prochains imports.'**
+  /// **'Une règle reconnaît un libellé, « CARREFOUR » par exemple, et attribue sa catégorie à chaque opération correspondante, aujourd’hui et aux prochains imports.'**
   String get rulesEmptyBody;
 
   /// Accessible label of the enable switch on a rule row.
@@ -3052,7 +3100,7 @@ abstract class AppLocalizations {
   /// Rule match field: the cleaned transaction description.
   ///
   /// In fr, this message translates to:
-  /// **'Libellé'**
+  /// **'Description'**
   String get ruleFieldDescription;
 
   /// Rule match field: the extracted merchant name.
@@ -3178,7 +3226,7 @@ abstract class AppLocalizations {
   /// Label of the rule editor's target-category select.
   ///
   /// In fr, this message translates to:
-  /// **'Catégorie attribuée'**
+  /// **'Catégorie cible'**
   String get ruleFormCategoryLabel;
 
   /// Empty option of the target-category select.
@@ -3196,7 +3244,7 @@ abstract class AppLocalizations {
   /// Label beside the rule editor's enable switch.
   ///
   /// In fr, this message translates to:
-  /// **'Règle active'**
+  /// **'Active'**
   String get ruleFormEnabledLabel;
 
   /// Label of the rule editor's logo section.
@@ -3214,7 +3262,7 @@ abstract class AppLocalizations {
   /// Button of the rule editor picking a logo picture.
   ///
   /// In fr, this message translates to:
-  /// **'Choisir une image…'**
+  /// **'Choisir une image'**
   String get ruleFormLogoChoose;
 
   /// Button of the rule editor picking a picture to replace the rule's logo.
@@ -3232,7 +3280,7 @@ abstract class AppLocalizations {
   /// Shown instead of the logo buttons while creating a rule: a logo is attached to a saved rule.
   ///
   /// In fr, this message translates to:
-  /// **'Enregistrez la règle pour pouvoir lui ajouter un logo.'**
+  /// **'Enregistrez la règle pour lui ajouter un logo.'**
   String get ruleFormLogoSaveFirst;
 
   /// Screen-reader label of a small logo picture that opens it enlarged when clicked.
@@ -3373,6 +3421,18 @@ abstract class AppLocalizations {
   /// **'Supprimer'**
   String get ruleFormDelete;
 
+  /// Title of the confirmation before a rule is deleted.
+  ///
+  /// In fr, this message translates to:
+  /// **'Supprimer cette règle ?'**
+  String get ruleDeleteConfirmTitle;
+
+  /// Body of the confirmation before a rule is deleted.
+  ///
+  /// In fr, this message translates to:
+  /// **'Les opérations qu’elle a déjà classées gardent leur catégorie.'**
+  String get ruleDeleteConfirmBody;
+
   /// Info banner shown while the match preview is in flight.
   ///
   /// In fr, this message translates to:
@@ -3382,13 +3442,13 @@ abstract class AppLocalizations {
   /// Match-preview banner when the backend returned no example to quote.
   ///
   /// In fr, this message translates to:
-  /// **'{count, plural, =0{Ne correspond à aucune transaction existante.} one{Correspond à {count} transaction existante.} other{Correspond à {count} transactions existantes.}}'**
+  /// **'{count, plural, =0{Ne correspond à aucune opération existante.} one{Correspond à {count} opération existante.} other{Correspond à {count} opérations existantes.}}'**
   String rulePreviewCount(int count);
 
   /// Match-preview banner naming one of the matched transactions, so the user can tell whether the rule caught what they meant.
   ///
   /// In fr, this message translates to:
-  /// **'{count, plural, one{Correspond à {count} transaction existante : « {sample} » du {date}.} other{Correspond à {count} transactions existantes, dont « {sample} » du {date}.}}'**
+  /// **'{count, plural, one{Correspond à {count} opération existante : « {sample} » du {date}.} other{Correspond à {count} opérations existantes, dont « {sample} » du {date}.}}'**
   String rulePreviewCountWithSample(int count, String sample, String date);
 
   /// Localized message for RULE_PATTERN_INVALID. Rendered on the pattern field, never as a match count of zero.

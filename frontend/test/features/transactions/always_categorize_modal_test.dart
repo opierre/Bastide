@@ -173,7 +173,7 @@ void main() {
     await settlePreview(tester);
 
     expect(find.byKey(const Key('rulePreviewBanner')), findsOneWidget);
-    expect(find.textContaining('7 transactions existantes'), findsOneWidget);
+    expect(find.textContaining('7 opérations existantes'), findsOneWidget);
   });
 
   testWidgets('creating posts the expected payload and reports the count', (

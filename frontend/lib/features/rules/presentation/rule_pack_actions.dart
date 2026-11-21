@@ -1,19 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:lucide_icons_flutter/lucide_icons_300.dart';
 
 import '../../../core/theme/tokens.dart';
+import '../../../core/widgets/app_button.dart';
 import '../../../l10n/app_localizations.dart';
 import '../application/rule_packs_controller.dart';
 import '../domain/rule_pack.dart';
 import 'rule_pack_export_sheet.dart';
 import 'rule_pack_import_sheet.dart';
 
-/// The pack actions on the rules view, one icon button each, beside
-/// « Exécuter les règles ».
+/// The pack actions at the right of the rules pane's header, one ghost icon
+/// button each, 8 px apart.
 ///
 /// Buttons rather than a menu: behind a single icon, users did not find them.
-/// Icon-only so the header's weight still belongs to « Exécuter les règles »;
-/// each button names its action in a tooltip.
+/// Icon-only so the header stays quiet; each button names its action in a
+/// tooltip. The built-in pack button hides once that pack is imported.
 class RulePackActions extends ConsumerWidget {
   const RulePackActions({super.key});
 
@@ -25,10 +27,11 @@ class RulePackActions extends ConsumerWidget {
 
     return Row(
       mainAxisSize: MainAxisSize.min,
+      spacing: AppSpacing.sm,
       children: [
         _PackActionButton(
           key: const Key('rulePackImportButton'),
-          icon: Icons.file_upload_outlined,
+          icon: LucideIcons300.fileUp,
           tooltip: l10n.rulePackImportFile,
           onPressed: () => startRulePackImport(context, ref),
         ),
@@ -37,14 +40,14 @@ class RulePackActions extends ConsumerWidget {
         if (firstBuiltin != null)
           _PackActionButton(
             key: const Key('rulePackImportBuiltinButton'),
-            icon: Icons.auto_awesome_outlined,
+            icon: LucideIcons300.packagePlus,
             tooltip: l10n.rulePackImportBuiltin(firstBuiltin.name),
             onPressed: () =>
                 startRulePackImport(context, ref, builtinId: firstBuiltin.id),
           ),
         _PackActionButton(
           key: const Key('rulePackExportButton'),
-          icon: Icons.file_download_outlined,
+          icon: LucideIcons300.fileDown,
           tooltip: l10n.rulePackExportAction,
           onPressed: () => startRulePackExport(context, ref),
         ),
@@ -67,19 +70,15 @@ class _PackActionButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return IconButton(
-      onPressed: onPressed,
-      tooltip: tooltip,
-      iconSize: 18,
-      // 34 px, the search pill's icon targets: three Material 48 px buttons
-      // crowd the header beside a French « Exécuter les règles » label.
-      padding: EdgeInsets.zero,
-      constraints: const BoxConstraints(minWidth: 34, minHeight: 34),
-      style: IconButton.styleFrom(
-        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+    return Tooltip(
+      message: tooltip,
+      child: AppButton(
+        label: tooltip,
+        icon: icon,
+        iconOnly: true,
+        variant: AppButtonVariant.ghost,
+        onPressed: onPressed,
       ),
-      color: context.colors.textSecondary,
-      icon: Icon(icon),
     );
   }
 }
@@ -113,12 +112,12 @@ class BuiltinPackOffer extends ConsumerWidget {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        OutlinedButton.icon(
+        AppButton(
           key: const Key('emptyStateBuiltinPackButton'),
+          label: l10n.rulePackStartWith(pack.name, pack.ruleCount),
+          icon: LucideIcons300.packagePlus,
           onPressed: () =>
               startRulePackImport(context, ref, builtinId: pack.id),
-          icon: const Icon(Icons.auto_awesome_outlined, size: 16),
-          label: Text(l10n.rulePackStartWith(pack.name, pack.ruleCount)),
         ),
         const SizedBox(height: AppSpacing.sm),
         Text(
