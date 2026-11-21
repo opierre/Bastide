@@ -1,7 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../core/api/api_client.dart' show ApiFailure;
 import '../../categories/domain/category.dart' show AppCategory;
 import '../data/transactions_repository.dart';
 import '../domain/transaction.dart';
@@ -41,7 +40,7 @@ final selectedTransactionProvider =
 ///
 /// The list is narrowed to the operation's account and day, so its page holds
 /// it whatever the filters were, and the operation is selected for the
-/// inspector. An unknown id leaves the panel as it was.
+/// inspector. An unknown id, or a failed read, leaves the panel as it was.
 class TransactionDeepLink extends Notifier<void> {
   @override
   void build() {}
@@ -50,7 +49,8 @@ class TransactionDeepLink extends Notifier<void> {
     final Transaction transaction;
     try {
       transaction = await ref.read(transactionsRepositoryProvider).get(id);
-    } on ApiFailure {
+    } catch (_) {
+      // Unknown id or unreachable sidecar alike: leave the panel as it was.
       return;
     }
     final day = transaction.bookedDate;

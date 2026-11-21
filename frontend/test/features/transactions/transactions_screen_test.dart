@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:bastide/core/api/api_client.dart';
 import 'package:bastide/core/theme/app_theme.dart';
@@ -790,6 +791,14 @@ void main() {
       expect(_container(tester).read(transactionFiltersProvider), filters);
       expect(find.byKey(const Key('transactionInspector')), findsNothing);
     });
+
+    testWidgets('a failed read keeps the filters', (tester) async {
+      const filters = TransactionFilters(categoryId: 'c-insurance');
+      await _pump(tester, operationId: 'offline', filters: filters);
+
+      expect(_container(tester).read(selectedTransactionProvider), isNull);
+      expect(_container(tester).read(transactionFiltersProvider), filters);
+    });
   });
 
   group('states', () {
@@ -876,13 +885,15 @@ class _PresetFilters extends TransactionFiltersNotifier {
 }
 
 /// The repository a deep link reads its operation from: `t2` exists, any
-/// other id is unknown.
+/// other id is unknown, and `offline` fails as an unreachable sidecar would.
 class _Repository extends Mock implements TransactionsRepository {
   @override
-  Future<Transaction> get(String id) async => id == 't2'
-      ? _transaction(id: 't2')
-      : throw const ApiFailure(
-          code: 'TRANSACTION_NOT_FOUND',
-          message: 'Transaction not found',
-        );
+  Future<Transaction> get(String id) async => switch (id) {
+    't2' => _transaction(id: 't2'),
+    'offline' => throw const SocketException('Connection refused'),
+    _ => throw const ApiFailure(
+      code: 'TRANSACTION_NOT_FOUND',
+      message: 'Transaction not found',
+    ),
+  };
 }
