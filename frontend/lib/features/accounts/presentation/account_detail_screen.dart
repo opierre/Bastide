@@ -1005,6 +1005,8 @@ class _OperationRow extends StatelessWidget {
     return AppTableRow(
       key: Key('transactionRow-${transaction.id}'),
       columns: columns,
+      onTap: () =>
+          context.go(TransactionsScreen.location(operationId: transaction.id)),
       // A linked card's purchase names its card under the label.
       twoLines: card != null,
       cells: [

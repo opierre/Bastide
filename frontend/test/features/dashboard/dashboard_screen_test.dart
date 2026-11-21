@@ -27,6 +27,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:lucide_icons_flutter/lucide_icons_300.dart';
 
+import '../../support/route_probe.dart';
 import '../../support/dashboard_fixtures.dart';
 import '../../support/fake_dashboard_controller.dart';
 
@@ -45,6 +46,7 @@ Widget _wrap({
   required DashboardState state,
   Locale locale = const Locale('fr'),
   ThemeData? theme,
+  bool routed = false,
 }) {
   return ProviderScope(
     overrides: [
@@ -52,13 +54,21 @@ Widget _wrap({
         () => FakeDashboardController(initialState: state),
       ),
     ],
-    child: MaterialApp(
-      locale: locale,
-      theme: theme ?? AppTheme.dark,
-      localizationsDelegates: AppLocalizations.localizationsDelegates,
-      supportedLocales: AppLocalizations.supportedLocales,
-      home: const Scaffold(body: DashboardScreen()),
-    ),
+    child: routed
+        ? MaterialApp.router(
+            locale: locale,
+            theme: theme ?? AppTheme.dark,
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+            routerConfig: probeRouter(const DashboardScreen()),
+          )
+        : MaterialApp(
+            locale: locale,
+            theme: theme ?? AppTheme.dark,
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+            home: Scaffold(body: const DashboardScreen()),
+          ),
   );
 }
 
@@ -92,6 +102,20 @@ Finder _byKey(String key) => find.byKey(Key(key));
 void main() {
   BuildContext ctx(WidgetTester tester) =>
       tester.element(find.byType(DashboardScreen));
+
+  testWidgets('a recent activity row opens Transactions on it', (tester) async {
+    _useDesktopSurface(tester);
+    await tester.pumpWidget(_wrap(state: _state(), routed: true));
+    await tester.pumpAndSettle();
+
+    await tester.tap(_byKey('dashboardRecentRow-t1'));
+    await tester.pumpAndSettle();
+
+    expect(
+      probedLocation(tester.widget(_byKey('routeProbe'))),
+      '/transactions?operation=t1',
+    );
+  });
 
   group('reading line', () {
     testWidgets('leads with the savings rate, then income, expenses, net', (
