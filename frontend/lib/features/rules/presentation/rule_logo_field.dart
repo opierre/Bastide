@@ -10,6 +10,7 @@ import '../../../core/widgets/app_modal.dart';
 import '../../../core/widgets/inline_banner.dart';
 import '../../../core/widgets/institution_avatar.dart';
 import '../../../core/widgets/labeled_field.dart';
+import '../../../core/widgets/monogram_avatar.dart';
 import '../../../core/widgets/picture_crop_modal.dart';
 import '../../../core/widgets/primary_button.dart';
 import '../../../l10n/app_localizations.dart';
@@ -17,7 +18,9 @@ import '../application/rule_logo_controller.dart';
 import '../application/rule_logo_url_controller.dart';
 import '../application/rules_controller.dart';
 
-const _previewSize = 40.0;
+/// The 22 px monogram the rules table and the matched rows show
+/// (`docs/design/08` §Rule editor).
+const _previewSize = MonogramAvatar.small;
 
 /// The rule editor's « Logo » field: the chip the matched rows will show, and
 /// the buttons to give the rule a logo, replace it or remove it.
@@ -84,58 +87,51 @@ class RuleLogoField extends ConsumerWidget {
         final failure? => ruleLogoFailureText(l10n, failure),
         null => null,
       },
-      child: Row(
-        children: [
-          InstitutionAvatar(
-            key: const Key('ruleFormLogoPreview'),
-            name: name,
-            size: _previewSize,
-            logo: logo,
-            zoomable: true,
-          ),
-          const SizedBox(width: AppSpacing.md),
-          if (ruleId != null)
-            // Wraps rather than overflows: the French labels run long.
-            Flexible(
-              child: Wrap(
-                spacing: AppSpacing.sm,
-                runSpacing: AppSpacing.sm,
-                children: [
-                  OutlinedButton(
-                    key: const Key('ruleFormLogoChoose'),
-                    onPressed: state.busy ? null : pick,
-                    child: Text(
-                      logo == null
-                          ? l10n.ruleFormLogoChoose
-                          : l10n.ruleFormLogoReplace,
-                    ),
-                  ),
-                  OutlinedButton(
-                    key: const Key('ruleFormLogoFromUrl'),
-                    onPressed: state.busy ? null : fromUrl,
-                    child: Text(l10n.ruleFormLogoFromUrl),
-                  ),
-                  if (logo != null)
-                    // A bin rather than a text button: lighter next to the
-                    // two outlined ones; the label stays as the tooltip,
-                    // which also gives it its semantic label.
-                    IconButton(
-                      key: const Key('ruleFormLogoRemove'),
-                      onPressed: state.busy
-                          ? null
-                          : () => controller.remove(ruleId),
-                      tooltip: l10n.ruleFormLogoRemove,
-                      iconSize: 18,
-                      icon: Icon(
-                        Icons.delete_outline_rounded,
-                        color: context.colors.textSecondary,
+      // A new rule shows only the helper: there is no logo to preview yet.
+      child: ruleId == null
+          ? const SizedBox.shrink()
+          : Row(
+              children: [
+                InstitutionAvatar(
+                  key: const Key('ruleFormLogoPreview'),
+                  name: name,
+                  size: _previewSize,
+                  logo: logo,
+                  zoomable: true,
+                ),
+                const SizedBox(width: AppSpacing.smPlus),
+                // Wraps rather than overflows: the French labels run long.
+                Flexible(
+                  child: Wrap(
+                    spacing: AppSpacing.sm,
+                    runSpacing: AppSpacing.sm,
+                    children: [
+                      AppButton(
+                        key: const Key('ruleFormLogoChoose'),
+                        label: logo == null
+                            ? l10n.ruleFormLogoChoose
+                            : l10n.ruleFormLogoReplace,
+                        onPressed: state.busy ? null : pick,
                       ),
-                    ),
-                ],
-              ),
+                      AppButton(
+                        key: const Key('ruleFormLogoFromUrl'),
+                        label: l10n.ruleFormLogoFromUrl,
+                        onPressed: state.busy ? null : fromUrl,
+                      ),
+                      if (logo != null)
+                        AppButton(
+                          key: const Key('ruleFormLogoRemove'),
+                          label: l10n.ruleFormLogoRemove,
+                          variant: AppButtonVariant.ghost,
+                          onPressed: state.busy
+                              ? null
+                              : () => controller.remove(ruleId),
+                        ),
+                    ],
+                  ),
+                ),
+              ],
             ),
-        ],
-      ),
     );
   }
 }
@@ -229,9 +225,9 @@ class _RuleLogoUrlModalState extends ConsumerState<_RuleLogoUrlModal> {
       title: l10n.ruleLogoUrlTitle,
       width: 420,
       actions: [
-        OutlinedButton(
+        AppButton(
+          label: l10n.ruleLogoUrlCancel,
           onPressed: busy ? null : () => Navigator.of(context).pop(),
-          child: Text(l10n.ruleLogoUrlCancel),
         ),
         PrimaryButton(
           key: const Key('ruleLogoUrlFetch'),

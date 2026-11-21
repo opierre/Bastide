@@ -330,6 +330,7 @@ async def _execute(
             if status == "assigned":
                 row.category_id = outcome.category_id
                 row.categorization_source = "model"
+                row.rule_id = None
                 row.categorization_confidence = outcome.confidence
                 row.needs_review = False
             # A deferred or failed row is otherwise left exactly as it was: it stays in the

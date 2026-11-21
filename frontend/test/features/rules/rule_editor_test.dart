@@ -137,7 +137,7 @@ void main() {
 
     expect(find.byKey(const Key('rulePreviewBanner')), findsOneWidget);
     expect(
-      find.textContaining('Correspond à 7 transactions existantes'),
+      find.textContaining('Correspond à 7 opérations existantes'),
       findsOneWidget,
     );
     expect(find.textContaining('CB CARREFOUR PARIS 15'), findsOneWidget);
@@ -156,7 +156,7 @@ void main() {
     await _settlePreview(tester);
 
     expect(
-      find.text('Ne correspond à aucune transaction existante.'),
+      find.text('Ne correspond à aucune opération existante.'),
       findsOneWidget,
     );
   });

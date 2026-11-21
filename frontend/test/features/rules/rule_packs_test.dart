@@ -143,8 +143,8 @@ Widget _wrap(
   );
 }
 
+/// The rules pane stands beside the tree: nothing to open, only to settle.
 Future<void> _openRules(WidgetTester tester) async {
-  await tester.tap(find.byKey(const Key('rulesViewSegment')));
   await tester.pumpAndSettle();
 }
 

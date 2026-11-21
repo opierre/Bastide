@@ -1661,10 +1661,17 @@ class AppLocalizationsEn extends AppLocalizations {
   String get categoriesRetry => 'Try again';
 
   @override
-  String get categoryBadgeSystem => 'System';
+  String get categoriesPanelTitle => 'Categories and rules';
 
   @override
-  String get categoryBadgeCustom => 'Custom';
+  String get categoriesTreeTitle => 'Categories';
+
+  @override
+  String get categoriesAllRules => 'All rules';
+
+  @override
+  String get categoriesSystemNote =>
+      'The categories that come with Bastide cannot be deleted.';
 
   @override
   String get categorySystemLockedTooltip =>
@@ -1687,9 +1694,9 @@ class AppLocalizationsEn extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '$count automatic rules',
-      one: '1 automatic rule',
-      zero: 'No rules',
+      other: '$count rules',
+      one: '1 rule',
+      zero: 'no rule',
     );
     return '$_temp0';
   }
@@ -1881,12 +1888,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get categoryErrorGeneric => 'Something went wrong. Please try again.';
 
   @override
-  String get categoriesTabCategories => 'Categories';
-
-  @override
-  String get categoriesTabRules => 'Rules';
-
-  @override
   String get rulesAddButton => 'New rule';
 
   @override
@@ -1913,7 +1914,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get rulesApplyToastBody =>
-      'The categories you chose yourself were left untouched.';
+      'The categories you chose by hand were not changed.';
 
   @override
   String get rulesApplyFailed => 'The rule run failed';
@@ -1928,17 +1929,41 @@ class AppLocalizationsEn extends AppLocalizations {
   String get rulesFilterClear => 'Show all rules';
 
   @override
-  String get rulesFilterEmpty => 'No rule targets this category.';
+  String get rulesFilterEmpty => 'No rule for this category.';
 
   @override
   String get rulesRetry => 'Try again';
+
+  @override
+  String get rulesPaneTitle => 'Rules';
+
+  @override
+  String get rulesColumnOrder => 'Order';
+
+  @override
+  String get rulesColumnField => 'Field';
+
+  @override
+  String get rulesColumnCondition => 'Condition';
+
+  @override
+  String get rulesColumnPattern => 'Pattern';
+
+  @override
+  String get rulesColumnCategory => 'Category';
+
+  @override
+  String get rulesColumnMatches => 'Matches';
+
+  @override
+  String get rulesColumnActive => 'Active';
 
   @override
   String get rulesEmptyTitle => 'No rules';
 
   @override
   String get rulesEmptyBody =>
-      'A rule recognizes a label, such as “CARREFOUR”, and applies its category to every matching transaction, today and on every import after.';
+      'A rule recognizes a label, “CARREFOUR” for example, and gives its category to every matching transaction, today and on every import after.';
 
   @override
   String get ruleToggleSemantics => 'Enable rule';
@@ -1947,7 +1972,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get ruleTargetMissing => 'Category missing';
 
   @override
-  String get ruleFieldDescription => 'Label';
+  String get ruleFieldDescription => 'Description';
 
   @override
   String get ruleFieldMerchant => 'Merchant';
@@ -2013,7 +2038,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get rulePatternHintRange => '-10000:-5000';
 
   @override
-  String get ruleFormCategoryLabel => 'Category assigned';
+  String get ruleFormCategoryLabel => 'Target category';
 
   @override
   String get ruleFormCategoryNone => 'Choose a category';
@@ -2023,7 +2048,7 @@ class AppLocalizationsEn extends AppLocalizations {
       'Choose the category this rule assigns.';
 
   @override
-  String get ruleFormEnabledLabel => 'Rule active';
+  String get ruleFormEnabledLabel => 'Active';
 
   @override
   String get ruleFormLogoLabel => 'Logo';
@@ -2033,7 +2058,7 @@ class AppLocalizationsEn extends AppLocalizations {
       'Shown instead of the monogram on the transactions and subscriptions this rule matches.';
 
   @override
-  String get ruleFormLogoChoose => 'Choose a picture…';
+  String get ruleFormLogoChoose => 'Choose a picture';
 
   @override
   String get ruleFormLogoReplace => 'Replace…';
@@ -2120,6 +2145,13 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get ruleFormDelete => 'Delete';
+
+  @override
+  String get ruleDeleteConfirmTitle => 'Delete this rule?';
+
+  @override
+  String get ruleDeleteConfirmBody =>
+      'The transactions it already classed keep their category.';
 
   @override
   String get rulePreviewLoading => 'Looking for matching transactions…';

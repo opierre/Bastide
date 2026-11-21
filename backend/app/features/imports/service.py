@@ -25,7 +25,7 @@ from app.features.imports.parsers.ofx import (
     parse_statements,
 )
 from app.features.imports.repository import ImportRepository
-from app.features.rules.engine import match_category
+from app.features.rules.engine import match_rule
 from app.features.rules.repository import RuleRepository
 from app.features.transactions.models import Transaction
 
@@ -211,10 +211,11 @@ class ImportService:
                 fitid=row.fitid,
                 dedup_hash=row.dedup_hash,
             )
-            matched_category_id = match_category(transaction, rules)
-            if matched_category_id is not None:
-                transaction.category_id = matched_category_id
+            matched_rule = match_rule(transaction, rules)
+            if matched_rule is not None:
+                transaction.category_id = matched_rule.category_id
                 transaction.categorization_source = "rule"
+                transaction.rule_id = matched_rule.id
                 transaction.needs_review = False
             new_transactions.append(transaction)
 

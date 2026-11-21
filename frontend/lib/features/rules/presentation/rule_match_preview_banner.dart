@@ -2,17 +2,21 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 import '../../../core/widgets/inline_banner.dart';
+import '../../../core/widgets/note_line.dart';
 import '../../../l10n/app_localizations.dart';
 import '../application/rule_preview_controller.dart';
 import 'rule_error_localizer.dart';
 
-/// The info banner frame 08 draws under the pattern field: the count, and one
-/// example named so the user can tell at a glance whether the rule caught what
-/// they meant.
+/// The note the rule editor shows under the target category
+/// (`docs/design/08` §Rule editor): the count, and one example named so the
+/// user can tell at a glance whether the rule caught what they meant
+/// (« Correspond à 7 opérations existantes, dont « CB CARREFOUR PARIS 15 »
+/// du 14 mai 2026. »).
 ///
-/// Silent while the pattern is empty, and silent on a rejected pattern too —
-/// that message belongs on the field, and repeating it here would state the
-/// same failure twice.
+/// A note, not a banner: it is something to know, not to act on. A failed
+/// count is the exception, a warning banner, since the user may want to retry.
+/// Silent while the pattern is empty, and silent on a rejected pattern too:
+/// that message belongs on the field.
 class RuleMatchPreviewBanner extends StatelessWidget {
   const RuleMatchPreviewBanner({super.key, required this.state});
 
@@ -23,10 +27,9 @@ class RuleMatchPreviewBanner extends StatelessWidget {
     final l10n = AppLocalizations.of(context)!;
 
     if (state.isLoading && state.preview == null) {
-      return InlineBanner(
+      return NoteLine(
         key: const Key('rulePreviewLoading'),
-        tone: BannerTone.info,
-        message: l10n.rulePreviewLoading,
+        text: l10n.rulePreviewLoading,
       );
     }
     if (state.error != null) {
@@ -48,13 +51,9 @@ class RuleMatchPreviewBanner extends StatelessWidget {
         : l10n.rulePreviewCountWithSample(
             preview.matchCount,
             sample.descriptionClean,
-            DateFormat.yMd(locale).format(sample.bookedDate),
+            DateFormat.yMMMMd(locale).format(sample.bookedDate),
           );
 
-    return InlineBanner(
-      key: const Key('rulePreviewBanner'),
-      tone: BannerTone.info,
-      message: message,
-    );
+    return NoteLine(key: const Key('rulePreviewBanner'), text: message);
   }
 }

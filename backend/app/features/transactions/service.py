@@ -119,6 +119,7 @@ class TransactionService:
                 )
             transaction.category_id = data.category_id
             transaction.categorization_source = "user"
+            transaction.rule_id = None
             transaction.needs_review = False
         if data.description_clean is not None:
             transaction.description_clean = data.description_clean

@@ -4,24 +4,27 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../data/categories_repository.dart';
 import '../domain/category.dart';
 
-/// Which of the panel's two views is showing.
+/// The top-level categories open in the panel's tree, showing their
+/// subcategories (`docs/design/08`). All closed when the panel first opens.
 ///
-/// Held in its own provider rather than in the screen's `State` because the top
-/// bar's primary button is contextual — « Nouvelle catégorie » or « Nouvelle
-/// règle » — and the bar is built *above* the content region, so it can't read
-/// state a child owns. See the fixed-chrome invariant in `frontend/CLAUDE.md`.
-enum CategoriesView { categories, rules }
-
-class CategoriesViewNotifier extends Notifier<CategoriesView> {
+/// Which category the rules pane is filtered on is a separate thing, held by
+/// `rulesCategoryFilterProvider`: closing a category leaves it selected.
+class ExpandedCategoriesNotifier extends Notifier<Set<String>> {
   @override
-  CategoriesView build() => CategoriesView.categories;
+  Set<String> build() => const <String>{};
 
-  void set(CategoriesView view) => state = view;
+  void toggle(String categoryId) => state = state.contains(categoryId)
+      ? {...state}.difference({categoryId})
+      : {...state, categoryId};
+
+  void expand(String categoryId) {
+    if (!state.contains(categoryId)) state = {...state, categoryId};
+  }
 }
 
-final categoriesViewProvider =
-    NotifierProvider<CategoriesViewNotifier, CategoriesView>(
-      CategoriesViewNotifier.new,
+final expandedCategoriesProvider =
+    NotifierProvider<ExpandedCategoriesNotifier, Set<String>>(
+      ExpandedCategoriesNotifier.new,
     );
 
 /// The category catalog: system rows plus the caller's own.

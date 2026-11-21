@@ -79,6 +79,7 @@ details?}}`. Model names refer to the Pydantic schemas in `backend/app/features/
 | `GET` | `/rules` |  |  | 200 [`RuleRead`] |
 | `POST` | `/rules` |  | `RuleCreate` | 201 `RuleRead` |
 | `GET` | `/rules/suggestion` | `transaction_id` |  | 200 `RuleSuggestionRead` |
+| `GET` | `/rules/match-counts` |  |  | 200 [`RuleMatchCountRead`] |
 | `POST` | `/rules/preview` |  | `RulePreviewRequest` | 200 `RulePreviewResult` |
 | `POST` | `/rules/from-transaction` |  | `RuleFromTransactionRequest` | 201 `RuleFromTransactionResult` |
 | `GET` | `/rules/packs/builtin` |  |  | 200 [`BuiltinPackRead`] |

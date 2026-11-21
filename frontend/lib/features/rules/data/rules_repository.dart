@@ -97,6 +97,16 @@ class RulesRepository {
     return json['recategorized_count'] as int;
   }
 
+  /// How many transactions each rule currently classes, keyed by rule id
+  /// (`GET /rules/match-counts`). Every rule is listed, disabled ones at 0.
+  Future<Map<String, int>> matchCounts() async {
+    final json = await _apiClient.get('/rules/match-counts') as List<dynamic>;
+    return {
+      for (final entry in json.cast<Map<String, dynamic>>())
+        entry['rule_id'] as String: entry['match_count'] as int,
+    };
+  }
+
   /// The form's pre-fill for a rule derived from [transactionId].
   Future<RuleSuggestion> suggestion(String transactionId) async {
     final json = await _apiClient.get(

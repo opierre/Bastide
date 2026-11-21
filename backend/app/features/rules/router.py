@@ -38,6 +38,7 @@ from app.features.rules.schemas import (
     RuleCreate,
     RuleFromTransactionRequest,
     RuleFromTransactionResult,
+    RuleMatchCountRead,
     RulePreviewRequest,
     RulePreviewResult,
     RuleRead,
@@ -124,6 +125,18 @@ async def suggest_rule_for_transaction(
         match_type=suggestion.match_type,
         pattern=suggestion.pattern,
     )
+
+
+@router.get("/match-counts", response_model=list[RuleMatchCountRead])
+async def list_rule_match_counts(
+    service: Annotated[RuleService, Depends(_service)],
+    user: Annotated[User, Depends(get_current_user)],
+) -> list[RuleMatchCountRead]:
+    """How many transactions each of the caller's rules currently classes."""
+    return [
+        RuleMatchCountRead(rule_id=rule_id, match_count=count)
+        for rule_id, count in service.match_counts(user.id).items()
+    ]
 
 
 @router.post("/preview", response_model=RulePreviewResult)

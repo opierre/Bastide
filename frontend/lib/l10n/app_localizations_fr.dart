@@ -1668,10 +1668,17 @@ class AppLocalizationsFr extends AppLocalizations {
   String get categoriesRetry => 'Réessayer';
 
   @override
-  String get categoryBadgeSystem => 'Système';
+  String get categoriesPanelTitle => 'Catégories et règles';
 
   @override
-  String get categoryBadgeCustom => 'Personnalisée';
+  String get categoriesTreeTitle => 'Catégories';
+
+  @override
+  String get categoriesAllRules => 'Toutes les règles';
+
+  @override
+  String get categoriesSystemNote =>
+      'Les catégories fournies avec Bastide ne peuvent pas être supprimées.';
 
   @override
   String get categorySystemLockedTooltip =>
@@ -1694,9 +1701,9 @@ class AppLocalizationsFr extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '$count règles automatiques',
-      one: '1 règle automatique',
-      zero: 'Aucune règle',
+      other: '$count règles',
+      one: '1 règle',
+      zero: 'aucune règle',
     );
     return '$_temp0';
   }
@@ -1889,12 +1896,6 @@ class AppLocalizationsFr extends AppLocalizations {
       'Une erreur est survenue. Veuillez réessayer.';
 
   @override
-  String get categoriesTabCategories => 'Catégories';
-
-  @override
-  String get categoriesTabRules => 'Règles';
-
-  @override
   String get rulesAddButton => 'Nouvelle règle';
 
   @override
@@ -1912,16 +1913,16 @@ class AppLocalizationsFr extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '$count transactions recatégorisées',
-      one: '$count transaction recatégorisée',
-      zero: 'Aucune transaction recatégorisée',
+      other: '$count opérations recatégorisées',
+      one: '$count opération recatégorisée',
+      zero: 'Aucune opération recatégorisée',
     );
     return '$_temp0';
   }
 
   @override
   String get rulesApplyToastBody =>
-      'Vos catégories choisies manuellement n\'ont pas été modifiées.';
+      'Vos catégories choisies à la main n’ont pas été modifiées.';
 
   @override
   String get rulesApplyFailed => 'L\'exécution des règles a échoué';
@@ -1936,17 +1937,41 @@ class AppLocalizationsFr extends AppLocalizations {
   String get rulesFilterClear => 'Afficher toutes les règles';
 
   @override
-  String get rulesFilterEmpty => 'Aucune règle ne cible cette catégorie.';
+  String get rulesFilterEmpty => 'Aucune règle pour cette catégorie.';
 
   @override
   String get rulesRetry => 'Réessayer';
+
+  @override
+  String get rulesPaneTitle => 'Règles';
+
+  @override
+  String get rulesColumnOrder => 'Ordre';
+
+  @override
+  String get rulesColumnField => 'Champ';
+
+  @override
+  String get rulesColumnCondition => 'Condition';
+
+  @override
+  String get rulesColumnPattern => 'Motif';
+
+  @override
+  String get rulesColumnCategory => 'Catégorie';
+
+  @override
+  String get rulesColumnMatches => 'Correspondances';
+
+  @override
+  String get rulesColumnActive => 'Active';
 
   @override
   String get rulesEmptyTitle => 'Aucune règle';
 
   @override
   String get rulesEmptyBody =>
-      'Une règle reconnaît un libellé, comme « CARREFOUR », et attribue sa catégorie à chaque transaction correspondante, aujourd\'hui et aux prochains imports.';
+      'Une règle reconnaît un libellé, « CARREFOUR » par exemple, et attribue sa catégorie à chaque opération correspondante, aujourd’hui et aux prochains imports.';
 
   @override
   String get ruleToggleSemantics => 'Activer la règle';
@@ -1955,7 +1980,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get ruleTargetMissing => 'Catégorie introuvable';
 
   @override
-  String get ruleFieldDescription => 'Libellé';
+  String get ruleFieldDescription => 'Description';
 
   @override
   String get ruleFieldMerchant => 'Commerçant';
@@ -2022,7 +2047,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get rulePatternHintRange => '-10000:-5000';
 
   @override
-  String get ruleFormCategoryLabel => 'Catégorie attribuée';
+  String get ruleFormCategoryLabel => 'Catégorie cible';
 
   @override
   String get ruleFormCategoryNone => 'Choisir une catégorie';
@@ -2032,7 +2057,7 @@ class AppLocalizationsFr extends AppLocalizations {
       'Choisissez la catégorie que cette règle attribue.';
 
   @override
-  String get ruleFormEnabledLabel => 'Règle active';
+  String get ruleFormEnabledLabel => 'Active';
 
   @override
   String get ruleFormLogoLabel => 'Logo';
@@ -2042,7 +2067,7 @@ class AppLocalizationsFr extends AppLocalizations {
       'Affiché à la place du monogramme sur les transactions et les abonnements que cette règle reconnaît.';
 
   @override
-  String get ruleFormLogoChoose => 'Choisir une image…';
+  String get ruleFormLogoChoose => 'Choisir une image';
 
   @override
   String get ruleFormLogoReplace => 'Remplacer…';
@@ -2052,7 +2077,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get ruleFormLogoSaveFirst =>
-      'Enregistrez la règle pour pouvoir lui ajouter un logo.';
+      'Enregistrez la règle pour lui ajouter un logo.';
 
   @override
   String get logoZoomOpen => 'Afficher le logo en grand';
@@ -2133,6 +2158,13 @@ class AppLocalizationsFr extends AppLocalizations {
   String get ruleFormDelete => 'Supprimer';
 
   @override
+  String get ruleDeleteConfirmTitle => 'Supprimer cette règle ?';
+
+  @override
+  String get ruleDeleteConfirmBody =>
+      'Les opérations qu’elle a déjà classées gardent leur catégorie.';
+
+  @override
   String get rulePreviewLoading =>
       'Recherche des transactions correspondantes…';
 
@@ -2141,9 +2173,9 @@ class AppLocalizationsFr extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: 'Correspond à $count transactions existantes.',
-      one: 'Correspond à $count transaction existante.',
-      zero: 'Ne correspond à aucune transaction existante.',
+      other: 'Correspond à $count opérations existantes.',
+      one: 'Correspond à $count opération existante.',
+      zero: 'Ne correspond à aucune opération existante.',
     );
     return '$_temp0';
   }
@@ -2154,8 +2186,8 @@ class AppLocalizationsFr extends AppLocalizations {
       count,
       locale: localeName,
       other:
-          'Correspond à $count transactions existantes, dont « $sample » du $date.',
-      one: 'Correspond à $count transaction existante : « $sample » du $date.',
+          'Correspond à $count opérations existantes, dont « $sample » du $date.',
+      one: 'Correspond à $count opération existante : « $sample » du $date.',
     );
     return '$_temp0';
   }

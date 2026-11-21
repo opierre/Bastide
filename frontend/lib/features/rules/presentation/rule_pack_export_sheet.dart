@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:lucide_icons_flutter/lucide_icons_300.dart';
 
 import '../../../core/theme/tokens.dart';
 import '../../../core/widgets/app_modal.dart';
 import '../../../core/widgets/app_toast.dart';
-import '../../../core/widgets/app_toggle.dart';
+import '../../../core/widgets/app_checkbox.dart';
 import '../../../core/widgets/inline_banner.dart';
+import '../../../core/widgets/note_line.dart';
 import '../../../core/widgets/primary_button.dart';
 import '../../../l10n/app_localizations.dart';
 import '../application/rule_packs_controller.dart';
@@ -40,8 +42,9 @@ Future<void> startRulePackExport(BuildContext context, WidgetRef ref) async {
   }
 }
 
-/// The review sheet: the pack's contents verbatim, what it could not carry, and
-/// a plain warning that patterns can hold personal detail.
+/// The review modal, 560 px (`docs/design/08` §Rule packs): the pack's
+/// contents verbatim, what it could not carry, and a plain note that patterns
+/// can hold personal detail.
 class RulePackExportSheet extends ConsumerStatefulWidget {
   const RulePackExportSheet({super.key, required this.export});
 
@@ -125,11 +128,11 @@ class _RulePackExportSheetState extends ConsumerState<RulePackExportSheet> {
 
     return AppModal(
       title: l10n.rulePackExportTitle,
-      width: 520,
+      width: AppCategoriesPanel.packModalWidth,
       actions: [
-        OutlinedButton(
+        AppButton(
+          label: l10n.rulePackCancel,
           onPressed: isBusy ? null : () => Navigator.of(context).pop(),
-          child: Text(l10n.rulePackCancel),
         ),
         PrimaryButton(
           key: const Key('rulePackExportSave'),
@@ -148,21 +151,21 @@ class _RulePackExportSheetState extends ConsumerState<RulePackExportSheet> {
             ),
             const SizedBox(height: AppSpacing.md),
           ],
-          InlineBanner(
+          NoteLine(
             key: const Key('rulePackPrivacyNotice'),
-            tone: BannerTone.warning,
-            message: l10n.rulePackExportPrivacyNotice,
+            icon: LucideIcons300.triangleAlert,
+            text: l10n.rulePackExportPrivacyNotice,
           ),
-          const SizedBox(height: AppSpacing.md),
+          const SizedBox(height: AppSpacing.fieldGap),
           Row(
             children: [
-              AppToggle(
+              AppCheckbox(
                 key: const Key('rulePackExportIncludeLogos'),
                 value: _includeLogos,
                 semanticLabel: l10n.rulePackExportIncludeLogos,
                 onChanged: isBusy ? null : _setIncludeLogos,
               ),
-              const SizedBox(width: AppSpacing.sm + AppSpacing.xs),
+              const SizedBox(width: AppSpacing.sm),
               Expanded(
                 child: Text(
                   l10n.rulePackExportIncludeLogos,
@@ -180,18 +183,17 @@ class _RulePackExportSheetState extends ConsumerState<RulePackExportSheet> {
                 message: l10n.rulePackExportLogosTooLarge,
               )
             else
-              Text(
-                l10n.rulePackExportLogoCount(_export.logoCount),
+              NoteLine(
                 key: const Key('rulePackExportLogoCount'),
-                style: context.textStyles.helper,
+                text: l10n.rulePackExportLogoCount(_export.logoCount),
               ),
           ],
-          const SizedBox(height: AppSpacing.md),
+          const SizedBox(height: AppSpacing.fieldGap),
           Text(
             l10n.rulePackExportContents(pack.rules.length),
             style: context.textStyles.sectionLabel,
           ),
-          const SizedBox(height: AppSpacing.sm - 2),
+          const SizedBox(height: AppSpacing.xsPlus),
           // The file itself, not a summary of it: the point of the step is that
           // the user reads what leaves their machine.
           Container(
@@ -200,8 +202,8 @@ class _RulePackExportSheetState extends ConsumerState<RulePackExportSheet> {
             padding: const EdgeInsets.all(AppSpacing.sm + AppSpacing.xs),
             decoration: BoxDecoration(
               color: context.colors.field,
-              borderRadius: BorderRadius.circular(AppRadii.md),
-              border: Border.all(color: context.colors.line),
+              borderRadius: BorderRadius.circular(AppRadii.container),
+              border: Border.all(color: context.colors.lineStrong),
             ),
             child: SingleChildScrollView(
               child: SelectableText(
@@ -218,23 +220,24 @@ class _RulePackExportSheetState extends ConsumerState<RulePackExportSheet> {
             ),
           ),
           if (omitted.isNotEmpty) ...[
-            const SizedBox(height: AppSpacing.md),
+            const SizedBox(height: AppSpacing.fieldGap),
             Text(
               l10n.rulePackOmittedLabel(omitted.length),
               style: context.textStyles.sectionLabel,
             ),
-            const SizedBox(height: AppSpacing.sm - 2),
             for (final rule in omitted)
               Padding(
                 key: Key('rulePackOmitted-${rule.ruleId}'),
-                padding: const EdgeInsets.only(top: 2),
-                child: Text(switch (rule.reason) {
-                  RuleOmissionReason.regex => l10n.rulePackOmittedRegex(
-                    rule.pattern,
-                  ),
-                  RuleOmissionReason.userCategory =>
-                    l10n.rulePackOmittedUserCategory(rule.pattern),
-                }, style: context.textStyles.helper),
+                padding: const EdgeInsets.only(top: AppSpacing.xsPlus),
+                child: NoteLine(
+                  text: switch (rule.reason) {
+                    RuleOmissionReason.regex => l10n.rulePackOmittedRegex(
+                      rule.pattern,
+                    ),
+                    RuleOmissionReason.userCategory =>
+                      l10n.rulePackOmittedUserCategory(rule.pattern),
+                  },
+                ),
               ),
           ],
           const SizedBox(height: AppSpacing.sm),

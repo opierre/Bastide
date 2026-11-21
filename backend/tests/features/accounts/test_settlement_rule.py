@@ -128,6 +128,8 @@ def test_saving_the_rule_files_the_debits_already_imported(client: TestClient) -
     # The card's rule goes ahead of every other, and is an ordinary rule in the list.
     rules = client.get("/api/v1/rules", headers=headers).json()
     assert rules[0]["pattern"] == "DEPENSES CARTE X4821"
+    counts = client.get("/api/v1/rules/match-counts", headers=headers).json()
+    assert {"rule_id": rules[0]["id"], "match_count": 2} in counts
 
 
 def test_saving_again_replaces_the_cards_one_rule(client: TestClient) -> None:

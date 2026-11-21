@@ -47,6 +47,14 @@ class Transaction(Base):
     )
     category: Mapped[Category | None] = relationship(Category, lazy="select", viewonly=True)
     categorization_source: Mapped[str] = mapped_column(String(20))
+    #: The rule that set ``category_id``, while ``categorization_source`` is ``rule``; ``None``
+    #: otherwise. Deleting the rule clears it and leaves the category as it was.
+    rule_id: Mapped[str | None] = mapped_column(
+        String(36),
+        ForeignKey("categorization_rules.id", ondelete="SET NULL", name="fk_transactions_rule_id"),
+        nullable=True,
+        index=True,
+    )
     categorization_confidence: Mapped[float | None] = mapped_column(Float, nullable=True)
     needs_review: Mapped[bool] = mapped_column(Boolean, default=True)
     fitid: Mapped[str | None] = mapped_column(String(255), nullable=True)
