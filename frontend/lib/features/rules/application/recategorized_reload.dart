@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../dashboard/application/dashboard_controller.dart';
 import '../../transactions/application/review_count_provider.dart';
 import '../../transactions/application/transactions_controller.dart';
+import 'rule_match_counts.dart';
 
 /// Re-reads every view that shows a category the rules have just rewritten.
 ///
@@ -22,6 +23,9 @@ Future<void> reloadRecategorizedViews(Ref ref) async {
   // chip it replaces.
   await ref.read(transactionsControllerProvider.notifier).refreshQuietly();
   ref.invalidate(reviewCountProvider);
+  // The rules table's « Correspondances » counts what the rules classed, and
+  // the run has just changed that.
+  ref.invalidate(ruleMatchCountsProvider);
 
   // Invalidated rather than refreshed: the rules live in the categories panel,
   // so the dashboard is usually unmounted here — this costs a request only if
