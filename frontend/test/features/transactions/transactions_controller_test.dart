@@ -281,14 +281,12 @@ void main() {
     expect(page.totalPages, 3);
   });
 
-  test('the page carries the net and each row its exclusion', () async {
+  test('the page carries the net', () async {
     when(
       () => apiClient.get('/transactions', query: any(named: 'query')),
     ).thenAnswer(
       (_) async => {
-        ..._pageJson([
-          {..._transactionJson(), 'excluded_from_totals': true},
-        ]),
+        ..._pageJson([_transactionJson()]),
         'net_minor': -48_210,
       },
     );
@@ -296,7 +294,6 @@ void main() {
     final page = await container.read(transactionsControllerProvider.future);
 
     expect(page.netMinor, -48_210);
-    expect(page.items.single.excludedFromTotals, isTrue);
   });
 
   test('the review tab reads the queue with the search only', () async {
@@ -340,46 +337,6 @@ void main() {
       const TransactionFilters(),
     );
     expect(container.read(transactionFiltersProvider).hasListFilter, isFalse);
-  });
-
-  test('excluding a row patches it and re-reads the net', () async {
-    var net = -3_000;
-    var excluded = false;
-    when(
-      () => apiClient.get('/transactions', query: any(named: 'query')),
-    ).thenAnswer(
-      (_) async => {
-        ..._pageJson([
-          {..._transactionJson(id: 't1'), 'excluded_from_totals': excluded},
-        ]),
-        'net_minor': net,
-      },
-    );
-    when(
-      () => apiClient.patch('/transactions/t1', body: any(named: 'body')),
-    ).thenAnswer(
-      (_) async => {
-        ..._transactionJson(id: 't1'),
-        'excluded_from_totals': true,
-      },
-    );
-
-    final page = await container.read(transactionsControllerProvider.future);
-    net = 0;
-    excluded = true;
-    await container
-        .read(transactionsControllerProvider.notifier)
-        .setExcludedFromTotals(page.items.single, excluded: true);
-
-    verify(
-      () => apiClient.patch(
-        '/transactions/t1',
-        body: {'excluded_from_totals': true},
-      ),
-    ).called(1);
-    final reloaded = container.read(transactionsControllerProvider).value!;
-    expect(reloaded.netMinor, 0);
-    expect(reloaded.items.single.excludedFromTotals, isTrue);
   });
 
   test('the context maps the import, rule, series and history', () async {

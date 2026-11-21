@@ -36,8 +36,6 @@ class TransactionRead(BaseModel):
     categorization_source: str
     categorization_confidence: float | None
     needs_review: bool
-    #: Kept out of the income, expense and spending totals by the user; still listed.
-    excluded_from_totals: bool = False
     fitid: str | None
     dedup_hash: str
     #: The recurring series this transaction is an occurrence of, ``None`` when it is in none.
@@ -58,8 +56,8 @@ class TransactionPage(BaseModel):
     page: int
     page_size: int
     total: int
-    #: Signed sum of every row the filters match, across all pages, leaving out the rows
-    #: excluded from totals. ``None`` on a listing that does not compute it.
+    #: Signed sum of every row the filters match, across all pages. ``None`` on a listing
+    #: that does not compute it.
     net_minor: int | None = None
 
 
@@ -69,8 +67,6 @@ class TransactionUpdate(BaseModel):
     category_id: str | None = None
     description_clean: str | None = Field(default=None, min_length=1)
     merchant: str | None = None
-    #: Keeps the row out of (``True``) or back in (``False``) the totals.
-    excluded_from_totals: bool | None = None
 
 
 class TransactionRuleRef(BaseModel):

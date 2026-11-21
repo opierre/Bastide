@@ -1440,10 +1440,6 @@
   "@transactionsColumnAmount": {
     "description": "Column header."
   },
-  "transactionsExcludedSuffix": "exclue des totaux",
-  "@transactionsExcludedSuffix": {
-    "description": "Follows the label of an operation the user excluded from totals."
-  },
   "transactionsPagerPrevious": "Page précédente",
   "@transactionsPagerPrevious": {
     "description": "Pager button tooltip."
@@ -1553,14 +1549,6 @@
   "transactionEditRule": "Modifier la règle",
   "@transactionEditRule": {
     "description": "Opens the rule that filed the operation."
-  },
-  "transactionExclude": "Exclure des totaux",
-  "@transactionExclude": {
-    "description": "Inspector action."
-  },
-  "transactionInclude": "Inclure dans les totaux",
-  "@transactionInclude": {
-    "description": "Inspector action on an operation already excluded from totals."
   },
   "reviewProgressCount": "{done} sur {total}",
   "@reviewProgressCount": {

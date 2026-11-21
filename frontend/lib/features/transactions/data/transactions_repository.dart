@@ -64,7 +64,6 @@ class TransactionsRepository {
     String? categoryId,
     String? descriptionClean,
     String? merchant,
-    bool? excludedFromTotals,
   }) async {
     final json = await _apiClient.patch(
       '/transactions/$id',
@@ -72,7 +71,6 @@ class TransactionsRepository {
         'category_id': ?categoryId,
         'description_clean': ?descriptionClean,
         'merchant': ?merchant,
-        'excluded_from_totals': ?excludedFromTotals,
       },
     );
     return _parse(json as Map<String, dynamic>);
@@ -155,7 +153,6 @@ class TransactionsRepository {
       categorizationConfidence: (json['categorization_confidence'] as num?)
           ?.toDouble(),
       needsReview: json['needs_review'] as bool,
-      excludedFromTotals: json['excluded_from_totals'] as bool? ?? false,
       fitid: json['fitid'] as String?,
       dedupHash: json['dedup_hash'] as String,
       recurringSeriesId: json['recurring_series_id'] as String?,

@@ -301,22 +301,6 @@ class TransactionsController extends AsyncNotifier<TransactionsPage> {
     await updateCategory(transaction, proposed.id);
   }
 
-  /// Keeps [transaction] out of the totals, or puts it back.
-  ///
-  /// The row stays listed; the page is then re-read quietly, because the net
-  /// it reports covers every page and only the server can recount it.
-  Future<void> setExcludedFromTotals(
-    Transaction transaction, {
-    required bool excluded,
-  }) async {
-    final updated = await ref
-        .read(transactionsRepositoryProvider)
-        .update(transaction.id, excludedFromTotals: excluded);
-    _replace(updated);
-    ref.read(transactionEditsProvider.notifier).saved();
-    await refreshQuietly();
-  }
-
   void _replace(Transaction updated) {
     final current = state.value;
     if (current == null) return;

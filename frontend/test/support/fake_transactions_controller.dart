@@ -34,33 +34,6 @@ class FakeTransactionsController extends TransactionsController {
   @override
   Future<void> refreshQuietly() async => refreshQuietlyCalls++;
 
-  final excludeCalls = <({String transactionId, bool excluded})>[];
-
-  @override
-  Future<void> setExcludedFromTotals(
-    Transaction transaction, {
-    required bool excluded,
-  }) async {
-    excludeCalls.add((transactionId: transaction.id, excluded: excluded));
-    final current = state.value;
-    if (current == null) return;
-    state = AsyncValue.data(
-      TransactionsPage(
-        items: [
-          for (final item in current.items)
-            if (item.id == transaction.id)
-              item.copyWith(excludedFromTotals: excluded)
-            else
-              item,
-        ],
-        page: current.page,
-        pageSize: current.pageSize,
-        total: current.total,
-        netMinor: current.netMinor,
-      ),
-    );
-  }
-
   void _applyCategory(String transactionId, String categoryId) {
     final current = state.value;
     if (current == null) return;

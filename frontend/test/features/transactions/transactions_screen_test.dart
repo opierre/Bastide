@@ -81,7 +81,6 @@ Transaction _transaction({
   TransactionCategory? category = _insurance,
   CategorizationSource source = CategorizationSource.rule,
   double? confidence,
-  bool excluded = false,
   bool needsReview = false,
 }) => Transaction(
   id: id,
@@ -98,7 +97,6 @@ Transaction _transaction({
   categorizationSource: source,
   categorizationConfidence: confidence,
   needsReview: needsReview,
-  excludedFromTotals: excluded,
   fitid: null,
   dedupHash: 'hash-$id',
   createdAt: DateTime.utc(2026, 5, 11),
@@ -328,26 +326,6 @@ void main() {
         ),
         findsOneWidget,
       );
-    });
-
-    testWidgets('an excluded row is dimmed and says so', (tester) async {
-      await _pump(tester, items: [_transaction(excluded: true)]);
-
-      expect(find.text('exclue des totaux'), findsOneWidget);
-      final row = tester.widget<AppTableRow>(
-        find.descendant(
-          of: find.byKey(const Key('transactionRow-t1')),
-          matching: find.byType(AppTableRow),
-        ),
-      );
-      expect(row.dimmed, isTrue);
-      final amount = tester.widget<AmountText>(
-        find.descendant(
-          of: find.byKey(const Key('transactionRow-t1')),
-          matching: find.byType(AmountText),
-        ),
-      );
-      expect(amount.colorize, isFalse);
     });
 
     testWidgets('the filter row ends on the count and the signed net', (
@@ -714,23 +692,6 @@ void main() {
       );
     });
 
-    testWidgets('« Exclure des totaux » excludes, then offers to include', (
-      tester,
-    ) async {
-      final controller = FakeTransactionsController(
-        initialPage: _page([_transaction()]),
-      );
-      await _pump(tester, controller: controller);
-      await _select(tester, 't1');
-
-      await tester.tap(find.text('Exclure des totaux'));
-      await tester.pumpAndSettle();
-
-      expect(controller.excludeCalls, [(transactionId: 't1', excluded: true)]);
-      expect(find.text('Inclure dans les totaux'), findsOneWidget);
-      expect(find.text('exclue des totaux'), findsOneWidget);
-    });
-
     testWidgets('a context that fails to load says so', (tester) async {
       _useDesktopSurface(tester);
       await tester.pumpWidget(
@@ -828,7 +789,6 @@ void main() {
       expect(find.text('Operation'), findsOneWidget);
       expect(find.text('Filed by'), findsOneWidget);
       expect(find.text('Same merchant'), findsOneWidget);
-      expect(find.text('Exclude from totals'), findsOneWidget);
       expect(find.text('rule “ASSUR EXEMPLE”'), findsOneWidget);
       expect(find.textContaining('opération'), findsNothing);
     });

@@ -10,7 +10,6 @@ import '../../../core/widgets/amount_text.dart';
 import '../../../core/widgets/app_button.dart';
 import '../../../core/widgets/app_toast.dart';
 import '../../../core/widgets/focus_ring.dart';
-import '../../../core/widgets/inline_banner.dart';
 import '../../../core/widgets/inspector_pane.dart';
 import '../../../core/widgets/institution_avatar.dart';
 import '../../../core/widgets/key_value_list.dart';
@@ -31,14 +30,13 @@ import '../application/transactions_controller.dart';
 import '../domain/transaction.dart';
 import 'always_categorize_modal.dart';
 import 'category_picker.dart';
-import 'transaction_error_localizer.dart';
 import 'transaction_labels.dart';
 import 'transactions_link.dart';
 
 /// The inspector pane of the « Toutes » tab (`07-transactions.md` §Inspector
 /// pane) for the selected operation: its header, amount and key/value list,
-/// its recurring series, the merchant's earlier operations, and the rule and
-/// exclusion actions.
+/// its recurring series, the merchant's earlier operations, and the rule
+/// action.
 class TransactionInspector extends ConsumerWidget {
   const TransactionInspector({super.key, required this.transaction});
 
@@ -164,7 +162,6 @@ class _Summary extends ConsumerWidget {
           amountMinor: transaction.amountMinor,
           currency: transaction.currency,
           showPositiveSign: true,
-          colorize: !transaction.excludedFromTotals,
           style: tabularNumberStyle(textTheme.displayMedium!),
         ),
         const SizedBox(height: InspectorPane.blockGap),
@@ -365,8 +362,8 @@ class _MarkRecurring extends ConsumerWidget {
   }
 }
 
-/// « Même marchand » and up to five earlier operations, then the rule and
-/// exclusion actions at the foot of the pane.
+/// « Même marchand » and up to five earlier operations, then the rule action
+/// at the foot of the pane.
 class _History extends ConsumerWidget {
   const _History({required this.transaction, required this.details});
 
@@ -418,30 +415,19 @@ class _History extends ConsumerWidget {
               ),
             ),
         const SizedBox(height: AppSpacing.lg),
-        Wrap(
-          spacing: AppSpacing.sm,
-          runSpacing: AppSpacing.sm,
-          children: [
-            if (rule == null)
-              AppButton(
-                key: const Key('transactionInspectorCreateRule'),
-                label: l10n.transactionCreateRule,
-                onPressed: () => _createRule(context),
-              )
-            else
-              AppButton(
-                key: const Key('transactionInspectorEditRule'),
-                label: l10n.transactionEditRule,
-                onPressed: () => _editRule(context, ref, rule.id),
-              ),
-            AppButton(
-              key: const Key('transactionInspectorExclude'),
-              label: transaction.excludedFromTotals
-                  ? l10n.transactionInclude
-                  : l10n.transactionExclude,
-              onPressed: () => _toggleExcluded(context, ref),
-            ),
-          ],
+        Align(
+          alignment: AlignmentDirectional.centerStart,
+          child: rule == null
+              ? AppButton(
+                  key: const Key('transactionInspectorCreateRule'),
+                  label: l10n.transactionCreateRule,
+                  onPressed: () => _createRule(context),
+                )
+              : AppButton(
+                  key: const Key('transactionInspectorEditRule'),
+                  label: l10n.transactionEditRule,
+                  onPressed: () => _editRule(context, ref, rule.id),
+                ),
         ),
       ],
     );
@@ -472,24 +458,5 @@ class _History extends ConsumerWidget {
     if (rule == null || !context.mounted) return;
     final saved = await showRuleEditor(context, initial: rule);
     if (saved != null) ref.read(transactionEditsProvider.notifier).saved();
-  }
-
-  Future<void> _toggleExcluded(BuildContext context, WidgetRef ref) async {
-    final l10n = AppLocalizations.of(context)!;
-    final overlay = Overlay.of(context);
-    try {
-      await ref
-          .read(transactionsControllerProvider.notifier)
-          .setExcludedFromTotals(
-            transaction,
-            excluded: !transaction.excludedFromTotals,
-          );
-    } catch (error) {
-      showAppToastOn(
-        overlay,
-        title: localizeTransactionError(l10n, error),
-        tone: BannerTone.error,
-      );
-    }
   }
 }

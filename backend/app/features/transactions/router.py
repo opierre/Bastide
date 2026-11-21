@@ -58,7 +58,6 @@ def _to_read(transaction: Transaction, logos: RuleLogoResolver) -> TransactionRe
         categorization_source=transaction.categorization_source,
         categorization_confidence=transaction.categorization_confidence,
         needs_review=transaction.needs_review,
-        excluded_from_totals=transaction.excluded_from_totals,
         fitid=transaction.fitid,
         dedup_hash=transaction.dedup_hash,
         recurring_series_id=transaction.recurring_series_id,
@@ -90,7 +89,7 @@ async def list_transactions(
     account. Each row keeps its own `account_id`, so a client can tell the card's apart.
     `category_id` matches that category and its sub-categories.
     `import_batch_id` keeps only the rows that import added.
-    `net_minor` sums every matching row across all pages, rows excluded from totals aside.
+    `net_minor` sums every matching row across all pages.
     """
     items, total, net = service.list_for_user(
         user.id,
@@ -132,10 +131,7 @@ async def update_transaction(
     logos: Annotated[RuleLogoResolver, Depends(get_logo_resolver)],
     user: Annotated[User, Depends(get_current_user)],
 ) -> TransactionRead:
-    """Patch category/description/merchant, or the exclusion from totals.
-
-    A category edit sets `source=user`.
-    """
+    """Patch category/description/merchant. A category edit sets `source=user`."""
     return _to_read(service.update(user.id, transaction_id, payload), logos)
 
 

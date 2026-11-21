@@ -483,7 +483,7 @@ class _TransactionsTableState extends ConsumerState<_TransactionsTable> {
 }
 
 /// One operation: monogram and name, its top-level category, its signed
-/// amount. Excluded from totals: dimmed, « exclue des totaux » after the name.
+/// amount.
 class _TransactionRow extends ConsumerWidget {
   const _TransactionRow({
     super.key,
@@ -502,16 +502,11 @@ class _TransactionRow extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final l10n = AppLocalizations.of(context)!;
-    final colors = context.colors;
-    final textTheme = Theme.of(context).textTheme;
     final unnamed = isUnnamed(transaction);
-    final dimmed = transaction.excludedFromTotals;
 
     return AppTableRow(
       columns: columns,
       selected: selected,
-      dimmed: dimmed,
       inset: edgeTableInset,
       onTap: onTap,
       cells: [
@@ -531,17 +526,6 @@ class _TransactionRow extends ConsumerWidget {
                 style: unnamed ? TextStyle(fontFamily: AppFonts.mono) : null,
               ),
             ),
-            if (dimmed) ...[
-              const SizedBox(width: AppSpacing.xsPlus),
-              Text(
-                l10n.transactionsExcludedSuffix,
-                key: const Key('transactionRowExcluded'),
-                maxLines: 1,
-                style: textTheme.bodySmall?.copyWith(
-                  color: colors.textTertiary,
-                ),
-              ),
-            ],
           ],
         ),
         Builder(
@@ -557,7 +541,6 @@ class _TransactionRow extends ConsumerWidget {
           amountMinor: transaction.amountMinor,
           currency: transaction.currency,
           showPositiveSign: true,
-          colorize: !dimmed,
         ),
       ],
     );

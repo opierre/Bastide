@@ -67,7 +67,7 @@ class TransactionService:
     ) -> tuple[list[Transaction], int, int]:
         """A filtered, paginated page of the user's transactions, the match count and the net.
 
-        Page size is fixed. The net sums every matching row, rows excluded from totals aside.
+        Page size is fixed. The net sums every matching row.
 
         `include_linked_cards` adds, to an account filter, the rows of the deferred cards
         settled on that account. `import_batch_id` keeps only the rows that import added.
@@ -124,8 +124,6 @@ class TransactionService:
             transaction.description_clean = data.description_clean
         if data.merchant is not None:
             transaction.merchant = data.merchant
-        if data.excluded_from_totals is not None:
-            transaction.excluded_from_totals = data.excluded_from_totals
         self._repository.update(transaction)
         # Read back rather than returning the refreshed row: a refresh reloads the columns but
         # not the series id, which the response carries.

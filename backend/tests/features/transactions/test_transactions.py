@@ -565,7 +565,7 @@ def test_patch_keeps_the_series_in_its_response(client: TestClient, tmp_path: Pa
     assert response.json()["recurring_series_id"] == series_id
 
 
-# --- net and exclusion from totals -------------------------------------------------------------
+# --- net ---------------------------------------------------------------------------------------
 
 
 def test_list_reports_the_net_of_every_matching_row(client: TestClient, tmp_path: Path) -> None:
@@ -579,56 +579,6 @@ def test_list_reports_the_net_of_every_matching_row(client: TestClient, tmp_path
 
     assert body["net_minor"] == 243_860
     assert isinstance(body["net_minor"], int)
-
-
-def test_excluded_rows_stay_listed_but_leave_the_net(client: TestClient, tmp_path: Path) -> None:
-    headers, _ = _register(client)
-    account_id = _create_account(client, headers)
-    _insert_transaction(tmp_path, account_id, amount_minor=-2_000)
-    excluded_id = _insert_transaction(tmp_path, account_id, amount_minor=-50_000)
-
-    patched = client.patch(
-        f"/api/v1/transactions/{excluded_id}",
-        json={"excluded_from_totals": True},
-        headers=headers,
-    )
-    body = client.get("/api/v1/transactions", headers=headers).json()
-
-    assert patched.status_code == 200
-    assert patched.json()["excluded_from_totals"] is True
-    assert body["total"] == 2
-    assert body["net_minor"] == -2_000
-    flags = {item["id"]: item["excluded_from_totals"] for item in body["items"]}
-    assert flags[excluded_id] is True
-
-
-def test_excluding_a_row_keeps_its_category_and_review_flag(
-    client: TestClient, tmp_path: Path
-) -> None:
-    headers, _ = _register(client)
-    account_id = _create_account(client, headers)
-    transaction_id = _insert_transaction(tmp_path, account_id)
-
-    body = client.patch(
-        f"/api/v1/transactions/{transaction_id}",
-        json={"excluded_from_totals": True},
-        headers=headers,
-    ).json()
-
-    assert body["categorization_source"] == "uncategorized"
-    assert body["needs_review"] is True
-
-
-def test_a_row_can_be_put_back_in_the_totals(client: TestClient, tmp_path: Path) -> None:
-    headers, _ = _register(client)
-    account_id = _create_account(client, headers)
-    transaction_id = _insert_transaction(tmp_path, account_id, amount_minor=-3_000)
-    url = f"/api/v1/transactions/{transaction_id}"
-    client.patch(url, json={"excluded_from_totals": True}, headers=headers)
-
-    client.patch(url, json={"excluded_from_totals": False}, headers=headers)
-
-    assert client.get("/api/v1/transactions", headers=headers).json()["net_minor"] == -3_000
 
 
 # --- inspector context -------------------------------------------------------------------------

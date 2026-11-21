@@ -1182,9 +1182,6 @@ class AppLocalizationsFr extends AppLocalizations {
   String get transactionsColumnAmount => 'Montant';
 
   @override
-  String get transactionsExcludedSuffix => 'exclue des totaux';
-
-  @override
   String get transactionsPagerPrevious => 'Page précédente';
 
   @override
@@ -1261,12 +1258,6 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get transactionEditRule => 'Modifier la règle';
-
-  @override
-  String get transactionExclude => 'Exclure des totaux';
-
-  @override
-  String get transactionInclude => 'Inclure dans les totaux';
 
   @override
   String reviewProgressCount(int done, int total) {

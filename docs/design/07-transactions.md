@@ -47,7 +47,7 @@ Two panes: list (flexible) · inspector (440 px, `00` §7).
 5. Hairline. « Même marchand » heading + up to 5 previous operations: date `textSecondary` ·
    signed amount.
 6. Bottom of the pane: secondary « Créer une règle » (or « Modifier la règle » when one
-   classed it) · secondary « Exclure des totaux ».
+   classed it).
 
 Nothing selected: the pane shows the note « Sélectionnez une opération pour voir son détail. »
 
@@ -104,13 +104,11 @@ no result for the filters (in the table area: « Aucune opération pour ces filt
 - Choosing a category by hand is never overwritten by a rule or by the AI.
 - The classification run is asynchronous and cancellable; the panel stays usable.
 - The filters, the tab and the page survive leaving and returning to the panel in a session.
-- An operation excluded from totals stays listed, dimmed, with « exclue des totaux » after its
-  label.
 
 ## Copy
 Delete `navTransactionsSubtitle`, `reviewQueueEncouragement`. `transactionsEmptyTitle` per
 `00` §14. Replace « — aucune proposition » with « Aucune proposition ». New: « Classée par »,
-« Même marchand », « Exclure des totaux », « Sélectionnez une opération pour voir son
+« Même marchand », « Sélectionnez une opération pour voir son
 détail. », « Rien à vérifier ».
 
 ## Removed from v1

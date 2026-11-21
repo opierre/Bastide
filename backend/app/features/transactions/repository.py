@@ -57,8 +57,7 @@ class TransactionRepository:
         An `import_batch_id` filter keeps the rows that import added. A batch of another
         user matches nothing, since the account join already scopes rows to `user_id`.
 
-        The net is the signed sum of every row the filters match, across all pages, leaving
-        out the rows the user excluded from totals.
+        The net is the signed sum of every row the filters match, across all pages.
 
         Eager-loads `category` (`selectinload`) so rendering a page never triggers one query
         per row.
@@ -76,8 +75,8 @@ class TransactionRepository:
         )
 
         total = self._db.scalar(select(func.count()).select_from(query.subquery())) or 0
-        counted = query.where(Transaction.excluded_from_totals.is_(False)).subquery()
-        net = self._db.scalar(select(func.coalesce(func.sum(counted.c.amount_minor), 0))) or 0
+        matched = query.subquery()
+        net = self._db.scalar(select(func.coalesce(func.sum(matched.c.amount_minor), 0))) or 0
 
         rows = list(
             self._db.scalars(

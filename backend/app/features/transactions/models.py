@@ -3,7 +3,7 @@
 from datetime import UTC, date, datetime
 from uuid import uuid4
 
-from sqlalchemy import Boolean, Date, Float, ForeignKey, Index, Integer, String, false
+from sqlalchemy import Boolean, Date, Float, ForeignKey, Index, Integer, String
 from sqlalchemy.orm import Mapped, mapped_column, query_expression, relationship
 
 from app.core.db import Base, UtcDateTime
@@ -49,12 +49,6 @@ class Transaction(Base):
     categorization_source: Mapped[str] = mapped_column(String(20))
     categorization_confidence: Mapped[float | None] = mapped_column(Float, nullable=True)
     needs_review: Mapped[bool] = mapped_column(Boolean, default=True)
-    #: Set by the user to keep this row out of the income, expense and spending totals (a
-    #: refund passed back, a one-off transfer filed as spending). It stays listed, and it
-    #: still moves the account's balance: a balance is a fact, a total is a reading.
-    #: Defaulted by the database alone, so an insert that does not set it leaves the column
-    #: out (the data-migration tests insert rows at revisions that predate it).
-    excluded_from_totals: Mapped[bool] = mapped_column(Boolean, server_default=false())
     fitid: Mapped[str | None] = mapped_column(String(255), nullable=True)
     dedup_hash: Mapped[str] = mapped_column(String(64))
     #: The recurring series this row is an occurrence of, if any. Not a column: occurrences

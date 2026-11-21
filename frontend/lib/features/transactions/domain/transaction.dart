@@ -71,7 +71,6 @@ class Transaction {
     required this.categorizationSource,
     required this.categorizationConfidence,
     required this.needsReview,
-    this.excludedFromTotals = false,
     required this.fitid,
     required this.dedupHash,
     this.recurringSeriesId,
@@ -97,10 +96,6 @@ class Transaction {
   final CategorizationSource categorizationSource;
   final double? categorizationConfidence;
   final bool needsReview;
-
-  /// Kept out of the totals by the user: still listed, dimmed, and left out of
-  /// the list's net and the dashboard's figures.
-  final bool excludedFromTotals;
   final String? fitid;
   final String dedupHash;
 
@@ -130,7 +125,6 @@ class Transaction {
     bool clearCategory = false,
     CategorizationSource? categorizationSource,
     bool? needsReview,
-    bool? excludedFromTotals,
   }) {
     return Transaction(
       id: id,
@@ -147,7 +141,6 @@ class Transaction {
       categorizationSource: categorizationSource ?? this.categorizationSource,
       categorizationConfidence: categorizationConfidence,
       needsReview: needsReview ?? this.needsReview,
-      excludedFromTotals: excludedFromTotals ?? this.excludedFromTotals,
       fitid: fitid,
       dedupHash: dedupHash,
       recurringSeriesId: recurringSeriesId,
@@ -175,7 +168,6 @@ class Transaction {
           other.categorizationSource == categorizationSource &&
           other.categorizationConfidence == categorizationConfidence &&
           other.needsReview == needsReview &&
-          other.excludedFromTotals == excludedFromTotals &&
           other.fitid == fitid &&
           other.dedupHash == dedupHash &&
           other.recurringSeriesId == recurringSeriesId &&
@@ -200,7 +192,6 @@ class Transaction {
     categorizationConfidence,
     needsReview,
     Object.hash(
-      excludedFromTotals,
       fitid,
       dedupHash,
       recurringSeriesId,
@@ -227,8 +218,8 @@ class TransactionsPage {
   final int pageSize;
   final int total;
 
-  /// The signed sum of every row the filters match, across all pages, rows
-  /// excluded from totals aside. `null` when the API did not report it.
+  /// The signed sum of every row the filters match, across all pages. `null`
+  /// when the API did not report it.
   final int? netMinor;
 
   int get totalPages => total == 0 ? 1 : ((total - 1) ~/ pageSize) + 1;

@@ -1861,12 +1861,6 @@ abstract class AppLocalizations {
   /// **'Montant'**
   String get transactionsColumnAmount;
 
-  /// Follows the label of an operation the user excluded from totals.
-  ///
-  /// In fr, this message translates to:
-  /// **'exclue des totaux'**
-  String get transactionsExcludedSuffix;
-
   /// Pager button tooltip.
   ///
   /// In fr, this message translates to:
@@ -1998,18 +1992,6 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Modifier la règle'**
   String get transactionEditRule;
-
-  /// Inspector action.
-  ///
-  /// In fr, this message translates to:
-  /// **'Exclure des totaux'**
-  String get transactionExclude;
-
-  /// Inspector action on an operation already excluded from totals.
-  ///
-  /// In fr, this message translates to:
-  /// **'Inclure dans les totaux'**
-  String get transactionInclude;
 
   /// Review progress: operations filed out of the queue's size this session.
   ///
