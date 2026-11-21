@@ -452,8 +452,6 @@
   "dashboardCategoryNoSpending": "No spending this month.",
   "dashboardSavingsTrendTitle": "Monthly savings",
   "dashboardSavingsTrendAverage": "on average over 12 months",
-  "dashboardSavingsViewBars": "Bars",
-  "dashboardSavingsViewLine": "Line",
   "dashboardRecentActivityTitle": "Recent activity",
   "dashboardViewAllTransactions": "All transactions",
   "dashboardEmptyTitle": "No data for this month",

@@ -265,7 +265,7 @@ void main() {
         () => apiClient.get('/dashboard/summary', query: any(named: 'query')),
       ).thenAnswer((_) async => _summaryJson());
       when(
-        () => apiClient.get('/dashboard/trends'),
+        () => apiClient.get('/dashboard/trends', query: any(named: 'query')),
       ).thenAnswer((_) async => _trendsJson());
     });
 

@@ -6,11 +6,10 @@ import '../data/dashboard_repository.dart';
 import '../domain/dashboard_summary.dart';
 import '../domain/dashboard_trends.dart';
 
-/// The selected month alongside the summary loaded for it, plus the savings series.
+/// The selected month alongside the summary and the savings series loaded for it.
 ///
-/// The month is always the first of that month. [trends] is *not* keyed to it: its window
-/// ends at the current calendar month, so paging the picker back leaves the savings
-/// chart where it is.
+/// The month is always the first of that month. [trends] ends on it, so paging the picker
+/// back moves the savings chart's window with it.
 @immutable
 class DashboardState {
   const DashboardState({
@@ -28,7 +27,7 @@ class DashboardState {
   /// its empty state; a month without data still draws the panel with « — ».
   bool get hasTransactions => recent.isNotEmpty;
 
-  /// The newest transactions, for « Activité récente ». Like [trends], not keyed to [month] —
+  /// The newest transactions, for « Activité récente ». Not keyed to [month] —
   /// "recent" means recent, not "recent within the month you happen to be looking at".
   final List<RecentTransaction> recent;
 }
@@ -45,7 +44,7 @@ class DashboardController extends AsyncNotifier<DashboardState> {
     // Independent of each other, so they go out together rather than in series.
     final (summary, trends, recent) = await (
       repository.summary(month),
-      repository.trends(),
+      repository.trends(month, currentMonth: _currentMonth()),
       repository.recentTransactions(),
     ).wait;
     return DashboardState(
@@ -67,21 +66,24 @@ class DashboardController extends AsyncNotifier<DashboardState> {
 
   Future<void> refresh() {
     final current = state.value;
-    return _load(current?.month ?? _currentMonth(), reloadTrends: true);
+    return _load(current?.month ?? _currentMonth(), reloadRecent: true);
   }
 
-  /// Reloads the summary for [month]. The trends and the activity list are re-fetched only on
-  /// an explicit refresh: neither depends on the month, so paging the picker would otherwise
-  /// re-request data that cannot have changed.
-  Future<void> _load(DateTime month, {bool reloadTrends = false}) async {
+  /// Reloads the summary and the savings series for [month]. The activity list is re-fetched
+  /// only on an explicit refresh: it doesn't depend on the month, so paging the picker would
+  /// otherwise re-request data that cannot have changed.
+  Future<void> _load(DateTime month, {bool reloadRecent = false}) async {
     final previous = state.value;
     state = const AsyncValue.loading();
     state = await AsyncValue.guard(() async {
       final repository = ref.read(dashboardRepositoryProvider);
+      final currentMonth = _currentMonth();
+      // The summary goes first and alone, so its failure (a bad month) surfaces as itself
+      // rather than wrapped in a `ParallelWaitError`.
       final summary = await repository.summary(month);
-      if (reloadTrends || previous == null) {
+      if (reloadRecent || previous == null) {
         final (trends, recent) = await (
-          repository.trends(),
+          repository.trends(month, currentMonth: currentMonth),
           repository.recentTransactions(),
         ).wait;
         return DashboardState(
@@ -91,43 +93,31 @@ class DashboardController extends AsyncNotifier<DashboardState> {
           recent: recent,
         );
       }
+      final trends = await repository.trends(month, currentMonth: currentMonth);
       return DashboardState(
         month: month,
         summary: summary,
-        trends: previous.trends,
+        trends: trends,
         recent: previous.recent,
       );
     });
   }
+
+  DateTime _currentMonth() {
+    final now = ref.read(dashboardTodayProvider)();
+    return DateTime(now.year, now.month);
+  }
 }
 
-DateTime _currentMonth() {
-  final now = DateTime.now();
-  return DateTime(now.year, now.month);
-}
+/// "Today" for the dashboard: the month it opens on when there is no data yet, and the month
+/// in progress the savings chart hatches. A provider so tests can pin the clock.
+final dashboardTodayProvider = Provider<DateTime Function()>(
+  (ref) => DateTime.now,
+);
 
 final dashboardControllerProvider =
     AsyncNotifierProvider<DashboardController, DashboardState>(
       DashboardController.new,
-    );
-
-/// How « Épargne mensuelle » draws its months: one bar each, or joined as a line.
-enum SavingsChartView { bars, line }
-
-/// The savings chart's chosen view. Panel state held for the session: the provider lives as
-/// long as the app's `ProviderScope`, so leaving the dashboard and coming back keeps the
-/// choice, and a relaunch starts again on the bars. Both views draw the same series, so
-/// switching re-reads nothing.
-class SavingsChartViewController extends Notifier<SavingsChartView> {
-  @override
-  SavingsChartView build() => SavingsChartView.bars;
-
-  void set(SavingsChartView view) => state = view;
-}
-
-final savingsChartViewProvider =
-    NotifierProvider<SavingsChartViewController, SavingsChartView>(
-      SavingsChartViewController.new,
     );
 
 /// Points the transactions list at what a « Dépenses par catégorie » row

@@ -38,9 +38,8 @@ and month.
 ### 3b. Épargne mensuelle
 Heading; right side: the 12-month average, signed and coloured, + « en moyenne sur 12 mois ».
 Bars by sign, one per month, the last 12 months ending on the selected month. The month in
-progress is hatched. Hover card: month, signed amount. A « Barres · Courbe » segmented control
-sits before the average (bars by default, kept for the session); the line view draws the same
-values with the line recipe, a dot per month in its sign's colour.
+progress is hatched when it is in the window; an earlier selected month shows no hatched bar.
+Hover card: month, signed amount. Bars only: there is no line view and no view switch.
 
 ### 5a. Activité récente
 Heading; right link « Toutes les transactions ». Table without header, as many rows as fit

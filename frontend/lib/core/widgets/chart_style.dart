@@ -92,31 +92,6 @@ abstract final class ChartPaints {
       ..drawCircle(center, radius, Paint()..color = color);
   }
 
-  /// A hollow dot, for a point still moving (the open month): the same ring,
-  /// then an outline in [color] instead of a disc.
-  static void hollowDot(
-    AppColors colors,
-    Canvas canvas,
-    Offset center,
-    double radius,
-    Color color,
-  ) {
-    canvas
-      ..drawCircle(
-        center,
-        radius + AppChart.dotRing,
-        Paint()..color = colors.bg,
-      )
-      ..drawCircle(
-        center,
-        radius - AppChart.dotRing / 2,
-        Paint()
-          ..color = color
-          ..style = PaintingStyle.stroke
-          ..strokeWidth = AppChart.dotRing,
-      );
-  }
-
   /// The zero line, 1 px `lineStrong`, solid, for a series that crosses zero
   /// (`00` §9). Dashes are for annotations only.
   static void zeroLine(

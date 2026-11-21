@@ -14,7 +14,8 @@ from app.features.dashboard.schemas import (
 )
 from app.features.settings.models import DEFAULT_SAVINGS_RATE_GOAL_PERCENT
 
-#: How many months each trend series covers, ending with the current month.
+#: How many months each trend series covers: the bars end with the current month, the savings
+#: series with the selected one.
 BARS_MONTHS = 4
 SAVINGS_MONTHS = 12
 
@@ -82,40 +83,51 @@ class DashboardService:
         goal = self._repository.savings_rate_goal_percent(user_id)
         return DEFAULT_SAVINGS_RATE_GOAL_PERCENT if goal is None else goal
 
-    def trends(self, user_id: str, currency: str, today: date) -> DashboardTrends:
-        """Both trend series, over the months ending with `today`'s.
+    def trends(
+        self, user_id: str, currency: str, today: date, month: str | None = None
+    ) -> DashboardTrends:
+        """Both trend series: savings over the months ending with `month` (`YYYY-MM`), the
+        monthly bars over the months ending with `today`'s.
 
-        Anchored on `today` rather than on a requested month: these answer "how am I trending
-        lately", a question the month picker doesn't change. `today` is a parameter rather than
-        a `date.today()` call so the series are testable without freezing the clock.
+        The savings window follows the dashboard's selected month (default: `today`'s), so
+        paging the month picker back shows the year leading up to that month. The monthly bars
+        stay anchored on the calendar whatever `month` is. `today` is a parameter rather than a
+        `date.today()` call so the series are testable without freezing the clock.
+
+        Raises:
+            DashboardMonthInvalidError: `month` doesn't parse as `YYYY-MM`.
         """
-        current = month_index(today)
-        months = range(current - SAVINGS_MONTHS + 1, current + 1)
-        window_start = first_of_month(months[0])
+        this_month = month_index(today)
+        savings_end = this_month if month is None else _parse_month(month)
+        savings_months = range(savings_end - SAVINGS_MONTHS + 1, savings_end + 1)
+        bars_months = range(this_month - BARS_MONTHS + 1, this_month + 1)
 
+        # One grouped query spanning both windows; a month without rows is absent, i.e. zero.
         buckets = self._repository.monthly_totals_by_month(
-            user_id, window_start, first_of_month(current + 1)
+            user_id,
+            first_of_month(min(savings_months[0], bars_months[0])),
+            first_of_month(max(savings_end, this_month) + 1),
         )
 
-        savings_series: list[SavingsPoint] = []
-        monthly_series: list[MonthlyTotals] = []
-        bars_from = current - BARS_MONTHS + 1
-
-        for index in months:
+        def totals(index: int) -> tuple[int, int]:
             month_start = first_of_month(index)
-            income, expense = buckets.get((month_start.year, month_start.month), (0, 0))
-            savings_series.append(
-                SavingsPoint(month=month_key(index), saved_minor=income - expense)
+            return buckets.get((month_start.year, month_start.month), (0, 0))
+
+        savings_series = [
+            SavingsPoint(month=month_key(index), saved_minor=income - expense)
+            for index in savings_months
+            for income, expense in [totals(index)]
+        ]
+        monthly_series = [
+            MonthlyTotals(
+                month=month_key(index),
+                income_minor=income,
+                expense_minor=expense,
+                net_minor=income - expense,
             )
-            if index >= bars_from:
-                monthly_series.append(
-                    MonthlyTotals(
-                        month=month_key(index),
-                        income_minor=income,
-                        expense_minor=expense,
-                        net_minor=income - expense,
-                    )
-                )
+            for index in bars_months
+            for income, expense in [totals(index)]
+        ]
 
         return DashboardTrends(
             monthly_series=monthly_series,

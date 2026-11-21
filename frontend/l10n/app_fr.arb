@@ -2009,14 +2009,6 @@
   "@dashboardSavingsTrendAverage": {
     "description": "Follows the signed 12-month average on the right of the « Épargne mensuelle » heading."
   },
-  "dashboardSavingsViewBars": "Barres",
-  "@dashboardSavingsViewBars": {
-    "description": "Savings chart view switch: one bar per month."
-  },
-  "dashboardSavingsViewLine": "Courbe",
-  "@dashboardSavingsViewLine": {
-    "description": "Savings chart view switch: the same months joined as a line."
-  },
   "dashboardRecentActivityTitle": "Activité récente",
   "@dashboardRecentActivityTitle": {
     "description": "Title of the recent-transactions card."

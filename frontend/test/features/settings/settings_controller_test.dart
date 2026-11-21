@@ -501,7 +501,9 @@ void main() {
           'total': 0,
         },
       );
-      when(() => apiClient.get('/dashboard/trends')).thenAnswer(
+      when(
+        () => apiClient.get('/dashboard/trends', query: any(named: 'query')),
+      ).thenAnswer(
         (_) async => {
           'monthly_series': <Object>[],
           'savings_series': <Object>[],

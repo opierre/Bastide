@@ -2617,18 +2617,6 @@ abstract class AppLocalizations {
   /// **'en moyenne sur 12 mois'**
   String get dashboardSavingsTrendAverage;
 
-  /// Savings chart view switch: one bar per month.
-  ///
-  /// In fr, this message translates to:
-  /// **'Barres'**
-  String get dashboardSavingsViewBars;
-
-  /// Savings chart view switch: the same months joined as a line.
-  ///
-  /// In fr, this message translates to:
-  /// **'Courbe'**
-  String get dashboardSavingsViewLine;
-
   /// Title of the recent-transactions card.
   ///
   /// In fr, this message translates to:

@@ -17,18 +17,36 @@ class SavingsPoint {
 
 /// The dashboard's savings series.
 ///
-/// The window ends at the *current* month rather than the selected one — they answer "how am
-/// I trending lately", which doesn't change when the user pages the month picker back. That is
-/// why they arrive from their own endpoint and are fetched once per session rather than per
-/// month.
+/// The window ends on the month selected on the dashboard, so paging the month picker back
+/// shows the year leading up to that month.
 @immutable
 class DashboardTrends {
-  const DashboardTrends({required this.savingsSeries, required this.currency});
+  const DashboardTrends({
+    required this.savingsSeries,
+    required this.currency,
+    this.currentMonth,
+  });
 
-  /// The last 12 months ending with the current one, oldest first. The last
-  /// point is therefore always the month in progress, hatched on the chart.
+  /// The 12 months ending with the selected one, oldest first.
   final List<SavingsPoint> savingsSeries;
   final String currency;
+
+  /// The calendar month when the series was read (first of the month), or `null` when
+  /// unknown. The month in progress is not yet a fact, so the chart hatches it, and only it.
+  final DateTime? currentMonth;
+
+  /// The indexes in [savingsSeries] of the month in progress: one when [currentMonth] falls
+  /// inside the window, none when the window ends before it.
+  Set<int> get inProgress {
+    final current = currentMonth;
+    if (current == null) return const {};
+    return {
+      for (var i = 0; i < savingsSeries.length; i++)
+        if (savingsSeries[i].month.year == current.year &&
+            savingsSeries[i].month.month == current.month)
+          i,
+    };
+  }
 
   /// How many months the savings average spans at most: a year, so a seasonal month (a
   /// bonus, a holiday) is weighed against the rest of the year rather than its neighbours.

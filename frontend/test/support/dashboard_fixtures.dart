@@ -103,6 +103,7 @@ DashboardTrends specTrends() => DashboardTrends(
     SavingsPoint(month: DateTime(2026, 5), savedMinor: 63565),
   ],
   currency: 'EUR',
+  currentMonth: DateTime(2026, 5),
 );
 
 /// The four activity rows exactly as `docs/design/04-dashboard.md` tabulates them.
