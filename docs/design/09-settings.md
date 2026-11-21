@@ -28,7 +28,7 @@ first). No card, no tinted callout, no coloured border.
 | | Nom d’utilisateur · « Vous pouvez vous connecter avec ce nom ou avec votre e-mail. » | The name + secondary « Modifier » (modal 420 px). |
 | | Adresse e-mail · « Sert uniquement à vous connecter. Bastide n’envoie aucun message. » | The address, `textSecondary`. |
 | Sécurité | Mot de passe · « Au moins 12 caractères. Il protège l’accès à vos données sur cet ordinateur. » | Secondary « Changer le mot de passe » (modal 420 px: current, new, confirm). |
-| | Code de récupération · « Permet de réinitialiser votre mot de passe si vous l’oubliez. En générer un nouveau invalide l’ancien. » | Secondary « Générer un nouveau code » (modal 480 px: asks the password, then shows the code once, `00` §7 single way out). |
+| | Code de récupération · « Permet de réinitialiser votre mot de passe si vous l’oubliez. En générer un nouveau invalide l’ancien. » | Secondary « Générer un nouveau code » (modal 480 px: asks the password, then shows the code once, `00` §7 single way out: focus on « Copier », secondary « Enregistrer dans un fichier »). |
 | Session | Se déconnecter · « Vos données restent sur cet ordinateur, protégées par votre mot de passe. » | Secondary « Se déconnecter » (`log-out`). |
 
 Avatar picking opens the crop modal (420 px): the square crop with the avatar's circle drawn and the corners veiled (`00` §7).
@@ -76,15 +76,17 @@ Modals (all 500 px):
 - **Restore confirmation:** title « Restaurer cette sauvegarde ? », the file name in Geist
   Mono, a key/value list (Exporté le, Version de l’application, then one count per kind of
   data), a Banner with a `warning` icon « Toutes vos données actuelles seront remplacées.
-  Exportez-les d’abord si besoin. », footer « Annuler » · solid `negative` button « Remplacer
-  mes données ».
+  Exportez-les d’abord si besoin. », footer: ghost « Exporter d’abord » (`download`) on the left · « Annuler » · solid `negative`
+  button « Remplacer mes données ». « Exporter d’abord » runs the export and its save dialog
+  without closing the modal.
 - **Restore refused:** a Banner with a `negative` icon inside the Sauvegarde group, under the
   restore row: « Restauration impossible. Ce fichier provient d’une version plus récente de
   Bastide. Mettez l’application à jour pour le restaurer. »
 - **Reset confirmation:** title « Réinitialiser la base de données ? », lead naming the
   profile, key/value list of live counts, note « Les catégories fournies, vos préférences et le
   réglage IA sont conservés. », field « Saisissez SUPPRIMER pour confirmer » (Geist Mono),
-  footer « Annuler » · solid `negative` « Tout supprimer », disabled until the field matches.
+  footer: ghost « Exporter d’abord » on the left, as in the restore · « Annuler » · solid
+  `negative` « Tout supprimer », disabled until the field matches.
 - Toasts: « Sauvegarde enregistrée · 1 284 opérations, 4 comptes. » · « Base de données
   réinitialisée. »
 

@@ -79,6 +79,10 @@ imported.
   footer « Annuler » · « Télécharger ».
 - **Logo zoom** (240 px), the zoom variant.
 - **Pack refused** and **logos not added** (480 px), acknowledgements with a single « Fermer ».
+- **Logos downloading** (the import modal, 560 px): progress « Téléchargement des logos… {n} /
+  {total} » with a meter and the note that the rules are already imported. Secondary
+  « Arrêter les téléchargements » closes it; the logos not yet downloaded join the « logos not
+  added » result.
 
 ## States
 | State | What shows |

@@ -237,7 +237,8 @@ Mockup: `proposal_v6/index.html#panel=m-frame`, then one page per feature.
 - **Frame:** `surface`, radius 12, `shadow`, no border, centred on `scrim`; at most the window
   height minus 24 px above and below.
 - **Header:** padding 24 24 14; title 16/600; optional lead 13 `textSecondary` 4 px under it.
-  No icon or glyph plate before the title, no close button.
+  No icon or glyph plate before the title, no close button. A long title wraps; it never
+  truncates and never widens the modal.
 - **Body:** padding 0 24, fields 14 px apart, two-column grids with a 16 px gutter. Fields in
   a row align by their input: a helper under one does not push its neighbour down. A grid
   leaves no empty cell before its last row. Only the body scrolls; while it does, a `line`
@@ -252,8 +253,11 @@ Mockup: `proposal_v6/index.html#panel=m-frame`, then one page per feature.
   without a body (a confirmation) keeps the footer 24 px under the lead.
 - **Widths:** 420, 440, 480, 500, 520, 560, 600, 620; each panel spec names its modal's width.
   A modal never widens for a label.
-- **Closing:** Escape and a click on the scrim act as the secondary action, except while a save
-  is running and on a modal with a single way out.
+- **Closing:** Escape and a click on the scrim act as the secondary action on a confirmation
+  and on a form nobody has changed. Once a form holds unsaved input, the scrim does nothing,
+  and Escape or « Annuler » asks « Abandonner les modifications ? » (420 px, lead naming the
+  form; « Continuer la saisie » · ink « Abandonner »; its own Escape returns to the form).
+  Nothing closes while a save is running, nor a modal with a single way out.
 - **Variants:**
   - Confirmation: the title asks the question, the lead says what changes, the primary action
     repeats the title's verb (« Archiver ») or names its effect when the verb alone would be
@@ -261,7 +265,9 @@ Mockup: `proposal_v6/index.html#panel=m-frame`, then one page per feature.
   - Destructive confirmation: the same, with the destructive button (§6) as the confirm
     action. When the action needs typing a word, the button stays disabled until it matches.
   - Single way out: something shown once (a recovery code); one primary action, Escape and
-    the scrim do nothing.
+    the scrim do nothing. Initial focus goes to the copy action, never to the closing one, so
+    Enter cannot dismiss it; a secondary « Enregistrer dans un fichier » writes it to a text
+    file on this machine.
   - Acknowledgement: a result to read (a refused pack, logos not added); body only, one
     primary « Fermer »; Escape and the scrim close it.
   - List editor: a modal that edits a list in place (Historique déclaré); the entry row in the
@@ -274,7 +280,8 @@ Mockup: `proposal_v6/index.html#panel=m-frame`, then one page per feature.
     closes it.
 - **States:** a refused field takes the field error of §6; a failed save shows a Banner with
   a `negative` icon at the top of the body and keeps the input; a running save shows the
-  spinner in the primary button and disables the rest; a loading body shows its silhouette
+  spinner in the primary button and disables the other actions and the fields, and a second
+  click does nothing (a confirmation's action behaves the same); a loading body shows its silhouette
   (as §7 « Loading »); a body that cannot load shows a Banner with a `warning` icon and a
   secondary « Réessayer ».
 

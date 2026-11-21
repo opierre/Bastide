@@ -75,8 +75,9 @@ Heading, then Notes:
 - **Historique déclaré** (560 px): lead « Le total de tous vos comptes à la fin d’un mois,
   pour la période avant vos imports. Un mois couvert par vos imports garde le chiffre
   importé. » One row: Mois (« MM/AAAA ») · Total des comptes · primary « Enregistrer ». Then
-  the list, newest first, rows 48 px: month · neutral text « Couvert par vos imports » when the
-  ledger has it · amount · icon buttons edit and delete. Footer « Fermer ».
+  the list, newest first, rows 36 px: month · « Couvert par vos imports » when the ledger has
+  it · amount · icon buttons edit and delete. A covered month is a dimmed row and keeps only
+  delete: its declared figure is no longer used. Footer « Fermer » (`00` §7 list editor).
 
 ## States
 | State | What shows |

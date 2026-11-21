@@ -488,7 +488,7 @@ const chk = (on, label) => `<span class="row"><span class="chk ${on ? 'on' : ''}
 const note = (ic, t) => `<span class="note">${I(ic, 's14')}<span>${t}</span></span>`;
 const bnr = (ic, cls, t, acts = '') => `<div class="banner">${I(ic, 's14 ' + cls)}<span style="flex:1">${t}</span>${acts}</div>`;
 const CANCEL = B('Annuler');
-const modal = (w, title, lead, body, foot, o = {}) => `<div class="modal ${o.cls || ''}" style="width:${w}px" role="dialog" aria-modal="true" aria-label="${title}">
+const modal = (w, title, lead, body, foot, o = {}) => `<div class="modal ${o.cls || ''}" style="width:${w}px;${o.style || ''}" role="dialog" aria-modal="true" aria-label="${title}">
   <header><h2>${title}</h2>${lead ? `<p>${lead}</p>` : ''}</header><div class="mb">${body}</div><footer>${foot}</footer></div>`;
 
 /* pictures for the crop and zoom variants: invented, drawn here */
@@ -511,9 +511,9 @@ MD.failed = () => modal(480, 'Règle de prélèvement de la carte', '', `
   ${bnr('circle-x', 'neg', 'Impossible d’enregistrer la règle. Réessayez.')}
   ${F('Le libellé du prélèvement contient', inp('PRLV CARTE X4821', 'mono'))}`, B('Plus tard') + B('Enregistrer la règle', 'pri'));
 MD.busy = () => modal(420, 'Changer le mot de passe', 'Votre code de récupération reste valable.', `
-  ${F('Mot de passe actuel', pwF('••••••••••••'))}
-  ${F('Nouveau mot de passe', pwF('••••••••••••••'))}
-  ${F('Confirmer le mot de passe', pwF('••••••••••••••'))}`, `<span class="btn" style="opacity:.45">Annuler</span><span class="btn pri"><span class="spin"></span>Changer le mot de passe</span>`);
+  ${F('Mot de passe actuel', pwF('••••••••••••'), '', { cls: 'off' })}
+  ${F('Nouveau mot de passe', pwF('••••••••••••••'), '', { cls: 'off' })}
+  ${F('Confirmer le mot de passe', pwF('••••••••••••••'), '', { cls: 'off' })}`, `<span class="btn" style="opacity:.45">Annuler</span><span class="btn pri"><span class="spin"></span>Changer le mot de passe</span>`);
 MD.loading = () => modal(520, 'Marquer comme récurrent', '', `
   <div class="col" style="gap:10px;padding:4px 0 8px"><div class="sk" style="width:80%"></div><div class="sk" style="width:55%"></div>
   <div class="g2m" style="margin-top:6px"><div class="sk" style="height:32px"></div><div class="sk" style="height:32px"></div></div>
@@ -522,7 +522,14 @@ MD.loadError = () => modal(520, 'Marquer comme récurrent', '', `
   ${bnr('triangle-alert', 'warn', 'Impossible de préparer l’aperçu. Rien n’a été modifié.', B('Réessayer'))}`, CANCEL + `<span class="btn pri" style="opacity:.45">Enregistrer la série</span>`);
 MD.long = () => modal(480, 'Modifier le compte', '', `
   ${F('Nom', inp('Revolut'))}${F('Type', selF('Carte à débit différé'))}
-  ${F('Établissement', inp(`${mg('RE')}Revolut`))}`, CANCEL + B('Enregistrer', 'pri'), { cls: 'scrolled' });
+  ${F('Établissement', inp(`${mg('RE')}Revolut`))}
+  ${F('Débit de la carte', `<span class="seg" style="justify-self:start"><span class="on">Débit différé</span><span>Crédit</span></span>`)}
+  ${F('Prélevée sur', selF(`${mg('BN')}BNP Compte courant`))}`, CANCEL + B('Enregistrer', 'pri'), { cls: 'scrolled', style: 'max-height:400px' });
+/* hardening: leaving a form that holds unsaved input */
+MD.discard = () => modal(420, 'Abandonner les modifications ?', 'Ce que vous avez saisi dans « Modifier le crédit » sera perdu.', '', B('Continuer la saisie') + B('Abandonner', 'pri'), { cls: 'nobody' });
+/* hardening: a long title wraps, it never truncates */
+MD.longTitle = () => modal(560, 'Ajouter à « Adobe Creative Cloud, offre Photographie avec 20 Go de stockage en ligne »', 'Les opérations qui ne font partie d’aucune série, les plus proches en premier.', `
+  ${chargeRows(CHARGES.slice(0, 2))}`, CANCEL + B('Ajouter 2 opérations', 'pri'));
 
 /* ── accounts ── */
 MD.accountNew = () => modal(480, 'Nouveau compte', '', `
@@ -566,7 +573,8 @@ MD.passwordWrong = () => modal(420, 'Changer le mot de passe', 'Votre code de r�
 MD.recoveryAsk = () => modal(480, 'Nouveau code de récupération', 'Confirmez votre mot de passe pour générer un nouveau code. L’ancien cessera de fonctionner.', `
   ${F('Mot de passe', pwF('••••••••••••', 'focus'))}`, CANCEL + B('Générer', 'pri'));
 MD.recoveryShown = () => modal(480, 'Nouveau code de récupération', 'Notez ce code et gardez-le en lieu sûr : il ne sera plus affiché.', `
-  <div class="code row"><span class="mono" style="font-size:16px;letter-spacing:0;flex:1">K7QM-2XRA-9DWT-F4HN</span>${B('Copier', 'ghost', 'copy')}</div>`, B('Terminé', 'pri'));
+  <div class="code"><span class="mono" style="font-size:16px;letter-spacing:0">K7QM-2XRA-9DWT-F4HN</span></div>
+  <div class="row">${B('Copier', 'focus', 'copy')}${B('Enregistrer dans un fichier', '', 'download')}</div>`, B('Terminé', 'pri'));
 const cropBody = (lead, w, h, pic, guide = false) => `<span class="t2">${lead}</span>
   <div class="crop" style="width:${w}px;height:${h}px">${pic}${guide ? '<span class="guide"></span>' : ''}</div>`;
 MD.avatarCrop = () => modal(420, 'Recadrer la photo', '', cropBody('Faites glisser et zoomez pour cadrer votre avatar.', 320, 320, PHOTO, true), CANCEL + B('Utiliser cette photo', 'pri'));
@@ -577,11 +585,11 @@ const kvList = rows => `<dl class="kv" style="gap:6px 24px">${rows.map(([k, v]) 
 MD.restore = () => modal(500, 'Restaurer cette sauvegarde ?', '', `
   <span class="mono">bastide-2026-05-11.bastide</span>
   ${kvList([['Exporté le', '11 mai 2026 à 14:32'], ['Version de l’application', '0.2.0'], ...COUNTS])}
-  ${bnr('triangle-alert', 'warn', 'Toutes vos données actuelles seront remplacées. Exportez-les d’abord si besoin.')}`, CANCEL + B('Remplacer mes données', 'dsolid'));
+  ${bnr('triangle-alert', 'warn', 'Toutes vos données actuelles seront remplacées. Exportez-les d’abord si besoin.')}`, `<span class="lead-act">${B('Exporter d’abord', 'ghost', 'download')}</span>` + CANCEL + B('Remplacer mes données', 'dsolid'));
 MD.reset = (typed = 'SUPPR') => modal(500, 'Réinitialiser la base de données ?', 'Tout le contenu du profil Camille Dubois sera supprimé définitivement :', `
   ${kvList([COUNTS[0], COUNTS[1], ['Catégories personnalisées', '3'], ...COUNTS.slice(3)])}
   ${note('info', 'Les catégories fournies, vos préférences et le réglage IA sont conservés.')}
-  ${F('Saisissez SUPPRIMER pour confirmer', inp(typed, 'mono focus'))}`, CANCEL + `<span class="btn dsolid" ${typed === 'SUPPRIMER' ? '' : 'style="opacity:.45"'}>Tout supprimer</span>`);
+  ${F('Saisissez SUPPRIMER pour confirmer', inp(typed, 'mono focus'))}`, `<span class="lead-act">${B('Exporter d’abord', 'ghost', 'download')}</span>` + CANCEL + `<span class="btn dsolid" ${typed === 'SUPPRIMER' ? '' : 'style="opacity:.45"'}>Tout supprimer</span>`);
 
 /* ── categories ── */
 const ICONS = ['house', 'key-round', 'zap', 'wrench', 'sofa', 'soup', 'shopping-cart', 'utensils', 'coffee', 'car', 'bus', 'fuel', 'plane', 'star', 'ticket', 'gamepad-2', 'book-open', 'dumbbell', 'refresh-cw', 'smartphone', 'wifi', 'cross', 'pill', 'coins', 'piggy-bank', 'credit-card', 'landmark', 'trending-up', 'receipt', 'arrow-up', 'briefcase', 'gift', 'shirt', 'shopping-bag', 'graduation-cap', 'baby', 'paw-print', 'hand-heart'];
@@ -636,7 +644,7 @@ MD.packImport = () => modal(560, 'Commerces courants', '', `
   ${chk(true, 'Appliquer les règles à mes transactions existantes après l’import')}`, CANCEL + B('Importer', 'pri'));
 MD.packProgress = () => modal(560, 'Commerces courants', '', `
   <div class="col" style="gap:8px"><div class="row"><span>Téléchargement des logos… 4 / 6</span></div>${meter(66.7)}</div>
-  ${note('info', 'Les règles sont importées : il ne reste que leurs logos.')}`, `<span class="btn" style="opacity:.45">Fermer</span>`);
+  ${note('info', 'Les règles sont importées : il ne reste que leurs logos. Si vous arrêtez, les logos restants ne sont pas ajoutés.')}`, B('Arrêter les téléchargements'));
 MD.packRefused = () => modal(480, 'Ce fichier n’a pas été accepté', '', `
   ${bnr('circle-x', 'neg', 'Ce pack contient une règle « regex ». Les expressions régulières ne sont pas acceptées dans un pack partagé : une expression venue d’un fichier tiers peut bloquer votre machine. Utilisez « contient », « égal à » ou « plage ».')}`, B('Fermer', 'pri'));
 MD.packLogoFailures = () => modal(480, '2 logos n’ont pas pu être ajoutés', '', `
@@ -720,7 +728,7 @@ MD.revalue = () => modal(420, 'Nouvelle estimation', 'Studio Villeurbanne : 145 
   <div class="g2m">${F('Valeur déclarée', inp('150 000,00 €', 'r focus'))}${F('Date d’estimation', dateF('14/05/2026'))}</div>`, CANCEL + B('Enregistrer', 'pri'));
 MD.declared = () => modal(560, 'Historique déclaré', 'Le total de tous vos comptes à la fin d’un mois, pour la période avant vos imports. Un mois couvert par vos imports garde le chiffre importé.', `
   <div class="row" style="gap:16px;align-items:flex-end">${F('Mois', inp('MM/AAAA', 'ph'), '', { cls: 'm130' })}<label class="f" style="flex:1">Total des comptes${inp('0,00 €', 'r ph')}</label>${B('Enregistrer', 'pri')}</div>
-  <table class="mtable">${[['déc. 2024', '', '11 240,00 €'], ['nov. 2024', '', '10 980,00 €'], ['oct. 2024', 'Couvert par vos imports', '10 615,00 €'], ['sept. 2024', '', '10 402,00 €']].map(r => `<tr><td style="width:100px">${r[0]}</td><td class="t2 sm">${r[1]}</td><td class="c">${r[2]}</td><td class="n" style="width:72px"><span class="row" style="gap:2px;justify-content:flex-end">${IB('pencil', 'Modifier')}${IB('trash-2', 'Supprimer')}</span></td></tr>`).join('')}</table>`, B('Fermer'));
+  <table class="mtable">${[['déc. 2024', '', '11 240,00 €'], ['nov. 2024', '', '10 980,00 €'], ['oct. 2024', 'Couvert par vos imports', '10 615,00 €'], ['sept. 2024', '', '10 402,00 €']].map(r => `<tr class="${r[1] ? 't3' : ''}"><td style="width:100px">${r[0]}</td><td class="sm ${r[1] ? '' : 't2'}">${r[1]}</td><td class="c">${r[2]}</td><td class="n" style="width:72px"><span class="row" style="gap:2px;justify-content:flex-end">${r[1] ? '' : IB('pencil', 'Modifier')}${IB('trash-2', 'Supprimer')}</span></td></tr>`).join('')}</table>`, B('Fermer'));
 
 /* ── investments ── */
 MD.investmentForm = (edit = false) => modal(440, edit ? 'Modifier le placement' : 'Nouveau placement', '', `
@@ -766,17 +774,19 @@ P['m-frame'] = galleryM('Cadre commun des modales', 'Toutes les modales de l’a
   itemM('Formulaire', '480 · action tertiaire à gauche', MD.form(), 'Un formulaire d’édition porte « Supprimer » en bouton fantôme à gauche du pied ; sa confirmation est une modale destructive.'),
   itemM('Confirmation', '420 · sans corps', MD.confirm(), 'Le titre pose la question, le chapeau dit ce qui change. L’action principale reprend le verbe du titre ou nomme son effet (« Remplacer mes données »). Sans champ, le corps est vide et le pied suit le chapeau à 24 px.'),
   itemM('Confirmation destructive', '480 · bouton plein negative', MD.destructive(), 'Seule place du bouton plein negative (libellé bg). Ni icône ni pastille devant le titre : le verbe et la couleur du bouton suffisent.'),
-  itemM('Sans issue', '480 · une seule action', MD.recoveryShown(), 'Ce qui ne sera plus jamais affiché : un seul bouton, Échap et le voile ne ferment pas.'),
+  itemM('Sans issue', '480 · une seule action', MD.recoveryShown(), 'Ce qui ne sera plus jamais affiché : une seule action de fermeture, Échap et le voile ne ferment pas. Le focus arrive sur « Copier », pas sur « Terminé » : Entrée ne peut pas faire disparaître le code. « Enregistrer dans un fichier » l’écrit sur cet ordinateur.'),
+  itemM('Abandonner les modifications ?', '420 · sur un formulaire modifié', MD.discard(), 'Un formulaire qui contient une saisie ne se ferme pas d’un clic sur le voile. Échap et « Annuler » posent cette question ; Échap ici revient au formulaire.'),
   itemM('Recadrage carré', '420 · fenêtre 320 × 320', MD.ruleLogoCrop(), 'Glisser pour déplacer, molette ou pincement pour zoomer (1 à 5 ×). Fenêtre rayon 8, filet line, centrée sous le chapeau.'),
   itemM('Recadrage bannière', '440 · fenêtre 392 × 169 (44:19)', MD.goalCrop(), 'Même geste ; la fenêtre prend toute la largeur du corps.'),
   itemM('Agrandissement', '240 × 240 · sans cadre', MD.logoZoom(), 'L’image seule, rayon 12, ombre, sur le voile. Un clic n’importe où ou Échap la ferme.'),
   `<h2>États</h2>`,
   itemM('Champ refusé', 'bordure et aide en negative', MD.fieldError()),
   itemM('Échec de l’enregistrement', 'bannière en tête du corps', MD.failed(), 'La modale reste ouverte ; la bannière (icône negative) dit ce qui a échoué. Les champs gardent la saisie.'),
-  itemM('Enregistrement en cours', 'roue dans le bouton principal', MD.busy(), 'La roue remplace l’icône, le libellé reste, la largeur ne bouge pas. Les autres actions et les champs sont désactivés.'),
+  itemM('Enregistrement en cours', 'roue dans le bouton principal', MD.busy(), 'La roue remplace l’icône, le libellé reste, la largeur ne bouge pas. Les autres actions et les champs sont désactivés ; un second clic ne fait rien. Une confirmation suit la même règle.'),
   itemM('Chargement', 'silhouette du corps', MD.loading(), 'Pas de roue au centre : la silhouette du corps en blocs hover, qui pulse comme celle des panneaux.'),
   itemM('Chargement impossible', 'bannière et « Réessayer »', MD.loadError()),
-  itemM('Corps qui défile', 'filets sous l’en-tête et sur le pied', MD.long()),
+  itemM('Corps qui défile', 'filets sous l’en-tête et sur le pied', MD.long(), 'La modale atteint la hauteur de la fenêtre moins 24 px en haut et en bas ; seul le corps défile, en-tête et pied restent.'),
+  itemM('Titre long', 'le titre passe à la ligne', MD.longTitle(), 'Un titre long passe à la ligne, il n’est jamais tronqué ; la largeur ne change pas.'),
 ]);
 
 P['m-accounts'] = galleryM('Comptes', 'Ticket #267 · spécifications 05-accounts.md et 16-account-detail.md.', () => [
@@ -796,7 +806,7 @@ P['m-profile'] = galleryM('Profil', 'Ticket #268 · spécification 09-settings.m
   itemM('Recadrer la photo', `420 · ${SRC}auth/presentation/avatar_crop_modal.dart`, MD.avatarCrop(), 'Recadrage carré. Le cercle montre ce que l’avatar rond gardera ; le reste est voilé.'),
 ]);
 P['m-data'] = galleryM('Paramètres, données', 'Ticket #269 · spécification 09-settings.md, Données.', () => [
-  itemM('Restaurer cette sauvegarde ?', `500 · ${SRC}settings/presentation/restore_confirm_modal.dart`, MD.restore()),
+  itemM('Restaurer cette sauvegarde ?', `500 · ${SRC}settings/presentation/restore_confirm_modal.dart`, MD.restore(), '« Exporter d’abord », fantôme à gauche, enregistre une sauvegarde des données actuelles sans fermer la modale. Même action dans la réinitialisation.'),
   itemM('Réinitialiser la base de données ?', `500 · ${SRC}settings/presentation/reset_confirm_modal.dart`, MD.reset(), '« Tout supprimer » reste désactivé tant que le champ ne vaut pas exactement SUPPRIMER.'),
   itemM('Réinitialiser la base de données ?, mot saisi', '500', MD.reset('SUPPRIMER')),
 ]);
@@ -816,7 +826,7 @@ P['m-rules'] = galleryM('Règles', 'Ticket #271 · spécification 08-categories-
   itemM('Agrandir le logo', `240 · frontend/lib/core/widgets/logo_zoom.dart`, MD.logoZoom()),
   itemM('Exporter mes règles', `560 · ${SRC}rules/presentation/rule_pack_export_sheet.dart`, MD.packExport(), 'Le fichier lui-même, en Geist Mono dans un puits field de 168 px qui défile : ce qui quitte la machine se lit avant d’être enregistré.'),
   itemM('Importer un pack, aperçu', `560 · ${SRC}rules/presentation/rule_pack_import_sheet.dart`, MD.packImport(), 'Titre : le nom du pack. Les règles en table standard sans en-tête : logo ou monogramme, motif, catégorie.'),
-  itemM('Importer un pack, logos en cours', '560', MD.packProgress()),
+  itemM('Importer un pack, logos en cours', '560', MD.packProgress(), 'Les règles sont déjà importées : « Arrêter les téléchargements » ferme la modale, et les logos non téléchargés rejoignent le bilan « logos non ajoutés ».'),
   itemM('Ce fichier n’a pas été accepté', '480', MD.packRefused()),
   itemM('Logos non ajoutés', '480', MD.packLogoFailures()),
 ]);
@@ -847,7 +857,7 @@ P['m-loans'] = galleryM('Crédits', 'Ticket #275 · spécification 12-credits.md
 P['m-networth'] = galleryM('Synthèse', 'Ticket #276 · spécification 15-synthese.md.', () => [
   itemM('Nouveau bien', `620 · ${SRC}properties/presentation/property_form_modal.dart`, MD.property(), 'Libellé et adresse sur toute la largeur, puis nature et quote-part, estimation, acquisition : aucune case vide. La quote-part porte « part : {montant} » à droite de son libellé, mis à jour à la saisie.'),
   itemM('Nouvelle estimation', '420', MD.revalue()),
-  itemM('Historique déclaré', `560 · ${SRC}networth/presentation/declared_balances_modal.dart`, MD.declared(), 'Une modale qui édite une liste : la ligne de saisie porte l’action principale, la liste suit en lignes de 36 px, le pied n’a que « Fermer ». Les boutons icône (modifier, supprimer) sont fantômes.'),
+  itemM('Historique déclaré', `560 · ${SRC}networth/presentation/declared_balances_modal.dart`, MD.declared(), 'Une modale qui édite une liste : la ligne de saisie porte l’action principale, la liste suit en lignes de 36 px, le pied n’a que « Fermer ». Les boutons icône (modifier, supprimer) sont fantômes. Un mois couvert par vos imports est grisé et ne garde que « Supprimer » : son chiffre déclaré n’est plus utilisé.'),
 ]);
 P['m-investments'] = galleryM('Placements', 'Spécification 17-placements.md : toutes les modales à 440 px.', () => [
   itemM('Nouveau placement', '440', MD.investmentForm(), 'Les deux montants facultatifs n’existent qu’à la création ; « Versements déjà effectués » crée un seul versement à la date d’ouverture.'),
